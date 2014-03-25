@@ -107,7 +107,6 @@ public:
     virtual void giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveGeneralizedStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
-    virtual void giveGeneralizedStress_PlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
 
 
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -119,8 +118,6 @@ public:
     virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-
 
     /**
      * Initializes receiver acording to object description stored in input record.
@@ -146,7 +143,7 @@ public:
 
     virtual double give(int aProperty, GaussPoint *gp);
     virtual double give(CrossSectionProperty a, GaussPoint *gp) { return CrossSection :: give(a, gp); }
-    virtual double give(CrossSectionProperty a, const FloatArray *coords, Element *elem, bool local) { return CrossSection :: give(a, coords, elem, local); }
+    virtual double give(CrossSectionProperty a, const FloatArray *coords, ElementGeometry *elem, bool local) { return CrossSection :: give(a, coords, elem, local); }
     virtual Material *giveMaterial(IntegrationPoint *ip);
 
     int giveMaterialNumber() const { return this->materialNumber; };

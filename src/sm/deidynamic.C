@@ -60,6 +60,7 @@ NumericalMethod *DEIDynamic :: giveNumericalMethod(MetaStep *mStep)
 IRResultType
 DEIDynamic :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     StructuralEngngModel :: initializeFrom(ir);
@@ -78,12 +79,12 @@ double DEIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, D
     int eq = dof->__giveEquationNumber();
 #ifdef DEBUG
     if ( eq == 0 ) {
-        OOFEM_ERROR("invalid equation number");
+        _error("giveUnknownComponent: invalid equation number");
     }
 #endif
 
     if ( tStep != this->giveCurrentStep() ) {
-        OOFEM_ERROR("unknown time step encountered");
+        _error("giveUnknownComponent: unknown time step encountered");
         return 0.;
     }
 
@@ -98,7 +99,7 @@ double DEIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, D
         return accelerationVector.at(eq);
 
     default:
-        OOFEM_ERROR("Unknown is of undefined ValueModeType for this problem");
+        _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
     }
 
     return 0.0;
@@ -142,7 +143,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     int nelem = domain->giveNumberOfElements();
     int nman = domain->giveNumberOfDofManagers();
     IntArray loc;
-    Element *element;
+    BaseElement *element;
     DofManager *node;
     Dof *iDof;
     int nDofs, neq;
@@ -168,17 +169,17 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
         EModelDefaultEquationNumbering dn;
         for ( i = 1; i <= nelem; i++ ) {
             element = domain->giveElement(i);
-            element->giveLocationArray(loc, EID_MomentumBalance, dn);
-            element->giveCharacteristicMatrix(charMtrx,  LumpedMassMatrix, tStep);
+			element->giveElementEvaluator()->giveLocationArray(loc, EID_MomentumBalance, dn, element->giveElementGeometry());
+			element->giveElementEvaluator()->giveCharacteristicMatrix(charMtrx, LumpedMassMatrix, tStep);
             // charMtrx.beLumpedOf(fullCharMtrx);
-            element->giveCharacteristicMatrix(charMtrx2, StiffnessMatrix, tStep);
+            element->giveElementEvaluator()->giveCharacteristicMatrix(charMtrx2, StiffnessMatrix, tStep);
 
             //
             // assemble it manually
             //
 #ifdef DEBUG
             if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {
-                OOFEM_ERROR("dimension mismatch");
+                _error("solveYourselfAt : dimension mismatch");
             }
 
 #endif
@@ -296,8 +297,8 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     EModelDefaultEquationNumbering dn;
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
-        element->giveLocationArray(loc, EID_MomentumBalance, dn);
-        element->giveCharacteristicMatrix(charMtrx, StiffnessMatrix, tStep);
+		element->giveElementEvaluator()->giveLocationArray(loc, EID_MomentumBalance, dn, element->giveElementGeometry());
+		element->giveElementEvaluator()->giveCharacteristicMatrix(charMtrx, StiffnessMatrix, tStep);
         n = loc.giveSize();
         for ( j = 1; j <= n; j++ ) {
             jj = loc.at(j);

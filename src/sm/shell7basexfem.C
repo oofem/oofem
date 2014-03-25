@@ -34,8 +34,8 @@
 
 #include "shell7basexfem.h"
 #include "shell7base.h"
-#include "xfem/enrichmentitem.h"
-#include "xfem/xfemmanager.h"
+#include "enrichmentitem.h"
+#include "xfemmanager.h"
 #include "dofmanager.h"
 #include "constantpressureload.h"
 #include "simpleinterfacemat.h"
@@ -147,6 +147,7 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStat
 
 IRResultType Shell7BaseXFEM :: initializeFrom(InputRecord *ir)
 {
+    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     // old, to be removed
@@ -173,7 +174,7 @@ Interface
     if ( it != XfemElementInterfaceType ) {
         return Shell7Base :: giveInterface(it);
     } else if ( it == XfemElementInterfaceType ) {
-        return static_cast< XfemElementInterface * >(this);
+        return static_cast< XfemElementInterface * >( this );
     } else {
         return Shell7Base :: giveInterface(it); ///@todo remove
     }
@@ -975,7 +976,7 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
             this->giveUnknownsAt(localCoords, solVec, xbar, m, gam, tStep);
             //this->computeNmatrixAt(gp, N);
             //unknowns.beProductOf(N,a); // [xbar, m, gam]^T
-            //m = {unknowns.at(4), unknowns.at(5), unknowns.at(6) };
+            //m.setValues(3, unknowns.at(4), unknowns.at(5), unknowns.at(6) );
             //double gam = unknowns.at(7);
 
 
@@ -1109,7 +1110,7 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
         }
         return;
     } else {
-        OOFEM_ERROR("load type not supported");
+        _error("Shell7BaseXFEM :: computeEdgeLoadVectorAt: load type not supported");
         return;
     }
 }
@@ -1164,7 +1165,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 #endif
         return;
     } else {
-        OOFEM_ERROR("load type not supported");
+        _error("Shell7Base :: computeSurfaceLoadVectorAt: load type not supported");
         return;
     }
 }

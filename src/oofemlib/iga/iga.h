@@ -64,19 +64,19 @@ class OOFEM_EXPORT FEIIGAElementGeometryWrapper : public FEICellGeometry
 {
 public:
     const IntArray *knotSpan;
-    Element *elem;
+    ElementGeometry *elemGeometry;
 public:
-    FEIIGAElementGeometryWrapper(Element * _elem, const IntArray * _knotSpan) : FEICellGeometry() {
-        this->elem = _elem;
+    FEIIGAElementGeometryWrapper(ElementGeometry * _elemGeometry, const IntArray * _knotSpan) : FEICellGeometry() {
+        this->elemGeometry = _elemGeometry;
         this->knotSpan = _knotSpan;
     }
-    FEIIGAElementGeometryWrapper(Element * _elem) : FEICellGeometry() {
-        this->elem = _elem;
+    FEIIGAElementGeometryWrapper(ElementGeometry * _elemGeometry) : FEICellGeometry() {
+        this->elemGeometry = _elemGeometry;
         this->knotSpan = NULL;
     }
 
-    int giveNumberOfVertices() const { return elem->giveNumberOfNodes(); }
-    const FloatArray *giveVertexCoordinates(int i) const { return elem->giveNode(i)->giveCoordinates(); }
+    int giveNumberOfVertices() const { return elemGeometry->giveNumberOfNodes(); }
+    const FloatArray *giveVertexCoordinates(int i) const { return elemGeometry->giveNode(i)->giveCoordinates(); }
 };
 
 
@@ -88,7 +88,7 @@ class OOFEM_EXPORT IGAIntegrationElement : public GaussIntegrationRule
 protected:
     IntArray knotSpan;     // knot_span(nsd)
 public:
-    IGAIntegrationElement(int _n, Element * _e, IntArray & _knotSpan) :
+    IGAIntegrationElement(int _n, ElementGeometry * _e, IntArray & _knotSpan) :
         GaussIntegrationRule(_n, _e, 0, 0, false),
         knotSpan(_knotSpan) { }
     const IntArray *giveKnotSpan() { return & this->knotSpan; }

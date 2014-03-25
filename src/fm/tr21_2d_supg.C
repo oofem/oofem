@@ -96,21 +96,21 @@ void
 TR21_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     if ( ut == EID_MomentumBalance ) {
-        answer = {V_u, V_v};
+        answer.setValues(2, V_u, V_v);
     } else if ( ut == EID_ConservationEquation ) {
         if ( ( inode >= 1 ) && ( inode < 4 ) ) {
-            answer = {P_f};
+            answer.setValues(1, P_f);
         } else {
             answer.clear();
         }
     } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
         if ( ( inode >= 1 ) && ( inode < 4 ) ) {
-            answer = {V_u, V_v, P_f};
+            answer.setValues(3, V_u, V_v, P_f);
         } else {
-            answer = {V_u, V_v};
+            answer.setValues(2, V_u, V_v);
         }
     } else {
-        OOFEM_ERROR("Unknown equation id encountered");
+        _error("giveDofManDofIDMask: Unknown equation id encountered");
     }
 }
 

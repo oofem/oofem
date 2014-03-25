@@ -47,7 +47,6 @@
 #define _IFT_IsoInterfaceDamageMaterial_gf "gf"
 #define _IFT_IsoInterfaceDamageMaterial_maxOmega "maxomega"
 #define _IFT_IsoInterfaceDamageMaterial_talpha "talpha"
-#define _IFT_IsoInterfaceDamageMaterial_beta "beta"
 //@}
 
 namespace oofem {
@@ -128,8 +127,6 @@ protected:
     double e0;
     /// Maximum limit on omega. The purpose is elimination of a too compliant material which may cause convergency problems. Set to something like 0.99 if needed.
     double maxOmega;
-    /// Weight factor for the influence of shear component of displacement jump on equivalent strain.
-    double beta;
 
 public:
     /// Constructor

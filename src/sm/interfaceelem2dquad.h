@@ -38,7 +38,6 @@
 #include "structuralelement.h"
 
 #define _IFT_InterfaceElem2dQuad_Name "interface2dquad"
-#define _IFT_InterfaceElem2dQuad_axisymmode "axisymmode"
 
 namespace oofem {
 class FEI2dLineQuad;
@@ -53,8 +52,6 @@ class InterfaceElem2dQuad : public StructuralElement
 {
 protected:
     static FEI2dLineQuad interp;
-    /// Flag controlling axisymmetric mode (integration over unit circumferential angle)
-    bool axisymmode;
 
 public:
     InterfaceElem2dQuad(int n, Domain * d);

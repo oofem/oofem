@@ -47,7 +47,7 @@ namespace oofem {
 REGISTER_Function(PiecewiseLinFunction);
 
 PiecewiseLinFunction :: PiecewiseLinFunction(int i, Domain *d) : Function(i, d), dates(), values()
-{ }
+{}
 
 double PiecewiseLinFunction :: evaluateAtTime(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
@@ -58,7 +58,7 @@ double PiecewiseLinFunction :: evaluateAtTime(double time)
     double xa, xb, ya, yb;
 
     if ( this->dates.giveSize() == 0 ) {
-        OOFEM_ERROR("Undefined dates and values");
+        _error("at: Undefined dates and values");
     }
 
     for ( int i = 1; i <= this->dates.giveSize(); i++ ) {
@@ -66,7 +66,7 @@ double PiecewiseLinFunction :: evaluateAtTime(double time)
             return this->values.at(i);
         } else if ( this->dates.at(i) > time ) {
             if ( i == 1 ) {
-                OOFEM_WARNING("computational time %f is out of given time %f, extrapolating value(s)", time, dates.at(i) );
+                OOFEM_WARNING3( "PiecewiseLinFunction :: evaluateAtTime: computational time %f is out of given time %f, extrapolating value(s)", time, dates.at(i) );
                 return 0.;
             }
 
@@ -91,7 +91,7 @@ double PiecewiseLinFunction :: evaluateVelocityAtTime(double time)
     double xa, xb, ya, yb;
 
     if ( this->dates.giveSize() == 0 ) {
-        OOFEM_ERROR("Undefined dates and values");
+        _error("at: Undefined dates and values");
     }
 
     for ( int i = 1; i <= this->dates.giveSize(); i++ ) {
@@ -121,6 +121,7 @@ double PiecewiseLinFunction :: evaluateVelocityAtTime(double time)
 IRResultType
 PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     Function :: initializeFrom(ir);
@@ -133,7 +134,7 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, fname, _IFT_PiecewiseLinFunction_dataFile);
         std :: ifstream file(fname.c_str(), std :: ios :: in);
         if ( !file.is_open() ) {
-            OOFEM_ERROR("Failed to open data file: %s\n", fname.c_str());
+            OOFEM_ERROR2( "PieceWiseLinFunction :: initializeFrom - Failed to open data file: %s\n", fname.c_str() );
         }
         // Data should be stored in two columns (or just interleaved)
         double temp_t, temp_ft;

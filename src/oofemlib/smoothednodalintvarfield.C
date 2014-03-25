@@ -38,7 +38,6 @@
 #include "element.h"
 #include "feinterpol.h"
 #include "dofmanager.h"
-#include "set.h"
 
 namespace oofem {
 SmoothedNodalInternalVariableField :: SmoothedNodalInternalVariableField(InternalStateType ist, FieldType ft, NodalRecoveryModel :: NodalRecoveryModelType st, Domain *d) : Field(ft)
@@ -46,6 +45,8 @@ SmoothedNodalInternalVariableField :: SmoothedNodalInternalVariableField(Interna
     this->istType = ist;
     this->stype = st;
     this->smoother = classFactory.createNodalRecoveryModel(this->stype, d);
+    // setup smoother (whole domain recovery)
+    this->smoother->setRecoveryMode( 0, IntArray() );
     this->domain = d;
 }
 
@@ -59,28 +60,24 @@ SmoothedNodalInternalVariableField :: ~SmoothedNodalInternalVariableField()
 int
 SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *tStep)
 {
-    int i, result = 0; // assume ok
+    int i, region = 1, result = 0; // assume ok
     FloatArray lc, n;
     const FloatArray *nodalValue;
 
-    // use whole domain recovery
-    // create a new set containing all elements
-    Set elemSet(0, this->domain);
-    elemSet.addAllElements();
-    this->smoother->recoverValues(elemSet, istType, tStep);
+    this->smoother->recoverValues(istType, tStep);
     // request element containing target point
-    Element *elem = this->domain->giveSpatialLocalizer()->giveElementContainingPoint(coords);
-    if ( elem ) { // ok element containing target point found
-        FEInterpolation *interp = elem->giveInterpolation();
+    ElementGeometry *elemGeometry = this->domain->giveSpatialLocalizer()->giveElementContainingPoint(coords);
+    if ( elemGeometry ) { // ok element containing target point found
+        FEInterpolation *interp = elemGeometry->giveInterpolation();
         if ( interp ) {
             // map target point to element local coordinates
-            if ( interp->global2local( lc, coords, FEIElementGeometryWrapper(elem) ) ) {
+            if ( interp->global2local( lc, coords, FEIElementGeometryWrapper(elemGeometry) ) ) {
                 // evaluate interpolation functions at target point
-                interp->evalN( n, lc, FEIElementGeometryWrapper(elem) );
+                interp->evalN( n, lc, FEIElementGeometryWrapper(elemGeometry) );
                 // loop over element nodes
                 for ( i = 1; i <= n.giveSize(); i++ ) {
                     // request nodal value
-                    this->smoother->giveNodalVector( nodalValue, elem->giveDofManagerNumber(i) );
+                    this->smoother->giveNodalVector(nodalValue, elemGeometry->giveDofManagerNumber(i), region);
                     // multiply nodal value by value of corresponding shape function and add this to answer
                     answer.add(n.at(i), * nodalValue);
                 }
@@ -99,9 +96,10 @@ SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, FloatArray 
 int
 SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep)
 {
+    int region = 1;
     if ( dman->hasCoordinates() ) {
         const FloatArray *val;
-        int result = this->smoother->giveNodalVector( val, dman->giveNumber() );
+        int result = this->smoother->giveNodalVector(val, dman->giveNumber(), region);
         answer = * val;
         return ( result == 1 );
     } else {

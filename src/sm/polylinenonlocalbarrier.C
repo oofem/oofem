@@ -81,7 +81,7 @@ PolylineNonlocalBarrier :: isActivated(const FloatArray &c1, const FloatArray &c
 
     int mci = max(localXCoordIndx, localYCoordIndx);
     if ( ( c1.giveSize() > mci ) || ( c2.giveSize() > mci ) ) {
-        OOFEM_ERROR("local coordinate index size violation");
+        _error("PolylineNonlocalBarrier::isActivated: local coordinate index size violation");
     }
 
     xc1 = c1.at(localXCoordIndx);
@@ -188,6 +188,7 @@ PolylineNonlocalBarrier :: giveDistancePointLine(const FloatArray &coordsA, cons
 IRResultType
 PolylineNonlocalBarrier :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, vertexNodes, _IFT_PolylineNonlocalBarrier_vertexnodes);

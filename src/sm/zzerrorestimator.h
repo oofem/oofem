@@ -59,7 +59,7 @@
 namespace oofem {
 #define ZZErrorEstimator_ElementResultCashed
 
-class Element;
+class BaseElement;
 class GaussPoint;
 
 /**
@@ -116,7 +116,7 @@ public:
     /// Destructor
     virtual ~ZZErrorEstimator() { }
 
-    virtual double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep);
+    virtual double giveElementError(EE_ErrorType type, ElementGeometry *elemGeometry, TimeStep *tStep);
     virtual double giveValue(EE_ValueType type, TimeStep *tStep);
 
     virtual int estimateError(EE_ErrorMode mode, TimeStep *tStep);
@@ -154,7 +154,7 @@ public:
      * Default implementation returns element default rule.
      */
     virtual IntegrationRule *ZZErrorEstimatorI_giveIntegrationRule() {
-        return this->ZZErrorEstimatorI_giveElement()->giveDefaultIntegrationRulePtr();
+        return this->ZZErrorEstimatorI_giveElement()->giveElementGeometry()->giveDefaultIntegrationRulePtr();
     }
 
     /**

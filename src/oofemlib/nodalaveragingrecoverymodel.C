@@ -51,8 +51,10 @@ NodalAveragingRecoveryModel :: ~NodalAveragingRecoveryModel()
 { }
 
 int
-NodalAveragingRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep)
+NodalAveragingRecoveryModel :: recoverValues(InternalStateType type, TimeStep *tStep)
 {
+    int nregions = this->giveNumberOfVirtualRegions();
+    int nelem = domain->giveNumberOfElements();
     int nnodes = domain->giveNumberOfDofManagers();
     IntArray regionNodalNumbers(nnodes);
     IntArray regionDofMansConnectivity;
@@ -73,91 +75,96 @@ NodalAveragingRecoveryModel :: recoverValues(Set elementSet, InternalStateType t
     // clear nodal table
     this->clear();
 
-    int regionValSize = 0;
-    int regionDofMans;
+    // loop over regions
+    for ( int ireg = 1; ireg <= nregions; ireg++ ) {
+        int regionValSize = 0;
+        int regionDofMans;
 
-    // loop over elements and determine local region node numbering and determine and check nodal values size
-    if ( this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, elementSet) == 0 ) {
-        return 0;
-    }
+        // loop over elements and determine local region node numbering and determine and check nodal values size
+        if ( this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, ireg) == 0 ) {
+            break;
+        }
 
-    regionDofMansConnectivity.resize(regionDofMans);
-    regionDofMansConnectivity.zero();
+        regionDofMansConnectivity.resize(regionDofMans);
+        regionDofMansConnectivity.zero();
 
-    IntArray elements = elementSet.giveElementList();
-    // assemble element contributions
-    for ( int i = 1; i <= elements.giveSize(); i++ ) {
-        int ielem = elements.at(i);
-        NodalAveragingRecoveryModelInterface *interface;
-        Element *element = domain->giveElement(ielem);
+        // assemble element contributions
+        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+            NodalAveragingRecoveryModelInterface *interface;
+            ElementGeometry *elementGeometry = domain->giveElementGeometry(ielem);
 
 #ifdef __PARALLEL_MODE
-        if ( element->giveParallelMode() != Element_local ) {
-            continue;
-        }
+            if ( element->giveParallelMode() != Element_local ) {
+                continue;
+            }
 
 #endif
-
-        // If an element doesn't implement the interface, it is ignored.
-        if ( ( interface = static_cast< NodalAveragingRecoveryModelInterface * >
-                           ( element->giveInterface(NodalAveragingRecoveryModelInterfaceType) ) ) == NULL ) {
-            //abort();
-            continue;
-        }
-
-        int elemNodes = element->giveNumberOfDofManagers();
-        // ask element contributions
-        for ( int elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
-            int node = element->giveDofManager(elementNode)->giveNumber();
-            interface->NodalAveragingRecoveryMI_computeNodalValue(val, elementNode, type, tStep);
-            // if the element cannot evaluate this variable, it is ignored
-            if ( val.giveSize() == 0 ) {
-                continue;
-            } else if ( regionValSize == 0 ) {
-                regionValSize = val.giveSize();
-                lhs.resize(regionDofMans * regionValSize);
-                lhs.zero();
-            } else if ( val.giveSize() != regionValSize ) {
-                OOFEM_LOG_RELEVANT("NodalAveragingRecoveryModel :: size mismatch for InternalStateType %s, ignoring all elements that doesn't use the size %d\n", __InternalStateTypeToString(type), regionValSize);
+            if ( this->giveElementVirtualRegionNumber(ielem) != ireg ) {
                 continue;
             }
-            int eq = ( regionNodalNumbers.at(node) - 1 ) * regionValSize;
-            for ( int i = 1; i <= regionValSize; i++ ) {
-                lhs.at(eq + i) += val.at(i);
+
+            // If an element doesn't implement the interface, it is ignored.
+            if ( ( interface = static_cast< NodalAveragingRecoveryModelInterface * >
+                               ( elementGeometry->giveInterface(NodalAveragingRecoveryModelInterfaceType) ) ) == NULL ) {
+                //abort();
+                continue;
             }
 
-            regionDofMansConnectivity.at( regionNodalNumbers.at(node) )++;
-        }
-    } // end assemble element contributions
+            int elemNodes = elementGeometry->giveNumberOfDofManagers();
+            // ask element contributions
+            for ( int elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
+                int node = elementGeometry->giveDofManager(elementNode)->giveNumber();
+                interface->NodalAveragingRecoveryMI_computeNodalValue(val, elementNode, type, tStep);
+                // if the element cannot evaluate this variable, it is ignored
+                if ( val.giveSize() == 0 ) {
+                    continue;
+                } else if ( regionValSize == 0 ) {
+                    regionValSize = val.giveSize();
+                    lhs.resize(regionDofMans * regionValSize);
+                    lhs.zero();
+                } else if ( val.giveSize() != regionValSize ) {
+                    OOFEM_LOG_RELEVANT("NodalAveragingRecoveryModel :: size mismatch for InternalStateType %s, ignoring all elements that doesn't use the size %d\n", __InternalStateTypeToString(type), regionValSize);
+                    continue;
+                }
+                int eq = ( regionNodalNumbers.at(node) - 1 ) * regionValSize;
+                for ( int i = 1; i <= regionValSize; i++ ) {
+                    lhs.at(eq + i) += val.at(i);
+                }
+
+                regionDofMansConnectivity.at( regionNodalNumbers.at(node) )++;
+            }
+        } // end assemble element contributions
 
 #ifdef __PARALLEL_MODE
-    if ( parallel ) {
-        this->exchangeDofManValues(lhs, regionDofMansConnectivity, regionNodalNumbers, regionValSize);
-    }
+        if ( parallel ) {
+            this->exchangeDofManValues(ireg, lhs, regionDofMansConnectivity, regionNodalNumbers, regionValSize);
+        }
 #endif
 
-    // solve for recovered values of active region
-    for ( int inode = 1; inode <= nnodes; inode++ ) {
-        if ( regionNodalNumbers.at(inode) ) {
-            int eq = ( regionNodalNumbers.at(inode) - 1 ) * regionValSize;
-            for ( int i = 1; i <= regionValSize; i++ ) {
-                if ( regionDofMansConnectivity.at( regionNodalNumbers.at(inode) ) > 0 ) {
-                    lhs.at(eq + i) /= regionDofMansConnectivity.at( regionNodalNumbers.at(inode) );
-                } else {
-                    OOFEM_WARNING("values of dofmanager %d undetermined", inode);
-                    lhs.at(eq + i) = 0.0;
+        // solve for recovered values of active region
+        for ( int inode = 1; inode <= nnodes; inode++ ) {
+            if ( regionNodalNumbers.at(inode) ) {
+                int eq = ( regionNodalNumbers.at(inode) - 1 ) * regionValSize;
+                for ( int i = 1; i <= regionValSize; i++ ) {
+                    if ( regionDofMansConnectivity.at( regionNodalNumbers.at(inode) ) > 0 ) {
+                        lhs.at(eq + i) /= regionDofMansConnectivity.at( regionNodalNumbers.at(inode) );
+                    } else {
+                        OOFEM_WARNING2("NodalAveragingRecoveryModel::recoverValues: values of dofmanager %d undetermined", inode);
+                        lhs.at(eq + i) = 0.0;
+                    }
                 }
             }
         }
-    }
 
-    // update recovered values
-    this->updateRegionRecoveredValues(regionNodalNumbers, regionValSize, lhs);
+        // update recovered values
+        this->updateRegionRecoveredValues(ireg, regionNodalNumbers, regionValSize, lhs);
+    } // end loop over regions
 
     this->valType = type;
     this->stateCounter = tStep->giveSolutionStateCounter();
     return 1;
 }
+
 
 #ifdef __PARALLEL_MODE
 
@@ -176,13 +183,13 @@ NodalAveragingRecoveryModel :: initCommMaps()
             OOFEM_LOG_INFO("NodalAveragingRecoveryModel :: initCommMaps: initialized comm maps\n");
             initCommMap = false;
         } else {
-            OOFEM_ERROR("unsupported comm mode");
+            OOFEM_ERROR("NodalAveragingRecoveryModel :: initCommMaps: unsupported comm mode");
         }
     }
 }
 
 void
-NodalAveragingRecoveryModel :: exchangeDofManValues(FloatArray &lhs, IntArray &regionDofMansConnectivity,
+NodalAveragingRecoveryModel :: exchangeDofManValues(int ireg, FloatArray &lhs, IntArray &regionDofMansConnectivity,
                                                     IntArray &regionNodalNumbers, int regionValSize)
 {
     EngngModel *emodel = domain->giveEngngModel();
@@ -193,11 +200,11 @@ NodalAveragingRecoveryModel :: exchangeDofManValues(FloatArray &lhs, IntArray &r
 
         // exchange data for shared nodes
         communicator->packAllData(this, & ls, & NodalAveragingRecoveryModel :: packSharedDofManData);
-        communicator->initExchange(789);
+        communicator->initExchange(789 + ireg);
         communicator->unpackAllData(this, & ls, & NodalAveragingRecoveryModel :: unpackSharedDofManData);
         communicator->finishExchange();
     } else {
-        OOFEM_ERROR("Unsupported commMode");
+        OOFEM_ERROR("NodalAveragingRecoveryModel :: exchangeDofManValues: Unsupported commMode");
     }
 }
 

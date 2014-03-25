@@ -58,6 +58,7 @@ NLTransientTransportProblem :: ~NLTransientTransportProblem()
 IRResultType
 NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     NonStationaryTransportProblem :: initializeFrom(ir);
@@ -101,7 +102,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( conductivityMatrix == NULL ) {
-            OOFEM_ERROR("sparse matrix creation failed");
+            _error("solveYourselfAt: sparse matrix creation failed");
         }
 
         conductivityMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
@@ -208,7 +209,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         OOFEM_LOG_INFO("%-15e %-10d %-15e %-15e\n", tStep->giveTargetTime(), nite, solutionErr, incrementErr);
 
         if ( nite >= nsmax ) {
-            OOFEM_ERROR("convergence not reached after %d iterations", nsmax);
+            _error2("convergence not reached after %d iterations", nsmax);
         }
     } while ( ( fabs(solutionErr) > rtol ) || ( fabs(incrementErr) > rtol ) );
 }
@@ -226,7 +227,7 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
-            OOFEM_ERROR("Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+            OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
         }
     }
 
@@ -234,7 +235,7 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
     TimeStep *previousStep = this->givePreviousStep(), *currentStep = this->giveCurrentStep();
 
     if ( dof->__giveEquationNumber() == 0 ) {
-        OOFEM_ERROR("invalid equation number on DoF %d", dof->giveNumber() );
+        OOFEM_ERROR2( "giveUnknownComponent: invalid equation number on DoF %d", dof->giveNumber() );
     }
 
     if ( ( t >= previousStep->giveTargetTime() ) && ( t <= currentStep->giveTargetTime() ) ) {
@@ -248,10 +249,10 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
         } else if ( mode == VM_Total ) {
             return psi * rtdt + ( 1. - psi ) * rt;
         } else {
-            OOFEM_ERROR("Unknown mode %s is undefined for this problem", __ValueModeTypeToString(mode) );
+            OOFEM_ERROR2( "giveUnknownComponent: Unknown mode %s is undefined for this problem", __ValueModeTypeToString(mode) );
         }
     } else {
-        OOFEM_ERROR("time value %f not within bounds %f and %f", t, previousStep->giveTargetTime(), currentStep->giveTargetTime() );
+        OOFEM_ERROR4( "giveUnknownComponent: time value %f not within bounds %f and %f", t, previousStep->giveTargetTime(), currentStep->giveTargetTime() );
     }
 
     return 0.; // to make compiler happy;
@@ -319,10 +320,10 @@ NLTransientTransportProblem :: giveUnknownDictHashIndx(ValueModeType mode, TimeS
         } else if ( tStep->giveNumber() == this->giveCurrentStep()->giveNumber() - 1 ) { //previous time
             return 1;
         } else {
-            OOFEM_ERROR("No history available at TimeStep %d = %f, called from TimeStep %d = %f", tStep->giveNumber(), tStep->giveTargetTime(), this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveTargetTime() );
+            _error5( "No history available at TimeStep %d = %f, called from TimeStep %d = %f", tStep->giveNumber(), tStep->giveTargetTime(), this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveTargetTime() );
         }
     } else {
-        OOFEM_ERROR("ValueModeType %s undefined", __ValueModeTypeToString(mode));
+        _error2( "ValueModeType %s undefined", __ValueModeTypeToString(mode) );
     }
 
     return 0;
@@ -384,7 +385,7 @@ NLTransientTransportProblem :: updateInternalState(TimeStep *tStep)
 
         int nelem = domain->giveNumberOfElements();
         for ( int j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(tStep);
+            domain->giveElementGeometry(j)->updateInternalState(tStep);
         }
     }
 }
@@ -400,7 +401,8 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
     IntArray loc;
     FloatMatrix charMtrxCond, charMtrxCap, bcMtrx;
     FloatArray r, drdt, contrib, help;
-    Element *element;
+	ElementGeometry *elementGeometry;
+	ElementEvaluator *elementEvaluator; 
     TimeStep *previousStep = this->givePreviousStep(); //r_t
     TimeStep *currentStep = this->giveCurrentStep(); //r_{t+\Delta t}. Note that *tStep is a Tau step between r_t and r_{t+\Delta t}
 
@@ -408,7 +410,8 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
     int nelem = domain->giveNumberOfElements();
 
     for ( int i = 1; i <= nelem; i++ ) {
-        element = domain->giveElement(i);
+        elementGeometry = domain->giveElementGeometry(i);
+		elementEvaluator = domain->giveElementEvaluator(i);
 #ifdef __PARALLEL_MODE
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
@@ -418,15 +421,15 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
         }
 
 #endif
-        if ( !element->isActivated(tStep) ) {
+        if ( !elementGeometry->isActivated(tStep) ) {
             continue;
         }
 
-        element->giveLocationArray(loc, ut, ns);
+		elementEvaluator->giveLocationArray(loc, ut, ns, elementGeometry);
 
-        element->giveCharacteristicMatrix(charMtrxCond, ConductivityMatrix, tStep);
-        element->giveCharacteristicMatrix(bcMtrx, LHSBCMatrix, tStep);
-        element->giveCharacteristicMatrix(charMtrxCap, CapacityMatrix, tStep);
+        elementEvaluator->giveCharacteristicMatrix(charMtrxCond, ConductivityMatrix, tStep);
+        elementEvaluator->giveCharacteristicMatrix(bcMtrx, LHSBCMatrix, tStep);
+        elementEvaluator->giveCharacteristicMatrix(charMtrxCap, CapacityMatrix, tStep);
 
 
         /*
@@ -436,8 +439,8 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
 
         if ( ( t >= previousStep->giveTargetTime() ) && ( t <= currentStep->giveTargetTime() ) ) {
             FloatArray rp, rc;
-            element->computeVectorOf(EID_ConservationEquation, VM_Total, currentStep, rc);
-            element->computeVectorOf(EID_ConservationEquation, VM_Total, previousStep, rp);
+			elementEvaluator->computeVectorOf(EID_ConservationEquation, VM_Total, currentStep, rc, elementGeometry);
+			elementEvaluator->computeVectorOf(EID_ConservationEquation, VM_Total, previousStep, rp, elementGeometry);
 
             //approximate derivative with a difference
             drdt.beDifferenceOf(rc, rp);
@@ -448,7 +451,7 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
             r = rc;
             r.add(rp);
         } else {
-            OOFEM_ERROR("unsupported time value");
+            _error("assembleAlgorithmicPartOfRhs: unsupported time value");
         }
 
 

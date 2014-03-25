@@ -138,7 +138,7 @@ void XFEMDebugTools :: WriteArrayToMatlab(const std :: string &iName, const std 
 void XFEMDebugTools :: WriteArrayToGnuplot(const std :: string &iName, const std :: vector< double > &iX, const std :: vector< double > &iY)
 {
     if ( iX.size() != iY.size() ) {
-        OOFEM_SIMPLE_ERROR("Error in XFEMDebugTools :: WriteArrayToGnuplot(): iX.size() != iY.size().")
+        OOFEM_ERROR("Error in XFEMDebugTools :: WriteArrayToGnuplot(): iX.size() != iY.size().")
     }
 
     std :: ofstream file;

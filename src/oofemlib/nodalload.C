@@ -42,6 +42,7 @@ REGISTER_BoundaryCondition(NodalLoad);
 IRResultType
 NodalLoad :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     int value = 1;

@@ -59,7 +59,7 @@ class GaussPoint;
 class Dictionary;
 class FloatArray;
 class FloatMatrix;
-
+class ElementGeometry;
 /**
  * Abstract base class for all material models. Declares the basic common interface
  * to all material models. Derived classes should expand this interface, because they are
@@ -158,13 +158,11 @@ public:
      * @param tStep Time step to check activity for.
      * @return True if material is activated for given solution step.
      */
-    bool isActivated(TimeStep *tStep) {
-        if ( tStep ) {
-            return ( tStep->giveIntrinsicTime() >= this->castingTime );
-        } else {
-            return true;
-        }
-    }
+    bool isActivated(TimeStep *tStep) { if ( tStep ) {
+                                            return ( tStep->giveIntrinsicTime() >= this->castingTime );
+                                        } else {
+                                            return true;
+                                        } }
 
     // identification and auxiliary functions
     /**
@@ -238,7 +236,7 @@ public:
      * @param element Pointer to element.
      * @return Zero on error.
      */
-    virtual int initMaterial(Element *element);
+    virtual int initMaterial(ElementGeometry *element);
     /**
      * Returns material status of receiver in given integration point.
      * If status does not exist yet, it is created using CreateStatus member function.

@@ -166,7 +166,7 @@ void QTrPlaneStrain :: computeGaussPoints()
 void
 QTrPlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer = {D_u, D_v};
+    answer.setValues(2, D_u, D_v);
 }
 
 
@@ -189,7 +189,7 @@ QTrPlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Float
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
+        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -418,7 +418,7 @@ QTrPlaneStrain :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answ
         answer.at(2) = this->giveNode(6)->giveNumber();
         answer.at(3) = this->giveNode(5)->giveNumber();
     } else {
-        OOFEM_ERROR("node unknown");
+        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 

@@ -42,7 +42,6 @@
 #include "classfactory.h"
 #include "shell7base.h"
 #include "intmatbilinczfagerstrom.h"
-#include "dynamicinputrecord.h"
 //#include "vld.h"
 
 namespace oofem {
@@ -196,7 +195,7 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
             for ( int iter = 1; fabs(loadFun) / sigf > errorTol; iter++ ) {
                 //printf("loadfun = %e \n",loadFun);
                 if ( iter > 40 ) {
-                    OOFEM_ERROR("no convergence in constitutive driver");
+                    OOFEM_ERROR("BilinearCZMaterialFagerstrom :: giveRealStressVector - no convergence in constitutive driver");
                 }
                 Smat.zero();    // S_mat=0.d0
 
@@ -529,6 +528,7 @@ const double tolerance = 1.0e-12; // small number
 IRResultType
 IntMatBilinearCZFagerstrom :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, kn0, _IFT_IntMatBilinearCZFagerstrom_kn);
@@ -576,15 +576,15 @@ int
 IntMatBilinearCZFagerstrom :: checkConsistency()
 {
     if ( this->kn0 < 0.0 ) {
-        OOFEM_ERROR("stiffness kn0 is negative (%.2e)", this->kn0);
+        OOFEM_ERROR2("IntMatBilinearCZFagerstrom :: initializeFrom - stiffness kn0 is negative (%.2e)", this->kn0);
     } else if ( this->ks0 < 0.0 ) {
-        OOFEM_ERROR("stiffness ks0 is negative (%.2e)", this->ks0);
+        OOFEM_ERROR2("IntMatBilinearCZFagerstrom :: initializeFrom - stiffness ks0 is negative (%.2e)", this->ks0);
     } else if ( this->GIc < 0.0 ) {
-        OOFEM_ERROR("GIc is negative (%.2e)", this->GIc);
+        OOFEM_ERROR2("IntMatBilinearCZFagerstrom :: initializeFrom - GIc is negative (%.2e)", this->GIc);
     } else if ( this->GIIc < 0.0 ) {
-        OOFEM_ERROR("GIIc is negative (%.2e)", this->GIIc);
+        OOFEM_ERROR2("IntMatBilinearCZFagerstrom :: initializeFrom - GIIc is negative (%.2e)", this->GIIc);
     } else if ( this->gamma < 0.0  ) {
-        OOFEM_ERROR("gamma (%.2e) is below zero which is unphysical",
+        OOFEM_ERROR2("IntMatBilinearCZFagerstrom :: initializeFrom - gamma (%.2e) is below zero which is unphysical",
                      this->gamma);
     }
     return 1;
@@ -637,7 +637,7 @@ IntMatBilinearCZFagerstromStatus :: IntMatBilinearCZFagerstromStatus(int n, Doma
 
     Shell7Base *shell = dynamic_cast< Shell7Base * >( gp->giveElement() );
     if ( !shell ) {
-        OOFEM_ERROR("oh no wrong element type");
+        OOFEM_ERROR("BilinearCZMaterialFagerstrom :: giveRealStressVector - oh no wrong element type");
     }
     FloatArray lCoords(3);
     lCoords.at(1) = gp->giveCoordinate(1);

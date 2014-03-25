@@ -40,6 +40,7 @@
 #include "enrichmentdomain.h"
 #include "cltypes.h"
 #include "connectivitytable.h"
+#include "oofem_limits.h"
 #include "classfactory.h"
 #include "fracturemanager.h"
 #include "mathfem.h"
@@ -55,9 +56,6 @@
 #include <limits>
 #include <sstream>
 
-#include "enrichmentfronts/enrichmentfront.h"
-#include "enrichmentfronts/enrichmentfrontdonothing.h"
-
 namespace oofem {
 
 const double EnrichmentItem :: mLevelSetTol = 1.0e-12;
@@ -65,6 +63,7 @@ const double EnrichmentItem :: mLevelSetTol = 1.0e-12;
 REGISTER_EnrichmentItem(Inclusion)
 REGISTER_EnrichmentItem(Delamination)
 
+REGISTER_EnrichmentItem(Crack)
 
 EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FEMComponent(n, aDomain),
     mpEnrichmentDomain(NULL),
@@ -73,17 +72,18 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
     mEnrFrontIndex(0),
     mpPropagationLaw(NULL),
     mPropLawIndex(0),
-    mInheritBoundaryConditions(false),
-    startOfDofIdPool(-1),
-    endOfDofIdPool(-1),
-    mpEnrichesDofsWithIdArray(),
     mLevelSetsNeedUpdate(true),
     mLevelSetTol2(1.0e-12)
 {
+    this->startOfDofIdPool = -1;
+    this->endOfDofIdPool = -1;
+    this->mpEnrichesDofsWithIdArray = new IntArray;
 }
 
 EnrichmentItem :: ~EnrichmentItem()
 {
+    delete this->mpEnrichesDofsWithIdArray;
+
     if ( mpEnrichmentDomain != NULL ) {
         delete mpEnrichmentDomain;
         mpEnrichmentDomain = NULL;
@@ -107,6 +107,7 @@ EnrichmentItem :: ~EnrichmentItem()
 
 IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
     mEnrFrontIndex = 0;
@@ -116,9 +117,6 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
     mPropLawIndex = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mPropLawIndex, _IFT_EnrichmentItem_propagationlaw);
 
-    if(ir->hasField(_IFT_EnrichmentItem_inheritbc)) {
-    	mInheritBoundaryConditions = true;
-    }
 
     return IRRT_OK;
 }
@@ -130,10 +128,6 @@ void EnrichmentItem :: appendInputRecords(DynamicDataReader &oDR)
 
     eiRec->setField(mEnrFrontIndex,                     _IFT_EnrichmentItem_front);
     eiRec->setField(mPropLawIndex,                      _IFT_EnrichmentItem_propagationlaw);
-
-    if(mInheritBoundaryConditions) {
-    	eiRec->setField(_IFT_EnrichmentItem_inheritbc);
-    }
 
     oDR.insertInputRecord(DataReader :: IR_enrichItemRec, eiRec);
 
@@ -168,6 +162,7 @@ void EnrichmentItem :: appendInputRecords(DynamicDataReader &oDR)
 
 int EnrichmentItem :: instanciateYourself(DataReader *dr)
 {
+    const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
     std :: string name;
 
@@ -176,14 +171,14 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     result = mir->giveRecordKeywordField(name);
 
     if ( result != IRRT_OK ) {
-        mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
+        IR_IOERR(giveClassName(), __proc, "", mir, result);
     }
 
     mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), 1, this->giveDomain() );
     if ( mpEnrichmentFunc != NULL ) {
         mpEnrichmentFunc->initializeFrom(mir);
     } else {
-        OOFEM_ERROR("failed to create enrichment function (%s)", name.c_str() );
+        OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: failed to create enrichment function (%s)", name.c_str() );
     }
 
 
@@ -191,12 +186,12 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     mir = dr->giveInputRecord(DataReader :: IR_geoRec, 1);
     result = mir->giveRecordKeywordField(name);
     if ( result != IRRT_OK ) {
-        mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
+        IR_IOERR(giveClassName(), __proc, "", mir, result);
     }
 
     mpEnrichmentDomain = classFactory.createEnrichmentDomain( name.c_str() );
     if ( mpEnrichmentDomain == NULL ) {
-        OOFEM_ERROR("unknown enrichment domain (%s)", name.c_str() );
+        OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: unknown enrichment domain (%s)", name.c_str() );
     }
 
     if ( giveDomain()->giveXfemManager()->giveVtkDebug() ) {
@@ -219,7 +214,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         if ( mpEnrichmentFront != NULL ) {
             mpEnrichmentFront->initializeFrom(enrFrontir);
         } else {
-            OOFEM_ERROR("Failed to create enrichment front (%s)", enrFrontName.c_str() );
+            OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: Failed to create enrichment front (%s)", enrFrontName.c_str() );
         }
     }
 
@@ -237,12 +232,12 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         if ( mpPropagationLaw != NULL ) {
             mpPropagationLaw->initializeFrom(propLawir);
         } else {
-            OOFEM_ERROR("Failed to create propagation law (%s)", propLawName.c_str() );
+            OOFEM_ERROR2( "EnrichmentItem::instanciateYourself: Failed to create propagation law (%s)", propLawName.c_str() );
         }
     }
 
     // Set start of the enrichment dof pool for the given EI
-    int xDofPoolAllocSize = this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() * 1 + 5; // TODO: overload for Crack
+    int xDofPoolAllocSize = this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() * 1;
     this->startOfDofIdPool = this->giveDomain()->giveNextFreeDofID(xDofPoolAllocSize);
     this->endOfDofIdPool = this->startOfDofIdPool + xDofPoolAllocSize - 1;
 
@@ -297,25 +292,6 @@ int EnrichmentItem :: giveNumDofManEnrichments(const DofManager &iDMan) const
     }
 
     return 0;
-}
-
-int EnrichmentItem :: giveNumEnrichedDofs(const DofManager &iDMan) const
-{
-	int numEnrDofs = 0;
-
-	int startId = giveStartOfDofIdPool();
-	int endId = this->giveEndOfDofIdPool();
-
-	for(int i = 1; i <= iDMan.giveNumberOfDofs(); i++) {
-		int dofId = iDMan.giveDof(i)->giveDofID();
-
-		// If the dof belongs to this enrichment item
-		if(dofId >= startId && dofId <= endId) {
-			numEnrDofs++;
-		}
-	}
-
-	return numEnrDofs;
 }
 
 bool EnrichmentItem :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const
@@ -515,15 +491,15 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
     // Loop over elements and use the level sets to mark nodes belonging to completely cut elements.
     for ( int elIndex = 1; elIndex <= nEl; elIndex++ ) {
-        Element *el = d->giveElement(elIndex);
+        ElementGeometry *el = d->giveElementGeometry(elIndex);
         int nElNodes = el->giveNumberOfNodes();
 
         double minSignPhi  = 1, maxSignPhi         = -1;
         double minPhi = std :: numeric_limits< double > :: max();
         double maxPhi = std :: numeric_limits< double > :: min();
 
-        FloatArray elCenter(2);
-        elCenter.zero();
+        FloatArray elCenter;
+        elCenter.setValues(2, 0.0, 0.0);
 
         for ( int elNodeInd = 1; elNodeInd <= nElNodes; elNodeInd++ ) {
             int nGlob = el->giveNode(elNodeInd)->giveGlobalNumber();
@@ -679,9 +655,6 @@ void EnrichmentItem :: createEnrichedDofs()
     int nrDofMan = this->giveDomain()->giveNumberOfDofManagers();
     IntArray dofIdArray;
 
-    int bcIndex = -1;
-    int icIndex = -1;
-
     // Create new dofs
     for ( int i = 1; i <= nrDofMan; i++ ) {
         DofManager *dMan = this->giveDomain()->giveDofManager(i);
@@ -692,36 +665,7 @@ void EnrichmentItem :: createEnrichedDofs()
             int nDofs = dMan->giveNumberOfDofs();
             for ( int m = 1; m <= dofIdArray.giveSize(); m++ ) {
                 if ( !dMan->hasDofID( ( DofIDItem ) ( dofIdArray.at(m) ) ) ) {
-
-                	if( mInheritBoundaryConditions ) {
-                		// Check if the other dofs in the dof manager have
-                		// Dirichlet BCs. If so, let the new enriched dof
-                		// inherit the same BC.
-                		bool foundBC = false;
-                		for(int n = 1; n <= nDofs; n++) {
-                			Dof *dof = dMan->giveDof(n);
-                			if(dof->giveBcId() > 0) {
-                				foundBC = true;
-                				bcIndex = dof->giveBcId();
-                				break;
-                			}
-                		}
-
-                		if(foundBC) {
-                			// Append dof with BC
-                    		dMan->appendDof( new MasterDof( nDofs + m, dMan, bcIndex, icIndex, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
-                		}
-                		else {
-                    		// No BC found, append enriched dof without BC
-                    		dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
-                		}
-
-                	}
-                	else {
-                		// Append enriched dof without BC
-                		dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
-                	}
-
+                    dMan->appendDof( new MasterDof( nDofs + m, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
                 }
             }
         }
@@ -1146,7 +1090,7 @@ Inclusion :: Inclusion(int n, XfemManager *xm, Domain *aDomain) :
     EnrichmentItem(n, xm, aDomain),
     mpCrossSection(NULL)
 {
-    mpEnrichesDofsWithIdArray = {D_u, D_v, D_w};
+    mpEnrichesDofsWithIdArray->setValues(3, D_u, D_v, D_w);
 }
 
 Inclusion :: ~Inclusion()
@@ -1180,6 +1124,7 @@ bool Inclusion :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection
 IRResultType Inclusion :: initializeFrom(InputRecord *ir)
 {
     EnrichmentItem :: initializeFrom(ir);
+    const char *__proc = "initializeFrom";
     IRResultType result;
     int crossSectionIndex = 0;
     IR_GIVE_FIELD(ir, crossSectionIndex, _IFT_Inclusion_CrossSection);
@@ -1199,7 +1144,7 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
     if ( fc->hasFailed( this->giveNumber() ) ) { // interface has failed
         //printf( "...fails in interface %d \n", this->giveNumber() );
         IntArray dofManNumbers, elDofMans;
-        Element *el = fc->el;
+        ElementGeometry *el = fc->el;
         elDofMans = el->giveDofManArray();
 
         for ( int i = 1; i <= el->giveNumberOfDofManagers(); i++ ) {
@@ -1233,7 +1178,7 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
 
 Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 {
-    mpEnrichesDofsWithIdArray = {D_u, D_v, D_w, W_u, W_v, W_w};
+    mpEnrichesDofsWithIdArray->setValues(6, D_u, D_v, D_w, W_u, W_v, W_w);
     this->interfaceNum = -1;
     this->crossSectionNum = -1;
     this->matNum = 0;
@@ -1243,6 +1188,7 @@ Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : Enrichme
 IRResultType Delamination :: initializeFrom(InputRecord *ir)
 {
     EnrichmentItem :: initializeFrom(ir);
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     // Compute the delamination xi-coord
@@ -1251,7 +1197,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
 
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveDomain()->giveCrossSection(this->crossSectionNum) );
     if ( layeredCS == NULL ) {
-        OOFEM_ERROR("requires a layered cross section reference as input");
+        OOFEM_ERROR("Delamination :: initializeFrom - requires a layered cross section reference as input");
     }
 
     this->delamXiCoord = -1.0;
@@ -1314,6 +1260,472 @@ Delamination :: appendInputRecords(DynamicDataReader &oDR)
         this->mpPropagationLaw->giveInputRecord(* plRec);
         oDR.insertInputRecord(DataReader :: IR_propagationLawRec, plRec);
     }
+}
+
+
+
+Crack :: Crack(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
+{
+    mpEnrichesDofsWithIdArray->setValues(3, D_u, D_v, D_w);
+}
+
+IRResultType Crack :: initializeFrom(InputRecord *ir)
+{
+    EnrichmentItem :: initializeFrom(ir);
+
+    return IRRT_OK;
+}
+
+void Crack::AppendCohesiveZoneGaussPoint(GaussPoint *ipGP)
+{
+	StructuralInterfaceMaterialStatus *matStat = dynamic_cast<StructuralInterfaceMaterialStatus*> ( ipGP->giveMaterialStatus() );
+	matStat->printYourself();
+	if(matStat != NULL) {
+		// Compute arc length position of the Gauss point
+		const FloatArray &coord = *(ipGP->giveCoordinates());
+		double tangDist = 0.0, arcPos = 0.0;
+		mpEnrichmentDomain->computeTangentialSignDist(tangDist, coord, arcPos);
+
+		// Insert at correct position
+		std::vector<GaussPoint*>::iterator iteratorGP 	= mCohesiveZoneGaussPoints.begin();
+		std::vector<double>::iterator iteratorPos 		= mCohesiveZoneArcPositions.begin();
+		for(size_t i = 0; i < mCohesiveZoneArcPositions.size(); i++) {
+			if( arcPos > mCohesiveZoneArcPositions[i] ) {
+				iteratorGP++;
+				iteratorPos++;
+			}
+		}
+
+		mCohesiveZoneGaussPoints.insert(iteratorGP, ipGP);
+		mCohesiveZoneArcPositions.insert(iteratorPos, arcPos);
+	}
+	else{
+		OOFEM_ERROR("Error in Crack::AppendCohesiveZoneGaussPoint(GaussPoint *ipGP): matStat == NULL.")
+	}
+}
+
+void Crack :: callGnuplotExportModule(GnuplotExportModule &iExpMod)
+{
+	iExpMod.outputXFEM(*this);
+}
+
+REGISTER_EnrichmentFront(EnrFrontDoNothing)
+REGISTER_EnrichmentFront(EnrFrontExtend)
+REGISTER_EnrichmentFront(EnrFrontLinearBranchFuncRadius)
+REGISTER_EnrichmentFront(EnrFrontReduceFront)
+REGISTER_EnrichmentFront(EnrFrontLinearBranchFuncOneEl)
+
+bool EnrichmentFront :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex) const
+{
+    for ( size_t i = 0; i < mTipInfo.size(); i++ ) {
+        if ( mTipInfo [ i ].mElIndex == iElIndex ) {
+            oCoord = mTipInfo [ i ].mGlobalCoord;
+            oArcPos = mTipInfo [ i ].mArcPos;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void EnrichmentFront :: addTipIndexToNode(int iNodeInd, int iTipInd)
+{
+    // If the node is already enriched by the tip,
+    // append the new index to the list.
+    for ( size_t i = 0; i < mNodeTipIndices.size(); i++ ) {
+        if ( mNodeTipIndices [ i ].first == iNodeInd ) {
+            for ( size_t j = 0; j < mNodeTipIndices [ i ].second.size(); j++ ) {
+                if ( mNodeTipIndices [ i ].second [ j ] == iTipInd ) {
+                    // If the index is already present, we do not
+                    // need to do anything
+                    return;
+                }
+            }
+
+            mNodeTipIndices [ i ].second.push_back(iTipInd);
+            return;
+        }
+    }
+
+    // If not, create a new pair
+    std :: vector< int >tipIndices;
+    tipIndices.push_back(iTipInd);
+    std :: pair< int, std :: vector< int > >nodeTipInd = make_pair(iNodeInd, tipIndices);
+    mNodeTipIndices.push_back(nodeTipInd);
+}
+
+void EnrichmentFront :: giveNodeTipIndices(int iNodeInd, std :: vector< int > &oTipIndices) const
+{
+    for ( size_t i = 0; i < mNodeTipIndices.size(); i++ ) {
+        if ( mNodeTipIndices [ i ].first == iNodeInd ) {
+            oTipIndices = mNodeTipIndices [ i ].second;
+            return;
+        }
+    }
+}
+
+void EnrFrontDoNothing :: giveInputRecord(DynamicInputRecord &input)
+{
+    int number = 1;
+    input.setRecordKeywordField(this->giveInputRecordName(), number);
+}
+
+
+void EnrFrontExtend :: MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo)
+{
+    // Extend the set of enriched nodes as follows:
+    // If any node of the neighboring elements is enriched, the current node is also enriched.
+
+    Domain &d = * ( ixFemMan.giveDomain() );
+
+    // Loop over all nodes
+    int nNodes = d.giveNumberOfDofManagers();
+
+    std :: vector< int >newEnrNodes;
+    for ( int i = 1; i <= nNodes; i++ ) {
+        // Check if the node is already enriched
+        bool alreadyEnr = ( ioNodeEnrMarker [ i - 1 ] > 0 );
+
+#if defined ( ENABLE_XFEM_CPP11 )
+        auto begin      = newEnrNodes.begin();
+        auto end        = newEnrNodes.end();
+#else
+        std :: vector< int > :: const_iterator begin  = newEnrNodes.begin();
+        std :: vector< int > :: const_iterator end    = newEnrNodes.end();
+#endif
+        if ( std :: binary_search(begin, end, i) ) {
+            alreadyEnr = true;
+        }
+
+
+        if ( !alreadyEnr ) {
+            bool goOn = true;
+
+            // Loop over neighbors
+            const IntArray &neigh = * ( d.giveConnectivityTable()->giveDofManConnectivityArray(i) );
+            for ( int j = 1; j <= neigh.giveSize(); j++ ) {
+                if ( !goOn ) {
+                    break;
+                }
+
+                ElementGeometry &el = * ( d.giveElementGeometry( neigh.at(j) ) );
+
+                // Loop over neighbor element nodes
+                for ( int k = 1; k <= el.giveNumberOfDofManagers(); k++ ) {
+                    int kGlob = el.giveDofManager(k)->giveGlobalNumber();
+                    if ( iLevelSetNormalDir [ kGlob - 1 ] < 0 ) {
+                        newEnrNodes.push_back(i);
+                        goOn = false;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+
+    // Mark the new nodes to be enriched
+    for ( int i = 0; i < int ( newEnrNodes.size() ); i++ ) {
+        ioNodeEnrMarker [ newEnrNodes [ i ] - 1 ] = 1;
+    }
+}
+
+void EnrFrontExtend :: giveInputRecord(DynamicInputRecord &input)
+{
+    int number = 1;
+    input.setRecordKeywordField(this->giveInputRecordName(), number);
+}
+
+
+void EnrFrontReduceFront :: MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo)
+{
+	// Remove nodes touched by the crack tip
+    Domain &d = * ( ixFemMan.giveDomain() );
+
+    for(size_t tipInd = 0; tipInd < iTipInfo.size(); tipInd++) {
+//    	printf("iTipInfo[tipInd].mElIndex: %d\n", iTipInfo[tipInd].mElIndex );
+
+    	ElementGeometry *el = d.giveElementGeometry(iTipInfo[tipInd].mElIndex);
+
+    	const IntArray & elNodes = el->giveDofManArray();
+
+    	for(int i = 1; i <= elNodes.giveSize(); i++) {
+    		ioNodeEnrMarker[ elNodes.at(i)-1 ] = 0;
+    	}
+    }
+}
+
+void EnrFrontReduceFront :: giveInputRecord(DynamicInputRecord &input)
+{
+    int number = 1;
+    input.setRecordKeywordField(this->giveInputRecordName(), number);
+}
+
+
+EnrFrontLinearBranchFuncRadius :: EnrFrontLinearBranchFuncRadius() :
+    mEnrichmentRadius(0.0)
+{
+    mpBranchFunc = new LinElBranchFunction();
+}
+
+EnrFrontLinearBranchFuncRadius :: ~EnrFrontLinearBranchFuncRadius()
+{
+    if ( mpBranchFunc != NULL ) {
+        delete mpBranchFunc;
+        mpBranchFunc = NULL;
+    }
+}
+
+
+void EnrFrontLinearBranchFuncRadius :: MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo)
+{
+    // Enrich all nodes within a prescribed radius around the crack tips.
+    // TODO: If performance turns out to be an issue, we may wish
+    // to put the nodes in a Kd tree (or similar) to speed up searching.
+    // For now, loop over all nodes.
+
+    mTipInfo = iTipInfo;
+    mNodeTipIndices.clear();
+
+    Domain *d = ixFemMan.giveDomain();
+    int nNodes = d->giveNumberOfDofManagers();
+
+    for ( int i = 1; i <= nNodes; i++ ) {
+        DofManager *dMan = d->giveDofManager(i);
+        const FloatArray &nodePos = * ( dMan->giveCoordinates() );
+
+        for ( int j = 0; j < int ( iTipInfo.size() ); j++ ) {
+            double radius2 = iTipInfo [ j ].mGlobalCoord.distance_square(nodePos);
+
+            if ( radius2 < mEnrichmentRadius * mEnrichmentRadius ) {
+                ioNodeEnrMarker [ i - 1 ] = 2;
+                addTipIndexToNode(i, j);
+            }
+        }
+    }
+}
+
+int EnrFrontLinearBranchFuncRadius :: giveNumEnrichments(const DofManager &iDMan) const
+{
+    std :: vector< int >tipIndices;
+    int nodeInd = iDMan.giveGlobalNumber();
+    giveNodeTipIndices(nodeInd, tipIndices);
+
+    return 4 * tipIndices.size();
+}
+
+void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const
+{
+    oEnrFunc.clear();
+
+    std :: vector< int >tipIndices;
+    giveNodeTipIndices(iNodeInd, tipIndices);
+
+    for ( size_t i = 0; i < tipIndices.size(); i++ ) {
+        FloatArray xTip;
+        int tipInd = tipIndices [ i ];
+        xTip.setValues( 2, mTipInfo [ tipInd ].mGlobalCoord.at(1), mTipInfo [ tipInd ].mGlobalCoord.at(2) );
+
+        FloatArray pos;
+        pos.setValues( 2, iPos.at(1), iPos.at(2) );
+
+        // Crack tip tangent and normal
+        const FloatArray &t = mTipInfo [ tipInd ].mTangDir;
+        const FloatArray &n = mTipInfo [ tipInd ].mNormalDir;
+
+        double r = 0.0, theta = 0.0;
+        EnrichmentItem :: calcPolarCoord(r, theta, xTip, pos, n, t);
+
+        mpBranchFunc->evaluateEnrFuncAt(oEnrFunc, r, theta);
+    }
+}
+
+void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const
+{
+    oEnrFuncDeriv.clear();
+
+    std :: vector< int >tipIndices;
+    giveNodeTipIndices(iNodeInd, tipIndices);
+
+    for ( size_t i = 0; i < tipIndices.size(); i++ ) {
+        int tipInd = tipIndices [ i ];
+        const FloatArray &xTip = mTipInfo [ tipInd ].mGlobalCoord;
+
+        // Crack tip tangent and normal
+        const FloatArray &t = mTipInfo [ tipInd ].mTangDir;
+        const FloatArray &n = mTipInfo [ tipInd ].mNormalDir;
+
+        double r = 0.0, theta = 0.0;
+        EnrichmentItem :: calcPolarCoord(r, theta, xTip, iPos, n, t);
+
+
+        size_t sizeStart = oEnrFuncDeriv.size();
+        mpBranchFunc->evaluateEnrFuncDerivAt(oEnrFuncDeriv, r, theta);
+
+        /**
+         * Transform to global coordinates.
+         */
+        FloatMatrix E;
+        E.resize(2, 2);
+        E.setColumn(t, 1);
+        E.setColumn(n, 2);
+
+
+        for ( size_t j = sizeStart; j < oEnrFuncDeriv.size(); j++ ) {
+            FloatArray enrFuncDerivGlob;
+            enrFuncDerivGlob.beProductOf(E, oEnrFuncDeriv [ j ]);
+            oEnrFuncDeriv [ j ] = enrFuncDerivGlob;
+        }
+    }
+}
+
+void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const
+{
+    mpBranchFunc->giveJump(oEnrFuncJumps);
+}
+
+IRResultType EnrFrontLinearBranchFuncRadius :: initializeFrom(InputRecord *ir)
+{
+    const char *__proc = "initializeFrom";
+    IRResultType result;
+
+    IR_GIVE_FIELD(ir, mEnrichmentRadius, _IFT_EnrFrontLinearBranchFuncRadius_Radius);
+
+    printf("In EnrFrontLinearBranchFuncRadius :: initializeFrom(): mEnrichmentRadius: %e\n", mEnrichmentRadius);
+
+    return IRRT_OK;
+}
+
+void EnrFrontLinearBranchFuncRadius :: giveInputRecord(DynamicInputRecord &input)
+{
+    int number = 1;
+    input.setRecordKeywordField(this->giveInputRecordName(), number);
+
+    input.setField(mEnrichmentRadius, _IFT_EnrFrontLinearBranchFuncRadius_Radius);
+}
+
+EnrFrontLinearBranchFuncOneEl :: EnrFrontLinearBranchFuncOneEl()
+{
+    mpBranchFunc = new LinElBranchFunction();
+}
+
+EnrFrontLinearBranchFuncOneEl :: ~EnrFrontLinearBranchFuncOneEl()
+{
+    if ( mpBranchFunc != NULL ) {
+        delete mpBranchFunc;
+        mpBranchFunc = NULL;
+    }
+}
+
+
+void EnrFrontLinearBranchFuncOneEl :: MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo)
+{
+    mTipInfo = iTipInfo;
+    mNodeTipIndices.clear();
+
+    Domain &d = * ( ixFemMan.giveDomain() );
+
+    for(size_t tipInd = 0; tipInd < iTipInfo.size(); tipInd++) {
+
+    	ElementGeometry *el = d.giveElementGeometry(iTipInfo[tipInd].mElIndex);
+
+    	const IntArray & elNodes = el->giveDofManArray();
+
+    	for(int i = 1; i <= elNodes.giveSize(); i++) {
+    		ioNodeEnrMarker[ elNodes.at(i)-1 ] = 2;
+            addTipIndexToNode(elNodes.at(i), tipInd);
+    	}
+    }
+}
+
+int EnrFrontLinearBranchFuncOneEl :: giveNumEnrichments(const DofManager &iDMan) const
+{
+    std :: vector< int >tipIndices;
+    int nodeInd = iDMan.giveGlobalNumber();
+    giveNodeTipIndices(nodeInd, tipIndices);
+
+    return 4 * tipIndices.size();
+}
+
+void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const
+{
+    oEnrFunc.clear();
+
+    std :: vector< int >tipIndices;
+    giveNodeTipIndices(iNodeInd, tipIndices);
+
+    for ( size_t i = 0; i < tipIndices.size(); i++ ) {
+        FloatArray xTip;
+        int tipInd = tipIndices [ i ];
+        xTip.setValues( 2, mTipInfo [ tipInd ].mGlobalCoord.at(1), mTipInfo [ tipInd ].mGlobalCoord.at(2) );
+
+        FloatArray pos;
+        pos.setValues( 2, iPos.at(1), iPos.at(2) );
+
+        // Crack tip tangent and normal
+        const FloatArray &t = mTipInfo [ tipInd ].mTangDir;
+        const FloatArray &n = mTipInfo [ tipInd ].mNormalDir;
+
+        double r = 0.0, theta = 0.0;
+        EnrichmentItem :: calcPolarCoord(r, theta, xTip, pos, n, t);
+
+        mpBranchFunc->evaluateEnrFuncAt(oEnrFunc, r, theta);
+    }
+}
+
+void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const
+{
+    oEnrFuncDeriv.clear();
+
+    std :: vector< int >tipIndices;
+    giveNodeTipIndices(iNodeInd, tipIndices);
+
+    for ( size_t i = 0; i < tipIndices.size(); i++ ) {
+        int tipInd = tipIndices [ i ];
+        const FloatArray &xTip = mTipInfo [ tipInd ].mGlobalCoord;
+
+        // Crack tip tangent and normal
+        const FloatArray &t = mTipInfo [ tipInd ].mTangDir;
+        const FloatArray &n = mTipInfo [ tipInd ].mNormalDir;
+
+        double r = 0.0, theta = 0.0;
+        EnrichmentItem :: calcPolarCoord(r, theta, xTip, iPos, n, t);
+
+
+        size_t sizeStart = oEnrFuncDeriv.size();
+        mpBranchFunc->evaluateEnrFuncDerivAt(oEnrFuncDeriv, r, theta);
+
+        /**
+         * Transform to global coordinates.
+         */
+        FloatMatrix E;
+        E.resize(2, 2);
+        E.setColumn(t, 1);
+        E.setColumn(n, 2);
+
+
+        for ( size_t j = sizeStart; j < oEnrFuncDeriv.size(); j++ ) {
+            FloatArray enrFuncDerivGlob;
+            enrFuncDerivGlob.beProductOf(E, oEnrFuncDeriv [ j ]);
+            oEnrFuncDeriv [ j ] = enrFuncDerivGlob;
+        }
+    }
+}
+
+void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const
+{
+    mpBranchFunc->giveJump(oEnrFuncJumps);
+}
+
+IRResultType EnrFrontLinearBranchFuncOneEl :: initializeFrom(InputRecord *ir)
+{
+    return IRRT_OK;
+}
+
+void EnrFrontLinearBranchFuncOneEl :: giveInputRecord(DynamicInputRecord &input)
+{
+    int number = 1;
+    input.setRecordKeywordField(this->giveInputRecordName(), number);
 }
 
 } // end namespace oofem

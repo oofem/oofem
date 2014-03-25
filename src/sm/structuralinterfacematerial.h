@@ -104,13 +104,13 @@ public:
      */
     virtual void giveFirstPKTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                         const FloatArray &reducedF, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented "); }
+    { _error("giveFirstPKTraction_1d: not implemented "); }
     virtual void giveFirstPKTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                         const FloatArray &reducedF, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented "); }
+    { _error("giveFirstPKTraction_2d: not implemented "); }
     virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                         const FloatMatrix &F, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented "); }
+    { _error("giveFirstPKTraction_3d: not implemented "); }
 
     virtual void giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
     virtual void giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
@@ -125,9 +125,9 @@ public:
      * @param tStep Time step.
      */
     virtual void give1dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented "); }
+    { _error("give1dStiffnessMatrix_dTdj: not implemented "); }
     virtual void give2dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented "); }
+    { _error("give2dStiffnessMatrix_dTdj: not implemented "); }
     virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual void give1dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);

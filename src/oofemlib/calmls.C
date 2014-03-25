@@ -46,7 +46,7 @@
 #include "contextioerr.h"
 #include "exportmodulemanager.h"
 #ifdef __PARALLEL_MODE
- #include "parallelcontext.h"
+#include "parallelcontext.h"
 #endif
 
 namespace oofem {
@@ -355,7 +355,7 @@ restart:
                 goto restart;
             } else {
                 status = NM_NoSuccess;
-                OOFEM_ERROR("can't continue further");
+                OOFEM_ERROR("CALMLS :: solve - can't continue further");
             }
         }
 
@@ -438,7 +438,7 @@ restart:
                 goto restart;
             } else {
                 status = NM_NoSuccess;
-                OOFEM_WARNING("Convergence not reached after %d iterations", nsmax);
+                OOFEM_WARNING2("CALMLS :: solve - Convergence not reached after %d iterations", nsmax);
                 // exit(1);
                 break;
             }
@@ -520,7 +520,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
     int nelem = domain->giveNumberOfElements();
     double forceErr, dispErr, _val;
     DofManager *_idofmanptr;
-    Element *_ielemptr;
+    ElementGeometry *_ielemptr;
     Dof *_idofptr;
     FloatArray rhs; // residual of momentum balance eq (unbalanced nodal forces)
     FloatArray dg_forceErr(nccdg), dg_dispErr(nccdg), dg_totalLoadLevel(nccdg), dg_totalDisp(nccdg);
@@ -598,7 +598,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
 
         // loop over elements and their DOFs
         for ( _ielem = 1; _ielem <= nelem; _ielem++ ) {
-            _ielemptr = domain->giveElement(_ielem);
+            _ielemptr = domain->giveElementGeometry(_ielem);
 #ifdef __PARALLEL_MODE
             if ( _ielemptr->giveParallelMode() != Element_local ) {
                 continue;
@@ -755,6 +755,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
 //
 //
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     double oldPsi =  Psi; // default from constructor
@@ -858,7 +859,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         }
 
         if ( ( calm_HPCDmanDofSrcArray.giveSize() % 2 ) != 0 ) {
-            OOFEM_ERROR("HPC Map size must be even number, it contains pairs <node, nodeDof>");
+            OOFEM_ERROR("CALMSLS :: HPC Map size must be even number, it contains pairs <node, nodeDof>");
         }
 
         nsize = calm_HPCDmanDofSrcArray.giveSize() / 2;
@@ -869,13 +870,13 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
                 calm_HPCWeights.at(i) = 1.0;
             }
         } else if ( nsize != calm_HPCWeights.giveSize() ) {
-            OOFEM_ERROR("HPC map size and weight array size mismatch");
+            OOFEM_ERROR("CALMSLS :: HPC map size and weight array size mismatch");
         }
 
         calm_hpc_init = 1;
     } else {
         if ( hpcMode ) {
-            OOFEM_ERROR("HPC Map must be specified");
+            OOFEM_ERROR("CALMSLS :: HPC Map must be specified");
         }
     }
 
@@ -944,7 +945,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, rtold, _IFT_CylindricalALM_rtold);
 
         if ( ( rtolf.giveSize() != nccdg ) || ( rtold.giveSize() != nccdg ) ) {
-            OOFEM_ERROR("Incompatible size of rtolf or rtold params, expected size %d (nccdg)", nccdg);
+            OOFEM_ERROR2("CALMLS :: Incompatible size of rtolf or rtold params, expected size %d (nccdg)", nccdg);
         }
     } else {
         nccdg = 0;
@@ -1022,7 +1023,7 @@ void CylindricalALM :: convertHPCMap()
 
 #ifndef __PARALLEL_MODE
     if ( count != size ) {
-        OOFEM_WARNING("some dofmans/Dofs in HPCarray not recognized");
+        OOFEM_WARNING("CylindricalALM :: convertHPCMap: some dofmans/Dofs in HPCarray not recognized");
     }
 
 #endif
@@ -1076,7 +1077,7 @@ CylindricalALM :: giveLinearSolver()
 
     linSolver = classFactory.createSparseLinSolver(solverType, domain, engngModel);
     if ( linSolver == NULL ) {
-        OOFEM_ERROR("linear solver creation failed");
+        OOFEM_ERROR("CALMSLS :: giveLinearSolver: linear solver creation failed");
     }
 
     return linSolver;
@@ -1172,7 +1173,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
         // solution of quadratic eqn.
         double discr = a2 * a2 - 4.0 * a1 * a3;
         if ( discr < 0.0 ) {
-            OOFEM_ERROR("discriminant is negative, solution failed");
+            OOFEM_ERROR("CALMSLS :: computeDeltaLambda: discriminant is negative, solution failed");
         }
 
         discr = sqrt(discr);
@@ -1243,7 +1244,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
         denom = colv(1);
 #endif
         if ( fabs(denom) < calm_SMALL_NUM ) {
-            OOFEM_ERROR("calm: zero denominator in linearized control");
+            OOFEM_ERROR("CALMSLS :: \ncalm: zero denominator in linearized control");
         }
 
         deltaLambda = ( deltaL - nom ) / denom;

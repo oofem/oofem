@@ -552,7 +552,7 @@ RerShell :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
 {
     // test the parameter
     if ( global.giveSize() != 3 ) {
-        OOFEM_ERROR("cannot transform coordinates- size mismatch");
+        _error("GiveLocalCoordinate : cannot transform coordinates- size mismatch");
         exit(1);
     }
 
@@ -613,7 +613,7 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
         answer.at(1, 2) = curv.at(6) / 2.;
         answer.at(2, 1) = curv.at(6) / 2.;
     } else {
-        OOFEM_ERROR("unsupported tensor mode");
+        _error("GiveCharacteristicTensor: unsupported tensor mode");
         exit(1);
     }
 
@@ -655,7 +655,7 @@ RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
     GaussPoint *gp;
-    FloatArray v;
+    FloatMatrix globTensorMembrane, globTensorPlate;
 
     fprintf(file, "element %d :\n", number);
 
@@ -665,34 +665,23 @@ RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
 
 
         fprintf( file, "  GP %d :", gp->giveNumber() );
-        this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
-        fprintf(file, "  strains    ");
-        // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
-        fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+        this->giveCharacteristicTensor(globTensorMembrane, GlobalStrainTensor, gp, tStep);
+        this->giveCharacteristicTensor(globTensorPlate, GlobalCurvatureTensor, gp, tStep);
+        fprintf(file, "  strains ");
+        fprintf( file, " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+                globTensorMembrane.at(1, 1), globTensorMembrane.at(2, 2), globTensorMembrane.at(3, 3),
+                2. * globTensorMembrane.at(2, 3), 2. * globTensorMembrane.at(3, 1), 2. * globTensorMembrane.at(1, 2),
+                globTensorPlate.at(1, 1), globTensorPlate.at(2, 2), globTensorPlate.at(3, 3),
+                2. * globTensorPlate.at(2, 3), 2. * globTensorPlate.at(1, 3), 2. * globTensorPlate.at(1, 2) );
 
-        this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
-        fprintf(file, "\n              curvatures ");
-        // k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
-        fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
-
-        // Forces - Moments
-        this->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
-        fprintf(file, "\n              stresses   ");
-        // n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
-        fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
-
-        this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
-        fprintf(file, "\n              moments    ");
-        // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
-        fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+        this->giveCharacteristicTensor(globTensorMembrane, GlobalForceTensor, gp, tStep);
+        this->giveCharacteristicTensor(globTensorPlate, GlobalMomentumTensor, gp, tStep);
+        fprintf(file, "\n          stresses");
+        fprintf( file, " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+                globTensorMembrane.at(1, 1), globTensorMembrane.at(2, 2), globTensorMembrane.at(3, 3),
+                globTensorMembrane.at(2, 3), globTensorMembrane.at(3, 1), globTensorMembrane.at(1, 2),
+                globTensorPlate.at(1, 1), globTensorPlate.at(2, 2), globTensorPlate.at(3, 3),
+                globTensorPlate.at(2, 3), globTensorPlate.at(1, 3), globTensorPlate.at(1, 2) );
 
         fprintf(file, "\n");
     }
@@ -702,7 +691,7 @@ RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
 void
 RerShell :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
+    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
 }
 
 
@@ -730,8 +719,8 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 
     answer.resize(12);
 
-    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellStrainTensor ) ) {
-        if ( type == IST_ShellForceTensor ) {
+    if ( ( type == IST_ShellForceMomentumTensor ) || ( type == IST_ShellStrainCurvatureTensor ) ) {
+        if ( type == IST_ShellForceMomentumTensor ) {
             cht = GlobalForceTensor;
         } else {
             cht = GlobalStrainTensor;
@@ -739,34 +728,28 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
-        answer.at(1) = globTensor.at(1, 1); //sxForce
-        answer.at(2) = globTensor.at(1, 2); //qxyForce
-        answer.at(3) = globTensor.at(1, 3); //qxzForce
-        answer.at(4) = globTensor.at(1, 2); //qxyForce
-        answer.at(5) = globTensor.at(2, 2); //syForce
-        answer.at(6) = globTensor.at(2, 3); //syzForce
-        answer.at(7) = globTensor.at(1, 3); //qxzForce
-        answer.at(8) = globTensor.at(2, 3); //syzForce
-        answer.at(9) = 0.0;
+        answer.at(1) = globTensor.at(1, 1);  //sxForce
+        answer.at(2) = globTensor.at(2, 2);  //syForce
+        answer.at(3) = globTensor.at(3, 3);  //szForce
+        answer.at(4) = globTensor.at(2, 3);  //syzForce
+        answer.at(5) = globTensor.at(1, 3);  //qxzForce
+        answer.at(6) = globTensor.at(1, 2);  //qxyForce
 
-        return 1;
-    } else if ( ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
-        if ( type == IST_ShellMomentumTensor ) {
+        if ( type == IST_ShellForceMomentumTensor ) {
             cht = GlobalMomentumTensor;
         } else {
             cht = GlobalCurvatureTensor;
         }
+
+
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
-        answer.at(1)  = globTensor.at(1, 1); //mxForce
-        answer.at(2)  = globTensor.at(1, 2); //mxyForce
-        answer.at(3)  = 0.0;
-        answer.at(4)  = globTensor.at(1, 2); //mxyForce
-        answer.at(5)  = globTensor.at(2, 2); //myForce
-        answer.at(6)  = 0.0;
-        answer.at(7)  = 0.0;
-        answer.at(8)  = 0.0;
-        answer.at(9)  = globTensor.at(3, 3); //mzForce
+        answer.at(7)  = globTensor.at(1, 1);  //mxForce
+        answer.at(8)  = globTensor.at(2, 2);  //myForce
+        answer.at(9)  = globTensor.at(3, 3);  //mzForce
+        answer.at(10) = globTensor.at(2, 3);  //myzForce
+        answer.at(11) = globTensor.at(1, 3);  //mxzForce
+        answer.at(12) = globTensor.at(1, 2);  //mxyForce
 
         return 1;
     } else {

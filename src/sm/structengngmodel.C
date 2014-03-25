@@ -171,13 +171,13 @@ StructuralEngngModel :: checkConsistency()
     // check for proper element type
 
     for ( int i = 1; i <= nelem; i++ ) {
-        Element *ePtr = domain->giveElement(i);
+		BaseElement *ePtr = domain->giveElement(i);
         StructuralElement *sePtr = dynamic_cast< StructuralElement * >(ePtr);
         StructuralInterfaceElement *siePtr = dynamic_cast< StructuralInterfaceElement * >(ePtr);
         StructuralElementEvaluator *see = dynamic_cast< StructuralElementEvaluator * >(ePtr);
 
         if ( sePtr == NULL && see == NULL && siePtr == NULL ) {
-            OOFEM_WARNING("element %d has no Structural support", i);
+            _warning2("checkConsistency: element %d has no Structural support", i);
             return 0;
         }
     }
@@ -220,7 +220,7 @@ StructuralEngngModel :: updateInternalState(TimeStep *tStep)
         if ( internalVarUpdateStamp != tStep->giveSolutionStateCounter() ) {
             int nelem = domain->giveNumberOfElements();
             for ( int j = 1; j <= nelem; j++ ) {
-                domain->giveElement(j)->updateInternalState(tStep);
+                domain->giveElementGeometry(j)->updateInternalState(tStep);
             }
 
             internalVarUpdateStamp = tStep->giveSolutionStateCounter();
@@ -258,7 +258,7 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
                     eqn.at(count) = rindex;
                 } else {
                     // NullDof has no equation number and no prescribed equation number
-                    //_error("No prescribed equation number assigned to supported DOF");
+                    //_error ("No prescribed equation number assigned to supported DOF");
                 }
             }
         }

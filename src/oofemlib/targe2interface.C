@@ -56,14 +56,14 @@ Targe2Interface :: createInput(Domain *d, TimeStep *tStep)
 {
     int nelem = d->giveNumberOfElements();
     FILE *outputStrem;
-    Element *ielem;
+    ElementGeometry *ielem;
     RemeshingCriteria *rc = d->giveErrorEstimator()->giveRemeshingCrit();
 
     outputStrem = fopen("targe2.bmf", "w");
     // print header for 2D
 
     for ( int i = 1; i <= nelem; i++ ) {
-        ielem = d->giveElement(i);
+        ielem = d->giveElementGeometry(i);
         fprintf( outputStrem, "MC-T %e %e %e %e %e %e   %e %e %e\n",
                 ielem->giveNode(1)->giveCoordinate(1), ielem->giveNode(1)->giveCoordinate(2),
                 ielem->giveNode(2)->giveCoordinate(1), ielem->giveNode(2)->giveCoordinate(2),

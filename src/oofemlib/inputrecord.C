@@ -172,7 +172,7 @@ InputRecord :: giveOptionalField(std :: list< Range > &answer, InputFieldType id
 }
 
 IRResultType
-InputRecord :: giveOptionalField(ScalarFunction &answer, InputFieldType id)
+InputRecord :: giveOptionalField(ScalarFunction& answer, InputFieldType id)
 {
     IRResultType r = this->giveField(answer, id);
     if ( r == IRRT_NOTFOUND ) {

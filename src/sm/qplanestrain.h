@@ -76,7 +76,7 @@ public:
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual ElementGeometry *ZZNodalRecoveryMI_giveElementGeometry() { return this; }
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);

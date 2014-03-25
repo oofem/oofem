@@ -794,7 +794,7 @@ TR1_2D_SUPG_AXI :: computeBCLhsTerm_MB(FloatMatrix &answer, TimeStep *tStep)
         } else {
             answer.resize(6, 6);
             answer.zero();
-            // OOFEM_ERROR("unsupported load type class");
+            // _error("computeForceLoadVector : unsupported load type class");
         }
 
         answer.add(helpMatrix);
@@ -817,7 +817,7 @@ TR1_2D_SUPG_AXI :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *l
     answer.zero();
 
     BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
-    beta = edgeLoad->giveProperty('a', tStep);
+    beta = edgeLoad->giveProperty('a');
     node1 = side;
     node2 = ( node1 == 3 ? 1 : node1 + 1 );
 
@@ -865,7 +865,7 @@ TR1_2D_SUPG_AXI :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer
     answer.zero();
 
     BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
-    alpha = edgeLoad->giveProperty('a', tStep);
+    alpha = edgeLoad->giveProperty('a');
     node1 = side;
     node2 = ( node1 == 3 ? 1 : node1 + 1 );
 
@@ -979,7 +979,7 @@ TR1_2D_SUPG_AXI :: computeBCLhsPressureTerm_MB(FloatMatrix &answer, TimeStep *tS
         } else {
             answer.resize(6, 3);
             answer.zero();
-            // OOFEM_ERROR("unsupported load type class");
+            // _error("computeForceLoadVector : unsupported load type class");
         }
 
         answer.add(helpMatrix);
@@ -1219,7 +1219,7 @@ TR1_2D_SUPG_AXI :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi
             double __volume = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 ) * ( ( x1 + x2 + x3 ) / 3. );
             double volume = this->area * ( ( this->giveNode(1)->giveCoordinate(1) + this->giveNode(2)->giveCoordinate(1) + this->giveNode(3)->giveCoordinate(1) ) / 3. );
             if ( fabs(__volume) / volume > 1.00001 ) {
-                OOFEM_ERROR("internal consistency error");
+                OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
             }
 
             // prevent some roundoff errors
@@ -1237,7 +1237,7 @@ TR1_2D_SUPG_AXI :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi
                 answer.at(2) = 1.0 - answer.at(1);
             }
         } else {
-            OOFEM_ERROR("internal consistency error");
+            OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
         }
     }
 }

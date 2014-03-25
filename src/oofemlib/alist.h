@@ -129,7 +129,7 @@ public:
 template< class T >AList< T > :: AList(int s, int sizeIncrement)
 // Constructor : creates a list of size s.
 {
-    int i;
+    register int i;
     T **p;
 
     allocatedSize = size = s;
@@ -178,13 +178,13 @@ template< class T > void
 AList< T > :: growTo(int newSize)
 // Expands the receiver from its current size to newSize, in order to accommodate new entries.
 {
-    int i;
+    register int i;
     T **newValues, **p1, **p2;
 
 
     if ( newSize < size ) {
 #ifdef DEBUG
-        OOFEM_SIMPLE_ERROR("AList::growTo : new list size (%d) not larger than current size (%d)", newSize, size);
+        OOFEM_WARNING3("AList::growTo : new list size (%d) not larger than current size (%d)", newSize, size);
 #endif
         // delete entities in indexes in the range (newSize, size)
         i = size;
@@ -224,7 +224,7 @@ AList< T > :: at(int i) const
 {
 #ifdef DEBUG
     if ( i <= 0 ) {
-        OOFEM_SIMPLE_ERROR("AList :: at - Asking for negative or zero indices (%d)", i);
+        OOFEM_ERROR2("AList :: at - Asking for negative or zero indices (%d)", i);
     }
 #endif
     return values [ i - 1 ];
@@ -237,7 +237,7 @@ AList< T > :: includes(int i) const
 {
 #ifdef DEBUG
     if ( i <= 0 ) {
-        OOFEM_SIMPLE_ERROR("AList :: includes - Asking for negative or zero indices (%d)", i);
+        OOFEM_ERROR2("AList :: includes - Asking for negative or zero indices (%d)", i);
     }
 #endif
     if ( i > size ) {
@@ -262,7 +262,7 @@ template< class T > void AList< T > :: put(int i, T *anObject)
 {
 #ifdef DEBUG
     if ( i <= 0 ) {
-        OOFEM_SIMPLE_ERROR("AList :: put - Trying to write to zero or negative indices (%d)", i);
+        OOFEM_ERROR2("AList :: put - Trying to write to zero or negative indices (%d)", i);
     }
 #endif
     if ( size < i ) {
@@ -281,7 +281,7 @@ template< class T > void AList< T > :: remove(int i)
 {
 #ifdef DEBUG
     if ( i < 0 ) {
-        OOFEM_SIMPLE_ERROR("AList :: remove - Trying to remove at zero or negative indices (%d)", i);
+        OOFEM_ERROR2("AList :: remove - Trying to remove at zero or negative indices (%d)", i);
     }
 #endif
 
@@ -300,7 +300,7 @@ template< class T > T *AList< T > :: unlink(int i)
 {
 #ifdef DEBUG
     if ( i <= 0 ) {
-        OOFEM_SIMPLE_ERROR("AList :: unlink - Trying to unlink at zero or negative indices (%d)", i);
+        OOFEM_ERROR2("AList :: unlink - Trying to unlink at zero or negative indices (%d)", i);
     }
 #endif
     if ( size < i ) {

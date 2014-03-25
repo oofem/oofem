@@ -56,7 +56,11 @@
 
 namespace oofem {
 GradDpElement :: GradDpElement()
-{ }
+// Constructor.
+{
+    nlGeo = 0;
+    averType = 0;
+}
 
 void
 GradDpElement :: setDisplacementLocationArray(IntArray &answer, int nPrimNodes, int nPrimVars, int nSecNodes, int nSecVars)
@@ -116,13 +120,13 @@ GradDpElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, 
 
     double nlCumulatedStrain;
 
-    int nlGeo = elem->giveGeometryMode();
-    StructuralCrossSection *cs = elem->giveStructuralCrossSection();
+    nlGeo = elem->giveGeometryMode();
+    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
     GradDpMaterialExtensionInterface *dpmat = static_cast< GradDpMaterialExtensionInterface * >(
         cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );
 
     if ( !dpmat ) {
-        OOFEM_SIMPLE_ERROR("GradDpElement :: computeStiffnessMatrix_uu - Material doesn't implement the required DpGrad interface!");
+        OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_uu - Material doesn't implement the required DpGrad interface!");
     }
 
     this->computeNonlocalCumulatedStrain(nlCumulatedStrain, gp, tStep);
@@ -133,7 +137,7 @@ GradDpElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, 
             dpmat->giveRealStressVectorGrad(answer, localCumulatedStrain, gp, Epsilon, nlCumulatedStrain, tStep);
             return;
         } else {
-            OOFEM_SIMPLE_ERROR("computeStressVectorAndLocalCumulatedStrain : unsupported mode");
+            OOFEM_ERROR("computeStressVectorAndLocalCumulatedStrain : unsupported mode");
         }
     } else if ( nlGeo == 1 ) {
         if ( elem->giveDomain()->giveEngngModel()->giveFormulation() == TL ) {
@@ -143,7 +147,7 @@ GradDpElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, 
                 dpmat->giveFirstPKStressVectorGrad(answer, localCumulatedStrain, gp, vF, nlCumulatedStrain, tStep);
                 return;
             } else {
-                OOFEM_SIMPLE_ERROR("computeStressVectorAndLocalCumulatedStrain : unsupported mode");
+                OOFEM_ERROR("computeStressVectorAndLocalCumulatedStrain : unsupported mode");
             }
         } else {
             FloatArray vF;
@@ -152,7 +156,7 @@ GradDpElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, 
                 dpmat->giveCauchyStressVectorGrad(answer, localCumulatedStrain, gp, vF, nlCumulatedStrain, tStep);
                 return;
             } else {
-                OOFEM_SIMPLE_ERROR("computeStressVectorAndLocalCumulatedStrain : unsupported mode");
+                OOFEM_ERROR("computeStressVectorAndLocalCumulatedStrain : unsupported mode");
             }
         }
     }
@@ -165,6 +169,7 @@ GradDpElement :: computeLocalStrainVector(FloatArray &answer, GaussPoint *gp, Ti
     FloatArray u;
     FloatMatrix b;
     NLStructuralElement *elem = this->giveNLStructuralElement();
+    nlGeo = elem->giveGeometryMode();
 
     this->computeDisplacementDegreesOfFreedom(u, tStep);
     elem->computeBmatrixAt(gp, b);
@@ -200,7 +205,7 @@ GradDpElement :: computeDeformationGradientVector(FloatArray &answer, GaussPoint
     } else if ( matMode == _1dMat ) {
         answer.at(1) += 1.0;
     } else {
-        OOFEM_SIMPLE_ERROR( "computeDeformationGradientVector : MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
+        OOFEM_ERROR2( "computeDeformationGradientVector : MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
     }
 }
 
@@ -275,7 +280,7 @@ GradDpElement :: giveLocalInternalForcesVector(FloatArray &answer, TimeStep *tSt
 {
     NLStructuralElement *elem = this->giveNLStructuralElement();
     IntegrationRule *iRule = elem->giveIntegrationRule(0);
-    int nlGeo = elem->giveGeometryMode();
+    nlGeo = elem->giveGeometryMode();
     FloatArray BS, vStress;
     FloatMatrix B;
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
@@ -386,25 +391,27 @@ GradDpElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMo
 }
 
 
+
+
 void
 GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
     NLStructuralElement *elem = this->giveNLStructuralElement();
-    StructuralCrossSection *cs = elem->giveStructuralCrossSection();
     FloatMatrix B, D, DB;
 
+    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
 
-    int nlGeo = elem->giveGeometryMode();
+    nlGeo = elem->giveGeometryMode();
     IntegrationRule *iRule = elem->giveIntegrationRule(0);
     bool matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
-    answer.clear();
+    answer.resize(locSize, locSize);
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(j);
 
         GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(
             cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );
         if ( !dpmat ) {
-            OOFEM_SIMPLE_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
+            OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
         }
         if ( nlGeo == 0 ) {
             elem->computeBmatrixAt(gp, B);
@@ -438,19 +445,22 @@ GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode 
 }
 
 
+
+
+
+
 void
 GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    //OOFEM_ERROR("test");
     double dV;
     NLStructuralElement *elem = this->giveNLStructuralElement();
-    FloatMatrix B, DkuB, Dku, Nk;
-    StructuralCrossSection *cs = elem->giveStructuralCrossSection();
+    FloatMatrix B, DB, D, Nk, NkT, NkDB;
+    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
 
-    answer.clear();
+    answer.resize(nlSize, locSize);
 
     IntegrationRule *iRule = elem->giveIntegrationRule(0);
-    int nlGeo = elem->giveGeometryMode();
+    int nlGeo = this->giveNLStructuralElement()->giveGeometryMode();
 
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(j);
@@ -458,7 +468,7 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
         GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(
             cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );
         if ( !dpmat ) {
-            OOFEM_SIMPLE_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
+            OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
         }
 
         elem->computeBmatrixAt(gp, B);
@@ -470,20 +480,24 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
             }
         }
 
-        dpmat->givePDGradMatrix_ku(Dku, rMode, gp, tStep);
+        dpmat->givePDGradMatrix_ku(D, rMode, gp, tStep);
         this->computeNkappaMatrixAt(gp, Nk);
+        NkT.beTranspositionOf(Nk);
         dV = elem->computeVolumeAround(gp);
-        DkuB.beProductOf(Dku, B);
-        answer.plusProductUnsym(Nk, DkuB, -dV);
+        DB.beProductOf(D, B);
+        NkDB.beProductOf(NkT, DB);
+        NkDB.times(-dV);
+        answer.add(NkDB);
 
         if ( dpmat->giveAveragingType() == 2 ) {
             double dl1, dl2, dl3;
             FloatArray Gk;
-            FloatMatrix D, DB, LDB;
-            FloatMatrix Bk, BktM22, BktM22Gk, BktM12, BktM12Gk, M22(2, 2), M12(2, 2);
-            FloatMatrix dL1(1, 3), dL2(1, 3), result1, result2, dLdS, n(2, 2);
+            FloatMatrix DB, LDB;
+            FloatMatrix Bk, BkT, Nk, BktM22, BktM22Gk, BktM12, BktM12Gk, M22(2, 2), M12(2, 2);
+            FloatMatrix dL1(1, 3), dL2(1, 3), result, result1, result2, dLdS, n(2, 2);
 
             this->computeBkappaMatrixAt(gp, Bk);
+            BkT.beTranspositionOf(Bk);
             dpmat->givePDGradMatrix_uu(D, rMode, gp, tStep);
             dpmat->givePDGradMatrix_LD(dLdS, rMode, gp, tStep);
             this->computeNonlocalGradient(Gk, gp, tStep);
@@ -496,7 +510,7 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
             n.at(1, 2) = dLdS.at(1, 2);
             n.at(2, 1) = dLdS.at(2, 1);
             n.at(2, 2) = dLdS.at(2, 2);
-            // first term Bk^T M22 G L1 D B
+            // first term BkT M22 G L1 D B
             // M22 = n2 \otimes n2
             M22.at(1, 1) = n.at(1, 2) * n.at(1, 2);
             M22.at(1, 2) = n.at(1, 2) * n.at(2, 2);
@@ -509,15 +523,9 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
 
             DB.beProductOf(D, B);
             LDB.beProductOf(dL1, DB);
-            BktM22.beTProductOf(Bk, M22);
-            ///@todo This can't possibly work if this is uncommented (!) / Mikael
+            BktM22.beProductOf(BkT, M22);
             //BktM22Gk.beProductOf(BktM22,Gk);
             result1.beProductOf(BktM22Gk, LDB);
-            answer.add(dV, result1);
-            // This would be slightly shorter and faster;
-            //GkLDB.beProductOf(Gk, LDB);
-            //MGkLDB.beProductOf(M22, GkLDB);
-            //answer.plusProductUnsym(Bk, MGkLDB, dV);
 
             // M12 + M21  = n1 \otimes n2 + n2 \otimes n1
             M12.at(1, 1) = n.at(1, 1) * n.at(1, 2) + n.at(1, 2) * n.at(1, 1);
@@ -530,15 +538,15 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
             dL2.at(1, 3) = dl3 * ( n.at(1, 2) * n.at(2, 1) + n.at(1, 1) * n.at(2, 2) );
 
             LDB.beProductOf(dL2, DB);
-            BktM12.beTProductOf(Bk, M12);
-            ///@todo This can't possibly work if this is uncommented (!) / Mikael
+            BktM12.beProductOf(BkT, M12);
             //BktM12Gk.beProductOf(BktM12,Gk);
             result2.beProductOf(BktM12Gk, LDB);
-            answer.add(dV, result2);
-            // This would be slightly shorter and faster;
-            //GkLDB.beProductOf(Gk, LDB);
-            //MGkLDB.beProductOf(M12, GkLDB);
-            //answer.plusProductUnsym(Bk, MGkLDB, dV);
+
+            result = result1;
+            result.add(result2);
+
+            result.times(dV);
+            answer.add(result);
         }
     }
 }
@@ -549,13 +557,14 @@ GradDpElement :: computeStiffnessMatrix_kk(FloatMatrix &answer, MatResponseMode 
 {
     StructuralElement *elem = this->giveStructuralElement();
     double dV;
+    double l;
     FloatMatrix lStiff;
-    FloatMatrix Bk, Nk, LBk;
-    StructuralCrossSection *cs = elem->giveStructuralCrossSection();
+    FloatMatrix Bk, Bt, BtB, N, Nt, NtN;
+    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
 
     IntegrationRule *iRule = elem->giveIntegrationRule(0);
 
-    answer.clear();
+    answer.resize(nlSize, nlSize);
 
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(j);
@@ -563,21 +572,29 @@ GradDpElement :: computeStiffnessMatrix_kk(FloatMatrix &answer, MatResponseMode 
         GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(
             cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );
         if ( !dpmat ) {
-            OOFEM_SIMPLE_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
+            OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
         }
 
-        this->computeNkappaMatrixAt(gp, Nk);
+        this->computeNkappaMatrixAt(gp, N);
+        Nt.beTranspositionOf(N);
         this->computeBkappaMatrixAt(gp, Bk);
+        Bt.beTranspositionOf(Bk);
         dV = elem->computeVolumeAround(gp);
-
         dpmat->givePDGradMatrix_kk(lStiff, rMode, gp, tStep);
-        answer.plusProductUnsym(Nk, Nk, dV);
-        if ( dpmat->giveAveragingType() == 0 || dpmat->giveAveragingType() == 1 ) {
-            double l = lStiff.at(1, 1);
-            answer.plusProductUnsym(Bk, Bk, l * l * dV);
-        } else if ( dpmat->giveAveragingType() == 2 ) {
-            LBk.beProductOf(lStiff, Bk);
-            answer.plusProductUnsym(Bk, LBk, dV);
+        NtN.beProductOf(Nt, N);
+        NtN.times(dV);
+        answer.add(NtN);
+        if ( averType == 0 || averType == 1 ) {
+            l = lStiff.at(1, 1);
+            BtB.beProductOf(Bt, Bk);
+            BtB.times(l * l * dV);
+            answer.add(BtB);
+        } else if ( averType == 2 ) {
+            FloatMatrix BtL, BtLB;
+            BtL.beProductOf(Bt, lStiff);
+            BtLB.beProductOf(BtL, Bk);
+            BtLB.times(dV);
+            answer.add(BtLB);
         }
     }
 }
@@ -588,12 +605,12 @@ GradDpElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode 
 {
     NLStructuralElement *elem = this->giveNLStructuralElement();
     double dV;
-    StructuralCrossSection *cs = elem->giveStructuralCrossSection();
-    int nlGeo = elem->giveGeometryMode();
-    IntegrationRule *iRule = elem->giveIntegrationRule(0);
-    FloatMatrix B, Nk, SNk, gPSigma;
+    StructuralCrossSection *cs = this->giveNLStructuralElement()->giveStructuralCrossSection();
 
-    answer.clear();
+    IntegrationRule *iRule = elem->giveIntegrationRule(0);
+    FloatMatrix B, Bt, Nk, BSN, BS, gPSigma;
+
+    answer.resize(locSize, nlSize);
 
     for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
         GaussPoint *gp = iRule->getIntegrationPoint(j);
@@ -601,7 +618,7 @@ GradDpElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode 
         GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(
             cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );
         if ( !dpmat ) {
-            OOFEM_SIMPLE_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
+            OOFEM_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
         }
         dpmat->givePDGradMatrix_uk(gPSigma, rMode, gp, tStep);
         this->computeNkappaMatrixAt(gp, Nk);
@@ -613,16 +630,20 @@ GradDpElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode 
                 elem->computeBHmatrixAt(gp, B);
             }
         }
-        dV = elem->computeVolumeAround(gp);
 
-        SNk.beProductOf(gPSigma, Nk);
-        answer.plusProductUnsym(B, SNk, -dV);
+        Bt.beTranspositionOf(B);
+        dV = elem->computeVolumeAround(gp);
+        BS.beProductOf(Bt, gPSigma);
+        BSN.beProductOf(BS, Nk);
+        BSN.times(-dV);
+        answer.add(BSN);
     }
 }
 
 IRResultType
 GradDpElement :: initializeFrom(InputRecord *ir)
 {
+    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                // Required by IR_GIVE_FIELD macro
     //nlGeo = 0;
 

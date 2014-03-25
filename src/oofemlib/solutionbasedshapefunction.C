@@ -81,6 +81,7 @@ SolutionbasedShapeFunction :: ~SolutionbasedShapeFunction()
 IRResultType
 SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";
     IRResultType result;
 
     ActiveBoundaryCondition :: initializeFrom(ir);
@@ -153,7 +154,7 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
         int ElementID = BoundaryList(2 * i);
         int Boundary = BoundaryList(2 * i + 1);
 
-        Element *thisElement = m->giveDomain(1)->giveElement(ElementID);
+        ElementGeometry *thisElement = m->giveDomain(1)->giveElementGeometry(ElementID);
         FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
         IntArray bnodes, zNodes, pNodes, mNodes;
         FloatMatrix nodeValues;
@@ -238,7 +239,7 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
 }
 
 void
-SolutionbasedShapeFunction :: splitBoundaryNodeIDs(modeStruct &mode, Element &e, IntArray &bnodes, IntArray &pList, IntArray &mList, IntArray &zList, FloatMatrix &nodeValues)
+SolutionbasedShapeFunction :: splitBoundaryNodeIDs(modeStruct &mode, ElementGeometry &e, IntArray &bnodes, IntArray &pList, IntArray &mList, IntArray &zList, FloatMatrix &nodeValues)
 {
     pList.clear();
     mList.clear();
@@ -311,7 +312,8 @@ SolutionbasedShapeFunction :: computeDofTransformation(ActiveDof *dof, FloatArra
     masterContribs.resize( this->giveDomain()->giveNumberOfSpatialDimensions() );
     masterContribs2.resize( this->giveDomain()->giveNumberOfSpatialDimensions() );
 
-    IntArray dofIDs = {dof->giveDofID()};
+    IntArray dofIDs;
+    dofIDs.setValues( 1, ( int ) dof->giveDofID() );
 
     bool isPlus, isMinus, isZero, found;
     whichBoundary(* dof->giveDofManager()->giveCoordinates(), isPlus, isMinus, isZero);
@@ -374,7 +376,7 @@ SolutionbasedShapeFunction :: loadProblem()
 
         // Check
         for ( int j = 1; j <= myEngngModel->giveDomain(1)->giveNumberOfElements(); j++ ) {
-            Element *e = myEngngModel->giveDomain(1)->giveElement(j);
+            ElementGeometry *e = myEngngModel->giveDomain(1)->giveElementGeometry(j);
             FloatArray centerCoord;
             int vlockCount = 0;
             centerCoord.resize(3);
@@ -390,7 +392,7 @@ SolutionbasedShapeFunction :: loadProblem()
                 }
             }
             if ( vlockCount == 30 ) {
-                OOFEM_WARNING("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", e->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
+                OOFEM_WARNING5("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", e->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
             }
         }
 
@@ -483,7 +485,7 @@ SolutionbasedShapeFunction :: setLoads(EngngModel *myEngngModel, int d)
 
     for ( int i = 1; i <= myEngngModel->giveDomain(1)->giveNumberOfElements(); i++ ) {
         IntArray *blArray;
-        blArray = myEngngModel->giveDomain(1)->giveElement(i)->giveBodyLoadArray();
+        blArray = myEngngModel->giveDomain(1)->giveElementEvaluator(i)->giveBodyLoadArray();
         blArray->resizeWithValues(blArray->giveSize() + 1);
         blArray->at( blArray->giveSize() ) = bcID;
     }
@@ -525,10 +527,10 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, Flo
                 permuteIndex.push_back(i);
                 n++;
                 //thisMask = thisMask + pow(2.0, i - 1);   // compiler warning on conversion from double to int
-                thisMask = thisMask + ( 0x01 << ( i - 1 ) );
+		thisMask = thisMask + ( 0x01 << (i - 1) );
             }
         }
-        int _s = 0x01 << n;
+	int _s = 0x01 << n;
         for ( int i = 0; i < _s; i++ ) {
             int mask = i, counter = 1;
             FloatArray *newCoord = new(FloatArray) ( coords.giveSize() );
@@ -581,7 +583,7 @@ SolutionbasedShapeFunction :: giveValueAtPoint(FloatArray &answer, const FloatAr
 
     FloatArray closest, lcoords, values;
 
-    Element *elementAtCoords = myEngngModel.giveDomain(1)->giveSpatialLocalizer()->giveElementContainingPoint(coords);
+    ElementGeometry *elementAtCoords = myEngngModel.giveDomain(1)->giveSpatialLocalizer()->giveElementContainingPoint(coords);
 
     if ( elementAtCoords == NULL ) {
         elementAtCoords = myEngngModel.giveDomain(1)->giveSpatialLocalizer()->giveElementClosestToPoint(lcoords, closest, coords, 1);
@@ -648,7 +650,7 @@ SolutionbasedShapeFunction :: initializeSurfaceData(modeStruct *mode)
         int ElementID = BoundaryList(2 * i);
         int Boundary = BoundaryList(2 * i + 1);
 
-        Element *e = m->giveDomain(1)->giveElement(ElementID);
+        ElementGeometry *e = m->giveDomain(1)->giveElementGeometry(ElementID);
         FEInterpolation *geoInterpolation = e->giveInterpolation();
 
         // Check all sides of element

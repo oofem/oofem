@@ -69,7 +69,7 @@ public:
      * @param n Load time function number.
      * @param d Domain to which new object will belongs..
      */
-    CalculatorFunction(int n, Domain * d);
+    CalculatorFunction(int n, Domain *d);
     /// Destructor.
     virtual ~CalculatorFunction() { }
 

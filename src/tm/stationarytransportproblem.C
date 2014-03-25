@@ -75,6 +75,7 @@ NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(MetaStep *mSt
 IRResultType
 StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     EngngModel :: initializeFrom(ir);
@@ -131,7 +132,7 @@ double StationaryTransportProblem :: giveUnknownComponent(ValueModeType mode, Ti
 {
 #ifdef DEBUG
     if ( dof->__giveEquationNumber() == 0 ) {
-        OOFEM_ERROR("invalid equation number");
+        _error("giveUnknownComponent: invalid equation number");
     }
 #endif
     return UnknownsField->giveUnknownValue(dof, mode, tStep);
@@ -175,7 +176,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( conductivityMatrix == NULL ) {
-            OOFEM_ERROR("sparse matrix creation failed");
+            _error("solveYourselfAt: sparse matrix creation failed");
         }
 
         conductivityMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
@@ -254,7 +255,7 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
         }
         return;
     } else {
-        OOFEM_ERROR("Unknown component");
+        OOFEM_ERROR("StationaryTransportProblem::updateComponent - Unknown component");
     }
 }
 
@@ -350,9 +351,9 @@ StationaryTransportProblem :: checkConsistency()
     // check for proper element type
     int nelem = domain->giveNumberOfElements();
     for ( int i = 1; i <= nelem; i++ ) {
-        Element *ePtr = domain->giveElement(i);
+        BaseElement *ePtr = domain->giveElement(i);
         if ( !dynamic_cast< TransportElement * >(ePtr) ) {
-            OOFEM_WARNING("Element %d has no TransportElement base", i);
+            _warning2("Element %d has no TransportElement base", i);
             return 0;
         }
     }
@@ -384,7 +385,7 @@ StationaryTransportProblem :: updateInternalState(TimeStep *tStep)
         Domain *domain = this->giveDomain(idomain);
         int nelem = domain->giveNumberOfElements();
         for ( int j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(tStep);
+            domain->giveElementGeometry(j)->updateInternalState(tStep);
         }
     }
 }

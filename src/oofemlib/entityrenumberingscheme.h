@@ -116,10 +116,10 @@ public:
                 return it->second;
             }
         } else {
-            OOFEM_SIMPLE_ERROR("MapBasedEntityRenumberingFunctor: unsupported EntityRenumberingScheme");
+            OOFEM_ERROR("MapBasedEntityRenumberingFunctor: unsupported EntityRenumberingScheme");
         }
 
-        OOFEM_SIMPLE_ERROR("MapBasedEntityRenumberingFunctor: component label %d not found", n);
+        OOFEM_ERROR2("MapBasedEntityRenumberingFunctor: component label %d not found", n);
         return 0;
     }
 

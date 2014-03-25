@@ -79,7 +79,7 @@ private:
     /// Helper function to run given function for given value dictionary.
     void getArray(FloatArray &answer, PyObject *func, std :: map< std :: string, FunctionArgument > &valDict);
     /// Helper function to run given function for given time
-    double getScalar(PyObject *func, double time);
+    double getScalar(PyObject *func , double time);
 
 public:
     /**
@@ -87,7 +87,7 @@ public:
      * @param n Load time function number.
      * @param d Domain to which new object will belongs..
      */
-    PythonExpression(int n, Domain * d);
+    PythonExpression(int n, Domain *d);
     /// Destructor.
     virtual ~PythonExpression();
 

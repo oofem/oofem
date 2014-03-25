@@ -136,9 +136,9 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_MixedGradientPressureWeakPeriodic_Name; }
 
 protected:
-    void integrateTractionVelocityTangent(FloatMatrix &answer, Element *el, int boundary);
-    void integrateTractionXTangent(FloatMatrix &answer, Element *el, int boundary);
-    void integrateTractionDev(FloatArray &answer, Element *el, int boundary, const FloatMatrix &ddev);
+    void integrateTractionVelocityTangent(FloatMatrix &answer, ElementGeometry *el, int boundary);
+    void integrateTractionXTangent(FloatMatrix &answer, ElementGeometry *el, int boundary);
+    void integrateTractionDev(FloatArray &answer, ElementGeometry *el, int boundary, const FloatMatrix &ddev);
     void evaluateTractionBasisFunctions(FloatArray &answer, const FloatArray &coords);
 
     void constructFullMatrixForm(FloatMatrix &d, const FloatArray &d_voigt) const;

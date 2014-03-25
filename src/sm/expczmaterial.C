@@ -154,7 +154,7 @@ ExpCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, Mat
 
         answer.at(3, 3) = dtndgn;
     }  else {
-        OOFEM_ERROR("unknown MatResponseMode");
+        _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
     }
 }
 
@@ -335,7 +335,7 @@ ExpCZMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, Mat
             }
         }
     }  else {
-        OOFEM_ERROR("unknown MatResponseMode");
+        _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
     }
 }
 
@@ -394,7 +394,7 @@ ExpCZMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix &answer, Mat
             }
         }
     }  else {
-        OOFEM_ERROR("unknown MatResponseMode");
+        _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
     }
 }
 
@@ -427,6 +427,7 @@ ExpCZMaterial :: giveIPValueSize(InternalStateType type, GaussPoint *gp)
 IRResultType
 ExpCZMaterial :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, this->GIc, _IFT_ExpCZMaterial_g1c);
@@ -452,7 +453,7 @@ int
 ExpCZMaterial :: checkConsistency()
 {
     if ( this->GIc < 0.0 ) {
-        OOFEM_ERROR("GIc is negative (%.2e)", this->GIc);
+        OOFEM_ERROR2("ExpCZMaterial :: initializeFrom - GIc is negative (%.2e)", this->GIc);
     }
     return 1;
 }

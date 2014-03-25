@@ -85,9 +85,9 @@ private:
     Domain *domain;
 
     /// List of graph nodes.
-    std::vector< SloanGraphNode >nodes;
+    AList< SloanGraphNode >nodes;
     /// List of dof managers corresponding to nodes.
-    std::vector< DofManager* >dmans;
+    AList< DofManager >dmans;
     /// Start peripheral node.
     int startNode;
     /// End peripheral node.
@@ -156,16 +156,14 @@ public:
     int writeOptimalRenumberingTable(FILE *file);
 
     /// Sets weight distance to given value.
-    void setWeightDistance(int w) {
-        if ( w >= 0 ) {
-            WeightDistance = w;
-        }
+    void setWeightDistance(int w) { if ( w >= 0 ) {
+                                        WeightDistance = w;
+                                    }
     }
     /// Sets weight degree to given value.
-    void setWeightDegree(int w) {
-        if ( w >= 0 ) {
-            WeightDegree = w;
-        }
+    void setWeightDegree(int w) { if ( w >= 0 ) {
+                                      WeightDegree = w;
+                                  }
     }
     /// Select spine quality generation.
     void  setSpineQuality(SpineQualityType q) {

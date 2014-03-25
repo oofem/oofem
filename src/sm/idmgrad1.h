@@ -67,13 +67,11 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_IDGMaterial_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual Interface *giveInterface(InterfaceType t) {
-        if ( t == GradDpMaterialExtensionInterfaceType ) {
-            return static_cast< GradDpMaterialExtensionInterface * >(this);
-        } else {
-            return NULL;
-        }
-    }
+    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) {
+                                                            return static_cast< GradDpMaterialExtensionInterface * >(this);
+                                                        } else {
+                                                            return NULL;
+                                                        } }
     virtual int hasMaterialModeCapability(MaterialMode mode);
 
     virtual void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);

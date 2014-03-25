@@ -95,8 +95,8 @@ public:
     void printMatlab() const;
     virtual SparseMtrxType  giveType() const;
     virtual bool isAsymmetric() const;
+
     virtual void writeToFile(const char *fname) const;
-    virtual const char *giveClassName() const { return "PetscSparseMtrx"; }
 
     /// Creates a global vector that fits the instance of this matrix.
     void createVecGlobal(Vec *answer) const;

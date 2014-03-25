@@ -190,7 +190,7 @@ Brick1_ht :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        OOFEM_ERROR("unknown node number %d", pap);
+        _error2("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: unknown node number %d", pap);
     }
 }
 

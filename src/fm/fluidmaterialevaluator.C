@@ -56,6 +56,7 @@ FluidMaterialEvaluator :: ~FluidMaterialEvaluator()
 
 IRResultType FluidMaterialEvaluator :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";
     IRResultType result;
 
     this->deltaT = 1.0;
@@ -91,7 +92,7 @@ void FluidMaterialEvaluator :: solveYourself()
 
     MaterialMode mode;
     if ( ndim == 1 ) {
-        OOFEM_ERROR("1d flow not supported (should be added)")
+        OOFEM_ERROR("FluidMaterialEvaluator :: solveYourself - 1d flow not supported (should be added)")
         //mode = _1dFlow;
         mode = _Unknown;
     } else if ( ndim == 2 ) {
@@ -138,16 +139,16 @@ void FluidMaterialEvaluator :: solveYourself()
             // Update the controlled parts
             for ( int j = 1; j <= eControl.giveSize(); ++j ) {
                 int p = eControl.at(j);
-                strainDev.at(p) = d->giveFunction( cmpntFunctions.at(p) )->evaluateAtTime( tStep->giveIntrinsicTime() );
+                strainDev.at(p) = d->giveFunction( cmpntFunctions.at(p) )->evaluateAtTime(tStep->giveIntrinsicTime());
             }
 
             for ( int j = 1; j <= sControl.giveSize(); ++j ) {
                 int p = sControl.at(j);
-                stressDevC.at(j) = d->giveFunction( cmpntFunctions.at(p) )->evaluateAtTime( tStep->giveIntrinsicTime() );
+                stressDevC.at(j) = d->giveFunction( cmpntFunctions.at(p) )->evaluateAtTime(tStep->giveIntrinsicTime());
             }
 
             if ( pressureControl ) {
-                pressure = d->giveFunction(volFunction)->evaluateAtTime( tStep->giveIntrinsicTime() );
+                pressure = d->giveFunction(volFunction)->evaluateAtTime(tStep->giveIntrinsicTime());
             } else {
                 ///@todo Support volumetric strain control (which is actually quite tricky)
                 OOFEM_ERROR("Volumetric strain rate control not yet implemented");

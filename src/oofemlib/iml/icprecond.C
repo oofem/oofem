@@ -53,7 +53,7 @@ CompCol_ICPreconditioner :: init(const SparseMtrx &A)
     } else if ( A.giveType() == SMT_CompCol ) {
         this->initialize( * ( ( CompCol * ) & A ) );
     } else {
-        OOFEM_SIMPLE_ERROR("unsupported sparse matrix type");
+        OOFEM_ERROR("CompCol_ICPreconditioner::init : unsupported sparse matrix type");
     }
 }
 
@@ -101,7 +101,7 @@ CompCol_ICPreconditioner :: initialize(const CompCol &A)
 
     for ( i = 0; i < dim_ [ 1 ]; i++ ) {
         if ( indx_( pntr_(i) ) != i ) {
-            OOFEM_SIMPLE_ERROR("diagonal not found!");
+            OOFEM_ERROR("CompCol_ICPreconditioner::initialize -  diagonal not found!");
         }
     }
 

@@ -40,8 +40,6 @@
 #include "equationid.h"
 #include "valuemodetype.h"
 
-#include <string>
-
 namespace oofem {
 class Domain;
 class Element;
@@ -94,8 +92,10 @@ public:
     virtual int evaluateAt(FloatArray &answer, IntArray &dofMask, ValueModeType mode,
                            Domain *oldd, FloatArray &coords, IntArray &regList, TimeStep *tStep) = 0;
 protected:
-    /// Returns string for prepending output (used by error reporting macros).
-    std :: string errorInfo(const char *func) const;
+    /// Prints error message and exits.
+    void error(const char *file, int line, const char *format, ...) const;
+    /// Prints warning message.
+    void warning(const char *file, int line, const char *format, ...) const;
 };
 } // end namespace oofem
 #endif // primaryunknownmapper_h

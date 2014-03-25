@@ -54,7 +54,7 @@
 namespace oofem {
 class Domain;
 class EngngModel;
-class Element;
+class BaseElement;
 class DofManager;
 class GeneralBoundaryCondition;
 class CrossSection;
@@ -95,27 +95,27 @@ class FailureCriteriaStatus;
 class FailureCriteria;
 
 // Templates to wrap constructors into functions
-template< typename T > Element *elemCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > DofManager *dofmanCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > GeneralBoundaryCondition *bcCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > CrossSection *csCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > Material *matCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > EngngModel *engngCreator(int n, EngngModel *m) { return ( new T(n, m) ); }
-template< typename T > Function *funcCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > NonlocalBarrier *nlbCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > RandomFieldGenerator *rfgCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > ExportModule *exportCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
-template< typename T > SparseNonLinearSystemNM *nonlinCreator(Domain *d, EngngModel *m) { return ( new T(d, m) ); }
-template< typename T > InitModule *initCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
-template< typename T > TopologyDescription *topologyCreator(Domain *d) { return new T(d); }
+template< typename T >BaseElement *elemCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T >DofManager *dofmanCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T >GeneralBoundaryCondition *bcCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T >CrossSection *csCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T >Material *matCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T >EngngModel *engngCreator(int n, EngngModel *m) { return ( new T(n, m) ); }
+template< typename T >Function *funcCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T >NonlocalBarrier *nlbCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T >RandomFieldGenerator *rfgCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T >ExportModule *exportCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
+template< typename T >SparseNonLinearSystemNM *nonlinCreator(Domain *d, EngngModel *m) { return ( new T(d, m) ); }
+template< typename T >InitModule *initCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
+template< typename T >TopologyDescription *topologyCreator(Domain *d) { return new T(d); }
 
-template< typename T > Dof *dofCreator(int n, DofManager *dman) { return new T(n, dman); }
-template< typename T > SparseMtrx *sparseMtrxCreator() { return new T(); }
-template< typename T > SparseLinearSystemNM *sparseLinSolCreator(Domain *d, EngngModel *m) { return new T(d, m); }
-template< typename T > ErrorEstimator *errEstCreator(int n, Domain *d) { return new T(n, d); }
+template< typename T >Dof *dofCreator(int n, DofManager *dman) { return new T(n, dman); }
+template< typename T >SparseMtrx *sparseMtrxCreator() { return new T(); }
+template< typename T >SparseLinearSystemNM *sparseLinSolCreator(Domain *d, EngngModel *m) { return new T(d, m); }
+template< typename T >ErrorEstimator *errEstCreator(int n, Domain *d) { return new T(n, d); }
 
-template< typename T > LoadBalancer *loadBalancerCreator(Domain *d) { return new T(d); }
-template< typename T > LoadBalancerMonitor *loadMonitorCreator(EngngModel *e) { return new T(e); }
+template< typename T >LoadBalancer *loadBalancerCreator(Domain *d) { return new T(d); }
+template< typename T >LoadBalancerMonitor *loadMonitorCreator(EngngModel *e) { return new T(e); }
 
 // XFEM stuff
 template< typename T > EnrichmentItem *enrichItemCreator(int n, XfemManager *x, Domain *d) { return new T(n, x, d); }
@@ -131,21 +131,21 @@ template< typename T > FailureCriteriaStatus *failureCriteriaCreator(int n, Fail
 
 ///@name Macros for registering new components. Unique dummy variables must be created as a result (design flaw in C++).
 //@{
-#define REGISTER_Element(class) static bool __dummy_ ## class = GiveClassFactory().registerElement(_IFT_ ## class ## _Name, elemCreator< class > );
-#define REGISTER_DofManager(class) static bool __dummy_ ## class = GiveClassFactory().registerDofManager(_IFT_ ## class ## _Name, dofmanCreator< class > );
-#define REGISTER_BoundaryCondition(class) static bool __dummy_ ## class = GiveClassFactory().registerBoundaryCondition(_IFT_ ## class ## _Name, bcCreator< class > );
-#define REGISTER_CrossSection(class) static bool __dummy_ ## class = GiveClassFactory().registerCrossSection(_IFT_ ## class ## _Name, csCreator< class > );
-#define REGISTER_Material(class) static bool __dummy_ ## class = GiveClassFactory().registerMaterial(_IFT_ ## class ## _Name, matCreator< class > );
-#define REGISTER_EngngModel(class) static bool __dummy_ ## class = GiveClassFactory().registerEngngModel(_IFT_ ## class ## _Name, engngCreator< class > );
-#define REGISTER_Function(class) static bool __dummy_ ## class = GiveClassFactory().registerFunction(_IFT_ ## class ## _Name, funcCreator< class > );
-#define REGISTER_NonlocalBarrier(class) static bool __dummy_ ## class = GiveClassFactory().registerNonlocalBarrier(_IFT_ ## class ## _Name, nlbCreator< class > );
-#define REGISTER_RandomFieldGenerator(class) static bool __dummy_ ## class = GiveClassFactory().registerRandomFieldGenerator(_IFT_ ## class ## _Name, rfgCreator< class > );
-#define REGISTER_ExportModule(class) static bool __dummy_ ## class = GiveClassFactory().registerExportModule(_IFT_ ## class ## _Name, exportCreator< class > );
-#define REGISTER_SparseNonLinearSystemNM(class) static bool __dummy_ ## class = GiveClassFactory().registerSparseNonLinearSystemNM(_IFT_ ## class ## _Name, nonlinCreator< class > );
-#define REGISTER_InitModule(class) static bool __dummy_ ## class = GiveClassFactory().registerInitModule(_IFT_ ## class ## _Name, initCreator< class > );
-#define REGISTER_TopologyDescription(class) static bool __dummy_ ## class = GiveClassFactory().registerTopologyDescription(_IFT_ ## class ## _Name, topologyCreator< class > );
-#define REGISTER_LoadMonitor(class) static bool __dummy_ ## class = GiveClassFactory().registerLoadMonitor(_IFT_ ## class ## _Name, loadMonitorCreator< class > );
-#define REGISTER_LoadBalancer(class) static bool __dummy_ ## class = GiveClassFactory().registerLoadBalancer(_IFT_ ## class ## _Name, loadBalancerCreator< class > );
+#define REGISTER_Element(class ) static bool __dummy_ ## class = GiveClassFactory().registerElement(_IFT_ ## class ## _Name, elemCreator< class > );
+#define REGISTER_DofManager(class ) static bool __dummy_ ## class = GiveClassFactory().registerDofManager(_IFT_ ## class ## _Name, dofmanCreator< class > );
+#define REGISTER_BoundaryCondition(class ) static bool __dummy_ ## class = GiveClassFactory().registerBoundaryCondition(_IFT_ ## class ## _Name, bcCreator< class > );
+#define REGISTER_CrossSection(class ) static bool __dummy_ ## class = GiveClassFactory().registerCrossSection(_IFT_ ## class ## _Name, csCreator< class > );
+#define REGISTER_Material(class ) static bool __dummy_ ## class = GiveClassFactory().registerMaterial(_IFT_ ## class ## _Name, matCreator< class > );
+#define REGISTER_EngngModel(class ) static bool __dummy_ ## class = GiveClassFactory().registerEngngModel(_IFT_ ## class ## _Name, engngCreator< class > );
+#define REGISTER_Function(class ) static bool __dummy_ ## class = GiveClassFactory().registerFunction(_IFT_ ## class ## _Name, funcCreator< class > );
+#define REGISTER_NonlocalBarrier(class ) static bool __dummy_ ## class = GiveClassFactory().registerNonlocalBarrier(_IFT_ ## class ## _Name, nlbCreator< class > );
+#define REGISTER_RandomFieldGenerator(class ) static bool __dummy_ ## class = GiveClassFactory().registerRandomFieldGenerator(_IFT_ ## class ## _Name, rfgCreator< class > );
+#define REGISTER_ExportModule(class ) static bool __dummy_ ## class = GiveClassFactory().registerExportModule(_IFT_ ## class ## _Name, exportCreator< class > );
+#define REGISTER_SparseNonLinearSystemNM(class ) static bool __dummy_ ## class = GiveClassFactory().registerSparseNonLinearSystemNM(_IFT_ ## class ## _Name, nonlinCreator< class > );
+#define REGISTER_InitModule(class ) static bool __dummy_ ## class = GiveClassFactory().registerInitModule(_IFT_ ## class ## _Name, initCreator< class > );
+#define REGISTER_TopologyDescription(class ) static bool __dummy_ ## class = GiveClassFactory().registerTopologyDescription(_IFT_ ## class ## _Name, topologyCreator< class > );
+#define REGISTER_LoadMonitor(class ) static bool __dummy_ ## class = GiveClassFactory().registerLoadMonitor(_IFT_ ## class ## _Name, loadMonitorCreator< class > );
+#define REGISTER_LoadBalancer(class ) static bool __dummy_ ## class = GiveClassFactory().registerLoadBalancer(_IFT_ ## class ## _Name, loadBalancerCreator< class > );
 
 // These should be converted to use strings.
 #define REGISTER_SparseMtrx(class, type) static bool __dummy_ ## class = GiveClassFactory().registerSparseMtrx(type, sparseMtrxCreator< class > );
@@ -173,38 +173,43 @@ template< typename T > FailureCriteriaStatus *failureCriteriaCreator(int n, Fail
  */
 class OOFEM_EXPORT ClassFactory
 {
+    struct CaseComp
+    {
+        int operator() (const std :: string &a, const std :: string &b) const;
+    };
+
 private:
     /// Associative container containing element creators with element name as key.
-    std :: map < std :: string, Element * ( * )(int, Domain *) > elemList;
+    std :: map < std :: string, BaseElement * ( * )(int, Domain *), CaseComp > elemList;
     /// Associative container containing dofmanager creators with dofmanager  name as key.
-    std :: map < std :: string, DofManager * ( * )(int, Domain *) > dofmanList;
+    std :: map < std :: string, DofManager * ( * )(int, Domain *), CaseComp > dofmanList;
     /// Associative container containing boundary condition creators with bc  name as key.
-    std :: map < std :: string, GeneralBoundaryCondition * ( * )(int, Domain *) > bcList;
+    std :: map < std :: string, GeneralBoundaryCondition * ( * )(int, Domain *), CaseComp > bcList;
     /// Associative container containing cross section creators with cross section name as key.
-    std :: map < std :: string, CrossSection * ( * )(int, Domain *) > csList;
+    std :: map < std :: string, CrossSection * ( * )(int, Domain *), CaseComp > csList;
     /// Associative container containing material creators with material name as key.
-    std :: map < std :: string, Material * ( * )(int, Domain *) > matList;
+    std :: map < std :: string, Material * ( * )(int, Domain *), CaseComp > matList;
     /// Associative container containing engng model creators with engng model name as key.
-    std :: map < std :: string, EngngModel * ( * )(int, EngngModel *) > engngList;
+    std :: map< std :: string, EngngModel * ( * )( int, EngngModel * ), CaseComp >engngList;
     /// Associative container containing load time function creators with function name as key.
-    std :: map < std :: string, Function * ( * )(int, Domain *) > funcList;
+    std :: map< std :: string, Function * ( * )( int, Domain * ), CaseComp >funcList;
     /// Associative container containing nonlocal barriers creators with barrier name as key.
-    std :: map < std :: string, NonlocalBarrier * ( * )(int, Domain *) > nlbList;
+    std :: map < std :: string, NonlocalBarrier * ( * )(int, Domain *), CaseComp > nlbList;
     /// Associative container containing random field generator creators with names as key.
-    std :: map < std :: string, RandomFieldGenerator * ( * )(int, Domain *) > rfgList;
+    std :: map < std :: string, RandomFieldGenerator * ( * )(int, Domain *), CaseComp > rfgList;
     /// Associative container containing export module creators.
-    std :: map < std :: string, ExportModule * ( * )(int, EngngModel *) > exportList;
+    std :: map < std :: string, ExportModule * ( * )(int, EngngModel *), CaseComp > exportList;
     /// Associative container containing nonlinear solver creators.
-    std :: map < std :: string, SparseNonLinearSystemNM * ( * )(Domain *, EngngModel *) > nonlinList;
+    std :: map < std :: string, SparseNonLinearSystemNM * ( * )(Domain *, EngngModel *), CaseComp > nonlinList;
     /// Associative container containing init module creators.
-    std :: map < std :: string, InitModule * ( * )(int, EngngModel *) > initList;
+    std :: map < std :: string, InitModule * ( * )(int, EngngModel *), CaseComp > initList;
     /// Associative container containing topology description creators.
-    std :: map < std :: string, TopologyDescription * ( * )(Domain *) > topologyList;
+    std :: map < std :: string, TopologyDescription * ( * )(Domain *), CaseComp > topologyList;
     /// Associative container containing load balancer creators.
 #ifdef __PARALLEL_MODE
-    std :: map < std :: string, LoadBalancer * ( * )(Domain *) > loadBalancerList;
+    std :: map < std :: string, LoadBalancer * ( * )(Domain *), CaseComp > loadBalancerList;
     /// Associative container containing load balancer monitor creators.
-    std :: map < std :: string, LoadBalancerMonitor * ( * )(EngngModel *) > loadMonitorList;
+    std :: map < std :: string, LoadBalancerMonitor * ( * )(EngngModel *), CaseComp > loadMonitorList;
 #endif
     // Internal structures (accessed by hard-coded enum values)
     /// Associative container containing sparse matrix creators.
@@ -218,22 +223,22 @@ private:
 
     // XFEM:
     /// Associative container containing enrichment item creators
-    std :: map < std :: string, EnrichmentItem * ( * )(int, XfemManager *, Domain *) > enrichItemList;
+    std :: map < std :: string, EnrichmentItem * ( * )(int, XfemManager *, Domain *), CaseComp > enrichItemList;
     /// Associative container containing enrichment function creators
-    std :: map < std :: string, EnrichmentFunction * ( * )(int, Domain *) > enrichFuncList;
+    std :: map < std :: string, EnrichmentFunction * ( * )(int, Domain *), CaseComp > enrichFuncList;
     /// Associative container containing geometry creators
-    std :: map < std :: string, BasicGeometry * ( * )() > geometryList;
+    std :: map < std :: string, BasicGeometry * ( * )(), CaseComp > geometryList;
     /// Associative container containing enrichment-domain creators
-    std :: map < std :: string, EnrichmentDomain * ( * )() > enrichmentDomainList;
+    std :: map < std :: string, EnrichmentDomain * ( * )(), CaseComp > enrichmentDomainList;
     /// Associative container containing enrichment front creators
-    std :: map < std :: string, EnrichmentFront * ( * )() > enrichmentFrontList;
+    std :: map < std :: string, EnrichmentFront * ( * )(), CaseComp > enrichmentFrontList;
     /// Associative container containing propagation law creators
-    std :: map < std :: string, PropagationLaw * ( * )() > propagationLawList;
+    std :: map < std :: string, PropagationLaw * ( * )(), CaseComp > propagationLawList;
 
 
     /// Associative container containing failure criteria creators
-    std :: map < std :: string, FailureCriteria * ( * )(int, FractureManager *) > failureCriteriaList;
-    std :: map < std :: string, FailureCriteriaStatus * ( * )(int, FailureCriteria *) > failureCriteriaStatusList;
+    std :: map < std :: string, FailureCriteria * ( * )(int, FractureManager *), CaseComp > failureCriteriaList;
+    std :: map < std :: string, FailureCriteriaStatus * ( * )(int, FailureCriteria *), CaseComp > failureCriteriaStatusList;
 
 public:
     /// Constructor, registers all classes
@@ -246,12 +251,12 @@ public:
      * @param domain Domain assigned to new element.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    Element *createElement(const char *name, int num, Domain *domain);
+    BaseElement *createElement(const char *name, int num, Domain *domain);
     /**
      * Registers a new element in the class factory.
      * @param name Keyword string.
      */
-    bool registerElement( const char *name, Element * ( *creator )( int, Domain * ) );
+    bool registerElement( const char *name, BaseElement * ( *creator )( int, Domain * ) );
     /**
      * Creates new instance of Dof manager corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -329,7 +334,7 @@ public:
      * Registers a new load time function in the class factory.
      * @param name Keyword string.
      */
-    bool registerFunction( const char *name, Function * ( *creator )( int, Domain * ) );
+    bool registerFunction( const char *name, Function * ( * creator )( int, Domain * ) );
     /**
      * Creates new instance of nonlocal barrier corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
@@ -500,7 +505,7 @@ public:
 
 
     SparseGeneralEigenValueSystemNM *createGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *d, EngngModel *m);
-    IntegrationRule *createIRule(IntegrationRuleType type, int number, Element *e);
+    IntegrationRule *createIRule(IntegrationRuleType type, int number, ElementGeometry *e);
     MaterialMappingAlgorithm *createMaterialMappingAlgorithm(MaterialMappingAlgorithmType type);
     MesherInterface *createMesherInterface(MeshPackageType type, Domain *d);
 

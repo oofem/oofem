@@ -145,7 +145,7 @@ RankineMatNl :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mo
         return;
     }
 
-    OOFEM_ERROR("unknown type of stiffness\n");
+    _error("RankineMatNl :: givePlaneStressStiffMtrx ... unknown type of stiffness\n");
 }
 
 void
@@ -224,6 +224,7 @@ RankineMatNl :: giveInterface(InterfaceType type)
 IRResultType
 RankineMatNl :: initializeFrom(InputRecord *ir)
 {
+    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     RankineMat :: initializeFrom(ir);
@@ -289,7 +290,7 @@ RankineMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
         rmat = dynamic_cast< RankineMatNl * >( pos->nearGp->giveMaterial() );
         if ( rmat ) {
             rmat->giveRemoteNonlocalStiffnessContribution(pos->nearGp, rloc, s, rcontrib, tStep);
-            coeff = gp->giveElement()->computeVolumeAround(gp) * pos->weight / status->giveIntegrationScale();
+            coeff = gp->giveElementGeometry()->computeVolumeAround(gp) * pos->weight / status->giveIntegrationScale();
 
             int i, j, dim1 = loc.giveSize(), dim2 = rloc.giveSize();
             contrib.resize(dim1, dim2);
@@ -323,7 +324,8 @@ RankineMatNl :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
     int nrows, nsize;
     double sum, nlKappa, damage, tempDamage;
     RankineMatNlStatus *status = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
-    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
+	//@todo add evaluator
+    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElementGeometry() );
     FloatMatrix b;
     FloatArray stress;
 
@@ -362,7 +364,7 @@ RankineMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
                                                         FloatArray &rcontrib, TimeStep *tStep)
 {
     RankineMatNlStatus *status = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
-    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
+    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElementGeometry() );
     elem->giveLocationArray(rloc, EID_MomentumBalance, s);
     FloatMatrix b;
     elem->computeBmatrixAt(gp, b);

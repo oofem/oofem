@@ -55,7 +55,7 @@
 
 namespace oofem {
 class Domain;
-class Element;
+class ElementGeometry;
 class TimeStep;
 class RemeshingCriteria;
 
@@ -102,11 +102,11 @@ public:
     /**
      * Returns the element error. The estimateError service should be called before.
      * @param type Error type.
-     * @param elem Element for which error requested.
+     * @param elem ElementGeometry for which error requested.
      * @param tStep Time step.
      * @return Element error.
      */
-    virtual double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep) = 0;
+    virtual double giveElementError(EE_ErrorType type, ElementGeometry *elemGeometry, TimeStep *tStep) = 0;
     /**
      * Returns the characteristic value of given type. The estimateError service should be called before.
      * This method is supposed to be used by associated remeshingCriteria to access some characteristic

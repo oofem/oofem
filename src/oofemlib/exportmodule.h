@@ -147,8 +147,8 @@ protected:
      */
     bool testDomainOutput(int n);
 
-    /// Returns string for prepending output (used by error reporting macros).
-    std :: string errorInfo(const char *func) const;
+    /// Prints simple error message and exits.
+    void error(const char *file, int line, const char *format, ...) const;
 };
 } // end namespace oofem
 #endif // exportmodule_h

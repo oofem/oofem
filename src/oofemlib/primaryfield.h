@@ -102,7 +102,7 @@ protected:
     int actualStepNumber;
     int actualStepIndx;
     int nHistVectors;
-    std :: vector< FloatArray >solutionVectors;
+    AList< FloatArray >solutionVectors;
     AList< TimeStep >solStepList;
     EngngModel *emodel;
     int domainIndx;

@@ -97,7 +97,7 @@ Concrete3 :: computeStrength(GaussPoint *gp, double charLength)
         Ft = sqrt(2. * Ee * Gf / charLength);
         //
         OOFEM_LOG_INFO("Reducing Ft to %f in element %d, gp %d, Le %f",
-                       Ft, gp->giveElement()->giveNumber(), gp->giveNumber(), charLength);
+                       Ft, gp->giveElementGeometry()->giveNumber(), gp->giveNumber(), charLength);
         //
     }
 
@@ -159,7 +159,7 @@ Concrete3 :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i)
  * char errMsg [80];
  * sprintf (errMsg,"Element %d returned zero char length",
  *    gp->giveElement()->giveNumber());
- * OOFEM_ERROR(errMsg);
+ * _error (errMsg);
  * }
  *
  * status -> setCharLength(i, Le);
@@ -439,6 +439,7 @@ Concrete3 :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int i)
 IRResultType
 Concrete3 :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //double value ;

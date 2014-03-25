@@ -89,7 +89,7 @@ public:
     virtual void drawScalar(oofegGraphicContext &context);
 #endif
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual ElementGeometry *ZZNodalRecoveryMI_giveElementGeometry() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
@@ -101,7 +101,7 @@ public:
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
+    virtual ElementGeometry *SpatialLocalizerI_giveElementGeometry() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 

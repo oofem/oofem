@@ -62,10 +62,6 @@
  #include <Python.h>
 #endif
 
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
-#endif
-
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
@@ -82,7 +78,7 @@ using namespace oofem;
 void freeStoreError()
 // This function is called whenever operator "new" is unable to allocate memory.
 {
-    OOFEM_SIMPLE_FATAL("free store exhausted");
+    OOFEM_FATAL("freeStoreError : free store exhausted");
 }
 
 // debug
@@ -162,6 +158,7 @@ int main(int argc, char *argv[])
                     i++;
                     int level = strtol(argv [ i ], NULL, 10);
                     oofem_logger.setLogLevel(level);
+                    oofem_errLogger.setLogLevel(level);
                 }
             } else if ( strcmp(argv [ i ], "-qe") == 0 ) {
                 if ( i + 1 < argc ) {
@@ -240,14 +237,14 @@ int main(int argc, char *argv[])
     }
 #endif
     if ( outputFileFlag ) {
-        oofem_logger.appendLogTo( outputFileName.str() );
+        oofem_logger.appendlogTo( const_cast< char * >( outputFileName.str().c_str() ) );
     }
     if ( errOutputFileFlag ) {
-        oofem_logger.appendErrorTo( errOutputFileName.str() );
+        oofem_errLogger.appendlogTo( const_cast< char * >( errOutputFileName.str().c_str() ) );
     }
 
     // print header to redirected output
-    OOFEM_LOG_FORCED(PRG_HEADER_SM);
+    LOG_FORCED_MSG(oofem_logger, PRG_HEADER_SM);
 
     OOFEMTXTDataReader dr( inputFileName.str ( ).c_str() );
     problem = :: InstanciateProblem(& dr, _processor, contextFlag, NULL, parallelFlag);
@@ -295,7 +292,7 @@ int main(int argc, char *argv[])
         DynamicCommunicationBuffer :: printInfo();
     }
 #endif
-    oofem_logger.printStatistics();
+    oofem_errLogger.printStatistics();
     delete problem;
 
     oofem_finalize_modules();

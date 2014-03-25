@@ -133,8 +133,6 @@ public:
     virtual SparseLinearSystemNM *giveLinearSolver() { return NULL; }
 
     virtual const char *giveClassName() const { return "SparseNonLinearSystemNM"; }
-    /// Error printing helper.
-    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
 };
 } // end namespace oofem
 #endif // sparsenonlinsystemnm_h

@@ -49,7 +49,7 @@
 #include "sparsenonlinsystemnm.h"
 
 #ifdef __CEMHYD_MODULE
- #include "cemhyd/cemhydmat.h"
+ #include "cemhydmat.h"
 #endif
 
 namespace oofem {
@@ -85,7 +85,7 @@ NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *
 
     linSolver = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( linSolver == NULL ) {
-        OOFEM_ERROR("linear solver creation failed");
+        _error("giveNumericalMethod: linear solver creation failed");
     }
 
     return linSolver;
@@ -94,6 +94,7 @@ NumericalMethod *NonStationaryTransportProblem :: giveNumericalMethod(MetaStep *
 IRResultType
 NonStationaryTransportProblem :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     EngngModel :: initializeFrom(ir);
@@ -150,12 +151,12 @@ double NonStationaryTransportProblem :: giveUnknownComponent(ValueModeType mode,
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
-            OOFEM_ERROR("Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode));
+            OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
         }
     }
 
     if ( dof->__giveEquationNumber() == 0 ) {
-        OOFEM_ERROR("invalid equation number on DoF %d", dof->giveNumber());
+        OOFEM_ERROR2( "giveUnknownComponent: invalid equation number on DoF %d", dof->giveNumber() );
     }
 
     return UnknownsField->giveUnknownValue(dof, mode, tStep);
@@ -210,7 +211,7 @@ NonStationaryTransportProblem :: giveDiscreteTime(int iStep)
         return ( initT );
     }
 
-    OOFEM_ERROR("invalid iStep");
+    _error("giveDiscreteTime: invalid iStep");
     return 0.0;
 }
 
@@ -290,7 +291,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( conductivityMatrix == NULL ) {
-            OOFEM_ERROR("sparse matrix creation failed");
+            _error("solveYourselfAt: sparse matrix creation failed");
         }
 
         conductivityMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
@@ -410,7 +411,7 @@ NonStationaryTransportProblem :: updateInternalState(TimeStep *tStep)
         if ( internalVarUpdateStamp != tStep->giveSolutionStateCounter() ) {
             nelem = domain->giveNumberOfElements();
             for ( int j = 1; j <= nelem; j++ ) {
-                domain->giveElement(j)->updateInternalState(tStep);
+                domain->giveElementGeometry(j)->updateInternalState(tStep);
             }
 
             internalVarUpdateStamp = tStep->giveSolutionStateCounter();
@@ -507,7 +508,7 @@ NonStationaryTransportProblem :: checkConsistency()
     // check internal consistency
     // if success returns nonzero
     int nelem;
-    Element *ePtr;
+    BaseElement *ePtr;
     TransportElement *sePtr;
     Domain *domain = this->giveDomain(1);
 
@@ -518,7 +519,7 @@ NonStationaryTransportProblem :: checkConsistency()
         ePtr = domain->giveElement(i);
         sePtr = dynamic_cast< TransportElement * >(ePtr);
         if ( sePtr == NULL ) {
-            OOFEM_WARNING("Element %d has no TransportElement base", i);
+            _warning2("Element %d has no TransportElement base", i);
             return 0;
         }
     }
@@ -544,7 +545,7 @@ NonStationaryTransportProblem :: giveUnknownDictHashIndx(ValueModeType mode, Tim
     } else if ( mode == VM_RhsTotal ) { //Nodal Rhs
         return 1;
     } else {
-        OOFEM_ERROR("ValueModeType %s undefined", __ValueModeTypeToString(mode));
+        _error2( "ValueModeType %s undefined", __ValueModeTypeToString(mode) );
     }
 
     return 0;
@@ -560,12 +561,12 @@ NonStationaryTransportProblem :: giveElementCharacteristicMatrix(FloatMatrix &an
     // element class level
 
     if ( ( type == NSTP_MidpointLhs ) || ( type == NSTP_MidpointRhs ) ) {
-        Element *element;
+        ElementEvaluator *elementEvaluator;
         FloatMatrix charMtrx1, charMtrx2;
 
-        element = domain->giveElement(num);
-        element->giveCharacteristicMatrix(answer, ConductivityMatrix, tStep);
-        element->giveCharacteristicMatrix(charMtrx2, CapacityMatrix, tStep);
+        elementEvaluator = domain->giveElementEvaluator(num);
+        elementEvaluator->giveCharacteristicMatrix(answer, ConductivityMatrix, tStep);
+        elementEvaluator->giveCharacteristicMatrix(charMtrx2, CapacityMatrix, tStep);
 
         if ( lumpedCapacityStab ) {
             int size = charMtrx2.giveNumberOfRows();
@@ -603,7 +604,7 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
     IntArray loc;
     FloatMatrix charMtrx, bcMtrx;
     FloatArray unknownVec, contrib;
-    Element *element;
+    BaseElement *element;
 
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
@@ -619,16 +620,16 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
         }
 
 #endif
-        element->giveLocationArray(loc, ut, s);
+		element->giveElementEvaluator()->giveLocationArray(loc, ut, s, element->giveElementGeometry());
         this->giveElementCharacteristicMatrix(charMtrx, i, NSTP_MidpointRhs, tStep, domain);
-        element->giveCharacteristicMatrix(bcMtrx, LHSBCMatrix, tStep);
+		element->giveElementEvaluator()->giveCharacteristicMatrix(bcMtrx, LHSBCMatrix, tStep);
         bcMtrx.times(this->alpha - 1.0);
         if ( bcMtrx.isNotEmpty() ) {
             charMtrx.add(bcMtrx);
         }
 
         if ( charMtrx.isNotEmpty() ) {
-            element->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, unknownVec);
+			element->giveElementEvaluator()->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, unknownVec, element->giveElementGeometry());
             contrib.beProductOf(charMtrx, unknownVec);
             answer.assemble(contrib, loc);
         }
@@ -729,7 +730,7 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
                                                               const UnknownNumberingScheme &ns, Domain *d)
 {
     IntArray loc;
-    Element *element;
+    BaseElement *element;
     FloatArray rp, charVec;
     FloatMatrix s, bcMtrx;
 
@@ -738,17 +739,17 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         element = d->giveElement(ielem);
 
-        element->computeVectorOfPrescribed(EID_ConservationEquation, mode, tStep, rp);
+		element->giveElementEvaluator()->computeVectorOfPrescribed(EID_ConservationEquation, mode, tStep, rp, element->giveElementGeometry());
         if ( rp.containsOnlyZeroes() ) {
             continue;
         } else {
             this->giveElementCharacteristicMatrix(s, ielem, lhsType, tStep, d);
-            element->giveCharacteristicMatrix(bcMtrx, LHSBCMatrix, tStep);
+			element->giveElementEvaluator()->giveCharacteristicMatrix(bcMtrx, LHSBCMatrix, tStep);
             s.add(bcMtrx);
             charVec.beProductOf(s, rp);
             charVec.negated();
 
-            element->giveLocationArray(loc, ut, ns);
+			element->giveElementEvaluator()->giveLocationArray(loc, ut, ns, element->giveElementGeometry());
             answer.assemble(charVec, loc);
         }
     } // end element loop

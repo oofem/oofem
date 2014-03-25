@@ -76,7 +76,7 @@ public:
     virtual int giveNumberOfDofs();
     virtual int giveNumberOfEdgeDofs() = 0;
     virtual int giveNumberOfEdgeDofManagers() = 0;
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual ElementGeometry *ZZNodalRecoveryMI_giveElementGeometry() { return this; }
     //void evalInitialCovarBaseVectorsAt(GaussPoint *gp, FloatMatrix &Gcov);
     void evalInitialCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &Gcov);
 

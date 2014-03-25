@@ -50,6 +50,7 @@
 namespace oofem {
 IRResultType Set :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";
     IRResultType result;
 
     FEMComponent :: initializeFrom(ir);
@@ -144,7 +145,7 @@ const IntArray &Set :: giveNodeList()
         IntArray afflictedNodes( this->domain->giveNumberOfDofManagers() );
         afflictedNodes.zero();
         for ( int ielem = 1; ielem <= this->elements.giveSize(); ++ielem ) {
-            Element *e = this->domain->giveElement( this->elements.at(ielem) );
+            ElementGeometry *e = this->domain->giveElementGeometry( this->elements.at(ielem) );
             for ( int inode = 1; inode <= e->giveNumberOfNodes(); ++inode ) {
                 afflictedNodes.at( e->giveNode(inode)->giveNumber() ) = 1;
             }
@@ -152,7 +153,7 @@ const IntArray &Set :: giveNodeList()
 
         IntArray bNodes;
         for ( int ibnd = 1; ibnd <= this->elementBoundaries.giveSize() / 2; ++ibnd ) {
-            Element *e = this->domain->giveElement( this->elementBoundaries.at(ibnd * 2 - 1) );
+            ElementGeometry *e = this->domain->giveElementGeometry( this->elementBoundaries.at(ibnd * 2 - 1) );
             int boundary = this->elementBoundaries.at(ibnd * 2);
             FEInterpolation *fei = e->giveInterpolation();
             fei->boundaryGiveNodes(bNodes, boundary);
@@ -163,7 +164,7 @@ const IntArray &Set :: giveNodeList()
 
         IntArray eNodes;
         for ( int iedge = 1; iedge <= this->elementEdges.giveSize() / 2; ++iedge ) {
-            Element *e = this->domain->giveElement( this->elementEdges.at(iedge * 2 - 1) );
+            ElementGeometry *e = this->domain->giveElementGeometry( this->elementEdges.at(iedge * 2 - 1) );
             int edge = this->elementEdges.at(iedge * 2);
             FEInterpolation3d *fei = static_cast< FEInterpolation3d * >( e->giveInterpolation() );
             fei->computeLocalEdgeMapping(eNodes, edge);
@@ -189,16 +190,6 @@ void Set :: setBoundaryList(const IntArray &newBoundaries) { this->elementBounda
 void Set :: setEdgeList(const IntArray &newEdges) { this->elementEdges = newEdges; }
 
 void Set :: setNodeList(const IntArray &newNodes) { this->nodes = newNodes; }
-
-void Set :: addAllElements()
-{
-    this->elements.enumerate(this->giveDomain()->giveNumberOfElements());
-}
-
-bool Set :: hasElement(int number) const
-{
-    return this->elements.contains(number);
-}
 
 void Set :: clear()
 {

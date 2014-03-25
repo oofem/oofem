@@ -38,10 +38,8 @@
 #include "femcmpnn.h"
 #include "domain.h"
 #include "valuemodetype.h"
-#include "floatarray.h"
 
 #include <map>
-#include <algorithm>
 
 ///@name Input fields for Function
 //@{
@@ -49,6 +47,7 @@
 //@}
 
 namespace oofem {
+
 class FloatArray;
 class IntArray;
 
@@ -70,14 +69,14 @@ public:
     FunctionArgumentType type;
 
     double val0;
-    FloatArray val1;
+    const FloatArray &val1;
     int val2;
-    IntArray val3;
+    const IntArray &val3;
 
-    FunctionArgument(double val) : type(FAT_double), val0(val), val1(), val2(0), val3() { }
-    FunctionArgument(FloatArray val) : type(FAT_FloatArray),  val0(0), val1(std::move(val)), val2(0), val3() { }
-    FunctionArgument(int val) : type(FAT_int),  val0(0), val1(), val2(val), val3() { }
-    FunctionArgument(IntArray val) : type(FAT_IntArray),  val0(0), val1(), val2(0), val3(std::move(val)) { }
+    FunctionArgument(double val): type(FAT_double), val0(val), val1(0), val2(0), val3(0) { }
+    FunctionArgument(const FloatArray &val): type(FAT_FloatArray),  val0(0), val1(val), val2(0), val3(0) { }
+    FunctionArgument(int val): type(FAT_int),  val0(0), val1(0), val2(val), val3(0) { }
+    FunctionArgument(const IntArray &val): type(FAT_IntArray),  val0(0), val1(0), val2(0), val3(val) { }
 };
 
 /**
@@ -105,7 +104,7 @@ public:
      * @param n Load time function number.
      * @param d Domain to which new object will belongs.
      */
-    Function(int n, Domain * d);
+    Function(int n, Domain *d);
     /// Destructor
     virtual ~Function() { }
 

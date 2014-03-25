@@ -88,7 +88,7 @@ public:
     virtual Interface *giveInterface(InterfaceType);
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual ElementGeometry *ZZNodalRecoveryMI_giveElementGeometry() { return this; }
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);

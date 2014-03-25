@@ -254,13 +254,11 @@ public:
     double giveTempCumulativePlasticStrain() { return tempKappa; }
 
     double giveDKappa(int i)
-    {
-        if ( i == 1 ) {
-            return dKappa1;
-        } else {
-            return dKappa2;
-        }
-    }
+    { if ( i == 1 ) {
+          return dKappa1;
+      } else {
+          return dKappa2;
+      } }
 
     double giveTangentShearStiffness()
     { return tanG; }

@@ -47,6 +47,7 @@ REGISTER_Material(NewtonianFluidMaterial);
 IRResultType
 NewtonianFluidMaterial :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     this->FluidDynamicMaterial :: initializeFrom(ir);
@@ -130,12 +131,10 @@ NewtonianFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gaus
         answer.at(5) = eps.at(5) * viscosity;
         answer.at(6) = eps.at(6) * viscosity;
     }  else {
-        OOFEM_ERROR("unsuported material mode");
+        _error("computeDeviatoricStressVector: unsuported material mode");
     }
 
-
     static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) )->letDeviatoricStressVectorBe(answer);
-    static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) )->letDeviatoricStrainRateVectorBe(eps);
 }
 
 void
@@ -178,7 +177,7 @@ NewtonianFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, Mat
 
         answer.at(4, 4) = answer.at(5, 5) = answer.at(6, 6) = viscosity;
     } else {
-        OOFEM_ERROR("unsupportted material mode");
+        _error("giveDeviatoricStiffnessMatrix: unsupportted material mode");
     }
 }
 

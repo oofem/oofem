@@ -72,6 +72,7 @@ LumpedMassElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
 IRResultType
 LumpedMassElement :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     this->StructuralElement :: initializeFrom(ir);
@@ -90,7 +91,7 @@ LumpedMassElement :: checkConsistency()
     int _result = StructuralElement :: checkConsistency();
     int _ndofs = this->computeNumberOfDofs();
     if ( _ndofs != this->components.giveSize() ) {
-        OOFEM_WARNING("component array size mismatch");
+        _warning("checkConsistency : component array size mismatch");
         _result = 0;
     }
 

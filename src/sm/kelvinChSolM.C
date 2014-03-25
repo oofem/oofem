@@ -110,7 +110,7 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint
         answer = reducedAnswer;
     } else {
         /* error - total mode not implemented yet */
-        OOFEM_ERROR("mode is not supported");
+        _error("giveEigenStrainVector - mode is not supported");
     }
 }
 
@@ -234,7 +234,7 @@ KelvinChainSolidMaterial :: initializeFrom(InputRecord *ir)
 double
 KelvinChainSolidMaterial :: computeCreepFunction(double tStep, double ofAge)
 {
-    OOFEM_ERROR("function has not been yet implemented to KelvinChainSolidMaterialStatus.C");
+    _error("computeCreepFunction: function has not been yet implemented to KelvinChainSolidMaterialStatus.C");
     return 0.;
 }
 

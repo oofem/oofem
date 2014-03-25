@@ -38,6 +38,7 @@
 #include "boundarycondition.h"
 #include "initialcondition.h"
 #include "datastream.h"
+#include "oofem_limits.h"
 #include "contextioerr.h"
 #include "unknownnumberingscheme.h"
 
@@ -68,7 +69,7 @@ void Dof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberin
 
 void Dof :: giveDofIDs(IntArray &masterDofIDs)
 {
-    masterDofIDs = {this->giveDofID()};
+    masterDofIDs.setValues( 1, this->giveDofID() );
 }
 
 int
@@ -116,9 +117,17 @@ void Dof :: printYourself()
 }
 
 
-std :: string Dof :: errorInfo(const char *func) const
+void Dof :: error(const char *file, int line, const char *format, ...) const
 {
-    return std::string(this->giveClassName()) + "::" + func + " number " + std::to_string(number) + ", of DofManager " + std::to_string(dofManager->giveNumber());
+    char buffer [ MAX_ERROR_MSG_LENGTH ];
+    va_list args;
+
+    va_start(args, format);
+    vsprintf(buffer, format, args);
+    va_end(args);
+
+    __OOFEM_ERROR5(file, line, "Class: %s, number %d, of DofManager %d\n%s",
+                   this->giveClassName(), number, dofManager->giveNumber(), buffer);
 }
 
 char *

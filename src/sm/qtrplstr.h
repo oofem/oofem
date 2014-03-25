@@ -85,7 +85,7 @@ public:
     virtual const char *giveClassName() const { return "QTrPlaneStress2d"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
+    virtual ElementGeometry *SpatialLocalizerI_giveElementGeometry() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 

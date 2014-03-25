@@ -63,9 +63,9 @@ void
 QPlaneStressGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     if ( inode <= nSecNodes ) {
-        answer = {D_u, D_v, G_0};
+        answer.setValues(3, D_u, D_v, G_0);
     } else {
-        answer = {D_u, D_v};
+        answer.setValues(2, D_u, D_v);
     }
 }
 

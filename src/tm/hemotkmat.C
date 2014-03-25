@@ -55,6 +55,7 @@ HeMoTKMaterial :: hasMaterialModeCapability(MaterialMode mode)
 IRResultType
 HeMoTKMaterial :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, a_0, _IFT_HeMoTKMaterial_a_0);
@@ -134,7 +135,7 @@ HeMoTKMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     if ( ( mode == Conductivity_ww ) || ( mode == Conductivity_hh ) || ( mode == Conductivity_hw ) || ( mode == Conductivity_wh ) ) {
         this->computeConductivityMtrx(answer, mode, gp, tStep);
     } else {
-        OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
+        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MatResponseModeToString(mode) );
     }
 }
 
@@ -161,7 +162,7 @@ void HeMoTKMaterial :: computeConductivityMtrx(FloatMatrix &answer, MatResponseM
         return;
 
     default:
-        OOFEM_ERROR("Unsupported MaterialMode");
+        _error("Unsupported MaterialMode");
     }
 }
 
@@ -183,7 +184,7 @@ HeMoTKMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
     //  t = Tm->ip[ipp].av[1];
     s = status->giveTempField();
     if ( s.isEmpty() ) {
-        OOFEM_ERROR("undefined state vector");
+        _error("matcond1d: undefined state vector");
     }
 
     w = s.at(2);
@@ -198,7 +199,7 @@ HeMoTKMaterial :: matcond1d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
     } else if ( mode == Conductivity_hh ) {
         k = get_chi(w, t) + get_latent(w, t) * perm_wt(w, t);
     } else {
-        OOFEM_ERROR("Unknown MatResponseMode");
+        _error("Unknown MatResponseMode");
     }
 
     d.resize(1, 1);
@@ -222,7 +223,7 @@ HeMoTKMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
     //  t = Tm->ip[ipp].av[1];
     s = status->giveTempField();
     if ( s.isEmpty() ) {
-        OOFEM_ERROR("undefined state vector");
+        _error("matcond2d: undefined state vector");
     }
 
     w = s.at(2);
@@ -237,7 +238,7 @@ HeMoTKMaterial :: matcond2d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
     } else if ( mode == Conductivity_hh ) {
         k = get_chi(w, t) + get_latent(w, t) * perm_wt(w, t);
     } else {
-        OOFEM_ERROR("Unknown MatResponseMode");
+        _error("Unknown MatResponseMode");
     }
 
     d.resize(2, 2);
@@ -264,7 +265,7 @@ HeMoTKMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
     //  t = Tm->ip[ipp].av[1];
     s = status->giveTempField();
     if ( s.isEmpty() ) {
-        OOFEM_ERROR("undefined state vector");
+        _error("matcond3d: undefined state vector");
     }
 
     w = s.at(2);
@@ -279,7 +280,7 @@ HeMoTKMaterial :: matcond3d(FloatMatrix &d, GaussPoint *gp, MatResponseMode mode
     } else if ( mode == Conductivity_hh ) {
         k = get_chi(w, t) + get_latent(w, t) * perm_wt(w, t);
     } else {
-        OOFEM_ERROR("Unknown MatResponseMode");
+        _error("Unknown MatResponseMode");
     }
 
     d.resize(3, 3);
@@ -308,7 +309,7 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
 
         s = status->giveTempField();
         if ( s.isEmpty() ) {
-            OOFEM_ERROR("undefined state vector");
+            _error("computeCapacityCoeff: undefined state vector");
         }
 
         w = s.at(2);
@@ -321,14 +322,14 @@ double HeMoTKMaterial :: computeCapacityCoeff(MatResponseMode mode, GaussPoint *
 
         s = status->giveTempField();
         if ( s.isEmpty() ) {
-            OOFEM_ERROR("undefined state vector");
+            _error("computeCapacityCoeff: undefined state vector");
         }
 
         w = s.at(2);
         t = s.at(1);
         return get_ceff(w, t);
     } else {
-        OOFEM_ERROR("Unknown MatResponseMode");
+        _error("Unknown MatResponseMode");
     }
 
     return 0.0; // to make compiler happy
@@ -341,7 +342,7 @@ HeMoTKMaterial :: giveHumidity(GaussPoint *gp, ValueModeType mode)
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     const FloatArray &tempState = ms->giveTempField();
     if ( tempState.giveSize() < 2 ) {
-        OOFEM_ERROR("undefined moisture status!");
+        _error("giveHumidity: undefined moisture status!");
     }
 
     FloatArray state = ms->giveField();
@@ -409,7 +410,7 @@ HeMoTKMaterial :: give_delta_gw(double phi)
     double delta_gw;
 
     if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
-        OOFEM_ERROR("Relative humidity is out of range");
+        _error("give_delta_gw : Relative humidity is out of range");
     }
 
     // water vapor permeability
@@ -432,7 +433,7 @@ HeMoTKMaterial :: sorption_isotherm(double phi)
     double w;
 
     if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
-        OOFEM_ERROR("Relative humidity %.3f is out of range", phi);
+        OOFEM_ERROR2("HeMoTKMaterial :: sorption_isotherm : Relative humidity %.3f is out of range", phi);
     }
 
     // water content
@@ -459,7 +460,7 @@ HeMoTKMaterial :: inverse_sorption_isotherm(double w)
     phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
 
     if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
-        OOFEM_ERROR("Relative humidity %.3f is out of range", phi);
+        OOFEM_ERROR2("HeMoTKMaterial :: inverse_sorption_isotherm : Relative humidity %.3f is out of range", phi);
     }
 
     return ( phi );
@@ -594,7 +595,7 @@ HeMoTKMaterial :: isCharacteristicMtrxSymmetric(MatResponseMode mode)
     if ( ( mode == Conductivity_ww ) || ( mode == Conductivity_hh ) || ( mode == Conductivity_hw ) || ( mode == Conductivity_wh ) ) {
         return false;
     } else {
-        OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
+        _error2( "isCharacteristicMtrxSymmetric : unknown mode (%s)", __MatResponseModeToString(mode) );
     }
 
     return false; // to make compiler happy

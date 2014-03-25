@@ -49,65 +49,62 @@ REGISTER_CrossSection(FiberedCrossSection);
 void
 FiberedCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_3d - Not supported\n");
 }
 
 
 void
 FiberedCrossSection :: giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_PlaneStrain - Not supported\n");
 }
 
 
 void
 FiberedCrossSection :: giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_PlaneStress - Not supported\n");
 }
 
 
 void
 FiberedCrossSection :: giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("FiberedCrossSection :: giveRealStress_1d - Not supported\n");
 }
 
 
 void
 FiberedCrossSection :: giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("FiberedCrossSection :: giveStiffnessMatrix_3d - Not supported\n");
 }
 
 
 void
 FiberedCrossSection :: giveStiffnessMatrix_PlaneStress(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("FiberedCrossSection :: giveStiffnessMatrix_PlaneStress - Not supported\n");
 }
 
 
 void
 FiberedCrossSection :: giveStiffnessMatrix_PlaneStrain(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("FiberedCrossSection :: giveStiffnessMatrix_PlaneStrain - Not supported\n");
 }
 
 
 void
 FiberedCrossSection :: giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("FiberedCrossSection :: giveStiffnessMatrix_1d - Not supported\n");
 }
-
-
-
 
 void
 FiberedCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("FiberedCrossSection :: giveGeneralizedStress_Beam2d - Not supported\n");
 }
 
 
@@ -116,11 +113,11 @@ FiberedCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoi
 {
     double fiberThick, fiberWidth, fiberZCoord, fiberYCoord;
     FloatArray fiberStrain, fullStressVect, reducedFiberStress;
-    StructuralElement *element = static_cast< StructuralElement * >( gp->giveElement() );
+    StructuralElement *element = static_cast< StructuralElement * >( gp->giveElementGeometry() );
     FiberedCrossSectionInterface *interface;
 
     if ( ( interface = static_cast< FiberedCrossSectionInterface * >( element->giveInterface(FiberedCrossSectionInterfaceType) ) ) == NULL ) {
-        OOFEM_ERROR("element with no fiber support encountered");
+        _error("giveGeneralizedStress_Beam3d - element with no fiber support encountered");
     }
 
     answer.resize(6);
@@ -169,28 +166,23 @@ FiberedCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoi
 void
 FiberedCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("FiberedCrossSection :: giveGeneralizedStress_Plate - Not supported\n");
 }
 
 
 void
 FiberedCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("FiberedCrossSection :: giveGeneralizedStress_Shell - Not supported\n");
 }
 
 
 void
 FiberedCrossSection :: giveGeneralizedStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported in given cross-section (yet).");
+    OOFEM_ERROR("FiberedCrossSection :: giveGeneralizedStress_MembraneRot - Not supported in given cross-section (yet).");
 }
 
-void
-FiberedCrossSection :: giveGeneralizedStress_PlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
-{
-  OOFEM_ERROR("Not supported in given cross-section.");
-}
 
 void
 FiberedCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
@@ -208,14 +200,14 @@ FiberedCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
     } else if ( mode == _3dShell ) {
         this->give3dShellStiffMtrx(answer, rMode, gp, tStep);
     } else {
-        OOFEM_ERROR("Not implemented for bulk materials.\n");
+        OOFEM_ERROR("FiberedCrossSection :: giveCharMaterialStiffnessMatrix - Not implemented for bulk materials.\n");
         ///@todo What about the fibers?! Rather give just an error message if the fibers aren't supported than to just silently ignore them.
 #if 0
         StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
         if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
             mat->giveStiffnessMatrix(answer, rMode, gp, tStep);
         } else {
-            OOFEM_ERROR("unsupported StressStrainMode");
+            _error("giveCharMaterialStiffnessMatrix: unsupported StressStrainMode");
         }
 #endif
     }
@@ -225,7 +217,7 @@ FiberedCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
 void
 FiberedCrossSection :: give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not implemented\n");
+    OOFEM_ERROR("FiberedCrossSection :: give2dBeamStiffMtrx - Not implemented\n");
 }
 
 
@@ -292,28 +284,22 @@ FiberedCrossSection :: give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode 
 void
 FiberedCrossSection :: give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not implemented\n");
+    OOFEM_ERROR("FiberedCrossSection :: give2dPlateStiffMtrx - Not implemented\n");
 }
 
 
 void
 FiberedCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not implemented\n");
+    OOFEM_ERROR("FiberedCrossSection :: give3dShellStiffMtrx - Not implemented\n");
 }
+
 
 void
 FiberedCrossSection :: giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not implemented\n");
+    OOFEM_ERROR("FiberedCrossSection :: giveMembraneRotStiffMtrx - Not implemented\n");
 }
-
-void
-FiberedCrossSection :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-{
-     OOFEM_ERROR("Not supported\n");
-}
-
 
 
 FloatArray *
@@ -336,7 +322,7 @@ FiberedCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
     MaterialMode mode = gp->giveMaterialMode();
     int size = gradientStressVector3d->giveSize();
     if ( size != 6 ) {
-        OOFEM_ERROR("gradientStressVector3d size mismatch");
+        _error("ImposeStressConstrainsOnGradient: gradientStressVector3d size mismatch");
     }
 
     switch ( mode ) {
@@ -368,7 +354,7 @@ FiberedCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
     MaterialMode mode = gp->giveMaterialMode();
     int size = gradientStrainVector3d->giveSize();
     if ( size != 6 ) {
-        OOFEM_ERROR("gradientStrainVector3d size mismatch");
+        _error("ImposeStrainConstrainsOnGradient: gradientStrainVector3d size mismatch");
     }
 
     switch ( mode ) {
@@ -409,6 +395,7 @@ FiberedCrossSection :: initializeFrom(InputRecord *ir)
 // instanciates receiver from input record
 //
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
 #  ifdef VERBOSE
@@ -432,11 +419,11 @@ FiberedCrossSection :: initializeFrom(InputRecord *ir)
         ( numberOfFibers != fiberWidths.giveSize() )     ||
         ( numberOfFibers != fiberYcoords.giveSize() )    ||
         ( numberOfFibers != fiberZcoords.giveSize() ) ) {
-        OOFEM_ERROR("Array size mismatch ");
+        _error("instanciateFrom : Array size mismatch ");
     }
 
     if ( numberOfFibers <= 0 ) {
-        OOFEM_ERROR("numberOfFibers <= 0 is not allowed");
+        _error("instanciateFrom : numberOfFibers <= 0 is not allowed");
     }
 
     return IRRT_OK;
@@ -464,7 +451,7 @@ FiberedCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
         // check for proper dimensions - slave can be NULL if index too high or if not
         // slaves previously defined
         if ( i > this->numberOfFibers ) {
-            OOFEM_ERROR("no such fiber defined");
+            _error("giveSlaveGaussPoint: no such fiber defined");
         }
 
         // create new slave record in masterGp
@@ -576,7 +563,7 @@ FiberedCrossSection :: giveCorrespondingSlaveMaterialMode(MaterialMode masterMod
     if ( masterMode == _3dBeam ) {
         return _Fiber;
     } else {
-        OOFEM_ERROR("unsupported mode");
+        _error("giveCorrespondingSlaveMaterialMode : unsupported mode");
     }
 
     return _Unknown;
@@ -647,7 +634,7 @@ FiberedCrossSection :: checkConsistency()
     for ( int i = 1; this->fiberMaterials.giveSize(); i++ ) {
         Material *mat = this->giveDomain()->giveMaterial( this->fiberMaterials.at(i) );
         if ( !dynamic_cast< StructuralMaterial * >(mat) ) {
-            OOFEM_WARNING("material %s without structural support", mat->giveClassName() );
+            _warning2( "checkConsistency : material %s without structural support", mat->giveClassName() );
             result = 0;
             continue;
         }

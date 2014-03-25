@@ -47,6 +47,7 @@ CalculatorFunction :: CalculatorFunction(int n, Domain *d) : Function(n, d) { }
 IRResultType
 CalculatorFunction :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";
     IRResultType result;
 
     IR_GIVE_FIELD(ir, fExpression, _IFT_CalculatorFunction_f);
@@ -74,19 +75,20 @@ CalculatorFunction :: evaluate(FloatArray &answer, std :: map< std :: string, Fu
     int err;
 
     std :: ostringstream buff;
-    for ( const auto &named_arg: valDict ) {
-        const FunctionArgument &arg = named_arg.second;
-        if ( arg.type == FunctionArgument :: FAT_double ) {
-            buff << named_arg.first << "=" << arg.val0 << ";";
-        } else if ( arg.type == FunctionArgument :: FAT_FloatArray ) {
-            for ( int i = 1; i <= arg.val1.giveSize(); ++i ) {
-                buff << named_arg.first << i << "=" << arg.val1.at(i) << ";";
+    //for (auto val : valDict) {
+    for (std :: map< std :: string, FunctionArgument > :: iterator val = valDict.begin(); val != valDict.end(); ++val) {
+        const FunctionArgument &arg = val->second;
+        if ( arg.type == FunctionArgument::FAT_double ) {
+            buff << val->first << "=" << arg.val0 << ";";
+        } else if ( arg.type == FunctionArgument::FAT_FloatArray ) {
+            for (int i = 1; i <= arg.val1.giveSize(); ++i) {
+                buff << val->first << i << "=" << arg.val1.at(i) << ";";
             }
-        } else if ( arg.type == FunctionArgument :: FAT_int ) {
-            buff << named_arg.first << "=" << arg.val2 << ";";
-        } else if ( arg.type == FunctionArgument :: FAT_IntArray ) {
-            for ( int i = 1; i <= arg.val3.giveSize(); ++i ) {
-                buff << named_arg.first << i << "=" << arg.val3.at(i) << ";";
+        } else if ( arg.type == FunctionArgument::FAT_int ) {
+            buff << val->first << "=" << arg.val2 << ";";
+        } else if ( arg.type == FunctionArgument::FAT_IntArray ) {
+            for (int i = 1; i <= arg.val3.giveSize(); ++i) {
+                buff << val->first << i << "=" << arg.val3.at(i) << ";";
             }
         }
     }
@@ -94,7 +96,7 @@ CalculatorFunction :: evaluate(FloatArray &answer, std :: map< std :: string, Fu
     answer.resize(1);
     answer.at(1) = myParser.eval(buff.str().c_str(), err);
     if ( err ) {
-        OOFEM_ERROR("parser syntax error");
+        _error("at: parser syntax error");
     }
 }
 
@@ -109,7 +111,7 @@ double CalculatorFunction :: evaluateAtTime(double time)
     buff << "t=" << time << ";" << fExpression;
     result = myParser.eval(buff.str().c_str(), err);
     if ( err ) {
-        OOFEM_ERROR("parser syntax error");
+        _error("at: parser syntax error");
     }
 
     return result;
@@ -122,7 +124,7 @@ double CalculatorFunction :: evaluateVelocityAtTime(double time)
     double result;
 
     if ( dfdtExpression.size() == 0 ) {
-        OOFEM_ERROR("derivative not provided");
+        _error("derAt: derivative not provided");
         return 0.;
     }
 
@@ -130,7 +132,7 @@ double CalculatorFunction :: evaluateVelocityAtTime(double time)
     buff << "t=" << time << ";" << dfdtExpression;
     result = myParser.eval(buff.str().c_str(), err);
     if ( err ) {
-        OOFEM_ERROR("parser syntax error");
+        _error("derAt: parser syntax error");
     }
 
     return result;
@@ -144,7 +146,7 @@ double CalculatorFunction :: evaluateAccelerationAtTime(double time)
     double result;
 
     if ( d2fdt2Expression.size() == 0 ) {
-        OOFEM_ERROR("derivative not provided");
+        _error("derAt: derivative not provided");
         return 0.;
     }
 
@@ -152,7 +154,7 @@ double CalculatorFunction :: evaluateAccelerationAtTime(double time)
     buff << "t=" << time << ";" << d2fdt2Expression;
     result = myParser.eval(buff.str().c_str(), err);
     if ( err ) {
-        OOFEM_ERROR("parser syntax error");
+        _error("accelAt: parser syntax error");
     }
 
     return result;

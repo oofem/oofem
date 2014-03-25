@@ -46,7 +46,6 @@
 #define _IFT_BoundaryLoad_loadtype "loadtype"
 #define _IFT_BoundaryLoad_cstype "cstype"
 #define _IFT_BoundaryLoad_properties "properties"
-#define _IFT_BoundaryLoad_propertyTimeFunctions "propertytf"
 //@}
 
 namespace oofem {
@@ -129,8 +128,6 @@ protected:
     CoordSystType coordSystemType;
     /// Additional b.c properties.
     Dictionary propertyDictionary;
-    /// Optional time-functions for properties
-    Dictionary propertyTimeFunctDictionary;
 
 public:
     /**
@@ -166,7 +163,7 @@ public:
      * See cltypes.h file for details.
      */
     virtual bcType giveType() const { return lType; }
-    virtual double giveProperty(int aProperty, TimeStep *tStep);
+    virtual double giveProperty(int aProperty);
 
 protected:
     /**

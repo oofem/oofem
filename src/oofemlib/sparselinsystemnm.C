@@ -50,7 +50,7 @@ NM_Status SparseLinearSystemNM :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatr
     int ncol = A->giveNumberOfRows();
     int nrhs = B.giveNumberOfColumns();
     if ( A->giveNumberOfRows() != B.giveNumberOfRows() ) {
-        OOFEM_ERROR("A and B matrix mismatch");
+        OOFEM_ERROR("SparseLinearSystemNM :: solve - A and B matrix mismatch");
     }
     FloatArray bi(ncol), xi(ncol);
     X.resize(ncol, nrhs);

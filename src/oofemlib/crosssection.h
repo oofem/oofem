@@ -144,7 +144,7 @@ public:
      * @param gp Integration point
      * @return Property value.
      */
-    virtual double give(CrossSectionProperty a, const FloatArray *coords, Element *elem, bool local = true);
+    virtual double give(CrossSectionProperty a, const FloatArray *coords, ElementGeometry *elemGeometry, bool local = true);
 
     /**
      * Returns the value of cross section property.
@@ -169,10 +169,10 @@ public:
      * Default behavior is just to call the Gauss integration rule, but for example the layered and fibered crosssections need to do their own thing.
      * @param irule Integration rule to set up.
      * @param npoints Number of integration points.
-     * @param element Element which the integration rule belongs to.
+     * @param elementGeometry Element Geometry which the integration rule belongs to.
      * @return Number of integration points.
      */
-    virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element);
+    virtual int setupIntegrationPoints(IntegrationRule &irule, int npoints, ElementGeometry *elementGeometry);
     /**
      * Returns nonzero, if receiver implements required extension.
      * @param ext Required extension.

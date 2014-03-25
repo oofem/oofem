@@ -91,13 +91,14 @@ DofManager *MixedGradientPressureWeakPeriodic :: giveInternalDofManager(int i)
 
 IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";
     IRResultType result;
 
     MixedGradientPressureBC :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, this->order, _IFT_MixedGradientPressureWeakPeriodic_order);
     if ( this->order < 0 ) {
-        OOFEM_ERROR("order must be at least 0");
+        OOFEM_ERROR("MixedGradientPressureWeakPeriodic :: initializeFrom - order must be at least 0");
     }
 
     int nsd = this->domain->giveNumberOfSpatialDimensions();
@@ -144,7 +145,7 @@ void MixedGradientPressureWeakPeriodic :: constructFullMatrixForm(FloatMatrix &d
         d.resize(1, 1);
         d.at(1, 1) = d_voigt.at(1);
     } else {
-        OOFEM_ERROR("Tensor is in strange voigt format. Should be 3 or 6. Use setPrescribedTensor directly if needed.");
+        OOFEM_ERROR("MixedGradientPressureWeakPeriodic :: setPrescribedDeviatoricGradientFromVoigt: Tensor is in strange voigt format. Should be 3 or 6. Use setPrescribedTensor directly if needed.");
     }
 }
 
@@ -178,12 +179,14 @@ void MixedGradientPressureWeakPeriodic :: giveLocationArrays(std :: vector< IntA
     cols.resize(boundaries.giveSize() + 2);
     int i = 0;
     for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-        Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+        ElementGeometry *eG = this->giveDomain()->giveElementGeometry( boundaries.at(pos * 2 - 1) );
+		ElementEvaluator *eE = this->giveDomain()->giveElementEvaluator(boundaries.at(pos * 2 - 1));
+
         int boundary = boundaries.at(pos * 2);
 
-        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-        e->giveBoundaryLocationArray(loc_r, bNodes, eid, r_s);
-        e->giveBoundaryLocationArray(loc_c, bNodes, eid, c_s);
+        eG->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+        eE->giveBoundaryLocationArray(loc_r, bNodes, eid, r_s, eG);
+		eE->giveBoundaryLocationArray(loc_c, bNodes, eid, c_s, eG);
         // For most uses, *loc_r == *loc_c
         rows [ i ] = loc_r;
         cols [ i ] = t_loc_c;
@@ -205,7 +208,7 @@ void MixedGradientPressureWeakPeriodic :: giveLocationArrays(std :: vector< IntA
 }
 
 
-void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(FloatMatrix &answer, Element *el, int boundary)
+void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(FloatMatrix &answer, ElementGeometry *el, int boundary)
 {
     // Computes the integral: int dt . dv dA
     FloatArray normal, n, m, t, surfCoords, coords, contrib;
@@ -260,7 +263,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(Float
 }
 
 
-void MixedGradientPressureWeakPeriodic :: integrateTractionXTangent(FloatMatrix &answer, Element *el, int boundary)
+void MixedGradientPressureWeakPeriodic :: integrateTractionXTangent(FloatMatrix &answer, ElementGeometry *el, int boundary)
 {
     // Computes the integral: int dt . dx_m dA
     FloatArray normal, t, surfCoords, coords, contrib;
@@ -310,7 +313,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionXTangent(FloatMatrix 
 }
 
 
-void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answer, Element *el, int boundary, const FloatMatrix &ddev)
+void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answer, ElementGeometry *el, int boundary, const FloatMatrix &ddev)
 {
     // Computes the integral: int dt . dx dA
     FloatArray normal, t, surfCoords, coords, vM_dev, contrib;
@@ -419,7 +422,7 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
         // The second contribution is on the momentumbalance equation; int t . [[ d_dev . x ]] dA = int t . [[ d_dev . x ]] dA
         FloatArray fe;
         for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-            Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+            ElementGeometry *e = this->giveDomain()->giveElementGeometry( boundaries.at(pos * 2 - 1) );
             int boundary = boundaries.at(pos * 2);
 
             this->integrateTractionDev(fe, e, boundary, this->devGradient);
@@ -443,17 +446,19 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
         //            int delta_t . [[ e.x - v ]] dA
         //            int       t . [[ x ]]       dA delta_e
         for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-            Element *el = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+            ElementGeometry *eG = this->giveDomain()->giveElementGeometry( boundaries.at(pos * 2 - 1) );
+			ElementEvaluator *eE = this->giveDomain()->giveElementEvaluator(boundaries.at(pos * 2 - 1));
+
             int boundary = boundaries.at(pos * 2);
 
             // Fetch the element information;
-            el->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-            el->giveBoundaryLocationArray(v_loc, bNodes, eid, s, & velocityDofIDs);
-            el->computeBoundaryVectorOf(bNodes, eid, mode, tStep, v);
+            eG->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+            eE->giveBoundaryLocationArray(v_loc, bNodes, eid, s, eG, & velocityDofIDs);
+            eE->computeBoundaryVectorOf(bNodes, eid, mode, tStep, v, eG);
 
             // Integrate the tangents;
-            this->integrateTractionVelocityTangent(Ke_v, el, boundary);
-            this->integrateTractionXTangent(Ke_e, el, boundary);
+            this->integrateTractionVelocityTangent(Ke_v, eG, boundary);
+            this->integrateTractionXTangent(Ke_e, eG, boundary);
 
             // We just use the tangent, less duplicated code
             fe_v.beTProductOf(Ke_v, t);
@@ -503,16 +508,18 @@ void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx *answer, TimeStep 
         this->voldman->giveCompleteLocationArray(e_loc_c, c_s);
 
         for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-            Element *el = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+            ElementGeometry *eG = this->giveDomain()->giveElementGeometry( boundaries.at(pos * 2 - 1) );
+			ElementEvaluator *eE = this->giveDomain()->giveElementEvaluator(boundaries.at(pos * 2 - 1));
+
             int boundary = boundaries.at(pos * 2);
 
             // Fetch the element information;
-            el->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-            el->giveBoundaryLocationArray(v_loc_r, bNodes, eid, r_s);
-            el->giveBoundaryLocationArray(v_loc_c, bNodes, eid, c_s);
+            eG->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+            eE->giveBoundaryLocationArray(v_loc_r, bNodes, eid, r_s, eG);
+			eE->giveBoundaryLocationArray(v_loc_c, bNodes, eid, c_s, eG);
 
-            this->integrateTractionVelocityTangent(Ke_v, el, boundary);
-            this->integrateTractionXTangent(Ke_e, el, boundary);
+			this->integrateTractionVelocityTangent(Ke_v, eG, boundary);
+            this->integrateTractionXTangent(Ke_e, eG, boundary);
 
             Ke_v.negated();
             Ke_vT.beTranspositionOf(Ke_v);
@@ -543,7 +550,7 @@ void MixedGradientPressureWeakPeriodic :: computeFields(FloatArray &sigmaDev, do
     sigma.resize(3, 3);
     sigma.zero();
     for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-        Element *el = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+        ElementGeometry *el = this->giveDomain()->giveElementGeometry( boundaries.at(pos * 2 - 1) );
         int boundary = boundaries.at(pos * 2);
 
         FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
@@ -635,7 +642,7 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
     // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
     Kff = classFactory.createSparseMtrx(stype);
     if ( !Kff ) {
-        OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
+        OOFEM_ERROR2("MixedGradientPressureWeakPeriodic :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, this->domain->giveNumber(), eid, fnum);
     rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, fnum, this->domain);
@@ -669,7 +676,7 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
         ddevVoigt.at(i) = 1.0 * rve_size;
         this->constructFullMatrixForm(ddev_tmp, ddevVoigt);
         for ( int k = 1; k <= boundaries.giveSize() / 2; ++k ) {
-            Element *e = this->giveDomain()->giveElement( boundaries.at(k * 2 - 1) );
+            ElementGeometry *e = this->giveDomain()->giveElementGeometry( boundaries.at(k * 2 - 1) );
             int boundary = boundaries.at(k * 2);
 
             this->integrateTractionDev(fe, e, boundary, ddev_tmp);
@@ -722,7 +729,7 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
     FloatMatrix sigma;
     for ( int dpos = 1; dpos <= nd; ++dpos ) {
         for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-            Element *el = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+            ElementGeometry *el = this->giveDomain()->giveElementGeometry( boundaries.at(pos * 2 - 1) );
             int boundary = boundaries.at(pos * 2);
 
             FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
@@ -790,13 +797,13 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
     }
 
     // Reorder to voigt form:
-    IntArray indx;
+    IntArray indx(nd);
     if ( nsd == 3 ) {
-        indx = { 1, 4, 6, 5, 3, 2};
+        indx.setValues(6,  1, 4, 6, 5, 3, 2);
     } else if ( nsd == 2 ) {
-        indx = { 1, 3, 2};
+        indx.setValues(3,  1, 3, 2);
     } else if ( nsd == 1 ) {
-        indx = { 1};
+        indx.setValues(1,  1);
     }
     Ed.beSubMatrixOf(Ed_tmp, indx, indx);
 
@@ -808,7 +815,7 @@ void MixedGradientPressureWeakPeriodic :: giveInputRecord(DynamicInputRecord &in
 {
     MixedGradientPressureBC :: giveInputRecord(input);
     input.setField(this->pressure, _IFT_MixedGradientPressure_pressure);
-    OOFEM_ERROR("Not supported yet\n");
+    OOFEM_ERROR("MixedGradientPressureWeakPeriodic :: giveInputRecord - Not supported yet\n");
     //FloatArray devGradientVoigt;
     //input.setField(devGradientVoigt, _IFT_MixedGradientPressure_devGradient);
 }

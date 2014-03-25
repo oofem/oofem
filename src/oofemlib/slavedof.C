@@ -48,20 +48,21 @@ SlaveDof :: SlaveDof(int n, DofManager *aNode, DofIDItem id) : Dof(n, aNode, id)
 
 
 void
-SlaveDof :: initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray &mstrDofID, const FloatArray &mstrContribution)
+SlaveDof :: initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray *mstrDofID, const FloatArray &mstrContribution)
 {
     int id;
     bool idSame = false;
 
 
-    if ( mstrDofID.isEmpty() ) {
+    if ( mstrDofID == NULL ) {
         idSame = true;
-    } else if ( mstrDofID.giveSize() < cntOfMstrDfMngr ) {
-        OOFEM_ERROR("mstrDofID.giveSize %d != cntOfMstrDfMngr %d", mstrDofID.giveSize(), cntOfMstrDfMngr);
+    } else
+    if ( mstrDofID->giveSize() < cntOfMstrDfMngr ) {
+        _error3("initialize: mstrDofID.giveSize %d != cntOfMstrDfMngr %d", mstrDofID->giveSize(), cntOfMstrDfMngr);
     }
 
     if ( mstrContribution.giveSize() < cntOfMstrDfMngr ) {
-        OOFEM_ERROR("mstrContribution.giveSize %d != cntOfMstrDfMngr %d", mstrContribution.giveSize(), cntOfMstrDfMngr);
+        _error3("initialize: mstrContribution.giveSize %d != cntOfMstrDfMngr %d", mstrContribution.giveSize(), cntOfMstrDfMngr);
     }
 
 
@@ -75,7 +76,7 @@ SlaveDof :: initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const I
         if ( idSame ) {
             id = this->dofID;
         } else {
-            id = mstrDofID.at(i);
+            id = mstrDofID->at(i);
         }
 
         masterDofMans.at(i) = masterNodes.at(i);
@@ -90,13 +91,13 @@ SlaveDof :: giveNumberOfPrimaryMasterDofs()
         return countOfPrimaryMasterDofs;
     } else
     if ( countOfPrimaryMasterDofs == 0 ) {
-        OOFEM_ERROR("slaveDof number %ld is own master", this->giveNumber());
+        _error2( "giveNumberOfPrimaryDofs: slaveDof number %ld is own master", this->giveNumber() );
     }
 
     countOfPrimaryMasterDofs = 0;
 
-    int c = 0;
-    for ( int i = 1; i <= countOfMasterDofs; i++ ) {
+    long i, c = 0;
+    for ( i = 1; i <= countOfMasterDofs; i++ ) {
         c += this->giveMasterDof(i)->giveNumberOfPrimaryMasterDofs();
     }
 
@@ -201,14 +202,14 @@ double SlaveDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep
 
 int SlaveDof :: __giveEquationNumber() const
 {
-    OOFEM_ERROR("undefined");
+    OOFEM_ERROR("SlaveDof :: __giveEquationNumber: undefined");
     return 0;
 }
 
 
 int SlaveDof :: __givePrescribedEquationNumber()
 {
-    OOFEM_ERROR("undefined");
+    OOFEM_ERROR("SlaveDof :: __givePrescribedEquationNumber: undefined");
     return 0;
 }
 

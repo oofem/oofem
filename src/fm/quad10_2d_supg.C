@@ -90,7 +90,7 @@ Quad10_2D_SUPG :: giveInterpolation(DofIDItem id) const
 DofManager *
 Quad10_2D_SUPG :: giveInternalDofManager(int i) const
 {
-    return const_cast< ElementDofManager * >(& pressureNode);
+    return const_cast< ElementDofManager * >( & pressureNode );
 }
 
 
@@ -105,11 +105,11 @@ void
 Quad10_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     if ( ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
-        answer = {V_u, V_v};
+        answer.setValues(2, V_u, V_v);
     } else if ( ut == EID_ConservationEquation ) {
         answer.clear();
     } else {
-        OOFEM_ERROR("Unknown equation id encountered");
+        _error("giveDofManDofIDMask: Unknown equation id encountered");
     }
 }
 
@@ -120,9 +120,9 @@ Quad10_2D_SUPG :: giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &an
     if ( ut == EID_MomentumBalance ) {
         answer.clear();
     } else if ( ut == EID_ConservationEquation || ut == EID_MomentumBalance_ConservationEquation ) {
-        answer = {P_f};
+        answer.setValues(1, P_f);
     } else {
-        OOFEM_ERROR("Unknown equation id encountered");
+        _error("giveDofManDofIDMask: Unknown equation id encountered");
     }
 }
 
@@ -190,7 +190,7 @@ Quad10_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Ti
     FloatArray u, un;
     this->velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     this->computeNuMatrix(n, gp);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, un);
+	this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, un);
 
     u.beProductOf(n, un);
 
@@ -592,7 +592,7 @@ Quad10_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateT
         MaterialInterface *mi = domain->giveEngngModel()->giveMaterialInterface( domain->giveNumber() );
         if ( mi ) {
             FloatArray val;
-            mi->giveElementMaterialMixture( val, gp->giveElement()->giveNumber() );
+            mi->giveElementMaterialMixture( val, gp->giveElementGeometry()->giveNumber() );
             answer.resize(1);
             answer.at(1) = val.at(1);
             return 1;

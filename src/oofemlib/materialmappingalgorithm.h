@@ -40,7 +40,6 @@
 #include "intarray.h"
 #include "inputrecord.h"
 #include "internalstatetype.h"
-#include "set.h"
 
 namespace oofem {
 class Domain;
@@ -97,7 +96,7 @@ public:
      * @param gp Integration point of to initialize.
      * @param tStep Time step.
      */
-    void init(Domain *dold, IntArray &varTypes, GaussPoint *gp, Set &sourceElemSet, TimeStep *tStep, bool iCohesiveZoneGP = false);
+    void init(Domain *dold, IntArray &varTypes, GaussPoint *gp, TimeStep *tStep, bool iCohesiveZoneGP = false);
     /**
      * Initializes the receiver state before mapping. The idea is to place some
      * common global operations before mapping particular IP's if necessary.
@@ -109,7 +108,7 @@ public:
      * @param region If > 0 region id of receiver point, if < 0 ignore regions.
      * @param tStep Time step.
      */
-    virtual void __init(Domain *dold, IntArray &varTypes, FloatArray &coords, Set &sourceElemSet, TimeStep *tStep, bool iCohesiveZoneGP = false) = 0;
+    virtual void __init(Domain *dold, IntArray &varTypes, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP = false) = 0;
     /**
      * Finishes the mapping for given time step. Used to perform cleanup.
      * Typically some mappers require to compute some global mesh data related to
@@ -157,9 +156,7 @@ public:
      */
     virtual void giveInputRecord(DynamicInputRecord &input) { }
     /// Returns class name of the receiver.
-    virtual const char *giveClassName() const = 0;
-    /// Error printing helper.
-    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
+    virtual const char *giveClassName() const  = 0;
 };
 } // end namespace oofem
 #endif // materialmappingalgorithm_h

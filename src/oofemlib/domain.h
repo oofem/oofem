@@ -49,6 +49,10 @@
  #include "entityrenumberingscheme.h"
 #endif
 
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
+#endif
+
 ///@name Input fields for domains
 //@{
 #define _IFT_Domain_type "domain" ///< This is trouble, will not work with dynamic input record
@@ -70,7 +74,9 @@
 //@}
 
 namespace oofem {
-class Element;
+class BaseElement;
+class ElementGeometry;
+class ElementEvaluator;
 class Node;
 class Material;
 class GeneralBoundaryCondition;
@@ -94,7 +100,6 @@ class TopologyDescription;
 class DataReader;
 class Set;
 class FractureManager;
-class oofegGraphicContext;
 
 #ifdef __PARALLEL_MODE
 class ProcessCommunicator;
@@ -118,7 +123,7 @@ class OOFEM_EXPORT Domain
 {
 private:
     /// Element list.
-    AList< Element > *elementList;
+    AList< BaseElement > *elementList;
     /// Dof manager list.
     AList< DofManager > *dofManagerList;
     /// Material list.
@@ -212,7 +217,7 @@ private:
     /// dmanMap init flag.
     bool dmanMapInitialized;
     /// Global element map (index is global of man number).
-    std :: map< int, Element * >elementMap;
+    std :: map< int, BaseElement * >elementMap;
     /// dmanMap init flag.
     bool elementMapInitialized;
 
@@ -220,7 +225,7 @@ private:
     /**@name Load Balancing data structures */
     //@{
     /// List of received elements.
-    std :: list< Element * >recvElemList;
+    std :: list< BaseElement * >recvElemList;
     //@}
 #endif
 
@@ -253,13 +258,37 @@ public:
      * Generates error if no such element is defined.
      * @param n Pointer to n-th element is returned.
      */
-    Element *giveElement(int n);
+    BaseElement *giveElement(int n);	
+	/**
+     * Service for accessing particular domain fe element geometry.
+     * Generates error if no such element geometry is defined.
+     * @param n Pointer to n-th element geometry is returned.
+     */
+    ElementGeometry *giveElementGeometry(int n);
+	/**
+     * Service for accessing particular domain fe element evaluator.
+     * Generates error if no such element evaluator is defined.
+     * @param n Pointer to n-th element evaluator is returned.
+     */
+    ElementEvaluator *giveElementEvaluator(int n);
     /**
      * Service for accessing particular domain fe element.
      * Generates error if no such element is defined.
      * @param n Pointer to the element with id n
      */
-    Element *giveGlobalElement(int n);
+    BaseElement *giveGlobalElement(int n);
+	/**
+     * Service for accessing particular domain fe element geometry.
+     * Generates error if no such element is defined.
+     * @param n Pointer to the element geometry with id n
+     */
+    ElementGeometry *giveGlobalElementGeometry(int n);
+	/**
+     * Service for accessing particular domain fe element evaluator.
+     * Generates error if no such element is defined.
+     * @param n Pointer to the element evaluator with id n
+     */
+    ElementEvaluator *giveGlobalElementEvaluator(int n);
     /**
      * Returns engineering model to which receiver is associated.
      */
@@ -422,7 +451,7 @@ public:
     /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setDofManager(int i, DofManager *obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
-    void setElement(int i, Element *obj);
+    void setElement(int i, BaseElement *obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setCrossSection(int i, CrossSection *obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
@@ -641,8 +670,8 @@ public:
 private:
     void resolveDomainDofsDefaults(const char *);
 
-    /// Returns string for prepending output (used by error reporting macros).
-    std :: string errorInfo(const char *func) const;
+    void error(const char *file, int line, const char *format, ...);
+    void warning(const char *file, int line, const char *format, ...);
 };
 } // end namespace oofem
 #endif // domain_h

@@ -82,6 +82,7 @@ TR1_2D_SUPG2_AXI :: ~TR1_2D_SUPG2_AXI()
 IRResultType
 TR1_2D_SUPG2_AXI :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;               // Required by IR_GIVE_FIELD macro
 
     SUPGElement :: initializeFrom(ir);
@@ -724,7 +725,7 @@ TR1_2D_SUPG2_AXI :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
     for ( int i = 1; i <= 3; i++ ) {
         for ( int j = 1; j <= 3; j++ ) {
             if ( fabs( ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) ) >= 1.e-8 ) {
-                OOFEM_ERROR("test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j));
+                _error2( "computePressureTerm_MC: test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) );
             }
         }
     }
@@ -1205,7 +1206,7 @@ TR1_2D_SUPG2_AXI :: computeLEPLICVolumeFraction(const FloatArray &n, const doubl
     this->formVolumeInterfacePoly(pg, matInterface, n, p, updFlag);
     answer = fabs(pg.computeVolume() / volume);
     if ( answer > 1.000000001 ) {
-        OOFEM_WARNING("VOF fraction out of bounds, vof = %e\n", answer);
+        _warning2("VOF fraction out of bounds, vof = %e\n", answer);
         return 1.0;
     } else {
         return answer;
@@ -1601,7 +1602,7 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
         } else if ( c [ i ] == 0 ) {
             continue;
         } else {
-            OOFEM_ERROR("cannot set up integration domain for %d vertex polygon", c [ i ]);
+            _error2("updateYourself: cannot set up integration domain for %d vertex polygon", c [ i ]);
         }
 
         if ( c [ i ] ) {
@@ -1650,7 +1651,7 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
     /*
      * double __err = fabs(__area-area)/area;
      * if (__err > 1.e-6) {
-     * OOFEM_WARNING("volume inconsistency (%5.2f\%)", __err*100);
+     * _warning2 ("updateIntegrationRules: volume inconsistency (%5.2f\%)", __err*100);
      *
      * __area=0.0;
      * for (ifluid = 0; ifluid< 2; ifluid++) {
@@ -1815,7 +1816,7 @@ TR1_2D_SUPG2_AXI :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &an
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        OOFEM_ERROR("node unknown");
+        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 

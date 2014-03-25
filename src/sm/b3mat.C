@@ -44,6 +44,7 @@ REGISTER_Material(B3Material);
 IRResultType
 B3Material :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //
@@ -267,7 +268,7 @@ B3Material :: giveShrinkageStrainVector(FloatArray &answer,
     }
 
     if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
-        OOFEM_ERROR("unsupported mode");
+        _error("giveShrinkageStrainVector: unsupported mode");
     }
 
     if ( this->shMode == B3_AverageShrinkage ) {
@@ -363,9 +364,9 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
 
     if ( ( tf = fm->giveField(FT_Temperature) ) ) {
         // temperature field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+        gp->giveElementGeometry()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Incremental, tStep) ) ) {
-            OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
+            _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
         }
 
         trate = et2.at(1);
@@ -374,13 +375,13 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // temperature field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+        gp->giveElementGeometry()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
-            OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
+            _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
         }
 
         if ( ( err = tf->evaluateAt(ei2, gcoords, VM_Incremental, tStep) ) ) {
-            OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
+            _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
         }
 
         // convert water mass to relative humidity
@@ -389,7 +390,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
     }
 
     if ( ( tflag == 0 ) || ( wflag == 0 ) ) {
-        OOFEM_ERROR("external fields not found");
+        _error("computeTotalShrinkageStrainVector: external fields not found");
     }
 
     if ( status->giveStressVector().giveSize() ) {
@@ -452,7 +453,7 @@ B3Material :: inverse_sorption_isotherm(double w)
     phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
 
     if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
-        OOFEM_ERROR("Relative humidity h = %e (w=%e) is out of range", phi, w);
+        _error3("inverse_sorption_isotherm : Relative humidity h = %e (w=%e) is out of range", phi, w);
     }
 
     return phi;

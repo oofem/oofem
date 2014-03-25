@@ -119,9 +119,9 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
         return;
     }
 
-    FEInterpolation *fei = this->giveInterpolation();
+	FEInterpolation *fei = this->giveInterpolation();
     if ( !fei ) {
-        OOFEM_ERROR("No interpolator available\n");
+        OOFEM_ERROR("StructuralElement :: computeBoundaryLoadVector - No interpolator available\n");
     }
 
     FloatArray n_vec;
@@ -189,7 +189,7 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        OOFEM_ERROR("unknown load type");
+        _error("computeBodyLoadVectorAt: unknown load type");
     }
 
     // note: force is assumed to be in global coordinate system.
@@ -229,7 +229,7 @@ StructuralElement :: computePointLoadVectorAt(FloatArray &answer, Load *load, Ti
         this->computeNmatrixAt(* ( __gp.giveLocalCoordinates() ), n);
         answer.beTProductOf(n, force);
     } else {
-        OOFEM_WARNING("point load outside element");
+        _warning("computePointLoadVectorAt: point load outside element");
     }
 
     // transform force
@@ -262,7 +262,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
     FloatArray globalIPcoords;
 
     if ( !this->testElementExtension(Element_EdgeLoadSupport) ) {
-        OOFEM_ERROR("no edge load support");
+        _error("computeEdgeLoadVectorAt : no edge load support");
     }
 
     BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
@@ -313,7 +313,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
 
         return;
     } else {
-        OOFEM_ERROR("incompatible load");
+        _error("computeEdgeLoadVectorAt: incompatible load");
         return;
     }
 }
@@ -342,7 +342,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
     FloatMatrix T;
 
     if ( !this->testElementExtension(Element_SurfaceLoadSupport) ) {
-        OOFEM_ERROR("no surface load support");
+        _error("computeSurfaceLoadVectorAt : no surface load support");
     }
 
     BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >(load);
@@ -394,7 +394,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 
         return;
     } else {
-        OOFEM_ERROR("incompatible load");
+        _error("computeSurfaceLoadVectorAt: incompatible load");
         return;
     }
 }
@@ -417,7 +417,7 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     }
 
     if ( ( nip = this->giveNumberOfIPForMassMtrxIntegration() ) == 0 ) {
-        OOFEM_ERROR("no integration points available");
+        _error("computeConsistentMassMatrix no integration points available");
     }
 
     iRule.setUpIntegrationPoints( this->giveIntegrationDomain(),
@@ -490,7 +490,7 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *t
         } else {
             if ( load->giveBCValType() != TemperatureBVT && load->giveBCValType() != EigenstrainBVT ) {
                 // temperature and eigenstrain is handled separately at computeLoadVectorAt subroutine
-                OOFEM_ERROR("body load %d is of unsupported type (%d)", id, ltype);
+                OOFEM_ERROR3("StructuralElement :: computeLocalForceLoadVector - body load %d is of unsupported type (%d)", id, ltype);
             }
         }
     }
@@ -519,7 +519,7 @@ StructuralElement :: computeLocalForceLoadVector(FloatArray &answer, TimeStep *t
                 answer.add(helpLoadVector);
             }
         } else {
-            OOFEM_ERROR("boundary load %d is of unsupported type (%d)", id, ltype);
+            OOFEM_ERROR3("StructuralElement :: computeLocalForceLoadVector - boundary load %d is of unsupported type (%d)", id, ltype);
         }
     }
 }
@@ -595,7 +595,7 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     }
 
     if ( indx != ldofs ) {
-        OOFEM_ERROR("internal consistency check failed");
+        _error("computeMassMatrix : internal consistency check failed");
     }
 
     dim = dimFlag.at(1) + dimFlag.at(2) + dimFlag.at(3);
@@ -619,7 +619,7 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
     FloatArray gCoords, temperature;
 
     if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
-        OOFEM_ERROR("computeGlobalCoordinates failed");
+        _error("computeResultingIPTemperatureAt: computeGlobalCoordinates failed");
     }
 
     answer.clear();
@@ -643,7 +643,7 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
     FloatArray gCoords, eigenstrain;
 
     if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
-        OOFEM_ERROR("computeGlobalCoordinates failed");
+        _error("computeResultingIPTemperatureAt: computeGlobalCoordinates failed");
     }
 
     answer.clear();
@@ -872,17 +872,18 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
         // now every gauss point has real stress vector
         // compute nodal representation of internal forces using f = B^T*Sigma dV
         double dV = this->computeVolumeAround(gp);
-        if ( stress.giveSize() == 6 ) {
-            // It may happen that e.g. plane strain is computed
-            // using the default 3D implementation. If so,
-            // the stress needs to be reduced.
-            // (Note that no reduction will take place if
-            //  the simulation is actually 3D.)
-            FloatArray stressTemp;
-            StructuralMaterial :: giveReducedSymVectorForm( stressTemp, stress, gp->giveMaterialMode() );
-            answer.plusProduct(b, stressTemp, dV);
-        } else   {
-            answer.plusProduct(b, stress, dV);
+        if(stress.giveSize() == 6) {
+        	// It may happen that e.g. plane strain is computed
+        	// using the default 3D implementation. If so,
+        	// the stress needs to be reduced.
+        	// (Note that no reduction will take place if
+        	//  the simulation is actually 3D.)
+        	FloatArray stressTemp;
+        	StructuralMaterial::giveReducedSymVectorForm(stressTemp, stress, gp->giveMaterialMode());
+        	answer.plusProduct(b, stressTemp, dV);
+        }
+        else {
+        	answer.plusProduct(b, stress, dV);
         }
     }
 
@@ -922,7 +923,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
     answer.clear();
 
     FloatArray *m = & answer;
-    if ( this->giveInterpolation() && this->giveInterpolation()->hasSubPatchFormulation() ) {
+	if (this->giveInterpolation() && this->giveInterpolation()->hasSubPatchFormulation()) {
         m = & temp;
     }
 
@@ -1000,7 +1001,7 @@ StructuralElement :: giveCharacteristicMatrix(FloatMatrix &answer,
     } else if ( mtrx == InitialStressMatrix ) {
         this->computeInitialStressMatrix(answer, tStep);
     } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
+        _error2( "giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
 }
 
@@ -1023,7 +1024,7 @@ StructuralElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx,
          * statuses. Mainly used to compute reaction forces */
         this->giveInternalForcesVector(answer, tStep, 1);
     } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
+        _error2( "giveCharacteristicVector: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
 }
 
@@ -1095,7 +1096,7 @@ StructuralElement :: updateBeforeNonlocalAverage(TimeStep *tStep)
                                                                                          giveMaterialInterface(NonlocalMaterialExtensionInterfaceType, ip) );
 
             if ( !materialExt ) {
-                return;             //_error("updateBeforeNonlocalAverage: material with no StructuralNonlocalMaterial support");
+                return;             //_error ("updateBeforeNonlocalAverage: material with no StructuralNonlocalMaterial support");
             }
             materialExt->updateBeforeNonlocAverage(epsilon, iRule->getIntegrationPoint(j), tStep);
         }
@@ -1113,7 +1114,7 @@ StructuralElement :: checkConsistency()
 {
     int result = 1;
     if ( !this->giveCrossSection()->testCrossSectionExtension(CS_StructuralCapability) ) {
-        OOFEM_WARNING("cross-section %s without structural support", this->giveCrossSection()->giveClassName() );
+        _warning2( "checkConsistency : cross-section %s without structural support", this->giveCrossSection()->giveClassName() );
         result = 0;
     }
 
@@ -1154,18 +1155,18 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
 
     // check
     if ( !stiff->isSquare() ) {
-        OOFEM_ERROR("stiffness size mismatch");
+        _error("condense: stiffness size mismatch");
     }
 
     if ( mass ) {
         if ( !( mass->isSquare() && mass->giveNumberOfRows() == size ) ) {
-            OOFEM_ERROR("mass size mismatch");
+            _error("condense: mass size mismatch");
         }
     }
 
     if ( load ) {
         if ( !( load->giveSize() == size ) ) {
-            OOFEM_ERROR("load size mismatch");
+            _error("condense: load size mismatch");
         }
     }
 
@@ -1177,7 +1178,7 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
     for ( i = 1; i <= nkon; i++ ) {
         ii  = what->at(i);
         if ( ( ii > size ) || ( ii <= 0 ) ) {
-            OOFEM_ERROR("wrong dof number");
+            _error("condense: wrong dof number");
         }
 
         dii = stiff->at(ii, ii);
@@ -1277,7 +1278,7 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const Un
                                 NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(ip);
         // loop over IP influencing IPs, extract corresponding element numbers and their code numbers
         for ( pos = integrationDomainList->begin(); pos != integrationDomainList->end(); ++pos ) {
-            pos->nearGp->giveElement()->giveLocationArray(elemLocArry, EID_MomentumBalance, s);
+			pos->nearGp->giveElementGeometry()->giveDomain()->giveElementEvaluator(pos->nearGp->giveElementGeometry()->giveNumber())->giveLocationArray(elemLocArry, EID_MomentumBalance, s, pos->nearGp->giveElementGeometry());
             /*
              * Currently no care given to multiple occurences of code number in locationArray.
              */

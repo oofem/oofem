@@ -56,7 +56,7 @@ Function *GeneralBoundaryCondition :: giveTimeFunction()
 // data file if has not been done yet.
 {
     if ( !timeFunction ) {
-        OOFEM_ERROR("TimeFunction is not defined");
+        _error("giveTimeFunction: TimeFunction is not defined");
     }
 
     return domain->giveFunction(timeFunction);
@@ -66,11 +66,12 @@ Function *GeneralBoundaryCondition :: giveTimeFunction()
 IRResultType
 GeneralBoundaryCondition :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;           // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, timeFunction, _IFT_GeneralBoundaryCondition_timeFunct);
     if ( timeFunction <= 0 ) {
-        OOFEM_ERROR("bad TimeFunction id");
+        _error("initializeFrom: bad TimeFunction id");
     }
 
     int val = 0;
@@ -95,7 +96,7 @@ bool GeneralBoundaryCondition :: isImposed(TimeStep *tStep)
     // in given time (nonzero indicates imposed b.c.).
 
     if ( isImposedTimeFunction ) {
-        return ( domain->giveFunction(isImposedTimeFunction)->evaluateAtTime( tStep->giveIntrinsicTime() ) != 0. );
+        return ( domain->giveFunction(isImposedTimeFunction)->evaluateAtTime(tStep->giveIntrinsicTime()) != 0. );
     } else {
         // zero value indicates default behavior -> b.c. is imposed
         // anytime

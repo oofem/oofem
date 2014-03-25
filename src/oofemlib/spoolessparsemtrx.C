@@ -43,7 +43,7 @@ REGISTER_SparseMtrx(SpoolesSparseMtrx, SMT_SpoolesMtrx);
 SparseMtrx *
 SpoolesSparseMtrx :: GiveCopy() const
 {
-    OOFEM_ERROR("Not implemented");
+    OOFEM_ERROR("SpoolesSparseMtrx::GiveCopy - Not implemented");
     return NULL;
 }
 
@@ -61,7 +61,7 @@ SpoolesSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
     } else if ( sflag == SPOOLES_NONSYMMETRIC ) {
         result = InpMtx_nonsym_gmvm( this->mtrx, & beta, 1, answer.givePointer(), & alpha, 1, x.givePointer() );
     } else {
-        OOFEM_ERROR("unsupported symmetry flag");
+        OOFEM_ERROR("SpoolesSparseMtrx::times - unsupported symmetry flag");
         exit(1);
     }
 }
@@ -69,7 +69,7 @@ SpoolesSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
 void
 SpoolesSparseMtrx :: times(double x)
 {
-    OOFEM_ERROR("unsupported");
+    OOFEM_ERROR("SpoolesSparseMtrx::times(double x) - unsupported");
 }
 
 void
@@ -85,11 +85,11 @@ SpoolesSparseMtrx :: timesT(const FloatArray &x, FloatArray &answer) const
     } else if ( sflag == SPOOLES_NONSYMMETRIC ) {
         result = InpMtx_nonsym_gmvm_T( this->mtrx, & beta, 1, answer.givePointer(), & alpha, 1, x.givePointer() );
     } else {
-        OOFEM_ERROR("unsupported symmetry flag");
+        OOFEM_ERROR("SpoolesSparseMtrx::timesT - unsupported symmetry flag");
     }
 
     if ( result != 1 ) {
-        OOFEM_ERROR("error code from InpMtx_(non)sym_gmvm %d", result);
+        OOFEM_ERROR2("SpoolesSparseMtrx::timesT - error code from InpMtx_(non)sym_gmvm %d", result);
     }
 }
 
@@ -173,14 +173,14 @@ SpoolesSparseMtrx :: zero()
 double &
 SpoolesSparseMtrx :: at(int i, int j)
 {
-    OOFEM_ERROR("unsupported");
+    OOFEM_ERROR("SpoolesSparseMtrx::at(i,j) - unsupported");
     abort();
 }
 
 double
 SpoolesSparseMtrx :: at(int i, int j) const
 {
-    OOFEM_ERROR("unsupported");
+    OOFEM_ERROR("SpoolesSparseMtrx::at(i,j) - unsupported");
     return 0.0;
 }
 

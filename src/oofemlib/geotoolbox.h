@@ -40,13 +40,12 @@
 
 #include "oofemcfg.h"
 #include "floatarray.h"
-
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
-namespace oofem {
 
+namespace oofem {
 #define GT_EPS 1.e-12
 // zero for parallel lines test
 #define GT_TEPS 1.e-16

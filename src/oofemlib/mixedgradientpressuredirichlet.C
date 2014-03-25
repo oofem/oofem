@@ -172,7 +172,7 @@ void MixedGradientPressureDirichlet :: computeDofTransformation(ActiveDof *dof, 
         masterContribs.at(6) = dx.at(1) / 2.0;  // gamma_13
         masterContribs.at(7) = 0.0;           // gamma_12
     } else {
-        OOFEM_ERROR("Incompatible id on subjected dof\n");
+        OOFEM_ERROR("MixedGradientPressureDirichlet :: computeDofTransformation - Incompatible id on subjected dof\n");
     }
 }
 
@@ -183,7 +183,7 @@ double MixedGradientPressureDirichlet :: giveUnknown(double vol, const FloatArra
     FloatArray *coords = dof->giveDofManager()->giveCoordinates();
 
     if ( coords == NULL || coords->giveSize() != this->centerCoord.giveSize() ) {
-        OOFEM_ERROR("Size of coordinate system different from center coordinate (%d) in b.c.", this->centerCoord.giveSize() );
+        OOFEM_ERROR2( "MixedGradientPressureDirichlet :: give - Size of coordinate system different from center coordinate (%d) in b.c.", this->centerCoord.giveSize() );
     }
 
     FloatArray dx;
@@ -268,7 +268,7 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
     Kpf = classFactory.createSparseMtrx(stype);
     Kpp = classFactory.createSparseMtrx(stype);
     if ( !Kff ) {
-        OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
+        OOFEM_ERROR2("MixedGradientPressureDirichlet :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, 1, eid, fnum);
     Kfp->buildInternalStructure(rve, 1, eid, fnum, pnum);
@@ -417,7 +417,7 @@ double MixedGradientPressureDirichlet :: giveBcValue(ActiveDof *dof, ValueModeTy
     if ( this->isDevDof(dof) ) {
         return this->devGradient( dof->giveNumber() );
     }
-    OOFEM_ERROR("Has no prescribed value from bc.");
+    OOFEM_ERROR("MixedGradientPressureDirichlet :: giveBcValue - Has no prescribed value from bc.");
     return 0.0;
 }
 
@@ -436,6 +436,7 @@ bool MixedGradientPressureDirichlet :: isDevDof(ActiveDof *dof)
 
 IRResultType MixedGradientPressureDirichlet :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";
     IRResultType result;
 
     MixedGradientPressureBC :: initializeFrom(ir);

@@ -116,7 +116,7 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual ElementGeometry *ZZNodalRecoveryMI_giveElementGeometry() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
@@ -133,7 +133,7 @@ public:
     virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     // SpatialLocalizerI
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
+    virtual ElementGeometry *SpatialLocalizerI_giveElementGeometry() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
     virtual void SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1);
@@ -145,31 +145,29 @@ public:
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS)
-    { OOFEM_ERROR("calling of this function is not allowed"); }
+    { _error("TR_SHELL01 :: computeBmatrixAt: calling of this function is not allowed"); }
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &)
-    { OOFEM_ERROR("calling of this function is not allowed"); }
+    { _error("TR_SHELL01 :: computeNmatrixAt: calling of this function is not allowed"); }
 
     /// @todo In time delete
 protected:
     virtual void computeGaussPoints()
-    {
-        this->membrane->computeGaussPoints();
-        this->plate->computeGaussPoints();
-    }
+    { this->membrane->computeGaussPoints();
+      this->plate->computeGaussPoints(); }
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("calling of this function is not allowed"); }
+    { _error("TR_SHELL01 :: computeStressVector: calling of this function is not allowed"); }
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
-    { OOFEM_ERROR("calling of this function is not allowed"); }
+    { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-    { OOFEM_ERROR("calling of this function is not allowed"); }
+    { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
 
 public:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
-    { OOFEM_ERROR("calling of this function is not allowed"); }
+    { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
-    { OOFEM_ERROR("calling of this function is not allowed"); }
+    { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
-    { OOFEM_ERROR("calling of this function is not allowed"); }
+    { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
 };
 } // end namespace oofem
 #endif

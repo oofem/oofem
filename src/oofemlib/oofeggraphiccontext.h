@@ -40,8 +40,8 @@
 
  #include "oofemcfg.h"
  #include "intarray.h"
+ #include "nodalrecoverymodel.h"
  #include "internalstatemode.h"
- #include "internalstatetype.h"
 
  #include <list>
 

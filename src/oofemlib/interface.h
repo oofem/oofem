@@ -37,8 +37,6 @@
 
 #include "oofemcfg.h"
 
-#include <string>
-
 namespace oofem {
 /**
  * Class Interface. Interface class is abstract base class.
@@ -85,7 +83,7 @@ public:
     /// Constructor.
     Interface() { }
     virtual ~Interface() { }
-    virtual const char *giveClassName() const = 0;
+    virtual const char *giveClassName() const  = 0;
 };
 } // end namespace oofem
 #endif // interface_h

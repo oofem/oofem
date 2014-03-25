@@ -57,6 +57,7 @@ GPExportModule :: ~GPExportModule()
 IRResultType
 GPExportModule :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
     ExportModule :: initializeFrom(ir);
@@ -76,7 +77,7 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     int nc, nv, nvars;
     double weight;
-    Element *elem;
+    ElementGeometry *elemGeometry;
     GaussPoint *gp;
     FloatArray gcoords, intvar;
     InternalStateType vartype;
@@ -100,11 +101,11 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     // loop over elements
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        elem = d->giveElement(ielem);
+        elemGeometry = d->giveElementGeometry(ielem);
         //iRule = elem->giveDefaultIntegrationRulePtr();
         //int numIntRules = elem->giveNumberOfIntegrationRules();
-        for ( int i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
-            iRule = elem->giveIntegrationRule(i);
+        for ( int i = 0; i < elemGeometry->giveNumberOfIntegrationRules(); i++ ) {
+            iRule = elemGeometry->giveIntegrationRule(i);
 
             // loop over Gauss points
             for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
@@ -115,12 +116,12 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                 // 3) Integration rule number
                 // 4) Gauss point number
                 // 5) contributing volume around Gauss point
-                weight = elem->computeVolumeAround(gp);
-                fprintf(stream, "%d %d %d %d %.6e ", elem->giveNumber(), -1, i + 1, j + 1, weight);
+                weight = elemGeometry->computeVolumeAround(gp);
+                fprintf(stream, "%d %d %d %d %.6e ", elemGeometry->giveNumber(), -1, i + 1, j + 1, weight);
 
                 // export Gauss point coordinates
                 if ( ncoords ) { // no coordinates exported if ncoords==0
-                    elem->computeGlobalCoordinates( gcoords, * ( gp->giveCoordinates() ) );
+                    elemGeometry->computeGlobalCoordinates( gcoords, * ( gp->giveCoordinates() ) );
                     nc = gcoords.giveSize();
                     if ( ncoords >= 0 ) {
                         fprintf(stream, "%d ", ncoords);
@@ -144,7 +145,7 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                 // export internal variables
                 for ( int iv = 1; iv <= nvars; iv++ ) {
                     vartype = ( InternalStateType ) vartypes.at(iv);
-                    elem->giveIPValue(intvar, gp, vartype, tStep);
+                    elemGeometry->giveIPValue(intvar, gp, vartype, tStep);
                     nv = intvar.giveSize();
                     fprintf(stream, "%d ", nv);
                     for ( int ic = 1; ic <= nv; ic++ ) {
@@ -159,10 +160,10 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 #if 0
         // for CST elements write also nodal coordinates
         // (non-standard part, used only exceptionally)
-        int nnode = elem->giveNumberOfNodes();
+        int nnode = elemGeometry->giveNumberOfNodes();
         if ( nnode == 3 ) {
             for ( int inod = 1; inod <= 3; inod++ ) {
-                fprintf( stream, "%f %f ", elem->giveNode(inod)->giveCoordinate(1), elem->giveNode(inod)->giveCoordinate(2) );
+                fprintf( stream, "%f %f ", elemGeometry->giveNode(inod)->giveCoordinate(1), elemGeometry->giveNode(inod)->giveCoordinate(2) );
             }
         }
 #endif
@@ -188,7 +189,7 @@ GPExportModule :: giveOutputStream(TimeStep *tStep)
 
     std :: string fileName = this->giveOutputBaseFileName(tStep) + ".gp";
     if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR("failed to open file %s", fileName.c_str());
+        OOFEM_ERROR2( "GPExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
     }
 
     return answer;

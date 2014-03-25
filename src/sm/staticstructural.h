@@ -66,7 +66,7 @@ protected:
     double deltaT;
 
 public:
-    StaticStructural(int i, EngngModel * _master = NULL);
+    StaticStructural(int i, EngngModel *_master = NULL);
     virtual ~StaticStructural();
     virtual IRResultType initializeFrom(InputRecord *ir);
 

@@ -36,6 +36,7 @@
 #define GNUPLOTEXPORTMODULE_H_
 
 #include "exportmodule.h"
+#include "export/bcexportinterface.h"
 
 ///@name Input fields for MatlabExportModule
 //@{
@@ -58,7 +59,7 @@ class PrescribedGradient;
  *
  * Created on: Jan 29, 2014
  */
-class OOFEM_EXPORT GnuplotExportModule : public ExportModule {
+class OOFEM_EXPORT GnuplotExportModule : public ExportModule, public BCExportInterface {
 public:
 	GnuplotExportModule(int n, EngngModel *e);
 	virtual ~GnuplotExportModule();
@@ -80,7 +81,7 @@ public:
     /**
      * Boundary condition output
      */
-    void outputBoundaryCondition(PrescribedGradient &iBC, TimeStep *tStep);
+    virtual void outputBoundaryCondition(PrescribedGradient &iBC, TimeStep *tStep);
 
 
 protected:

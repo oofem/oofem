@@ -43,6 +43,7 @@
 namespace oofem {
 EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag, EngngModel *_master, bool parallelFlag)
 {
+    const char *__proc = "InstanciateProblem"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                       // Required by IR_GIVE_FIELD macro
     EngngModel *problem;
     std :: string problemName, dataOutputFileName, desc;
@@ -57,12 +58,12 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
     InputRecord *emodelir = dr->giveInputRecord(DataReader :: IR_emodelRec, 1)->GiveCopy();
     result = emodelir->giveRecordKeywordField(problemName); ///@todo Make this function robust, it can't be allowed to fail (the record keyword is not a normal field-id)
     if ( result != IRRT_OK ) {
-        emodelir->report_error("", __func__, "", result, __FILE__, __LINE__);
+        IR_IOERR("", __proc, "", emodelir, result);
     }
 
     problem = classFactory.createEngngModel(problemName.c_str(), 1, _master);
     if ( !problem ) {
-        OOFEM_SIMPLE_ERROR( "Failed to construct engineering model if type \"%s\".\n", problemName.c_str() );
+        OOFEM_ERROR2( "EngngModel::InstanciateProblem - Failed to construct engineering model if type \"%s\".\n", problemName.c_str() );
     }
     problem->setProblemMode(mode);
     problem->setParallelMode(parallelFlag);

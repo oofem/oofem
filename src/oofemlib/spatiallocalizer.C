@@ -48,14 +48,14 @@ namespace oofem {
 void
 SpatialLocalizerInterface :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
 {
-    Element *element = this->SpatialLocalizerI_giveElement();
+    ElementGeometry *elementGeometry = this->SpatialLocalizerI_giveElementGeometry();
     FloatArray *coordinates;
 
-    coordinates = element->giveNode(1)->giveCoordinates();
-    bb1 = bb0 = * element->giveNode(1)->giveCoordinates();
+    coordinates = elementGeometry->giveNode(1)->giveCoordinates();
+    bb1 = bb0 = * elementGeometry->giveNode(1)->giveCoordinates();
 
-    for ( int i = 2; i <= element->giveNumberOfNodes(); ++i ) {
-        coordinates = element->giveNode(i)->giveCoordinates();
+    for ( int i = 2; i <= elementGeometry->giveNumberOfNodes(); ++i ) {
+        coordinates = elementGeometry->giveNode(i)->giveCoordinates();
         bb0.beMinOf(bb0, * coordinates);
         bb1.beMaxOf(bb1, * coordinates);
     }
@@ -65,7 +65,7 @@ SpatialLocalizerInterface :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatAr
 double
 SpatialLocalizerInterface :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords)
 {
-    Element *e = this->SpatialLocalizerI_giveElement();
+    ElementGeometry *e = this->SpatialLocalizerI_giveElementGeometry();
     FEInterpolation *interp = e->giveInterpolation();
 
     if ( !interp->global2local( lcoords, gcoords, FEIElementGeometryWrapper(e) ) ) { // Outside element

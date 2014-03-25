@@ -189,11 +189,12 @@ TrPlanestressRotAllman :: computeStiffnessMatrixZeroEnergyStabilization(FloatMat
 {
     FloatMatrix b(1, 9), d(1, 1);
     FloatMatrix dnx;
-    FloatArray lxy [ 6 ], lec = {0.333333333333, 0.333333333333, 0.333333333333}; // element center in local coordinates
+    FloatArray lxy [ 6 ], lec;
     const FloatArray *lxyptr[] = {
         lxy, lxy + 1, lxy + 2, lxy + 3, lxy + 4, lxy + 5
     };
 
+    lec.setValues(3, 0.333333333333, 0.333333333333, 0.333333333333); // element center in local coordinates
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
     this->qinterpolation.evaldNdx( dnx, lec, FEIVertexListGeometryWrapper(6, lxyptr) );
 
@@ -228,7 +229,7 @@ TrPlanestressRotAllman :: computeStiffnessMatrixZeroEnergyStabilization(FloatMat
 void
 TrPlanestressRotAllman :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer = {D_u, D_v, R_w};
+    answer.setValues(3, D_u, D_v, R_w);
 }
 
 
@@ -313,7 +314,7 @@ TrPlanestressRotAllman :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(5) = 2;
         answer.at(6) = 3;
     } else {
-        OOFEM_ERROR("wrong edge number");
+        _error("giveEdgeDofMapping: wrong edge number");
     }
 }
 
@@ -362,7 +363,7 @@ TrPlanestressRotAllman :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
  *      aNode = 3;
  *      bNode = 1;
  *  } else {
- *      OOFEM_ERROR("wrong egde number");
+ *      _error("computeEdgeVolumeAround: wrong egde number");
  *  }
  *
  *  nodeA   = this->giveNode(aNode);

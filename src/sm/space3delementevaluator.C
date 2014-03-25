@@ -44,7 +44,7 @@
 #include "crosssection.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
-#include "iga/iga.h"
+#include "iga.h"
 
 namespace oofem {
 /* 3D Space Elements */

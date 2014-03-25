@@ -38,11 +38,11 @@
 #include "mathfem.h"
 
 namespace oofem {
-LobattoIntegrationRule :: LobattoIntegrationRule(int n, Element *e,
+LobattoIntegrationRule :: LobattoIntegrationRule(int n, ElementGeometry *e,
                                                  int startIndx, int endIndx, bool dynamic) :
     IntegrationRule(n, e, startIndx, endIndx, dynamic) { }
 
-LobattoIntegrationRule :: LobattoIntegrationRule(int n, Element *e) :
+LobattoIntegrationRule :: LobattoIntegrationRule(int n, ElementGeometry *e) :
     IntegrationRule(n, e) { }
 
 LobattoIntegrationRule :: ~LobattoIntegrationRule()
@@ -72,7 +72,7 @@ int
 LobattoIntegrationRule :: SetUpPointsOnSquare(int nPoints, MaterialMode mode)
 //GaussIntegrationRule :: SetUpPointsOnSquare(int nPoints_xi1, int nPoints_xi2, MaterialMode mode)
 {
-    int nPoints_xi1 = ( int ) floor( sqrt( double ( nPoints ) ) );
+    int nPoints_xi1 = (int) floor( sqrt( double ( nPoints ) ) );
     int nPoints_xi2 = nPoints_xi1;
     FloatArray coords_xi1, weights1, coords_xi2, weights2;
     this->giveLineCoordsAndWeights(nPoints_xi1, coords_xi1, weights1);
@@ -99,7 +99,7 @@ int
 LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
 //GaussIntegrationRule :: SetUpPointsOnCube(int nPoints_xi1, int nPoints_xi2, int nPoints_xi3, MaterialMode mode)
 {
-    int nPoints_xi1 = ( int ) floor(cbrt( double ( nPoints ) ) + 0.5);
+    int nPoints_xi1 = (int) floor(cbrt( double ( nPoints ) ) + 0.5);
     int nPoints_xi2 = nPoints_xi1;
     int nPoints_xi3 = nPoints_xi1;
     FloatArray coords_xi1, weights1, coords_xi2, weights2, coords_xi3, weights3;
@@ -284,7 +284,7 @@ LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
 //        break;
 //
 //    default:
-//        OOFEM_ERROR("unsupported number of IPs (%d)", nPoints);
+//        OOFEM_ERROR2("SetUpPointsOnLine: unsupported number of IPs (%d)", nPoints);
 //    }
 //
 //    return nPoints;
@@ -293,7 +293,7 @@ LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
 int
 LobattoIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 {
-    OOFEM_ERROR("unsupported number of IPs (%d)", nPoints);
+    OOFEM_ERROR2("SetUpPointsOnTriangle: unsupported number of IPs (%d)", nPoints);
     return nPoints;
 }
 
@@ -319,7 +319,7 @@ LobattoIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain
         return requiredNIP;
 
     default:
-        OOFEM_ERROR("unknown integrationDomain");
+        OOFEM_ERROR("LobattoIntegrationRule::setUpIntegrationPoints - unknown integrationDomain");
     }
 
     return -1;
@@ -335,61 +335,100 @@ LobattoIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coor
 
     switch ( nPoints ) {
     case 1:
-        coords_xi = {0.0};
-        weights = {2.0};
+
+        coords_xi.setValues(1, 0.0);
+        weights.setValues(1, 2.0);
+
         break;
 
     case 2:
-        coords_xi = {-1.0, 1.0};
-        weights = {1.0, 1.0};
+
+        coords_xi.setValues(2,
+                            -1.0,
+                            1.0
+                            );
+
+        weights.setValues(2,
+                          1.0,
+                          1.0
+                          );
+
         break;
 
     case 3:
-        coords_xi = {-1.0, 0.0, 1.0};
-        weights = {0.333333333333333, 1.333333333333333, 0.333333333333333};
-        break;
 
+        coords_xi.setValues(3,
+                            -1.0,
+                            0.0,
+                            1.0
+                            );
+
+        weights.setValues(3,
+                          0.333333333333333,
+                          1.333333333333333,
+                          0.333333333333333
+                          );
+
+        break;
     case 4:
-        coords_xi = {-1.0,
-                     -0.447213595499958,
-                      0.447213595499958,
-                      1.0};
-        weights = { 0.166666666666667,
-                    0.833333333333333,
-                    0.833333333333333,
-                    0.166666666666667};
+
+        coords_xi.setValues(4,
+                            -1.0,
+                            -0.447213595499958,
+                            0.447213595499958,
+                            1.0
+                            );
+
+        weights.setValues(4,
+                          0.166666666666667,
+                          0.833333333333333,
+                          0.833333333333333,
+                          0.166666666666667
+                          );
         break;
 
     case 5:
-        coords_xi = {-1.0,
-                     -0.654653670707977,
-                      0.0,
-                      0.654653670707977,
-                      1.0};
-        weights = { 0.1,
-                    0.544444444444444,
-                    0.711111111111111,
-                    0.544444444444444,
-                    0.1};
+
+        coords_xi.setValues(5,
+                            -1.0,
+                            -0.654653670707977,
+                            0.0,
+                            0.654653670707977,
+                            1.0
+                            );
+
+        weights.setValues(5,
+                          0.1,
+                          0.544444444444444,
+                          0.711111111111111,
+                          0.544444444444444,
+                          0.1
+                          );
         break;
 
     case 6:
-        coords_xi = {-1.0,
-                     -0.765055323929465,
-                     -0.285231516480645,
-                      0.285231516480645,
-                      0.765055323929465,
-                      1.0};
-        weights = { 0.066666666666667,
-                    0.378474956297847,
-                    0.554858377035486,
-                    0.554858377035486,
-                    0.378474956297847,
-                    0.066666666666667};
+
+        coords_xi.setValues(6,
+                            -1.0,
+                            -0.765055323929465,
+                            -0.285231516480645,
+                            0.285231516480645,
+                            0.765055323929465,
+                            1.0
+                            );
+
+        weights.setValues(6,
+                          0.066666666666667,
+                          0.378474956297847,
+                          0.554858377035486,
+                          0.554858377035486,
+                          0.378474956297847,
+                          0.066666666666667
+                          );
         break;
 
     default:
-        OOFEM_SIMPLE_ERROR("unsupported number of IPs (%d)", nPoints);
+        OOFEM_ERROR2("LobattoIntegrationRule :: giveLineCoordsAndWeights - unsupported number of IPs (%d)", nPoints);
     }
 }
 } // end namespace oofem

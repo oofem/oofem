@@ -45,6 +45,7 @@ ConstantFunction :: initializeFrom(InputRecord *ir)
     //
     // instanciates receiver according to input record
     //
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     Function :: initializeFrom(ir);

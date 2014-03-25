@@ -117,7 +117,7 @@ void Tr1Darcy :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Val
     } else if ( mtrx == InternalForcesVector ) {
         this->computeInternalForcesVector(answer, tStep);
     } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
+        _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -253,7 +253,7 @@ void Tr1Darcy :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, Ti
     if ( mtrx == StiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, tStep);
     } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
+        _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -267,9 +267,9 @@ void Tr1Darcy :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer)
 
     if ( ( inode == 1 ) || ( inode == 2 ) || ( inode == 3 ) ) {
         if ( ut == EID_ConservationEquation ) {
-            answer = {P_f};
+            answer.setValues(1, P_f);
         } else {
-            OOFEM_ERROR("Unknown equation id encountered");
+            _error("giveDofManDofIDMask: Unknown equation id encountered");
         }
     }
 }

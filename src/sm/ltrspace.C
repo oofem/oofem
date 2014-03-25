@@ -190,6 +190,7 @@ double LTRSpace :: computeVolumeAround(GaussPoint *gp)
 IRResultType
 LTRSpace :: initializeFrom(InputRecord *ir)
 {
+    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                            // Required by IR_GIVE_FIELD macro
 
     numberOfGaussPoints = 1;
@@ -241,7 +242,7 @@ LTRSpace :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 void
 LTRSpace :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer = {D_u, D_v, D_w};
+    answer.setValues(3, D_u, D_v, D_w);
 }
 
 
@@ -301,7 +302,7 @@ LTRSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        OOFEM_ERROR("node unknown");
+        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 
@@ -651,7 +652,7 @@ LTRSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray 
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
+        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -722,6 +723,7 @@ LTRSpace :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &ans
                                                                  coordType ct, nodalValContainerType &list,
                                                                  InternalStateType type, TimeStep *tStep)
 {
+    int i, n;
     double l1, l2, l3, l4;
     FloatArray lcoords;
     if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
@@ -734,11 +736,12 @@ LTRSpace :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &ans
     l2 = lcoords.at(2);
     l3 = lcoords.at(3);
     l4 = 1.0 - l1 - l2 - l3;
-    answer.resize(0);
-    answer.add(l1, list[0]);
-    answer.add(l2, list[1]);
-    answer.add(l3, list[2]);
-    answer.add(l4, list[3]);
+    n = list.at(1)->giveSize();
+    answer.resize(n);
+
+    for ( i = 1; i <= n; i++ ) {
+        answer.at(i) = l1 * list.at(1)->at(i) + l2 *list.at(2)->at(i) + l3 *list.at(3)->at(i) + l4 *list.at(4)->at(i);
+    }
 }
 
 
@@ -825,7 +828,7 @@ LTRSpace :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(5) = 11;
         answer.at(6) = 12;
     } else {
-        OOFEM_ERROR("wrong edge number");
+        _error("giveEdgeDofMapping: wrong edge number");
     }
 }
 
@@ -856,7 +859,7 @@ LTRSpace :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
     //
     // i.e. f(element local) = T * f(edge local)
     //
-    OOFEM_ERROR("egde local coordinate system not supported");
+    _error("computeLoadLEToLRotationMatrix: egde local coordinate system not supported");
     return 1;
 }
 
@@ -935,7 +938,7 @@ LTRSpace :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
         answer.at(8) = 8;
         answer.at(9) = 9;
     } else {
-        OOFEM_ERROR("wrong surface number");
+        _error("giveSurfaceDofMapping: wrong surface number");
     }
 }
 
@@ -976,7 +979,7 @@ LTRSpace :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int is
 int
 LTRSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *)
 {
-    OOFEM_ERROR("surface local coordinate system not supported");
+    _error("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
     return 1;
 }
 } // end namespace oofem

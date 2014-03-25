@@ -199,7 +199,7 @@ Quad1PlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(3) = 1;
         answer.at(4) = 2;
     } else {
-        OOFEM_ERROR("wrong edge number");
+        _error("giveEdgeDofMapping: wrong edge number");
     }
 }
 
@@ -249,7 +249,7 @@ Quad1PlaneStrain :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdg
         aNode = 4;
         bNode = 1;
     } else {
-        OOFEM_ERROR("wrong egde number");
+        _error("computeLoadLEToLRotationMatrix: wrong egde number");
     }
 
     nodeA = this->giveNode(aNode);
@@ -314,7 +314,7 @@ Quad1PlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &n
 void
 Quad1PlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer = {D_u, D_v};
+    answer.setValues(2, D_u, D_v);
 }
 
 
@@ -781,7 +781,7 @@ Quad1PlaneStrain :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &an
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        OOFEM_ERROR("node unknown");
+        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 
@@ -822,7 +822,7 @@ Quad1PlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
+        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {

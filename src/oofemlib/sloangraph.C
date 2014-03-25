@@ -48,7 +48,7 @@
 #include <set>
 
 namespace oofem {
-SloanGraph :: SloanGraph(Domain *d)  : nodes(), queue(), OptimalRenumberingTable()
+SloanGraph :: SloanGraph(Domain *d)  : nodes(0), queue(), OptimalRenumberingTable()
 {
     domain  = d;
     WeightDistance = 1;
@@ -63,64 +63,66 @@ SloanGraph :: SloanGraph(Domain *d)  : nodes(), queue(), OptimalRenumberingTable
 
 SloanGraph :: ~SloanGraph()
 {
+    dmans.clear(false); // Otherwise AList will delete the dof managers!
 }
 
 void SloanGraph :: initialize()
 {
-    int k;
+    int i, j, k, ielemnodes, ielemintdmans, ndofmans;
     int nnodes = domain->giveNumberOfDofManagers();
     int nelems = domain->giveNumberOfElements();
     int nbcs = domain->giveNumberOfBoundaryConditions();
+    ElementGeometry *ielem;
     GeneralBoundaryCondition *ibc;
 
-    this->nodes.reserve(nnodes);
+    ///@todo Use std::list for this first part instead (suboptimization?)
+    this->nodes.growTo(nnodes);
 
     // Add dof managers.
-    for ( int i = 1; i <= nnodes; i++ ) {
-        nodes.emplace_back(this, i);
-        dmans.push_back(domain->giveDofManager(i));
+    for ( i = 1; i <= nnodes; i++ ) {
+        SloanGraphNode *node = new SloanGraphNode(this, i);
+        nodes.put(i, node);
+        dmans.put( i, domain->giveDofManager(i) );
     }
     k = nnodes;
     // Add element internal dof managers
-    for ( int i = 1; i <= nelems; i++ ) {
-        Element *ielem = domain->giveElement(i);
-        this->nodes.reserve( k + ielem->giveNumberOfInternalDofManagers() );
-        this->dmans.reserve( k + ielem->giveNumberOfInternalDofManagers() );
-        for ( int j = 1; j <= ielem->giveNumberOfInternalDofManagers(); ++j ) {
-            nodes.emplace_back(this, i);
-            dmans.push_back( ielem->giveInternalDofManager(i) );
-            ++k;
+    for ( i = 1; i <= nelems; i++ ) {
+        ielem = domain->giveElementGeometry(i);
+        this->nodes.growTo( k + ielem->giveNumberOfInternalDofManagers() );
+        for ( j = 1; j <= ielem->giveNumberOfInternalDofManagers(); ++j ) {
+            SloanGraphNode *node = new SloanGraphNode(this, i);
+            nodes.put(++k, node);
+            dmans.put( ++k, ielem->giveInternalDofManager(i) );
         }
     }
     // Add boundary condition internal dof managers
-    for ( int i = 1; i <= nbcs; i++ ) {
+    for ( i = 1; i <= nbcs; i++ ) {
         ibc = domain->giveBc(i);
         if ( ibc ) {
-            this->nodes.reserve( k + ibc->giveNumberOfInternalDofManagers() );
-            this->dmans.reserve( k + ibc->giveNumberOfInternalDofManagers() );
-            for ( int j = 1; j <= ibc->giveNumberOfInternalDofManagers(); ++j ) {
-                nodes.emplace_back(this, i);
-                dmans.push_back( ibc->giveInternalDofManager(i) );
-                ++k;
+            this->nodes.growTo( k + ibc->giveNumberOfInternalDofManagers() );
+            for ( j = 1; j <= ibc->giveNumberOfInternalDofManagers(); ++j ) {
+                SloanGraphNode *node = new SloanGraphNode(this, i);
+                nodes.put(++k, node);
+                dmans.put( ++k, ibc->giveInternalDofManager(i) );
             }
         }
     }
 
     IntArray connections;
-    for ( int i = 1; i <= nelems; i++ ) {
-        Element *ielem = domain->giveElement(i);
-        int ielemnodes = ielem->giveNumberOfDofManagers();
-        int ielemintdmans = ielem->giveNumberOfInternalDofManagers();
-        int ndofmans = ielemnodes + ielemintdmans;
+    for ( i = 1; i <= nelems; i++ ) {
+        ielem = domain->giveElementGeometry(i);
+        ielemnodes = ielem->giveNumberOfDofManagers();
+        ielemintdmans = ielem->giveNumberOfInternalDofManagers();
+        ndofmans = ielemnodes + ielemintdmans;
         connections.resize(ndofmans);
-        for ( int j = 1; j <= ielemnodes; j++ ) {
+        for ( j = 1; j <= ielemnodes; j++ ) {
             connections.at(j) = ielem->giveDofManager(j)->giveNumber();
         }
-        for ( int j = 1; j <= ielemintdmans; j++ ) {
+        for ( j = 1; j <= ielemintdmans; j++ ) {
             connections.at(ielemnodes + j) = ielem->giveInternalDofManager(j)->giveNumber();
         }
-        for ( int j = 1; j <= ndofmans; j++ ) {
-            for ( int k = j + 1; k <= ndofmans; k++ ) {
+        for ( j = 1; j <= ndofmans; j++ ) {
+            for ( k = j + 1; k <= ndofmans; k++ ) {
                 // Connect both ways
                 this->giveNode( connections.at(j) )->addNeighbor( connections.at(k) );
                 this->giveNode( connections.at(k) )->addNeighbor( connections.at(j) );
@@ -133,12 +135,13 @@ void SloanGraph :: initialize()
     std :: set< int, std :: less< int > > :: iterator it;
 
     IntArray dofMasters;
-    for ( int i = 1; i <= nnodes; i++ ) {
+    DofManager *iDofMan;
+    for ( i = 1; i <= nnodes; i++ ) {
         if ( domain->giveDofManager(i)->hasAnySlaveDofs() ) {
             // slave dofs are present in dofManager
             // first - ask for masters, these may be different for each dof
             masters.clear();
-            DofManager *iDofMan = domain->giveDofManager(i);
+            iDofMan = domain->giveDofManager(i);
             for ( int j = 1; j <= iDofMan->giveNumberOfDofs(); j++ ) {
                 if ( !iDofMan->giveDof(j)->isPrimaryDof() ) {
                     iDofMan->giveDof(j)->giveMasterDofManArray(dofMasters);
@@ -160,7 +163,8 @@ void SloanGraph :: initialize()
 SloanGraphNode *
 SloanGraph :: giveNode(int num)
 {
-    return &nodes[num-1];
+    SloanGraphNode *node = nodes.at(num);
+    return node;
 }
 
 int
@@ -169,9 +173,10 @@ SloanGraph :: giveNodeWithMinDegree()
     int nnodes = domain->giveNumberOfDofManagers();
     int node_min = 0;
     int min = nnodes + 1;
+    int i, deg;
 
-    for ( int i = 1; i <= nnodes; i++ ) {
-        int deg = this->giveNode(i)->giveDegree();
+    for ( i = 1; i <= nnodes; i++ ) {
+        deg = this->giveNode(i)->giveDegree();
         if ( deg < min && deg > 0 && ( this->giveNode(i)->giveNewNumber() == 0 ) ) {
             min      = deg;
             node_min = i;
@@ -195,7 +200,7 @@ SloanGraph :: findPeripheralNodes()
     } else if ( SpineQuality == Good ) {
         InitialRoot = giveNodeWithMinDegree();
     } else {
-        OOFEM_SIMPLE_WARNING("SloanGraph::findPeripheralNodes : Unsupported value of SpineQuality, using (Good)");
+        OOFEM_WARNING("SloanGraph::findPeripheralNodes : Unsupported value of SpineQuality, using (Good)");
         InitialRoot = giveNodeWithMinDegree();
     }
 
@@ -257,7 +262,7 @@ void
 SloanGraph :: extractCandidates(std :: list< int > &candidates, SloanLevelStructure *Spine)
 {
     if ( !Spine ) {
-        OOFEM_SIMPLE_ERROR("SloanGraph::extractCandidates : Invalid spine");
+        OOFEM_ERROR("SloanGraph::extractCandidates : Invalid spine");
     }
 
     int i, NumberOfLevels = Spine->giveDepth();
@@ -332,12 +337,14 @@ SloanGraph :: giveOptimalProfileDensity()
 void
 SloanGraph :: initStatusAndPriority()
 {
+    int i;
+
     this->findPeripheralNodes();
 #ifndef MDC
     this->evaluateNodeDistances();
     int nnodes = domain->giveNumberOfDofManagers();
 
-    for ( int i = 1; i <= nnodes; i++ ) {
+    for ( i = 1; i <= nnodes; i++ ) {
         int Distance = giveNode(i)->giveDistance();
         int Degree   = giveNode(i)->giveDegree();
         int Priority = WeightDistance * Distance - WeightDegree * ( Degree + 1 );
@@ -347,6 +354,7 @@ SloanGraph :: initStatusAndPriority()
 
 #else
     int NumLevels;
+    int j;
     IntArray *Level;
     int End = endNode;
 
@@ -355,9 +363,9 @@ SloanGraph :: initStatusAndPriority()
     SloanLevelStructure BackSpine(this, End);
     NumLevels = BackSpine.giveDepth();
 
-    for ( int i = 1; i <= NumLevels; i++ ) {
+    for ( i = 1; i <= NumLevels; i++ ) {
         Level = BackSpine.giveLevel(i);
-        for ( int j = 1; j <= Level->giveSize(); j++ ) {
+        for ( j = 1; j <= Level->giveSize(); j++ ) {
             Distance = i - 1;
             this->giveNode( Level->at(j) )->setDistance(Distance);
             Degree   = this->giveNode( Level->at(j) )->giveDegree();
@@ -375,6 +383,7 @@ void
 SloanGraph :: evaluateNodeDistances()
 {
     int NumLevels;
+    int i, j;
     IntArray *Level;
 
     if ( this->nodeDistancesFlag ) {
@@ -385,9 +394,9 @@ SloanGraph :: evaluateNodeDistances()
     SloanLevelStructure BackSpine(this, End);
     NumLevels = BackSpine.giveDepth();
 
-    for ( int i = 1; i <= NumLevels; i++ ) {
+    for ( i = 1; i <= NumLevels; i++ ) {
         Level = BackSpine.giveLevel(i);
-        for ( int j = 1; j <= Level->giveSize(); j++ ) {
+        for ( j = 1; j <= Level->giveSize(); j++ ) {
             this->giveNode( Level->at(j) )->setDistance(i - 1);
         }
     }
@@ -398,8 +407,8 @@ SloanGraph :: evaluateNodeDistances()
 void
 SloanGraph :: assignOldNumbers()
 {
-    int nnodes = domain->giveNumberOfDofManagers();
-    for ( int i = 1; i <= nnodes; i++ ) {
+    int i, nnodes = domain->giveNumberOfDofManagers();
+    for ( i = 1; i <= nnodes; i++ ) {
         giveNode(i)->assignOldNumber();
     }
 }
@@ -408,8 +417,8 @@ SloanGraph :: assignOldNumbers()
 void
 SloanGraph :: numberIsolatedNodes(int &NextNumber, int &labeledNodes)
 {
-    int nnodes = domain->giveNumberOfDofManagers();
-    for ( int i = 1; i <= nnodes; i++ ) {
+    int i, nnodes = domain->giveNumberOfDofManagers();
+    for ( i = 1; i <= nnodes; i++ ) {
         if ( giveNode(i)->giveDegree() == 0 ) {
             giveNode(i)->setNewNumber(++NextNumber);
             labeledNodes++;
@@ -424,8 +433,8 @@ SloanGraph :: assignNewNumbers()
     int Start, inext, NextNumber = 0;
     int labeledNodes = 0;
 
-    int nnodes = domain->giveNumberOfDofManagers();
-    for ( int i = 1; i <= nnodes; i++ ) {
+    int i, nnodes = domain->giveNumberOfDofManagers();
+    for ( i = 1; i <= nnodes; i++ ) {
         giveNode(i)->setNewNumber(0);
     }
 
@@ -474,7 +483,7 @@ SloanGraph :: assignNewNumbers()
 }
 #else
     if ( labeledNodes != domain->giveNumberOfDofManagers() ) {
-        OOFEM_SIMPLE_ERROR("SloanGraph :: assignNewNumbers: Internal error:\n%s", "Isolated nodes or separated sub-domains exist");
+        OOFEM_ERROR2("SloanGraph :: assignNewNumbers: Internal error:\n%s", "Isolated nodes or separated sub-domains exist");
     }
 
 #endif
@@ -563,7 +572,8 @@ SloanGraph :: computeProfileSize()
         assignOldNumbers();
     }
 
-    for ( int i = 1; i <= nnodes; i++ ) {
+    int i;
+    for ( i = 1; i <= nnodes; i++ ) {
         ProfSize += this->giveNode(i)->computeProfileHeight();
     }
 
@@ -577,9 +587,9 @@ SloanGraph :: computeProfileSize()
 void
 SloanGraph :: askNewOptimalNumbering(TimeStep *tStep)
 {
-    int ndmans = OptimalRenumberingTable.giveSize();
+    int ndmans = dmans.giveSize();
     for ( int i = 1; i <= ndmans; ++i ) {
-        dmans[ OptimalRenumberingTable.at(i) - 1 ]->askNewEquationNumbers(tStep);
+        dmans.at( OptimalRenumberingTable.at(i) )->askNewEquationNumbers(tStep);
     }
 }
 
@@ -587,12 +597,14 @@ SloanGraph :: askNewOptimalNumbering(TimeStep *tStep)
 void
 SloanGraph :: writeRenumberingTable(FILE *file)
 {
-    int nnodes = this->domain->giveNumberOfDofManagers();
+    int i, inew, nnodes = this->domain->giveNumberOfDofManagers();
 
-    for ( int i = 1; i <= nnodes; i++ ) {
-        int inew = this->giveNode(i)->giveNewNumber();
+    for ( i = 1; i <= nnodes; i++ ) {
+        inew = this->giveNode(i)->giveNewNumber();
         fprintf(file, "%8i %8i\n", i, inew);
     }
+
+    //fclose(file);
 }
 
 int
@@ -602,8 +614,8 @@ SloanGraph :: writeOptimalRenumberingTable(FILE *OutputFile)
         return 0;
     }
 
-    int nnodes = domain->giveNumberOfDofManagers();
-    for ( int i = 1; i <= nnodes; i++ ) {
+    int i, nnodes = domain->giveNumberOfDofManagers();
+    for ( i = 1; i <= nnodes; i++ ) {
         fprintf( OutputFile, "%8i %8i\n", i, OptimalRenumberingTable.at(i) );
     }
 
@@ -635,7 +647,7 @@ SloanGraph :: setParameters(int wdeg, int wdis)
 void
 SloanGraph :: tryParameters(int wdeg, int wdis)
 {
-    int nnodes = domain->giveNumberOfDofManagers();
+    int i, nnodes = domain->giveNumberOfDofManagers();
 
     setParameters(wdeg, wdis);
     int psize = computeProfileSize();
@@ -651,7 +663,7 @@ SloanGraph :: tryParameters(int wdeg, int wdis)
         OptimalWeightDegree   = wdeg;
         OptimalWeightDistance = wdis;
         OptimalRenumberingTable.resize(nnodes);
-        for ( int i = 1; i <= nnodes; i++ ) {
+        for ( i = 1; i <= nnodes; i++ ) {
             OptimalRenumberingTable.at( this->giveNode(i)->giveNewNumber() ) = i;
         }
     }

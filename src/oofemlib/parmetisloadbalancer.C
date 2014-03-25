@@ -58,7 +58,7 @@ ParmetisLoadBalancer :: ParmetisLoadBalancer(Domain *d) : LoadBalancer(d)
     elmdist = NULL;
     tpwgts  = NULL;
 #else
-    OOFEM_SIMPLE_ERROR("ParMETIS support not compiled");
+    OOFEM_ERROR("ParMETIS support not compiled");
 #endif
 }
 
@@ -111,7 +111,7 @@ ParmetisLoadBalancer :: calculateLoadTransfer()
     eind = new idx_t [ eind_size ];
     eptr = new idx_t [ nlocalelems + 1 ];
     if ( ( eind == NULL ) || ( eptr == NULL ) ) {
-        OOFEM_SIMPLE_ERROR("ParmetisLoadBalancer::balanceLoad: failed to allocate eind and eptr arrays");
+        OOFEM_ERROR("ParmetisLoadBalancer::balanceLoad: failed to allocate eind and eptr arrays");
     }
 
     // fill in the eind and eptr (mesh graph)
@@ -169,7 +169,7 @@ ParmetisLoadBalancer :: calculateLoadTransfer()
     lbm->giveProcessorWeights(_procweights);
     if ( tpwgts == NULL ) {
         if ( ( tpwgts = new real_t [ nproc ] ) == NULL ) {
-            OOFEM_SIMPLE_ERROR("ParmetisLoadBalancer::balanceLoad: failed to allocate tpwgts");
+            OOFEM_ERROR("ParmetisLoadBalancer::balanceLoad: failed to allocate tpwgts");
         }
     }
 
@@ -186,11 +186,11 @@ ParmetisLoadBalancer :: calculateLoadTransfer()
 
     // obtain vertices weights (element weights) representing relative computational cost
     if ( ( vwgt = new idx_t [ nlocalelems ] ) == NULL ) {
-        OOFEM_SIMPLE_ERROR("ParmetisLoadBalancer::balanceLoad: failed to allocate vwgt");
+        OOFEM_ERROR("ParmetisLoadBalancer::balanceLoad: failed to allocate vwgt");
     }
 
     if ( ( vsize = new idx_t [ nlocalelems ] ) == NULL ) {
-        OOFEM_SIMPLE_ERROR("ParmetisLoadBalancer::balanceLoad: failed to allocate vsize");
+        OOFEM_ERROR("ParmetisLoadBalancer::balanceLoad: failed to allocate vsize");
     }
 
     for ( ie = 0, i = 0; i < nelem; i++ ) {
@@ -205,7 +205,7 @@ ParmetisLoadBalancer :: calculateLoadTransfer()
     numflag = 0;
     ncon = 1;
     if ( ( part = new idx_t [ nlocalelems ] ) == NULL ) {
-        OOFEM_SIMPLE_ERROR("ParmetisLoadBalancer::balanceLoad: failed to allocate part");
+        OOFEM_ERROR("ParmetisLoadBalancer::balanceLoad: failed to allocate part");
     }
 
     // call ParMETIS balancing routineParMETIS_V3_AdaptiveRepart
@@ -264,7 +264,7 @@ ParmetisLoadBalancer :: initGlobalParmetisElementNumbering()
     if ( elmdist == NULL ) {
         elmdist = new idx_t [ nproc + 1 ];
         if ( elmdist == NULL ) {
-            OOFEM_SIMPLE_ERROR("ParmetisLoadBalancer::initGlobalParmetisNumbering: failed to allocate elmdist array");
+            OOFEM_ERROR("ParmetisLoadBalancer::initGlobalParmetisNumbering: failed to allocate elmdist array");
         }
     }
 
@@ -549,7 +549,7 @@ ParmetisLoadBalancer :: unpackSharedDmanPartitions(ProcessCommunicator &pc)
         if ( ( _locnum = domain->dofmanGlobal2Local(_globnum) ) ) {
             this->addSharedDofmanPartitions(_locnum, _partitions);
         } else {
-            OOFEM_SIMPLE_ERROR("ParmetisLoadBalancer::unpackSharedDmanPartitions: internal error, unknown global dofman %d", _globnum);
+            OOFEM_ERROR2("ParmetisLoadBalancer::unpackSharedDmanPartitions: internal error, unknown global dofman %d", _globnum);
         }
 
         /*

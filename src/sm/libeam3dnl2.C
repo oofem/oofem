@@ -69,7 +69,7 @@ void
 LIBeam3dNL2 :: computeSMtrx(FloatMatrix &answer, FloatArray &vec)
 {
     if ( vec.giveSize() != 3 ) {
-        OOFEM_ERROR("vec param size mismatch");
+        _error("computeSMtrx: vec param size mismatch");
     }
 
     answer.resize(3, 3);
@@ -91,7 +91,7 @@ LIBeam3dNL2 :: computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
     double psiSize;
 
     if ( psi.giveSize() != 3 ) {
-        OOFEM_ERROR("psi param size mismatch");
+        _error("computeSMtrx: psi param size mismatch");
     }
 
     answer.resize(3, 3);
@@ -452,6 +452,7 @@ LIBeam3dNL2 :: computeStressVector(FloatArray &answer, const FloatArray &strain,
 IRResultType
 LIBeam3dNL2 :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // first call parent
@@ -459,14 +460,14 @@ LIBeam3dNL2 :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3dNL2_refnode);
     if ( referenceNode == 0 ) {
-        OOFEM_ERROR("wrong reference node specified");
+        _error("instanciateFrom: wrong reference node specified");
     }
 
     /*
      * if (this->hasString (initString, "dofstocondense")) {
      *  dofsToCondense = this->ReadIntArray (initString, "dofstocondense");
      *  if (dofsToCondense->giveSize() >= 12)
-     *    OOFEM_ERROR("wrong input data for condensed dofs");
+     *    _error ("instanciateFrom: wrong input data for condensed dofs");
      * } else {
      *  dofsToCondense = NULL;
      * }
@@ -566,7 +567,7 @@ LIBeam3dNL2 :: computeVolumeAround(GaussPoint *gp)
 void
 LIBeam3dNL2 :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
+    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
 }
 
 int
@@ -616,7 +617,7 @@ LIBeam3dNL2 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      * to global element dofs
      */
     if ( iEdge != 1 ) {
-        OOFEM_ERROR("wrong edge number");
+        _error("giveEdgeDofMapping: wrong edge number");
     }
 
     answer.resize(12);
@@ -630,7 +631,7 @@ double
 LIBeam3dNL2 :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
-        OOFEM_ERROR("wrong egde number");
+        _error("computeEdgeVolumeAround: wrong egde number");
     }
 
     double weight  = gp->giveWeight();

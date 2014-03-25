@@ -58,10 +58,10 @@ ScalarErrorIndicator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
 }
 
 double
-ScalarErrorIndicator :: giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep)
+ScalarErrorIndicator :: giveElementError(EE_ErrorType type, ElementGeometry *elemGeometry, TimeStep *tStep)
 {
     FloatArray val;
-    IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
+    IntegrationRule *iRule = elemGeometry->giveDefaultIntegrationRulePtr();
     int result = 1, nip = iRule->giveNumberOfIntegrationPoints();
     double sval, maxVal = 0.0;
 
@@ -69,12 +69,12 @@ ScalarErrorIndicator :: giveElementError(EE_ErrorType type, Element *elem, TimeS
         return 0.0;
     }
 
-    if ( this->skipRegion( elem->giveRegionNumber() ) ) {
+    if ( this->skipRegion( elemGeometry->giveRegionNumber() ) ) {
         return 0.0;
     }
 
     for ( int i = 0; i < nip; i++ ) {
-        result = elem->giveIPValue(val, iRule->getIntegrationPoint(i), varType, tStep);
+        result = elemGeometry->giveIPValue(val, iRule->getIntegrationPoint(i), varType, tStep);
         if ( result ) {
             sval = val.computeNorm();
             if ( i == 0 ) {
@@ -92,13 +92,14 @@ ScalarErrorIndicator :: giveElementError(EE_ErrorType type, Element *elem, TimeS
 IRResultType
 ScalarErrorIndicator :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     ErrorEstimator :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, indicatorType, _IFT_ScalarErrorIndicator_vartype);
     if ( indicatorType != 1 ) {
-        OOFEM_ERROR("usupported varType");
+        _error("instanciateFrom: usupported varType");
     }
 
     return this->giveRemeshingCrit()->initializeFrom(ir);

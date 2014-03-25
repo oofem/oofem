@@ -35,10 +35,9 @@
 #ifndef refinedelement_h
 #define refinedelement_h
 
+#include "alist.h"
 #include "intarray.h"
 #include "valuemodetype.h"
-
-#include <vector>
 
 namespace oofem {
 class Domain;
@@ -50,7 +49,7 @@ class RefinedElement
 {
 protected:
     int elementId;
-    std::vector< IntArray >fineNodeList;
+    AList< IntArray >fineNodeList;
     IntArray boundaryFlag;
 
 public:
@@ -60,16 +59,16 @@ public:
     IntArray *giveFineNodeArray(int node);
     IntArray *giveBoundaryFlagArray(void) { return & boundaryFlag; }
 
-    void giveBoundaryFlagArray(int inode, Element *element, IntArray &answer);
+	void giveBoundaryFlagArray(int inode, Element *element, IntArray &answer);
 
-    bool giveBoundaryLoadArray1D(int inode, Element *element, IntArray &boundaryLoadArray);
-    bool giveBoundaryLoadArray2D(int inode, Element *element, std::vector< IntArray > &boundaryLoadList);
-    bool giveBoundaryLoadArray3D(int inode, Element *element, std::vector< IntArray > &boundaryLoadList);
+	bool giveBoundaryLoadArray1D(int inode, Element *elementEvaluator, IntArray &boundaryLoadArray);
+	bool giveBoundaryLoadArray2D(int inode, Element *elementEvaluator, AList< IntArray > &boundaryLoadList);
+	bool giveBoundaryLoadArray3D(int inode, Element *elementEvaluator, AList< IntArray > &boundaryLoadList);
 
-    bool giveBcDofArray1D(int inode, Element *element, IntArray &sideBcDofId, int &sideNumBc, TimeStep *tStep);
-    bool giveBcDofArray2D(int inode, Element *element, std::vector< IntArray > &sideBcDofIdList, IntArray &sideNumBc, TimeStep *tStep);
-    bool giveBcDofArray3D(int inode, Element *element, std::vector< IntArray > &sideBcDofIdList, IntArray &sideNumBc,
-                          std::vector< IntArray > &faceBcDofIdList, IntArray &faceNumBc, TimeStep *tStep);
+	bool giveBcDofArray1D(int inode, Element *element, IntArray *sideBcDofId, int &sideNumBc, TimeStep *tStep);
+	bool giveBcDofArray2D(int inode, Element *element, AList< IntArray > &sideBcDofIdList, IntArray &sideNumBc, TimeStep *tStep);
+	bool giveBcDofArray3D(int inode, Element *element, AList< IntArray > &sideBcDofIdList, IntArray &sideNumBc,
+                          AList< IntArray > &faceBcDofIdList, IntArray &faceNumBc, TimeStep *tStep);
 
 protected:
     /**
@@ -83,11 +82,11 @@ protected:
      * @param tStep Active time step.
      * @return Number of Dofs with compatible BCs.
      */
-    int giveCompatibleBcDofArray(Node *master_node, Node *slave_node, IntArray &dofArray, int dofs, IntArray &answer,
+    int giveCompatibleBcDofArray(Node *master_node, Node *slave_node, IntArray &dofArray, int dofs, IntArray *answer,
                                  ValueModeType mode, TimeStep *tStep);
 
-    /// Returns string for prepending output (used by error reporting macros).
-    std :: string errorInfo(const char *func) const;
+    /// Prints simple error message and exits.
+    void error(const char *file, int line, const char *format, ...) const;
 };
 } // end namespace oofem
 #endif // refinedelement_h

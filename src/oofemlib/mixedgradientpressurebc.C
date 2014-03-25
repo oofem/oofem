@@ -49,7 +49,7 @@ double MixedGradientPressureBC :: domainSize()
     const IntArray &boundaries = set->giveBoundaryList();
 
     for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-        Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+        ElementGeometry *e = this->giveDomain()->giveElementGeometry( boundaries.at(pos * 2 - 1) );
         int boundary = boundaries.at(pos * 2);
         FEInterpolation *fei = e->giveInterpolation();
         domain_size += fei->evalNXIntegral( boundary, FEIElementGeometryWrapper(e) );
@@ -60,6 +60,7 @@ double MixedGradientPressureBC :: domainSize()
 
 IRResultType MixedGradientPressureBC :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";
     IRResultType result;
 
     GeneralBoundaryCondition :: initializeFrom(ir);

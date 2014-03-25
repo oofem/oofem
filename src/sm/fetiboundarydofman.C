@@ -118,7 +118,7 @@ FETIBoundaryDofManager :: giveCodeNumber(int partition_num, int dof_num)
     }
 
     if ( ( dof_num < 1 ) || ( dof_num > ndofs ) ) {
-        OOFEM_SIMPLE_ERROR("FETIBoundaryDofManager::giveCodeNumber : bad dof_num requested");
+        OOFEM_ERROR("FETIBoundaryDofManager::giveCodeNumber : bad dof_num requested");
     }
 
     return codeNumbers.at( ( indx - 1 ) * ndofs + dof_num );

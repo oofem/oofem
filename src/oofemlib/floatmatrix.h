@@ -46,8 +46,9 @@
 #include "contextmode.h"
 
 #include <iosfwd>
-#include <initializer_list>
-#include <algorithm>
+#if __cplusplus > 199711L
+ #include <initializer_list>
+#endif
 
 #ifdef BOOST_PYTHON
 namespace boost {
@@ -63,7 +64,9 @@ namespace oofem {
 class FloatArray;
 class IntArray;
 class DataStream;
+#ifdef __PARALLEL_MODE
 class CommunicationBuffer;
+#endif
 
 /**
  * Implementation of matrix containing floating point numbers. FloatMatrix can grow and shrink
@@ -94,8 +97,10 @@ protected:
     int nRows;
     /// Number of columns.
     int nColumns;
+    /// Allocated size for values.
+    int allocatedSize;
     /// Values of matrix stored column wise.
-    std::vector<double> values;
+    double *values;
 
 public:
     /**
@@ -103,9 +108,9 @@ public:
      * @param n Number of rows.
      * @param m Requested number of columns.
      */
-    FloatMatrix(int n, int m) : nRows(n), nColumns(m), values(n*m) {}
+    FloatMatrix(int n, int m);
     /// Creates zero sized matrix.
-    FloatMatrix() : nRows(0), nColumns(0), values() {}
+    FloatMatrix();
     /**
      * Constructor. Creates float matrix from float vector. Vector may be stored row wise
      * or column wise, depending on second parameter.
@@ -114,30 +119,19 @@ public:
      * will be created and initialized, if true then a matrix of size (1,vector->giveSize())
      * will be created.
      */
-    FloatMatrix(const FloatArray &vector, bool transpose = false);
+    FloatMatrix(const FloatArray * vector, bool transpose = false);
     /// Copy constructor.
-    FloatMatrix(const FloatMatrix &mat) : nRows(mat.nRows), nColumns(mat.nColumns), values(mat.values) {}
-    /// Copy constructor.
-    FloatMatrix(FloatMatrix &&mat) : nRows(mat.nRows), nColumns(mat.nColumns), values(std::move(mat.values)) {}
+    FloatMatrix(const FloatMatrix &);
+#if __cplusplus > 199711L
     /// Initializer list constructor.
     FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat);
     /// Assignment operator.
     FloatMatrix &operator = ( std :: initializer_list< std :: initializer_list< double > >mat );
-    /// Assignment operator, adjusts size of the receiver if necessary.
-    FloatMatrix &operator = ( const FloatMatrix &mat) { 
-        nRows = mat.nRows;
-        nColumns = mat.nColumns;
-        values = mat.values;
-        return *this;
-    }
-    FloatMatrix &operator = ( FloatMatrix &&mat) { 
-        nRows = std::move(mat.nRows);
-        nColumns = std::move(mat.nColumns);
-        values = std::move(mat.values);
-        return *this;
-    }
+#endif
     /// Destructor.
-    ~FloatMatrix() {};
+    ~FloatMatrix();
+    /// Assignment operator, adjusts size of the receiver if necessary.
+    FloatMatrix &operator = ( const FloatMatrix & );
 
     /**
      * Checks size of receiver towards requested bounds.
@@ -187,7 +181,9 @@ public:
 #ifdef DEBUG
     double &operator() (int i, int j);
 #else
-    inline double &operator() (int i, int j) { return values [ j * nRows + i ]; }
+    inline double &operator() (int i, int j)  {
+        return values [ j * nRows + i ];
+    };
 #endif
     /**
      * Coefficient access function. Implements 0-based indexing.
@@ -494,8 +490,7 @@ public:
      */
     void hardResize(int r, int c);
     /// Sets size of receiver to be an empty matrix. It will have zero rows and zero columns size.
-    void clear() { this->nRows = 0;
-                   this->nColumns = 0; }
+    void clear() { this->nRows = 0; this->nColumns = 0; }
     /**
      * Computes eigenvalues and eigenvectors of receiver (must be symmetric)
      * The receiver is preserved.
@@ -515,7 +510,7 @@ public:
      * Exposes the internal values of the matrix. Should typically not be used outside of matrix classes.
      * @return Pointer to the values of the matrix.
      */
-    double *givePointer() const { return const_cast< double* >(values.data()); }
+    double *givePointer() const { return values; }
 
     /**
      * Reciever will be a 3x3 matrix formed from a vector with either 9 or 6 components.

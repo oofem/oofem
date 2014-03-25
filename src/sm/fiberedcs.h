@@ -126,7 +126,6 @@ public:
     virtual void giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveGeneralizedStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
-    virtual void giveGeneralizedStress_PlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
 
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
@@ -135,12 +134,11 @@ public:
     virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual bool isCharacteristicMtrxSymmetric(MatResponseMode mode);
     virtual double give(int aProperty, GaussPoint *gp)
     {
-        OOFEM_ERROR("not implemented yet");
+        OOFEM_ERROR1("FiberedCrossSection :: give - not implemented yet");
         return 0.0;
     };
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *gradientStressVector3d);
@@ -184,32 +182,32 @@ public:
 #ifdef __PARALLEL_MODE
     int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     {
-        OOFEM_ERROR("not implemented");
+        _error("packUnknowns: not implemented");
         return 0;
     }
 
     int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     {
-        OOFEM_ERROR("not implemented");
+        _error("unpackAndUpdateUnknowns: not implemented");
         return 0;
     }
 
     int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
     {
-        OOFEM_ERROR("not implemented");
+        _error("estimatePackSize: not implemented");
         return 0;
     }
 #endif
 
 
     virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented"); };
+    { OOFEM_ERROR("giveFirstPKStresses not implemented for fibered cross section"); };
     virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented"); };
+    { OOFEM_ERROR("giveCauchyStresses not implemented for fibered cross section"); };
     virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented"); };
+    { OOFEM_ERROR("giveStiffnessMatrix_dPdF not implemented for fibered cross section"); };
     virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("not implemented"); };
+    { OOFEM_ERROR("giveStiffnessMatrix_dCde not implemented for fibered cross section"); };
 
 
 protected:

@@ -81,7 +81,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
         reglist.resize( nodeConnectivity->giveSize() );
         reglist.clear();
         for ( int indx = 1; indx <= nodeConnectivity->giveSize(); indx++ ) {
-            reglist.insertSortedOnce( newd->giveElement( nodeConnectivity->at(indx) )->giveRegionNumber() );
+            reglist.insertSortedOnce( newd->giveElementGeometry( nodeConnectivity->at(indx) )->giveRegionNumber() );
         }
 
 #endif
@@ -107,7 +107,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
                 answer.assemble(unknownValues, locationArray);
             }
         } else {
-            OOFEM_ERROR("evaluateAt service failed for node %d", inode);
+            OOFEM_ERROR2("EIPrimaryUnknownMapper :: mapAndUpdate - evaluateAt service failed for node %d", inode);
         }
     }
 
@@ -119,25 +119,25 @@ int
 EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, ValueModeType mode,
                                      Domain *oldd, FloatArray &coords, IntArray &regList, TimeStep *tStep)
 {
-    Element *oelem;
+    ElementGeometry *oelemGeometry;
     EIPrimaryUnknownMapperInterface *interface;
     SpatialLocalizer *sl = oldd->giveSpatialLocalizer();
 
     ///@todo Change to the other version after checking that it works properly. Will render "giveElementCloseToPoint" obsolete (superseeded by giveElementClosestToPoint).
 #if 1
     if ( regList.isEmpty() ) {
-        oelem = sl->giveElementContainingPoint(coords);
+        oelemGeometry = sl->giveElementContainingPoint(coords);
     } else {
-        oelem = sl->giveElementContainingPoint(coords, & regList);
+        oelemGeometry = sl->giveElementContainingPoint(coords, & regList);
     }
-    if ( !oelem ) {
+    if ( !oelemGeometry ) {
         if ( regList.isEmpty() ) {
-            oelem = oldd->giveSpatialLocalizer()->giveElementCloseToPoint(coords);
+            oelemGeometry = oldd->giveSpatialLocalizer()->giveElementCloseToPoint(coords);
         } else {
-            oelem = oldd->giveSpatialLocalizer()->giveElementCloseToPoint(coords, & regList);
+            oelemGeometry = oldd->giveSpatialLocalizer()->giveElementCloseToPoint(coords, & regList);
         }
-        if ( !oelem ) {
-            OOFEM_WARNING("Couldn't find any element containing point.");
+        if ( !oelemGeometry ) {
+            OOFEM_WARNING("EIPrimaryUnknownMapper :: evaluateAt - Couldn't find any element containing point.");
             return false;
         }
     }
@@ -164,13 +164,13 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
             }
         }
     }
-    if ( !oelem ) {
-        OOFEM_WARNING("Couldn't find any element containing point.");
+    if ( !oelemGeometry ) {
+        OOFEM_WARNING("EIPrimaryUnknownMapper :: evaluateAt - Couldn't find any element containing point.");
         return false;
     }
 #endif
 
-    interface = static_cast< EIPrimaryUnknownMapperInterface * >( oelem->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
+    interface = static_cast< EIPrimaryUnknownMapperInterface * >( oelemGeometry->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
     if ( interface ) {
         interface->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(dofMask);
 #if 1
@@ -179,7 +179,7 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
         interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
 #endif
     } else {
-        OOFEM_ERROR("Element does not support EIPrimaryUnknownMapperInterface");
+        OOFEM_ERROR("EIPrimaryUnknownMapper :: evaluateAt - Element does not support EIPrimaryUnknownMapperInterface");
     }
 
     return true;

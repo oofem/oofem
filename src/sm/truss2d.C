@@ -75,7 +75,7 @@ Truss2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 
     double l, x1, x2, z1, z2;
     //determine in which plane the truss is defined
-    int c1 = 0, c2 = 0;
+    int c1, c2;
     resolveCoordIndices(c1, c2);
 
     x1 = this->giveNode(1)->giveCoordinate(c1);
@@ -161,7 +161,7 @@ int
 Truss2d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
     //determine in which plane the truss is defined
-    int c1 = 0, c2 = 0;
+    int c1, c2;
     resolveCoordIndices(c1, c2);
 
     double ksi, n1, n2;
@@ -192,7 +192,7 @@ double Truss2d :: computeLength()
 // Returns the length of the receiver.
 {
     //determine in which plane the truss is defined
-    int c1 = 0, c2 = 0;
+    int c1, c2;
     resolveCoordIndices(c1, c2);
 
     double dx, dz;
@@ -216,7 +216,7 @@ double Truss2d :: givePitch()
     double xA, xB, zA, zB;
     Node *nodeA, *nodeB;
     //determine in which plane the truss is defined
-    int c1 = 0, c2 = 0;
+    int c1, c2;
     resolveCoordIndices(c1, c2);
 
     if ( pitch == 10. ) {             // 10. : dummy initialization value
@@ -274,13 +274,14 @@ Truss2d :: resolveCoordIndices(int &c1, int &c2)
         c1 = 2;
         c2 = 3;
     } else {
-        OOFEM_ERROR("Unknow cs_mode");
+        _error("resolveCoordIndices: Unknow cs_mode");
     }
 }
 
 IRResultType
 Truss2d :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                            // Required by IR_GIVE_FIELD macro
     this->NLStructuralElement :: initializeFrom(ir);
 
@@ -288,7 +289,7 @@ Truss2d :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, cs_mode, _IFT_Truss2d_cs);
 
     if ( cs_mode != 0 && cs_mode != 1 && cs_mode != 2 ) {
-        OOFEM_ERROR("Unsupported value of cs_mode");
+        _error("Unsupported value of cs_mode");
     }
 
     return IRRT_OK;
@@ -299,11 +300,11 @@ void
 Truss2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
     if ( cs_mode == 0 ) {
-        answer = {D_u, D_w};
+        answer.setValues(2, D_u, D_w);
     } else if ( cs_mode == 1 ) {
-        answer = {D_u, D_v};
+        answer.setValues(2, D_u, D_v);
     } else if ( cs_mode == 2 ) {
-        answer = {D_v, D_w};
+        answer.setValues(2, D_v, D_w);
     }
 }
 
@@ -343,7 +344,7 @@ Truss2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      */
 
     if ( iEdge != 1 ) {
-        OOFEM_ERROR("wrong edge number");
+        _error("giveEdgeDofMapping: wrong edge number");
     }
 
 
@@ -358,7 +359,7 @@ double
 Truss2d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
-        OOFEM_ERROR("wrong egde number");
+        _error("computeEdgeVolumeAround: wrong egde number");
     }
 
     double weight  = gp->giveWeight();

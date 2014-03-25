@@ -129,7 +129,7 @@ void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *tStep, Valu
 void DofManager :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeStep *tStep, ValueModeType mode)
 {
     if ( load->giveBCGeoType() != NodalLoadBGT ) {
-        OOFEM_ERROR("incompatible load type applied");
+        _error("computeLoadVector: incompatible load type applied");
     }
     load->computeComponentArrayAt(answer, tStep, mode);
 }
@@ -140,7 +140,7 @@ Dof *DofManager :: giveDof(int i) const
 {
 #ifdef DEBUG
     if ( !dofArray ) {
-        OOFEM_ERROR("dof is not defined");
+        _error("giveDof: dof is not defined");
     }
 #endif
 
@@ -155,7 +155,7 @@ Dof *DofManager :: giveDofWithID(int dofID) const
 
 #ifdef DEBUG
     if ( !indx ) {
-        OOFEM_ERROR("dof with given DofID does not exists");
+        _error("giveDofWithID: dof with given DofID does not exists");
     }
 #endif
 
@@ -172,7 +172,7 @@ void DofManager :: setDof(int i, Dof *dof)
 
         dofArray [ i - 1 ] = dof;
     } else {
-        OOFEM_ERROR("DOF index out of range");
+        _error("setDof: DOF index out of range");
     }
 }
 
@@ -186,7 +186,7 @@ void DofManager :: appendDof(Dof *dof)
 #ifdef DEBUG
     // check if dofID of DOF to be added not already present
     if ( this->findDofWithDofId( dof->giveDofID() ) != 0 ) {
-        OOFEM_ERROR("DOF with dofID %d already present (dofman %d)", dof->giveDofID(), this->number);
+        _error3("DofManager::addDof: DOF with dofID %d already present (dofman %d)", dof->giveDofID(), this->number);
     }
 #endif
 
@@ -219,7 +219,7 @@ void DofManager :: removeDof(DofIDItem id)
         dofArray = dofArray_new;
         numberOfDofs--;
     } else {
-        OOFEM_ERROR("no DOF with dofID %d found", id);
+        _error2("removeDof::no DOF with dofID %d found", id);
     }
 }
 
@@ -245,7 +245,7 @@ void DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locati
         locationArray.resize(size);
         for ( int i = 1; i <= size; i++ ) {
             if ( ( indx = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) ) ) == 0 ) {
-                OOFEM_ERROR("incompatible dof (%d) requested", dofIDArry.at(i));
+                _error2( "giveLocationArray: incompatible dof (%d) requested", dofIDArry.at(i) );
             }
 
             locationArray.at(i) = s.giveDofEquationNumber( this->giveDof(indx) );
@@ -345,7 +345,7 @@ void DofManager :: giveDofArray(const IntArray &dofIDArry, IntArray &answer) con
     answer.resize(size);
     for ( int i = 1; i <= size; i++ ) {
         if ( ( answer.at(i) = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) ) ) == 0 ) {
-            OOFEM_ERROR("incompatible dof requested");
+            _error("giveDofArray : incompatible dof requested");
         }
     }
 }
@@ -424,6 +424,7 @@ int DofManager :: giveNumberOfPrimaryMasterDofs(IntArray &dofArray) const
 IRResultType
 DofManager :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
     delete dofidmask;
@@ -506,7 +507,7 @@ DofManager :: initializeFrom(InputRecord *ir)
     // check sizes
     if ( hasBc ) {
         if ( mBC.giveSize() != dofIDArry.giveSize() ) {
-            OOFEM_ERROR("bc size mismatch. Size is %d and need %d", mBC.giveSize(), dofIDArry.giveSize());
+            _error3( "initializeFrom: bc size mismatch. Size is %d and need %d", mBC.giveSize(), dofIDArry.giveSize() );
         }
         this->dofBCmap = new std :: map< int, int >();
         for ( int i = 1; i <= mBC.giveSize(); ++i ) {
@@ -518,7 +519,7 @@ DofManager :: initializeFrom(InputRecord *ir)
 
     if ( hasIc ) {
         if ( ic.giveSize() != dofIDArry.giveSize() ) {
-            OOFEM_ERROR("ic size mismatch. Size is %d and need %d", ic.giveSize(), dofIDArry.giveSize());
+            _error3( "initializeFrom: ic size mismatch. Size is %d and need %d", ic.giveSize(), dofIDArry.giveSize() );
         }
         this->dofICmap = new std :: map< int, int >();
         for ( int i = 1; i <= ic.giveSize(); ++i ) {
@@ -530,7 +531,7 @@ DofManager :: initializeFrom(InputRecord *ir)
 
     if ( hasTypeinfo ) {
         if ( dofTypeMask.giveSize() != dofIDArry.giveSize() ) {
-            OOFEM_ERROR("dofTypeMask size mismatch. Size is %d and need %d", dofTypeMask.giveSize(), dofIDArry.giveSize());
+            _error3( "initializeFrom: dofTypeMask size mismatch. Size is %d and need %d", dofTypeMask.giveSize(), dofIDArry.giveSize() );
         }
         this->dofTypemap = new std :: map< int, int >();
         for ( int i = 1; i <= dofTypeMask.giveSize(); ++i ) {
@@ -542,7 +543,7 @@ DofManager :: initializeFrom(InputRecord *ir)
         if ( dofTypeMask.contains(DT_simpleSlave) ) {
             IR_GIVE_FIELD(ir, masterMask, _IFT_DofManager_mastermask);
             if ( masterMask.giveSize() != dofIDArry.giveSize() ) {
-                OOFEM_ERROR("mastermask size mismatch");
+                _error("initializeFrom: mastermask size mismatch");
             }
             this->dofMastermap = new std :: map< int, int >();
             for ( int i = 1; i <= masterMask.giveSize(); ++i ) {
@@ -817,7 +818,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
         int pos = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) );
 #ifdef DEBUG
         if ( pos == 0 ) {
-            OOFEM_ERROR("Couldn't find dof with Dof ID %d", dofIDArry.at(i));
+            OOFEM_ERROR2( "DofManager :: giveUnknownVector - Couldn't find dof with Dof ID %d", dofIDArry.at(i) );
         }
 #endif
         answer.at(i) = this->giveDof(pos)->giveUnknown(mode, tStep);
@@ -843,7 +844,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
         int pos = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) );
 #ifdef DEBUG
         if ( pos == 0 ) {
-            OOFEM_ERROR("Couldn't find dof with Dof ID %d", dofIDArry.at(i));
+            OOFEM_ERROR2( "DofManager :: giveUnknownVector - Couldn't find dof with Dof ID %d", dofIDArry.at(i) );
         }
 #endif
         answer.at(i) = this->giveDof(pos)->giveUnknown(field, mode, tStep);
@@ -927,7 +928,7 @@ void DofManager :: giveUnknownVectorOfType(FloatArray &answer, UnknownType ut, V
                 k++;
             }
         } else {
-            OOFEM_ERROR("Can't produce vector for unknown type: %d", ut);
+            OOFEM_ERROR2("DofManager :: giveUnknownVectorOfType - Can't produce vector for unknown type: %d", ut);
         }
     }
 
@@ -1069,8 +1070,9 @@ void DofManager :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
     //update masterNode numbering
     if ( this->dofMastermap ) {
-        for ( auto mapper: *this->dofMastermap ) {
-            mapper.second = f( mapper.second, ERS_DofManager );
+        std :: map< int, int > :: iterator it = this->dofMastermap->begin();
+        for ( ; it != this->dofMastermap->end(); it++ ) {
+            ( * it ).second = f( ( * it ).second, ERS_DofManager );
         }
     }
     for ( int i = 1; i <= numberOfDofs; i++ ) {

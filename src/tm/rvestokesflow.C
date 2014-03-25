@@ -78,7 +78,7 @@ RVEStokesFlowMaterialStatus :: exportFilter(GaussPoint *gp, TimeStep *tStep)
     std :: ostringstream filenameStringStream;
 
 
-    filenameStringStream << this->giveDomain()->giveEngngModel()->giveOutputBaseFileName().c_str() << ".rve/Rve_" << gp->giveElement()->giveGlobalNumber() << "_" << gp->giveNumber();
+    filenameStringStream << this->giveDomain()->giveEngngModel()->giveOutputBaseFileName().c_str() << ".rve/Rve_" << gp->giveElementGeometry()->giveGlobalNumber() << "_" << gp->giveNumber();
 
     filename = filenameStringStream.str();
 
@@ -120,7 +120,7 @@ RVEStokesFlowMaterialStatus :: saveContext(DataStream *stream, ContextMode mode,
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
+        _error("saveContex : can't write into NULL stream");
     }
 
     if ( ( iores = TransportMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -136,7 +136,7 @@ RVEStokesFlowMaterialStatus :: restoreContext(DataStream *stream, ContextMode mo
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
+        _error("saveContex : can't write into NULL stream");
     }
 
     if ( ( iores = TransportMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
@@ -198,7 +198,7 @@ RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatA
 {
     this->suppressStdout();
 
-    OOFEM_LOG_DEBUG("\n****** Enter giveFluxVector ********************** Element number %u, Gauss point %u, rve @ %p \n", gp->giveElement()->giveGlobalNumber(), gp->giveNumber(), this->rve);
+    OOFEM_LOG_DEBUG("\n****** Enter giveFluxVector ********************** Element number %u, Gauss point %u, rve @ %p \n", gp->giveElementGeometry()->giveGlobalNumber(), gp->giveNumber(), this->rve);
 
     RVEStokesFlowMaterialStatus *status = static_cast< RVEStokesFlowMaterialStatus * >( this->giveStatus(gp) );
     FloatArray temp = status->giveTempGradient();
@@ -246,7 +246,7 @@ RVEStokesFlow :: exportFilter(EngngModel *E, GaussPoint *gp, TimeStep *tStep)
     std :: ostringstream tempstring;
 
     basefilename = this->giveDomain()->giveEngngModel()->giveOutputBaseFileName();
-    tempstring << basefilename << ".rve/Rve_" << gp->giveElement()->giveGlobalNumber() << "_" << gp->giveNumber();
+    tempstring << basefilename << ".rve/Rve_" << gp->giveElementGeometry()->giveGlobalNumber() << "_" << gp->giveNumber();
     filename = tempstring.str();
 
     basefilename = E->giveOutputBaseFileName();

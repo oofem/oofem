@@ -158,7 +158,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_WeakPeriodicBoundaryCondition_Name; }
 
 protected:
-    void computeElementTangent(FloatMatrix &answer, Element *e, int boundary);
+    void computeElementTangent(FloatMatrix &answer, ElementGeometry *e, int boundary);
 };
 }
 #endif /* WEAKPERIODICBC_H_ */

@@ -145,6 +145,7 @@ MicroMaterial :: ~MicroMaterial()
 
 IRResultType MicroMaterial :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
 
@@ -177,7 +178,7 @@ void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     //     EngngModel *microEngngModel = microDomain->giveEngngModel();
     //     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
-    OOFEM_ERROR("Should not be called, use giveInternalForcesVector instead\n");
+    OOFEM_ERROR("\n MicroMaterial :: giveRealStressVector should not be called, use giveInternalForcesVector instead\n");
 
     //     this->initGpForNewStep(gp);
     //     int nelem = microDomain->giveNumberOfElements();
@@ -259,7 +260,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     } else if ( rMode == ElasticStiffness ) {
         type = ElasticStiffnessMatrix;
     } else {
-        OOFEM_ERROR("Material response mode %s is undefined", __MatResponseModeToString(rMode) );
+        OOFEM_ERROR2( "Material response mode %s is undefined", __MatResponseModeToString(rMode) );
     }
 
     FloatMatrix Kbb; //contains reduced problem with boundary nodes and without interior nodes
@@ -417,7 +418,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     //     for ( i = 1; i <= interiorDofNode.giveSize(); i++ ) {//how many DOFs will be condensed out
     //         ii  = interiorDofNode.at(i);
     //         if ( ( ii > ndofs ) || ( ii <= 0 ) ) {
-    //             OOFEM_ERROR("wrong DOF number");
+    //             OOFEM_ERROR("condense: wrong DOF number");
     //         }
     //
     //         dii = stiffnessMatrixMicroFloat.at(ii, ii);
@@ -462,7 +463,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
     //       dof = DofMan->giveDof(1);
     //       j = boundaryDofNode.findFirstIndexOf(giveDofEquationNumber(dof));
     //       if(!j)
-    //         OOFEM_ERROR("Not found equation number %d in reduced stiffness matrix of node %d\n", giveDofEquationNumber(dof), DofMan->giveGlobalNumber());
+    //         OOFEM_ERROR3("Not found equation number %d in reduced stiffness matrix of node %d\n", giveDofEquationNumber(dof), DofMan->giveGlobalNumber());
     //       microMasterNodesLoc.followedBy(j);
     //     }
 
@@ -474,7 +475,7 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
         dof = DofMan->giveDof(1);
         nodePos = microBoundaryDofsArr.findFirstIndexOf( giveDofEquationNumber(dof) ); //row(column) of reduced stiffness matrix
         if ( !nodePos ) {
-            OOFEM_ERROR("Not found equation number %d in reduced stiffness matrix of node %d\n", giveDofEquationNumber(dof), DofMan->giveGlobalNumber() );
+            OOFEM_ERROR3( "Not found equation number %d in reduced stiffness matrix of node %d\n", giveDofEquationNumber(dof), DofMan->giveGlobalNumber() );
         }
 
         this->macroLSpaceElement->evalInterpolation( n, this->microMasterCoords, * DofMan->giveCoordinates() );
@@ -572,7 +573,7 @@ void MicroMaterial :: setMacroProperties(Domain *macroDomain, MacroLSpace *macro
         numDofMan = DofMan->giveGlobalNumber();
         numDofs = DofMan->giveNumberOfDofs();
         if ( numDofs != 3 ) {
-            OOFEM_ERROR("Node %d does not have three degrees of freedom", DofMan->giveGlobalNumber() );
+            OOFEM_ERROR2( "Node %d does not have three degrees of freedom", DofMan->giveGlobalNumber() );
         }
 
         for ( int j = 0; j < numDofs; j++ ) {

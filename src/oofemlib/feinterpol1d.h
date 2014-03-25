@@ -48,16 +48,14 @@ public:
     virtual int giveNsd() { return 1; }
 
     virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary)
-    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); }
     virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); }
     virtual double boundaryEdgeGiveTransformationJacobian(int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    {
-        OOFEM_ERROR("Functions not supported for this interpolator.");
-        return 0.;
-    }
+    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator.");
+      return 0.; }
     virtual void boundaryEdgeLocal2Global(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
-    { OOFEM_ERROR("Functions not supported for this interpolator."); }
+    { OOFEM_ERROR("FEInterpolation1d :: boundaryEdge... - Functions not supported for this interpolator."); }
 
     virtual void boundaryGiveNodes(IntArray &answer, int boundary);
     virtual void boundaryEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -70,10 +68,8 @@ public:
      * @return Length of geometry.
      */
     virtual double giveLength(const FEICellGeometry &cellgeo) const
-    {
-        OOFEM_ERROR("Not implemented in subclass.");
-        return 0;
-    }
+    { OOFEM_ERROR("FEInterpolation1d :: giveLength - Not implemented in subclass.");
+      return 0; }
 
     virtual IntegrationRule *giveIntegrationRule(int order);
     virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);

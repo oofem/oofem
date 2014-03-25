@@ -482,8 +482,8 @@ bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
             int a, b, c;
             std :: set< std :: size_t >tris = node_triangle [ segment.at(1) - 1 ];
             // Now look up any triangle with the other point included.
-            for ( auto tri: tris ) {
-                IntArray &triangle = triangles [ tri ];
+            for ( std :: set< std :: size_t > :: iterator it = tris.begin(); it != tris.end(); ++it ) {
+                IntArray &triangle = triangles [ * it ];
                 if ( ( b = triangle.findFirstIndexOf( segment.at(2) ) ) > 0 ) {
                     a = triangle.findFirstIndexOf( segment.at(1) );
                     if ( a + b == 3 ) {
@@ -530,7 +530,7 @@ bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
     //free(output.holelist);
     //free(output.regionlist);
 #else
-    OOFEM_SIMPLE_ERROR("TriangleMesherInterface :: meshPSLG - OOFEM is not compiled with support for triangle.");
+    OOFEM_ERROR("TriangleMesherInterface :: meshPSLG - OOFEM is not compiled with support for triangle.");
 #endif
 
     return true;

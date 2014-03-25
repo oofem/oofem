@@ -39,14 +39,13 @@
 #include "interface.h"
 #include "logger.h"
 #include "error.h"
-#include "set.h"
 
 #include <set>
 #include <list>
 
 namespace oofem {
 class Domain;
-class Element;
+class ElementGeometry;
 class TimeStep;
 class GaussPoint;
 class FloatArray;
@@ -65,7 +64,7 @@ public:
      */
     //@{
     /// @return Reference to corresponding element.
-    virtual Element *SpatialLocalizerI_giveElement() = 0;
+    virtual ElementGeometry *SpatialLocalizerI_giveElementGeometry() = 0;
     /**
      * Checks if element contains specified coordinate.
      * @param coords Global coordinate.
@@ -91,7 +90,7 @@ public:
      */
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
     {
-        OOFEM_SIMPLE_ERROR( "SpatialLocalizerInterface :: SpatialLocalizerI_giveDistanceFromParametricCenter - Not implemented for %s", this->giveClassName() );
+        OOFEM_ERROR2( "SpatialLocalizerInterface :: SpatialLocalizerI_giveDistanceFromParametricCenter - Not implemented for %s", this->giveClassName() );
         return 0.0;
     }
 
@@ -140,21 +139,14 @@ public:
      * @param regionList Only elements within given regions are considered, if NULL all regions are considered.
      * @return The element belonging to associated domain, containing given point, NULL otherwise.
      */
-    virtual Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = NULL) = 0;
-    /**
-     * Returns the element, containing given point and belonging to one of the region in region list.
-     * @param coords Global problem coordinates of point of interest.
-     * @param element set Only elements within given set are considered.
-     * @return The element belonging to associated domain, containing given point, NULL otherwise.
-     */
-    virtual Element *giveElementContainingPoint(const FloatArray &coords, const Set &eset) = 0;
+    virtual ElementGeometry *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = NULL) = 0;
     /**
      * Returns the element close to point
      * @param coords Global problem coordinates of point of interest.
      * @param regionList Only elements within given regions are considered, if NULL all regions are considered.
      * @return The element belonging to associated domain, close to given point, NULL otherwise.
      */
-    virtual Element *giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList = NULL) = 0;
+    virtual ElementGeometry *giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList = NULL) = 0;
     /**
      * Returns the element closest to a given point.
      * @param[out] lcoords Local coordinates in element found.
@@ -163,10 +155,10 @@ public:
      * @param region Only elements within given region are considered, if 0 all regions are considered.
      * @return The element belonging to associated domain, close to given point, NULL otherwise.
      */
-    virtual Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest,
+    virtual ElementGeometry *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest,
                                                const FloatArray &coords, int region = 0)
     {
-        OOFEM_SIMPLE_ERROR( "SpatialLocalizer :: giveElementClosestToPoint - Not implemented for %s", this->giveClassName() );
+        OOFEM_ERROR2( "SpatialLocalizer :: giveElementClosestToPoint - Not implemented for %s", this->giveClassName() );
         return NULL;
     }
     /**
@@ -179,20 +171,8 @@ public:
      * region will be considered, if value < 0 all regions will be valid
      * @return The IP belonging to associated domain (only those provided by elements in default integration rule
      * are taken into account), NULL otherwise
-     * @note: regions are deprecated, use sets instaed
      */
     virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP = false) = 0;
-    /**
-     * Returns the integration point in associated domain, which is closest
-     * to given point. Since IP holds the information about its element,
-     * the IP reference is containing all the information.
-     * @note{Only the gp belonging to the given set are taken into account.}
-     * @param coords Global problem coordinates of point of interest
-     * @param region Only closet point from given region will be considered
-     * @return The IP belonging to associated domain (only those provided by elements in default integration rule
-     * are taken into account), NULL otherwise
-     */
-    virtual GaussPoint *giveClosestIP(const FloatArray &coords, Set &elemSet, bool iCohesiveZoneGP = false) = 0;
 
     /**
      * Returns container (set) of all domain elements having integration point within given box.
@@ -227,8 +207,6 @@ public:
     virtual int init(bool force = false) { return 1; }
 
     virtual const char *giveClassName() const = 0;
-    /// Error printing helper.
-    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
 };
 } // end namespace oofem
 #endif // spatiallocalizer_h

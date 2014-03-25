@@ -196,9 +196,6 @@ protected:
     /// Method used for evaluation of characteristic element size
     ElementCharSizeMethod ecsMethod;
 
-    ///cached source element set used to map internal variables (adaptivity), created on demand
-    Set *sourceElemSet;
-
 #ifdef IDM_USE_MMAClosestIPTransfer
     /// Mapper used to map internal variables in adaptivity.
     static MMAClosestIPTransfer mapper;

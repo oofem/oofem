@@ -246,6 +246,7 @@ LineSearchNM :: search(int istep, FloatArray &prod, FloatArray &eta, double amp,
 IRResultType
 LineSearchNM :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     /* default values set in constructor

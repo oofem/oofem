@@ -99,7 +99,7 @@ bool EDCrack :: giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) co
             oInfo.mTangDir.normalize();
 
             // Tip normal
-            oInfo.mNormalDir = {-oInfo.mTangDir.at(2), oInfo.mTangDir.at(1)};
+            oInfo.mNormalDir.setValues( 2, -oInfo.mTangDir.at(2), oInfo.mTangDir.at(1) );
 
             oInfo.mTipIndex = 0;
 
@@ -118,7 +118,7 @@ bool EDCrack :: giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) co
             oInfo.mTangDir.normalize();
 
             // Tip normal
-            oInfo.mNormalDir = {-oInfo.mTangDir.at(2), oInfo.mTangDir.at(1)};
+            oInfo.mNormalDir.setValues( 2, -oInfo.mTangDir.at(2), oInfo.mTangDir.at(1) );
 
             oInfo.mTipIndex = 1;
 
@@ -163,7 +163,7 @@ bool EDCrack :: giveTipInfos(std :: vector< TipInfo > &oInfo) const
         info1.mTangDir.normalize();
 
         // Tip normal
-        info1.mNormalDir = {-info1.mTangDir.at(2), info1.mTangDir.at(1)};
+        info1.mNormalDir.setValues( 2, -info1.mTangDir.at(2), info1.mTangDir.at(1) );
 
         info1.mTipIndex = 0;
         info1.mArcPos = 0.0;
@@ -183,7 +183,7 @@ bool EDCrack :: giveTipInfos(std :: vector< TipInfo > &oInfo) const
         info2.mTangDir.normalize();
 
         // Tip normal
-        info2.mNormalDir = {-info2.mTangDir.at(2), info2.mTangDir.at(1)};
+        info2.mNormalDir.setValues( 2, -info2.mTangDir.at(2), info2.mTangDir.at(1) );
 
         info2.mTipIndex = 1;
         info2.mArcPos = 1.0;
@@ -226,6 +226,7 @@ void DofManList :: computeSurfaceNormalSignDist(double &oDist, const FloatArray 
 
 IRResultType DofManList :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";     // Required by IR_GIVE_FIELD macro
     IRResultType result;     // Required by IR_GIVE_FIELD macro
 
     IntArray idList;

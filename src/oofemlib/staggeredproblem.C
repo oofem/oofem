@@ -127,6 +127,7 @@ StaggeredProblem :: instanciateSlaveProblems()
 IRResultType
 StaggeredProblem :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
 
@@ -149,7 +150,7 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, dtFunction, _IFT_StaggeredProblem_dtf);
     IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, _IFT_StaggeredProblem_stepmultiplier);
     if ( stepMultiplier < 0 ) {
-        OOFEM_ERROR("stepMultiplier must be > 0")
+        _error("stepMultiplier must be > 0")
     }
 
     IR_GIVE_FIELD(ir, inputStreamNames [ 0 ], _IFT_StaggeredProblem_prob1);
@@ -167,6 +168,7 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 void
 StaggeredProblem :: updateAttributes(MetaStep *mStep)
 {
+    const char *__proc = "updateAttributes"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                  // Required by IR_GIVE_FIELD macro
 
     InputRecord *ir = mStep->giveAttributesRecord();
@@ -184,7 +186,7 @@ StaggeredProblem :: updateAttributes(MetaStep *mStep)
             IR_GIVE_OPTIONAL_FIELD(ir, dtFunction, _IFT_StaggeredProblem_dtf);
             IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, _IFT_StaggeredProblem_stepmultiplier);
             if ( stepMultiplier < 0 ) {
-                OOFEM_ERROR("stepMultiplier must be > 0")
+                _error("stepMultiplier must be > 0")
             }
         } else if ( ir->hasField(_IFT_StaggeredProblem_prescribedtimes) ) {
             IR_GIVE_FIELD(ir, discreteTimes, _IFT_StaggeredProblem_prescribedtimes);
@@ -206,7 +208,7 @@ double
 StaggeredProblem :: giveDeltaT(int n)
 {
     if ( giveDtFunction() ) {
-        return deltaT *giveDtFunction()->evaluateAtTime(n);
+        return deltaT * giveDtFunction()->evaluateAtTime(n);
     }
 
     //in the first step the time increment is taken as the initial, user-specified value
@@ -234,7 +236,7 @@ StaggeredProblem :: giveDiscreteTime(int iStep)
         return ( 0.0 );
     }
 
-    OOFEM_ERROR("invalid iStep");
+    _error("giveDiscreteTime: invalid iStep");
     return 0.0;
 }
 
@@ -445,7 +447,7 @@ StaggeredProblem :: giveSlaveProblem(int i)
     if ( ( i > 0 ) && ( i <= this->nModels ) ) {
         return this->emodelList->at(i);
     } else {
-        OOFEM_ERROR("Undefined problem");
+        _error("giveSlaveProblem: Undefined problem");
     }
 
     return NULL;

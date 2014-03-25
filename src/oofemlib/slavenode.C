@@ -43,6 +43,7 @@ REGISTER_DofManager(SlaveNode);
 
 IRResultType SlaveNode :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     Node :: initializeFrom(ir);
@@ -54,7 +55,7 @@ IRResultType SlaveNode :: initializeFrom(InputRecord *ir)
         masterWeights.resize( masterDofManagers.giveSize() );
         masterWeights.add( 1 / ( double ) masterDofManagers.giveSize() );
     } else if ( masterDofManagers.giveSize() != masterWeights.giveSize() ) {
-        OOFEM_ERROR("master dof managers and weights size mismatch.");
+        _error("initializeFrom: master dof managers and weights size mismatch.");
     }
     return IRRT_OK;
 }
@@ -68,7 +69,7 @@ void SlaveNode :: postInitialize()
     for ( int i = 1; i <= numberOfDofs; ++i ) {
         SlaveDof *sdof = dynamic_cast< SlaveDof * >(dofArray [ i - 1 ]);
         if ( sdof ) {
-	  sdof->initialize(masterDofManagers.giveSize(), masterDofManagers, IntArray(), masterWeights);
+            sdof->initialize(masterDofManagers.giveSize(), masterDofManagers, NULL, masterWeights);
         }
     }
 }

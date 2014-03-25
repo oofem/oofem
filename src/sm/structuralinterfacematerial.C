@@ -69,6 +69,7 @@ StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, I
 IRResultType
 StructuralInterfaceMaterial :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->useNumericalTangent, _IFT_StructuralInterfaceMaterial_useNumericalTangent);
@@ -128,7 +129,8 @@ StructuralInterfaceMaterial :: give2dStiffnessMatrix_Eng(FloatMatrix &answer, Ma
 {
     FloatMatrix answer3D;
     give3dStiffnessMatrix_Eng(answer3D, mode, gp, tStep);
-    IntArray mask = {1, 3};
+    IntArray mask;
+    mask.setValues(2,  1, 3);
     answer.beSubMatrixOf(answer3D, mask, mask);
 
 
@@ -158,7 +160,7 @@ StructuralInterfaceMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, Ma
 void
 StructuralInterfaceMaterial :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("not implemented ")
+    _error("give3dStiffnessMatrix_dTdj: not implemented ")
 }
 
 void
@@ -170,14 +172,16 @@ StructuralInterfaceMaterial :: give1dStiffnessMatrix_Eng(FloatMatrix &answer, Ma
 void
 StructuralInterfaceMaterial :: giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
-    FloatArray modifiedJump = {0.0, 0.0, jump.at(3)};
+    FloatArray modifiedJump(3);
+    modifiedJump.setValues( 3, 0.0, 0.0, jump.at(3) );
     this->giveEngTraction_3d(answer, gp, modifiedJump, tStep);
 }
 
 void
 StructuralInterfaceMaterial :: giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
-    FloatArray modifiedJump = {jump.at(1), 0.0, jump.at(3)};
+    FloatArray modifiedJump(3);
+    modifiedJump.setValues( 3, jump.at(1), 0.0, jump.at(3) );
     this->giveEngTraction_3d(answer, gp, modifiedJump, tStep);
 }
 

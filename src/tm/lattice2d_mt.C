@@ -145,7 +145,7 @@ Lattice2d_mt :: computeNSubMatrixAt(FloatMatrix &answer, const FloatArray &coord
     ksi = coords.at(1);
     n1  = ( 1. - ksi ) * 0.5;
     n2  = ( 1. + ksi ) * 0.5;
-
+    //answer = new FloatMatrix(2,4) ;
     answer.resize(1, 2);
     answer.zero();
 
@@ -227,6 +227,7 @@ Lattice2d_mt :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) con
 IRResultType
 Lattice2d_mt :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     // first call parent
     this->LatticeTransportElement :: initializeFrom(ir);
@@ -419,7 +420,7 @@ Lattice2d_mt :: drawYourself(oofegGraphicContext &gc)
         this->drawRawGeometry(gc);
         this->drawRawCrossSections(gc);
     } else {
-        OOFEM_ERROR("unsupported mode");
+        _error("drawYourself : unsupported mode");
     }
 }
 

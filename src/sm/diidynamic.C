@@ -96,7 +96,7 @@ NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
     }
 
     if ( nMethod == NULL ) {
-        OOFEM_ERROR("linear solver creation failed (unknown type or no parallel support)");
+        _error("giveNumericalMethod: linear solver creation failed (unknown type or no parallel support)");
     }
 
     return nMethod;
@@ -109,7 +109,7 @@ NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
 
     nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
-        OOFEM_ERROR("linear solver creation failed");
+        _error("giveNumericalMethod: linear solver creation failed");
     }
 
     return nMethod;
@@ -119,6 +119,7 @@ NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
 IRResultType
 DIIDynamic :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     StructuralEngngModel :: initializeFrom(ir);
@@ -156,11 +157,11 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
         OOFEM_LOG_INFO("Selecting Wilson-theta metod\n");
         IR_GIVE_OPTIONAL_FIELD(ir, theta, _IFT_DIIDynamic_theta);
         if ( theta < 1.37 ) {
-            OOFEM_WARNING("Found theta < 1.37. Performing correction, theta = 1.37");
+            OOFEM_LOG_WARNING("Found theta < 1.37. Performing correction, theta = 1.37");
             theta = 1.37;
         }
     } else {
-        OOFEM_ERROR("Time-stepping scheme not found!\n");
+        _error("NonLinearDynamic: Time-stepping scheme not found!\n");
     }
 
     IR_GIVE_FIELD(ir, deltaT, _IFT_DIIDynamic_deltat);
@@ -176,12 +177,12 @@ double DIIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, D
     int eq = dof->__giveEquationNumber();
 #ifdef DEBUG
     if ( eq == 0 ) {
-        OOFEM_ERROR("invalid equation number");
+        _error("giveUnknownComponent: invalid equation number");
     }
 #endif
 
     if ( tStep != this->giveCurrentStep() ) {
-        OOFEM_ERROR("unknown time step encountered");
+        _error("giveUnknownComponent: unknown time step encountered");
         return 0.;
     }
 
@@ -196,7 +197,7 @@ double DIIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, D
         return accelerationVector.at(eq);
 
     default:
-        OOFEM_ERROR("Unknown is of undefined ValueModeType for this problem");
+        _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
     }
 
     return 0.0;
@@ -295,7 +296,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
 #endif
         stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( stiffnessMatrix == NULL ) {
-            OOFEM_ERROR("sparse matrix creation failed");
+            _error("solveYourselfAt: sparse matrix creation failed");
         }
 
         stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
@@ -433,14 +434,14 @@ DIIDynamic :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num,
     // element class level.
 
     if ( type == EffectiveStiffnessMatrix ) {
-        Element *element;
+        ElementEvaluator *elementEvaluator;
         FloatMatrix charMtrx;
 
-        element = domain->giveElement(num);
-        element->giveCharacteristicMatrix(answer, StiffnessMatrix, tStep);
+        elementEvaluator = domain->giveElementEvaluator(num);
+        elementEvaluator->giveCharacteristicMatrix(answer, StiffnessMatrix, tStep);
         answer.times(1 + this->delta * a1);
 
-        element->giveCharacteristicMatrix(charMtrx, MassMatrix, tStep);
+        elementEvaluator->giveCharacteristicMatrix(charMtrx, MassMatrix, tStep);
         charMtrx.times(this->a0 + this->eta * this->a1);
 
         answer.add(charMtrx);
@@ -488,7 +489,7 @@ DIIDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Doma
     int i, j, k, jj, kk, n;
     FloatMatrix charMtrx;
     IntArray loc;
-    Element *element;
+    BaseElement *element;
     EModelDefaultEquationNumbering en;
 
     answer.resize(neq);
@@ -504,12 +505,12 @@ DIIDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Doma
 
 #endif
 
-        element->giveLocationArray(loc, EID_MomentumBalance, en);
-        element->giveCharacteristicMatrix(charMtrx, type, tStep);
+		element->giveElementEvaluator()->giveLocationArray(loc, EID_MomentumBalance, en, element->giveElementGeometry());
+		element->giveElementEvaluator()->giveCharacteristicMatrix(charMtrx, type, tStep);
 
 #ifdef DEBUG
         if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {
-            OOFEM_ERROR("dimension mismatch");
+            _error("solveYourselfAt : dimension mismatch");
         }
 
 #endif
@@ -609,7 +610,7 @@ DIIDynamic :: determineConstants(TimeStep *tStep)
         a10 = deltaT * deltaT / 6;
         a11 = 0;
     } else {
-        OOFEM_ERROR("Time-stepping scheme not found!\n");
+        _error("DIIDynamic: Time-stepping scheme not found!\n");
     }
 }
 

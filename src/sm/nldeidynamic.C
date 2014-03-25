@@ -91,6 +91,7 @@ NumericalMethod *NlDEIDynamic :: giveNumericalMethod(MetaStep *mStep)
 IRResultType
 NlDEIDynamic :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     StructuralEngngModel :: initializeFrom(ir);
@@ -111,7 +112,7 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
     } else if ( ir->hasField(_IFT_NlDEIDynamic_elementcutmode) ) {
         commMode = ProblemCommMode__ELEMENT_CUT;
     } else {
-        OOFEM_ERROR("NlDEIDynamicCommunicatorMode not specified");
+        _error("instanciateFrom: NlDEIDynamicCommunicatorMode not specified");
     }
 
     commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
@@ -139,12 +140,12 @@ double NlDEIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep,
     int eq = dof->__giveEquationNumber();
 #ifdef DEBUG
     if ( eq == 0 ) {
-        OOFEM_ERROR("invalid equation number");
+        _error("giveUnknownComponent: invalid equation number");
     }
 #endif
 
     if ( tStep != this->giveCurrentStep() ) {
-        OOFEM_ERROR("unknown time step encountered");
+        _error("giveUnknownComponent: unknown time step encountered");
         return 0.;
     }
 
@@ -162,7 +163,7 @@ double NlDEIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep,
         return accelerationVector.at(eq);
 
     default:
-        OOFEM_ERROR("Unknown is of undefined type for this problem");
+        _error("giveUnknownComponent: Unknown is of undefined type for this problem");
     }
 
     return 0.;
@@ -495,7 +496,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
     //     NM_Status s = nMethod->solve(massMatrix, & loadVector, & displacementVector);
     //    if ( !(s & NM_Success) ) {
-    //        OOFEM_ERROR("No success in solving system. Ma=f");
+    //        OOFEM_ERROR("nldeidynamic :: solverYourselfAt - No success in solving system. Ma=f");
     //    }
 
 
@@ -553,7 +554,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     double maxOmi, maxOmEl;
     FloatMatrix charMtrx, charMtrx2;
     IntArray loc;
-    Element *element;
+    BaseElement *element;
     EModelDefaultEquationNumbering en;
 #ifdef __PARALLEL_MODE
     int result;
@@ -573,21 +574,21 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
-        if ( element->giveParallelMode() == Element_remote ) {
+        if ( element->giveElementGeometry()->giveParallelMode() == Element_remote ) {
             continue;
         }
 #endif
 
-        element->giveLocationArray(loc, EID_MomentumBalance, en);
-        element->giveCharacteristicMatrix(charMtrx, LumpedMassMatrix, tStep);
+		element->giveElementEvaluator()->giveLocationArray(loc, EID_MomentumBalance, en, element->giveElementGeometry());
+		element->giveElementEvaluator()->giveCharacteristicMatrix(charMtrx, LumpedMassMatrix, tStep);
 
 #ifdef LOCAL_ZERO_MASS_REPLACEMENT
-        element->giveCharacteristicMatrix(charMtrx2, StiffnessMatrix, tStep);
+		element->giveElementEvaluator()->giveCharacteristicMatrix(charMtrx2, StiffnessMatrix, tStep);
 #endif
 
 #ifdef DEBUG
         if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {
-            OOFEM_ERROR("dimension mismatch");
+            _error("solveYourselfAt : dimension mismatch");
         }
 #endif
 
@@ -602,7 +603,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
         }
 
         if ( maxElmass <= 0.0 ) {
-            OOFEM_WARNING("Element (%d) with zero (or negative) lumped mass encountered\n", i);
+            _warning2("solveYourselfAt: Element (%d) with zero (or negative) lumped mass encountered\n", i);
         }
 
         for ( j = 1; j <= n; j++ ) {
@@ -654,7 +655,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     }
 
     if ( maxElmass <= 0.0 ) {
-        OOFEM_ERROR("Element with zero (or negative) lumped mass encountered\n");
+        _error("solveYourselfAt: Element with zero (or negative) lumped mass encountered\n");
     }
 
     for ( j = 1; j <= neq; j++ ) {
@@ -690,7 +691,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
   #endif
 
     if ( result != MPI_SUCCESS ) {
-        OOFEM_ERROR("MPI_Allreduce failed");
+        _error("setUpCommunicationMaps: MPI_Allreduce failed");
     }
 
     maxOm = globalMaxOm;

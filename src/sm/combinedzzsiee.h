@@ -65,7 +65,7 @@ public:
     /// Destructor
     virtual ~CombinedZZSIErrorEstimator() { }
 
-    virtual double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep);
+    virtual double giveElementError(EE_ErrorType type, ElementGeometry *elemGeometry, TimeStep *tStep);
     virtual double giveValue(EE_ValueType type, TimeStep *tStep);
 
     virtual int estimateError(EE_ErrorMode mode, TimeStep *tStep);

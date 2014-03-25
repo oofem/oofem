@@ -48,11 +48,11 @@ double PeriodicPiecewiseLinFunction :: evaluateAtTime(double time)
     double add, last;
 
     if ( !this->dates.giveSize() ) {
-        OOFEM_ERROR("Undefined dates and values!");
+        _error("at: Undefined dates and values!");
     }
 
     if ( addTF && !domain->giveFunction(addTF) ) {
-        OOFEM_ERROR("Undefined time function to add!");
+        _error("at: Undefined time function to add!");
     }
 
     if ( addTF ) {
@@ -80,11 +80,11 @@ double PeriodicPiecewiseLinFunction :: evaluateVelocityAtTime(double time)
     double add, last;
 
     if ( !this->dates.giveSize() ) {
-        OOFEM_ERROR("Undefined dates and values!");
+        _error("derAt: Undefined dates and values!");
     }
 
     if ( addTF && !domain->giveFunction(addTF) ) {
-        OOFEM_ERROR("Undefined time function to add!");
+        _error("derAt: Undefined time function to add!");
     }
 
     if ( addTF ) {
@@ -106,6 +106,7 @@ double PeriodicPiecewiseLinFunction :: evaluateVelocityAtTime(double time)
 IRResultType
 PeriodicPiecewiseLinFunction :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     PiecewiseLinFunction :: initializeFrom(ir);

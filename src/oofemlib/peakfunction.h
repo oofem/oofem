@@ -58,7 +58,7 @@ private:
     double value;
 
 public:
-    PeakFunction(int i, Domain * d) : Function(i, d)
+    PeakFunction(int i, Domain *d) : Function(i, d)
     {
         t = 0.0;
         value = 0.0;
@@ -72,6 +72,7 @@ public:
     virtual double evaluateAtTime(double);
     virtual double evaluateVelocityAtTime(double t) { return 0.; }
     virtual double evaluateAccelerationAtTime(double t) { return 0.; }
+
 };
 } // end namespace oofem
 #endif // peakfunction_h

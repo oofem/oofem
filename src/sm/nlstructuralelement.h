@@ -226,7 +226,7 @@ protected:
      */
 
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) {
-        OOFEM_ERROR("method not implemented for this element");
+        OOFEM_ERROR("NLStructuralElement::computeBHmatrixAt : method not implemented for this element");
         return;
     }
     friend class GradDpElement;

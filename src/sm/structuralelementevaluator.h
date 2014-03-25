@@ -35,7 +35,7 @@
 #ifndef structuralelementevaluator_h
 #define structuralelementevaluator_h
 
-#include "iga/iga.h"
+#include "iga.h"
 #include "matresponsemode.h"
 
 namespace oofem {
@@ -53,7 +53,7 @@ namespace oofem {
  * Individual elements supposed to be derived from StructuralElementEvaluator and IGAElement
  * @todo{Class is missing much documentation.}
  */
-class StructuralElementEvaluator
+	class StructuralElementEvaluator 
 {
 protected:
     FloatMatrix rotationMatrix;
@@ -64,7 +64,7 @@ protected:
     virtual ~StructuralElementEvaluator() { }
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
-
+	virtual Element* giveElement() = 0;
     /**
      * Returns the integration rule for mass matrices, if relevant.
      * @return Number of integration points for mass matrix.
@@ -105,8 +105,7 @@ protected:
     virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass);
 
 protected:
-    virtual Element *giveElement() = 0;
-
+  
     /**
      * Computes the matrix for which the unknown field is obtained, typically [N1, 0, N2, 0, ...; 0, N1, 0, N2, ...].
      */
@@ -115,11 +114,11 @@ protected:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual double computeVolumeAround(GaussPoint *gp) { return 0.; }
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, bool useUpdatedGpRecord = false);
-    void computeVectorOf(EquationID type, ValueModeType u,
-                         TimeStep *tStep, FloatArray &answer) {
-        this->giveElement()->computeVectorOf(type, u, tStep, answer);
-    }
-    void computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *tStep, FloatArray &answer) {
+  /*  void computeVectorOf(EquationID type, ValueModeType u,
+		TimeStep *tStep, FloatArray &answer, ElementEva* elementGeometry) {
+        elementGeometry->computeVectorOf(type, u, tStep, answer);
+    }*/
+	void computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *tStep, FloatArray &answer, ElementGeometry* elementGeometry) {
         this->giveElement()->computeVectorOf(field, u, tStep, answer);
     }
     bool isActivated(TimeStep *tStep) { return true; }
@@ -157,8 +156,7 @@ protected:
      * shape functions
      * @returns returns nonzero if integration rule code numbers differ from element code numbers
      */
-    //virtual int giveIntegrationElementCodeNumbers(IntArray &answer, Element *elem,
-    //                                              IntegrationRule *ie, EquationID ut);
+   // virtual int giveIntegrationElementCodeNumbers(IntArray &answer, Element *elem,IntegrationRule *ie, EquationID ut);
 
     /**
      * Assembles the local element code numbers of given integration element (sub-patch)
@@ -172,6 +170,7 @@ protected:
 #ifdef __OOFEG
     friend void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se, oofegGraphicContext &gc, UnknownType);
 #endif
+	
 public:
     void elem(int arg1, EquationID arg2, IntArray arg3);
 };

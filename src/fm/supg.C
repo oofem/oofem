@@ -66,7 +66,7 @@ NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
 
     nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
-        OOFEM_ERROR("linear solver creation failed");
+        _error("giveNumericalMethod: linear solver creation failed");
     }
 
     return nMethod;
@@ -75,6 +75,7 @@ NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
 IRResultType
 SUPG :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     FluidModel :: initializeFrom(ir);
@@ -140,7 +141,7 @@ SUPG :: initializeFrom(InputRecord *ir)
         // export velocity field
         FieldManager *fm = this->giveContext()->giveFieldManager();
         IntArray mask;
-        mask = {V_u, V_v, V_w};
+        mask.setValues(3, V_u, V_v, V_w);
 
 #ifdef  FIELDMANAGER_USE_SHARED_PTR
         std :: tr1 :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, this->VelocityPressureField, mask ) );
@@ -172,12 +173,12 @@ SUPG :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
-            OOFEM_ERROR("Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode));
+            OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
         }
     } else {
         int eq = dof->__giveEquationNumber();
         if ( eq == 0 ) {
-            OOFEM_ERROR("invalid equation number");
+            _error("giveUnknownComponent: invalid equation number");
         }
 
         if ( mode == VM_Acceleration ) {
@@ -187,7 +188,7 @@ SUPG :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof
              * return accelerationVector.at(eq);
              * } else if (tStep == givePreviousStep()) {
              * return previousAccelerationVector.at(eq);
-             * } else OOFEM_ERROR("VM_Acceleration history past previous step not supported");
+             * } else _error ("giveUnknownComponent: VM_Acceleration history past previous step not supported");
              */
         } else if ( mode == VM_Velocity ) {
             return VelocityPressureField->giveUnknownValue(dof, VM_Total, tStep);
@@ -317,7 +318,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
         lhs = classFactory.createSparseMtrx(sparseMtrxType);
         if ( lhs == NULL ) {
-            OOFEM_ERROR("sparse matrix creation failed");
+            _error("solveYourselfAt: sparse matrix creation failed");
         }
 
         lhs->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering() );
@@ -385,15 +386,15 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     //
     externalForces.zero();
     this->assembleVector( externalForces, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
-                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(),  LoadExchangeTag);
+    this->updateSharedDofManagers(externalForces,EModelDefaultEquationNumbering(),  LoadExchangeTag);
 #endif
 
     // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
     internalForces.zero();
     this->assembleVector( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
-                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
@@ -499,7 +500,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         //
         internalForces.zero();
         this->assembleVector( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
-                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                              EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
         this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
@@ -548,7 +549,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             //
             internalForces.zero();
             this->assembleVector( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
-                                 EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                                  EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
             this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
@@ -559,7 +560,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     if ( nite <= maxiter ) {
         OOFEM_LOG_INFO("SUPG info: number of iterations: %d\n", nite);
     } else {
-        OOFEM_WARNING("Convergence not reached, number of iterations: %d\n", nite);
+        OOFEM_WARNING2("SUPG info: Convergence not reached, number of iterations: %d\n", nite);
         if ( stopmaxiter ) {
             exit(1);
         }
@@ -616,7 +617,7 @@ SUPG :: updateInternalState(TimeStep *tStep)
 
         int nelem = domain->giveNumberOfElements();
         for ( int j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(tStep);
+            domain->giveElementGeometry(j)->updateInternalState(tStep);
         }
     }
 }
@@ -726,7 +727,7 @@ SUPG :: checkConsistency()
     // check internal consistency
     // if success returns nonzero
     int nelem;
-    Element *ePtr;
+    ElementGeometry *ePtr;
     SUPGElement *sePtr;
     GeneralBoundaryCondition *bcPtr;
     InitialCondition *icPtr;
@@ -736,10 +737,10 @@ SUPG :: checkConsistency()
     // check for proper element type
 
     for ( int i = 1; i <= nelem; i++ ) {
-        ePtr = domain->giveElement(i);
+        ePtr = domain->giveElementGeometry(i);
         sePtr = dynamic_cast< SUPGElement * >(ePtr);
         if ( sePtr == NULL ) {
-            OOFEM_WARNING("Element %d has no SUPG base", i);
+            _warning2("Element %d has no SUPG base", i);
             return 0;
         }
     }
@@ -759,7 +760,7 @@ SUPG :: checkConsistency()
             } else if ( bcPtr->giveBCValType() == ForceLoadBVT ) {
                 bcPtr->scale( 1. / this->giveVariableScale(VST_Force) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type\n");
+                _error("checkConsistency: unknown bc/ic type\n");
             }
         }
 
@@ -771,7 +772,7 @@ SUPG :: checkConsistency()
             } else if ( icPtr->giveICValType() == PressureBVT ) {
                 icPtr->scale( VM_Total, 1. / this->giveVariableScale(VST_Pressure) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type\n");
+                _error("checkConsistency: unknown bc/ic type\n");
             }
         }
     }
@@ -799,7 +800,7 @@ SUPG :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
     } else if ( type == P_f ) {
         iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, pscale);
     } else {
-        OOFEM_ERROR("unsupported dof type");
+        _error("printDofOutputAt: unsupported dof type");
     }
 }
 
@@ -887,7 +888,7 @@ SUPG :: giveVariableScale(VarScaleType varID)
     } else if ( varID == VST_Viscosity ) {
         return 1.0;
     } else {
-        OOFEM_ERROR("unknown variable type");
+        _error("giveVariableScale: unknown variable type");
     }
 
     return 0.0;
@@ -949,7 +950,7 @@ SUPG :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType t
         } else if ( type == SecantStiffnessMatrix ) {
             element->computeDiffusionDerivativeTerm_MB(h, SecantStiffness, tStep);
         } else {
-            OOFEM_ERROR("CharType not supported\n");
+            OOFEM_ERROR("SUPG :: giveElementCharacteristicMatrx - CharType not supported\n");
         }
 
         h.times( alpha * tStep->giveTimeIncrement() );
@@ -1185,7 +1186,7 @@ SUPG :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
     if ( ( tStep == this->giveCurrentStep() ) || ( tStep == this->givePreviousStep() ) ) {
         return ( tStep->giveNumber() % 2 ) * 100 + mode;
     } else {
-        OOFEM_ERROR("unsupported solution step");
+        _error("giveUnknownDictHashIndx: unsupported solution step");
     }
 
     return 0;
@@ -1220,10 +1221,10 @@ SUPG :: updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &
     }
 
     for ( int j = 1; j <= domain->giveNumberOfElements(); j++ ) {
-        Element *elem = domain->giveElement(j);
-        int ndofman = elem->giveNumberOfInternalDofManagers();
+        ElementGeometry *elemGeometry = domain->giveElementGeometry(j);
+        int ndofman = elemGeometry->giveNumberOfInternalDofManagers();
         for ( int ji = 1; ji <= ndofman; ji++ ) {
-            DofManager *dofman = elem->giveInternalDofManager(ji);
+            DofManager *dofman = elemGeometry->giveInternalDofManager(ji);
             int nDofs = dofman->giveNumberOfDofs();
             for ( int k = 1; k <= nDofs; k++ ) {
                 Dof *iDof = dofman->giveDof(k);
@@ -1279,10 +1280,10 @@ SUPG :: updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerati
     } // end loop over dnam
 
     for ( int j = 1; j <= domain->giveNumberOfElements(); j++ ) {
-        Element *elem = domain->giveElement(j);
-        int ndofman = elem->giveNumberOfInternalDofManagers();
+        ElementGeometry *elemGeometry = domain->giveElementGeometry(j);
+        int ndofman = elemGeometry->giveNumberOfInternalDofManagers();
         for ( int ji = 1; ji <= ndofman; ji++ ) {
-            DofManager *dofman = elem->giveInternalDofManager(ji);
+            DofManager *dofman = elemGeometry->giveInternalDofManager(ji);
             int nDofs = dofman->giveNumberOfDofs();
             for ( int k = 1; k <= nDofs; k++ ) {
                 Dof *iDof = dofman->giveDof(k);
@@ -1436,7 +1437,7 @@ SUPG :: initParallelContexts()
  *        else if (type == V_v)
  *          iDof->updateUnknownsDictionary (tStep, VM_Total, vy); // velocity
  *          else if (type == V_w) {
- *            OOFEM_ERROR("3d not yet supported");
+ *            _error ("3d not yet supported");
  *          } else if (type == P_f) {
  *          //iDof->updateUnknownsDictionary (tStep, VM_Total, 0.0);
  *          } else {_error2 ("unknown DOF type encountered (%s)", __DofIDItemToString (type));}

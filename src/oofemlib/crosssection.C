@@ -43,9 +43,9 @@
 
 namespace oofem {
 int
-CrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element)
+CrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoints, ElementGeometry *elementGeometry)
 {
-    return irule.setUpIntegrationPoints( element->giveIntegrationDomain(), npoints, element->giveMaterialMode() );
+    return irule.setUpIntegrationPoints( elementGeometry->giveIntegrationDomain(), npoints, elementGeometry->giveMaterialMode() );
 }
 
 
@@ -55,6 +55,7 @@ CrossSection :: initializeFrom(InputRecord *ir)
 // instanciates receiver from input record
 //
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     // Read set number the cross section is applied to
@@ -63,14 +64,14 @@ CrossSection :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-int
+int 
 CrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep)
 {
-    if ( type == IST_CrossSectionNumber ) {
-        answer.resize(1);
-        answer.at(1) = this->giveNumber();
-        return 1;
-    }
+   if ( type == IST_CrossSectionNumber ) {
+       answer.resize(1);
+       answer.at(1) = this->giveNumber();
+       return 1;
+    } 
     return ip->giveMaterial()->giveIPValue(answer, ip, type, tStep);
 }
 
@@ -127,20 +128,20 @@ CrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
     if ( propertyDictionary->includes(aProperty) ) {
         return propertyDictionary->at(aProperty);
     } else {
-        OOFEM_ERROR("Undefined property ID %d", aProperty);
+        OOFEM_ERROR3("Cross-section Number %d has undefined property ID %d", this->giveNumber(), aProperty);
     }
 
     return 0.0;
 }
 
 double
-CrossSection :: give(CrossSectionProperty aProperty, const FloatArray *coords, Element *elem, bool local)
+CrossSection :: give(CrossSectionProperty aProperty, const FloatArray *coords, ElementGeometry *elemGeometry, bool local)
 // Returns the value of the property aProperty of the receiver.
 {
     if ( propertyDictionary->includes(aProperty) ) {
         return propertyDictionary->at(aProperty);
     } else {
-        OOFEM_ERROR("Undefined property ID %d", aProperty);
+        OOFEM_ERROR3("Cross-section Number %d has undefined property ID %d", this->giveNumber(), aProperty);
     }
 
     return 0.0;

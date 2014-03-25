@@ -123,7 +123,7 @@ InterfaceElement3dTrLin :: computeGlobalCoordinates(FloatArray &answer, const Fl
 bool
 InterfaceElement3dTrLin :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
 {
-    OOFEM_ERROR("Not implemented");
+    _error("Not implemented");
     return false;
 }
 
@@ -167,7 +167,7 @@ InterfaceElement3dTrLin :: initializeFrom(InputRecord *ir)
 void
 InterfaceElement3dTrLin :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer = {D_u, D_v, D_w};
+    answer.setValues(3, D_u, D_v, D_w);
 }
 
 

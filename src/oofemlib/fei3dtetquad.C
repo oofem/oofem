@@ -229,7 +229,7 @@ FEI3dTetQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, cons
 {
     FloatArray res, delta, guess, lcoords_guess;
     FloatMatrix jac;
-    double convergence_limit, error = 0.0;
+    double convergence_limit, error=0.0;
 
     // find a suitable convergence limit
     convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);
@@ -338,7 +338,7 @@ FEI3dTetQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
     ///@todo Implement this
-    OOFEM_ERROR("Not supported");
+    OOFEM_ERROR("FEI3dTetQuad :: edgeEvaldNdx - Not supported");
 }
 
 void
@@ -363,7 +363,7 @@ FEI3dTetQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoo
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
     ///@todo Implement this
-    OOFEM_ERROR("Not supported");
+    OOFEM_ERROR("FEI3dTetQuad :: edgeGiveTransformationJacobian - Not supported");
     return -1;
 }
 
@@ -398,7 +398,7 @@ FEI3dTetQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         edgeNodes(1) = 4;
         edgeNodes(2) = 10;
     } else {
-        OOFEM_ERROR("wrong egde number (%d)", iedge);
+        OOFEM_ERROR2("FEI3dTetQuad :: computeEdgeMapping: wrong egde number (%d)", iedge);
     }
 }
 
@@ -406,7 +406,7 @@ double
 FEI3dTetQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
 {
     ///@todo Implement this
-    OOFEM_ERROR("Not supported");
+    OOFEM_ERROR("FEI3dTetQuad :: edgeComputeLength - Not supported");
     return -1;
 }
 
@@ -551,7 +551,7 @@ FEI3dTetQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
         eNode = 10;
         fNode = 7;
     } else {
-        OOFEM_ERROR("wrong surface number (%d)", isurf);
+        OOFEM_ERROR2("FEI3dTetQuad :: computeLocalSurfaceMapping: wrong surface number (%d)", isurf);
     }
 
     surfNodes.at(1) = aNode;

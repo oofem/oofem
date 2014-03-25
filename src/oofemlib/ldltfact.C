@@ -60,26 +60,26 @@ LDLTFactorization :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
     // first check whether Lhs is defined
     if ( !A ) {
-        OOFEM_ERROR("unknown Lhs");
+        OOFEM_ERROR("LDLTFactorization :: solveYourselfAt: unknown Lhs");
     }
 
     // and whether Rhs
     if ( !b ) {
-        OOFEM_ERROR("unknown Rhs");
+        OOFEM_ERROR("LDLTFactorization :: solveYourselfAt: unknown Rhs");
     }
 
     // and whether previous Solution exist
     if ( !x ) {
-        OOFEM_ERROR("unknown solution array");
+        OOFEM_ERROR("LDLTFactorization :: solveYourselfAt: unknown solution array");
     }
 
     if ( ( size = x->giveSize() ) != b->giveSize() ) {
-        OOFEM_ERROR("size mismatch");
+        OOFEM_ERROR("LDLTFactorization :: solveYourselfAt: size mismatch");
     }
 
     // check whether Lhs supports factorization
     if ( !A->canBeFactorized() ) {
-        OOFEM_ERROR("Lhs not support factorization");
+        OOFEM_ERROR("LDLTFactorization :: solveYourselfAt: Lhs not support factorization");
     }
 
     for ( int i = 1; i <= size; i++ ) {

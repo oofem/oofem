@@ -62,7 +62,7 @@ FreemInterface :: createInput(Domain *d, TimeStep *tStep)
     double density;
     FILE *outputStrem;
     Node *inode;
-    Element *ielem;
+    ElementGeometry *ielem;
 
     outputStrem = fopen("freem.bmf", "w");
     // print header for 2D
@@ -88,9 +88,9 @@ FreemInterface :: createInput(Domain *d, TimeStep *tStep)
     }
 
     for ( int i = 1; i <= nelem; i++ ) {
-        ielem = d->giveElement(i);
+        ielem = d->giveElementGeometry(i);
         if ( ielem->giveGeometryType() != EGT_quad_1 ) {
-            OOFEM_SIMPLE_ERROR("FreemInterface::createInput : unsupported element type (not a bilinear quad)");
+            OOFEM_ERROR("FreemInterface::createInput : unsupported element type (not a bilinear quad)");
         }
 
         fprintf( outputStrem, "backgroundMeshElem %d  nodes 4 %d %d %d %d\n", i,
@@ -112,9 +112,10 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
     double dist;
     const IntArray *candidateConnectivity;
     FloatArray *neighbourCoords;
-    Element *jelem;
+    ElementGeometry *jelem;
     Node *candNode;
     std :: list< int >queue;
+    std :: list< int > :: iterator pos;
 
 
     // loop over nodes
@@ -135,7 +136,7 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
             // find candidate neighbours
             candidateConnectivity = d->giveConnectivityTable()->giveDofManConnectivityArray(candidate);
             for ( int j = 1; j <= candidateConnectivity->giveSize(); j++ ) {
-                jelem = d->giveElement( candidateConnectivity->at(j) );
+                jelem = d->giveElementGeometry( candidateConnectivity->at(j) );
                 jelemNodes = jelem->giveNumberOfNodes();
                 for ( int k = 1; k <= jelemNodes; k++ ) {
                     neighbour = jelem->giveNode(k)->giveNumber();
@@ -153,9 +154,8 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
                         nodalDensities.at(neighbour) = max( 1.0 * dist, nodalDensities.at(candidate) );
                         // printf ("o");
                         // put candidate into queue if not yet added present
-                        found = 0;
-                        for ( int q: queue ) {
-                            if ( q == neighbour ) {
+                        for ( found = 0, pos = queue.begin(); pos != queue.end(); ++pos ) {
+                            if ( * pos == neighbour ) {
                                 found = 1;
                                 break;
                             }
@@ -171,9 +171,8 @@ FreemInterface :: smoothNodalDensities(Domain *d,  FloatArray &nodalDensities, T
                         nodalDensities.at(neighbour) = nodalDensities.at(candidate) + 2.2 * dist;
                         //printf ("g");
                         // put candidate into queue if not yet added present
-                        found = 0;
-                        for ( int q: queue ) {
-                            if ( q == neighbour ) {
+                        for ( found = 0, pos = queue.begin(); pos != queue.end(); ++pos ) {
+                            if ( * pos == neighbour ) {
                                 found = 1;
                                 break;
                             }

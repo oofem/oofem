@@ -11,8 +11,8 @@
 #include "floatarray.h"
 
 namespace oofem {
-/**
- * TipInfo gathers useful information about a crack tip,
+/*
+ * struct TipInfo gathers useful information about a crack tip,
  * like its position and tangent direction. The purpose of the
  * struct is to keep the interface clean when evaluating
  * XFEM branch functions.
@@ -20,7 +20,7 @@ namespace oofem {
  * @author Erik Svenning
  *  August 2013
  */
-class TipInfo {
+struct TipInfo {
 public:
     TipInfo() { }
     ~TipInfo() { }

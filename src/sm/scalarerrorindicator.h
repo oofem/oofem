@@ -67,7 +67,7 @@ public:
     /// Destructor
     virtual ~ScalarErrorIndicator() { }
 
-    virtual double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep);
+    virtual double giveElementError(EE_ErrorType type, ElementGeometry *elemGeometry, TimeStep *tStep);
     virtual double giveValue(EE_ValueType type, TimeStep *tStep) { return 0.0; }
     virtual int estimateError(EE_ErrorMode mode, TimeStep *tStep);
     virtual RemeshingCriteria *giveRemeshingCrit();

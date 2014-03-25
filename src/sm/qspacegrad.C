@@ -79,9 +79,9 @@ void
 QSpaceGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     if ( inode <= nSecNodes ) {
-        answer = {D_u, D_v, D_w, G_0};
+        answer.setValues(4, D_u, D_v, D_w, G_0);
     } else {
-        answer = {D_u, D_v, D_w};
+        answer.setValues(3, D_u, D_v, D_w);
     }
 }
 

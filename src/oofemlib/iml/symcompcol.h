@@ -111,7 +111,6 @@ public:
     virtual void zero();
     virtual double &at(int i, int j);
     virtual double at(int i, int j) const;
-    virtual const char* giveClassName() const { return "SymCompCol"; }
     SparseMtrxType giveType() const { return SMT_SymCompCol; }
     bool isAntisymmetric() const { return false; }
 

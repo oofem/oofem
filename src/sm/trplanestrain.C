@@ -193,7 +193,7 @@ TrPlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(3) = 1;
         answer.at(4) = 2;
     } else {
-        OOFEM_ERROR("wrong edge number");
+        _error("giveEdgeDofMapping: wrong edge number");
     }
 }
 
@@ -242,7 +242,7 @@ TrPlaneStrain :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, 
         aNode = 3;
         bNode = 1;
     } else {
-        OOFEM_ERROR("wrong egde number");
+        _error("computeSurfaceVolumeAround: wrong egde number");
     }
 
     nodeA = this->giveNode(aNode);
@@ -303,7 +303,7 @@ TrPlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &norm
 void
 TrPlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer = {D_u, D_v};
+    answer.setValues(2, D_u, D_v);
 }
 
 
@@ -344,7 +344,7 @@ TrPlaneStrain :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answe
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        OOFEM_ERROR("node unknown");
+        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 
@@ -382,7 +382,7 @@ TrPlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatA
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
+        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -445,6 +445,7 @@ TrPlaneStrain :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray
                                                                       InternalStateType type, TimeStep *tStep)
 {
     FloatArray n, lcoords;
+    int vals;
 
     if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
         lcoords = coords;
@@ -454,11 +455,12 @@ TrPlaneStrain :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray
 
     this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
 
-    ///@todo Introduce support function for this type of construction..
-    answer.resize(0);
-    answer.add(n.at(1), list[0]);
-    answer.add(n.at(2), list[1]);
-    answer.add(n.at(3), list[2]);
+    vals = list.at(1)->giveSize();
+    answer.resize(vals);
+
+    for ( int i = 1; i <= vals; i++ ) {
+        answer.at(i) = n.at(1) * list.at(1)->at(i) + n.at(2) * list.at(2)->at(i) + n.at(3) * list.at(3)->at(i);
+    }
 }
 
 

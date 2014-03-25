@@ -134,19 +134,19 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
         }
     }
 
-    Element *elem = gp->giveElement();
+    ElementGeometry *elem = gp->giveElementGeometry();
     FloatArray coords;
     elem->computeGlobalCoordinates( coords, * ( gp->giveCoordinates() ) );
     double xtarget = coords.at(1);
 
     double w, wsum = 0., x, xprev, damage, damageprev = 0.;
-    Element *nearElem;
+    ElementGeometry *nearElem;
 
     // process the list from the target to the end
     double distance = 0.; // distance modified by damage
     xprev = xtarget;
     for ( pos = postarget; pos != list->end(); ++pos ) {
-        nearElem = ( pos->nearGp )->giveElement();
+        nearElem = ( pos->nearGp )->giveElementGeometry();
         nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveCoordinates() ) );
         x = coords.at(1);
         nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(pos->nearGp) );
@@ -169,7 +169,7 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     // process the list from the target to the beginning
     distance = 0.;
     for ( pos = postarget; pos != list->begin(); --pos ) {
-        nearElem = ( pos->nearGp )->giveElement();
+        nearElem = ( pos->nearGp )->giveElementGeometry();
         nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveCoordinates() ) );
         x = coords.at(1);
         nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(pos->nearGp) );
@@ -192,7 +192,7 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     // the beginning must be treated separately
     pos = list->begin();
     if ( pos != postarget ) {
-        nearElem = ( pos->nearGp )->giveElement();
+        nearElem = ( pos->nearGp )->giveElementGeometry();
         nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveCoordinates() ) );
         x = coords.at(1);
         nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(pos->nearGp) );
@@ -271,7 +271,7 @@ IDNLMaterial :: computeAngleAndSigmaRatio(double &angle, double &ratio, GaussPoi
     MaterialMode matMode;
     matMode = gp->giveMaterialMode();
     if ( ( matMode == _3dMat ) || ( matMode == _1dMat ) ) { //Check if the stress-based approach can be applied
-        OOFEM_ERROR("3D or 1D realisation for Stress-based averaging not supported");
+        _error("computeAngleAndSigmaRatio: 3D or 1D realisation for Stress-based averaging not supported");
     }
 
     //Get the temporary strain vector
@@ -317,8 +317,8 @@ IDNLMaterial :: computeStressBasedWeight(double &angle, double &ratio, GaussPoin
 {
     //Compute Distance between source and receiver point
     FloatArray gpCoords, jGpCoords;
-    gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveCoordinates() ) );
-    jGp->giveElement()->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) );
+    gp->giveElementGeometry()->computeGlobalCoordinates( gpCoords, * ( gp->giveCoordinates() ) );
+    jGp->giveElementGeometry()->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) );
     FloatArray distance(jGpCoords); // Line End jGP Point
     distance.subtract(gpCoords); // Line Begin gP Point
     if ( distance.computeNorm() == 0 ) { //Check if source and receiver point coincide
@@ -339,7 +339,7 @@ IDNLMaterial :: computeStressBasedWeight(double &angle, double &ratio, GaussPoin
     distanceRotated.at(2) = distanceRotated.at(2) / gamma;
     //Get new weight
     double updatedWeight = this->computeWeightFunction( distanceRotated.computeNorm() );
-    updatedWeight = updatedWeight * jGp->giveElement()->computeVolumeAround(jGp); //weight * (Volume where the weight is applied)
+    updatedWeight = updatedWeight * jGp->giveElementGeometry()->computeVolumeAround(jGp); //weight * (Volume where the weight is applied)
     return updatedWeight;
 }
 
@@ -439,6 +439,7 @@ IDNLMaterial :: giveInterface(InterfaceType type)
 IRResultType
 IDNLMaterial :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IsotropicDamageMaterial1 :: initializeFrom(ir);
@@ -554,7 +555,7 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
         rmat = dynamic_cast< IDNLMaterial * >( pos->nearGp->giveMaterial() );
         if ( rmat ) {
             rmat->giveRemoteNonlocalStiffnessContribution(pos->nearGp, rloc, s, rcontrib, tStep);
-            coeff = gp->giveElement()->computeVolumeAround(gp) * pos->weight / status->giveIntegrationScale();
+            coeff = gp->giveElementGeometry()->computeVolumeAround(gp) * pos->weight / status->giveIntegrationScale();
             //   printf ("\nelement %d:", gp->giveElement()->giveNumber());
             //   lcontrib.printYourself();
             //   rcontrib.printYourself();
@@ -690,7 +691,7 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
     int nrows, nsize;
     double sum, f, equivStrain;
     IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
-    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
+    StructuralElement *elemGeometry = static_cast< StructuralElement * >( gp->giveElementGeometry() );
     FloatMatrix b, de;
     FloatArray stress, strain;
 
@@ -733,7 +734,9 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
          */
 
         // no support for reduced integration now
-        elem->computeBmatrixAt(gp, b);
+		ElementEvaluator* eE = elemGeometry->giveDomain()->giveElementEvaluator(elemGeometry->giveNumber());
+		StructuralElement* sE = static_cast< StructuralElement*> (eE);
+		sE->computeBmatrixAt(gp, b);
 
         LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
         lmat->giveStiffnessMatrix(de, SecantStiffness, gp, tStep);
@@ -756,7 +759,7 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
     }
 
     // request element code numbers
-    elem->giveLocationArray(loc, EID_MomentumBalance, s);
+    elemGeometry->giveLocationArray(loc, EID_MomentumBalance, s);
 
     return 1;
 }
@@ -769,7 +772,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     int ncols, nsize;
     double coeff = 0.0, sum;
     IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
-    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
+    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElementGeometry() );
     FloatMatrix b, de, den, princDir(3, 3), t;
     FloatArray stress, fullStress, strain, principalStress, help, nu;
 
@@ -816,10 +819,10 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
                     principalStress.at(indx) = principalStress.at(3);
                     principalStress.at(3) = swap;
                 } else if ( zeroFlag == 0 ) {
-                    OOFEM_ERROR("internal error");
+                    _error("giveRemoteNonlocalStiffnessContribution: internal error");
                 }
             } else {
-                OOFEM_ERROR("equivStrainType not supported");
+                _error("giveRemoteNonlocalStiffnessContribution: equivStrainType not supported");
             }
         }
 
@@ -899,7 +902,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
         nu = stress;
         coeff = 1.0 / ( lmat->give('E', gp) * equivStrain );
     } else {
-        OOFEM_ERROR("equivStrainType not supported");
+        _error("giveRemoteNonlocalStiffnessContribution: equivStrainType not supported");
     }
 
 

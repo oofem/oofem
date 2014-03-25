@@ -44,7 +44,7 @@
 #include "staggeredproblem.h"
 #include "classfactory.h"
 #ifdef __TM_MODULE
- #include "../tm/latticetransportelement.h"
+ #include "latticetransportelement.h"
 #endif
 
 #include <cstdlib>
@@ -69,6 +69,7 @@ LatticeDamage2d :: hasMaterialModeCapability(MaterialMode mode)
 IRResultType
 LatticeDamage2d :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
     StructuralMaterial :: initializeFrom(ir);
@@ -107,7 +108,7 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
         e0OneMean = 0.3 * e0Mean;
         IR_GIVE_OPTIONAL_FIELD(ir, e0OneMean, _IFT_LatticeDamage2d_e0OneMean);
     } else {
-        OOFEM_ERROR("Unknown softening type");
+        _error("Unknown softening type");
     }
 
     localRandomType = 0; //Default: No local random field
@@ -165,7 +166,7 @@ LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const Flo
             //linear stress-crack opening relation
             //check if input parameter make sense
             if ( this->wf / status->giveLe() <= e0 ) {
-                OOFEM_ERROR("e0>wf/Le \n Possible solutions: Increase fracture energy or reduce element size\n");
+                _error("e0>wf/Le \n Possible solutions: Increase fracture energy or reduce element size\n");
             }
 
             omega = ( 1. - e0 / tempKappa ) / ( 1. - e0 / ( this->wf / status->giveLe() ) );
@@ -179,9 +180,9 @@ LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const Flo
 
         //Check if input parameter make sense
         if ( e0 > wfOne / status->giveLe() ) {
-            OOFEM_ERROR("parameter wf1 is too small");
+            _error("parameter wf1 is too small");
         } else if ( wfOne / status->giveLe() >  this->wf / status->giveLe() ) {
-            OOFEM_ERROR("parameter wf is too small");
+            _error("parameter wf is too small");
         }
 
         //
@@ -223,16 +224,16 @@ LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const Flo
                 Lhs = eNormal * tempKappa - Ft *exp(-help) * status->giveLe() * tempKappa / this->wf;
                 omega += R / Lhs;
                 if ( nite > 40 ) {
-                    OOFEM_ERROR("algorithm not converging");
+                    _error("computeDamageParam: algorithm not converging");
                 }
             } while ( fabs(R) >= 1.e-4 );
 
             if ( ( omega > 1.0 ) || ( omega < 0.0 ) ) {
-                OOFEM_ERROR("internal error\n");
+                _error("computeDamageParam: internal error\n");
             }
         }
     } else {
-        OOFEM_ERROR("Unknown softening type");
+        _error("Unknown softening type");
     }
 }
 
@@ -244,7 +245,8 @@ LatticeDamage2d :: computeStressIndependentStrainVector(FloatArray &answer,
                                                         ValueModeType mode)
 {
     FloatArray et;
-    LatticeStructuralElement *lselem = static_cast< LatticeStructuralElement * >( gp->giveElement() );
+	//@todo add evaluator
+    LatticeStructuralElement *lselem = static_cast< LatticeStructuralElement * >( gp->giveElementGeometry() );
 
     answer.resize(3);
     answer.zero();
@@ -263,7 +265,7 @@ LatticeDamage2d :: computeStressIndependentStrainVector(FloatArray &answer,
     }
 
     if ( et.giveSize() < 1 ) {
-        OOFEM_ERROR("Bad format of TemperatureLoad");
+        _error("computeStressIndependentStrainVector - Bad format of TemperatureLoad");
         exit(1);
     }
 
@@ -276,7 +278,7 @@ LatticeDamage2d :: computeStressIndependentStrainVector(FloatArray &answer,
         answer.at(1) = this->give(tAlpha, gp) * et.at(1);
     }
 
-    double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
+    double length = ( static_cast< LatticeStructuralElement * >( gp->giveElementGeometry() ) )->giveLength();
 
     answer.at(1) += this->cAlpha * et.at(1) / length;
     return;
@@ -310,7 +312,7 @@ LatticeDamage2d :: initDamaged(double kappa, FloatArray &strainVector, GaussPoin
             crackPlaneNormal.at(i) = principalDir.at(i, indx);
         }
 
-        le = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
+        le = gp->giveElementGeometry()->giveCharacteristicLenght(gp, crackPlaneNormal);
         // remember le in corresponding status
         status->setLe(le);
     }
@@ -414,11 +416,11 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
 #ifdef __TM_MODULE
     if ( domain->giveEngngModel()->giveMasterEngngModel() ) {
         ( static_cast< StaggeredProblem * >( domain->giveEngngModel()->giveMasterEngngModel() ) )->giveCoupledModels(coupledModels);
-        int couplingFlag = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveCouplingFlag();
+        int couplingFlag = ( static_cast< LatticeStructuralElement * >( gp->giveElementGeometry() ) )->giveCouplingFlag();
 
         if ( couplingFlag == 1 && coupledModels.at(2) != 0 && !tStep->isTheFirstStep() ) {
             int couplingNumber;
-            couplingNumber = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveCouplingNumber();
+            couplingNumber = ( static_cast< LatticeStructuralElement * >( gp->giveElementGeometry() ) )->giveCouplingNumber();
             LatticeTransportElement *coupledElement;
             coupledElement  = static_cast< LatticeTransportElement * >( domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem( coupledModels.at(2) )->giveDomain(1)->giveElement(couplingNumber) );
             waterPressure = coupledElement->givePressure();
@@ -461,7 +463,7 @@ LatticeDamage2d :: computeDeltaDissipation(double omega,
                                            TimeStep *tStep)
 {
     LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
-    double length = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
+    double length = ( static_cast< LatticeStructuralElement * >( gp->giveElementGeometry() ) )->giveLength();
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
 
     FloatArray reducedStrainOld;
@@ -556,7 +558,7 @@ void LatticeDamage2d :: giveRandomParameters(FloatArray &param)
     if ( localRandomType == 1 ) { //Gaussian
         param.at(2) = coefficientOfVariation;
     } else {
-        OOFEM_ERROR("Unknown local random type:\n randomtype 1 = Gaussian\n");
+        _error("Error: Unknown local random type:\n randomtype 1 = Gaussian\n");
     }
 }
 
@@ -584,12 +586,12 @@ LatticeDamage2d :: giveStiffnessMatrix(FloatMatrix &answer,
         } else if ( rMode == TangentStiffness ) {
             this->giveSecantStiffnessMatrix(answer, gp, tStep);
         } else {
-            OOFEM_ERROR("Unsupported stiffness mode\n");
+            _error("Unsupported stiffness mode\n");
         }
 
         break;
     default:
-        OOFEM_ERROR("unknown material mode");
+        _error("unknown material mode");
     }
 }
 
@@ -621,7 +623,7 @@ LatticeDamage2d :: giveTangentStiffnessMatrix(FloatMatrix &answer,
                                               GaussPoint *gp,
                                               TimeStep *tStep)
 {
-    OOFEM_ERROR("tangent stiffness not implemented\n");
+    _error("tangent stiffness not implemented\n");
 }
 
 

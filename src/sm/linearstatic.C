@@ -52,8 +52,6 @@
  #include "communicator.h"
 #endif
 
-#include <typeinfo>
-
 namespace oofem {
 REGISTER_EngngModel(LinearStatic);
 
@@ -100,7 +98,7 @@ NumericalMethod *LinearStatic :: giveNumericalMethod(MetaStep *mStep)
     }
 
     if ( nMethod == NULL ) {
-        OOFEM_ERROR("linear solver creation failed");
+        _error("giveNumericalMethod: linear solver creation failed");
     }
 
     return nMethod;
@@ -109,6 +107,7 @@ NumericalMethod *LinearStatic :: giveNumericalMethod(MetaStep *mStep)
 IRResultType
 LinearStatic :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     StructuralEngngModel :: initializeFrom(ir);
@@ -142,12 +141,12 @@ double LinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep,
     int eq = dof->__giveEquationNumber();
 #ifdef DEBUG
     if ( eq == 0 ) {
-        OOFEM_ERROR("invalid equation number");
+        _error("giveUnknownComponent: invalid equation number");
     }
 #endif
 
     if ( tStep != this->giveCurrentStep() ) {
-        OOFEM_ERROR("unknown time step encountered");
+        _error("giveUnknownComponent: unknown time step encountered");
         return 0.;
     }
 
@@ -161,7 +160,7 @@ double LinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep,
         }
 
     default:
-        OOFEM_ERROR("Unknown is of undefined type for this problem");
+        _error("giveUnknownComponent: Unknown is of undefined type for this problem");
     }
 
     return 0.;
@@ -231,7 +230,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
         //
         stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( stiffnessMatrix == NULL ) {
-            OOFEM_ERROR("sparse matrix creation failed");
+            _error("solveYourselfAt: sparse matrix creation failed");
         }
 
         stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
@@ -269,7 +268,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalForces);
-
+    
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
 #endif
@@ -287,7 +286,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
 #endif
     NM_Status s = nMethod->solve(stiffnessMatrix, & loadVector, & displacementVector);
     if ( !( s & NM_Success ) ) {
-        OOFEM_ERROR("No success in solving system.");
+        OOFEM_ERROR("LinearStatic :: solverYourselfAt - No success in solving system.");
     }
 
     tStep->incrementStateCounter();            // update solution state counter

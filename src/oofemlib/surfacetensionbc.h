@@ -89,11 +89,11 @@ protected:
     /**
      * Helper function for computing the contributions to the load vector.
      */
-    void computeLoadVectorFromElement(FloatArray &answer, Element *e, int side, TimeStep *tStep);
+    void computeLoadVectorFromElement(FloatArray &answer, ElementGeometry *e, int side, TimeStep *tStep);
     /**
      * Helper function for computing the tangent (@f$ K = \frac{\mathrm{d}F}{\mathrm{d}u} @f$)
      */
-    void computeTangentFromElement(FloatMatrix &answer, Element *e, int side, TimeStep *tStep);
+    void computeTangentFromElement(FloatMatrix &answer, ElementGeometry *e, int side, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // surfacetensionbc_h

@@ -54,8 +54,8 @@ public:
      * @param endIndx Last component, for which rule applies.
      * @param dynamic Flag indicating that receiver can change.
      */
-    LobattoIntegrationRule(int n, Element * e, int startIndx, int endIndx, bool dynamic);
-    LobattoIntegrationRule(int n, Element * e);
+    LobattoIntegrationRule(int n, ElementGeometry * e, int startIndx, int endIndx, bool dynamic);
+    LobattoIntegrationRule(int n, ElementGeometry * e);
     /// Destructor
     virtual ~LobattoIntegrationRule();
 

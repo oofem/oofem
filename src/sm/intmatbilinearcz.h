@@ -48,6 +48,8 @@
 #include "structuralinterfacematerial.h"
 #include "structuralinterfacematerialstatus.h"
 
+#include "dynamicinputrecord.h"
+
 ///@name Input fields for IntMatBilinearCZ
 //@{
 #define _IFT_IntMatBilinearCZ_Name "intmatbilinearcz"

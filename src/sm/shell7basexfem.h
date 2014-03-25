@@ -36,7 +36,7 @@
 #define Shell7BaseXFEM_h
 
 #include "shell7base.h"
-#include "xfem/xfemelementinterface.h"
+#include "xfemelementinterface.h"
 
 
 ///@name Input fields for el

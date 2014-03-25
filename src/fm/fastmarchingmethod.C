@@ -50,7 +50,7 @@ FastMarchingMethod :: solve(FloatArray &dmanValues,
     int i, j, jn, candidate;
     const IntArray *neighborElemList;
     ConnectivityTable *ct = domain->giveConnectivityTable();
-    Element *ie;
+    ElementGeometry *ie;
 
 
     this->dmanValuesPtr = & dmanValues;
@@ -68,7 +68,7 @@ FastMarchingMethod :: solve(FloatArray &dmanValues,
         // and recompute the values of T at all trial neighbors of candidate
         neighborElemList = ct->giveDofManConnectivityArray(candidate);
         for ( i = 1; i <= neighborElemList->giveSize(); i++ ) {
-            ie = domain->giveElement( neighborElemList->at(i) );
+            ie = domain->giveElementGeometry( neighborElemList->at(i) );
             for ( j = 1; j <= ie->giveNumberOfDofManagers(); j++ ) {
                 jn = ie->giveDofManagerNumber(j);
                 if ( dmanRecords.at(jn - 1).status != FMM_Status_KNOWN ) {
@@ -90,8 +90,10 @@ FastMarchingMethod :: initialize(FloatArray &dmanValues,
     // tag points with boundary value as known
     // then tag as trial all points that are one grid point away
     // finally tag as far all other grid points
-    int i;
-    int nnode = domain->giveNumberOfDofManagers();
+    int i, k, l;
+    int jnode, neighborNode, nnode = domain->giveNumberOfDofManagers();
+    ElementGeometry *neighborElem;
+    const IntArray *neighborElemList;
     ConnectivityTable *ct = domain->giveConnectivityTable();
 
     // all points are far by default
@@ -103,8 +105,8 @@ FastMarchingMethod :: initialize(FloatArray &dmanValues,
     // first tag all boundary points
     std :: list< int > :: const_iterator it;
 
-    for ( int jnode: bcDofMans ) {
-        if ( jnode > 0 ) {
+    for ( it = bcDofMans.begin(); it != bcDofMans.end(); ++it ) {
+        if ( ( jnode = * it ) > 0 ) {
             dmanRecords.at(jnode - 1).status = FMM_Status_KNOWN;
         } else {
             dmanRecords.at(-jnode - 1).status = FMM_Status_KNOWN_BOUNDARY;
@@ -112,19 +114,18 @@ FastMarchingMethod :: initialize(FloatArray &dmanValues,
     }
 
     // tag as trial all points that are one grid point away
-    for ( int jnode: bcDofMans ) {
-        jnode = abs(jnode);
+    for ( it = bcDofMans.begin(); it != bcDofMans.end(); ++it ) {
+        jnode = abs(* it);
 
-        const IntArray *neighborElemList = ct->giveDofManConnectivityArray(jnode);
-        for ( int k = 1; k <= neighborElemList->giveSize(); k++ ) {
-            ///@todo This uses "i" which will always be equal to "node" from the earlier loop. Unsafe coding.
+        neighborElemList = ct->giveDofManConnectivityArray(jnode);
+        for ( k = 1; k <= neighborElemList->giveSize(); k++ ) {
             if ( neighborElemList->at(k) == i ) {
                 continue;
             }
 
-            Element *neighborElem = domain->giveElement( neighborElemList->at(k) );
-            for ( int l = 1; l <= neighborElem->giveNumberOfDofManagers(); l++ ) {
-                int neighborNode = neighborElem->giveDofManagerNumber(l);
+            neighborElem = domain->giveElementGeometry( neighborElemList->at(k) );
+            for ( l = 1; l <= neighborElem->giveNumberOfDofManagers(); l++ ) {
+                neighborNode = neighborElem->giveDofManagerNumber(l);
                 if ( ( dmanRecords.at(neighborNode - 1).status != FMM_Status_KNOWN ) &&
                     ( dmanRecords.at(neighborNode - 1).status != FMM_Status_KNOWN_BOUNDARY ) &&
                     ( dmanRecords.at(neighborNode - 1).status != FMM_Status_TRIAL ) ) {
@@ -142,7 +143,7 @@ FastMarchingMethod :: updateTrialValue(FloatArray &dmanValues, int id, double F)
     int i, j, ai, bi, ci, h, nroot, _ind = 0;
     double at, bt, ht, a, b, u, cos_fi, sin_fi, _a, _b, _c, r1, r2, r3, t = 0.0, _h;
     bool reg_upd_flag;
-    Element *ie;
+    ElementGeometry *ie;
     FloatArray *ac, *bc, *cc, cb, ca;
     const IntArray *neighborElemList;
     ConnectivityTable *ct = domain->giveConnectivityTable();
@@ -153,7 +154,7 @@ FastMarchingMethod :: updateTrialValue(FloatArray &dmanValues, int id, double F)
     neighborElemList = ct->giveDofManConnectivityArray(id);
     for ( i = 1; i <= neighborElemList->giveSize(); i++ ) {
         // test element if admissible
-        ie = domain->giveElement( neighborElemList->at(i) );
+        ie = domain->giveElementGeometry( neighborElemList->at(i) );
         if ( ie->giveGeometryType() == EGT_triangle_1 ) {
             for ( j = 1; j <= 3; j++ ) {
                 if ( ie->giveDofManagerNumber(j) == id ) {

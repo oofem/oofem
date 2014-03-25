@@ -49,7 +49,7 @@ UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *tSte
     double result;
 
     if ( ( mode != VM_Incremental ) && ( mode != VM_Total ) ) {
-        OOFEM_ERROR("unknown mode (%s)", __ValueModeTypeToString(mode) );
+        _error2( "computeComponentArrayAt: unknown mode (%s)", __ValueModeTypeToString(mode) );
     }
 
     answer.resize(this->size);
@@ -59,7 +59,7 @@ UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *tSte
         ";t=" << tStep->giveTargetTime() << ";" << ftExpression [ i - 1 ];
         result = myParser.eval(buff.str().c_str(), err);
         if ( err ) {
-            OOFEM_ERROR("parser syntax error");
+            _error("computeValueAt: parser syntax error");
         }
 
         answer.at(i) = result;
@@ -69,7 +69,7 @@ UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *tSte
             ";t=" << ( tStep->giveTargetTime() - tStep->giveTimeIncrement() ) << ";" << ftExpression [ i - 1 ];
             result = myParser.eval(buff.str().c_str(), err);
             if ( err ) {
-                OOFEM_ERROR("parser syntax error");
+                _error("computeValueAt: parser syntax error");
             }
 
             answer.at(i) -= result;
@@ -80,6 +80,7 @@ UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *tSte
 IRResultType
 UserDefinedTemperatureField :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, size, _IFT_UserDefinedTemperatureField_size);

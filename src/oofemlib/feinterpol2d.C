@@ -63,7 +63,7 @@ void FEInterpolation2d :: boundaryEdgeLocal2Global(FloatArray &answer, int bound
 
 double FEInterpolation2d :: giveArea(const FEICellGeometry &cellgeo) const
 {
-    OOFEM_ERROR("Not implemented in subclass.");
+    OOFEM_ERROR("FEInterpolation2d :: giveArea - Not implemented in subclass.");
     return 0;
 }
 

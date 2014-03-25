@@ -62,6 +62,7 @@ RandomMaterialStatusExtensionInterface :: _setProperty(int key, double value)
 IRResultType
 RandomMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
     randVariables.clear();
@@ -70,7 +71,7 @@ RandomMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, randomVariableGenerators, _IFT_RandomMaterialExt_randGen);
 
     if ( randVariables.giveSize() != randomVariableGenerators.giveSize() ) {
-        OOFEM_SIMPLE_ERROR("RandomMaterialExtensionInterface::_initializeFrom: Incompatible size of randvars and randdist attrs");
+        OOFEM_ERROR("RandomMaterialExtensionInterface::_initializeFrom: Incompatible size of randvars and randdist attrs");
     }
 
     return IRRT_OK;
@@ -106,7 +107,7 @@ RandomMaterialExtensionInterface :: _generateStatusVariables(GaussPoint *gp) con
                                                      ( matStat->giveInterface(RandomMaterialStatusExtensionInterfaceType) );
 
     for ( int i = 1; i <= size; i++ ) {
-        gp->giveElement()->giveDomain()->
+        gp->giveElementGeometry()->giveDomain()->
         giveRandomFieldGenerator( randomVariableGenerators.at(i) )->generateRandomValueAt(value, gp);
         status->_setProperty(randVariables.at(i), value);
     }

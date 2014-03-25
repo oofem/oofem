@@ -170,6 +170,11 @@ StokesFlowVelocityHomogenization :: getMeans(FloatArray &gradP, FloatArray &v, T
     v.times(1. / AreaFull);
 }
 
+void
+StokesFlowVelocityHomogenization :: updateC()
+{
+    OOFEM_LOG_ERROR("Uses StokesFlowVelocityHomogenization :: updateC()");
+}
 
 void
 StokesFlowVelocityHomogenization :: rveGiveCharacteristicData(int DataType, void *input, void *answer, TimeStep *tStep)

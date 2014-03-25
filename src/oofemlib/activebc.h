@@ -76,6 +76,7 @@ public:
     {
         GeneralBoundaryCondition :: initializeFrom(ir);
 
+        const char *__proc = "initializeFrom";
         IRResultType result;
         IntArray tempA, tempB, tempC;
         IR_GIVE_OPTIONAL_FIELD(ir, tempB, _IFT_ActiveBoundaryCondition_elementSides);
@@ -93,7 +94,7 @@ public:
      * @param elem Element number.
      * @param side Side number.
      */
-    virtual void addElementSide(int elem, int side) { OOFEM_ERROR("Not supported"); }
+    virtual void addElementSide(int elem, int side) { OOFEM_ERROR2( "%s :: addElement - Not supported", giveClassName() ); }
     //@}
 
     /**
@@ -173,7 +174,7 @@ public:
      */
     virtual int giveNumberOfMasterDofs(ActiveDof *dof)
     {
-        OOFEM_ERROR("Not supported by bc.");
+        OOFEM_ERROR2( "%s :: giveNumberOfPrimaryMasterDofs - Not supported by bc.", giveClassName() );
         return 0;
     }
     /**
@@ -184,12 +185,12 @@ public:
      */
     virtual Dof *giveMasterDof(ActiveDof *dof, int mdof)
     {
-        OOFEM_ERROR("Not supported by bc.");
+        OOFEM_ERROR2( "%s :: giveMasterDof - Not supported by bc.", giveClassName() );
         return NULL;
     }
     virtual void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs)
     {
-        OOFEM_ERROR("Not supported by bc.");
+        OOFEM_ERROR2( "%s :: computeDofTransformation - Not supported by bc.", giveClassName() );
     }
     /**
      * Computes the value of the dof.
@@ -201,7 +202,7 @@ public:
      */
     virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
     {
-        OOFEM_ERROR("Not supported by bc.");
+        OOFEM_ERROR2( "%s :: giveUnknown - Not supported by bc.", giveClassName() );
         return 0.0;
     }
     /**
@@ -213,7 +214,7 @@ public:
      */
     virtual double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
     {
-        OOFEM_ERROR("Not supported by bc.");
+        OOFEM_ERROR2( "%s :: giveUnknown - Not supported by bc.", giveClassName() );
         return 0.0;
     }
     //@}

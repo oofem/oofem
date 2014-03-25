@@ -77,7 +77,7 @@ Q27Space :: initializeFrom(InputRecord *ir)
 void
 Q27Space :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    answer = {D_u, D_v, D_w};
+    answer.setValues(3, D_u, D_v, D_w);
 }
 
 MaterialMode
@@ -244,7 +244,7 @@ Q27Space :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, Gauss
     // local y axis - completes the righ hand side cs.
 
     /*
-     * OOFEM_ERROR("surface local coordinate system not supported");
+     * _error ("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
      * return 1;
      */
     FloatArray gc(3);
@@ -343,7 +343,7 @@ Q27Space :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        OOFEM_ERROR("unknown node number %d", pap);
+        _error2("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: unknown node number %d", pap);
     }
 }
 
@@ -365,7 +365,7 @@ void
 Q27Space :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
     answer.clear();
-    OOFEM_WARNING("IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
+    _warning("Qspace element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
 void

@@ -41,6 +41,11 @@
 #include "nonlocmatstiffinterface.h"
 #include "cltypes.h"
 
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
+ #include "connectivitytable.h"
+#endif
+
 ///@name Input fields for TrabBoneNL3D
 //@{
 #define _IFT_TrabBoneNL3D_Name "trabbonenl3d"

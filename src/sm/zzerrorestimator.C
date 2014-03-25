@@ -70,7 +70,7 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
     InternalStateType type = IStype;
 
     if ( mode == temporaryEM ) {
-        type = IST_StressTensorTemp;                  // OOFEM_ERROR("temporaryEM mode not supported");
+        type = IST_StressTensorTemp;                  // _error ("estimateError: temporaryEM mode not supported");
     }
 
     if ( this->stateCounter == tStep->giveSolutionStateCounter() ) {
@@ -83,18 +83,17 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
     } else if ( this->nodalRecoveryType == SPRRecovery ) {
         rm = new SPRNodalRecoveryModel(this->domain);
     } else {
-        OOFEM_ERROR("unknown nodal recovery type");
+        _error("estimateError: unknown nodal recovery type");
     }
 
     // first set the domain Smoother to suitable one, keep old one to be recovered
     oldSmoother = this->domain->giveSmoother();
     this->domain->setSmoother(rm, 0); // do not delete old one
 
-    // create a new set containing all elements
-    Set elemSet(0, this->domain);
-    elemSet.addAllElements();
-    // recover nodal values on entire elemSet (domain)
-    rm->recoverValues(elemSet, type, tStep);
+    // set recovery mode
+    rm->setRecoveryMode( -1, IntArray() );
+    // recover nodal values
+    rm->recoverValues(type, tStep);
 
 #ifdef ZZErrorEstimator_ElementResultCashed
     this->eNorms.resize(nelems);
@@ -108,13 +107,13 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
     this->globalENorm = this->globalSNorm = 0.0;
     // loop over domain's elements
     for ( int ielem = 1; ielem <= nelems; ielem++ ) {
-        if ( this->skipRegion( this->domain->giveElement(ielem)->giveRegionNumber() ) ) {
+        if ( this->skipRegion( this->domain->giveElementGeometry(ielem)->giveRegionNumber() ) ) {
             continue;
         }
 
-        interface = static_cast< ZZErrorEstimatorInterface * >( this->domain->giveElement(ielem)->giveInterface(ZZErrorEstimatorInterfaceType) );
+        interface = static_cast< ZZErrorEstimatorInterface * >( this->domain->giveElementGeometry(ielem)->giveInterface(ZZErrorEstimatorInterfaceType) );
         if ( interface == NULL ) {
-            OOFEM_ERROR("Element has no ZZ error estimator interface defined");
+            _error("estimateError: Element has no ZZ error estimator interface defined");
         }
 
 #ifdef ZZErrorEstimator_ElementResultCashed
@@ -160,9 +159,9 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
 }
 
 double
-ZZErrorEstimator :: giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep)
+ZZErrorEstimator :: giveElementError(EE_ErrorType type, ElementGeometry *elemGeometry, TimeStep *tStep)
 {
-    if ( this->skipRegion( elem->giveRegionNumber() ) ) {
+    if ( this->skipRegion( elemGeometry->giveRegionNumber() ) ) {
         return 0.0;
     }
 
@@ -170,7 +169,7 @@ ZZErrorEstimator :: giveElementError(EE_ErrorType type, Element *elem, TimeStep 
 
 #ifdef ZZErrorEstimator_ElementResultCashed
     if ( type == internalStressET ) {
-        return this->eNorms.at( elem->giveNumber() );
+        return this->eNorms.at( elemGeometry->giveNumber() );
     }
 
 #else
@@ -219,6 +218,7 @@ ZZErrorEstimator :: giveRemeshingCrit()
 IRResultType
 ZZErrorEstimator :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     int n;
 
@@ -259,8 +259,8 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
     nDofMans = elem->giveNumberOfDofManagers();
     // assemble nodal recovered stresses
     for ( int i = 1; i <= elem->giveNumberOfNodes(); i++ ) {
-        elem->giveDomain()->giveSmoother()->giveNodalVector( recoveredStress,
-                                                            elem->giveDofManager(i)->giveNumber() );
+        elem->giveDomain()->giveSmoother()->giveNodalVector( recoveredStress, elem->giveDofManager(i)->giveNumber(),
+                                                            elem->giveRegionNumber() );
         if ( i == 1 ) {
             nodalRecoveredStreses.resize( nDofMans, recoveredStress->giveSize() );
         }
@@ -320,7 +320,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
             sNorm += lsig_reduced.dotProduct(help) * dV;
         }
     } else {
-        OOFEM_SIMPLE_ERROR("ZZErrorEstimatorInterface::ZZErrorEstimatorI_computeElementContributions unsupported norm type");
+        OOFEM_ERROR("ZZErrorEstimatorInterface::ZZErrorEstimatorI_computeElementContributions unsupported norm type");
     }
 
     eNorm = sqrt(eNorm);
@@ -367,7 +367,7 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 {
     int nelem, nnode, jnode, elemPolyOrder, ielemNodes;
     double globValNorm = 0.0, globValErrorNorm = 0.0, elemErrLimit, eerror, iratio, currDensity, elemSize;
-    Element *ielem;
+    ElementGeometry *ielem;
     EE_ErrorType errorType = indicatorET;
     ZZRemeshingCriteriaInterface *interface;
     double pe, coeff = 2.0;
@@ -392,7 +392,7 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
         globValErrorNorm = this->ee->giveValue(globalErrorEEV, tStep);
         errorType = internalStressET;
     } else {
-        OOFEM_ERROR("unknown mode");
+        _error("estimateMeshDensities: unknown mode");
     }
 
 
@@ -414,16 +414,16 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     this->requiredError * coeff;
 
     for ( int i = 1; i <= nelem; i++ ) {
-        ielem = domain->giveElement(i);
+        ielem = domain->giveElementGeometry(i);
 
         if ( this->ee->skipRegion( ielem->giveRegionNumber() ) ) {
             continue;
         }
 
         interface = static_cast< ZZRemeshingCriteriaInterface * >
-                    ( domain->giveElement(i)->giveInterface(ZZRemeshingCriteriaInterfaceType) );
+                    ( domain->giveElementGeometry(i)->giveInterface(ZZRemeshingCriteriaInterfaceType) );
         if ( !interface ) {
-            OOFEM_ERROR("element does not support ZZRemeshingCriteriaInterface");
+            _error("estimateMeshDensities: element does not support ZZRemeshingCriteriaInterface");
         }
 
         eerror = this->ee->giveElementError(errorType, ielem, tStep);
@@ -473,6 +473,7 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 IRResultType
 ZZRemeshingCriteria :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, this->requiredError, _IFT_ZZRemeshingCriteria_requirederror);
@@ -502,7 +503,7 @@ ZZRemeshingCriteria :: giveDofManDensity(int num)
      * interface = (ZZRemeshingCriteriaInterface*)
      * domain->giveElement(con->at(i))->giveInterface (ZZRemeshingCriteriaInterfaceType);
      * if (!interface) {
-     * OOFEM_ERROR("element does not support ZZRemeshingCriteriaInterface");
+     * _error ("giveDofManDensity: element does not support ZZRemeshingCriteriaInterface");
      * }
      * if (i==1) density = interface->ZZRemeshingCriteriaI_giveCharacteristicSize ();
      * else density = min (density, interface->ZZRemeshingCriteriaI_giveCharacteristicSize ());
@@ -514,7 +515,7 @@ ZZRemeshingCriteria :: giveDofManDensity(int num)
     density = 0.0;
     for ( int i = 1; i <= isize; i++ ) {
         interface = static_cast< ZZRemeshingCriteriaInterface * >
-                    ( domain->giveElement( con->at(i) )->giveInterface(ZZRemeshingCriteriaInterfaceType) );
+                    ( domain->giveElementGeometry( con->at(i) )->giveInterface(ZZRemeshingCriteriaInterfaceType) );
         if ( interface ) {
             init = true;
             density += interface->ZZRemeshingCriteriaI_giveCharacteristicSize();

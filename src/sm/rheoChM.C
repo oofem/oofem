@@ -371,7 +371,7 @@ RheoChainMaterial :: computeCharTimes()
     Tau1  = begOfTimeOfInterest;
 
     if ( Tau1 <= 0 ) {
-        OOFEM_ERROR("begOfTimeOfInterest must be a positive number");
+        _error("begOfTimeOfInterest must be a positive number");
     }
 
     nsteps = ( int ) ( ( log(Taun1) - log(Tau1) ) / log(10.) + 1. );
@@ -472,6 +472,7 @@ RheoChainMaterial :: CreateStatus(GaussPoint *gp) const
 IRResultType
 RheoChainMaterial :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     StructuralMaterial :: initializeFrom(ir);
@@ -527,7 +528,7 @@ RheoChainMaterial :: saveIPContext(DataStream *stream, ContextMode mode, GaussPo
     contextIOResultType iores;
 
     if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
+        _error("saveContext : can't write into NULL stream");
     }
 
     if ( ( iores = Material :: saveIPContext(stream, mode, gp) ) != CIO_OK ) {
@@ -594,7 +595,7 @@ RheoChainMaterialStatus :: letTempHiddenVarsVectorBe(int i, FloatArray &valueArr
     // Sets the i:th hidden variables vector to valueArray.
 #if DEBUG
     if ( i > nUnits ) {
-        OOFEM_ERROR("unit number exceeds the specified limit");
+        OOFEM_ERROR("RheoChainMaterialStatus :: letTempHiddenVarsVectorBe - unit number exceeds the specified limit");
     }
 #endif
     this->tempHiddenVars [ i - 1 ] = valueArray;
@@ -658,7 +659,7 @@ RheoChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
     contextIOResultType iores;
 
     if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
+        _error("saveContext : can't write into NULL stream");
     }
 
     if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {

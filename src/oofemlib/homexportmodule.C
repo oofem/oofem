@@ -41,15 +41,15 @@
 #include "classfactory.h"
 
 #ifdef __SM_MODULE
- #include "../sm/structuralelement.h"
- #include "../sm/structuralmaterial.h"
- #include "../sm/truss3d.h"
- #include "../sm/stressvector.h"
- #include "../sm/strainvector.h"
+ #include "structuralelement.h"
+ #include "structuralmaterial.h"
+ #include "truss3d.h"
+ #include "stressvector.h"
+ #include "strainvector.h"
 #endif
 
 #ifdef __TM_MODULE
- #include "../tm/transportmaterial.h"
+ #include "transportmaterial.h"
 #endif
 
 
@@ -69,6 +69,7 @@ HOMExportModule :: ~HOMExportModule()
 IRResultType
 HOMExportModule :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     IRResultType val;
     this->scale = 1.;
@@ -86,7 +87,7 @@ HOMExportModule :: initializeFrom(InputRecord *ir)
 void
 HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
-    Element *elem;
+    ElementGeometry *elemGeometry;
     if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
         return;
     }
@@ -106,15 +107,15 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     if ( domType == _HeatTransferMode || domType == _HeatMass1Mode ) {
         for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-            elem = d->giveElement(ielem);
-            if ( this->matnum.giveSize() == 0 || this->matnum.contains( elem->giveMaterial()->giveNumber() ) ) {
-                iRule = elem->giveDefaultIntegrationRulePtr();
+            elemGeometry = d->giveElementGeometry(ielem);
+            if ( this->matnum.giveSize() == 0 || this->matnum.contains( elemGeometry->giveMaterial()->giveNumber() ) ) {
+                iRule = elemGeometry->giveDefaultIntegrationRulePtr();
                 for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
                     gp  = iRule->getIntegrationPoint(i);
-                    dV  = elem->computeVolumeAround(gp);
+                    dV  = elemGeometry->computeVolumeAround(gp);
                     VolTot += dV;
-                    elem->giveIPValue(vecState, gp, IST_Temperature, tStep);
-                    elem->giveIPValue(vecFlow, gp, IST_TemperatureFlow, tStep);
+                    elemGeometry->giveIPValue(vecState, gp, IST_Temperature, tStep);
+                    elemGeometry->giveIPValue(vecFlow, gp, IST_TemperatureFlow, tStep);
                     sumState += vecState.at(1) * dV;
                     vecFlow.resize(3);
                     vecFlow.times(dV);
@@ -131,7 +132,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 #ifdef __SM_MODULE
         StructuralElement *structElem;
         //int nnodes = d->giveNumberOfDofManagers();
-        FloatArray VecStrain, VecStress, VecEigStrain, VecEigStrainReduced, tempStrain(6), tempStress(6), tempEigStrain(6), SumStrain(6), SumStress(6), SumEigStrain(6), tempFloatAr, damage;
+        FloatArray VecStrain, VecStress, VecEigStrain, tempStrain(6), tempStress(6), tempEigStrain(6), SumStrain(6), SumStress(6), SumEigStrain(6), tempFloatAr, damage;
         double sumDamage = 0.;
         //stress and strain vectors are always in global c.s.
         SumStrain.zero(); //xx, yy, zz, yz, zx, xy
@@ -143,27 +144,22 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             tempStress.zero();
             tempEigStrain.zero();
 
-            elem = d->giveElement(ielem);
-            if ( this->matnum.giveSize() == 0 || this->matnum.contains( elem->giveMaterial()->giveNumber() ) ) {
-                iRule = elem->giveDefaultIntegrationRulePtr();
+            elemGeometry = d->giveElementGeometry(ielem);
+            if ( this->matnum.giveSize() == 0 || this->matnum.contains( elemGeometry->giveMaterial()->giveNumber() ) ) {
+                iRule = elemGeometry->giveDefaultIntegrationRulePtr();
                 for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
                     gp  = iRule->getIntegrationPoint(i);
-                    structElem = static_cast< StructuralElement * >(elem);
-                    // structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
-                    structElem->computeResultingIPEigenstrainAt(VecEigStrainReduced, tStep, gp, VM_Total);
-		    if( VecEigStrainReduced.giveSize() == 0 ){
-                        VecEigStrain.resize(0);
-                    } else {
-                        ((StructuralMaterial*)structElem->giveMaterial())->giveFullSymVectorForm(VecEigStrain, VecEigStrainReduced,  gp->giveMaterialMode());
-                    }
-                    dV  = elem->computeVolumeAround(gp);
-                    elem->giveIPValue(VecStrain, gp, IST_StrainTensor, tStep);
-                    elem->giveIPValue(VecStress, gp, IST_StressTensor, tStep);
-                    elem->giveIPValue(damage, gp, IST_DamageTensor, tStep);
+                    structElem = static_cast< StructuralElement * >( elemGeometry );
+		    // structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
+                    structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Total);
+                    dV  = elemGeometry->computeVolumeAround(gp);
+                    elemGeometry->giveIPValue(VecStrain, gp, IST_StrainTensor, tStep);
+                    elemGeometry->giveIPValue(VecStress, gp, IST_StressTensor, tStep);
+                    elemGeometry->giveIPValue(damage, gp, IST_DamageTensor, tStep);
 
                     //truss element has strains and stresses in the first array so transform them to global coordinates
                     ///@todo Should this be the job of giveIPValue to ensure that vectors are given in global c.s.?
-                    if ( dynamic_cast< Truss3d * >(elem) ) {
+                    if ( dynamic_cast< Truss3d * >(elemGeometry) ) {
                         MaterialMode mmode = _3dMat;
                         tempStress.at(1) = VecStress.at(1);
                         tempStrain.at(1) = VecStrain.at(1);
@@ -176,7 +172,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                         StrainVector strainVector2(mmode);
                         StrainVector strainEigVector1(tempEigStrain, mmode); //convert from array
                         StrainVector strainEigVector2(mmode);
-                        elem->giveLocalCoordinateSystem(baseGCS);
+                        elemGeometry->giveLocalCoordinateSystem(baseGCS);
 
                         stressVector1.transformTo(stressVector2, baseGCS, 0);
                         strainVector1.transformTo(strainVector2, baseGCS, 0);
@@ -251,7 +247,7 @@ HOMExportModule :: initialize()
 
     std :: string fileName = emodel->giveOutputBaseFileName() + ".hom";
     if ( ( this->stream = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR("failed to open file %s", fileName.c_str());
+        OOFEM_ERROR2( "HOMExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
     }
 
     if ( domType == _HeatTransferMode || domType == _HeatMass1Mode ) {

@@ -84,7 +84,7 @@ QSpace :: giveMaterialOrientationAt(FloatArray &x, FloatArray &y, FloatArray &z,
 void
 QSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    answer = {D_u, D_v, D_w};
+    answer.setValues(3, D_u, D_v, D_w);
 }
 
 
@@ -379,7 +379,7 @@ QSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPo
     // local y axis - completes the righ hand side cs.
 
     /*
-     * OOFEM_ERROR("surface local coordinate system not supported");
+     * _error ("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
      * return 1;
      */
     FloatArray gc(3);
@@ -478,7 +478,7 @@ QSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int 
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        OOFEM_ERROR("unknown node number %d", pap);
+        _error2("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: unknown node number %d", pap);
     }
 }
 
@@ -500,7 +500,7 @@ void
 QSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
     answer.clear();
-    OOFEM_WARNING("IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
+    _warning("Qspace element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
 void

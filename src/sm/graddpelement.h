@@ -51,12 +51,26 @@ protected:
     int nPrimNodes, nPrimVars, nSecNodes, nSecVars;
     IntArray locU, locK;
     int totalSize, nlSize, locSize;
+    int averType, nlGeo;
 
 public:
     GradDpElement();
     virtual ~GradDpElement() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    //virtual void giveDofManDofIDMask (int inode, EquationID ut, IntArray& answer) const;
+
+    // definition & identification
+    virtual const char *giveClassName() const { return "GradDpElement"; }
+    /***********************Predelat************************************/
+    virtual int getNprimNodes() { return 0; }
+    virtual int getNprimVars() { return 0; }
+    virtual int getNsecNodes() { return 0; }
+    virtual int getNsecVars() { return 0; }
+
+    /************************************************************/
+    //  virtual int  computeNumberOfDofs (EquationID ut){return (nPrimNodes*nPrimVars+nSecNodes*nSecVars);};
+    //virtual int    checkConsistency();
 
 protected:
     virtual StructuralElement *giveStructuralElement() = 0;
@@ -64,6 +78,7 @@ protected:
 
     virtual void computeNkappaMatrixAt(GaussPoint *, FloatMatrix &) = 0;
     virtual void computeBkappaMatrixAt(GaussPoint *, FloatMatrix &) = 0;
+    //void initialize();
     void setDisplacementLocationArray(IntArray &answer, int nPrimNodes, int nPrimVars, int nSecNodes, int nSecVars);
     void setNonlocalLocationArray(IntArray &answer, int nPrimNodes, int nPrimVars, int nSecNodes, int nSecVars);
 
@@ -89,6 +104,11 @@ protected:
     void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     void computeLocForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     void computeDistanceToBoundary();
+
+    //@todo this method has been removed from NLStructuralElement and has simply been put here to
+    // not affect these derived elements
+    virtual void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
+    { OOFEM_ERROR("computeNLBMatrixAt is not implemented"); }
 };
 } // end namespace oofem
 

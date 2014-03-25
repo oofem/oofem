@@ -69,7 +69,7 @@ protected:
     /// Total number of nonzero coefficients stored.
     int nwk;
     /// Integer array holding addresses of diagonal members.
-    IntArray adr;
+    IntArray *adr;
     /// Vector of stored coefficients.
     double *mtrx;
     /// Flag indicating whether factorized.
@@ -99,7 +99,7 @@ public:
      * Allocates and builds internal structure according to given
      * array holding addresses of diagonal members values (adr).
      */
-    int setInternalStructure(IntArray &a);
+    int setInternalStructure(IntArray *a);
 
     virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
     virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
@@ -147,10 +147,8 @@ public:
     virtual SparseMtrxType giveType() const { return SMT_Skyline; }
     virtual bool isAsymmetric() const { return false; }
 
-    virtual const char *giveClassName() const { return "Skyline"; }
-
 protected:
-    Skyline(int, int, double *, const IntArray &);
+    Skyline(int, int, double *, IntArray *);
 };
 } // end namespace oofem
 #endif // skyline_h

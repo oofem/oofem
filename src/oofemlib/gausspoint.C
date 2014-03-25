@@ -119,7 +119,7 @@ GaussPoint *GaussPoint :: giveSlaveGaussPoint(int index)
     }
 
     if ( ( index < 0 ) || ( index >= numberOfGp ) ) {
-        OOFEM_SIMPLE_ERROR("giveSlaveGaussPoint: index out of range");
+        OOFEM_ERROR("giveSlaveGaussPoint: index out of range");
     }
 
     return gaussPointArray [ index ];

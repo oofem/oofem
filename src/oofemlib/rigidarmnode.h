@@ -71,10 +71,16 @@ class OOFEM_EXPORT RigidArmNode : public Node
 protected:
     ///
     IntArray masterMask;
+    /// Count of Master Dofs
+    IntArray *countOfMasterDofs;
     /// Number of master DofManager (Node)
     int masterDofMngr;
     /// Pointer to master Node
     Node *masterNode;
+    ///
+    IntArray **masterDofID;
+    /// Array of vectors of master contribution coefficients
+    FloatArray **masterContribution;
 
 private:
     void allocAuxArrays();
@@ -96,8 +102,7 @@ public:
     /**
      * Compute vector of master contribution coefficients - SUMA of contributions == 1.0
      */
-    void computeMasterContribution(IntArray &countOfMasterDofs, std::vector< IntArray > &masterDofID, 
-                                   std::vector< FloatArray > &masterContribution);
+    void computeMasterContribution();
 
     virtual const char *giveClassName() const { return "RigidArmNode"; }
     virtual const char *giveInputRecordName() const { return _IFT_RigidArmNode_Name; }

@@ -42,6 +42,7 @@ namespace oofem {
 class GaussPoint;
 class ZZNodalRecoveryModelInterface;
 class ProcessCommunicator;
+class ElementGeometry;
 
 /**
  * The nodal recovery model based on paper of Zienkiewicz and Zhu "A Simple Estimator and Adaptive
@@ -70,9 +71,7 @@ public:
     /// Destructor.
     virtual ~ZZNodalRecoveryModel();
 
-    virtual int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep);
-
-    virtual const char *giveClassName() const { return "ZZNodalRecoveryModel"; }
+    virtual int recoverValues(InternalStateType type, TimeStep *tStep);
 
 private:
     /**
@@ -85,7 +84,7 @@ private:
 
 #ifdef __PARALLEL_MODE
     void initCommMaps();
-    void exchangeDofManValues(FloatArray &lhs, FloatMatrix &rhs, IntArray &rn);
+    void exchangeDofManValues(int ireg, FloatArray &lhs, FloatMatrix &rhs, IntArray &rn);
     int packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
     int unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
 #endif
@@ -121,7 +120,7 @@ public:
     /**
      * Returns the corresponding element to interface.
      */
-    virtual Element *ZZNodalRecoveryMI_giveElement() = 0;
+    virtual ElementGeometry *ZZNodalRecoveryMI_giveElementGeometry() = 0;
     //@}
 };
 } // end namespace oofem

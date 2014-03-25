@@ -57,11 +57,10 @@ public:
     /// Defines type of spring element (longitudinal/rotational) spring.
     enum SpringElementType {
         SE_1D_SPRING = 0,             ///< 1D spring element along x-axis.
-        SE_2D_SPRING_XY = 1,          ///< 2D spring element in xy plane, requires D_u and D_v DOFs in each node (orientation vector should be in this plane). 
-	SE_2D_SPRING_XZ = 2,          /// < 2D spring element in xz plane, requires D_u and D_w DOFs in each node (orientation vector should be in this plane). 
-        SE_2D_TORSIONALSPRING_XZ = 3, ///< 2D torsional spring element in xz plane, requires R_v DOFs in each node.
-        SE_3D_SPRING = 4,             ///< 3D spring element in space, requires D_u, D_v, and D_w DOFs in each node.
-        SE_3D_TORSIONALSPRING = 5     ///< 3D torsional spring in space, requires R_u, R_v, and R_w DOFs in each node.
+        SE_2D_SPRING_XY = 1,          ///< 2D spring element in xy plane, requires D_u and D_v DOFs in each node (orientation vector should be in this plane).
+        SE_2D_TORSIONALSPRING_XZ = 2, ///< 2D torsional spring element in xz plane, requires R_v DOFs in each node.
+        SE_3D_SPRING = 3,             ///< 3D spring element in space, requires D_u, D_v, and D_w DOFs in each node.
+        SE_3D_TORSIONALSPRING = 4     ///< 3D torsional spring in space, requires R_u, R_v, and R_w DOFs in each node.
     };
 
 protected:

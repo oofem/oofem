@@ -64,6 +64,7 @@ J2MPlasticMaterial :: ~J2MPlasticMaterial()
 IRResultType
 J2MPlasticMaterial :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     double value;
 

@@ -34,9 +34,12 @@
 
 #include "feinterpol.h"
 #include "element.h"
+#include "elementgeometry.h"
 #include "node.h"
 
 namespace oofem {
 int FEIElementGeometryWrapper :: giveNumberOfVertices() const { return elem->giveNumberOfNodes(); }
 const FloatArray *FEIElementGeometryWrapper :: giveVertexCoordinates(int i) const { return elem->giveNode(i)->giveCoordinates(); }
+//int FEIElementGeometryWrapper :: giveNumberOfVertices() const { return elemGeometry->giveNumberOfNodes(); }
+//const FloatArray *FEIElementGeometryWrapper :: giveVertexCoordinates(int i) const { return elemGeometry->giveNode(i)->giveCoordinates(); }
 } // end namespace oofem

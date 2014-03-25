@@ -58,9 +58,7 @@ InternalVariableField :: evaluateAt(FloatArray &answer, FloatArray &coords, Valu
     IntArray types(1);
     types.at(1) = this->type;
     /// Use MaterialMappingAlgorithm classes to do the job
-    Set eset(0, domain);
-    eset.addAllElements();
-    this->mma->__init(domain, types, coords, eset, tStep);
+    this->mma->__init(domain, types, coords, -1, tStep);
     this->mma->__mapVariable(answer, coords, this->type, tStep);
 
     return 0; // ok

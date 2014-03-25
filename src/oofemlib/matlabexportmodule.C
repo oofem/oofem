@@ -51,13 +51,13 @@
 #include "unknownnumberingscheme.h"
 
 #ifdef __FM_MODULE
- #include "../fm/tr21stokes.h"
- #include "../fm/tet21stokes.h"
- #include "../fm/stokesflow.h"
+ #include "tr21stokes.h"
+ #include "tet21stokes.h"
+ #include "stokesflow.h"
 #endif
 
 #ifdef __SM_MODULE
- #include "../sm/structengngmodel.h"
+ #include "structengngmodel.h"
 #endif
 
 
@@ -84,9 +84,10 @@ MatlabExportModule :: ~MatlabExportModule()
 IRResultType
 MatlabExportModule :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
-    ExportModule :: initializeFrom(ir);
+    ExportModule::initializeFrom(ir);
 
     exportMesh = ir->hasField(_IFT_MatlabExportModule_mesh);
     exportData = ir->hasField(_IFT_MatlabExportModule_data);
@@ -134,11 +135,11 @@ MatlabExportModule :: computeArea()
 
     if ( domain->giveNumberOfSpatialDimensions() == 2 ) {
         for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
-            Area = Area + domain->giveElement(i)->computeArea();
+            Area = Area + domain->giveElementGeometry(i)->computeArea();
         }
     } else {
         for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
-            Volume = Volume + domain->giveElement(i)->computeVolume();
+            Volume = Volume + domain->giveElementGeometry(i)->computeVolume();
         }
     }
 }
@@ -147,7 +148,7 @@ MatlabExportModule :: computeArea()
 void
 MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
-    if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
+    if (!(testTimeStepOutput(tStep) || forcedOutput)) {
         return;
     }
 
@@ -241,13 +242,13 @@ MatlabExportModule :: doOutputMesh(TimeStep *tStep, FILE *FID)
 
     fprintf(FID, "]';\n");
 
-    int numberOfDofMans = domain->giveElement(1)->giveNumberOfDofManagers();
+    int numberOfDofMans = domain->giveElementGeometry(1)->giveNumberOfDofManagers();
 
     fprintf(FID, "\tmesh.t=[");
     for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
-        if ( domain->giveElement(i)->giveNumberOfDofManagers() == numberOfDofMans ) {
-            for ( int j = 1; j <= domain->giveElement(i)->giveNumberOfDofManagers(); j++ ) {
-                fprintf( FID, "%d,", domain->giveElement(i)->giveDofManagerNumber(j) );
+        if ( domain->giveElementGeometry(i)->giveNumberOfDofManagers() == numberOfDofMans ) {
+            for ( int j = 1; j <= domain->giveElementGeometry(i)->giveNumberOfDofManagers(); j++ ) {
+                fprintf( FID, "%d,", domain->giveElementGeometry(i)->giveDofManagerNumber(j) );
             }
         }
         fprintf(FID, ";");
@@ -395,14 +396,14 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
     FloatArray reactions;
     IntArray dofManMap, dofMap, eqnMap;
 #ifdef __SM_MODULE
-    StructuralEngngModel *strEngMod = dynamic_cast< StructuralEngngModel * >(emodel);
+    StructuralEngngModel *strEngMod = dynamic_cast< StructuralEngngModel * >( emodel );
     if ( strEngMod ) {
         strEngMod->buildReactionTable(dofManMap, dofMap, eqnMap, tStep, domainIndex);
         strEngMod->computeReaction(reactions, tStep, 1);
     } else
 #endif
     {
-        OOFEM_ERROR("Cannot export reaction forces - only implemented for structural problems.");
+        OOFEM_ERROR("MatlabExportModule :: doOutputReactionForces - Cannot export reaction forces - only implemented for structural problems.");
     }
 
     int numDofManToExport = this->reactionForcesDofManList.giveSize();
@@ -511,7 +512,7 @@ MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *F
     fprintf(FID, "\tIntegrationPointFields.Elements = cell(%i,1); \n", nelem);
 
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        Element *el = domain->giveElement( this->elList.at(ielem) );
+        ElementGeometry *el = domain->giveElementGeometry( this->elList.at(ielem) );
         fprintf( FID, "\tIntegrationPointFields.Elements{%i}.elementNumber = %i; \n", ielem, el->giveNumber() );
 
         int numIntRules = el->giveNumberOfIntegrationRules();
@@ -578,8 +579,8 @@ FILE *
 MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 {
     FILE *answer;
-    std :: ostringstream baseFileName;
-    std :: string fileName;
+    std::ostringstream baseFileName;
+    std::string fileName;
 
     fileName = this->emodel->giveOutputBaseFileName();
 
@@ -587,22 +588,25 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
     foundDot = fileName.rfind(".");
     fileName.replace(foundDot, 1, "_");
 
-    char fext [ 100 ];
+    char fext[100];
     if ( this->testSubStepOutput() ) {
         // include tStep version in output file name
 #ifdef __PARALLEL_MODE
         if ( this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1 ) {
             sprintf( fext, "_%03d_m%d_%d_%d", emodel->giveRank(), this->number, tStep->giveNumber(), tStep->giveSubStepNumber() );
-        } else
+        }
+        else
 #endif
-        sprintf( fext, "_m%d_%d_%d", this->number, tStep->giveNumber(), tStep->giveSubStepNumber() );
-    } else   {
+            sprintf(fext, "_m%d_%d_%d", this->number, tStep->giveNumber(), tStep->giveSubStepNumber());
+    }
+    else {
 #ifdef __PARALLEL_MODE
-        if ( this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1 ) {
-            sprintf( fext, "_%03d_m%d_%d", emodel->giveRank(), this->number, tStep->giveNumber() );
-        } else
+        if (this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1) {
+            sprintf(fext, "_%03d_m%d_%d", emodel->giveRank(), this->number, tStep->giveNumber());
+        }
+        else
 #endif
-        sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
+            sprintf(fext, "_m%d_%d", this->number, tStep->giveNumber());
     }
 
     fileName += fext;
@@ -611,7 +615,7 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
     fileName += ".m";
 
     if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR("failed to open file %s", fileName.c_str() );
+        OOFEM_ERROR2( "MatlabExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
     }
 
     return answer;

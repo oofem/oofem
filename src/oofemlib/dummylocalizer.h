@@ -41,6 +41,7 @@
 
 namespace oofem {
 class IntArray;
+class ElementGeometry;
 
 /**
  * The dummy implementation of spatial localizer based on traversing the whole domain.
@@ -62,9 +63,9 @@ public:
 
     virtual int init(bool force = false);
 
-    virtual Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = NULL);
-    virtual Element *giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList = NULL);
-    virtual Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &coords, int region = 0);
+    virtual ElementGeometry *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = NULL);
+    virtual ElementGeometry *giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList = NULL);
+    virtual ElementGeometry *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &coords, int region = 0);
     virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP = false);
     virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius);
     virtual void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);

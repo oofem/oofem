@@ -79,8 +79,6 @@ public:
     virtual void doInit() = 0;
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "InitModule"; }
-    /// Error printing helper.
-    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
 };
 } // end namespace oofem
 #endif // initmodule_h

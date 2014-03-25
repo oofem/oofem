@@ -82,6 +82,7 @@ DruckerPragerCutMat :: hasMaterialModeCapability(MaterialMode mode)
 IRResultType
 DruckerPragerCutMat :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // required by IR_GIVE_FIELD macro
     IRResultType result;                 // required by IR_GIVE_FIELD macro
 
     StructuralMaterial :: initializeFrom(ir);
@@ -188,7 +189,7 @@ DruckerPragerCutMat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatri
         gradientMatrix.resize(4, 4);
         break;
     default:
-        OOFEM_ERROR("Unknown material mode (%s)", __MaterialModeToString( gp->giveMaterialMode() ) );
+        OOFEM_ERROR2( "Unknown material mode (%s)", __MaterialModeToString( gp->giveMaterialMode() ) );
     }
 
     gradientMatrix.zero();
@@ -239,7 +240,7 @@ DruckerPragerCutMat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatri
             }
             gradientMatrix.symmetrized();
         } else {
-            OOFEM_ERROR("Unknown material mode (%s)", __MaterialModeToString( gp->giveMaterialMode() ) );
+            OOFEM_ERROR2( "Unknown material mode (%s)", __MaterialModeToString( gp->giveMaterialMode() ) );
         }
     }
 }

@@ -56,8 +56,8 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "xfem/enrichmentitem.h"
- #include "xfem/xfemmanager.h"
+ #include "enrichmentitem.h"
+ #include "xfemmanager.h"
 #endif
 
 namespace oofem {
@@ -91,6 +91,7 @@ Node :: giveCoordinate(int i)
 IRResultType Node :: initializeFrom(InputRecord *ir)
 // Gets from the source line from the data file all the data of the receiver.
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     int size;
@@ -117,7 +118,7 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, triplets, _IFT_Node_lcs);
         size = triplets.giveSize();
         if ( size != 6 ) {
-            OOFEM_WARNING("lcs in node %d is not properly defined, will be ignored", this->giveNumber() );
+            _warning2( "initializeFrom: lcs in node %d is not properly defined, will be ignored", this->giveNumber() );
         }
 
         double n1 = 0.0, n2 = 0.0;
@@ -133,7 +134,7 @@ IRResultType Node :: initializeFrom(InputRecord *ir)
         n1 = sqrt(n1);
         n2 = sqrt(n2);
         if ( ( n1 <= 1.e-6 ) || ( n2 <= 1.e-6 ) ) {
-            OOFEM_ERROR("lcs input error");
+            _error("instanciateFrom : lcs input error");
         }
 
         for ( int j = 1; j <= 3; j++ ) { // normalize e1' e2'
@@ -178,11 +179,11 @@ Node :: computeLoadVector(FloatArray &answer, Load *load, CharType type, TimeSte
 
     NodalLoad *loadN = dynamic_cast< NodalLoad * >(load);
     if ( !loadN ) {
-        OOFEM_ERROR("incompatible load");
+        _error("computeLoadVectorAt: incompatible load");
     }
 
     if ( loadN->giveBCGeoType() != NodalLoadBGT ) {
-        OOFEM_ERROR("incompatible load type applied");
+        _error("computeLoadVectorAt: incompatible load type applied");
     }
 
     loadN->computeComponentArrayAt(answer, tStep, mode); // can be NULL
@@ -251,7 +252,7 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, double scale)
 {
 #ifdef DEBUG
     if ( ( ic < 1 ) || ( ic > 3 ) ) {
-        OOFEM_ERROR("Can't return non-existing coordinate (index not in range 1..3)");
+        _error("giveUpdatedCoordinate: Can't return non-existing coordinate (index not in range 1..3)");
         return 0.;
     }
 #endif
@@ -301,7 +302,7 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, double scale)
 
         return coordinate;
     } else {
-        OOFEM_ERROR("Can't return updatedCoordinate for non-current timestep");
+        _error("Can't return updatedCoordinate for non-current timestep");
     }
 
     return 0.;
@@ -374,10 +375,10 @@ Node :: checkConsistency()
                 // compare coordinate systems
                 masterNode = dynamic_cast< Node * >( domain->giveDofManager(master) );
                 if ( !masterNode ) {
-                    OOFEM_WARNING("master dofManager is not compatible", 1);
+                    _warning2("checkConsistency: master dofManager is not compatible", 1);
                     result = 0;
                 } else if ( !this->hasSameLCS(masterNode) ) {
-                    OOFEM_WARNING("different lcs for master/slave nodes", 1);
+                    _warning2("checkConsistency: different lcs for master/slave nodes", 1);
                     result = 0;
                 }
             }
@@ -494,7 +495,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                     break;
 
                 default:
-                    OOFEM_ERROR("unknown dofID (%s)", __DofIDItemToString(id).c_str());
+                    _error2( "computeGNTransformation: unknown dofID (%s)", __DofIDItemToString(id).c_str() );
                 }
             }
         } else { // end if (dofIDArry.isEmpty())
@@ -549,7 +550,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                     break;
 
                 default:
-                    OOFEM_ERROR("unknown dofID (%s)", __DofIDItemToString(id).c_str());
+                    _error2( "computeGNTransformation: unknown dofID (%s)", __DofIDItemToString(id).c_str() );
                 }
             }
         } // end map is provided -> assemble for requested dofs
@@ -567,7 +568,7 @@ Node :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
+        _error("saveContex : can't write into NULL stream");
     }
 
     if ( ( iores = DofManager :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -604,7 +605,7 @@ Node :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
+        _error("restoreContex : can't write into NULL stream");
     }
 
     if ( ( iores = DofManager :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

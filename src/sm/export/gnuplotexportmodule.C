@@ -46,13 +46,13 @@
 #include "outputmanager.h"
 #include "dofmanager.h"
 #include "boundarycondition.h"
-#include "xfem/enrichmentitem.h"
-#include "xfem/xfemmanager.h"
+#include "enrichmentitem.h"
+#include "xfemmanager.h"
 #include "structuralinterfacematerialstatus.h"
-#include "xfem/enrichmentdomain.h"
-#include "xfem/XFEMDebugTools.h"
+#include "enrichmentdomain.h"
+#include "XFEMDebugTools.h"
 #include "prescribedgradient.h"
-#include "xfem/enrichmentitems/crack.h"
+#include "export/exportmodulecallerinterface.h"
 
 #include <sstream>
 
@@ -73,9 +73,19 @@ GnuplotExportModule::~GnuplotExportModule() {
 
 IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
 {
-    mExportReactionForces = ir->hasField(_IFT_GnuplotExportModule_ReactionForces);
-    mExportBoundaryConditions = ir->hasField(_IFT_GnuplotExportModule_BoundaryConditions);
-    return ExportModule::initializeFrom(ir);
+//    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
+
+    if(ir->hasField(_IFT_GnuplotExportModule_ReactionForces)) {
+    	mExportReactionForces = true;
+    }
+
+    if(ir->hasField(_IFT_GnuplotExportModule_BoundaryConditions)) {
+    	mExportBoundaryConditions = true;
+    }
+
+    ExportModule::initializeFrom(ir);
+
+    return IRRT_OK;
 }
 
 void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
@@ -96,10 +106,10 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 		int numBC = domain->giveNumberOfBoundaryConditions();
 
 		for(int i = 1; i <= numBC; i++) {
-			PrescribedGradient *presGradBC = dynamic_cast<PrescribedGradient*>( domain->giveBc(i) );
+			ExportModuleCallerInterface *expModCaller = dynamic_cast<ExportModuleCallerInterface*>( domain->giveBc(i) );
 
-			if(presGradBC != NULL) {
-				outputBoundaryCondition(*presGradBC, tStep);
+			if(expModCaller != NULL) {
+				expModCaller->callExportModule(*this, tStep);
 			}
 		}
 	}
@@ -136,7 +146,7 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
 	Domain *domain = emodel->giveDomain(1);
 	StructuralEngngModel *seMod = dynamic_cast<StructuralEngngModel* >(emodel);
 	if(seMod == NULL) {
-		OOFEM_ERROR("failed to cast to StructuralEngngModel.\n");
+		OOFEM_ERROR("Error in GnuplotExportModule::doOutput(): failed to cast to StructuralEngngModel.\n");
 	}
 
     IntArray ielemDofMask;

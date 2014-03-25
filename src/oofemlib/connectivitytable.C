@@ -62,6 +62,8 @@ ConnectivityTable :: instanciateConnectivityTable()
 {
     int ndofMan = domain->giveNumberOfDofManagers();
     int nelems = domain->giveNumberOfElements();
+    int i, j, jnode, nnodes;
+    ElementGeometry *ielemGeometry;
     IntArray dofManConnectivity(ndofMan);
 
     if ( nodalConnectivityFlag ) {
@@ -70,30 +72,30 @@ ConnectivityTable :: instanciateConnectivityTable()
 
     OOFEM_LOG_INFO("ConnectivityTable: initializing\n");
 
-    for ( int i = 1; i <= nelems; i++ ) {
-        Element *ielem = domain->giveElement(i);
-        int nnodes = ielem->giveNumberOfDofManagers();
-        for ( int j = 1; j <= nnodes; j++ ) {
-            int jnode = ielem->giveDofManager(j)->giveNumber();
+    for ( i = 1; i <= nelems; i++ ) {
+        ielemGeometry = domain->giveElementGeometry(i);
+        nnodes = ielemGeometry->giveNumberOfDofManagers();
+        for ( j = 1; j <= nnodes; j++ ) {
+            jnode = ielemGeometry->giveDofManager(j)->giveNumber();
             dofManConnectivity.at(jnode)++;
         }
     }
 
     // allocate Nodal connectivity table for domain
-    nodalConnectivity.resize(ndofMan);
-    for ( int i = 0; i < ndofMan; i++ ) {
-        nodalConnectivity[i].resize( dofManConnectivity(i) );
+    nodalConnectivity.growTo(ndofMan);
+    for ( i = 1; i <= ndofMan; i++ ) {
+        nodalConnectivity.put( i, new IntArray( dofManConnectivity.at(i) ) );
     }
 
     // build Nodal connectivity table for domain
     dofManConnectivity.zero();
 
-    for ( int i = 1; i <= nelems; i++ ) {
-        Element *ielem = domain->giveElement(i);
-        int nnodes = ielem->giveNumberOfDofManagers();
-        for ( int j = 1; j <= nnodes; j++ ) {
-            int jnode = ielem->giveDofManager(j)->giveNumber();
-            nodalConnectivity[jnode-1].at( ++dofManConnectivity.at(jnode) ) = i;
+    for ( i = 1; i <= nelems; i++ ) {
+        ielemGeometry = domain->giveElementGeometry(i);
+        nnodes = ielemGeometry->giveNumberOfDofManagers();
+        for ( j = 1; j <= nnodes; j++ ) {
+            jnode = ielemGeometry->giveDofManager(j)->giveNumber();
+            nodalConnectivity.at(jnode)->at( ++dofManConnectivity.at(jnode) ) = i;
         }
     }
 
@@ -107,29 +109,36 @@ ConnectivityTable :: giveDofManConnectivityArray(int dofman)
         this->instanciateConnectivityTable();
     }
 
-    return &this->nodalConnectivity[dofman-1];
+    return this->nodalConnectivity.at(dofman);
 }
 
 
 void
 ConnectivityTable :: giveElementNeighbourList(IntArray &answer, IntArray &elemList)
 {
-    int nelems = elemList.giveSize();
+    int i, j, k, nnode, jnode, nelems = elemList.giveSize();
+    ElementGeometry *ielem;
     if ( nodalConnectivityFlag == 0 ) {
         this->instanciateConnectivityTable();
     }
 
-    answer.resize(0);
+    std :: set< int >neighbours;
 
-    for ( int i = 1; i <= nelems; i++ ) {
-        Element *ielem = domain->giveElement( elemList.at(i) );
-        int nnode = ielem->giveNumberOfDofManagers();
-        for ( int j = 1; j <= nnode; j++ ) {
-            int jnode = ielem->giveDofManager(j)->giveNumber();
-            for ( int k = 1; k <= this->nodalConnectivity[jnode-1].giveSize(); k++ ) {
-                answer.insertSortedOnce( this->nodalConnectivity[jnode-1].at(k) );
+    for ( i = 1; i <= nelems; i++ ) {
+        ielem = domain->giveElementGeometry( elemList.at(i) );
+        nnode = ielem->giveNumberOfDofManagers();
+        for ( j = 1; j <= nnode; j++ ) {
+            jnode = ielem->giveDofManager(j)->giveNumber();
+            for ( k = 1; k <= this->nodalConnectivity.at(jnode)->giveSize(); k++ ) {
+                neighbours.insert( this->nodalConnectivity.at(jnode)->at(k) );
             }
         }
+    }
+
+    answer.resize( neighbours.size() );
+    std :: set< int > :: iterator pos;
+    for ( pos = neighbours.begin(), i = 1; pos != neighbours.end(); ++pos, i++ ) {
+        answer.at(i) = * pos;
     }
 }
 
@@ -137,18 +146,24 @@ ConnectivityTable :: giveElementNeighbourList(IntArray &answer, IntArray &elemLi
 void
 ConnectivityTable :: giveNodeNeighbourList(IntArray &answer, IntArray &nodeList)
 {
-    int nnodes = nodeList.giveSize();
+    int i, k, inode, nnodes = nodeList.giveSize();
     if ( nodalConnectivityFlag == 0 ) {
         this->instanciateConnectivityTable();
     }
 
-    answer.resize(0);
+    std :: set< int >neighbours;
 
-    for ( int i = 1; i <= nnodes; i++ ) {
-        int inode = nodeList.at(i);
-        for ( int k = 1; k <= this->nodalConnectivity[inode-1].giveSize(); k++ ) {
-            answer.insertSortedOnce( this->nodalConnectivity[inode-1].at(k) );
+    for ( i = 1; i <= nnodes; i++ ) {
+        inode = nodeList.at(i);
+        for ( k = 1; k <= this->nodalConnectivity.at(inode)->giveSize(); k++ ) {
+            neighbours.insert( this->nodalConnectivity.at(inode)->at(k) );
         }
+    }
+
+    answer.resize( neighbours.size() );
+    std :: set< int > :: iterator pos;
+    for ( pos = neighbours.begin(), i = 1; pos != neighbours.end(); ++pos, i++ ) {
+        answer.at(i) = * pos;
     }
 }
 } // end namespace oofem

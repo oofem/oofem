@@ -38,6 +38,7 @@
 #include "oofemtxtdatareader.h"
 #include "engngm.h"
 #include "timestep.h"
+#include "compiler.h"
 #include "error.h"
 #include "oofeggraphiccontext.h"
 
@@ -61,7 +62,6 @@
 
 #include <sstream>
 #include <iostream>
-#include <cstring>
 
 //
 // for c++ compiler to be successful on some c files
@@ -318,6 +318,7 @@ main(int argc, char *argv[])
                     strcpy(buff, argv [ i + 1 ]);
                     int level = strtol(buff, ( char ** ) NULL, 10);
                     oofem_logger.setLogLevel(level);
+                    oofem_errLogger.setLogLevel(level);
                 }
             }   else if ( strcmp(argv [ i ], "-p") == 0 ) {
 #ifdef __PARALLEL_MODE
@@ -948,7 +949,7 @@ void OOFEGSimpleCmd(char *buf)
     int istep, pstep, iversion = 0;
 
     readSimpleString(buf, cmd, & remain); // read command
-    if ( !strncmp(cmd, "active_step", 11) ) {
+    if ( !strncasecmp(cmd, "active_step", 11) ) {
         pstep = gc [ 0 ].getActiveStep();
         istep = atoi(remain);
         stepinfo [ 0 ] = istep;
@@ -972,7 +973,7 @@ void OOFEGSimpleCmd(char *buf)
         updateGraphics();
 
         //problem ->forceEquationNumbering();
-    } else if ( !strncmp(cmd, "active_eigen_value", 18) ) {
+    } else if ( !strncasecmp(cmd, "active_eigen_value", 18) ) {
         istep = atoi(remain);
         gc [ 0 ].setActiveStep(istep);
         stepinfo [ 0 ] = istep;
@@ -984,28 +985,28 @@ void OOFEGSimpleCmd(char *buf)
             exit(1);
         }
         gc [ 0 ].setActiveEigVal(istep);
-    } else if ( !strncmp(cmd, "set_def_scale", 13) ) {
+    } else if ( !strncasecmp(cmd, "set_def_scale", 13) ) {
         gc [ 0 ].setDefScale( strtod(remain, NULL) );
         if ( strtod(remain, NULL) < 0 ) {
             gc [ 0 ].setDefScale(1.0);
         }
-    } else if ( !strncmp(cmd, "set_zprof_scale", 15) ) {
+    } else if ( !strncasecmp(cmd, "set_zprof_scale", 15) ) {
         gc [ 0 ].setLandScale( strtod(remain, NULL) );
         if ( strtod(remain, NULL) < 0 ) {
             gc [ 0 ].setDefScale(1.0);
         }
-    } else if ( !strncmp(cmd, "element_filter", 14) ) {
+    } else if ( !strncasecmp(cmd, "element_filter", 14) ) {
         char buff [ 80 ];
         sprintf(buff, "element_filter %s", remain);
         gc [ 0 ].setElementFilterState(buff);
-    } else if ( !strncmp(cmd, "active_prob", 11) ) {
+    } else if ( !strncasecmp(cmd, "active_prob", 11) ) {
         int iprob = atoi(remain);
         if ( ( iprob > 0 ) && ( iprob <= problem->giveNumberOfSlaveProblems() ) ) {
             gc [ 0 ].setActiveProblem(iprob);
             printf("Setting problem %d as active\n", iprob);
             updateGraphics();
         }
-    } else if ( !strncmp(cmd, "contour_width", 13) ) {
+    } else if ( !strncasecmp(cmd, "contour_width", 13) ) {
         int width = atoi(remain);
         SetContourWidth(width);
 
@@ -1014,7 +1015,7 @@ void OOFEGSimpleCmd(char *buf)
             EVFastRedraw(v);
             v = ( EView * ) get_list_next(age_model->dependent_views, v);
         }
-    } else if ( !strncmp(cmd, "number_of_contours", 18) ) {
+    } else if ( !strncasecmp(cmd, "number_of_contours", 18) ) {
         SetContourCount( atoi(remain) );
     }
 }
@@ -1597,7 +1598,7 @@ void beamForcePlot(Widget w, XtPointer ptr, XtPointer call_data)
 
     //deleteLayerGraphics(OOFEG_VARPLOT_PATTERN_LAYER);
     ac = * ( ( int * ) ptr );
-    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setInternalStateType(IST_ShellMomentumTensor);
+    gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setInternalStateType(IST_ShellForceMomentumTensor);
     gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setIntVarIndx(ac);
     gc [ OOFEG_VARPLOT_PATTERN_LAYER ].setPlotMode(OGC_scalarPlot);
 
@@ -1772,9 +1773,7 @@ setupSmoother(oofegGraphicContext &gc)
                 smoother = domain->giveSmoother();
             }
 
-            Set wholeDomain(0, domain);
-            wholeDomain.addAllElements();
-            smoother->recoverValues( wholeDomain, gc.giveIntVarType(), gc.getActiveProblem()->giveCurrentStep() );
+            smoother->recoverValues( gc.giveIntVarType(), gc.getActiveProblem()->giveCurrentStep() );
             //   problem->giveSmoother()->giveMinMaxVal(&min,&max);
         }
     }
@@ -1804,10 +1803,10 @@ void setSmoother(SmootherType mode)
         } else if ( mode == Smoother_SPR ) {
             gc [ 0 ].getActiveProblem()->giveDomain(id)->setSmoother( new SPRNodalRecoveryModel( gc [ 0 ].getActiveProblem()->giveDomain(id) ) );
         } else {
-            OOFEM_SIMPLE_ERROR("Unrecognized nodal recovery model");
+            OOFEM_ERROR("Unrecognized nodal recovery model");
         }
 
-//         gc [ 0 ].getActiveProblem()->giveDomain(id)->giveSmoother()->setRecoveryMode( -1, IntArray() );
+        gc [ 0 ].getActiveProblem()->giveDomain(id)->giveSmoother()->setRecoveryMode( -1, IntArray() );
     }
 
     gc [ 0 ].setSmootherType(mode);

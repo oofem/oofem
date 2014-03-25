@@ -237,7 +237,7 @@ public:
                                                TimeStep *tStep);
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *,
-                                         const FloatArray &, TimeStep *);
+                                      const FloatArray &, TimeStep *);
 
     virtual const char *giveInputRecordName() const { return _IFT_TrabBone3D_Name; }
     virtual const char *giveClassName() const { return "TrabBone3D"; }

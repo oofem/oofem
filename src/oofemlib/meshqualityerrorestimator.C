@@ -42,22 +42,22 @@
 #include "gausspoint.h"
 
 namespace oofem {
-double MeshQualityErrorEstimator :: giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep)
+double MeshQualityErrorEstimator :: giveElementError(EE_ErrorType type, ElementGeometry *elemGeometry, TimeStep *tStep)
 {
     // A good plan would probably be to let the element determines its own quality if they implement some interface.
     // otherwise use a sane default.
     double error;
-    FEInterpolation *fei = elem->giveInterpolation();
-    IntegrationRule *ir = elem->giveDefaultIntegrationRulePtr();
+    FEInterpolation *fei = elemGeometry->giveInterpolation();
+    IntegrationRule *ir = elemGeometry->giveDefaultIntegrationRulePtr();
     if ( fei && ir ) {
-        error = this->computeJacobianError(* fei, * ir, elem);
+        error = this->computeJacobianError(* fei, * ir, elemGeometry);
     } else {
-        switch ( elem->giveGeometryType() ) {
+        switch ( elemGeometry->giveGeometryType() ) {
         case EGT_triangle_1:
-            error = this->computeTriangleRadiusError(elem);
+            error = this->computeTriangleRadiusError(elemGeometry);
             break;
         case EGT_triangle_2:
-            error = this->computeTriangleRadiusError(elem);
+            error = this->computeTriangleRadiusError(elemGeometry);
             break;
         default:
             error = 0.0;
@@ -67,15 +67,15 @@ double MeshQualityErrorEstimator :: giveElementError(EE_ErrorType type, Element 
     return error;
 }
 
-double MeshQualityErrorEstimator :: computeTriangleRadiusError(Element *elem)
+double MeshQualityErrorEstimator :: computeTriangleRadiusError(ElementGeometry *elemGeometry)
 {
     // Outside/inside circle radius fraction based for quality measurement.
     // Zero for a perfect triangle,
     double a, b, c;
     FloatArray *c1, *c2, *c3;
-    c1 = elem->giveNode(1)->giveCoordinates();
-    c2 = elem->giveNode(2)->giveCoordinates();
-    c3 = elem->giveNode(3)->giveCoordinates();
+    c1 = elemGeometry->giveNode(1)->giveCoordinates();
+    c2 = elemGeometry->giveNode(2)->giveCoordinates();
+    c3 = elemGeometry->giveNode(3)->giveCoordinates();
     a = c1->distance(* c2);
     b = c1->distance(* c3);
     c = c2->distance(* c3);
@@ -85,14 +85,14 @@ double MeshQualityErrorEstimator :: computeTriangleRadiusError(Element *elem)
     // Which is safe except for when all points coincide, i.e. a = b = c = 0
 }
 
-double MeshQualityErrorEstimator :: computeJacobianError(FEInterpolation &fei, IntegrationRule &ir, Element *elem)
+double MeshQualityErrorEstimator :: computeJacobianError(FEInterpolation &fei, IntegrationRule &ir, ElementGeometry *elemGeometry)
 {
     double min_rcond = 1.0, rcond;
     FloatMatrix jac;
 
-    FEIElementGeometryWrapper egw(elem);
+    FEIElementGeometryWrapper egw(elemGeometry);
     for ( int i = 1; i < ir.giveNumberOfIntegrationPoints(); ++i ) {
-        fei.giveJacobianMatrixAt( jac, * ir.getIntegrationPoint(i)->giveCoordinates(), FEIElementGeometryWrapper(elem) );
+        fei.giveJacobianMatrixAt( jac, * ir.getIntegrationPoint(i)->giveCoordinates(), FEIElementGeometryWrapper(elemGeometry) );
         rcond = jac.computeReciprocalCondition() * sgn( jac.giveDeterminant() ); // Signed rcond. as inverted mappings are particularly bad.
         if ( rcond < min_rcond ) {
             min_rcond = rcond;
@@ -105,7 +105,7 @@ double MeshQualityErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep
 {
     double error = 0.0, temp;
     for ( int i = 1; i <= this->domain->giveNumberOfElements(); ++i ) {
-        temp = this->giveElementError(unknownET, this->domain->giveElement(i), tStep);
+        temp = this->giveElementError(unknownET, this->domain->giveElementGeometry(i), tStep);
         if ( temp > error ) {
             error = temp;
         }

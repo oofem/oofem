@@ -44,14 +44,14 @@
 #include "crosssection.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
-#include "iga/iga.h"
+#include "iga.h"
 
 namespace oofem {
 void PlaneStressStructuralElementEvaluator :: computeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray N;
-    FEInterpolation *interp = gp->giveElement()->giveInterpolation();
-    interp->evalN( N, * gp->giveCoordinates(), FEIIGAElementGeometryWrapper( gp->giveElement(), gp->giveIntegrationRule()->giveKnotSpan() ) );
+    FEInterpolation *interp = gp->giveElementGeometry()->giveInterpolation();
+    interp->evalN( N, * gp->giveCoordinates(), FEIIGAElementGeometryWrapper( gp->giveElementGeometry(), gp->giveIntegrationRule()->giveKnotSpan() ) );
     answer.beNMatrixOf(N, 2);
 }
 
@@ -59,10 +59,10 @@ void PlaneStressStructuralElementEvaluator :: computeBMatrixAt(FloatMatrix &answ
 {
     FloatMatrix d;
 
-    FEInterpolation *interp = gp->giveElement()->giveInterpolation();
+	FEInterpolation *interp = gp->giveElementGeometry()->giveInterpolation();
     // this uses FEInterpolation::nodes2coords - quite inefficient in this case (large num of dofmans)
     interp->evaldNdx( d, * gp->giveCoordinates(),
-                     FEIIGAElementGeometryWrapper( gp->giveElement(), gp->giveIntegrationRule()->giveKnotSpan() ) );
+                     FEIIGAElementGeometryWrapper( gp->giveElementGeometry(), gp->giveIntegrationRule()->giveKnotSpan() ) );
 
     answer.resize(3, d.giveNumberOfRows() * 2);
     answer.zero();

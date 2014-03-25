@@ -36,6 +36,7 @@
 
 #include "communicator.h"
 #include "intarray.h"
+#include "oofem_limits.h"
 
 #include <cstdarg>
 
@@ -156,10 +157,17 @@ Communicator :: clearBuffers()
     }
 }
 
-std :: string
-Communicator :: errorInfo(const char *func) const
+void
+Communicator :: error(const char *file, int line, const char *format, ...) const
 {
-    return std::string("Communicator::") + func + ", Rank: " + std::to_string(rank);
+    char buffer [ MAX_ERROR_MSG_LENGTH ];
+    va_list args;
+
+    va_start(args, format);
+    vsprintf(buffer, format, args);
+    va_end(args);
+
+    __OOFEM_ERROR3(file, line, "Class: Communicator, Rank: %d\n%s", rank, buffer);
 }
 } // end namespace oofem
 #endif

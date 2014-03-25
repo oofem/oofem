@@ -64,7 +64,7 @@ NumericalMethod *CBS :: giveNumericalMethod(MetaStep *mStep)
 
     nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
-        OOFEM_ERROR("linear solver creation failed");
+        _error("giveNumericalMethod: linear solver creation failed");
     }
 
     return nMethod;
@@ -73,6 +73,7 @@ NumericalMethod *CBS :: giveNumericalMethod(MetaStep *mStep)
 IRResultType
 CBS :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     EngngModel :: initializeFrom(ir);
@@ -115,7 +116,8 @@ CBS :: initializeFrom(InputRecord *ir)
         this->materialInterface = new LEPlic( 1, this->giveDomain(1) );
         // export velocity field
         FieldManager *fm = this->giveContext()->giveFieldManager();
-        IntArray mask = {V_u, V_v, V_w};
+        IntArray mask;
+        mask.setValues(3, V_u, V_v, V_w);
 
 #ifdef FIELDMANAGER_USE_SHARED_PTR
         //std::tr1::shared_ptr<Field> _velocityField = make_shared<MaskedPrimaryField>(FT_Velocity, &this->VelocityField, mask);
@@ -139,7 +141,7 @@ CBS :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof 
 {
 #ifdef DEBUG
     if ( dof->__giveEquationNumber() == 0 ) {
-        OOFEM_ERROR("invalid equation number");
+        _error("giveUnknownComponent: invalid equation number");
     }
 
 #endif
@@ -171,7 +173,7 @@ CBS :: giveTractionPressure(Dof *dof)
     if ( eq ) {
         return prescribedTractionPressure.at(eq);
     } else {
-        OOFEM_ERROR("prescribed traction pressure requested for dof with no BC");
+        _error("giveUnknownComponent: prescribed traction pressure requested for dof with no BC");
     }
 
     return 0;
@@ -257,7 +259,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
         lhs = classFactory.createSparseMtrx(sparseMtrxType);
         if ( lhs == NULL ) {
-            OOFEM_ERROR("sparse matrix creation failed");
+            _error("solveYourselfAt: sparse matrix creation failed");
         }
 
         lhs->buildInternalStructure(this, 1, EID_MomentumBalance_ConservationEquation, pnum);
@@ -269,7 +271,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         if ( consistentMassFlag ) {
             mss = classFactory.createSparseMtrx(sparseMtrxType);
             if ( mss == NULL ) {
-                OOFEM_ERROR("sparse matrix creation failed");
+                _error("solveYourselfAt: sparse matrix creation failed");
             }
 
             mss->buildInternalStructure(this, 1, EID_MomentumBalance_ConservationEquation, vnum);
@@ -442,7 +444,7 @@ CBS :: updateInternalState(TimeStep *tStep)
 
         int nelem = domain->giveNumberOfElements();
         for ( int j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(tStep);
+            domain->giveElementGeometry(j)->updateInternalState(tStep);
         }
     }
 }
@@ -554,7 +556,7 @@ CBS :: checkConsistency()
     int nelem = domain->giveNumberOfElements();
     for ( int i = 1; i <= nelem; i++ ) {
         if ( !dynamic_cast< CBSElement * >( domain->giveElement(i) ) ) {
-            OOFEM_WARNING("Element %d has no CBS base", i);
+            _warning2("Element %d has no CBS base", i);
             return 0;
         }
     }
@@ -574,7 +576,7 @@ CBS :: checkConsistency()
             } else if ( bcPtr->giveBCValType() == ForceLoadBVT ) {
                 bcPtr->scale( 1. / this->giveVariableScale(VST_Force) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type\n");
+                _error("checkConsistency: unknown bc/ic type\n");
             }
         }
 
@@ -586,7 +588,7 @@ CBS :: checkConsistency()
             } else if ( icPtr->giveICValType() == PressureBVT ) {
                 icPtr->scale( VM_Total, 1. / this->giveVariableScale(VST_Pressure) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type\n");
+                _error("checkConsistency: unknown bc/ic type\n");
             }
         }
     }
@@ -614,7 +616,7 @@ CBS :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
     } else if ( type == P_f ) {
         iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, pscale);
     } else {
-        OOFEM_ERROR("unsupported dof type");
+        _error("printDofOutputAt: unsupported dof type");
     }
 }
 
@@ -684,7 +686,7 @@ CBS :: giveNewEquationNumber(int domain, DofIDItem id)
     } else if ( id == P_f ) {
         return this->pnum.askNewEquationNumber();
     } else {
-        OOFEM_ERROR("Unknown DofIDItem");
+        _error("giveNewEquationNumber:: Unknown DofIDItem");
     }
 
     return 0;
@@ -699,7 +701,7 @@ CBS :: giveNewPrescribedEquationNumber(int domain, DofIDItem id)
     } else if ( id == P_f ) {
         return this->pnumPrescribed.askNewEquationNumber();
     } else {
-        OOFEM_ERROR("Unknown DofIDItem");
+        _error("giveNewPrescribedEquationNumber:: Unknown DofIDItem");
     }
 
     return 0;
@@ -733,7 +735,7 @@ double CBS :: giveVariableScale(VarScaleType varID)
     } else if ( varID == VST_Viscosity ) {
         return 1.0;
     } else {
-        OOFEM_ERROR("unknown variable type");
+        _error("giveVariableScale: unknown variable type");
     }
 
     return 0.0;

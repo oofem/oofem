@@ -68,13 +68,13 @@ TR_SHELL01 :: initializeFrom(InputRecord *ir)
     /*
      * IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_Element_nip);
      * if ( val != -1 ) {
-     *  OOFEM_ERROR("key word NIP is not allowed for element TR_SHELL01");
+     *  _error("key word NIP is not allowed for element TR_SHELL01");
      * }
      *
      *
      * IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_TrPlaneStrRot_niprot, "niprot");
      * if ( val != -1 ) {
-     *  OOFEM_ERROR("key word NIProt is not allowed for element TR_SHELL01");
+     *  _error("key word NIProt is not allowed for element TR_SHELL01");
      * }
      */
 
@@ -88,26 +88,26 @@ TR_SHELL01 :: initializeFrom(InputRecord *ir)
 void
 TR_SHELL01 :: postInitialize()
 {
-    StructuralElement :: postInitialize();
+  StructuralElement::postInitialize();
 
-    if ( plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() ) {
-        OOFEM_ERROR("incompatible integration rules detected");
-    }
+  if ( plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() != membrane->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints() ) {
+    OOFEM_ERROR("TR_SHELL01: incompatible integration rules detected");
+  }
 }
 
 void
 TR_SHELL01 :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
-    StructuralElement :: updateLocalNumbering(f);
-    plate->updateLocalNumbering(f);
-    membrane->updateLocalNumbering(f);
+  StructuralElement::updateLocalNumbering(f);
+  plate->updateLocalNumbering(f);
+  membrane->updateLocalNumbering(f);
 }
 
-void TR_SHELL01 :: setCrossSection(int csIndx)
-{
-    StructuralElement :: setCrossSection(csIndx);
-    plate->setCrossSection(csIndx);
-    membrane->setCrossSection(csIndx);
+void TR_SHELL01 :: setCrossSection(int csIndx) 
+{ 
+  StructuralElement::setCrossSection(csIndx);
+  plate->setCrossSection(csIndx);
+  membrane->setCrossSection(csIndx);
 }
 
 
@@ -125,11 +125,11 @@ TR_SHELL01 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueM
     answer.zero();
 
     plate->giveCharacteristicVector(aux, mtrx, mode, tStep);
-    loc = {3, 4, 5, 9, 10, 11, 15, 16, 17};
+    loc.setValues(9, 3, 4, 5, 9, 10, 11, 15, 16, 17);
     answer.assemble(aux, loc);
 
     membrane->giveCharacteristicVector(aux, mtrx, mode, tStep);
-    loc = {1, 2, 6, 7, 8, 12, 13, 14, 18};
+    loc.setValues(9, 1, 2, 6, 7, 8, 12, 13, 14, 18);
     answer.assemble(aux, loc);
 }
 
@@ -139,18 +139,18 @@ TR_SHELL01 :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeS
 // returns characteristics matrix of receiver accordind to mtrx
 //
 {
-    IntArray loc;
+    IntArray loc(9);
     FloatMatrix aux;
 
     answer.resize(18, 18);
     answer.zero();
 
     plate->giveCharacteristicMatrix(aux, mtrx, tStep);
-    loc = {3, 4, 5, 9, 10, 11, 15, 16, 17};
+    loc.setValues(9, 3, 4, 5, 9, 10, 11, 15, 16, 17);
     answer.assemble(aux, loc);
 
     membrane->giveCharacteristicMatrix(aux, mtrx, tStep);
-    loc = {1, 2, 6, 7, 8, 12, 13, 14, 18};
+    loc.setValues(9, 1, 2, 6, 7, 8, 12, 13, 14, 18);
     answer.assemble(aux, loc);
 }
 
@@ -159,7 +159,7 @@ TR_SHELL01 :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
 {
     IntArray loc(9);
     FloatMatrix aux1, aux2;
-    int ncol;
+    int i, j, ncol;
 
     bool t1 = plate->giveRotationMatrix(aux1, eid);
     bool t2 =  membrane->giveRotationMatrix(aux2, eid);
@@ -172,16 +172,16 @@ TR_SHELL01 :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
         ncol = aux1.giveNumberOfColumns();
         answer.resize(18, ncol);
 
-        loc = {3, 4, 5, 9, 10, 11, 15, 16, 17};
-        for ( int i = 1; i <= 9; i++ ) { // row index
-            for ( int j = 1; j <= ncol; j++ ) {
+        loc.setValues(9, 3, 4, 5, 9, 10, 11, 15, 16, 17);
+        for ( i = 1; i <= 9; i++ ) { // row index
+            for ( j = 1; j <= ncol; j++ ) {
                 answer.at(loc.at(i), j) = aux1.at(i, j);
             }
         }
 
-        loc = {1, 2, 6, 7, 8, 12, 13, 14, 18};
-        for ( int i = 1; i <= 9; i++ ) { // row index
-            for ( int j = 1; j <= ncol; j++ ) {
+        loc.setValues(9, 1, 2, 6, 7, 8, 12, 13, 14, 18);
+        for ( i = 1; i <= 9; i++ ) { // row index
+            for ( j = 1; j <= ncol; j++ ) {
                 answer.at(loc.at(i), j) = aux2.at(i, j);
             }
         }
@@ -236,15 +236,24 @@ TR_SHELL01 :: computeVolumeAround(GaussPoint *gp)
 int
 TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellStrainTensor ) ||
-        ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
+    if ( type == IST_ShellForceMomentumTensor ) {
         FloatArray aux;
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
 
-        plate->giveIPValue(answer, plateGP, type, tStep);
-        membrane->giveIPValue(aux, membraneGP, type, tStep);
+        plate->giveIPValue(answer, plateGP, IST_ShellForceMomentumTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, tStep);
         answer.add(aux);
+        return 1;
+    } else if ( type == IST_ShellStrainCurvatureTensor ) {
+        FloatArray aux;
+        GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
+        GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
+
+        plate->giveIPValue(answer, plateGP, IST_ShellStrainCurvatureTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, tStep);
+        answer.add(aux);
+
         return 1;
     } else {
         return StructuralElement :: giveIPValue(answer, gp, type, tStep);
@@ -301,46 +310,26 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf( file, "  GP %2d.%-2d :", iRule->giveNumber(), gp->giveNumber() );
         membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         // Strain - Curvature
-        plate->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellStrainTensor, tStep);
+        plate->giveIPValue(v, gp, IST_ShellStrainCurvatureTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, tStep);
         v.add(aux);
 
-        fprintf(file, "  strains    ");
-        // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
+        fprintf(file, "  strains ");
         fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+                " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+                v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
+                v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
 
-        plate->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellCurvatureTensor, tStep);
+        // Strain - Curvature
+        plate->giveIPValue(v, gp, IST_ShellForceMomentumTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, tStep);
         v.add(aux);
 
-        fprintf(file, "\n              curvatures ");
-        // k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
+        fprintf(file, "\n              stresses");
         fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
-
-        // Forces - Moments
-        plate->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellForceTensor, tStep);
-        v.add(aux);
-
-        fprintf(file, "\n              stresses   ");
-        // n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
-        fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
-
-        plate->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellMomentumTensor, tStep);
-        v.add(aux);
-
-        fprintf(file, "\n              moments    ");
-        // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
-        fprintf( file,
-                " % .4e % .4e % .4e % .4e % .4e % .4e ",
-                v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+                " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
+                v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
+                v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
 
         fprintf(file, "\n");
     }
@@ -605,10 +594,11 @@ TR_SHELL01 :: drawScalar(oofegGraphicContext &context)
         result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
     } else if ( context.giveIntVarMode() == ISM_local ) {
         int nip = plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
-        FloatArray a, v;
+        FloatArray a, v(12);
+        v.zero();
         for ( int _i = 1; _i <= nip; _i++ ) {
-            this->giveIPValue(a, plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(_i - 1), IST_ShellMomentumTensor, tStep);
-            v.add(a);
+            this->giveIPValue(a, plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(_i - 1), IST_ShellForceMomentumTensor, tStep);
+            v += a;
         }
         v.times(1. / nip);
         v1 = v;

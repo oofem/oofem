@@ -160,9 +160,9 @@ public:
 
 protected:
     /// Helper function that integrates the deviatoric tangent contribution from a single element boundary.
-    void integrateDevTangent(FloatMatrix &answer, Element *e, int boundary);
+    void integrateDevTangent(FloatMatrix &answer, ElementGeometry *e, int boundary);
     /// Helper function that integrates the volumetric tangent contribution from a single element boundary.
-    void integrateVolTangent(FloatArray &answer, Element *e, int boundary);
+    void integrateVolTangent(FloatArray &answer, ElementGeometry *e, int boundary);
 
     /// Converts from deviatoric to (normal) cartesian base (arrays are second order 2D tensors in Voigt notation)
     void fromDeviatoricBase2D(FloatArray &cartesian, FloatArray &deviatoric);

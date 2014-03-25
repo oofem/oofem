@@ -38,7 +38,7 @@
 #include "integrationrule.h"
 
 namespace oofem {
-class Element;
+class BaseElement;
 
 /**
  * Class representing Gaussian-quadrature integration rule.
@@ -60,13 +60,15 @@ public:
     /**
      * Constructor.
      * @param n Number associated with receiver.
-     * @param e Element associated with receiver.
+     * @param e ElementGeometry associated with receiver.
      * @param startIndx First component, for which rule applies.
      * @param endIndx Last component, for which rule applies.
      * @param dynamic Flag indicating that receiver can change.
      */
-    GaussIntegrationRule(int n, Element * e, int startIndx, int endIndx, bool dynamic = false);
-    GaussIntegrationRule(int n, Element * e);
+ 
+	GaussIntegrationRule(int n, ElementGeometry* e, int startIndx, int endIndx, bool dynamic = false);
+    GaussIntegrationRule(int n, ElementGeometry* e);
+
     /// Destructor
     virtual ~GaussIntegrationRule();
 

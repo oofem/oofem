@@ -46,6 +46,7 @@ REGISTER_Material(AnisotropicMassTransferMaterial);
 IRResultType
 AnisotropicMassTransferMaterial :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";       // Required by IR_GIVE_FIELD macro
     IRResultType result;                          // Required by IR_GIVE_FIELD macro
 
     this->Material :: initializeFrom(ir);
@@ -92,7 +93,7 @@ AnisotropicMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         return;
 
     default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
+        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -100,7 +101,7 @@ AnisotropicMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 double
 AnisotropicMassTransferMaterial :: giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
+    _error2( "giveCharacteristicValue : unknown mode (%s)", __MatResponseModeToString(mode) );
 
     return 0.;
 }

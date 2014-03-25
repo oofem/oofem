@@ -45,6 +45,7 @@ IRResultType RVEMaterial :: initializeFrom(InputRecord *ir)
 {
     printf("rvematerial initializing...\n");
 
+    const char *__proc = "initializeFrom";
     IRResultType result;
 
     // Read filename and instanciate RVE problem

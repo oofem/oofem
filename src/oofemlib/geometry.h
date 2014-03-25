@@ -95,15 +95,15 @@ public:
     /// Used by XFEM level set functions.
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const = 0;
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const = 0;
-    virtual void computeLocalCoordinates(FloatArray &oLocCoord, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented.\n"); }
-    virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const { OOFEM_ERROR("?"); }
+    virtual void computeLocalCoordinates(FloatArray &oLocCoord, const FloatArray &iPoint) const { OOFEM_ERROR("BasicGeometry::computeLocalCoordinates() is not implemented.\n"); }
+    virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const { OOFEM_ERROR("BasicGeometry::giveSubPolygon()"); }
 
     /// Checks whether an element is interacted, Element reference will be later replaced by Geometry.
-    virtual bool intersects(Element *element) { return false; }
+    virtual bool intersects(ElementGeometry *element) { return false; }
     /// Gives number of intersection points of Geometry entity with an element, Element reference will be later replaced by Geometry.
-    virtual int computeNumberOfIntersectionPoints(Element *element) { return 0; }
+    virtual int computeNumberOfIntersectionPoints(ElementGeometry *element) { return 0; }
     /// Gives intersection points between this Geometry and Element.
-    virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints) { }
+    virtual void computeIntersectionPoints(ElementGeometry *element, std :: vector< FloatArray > &oIntersectionPoints) { }
 
     const FloatArray &giveVertex(int n) const { return mVertices [ n - 1 ]; }
 
@@ -115,14 +115,13 @@ public:
 
     /// Initializes the Geometry from the InputRecord.
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
-    virtual void giveInputRecord(DynamicInputRecord &input) { OOFEM_ERROR("not implemented"); }
+    virtual void giveInputRecord(DynamicInputRecord &input) { OOFEM_ERROR("giveInputRecord is not implemented for this subclass of BasicGeometry."); }
     /// Gives class name.
     virtual const char *giveClassName() const { return NULL; }
-    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
     /// Returns number of Geometry vertices.
     int giveNrVertices() const { return mVertices.size(); }
     virtual bool isOutside(BasicGeometry *bg) { return false; }
-    virtual bool isInside(Element *el) { return false; }
+    virtual bool isInside(ElementGeometry *el) { return false; }
     virtual bool isInside(FloatArray &point) { return false; }
     virtual void printYourself() { }
     /**
@@ -154,27 +153,27 @@ class OOFEM_EXPORT Line : public BasicGeometry
 public:
     Line() : BasicGeometry() { }
     virtual ~Line() { }
-    Line(FloatArray &pointA, FloatArray &pointB);
+    Line(FloatArray * pointA, FloatArray * pointB);
 
     virtual BasicGeometry *Clone() { return new Line(*this); }
 
     virtual double computeDistanceTo(const FloatArray *point);
     /// Computes tangential distance to a point
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("not implemented"); };
+    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("Line::computeNormalSignDist -- not implemented"); };
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("Line::computeTangentialSignDist -- not implemented"); };
 
 
     double computeTangentialDistanceToEnd(FloatArray *point);
     void computeProjection(FloatArray &answer);
-    virtual int computeNumberOfIntersectionPoints(Element *element);
-    virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints);
+    virtual int computeNumberOfIntersectionPoints(ElementGeometry *element);
+    virtual void computeIntersectionPoints(ElementGeometry *element, std :: vector< FloatArray > &oIntersectionPoints);
     double computeInclinationAngle();
     void computeTransformationMatrix(FloatMatrix &answer);
     void transformIntoPolar(FloatArray *point, FloatArray &answer);
     virtual IRResultType initializeFrom(InputRecord *ir);
     bool isPointInside(FloatArray *point);
-    virtual bool intersects(Element *element);
+    virtual bool intersects(ElementGeometry *element);
     virtual bool isOutside(BasicGeometry *bg);
 };
 
@@ -186,15 +185,15 @@ public:
 
     virtual BasicGeometry *Clone() { return new Triangle(*this); }
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_SIMPLE_ERROR("Triangle::computeNormalSignDist -- not implemented"); };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_SIMPLE_ERROR("Triangle::computeTangentialSignDist -- not implemented"); };
+    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("Triangle::computeNormalSignDist -- not implemented"); };
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("Triangle::computeTangentialSignDist -- not implemented"); };
 
     double getArea();
     void computeBarycentrCoor(FloatArray &answer) const;
     double getRadiusOfCircumCircle();
     void computeCenterOfCircumCircle(FloatArray &answer) const;
     virtual void printYourself();
-    virtual int computeNumberOfIntersectionPoints(Element *element) { return 0; }
+    virtual int computeNumberOfIntersectionPoints(ElementGeometry *element) { return 0; }
     bool isOrientedAnticlockwise();
     void changeToAnticlockwise();
 
@@ -214,7 +213,7 @@ protected:
 public:
     Circle() : BasicGeometry(), radius(0.0), mTangSignDist(1.0) { }
     virtual ~Circle() { }
-    Circle(FloatArray &center, double radius);
+    Circle(FloatArray * center, double radius);
 
     virtual BasicGeometry *Clone() { return new Circle(*this); }
 
@@ -226,12 +225,12 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "Circle"; }
-    virtual bool intersects(Element *element);
-    virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints);
+    virtual bool intersects(ElementGeometry *element);
+    virtual void computeIntersectionPoints(ElementGeometry *element, std :: vector< FloatArray > &oIntersectionPoints);
     virtual void computeIntersectionPoints(Line *l, std :: vector< FloatArray > &oIntersectionPoints);
-    virtual int computeNumberOfIntersectionPoints(Element *element);
+    virtual int computeNumberOfIntersectionPoints(ElementGeometry *element);
     virtual bool isOutside(BasicGeometry *bg);
-    virtual bool isInside(Element *element);
+    virtual bool isInside(ElementGeometry *element);
     virtual bool isInside(FloatArray &point);
     virtual void printYourself();
 };
@@ -259,15 +258,15 @@ public:
     virtual const char *giveClassName() const { return "PolygonLine"; }
 
 #ifdef __BOOST_MODULE
-    virtual bool boundingBoxIntersects(Element *element);
+    virtual bool boundingBoxIntersects(ElementGeometry *element);
 #endif
 
-    virtual bool intersects(Element *element);
-    virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints);
+    virtual bool intersects(ElementGeometry *element);
+    virtual void computeIntersectionPoints(ElementGeometry *element, std :: vector< FloatArray > &oIntersectionPoints);
     virtual void computeIntersectionPoints(Line *l, std :: vector< FloatArray > &oIntersectionPoints);
-    virtual int computeNumberOfIntersectionPoints(Element *element);
+    virtual int computeNumberOfIntersectionPoints(ElementGeometry *element);
     virtual bool isOutside(BasicGeometry *bg);
-    virtual bool isInside(Element *element);
+    virtual bool isInside(ElementGeometry *element);
     virtual bool isInside(FloatArray &point);
 
 #ifdef __BOOST_MODULE
@@ -297,18 +296,18 @@ public:
 
     virtual BasicGeometry *Clone() { return new PointSwarm(*this); }
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("not implemented"); };
+    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("PointSwarm::computeNormalSignDist -- not implemented"); };
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("PointSwarm::computeTangentialSignDist -- not implemented"); };
 
     /// Computes the normal distance to the surface not to the center.
     // virtual double computeDistanceTo(FloatArray *point);
     virtual IRResultType initializeFrom(InputRecord *ir);
     // virtual const char *giveClassName() const { return "Circle"; }
-    // virtual bool intersects(Element *element);
-    // virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > *intersecPoints);
-    // virtual void computeIntersectionPoints(Line *l, std :: vector< FloatArray > *intersecPoints);
+    // virtual bool intersects(ElementGeometry *element);
+    // virtual void computeIntersectionPoints(ElementGeometry *element, AList< FloatArray > *intersecPoints);
+    // virtual void computeIntersectionPoints(Line *l, AList< FloatArray > *intersecPoints);
     // virtual bool isOutside(BasicGeometry *bg);
-    // virtual bool isInside(Element *element);
+    // virtual bool isInside(ElementGeometry *element);
     // virtual bool isInside(FloatArray &point);
 };
 } // end namespace oofem

@@ -83,73 +83,73 @@ protected:
             }
         }
 
-        conservation_ordering = {4, 8, 12, 16, 20, 24, 28, 32};
+        conservation_ordering.setValues(8, 4, 8, 12, 16, 20, 24, 28, 32);
 
-        surf_ordering [ 0 ] = {
-                                5,   6,   7, // node 2
-                                1,   2,   3, // node 1
-                                13,  14,  15, // node 4
-                                9,  10,  11, // node 3
-                                33,  34,  35, // node 9
-                                42,  43,  44, // node 12
-                                39,  40,  41, // node 11
-                                36,  37,  38, // node 10
-                                69,  70,  71}; // node 21
+        surf_ordering [ 0 ].setValues(27,
+                                      5,   6,   7, // node 2
+                                      1,   2,   3, // node 1
+                                      13,  14,  15, // node 4
+                                      9,  10,  11, // node 3
+                                      33,  34,  35, // node 9
+                                      42,  43,  44, // node 12
+                                      39,  40,  41, // node 11
+                                      36,  37,  38, // node 10
+                                      69,  70,  71); // node 21
 
-        surf_ordering [ 1 ] = {
-                                17,  18,  19, // node 5
-                                21,  22,  23, // node 6
-                                25,  26,  27, // node 7
-                                29,  30,  31, // node 8
-                                45,  46,  47, // node 13
-                                48,  49,  50, // node 14
-                                51,  52,  53, // node 15
-                                54,  55,  56, // node 16
-                                72,  73,  74}; // node 22
+        surf_ordering [ 1 ].setValues(27,
+                                      17,  18,  19, // node 5
+                                      21,  22,  23, // node 6
+                                      25,  26,  27, // node 7
+                                      29,  30,  31, // node 8
+                                      45,  46,  47, // node 13
+                                      48,  49,  50, // node 14
+                                      51,  52,  53, // node 15
+                                      54,  55,  56, // node 16
+                                      72,  73,  74); // node 22
 
-        surf_ordering [ 2 ] = {
-                                1,   2,   3, // node 1
-                                17,  18,  19, // node 5
-                                21,  22,  23, // node 6
-                                5,   6,   7, // node 2
-                                57,  58,  59, // node 17
-                                45,  46,  47, // node 13
-                                60,  61,  62, // node 18
-                                33,  34,  35, // node 9
-                                75,  76,  77}; // node 23
+        surf_ordering [ 2 ].setValues(27,
+                                      1,   2,   3, // node 1
+                                      17,  18,  19, // node 5
+                                      21,  22,  23, // node 6
+                                      5,   6,   7, // node 2
+                                      57,  58,  59, // node 17
+                                      45,  46,  47, // node 13
+                                      60,  61,  62, // node 18
+                                      33,  34,  35, // node 9
+                                      75,  76,  77); // node 23
 
-        surf_ordering [ 3 ] = {
-                                5,   6,   7, // node 2
-                                9,  10,  11, // node 3
-                                25,  26,  27, // node 7
-                                21,  22,  23, // node 6
-                                36,  37,  38, // node 10
-                                63,  64,  65, // node 19
-                                48,  49,  50, // node 14
-                                60,  61,  62, // node 18
-                                78,  79,  80}; // node 24
+        surf_ordering [ 3 ].setValues(27,
+                                      5,   6,   7, // node 2
+                                      9,  10,  11, // node 3
+                                      25,  26,  27, // node 7
+                                      21,  22,  23, // node 6
+                                      36,  37,  38, // node 10
+                                      63,  64,  65, // node 19
+                                      48,  49,  50, // node 14
+                                      60,  61,  62, // node 18
+                                      78,  79,  80); // node 24
 
-        surf_ordering [ 4 ] = {
-                                9,  10,  11, // node 3
-                                13,  14,  15, // node 4
-                                29,  30,  31, // node 8
-                                25,  26,  27, // node 7
-                                39,  40,  41, // node 11
-                                66,  67,  68, // node 20
-                                51,  52,  53, // node 15
-                                63,  64,  65, // node 19
-                                81,  82,  83}; // node 25
+        surf_ordering [ 4 ].setValues(27,
+                                      9,  10,  11, // node 3
+                                      13,  14,  15, // node 4
+                                      29,  30,  31, // node 8
+                                      25,  26,  27, // node 7
+                                      39,  40,  41, // node 11
+                                      66,  67,  68, // node 20
+                                      51,  52,  53, // node 15
+                                      63,  64,  65, // node 19
+                                      81,  82,  83); // node 25
 
-        surf_ordering [ 5 ] = {
-                                13,  14,  15, // node 4
-                                1,   2,   3, // node 1
-                                17,  18,  19, // node 5
-                                29,  30,  31, // node 8
-                                42,  43,  44, // node 12
-                                57,  58,  59, // node 17
-                                54,  55,  56, // node 16
-                                66,  67,  68, // node 20
-                                84,  85,  86}; // node 26
+        surf_ordering [ 5 ].setValues(27,
+                                      13,  14,  15, // node 4
+                                      1,   2,   3, // node 1
+                                      17,  18,  19, // node 5
+                                      29,  30,  31, // node 8
+                                      42,  43,  44, // node 12
+                                      57,  58,  59, // node 17
+                                      54,  55,  56, // node 16
+                                      66,  67,  68, // node 20
+                                      84,  85,  86); // node 26
         return true;
     }
 
@@ -184,7 +184,7 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
 
     // Spatial localizer interface:
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
+    virtual ElementGeometry *SpatialLocalizerI_giveElementGeometry() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 

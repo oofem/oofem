@@ -70,6 +70,7 @@ MacroLSpace :: ~MacroLSpace() { }
 
 IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
     //IRResultType val;
 
@@ -94,7 +95,7 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
             this->stiffMatrxFileNoneReadingWriting = 1;
         } else {   //or create a new one
             if ( ( stiffMatrxFile = fopen(this->stiffMatrxFileName, "w") ) == NULL ) {
-                OOFEM_ERROR("Can not create a new file %s\n", this->stiffMatrxFileName);
+                OOFEM_ERROR2("Can not create a new file %s\n", this->stiffMatrxFileName);
             }
             this->stiffMatrxFileNoneReadingWriting = 2;
         }
@@ -192,7 +193,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     ir_func.setRecordKeywordField("constantfunction", 1);
     ir_func.setField(1.0, _IFT_ConstantFunction_f);
     if ( ( timeFunct = classFactory.createFunction("constantfunction", 1, microDomain) ) == NULL ) {
-        OOFEM_ERROR("Couldn't create constant time function");
+        OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create constant time function");
     }
     timeFunct->initializeFrom(& ir_func);
     microDomain->setFunction(1, timeFunct);
@@ -219,7 +220,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
                 ir_bc.setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
                 ir_bc.setField(displ, _IFT_BoundaryCondition_PrescribedValue);
                 if ( ( GeneralBoundaryCond = classFactory.createBoundaryCondition("boundarycondition", counter, microDomain) ) == NULL ) {
-                    OOFEM_ERROR("Couldn't create boundary condition.");
+                    OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create boundary condition.");
                 }
                 GeneralBoundaryCond->initializeFrom(& ir_bc);
                 microDomain->setBoundaryCondition(counter, GeneralBoundaryCond);
@@ -260,7 +261,7 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
         this->microEngngModel->solveYourselfAt( this->microEngngModel->giveCurrentStep() );
         this->microEngngModel->updateYourself( this->microEngngModel->giveCurrentStep() );
         //this->microEngngModel->terminate( this->microEngngModel->giveCurrentStep() );
-        StructuralEngngModel *microStructuralEngngModel = dynamic_cast< StructuralEngngModel * >(this->microEngngModel);
+        StructuralEngngModel *microStructuralEngngModel = dynamic_cast< StructuralEngngModel * >( this->microEngngModel );
 
         //reaction vector contains contributions from unknownNumberingScheme
         microStructuralEngngModel->computeReaction(reactions, this->microEngngModel->giveCurrentStep(), 1);

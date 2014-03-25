@@ -54,6 +54,7 @@ HeavisideTimeFunction :: evaluateAtTime(double time)
 IRResultType
 HeavisideTimeFunction :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     Function :: initializeFrom(ir);

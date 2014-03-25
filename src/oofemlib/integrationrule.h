@@ -47,8 +47,8 @@
 namespace oofem {
 class TimeStep;
 class GaussPoint;
-class Element;
 class DataStream;
+class ElementGeometry;
 
 ///@todo Breaks modularity, reconsider this;
 enum IntegrationRuleType {
@@ -96,9 +96,9 @@ class OOFEM_EXPORT IntegrationRule
 protected:
     /// Number.
     int number;
-    /// Element which integration rule is coupled to.
-    Element *elem;
-    /// Integration domain
+   	/// Element which integration rule is coupled to.
+	ElementGeometry *elemGeometry;
+	/// Integration domain
     integrationDomain intdomain;
 
     /// Array containing integration points.
@@ -143,18 +143,19 @@ public:
     /**
      * Constructor.
      * @param n Number associated with receiver.
-     * @param e Reference to element.
+     * @param e Reference to element geometry.
      * @param startIndx First component, for which rule applies.
      * @param endIndx Last component, for which rule applies.
      * @param dynamic Flag indicating that receiver can change.
      */
-    IntegrationRule(int n, Element * e, int startIndx, int endIndx, bool dynamic);
+	IntegrationRule(int n, ElementGeometry * e, int startIndx, int endIndx, bool dynamic);
     /**
      * Constructor.
      * @param n Number associated with receiver.
-     * @param e Reference to element.
+     * @param e Reference to element geometry.
      */
-    IntegrationRule(int n, Element * e);
+	IntegrationRule(int n, ElementGeometry * e);
+
     /// Destructor.
     virtual ~IntegrationRule();
 
@@ -212,8 +213,8 @@ public:
      */
     void initForNewStep();
 
-    /** Returns reference to element containing receiver */
-    Element *giveElement() { return elem; }
+    /** Returns reference to element geometry containing receiver */
+	ElementGeometry *giveElementGeometry() { return elemGeometry; }
     /** Returns receiver number */
     int giveNumber() { return this->number; }
     /** Returns the domain for the receiver */
@@ -258,8 +259,6 @@ public:
     virtual const IntArray *giveKnotSpan() { return NULL; }
 
     virtual const char *giveClassName() const { return "IntegrationRule"; }
-    /// Error printing helper.
-    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
     virtual IntegrationRuleType giveIntegrationRuleType() const { return IRT_None; }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
 

@@ -87,8 +87,8 @@ TR1_2D_SUPG2 :: ~TR1_2D_SUPG2()
 
         vcoords [ i ] = NULL;
     }
-    if ( defaultIRule ) {
-        delete defaultIRule;
+    if (defaultIRule) {
+      delete defaultIRule;
     }
 }
 
@@ -110,13 +110,13 @@ void
 TR1_2D_SUPG2 :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     if ( ut == EID_MomentumBalance ) {
-        answer = {V_u, V_v};
+        answer.setValues(2, V_u, V_v);
     } else if ( ut == EID_ConservationEquation ) {
-        answer = {P_f};
+        answer.setValues(1, P_f);
     } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        answer = {V_u, V_v, P_f};
+        answer.setValues(3, V_u, V_v, P_f);
     } else {
-        OOFEM_ERROR("Unknown equation id encountered");
+        _error("giveDofManDofIDMask: Unknown equation id encountered");
     }
 }
 
@@ -130,6 +130,7 @@ TR1_2D_SUPG2 :: giveElementDofIDMask(EquationID ut, IntArray &answer) const
 IRResultType
 TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;               // Required by IR_GIVE_FIELD macro
 
     SUPGElement :: initializeFrom(ir);
@@ -189,8 +190,8 @@ TR1_2D_SUPG2 :: computeGaussPoints()
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3, true);
     }
     if ( !defaultIRule ) {
-        defaultIRule = new GaussIntegrationRule(1, this, 1, 3, true);
-        this->giveCrossSection()->setupIntegrationPoints(* defaultIRule, 1, this);
+      defaultIRule = new GaussIntegrationRule(1, this, 1, 3, true);
+      this->giveCrossSection()->setupIntegrationPoints(*defaultIRule, 1, this);
     }
 }
 
@@ -306,7 +307,7 @@ TR1_2D_SUPG2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep)
     for ( i = 1; i <= 6; i++ ) {
         for ( j = 1; j <= 6; j++ ) {
             if ( fabs( ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) ) >= 1.e-10 ) {
-                OOFEM_ERROR("test failure");
+                _error("computeAccelerationTerm_MB: test failure");
             }
         }
     }
@@ -378,7 +379,7 @@ TR1_2D_SUPG2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
     _t.beProductOf(_h, u);
     for ( i = 1; i <= 6; i++ ) {
         if ( ( fabs( answer.at(i) - _t.at(i) ) >= 1.e-6 ) ) {
-            OOFEM_ERROR("test failure (elem %d, error=%e)", this->number, fabs( answer.at(i) - _t.at(i) ));
+            _error3( "computeAdvectionTerm_MB: test failure (elem %d, error=%e)", this->number, fabs( answer.at(i) - _t.at(i) ) );
         }
     }
 
@@ -394,7 +395,7 @@ TR1_2D_SUPG2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
     integrationRulesArray [ 0 ] = __ir0;
     for ( int i = 1; i <= 6; i++ ) {
         if ( fabs( ( answer.at(i) - test.at(i) ) / test.at(i) ) >= 1.e-10 ) {
-            OOFEM_ERROR("test failure");
+            _error("computeAdvectionTerm_MB: test failure");
         }
     }
 
@@ -479,7 +480,7 @@ TR1_2D_SUPG2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
     for ( int i = 1; i <= 6; i++ ) {
         for ( int j = 1; j <= 6; j++ ) {
             if ( fabs( ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) ) >= 1.e-8 ) {
-                OOFEM_ERROR("test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j));
+                _error2( "computeAdvectionDerivativeTerm_MB: test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) );
             }
         }
     }
@@ -546,7 +547,7 @@ TR1_2D_SUPG2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
     integrationRulesArray [ 0 ] = __ir0;
     for ( int i = 1; i <= 6; i++ ) {
         if ( fabs( ( answer.at(i) - test.at(i) ) / test.at(i) ) >= 1.e-10 ) {
-            OOFEM_ERROR("test failure");
+            _error("computeDiffusionTerm_MB: test failure");
         }
     }
 
@@ -628,7 +629,7 @@ TR1_2D_SUPG2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
     for ( int i = 1; i <= 6; i++ ) {
         for ( int j = 1; j <= 6; j++ ) {
             if ( fabs( ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) ) >= 1.e-8 ) {
-                OOFEM_ERROR("test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j));
+                _error2( "computeDiffusionDerivativeTerm_MB: test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) );
             }
         }
     }
@@ -729,7 +730,7 @@ TR1_2D_SUPG2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *t
     for ( int i = 1; i <= 6; i++ ) {
         for ( int j = 1; j <= 6; j++ ) {
             if ( fabs( ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) ) >= 1.e-8 ) {
-                OOFEM_ERROR("test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j));
+                _error2( "computeLSICStabilizationTerm_MB: test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) );
             }
         }
     }
@@ -854,7 +855,7 @@ TR1_2D_SUPG2 :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
     for ( int i = 1; i <= 3; i++ ) {
         for ( int j = 1; j <= 3; j++ ) {
             if ( fabs( ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) ) >= 1.e-8 ) {
-                OOFEM_ERROR("test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j));
+                _error2( "computePressureTerm_MC: test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) );
             }
         }
     }
@@ -961,7 +962,7 @@ TR1_2D_SUPG2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
     integrationRulesArray [ 0 ] = __ir0;
     for ( int i = 1; i <= 6; i++ ) {
         if ( fabs( ( answer.at(i) - test.at(i) ) / test.at(i) ) >= 1.e-10 ) {
-            OOFEM_ERROR("test failure");
+            _error("computeBCRhsTerm_MB: test failure");
         }
     }
 
@@ -1284,7 +1285,7 @@ TR1_2D_SUPG2 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatAr
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
+        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -1360,7 +1361,7 @@ TR1_2D_SUPG2 :: computeLEPLICVolumeFraction(const FloatArray &n, const double p,
     this->formVolumeInterfacePoly(pg, matInterface, n, p, updFlag);
     answer = fabs(pg.computeVolume() / volume);
     if ( answer > 1.000000001 ) {
-        OOFEM_WARNING("VOF fraction out of bounds, vof = %e\n", answer);
+        _warning2("VOF fraction out of bounds, vof = %e\n", answer);
         return 1.0;
     } else {
         return answer;
@@ -1735,7 +1736,7 @@ TR1_2D_SUPG2 :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Primar
 
         return 0; // ok
     } else {
-        OOFEM_ERROR("target point not in receiver volume");
+        _error("EIPrimaryFieldI_evaluateFieldVectorAt: target point not in receiver volume");
         return 1; // fail
     }
 }
@@ -1806,7 +1807,7 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
         } else if ( c [ i ] == 0 ) {
             continue;
         } else {
-            OOFEM_ERROR("cannot set up integration domain for %d vertex polygon", c [ i ]);
+            _error2("updateYourself: cannot set up integration domain for %d vertex polygon", c [ i ]);
         }
 
 #if 0
@@ -1857,7 +1858,7 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
 
     double __err = fabs(__area - area) / area;
     if ( __err > 1.e-6 ) {
-        OOFEM_ERROR("volume inconsistency (%5.2f)", __err * 100);
+        _error2("updateIntegrationRules: volume inconsistency (%5.2f)", __err * 100);
 
         __area = 0.0;
         for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
@@ -1945,7 +1946,7 @@ TR1_2D_SUPG2 :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        OOFEM_ERROR("node unknown");
+        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 

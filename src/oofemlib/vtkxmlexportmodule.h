@@ -43,8 +43,8 @@
 #include "interface.h"
 #include "internalstatevaluetype.h"
 #include "integrationrule.h"
-#include "xfem/xfemmanager.h"
-#include "set.h"
+#include "xfemmanager.h"
+
 
 
 #ifdef __VTK_MODULE
@@ -63,7 +63,9 @@
 #define _IFT_VTKXMLExportModule_primvars "primvars"
 #define _IFT_VTKXMLExportModule_ipvars "ipvars"
 #define _IFT_VTKXMLExportModule_stype "stype"
-#define _IFT_VTKXMLExportModule_regionsets "regionsets"
+#define _IFT_VTKXMLExportModule_regionstoskip "regionstoskip"
+#define _IFT_VTKXMLExportModule_nvr "nvr"
+#define _IFT_VTKXMLExportModule_vrmap "vrmap"
 //@}
 
 namespace oofem {
@@ -156,11 +158,12 @@ protected:
     NodalRecoveryModel *smoother;
     /// Smoother for primary variables.
     NodalRecoveryModel *primVarSmoother;
-    /// regions represented by sets
-    IntArray regionSets;
-    /// Default region set
-    Set defaultElementSet;
-
+    /// List of regions to skip.
+    IntArray regionsToSkip;
+    /// Number of virtual regions.
+    int nvr;
+    /// Real->virtual region map.
+    IntArray vrmap;
     /// Scaling time in output, e.g. conversion from seconds to hours
     double timeScale;
 
@@ -206,10 +209,9 @@ public:
      * Computes a cell average of an InternalStateType varible based on the weights
      * in the integrationpoints (=> volume/area/length average)
      */
-    static void computeIPAverage(FloatArray &answer, IntegrationRule *iRule, Element *elem,  InternalStateType isType, TimeStep *tStep);
+    static void computeIPAverage(FloatArray &answer, IntegrationRule *iRule, ElementGeometry *elem,  InternalStateType isType, TimeStep *tStep);
 
 protected:
-
     /// Gives the full form of given symmetrically stored tensors, missing components are filled with zeros.
     void makeFullForm(FloatArray &answer, const FloatArray &reducedForm);
 
@@ -222,11 +224,11 @@ protected:
      * Returns corresponding element cell_type.
      * Some common element types are supported, others can be supported via interface concept.
      */
-    int giveCellType(Element *element);
+    int giveCellType(ElementGeometry *element);
     /**
      * Returns the number of elements vtk cells.
      */
-    int giveNumberOfElementCells(Element *element);
+    int giveNumberOfElementCells(ElementGeometry *element);
     /**
      * Returns number of nodes corresponding to cell type
      */
@@ -234,7 +236,7 @@ protected:
     /**
      * Returns the element cell geometry.
      */
-    void giveElementCell(IntArray &answer, Element *elem);
+    void giveElementCell(IntArray &answer, ElementGeometry *elem);
 
 
     /**
@@ -291,7 +293,7 @@ protected:
     //
     //  Exports a single cell variable (typically an internal variable).
     //
-    void getCellVariableFromIS(FloatArray &answer, Element *el, InternalStateType type, TimeStep *tStep);
+    void getCellVariableFromIS(FloatArray &answer, ElementGeometry *el, InternalStateType type, TimeStep *tStep);
     /**
      * Exports given internal variables directly in integration points (raw data, no smoothing)
      * @param valIDs the UnknownType values identifying the internal variables to export
@@ -310,10 +312,6 @@ protected:
     int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
                                 int &regionDofMans, int &totalcells,
                                 Domain *domain, int reg);
-    /// Returns number of regions (aka regionSets)
-    int giveNumberOfRegions();
-    /// Returns element set
-    Set *giveRegionSet(int i);
     /**
      * Writes a VTK collection file where time step data is stored.
      */
@@ -333,8 +331,8 @@ protected:
 
     // Export of composite elements (built up from several subcells)
 
-    bool isElementComposite(Element *elem); /// Returns true if element geometry type is composite (not a single cell).
-    void exportCompositeElement(VTKPiece &vtkPiece, Element *el, TimeStep *tStep);
+    bool isElementComposite(ElementGeometry *elem); /// Returns true if element geometry type is composite (not a single cell).
+    void exportCompositeElement(VTKPiece &vtkPiece, ElementGeometry *el, TimeStep *tStep);
 };
 
 

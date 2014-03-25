@@ -127,7 +127,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
     long *tmp_array_cen [ 6 ], *tmp_array [ 12 ];
     int swap [ 6 ], flag;
 
-    Element *element = NULL;
+    ElementGeometry *elementGeometry = NULL;
     RefinedElement *refinedElement = NULL;
     IntArray *connectivity = NULL, *boundary = NULL;
 
@@ -189,8 +189,8 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
     fe_elems = d->giveNumberOfElements();
 
     for ( i = 0; i < fe_elems; i++ ) {
-        element = d->giveElement(i + 1);
-        switch ( element->giveGeometryType() ) {
+        elementGeometry = d->giveElementGeometry(i + 1);
+        switch ( elementGeometry->giveGeometryType() ) {
         case EGT_line_1:
             fe_edges++;
             break;
@@ -259,12 +259,12 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
 
     edge_id = face_id = quad_id = tetra_id = hexa_id = 0;
     for ( i = 0; i < fe_elems; i++ ) {
-        element = d->giveElement(i + 1);
-        switch ( element->giveGeometryType() ) {
+        elementGeometry = d->giveElementGeometry(i + 1);
+        switch ( elementGeometry->giveGeometryType() ) {
         case EGT_line_1:
             fe_edge = & ( fe_edge_array [ edge_id++ ] );
             for ( j = 0; j < 2; j++ ) {
-                nd = element->giveNode(j + 1)->giveNumber();
+                nd = elementGeometry->giveNode(j + 1)->giveNumber();
                 if ( nd <= 0 || nd > fe_nodes ) {
                     error_message("Invalid edge nodes");
                 }
@@ -276,7 +276,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
         case EGT_triangle_1:
             fe_face = & ( fe_face_array [ face_id++ ] );
             for ( j = 0; j < 3; j++ ) {
-                nd = element->giveNode(j + 1)->giveNumber();
+                nd = elementGeometry->giveNode(j + 1)->giveNumber();
                 if ( nd <= 0 || nd > fe_nodes ) {
                     error_message("Invalid face nodes");
                 }
@@ -288,7 +288,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
         case EGT_quad_1:
             fe_quad = & ( fe_quad_array [ quad_id++ ] );
             for ( j = 0; j < 4; j++ ) {
-                nd = element->giveNode(j + 1)->giveNumber();
+                nd = elementGeometry->giveNode(j + 1)->giveNumber();
                 if ( nd <= 0 || nd > fe_nodes ) {
                     error_message("Invalid quad nodes");
                 }
@@ -300,7 +300,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
         case EGT_tetra_1:
             fe_tetra = & ( fe_tetra_array [ tetra_id++ ] );
             for ( j = 0; j < 4; j++ ) {
-                nd = element->giveNode(j + 1)->giveNumber();
+                nd = elementGeometry->giveNode(j + 1)->giveNumber();
                 if ( nd <= 0 || nd > fe_nodes ) {
                     error_message("Invalid tetra nodes");
                 }
@@ -312,7 +312,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
         case EGT_hexa_1:
             fe_hexa = & ( fe_hexa_array [ hexa_id++ ] );
             for ( j = 0; j < 8; j++ ) {
-                nd = element->giveNode(j + 1)->giveNumber();
+                nd = elementGeometry->giveNode(j + 1)->giveNumber();
                 if ( nd <= 0 || nd > fe_nodes ) {
                     error_message("Invalid hexa nodes");
                 }
@@ -2816,11 +2816,11 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
 
     edge_id = face_id = quad_id = tetra_id = hexa_id = 0;
     for ( i = 0; i < fe_elems; i++ ) {
-        element = d->giveElement(i + 1);
+        elementGeometry = d->giveElementGeometry(i + 1);
         refinedElement = refinedElementList.at(i + 1);
         boundary = refinedElement->giveBoundaryFlagArray();
 
-        switch ( element->giveGeometryType() ) {
+        switch ( elementGeometry->giveGeometryType() ) {
         case EGT_line_1:
             pos = edge_id * 2;
             fine_edge = & ( fine_edge_array [ pos ] );

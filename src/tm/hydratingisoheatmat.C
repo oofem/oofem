@@ -44,6 +44,7 @@ REGISTER_Material(HydratingIsoHeatMaterial);
 IRResultType
 HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
     int value;
     double dvalue;
@@ -100,7 +101,7 @@ HydratingIsoHeatMaterial :: setMixture(MixtureType mix)
     if ( hydrationModel ) {
         hydrationModel->setMixture(mix);
     } else if ( hydration ) {
-        OOFEM_ERROR("Can't setup undefined hydrationModel.");
+        _error("setMixture: Can't setup undefined hydrationModel.");
     }
 }
 
@@ -149,7 +150,7 @@ HydratingIsoHeatMaterial :: updateInternalState(const FloatArray &vec, GaussPoin
         if ( hydration ) {
             /* OBSOLETE
              * FloatArray s = ms->giveStateVector ();
-             * if (vec.isEmpty()) OOFEM_ERROR("empty new state vector");
+             * if (vec.isEmpty()) _error("updateInternalState: empty new state vector");
              * aux.resize(2);
              * aux.at(1) = vec.at(1);
              * if (s.isEmpty()||(tStep->giveTime()<=0)) aux.at(2) = initialHydrationDegree; // apply initial conditions
@@ -170,7 +171,7 @@ HydratingIsoHeatMaterial :: updateInternalState(const FloatArray &vec, GaussPoin
                 }
 
                 aux.times( 1. / give('d', gp) );
-                fprintf( vyst, "Elem %.3d krok %.2d: t= %.0f, dt=%.0f, %ld. it, ksi= %.12f, T= %.8f, heat=%.8f\n", gp->giveElement()->giveNumber(), tStep->giveNumber(),
+                fprintf( vyst, "Elem %.3d krok %.2d: t= %.0f, dt=%.0f, %ld. it, ksi= %.12f, T= %.8f, heat=%.8f\n", gp->giveElementGeometry()->giveNumber(), tStep->giveNumber(),
                         tStep->giveTargetTime(), tStep->giveTimeIncrement(), tStep->giveSolutionStateCounter(),
                         giveHydrationDegree(gp, tStep, VM_Total), vec.at(1), aux.at(1) * tStep->giveTimeIncrement() );
                 fclose(vyst);
@@ -203,7 +204,7 @@ HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, Gauss
         answer = hydrationModel->giveCharacteristicValue(vec, rmode, gp, tStep)
         / tStep->giveTimeIncrement();
     } else {
-        OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(rmode) );
+        _error2( "giveCharacteristicValue: unknown MatResponseMode (%s)", __MatResponseModeToString(rmode) );
     }
 
     return answer;

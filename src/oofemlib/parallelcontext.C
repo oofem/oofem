@@ -48,7 +48,8 @@ ParallelContext :: ParallelContext(EngngModel *e)
 }
 
 ParallelContext :: ~ParallelContext()
-{ }
+{
+}
 
 void
 ParallelContext :: init(int di)
@@ -194,4 +195,5 @@ ParallelContext :: accumulate(const FloatArray &local, FloatArray &global)
 }
 #endif
 }
+
 } // end namespace oofem

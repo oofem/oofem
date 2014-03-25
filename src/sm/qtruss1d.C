@@ -73,7 +73,7 @@ QTruss1d :: initializeFrom(InputRecord *ir)
 void
 QTruss1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer = {D_u};
+    answer.setValues(1, D_u);
 }
 
 int

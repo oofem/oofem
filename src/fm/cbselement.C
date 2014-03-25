@@ -56,6 +56,7 @@ CBSElement :: ~CBSElement()
 IRResultType
 CBSElement :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, _IFT_CBSElement_bsides);
@@ -90,7 +91,7 @@ CBSElement :: giveCharacteristicMatrix(FloatMatrix &answer,
     } else if ( mtrx == MassMatrix ) {
         this->computeConsistentMassMtrx(answer, tStep);
     } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
+        _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -124,7 +125,7 @@ CBSElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueM
     //else if (mtrx == PrescribedDensityRhsVector)
     //  this->computePrescribedTermsII (answer, mode, tStep);
     else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
+        _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -135,7 +136,7 @@ CBSElement :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
     if ( mtrx == CriticalTimeStep ) {
         return this->computeCriticalTimeStep(tStep);
     } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
+        _error("giveCharacteristicValue: Unknown Type of characteristic mtrx.");
     }
 
     return 0.0;

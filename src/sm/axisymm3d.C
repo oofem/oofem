@@ -108,7 +108,7 @@ Axisymm3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     }
 
     if ( ( size < 0 ) || ( size > 6 ) ) {
-        OOFEM_ERROR("ComputeBmatrixAt size mismatch");
+        _error("ComputeBmatrixAt size mismatch");
     }
 
     answer.resize(size, 6);
@@ -256,6 +256,7 @@ Axisymm3d :: computeGaussPoints()
 IRResultType
 Axisymm3d :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     numberOfGaussPoints = 1;
@@ -317,7 +318,7 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
 
             this->computeBmatrixAt(helpGaussPoint, b, 3, 6);
         } else {
-            OOFEM_ERROR("numberOfRotGaussPoints size mismatch");
+            _error("ComputeStrainVector: numberOfRotGaussPoints size mismatch");
         }
 
         Epsilon.beProductOf(b, u);
@@ -325,10 +326,10 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
         answer.at(6) = Epsilon.at(4);
 
         if ( nlGeometry ) {
-            OOFEM_ERROR("only supports nlGeometry = 0");
+            OOFEM_ERROR("Axisymm3d :: computeStrainVector - only supports nlGeometry = 0");
         }
     } else if ( mode == AL ) { // actualized Lagrange formulation
-        OOFEM_ERROR("unsupported mode");
+        _error("computeStrainVector : unsupported mode");
     }
 }
 
@@ -370,7 +371,7 @@ Axisymm3d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalTo
 void
 Axisymm3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    answer = {D_u, D_v};
+    answer.setValues(2, D_u, D_v);
 }
 
 
@@ -415,7 +416,7 @@ Axisymm3d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        OOFEM_ERROR("node unknown");
+        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 
@@ -489,7 +490,7 @@ Axisymm3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(3) = 1;
         answer.at(4) = 2;
     } else {
-        OOFEM_ERROR("wrong edge number");
+        _error("giveEdgeDofMapping: wrong edge number");
     }
 }
 
@@ -541,7 +542,7 @@ Axisymm3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
         aNode = 3;
         bNode = 1;
     } else {
-        OOFEM_ERROR("wrong egde number");
+        _error("computeLoadLBtoLRotationMatrix: wrong egde number");
     }
 
     nodeA   = this->giveNode(aNode);
@@ -579,7 +580,7 @@ Axisymm3d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
+        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {

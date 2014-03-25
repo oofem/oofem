@@ -73,8 +73,8 @@ void
 DynamicDataReader :: finish()
 {
     // Not sure if i need to do this;
-    for ( auto &rec: this->recordList ) {
-        delete rec;
+    for ( std :: list< InputRecord * > :: iterator tempit = this->recordList.begin(); tempit != this->recordList.end(); ++tempit ) {
+        delete *tempit;
     }
     this->recordList.clear();
 }
@@ -86,8 +86,8 @@ DynamicDataReader :: writeToFile(const char *fileName)
 
     fout << this->outputFileName << '\n';
     fout << this->description << '\n';
-    for ( auto &rec: this->recordList ) {
-        fout << rec->giveRecordAsString() << "\n";
+    for ( std :: list< InputRecord * > :: iterator it = this->recordList.begin(); it != this->recordList.end(); ++it ) {
+        fout << (*it)->giveRecordAsString() << "\n";
     }
     fout.close();
 }

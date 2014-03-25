@@ -53,6 +53,7 @@ IsotropicHeatTransferMaterial :: ~IsotropicHeatTransferMaterial() {
 IRResultType
 IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     // double value ;
 
@@ -127,7 +128,7 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         return;
 
     default:
-        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
+        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -140,7 +141,7 @@ IsotropicHeatTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
     if ( mode == Capacity ) {
         return ( capacity * this->give('d', gp) );
     } else {
-        OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
+        _error2( "giveCharacteristicValue : unknown mode (%s)", __MatResponseModeToString(mode) );
     }
 
     return 0.;

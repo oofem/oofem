@@ -46,9 +46,6 @@
 
 #define _IFT_DKTPlate_Name "dktplate"
 
-// enable or disable element vertex moment cache; enabling will speed up postprocessing
-#define DKT_EnableVertexMomentsCache
-
 namespace oofem {
 /**
  * This class implements an triangular Discrete Kirchhoff Theory (DKT) element.
@@ -64,21 +61,17 @@ namespace oofem {
  * - calculating its B,D,N matrices and dV.
  */
 class DKTPlate : public NLStructuralElement,
-    public LayeredCrossSectionInterface, public ZZNodalRecoveryModelInterface,
-    public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-    public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface
+public LayeredCrossSectionInterface, public ZZNodalRecoveryModelInterface,
+public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
+public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface
 {
 protected:
     /// Element geometry approximation
     static FEI2dTrLin interp_lin;
     double area;
-#ifdef DKT_EnableVertexMomentsCache
-    FloatMatrix vertexMoments;
-    StateCounterType stateCounter;
-#endif
 
 public:
-    DKTPlate(int n, Domain *d);
+    DKTPlate(int n, Domain * d);
     virtual ~DKTPlate() { }
 
     virtual FEInterpolation *giveInterpolation() const { return & interp_lin; }
@@ -86,7 +79,7 @@ public:
 
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
     virtual int giveApproxOrder() { return 1; }
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
+    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
 protected:
     virtual void computeGaussPoints();
@@ -103,27 +96,16 @@ protected:
                                      double *z = NULL);
 
 
-    /**
-     * @name Edge load support
-     */
-    //@{
     virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
+    //virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp) { answer.clear(); }
     virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    //virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.clear(); }
+    //virtual IntegrationRule *GetSurfaceIntegrationRule(int i) { return NULL; }
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+    //virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
+    //virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.clear(); }
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
-    //@}
-    /**
-     * @name Surface load support
-     */
-    //@{
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
-    virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int iSurf);
-    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
-    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf);
-    virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp);
-    //@}
 
 public:
     // definition & identification
@@ -148,7 +130,7 @@ public:
     virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual ElementGeometry *ZZNodalRecoveryMI_giveElementGeometry() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
@@ -169,10 +151,6 @@ public:
     // layered cross section support functions
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
                                             GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
-
-    void computeVertexBendingMoments(FloatMatrix &answer, TimeStep *tStep);
-    // postproccess the shear forces on the element
-    void computeShearForces(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);

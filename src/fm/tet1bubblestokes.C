@@ -94,11 +94,11 @@ int Tet1BubbleStokes :: computeNumberOfDofs()
 void Tet1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     if ( ut == EID_MomentumBalance ) {
-        answer = {V_u, V_v, V_w};
+        answer.setValues(3, V_u, V_v, V_w);
     } else if ( ut == EID_ConservationEquation ) {
-        answer = {P_f};
+        answer.setValues(1, P_f);
     } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        answer = {V_u, V_v, V_w, P_f};
+        answer.setValues(4, V_u, V_v, V_w, P_f);
     } else {
         answer.clear();
     }
@@ -107,7 +107,7 @@ void Tet1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray 
 void Tet1BubbleStokes :: giveInternalDofManDofIDMask(int i, EquationID eid, IntArray &answer) const
 {
     if ( eid == EID_MomentumBalance_ConservationEquation || eid == EID_MomentumBalance ) {
-        answer = {V_u, V_v, V_w};
+        answer.setValues(3, V_u, V_v, V_w);
     } else {
         answer.clear();
     }
@@ -128,7 +128,7 @@ void Tet1BubbleStokes :: giveCharacteristicVector(FloatArray &answer, CharType m
     } else if ( mtrx == InternalForcesVector ) {
         this->computeInternalForcesVector(answer, tStep);
     } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -139,7 +139,7 @@ void Tet1BubbleStokes :: giveCharacteristicMatrix(FloatMatrix &answer,
     if ( mtrx == StiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, tStep);
     } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -207,7 +207,7 @@ void Tet1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeSte
         if ( ltype == SurfaceLoadBGT ) {
             this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
         } else {
-            OOFEM_ERROR("Unsupported boundary condition: %d", load_id);
+            OOFEM_ERROR2("Tet1BubbleStokes :: computeLoadVector - Unsupported boundary condition: %d", load_id);
         }
 
         answer.add(vec);
@@ -221,7 +221,7 @@ void Tet1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeSte
             this->computeLoadVector(vec, load, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         } else {
-            OOFEM_ERROR("Unsupported body load: %d", load);
+            OOFEM_ERROR2("Tet1BubbleStokes :: computeLoadVector - Unsupported body load: %d", load);
         }
     }
 }
@@ -321,7 +321,7 @@ void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryL
         answer.zero();
         answer.assemble(f, this->surf_ordering [ iSurf - 1 ]);
     } else {
-        OOFEM_ERROR("Strange boundary condition type");
+        OOFEM_ERROR("Tet1BubbleStokes :: computeBoundaryLoadVector - Strange boundary condition type");
     }
 }
 
@@ -465,13 +465,14 @@ int Tet1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueMo
 
 void Tet1BubbleStokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
-    answer = {V_u, V_v, V_w, P_f};
+    answer.setValues(4, V_u, V_v, V_w, P_f);
 }
 
 double Tet1BubbleStokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
     FloatArray center;
-    FloatArray lcoords = {0.333333, 0.333333, 0.333333, 0.333333};
+    FloatArray lcoords;
+    lcoords.setValues(4, 0.333333, 0.333333, 0.333333, 0.333333);
     this->interp.local2global( center, lcoords, FEIElementGeometryWrapper(this) );
     return center.distance(coords);
 }

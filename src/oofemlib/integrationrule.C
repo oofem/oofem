@@ -65,10 +65,10 @@ IntegrationRule :: iterator
 IntegrationRule :: end() { return iterator(this, this->numberOfIntegrationPoints); }
 
 
-IntegrationRule :: IntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic)
+IntegrationRule :: IntegrationRule(int n, ElementGeometry *e, int startIndx, int endIndx, bool dynamic)
 {
     number = n;
-    elem = e;
+    elemGeometry = e;
     numberOfIntegrationPoints = 0;
     gaussPointArray = NULL;
     firstLocalStrainIndx = startIndx;
@@ -77,10 +77,10 @@ IntegrationRule :: IntegrationRule(int n, Element *e, int startIndx, int endIndx
     intdomain = _Unknown_integrationDomain;
 }
 
-IntegrationRule :: IntegrationRule(int n, Element *e)
+IntegrationRule :: IntegrationRule(int n, ElementGeometry *e)
 {
     number = n;
-    elem = e;
+    elemGeometry = e;
     numberOfIntegrationPoints = 0;
     gaussPointArray = NULL;
     firstLocalStrainIndx = lastLocalStrainIndx = 0;
@@ -116,7 +116,7 @@ IntegrationRule :: getIntegrationPoint(int i)
 {
 #  ifdef DEBUG
     if ( ( i < 0 ) || ( i >= numberOfIntegrationPoints ) ) {
-        OOFEM_ERROR("request out of bounds (%d)", i);
+        OOFEM_ERROR2("IntegrationRule::getIntegrationPoint - request out of bounds (%d)", i);
     }
 
 #  endif
@@ -167,7 +167,7 @@ IntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     contextIOResultType iores;
 
     if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
+        OOFEM_ERROR("saveContex : can't write into NULL stream");
     }
 
     int isdyn = isDynamic;
@@ -238,7 +238,7 @@ IntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, void *ob
     //Element* __parelem = (Element*) obj;
 
     if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
+        OOFEM_ERROR("restoreContex : can't write into NULL stream");
     }
 
     int isdyn;
@@ -354,7 +354,7 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
         return numberOfIntegrationPoints;
 
     default:
-        OOFEM_ERROR("unknown mode (%d)", mode);
+        OOFEM_ERROR2("IntegrationRule::setUpIntegrationPoints - unknown mode (%d)", mode);
     }
 
     return 0;
@@ -371,7 +371,7 @@ IntegrationRule :: setUpEmbeddedIntegrationPoints(integrationDomain mode, int nP
         return  ( numberOfIntegrationPoints = this->SetUpPointsOn2DEmbeddedLine(nPoints, matMode, coords) );
 
     default:
-        OOFEM_ERROR("unknown mode");
+        OOFEM_ERROR("IntegrationRule::setUpEmbeddedIntegrationPoints - unknown mode");
     }
 
     return 0;

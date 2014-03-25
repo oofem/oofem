@@ -38,8 +38,6 @@
 #include "domain.h"
 #include "field.h"
 
-#include <vector>
-
 namespace oofem {
 /**
  * Class representing field defined by nodal values associated to given domain.
@@ -53,7 +51,7 @@ protected:
     /// Associated domain (need its elements to interpolate)
     Domain *domain;
     /// Array of dofman values
-    std::vector< FloatArray >dmanvallist;
+    AList< FloatArray >dmanvallist;
 
 public:
     /**

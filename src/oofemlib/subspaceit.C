@@ -88,16 +88,16 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
     // check matrix size
     //
     if ( ( !a ) || ( !b ) ) {
-        OOFEM_ERROR("matrices are not defined\n");
+        OOFEM_ERROR("SubspaceIteration :: solveYourselfAt : matrices are not defined\n");
     }
 
     if ( a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
-        OOFEM_ERROR("matrices size mismatch\n");
+        OOFEM_ERROR("SubspaceIteration :: solveYourselfAt : matrices size mismatch\n");
     }
 
     // check matrix for factorization support
     if ( !a->canBeFactorized() ) {
-        OOFEM_ERROR("a matrix not support factorization");
+        OOFEM_ERROR("SubspaceIteration :: a matrix not support factorization");
     }
 
     //
@@ -130,20 +130,20 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
     vec.zero();                   // eigen vectors of reduced problem
     // check matrix for storing resulted eigen vectors at the end
     if ( _r == NULL ) {
-        OOFEM_ERROR("unknown eigen vectors mtrx");
+        OOFEM_ERROR("SubspaceIteration :: solveYourselfAt: unknown eigen vectors mtrx");
     }
 
     if ( ( _r->giveNumberOfRows() != nn ) || ( _r->giveNumberOfColumns() != nroot ) ) {
-        OOFEM_ERROR("_r size mismatch");
+        OOFEM_ERROR("SubspaceIteration :: solveYourselfAt: _r size mismatch");
     }
 
     // check array for storing eigenvalues
     if ( _eigv == NULL ) {
-        OOFEM_ERROR("unknown eigenvalue array");
+        OOFEM_ERROR("SubspaceIteration :: solveYourselfAt: unknown eigenvalue array");
     }
 
     if ( _eigv->giveSize() != nroot ) {
-        OOFEM_ERROR("eigv size mismatch");
+        OOFEM_ERROR("SubspaceIteration :: solveYourselfAt: eigv size mismatch");
     }
 
     //

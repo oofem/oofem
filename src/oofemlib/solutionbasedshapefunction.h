@@ -104,7 +104,7 @@ private:
 
     void giveCorrectedValueAtPoint(FloatArray &answer, const FloatArray &coords, IntArray &dofID, EngngModel &myEngngModel);
 
-    void splitBoundaryNodeIDs(modeStruct &mode, Element &e, IntArray &boundary, IntArray &pList, IntArray &mList, IntArray &zList, FloatMatrix &nodeValues);
+    void splitBoundaryNodeIDs(modeStruct &mode, ElementGeometry &e, IntArray &boundary, IntArray &pList, IntArray &mList, IntArray &zList, FloatMatrix &nodeValues);
 
     void computeBaseFunctionValueAt(FloatArray &answer, FloatArray &coords, IntArray &dofIDs, EngngModel &myEngngModel);
 

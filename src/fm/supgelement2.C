@@ -60,6 +60,7 @@ SUPGElement2 :: ~SUPGElement2()
 IRResultType
 SUPGElement2 :: initializeFrom(InputRecord *ir)
 {
+    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                               // Required by IR_GIVE_FIELD macro
 
     return SUPGElement :: initializeFrom(ir);
@@ -109,7 +110,7 @@ SUPGElement2 :: giveCharacteristicMatrix(FloatMatrix &answer,
     } else
 #endif
     {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
+        _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -182,7 +183,7 @@ SUPGElement2 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
     } else
 #endif
     {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
+        _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -193,7 +194,7 @@ SUPGElement2 :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
     if ( mtrx == CriticalTimeStep ) {
         return this->computeCriticalTimeStep(tStep);
     } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
+        _error("giveCharacteristicValue: Unknown Type of characteristic mtrx.");
     }
 
     return 0.0;
@@ -211,7 +212,7 @@ SUPGElement2 :: checkConsistency()
     int result = 1;
     /*
      * if (!this->giveMaterial()->testMaterialExtension(Material_TransportCapability)) {
-     * OOFEM_WARNING("material without support for transport problems");
+     * _warning("checkConsistency : material without support for transport problems");
      * result =0;
      * }
      */
@@ -718,7 +719,7 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
                 answer.add(helpLoadVector);
             }
         } else {
-            OOFEM_ERROR("unsupported load type class");
+            _error("computeForceLoadVector : unsupported load type class");
         }
     }
 }
@@ -776,7 +777,7 @@ SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
                 answer.add(helpLoadVector);
             }
         } else {
-            OOFEM_ERROR("unsupported load type class");
+            _error("computeForceLoadVector : unsupported load type class");
         }
     }
 }
@@ -784,25 +785,25 @@ SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
 void
 SUPGElement2 :: computeEdgeLoadVector_MB(FloatArray &answer, Load *load, int id, TimeStep *tStep)
 {
-    OOFEM_ERROR("not implemented");
+    _error("computeEdgeLoadVectorAt_MB: not implemented");
 }
 
 void
 SUPGElement2 :: computeSurfaceLoadVector_MB(FloatArray &answer, Load *load, int id, TimeStep *tStep)
 {
-    OOFEM_ERROR("not implemented");
+    _error("computeSurfaceLoadVectorAt_MB: not implemented");
 }
 
 void
 SUPGElement2 :: computeEdgeLoadVector_MC(FloatArray &answer, Load *load, int id, TimeStep *tStep)
 {
-    OOFEM_ERROR("not implemented");
+    _error("computeEdgeLoadVectorAt_MC: not implemented");
 }
 
 void
 SUPGElement2 :: computeSurfaceLoadVector_MC(FloatArray &answer, Load *load, int id, TimeStep *tStep)
 {
-    OOFEM_ERROR("not implemented");
+    _error("computeEdgeLoadVectorAt_MC: not implemented");
 }
 
 

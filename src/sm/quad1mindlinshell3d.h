@@ -66,9 +66,9 @@ class FEI2dQuadLin;
  *
  * @author Mikael Öhman
  */
-class Quad1MindlinShell3D : public NLStructuralElement,
-public ZZNodalRecoveryModelInterface,
-public SPRNodalRecoveryModelInterface
+ class Quad1MindlinShell3D : public NLStructuralElement,
+  public ZZNodalRecoveryModelInterface,
+  public SPRNodalRecoveryModelInterface
 {
 protected:
     /// Cached nodal coordinates in local c.s.,
@@ -88,8 +88,8 @@ protected:
     static bool __initialized;
     /// Defines the ordering of the dofs in the local stiffness matrix.
     static bool initOrdering() {
-        shellOrdering = { 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23};
-        drillOrdering = { 6, 12, 18, 24};
+        shellOrdering.setValues(20,  1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23);
+        drillOrdering.setValues(4,  6, 12, 18, 24);
         return true;
     }
 
@@ -136,9 +136,9 @@ public:
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP() { return this->numberOfGaussPoints; }
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType() { return SPRPatchType_2dxy; }
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual ElementGeometry *ZZNodalRecoveryMI_giveElementGeometry() { return this; }
 
-
+  
 
 
 protected:
@@ -147,7 +147,6 @@ protected:
     virtual void computeSurfaceLoadVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep, ValueModeType mode);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
 
-    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
@@ -161,7 +160,6 @@ protected:
     //virtual IntegrationRule *GetSurfaceIntegrationRule(int i) { return NULL; }
     //virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
     //virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.clear(); }
-    void splitUnknowns(FloatArray &shellUnknowns, FloatArray &drillUnknowns, FloatArray &unknowns);
 };
 } // end namespace oofem
 #endif // quad1mindlinshell3d_h

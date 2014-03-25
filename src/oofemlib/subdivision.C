@@ -316,7 +316,7 @@ Subdivision :: RS_Tetra :: numberSharedEdges(int iNode, IntArray &connNodes)
             elems = iElems->findCommonValuesSorted(* jElems, common, 0);
  #ifdef DEBUG_CHECK
             if ( !elems ) {
-                OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::numberSharedEdges - potentionally shared edge %d is not shared by common elements", eNum);
+                OOFEM_ERROR2("Subdivision::RS_Tetra::numberSharedEdges - potentionally shared edge %d is not shared by common elements", eNum);
             }
 
  #endif
@@ -403,7 +403,7 @@ Subdivision :: RS_Triangle :: RS_Triangle(int number, RS_Mesh *mesh, int parent,
 
 #ifdef DEBUG_CHECK
     if ( nodes.findFirstIndexOf(0) ) {
-        OOFEM_SIMPLE_ERROR("Subdivision::RS_Triangle::RS_Triangle: 0 node of element %d", this->number);
+        OOFEM_ERROR2("Subdivision::RS_Triangle::RS_Triangle: 0 node of element %d", this->number);
     }
 
 #endif
@@ -422,7 +422,7 @@ Subdivision :: RS_Tetra :: RS_Tetra(int number, RS_Mesh *mesh, int parent, IntAr
 
 #ifdef DEBUG_CHECK
     if ( nodes.findFirstIndexOf(0) ) {
-        OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::RS_Tetra: 0 node of element %d", this->number);
+        OOFEM_ERROR2("Subdivision::RS_Tetra::RS_Tetra: 0 node of element %d", this->number);
     }
 
 #endif
@@ -585,7 +585,7 @@ Subdivision :: RS_Triangle :: giveEdgeIndex(int iNode, int jNode)
     }
 
     if ( in == 0 || jn == 0 ) {
-        OOFEM_SIMPLE_ERROR( "Subdivision::RS_Triangle::giveEdgeIndex - there is no edge connecting %d and %d on element %d",
+        OOFEM_ERROR4( "Subdivision::RS_Triangle::giveEdgeIndex - there is no edge connecting %d and %d on element %d",
                      iNode, jNode, this->giveNumber() );
         return 0;
     }
@@ -624,7 +624,7 @@ Subdivision :: RS_Tetra :: giveEdgeIndex(int iNode, int jNode)
     }
 
     if ( in == 0 || jn == 0 ) {
-        OOFEM_SIMPLE_ERROR( "Subdivision::RS_Tetra::giveEdgeIndex - there is no edge connecting %d and %d on element %d",
+        OOFEM_ERROR4( "Subdivision::RS_Tetra::giveEdgeIndex - there is no edge connecting %d and %d on element %d",
                      iNode, jNode, this->giveNumber() );
         return 0;
     }
@@ -705,7 +705,7 @@ Subdivision :: RS_Triangle :: bisect(std :: queue< int > &subdivqueue, std :: li
 
 #ifdef QUICK_HACK
         if ( mesh->giveNode( nodes.at(1) )->isBoundary() && mesh->giveNode( nodes.at(2) )->isBoundary() && mesh->giveNode( nodes.at(3) )->isBoundary() ) {
-            OOFEM_SIMPLE_ERROR( "Subdivision::RS_Triangle::bisect - quick hack not applicable due to element %d", this->giveNumber() );
+            OOFEM_ERROR2( "Subdivision::RS_Triangle::bisect - quick hack not applicable due to element %d", this->giveNumber() );
         }
 
         if ( mesh->giveNode(iNode)->isBoundary() && mesh->giveNode(jNode)->isBoundary() ) {
@@ -720,7 +720,7 @@ Subdivision :: RS_Triangle :: bisect(std :: queue< int > &subdivqueue, std :: li
             // however this might not be true
             // therefore in smoothing the boundary flag is setuped again if not set boundary from here
             if ( mesh->giveNode(iNode)->isBoundary() || mesh->giveNode(jNode)->isBoundary() ) {
-                if ( dorig->giveElement( this->giveTopParent() )->giveRegionNumber() != dorig->giveElement( mesh->giveElement( this->neghbours_base_elements.at(leIndex) )->giveTopParent() )->giveRegionNumber() ) {
+                if ( dorig->giveElementGeometry( this->giveTopParent() )->giveRegionNumber() != dorig->giveElementGeometry( mesh->giveElement( this->neghbours_base_elements.at(leIndex) )->giveTopParent() )->giveRegionNumber() ) {
                     boundary = true;
                 }
             }
@@ -757,7 +757,7 @@ Subdivision :: RS_Triangle :: bisect(std :: queue< int > &subdivqueue, std :: li
 
  #ifdef DEBUG_CHECK
                     if ( !edge->givePartitions()->giveSize() ) {
-                        OOFEM_SIMPLE_ERROR( "Subdivision::RS_Triangle::bisect - unshared edge %d of element %d is marked as shared",
+                        OOFEM_ERROR3( "Subdivision::RS_Triangle::bisect - unshared edge %d of element %d is marked as shared",
                                      shared_edges.at(leIndex), this->giveNumber() );
                     }
 
@@ -808,7 +808,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
 #endif
 
     dorig = mesh->giveSubdivision()->giveDomain();
-    reg = dorig->giveElement( this->giveTopParent() )->giveRegionNumber();
+    reg = dorig->giveElementGeometry( this->giveTopParent() )->giveRegionNumber();
 
     // first resolve whether there will be inserted irregular on the edge opposite to longest edge
     // this will happen if the opposite edge is longest for a side not shared by the longest edge
@@ -866,7 +866,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
             cnt = 2;
 #ifdef DEBUG_CHECK
             if ( ed [ 1 ] != opp_ed [ leIndex - 1 ] ) {
-                OOFEM_SIMPLE_ERROR( "Subdivision::RS_Tetra::bisect - unexpected situation on element %d", this->giveNumber() );
+                OOFEM_ERROR2( "Subdivision::RS_Tetra::bisect - unexpected situation on element %d", this->giveNumber() );
             }
 
 #endif
@@ -876,7 +876,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
 #ifdef QUICK_HACK
     if ( mesh->giveNode( nodes.at(1) )->isBoundary() && mesh->giveNode( nodes.at(2) )->isBoundary() &&
         mesh->giveNode( nodes.at(3) )->isBoundary() && mesh->giveNode( nodes.at(4) )->isBoundary() ) {
-        OOFEM_SIMPLE_ERROR( "Subdivision::RS_Tetra::bisect - quick hack not applicable due to element %d", this->giveNumber() );
+        OOFEM_ERROR2( "Subdivision::RS_Tetra::bisect - quick hack not applicable due to element %d", this->giveNumber() );
     }
 
 #endif
@@ -999,7 +999,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
 
  #ifdef DEBUG_CHECK
                     if ( !edge->givePartitions()->giveSize() ) {
-                        OOFEM_SIMPLE_ERROR( "Subdivision::RS_Tetra::bisect - unshared edge %d of element %d is marked as shared",
+                        OOFEM_ERROR3( "Subdivision::RS_Tetra::bisect - unshared edge %d of element %d is marked as shared",
                                      shared_edges.at(eIndex), this->giveNumber() );
                     }
 
@@ -1031,7 +1031,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
                     elems = iElems->findCommonValuesSorted(* jElems, common, 0);
  #ifdef DEBUG_CHECK
                     if ( !elems ) {
-                        OOFEM_SIMPLE_ERROR( "Subdivision::RS_Tetra::bisect - shared edge %d is not shared by common elements",
+                        OOFEM_ERROR2( "Subdivision::RS_Tetra::bisect - shared edge %d is not shared by common elements",
                                      shared_edges.at(eIndex) );
                     }
 
@@ -1047,7 +1047,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
 
  #ifdef DEBUG_CHECK
                         if ( !elem->giveSharedEdges()->giveSize() ) {
-                            OOFEM_SIMPLE_ERROR( "Subdivision::RS_Tetra::bisect - element %d incident to shared edge %d does not have shared edges",
+                            OOFEM_ERROR3( "Subdivision::RS_Tetra::bisect - element %d incident to shared edge %d does not have shared edges",
                                          common.at(j), shared_edges.at(eIndex) );
                         }
 
@@ -1127,7 +1127,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
                         // however this might not be true
                         // therefore in smoothing the boundary flag is setuped again if not set boundary from here
                         if ( iboundary == true || jboundary == true ) {
-                            if ( dorig->giveElement( elem2->giveTopParent() )->giveRegionNumber() != reg ) {
+                            if ( dorig->giveElementGeometry( elem2->giveTopParent() )->giveRegionNumber() != reg ) {
                                 boundary = true;
                             }
                         }
@@ -1185,7 +1185,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
                          coords.at(2) > 0.000001 && coords.at(2) < 249.99999 &&
                          coords.at(3) > 0.000001 && coords.at(3) < 499.99999 ) {
                         if ( 987.5 - coords.at(1) > 0.000001 || coords.at(1) - 1012.5 > 0.000001 || 300.0 - coords.at(3) > 0.000001 ) {
-                            OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::bisect Irregular %d [%d %d] not on boundary", iNum, iNode, jNode);
+                            OOFEM_ERROR4("Subdivision::RS_Tetra::bisect Irregular %d [%d %d] not on boundary", iNum, iNode, jNode);
                         }
                     }
 
@@ -1220,7 +1220,7 @@ Subdivision :: RS_Tetra :: bisect(std :: queue< int > &subdivqueue, std :: list<
                     elems = iElems->findCommonValuesSorted(* jElems, common, 0);
 #ifdef DEBUG_CHECK
                     if ( !elems ) {
-                        OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::bisect - local outer edge %d %d is not shared by common elements",
+                        OOFEM_ERROR3("Subdivision::RS_Tetra::bisect - local outer edge %d %d is not shared by common elements",
                                      iNode, jNode);
                     }
 
@@ -1292,7 +1292,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
 {
 #ifdef DEBUG_CHECK
     if ( this->queue_flag ) {
-        OOFEM_SIMPLE_ERROR("Subdivision::RS_Triangle::generate - unexpected queue flag of %d ", this->number);
+        OOFEM_ERROR2("Subdivision::RS_Triangle::generate - unexpected queue flag of %d ", this->number);
     }
 
 #endif
@@ -1772,7 +1772,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
 
 #endif
         } else {
-            OOFEM_SIMPLE_ERROR("Subdivision::RS_Triangle::generate - element %d internal data inconsistency", this->number);
+            OOFEM_ERROR2("Subdivision::RS_Triangle::generate - element %d internal data inconsistency", this->number);
         }
 
         // if there is neighbor of "this" not designated for bisection
@@ -1781,7 +1781,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
             if ( this->neghbours_base_elements.at(i) ) {
 #ifdef DEBUG_CHECK
                 if ( this->neghbours_base_elements.at(i) < 0 ) {
-                    OOFEM_SIMPLE_ERROR("Subdivision::RS_Triangle::generate - negative neighbor of %d not expected", this->number);
+                    OOFEM_ERROR2("Subdivision::RS_Triangle::generate - negative neighbor of %d not expected", this->number);
                 }
 
 #endif
@@ -1804,7 +1804,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
 {
 #ifdef DEBUG_CHECK
     if ( this->queue_flag ) {
-        OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::generate - unexpected queue flag of %d ", this->number);
+        OOFEM_ERROR2("Subdivision::RS_Tetra::generate - unexpected queue flag of %d ", this->number);
     }
 
 #endif
@@ -1946,7 +1946,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 } else {
 #ifdef DEBUG_CHECK
                     if ( leIndex1 != iiedge ) {
-                        OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::generate - side longest edge inconsistency on %d", this->number);
+                        OOFEM_ERROR2("Subdivision::RS_Tetra::generate - side longest edge inconsistency on %d", this->number);
                     }
 
 #endif
@@ -1965,7 +1965,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 } else {
 #ifdef DEBUG_CHECK
                     if ( leIndex2 != iiedge ) {
-                        OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::generate - side longest edge inconsistency on %d", this->number);
+                        OOFEM_ERROR2("Subdivision::RS_Tetra::generate - side longest edge inconsistency on %d", this->number);
                     }
 
 #endif
@@ -2323,7 +2323,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 } else {
 #ifdef DEBUG_CHECK
                     if ( leIndex1 != iedge ) {
-                        OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::generate - side longest edge inconsistency on %d", this->number);
+                        OOFEM_ERROR2("Subdivision::RS_Tetra::generate - side longest edge inconsistency on %d", this->number);
                     }
 
 #endif
@@ -2342,7 +2342,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
                 } else {
 #ifdef DEBUG_CHECK
                     if ( leIndex2 != iedge ) {
-                        OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::generate - side longest edge inconsistency on %d", this->number);
+                        OOFEM_ERROR2("Subdivision::RS_Tetra::generate - side longest edge inconsistency on %d", this->number);
                     }
 
 #endif
@@ -2661,7 +2661,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
         if ( irregulars1 ) {
 #ifdef DEBUG_CHECK
             if ( !mesh->giveElement( children.at(1) )->giveIrregular(leIndex1) ) {
-                OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::generate - leIndex incosistency for child 1 of %d", this->number);
+                OOFEM_ERROR2("Subdivision::RS_Tetra::generate - leIndex incosistency for child 1 of %d", this->number);
             }
 
 #endif
@@ -2672,7 +2672,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
         if ( irregulars2 ) {
 #ifdef DEBUG_CHECK
             if ( !mesh->giveElement( children.at(2) )->giveIrregular(leIndex2) ) {
-                OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::generate - leIndex incosistency for child 2 of %d", this->number);
+                OOFEM_ERROR2("Subdivision::RS_Tetra::generate - leIndex incosistency for child 2 of %d", this->number);
             }
 
 #endif
@@ -2686,7 +2686,7 @@ Subdivision :: RS_Tetra :: generate(std :: list< int > &sharedEdgesQueue)
             if ( this->neghbours_base_elements.at(i) ) {
 #ifdef DEBUG_CHECK
                 if ( this->neghbours_base_elements.at(i) < 0 ) {
-                    OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::generate - negative neighbor of %d not expected", this->number);
+                    OOFEM_ERROR2("Subdivision::RS_Tetra::generate - negative neighbor of %d not expected", this->number);
                 }
 
 #endif
@@ -2737,7 +2737,7 @@ Subdivision :: RS_Triangle :: update_neighbours()
                 }
 
                 if ( !found ) {
-                    OOFEM_SIMPLE_ERROR("Subdivision::RS_Triangle::update_neighbours failed for element %d", this->number);
+                    OOFEM_ERROR2("Subdivision::RS_Triangle::update_neighbours failed for element %d", this->number);
                 }
             } else {
                 // parent neighbour remains actual neighbour
@@ -2803,7 +2803,7 @@ Subdivision :: RS_Tetra :: update_neighbours()
 
 #ifdef DEBUG_CHECK
                                     else {
-                                        OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::update_neighbours: too many subdivision levels for element %d", this->number);
+                                        OOFEM_ERROR2("Subdivision::RS_Tetra::update_neighbours: too many subdivision levels for element %d", this->number);
                                     }
 #endif
                                 }
@@ -2821,7 +2821,7 @@ Subdivision :: RS_Tetra :: update_neighbours()
                 }
 
                 if ( !found ) {
-                    OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::update_neighbours failed for element %d (side %d, elem %d)",
+                    OOFEM_ERROR4("Subdivision::RS_Tetra::update_neighbours failed for element %d (side %d, elem %d)",
                                  this->number, iside, parentNeighbor);
                 }
             } else {
@@ -2843,12 +2843,12 @@ Subdivision :: RS_Tetra :: update_neighbours()
                 this->giveSideNodes(i, snodes1);
                 ngb = mesh->giveElement( this->neghbours_base_elements.at(i) );
                 if ( ngb->giveNumber() < 0 ) {
-                    OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::update_neighbours neighbour %d of %d is temporary",
+                    OOFEM_ERROR3("Subdivision::RS_Tetra::update_neighbours neighbour %d of %d is temporary",
                                  this->neghbours_base_elements.at(i), this->number);
                 }
 
                 if ( !ngb->isTerminal() ) {
-                    OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::update_neighbours neighbour %d of %d not terminal",
+                    OOFEM_ERROR3("Subdivision::RS_Tetra::update_neighbours neighbour %d of %d not terminal",
                                  this->neghbours_base_elements.at(i), this->number);
                 }
 
@@ -2862,11 +2862,11 @@ Subdivision :: RS_Tetra :: update_neighbours()
                                 continue;
                             }
 
-                            OOFEM_SIMPLE_ERROR( "Subdivision::RS_Tetra::update_neighbours: element %d is not neighbor (%d) of element %d",
+                            OOFEM_ERROR4( "Subdivision::RS_Tetra::update_neighbours: element %d is not neighbor (%d) of element %d",
                                          this->number, i, this->neghbours_base_elements.at(i) );
                         }
                     } else {
-                        OOFEM_SIMPLE_ERROR( "Subdivision::RS_Tetra::update_neighbours: element %d is not neighbor (%d) of element %d",
+                        OOFEM_ERROR4( "Subdivision::RS_Tetra::update_neighbours: element %d is not neighbor (%d) of element %d",
                                      this->number, i, this->neghbours_base_elements.at(i) );
                     }
                 } else {
@@ -2876,12 +2876,12 @@ Subdivision :: RS_Tetra :: update_neighbours()
                             continue;
                         }
 
-                        OOFEM_SIMPLE_ERROR( "Subdivision::RS_Tetra::update_neighbours: element %d is not neighbor of element %d",
+                        OOFEM_ERROR3( "Subdivision::RS_Tetra::update_neighbours: element %d is not neighbor of element %d",
                                      this->number, this->neghbours_base_elements.at(i) );
                     }
                 }
             } else {
-                OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::update_neighbours negative neighbour %d of %d not expected",
+                OOFEM_ERROR3("Subdivision::RS_Tetra::update_neighbours negative neighbour %d of %d not expected",
                              this->neghbours_base_elements.at(i), this->number);
             }
         }
@@ -3424,24 +3424,24 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     // all elements (including remote which are not needed) are imported to ensure consistency between
     // element number (in the mesh) and its parent number (in the domain) because the domain is used to import connectivities
     for ( int i = 1; i <= nelems; i++ ) {
-        if ( domain->giveElement(i)->giveGeometryType() == EGT_triangle_1 ) {
+        if ( domain->giveElementGeometry(i)->giveGeometryType() == EGT_triangle_1 ) {
             enodes.resize(3);
             for ( int j = 1; j <= 3; j++ ) {
-                enodes.at(j) = domain->giveElement(i)->giveDofManagerNumber(j);
+                enodes.at(j) = domain->giveElementGeometry(i)->giveDofManagerNumber(j);
             }
 
             _element = new Subdivision :: RS_Triangle(i, mesh, i, enodes);
             this->mesh->addElement(i, _element);
-        } else if ( domain->giveElement(i)->giveGeometryType() == EGT_tetra_1 ) {
+        } else if ( domain->giveElementGeometry(i)->giveGeometryType() == EGT_tetra_1 ) {
             enodes.resize(4);
             for ( int j = 1; j <= 4; j++ ) {
-                enodes.at(j) = domain->giveElement(i)->giveDofManagerNumber(j);
+                enodes.at(j) = domain->giveElementGeometry(i)->giveDofManagerNumber(j);
             }
 
             _element = new Subdivision :: RS_Tetra(i, mesh, i, enodes);
             this->mesh->addElement(i, _element);
         } else {
-            OOFEM_SIMPLE_ERROR("Subdivision::createMesh: Unsupported element geometry (element %d)", i);
+            OOFEM_ERROR2("Subdivision::createMesh: Unsupported element geometry (element %d)", i);
             _element = NULL;
         }
 
@@ -3549,7 +3549,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
 
     Dof *idofPtr, *dof;
     DofManager *parentNodePtr, *node;
-    Element *elem;
+    BaseElement *elem;
     CrossSection *crossSection;
     Material *mat;
     NonlocalBarrier *barrier;
@@ -3585,7 +3585,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                     if ( simpleSlaveDofPtr ) {
                         dof = new SimpleSlaveDof( idof, node, simpleSlaveDofPtr->giveMasterDofManagerNum(), idofPtr->giveDofID() );
                     } else {
-                        OOFEM_SIMPLE_ERROR("Subdivision :: createMesh: unsupported DOF type");
+                        OOFEM_ERROR("Subdivision :: createMesh: unsupported DOF type");
                         dof = NULL;
                     }
                 }
@@ -3812,11 +3812,11 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
 #endif
         if ( parent ) {
             // Copy most of the existing parent element:
-            DynamicInputRecord ir( *domain->giveElement ( parent ) );
-            ir.setField(* mesh->giveElement(ielem)->giveNodes(), _IFT_Element_nodes);
+            DynamicInputRecord ir(*domain->giveElementGeometry(parent));
+            ir.setField(* mesh->giveElement(ielem)->giveNodes(), _IFT_ElementGeometry_nodes);
             ir.giveRecordKeywordField(name);
             elem = classFactory.createElement(name.c_str(), eNum, * dNew);
-            elem->initializeFrom(& ir);
+			elem->giveElementGeometry()->initializeFrom(& ir);
 
 #ifdef __PARALLEL_MODE
             //ir.setRecordKeywordNumber( mesh->giveElement(ielem)->giveGlobalNumber() );
@@ -3825,9 +3825,9 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             // local elements have array partitions empty !
 #endif
             ( * dNew )->setElement(eNum, elem);
-            elem->postInitialize();
+			elem->giveElementGeometry()->postInitialize();
         } else {
-            OOFEM_SIMPLE_ERROR("Subdivision :: createMesh: parent element missing");
+            OOFEM_ERROR("Subdivision :: createMesh: parent element missing");
         }
     } // end loop over elements
 
@@ -3836,7 +3836,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int ncrosssect = domain->giveNumberOfCrossSectionModels();
     ( * dNew )->resizeCrossSectionModels(ncrosssect);
     for ( int i = 1; i <= ncrosssect; i++ ) {
-        DynamicInputRecord ir( *domain->giveCrossSection ( i ) );
+        DynamicInputRecord ir(*domain->giveCrossSection(i));
 
         crossSection = classFactory.createCrossSection(name.c_str(), i, * dNew);
         crossSection->initializeFrom(& ir);
@@ -3847,7 +3847,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int nmat = domain->giveNumberOfMaterialModels();
     ( * dNew )->resizeMaterials(nmat);
     for ( int i = 1; i <= nmat; i++ ) {
-        DynamicInputRecord ir( *domain->giveMaterial ( i ) );
+        DynamicInputRecord ir(*domain->giveMaterial(i));
 
         mat = classFactory.createMaterial(name.c_str(), i, * dNew);
         mat->initializeFrom(& ir);
@@ -3858,7 +3858,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int nbarriers = domain->giveNumberOfNonlocalBarriers();
     ( * dNew )->resizeNonlocalBarriers(nbarriers);
     for ( int i = 1; i <= nbarriers; i++ ) {
-        DynamicInputRecord ir( *domain->giveNonlocalBarrier ( i ) );
+        DynamicInputRecord ir(*domain->giveNonlocalBarrier(i));
 
         barrier = classFactory.createNonlocalBarrier(name.c_str(), i, * dNew);
         barrier->initializeFrom(& ir);
@@ -3869,7 +3869,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int nbc = domain->giveNumberOfBoundaryConditions();
     ( * dNew )->resizeBoundaryConditions(nbc);
     for ( int i = 1; i <= nbc; i++ ) {
-        DynamicInputRecord ir( *domain->giveBc ( i ) );
+        DynamicInputRecord ir(*domain->giveBc(i));
 
         bc = classFactory.createBoundaryCondition(name.c_str(), i, * dNew);
         bc->initializeFrom(& ir);
@@ -3880,7 +3880,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int nic = domain->giveNumberOfInitialConditions();
     ( * dNew )->resizeInitialConditions(nic);
     for ( int i = 1; i <= nic; i++ ) {
-        DynamicInputRecord ir( *domain->giveIc ( i ) );
+        DynamicInputRecord ir(*domain->giveIc(i));
 
         ic = new InitialCondition(i, *dNew);
         ic->initializeFrom(& ir);
@@ -3891,7 +3891,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
     int nfunc = domain->giveNumberOfFunctions();
     ( * dNew )->resizeFunctions(nfunc);
     for ( int i = 1; i <= nfunc; i++ ) {
-        DynamicInputRecord ir( *domain->giveFunction ( i ) );
+        DynamicInputRecord ir(*domain->giveFunction(i));
         ir.giveRecordKeywordField(name);
 
         func = classFactory.createFunction(name.c_str(), i, * dNew);
@@ -3983,7 +3983,6 @@ Subdivision :: bisectMesh()
     int myrank = this->giveRank();
     int problem_size = this->giveNumberOfProcesses();
     int value;
-    int *partitionsIrregulars = new int[ problem_size ];
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -4037,7 +4036,7 @@ Subdivision :: bisectMesh()
 
 #ifdef DEBUG_CHECK
             if ( elem->giveQueueFlag() ) {
-                OOFEM_SIMPLE_ERROR("Subdivision::bisectMesh - unexpected queue flag of %d ", ie);
+                OOFEM_ERROR2("Subdivision::bisectMesh - unexpected queue flag of %d ", ie);
             }
 
 #endif
@@ -4079,7 +4078,7 @@ Subdivision :: bisectMesh()
 #ifdef DEBUG_CHECK
  #ifdef __PARALLEL_MODE
             if ( elem->giveParallelMode() != Element_local ) {
-                OOFEM_SIMPLE_ERROR( "Subdivision::bisectMesh - nonlocal element %d not expected for bisection", elem->giveNumber() );
+                OOFEM_ERROR2( "Subdivision::bisectMesh - nonlocal element %d not expected for bisection", elem->giveNumber() );
             }
 
  #endif
@@ -4121,7 +4120,7 @@ Subdivision :: bisectMesh()
  #ifdef __VERBOSE_PARALLEL
         OOFEM_LOG_INFO("[%d] Subdivision::bisectMesh: number of new local irregulars is %d\n", myrank, localIrregulars);
  #endif
-        int irank, localOffset = 0, gnum;
+        int irank, localOffset = 0, gnum, partitionsIrregulars [ problem_size ];
         // gather number of local irregulars from all partitions
         MPI_Allgather(& localIrregulars, 1, MPI_INT, partitionsIrregulars, 1, MPI_INT, MPI_COMM_WORLD);
         // compute local offset
@@ -4154,7 +4153,7 @@ Subdivision :: bisectMesh()
                 // this must be done after globnum is made positive
                 this->mesh->insertGlobalSharedNodeMap(node);
             } else if ( gnum == 0 ) {
-                OOFEM_SIMPLE_ERROR("[%d] Subdivision::bisectMesh: zero globnum identified on node %d", myrank, in);
+                OOFEM_ERROR3("[%d] Subdivision::bisectMesh: zero globnum identified on node %d", myrank, in);
             }
         }
 
@@ -4242,11 +4241,6 @@ Subdivision :: bisectMesh()
  #endif
 #endif
     }
-#ifdef __PARALLEL_MODE
-    if (partitionsIrregulars) {
-      delete[] partitionsIrregulars;
-    }
-#endif
 }
 
 
@@ -4346,7 +4340,7 @@ Subdivision :: smoothMesh()
             sprintf( buffer + len, " %d", node_con_elems.at(i) );
             len = strlen(buffer);
             if ( len >= 1024 ) {
-                OOFEM_SIMPLE_ERROR("Subdivision::smoothMesh: too small buffer");
+                OOFEM_ERROR("Subdivision::smoothMesh: too small buffer");
             }
         }
 
@@ -4435,7 +4429,7 @@ Subdivision :: smoothMesh()
             sprintf( buffer + len, " %d", node_con_nodes.at(i) );
             len = strlen(buffer);
             if ( len >= 1024 ) {
-                OOFEM_SIMPLE_ERROR("Subdivision::smoothMesh: too small buffer");
+                OOFEM_ERROR("Subdivision::smoothMesh: too small buffer");
             }
         }
 
@@ -4474,11 +4468,11 @@ Subdivision :: smoothMesh()
         }
 
         if ( !fixed ) {
-            reg = domain->giveElement( elem->giveTopParent() )->giveRegionNumber();
+            reg = domain->giveElementGeometry( elem->giveTopParent() )->giveRegionNumber();
             for ( i = node_num_elems.at(in) + 1; i < node_num_elems.at(in + 1); i++ ) {
                 elem = mesh->giveElement( node_con_elems.at(i) );
                 // check for material boundary
-                if ( domain->giveElement( elem->giveTopParent() )->giveRegionNumber() != reg ) {
+                if ( domain->giveElementGeometry( elem->giveTopParent() )->giveRegionNumber() != reg ) {
                     mesh->giveNode(in)->setNumber(-in);                                             //mark fixed node on material boundary
                     fixed = true;
                     break;
@@ -4549,20 +4543,20 @@ Subdivision :: smoothMesh()
                             coords->add( mesh->giveNode( node_con_nodes.at(i) )->giveCoordinates() );
                             count++;
                         } else {
-                            OOFEM_SIMPLE_ERROR("Smooth: node %d without coordinates", in);
+                            OOFEM_ERROR2("Smooth: node %d without coordinates", in);
                         }
                     } else {
-                        OOFEM_SIMPLE_ERROR("Smooth: undefined node %d", in);
+                        OOFEM_ERROR2("Smooth: undefined node %d", in);
                     }
                 }
 
                 if ( !count ) {
-                    OOFEM_SIMPLE_ERROR("Smooth: node %d without connectivity", in);
+                    OOFEM_ERROR2("Smooth: node %d without connectivity", in);
                 }
 
                 coords->times( 1.0 / ( node_num_nodes.at(in + 1) - node_num_nodes.at(in) ) );
             } else {
-                OOFEM_SIMPLE_ERROR("Smooth: node %d without coordinates", in);
+                OOFEM_ERROR2("Smooth: node %d without coordinates", in);
             }
 
 #else
@@ -4719,7 +4713,7 @@ Subdivision :: unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
             // I am using zero chunk because array common is large enough
             elems = iElems->findCommonValuesSorted(* jElems, common, 0);
             if ( !elems ) {
-                OOFEM_SIMPLE_ERROR("Subdivision::unpackSharedIrregulars - no element found sharing nodes %d and %d",
+                OOFEM_ERROR3("Subdivision::unpackSharedIrregulars - no element found sharing nodes %d and %d",
                              iNode, jNode);
             }
 
@@ -4728,12 +4722,12 @@ Subdivision :: unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
             eIndex = elem->giveEdgeIndex(iNode, jNode);
  #ifdef DEBUG_CHECK
             if ( !elem->giveSharedEdges()->giveSize() ) {
-                OOFEM_SIMPLE_ERROR("Subdivision::unpackSharedIrregulars - element %d sharing nodes %d %d has no shared edges",
+                OOFEM_ERROR4("Subdivision::unpackSharedIrregulars - element %d sharing nodes %d %d has no shared edges",
                              elem->giveNumber(), iNode, jNode);
             }
 
             if ( !elem->giveSharedEdge(eIndex) ) {
-                OOFEM_SIMPLE_ERROR("Subdivision::unpackSharedIrregulars - element %d sharing nodes %d and %d has no shared edge %d",
+                OOFEM_ERROR5("Subdivision::unpackSharedIrregulars - element %d sharing nodes %d and %d has no shared edge %d",
                              elem->giveNumber(), iNode, jNode, eIndex);
             }
 
@@ -4816,17 +4810,17 @@ Subdivision :: unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
                     eIndex = elem->giveEdgeIndex(iNode, jNode);
  #ifdef DEBUG_CHECK
                     if ( !elem->giveSharedEdges()->giveSize() ) {
-                        OOFEM_SIMPLE_ERROR("Subdivision::unpackSharedIrregulars - element %d sharing nodes %d %d has no shared edges",
+                        OOFEM_ERROR4("Subdivision::unpackSharedIrregulars - element %d sharing nodes %d %d has no shared edges",
                                      elem->giveNumber(), iNode, jNode);
                     }
 
                     if ( !elem->giveSharedEdge(eIndex) ) {
-                        OOFEM_SIMPLE_ERROR("Subdivision::unpackSharedIrregulars - element %d sharing nodes %d and %d has no shared edge %d",
+                        OOFEM_ERROR5("Subdivision::unpackSharedIrregulars - element %d sharing nodes %d and %d has no shared edge %d",
                                      elem->giveNumber(), iNode, jNode, eIndex);
                     }
 
                     if ( elem->giveIrregular(eIndex) ) {
-                        OOFEM_SIMPLE_ERROR("Subdivision::unpackSharedIrregulars - element %d sharing nodes %d %d already has irregular",
+                        OOFEM_ERROR4("Subdivision::unpackSharedIrregulars - element %d sharing nodes %d %d already has irregular",
                                      elem->giveNumber(), iNode, jNode);
                     }
 
@@ -4863,7 +4857,7 @@ Subdivision :: unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
                 }
             }
         } else {
-            OOFEM_SIMPLE_ERROR("Subdivision::unpackSharedIrregulars: unknown tag received");
+            OOFEM_ERROR("Subdivision::unpackSharedIrregulars: unknown tag received");
         }
 
         // get type of the next record
@@ -4972,7 +4966,7 @@ Subdivision :: unpackIrregularSharedGlobnums(Subdivision *s, ProcessCommunicator
             // I am using zero chunk because array common is large enough
             elems = iElems->findCommonValuesSorted(* jElems, common, 0);
             if ( !elems ) {
-                OOFEM_SIMPLE_ERROR("Subdivision::unpackIrregularSharedGlobnums - no element found sharing nodes %d and %d",
+                OOFEM_ERROR3("Subdivision::unpackIrregularSharedGlobnums - no element found sharing nodes %d and %d",
                              iNode, jNode);
             }
 
@@ -4982,17 +4976,17 @@ Subdivision :: unpackIrregularSharedGlobnums(Subdivision *s, ProcessCommunicator
             iNum = elem->giveIrregular(eIndex);
  #ifdef DEBUG_CHECK
             if ( !elem->giveSharedEdges()->giveSize() ) {
-                OOFEM_SIMPLE_ERROR("Subdivision::unpackIrregularSharedGlobnums - element %d sharing nodes %d %d has no shared edges",
+                OOFEM_ERROR4("Subdivision::unpackIrregularSharedGlobnums - element %d sharing nodes %d %d has no shared edges",
                              elem->giveNumber(), iNode, jNode);
             }
 
             if ( !elem->giveSharedEdge(eIndex) ) {
-                OOFEM_SIMPLE_ERROR("Subdivision::unpackIrregularSharedGlobnums - element %d sharing nodes %d and %d has no shared edge %d",
+                OOFEM_ERROR5("Subdivision::unpackIrregularSharedGlobnums - element %d sharing nodes %d and %d has no shared edge %d",
                              elem->giveNumber(), iNode, jNode, eIndex);
             }
 
             if ( !iNum ) {
-                OOFEM_SIMPLE_ERROR("Subdivision::unpackIrregularSharedGlobnums - element %d sharing nodes %d %d does not have irregular",
+                OOFEM_ERROR4("Subdivision::unpackIrregularSharedGlobnums - element %d sharing nodes %d %d does not have irregular",
                              elem->giveNumber(), iNode, jNode);
             }
 
@@ -5007,7 +5001,7 @@ Subdivision :: unpackIrregularSharedGlobnums(Subdivision *s, ProcessCommunicator
                            myrank, iNum, -edgeInfo.at(3), edgeInfo.at(1), edgeInfo.at(2), iproc);
  #endif
         } else {
-            OOFEM_SIMPLE_ERROR("Subdivision::unpackIrregularSharedGlobnums: unknown tag received");
+            OOFEM_ERROR("Subdivision::unpackIrregularSharedGlobnums: unknown tag received");
         }
 
         pcbuff->unpackInt(_type);
@@ -5324,8 +5318,7 @@ Subdivision :: assignGlobalNumbersToElements(Domain *d)
 {
     int problem_size = this->giveNumberOfProcesses();
     int myrank = this->giveRank();
-    int i, nelems, numberOfLocalElementsToNumber = 0;
-    int *partitionNumberOfElements = new int[ problem_size ];
+    int i, nelems, numberOfLocalElementsToNumber = 0, partitionNumberOfElements [ problem_size ];
     int localMaxGlobnum = 0, globalMaxGlobnum;
 
     // idea: first determine the number of local elements waiting for new global id
@@ -5335,7 +5328,7 @@ Subdivision :: assignGlobalNumbersToElements(Domain *d)
         localMaxGlobnum = max( localMaxGlobnum, d->giveElement(i)->giveGlobalNumber() );
  #ifdef DEBUG_CHECK
         if ( d->giveElement(i)->giveParallelMode() == Element_remote ) {
-            OOFEM_SIMPLE_ERROR("Subdivision::assignGlobalNumbersToElements - unexpected remote element %d ", i);
+            OOFEM_ERROR2("Subdivision::assignGlobalNumbersToElements - unexpected remote element %d ", i);
         }
 
  #endif
@@ -5373,11 +5366,6 @@ Subdivision :: assignGlobalNumbersToElements(Domain *d)
      * }
      */
  #endif
-
-    if (partitionNumberOfElements) {
-      delete[] partitionNumberOfElements;
-    }
-
 }
 
 
@@ -5462,7 +5450,7 @@ Subdivision :: exchangeSharedEdges()
             elems = iElems->findCommonValuesSorted(* jElems, common, 0);
  #ifdef DEBUG_CHECK
             if ( !elems ) {
-                OOFEM_SIMPLE_ERROR("Subdivision::exchangeSharedEdges - no element found sharing nodes %d and %d corresponding to edge %d",
+                OOFEM_ERROR4("Subdivision::exchangeSharedEdges - no element found sharing nodes %d and %d corresponding to edge %d",
                              iNode, jNode, pi);
             }
 
@@ -5471,7 +5459,7 @@ Subdivision :: exchangeSharedEdges()
                 elem = mesh->giveElement( common.at(i) );
  #ifdef DEBUG_CHECK
                 if ( !elem->giveSharedEdges()->giveSize() ) {
-                    OOFEM_SIMPLE_ERROR("Subdivision::exchangeSharedEdges - element %d sharing nodes %d %d has no shared edges",
+                    OOFEM_ERROR4("Subdivision::exchangeSharedEdges - element %d sharing nodes %d %d has no shared edges",
                                  elem->giveNumber(), iNode, jNode);
                 }
 
@@ -5579,12 +5567,12 @@ Subdivision :: unpackSharedEdges(Subdivision *s, ProcessCommunicator &pc)
                 eIndex = elem->giveEdgeIndex(iNode, jNode);
  #ifdef DEBUG_CHECK
                 if ( !elem->giveSharedEdges()->giveSize() ) {
-                    OOFEM_SIMPLE_ERROR("Subdivision::unpackSharedEdges - element %d sharing nodes %d %d has no shared edges",
+                    OOFEM_ERROR4("Subdivision::unpackSharedEdges - element %d sharing nodes %d %d has no shared edges",
                                  elem->giveNumber(), iNode, jNode);
                 }
 
                 if ( !elem->giveSharedEdge(eIndex) ) {
-                    OOFEM_SIMPLE_ERROR("Subdivision::unpackSharedEdges - element %d sharing nodes %d and %d has no shared edge %d",
+                    OOFEM_ERROR5("Subdivision::unpackSharedEdges - element %d sharing nodes %d and %d has no shared edge %d",
                                  elem->giveNumber(), iNode, jNode, eIndex);
                 }
 
@@ -5599,7 +5587,7 @@ Subdivision :: unpackSharedEdges(Subdivision *s, ProcessCommunicator &pc)
  #endif
             }
         } else {
-            OOFEM_SIMPLE_ERROR("Subdivision::unpackSharedEdges: unknown tag received");
+            OOFEM_ERROR("Subdivision::unpackSharedEdges: unknown tag received");
         }
 
         pcbuff->unpackInt(_type);

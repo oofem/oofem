@@ -96,6 +96,7 @@ FETISolver :: estimateMaxPackSize(IntArray &map, CommunicationBuffer &buff, int 
 IRResultType
 FETISolver :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, ni, _IFT_FETISolver_maxiter);
@@ -1067,7 +1068,7 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
         OOFEM_ERROR("FETISolver :: solve: unsuported sparse matrix type");
     }
 
-    partitionStiffness = static_cast< Skyline * >(A);
+    partitionStiffness = static_cast< Skyline * >( A );
 
     if ( ( partitionSolution->giveSize() ) != partitionLoad->giveSize() ) {
         OOFEM_ERROR("FETISolver :: solveYourselfAt: size mismatch");

@@ -243,7 +243,7 @@ Lattice2d :: computeVolumeAround(GaussPoint *gp)
 void
 Lattice2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer = {D_u, D_v, R_w};
+    answer.setValues(3, D_u, D_v, R_w);
 }
 
 
@@ -327,6 +327,7 @@ Lattice2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 IRResultType
 Lattice2d :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     // first call parent
     LatticeStructuralElement :: initializeFrom(ir);
@@ -388,7 +389,7 @@ Lattice2d :: drawYourself(oofegGraphicContext &gc)
     } else if ( mode == OGC_elemSpecial ) {
         this->drawSpecial(gc);
     } else {
-        OOFEM_ERROR("unsupported mode");
+        _error("drawYourself : unsupported mode");
     }
 }
 

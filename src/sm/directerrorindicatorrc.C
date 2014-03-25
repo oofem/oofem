@@ -100,9 +100,9 @@ DirectErrorIndicatorRC :: giveLocalDofManDensity(int num)
     for ( int i = 1; i <= isize; i++ ) {
         // ask for indicator variable value and determine current mesh density
         interface = static_cast< DirectErrorIndicatorRCInterface * >
-                    ( d->giveElement( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType) );
+                    ( d->giveElementGeometry( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType) );
         if ( !interface ) {
-            OOFEM_WARNING("elem %d does not support DirectErrorIndicatorRCInterface", con->at(i) );
+            OOFEM_WARNING2( "DirectErrorIndicatorRC::giveRequiredDofManDensity: elem %d does not support DirectErrorIndicatorRCInterface", con->at(i) );
         }
 
         if ( i == 1 ) {
@@ -149,15 +149,15 @@ DirectErrorIndicatorRC :: giveLocalDofManIndicator(int inode, TimeStep *tStep)
     for ( int i = 1; i <= isize; i++ ) {
         // ask for indicator variable value and determine current mesh density
         interface = static_cast< DirectErrorIndicatorRCInterface * >
-                    ( d->giveElement( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType) );
+                    ( d->giveElementGeometry( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType) );
         if ( !interface ) {
-            OOFEM_WARNING("element %d does not support DirectErrorIndicatorRCInterface", con->at(i) );
+            OOFEM_WARNING2( "DirectErrorIndicatorRC::giveRequiredDofManDensity: element %d does not support DirectErrorIndicatorRCInterface", con->at(i) );
         }
 
         if ( i == 1 ) {
-            indicatorVal = ee->giveElementError(indicatorET, d->giveElement( con->at(i) ), tStep);
+            indicatorVal = ee->giveElementError(indicatorET, d->giveElementGeometry( con->at(i) ), tStep);
         } else {
-            indicatorVal = max( indicatorVal, ee->giveElementError(indicatorET, d->giveElement( con->at(i) ), tStep) );
+            indicatorVal = max( indicatorVal, ee->giveElementError(indicatorET, d->giveElementGeometry( con->at(i) ), tStep) );
         }
     }
 
@@ -246,6 +246,7 @@ DirectErrorIndicatorRC :: giveRequiredDofManDensity(int num, TimeStep *tStep, in
 IRResultType
 DirectErrorIndicatorRC :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, minIndicatorLimit, _IFT_DirectErrorIndicatorRC_minlim);

@@ -63,7 +63,7 @@ protected:
 
 public:
     /// Constructor.
-    PatchIntegrationRule(int n, Element * e, const std :: vector< Triangle > & iTriangles);
+    PatchIntegrationRule(int n, ElementGeometry * e, const std :: vector< Triangle > & iTriangles);
     /// Destructor.
     virtual ~PatchIntegrationRule();
 

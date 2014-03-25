@@ -68,10 +68,10 @@ FluidModel :: forceEquationNumbering(int id)
     }
 
     for ( int i = 1; i <= nelem; ++i ) {
-        Element *elem = domain->giveElement(i);
-        int innodes = elem->giveNumberOfInternalDofManagers();
+        ElementGeometry *elemGeometry = domain->giveElementGeometry(i);
+        int innodes = elemGeometry->giveNumberOfInternalDofManagers();
         for ( int k = 1; k <= innodes; k++ ) {
-            DofManager *dman = elem->giveInternalDofManager(k);
+            DofManager *dman = elemGeometry->giveInternalDofManager(k);
             int ndofs = dman->giveNumberOfDofs();
             for ( int j = 1; j <= ndofs; j++ ) {
                 Dof *jDof = dman->giveDof(j);
@@ -113,7 +113,7 @@ FluidModel :: forceEquationNumbering(int id)
     }
 
     for ( int i = 1; i <= nelem; ++i ) {
-        Element *elem = domain->giveElement(i);
+        ElementGeometry *elem = domain->giveElementGeometry(i);
         int innodes = elem->giveNumberOfInternalDofManagers();
         for ( int k = 1; k <= innodes; k++ ) {
             DofManager *dman = elem->giveInternalDofManager(k);

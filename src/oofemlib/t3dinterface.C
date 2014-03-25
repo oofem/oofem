@@ -59,7 +59,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *tStep)
     double density;
     FILE *outputStrem;
     Node *inode;
-    Element *ielem;
+    ElementGeometry *ielem;
     int edges, trias, quads, tetras, pyrams, wedges, hexas;
     IntArray edgeIdArray, triaIdArray, quadIdArray, tetraIdArray, pyramIdArray, wedgeIdArray, hexaIdArray;
     bool tri_tetra = false;
@@ -67,7 +67,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *tStep)
 
     edges = trias = quads = tetras = pyrams = wedges = hexas = 0;
     for ( int i = 1; i <= nelem; i++ ) {
-        ielem = d->giveElement(i);
+        ielem = d->giveElementGeometry(i);
         switch ( ielem->giveGeometryType() ) {
         case EGT_point:
             break;
@@ -96,7 +96,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *tStep)
             hexas++;
             break;
         default:
-            OOFEM_SIMPLE_ERROR( "T3DInterface::createInput unknown element type (%s)",
+            OOFEM_ERROR2( "T3DInterface::createInput unknown element type (%s)",
                          __Element_Geometry_TypeToString( ielem->giveGeometryType() ) );
         }
     }
@@ -111,7 +111,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *tStep)
 
     edges = trias = quads = tetras = pyrams = wedges = hexas = 0;
     for ( int i = 1; i <= nelem; i++ ) {
-        ielem = d->giveElement(i);
+        ielem = d->giveElementGeometry(i);
         switch ( ielem->giveGeometryType() ) {
         case EGT_point:
             break;
@@ -177,7 +177,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *tStep)
 
     if ( edges != 0 ) {
         for ( int i = 1; i <= edges; i++ ) {
-            ielem = d->giveElement( edgeIdArray.at(i) );
+            ielem = d->giveElementGeometry( edgeIdArray.at(i) );
             fprintf(outputStrem, "%d", i);
             for ( int j = 1; j <= 2; j++ ) {
                 fprintf( outputStrem, " %d", ielem->giveNode(j)->giveNumber() );
@@ -189,7 +189,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *tStep)
 
     if ( trias != 0 ) {
         for ( int i = 1; i <= trias; i++ ) {
-            ielem = d->giveElement( triaIdArray.at(i) );
+            ielem = d->giveElementGeometry( triaIdArray.at(i) );
             fprintf(outputStrem, "%d", i);
             for ( int j = 1; j <= 3; j++ ) {
                 fprintf( outputStrem, " %d", ielem->giveNode(j)->giveNumber() );
@@ -201,7 +201,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *tStep)
 
     if ( quads != 0 ) {
         for ( int i = 1; i <= quads; i++ ) {
-            ielem = d->giveElement( quadIdArray.at(i) );
+            ielem = d->giveElementGeometry( quadIdArray.at(i) );
             fprintf(outputStrem, "%d", i);
             for ( int j = 1; j <= 4; j++ ) {
                 fprintf( outputStrem, " %d", ielem->giveNode(j)->giveNumber() );
@@ -213,7 +213,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *tStep)
 
     if ( tetras != 0 ) {
         for ( int i = 1; i <= tetras; i++ ) {
-            ielem = d->giveElement( tetraIdArray.at(i) );
+            ielem = d->giveElementGeometry( tetraIdArray.at(i) );
             fprintf(outputStrem, "%d", i);
             for ( int j = 1; j <= 4; j++ ) {
                 fprintf( outputStrem, " %d", ielem->giveNode(j)->giveNumber() );
@@ -225,7 +225,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *tStep)
 
     if ( pyrams != 0 ) {
         for ( int i = 1; i <= pyrams; i++ ) {
-            ielem = d->giveElement( pyramIdArray.at(i) );
+            ielem = d->giveElementGeometry( pyramIdArray.at(i) );
             fprintf(outputStrem, "%d", i);
             for ( int j = 1; j <= 5; j++ ) {
                 fprintf( outputStrem, " %d", ielem->giveNode(j)->giveNumber() );
@@ -237,7 +237,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *tStep)
 
     if ( wedges != 0 ) {
         for ( int i = 1; i <= wedges; i++ ) {
-            ielem = d->giveElement( wedgeIdArray.at(i) );
+            ielem = d->giveElementGeometry( wedgeIdArray.at(i) );
             fprintf(outputStrem, "%d", i);
             for ( int j = 1; j <= 6; j++ ) {
                 fprintf( outputStrem, " %d", ielem->giveNode(j)->giveNumber() );
@@ -249,7 +249,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *tStep)
 
     if ( hexas != 0 ) {
         for ( int i = 1; i <= hexas; i++ ) {
-            ielem = d->giveElement( hexaIdArray.at(i) );
+            ielem = d->giveElementGeometry( hexaIdArray.at(i) );
             fprintf(outputStrem, "%d", i);
             for ( int j = 1; j <= 8; j++ ) {
                 fprintf( outputStrem, " %d", ielem->giveNode(j)->giveNumber() );

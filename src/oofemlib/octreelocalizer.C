@@ -44,7 +44,7 @@
 #include "mathfem.h"
 #include "timer.h"
 #include "error.h"
-#include "xfem/xfemelementinterface.h"
+#include "xfemelementinterface.h"
 
 #include <iostream>
 
@@ -135,7 +135,7 @@ OctantRec :: giveChild(int xi, int yi, int zi)
     if ( ( xi >= 0 ) && ( xi < 2 ) && ( yi >= 0 ) && ( yi < 2 ) && ( zi >= 0 ) && ( zi < 2 ) ) {
         return this->child [ xi ] [ yi ] [ zi ];
     } else {
-        OOFEM_ERROR("invalid child index (%d,%d,%d)", xi, yi, zi);
+        OOFEM_ERROR4("OctantRec::giveChild invalid child index (%d,%d,%d)", xi, yi, zi);
     }
 
     return NULL;
@@ -271,7 +271,7 @@ OctreeSpatialLocalizer :: findTerminalContaining(OctantRec *startCell, const Flo
     while ( !currCell->isTerminalOctant() ) {
         result = currCell->giveChildContainingPoint(& currCell, coords);
         if ( result == OctantRec :: CS_NoChild ) {
-            OOFEM_ERROR("internal error - octree inconsistency");
+            OOFEM_ERROR("OctreeSpatialLocalizer :: findTerminalContaining: internal error - octree inconsistency");
         }
     }
     return currCell;
@@ -381,7 +381,7 @@ OctreeSpatialLocalizer :: initElementIPDataStructure()
     //
     int nip;
     int nelems = this->domain->giveNumberOfElements();
-    Element *ielem;
+    ElementGeometry *ielemGeometry;
     IntegrationRule *iRule;
     GaussPoint *jGp;
     FloatArray jGpCoords;
@@ -393,17 +393,17 @@ OctreeSpatialLocalizer :: initElementIPDataStructure()
     // insert IP records into tree (the tree topology is determined by nodes)
     for ( int i = 1; i <= nelems; i++ ) {
         // only default IP are taken into account
-        ielem = this->giveDomain()->giveElement(i);
-        if ( ielem->giveNumberOfIntegrationRules() > 0 ) {
-            iRule = ielem->giveDefaultIntegrationRulePtr();
+        ielemGeometry = this->giveDomain()->giveElementGeometry(i);
+        if ( ielemGeometry->giveNumberOfIntegrationRules() > 0 ) {
+            iRule = ielemGeometry->giveDefaultIntegrationRulePtr();
             nip = iRule->giveNumberOfIntegrationPoints();
             if ( nip ) {
                 for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
                     jGp = iRule->getIntegrationPoint(j);
-                    if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
+                    if ( ielemGeometry->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
                         this->insertIPElementIntoOctree(this->rootCell, i, jGpCoords);
                     } else {
-                        OOFEM_ERROR("computeGlobalCoordinates failed");
+                        OOFEM_ERROR("OctreeSpatialLocalizer :: initElementIPDataStructure: computeGlobalCoordinates failed");
                     }
                 }
                 continue;
@@ -413,8 +413,8 @@ OctreeSpatialLocalizer :: initElementIPDataStructure()
         // but the element should be present in octree data structure
         // this is needed by some services (giveElementContainingPoint, for example)
         FloatArray *nc;
-        for ( int j = 1; j <= ielem->giveNumberOfNodes(); j++ ) {
-            nc = ielem->giveNode(j)->giveCoordinates();
+        for ( int j = 1; j <= ielemGeometry->giveNumberOfNodes(); j++ ) {
+            nc = ielemGeometry->giveNode(j)->giveCoordinates();
             this->insertIPElementIntoOctree(this->rootCell, i, * nc);
         }
     }
@@ -449,7 +449,7 @@ OctreeSpatialLocalizer :: insertIPElementIntoOctree(OctantRec *rootCell, int ele
 void
 OctreeSpatialLocalizer :: initElementDataStructure(int region)
 {
-    Element *ielem;
+    ElementGeometry *ielemGeometry;
     SpatialLocalizerInterface *interface;
     FloatArray b0, b1;
 
@@ -459,9 +459,9 @@ OctreeSpatialLocalizer :: initElementDataStructure(int region)
     }
 
     for ( int i = 1; i <= this->domain->giveNumberOfElements(); i++ ) {
-        ielem = this->giveDomain()->giveElement(i);
-        if ( ielem->giveRegionNumber() == region || region == 0 ) {
-            interface = static_cast< SpatialLocalizerInterface * >( ielem->giveInterface(SpatialLocalizerInterfaceType) );
+        ielemGeometry = this->giveDomain()->giveElementGeometry(i);
+        if ( ielemGeometry->giveRegionNumber() == region || region == 0 ) {
+            interface = static_cast< SpatialLocalizerInterface * >( ielemGeometry->giveInterface(SpatialLocalizerInterfaceType) );
             if ( interface ) {
                 interface->SpatialLocalizerI_giveBBox(b0, b1);
                 this->insertElementIntoOctree(this->rootCell, region, i, b0, b1);
@@ -597,7 +597,7 @@ OctreeSpatialLocalizer :: insertNodeIntoOctree(OctantRec *rootCell, int nodeNum,
         // find child containing new node
         result = currCell->giveChildContainingPoint(& currCell, coords);
         if ( result != OctantRec :: CS_ChildFound ) {
-            OOFEM_ERROR("insertNodeIntoOctree: internal error - octree inconsistency");
+            OOFEM_ERROR("OctreeSpatialLocalizer :: insertNodeIntoOctree: internal error - octree inconsistency");
         }
     }
 
@@ -605,10 +605,10 @@ OctreeSpatialLocalizer :: insertNodeIntoOctree(OctantRec *rootCell, int nodeNum,
 }
 
 
-Element *
+ElementGeometry *
 OctreeSpatialLocalizer :: giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList)
 {
-    Element *answer;
+    ElementGeometry *answer;
     //SpatialLocalizerInterface* interface;
     OctantRec *currCell, *childCell = NULL;
 
@@ -635,38 +635,8 @@ OctreeSpatialLocalizer :: giveElementContainingPoint(const FloatArray &coords, c
     return NULL;
 }
 
-Element *
-OctreeSpatialLocalizer :: giveElementContainingPoint(const FloatArray &coords, const Set &eset)
-{
-    Element *answer;
-    //SpatialLocalizerInterface* interface;
-    OctantRec *currCell, *childCell = NULL;
 
-    this->init();
-    this->initElementIPDataStructure();
-
-    // found terminal octant containing point
-    currCell = this->findTerminalContaining(rootCell, coords);
-
-    while ( currCell != NULL ) {
-        // loop over all elements in currCell, skip search on child cell already scanned
-        answer = this->giveElementContainingPoint(currCell, coords, childCell, & eset);
-        if ( answer ) {
-            return answer;
-        }
-
-        childCell = currCell;
-        // terminal cell does not contain node and its connected elements containing the given point
-        // search at parent level
-        currCell = currCell->giveParent();
-    }
-
-    // there isn't any element containing point.
-    return NULL;
-}
-
-
-Element *
+ElementGeometry *
 OctreeSpatialLocalizer :: giveElementContainingPoint(OctantRec *cell, const FloatArray &coords,
                                                      OctantRec *scannedChild, const IntArray *regionList)
 {
@@ -675,13 +645,13 @@ OctreeSpatialLocalizer :: giveElementContainingPoint(OctantRec *cell, const Floa
     // recursive implementation
     if ( cell->isTerminalOctant() && ( !elementList->empty() ) ) {
         int ielem;
-        Element *ielemptr;
+        ElementGeometry *ielemptr;
         SpatialLocalizerInterface *interface;
         elementContainerType :: iterator pos;
 
         for ( pos = elementList->begin(); pos !=  elementList->end(); ++pos ) {
             ielem = * pos;
-            ielemptr = this->giveDomain()->giveElement(ielem);
+            ielemptr = this->giveDomain()->giveElementGeometry(ielem);
 
             /* HUHU CHEATING */
 #ifdef __PARALLEL_MODE
@@ -708,7 +678,7 @@ OctreeSpatialLocalizer :: giveElementContainingPoint(OctantRec *cell, const Floa
 
         return NULL;
     } else {
-        Element *answer;
+        ElementGeometry *answer;
         // receiver is not terminal octant -> call same service on childs
         for ( int i = 0; i <= octreeMask.at(1); i++ ) {
             for ( int j = 0; j <= octreeMask.at(2); j++ ) {
@@ -731,70 +701,6 @@ OctreeSpatialLocalizer :: giveElementContainingPoint(OctantRec *cell, const Floa
     return NULL;
 }
 
-Element *
-OctreeSpatialLocalizer :: giveElementContainingPoint(OctantRec *cell, const FloatArray &coords,
-                                                     OctantRec *scannedChild, const Set *eset)
-{
-    elementContainerType *elementList = cell->giveIPElementList();
-
-    // recursive implementation
-    if ( cell->isTerminalOctant() && ( !elementList->empty() ) ) {
-        int ielem;
-        Element *ielemptr;
-        SpatialLocalizerInterface *interface;
-        elementContainerType :: iterator pos;
-
-        for ( pos = elementList->begin(); pos !=  elementList->end(); ++pos ) {
-            ielem = * pos;
-            ielemptr = this->giveDomain()->giveElement(ielem);
-
-            /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
-            if ( ielemptr->giveParallelMode() == Element_remote ) {
-                continue;
-            }
-#endif
-
-            interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
-            if ( interface ) {
-                if ( eset && ( eset->hasElement( ielemptr->giveNumber() ) ) ) {
-                    continue;
-                }
-
-                if ( interface->SpatialLocalizerI_BBoxContainsPoint(coords) == 0 ) {
-                    continue;
-                }
-
-                if ( interface->SpatialLocalizerI_containsPoint(coords) ) {
-                    return ielemptr;
-                }
-            }
-        }
-
-        return NULL;
-    } else {
-        Element *answer;
-        // receiver is not terminal octant -> call same service on childs
-        for ( int i = 0; i <= octreeMask.at(1); i++ ) {
-            for ( int j = 0; j <= octreeMask.at(2); j++ ) {
-                for ( int k = 0; k <= octreeMask.at(3); k++ ) {
-                    if ( cell->giveChild(i, j, k) ) {
-                        if ( scannedChild == cell->giveChild(i, j, k) ) {
-                            continue;
-                        }
-
-                        answer = this->giveElementContainingPoint(cell->giveChild(i, j, k), coords, NULL, eset);
-                        if ( answer ) {
-                            return answer;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return NULL;
-}
 
 //
 //  WARNING !! LIMITED IMPLEMENTATION HERE !!
@@ -804,10 +710,10 @@ OctreeSpatialLocalizer :: giveElementContainingPoint(OctantRec *cell, const Floa
 //  maybe nonlocal barrier should be used
 //
 
-Element *
+ElementGeometry *
 OctreeSpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList)
 {
-    Element *ielemptr, *answer = NULL;
+    ElementGeometry *ielemptr, *answer = NULL;
     double currDist, minDist;
     elementContainerType :: iterator pos;
     elementContainerType *elementList;
@@ -825,7 +731,7 @@ OctreeSpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, cons
         SpatialLocalizerInterface *interface;
 
         for ( pos = elementList->begin(); pos !=  elementList->end(); ++pos ) {
-            ielemptr = this->giveDomain()->giveElement(* pos);
+            ielemptr = this->giveDomain()->giveElementGeometry(* pos);
 
             /* HUHU CHEATING */
 #ifdef __PARALLEL_MODE
@@ -846,7 +752,7 @@ OctreeSpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, cons
                     minDist = currDist;
                 }
             } else {
-                OOFEM_ERROR("no interface");
+                OOFEM_ERROR("OctreeSpatialLocalizer :: giveElementCloseToPoint: no interface");
             }
         }
 
@@ -896,11 +802,12 @@ OctreeSpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, cons
     return answer;
 }
 
-Element *
+
+ElementGeometry *
 OctreeSpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest,
                                                     const FloatArray &gcoords, int region)
 {
-    Element *answer = NULL;
+    ElementGeometry *answer = NULL;
     std :: list< OctantRec * >cellList;
     OctantRec *currCell;
     FloatArray currLcoords;
@@ -936,10 +843,10 @@ OctreeSpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatAr
 
 void
 OctreeSpatialLocalizer :: giveElementClosestToPointWithinOctant(OctantRec *currCell, const FloatArray &gcoords,
-                                                                double &minDist, FloatArray &lcoords, FloatArray &closest, Element * &answer, int region)
+                                                                double &minDist, FloatArray &lcoords, FloatArray &closest, ElementGeometry * &answer, int region)
 {
     SpatialLocalizerInterface *interface;
-    Element *ielemptr;
+    ElementGeometry *ielemptr;
 
     double currDist;
     std :: list< int > :: iterator pos;
@@ -950,7 +857,7 @@ OctreeSpatialLocalizer :: giveElementClosestToPointWithinOctant(OctantRec *currC
     elementList = currCell->giveElementList(region);
     if ( !elementList->empty() ) {
         for ( pos = elementList->begin(); pos !=  elementList->end(); ++pos ) {
-            ielemptr = this->giveDomain()->giveElement(* pos);
+            ielemptr = this->giveDomain()->giveElementGeometry(* pos);
 
 #ifdef __PARALLEL_MODE
             if ( ielemptr->giveParallelMode() == Element_remote ) {
@@ -978,11 +885,11 @@ OctreeSpatialLocalizer :: giveElementClosestToPointWithinOctant(OctantRec *currC
 
 void
 OctreeSpatialLocalizer :: giveElementCloseToPointWithinOctant(OctantRec *cell, const FloatArray &coords,
-                                                              double &minDist, Element **answer,
+                                                              double &minDist, ElementGeometry **answer,
                                                               const IntArray *regionList)
 {
     if ( cell->isTerminalOctant() ) {
-        Element *ielemptr;
+        ElementGeometry *ielemptr;
         SpatialLocalizerInterface *interface;
         elementContainerType *elementList = cell->giveIPElementList();
         elementContainerType :: iterator pos;
@@ -990,7 +897,7 @@ OctreeSpatialLocalizer :: giveElementCloseToPointWithinOctant(OctantRec *cell, c
 
         if ( !elementList->empty() ) {
             for ( pos = elementList->begin(); pos !=  elementList->end(); ++pos ) {
-                ielemptr = this->giveDomain()->giveElement(* pos);
+                ielemptr = this->giveDomain()->giveElementGeometry(* pos);
 
                 /* HUHU CHEATING */
 #ifdef __PARALLEL_MODE
@@ -1012,7 +919,7 @@ OctreeSpatialLocalizer :: giveElementCloseToPointWithinOctant(OctantRec *cell, c
                         minDist = currDist;
                     }
                 } else {
-                    OOFEM_ERROR("no interface");
+                    OOFEM_ERROR("OctreeSpatialLocalizer :: giveElementCloseToPointWithinOctant: no interface");
                 }
             }
         }
@@ -1048,7 +955,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
     OctantRec :: BoundingBoxStatus BBStatus;
     elementContainerType :: iterator pos;
     elementContainerType *elementList;
-    Element *ielem;
+    ElementGeometry *ielem;
     FloatArray jGpCoords;
     IntegrationRule *iRule;
 
@@ -1064,7 +971,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
     // find nearest ip in this terminal cell
     if ( !elementList->empty() ) {
         for ( pos = elementList->begin(); pos !=  elementList->end(); ++pos ) {
-            ielem = domain->giveElement(* pos);
+            ielem = domain->giveElementGeometry(* pos);
 
             /* HUHU CHEATING */
 #ifdef __PARALLEL_MODE
@@ -1093,7 +1000,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
                             nearestGp = jGp;
                         }
                     } else {
-                        OOFEM_ERROR("computeGlobalCoordinates failed");
+                        OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIP: computeGlobalCoordinates failed");
                     }
                 }
             } else {
@@ -1117,11 +1024,11 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
                                         nearestGp = jGp;
                                     }
                                 } else {
-                                    OOFEM_ERROR("computeGlobalCoordinates failed");
+                                    OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIP: computeGlobalCoordinates failed");
                                 }
                             }
                         } else {
-                            OOFEM_ERROR("iRule == NULL");
+                            OOFEM_ERROR("OctreeSpatialLocalizer::giveClosestIP: iRule == NULL");
                         }
                     }
                 }
@@ -1206,7 +1113,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
                                 nearestGp = jGp;
                             }
                         } else {
-                            OOFEM_ERROR("computeGlobalCoordinates failed");
+                            OOFEM_ERROR("giveClosestIP: computeGlobalCoordinates failed");
                         }
                     }
                 }
@@ -1216,7 +1123,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
     } else {
         printf("coords: ");
         coords.printYourself();
-        OOFEM_ERROR("octree inconsistency found");
+        OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIP: octree inconsistency found");
     }
 
     return NULL;
@@ -1233,7 +1140,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
         elementContainerType :: iterator pos;
         elementContainerType *elementList;
         //FloatArray *ipCoords;
-        Element *ielem;
+        ElementGeometry *ielem;
         IntegrationRule *iRule;
         FloatArray jGpCoords;
 
@@ -1242,7 +1149,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
         if ( !elementList->empty() ) {
             for ( pos = elementList->begin(); pos !=  elementList->end(); ++pos ) {
                 // ask for element
-                ielem = domain->giveElement(* pos);
+                ielem = domain->giveElementGeometry(* pos);
 
                 /* HUHU CHEATING */
 #ifdef __PARALLEL_MODE
@@ -1270,7 +1177,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                                 * answer = iRule->getIntegrationPoint(j);
                             }
                         } else {
-                            OOFEM_ERROR("computeGlobalCoordinates failed");
+                            OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIPWithinOctant: computeGlobalCoordinates failed");
                         }
                     }
                 } else {
@@ -1292,7 +1199,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                                             * answer = iRule->getIntegrationPoint(j);
                                         }
                                     } else {
-                                        OOFEM_ERROR("computeGlobalCoordinates failed");
+                                        OOFEM_ERROR("OctreeSpatialLocalizer :: giveClosestIPWithinOctant: computeGlobalCoordinates failed");
                                     }
                                 }
                             }
@@ -1326,294 +1233,6 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
 }
 
 
-GaussPoint *
-OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, Set &elementSet, bool iCohesiveZoneGP)
-{
-    double dist, minDist;
-    OctantRec *currCell;
-    GaussPoint *nearestGp = NULL, *jGp;
-    OctantRec :: BoundingBoxStatus BBStatus;
-    elementContainerType :: iterator pos;
-    elementContainerType *elementList;
-    Element *ielem;
-    FloatArray jGpCoords;
-    IntegrationRule *iRule;
-
-    this->init();
-    this->initElementIPDataStructure();
-
-    // list of already tested elements
-    // elementContainerType visitedElems;
-    minDist = 1.1 * rootCell->giveWidth();
-    // found terminal octant containing point
-    currCell = this->findTerminalContaining(rootCell, coords);
-    elementList = currCell->giveIPElementList();
-    // find nearest ip in this terminal cell
-    if ( !elementList->empty() ) {
-        for ( pos = elementList->begin(); pos !=  elementList->end(); ++pos ) {
-            ielem = domain->giveElement(* pos);
-
-            /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
-            if ( ielem->giveParallelMode() == Element_remote ) {
-                continue;
-            }
-
-#endif
-
-            //igp   = ipContainer[i].giveGp();
-            if ( !elementSet.hasElement( ielem->giveNumber() ) ) {
-                continue;
-            }
-
-            if ( !iCohesiveZoneGP ) {
-                // test if element already visited
-                // if (!visitedElems.insert(*pos).second) continue;
-                iRule = ielem->giveDefaultIntegrationRulePtr();
-                for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                    jGp = iRule->getIntegrationPoint(j);
-                    if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
-                        // compute distance
-                        dist = coords.distance(jGpCoords);
-                        if ( dist < minDist ) {
-                            minDist   = dist;
-                            nearestGp = jGp;
-                        }
-                    } else {
-                        OOFEM_ERROR("computeGlobalCoordinates failed");
-                    }
-                }
-            } else {
-                ////////////////////////////////
-                // Check for cohesive zone Gauss points
-                XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >(ielem);
-
-                if ( xFemEl != NULL ) {
-                    size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
-                    for ( size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++ ) {
-                        iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
-                        if ( iRule != NULL ) {
-                            for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                                jGp = iRule->getIntegrationPoint(j);
-                                if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
-                                    // compute distance
-                                    dist = coords.distance(jGpCoords);
-                                    //									printf("czRuleIndex: %d j: %d dist: %e\n", czRuleIndex, j, dist);
-                                    if ( dist < minDist ) {
-                                        minDist   = dist;
-                                        nearestGp = jGp;
-                                    }
-                                } else {
-                                    OOFEM_ERROR("computeGlobalCoordinates failed");
-                                }
-                            }
-                        } else {
-                            OOFEM_ERROR("iRule == NULL");
-                        }
-                    }
-                }
-                ////////////////////////////////
-            }
-        }
-    }
-
-    FloatArray bborigin = coords;
-    // all cell element ip's scanned
-    // construct bounding box and test its position within currCell
-    BBStatus = currCell->testBoundingBox(bborigin, minDist);
-    if ( BBStatus == OctantRec :: BBS_InsideCell ) {
-        return nearestGp;
-    } else if ( BBStatus == OctantRec :: BBS_ContainsCell ) {
-        std :: list< OctantRec * >cellList;
-        std :: list< OctantRec * > :: iterator cellListIt;
-
-        // found terminal octant containing point
-        OctantRec *startCell = this->findTerminalContaining(rootCell, coords);
-        // go up, until cell containing bbox is found
-        if ( startCell != rootCell ) {
-            while ( startCell->testBoundingBox(coords, minDist) != OctantRec :: BBS_InsideCell ) {
-                startCell = startCell->giveParent();
-                if ( startCell == rootCell ) {
-                    break;
-                }
-            }
-        }
-
-        this->giveListOfTerminalCellsInBoundingBox(cellList, bborigin, minDist, 0, startCell);
-
-        for ( cellListIt = cellList.begin(); cellListIt != cellList.end(); ++cellListIt ) {
-            if ( currCell == ( * cellListIt ) ) {
-                continue;
-            }
-
-            this->giveClosestIPWithinOctant( ( * cellListIt ), coords, elementSet, minDist, & nearestGp, iCohesiveZoneGP );
-        }
-
-        return nearestGp;
-
-#if 0
-        // found terminal octant containing point
-        OctantRec *startCell = this->findTerminalContaining(rootCell, coords);
-        // go up, until cell containing bbox is found
-        if ( startCell != rootCell ) {
-            while ( startCell->testBoundingBox(coords, minDist) != OctantRec :: BBS_InsideCell ) {
-                startCell = startCell->giveParent();
-                if ( startCell == rootCell ) {
-                    break;
-                }
-            }
-        }
-        // loop over all child (if any) and found all nodes meeting the criteria
-        // this->giveClosestIPWithinOctant (startCell, visitedElems, coords, region, minDist, &nearestGp);
-        this->giveClosestIPWithinOctant(startCell, coords, region, minDist, & nearestGp);
-        return nearestGp;
-
-#endif
-
-
-#if 0
-        set< int >nearElementList;
-        // find all elements within bbox and find nearest ip
-        this->giveAllElementsWithIpWithinBox(nearElementList, bborigin, minDist);
-        // loop over those elements and find nearest ip and return it
-        // check for region also
-        if ( !nearElementList.empty() ) {
-            for ( pos = nearElementList.begin(); pos !=  nearElementList.end(); ++pos ) {
-                ielem = domain->giveElement(* pos);
-                //igp   = ipContainer[i].giveGp();
-                if ( region == ielem->giveRegionNumber() ) {
-                    iRule = ielem->giveDefaultIntegrationRulePtr();
-                    for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                        jGp = iRule->getIntegrationPoint(j);
-                        if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
-                            // compute distance
-                            dist = coords.distance(jGpCoords);
-                            if ( dist < minDist ) {
-                                minDist   = dist;
-                                nearestGp = jGp;
-                            }
-                        } else {
-                            OOFEM_ERROR("computeGlobalCoordinates failed");
-                        }
-                    }
-                }
-            }
-        }
-#endif
-    } else {
-        printf("coords: ");
-        coords.printYourself();
-        OOFEM_ERROR("octree inconsistency found");
-    }
-
-    return NULL;
-}
-
-
-void
-OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //elementContainerType& visitedElems,
-                                                    const FloatArray &coords,
-                                                    Set &elementSet, double &dist, GaussPoint **answer, bool iCohesiveZoneGP)
-{
-    if ( currentCell->isTerminalOctant() ) {
-        double currDist;
-        elementContainerType :: iterator pos;
-        elementContainerType *elementList;
-        //FloatArray *ipCoords;
-        Element *ielem;
-        IntegrationRule *iRule;
-        FloatArray jGpCoords;
-
-        // loop over cell elements and check if they meet the criteria
-        elementList = currentCell->giveIPElementList();
-        if ( !elementList->empty() ) {
-            for ( pos = elementList->begin(); pos !=  elementList->end(); ++pos ) {
-                // ask for element
-                ielem = domain->giveElement(* pos);
-
-                /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
-                if ( ielem->giveParallelMode() == Element_remote ) {
-                    continue;
-                }
-
-#endif
-
-                if ( !elementSet.hasElement( ielem->giveNumber() ) ) {
-                    continue;
-                }
-
-                if ( iCohesiveZoneGP ) {
-                    // test if element already visited
-                    // if (!visitedElems.insert(*pos).second) continue;
-                    // is one of his ip's  within given bbox -> inset it into elemSet
-                    iRule = ielem->giveDefaultIntegrationRulePtr();
-                    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                        if ( ielem->computeGlobalCoordinates( jGpCoords, * ( iRule->getIntegrationPoint(j)->giveCoordinates() ) ) ) {
-                            currDist = coords.distance(jGpCoords);
-                            // multiple insertion are handled by STL set implementation
-                            if ( currDist <= dist ) {
-                                dist = currDist;
-                                * answer = iRule->getIntegrationPoint(j);
-                            }
-                        } else {
-                            OOFEM_ERROR("computeGlobalCoordinates failed");
-                        }
-                    }
-                } else {
-                    //////////////////////////////////////////////////////////
-                    // Check for cohesive zone Gauss points
-                    XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >(ielem);
-
-                    if ( xFemEl != NULL ) {
-                        size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
-                        for ( size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++ ) {
-                            iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
-                            if ( iRule != NULL ) {
-                                for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                                    if ( ielem->computeGlobalCoordinates( jGpCoords, * ( iRule->getIntegrationPoint(j)->giveCoordinates() ) ) ) {
-                                        currDist = coords.distance(jGpCoords);
-                                        // multiple insertion are handled by STL set implementation
-                                        if ( currDist <= dist ) {
-                                            dist = currDist;
-                                            * answer = iRule->getIntegrationPoint(j);
-                                        }
-                                    } else {
-                                        OOFEM_ERROR("computeGlobalCoordinates failed");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    //////////////////////////////////////////////////////////
-                }
-            }
-        }
-
-        return;
-    } else {
-        OctantRec :: BoundingBoxStatus BBStatus;
-
-        for ( int i = 0; i <= octreeMask.at(1); i++ ) {
-            for ( int j = 0; j <= octreeMask.at(2); j++ ) {
-                for ( int k = 0; k <= octreeMask.at(3); k++ ) {
-                    if ( currentCell->giveChild(i, j, k) ) {
-                        // test if box hits the cell
-                        BBStatus = currentCell->giveChild(i, j, k)->testBoundingBox(coords, dist);
-                        if ( ( BBStatus == OctantRec :: BBS_InsideCell ) || ( BBStatus == OctantRec :: BBS_ContainsCell ) ) {
-                            // if yes call this method for such cell
-                            //this->giveClosestIPWithinOctant (currentCell->giveChild(i,j,k), visitedElems, coords, region, dist, answer);
-                            this->giveClosestIPWithinOctant(currentCell->giveChild(i, j, k), coords, elementSet, dist, answer, iCohesiveZoneGP);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-
-
 void
 OctreeSpatialLocalizer :: giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords,
                                                          const double radius, bool iCohesiveZoneGP)
@@ -1635,7 +1254,7 @@ OctreeSpatialLocalizer :: giveAllElementsWithIpWithinBox(elementContainerType &e
     // loop over all child (if any) and found all nodes meeting the criteria
     this->giveElementsWithIPWithinBox(elemSet, currCell, coords, radius, iCohesiveZoneGP);
     if ( elemSet.empty() ) {
-        OOFEM_ERROR("empty set found");
+        OOFEM_ERROR("OctreeSpatialLocalizer :: giveAllElementsWithIpWithinBox empty set found");
     }
 }
 
@@ -1648,7 +1267,7 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
         double currDist;
         elementContainerType :: iterator pos;
         elementContainerType *elementList;
-        Element *ielem;
+        ElementGeometry *ielem;
         IntegrationRule *iRule;
         FloatArray jGpCoords;
 
@@ -1662,7 +1281,7 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
                 }
 
                 // ask for element
-                ielem = domain->giveElement(* pos);
+                ielem = domain->giveElementGeometry(* pos);
 
                 /* #ifdef __PARALLEL_MODE
                  *       if(ielem -> giveParallelMode() == Element_remote)continue;
@@ -1679,7 +1298,7 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
                                 elemSet.insert(* pos);
                             }
                         } else {
-                            OOFEM_ERROR("computeGlobalCoordinates failed");
+                            OOFEM_ERROR("OctreeSpatialLocalizer :: giveElementsWithIPWithinBox: computeGlobalCoordinates failed");
                         }
                     }
                 } else {
@@ -1700,7 +1319,7 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
                                             elemSet.insert(* pos);
                                         }
                                     } else {
-                                        OOFEM_ERROR("computeGlobalCoordinates failed");
+                                        OOFEM_ERROR("OctreeSpatialLocalizer :: giveElementsWithIPWithinBox: computeGlobalCoordinates failed");
                                     }
                                 }
                             }

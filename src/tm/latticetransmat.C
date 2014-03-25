@@ -49,6 +49,7 @@ REGISTER_Material(LatticeTransportMaterial);
 IRResultType
 LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     this->Material :: initializeFrom(ir);
@@ -78,7 +79,7 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, this->suctionAirEntry, _IFT_LatticeTransportMaterial_paev);
 
         if ( thetaM < thetaS ) {
-            OOFEM_WARNING("thetaM cannot be smaller than thetaS. Choose thetaM=thetaS.");
+            _warning("initializeFrom : thetaM cannot be smaller than thetaS. Choose thetaM=thetaS.");
             thetaM = thetaS;
         }
 
@@ -90,7 +91,7 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
         }
     } //end of contype condition
     else if ( conType != 0 && conType != 1 ) {
-        OOFEM_ERROR("unknown conType mode");
+        _error("initializeFrom : unknown conType mode");
     }
 
     crackTortuosity = 1.;
@@ -135,7 +136,7 @@ LatticeTransportMaterial :: giveCharacteristicValue(MatResponseMode mode,
     } else if ( mode == Conductivity ) {
         return computeConductivity(suction, gp, tStep);
     } else {
-        OOFEM_ERROR("unknown mode");
+        _error("giveCharacteristicValue : unknown mode");
     }
 
     return 0; // to make compiler happy
@@ -163,11 +164,11 @@ LatticeTransportMaterial :: computeConductivity(double suction,
     IntArray coupledModels;
     if ( domain->giveEngngModel()->giveMasterEngngModel() ) {
         ( static_cast< StaggeredProblem * >( domain->giveEngngModel()->giveMasterEngngModel() ) )->giveCoupledModels(coupledModels);
-        int couplingFlag = ( static_cast< LatticeTransportElement * >( gp->giveElement() ) )->giveCouplingFlag();
+        int couplingFlag = ( static_cast< LatticeTransportElement * >( gp->giveElementGeometry() ) )->giveCouplingFlag();
 
         if ( couplingFlag == 1 && coupledModels.at(1) != 0 && !tStep->isTheFirstStep() ) {
             int couplingNumber;
-            couplingNumber = ( static_cast< LatticeTransportElement * >( gp->giveElement() ) )->giveCouplingNumber();
+            couplingNumber = ( static_cast< LatticeTransportElement * >( gp->giveElementGeometry() ) )->giveCouplingNumber();
             LatticeStructuralElement *coupledElement;
             coupledElement  = static_cast< LatticeStructuralElement * >( domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem( coupledModels.at(1) )->giveDomain(1)->giveElement(couplingNumber) );
             crackWidth = coupledElement->giveCrackWidth();
@@ -176,7 +177,7 @@ LatticeTransportMaterial :: computeConductivity(double suction,
 #endif
 
     if ( !domain->giveEngngModel()->giveMasterEngngModel() ) {
-        crackWidth = ( static_cast< LatticeTransportElement * >( gp->giveElement() ) )->giveCrackWidth();
+        crackWidth = ( static_cast< LatticeTransportElement * >( gp->giveElementGeometry() ) )->giveCrackWidth();
     }
 
 
@@ -206,7 +207,7 @@ LatticeTransportMaterial :: computeConductivity(double suction,
 
     //add crack contribution;
     double crackContribution = 0.;
-    double width = ( static_cast< LatticeTransportElement * >( gp->giveElement() ) )->giveWidth();
+    double width = ( static_cast< LatticeTransportElement * >( gp->giveElementGeometry() ) )->giveWidth();
 
     crackContribution = pow(crackWidth, 3.) / ( width * 12. * this->viscosity ) * this->crackTortuosity * relativePermeability;
 

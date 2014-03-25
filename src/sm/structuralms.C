@@ -39,6 +39,7 @@
 #include "gausspoint.h"
 
 namespace oofem {
+
 StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoint *g) :
     MaterialStatus(n, d, g), strainVector(), stressVector(),
     tempStressVector(), tempStrainVector(), FVector(), tempFVector()
@@ -51,7 +52,7 @@ StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoin
     tempStressVector = stressVector;
     tempStrainVector = strainVector;
 
-    if ( NLStructuralElement * el = dynamic_cast< NLStructuralElement * >( gp->giveElement() ) ) {
+    if ( NLStructuralElement * el = dynamic_cast< NLStructuralElement * >( gp->giveElementGeometry() ) ) {
         if ( el->giveGeometryMode() == 1  ) { // if large def, initialize F and P
             PVector.resize(9);
             PVector.zero();
@@ -138,7 +139,7 @@ StructuralMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, vo
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
+        _error("saveContex : can't write into NULL stream");
     }
 
     if ( ( iores = MaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -166,7 +167,7 @@ StructuralMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode,
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
+        _error("saveContex : can't write into NULL stream");
     }
 
     if ( ( iores = MaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

@@ -90,13 +90,13 @@ void
 TR1_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     if ( ut == EID_MomentumBalance ) {
-        answer = {V_u, V_v};
+        answer.setValues(2, V_u, V_v);
     } else if ( ut == EID_ConservationEquation ) {
-        answer = {P_f};
+        answer.setValues(1, P_f);
     } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        answer = {V_u, V_v, P_f};
+        answer.setValues(3, V_u, V_v, P_f);
     } else {
-        OOFEM_ERROR("Unknown equation id encountered");
+        _error("giveDofManDofIDMask: Unknown equation id encountered");
     }
 }
 
@@ -110,6 +110,7 @@ TR1_2D_SUPG :: giveElementDofIDMask(EquationID ut, IntArray &answer) const
 IRResultType
 TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;               // Required by IR_GIVE_FIELD macro
 
     SUPGElement :: initializeFrom(ir);
@@ -602,7 +603,7 @@ TR1_2D_SUPG :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load,
     //beta
     //area
     BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
-    beta = edgeLoad->giveProperty('a', tStep);
+    beta = edgeLoad->giveProperty('a');
     node1 = side;
     node2 = ( node1 == 3 ? 1 : node1 + 1 );
 
@@ -698,7 +699,7 @@ TR1_2D_SUPG :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Lo
     answer.zero();
 
     BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
-    alpha = edgeLoad->giveProperty('a', tStep);
+    alpha = edgeLoad->giveProperty('a');
     node1 = side;
     node2 = ( node1 == 3 ? 1 : node1 + 1 );
 
@@ -1455,7 +1456,7 @@ TR1_2D_SUPG :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArr
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
+        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -1508,7 +1509,7 @@ TR1_2D_SUPG :: initGeometry()
     this->area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
 
     if ( area < 0.0 ) {
-        OOFEM_ERROR("Area is negative, check element numbering orientation");
+        _error("Area is negative, check element numbering orientation");
     }
 
     b [ 0 ] = ( y2 - y3 ) / ( 2. * area );
@@ -1885,14 +1886,14 @@ TR1_2D_SUPG :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Primary
 
                 answer.at(i) = sum;
             } else {
-                // OOFEM_ERROR("unknown dof id encountered");
+                // _error("EIPrimaryFieldI_evaluateFieldVectorAt: unknown dof id encountered");
                 answer.at(i) = 0.0;
             }
         }
 
         return 0; // ok
     } else {
-        OOFEM_ERROR("target point not in receiver volume");
+        _error("EIPrimaryFieldI_evaluateFieldVectorAt: target point not in receiver volume");
         return 1; // fail
     }
 }
@@ -1912,7 +1913,7 @@ TR1_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType
         MaterialInterface *mi = domain->giveEngngModel()->giveMaterialInterface( domain->giveNumber() );
         if ( mi ) {
             FloatArray val;
-            mi->giveElementMaterialMixture( val, gp->giveElement()->giveNumber() );
+            mi->giveElementMaterialMixture( val, gp->giveElementGeometry()->giveNumber() );
             answer.resize(1);
             answer.at(1) = val.at(1);
             return 1;
@@ -1959,7 +1960,7 @@ TR1_2D_SUPG :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer,
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        OOFEM_ERROR("node unknown");
+        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 
@@ -2140,7 +2141,7 @@ TR1_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep)
                 return ( __area - ( area - __area ) ) / area;
             }
         } else {
-            OOFEM_ERROR("internal consistency error");
+            OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
             return 0.0;
         }
     }
@@ -2226,7 +2227,7 @@ TR1_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             // compute area
             double __area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
             if ( fabs(__area) / area > 1.00001 ) {
-                OOFEM_ERROR("internal consistency error");
+                OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
             }
 
             // prevent some roundoff errors
@@ -2244,7 +2245,7 @@ TR1_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
                 answer.at(2) = 1.0 - answer.at(1);
             }
         } else {
-            OOFEM_ERROR("internal consistency error");
+            OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
         }
     }
 }

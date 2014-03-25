@@ -212,8 +212,8 @@ Beam3d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
     for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
         GaussPoint *gp = ir->getIntegrationPoint(i);
         this->computeBmatrixAt(gp, B);
-        this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
-        double dV = gp->giveWeight() * 0.5 * l;
+        this->computeConstitutiveMatrixAt(d, rMode, gp, tStep); 
+        double dV = gp->giveWeight() * 0.5*l;
         DB.beProductOf(d, B);
         answer.plusProductSymmUpper(B, DB, dV);
     }
@@ -273,7 +273,7 @@ Beam3d :: computeVolumeAround(GaussPoint *gp)
 void
 Beam3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
+    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
 }
 
 
@@ -385,6 +385,7 @@ Beam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 IRResultType
 Beam3d :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // first call parent
@@ -392,14 +393,14 @@ Beam3d :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, referenceNode, _IFT_Beam3d_refnode);
     if ( referenceNode == 0 ) {
-        OOFEM_ERROR("wrong reference node specified");
+        _error("instanciateFrom: wrong reference node specified");
     }
 
     if ( ir->hasField(_IFT_Beam3d_dofstocondense) ) {
         IntArray val;
         IR_GIVE_FIELD(ir, val, _IFT_Beam3d_dofstocondense);
         if ( val.giveSize() >= 12 ) {
-            OOFEM_ERROR("wrong input data for condensed dofs");
+            _error("instanciateFrom: wrong input data for condensed dofs");
         }
 
         dofsToCondense = new IntArray(val);
@@ -428,7 +429,7 @@ Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
         ///@todo Pretty sure this won't work for nonlinear problems. I think dofsToCondense should just be replaced by an extra slave node.
         FloatMatrix stiff;
         this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
-        this->condense(& stiff, NULL, & answer, this->dofsToCondense);
+        this->condense(&stiff, NULL, &answer, this->dofsToCondense);
     }
 #endif
 }
@@ -481,7 +482,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
         if ( edgeLoad->giveNumberOfDofs() != 6 ) {
-            OOFEM_ERROR("load number of dofs mismatch");
+            _error("computeEdgeLoadVectorAt: load number of dofs mismatch");
         }
 
         answer.resize(12);
@@ -616,7 +617,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             break;
 
         default:
-            OOFEM_ERROR("unsupported load type");
+            _error("computeEdgeLoadVectorAt: unsupported load type");
         }
     }
 }

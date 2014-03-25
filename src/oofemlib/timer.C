@@ -39,27 +39,38 @@
 #ifndef _WIN32 //_MSC_VER and __MINGW32__ included
 //for getrusage - user time reporting
  #include <sys/resource.h>
-#else
- #include <ctime>
 #endif
 
 namespace oofem {
-void Timer :: getUtime(std :: chrono :: duration< double > &answer)
-{
 #ifdef _WIN32 //_MSC_VER and __MINGW32__ included
+void Timer :: getUtime(oofem_timeval &answer)
+{
     clock_t utime = clock();
-    answer = std :: chrono :: seconds(utime / CLOCKS_PER_SEC);
-#else
-    struct rusage rsg;
-    getrusage(RUSAGE_SELF, & rsg);
-    answer = std :: chrono :: seconds(rsg.ru_utime.tv_sec) + std :: chrono :: microseconds(rsg.ru_utime.tv_usec);
-#endif
+    answer.tv_sec = utime / CLOCKS_PER_SEC;
+    answer.tv_usec = 0;
 }
 
-void Timer :: getTime(std :: chrono :: time_point< std :: chrono :: high_resolution_clock > &answer)
+void Timer :: getTime(oofem_timeval &answer)
 {
-    answer = std :: chrono :: high_resolution_clock :: now();
+    time_t t;
+    t = time(NULL);
+    answer.tv_sec = ( unsigned long ) t;
+    answer.tv_usec = 0;
 }
+#else
+void Timer :: getUtime(oofem_timeval &answer)
+{
+    struct rusage rsg;
+    getrusage(RUSAGE_SELF, & rsg);
+    answer.tv_sec  = rsg.ru_utime.tv_sec;
+    answer.tv_usec = rsg.ru_utime.tv_usec;
+}
+
+void Timer :: getTime(oofem_timeval &answer)
+{
+    gettimeofday(& answer, NULL);
+}
+#endif
 
 Timer :: Timer()
 {
@@ -97,28 +108,25 @@ void Timer :: resumeTimer()
 
 void Timer :: initTimer()
 {
-    elapsedWTime = elapsedWTime.zero();
-    elapsedUTime = elapsedUTime.zero();
+    elapsedWTime.tv_sec = elapsedWTime.tv_usec = elapsedUTime.tv_sec = elapsedUTime.tv_usec = 0;
     running = false;
 }
 
 double Timer :: getUtime()
 {
     this->updateElapsedTime();
-    return elapsedUTime.count();
+    return ( double ) elapsedUTime.tv_sec + ( double ) elapsedUTime.tv_usec * 1.e-6;
 }
 
 double Timer :: getWtime()
 {
     updateElapsedTime();
-    return elapsedWTime.count();
+    return ( double ) elapsedWTime.tv_sec + ( double ) elapsedWTime.tv_usec * 1.e-6;
 }
 
-void Timer :: convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec)
+void Timer :: convert2HMS(int &nhrs, int &nmin, int &nsec, long int tsec)
 {
-    long int _nsec = ( long int ) tsec;
-    nhrs = 0;
-    nmin = 0;
+    long int _nsec = tsec;
     if ( _nsec > 60 ) {
         nmin = _nsec / 60;
         _nsec %= 60;
@@ -132,9 +140,14 @@ void Timer :: convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec)
     nsec = _nsec;
 }
 
+void Timer :: convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec)
+{
+    Timer :: convert2HMS(nhrs, nmin, nsec, ( long int ) tsec);
+}
+
 void Timer :: toString(char *buff)
 {
-    std :: sprintf( buff, "ut: %f.3s, wt: %f.3s", getUtime(), getWtime() );
+    sprintf( buff, "ut: %f.3s, wt: %f.3s", getUtime(), getWtime() );
 }
 
 void Timer :: updateElapsedTime()
@@ -144,8 +157,14 @@ void Timer :: updateElapsedTime()
         resumeTimer();
     }
 
-    elapsedWTime += end_wtime - start_wtime;
-    elapsedUTime += end_utime - start_utime;
+#ifndef _WIN32
+    oofem_timeval etime;
+    timersub(& end_wtime, & start_wtime, & etime);
+    timeradd(& etime, & elapsedWTime, & elapsedWTime);
+
+    timersub(& end_utime, & start_utime, & etime);
+    timeradd(& etime, & elapsedUTime, & elapsedUTime);
+#endif
 
     start_utime = end_utime;
     start_wtime = end_wtime;
@@ -161,7 +180,12 @@ double EngngModelTimer :: getWtime(EngngModelTimer :: EngngModelTimerType t)
     return timers [ t ].getWtime();
 }
 
-void EngngModelTimer :: convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec)
+void EngngModelTimer :: convert2HMS(int &nhrs, int &nmin, int &nsec, long int tsec) const
+{
+    Timer :: convert2HMS(nhrs, nmin, nsec, tsec);
+}
+
+void EngngModelTimer :: convert2HMS(int &nhrs, int &nmin, int &nsec, double tsec) const
 {
     Timer :: convert2HMS(nhrs, nmin, nsec, tsec);
 }

@@ -1,9 +1,11 @@
 set (sm_element
     structuralelementevaluator.C
+	structuralelementevaluator2.C
     space3delementevaluator.C
     planestresselementevaluator.C
     igaelements.C
     structuralelement.C
+	structuralelements.C
     nlstructuralelement.C
     lspace.C lspacebb.C
     qspace.C qspacegrad.C
@@ -48,9 +50,7 @@ set (sm_element
     qplanestrain.C qplanestraingrad.C
     qtrplanestrain.C qtrplanestraingrad.C
     qspacegrad.C
-    dkt.C qdkt.C
-    quad1platesubsoil.C tria1platesubsoil.C
-    interfaceelem2dlin.C
+    dkt.C
     )
 
 set (sm_crosssection
@@ -77,6 +77,7 @@ set (sm_emodel
     diidynamic.C
     nldeidynamic.C
     incrementallinearstatic.C
+    fracturemanager.C
     )
 
 set (sm_loads
@@ -135,7 +136,6 @@ set (sm_material
 	InterfaceMaterials/intmatdummycz.C
     simplevitrificationmaterial.C
     anisodamagemodel.C
-    winklerpasternak.C
     )
 
 set (sm_error
@@ -169,19 +169,12 @@ set (sm_status
     microplanematerial.C microplanematerial_bazant.C
     )
 
-set (sm_xfem
-	xfem/xfemstructuralelementinterface.C
-	xfem/enrichmentitems/crack.C
-	)
-
 set (sm_unsorted
     particle.C
     refinedelement.C
     refinedmesh.C
     microplane.C
     gpinitmodule.C
-    stressstrainbasevector.C stressvector.C strainvector.C
-    mappers/primvarmapper.C
     )
 
 set (sm_parallel
@@ -210,7 +203,6 @@ set (sm
     ${sm_export}
     ${sm_barrier}
     ${sm_error}
-    ${sm_xfem}
     ${sm_unsorted}
     ${sm_parallel}
     ${sm_obsolete}

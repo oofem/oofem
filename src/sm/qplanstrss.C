@@ -43,10 +43,6 @@
 #include "mathfem.h"
 #include "classfactory.h"
 
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
-#endif
-
 namespace oofem {
 REGISTER_Element(QPlaneStress2d);
 
@@ -164,7 +160,7 @@ QPlaneStress2d :: computeVolumeAround(GaussPoint *gp)
 void
 QPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer = {D_u, D_v};
+    answer.setValues(2, D_u, D_v);
 }
 
 

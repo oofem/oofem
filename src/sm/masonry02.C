@@ -71,6 +71,7 @@ Masonry02 :: hasMaterialModeCapability(MaterialMode mode)
 IRResultType
 Masonry02 :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     MPlasticMaterial2 :: initializeFrom(ir);

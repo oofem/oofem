@@ -55,7 +55,6 @@ StokesFlow :: StokesFlow(int i, EngngModel *_master) : FluidModel(i, _master)
     this->ndomains = 1;
     this->stiffnessMatrix = NULL;
     this->meshqualityee = NULL;
-    this->velocityPressureField = NULL;
 #ifdef __PARALLEL_MODE
     commMode = ProblemCommMode__NODE_CUT;
 #endif
@@ -65,12 +64,19 @@ StokesFlow :: ~StokesFlow()
 {
     delete this->velocityPressureField;
     delete this->nMethod;
-    delete this->stiffnessMatrix;
-    delete this->meshqualityee;
+
+    if ( this->stiffnessMatrix ) {
+        delete this->stiffnessMatrix;
+    }
+
+    if ( this->meshqualityee ) {
+        delete this->meshqualityee;
+    }
 }
 
 IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";
     IRResultType result;
     int val;
 
@@ -85,12 +91,7 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
     this->deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_StokesFlow_deltat);
 
-    delete this->velocityPressureField;
     this->velocityPressureField = new PrimaryField(this, 1, FT_VelocityPressure, EID_MomentumBalance_ConservationEquation, 1);
-    delete this->stiffnessMatrix;
-    this->stiffnessMatrix = NULL;
-    delete this->meshqualityee;
-    this->meshqualityee = NULL;
 
     this->ts = TS_OK;
 
@@ -138,7 +139,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     if ( !this->stiffnessMatrix ) {
         this->stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( !this->stiffnessMatrix ) {
-            OOFEM_ERROR("Couldn't create requested sparse matrix of type %d", sparseMtrxType);
+            OOFEM_ERROR2("StokesFlow :: solveYourselfAt - Couldn't create requested sparse matrix of type %d", sparseMtrxType);
         }
 
         this->stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering() );
@@ -151,7 +152,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     this->externalForces.resize(neq);
     this->externalForces.zero();
     this->assembleVector( this->externalForces, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
-                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 #endif
@@ -187,7 +188,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 #endif
 
     if ( !( status & NM_Success ) ) {
-        OOFEM_ERROR("No success in solving problem at time step", tStep->giveNumber());
+        OOFEM_ERROR2( "No success in solving problem at time step", tStep->giveNumber() );
     }
 
 
@@ -221,7 +222,7 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
                        EModelDefaultEquationNumbering(), d);
         return;
     } else {
-        OOFEM_ERROR("Unknown component");
+        OOFEM_ERROR("StokesFlow::updateComponent - Unknown component");
     }
 }
 
@@ -280,7 +281,7 @@ int StokesFlow :: checkConsistency()
     for ( int i = 1; i <= nelem; i++ ) {
         sePtr = dynamic_cast< FMElement * >( domain->giveElement(i) );
         if ( sePtr == NULL ) {
-            OOFEM_WARNING("Element %d has no FMElement base", i);
+            OOFEM_WARNING2("Element %d has no FMElement base", i);
             return false;
         }
     }
@@ -297,7 +298,7 @@ void StokesFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
     } else if ( type == P_f ) {
         iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, 1);
     } else {
-        OOFEM_ERROR("unsupported dof type");
+        OOFEM_ERROR("printDofOutputAt: unsupported dof type");
     }
 }
 
@@ -313,7 +314,7 @@ void StokesFlow :: updateInternalState(TimeStep *tStep)
 
         int nelem = domain->giveNumberOfElements();
         for ( int j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(tStep);
+            domain->giveElementGeometry(j)->updateInternalState(tStep);
         }
     }
 }

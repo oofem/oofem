@@ -91,17 +91,16 @@ public:
     /// Returns true if cell is boundary.
     bool isBoundary();
     /// Return number of receiver's element.
-    virtual Element *giveElement() = 0;
+    virtual ElementGeometry *giveElementGeometry() = 0;
     /// Computes critical time step.
     virtual double computeCriticalLEPlicTimeStep(TimeStep *tStep) = 0;
     //@}
 
     void setTempLineConstant(double tp) { temp_p = tp; }
     void setTempInterfaceNormal(const FloatArray &tg) { temp_normal = tg; }
-    void setTempVolumeFraction(double v) {
-        if ( !permanentVofFlag ) {
-            temp_vof = v;
-        }
+    void setTempVolumeFraction(double v) { if ( !permanentVofFlag ) {
+                                               temp_vof = v;
+                                           }
     }
     void setPermanentVolumeFraction(double v) {
         temp_vof = vof = v;

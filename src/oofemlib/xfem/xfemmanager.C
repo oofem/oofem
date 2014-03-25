@@ -106,7 +106,7 @@ EnrichmentItem *XfemManager :: giveEnrichmentItem(int n)
     if ( enrichmentItemList->includes(n) ) {
         return enrichmentItemList->at(n);
     } else {
-        OOFEM_SIMPLE_ERROR("giveEnrichmentItem: undefined enrichmentItem (%d)", n);
+        OOFEM_ERROR2("giveEnrichmentItem: undefined enrichmentItem (%d)", n);
     }
 
     return NULL;
@@ -127,6 +127,7 @@ XfemManager :: createEnrichedDofs()
 
 IRResultType XfemManager :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
@@ -164,6 +165,7 @@ void XfemManager :: giveInputRecord(DynamicInputRecord &input)
 
 int XfemManager :: instanciateYourself(DataReader *dr)
 {
+    const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
     std :: string name;
 
@@ -173,12 +175,12 @@ int XfemManager :: instanciateYourself(DataReader *dr)
         result = mir->giveRecordKeywordField(name);
 
         if ( result != IRRT_OK ) {
-            mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
+            IR_IOERR(giveClassName(), __proc, "", mir, result);
         }
 
         EnrichmentItem *ei = classFactory.createEnrichmentItem( name.c_str(), i, this, this->giveDomain() );
         if ( ei == NULL ) {
-            OOFEM_SIMPLE_ERROR( "XfemManager::instanciateYourself: unknown enrichment item (%s)", name.c_str() );
+            OOFEM_ERROR2( "XfemManager::instanciateYourself: unknown enrichment item (%s)", name.c_str() );
         }
 
         ei->initializeFrom(mir);

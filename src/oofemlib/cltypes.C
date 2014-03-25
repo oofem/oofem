@@ -49,7 +49,7 @@
 #include "contextioerr.h"
 #include "field.h"
 #include "equationid.h"
-#include "xfem/xfemmanager.h"
+#include "xfemmanager.h"
 
 #include <cstring>
 #include <string>
@@ -66,7 +66,7 @@ char cltypesGiveUnknownTypeModeKey(ValueModeType mode)
 
     case VM_Acceleration: return 'a';
 
-    default: OOFEM_SIMPLE_ERROR("cltypesGiveUnknownTypeModeKey : unsupported ValueModeType");
+    default: OOFEM_ERROR("cltypesGiveUnknownTypeModeKey : unsupported ValueModeType");
     }
 
     return 0;
@@ -78,7 +78,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     switch ( type ) {
     case IST_StressTensor:
     case IST_StrainTensor:
-        //case IST_CurvatureTensor:
+    case IST_CurvatureTensor:
     case IST_DamageTensor:
     case IST_DamageInvTensor:
     case IST_PrincipalDamageTensor:
@@ -100,10 +100,8 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
 
     case IST_BeamForceMomentumTensor:
     case IST_BeamStrainCurvatureTensor:
-    case IST_ShellStrainTensor:
-    case IST_ShellCurvatureTensor:
-    case IST_ShellForceTensor:
-    case IST_ShellMomentumTensor:
+    case IST_ShellForceMomentumTensor:
+    case IST_ShellStrainCurvatureTensor:
     case IST_DeformationGradientTensor:
     case IST_FirstPKStressTensor:
         return ISVT_TENSOR_G;
@@ -208,7 +206,7 @@ InternalStateValueType giveInternalStateValueType(UnknownType type)
     } else if ( ( type == FluxVector ) || ( type == PressureVector ) || ( type == Temperature ) ) {
         return ISVT_SCALAR;
     } else {
-        OOFEM_SIMPLE_ERROR( "giveInternalStateValueType: unsupported UnknownType %s", __UnknownTypeToString(type) );
+        OOFEM_ERROR2( "giveInternalStateValueType: unsupported UnknownType %s", __UnknownTypeToString(type) );
         return ISVT_SCALAR; // To make compiler happy.
     }
 }
@@ -237,13 +235,10 @@ void
 ContextIOERR :: print()
 {
     if ( msg ) {
-        oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line, 
-                                  "ContextIOERR encountered, error code: %d\n%s", error, msg);
+        __OOFEM_ERROR3(file, line, "ContextIOERR encountered, error code: %d\n%s", error, msg);
     }  else {
-        oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line, 
-                                  "ContextIOERR encountered, error code: %d", error);
+        __OOFEM_ERROR2(file, line, "ContextIOERR encountered, error code: %d", error);
     }
-    oofem_exit(1);
 }
 
 /*

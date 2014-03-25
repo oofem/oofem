@@ -70,17 +70,17 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
 
     // first check whether Amatrix is defined
     if ( !a ) {
-        OOFEM_ERROR("unknown A matrix");
+        OOFEM_ERROR("GJacobi :: solveYourselfAt: unknown A matrix");
     }
 
     // and whether Bmatrix
     if ( !b ) {
-        OOFEM_ERROR("unknown Bmatrx");
+        OOFEM_ERROR("GJacobi :: solveYourselfAt: unknown Bmatrx");
     }
 
     if ( a->giveNumberOfRows() != b->giveNumberOfRows() ||
         !a->isSquare() || !b->isSquare() ) {
-        OOFEM_ERROR("A matrix, B mtrix -> size mismatch");
+        OOFEM_ERROR("GJacobi :: solveYourselfAt: A matrix, B mtrix -> size mismatch");
     }
 
     int n = a->giveNumberOfRows();
@@ -88,33 +88,33 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
     // Check output  arrays
     //
     if ( !eigv ) {
-        OOFEM_ERROR("unknown eigv array");
+        OOFEM_ERROR("GJacobi :: solveYourselfAt: unknown eigv array");
     }
 
     if ( !x ) {
-        OOFEM_ERROR("unknown x    mtrx ");
+        OOFEM_ERROR("GJacobi :: solveYourselfAt: unknown x    mtrx ");
     }
 
     if ( eigv->giveSize() != n ) {
-        OOFEM_ERROR("eigv size mismatch");
+        OOFEM_ERROR("GJacobi :: solveYourselfAt: eigv size mismatch");
     }
 
     if ( ( !x->isSquare() ) || ( x->giveNumberOfRows() != n ) ) {
-        OOFEM_ERROR("x size mismatch");
+        OOFEM_ERROR("GJacobi :: solveYourselfAt: x size mismatch");
     }
 
     //
     // Create temporary arrays
     //
-    FloatArray d(n);
+    FloatArray *d = new FloatArray(n);
     //
     // Initialize EigenValue and EigenVector Matrices
     //
     for ( i = 1; i <= n; i++ ) {
         //      if((a->at(i,i) <= 0. ) && (b->at(i,i) <= 0.))
-        //        OOFEM_ERROR("Matrices are not positive definite");
-        d.at(i) = a->at(i, i) / b->at(i, i);
-        eigv->at(i) = d.at(i);
+        //        _error ("solveYourselfAt: Matrices are not positive definite");
+        d->at(i) = a->at(i, i) / b->at(i, i);
+        eigv->at(i) = d->at(i);
     }
 
     for ( i = 1; i <= n; i++ ) {
@@ -164,7 +164,7 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
                 if ( fabs(check) < GJacobi_ZERO_CHECK_TOL ) {
                     check = fabs(check);
                 } else if ( check < 0.0 ) {
-                    OOFEM_ERROR("Matrices are not positive definite");
+                    OOFEM_ERROR("GJacobi :: solveYourselfAt: Matrices are not positive definite");
                 }
 
                 sqch = sqrt(check);
@@ -276,8 +276,8 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
         // check for convergence
         //
         for ( i = 1; i <= n; i++ ) {       // label 230
-            tol = rtol * d.at(i);
-            dif = ( eigv->at(i) - d.at(i) );
+            tol = rtol * d->at(i);
+            dif = ( eigv->at(i) - d->at(i) );
             if ( fabs(dif) > tol ) {
                 goto label280;
             }
@@ -310,7 +310,7 @@ GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *
         //
 label280:
         for ( i = 1; i <= n; i++ ) {
-            d.at(i) = eigv->at(i);
+            d->at(i) = eigv->at(i);
         }
     } while ( nsweep < nsmax );
 
@@ -330,6 +330,7 @@ label280:
     }                                  // label 270
 
     solved = 1;
+    delete d;
     return NM_Success;
 }
 } // end namespace oofem

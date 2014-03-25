@@ -92,13 +92,13 @@ void
 TR1_2D_CBS :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
     if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        answer = {V_u, V_v, P_f};
+        answer.setValues(3, V_u, V_v, P_f);
     } else if ( ut == EID_MomentumBalance ) {
-        answer = {V_u, V_v};
+        answer.setValues(2, V_u, V_v);
     } else if ( ut == EID_ConservationEquation ) {
-        answer = {P_f};
+        answer.setValues(1, P_f);
     } else {
-        OOFEM_ERROR("Unknown equation id encountered");
+        _error("giveDofManDofIDMask: Unknown equation id encountered");
     }
 }
 
@@ -113,6 +113,7 @@ IRResultType
 TR1_2D_CBS :: initializeFrom(InputRecord *ir)
 {
     //<RESTRICTED_SECTION>
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     //</RESTRICTED_SECTION>
 
@@ -340,7 +341,7 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
         if ( ( code & FMElement_PrescribedTractionBC ) ) {
             //printf ("TR1_2D_CBS :: computeDiffusionTermsI tractions detected\n");
 
-            //_error("computeDiffusionTermsI: traction bc not supported");
+            //_error ("computeDiffusionTermsI: traction bc not supported");
             FloatArray t, coords(1);
             int nLoads, n;
             BoundaryLoad *load;
@@ -712,7 +713,7 @@ TR1_2D_CBS :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArra
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
+        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -1081,7 +1082,7 @@ TR1_2D_CBS :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryF
 
         return 0; // ok
     } else {
-        OOFEM_ERROR("target point not in receiver volume");
+        _error("EIPrimaryFieldI_evaluateFieldVectorAt: target point not in receiver volume");
         return 1; // fail
     }
 }
@@ -1142,7 +1143,7 @@ TR1_2D_CBS :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, 
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        OOFEM_ERROR("node unknown");
+        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 

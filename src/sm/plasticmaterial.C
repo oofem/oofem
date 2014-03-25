@@ -210,8 +210,8 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
         delete residualVectorR;
 
         if ( nIterations > PLASTIC_MATERIAL_MAX_ITERATIONS ) {
-            OOFEM_WARNING("local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
-                      PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElement()->giveNumber(), gp->giveNumber() );
+            _warning4( "GiveRealStressVector: local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
+                      PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElementGeometry()->giveNumber(), gp->giveNumber() );
             break;
         }
     } while ( 1 );
@@ -331,7 +331,7 @@ PlasticMaterial :: computeTrialStressIncrement(FloatArray &answer, GaussPoint *g
 {
     /* Computes the full trial elastic stress vector */
 
-    OOFEM_ERROR("Unable to compute trial stress increment");
+    _error("Unable to compute trial stress increment");
 }
 
 
@@ -543,7 +543,7 @@ PlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 {
     MaterialMode originalMode = gp->giveMaterialMode();
     if ( originalMode != _3dMat ) {
-        OOFEM_ERROR("Different stressStrain mode encountered");
+        _error("give3dMaterialStiffnessMatrix : Different stressStrain mode encountered");
     }
 
     // we can force 3d response, and we obtain correct 3d tangent matrix,

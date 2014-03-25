@@ -167,20 +167,20 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
         }
     }
 
-    Element *elem = gp->giveElement();
+    ElementGeometry *elemGeometry = gp->giveElementGeometry();
     FloatArray coords;
-    elem->computeGlobalCoordinates( coords, * ( gp->giveCoordinates() ) );
+    elemGeometry->computeGlobalCoordinates( coords, * ( gp->giveCoordinates() ) );
     double xtarget = coords.at(1);
 
     double w, wsum = 0., x, xprev, damage, damageprev = 0.0;
-    Element *nearElem;
+    ElementGeometry *nearElemGeometry;
 
     // process the list from the target to the end
     double distance = 0.; // distance modified by damage
     xprev = xtarget;
     for ( pos = postarget; pos != list->end(); ++pos ) {
-        nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveCoordinates() ) );
+        nearElemGeometry = ( pos->nearGp )->giveElementGeometry();
+        nearElemGeometry->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveCoordinates() ) );
         x = coords.at(1);
         nonlocStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(pos->nearGp) );
         damage = nonlocStatus->giveTempDamage();
@@ -188,7 +188,7 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
             distance += ( x - xprev ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
         }
 
-        w = computeWeightFunction(distance) * nearElem->computeVolumeAround(pos->nearGp);
+        w = computeWeightFunction(distance) * nearElemGeometry->computeVolumeAround(pos->nearGp);
         pos->weight = w;
         wsum += w;
         xprev = x;
@@ -198,14 +198,14 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     // process the list from the target to the beginning
     distance = 0.;
     for ( pos = postarget; pos != list->begin(); --pos ) {
-        nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveCoordinates() ) );
+        nearElemGeometry = ( pos->nearGp )->giveElementGeometry();
+        nearElemGeometry->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveCoordinates() ) );
         x = coords.at(1);
         nonlocStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(pos->nearGp) );
         damage = nonlocStatus->giveTempDamage();
         if ( pos != postarget ) {
             distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
-            w = computeWeightFunction(distance) * nearElem->computeVolumeAround(pos->nearGp);
+            w = computeWeightFunction(distance) * nearElemGeometry->computeVolumeAround(pos->nearGp);
             pos->weight = w;
             wsum += w;
         }
@@ -217,13 +217,13 @@ MisesMatNl :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
     // the beginning must be treated separately
     pos = list->begin();
     if ( pos != postarget ) {
-        nearElem = ( pos->nearGp )->giveElement();
-        nearElem->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveCoordinates() ) );
+        nearElemGeometry = ( pos->nearGp )->giveElementGeometry();
+        nearElemGeometry->computeGlobalCoordinates( coords, * ( ( pos->nearGp )->giveCoordinates() ) );
         x = coords.at(1);
         nonlocStatus = static_cast< MisesMatNlStatus * >( this->giveStatus(pos->nearGp) );
         damage = nonlocStatus->giveTempDamage();
         distance += ( xprev - x ) * 0.5 * ( computeDistanceModifier(damage) + computeDistanceModifier(damageprev) );
-        w = computeWeightFunction(distance) * nearElem->computeVolumeAround(pos->nearGp);
+        w = computeWeightFunction(distance) * nearElemGeometry->computeVolumeAround(pos->nearGp);
         pos->weight = w;
         wsum += w;
     }
@@ -304,6 +304,7 @@ MisesMatNl :: giveInterface(InterfaceType type)
 IRResultType
 MisesMatNl :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     MisesMat :: initializeFrom(ir);
@@ -388,7 +389,7 @@ MisesMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &d
         rmat = dynamic_cast< MisesMatNl * >( pos->nearGp->giveMaterial() );
         if ( rmat ) {
             rmat->giveRemoteNonlocalStiffnessContribution(pos->nearGp, rloc, s, rcontrib, tStep);
-            coeff = gp->giveElement()->computeVolumeAround(gp) * pos->weight / status->giveIntegrationScale();
+            coeff = gp->giveElementGeometry()->computeVolumeAround(gp) * pos->weight / status->giveIntegrationScale();
 
             int i, j, dim1 = loc.giveSize(), dim2 = rloc.giveSize();
             contrib.resize(dim1, dim2);
@@ -420,7 +421,7 @@ MisesMatNl :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &l
     int nrows, nsize, i, j;
     double sum, nlKappa, damage, tempDamage, dDamF;
     MisesMatNlStatus *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
-    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
+    StructuralElement *elemGeometry = static_cast< StructuralElement * >( gp->giveElementGeometry() );
     FloatMatrix b;
     FloatArray stress;
 
@@ -428,9 +429,12 @@ MisesMatNl :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &l
     damage = status->giveDamage();
     tempDamage = status->giveTempDamage();
     if ( ( tempDamage - damage ) > 0 ) {
-        elem->giveLocationArray(loc, EID_MomentumBalance, s);
+        elemGeometry->giveLocationArray(loc, EID_MomentumBalance, s);
         status->giveTempEffectiveStress(stress);
-        elem->computeBmatrixAt(gp, b);
+		ElementEvaluator* eE = elemGeometry->giveDomain()->giveElementEvaluator(elemGeometry->giveNumber());
+		StructuralElement* sE = static_cast< StructuralElement*> (eE);
+		sE->computeBmatrixAt(gp, b);
+        //elem->computeBmatrixAt(gp, b);
         dDamF = computeDamageParamPrime(nlKappa);
         nrows = b.giveNumberOfColumns();
         nsize = stress.giveSize();
@@ -457,14 +461,18 @@ MisesMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &
     int ncols, nsize, i, j;
     double sum, kappa, tempKappa;
     MisesMatNlStatus *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
-    StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
-    FloatMatrix b;
+    StructuralElement *elemGeometry = static_cast< StructuralElement * >( gp->giveElementGeometry() );
+	FloatMatrix b;
     FloatArray stress;
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
     double E = lmat->give('E', gp);
 
-    elem->giveLocationArray(rloc, EID_MomentumBalance, s);
-    elem->computeBmatrixAt(gp, b);
+    elemGeometry->giveLocationArray(rloc, EID_MomentumBalance, s);
+    //elem->computeBmatrixAt(gp, b);
+	ElementEvaluator* eE = elemGeometry->giveDomain()->giveElementEvaluator(elemGeometry->giveNumber());
+	StructuralElement* sE = static_cast< StructuralElement*> (eE);
+	sE->computeBmatrixAt(gp, b);
+
     ncols = b.giveNumberOfColumns();
     rcontrib.resize(ncols);
     kappa = status->giveCumulativePlasticStrain();

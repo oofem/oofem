@@ -3,7 +3,7 @@ set (core_unsorted
     classfactory.C
     femcmpnn.C domain.C timestep.C metastep.C gausspoint.C
     cltypes.C timer.C dictionary.C
-    connectivitytable.C error.C mathfem.C logger.C util.C
+    connectivitytable.C compiler.C error.C mathfem.C logger.C util.C
     initmodulemanager.C initmodule.C initialcondition.C
     homogenize.C
     localgaussianrandomgenerator.C
@@ -17,11 +17,11 @@ set (core_unsorted
     rvematerial.C
     weakperiodicbc.C
     solutionbasedshapefunction.C
-    fracturemanager.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
     eleminterpunknownmapper.C primaryunknownmapper.C materialmappingalgorithm.C
+    primvarmapper.C
     nonlocalmaterialext.C randommaterialext.C
     inputrecord.C oofemtxtinputrecord.C dynamicinputrecord.C
     dynamicdatareader.C oofemtxtdatareader.C tokenizer.C parser.C
@@ -133,6 +133,8 @@ set (core_export
     homexportmodule.C
     matlabexportmodule.C
     gpexportmodule.C
+    export/exportmodulecallerinterface.C
+    export/bcexportinterface.C
     )
 
 set (core_iga
@@ -145,6 +147,9 @@ set (core_iga
 set (core_arrays
     intarray.C
     floatarray.C
+    stressstrainbasevector.C
+    stressvector.C
+    strainvector.C
     floatmatrix.C
     )
 
@@ -155,6 +160,8 @@ set (core_engng
 
 set (core_element
     element.C
+	elementgeometry.C
+	elementevaluator.C
     )
 
 set (core_fei
@@ -195,12 +202,6 @@ set (core_xfem
     xfem/enrichmentdomain.C
     xfem/propagationlaw.C
     xfem/XFEMDebugTools.C
-    xfem/enrichmentfronts/enrichmentfront.C
-    xfem/enrichmentfronts/enrichmentfrontdonothing.C
-    xfem/enrichmentfronts/enrichmentfrontextend.C
-    xfem/enrichmentfronts/enrichmentfrontreducefront.C
-    xfem/enrichmentfronts/enrichmentfrontlinbranchfuncradius.C
-    xfem/enrichmentfronts/enrichmentfrontlinbranchfunconeel.C
     )
 
 set (core_parallel

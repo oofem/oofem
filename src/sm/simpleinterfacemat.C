@@ -78,7 +78,7 @@ SimpleInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 // computes full constitutive matrix for case of gp stress-strain state.
 //
 {
-    OOFEM_ERROR("not implemented");
+    _error("give3dMaterialStiffnessMatrix: not implemented");
 }
 
 
@@ -96,7 +96,7 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
     SimpleInterfaceMaterialStatus *status = static_cast< SimpleInterfaceMaterialStatus * >( this->giveStatus(gp) );
     this->initGpForNewStep(gp);
     FloatArray shearStrain(2), shearStress; //, strainVector;
-    StructuralElement *el = static_cast< StructuralElement * >( gp->giveElement() );
+    StructuralElement *elGeo = static_cast< StructuralElement * >( gp->giveElementGeometry() );
     //el->computeStrainVector(strainVector, gp, tStep);
 
     FloatArray tempShearStressShift = status->giveTempShearStressShift();
@@ -104,7 +104,7 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
     double normalStress, maxShearStress, dp;
     double shift = -this->kn * this->stiffCoeff * normalClearance;
 
-    MaterialMode mMode = el->giveMaterialMode();
+    MaterialMode mMode = elGeo->giveMaterialMode();
     //answer.resize(giveSizeOfReducedStressStrainVector(mMode));
     answer.zero();
     if ( normalStrain + normalClearance <= 0. ) {
@@ -151,7 +151,7 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
         answer.at(3) = shearStress.at(2);
         break;
     default:
-        OOFEM_ERROR("Unsupported interface mode");
+        _error("giveMaterialMode: Unsupported interface mode");
     }
 
     double lim = 1.e+50;
@@ -173,10 +173,11 @@ SimpleInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
 // Returns characteristic material stiffness matrix of the receiver
 //
 {
-    MaterialMode mMode = gp->giveElement()->giveMaterialMode();
+    MaterialMode mMode = gp->giveElementGeometry()->giveMaterialMode();
 
     FloatArray strainVector;
-    StructuralElement *el = static_cast< StructuralElement * >( gp->giveElement() );
+	//@todo dodelat evaluator??
+    StructuralElement *el = static_cast< StructuralElement * >( gp->giveElementGeometry() );
     double normalStrain;
 
     el->computeStrainVector(strainVector, gp, tStep);
@@ -195,7 +196,7 @@ SimpleInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
             if ( rMode == ElasticStiffness ) {
                 answer.at(1, 1) = this->kn;
             } else {
-                OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
+                _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
             }
         }
 
@@ -213,7 +214,7 @@ SimpleInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
             if ( rMode == ElasticStiffness ) {
                 answer.at(1, 1) = answer.at(2, 2) = this->kn;
             } else {
-                OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
+                _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
             }
         }
 
@@ -231,7 +232,7 @@ SimpleInterfaceMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
             if ( rMode == ElasticStiffness ) {
                 answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn;
             } else {
-                OOFEM_ERROR("unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
+                _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
             }
         }
 
@@ -268,6 +269,7 @@ SimpleInterfaceMaterial :: giveThermalDilatationVector(FloatArray &answer,
 IRResultType
 SimpleInterfaceMaterial :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     frictCoeff = 0.;

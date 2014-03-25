@@ -134,7 +134,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType);
 
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
+    virtual ElementGeometry *SpatialLocalizerI_giveElementGeometry() { return this; }
     virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
@@ -150,10 +150,10 @@ public:
     virtual double truncateMatVolume(const Polygon &matvolpoly, double &volume);
     virtual void giveElementCenter(LEPlic *mat_interface, FloatArray &center, bool updFlag);
     virtual void formMyVolumePoly(Polygon &myPoly, LEPlic *mat_interface, bool updFlag);
-    virtual Element *giveElement() { return this; }
+    //virtual Element *giveElement() { return this; }
     virtual double computeMyVolume(LEPlic *matInterface, bool updFlag);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual ElementGeometry *ZZNodalRecoveryMI_giveElementGeometry() { return this; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);

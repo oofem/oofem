@@ -38,11 +38,15 @@
 #include "interface.h"
 #include "nonlocalmaterialext.h"
 
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
+ #include "connectivitytable.h"
+#endif
+
 namespace oofem {
 class SparseMtrx;
 class GaussPoint;
 class TimeStep;
-class oofegGraphicContext;
 
 /**
  * Class Nonlocal Material Stiffness Interface. This is only abstract class.

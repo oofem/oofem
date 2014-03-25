@@ -45,7 +45,7 @@
 #include "structuralmaterial.h"
 #include "structuralms.h"
 #include "mathfem.h"
-#include "iga/iga.h"
+#include "iga.h"
 
 namespace oofem {
 StructuralElementEvaluator :: StructuralElementEvaluator()
@@ -89,12 +89,12 @@ int StructuralElementEvaluator :: giveIntegrationElementLocalCodeNumbers(IntArra
     elem->giveDofManDofIDMask(1, ut, nodeDofIDMask);
     dofmandof = nodeDofIDMask.giveSize();
 
-    nsd = elem->giveInterpolation()->giveNsd();
+	nsd = elem->giveInterpolation()->giveNsd();
 
     // first evaluate nonzero basis function mask
-    if ( elem->giveInterpolation()->hasSubPatchFormulation() ) {
+	if (elem->giveInterpolation()->hasSubPatchFormulation()) {
         IGAIntegrationElement *ee = static_cast< IGAIntegrationElement * >(ie);
-        elem->giveInterpolation()->giveKnotSpanBasisFuncMask(* ee->giveKnotSpan(), mask);
+		elem->giveInterpolation()->giveKnotSpanBasisFuncMask(*ee->giveKnotSpan(), mask);
         // loop over nonzero shape functions and assemble localization array
         answer.clear();
         for ( int i = 1; i <= mask.giveSize(); i++ ) {
@@ -139,7 +139,7 @@ void StructuralElementEvaluator :: giveCharacteristicMatrix(FloatMatrix &answer,
     } else if ( mtrx == LumpedMassMatrix ) {
         this->computeLumpedMassMatrix(answer, tStep);
     } else {
-        OOFEM_SIMPLE_ERROR( "giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
+        OOFEM_ERROR2( "giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
 }
 
@@ -190,7 +190,7 @@ void StructuralElementEvaluator :: computeLumpedMassMatrix(FloatMatrix &answer, 
     }
 
     if ( indx != ldofs ) {
-        OOFEM_SIMPLE_ERROR("computeMassMatrix : internal consistency check failed");
+        OOFEM_ERROR("computeMassMatrix : internal consistency check failed");
     }
 
     dim = dimFlag.at(1) + dimFlag.at(2) + dimFlag.at(3);
@@ -220,7 +220,7 @@ void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answ
     }
 
     if ( ( iRule = this->giveMassMtrxIntegrationRule() ) ) {
-        OOFEM_SIMPLE_ERROR("computeConsistentMassMatrix no integration rule available");
+        OOFEM_ERROR("computeConsistentMassMatrix no integration rule available");
     }
 
     this->giveMassMtrxIntegrationMask(mask);
@@ -266,12 +266,12 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
     FloatArray strain, stress, u, temp;
     IntArray irlocnum;
 
-    elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+	elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
     answer.resize(ndofs);
     answer.zero();
     FloatArray *m = & answer;
-    if ( elem->giveInterpolation()->hasSubPatchFormulation() ) {
+	if (elem->giveInterpolation()->hasSubPatchFormulation()) {
         m = & temp;
     }
 
@@ -407,7 +407,7 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
     answer.zero();
 
     FloatMatrix *m = & answer;
-    if ( elem->giveInterpolation()->hasSubPatchFormulation() ) {
+	if (elem->giveInterpolation()->hasSubPatchFormulation()) {
         m = & temp;
     }
 

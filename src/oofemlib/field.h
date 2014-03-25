@@ -132,9 +132,26 @@ public:
      */
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode) = 0;
 
-
-    /// Returns string for prepending output (used by error reporting macros).
-    std :: string errorInfo(const char *func) const;
+    /**
+     * @name Error and warning reporting methods
+     * These methods will print error (or warning) message using oofem default loggers.
+     * Do not use these methods directly, to avoid specify file and line parameters.
+     * More preferably, use these methods via corresponding OOFEM_CLASS_ERROR and OOFEM_CLASS_WARNING macros,
+     * that will include file and line parameters automatically.
+     *
+     * Uses variable number of arguments, so a format string followed by optional arguments is expected
+     * (according to printf conventions).
+     *
+     * @param file Source file name, where error encountered (where error* function called)
+     * @param line Source file line number, where error encountered
+     *
+     */
+    //@{
+    /// Prints error message and exits
+    void error(const char *file, int line, const char *format, ...) const;
+    /// Prints warning message
+    void warning(const char *file, int line, const char *format, ...) const;
+    //@}
 
     /// @return Class name of the receiver.
     virtual const char *giveClassName() const = 0;

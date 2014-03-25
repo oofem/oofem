@@ -38,6 +38,8 @@
 #include "structuralinterfacematerial.h"
 #include "structuralinterfacematerialstatus.h"
 
+#include "dynamicinputrecord.h"
+
 ///@name Input fields for IntMatBilinearCZFagerstrom
 //@{
 #define _IFT_IntMatBilinearCZFagerstrom_Name "intmatbilinearczfagerstrom"

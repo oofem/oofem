@@ -154,7 +154,7 @@ Truss1d :: initializeFrom(InputRecord *ir)
 void
 Truss1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer = {D_u};
+    answer.setValues(1, D_u);
 }
 
 
@@ -432,7 +432,7 @@ Truss1d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
+        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -466,7 +466,7 @@ Truss1d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
     result = this->computeLocalCoordinates(ksi, coords);
     this->interp.evalN( n, ksi, FEIElementGeometryWrapper(this) );
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
-    answer = {n.dotProduct(u) };
+    answer.setValues( 1, n.dotProduct(u) );
     return result;
 }
 
@@ -483,6 +483,7 @@ Truss1d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answ
                                                                 coordType ct, nodalValContainerType &list,
                                                                 InternalStateType type, TimeStep *tStep)
 {
+    int vars;
     FloatArray lcoords, n;
     if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
         lcoords = coords;
@@ -492,8 +493,10 @@ Truss1d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answ
 
     this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
 
-    answer.resize(0);
-    answer.add(n.at(1), list[0]);
-    answer.add(n.at(2), list[1]);
+    vars = list.at(1)->giveSize();
+    answer.resize(vars);
+    for ( int i = 1; i <= vars; i++ ) {
+        answer.at(i) = n.at(1) * list.at(1)->at(i) + n.at(2) * list.at(2)->at(i);
+    }
 }
 } // end namespace oofem

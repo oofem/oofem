@@ -44,10 +44,6 @@
 #include "mathfem.h"
 #include "classfactory.h"
 
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
-#endif
-
 namespace oofem {
 REGISTER_Element(LIBeam3d);
 
@@ -216,7 +212,7 @@ LIBeam3d :: computeVolumeAround(GaussPoint *gp)
 void
 LIBeam3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
+    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
 }
 
 
@@ -268,17 +264,18 @@ LIBeam3d :: computeLength()
 IRResultType
 LIBeam3d :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3d_refnode);
     if ( referenceNode == 0 ) {
-        OOFEM_ERROR("wrong reference node specified");
+        _error("instanciateFrom: wrong reference node specified");
     }
 
     //  if (this->hasString (initString, "dofstocondense")) {
     //    dofsToCondense = this->ReadIntArray (initString, "dofstocondense");
     //    if (dofsToCondense->giveSize() >= 12)
-    //      OOFEM_ERROR("wrong input data for condensed dofs");
+    //      _error ("instanciateFrom: wrong input data for condensed dofs");
     //  } else {
     //    dofsToCondense = NULL;
     //  }
@@ -316,7 +313,7 @@ LIBeam3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      * to global element dofs
      */
     if ( iEdge != 1 ) {
-        OOFEM_ERROR("wrong edge number");
+        _error("giveEdgeDofMapping: wrong edge number");
     }
 
 
@@ -330,7 +327,7 @@ double
 LIBeam3d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
-        OOFEM_ERROR("wrong egde number");
+        _error("computeEdgeVolumeAround: wrong egde number");
     }
 
     double weight  = gp->giveWeight();

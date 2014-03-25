@@ -64,13 +64,13 @@ CombinedZZSIErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
 }
 
 double
-CombinedZZSIErrorEstimator :: giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep)
+CombinedZZSIErrorEstimator :: giveElementError(EE_ErrorType type, ElementGeometry *elemGeometry, TimeStep *tStep)
 {
     this->estimateError(equilibratedEM, tStep);
     if ( type == indicatorET ) {
-        return siee.giveElementError(type, elem, tStep);
+        return siee.giveElementError(type, elemGeometry, tStep);
     } else {
-        return zzee.giveElementError(type, elem, tStep);
+        return zzee.giveElementError(type, elemGeometry, tStep);
     }
 }
 
@@ -183,9 +183,9 @@ CombinedZZSIRemeshingCriteria :: giveDofManDensity(int num)
 
     for ( int i = 1; i <= isize; i++ ) {
         interface = static_cast< ZZRemeshingCriteriaInterface * >
-                    ( domain->giveElement( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType) );
+                    ( domain->giveElementGeometry( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType) );
         if ( !interface ) {
-            OOFEM_ERROR("element does not support ZZRemeshingCriteriaInterface");
+            _error("giveDofManDensity: element does not support ZZRemeshingCriteriaInterface");
         }
 
         if ( i == 1 ) {

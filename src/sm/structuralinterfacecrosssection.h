@@ -107,9 +107,10 @@ public:
     }
     void giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
     {
-        FloatArray answer3D, jump3D = {jump.at(1), 0.0, jump.at(2)};
+        FloatArray jump3D, answer3D;
+        jump3D.setValues( 3,  jump.at(1), 0.0, jump.at(2) );
         this->giveInterfaceMaterial()->giveEngTraction_2d(answer3D, gp, jump3D, tStep);
-        answer = { answer3D.at(1), answer3D.at(3) };
+        answer.setValues( 2,  answer3D.at(1), answer3D.at(3) );
     }
     void giveEngTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
     {

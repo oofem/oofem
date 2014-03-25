@@ -35,6 +35,7 @@
 #include "exportmodule.h"
 #include "timestep.h"
 #include "engngm.h"
+#include "oofem_limits.h"
 #include "range.h"
 
 #include <cstdarg>
@@ -55,6 +56,7 @@ ExportModule :: ~ExportModule()
 IRResultType
 ExportModule :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     tstep_all_out_flag = ir->hasField(_IFT_ExportModule_tstepall);
@@ -116,9 +118,10 @@ ExportModule :: testTimeStepOutput(TimeStep *tStep)
         }
     }
 
-    for ( auto &step: tsteps_out ) {
+    std :: list< Range > :: iterator tstepsIter;
+    for ( tstepsIter = tsteps_out.begin(); tstepsIter != tsteps_out.end(); ++tstepsIter ) {
         // test if INCLUDED
-        if ( step.test( tStep->giveNumber() ) ) {
+        if ( ( * tstepsIter ).test( tStep->giveNumber() ) ) {
             return true;
         }
     }
@@ -136,8 +139,15 @@ ExportModule :: testDomainOutput(int n)
     return domainMask.findFirstIndexOf(n);
 }
 
-std :: string ExportModule :: errorInfo(const char *func) const
+void ExportModule :: error(const char *file, int line, const char *format, ...) const
 {
-    return std :: string(this->giveClassName()) + "::" + func;
+    char buffer [ MAX_ERROR_MSG_LENGTH ];
+    va_list args;
+
+    va_start(args, format);
+    vsprintf(buffer, format, args);
+    va_end(args);
+
+    __OOFEM_ERROR3(file, line, "Class: %s\n%s", this->giveClassName(), buffer);
 }
 } // end namespace oofem

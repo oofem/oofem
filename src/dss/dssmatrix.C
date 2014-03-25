@@ -64,7 +64,7 @@ DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx()
     } else if ( _t == unsym_LU ) {
         _st = eDSSFactorizationLU;
     } else {
-        OOFEM_ERROR("unknown dssType");
+        OOFEM_ERROR("DSSMatrix::DSSMatrix() -- unknown dssType");
     }
 
     _dss->Initialize(0, _st);
@@ -85,7 +85,7 @@ DSSMatrix :: DSSMatrix(dssType _t, int n) : SparseMtrx(n, n)
     } else if ( _t == unsym_LU ) {
         _st = eDSSFactorizationLU;
     } else {
-        OOFEM_ERROR("unknown dssType");
+        OOFEM_ERROR("DSSMatrix::DSSMatrix() -- unknown dssType");
     }
 
     _dss->Initialize(0, _st);
@@ -105,23 +105,23 @@ DSSMatrix :: ~DSSMatrix()
 
 DSSMatrix :: DSSMatrix(const DSSMatrix &S) : SparseMtrx(S.nRows, S.nColumns)
 {
-    OOFEM_ERROR("not implemented");
+    OOFEM_ERROR("DSSMatrix::DSSMatrix(const DSSMatrix &S) -- not implemented");
 }
 
 SparseMtrx *DSSMatrix :: GiveCopy() const
 {
-    OOFEM_ERROR("not implemented");
+    OOFEM_ERROR("DSSMatrix::GiveCopy -- not implemented");
     return NULL;
 }
 
 void DSSMatrix :: times(const FloatArray &x, FloatArray &answer) const
 {
-    OOFEM_ERROR("not implemented");
+    OOFEM_ERROR("DSSMatrix::times -- not implemented");
 }
 
 void DSSMatrix :: times(double x)
 {
-    OOFEM_ERROR("not implemented");
+    OOFEM_ERROR("DSSMatrix::times -- not implemented");
 }
 
 int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
@@ -185,7 +185,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
     unsigned long *rowind_ = new unsigned long [ nz_ ];
     unsigned long *colptr_ = new unsigned long [ neq + 1 ];
     if ( ( rowind_ == NULL ) || ( colptr_ == NULL ) ) {
-        OOFEM_ERROR("free store exhausted, exiting");
+        OOFEM_ERROR("DSSMatrix::buildInternalStructure: free store exhausted, exiting");
     }
 
     indx = 0;
@@ -205,7 +205,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
     }
 
     if ( ( _sm = new SparseMatrixF(neq, NULL, rowind_, colptr_, 0, 0, true) ) == NULL ) {
-        OOFEM_FATAL("free store exhausted, exiting");
+        OOFEM_ERROR("DSSMatrix::buildInternalStructure: free store exhausted, exiting");
     }
 
     int bsize = eModel->giveDomain(1)->giveDefaultNodeDofIDArry().giveSize();
@@ -226,7 +226,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
     DofManager *dman;
 
     if ( mcn == NULL ) {
-        OOFEM_FATAL("free store exhausted, exiting");
+        OOFEM_ERROR("DSSMatrix::buildInternalStructure: free store exhausted, exiting");
     }
 
     for ( n = 1; n <= ndofmans; n++ ) {
@@ -310,7 +310,7 @@ int DSSMatrix :: assemble(const IntArray &loc, const FloatMatrix &mat)
  #  ifdef DEBUG
     dim = mat.giveNumberOfRows();
     if ( dim != loc.giveSize() ) {
-        OOFEM_ERROR("dimension of 'k' and 'loc' mismatch");
+        OOFEM_ERROR("CompCol::assemble : dimension of 'k' and 'loc' mismatch");
     }
 
  #  endif

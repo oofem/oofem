@@ -150,7 +150,7 @@ FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
 {
     FloatArray res, delta, guess;
     FloatMatrix jac;
-    double convergence_limit, error = 0.0;
+    double convergence_limit, error=0.0;
 
     // find a suitable convergence limit
     convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);
@@ -179,7 +179,7 @@ FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
         answer.add(delta);
     }
     if ( error > convergence_limit ) { // Imperfect, could give false negatives.
-        //OOFEM_ERROR("no convergence after 10 iterations");
+        //OOFEM_ERROR ("global2local: no convergence after 10 iterations");
         answer.zero();
         return false;
     }
@@ -278,7 +278,7 @@ FEI2dQuadQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         bNode = 1;
         cNode = 8;
     } else {
-        OOFEM_ERROR("wrong edge number (%d)", iedge);
+        OOFEM_ERROR2("FEI2dQuadQuad :: computeEdgeMapping: wrong edge number (%d)", iedge);
     }
 
     edgeNodes.at(1) = aNode;

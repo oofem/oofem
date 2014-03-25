@@ -40,7 +40,7 @@
 
 namespace oofem {
 class Domain;
-class Element;
+class ElementGeometry;
 class TimeStep;
 class IntegrationRule;
 class FEInterpolation;
@@ -63,13 +63,13 @@ protected:
      * Computes error based on the inscribed triangle/circle ratio.
      * @return Error value for the element. Zero for equilateral triangle.
      */
-    static double computeTriangleRadiusError(Element *elem);
+    static double computeTriangleRadiusError(ElementGeometry *elem);
 
     /**
      * Computes the error based on the conditioning of the Jacobian.
      * @return Error value for the element.
      */
-    static double computeJacobianError(FEInterpolation &fei, IntegrationRule &ir, Element *elem);
+    static double computeJacobianError(FEInterpolation &fei, IntegrationRule &ir, ElementGeometry *elem);
 
 public:
     /// Constructor
@@ -79,7 +79,7 @@ public:
     /// Destructor
     virtual ~MeshQualityErrorEstimator() { }
 
-    virtual double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep);
+    virtual double giveElementError(EE_ErrorType type, ElementGeometry *elem, TimeStep *tStep);
 
     /// Gives the max error from any element in the domain.
     virtual double giveValue(EE_ValueType type, TimeStep *tStep);

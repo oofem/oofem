@@ -51,6 +51,7 @@ OutputManager :: OutputManager(Domain *d) : dofman_out(), dofman_except(), eleme
 IRResultType
 OutputManager :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     tstep_all_out_flag  = ir->hasField(_IFT_OutputManager_tstepall);
@@ -127,12 +128,12 @@ OutputManager :: doElementOutput(FILE *file, TimeStep *tStep)
 
 #endif
 
-            domain->giveElement(i)->printOutputAt(file, tStep);
+            domain->giveElementGeometry(i)->printOutputAt(file, tStep);
         }
     } else {
         for ( int i = 1; i <= nelem; i++ ) {
             if ( _testElementOutput(i) ) {
-                domain->giveElement(i)->printOutputAt(file, tStep);
+                domain->giveElementGeometry(i)->printOutputAt(file, tStep);
             }
         }
     }
@@ -211,7 +212,7 @@ OutputManager :: _testElementOutput(int number)
     } else {
         // test for particular element selection
         std :: list< Range > :: iterator elemOutIter;
-        int _label = domain->giveElement(number)->giveLabel();
+        int _label = domain->giveElementGeometry(number)->giveLabel();
 
         for ( elemOutIter = element_out.begin(); elemOutIter != element_out.end(); ++elemOutIter ) {
             if ( ( * elemOutIter ).test(_label) ) {
@@ -228,7 +229,7 @@ OutputManager :: _testElementOutput(int number)
 
     // if selected check exclude list
     std :: list< Range > :: iterator elemExceptIter;
-    int _label = domain->giveElement(number)->giveLabel();
+    int _label = domain->giveElementGeometry(number)->giveLabel();
 
     for ( elemExceptIter = element_except.begin(); elemExceptIter != element_except.end(); ++elemExceptIter ) {
         // test if excluded

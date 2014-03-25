@@ -64,7 +64,7 @@ FEInterpolation *Line2BoundaryElement :: giveInterpolation() const
 void Line2BoundaryElement :: giveDofManDofIDMask(int i, EquationID eid, IntArray &nodeDofIDMask) const
 {
     if ( eid == EID_MomentumBalance || eid == EID_MomentumBalance_ConservationEquation ) {
-        nodeDofIDMask = {V_u, V_v};
+        nodeDofIDMask.setValues(2, V_u, V_v);
     } else {
         nodeDofIDMask.clear();
     }
@@ -107,7 +107,7 @@ int Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(Val
 
 void Line2BoundaryElement :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
-    answer = {V_u, V_v};
+    answer.setValues(2, V_u, V_v);
 }
 
 void Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,

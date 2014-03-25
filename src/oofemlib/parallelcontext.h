@@ -38,7 +38,7 @@
 #include "oofemcfg.h"
 #include "equationid.h"
 #ifdef __PARALLEL_MODE
- #include "parallelordering.h"
+#include "parallelordering.h"
 #endif
 
 namespace oofem {
@@ -67,7 +67,7 @@ public:
      * Creates a context belonging to a system of equations in a given engineering model.
      * @param e Engineering model to work with.
      */
-    ParallelContext(EngngModel * e);
+    ParallelContext(EngngModel *e);
     ~ParallelContext();
 
     /**
@@ -109,10 +109,10 @@ public:
     void accumulate(const FloatArray &local, FloatArray &global);
     //@}
 
-#ifdef __PARALLEL_MODE
+ #ifdef __PARALLEL_MODE
     Natural2GlobalOrdering *giveN2Gmap() { return & n2g; }
     Natural2LocalOrdering *giveN2Lmap() { return & n2l; }
-#endif
+ #endif
 };
 } // end namespace oofem
 

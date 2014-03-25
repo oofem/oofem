@@ -58,6 +58,7 @@ REGISTER_BoundaryCondition(SurfaceTensionBoundaryCondition);
 
 IRResultType SurfaceTensionBoundaryCondition :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom";
     IRResultType result;
 
     IR_GIVE_FIELD(ir, this->gamma, _IFT_SurfaceTensionBoundaryCondition_gamma);
@@ -85,13 +86,15 @@ void SurfaceTensionBoundaryCondition :: giveLocationArrays(std :: vector< IntArr
     cols.resize(boundaries.giveSize() / 2);
 
     for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-        Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+        ElementGeometry *eG = this->giveDomain()->giveElementGeometry( boundaries.at(pos * 2 - 1) );
+		ElementEvaluator *eE = this->giveDomain()->giveElementEvaluator(boundaries.at(pos * 2 - 1));
+
         int boundary = boundaries.at(pos * 2);
 
-        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+        eG->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
 
-        e->giveBoundaryLocationArray(rows [ pos ], bNodes, eid, r_s);
-        e->giveBoundaryLocationArray(cols [ pos ], bNodes, eid, c_s);
+        eE->giveBoundaryLocationArray(rows [ pos ], bNodes, eid, r_s, eG);
+        eE->giveBoundaryLocationArray(cols [ pos ], bNodes, eid, c_s, eG);
     }
 }
 
@@ -105,7 +108,7 @@ void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *t
         return;
     }
 
-    OOFEM_ERROR("Not implemented yet.");
+    OOFEM_ERROR("SurfaceTensionBoundaryCondition :: assemble - Not implemented yet.");
 
     FloatMatrix Ke;
     IntArray r_loc, c_loc, bNodes;
@@ -114,14 +117,16 @@ void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *t
     const IntArray &boundaries = set->giveBoundaryList();
 
     for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-        Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+        ElementGeometry *eG = this->giveDomain()->giveElementGeometry( boundaries.at(pos * 2 - 1) );
+		ElementEvaluator *eE = this->giveDomain()->giveElementEvaluator(boundaries.at(pos * 2 - 1));
+
         int boundary = boundaries.at(pos * 2);
 
-        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+        eG->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
 
-        e->giveBoundaryLocationArray(r_loc, bNodes, eid, r_s);
-        e->giveBoundaryLocationArray(c_loc, bNodes, eid, c_s);
-        this->computeTangentFromElement(Ke, e, boundary, tStep);
+        eE->giveBoundaryLocationArray(r_loc, bNodes, eid, r_s, eG);
+        eE->giveBoundaryLocationArray(c_loc, bNodes, eid, c_s, eG);
+        this->computeTangentFromElement(Ke, eG, boundary, tStep);
         answer->assemble(r_loc, c_loc, Ke);
     }
 }
@@ -147,13 +152,15 @@ void SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeS
     const IntArray &boundaries = set->giveBoundaryList();
 
     for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-        Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+        ElementGeometry *eG = this->giveDomain()->giveElementGeometry( boundaries.at(pos * 2 - 1) );
+		ElementEvaluator *eE = this->giveDomain()->giveElementEvaluator(boundaries.at(pos * 2 - 1));
+		
         int boundary = boundaries.at(pos * 2);
 
-        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+        eG->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
 
-        e->giveBoundaryLocationArray(loc, bNodes, eid, s, & masterdofids);
-        this->computeLoadVectorFromElement(fe, e, boundary, tStep);
+		eE->giveBoundaryLocationArray(loc, bNodes, eid, s, eG, & masterdofids);
+        this->computeLoadVectorFromElement(fe, eG, boundary, tStep);
         answer.assemble(fe, loc);
         if ( eNorms ) {
             for ( int i = 1; i <= loc.giveSize(); ++i ) {
@@ -165,12 +172,12 @@ void SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeS
     }
 }
 
-void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &answer, Element *e, int side, TimeStep *tStep)
+void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &answer, ElementGeometry *e, int side, TimeStep *tStep)
 {
     FEInterpolation *fei = e->giveInterpolation();
     IntegrationRule *iRule = e->giveDefaultIntegrationRulePtr();
     if ( !fei || !iRule ) {
-        OOFEM_ERROR("No interpolation available for element.");
+        OOFEM_ERROR("SurfaceTensionBoundaryCondition :: computeTangentFromElement - No interpolation available for element.");
     }
 
     int nsd = e->giveDomain()->giveNumberOfSpatialDimensions();
@@ -179,7 +186,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
 
     if ( nsd == 2 ) {
         if ( !( ( side == -1 && id == _Line ) || ( side > 0 && ( id == _Triangle || id == _Square ) ) ) ) {
-            OOFEM_ERROR("Not a surface element.");
+            OOFEM_ERROR("SurfaceTensionBoundaryCondition :: assembleVectorFromElement - Not a surface element.");
         }
         if ( side == -1 ) {
             side = 1;
@@ -258,7 +265,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
         answer.symmetrized();
     }  else if ( nsd ==  3 ) {
         if ( !( ( ( id == _Triangle || id == _Square ) && side == -1 ) || ( ( id == _Tetrahedra || id == _Cube ) && side > 0 ) ) ) {
-            OOFEM_ERROR("Not a surface element.");
+            OOFEM_ERROR("SurfaceTensionBoundaryCondition :: assembleVectorFromElement - Not a surface element.");
         }
         if ( side == -1 ) {
             side = 1;
@@ -266,7 +273,7 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
 
         FEInterpolation3d *fei3d = static_cast< FEInterpolation3d * >(fei);
 
-        OOFEM_ERROR("3D tangents not implemented yet.");
+        OOFEM_ERROR("SurfaceTensionBoundaryCondition :: assembleVectorFromElement - 3D tangents not implemented yet.");
 
         FloatMatrix tmp(3 *nodes, 3 *nodes);
         FloatMatrix dNdx;
@@ -288,16 +295,16 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
             ///@todo  Derive expressions for this.
         }
     } else {
-        OOFEM_WARNING("Only 2D or 3D is possible!");
+        OOFEM_WARNING("SurfaceTensionBoundaryCondition :: assembleVectorFromElement - Only 2D or 3D is possible!");
     }
 }
 
-void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray &answer, Element *e, int side, TimeStep *tStep)
+void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray &answer, ElementGeometry *e, int side, TimeStep *tStep)
 {
     FEInterpolation *fei = e->giveInterpolation();
     IntegrationRule *iRule = e->giveDefaultIntegrationRulePtr();
     if ( !fei || !iRule ) {
-        OOFEM_ERROR("No interpolation or default integration available for element.");
+        OOFEM_ERROR("SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement - No interpolation or default integration available for element.");
     }
 
     int nsd = e->giveDomain()->giveNumberOfSpatialDimensions();
@@ -306,7 +313,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
 
     if ( nsd == 2 ) {
         if ( !( ( side == -1 && id == _Line ) || ( side > 0 && ( id == _Triangle || id == _Square ) ) ) ) {
-            OOFEM_ERROR("Not a surface element.");
+            OOFEM_ERROR("SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement - Not a surface element.");
         }
         if ( side == -1 ) {
             side = 1;
@@ -370,7 +377,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
         }
     } else if ( nsd ==  3 ) {
         if ( !( ( ( id == _Triangle || id == _Square ) && side == -1 ) || ( ( id == _Tetrahedra || id == _Cube ) && side > 0 ) ) ) {
-            OOFEM_ERROR("Not a surface element.");
+            OOFEM_ERROR("SurfaceTensionBoundaryCondition :: assembleVectorFromElement - Not a surface element.");
         }
         if ( side == -1 ) {
             side = 1;
@@ -394,7 +401,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
             }
             answer.add(-gamma * J * gp->giveWeight(), tmp);
         }
-        OOFEM_WARNING("3D Completely untested!");
+        OOFEM_WARNING("SurfaceTensionBoundaryCondition :: assembleVectorFromElement - 3D Completely untested!");
     }
 }
 } // end namespace oofem

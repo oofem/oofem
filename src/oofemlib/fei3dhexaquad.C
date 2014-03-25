@@ -118,7 +118,7 @@ FEI3dHexaQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
 {
     FloatArray res, delta, guess;
     FloatMatrix jac;
-    double convergence_limit, error = 0.0;
+    double convergence_limit, error=0.0;
 
     // find a suitable convergence limit
     convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);
@@ -147,7 +147,7 @@ FEI3dHexaQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
         answer.add(delta);
     }
     if ( error > convergence_limit ) { // Imperfect, could give false negatives.
-        //OOFEM_ERROR("no convergence after 10 iterations");
+        //OOFEM_ERROR ("global2local: no convergence after 10 iterations");
         answer.zero();
         return false;
     }
@@ -227,31 +227,31 @@ void
 FEI3dHexaQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 {
     if ( iedge == 1 ) {
-        edgeNodes = { 1, 2,  9};
+        edgeNodes.setValues(3,  1, 2,  9);
     } else if ( iedge == 2 ) {
-        edgeNodes = { 2, 3, 10};
+        edgeNodes.setValues(3,  2, 3, 10);
     } else if ( iedge == 3 ) {
-        edgeNodes = { 3, 4, 11};
+        edgeNodes.setValues(3,  3, 4, 11);
     } else if ( iedge == 4 ) {
-        edgeNodes = { 4, 1, 12};
+        edgeNodes.setValues(3,  4, 1, 12);
     } else if ( iedge == 5 ) {
-        edgeNodes = { 5, 6, 13};
+        edgeNodes.setValues(3,  5, 6, 13);
     } else if ( iedge == 6 ) {
-        edgeNodes = { 6, 7, 14};
+        edgeNodes.setValues(3,  6, 7, 14);
     } else if ( iedge == 7 ) {
-        edgeNodes = { 7, 8, 15};
+        edgeNodes.setValues(3,  7, 8, 15);
     } else if ( iedge == 8 ) {
-        edgeNodes = { 8, 5, 16};
+        edgeNodes.setValues(3,  8, 5, 16);
     } else if ( iedge == 9 ) {
-        edgeNodes = { 1, 5, 17};
+        edgeNodes.setValues(3,  1, 5, 17);
     } else if ( iedge == 10 ) {
-        edgeNodes = { 2, 6, 18};
+        edgeNodes.setValues(3,  2, 6, 18);
     } else if ( iedge == 11 ) {
-        edgeNodes = { 3, 7, 19};
+        edgeNodes.setValues(3,  3, 7, 19);
     } else if ( iedge == 12 ) {
-        edgeNodes = { 4, 8, 20};
+        edgeNodes.setValues(3,  4, 8, 20);
     } else {
-        OOFEM_ERROR("wrong edge number (%d)", iedge);
+        OOFEM_ERROR2("FEI3dHexaQuad :: computeLocalEdgeMapping: wrong edge number (%d)", iedge);
     }
 }
 
@@ -349,19 +349,19 @@ FEI3dHexaQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
     // the actual numbering  has a positive normal pointing outwards from the element  - (LSpace compatible)
 
     if ( isurf == 1 ) {
-        nodes = { 3, 2, 1, 4, 10,  9, 12, 11};
+        nodes.setValues(8,  3, 2, 1, 4, 10,  9, 12, 11);
     } else if ( isurf == 2 ) {
-        nodes = { 7, 8, 5, 6, 15, 16, 13, 14};
+        nodes.setValues(8,  7, 8, 5, 6, 15, 16, 13, 14);
     } else if ( isurf == 3 ) {
-        nodes = { 2, 6, 5, 1, 18, 13, 17,  9};
+        nodes.setValues(8,  2, 6, 5, 1, 18, 13, 17,  9);
     } else if ( isurf == 4 ) {
-        nodes = { 3, 7, 6, 2, 19, 14, 18, 10};
+        nodes.setValues(8,  3, 7, 6, 2, 19, 14, 18, 10);
     } else if ( isurf == 5 ) {
-        nodes = { 3, 4, 8, 7, 11, 20, 15, 19};
+        nodes.setValues(8,  3, 4, 8, 7, 11, 20, 15, 19);
     } else if ( isurf == 6 ) {
-        nodes = { 4, 1, 5, 8, 12, 17, 16, 20};
+        nodes.setValues(8,  4, 1, 5, 8, 12, 17, 16, 20);
     } else {
-        OOFEM_ERROR("wrong surface number (%d)", isurf);
+        OOFEM_ERROR2("FEI3dHexaQuad :: computeLocalSurfaceMapping: wrong surface number (%d)", isurf);
     }
 
 #if 0
@@ -422,7 +422,7 @@ FEI3dHexaQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
         nodes.at(7) = 17;
         nodes.at(8) = 12;
     } else {
-        OOFEM_ERROR("wrong surface number (%d)", isurf);
+        OOFEM_ERROR2("FEI3dHexaQuad :: computeLocalSurfaceMapping: wrong surface number (%d)", isurf);
     }
 #endif
 }

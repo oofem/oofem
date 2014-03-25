@@ -402,7 +402,7 @@ LIBeam2dNL :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &m
 void
 LIBeam2dNL :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer = {D_u, D_w, R_v};
+    answer.setValues(3, D_u, D_w, R_v);
 }
 
 
@@ -498,7 +498,7 @@ LIBeam2dNL :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      */
 
     if ( iEdge != 1 ) {
-        OOFEM_ERROR("wrong edge number");
+        _error("giveEdgeDofMapping: wrong edge number");
     }
 
 
@@ -515,7 +515,7 @@ double
 LIBeam2dNL ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
-        OOFEM_ERROR("wrong egde number");
+        _error("computeEdgeVolumeAround: wrong egde number");
     }
 
     double weight  = gp->giveWeight();

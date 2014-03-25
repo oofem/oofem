@@ -228,7 +228,7 @@ void DynCompCol :: times(const FloatArray &x, FloatArray &answer) const
 {
     //      Check for compatible dimensions:
     if ( x.giveSize() != nColumns ) {
-        OOFEM_ERROR("incompatible dimensions");
+        OOFEM_ERROR("DynCompCol::times: Error in CompCol -- incompatible dimensions");
     }
 
     answer.resize(nRows);
@@ -246,11 +246,13 @@ void DynCompCol :: times(const FloatArray &x, FloatArray &answer) const
     }
 
 #else
+    int j;
     double rhs;
+    std :: map< int, double > :: iterator pos;
 
-    for ( int j = 0; j < nColumns; j++ ) {
+    for ( j = 0; j < nColumns; j++ ) {
         rhs = x(j);
-        for ( int row: columns [ j ]->begin(); pos != columns [ j ]->end(); ++pos ) {
+        for ( pos = columns [ j ]->begin(); pos != columns [ j ]->end(); ++pos ) {
             answer(pos->first) += pos->second * rhs;
         }
     }
@@ -491,7 +493,7 @@ int DynCompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
 #  ifdef DEBUG
     dim = mat.giveNumberOfRows();
     if ( dim != loc.giveSize() ) {
-        OOFEM_ERROR("dimension of 'k' and 'loc' mismatch");
+        OOFEM_ERROR("DynCompCol::assemble : dimension of 'k' and 'loc' mismatch");
     }
 
 #  endif
@@ -667,7 +669,7 @@ double &DynCompCol :: at(int i, int j)
         return columns_ [ j - 1 ]->at(rowIndx);
     }
 
-    OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
+    OOFEM_ERROR3("DynCompCol::operator at(): Array accessing exception -- (%d,%d) out of bounds", i, j);
     return columns_ [ 0 ]->at(1); // return to suppress compiler warning message
 
 #else
@@ -699,7 +701,7 @@ double DynCompCol :: at(int i, int j) const
     if ( i <= nRows && j <= nColumns ) {
         return 0.0;
     } else {
-        OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
+        OOFEM_ERROR3("DynCompCol::operator at(): Array accessing exception -- (%d,%d) out of bounds", i, j);
         return columns_ [ 0 ]->at(1); // return to suppress compiler warning message
     }
 
@@ -709,7 +711,7 @@ double DynCompCol :: at(int i, int j) const
     if ( pos != this->columns [ j - 1 ]->end() ) {
         return pos->second;
     } else {
-        OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
+        OOFEM_ERROR("DynCompCol::operator at(): Array accessing exception -- (%d,%d) out of bounds", i, j);
         return 0.0;
     }
 
@@ -738,7 +740,7 @@ double DynCompCol :: operator() (int i, int j)  const
     if ( i < nRows && j < nColumns ) {
         return 0.0;
     } else {
-        OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
+        OOFEM_ERROR3("DynCompCol::operator(): Array accessing exception -- (%d,%d) out of bounds", i, j);
         return columns_ [ 0 ]->at(1); // return to suppress compiler warning message
     }
 
@@ -748,7 +750,7 @@ double DynCompCol :: operator() (int i, int j)  const
     if ( pos != this->columns [ j ]->end() ) {
         return pos->second;
     } else {
-        OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
+        OOFEM_ERROR("DynCompCol::operator at(): Array accessing exception -- (%d,%d) out of bounds", i, j);
         return 0.0;
     }
 
@@ -774,7 +776,7 @@ double &DynCompCol :: operator() (int i, int j)
         return columns_ [ j ]->at(rowIndx);
     }
 
-    OOFEM_ERROR("Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
+    OOFEM_ERROR3("DynCompCol::operator(): Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
     return columns_ [ 0 ]->at(1); // return to suppress compiler warning message
 
 #else
@@ -788,7 +790,7 @@ void DynCompCol :: timesT(const FloatArray &x, FloatArray &answer) const
 {
     // Check for compatible dimensions:
     if ( x.giveSize() != nRows ) {
-        OOFEM_ERROR("Error in CompCol -- incompatible dimensions");
+        OOFEM_ERROR("DynCompCol::trans_mult: Error in CompCol -- incompatible dimensions");
     }
     answer.resize(nColumns);
     answer.zero();

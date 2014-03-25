@@ -109,11 +109,11 @@ protected:
      * Returns corresponding element cell_type.
      * Some common element types are supported, others can be supported via interface concept.
      */
-    int giveCellType(Element *tStep);
+    int giveCellType(ElementGeometry *tStep);
     /**
      * Returns the number of elements vtk cells.
      */
-    int giveNumberOfElementCells(Element *);
+    int giveNumberOfElementCells(ElementGeometry *);
     /**
      * Returns number of nodes corresponding to cell type.
      */
@@ -121,7 +121,7 @@ protected:
     /**
      * Returns the element cell geometry.
      */
-    void giveElementCell(IntArray &answer, Element *elem, int cell);
+    void giveElementCell(IntArray &answer, ElementGeometry *elem, int cell);
     /**
      * Export internal variables.
      */

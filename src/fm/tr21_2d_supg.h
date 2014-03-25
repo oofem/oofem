@@ -93,7 +93,7 @@ public:
     virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
 
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
+    virtual ElementGeometry *ZZNodalRecoveryMI_giveElementGeometry() { return this; }
 
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,

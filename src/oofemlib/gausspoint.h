@@ -44,7 +44,7 @@
 #include "oofemcfg.h"
 #include "integrationrule.h"
 #include "integrationpointstatus.h"
-#include "element.h"
+#include "elementgeometry.h"
 #include "materialmode.h"
 
 namespace oofem {
@@ -135,21 +135,17 @@ public:
     void setCoordinates(const FloatArray &c) { * coordinates = c; }
 
     /// Returns local sub-patch coordinates of the receiver
-    FloatArray *giveLocalCoordinates() {
-        if ( localCoordinates ) {
-            return localCoordinates;
-        } else {
-            return coordinates;
-        }
-    }
+    FloatArray *giveLocalCoordinates() { if ( localCoordinates ) {
+                                             return localCoordinates;
+                                         } else {
+                                             return coordinates;
+                                         } }
     void setLocalCoordinates(const FloatArray &c)
-    {
-        if ( localCoordinates ) {
-            * localCoordinates = c;
-        } else {
-            localCoordinates = new FloatArray(c);
-        }
-    }
+    { if ( localCoordinates ) {
+          * localCoordinates = c;
+      } else {
+          localCoordinates = new FloatArray(c);
+      } }
 
     /// Returns  integration weight of receiver.
     virtual double giveWeight() { return weight; }
@@ -158,20 +154,19 @@ public:
     int giveNumber() { return number; }
     /// Returns corresponding integration rule to receiver.
     IntegrationRule *giveIntegrationRule() { return irule; }
-    /// Returns corresponding element to receiver.
-    Element *giveElement() { return irule->giveElement(); }
-
-    /// Returns corresponding material mode of receiver.
+    /// Returns corresponding element geometry to receiver.
+    ElementGeometry *giveElementGeometry() { return irule->giveElementGeometry(); }
+	/// Returns corresponding material mode of receiver.
     MaterialMode giveMaterialMode() { return this->materialMode; }
     /// Sets material mode of receiver.
     void setMaterialMode(MaterialMode newMode) { this->materialMode = newMode; }
     ///@todo giveMaterial routine most be removed from gauss-points, it doesn't fit with different types of cross-sections.
 
     /// Returns reference to material associated to related element of receiver.
-    Material *giveMaterial() { return giveElement()->giveMaterial(); }
+    Material *giveMaterial() { return giveElementGeometry()->giveMaterial(); }
 
     /// Returns reference to cross section associated to related element of receiver.
-    CrossSection *giveCrossSection() { return giveElement()->giveCrossSection(); }
+    CrossSection *giveCrossSection() { return giveElementGeometry()->giveCrossSection(); }
 
     /**
      * Returns reference to associated material status (NULL if not defined).
@@ -197,7 +192,7 @@ public:
     IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr)
     {
         if ( this->materialStatus != NULL ) {
-            OOFEM_SIMPLE_ERROR(" MaterialStatus :: setMaterialStatus status already exist");
+            OOFEM_ERROR(" MaterialStatus :: setMaterialStatus status already exist");
         }
         this->materialStatus = ptr;
         return ptr;

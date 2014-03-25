@@ -50,7 +50,7 @@
 #include "engngm.h"
 
 namespace oofem {
-PatchIntegrationRule :: PatchIntegrationRule(int n, Element *e, const std :: vector< Triangle > &iTriangles) :
+PatchIntegrationRule :: PatchIntegrationRule(int n, ElementGeometry *e, const std :: vector< Triangle > &iTriangles) :
     GaussIntegrationRule(n, e),
     mTriangles(iTriangles)
 { }
@@ -104,7 +104,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
     std :: vector< FloatArray >newGPCoord;
 
-    double parentArea = this->elem->computeArea();
+	double parentArea = elemGeometry->computeArea();
 
     // Loop over triangles
     for ( int i = 0; i < int ( triToKeep.size() ); i++ ) {
@@ -136,14 +136,14 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
 
             FloatArray local;
-            this->elem->computeLocalCoordinates(local, global);
+			elemGeometry->computeLocalCoordinates(local, global);
 
             gp->setCoordinates(local);
 
 
 
 
-            double refElArea = this->elem->giveParentElSize();
+			double refElArea = elemGeometry->giveParentElSize();
 
             gp->setWeight(2.0 * refElArea * gp->giveWeight() * mTriangles [ triToKeep [ i ] ].getArea() / parentArea); // update integration weight
 
@@ -159,12 +159,12 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
         delete [] coords;
     }
 
-    XfemManager *xMan = elem->giveDomain()->giveXfemManager();
+    XfemManager *xMan = elemGeometry->giveDomain()->giveXfemManager();
     if ( xMan != NULL ) {
         if ( xMan->giveVtkDebug() ) {
             double time = 0.0;
 
-            Element *el = this->elem;
+			ElementGeometry *el = elemGeometry;
             if ( el != NULL ) {
                 Domain *dom = el->giveDomain();
                 if ( dom != NULL ) {
@@ -178,7 +178,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
                 }
             }
 
-            int elIndex = this->elem->giveGlobalNumber();
+			int elIndex = this->elemGeometry->giveGlobalNumber();
             std :: stringstream str;
             str << "GaussPointsTime" << time << "El" << elIndex << ".vtk";
             std :: string name = str.str();
@@ -221,7 +221,7 @@ PatchIntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *
      *
      *      patch->saveContext(stream, mode, obj);
      *  } else {
-     *      OOFEM_ERROR("can't store NULL patch");
+     *      OOFEM_ERROR("saveContex : can't store NULL patch");
      *  }
      */
     return CIO_OK;
@@ -240,7 +240,7 @@ PatchIntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, voi
     contextIOResultType iores;
 
     if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
+        OOFEM_ERROR("restoreContex : can't write into NULL stream");
     }
 
     if ( ( iores = IntegrationRule :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

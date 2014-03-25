@@ -39,34 +39,13 @@
 #include "floatmatrix.h"
 #include "dictionary.h"
 #include "range.h"
-#include "node.h"
-#include "element.h"
-#include "scalarfunction.h"
 
 #include <sstream>
 
 namespace oofem {
-DynamicInputRecord *CreateNodeIR(int i, InputFieldType nodeType, const FloatArray &coord)
-{
-    DynamicInputRecord *result = new DynamicInputRecord(nodeType, i);
-    result->setField(coord, _IFT_Node_coords);
-    return result;
-}
-
-DynamicInputRecord *CreateElementIR(int i, InputFieldType elementType, const IntArray &nodes, int cs)
-{
-    DynamicInputRecord *result = new DynamicInputRecord(elementType, i);
-    result->setField(nodes, _IFT_Element_nodes);
-    if ( cs != 0 ) {
-        result->setField(cs, _IFT_Element_crosssect);
-    }
-    return result;
-}
-
-
-DynamicInputRecord :: DynamicInputRecord(std :: string keyword, int value) : InputRecord(),
-    recordKeyword(keyword), ///@todo std::move here
-    recordNumber(value),
+DynamicInputRecord :: DynamicInputRecord() : InputRecord(),
+    recordKeyword(),
+    recordNumber(0),
     emptyRecord(),
     intRecord(),
     doubleRecord(),
@@ -95,7 +74,7 @@ DynamicInputRecord :: DynamicInputRecord(FEMComponent &femc) : InputRecord(),
     dictionaryRecord(),
     rangeRecord()
 {
-    femc.giveInputRecord(* this);
+    femc.giveInputRecord(*this);
 }
 
 DynamicInputRecord :: DynamicInputRecord(const DynamicInputRecord &src) : InputRecord(src),
@@ -321,21 +300,9 @@ void DynamicInputRecord :: setField(const FloatArray &item, InputFieldType id)
     this->floatArrayRecord [ id ] = item;
 }
 
-void DynamicInputRecord :: setField(std :: initializer_list< double > item, InputFieldType id)
-{
-  //this->floatArrayRecord.emplace(id, item);
-  this->floatArrayRecord.insert(std::make_pair(id, FloatArray(item)));
-}
-
 void DynamicInputRecord :: setField(const IntArray &item, InputFieldType id)
 {
     this->intArrayRecord [ id ] = item;
-}
-
-void DynamicInputRecord :: setField(std :: initializer_list< int > item, InputFieldType id)
-{
-  //this->intArrayRecord.emplace(id, item);
-  this->intArrayRecord.insert(std::make_pair(id, IntArray(item)));
 }
 
 void DynamicInputRecord :: setField(const FloatMatrix &item, InputFieldType id)
@@ -388,16 +355,13 @@ void
 DynamicInputRecord :: report_error(const char *_class, const char *proc, InputFieldType id,
                                    IRResultType result, const char *file, int line)
 {
-    oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line,
-                              "Input error: \"%s\", field keyword \"%s\"\n%s::%s",
-                              strerror(result), id, _class, proc);
-    oofem_exit(1); ///@todo We should never directly exit when dealing with user input.
+    __OOFEM_ERROR5(file, line, "Input error: \"%s\", field keyword \"%s\"\n%s::%s", strerror(result), id, _class, proc);
 }
 
 // Helpful macro since we have so many separate records
-#define forRecord(name) \
-    for ( const auto &x: name ) { \
-        rec << " " << x.first << " " << x.second; \
+#define forRecord(type, name) \
+    for ( std :: map< std :: string, type > :: const_iterator it = name.begin(); it != name.end(); ++it ) { \
+        rec << " " << it->first << " " << it->second; \
     }
 
 std :: string DynamicInputRecord :: giveRecordAsString() const
@@ -411,37 +375,37 @@ std :: string DynamicInputRecord :: giveRecordAsString() const
     }
 
     // Empty fields
-    for ( const auto &x: emptyRecord ) {
-        rec << " " << x;
+    for ( std :: set< std :: string > :: const_iterator it = emptyRecord.begin(); it != emptyRecord.end(); ++it ) {
+        rec << " " << * it;
     }
 
     // Standard fields;
-    forRecord(intRecord);
-    forRecord(doubleRecord);
-    forRecord(boolRecord);
-    forRecord(stringRecord);
-    forRecord(floatArrayRecord);
-    forRecord(intArrayRecord);
-    forRecord(matrixRecord);
-    forRecord(dictionaryRecord);
-    forRecord(scalarFunctionRecord);
+    forRecord(int, intRecord);
+    forRecord(double, doubleRecord);
+    forRecord(bool, boolRecord);
+    forRecord(std :: string, stringRecord);
+    forRecord(FloatArray, floatArrayRecord);
+    forRecord(IntArray, intArrayRecord);
+    forRecord(FloatMatrix, matrixRecord);
+    forRecord(Dictionary, dictionaryRecord);
+    forRecord(ScalarFunction, scalarFunctionRecord);
 
     // Have to write special code for std::vector and std::list
-    for ( const auto &x: stringListRecord ) {
-        rec << " " << x.first;
-        const std :: vector< std :: string > &list = x.second;
+    for ( std :: map< std :: string, std :: vector< std :: string > > :: const_iterator it = stringListRecord.begin(); it != stringListRecord.end(); ++it ) {
+        rec << " " << it->first;
+        std :: vector< std :: string >list = it->second;
         rec << " " << list.size();
-        for ( const auto &y: list ) {
-            rec << " " << y;
+        for ( std :: vector< std :: string > :: const_iterator it2 = list.begin(); it2 != list.end(); ++it2 ) {
+            rec << " " << * it2;
         }
     }
 
-    for ( const auto &x: rangeRecord ) {
-        rec << " " << x.first;
-        const std :: list< Range > &list = x.second;
+    for ( std :: map< std :: string, std :: list< Range > > :: const_iterator it = rangeRecord.begin(); it != rangeRecord.end(); ++it ) {
+        rec << " " << it->first;
+        std :: list< Range >list = it->second;
         rec << " " << list.size();
-        for ( const auto &y: list ) {
-            rec << " " << y;
+        for ( std :: list< Range > :: const_iterator it2 = list.begin(); it2 != list.end(); ++it2 ) {
+            rec << " " << * it2;
         }
     }
 

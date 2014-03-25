@@ -43,6 +43,7 @@ REGISTER_Material(IsotropicLinMoistureTransferMaterial);
 IRResultType
 IsotropicLinMoistureTransferMaterial :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IsotropicMoistureTransferMaterial :: initializeFrom(ir);

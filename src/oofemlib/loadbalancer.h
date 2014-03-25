@@ -273,7 +273,7 @@ protected:
     AList< WorkTransferPlugin >wtpList;
 };
 
-/*
+
 class OOFEM_EXPORT LoadBalancerElementInterface : public Interface
 {
 public:
@@ -281,7 +281,6 @@ public:
 
     virtual double predictRelativeComputationalCost();
 };
-*/
 } // end namespace oofem
 #endif
 #endif // loadbalancer_h

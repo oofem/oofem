@@ -74,6 +74,7 @@ IMLSolver :: ~IMLSolver() {
 IRResultType
 IMLSolver :: initializeFrom(InputRecord *ir)
 {
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     int val;
@@ -102,7 +103,7 @@ IMLSolver :: initializeFrom(InputRecord *ir)
     } else if ( precondType == IML_ICPrec ) {
         M = new CompCol_ICPreconditioner();
     } else {
-        OOFEM_ERROR("unknown preconditioner type");
+        OOFEM_ERROR("IMLSolver::setSparseMtrxAsComponent: unknown preconditioner type");
     }
 
     // initialize precond attributes
@@ -122,21 +123,21 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
     // first check whether Lhs is defined
     if ( !A ) {
-        OOFEM_ERROR("unknown Lhs");
+        OOFEM_ERROR("IMLSolver :: solve: unknown Lhs");
     }
 
     // and whether Rhs
     if ( !b ) {
-        OOFEM_ERROR("unknown Rhs");
+        OOFEM_ERROR("IMLSolver :: solve: unknown Rhs");
     }
 
     // and whether previous Solution exist
     if ( !x ) {
-        OOFEM_ERROR("unknown solution array");
+        OOFEM_ERROR("IMLSolver :: solve: unknown solution array");
     }
 
     if ( x->giveSize() != b->giveSize() ) {
-        OOFEM_ERROR("size mismatch");
+        OOFEM_ERROR("IMLSolver :: solve: size mismatch");
     }
 
 
@@ -146,7 +147,7 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
             M->init(* A);
         }
     } else {
-        OOFEM_ERROR("preconditioner creation error");
+        OOFEM_ERROR("IMLSolver :: solve: preconditioner creation error");
     }
 
     Lhs = A;
@@ -170,7 +171,7 @@ IMLSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
         result = GMRES(* Lhs, * x, * b, * M, H, restart, mi, t);
         OOFEM_LOG_INFO("GMRES(%s): flag=%d, nite %d, achieved tol. %g\n", M->giveClassName(), result, mi, t);
     } else {
-        OOFEM_ERROR("unknown lsover type");
+        OOFEM_ERROR("IMLSolver :: solve: unknown lsover type");
     }
 
 #ifdef TIME_REPORT

@@ -175,9 +175,9 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
         //    // modify sizes if stored traction has 3 components and the spatial dimension is less
         //    int spatialDim = this->giveSpatialDimension();
         //    if ( traction.giveSize() == 3 && spatialDim == 1 ) {
-        //        traction = {tractionTemp.at(3) };
+        //        traction.setValues(1, tractionTemp.at(3) );
         //    } else if ( traction.giveSize() == 3 && spatialDim == 2 ) {
-        //        traction = {tractionTemp.at(1), tractionTemp.at(3) };
+        //        traction.setValues(2, tractionTemp.at(1), tractionTemp.at(3) );
         //    } else {
         //        traction = tractionTemp;
         //    }
@@ -244,7 +244,7 @@ StructuralInterfaceElement :: giveCharacteristicMatrix(FloatMatrix &answer, Char
     } else if ( mtrx == ElasticStiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, ElasticStiffness, tStep);
     } else {
-        OOFEM_ERROR("Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
+        _error2( "giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
 }
 
@@ -308,7 +308,7 @@ StructuralInterfaceElement :: checkConsistency()
     // check if the cross section is a 'StructuralInterfaceCrossSection'
     int result = 1;
     if ( !this->giveInterfaceCrossSection()->testCrossSectionExtension(this->giveInterfaceCrossSection()->crossSectionType) ) {
-        OOFEM_ERROR("cross section %s is not a structural interface cross section", this->giveCrossSection()->giveClassName() );
+        OOFEM_ERROR2( "StructuralInterfaceElement :: checkConsistency : cross section %s is not a structural interface cross section", this->giveCrossSection()->giveClassName() );
         result = 0;
     }
     return result;

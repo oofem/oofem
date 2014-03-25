@@ -48,11 +48,11 @@ REGISTER_SparseMtrx(PetscSparseMtrx, SMT_PetscMtrx);
 
 
 PetscSparseMtrx :: PetscSparseMtrx(int n, int m) : SparseMtrx(n, m),
-    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL) { }
+    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL) {}
 
 
 PetscSparseMtrx :: PetscSparseMtrx() : SparseMtrx(),
-    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL) { }
+    mtrx(NULL), symmFlag(false), leqs(0), geqs(0), di(0), kspInit(false), newValues(true), localIS(NULL), globalIS(NULL) {}
 
 
 PetscSparseMtrx :: ~PetscSparseMtrx()
@@ -62,8 +62,8 @@ PetscSparseMtrx :: ~PetscSparseMtrx()
         KSPDestroy(& this->ksp);
     }
     if ( localIS ) {
-        ISDestroy(& localIS);
-        ISDestroy(& globalIS);
+        ISDestroy( &localIS );
+        ISDestroy( &globalIS );
     }
 }
 
@@ -154,7 +154,7 @@ PetscSparseMtrx :: timesT(const FloatArray &x, FloatArray &answer) const
 
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
-        OOFEM_ERROR("Not implemented");
+        OOFEM_ERROR("PetscSparseMtrx :: timesT - Not implemented");
     }
 #endif
     Vec globX, globY;
@@ -186,7 +186,7 @@ PetscSparseMtrx :: times(const FloatMatrix &B, FloatMatrix &answer) const
 
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
-        OOFEM_ERROR("Not implemented");
+        OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
     }
 #endif
     // I'm opting to work with a set of vectors, as i think it might be faster and more robust. / Mikael
@@ -245,7 +245,7 @@ PetscSparseMtrx :: timesT(const FloatMatrix &B, FloatMatrix &answer) const
 
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
-        OOFEM_ERROR("Not implemented");
+        OOFEM_ERROR("PetscSparseMtrx :: times - Not implemented");
     }
 #endif
     int nr = this->giveNumberOfColumns();
@@ -302,7 +302,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 
 #ifdef __PARALLEL_MODE
     if ( eModel->isParallel() ) {
-        OOFEM_ERROR("Not implemented");
+        OOFEM_ERROR("PetscSparseMtrx :: buildInternalStructure - Not implemented");
     }
 #endif
 
@@ -731,14 +731,14 @@ double &
 PetscSparseMtrx :: at(int i, int j)
 {
     static double a;
-    OOFEM_ERROR("unsupported");
+    OOFEM_ERROR("PetscSparseMtrx::at(i,j) - unsupported");
     return a;
 }
 
 double
 PetscSparseMtrx :: at(int i, int j) const
 {
-    OOFEM_ERROR("unsupported");
+    OOFEM_ERROR("PetscSparseMtrx::at(i,j) - unsupported");
     return 0;
     //double value;
     //int row = i-1, col = j-1;
@@ -749,7 +749,7 @@ PetscSparseMtrx :: at(int i, int j) const
 void
 PetscSparseMtrx :: toFloatMatrix(FloatMatrix &answer) const
 {
-    OOFEM_ERROR("unsupported");
+    OOFEM_ERROR("PetscSparseMtrx::toFloatMatrix() - unsupported");
 }
 
 void
@@ -789,7 +789,7 @@ PetscSparseMtrx :: createVecGlobal(Vec *answer) const
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
         VecCreate(this->emodel->giveParallelComm(), answer);
-        VecSetSizes(* answer, this->leqs, this->geqs);
+        VecSetSizes( * answer, this->leqs, this->geqs );
         VecSetFromOptions(* answer);
     } else {
 #endif
@@ -818,7 +818,7 @@ PetscSparseMtrx :: scatterG2L(Vec src, FloatArray &dest) const
         VecScatterEnd(n2gvecscat, src, locVec, INSERT_VALUES, SCATTER_REVERSE);
         VecScatterDestroy(& n2gvecscat);
 
-        dest.resize(neqs);
+        dest.resize( neqs );
         VecGetArray(locVec, & ptr);
         for ( int i = 0; i < neqs; i++ ) {
             dest.at(i + 1) = ptr [ i ];
@@ -828,15 +828,15 @@ PetscSparseMtrx :: scatterG2L(Vec src, FloatArray &dest) const
         VecDestroy(& locVec);
     } else {
 #endif
-    int neqs = this->giveNumberOfRows();
-    dest.resize(neqs);
-    VecGetArray(src, & ptr);
-    for ( int i = 0; i < neqs; i++ ) {
-        dest.at(i + 1) = ptr [ i ];
-    }
-    VecRestoreArray(src, & ptr);
+        int neqs = this->giveNumberOfRows();
+        dest.resize(neqs);
+        VecGetArray(src, & ptr);
+        for ( int i = 0; i < neqs; i++ ) {
+            dest.at(i + 1) = ptr [ i ];
+        }
+        VecRestoreArray(src, & ptr);
 #ifdef __PARALLEL_MODE
-}
+    }
 #endif
     return 1;
 }

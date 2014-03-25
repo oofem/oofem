@@ -129,65 +129,46 @@ namespace oofem {
 #define LOG_ERR_TAIL   "_______________________________________________________\a\n"
 
 // Default log output
-Logger oofem_logger(Logger :: LOG_LEVEL_INFO);
+Logger oofem_logger(Logger :: LOG_LEVEL_INFO, stdout);
+Logger oofem_errLogger(Logger :: LOG_LEVEL_WARNING, stderr);
 
-Logger :: Logger(logLevelType level)
+Logger :: Logger(logLevelType level, FILE *stream)
 {
     this->logLevel = level;
-    this->logStream = stdout;
-    this->errStream = stderr;
+    if ( stream ) {
+        this->mylogStream = stream;
+    } else {
+        this->mylogStream = stdout;
+    }
 
     this->closeFlag = false;
-    this->errCloseFlag = false;
     numberOfWrn = numberOfErr = 0;
 }
 
 Logger :: ~Logger()
 {
     if ( this->closeFlag ) {
-        fclose(this->logStream);
-    }
-    if ( this->errCloseFlag ) {
-        fclose(this->errStream);
+        fclose(this->mylogStream);
     }
 }
 
 void
-Logger :: appendLogTo(const std :: string &fname)
+Logger :: appendlogTo(char *fname)
 {
     FILE *stream = NULL;
     if ( this->closeFlag ) {
-        stream = freopen(fname.c_str(), "w", this->logStream);
+        stream = freopen(fname, "w", mylogStream);
     } else {
-        stream = fopen(fname.c_str(), "w");
+        stream = fopen(fname, "w");
     }
 
     if ( stream == NULL ) {
-        OOFEM_SIMPLE_WARNING( "Logger::appendLogTo : file opening error (%s)", fname.c_str() );
+        OOFEM_WARNING2("Logger::appendlogTo : file opening error (%s)", fname);
     } else {
-        this->logStream = stream;
+        mylogStream = stream;
     }
 
     this->closeFlag = true;
-}
-
-void
-Logger :: appendErrorTo(const std :: string &fname)
-{
-    FILE *stream = NULL;
-    if ( this->errCloseFlag ) {
-        stream = freopen(fname.c_str(), "w", this->errStream);
-    } else {
-        stream = fopen(fname.c_str(), "w");
-    }
-
-    if ( stream == NULL ) {
-        OOFEM_SIMPLE_WARNING( "Logger::appendErrorTo : file opening error (%s)", fname.c_str() );
-    } else {
-        this->errStream = stream;
-    }
-
-    this->errCloseFlag = true;
 }
 
 void
@@ -198,59 +179,47 @@ Logger :: writeLogMsg(logLevelType level, const char *format, ...)
 #ifdef __PARALLEL_MODE
     MPI_Comm_rank(MPI_COMM_WORLD, & rank);
 #endif
-    FILE *stream = this->logStream;
-    if ( level == LOG_LEVEL_FATAL || level == LOG_LEVEL_ERROR ) {
-        numberOfErr++;
-        stream = this->errStream;
-    } else if ( level == LOG_LEVEL_WARNING ) {
-        numberOfWrn++;
-        stream = this->errStream;
-    }
-
 
     if ( rank == 0 ) {
         va_list args;
 
         if ( level <= this->logLevel ) {
             va_start(args, format);
-            vfprintf(stream, format, args);
+            vfprintf(mylogStream, format, args);
             va_end(args);
         }
+    }
+
+    if ( ( level == LOG_LEVEL_FATAL ) || ( level == LOG_LEVEL_ERROR ) ) {
+        numberOfErr++;
+    } else if ( level == LOG_LEVEL_WARNING ) {
+        numberOfWrn++;
     }
 }
 
 void
-Logger :: writeELogMsg(logLevelType level, const char *_func, const char *_file, int _line, const char *format, ...)
+Logger :: writeELogMsg(logLevelType level, const char *_file, int _line, const char *format, ...)
 {
     va_list args;
 
-    FILE *stream = this->logStream;
-    if ( level == LOG_LEVEL_FATAL || level == LOG_LEVEL_ERROR ) {
-        numberOfErr++;
-        stream = this->errStream;
-    } else if ( level == LOG_LEVEL_WARNING ) {
-        numberOfWrn++;
-        stream = this->errStream;
-    }
-
     if  ( level <= this->logLevel ) {
         if ( _file ) {
-            fprintf(stream, "%s\n%s: (%s:%d)\n", LOG_ERR_HEADER, giveLevelName(level), _file, _line);
+            fprintf(mylogStream, "%s\n%s: (%s:%d)\n", LOG_ERR_HEADER, giveLevelName(level), _file, _line);
         } else {
-            fprintf(stream, "%s\n%s:\n", LOG_ERR_HEADER, giveLevelName(level) );
-        }
-        if ( _func ) {
-            fprintf(stream, "In %s:\n", _func );
+            fprintf( mylogStream, "%s\n%s:\n", LOG_ERR_HEADER, giveLevelName(level) );
         }
 
         va_start(args, format);
-        vfprintf(stream, format, args);
+        vfprintf(mylogStream, format, args);
         va_end(args);
-        fprintf(stream, "\n%s", LOG_ERR_TAIL);
+        fprintf(mylogStream, "\n%s", LOG_ERR_TAIL);
     }
 
-    if ( level == LOG_LEVEL_FATAL || level == LOG_LEVEL_ERROR ) {
-        print_stacktrace(this->errStream, 10);
+    if ( ( level == LOG_LEVEL_FATAL ) || ( level == LOG_LEVEL_ERROR ) ) {
+        numberOfErr++;
+        print_stacktrace(mylogStream, 10);
+    } else if ( level == LOG_LEVEL_WARNING ) {
+        numberOfWrn++;
     }
 }
 
@@ -295,8 +264,77 @@ Logger :: printStatistics()
 #endif
     if ( rank == 0 ) {
         // force output
-        fprintf(logStream, "Total %d error(s) and %d warning(s) reported\n", totalNumberOfErr, totalNumberOfWrn);
+        fprintf(mylogStream, "Total %d error(s) and %d warning(s) reported\n", totalNumberOfErr, totalNumberOfWrn);
     }
 }
 
+
+#ifndef HAVE_MACRO_VA_ARGS
+
+
+ #ifdef _MSC_VER
+
+  #define __PROCESS_LOG \
+    char buff [ MAX_ERROR_MSG_LENGTH ]; \
+    va_list args; \
+    va_start(args, format); \
+    _vsnprintf(buff, MAX_ERROR_MSG_LENGTH, format, args); \
+    va_end(args);
+
+ #else
+
+  #define __PROCESS_LOG \
+    char buff [ MAX_ERROR_MSG_LENGTH ]; \
+    va_list args; \
+    va_start(args, format); \
+    vsnprintf(buff, MAX_ERROR_MSG_LENGTH, format, args); \
+    va_end(args);
+
+ #endif
+
+void LOG_FORCED_MSG(Logger &logger, const char *format, ...)
+{
+    __PROCESS_LOG;
+    logger.writeLogMsg(Logger :: LOG_LEVEL_FORCED, buff);
+}
+
+void LOG_RELEVANT(Logger &logger, const char *format, ...)
+{
+    __PROCESS_LOG;
+    logger.writeLogMsg(Logger :: LOG_LEVEL_RELEVANT, buff);
+}
+
+
+void LOG_INFO(Logger &logger, const char *format, ...)
+{
+    __PROCESS_LOG;
+    logger.writeLogMsg(Logger :: LOG_LEVEL_INFO, buff);
+}
+
+void LOG_DEBUG(Logger &logger, const char *format, ...)
+{
+    __PROCESS_LOG;
+    logger.writeLogMsg(Logger :: LOG_LEVEL_DEBUG, buff);
+}
+
+void OOFEM_LOG_RELEVANT(const char *format, ...)
+{
+    __PROCESS_LOG;
+    oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_RELEVANT, buff);
+}
+
+
+void OOFEM_LOG_INFO(const char *format, ...)
+{
+    __PROCESS_LOG;
+    oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_INFO, buff);
+}
+
+void OOFEM_LOG_DEBUG(const char *format, ...)
+{
+    __PROCESS_LOG;
+    oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_DEBUG, buff);
+}
+
+#endif
 } // end namespace oofem

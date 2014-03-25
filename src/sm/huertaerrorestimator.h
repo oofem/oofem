@@ -154,7 +154,7 @@ public:
      */
     int giveRefinementLevel() { return this->refineLevel; }
 
-    virtual double giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep);
+    virtual double giveElementError(EE_ErrorType type, ElementGeometry *elemGeometry, TimeStep *tStep);
 
     virtual double giveValue(EE_ValueType type, TimeStep *tStep);
 
@@ -211,7 +211,7 @@ private:
      * @param dofs Number of dofs at each node.
      * @param tStep Time step.
      */
-    void extractVectorFrom(Element *element, FloatArray &vector, FloatArray &answer, int dofs, TimeStep *tStep);
+    void extractVectorFrom(ElementGeometry *element, FloatArray &vector, FloatArray &answer, int dofs, TimeStep *tStep);
 
     void setupRefinedProblemProlog(const char *problemName, int problemId, IntArray &localNodeIdArray,
                                    int nodes, int elems, int csects, int mats, int loads, int funcs,

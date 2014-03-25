@@ -130,6 +130,7 @@ IRResultType
 ExternalFieldGenerator :: initializeFrom(InputRecord *ir)
 {
     std :: string name;
+    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, name, _IFT_ExternalFieldGenerator_name);
@@ -137,7 +138,7 @@ ExternalFieldGenerator :: initializeFrom(InputRecord *ir)
     std :: ifstream inputField( name.c_str() );
 
     if ( !inputField.is_open() ) {
-        OOFEM_ERROR("Unable to open file %s", name.c_str());
+        OOFEM_ERROR2( "ExternalFieldGenerator :: initializeFrom - Unable to open file %s", name.c_str() );
     }
 
     double deltaX, deltaY;
