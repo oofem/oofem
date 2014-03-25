@@ -311,10 +311,11 @@ void XfemManager :: updateNodeEnrichmentItemMap()
 	for(int eiIndex = 1; eiIndex <= nEI; eiIndex++) {
 		EnrichmentItem *ei = giveEnrichmentItem(eiIndex);
 
-		const std :: vector< int > &enrNodeInd = ei->giveEnrNodeIndices();
+		const std::unordered_map<int, int> &enrNodeInd = ei->giveEnrNodeMap();
 
-		for(size_t i = 0; i < enrNodeInd.size(); i++) {
-			mNodeEnrichmentItemIndices[ enrNodeInd[i]-1 ].push_back(eiIndex);
+		//for(size_t i = 0; i < enrNodeInd.size(); i++) {
+		for(auto nodeEiPair = enrNodeInd.begin(); nodeEiPair != enrNodeInd.end(); nodeEiPair++) {
+			mNodeEnrichmentItemIndices[ nodeEiPair->first-1 ].push_back(eiIndex);
 		}
 
 	}

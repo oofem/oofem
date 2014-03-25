@@ -46,6 +46,7 @@
 
 #include "dofmanager.h"
 #include <algorithm>
+#include <unordered_map>
 
 #include "xfem/enrichmentfronts/enrichmentfront.h"
 
@@ -159,9 +160,9 @@ public:
     void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const;
     void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, int iNodeInd) const;
 
-    void evalLevelSetNormalInNode(double &oLevelSet, int iNodeInd) const { oLevelSet = mLevelSetNormalDir [ iNodeInd - 1 ]; }
-    void evalLevelSetTangInNode(double &oLevelSet, int iNodeInd) const { oLevelSet = mLevelSetTangDir [ iNodeInd - 1 ]; }
-    void evalNodeEnrMarkerInNode(double &oLevelSet, int iNodeInd) const { oLevelSet = mNodeEnrMarker [ iNodeInd - 1 ]; }
+    bool evalLevelSetNormalInNode(double &oLevelSet, int iNodeInd) const;
+    bool evalLevelSetTangInNode(double &oLevelSet, int iNodeInd) const;
+    bool evalNodeEnrMarkerInNode(double &oNodeEnrMarker, int iNodeInd) const;
 
     bool levelSetChangesSignInEl(const IntArray &iElNodes) const;
 
@@ -213,7 +214,10 @@ public:
 
     const EnrichmentDomain *giveEnrichmentDomain() const {return mpEnrichmentDomain;}
 
-    const std :: vector< int > &giveEnrNodeIndices() const {return mEnrNodeIndices;}
+    const std::unordered_map<int, int> &giveEnrNodeMap() const {return mNodeEnrMarkerMap;}
+
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
+
 protected:
 
     EnrichmentDomain *mpEnrichmentDomain;
@@ -249,33 +253,29 @@ protected:
     // Level set for signed distance to the interface.
     //	The sign is determined by the interface normal direction.
     // This level set function is relevant for both open and closed interfaces.
-    std :: vector< double >mLevelSetNormalDir;
+    std::unordered_map<int, double> mLevelSetNormalDirMap;
 
     // Level set for signed distance along the interface.
     // Only relevant for open interfaces.
-    std :: vector< double >mLevelSetTangDir;
+    std::unordered_map<int, double> mLevelSetTangDirMap;
 
     //	The sign is determined by the surface normal direction. Currently used
     //  to keep track of a delamination surface in a shell element
     std :: vector< double >mLevelSetSurfaceNormalDir;
 
     // Field with desired node enrichment types
-    std :: vector< int >mNodeEnrMarker;
-
-    // Indices of enriched nodes: this list is used to tell
-    // if a given node is enriched.
-    std :: vector< int >mEnrNodeIndices;
+    std::unordered_map<int, int> mNodeEnrMarkerMap;
 
     bool mLevelSetsNeedUpdate;
 
     static const double mLevelSetTol;
-    //    static constexpr double mLevelSetTol = 1.0e-12;
     const double mLevelSetTol2;
 };
 
 inline bool EnrichmentItem :: isDofManEnriched(const DofManager &iDMan) const
 {
-    return std :: binary_search( mEnrNodeIndices.begin(), mEnrNodeIndices.end(), iDMan.giveGlobalNumber() );
+	auto res = mNodeEnrMarkerMap.find( iDMan.giveGlobalNumber() );
+	return !(res == mNodeEnrMarkerMap.end());
 }
 
 /** Inclusion. */
@@ -328,7 +328,11 @@ inline void EnrichmentItem :: interpLevelSet(double &oLevelSet, const FloatArray
 {
     oLevelSet = 0.0;
     for ( int i = 1; i <= iN.giveSize(); i++ ) {
-        oLevelSet += iN.at(i) * mLevelSetNormalDir [ iNodeInd [ i - 1 ] - 1 ];
+    	double levelSetNode = 0.0;
+        if( evalLevelSetNormalInNode( levelSetNode, iNodeInd [ i - 1 ] ) ) {
+        	oLevelSet += iN.at(i) * levelSetNode;
+        }
+
     }
 }
 
@@ -337,7 +341,10 @@ void EnrichmentItem :: interpLevelSetTangential(double &oLevelSet, const FloatAr
 {
     oLevelSet = 0.0;
     for ( int i = 1; i <= iN.giveSize(); i++ ) {
-        oLevelSet += iN.at(i) * mLevelSetTangDir [ iNodeInd [ i - 1 ] - 1 ];
+    	double levelSetNode = 0.0;
+        if( evalLevelSetTangInNode( levelSetNode, iNodeInd [ i - 1 ] ) ) {
+        	oLevelSet += iN.at(i) * levelSetNode;
+        }
     }
 }
 
@@ -354,7 +361,10 @@ void EnrichmentItem :: interpGradLevelSet(FloatArray &oGradLevelSet, const Float
 
     for ( int i = 1; i <= idNdX.giveNumberOfRows(); i++ ) {
         for ( int j = 1; j <= dim; j++ ) {
-            oGradLevelSet.at(j) += idNdX.at(i, j) * mLevelSetNormalDir [ iNodeInd [ i - 1 ] - 1 ];
+        	double levelSetNode = 0.0;
+            if( evalLevelSetNormalInNode( levelSetNode, iNodeInd [ i - 1 ] ) ) {
+            	oGradLevelSet.at(j) += idNdX.at(i, j) * levelSetNode;
+            }
         }
     }
 }

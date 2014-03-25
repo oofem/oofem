@@ -42,7 +42,7 @@
 namespace oofem {
 REGISTER_EnrichmentFront(EnrFrontReduceFront)
 
-void EnrFrontReduceFront :: MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo)
+void EnrFrontReduceFront :: MarkNodesAsFront(std::unordered_map<int, int> &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std::unordered_map<int, double> &iLevelSetNormalDirMap, const std::unordered_map<int, double> &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo)
 {
 	// Remove nodes touched by the crack tip
 	Domain &d = * ( ixFemMan.giveDomain() );
@@ -55,7 +55,7 @@ void EnrFrontReduceFront :: MarkNodesAsFront(std :: vector< int > &ioNodeEnrMark
 		const IntArray & elNodes = el->giveDofManArray();
 
 		for(int i = 1; i <= elNodes.giveSize(); i++) {
-			ioNodeEnrMarker[ elNodes.at(i)-1 ] = 0;
+			ioNodeEnrMarkerMap[elNodes.at(i)] = 0;
 		}
 	}
 }

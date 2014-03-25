@@ -86,6 +86,9 @@ public:
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const { }
 
+    // Return the center and radius of a sphere containing all nodes
+    // enriched by the enrichment item.
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius) = 0;
 
     virtual bool giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const { return false; }
 
@@ -128,6 +131,9 @@ public:
 
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
+
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
+
 };
 
 class OOFEM_EXPORT EDBGCircle : public EnrichmentDomain_BG
@@ -144,6 +150,10 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_EDBGCircle_Name; }
     virtual const char *giveClassName() const { return "EDBGCircle"; }
+    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
+
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
+
 };
 
 /**
@@ -196,6 +206,8 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_DofManList_Name; }
     virtual const char *giveClassName() const { return "DofManList"; }
+
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
 };
 
 /**
@@ -220,6 +232,8 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_WholeDomain_Name; }
     virtual const char *giveClassName() const { return "WholeDomain"; }
+
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
 };
 } // end namespace oofem
 #endif

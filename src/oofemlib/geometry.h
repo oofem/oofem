@@ -236,6 +236,8 @@ public:
     virtual bool isInside(Element *element);
     virtual bool isInside(FloatArray &point);
     virtual void printYourself();
+
+    double giveRadius() const {return radius;}
 };
 
 class OOFEM_EXPORT PolygonLine : public BasicGeometry

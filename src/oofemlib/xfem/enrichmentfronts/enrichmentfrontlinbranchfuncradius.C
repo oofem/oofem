@@ -58,7 +58,7 @@ EnrFrontLinearBranchFuncRadius :: ~EnrFrontLinearBranchFuncRadius()
 	}
 }
 
-void EnrFrontLinearBranchFuncRadius :: MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo)
+void EnrFrontLinearBranchFuncRadius :: MarkNodesAsFront(std::unordered_map<int, int> &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std::unordered_map<int, double> &iLevelSetNormalDirMap, const std::unordered_map<int, double> &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo)
 {
 	// Enrich all nodes within a prescribed radius around the crack tips.
 	// TODO: If performance turns out to be an issue, we may wish
@@ -79,7 +79,7 @@ void EnrFrontLinearBranchFuncRadius :: MarkNodesAsFront(std :: vector< int > &io
 			double radius2 = iTipInfo [ j ].mGlobalCoord.distance_square(nodePos);
 
 			if ( radius2 < mEnrichmentRadius * mEnrichmentRadius ) {
-				ioNodeEnrMarker [ i - 1 ] = 2;
+				ioNodeEnrMarkerMap[i] = 2;
 				addTipIndexToNode(i, j);
 			}
 		}
