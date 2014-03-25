@@ -556,8 +556,6 @@ bool EnrichmentItem :: levelSetChangesSignInEl(const IntArray &iElNodes) const
 
 void EnrichmentItem :: updateLevelSets(XfemManager &ixFemMan)
 {
-    int nNodes = ixFemMan.giveDomain()->giveNumberOfDofManagers();
-
     mLevelSetNormalDirMap.clear();
     mLevelSetTangDirMap.clear();
 
@@ -599,9 +597,6 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
     updateLevelSets(ixFemMan);
 
     Domain *d = ixFemMan.giveDomain();
-    int nEl = d->giveNumberOfElements();
-    int nNodes = d->giveNumberOfDofManagers();
-
     mNodeEnrMarkerMap.clear();
     std :: vector< TipInfo >tipInfoArray;
 
@@ -731,8 +726,6 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const DofManLi
 {
     updateLevelSets(ixFemMan);
 
-    Domain *d = ixFemMan.giveDomain();
-    int nNodes = d->giveNumberOfDofManagers();
     mNodeEnrMarkerMap.clear();
 
     //printf("\n The following nodes are enriched ");
