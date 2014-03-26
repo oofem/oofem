@@ -226,6 +226,8 @@ protected:
      */
     void updateInternalState(TimeStep *);
     void applyIC(TimeStep *);
+
+	void deactivateTooCloseParticles();
 };
 } // end namespace oofem
 #endif // pfem_h

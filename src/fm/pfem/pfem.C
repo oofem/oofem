@@ -646,57 +646,6 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
 
     tStep->incrementStateCounter();
-    this->updateYourself( this->giveCurrentStep() );
-
-    // deactivating particles
-    if ( particleRemovalRatio > 1.e-6 ) { // >0
-        for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfElements(); i++ ) {
-            TR1_2D_PFEM *element = dynamic_cast< TR1_2D_PFEM * >( d->giveElement(i) );
-
-            PFEMParticle *particle1 = dynamic_cast< PFEMParticle * >( element->giveNode(1) );
-            PFEMParticle *particle2 = dynamic_cast< PFEMParticle * >( element->giveNode(2) );
-            PFEMParticle *particle3 = dynamic_cast< PFEMParticle * >( element->giveNode(3) );
-
-            double l12 = particle1->giveCoordinates()->distance( particle2->giveCoordinates() );
-            double l23 = particle2->giveCoordinates()->distance( particle3->giveCoordinates() );
-            double l31 = particle3->giveCoordinates()->distance( particle1->giveCoordinates() );
-
-            double maxLength = max( l12, max(l23, l31) );
-            double minLength = min( l12, min(l23, l31) );
-
-            if ( minLength / maxLength < particleRemovalRatio ) {
-                if ( fabs(l12 - minLength) < 1.e-6 ) {             // ==
-                    if ( particle1->isActive() && particle2->isActive() ) {
-                        particle1->deactivate();
-                    } else if ( particle1->isActive() == false || particle2->isActive() == false )     {
-                        ;                        // it was deactivated by other element
-                    } else   {
-                        _error("Both particles deactivated");
-                    }
-                }
-
-                if ( fabs(l23 - minLength) < 1.e-6 ) {             // ==
-                    if ( particle2->isActive() && particle3->isActive() ) {
-                        particle2->deactivate();
-                    } else if ( particle2->isActive() == false || particle3->isActive() == false )     {
-                        ;                        // it was deactivated by other element
-                    } else   {
-                        _error("Both particles deactivated");
-                    }
-                }
-
-                if ( fabs(l31 - minLength) < 1.e-6 ) {             // ==
-                    if ( particle3->isActive() && particle1->isActive() ) {
-                        particle3->deactivate();
-                    } else if ( particle3->isActive() == false || particle1->isActive() == false )     {
-                        ;                        // it was deactivated by other element
-                    } else   {
-                        _error("Both particles deactivated");
-                    }
-                }
-            }
-        }
-    }
 }
 
 
@@ -705,6 +654,8 @@ PFEM :: updateYourself(TimeStep *stepN)
 {
     this->updateInternalState(stepN);
     EngngModel :: updateYourself(stepN);
+
+	this->deactivateTooCloseParticles();
 }
 
 
@@ -1089,5 +1040,60 @@ PFEM :: resetEquationNumberings()
     prescribedVns.reset();
     pns.reset();
     avns.reset();
+}
+
+void
+PFEM :: deactivateTooCloseParticles()
+{
+	Domain *d = this->giveDomain(1);
+	// deactivating particles
+    if ( particleRemovalRatio > 1.e-6 ) { // >0
+        for ( int i = 1; i <= d->giveNumberOfElements(); i++ ) {
+            TR1_2D_PFEM *element = dynamic_cast< TR1_2D_PFEM * >( d->giveElement(i) );
+
+            PFEMParticle *particle1 = dynamic_cast< PFEMParticle * >( element->giveNode(1) );
+            PFEMParticle *particle2 = dynamic_cast< PFEMParticle * >( element->giveNode(2) );
+            PFEMParticle *particle3 = dynamic_cast< PFEMParticle * >( element->giveNode(3) );
+
+            double l12 = particle1->giveCoordinates()->distance( particle2->giveCoordinates() );
+            double l23 = particle2->giveCoordinates()->distance( particle3->giveCoordinates() );
+            double l31 = particle3->giveCoordinates()->distance( particle1->giveCoordinates() );
+
+            double maxLength = max( l12, max(l23, l31) );
+            double minLength = min( l12, min(l23, l31) );
+
+            if ( minLength / maxLength < particleRemovalRatio ) {
+                if ( fabs(l12 - minLength) < 1.e-6 ) {             // ==
+                    if ( particle1->isActive() && particle2->isActive() ) {
+                        particle1->deactivate();
+                    } else if ( particle1->isActive() == false || particle2->isActive() == false )     {
+                        ;                        // it was deactivated by other element
+                    } else   {
+                        _error("Both particles deactivated");
+                    }
+                }
+
+                if ( fabs(l23 - minLength) < 1.e-6 ) {             // ==
+                    if ( particle2->isActive() && particle3->isActive() ) {
+                        particle2->deactivate();
+                    } else if ( particle2->isActive() == false || particle3->isActive() == false )     {
+                        ;                        // it was deactivated by other element
+                    } else   {
+                        _error("Both particles deactivated");
+                    }
+                }
+
+                if ( fabs(l31 - minLength) < 1.e-6 ) {             // ==
+                    if ( particle3->isActive() && particle1->isActive() ) {
+                        particle3->deactivate();
+                    } else if ( particle3->isActive() == false || particle1->isActive() == false )     {
+                        ;                        // it was deactivated by other element
+                    } else   {
+                        _error("Both particles deactivated");
+                    }
+                }
+            }
+        }
+    }
 }
 } // end namespace oofem
