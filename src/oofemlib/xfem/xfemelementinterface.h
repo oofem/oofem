@@ -104,6 +104,11 @@ public:
      */
     void XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl, const std::vector<int> &iLocNodeInd);
 
+    /**
+     * Computes total number of enrichments in a node.
+     */
+    int XfemElementInterface_giveNumDofManEnrichments(const DofManager &iDMan, XfemManager &iXMan) const;
+
     /// Partitions the element into patches by a triangulation.
     virtual void XfemElementInterface_partitionElement(std :: vector< Triangle > &oTriangles, const std :: vector< FloatArray > &iPoints);
     /// Updates integration rule based on the triangulation.

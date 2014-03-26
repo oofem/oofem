@@ -43,6 +43,7 @@
 #include "contextmode.h"
 #include "enrichmentitem.h"
 #include "enumitem.h"
+#include <unordered_map>
 
 ///@name Input fields for XfemManager
 //@{
@@ -114,9 +115,10 @@ protected:
 
     /**
      * Let the XfemManager keep track of enrichment items enriching each
-     * node, to allow more efficient computations.
+     * node and each element, to allow more efficient computations.
      */
     std::vector< std::vector<int> > mNodeEnrichmentItemIndices;
+    std::unordered_map< int, std::vector<int> > mElementEnrichmentItemIndices;
 public:
 
     /**
@@ -184,6 +186,7 @@ public:
     void updateNodeEnrichmentItemMap();
 
     const std::vector<int> &giveNodeEnrichmentItemIndices(int iNodeIndex) const {return mNodeEnrichmentItemIndices[iNodeIndex-1];}
+    void giveElementEnrichmentItemIndices(std::vector<int> &oElemEnrInd, int iElementIndex) const;
 };
 } // end namespace oofem
 #endif // xfemmanager_h

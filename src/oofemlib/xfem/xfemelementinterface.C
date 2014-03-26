@@ -165,28 +165,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
         DofManager *dMan = iEl.giveDofManager(j);
 
         // Compute the total number of enrichments for node j
-        int numEnrNode = 0;
-
-        if( xMan != NULL ) {
-#if 0
-			for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-				EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-				if ( ei->isDofManEnriched(* dMan) ) {
-					numEnrNode += ei->giveNumDofManEnrichments(* dMan);
-				}
-			}
-#else
-			int globalNodeInd = dMan->giveGlobalNumber();
-			const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices(globalNodeInd);
-			for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
-				EnrichmentItem *ei = xMan->giveEnrichmentItem( nodeEiIndices[i]);
-				if ( ei->isDofManEnriched(* dMan) ) {
-					numEnrNode += ei->giveNumDofManEnrichments(* dMan);
-				}
-			}
-#endif
-
-        }
+        int numEnrNode = XfemElementInterface_giveNumDofManEnrichments(*dMan, *xMan);
 
         if ( numEnrNode > 0 ) {
             FloatMatrix &BdNode = Bd [ j - 1 ];
@@ -198,14 +177,9 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 
             int nodeEnrCounter = 0;
 
-#if 0
-            for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-                EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-#else
             const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices(globalNodeInd);
             for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
                 EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices[i]);
-#endif
 
                 double levelSetGP = 0.0;
                 ei->interpLevelSet(levelSetGP, N, elNodes);
@@ -317,27 +291,14 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
     // XFEM part of N-matrix
     XfemManager *xMan = iEl.giveDomain()->giveXfemManager();
 
-
-//    std :: vector< FloatMatrix > Bd(nDofMan);  // One Bd per node
-
     int counter = iLocNodeInd.size() * dim;
 
     std :: vector< std :: vector< double > > Nd(iLocNodeInd.size());
-
-//    for ( int j = 1; j <= nDofMan; j++ ) {
     for ( int j = 1; j <= int(iLocNodeInd.size()); j++ ) {
-//        DofManager *dMan = iEl.giveDofManager(j);
         DofManager *dMan = iEl.giveDofManager( iLocNodeInd[j-1] );
 
         // Compute the total number of enrichments for node j
-        int numEnrNode = 0;
-        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-            EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-            if ( ei->isDofManEnriched(* dMan) ) {
-                numEnrNode += ei->giveNumDofManEnrichments(* dMan);
-            }
-        }
-
+        int numEnrNode = XfemElementInterface_giveNumDofManEnrichments(*dMan, *xMan);
         std :: vector< double > &NdNode = Nd [ j - 1 ];
         NdNode.assign(numEnrNode, 0.0);
 
@@ -346,9 +307,9 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
 
         size_t nodeCounter = 0;
 
-        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-            EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-
+        const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices(globalNodeInd);
+        for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
+        	EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices[i]);
             double levelSetGP = 0.0;
             ei->interpLevelSet(levelSetGP, Nc, elNodes);
 
@@ -380,10 +341,8 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
         }
     }
 
-//    int numN = nDofMan;
     int numN = iLocNodeInd.size();
 
-//    for ( int j = 1; j <= nDofMan; j++ ) {
     for ( int j = 1; j <= int(iLocNodeInd.size()); j++ ) {
         numN += Nd [ j - 1 ].size();
     }
@@ -393,7 +352,6 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
     NTot.zero();
     int column = 1;
 
-//    for ( int i = 1; i <= nDofMan; i++ ) {
     for ( int i = 1; i <= int(iLocNodeInd.size()); i++ ) {
         NTot.at(column) = Nc.at( iLocNodeInd[i-1]);
         column++;
@@ -406,6 +364,21 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
     }
 
     oAnswer.beNMatrixOf(NTot, 2);
+}
+
+int XfemElementInterface ::XfemElementInterface_giveNumDofManEnrichments(const DofManager &iDMan, XfemManager &iXMan) const
+{
+	int numEnrNode = 0;
+	int globalNodeInd = iDMan.giveGlobalNumber();
+	const std::vector<int> &nodeEiIndices = iXMan.giveNodeEnrichmentItemIndices(globalNodeInd);
+	for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
+		EnrichmentItem *ei = iXMan.giveEnrichmentItem( nodeEiIndices[i]);
+		if ( ei->isDofManEnriched(iDMan) ) {
+			numEnrNode += ei->giveNumDofManEnrichments(iDMan);
+		}
+	}
+
+	return numEnrNode;
 }
 
 void XfemElementInterface :: XfemElementInterface_partitionElement(std :: vector< Triangle > &oTriangles, const std :: vector< FloatArray > &iPoints)
@@ -446,8 +419,14 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
         std :: vector< std :: vector< FloatArray > >pointPartitions;
         std :: vector< Triangle >allTri;
 
-        int numEI = xMan->giveNumberOfEnrichmentItems();
-        for ( int eiIndex = 1; eiIndex <= numEI; eiIndex++ ) {
+        std::vector<int> enrichingEIs;
+        int elPlaceInArray = xMan->giveDomain()->giveElementPlaceInArray( element->giveGlobalNumber() );
+        xMan->giveElementEnrichmentItemIndices(enrichingEIs, elPlaceInArray);
+
+
+        for(size_t p = 0; p < enrichingEIs.size(); p++) {
+
+        	int eiIndex = enrichingEIs[p];
 
             if ( firstIntersection ) {
                 // Get the points describing each subdivision of the element
@@ -456,7 +435,7 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                 this->XfemElementInterface_prepareNodesForDelaunay(pointPartitions, startXi, endXi, eiIndex, intersection);
 
                 if ( intersection ) {
-                    firstIntersection = false;
+                	firstIntersection = false;
 
                     // Use XfemElementInterface_partitionElement to subdivide the element
                     for ( int i = 0; i < int ( pointPartitions.size() ); i++ ) {
@@ -474,13 +453,6 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                         // We have xi_s and xi_e. Fetch sub polygon.
                         std :: vector< FloatArray >crackPolygon;
                         crack->giveSubPolygon(crackPolygon, startXi, endXi);
-
-                        /*
-                         *                                              printf("crackPolygon: \n");
-                         *                                              for(size_t i = 0; i < crackPolygon.size(); i++) {
-                         *                                                      printf("i: %d x: %e y: %e\n", i, crackPolygon[i].at(1), crackPolygon[i].at(2) );
-                         *                                              }
-                         */
 
                         ///////////////////////////////////
                         // Add cohesive zone Gauss points
@@ -549,7 +521,7 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                     XfemElementInterface_prepareNodesForDelaunay(pointPartitionsTri, startXi, endXi, allTri [ triIndex ], eiIndex, intersection);
 
                     if ( intersection ) {
-                        // Use XfemElementInterface_partitionElement to subdivide triangle j
+                    	// Use XfemElementInterface_partitionElement to subdivide triangle j
                         for ( int i = 0; i < int ( pointPartitionsTri.size() ); i++ ) {
                             this->XfemElementInterface_partitionElement(allTriCopy, pointPartitionsTri [ i ]);
                         }
@@ -1420,7 +1392,7 @@ void XfemElementInterface :: computeCohesiveTangentAt(FloatMatrix &answer, TimeS
 
 void XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity)
 {
-    StructuralElement *structEl = dynamic_cast< StructuralElement * >(element);
+	StructuralElement *structEl = dynamic_cast< StructuralElement * >(element);
     if ( structEl == NULL ) {
         OOFEM_SIMPLE_ERROR("Error in XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix().\n");
     }
@@ -1574,14 +1546,7 @@ void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, 
         DofManager *dMan = element->giveDofManager(j);
 
         // Compute the total number of enrichments for node j
-        int numEnrNode = 0;
-        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-            EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-            if ( ei->isDofManEnriched(* dMan) ) {
-                numEnrNode += ei->giveNumDofManEnrichments(* dMan);
-            }
-        }
-
+        int numEnrNode = XfemElementInterface_giveNumDofManEnrichments(*dMan, *xMan);
         std :: vector< double > &NdNode = Nd [ j - 1 ];
         NdNode.assign(numEnrNode, 0.0);
 
@@ -1590,8 +1555,9 @@ void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, 
 
 
         int ndNodeInd = 0;
-        for ( int i = 1; i <= xMan->giveNumberOfEnrichmentItems(); i++ ) {
-            EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+        const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices(globalNodeInd);
+        for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
+        	EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices[i]);
 
             if ( ei->isDofManEnriched(* dMan) ) {
                 int numEnr = ei->giveNumDofManEnrichments(* dMan);
@@ -1600,7 +1566,7 @@ void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, 
                 ei->evaluateEnrFuncJumps(efJumps, globalNodeInd);
 
                 for ( int k = 0; k < numEnr; k++ ) {
-                    if ( i == iEnrItemIndex ) {
+                    if ( nodeEiIndices[i] == iEnrItemIndex ) {
                         NdNode [ ndNodeInd ] = efJumps [ k ] * Nc.at(j);
                     } else {
                         NdNode [ ndNodeInd ] = 0.0;

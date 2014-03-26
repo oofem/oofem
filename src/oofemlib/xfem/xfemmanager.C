@@ -65,6 +65,7 @@ XfemManager :: XfemManager(Domain *domain)
     vtkExportFields.clear();
 
     mNodeEnrichmentItemIndices.resize(0);
+    mElementEnrichmentItemIndices.clear();
 }
 
 XfemManager :: ~XfemManager()
@@ -92,12 +93,23 @@ XfemManager :: giveXFEMStateValueType(XFEMStateType type)
 
 bool XfemManager :: isElementEnriched(const Element *elem)
 {
+#if 0
     // Loop over all EI which asks if el is enriched.
     for ( int i = 1; i <= this->giveNumberOfEnrichmentItems(); i++ ) {
         if ( this->giveEnrichmentItem(i)->isElementEnriched(elem) ) {
             return true;
         }
     }
+#else
+    // An element is enriched if one of its nodes is enriched.
+    const IntArray &elNodes = elem->giveDofManArray();
+    for(int i = 1; i <= elNodes.giveSize(); i++) {
+    	if(mNodeEnrichmentItemIndices[elNodes[i-1]-1].size() > 0) {
+    		return true;
+    	}
+    }
+
+#endif
 
     return false;
 }
@@ -285,6 +297,8 @@ void XfemManager :: propagateFronts()
             XFEMDebugTools :: WriteArrayToGnuplot(fileName, x, y);
         }
     }
+
+    updateNodeEnrichmentItemMap();
 }
 
 bool XfemManager :: hasPropagatingFronts()
@@ -302,9 +316,22 @@ void XfemManager :: updateNodeEnrichmentItemMap()
 {
 	Domain *domain = giveDomain();
 	int nDMan = domain->giveNumberOfDofManagers();
-
 	mNodeEnrichmentItemIndices.clear();
 	mNodeEnrichmentItemIndices.resize(nDMan);
+
+	int nElem = domain->giveNumberOfElements();
+	mElementEnrichmentItemIndices.clear();
+
+	std::vector<int> emptyVec;
+	for(int i = 1; i <= nElem; i++) {
+		int elIndex = domain->giveElement(i)->giveGlobalNumber();
+		int elPlaceInArray = domain->giveElementPlaceInArray(elIndex);
+		if(i != elPlaceInArray) {
+			printf("i != elPlaceInArray.\n");
+			exit(0);
+		}
+		mElementEnrichmentItemIndices[elPlaceInArray] = emptyVec;
+	}
 
 	int nEI = giveNumberOfEnrichmentItems();
 
@@ -316,9 +343,40 @@ void XfemManager :: updateNodeEnrichmentItemMap()
 		//for(size_t i = 0; i < enrNodeInd.size(); i++) {
 		for(auto nodeEiPair = enrNodeInd.begin(); nodeEiPair != enrNodeInd.end(); nodeEiPair++) {
 			mNodeEnrichmentItemIndices[ nodeEiPair->first-1 ].push_back(eiIndex);
+
+			ConnectivityTable *ct = domain->giveConnectivityTable();
+			//const IntArray *nodeElements = ct->giveDofManConnectivityArray(nodeEiPair->first);
+			IntArray nodeElements;
+			IntArray nodeList = {nodeEiPair->first};
+			ct->giveNodeNeighbourList(nodeElements, nodeList);
+
+			for(int i = 1; i <= nodeElements.giveSize(); i++) {
+				int elInd = nodeElements.at(i);
+
+				bool found = false;
+				for(size_t j = 0; j < mElementEnrichmentItemIndices[elInd].size(); j++) {
+					if( mElementEnrichmentItemIndices[elInd][j] == eiIndex ) {
+						found = true;
+						break;
+					}
+				}
+
+				if(!found) {
+					mElementEnrichmentItemIndices[elInd].push_back(eiIndex);
+				}
+			}
 		}
 
 	}
 }
+
+void XfemManager :: giveElementEnrichmentItemIndices(std::vector<int> &oElemEnrInd, int iElementIndex) const
+{
+	auto res = mElementEnrichmentItemIndices.find(iElementIndex);
+	if(res != mElementEnrichmentItemIndices.end()) {
+		oElemEnrInd = res->second;
+	}
+}
+
 
 } // end namespace oofem
