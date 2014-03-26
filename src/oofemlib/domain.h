@@ -42,6 +42,7 @@
 #include "intarray.h"
 #include "equationid.h"
 
+#include <unordered_map>
 #include <map>
 #include <string>
 #ifdef __PARALLEL_MODE
@@ -195,6 +196,12 @@ private:
     /// Fracture Manager
     FractureManager *fracManager;
 
+    /**
+     * Map from an element's global number to its place
+     * in the element array. Added by ES 140326.
+     */
+    std::unordered_map< int, int > mElementPlaceInArray;
+
     /// Topology description
     TopologyDescription *topology;
 
@@ -260,6 +267,12 @@ public:
      * @param n Pointer to the element with id n
      */
     Element *giveGlobalElement(int n);
+    /**
+     * Returns the array index of the element with global
+     * number iGlobalElNum, so that it can be fetched by
+     * calling giveElement. Returns -1 if not found.
+     */
+    int giveElementPlaceInArray(int iGlobalElNum) const;
     /**
      * Returns engineering model to which receiver is associated.
      */
@@ -643,6 +656,14 @@ private:
 
     /// Returns string for prepending output (used by error reporting macros).
     std :: string errorInfo(const char *func) const;
+
+private:
+    /**
+     * Construct map from an element's global number to
+     * its place the element array.
+     */
+    void BuildElementPlaceInArrayMap();
+
 };
 } // end namespace oofem
 #endif // domain_h
