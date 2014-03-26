@@ -165,7 +165,7 @@ public:
     }
 
     /**
-     * Computes shear modulus from given Young's modulus and Poisson's ratio.
+     * Computes shear modulus from given 
      * @param young Young's modulus (@f$ E @f$).
      * @param nu Poisson's ratio (@f$ \nu @f$).
      * @return Shear modulus (@f$ G = \frac{E}{2 (1+\nu)} @f$).
@@ -174,6 +174,15 @@ public:
     {
         return young / ( 2. * ( 1. + nu ) );
     }
+
+    /**
+     * Computes stiffness matrix from given Young's modulus and Poisson's ratio.
+     * @param young Young's modulus (@f$ E @f$).
+     * @param nu Poisson's ratio (@f$ \nu @f$).
+     * @return linear isotropic stiffness matrix
+     */
+    static void computeStiffnessMatrixFromYoungAndPoisson(FloatMatrix& answer, double E, double nu);
+    static FloatMatrix computeStiffnessMatrixFromYoungAndPoisson(double E, double nu) { FloatMatrix answer; computeStiffnessMatrixFromYoungAndPoisson(answer,E,nu); return answer; }
 };
 } // end namespace oofem
 #endif // isolinearelasticmaterial_h

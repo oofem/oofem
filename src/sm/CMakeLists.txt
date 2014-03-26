@@ -136,6 +136,7 @@ set (sm_material
     simplevitrificationmaterial.C
     anisodamagemodel.C
     winklerpasternak.C
+    structmatsettable.C
     )
 
 set (sm_error

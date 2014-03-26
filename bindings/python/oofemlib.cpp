@@ -91,6 +91,7 @@ namespace bp = boost::python;
 #include "outputmanager.h"
 #include "classfactory.h"
 
+#include "structmatsettable.h"
 
 namespace oofem {
 
@@ -302,6 +303,10 @@ struct PySparseMtrx : SparseMtrx, wrapper<SparseMtrx>
     FloatArray trans_mult(const FloatArray &x) const {
         return this->get_override("trans_mult")();
     }
+
+    const char *giveClassName() const {
+		 return this->get_override("giveClassName")();
+	 }
 };
 
 void (PySparseMtrx::*sm_times_1)(const FloatArray &x, FloatArray &ans) const  = &PySparseMtrx::times;
@@ -766,10 +771,25 @@ void pyclass_StructuralMaterial()
 {
     class_<PyStructuralMaterial, bases<Material>, boost::noncopyable >("StructuralMaterial", no_init)
         .def("giveRealStressVector", pure_virtual( &StructuralMaterial::giveRealStressVector))
+        .def("giveStiffnessMatrix", &StructuralMaterial::giveStiffnessMatrix)
         ;
 }
 
+/*****************************************************
+* StructuralMaterialSettable //
+*****************************************************/
+void pyclass_StructuralMaterialSettable()
+{
+    class_<StructuralMaterialSettable, bases<StructuralMaterial>, boost::noncopyable >("StructuralMaterialSettable", no_init)
+        .def("giveIPValue", &StructuralMaterialSettable::giveIPValue)
+        .def("setIPValue", &StructuralMaterialSettable::setIPValue)
+        ;
+}
+
+
 StructuralMaterial* material2structuralMaterial(Material *mat) { return (StructuralMaterial*)mat; }
+StructuralMaterialSettable* material2structMatSettable(Material *mat) { return (StructuralMaterialSettable*)mat; }
+
 
 
 
@@ -821,7 +841,7 @@ void pyclass_Load()
 {
     class_<PyLoad, bases<GeneralBoundaryCondition>, boost::noncopyable >("Load", no_init)
         .def("setComponentArray", &Load::setComponentArray)
-        .def("giveCopyOfComponentArray", &Load::giveCopyOfComponentArray)
+        .def("giveComponentArray", &Load::GiveCopyOfComponentArray,return_value_policy<manage_new_object>())
         .def("computeValueAt", pure_virtual( &Load::computeValueAt))
         ;
 }
@@ -1167,6 +1187,7 @@ void pyenum_InternalStateType()
     enum_<InternalStateType>("InternalStateType")
         .value("IST_StressTensor", IST_StressTensor)
         .value("IST_StrainTensor", IST_StrainTensor)
+        .value("IST_PlasticStrainTensor", IST_PlasticStrainTensor)
         ;
 }
 
@@ -1578,6 +1599,7 @@ BOOST_PYTHON_MODULE (liboofem)
     pyclass_Element();
     pyclass_Material();
     pyclass_StructuralMaterial();
+    pyclass_StructuralMaterialSettable();
     pyclass_CrossSection();
     pyclass_GeneralBoundaryCondition();
     pyclass_BoundaryCondition();
@@ -1616,6 +1638,7 @@ BOOST_PYTHON_MODULE (liboofem)
     register_ptr_to_python< std::auto_ptr<Field> >();
 
     def("material2structuralMaterial", &material2structuralMaterial, return_internal_reference<>());
+    def("material2structMatSettable", &material2structMatSettable, return_internal_reference<>());
     // modul variable classFactory
     scope().attr("classFactory") = object(ptr(&classFactory));
 
