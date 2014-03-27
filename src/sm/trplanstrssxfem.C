@@ -123,27 +123,26 @@ void TrPlaneStress2dXFEM :: computeNmatrixAt(const FloatArray &iLocCoord, FloatM
 
 
 void
-TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, EquationID iEqnId, IntArray &answer) const
 {
-    // Returns the total id mask of the dof manager = regular id's + enriched id's
+    // Continuous part
+	TrPlaneStress2d::giveDofManDofIDMask(inode, iEqnId, answer);
 
-    if ( giveDomain()->hasXfemManager() ) {
-        XfemManager *xMan = this->domain->giveXfemManager();
-        if ( xMan != NULL ) {
-            this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
-        } else {
-            // Continuous part
-            TrPlaneStress2d :: giveDofManDofIDMask(inode, ut, answer);
-        }
-    } else   {
-        TrPlaneStress2d :: giveDofManDofIDMask(inode, ut, answer);
-    }
+    // Discontinuous part
+	if( this->giveDomain()->hasXfemManager() ) {
+		DofManager *dMan = giveDofManager(inode);
+		XfemManager *xMan = giveDomain()->giveXfemManager();
 
-
-    if ( answer.giveSize() == 0 ) {
-        // TODO: How do we fix this in a nicer way? /ES
-        answer = {D_u, D_v};
-    }
+        const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices( dMan->giveGlobalNumber() );
+        for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
+            EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices[i]);
+			if ( ei->isDofManEnriched(* dMan) ) {
+				IntArray eiDofIdArray;
+				ei->computeEnrichedDofManDofIdArray(eiDofIdArray, *dMan);
+				answer.followedBy(eiDofIdArray);
+			}
+		}
+	}
 }
 
 void

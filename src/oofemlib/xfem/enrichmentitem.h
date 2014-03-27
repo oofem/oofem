@@ -134,8 +134,13 @@ public:
     int  giveNumDofManEnrichments(const DofManager &iDMan) const;
     int giveNumEnrichedDofs(const DofManager &iDMan) const;
 
+    // Returns true if the enrichment item can assign
+    // a different material to any Gauss point.
+    inline virtual bool canModifyMaterial() const {return false;}
+
     // Returns true if the enrichment item assigns a different material to the Gauss point
     virtual bool isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const;
+
 
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep) { };
@@ -286,6 +291,10 @@ protected:
 public:
     Inclusion(int n, XfemManager * xm, Domain * aDomain);
     virtual ~Inclusion();
+
+    // Returns true if the enrichment item can assign
+    // a different material to any Gauss point.
+    inline virtual bool canModifyMaterial() const {return true;}
 
     // Returns true if the enrichment item assigns a different material to the Gauss point
     virtual bool isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const;

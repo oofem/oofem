@@ -119,6 +119,13 @@ protected:
      */
     std::vector< std::vector<int> > mNodeEnrichmentItemIndices;
     std::unordered_map< int, std::vector<int> > mElementEnrichmentItemIndices;
+
+    /**
+     * Keep track of enrichment items that may assign a different
+     * material to some Gauss points.
+     */
+    std::vector<int> mMaterialModifyingEnrItemIndices;
+
 public:
 
     /**
@@ -187,6 +194,8 @@ public:
 
     const std::vector<int> &giveNodeEnrichmentItemIndices(int iNodeIndex) const {return mNodeEnrichmentItemIndices[iNodeIndex-1];}
     void giveElementEnrichmentItemIndices(std::vector<int> &oElemEnrInd, int iElementIndex) const;
+
+    const std::vector<int> &giveMaterialModifyingEnrItemIndices() const {return mMaterialModifyingEnrItemIndices;}
 };
 } // end namespace oofem
 #endif // xfemmanager_h

@@ -1083,11 +1083,17 @@ void XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(Fl
     if( element->giveDomain()->hasXfemManager() ) {
 
 		XfemManager *xMan = element->giveDomain()->giveXfemManager();
-		int nEI = xMan->giveNumberOfEnrichmentItems();
 		CrossSection *cs = NULL;
 
+#if 0
+		int nEI = xMan->giveNumberOfEnrichmentItems();
 		for ( int i = 1; i <= nEI; i++ ) {
 			EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(i) );
+#else
+		const std::vector<int> &materialModifyingEnrItemIndices = xMan->giveMaterialModifyingEnrItemIndices();
+		for(size_t i = 0; i < materialModifyingEnrItemIndices.size(); i++) {
+			EnrichmentItem &ei = * ( xMan->giveEnrichmentItem( materialModifyingEnrItemIndices[i]) );
+#endif
 			if ( ei.isMaterialModified(* gp, * element, cs) ) {
 				StructuralCrossSection *structCS = dynamic_cast< StructuralCrossSection * >( cs );
 
@@ -1118,11 +1124,17 @@ void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray
 
 		XfemManager *xMan = element->giveDomain()->giveXfemManager();
 
-		int nEI = xMan->giveNumberOfEnrichmentItems();
 
 		CrossSection *csInclusion = NULL;
+#if 0
+		int nEI = xMan->giveNumberOfEnrichmentItems();
 		for ( int i = 1; i <= nEI; i++ ) {
 			EnrichmentItem &ei = * ( xMan->giveEnrichmentItem(i) );
+#else
+		const std::vector<int> &materialModifyingEnrItemIndices = xMan->giveMaterialModifyingEnrItemIndices();
+		for(size_t i = 0; i < materialModifyingEnrItemIndices.size(); i++) {
+			EnrichmentItem &ei = * ( xMan->giveEnrichmentItem( materialModifyingEnrItemIndices[i]) );
+#endif
 			if ( ei.isMaterialModified(* gp, * element, csInclusion) ) {
 				StructuralCrossSection *structCSInclusion = dynamic_cast< StructuralCrossSection * >( csInclusion );
 

@@ -66,6 +66,7 @@ XfemManager :: XfemManager(Domain *domain)
 
     mNodeEnrichmentItemIndices.resize(0);
     mElementEnrichmentItemIndices.clear();
+    mMaterialModifyingEnrItemIndices.clear();
 }
 
 XfemManager :: ~XfemManager()
@@ -368,6 +369,19 @@ void XfemManager :: updateNodeEnrichmentItemMap()
 		}
 
 	}
+
+
+
+
+	mMaterialModifyingEnrItemIndices.clear();
+	for(int eiIndex = 1; eiIndex <= nEI; eiIndex++) {
+		EnrichmentItem *ei = giveEnrichmentItem(eiIndex);
+
+		if(ei->canModifyMaterial()) {
+			mMaterialModifyingEnrItemIndices.push_back(eiIndex);
+		}
+	}
+
 }
 
 void XfemManager :: giveElementEnrichmentItemIndices(std::vector<int> &oElemEnrInd, int iElementIndex) const

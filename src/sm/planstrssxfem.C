@@ -122,15 +122,26 @@ int PlaneStress2dXfem :: computeNumberOfDofs()
 
 
 void
-PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID iEqnId, IntArray &answer) const
 {
-    // Returns the total id mask of the dof manager = regular id's + enriched id's
-    this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
+    // Continuous part
+	PlaneStress2d::giveDofManDofIDMask(inode, iEqnId, answer);
 
-    if ( answer.giveSize() == 0 ) {
-        // TODO: How do we fix this in a nicer way? /ES
-        answer = {D_u, D_v};
-    }
+    // Discontinuous part
+	if( this->giveDomain()->hasXfemManager() ) {
+		DofManager *dMan = giveDofManager(inode);
+		XfemManager *xMan = giveDomain()->giveXfemManager();
+
+        const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices( dMan->giveGlobalNumber() );
+        for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
+            EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices[i]);
+			if ( ei->isDofManEnriched(* dMan) ) {
+				IntArray eiDofIdArray;
+				ei->computeEnrichedDofManDofIdArray(eiDofIdArray, *dMan);
+				answer.followedBy(eiDofIdArray);
+			}
+		}
+	}
 }
 
 
