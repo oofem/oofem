@@ -130,9 +130,6 @@ IsotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &ans
 // forceElasticResponse ignored - always elastic
 //
 {
-	 computeStiffnessMatrixFromYoungAndPoisson(answer,this->E,this->nu);
-
-	 /*
     double e, nu, ee;
 
     e  = this->E;
@@ -157,7 +154,6 @@ IsotropicLinearElasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &ans
     answer.at(6, 6) =  ( 1. - 2. * nu ) * 0.5;
 
     answer.times(ee);
-	 */
 }
 
 
@@ -248,29 +244,4 @@ IsotropicLinearElasticMaterial :: CreateStatus(GaussPoint *gp) const
 {
     return new StructuralMaterialStatus(1, this->giveDomain(), gp);
 }
-
-void
-IsotropicLinearElasticMaterial :: computeStiffnessMatrixFromYoungAndPoisson(FloatMatrix& answer, double E, double nu) {
-
-    double ee = E / ( ( 1. + nu ) * ( 1. - 2. * nu ) );
-    answer.resize(6, 6);
-    answer.zero();
-
-    answer.at(1, 1) =  1. - nu;
-    answer.at(1, 2) =  nu;
-    answer.at(1, 3) =  nu;
-    answer.at(2, 1) =  nu;
-    answer.at(2, 2) =  1. - nu;
-    answer.at(2, 3) =  nu;
-    answer.at(3, 1) =  nu;
-    answer.at(3, 2) =  nu;
-    answer.at(3, 3) =  1. - nu;
-
-    answer.at(4, 4) =  ( 1. - 2. * nu ) * 0.5;
-    answer.at(5, 5) =  ( 1. - 2. * nu ) * 0.5;
-    answer.at(6, 6) =  ( 1. - 2. * nu ) * 0.5;
-
-    answer.times(ee); 
-}
-
 } // end namespace oofem

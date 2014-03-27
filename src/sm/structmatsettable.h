@@ -40,6 +40,8 @@
 #include "structuralms.h"
 #include "structuralmaterial.h"
 
+#include "isolinearelasticmaterial.h"
+
 ///@name Input fields for StructuralMaterialSettable
 //@{
 #define _IFT_StructuralMaterialSettable_Name "structmatsettable"
@@ -55,10 +57,8 @@ namespace oofem {
 class StructuralMaterialSettable : public StructuralMaterial
 {
 private:
-	 /// Young's modulus
-    double E;
-	 /// Poisson's ratio
-	 double nu;
+	 IsotropicLinearElasticMaterial *isoLE;
+
 public:
     /// Constructor
     StructuralMaterialSettable(int n, Domain *d);

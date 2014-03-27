@@ -42,7 +42,6 @@
 #include "contextioerr.h"
 #include "mathfem.h"
 #include "classfactory.h"
-#include "isolinearelasticmaterial.h"
 
 namespace oofem {
 
@@ -51,23 +50,21 @@ REGISTER_Material( StructuralMaterialSettable );
 StructuralMaterialSettable :: StructuralMaterialSettable(int n, Domain *d) :
     StructuralMaterial(n, d)
 {
+	isoLE = new IsotropicLinearElasticMaterial(n,d);
 }
 
 StructuralMaterialSettable :: ~StructuralMaterialSettable()
 {
+	delete isoLE;
 }
 
 IRResultType
 StructuralMaterialSettable :: initializeFrom(InputRecord *ir)
 {
     //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    //IRResultType result;                // Required by IR_GIVE_FIELD macro
     StructuralMaterial :: initializeFrom(ir);
-	 E = 1.;
-	 nu = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
-    IR_GIVE_OPTIONAL_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
-    return IRRT_OK;
+	 return isoLE->initializeFrom(ir);
 }
 
 void
@@ -94,7 +91,7 @@ StructuralMaterialSettable :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                            GaussPoint *gp,
                                                            TimeStep *atTime)
 {
-    answer = IsotropicLinearElasticMaterial :: computeStiffnessMatrixFromYoungAndPoisson(E,nu);
+    isoLE->give3dMaterialStiffnessMatrix(answer,mode,gp,atTime);
 }
 
 MaterialStatus *
