@@ -79,7 +79,7 @@ IsoInterfaceDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 // computes full constitutive matrix for case of gp stress-strain state.
 //
 {
-    _error("give3dMaterialStiffnessMatrix: not implemented");
+    OOFEM_ERROR("give3dMaterialStiffnessMatrix: not implemented");
 }
 
 
@@ -215,7 +215,7 @@ IsoInterfaceDamageMaterial :: give2dInterfaceMaterialStiffnessMatrix(FloatMatrix
             }
         }
     }  else {
-        _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
+        OOFEM_ERROR("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
     }
 }
 
@@ -274,7 +274,7 @@ IsoInterfaceDamageMaterial :: give3dInterfaceMaterialStiffnessMatrix(FloatMatrix
             }
         }
     }  else {
-        _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
+        OOFEM_ERROR("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
     }
 }
 

@@ -207,7 +207,7 @@ void Tet1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeSte
         if ( ltype == SurfaceLoadBGT ) {
             this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
         } else {
-            OOFEM_ERROR2("Tet1BubbleStokes :: computeLoadVector - Unsupported boundary condition: %d", load_id);
+            OOFEM_ERROR("Tet1BubbleStokes :: computeLoadVector - Unsupported boundary condition: %d", load_id);
         }
 
         answer.add(vec);
@@ -221,7 +221,7 @@ void Tet1BubbleStokes :: computeExternalForcesVector(FloatArray &answer, TimeSte
             this->computeLoadVector(vec, load, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         } else {
-            OOFEM_ERROR2("Tet1BubbleStokes :: computeLoadVector - Unsupported body load: %d", load);
+            OOFEM_ERROR("Tet1BubbleStokes :: computeLoadVector - Unsupported body load: %d", load);
         }
     }
 }

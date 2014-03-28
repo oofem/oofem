@@ -65,7 +65,7 @@ Dof *SimpleSlaveDof :: giveMasterDof() const
     if ( this->masterDofIndx == -1 ) {
         this->masterDofIndx = dofManager->giveDomain()->giveDofManager(masterDofMngr)->findDofWithDofId(this->dofID);
         if ( !this->masterDofIndx ) {
-            _error("giveMasterDof: no dof with dofID in master found");
+            OOFEM_ERROR("giveMasterDof: no dof with dofID in master found");
         }
     }
     return dofManager->giveDomain()->giveDofManager(masterDofMngr)->giveDof(masterDofIndx);

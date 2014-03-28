@@ -81,7 +81,7 @@ IsoInterfaceDamageMaterial_2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answe
 // computes full constitutive matrix for case of gp stress-strain state.
 //
 {
-    _error("give3dMaterialStiffnessMatrix: not implemented");
+    OOFEM_ERROR("give3dMaterialStiffnessMatrix: not implemented");
 }
 
 
@@ -217,7 +217,7 @@ IsoInterfaceDamageMaterial_2 :: give2dInterfaceMaterialStiffnessMatrix(FloatMatr
             }
         }
     }  else {
-        _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
+        OOFEM_ERROR("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
     }
 }
 
@@ -276,7 +276,7 @@ IsoInterfaceDamageMaterial_2 :: give3dInterfaceMaterialStiffnessMatrix(FloatMatr
             }
         }
     }  else {
-        _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
+        OOFEM_ERROR("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
     }
 }
 
@@ -356,7 +356,7 @@ IsoInterfaceDamageMaterial_2 :: initializeFrom(InputRecord *ir)
 
     is.open(tablename.c_str(), std :: ifstream :: in);
     if ( !is.is_open() ) {
-        OOFEM_ERROR2( "IsoInterfaceDamageMaterial :: initializeFrom: Can't open table file %s.", tablename.c_str() );
+        OOFEM_ERROR( "IsoInterfaceDamageMaterial :: initializeFrom: Can't open table file %s.", tablename.c_str() );
     }
 
     // Read first line
@@ -375,12 +375,12 @@ IsoInterfaceDamageMaterial_2 :: initializeFrom(InputRecord *ir)
 
     for ( int i = 0; i < nbrOfLinesToRead; i++ ) {
         if ( !( is >> strains(i + 1) >> damages(i + 1) ) ) {
-            OOFEM_ERROR2("IsoInterfaceDamageMaterial :: initializeFrom: Error reading table file at line %d, expected a "
+            OOFEM_ERROR("IsoInterfaceDamageMaterial :: initializeFrom: Error reading table file at line %d, expected a "
                          "strain damage pair.", i + 2);
         }
 
         if ( ( damages(i + 1) < damages(i) ) || ( strains(i + 1) < strains(i) ) ) {
-            OOFEM_ERROR2("IsoInterfaceDamageMaterial :: initializeFrom: Error reading table file at line %d, strain "
+            OOFEM_ERROR("IsoInterfaceDamageMaterial :: initializeFrom: Error reading table file at line %d, strain "
                          "and damage must be given in an increasing order and be positive.", i + 2);
         }
     }

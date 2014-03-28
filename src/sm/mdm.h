@@ -86,6 +86,7 @@
 #define _IFT_MDM_formulation "formulation"
 #define _IFT_MDM_mode "mode"
 #define _IFT_MDM_mapper "mapper"
+#define _IFT_MDM_sourceRegionSet "sourceregset"
 //@}
 
 namespace oofem {
@@ -192,6 +193,10 @@ protected:
     int nonlocal;
     /// Interaction radius, related to the nonlocal characteristic length of material.
     double R;
+
+    ///cached source element set used to map internal variables (adaptivity), created on demand
+    Set *sourceElemSet;
+
 
 #ifdef MDM_MAPPING_DEBUG
     /// Mapper used to map internal variables in adaptivity.

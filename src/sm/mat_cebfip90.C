@@ -77,7 +77,7 @@ CebFipSlip90Material :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 // computes full constitutive matrix for case of gp stress-strain state.
 //
 {
-    _error("give3dMaterialStiffnessMatrix: not implemented");
+    OOFEM_ERROR("give3dMaterialStiffnessMatrix: not implemented");
 }
 
 
@@ -168,7 +168,7 @@ CebFipSlip90Material :: give1dInterfaceMaterialStiffnessMatrix(FloatMatrix &answ
     } else if ( rMode == TangentStiffness ) {
         answer.at(1, 1) = computeBondForceStiffness( status->giveTempKappa() );
     }  else {
-        _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
+        OOFEM_ERROR( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
     }
 }
 

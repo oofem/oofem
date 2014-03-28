@@ -144,7 +144,7 @@ void StructuralElementEvaluator2 :: computeBoundaryLoadVector(FloatArray &answer
 
 	FEInterpolation *fei = elemGeometry->giveInterpolation();
     if ( !fei ) {
-        OOFEM_ERROR("StructuralElement :: computeBoundaryLoadVector - No interpolator available\n");
+        OOFEM_SIMPLE_ERROR("StructuralElement :: computeBoundaryLoadVector - No interpolator available\n");
     }
 
     FloatArray n_vec;
@@ -516,7 +516,7 @@ StructuralElementEvaluator2 :: computeLocalForceLoadVector(FloatArray &answer, T
         } else {
             if ( load->giveBCValType() != TemperatureBVT && load->giveBCValType() != EigenstrainBVT ) {
                 // temperature and eigenstrain is handled separately at computeLoadVectorAt subroutine
-                OOFEM_ERROR3("StructuralElement :: computeLocalForceLoadVector - body load %d is of unsupported type (%d)", id, ltype);
+                OOFEM_SIMPLE_ERROR("StructuralElement :: computeLocalForceLoadVector - body load %d is of unsupported type (%d)", id, ltype);
             }
         }
     }
@@ -546,7 +546,7 @@ StructuralElementEvaluator2 :: computeLocalForceLoadVector(FloatArray &answer, T
                 answer.add(helpLoadVector);
             }
         } else {
-            OOFEM_ERROR3("StructuralElement :: computeLocalForceLoadVector - boundary load %d is of unsupported type (%d)", id, ltype);
+	  OOFEM_SIMPLE_ERROR("StructuralElement :: computeLocalForceLoadVector - boundary load %d is of unsupported type (%d)", id, ltype);
         }
     }
 }
@@ -1204,7 +1204,7 @@ StructuralElementEvaluator2 :: computeDeformationGradientVector(FloatArray &answ
     } else if ( matMode == _1dMat ) {
         answer.at(1) += 1.0;
     } else {
-        OOFEM_ERROR2( "computeDeformationGradientVector : MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
+        OOFEM_SIMPLE_ERROR( "computeDeformationGradientVector : MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
     }
 }
 
@@ -1335,7 +1335,7 @@ StructuralElementEvaluator2 :: checkConsistency(ElementGeometry* elemGeometry)
 
 
 	if ( this->nlGeometry != 0  &&  this->nlGeometry != 1 ) {
-        OOFEM_ERROR2("StructuralElementEvaluator :: checkConsistency - nlGeometry must be either 0 or 1 (%d not supported)", this->nlGeometry);
+        OOFEM_SIMPLE_ERROR("StructuralElementEvaluator :: checkConsistency - nlGeometry must be either 0 or 1 (%d not supported)", this->nlGeometry);
         return 0;
     } else {
         return 1;
@@ -1865,17 +1865,17 @@ void AxisymmetricStructuralElementEvaluator :: computeBmatrixAt(GaussPoint *gp, 
                                   int li, int ui)
 {
 	
-	int nDofMan;
-	double r = 0., x;
+    int nDofMan = elemGeometry->giveNumberOfDofManagers();
+    double r = 0., x;
     FloatArray n(nDofMan/2);
     FloatMatrix d;
 
-    nDofMan  = elemGeometry->giveNumberOfDofManagers();
-	FEInterpolation *interp = elemGeometry->giveInterpolation(displacementInterpolationNumber);
-	interp->evaldNdx(d, * gp->giveCoordinates(), FEIElementGeometryWrapper( elemGeometry));
-	interp->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(elemGeometry) );
    
-   
+    FEInterpolation *interp = elemGeometry->giveInterpolation(displacementInterpolationNumber);
+    interp->evaldNdx(d, * gp->giveCoordinates(), FEIElementGeometryWrapper( elemGeometry));
+    interp->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(elemGeometry) );
+    
+    
 
     answer.resize(6, nDofMan);
     answer.zero();

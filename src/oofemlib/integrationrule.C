@@ -116,7 +116,7 @@ IntegrationRule :: getIntegrationPoint(int i)
 {
 #  ifdef DEBUG
     if ( ( i < 0 ) || ( i >= numberOfIntegrationPoints ) ) {
-        OOFEM_ERROR2("IntegrationRule::getIntegrationPoint - request out of bounds (%d)", i);
+        OOFEM_ERROR("IntegrationRule::getIntegrationPoint - request out of bounds (%d)", i);
     }
 
 #  endif
@@ -354,7 +354,7 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
         return numberOfIntegrationPoints;
 
     default:
-        OOFEM_ERROR2("IntegrationRule::setUpIntegrationPoints - unknown mode (%d)", mode);
+        OOFEM_ERROR("IntegrationRule::setUpIntegrationPoints - unknown mode (%d)", mode);
     }
 
     return 0;

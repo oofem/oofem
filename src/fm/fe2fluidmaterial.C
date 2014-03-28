@@ -260,7 +260,6 @@ void FE2FluidMaterial :: giveStiffnessMatrices(FloatMatrix &dsdd, FloatArray &ds
 
 IRResultType FE2FluidMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
     IR_GIVE_FIELD(ir, this->inputfile, _IFT_FE2FluidMaterial_fileName);
     return this->FluidDynamicMaterial :: initializeFrom(ir);

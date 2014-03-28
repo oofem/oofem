@@ -181,7 +181,7 @@ KelvinChainMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp,
         answer = reducedAnswer;
     } else {
         /* error - total mode not implemented yet */
-        _error("giveEigenStrainVector - mode is not supported");
+        OOFEM_ERROR("giveEigenStrainVector - mode is not supported");
     }
 }
 

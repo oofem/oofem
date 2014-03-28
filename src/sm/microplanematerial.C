@@ -54,7 +54,7 @@ MicroplaneMaterial :: giveMicroplane(int i, GaussPoint *masterGp)
         // check for proper dimensions - slave can be NULL if index too high or if not
         // slaves previously defined
         if ( ( i < 0 ) || ( i > ( this->numberOfMicroplanes - 1 ) ) ) {
-            _error("giveMicroplane: no such microplane defined");
+            OOFEM_ERROR("giveMicroplane: no such microplane defined");
         }
 
         // create new slave record in masterGp
@@ -136,7 +136,7 @@ MicroplaneMaterial :: saveIPContext(DataStream *stream, ContextMode mode, GaussP
     IntegrationPointStatus *status;
 
     if ( stream == NULL ) {
-        _error("saveContex : can't write into NULL stream");
+        OOFEM_ERROR("saveContex : can't write into NULL stream");
     }
 
     if ( gp == NULL ) {
@@ -645,7 +645,7 @@ MicroplaneMaterial :: initializeData(int numberOfMicroplanes)
          * }
          */
     } else {
-        _error("initializeData: Unsupported number of microplanes");
+        OOFEM_ERROR("initializeData: Unsupported number of microplanes");
     }
 
     // compute projection tensors for each microplane

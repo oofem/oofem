@@ -82,7 +82,6 @@ RigidArmNode :: deallocAuxArrays()
 IRResultType
 RigidArmNode :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
     Node :: initializeFrom(ir);
@@ -91,7 +90,7 @@ RigidArmNode :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, masterMask, _IFT_DofManager_mastermask);
     if ( masterMask.giveSize() != this->dofidmask->giveSize() ) {
-        _error("initializeFrom: mastermask size mismatch");
+        OOFEM_ERROR("initializeFrom: mastermask size mismatch");
     }
 
     return IRRT_OK;
@@ -161,14 +160,14 @@ RigidArmNode :: checkConsistency()
 
     // check if receiver has the same coordinate system as master dofManager
     if ( !this->hasSameLCS(this->masterNode) ) {
-        _warning2("checkConsistency: different lcs for master/slave nodes", 1);
+        OOFEM_WARNING("checkConsistency: different lcs for master/slave nodes", 1);
         result = 0;
     }
 
     // check if created DOFs (dofType) compatible with mastermask
     for ( int i = 1; i <= this->giveNumberOfDofs(); i++ ) {
         if ( this->masterMask.at(i) && this->dofArray [ i - 1 ]->isPrimaryDof() ) {
-            _error("checkConsistency: incompatible mastermask and doftype data");
+            OOFEM_ERROR("checkConsistency: incompatible mastermask and doftype data");
         }
     }
 
@@ -234,7 +233,7 @@ RigidArmNode :: computeMasterContribution()
 
             break;
         default:
-            _error("computeMasterContribution: unknown value in masterMask");
+            OOFEM_ERROR("computeMasterContribution: unknown value in masterMask");
         }
 
         k = ++this->countOfMasterDofs->at(i);

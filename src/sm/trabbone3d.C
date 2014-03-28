@@ -680,7 +680,7 @@ TrabBone3D :: computeDamage(GaussPoint *gp,  TimeStep *tStep)
 
     double tempDam = computeDamageParam(tempKappa);
     if ( tempDam < 0 ) {
-        _error("negative damage");
+        OOFEM_ERROR("negative damage");
     }
 
     return tempDam;

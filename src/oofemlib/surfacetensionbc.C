@@ -58,7 +58,6 @@ REGISTER_BoundaryCondition(SurfaceTensionBoundaryCondition);
 
 IRResultType SurfaceTensionBoundaryCondition :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     IR_GIVE_FIELD(ir, this->gamma, _IFT_SurfaceTensionBoundaryCondition_gamma);

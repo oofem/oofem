@@ -55,13 +55,16 @@ InternalVariableField :: ~InternalVariableField()
 int
 InternalVariableField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *tStep)
 {
+
     IntArray types(1);
     types.at(1) = this->type;
     /// Use MaterialMappingAlgorithm classes to do the job
-    this->mma->__init(domain, types, coords, -1, tStep);
+    Set eset(0, domain);
+    eset.addAllElements();
+    this->mma->__init(domain, types, coords, eset, tStep);
     this->mma->__mapVariable(answer, coords, this->type, tStep);
 
-    return 0; // ok
+    return 0; // ok  
 }
 
 int

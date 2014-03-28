@@ -296,7 +296,7 @@ FEI3dTetLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         aNode = 3;
         bNode = 4;
     } else {
-        OOFEM_ERROR2("FEI3dTetLin :: computeEdgeMapping: wrong egde number (%d)", iedge);
+        OOFEM_ERROR("FEI3dTetLin :: computeEdgeMapping: wrong egde number (%d)", iedge);
     }
 
     edgeNodes.at(1) = ( aNode );
@@ -419,7 +419,7 @@ FEI3dTetLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
         bNode = 4;
         cNode = 3;
     } else {
-        OOFEM_ERROR2("FEI3dTetLin :: computeSurfaceMapping: wrong surface number (%d)", isurf);
+        OOFEM_ERROR("FEI3dTetLin :: computeSurfaceMapping: wrong surface number (%d)", isurf);
     }
 
     surfNodes.at(1) = ( aNode );

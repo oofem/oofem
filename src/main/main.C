@@ -78,7 +78,7 @@ using namespace oofem;
 void freeStoreError()
 // This function is called whenever operator "new" is unable to allocate memory.
 {
-    OOFEM_FATAL("freeStoreError : free store exhausted");
+    OOFEM_SIMPLE_FATAL("freeStoreError : free store exhausted");
 }
 
 // debug
@@ -158,8 +158,7 @@ int main(int argc, char *argv[])
                     i++;
                     int level = strtol(argv [ i ], NULL, 10);
                     oofem_logger.setLogLevel(level);
-                    oofem_errLogger.setLogLevel(level);
-                }
+		}
             } else if ( strcmp(argv [ i ], "-qe") == 0 ) {
                 if ( i + 1 < argc ) {
                     i++;
@@ -237,14 +236,14 @@ int main(int argc, char *argv[])
     }
 #endif
     if ( outputFileFlag ) {
-        oofem_logger.appendlogTo( const_cast< char * >( outputFileName.str().c_str() ) );
+        oofem_logger.appendLogTo( outputFileName.str() );
     }
     if ( errOutputFileFlag ) {
-        oofem_errLogger.appendlogTo( const_cast< char * >( errOutputFileName.str().c_str() ) );
+        oofem_logger.appendErrorTo( errOutputFileName.str() );
     }
 
     // print header to redirected output
-    LOG_FORCED_MSG(oofem_logger, PRG_HEADER_SM);
+    OOFEM_LOG_FORCED(PRG_HEADER_SM);
 
     OOFEMTXTDataReader dr( inputFileName.str ( ).c_str() );
     problem = :: InstanciateProblem(& dr, _processor, contextFlag, NULL, parallelFlag);
@@ -292,7 +291,7 @@ int main(int argc, char *argv[])
         DynamicCommunicationBuffer :: printInfo();
     }
 #endif
-    oofem_errLogger.printStatistics();
+    oofem_logger.printStatistics();
     delete problem;
 
     oofem_finalize_modules();

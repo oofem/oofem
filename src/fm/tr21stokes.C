@@ -105,7 +105,7 @@ void Tr21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answe
         } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
             answer.setValues(3, V_u, V_v, P_f);
         } else {
-            _error("giveDofManDofIDMask: Unknown equation id encountered");
+            OOFEM_ERROR("giveDofManDofIDMask: Unknown equation id encountered");
         }
     } else {
         if ( ut == EID_MomentumBalance ) {
@@ -115,7 +115,7 @@ void Tr21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answe
         } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
             answer.setValues(2, V_u, V_v);
         } else {
-            _error("giveDofManDofIDMask: Unknown equation id encountered");
+            OOFEM_ERROR("giveDofManDofIDMask: Unknown equation id encountered");
         }
     }
 }

@@ -46,13 +46,12 @@
 #include "outputmanager.h"
 #include "dofmanager.h"
 #include "boundarycondition.h"
-#include "enrichmentitem.h"
-#include "xfemmanager.h"
+#include "xfem/enrichmentitem.h"
+#include "xfem/xfemmanager.h"
 #include "structuralinterfacematerialstatus.h"
-#include "enrichmentdomain.h"
-#include "XFEMDebugTools.h"
+#include "xfem/enrichmentdomain.h"
+#include "xfem/XFEMDebugTools.h"
 #include "prescribedgradient.h"
-#include "export/exportmodulecallerinterface.h"
 
 #include <sstream>
 
@@ -90,7 +89,7 @@ IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
 
 void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 {
-    if (!(testTimeStepOutput(tStep) || forcedOutput)) {
+     if (!(testTimeStepOutput(tStep) || forcedOutput)) {
         return;
     }
 
@@ -106,10 +105,10 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 		int numBC = domain->giveNumberOfBoundaryConditions();
 
 		for(int i = 1; i <= numBC; i++) {
-			ExportModuleCallerInterface *expModCaller = dynamic_cast<ExportModuleCallerInterface*>( domain->giveBc(i) );
+			PrescribedGradient *presGradBC = dynamic_cast<PrescribedGradient*>( domain->giveBc(i) );
 
-			if(expModCaller != NULL) {
-				expModCaller->callExportModule(*this, tStep);
+			if(presGradBC != NULL) {
+				outputBoundaryCondition(*presGradBC, tStep);
 			}
 		}
 	}

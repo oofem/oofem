@@ -35,7 +35,7 @@
 #ifndef structuralelementevaluator_h
 #define structuralelementevaluator_h
 
-#include "iga.h"
+#include "iga/iga.h"
 #include "matresponsemode.h"
 
 namespace oofem {

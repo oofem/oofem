@@ -36,7 +36,6 @@
 #define GNUPLOTEXPORTMODULE_H_
 
 #include "exportmodule.h"
-#include "export/bcexportinterface.h"
 
 ///@name Input fields for MatlabExportModule
 //@{
@@ -59,7 +58,7 @@ class PrescribedGradient;
  *
  * Created on: Jan 29, 2014
  */
-class OOFEM_EXPORT GnuplotExportModule : public ExportModule, public BCExportInterface {
+class OOFEM_EXPORT GnuplotExportModule : public ExportModule {
 public:
 	GnuplotExportModule(int n, EngngModel *e);
 	virtual ~GnuplotExportModule();

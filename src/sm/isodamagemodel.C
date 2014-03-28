@@ -149,7 +149,7 @@ IsotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
             //printf (".");
         }
     } else {
-        _error("giveRealStressVector: unsupported loading/uloading criteria");
+        OOFEM_ERROR("giveRealStressVector: unsupported loading/uloading criteria");
     }
 
 

@@ -166,7 +166,7 @@ Truss1d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refi
                                                             IntArray &controlNode, IntArray &controlDof,
                                                             HuertaErrorEstimator :: AnalysisMode aMode)
 {
-    Element *element = this->HuertaErrorEstimatorI_giveElement();
+    BaseElement *element = this->HuertaErrorEstimatorI_giveElement();
     int inode, nodes = 2;
     FloatArray *corner [ 2 ], midNode, cor [ 2 ];
     double x = 0.0;
@@ -174,7 +174,7 @@ Truss1d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refi
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
-            corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
+            corner [ inode ] = element->giveElementGeometry()->giveNode(inode + 1)->giveCoordinates();
             if ( corner [ inode ]->giveSize() != 3 ) {
                 cor [ inode ].resize(3);
                 cor [ inode ].at(1) = corner [ inode ]->at(1);
@@ -432,7 +432,7 @@ Truss1d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {

@@ -44,12 +44,11 @@ REGISTER_BoundaryCondition(LinearEdgeLoad);
 IRResultType
 LinearEdgeLoad :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     BoundaryLoad :: initializeFrom(ir);
     if ( componentArray.giveSize() != nDofs * 2 ) {
-        _error("instanciateFrom: componentArray size mismatch");
+        OOFEM_ERROR("instanciateFrom: componentArray size mismatch");
     }
 
     int fType = 0;
@@ -60,7 +59,7 @@ LinearEdgeLoad :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, startCoords, _IFT_LinearEdgeLoad_startcoord);
         IR_GIVE_FIELD(ir, endCoords, _IFT_LinearEdgeLoad_endcoord);
         if ( startCoords.isEmpty() || endCoords.isEmpty() ) {
-            _error("instanciateFrom: coordinates not specified");
+            OOFEM_ERROR("instanciateFrom: coordinates not specified");
         }
     } else {
         this->formulation = FT_Entity;
@@ -98,14 +97,14 @@ LinearEdgeLoad :: computeNArray(FloatArray &answer, FloatArray &coords) const
         dir.subtract(startCoords);
 
         if ( ( ksi < -1.0 ) ||  ( ksi > 1.0 ) ) {
-            _warning2("computeNArray: point out of receiver, skipped", 1);
+            OOFEM_WARNING("computeNArray: point out of receiver, skipped", 1);
             answer.resize(2);
             answer.zero();
         }
 
         for ( i = 1; i <= dir.giveSize(); i++ ) {
             if ( fabs( startCoords.at(i) + dir.at(i) * eta - coords.at(i) ) > 1.e-6 ) {
-                _warning2("computeNArray: point out of receiver, skipped", 1);
+                OOFEM_WARNING("computeNArray: point out of receiver, skipped", 1);
                 answer.resize(2);
                 answer.zero();
             }

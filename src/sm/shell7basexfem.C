@@ -34,8 +34,8 @@
 
 #include "shell7basexfem.h"
 #include "shell7base.h"
-#include "enrichmentitem.h"
-#include "xfemmanager.h"
+#include "xfem/enrichmentitem.h"
+#include "xfem/xfemmanager.h"
 #include "dofmanager.h"
 #include "constantpressureload.h"
 #include "simpleinterfacemat.h"
@@ -1110,7 +1110,7 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
         }
         return;
     } else {
-        _error("Shell7BaseXFEM :: computeEdgeLoadVectorAt: load type not supported");
+        OOFEM_ERROR("Shell7BaseXFEM :: computeEdgeLoadVectorAt: load type not supported");
         return;
     }
 }
@@ -1165,7 +1165,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 #endif
         return;
     } else {
-        _error("Shell7Base :: computeSurfaceLoadVectorAt: load type not supported");
+        OOFEM_ERROR("Shell7Base :: computeSurfaceLoadVectorAt: load type not supported");
         return;
     }
 }

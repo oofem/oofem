@@ -123,7 +123,7 @@ InterfaceElement3dTrLin :: computeGlobalCoordinates(FloatArray &answer, const Fl
 bool
 InterfaceElement3dTrLin :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
 {
-    _error("Not implemented");
+    OOFEM_ERROR("Not implemented");
     return false;
 }
 

@@ -53,7 +53,6 @@ HangingNode :: HangingNode(int n, Domain *aDomain) : Node(n, aDomain)
 
 IRResultType HangingNode :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     Node :: initializeFrom(ir);
@@ -120,10 +119,10 @@ void HangingNode :: postInitialize()
         }
         this->masterElement = e->giveNumber();
     } else if ( !( e = this->giveDomain()->giveElementGeometry(this->masterElement) ) ) {
-        OOFEM_ERROR2("HangingNode :: postInitialize - Requested element %d doesn't exist.", this->masterElement);
+        OOFEM_ERROR("HangingNode :: postInitialize - Requested element %d doesn't exist.", this->masterElement);
     }
     if ( !( fei = e->giveInterpolation() ) ) {
-        OOFEM_ERROR2("HangingNode :: postInitialize - Requested element %d doesn't have a interpolator.", this->masterElement);
+        OOFEM_ERROR("HangingNode :: postInitialize - Requested element %d doesn't have a interpolator.", this->masterElement);
     }
 
     if ( lcoords.giveSize() == 0 ) { // we don't need to do this again if the spatial localizer was used.
@@ -138,7 +137,7 @@ void HangingNode :: postInitialize()
             DofIDItem id = sdof->giveDofID();
             fei = e->giveInterpolation(id);
             if ( !fei ) {
-                OOFEM_ERROR3("HangingNode :: postInitialize - Requested interpolation for dof id %d doesn't exist in element %d.",
+                OOFEM_ERROR("HangingNode :: postInitialize - Requested interpolation for dof id %d doesn't exist in element %d.",
                              id, this->masterElement);
             }
 #if 0 // This won't work (yet), as it requires some more general FEI classes, or something similar.

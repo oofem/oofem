@@ -38,6 +38,7 @@
 #include "floatmatrix.h"
 #include "dictionary.h"
 #include "range.h"
+#include "scalarfunction.h"
 
 #include <cstdlib>
 #include <cstdio>
@@ -111,7 +112,7 @@ OOFEMTXTInputRecord :: giveRecordKeywordField(std :: string &answer, int &value)
 
         return IRRT_OK;
     } else {
-        return IRRT_NOTFOUND;
+        return IRRT_BAD_FORMAT;
     }
 }
 
@@ -124,7 +125,7 @@ OOFEMTXTInputRecord :: giveRecordKeywordField(std :: string &answer)
 
         return IRRT_OK;
     } else {
-        return IRRT_NOTFOUND;
+        return IRRT_BAD_FORMAT;
     }
 }
 
@@ -366,7 +367,7 @@ OOFEMTXTInputRecord :: giveField(std :: list< Range > &list, InputFieldType id)
         setReadFlag(indx);
         rec = tokenizer.giveToken(++indx);
         if ( * rec != '{' ) {
-            OOFEM_WARNING("OOFEMTXTInputRecord::readRangeList: parse error - missing left '{'");
+            OOFEM_SIMPLE_WARNING("OOFEMTXTInputRecord::readRangeList: parse error - missing left '{'");
             list.clear();
             return IRRT_BAD_FORMAT;
         }
@@ -386,7 +387,7 @@ OOFEMTXTInputRecord :: giveField(std :: list< Range > &list, InputFieldType id)
 
         // test for enclosing bracket
         if ( * rec != '}' ) {
-            OOFEM_WARNING("OOFEMTXTInputRecord::readRangeList: parse error - missing end '}'");
+            OOFEM_SIMPLE_WARNING("OOFEMTXTInputRecord::readRangeList: parse error - missing end '}'");
             list.clear();
             return IRRT_BAD_FORMAT;
         }
@@ -407,37 +408,35 @@ OOFEMTXTInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
         setReadFlag(indx);
         rec = tokenizer.giveToken(++indx);
         if ( * rec == '@' ) {
-            // reference to function 
-	    int refVal;
-	    if ( scanInteger(rec+1, refVal) == 0 ) {
-	      return IRRT_BAD_FORMAT;
-	    }
-        setReadFlag(indx);
-	answer.setReference(refVal);
+            // reference to function
+            int refVal;
+            if ( scanInteger(rec + 1, refVal) == 0 ) {
+                return IRRT_BAD_FORMAT;
+            }
+            setReadFlag(indx);
+            answer.setReference(refVal);
+        } else if ( * rec == '$' ) {
+            // simple expression
+            std :: string expr;
 
-	} else if (* rec == '$' ) {
-	  // simple expression 
-	  std::string expr;
+            expr = std :: string( tokenizer.giveToken(indx) );
+            setReadFlag(indx);
+            std :: string _v = expr.substr(1, expr.size() - 2);
 
-	  expr = std :: string( tokenizer.giveToken(indx) );
-	  setReadFlag(indx);
-	  std::string _v = expr.substr(1,expr.size()-2);
+            answer.setSimpleExpression(_v); // get rid of enclosing '$'
+        } else {
+            double val;
+            if ( scanDouble(tokenizer.giveToken(indx), val) == 0 ) {
+                return IRRT_BAD_FORMAT;
+            }
 
-	  answer.setSimpleExpression(_v); // get rid of enclosing '$'
+            setReadFlag(indx);
+            answer.setValue(val);
+        }
 
-	} else {
-	  double val;
-	  if ( scanDouble(tokenizer.giveToken(indx), val) == 0 ) {
-            return IRRT_BAD_FORMAT;
-	  }
-
-	  setReadFlag(indx);
-	  answer.setValue(val);
-	}
-	  
         return IRRT_OK;
     } else {
-      return IRRT_NOTFOUND;
+        return IRRT_NOTFOUND;
     }
 }
 
@@ -553,7 +552,7 @@ OOFEMTXTInputRecord :: finish(bool wrn)
     }
 
     if ( wf ) {
-        OOFEM_WARNING( buff.str().c_str() );
+        OOFEM_SIMPLE_WARNING( buff.str().c_str() );
     }
 }
 
@@ -579,7 +578,7 @@ OOFEMTXTInputRecord :: __readSimpleString(const char *source, char *simpleString
     }
 
     if ( !curr ) {
-        OOFEM_ERROR("OOFEMTXTInputRecord::readSimpleString : unexpected end-of-line");
+        OOFEM_SIMPLE_ERROR("OOFEMTXTInputRecord::readSimpleString : unexpected end-of-line");
     }
 
     while ( ( !( isspace(* curr) || ! * curr ) ) && ( ++count < maxchar ) ) {
@@ -713,7 +712,7 @@ OOFEMTXTInputRecord :: readRange(const char **helpSource, int &li, int &hi)
         * helpSource = endptr;
         // test whitespaces
         if ( * * helpSource != ' ' && * * helpSource != '\t' ) {
-            OOFEM_WARNING("OOFEMTXTInputRecord::readRange: unexpected token while reading range value");
+            OOFEM_SIMPLE_WARNING("OOFEMTXTInputRecord::readRange: unexpected token while reading range value");
             return 0;
         }
 
@@ -730,7 +729,7 @@ OOFEMTXTInputRecord :: readRange(const char **helpSource, int &li, int &hi)
             ( * helpSource )++;
             return 1;
         } else {
-            OOFEM_WARNING("OOFEMTXTInputRecord::readRange: end ')' missing while parsing range value");
+            OOFEM_SIMPLE_WARNING("OOFEMTXTInputRecord::readRange: end ')' missing while parsing range value");
             return 0;
         }
     }
@@ -773,7 +772,7 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
                 if ( * endptr == ';' ) {
                     ( endptr )++;
                 } else {
-                    OOFEM_WARNING("OOFEMTXTInputRecord::readMatrix: missing row terminating semicolon");
+                    OOFEM_SIMPLE_WARNING("OOFEMTXTInputRecord::readMatrix: missing row terminating semicolon");
                     return 0;
                 }
             }
@@ -790,7 +789,7 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
             helpSource = endptr;
             return 1;
         } else {
-            OOFEM_WARNING("OOFEMTXTInputRecord::readMatrix: end '}' missing while parsing matrix value");
+            OOFEM_SIMPLE_WARNING("OOFEMTXTInputRecord::readMatrix: end '}' missing while parsing matrix value");
             return 0;
         }
     } else {
@@ -805,6 +804,9 @@ void
 OOFEMTXTInputRecord :: report_error(const char *_class, const char *proc, InputFieldType id,
                                     IRResultType result, const char *file, int line)
 {
-    __OOFEM_ERROR6(file, line, "Input error on line %d: \"%s\", field keyword \"%s\"\n%s::%s", lineNumber, strerror(result), id, _class, proc);
+    oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line,
+                              "Input error on line %d: \"%s\", field keyword \"%s\"\n%s::%s",
+                              lineNumber, strerror(result), id, _class, proc);
+    oofem_exit(1); ///@todo We should never directly exit when dealing with user input.
 }
 } // end namespace oofem

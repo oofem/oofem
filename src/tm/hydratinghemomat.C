@@ -47,7 +47,6 @@ REGISTER_Material(HydratingHeMoMaterial);
 IRResultType
 HydratingHeMoMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
     int value;
     double dvalue;
@@ -112,7 +111,7 @@ HydratingHeMoMaterial :: setMixture(MixtureType mix)
     if ( hydrationModel ) {
         hydrationModel->setMixture(mix);
     } else if ( hydration ) {
-        _error("setMixture: Can't setup undefined hydrationModel.");
+        OOFEM_ERROR("setMixture: Can't setup undefined hydrationModel.");
     }
 }
 
@@ -233,7 +232,7 @@ HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoi
             }
         }
     } else {
-        _error2( "giveCharacteristicValue: unknown MatResponseMode (%s)", __MatResponseModeToString(rmode) );
+        OOFEM_ERROR( "giveCharacteristicValue: unknown MatResponseMode (%s)", __MatResponseModeToString(rmode) );
     }
 
     return answer;

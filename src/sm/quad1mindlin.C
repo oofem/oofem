@@ -57,6 +57,7 @@ Quad1Mindlin :: Quad1Mindlin(int n, Domain *aDomain) :
 {
     numberOfGaussPoints = 4;
     numberOfDofMans = 4;
+    this->reducedIntegrationFlag = false;
 }
 
 
@@ -89,7 +90,7 @@ Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeS
     FloatArray force, gravity, n;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        _error("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("computeBodyLoadVectorAt: unknown load type");
     }
 
     // note: force is assumed to be in global coordinate system.
@@ -126,8 +127,8 @@ Quad1Mindlin :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, in
 // Returns the [5x9] strain-displacement matrix {B} of the receiver,
 // evaluated at gp.
 {
-    FloatArray n;
-    FloatMatrix dn;
+    FloatArray n, ns;
+    FloatMatrix dn, dns;
 
     this->interp_lin.evaldNdx( dn, * gp->giveCoordinates(),  FEIElementGeometryWrapper(this) );
     this->interp_lin.evalN( n, * gp->giveCoordinates(),  FEIElementGeometryWrapper(this) );
@@ -135,17 +136,29 @@ Quad1Mindlin :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, in
     answer.resize(5, 12);
     answer.zero();
 
+
+// enforce one-point reduced integration if requested
+    if ( this->reducedIntegrationFlag ) {
+        FloatArray lc(2);
+        lc.zero(); // set to element center coordinates
+
+        this->interp_lin.evaldNdx( dns, lc, FEIElementGeometryWrapper(this));
+        this->interp_lin.evalN( ns, lc,  FEIElementGeometryWrapper(this));
+     } else {
+        dns = dn;
+        ns = n;
+    }
     ///@todo Check sign here
     for ( int i = 0; i < 4; ++i ) {
-        answer(0, 1 + i * 3) = dn(i, 0);
-        answer(1, 2 + i * 3) = dn(i, 1);
-        answer(2, 1 + i * 3) = dn(i, 1);
-        answer(2, 2 + i * 3) = dn(i, 0);
+        answer(0, 2 + i * 3) = dn(i, 0); // kappa_x = d(fi_y)/dx
+        answer(1, 1 + i * 3) = -dn(i, 1); // kappa_y = -d(fi_x)/dy
+        answer(2, 2 + i * 3) = dn(i, 1); // kappa_xy=d(fi_y)/dy-d(fi_x)/dx
+        answer(2, 1 + i * 3) = -dn(i, 0);
 
-        answer(3, 0 + i * 3) = -dn(i, 0);
-        answer(3, 1 + i * 3) = n(i);
-        answer(4, 0 + i * 3) = -dn(i, 1);
-        answer(4, 2 + i * 3) = n(i);
+        answer(3, 0 + i * 3) = dns(i, 0); // gamma_xz = fi_y+dw/dx
+        answer(3, 2 + i * 3) = ns(i);
+        answer(4, 0 + i * 3) = dns(i, 1); // gamma_yz = -fi_x+dw/dy
+        answer(4, 1 + i * 3) = -ns(i);
     }
 }
 
@@ -168,6 +181,7 @@ IRResultType
 Quad1Mindlin :: initializeFrom(InputRecord *ir)
 {
     this->numberOfGaussPoints = 4;
+    this->reducedIntegrationFlag = ir->hasField(_IFT_Quad1Mindlin_ReducedIntegration);
     return this->NLStructuralElement :: initializeFrom(ir);
 }
 
@@ -236,10 +250,10 @@ Quad1Mindlin :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 int
 Quad1Mindlin :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    if ( type == IST_ShellForceMomentumTensor ) {
+    if ( type == IST_ShellForceTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         return 1;
-    } else if ( type == IST_ShellStrainCurvatureTensor ) {
+    } else if ( type == IST_ShellStrainTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
@@ -273,7 +287,7 @@ Quad1Mindlin :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     } else if ( iEdge == 4 ) { // edge between nodes 4 1
         answer.setValues(6, 10, 11, 12, 1, 2, 3);
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("giveEdgeDofMapping: wrong edge number");
     }
 }
 

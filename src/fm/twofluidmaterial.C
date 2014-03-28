@@ -61,7 +61,7 @@ TwoFluidMaterial :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->slaveMaterial, _IFT_TwoFluidMaterial_mat);
     if ( this->slaveMaterial.giveSize() != 2 ) {
-        _error("initializeFrom: mat array should have two values\n");
+        OOFEM_ERROR("initializeFrom: mat array should have two values\n");
     }
 
     return IRRT_OK;
@@ -159,7 +159,7 @@ TwoFluidMaterial :: giveTempVOF(GaussPoint *gp)
         mi->giveElementMaterialMixture( vof, gp->giveElementGeometry()->giveNumber() );
 
         if ( ( vof.at(1) < 0. ) || ( vof.at(1) > 1.0 ) ) {
-            _error2( "giveTempVOF: vof value out of range (vof=%lf)", vof.at(1) );
+            OOFEM_ERROR( "giveTempVOF: vof value out of range (vof=%lf)", vof.at(1) );
         }
 
         return vof.at(1);

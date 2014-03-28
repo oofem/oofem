@@ -302,7 +302,7 @@ LTRSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 
@@ -327,7 +327,7 @@ LTRSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *ref
                                                              IntArray &controlNode, IntArray &controlDof,
                                                              HuertaErrorEstimator :: AnalysisMode aMode)
 {
-    Element *element = this->HuertaErrorEstimatorI_giveElement();
+    BaseElement *element = this->HuertaErrorEstimatorI_giveElement();
     FloatArray *corner [ 4 ], midSide [ 6 ], midFace [ 4 ], midNode;
     double x = 0.0, y = 0.0, z = 0.0;
     int inode, nodes = 4, iside, sides = 6, iface, faces = 4, nd, nd1, nd2;
@@ -345,7 +345,7 @@ LTRSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *ref
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
-            corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
+            corner [ inode ] = element->giveElementGeometry()->giveNode(inode + 1)->giveCoordinates();
 
             x += corner [ inode ]->at(1);
             y += corner [ inode ]->at(2);
@@ -652,7 +652,7 @@ LTRSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray 
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -828,7 +828,7 @@ LTRSpace :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(5) = 11;
         answer.at(6) = 12;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("giveEdgeDofMapping: wrong edge number");
     }
 }
 
@@ -859,7 +859,7 @@ LTRSpace :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
     //
     // i.e. f(element local) = T * f(edge local)
     //
-    _error("computeLoadLEToLRotationMatrix: egde local coordinate system not supported");
+    OOFEM_ERROR("computeLoadLEToLRotationMatrix: egde local coordinate system not supported");
     return 1;
 }
 
@@ -938,7 +938,7 @@ LTRSpace :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
         answer.at(8) = 8;
         answer.at(9) = 9;
     } else {
-        _error("giveSurfaceDofMapping: wrong surface number");
+        OOFEM_ERROR("giveSurfaceDofMapping: wrong surface number");
     }
 }
 
@@ -979,7 +979,7 @@ LTRSpace :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int is
 int
 LTRSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *)
 {
-    _error("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
+    OOFEM_ERROR("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
     return 1;
 }
 } // end namespace oofem

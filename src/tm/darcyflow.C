@@ -138,7 +138,7 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
                                             tStep);
 
     if ( status & NM_NoSuccess ) {
-        OOFEM_ERROR2( "DarcyFlow :: couldn't solve for time step %d\n", tStep->giveNumber() );
+        OOFEM_ERROR( "DarcyFlow :: couldn't solve for time step %d\n", tStep->giveNumber() );
     }
 
 #define DUMPMATRICES 0
@@ -191,7 +191,7 @@ void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
     if ( type == P_f ) {
         iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, 1);
     } else {
-        _error("printDofOutputAt: unsupported dof type");
+        OOFEM_ERROR("printDofOutputAt: unsupported dof type");
     }
 }
 
@@ -225,7 +225,7 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
         break;
 
     default:
-        _error2("updateComponent: Unknown component id (%d)", ( int ) cmpn);
+        OOFEM_ERROR("updateComponent: Unknown component id (%d)", ( int ) cmpn);
     }
 }
 

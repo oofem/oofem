@@ -130,12 +130,12 @@ public:
     int giveNumberOfEnrDofs() const;
 
     // Spatial query
-    bool isElementEnriched(const Element *element) const;
+    bool isElementEnriched(const ElementGeometry *element) const;
     inline bool isDofManEnriched(const DofManager &iDMan) const;
     int  giveNumDofManEnrichments(const DofManager &iDMan) const;
 
     // Returns true if the enrichment item assigns a different material to the Gauss point
-    virtual bool isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const;
+    virtual bool isMaterialModified(GaussPoint &iGP, ElementGeometry &iEl, CrossSection * &opCS) const;
 
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep) { };
@@ -187,8 +187,8 @@ public:
 
     void createEnrichedDofs();
 
-    virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, std :: vector< double > &oMinDistArcPos) const;
-    virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, const Triangle &iTri, std :: vector< double > &oMinDistArcPos) const;
+    virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, ElementGeometry *element, std :: vector< double > &oMinDistArcPos) const;
+    virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, ElementGeometry *element, const Triangle &iTri, std :: vector< double > &oMinDistArcPos) const;
 
 
     // Return the coordinates of the tip in element iElIndex,
@@ -274,7 +274,7 @@ public:
     virtual ~Inclusion();
 
     // Returns true if the enrichment item assigns a different material to the Gauss point
-    virtual bool isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const;
+    virtual bool isMaterialModified(GaussPoint &iGP, ElementGeometry &iEl, CrossSection * &opCS) const;
 
 
     virtual const char *giveClassName() const { return "Inclusion"; }

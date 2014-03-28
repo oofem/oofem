@@ -237,7 +237,7 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    virtual void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) { _error("IsotropicDamageMaterial: computeEta is not implemented"); }
+    virtual void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep) { OOFEM_SIMPLE_ERROR("IsotropicDamageMaterial: computeEta is not implemented"); }
     /**
      * Computes the value of damage parameter omega, based on given value of equivalent strain.
      * @param[out] omega Contains result.
@@ -270,7 +270,7 @@ protected:
      * @param gp Integration point.
      */
     virtual double damageFunctionPrime(double kappa, GaussPoint *gp) {
-        _error("IsotropicDamageMaterial: damageFunctionPrime is not implemented");
+        OOFEM_ERROR("IsotropicDamageMaterial: damageFunctionPrime is not implemented");
         return 0;
     }
 

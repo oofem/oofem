@@ -60,7 +60,7 @@ CCTPlate3d :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
     FloatArray offset;
     // test the parametr
     if ( global.giveSize() != 3 ) {
-        _error("giveLocalCoordinate : cannot transform coordinates - size mismatch");
+        OOFEM_ERROR("giveLocalCoordinate : cannot transform coordinates - size mismatch");
         exit(1);
     }
 
@@ -268,7 +268,7 @@ CCTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         answer.at(1, 2) = charVect.at(3) / 2.;
         answer.at(2, 1) = charVect.at(3) / 2.;
     } else {
-        _error("GiveCharacteristicTensor: unsupported tensor mode");
+        OOFEM_ERROR("GiveCharacteristicTensor: unsupported tensor mode");
         exit(1);
     }
 
@@ -288,8 +288,8 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
     answer.resize(12);
 
-    if ( ( type == IST_ShellForceMomentumTensor ) || ( type == IST_ShellStrainCurvatureTensor ) ) {
-        if ( type == IST_ShellForceMomentumTensor ) {
+    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellStrainTensor ) ) {
+        if ( type == IST_ShellForceTensor ) {
             cht = GlobalForceTensor;
         } else {
             cht = GlobalStrainTensor;
@@ -304,7 +304,7 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer.at(5) = globTensor.at(1, 3); //qxzForce
         answer.at(6) = globTensor.at(1, 2); //qxyForce
 
-        if ( type == IST_ShellForceMomentumTensor ) {
+        if ( type == IST_ShellForceTensor ) {
             cht = GlobalMomentumTensor;
         } else {
             cht = GlobalCurvatureTensor;
@@ -341,7 +341,7 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
     FloatMatrix T;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        _error("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("computeBodyLoadVectorAt: unknown load type");
     }
 
     GaussIntegrationRule irule(1, this, 1, 5);
@@ -402,14 +402,14 @@ CCTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
 
             fprintf( file, "  GP %2d.%-2d :", i + 1, gp->giveNumber() );
 
-            this->giveIPValue(v, gp, IST_ShellStrainCurvatureTensor, tStep);
+            this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
             fprintf(file, "  strains ");
             fprintf( file,
                     " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
                     v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
                     v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
 
-            this->giveIPValue(v, gp, IST_ShellForceMomentumTensor, tStep);
+            this->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
             fprintf(file, "\n              stresses");
             fprintf( file,
                     " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",

@@ -160,7 +160,7 @@ StructuralInterfaceMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, Ma
 void
 StructuralInterfaceMaterial :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    _error("give3dStiffnessMatrix_dTdj: not implemented ")
+    OOFEM_ERROR("give3dStiffnessMatrix_dTdj: not implemented ")
 }
 
 void

@@ -254,7 +254,7 @@ TrPlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(3) = 1;
         answer.at(4) = 2;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("giveEdgeDofMapping: wrong edge number");
     }
 }
 
@@ -300,7 +300,7 @@ TrPlaneStress2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge
         aNode = 3;
         bNode = 1;
     } else {
-        _error("computeLoadLEToLRotationMatrix: wrong egde number");
+        OOFEM_ERROR("computeLoadLEToLRotationMatrix: wrong egde number");
     }
 
     nodeA   = this->giveNode(aNode);
@@ -436,13 +436,13 @@ TrPlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCr
         }
 
         if ( dPhidN == 0. ) {
-            _error("Zero value of dPhidN in TrPlaneStress2d :: giveCharacteristicSize\n");
+            OOFEM_ERROR("Zero value of dPhidN in TrPlaneStress2d :: giveCharacteristicSize\n");
         }
 
         return 1. / fabs(dPhidN);
     }
 
-    _error("TrPlaneStress2d :: giveCharacteristicSize: invalid method");
+    OOFEM_ERROR("TrPlaneStress2d :: giveCharacteristicSize: invalid method");
     return 0.;
 }
 
@@ -478,7 +478,7 @@ TrPlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedEleme
                                                                     IntArray &controlNode, IntArray &controlDof,
                                                                     HuertaErrorEstimator :: AnalysisMode aMode)
 {
-    Element *element = this->HuertaErrorEstimatorI_giveElement();
+    BaseElement *element = this->HuertaErrorEstimatorI_giveElement();
     int inode, nodes = 3, iside, sides = 3, nd1, nd2;
     FloatArray *corner [ 3 ], midSide [ 3 ], midNode, cor [ 3 ];
     double x = 0.0, y = 0.0;
@@ -488,7 +488,7 @@ TrPlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedEleme
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
-            corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
+            corner [ inode ] = element->giveElementGeometry()->giveNode(inode + 1)->giveCoordinates();
             if ( corner [ inode ]->giveSize() != 3 ) {
                 cor [ inode ].resize(3);
                 cor [ inode ].at(1) = corner [ inode ]->at(1);
@@ -796,7 +796,7 @@ TrPlaneStress2d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &ans
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 
@@ -832,7 +832,7 @@ TrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Floa
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {

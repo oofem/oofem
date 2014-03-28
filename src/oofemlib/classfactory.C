@@ -38,7 +38,6 @@
 #ifdef HAVE_STRINGS_H
  #include <strings.h>
 #endif
-#include "compiler.h"
 
 #include "masterdof.h"
 #include "slavedof.h"

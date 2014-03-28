@@ -386,7 +386,6 @@ TrabBoneNL3D :: giveInterface(InterfaceType type)
 IRResultType
 TrabBoneNL3D :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
     TrabBone3D :: initializeFrom(ir);

@@ -208,7 +208,7 @@ LEPlic :: doLagrangianPhase(TimeStep *tStep)
         FM_FieldPtr vfield;
         vfield = emodel->giveContext()->giveFieldManager()->giveField(FT_Velocity);
         if ( vfield == NULL ) {
-            _error("doLagrangianPhase: Velocity field not available");
+            OOFEM_ERROR("doLagrangianPhase: Velocity field not available");
         }
 
         err = vfield->evaluateAt(v_tn1, x2, VM_Total, tStep);
@@ -216,7 +216,7 @@ LEPlic :: doLagrangianPhase(TimeStep *tStep)
             // point outside domain -> be explicit
             v_tn1 = v_t;
         } else if ( err != 0 ) {
-            _error2("doLagrangianPhase: vfield->evaluateAt failed, error code %d", err);
+            OOFEM_ERROR("doLagrangianPhase: vfield->evaluateAt failed, error code %d", err);
         }
 
         // compute final updated position
@@ -342,7 +342,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *tStep)
 #endif
                 double err = fabs(matVol - matVolSum) / matVol;
                 if ( ( err > 1.e-12 ) && ( fabs(matVol - matVolSum) > 1.e-4 ) && ( matVol > 1.e-6 ) ) {
-                    OOFEM_WARNING4("LEPlic::doInterfaceRemapping:  volume inconsistency %5.2f%%\n\ttstep %d, element %d\n", err * 100, tStep->giveNumber(), ie);
+                    OOFEM_WARNING("LEPlic::doInterfaceRemapping:  volume inconsistency %5.2f%%\n\ttstep %d, element %d\n", err * 100, tStep->giveNumber(), ie);
                 }
 
 #if 0
@@ -642,7 +642,7 @@ LEPlic :: findCellLineConstant(double &p, FloatArray &fvgrad, int ie, bool coord
 #endif
         } else {
             //fprintf (stderr, "target_vof = %le, fvi=%le\n", target_vof, fvi);
-            OOFEM_ERROR3("LEPlic::findCellLineConstant: finding lower and uper bounds of line constant value failed (lowerVOF = %lf, upperVOF=%lf)", lower_vof, upper_vof);
+            OOFEM_ERROR("LEPlic::findCellLineConstant: finding lower and uper bounds of line constant value failed (lowerVOF = %lf, upperVOF=%lf)", lower_vof, upper_vof);
         }
     }
 }
@@ -650,7 +650,6 @@ LEPlic :: findCellLineConstant(double &p, FloatArray &fvgrad, int ie, bool coord
 IRResultType
 LEPlic :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;
 
     orig_reference_fluid_volume = 0.0;

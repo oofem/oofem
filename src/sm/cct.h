@@ -137,7 +137,7 @@ public:
     virtual int SPRNodalRecoveryMI_giveNumberOfIP() { return 1; }
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
     // ZZErrorEstimatorInterface
-    virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
+    virtual ElementGeometry *ZZErrorEstimatorI_giveElementGeometry() { return this; }
 
     // ZZRemeshingCriteriaInterface
     virtual double ZZRemeshingCriteriaI_giveCharacteristicSize();

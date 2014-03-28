@@ -76,7 +76,6 @@ StokesFlow :: ~StokesFlow()
 
 IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
     int val;
 
@@ -139,7 +138,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     if ( !this->stiffnessMatrix ) {
         this->stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( !this->stiffnessMatrix ) {
-            OOFEM_ERROR2("StokesFlow :: solveYourselfAt - Couldn't create requested sparse matrix of type %d", sparseMtrxType);
+            OOFEM_ERROR("StokesFlow :: solveYourselfAt - Couldn't create requested sparse matrix of type %d", sparseMtrxType);
         }
 
         this->stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering() );
@@ -188,7 +187,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 #endif
 
     if ( !( status & NM_Success ) ) {
-        OOFEM_ERROR2( "No success in solving problem at time step", tStep->giveNumber() );
+        OOFEM_ERROR( "No success in solving problem at time step", tStep->giveNumber() );
     }
 
 
@@ -281,7 +280,7 @@ int StokesFlow :: checkConsistency()
     for ( int i = 1; i <= nelem; i++ ) {
         sePtr = dynamic_cast< FMElement * >( domain->giveElement(i) );
         if ( sePtr == NULL ) {
-            OOFEM_WARNING2("Element %d has no FMElement base", i);
+            OOFEM_WARNING("Element %d has no FMElement base", i);
             return false;
         }
     }

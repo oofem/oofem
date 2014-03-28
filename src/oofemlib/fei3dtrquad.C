@@ -210,7 +210,7 @@ FEI3dTrQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         bNode = 1;
         cNode = 6;
     } else {
-        OOFEM_ERROR2("FEI3dTrQuad :: computeEdgeMapping: wrong egde number (%d)", iedge);
+        OOFEM_ERROR("FEI3dTrQuad :: computeEdgeMapping: wrong egde number (%d)", iedge);
     }
 
     edgeNodes.at(1) = aNode;

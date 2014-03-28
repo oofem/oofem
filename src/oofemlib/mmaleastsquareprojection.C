@@ -52,7 +52,7 @@ MMALeastSquareProjection :: MMALeastSquareProjection() : MaterialMappingAlgorith
 MMALeastSquareProjection :: ~MMALeastSquareProjection() { }
 
 void
-MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP)
+MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, Set &elemSet, TimeStep *tStep, bool iCohesiveZoneGP)
 //(Domain* dold, IntArray& varTypes, GaussPoint* gp, TimeStep* tStep)
 {
     GaussPoint *sourceIp;
@@ -66,10 +66,10 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
 
     this->patchDomain = dold;
     // find the closest IP on old mesh
-    sourceElement = sl->giveElementContainingPoint(coords);
+    sourceElement = sl->giveElementContainingPoint(coords, elemSet);
 
     if ( !sourceElement ) {
-        OOFEM_ERROR("MMALeastSquareProjection::__init: no suitable source element found");
+        OOFEM_ERROR("no suitable source element found");
     }
 
     // determine the type of patch
@@ -79,7 +79,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     } else if ( ( egt == EGT_triangle_1 ) || ( egt == EGT_quad_1 ) ) {
         this->patchType = MMALSPPatchType_2dq;
     } else {
-        OOFEM_ERROR("MMALeastSquareProjection::__init: unsupported material mode");
+        OOFEM_ERROR("unsupported material mode");
     }
 
     /* Determine the state of closest point.
@@ -100,7 +100,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     }
 
     // from source neighbours the patch will be constructed
-    ElementGeometry *elementGeometry;
+    ElementGeometry *element;
     IntArray neighborList;
     patchList.resize(1);
     patchList.at(1) = sourceElement->giveNumber();
@@ -118,17 +118,17 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
         actualNumberOfPoints = 0;
         for ( int i = 1; i <= neighborList.giveSize(); i++ ) {
             if ( this->stateFilter ) {
-                elementGeometry = patchDomain->giveElementGeometry( neighborList.at(i) );
+	      element = patchDomain->giveElement( neighborList.at(i) )->giveElementGeometry();
                 // exclude elements in different regions
-                if ( this->regionFilter && ( elementGeometry->giveRegionNumber() != region ) ) {
+                if ( !elemSet.hasElement( element->giveNumber() ) ) {
                     continue;
                 }
 
-                iRule = elementGeometry->giveDefaultIntegrationRulePtr();
+                iRule = element->giveDefaultIntegrationRulePtr();
                 nip = iRule->giveNumberOfIntegrationPoints();
                 elemFlag = 0;
                 for ( int j = 0; j < nip; j++ ) {
-                    elementGeometry->giveIPValue(dam, iRule->getIntegrationPoint(j), IST_PrincipalDamageTensor, tStep);
+                    element->giveIPValue(dam, iRule->getIntegrationPoint(j), IST_PrincipalDamageTensor, tStep);
                     if ( state && ( dam.computeNorm() > 1.e-3 ) ) {
                         actualNumberOfPoints++;
                         elemFlag = 1;
@@ -136,20 +136,19 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
                         actualNumberOfPoints++;
                         elemFlag = 1;
                     }
-                }
-
-                if ( elemFlag ) {
+		}
+		if ( elemFlag ) {
                     // include this element with corresponding state in neighbor search.
                     patchList.followedBy(neighborList.at(i), 10);
                 }
             } else { // if (! yhis->stateFilter)
-                elementGeometry = patchDomain->giveElementGeometry( neighborList.at(i) );
+	      element = patchDomain->giveElement( neighborList.at(i) )->giveElementGeometry();
                 // exclude elements in different regions
-                if ( this->regionFilter && ( elementGeometry->giveRegionNumber() != region ) ) {
+                if ( !elemSet.hasElement( element->giveNumber() ) ) {
                     continue;
                 }
 
-                actualNumberOfPoints += elementGeometry->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
+                actualNumberOfPoints += element->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
 
                 patchList.followedBy(neighborList.at(i), 10);
             }
@@ -161,7 +160,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     if ( nite > 2 ) {
         // not enough points -> take closest point projection
         patchGPList.clear();
-        sourceIp = sl->giveClosestIP(coords, region);
+        sourceIp = sl->giveClosestIP(coords, elemSet);
         patchGPList.push_front(sourceIp);
         //fprintf(stderr, "MMALeastSquareProjection: too many neighbor search iterations\n");
         //exit (1);
@@ -176,17 +175,17 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     int npoints = 0;
     // check allocation of gpList
     if ( gpList == NULL ) {
-        OOFEM_ERROR("MMALeastSquareProjection::__init:  memory allocation error");
+        OOFEM_FATAL("memory allocation error");
     }
 
     for ( int ielem = 1; ielem <= patchList.giveSize(); ielem++ ) {
-        elementGeometry = patchDomain->giveElementGeometry( patchList.at(ielem) );
-        iRule = elementGeometry->giveDefaultIntegrationRulePtr();
+        element = patchDomain->giveElement( patchList.at(ielem) );
+        iRule = element->giveDefaultIntegrationRulePtr();
         nip = iRule->giveNumberOfIntegrationPoints();
         for ( int i = 0; i < nip; i++ ) {
             srcgp  = iRule->getIntegrationPoint(i);
-            if ( elementGeometry->computeGlobalCoordinates( srcgpcoords, * ( srcgp->giveCoordinates() ) ) ) {
-                elementGeometry->giveIPValue(dam, srcgp, IST_PrincipalDamageTensor, tStep);
+            if ( element->computeGlobalCoordinates( srcgpcoords, * ( srcgp->giveCoordinates() ) ) ) {
+                element->giveIPValue(dam, srcgp, IST_PrincipalDamageTensor, tStep);
                 if ( this->stateFilter ) {
                     // consider only points with same state
                     if ( ( ( state == 1 ) && ( norm(dam) > 1.e-3 ) ) || ( ( ( state == 0 ) && norm(dam) < 1.e-3 ) ) ) {
@@ -201,13 +200,12 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
                     gpList [ npoints - 1 ] = srcgp;
                 }
             } else {
-                _error("init: computeGlobalCoordinates failed");
+                OOFEM_ERROR("computeGlobalCoordinates failed");
             }
         }
     }
-
-    if ( npoints != actualNumberOfPoints ) {
-        OOFEM_ERROR(stderr, "MMALeastSquareProjection::__init: internal error");
+     if ( npoints != actualNumberOfPoints ) {
+        OOFEM_ERROR("internal error");
     }
 
     //minNumberOfPoints = min (actualNumberOfPoints, minNumberOfPoints+2);
@@ -240,7 +238,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     }
 
     if ( patchGPList.size() != minNumberOfPoints ) {
-        OOFEM_ERROR("MMALeastSquareProjection: internal error 2\n");
+        OOFEM_ERROR("internal error 2\n");
         exit(1);
     }
 
@@ -251,8 +249,8 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     // take all neighbors
     patchGPList.clear();
     for ( int ielem = 1; ielem <= patchList.giveSize(); ielem++ ) {
-        elementGeometry = patchDomain->giveElementGeometry( patchList.at(ielem) );
-        iRule = elementGeometry->giveDefaultIntegrationRulePtr();
+      element = patchDomain->giveElement( patchList.at(ielem) )->giveElementGeometry();
+        iRule = element->giveDefaultIntegrationRulePtr();
         nip = iRule->giveNumberOfIntegrationPoints();
         for ( int i = 0; i < nip; i++ ) {
             patchGPList.push_front( iRule->getIntegrationPoint(i) );
@@ -261,7 +259,6 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
 
 #endif
 }
-
 
 void
 MMALeastSquareProjection :: finish(TimeStep *tStep)
@@ -423,7 +420,6 @@ MMALeastSquareProjection :: giveNumberOfUnknownPolynomialCoefficients(MMALeastSq
 IRResultType
 MMALeastSquareProjection :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     this->stateFilter = 0;

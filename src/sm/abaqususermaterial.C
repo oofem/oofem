@@ -107,13 +107,13 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
 #else
     this->umatobj = dlopen(filename.c_str(), RTLD_NOW);
     if ( !this->umatobj ) {
-        OOFEM_ERROR3( "AbaqusUserMaterial :: initializeFrom - couldn't load \"%s\",\ndlerror: %s", filename.c_str(), dlerror() );
+        OOFEM_ERROR( "AbaqusUserMaterial :: initializeFrom - couldn't load \"%s\",\ndlerror: %s", filename.c_str(), dlerror() );
     }
 
     * ( void ** ) ( & this->umat ) = dlsym(this->umatobj, "umat_");
     char *dlresult = dlerror();
     if ( dlresult ) {
-        OOFEM_ERROR2("AbaqusUserMaterial :: initializeFrom - couldn't load symbol umat,\ndlerror: %s\n", dlresult);
+        OOFEM_ERROR("AbaqusUserMaterial :: initializeFrom - couldn't load symbol umat,\ndlerror: %s\n", dlresult);
     }
 
 #endif

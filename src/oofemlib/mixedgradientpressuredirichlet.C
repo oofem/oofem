@@ -183,7 +183,7 @@ double MixedGradientPressureDirichlet :: giveUnknown(double vol, const FloatArra
     FloatArray *coords = dof->giveDofManager()->giveCoordinates();
 
     if ( coords == NULL || coords->giveSize() != this->centerCoord.giveSize() ) {
-        OOFEM_ERROR2( "MixedGradientPressureDirichlet :: give - Size of coordinate system different from center coordinate (%d) in b.c.", this->centerCoord.giveSize() );
+        OOFEM_ERROR( "MixedGradientPressureDirichlet :: give - Size of coordinate system different from center coordinate (%d) in b.c.", this->centerCoord.giveSize() );
     }
 
     FloatArray dx;
@@ -268,7 +268,7 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
     Kpf = classFactory.createSparseMtrx(stype);
     Kpp = classFactory.createSparseMtrx(stype);
     if ( !Kff ) {
-        OOFEM_ERROR2("MixedGradientPressureDirichlet :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
+        OOFEM_ERROR("MixedGradientPressureDirichlet :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, 1, eid, fnum);
     Kfp->buildInternalStructure(rve, 1, eid, fnum, pnum);
@@ -436,7 +436,6 @@ bool MixedGradientPressureDirichlet :: isDevDof(ActiveDof *dof)
 
 IRResultType MixedGradientPressureDirichlet :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     MixedGradientPressureBC :: initializeFrom(ir);

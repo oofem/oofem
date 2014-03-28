@@ -58,7 +58,7 @@ TrPlaneStrRot3d :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
 {
     // test the parameter
     if ( global.giveSize() != 3 ) {
-        _error("giveLocalCoordinate : cannot transform coordinates - size mismatch");
+        OOFEM_ERROR("giveLocalCoordinate : cannot transform coordinates - size mismatch");
         exit(1);
     }
 
@@ -209,7 +209,7 @@ TrPlaneStrRot3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type
 
         answer.at(3, 3) = charVect.at(4);
     } else {
-        _error("GiveCharacteristicTensor: unsupported tensor mode");
+        OOFEM_ERROR("GiveCharacteristicTensor: unsupported tensor mode");
         exit(1);
     }
 
@@ -229,8 +229,8 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
 
     answer.resize(12);
 
-    if ( ( type == IST_ShellForceMomentumTensor ) || ( type == IST_ShellStrainCurvatureTensor ) ) {
-        if ( type == IST_ShellForceMomentumTensor ) {
+    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellStrainTensor ) ) {
+        if ( type == IST_ShellForceTensor ) {
             cht = GlobalForceTensor;
         } else {
             cht = GlobalStrainTensor;
@@ -247,7 +247,7 @@ TrPlaneStrRot3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
         // mutiply stresses by thickness to get forces
         answer.times( this->giveCrossSection()->give(CS_Thickness, gp) );
 
-        if ( type == IST_ShellForceMomentumTensor ) {
+        if ( type == IST_ShellForceTensor ) {
             cht = GlobalMomentumTensor;
         } else {
             cht = GlobalCurvatureTensor;
@@ -284,7 +284,7 @@ TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Ti
     FloatMatrix T;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        _error("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("computeBodyLoadVectorAt: unknown load type");
     }
 
     // note: force is assumed to be in global coordinate system.
@@ -340,14 +340,14 @@ TrPlaneStrRot3d :: printOutputAt(FILE *file, TimeStep *tStep)
 
             fprintf( file, "  GP %2d.%-2d :", i + 1, gp->giveNumber() );
 
-            this->giveIPValue(v, gp, IST_ShellStrainCurvatureTensor, tStep);
+            this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
             fprintf(file, "  strains ");
             fprintf( file,
                     " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
                     v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
                     v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
 
-            this->giveIPValue(v, gp, IST_ShellForceMomentumTensor, tStep);
+            this->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
             fprintf(file, "\n              stresses");
             fprintf( file,
                     " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",

@@ -71,7 +71,9 @@ public:
     /// Destructor.
     virtual ~ZZNodalRecoveryModel();
 
-    virtual int recoverValues(InternalStateType type, TimeStep *tStep);
+    virtual int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep);
+
+    virtual const char *giveClassName() const { return "ZZNodalRecoveryModel"; }
 
 private:
     /**

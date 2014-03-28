@@ -636,7 +636,7 @@ protected:
      */
 
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer, ElementGeometry* elemeGeometry) {
-        OOFEM_ERROR("NLStructuralElement::computeBHmatrixAt : method not implemented for this element");
+        OOFEM_SIMPLE_ERROR("NLStructuralElement::computeBHmatrixAt : method not implemented for this element");
         return;
     }
 

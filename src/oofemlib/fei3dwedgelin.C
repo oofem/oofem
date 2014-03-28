@@ -210,7 +210,7 @@ FEI3dWedgeLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
     } else if ( iedge == 9 ) {
         edgeNodes.setValues(2, 3, 6);
     } else {
-        OOFEM_ERROR2("FEI3dWedgeQuad :: computeLocalEdgeMapping - Edge %d doesn't exist.\n", iedge);
+        OOFEM_ERROR("FEI3dWedgeQuad :: computeLocalEdgeMapping - Edge %d doesn't exist.\n", iedge);
     }
 }
 
@@ -275,7 +275,7 @@ FEI3dWedgeLin :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
     } else if ( isurf == 5 ) {
         nodes.setValues(4, 3, 1, 4, 6);
     } else {
-        OOFEM_ERROR2("FEI3dWedgeQuad :: computeLocalSurfaceMapping - Surface %d doesn't exist.\n", isurf);
+        OOFEM_ERROR("FEI3dWedgeQuad :: computeLocalSurfaceMapping - Surface %d doesn't exist.\n", isurf);
     }
 }
 

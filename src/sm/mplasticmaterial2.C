@@ -446,11 +446,11 @@ huhu: //label for goto
                                 this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, tStep);
                                 fullStressVector.printYourself();
 
-                                _error("Internal Consistency error: all combinations of yield functions tried, no consistent return");
+                                OOFEM_ERROR("Internal Consistency error: all combinations of yield functions tried, no consistent return");
                             }
 
 #else
-                            _error("Internal Consistency error: all combinations of yield functions tried, no consistent return");
+                            OOFEM_ERROR("Internal Consistency error: all combinations of yield functions tried, no consistent return");
 #endif
                         }
 
@@ -479,7 +479,7 @@ huhu: //label for goto
                          * }
                          *
                          * if (!restart) {
-                         *  _error ("Internal Consistency error");
+                         *  OOFEM_ERROR ("Internal Consistency error");
                          * }
                          * }
                          */
@@ -743,11 +743,11 @@ huhu: //label for goto
                             this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, tStep);
                             fullStressVector.printYourself();
 
-                            _error("Internal Consistency error: all combinations of yield functions tried, no consistent return");
+                            OOFEM_ERROR("Internal Consistency error: all combinations of yield functions tried, no consistent return");
                         }
 
 #else
-                        _error("Internal Consistency error: all combinations of yield functions tried, no consistent return");
+                        OOFEM_ERROR("Internal Consistency error: all combinations of yield functions tried, no consistent return");
 #endif
                     }
 
@@ -786,11 +786,11 @@ huhu: //label for goto
                                     this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, tStep);
                                     fullStressVector.printYourself();
 
-                                    _error("Internal Consistency error: all combinations of yield functions tried, no consistent return");
+                                    OOFEM_ERROR("Internal Consistency error: all combinations of yield functions tried, no consistent return");
                                 }
 
 #else
-                                _error("Internal Consistency error: all combinations of yield functions tried, no consistent return");
+                                OOFEM_ERROR("Internal Consistency error: all combinations of yield functions tried, no consistent return");
 #endif
                             }
 
@@ -823,7 +823,7 @@ huhu: //label for goto
 
                     continue;
                 } else {
-                    _warning4( "GiveRealStressVector: local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
+                    OOFEM_WARNING( "GiveRealStressVector: local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
                               PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElementGeometry()->giveNumber(), gp->giveNumber() );
                     answer = fullStressVector;
                     // debug line
@@ -1205,7 +1205,7 @@ huhu: //label for goto
 
                     continue;
                 } else {
-                    _warning4( "GiveRealStressVector: local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
+                    OOFEM_WARNING( "GiveRealStressVector: local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
                               PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElementGeometry()->giveNumber(), gp->giveNumber() );
                     answer = fullStressVector;
                     // debug line
@@ -1697,7 +1697,7 @@ MPlasticMaterial2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 {
     MaterialMode originalMode = gp->giveMaterialMode();
     if ( originalMode != _3dMat ) {
-        _error("give3dMaterialStiffnessMatrix : Different stressStrain mode encountered");
+        OOFEM_ERROR("give3dMaterialStiffnessMatrix : Different stressStrain mode encountered");
     }
 
     // we can force 3d response, and we obtain correct 3d tangent matrix,

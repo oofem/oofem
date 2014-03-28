@@ -53,7 +53,7 @@ Particle :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, radius, _IFT_Particle_rad);
     if ( radius < 0.0 ) {
-        _error("particle: negative radius");
+        OOFEM_ERROR("particle: negative radius");
     }
 
     return IRRT_OK;

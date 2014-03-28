@@ -470,10 +470,10 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
 
     if ( yieldHardPrimePeak < 0 ) {
         yieldHardPrimePeak = 0.;
-        _warning("kPrimePeak cannot be less than zero\n");
+        OOFEM_WARNING("kPrimePeak cannot be less than zero\n");
     } else if ( yieldHardPrimePeak > ( 1. - yieldHardInitial ) ) {
         yieldHardPrimePeak = 1. - yieldHardInitial;
-        _warning("kPrimePeak cannot be greater than 1.-kinit\n");
+        OOFEM_WARNING("kPrimePeak cannot be greater than 1.-kinit\n");
     }
 
     AHard = 8.e-2;
@@ -492,7 +492,7 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, softeningType, _IFT_ConcreteDPM2_softeningType);
 
     if ( softeningType > 1 ) {
-        _error("softening type not implemented\n");
+        OOFEM_ERROR("softening type not implemented\n");
     }
 
     IR_GIVE_FIELD(ir, this->wf, _IFT_ConcreteDPM2_wf);
@@ -1052,7 +1052,7 @@ ConcreteDPM2 :: computeDamageParamCompression(double equivStrain, double kappaOn
                               exponent * this->ft * ( kappaOne + omega * kappaTwo ) * kappaTwo / pow(this->efCompression, exponent) * exp( -pow( ( kappaOne + omega * kappaTwo ), exponent ) / pow(this->efCompression, exponent) );
             omega -= residual / dResidualDOmega;
             if ( nite > 40 ) {
-                _error("computeDamageParam: algorithm not converging");
+                OOFEM_ERROR("computeDamageParam: algorithm not converging");
             }
         } while ( fabs(residual) >= DPM2_DAMAGE_TOLERANCE );
     } else {
@@ -2300,7 +2300,7 @@ ConcreteDPM2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         } else if ( mode == SecantStiffness ) {
             computeSecantStiffness(answer, mode, gp, tStep);
         } else if ( mode == TangentStiffness ) {
-            _error("Tangent stiffness not implemented. Use either elastic or secant stiffness.\n");
+            OOFEM_ERROR("Tangent stiffness not implemented. Use either elastic or secant stiffness.\n");
         }
     }
 }

@@ -79,12 +79,12 @@ double DEIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, D
     int eq = dof->__giveEquationNumber();
 #ifdef DEBUG
     if ( eq == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
+        OOFEM_ERROR("giveUnknownComponent: invalid equation number");
     }
 #endif
 
     if ( tStep != this->giveCurrentStep() ) {
-        _error("giveUnknownComponent: unknown time step encountered");
+        OOFEM_ERROR("giveUnknownComponent: unknown time step encountered");
         return 0.;
     }
 
@@ -99,7 +99,7 @@ double DEIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, D
         return accelerationVector.at(eq);
 
     default:
-        _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
+        OOFEM_ERROR("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
     }
 
     return 0.0;
@@ -179,7 +179,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
             //
 #ifdef DEBUG
             if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {
-                _error("solveYourselfAt : dimension mismatch");
+                OOFEM_ERROR("solveYourselfAt : dimension mismatch");
             }
 
 #endif

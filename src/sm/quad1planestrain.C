@@ -199,7 +199,7 @@ Quad1PlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(3) = 1;
         answer.at(4) = 2;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("giveEdgeDofMapping: wrong edge number");
     }
 }
 
@@ -249,7 +249,7 @@ Quad1PlaneStrain :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdg
         aNode = 4;
         bNode = 1;
     } else {
-        _error("computeLoadLEToLRotationMatrix: wrong egde number");
+        OOFEM_ERROR("computeLoadLEToLRotationMatrix: wrong egde number");
     }
 
     nodeA = this->giveNode(aNode);
@@ -349,7 +349,7 @@ Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElem
                                                                      IntArray &controlNode, IntArray &controlDof,
                                                                      HuertaErrorEstimator :: AnalysisMode aMode)
 {
-    Element *element = this->HuertaErrorEstimatorI_giveElement();
+    BaseElement *element = this->HuertaErrorEstimatorI_giveElement();
     int inode, nodes = 4, iside, sides = 4, nd1, nd2;
     FloatArray *corner [ 4 ], midSide [ 4 ], midNode, cor [ 4 ];
     double x = 0.0, y = 0.0;
@@ -359,7 +359,7 @@ Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElem
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
-            corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
+            corner [ inode ] = element->giveElementGeometry()->giveNode(inode + 1)->giveCoordinates();
             if ( corner [ inode ]->giveSize() != 3 ) {
                 cor [ inode ].resize(3);
                 cor [ inode ].at(1) = corner [ inode ]->at(1);
@@ -781,7 +781,7 @@ Quad1PlaneStrain :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &an
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 
@@ -822,7 +822,7 @@ Quad1PlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {

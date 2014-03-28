@@ -48,13 +48,14 @@
 namespace oofem {
 class FloatArray;
 
+/*
 #ifndef HAVE_M_PI
  #define M_PI 3.1415926535897932384626433832795029L
 #endif
 #ifndef HAVE_M_LN2
  #define M_LN2 0.6931471805599453094172321214581766L
 #endif
-
+*/
 /// Returns smaller value from two given decimals
 inline int min(int i, int j)
 { return ( i <= j ? i : j ); }
@@ -339,7 +340,7 @@ template< class T > double brent(double ax, double bx, double cx, const T &f,
     }
 
     // too many iterations
-    OOFEM_WARNING("brent : too many iterations\n");
+    OOFEM_LOG_WARNING("brent : too many iterations\n");
     xmin = x;
     return fx;
 }

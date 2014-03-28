@@ -85,7 +85,7 @@ NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, Gaus
     } else if ( matMode == _1dMat ) {
         answer.at(1) += 1.0;
     } else {
-        OOFEM_ERROR2( "computeDeformationGradientVector : MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
+        OOFEM_ERROR( "computeDeformationGradientVector : MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
     }
 }
 
@@ -572,7 +572,7 @@ NLStructuralElement :: checkConsistency()
     }
 
     if ( this->nlGeometry != 0  &&  this->nlGeometry != 1 ) {
-        OOFEM_ERROR2("NLStructuralElement :: checkConsistency - nlGeometry must be either 0 or 1 (%d not supported)", this->nlGeometry);
+        OOFEM_ERROR("NLStructuralElement :: checkConsistency - nlGeometry must be either 0 or 1 (%d not supported)", this->nlGeometry);
         return 0;
     } else {
         return 1;

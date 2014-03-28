@@ -274,7 +274,7 @@ LSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int 
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        _error2("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: unknown node number %d", pap);
+        OOFEM_ERROR("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: unknown node number %d", pap);
     }
 }
 
@@ -394,7 +394,7 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
         x3 = -1.0;
         break;
     default:
-        _error("LSpace ::giveInternalStateAtNode: unsupported node");
+        OOFEM_ERROR("LSpace ::giveInternalStateAtNode: unsupported node");
     }
 
     answer.resize(size);
@@ -431,7 +431,7 @@ LSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &c
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -495,7 +495,7 @@ LSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refin
                                                            IntArray &controlNode, IntArray &controlDof,
                                                            HuertaErrorEstimator :: AnalysisMode aMode)
 {
-    Element *element = this->HuertaErrorEstimatorI_giveElement();
+    BaseElement *element = this->HuertaErrorEstimatorI_giveElement();
     FloatArray *corner [ 8 ], midSide [ 12 ], midFace [ 6 ], midNode;
     double x = 0.0, y = 0.0, z = 0.0;
     int inode, nodes = 8, iside, sides = 12, iface, faces = 6, nd, nd1, nd2;
@@ -518,7 +518,7 @@ LSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refin
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
-            corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
+            corner [ inode ] = element->giveElementGeometry()->giveNode(inode + 1)->giveCoordinates();
 
             x += corner [ inode ]->at(1);
             y += corner [ inode ]->at(2);
@@ -1029,7 +1029,7 @@ LSpace :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(5) = 14;
         answer.at(6) = 15;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("giveEdgeDofMapping: wrong edge number");
     }
 }
 
@@ -1060,7 +1060,7 @@ LSpace :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPo
     //
     // i.e. f(element local) = T * f(edge local)
     //
-    _error("computeLoadLEToLRotationMatrix: egde local coordinate system not supported");
+    OOFEM_ERROR("computeLoadLEToLRotationMatrix: egde local coordinate system not supported");
     return 1;
 }
 
@@ -1192,7 +1192,7 @@ LSpace :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
         answer.at(11) = 23;
         answer.at(12) = 24;
     } else {
-        _error("giveSurfaceDofMapping: wrong surface number");
+        OOFEM_ERROR("giveSurfaceDofMapping: wrong surface number");
     }
 }
 
@@ -1243,7 +1243,7 @@ LSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPo
     // local y axis - completes the righ hand side cs.
 
     /*
-     * _error ("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
+     * OOFEM_ERROR ("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
      * return 1;
      */
     FloatArray gc(3);

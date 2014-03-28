@@ -128,6 +128,13 @@ public:
      * Clears the entire set.
      */
     void clear();
+    /**
+     * Initialize the element set to contain all elements in the receiver domain
+     */
+    void addAllElements();
+    /// Return True if given element is contained
+    bool hasElement(int elem) const;
+
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
     /**
      * Renumbering of nodes (could change due to load balancing).

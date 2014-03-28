@@ -55,7 +55,6 @@ CrossSection :: initializeFrom(InputRecord *ir)
 // instanciates receiver from input record
 //
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     // Read set number the cross section is applied to
@@ -128,7 +127,7 @@ CrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
     if ( propertyDictionary->includes(aProperty) ) {
         return propertyDictionary->at(aProperty);
     } else {
-        OOFEM_ERROR3("Cross-section Number %d has undefined property ID %d", this->giveNumber(), aProperty);
+        OOFEM_ERROR("Cross-section Number %d has undefined property ID %d", this->giveNumber(), aProperty);
     }
 
     return 0.0;
@@ -141,7 +140,7 @@ CrossSection :: give(CrossSectionProperty aProperty, const FloatArray *coords, E
     if ( propertyDictionary->includes(aProperty) ) {
         return propertyDictionary->at(aProperty);
     } else {
-        OOFEM_ERROR3("Cross-section Number %d has undefined property ID %d", this->giveNumber(), aProperty);
+        OOFEM_ERROR("Cross-section Number %d has undefined property ID %d", this->giveNumber(), aProperty);
     }
 
     return 0.0;

@@ -378,7 +378,7 @@ Parser :: name *Parser :: look(const char *p, int ins)
 void Parser :: error(const char *s)
 {
     no_of_errors++;
-    OOFEM_WARNING2("Parser :: error: %s", s);
+    OOFEM_SIMPLE_WARNING("Parser :: error: %s", s);
 }
 
 double Parser :: eval(const char *string, int &err)

@@ -118,6 +118,7 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input) { OOFEM_ERROR("giveInputRecord is not implemented for this subclass of BasicGeometry."); }
     /// Gives class name.
     virtual const char *giveClassName() const { return NULL; }
+    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
     /// Returns number of Geometry vertices.
     int giveNrVertices() const { return mVertices.size(); }
     virtual bool isOutside(BasicGeometry *bg) { return false; }

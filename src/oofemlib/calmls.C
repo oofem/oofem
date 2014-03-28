@@ -438,7 +438,7 @@ restart:
                 goto restart;
             } else {
                 status = NM_NoSuccess;
-                OOFEM_WARNING2("CALMLS :: solve - Convergence not reached after %d iterations", nsmax);
+                OOFEM_WARNING("CALMLS :: solve - Convergence not reached after %d iterations", nsmax);
                 // exit(1);
                 break;
             }
@@ -755,7 +755,6 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
 //
 //
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     double oldPsi =  Psi; // default from constructor
@@ -945,7 +944,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, rtold, _IFT_CylindricalALM_rtold);
 
         if ( ( rtolf.giveSize() != nccdg ) || ( rtold.giveSize() != nccdg ) ) {
-            OOFEM_ERROR2("CALMLS :: Incompatible size of rtolf or rtold params, expected size %d (nccdg)", nccdg);
+            OOFEM_ERROR("CALMLS :: Incompatible size of rtolf or rtold params, expected size %d (nccdg)", nccdg);
         }
     } else {
         nccdg = 0;

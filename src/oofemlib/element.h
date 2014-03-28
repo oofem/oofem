@@ -75,21 +75,23 @@ public:
 	virtual void printOutputAt(FILE *file, TimeStep *tStep)
 	{
 		ElementGeometry::printOutputAt(file, tStep);
-//		ElementEvaluator::printOutputAt(file, tStep);
 	}
 	
 	IRResultType initializeFrom(InputRecord *ir)
 	{
-		IRResultType iTeG,iTeE;
-		iTeE =  ElementEvaluator::initializeFrom(ir);
-		iTeG = ElementGeometry::initializeFrom(ir);
-		return iTeE;
+	    IRResultType iTeE, iTeG;
+	    iTeE =  ElementEvaluator::initializeFrom(ir);
+	    iTeG = ElementGeometry::initializeFrom(ir);
+	    if(iTeE == IRRT_OK)
+	      return iTeG;
+	    else    
+	      return iTeE;
 	}
 
 	void giveInputRecord(DynamicInputRecord &input)
 	{
-		ElementEvaluator::giveInputRecord(input);		
-		ElementGeometry::giveInputRecord(input);
+	    ElementEvaluator::giveInputRecord(input);		
+	    ElementGeometry::giveInputRecord(input);
 	}
 
 	contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj)
@@ -231,7 +233,7 @@ public:
 	*/
 	virtual bool computeGtoLRotationMatrix(FloatMatrix &answer)
 	{
-		return ElementEvaluator :: computeGtoLRotationMatrix(answer, this);
+		return ElementEvaluator :: computeGtoLRotationMatrix(answer);
 	}
 	/**
 	* Transformation matrices updates rotation matrix between element-local and primary DOFs,

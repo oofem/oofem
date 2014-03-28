@@ -51,7 +51,6 @@ OutputManager :: OutputManager(Domain *d) : dofman_out(), dofman_except(), eleme
 IRResultType
 OutputManager :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     tstep_all_out_flag  = ir->hasField(_IFT_OutputManager_tstepall);

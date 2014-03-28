@@ -46,7 +46,7 @@ ConstantSurfaceLoad :: initializeFrom(InputRecord *ir)
 {
     BoundaryLoad :: initializeFrom(ir);
     if ( componentArray.giveSize() != nDofs ) {
-        _error("instanciateFrom: componentArray size mismatch");
+        OOFEM_ERROR("instanciateFrom: componentArray size mismatch");
     }
 
     return IRRT_OK;
@@ -61,7 +61,7 @@ ConstantSurfaceLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, Float
     double factor;
 
     if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
-        _error("computeValueAt: mode not supported");
+        OOFEM_ERROR("computeValueAt: mode not supported");
     }
 
     // ask time distribution

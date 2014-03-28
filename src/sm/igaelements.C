@@ -44,7 +44,7 @@
 #include "crosssection.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
-#include "iga.h"
+#include "iga/iga.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG

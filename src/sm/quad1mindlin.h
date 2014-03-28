@@ -39,6 +39,7 @@
 #include "fei2dquadlin.h"
 
 #define _IFT_Quad1Mindlin_Name "quad1mindlin"
+#define _IFT_Quad1Mindlin_ReducedIntegration "reducedintegration"
 
 namespace oofem {
 /**
@@ -61,6 +62,8 @@ class Quad1Mindlin : public NLStructuralElement
 {
 protected:
     static FEI2dQuadLin interp_lin;
+   /// Flag controlling reduced (one - point) integration for shear
+    bool reducedIntegrationFlag;
 
 public:
     Quad1Mindlin(int n, Domain * d);

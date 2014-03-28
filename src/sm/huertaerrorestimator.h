@@ -73,7 +73,7 @@
 //@}
 
 namespace oofem {
-class Element;
+class BaseElement;
 class GaussPoint;
 
 /**
@@ -236,7 +236,7 @@ public:
     HuertaErrorEstimatorInterface() { }
 
     /// Returns reference to corresponding element
-    virtual Element *HuertaErrorEstimatorI_giveElement() = 0;
+    virtual BaseElement *HuertaErrorEstimatorI_giveElement() = 0;
 
     virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                                   IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
@@ -249,7 +249,7 @@ public:
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer) = 0;
 
 protected:
-    void setupRefinedElementProblem1D(Element *element, RefinedElement *refinedElement,
+    void setupRefinedElementProblem1D(BaseElement *element, RefinedElement *refinedElement,
                                       int level, int nodeId, IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                       HuertaErrorEstimatorInterface :: SetupMode mode, TimeStep *tStep, int nodes,
                                       FloatArray **corner, FloatArray &midNode,
@@ -257,7 +257,7 @@ protected:
                                       IntArray &controlNode, IntArray &controlDof,
                                       HuertaErrorEstimator :: AnalysisMode aMode, const char *edgetype);
 
-    void setupRefinedElementProblem2D(Element *element, RefinedElement *refinedElement,
+    void setupRefinedElementProblem2D(BaseElement *element, RefinedElement *refinedElement,
                                       int level, int nodeId, IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                       HuertaErrorEstimatorInterface :: SetupMode mode, TimeStep *tStep, int nodes,
                                       FloatArray **corner, FloatArray *midSide, FloatArray &midNode,
@@ -265,7 +265,7 @@ protected:
                                       IntArray &controlNode, IntArray &controlDof,
                                       HuertaErrorEstimator :: AnalysisMode aMode, const char *quadtype);
 
-    void setupRefinedElementProblem3D(Element *element, RefinedElement *refinedElement,
+    void setupRefinedElementProblem3D(BaseElement *element, RefinedElement *refinedElement,
                                       int level, int nodeId, IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                       HuertaErrorEstimatorInterface :: SetupMode mode, TimeStep *tStep, int nodes,
                                       FloatArray **corner, FloatArray *midSide, FloatArray *midFace, FloatArray &midNode,

@@ -73,7 +73,7 @@ void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 // Print the state variable and the flow vector on the data file.
 {
     FloatArray flowVec;
-	TransportElement *transpElemGeometry = static_cast< TransportElement * >( gp->giveElementGeometry() );
+    TransportElement *transpElemEvaluator = static_cast< TransportElement * >( gp->giveElementGeometry()->giveDomain()->giveElementEvaluator( gp->giveElementGeometry()->giveNumber()) );
     MaterialStatus :: printOutputAt(File, tNow);
 
     fprintf(File, "  state");
@@ -82,10 +82,9 @@ void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
         fprintf( File, " % .4e", field.at(i) );
     }
 
-
-	flowVec = this->giveFlux();
-	//@todo is flow really the same thing as flux
-    //transpElem->computeFlow(flowVec, gp, tNow);
+    //@todo is flow really the same thing as flux
+    //	flowVec = this->giveFlux();
+    transpElemEvaluator->computeFlow(flowVec, gp, tNow);
 
     fprintf(File, "   flow");
     for ( int i = 1; i <= flowVec.giveSize(); i++ ) {
@@ -128,7 +127,7 @@ TransportMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        _error("saveContex : can't write into NULL stream");
+        OOFEM_ERROR("saveContex : can't write into NULL stream");
     }
 
     if ( ( iores = MaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -160,7 +159,7 @@ TransportMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        _error("saveContex : can't write into NULL stream");
+        OOFEM_ERROR("saveContex : can't write into NULL stream");
     }
 
     if ( ( iores = MaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

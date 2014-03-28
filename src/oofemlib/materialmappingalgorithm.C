@@ -38,14 +38,14 @@
 
 namespace oofem {
 void
-MaterialMappingAlgorithm :: init(Domain *dold, IntArray &type, GaussPoint *gp, TimeStep *tStep, bool iCohesiveZoneGP)
+MaterialMappingAlgorithm :: init(Domain *dold, IntArray &type, GaussPoint *gp, Set &elemSet, TimeStep *tStep, bool iCohesiveZoneGP)
 {
     FloatArray coords;
     if ( gp->giveElementGeometry()->computeGlobalCoordinates( coords, * ( gp->giveCoordinates() ) ) == 0 ) {
-        OOFEM_ERROR("MaterialMappingAlgorithm::init: computeGlobalCoordinates failed");
+        OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 
-    this->__init(dold, type, coords, gp->giveElementGeometry()->giveRegionNumber(), tStep, iCohesiveZoneGP);
+    this->__init(dold, type, coords, elemSet, tStep, iCohesiveZoneGP);
 }
 
 int

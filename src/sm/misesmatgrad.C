@@ -71,7 +71,7 @@ MisesMatGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, 
 // Returns characteristic material stiffness matrix of the receiver
 //
 {
-    _error("giveStiffnessMatrix : Shouldn't be called.");
+    OOFEM_ERROR("giveStiffnessMatrix : Shouldn't be called.");
 }
 
 
@@ -91,7 +91,7 @@ MisesMatGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, G
         give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         break;
     default:
-        _error2( "givePDGradMatrix_uu : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "givePDGradMatrix_uu : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -110,7 +110,7 @@ MisesMatGrad :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, G
         give3dKappaMatrix(answer, mode, gp, tStep);
         break;
     default:
-        _error2( "givePDGradMatrix_ku : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "givePDGradMatrix_ku : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -129,7 +129,7 @@ MisesMatGrad :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode, G
         give3dGprime(answer, mode, gp, tStep);
         break;
     default:
-        _error2( "givePDGradMatrix_uk : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "givePDGradMatrix_uk : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -148,7 +148,7 @@ MisesMatGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode, G
         giveInternalLength(answer, mode, gp, tStep);
         break;
     default:
-        _error2( "givePDGradMatrix_kk : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "givePDGradMatrix_kk : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -156,7 +156,7 @@ void
 MisesMatGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
-    _error2( "givePDGradMatrix_LD : unknown mode (%s)", __MaterialModeToString(mMode) );
+    OOFEM_ERROR( "givePDGradMatrix_LD : unknown mode (%s)", __MaterialModeToString(mMode) );
 }
 
 

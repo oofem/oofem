@@ -82,7 +82,6 @@ TR1_2D_SUPG2_AXI :: ~TR1_2D_SUPG2_AXI()
 IRResultType
 TR1_2D_SUPG2_AXI :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;               // Required by IR_GIVE_FIELD macro
 
     SUPGElement :: initializeFrom(ir);
@@ -1206,7 +1205,7 @@ TR1_2D_SUPG2_AXI :: computeLEPLICVolumeFraction(const FloatArray &n, const doubl
     this->formVolumeInterfacePoly(pg, matInterface, n, p, updFlag);
     answer = fabs(pg.computeVolume() / volume);
     if ( answer > 1.000000001 ) {
-        _warning2("VOF fraction out of bounds, vof = %e\n", answer);
+        OOFEM_WARNING("VOF fraction out of bounds, vof = %e\n", answer);
         return 1.0;
     } else {
         return answer;
@@ -1602,7 +1601,7 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
         } else if ( c [ i ] == 0 ) {
             continue;
         } else {
-            _error2("updateYourself: cannot set up integration domain for %d vertex polygon", c [ i ]);
+            OOFEM_ERROR("updateYourself: cannot set up integration domain for %d vertex polygon", c [ i ]);
         }
 
         if ( c [ i ] ) {
@@ -1816,7 +1815,7 @@ TR1_2D_SUPG2_AXI :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &an
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 

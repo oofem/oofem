@@ -108,7 +108,7 @@ protected:
     //@todo this method has been removed from NLStructuralElement and has simply been put here to
     // not affect these derived elements
     virtual void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
-    { OOFEM_ERROR("computeNLBMatrixAt is not implemented"); }
+    { OOFEM_SIMPLE_ERROR("computeNLBMatrixAt is not implemented"); }
 };
 } // end namespace oofem
 

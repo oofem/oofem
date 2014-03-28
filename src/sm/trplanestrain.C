@@ -193,7 +193,7 @@ TrPlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(3) = 1;
         answer.at(4) = 2;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("giveEdgeDofMapping: wrong edge number");
     }
 }
 
@@ -242,7 +242,7 @@ TrPlaneStrain :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, 
         aNode = 3;
         bNode = 1;
     } else {
-        _error("computeSurfaceVolumeAround: wrong egde number");
+        OOFEM_ERROR("computeSurfaceVolumeAround: wrong egde number");
     }
 
     nodeA = this->giveNode(aNode);
@@ -344,7 +344,7 @@ TrPlaneStrain :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answe
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 
@@ -382,7 +382,7 @@ TrPlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatA
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -472,7 +472,7 @@ TrPlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode)
 {
-    Element *element = this->HuertaErrorEstimatorI_giveElement();
+    BaseElement *element = this->HuertaErrorEstimatorI_giveElement();
     int inode, nodes = 3, iside, sides = 3, nd1, nd2;
     FloatArray *corner [ 3 ], midSide [ 3 ], midNode, cor [ 3 ];
     double x = 0.0, y = 0.0;
@@ -482,7 +482,7 @@ TrPlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
-            corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
+            corner [ inode ] = element->giveElementGeometry()->giveNode(inode + 1)->giveCoordinates();
             if ( corner [ inode ]->giveSize() != 3 ) {
                 cor [ inode ].resize(3);
                 cor [ inode ].at(1) = corner [ inode ]->at(1);

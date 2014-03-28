@@ -398,7 +398,7 @@ FEI3dTetQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         edgeNodes(1) = 4;
         edgeNodes(2) = 10;
     } else {
-        OOFEM_ERROR2("FEI3dTetQuad :: computeEdgeMapping: wrong egde number (%d)", iedge);
+        OOFEM_ERROR("FEI3dTetQuad :: computeEdgeMapping: wrong egde number (%d)", iedge);
     }
 }
 
@@ -551,7 +551,7 @@ FEI3dTetQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
         eNode = 10;
         fNode = 7;
     } else {
-        OOFEM_ERROR2("FEI3dTetQuad :: computeLocalSurfaceMapping: wrong surface number (%d)", isurf);
+        OOFEM_ERROR("FEI3dTetQuad :: computeLocalSurfaceMapping: wrong surface number (%d)", isurf);
     }
 
     surfNodes.at(1) = aNode;

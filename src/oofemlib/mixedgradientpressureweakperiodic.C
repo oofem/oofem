@@ -91,7 +91,6 @@ DofManager *MixedGradientPressureWeakPeriodic :: giveInternalDofManager(int i)
 
 IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     MixedGradientPressureBC :: initializeFrom(ir);
@@ -642,7 +641,7 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
     // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
     Kff = classFactory.createSparseMtrx(stype);
     if ( !Kff ) {
-        OOFEM_ERROR2("MixedGradientPressureWeakPeriodic :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
+        OOFEM_ERROR("MixedGradientPressureWeakPeriodic :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, this->domain->giveNumber(), eid, fnum);
     rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, fnum, this->domain);

@@ -48,7 +48,7 @@
 namespace oofem {
 class LEPlic;
 class Polygon;
-class Element;
+class ElementGeometry;
 
 /**
  * Element interface for LEPlic class representing Lagrangian-Eulerian (moving) material interface.

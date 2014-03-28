@@ -514,7 +514,7 @@ DustMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         answer.times(coeff);
     } else {
-        _error("Unsupported MatResponseMode\n");
+        OOFEM_ERROR("Unsupported MatResponseMode\n");
     }
 }
 

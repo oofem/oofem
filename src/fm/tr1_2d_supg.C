@@ -96,7 +96,7 @@ TR1_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) c
     } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
         answer.setValues(3, V_u, V_v, P_f);
     } else {
-        _error("giveDofManDofIDMask: Unknown equation id encountered");
+        OOFEM_ERROR("giveDofManDofIDMask: Unknown equation id encountered");
     }
 }
 
@@ -110,7 +110,6 @@ TR1_2D_SUPG :: giveElementDofIDMask(EquationID ut, IntArray &answer) const
 IRResultType
 TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;               // Required by IR_GIVE_FIELD macro
 
     SUPGElement :: initializeFrom(ir);
@@ -1456,7 +1455,7 @@ TR1_2D_SUPG :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArr
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -1509,7 +1508,7 @@ TR1_2D_SUPG :: initGeometry()
     this->area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
 
     if ( area < 0.0 ) {
-        _error("Area is negative, check element numbering orientation");
+        OOFEM_ERROR("Area is negative, check element numbering orientation");
     }
 
     b [ 0 ] = ( y2 - y3 ) / ( 2. * area );
@@ -1893,7 +1892,7 @@ TR1_2D_SUPG :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Primary
 
         return 0; // ok
     } else {
-        _error("EIPrimaryFieldI_evaluateFieldVectorAt: target point not in receiver volume");
+        OOFEM_ERROR("EIPrimaryFieldI_evaluateFieldVectorAt: target point not in receiver volume");
         return 1; // fail
     }
 }
@@ -1960,7 +1959,7 @@ TR1_2D_SUPG :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer,
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 

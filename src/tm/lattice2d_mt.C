@@ -227,7 +227,6 @@ Lattice2d_mt :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) con
 IRResultType
 Lattice2d_mt :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     // first call parent
     this->LatticeTransportElement :: initializeFrom(ir);

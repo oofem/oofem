@@ -43,8 +43,8 @@
 #include "contextioerr.h"
 
 #include "layeredcrosssection.h"
-#include "xfemmanager.h"
-#include "enrichmentdomain.h"
+#include "xfem/xfemmanager.h"
+#include "xfem/enrichmentdomain.h"
 #include "classfactory.h"
 
 
@@ -71,7 +71,7 @@ FractureManager :: clear() { }
 IRResultType FractureManager :: initializeFrom(InputRecord *ir)
 {
     /// Read number of failure criterias to evaluate
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
     int numCriterias;
@@ -89,7 +89,6 @@ IRResultType FractureManager :: initializeFrom(InputRecord *ir)
 
 int FractureManager :: instanciateYourself(DataReader *dr)
 {
-    const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
     std :: string name;
 
@@ -99,12 +98,12 @@ int FractureManager :: instanciateYourself(DataReader *dr)
         result = mir->giveRecordKeywordField(name);
 
         if ( result != IRRT_OK ) {
-            IR_IOERR(giveClassName(), __proc, "", mir, result);
+            IR_IOERR("", mir, result);
         }
 
         FailureCriteria *failCriteria = classFactory.createFailureCriteria(name.c_str(), i, this);
         if ( failCriteria == NULL ) {
-            OOFEM_ERROR2( "FractureManager :: instanciateYourself: unknown failure criteria (%s)", name.c_str() );
+            OOFEM_SIMPLE_ERROR( "FractureManager :: instanciateYourself: unknown failure criteria (%s)", name.c_str() );
         }
         failCriteria->initializeFrom(mir);
 
@@ -118,11 +117,11 @@ int FractureManager :: instanciateYourself(DataReader *dr)
                 failCriteria->list.at(j - 1) = fcs;
             }
         } else if ( failCriteria->giveType() == IPLocal ) {
-            OOFEM_ERROR1("FractureManager :: instanciateYourself - IPLocal criteria not supported yet");
+            OOFEM_SIMPLE_ERROR("FractureManager :: instanciateYourself - IPLocal criteria not supported yet");
         } else if ( failCriteria->giveType() == Nonlocal ) {
-            OOFEM_ERROR1("FractureManager :: instanciateYourself - Nonlocal criteria not supported yet");
+            OOFEM_SIMPLE_ERROR("FractureManager :: instanciateYourself - Nonlocal criteria not supported yet");
         } else {
-            OOFEM_ERROR1("FractureManager :: instanciateYourself - Unknown failure criteria");
+            OOFEM_SIMPLE_ERROR("FractureManager :: instanciateYourself - Unknown failure criteria");
         }
 
         this->criteriaList.at(i - 1) = failCriteria;
@@ -163,9 +162,9 @@ FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
                 this->setUpdateFlag( failCrit->evaluateFailureCriteria(fcStatus) );
             }
         } else if ( failCrit->giveType() == Nonlocal ) {
-            OOFEM_ERROR1("FractureManager :: evaluateFailureCriterias - Nonlocal criteria not supported yet");
+            OOFEM_SIMPLE_ERROR("FractureManager :: evaluateFailureCriterias - Nonlocal criteria not supported yet");
         } else {
-            OOFEM_ERROR1("FractureManager :: evaluateFailureCriterias - Unknown failure criteria");
+            OOFEM_SIMPLE_ERROR("FractureManager :: evaluateFailureCriterias - Unknown failure criteria");
         }
     }
 }
@@ -264,7 +263,6 @@ IRResultType FailureCriteria :: initializeFrom(InputRecord *ir)
 
 IRResultType DamagedNeighborLayered :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result; // Required by IR_GIVE_FIELD macro
 
     // Read damage threshold value

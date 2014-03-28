@@ -84,7 +84,7 @@ Tet1_3D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) 
     } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
         answer.setValues(4, V_u, V_v, V_w, P_f);
     } else {
-        _error("giveDofManDofIDMask: Unknown equation id encountered");
+        OOFEM_ERROR("giveDofManDofIDMask: Unknown equation id encountered");
     }
 }
 

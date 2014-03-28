@@ -72,7 +72,7 @@ BoundaryCondition *MasterDof :: giveBc()
         }
     }
 
-    _error2("Incompatible BC (%d) applied as Dirichlet/Primary BC", bc);
+    OOFEM_ERROR("Incompatible BC (%d) applied as Dirichlet/Primary BC", bc);
     return NULL;
 }
 
@@ -339,7 +339,7 @@ contextIOResultType MasterDof :: saveContext(DataStream *stream, ContextMode mod
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        _error("saveContex : can't write into NULL stream");
+        OOFEM_ERROR("saveContex : can't write into NULL stream");
     }
 
     if ( ( iores = Dof :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -379,7 +379,7 @@ contextIOResultType MasterDof :: restoreContext(DataStream *stream, ContextMode 
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        _error("restoreContex : can't write into NULL stream");
+        OOFEM_ERROR("restoreContex : can't write into NULL stream");
     }
 
     if ( ( iores = Dof :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

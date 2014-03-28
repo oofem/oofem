@@ -56,7 +56,7 @@ Function *GeneralBoundaryCondition :: giveTimeFunction()
 // data file if has not been done yet.
 {
     if ( !timeFunction ) {
-        _error("giveTimeFunction: TimeFunction is not defined");
+        OOFEM_ERROR("giveTimeFunction: TimeFunction is not defined");
     }
 
     return domain->giveFunction(timeFunction);
@@ -66,12 +66,11 @@ Function *GeneralBoundaryCondition :: giveTimeFunction()
 IRResultType
 GeneralBoundaryCondition :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;           // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, timeFunction, _IFT_GeneralBoundaryCondition_timeFunct);
     if ( timeFunction <= 0 ) {
-        _error("initializeFrom: bad TimeFunction id");
+        OOFEM_ERROR("initializeFrom: bad TimeFunction id");
     }
 
     int val = 0;

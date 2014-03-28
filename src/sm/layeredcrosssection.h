@@ -132,6 +132,7 @@ public:
     virtual void giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
     virtual void giveGeneralizedStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveGeneralizedStress_PlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
 
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
@@ -142,12 +143,13 @@ public:
     virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *);
 
     virtual double give(CrossSectionProperty a, GaussPoint *gp);
-    virtual double give(CrossSectionProperty a, const FloatArray *coords, Element *elem, bool local);
+    virtual double give(CrossSectionProperty a, const FloatArray *coords, ElementGeometry *elem, bool local);
     int giveNumberOfLayers();
 
     /// Returns the total thickness of all layers.
@@ -200,44 +202,44 @@ public:
 
     void mapLayerGpCoordsToShellCoords(IntegrationRule ** &layerIntegrationRulesArray);
 
-    void setupLayeredIntegrationRule(IntegrationRule ** &layerIntegrationRulesArray, Element *el, int numInPlanePoints);
+    void setupLayeredIntegrationRule(IntegrationRule ** &layerIntegrationRulesArray, ElementGeometry *el, int numInPlanePoints);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
     virtual double give(int aProperty, GaussPoint *gp)
     {
-        OOFEM_ERROR1("LayeredCrossSection :: give - not implemented yet");
+        OOFEM_ERROR("not implemented yet");
         return 0.0;
     };
 
 #ifdef __PARALLEL_MODE
     int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     {
-        _error("packUnknowns: not implemented");
+        OOFEM_ERROR("not implemented");
         return 0;
     }
 
     int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     {
-        _error("unpackAndUpdateUnknowns: not implemented");
+        OOFEM_ERROR("not implemented");
         return 0;
     }
 
     int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
     {
-        _error("estimatePackSize: not implemented");
+        OOFEM_ERROR("not implemented");
         return 0;
     }
 #endif
 
 
     virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
-    { OOFEM_ERROR("giveFirstPKStresses not implemented for layered cross section"); };
+    { OOFEM_ERROR("not implemented"); };
     virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
-    { OOFEM_ERROR("giveCauchyStresses not implemented for layered cross section"); };
+    { OOFEM_ERROR("not implemented"); };
     virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("giveStiffnessMatrix_dPdF not implemented for layered cross section"); };
+    { OOFEM_ERROR("not implemented"); };
     virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("giveStiffnessMatrix_dCde not implemented for layered cross section"); };
+    { OOFEM_ERROR("not implemented"); };
 
 
 protected:
@@ -267,8 +269,8 @@ public:
 class LayeredIntegrationRule : public IntegrationRule
 {
 public:
-    LayeredIntegrationRule(int n, Element * e, int startIndx, int endIndx, bool dynamic = false);
-    LayeredIntegrationRule(int n, Element * e);
+    LayeredIntegrationRule(int n, ElementGeometry * e, int startIndx, int endIndx, bool dynamic = false);
+    LayeredIntegrationRule(int n, ElementGeometry * e);
     virtual ~LayeredIntegrationRule();
 
     virtual const char *giveClassName() const { return "LayeredIntegrationRule"; }

@@ -164,7 +164,7 @@ public:
   * @param answer Computed rotation matrix.
   * @return Nonzero if transformation is necessary, zero otherwise.
   */
-  virtual bool computeGtoLRotationMatrix(FloatMatrix &answer, ElementGeometry* elementGeometry);
+  virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
   /**
   * Transformation matrices updates rotation matrix between element-local and primary DOFs,
   * taking into account nodal c.s. and master DOF weights.

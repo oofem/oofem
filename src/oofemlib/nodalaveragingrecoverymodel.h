@@ -69,7 +69,8 @@ public:
     /// Destructor.
     ~NodalAveragingRecoveryModel();
 
-    int recoverValues(InternalStateType type, TimeStep *tStep);
+    int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep);
+    virtual const char *giveClassName() const { return "NodalAveragingRecoveryModel"; }
 
 private:
 #ifdef __PARALLEL_MODE

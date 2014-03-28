@@ -108,6 +108,7 @@ StressVector :: computePrincipalValues(FloatArray &answer) const
     // Engineering notation is used.
     //
     MaterialMode myMode = this->giveStressStrainMode();
+    double swap;
     int size = this->giveSize();
     int nonzeroFlag = 0;
 
@@ -145,16 +146,19 @@ StressVector :: computePrincipalValues(FloatArray &answer) const
         if ( answer.at(1) > answer.at(2) ) {
             return;
         } else {
-            std::swap(answer.at(1), answer.at(2));
+            swap = answer.at(1);
+            answer.at(1) = answer.at(2);
+            answer.at(2) = swap;
             return;
         }
     } else {
         // 3D problem
         double I1 = 0.0, I2 = 0.0, I3 = 0.0, s1, s2, s3;
+        int i, j;
         FloatArray s;
 
         this->convertToFullForm(s);
-        for ( int i = 1; i <= size; i++ ) {
+        for ( i = 1; i <= size; i++ ) {
             if ( fabs( s.at(i) ) > 1.e-20 ) {
                 nonzeroFlag = 1;
             }
@@ -177,7 +181,6 @@ StressVector :: computePrincipalValues(FloatArray &answer) const
          * Call cubic3r to ensure, that all three real eigenvalues will be found, because we have symmetric tensor.
          * This allows to overcome various rounding errors when solving general cubic equation.
          */
-        int i;
         cubic3r( ( double ) -1., I1, -I2, I3, & s1, & s2, & s3, & i );
 
         if ( i > 0 ) {
@@ -193,13 +196,17 @@ StressVector :: computePrincipalValues(FloatArray &answer) const
         }
 
         // sort results
-        for ( int i = 1; i < 3; i++ ) {
-            for ( int j = 1; j < 3; j++ ) {
+        for ( i = 1; i < 3; i++ ) {
+            for ( j = 1; j < 3; j++ ) {
                 if ( answer.at(j + 1) > answer.at(j) ) {
-                    std::swap(answer.at(j + 1), answer.at(j));
+                    swap = answer.at(j + 1);
+                    answer.at(j + 1) = answer.at(j);
+                    answer.at(j) = swap;
                 }
             }
         }
+
+        return;
     }
 }
 
@@ -217,7 +224,8 @@ StressVector :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) con
 
     FloatMatrix ss;
     FloatArray sp;
-    int nval;
+    double swap;
+    int i, ii, jj, kk, nval;
     int nonzeroFlag = 0;
     int size = this->giveSize();
     MaterialMode myMode = this->giveStressStrainMode();
@@ -232,7 +240,7 @@ StressVector :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) con
         ss.resize(2, 2);
         answer.resize(2);
 
-        for ( int i = 1; i <= size; i++ ) {
+        for ( i = 1; i <= size; i++ ) {
             if ( fabs( this->at(i) ) > 1.e-20 ) {
                 nonzeroFlag = 1;
             }
@@ -255,7 +263,7 @@ StressVector :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) con
         answer.resize(3);
 
         this->convertToFullForm(s);
-        for ( int i = 1; i <= size; i++ ) {
+        for ( i = 1; i <= size; i++ ) {
             if ( fabs( s.at(i) ) > 1.e-20 ) {
                 nonzeroFlag = 1;
             }
@@ -286,13 +294,17 @@ StressVector :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) con
         nval = 2;
     }
 
-    for ( int ii = 1; ii < nval; ii++ ) {
-        for ( int jj = 1; jj < nval; jj++ ) {
+    for ( ii = 1; ii < nval; ii++ ) {
+        for ( jj = 1; jj < nval; jj++ ) {
             if ( answer.at(jj + 1) > answer.at(jj) ) {
                 // swap eigen values and eigen vectors
-                std::swap(answer.at(jj + 1), answer.at(jj));
-                for ( int kk = 1; kk <= nval; kk++ ) {
-                    std::swap(dir.at(kk, jj + 1), dir.at(kk, jj));
+                swap = answer.at(jj + 1);
+                answer.at(jj + 1) = answer.at(jj);
+                answer.at(jj) = swap;
+                for ( kk = 1; kk <= nval; kk++ ) {
+                    swap = dir.at(kk, jj + 1);
+                    dir.at(kk, jj + 1) = dir.at(kk, jj);
+                    dir.at(kk, jj) = swap;
                 }
             }
         }

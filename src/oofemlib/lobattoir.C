@@ -293,7 +293,7 @@ LobattoIntegrationRule :: SetUpPointsOnCube(int nPoints, MaterialMode mode)
 int
 LobattoIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 {
-    OOFEM_ERROR2("SetUpPointsOnTriangle: unsupported number of IPs (%d)", nPoints);
+    OOFEM_SIMPLE_ERROR("SetUpPointsOnTriangle: unsupported number of IPs (%d)", nPoints);
     return nPoints;
 }
 
@@ -428,7 +428,7 @@ LobattoIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coor
         break;
 
     default:
-        OOFEM_ERROR2("LobattoIntegrationRule :: giveLineCoordsAndWeights - unsupported number of IPs (%d)", nPoints);
+        OOFEM_SIMPLE_ERROR("LobattoIntegrationRule :: giveLineCoordsAndWeights - unsupported number of IPs (%d)", nPoints);
     }
 }
 } // end namespace oofem

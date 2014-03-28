@@ -98,7 +98,7 @@ TR1_2D_CBS :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) co
     } else if ( ut == EID_ConservationEquation ) {
         answer.setValues(1, P_f);
     } else {
-        _error("giveDofManDofIDMask: Unknown equation id encountered");
+        OOFEM_ERROR("giveDofManDofIDMask: Unknown equation id encountered");
     }
 }
 
@@ -113,7 +113,6 @@ IRResultType
 TR1_2D_CBS :: initializeFrom(InputRecord *ir)
 {
     //<RESTRICTED_SECTION>
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     //</RESTRICTED_SECTION>
 
@@ -713,7 +712,7 @@ TR1_2D_CBS :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArra
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -1082,7 +1081,7 @@ TR1_2D_CBS :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryF
 
         return 0; // ok
     } else {
-        _error("EIPrimaryFieldI_evaluateFieldVectorAt: target point not in receiver volume");
+       OOFEM_ERROR("EIPrimaryFieldI_evaluateFieldVectorAt: target point not in receiver volume");
         return 1; // fail
     }
 }
@@ -1143,7 +1142,7 @@ TR1_2D_CBS :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, 
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 

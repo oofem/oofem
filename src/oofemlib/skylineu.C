@@ -569,7 +569,7 @@ SkylineUnsym :: backSubstitutionWith(FloatArray &y) const
         diag = this->giveRowColumn(k)->atDiag();
 #     ifdef DEBUG
         if ( fabs(diag) < SkylineUnsym_TINY_PIVOT ) {
-            OOFEM_ERROR2("SkylineUnsym::backSubstitutionWith : diagScaling: pivot %d is small", k);
+            OOFEM_ERROR("SkylineUnsym::backSubstitutionWith : diagScaling: pivot %d is small", k);
         }
 
 #     endif
@@ -689,7 +689,7 @@ SkylineUnsym :: growTo(int n)
 
 #  ifdef DEBUG
     else if ( n <= size ) {
-        OOFEM_ERROR3("SkylineUnsym::growTo : cannot grow from %d to %d", size, n);
+        OOFEM_ERROR("SkylineUnsym::growTo : cannot grow from %d to %d", size, n);
     }
 #  endif
 

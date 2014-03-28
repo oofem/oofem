@@ -77,7 +77,7 @@ MPSMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj
     contextIOResultType iores;
 
     if ( stream == NULL ) {
-        _error("saveContext : can't write into NULL stream");
+        OOFEM_ERROR("saveContext : can't write into NULL stream");
     }
 
     if ( ( iores = KelvinChainSolidMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -143,7 +143,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     double tf;
     IR_GIVE_FIELD(ir, tf, _IFT_RheoChainMaterial_timefactor);
     if ( tf != 1. ) {
-        _error("initializeFrom: for MPS material timefactor must be equal to 1.");
+        OOFEM_ERROR("initializeFrom: for MPS material timefactor must be equal to 1.");
     }
 
     int mode = 0;
@@ -172,7 +172,7 @@ MPSMaterial :: initializeFrom(InputRecord *ir)
     int type = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, type, _IFT_MPSMaterial_coupledanalysistype);
     if ( type >= 2 ) {
-        _error("initializeFrom: CoupledAnalysisType must be equal to 0 or 1");
+        OOFEM_ERROR("initializeFrom: CoupledAnalysisType must be equal to 0 or 1");
     }
 
     this->CoupledAnalysis = ( coupledAnalysisType ) type;
@@ -280,7 +280,7 @@ MPSMaterial :: giveShrinkageStrainVector(FloatArray &answer,
                                          ValueModeType mode)
 {
     if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
-        _error("giveShrinkageStrainVector: unsupported mode");
+        OOFEM_ERROR("giveShrinkageStrainVector: unsupported mode");
     }
 
 
@@ -468,7 +468,7 @@ MPSMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
         // }
         // TRAPEZOIDAL INTEGRATION RULE
     } else {
-        _error("giveEModulus - mode is not supported");
+        OOFEM_ERROR("giveEModulus - mode is not supported");
     }
 
     return 1. / ( q1 + 1. / ( EspringVal * v ) + sum  +  Cf );
@@ -612,7 +612,7 @@ MPSMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep)
             status->setFlowTermViscosityTemp(eta);
         }
     } else {
-        _error("computeFlowTermViscosity - mode is not supported");
+        OOFEM_ERROR("computeFlowTermViscosity - mode is not supported");
     }
 
 
@@ -624,7 +624,7 @@ double
 MPSMaterial :: giveInitViscosity(TimeStep *tStep)
 {
     if ( ( t0 - tStep->giveTimeIncrement() ) < 0 ) {
-        _error("giveInitViscosity - length of the first time step must be bigger than t0");
+        OOFEM_ERROR("giveInitViscosity - length of the first time step must be bigger than t0");
     }
 
     return ( t0 - tStep->giveTimeIncrement() ) / q4;
@@ -685,7 +685,7 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeSte
             // }
             // MIDPOINT INTEGRATION RULE
         } else {
-            _error("giveEigenStrainVector - mode is not supported")
+            OOFEM_ERROR("giveEigenStrainVector - mode is not supported")
         }
 
         //computes creep component of the Kelvin Chain
@@ -696,7 +696,7 @@ MPSMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, TimeSte
         return;
     } else {
         /* error - total mode not implemented yet */
-        _error("giveEigenStrainVector - mode is not supported");
+        OOFEM_ERROR("giveEigenStrainVector - mode is not supported");
     }
 }
 
@@ -742,7 +742,7 @@ MPSMaterial :: inverse_sorption_isotherm(double w)
     double phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
 
     /*if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
-     * _error3("inverse_sorption_isotherm : Relative humidity h = %e (w=%e) is out of range", phi, w);
+     * OOFEM_ERROR3("inverse_sorption_isotherm : Relative humidity h = %e (w=%e) is out of range", phi, w);
      * }*/
     //if ( phi < 0.20 ){ phi = 0.2;}
     //if ( phi > 0.98 ){ phi = 0.98;}
@@ -769,11 +769,11 @@ MPSMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep, int option)
         if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
             gp->giveElementGeometry()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
             if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
-                _error2("giveHumidity: tf->evaluateAt failed, error value %d", err);
+                OOFEM_ERROR("giveHumidity: tf->evaluateAt failed, error value %d", err);
             }
 
             if ( ( err = tf->evaluateAt(ei2, gcoords, VM_Incremental, tStep) ) ) {
-                _error2("giveHumidity: tf->evaluateAt failed, error value %d", err);
+                OOFEM_ERROR("giveHumidity: tf->evaluateAt failed, error value %d", err);
             }
 
             // convert water mass to relative humidity
@@ -783,7 +783,7 @@ MPSMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep, int option)
         }
 
         if ( wflag == 0 ) {
-            _error("giveHumidity: external fields not found");
+            OOFEM_ERROR("giveHumidity: external fields not found");
         }
 
         // write field values to status
@@ -803,7 +803,7 @@ MPSMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep, int option)
 
     case 3: return H_inc; // returns relative humidity INCREMENT
 
-    default: _error2("giveHumidity: option  %d not supported", option);
+    default: OOFEM_ERROR("giveHumidity: option  %d not supported", option);
     }
     return 0.; // happy compiler
 }
@@ -826,11 +826,11 @@ MPSMaterial :: giveTemperature(GaussPoint *gp, TimeStep *tStep, int option)
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {
             gp->giveElementGeometry()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
             if ( ( err = tf->evaluateAt(et1, gcoords, VM_Total, tStep) ) ) {
-                _error2("giveTemperature: tf->evaluateAt failed, error value %d", err);
+                OOFEM_ERROR("giveTemperature: tf->evaluateAt failed, error value %d", err);
             }
 
             if ( ( err = tf->evaluateAt(ei1, gcoords, VM_Incremental, tStep) ) ) {
-                _error2("giveTemperature: tf->evaluateAt failed, error value %d", err);
+                OOFEM_ERROR("giveTemperature: tf->evaluateAt failed, error value %d", err);
             }
 
             T_tot = et1.at(1);
@@ -840,7 +840,7 @@ MPSMaterial :: giveTemperature(GaussPoint *gp, TimeStep *tStep, int option)
         }
 
         if ( tflag == 0 ) {
-            _error("giveTemperature: external fields not found");
+            OOFEM_ERROR("giveTemperature: external fields not found");
         }
 
         // write field values to status
@@ -860,7 +860,7 @@ MPSMaterial :: giveTemperature(GaussPoint *gp, TimeStep *tStep, int option)
 
     case 3: return T_inc; // returns temperature INCREMENT
 
-    default: _error2("giveTemperature: option  %d not supported", option);
+    default: OOFEM_ERROR("giveTemperature: option  %d not supported", option);
     }
     return 0.; // happy compiler
 }
@@ -919,7 +919,7 @@ MPSMaterial :: computeEquivalentTime(GaussPoint *gp, TimeStep *tStep, int option
         } else if ( option == 1 ) { // gives time in the middle of the timestep - for UPDATING
             return relMatAge - tStep->giveTimeIncrement() + PsiE *tStep->giveTimeIncrement();
         } else {
-            _error("computeEquivalentTime - mode is not supported")
+            OOFEM_ERROR("computeEquivalentTime - mode is not supported")
         }
     } else {
         MPSMaterialStatus *status = static_cast< MPSMaterialStatus * >( this->giveStatus(gp) );
@@ -930,7 +930,7 @@ MPSMaterial :: computeEquivalentTime(GaussPoint *gp, TimeStep *tStep, int option
         } else if ( option == 1 ) { // gives time in the middle of the timestep - for UPDATING
             tEquiv = tEquiv + PsiE *tStep->giveTimeIncrement();
         } else {
-            _error("computeEquivalentTime - mode is not supported")
+            OOFEM_ERROR("computeEquivalentTime - mode is not supported")
         }
 
         return tEquiv;

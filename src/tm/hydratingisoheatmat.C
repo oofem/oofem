@@ -44,7 +44,6 @@ REGISTER_Material(HydratingIsoHeatMaterial);
 IRResultType
 HydratingIsoHeatMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
     int value;
     double dvalue;
@@ -101,7 +100,7 @@ HydratingIsoHeatMaterial :: setMixture(MixtureType mix)
     if ( hydrationModel ) {
         hydrationModel->setMixture(mix);
     } else if ( hydration ) {
-        _error("setMixture: Can't setup undefined hydrationModel.");
+        OOFEM_ERROR("setMixture: Can't setup undefined hydrationModel.");
     }
 }
 
@@ -204,7 +203,7 @@ HydratingIsoHeatMaterial :: giveCharacteristicValue(MatResponseMode rmode, Gauss
         answer = hydrationModel->giveCharacteristicValue(vec, rmode, gp, tStep)
         / tStep->giveTimeIncrement();
     } else {
-        _error2( "giveCharacteristicValue: unknown MatResponseMode (%s)", __MatResponseModeToString(rmode) );
+        OOFEM_ERROR( "giveCharacteristicValue: unknown MatResponseMode (%s)", __MatResponseModeToString(rmode) );
     }
 
     return answer;

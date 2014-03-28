@@ -62,7 +62,7 @@ NumericalMethod *LinearStability :: giveNumericalMethod(MetaStep *mStep)
 
     nMethod = classFactory.createGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
-        _error("giveNumericalMethod:  solver creation failed");
+        OOFEM_ERROR("solver creation failed");
     }
 
     return nMethod;
@@ -76,7 +76,7 @@ SparseLinearSystemNM *LinearStability :: giveNumericalMethodForLinStaticProblem(
 
     nMethodLS = classFactory.createSparseLinSolver(ST_Direct, this->giveDomain(1), this); ///@todo Support other solvers
     if ( nMethodLS == NULL ) {
-        _error("giveNumericalMethodForLinStaticProblem:  solver creation failed");
+        OOFEM_ERROR("solver creation failed");
     }
 
     return nMethodLS;
@@ -85,7 +85,6 @@ SparseLinearSystemNM *LinearStability :: giveNumericalMethodForLinStaticProblem(
 IRResultType
 LinearStability :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //StructuralEngngModel::instanciateFrom(ir);
@@ -121,7 +120,7 @@ double LinearStability :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
     int eq = dof->__giveEquationNumber();
 #ifdef DEBUG
     if ( eq == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
+        OOFEM_ERROR("invalid equation number");
     }
 #endif
 
@@ -135,7 +134,7 @@ double LinearStability :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
         return displacementVector.at(eq);
 
     default:
-        _error("giveUnknownComponent: Unknown is of undefined type for this problem");
+        OOFEM_ERROR("Unknown is of undefined type for this problem");
     }
 
     return 0.;
@@ -223,8 +222,8 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     loadVector.negated();
 
     this->assembleVector( loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
-                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
-    
+                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
+
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
 #endif
@@ -319,14 +318,14 @@ LinearStability :: terminateLinStatic(TimeStep *tStep)
 #  endif
 
 
-    ElementGeometry *elemGeometry;
+    ElementGeometry *elem;
 
     int nelem = domain->giveNumberOfElements();
     for ( j = 1; j <= nelem; j++ ) {
-        elemGeometry = domain->giveElementGeometry(j);
-        elemGeometry->updateInternalState(tStep);
-        elemGeometry->updateYourself(tStep);
-        elemGeometry->printOutputAt(File, tStep);
+        elem = domain->giveElementGeometry(j);
+        elem->updateInternalState(tStep);
+        elem->updateYourself(tStep);
+        elem->printOutputAt(File, tStep);
     }
 
 #  ifdef VERBOSE

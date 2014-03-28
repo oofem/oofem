@@ -56,7 +56,6 @@ PointLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coo
 IRResultType
 PointLoad :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     result = Load :: initializeFrom(ir);

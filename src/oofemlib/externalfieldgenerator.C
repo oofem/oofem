@@ -138,7 +138,7 @@ ExternalFieldGenerator :: initializeFrom(InputRecord *ir)
     std :: ifstream inputField( name.c_str() );
 
     if ( !inputField.is_open() ) {
-        OOFEM_ERROR2( "ExternalFieldGenerator :: initializeFrom - Unable to open file %s", name.c_str() );
+        OOFEM_ERROR( "ExternalFieldGenerator :: initializeFrom - Unable to open file %s", name.c_str() );
     }
 
     double deltaX, deltaY;

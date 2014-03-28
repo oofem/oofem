@@ -107,7 +107,7 @@ IsotropicMoistureTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answe
         return;
 
     default:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 
     return;
@@ -122,7 +122,7 @@ IsotropicMoistureTransferMaterial :: giveCharacteristicValue(MatResponseMode mod
     if ( mode == Capacity ) {
         return ( this->giveMoistureCapacity(gp, tStep) );
     } else {
-        _error2( "giveCharacteristicValue : unknown mode (%s)", __MatResponseModeToString(mode) );
+        OOFEM_ERROR( "giveCharacteristicValue : unknown mode (%s)", __MatResponseModeToString(mode) );
     }
 
     return 0.;

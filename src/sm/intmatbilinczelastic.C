@@ -192,7 +192,7 @@ IntMatBilinearCZElastic :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRe
             //printf("Failed...\n");
         }
     }  else {
-        _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
+        OOFEM_ERROR("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
     }
 }
 
@@ -245,13 +245,13 @@ IntMatBilinearCZElastic :: checkConsistency()
 {
     double kn0min = 0.5 * this->sigfn * this->sigfn / this->GIc;
     if ( this->kn0 < 0.0 ) {
-        OOFEM_ERROR2("IntMatBilinearCZElastic :: initializeFrom - stiffness kn0 is negative (%.2e)", this->kn0);
+        OOFEM_ERROR("IntMatBilinearCZElastic :: initializeFrom - stiffness kn0 is negative (%.2e)", this->kn0);
     } else if ( this->ks0 < 0.0 ) {
-        OOFEM_ERROR2("IntMatBilinearCZElastic :: initializeFrom - stiffness ks0 is negative (%.2e)", this->ks0);
+        OOFEM_ERROR("IntMatBilinearCZElastic :: initializeFrom - stiffness ks0 is negative (%.2e)", this->ks0);
     } else if ( this->GIc < 0.0 ) {
-        OOFEM_ERROR2("IntMatBilinearCZElastic :: initializeFrom - GIc is negative (%.2e)", this->GIc);
+        OOFEM_ERROR("IntMatBilinearCZElastic :: initializeFrom - GIc is negative (%.2e)", this->GIc);
     } else if ( this->kn0 < kn0min  ) { // => gn0 > gnmax
-        //   OOFEM_ERROR3("IntMatBilinearCZElastic :: initializeFrom - kn0 (%.2e) is below minimum stiffness (%.2e), => gn0 > gnmax, which is unphysical" ,
+        //   OOFEMOOFEM_ERROR("IntMatBilinearCZElastic :: initializeFrom - kn0 (%.2e) is below minimum stiffness (%.2e), => gn0 > gnmax, which is unphysical" ,
         //       this->kn0, kn0min);
     }
     return 1;

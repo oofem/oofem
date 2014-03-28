@@ -119,7 +119,7 @@ protected:
     virtual void updateYourself(TimeStep *tStep);
     virtual void initForNewStep();
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx, int upperIndx)
-    { _error("computeBmatrixAt: not implemented"); }
+    { OOFEM_ERROR("computeBmatrixAt: not implemented"); }
     //int computeGtoLRotationMatrix(FloatMatrix& answer);
 
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);

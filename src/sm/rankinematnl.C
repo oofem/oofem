@@ -145,7 +145,7 @@ RankineMatNl :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mo
         return;
     }
 
-    _error("RankineMatNl :: givePlaneStressStiffMtrx ... unknown type of stiffness\n");
+    OOFEM_ERROR("RankineMatNl :: givePlaneStressStiffMtrx ... unknown type of stiffness\n");
 }
 
 void

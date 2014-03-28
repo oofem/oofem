@@ -60,7 +60,7 @@ Function :: evaluate(TimeStep *tStep, ValueModeType mode)
             return this->evaluateAtTime( tStep->giveIntrinsicTime() ) - this->evaluateAtTime( tStep->giveIntrinsicTime() - tStep->giveTimeIncrement() );
         }
     } else {
-        _error2("Function:: evaluate: unsupported mode(%d)", mode);
+        OOFEM_ERROR("unsupported mode(%d)", mode);
     }
 
     return 0.;
@@ -73,7 +73,6 @@ Function :: initializeFrom(InputRecord *ir)
     //
     // instanciates receiver according to input record
     //
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
 
@@ -95,30 +94,28 @@ Function :: giveInputRecord(DynamicInputRecord &input)
 double
 Function :: evaluateAtTime(double t)
 {
-    std::map< std::string, FunctionArgument > valDict;
-    valDict.insert(std::make_pair("t", t));
+    std :: map< std :: string, FunctionArgument >valDict = {{"t",t}};
     FloatArray v;
     this->evaluate(v, valDict);
     ///@todo This should be possible and nice to use if we have C++11
-    //this->evaluate(v, {{t, "t"}});
+    //this->evaluate(v, {{"t", t}});
     if ( v.giveSize() != 1 ) {
-        OOFEM_ERROR2("%s :: evaluateAtTime - Function doesn't return scalar results.", this->giveClassName());
+        OOFEM_ERROR("Function doesn't return scalar results.");
     }
     return v.at(1);
 }
 
 
 void
-Function :: evaluate(FloatArray &answer, std::map< std::string, FunctionArgument > &valDict)
+Function :: evaluate(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict)
 {
-    std::map< std::string, FunctionArgument > :: iterator it = valDict.find("t");
+    std :: map< std :: string, FunctionArgument > :: iterator it = valDict.find("t");
 #ifdef DEBUG
     if ( it == valDict.end() ) {
-        OOFEM_ERROR("Funciton :: evaluate - Missing necessary argument \"t\"");
+        OOFEM_ERROR("Missing necessary argument \"t\"");
     }
 #endif
     answer.resize(1);
     answer.at(1) = this->evaluateAtTime(it->second.val0);
 }
-
 } // end namespace oofem

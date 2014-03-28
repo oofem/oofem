@@ -191,7 +191,7 @@ TrabBoneMaterial :: computeDamageParam(double alpha, GaussPoint *gp)
     }
 
     if ( alpha < 0. ) {
-        _error("Alpha less than zero. Not possible");
+        OOFEM_ERROR("Alpha less than zero. Not possible");
     }
 
     return dam;

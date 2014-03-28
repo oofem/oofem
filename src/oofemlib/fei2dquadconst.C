@@ -130,7 +130,7 @@ FEI2dQuadConst :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         aNode = 3;
         bNode = 1;
     } else {
-        OOFEM_ERROR2("FEI2dQuadConst :: computeEdgeMapping: wrong egde number (%d)", iedge);
+        OOFEM_ERROR("FEI2dQuadConst :: computeEdgeMapping: wrong egde number (%d)", iedge);
     }
 
     edgeNodes.at(1) = aNode;

@@ -50,7 +50,7 @@ ConstantPressureLoad :: initializeFrom(InputRecord *ir)
 {
     BoundaryLoad :: initializeFrom(ir);
     if ( componentArray.giveSize() != nDofs ) {
-        _error("instanciateFrom: componentArray size mismatch");
+        OOFEM_SIMPLE_ERROR("instanciateFrom: componentArray size mismatch");
     }
 
     const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
@@ -68,7 +68,7 @@ ConstantPressureLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, Floa
     double factor;
 
     if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
-        _error("computeValueAt: mode not supported");
+        OOFEM_SIMPLE_ERROR("computeValueAt: mode not supported");
     }
 
     // ask time distribution

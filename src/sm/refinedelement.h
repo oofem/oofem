@@ -41,7 +41,7 @@
 
 namespace oofem {
 class Domain;
-class Element;
+class BaseElement;
 class TimeStep;
 class Node;
 
@@ -59,15 +59,15 @@ public:
     IntArray *giveFineNodeArray(int node);
     IntArray *giveBoundaryFlagArray(void) { return & boundaryFlag; }
 
-	void giveBoundaryFlagArray(int inode, Element *element, IntArray &answer);
+	void giveBoundaryFlagArray(int inode, BaseElement *element, IntArray &answer);
 
-	bool giveBoundaryLoadArray1D(int inode, Element *elementEvaluator, IntArray &boundaryLoadArray);
-	bool giveBoundaryLoadArray2D(int inode, Element *elementEvaluator, AList< IntArray > &boundaryLoadList);
-	bool giveBoundaryLoadArray3D(int inode, Element *elementEvaluator, AList< IntArray > &boundaryLoadList);
+	bool giveBoundaryLoadArray1D(int inode, BaseElement *element, IntArray &boundaryLoadArray);
+	bool giveBoundaryLoadArray2D(int inode, BaseElement *element, AList< IntArray > &boundaryLoadList);
+	bool giveBoundaryLoadArray3D(int inode, BaseElement *element, AList< IntArray > &boundaryLoadList);
 
-	bool giveBcDofArray1D(int inode, Element *element, IntArray *sideBcDofId, int &sideNumBc, TimeStep *tStep);
-	bool giveBcDofArray2D(int inode, Element *element, AList< IntArray > &sideBcDofIdList, IntArray &sideNumBc, TimeStep *tStep);
-	bool giveBcDofArray3D(int inode, Element *element, AList< IntArray > &sideBcDofIdList, IntArray &sideNumBc,
+	bool giveBcDofArray1D(int inode, BaseElement *element, IntArray *sideBcDofId, int &sideNumBc, TimeStep *tStep);
+	bool giveBcDofArray2D(int inode, BaseElement *element, AList< IntArray > &sideBcDofIdList, IntArray &sideNumBc, TimeStep *tStep);
+	bool giveBcDofArray3D(int inode, BaseElement *element, AList< IntArray > &sideBcDofIdList, IntArray &sideNumBc,
                           AList< IntArray > &faceBcDofIdList, IntArray &faceNumBc, TimeStep *tStep);
 
 protected:
@@ -85,8 +85,9 @@ protected:
     int giveCompatibleBcDofArray(Node *master_node, Node *slave_node, IntArray &dofArray, int dofs, IntArray *answer,
                                  ValueModeType mode, TimeStep *tStep);
 
-    /// Prints simple error message and exits.
-    void error(const char *file, int line, const char *format, ...) const;
+    /// Returns string for prepending output (used by error reporting macros).
+    std :: string errorInfo(const char *func) const;
+
 };
 } // end namespace oofem
 #endif // refinedelement_h

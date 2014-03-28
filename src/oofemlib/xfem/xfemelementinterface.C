@@ -428,7 +428,7 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                     if ( mpCZMat != NULL ) {
                         Crack *crack = dynamic_cast<Crack*>( xMan->giveEnrichmentItem(eiIndex) );
                         if(crack == NULL) {
-                        	OOFEM_ERROR("Error in XfemElementInterface :: XfemElementInterface_updateIntegrationRule(): Cohesive zones are only available for cracks.\n")
+                        	OOFEM_SIMPLE_ERROR("Error in XfemElementInterface :: XfemElementInterface_updateIntegrationRule(): Cohesive zones are only available for cracks.\n")
                         }
 
                         // We have xi_s and xi_e. Fetch sub polygon.
@@ -474,7 +474,7 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                                 // Fetch material status and set normal
                                 StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(& gp) );
                                 if ( ms == NULL ) {
-                                    OOFEM_ERROR("In XfemElementInterface :: XfemElementInterface_updateIntegrationRule(): Failed to fetch material status.\n");
+                                    OOFEM_SIMPLE_ERROR("In XfemElementInterface :: XfemElementInterface_updateIntegrationRule(): Failed to fetch material status.\n");
                                 }
 
                                 ms->letNormalBe(crackNormal);
@@ -518,7 +518,7 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                         if ( mpCZMat != NULL ) {
                             Crack *crack = dynamic_cast<Crack*>( xMan->giveEnrichmentItem(eiIndex) );
                             if(crack == NULL) {
-                            	OOFEM_ERROR("Error in XfemElementInterface :: XfemElementInterface_updateIntegrationRule(): Cohesive zones are only available for cracks.\n")
+                            	OOFEM_SIMPLE_ERROR("Error in XfemElementInterface :: XfemElementInterface_updateIntegrationRule(): Cohesive zones are only available for cracks.\n")
                             }
 
                             // We have xi_s and xi_e. Fetch sub polygon.
@@ -556,7 +556,7 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
                                     // Fetch material status and set normal
                                     StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(& gp) );
                                     if ( ms == NULL ) {
-                                        OOFEM_ERROR("In XfemElementInterface :: XfemElementInterface_updateIntegrationRule(): Failed to fetch material status.\n");
+                                        OOFEM_SIMPLE_ERROR("In XfemElementInterface :: XfemElementInterface_updateIntegrationRule(): Failed to fetch material status.\n");
                                     }
 
                                     ms->letNormalBe(crackNormal);
@@ -971,7 +971,7 @@ void XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(Fl
 					structCS->giveCharMaterialStiffnessMatrix(answer, rMode, gp, tStep);
 					return;
 				} else {
-					OOFEM_ERROR("XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt: failed to fetch StructuralMaterial\n");
+					OOFEM_SIMPLE_ERROR("XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt: failed to fetch StructuralMaterial\n");
 				}
 			}
 		}
@@ -987,7 +987,7 @@ void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray
 {
     StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection * >( element->giveCrossSection() );
     if ( cs == NULL ) {
-        OOFEM_ERROR("XfemElementInterface :: XfemElementInterface_computeStressVector: cs == NULL.\n");
+        OOFEM_SIMPLE_ERROR("XfemElementInterface :: XfemElementInterface_computeStressVector: cs == NULL.\n");
     }
 
     cs->giveRealStresses(answer, gp, strain, tStep);
@@ -1008,7 +1008,7 @@ void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray
 					structCSInclusion->giveRealStresses(answer, gp, strain, tStep);
 					return;
 				} else {
-					OOFEM_ERROR("PlaneStress2dXfem :: computeStressVector: failed to fetch StructuralCrossSection\n");
+					OOFEM_SIMPLE_ERROR("PlaneStress2dXfem :: computeStressVector: failed to fetch StructuralCrossSection\n");
 				}
 			}
 		}
@@ -1044,7 +1044,7 @@ void XfemElementInterface :: computeCohesiveForces(FloatArray &answer, TimeStep 
                 // Fetch material status and get normal
                 StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(& gp) );
                 if ( ms == NULL ) {
-                    OOFEM_ERROR("In XfemElementInterface :: computeCohesiveForces(): Failed to fetch material status.\n");
+                    OOFEM_SIMPLE_ERROR("In XfemElementInterface :: computeCohesiveForces(): Failed to fetch material status.\n");
                 }
 
                 FloatArray crackNormal( ms->giveNormal() );
@@ -1175,7 +1175,7 @@ void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeSte
                     // Fetch material status and get normal
                     StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(& gp) );
                     if ( ms == NULL ) {
-                        OOFEM_ERROR("In XfemElementInterface :: computeCohesiveForces(): Failed to fetch material status.\n");
+                        OOFEM_SIMPLE_ERROR("In XfemElementInterface :: computeCohesiveForces(): Failed to fetch material status.\n");
                     }
 
                     FloatArray crackNormal( ms->giveNormal() );
@@ -1212,7 +1212,7 @@ void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeSte
                     // Fetch material status and get normal
                     StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(& gp) );
                     if ( ms == NULL ) {
-                        OOFEM_ERROR("In XfemElementInterface :: computeCohesiveForces(): Failed to fetch material status.\n");
+                        OOFEM_SIMPLE_ERROR("In XfemElementInterface :: computeCohesiveForces(): Failed to fetch material status.\n");
                     }
 
                     FloatArray crackNormal( ms->giveNormal() );
@@ -1265,7 +1265,7 @@ void XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix(Fl
 {
     StructuralElement *structEl = dynamic_cast< StructuralElement * >(element);
     if ( structEl == NULL ) {
-        OOFEM_ERROR("Error in XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix().\n");
+        OOFEM_SIMPLE_ERROR("Error in XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix().\n");
     }
 
     int ndofs = structEl->computeNumberOfDofs();
@@ -1323,7 +1323,6 @@ void XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix(Fl
 IRResultType
 XfemElementInterface :: initializeCZFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     int material = -1;
@@ -1371,7 +1370,7 @@ void XfemElementInterface :: initializeCZMaterial()
         mpCZMat = dynamic_cast< StructuralInterfaceMaterial * >( this->element->giveDomain()->giveMaterial(mCZMaterialNum) );
 
         if ( mpCZMat == NULL ) {
-            OOFEM_ERROR("In XfemElementInterface :: initializeCZMaterial(): Failed to fetch pointer for mpCZMat.\n");
+            OOFEM_SIMPLE_ERROR("In XfemElementInterface :: initializeCZMaterial(): Failed to fetch pointer for mpCZMat.\n");
         }
     }
 }

@@ -153,7 +153,7 @@ void
 FEI3dLineLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 {
     if ( iedge != 1 ) {
-        OOFEM_ERROR2("FEI3dLineLin :: computeEdgeMapping: wrong edge number (%d)", iedge);
+        OOFEM_ERROR("FEI3dLineLin :: computeEdgeMapping: wrong edge number (%d)", iedge);
     }
     edgeNodes.setValues(2, 1, 2);
 }

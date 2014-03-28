@@ -110,7 +110,7 @@ SUPGElement2 :: giveCharacteristicMatrix(FloatMatrix &answer,
     } else
 #endif
     {
-        _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -183,7 +183,7 @@ SUPGElement2 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
     } else
 #endif
     {
-        _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -194,7 +194,7 @@ SUPGElement2 :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
     if ( mtrx == CriticalTimeStep ) {
         return this->computeCriticalTimeStep(tStep);
     } else {
-        _error("giveCharacteristicValue: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("giveCharacteristicValue: Unknown Type of characteristic mtrx.");
     }
 
     return 0.0;
@@ -719,7 +719,7 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
                 answer.add(helpLoadVector);
             }
         } else {
-            _error("computeForceLoadVector : unsupported load type class");
+           OOFEM_ERROR("computeForceLoadVector : unsupported load type class");
         }
     }
 }
@@ -777,7 +777,7 @@ SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
                 answer.add(helpLoadVector);
             }
         } else {
-            _error("computeForceLoadVector : unsupported load type class");
+            OOFEM_ERROR("computeForceLoadVector : unsupported load type class");
         }
     }
 }
@@ -785,25 +785,25 @@ SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
 void
 SUPGElement2 :: computeEdgeLoadVector_MB(FloatArray &answer, Load *load, int id, TimeStep *tStep)
 {
-    _error("computeEdgeLoadVectorAt_MB: not implemented");
+    OOFEM_ERROR("computeEdgeLoadVectorAt_MB: not implemented");
 }
 
 void
 SUPGElement2 :: computeSurfaceLoadVector_MB(FloatArray &answer, Load *load, int id, TimeStep *tStep)
 {
-    _error("computeSurfaceLoadVectorAt_MB: not implemented");
+    OOFEM_ERROR("computeSurfaceLoadVectorAt_MB: not implemented");
 }
 
 void
 SUPGElement2 :: computeEdgeLoadVector_MC(FloatArray &answer, Load *load, int id, TimeStep *tStep)
 {
-    _error("computeEdgeLoadVectorAt_MC: not implemented");
+    OOFEM_ERROR("computeEdgeLoadVectorAt_MC: not implemented");
 }
 
 void
 SUPGElement2 :: computeSurfaceLoadVector_MC(FloatArray &answer, Load *load, int id, TimeStep *tStep)
 {
-    _error("computeEdgeLoadVectorAt_MC: not implemented");
+    OOFEM_ERROR("computeEdgeLoadVectorAt_MC: not implemented");
 }
 
 

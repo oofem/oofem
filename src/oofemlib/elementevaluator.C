@@ -76,7 +76,7 @@ ElementEvaluator :: giveCharacteristicMatrix(FloatMatrix &answer,
 // returns characteristics matrix of receiver according to mtrx
 //
 {
-    OOFEM_ERROR("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
+    OOFEM_SIMPLE_ERROR("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
 }
 
 
@@ -86,21 +86,21 @@ ElementEvaluator::giveCharacteristicVector(FloatArray &answer, CharType type, Va
 // returns characteristics vector of receiver according to mtrx
 //
 {
-	OOFEM_ERROR("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
+    OOFEM_SIMPLE_ERROR("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
 }
 
 
 void
 ElementEvaluator::computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
-	OOFEM_ERROR("computeLoadVector: Unknown load type.");
+    OOFEM_SIMPLE_ERROR("computeLoadVector: Unknown load type.");
 }
 
 
 void
 ElementEvaluator::computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
 {
-	OOFEM_ERROR("computeBoundaryLoadVector: Unknown load type.");
+    OOFEM_SIMPLE_ERROR("computeBoundaryLoadVector: Unknown load type.");
 }
 
 
@@ -108,7 +108,7 @@ void
 ElementEvaluator::computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLoad *load, int edge, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     ///@todo Change the load type to "BoundaryEdgeLoad" maybe?
-	OOFEM_ERROR("computeBoundaryEdgeLoadVector: Unknown load type.");
+    OOFEM_SIMPLE_ERROR("computeBoundaryEdgeLoadVector: Unknown load type.");
 }
 
 
@@ -118,7 +118,7 @@ ElementEvaluator::giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
 // returns characteristics value of receiver according to CharType
 //
 {
-	OOFEM_ERROR("giveCharacteristicValue: Unknown Type of characteristic mtrx.");
+    OOFEM_SIMPLE_ERROR("giveCharacteristicValue: Unknown Type of characteristic mtrx.");
     return 0.;
 }
 
@@ -151,7 +151,7 @@ void ElementEvaluator::computeVectorOf(EquationID type, ValueModeType u, TimeSte
 	}
 	answer.resizeWithValues(k);
 	
-	if (this->computeGtoLRotationMatrix(G2L, elementGeometry)) {
+	if (this->computeGtoLRotationMatrix(G2L)) {
 		answer.rotatedWith(G2L, 'n');
 	}
 }
@@ -181,8 +181,8 @@ void ElementEvaluator::computeBoundaryVectorOf(const IntArray &bNodes, EquationI
 		}
 	}
 	
-	if (this->computeGtoLRotationMatrix(G2L, elementGeometry)) {
-		OOFEM_ERROR("Element :: computeBoundaryVector - Local coordinate system is not implemented yet");
+	if (this->computeGtoLRotationMatrix(G2L)) {
+		OOFEM_SIMPLE_ERROR("ElementEvaluator :: computeBoundaryVector - Local coordinate system is not implemented yet");
 	}
 }
 
@@ -219,7 +219,7 @@ void ElementEvaluator::computeVectorOf(PrimaryField &field, ValueModeType u, Tim
 	}
 	answer.resizeWithValues(k);
 
-	if (this->computeGtoLRotationMatrix(G2L, elementGeometry)) {
+	if (this->computeGtoLRotationMatrix(G2L)) {
 		answer.rotatedWith(G2L, 'n');
 	}
 }
@@ -257,7 +257,7 @@ void ElementEvaluator::computeVectorOfPrescribed(EquationID ut, ValueModeType mo
 	}
 	answer.resizeWithValues(k);
 
-	if (this->computeGtoLRotationMatrix(G2L, elementGeometry)) {
+	if (this->computeGtoLRotationMatrix(G2L)) {
 		answer.rotatedWith(G2L, 'n');
 	}
 }
@@ -290,7 +290,7 @@ int	ElementEvaluator::computeNumberOfPrimaryMasterDofs(EquationID ut, ElementGeo
 
 
 bool
-ElementEvaluator::computeGtoLRotationMatrix(FloatMatrix &answer, ElementGeometry *elementGeometry)
+ElementEvaluator::computeGtoLRotationMatrix(FloatMatrix &answer)
 {
 	answer.clear();
 	return false;
@@ -303,24 +303,24 @@ bool ElementEvaluator::giveRotationMatrix(FloatMatrix &answer, EquationID eid, E
 	IntArray nodes;
 	nodes.enumerate(elementGeometry->giveNumberOfDofManagers());
 
-	is_GtoL = this->computeGtoLRotationMatrix(GtoL, elementGeometry);
+	is_GtoL = this->computeGtoLRotationMatrix(GtoL);
 	is_NtoG = this->computeDofTransformationMatrix(NtoG, nodes, true, eid, elementGeometry);
 
 #ifdef DEBUG
 	if (is_GtoL) {
 		if (GtoL.giveNumberOfColumns() != this->computeNumberOfGlobalDofs()) {
-			OOFEM_ERROR("Element :: updateRotationMatrix - GtoL transformation matrix size mismatch in columns");
+			OOFEM_SIMPLE_ERROR("ElementEvaluator :: updateRotationMatrix - GtoL transformation matrix size mismatch in columns");
 		}
 		if (GtoL.giveNumberOfRows() != this->computeNumberOfDofs()) {
-			OOFEM_ERROR("Element :: updateRotationMatrix - GtoL transformation matrix size mismatch in rows");
+			OOFEM_SIMPLE_ERROR("ElementEvaluator :: updateRotationMatrix - GtoL transformation matrix size mismatch in rows");
 		}
 	}
 	if (is_NtoG) {
 		if (NtoG.giveNumberOfColumns() != this->computeNumberOfPrimaryMasterDofs(eid, elementGeometry)) {
-			OOFEM_ERROR("Element :: updateRotationMatrix - NtoG transformation matrix size mismatch in columns");
+			OOFEM_SIMPLE_ERROR("ElementEvaluator :: updateRotationMatrix - NtoG transformation matrix size mismatch in columns");
 		}
 		if (NtoG.giveNumberOfRows() != this->computeNumberOfGlobalDofs()) {
-			OOFEM_ERROR("Element :: updateRotationMatrix - NtoG transformation matrix size mismatch in rows");
+			OOFEM_SIMPLE_ERROR("ElementEvaluator :: updateRotationMatrix - NtoG transformation matrix size mismatch in rows");
 		}
 	}
 #endif
@@ -526,7 +526,6 @@ void ElementEvaluator::giveBoundaryLocationArray(IntArray &locationArray, const 
 
 IRResultType ElementEvaluator::initializeFrom(InputRecord *ir)
 {
-	const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
 	IRResultType result;                          // Required by IR_GIVE_FIELD macro
 #  ifdef VERBOSE
 			// VERBOSE_PRINT1("Instanciating element ",number);
@@ -580,8 +579,7 @@ contextIOResultType ElementEvaluator::restoreContext(DataStream *stream, Context
 //
 {
 	contextIOResultType iores;
-	int _nrules;
-
+	
 	if (mode & CM_Definition) {
 		if ((iores = bodyLoadArray.restoreYourself(stream, mode)) != CIO_OK) {
 			THROW_CIOERR(iores);

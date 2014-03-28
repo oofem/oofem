@@ -83,23 +83,13 @@ ElementGeometry :: ~ElementGeometry()
     }
 }
 
-
-
-
-
-
-
-
-
-
-
 Material *ElementGeometry :: giveMaterial()
 // Returns the material of the receiver.
 {
 #ifdef DEBUG
     if ( !material ) {
         // material = this -> readInteger("mat") ;
-        _error("giveMaterial: material not defined");
+        OOFEM_ERROR("giveMaterial: material not defined");
     }
 #endif
     return domain->giveMaterial(material);
@@ -111,7 +101,7 @@ CrossSection *ElementGeometry :: giveCrossSection()
 {
 #ifdef DEBUG
     if ( !crossSection ) {
-        _error("giveCrossSection: crossSection not defined");
+      OOFEM_ERROR("giveCrossSection: crossSection not defined");
     }
 #endif
     return domain->giveCrossSection(crossSection);
@@ -131,7 +121,7 @@ ElementGeometry :: giveDofManager(int i) const
 {
 #ifdef DEBUG
     if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
-        OOFEM_ERROR2("giveNode: Node %i is not defined", i);
+        OOFEM_ERROR("giveNode: Node %i is not defined", i);
     }
 #endif
     return domain->giveDofManager( dofManArray.at(i) );
@@ -144,7 +134,7 @@ ElementGeometry :: giveNode(int i) const
 {
 #ifdef DEBUG
     if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
-        _error("giveNode: Node is not defined");
+        OOFEM_ERROR("giveNode: Node is not defined");
     }
 #endif
     return domain->giveNode( dofManArray.at(i) );
@@ -157,7 +147,7 @@ ElementGeometry :: giveSide(int i) const
 {
 #ifdef DEBUG
     if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
-        _error("giveNode: Side is not defined");
+        OOFEM_ERROR("giveNode: Side is not defined");
     }
 #endif
     return domain->giveSide( dofManArray.at(i) );
@@ -198,7 +188,6 @@ ElementGeometry :: setIntegrationRules(AList< IntegrationRule > *irlist)
 IRResultType
 ElementGeometry :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                          // Required by IR_GIVE_FIELD macro
 
 #  ifdef VERBOSE
@@ -708,7 +697,7 @@ ElementGeometry :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *)
 // valid only for plane elements (shells, plates, ....)
 // computes mid-plane normal at gaussPoint - for materials with orthotrophy
 {
-    _error("Unable to compute mid-plane normal, not supported");
+    OOFEM_ERROR("Unable to compute mid-plane normal, not supported");
 }
 
 
@@ -794,7 +783,7 @@ ElementGeometry :: giveSpatialDimension()
         break;
     }
 
-    _error("giveSpatialDimension: failure (maybe new element type was registered)");
+    OOFEM_ERROR("giveSpatialDimension: failure (maybe new element type was registered)");
     return 0; //to make compiler happy
 }
 
@@ -840,7 +829,7 @@ ElementGeometry :: giveNumberOfBoundarySides()
         break;
     }
 
-    _error2( "giveSpatialDimension: failure, unsupported geometry type (%s)",
+    OOFEM_ERROR( "giveSpatialDimension: failure, unsupported geometry type (%s)",
              __Element_Geometry_TypeToString( this->giveGeometryType() ) );
     return 0; // to make compiler happy
 }
@@ -869,9 +858,21 @@ ElementGeometry :: adaptiveMap(Domain *oldd, TimeStep *tStep)
 }
 
 int
-ElementGeometry :: mapStateVariables(const Domain &iOldDom, const TimeStep &iTStep)
+ElementGeometry :: mapStateVariables(Domain &iOldDom, const TimeStep &iTStep)
 {
     int result = 1;
+    // create source set (this is quite inefficient here as done for each element geometry.
+    // the alternative MaterialModelMapperInterface approach allows to cache sets on material model
+    Set sourceElemSet = Set(0, & iOldDom);
+    IntArray el;
+    // compile source list to contain all elements on old odmain with the same material id
+    for ( int i = 1; i <= iOldDom.giveNumberOfElements(); i++ ) {
+      if ( iOldDom.giveElementGeometry(i)->giveMaterial()->giveNumber() == this->giveMaterial()->giveNumber() ) {
+	// add oldd domain element to source list
+	el.followedBy(i, 10);
+      }
+    }
+    sourceElemSet.setElementList(el);
 
     for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
         IntegrationRule *iRule = integrationRulesArray [ i ];
@@ -888,7 +889,7 @@ ElementGeometry :: mapStateVariables(const Domain &iOldDom, const TimeStep &iTSt
                 OOFEM_ERROR("In Element :: mapStateVariables(): Failed to fetch MaterialStatusMapperInterface.\n");
             }
 
-            result &= interface->MSMI_map( gp, iOldDom, iTStep, * ( ms ) );
+            result &= interface->MSMI_map( gp, iOldDom, sourceElemSet, iTStep, * ( ms ) );
         }
     }
 

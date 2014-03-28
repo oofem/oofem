@@ -78,7 +78,7 @@ PrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answ
         answer = * ( this->giveSolutionVector(tStep) );
         answer.subtract( * this->giveSolutionVector(indxm1) );
     } else {
-        _error2( "giveUnknownValue: unsupported mode %s", __ValueModeTypeToString(mode) );
+        OOFEM_ERROR( "giveUnknownValue: unsupported mode %s", __ValueModeTypeToString(mode) );
     }
 }
 
@@ -88,7 +88,7 @@ PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
     int eq = dof->giveEquationNumber( emodel->giveUnknownNumberingScheme(this->ut) );
     if ( eq == 0 ) {
-        _error("giveUnknownValue: invalid equation number");
+        OOFEM_ERROR("giveUnknownValue: invalid equation number");
     }
 
     if ( mode == VM_Total ) {
@@ -97,7 +97,7 @@ PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
         int indxm1 = this->resolveIndx(tStep, -1);
         return ( this->giveSolutionVector(tStep)->at(eq) - this->giveSolutionVector(indxm1)->at(eq) );
     } else {
-        _error("giveUnknownValue: unsupported mode");
+        OOFEM_ERROR("giveUnknownValue: unsupported mode");
     }
 
     return 0.0;
@@ -150,7 +150,7 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray &coords,
             return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, elemDofId, mode, tStep);
         }
     } else {
-        _error("ScalarPrimaryField::operator(): background element does not support EIPrimaryFiledInterface\n");
+        OOFEM_ERROR("ScalarPrimaryField::operator(): background element does not support EIPrimaryFiledInterface\n");
         return 1; // failed
     }
 }
@@ -184,7 +184,7 @@ PrimaryField :: giveSolutionVector(int i)
     if ( ( i >= 1 ) && ( i <= ( nHistVectors + 1 ) ) ) {
         answer = solutionVectors.at(i); // alist 1-based access
     } else {
-        _error("giveSolutionVector: index out of range");
+        OOFEM_ERROR("giveSolutionVector: index out of range");
     }
 
     return answer;
@@ -200,7 +200,7 @@ PrimaryField :: resolveIndx(TimeStep *tStep, int shift)
     if ( ( relPos >= 0 ) && ( relPos <= nHistVectors ) ) {
         return ( actualStepIndx + relPos ) % ( nHistVectors + 1 ) + 1;
     } else {
-        _error3("resolveIndx: History not available for relative step no. %d to step no. %d", shift, tStepo);
+        OOFEM_ERROR("resolveIndx: History not available for relative step no. %d to step no. %d", shift, tStepo);
     }
 
     return 0;
@@ -216,7 +216,7 @@ PrimaryField :: advanceSolution(TimeStep *tStep)
         return;
     }
     if ( ( actualStepNumber >= 0 ) && ( actualStepNumber + 1 != tStep->giveNumber() ) ) {
-        _error("advanceSolution: can not advance due to steps skipped");
+        OOFEM_ERROR("advanceSolution: can not advance due to steps skipped");
     }
 
     actualStepIndx = ( actualStepIndx > 0 ) ? actualStepIndx - 1 : nHistVectors;

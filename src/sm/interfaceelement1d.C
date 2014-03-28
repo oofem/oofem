@@ -76,7 +76,7 @@ InterfaceElem1d :: setCoordMode()
         this->mode = ie1d_3d;
         break;
     default:
-        _error("setCoordMode: Unsupported domain type")
+        OOFEM_ERROR("setCoordMode: Unsupported domain type")
     }
 }
 
@@ -92,7 +92,7 @@ InterfaceElem1d :: giveMaterialMode()
 
     case ie1d_3d: return _3dInterface;
 
-    default: _error("giveMaterialMode: Unsupported coord mode");
+    default: OOFEM_ERROR("giveMaterialMode: Unsupported coord mode");
     }
     return _1dInterface; // to make the compiler happy
 }
@@ -147,7 +147,7 @@ InterfaceElem1d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li,
         bLoc.at(3, 6) = +1.0;
         break;
     default:
-        _error("giveDofManDofIDMask: unsupported mode");
+        OOFEM_ERROR("giveDofManDofIDMask: unsupported mode");
     }
 
     bLoc.times(area);
@@ -204,7 +204,7 @@ InterfaceElem1d :: evaluateLocalCoordinateSystem(FloatMatrix &lcs)
     }
 
     default:
-        _error("giveDofManDofIDMask: unsupported mode");
+        OOFEM_ERROR("giveDofManDofIDMask: unsupported mode");
     }
 }
 
@@ -237,7 +237,7 @@ InterfaceElem1d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray
 bool
 InterfaceElem1d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
 {
-    _error("Not implemented");
+    OOFEM_ERROR("Not implemented");
     return false;
 }
 
@@ -253,14 +253,13 @@ InterfaceElem1d :: computeVolumeAround(GaussPoint *gp)
 IRResultType
 InterfaceElem1d :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     this->StructuralElement :: initializeFrom(ir);
     IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_InterfaceElem1d_refnode);
     IR_GIVE_OPTIONAL_FIELD(ir, normal, _IFT_InterfaceElem1d_normal);
     if ( referenceNode == 0 && normal.at(1) == 0 && normal.at(2) == 0 && normal.at(1) == 0 && normal.at(3) == 0 ) {
-        _error("instanciateFrom: wrong reference node or normal specified");
+        OOFEM_ERROR("instanciateFrom: wrong reference node or normal specified");
     }
 
     this->computeLocalSlipDir(normal); ///@todo Move into postInitialize ?
@@ -283,7 +282,7 @@ InterfaceElem1d :: computeNumberOfDofs()
         return 6;
 
     default:
-        _error("giveDofManDofIDMask: unsupported mode");
+        OOFEM_ERROR("giveDofManDofIDMask: unsupported mode");
     }
 
     return 0; // to suppress compiler warning
@@ -310,7 +309,7 @@ InterfaceElem1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) 
         answer.setValues(1, D_u);
         break;
     default:
-        _error("giveDofManDofIDMask: unsupported mode");
+        OOFEM_ERROR("giveDofManDofIDMask: unsupported mode");
     }
 }
 
@@ -326,7 +325,7 @@ InterfaceElem1d :: computeLocalSlipDir(FloatArray &normal)
         normal.at(3) = domain->giveNode(this->referenceNode)->giveCoordinate(3) - this->giveNode(1)->giveCoordinate(3);
     } else {
         if ( normal.at(1) == 0 && normal.at(2) == 0 && normal.at(3) == 0 ) {
-            _error("computeLocalSlipDir: normal is not defined (referenceNode=0,normal=(0,0,0))");
+            OOFEM_ERROR("computeLocalSlipDir: normal is not defined (referenceNode=0,normal=(0,0,0))");
         }
     }
 

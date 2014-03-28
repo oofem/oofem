@@ -75,7 +75,6 @@ Load :: computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, ValueModeTy
 IRResultType
 Load :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
 #  ifdef VERBOSE
@@ -89,7 +88,7 @@ Load :: initializeFrom(InputRecord *ir)
     dofExcludeMask.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, dofExcludeMask, _IFT_Load_dofexcludemask);
     if ( dofExcludeMask.giveSize() != size ) {
-        _error("initializeFrom: dofExcludeMask and componentArray size mismatch");
+        OOFEM_ERROR("initializeFrom: dofExcludeMask and componentArray size mismatch");
     } else {
         for ( int i = 1; i <= size; i++ ) {
             if ( dofExcludeMask.at(i) ) {
@@ -118,7 +117,7 @@ Load :: isDofExcluded(int indx)
     if ( ( indx > 0 ) && ( indx <= dofExcludeMask.giveSize() ) ) {
         return dofExcludeMask.at(indx);
     } else {
-        _error("isDofExcluded: dof index out of range");
+        OOFEM_ERROR("isDofExcluded: dof index out of range");
     }
 
     return 0;

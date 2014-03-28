@@ -200,7 +200,7 @@ FEI3dHexaTriQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
     } else if ( isurf == 6 ) {
         nodes.setValues(9,  4, 1, 5, 8, 12, 17, 16, 20, 26);
     } else {
-        OOFEM_ERROR2("FEI3dHexaTriQuad :: computeLocalSurfaceMapping: wrong surface number (%d)", isurf);
+        OOFEM_ERROR("FEI3dHexaTriQuad :: computeLocalSurfaceMapping: wrong surface number (%d)", isurf);
     }
 }
 

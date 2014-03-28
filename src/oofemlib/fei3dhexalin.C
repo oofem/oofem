@@ -322,7 +322,7 @@ FEI3dHexaLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         aNode = 8;
         bNode = 5;
     } else {
-        OOFEM_ERROR2("FEI3dHexaLin :: computeEdgeMapping: wrong egde number (%d)", iedge);
+        OOFEM_ERROR("FEI3dHexaLin :: computeEdgeMapping: wrong egde number (%d)", iedge);
     }
 
     edgeNodes.setValues(2, aNode, bNode);
@@ -444,7 +444,7 @@ FEI3dHexaLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
         cNode = 5;
         dNode = 8;
     } else {
-        OOFEM_ERROR2("FEI3dHexaLin :: computeSurfaceMapping: wrong surface number (%d)", isurf);
+        OOFEM_ERROR("FEI3dHexaLin :: computeSurfaceMapping: wrong surface number (%d)", isurf);
     }
 
     surfNodes.setValues(4, aNode, bNode, cNode, dNode);

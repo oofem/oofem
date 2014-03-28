@@ -107,7 +107,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
                 answer.assemble(unknownValues, locationArray);
             }
         } else {
-            OOFEM_ERROR2("EIPrimaryUnknownMapper :: mapAndUpdate - evaluateAt service failed for node %d", inode);
+            OOFEM_ERROR("EIPrimaryUnknownMapper :: mapAndUpdate - evaluateAt service failed for node %d", inode);
         }
     }
 

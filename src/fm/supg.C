@@ -66,7 +66,7 @@ NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
 
     nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
-        _error("giveNumericalMethod: linear solver creation failed");
+        OOFEM_ERROR("giveNumericalMethod: linear solver creation failed");
     }
 
     return nMethod;
@@ -75,7 +75,6 @@ NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
 IRResultType
 SUPG :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     FluidModel :: initializeFrom(ir);
@@ -173,12 +172,12 @@ SUPG :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
-            OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+            OOFEM_ERROR( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
         }
     } else {
         int eq = dof->__giveEquationNumber();
         if ( eq == 0 ) {
-            _error("giveUnknownComponent: invalid equation number");
+            OOFEM_ERROR("giveUnknownComponent: invalid equation number");
         }
 
         if ( mode == VM_Acceleration ) {
@@ -318,7 +317,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
         lhs = classFactory.createSparseMtrx(sparseMtrxType);
         if ( lhs == NULL ) {
-            _error("solveYourselfAt: sparse matrix creation failed");
+            OOFEM_ERROR("solveYourselfAt: sparse matrix creation failed");
         }
 
         lhs->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering() );
@@ -560,7 +559,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     if ( nite <= maxiter ) {
         OOFEM_LOG_INFO("SUPG info: number of iterations: %d\n", nite);
     } else {
-        OOFEM_WARNING2("SUPG info: Convergence not reached, number of iterations: %d\n", nite);
+        OOFEM_WARNING("SUPG info: Convergence not reached, number of iterations: %d\n", nite);
         if ( stopmaxiter ) {
             exit(1);
         }
@@ -740,7 +739,7 @@ SUPG :: checkConsistency()
         ePtr = domain->giveElementGeometry(i);
         sePtr = dynamic_cast< SUPGElement * >(ePtr);
         if ( sePtr == NULL ) {
-            _warning2("Element %d has no SUPG base", i);
+           OOFEM_WARNING("Element %d has no SUPG base", i);
             return 0;
         }
     }
@@ -760,7 +759,7 @@ SUPG :: checkConsistency()
             } else if ( bcPtr->giveBCValType() == ForceLoadBVT ) {
                 bcPtr->scale( 1. / this->giveVariableScale(VST_Force) );
             } else {
-                _error("checkConsistency: unknown bc/ic type\n");
+                OOFEM_ERROR("checkConsistency: unknown bc/ic type\n");
             }
         }
 
@@ -772,7 +771,7 @@ SUPG :: checkConsistency()
             } else if ( icPtr->giveICValType() == PressureBVT ) {
                 icPtr->scale( VM_Total, 1. / this->giveVariableScale(VST_Pressure) );
             } else {
-                _error("checkConsistency: unknown bc/ic type\n");
+                OOFEM_ERROR("checkConsistency: unknown bc/ic type\n");
             }
         }
     }
@@ -800,7 +799,7 @@ SUPG :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
     } else if ( type == P_f ) {
         iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, pscale);
     } else {
-        _error("printDofOutputAt: unsupported dof type");
+       OOFEM_ERROR("printDofOutputAt: unsupported dof type");
     }
 }
 
@@ -888,7 +887,7 @@ SUPG :: giveVariableScale(VarScaleType varID)
     } else if ( varID == VST_Viscosity ) {
         return 1.0;
     } else {
-        _error("giveVariableScale: unknown variable type");
+        OOFEM_ERROR("giveVariableScale: unknown variable type");
     }
 
     return 0.0;
@@ -1186,7 +1185,7 @@ SUPG :: giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep)
     if ( ( tStep == this->giveCurrentStep() ) || ( tStep == this->givePreviousStep() ) ) {
         return ( tStep->giveNumber() % 2 ) * 100 + mode;
     } else {
-        _error("giveUnknownDictHashIndx: unsupported solution step");
+       OOFEM_ERROR("giveUnknownDictHashIndx: unsupported solution step");
     }
 
     return 0;

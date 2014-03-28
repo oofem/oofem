@@ -50,7 +50,9 @@ set (sm_element
     qplanestrain.C qplanestraingrad.C
     qtrplanestrain.C qtrplanestraingrad.C
     qspacegrad.C
-    dkt.C
+    dkt.C qdkt.C
+    quad1platesubsoil.C tria1platesubsoil.C
+    interfaceelem2dlin.C
     )
 
 set (sm_crosssection
@@ -136,6 +138,7 @@ set (sm_material
 	InterfaceMaterials/intmatdummycz.C
     simplevitrificationmaterial.C
     anisodamagemodel.C
+    winklerpasternak.C
     )
 
 set (sm_error
@@ -175,6 +178,9 @@ set (sm_unsorted
     refinedmesh.C
     microplane.C
     gpinitmodule.C
+    stressstrainbasevector.C stressvector.C strainvector.C
+    gpinitmodule.C
+    mappers/primvarmapper.C
     )
 
 set (sm_parallel

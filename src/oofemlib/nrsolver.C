@@ -118,7 +118,6 @@ NRSolver :: ~NRSolver()
 IRResultType
 NRSolver :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // Choosing a big "enough" number. (Alternative: Force input of maxinter)
@@ -279,7 +278,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 
         if ( errorOutOfRangeFlag ) {
             status = NM_NoSuccess;
-            OOFEM_WARNING2("NRSolver:  Divergence reached after %d iterations", nite);
+            OOFEM_WARNING("NRSolver:  Divergence reached after %d iterations", nite);
             break;
         } else if ( converged && ( nite >= minIterations ) ) {
             break;

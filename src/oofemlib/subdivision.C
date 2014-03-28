@@ -585,7 +585,7 @@ Subdivision :: RS_Triangle :: giveEdgeIndex(int iNode, int jNode)
     }
 
     if ( in == 0 || jn == 0 ) {
-        OOFEM_ERROR4( "Subdivision::RS_Triangle::giveEdgeIndex - there is no edge connecting %d and %d on element %d",
+        OOFEM_SIMPLE_ERROR( "Subdivision::RS_Triangle::giveEdgeIndex - there is no edge connecting %d and %d on element %d",
                      iNode, jNode, this->giveNumber() );
         return 0;
     }
@@ -624,7 +624,7 @@ Subdivision :: RS_Tetra :: giveEdgeIndex(int iNode, int jNode)
     }
 
     if ( in == 0 || jn == 0 ) {
-        OOFEM_ERROR4( "Subdivision::RS_Tetra::giveEdgeIndex - there is no edge connecting %d and %d on element %d",
+        OOFEM_SIMPLE_ERROR( "Subdivision::RS_Tetra::giveEdgeIndex - there is no edge connecting %d and %d on element %d",
                      iNode, jNode, this->giveNumber() );
         return 0;
     }
@@ -1772,7 +1772,7 @@ Subdivision :: RS_Triangle :: generate(std :: list< int > &sharedEdgesQueue)
 
 #endif
         } else {
-            OOFEM_ERROR2("Subdivision::RS_Triangle::generate - element %d internal data inconsistency", this->number);
+            OOFEM_SIMPLE_ERROR("Subdivision::RS_Triangle::generate - element %d internal data inconsistency", this->number);
         }
 
         // if there is neighbor of "this" not designated for bisection
@@ -2737,7 +2737,7 @@ Subdivision :: RS_Triangle :: update_neighbours()
                 }
 
                 if ( !found ) {
-                    OOFEM_ERROR2("Subdivision::RS_Triangle::update_neighbours failed for element %d", this->number);
+                    OOFEM_SIMPLE_ERROR("Subdivision::RS_Triangle::update_neighbours failed for element %d", this->number);
                 }
             } else {
                 // parent neighbour remains actual neighbour
@@ -2821,7 +2821,7 @@ Subdivision :: RS_Tetra :: update_neighbours()
                 }
 
                 if ( !found ) {
-                    OOFEM_ERROR4("Subdivision::RS_Tetra::update_neighbours failed for element %d (side %d, elem %d)",
+                    OOFEM_SIMPLE_ERROR("Subdivision::RS_Tetra::update_neighbours failed for element %d (side %d, elem %d)",
                                  this->number, iside, parentNeighbor);
                 }
             } else {
@@ -3441,7 +3441,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             _element = new Subdivision :: RS_Tetra(i, mesh, i, enodes);
             this->mesh->addElement(i, _element);
         } else {
-            OOFEM_ERROR2("Subdivision::createMesh: Unsupported element geometry (element %d)", i);
+            OOFEM_SIMPLE_ERROR("Subdivision::createMesh: Unsupported element geometry (element %d)", i);
             _element = NULL;
         }
 
@@ -3585,7 +3585,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                     if ( simpleSlaveDofPtr ) {
                         dof = new SimpleSlaveDof( idof, node, simpleSlaveDofPtr->giveMasterDofManagerNum(), idofPtr->giveDofID() );
                     } else {
-                        OOFEM_ERROR("Subdivision :: createMesh: unsupported DOF type");
+                        OOFEM_SIMPLE_ERROR("Subdivision :: createMesh: unsupported DOF type");
                         dof = NULL;
                     }
                 }
@@ -3827,7 +3827,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             ( * dNew )->setElement(eNum, elem);
 			elem->giveElementGeometry()->postInitialize();
         } else {
-            OOFEM_ERROR("Subdivision :: createMesh: parent element missing");
+            OOFEM_SIMPLE_ERROR("Subdivision :: createMesh: parent element missing");
         }
     } // end loop over elements
 

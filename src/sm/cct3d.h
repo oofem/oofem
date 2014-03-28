@@ -113,7 +113,7 @@ public:
 
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer)
     {
-        _error("cct3d :: giveLocalCoordinateSystem: calling of this function id not allowed");
+        OOFEM_ERROR("cct3d :: giveLocalCoordinateSystem: calling of this function id not allowed");
         return 0;
     }
 

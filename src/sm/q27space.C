@@ -343,7 +343,7 @@ Q27Space :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        _error2("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: unknown node number %d", pap);
+        OOFEM_ERROR("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: unknown node number %d", pap);
     }
 }
 
@@ -365,7 +365,7 @@ void
 Q27Space :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
     answer.clear();
-    _warning("Qspace element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
+    OOFEM_WARNING("Qspace element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
 void

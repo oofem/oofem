@@ -57,7 +57,6 @@ GPExportModule :: ~GPExportModule()
 IRResultType
 GPExportModule :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
     ExportModule :: initializeFrom(ir);
@@ -189,7 +188,7 @@ GPExportModule :: giveOutputStream(TimeStep *tStep)
 
     std :: string fileName = this->giveOutputBaseFileName(tStep) + ".gp";
     if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2( "GPExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
+        OOFEM_ERROR( "GPExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
     }
 
     return answer;

@@ -116,7 +116,7 @@ TR1_2D_SUPG2 :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) 
     } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
         answer.setValues(3, V_u, V_v, P_f);
     } else {
-        _error("giveDofManDofIDMask: Unknown equation id encountered");
+        OOFEM_ERROR("giveDofManDofIDMask: Unknown equation id encountered");
     }
 }
 
@@ -130,7 +130,6 @@ TR1_2D_SUPG2 :: giveElementDofIDMask(EquationID ut, IntArray &answer) const
 IRResultType
 TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;               // Required by IR_GIVE_FIELD macro
 
     SUPGElement :: initializeFrom(ir);
@@ -1285,7 +1284,7 @@ TR1_2D_SUPG2 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatAr
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -1361,7 +1360,7 @@ TR1_2D_SUPG2 :: computeLEPLICVolumeFraction(const FloatArray &n, const double p,
     this->formVolumeInterfacePoly(pg, matInterface, n, p, updFlag);
     answer = fabs(pg.computeVolume() / volume);
     if ( answer > 1.000000001 ) {
-        _warning2("VOF fraction out of bounds, vof = %e\n", answer);
+        OOFEM_WARNING("VOF fraction out of bounds, vof = %e\n", answer);
         return 1.0;
     } else {
         return answer;
@@ -1736,7 +1735,7 @@ TR1_2D_SUPG2 :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Primar
 
         return 0; // ok
     } else {
-        _error("EIPrimaryFieldI_evaluateFieldVectorAt: target point not in receiver volume");
+        OOFEM_ERROR("EIPrimaryFieldI_evaluateFieldVectorAt: target point not in receiver volume");
         return 1; // fail
     }
 }
@@ -1807,7 +1806,7 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
         } else if ( c [ i ] == 0 ) {
             continue;
         } else {
-            _error2("updateYourself: cannot set up integration domain for %d vertex polygon", c [ i ]);
+            OOFEM_ERROR("updateYourself: cannot set up integration domain for %d vertex polygon", c [ i ]);
         }
 
 #if 0
@@ -1858,7 +1857,7 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
 
     double __err = fabs(__area - area) / area;
     if ( __err > 1.e-6 ) {
-        _error2("updateIntegrationRules: volume inconsistency (%5.2f)", __err * 100);
+        OOFEM_ERROR("updateIntegrationRules: volume inconsistency (%5.2f)", __err * 100);
 
         __area = 0.0;
         for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
@@ -1946,7 +1945,7 @@ TR1_2D_SUPG2 :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 

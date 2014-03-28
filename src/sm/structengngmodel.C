@@ -171,13 +171,13 @@ StructuralEngngModel :: checkConsistency()
     // check for proper element type
 
     for ( int i = 1; i <= nelem; i++ ) {
-		BaseElement *ePtr = domain->giveElement(i);
+        BaseElement *ePtr = domain->giveElement(i);
         StructuralElement *sePtr = dynamic_cast< StructuralElement * >(ePtr);
         StructuralInterfaceElement *siePtr = dynamic_cast< StructuralInterfaceElement * >(ePtr);
         StructuralElementEvaluator *see = dynamic_cast< StructuralElementEvaluator * >(ePtr);
 
         if ( sePtr == NULL && see == NULL && siePtr == NULL ) {
-            _warning2("checkConsistency: element %d has no Structural support", i);
+            OOFEM_WARNING("checkConsistency: element %d has no Structural support", i);
             return 0;
         }
     }

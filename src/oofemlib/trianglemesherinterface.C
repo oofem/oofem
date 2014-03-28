@@ -530,7 +530,7 @@ bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
     //free(output.holelist);
     //free(output.regionlist);
 #else
-    OOFEM_ERROR("TriangleMesherInterface :: meshPSLG - OOFEM is not compiled with support for triangle.");
+    OOFEM_SIMPLE_ERROR("TriangleMesherInterface :: meshPSLG - OOFEM is not compiled with support for triangle.");
 #endif
 
     return true;

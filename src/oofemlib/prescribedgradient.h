@@ -42,7 +42,6 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
-#include "export/exportmodulecallerinterface.h"
 
 ///@name Input fields for PrescribedTensor
 //@{
@@ -63,7 +62,7 @@ class BCExportInterface;
  * @author Mikael Öhman
  * @author Erik Svenning
  */
-class OOFEM_EXPORT PrescribedGradient : public BoundaryCondition, public ExportModuleCallerInterface
+class OOFEM_EXPORT PrescribedGradient : public BoundaryCondition
 {
 protected:
     /// Prescribed gradient @f$ d_{ij} @f$
@@ -151,10 +150,6 @@ public:
     virtual const char *giveClassName() const { return "PrescribedGradient"; }
     virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradient_Name; }
 
-    /**
-     * Overloaded function for ExportModuleCallerInterface.
-     */
-    virtual void callExportModule(BCExportInterface &iExpMod, TimeStep *tStep);
 
 protected:
     double domainSize();

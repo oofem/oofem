@@ -251,7 +251,7 @@ FEI3dHexaQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
     } else if ( iedge == 12 ) {
         edgeNodes.setValues(3,  4, 8, 20);
     } else {
-        OOFEM_ERROR2("FEI3dHexaQuad :: computeLocalEdgeMapping: wrong edge number (%d)", iedge);
+        OOFEM_ERROR("FEI3dHexaQuad :: computeLocalEdgeMapping: wrong edge number (%d)", iedge);
     }
 }
 
@@ -361,7 +361,7 @@ FEI3dHexaQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
     } else if ( isurf == 6 ) {
         nodes.setValues(8,  4, 1, 5, 8, 12, 17, 16, 20);
     } else {
-        OOFEM_ERROR2("FEI3dHexaQuad :: computeLocalSurfaceMapping: wrong surface number (%d)", isurf);
+        OOFEM_ERROR("FEI3dHexaQuad :: computeLocalSurfaceMapping: wrong surface number (%d)", isurf);
     }
 
 #if 0

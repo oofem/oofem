@@ -54,8 +54,10 @@ MMAShapeFunctProjection :: MMAShapeFunctProjection() : MaterialMappingAlgorithm(
 MMAShapeFunctProjection :: ~MMAShapeFunctProjection()
 { }
 
+
+
 void
-MMAShapeFunctProjection :: __init(Domain *dold, IntArray &varTypes, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP)
+MMAShapeFunctProjection :: __init(Domain *dold, IntArray &varTypes, FloatArray &coords, Set &elemSet, TimeStep *tStep, bool iCohesiveZoneGP)
 //(Domain* dold, IntArray& varTypes, GaussPoint* gp, TimeStep* tStep)
 {
     int nvar = varTypes.giveSize();
@@ -76,7 +78,7 @@ MMAShapeFunctProjection :: __init(Domain *dold, IntArray &varTypes, FloatArray &
 
     this->intVarTypes = varTypes;
     for ( int ivar = 1; ivar <= nvar; ivar++ ) {
-        this->smootherList.at(ivar)->recoverValues( ( InternalStateType ) varTypes.at(ivar), tStep );
+        this->smootherList.at(ivar)->recoverValues(elemSet, ( InternalStateType ) varTypes.at(ivar), tStep);
     }
 
     // remember time stemp
@@ -110,8 +112,7 @@ MMAShapeFunctProjection :: mapVariable(FloatArray &answer, GaussPoint *gp, Inter
     if ( indx ) {
         for ( int inode = 1; inode <= nnodes; inode++ ) {
             container.put(inode, new FloatArray);
-            this->smootherList.at(indx)->giveNodalVector( nvec, elemGeometry->giveDofManager(inode)->giveNumber(),
-                                                         elemGeometry->giveRegionNumber() );
+            this->smootherList.at(indx)->giveNodalVector( nvec, elemGeometry->giveDofManager(inode)->giveNumber());
             * ( container.at(inode) ) = * nvec;
         }
 
@@ -149,8 +150,7 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
     if ( indx ) {
         for ( int inode = 1; inode <= nnodes; inode++ ) {
             container.put(inode, new FloatArray);
-            this->smootherList.at(indx)->giveNodalVector( nvec, elemGeometry->giveDofManager(inode)->giveNumber(),
-                                                         elemGeometry->giveRegionNumber() );
+            this->smootherList.at(indx)->giveNodalVector( nvec, elemGeometry->giveDofManager(inode)->giveNumber());
             * ( container.at(inode) ) = * nvec;
         }
 

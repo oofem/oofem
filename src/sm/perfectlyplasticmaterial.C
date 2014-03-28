@@ -374,7 +374,7 @@ PerfectlyPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 {
     MaterialMode originalMode = gp->giveMaterialMode();
     if ( originalMode != _3dMat ) {
-        _error("give3dMaterialStiffnessMatrix : Different stressStrain mode encountered");
+        OOFEM_ERROR("give3dMaterialStiffnessMatrix : Different stressStrain mode encountered");
     }
 
     // we can force 3d response, and we obtain correct 3d tangent matrix,
@@ -562,13 +562,13 @@ PerfectlyPlasticMaterial :: computePlasticStiffnessAt(FloatMatrix &answer,
     yeldStressGrad = this->GiveYCStressGradient(gp, currentStressVector,
                                                 currentPlasticStrainVector);
     crossSection->imposeStressConstrainsOnGradient(gp, yeldStressGrad);
-    yeldStressGradMat = new FloatMatrix(yeldStressGrad, 1); // transpose
+    yeldStressGradMat = new FloatMatrix(*yeldStressGrad, 1); // transpose
 
     loadingStressGrad = this->GiveLCStressGradient(gp, currentStressVector,
                                                    currentPlasticStrainVector);
 
     crossSection->imposeStrainConstrainsOnGradient(gp, loadingStressGrad);
-    loadingStressGradMat = new FloatMatrix(yeldStressGrad);
+    loadingStressGradMat = new FloatMatrix(*yeldStressGrad);
 
     help.beProductOf(de, * loadingStressGrad);
     delete loadingStressGrad;
@@ -659,7 +659,7 @@ PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint *gp)
         if ( linearElasticMaterial ) {
             value = this->linearElasticMaterial->give(aProperty, gp);
         } else {
-            _error("give: property not defined");
+            OOFEM_ERROR("give: property not defined");
         }
     }
 

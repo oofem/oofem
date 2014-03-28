@@ -91,7 +91,7 @@ public:
      */
     virtual int instanciateYourself(DataReader *dr, InputRecord *ir)
     {
-        const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
+
         IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
         std :: string name;
@@ -104,13 +104,13 @@ public:
             mir = dr->giveInputRecord(DataReader :: IR_expModuleRec, i + 1);
             result = mir->giveRecordKeywordField(name);
             if ( result != IRRT_OK ) {
-                IR_IOERR(giveClassName(), __proc, "", mir, result);
+                IR_IOERR("", mir, result);
             }
 
             // read type of module
             module = this->CreateModule(name.c_str(), i, emodel);
             if ( module == NULL ) {
-                OOFEM_ERROR2( "InitModuleManager::instanciateYourself: unknown module (%s)", name.c_str() );
+                OOFEM_SIMPLE_ERROR( "InitModuleManager::instanciateYourself: unknown module (%s)", name.c_str() );
             }
 
             module->initializeFrom(mir);
@@ -141,7 +141,7 @@ public:
         if ( moduleList->includes(num) ) {
             elem = moduleList->at(num);
         } else {
-            OOFEM_ERROR2("ModuleManager::giveOuputModule: No module no. %d defined", num);
+            OOFEM_SIMPLE_ERROR("ModuleManager::giveOuputModule: No module no. %d defined", num);
         }
 
         return elem;

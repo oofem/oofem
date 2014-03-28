@@ -53,7 +53,7 @@ ActiveBoundaryCondition *ActiveDof :: giveActiveBoundaryCondition()
     if ( !activeBC ) {
         activeBC = dynamic_cast< ActiveBoundaryCondition * >( this->dofManager->giveDomain()->giveBc(bc) );
         if ( !activeBC ) {
-            OOFEM_ERROR2("ActiveBoundaryCondition :: giveActiveBoundaryCondition - No active bc at %d\n", bc);
+            OOFEM_ERROR("ActiveBoundaryCondition :: giveActiveBoundaryCondition - No active bc at %d\n", bc);
         }
     }
     return activeBC;

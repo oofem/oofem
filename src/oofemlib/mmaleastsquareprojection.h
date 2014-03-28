@@ -94,7 +94,7 @@ public:
     /// Destructor
     virtual ~MMALeastSquareProjection();
 
-    virtual void __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP = false);
+    virtual void __init(Domain *dold, IntArray &type, FloatArray &coords, Set &sourceElemSet, TimeStep *tStep, bool iCohesiveZoneGP = false);
 
     virtual void finish(TimeStep *tStep);
 

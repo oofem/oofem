@@ -108,7 +108,7 @@ CohesiveInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 // computes full constitutive matrix for case of gp stress-strain state.
 //
 {
-    _error("give3dMaterialStiffnessMatrix: not implemented");
+    OOFEM_ERROR("give3dMaterialStiffnessMatrix: not implemented");
 }
 
 

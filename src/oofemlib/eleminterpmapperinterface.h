@@ -76,7 +76,7 @@ public:
      */
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                        TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
-    { OOFEM_ERROR("Not implemented\n"); }
+    { OOFEM_SIMPLE_ERROR("Not implemented\n"); }
 
     /**
      * Returns the dof meaning of element vector of primary unknowns.

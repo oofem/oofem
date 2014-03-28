@@ -118,7 +118,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
     FloatArray forceX, forceY, forceZ, glob_gravity, gravity, n;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        _error("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("computeBodyLoadVectorAt: unknown load type");
     }
 
     // note: force is assumed to be in global coordinate system.
@@ -448,10 +448,10 @@ Quad1MindlinShell3D :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tS
 int
 Quad1MindlinShell3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    if ( type == IST_ShellForceMomentumTensor ) {
+    if ( type == IST_ShellForceTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         return 1;
-    } else if ( type == IST_ShellStrainCurvatureTensor ) {
+    } else if ( type == IST_ShellStrainTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
@@ -485,7 +485,7 @@ Quad1MindlinShell3D :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     } else if ( iEdge == 4 ) { // edge between nodes 4 1
         answer.setValues(12, 19, 20, 21, 22, 23, 24, 1, 2, 3, 4, 5, 6);
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("giveEdgeDofMapping: wrong edge number");
     }
 }
 
@@ -617,7 +617,7 @@ Quad1MindlinShell3D :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray 
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 

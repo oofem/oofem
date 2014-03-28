@@ -113,7 +113,7 @@ MDM :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
             char buff [ 1024 ];
             sprintf( buff, "giveRealStressVector: negative eigenvalue of damage tensor detected, element %d, ip %d",
                     gp->giveElementGeometry()->giveNumber(), gp->giveNumber() );
-            _error(buff);
+            OOFEM_ERROR(buff);
         }
     }
 
@@ -148,7 +148,7 @@ MDM :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
      * char buff[1024];
      * sprintf (buff, "giveRealStressVector: INF or NAN error detected, element %d, ip %d",
      *     gp->giveElement()->giveNumber(), gp->giveNumber());
-     * _error (buff);
+     * OOFEM_ERROR (buff);
      * }
      * }
      * // end debug test
@@ -242,9 +242,9 @@ MDM :: computeLocalDamageTensor(FloatMatrix &damageTensor, const FloatArray &tot
                 damageVector.at(i) += this->N [ im ] [ i - 1 ] * this->microplaneWeights [ im ] / Psi;
             }
         }
-        //else MicroplaneMaterial::_error ("Unknown type of formulation");
+        //else MicroplaneMaterial::OOFEM_ERROR ("Unknown type of formulation");
         else {
-            _error("Unknown type of formulation");
+            OOFEM_ERROR("Unknown type of formulation");
         }
     }
 
@@ -268,9 +268,9 @@ MDM :: computeLocalDamageTensor(FloatMatrix &damageTensor, const FloatArray &tot
         damageTensor.at(3, 1) = damageTensor.at(1, 3) = damageVector.at(5);
         damageTensor.at(1, 2) = damageTensor.at(2, 1) = damageVector.at(6);
 
-        //} else MicroplaneMaterial::_error ("computeDamageTensor: unknown ndc value encountered");
+        //} else MicroplaneMaterial::OOFEM_ERROR ("computeDamageTensor: unknown ndc value encountered");
     } else {
-        _error("computeDamageTensor: unknown ndc value encountered");
+        OOFEM_ERROR("computeDamageTensor: unknown ndc value encountered");
     }
 }
 
@@ -322,9 +322,9 @@ MDM :: computeDamageOnPlane(GaussPoint *gp, Microplane *mplane, const FloatArray
         }
 
         Enorm = sqrt(en * en + em * em + el * el);
-        //} else MicroplaneMaterial::_error ("Unknown type of damage law");
+        //} else MicroplaneMaterial::OOFEM_ERROR ("Unknown type of damage law");
     } else {
-        _error("Unknown type of damage law");
+        OOFEM_ERROR("Unknown type of damage law");
     }
 
 
@@ -341,9 +341,9 @@ MDM :: computeDamageOnPlane(GaussPoint *gp, Microplane *mplane, const FloatArray
             }
         }
 
-        //} else MicroplaneMaterial::_error ("Unknown type of softening");
+        //} else MicroplaneMaterial::OOFEM_ERROR ("Unknown type of softening");
     } else {
-        _error("Unknown type of softening");
+        OOFEM_ERROR("Unknown type of softening");
     }
 
     return answer;
@@ -439,8 +439,8 @@ MDM :: applyDamageTranformation(FloatArray &strainPDC, const FloatArray &tempDam
             strainPDC.at(5) *= sqrt(psi1 * psi3);
             strainPDC.at(6) *= sqrt(psi1 * psi2);
         } else {
-            //MicroplaneMaterial::_error ("Unknown type of formulation");
-            _error("Unknown type of formulation");
+            //MicroplaneMaterial::OOFEM_ERROR ("Unknown type of formulation");
+            OOFEM_ERROR("Unknown type of formulation");
         }
     } else if ( mdmMode == mdm_2d ) {
         double psi1 = tempDamageTensorEigenVals.at(1);
@@ -454,13 +454,13 @@ MDM :: applyDamageTranformation(FloatArray &strainPDC, const FloatArray &tempDam
             strainPDC.at(2) *= psi2;
             strainPDC.at(3) *= sqrt(psi1 * psi2);
         } else {
-            //MicroplaneMaterial::_error ("Unknown type of formulation");
-            _error("Unknown type of formulation");
+            //MicroplaneMaterial::OOFEM_ERROR ("Unknown type of formulation");
+            OOFEM_ERROR("Unknown type of formulation");
         }
 
-        //} else MicroplaneMaterial::_error ("Unknown type of mdm mode");
+        //} else MicroplaneMaterial::OOFEM_ERROR ("Unknown type of mdm mode");
     } else {
-        _error("Unknown type of mdm mode");
+        OOFEM_ERROR("Unknown type of mdm mode");
     }
 }
 
@@ -564,9 +564,9 @@ MDM :: applyDamageToStiffness(FloatMatrix &d, GaussPoint *gp)
             psi1 = 1. / ( status->giveTempDamageTensorEigenVals().at(1) );
             psi2 = 1. / ( status->giveTempDamageTensorEigenVals().at(2) );
             psi3 = 1. / ( status->giveTempDamageTensorEigenVals().at(3) );
-            //} else MicroplaneMaterial::_error ("Unknown type of formulation");
+            //} else MicroplaneMaterial::OOFEM_ERROR ("Unknown type of formulation");
         } else {
-            _error("Unknown type of formulation");
+            OOFEM_ERROR("Unknown type of formulation");
         }
 
         //if ((psi1 > MAX_REL_COMPL_TRESHOLD) || (psi2 > MAX_REL_COMPL_TRESHOLD) || (psi3 > MAX_REL_COMPL_TRESHOLD)) printf (":");
@@ -599,9 +599,9 @@ MDM :: applyDamageToStiffness(FloatMatrix &d, GaussPoint *gp)
             d.at(3, 2) /= ( psi3 * psi2 );
             d.at(3, 3) /= ( psi3 * psi3 );
             d.at(4, 4) /= ( psi1 * psi2 );
-            //} else MicroplaneMaterial::_error ("Unknown type stiffness");
+            //} else MicroplaneMaterial::OOFEM_ERROR ("Unknown type stiffness");
         } else {
-            _error("Unknown type stiffness");
+            OOFEM_ERROR("Unknown type stiffness");
         }
 
         return;
@@ -613,9 +613,9 @@ MDM :: applyDamageToStiffness(FloatMatrix &d, GaussPoint *gp)
         } else if ( formulation == STIFFNESS_DAMAGE ) {
             psi1 = 1. / ( status->giveTempDamageTensorEigenVals().at(1) );
             psi2 = 1. / ( status->giveTempDamageTensorEigenVals().at(2) );
-            //} else MicroplaneMaterial::_error ("Unknown type of formulation");
+            //} else MicroplaneMaterial::OOFEM_ERROR ("Unknown type of formulation");
         } else {
-            _error("Unknown type of formulation");
+            OOFEM_ERROR("Unknown type of formulation");
         }
 
 
@@ -789,7 +789,6 @@ MDM :: initializeFrom(InputRecord *ir)
 // initializes according to string
 //
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, this->tempDillatCoeff, _IFT_MDM_talpha);
@@ -810,7 +809,7 @@ MDM :: initializeFrom(InputRecord *ir)
             IR_GIVE_FIELD(ir, this->Gf, _IFT_MDM_gf);
             IR_GIVE_FIELD(ir, this->Ft, _IFT_MDM_ft);
         } else {
-            _error("instanciateFrom: unknown set of parameters");
+            OOFEM_ERROR("instanciateFrom: unknown set of parameters");
         }
     } else { // local case
         if ( ( ir->hasField(_IFT_MDM_efp) ) && ( ir->hasField(_IFT_MDM_ep) ) ) {
@@ -821,7 +820,7 @@ MDM :: initializeFrom(InputRecord *ir)
             IR_GIVE_FIELD(ir, this->Gf, _IFT_MDM_gf);
             IR_GIVE_FIELD(ir, this->mdm_Ep, _IFT_MDM_ep);
         } else {
-            _error("instanciateFrom: unknown set of parameters");
+            OOFEM_ERROR("instanciateFrom: unknown set of parameters");
         }
     }
 
@@ -982,8 +981,8 @@ MDM :: formTransformationMatrix(FloatMatrix &answer, const FloatMatrix &t, int n
         return;
 
     default:
-        //MicroplaneMaterial::_error ("Stress transformation matrix format not implemented");
-        _error("Stress transformation matrix format not implemented");
+        //MicroplaneMaterial::OOFEM_ERROR ("Stress transformation matrix format not implemented");
+        OOFEM_ERROR("Stress transformation matrix format not implemented");
     }
 }
 
@@ -1045,8 +1044,8 @@ MDM :: giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedSt
         }
 
         if ( Efp <= 0. ) {
-            //MicroplaneMaterial::_error("Warning: negative Efp encountered");
-            _error("Warning: negative Efp encountered");
+            //MicroplaneMaterial::OOFEM_ERROR("Warning: negative Efp encountered");
+            OOFEM_ERROR("Warning: negative Efp encountered");
         }
 
         return;
@@ -1093,7 +1092,7 @@ MDM :: giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedSt
  * else
  * Efp = (Gf/(h*E*Ep)+(2.13+ParMd)*Ep)/(2.73-ParMd) - Ep;
  * if (Efp<=0.)
- * MicroplaneMaterial::_error("Warning: negative Efp encountered");
+ * MicroplaneMaterial::OOFEM_ERROR("Warning: negative Efp encountered");
  *
  * return Efp;
  * }
@@ -1106,8 +1105,8 @@ MDM :: initializeData(int numberOfMicroplanes)
         MicroplaneMaterial :: initializeData(numberOfMicroplanes);
     } else if ( this->mdmMode == mdm_2d ) {
         if ( numberOfMicroplanes > MAX_NUMBER_OF_MICROPLANES ) {
-            //MicroplaneMaterial::_error ("initializeData: required number of microplanes too big");
-            _error("initializeData: required number of microplanes too big");
+            //MicroplaneMaterial::OOFEM_ERROR ("initializeData: required number of microplanes too big");
+            OOFEM_ERROR("initializeData: required number of microplanes too big");
         }
 
         int iplane;
@@ -1143,9 +1142,9 @@ MDM :: initializeData(int numberOfMicroplanes)
             }
         } // end loop over mplanes
 
-        //} else MicroplaneMaterial::_error ("initializeData: Unknown MDMModeType ecountered");
+        //} else MicroplaneMaterial::OOFEM_ERROR ("initializeData: Unknown MDMModeType ecountered");
     } else {
-        _error("initializeData: Unknown MDMModeType ecountered");
+        OOFEM_ERROR("initializeData: Unknown MDMModeType ecountered");
     }
 }
 
@@ -1192,27 +1191,41 @@ MDM :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep)
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
 
     toMap.at(1) = ( int ) IST_MicroplaneDamageValues;
+    
+    // Set up source element set if not set up by user
+    if ( sourceElemSet == NULL ) {
+        sourceElemSet = new Set(0, oldd);
+	IntArray el;
+	// compile source list to contain all elements on old odmain with the same material id
+        for ( int i = 1; i <= oldd->giveNumberOfElements(); i++ ) {
+            if ( oldd->giveElementGeometry(i)->giveMaterial()->giveNumber() == this->giveNumber() ) {
+	        // add oldd domain element to source list
+	        el.followedBy(i, 10);
+            }
+        }
+        sourceElemSet->setElementList(el);
+    }
 
 #ifndef MDM_MAPPING_DEBUG
-    this->mapper.init(oldd, toMap, gp, tStep);
+    this->mapper.init(oldd, toMap, gp, * sourceElemSet, tStep);
     result = mapper.mapVariable(intVal, gp, IST_MicroplaneDamageValues, tStep);
 #else
     if ( mapperType == mdm_cpt ) {
-        this->mapper2.init(oldd, toMap, gp, tStep);
+        this->mapper2.init(oldd, toMap, gp, * sourceElemSet, tStep);
         result = mapper2.mapVariable(intVal, gp, IST_MicroplaneDamageValues, tStep);
     } else if ( mapperType == mdm_sft ) {
-        this->mapperSFT.init(oldd, toMap, gp, tStep);
+        this->mapperSFT.init(oldd, toMap, gp, * sourceElemSet, tStep);
         result = mapperSFT.mapVariable(intVal, gp, IST_MicroplaneDamageValues, tStep);
     } else if ( mapperType == mdm_lst ) {
-        this->mapperLST.init(oldd, toMap, gp, tStep);
+        this->mapperLST.init(oldd, toMap, gp, * sourceElemSet, tStep);
         result = mapperLST.mapVariable(intVal, gp, IST_MicroplaneDamageValues, tStep);
     } else {
-        _error("MMI_map: unsupported Mapper id");
+        OOFEM_ERROR("unsupported Mapper id");
     }
 
 #endif
 
-    if ( formulation == COMPLIANCE_DAMAGE ) {
+     if ( formulation == COMPLIANCE_DAMAGE ) {
         for ( int i = 1; i <= intVal.giveSize(); i++ ) {
             if ( intVal.at(i) < 1.0 ) {
                 intVal.at(i) = 1.0;
@@ -1240,7 +1253,7 @@ MDM :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep)
     toMap.resize(2);
     toMap.at(1) = ( int ) IST_StrainTensor;
     toMap.at(2) = ( int ) IST_StressTensor;
-    this->mapper2.init(oldd, toMap, gp, tStep);
+    this->mapper2.init(oldd, toMap, gp, * sourceElemSet, tStep);
 
     result = mapper2.mapVariable(intVal, gp, IST_StressTensor, tStep);
     if ( result ) {
@@ -1254,7 +1267,8 @@ MDM :: MMI_map(GaussPoint *gp, Domain *oldd, TimeStep *tStep)
 
     status->updateYourself(tStep);
 
-    return result;
+    return result; 
+
 }
 
 
@@ -1384,9 +1398,9 @@ MDMStatus :: ~MDMStatus() { }
 contextIOResultType
 MDMStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
-    //if (stream == NULL) StructuralMaterialStatus::_error ("saveContex : can't write into NULL stream");
+    //if (stream == NULL) StructuralMaterialStatus::OOFEM_ERROR ("saveContex : can't write into NULL stream");
     if ( stream == NULL ) {
-        _error("saveContex : can't write into NULL stream");
+        OOFEM_ERROR("saveContex : can't write into NULL stream");
     }
 
     contextIOResultType iores;

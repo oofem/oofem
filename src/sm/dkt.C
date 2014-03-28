@@ -100,7 +100,7 @@ DKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
     FloatMatrix T;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        _error("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("computeBodyLoadVectorAt: unknown load type");
     }
 
     GaussIntegrationRule irule(1, this, 1, 5);
@@ -512,10 +512,10 @@ DKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 int
 DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    if ( type == IST_ShellForceMomentumTensor ) {
+    if ( type == IST_ShellForceTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         return 1;
-    } else if ( type == IST_ShellStrainCurvatureTensor ) {
+    } else if ( type == IST_ShellStrainTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         return 1;
     } else {
@@ -540,10 +540,10 @@ DKTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
                                                        InternalStateType type, TimeStep *tStep)
 {
     GaussPoint *gp;
-    if ( type == IST_ShellForceMomentumTensor ) {
+    if ( type == IST_ShellForceTensor ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
-    } else if ( type == IST_ShellStrainCurvatureTensor ) {
+    } else if ( type == IST_ShellStrainTensor ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
     } else {
@@ -582,7 +582,7 @@ DKTPlate :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
         ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
     }
 }
 
@@ -665,7 +665,7 @@ DKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(5) = 2;
         answer.at(6) = 3;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("giveEdgeDofMapping: wrong edge number");
     }
 }
 

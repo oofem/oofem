@@ -237,7 +237,6 @@ M4Material :: giveRealMicroplaneStressVector(FloatArray &answer,
 IRResultType
 M4Material :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // je-li funkce prepsana, je treba zavolat predchazejici

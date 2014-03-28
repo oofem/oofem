@@ -638,7 +638,7 @@ ConcreteDPM :: computeDamageParam(double kappa, GaussPoint *gp)
         aux1 = ( ft / eM ) * h / ef;
         if ( aux1 > 1 ) {
             printf("computeDamageParam: ft=%g, E=%g, wf=%g, hmax=E*wf/ft=%g, h=%g\n", ft, eM, ef, eM * ef / ft, h);
-            _error("computeDamageParam: element too large");
+            OOFEM_ERROR("computeDamageParam: element too large");
         }
 
         do {
@@ -648,7 +648,7 @@ ConcreteDPM :: computeDamageParam(double kappa, GaussPoint *gp)
             Lhs = -1. + aux1 * aux;
             omega -= R / Lhs;
             if ( nite > 40 ) {
-                _error("computeDamageParam: algorithm not converging");
+                OOFEM_ERROR("computeDamageParam: algorithm not converging");
             }
         } while ( fabs(R) >= DPM_DAMAGE_TOLERANCE );
 
@@ -675,7 +675,7 @@ ConcreteDPM :: computeDamageParam(double kappa, GaussPoint *gp)
 
 #endif
         if ( ( omega > 1.0 ) || ( omega < 0.0 ) ) {
-            _error2("computeDamageParam: internal error, omega = %g", omega);
+            OOFEM_ERROR("computeDamageParam: internal error, omega = %g", omega);
         }
     }
 
@@ -934,7 +934,7 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
 
     while ( residualNorm > yieldTol ) {
         if ( ++iterationCount == newtonIter ) {
-            _error("Closest point projection did not converge.\n");
+            OOFEM_ERROR("Closest point projection did not converge.\n");
         }
 
         //compute the stress, yield value and residuals

@@ -153,7 +153,7 @@ DofManExportModule :: giveOutputStream(TimeStep *tStep)
 
     std :: string fileName = this->giveOutputBaseFileName(tStep) + ".dm";
     if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2( "DofManExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
+        OOFEM_ERROR( "DofManExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
     }
 
     return answer;

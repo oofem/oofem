@@ -58,11 +58,11 @@ SlaveDof :: initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const I
         idSame = true;
     } else
     if ( mstrDofID->giveSize() < cntOfMstrDfMngr ) {
-        _error3("initialize: mstrDofID.giveSize %d != cntOfMstrDfMngr %d", mstrDofID->giveSize(), cntOfMstrDfMngr);
+        OOFEM_ERROR("initialize: mstrDofID.giveSize %d != cntOfMstrDfMngr %d", mstrDofID->giveSize(), cntOfMstrDfMngr);
     }
 
     if ( mstrContribution.giveSize() < cntOfMstrDfMngr ) {
-        _error3("initialize: mstrContribution.giveSize %d != cntOfMstrDfMngr %d", mstrContribution.giveSize(), cntOfMstrDfMngr);
+        OOFEM_ERROR("initialize: mstrContribution.giveSize %d != cntOfMstrDfMngr %d", mstrContribution.giveSize(), cntOfMstrDfMngr);
     }
 
 
@@ -91,7 +91,7 @@ SlaveDof :: giveNumberOfPrimaryMasterDofs()
         return countOfPrimaryMasterDofs;
     } else
     if ( countOfPrimaryMasterDofs == 0 ) {
-        _error2( "giveNumberOfPrimaryDofs: slaveDof number %ld is own master", this->giveNumber() );
+        OOFEM_ERROR( "giveNumberOfPrimaryDofs: slaveDof number %ld is own master", this->giveNumber() );
     }
 
     countOfPrimaryMasterDofs = 0;

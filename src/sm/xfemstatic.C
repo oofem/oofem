@@ -39,7 +39,7 @@
 #include "dictionary.h"
 #include "classfactory.h"
 #include "dofmanager.h"
-#include "xfemelementinterface.h"
+#include "xfem/xfemelementinterface.h"
 #include "element.h"
 #include "structuralelement.h"
 
@@ -48,7 +48,7 @@
 
 #include "gausspoint.h"
 
-#include "primvarmapper.h"
+#include "mappers/primvarmapper.h"
 #include "matstatmapperint.h"
 #include "structuralinterfacematerial.h"
 #include "structuralinterfacematerialstatus.h"
@@ -160,6 +160,10 @@ XFEMStatic :: terminate(TimeStep *tStep)
     // (e.g. if a crack has moved and cut a new element)
     for ( int domInd = 1; domInd <= this->giveNumberOfDomains(); domInd++ ) {
         Domain *domain = this->giveDomain(domInd);
+	
+	// create a new set containing all elements
+        Set elemSet(0, domain);
+        elemSet.addAllElements();
 
         if ( domain->giveXfemManager()->hasPropagatingFronts() || mForceRemap ) {
             // If domain cloning is performed, there is no need to
@@ -233,7 +237,7 @@ XFEMStatic :: terminate(TimeStep *tStep)
                                     if ( siMatStat == NULL ) {
                                         OOFEM_ERROR("In XFEMStatic :: terminate: Failed to cast to StructuralInterfaceMaterialStatus.\n");
                                     }
-                                    interface->MSMI_map(gp, * domain, * tStep, * siMatStat);
+                                    interface->MSMI_map(gp, * domain, elemSet, * tStep, * siMatStat);
                                 }
                             }
                         }
@@ -426,7 +430,6 @@ XFEMStatic ::  giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain 
 
 IRResultType XFEMStatic :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     NonLinearStatic :: initializeFrom(ir);

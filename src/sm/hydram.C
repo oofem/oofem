@@ -112,7 +112,7 @@ HydrationModel :: HydrationModel(MixtureType mix, FindRootMethod usefr) : Materi
     if ( ( usefr ) && ( usefr <= frMixed ) ) {
         useFindRoot = usefr;
     } else {
-        _error("constructor: unknown FindRootMethod\n");
+        OOFEM_ERROR("constructor: unknown FindRootMethod\n");
     }
 }
 
@@ -129,7 +129,7 @@ HydrationModel :: initializeFrom(InputRecord *ir)
     if ( initialHydrationDegree >= 0. ) {
         OOFEM_LOG_INFO("HydrationModel: Hydration from %.2f.", initialHydrationDegree);
     } else {
-        _error("Hydration degree input incorrect, use 0..1 to set initial material hydration degree.");
+        OOFEM_ERROR("Hydration degree input incorrect, use 0..1 to set initial material hydration degree.");
     }
 
     if ( ir->hasField(_IFT_HydrationModel_c60mix) ) {
@@ -208,7 +208,7 @@ HydrationModel :: setMixture(MixtureType mix)
 
         e0 = 0.05; // ksi_0
     } else {
-        _error("Unknown mixture type!");
+        OOFEM_ERROR("Unknown mixture type!");
     }
 
     ear = 4000; // activation term [K]
@@ -303,7 +303,7 @@ HydrationModel :: giveStatus(GaussPoint *gp) const
             hmi->setHydrationModelStatus(status);
         }
     } else {
-        _error("giveStatus: Master status undefined.");
+        OOFEM_ERROR("giveStatus: Master status undefined.");
     }
 
     return status;
@@ -332,12 +332,12 @@ HydrationModel :: giveCharacteristicValue(const FloatArray &vec, MatResponseMode
 
     if ( ( rmode == IntSource ) || ( rmode == IntSource_hh ) || ( rmode == IntSource_ww ) || ( rmode == IntSource_wh ) || ( rmode == IntSource_hw ) ) {
         if ( vec.isEmpty() ) {
-            _error("giveCharacteristicValue: undefined state vector.");
+            OOFEM_ERROR("giveCharacteristicValue: undefined state vector.");
         }
 
         answer = computeIntSource(vec, gp, tStep, rmode);
     } else {
-        _error("giveCharacteristicValue: wrong MatResponseMode.");
+        OOFEM_ERROR("giveCharacteristicValue: wrong MatResponseMode.");
     }
 
     return answer;
@@ -364,7 +364,7 @@ HydrationModel :: computeHydrationDegreeIncrement(double ksi, double T, double h
             break;
 #ifdef DEBUG
         default: {
-            OOFEM_ERROR2("HydrationModel :: dksi - unknown FindRootMethod %d", useFindRoot);
+            OOFEM_ERROR("HydrationModel :: dksi - unknown FindRootMethod %d", useFindRoot);
         }
 #endif
         }
@@ -415,7 +415,7 @@ HydrationModel :: computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeSt
 
         case IntSource_wh: return -we *dksidT(ksi, T, h, dt);
 
-        default: _error("computeIntSource: Wrong MatResponseMode.");
+        default: OOFEM_ERROR("computeIntSource: Wrong MatResponseMode.");
         }
     }
 
@@ -457,7 +457,7 @@ HydrationModel :: updateInternalState(const FloatArray &vec, GaussPoint *gp, Tim
             h = 1; // assume saturated if undefined
         }
     } else {
-        _error("updateInternalState: undefined state vector.");
+        OOFEM_ERROR("updateInternalState: undefined state vector.");
     }
 
     ksi = status->giveHydrationDegree();
@@ -610,7 +610,7 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
     if ( value >= 0. ) {
         OOFEM_LOG_INFO("HydratingMaterial: creating HydrationModel.");
         if ( !( hydrationModel = new HydrationModel() ) ) {
-            OOFEM_ERROR("Could not create HydrationModel instance.");
+            OOFEM_SIMPLE_ERROR("Could not create HydrationModel instance.");
         }
 
         hydrationModel->initializeFrom(ir);
@@ -620,7 +620,7 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
         constantHydrationDegree = -value;
         OOFEM_LOG_INFO("HydratingMaterial: Hydration degree set to %.2f.", -value);
     } else {
-        OOFEM_ERROR("HydrationModelInterface :: initializeFrom - Hydration degree input incorrect, use -1..<0 for constant hydration degree, 0..1 to set initial material hydration degree.");
+        OOFEM_SIMPLE_ERROR("HydrationModelInterface :: initializeFrom - Hydration degree input incorrect, use -1..<0 for constant hydration degree, 0..1 to set initial material hydration degree.");
     }
 
     // Material cast time - start of hydration

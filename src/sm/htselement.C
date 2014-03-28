@@ -338,7 +338,7 @@ HTSelement :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueM
                 answer.add(helpLoadVector);
             }
         } else {
-            OOFEM_ERROR3("HTSelement :: computeLocalForceLoadVector - boundary load %d is of unsupported type (%d)", id, ltype);
+            OOFEM_ERROR("HTSelement :: computeLocalForceLoadVector - boundary load %d is of unsupported type (%d)", id, ltype);
         }
     }
     this->computePrescribedDisplacementLoadVectorAt(helpLoadVector, tStep, mode);

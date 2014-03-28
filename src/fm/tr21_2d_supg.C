@@ -110,7 +110,7 @@ TR21_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) 
             answer.setValues(2, V_u, V_v);
         }
     } else {
-        _error("giveDofManDofIDMask: Unknown equation id encountered");
+        OOFEM_ERROR("giveDofManDofIDMask: Unknown equation id encountered");
     }
 }
 

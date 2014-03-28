@@ -124,10 +124,10 @@ public:
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
     // ZZErrorEstimatorInterface
-    virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
+    virtual ElementGeometry *ZZErrorEstimatorI_giveElementGeometry() { return this; }
 
     // HuertaErrorEstimatorInterface
-    virtual Element *HuertaErrorEstimatorI_giveElement() { return this; }
+    virtual BaseElement *HuertaErrorEstimatorI_giveElement() { return this; }
 
     virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                                   IntArray &localNodeIdArray, IntArray &globalNodeIdArray,

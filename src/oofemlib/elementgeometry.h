@@ -222,7 +222,7 @@ public:
 	* @return DOF number i.
 	*/
 	virtual DofManager *giveInternalDofManager(int i) const {
-		_error2("No such DOF available on Element %d", number);
+	        OOFEM_ERROR("No such DOF available on Element %d", number);
 		return NULL;
 	}
 	
@@ -602,7 +602,7 @@ public:
 	* @param iTStep Time step.
 	* @return Nonzero if o.k, otherwise zero.
 	*/
-	virtual int mapStateVariables(const Domain &iOldDom, const TimeStep &iTStep);
+	virtual int mapStateVariables(Domain &iOldDom, const TimeStep &iTStep);
 	/**
 	* Updates the internal state variables stored in all IPs according to
 	* already mapped state.

@@ -47,7 +47,6 @@
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 #include "feinterpol.h"
-#include "export/bcexportinterface.h"
 
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
@@ -114,14 +113,6 @@ void PrescribedGradient :: setPrescribedGradientVoigt(const FloatArray &t)
     } else {
         OOFEM_ERROR("setPrescribedTensorVoigt: Tensor is in strange voigt format. Should be 3 or 6. Use setPrescribedTensor directly if needed.");
     }
-}
-
-/**
- * Overloaded function for ExportModuleCallerInterface.
- */
-void PrescribedGradient :: callExportModule(BCExportInterface &iExpMod, TimeStep *tStep)
-{
-	iExpMod.outputBoundaryCondition(*this, tStep);
 }
 
 
@@ -262,7 +253,7 @@ void PrescribedGradient :: computeTangent(FloatMatrix &tangent, EquationID eid, 
     SparseMtrx *Kpf = classFactory.createSparseMtrx(stype);
     SparseMtrx *Kpp = classFactory.createSparseMtrx(stype);
     if ( !Kff ) {
-        OOFEM_ERROR2("MixedGradientPressureBC :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
+        OOFEM_ERROR("MixedGradientPressureBC :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, 1, eid, fnum);
     Kfp->buildInternalStructure(rve, 1, eid, fnum, pnum);
@@ -295,7 +286,6 @@ void PrescribedGradient :: computeTangent(FloatMatrix &tangent, EquationID eid, 
 
 IRResultType PrescribedGradient :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     GeneralBoundaryCondition :: initializeFrom(ir);

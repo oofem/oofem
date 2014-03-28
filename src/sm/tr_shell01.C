@@ -236,22 +236,22 @@ TR_SHELL01 :: computeVolumeAround(GaussPoint *gp)
 int
 TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    if ( type == IST_ShellForceMomentumTensor ) {
+    if ( type == IST_ShellForceTensor ) {
         FloatArray aux;
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
 
-        plate->giveIPValue(answer, plateGP, IST_ShellForceMomentumTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, tStep);
+        plate->giveIPValue(answer, plateGP, IST_ShellForceTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellForceTensor, tStep);
         answer.add(aux);
         return 1;
-    } else if ( type == IST_ShellStrainCurvatureTensor ) {
+    } else if ( type == IST_ShellStrainTensor ) {
         FloatArray aux;
         GaussPoint *membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         GaussPoint *plateGP = plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
 
-        plate->giveIPValue(answer, plateGP, IST_ShellStrainCurvatureTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, tStep);
+        plate->giveIPValue(answer, plateGP, IST_ShellStrainTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellStrainTensor, tStep);
         answer.add(aux);
 
         return 1;
@@ -310,8 +310,8 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf( file, "  GP %2d.%-2d :", iRule->giveNumber(), gp->giveNumber() );
         membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         // Strain - Curvature
-        plate->giveIPValue(v, gp, IST_ShellStrainCurvatureTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellStrainCurvatureTensor, tStep);
+        plate->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellStrainTensor, tStep);
         v.add(aux);
 
         fprintf(file, "  strains ");
@@ -321,8 +321,8 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
                 v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
 
         // Strain - Curvature
-        plate->giveIPValue(v, gp, IST_ShellForceMomentumTensor, tStep);
-        membrane->giveIPValue(aux, membraneGP, IST_ShellForceMomentumTensor, tStep);
+        plate->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
+        membrane->giveIPValue(aux, membraneGP, IST_ShellForceTensor, tStep);
         v.add(aux);
 
         fprintf(file, "\n              stresses");
