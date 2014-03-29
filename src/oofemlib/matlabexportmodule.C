@@ -433,14 +433,12 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
         fprintf(FID, "\tReactionForces.ReactionForces{%i} = [", i);
         if ( dofManMap.contains(dManNum) ) {
             DofManager *dofMan = domain->giveDofManager(dManNum);
-            dofIDs.resize( dofMan->giveNumberOfDofs() );
-            dofIDs.zero();
+            dofIDs.clear();
 
-            for ( int j = 1; j <= dofMan->giveNumberOfDofs(); j++ ) {
-                Dof *dof = dofMan->giveDof(j);
+            for ( Dof *dof: *dofMan ) {
                 int num = dof->giveEquationNumber( EModelDefaultPrescribedEquationNumbering() );
                 int pos = eqnMap.findFirstIndexOf(num);
-                dofIDs.at(j) = ( int ) dof->giveDofID();
+                dofIDs.followedBy(dof->giveDofID());
                 if ( pos > 0 ) {
                     fprintf(FID, "%e ", reactions.at(pos));
                 } else {
