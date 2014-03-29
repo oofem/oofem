@@ -49,7 +49,7 @@ class FEI3dHexaTriQuad;
 
 /**
  * Hexahedral Taylor-Hood element for Stokes flow.
- ***(Tri)Quadratic interpolation of geometry and velocity, and linear interpolation of pressures.
+ * (Tri)Quadratic interpolation of geometry and velocity, and linear interpolation of pressures.
  * @author Mikael Öhman
  */
 class Hexa21Stokes : public FMElement,

@@ -1160,11 +1160,11 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                     node->computeLoadVector(charVec, nLoad, type, tStep, mode);
 
                     if ( charVec.isNotEmpty() ) {
-                        if ( node->computeM2LTransformation(R, dofIDarry) ) {
+                        if ( node->computeM2LTransformation(R, nLoad->giveDofIDs()) ) {
                             charVec.rotatedWith(R, 't');
                         }
 
-                        node->giveCompleteLocationArray(loc, s);
+                        node->giveLocationArray(nLoad->giveDofIDs(), loc, s);
                         answer.assemble(charVec, loc);
 
                         if ( eNorms ) {
