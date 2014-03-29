@@ -1254,27 +1254,30 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
 
                     if ( bc == 1 ) {
                         if ( aMode == HuertaErrorEstimator :: HEE_linear ) {
-                            FloatArray bcs(dofs);
-                            for ( idof = 0; idof < dofs; idof++ ) {
-                                bcs(idof) = ++localBcId;
+                            IntArray bcs, dofids;
+                            for ( Dof *dof: *node ) {
+                                bcs.followedBy(++localBcId);
+                                dofids.followedBy(dof->giveDofID());
                             }
                             ir->setField(bcs, _IFT_DofManager_bc);
+                            ir->setField(dofids, _IFT_DofManager_dofidmask);
                         }
                     } else {
                         if ( hasBc == true ) {
                             // it is necessary to reproduce bc from coarse mesh
 
                             if ( m == 0 ) {       // at node
-                                FloatArray bcs(dofs);
-                                for ( idof = 1; idof <= dofs; idof++ ) {
+                                IntArray bcs, dofids;
+                                for ( Dof *nodeDof: *node ) {
                                     bcDofId = 0;
-                                    nodeDof = node->giveDof(idof);
                                     if ( nodeDof->hasBc(tStep) != 0 ) {
                                         bcDofId = nodeDof->giveBcId();
                                     }
-                                    bcs.at(idof) = bcDofId;
+                                    bcs.followedBy(bcDofId);
+                                    dofids.followedBy(nodeDof->giveDofID());
                                 }
                                 ir->setField(bcs, _IFT_DofManager_bc);
+                                ir->setField(dofids, _IFT_DofManager_dofidmask);
 
                                 // copy node load
                                 if ( ( loadArray = node->giveLoadArray() )->giveSize() != 0 ) {
@@ -1282,7 +1285,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                                 }
                             } else {
                                 if ( sideNumBc != 0 ) {
-                                    FloatArray bcs(dofs);
+                                    IntArray bcs, dofids;
 
                                     // I rely on the fact that bc dofs to be reproduced are ordered with respect to the dof ordering of the corner node
 
@@ -1290,7 +1293,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                                     for ( idof = 1; idof <= dofs; idof++ ) {
                                         bcDofId = 0;
                                         if ( bcId <= sideNumBc ) {
-                                            nodeDof = node->giveDof( sideBcDofId.at(bcId) );
+                                            nodeDof = node->giveDofWithID( sideBcDofId.at(bcId) );
                                             if ( nodeDof->giveDofID() == dofIdArray.at(idof) ) {
                                                 bcDofId = nodeDof->giveBcId();
                                                 bcId++;
@@ -1300,6 +1303,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                                         bcs.at(idof) = bcDofId;
                                     }
                                     ir->setField(bcs, _IFT_DofManager_bc);
+                                    //ir->setField(dofids, _IFT_DofManager_dofidmask);
                                 }
                             }
                         } else {
@@ -1736,18 +1740,19 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                 // it is necessary to reproduce bc from coarse mesh
 
                                 if ( m == 0 && n == 0 ) {    // at node
-                                    FloatArray bcs(dofs);
+                                    IntArray bcs, dofids;
 
-                                    for ( idof = 1; idof <= dofs; idof++ ) {
+                                    for ( Dof *nodeDof: *node ) {
                                         bcDofId = 0;
-                                        nodeDof = node->giveDof(idof);
                                         if ( nodeDof->hasBc(tStep) != 0 ) {
                                             bcDofId = nodeDof->giveBcId();
                                         }
 
-                                        bcs.at(idof) = bcDofId;
+                                        bcs.followedBy(bcDofId);
+                                        dofids.followedBy(nodeDof->giveDofID());
                                     }
-                                    ir->setField(bcs, "bc");
+                                    ir->setField(bcs, _IFT_DofManager_bc);
+                                    ir->setField(dofids, _IFT_DofManager_dofidmask);
 
                                     // copy node load
 
@@ -1774,7 +1779,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                         for ( idof = 1; idof <= dofs; idof++ ) {
                                             bcDofId = 0;
                                             if ( bcId <= sideNumBc.at(index) ) {
-                                                nodeDof = node->giveDof( sideBcDofId.at(bcId) );
+                                                nodeDof = node->giveDofWithID( sideBcDofId.at(bcId) );
                                                 if ( nodeDof->giveDofID() == dofIdArray.at(idof) ) {
                                                     bcDofId = nodeDof->giveBcId();
                                                     bcId++;
@@ -2361,18 +2366,19 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                     // it is necessary to reproduce bc from coarse mesh
 
                                     if ( m == 0 && n == 0 && k == 0 ) { // at node
-                                        FloatArray bcs(dofs);
+                                        IntArray bcs, dofids;
 
-                                        for ( idof = 1; idof <= dofs; idof++ ) {
+                                        for ( Dof *nodeDof: *node ) {
                                             bcDofId = 0;
-                                            nodeDof = node->giveDof(idof);
                                             if ( nodeDof->hasBc(tStep) != 0 ) {
                                                 bcDofId = nodeDof->giveBcId();
                                             }
 
-                                            bcs.at(idof) = bcDofId;
+                                            bcs.followedBy(bcDofId);
+                                            dofids.followedBy(nodeDof->giveDofID());
                                         }
-                                        ir->setField(bcs, "bc");
+                                        ir->setField(bcs, _IFT_DofManager_bc);
+                                        ir->setField(dofids, _IFT_DofManager_dofidmask);
 
                                         // copy node load
 
@@ -2404,7 +2410,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                                 for ( idof = 1; idof <= dofs; idof++ ) {
                                                     bcDofId = 0;
                                                     if ( bcId <= sideNumBc.at(index) ) {
-                                                        nodeDof = node->giveDof( sideBcDofId.at(bcId) );
+                                                        nodeDof = node->giveDofWithID( sideBcDofId.at(bcId) );
                                                         if ( nodeDof->giveDofID() == dofIdArray.at(idof) ) {
                                                             bcDofId = nodeDof->giveBcId();
                                                             bcId++;
@@ -2439,7 +2445,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                                 for ( idof = 1; idof <= dofs; idof++ ) {
                                                     bcDofId = 0;
                                                     if ( bcId <= faceNumBc.at(index) ) {
-                                                        nodeDof = node->giveDof( faceBcDofId.at(bcId) );
+                                                        nodeDof = node->giveDofWithID( faceBcDofId.at(bcId) );
                                                         if ( nodeDof->giveDofID() == dofIdArray.at(idof) ) {
                                                             bcDofId = nodeDof->giveBcId();
                                                             bcId++;
@@ -3043,18 +3049,19 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
         node = refinedDomain->giveNode(inode);
         node->giveUnknownVector(nodeSolution, dofIdArray, VM_Total, refinedTStep);
         for ( idof = 1; idof <= dofs; idof++, pos++ ) {
-            nodeDof = node->giveDof(idof);
+            double sol = nodeSolution.at(idof);
+            nodeDof = node->giveDofWithID(dofIdArray.at(idof));
             if ( nodeDof->hasBc(refinedTStep) == 0 ) {
                 coarseSol = uCoarse.at( nodeDof->__giveEquationNumber() );
             } else {
                 // coarse solution is identical with fine solution at BC
-                coarseSol = nodeSolution.at(idof);
+                coarseSol = sol;
             }
 
             //    coarseSol = nodeDof -> giveBcValue(VM_Total, refinedTStep);
 
             coarseSolution.at(pos) = coarseSol;
-            elementError.at(pos) = nodeSolution.at(idof) - coarseSol;
+            elementError.at(pos) = sol - coarseSol;
             patchError.at(pos) = primaryUnknownError.at( ( globalNodeIdArray.at(inode) - 1 ) * dofs + idof ) - coarseSol;
         }
     }
@@ -3824,12 +3831,12 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
         node->giveUnknownVector(nodeSolution, dofIdArray, VM_Total, refinedTStep);
         for ( idof = 1; idof <= dofs; idof++, pos++ ) {
             fineSolution.at(pos) = nodeSolution.at(idof);
-            nodeDof = node->giveDof(idof);
+            nodeDof = node->giveDofWithID(dofIdArray.at(idof));
             if ( nodeDof->hasBc(refinedTStep) == 0 ) {
                 coarseSolution.at(pos) = uCoarse.at( nodeDof->__giveEquationNumber() );
             } else {
                 // coarse solution is identical with fine solution at BC
-                coarseSolution.at(pos) = nodeSolution.at(idof);
+                coarseSolution.at(pos) = fineSolution.at(pos);
             }
 
             //    coarseSolution.at(pos) = nodeDof -> giveBcValue(VM_Total, refinedTStep);

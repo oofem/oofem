@@ -76,14 +76,14 @@ protected:
      * Extract from dofArray of slave_node those Dofs that have compatible BCs with master_node
      * @param master_node Node to which Dof compatibility will be compared.
      * @param slave_node Node with original Dofs.
-     * @param dofArray Array of ids of Dofs of slave_node to chose from.
+     * @param dofIDArray Array of ids of Dofs of slave_node to chose from.
      * @param dofs Number of Dofs in dofArray.
      * @param answer Array of ids of Dofs in dofArray with compatible BCs.
      * @param mode Mode of Dof values.
      * @param tStep Active time step.
      * @return Number of Dofs with compatible BCs.
      */
-    int giveCompatibleBcDofArray(Node *master_node, Node *slave_node, IntArray &dofArray, int dofs, IntArray &answer,
+    int giveCompatibleBcDofArray(Node *master_node, Node *slave_node, IntArray &dofIDArray, int dofs, IntArray &answer,
                                  ValueModeType mode, TimeStep *tStep);
 
     /// Returns string for prepending output (used by error reporting macros).
