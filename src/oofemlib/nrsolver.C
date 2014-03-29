@@ -399,7 +399,7 @@ NRSolver :: initPrescribedEqs()
     ParallelContext *parallel_context = engngModel->giveParallelContext( this->domain->giveNumber() );
 #endif
     int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
-    int inode, idof;
+    int inode, idofid;
     IntArray localPrescribedEqs(numberOfPrescribedDofs);
 
     for ( int j = 1; j <= ndofman; j++ ) {
@@ -411,9 +411,9 @@ NRSolver :: initPrescribedEqs()
         jglobnum = domain->giveNode(j)->giveGlobalNumber();
         for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
             inode = prescribedDofs.at(2 * i - 1);
-            idof  = prescribedDofs.at(2 * i);
+            idofid = prescribedDofs.at(2 * i);
             if ( inode == jglobnum ) {
-                localPrescribedEqs.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
+                localPrescribedEqs.at(++count) = domain->giveNode(j)->giveDofWithID(idofid)->giveEquationNumber(dn);
                 continue;
             }
         }

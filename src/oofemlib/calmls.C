@@ -979,31 +979,31 @@ void CylindricalALM :: convertHPCMap()
 {
     IntArray indirectMap;
     FloatArray weights;
-    int size, i;
-    int inode, idof;
+    int size;
+    int inode, idofid;
     EModelDefaultEquationNumbering dn;
 
-    int j, jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
+    int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
     size = calm_HPCDmanDofSrcArray.giveSize() / 2;
     indirectMap.resize(size);
     weights.resize(size);
-    for ( j = 1; j <= ndofman; j++ ) {
+    for ( int j = 1; j <= ndofman; j++ ) {
         jglobnum = domain->giveNode(j)->giveLabel();
-        for ( i = 1; i <= size; i++ ) {
+        for ( int i = 1; i <= size; i++ ) {
             inode = calm_HPCDmanDofSrcArray.at(2 * i - 1);
-            idof  = calm_HPCDmanDofSrcArray.at(2 * i);
+            idofid = calm_HPCDmanDofSrcArray.at(2 * i);
             if ( inode == jglobnum ) {
 #ifdef __PARALLEL_MODE
                 // HUHU hard wired domain no 1
                 if ( parallel_context->isLocal( domain->giveNode(j) ) ) {
-                    indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
+                    indirectMap.at(++count) = domain->giveNode(j)->giveDofWithID(idofid)->giveEquationNumber(dn);
                     if ( calm_Control == calml_hpc ) {
                         weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
                     }
                 }
 
 #else
-                indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
+                indirectMap.at(++count) = domain->giveNode(j)->giveDofWithID(idofid)->giveEquationNumber(dn);
                 if ( calm_Control == calml_hpc ) {
                     weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
                 }
@@ -1027,7 +1027,7 @@ void CylindricalALM :: convertHPCMap()
         calm_HPCWeights.resize(count);
     }
 
-    for ( i = 1; i <= count; i++ ) {
+    for ( int i = 1; i <= count; i++ ) {
         calm_HPCIndirectDofMask.at(i) = indirectMap.at(i);
         calm_HPCWeights.at(i) = weights.at(i);
     }
