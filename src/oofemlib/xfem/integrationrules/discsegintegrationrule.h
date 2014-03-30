@@ -32,38 +32,37 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "enrichmentfrontreducefront.h"
-#include "dynamicinputrecord.h"
-#include "classfactory.h"
-#include "xfem/xfemmanager.h"
-#include "domain.h"
-#include "connectivitytable.h"
+#ifndef DISCSEGINTEGRATIONRULE_H_
+#define DISCSEGINTEGRATIONRULE_H_
+
+#include "gaussintegrationrule.h"
+
+#include "geometry.h"
 
 namespace oofem {
-REGISTER_EnrichmentFront(EnrFrontReduceFront)
 
-void EnrFrontReduceFront :: MarkNodesAsFront(std::unordered_map<int, int> &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std::unordered_map<int, double> &iLevelSetNormalDirMap, const std::unordered_map<int, double> &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo)
+/**
+ * DiscontinuousSegmentIntegrationRule provides integration over a
+ * discontinuous boundary segment.
+ *
+ * @author Erik Svenning
+ * @date Mar 14, 2014
+ */
+class OOFEM_EXPORT DiscontinuousSegmentIntegrationRule : public GaussIntegrationRule
 {
-	// Remove nodes touched by the crack tip
-	Domain &d = * ( ixFemMan.giveDomain() );
+protected:
+	std :: vector< Line > mSegments;
 
-	for(size_t tipInd = 0; tipInd < iTipInfo.size(); tipInd++) {
-		//    	printf("iTipInfo[tipInd].mElIndex: %d\n", iTipInfo[tipInd].mElIndex );
+	/// Start and end points of the boundary segment.
+	FloatArray mXS, mXE;
 
-		Element *el = d.giveElement(iTipInfo[tipInd].mElIndex);
+public:
+	DiscontinuousSegmentIntegrationRule(int n, Element * e, const std :: vector< Line > & iSegments, const FloatArray &iXS, const FloatArray &iXE);
+	virtual ~DiscontinuousSegmentIntegrationRule();
 
-		const IntArray & elNodes = el->giveDofManArray();
+	virtual int SetUpPointsOnLine(int iNumPointsPerSeg, MaterialMode mode);
+};
 
-		for(int i = 1; i <= elNodes.giveSize(); i++) {
-			ioNodeEnrMarkerMap[elNodes.at(i)] = 0;
-		}
-	}
-}
+} /* namespace oofem */
 
-void EnrFrontReduceFront :: giveInputRecord(DynamicInputRecord &input)
-{
-	int number = 1;
-	input.setRecordKeywordField(this->giveInputRecordName(), number);
-}
-
-} // end namespace oofem
+#endif /* DISCSEGINTEGRATIONRULE_H_ */

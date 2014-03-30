@@ -38,6 +38,7 @@
 #include "interface.h"
 #include "alist.h"
 #include "xfemmanager.h"
+#include "geometry.h"
 
 #define _IFT_XfemElementInterface_CohesiveZoneMaterial "czmaterial"
 #define _IFT_XfemElementInterface_NumIntPointsCZ "nipcz"
@@ -74,6 +75,9 @@ public:
     /// Flag that tells if plane stress or plane strain is assumed
     bool mUsePlaneStrain;
 
+    virtual const char *giveClassName() const { return "XfemElementInterface"; }
+    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
+
 public:
     /// Constructor.
     XfemElementInterface(Element * e);
@@ -95,6 +99,16 @@ public:
     /// Creates enriched N-matrix.
     void XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl);
 
+    /**
+     * Creates enriched N-matrix for a chosen subset of element nodes.
+     */
+    void XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl, const std::vector<int> &iLocNodeInd);
+
+    /**
+     * Computes total number of enrichments in a node.
+     */
+    int XfemElementInterface_giveNumDofManEnrichments(const DofManager &iDMan, XfemManager &iXMan) const;
+
     /// Partitions the element into patches by a triangulation.
     virtual void XfemElementInterface_partitionElement(std :: vector< Triangle > &oTriangles, const std :: vector< FloatArray > &iPoints);
     /// Updates integration rule based on the triangulation.
@@ -106,6 +120,13 @@ public:
 
     // Help functions for partitioning
     void putPointsInCorrectPartition(std :: vector< std :: vector< FloatArray > > &oPointPartitions, const std :: vector< FloatArray > &iIntersecPoints, const std :: vector< const FloatArray * > &iNodeCoord) const;
+
+    /**
+     * Partition a boundary segment to account for cracks cutting
+     * the boundary. This is a necessary step to evaluate integrals
+     * along an edge cut by one or several cracks.
+     */
+    void partitionEdgeSegment(int iBndIndex, std::vector<Line> &oSegments);
 
     /**
      * XfemElementInterface_computeConstitutiveMatrixAt.

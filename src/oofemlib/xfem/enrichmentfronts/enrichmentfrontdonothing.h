@@ -62,7 +62,7 @@ public:
     EnrFrontDoNothing() { };
     virtual ~EnrFrontDoNothing() { };
 
-    virtual void MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo) { /*printf("Entering EnrFrontDoNothing::MarkNodesAsFront().\n");*/ }
+    virtual void MarkNodesAsFront(std::unordered_map<int, int> &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std::unordered_map<int, double> &iLevelSetNormalDirMap, const std::unordered_map<int, double> &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo) { /*printf("Entering EnrFrontDoNothing::MarkNodesAsFront().\n");*/ }
 
     // No special tip enrichments are applied with this model.
     virtual int  giveNumEnrichments(const DofManager &iDMan) const { return 0; }
@@ -78,6 +78,9 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     virtual void giveInputRecord(DynamicInputRecord &input);
+
+    virtual double giveSupportRadius() const {return 0.0;}
+
 };
 
 } // end namespace oofem

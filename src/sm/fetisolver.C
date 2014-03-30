@@ -68,7 +68,7 @@ FETISolver :: estimateMaxPackSize(IntArray &map, CommunicationBuffer &buff, int 
 {
     int rank = domain->giveEngngModel()->giveRank();
     int mapSize = map.giveSize();
-    int eqNum, count = 0;
+    int count = 0;
     EModelDefaultEquationNumbering dn;
 
     if ( rank == 0 ) {

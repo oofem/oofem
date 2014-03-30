@@ -72,6 +72,41 @@ void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, Xf
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }
 
+void EnrichmentDomain_BG :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
+{
+    int nVert = bg->giveNrVertices();
+    oCenter = {0.0, 0.0};
+    oRadius = 0.0;
+
+    if(nVert > 0) {
+		for(int i = 1; i <= nVert; i++) {
+			oCenter.add( bg->giveVertex(i) );
+		}
+
+		oCenter.times( 1.0/double(nVert) );
+
+		for(int i = 1; i <= nVert; i++) {
+			oRadius = std::max( oRadius, oCenter.distance( bg->giveVertex(i) ) );
+		}
+
+    }
+
+}
+
+void EDBGCircle::giveBoundingSphere(FloatArray &oCenter, double &oRadius)
+{
+	Circle *circle = dynamic_cast<Circle*>(bg);
+
+	if(circle == NULL) {
+		OOFEM_ERROR("In EDBGCircle::giveBoundingSphere(): Failed to cast to Circle.")
+	}
+
+	oCenter = bg->giveVertex(1);
+	oRadius = circle->giveRadius();
+
+}
+
+
 IRResultType EDCrack :: initializeFrom(InputRecord *ir)
 {
     IRResultType result = bg->initializeFrom(ir);
@@ -253,6 +288,14 @@ void DofManList :: giveInputRecord(DynamicInputRecord &input)
     input.setField(idList, _IFT_DofManList_list);
 }
 
+void DofManList :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
+{
+	// TODO: Compute tighter bounds. /ES
+	oCenter = {0.0,0.0};
+	oRadius = std :: numeric_limits< double > :: max();
+}
+
+
 void WholeDomain :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
@@ -262,4 +305,12 @@ void WholeDomain :: giveInputRecord(DynamicInputRecord &input)
 {
     input.setRecordKeywordField(this->giveInputRecordName(), 1);
 }
+
+void WholeDomain :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
+{
+	// TODO: Compute tighter bounds. /ES
+	oCenter = {0.0,0.0};
+	oRadius = std :: numeric_limits< double > :: max();
+}
+
 } // end namespace oofem

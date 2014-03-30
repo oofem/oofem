@@ -517,7 +517,7 @@ public:
      */
     int giveDofManagerNumber(int i) const { return dofManArray.at(i); }
     /// @return Receivers list of dof managers.
-    IntArray &giveDofManArray() { return dofManArray; }
+    const IntArray &giveDofManArray() const { return dofManArray; }
     /**
      * @param i Local index of the dof manager in element.
      * @return The i-th dofmanager of element.

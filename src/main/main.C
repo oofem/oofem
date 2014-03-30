@@ -35,6 +35,9 @@
 //  MAIN
 //  Solves finite element problems.
 //
+#ifdef __PYTHON_MODULE
+ #include <Python.h>
+#endif
 
 #include "engngm.h"
 #include "oofemcfg.h"
@@ -56,10 +59,6 @@
 
 #ifdef __SLEPC_MODULE
  #include <slepceps.h>
-#endif
-
-#ifdef __PYTHON_MODULE
- #include <Python.h>
 #endif
 
 #ifdef __OOFEG

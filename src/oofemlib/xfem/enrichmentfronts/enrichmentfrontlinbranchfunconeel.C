@@ -58,7 +58,7 @@ EnrFrontLinearBranchFuncOneEl :: ~EnrFrontLinearBranchFuncOneEl()
 }
 
 
-void EnrFrontLinearBranchFuncOneEl :: MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo)
+void EnrFrontLinearBranchFuncOneEl :: MarkNodesAsFront(std::unordered_map<int, int> &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std::unordered_map<int, double> &iLevelSetNormalDirMap, const std::unordered_map<int, double> &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo)
 {
     mTipInfo = iTipInfo;
     mNodeTipIndices.clear();
@@ -72,7 +72,7 @@ void EnrFrontLinearBranchFuncOneEl :: MarkNodesAsFront(std :: vector< int > &ioN
     	const IntArray & elNodes = el->giveDofManArray();
 
     	for(int i = 1; i <= elNodes.giveSize(); i++) {
-    		ioNodeEnrMarker[ elNodes.at(i)-1 ] = 2;
+    		ioNodeEnrMarkerMap[ elNodes.at(i) ] = 2;
             addTipIndexToNode(elNodes.at(i), tipInd);
     	}
     }

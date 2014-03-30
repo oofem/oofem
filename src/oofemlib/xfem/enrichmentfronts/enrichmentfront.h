@@ -39,6 +39,8 @@
 #include <vector>
 #include "inputrecord.h"
 
+#include <unordered_map>
+
 namespace oofem {
 
 class XfemManager;
@@ -79,7 +81,7 @@ public:
      *                      should get special treatment. May also modify the set of nodes
      *                      enriched by the interior enrichment.
      */
-    virtual void MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo) = 0;
+    virtual void MarkNodesAsFront(std::unordered_map<int, int> &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std::unordered_map<int, double> &iLevelSetNormalDirMap, const std::unordered_map<int, double> &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo) = 0;
 
     // The number of enrichment functions applied to tip nodes.
     virtual int  giveNumEnrichments(const DofManager &iDMan) const = 0;
@@ -98,6 +100,8 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input) = 0;
 
     virtual bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex) const;
+
+    virtual double giveSupportRadius() const = 0;
 
 protected:
     std :: vector< TipInfo >mTipInfo;

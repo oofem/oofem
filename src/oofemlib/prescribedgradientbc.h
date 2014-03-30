@@ -32,38 +32,50 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "enrichmentfrontreducefront.h"
-#include "dynamicinputrecord.h"
-#include "classfactory.h"
-#include "xfem/xfemmanager.h"
-#include "domain.h"
-#include "connectivitytable.h"
+
+#ifndef PRESCRIBEDGRADIENTBC_H_
+#define PRESCRIBEDGRADIENTBC_H_
+
+#include "activebc.h"
+#include "valuemodetype.h"
+#include "floatmatrix.h"
+
+#define _IFT_PrescribedGradientBC_centercoords "ccoord"
+#define _IFT_PrescribedGradientBC_gradient "gradient"
 
 namespace oofem {
-REGISTER_EnrichmentFront(EnrFrontReduceFront)
+/**
+ * Base class for boundary conditions that prescribe a displacement gradient
+ * (in a strong or weak sense) on the boundary of a RVE.
+ *
+ * Under development.
+ *
+ * @author Erik Svenning
+ * @date Mar 5, 2014
+ */
 
-void EnrFrontReduceFront :: MarkNodesAsFront(std::unordered_map<int, int> &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std::unordered_map<int, double> &iLevelSetNormalDirMap, const std::unordered_map<int, double> &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo)
-{
-	// Remove nodes touched by the crack tip
-	Domain &d = * ( ixFemMan.giveDomain() );
+class OOFEM_EXPORT PrescribedGradientBC : public ActiveBoundaryCondition {
+public:
+	PrescribedGradientBC(int n, Domain * d);
+	virtual ~PrescribedGradientBC();
 
-	for(size_t tipInd = 0; tipInd < iTipInfo.size(); tipInd++) {
-		//    	printf("iTipInfo[tipInd].mElIndex: %d\n", iTipInfo[tipInd].mElIndex );
+    virtual bcType giveType() const { return UnknownBT; }
 
-		Element *el = d.giveElement(iTipInfo[tipInd].mElIndex);
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
-		const IntArray & elNodes = el->giveDofManArray();
+    void giveGradientVoigt(FloatArray &oGradient) const;
+protected:
+    /// Prescribed gradient @f$ d_{ij} @f$
+    FloatMatrix mGradient;
 
-		for(int i = 1; i <= elNodes.giveSize(); i++) {
-			ioNodeEnrMarkerMap[elNodes.at(i)] = 0;
-		}
-	}
-}
+    /// Center coordinate @f$ \bar{x}_i @f$
+    FloatArray mCenterCoord;
 
-void EnrFrontReduceFront :: giveInputRecord(DynamicInputRecord &input)
-{
-	int number = 1;
-	input.setRecordKeywordField(this->giveInputRecordName(), number);
-}
+    double domainSize();
 
-} // end namespace oofem
+};
+
+} /* namespace oofem */
+
+#endif /* PRESCRIBEDGRADIENTBC_H_ */

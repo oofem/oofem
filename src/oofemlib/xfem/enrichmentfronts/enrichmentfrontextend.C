@@ -42,7 +42,7 @@
 namespace oofem {
 REGISTER_EnrichmentFront(EnrFrontExtend)
 
-		void EnrFrontExtend :: MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo)
+		void EnrFrontExtend :: MarkNodesAsFront(std::unordered_map<int, int> &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std::unordered_map<int, double> &iLevelSetNormalDirMap, const std::unordered_map<int, double> &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo)
 		{
 		    // Extend the set of enriched nodes as follows:
 		    // If any node of the neighboring elements is enriched, the current node is also enriched.
@@ -55,7 +55,11 @@ REGISTER_EnrichmentFront(EnrFrontExtend)
 		    std :: vector< int >newEnrNodes;
 		    for ( int i = 1; i <= nNodes; i++ ) {
 		        // Check if the node is already enriched
-		        bool alreadyEnr = ( ioNodeEnrMarker [ i - 1 ] > 0 );
+		    	bool alreadyEnr = false;
+		    	auto resMarker = ioNodeEnrMarkerMap.find(i);
+		    	if(resMarker != ioNodeEnrMarkerMap.end()) {
+		    		alreadyEnr = true;
+		    	}
 
 		#if defined ( ENABLE_XFEM_CPP11 )
 		        auto begin      = newEnrNodes.begin();
@@ -84,7 +88,8 @@ REGISTER_EnrichmentFront(EnrFrontExtend)
 		                // Loop over neighbor element nodes
 		                for ( int k = 1; k <= el.giveNumberOfDofManagers(); k++ ) {
 		                    int kGlob = el.giveDofManager(k)->giveGlobalNumber();
-		                    if ( iLevelSetNormalDir [ kGlob - 1 ] < 0 ) {
+		                    auto res = iLevelSetNormalDirMap.find(kGlob);
+		                    if(res != iLevelSetNormalDirMap.end() && res->second < 0.0) {
 		                        newEnrNodes.push_back(i);
 		                        goOn = false;
 		                        break;
@@ -97,7 +102,7 @@ REGISTER_EnrichmentFront(EnrFrontExtend)
 
 		    // Mark the new nodes to be enriched
 		    for ( int i = 0; i < int ( newEnrNodes.size() ); i++ ) {
-		        ioNodeEnrMarker [ newEnrNodes [ i ] - 1 ] = 1;
+		    	ioNodeEnrMarkerMap[newEnrNodes [ i ]] = 1;
 		    }
 		}
 

@@ -466,7 +466,12 @@ double FloatArray :: distance(const FloatArray &x) const
 
 double FloatArray :: distance(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const
 {
-    double dist = 0.0;
+	return sqrt( distance_square(iP1, iP2, oXi) );
+}
+
+double FloatArray :: distance_square(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const
+{
+    double dist2 = 0.0;
 
     // Vector from start P1 to point X
     FloatArray u;
@@ -475,37 +480,37 @@ double FloatArray :: distance(const FloatArray &iP1, const FloatArray &iP2, doub
     // Line tangent vector
     FloatArray t;
     t.beDifferenceOf(iP2, iP1);
-    double l = norm(t);
+    double l2 = t.computeSquaredNorm();
 
-    if ( l > 0.0 ) {
-        t.normalize();
+    if ( l2 > 0.0 ) {
+        double l = t.normalize();
         double s = dot(u, t);
 
         if ( s < 0.0 ) {
             // X is closest to P1
-            dist = this->distance(iP1);
+            dist2 = this->distance_square(iP1);
             oXi = 0.0;
-            return dist;
+            return dist2;
         } else {
             if ( s > l ) {
                 // X is closest to P2
-                dist = this->distance(iP2);
+                dist2 = this->distance_square(iP2);
                 oXi = 1.0;
-                return dist;
+                return dist2;
             } else {
                 oXi = s / l;
                 FloatArray q = ( 1.0 - oXi ) * iP1 + oXi * iP2;
-                dist = this->distance(q);
-                return dist;
+                dist2 = this->distance_square(q);
+                return dist2;
             }
         }
     } else {
         // If the points P1 and P2 coincide,
         // we can compute the distance to any
         // of these points.
-        dist = this->distance(iP1);
+        dist2 = this->distance_square(iP1);
         oXi = 0.5;
-        return dist;
+        return dist2;
     }
 }
 

@@ -50,8 +50,6 @@
 //@}
 
 namespace oofem {
-class BCExportInterface;
-
 /**
  * Prescribes @f$ v_i = d_{ij}(x_j-\bar{x}_j) @f$ or @f$ s = d_{1j}(x_j - \bar{x}_j) @f$
  * where @f$ v_i @f$ are primary unknowns for the subscale.

@@ -72,10 +72,10 @@ bool Line :: intersects(Element *element)
     return ( ip > 0 );
 }
 
-Line :: Line(FloatArray &pointA, FloatArray &pointB) : BasicGeometry()
+Line :: Line(const FloatArray &iPointA, const FloatArray &iPointB) : BasicGeometry()
 {
-    mVertices.push_back(pointA);
-    mVertices.push_back(pointB);
+    mVertices.push_back(iPointA);
+    mVertices.push_back(iPointB);
 }
 
 double Line :: computeDistanceTo(const FloatArray *point)
@@ -268,6 +268,12 @@ Triangle :: Triangle(const FloatArray &iP1, const FloatArray &iP2, const FloatAr
     mVertices.push_back(iP1);
     mVertices.push_back(iP2);
     mVertices.push_back(iP3);
+
+    for(size_t i = 0; i < mVertices.size(); i++) {
+    	if( mVertices[i].giveSize() == 2 ) {
+    		mVertices[i] = {mVertices[i].at(1), mVertices[i].at(2), 0.0};
+    	}
+    }
 }
 
 double Triangle :: getArea()
@@ -347,6 +353,13 @@ void Triangle :: changeToAnticlockwise()
 
 bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
 {
+	FloatArray P(iP);
+	if(iP.giveSize() == 2) {
+		P = {iP.at(1), iP.at(2), 0.0};
+	}
+
+	const double tol2 = 1.0e-18;
+
     // Compute triangle normal
     FloatArray p1p2;
     p1p2.beDifferenceOf(mVertices [ 1 ], mVertices [ 0 ]);
@@ -356,15 +369,21 @@ bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
 
     FloatArray N;
     N.beVectorProductOf(p1p2, p1p3);
-    N.normalize();
+    if(N.computeSquaredNorm() < tol2) {
+    	// The triangle is degenerated
+    	return false;
+    }
+    else {
+    	N.normalize();
+    }
 
     // Compute normal distance from triangle to point
     FloatArray p1p;
-    p1p.beDifferenceOf(iP, mVertices [ 0 ]);
+    p1p.beDifferenceOf(P, mVertices [ 0 ]);
     double d = p1p.dotProduct(N);
 
     // Project point onto triangle plane
-    FloatArray pProj = iP;
+    FloatArray pProj = P;
     pProj.add(-d, N);
 
     // Check if the point is on the correct side of all edges
@@ -372,10 +391,22 @@ bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
     // Edge 1
     FloatArray t1;
     t1.beDifferenceOf(mVertices [ 1 ], mVertices [ 0 ]);
-    t1.normalize();
+    if(t1.computeSquaredNorm() < tol2) {
+    	// The triangle is degenerated
+    	return false;
+    }
+    else {
+    	t1.normalize();
+    }
     FloatArray a1;
     a1.beVectorProductOf(N, t1);
-    a1.normalize();
+    if(a1.computeSquaredNorm() < tol2) {
+    	// The triangle is degenerated
+    	return false;
+    }
+    else {
+    	a1.normalize();
+    }
 
     FloatArray p1pProj;
     p1pProj.beDifferenceOf(pProj, mVertices [ 0 ]);
@@ -387,10 +418,22 @@ bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
     // Edge 2
     FloatArray t2;
     t2.beDifferenceOf(mVertices [ 2 ], mVertices [ 1 ]);
-    t2.normalize();
+    if(t2.computeSquaredNorm() < tol2) {
+    	// The triangle is degenerated
+    	return false;
+    }
+    else {
+    	t2.normalize();
+    }
     FloatArray a2;
     a2.beVectorProductOf(N, t2);
-    a2.normalize();
+    if(a2.computeSquaredNorm() < tol2) {
+    	// The triangle is degenerated
+    	return false;
+    }
+    else {
+    	a2.normalize();
+    }
 
     FloatArray p2pProj;
     p2pProj.beDifferenceOf(pProj, mVertices [ 1 ]);
@@ -402,10 +445,22 @@ bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
     // Edge 3
     FloatArray t3;
     t3.beDifferenceOf(mVertices [ 0 ], mVertices [ 2 ]);
-    t3.normalize();
+    if(t3.computeSquaredNorm() < tol2) {
+    	// The triangle is degenerated
+    	return false;
+    }
+    else {
+    	t3.normalize();
+    }
     FloatArray a3;
     a3.beVectorProductOf(N, t3);
-    a3.normalize();
+    if(a3.computeSquaredNorm() < tol2) {
+    	// The triangle is degenerated
+    	return false;
+    }
+    else {
+    	a3.normalize();
+    }
 
     FloatArray p3pProj;
     p3pProj.beDifferenceOf(pProj, mVertices [ 2 ]);
@@ -615,7 +670,7 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
 
     // TODO: This can probably be done in a nicer way.
     // Ensure that we work in 2d.
-    FloatArray point = {iPoint.at(1), iPoint.at(2)};
+    const int dim = 2;
 
     for ( int segId = 1; segId <= numSeg; segId++ ) {
         // Crack segment
@@ -623,93 +678,75 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
 
         const FloatArray &crackP2( this->giveVertex ( segId + 1 ) );
 
-        double dist = 0.0;
+        double dist2 = 0.0;
         if ( segId == 1 ) {
             // Vector from start P1 to point X
-            FloatArray u;
-            u.beDifferenceOf(point, crackP1);
+        	FloatArray u = {iPoint.at(1) - crackP1.at(1), iPoint.at(2) - crackP1.at(2)};
 
             // Line tangent vector
-            FloatArray t;
-            t.beDifferenceOf(crackP2, crackP1);
-            double l = norm(t);
+            FloatArray t = {crackP2.at(1) - crackP1.at(1), crackP2.at(2) - crackP1.at(2)};
+            double l2 = t.computeSquaredNorm();
 
-            if ( l > 0.0 ) {
-                t.normalize();
+            if ( l2 > 0.0 ) {
+            	double l = t.normalize();
                 double s = dot(u, t);
 
-                //				if( s < 0.0 ) {
-                //					// X is closest to P1
-                //					dist = point.distance(crackP1);
-                //				}
-                //				else {
                 if ( s > l ) {
                     // X is closest to P2
-                    dist = point.distance(crackP2);
+                    dist2 = iPoint.distance_square(crackP2);
                 } else {
                     double xi = s / l;
                     FloatArray q = ( 1.0 - xi ) * crackP1 + xi * crackP2;
-                    dist = point.distance(q);
+                    dist2 = iPoint.distance_square(q);
                 }
-                //				}
             } else {
                 // If the points P1 and P2 coincide,
                 // we can compute the distance to any
                 // of these points.
-                dist = point.distance(crackP1);
+                dist2 = iPoint.distance_square(crackP1);
             }
         } else if ( segId == numSeg ) {
             // Vector from start P1 to point X
-            FloatArray u;
-            u.beDifferenceOf(point, crackP1);
+        	FloatArray u = {iPoint.at(1) - crackP1.at(1), iPoint.at(2) - crackP1.at(2)};
 
             // Line tangent vector
-            FloatArray t;
-            t.beDifferenceOf(crackP2, crackP1);
-            double l = norm(t);
+            FloatArray t = {crackP2.at(1) - crackP1.at(1), crackP2.at(2) - crackP1.at(2)};
+            double l2 = t.computeSquaredNorm();
 
-            if ( l > 0.0 ) {
-                t.normalize();
+            if ( l2 > 0.0 ) {
+            	double l = t.normalize();
                 double s = dot(u, t);
 
                 if ( s < 0.0 ) {
                     // X is closest to P1
-                    dist = point.distance(crackP1);
+                    dist2 = iPoint.distance_square(crackP1);
                 } else {
-                    //					if( s > l ) {
-                    //						// X is closest to P2
-                    //						dist = point.distance(crackP2);
-                    //					}
-                    //					else {
                     double xi = s / l;
                     FloatArray q = ( 1.0 - xi ) * crackP1 + xi * crackP2;
-                    dist = point.distance(q);
+                    dist2 = iPoint.distance_square(q);
                     //					}
                 }
             } else {
                 // If the points P1 and P2 coincide,
                 // we can compute the distance to any
                 // of these points.
-                dist = point.distance(crackP1);
+                dist2 = iPoint.distance_square(crackP1);
             }
         } else {
             double arcPos = -1.0;
-            dist = point.distance(crackP1, crackP2, arcPos);
+            dist2 = iPoint.distance_square(crackP1, crackP2, arcPos);
         }
 
+        if ( dist2 < oDist*oDist ) {
+            FloatArray lineToP;
+            lineToP.beDifferenceOf(iPoint, crackP1, dim);
 
-        FloatArray t;
-        t.beDifferenceOf(crackP2, crackP1);
+            FloatArray t;
+            t.beDifferenceOf(crackP2, crackP1, dim);
 
-        FloatArray n = {-t.at(2), t.at(1)};
+            FloatArray n = {-t.at(2), t.at(1)};
 
-        FloatArray lineToP;
-        lineToP.beDifferenceOf(point, crackP1);
-
-        double sign = sgn( lineToP.dotProduct(n) );
-
-        if ( dist < fabs(oDist) ) {
-            oDist = sign * dist;
+            oDist = sgn( lineToP.dotProduct(n) ) * sqrt(dist2);
         }
     }
 }

@@ -311,6 +311,7 @@ Domain :: clear()
 // Clear receiver
 {
     elementList->clear();
+    mElementPlaceInArray.clear();
     dofManagerList->clear();
     materialList->clear();
     bcList->clear();
@@ -369,6 +370,19 @@ Domain :: giveGlobalElement(int n)
 
     OOFEM_ERROR("undefined element id (%d)", n);
     return NULL;
+}
+
+int Domain :: giveElementPlaceInArray(int iGlobalElNum) const
+{
+	auto res = mElementPlaceInArray.find(iGlobalElNum);
+
+	if(res != mElementPlaceInArray.end()) {
+		return res->second;
+	}
+	else {
+		OOFEM_ERROR("In Domain :: giveElementPlaceInArray: returning -1 for iGlobalElNum: %d.\n", iGlobalElNum );
+		return -1;
+	}
 }
 
 Load *
@@ -622,7 +636,7 @@ void Domain :: resizeRandomFieldGenerators(int _newSize) { randomFieldGeneratorL
 void Domain :: resizeSets(int _newSize) { setList->growTo(_newSize); }
 
 void Domain :: setDofManager(int i, DofManager *obj) { dofManagerList->put(i, obj); }
-void Domain :: setElement(int i, Element *obj) { elementList->put(i, obj); }
+void Domain :: setElement(int i, Element *obj) { elementList->put(i, obj); mElementPlaceInArray[obj->giveGlobalNumber()] = i;}
 void Domain :: setCrossSection(int i, CrossSection *obj) { crossSectionList->put(i, obj); }
 void Domain :: setMaterial(int i, Material *obj) { materialList->put(i, obj); }
 void Domain :: setNonlocalBarrier(int i, NonlocalBarrier *obj) { nonlocalBarierList->put(i, obj); }
@@ -773,6 +787,8 @@ Domain :: instanciateYourself(DataReader *dr)
 
         ir->finish();
     }
+
+    BuildElementPlaceInArrayMap();
 
 #  ifdef VERBOSE
     VERBOSE_PRINT0("Instanciated elements ", nelem);
@@ -1735,6 +1751,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         // clear receiver data
         dofManagerList->clear();
         elementList->clear();
+        mElementPlaceInArray.clear();
         materialList->clear();
         bcList->clear();
         icList->clear();
@@ -1962,6 +1979,7 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
     this->elementList->clear(false);
     delete elementList;
     this->elementList = elementList_new;
+    BuildElementPlaceInArrayMap();
 
     this->giveConnectivityTable()->reset();
     this->giveSpatialLocalizer()->init(true);
@@ -2139,4 +2157,17 @@ Domain :: elementGlobal2Local(int _globnum)
 
 
 #endif
+
+void Domain::BuildElementPlaceInArrayMap()
+{
+    mElementPlaceInArray.clear();
+
+    int nelem = giveNumberOfElements();
+
+    for ( int i = 1; i <= nelem; i++ ) {
+        Element *elem = this->giveElement(i);
+        mElementPlaceInArray[ elem->giveGlobalNumber() ] = i;
+    }
+}
+
 } // end namespace oofem
