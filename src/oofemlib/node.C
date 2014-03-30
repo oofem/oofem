@@ -425,12 +425,13 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
     // Note: implementation rely on D_u, D_v and D_w (R_u, R_v, R_w) order in cltypes.h
     // file. Do not change their order and do not insert any values between these values.
     //
-    DofIDItem id, id2;
+    DofIDItem id;
 
     if ( localCoordinateSystem == NULL ) {
         answer.clear();
         return false;
     } else {
+        ///@todo This relies on the order of the dofs, not good.. / Mikael
         if ( dofIDArry.isEmpty() ) {
             // response for all local dofs is computed
 
@@ -438,14 +439,18 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
             answer.resize(numberOfDofs, numberOfDofs);
             answer.zero();
 
-            for ( int i = 1; i <= numberOfDofs; i++ ) {
+            int i = 0;
+            for ( Dof *dof: *this ) {
                 // test for vector quantities
-                switch ( id = giveDof(i)->giveDofID() ) {
+                i++;
+                int j = 0;
+                switch ( id = dof->giveDofID() ) {
                 case D_u:
                 case D_v:
                 case D_w:
-                    for ( int j = 1; j <= numberOfDofs; j++ ) {
-                        id2 = giveDof(j)->giveDofID();
+                    for ( Dof *dof: *this ) {
+                        DofIDItem id2 = dof->giveDofID();
+                        j++;
                         if ( ( id2 == D_u ) || ( id2 == D_v ) || ( id2 == D_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( D_u ) + 1,
                                                                         ( int ) ( id2 ) - ( int ) ( D_u ) + 1 );
@@ -457,8 +462,9 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case V_u:
                 case V_v:
                 case V_w:
-                    for ( int j = 1; j <= numberOfDofs; j++ ) {
-                        id2 = giveDof(j)->giveDofID();
+                    for ( Dof *dof: *this ) {
+                        DofIDItem id2 = dof->giveDofID();
+                        j++;
                         if ( ( id2 == V_u ) || ( id2 == V_v ) || ( id2 == V_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1,
                                                                         ( int ) ( id2 ) - ( int ) ( V_u ) + 1 );
@@ -470,8 +476,9 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case R_u:
                 case R_v:
                 case R_w:
-                    for ( int j = 1; j <= numberOfDofs; j++ ) {
-                        id2 = giveDof(j)->giveDofID();
+                    for ( Dof *dof: *this ) {
+                        DofIDItem id2 = dof->giveDofID();
+                        j++;
                         if ( ( id2 == R_u ) || ( id2 == R_v ) || ( id2 == R_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( R_u ) + 1,
                                                                         ( int ) ( id2 ) - ( int ) ( R_u ) + 1 );
@@ -503,7 +510,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case D_v:
                 case D_w:
                     for ( int j = 1; j <= size; j++ ) {
-                        id2 = ( DofIDItem ) dofIDArry.at(j);
+                        DofIDItem id2 = ( DofIDItem ) dofIDArry.at(j);
                         if ( ( id2 == D_u ) || ( id2 == D_v ) || ( id2 == D_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( D_u ) + 1, ( int ) ( id2 ) - ( int ) ( D_u ) + 1 );
                         }
@@ -515,7 +522,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case V_v:
                 case V_w:
                     for ( int j = 1; j <= size; j++ ) {
-                        id2 = ( DofIDItem ) dofIDArry.at(j);
+                        DofIDItem id2 = ( DofIDItem ) dofIDArry.at(j);
                         if ( ( id2 == V_u ) || ( id2 == V_v ) || ( id2 == V_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1, ( int ) ( id2 ) - ( int ) ( V_u ) + 1 );
                         }
@@ -527,7 +534,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case R_v:
                 case R_w:
                     for ( int j = 1; j <= size; j++ ) {
-                        id2 = ( DofIDItem ) dofIDArry.at(j);
+                        DofIDItem id2 = ( DofIDItem ) dofIDArry.at(j);
                         if ( ( id2 == R_u ) || ( id2 == R_v ) || ( id2 == R_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( R_u ) + 1, ( int ) ( id2 ) - ( int ) ( R_u ) + 1 );
                         }
@@ -824,8 +831,10 @@ Node :: drawYourself(oofegGraphicContext &gc)
 
             FloatArray force(3), momentum(3);
             int numberOfDofs = this->giveNumberOfDofs();
-            for ( int i = 1; i <= numberOfDofs; i++ ) {
-                switch ( giveDof(i)->giveDofID() ) {
+            int i = 0;
+            for ( Dof *dof: *this ) {
+                i++;
+                switch ( dof->giveDofID() ) {
                 case D_u: force.at(1) = defScale * load.at(i);
                     break;
                 case D_v: force.at(2) = defScale * load.at(i);

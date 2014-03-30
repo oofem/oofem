@@ -100,13 +100,12 @@ void DofManager :: setLoadArray(IntArray &la)
 void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 // Computes the vector of the nodal loads of the receiver.
 {
-    FloatArray contribution;
+    answer.clear();
 
     if ( this->giveLoadArray()->isEmpty() ) {
-        answer.clear();
         return;
     } else {
-        answer.clear();
+        FloatArray contribution;
         int nLoads = loadArray.giveSize();     // the node may be subjected
         for ( int i = 1; i <= nLoads; i++ ) {   // to more than one load
             int n = loadArray.at(i);
@@ -124,13 +123,6 @@ void DofManager :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
         OOFEM_ERROR("incompatible load type applied");
     }
     load->computeComponentArrayAt(answer, tStep, mode);
-}
-
-
-Dof *DofManager :: giveDof(int i) const
-// Returns the i-th degree of freedom of the receiver.
-{
-    return dofArray [ i - 1 ];
 }
 
 

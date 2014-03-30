@@ -110,7 +110,7 @@ class IntArray;
  * based on domain type of problem.
  *
  * Tasks:
- * - managing its degrees of freedom (giveDof).
+ * - managing its degrees of freedom.
  * - calculating its nodal vector.
  * - printing and updating at end of step .
  * - managing its swapping to and from disk.
@@ -177,16 +177,6 @@ public:
 
     /**@name Dof management methods */
     //@{
-
-    /**
-     * Returns reference (pointer) to i-th dof of receiver.
-     * Index of Dof with required physical meaning can be obtained by invoking
-     * method findDofWithDofId.
-     * @param i The index of the DOF.
-     * @return The requested DOF.
-     * @see DofManager::findDofWithDofId
-     */
-    Dof *giveDof(int i) const;
     /**
      * Returns DOF with given dofID; issues error if not present.
      * @param dofID The ID for the requested DOF.
