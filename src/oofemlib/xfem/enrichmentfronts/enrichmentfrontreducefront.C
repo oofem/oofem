@@ -38,6 +38,7 @@
 #include "xfem/xfemmanager.h"
 #include "domain.h"
 #include "connectivitytable.h"
+#include "spatiallocalizer.h"
 
 namespace oofem {
 REGISTER_EnrichmentFront(EnrFrontReduceFront)
@@ -50,7 +51,7 @@ void EnrFrontReduceFront :: MarkNodesAsFront(std::unordered_map<int, int> &ioNod
 	for(size_t tipInd = 0; tipInd < iTipInfo.size(); tipInd++) {
 		//    	printf("iTipInfo[tipInd].mElIndex: %d\n", iTipInfo[tipInd].mElIndex );
 
-		Element *el = d.giveElement(iTipInfo[tipInd].mElIndex);
+		Element *el = d.giveSpatialLocalizer()->giveElementContainingPoint( iTipInfo[tipInd].mGlobalCoord );
 
 		const IntArray & elNodes = el->giveDofManArray();
 

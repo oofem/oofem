@@ -99,8 +99,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) = 0;
     virtual void giveInputRecord(DynamicInputRecord &input) = 0;
 
-    virtual bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex) const;
-
     virtual double giveSupportRadius() const = 0;
 
 protected:

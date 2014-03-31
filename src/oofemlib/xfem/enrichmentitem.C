@@ -599,6 +599,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
     Domain *d = ixFemMan.giveDomain();
     mNodeEnrMarkerMap.clear();
     std :: vector< TipInfo >tipInfoArray;
+    mpEnrichmentDomain->giveTipInfos( tipInfoArray );
 
 
     FloatArray center;
@@ -681,36 +682,14 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
             }
 
 
-            if ( numEdgeIntersec >= 2 ) {
-                // If we captured a completely cut element.
+            if ( numEdgeIntersec >= 1 ) {
+                // If we captured a cut element.
                 for ( int elNodeInd = 1; elNodeInd <= nElNodes; elNodeInd++ ) {
                     int nGlob = el->giveNode(elNodeInd)->giveGlobalNumber();
 
                     auto res = mNodeEnrMarkerMap.find(nGlob);
                     if(res == mNodeEnrMarkerMap.end()) {
                     	mNodeEnrMarkerMap[nGlob] = 1;
-                    }
-                }
-            } else {
-                // Store indices of elements containing an interface tip.
-                if ( numEdgeIntersec == 1 ) {
-                    TipInfo tipInfo;
-                    if ( mpEnrichmentDomain->giveClosestTipInfo(elCenter, tipInfo) ) {
-                        // Prevent storage of duplicates
-                        const double tol2 = 1.0e-20;
-                        bool alreadyAdded = false;
-
-                        for ( size_t i = 0; i < tipInfoArray.size(); i++ ) {
-                            if ( tipInfoArray [ i ].mGlobalCoord.distance_square(tipInfo.mGlobalCoord) < tol2 ) {
-                                alreadyAdded = true;
-                                break;
-                            }
-                        }
-
-                        if ( !alreadyAdded ) {
-                            tipInfo.mElIndex = *elIndex;
-                            tipInfoArray.push_back(tipInfo);
-                        }
                     }
                 }
             }
@@ -1173,28 +1152,60 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
 }
 
 
-bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex) const
+bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const FloatArray &iElCenter) const
 {
-    if ( mpEnrichmentFront != NULL ) {
-        double arcPos = -1.0;
-        return mpEnrichmentFront->giveElementTipCoord(oCoord, arcPos, iElIndex);
-    } else {
-        return false;
+    std::vector<TipInfo> tipInfos;
+    mpEnrichmentDomain->giveTipInfos(tipInfos);
+
+    double minDist2 = std :: numeric_limits< double > :: max();
+    size_t minIndex = 0;
+    bool foundTip = false;
+
+    for(size_t i = 0; i < tipInfos.size(); i++) {
+    	if( tipInfos[i].mGlobalCoord.distance_square(iElCenter) < minDist2 ) {
+    		minDist2 = tipInfos[i].mGlobalCoord.distance_square(iElCenter);
+    		minIndex = i;
+    		foundTip = true;
+    	}
+    }
+
+    if(!foundTip) {
+    	return false;
+    }
+    else{
+    	oCoord = tipInfos[minIndex].mGlobalCoord;
+    	oArcPos = tipInfos[minIndex].mArcPos;
+    	return true;
     }
 }
 
-bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const Triangle &iTri) const
+bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const Triangle &iTri, const FloatArray &iElCenter) const
 {
-    if ( mpEnrichmentFront != NULL ) {
-        double arcPos = -1.0;
-        if ( mpEnrichmentFront->giveElementTipCoord(oCoord, arcPos, iElIndex) ) {
-            if ( iTri.pointIsInTriangle(oCoord) ) {
-                return true;
-            }
-        }
+    std::vector<TipInfo> tipInfos;
+    mpEnrichmentDomain->giveTipInfos(tipInfos);
+
+    double minDist2 = std :: numeric_limits< double > :: max();
+    size_t minIndex = 0;
+    bool foundTip = false;
+
+    for(size_t i = 0; i < tipInfos.size(); i++) {
+    	if( tipInfos[i].mGlobalCoord.distance_square(iElCenter) < minDist2 ) {
+    		if ( iTri.pointIsInTriangle(tipInfos[i].mGlobalCoord) ) {
+				minDist2 = tipInfos[i].mGlobalCoord.distance_square(iElCenter);
+				minIndex = i;
+				foundTip = true;
+    		}
+    	}
     }
 
-    return false;
+    if(!foundTip) {
+    	return false;
+    }
+    else{
+    	oCoord = tipInfos[minIndex].mGlobalCoord;
+    	oArcPos = tipInfos[minIndex].mArcPos;
+    	return true;
+    }
 }
 
 double EnrichmentItem :: calcXiZeroLevel(const double &iQ1, const double &iQ2)

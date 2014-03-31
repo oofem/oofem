@@ -203,8 +203,8 @@ public:
 
     // Return the coordinates of the tip in element iElIndex,
     // if the element contains a tip.
-    bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex) const;
-    bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const Triangle &iTri) const;
+    bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const FloatArray &iElCenter) const;
+    bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const Triangle &iTri, const FloatArray &iElCenter) const;
 
     // Help functions
     static double calcXiZeroLevel(const double &iQ1, const double &iQ2);

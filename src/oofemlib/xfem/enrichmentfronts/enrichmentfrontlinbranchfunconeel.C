@@ -38,6 +38,7 @@
 #include "xfem/xfemmanager.h"
 #include "domain.h"
 #include "connectivitytable.h"
+#include "spatiallocalizer.h"
 
 namespace oofem {
 
@@ -67,14 +68,16 @@ void EnrFrontLinearBranchFuncOneEl :: MarkNodesAsFront(std::unordered_map<int, i
 
     for(size_t tipInd = 0; tipInd < iTipInfo.size(); tipInd++) {
 
-    	Element *el = d.giveElement(iTipInfo[tipInd].mElIndex);
+		Element *el = d.giveSpatialLocalizer()->giveElementContainingPoint( iTipInfo[tipInd].mGlobalCoord );
 
-    	const IntArray & elNodes = el->giveDofManArray();
+		if(el != NULL) {
+			const IntArray & elNodes = el->giveDofManArray();
 
-    	for(int i = 1; i <= elNodes.giveSize(); i++) {
-    		ioNodeEnrMarkerMap[ elNodes.at(i) ] = 2;
-            addTipIndexToNode(elNodes.at(i), tipInd);
-    	}
+			for(int i = 1; i <= elNodes.giveSize(); i++) {
+				ioNodeEnrMarkerMap[ elNodes.at(i) ] = 2;
+				addTipIndexToNode(elNodes.at(i), tipInd);
+			}
+		}
     }
 }
 

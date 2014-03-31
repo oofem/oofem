@@ -667,10 +667,15 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
 void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, double &oCrackStartXi, double &oCrackEndXi, int iEnrItemIndex, bool &oIntersection)
 {
-    std :: vector< const FloatArray * >nodeCoord;
+
+	FloatArray elCenter(element->giveDofManager(1)->giveCoordinates()->giveSize());
+	elCenter.zero();
+	std :: vector< const FloatArray * >nodeCoord;
     for ( int i = 1; i <= this->element->giveNumberOfDofManagers(); i++ ) {
         nodeCoord.push_back( element->giveDofManager(i)->giveCoordinates() );
+        elCenter.add( *(element->giveDofManager(i)->giveCoordinates()) );
     }
+    elCenter.times(1.0/double(element->giveNumberOfDofManagers()));
 
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
     EnrichmentItem *ei = xMan->giveEnrichmentItem(iEnrItemIndex);
@@ -710,7 +715,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         bool foundTip = false;
         double tipArcPos = -1.0;
 
-        if ( ei->giveElementTipCoord( tipCoord, tipArcPos, element->giveNumber() ) ) {
+        if ( ei->giveElementTipCoord( tipCoord, tipArcPos, element->giveNumber(), elCenter ) ) {
             foundTip = true;
         }
 
@@ -800,10 +805,14 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
 
 void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, double &oCrackStartXi, double &oCrackEndXi, const Triangle &iTri, int iEnrItemIndex, bool &oIntersection)
 {
+	FloatArray elCenter(iTri.giveVertex(1).giveSize());
+	elCenter.zero();
     std :: vector< const FloatArray * >nodeCoord;
     for ( int i = 1; i <= 3; i++ ) {
         nodeCoord.push_back( & iTri.giveVertex(i) );
+        elCenter.add( iTri.giveVertex(i) );
     }
+    elCenter.times(1.0/3.0);
 
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
     EnrichmentItem *ei = xMan->giveEnrichmentItem(iEnrItemIndex);
@@ -842,7 +851,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         bool foundTip = false;
         double tipArcPos = -1.0;
 
-        if ( ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), iTri) ) {
+        if ( ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), iTri, elCenter) ) {
             foundTip = true;
         }
 
