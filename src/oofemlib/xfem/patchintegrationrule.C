@@ -98,7 +98,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     int nPointsTot = nPoints * triToKeep.size();
     FloatArray coords_xi1, coords_xi2, weights;
     this->giveTriCoordsAndWeights(nPoints, coords_xi1, coords_xi2, weights);
-    this->gaussPointArray = new GaussPoint * [ nPointsTot ];
+    this->gaussPoints.resize( nPointsTot );
     ////////////////////////////////////////////
 
 
@@ -120,7 +120,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
         for ( int j = 0; j < nPoints; j++ ) {
             FloatArray global;
-            GaussPoint * &gp = this->gaussPointArray [ pointsPassed ];
+            GaussPoint * &gp = this->gaussPoints [ pointsPassed ];
 
             FloatArray *coord = new FloatArray(2);
             coord->at(1) = coords_xi1.at(j + 1);
@@ -187,10 +187,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
         }
     }
 
-    numberOfIntegrationPoints = pointsPassed;
-
-
-    return numberOfIntegrationPoints;
+    return this->giveNumberOfIntegrationPoints();
 }
 
 contextIOResultType

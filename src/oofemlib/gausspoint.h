@@ -107,10 +107,8 @@ private:
 
 protected:
     // layer and fibered material support
-    /// Number of slaves.
-    int numberOfGp;
     /// List of slave integration points.
-    GaussPoint **gaussPointArray;
+    std::vector< GaussPoint * >gaussPoints;
     /// Status of e.g. material in point
     IntegrationPointStatus *materialStatus;
 

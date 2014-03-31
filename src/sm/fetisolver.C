@@ -67,18 +67,17 @@ int
 FETISolver :: estimateMaxPackSize(IntArray &map, CommunicationBuffer &buff, int &packUnpackType)
 {
     int rank = domain->giveEngngModel()->giveRank();
-    int mapSize = map.giveSize();
     int count = 0;
     EModelDefaultEquationNumbering dn;
 
     if ( rank == 0 ) {
         // master comm maps contain boundary dof managers
-        for ( int i = 1; i <= mapSize; i++ ) {
-            count += masterCommunicator->giveDofManager( map.at(i) )->giveNumberOfDofs();
+        for ( int m: map ) {
+            count += masterCommunicator->giveDofManager( m )->giveNumberOfDofs();
         }
     } else {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            for ( Dof *dof: *domain->giveDofManager( map.at(i) ) ) {
+        for ( int m: map ) {
+            for ( Dof *dof: *domain->giveDofManager( m ) ) {
                 if ( dof->giveEquationNumber(dn) != 0 ) {
                     count++;
                 }

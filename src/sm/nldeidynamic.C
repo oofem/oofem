@@ -248,10 +248,9 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
             // Compute the processor part of load vector norm pMp
             this->pMp = 0.0;
             double my_pMp = 0.0, coeff = 1.0;
-            int eqNum, ndofs, ndofman = domain->giveNumberOfDofManagers();
+            int eqNum, ndofman = domain->giveNumberOfDofManagers();
             dofManagerParallelMode dofmanmode;
             DofManager *dman;
-            Dof *jdof;
             for ( int dm = 1; dm <= ndofman; dm++ ) {
                 dman = domain->giveDofManager(dm);
                 dofmanmode = dman->giveParallelMode();
@@ -381,13 +380,11 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
 #ifdef __PARALLEL_MODE
         double my_pt = 0.0, coeff = 1.0;
-        int eqNum, ndofs, ndofman = domain->giveNumberOfDofManagers();
+        int eqNum, ndofman = domain->giveNumberOfDofManagers();
         dofManagerParallelMode dofmanmode;
         DofManager *dman;
-        Dof *jdof;
         for ( int dm = 1; dm <= ndofman; dm++ ) {
             dman = domain->giveDofManager(dm);
-            ndofs = dman->giveNumberOfDofs();
             dofmanmode = dman->giveParallelMode();
             // skip all remote and null dofmanagers
             coeff = 1.0;

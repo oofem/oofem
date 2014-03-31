@@ -63,13 +63,12 @@ MicroplaneMaterial :: giveMicroplane(int i, GaussPoint *masterGp)
         MaterialMode slaveMode, masterMode = masterGp->giveMaterialMode();
         slaveMode = this->giveCorrespondingSlaveMaterialMode(masterMode);
 
-        masterGp->numberOfGp = this->numberOfMicroplanes;
-        masterGp->gaussPointArray = new GaussPoint * [ numberOfMicroplanes ];
+        masterGp->gaussPoints.resize( this->numberOfMicroplanes );
         for ( int j = 0; j < numberOfMicroplanes; j++ ) {
-            masterGp->gaussPointArray [ j ] = new Microplane(masterGp->giveIntegrationRule(), j + 1, slaveMode);
+            masterGp->gaussPoints [ j ] = new Microplane(masterGp->giveIntegrationRule(), j + 1, slaveMode);
         }
 
-        slave = masterGp->gaussPointArray [ i ];
+        slave = masterGp->gaussPoints [ i ];
     }
 
     return static_cast< Microplane * >(slave);

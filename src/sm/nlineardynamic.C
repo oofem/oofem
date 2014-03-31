@@ -930,7 +930,6 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
 int
 NonLinearDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
 {
-    int mapSize = commMap.giveSize();
     int count = 0, pcount = 0;
     IntArray locationArray;
     Domain *domain = this->giveDomain(1);
@@ -944,7 +943,6 @@ NonLinearDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
     } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
         for ( int map: commMap ) {
             DofManager *dman = domain->giveDofManager( map );
-            int ndofs = dman->giveNumberOfDofs();
             for ( Dof *dof: *dman ) {
                 if ( dof->isPrimaryDof() && ( dof->__giveEquationNumber() ) ) {
                     count++;

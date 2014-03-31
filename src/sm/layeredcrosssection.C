@@ -1027,8 +1027,8 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
         bottom = this->give(CS_BottomZCoord, masterGp);
         top = this->give(CS_TopZCoord, masterGp);
 
-        masterGp->numberOfGp = this->numberOfLayers;                        // Generalize to multiple integration points per layer
-        masterGp->gaussPointArray = new GaussPoint * [ numberOfLayers ];
+        ///@todo Generalize to multiple integration points per layer
+        masterGp->gaussPoints.resize( numberOfLayers );
         currentZTopCoord = -midSurfaceZcoordFromBottom;
         for ( int j = 0; j < numberOfLayers; j++ ) {
             currentZTopCoord += this->layerThicks.at(j + 1);
@@ -1045,13 +1045,13 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
 
             zCoord->at(3) = ( 2.0 * currentZCoord - top - bottom ) / ( top - bottom );
             // in gp - is stored isoparametric coordinate (-1,1) of z-coordinate
-            //masterGp->gaussPointArray [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, zCoord, 0., slaveMode);
+            //masterGp->gaussPoints [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, zCoord, 0., slaveMode);
 
             // test - remove!
-            masterGp->gaussPointArray [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, zCoord, 1.0, slaveMode);
+            masterGp->gaussPoints [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, zCoord, 1.0, slaveMode);
         }
 
-        slave = masterGp->gaussPointArray [ i ];
+        slave = masterGp->gaussPoints [ i ];
     }
 
     return slave;
@@ -1328,8 +1328,7 @@ LayeredIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsThicknes
 
     int nPoints = nPointsTri * nPointsThickness;
     //@todo - is not really a Gauss point but rather a hybrid.
-    this->gaussPointArray = new GaussPoint * [ nPoints ];
-    this->numberOfIntegrationPoints = nPoints;
+    this->gaussPoints.resize( nPoints );
 
     // uses Gauss integration in the plane and Lobatto in the thickness
     FloatArray coords_xi1, coords_xi2, coords_xi, weights_tri, weights_thickness;
@@ -1351,7 +1350,7 @@ LayeredIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsThicknes
             coord->at(1) = coords_xi1.at(j);
             coord->at(2) = coords_xi2.at(j);
             coord->at(3) = coords_xi.at(i);
-            this->gaussPointArray [ ind ] =
+            this->gaussPoints [ ind ] =
                 new GaussPoint(this, 1, coord, weights_tri.at ( j ) *weights_thickness.at ( i ), mode);
 
             // store interface points
@@ -1363,7 +1362,7 @@ LayeredIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsThicknes
             ind++;
         }
     }
-    return numberOfIntegrationPoints;
+    return this->giveNumberOfIntegrationPoints();
 }
 
 

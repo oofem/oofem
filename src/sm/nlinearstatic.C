@@ -875,7 +875,6 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
 int
 NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
 {
-    int mapSize = commMap.giveSize();
     int count = 0, pcount = 0;
     IntArray locationArray;
     Domain *domain = this->giveDomain(1);

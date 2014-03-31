@@ -474,18 +474,17 @@ FiberedCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
         MaterialMode slaveMode, masterMode = masterGp->giveMaterialMode();
         slaveMode = this->giveCorrespondingSlaveMaterialMode(masterMode);
 
-        masterGp->numberOfGp = this->numberOfFibers;
-        masterGp->gaussPointArray = new GaussPoint * [ numberOfFibers ];
+        masterGp->gaussPoints.resize( this->numberOfFibers );
 
         for ( int j = 0; j < numberOfFibers; j++ ) {
             coords = new FloatArray(2);
             coords->at(1) = fiberYcoords.at(j + 1);
             coords->at(2) = fiberZcoords.at(j + 1);
             // in gp - is stored isoparametric coordinate (-1,1) of z-coordinate
-            masterGp->gaussPointArray [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, coords, 0., slaveMode);
+            masterGp->gaussPoints [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, coords, 0., slaveMode);
         }
 
-        slave = masterGp->gaussPointArray [ i ];
+        slave = masterGp->gaussPoints [ i ];
     }
 
     return slave;
