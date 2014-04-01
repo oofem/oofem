@@ -47,7 +47,7 @@ namespace oofem {
 bool Delaunay :: colinear(const FloatArray &iP1, const FloatArray &iP2, const FloatArray &iP3) const
 {
     double dist = iP1.at(1) * ( iP2.at(2) - iP3.at(2) ) + iP2.at(1) * ( iP3.at(2) - iP1.at(2) ) +
-    iP3.at(1) * ( iP1.at(2) - iP2.at(2) );
+                  iP3.at(1) * ( iP1.at(2) - iP2.at(2) );
 
     if ( dist < mTol && dist > -mTol ) {
         return true;
@@ -84,7 +84,7 @@ void Delaunay :: triangulate(const std :: vector< FloatArray > &iVertices, std :
     int n = iVertices.size();
 
     // copy of vertices, since they will be shifted
-    std :: vector< FloatArray > vertices(iVertices);
+    std :: vector< FloatArray >vertices(iVertices);
 
     // small shift of vertices
     const double shift = 1.0e-12;

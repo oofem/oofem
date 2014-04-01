@@ -40,7 +40,6 @@
 #include "geometry.h"
 
 namespace oofem {
-
 /**
  * DiscontinuousSegmentIntegrationRule provides integration over a
  * discontinuous boundary segment.
@@ -51,18 +50,17 @@ namespace oofem {
 class OOFEM_EXPORT DiscontinuousSegmentIntegrationRule : public GaussIntegrationRule
 {
 protected:
-	std :: vector< Line > mSegments;
+    std :: vector< Line >mSegments;
 
-	/// Start and end points of the boundary segment.
-	FloatArray mXS, mXE;
+    /// Start and end points of the boundary segment.
+    FloatArray mXS, mXE;
 
 public:
-	DiscontinuousSegmentIntegrationRule(int n, Element * e, const std :: vector< Line > & iSegments, const FloatArray &iXS, const FloatArray &iXE);
-	virtual ~DiscontinuousSegmentIntegrationRule();
+    DiscontinuousSegmentIntegrationRule(int n, Element *e, const std :: vector< Line > &iSegments, const FloatArray &iXS, const FloatArray &iXE);
+    virtual ~DiscontinuousSegmentIntegrationRule();
 
-	virtual int SetUpPointsOnLine(int iNumPointsPerSeg, MaterialMode mode);
+    virtual int SetUpPointsOnLine(int iNumPointsPerSeg, MaterialMode mode);
 };
-
 } /* namespace oofem */
 
 #endif /* DISCSEGINTEGRATIONRULE_H_ */

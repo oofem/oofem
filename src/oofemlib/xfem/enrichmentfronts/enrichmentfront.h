@@ -42,7 +42,6 @@
 #include <unordered_map>
 
 namespace oofem {
-
 class XfemManager;
 class TipInfo;
 class DofManager;
@@ -81,7 +80,7 @@ public:
      *                      should get special treatment. May also modify the set of nodes
      *                      enriched by the interior enrichment.
      */
-    virtual void MarkNodesAsFront(std::unordered_map<int, int> &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std::unordered_map<int, double> &iLevelSetNormalDirMap, const std::unordered_map<int, double> &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo) = 0;
+    virtual void MarkNodesAsFront(std :: unordered_map< int, int > &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo) = 0;
 
     // The number of enrichment functions applied to tip nodes.
     virtual int  giveNumEnrichments(const DofManager &iDMan) const = 0;
@@ -114,7 +113,6 @@ protected:
     void addTipIndexToNode(int iNodeInd, int iTipInd); // Help function for updating mNodeTipIndices
     void giveNodeTipIndices(int iNodeInd, std :: vector< int > &oTipIndices) const;
 };
-
 } // end namespace oofem
 
 

@@ -69,7 +69,7 @@
 
 
 namespace oofem {
-template< class T > class AList;
+template< class T >class AList;
 class BasicGeometry;
 class EnrichmentFunction;
 class EnrichmentDomain;
@@ -101,7 +101,7 @@ class OOFEM_EXPORT EnrichmentItem : public FEMComponent
 {
 public:
     /// Constructor / destructor
-    EnrichmentItem(int n, XfemManager * xm, Domain * aDomain);
+    EnrichmentItem(int n, XfemManager *xm, Domain *aDomain);
     virtual ~EnrichmentItem();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -119,7 +119,7 @@ public:
 
     int instanciateYourself(DataReader *dr);
     virtual const char *giveClassName() const = 0;
-    const IntArray *giveEnrichesDofsWithIdArray() const { return &mpEnrichesDofsWithIdArray; }
+    const IntArray *giveEnrichesDofsWithIdArray() const { return & mpEnrichesDofsWithIdArray; }
     int giveNumberOfEnrDofs() const;
 
     // Spatial query
@@ -130,7 +130,7 @@ public:
 
     // Returns true if the enrichment item can assign
     // a different material to any Gauss point.
-    inline virtual bool canModifyMaterial() const {return false;}
+    inline virtual bool canModifyMaterial() const { return false; }
 
     // Returns true if the enrichment item assigns a different material to the Gauss point
     virtual bool isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const;
@@ -211,9 +211,9 @@ public:
 
     virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod);
 
-    const EnrichmentDomain *giveEnrichmentDomain() const {return mpEnrichmentDomain;}
+    const EnrichmentDomain *giveEnrichmentDomain() const { return mpEnrichmentDomain; }
 
-    const std::unordered_map<int, int> &giveEnrNodeMap() const {return mNodeEnrMarkerMap;}
+    const std :: unordered_map< int, int > &giveEnrNodeMap() const { return mNodeEnrMarkerMap; }
 
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
 
@@ -252,18 +252,18 @@ protected:
     // Level set for signed distance to the interface.
     //	The sign is determined by the interface normal direction.
     // This level set function is relevant for both open and closed interfaces.
-    std::unordered_map<int, double> mLevelSetNormalDirMap;
+    std :: unordered_map< int, double >mLevelSetNormalDirMap;
 
     // Level set for signed distance along the interface.
     // Only relevant for open interfaces.
-    std::unordered_map<int, double> mLevelSetTangDirMap;
+    std :: unordered_map< int, double >mLevelSetTangDirMap;
 
     //	The sign is determined by the surface normal direction. Currently used
     //  to keep track of a delamination surface in a shell element
     std :: vector< double >mLevelSetSurfaceNormalDir;
 
     // Field with desired node enrichment types
-    std::unordered_map<int, int> mNodeEnrMarkerMap;
+    std :: unordered_map< int, int >mNodeEnrMarkerMap;
 
     bool mLevelSetsNeedUpdate;
 
@@ -273,8 +273,8 @@ protected:
 
 inline bool EnrichmentItem :: isDofManEnriched(const DofManager &iDMan) const
 {
-	auto res = mNodeEnrMarkerMap.find( iDMan.giveGlobalNumber() );
-	return !(res == mNodeEnrMarkerMap.end());
+    auto res = mNodeEnrMarkerMap.find( iDMan.giveGlobalNumber() );
+    return !( res == mNodeEnrMarkerMap.end() );
 }
 
 /** Inclusion. */
@@ -283,12 +283,12 @@ class OOFEM_EXPORT Inclusion : public EnrichmentItem
 protected:
     CrossSection *mpCrossSection;
 public:
-    Inclusion(int n, XfemManager * xm, Domain * aDomain);
+    Inclusion(int n, XfemManager *xm, Domain *aDomain);
     virtual ~Inclusion();
 
     // Returns true if the enrichment item can assign
     // a different material to any Gauss point.
-    inline virtual bool canModifyMaterial() const {return true;}
+    inline virtual bool canModifyMaterial() const { return true; }
 
     // Returns true if the enrichment item assigns a different material to the Gauss point
     virtual bool isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const;
@@ -309,11 +309,10 @@ inline void EnrichmentItem :: interpLevelSet(double &oLevelSet, const FloatArray
 {
     oLevelSet = 0.0;
     for ( int i = 1; i <= iN.giveSize(); i++ ) {
-    	double levelSetNode = 0.0;
-        if( evalLevelSetNormalInNode( levelSetNode, iNodeInd [ i - 1 ] ) ) {
-        	oLevelSet += iN.at(i) * levelSetNode;
+        double levelSetNode = 0.0;
+        if ( evalLevelSetNormalInNode(levelSetNode, iNodeInd [ i - 1 ]) ) {
+            oLevelSet += iN.at(i) * levelSetNode;
         }
-
     }
 }
 
@@ -322,9 +321,9 @@ void EnrichmentItem :: interpLevelSetTangential(double &oLevelSet, const FloatAr
 {
     oLevelSet = 0.0;
     for ( int i = 1; i <= iN.giveSize(); i++ ) {
-    	double levelSetNode = 0.0;
-        if( evalLevelSetTangInNode( levelSetNode, iNodeInd [ i - 1 ] ) ) {
-        	oLevelSet += iN.at(i) * levelSetNode;
+        double levelSetNode = 0.0;
+        if ( evalLevelSetTangInNode(levelSetNode, iNodeInd [ i - 1 ]) ) {
+            oLevelSet += iN.at(i) * levelSetNode;
         }
     }
 }
@@ -342,9 +341,9 @@ void EnrichmentItem :: interpGradLevelSet(FloatArray &oGradLevelSet, const Float
 
     for ( int i = 1; i <= idNdX.giveNumberOfRows(); i++ ) {
         for ( int j = 1; j <= dim; j++ ) {
-        	double levelSetNode = 0.0;
-            if( evalLevelSetNormalInNode( levelSetNode, iNodeInd [ i - 1 ] ) ) {
-            	oGradLevelSet.at(j) += idNdX.at(i, j) * levelSetNode;
+            double levelSetNode = 0.0;
+            if ( evalLevelSetNormalInNode(levelSetNode, iNodeInd [ i - 1 ]) ) {
+                oGradLevelSet.at(j) += idNdX.at(i, j) * levelSetNode;
             }
         }
     }
@@ -361,7 +360,6 @@ void EnrichmentItem :: interpSurfaceLevelSet(double &oLevelSet, const FloatArray
         oLevelSet -= iN.at(i) * mLevelSetSurfaceNormalDir [ iNodeInd [ i - 1 ] - 1 ];
     }
 }
-
 } // end namespace oofem
 
 

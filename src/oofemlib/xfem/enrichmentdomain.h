@@ -99,7 +99,7 @@ public:
     virtual bool propagateTips(const std :: vector< TipPropagation > &iTipProp) { return false; }
 
     void setVtkDebug(bool iDebugVTK) { mDebugVTK = iDebugVTK; }
-    bool getVtkDebug() const {return mDebugVTK;}
+    bool getVtkDebug() const { return mDebugVTK; }
 
 protected:
     bool mDebugVTK;
@@ -133,7 +133,6 @@ public:
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
 
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
-
 };
 
 class OOFEM_EXPORT EDBGCircle : public EnrichmentDomain_BG
@@ -150,10 +149,9 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_EDBGCircle_Name; }
     virtual const char *giveClassName() const { return "EDBGCircle"; }
-    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
+    std :: string errorInfo(const char *func) const { return std :: string( giveClassName() ) + func; }
 
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
-
 };
 
 /**

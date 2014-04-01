@@ -36,7 +36,6 @@
 #include "xfem/tipinfo.h"
 
 namespace oofem {
-
 void EnrichmentFront :: addTipIndexToNode(int iNodeInd, int iTipInd)
 {
     // If the node is already enriched by the tip,
@@ -72,8 +71,4 @@ void EnrichmentFront :: giveNodeTipIndices(int iNodeInd, std :: vector< int > &o
         }
     }
 }
-
 } // end namespace oofem
-
-
-

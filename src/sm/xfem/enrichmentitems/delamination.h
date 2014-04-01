@@ -48,7 +48,6 @@
 //@}
 
 namespace oofem {
-
 /**
  * Delamination.
  * */
@@ -61,7 +60,7 @@ protected:
     int matNum;
     double delamXiCoord;    // defines at what local xi-coord the delamination is defined
 public:
-    Delamination(int n, XfemManager * xm, Domain * aDomain);
+    Delamination(int n, XfemManager *xm, Domain *aDomain);
 
     virtual const char *giveClassName() const { return "Delamination"; }
     virtual const char *giveInputRecordName() const { return _IFT_Delamination_Name; }
@@ -72,8 +71,6 @@ public:
     //virtual Material *giveMaterial() { return mat; }
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
 };
-
-
 } // end namespace oofem
 
 

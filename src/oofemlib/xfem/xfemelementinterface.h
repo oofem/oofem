@@ -74,11 +74,11 @@ public:
     bool mUsePlaneStrain;
 
     virtual const char *giveClassName() const { return "XfemElementInterface"; }
-    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
+    std :: string errorInfo(const char *func) const { return std :: string( giveClassName() ) + func; }
 
 public:
     /// Constructor.
-    XfemElementInterface(Element * e);
+    XfemElementInterface(Element *e);
 
     virtual ~XfemElementInterface();
 
@@ -100,7 +100,7 @@ public:
     /**
      * Creates enriched N-matrix for a chosen subset of element nodes.
      */
-    void XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl, const std::vector<int> &iLocNodeInd);
+    void XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl, const std :: vector< int > &iLocNodeInd);
 
     /**
      * Computes total number of enrichments in a node.
@@ -124,11 +124,11 @@ public:
      * the boundary. This is a necessary step to evaluate integrals
      * along an edge cut by one or several cracks.
      */
-    void partitionEdgeSegment(int iBndIndex, std::vector<Line> &oSegments);
+    void partitionEdgeSegment(int iBndIndex, std :: vector< Line > &oSegments);
 
     // TODO: Move to XfemStructuralElementInterface
     std :: vector< IntegrationRule * >mpCZIntegrationRules;
-    virtual MaterialStatus* giveCohesiveZoneMaterialStatus(GaussPoint &iGP) {return NULL;}
+    virtual MaterialStatus *giveCohesiveZoneMaterialStatus(GaussPoint &iGP) { return NULL; }
 
     MaterialMode giveMaterialMode();
 

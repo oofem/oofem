@@ -83,7 +83,6 @@ protected:
     double mRadius, mAngleInc, mIncrementLength, mHoopStressThreshold;
     bool mUseRadialBasisFunc;
 };
-
 } // end namespace oofem
 
 

@@ -42,7 +42,6 @@
 #include "element.h"
 
 namespace oofem {
-
 REGISTER_EnrichmentFront(EnrFrontLinearBranchFuncOneEl)
 
 
@@ -60,25 +59,24 @@ EnrFrontLinearBranchFuncOneEl :: ~EnrFrontLinearBranchFuncOneEl()
 }
 
 
-void EnrFrontLinearBranchFuncOneEl :: MarkNodesAsFront(std::unordered_map<int, int> &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std::unordered_map<int, double> &iLevelSetNormalDirMap, const std::unordered_map<int, double> &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo)
+void EnrFrontLinearBranchFuncOneEl :: MarkNodesAsFront(std :: unordered_map< int, int > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo)
 {
     mTipInfo = iTipInfo;
     mNodeTipIndices.clear();
 
     Domain &d = * ( ixFemMan.giveDomain() );
 
-    for(size_t tipInd = 0; tipInd < iTipInfo.size(); tipInd++) {
+    for ( size_t tipInd = 0; tipInd < iTipInfo.size(); tipInd++ ) {
+        Element *el = d.giveSpatialLocalizer()->giveElementContainingPoint(iTipInfo [ tipInd ].mGlobalCoord);
 
-		Element *el = d.giveSpatialLocalizer()->giveElementContainingPoint( iTipInfo[tipInd].mGlobalCoord );
+        if ( el != NULL ) {
+            const IntArray &elNodes = el->giveDofManArray();
 
-		if(el != NULL) {
-			const IntArray & elNodes = el->giveDofManArray();
-
-			for(int i = 1; i <= elNodes.giveSize(); i++) {
-				ioNodeEnrMarkerMap[ elNodes.at(i) ] = 2;
-				addTipIndexToNode(elNodes.at(i), tipInd);
-			}
-		}
+            for ( int i = 1; i <= elNodes.giveSize(); i++ ) {
+                ioNodeEnrMarkerMap [ elNodes.at(i) ] = 2;
+                addTipIndexToNode(elNodes.at(i), tipInd);
+            }
+        }
     }
 }
 
@@ -100,9 +98,13 @@ void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncAt(std :: vector< double > 
 
     for ( size_t i = 0; i < tipIndices.size(); i++ ) {
         int tipInd = tipIndices [ i ];
-        FloatArray xTip = {mTipInfo [ tipInd ].mGlobalCoord.at(1), mTipInfo [ tipInd ].mGlobalCoord.at(2)};
+        FloatArray xTip = {
+            mTipInfo [ tipInd ].mGlobalCoord.at(1), mTipInfo [ tipInd ].mGlobalCoord.at(2)
+        };
 
-        FloatArray pos = {iPos.at(1), iPos.at(2)};
+        FloatArray pos = {
+            iPos.at(1), iPos.at(2)
+        };
 
         // Crack tip tangent and normal
         const FloatArray &t = mTipInfo [ tipInd ].mTangDir;
@@ -169,7 +171,4 @@ void EnrFrontLinearBranchFuncOneEl :: giveInputRecord(DynamicInputRecord &input)
     int number = 1;
     input.setRecordKeywordField(this->giveInputRecordName(), number);
 }
-
-
 } // end namespace oofem
-

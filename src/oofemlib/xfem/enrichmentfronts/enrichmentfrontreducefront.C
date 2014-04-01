@@ -44,28 +44,27 @@
 namespace oofem {
 REGISTER_EnrichmentFront(EnrFrontReduceFront)
 
-void EnrFrontReduceFront :: MarkNodesAsFront(std::unordered_map<int, int> &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std::unordered_map<int, double> &iLevelSetNormalDirMap, const std::unordered_map<int, double> &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo)
+void EnrFrontReduceFront :: MarkNodesAsFront(std :: unordered_map< int, int > &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo)
 {
-	// Remove nodes touched by the crack tip
-	Domain &d = * ( ixFemMan.giveDomain() );
+    // Remove nodes touched by the crack tip
+    Domain &d = * ( ixFemMan.giveDomain() );
 
-	for(size_t tipInd = 0; tipInd < iTipInfo.size(); tipInd++) {
-		//    	printf("iTipInfo[tipInd].mElIndex: %d\n", iTipInfo[tipInd].mElIndex );
+    for ( size_t tipInd = 0; tipInd < iTipInfo.size(); tipInd++ ) {
+        //      printf("iTipInfo[tipInd].mElIndex: %d\n", iTipInfo[tipInd].mElIndex );
 
-		Element *el = d.giveSpatialLocalizer()->giveElementContainingPoint( iTipInfo[tipInd].mGlobalCoord );
+        Element *el = d.giveSpatialLocalizer()->giveElementContainingPoint(iTipInfo [ tipInd ].mGlobalCoord);
 
-		const IntArray & elNodes = el->giveDofManArray();
+        const IntArray &elNodes = el->giveDofManArray();
 
-		for(int i = 1; i <= elNodes.giveSize(); i++) {
-			ioNodeEnrMarkerMap[elNodes.at(i)] = 0;
-		}
-	}
+        for ( int i = 1; i <= elNodes.giveSize(); i++ ) {
+            ioNodeEnrMarkerMap [ elNodes.at(i) ] = 0;
+        }
+    }
 }
 
 void EnrFrontReduceFront :: giveInputRecord(DynamicInputRecord &input)
 {
-	int number = 1;
-	input.setRecordKeywordField(this->giveInputRecordName(), number);
+    int number = 1;
+    input.setRecordKeywordField(this->giveInputRecordName(), number);
 }
-
 } // end namespace oofem

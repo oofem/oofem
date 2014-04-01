@@ -44,6 +44,4 @@ void EnrFrontDoNothing :: giveInputRecord(DynamicInputRecord &input)
     int number = 1;
     input.setRecordKeywordField(this->giveInputRecordName(), number);
 }
-
 } // end namespace oofem
-

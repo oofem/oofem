@@ -78,7 +78,7 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
             }
         }
 
-        dynamic_cast< DofManList * >(this->mpEnrichmentDomain)->addDofManagers(dofManNumbers);     // fix JB
+        dynamic_cast< DofManList * >( this->mpEnrichmentDomain )->addDofManagers(dofManNumbers);     // fix JB
     }
 }
 
@@ -87,7 +87,9 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
 
 Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 {
-    mpEnrichesDofsWithIdArray = {D_u, D_v, D_w, W_u, W_v, W_w};
+    mpEnrichesDofsWithIdArray = {
+        D_u, D_v, D_w, W_u, W_v, W_w
+    };
     this->interfaceNum = -1;
     this->crossSectionNum = -1;
     this->matNum = 0;
@@ -169,8 +171,4 @@ Delamination :: appendInputRecords(DynamicDataReader &oDR)
         oDR.insertInputRecord(DataReader :: IR_propagationLawRec, plRec);
     }
 }
-
 } // end namespace oofem
-
-
-

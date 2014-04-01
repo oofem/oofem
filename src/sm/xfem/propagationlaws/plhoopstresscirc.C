@@ -361,6 +361,4 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
         }
     }
 }
-
-
 } // end namespace oofem

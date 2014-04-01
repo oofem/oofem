@@ -44,7 +44,6 @@
 #include "xfem/tipinfo.h"
 
 namespace oofem {
-
 class XfemManager;
 class DofManager;
 class FloatArray;
@@ -62,7 +61,7 @@ public:
     EnrFrontDoNothing() { };
     virtual ~EnrFrontDoNothing() { };
 
-    virtual void MarkNodesAsFront(std::unordered_map<int, int> &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std::unordered_map<int, double> &iLevelSetNormalDirMap, const std::unordered_map<int, double> &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo) { /*printf("Entering EnrFrontDoNothing::MarkNodesAsFront().\n");*/ }
+    virtual void MarkNodesAsFront(std :: unordered_map< int, int > &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo) { /*printf("Entering EnrFrontDoNothing::MarkNodesAsFront().\n");*/ }
 
     // No special tip enrichments are applied with this model.
     virtual int  giveNumEnrichments(const DofManager &iDMan) const { return 0; }
@@ -79,10 +78,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual double giveSupportRadius() const {return 0.0;}
-
+    virtual double giveSupportRadius() const { return 0.0; }
 };
-
 } // end namespace oofem
 
 #endif /* ENRICHMENTFRONTDONOTHING_H_ */
