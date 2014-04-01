@@ -66,6 +66,8 @@ set (fm_pfem
     pfem/pfemnumberingschemes.C
     pfem/delaunaytriangle.C
     pfem/tr1_2d_pfem.C
+	pfem/fluidstructureproblem.C
+	pfem/interactionload.C
     )
 
 set (fm
