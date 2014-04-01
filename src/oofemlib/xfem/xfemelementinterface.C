@@ -380,8 +380,6 @@ void XfemElementInterface :: XfemElementInterface_partitionElement(std :: vector
 
 bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 {
-	const double tol2 = 1.0e-18;
-
     bool partitionSucceeded = false;
 
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
@@ -899,48 +897,6 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std::vector<Lin
 
 }
 
-
-void XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-{
-	OOFEM_ERROR("Not implemented.")
-}
-
-void XfemElementInterface :: XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
-{
-	OOFEM_ERROR("Not implemented.")
-}
-
-void XfemElementInterface :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep)
-{
-	OOFEM_ERROR("Not implemented.")
-}
-
-void XfemElementInterface :: computeGlobalCohesiveTractionVector(FloatArray &oT, const FloatArray &iJump, const FloatArray &iCrackNormal, const FloatMatrix &iNMatrix, GaussPoint &iGP, TimeStep *tStep)
-{
-	OOFEM_ERROR("Not implemented.")
-}
-
-void XfemElementInterface :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
-{
-	OOFEM_ERROR("Not implemented.")
-}
-
-void XfemElementInterface :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep)
-{
-	OOFEM_ERROR("Not implemented.")
-}
-
-void XfemElementInterface :: XfemElementInterface_computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity)
-{
-	OOFEM_ERROR("Not implemented.")
-}
-
-IRResultType
-XfemElementInterface :: initializeCZFrom(InputRecord *ir)
-{
-	OOFEM_ERROR("Not implemented.")
-}
-
 MaterialMode XfemElementInterface :: giveMaterialMode()
 {
     if ( mUsePlaneStrain ) {
@@ -948,16 +904,6 @@ MaterialMode XfemElementInterface :: giveMaterialMode()
     } else {
         return _PlaneStress;
     }
-}
-
-void XfemElementInterface :: giveCZInputRecord(DynamicInputRecord &input)
-{
-	OOFEM_ERROR("Not implemented.")
-}
-
-void XfemElementInterface :: initializeCZMaterial()
-{
-	OOFEM_ERROR("Not implemented.")
 }
 
 void XfemElementInterface :: updateYourselfCZ(TimeStep *tStep)

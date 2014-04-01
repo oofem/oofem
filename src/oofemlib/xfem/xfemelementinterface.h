@@ -126,37 +126,11 @@ public:
      */
     void partitionEdgeSegment(int iBndIndex, std::vector<Line> &oSegments);
 
-    /**
-     * XfemElementInterface_computeConstitutiveMatrixAt.
-     * The reason for having a special implementation of this function is
-     * that the enrichment item may have a different material than
-     * the bulk material inside.
-     */
-    virtual void XfemElementInterface_computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
-    virtual void XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
-
-    /**
-     * Cohesive Zone functions
-     */
-    virtual bool hasCohesiveZone() const { return false; }
-
     // TODO: Move to XfemStructuralElementInterface
     std :: vector< IntegrationRule * >mpCZIntegrationRules;
     virtual MaterialStatus* giveCohesiveZoneMaterialStatus(GaussPoint &iGP) {return NULL;}
 
-    virtual void computeCohesiveForces(FloatArray &answer, TimeStep *tStep);
-    virtual void computeGlobalCohesiveTractionVector(FloatArray &oT, const FloatArray &iJump, const FloatArray &iCrackNormal, const FloatMatrix &iNMatrix, GaussPoint &iGP, TimeStep *tStep);
-
-    virtual void computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep);
-    virtual void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep);
-
-    virtual void XfemElementInterface_computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
-
-    virtual IRResultType initializeCZFrom(InputRecord *ir);
     MaterialMode giveMaterialMode();
-    virtual void giveCZInputRecord(DynamicInputRecord &input);
-
-    virtual void initializeCZMaterial();
 
     void updateYourselfCZ(TimeStep *tStep);
 
