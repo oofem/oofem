@@ -124,46 +124,6 @@ protected:
     double mAngle, mIncrementLength;
 };
 
-/**
- * Propagation law that propagates the crack in the direction
- * that gives \sigma_{r\theta} = 0.
- * Based on
- * T.P. Fries and M. Baydoun:
- * "Crack propagation with the extended finite element method
- * and a hybrid explicit-implicit crack description",
- * Internat. J. Numer. Methods Engrg 89,
- * pp. 1527--1558 (2012)
- *
- * The stress is evaluated in several points on a circle
- * surrounding the crack tip.
- *
- * Compared to the paper above, the implementation has been extended
- * with a criterion for crack propagation instead of always
- * propagating a predefined increment length. Two options are
- * currently available for stress interpolation:
- * 1) Take stress of closest Gauss point
- * 2) Interpolate with radial basis functions
- *
- * @author Erik Svenning
- */
-class OOFEM_EXPORT PLHoopStressCirc : public PropagationLaw
-{
-public:
-    PLHoopStressCirc() : mRadius(0.0), mAngleInc(0.0), mIncrementLength(0.0), mHoopStressThreshold(0.0), mUseRadialBasisFunc(false) { };
-    virtual ~PLHoopStressCirc() { };
-
-    virtual const char *giveClassName() const { return "PLHoopStressCirc"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PLHoopStressCirc_Name; }
-
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-
-    virtual void propagateInterfaces(Domain &iDomain, EnrichmentDomain &ioEnrDom);
-
-protected:
-    double mRadius, mAngleInc, mIncrementLength, mHoopStressThreshold;
-    bool mUseRadialBasisFunc;
-};
 } // end namespace oofem
 
 #endif /* PROPAGATIONLAW_H_ */

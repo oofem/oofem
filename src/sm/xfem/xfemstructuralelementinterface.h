@@ -37,7 +37,8 @@
 
 #include "xfem/xfemelementinterface.h"
 namespace oofem {
-
+class StructuralInterfaceMaterial;
+class IntegrationRule;
 /**
  * Provides Xfem interface for a structural element.
  * @author Erik Svenning
@@ -48,6 +49,35 @@ class OOFEM_EXPORT XfemStructuralElementInterface : public XfemElementInterface
 public:
 	XfemStructuralElementInterface(Element * e);
 	virtual ~XfemStructuralElementInterface();
+
+    /// Updates integration rule based on the triangulation.
+    virtual bool XfemElementInterface_updateIntegrationRule();
+
+    virtual void XfemElementInterface_computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
+    virtual void XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+
+    virtual bool hasCohesiveZone() const { return ( mpCZMat != NULL && mpCZIntegrationRules.size() > 0 ); }
+
+    virtual MaterialStatus* giveCohesiveZoneMaterialStatus(GaussPoint &iGP);
+
+    virtual void computeCohesiveForces(FloatArray &answer, TimeStep *tStep);
+    virtual void computeGlobalCohesiveTractionVector(FloatArray &oT, const FloatArray &iJump, const FloatArray &iCrackNormal, const FloatMatrix &iNMatrix, GaussPoint &iGP, TimeStep *tStep);
+
+    virtual void computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep);
+
+    virtual void XfemElementInterface_computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
+
+    virtual IRResultType initializeCZFrom(InputRecord *ir);
+    virtual void giveCZInputRecord(DynamicInputRecord &input);
+
+    virtual void initializeCZMaterial();
+
+    // Cohesive Zone variables
+    StructuralInterfaceMaterial *mpCZMat;
+    int mCZMaterialNum;
+    int mCSNumGaussPoints;
+
 };
 
 } /* namespace oofem */

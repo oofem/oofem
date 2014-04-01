@@ -44,6 +44,7 @@
 #include "xfem/xfemmanager.h"
 #include "xfem/enrichmentdomain.h"
 #include "classfactory.h"
+#include "element.h"
 
 
 namespace oofem {

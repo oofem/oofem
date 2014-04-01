@@ -39,6 +39,8 @@
 #include "alist.h"
 #include "xfemmanager.h"
 #include "geometry.h"
+#include "matresponsemode.h"
+#include "materialmode.h"
 
 #define _IFT_XfemElementInterface_CohesiveZoneMaterial "czmaterial"
 #define _IFT_XfemElementInterface_NumIntPointsCZ "nipcz"
@@ -52,7 +54,8 @@ class Element;
 class GaussPoint;
 class Element;
 class XfemManager;
-class StructuralInterfaceMaterial;
+class IntegrationRule;
+class MaterialStatus;
 
 /**
  * Provides Xfem interface for an element.
@@ -63,11 +66,6 @@ class OOFEM_EXPORT XfemElementInterface : public Interface
 public:
     Element *element;
 
-    // Cohesive Zone variables
-    StructuralInterfaceMaterial *mpCZMat;
-    int mCZMaterialNum;
-    int mCSNumGaussPoints;
-    std :: vector< IntegrationRule * >mpCZIntegrationRules;
 
     /// Index of enrichment items associated with cohesive zones
     std :: vector< int >mCZEnrItemIndices; // TODO: Not nice. /ES
@@ -140,21 +138,25 @@ public:
     /**
      * Cohesive Zone functions
      */
-    bool hasCohesiveZone() const { return ( mpCZMat != NULL && mpCZIntegrationRules.size() > 0 ); }
+    virtual bool hasCohesiveZone() const { return false; }
 
-    void computeCohesiveForces(FloatArray &answer, TimeStep *tStep);
-    void computeGlobalCohesiveTractionVector(FloatArray &oT, const FloatArray &iJump, const FloatArray &iCrackNormal, const FloatMatrix &iNMatrix, GaussPoint &iGP, TimeStep *tStep);
+    // TODO: Move to XfemStructuralElementInterface
+    std :: vector< IntegrationRule * >mpCZIntegrationRules;
+    virtual MaterialStatus* giveCohesiveZoneMaterialStatus(GaussPoint &iGP) {return NULL;}
 
-    void computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep);
-    void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeCohesiveForces(FloatArray &answer, TimeStep *tStep);
+    virtual void computeGlobalCohesiveTractionVector(FloatArray &oT, const FloatArray &iJump, const FloatArray &iCrackNormal, const FloatMatrix &iNMatrix, GaussPoint &iGP, TimeStep *tStep);
 
-    void XfemElementInterface_computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
+    virtual void computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep);
+    virtual void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep);
+
+    virtual void XfemElementInterface_computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
 
     virtual IRResultType initializeCZFrom(InputRecord *ir);
     MaterialMode giveMaterialMode();
     virtual void giveCZInputRecord(DynamicInputRecord &input);
 
-    void initializeCZMaterial();
+    virtual void initializeCZMaterial();
 
     void updateYourselfCZ(TimeStep *tStep);
 

@@ -38,7 +38,6 @@
 #include "femcmpnn.h"
 #include "domain.h"
 #include "floatmatrix.h"
-#include "layeredcrosssection.h"
 #include "dofiditem.h"
 #include "tipinfo.h"
 
@@ -63,12 +62,6 @@
 
 #define _IFT_EnrichmentItem_inheritbc "inheritbc"
 
-#define _IFT_Delamination_Name "delamination"
-#define _IFT_Delamination_xiCoord "delaminationxicoord"
-#define _IFT_Delamination_interfacenum "interfacenum"
-#define _IFT_Delamination_csnum "csnum"
-#define _IFT_Delamination_CohesiveZoneMaterial "czmaterial"
-//#define _IFT_MultipleDelamination_Name "multipledelamination"
 //@}
 
 #define _IFT_Crack_Name "crack"
@@ -91,6 +84,7 @@ class PropagationLaw;
 class DynamicDataReader;
 class Triangle;
 class GnuplotExportModule;
+class GaussPoint;
 /**
  * Abstract class representing entity, which is included in the FE model using one (or more)
  * global functions. Such entity may represent crack, material interface, etc.
@@ -306,28 +300,6 @@ public:
     CrossSection *giveCrossSection() { return mpCrossSection; }
 };
 
-
-/** Delamination. */
-class OOFEM_EXPORT Delamination : public EnrichmentItem
-{
-protected:
-    Material *mat;  // Material for cohesive zone model
-    int interfaceNum;
-    int crossSectionNum;
-    int matNum;
-    double delamXiCoord;    // defines at what local xi-coord the delamination is defined
-public:
-    Delamination(int n, XfemManager * xm, Domain * aDomain);
-
-    virtual const char *giveClassName() const { return "Delamination"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Delamination_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void appendInputRecords(DynamicDataReader &oDR);
-
-    double giveDelamXiCoord() { return delamXiCoord; };
-    //virtual Material *giveMaterial() { return mat; }
-    virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
-};
 
 /////////////////////////////////////////////////
 // Function implementations

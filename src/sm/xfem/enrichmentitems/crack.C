@@ -36,6 +36,7 @@
 #include "structuralinterfacematerialstatus.h"
 #include "xfem/enrichmentdomain.h"
 #include "export/gnuplotexportmodule.h"
+#include "gausspoint.h"
 
 namespace oofem {
 REGISTER_EnrichmentItem(Crack)

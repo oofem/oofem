@@ -39,7 +39,6 @@
 #include "gausspoint.h"
 #include "matstatmapperint.h"
 #include "xfem/xfemelementinterface.h"
-#include "structuralinterfacematerial.h"
 
 namespace oofem {
 MMAClosestIPTransfer :: MMAClosestIPTransfer() : MaterialMappingAlgorithm()
@@ -58,7 +57,7 @@ MMAClosestIPTransfer :: __init(Domain *dold, IntArray &type, FloatArray &coords,
             OOFEM_ERROR("xFemEl == NULL.\n");
         }
 
-        mpMaterialStatus = xFemEl->mpCZMat->giveStatus(source);
+        mpMaterialStatus = xFemEl->giveCohesiveZoneMaterialStatus(*source);
     } else {
         mpMaterialStatus = source->giveMaterial()->giveStatus(source);
     }

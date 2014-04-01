@@ -172,6 +172,8 @@ set (sm_status
 set (sm_xfem
 	xfem/xfemstructuralelementinterface.C
 	xfem/enrichmentitems/crack.C
+	xfem/enrichmentitems/delamination.C
+	xfem/propagationlaws/plhoopstresscirc.C
 	)
 
 set (sm_unsorted

@@ -38,6 +38,7 @@
 #include "xfem/xfemmanager.h"
 #include "domain.h"
 #include "connectivitytable.h"
+#include "element.h"
 
 namespace oofem {
 REGISTER_EnrichmentFront(EnrFrontExtend)

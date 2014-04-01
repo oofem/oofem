@@ -44,6 +44,7 @@
 #include "enrichmentitem.h"
 #include "enumitem.h"
 #include <unordered_map>
+#include "internalstatevaluetype.h"
 
 ///@name Input fields for XfemManager
 //@{

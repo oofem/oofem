@@ -32,40 +32,49 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "enrichmentfrontreducefront.h"
-#include "dynamicinputrecord.h"
-#include "classfactory.h"
-#include "xfem/xfemmanager.h"
-#include "domain.h"
-#include "connectivitytable.h"
-#include "spatiallocalizer.h"
-#include "element.h"
+#ifndef DELAMINATION_H_
+#define DELAMINATION_H_
+
+#include "xfem/enrichmentitem.h"
+
+///@name Input fields for Delamination
+//@{
+#define _IFT_Delamination_Name "delamination"
+#define _IFT_Delamination_xiCoord "delaminationxicoord"
+#define _IFT_Delamination_interfacenum "interfacenum"
+#define _IFT_Delamination_csnum "csnum"
+#define _IFT_Delamination_CohesiveZoneMaterial "czmaterial"
+//#define _IFT_MultipleDelamination_Name "multipledelamination"
+//@}
 
 namespace oofem {
-REGISTER_EnrichmentFront(EnrFrontReduceFront)
 
-void EnrFrontReduceFront :: MarkNodesAsFront(std::unordered_map<int, int> &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std::unordered_map<int, double> &iLevelSetNormalDirMap, const std::unordered_map<int, double> &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo)
+/**
+ * Delamination.
+ * */
+class OOFEM_EXPORT Delamination : public EnrichmentItem
 {
-	// Remove nodes touched by the crack tip
-	Domain &d = * ( ixFemMan.giveDomain() );
+protected:
+    Material *mat;  // Material for cohesive zone model
+    int interfaceNum;
+    int crossSectionNum;
+    int matNum;
+    double delamXiCoord;    // defines at what local xi-coord the delamination is defined
+public:
+    Delamination(int n, XfemManager * xm, Domain * aDomain);
 
-	for(size_t tipInd = 0; tipInd < iTipInfo.size(); tipInd++) {
-		//    	printf("iTipInfo[tipInd].mElIndex: %d\n", iTipInfo[tipInd].mElIndex );
+    virtual const char *giveClassName() const { return "Delamination"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Delamination_Name; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void appendInputRecords(DynamicDataReader &oDR);
 
-		Element *el = d.giveSpatialLocalizer()->giveElementContainingPoint( iTipInfo[tipInd].mGlobalCoord );
+    double giveDelamXiCoord() { return delamXiCoord; };
+    //virtual Material *giveMaterial() { return mat; }
+    virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
+};
 
-		const IntArray & elNodes = el->giveDofManArray();
-
-		for(int i = 1; i <= elNodes.giveSize(); i++) {
-			ioNodeEnrMarkerMap[elNodes.at(i)] = 0;
-		}
-	}
-}
-
-void EnrFrontReduceFront :: giveInputRecord(DynamicInputRecord &input)
-{
-	int number = 1;
-	input.setRecordKeywordField(this->giveInputRecordName(), number);
-}
 
 } // end namespace oofem
+
+
+#endif /* DELAMINATION_H_ */

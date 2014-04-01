@@ -39,6 +39,7 @@
 #include "domain.h"
 #include "connectivitytable.h"
 #include "spatiallocalizer.h"
+#include "element.h"
 
 namespace oofem {
 

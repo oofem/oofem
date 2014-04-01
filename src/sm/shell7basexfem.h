@@ -37,6 +37,7 @@
 
 #include "shell7base.h"
 #include "xfem/xfemelementinterface.h"
+#include "xfem/enrichmentitems/delamination.h"
 
 
 ///@name Input fields for el

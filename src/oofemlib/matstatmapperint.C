@@ -45,7 +45,6 @@
 #include "materialmappingalgorithm.h"
 #include "mmaclosestiptransfer.h"
 #include "matstatus.h"
-#include "structuralinterfacematerialstatus.h"
 
 namespace oofem {
 MaterialStatusMapperInterface :: MaterialStatusMapperInterface()
@@ -79,7 +78,7 @@ int MaterialStatusMapperInterface :: MSMI_map(const GaussPoint &iGP, const Domai
     return result;
 }
 
-int MaterialStatusMapperInterface :: MSMI_map(const GaussPoint &iGP, const Domain &iOldDom, Set &sourceSet, const TimeStep &iTStep, StructuralInterfaceMaterialStatus &oStatus)
+int MaterialStatusMapperInterface :: MSMI_map_cz(const GaussPoint &iGP, const Domain &iOldDom, Set &sourceSet, const TimeStep &iTStep, MaterialStatus &oStatus)
 {
     // Mapping of cohesive zone Gauss points
     int result = 1;
