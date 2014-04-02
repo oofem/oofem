@@ -298,7 +298,16 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
         // If cracks cross the edge, special treatment is necessary.
         // Exploit the XfemElementInterface to minimize duplication of code.
         if(xfemElInt != NULL && domain->hasXfemManager()) {
-            xfemElInt->XfemElementInterface_createEnrNmatrixAt(nMatrix, lcoords, *e);
+            // Compute global coordinates of Gauss point
+            FloatArray globalCoord;
+
+            interp->boundaryLocal2Global(globalCoord, iBndIndex, lcoords, cellgeo);
+
+            // Compute local coordinates on the element
+            FloatArray locCoord;
+            e->computeLocalCoordinates(locCoord, globalCoord);
+
+            xfemElInt->XfemElementInterface_createEnrNmatrixAt(nMatrix, locCoord, *e);
         } else {
             // Evaluate the velocity/displacement coefficients
             nMatrix.beNMatrixOf(n, nsd);
