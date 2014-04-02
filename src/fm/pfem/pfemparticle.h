@@ -57,7 +57,7 @@ class IntArray;
  */
 class PFEMParticle : public Node
 {
-private:
+protected:
     /// the particle is not building any element
     bool free;
 
@@ -83,47 +83,47 @@ public:
     /**
      * Initializes receiver acording to object description stored in input record.
      */
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     /**
      * Checks internal data consistency in node.
      * @return nonzero if receiver check is o.k.
      */
-    int checkConsistency();
+    virtual int checkConsistency();
 
     virtual void updateYourself(TimeStep *tStep);
 
     /// Returns the free-propery flag
-    bool isFree() { return free; }
+    virtual bool isFree() { return free; }
     /// Sets the free-property flag
     virtual void setFree(bool newFlag = true) { free = newFlag; }
 
     /// Returns true if the particle is on alpha shape
-    bool isOnAlphaShape() { return alphaShapeFlag; }
+    virtual bool isOnAlphaShape() { return alphaShapeFlag; }
     /// Sets the alphaShapeFlag
     virtual void setOnAlphaShape(bool newFlag = true) { alphaShapeFlag = newFlag; }
 
-    bool isActive() { return activeFlag; }
-    void deactivate() { activeFlag = false; }
+    virtual bool isActive() { return activeFlag; }
+    virtual void deactivate() { activeFlag = false; }
 
-
+	// not in use (commented out in pfem)
     void storeCoordinatesTimeStepBegin();
-
     void updateNodalCoordinates(TimeStep *tStep);
-
     void resetNodalCoordinates();
-
+	// not in use - end
 
     virtual void printOutputAt(FILE *stream, TimeStep *stepN);
 
     /**
      * Returns class name of the receiver.
      */
-    const char *giveClassName() const { return "PFEMParticle"; }
+    virtual const char *giveClassName() const { return "PFEMParticle"; }
+
+	virtual const char *giveInputRecordName() const { return _IFT_PFEMParticle_Name; }
     /**
      * Returns classType id of receiver.
      * @see FEMComponent::giveClassID
      */
-    classType giveClassID() const { return PFEMParticleClass; }
+    virtual classType giveClassID() const { return PFEMParticleClass; }
 
 #ifdef __OOFEG
     virtual void drawScalar(oofegGraphicContext &gc);
