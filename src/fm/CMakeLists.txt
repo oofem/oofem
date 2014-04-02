@@ -68,6 +68,7 @@ set (fm_pfem
     pfem/tr1_2d_pfem.C
 	pfem/fluidstructureproblem.C
 	pfem/interactionload.C
+	pfem/interactionpfemparticle.C
     )
 
 set (fm

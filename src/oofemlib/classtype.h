@@ -103,6 +103,7 @@ enum classType {
     ElementSideClass,
 
     PFEMParticleClass,
+	InteractionPFEMParticleClass,
 
     ElementDofManagerClass,
     RigidArmSlaveDofClass,
