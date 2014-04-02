@@ -72,7 +72,7 @@ protected:
      * myPoly[1] occupied by second fluid (air).
      */
     Polygon myPoly [ 2 ];
-    const FloatArray **vcoords [ 2 ];
+    std::vector< FloatArray > vcoords [ 2 ];
 
     integrationDomain id [ 2 ];
     /**
@@ -190,7 +190,7 @@ protected:
     void computeNVector(FloatArray &answer, GaussPoint *gp);
     virtual void updateVolumePolygons(Polygon &referenceFluidPoly, Polygon &secondFluidPoly, int &rfPoints, int &sfPoints,
                                       const FloatArray &normal, const double p, bool updFlag);
-    double computeVolumeAroundID(GaussPoint *gp, integrationDomain id, const FloatArray **idpoly);
+    double computeVolumeAroundID(GaussPoint *gp, integrationDomain id, const std::vector< FloatArray > &idpoly);
     void updateIntegrationRules();
     Material *_giveMaterial(int indx) { return domain->giveMaterial(mat [ indx ]); }
 };

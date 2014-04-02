@@ -74,8 +74,9 @@ TrPlanestressRotAllman :: giveInterface(InterfaceType interface)
 }
 
 void
-TrPlanestressRotAllman :: computeLocalNodalCoordinates(FloatArray lxy [ 6 ])
+TrPlanestressRotAllman :: computeLocalNodalCoordinates(std::vector< FloatArray > &lxy)
 {
+    lxy.resize(6);
     for ( int i = 0; i < 3; i++ ) {
         lxy [ i ] = * this->giveNode(i + 1)->giveCoordinates();
     }
@@ -96,16 +97,14 @@ TrPlanestressRotAllman :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMat
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp.
 {
-    FloatArray L(3), n(6), lxy [ 6 ];
-    const FloatArray *lxyptr[] = {
-        lxy, lxy + 1, lxy + 2, lxy + 3, lxy + 4, lxy + 5
-    };
+    FloatArray L(3), n(6);
+    std::vector< FloatArray > lxy;
 
     answer.resize(3, 9);
     answer.zero();
 
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
-    this->qinterpolation.evalN( n, iLocCoord, FEIVertexListGeometryWrapper(6, lxyptr) );
+    this->qinterpolation.evalN( n, iLocCoord, FEIVertexListGeometryWrapper(lxy) );
     this->interp.evalN( L, iLocCoord, FEIElementGeometryWrapper(this) );
 
     answer.at(1, 1) = answer.at(2, 2) = n.at(1) + n.at(4) / 2. + n.at(6) / 2.;
@@ -129,13 +128,10 @@ TrPlanestressRotAllman :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
 // luated at gp.
 {
     FloatMatrix dnx;
-    FloatArray lxy [ 6 ];
-    const FloatArray *lxyptr[] = {
-        lxy, lxy + 1, lxy + 2, lxy + 3, lxy + 4, lxy + 5
-    };
+    std::vector< FloatArray > lxy;
 
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
-    this->qinterpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(6, lxyptr) );
+    this->qinterpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(lxy) );
 
     answer.resize(3, 9);
     answer.zero();
@@ -189,13 +185,11 @@ TrPlanestressRotAllman :: computeStiffnessMatrixZeroEnergyStabilization(FloatMat
 {
     FloatMatrix b(1, 9), d(1, 1);
     FloatMatrix dnx;
-    FloatArray lxy [ 6 ], lec = {0.333333333333, 0.333333333333, 0.333333333333}; // element center in local coordinates
-    const FloatArray *lxyptr[] = {
-        lxy, lxy + 1, lxy + 2, lxy + 3, lxy + 4, lxy + 5
-    };
+    FloatArray lec = {0.333333333333, 0.333333333333, 0.333333333333}; // element center in local coordinates
+    std::vector< FloatArray > lxy; 
 
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
-    this->qinterpolation.evaldNdx( dnx, lec, FEIVertexListGeometryWrapper(6, lxyptr) );
+    this->qinterpolation.evaldNdx( dnx, lec, FEIVertexListGeometryWrapper(lxy) );
 
     // evaluate (dv/dx-du/dy)/2. at element center
     b.at(1, 1) = -1.0 * ( dnx.at(1, 2) + 0.5 * dnx.at(4, 2) + 0.5 * dnx.at(6, 2) );
@@ -258,16 +252,13 @@ void TrPlanestressRotAllman :: computeGaussPoints()
 void
 TrPlanestressRotAllman :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
-    FloatArray lxy [ 6 ];
-    const FloatArray *lxyptr[] = {
-        lxy, lxy + 1, lxy + 2, lxy + 3, lxy + 4, lxy + 5
-    };
+    std::vector< FloatArray > lxy;
     FloatArray l, n;
     IntArray en;
     FEI2dTrQuad qi(1, 2);
 
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
-    qi.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(6, lxyptr) );
+    qi.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(lxy) );
     qi.computeLocalEdgeMapping(en, iedge); // get edge mapping
     this->interp.edgeEvalN( l, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(3, 6);

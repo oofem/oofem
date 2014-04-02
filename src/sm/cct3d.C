@@ -117,17 +117,14 @@ CCTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
 {
     // rotate the input point Coordinate System into the element CS
     FloatArray inputCoords_ElCS;
-    FloatArray lc [ 3 ], llc;
-    const FloatArray *lcptr [ 3 ] = {
-        lc, lc + 1, lc + 2
-    };
+    std::vector< FloatArray > lc(3);
+    FloatArray llc;
     this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >(coords) );
     for ( int _i = 0; _i < 3; _i++ ) {
         this->giveLocalCoordinates( lc [ _i ], * this->giveNode(_i + 1)->giveCoordinates() );
     }
-    FEIVertexListGeometryWrapper wr(3, lcptr);
     FEI2dTrLin _interp(1, 2);
-    bool inplane = _interp.global2local(llc, inputCoords_ElCS, wr) > 0;
+    bool inplane = _interp.global2local(llc, inputCoords_ElCS, FEIVertexListGeometryWrapper(lc)) > 0;
     answer.resize(2);
     answer.at(1) = inputCoords_ElCS.at(1);
     answer.at(2) = inputCoords_ElCS.at(2);

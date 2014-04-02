@@ -110,12 +110,6 @@ MicroMaterial :: ~MicroMaterial()
         delete this->problemMicro;
     }
 
-    for ( int i = 1; i <= 8; i++ ) { //8 nodes
-        if ( this->microMasterCoords [ i - 1 ] != NULL ) {
-            delete this->microMasterCoords [ i - 1 ];
-        }
-    }
-
     for ( int i = 0; i < this->NumberOfDofManagers; i++ ) {
         if ( this->microBoundaryDofs ) {
             delete [] microBoundaryDofs [ i ];
@@ -540,9 +534,10 @@ void MicroMaterial :: setMacroProperties(Domain *macroDomain, MacroLSpace *macro
     this->macroDomain = macroDomain;
     this->macroLSpaceElement = macroLSpaceElement;
 
-    for ( int i = 1; i <= microMasterNodes.giveSize(); i++ ) { //8 nodes
-        this->microMasterCoords [ i - 1 ] = new const FloatArray( * microDomain->giveNode( microMasterNodes.at(i) )->giveCoordinates() );
-        //this->microMasterCoords [ i - 1 ]->printYourself();
+    this->microMasterCoords.clear();
+    this->microMasterCoords.reserve(microMasterNodes.giveSize());
+    for ( int nodeNum: microMasterNodes ) { //8 nodes
+        this->microMasterCoords.push_back( * microDomain->giveNode( nodeNum )->giveCoordinates() );
     }
 
     microEngngModel->giveNextStep(); //set the first time step

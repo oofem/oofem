@@ -107,12 +107,12 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     double parentArea = this->elem->computeArea();
 
     // Loop over triangles
-    for ( int i = 0; i < int ( triToKeep.size() ); i++ ) {
+    for ( int tri: triToKeep ) {
         // TODO: Probably unnecessary to allocate here
-        const FloatArray **coords = new const FloatArray * [ mTriangles [ triToKeep [ i ] ].giveNrVertices() ];
+        std::vector< FloatArray > coords( mTriangles [ tri ].giveNrVertices() );
         // this we should put into the function before
-        for ( int k = 0; k < mTriangles [ triToKeep [ i ] ].giveNrVertices(); k++ ) {
-            coords [ k ] = new FloatArray( ( mTriangles [ triToKeep [ i ] ].giveVertex ( k + 1 ) ) );
+        for ( int k = 1; k <= mTriangles [ tri ].giveNrVertices(); k++ ) {
+            coords[ k - 1 ] = mTriangles [ tri ].giveVertex( k );
         }
 
         // Can not be used because it writes to the start of the array instead of appending.
@@ -130,7 +130,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
 
             mTriInterp.local2global( global, * gp->giveCoordinates(),
-                                    FEIVertexListGeometryWrapper(mTriangles [ triToKeep [ i ] ].giveNrVertices(), coords) );
+                                    FEIVertexListGeometryWrapper(coords) );
 
             newGPCoord.push_back(global);
 
@@ -145,18 +145,11 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
             double refElArea = this->elem->giveParentElSize();
 
-            gp->setWeight(2.0 * refElArea * gp->giveWeight() * mTriangles [ triToKeep [ i ] ].getArea() / parentArea); // update integration weight
+            gp->setWeight(2.0 * refElArea * gp->giveWeight() * mTriangles [ tri ].getArea() / parentArea); // update integration weight
 
 
             pointsPassed++;
         }
-
-
-        for ( int k = 0; k < mTriangles [ triToKeep [ i ] ].giveNrVertices(); k++ ) {
-            delete coords [ k ];
-        }
-
-        delete [] coords;
     }
 
     XfemManager *xMan = elem->giveDomain()->giveXfemManager();

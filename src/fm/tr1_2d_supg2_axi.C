@@ -1507,11 +1507,6 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
 
     for ( int i = 0; i < 2; i++ ) {
         myPoly [ i ].clear();
-        if ( vcoords [ i ] ) {
-            delete vcoords [ i ];
-        }
-
-        vcoords [ i ] = NULL;
     }
 
     if ( this->temp_vof <= TRSUPG_ZERO_VOF ) {
@@ -1558,16 +1553,13 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
             OOFEM_ERROR("cannot set up integration domain for %d vertex polygon", c [ i ]);
         }
 
-        if ( c [ i ] ) {
-            vcoords [ i ] = new const FloatArray * [ c [ i ] ];
-        }
+        vcoords [ i ].clear();
+        vcoords [ i ].reserve( c [ i ] );
 
         // set up vertex coords
         Polygon :: PolygonVertexIterator it(myPoly + i);
-        int j = 0;
         while ( it.giveNext(& p) ) {
-            vcoords [ i ] [ j ] = p->getCoords();
-            j++;
+            vcoords [ i ].push_back( *p->getCoords() );
         }
 
         if ( id [ i ] == _Triangle ) {
@@ -1580,7 +1572,7 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
 
         // remap ip coords into area coords of receiver
         for ( GaussPoint *gp: *integrationRulesArray [ i ] ) {
-            approx->local2global( gc, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(c [ i ], vcoords [ i ]) );
+            approx->local2global( gc, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(vcoords [ i ]) );
             triaApprox.global2local( lc, gc, FEIElementGeometryWrapper(this) );
             // modify original ip coords to target ones
             gp->setLocalCoordinates( * gp->giveCoordinates() );
@@ -1637,17 +1629,17 @@ TR1_2D_SUPG2_AXI :: computeRadiusAt(GaussPoint *gp)
 
 
 double
-TR1_2D_SUPG2_AXI :: computeVolumeAroundID(GaussPoint *gp, integrationDomain id, const FloatArray **idpoly)
+TR1_2D_SUPG2_AXI :: computeVolumeAroundID(GaussPoint *gp, integrationDomain id, const std::vector< FloatArray > &idpoly)
 {
     double weight = gp->giveWeight();
     double _r = computeRadiusAt(gp);
 
     if ( id == _Triangle ) {
         FEI2dTrLin __interpolation(1, 2);
-        return _r *weight *fabs( __interpolation.giveTransformationJacobian ( *gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(3, idpoly) ) );
+        return _r *weight *fabs( __interpolation.giveTransformationJacobian ( *gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
     } else {
         FEI2dQuadLin __interpolation(1, 2);
-        double det = fabs( __interpolation.giveTransformationJacobian( * gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(4, idpoly) ) );
+        double det = fabs( __interpolation.giveTransformationJacobian( * gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
         return _r * det * weight;
     }
 }

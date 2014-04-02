@@ -2756,19 +2756,19 @@ Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &ans
     int VTKWedge2EL [] = {
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15
     };
-    FloatArray *coords [ numNodes ];
+    std :: vector< FloatArray >coords;
 
 
-    for ( int i = 1; i <= numNodes; i++ ) {
+    for ( int i = 0; i < numNodes; i++ ) {
         //int pos = i;
-        int pos = VTKWedge2EL [ i - 1 ];
-        //coords[ i - 1 ] = new FloatArray();
-        coords [ i - 1 ] = & nodes [ pos - 1 ];
+        int pos = VTKWedge2EL [ i ];
+        coords [ i ] = nodes [ pos - 1 ];
     }
+    ///@todo Doesn't this just simply copy: coords == nodes ?!
 
     FEInterpolation *interpol = static_cast< FEInterpolation * >(& this->interpolationForExport);
     FloatMatrix dNdx;
-    interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper(numNodes, ( const FloatArray ** ) coords) );
+    interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper(coords) );
 
 
 
@@ -2785,11 +2785,6 @@ Shell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &ans
         answer.at(1, j + 3) = dNdx.at(i, 2);
         answer.at(2, j + 2) = dNdx.at(i, 2);
         answer.at(2, j + 3) = dNdx.at(i, 1);
-    }
-
-    // how to destruct?
-    for ( int i = 1; i <= numNodes; i++ ) {
-        //coords [ i - 1 ]->~FloatArray();
     }
 }
 

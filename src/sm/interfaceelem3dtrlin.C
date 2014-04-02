@@ -135,20 +135,14 @@ InterfaceElement3dTrLin :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant, weight, thickness, volume;
     // first compute local nodal coordinates in element plane
-    FloatArray gnc(3), lnc [ 3 ];
-    const FloatArray *lncp [ 3 ];
+    std::vector< FloatArray > lncp(3);
     FloatMatrix lcs(3, 3);
     this->computeLCS(lcs);
     for ( int i = 1; i <= 3; i++ ) {
-        gnc.at(1) = this->giveNode(i)->giveCoordinate(1);
-        gnc.at(2) = this->giveNode(i)->giveCoordinate(2);
-        gnc.at(3) = this->giveNode(i)->giveCoordinate(3);
-
-        lnc [ i - 1 ].beProductOf(lcs, gnc);
-        lncp [ i - 1 ] = & lnc [ i - 1 ];
+        lncp[ i - 1 ].beProductOf(lcs, *this->giveNode(i)->giveCoordinates());
     }
 
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIVertexListGeometryWrapper(3, lncp) ) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIVertexListGeometryWrapper(lncp) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
     volume      = determinant * weight * thickness;

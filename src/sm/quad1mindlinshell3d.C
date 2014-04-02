@@ -59,24 +59,17 @@ bool Quad1MindlinShell3D :: __initialized = Quad1MindlinShell3D :: initOrdering(
 
 Quad1MindlinShell3D :: Quad1MindlinShell3D(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(),
-    SPRNodalRecoveryModelInterface()
+    SPRNodalRecoveryModelInterface(),
+    lnodes(4)
 {
     numberOfGaussPoints = 4;
     this->numberOfDofMans = 4;
-    this->lnodes [ 0 ] = new FloatArray();
-    this->lnodes [ 1 ] = new FloatArray();
-    this->lnodes [ 2 ] = new FloatArray();
-    this->lnodes [ 3 ] = new FloatArray();
     this->reducedIntegrationFlag = false;
 }
 
 
 Quad1MindlinShell3D :: ~Quad1MindlinShell3D()
 {
-    delete this->lnodes [ 0 ];
-    delete this->lnodes [ 1 ];
-    delete this->lnodes [ 2 ];
-    delete this->lnodes [ 3 ];
 }
 
 
@@ -206,7 +199,7 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
     FloatMatrix dn, dns;
     const FloatArray &localCoords = * gp->giveCoordinates();
 
-    this->interp.evaldNdx( dn, localCoords, FEIVertexListGeometryWrapper(4, ( const FloatArray ** ) lnodes) );
+    this->interp.evaldNdx( dn, localCoords, FEIVertexListGeometryWrapper(lnodes) );
     this->interp.evalN( n, localCoords,  FEIVoidCellGeometry() );
 
     answer.resize(8, 4 * 5);
@@ -217,7 +210,7 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
         FloatArray lc(2);
         lc.zero(); // set to element center coordinates
 
-        this->interp.evaldNdx( dns, lc, FEIVertexListGeometryWrapper(4, ( const FloatArray ** ) lnodes) );
+        this->interp.evaldNdx( dns, lc, FEIVertexListGeometryWrapper(lnodes) );
         this->interp.evalN( ns, lc,  FEIVoidCellGeometry() );
     } else {
         dns = dn;
@@ -435,7 +428,7 @@ Quad1MindlinShell3D :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIVertexListGeometryWrapper(4, ( const FloatArray ** ) lnodes) ) );
+    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIVertexListGeometryWrapper(lnodes) ) );
     return detJ * weight;
 }
 
@@ -555,7 +548,7 @@ Quad1MindlinShell3D :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 Quad1MindlinShell3D :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(4, ( const FloatArray ** ) lnodes) );
+    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(lnodes) );
     return detJ *gp->giveWeight();
 }
 
@@ -564,7 +557,7 @@ void
 Quad1MindlinShell3D :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
     FloatArray local;
-    this->interp.edgeLocal2global( local, iEdge, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(4, ( const FloatArray ** ) lnodes) );
+    this->interp.edgeLocal2global( local, iEdge, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(lnodes)  );
     local.resize(3);
     local.at(3) = 0.;
     answer.beProductOf(this->lcsMatrix, local);
@@ -621,7 +614,7 @@ Quad1MindlinShell3D :: computeLCS()
     }
 
     for ( int i = 1; i <= 4; i++ ) {
-        this->lnodes [ i - 1 ]->beTProductOf( this->lcsMatrix, * this->giveNode(i)->giveCoordinates() );
+        this->lnodes [ i - 1 ].beTProductOf( this->lcsMatrix, * this->giveNode(i)->giveCoordinates() );
     }
 }
 
