@@ -47,13 +47,13 @@ REGISTER_Element(TrPlaneStress2dXFEM);
 void TrPlaneStress2dXFEM :: updateYourself(TimeStep *tStep)
 {
     TrPlaneStress2d :: updateYourself(tStep);
-    XfemElementInterface :: updateYourselfCZ(tStep);
+    XfemStructuralElementInterface :: updateYourselfCZ(tStep);
 }
 
 void TrPlaneStress2dXFEM :: postInitialize()
 {
     TrPlaneStress2d :: postInitialize();
-    XfemElementInterface :: initializeCZMaterial();
+    XfemStructuralElementInterface :: initializeCZMaterial();
 }
 
 
@@ -148,26 +148,26 @@ TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, EquationID iEqnId, IntArra
 void
 TrPlaneStress2dXFEM :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
+    XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
 }
 
 void
 TrPlaneStress2dXFEM :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    XfemElementInterface :: XfemElementInterface_computeStressVector(answer, strain, gp, tStep);
+    XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(answer, strain, gp, tStep);
 }
 
 void TrPlaneStress2dXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
     TrPlaneStress2d :: computeStiffnessMatrix(answer, rMode, tStep);
-    XfemElementInterface :: computeCohesiveTangent(answer, tStep);
+    XfemStructuralElementInterface :: computeCohesiveTangent(answer, tStep);
 }
 
 void
 TrPlaneStress2dXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     TrPlaneStress2d :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
-    XfemElementInterface :: computeCohesiveForces(answer, tStep);
+    XfemStructuralElementInterface :: computeCohesiveForces(answer, tStep);
 }
 
 
@@ -254,19 +254,19 @@ TrPlaneStress2dXFEM :: initializeFrom(InputRecord *ir)
         return result;
     }
 
-    result = XfemElementInterface :: initializeCZFrom(ir);
+    result = XfemStructuralElementInterface :: initializeCZFrom(ir);
     return result;
 }
 
 MaterialMode TrPlaneStress2dXFEM :: giveMaterialMode()
 {
-    return XfemElementInterface :: giveMaterialMode();
+    return XfemStructuralElementInterface :: giveMaterialMode();
 }
 
 void TrPlaneStress2dXFEM :: giveInputRecord(DynamicInputRecord &input)
 {
     TrPlaneStress2d :: giveInputRecord(input);
-    XfemElementInterface :: giveCZInputRecord(input);
+    XfemStructuralElementInterface :: giveCZInputRecord(input);
 }
 
 

@@ -125,7 +125,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
             FloatArray *coord = new FloatArray(2);
             coord->at(1) = coords_xi1.at(j + 1);
             coord->at(2) = coords_xi2.at(j + 1);
-            gp = new GaussPoint(this, pointsPassed + 1, coord, weights.at ( j + 1 ), mode);
+            gp = new GaussPoint(this, pointsPassed + 1, coord, weights.at(j + 1), mode);
 
 
 

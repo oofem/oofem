@@ -39,7 +39,7 @@
 #include "dictionary.h"
 #include "classfactory.h"
 #include "dofmanager.h"
-#include "xfem/xfemelementinterface.h"
+#include "xfem/xfemstructuralelementinterface.h"
 #include "element.h"
 #include "structuralelement.h"
 
@@ -210,7 +210,7 @@ XFEMStatic :: terminate(TimeStep *tStep)
 
                 ////////////////////////////////////////////////////////
                 // Map state variables for cohesive zone if applicable
-                XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >(el);
+                XfemStructuralElementInterface *xFemEl = dynamic_cast< XfemStructuralElementInterface * >(el);
                 if ( xFemEl != NULL ) {
                     if ( xFemEl->mpCZMat != NULL ) {
                         size_t numCzRules = xFemEl->mpCZIntegrationRules.size();
@@ -237,7 +237,7 @@ XFEMStatic :: terminate(TimeStep *tStep)
                                     if ( siMatStat == NULL ) {
                                         OOFEM_ERROR("Failed to cast to StructuralInterfaceMaterialStatus.\n");
                                     }
-                                    interface->MSMI_map(*gp, * domain, elemSet, * tStep, * siMatStat);
+                                    interface->MSMI_map_cz(* gp, * domain, elemSet, * tStep, * siMatStat);
                                 }
                             }
                         }

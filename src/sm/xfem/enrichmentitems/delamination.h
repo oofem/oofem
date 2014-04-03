@@ -32,35 +32,46 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef DISCSEGINTEGRATIONRULE_H_
-#define DISCSEGINTEGRATIONRULE_H_
+#ifndef DELAMINATION_H_
+#define DELAMINATION_H_
 
-#include "gaussintegrationrule.h"
+#include "xfem/enrichmentitem.h"
 
-#include "geometry.h"
+///@name Input fields for Delamination
+//@{
+#define _IFT_Delamination_Name "delamination"
+#define _IFT_Delamination_xiCoord "delaminationxicoord"
+#define _IFT_Delamination_interfacenum "interfacenum"
+#define _IFT_Delamination_csnum "csnum"
+#define _IFT_Delamination_CohesiveZoneMaterial "czmaterial"
+//#define _IFT_MultipleDelamination_Name "multipledelamination"
+//@}
 
 namespace oofem {
 /**
- * DiscontinuousSegmentIntegrationRule provides integration over a
- * discontinuous boundary segment.
- *
- * @author Erik Svenning
- * @date Mar 14, 2014
- */
-class OOFEM_EXPORT DiscontinuousSegmentIntegrationRule : public GaussIntegrationRule
+ * Delamination.
+ * */
+class OOFEM_EXPORT Delamination : public EnrichmentItem
 {
 protected:
-    std :: vector< Line >mSegments;
-
-    /// Start and end points of the boundary segment.
-    FloatArray mXS, mXE;
-
+    Material *mat;  // Material for cohesive zone model
+    int interfaceNum;
+    int crossSectionNum;
+    int matNum;
+    double delamXiCoord;    // defines at what local xi-coord the delamination is defined
 public:
-    DiscontinuousSegmentIntegrationRule(int n, Element *e, const std :: vector< Line > &iSegments, const FloatArray &iXS, const FloatArray &iXE);
-    virtual ~DiscontinuousSegmentIntegrationRule();
+    Delamination(int n, XfemManager *xm, Domain *aDomain);
 
-    virtual int SetUpPointsOnLine(int iNumPointsPerSeg, MaterialMode mode);
+    virtual const char *giveClassName() const { return "Delamination"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Delamination_Name; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void appendInputRecords(DynamicDataReader &oDR);
+
+    double giveDelamXiCoord() { return delamXiCoord; };
+    //virtual Material *giveMaterial() { return mat; }
+    virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
 };
-} /* namespace oofem */
+} // end namespace oofem
 
-#endif /* DISCSEGINTEGRATIONRULE_H_ */
+
+#endif /* DELAMINATION_H_ */

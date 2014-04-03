@@ -380,7 +380,7 @@ int Domain :: giveElementPlaceInArray(int iGlobalElNum) const
 		return res->second;
 	}
 	else {
-		OOFEM_ERROR("In Domain :: giveElementPlaceInArray: returning -1 for iGlobalElNum: %d.\n", iGlobalElNum );
+		OOFEM_ERROR("returning -1 for iGlobalElNum: %d.", iGlobalElNum );
 		return -1;
 	}
 }

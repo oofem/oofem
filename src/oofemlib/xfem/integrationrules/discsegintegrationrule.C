@@ -38,22 +38,17 @@
 #include "fei1dlin.h"
 
 namespace oofem {
-
-DiscontinuousSegmentIntegrationRule::DiscontinuousSegmentIntegrationRule(int n, Element * e, const std :: vector< Line > & iSegments, const FloatArray &iXS, const FloatArray &iXE):
+DiscontinuousSegmentIntegrationRule :: DiscontinuousSegmentIntegrationRule(int n, Element *e, const std :: vector< Line > &iSegments, const FloatArray &iXS, const FloatArray &iXE) :
     GaussIntegrationRule(n, e),
     mSegments(iSegments),
     mXS(iXS), mXE(iXE)
+{}
+
+DiscontinuousSegmentIntegrationRule :: ~DiscontinuousSegmentIntegrationRule() {}
+
+int DiscontinuousSegmentIntegrationRule :: SetUpPointsOnLine(int iNumPointsPerSeg, MaterialMode mode)
 {
-
-}
-
-DiscontinuousSegmentIntegrationRule::~DiscontinuousSegmentIntegrationRule() {
-
-}
-
-int DiscontinuousSegmentIntegrationRule::SetUpPointsOnLine(int iNumPointsPerSeg, MaterialMode mode)
-{
-	int numPointsTot = iNumPointsPerSeg*mSegments.size();
+    int numPointsTot = iNumPointsPerSeg * mSegments.size();
     int pointsPassed = 0;
 
     ////////////////////////////////////////////
@@ -70,35 +65,34 @@ int DiscontinuousSegmentIntegrationRule::SetUpPointsOnLine(int iNumPointsPerSeg,
     std :: vector< FloatArray >newGPCoord;
 
     // Loop over line segments
-    for(size_t i = 0; i < mSegments.size(); i++) {
+    for ( size_t i = 0; i < mSegments.size(); i++ ) {
         for ( int j = 0; j < iNumPointsPerSeg; j++ ) {
             FloatArray global;
             GaussPoint * &gp = this->gaussPoints [ pointsPassed ];
 
             FloatArray *coord = new FloatArray(1);
             coord->at(1) = coords_xi.at(j + 1);
-            gp = new GaussPoint(this, pointsPassed + 1, coord, weights.at ( j + 1 ), mode);
+            gp = new GaussPoint(this, pointsPassed + 1, coord, weights.at(j + 1), mode);
 
 
             global.resize( mXS.giveSize() );
-            for(int m = 1; m <= mXS.giveSize(); m++) {
-            	global.at(m) = 0.5*( (1.0 - coord->at(1))*mSegments [ i ].giveVertex(1).at(m) + (1.0 + coord->at(1))*mSegments [ i ].giveVertex(2).at(m) );
+            for ( int m = 1; m <= mXS.giveSize(); m++ ) {
+                global.at(m) = 0.5 * ( ( 1.0 - coord->at(1) ) * mSegments [ i ].giveVertex(1).at(m) + ( 1.0 + coord->at(1) ) * mSegments [ i ].giveVertex(2).at(m) );
             }
 
             newGPCoord.push_back(global);
 
 
             // Local coordinate along the line segment
-            double xi = 2.0*( global.distance(mXS)/totalLength - 0.5 );
+            double xi = 2.0 * ( global.distance(mXS) / totalLength - 0.5 );
             gp->setCoordinates({xi});
 
-            gp->setWeight( 1.0 * gp->giveWeight() * mSegments [ i ].giveLength() / totalLength); // update integration weight
+            gp->setWeight(1.0 * gp->giveWeight() * mSegments [ i ].giveLength() / totalLength);  // update integration weight
 
             pointsPassed++;
         }
     }
 
-	return this->giveNumberOfIntegrationPoints();
+    return this->giveNumberOfIntegrationPoints();
 }
-
 } /* namespace oofem */

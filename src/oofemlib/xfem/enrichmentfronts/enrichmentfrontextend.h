@@ -44,7 +44,6 @@
 #include "xfem/tipinfo.h"
 
 namespace oofem {
-
 class XfemManager;
 class DofManager;
 class FloatArray;
@@ -62,7 +61,7 @@ public:
     EnrFrontExtend() { };
     virtual ~EnrFrontExtend() { };
 
-    virtual void MarkNodesAsFront(std::unordered_map<int, int> &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std::unordered_map<int, double> &iLevelSetNormalDirMap, const std::unordered_map<int, double> &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo);
+    virtual void MarkNodesAsFront(std :: unordered_map< int, int > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo);
 
     // No special tip enrichments are applied with this model,
     // it only modifies the set of nodes subject to bulk enrichment.
@@ -81,9 +80,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual double giveSupportRadius() const {return 0.0;}
+    virtual double giveSupportRadius() const { return 0.0; }
 };
-
 } // end namespace oofem
 
 

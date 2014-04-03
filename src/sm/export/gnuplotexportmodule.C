@@ -53,6 +53,8 @@
 #include "xfem/XFEMDebugTools.h"
 #include "prescribedgradient.h"
 #include "prescribedgradientbcneumann.h"
+#include "gausspoint.h"
+#include "timestep.h"
 #include "xfem/enrichmentitems/crack.h"
 
 #include <sstream>

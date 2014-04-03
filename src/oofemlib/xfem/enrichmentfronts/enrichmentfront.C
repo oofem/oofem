@@ -36,19 +36,6 @@
 #include "xfem/tipinfo.h"
 
 namespace oofem {
-bool EnrichmentFront :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex) const
-{
-    for ( size_t i = 0; i < mTipInfo.size(); i++ ) {
-        if ( mTipInfo [ i ].mElIndex == iElIndex ) {
-            oCoord = mTipInfo [ i ].mGlobalCoord;
-            oArcPos = mTipInfo [ i ].mArcPos;
-            return true;
-        }
-    }
-
-    return false;
-}
-
 void EnrichmentFront :: addTipIndexToNode(int iNodeInd, int iTipInd)
 {
     // If the node is already enriched by the tip,
@@ -84,8 +71,4 @@ void EnrichmentFront :: giveNodeTipIndices(int iNodeInd, std :: vector< int > &o
         }
     }
 }
-
 } // end namespace oofem
-
-
-

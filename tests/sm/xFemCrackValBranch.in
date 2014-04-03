@@ -68,7 +68,8 @@ ConstantFunction 1 f(t) 1.0
 XfemManager 1 numberofenrichmentitems 1
 crack 1 enrichmentfront 1 propagationlaw 1
 DiscontinuousFunction 1
-polygoncrack 1 points 6 -0.05 1.0 0.333333333333333 1.0 0.56666666666667 1.0
+#polygoncrack 1 points 6 -0.05 1.0 0.333333333333333 1.0 0.56666666666667 1.0
+polygoncrack 1 points 6 -1.0 1.0 0.333333333333333 1.0 0.56666666666667 1.0
 EnrFrontLinearBranchFuncRadius radius 0.5
 PropagationLawCrackPrescribedDir 1 angle 0.0 incrementLength 0.55
 #%BEGIN_CHECK% tolerance 1.e-8
