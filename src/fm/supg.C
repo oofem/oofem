@@ -751,7 +751,7 @@ SUPG :: checkConsistency()
             } else if ( bcPtr->giveBCValType() == ForceLoadBVT ) {
                 bcPtr->scale( 1. / this->giveVariableScale(VST_Force) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type\n");
+                OOFEM_ERROR("unknown bc/ic type");
             }
         }
 
@@ -763,7 +763,7 @@ SUPG :: checkConsistency()
             } else if ( icPtr->giveICValType() == PressureBVT ) {
                 icPtr->scale( VM_Total, 1. / this->giveVariableScale(VST_Pressure) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type\n");
+                OOFEM_ERROR("unknown bc/ic type");
             }
         }
     }
@@ -939,7 +939,7 @@ SUPG :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType t
         } else if ( type == SecantStiffnessMatrix ) {
             element->computeDiffusionDerivativeTerm_MB(h, SecantStiffness, tStep);
         } else {
-            OOFEM_ERROR("CharType not supported\n");
+            OOFEM_ERROR("CharType not supported");
         }
 
         h.times( alpha * tStep->giveTimeIncrement() );

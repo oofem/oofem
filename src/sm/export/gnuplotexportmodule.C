@@ -146,7 +146,7 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
 	Domain *domain = emodel->giveDomain(1);
 	StructuralEngngModel *seMod = dynamic_cast<StructuralEngngModel* >(emodel);
 	if(seMod == NULL) {
-		OOFEM_ERROR("failed to cast to StructuralEngngModel.\n");
+		OOFEM_ERROR("failed to cast to StructuralEngngModel.");
 	}
 
     IntArray ielemDofMask;

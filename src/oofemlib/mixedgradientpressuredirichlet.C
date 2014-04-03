@@ -177,7 +177,7 @@ void MixedGradientPressureDirichlet :: computeDofTransformation(ActiveDof *dof, 
         masterContribs.at(6) = dx.at(1) / 2.0;  // gamma_13
         masterContribs.at(7) = 0.0;           // gamma_12
     } else {
-        OOFEM_ERROR("Incompatible id on subjected dof\n");
+        OOFEM_ERROR("Incompatible id on subjected dof");
     }
 }
 

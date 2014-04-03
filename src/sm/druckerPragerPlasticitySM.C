@@ -517,7 +517,7 @@ DruckerPragerPlasticitySM :: performVertexReturn(double eM, double gM, double kM
     OOFEM_LOG_DEBUG("Done iteration in vertex return, after %d\n", iterationCount);
 
     if ( deltaKappa < 0. ) {
-        OOFEM_ERROR("Fatal error in the Newton iteration for vertex stress return. deltaKappa is evaluated as negative, but should always be positive. This is most likely due to a softening law with a local snapback, which is physically inadmissible.\n");
+        OOFEM_ERROR("Fatal error in the Newton iteration for vertex stress return. deltaKappa is evaluated as negative, but should always be positive. This is most likely due to a softening law with a local snapback, which is physically inadmissible.");
     }
 }
 
@@ -618,14 +618,14 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
             giveVertexAlgorithmicStiffMatrix(answer, mode, gp, tStep);
             break;
         default:
-            OOFEM_ERROR("Case did not match.\n");
+            OOFEM_ERROR("Case did not match.");
             break;
         }
 
         break;
 
     default:
-        OOFEM_ERROR("Switch failed: Only elastic and tangent stiffness are supported.\n");
+        OOFEM_ERROR("Switch failed: Only elastic and tangent stiffness are supported.");
         break;
     }
 }

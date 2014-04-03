@@ -165,7 +165,7 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
     } else if ( initialTimeDiscretization == TD_ThreePointBackward ) {
         OOFEM_LOG_INFO("Selecting Three-point Backward Euler metod\n");
     } else {
-        OOFEM_ERROR("Time-stepping scheme not found!\n");
+        OOFEM_ERROR("Time-stepping scheme not found!");
     }
 
     MANRMSteps = 0;

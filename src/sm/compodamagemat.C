@@ -123,7 +123,7 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
 void CompoDamageMat :: giveInputRecord(DynamicInputRecord &input)
 {
     StructuralMaterial :: giveInputRecord(input);
-    OOFEM_ERROR("Not implemented yet\n");
+    OOFEM_ERROR("Not implemented yet");
 }
 
 

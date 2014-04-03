@@ -68,11 +68,11 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
     //
     nc = min(2 * nroot, nroot + 8);
     if ( ( !a ) || ( !b ) ) {
-        OOFEM_ERROR("matrices are not defined\n");
+        OOFEM_ERROR("matrices are not defined");
     }
 
     if ( a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
-        OOFEM_ERROR("matrices size mismatch\n");
+        OOFEM_ERROR("matrices size mismatch");
     }
 
     if ( !a->canBeFactorized() ) {

@@ -469,10 +469,10 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
 
     if ( yieldHardPrimePeak < 0 ) {
         yieldHardPrimePeak = 0.;
-        OOFEM_WARNING("kPrimePeak cannot be less than zero\n");
+        OOFEM_WARNING("kPrimePeak cannot be less than zero");
     } else if ( yieldHardPrimePeak > ( 1. - yieldHardInitial ) ) {
         yieldHardPrimePeak = 1. - yieldHardInitial;
-        OOFEM_WARNING("kPrimePeak cannot be greater than 1.-kinit\n");
+        OOFEM_WARNING("kPrimePeak cannot be greater than 1.-kinit");
     }
 
     AHard = 8.e-2;
@@ -491,7 +491,7 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, softeningType, _IFT_ConcreteDPM2_softeningType);
 
     if ( softeningType > 1 ) {
-        OOFEM_ERROR("softening type not implemented\n");
+        OOFEM_ERROR("softening type not implemented");
     }
 
     IR_GIVE_FIELD(ir, this->wf, _IFT_ConcreteDPM2_wf);
@@ -1027,7 +1027,7 @@ ConcreteDPM2 :: computeDamageParamTension(double equivStrain, double kappaOne, d
         omega = 1.;
         return omega;
     } else if ( omega < 0. ) {
-        OOFEM_ERROR("omega is smaller than zero. Not possible\n");
+        OOFEM_ERROR("omega is smaller than zero. Not possible");
     }
 
     return omega;
@@ -1062,7 +1062,7 @@ ConcreteDPM2 :: computeDamageParamCompression(double equivStrain, double kappaOn
         omega = 1.;
         return omega;
     } else if ( omega < 0. ) {
-        OOFEM_ERROR("omega is smaller than zero. Not possible\n");
+        OOFEM_ERROR("omega is smaller than zero. Not possible");
     }
 
     return omega;
@@ -2299,7 +2299,7 @@ ConcreteDPM2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         } else if ( mode == SecantStiffness ) {
             computeSecantStiffness(answer, mode, gp, tStep);
         } else if ( mode == TangentStiffness ) {
-            OOFEM_ERROR("Tangent stiffness not implemented. Use either elastic or secant stiffness.\n");
+            OOFEM_ERROR("Tangent stiffness not implemented. Use either elastic or secant stiffness.");
         }
     }
 }

@@ -394,7 +394,7 @@ void FE2FluidMaterialStatus :: markOldTangents() { this->oldTangents = true; }
 void FE2FluidMaterialStatus :: computeTangents(TimeStep *tStep)
 {
     if ( !tStep->isTheCurrentTimeStep() ) {
-        OOFEM_ERROR("Only current timestep supported.\n");
+        OOFEM_ERROR("Only current timestep supported.");
     }
 
     if ( this->oldTangents ) {

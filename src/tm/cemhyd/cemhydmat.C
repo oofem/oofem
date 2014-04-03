@@ -4220,7 +4220,7 @@ void CemhydMatStatus :: init()
         /* Read in values for slag characteristics */
 
         if ( ( slagfile = fopen("slagchar.dat", "r") ) == NULL ) {
-            OOFEM_ERROR("Slag file can not be opened\n");
+            OOFEM_ERROR("Slag file can not be opened");
         }
 
 

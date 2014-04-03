@@ -221,21 +221,21 @@ XFEMStatic :: terminate(TimeStep *tStep)
 
                                     MaterialStatus *ms = xFemEl->mpCZMat->giveStatus(gp);
                                     if ( ms == NULL ) {
-                                        OOFEM_ERROR("Failed to fetch material status.\n");
+                                        OOFEM_ERROR("Failed to fetch material status.");
                                     }
 
                                     MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * >
                                                                                ( xFemEl->mpCZMat->giveStatus(gp) );
 
                                     if ( interface == NULL ) {
-                                        OOFEM_ERROR("Failed to fetch MaterialStatusMapperInterface.\n");
+                                        OOFEM_ERROR("Failed to fetch MaterialStatusMapperInterface.");
                                     }
 
 
                                     MaterialStatus *matStat = dynamic_cast< MaterialStatus * >( xFemEl->mpCZMat->giveStatus(gp) );
                                     StructuralInterfaceMaterialStatus *siMatStat = dynamic_cast< StructuralInterfaceMaterialStatus * >(matStat);
                                     if ( siMatStat == NULL ) {
-                                        OOFEM_ERROR("Failed to cast to StructuralInterfaceMaterialStatus.\n");
+                                        OOFEM_ERROR("Failed to cast to StructuralInterfaceMaterialStatus.");
                                     }
                                     interface->MSMI_map_cz(* gp, * domain, elemSet, * tStep, * siMatStat);
                                 }

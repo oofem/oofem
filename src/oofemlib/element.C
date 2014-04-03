@@ -1411,12 +1411,12 @@ Element :: mapStateVariables(Domain &iOldDom, const TimeStep &iTStep)
 
             MaterialStatus *ms = dynamic_cast< MaterialStatus * >( gp->giveMaterialStatus() );
             if ( ms == NULL ) {
-                OOFEM_ERROR("failed to fetch MaterialStatus.\n");
+                OOFEM_ERROR("failed to fetch MaterialStatus.");
             }
 
             MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * >(ms);
             if ( interface == NULL ) {
-                OOFEM_ERROR("Failed to fetch MaterialStatusMapperInterface.\n");
+                OOFEM_ERROR("Failed to fetch MaterialStatusMapperInterface.");
             }
 
             result &= interface->MSMI_map( *gp, iOldDom, sourceElemSet, iTStep, * ( ms ) );

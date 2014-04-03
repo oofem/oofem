@@ -140,7 +140,7 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray &coords,
             return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, elemDofId, mode, tStep);
         }
     } else {
-        OOFEM_ERROR("background element does not support EIPrimaryFiledInterface\n");
+        OOFEM_ERROR("background element does not support EIPrimaryFiledInterface");
         return 1; // failed
     }
 }

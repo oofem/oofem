@@ -276,7 +276,7 @@ void WeakPeriodicBoundaryCondition :: updateDirection()
     } else if ( fabs( normal.at(3) ) > 0.99 ) {         // Normal points in Z direction
         direction = 3;
         if ( this->domain->giveNumberOfSpatialDimensions() == 2 ) {
-            OOFEM_ERROR("3 dimensioal normal in a 2 dimensional problem.\n");
+            OOFEM_ERROR("3 dimensioal normal in a 2 dimensional problem.");
         } else {
             surfaceIndexes.at(1) = 1;
             surfaceIndexes.at(2) = 2;

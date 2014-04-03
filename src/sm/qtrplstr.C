@@ -114,7 +114,7 @@ QTrPlaneStress2d :: initializeFrom(InputRecord *ir)
            ( numberOfGaussPoints == 4 ) ||
            ( numberOfGaussPoints == 7 ) ||
            ( numberOfGaussPoints == 13 ) ) ) {
-        OOFEM_WARNING("number of Gauss points in QTrPlaneStress2d changed to 4\n");
+        OOFEM_WARNING("number of Gauss points in QTrPlaneStress2d changed to 4");
         numberOfGaussPoints = 4;
     }
 

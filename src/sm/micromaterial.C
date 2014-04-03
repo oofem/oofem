@@ -171,7 +171,7 @@ void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     //     EngngModel *microEngngModel = microDomain->giveEngngModel();
     //     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
 
-    OOFEM_ERROR("Should not be called, use giveInternalForcesVector instead\n");
+    OOFEM_ERROR("Should not be called, use giveInternalForcesVector instead");
 
     //     this->initGpForNewStep(gp);
     //     int nelem = microDomain->giveNumberOfElements();

@@ -54,7 +54,7 @@ MMAClosestIPTransfer :: __init(Domain *dold, IntArray &type, FloatArray &coords,
         XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >( source->giveElement() );
 
         if ( xFemEl == NULL ) {
-            OOFEM_ERROR("xFemEl == NULL.\n");
+            OOFEM_ERROR("xFemEl == NULL.");
         }
 
         mpMaterialStatus = xFemEl->giveCohesiveZoneMaterialStatus(*source);
@@ -88,7 +88,7 @@ MMAClosestIPTransfer :: mapStatus(MaterialStatus &oStatus) const
 
         return 1;
     } else {
-        OOFEM_ERROR("source not set.\n");
+        OOFEM_ERROR("source not set.");
     }
 
     return 0;

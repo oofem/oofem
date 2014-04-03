@@ -121,7 +121,7 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
 
     FEInterpolation *fei = this->giveInterpolation();
     if ( !fei ) {
-        OOFEM_ERROR("No interpolator available\n");
+        OOFEM_ERROR("No interpolator available");
     }
 
     FloatArray n_vec;

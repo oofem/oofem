@@ -787,20 +787,20 @@ LayeredCrossSection :: give2dBeamStiffMtrx(FloatMatrix &answer,
 void
 LayeredCrossSection :: give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not implemented\n");
+    OOFEM_ERROR("Not implemented");
 }
 
 
 void
 LayeredCrossSection :: giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not implemented\n");
+    OOFEM_ERROR("Not implemented");
 }
 
 void
 LayeredCrossSection :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not implemented\n");
+    OOFEM_ERROR("Not implemented");
 }
 
 

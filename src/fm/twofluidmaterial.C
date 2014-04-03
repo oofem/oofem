@@ -60,7 +60,7 @@ TwoFluidMaterial :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->slaveMaterial, _IFT_TwoFluidMaterial_mat);
     if ( this->slaveMaterial.giveSize() != 2 ) {
-        OOFEM_ERROR("mat array should have two values\n");
+        OOFEM_ERROR("mat array should have two values");
     }
 
     return IRRT_OK;

@@ -377,7 +377,7 @@ NonlocalMaterialExtensionInterface :: computeWeightFunction(double distance)
     {
         /*
          * if (this->domain->giveNumberOfSpatialDimensions() != 1){
-         * OOFEM_ERROR("this type of weight function can be used for a 1D problem only\n");
+         * OOFEM_ERROR("this type of weight function can be used for a 1D problem only");
          * }
          */
         iwf = giveIntegralOfWeightFunction(2); // indeed

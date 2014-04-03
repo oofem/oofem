@@ -78,7 +78,7 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, this->microMasterNodes, _IFT_MacroLspace_microMasterNodes);
 
     if ( this->microMasterNodes.giveSize() != 8 ) {
-        OOFEM_ERROR("Need 8 master nodes from the microproblem defined on macroLspace element\n");
+        OOFEM_ERROR("Need 8 master nodes from the microproblem defined on macroLspace element");
     }
 
     IR_GIVE_FIELD(ir, this->microBoundaryNodes, _IFT_MacroLspace_microBoundaryNodes);
@@ -120,7 +120,7 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
     if ( this->firstCall ) {
         this->microMaterial = static_cast< MicroMaterial * >( this->giveMaterial() );
         if ( this->microMaterial->microMatIsUsed == true ) {
-            OOFEM_ERROR("Micromaterial is already used on another element. Only one micromaterial can be assigned to one macro element\n");
+            OOFEM_ERROR("Micromaterial is already used on another element. Only one micromaterial can be assigned to one macro element");
         }
 
         this->microDomain = this->microMaterial->problemMicro->giveDomain(1); //from engngm.h

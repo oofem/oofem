@@ -586,7 +586,7 @@ SolutionbasedShapeFunction :: giveValueAtPoint(FloatArray &answer, const FloatAr
     if ( elementAtCoords == NULL ) {
         elementAtCoords = myEngngModel.giveDomain(1)->giveSpatialLocalizer()->giveElementClosestToPoint(lcoords, closest, coords, 1);
         if ( elementAtCoords == NULL ) {
-            OOFEM_WARNING("Cannot find element closest to point\n");
+            OOFEM_WARNING("Cannot find element closest to point");
             coords.pY();
         }
     }

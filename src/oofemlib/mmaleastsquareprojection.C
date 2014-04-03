@@ -233,7 +233,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
     }
 
     if ( patchGPList.size() != minNumberOfPoints ) {
-        OOFEM_ERROR("internal error 2\n");
+        OOFEM_ERROR("internal error 2");
         exit(1);
     }
 

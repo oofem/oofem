@@ -1720,7 +1720,7 @@ bool FloatMatrix :: computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix 
     return info == 0;
 
  #else
-    OOFEM_ERROR("Requires LAPACK\n");
+    OOFEM_ERROR("Requires LAPACK");
     return false;
 
  #endif

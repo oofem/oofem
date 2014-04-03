@@ -112,7 +112,7 @@ HydrationModel :: HydrationModel(MixtureType mix, FindRootMethod usefr) : Materi
     if ( ( usefr ) && ( usefr <= frMixed ) ) {
         useFindRoot = usefr;
     } else {
-        OOFEM_ERROR("unknown FindRootMethod\n");
+        OOFEM_ERROR("unknown FindRootMethod");
     }
 }
 
