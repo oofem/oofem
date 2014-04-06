@@ -180,8 +180,8 @@ ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, Ti
     if ( missingDofManContribution ) {
         std :: ostringstream msg;
         int i = 0;
-        for ( std :: set< int > :: const_iterator sit = unresolvedDofMans.begin(); sit != unresolvedDofMans.end(); ++sit ) {
-            msg << * sit << ' ';
+        for ( int dman: unresolvedDofMans ) {
+            msg << dman << ' ';
             if ( ++i > 20 ) {
                 break;
             }

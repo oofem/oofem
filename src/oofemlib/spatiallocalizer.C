@@ -105,7 +105,6 @@ SpatialLocalizer :: giveAllElementsWithNodesWithinBox(elementContainerType &elem
                                                       const double radius)
 {
     nodeContainerType nodesWithinBox;
-    nodeContainerType :: iterator it;
     const IntArray *dofmanConnectivity;
 
     elemSet.clear();
@@ -114,8 +113,8 @@ SpatialLocalizer :: giveAllElementsWithNodesWithinBox(elementContainerType &elem
 
     this->giveAllNodesWithinBox(nodesWithinBox, coords, radius);
 
-    for ( it = nodesWithinBox.begin(); it != nodesWithinBox.end(); ++it ) {
-        dofmanConnectivity = ct->giveDofManConnectivityArray(* it);
+    for ( int node: nodesWithinBox ) {
+        dofmanConnectivity = ct->giveDofManConnectivityArray(node);
         for ( int i = 1; i <= dofmanConnectivity->giveSize(); i++ ) {
             elemSet.insert( dofmanConnectivity->at(i) );
         }

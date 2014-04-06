@@ -158,11 +158,11 @@ POIExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
     }
 
     // loop over POIs
-    std :: list< POI_dataType > :: iterator PoiIter = POIList.begin();
-    poiCoords.at(1) = ( * PoiIter ).x;
-    poiCoords.at(2) = ( * PoiIter ).y;
-    poiCoords.at(3) = ( * PoiIter ).z;
-    //int region = ( * PoiIter ).region;
+    POI_dataType &poi = *POIList.begin();
+    poiCoords.at(1) = poi.x;
+    poiCoords.at(2) = poi.y;
+    poiCoords.at(3) = poi.z;
+    //int region = poi.region;
 
     for ( i = 1; i <= n; i++ ) {
         type = ( InternalStateType ) internalVarsToExport.at(i);
@@ -186,19 +186,18 @@ POIExportModule :: exportIntVarAs(InternalStateType valID, FILE *stream, TimeSte
     toMap.at(1) = ( int ) valID;
 
     // loop over POIs
-    std :: list< POI_dataType > :: iterator PoiIter;
-    for ( PoiIter = POIList.begin(); PoiIter != POIList.end(); ++PoiIter ) {
-        poiCoords.at(1) = ( * PoiIter ).x;
-        poiCoords.at(2) = ( * PoiIter ).y;
-        poiCoords.at(3) = ( * PoiIter ).z;
-        region = ( * PoiIter ).region;
+    for ( auto &poi: POIList ) {
+        poiCoords.at(1) = poi.x;
+        poiCoords.at(2) = poi.y;
+        poiCoords.at(3) = poi.z;
+        region = poi.region;
 
         this->giveMapper()->__init(d, toMap, poiCoords, * d->giveSet(region), tStep);
         if ( !this->giveMapper()->__mapVariable(val, poiCoords, valID, tStep) ) {
             OOFEM_WARNING("Failed to map variable");
             val.clear();
         }
-        fprintf(stream, "%10d ", ( * PoiIter ).id);
+        fprintf(stream, "%10d ", poi.id);
         for ( i = 1; i <= val.giveSize(); i++ ) {
             fprintf( stream, " %15e", val.at(i) );
         }
@@ -279,12 +278,10 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 
     SpatialLocalizer *sl = d->giveSpatialLocalizer();
     // loop over POIs
-    std :: list< POI_dataType > :: iterator PoiIter;
-    for ( PoiIter = POIList.begin(); PoiIter != POIList.end(); ++PoiIter ) {
-        coords.at(1) = ( * PoiIter ).x;
-        coords.at(2) = ( * PoiIter ).y;
-        coords.at(3) = ( * PoiIter ).z;
-        //region = (*PoiIter).region;
+    for ( auto &poi: POIList ) {
+        coords.at(1) = poi.x;
+        coords.at(3) = poi.z;
+        //region = poi.region;
 
         Element *source = sl->giveElementContainingPoint(coords, NULL);
         if ( source ) {
@@ -299,7 +296,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                                source->giveNumber() );
             }
 
-            fprintf(stream, "%10d ", ( * PoiIter ).id);
+            fprintf(stream, "%10d ", poi.id);
             if ( pv.giveSize() ) {
                 for ( int j = 1; j <= pv.giveSize(); j++ ) {
                     fprintf( stream, " %15e ", pv.at(j) );

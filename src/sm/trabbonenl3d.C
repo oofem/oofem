@@ -179,11 +179,11 @@ TrabBoneNL3D :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
         return;
     }
 
-    for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        rmat = dynamic_cast< TrabBoneNL3D * >( pos->nearGp->giveMaterial() );
+    for ( auto &lir: *list ) {
+        rmat = dynamic_cast< TrabBoneNL3D * >( lir.nearGp->giveMaterial() );
         if ( rmat ) {
-            rmat->giveRemoteNonlocalStiffnessContribution(pos->nearGp, rloc, s, rcontrib, tStep);
-            coeff = gp->giveElement()->computeVolumeAround(gp) * pos->weight / nlStatus->giveIntegrationScale();
+            rmat->giveRemoteNonlocalStiffnessContribution(lir.nearGp, rloc, s, rcontrib, tStep);
+            coeff = gp->giveElement()->computeVolumeAround(gp) * lir.weight / nlStatus->giveIntegrationScale();
 
             int i, j, dim1 = loc.giveSize(), dim2 = rloc.giveSize();
             contrib.resize(dim1, dim2);
@@ -346,12 +346,11 @@ TrabBoneNL3D :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep *t
     this->updateDomainBeforeNonlocAverage(tStep);
 
     std :: list< localIntegrationRecord > *list = nlStatus->giveIntegrationDomainList();
-    std :: list< localIntegrationRecord > :: iterator pos;
 
-    for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        nonlocStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(pos->nearGp) );
+    for ( auto &lir: *list ) {
+        nonlocStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(lir.nearGp) );
         nonlocalContribution = nonlocStatus->giveLocalCumPlastStrainForAverage();
-        nonlocalContribution *= pos->weight;
+        nonlocalContribution *= lir.weight;
         nonlocalCumPlastStrain += nonlocalContribution;
     }
 

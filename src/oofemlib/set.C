@@ -110,9 +110,9 @@ void Set :: computeIntArray(IntArray &answer, const IntArray &specified, std :: 
 {
     // Find the max value;
     int maxIndex = specified.giveSize() == 0 ? 0 : specified.maximum();
-    for ( std :: list< Range > :: iterator it = ranges.begin(); it != ranges.end(); ++it ) {
-        if ( it->giveEnd() > maxIndex ) {
-            maxIndex = it->giveEnd();
+    for ( auto &range: ranges ) {
+        if ( range.giveEnd() > maxIndex ) {
+            maxIndex = range.giveEnd();
         }
     }
     IntArray afflictedNodes(maxIndex);
@@ -122,8 +122,8 @@ void Set :: computeIntArray(IntArray &answer, const IntArray &specified, std :: 
         afflictedNodes.at( specified.at(i) ) = 1;
     }
 
-    for ( std :: list< Range > :: iterator it = ranges.begin(); it != ranges.end(); ++it ) {
-        for ( int i = it->giveStart(); i <= it->giveEnd(); ++i ) {
+    for ( auto &range: ranges ) {
+        for ( int i = range.giveStart(); i <= range.giveEnd(); ++i ) {
             afflictedNodes.at(i) = 1;
         }
     }

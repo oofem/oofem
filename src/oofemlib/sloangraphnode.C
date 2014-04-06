@@ -57,9 +57,8 @@ SloanGraphNode :: ~SloanGraphNode()
 void SloanGraphNode :: addNeighbor(int neighbor)
 {
     // check if neighbor already in list
-    std :: list< int > :: iterator pos;
-    for ( pos = this->neighborList.begin(); pos != this->neighborList.end(); ++pos ) {
-        if ( * pos == neighbor ) {
+    for ( int neighbor: this->neighborList ) {
+        if ( neighbor == neighbor ) {
             return;
         }
     }
@@ -72,8 +71,8 @@ int SloanGraphNode :: computeProfileHeight()
 {
     int numberMin = NumberNew;
     std :: list< int > :: iterator pos;
-    for ( pos = this->neighborList.begin(); pos != this->neighborList.end(); ++pos ) {
-        numberMin = min( numberMin, this->graph->giveNode(* pos)->giveNewNumber() );
+    for ( int neighbor: this->neighborList ) {
+        numberMin = min( numberMin, this->graph->giveNode(neighbor)->giveNewNumber() );
     }
 
     return ( NumberNew - numberMin + 1 );

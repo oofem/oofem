@@ -177,13 +177,12 @@ RankineMatNl :: computeCumPlasticStrain(double &kappa, GaussPoint *gp, TimeStep 
     double localCumPlasticStrain = status->giveLocalCumPlasticStrainForAverage();
     // compute nonlocal cumulative plastic strain
     std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp);
-    std :: list< localIntegrationRecord > :: iterator pos;
 
-    for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        nonlocStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(pos->nearGp) );
+    for ( auto &lir: *list ) {
+        nonlocStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(lir.nearGp) );
         nonlocalContribution = nonlocStatus->giveLocalCumPlasticStrainForAverage();
         if ( nonlocalContribution > 0 ) {
-            nonlocalContribution *= pos->weight;
+            nonlocalContribution *= lir.weight;
         }
 
         nonlocalCumPlasticStrain += nonlocalContribution;
@@ -271,7 +270,6 @@ RankineMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
     double coeff;
     RankineMatNlStatus *status = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
     std :: list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
-    std :: list< localIntegrationRecord > :: iterator pos;
     RankineMatNl *rmat;
     FloatArray rcontrib, lcontrib;
     IntArray loc, rloc;
@@ -282,11 +280,11 @@ RankineMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
         return;
     }
 
-    for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        rmat = dynamic_cast< RankineMatNl * >( pos->nearGp->giveMaterial() );
+    for ( auto &lir: *list ) {
+        rmat = dynamic_cast< RankineMatNl * >( lir.nearGp->giveMaterial() );
         if ( rmat ) {
-            rmat->giveRemoteNonlocalStiffnessContribution(pos->nearGp, rloc, s, rcontrib, tStep);
-            coeff = gp->giveElement()->computeVolumeAround(gp) * pos->weight / status->giveIntegrationScale();
+            rmat->giveRemoteNonlocalStiffnessContribution(lir.nearGp, rloc, s, rcontrib, tStep);
+            coeff = gp->giveElement()->computeVolumeAround(gp) * lir.weight / status->giveIntegrationScale();
 
             int i, j, dim1 = loc.giveSize(), dim2 = rloc.giveSize();
             contrib.resize(dim1, dim2);

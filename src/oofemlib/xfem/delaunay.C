@@ -56,10 +56,10 @@ bool Delaunay :: colinear(const FloatArray &iP1, const FloatArray &iP2, const Fl
     }
 }
 
-void Delaunay :: printTriangles(AList< Triangle > *triangles)
+void Delaunay :: printTriangles(std :: vector< Triangle > &triangles)
 {
-    for ( int i = 1; i <= triangles->giveSize(); i++ ) {
-        triangles->at(i)->printYourself();
+    for ( auto &tri: triangles ) {
+        tri.printYourself();
     }
 }
 
