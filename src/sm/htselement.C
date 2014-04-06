@@ -96,11 +96,10 @@ HTSelement :: initializeFrom(InputRecord *ir)
 void
 HTSelement :: computeGaussPoints()
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = numberOfEdges;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(numberOfEdges);
 
-        for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+        for ( int i = 0; i < numberOfEdges; i++ ) {
             integrationRulesArray [ i ] = new GaussIntegrationRule(i + 1, this, 1, 100);
             integrationRulesArray [ i ]->setUpIntegrationPoints(_Line, numberOfGaussPoints, _1dMat);
         }

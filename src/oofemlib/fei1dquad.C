@@ -67,7 +67,7 @@ FEI1dQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEIC
 void
 FEI1dQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatArray n(3);
+    FloatArray n;
     answer.resize(1);
 
     this->evalN(n, lcoords, cellgeo);

@@ -130,7 +130,7 @@ public:
     double giveCoordinate(int i) { return coordinates->at(i); }
     /// Returns coordinate array of receiver.
     FloatArray *giveCoordinates() { return coordinates; }
-    void setCoordinates(const FloatArray &c) { * coordinates = c; }
+    void setCoordinates(FloatArray c) { * coordinates = std :: move(c); }
 
     /// Returns local sub-patch coordinates of the receiver
     FloatArray *giveLocalCoordinates() {
@@ -140,12 +140,12 @@ public:
             return coordinates;
         }
     }
-    void setLocalCoordinates(const FloatArray &c)
+    void setLocalCoordinates(FloatArray c)
     {
         if ( localCoordinates ) {
-            * localCoordinates = c;
+            * localCoordinates = std :: move(c);
         } else {
-            localCoordinates = new FloatArray(c);
+            localCoordinates = new FloatArray(std :: move(c));
         }
     }
 

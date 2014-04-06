@@ -307,8 +307,8 @@ void MacroLSpace :: updateYourself(TimeStep *tStep)
 {
     FloatArray answer;
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        integrationRulesArray [ i ]->updateYourself(tStep);
+    for ( auto &iRule: integrationRulesArray ) {
+        iRule->updateYourself(tStep);
     }
 
     OOFEM_LOG_INFO("*** Updating macroelement\n");

@@ -115,9 +115,8 @@ void
 Quad1PlaneStrain :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -131,14 +130,7 @@ Quad1PlaneStrain :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &a
 {
     FloatArray n;
     this->interp.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
-
-    answer.resize(2, 8);
-    answer.zero();
-
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, 2 * i - 1) = n.at(i);
-        answer.at(2, 2 * i - 0) = n.at(i);
-    }
+    answer.beNMatrixOf(n, 2);
 }
 
 
@@ -859,13 +851,7 @@ Quad1PlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeTy
 
     this->interp.evalN( nv, lcoords, FEIElementGeometryWrapper(this) );
 
-    n.resize(2, 8);
-    n.zero();
-
-    n.at(1, 1) = n.at(2, 2) = nv.at(1);
-    n.at(1, 3) = n.at(2, 4) = nv.at(2);
-    n.at(1, 5) = n.at(2, 6) = nv.at(3);
-    n.at(1, 7) = n.at(2, 8) = nv.at(4);
+    n.beNMatrixOf(nv, 2);
 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);

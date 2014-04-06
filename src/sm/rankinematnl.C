@@ -68,14 +68,13 @@ RankineMatNl :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint 
     //mj this->initGpForNewStep(gp);
 
     double tempDam;
-    FloatArray tempEffStress, totalStress;
+    FloatArray tempEffStress;
     //mj performPlasticityReturn(gp, totalStrain, mode);
     // nonlocal method "computeDamage" performs the plastic return
     // for all Gauss points when it is called for the first time
     // in the iteration
     tempDam = this->computeDamage(gp, tStep);
-    nlStatus->giveTempEffectiveStress(tempEffStress);
-    answer.beScaled(1.0 - tempDam, tempEffStress);
+    answer.beScaled(1.0 - tempDam, nlStatus->giveTempEffectiveStress());
     nlStatus->setTempDamage(tempDam);
     nlStatus->letTempStrainVectorBe(totalStrain);
     nlStatus->letTempStressVectorBe(answer);
@@ -93,14 +92,12 @@ RankineMatNl :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
     //mj this->initGpForNewStep(gp);
 
     double tempDam;
-    FloatArray tempEffStress, totalStress;
     //mj performPlasticityReturn(gp, totalStrain, mode);
     // nonlocal method "computeDamage" performs the plastic return
     // for all Gauss points when it is called for the first time
     // in the iteration
     tempDam = this->computeDamage(gp, tStep);
-    nlStatus->giveTempEffectiveStress(tempEffStress);
-    answer.beScaled(1.0 - tempDam, tempEffStress);
+    answer.beScaled(1.0 - tempDam, nlStatus->giveTempEffectiveStress());
     nlStatus->setTempDamage(tempDam);
     nlStatus->letTempStrainVectorBe(totalStrain);
     nlStatus->letTempStressVectorBe(answer);
@@ -325,7 +322,6 @@ RankineMatNl :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
     RankineMatNlStatus *status = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
     FloatMatrix b;
-    FloatArray stress;
 
     damage = status->giveDamage();
     tempDamage = status->giveTempDamage();
@@ -334,7 +330,7 @@ RankineMatNl :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
     }
 
     elem->giveLocationArray(loc, EID_MomentumBalance, s);
-    status->giveTempEffectiveStress(stress);
+    const FloatArray &stress = status->giveTempEffectiveStress();
     elem->computeBmatrixAt(gp, b);
     this->computeCumPlasticStrain(nlKappa, gp, tStep);
     double factor = computeDamageParamPrime(nlKappa);

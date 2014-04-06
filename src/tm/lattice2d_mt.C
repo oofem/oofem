@@ -183,8 +183,7 @@ Lattice2d_mt :: updateInternalState(TimeStep *tStep)
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
     // force updating ip values
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ i ];
+    for ( auto &iRule: integrationRulesArray ) {
         for ( GaussPoint *gp: *iRule ) {
             this->computeNmatrixAt( n, * gp->giveCoordinates() );
             this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, r);
@@ -199,8 +198,7 @@ void
 Lattice2d_mt :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
+    integrationRulesArray.resize( 1 );
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
     integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _1dHeat);
 }
@@ -311,7 +309,7 @@ Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *t
     Node *nodeA, *nodeB;
 
 
-    FloatArray deltaX(3), normalVector(3);
+    FloatArray deltaX(3);
     FloatArray val, helpLoadVector, globalIPcoords;
     FloatMatrix nm;
     double k;

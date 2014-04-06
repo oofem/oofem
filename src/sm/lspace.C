@@ -160,9 +160,8 @@ LSpace :: giveMaterialMode()
 void LSpace :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -174,7 +173,7 @@ LSpace :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp.
 {
-    FloatArray n(8);
+    FloatArray n;
 
     answer.resize(3, 24);
     answer.zero();
@@ -447,26 +446,13 @@ LSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
                                                            TimeStep *tStep, const FloatArray &coords,
                                                            FloatArray &answer)
 {
-    FloatArray lcoords, u;
+    FloatArray lcoords, u, ni;
     FloatMatrix n;
-    FloatArray ni(8);
     int result;
 
     result = this->computeLocalCoordinates(lcoords, coords);
 
     this->interpolation.evalN( ni, lcoords, FEIElementGeometryWrapper(this) );
-
-    n.resize(3, 24);
-    n.zero();
-
-    n.at(1, 1)  = n.at(2, 2)  = n.at(3, 3)  = ni.at(1);
-    n.at(1, 4)  = n.at(2, 5)  = n.at(3, 6)  = ni.at(2);
-    n.at(1, 7)  = n.at(2, 8)  = n.at(3, 9)  = ni.at(3);
-    n.at(1, 10) = n.at(2, 11) = n.at(3, 12) = ni.at(4);
-    n.at(1, 13) = n.at(2, 14) = n.at(3, 15) = ni.at(5);
-    n.at(1, 16) = n.at(2, 17) = n.at(3, 18) = ni.at(6);
-    n.at(1, 19) = n.at(2, 20) = n.at(3, 21) = ni.at(7);
-    n.at(1, 22) = n.at(2, 23) = n.at(3, 24) = ni.at(8);
 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);

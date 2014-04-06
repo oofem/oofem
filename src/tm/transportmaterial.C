@@ -38,21 +38,21 @@
 
 namespace oofem {
 void
-TransportMaterialStatus :: setTempGradient(const FloatArray &grad)
+TransportMaterialStatus :: setTempGradient(FloatArray grad)
 {
-    this->temp_gradient = grad;
+    this->temp_gradient = std :: move(grad);
 }
 
 void
-TransportMaterialStatus :: setTempField(const FloatArray &field)
+TransportMaterialStatus :: setTempField(FloatArray field)
 {
-    this->temp_field = field;
+    this->temp_field = std :: move(field);
 }
 
 void
-TransportMaterialStatus :: setTempFlux(const FloatArray &w)
+TransportMaterialStatus :: setTempFlux(FloatArray w)
 {
-    this->temp_flux = w;
+    this->temp_flux = std :: move(w);
 }
 
 void

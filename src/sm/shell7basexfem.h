@@ -121,8 +121,7 @@ public:
     virtual int giveNumberOfDofs();
 
     bool hasCohesiveZone(int interfaceNum);
-    IntegrationRule **czIntegrationRulesArray;
-    IntegrationRule giveCZIntegrationRulesArray() { return * * czIntegrationRulesArray; };
+    std :: vector< IntegrationRule * > czIntegrationRulesArray;
 };
 } // end namespace oofem
 #endif

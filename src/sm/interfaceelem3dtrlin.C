@@ -69,7 +69,7 @@ InterfaceElement3dTrLin :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 // Returns the linear part of the B matrix
 //
 {
-    FloatArray n(3);
+    FloatArray n;
     this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 18);
@@ -90,9 +90,8 @@ void
 InterfaceElement3dTrLin :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
 
@@ -104,7 +103,7 @@ InterfaceElement3dTrLin :: computeGaussPoints()
 int
 InterfaceElement3dTrLin :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    FloatArray n(6);
+    FloatArray n;
 
     this->interpolation.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
 

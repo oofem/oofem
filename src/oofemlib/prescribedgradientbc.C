@@ -47,19 +47,19 @@ void PrescribedGradientBC::giveInputRecord(DynamicInputRecord &input)
 
 void PrescribedGradientBC :: giveGradientVoigt(FloatArray &oGradient) const
 {
-	int numRows = mGradient.giveNumberOfRows();
-	switch(numRows) {
-	case 1:
-		oGradient = {mGradient.at(1,1)};
-		break;
-	case 2:
-		// Do not assume symmetry
-		oGradient = {mGradient.at(1,1), mGradient.at(2,2), mGradient.at(1,2), mGradient.at(2,1)};
-		break;
-	case 3:
-		OOFEM_ERROR("PrescribedGradientBC :: giveGradientVoigt() not implemented for 3 rows.\n")
-		break;
-	};
+    int numRows = mGradient.giveNumberOfRows();
+    switch(numRows) {
+    case 1:
+        oGradient = {mGradient.at(1,1)};
+        break;
+    case 2:
+        // Do not assume symmetry
+        oGradient = {mGradient.at(1,1), mGradient.at(2,2), mGradient.at(1,2), mGradient.at(2,1)};
+        break;
+    case 3:
+        OOFEM_ERROR("PrescribedGradientBC :: giveGradientVoigt() not implemented for 3 rows.\n")
+        break;
+    };
 }
 
 double PrescribedGradientBC :: domainSize()

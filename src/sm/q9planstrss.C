@@ -30,7 +30,7 @@ Q9PlaneStress2d :: Q9PlaneStress2d(int n, Domain *aDomain) :
     //	printf("Entering Q9PlaneStress2d :: Q9PlaneStress2d().\n");
 
     numberOfDofMans  = 9;
-    numberOfGaussPoints = 9;
+    numberOfGaussPoints = 4;
 }
 
 Interface *
@@ -72,45 +72,25 @@ Q9PlaneStress2d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &an
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at gp.
 {
-    FloatArray n(9);
-
-    answer.resize(2, 18);
-    answer.zero();
+    FloatArray n;
 
     this->interpolation.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
 
-    for ( int i = 1; i <= 9; i++ ) {
-        answer.at(1, 2 * i - 1) = n.at(i);
-        answer.at(2, 2 * i - 0) = n.at(i);
-    }
+    answer.beNMatrixOf(n, 2);
 }
 
 IRResultType
 Q9PlaneStress2d :: initializeFrom(InputRecord *ir)
 {
-    numberOfGaussPoints = 4;
-    IRResultType result = this->Element :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
-        numberOfGaussPoints = 4;
-    }
-
-    return IRRT_OK;
+    return Element :: initializeFrom(ir);
 }
 
 void
 Q9PlaneStress2d :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }

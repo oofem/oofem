@@ -91,9 +91,8 @@ void
 Quad1MindlinShell3D :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -300,9 +299,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, unknowns);
     this->splitUnknowns(shellUnknowns, drillUnknowns, unknowns); // Split this for practical reasons into normal shell dofs and drilling dofs
 
-    FloatArray shellForces(20), drillMoment(4);
-    shellForces.zero();
-    drillMoment.zero();
+    FloatArray shellForces, drillMoment;
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
@@ -350,9 +347,7 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
     FloatArray n;
     bool drillCoeffFlag = false;
 
-    FloatMatrix shellStiffness(20, 20), drillStiffness(4, 4);
-    shellStiffness.zero();
-    drillStiffness.zero();
+    FloatMatrix shellStiffness, drillStiffness;
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     for ( GaussPoint *gp: *iRule ) {

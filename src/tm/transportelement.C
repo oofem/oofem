@@ -1055,8 +1055,7 @@ TransportElement :: updateInternalState(TimeStep *tStep)
 
     this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, r);
     // force updating ip values
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ i ];
+    for ( auto &iRule: integrationRulesArray ) {
         for ( GaussPoint *gp: *iRule ) {
 
             ///@todo Why is the state vector the unknown solution at the gauss point? / Mikael

@@ -136,10 +136,8 @@ void
 TR21_2D_SUPG :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 3;
-        integrationRulesArray = new IntegrationRule * [ 3 ];
-
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(3);
 
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 3, this);
@@ -212,7 +210,7 @@ TR21_2D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 TR21_2D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    FloatMatrix dn(6, 2);
+    FloatMatrix dn;
     velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 12);
@@ -227,7 +225,7 @@ TR21_2D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 TR21_2D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    FloatArray n(3);
+    FloatArray n;
     this->pressureInterpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 3);
@@ -293,8 +291,8 @@ void
 TR21_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
 {
     double mu_min, norm_N, norm_N_d, norm_M_d, norm_LSIC;
-    FloatMatrix dn, N, N_d, M_d, LSIC;
-    FloatArray dN, s, lcoords_nodes, u, lcn, dn_a(2), n, u1(6), u2(6);
+    FloatMatrix N, N_d, M_d, LSIC;
+    FloatArray u;
     IntegrationRule *iRule = integrationRulesArray [ 1 ];
     mu_min = 1;
     for ( GaussPoint *gp: *iRule ) {
@@ -485,7 +483,6 @@ TR21_2D_SUPG :: LS_PCS_computeVolume(double &answer, const FloatArray **coordina
         //answer += this->computeVolumeAround(gp);
 
         double determinant, weight, volume;
-        FloatArray dxi(6), deta(6), lcoords;
 
         determinant = fabs( this->velocityInterpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
 
@@ -513,7 +510,7 @@ TR21_2D_SUPG :: LS_PCS_computeVolume()
 double
 TR21_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep)
 {
-    FloatArray voff(2), fi(6), un, n;
+    FloatArray fi(6), un, n;
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
     double vol = 0.0, eps = 0.0, _fi, S = 0.0;

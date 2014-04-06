@@ -107,7 +107,7 @@ public:
     /// Returns flag indicating whether rebalancing is necessary; should update node weights as well.
     virtual LoadBalancerDecisionType decide(TimeStep *) = 0;
     /// Returns processor weights; the larger weight means more powerful node, sum of weights should equal to one.
-    void giveProcessorWeights(FloatArray &answer) { answer = nodeWeights; }
+    const FloatArray & giveProcessorWeights() { return nodeWeights; }
     //@}
 
     /// Returns class name of the receiver.

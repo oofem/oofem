@@ -77,7 +77,7 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 {
     FloatMatrix Ds0;
     double equivStrain;
-    FloatArray princStress, crackStrain, reducedAnswer;
+    FloatArray princStress, reducedAnswer;
     FloatArray reducedStrainVector, strainVector, principalStrain;
     FloatArray reducedSpaceStressVector;
     FloatMatrix tempCrackDirs;
@@ -94,7 +94,7 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
     StructuralMaterial :: giveFullSymVectorForm( strainVector, reducedStrainVector, gp->giveMaterialMode() );
 
-    status->giveTempCrackDirs(tempCrackDirs);
+    tempCrackDirs = status->giveTempCrackDirs();
     this->computePrincipalValDir(principalStrain, tempCrackDirs,
                                  strainVector,
                                  principal_strain);
@@ -105,14 +105,13 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
         this->giveRealPrincipalStressVector3d(princStress, gp, principalStrain, tempCrackDirs, tStep);
         princStress.resize(6);
-        status->giveTempCrackDirs(tempCrackDirs);
+        tempCrackDirs = status->giveTempCrackDirs();
         this->transformStressVectorTo(answer, tempCrackDirs, princStress, 1);
 
         StructuralMaterial :: giveReducedSymVectorForm( reducedSpaceStressVector, answer, gp->giveMaterialMode() );
         status->letTempStressVectorBe(reducedSpaceStressVector);
 
-        status->giveCrackStrainVector(crackStrain);
-        this->updateCrackStatus(gp, crackStrain);
+        this->updateCrackStatus(gp, status->giveCrackStrainVector());
 
         StructuralMaterial :: giveReducedSymVectorForm( reducedAnswer, answer, gp->giveMaterialMode() );
         answer = reducedAnswer;

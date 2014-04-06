@@ -79,7 +79,7 @@ protected:
 
     IntArray vars;
 
-    AList< GaussPoint >gps;
+    std::vector< GaussPoint >gps;
 
     std :: ofstream outfile;
 

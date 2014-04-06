@@ -213,9 +213,8 @@ void
 InterfaceElem1d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         integrationRulesArray [ 0 ]->setUpIntegrationPoints( _Line, 1, this->giveMaterialMode() );
     }
@@ -225,10 +224,7 @@ InterfaceElem1d :: computeGaussPoints()
 int
 InterfaceElem1d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    answer.resize(3);
-    answer.at(1) = this->giveNode(1)->giveCoordinate(1);
-    answer.at(2) = this->giveNode(1)->giveCoordinate(2);
-    answer.at(3) = this->giveNode(1)->giveCoordinate(3);
+    answer = *this->giveNode(1)->giveCoordinates();
 
     return 1;
 }

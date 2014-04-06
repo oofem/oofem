@@ -45,10 +45,8 @@ namespace oofem {
 
 TSplineInterpolation :: ~TSplineInterpolation()
 {
-    int i, j;
-
-    for ( i = 0; i <= numberOfControlPoints [ 0 ]; i++ ) {
-        for ( j = 0; j < nsd; j++ ) {
+    for ( int i = 0; i <= numberOfControlPoints [ 0 ]; i++ ) {
+        for ( int j = 0; j < nsd; j++ ) {
             delete [] localIndexKnotVector [ i ] [ j ];
         }
 
@@ -141,7 +139,8 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
 
 
 
-void TSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {
+void TSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     FloatArray N(nsd);
     IntArray span(nsd);

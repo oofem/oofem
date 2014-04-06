@@ -99,7 +99,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 {
     FloatMatrix Ds0;
     double equivStrain;
-    FloatArray princStress, crackStrain, nonlocalStrain, reducedSpaceStressVector;
+    FloatArray princStress, nonlocalStrain, reducedSpaceStressVector;
     FloatArray reducedNonlocStrainVector, fullNonlocStrainVector, principalStrain;
     FloatMatrix tempCrackDirs;
     RCSDNLMaterialStatus *nonlocStatus, *status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(gp) );
@@ -143,7 +143,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
     StructuralMaterial :: giveFullSymVectorForm( fullNonlocStrainVector, nonlocalStrain, gp->giveMaterialMode() );
 
-    status->giveTempCrackDirs(tempCrackDirs);
+    tempCrackDirs = status->giveTempCrackDirs();
     this->computePrincipalValDir(principalStrain, tempCrackDirs,
                                  fullNonlocStrainVector,
                                  principal_strain);
@@ -164,8 +164,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
         ////# stressIncrement.subtract (status -> giveStressVector());
         ////#  status -> letStressIncrementVectorBe (stressIncrement);
 
-        status->giveCrackStrainVector(crackStrain);
-        this->updateCrackStatus(gp, crackStrain);
+        this->updateCrackStatus(gp, status->giveCrackStrainVector());
 
         ////#
         this->giveMaterialStiffnessMatrix(Ds0, SecantStiffness, gp, tStep);

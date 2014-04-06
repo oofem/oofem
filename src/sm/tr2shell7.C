@@ -91,10 +91,10 @@ FEInterpolation *Tr2Shell7 :: giveInterpolation() const { return & interpolation
 void
 Tr2Shell7 :: computeGaussPoints()
 {
-    if ( !integrationRulesArray ) {
+    if ( integrationRulesArray.size() == 0 ) {
         int nPointsTri  = 6;   // points in the plane
         int nPointsEdge = 2;   // edge integration
-        specialIntegrationRulesArray = new IntegrationRule * [ 3 ];
+        specialIntegrationRulesArray.resize(3);
 
         // Midplane and thickness
 
@@ -114,7 +114,6 @@ Tr2Shell7 :: computeGaussPoints()
         if ( layeredCS == NULL ) {
             OOFEM_ERROR("Tr2Shell7 only supports layered cross section");
         }
-        this->numberOfIntegrationRules = layeredCS->giveNumberOfLayers();
         this->numberOfGaussPoints = layeredCS->giveNumberOfLayers() * nPointsTri * layeredCS->giveNumIntegrationPointsInLayer();
         layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
 

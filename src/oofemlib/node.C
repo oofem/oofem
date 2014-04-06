@@ -830,7 +830,6 @@ Node :: drawYourself(oofegGraphicContext &gc)
             }
 
             FloatArray force(3), momentum(3);
-            int numberOfDofs = this->giveNumberOfDofs();
             int i = 0;
             for ( Dof *dof: *this ) {
                 i++;

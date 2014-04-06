@@ -126,9 +126,8 @@ void
 TR1_2D_SUPG2_AXI :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 2;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 2 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3, true);
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3, true);
     }
@@ -296,12 +295,12 @@ TR1_2D_SUPG2_AXI :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
 {
     answer.resize(6);
     answer.zero();
-    FloatArray u, un, eps(3), stress;
+    FloatArray u, un, eps, stress;
     double dV, Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     //double dudx,dudy,dvdx,dvdy;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-    FloatArray n(3);
+    FloatArray n;
     double _u, _v, _r;
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
     FloatMatrix _b(4, 6);
@@ -341,10 +340,10 @@ TR1_2D_SUPG2_AXI :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRe
     //double dudx, dudy, dvdx, dvdy;
     answer.resize(6, 6);
     answer.zero();
-    FloatMatrix _db, _d, _b(3, 6), _bs(3, 6);
+    FloatMatrix _db, _d, _b;
     //FloatArray un;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
-    FloatArray un(6), u(6), n(3), eps, stress;
+    FloatArray un, u, n, eps, stress;
     double _u, _v, _r;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
@@ -395,7 +394,7 @@ TR1_2D_SUPG2_AXI :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 {
     answer.resize(6, 3);
     answer.zero();
-    FloatArray un, n(3);
+    FloatArray un, n;
     double _u, _v;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
@@ -463,15 +462,13 @@ TR1_2D_SUPG2_AXI :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep 
     answer.zero();
 
     double dV, _r;
-    FloatArray n(3);
+    FloatArray n;
 
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
         for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
             _r = this->computeRadiusAt(gp);
-            n.at(1) = gp->giveCoordinate(1);
-            n.at(2) = gp->giveCoordinate(2);
-            n.at(3) = 1. - n.at(1) - n.at(2);
+            computeNVector(n, gp);
             for ( int i = 1; i <= 3; i++ ) {
                 for ( int j = 1; j <= 3; j++ ) {
                     answer.at(j, 2 * i - 1) += b [ i - 1 ] * n.at(j) * dV;
@@ -489,7 +486,7 @@ TR1_2D_SUPG2_AXI :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep)
 {
     // N_epsilon (due to PSPG stabilization)
     double dudx, dudy, dvdx, dvdy, _u, _v;
-    FloatArray u, un, n(3);
+    FloatArray u, un, n;
     double dV;
 
     answer.resize(3);
@@ -525,7 +522,7 @@ TR1_2D_SUPG2_AXI :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeS
     answer.zero();
     int w_dof_addr, u_dof_addr, d1j, d2j, km1, mm1;
     //double rho = this->giveMaterial()->giveCharacteristicValue(Density, integrationRulesArray[0]->getIntegrationPoint(0), tStep);
-    FloatArray u, un, n(3);
+    FloatArray u, un, n;
     double dV, _u, _v;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
@@ -565,7 +562,7 @@ void TR1_2D_SUPG2_AXI :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *t
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     double rho;
     double dV, _r;
-    FloatArray eps, stress, u(6);
+    FloatArray eps, stress, u;
     FloatMatrix _b;
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
 
@@ -638,7 +635,7 @@ TR1_2D_SUPG2_AXI :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *tS
     answer.resize(3, 6);
     answer.zero();
     double dV;
-    FloatArray n(3);
+    FloatArray n;
     // M_\epsilon
 
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
@@ -1100,8 +1097,8 @@ void
 TR1_2D_SUPG2_AXI :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     /* one computes here average deviatoric stress, based on rule of mixture (this is used only for postprocessing) */
-    FloatArray u(6), eps(3), s0(3), s1(3);
-    FloatMatrix _b(4, 6);
+    FloatArray u, eps, s0, s1;
+    FloatMatrix _b;
     answer.resize(3);
 
 

@@ -286,14 +286,11 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
 
         int ruleNum = 1;
-        AList< IntegrationRule >irlist;
-        IntegrationRule *intRule = new PatchIntegrationRule(ruleNum, element, allTri);
 
-        intRule->SetUpPointsOnTriangle(xMan->giveNumGpPerTri(), matMode);
-
-        irlist.put(1, intRule);
         if ( partitionSucceeded ) {
-            element->setIntegrationRules(& irlist);
+            IntegrationRule *intRule = new PatchIntegrationRule(ruleNum, element, allTri);
+            intRule->SetUpPointsOnTriangle(xMan->giveNumGpPerTri(), matMode);
+            element->setIntegrationRules({intRule});
         }
 
 

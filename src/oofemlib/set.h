@@ -110,19 +110,19 @@ public:
     /**
      * Sets list of elements within set.
      */
-    void setElementList(const IntArray &newElements);
+    void setElementList(IntArray newElements);
     /**
      * Sets list of element boundaries within set.
      */
-    void setBoundaryList(const IntArray &newBoundaries);
+    void setBoundaryList(IntArray newBoundaries);
     /**
      * Sets list of element edges within set (must be edges of 3D elements).
      */
-    void setEdgeList(const IntArray &newEdges);
+    void setEdgeList(IntArray newEdges);
     /**
      * Sets list of nodes within set.
      */
-    void setNodeList(const IntArray &newNodes);
+    void setNodeList(IntArray newNodes);
 
     /**
      * Clears the entire set.

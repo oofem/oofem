@@ -99,9 +99,8 @@ void
 Tet1_3D_SUPG :: computeGaussPoints()
 // Sets up the array containing the integration points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 3;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(3);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
 
@@ -366,7 +365,7 @@ Tet1_3D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
 
     double ln = 1.e6;
     Node *inode, *jnode, *knode, *lnode;
-    FloatArray t1(3), t2(3), n3(3), n(3);
+    FloatArray t1, t2, n3, n;
     for ( int l = 1; l <= 4; l++ ) {
         int i = ( l > 3 ) ? 1 : l + 1;
         int j = ( i > 3 ) ? 1 : i + 1;
@@ -376,20 +375,14 @@ Tet1_3D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
         jnode = this->giveNode(j);
         knode = this->giveNode(k);
         lnode = this->giveNode(l);
-        t1.at(1) = inode->giveCoordinate(1) - jnode->giveCoordinate(1);
-        t1.at(2) = inode->giveCoordinate(2) - jnode->giveCoordinate(2);
-        t1.at(3) = inode->giveCoordinate(3) - jnode->giveCoordinate(3);
+        t1.beDifferenceOf(*inode->giveCoordinates(), *jnode->giveCoordinates());
 
-        t2.at(1) = knode->giveCoordinate(1) - jnode->giveCoordinate(1);
-        t2.at(2) = knode->giveCoordinate(2) - jnode->giveCoordinate(2);
-        t2.at(3) = knode->giveCoordinate(3) - jnode->giveCoordinate(3);
+        t2.beDifferenceOf(*knode->giveCoordinates(), *jnode->giveCoordinates());
 
         n.beVectorProductOf(t1, t2);
         n.normalize();
 
-        n3.at(1) = lnode->giveCoordinate(1) - jnode->giveCoordinate(1);
-        n3.at(2) = lnode->giveCoordinate(2) - jnode->giveCoordinate(2);
-        n3.at(3) = lnode->giveCoordinate(3) - jnode->giveCoordinate(3);
+        n3.beDifferenceOf(*lnode->giveCoordinates(), *jnode->giveCoordinates());
 
         ln = min( ln, sqrt( fabs( n.dotProduct(n3) ) ) );
     }

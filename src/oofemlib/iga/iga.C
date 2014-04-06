@@ -87,8 +87,8 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
         newgpcoords.resize(2);
         knotSpan.resize(2);
 
-        this->numberOfIntegrationRules = numberOfKnotSpansU * numberOfKnotSpansV;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+        int numberOfIntegrationRules = numberOfKnotSpansU * numberOfKnotSpansV;
+        integrationRulesArray.resize( numberOfIntegrationRules );
 
         knotSpan.at(2) = -1;
         for ( int vi = 1; vi <= numberOfKnotSpansV; vi++ ) {
@@ -133,8 +133,8 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
         newgpcoords.resize(3);
         knotSpan.resize(3);
 
-        this->numberOfIntegrationRules = numberOfKnotSpansU * numberOfKnotSpansV * numberOfKnotSpansW;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+        int numberOfIntegrationRules = numberOfKnotSpansU * numberOfKnotSpansV * numberOfKnotSpansW;
+        integrationRulesArray.resize( numberOfIntegrationRules );
 
         knotSpan.at(3) = -1;
         for ( int wi = 1; wi <= numberOfKnotSpansW; wi++ ) {
@@ -246,8 +246,8 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
         newgpcoords.resize(2);
         knotSpan.resize(2);
 
-        this->numberOfIntegrationRules = numberOfKnotSpansU * numberOfKnotSpansV;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+        int numberOfIntegrationRules = numberOfKnotSpansU * numberOfKnotSpansV;
+        integrationRulesArray.resize( numberOfIntegrationRules );
 
         knotSpan.at(2) = -1;
         for ( vi = 1; vi <= numberOfKnotSpansV; vi++ ) {
@@ -325,11 +325,9 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc)
     nseq = 4;
  #endif
 
-    int numberOfIntegrationRules = this->giveNumberOfIntegrationRules();
     const double *const *knotVector = interp->giveKnotVector();
     const IntArray *span;
-    IntegrationRule *iRule;
-    int ir, nsd = this->giveNsd();
+    int nsd = this->giveNsd();
 
     if ( nsd == 1 ) {
         FloatArray c [ 2 ], cg [ 2 ];
@@ -341,8 +339,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc)
         }
 
         // loop over individual integration rules (i.e., knot spans)
-        for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-            iRule = this->giveIntegrationRule(ir);
+        for ( auto &iRule: integrationRulesArray ) {
             span = iRule->giveKnotSpan();
             // divide span locally to get finer geometry rep.
             du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;
@@ -373,8 +370,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc)
         }
 
         // loop over individual integration rules (i.e., knot spans)
-        for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-            iRule = this->giveIntegrationRule(ir);
+        for ( auto &iRule: integrationRulesArray ) {
             span = iRule->giveKnotSpan();
             // divide span locally to get finer geometry rep.
             du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;
@@ -477,8 +473,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc)
         }
 
         // loop over individual integration rules (i.e., knot spans)
-        for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-            iRule = this->giveIntegrationRule(ir);
+        for ( auto &iRule: integrationRulesArray ) {
             span = iRule->giveKnotSpan();
             // divide span locally to get finer geometry rep.
             du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;
@@ -1041,11 +1036,9 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
     nseg = 4;
  #endif
 
-    int numberOfIntegrationRules = elem->giveNumberOfIntegrationRules();
     const double *const *knotVector = interp->giveKnotVector();
     const IntArray *span;
-    IntegrationRule *iRule;
-    int ir, nsd = interp->giveNsd();
+    int nsd = interp->giveNsd();
 
     se->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
 
@@ -1059,8 +1052,8 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
         }
 
         // loop over individual integration rules (i.e., knot spans)
-        for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-            iRule = elem->giveIntegrationRule(ir);
+        for ( int ir = 0; ir < elem->giveNumberOfIntegrationRules(); ir++ ) {
+            IntegrationRule *iRule = elem->giveIntegrationRule(ir);
             span = iRule->giveKnotSpan();
             // divide span locally to get finer geometry rep.
             du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;
@@ -1108,8 +1101,8 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
         }
 
         // loop over individual integration rules (i.e., knot spans)
-        for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-            iRule = elem->giveIntegrationRule(ir);
+        for ( int ir = 0; ir < elem->giveNumberOfIntegrationRules(); ir++ ) {
+            IntegrationRule *iRule = elem->giveIntegrationRule(ir);
             span = iRule->giveKnotSpan();
             // divide span locally to get finer geometry rep.
             du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;
@@ -1166,8 +1159,8 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
         }
 
         // loop over individual integration rules (i.e., knot spans)
-        for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-            iRule = elem->giveIntegrationRule(ir);
+        for ( int ir = 0; ir < elem->giveNumberOfIntegrationRules(); ir++ ) {
+            IntegrationRule *iRule = elem->giveIntegrationRule(ir);
             span = iRule->giveKnotSpan();
             // divide span locally to get finer geometry rep.
             du = ( knotVector [ 0 ] [ span->at(1) + 1 ] - knotVector [ 0 ] [ span->at(1) ] ) / nseg;

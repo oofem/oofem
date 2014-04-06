@@ -90,8 +90,7 @@ QTruss1dGrad :: initializeFrom(InputRecord *ir)
 void
 QTruss1dGrad :: computeGaussPoints()
 {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    integrationRulesArray.resize( 1 );
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 1);
     this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 }
@@ -122,12 +121,8 @@ void
 QTruss1dGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatArray n;
-    answer.resize(1, 2);
-    answer.zero();
-
     this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 2) = n.at(2);
+    answer.beNMatrixOf(n, 1);
 }
 
 

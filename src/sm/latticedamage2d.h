@@ -184,7 +184,7 @@ public:
      * Assign the temp value of plastic strain.
      * @param v New temp value of plastic strain.
      */
-    void letTempReducedStrainBe(const FloatArray &v)  { tempReducedStrain = v; }
+    void letTempReducedStrainBe(FloatArray v)  { tempReducedStrain = std :: move(v); }
 
     /// Prints the receiver state to given stream
     void printOutputAt(FILE *file, TimeStep *tStep);

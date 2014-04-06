@@ -80,9 +80,8 @@ Tet1BubbleStokes :: ~Tet1BubbleStokes()
 
 void Tet1BubbleStokes :: computeGaussPoints()
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(1);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
@@ -327,12 +326,10 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    FloatMatrix B(6, 15), EdB, K(15, 15), G, Dp, DvT, C, Ed, dN;
+    FloatMatrix B(6, 15), EdB, K, G, Dp, DvT, C, Ed, dN;
     FloatArray dNv(15), N, Ep, Cd, tmpA, tmpB;
     double Cp;
 
-    K.zero();
-    G.zero();
     B.zero();
 
     for ( GaussPoint *gp: *iRule ) {

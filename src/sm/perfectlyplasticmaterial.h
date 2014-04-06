@@ -84,10 +84,10 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    void givePlasticStrainVector(FloatArray &answer) const { answer =  plasticStrainVector; }
-    void givePlasticStrainIncrementVector(FloatArray &answer) const { answer = plasticStrainIncrementVector; }
-    void letPlasticStrainVectorBe(FloatArray &v) { plasticStrainVector = v; }
-    void letPlasticStrainIncrementVectorBe(FloatArray &v) { plasticStrainIncrementVector = v; }
+    const FloatArray &givePlasticStrainVector() const { return plasticStrainVector; }
+    const FloatArray &givePlasticStrainIncrementVector() const { return plasticStrainIncrementVector; }
+    void letPlasticStrainVectorBe(FloatArray v) { plasticStrainVector = std :: move(v); }
+    void letPlasticStrainIncrementVectorBe(FloatArray v) { plasticStrainIncrementVector = std :: move(v); }
 
     // definition
     virtual const char *giveClassName() const { return "PerfectlyPlasticMaterialStatus"; }

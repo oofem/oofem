@@ -81,11 +81,9 @@ MisesMatNl :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     this->initGpForNewStep(gp);
 
     double tempDam;
-    FloatArray tempEffStress, totalStress;
     performPlasticityReturn(gp, totalStrain);
     tempDam = this->computeDamage(gp, tStep);
-    nlStatus->giveTempEffectiveStress(tempEffStress);
-    answer.beScaled(1.0 - tempDam, tempEffStress);
+    answer.beScaled(1.0 - tempDam, nlStatus->giveTempEffectiveStress());
     nlStatus->setTempDamage(tempDam);
     nlStatus->letTempStrainVectorBe(totalStrain);
     nlStatus->letTempStressVectorBe(answer);
@@ -105,7 +103,6 @@ MisesMatNl :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, G
     double tempKappa = status->giveTempCumulativePlasticStrain();
     double tempDamage = status->giveTempDamage();
     double damage = status->giveDamage();
-    FloatArray stressVector;
     answer.at(1, 1) = ( 1 - tempDamage ) * E;
     if ( mode != TangentStiffness ) {
         return;
@@ -116,7 +113,7 @@ MisesMatNl :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, G
     }
 
     // === plastic loading ===
-    status->giveTempEffectiveStress(stressVector);
+    const FloatArray &stressVector = status->giveTempEffectiveStress();
     double stress = stressVector.at(1);
     answer.at(1, 1) = ( 1. - tempDamage ) * E * H / ( E + H );
     if ( tempDamage > damage ) {
@@ -422,14 +419,13 @@ MisesMatNl :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &l
     MisesMatNlStatus *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
     FloatMatrix b;
-    FloatArray stress;
 
     this->computeCumPlasticStrain(nlKappa, gp, tStep);
     damage = status->giveDamage();
     tempDamage = status->giveTempDamage();
     if ( ( tempDamage - damage ) > 0 ) {
+        const FloatArray &stress = status->giveTempEffectiveStress();
         elem->giveLocationArray(loc, EID_MomentumBalance, s);
-        status->giveTempEffectiveStress(stress);
         elem->computeBmatrixAt(gp, b);
         dDamF = computeDamageParamPrime(nlKappa);
         nrows = b.giveNumberOfColumns();
@@ -459,7 +455,6 @@ MisesMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &
     MisesMatNlStatus *status = static_cast< MisesMatNlStatus * >( this->giveStatus(gp) );
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
     FloatMatrix b;
-    FloatArray stress;
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
     double E = lmat->give('E', gp);
 
@@ -471,7 +466,7 @@ MisesMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &
     tempKappa = status->giveTempCumulativePlasticStrain();
 
     if ( ( tempKappa - kappa ) > 0 ) {
-        status->giveTempEffectiveStress(stress);
+        const FloatArray &stress = status->giveTempEffectiveStress();
         if ( gp->giveMaterialMode() == _1dMat ) {
             nsize = stress.giveSize();
             double coeff = sgn( stress.at(1) ) * E / ( E + H );

@@ -100,7 +100,7 @@ public:
      * Gives the cell origin.
      * @param answer Cell origin.
      */
-    void giveOrigin(FloatArray &answer) { answer = this->origin; }
+    const FloatArray & giveOrigin() { return this->origin; }
     /// @return Half the cell width.
     double giveWidth() { return 2. * this->halfWidth; }
     /// @return Depth in the tree for this octant.

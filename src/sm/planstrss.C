@@ -147,9 +147,8 @@ void
 PlaneStress2d :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -975,22 +974,15 @@ PlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType 
                                                                   TimeStep *tStep, const FloatArray &coords,
                                                                   FloatArray &answer)
 {
-    FloatArray lcoords, u;
+    FloatArray lcoords, u, ni;
     FloatMatrix n;
-    FloatArray ni(4);
     int result;
 
     result = this->computeLocalCoordinates(lcoords, coords);
 
     this->interpolation.evalN( ni, lcoords, FEIElementGeometryWrapper(this) );
 
-    n.resize(2, 8);
-    n.zero();
-
-    n.at(1, 1) = n.at(2, 2) = ni.at(1);
-    n.at(1, 3) = n.at(2, 4) = ni.at(2);
-    n.at(1, 5) = n.at(2, 6) = ni.at(3);
-    n.at(1, 7) = n.at(2, 8) = ni.at(4);
+    n.beNMatrixOf(ni, 2);
 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);

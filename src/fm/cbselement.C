@@ -185,8 +185,7 @@ CBSElement :: updateInternalState(TimeStep *tStep)
     FloatArray stress;
 
     // force updating strains & stresses
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ i ];
+    for ( auto &iRule: integrationRulesArray ) {
         for ( GaussPoint *gp: *iRule ) {
             computeDeviatoricStress(stress, gp, tStep);
         }

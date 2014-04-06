@@ -87,7 +87,7 @@ void FluidMaterialEvaluator :: solveYourself()
 {
     Domain *d = this->giveDomain(1);
 
-    gps.growTo( d->giveNumberOfMaterialModels() );
+    gps.clear();
 
     MaterialMode mode;
     if ( ndim == 1 ) {
@@ -104,10 +104,10 @@ void FluidMaterialEvaluator :: solveYourself()
     FloatArray initialStrain(components);
     initialStrain.zero();
     for ( int i = 1; i <= d->giveNumberOfMaterialModels(); i++ ) {
-        gps.put( i, new GaussPoint(NULL, i, NULL, 1, mode) );
+        gps.push_back( GaussPoint(NULL, i, NULL, 1, mode) );
         // Initialize the strain vector;
         FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( d->giveMaterial(i) );
-        FluidDynamicMaterialStatus *status = static_cast< FluidDynamicMaterialStatus * >( mat->giveStatus( gps.at(i) ) );
+        FluidDynamicMaterialStatus *status = static_cast< FluidDynamicMaterialStatus * >( mat->giveStatus( &gps[i-1] ) );
         status->letDeviatoricStrainRateVectorBe(initialStrain);
     }
 
@@ -130,7 +130,7 @@ void FluidMaterialEvaluator :: solveYourself()
     for ( int istep = 1; istep <= this->numberOfSteps; ++istep ) {
         this->timer.startTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
         for ( int imat = 1; imat <= d->giveNumberOfMaterialModels(); ++imat ) {
-            GaussPoint *gp = gps.at(imat);
+            GaussPoint *gp = &gps[imat-1];
             FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( d->giveMaterial(imat) );
             FluidDynamicMaterialStatus *status = static_cast< FluidDynamicMaterialStatus * >( mat->giveStatus(gp) );
 
@@ -228,7 +228,7 @@ void FluidMaterialEvaluator :: doStepOutput(TimeStep *tStep)
 
     outfile << tStep->giveIntrinsicTime();
     for ( int i = 1; i <= d->giveNumberOfMaterialModels(); i++ ) {
-        GaussPoint *gp = gps.at(i);
+        GaussPoint *gp = &gps[i-1];
         FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( d->giveMaterial(i) );
         for ( int j = 1; j <= this->vars.giveSize(); ++j ) {
             mat->giveIPValue(outputValue, gp, ( InternalStateType ) this->vars.at(j), tStep);

@@ -88,9 +88,9 @@ OOFEMTXTInputRecord :: operator = ( const OOFEMTXTInputRecord & src )
 }
 
 void
-OOFEMTXTInputRecord :: setRecordString(const std :: string &newRec)
+OOFEMTXTInputRecord :: setRecordString(std :: string newRec)
 {
-    this->record = newRec;
+    this->record = std :: move(newRec);
     tokenizer.tokenizeLine( this->record.c_str() );
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);

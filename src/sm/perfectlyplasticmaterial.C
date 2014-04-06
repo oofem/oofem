@@ -102,7 +102,7 @@ PerfectlyPlasticMaterial :: giveRealStressVector(FloatArray &answer,
     reducedStrainIncrement.beDifferenceOf( reducedStrain, status->giveStrainVector() );
 
     StructuralMaterial :: giveFullSymVectorForm( strainIncrement, reducedStrainIncrement, gp->giveMaterialMode() );
-    status->givePlasticStrainVector(plasticStrainVector);
+    plasticStrainVector = status->givePlasticStrainVector();
     StructuralMaterial :: giveFullSymVectorForm( statusFullPlasticVector, plasticStrainVector, gp->giveMaterialMode() );
     StructuralMaterial :: giveFullSymVectorForm( statusFullStressVector, status->giveStressVector(), gp->giveMaterialMode() );
 
@@ -337,7 +337,7 @@ PerfectlyPlasticMaterial :: giveMaterialStiffnessMatrix(FloatMatrix &answer, Mat
         return;
     }
 
-    status->givePlasticStrainVector(plasticStrainVector);
+    plasticStrainVector = status->givePlasticStrainVector();
     StructuralMaterial :: giveFullSymVectorForm( statusFullPlasticVector, plasticStrainVector, gp->giveMaterialMode() );
     StructuralMaterial :: giveFullSymVectorForm( statusFullStressVector, status->giveStressVector(), gp->giveMaterialMode() );
 
@@ -681,15 +681,14 @@ PerfectlyPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Inte
 {
     PerfectlyPlasticMaterialStatus *status = static_cast< PerfectlyPlasticMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_PlasticStrainTensor ) {
-        FloatArray ep;
-        status->givePlasticStrainVector(ep);
+        const FloatArray &ep = status->givePlasticStrainVector();
         ///@todo Fill in correct full form values here! This just adds zeros!
         StructuralMaterial :: giveFullSymVectorForm( answer, ep, gp->giveMaterialMode() );
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        FloatArray st(6), s;
+        FloatArray st;
 
-        status->givePlasticStrainVector(s);
+        const FloatArray &s = status->givePlasticStrainVector();
         ///@todo Fill in correct full form values here! This just adds zeros!
         StructuralMaterial :: giveFullSymVectorForm( st, s, gp->giveMaterialMode() );
 

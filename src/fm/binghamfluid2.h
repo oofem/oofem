@@ -91,7 +91,7 @@ public:
     void letTempDevStressMagnitudeBe(double _val) { temp_devStressMagnitude = _val; }
 
     const FloatArray &giveTempDeviatoricStrainVector() { return temp_deviatoricStrainVector; }
-    void letTempDeviatoricStrainVectorBe(const FloatArray &v) { temp_deviatoricStrainVector = v; }
+    void letTempDeviatoricStrainVectorBe(FloatArray v) { temp_deviatoricStrainVector = std :: move(v); }
 
     virtual const char *giveClassName() const { return "BinghamFluidMaterialStatus"; }
 };

@@ -70,9 +70,8 @@ void
 TR1_2D_SUPG_AXI :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 7, this);
     }
@@ -317,7 +316,7 @@ TR1_2D_SUPG_AXI :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 {
     answer.resize(6, 3);
     answer.zero();
-    FloatArray un, n(3);
+    FloatArray un, n;
     double _u, _v;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
@@ -379,13 +378,11 @@ TR1_2D_SUPG_AXI :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *
     answer.zero();
 
     double dV, _r;
-    FloatArray n(3);
+    FloatArray n;
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         dV = this->computeVolumeAround(gp);
         _r = this->computeRadiusAt(gp);
-        n.at(1) = gp->giveCoordinate(1);
-        n.at(2) = gp->giveCoordinate(2);
-        n.at(3) = 1. - n.at(1) - n.at(2);
+        this->computeNVector(n, gp);
         for ( int i = 1; i <= 3; i++ ) {
             for ( int j = 1; j <= 3; j++ ) {
                 answer.at(j, 2 * i - 1) += b [ i - 1 ] * n.at(j) * dV;
@@ -402,7 +399,7 @@ TR1_2D_SUPG_AXI :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep)
 {
     // N_epsilon (due to PSPG stabilization)
     double dudx, dudy, dvdx, dvdy, _u, _v;
-    FloatArray u, un, n(3);
+    FloatArray u, un, n;
     double dV;
 
     answer.resize(3);
@@ -609,7 +606,7 @@ TR1_2D_SUPG_AXI :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
     Load *load;
     bcGeomType ltype;
     FloatArray un, gVector;
-    FloatArray n(3);
+    FloatArray n;
     double dV, coeff, u, v, rho;
 
     // add body load (gravity) termms

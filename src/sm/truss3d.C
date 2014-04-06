@@ -115,9 +115,8 @@ void
 Truss3d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
@@ -161,11 +160,7 @@ Truss3d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 {
     FloatArray n;
     this->interp.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
-
-    answer.resize(3, 6);
-    answer.zero();
-    answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = n.at(1);
-    answer.at(1, 4) = answer.at(2, 5) = answer.at(3, 6) = n.at(2);
+    answer.beNMatrixOf(n, 3);
 }
 
 

@@ -238,9 +238,7 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
 
 
     // loop over individual integration rules
-    for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ ir ];
-
+    for ( auto &iRule: integrationRulesArray ) {
         for ( GaussPoint *gp: *iRule ) {
             StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
 
@@ -314,7 +312,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
     }
 
     // Compute matrix from material stiffness (total stiffness for small def.) - B^T * dS/dE * B
-    if ( numberOfIntegrationRules == 1 ) {
+    if ( integrationRulesArray.size() == 1 ) {
         FloatMatrix B, D, DB;
         IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
         for ( GaussPoint *gp: *iRule ) {
@@ -356,10 +354,10 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
 
         int iStartIndx, iEndIndx, jStartIndx, jEndIndx;
         FloatMatrix Bi, Bj, D, Dij, DBj;
-        for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+        for ( int i = 0; i < (int)integrationRulesArray.size(); i++ ) {
             iStartIndx = integrationRulesArray [ i ]->getStartIndexOfLocalStrainWhereApply();
             iEndIndx   = integrationRulesArray [ i ]->getEndIndexOfLocalStrainWhereApply();
-            for ( int j = 0; j < numberOfIntegrationRules; j++ ) {
+            for ( int j = 0; j < (int)integrationRulesArray.size(); j++ ) {
                 IntegrationRule *iRule;
                 jStartIndx = integrationRulesArray [ j ]->getStartIndexOfLocalStrainWhereApply();
                 jEndIndx   = integrationRulesArray [ j ]->getEndIndexOfLocalStrainWhereApply();
@@ -442,8 +440,7 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
     // Compute matrix from material stiffness
     FloatMatrix B, D, DB;
     IntArray irlocnum;
-    for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ ir ];
+    for ( auto &iRule: integrationRulesArray ) {
         for ( GaussPoint *gp: *iRule ) {
 
             if ( nlGeometry == 0 ) {

@@ -1258,16 +1258,16 @@ LayeredCrossSection :: giveInterfaceXiCoords(FloatArray &answer)
 }
 
 void
-LayeredCrossSection :: setupLayeredIntegrationRule(IntegrationRule ** &integrationRulesArray, Element *el, int numInPlanePoints)
+LayeredCrossSection :: setupLayeredIntegrationRule(std :: vector< IntegrationRule * > &integrationRulesArray, Element *el, int numInPlanePoints)
 {
     // Loop over each layer and set up an integration rule as if each layer was an independent element
     // @todo - only works for wedge integration at the moment
     int numberOfLayers     = this->giveNumberOfLayers();
     int numPointsThickness = this->giveNumIntegrationPointsInLayer();
 
-    integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
+    integrationRulesArray.resize( numberOfLayers );
     for ( int i = 0; i < numberOfLayers; i++ ) {
-        integrationRulesArray [ i ] = new LayeredIntegrationRule(1, el);
+        integrationRulesArray [ i ] = new LayeredIntegrationRule(i + 1, el);
         integrationRulesArray [ i ]->SetUpPointsOnWedge(numInPlanePoints, numPointsThickness, _3dMat);
     }
     this->mapLayerGpCoordsToShellCoords(integrationRulesArray);
@@ -1275,7 +1275,7 @@ LayeredCrossSection :: setupLayeredIntegrationRule(IntegrationRule ** &integrati
 
 
 void
-LayeredCrossSection :: mapLayerGpCoordsToShellCoords(IntegrationRule ** &layerIntegrationRulesArray)
+LayeredCrossSection :: mapLayerGpCoordsToShellCoords(std :: vector< IntegrationRule * > &layerIntegrationRulesArray)
 /*
  * Maps the local xi-coord (z-coord) in each layer [-1,1] to the corresponding
  * xi-coord in the cross section coordinate system.

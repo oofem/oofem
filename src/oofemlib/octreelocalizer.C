@@ -469,8 +469,7 @@ OctreeSpatialLocalizer :: insertElementIntoOctree(OctantRec *rootCell, int regio
     IntArray bbc [ 2 ] = {
         IntArray(3), IntArray(3)
     };
-    FloatArray origin;
-    rootCell->giveOrigin(origin);
+    FloatArray origin = rootCell->giveOrigin();
     for ( int i = 1; i <= b0.giveSize(); i++ ) {
         if ( this->octreeMask.at(i) ) {
             bbc [ 0 ].at(i) = b0.at(i) <= origin.at(i);
@@ -867,11 +866,10 @@ OctreeSpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatAr
     FloatArray currLcoords;
     FloatArray currClosest;
     double radius, prevRadius;
-    FloatArray c;
+    FloatArray c  = this->rootCell->giveOrigin();
 
     this->initElementDataStructure(region);
 
-    this->rootCell->giveOrigin(c);
     // Maximum distance given coordinate and furthest terminal cell ( center_distance + width/2*sqrt(3) )
     double minDist = c.distance(gcoords) + this->rootCell->giveWidth() * 0.87;
 

@@ -175,9 +175,8 @@ void
 TR1_2D_SUPG2 :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 2;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(2);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3, true);
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3, true);
     }
@@ -353,8 +352,8 @@ TR1_2D_SUPG2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
 
 #if 0
     // test of linearization
-    FloatMatrix _h(6, 6);
-    FloatArray _t(6);
+    FloatMatrix _h;
+    FloatArray _t;
     this->computeAdvectionDerivativeTerm_MB(_h, tStep);
     _t.beProductOf(_h, u);
     for ( i = 1; i <= 6; i++ ) {
@@ -1264,7 +1263,7 @@ void
 TR1_2D_SUPG2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     /* one computes here average deviatoric stress, based on rule of mixture (this is used only for postprocessing) */
-    FloatArray eps(3), s0(3), s1(3);
+    FloatArray eps, s0, s1;
     answer.resize(3);
 
     this->computeDeviatoricStrain(eps, gp, tStep);

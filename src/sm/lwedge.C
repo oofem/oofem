@@ -108,8 +108,7 @@ void
 LWedge :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    integrationRulesArray.resize(1);
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
     this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 }
@@ -120,18 +119,10 @@ LWedge :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp.
 {
-    FloatArray n(6);
-
-    answer.resize(3, 18);
-    answer.zero();
+    FloatArray n;
 
     this->interpolation.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
-
-    for ( int i = 1; i <= 6; i++ ) {
-        answer.at(1, 3 * i - 2) = n.at(i);
-        answer.at(2, 3 * i - 1) = n.at(i);
-        answer.at(3, 3 * i - 0) = n.at(i);
-    }
+    answer.beNMatrixOf(n, 3);
 }
 
 

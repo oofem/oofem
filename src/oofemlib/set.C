@@ -182,13 +182,13 @@ const IntArray &Set :: giveNodeList()
 
 const IntArray &Set :: giveSpecifiedNodeList() { return this->nodes; }
 
-void Set :: setElementList(const IntArray &newElements) { this->elements = newElements; }
+void Set :: setElementList(IntArray newElements) { this->elements = std :: move(newElements); }
 
-void Set :: setBoundaryList(const IntArray &newBoundaries) { this->elementBoundaries = newBoundaries; }
+void Set :: setBoundaryList(IntArray newBoundaries) { this->elementBoundaries = std :: move(newBoundaries); }
 
-void Set :: setEdgeList(const IntArray &newEdges) { this->elementEdges = newEdges; }
+void Set :: setEdgeList(IntArray newEdges) { this->elementEdges = std :: move(newEdges); }
 
-void Set :: setNodeList(const IntArray &newNodes) { this->nodes = newNodes; }
+void Set :: setNodeList(IntArray newNodes) { this->nodes = std :: move(newNodes); }
 
 void Set :: addAllElements()
 {

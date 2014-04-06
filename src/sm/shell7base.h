@@ -82,7 +82,7 @@ public:
 
 protected:
     virtual Interface *giveInterface(InterfaceType it);
-    IntegrationRule **specialIntegrationRulesArray;
+    std :: vector< IntegrationRule * > specialIntegrationRulesArray;
     LayeredCrossSection *layeredCS;
     static FEI3dWedgeQuad interpolationForExport;
     FEInterpolation3d *fei;

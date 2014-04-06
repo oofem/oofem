@@ -256,7 +256,7 @@ void
 LevelSetPCS :: giveMaterialMixtureAt(FloatArray &answer, FloatArray &position)
 {
     double ls;
-    FloatArray N(3);
+    FloatArray N;
     answer.resize(2);
 
     Element *elem = domain->giveSpatialLocalizer()->giveElementContainingPoint(position);
@@ -357,7 +357,6 @@ LevelSetPCS :: redistance(TimeStep *tStep)
 
     FloatArray fs(ndofman), w(ndofman), d_old, d;
     FloatMatrix dN;
-    FloatArray fi(4), gfi(nsd), n(nsd);
     //ConnectivityTable* contable = domain->giveConnectivityTable();
     //LevelSetPCSElementInterface* interface;
 

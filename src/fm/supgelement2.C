@@ -225,8 +225,7 @@ SUPGElement2 :: updateInternalState(TimeStep *tStep)
     FloatArray stress;
 
     // force updating strains & stresses
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ i ];
+    for ( auto &iRule: integrationRulesArray ) {
         for ( GaussPoint *gp: *iRule ) {
             computeDeviatoricStress(stress, gp, tStep);
         }
@@ -243,8 +242,8 @@ SUPGElement2 :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, "element %d :\n", number);
 #endif
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        integrationRulesArray [ i ]->printOutputAt(file, tStep);
+    for ( auto &iRule: integrationRulesArray ) {
+        iRule->printOutputAt(file, tStep);
     }
 }
 

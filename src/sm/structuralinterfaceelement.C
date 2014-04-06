@@ -290,8 +290,7 @@ StructuralInterfaceElement :: updateInternalState(TimeStep *tStep)
     FloatMatrix rotationMatGtoL;
 
     // force updating strains & stresses
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ i ];
+    for ( auto &iRule: integrationRulesArray ) {
         for ( GaussPoint *gp: *iRule ) {
             this->computeSpatialJump(jumpL, gp, tStep);
             this->computeTraction(tractionG, gp, jumpL, tStep);

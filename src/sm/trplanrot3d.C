@@ -436,7 +436,7 @@ TrPlaneStrRot3d :: printOutputAt(FILE *file, TimeStep *tStep)
 
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+    for ( int i = 0; i < (int)integrationRulesArray.size(); i++ ) {
         for ( GaussPoint *gp: *integrationRulesArray [ i ] ) {
 
             fprintf( file, "  GP %2d.%-2d :", i + 1, gp->giveNumber() );

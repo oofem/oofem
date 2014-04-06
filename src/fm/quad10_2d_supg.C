@@ -149,9 +149,8 @@ void
 Quad10_2D_SUPG :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 3;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(3);
 
 
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
@@ -289,8 +288,8 @@ void
 Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
 {
     double Re, norm_un, mu, mu_min, nu, norm_N, norm_N_d, norm_M_d, norm_LSIC, norm_G_c, norm_M_c, norm_N_c, t_p1, t_p2, t_p3, t_s1, t_s2, t_s3, rho;
-    FloatMatrix dn, N, N_d, M_d, LSIC, G_c, M_c, N_c;
-    FloatArray dN, s, lcoords_nodes, u, lcn, dn_a(2), n, u1(8), u2(8);
+    FloatMatrix N, N_d, M_d, LSIC, G_c, M_c, N_c;
+    FloatArray u;
 
     IntegrationRule *iRule = integrationRulesArray [ 1 ];
     mu_min = 1;
@@ -684,8 +683,8 @@ Quad10_2D_SUPG :: printOutputAt(FILE *file, TimeStep *tStep)
 #endif
     pressureNode.printOutputAt(file, tStep);
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        integrationRulesArray [ i ]->printOutputAt(file, tStep);
+    for ( auto &iRule: integrationRulesArray ) {
+        iRule->printOutputAt(file, tStep);
     }
 }
 
