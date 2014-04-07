@@ -77,7 +77,6 @@ void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *t
 
     IntArray loc, sigma_loc;  // For the displacements and stress respectively
     IntArray masterDofIDs, sigmaMasterDofIDs;
-    IntArray bNodes;
     mpSigmaHom->giveCompleteLocationArray(sigma_loc, s);
 
     if ( type == ExternalForcesVector ) {
@@ -106,21 +105,13 @@ void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *t
             int boundary = boundaries.at(pos * 2);
 
             // Fetch the element information;
-            e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-
-            IntArray elNodes(e->giveNumberOfDofManagers());
-            for(int j = 1; j <= elNodes.giveSize(); j++) {
-            	elNodes.at(j) = j;
-            }
-            e->giveBoundaryLocationArray(loc, elNodes, eid, s, & masterDofIDs);
-
+            e->giveLocationArray(loc, eid, s, &masterDofIDs);
             // Here, we could use only the nodes actually located on the boundary, but we don't.
             // Instead, we use all nodes belonging to the element, which is allowed because the
             // basis functions related to the interior nodes will be zero on the boundary.
             // Obviously, this is less efficient, so why do we want to do it this way?
             // Because it is easier when XFEM enrichments are present. /ES
-            e->computeBoundaryVectorOf(elNodes, eid, mode, tStep, e_u);
-
+            e->computeVectorOf(eid, mode, tStep, e_u);
             this->integrateTangent(Ke, e, boundary);
 
             // We just use the tangent, less duplicated code (the addition of sigmaDev is linear).
@@ -172,12 +163,8 @@ void PrescribedGradientBCNeumann::assemble(SparseMtrx *answer, TimeStep *tStep, 
             // basis functions related to the interior nodes will be zero on the boundary.
             // Obviously, this is less efficient, so why do we want to do it this way?
             // Because it is easier when XFEM enrichments are present. /ES
-            IntArray elNodes(e->giveNumberOfDofManagers());
-            for(int j = 1; j <= elNodes.giveSize(); j++) {
-            	elNodes.at(j) = j;
-            }
-            e->giveBoundaryLocationArray(loc_r, elNodes, eid, r_s);
-            e->giveBoundaryLocationArray(loc_c, elNodes, eid, c_s);
+            e->giveLocationArray(loc_r, eid, r_s);
+            e->giveLocationArray(loc_c, eid, c_s);
 
             this->integrateTangent(Ke, e, boundary);
             Ke.negated();
@@ -217,23 +204,14 @@ void PrescribedGradientBCNeumann::giveLocationArrays(std :: vector< IntArray > &
     int i = 0;
     for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
-        int boundary = boundaries.at(pos * 2);
-
-        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-
 
         // Here, we could use only the nodes actually located on the boundary, but we don't.
         // Instead, we use all nodes belonging to the element, which is allowed because the
         // basis functions related to the interior nodes will be zero on the boundary.
         // Obviously, this is less efficient, so why do we want to do it this way?
         // Because it is easier when XFEM enrichments are present. /ES
-        IntArray elNodes(e->giveNumberOfDofManagers());
-        for(int j = 1; j <= elNodes.giveSize(); j++) {
-        	elNodes.at(j) = j;
-        }
-
-        e->giveBoundaryLocationArray(loc_r, elNodes, dofids, r_s);
-        e->giveBoundaryLocationArray(loc_c, elNodes, dofids, c_s);
+        e->giveLocationArray(loc_r, eid, r_s);
+        e->giveLocationArray(loc_c, eid, c_s);
 
         // For most uses, loc_r == loc_c, and sigma_loc_r == sigma_loc_c.
         rows [ i ] = loc_r;
