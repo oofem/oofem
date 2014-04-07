@@ -956,7 +956,7 @@ void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, 
                 int numEnr = ei->giveNumDofManEnrichments(* dMan);
 
                 std :: vector< double >efJumps;
-                ei->evaluateEnrFuncJumps(efJumps, globalNodeInd);
+                ei->evaluateEnrFuncJumps(efJumps, globalNodeInd, iGP);
 
                 for ( int k = 0; k < numEnr; k++ ) {
                     if ( nodeEiIndices [ i ] == iEnrItemIndex ) {

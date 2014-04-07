@@ -128,7 +128,6 @@ public:
 
     // TODO: Move to XfemStructuralElementInterface
     std :: vector< IntegrationRule * >mpCZIntegrationRules;
-    virtual MaterialStatus *giveCohesiveZoneMaterialStatus(GaussPoint &iGP) { return NULL; }
 
     MaterialMode giveMaterialMode();
 

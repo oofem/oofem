@@ -454,7 +454,7 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrF
     }
 }
 
-void EnrichmentItem :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, int iNodeInd) const
+void EnrichmentItem :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, int iNodeInd, GaussPoint &iGP) const
 {
     auto res = mNodeEnrMarkerMap.find(iNodeInd);
     if ( res != mNodeEnrMarkerMap.end() ) {
@@ -464,7 +464,7 @@ void EnrichmentItem :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJum
             mpEnrichmentFunc->giveJump(oEnrFuncJumps);
         } else   {
             // Front enrichment
-            mpEnrichmentFront->evaluateEnrFuncJumps(oEnrFuncJumps);
+            mpEnrichmentFront->evaluateEnrFuncJumps(oEnrFuncJumps, iGP, iNodeInd);
         }
     } else   {
         printf("In EnrichmentItem :: evaluateEnrFuncDerivAt: evaluateEnrFuncJumps not found for iNodeInd %d\n", iNodeInd);

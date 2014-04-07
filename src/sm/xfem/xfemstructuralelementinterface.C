@@ -158,6 +158,10 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 GaussPoint &gp = * ( mpCZIntegrationRules [ segIndex ]->getIntegrationPoint(i) );
                                 gp.setWeight(gw);
 
+                                FloatArray locCoord;
+                                element->computeLocalCoordinates(locCoord, *(gp.giveCoordinates()) );
+                                gp.setLocalCoordinates(locCoord);
+
                                 // Fetch material status and set normal
                                 StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(& gp) );
                                 if ( ms == NULL ) {
@@ -408,11 +412,6 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(
     } else   {
         cs->giveRealStress_PlaneStress(answer, gp, strain, tStep);
     }
-}
-
-MaterialStatus *XfemStructuralElementInterface :: giveCohesiveZoneMaterialStatus(GaussPoint &iGP)
-{
-    return mpCZMat->giveStatus(& iGP);
 }
 
 void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep)

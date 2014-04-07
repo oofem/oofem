@@ -58,8 +58,6 @@ public:
 
     virtual bool hasCohesiveZone() const { return ( mpCZMat != NULL && mpCZIntegrationRules.size() > 0 ); }
 
-    virtual MaterialStatus *giveCohesiveZoneMaterialStatus(GaussPoint &iGP);
-
     virtual void computeCohesiveForces(FloatArray &answer, TimeStep *tStep);
     virtual void computeGlobalCohesiveTractionVector(FloatArray &oT, const FloatArray &iJump, const FloatArray &iCrackNormal, const FloatMatrix &iNMatrix, GaussPoint &iGP, TimeStep *tStep);
 

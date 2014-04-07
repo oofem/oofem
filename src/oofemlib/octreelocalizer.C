@@ -1256,7 +1256,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                     continue;
                 }
 
-                if ( iCohesiveZoneGP ) {
+                if ( !iCohesiveZoneGP ) {
                     // test if element already visited
                     // if (!visitedElems.insert(*pos).second) continue;
                     // is one of his ip's  within given bbox -> inset it into elemSet
@@ -1543,7 +1543,7 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                     continue;
                 }
 
-                if ( iCohesiveZoneGP ) {
+                if ( !iCohesiveZoneGP ) {
                     // test if element already visited
                     // if (!visitedElems.insert(*pos).second) continue;
                     // is one of his ip's  within given bbox -> inset it into elemSet

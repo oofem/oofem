@@ -150,12 +150,17 @@ void LinElBranchFunction :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &
 
 void LinElBranchFunction :: giveJump(std :: vector< double > &oJumps) const
 {
+	OOFEM_ERROR("The radius is needed to compute the jump for branch functions.")
+}
+
+void LinElBranchFunction :: giveJump(std :: vector< double > &oJumps, const double &iRadius) const
+{
     /**
-     * Psi1 is discontinuous with jump magnitude 2, the others are continuous.
+     * Psi1 is discontinuous with jump magnitude 2*sqrt(r), the others are continuous.
      */
 
     oJumps.clear();
-    oJumps.push_back(2.0);
+    oJumps.push_back(2.0*sqrt(iRadius));
     oJumps.push_back(0.0);
     oJumps.push_back(0.0);
     oJumps.push_back(0.0);

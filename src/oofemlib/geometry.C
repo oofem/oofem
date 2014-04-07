@@ -898,7 +898,7 @@ void PolygonLine :: giveSubPolygon(std :: vector< FloatArray > &oPoints, const d
             oPoints.push_back(p);
         }
 
-        if ( xiSegEnd > iXiStart && xiSegEnd < iXiEnd ) {
+        if ( xiSegEnd > iXiStart && xiSegEnd < iXiEnd + xiTol ) {
             // End point of the segment is within range
             oPoints.push_back(mVertices [ i + 1 ]);
         }

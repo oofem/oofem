@@ -157,7 +157,7 @@ public:
 
     void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd = -1) const;
     void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const;
-    void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, int iNodeInd) const;
+    void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, int iNodeInd, GaussPoint &iGP) const;
 
     bool evalLevelSetNormalInNode(double &oLevelSet, int iNodeInd) const;
     bool evalLevelSetTangInNode(double &oLevelSet, int iNodeInd) const;

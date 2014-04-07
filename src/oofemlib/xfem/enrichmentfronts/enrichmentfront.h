@@ -48,6 +48,7 @@ class DofManager;
 class FloatArray;
 class InputRecord;
 class DynamicInputRecord;
+class GaussPoint;
 /*
  * Class EnrichmentFront: describes the edge or tip of an XFEM enrichment.
  * The purpose is to add a different treatment of the front than the "interior"
@@ -90,7 +91,9 @@ public:
     // Evaluate the enrichment function and its derivative in front nodes.
     virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const = 0;
     virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const = 0;
-    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const = 0;
+    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd) const = 0;
+
+    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
 
     virtual const char *giveClassName() const = 0;
     virtual const char *giveInputRecordName() const = 0;
