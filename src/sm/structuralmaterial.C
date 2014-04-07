@@ -1383,18 +1383,35 @@ StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress)
     double J2;
     double v1, v2, v3;
 
-    if ( currentStress == NULL || currentStress->giveSize() != 6 ) {
+    if ( currentStress == NULL ) {
         return 0.0;
     }
 
-    v1 = ( ( currentStress->at(1) - currentStress->at(2) ) * ( currentStress->at(1) - currentStress->at(2) ) );
-    v2 = ( ( currentStress->at(2) - currentStress->at(3) ) * ( currentStress->at(2) - currentStress->at(3) ) );
-    v3 = ( ( currentStress->at(3) - currentStress->at(1) ) * ( currentStress->at(3) - currentStress->at(1) ) );
+    if ( currentStress->giveSize() == 4 ) {
+        // Plane strain
+        v1 = ( ( currentStress->at(1) - currentStress->at(2) ) * ( currentStress->at(1) - currentStress->at(2) ) );
+        v2 = ( ( currentStress->at(2) - currentStress->at(3) ) * ( currentStress->at(2) - currentStress->at(3) ) );
+        v3 = ( ( currentStress->at(3) - currentStress->at(1) ) * ( currentStress->at(3) - currentStress->at(1) ) );
 
-    J2 = ( 1. / 6. ) * ( v1 + v2 + v3 ) + currentStress->at(4) * currentStress->at(4) +
-    currentStress->at(5) * currentStress->at(5) + currentStress->at(6) * currentStress->at(6);
+        J2 = ( 1. / 6. ) * ( v1 + v2 + v3 ) + currentStress->at(4) * currentStress->at(4);
 
-    return sqrt(3 * J2);
+        return sqrt(3 * J2);
+    }
+    else if ( currentStress->giveSize() == 6 ) {
+        // 3D
+        v1 = ( ( currentStress->at(1) - currentStress->at(2) ) * ( currentStress->at(1) - currentStress->at(2) ) );
+        v2 = ( ( currentStress->at(2) - currentStress->at(3) ) * ( currentStress->at(2) - currentStress->at(3) ) );
+        v3 = ( ( currentStress->at(3) - currentStress->at(1) ) * ( currentStress->at(3) - currentStress->at(1) ) );
+
+        J2 = ( 1. / 6. ) * ( v1 + v2 + v3 ) + currentStress->at(4) * currentStress->at(4) +
+        currentStress->at(5) * currentStress->at(5) + currentStress->at(6) * currentStress->at(6);
+
+        return sqrt(3 * J2);
+    }
+    else {
+        return 0.0;
+    }
+
 }
 
 
