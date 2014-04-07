@@ -41,7 +41,7 @@ void
 MaterialMappingAlgorithm :: init(Domain *dold, IntArray &type, GaussPoint *gp, Set &elemSet, TimeStep *tStep, bool iCohesiveZoneGP)
 {
     FloatArray coords;
-    if ( gp->giveElement()->computeGlobalCoordinates( coords, * ( gp->giveCoordinates() ) ) == 0 ) {
+    if ( gp->giveElement()->computeGlobalCoordinates( coords, * ( gp->giveLocalCoordinates() ) ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 
