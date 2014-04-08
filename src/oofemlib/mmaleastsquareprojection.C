@@ -271,25 +271,19 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
     FloatMatrix a, rhs, x;
     Element *element;
     //IntegrationRule* iRule;
-    GaussPoint *srcgp;
 
     a.resize(neq, neq);
     a.zero();
 
     // determine the value from patch
-    std :: list< GaussPoint * > :: iterator pos;
     int size = patchGPList.size();
     if ( size == 1 ) {
-        pos = patchGPList.begin();
-        srcgp  = * pos;
+        GaussPoint *srcgp  = *patchGPList.begin();
         srcgp->giveElement()->giveIPValue(answer, srcgp, type, tStep);
     } else if ( size < neq ) {
         OOFEM_ERROR("internal error");
     } else {
-        std :: list< GaussPoint * > :: iterator pos;
-
-        for ( pos = patchGPList.begin(); pos != patchGPList.end(); ++pos ) {
-            srcgp  = * pos;
+        for ( auto &srcgp: patchGPList ) {
             element = srcgp->giveElement();
             element->giveIPValue(ipVal, srcgp, type, tStep);
             if ( nval == 0 ) {

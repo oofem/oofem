@@ -1105,8 +1105,8 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
         // loop over those elements and find nearest ip and return it
         // check for region also
         if ( !nearElementList.empty() ) {
-            for ( pos = nearElementList.begin(); pos !=  nearElementList.end(); ++pos ) {
-                ielem = domain->giveElement(* pos);
+            for ( int elnum: nearElementList ) {
+                ielem = domain->giveElement(elnum);
                 //igp   = ipContainer[i].giveGp();
                 if ( region == ielem->giveRegionNumber() ) {
                     iRule = ielem->giveDefaultIntegrationRulePtr();

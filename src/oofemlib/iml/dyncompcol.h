@@ -65,7 +65,7 @@ protected:
     FloatArray * * columns_; // data values per column
     IntArray **rowind_;   // row_ind per column
 #else
-    std :: map< int, double > ** columns;
+    std :: vector< std :: map< int, double > > columns;
 #endif
 
     int base_; // index base: offset of first element

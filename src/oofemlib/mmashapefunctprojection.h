@@ -35,12 +35,12 @@
 #ifndef mmashapefunctprojection_h
 #define mmashapefunctprojection_h
 
-#include "alist.h"
 #include "materialmappingalgorithm.h"
 #include "nodalrecoverymodel.h"
 #include "interface.h"
 
 #include <vector>
+#include <memory>
 
 namespace oofem {
 class Domain;
@@ -111,7 +111,7 @@ class OOFEM_EXPORT MMAShapeFunctProjection : public MaterialMappingAlgorithm
 {
 protected:
     /// Smother.
-    AList< NodalRecoveryModel >smootherList;
+    std :: vector< std :: unique_ptr< NodalRecoveryModel > > smootherList;
     /// Solution state counter.
     StateCounterType stateCounter;
     /// Internal variables in list.

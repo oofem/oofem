@@ -156,8 +156,7 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
                     // Evaluate the interpolation.
                     FloatArray sumQiWiVi;
                     double sumWiVi = 0.0;
-                    for ( std :: set< int > :: const_iterator elIt = elIndices.begin(); elIt != elIndices.end(); ++elIt ) {
-                        int elIndex = * elIt;
+                    for ( int elIndex: elIndices ) {
                         Element *gpEl = iDomain.giveElement(elIndex);
                         IntegrationRule *iRule = gpEl->giveDefaultIntegrationRulePtr();
 

@@ -169,24 +169,21 @@ MDM :: computeDamageTensor(FloatMatrix &damageTensor, const FloatArray &totalStr
         this->updateDomainBeforeNonlocAverage(tStep);
 
         // compute nonlocal strain increment first
-        std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
-        std :: list< localIntegrationRecord > :: iterator pos;
-
-        for ( pos = list->begin(); pos != list->end(); ++pos ) {
-            nonlocStatus = static_cast< MDMStatus * >( this->giveStatus(pos->nearGp) );
+        for ( auto &lir: *this->giveIPIntegrationList(gp) ) {
+            nonlocStatus = static_cast< MDMStatus * >( this->giveStatus(lir.nearGp) );
             const FloatMatrix &nonlocalContribution = nonlocStatus->giveLocalDamageTensorForAverage();
 
             if ( ndc == 3 ) {
-                nonlocalDamageTensor.at(1, 1) += nonlocalContribution.at(1, 1) * pos->weight;
-                nonlocalDamageTensor.at(2, 2) += nonlocalContribution.at(2, 2) * pos->weight;
-                nonlocalDamageTensor.at(1, 2) += nonlocalContribution.at(1, 2) * pos->weight;
+                nonlocalDamageTensor.at(1, 1) += nonlocalContribution.at(1, 1) * lir.weight;
+                nonlocalDamageTensor.at(2, 2) += nonlocalContribution.at(2, 2) * lir.weight;
+                nonlocalDamageTensor.at(1, 2) += nonlocalContribution.at(1, 2) * lir.weight;
             } else {
-                nonlocalDamageTensor.at(1, 1) += nonlocalContribution.at(1, 1) * pos->weight;
-                nonlocalDamageTensor.at(2, 2) += nonlocalContribution.at(2, 2) * pos->weight;
-                nonlocalDamageTensor.at(3, 3) += nonlocalContribution.at(3, 3) * pos->weight;
-                nonlocalDamageTensor.at(1, 2) += nonlocalContribution.at(1, 2) * pos->weight;
-                nonlocalDamageTensor.at(1, 3) += nonlocalContribution.at(1, 3) * pos->weight;
-                nonlocalDamageTensor.at(2, 3) += nonlocalContribution.at(2, 3) * pos->weight;
+                nonlocalDamageTensor.at(1, 1) += nonlocalContribution.at(1, 1) * lir.weight;
+                nonlocalDamageTensor.at(2, 2) += nonlocalContribution.at(2, 2) * lir.weight;
+                nonlocalDamageTensor.at(3, 3) += nonlocalContribution.at(3, 3) * lir.weight;
+                nonlocalDamageTensor.at(1, 2) += nonlocalContribution.at(1, 2) * lir.weight;
+                nonlocalDamageTensor.at(1, 3) += nonlocalContribution.at(1, 3) * lir.weight;
+                nonlocalDamageTensor.at(2, 3) += nonlocalContribution.at(2, 3) * lir.weight;
             }
         }
 

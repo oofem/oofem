@@ -546,8 +546,8 @@ void EnrichmentItem :: updateLevelSets(XfemManager &ixFemMan)
     std :: list< int >nodeList;
     localizer->giveAllNodesWithinBox(nodeList, center, radius);
 
-    for ( auto i = nodeList.begin(); i != nodeList.end(); i++ ) {
-        Node *node = ixFemMan.giveDomain()->giveNode(* i);
+    for ( int nodeNum: nodeList ) {
+        Node *node = ixFemMan.giveDomain()->giveNode(nodeNum);
 
         // Extract node coord
         const FloatArray &pos( * node->giveCoordinates() );
@@ -555,12 +555,12 @@ void EnrichmentItem :: updateLevelSets(XfemManager &ixFemMan)
         // Calc normal sign dist
         double phi = 0.0;
         mpEnrichmentDomain->computeNormalSignDist(phi, pos);
-        mLevelSetNormalDirMap [ * i ] = phi;
+        mLevelSetNormalDirMap [ nodeNum ] = phi;
 
         // Calc tangential sign dist
         double gamma = 0.0, arcPos = -1.0;
         mpEnrichmentDomain->computeTangentialSignDist(gamma, pos, arcPos);
-        mLevelSetTangDirMap [ * i ] = gamma;
+        mLevelSetTangDirMap [ nodeNum ] = gamma;
     }
 
     mLevelSetsNeedUpdate = false;
@@ -590,8 +590,8 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
     localizer->giveAllElementsWithNodesWithinBox(elList, center, radius);
 
     // Loop over elements and use the level sets to mark nodes belonging to completely cut elements.
-    for ( auto elIndex = elList.begin(); elIndex != elList.end(); elIndex++ ) {
-        Element *el = d->giveElement(* elIndex);
+    for ( int elNum: elList ) {
+        Element *el = d->giveElement(elNum);
         int nElNodes = el->giveNumberOfNodes();
 
         double minSignPhi  = 1, maxSignPhi         = -1;

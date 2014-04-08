@@ -57,7 +57,6 @@ namespace oofem {
 XfemManager :: XfemManager(Domain *domain)
 {
     this->domain = domain;
-    this->enrichmentItemList = new AList< EnrichmentItem >(0);
     numberOfEnrichmentItems = -1;
     mNumGpPerTri = 12;
     doVTKExport = false;
@@ -71,7 +70,6 @@ XfemManager :: XfemManager(Domain *domain)
 
 XfemManager :: ~XfemManager()
 {
-    delete enrichmentItemList;
 }
 
 
@@ -103,9 +101,8 @@ bool XfemManager :: isElementEnriched(const Element *elem)
     }
 #else
     // An element is enriched if one of its nodes is enriched.
-    const IntArray &elNodes = elem->giveDofManArray();
-    for ( int i = 1; i <= elNodes.giveSize(); i++ ) {
-        if ( mNodeEnrichmentItemIndices [ elNodes [ i - 1 ] - 1 ].size() > 0 ) {
+    for ( int n: elem->giveDofManArray() ) {
+        if ( mNodeEnrichmentItemIndices [ n - 1 ].size() > 0 ) {
             return true;
         }
     }
@@ -121,8 +118,7 @@ XfemManager :: createEnrichedDofs()
     // Creates new dofs due to enrichment and appends them to the dof managers
     IntArray dofIdArray;
 
-    for ( int j = 1; j <= this->giveNumberOfEnrichmentItems(); j++ ) {
-        EnrichmentItem *ei = this->giveEnrichmentItem(j);
+    for ( auto &ei: enrichmentItemList ) {
         ei->createEnrichedDofs();
     }
 }
@@ -169,7 +165,7 @@ int XfemManager :: instanciateYourself(DataReader *dr)
     IRResultType result; // Required by IR_GIVE_FIELD macro
     std :: string name;
 
-    enrichmentItemList->growTo(numberOfEnrichmentItems);
+    enrichmentItemList.resize(numberOfEnrichmentItems);
     for ( int i = 1; i <= numberOfEnrichmentItems; i++ ) {
         InputRecord *mir = dr->giveInputRecord(DataReader :: IR_enrichItemRec, i);
         result = mir->giveRecordKeywordField(name);
@@ -178,14 +174,14 @@ int XfemManager :: instanciateYourself(DataReader *dr)
             mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
         }
 
-        EnrichmentItem *ei = classFactory.createEnrichmentItem( name.c_str(), i, this, this->giveDomain() );
-        if ( ei == NULL ) {
+        std :: unique_ptr< EnrichmentItem > ei( classFactory.createEnrichmentItem( name.c_str(), i, this, this->giveDomain() ) );
+        if ( ei.get() == NULL ) {
             OOFEM_ERROR( "unknown enrichment item (%s)", name.c_str() );
         }
 
         ei->initializeFrom(mir);
         ei->instanciateYourself(dr);
-        this->enrichmentItemList->put(i, ei);
+        this->enrichmentItemList[i-1] = std :: move(ei);
     }
 
     updateNodeEnrichmentItemMap();
@@ -197,10 +193,8 @@ void XfemManager :: setDomain(Domain *ipDomain)
 {
     domain = ipDomain;
 
-    int numEI = enrichmentItemList->giveSize();
-
-    for ( int i = 1; i <= numEI; i++ ) {
-        enrichmentItemList->at(i)->setDomain(ipDomain);
+    for ( auto &ei : enrichmentItemList ) {
+        ei->setDomain(ipDomain);
     }
 }
 
@@ -239,10 +233,7 @@ contextIOResultType XfemManager :: restoreContext(DataStream *stream, ContextMod
         if ( !stream->read(& this->numberOfEnrichmentItems, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
-    }
-
-    if ( mode & CM_Definition ) {
-        this->enrichmentItemList->growTo(this->numberOfEnrichmentItems);
+        this->enrichmentItemList.resize(this->numberOfEnrichmentItems);
     }
 
     for ( int i = 1; i <= this->numberOfEnrichmentItems; i++ ) {
@@ -253,8 +244,9 @@ contextIOResultType XfemManager :: restoreContext(DataStream *stream, ContextMod
                 THROW_CIOERR(CIO_IOERR);
             }
 
-            obj = classFactory.createEnrichmentItem(name.c_str(), i, this, this->domain);
-            enrichmentItemList->put(i, obj);
+            std :: unique_ptr< EnrichmentItem > ei( classFactory.createEnrichmentItem(name.c_str(), i, this, this->domain) );
+            obj = ei.get();
+            enrichmentItemList.insert(enrichmentItemList.begin() + i-1, std :: move(ei));
         } else {
             obj = this->giveEnrichmentItem(i);
         }
@@ -270,8 +262,8 @@ contextIOResultType XfemManager :: restoreContext(DataStream *stream, ContextMod
 void XfemManager :: updateYourself()
 {
     // Update level sets
-    for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
-        enrichmentItemList->at(i)->updateGeometry();
+    for ( auto &ei: enrichmentItemList ) {
+        ei->updateGeometry();
     }
 
     updateNodeEnrichmentItemMap();
@@ -279,12 +271,12 @@ void XfemManager :: updateYourself()
 
 void XfemManager :: propagateFronts()
 {
-    for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
-        enrichmentItemList->at(i)->propagateFronts();
+    for ( auto &ei: enrichmentItemList ) {
+        ei->propagateFronts();
 
         if ( giveVtkDebug() ) {
             std :: vector< FloatArray >points;
-            enrichmentItemList->at(i)->giveSubPolygon(points, -0.1, 1.1);
+            ei->giveSubPolygon(points, -0.1, 1.1);
 
             std :: vector< double >x, y;
             for ( size_t j = 0; j < points.size(); j++ ) {
@@ -294,7 +286,7 @@ void XfemManager :: propagateFronts()
 
 
             char fileName [ 200 ];
-            sprintf(fileName, "crack%d.dat", i);
+            sprintf(fileName, "crack%d.dat", ei->giveNumber());
             XFEMDebugTools :: WriteArrayToGnuplot(fileName, x, y);
         }
     }
@@ -304,8 +296,8 @@ void XfemManager :: propagateFronts()
 
 bool XfemManager :: hasPropagatingFronts()
 {
-    for ( int i = 1; i <= enrichmentItemList->giveSize(); i++ ) {
-        if ( enrichmentItemList->at(i)->hasPropagatingFronts() ) {
+    for ( auto &ei: enrichmentItemList ) {
+        if ( ei->hasPropagatingFronts() ) {
             return true;
         }
     }
@@ -323,7 +315,6 @@ void XfemManager :: updateNodeEnrichmentItemMap()
     int nElem = domain->giveNumberOfElements();
     mElementEnrichmentItemIndices.clear();
 
-    std :: vector< int >emptyVec;
     for ( int i = 1; i <= nElem; i++ ) {
         int elIndex = domain->giveElement(i)->giveGlobalNumber();
         int elPlaceInArray = domain->giveElementPlaceInArray(elIndex);
@@ -331,7 +322,7 @@ void XfemManager :: updateNodeEnrichmentItemMap()
             printf("i != elPlaceInArray.\n");
             exit(0);
         }
-        mElementEnrichmentItemIndices [ elPlaceInArray ] = emptyVec;
+        mElementEnrichmentItemIndices [ elPlaceInArray ].clear();
     }
 
     int nEI = giveNumberOfEnrichmentItems();
@@ -342,14 +333,14 @@ void XfemManager :: updateNodeEnrichmentItemMap()
         const std :: unordered_map< int, int > &enrNodeInd = ei->giveEnrNodeMap();
 
         //for(size_t i = 0; i < enrNodeInd.size(); i++) {
-        for ( auto nodeEiPair = enrNodeInd.begin(); nodeEiPair != enrNodeInd.end(); nodeEiPair++ ) {
-            mNodeEnrichmentItemIndices [ nodeEiPair->first - 1 ].push_back(eiIndex);
+        for ( auto &nodeEiPair: enrNodeInd ) {
+            mNodeEnrichmentItemIndices [ nodeEiPair.first - 1 ].push_back(eiIndex);
 
             ConnectivityTable *ct = domain->giveConnectivityTable();
-            //const IntArray *nodeElements = ct->giveDofManConnectivityArray(nodeEiPair->first);
+            //const IntArray *nodeElements = ct->giveDofManConnectivityArray(nodeEiPair.first);
             IntArray nodeElements;
             IntArray nodeList = {
-                nodeEiPair->first
+                nodeEiPair.first
             };
             ct->giveNodeNeighbourList(nodeElements, nodeList);
 

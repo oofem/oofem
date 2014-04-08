@@ -1843,8 +1843,6 @@ Domain :: giveTransactionManager()
 int Domain :: commitTransactions(DomainTransactionManager *tm)
 {
     bool _exist;
-    std :: map< int, DofManager * > :: const_iterator dit;
-    std :: map< int, Element * > :: const_iterator eit;
     AList< DofManager > *dofManagerList_new = new AList< DofManager >(0);
     AList< Element > *elementList_new = new AList< Element >(0);
 
@@ -1856,21 +1854,21 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
     this->initGlobalDofManMap();
     if ( !tm->dofmanTransactions.empty() ) {
         DofManager *dman;
-        for ( dit = tm->dofmanTransactions.begin(); dit != tm->dofmanTransactions.end(); ++dit ) {
+        for ( auto &dmanTrans: tm->dofmanTransactions ) {
             _exist = false;
-            if ( dmanMap.find(dit->first) != dmanMap.end() ) {
+            if ( dmanMap.find(dmanTrans.first) != dmanMap.end() ) {
                 _exist = true;
             }
 
             if ( _exist ) {
-                int lnum = dmanMap [ dit->first ]->giveNumber();
+                int lnum = dmanMap [ dmanTrans.first ]->giveNumber();
                 dman = dofManagerList->unlink(lnum);
-                dmanMap.erase(dit->first);
+                dmanMap.erase(dmanTrans.first);
                 delete dman;
             }
 
-            if ( dit->second ) {
-                dmanMap [ dit->first ] = ( DofManager * ) dit->second;
+            if ( dmanTranssecond ) {
+                dmanMap [ dmanTrans.first ] = ( DofManager * ) dmanTrans.second;
             }
         } // end loop over DofmanTransactions
     }
@@ -1880,8 +1878,8 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
         int gen;
         Element *elem;
 
-        for ( eit = tm->elementTransactions.begin(); eit != tm->elementTransactions.end(); ++eit ) {
-            gen = eit->first;
+        for ( auto elTrans: elementTransactions ) {
+            gen = elTrans.first;
             bool _exist = false;
             if ( elementMap.find(gen) != elementMap.end() ) {
                 _exist = true;
@@ -1894,8 +1892,8 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
                 delete elem;
             }
 
-            if ( eit->second ) {
-                elementMap [ gen ] = ( Element * ) eit->second;
+            if ( elTrans.second ) {
+                elementMap [ gen ] = ( Element * ) elTrans.second;
             }
         }
     }
@@ -1947,24 +1945,24 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
 
     // initialize new dofman list
     int _i, _size = dmanMap.size();
-    std :: map< int, DofManager * > :: iterator dmit;
     dofManagerList_new->clear();
     dofManagerList_new->growTo(_size);
 
-    for ( _i = 0, dmit = dmanMap.begin(); dmit != dmanMap.end(); dmit++ ) {
-        dofManagerList_new->put(++_i, dmit->second);
+    _i = 0;
+    for ( auto &map: dmanMap ) {
+        dofManagerList_new->put(++_i, map.second);
     }
 
     this->renumberElements();
     this->renumberElementData(tm);
     // initialize new element list
     _size = elementMap.size();
-    std :: map< int, Element * > :: iterator elit;
     elementList_new->clear();
     elementList_new->growTo(_size);
 
-    for ( _i = 0, elit = elementMap.begin(); elit != elementMap.end(); elit++ ) {
-        elementList_new->put(++_i, elit->second);
+    _i = 0;
+    for ( auto &map: elementMap ) {
+        elementList_new->put(++_i, map.second);
     }
 
 
@@ -1998,14 +1996,13 @@ Domain :: initGlobalDofManMap(bool forceinit)
      * -> we need to keep the list of received nodes! (now they are only introduced into globally indexed dmanMap!);
      */
     if ( forceinit || !dmanMapInitialized ) {
-        int key, idofman, ndofman = this->giveNumberOfDofManagers();
-        DofManager *dofman;
+        int key, ndofman = this->giveNumberOfDofManagers();
         dmanMap.clear();
 
-        for ( idofman = 1; idofman <= ndofman; idofman++ ) {
-            dofman = this->giveDofManager(idofman);
+        for ( int idofman = 1; idofman <= ndofman; idofman++ ) {
+            DofManager *dofman = this->giveDofManager(idofman);
             key = dofman->giveGlobalNumber();
-            dmanMap [ key ] = dofman;
+            dmanMap.insert(key, dofman);
         }
     }
 }
@@ -2015,14 +2012,13 @@ void
 Domain :: initGlobalElementMap(bool forceinit)
 {
     if ( forceinit || !elementMapInitialized ) {
-        int key, ielem, nelem = this->giveNumberOfElements();
-        Element *elem;
+        int key, nelem = this->giveNumberOfElements();
         elementMap.clear();
 
-        for ( ielem = 1; ielem <= nelem; ielem++ ) {
-            elem = this->giveElement(ielem);
+        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+            Element *elem = this->giveElement(ielem);
             key = elem->giveGlobalNumber();
-            elementMap [ key ] = elem;
+            elementMap.insert(key, elem);
         }
     }
 }
@@ -2031,19 +2027,16 @@ Domain :: initGlobalElementMap(bool forceinit)
 void
 Domain :: renumberDofManData(DomainTransactionManager *tm)
 {
-    std :: map< int, DofManager * > :: iterator it;
-
     SpecificEntityRenumberingFunctor< Domain > domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
     SpecificEntityRenumberingFunctor< Domain > domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
 
-
-    for ( it = dmanMap.begin(); it != dmanMap.end(); it++ ) {
-        if ( tm->dofmanTransactions.find(it->first) != tm->dofmanTransactions.end() ) {
+    for ( auto &map: dmanMap ) {
+        if ( tm->dofmanTransactions.find(map.first) != tm->dofmanTransactions.end() ) {
             // received dof manager -> we map global numbers to new local number
-            it->second->updateLocalNumbering(domainGToLFunctor); // g_to_l
+            map.second->updateLocalNumbering(domainGToLFunctor); // g_to_l
         } else {
             // existing dof manager -> we map old local number to new local number
-            it->second->updateLocalNumbering(domainLToLFunctor); // l_to_l
+            map.second->updateLocalNumbering(domainLToLFunctor); // l_to_l
         }
     }
 }
@@ -2052,19 +2045,16 @@ Domain :: renumberDofManData(DomainTransactionManager *tm)
 void
 Domain :: renumberElementData(DomainTransactionManager *tm)
 {
-    std :: map< int, Element * > :: iterator it;
-
     SpecificEntityRenumberingFunctor< Domain > domainGToLFunctor(this, &Domain :: LB_giveUpdatedGlobalNumber);
     SpecificEntityRenumberingFunctor< Domain > domainLToLFunctor(this, &Domain :: LB_giveUpdatedLocalNumber);
 
-
-    for ( it = elementMap.begin(); it != elementMap.end(); it++ ) {
-        if ( tm->elementTransactions.find(it->first) != tm->elementTransactions.end() ) {
+    for ( auto &map: elementMap ) {
+        if ( tm->elementTransactions.find(map.first) != tm->elementTransactions.end() ) {
             // received dof manager -> we map global numbers to new local number
-            it->second->updateLocalNumbering(domainGToLFunctor); // g_to_l
+            map.second->updateLocalNumbering(domainGToLFunctor); // g_to_l
         } else {
             // existing dof manager -> we map old local number to new local number
-            it->second->updateLocalNumbering(domainLToLFunctor); // l_to_l
+            map.second->updateLocalNumbering(domainLToLFunctor); // l_to_l
         }
     }
 }
@@ -2074,10 +2064,8 @@ void
 Domain :: renumberDofManagers()
 {
     int _locnum;
-    std :: map< int, DofManager * > :: iterator it;
-
-    for ( _locnum = 1, it = dmanMap.begin(); it != dmanMap.end(); it++ ) {
-        it->second->setNumber(_locnum++);
+    for ( auto &map: dmanMap ) {
+        map.second->setNumber(_locnum++);
     }
 }
 
@@ -2085,11 +2073,9 @@ Domain :: renumberDofManagers()
 void
 Domain :: renumberElements()
 {
-    int _locnum;
-    std :: map< int, Element * > :: iterator it;
-
-    for ( _locnum = 1, it = elementMap.begin(); it != elementMap.end(); it++ ) {
-        it->second->setNumber(_locnum++);
+    int _locnum = 1;
+    for ( auto &map: elementMap ) {
+        map.second->setNumber(_locnum++);
     }
 }
 

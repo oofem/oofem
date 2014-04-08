@@ -5160,7 +5160,6 @@ Subdivision :: packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicat
     Element *elemPtr, *relemPtr;
     std :: queue< int >elemCandidates;
     std :: set< int >remoteElements, processedElements, nodesToSend;
-    std :: set< int > :: const_iterator si;
 
     if ( rproc == myrank ) {
         return 1;                  // skip local partition
@@ -5202,8 +5201,8 @@ Subdivision :: packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicat
      * mark shecheduled nodes:
      * loop over elements in remoteElements set and add all their nodes (except those that are shared)
      */
-    for ( si = remoteElements.begin(); si != remoteElements.end(); si++ ) {
-        relemPtr = d->giveElement(* si);
+    for ( int elNum: remoteElements ) {
+        relemPtr = d->giveElement(elNum);
         nn = relemPtr->giveNumberOfNodes();
         for ( in = 1; in <= nn; in++ ) {
             inode = relemPtr->giveDofManagerNumber(in);
@@ -5221,8 +5220,8 @@ Subdivision :: packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicat
     ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
     ProcessCommDataStream pcDataStream(pcbuff);
     // send nodes that define remote_elements gometry
-    for ( si = nodesToSend.begin(); si != nodesToSend.end(); si++ ) {
-        inodePtr = d->giveDofManager(* si);
+    for ( int nodeNum: nodesToSend ) {
+        inodePtr = d->giveDofManager(nodeNum);
 
         pcbuff->packString( inodePtr->giveInputRecordName() );
         pcbuff->packInt( inodePtr->giveGlobalNumber() );
@@ -5233,8 +5232,8 @@ Subdivision :: packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicat
     pcbuff->packString("");
 
     // send elements
-    for ( si = remoteElements.begin(); si != remoteElements.end(); si++ ) {
-        elemPtr = d->giveElement(* si);
+    for ( int elNum: remoteElements ) {
+        elemPtr = d->giveElement(elNum);
         // pack local element (node numbers shuld be global ones!!!)
         // pack type
         pcbuff->packString( elemPtr->giveInputRecordName() );
