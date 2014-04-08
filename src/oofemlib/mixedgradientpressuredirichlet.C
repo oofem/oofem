@@ -256,57 +256,66 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
     SparseLinearSystemNM *solver = classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ); // = rve->giveLinearSolver();
-    SparseMtrx *Kff, *Kfp, *Kpf, *Kpp;
     SparseMtrxType stype = SMT_PetscMtrx; // = rve->giveSparseMatrixType();
     EModelDefaultEquationNumbering fnum;
     EModelDefaultPrescribedEquationNumbering pnum;
 
     // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
-    Kff = classFactory.createSparseMtrx(stype);
-    Kfp = classFactory.createSparseMtrx(stype);
-    Kpf = classFactory.createSparseMtrx(stype);
-    Kpp = classFactory.createSparseMtrx(stype);
-    if ( !Kff ) {
-        OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
-    }
-    Kff->buildInternalStructure(rve, 1, eid, fnum);
-    Kfp->buildInternalStructure(rve, 1, eid, fnum, pnum);
-    Kpf->buildInternalStructure(rve, 1, eid, pnum, fnum);
-    Kpp->buildInternalStructure(rve, 1, eid, pnum);
-    rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, this->domain);
-    rve->assemble(Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain);
-    rve->assemble(Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain);
-    rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, this->domain);
-
-    // Setup up indices and locations
-    int neq = Kff->giveNumberOfRows();
-    int npeq = Kpf->giveNumberOfRows();
+    FloatMatrix ddev_pert;
+    FloatMatrix rhs_d; // RHS for d_dev [d_dev11, d_dev22, d_dev12] in 2D
+    FloatMatrix s_d; // Sensitivity fields for d_dev
+    FloatArray rhs_p; // RHS for pressure
+    FloatArray s_p; // Sensitivity fields for p
 
     // Indices and such of internal dofs
     int dvol_eq = this->giveVolDof()->giveEqn();
     int ndev = this->devGradient.giveSize();
-    // Matrices and arrays for sensitivities
-    FloatMatrix ddev_pert(ndev, npeq); // In fact, npeq should most likely equal ndev
-    FloatMatrix rhs_d(neq, npeq); // RHS for d_dev [d_dev11, d_dev22, d_dev12] in 2D
-    FloatMatrix s_d(neq, npeq); // Sensitivity fields for d_dev
-    FloatArray rhs_p(neq); // RHS for pressure
-    FloatArray s_p(neq); // Sensitivity fields for p
 
-    // Unit pertubations for d_dev
-    ddev_pert.zero();
-    for ( int i = 1; i <= ndev; ++i ) {
-        int eqn = this->devdman->giveDof(i)->__givePrescribedEquationNumber();
-        ddev_pert.at(eqn, i) = -1.0 * rve_size; // Minus sign for moving it to the RHS
+    {
+        // Sets up RHS for all sensitivity problems;
+        SparseMtrx *Kfp = classFactory.createSparseMtrx(stype);
+        Kfp->buildInternalStructure(rve, 1, eid, fnum, pnum);
+        rve->assemble(Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain);
+
+        // Setup up indices and locations
+        int neq = Kfp->giveNumberOfRows();
+        // Matrices and arrays for sensitivities
+        int npeq = Kfp->giveNumberOfColumns();
+
+        if ( npeq != ndev ) {
+            OOFEM_ERROR("Size mismatch, ndev != npeq");
+        }
+
+        // Unit pertubations for d_dev
+        ddev_pert.resize(ndev, ndev); // In fact, npeq should most likely equal ndev
+        ddev_pert.zero();
+        for ( int i = 1; i <= ndev; ++i ) {
+            int eqn = this->devdman->giveDof(i)->__givePrescribedEquationNumber();
+            ddev_pert.at(eqn, i) = -1.0; // Minus sign for moving it to the RHS
+        }
+        Kfp->times(ddev_pert, rhs_d);
+        s_d.resize(neq, ndev);
+
+        // Sensitivity analysis for p (already in rhs, just set value directly)
+        rhs_p.resize(neq);
+        rhs_p.zero();
+        rhs_p.at(dvol_eq) = -1.0 * rve_size; // dp = 1.0 (unit size)
+        s_p.resize(neq);
+        delete Kfp;
     }
-    Kfp->times(ddev_pert, rhs_d);
 
-    // Sensitivity analysis for p (already in rhs, just set value directly)
-    rhs_p.zero();
-    rhs_p.at(dvol_eq) = -1.0 * rve_size; // dp = 1.0 (unit size)
-
-    // Solve all sensitivities
-    solver->solve(Kff, & rhs_p, & s_p);
-    solver->solve(Kff, rhs_d, s_d);
+    {
+        // Solve all sensitivities
+        SparseMtrx *Kff = classFactory.createSparseMtrx(stype);
+        Kff->buildInternalStructure(rve, 1, eid, fnum);
+        if ( !Kff ) {
+            OOFEM_ERROR("MixedGradientPressureDirichlet :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
+        }
+        rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, this->domain);
+        solver->solve(Kff, & rhs_p, & s_p);
+        solver->solve(Kff, rhs_d, s_d);
+        delete Kff;
+    }
 
     // Sensitivities for d_vol is solved for directly;
     Cp = - s_p.at(dvol_eq); // Note: Defined with negative sign de = - C * dp
@@ -315,16 +324,25 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
         Cd.at(i) = s_d.at(dvol_eq, i); // Copy over relevant row from solution
     }
 
-    // Sensitivities for d_dev is obtained as reactions forces;
-    Kpf->times(s_p, Ep);
+    {
+        // Sensitivities for d_dev is obtained as reactions forces;
+        SparseMtrx *Kpf = classFactory.createSparseMtrx(stype);
+        SparseMtrx *Kpp = classFactory.createSparseMtrx(stype);
+        Kpf->buildInternalStructure(rve, 1, eid, pnum, fnum);
+        Kpp->buildInternalStructure(rve, 1, eid, pnum);
+        rve->assemble(Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain);
+        rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, this->domain);
 
-    FloatMatrix tmpMat;
-    Kpp->times(ddev_pert, tmpMat);
-    Kpf->times(s_d, Ed);
-
-    Ed.subtract(tmpMat);
-
-    Ed.times(1.0 / rve_size);
+        FloatMatrix tmpMat;
+        Kpp->times(ddev_pert, tmpMat);
+        Kpf->times(s_d, Ed);
+        Ed.subtract(tmpMat);
+        Ed.times(1.0 / rve_size);
+        Kpf->times(s_p, Ep);
+        Ep.times(1.0 / rve_size);
+        delete Kpp;
+        delete Kpf;
+    }
 
     // Not sure if i actually need to do this part, but the obtained tangents are to dsigma/dp, not dsigma_dev/dp, so they need to be corrected;
     int nsd = this->domain->giveNumberOfSpatialDimensions();
@@ -348,12 +366,6 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
         }
     }
 #endif
-
-    delete Kff;
-    delete Kfp;
-    delete Kpf;
-    delete Kpp;
-
     delete solver; ///@todo Remove this when solver is taken from engngmodel
 }
 

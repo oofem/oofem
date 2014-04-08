@@ -106,6 +106,11 @@ public:
      * Gives the name of the class.
      */
     virtual const char *giveClassName() const = 0;
+
+    /// Returns string for prepending output (used by error reporting macros).
+    std :: string errorInfo(const char *func) const {
+        return std::string(this->giveClassName()) + "::" + func;
+    }
 };
 } // end namespace oofem
 #endif // topologydescription_h

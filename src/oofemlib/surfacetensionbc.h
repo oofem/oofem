@@ -49,7 +49,6 @@
 
 namespace oofem {
 class Element;
-class ElementSide;
 
 /**
  * Computes the load (and possibly tangent) for surface tension. This boundary condition applicable to both solid and flow problems.
