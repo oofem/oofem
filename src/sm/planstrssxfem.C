@@ -52,13 +52,13 @@ REGISTER_Element(PlaneStress2dXfem)
 void PlaneStress2dXfem :: updateYourself(TimeStep *tStep)
 {
     PlaneStress2d :: updateYourself(tStep);
-    XfemElementInterface :: updateYourselfCZ(tStep);
+    XfemStructuralElementInterface :: updateYourselfCZ(tStep);
 }
 
 void PlaneStress2dXfem :: postInitialize()
 {
     PlaneStress2d :: postInitialize();
-    XfemElementInterface :: initializeCZMaterial();
+    XfemStructuralElementInterface :: initializeCZMaterial();
 }
 
 Interface *
@@ -122,41 +122,52 @@ int PlaneStress2dXfem :: computeNumberOfDofs()
 
 
 void
-PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID iEqnId, IntArray &answer) const
 {
-    // Returns the total id mask of the dof manager = regular id's + enriched id's
-    this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
+    // Continuous part
+	PlaneStress2d::giveDofManDofIDMask(inode, iEqnId, answer);
 
-    if ( answer.giveSize() == 0 ) {
-        // TODO: How do we fix this in a nicer way? /ES
-        answer = {D_u, D_v};
-    }
+    // Discontinuous part
+	if( this->giveDomain()->hasXfemManager() ) {
+		DofManager *dMan = giveDofManager(inode);
+		XfemManager *xMan = giveDomain()->giveXfemManager();
+
+        const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices( dMan->giveGlobalNumber() );
+        for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
+            EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices[i]);
+			if ( ei->isDofManEnriched(* dMan) ) {
+				IntArray eiDofIdArray;
+				ei->computeEnrichedDofManDofIdArray(eiDofIdArray, *dMan);
+				answer.followedBy(eiDofIdArray);
+			}
+		}
+	}
 }
 
 
 
 void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
+    XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
 }
 
 void
 PlaneStress2dXfem :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    XfemElementInterface :: XfemElementInterface_computeStressVector(answer, strain, gp, tStep);
+    XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(answer, strain, gp, tStep);
 }
 
 void PlaneStress2dXfem :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
     PlaneStress2d :: computeStiffnessMatrix(answer, rMode, tStep);
-    XfemElementInterface :: computeCohesiveTangent(answer, tStep);
+    XfemStructuralElementInterface :: computeCohesiveTangent(answer, tStep);
 }
 
 void
 PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     PlaneStress2d :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
-    XfemElementInterface :: computeCohesiveForces(answer, tStep);
+    XfemStructuralElementInterface :: computeCohesiveForces(answer, tStep);
 }
 
 Element_Geometry_Type
@@ -263,18 +274,18 @@ PlaneStress2dXfem :: initializeFrom(InputRecord *ir)
         return result;
     }
 
-    result = XfemElementInterface :: initializeCZFrom(ir);
+    result = XfemStructuralElementInterface :: initializeCZFrom(ir);
     return result;
 }
 
 MaterialMode PlaneStress2dXfem :: giveMaterialMode()
 {
-    return XfemElementInterface :: giveMaterialMode();
+    return XfemStructuralElementInterface :: giveMaterialMode();
 }
 
 void PlaneStress2dXfem :: giveInputRecord(DynamicInputRecord &input)
 {
     PlaneStress2d :: giveInputRecord(input);
-    XfemElementInterface :: giveCZInputRecord(input);
+    XfemStructuralElementInterface :: giveCZInputRecord(input);
 }
 } // end namespace oofem

@@ -112,7 +112,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
         const FloatArray **coords = new const FloatArray * [ mTriangles [ triToKeep [ i ] ].giveNrVertices() ];
         // this we should put into the function before
         for ( int k = 0; k < mTriangles [ triToKeep [ i ] ].giveNrVertices(); k++ ) {
-            coords [ k ] = new FloatArray( ( mTriangles [ triToKeep [ i ] ].giveVertex ( k + 1 ) ) );
+            coords [ k ] = new FloatArray( ( mTriangles [ triToKeep [ i ] ].giveVertex(k + 1) ) );
         }
 
         // Can not be used because it writes to the start of the array instead of appending.
@@ -125,12 +125,12 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
             FloatArray *coord = new FloatArray(2);
             coord->at(1) = coords_xi1.at(j + 1);
             coord->at(2) = coords_xi2.at(j + 1);
-            gp = new GaussPoint(this, pointsPassed + 1, coord, weights.at ( j + 1 ), mode);
+            gp = new GaussPoint(this, pointsPassed + 1, coord, weights.at(j + 1), mode);
 
 
 
             mTriInterp.local2global( global, * gp->giveCoordinates(),
-                                    FEIVertexListGeometryWrapper(mTriangles [ triToKeep [ i ] ].giveNrVertices(), coords) );
+                                     FEIVertexListGeometryWrapper(mTriangles [ triToKeep [ i ] ].giveNrVertices(), coords) );
 
             newGPCoord.push_back(global);
 

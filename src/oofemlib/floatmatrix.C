@@ -1009,7 +1009,7 @@ void FloatMatrix :: add(const FloatMatrix &aMatrix)
     double s = 1.;
     daxpy_(& aSize, & s, aMatrix.givePointer(), & inc, this->givePointer(), & inc, aSize, aSize);
 #else
-    for ( int i = 0; i < this->values.size(); i++ ) {
+    for ( size_t i = 0; i < this->values.size(); i++ ) {
         this->values [ i ] += aMatrix.values [ i ];
     }
 #endif
@@ -1040,7 +1040,7 @@ void FloatMatrix :: add(double s, const FloatMatrix &aMatrix)
     int inc = 1;
     daxpy_(& aSize, & s, aMatrix.givePointer(), & inc, this->givePointer(), & inc, aSize, aSize);
 #else
-    for ( int i = 0; i < this->values.size(); i++ ) {
+    for ( size_t i = 0; i < this->values.size(); i++ ) {
         this->values [ i ] += s * aMatrix.values [ i ];
     }
 #endif
@@ -1067,7 +1067,7 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
     double s = -1.;
     daxpy_(& aSize, & s, aMatrix.givePointer(), & inc, this->givePointer(), & inc, aSize, aSize);
 #else
-    for ( int i = 0; i < this->values.size(); i++ ) {
+    for ( size_t i = 0; i < this->values.size(); i++ ) {
         this->values [ i ] -= aMatrix.values [ i ];
     }
 #endif

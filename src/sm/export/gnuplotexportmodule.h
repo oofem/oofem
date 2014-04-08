@@ -50,6 +50,7 @@ namespace oofem {
 class EnrichmentItem;
 class Crack;
 class PrescribedGradient;
+class PrescribedGradientBCNeumann;
 /**
  * (Under development) The Gnuplot export module enables OOFEM to export some
  * data in a format that can be directly plotted with Gnuplot.
@@ -81,6 +82,7 @@ public:
      * Boundary condition output
      */
     void outputBoundaryCondition(PrescribedGradient &iBC, TimeStep *tStep);
+    void outputBoundaryCondition(PrescribedGradientBCNeumann &iBC, TimeStep *tStep);
 
 
 protected:

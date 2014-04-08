@@ -236,6 +236,8 @@ IntMatBilinearCZElastic :: initializeFrom(InputRecord *ir)
     this->gnmax = 2.0 * GIc / sigfn;                         // @todo defaults to zero - will this cause problems?
     this->kn1 = -this->sigfn / ( this->gnmax - this->gn0 );  // slope during softening part in normal dir
 
+    StructuralInterfaceMaterial :: initializeFrom(ir);
+
     this->checkConsistency();                                // check validity of the material paramters
     this->printYourself();
     return IRRT_OK;

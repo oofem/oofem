@@ -32,30 +32,50 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "materialmappingalgorithm.h"
-#include "gausspoint.h"
-#include "element.h"
+
+#ifndef PRESCRIBEDGRADIENTBC_H_
+#define PRESCRIBEDGRADIENTBC_H_
+
+#include "activebc.h"
+#include "valuemodetype.h"
+#include "floatmatrix.h"
+
+#define _IFT_PrescribedGradientBC_centercoords "ccoord"
+#define _IFT_PrescribedGradientBC_gradient "gradient"
 
 namespace oofem {
-void
-MaterialMappingAlgorithm :: init(Domain *dold, IntArray &type, GaussPoint *gp, Set &elemSet, TimeStep *tStep, bool iCohesiveZoneGP)
-{
-    FloatArray coords;
-    if ( gp->giveElement()->computeGlobalCoordinates( coords, * ( gp->giveLocalCoordinates() ) ) == 0 ) {
-        OOFEM_ERROR("computeGlobalCoordinates failed");
-    }
+/**
+ * Base class for boundary conditions that prescribe a displacement gradient
+ * (in a strong or weak sense) on the boundary of a RVE.
+ *
+ * Under development.
+ *
+ * @author Erik Svenning
+ * @date Mar 5, 2014
+ */
 
-    this->__init(dold, type, coords, elemSet, tStep, iCohesiveZoneGP);
-}
+class OOFEM_EXPORT PrescribedGradientBC : public ActiveBoundaryCondition {
+public:
+	PrescribedGradientBC(int n, Domain * d);
+	virtual ~PrescribedGradientBC();
 
-int
-MaterialMappingAlgorithm :: mapVariable(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
-{
-    FloatArray coords;
-    if ( gp->giveElement()->computeGlobalCoordinates( coords, * ( gp->giveCoordinates() ) ) == 0 ) {
-        OOFEM_ERROR("computeGlobalCoordinates failed");
-    }
+    virtual bcType giveType() const { return UnknownBT; }
 
-    return this->__mapVariable(answer, coords, type, tStep);
-}
-} // end namespace oofem
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
+
+    void giveGradientVoigt(FloatArray &oGradient) const;
+protected:
+    /// Prescribed gradient @f$ d_{ij} @f$
+    FloatMatrix mGradient;
+
+    /// Center coordinate @f$ \bar{x}_i @f$
+    FloatArray mCenterCoord;
+
+    double domainSize();
+
+};
+
+} /* namespace oofem */
+
+#endif /* PRESCRIBEDGRADIENTBC_H_ */

@@ -32,30 +32,35 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "materialmappingalgorithm.h"
-#include "gausspoint.h"
-#include "element.h"
+#ifndef DISCSEGINTEGRATIONRULE_H_
+#define DISCSEGINTEGRATIONRULE_H_
+
+#include "gaussintegrationrule.h"
+
+#include "geometry.h"
 
 namespace oofem {
-void
-MaterialMappingAlgorithm :: init(Domain *dold, IntArray &type, GaussPoint *gp, Set &elemSet, TimeStep *tStep, bool iCohesiveZoneGP)
+/**
+ * DiscontinuousSegmentIntegrationRule provides integration over a
+ * discontinuous boundary segment.
+ *
+ * @author Erik Svenning
+ * @date Mar 14, 2014
+ */
+class OOFEM_EXPORT DiscontinuousSegmentIntegrationRule : public GaussIntegrationRule
 {
-    FloatArray coords;
-    if ( gp->giveElement()->computeGlobalCoordinates( coords, * ( gp->giveLocalCoordinates() ) ) == 0 ) {
-        OOFEM_ERROR("computeGlobalCoordinates failed");
-    }
+protected:
+    std :: vector< Line >mSegments;
 
-    this->__init(dold, type, coords, elemSet, tStep, iCohesiveZoneGP);
-}
+    /// Start and end points of the boundary segment.
+    FloatArray mXS, mXE;
 
-int
-MaterialMappingAlgorithm :: mapVariable(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
-{
-    FloatArray coords;
-    if ( gp->giveElement()->computeGlobalCoordinates( coords, * ( gp->giveCoordinates() ) ) == 0 ) {
-        OOFEM_ERROR("computeGlobalCoordinates failed");
-    }
+public:
+    DiscontinuousSegmentIntegrationRule(int n, Element *e, const std :: vector< Line > &iSegments, const FloatArray &iXS, const FloatArray &iXE);
+    virtual ~DiscontinuousSegmentIntegrationRule();
 
-    return this->__mapVariable(answer, coords, type, tStep);
-}
-} // end namespace oofem
+    virtual int SetUpPointsOnLine(int iNumPointsPerSeg, MaterialMode mode);
+};
+} /* namespace oofem */
+
+#endif /* DISCSEGINTEGRATIONRULE_H_ */

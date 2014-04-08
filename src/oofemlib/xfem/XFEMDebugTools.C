@@ -145,7 +145,7 @@ void XFEMDebugTools :: WriteArrayToGnuplot(const std :: string &iName, const std
     file.open( iName.data() );
 
     // Set some output options
-    file << std::scientific;
+    file << std :: scientific;
 
     file << "# x y\n";
 

@@ -105,7 +105,7 @@ public:
     /// Gives intersection points between this Geometry and Element.
     virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints) { }
 
-    const FloatArray &giveVertex(int n) const { return mVertices [ n - 1 ]; }
+    inline const FloatArray &giveVertex(int n) const { return mVertices [ n - 1 ]; }
 
     void setVertex(FloatArray *vertex);
 
@@ -154,7 +154,7 @@ class OOFEM_EXPORT Line : public BasicGeometry
 public:
     Line() : BasicGeometry() { }
     virtual ~Line() { }
-    Line(FloatArray &pointA, FloatArray &pointB);
+    Line(const FloatArray &iPointA, const FloatArray &iPointB);
 
     virtual BasicGeometry *Clone() { return new Line(*this); }
 
@@ -176,6 +176,8 @@ public:
     bool isPointInside(FloatArray *point);
     virtual bool intersects(Element *element);
     virtual bool isOutside(BasicGeometry *bg);
+
+    double giveLength() const {return mVertices[0].distance( mVertices[1] );}
 };
 
 class OOFEM_EXPORT Triangle : public BasicGeometry
@@ -186,8 +188,8 @@ public:
 
     virtual BasicGeometry *Clone() { return new Triangle(*this); }
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_SIMPLE_ERROR("Triangle::computeNormalSignDist -- not implemented"); };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_SIMPLE_ERROR("Triangle::computeTangentialSignDist -- not implemented"); };
+    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("Triangle::computeNormalSignDist -- not implemented"); };
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("Triangle::computeTangentialSignDist -- not implemented"); };
 
     double getArea();
     void computeBarycentrCoor(FloatArray &answer) const;
@@ -234,6 +236,8 @@ public:
     virtual bool isInside(Element *element);
     virtual bool isInside(FloatArray &point);
     virtual void printYourself();
+
+    double giveRadius() const {return radius;}
 };
 
 class OOFEM_EXPORT PolygonLine : public BasicGeometry

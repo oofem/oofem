@@ -37,6 +37,7 @@
 
 #include "shell7base.h"
 #include "xfem/xfemelementinterface.h"
+#include "xfem/enrichmentitems/delamination.h"
 
 
 ///@name Input fields for el
@@ -112,6 +113,7 @@ public:
 
     void giveMaxCZDamages(FloatArray &answer, TimeStep *tStep);
     virtual const char *giveClassName()  const { return "Shell7BaseXFEM"; }
+    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
     virtual Interface *giveInterface(InterfaceType it);
 
     virtual IRResultType initializeFrom(InputRecord *ir);

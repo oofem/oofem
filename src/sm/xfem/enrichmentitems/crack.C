@@ -36,56 +36,54 @@
 #include "structuralinterfacematerialstatus.h"
 #include "xfem/enrichmentdomain.h"
 #include "export/gnuplotexportmodule.h"
+#include "gausspoint.h"
 
 namespace oofem {
 REGISTER_EnrichmentItem(Crack)
 
 Crack :: Crack(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 {
-	mpEnrichesDofsWithIdArray = {D_u, D_v, D_w};
+    mpEnrichesDofsWithIdArray = {
+        D_u, D_v, D_w
+    };
 }
 
 IRResultType Crack :: initializeFrom(InputRecord *ir)
 {
-	EnrichmentItem :: initializeFrom(ir);
+    EnrichmentItem :: initializeFrom(ir);
 
-	return IRRT_OK;
+    return IRRT_OK;
 }
 
-void Crack::AppendCohesiveZoneGaussPoint(GaussPoint *ipGP)
+void Crack :: AppendCohesiveZoneGaussPoint(GaussPoint *ipGP)
 {
-	StructuralInterfaceMaterialStatus *matStat = dynamic_cast<StructuralInterfaceMaterialStatus*> ( ipGP->giveMaterialStatus() );
-	matStat->printYourself();
-	if(matStat != NULL) {
-		// Compute arc length position of the Gauss point
-		const FloatArray &coord = *(ipGP->giveCoordinates());
-		double tangDist = 0.0, arcPos = 0.0;
-		mpEnrichmentDomain->computeTangentialSignDist(tangDist, coord, arcPos);
+    StructuralInterfaceMaterialStatus *matStat = dynamic_cast< StructuralInterfaceMaterialStatus * >( ipGP->giveMaterialStatus() );
+    matStat->printYourself();
+    if ( matStat != NULL ) {
+        // Compute arc length position of the Gauss point
+        const FloatArray &coord = * ( ipGP->giveCoordinates() );
+        double tangDist = 0.0, arcPos = 0.0;
+        mpEnrichmentDomain->computeTangentialSignDist(tangDist, coord, arcPos);
 
-		// Insert at correct position
-		std::vector<GaussPoint*>::iterator iteratorGP 	= mCohesiveZoneGaussPoints.begin();
-		std::vector<double>::iterator iteratorPos 		= mCohesiveZoneArcPositions.begin();
-		for(size_t i = 0; i < mCohesiveZoneArcPositions.size(); i++) {
-			if( arcPos > mCohesiveZoneArcPositions[i] ) {
-				iteratorGP++;
-				iteratorPos++;
-			}
-		}
+        // Insert at correct position
+        std :: vector< GaussPoint * > :: iterator iteratorGP   = mCohesiveZoneGaussPoints.begin();
+        std :: vector< double > :: iterator iteratorPos               = mCohesiveZoneArcPositions.begin();
+        for ( size_t i = 0; i < mCohesiveZoneArcPositions.size(); i++ ) {
+            if ( arcPos > mCohesiveZoneArcPositions [ i ] ) {
+                iteratorGP++;
+                iteratorPos++;
+            }
+        }
 
-		mCohesiveZoneGaussPoints.insert(iteratorGP, ipGP);
-		mCohesiveZoneArcPositions.insert(iteratorPos, arcPos);
-	}
-	else{
-		OOFEM_ERROR("matStat == NULL.")
-	}
+        mCohesiveZoneGaussPoints.insert(iteratorGP, ipGP);
+        mCohesiveZoneArcPositions.insert(iteratorPos, arcPos);
+    } else   {
+        OOFEM_ERROR("matStat == NULL.")
+    }
 }
 
 void Crack :: callGnuplotExportModule(GnuplotExportModule &iExpMod)
 {
-	iExpMod.outputXFEM(*this);
+    iExpMod.outputXFEM(* this);
 }
-
 } // end namespace oofem
-
-
-

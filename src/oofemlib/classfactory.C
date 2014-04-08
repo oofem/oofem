@@ -210,7 +210,7 @@ bool ClassFactory :: registerCrossSection( const char *name, CrossSection * ( *c
 
 Material *ClassFactory :: createMaterial(const char *name, int number, Domain *domain)
 {
-    return ( matList.count(name) == 1 ) ? matList [ conv2lower(name) ](number, domain) : NULL;
+    return ( matList.count(conv2lower(name).c_str()) == 1 ) ? matList [ conv2lower(name) ](number, domain) : NULL;
 }
 
 bool ClassFactory :: registerMaterial( const char *name, Material * ( *creator )( int, Domain * ) )

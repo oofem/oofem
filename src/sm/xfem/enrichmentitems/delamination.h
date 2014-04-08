@@ -32,30 +32,46 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "materialmappingalgorithm.h"
-#include "gausspoint.h"
-#include "element.h"
+#ifndef DELAMINATION_H_
+#define DELAMINATION_H_
+
+#include "xfem/enrichmentitem.h"
+
+///@name Input fields for Delamination
+//@{
+#define _IFT_Delamination_Name "delamination"
+#define _IFT_Delamination_xiCoord "delaminationxicoord"
+#define _IFT_Delamination_interfacenum "interfacenum"
+#define _IFT_Delamination_csnum "csnum"
+#define _IFT_Delamination_CohesiveZoneMaterial "czmaterial"
+//#define _IFT_MultipleDelamination_Name "multipledelamination"
+//@}
 
 namespace oofem {
-void
-MaterialMappingAlgorithm :: init(Domain *dold, IntArray &type, GaussPoint *gp, Set &elemSet, TimeStep *tStep, bool iCohesiveZoneGP)
+/**
+ * Delamination.
+ * */
+class OOFEM_EXPORT Delamination : public EnrichmentItem
 {
-    FloatArray coords;
-    if ( gp->giveElement()->computeGlobalCoordinates( coords, * ( gp->giveLocalCoordinates() ) ) == 0 ) {
-        OOFEM_ERROR("computeGlobalCoordinates failed");
-    }
+protected:
+    Material *mat;  // Material for cohesive zone model
+    int interfaceNum;
+    int crossSectionNum;
+    int matNum;
+    double delamXiCoord;    // defines at what local xi-coord the delamination is defined
+public:
+    Delamination(int n, XfemManager *xm, Domain *aDomain);
 
-    this->__init(dold, type, coords, elemSet, tStep, iCohesiveZoneGP);
-}
+    virtual const char *giveClassName() const { return "Delamination"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Delamination_Name; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void appendInputRecords(DynamicDataReader &oDR);
 
-int
-MaterialMappingAlgorithm :: mapVariable(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
-{
-    FloatArray coords;
-    if ( gp->giveElement()->computeGlobalCoordinates( coords, * ( gp->giveCoordinates() ) ) == 0 ) {
-        OOFEM_ERROR("computeGlobalCoordinates failed");
-    }
-
-    return this->__mapVariable(answer, coords, type, tStep);
-}
+    double giveDelamXiCoord() { return delamXiCoord; };
+    //virtual Material *giveMaterial() { return mat; }
+    virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
+};
 } // end namespace oofem
+
+
+#endif /* DELAMINATION_H_ */

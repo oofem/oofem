@@ -45,7 +45,6 @@
 #include "xfem/enrichmentfunction.h"
 
 namespace oofem {
-
 class XfemManager;
 class DofManager;
 class FloatArray;
@@ -61,10 +60,10 @@ class LinElBranchFunction;
 class OOFEM_EXPORT EnrFrontLinearBranchFuncOneEl : public EnrichmentFront
 {
 public:
-	EnrFrontLinearBranchFuncOneEl();
+    EnrFrontLinearBranchFuncOneEl();
     virtual ~EnrFrontLinearBranchFuncOneEl();
 
-    virtual void MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo);
+    virtual void MarkNodesAsFront(std :: unordered_map< int, int > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo);
 
     virtual int  giveNumEnrichments(const DofManager &iDMan) const;
     virtual int  giveMaxNumEnrichments() const { return 4; }
@@ -72,7 +71,7 @@ public:
     // Evaluate the enrichment function and its derivative in front nodes.
     virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const;
     virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const;
-    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const;
+    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd) const;
 
     virtual const char *giveClassName() const { return "EnrFrontLinearBranchFuncOneEl"; }
     virtual const char *giveInputRecordName() const { return _IFT_EnrFrontLinearBranchFuncOneEl_Name; }
@@ -80,11 +79,11 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
+    virtual double giveSupportRadius() const { return 0.0; }
+
 private:
     LinElBranchFunction *mpBranchFunc;
 };
-
-
 } // end namespace oofem
 
 

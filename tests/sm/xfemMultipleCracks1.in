@@ -5,10 +5,10 @@ XFEMStatic nsteps 5 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 25 minIter 2 s
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 4 nelem 1 ncrosssect 1 nmat 2 nbc 2 nic 0 nltf 1 nxfemman 1
-node 1     coords 3  0        0        0       bc 2 1 1
-node 2     coords 3  1        0        0       bc 2 1 1
-node 3     coords 3  1        1        0       bc 2 2 1
-node 4     coords 3  0        1        0       bc 2 1 1
+node 1     coords 2  0        0       bc 2 1 1
+node 2     coords 2  1        0       bc 2 1 1
+node 3     coords 2  1        1       bc 2 2 1
+node 4     coords 2  0        1       bc 2 1 1
 PlaneStress2DXfem 1    nodes 4   1   2   3  4   mat 1 crosssect 1 nip 4 nlgeo 0 czmaterial 2
 SimpleCS 1 thick 1.0 material 1
 #
@@ -49,9 +49,9 @@ polygoncrack 2 points 8 -0.1 0.8 0.4 0.5 0.7 -0.1 0.8 -0.2
 #REACTION tStep 1. number 3 dof 1 value 5.0145e+01
 #REACTION tStep 1. number 4 dof 1 value -2.3630e+01
 ## step 3
-#REACTION tStep 2. number 3 dof 1 value 4.8467e+01
-#REACTION tStep 2. number 4 dof 1 value -2.1225e+01
+#REACTION tStep 2. number 3 dof 1 value 4.8468e+01
+#REACTION tStep 2. number 4 dof 1 value -2.1286e+01
 ## step 4
 #REACTION tStep 3. number 3 dof 1 value 4.1057e+01
-#REACTION tStep 3. number 4 dof 1 value -1.7607e+01
+#REACTION tStep 3. number 4 dof 1 value -1.7596e+01
 #%END_CHECK%
