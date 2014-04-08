@@ -496,7 +496,10 @@ DelaunayTriangulator :: findNonDelaunayTriangles(int insertedNode, InsertTriangl
 {
     DofManager *dman = domain->giveDofManager(insertedNode);
     FloatArray *nodeCoords = NULL;
-    if ( ( dman->giveClassID() == NodeClass ) || ( dman->giveClassID() == RigidArmNodeClass ) || ( dman->giveClassID() == PFEMParticleClass ) ) {
+    if ( ( dman->giveClassID() == NodeClass ) ||
+		 ( dman->giveClassID() == RigidArmNodeClass ) ||
+		 ( dman->giveClassID() == PFEMParticleClass ) ||
+		 ( dman->giveClassID() == InteractionPFEMParticleClass ) ) {
         nodeCoords = ( ( ( Node * ) dman )->giveCoordinates() );
     }
 

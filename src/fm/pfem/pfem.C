@@ -235,30 +235,14 @@ PFEM :: giveSolutionStepWhenIcApply()
     return stepWhenIcApply;
 }
 
-TimeStep *
-PFEM :: giveNextStep()
+void
+PFEM :: preInitializeNextStep()
 {
-    int istep = this->giveNumberOfFirstStep();
-    int i, nelem, nnodes;
-    double totalTime = 0;
-    StateCounterType counter = 1;
-    delete previousStep;
-    DofManager *dman = NULL;
-    Domain *domain = this->giveDomain(1);
-    Dof *jDof = NULL;
-    DofIDItem type;
+	int i, nnodes, nelem;
+	Domain *domain = this->giveDomain(1);
+	domain->clearElements();
 
-
-    if ( currentStep == NULL ) {
-        // first step -> generate initial step
-        currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
-    } else {
-        istep =  currentStep->giveNumber() + 1;
-        counter = currentStep->giveSolutionStateCounter() + 1;
-        domain->clearElements();
-    }
-
-    DelaunayTriangulator myMesher(domain, alphaShapeCoef);
+	DelaunayTriangulator myMesher(domain, alphaShapeCoef);
     myMesher.generateMesh();
 
     nnodes = domain->giveNumberOfDofManagers();
@@ -285,10 +269,10 @@ PFEM :: giveNextStep()
 
     nnodes = domain->giveNumberOfDofManagers();
     for ( i = 1; i <= nnodes; i++ ) {
-        dman = domain->giveDofManager(i);
+        DofManager *dman = domain->giveDofManager(i);
         for ( int j = 1; j <= dman->giveNumberOfDofs(); j++ ) {
-            jDof  =  dman->giveDof(j);
-            type  =  jDof->giveDofID();
+            Dof *jDof  =  dman->giveDof(j);
+            DofIDItem type  =  jDof->giveDofID();
             if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
                 if ( jDof->giveBcId() ) {
                     dynamic_cast< PFEMParticle * >(dman)->setFree(false);
@@ -297,6 +281,31 @@ PFEM :: giveNextStep()
             }
         }
     }
+}
+
+TimeStep *
+PFEM :: giveNextStep()
+{
+    int istep = this->giveNumberOfFirstStep();
+    int i;//, nelem, nnodes;
+    double totalTime = 0;
+    StateCounterType counter = 1;
+    delete previousStep;
+    //DofManager *dman = NULL;
+    Domain *domain = this->giveDomain(1);
+    //Dof *jDof = NULL;
+    //DofIDItem type;
+
+
+    if ( currentStep == NULL ) {
+        // first step -> generate initial step
+        currentStep = new TimeStep( *giveSolutionStepWhenIcApply() );
+    } else {
+        istep =  currentStep->giveNumber() + 1;
+        counter = currentStep->giveSolutionStateCounter() + 1;    
+    }
+
+    
 
     previousStep = currentStep;
 

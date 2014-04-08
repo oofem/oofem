@@ -492,6 +492,15 @@ FluidStructureProblem :: setRenumberFlag()
     }
 }
 
+void
+FluidStructureProblem :: preInitializeNextStep()
+{
+	for ( int i = 1; i <= nModels; i++ ) {
+        this->giveSlaveProblem(i)->preInitializeNextStep();
+    }
+}
+
+
 #ifdef __OOFEG
 void FluidStructureProblem :: drawYourself(oofegGraphicContext &context)
 {

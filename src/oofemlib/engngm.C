@@ -655,6 +655,7 @@ EngngModel :: solveYourself()
             this->timer.startTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
             this->timer.initTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
+			this->preInitializeNextStep();
             this->giveNextStep();
 
             // renumber equations if necessary. Ensure to call forceEquationNumbering() for staggered problems

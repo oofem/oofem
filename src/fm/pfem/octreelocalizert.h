@@ -713,7 +713,10 @@ public:
         // first determine domain extends (bounding box), and check for degenerated domain type
         for ( i = 1; i <= nnode; i++ ) {
             dman = domain->giveDofManager(i);
-            if ( ( dman->giveClassID() == NodeClass ) || ( dman->giveClassID() == RigidArmNodeClass ) || ( dman->giveClassID() == PFEMParticleClass ) ) {
+            if ( ( dman->giveClassID() == NodeClass ) ||
+				 ( dman->giveClassID() == RigidArmNodeClass ) || 
+				 ( dman->giveClassID() == PFEMParticleClass ) ||
+				 ( dman->giveClassID() == InteractionPFEMParticleClass ) ) {
                 coords = ( ( ( Node * ) dman )->giveCoordinates() );
                 if ( init ) {
                     init = 0;

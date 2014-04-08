@@ -164,6 +164,8 @@ public:
     TimeStep *giveSolutionStepWhenIcApply();
     NumericalMethod *giveNumericalMethod(MetaStep *);
 
+	virtual void preInitializeNextStep();
+
     //equation numbering using PressureNumberingScheme
     virtual int forceEquationNumbering(int id);
     /**

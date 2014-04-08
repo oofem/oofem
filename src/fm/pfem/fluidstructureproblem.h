@@ -141,6 +141,8 @@ public:
     virtual TimeStep *giveNextStep();
     virtual TimeStep *giveSolutionStepWhenIcApply();
 
+	virtual void preInitializeNextStep();
+
     // identification
     virtual const char *giveClassName() const { return "FluidStructureProblem"; }
     virtual const char *giveInputRecordName() const { return _IFT_FluidStructureProblem_Name; }
