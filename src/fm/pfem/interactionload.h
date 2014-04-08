@@ -42,6 +42,7 @@
 ///@name Input fields for LinearEdgeLoad
 //@{
 #define _IFT_InteractionLoad_Name "interactionload"
+#define _IFT_InteractionLoad_CoupledParticles "coupledparticles"
 //#define _IFT_LinearEdgeLoad_formulation "formulation"
 //#define _IFT_LinearEdgeLoad_startcoord "sc"
 //#define _IFT_LinearEdgeLoad_endcoord "ec"
@@ -72,9 +73,12 @@ protected:
     /// Coordinates of start and end point
     //FloatArray startCoords, endCoords;
     //FormulationType formulation;
+	IntArray coupledParticles;
 
 public:
-    InteractionLoad(int i, Domain *d) : LinearEdgeLoad(i, d) { }
+    InteractionLoad(int i, Domain *d) : LinearEdgeLoad(i, d) , coupledParticles(2){ }
+
+	virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
 
     virtual int giveApproxOrder() { return 1; }
     virtual IRResultType initializeFrom(InputRecord *ir);

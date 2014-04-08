@@ -46,6 +46,7 @@
 #define _IFT_InteractionPFEMParticle_Name "interactionpfemparticle"
 #define _IFT_Node_coords "coords"
 #define _IFT_Node_lcs "lcs"
+#define _IFT_InteractionPFEMParticle_CoupledNode "couplednode"
 //@}
 
 namespace oofem {
@@ -57,6 +58,9 @@ class IntArray;
  */
 class InteractionPFEMParticle : public PFEMParticle
 {
+protected:
+	int coupledNode;
+
 public:
     /**
      * Constructor. Creates a particle  with number n, belonging to aDomain.

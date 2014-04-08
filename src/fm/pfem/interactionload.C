@@ -49,6 +49,8 @@ InteractionLoad :: initializeFrom(InputRecord *ir)
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     LinearEdgeLoad :: initializeFrom(ir);
+
+	IR_GIVE_FIELD(ir, coupledParticles, _IFT_InteractionLoad_CoupledParticles);
  ///   if ( componentArray.giveSize() != nDofs * 2 ) {
  ///       _error("instanciateFrom: componentArray size mismatch");
  ///   }
@@ -81,6 +83,11 @@ void InteractionLoad :: giveInputRecord(DynamicInputRecord& input)
  ///   }
 }
 
+void
+InteractionLoad::computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
+{
+	BoundaryLoad :: computeValueAt(answer, tStep, coords, mode);
+}
 
 void
 InteractionLoad :: computeNArray(FloatArray &answer, FloatArray &coords) const

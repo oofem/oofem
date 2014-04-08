@@ -36,20 +36,19 @@
 #include "interactionpfemparticle.h"
 #include "timestep.h"
 #include "classfactory.h"
+//#include "inputrecord.h"
 
 #ifndef __MAKEDEPEND
  #include <math.h>
  #include <stdlib.h>
 #endif
 
-
-
 namespace oofem {
 REGISTER_DofManager(InteractionPFEMParticle);
 /**
  * Constructor. Creates a particle with number n, belonging to aDomain.
  */
-InteractionPFEMParticle :: InteractionPFEMParticle(int n, Domain *aDomain) : PFEMParticle(n, aDomain)
+InteractionPFEMParticle :: InteractionPFEMParticle(int n, Domain *aDomain) : PFEMParticle(n, aDomain), coupledNode(0)
 { }
 //from hanging node
 
@@ -59,7 +58,14 @@ InteractionPFEMParticle :: InteractionPFEMParticle(int n, Domain *aDomain) : PFE
 IRResultType
 InteractionPFEMParticle :: initializeFrom(InputRecord *ir)
 {
-    return PFEMParticle :: initializeFrom(ir);
+	const char *__proc = "initializeFrom";            // Required by IR_GIVE_FIELD macro
+    IRResultType result;							// Required by IR_GIVE_FIELD macro
+
+    result = PFEMParticle :: initializeFrom(ir);
+
+	IR_GIVE_OPTIONAL_FIELD(ir, coupledNode, _IFT_InteractionPFEMParticle_CoupledNode);
+
+	return (result != IRRT_OK) ? result : IRRT_OK;
 }
 
 /**
