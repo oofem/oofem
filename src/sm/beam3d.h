@@ -104,6 +104,7 @@ public:
     ///@todo Introduce interpolator and remove these two:
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);
