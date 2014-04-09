@@ -213,4 +213,14 @@ RigidArmNode :: computeMasterContribution(IntArray &countOfMasterDofs, std::vect
         }
     }
 }
+
+
+void RigidArmNode :: updateLocalNumbering(EntityRenumberingFunctor &f)
+{
+    Node::updateLocalNumbering (f);
+    //update masterNode numbering
+    this->masterDofMngr = f( this->masterDofMngr, ERS_DofManager );
+}
+
+
 } // end namespace oofem
