@@ -67,41 +67,37 @@ SloanGraph :: ~SloanGraph()
 
 void SloanGraph :: initialize()
 {
-    int k;
     int nnodes = domain->giveNumberOfDofManagers();
     int nelems = domain->giveNumberOfElements();
     int nbcs = domain->giveNumberOfBoundaryConditions();
-    GeneralBoundaryCondition *ibc;
 
     this->nodes.reserve(nnodes);
+    this->dmans.reserve(nnodes);
 
     // Add dof managers.
     for ( int i = 1; i <= nnodes; i++ ) {
         nodes.emplace_back(this, i);
         dmans.push_back(domain->giveDofManager(i));
     }
-    k = nnodes;
     // Add element internal dof managers
     for ( int i = 1; i <= nelems; i++ ) {
         Element *ielem = domain->giveElement(i);
-        this->nodes.reserve( k + ielem->giveNumberOfInternalDofManagers() );
-        this->dmans.reserve( k + ielem->giveNumberOfInternalDofManagers() );
+        this->nodes.reserve( nodes.size() + ielem->giveNumberOfInternalDofManagers() );
+        this->dmans.reserve( dmans.size() + ielem->giveNumberOfInternalDofManagers() );
         for ( int j = 1; j <= ielem->giveNumberOfInternalDofManagers(); ++j ) {
             nodes.emplace_back(this, i);
             dmans.push_back( ielem->giveInternalDofManager(i) );
-            ++k;
         }
     }
     // Add boundary condition internal dof managers
     for ( int i = 1; i <= nbcs; i++ ) {
-        ibc = domain->giveBc(i);
+        GeneralBoundaryCondition *ibc = domain->giveBc(i);
         if ( ibc ) {
-            this->nodes.reserve( k + ibc->giveNumberOfInternalDofManagers() );
-            this->dmans.reserve( k + ibc->giveNumberOfInternalDofManagers() );
+            this->nodes.reserve( nodes.size() + ibc->giveNumberOfInternalDofManagers() );
+            this->dmans.reserve( dmans.size() + ibc->giveNumberOfInternalDofManagers() );
             for ( int j = 1; j <= ibc->giveNumberOfInternalDofManagers(); ++j ) {
                 nodes.emplace_back(this, i);
                 dmans.push_back( ibc->giveInternalDofManager(i) );
-                ++k;
             }
         }
     }
@@ -117,13 +113,13 @@ void SloanGraph :: initialize()
             connections.at(j) = ielem->giveDofManager(j)->giveNumber();
         }
         for ( int j = 1; j <= ielemintdmans; j++ ) {
-            connections.at(ielemnodes + j) = ielem->giveInternalDofManager(j)->giveNumber();
+            connections.at(ielemnodes + j) = nnodes + ielem->giveInternalDofManager(j)->giveNumber();
         }
         for ( int j = 1; j <= ndofmans; j++ ) {
             for ( int k = j + 1; k <= ndofmans; k++ ) {
                 // Connect both ways
-                this->giveNode( connections.at(j) )->addNeighbor( connections.at(k) );
-                this->giveNode( connections.at(k) )->addNeighbor( connections.at(j) );
+                this->giveNode( connections.at(j) ).addNeighbor( connections.at(k) );
+                this->giveNode( connections.at(k) ).addNeighbor( connections.at(j) );
             }
         }
     }
@@ -133,8 +129,8 @@ void SloanGraph :: initialize()
 
     IntArray dofMasters;
     for ( int i = 1; i <= nnodes; i++ ) {
-        if ( domain->giveDofManager(i)->hasAnySlaveDofs() ) {
-            DofManager *iDofMan = domain->giveDofManager(i);
+        DofManager *iDofMan = domain->giveDofManager(i);
+        if ( iDofMan->hasAnySlaveDofs() ) {
             // slave dofs are present in dofManager
             // first - ask for masters, these may be different for each dof
             masters.clear();
@@ -148,30 +144,30 @@ void SloanGraph :: initialize()
             }
 
             for ( int connection: masters ) {
-                this->giveNode(i)->addNeighbor(connection);
-                this->giveNode(connection)->addNeighbor(i);
+                this->giveNode(i).addNeighbor(connection);
+                this->giveNode(connection).addNeighbor(i);
             }
         }
     } // end dof man loop
 }
 
 
-SloanGraphNode *
+SloanGraphNode &
 SloanGraph :: giveNode(int num)
 {
-    return &nodes[num-1];
+    return nodes[num-1];
 }
 
 int
 SloanGraph :: giveNodeWithMinDegree()
 {
-    int nnodes = domain->giveNumberOfDofManagers();
+    int nnodes = (int)nodes.size();
     int node_min = 0;
     int min = nnodes + 1;
 
     for ( int i = 1; i <= nnodes; i++ ) {
-        int deg = this->giveNode(i)->giveDegree();
-        if ( deg < min && deg > 0 && ( this->giveNode(i)->giveNewNumber() == 0 ) ) {
+        int deg = this->giveNode(i).giveDegree();
+        if ( deg < min && deg > 0 && ( this->giveNode(i).giveNewNumber() == 0 ) ) {
             min      = deg;
             node_min = i;
         }
@@ -204,9 +200,8 @@ SloanGraph :: findPeripheralNodes()
 
     int MinimumWidth = domain->giveNumberOfDofManagers();
     int CurrentDiameter = Spine->giveDepth();
-    int TrialDepth, TrialWidth, Root;
+    int TrialDepth, TrialWidth;
     std :: list< int >candidates;
-    std :: list< int > :: iterator pos;
     int newStartNode = 1;
 
     while ( newStartNode ) {
@@ -215,8 +210,7 @@ SloanGraph :: findPeripheralNodes()
         this->extractCandidates(candidates, Spine);
         MinimumWidth = domain->giveNumberOfDofManagers();
 
-        for ( pos = candidates.begin(); pos != candidates.end(); ++pos ) {
-            Root = * pos;
+        for ( int Root: candidates ) {
             SloanLevelStructure *TrialSpine = new SloanLevelStructure(this, Root);
             // abort level struc assembly if TrialWidth>MinimumWidth.
             if ( TrialSpine->formYourself(MinimumWidth) == 0 ) {
@@ -259,17 +253,17 @@ SloanGraph :: extractCandidates(std :: list< int > &candidates, SloanLevelStruct
         OOFEM_ERROR("Invalid spine");
     }
 
-    int i, NumberOfLevels = Spine->giveDepth();
-    IntArray *LastLevel = Spine->giveLevel(NumberOfLevels);
-    sort( * LastLevel, SloanNodalDegreeOrderingCrit(this) );
+    int NumberOfLevels = Spine->giveDepth();
+    IntArray LastLevel = Spine->giveLevel(NumberOfLevels);
+    sort( LastLevel, SloanNodalDegreeOrderingCrit(this) );
 
     candidates.clear();
     // shrink candidates to contain only one node of each degree
     int lastDegree = 0;
-    for ( i = 1; i <= LastLevel->giveSize(); i++ ) {
-        if ( lastDegree != this->giveNode( LastLevel->at(i) )->giveDegree() ) {
-            lastDegree = this->giveNode( LastLevel->at(i) )->giveDegree();
-            candidates.push_back( LastLevel->at(i) );
+    for ( int node: LastLevel ) {
+        if ( lastDegree != this->giveNode( node ).giveDegree() ) {
+            lastDegree = this->giveNode( node ).giveDegree();
+            candidates.push_back( node );
         }
     }
 }
@@ -290,10 +284,10 @@ SloanGraph :: findBestRoot()
 {
     int BestRoot = 0;
     int Diameter = 0;
-    int i, nnodes = domain->giveNumberOfDofManagers();
+    int nnodes = (int)nodes.size();
     SloanLevelStructure *LSC;
     clock_t time_1, time_0 = :: clock();
-    for ( i = 1; i <= nnodes; i++ ) {
+    for ( int i = 1; i <= nnodes; i++ ) {
         LSC = new SloanLevelStructure(this, i);
         int Depth = LSC->giveDepth();
         if ( Depth > Diameter ) {
@@ -318,7 +312,7 @@ SloanGraph :: findBestRoot()
 double
 SloanGraph :: giveOptimalProfileDensity()
 {
-    int nnodes = domain->giveNumberOfDofManagers();
+    int nnodes = (int)nodes.size();
     double d = 0;
     if ( nnodes > 0 ) {
         d = 100.0 * MinimalProfileSize;
@@ -336,17 +330,16 @@ SloanGraph :: initStatusAndPriority()
     this->evaluateNodeDistances();
     int nnodes = domain->giveNumberOfDofManagers();
 
-    for ( int i = 1; i <= nnodes; i++ ) {
-        int Distance = giveNode(i)->giveDistance();
-        int Degree   = giveNode(i)->giveDegree();
+    for ( auto &node: nodes ) {
+        int Distance = node->giveDistance();
+        int Degree   = node->giveDegree();
         int Priority = WeightDistance * Distance - WeightDegree * ( Degree + 1 );
-        giveNode(i)->setPriority(Priority);
-        giveNode(i)->setStatus(SloanGraphNode :: Inactive);
+        node->setPriority(Priority);
+        node->setStatus(SloanGraphNode :: Inactive);
     }
 
 #else
     int NumLevels;
-    IntArray *Level;
     int End = endNode;
 
     int Distance, Degree, Priority;
@@ -355,14 +348,13 @@ SloanGraph :: initStatusAndPriority()
     NumLevels = BackSpine.giveDepth();
 
     for ( int i = 1; i <= NumLevels; i++ ) {
-        Level = BackSpine.giveLevel(i);
-        for ( int j = 1; j <= Level->giveSize(); j++ ) {
+        for ( int nodeNum: BackSpine.giveLevel(i) ) {
             Distance = i - 1;
-            this->giveNode( Level->at(j) )->setDistance(Distance);
-            Degree   = this->giveNode( Level->at(j) )->giveDegree();
+            this->giveNode(nodeNum).setDistance(Distance);
+            Degree   = this->giveNode(nodeNum).giveDegree();
             Priority = WeightDistance * Distance - WeightDegree * ( Degree + 1 );
-            this->giveNode( Level->at(j) )->setPriority(Priority);
-            this->giveNode( Level->at(j) )->setStatus(SloanGraphNode :: Inactive);
+            this->giveNode(nodeNum).setPriority(Priority);
+            this->giveNode(nodeNum).setStatus(SloanGraphNode :: Inactive);
         }
     }
 
@@ -374,7 +366,6 @@ void
 SloanGraph :: evaluateNodeDistances()
 {
     int NumLevels;
-    IntArray *Level;
 
     if ( this->nodeDistancesFlag ) {
         return;
@@ -385,9 +376,8 @@ SloanGraph :: evaluateNodeDistances()
     NumLevels = BackSpine.giveDepth();
 
     for ( int i = 1; i <= NumLevels; i++ ) {
-        Level = BackSpine.giveLevel(i);
-        for ( int j = 1; j <= Level->giveSize(); j++ ) {
-            this->giveNode( Level->at(j) )->setDistance(i - 1);
+        for ( int nodeNum: BackSpine.giveLevel(i) ) {
+            this->giveNode(nodeNum).setDistance(i - 1);
         }
     }
 
@@ -397,9 +387,8 @@ SloanGraph :: evaluateNodeDistances()
 void
 SloanGraph :: assignOldNumbers()
 {
-    int nnodes = domain->giveNumberOfDofManagers();
-    for ( int i = 1; i <= nnodes; i++ ) {
-        giveNode(i)->assignOldNumber();
+    for ( auto &node: nodes ) {
+        node.assignOldNumber();
     }
 }
 
@@ -407,10 +396,9 @@ SloanGraph :: assignOldNumbers()
 void
 SloanGraph :: numberIsolatedNodes(int &NextNumber, int &labeledNodes)
 {
-    int nnodes = domain->giveNumberOfDofManagers();
-    for ( int i = 1; i <= nnodes; i++ ) {
-        if ( giveNode(i)->giveDegree() == 0 ) {
-            giveNode(i)->setNewNumber(++NextNumber);
+    for ( auto &node: nodes ) {
+        if ( node.giveDegree() == 0 ) {
+            node.setNewNumber(++NextNumber);
             labeledNodes++;
         }
     }
@@ -423,9 +411,8 @@ SloanGraph :: assignNewNumbers()
     int Start, inext, NextNumber = 0;
     int labeledNodes = 0;
 
-    int nnodes = domain->giveNumberOfDofManagers();
-    for ( int i = 1; i <= nnodes; i++ ) {
-        giveNode(i)->setNewNumber(0);
+    for ( auto &node: nodes ) {
+        node.setNewNumber(0);
     }
 
 #ifdef MDC
@@ -433,13 +420,12 @@ SloanGraph :: assignNewNumbers()
 #endif
 
     this->initStatusAndPriority();
-    SloanGraphNode *nextNode;
     //std::list<int>::iterator next;
 
     Start = this->startNode;
     this->queue.clear();
     this->queue.push_back(Start);
-    this->giveNode(Start)->setStatus(SloanGraphNode :: Preactive);
+    this->giveNode(Start).setStatus(SloanGraphNode :: Preactive);
 
 #ifdef MDC
     for ( ; ; ) {
@@ -448,13 +434,13 @@ SloanGraph :: assignNewNumbers()
         // finds top priority, returns the corresponding node and deletes the entry
         inext = findTopPriorityInQueue();
         // this->queue.erase(next); - done by findTopPriority
-        nextNode = this->giveNode(inext);
-        if ( nextNode->giveStatus() == SloanGraphNode :: Preactive ) {
+        SloanGraphNode &nextNode = this->giveNode(inext);
+        if ( nextNode.giveStatus() == SloanGraphNode :: Preactive ) {
             this->insertNeigborsOf(inext);
         }
 
-        nextNode->setNewNumber(++NextNumber);
-        nextNode->setStatus(SloanGraphNode :: Postactive);
+        nextNode.setNewNumber(++NextNumber);
+        nextNode.setStatus(SloanGraphNode :: Postactive);
         modifyPriorityAround(inext);
         labeledNodes++;
     }
@@ -469,7 +455,7 @@ SloanGraph :: assignNewNumbers()
     Start = this->startNode;
     this->queue.clear();
     this->queue.push_back(Start);
-    this->giveNode(Start)->setStatus(SloanGraphNode :: Preactive);
+    this->giveNode(Start).setStatus(SloanGraphNode :: Preactive);
 }
 #else
     if ( labeledNodes != domain->giveNumberOfDofManagers() ) {
@@ -483,16 +469,12 @@ SloanGraph :: assignNewNumbers()
 void
 SloanGraph :: insertNeigborsOf(int next)
 {
-    int neighborNode;
-    SloanGraphNode *node = this->giveNode(next);
-    std :: list< int > *neighbors = node->giveNeighborList();
-    std :: list< int > :: iterator pos;
+    SloanGraphNode &node = this->giveNode(next);
 
-    for ( pos = neighbors->begin(); pos != neighbors->end(); ++pos ) {
-        neighborNode = * pos;
-        if ( this->giveNode(neighborNode)->giveStatus() == SloanGraphNode :: Inactive ) {
-            this->giveNode(neighborNode)->setStatus(SloanGraphNode :: Preactive);
-            this->queue.push_front(neighborNode);
+    for ( int nodeNum: node.giveNeighborList() ) {
+        if ( this->giveNode(nodeNum).giveStatus() == SloanGraphNode :: Inactive ) {
+            this->giveNode(nodeNum).setStatus(SloanGraphNode :: Preactive);
+            this->queue.push_front(nodeNum);
         }
     }
 }
@@ -501,25 +483,22 @@ void
 SloanGraph :: modifyPriorityAround(int next)
 {
     SloanGraphNode :: SloanGraphNode_StatusType status;
-    SloanGraphNode *neighborNode, *neighborOfNeighbor, *nextNode = this->giveNode(next);
-    std :: list< int > *neighborsOfneighbors, *neighbors = nextNode->giveNeighborList();
-    std :: list< int > :: iterator pos, npos;
+    SloanGraphNode &nextNode = this->giveNode(next);
 
-    for ( pos = neighbors->begin(); pos != neighbors->end(); ++pos ) {
-        neighborNode = this->giveNode(* pos);
-        if ( neighborNode->giveStatus() == SloanGraphNode :: Preactive ) {
-            neighborNode->increasePriorityBy(WeightDegree);
-            neighborNode->setStatus(SloanGraphNode :: Active);
-            neighborsOfneighbors =  neighborNode->giveNeighborList();
-            for ( npos = neighborsOfneighbors->begin(); npos != neighborsOfneighbors->end(); ++npos ) {
-                neighborOfNeighbor = this->giveNode(* npos);
-                status = neighborOfNeighbor->giveStatus();
+    for ( int nodeNum: nextNode.giveNeighborList() ) {
+        SloanGraphNode &neighborNode = this->giveNode(nodeNum);
+        if ( neighborNode.giveStatus() == SloanGraphNode :: Preactive ) {
+            neighborNode.increasePriorityBy(WeightDegree);
+            neighborNode.setStatus(SloanGraphNode :: Active);
+            for ( int nnodeNum: neighborNode.giveNeighborList() ) {
+                SloanGraphNode &neighborOfNeighbor = this->giveNode(nnodeNum);
+                status = neighborOfNeighbor.giveStatus();
                 if ( status == SloanGraphNode :: Active || status == SloanGraphNode :: Preactive ) {
-                    neighborOfNeighbor->increasePriorityBy(WeightDegree);
+                    neighborOfNeighbor.increasePriorityBy(WeightDegree);
                 } else if ( status == SloanGraphNode :: Inactive ) {
-                    neighborOfNeighbor->increasePriorityBy(WeightDegree);
-                    this->queue.push_front(* npos);
-                    neighborOfNeighbor->setStatus(SloanGraphNode :: Preactive);
+                    neighborOfNeighbor.increasePriorityBy(WeightDegree);
+                    this->queue.push_front(nnodeNum);
+                    neighborOfNeighbor.setStatus(SloanGraphNode :: Preactive);
                 }
             }
         }
@@ -530,10 +509,10 @@ int
 SloanGraph :: findTopPriorityInQueue()
 {
     int candidate = 0, priority, pmax = -WeightDegree * ( domain->giveNumberOfDofManagers() + 1 );
-    std :: list< int > :: iterator pos, toDel;
+    std :: list< int > :: iterator toDel;
 
-    for ( pos = queue.begin(); pos != queue.end(); ++pos ) {
-        priority = this->giveNode(* pos)->givePriority();
+    for ( auto pos = queue.begin(); pos != queue.end(); ++pos ) {
+        priority = this->giveNode(* pos).givePriority();
         if ( pmax < priority ) {
             pmax = priority;
             toDel = pos;
@@ -553,7 +532,6 @@ int
 SloanGraph :: computeProfileSize()
 {
     int ProfSize = 0;
-    int nnodes = this->domain->giveNumberOfDofManagers();
     //clock_t time_1, time_0 = ::clock();
 
     if ( WeightDistance || WeightDegree ) {
@@ -562,8 +540,8 @@ SloanGraph :: computeProfileSize()
         assignOldNumbers();
     }
 
-    for ( int i = 1; i <= nnodes; i++ ) {
-        ProfSize += this->giveNode(i)->computeProfileHeight();
+    for ( auto &node: nodes ) {
+        ProfSize += node.computeProfileHeight();
     }
 
     //time_1 = ::clock();
@@ -576,9 +554,8 @@ SloanGraph :: computeProfileSize()
 void
 SloanGraph :: askNewOptimalNumbering(TimeStep *tStep)
 {
-    int ndmans = OptimalRenumberingTable.giveSize();
-    for ( int i = 1; i <= ndmans; ++i ) {
-        dmans[ OptimalRenumberingTable.at(i) - 1 ]->askNewEquationNumbers(tStep);
+    for ( int dmanNum: OptimalRenumberingTable ) {
+        dmans[ dmanNum - 1 ]->askNewEquationNumbers(tStep);
     }
 }
 
@@ -586,10 +563,10 @@ SloanGraph :: askNewOptimalNumbering(TimeStep *tStep)
 void
 SloanGraph :: writeRenumberingTable(FILE *file)
 {
-    int nnodes = this->domain->giveNumberOfDofManagers();
+    int nnodes = (int)nodes.size();
 
     for ( int i = 1; i <= nnodes; i++ ) {
-        int inew = this->giveNode(i)->giveNewNumber();
+        int inew = this->giveNode(i).giveNewNumber();
         fprintf(file, "%8i %8i\n", i, inew);
     }
 }
@@ -601,7 +578,7 @@ SloanGraph :: writeOptimalRenumberingTable(FILE *OutputFile)
         return 0;
     }
 
-    int nnodes = domain->giveNumberOfDofManagers();
+    int nnodes = OptimalRenumberingTable.giveSize();
     for ( int i = 1; i <= nnodes; i++ ) {
         fprintf( OutputFile, "%8i %8i\n", i, OptimalRenumberingTable.at(i) );
     }
@@ -634,7 +611,6 @@ SloanGraph :: setParameters(int wdeg, int wdis)
 void
 SloanGraph :: tryParameters(int wdeg, int wdis)
 {
-    int nnodes = domain->giveNumberOfDofManagers();
 
     setParameters(wdeg, wdis);
     int psize = computeProfileSize();
@@ -646,12 +622,13 @@ SloanGraph :: tryParameters(int wdeg, int wdis)
     // printf(" profile size %d",psize);
 #endif
     if ( psize < MinimalProfileSize || MinimalProfileSize == 0 ) {
+        int nnodes = (int)nodes.size();
         MinimalProfileSize    = psize;
         OptimalWeightDegree   = wdeg;
         OptimalWeightDistance = wdis;
         OptimalRenumberingTable.resize(nnodes);
         for ( int i = 1; i <= nnodes; i++ ) {
-            OptimalRenumberingTable.at( this->giveNode(i)->giveNewNumber() ) = i;
+            OptimalRenumberingTable.at( this->giveNode(i).giveNewNumber() ) = i;
         }
     }
 }
@@ -660,7 +637,7 @@ SloanGraph :: tryParameters(int wdeg, int wdis)
 int
 SloanGraph :: giveFullProfileSize()
 {
-    int n = this->domain->giveNumberOfDofManagers();
+    int n = (int)nodes.size();
     return n * ( n + 1 );
 }
 } // end namespace oofem

@@ -84,7 +84,7 @@ public:
      * The entry is added only if not exist before,
      * the Degree member is updated accordingly.
      */
-    void  addNeighbor(int neighbor);
+    void addNeighbor(int neighbor);
 
     /// Returns new number of receiver.
     int giveNewNumber() { return NumberNew; }
@@ -99,7 +99,7 @@ public:
     /// Returns priority of receiver.
     int givePriority() { return Priority; }
     /// Returns the neighbor list of receiver.
-    std :: list< int > *giveNeighborList()  { return & neighborList; }
+    std :: list< int > &giveNeighborList()  { return neighborList; }
     /// sets new number equal to old one.
     void assignOldNumber() { NumberNew = NumberOld; }
 

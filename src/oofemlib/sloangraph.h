@@ -129,7 +129,7 @@ public:
     void resetAll() { startNode = endNode = nodeDistancesFlag = 0; }
 
     /// Return graph node
-    SloanGraphNode *giveNode(int num);
+    SloanGraphNode &giveNode(int num);
 
     /// Finds the peripheral nodes (rooted in optimal start node) according to receiver quality and current weights.
     void findPeripheralNodes();
@@ -151,7 +151,7 @@ public:
     /// Numbers all the DOFs according to the optimal renumbering found.
     void askNewOptimalNumbering(TimeStep *tStep);
     /// Returns the optimal reverse renumbering table
-    IntArray *giveOptimalRenumberingTable() { return & OptimalRenumberingTable; }
+    IntArray &giveOptimalRenumberingTable() { return OptimalRenumberingTable; }
     void writeRenumberingTable(FILE *file);
     int writeOptimalRenumberingTable(FILE *file);
 
@@ -221,7 +221,7 @@ public:
         graph = g;
     }
     int operator() (const int n1, const int n2) {
-        return graph->giveNode(n1)->giveDegree() - graph->giveNode(n2)->giveDegree();
+        return graph->giveNode(n1).giveDegree() - graph->giveNode(n2).giveDegree();
     }
 };
 } // end namespace oofem
