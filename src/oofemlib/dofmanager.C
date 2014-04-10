@@ -276,8 +276,8 @@ void DofManager :: giveMasterDofIDArray(const IntArray &dofIDArry, IntArray &mas
         masterDofIDs.preallocate(masterDofs);
         masterDofIDs.clear();
 
-        for ( int i = 1; i <= numberOfDofs; i++ ) {
-            this->giveDof(i)->giveDofIDs(temp);
+        for ( int i = 1; i <= dofArray.giveSize(); i++ ) {
+            this->giveDof(dofArray.at(i))->giveDofIDs(temp);
             masterDofIDs.followedBy(temp);
         }
     }
