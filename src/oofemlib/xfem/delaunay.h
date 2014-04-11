@@ -36,7 +36,7 @@
 #define delaunay_h
 
 #include "oofemcfg.h"
-#include "alist.h"
+
 #include <vector>
 
 namespace oofem {

@@ -38,7 +38,6 @@
 #include "femcmpnn.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
-#include "alist.h"
 #include "intarray.h"
 #include "error.h"
 #include "integrationrule.h"

@@ -69,7 +69,6 @@
 
 
 namespace oofem {
-template< class T >class AList;
 class BasicGeometry;
 class EnrichmentFunction;
 class EnrichmentDomain;

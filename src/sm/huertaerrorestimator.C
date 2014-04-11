@@ -1080,9 +1080,7 @@ HuertaRemeshingCriteria :: giveDofManDensity(int num)
 void
 HuertaErrorEstimator :: buildRefinedMesh()
 {
-    // Element *element;
-    RefinedElement *refinedElement;
-    int ielem, nelems;
+    int nelems;
     Domain *d = this->domain;
 
     if ( this->refinedMesh.completed == 1 ) {
@@ -1090,12 +1088,10 @@ HuertaErrorEstimator :: buildRefinedMesh()
     }
 
     nelems = d->giveNumberOfElements();
-    this->refinedElementList.growTo(nelems);
+    this->refinedElementList.reserve(nelems);
 
-    for ( ielem = 1; ielem <= nelems; ielem++ ) {
-        //  element = d -> giveElement(ielem);
-        refinedElement = new RefinedElement(d, ielem, this->refineLevel);
-        this->refinedElementList.put(ielem, refinedElement);
+    for ( int ielem = 1; ielem <= nelems; ielem++ ) {
+        this->refinedElementList.emplace_back(d, ielem, this->refineLevel);
     }
 
     if ( refinedMesh.refineMeshGlobally(d, this->refineLevel, this->refinedElementList) != 0 ) {
@@ -2889,7 +2885,7 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
  #endif
 #endif
 
-    refinedElement = this->refinedElementList.at(elemId);
+    refinedElement = &this->refinedElementList[elemId-1];
     interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
     if ( interface == NULL ) {
         OOFEM_ERROR("Element has no Huerta error estimator interface defined");
@@ -3371,7 +3367,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 
 #endif
 
-        refinedElement = this->refinedElementList.at(elemId);
+        refinedElement = &this->refinedElementList.at(elemId);
         interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
         if ( interface == NULL ) {
             OOFEM_ERROR("Element has no Huerta error estimator interface defined");
@@ -3409,7 +3405,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 
 #endif
 
-            refinedElement = this->refinedElementList.at(elemId);
+            refinedElement = &this->refinedElementList.at(elemId);
             interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
 
             for ( inode = 1; inode <= element->giveNumberOfNodes(); inode++ ) {
@@ -3454,7 +3450,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 
 #endif
 
-        refinedElement = this->refinedElementList.at(elemId);
+        refinedElement = &this->refinedElementList.at(elemId);
         interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
 
         for ( inode = 1; inode <= element->giveNumberOfNodes(); inode++ ) {
@@ -3484,7 +3480,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 
 #endif
 
-        refinedElement = this->refinedElementList.at(elemId);
+        refinedElement = &this->refinedElementList.at(elemId);
         interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
 
         for ( inode = 1; inode <= element->giveNumberOfNodes(); inode++ ) {
@@ -3518,7 +3514,7 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
 
 #endif
 
-            refinedElement = this->refinedElementList.at(elemId);
+            refinedElement = &this->refinedElementList.at(elemId);
             interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
 
             for ( inode = 1; inode <= element->giveNumberOfNodes(); inode++ ) {
@@ -3676,7 +3672,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
 
     for ( elemId = 1; elemId <= elems; elemId++ ) {
         element = domain->giveElement(elemId);
-        refinedElement = this->refinedElementList.at(elemId);
+        refinedElement = &this->refinedElementList.at(elemId);
         interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
         if ( interface == NULL ) {
             OOFEM_ERROR("Element has no Huerta error estimator interface defined");
@@ -3697,7 +3693,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
         localBcId = 0;
         for ( elemId = 1; elemId <= elems; elemId++ ) {
             element = domain->giveElement(elemId);
-            refinedElement = this->refinedElementList.at(elemId);
+            refinedElement = &this->refinedElementList.at(elemId);
             interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
             interface->HuertaErrorEstimatorI_setupRefinedElementProblem(refinedElement, this->refineLevel, 0,
                                                                         localNodeIdArray, globalNodeIdArray,
@@ -3724,7 +3720,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
 
     for ( elemId = 1; elemId <= elems; elemId++ ) {
         element = domain->giveElement(elemId);
-        refinedElement = this->refinedElementList.at(elemId);
+        refinedElement = &this->refinedElementList.at(elemId);
         interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
         interface->HuertaErrorEstimatorI_setupRefinedElementProblem(refinedElement, this->refineLevel, 0,
                                                                     localNodeIdArray, globalNodeIdArray,
@@ -3736,7 +3732,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
 
     for ( elemId = 1; elemId <= elems; elemId++ ) {
         element = domain->giveElement(elemId);
-        refinedElement = this->refinedElementList.at(elemId);
+        refinedElement = &this->refinedElementList.at(elemId);
         interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
         interface->HuertaErrorEstimatorI_setupRefinedElementProblem(refinedElement, this->refineLevel, 0,
                                                                     localNodeIdArray, globalNodeIdArray,
@@ -3752,7 +3748,7 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
         localBcId = loads;
         for ( elemId = 1; elemId <= elems; elemId++ ) {
             element = domain->giveElement(elemId);
-            refinedElement = this->refinedElementList.at(elemId);
+            refinedElement = &this->refinedElementList.at(elemId);
             interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
             interface->HuertaErrorEstimatorI_setupRefinedElementProblem(refinedElement, this->refineLevel, 0,
                                                                         localNodeIdArray, globalNodeIdArray,

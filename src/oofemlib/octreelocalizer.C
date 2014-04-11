@@ -40,7 +40,6 @@
 #include "dofmanager.h"
 #include "node.h"
 #include "connectivitytable.h"
-#include "alist.h"
 #include "mathfem.h"
 #include "timer.h"
 #include "error.h"
@@ -96,7 +95,7 @@ OctantRec :: giveIPElementList()
 std :: list< int > &
 OctantRec :: giveElementList(int region)
 {
-    if ( elementList.size() < region + 1 ) {
+    if ( (int)elementList.size() < region + 1 ) {
         elementList.resize(region + 1);
     }
     return elementList[region];

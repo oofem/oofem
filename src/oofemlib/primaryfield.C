@@ -200,7 +200,6 @@ PrimaryField :: resolveIndx(TimeStep *tStep, int shift)
 void
 PrimaryField :: advanceSolution(TimeStep *tStep)
 {
-    TimeStep *newts;
     if ( actualStepNumber == tStep->giveNumber() ) {
         // We're one the correct step already, no need to advance.
         return;
@@ -211,11 +210,7 @@ PrimaryField :: advanceSolution(TimeStep *tStep)
 
     actualStepIndx = ( actualStepIndx > 0 ) ? actualStepIndx - 1 : nHistVectors;
     actualStepNumber = tStep->giveNumber();
-    if ( ( newts = solStepList.at(actualStepIndx + 1) ) ) {
-        * newts = * tStep;
-    } else {
-        solStepList.put( actualStepIndx + 1, new TimeStep(* tStep) );
-    }
+    solStepList[actualStepIndx].reset(new TimeStep(* tStep));
 }
 
 
@@ -238,10 +233,9 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
         }
     }
 
-    TimeStep *iStep;
     int flag;
     for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( ( iStep = solStepList.at(i + 1) ) ) {
+        if ( solStepList[i] ) {
             flag = 1;
         } else {
             flag = 0;
@@ -252,7 +246,7 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
         }
 
         if ( flag ) {
-            if ( ( iores = solStepList.at(i + 1)->saveContext(stream, mode) ) != CIO_OK ) {
+            if ( ( iores = solStepList[i]->saveContext(stream, mode) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         }
@@ -281,22 +275,21 @@ PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
     }
 
     int flag;
-    TimeStep *iStep;
     for ( int i = 0; i <= nHistVectors; i++ ) {
         if ( !stream->read(& flag, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         if ( flag ) {
-            iStep = new TimeStep(emodel);
+            std :: unique_ptr< TimeStep > iStep(new TimeStep(emodel));
             if ( ( iores = iStep->restoreContext(stream, mode) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
+            solStepList[i].reset(NULL);
         } else {
-            iStep = NULL;
+            solStepList[i].reset(NULL);
         }
 
-        solStepList.put(i + 1, iStep);
     }
 
     return CIO_OK;

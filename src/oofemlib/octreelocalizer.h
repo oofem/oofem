@@ -38,7 +38,6 @@
 #include "oofemcfg.h"
 #include "spatiallocalizer.h"
 #include "floatarray.h"
-#include "alist.h"
 #include "intarray.h"
 
 #include <set>

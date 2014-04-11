@@ -37,7 +37,6 @@
 
 #include <cstdio>
 
-#include "alist.h"
 #include "femcmpnn.h"
 #include "intarray.h"
 #include "equationid.h"

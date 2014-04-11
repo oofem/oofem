@@ -37,7 +37,6 @@
 #include "intarray.h"
 #include "connectivitytable.h"
 #include "floatarray.h"
-#include "alist.h"
 #include "domain.h"
 #include "enrichmentdomain.h"
 #include "element.h"

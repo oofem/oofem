@@ -40,7 +40,6 @@
 #include "sloanlevelstruct.h"
 #include "dofmanager.h"
 #include "intarray.h"
-#include "alist.h"
 
 #include <list>
 

@@ -35,7 +35,6 @@
 #ifndef mmaleastsquareprojection_h
 #define mmaleastsquareprojection_h
 
-#include "alist.h"
 #include "materialmappingalgorithm.h"
 #include "interface.h"
 

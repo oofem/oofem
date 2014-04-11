@@ -116,7 +116,7 @@ namespace oofem {
 
 
 int
-RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > &refinedElementList)
+RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedElement > &refinedElementList)
 {
     int jj, kk = 0, j1, j2, j3, j4, type;
     long node, elem, nd, pos = 0, p, number, size;
@@ -128,7 +128,6 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
     int swap [ 6 ], flag;
 
     Element *element = NULL;
-    RefinedElement *refinedElement = NULL;
     IntArray *connectivity = NULL, *boundary = NULL;
 
     long fe_nodes = 0, fe_elems = 0;
@@ -2817,15 +2816,15 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
     edge_id = face_id = quad_id = tetra_id = hexa_id = 0;
     for ( i = 0; i < fe_elems; i++ ) {
         element = d->giveElement(i + 1);
-        refinedElement = refinedElementList.at(i + 1);
-        boundary = refinedElement->giveBoundaryFlagArray();
+        RefinedElement &refinedElement = refinedElementList.at(i + 1);
+        boundary = refinedElement.giveBoundaryFlagArray();
 
         switch ( element->giveGeometryType() ) {
         case EGT_line_1:
             pos = edge_id * 2;
             fine_edge = & ( fine_edge_array [ pos ] );
             for ( j = 0; j < 2; j++, fine_edge++ ) {
-                connectivity = refinedElement->giveFineNodeArray(j + 1);
+                connectivity = refinedElement.giveFineNodeArray(j + 1);
                 connectivity->resize(level + 2);
                 for ( k = 0; k < level + 2; k++ ) {
                     connectivity->at(k + 1) = fine_edge->fine_id [ k ];
@@ -2853,7 +2852,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
             pos = face_id * 3;
             fine_quad = & ( fine_quad_array [ pos ] );
             for ( j = 0; j < 3; j++, fine_quad++ ) {
-                connectivity = refinedElement->giveFineNodeArray(j + 1);
+                connectivity = refinedElement.giveFineNodeArray(j + 1);
                 connectivity->resize( ( level + 2 ) * ( level + 2 ) );
                 for ( k = 0; k < ( level + 2 ) * ( level + 2 ); k++ ) {
                     connectivity->at(k + 1) = fine_quad->fine_id [ k ];
@@ -2908,7 +2907,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
             pos = fe_faces * 3 + quad_id * 4;
             fine_quad = & ( fine_quad_array [ pos ] );
             for ( j = 0; j < 4; j++, fine_quad++ ) {
-                connectivity = refinedElement->giveFineNodeArray(j + 1);
+                connectivity = refinedElement.giveFineNodeArray(j + 1);
                 connectivity->resize( ( level + 2 ) * ( level + 2 ) );
                 for ( k = 0; k < ( level + 2 ) * ( level + 2 ); k++ ) {
                     connectivity->at(k + 1) = fine_quad->fine_id [ k ];
@@ -2963,7 +2962,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
             pos = tetra_id * 4;
             fine_hexa = & ( fine_hexa_array [ pos ] );
             for ( j = 0; j < 4; j++, fine_hexa++ ) {
-                connectivity = refinedElement->giveFineNodeArray(j + 1);
+                connectivity = refinedElement.giveFineNodeArray(j + 1);
                 connectivity->resize( ( level + 2 ) * ( level + 2 ) * ( level + 2 ) );
                 for ( k = 0; k < ( level + 2 ) * ( level + 2 ) * ( level + 2 ); k++ ) {
                     connectivity->at(k + 1) = fine_hexa->fine_id [ k ];
@@ -2986,7 +2985,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, AList< RefinedElement > 
             pos = fe_tetras * 4 + hexa_id * 8;
             fine_hexa = & ( fine_hexa_array [ pos ] );
             for ( j = 0; j < 8; j++, fine_hexa++ ) {
-                connectivity = refinedElement->giveFineNodeArray(j + 1);
+                connectivity = refinedElement.giveFineNodeArray(j + 1);
                 connectivity->resize( ( level + 2 ) * ( level + 2 ) * ( level + 2 ) );
                 for ( k = 0; k < ( level + 2 ) * ( level + 2 ) * ( level + 2 ); k++ ) {
                     connectivity->at(k + 1) = fine_hexa->fine_id [ k ];

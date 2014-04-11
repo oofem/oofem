@@ -39,10 +39,11 @@
 #include "interface.h"
 #include "refinedelement.h"
 #include "refinedmesh.h"
-#include "alist.h"
 #include "floatarray.h"
 #include "statecountertype.h"
 #include "remeshingcrit.h"
+
+#include <vector>
 
 ///@name Input fields for HuertaErrorEstimator
 //@{
@@ -118,7 +119,7 @@ protected:
     /// Refinement level.
     int refineLevel;
     /// Fine mesh.
-    AList< RefinedElement >refinedElementList;
+    std :: vector< RefinedElement >refinedElementList;
     /// Mesh refinement.
     RefinedMesh refinedMesh;
     /// Linear analysis flag.
@@ -134,7 +135,7 @@ protected:
 public:
     /// Constructor
     HuertaErrorEstimator(int n, Domain * d) : ErrorEstimator(n, d), eNorms(0), primaryUnknownError(0),
-        refinedElementList(0), refinedMesh()
+        refinedElementList(), refinedMesh()
     {
         eeType = EET_HEE;
         stateCounter = 0;

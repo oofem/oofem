@@ -33,7 +33,6 @@
  */
 
 #include "mathfem.h"
-#include "alist.h"
 #include "geometry.h"
 #include "element.h"
 #include "dofmanager.h"
