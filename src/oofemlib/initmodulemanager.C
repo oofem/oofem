@@ -61,8 +61,8 @@ InitModule *InitModuleManager :: CreateModule(const char *name, int n, EngngMode
 void
 InitModuleManager :: doInit()
 {
-    for ( int i = 1; i <= numberOfModules; i++ ) {
-        this->giveModule(i)->doInit();
+    for ( auto &module: moduleList ) {
+        module->doInit();
     }
 }
 } // end namespace oofem
