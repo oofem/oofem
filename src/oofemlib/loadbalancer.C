@@ -53,7 +53,7 @@
 namespace oofem {
 #define LoadBalancer_debug_print 0
 
-LoadBalancer :: LoadBalancer(Domain *d)  : wtpList(0)
+LoadBalancer :: LoadBalancer(Domain *d)  : wtpList()
 {
     domain = d;
 }
@@ -76,18 +76,19 @@ void
 LoadBalancer :: initializeWtp(IntArray &wtp)
 {
     int size = wtp.giveSize();
-    WorkTransferPlugin *plugin = NULL;
 
     if ( size ) {
-        wtpList.growTo(size);
-        for ( int i = 1; i <= size; i++ ) {
-            if ( wtp.at(i) == 1 ) {
-                plugin = new NonlocalMaterialWTP(this);
+        wtpList.clear();
+        wtpList.reserve(size);
+        for ( int iwtp: wtp ) {
+            std :: unique_ptr< WorkTransferPlugin > plugin;
+            if ( iwtp == 1 ) {
+                plugin.reset( new NonlocalMaterialWTP(this) );
             } else {
                 OOFEM_ERROR("Unknown work transfer plugin type");
             }
 
-            wtpList.put(i, plugin);
+            wtpList.push_back(std :: move( plugin ));
         }
     }
 }
@@ -103,8 +104,8 @@ LoadBalancer :: migrateLoad(Domain *d)
     OOFEM_LOG_RELEVANT("[%d] LoadBalancer: migrateLoad: migrating load\n", myrank);
 
     // initialize work transfer plugins before any transfer
-    for ( int i = 1; i <= wtpList.giveSize(); i++ ) {
-        wtpList.at(i)->init(d);
+    for ( auto &wtp: wtpList ) {
+        wtp->init(d);
     }
 
     CommunicatorBuff cb(nproc, CBT_dynamic);
@@ -159,13 +160,13 @@ LoadBalancer :: migrateLoad(Domain *d)
 #endif
 
     // migrate work transfer plugin data
-    for ( int i = 1; i <= wtpList.giveSize(); i++ ) {
-        wtpList.at(i)->migrate();
+    for ( auto &wtp: wtpList ) {
+        wtp->migrate();
     }
 
     // update work transfer plugin data
-    for ( int i = 1; i <= wtpList.giveSize(); i++ ) {
-        wtpList.at(i)->update();
+    for ( auto &wtp: wtpList ) {
+        wtp->update();
     }
 
     // print some local statistics

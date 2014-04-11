@@ -48,6 +48,9 @@
   #include "range.h"
  #endif
 
+ #include <vector>
+ #include <memory>
+
 ///@name Input fields for LoadBalancer
 //@{
  #define _IFT_LoadBalancer_wtp "wtp"
@@ -270,7 +273,7 @@ public:
 
 protected:
     /// List of work transfer plugins.
-    AList< WorkTransferPlugin >wtpList;
+    std :: vector< std :: unique_ptr< WorkTransferPlugin > >wtpList;
 };
 
 /*
