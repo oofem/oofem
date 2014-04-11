@@ -703,6 +703,8 @@ public:
     virtual TimeStep *giveNextStep() { return NULL; }
 	/// Does a pre-initialization of the next time step (implement if necessarry)
 	virtual void preInitializeNextStep() {}
+	/// Does a post-initialization of new current time step (implement if necessarry)
+	virtual void postInitializeCurrentStep() {}
     /// Returns the solution step when Initial Conditions (IC) apply.
     virtual TimeStep *giveSolutionStepWhenIcApply() { if ( master ) { return master->giveCurrentStep(); } else { return stepWhenIcApply; } }
     /// Returns number of first time step used by receiver.

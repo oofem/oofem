@@ -322,7 +322,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         initFlag = 0;
     }
 
-    if ( ( previousStep != NULL ) && ( tStep->giveTimeDiscretization() != previousStep->giveTimeDiscretization() ) ) {
+    if ( ( tStep->givePreviousStep() != NULL ) && ( tStep->giveTimeDiscretization() != tStep->givePreviousStep()->giveTimeDiscretization() ) ) {
 #ifdef VERBOSE
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
@@ -544,9 +544,9 @@ DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueM
 void
 DIIDynamic :: determineConstants(TimeStep *tStep)
 {
-    if ( ( currentStep->giveNumber() == giveNumberOfFirstStep() )
+    if ( ( this->giveCurrentStep()->giveNumber() == giveNumberOfFirstStep() )
          && ( initialTimeDiscretization == TD_ThreePointBackward ) ) {
-        currentStep->setTimeDiscretization( TD_TwoPointBackward );
+        this->giveCurrentStep()->setTimeDiscretization( TD_TwoPointBackward );
     }
 
     deltaT = tStep->giveTimeIncrement();
