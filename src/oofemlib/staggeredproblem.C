@@ -97,10 +97,12 @@ StaggeredProblem :: instanciateSlaveProblems()
 {
     //first instantiate master problem if defined
     EngngModel *timeDefProb;
+    emodelList.resize(inputStreamNames.size());
     if ( timeDefinedByProb ) {
         OOFEMTXTDataReader dr( inputStreamNames [ timeDefinedByProb - 1 ].c_str() );
-        timeDefProb = InstanciateProblem(& dr, this->pMode, this->contextOutputMode, NULL);
-        emodelList[timeDefinedByProb-1].reset(timeDefProb);
+        std :: unique_ptr< EngngModel >prob( InstanciateProblem(& dr, this->pMode, this->contextOutputMode, NULL) );
+        timeDefProb = prob.get();
+        emodelList[timeDefinedByProb-1] = std::move(prob);
     }
 
     for ( int i = 1; i <= (int)inputStreamNames.size(); i++ ) {
@@ -110,8 +112,8 @@ StaggeredProblem :: instanciateSlaveProblems()
 
         OOFEMTXTDataReader dr( inputStreamNames [ i - 1 ].c_str() );
         //the slave problem dictating time needs to have attribute master=NULL, other problems point to the dictating slave
-        EngngModel *slaveProb = InstanciateProblem(& dr, this->pMode, this->contextOutputMode, timeDefinedByProb ? timeDefProb : this);
-        emodelList[i-1].reset(slaveProb);
+        std :: unique_ptr< EngngModel >prob( InstanciateProblem(& dr, this->pMode, this->contextOutputMode, timeDefinedByProb ? timeDefProb : this) );
+        emodelList[i-1] = std::move(prob);
     }
 
     return 1;
