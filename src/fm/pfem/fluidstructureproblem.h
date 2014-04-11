@@ -142,6 +142,7 @@ public:
     virtual TimeStep *giveSolutionStepWhenIcApply();
 
 	virtual void preInitializeNextStep();
+	virtual void postInitializeCurrentStep();
 
     // identification
     virtual const char *giveClassName() const { return "FluidStructureProblem"; }

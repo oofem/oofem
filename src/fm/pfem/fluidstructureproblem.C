@@ -44,6 +44,8 @@
 #include "verbose.h"
 #include "classfactory.h"
 
+#include "diidynamic.h"
+
 #include <stdlib.h>
 
 #ifdef __OOFEG
@@ -497,6 +499,17 @@ FluidStructureProblem :: preInitializeNextStep()
 {
 	for ( int i = 1; i <= nModels; i++ ) {
         this->giveSlaveProblem(i)->preInitializeNextStep();
+    }
+}
+
+void
+FluidStructureProblem :: postInitializeCurrentStep()
+{
+	for ( int i = 1; i <= nModels; i++ ) {
+        DIIDynamic* dynamicProblem = dynamic_cast<DIIDynamic*>(this->giveSlaveProblem(i));
+		if (dynamicProblem) {
+			this->giveCurrentStep()->setTimeDiscretization(dynamicProblem->giveInitialTimeDiscretization());
+		}
     }
 }
 
