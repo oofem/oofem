@@ -54,6 +54,10 @@ using namespace std;
 #include "sparsemtrx.h"
 #include "errorestimator.h"
 
+#ifdef __PARALLEL_MODE
+ #include "loadbalancer.h"
+#endif
+
 namespace oofem {
 REGISTER_EngngModel(NonLinearDynamic);
 

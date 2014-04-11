@@ -55,6 +55,7 @@
 
 #ifdef __PARALLEL_MODE
  #include "parallelcontext.h"
+ #include "loadbalancer.h"
 #endif
 
 #ifdef __OOFEG

@@ -54,6 +54,7 @@
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
  #include "communicator.h"
+ #include "loadbalancer.h"
 #endif
 
 namespace oofem {

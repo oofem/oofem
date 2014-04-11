@@ -70,6 +70,7 @@
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
  #include "processcomm.h"
+ #include "loadbalancer.h"
 #endif
 
 #include <cstdio>

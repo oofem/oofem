@@ -39,6 +39,10 @@
 #include "classfactory.h"
 #include "contextioerr.h"
 
+#ifdef __PARALLEL_MODE
+ #include "loadbalancer.h"
+#endif
+
 namespace oofem {
 REGISTER_EngngModel(AdaptiveLinearStatic);
 

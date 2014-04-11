@@ -36,7 +36,6 @@
 #define enrichmentfunction_h
 
 #include "intarray.h"
-#include "classfactory.h"
 #include "femcmpnn.h"
 
 #define _IFT_DiscontinuousFunction_Name "discontinuousfunction"
