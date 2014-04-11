@@ -37,6 +37,10 @@
 #include "mathfem.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
+#include "timestep.h"
+#include "fluidstructureproblem.h"
+#include "pfem.h"
+#include "loadtimefunction.h"
 
 namespace oofem {
 
@@ -86,7 +90,53 @@ void InteractionLoad :: giveInputRecord(DynamicInputRecord& input)
 void
 InteractionLoad::computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
 {
-	BoundaryLoad :: computeValueAt(answer, tStep, coords, mode);
+	FloatArray pressureArray(this->componentArray);
+	//tStep->giveEngngModel();
+	FluidStructureProblem *fsiProblem = dynamic_cast<FluidStructureProblem*>(domain->giveEngngModel()->giveMasterEngngModel());
+	if (fsiProblem) {
+		for ( int i = 1; i <= fsiProblem->giveNumberOfSlaveProblems(); i++ ) {
+			PFEM *pfem = dynamic_cast<PFEM*>(fsiProblem->giveSlaveProblem(i));
+			if (pfem) {
+				for ( int j = 1; j <= coupledParticles.giveSize(); j++) {
+					DofManager *dman = pfem->giveDomain(1)->giveDofManager(coupledParticles.at(j));
+					Dof *pressureDof = dman->giveDofWithID(P_f);
+					double pressureValue = pfem->giveUnknownComponent(VM_Total, tStep, pfem->giveDomain(1), pressureDof);
+					pressureArray.at(j) *= pressureValue;
+					pressureArray.at(j+1) *= pressureValue;
+				}
+			}
+		}
+	}
+	// Evaluates the value at specific integration point
+    int i, j, nSize;
+    double value, factor;
+    FloatArray N;
+
+    if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
+        _error("computeValueAt: unknown mode");
+    }
+
+    answer.resize(this->nDofs);
+
+    this->computeNArray(N, coords);
+    nSize = N.giveSize();
+
+    if ( ( pressureArray.giveSize() / nSize ) != nDofs ) {
+        _error("computeValueAt: componentArray size mismatch");
+    }
+
+    for ( i = 1; i <= nDofs; i++ ) {
+        for ( value = 0., j = 1; j <= nSize; j++ ) {
+            value += N.at(j) * pressureArray.at(i + ( j - 1 ) * nDofs);
+        }
+
+        answer.at(i) = value;
+    }
+
+   
+    factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
+
+    answer.times(factor);
 }
 
 void
