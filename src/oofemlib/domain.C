@@ -1867,7 +1867,7 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
                 delete dman;
             }
 
-            if ( dmanTranssecond ) {
+            if ( dmanTrans.second ) {
                 dmanMap [ dmanTrans.first ] = ( DofManager * ) dmanTrans.second;
             }
         } // end loop over DofmanTransactions
@@ -1878,7 +1878,7 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
         int gen;
         Element *elem;
 
-        for ( auto elTrans: elementTransactions ) {
+        for ( auto elTrans: tm->elementTransactions ) {
             gen = elTrans.first;
             bool _exist = false;
             if ( elementMap.find(gen) != elementMap.end() ) {
@@ -2002,7 +2002,7 @@ Domain :: initGlobalDofManMap(bool forceinit)
         for ( int idofman = 1; idofman <= ndofman; idofman++ ) {
             DofManager *dofman = this->giveDofManager(idofman);
             key = dofman->giveGlobalNumber();
-            dmanMap.insert(key, dofman);
+            dmanMap[key] = dofman;
         }
     }
 }
@@ -2018,7 +2018,7 @@ Domain :: initGlobalElementMap(bool forceinit)
         for ( int ielem = 1; ielem <= nelem; ielem++ ) {
             Element *elem = this->giveElement(ielem);
             key = elem->giveGlobalNumber();
-            elementMap.insert(key, elem);
+            elementMap[key] = elem;
         }
     }
 }
