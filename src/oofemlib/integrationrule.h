@@ -173,7 +173,7 @@ public:
      * @return Number of points.
      */
     int setUpEmbeddedIntegrationPoints(integrationDomain intdomain, int nPoints, MaterialMode matMode,
-                                       const FloatArray **coords);
+                                       const std :: vector< FloatArray > &coords);
 
     /**
      * Prints receiver's output to given stream.
@@ -297,7 +297,7 @@ public:
      * @param nPoints Number of points along line.
      */
     virtual int SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode,
-                                            const FloatArray **coords) { return 0; }
+                                            const FloatArray &coord0, const FloatArray &coord1) { return 0; }
 
     /**
      * Sets up receiver's integration points on a wedge integration domain.

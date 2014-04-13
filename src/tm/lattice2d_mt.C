@@ -200,7 +200,7 @@ Lattice2d_mt :: computeGaussPoints()
 {
     integrationRulesArray.resize( 1 );
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _1dHeat);
+    integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _1dHeat);
 }
 
 void

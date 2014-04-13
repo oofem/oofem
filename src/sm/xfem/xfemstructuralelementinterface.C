@@ -133,13 +133,10 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                             int czRuleNum = 1;
                             mpCZIntegrationRules.push_back( new GaussIntegrationRule(czRuleNum, element) );
                             mCZEnrItemIndices.push_back(eiIndex);
-                            const FloatArray **coords = new const FloatArray * [ 2 ];
-                            coords [ 0 ] = new FloatArray(crackPolygon [ segIndex     ]);
-                            coords [ 1 ] = new FloatArray(crackPolygon [ segIndex + 1 ]);
 
                             // Compute crack normal
                             FloatArray crackTang;
-                            crackTang.beDifferenceOf(crackPolygon [ segIndex + 1 ], crackPolygon [ segIndex         ]);
+                            crackTang.beDifferenceOf(crackPolygon [ segIndex + 1 ], crackPolygon [ segIndex ]);
 
                             if ( crackTang.computeSquaredNorm() > tol2 ) {
                                 crackTang.normalize();
@@ -149,7 +146,8 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 -crackTang.at(2), crackTang.at(1)
                             };
 
-                            mpCZIntegrationRules [ segIndex ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode, coords);
+                            mpCZIntegrationRules [ segIndex ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
+                                                                        crackPolygon[segIndex],crackPolygon[segIndex + 1]);
 
                             for ( GaussPoint *gp: *mpCZIntegrationRules [ segIndex ] ) {
                                 double gw = gp->giveWeight();
@@ -173,10 +171,6 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 // to simplify post processing.
                                 crack->AppendCohesiveZoneGaussPoint(gp);
                             }
-
-                            delete coords [ 0 ];
-                            delete coords [ 1 ];
-                            delete [] coords;
                         }
                     }
 
@@ -221,13 +215,10 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 mpCZIntegrationRules.push_back( new GaussIntegrationRule(czRuleNum, element) );
                                 size_t newRuleInd = mpCZIntegrationRules.size() - 1;
                                 mCZEnrItemIndices.push_back(eiIndex);
-                                const FloatArray **coords = new const FloatArray * [ 2 ];
-                                coords [ 0 ] = new FloatArray(crackPolygon [ segIndex      ]);
-                                coords [ 1 ] = new FloatArray(crackPolygon [ segIndex + 1 ]);
 
                                 // Compute crack normal
                                 FloatArray crackTang;
-                                crackTang.beDifferenceOf(crackPolygon [ segIndex + 1 ], crackPolygon [ segIndex         ]);
+                                crackTang.beDifferenceOf(crackPolygon [ segIndex + 1 ], crackPolygon [ segIndex ]);
 
                                 if ( crackTang.computeSquaredNorm() > tol2 ) {
                                     crackTang.normalize();
@@ -237,7 +228,8 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                     -crackTang.at(2), crackTang.at(1)
                                 };
 
-                                mpCZIntegrationRules [ newRuleInd ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode, coords);
+                                mpCZIntegrationRules [ newRuleInd ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode, 
+                                                                            crackPolygon[segIndex],crackPolygon[segIndex + 1]);
 
                                 for ( GaussPoint *gp: * mpCZIntegrationRules [ newRuleInd ] ) {
                                     double gw = gp->giveWeight();
@@ -257,10 +249,6 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                     // to simplify post processing.
                                     crack->AppendCohesiveZoneGaussPoint(gp);
                                 }
-
-                                delete coords [ 0 ];
-                                delete coords [ 1 ];
-                                delete [] coords;
                             }
                         }
                     } else {

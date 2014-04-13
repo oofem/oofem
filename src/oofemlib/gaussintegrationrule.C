@@ -71,7 +71,7 @@ GaussIntegrationRule :: SetUpPointsOnLine(int nPoints, MaterialMode mode)
 
 
 int
-GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode, const FloatArray **coords)
+GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode, const FloatArray &coord0, const FloatArray &coord1)
 {
     FloatArray coords_xi, weights;
     this->giveLineCoordsAndWeights(nPoints, coords_xi, weights);
@@ -80,8 +80,8 @@ GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mo
     for ( int i = 1; i <= nPoints; i++ ) {
         double x = ( coords_xi.at(i) + 1.0 ) * 0.5;
         FloatArray *coord = new FloatArray(2);
-        coord->at(1) = ( 1. - x ) * coords [ 0 ]->at(1) + x * coords [ 1 ]->at(1);
-        coord->at(2) = ( 1. - x ) * coords [ 0 ]->at(2) + x * coords [ 1 ]->at(2);
+        coord->at(1) = ( 1. - x ) * coord0.at(1) + x * coord1.at(1);
+        coord->at(2) = ( 1. - x ) * coord0.at(2) + x * coord1.at(2);
         this->gaussPoints [ i - 1 ] = new GaussPoint(this, i, coord, weights.at ( i ), mode);
     }
 

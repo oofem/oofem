@@ -167,12 +167,9 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
         // Change to global ID for bnodes and identify the intersection of bnodes and the zero boundary
         splitBoundaryNodeIDs(myMode, * thisElement, bnodes, pNodes, mNodes, zNodes, nodeValues);
 
-        GaussIntegrationRule iRule(order, thisElement);
+        std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(order, Boundary));
 
-        int n = iRule.getRequiredNumberOfIntegrationPoints(_Triangle, order);
-        iRule.setUpIntegrationPoints(_Triangle, n, _Unknown);
-
-        for ( GaussPoint *gp: iRule ) {
+        for ( GaussPoint *gp: *iRule ) {
             FloatArray *lcoords = gp->giveCoordinates();
             FloatArray gcoords, normal, N;
             FloatArray Phi;

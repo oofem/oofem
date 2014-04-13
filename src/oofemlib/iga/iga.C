@@ -101,7 +101,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
                 knotSpan.at(1) += knotMultiplicityU->at(ui);
 
                 integrationRulesArray [ indx ] = new IGAIntegrationElement(indx, this, knotSpan);
-                integrationRulesArray [ indx ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStress); // HUHU _PlaneStress, rectangle
+                integrationRulesArray [ indx ]->SetUpPointsOnSquare(numberOfGaussPoints, _PlaneStress); // HUHU _PlaneStress, rectangle
 
                 // remap local subelement gp coordinates into knot span coordinates and update integration weight
                 for ( GaussPoint *gp: *integrationRulesArray [ indx ] ) {
@@ -152,7 +152,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
                     knotSpan.at(1) += knotMultiplicityU->at(ui);
 
                     integrationRulesArray [ indx ] = new IGAIntegrationElement(indx, this, knotSpan);
-                    integrationRulesArray [ indx ]->setUpIntegrationPoints(_Cube, numberOfGaussPoints, _3dMat);
+                    integrationRulesArray [ indx ]->SetUpPointsOnCube(numberOfGaussPoints, _3dMat);
 
                     // remap local subelement gp coordinates into knot span coordinates and update integration weight
                     for ( GaussPoint *gp: *integrationRulesArray [ indx ] ) {
@@ -260,7 +260,7 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
                 knotSpan.at(1) += knotMultiplicityU->at(ui);
 
                 integrationRulesArray [ indx ] = new IGAIntegrationElement(indx, this, knotSpan);
-                integrationRulesArray [ indx ]->setUpIntegrationPoints(_Square, numberOfGaussPoints, _PlaneStress); // HUHU _PlaneStress, rectangle
+                integrationRulesArray [ indx ]->SetUpPointsOnSquare(numberOfGaussPoints, _PlaneStress); // HUHU _PlaneStress, rectangle
 
                 // remap local subelement gp coordinates into knot span coordinates and update integration weight
                 for ( GaussPoint *gp: *integrationRulesArray [ indx ] ) {

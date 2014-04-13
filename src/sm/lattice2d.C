@@ -203,7 +203,7 @@ void Lattice2d :: computeGaussPoints()
     // classes are requested
     integrationRulesArray.resize( 1 );
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _2dLattice);
+    integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _2dLattice);
 }
 
 

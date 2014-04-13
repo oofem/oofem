@@ -315,13 +315,16 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
 
 int
 IntegrationRule :: setUpEmbeddedIntegrationPoints(integrationDomain mode, int nPoints, MaterialMode matMode,
-                                                  const FloatArray **coords)
+                                                  const std :: vector< FloatArray > &coords)
 {
     intdomain = mode;
 
     switch ( mode ) {
     case _Embedded2dLine:
-        return  this->SetUpPointsOn2DEmbeddedLine(nPoints, matMode, coords);
+        if ( coords.size() != 2 ) {
+            OOFEM_ERROR("Exactly 2 coordinates are required for 2D embedded lines!");
+        }
+        return  this->SetUpPointsOn2DEmbeddedLine(nPoints, matMode, coords[0], coords[1]);
 
     default:
         OOFEM_ERROR("unknown mode");

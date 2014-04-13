@@ -389,7 +389,7 @@ TR_SHELL01 :: ZZErrorEstimatorI_giveIntegrationRule()
         return this->compositeIR;
     } else {
         this->compositeIR = new GaussIntegrationRule(1, this, 1, 12);
-        this->compositeIR->setUpIntegrationPoints(_Triangle, plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(), _3dShell);
+        this->compositeIR->SetUpPointsOnTriangle(plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(), _3dShell);
         return this->compositeIR;
     }
 }

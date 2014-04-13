@@ -35,6 +35,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <algorithm>
+#include <memory>
 
 #include "activebc.h"
 #include "weakperiodicbc.h"
@@ -80,6 +81,9 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
 
     ngp = -1;        // Pressure as default
     IR_GIVE_OPTIONAL_FIELD(ir, ngp, _IFT_WeakPeriodicBoundaryCondition_ngp);
+    if ( ngp != -1 ) {
+        OOFEM_ERROR("ngp isn't being used anymore! see how the interpolator constructs the integration rule automatically.");
+    }
 
     IntArray temp;
 
@@ -182,13 +186,9 @@ double WeakPeriodicBoundaryCondition :: computeProjectionCoefficient(int vIndex,
         Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
         FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
 
-        GaussIntegrationRule iRule(1, thisElement);
+        std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(thisOrder, side [ thisSide ].at(ielement)));
 
-        int n = iRule.getRequiredNumberOfIntegrationPoints(sideGeom, thisOrder);
-
-        iRule.setUpIntegrationPoints(sideGeom, n, _Unknown);
-
-        for ( GaussPoint *gp: iRule ) {
+        for ( GaussPoint *gp: *iRule ) {
 
             FloatArray *lcoords = gp->giveCoordinates();
             FloatArray gcoords;
@@ -390,13 +390,9 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
     ///@todo Add this to all interpolators, should return _Point, _Line, _Triangle, ... etc.
     //integrationDomain sideGeom = geoInterpolation->boundaryGiveGeometry(boundary);
 
-    GaussIntegrationRule iRule(1, e);
-    if ( ngp == -1 ) {
-        ngp = iRule.getRequiredNumberOfIntegrationPoints(sideGeom, 2 + orderOfPolygon);
-    }
-    iRule.setUpIntegrationPoints(sideGeom, ngp, _Unknown);
+    std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(2 + orderOfPolygon, boundary));
 
-    for ( GaussPoint *gp: iRule ) {
+    for ( GaussPoint *gp: *iRule ) {
         FloatArray *lcoords = gp->giveCoordinates();
 
         FloatArray N;

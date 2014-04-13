@@ -216,7 +216,7 @@ InterfaceElem1d :: computeGaussPoints()
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints( _Line, 1, this->giveMaterialMode() );
+        integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, this->giveMaterialMode() );
     }
 }
 
