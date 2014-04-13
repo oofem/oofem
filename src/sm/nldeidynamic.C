@@ -352,9 +352,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_DEBUG("Assembling right hand side\n");
 #endif
 
-    for ( i = 1; i <= neq; i++ ) {
-        displacementVector.at(i) += previousIncrementOfDisplacementVector.at(i);
-    }
+    displacementVector.add(previousIncrementOfDisplacementVector);
 
     // Update solution state counter
     tStep->incrementStateCounter();
@@ -370,9 +368,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
         //
         // Assembling additional parts of right hand side.
         //
-        for ( k = 1; k <= neq; k++ ) {
-            loadVector.at(k) -= internalForces.at(k);
-        }
+        loadVector.subtract(internalForces);
     } else {
         // Dynamic relaxation
         // compute load factor

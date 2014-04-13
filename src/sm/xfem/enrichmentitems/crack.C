@@ -66,8 +66,8 @@ void Crack :: AppendCohesiveZoneGaussPoint(GaussPoint *ipGP)
         mpEnrichmentDomain->computeTangentialSignDist(tangDist, coord, arcPos);
 
         // Insert at correct position
-        std :: vector< GaussPoint * > :: iterator iteratorGP   = mCohesiveZoneGaussPoints.begin();
-        std :: vector< double > :: iterator iteratorPos               = mCohesiveZoneArcPositions.begin();
+        std :: vector< GaussPoint * > :: iterator iteratorGP = mCohesiveZoneGaussPoints.begin();
+        std :: vector< double > :: iterator iteratorPos = mCohesiveZoneArcPositions.begin();
         for ( size_t i = 0; i < mCohesiveZoneArcPositions.size(); i++ ) {
             if ( arcPos > mCohesiveZoneArcPositions [ i ] ) {
                 iteratorGP++;

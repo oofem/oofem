@@ -323,9 +323,7 @@ ParmetisLoadBalancer :: labelDofManagers()
     std :: set< int, std :: less< int > >__dmanpartitions;
     int myrank = domain->giveEngngModel()->giveRank();
     int nproc = domain->giveEngngModel()->giveNumberOfProcesses();
-    int ie, npart, __i;
-
-    std :: set< int, std :: less< int > > :: iterator it;
+    int ie, npart;
 
     // resize label array
     dofManState.resize(ndofman);
@@ -357,8 +355,9 @@ ParmetisLoadBalancer :: labelDofManagers()
 
             npart = __dmanpartitions.size();
             dofManPartitions [ idofman - 1 ].resize( __dmanpartitions.size() );
-            for ( __i = 1, it = __dmanpartitions.begin(); it != __dmanpartitions.end(); it++ ) {
-                dofManPartitions [ idofman - 1 ].at(__i++) = * it;
+            int i = 1;
+            for ( auto &dm: __dmanpartitions ) {
+                dofManPartitions [ idofman - 1 ].at(i++) = dm;
             }
         }
     }

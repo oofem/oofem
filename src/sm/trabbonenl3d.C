@@ -166,7 +166,6 @@ TrabBoneNL3D :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
 {
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
     std :: list< localIntegrationRecord > *list = nlStatus->giveIntegrationDomainList();
-    std :: list< localIntegrationRecord > :: iterator pos;
     TrabBoneNL3D *rmat;
 
     double coeff;
@@ -185,14 +184,8 @@ TrabBoneNL3D :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
             rmat->giveRemoteNonlocalStiffnessContribution(lir.nearGp, rloc, s, rcontrib, tStep);
             coeff = gp->giveElement()->computeVolumeAround(gp) * lir.weight / nlStatus->giveIntegrationScale();
 
-            int i, j, dim1 = loc.giveSize(), dim2 = rloc.giveSize();
-            contrib.resize(dim1, dim2);
-            for ( i = 1; i <= dim1; i++ ) {
-                for ( j = 1; j <= dim2; j++ ) {
-                    contrib.at(i, j) = -1.0 * lcontrib.at(i) * rcontrib.at(j) * coeff;
-                }
-            }
-
+            contrib.clear();
+            contrib.plusDyadUnsym(lcontrib, rcontrib, - 1.0 * coeff);
             dest.assemble(loc, rloc, contrib);
         }
     }

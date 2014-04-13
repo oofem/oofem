@@ -356,7 +356,6 @@ TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Ti
 void
 TrPlaneStrRot3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-    int i, j;
     FloatMatrix ne;
     this->computeNmatrixAt(* sgp->giveCoordinates(), ne);
 
@@ -369,8 +368,8 @@ TrPlaneStrRot3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, Gauss
         0, 1, 5, 6, 7, 11, 12, 13, 17
     };
 
-    for ( i = 0; i < 3; i++ ) {
-        for ( j = 0; j < 9; j++ ) {
+    for ( int i = 0; i < 3; i++ ) {
+        for ( int j = 0; j < 9; j++ ) {
             answer(ri [ i ], ci [ j ]) = ne(i, j);
         }
     }

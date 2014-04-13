@@ -97,7 +97,6 @@ FastMarchingMethod :: initialize(FloatArray &dmanValues,
     }
 
     // first tag all boundary points
-    std :: list< int > :: const_iterator it;
 
     for ( int jnode: bcDofMans ) {
         if ( jnode > 0 ) {

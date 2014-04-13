@@ -286,14 +286,8 @@ RankineMatNl :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
             rmat->giveRemoteNonlocalStiffnessContribution(lir.nearGp, rloc, s, rcontrib, tStep);
             coeff = gp->giveElement()->computeVolumeAround(gp) * lir.weight / status->giveIntegrationScale();
 
-            int i, j, dim1 = loc.giveSize(), dim2 = rloc.giveSize();
-            contrib.resize(dim1, dim2);
-            for ( i = 1; i <= dim1; i++ ) {
-                for ( j = 1; j <= dim2; j++ ) {
-                    contrib.at(i, j) = -1.0 * lcontrib.at(i) * rcontrib.at(j) * coeff;
-                }
-            }
-
+            contrib.clear();
+            contrib.plusDyadUnsym(lcontrib, rcontrib, - 1.0 * coeff);
             dest.assemble(loc, rloc, contrib);
         }
     }

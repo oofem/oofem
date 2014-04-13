@@ -225,12 +225,12 @@ IDNLMaterial :: modifyNonlocalWeightFunctionAround(GaussPoint *gp)
      *  fabs(fabs(xtarget)-0.00)<1e-6)
      * {
      *
-     * for ( pos = list->begin(); pos != list->end(); ++pos ) {
-     * nearElem = ((*pos).nearGp)->giveElement();
-     * nearElem->computeGlobalCoordinates (coords, *(((*pos).nearGp)->giveCoordinates()));
+     * for ( auto &lir: *list ) {
+     * nearElem = lir.nearGp->giveElement();
+     * nearElem->computeGlobalCoordinates (coords, *(lir.nearGp->giveCoordinates()));
      * x = coords.at(1);
-     * w = ((*pos).weight/wsum)/(nearElem->computeVolumeAround((*pos).nearGp));
-     * nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus((*pos).nearGp) );
+     * w = (lir.weight/wsum)/(nearElem->computeVolumeAround(lir.nearGp));
+     * nonlocStatus = static_cast< IDNLMaterialStatus * >( this->giveStatus(lir.nearGp) );
      * damage = nonlocStatus->giveDamage();
      * printf("%g %g %g\n",x,w,damage);
      * }
@@ -538,7 +538,6 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
     double coeff;
     IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(gp) );
     std :: list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
-    std :: list< localIntegrationRecord > :: iterator pos;
     IDNLMaterial *rmat;
     FloatArray rcontrib, lcontrib;
     IntArray loc, rloc;
@@ -549,11 +548,11 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
         return;
     }
 
-    for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        rmat = dynamic_cast< IDNLMaterial * >( pos->nearGp->giveMaterial() );
+    for ( auto &lir: *list ) {
+        rmat = dynamic_cast< IDNLMaterial * >( lir.nearGp->giveMaterial() );
         if ( rmat ) {
-            rmat->giveRemoteNonlocalStiffnessContribution(pos->nearGp, rloc, s, rcontrib, tStep);
-            coeff = gp->giveElement()->computeVolumeAround(gp) * pos->weight / status->giveIntegrationScale();
+            rmat->giveRemoteNonlocalStiffnessContribution(lir.nearGp, rloc, s, rcontrib, tStep);
+            coeff = gp->giveElement()->computeVolumeAround(gp) * lir.weight / status->giveIntegrationScale();
             //   printf ("\nelement %d:", gp->giveElement()->giveNumber());
             //   lcontrib.printYourself();
             //   rcontrib.printYourself();
@@ -570,14 +569,8 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx 
              *   if ((r != 0) && (c!=0)) dest.at(r,c) -= (double) (lcontrib.at(i)*rcontrib.at(j)*coeff);
              *  }
              */
-            int dim1 = loc.giveSize(), dim2 = rloc.giveSize();
-            contrib.resize(dim1, dim2);
-            for ( int i = 1; i <= dim1; i++ ) {
-                for ( int j = 1; j <= dim2; j++ ) {
-                    contrib.at(i, j) = -1.0 * lcontrib.at(i) * rcontrib.at(j) * coeff;
-                }
-            }
-
+            contrib.clear();
+            contrib.plusDyadUnsym(lcontrib, rcontrib, - 1.0 * coeff);
             dest.assemble(loc, rloc, contrib);
         }
     }
@@ -626,11 +619,10 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
 
     int n, m;
     std :: list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
-    std :: list< localIntegrationRecord > :: iterator pos;
-    for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        rmat = dynamic_cast< IDNLMaterial * >( pos->nearGp->giveMaterial() );
+    for ( auto &lir: *list ) {
+        rmat = dynamic_cast< IDNLMaterial * >( lir.nearGp->giveMaterial() );
         if ( rmat ) {
-            ( pos->nearGp )->giveElement()->giveLocationArray( rloc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+            lir.nearGp->giveElement()->giveLocationArray( rloc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
         } else {
             continue;
         }
