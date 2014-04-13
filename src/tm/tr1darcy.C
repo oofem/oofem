@@ -70,9 +70,8 @@ IRResultType Tr1Darcy :: initializeFrom(InputRecord *ir)
 
 void Tr1Darcy :: computeGaussPoints()
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -85,8 +84,6 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
      */
 
     FloatMatrix B, BT, K, KB;
-    FloatArray *lcoords;
-    GaussPoint *gp;
 
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
@@ -95,12 +92,10 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.resize(3, 3);
     answer.zero();
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
-        lcoords = gp->giveCoordinates();
+    for ( GaussPoint *gp: *iRule ) {
+        const FloatArray &lcoords = * gp->giveCoordinates();
 
-        double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
-        this->interpolation_lin.evaldNdx( BT, * lcoords, FEIElementGeometryWrapper(this) );
+        double detJ = this->interpolation_lin.evaldNdx( BT, lcoords, FEIElementGeometryWrapper(this) );
 
         mat->giveCharacteristicMatrix(K, TangentStiffness, gp, tStep);
 
@@ -134,8 +129,7 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep
     answer.resize(3);
     answer.zero();
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         FloatArray *lcoords = gp->giveCoordinates();
 
         double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
@@ -202,7 +196,6 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
         numberOfEdgeIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2;
 
         GaussIntegrationRule iRule(1, this, 1, 1);
-        GaussPoint *gp;
         FloatArray N, loadValue, reducedAnswer;
         reducedAnswer.resize(3);
         reducedAnswer.zero();
@@ -210,8 +203,7 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
 
         iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
 
-        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
-            gp = iRule.getIntegrationPoint(i);
+        for ( GaussPoint *gp: iRule ) {
             FloatArray *lcoords = gp->giveCoordinates();
             this->interpolation_lin.edgeEvalN( N, iEdge, * lcoords, FEIElementGeometryWrapper(this) );
             double dV = this->computeEdgeVolumeAround(gp, iEdge);
@@ -278,11 +270,10 @@ void
 Tr1Darcy :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                        InternalStateType type, TimeStep *tStep)
 {
-    GaussPoint *gp;
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
-
+    ///@todo Write support function for getting the closest gp given local c.s. and use that here
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    gp = iRule->getIntegrationPoint(0);
+    GaussPoint *gp = iRule->getIntegrationPoint(0);
     mat->giveIPValue(answer, gp, type, tStep);
 }
 

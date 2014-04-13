@@ -72,9 +72,8 @@ void
 Tria1PlateSubSoil :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -93,18 +92,17 @@ Tria1PlateSubSoil :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int l
 // Returns the [3x3] strain-displacement matrix {B} of the receiver,
 // evaluated at gp.
 {
-  FloatArray n, ns;
-  FloatMatrix dn, dns;
+    FloatArray n, ns;
+    FloatMatrix dn, dns;
 
-  this->interp_lin.evaldNdx( dn, * gp->giveCoordinates(),  FEIElementGeometryWrapper(this) );
-  this->interp_lin.evalN( n, * gp->giveCoordinates(),  FEIElementGeometryWrapper(this) );
+    this->interp_lin.evaldNdx( dn, * gp->giveCoordinates(),  FEIElementGeometryWrapper(this) );
+    this->interp_lin.evalN( n, * gp->giveCoordinates(),  FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 3);
     answer.zero();
 
     ///@todo Check sign here
     for ( int i = 0; i < 3; ++i ) {
-      
       answer(0, i) = n(i); // eps_z
       answer(1, i) = dn(i, 0); // gamma_xz
       answer(2, i) = dn(i, 1); // gamma_yz

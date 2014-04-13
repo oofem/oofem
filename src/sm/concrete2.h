@@ -108,13 +108,13 @@ public:
     virtual void printOutputAt(FILE *file, TimeStep *tStep)
     { StructuralMaterialStatus :: printOutputAt(file, tStep); }
 
-    void givePlasticStrainVector(FloatArray &answer) const { answer = plasticStrainVector; }
-    void givePlasticStrainIncrementVector(FloatArray &answer) const
-    { answer = plasticStrainIncrementVector; }
-    void letPlasticStrainVectorBe(FloatArray &v)
-    { plasticStrainVector = v; }
-    void letPlasticStrainIncrementVectorBe(FloatArray &v)
-    { plasticStrainIncrementVector = v; }
+    const FloatArray & givePlasticStrainVector() const { return plasticStrainVector; }
+    const FloatArray & givePlasticStrainIncrementVector() const
+    { return plasticStrainIncrementVector; }
+    void letPlasticStrainVectorBe(FloatArray v)
+    { plasticStrainVector = std :: move(v); }
+    void letPlasticStrainIncrementVectorBe(FloatArray v)
+    { plasticStrainIncrementVector = std :: move(v); }
 
     double &giveTempCurrentPressureStrength() { return tempSCCM; }
     double &giveTempMaxEffPlasticStrain()     { return tempEPM; }

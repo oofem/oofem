@@ -180,8 +180,8 @@ ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, Ti
     if ( missingDofManContribution ) {
         std :: ostringstream msg;
         int i = 0;
-        for ( std :: set< int > :: const_iterator sit = unresolvedDofMans.begin(); sit != unresolvedDofMans.end(); ++sit ) {
-            msg << * sit << ' ';
+        for ( int dman: unresolvedDofMans ) {
+            msg << dman << ' ';
             if ( ++i > 20 ) {
                 break;
             }
@@ -211,8 +211,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNValProduct(FloatMatri
     IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
 
     answer.clear();
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         double dV = elem->computeVolumeAround(gp);
         //this-> computeStressVector(stressVector, gp, tStep);
         if ( !elem->giveIPValue(stressVector, gp, type, tStep) ) {
@@ -243,7 +242,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
 
     if ( !interpol ) {
-        OOFEM_SIMPLE_ERROR( "ZZNodalRecoveryMI_computeNNMatrix: Element %d not providing interpolation", elem->giveNumber() );
+        OOFEM_ERROR( "Element %d not providing interpolation", elem->giveNumber() );
     }
 
     int size = elem->giveNumberOfDofManagers();
@@ -251,8 +250,7 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     fullAnswer.zero();
     double pok = 0.0;
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         double dV = elem->computeVolumeAround(gp);
         interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(elem) );
         fullAnswer.plusDyadSymmUpper(n, dV);

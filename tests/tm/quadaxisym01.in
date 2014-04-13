@@ -24,8 +24,8 @@ ConstantFunction 1 f(t) 1.0
 set 1 elementboundaries 2 1 3
 
 #%BEGIN_CHECK%
-#NODE tStep 1 number 3 dof 1 unknown f value 1.20000000e+01
-#NODE tStep 1 number 4 dof 1 unknown f value 1.20000000e+01
+#NODE tStep 1 number 3 dof 10 unknown d value 1.20000000e+01
+#NODE tStep 1 number 4 dof 10 unknown d value 1.20000000e+01
 #ELEMENT tStep 1 number 1 gp 1 keyword "flow" component 2 value -1.5000e+01
 #ELEMENT tStep 1 number 1 gp 2 keyword "flow" component 2 value -1.5000e+01
 #ELEMENT tStep 1 number 1 gp 3 keyword "flow" component 2 value -1.5000e+01

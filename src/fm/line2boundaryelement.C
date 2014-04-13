@@ -47,8 +47,7 @@ FEI2dLineQuad Line2BoundaryElement :: fei(1, 2);
 Line2BoundaryElement :: Line2BoundaryElement(int n, Domain *aDomain) : FMElement(n, aDomain)
 {
     this->numberOfDofMans = 3;
-    this->numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
+    integrationRulesArray.resize( 1 );
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
     this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 2, this);
 }
@@ -86,9 +85,7 @@ Interface *Line2BoundaryElement :: giveInterface(InterfaceType it)
 
 double Line2BoundaryElement :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
-    FloatArray c;
-    c = * this->giveNode(3)->giveCoordinates();
-    return c.distance(coords);
+    return this->giveNode(3)->giveCoordinates()->distance(coords);
 }
 
 int Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,

@@ -58,19 +58,19 @@ boundarycondition 1 loadtimefunction 1 prescribedvalue 0.0
 boundarycondition 2 loadtimefunction 1 prescribedvalue 100.0
 constantfunction 1 f(t) 1.0
 #%BEGIN_CHECK%
-#NODE tStep 1 number 11 dof 1 unknown f value 33.3333333
-#NODE tStep 1 number 12 dof 1 unknown f value 33.3333333
-#NODE tStep 1 number 19 dof 1 unknown f value 33.3333333
-#NODE tStep 1 number 20 dof 1 unknown f value 33.3333333
-#NODE tStep 1 number 26 dof 1 unknown f value 33.3333333
-#NODE tStep 1 number 30 dof 1 unknown f value 33.3333333
-#NODE tStep 1 number 5 dof 1 unknown f value 66.6666666
-#NODE tStep 1 number 6 dof 1 unknown f value 66.6666666
-#NODE tStep 1 number 13 dof 1 unknown f value 66.6666666
-#NODE tStep 1 number 14 dof 1 unknown f value 66.6666666
-#NODE tStep 1 number 21 dof 1 unknown f value 66.6666666
-#NODE tStep 1 number 22 dof 1 unknown f value 66.6666666
-#NODE tStep 1 number 27 dof 1 unknown f value 66.6666666
-#NODE tStep 1 number 31 dof 1 unknown f value 66.6666666
-#NODE tStep 1 number 34 dof 1 unknown f value 16.6666666
+#NODE tStep 1 number 11 dof 10 unknown d value 33.3333333
+#NODE tStep 1 number 12 dof 10 unknown d value 33.3333333
+#NODE tStep 1 number 19 dof 10 unknown d value 33.3333333
+#NODE tStep 1 number 20 dof 10 unknown d value 33.3333333
+#NODE tStep 1 number 26 dof 10 unknown d value 33.3333333
+#NODE tStep 1 number 30 dof 10 unknown d value 33.3333333
+#NODE tStep 1 number 5 dof 10 unknown d value 66.6666666
+#NODE tStep 1 number 6 dof 10 unknown d value 66.6666666
+#NODE tStep 1 number 13 dof 10 unknown d value 66.6666666
+#NODE tStep 1 number 14 dof 10 unknown d value 66.6666666
+#NODE tStep 1 number 21 dof 10 unknown d value 66.6666666
+#NODE tStep 1 number 22 dof 10 unknown d value 66.6666666
+#NODE tStep 1 number 27 dof 10 unknown d value 66.6666666
+#NODE tStep 1 number 31 dof 10 unknown d value 66.6666666
+#NODE tStep 1 number 34 dof 10 unknown d value 16.6666666
 #%END_CHECK%

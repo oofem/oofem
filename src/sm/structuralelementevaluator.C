@@ -139,7 +139,7 @@ void StructuralElementEvaluator :: giveCharacteristicMatrix(FloatMatrix &answer,
     } else if ( mtrx == LumpedMassMatrix ) {
         this->computeLumpedMassMatrix(answer, tStep);
     } else {
-        OOFEM_SIMPLE_ERROR( "giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
+        OOFEM_ERROR( "Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
 }
 
@@ -190,7 +190,7 @@ void StructuralElementEvaluator :: computeLumpedMassMatrix(FloatMatrix &answer, 
     }
 
     if ( indx != ldofs ) {
-        OOFEM_SIMPLE_ERROR("computeMassMatrix : internal consistency check failed");
+        OOFEM_ERROR("internal consistency check failed");
     }
 
     dim = dimFlag.at(1) + dimFlag.at(2) + dimFlag.at(3);
@@ -220,15 +220,14 @@ void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answ
     }
 
     if ( ( iRule = this->giveMassMtrxIntegrationRule() ) ) {
-        OOFEM_SIMPLE_ERROR("computeConsistentMassMatrix no integration rule available");
+        OOFEM_ERROR("no integration rule available");
     }
 
     this->giveMassMtrxIntegrationMask(mask);
 
     mass = 0.;
 
-    for ( int ip = 0; ip < iRule->giveNumberOfIntegrationPoints(); ip++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(ip);
+    for ( GaussPoint *gp: *iRule ) {
         double density = elem->giveStructuralCrossSection()->give('d', gp);
         double dV      = this->computeVolumeAround(gp);
         mass   += density * dV;
@@ -280,8 +279,7 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
         m->clear();
         IntegrationRule *iRule = elem->giveIntegrationRule(ir);
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *iRule ) {
             this->computeBMatrixAt(b, gp);
             if ( useUpdatedGpRecord ) {
                 stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
@@ -364,8 +362,7 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
         }
 #endif
         IntegrationRule *iRule = elem->giveIntegrationRule(i);
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(j);
+        for ( GaussPoint *gp: *iRule ) {
             this->computeStrainVector(strain, gp, tStep, u);
             this->computeStressVector(stress, strain, gp, tStep);
         }
@@ -373,20 +370,19 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
 
 #if 0
     // Original unoptimized version
-    int i, j;
     IntegrationRule *iRule;
     FloatArray stress;
     Element *elem = this->giveElement();
     // force updating strains & stresses
-    for ( i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
+    for ( int i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
  #ifdef __PARALLEL_MODE
         if ( this->giveElement()->giveKnotSpanParallelMode(i) == Element_remote ) {
             continue;
         }
  #endif
         iRule = elem->giveIntegrationRule(i);
-        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            computeStressVector(stress, iRule->getIntegrationPoint(j), tStep);
+        for ( GaussPoint *gp: *iRule ) {
+            computeStressVector(stress, gp, tStep);
         }
     }
 #endif
@@ -423,8 +419,7 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
         m->clear();
         IntegrationRule *iRule = elem->giveIntegrationRule(ir);
         // loop over individual integration points
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(j);
+        for ( GaussPoint *gp: *iRule ) {
             double dV = this->computeVolumeAround(gp);
             this->computeBMatrixAt(bj, gp);
             this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);

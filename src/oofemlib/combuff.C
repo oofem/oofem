@@ -93,7 +93,7 @@ MPIBuffer :: resize(int newSize)
         if ( ( newBuff = ( ComBuff_BYTE_TYPE * )
                          malloc( newSize * sizeof( ComBuff_BYTE_TYPE ) ) ) == NULL ) {
             // alloc failed -> memory error
-            OOFEM_SIMPLE_ERROR("resize failed");
+            OOFEM_ERROR("resize failed");
         }
 
         // copy old buffer into new one
@@ -136,7 +136,7 @@ MPIBuffer :: packArray(MPI_Comm communicator, const void *src, int n, MPI_Dataty
                 return 0;
             }
         } else {
-            OOFEM_SIMPLE_WARNING("CommunicationBuffer :: packIntArray: Resize requested in static mode");
+            OOFEM_WARNING("Resize requested in static mode");
             return 0;
         }
     }

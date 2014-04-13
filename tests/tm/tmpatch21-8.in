@@ -39,7 +39,7 @@ InitialCondition 1 Conditions 1 u 0.0
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK% 
-#NODE tStep 5.94000000e+07 number 1 dof 1 unknown f value 5.69682953e+00
-#NODE tStep 5.94000000e+07 number 2 dof 1 unknown f value 5.69682953e+00
+#NODE tStep 5.94000000e+07 number 1 dof 10 unknown d value 5.69682953e+00
+#NODE tStep 5.94000000e+07 number 2 dof 10 unknown d value 5.69682953e+00
 #%END_CHECK%
 

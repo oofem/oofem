@@ -87,10 +87,9 @@ DofManValueField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeTy
 }
 
 void
-DofManValueField :: setDofManValue(int dofMan, const FloatArray &value)
+DofManValueField :: setDofManValue(int dofMan, FloatArray value)
 {
-    ///@todo remove the "const" and use move semantics here.
-    this->dmanvallist[dofMan-1] = value;
+    this->dmanvallist[dofMan-1] = std :: move(value);
 }
 
 contextIOResultType

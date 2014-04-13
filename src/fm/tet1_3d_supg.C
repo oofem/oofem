@@ -99,9 +99,8 @@ void
 Tet1_3D_SUPG :: computeGaussPoints()
 // Sets up the array containing the integration points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 3;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(3);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
 
@@ -128,23 +127,15 @@ Tet1_3D_SUPG :: giveInterface(InterfaceType interface)
 void
 Tet1_3D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    FloatArray n(4);
+    FloatArray n;
     this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(3, 12);
-    answer.zero();
-
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, 3 * i - 2)  = n.at(i);
-        answer.at(2, 3 * i - 1)  = n.at(i);
-        answer.at(3, 3 * i - 0)  = n.at(i);
-    }
+    answer.beNMatrixOf(n, 3);
 }
 
 void
 Tet1_3D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatMatrix n, dn(4, 3);
+    FloatMatrix n, dn;
     FloatArray u, un;
     interpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     this->computeNuMatrix(n, gp);
@@ -191,7 +182,7 @@ Tet1_3D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
 void
 Tet1_3D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    FloatMatrix dn(4, 3);
+    FloatMatrix dn;
     interpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 12);
@@ -216,7 +207,7 @@ Tet1_3D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 Tet1_3D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    FloatMatrix dn(4, 3);
+    FloatMatrix dn;
     interpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 12);
@@ -232,7 +223,7 @@ Tet1_3D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 Tet1_3D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    FloatArray n(4);
+    FloatArray n;
     this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 4);
@@ -248,7 +239,7 @@ Tet1_3D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 Tet1_3D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    FloatMatrix dn(4, 3);
+    FloatMatrix dn;
     interpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.beTranspositionOf(dn);
@@ -279,17 +270,15 @@ Tet1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
     double nu;
 
     // compute averaged viscosity based on rule of mixture
-    GaussPoint *gp;
 
     dt = tStep->giveTimeIncrement() * tscale;
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    gp = iRule->getIntegrationPoint(0);
+    GaussPoint *gp = iRule->getIntegrationPoint(0);
     nu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity( gp, tStep->givePreviousStep() );
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
 
-    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
+    for ( GaussPoint *gp: *iRule ) {
         this->computeDivUMatrix(du, gp);
         divu.beProductOf(du, u);
         sum += divu.at(1);
@@ -374,33 +363,26 @@ Tet1_3D_SUPG :: computeCriticalTimeStep(TimeStep *tStep)
     double vn4 = sqrt( u.at(10) * u.at(10) + u.at(11) * u.at(11) + u.at(12) * u.at(12) );
     double veln = max( vn1, max( vn2, max(vn3, vn4) ) );
 
-    int i, j, k, l;
     double ln = 1.e6;
     Node *inode, *jnode, *knode, *lnode;
-    FloatArray t1(3), t2(3), n3(3), n(3);
-    for ( l = 1; l <= 4; l++ ) {
-        i = ( l > 3 ) ? 1 : l + 1;
-        j = ( i > 3 ) ? 1 : i + 1;
-        k = ( j > 3 ) ? 1 : j + 1;
+    FloatArray t1, t2, n3, n;
+    for ( int l = 1; l <= 4; l++ ) {
+        int i = ( l > 3 ) ? 1 : l + 1;
+        int j = ( i > 3 ) ? 1 : i + 1;
+        int k = ( j > 3 ) ? 1 : j + 1;
 
         inode = this->giveNode(i);
         jnode = this->giveNode(j);
         knode = this->giveNode(k);
         lnode = this->giveNode(l);
-        t1.at(1) = inode->giveCoordinate(1) - jnode->giveCoordinate(1);
-        t1.at(2) = inode->giveCoordinate(2) - jnode->giveCoordinate(2);
-        t1.at(3) = inode->giveCoordinate(3) - jnode->giveCoordinate(3);
+        t1.beDifferenceOf(*inode->giveCoordinates(), *jnode->giveCoordinates());
 
-        t2.at(1) = knode->giveCoordinate(1) - jnode->giveCoordinate(1);
-        t2.at(2) = knode->giveCoordinate(2) - jnode->giveCoordinate(2);
-        t2.at(3) = knode->giveCoordinate(3) - jnode->giveCoordinate(3);
+        t2.beDifferenceOf(*knode->giveCoordinates(), *jnode->giveCoordinates());
 
         n.beVectorProductOf(t1, t2);
         n.normalize();
 
-        n3.at(1) = lnode->giveCoordinate(1) - jnode->giveCoordinate(1);
-        n3.at(2) = lnode->giveCoordinate(2) - jnode->giveCoordinate(2);
-        n3.at(3) = lnode->giveCoordinate(3) - jnode->giveCoordinate(3);
+        n3.beDifferenceOf(*lnode->giveCoordinates(), *jnode->giveCoordinates());
 
         ln = min( ln, sqrt( fabs( n.dotProduct(n3) ) ) );
     }
@@ -432,9 +414,8 @@ double
 Tet1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
 {
     double answer = 0.0, norm, dV, vol = 0.0;
-    FloatMatrix n(3, 4), dn(4, 3);
+    FloatMatrix n, dn;
     FloatArray fi(4), u, un, gfi;
-    GaussPoint *gp;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, un);
 
@@ -443,8 +424,7 @@ Tet1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
     }
 
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
+    for ( GaussPoint *gp: *iRule ) {
         dV  = this->computeVolumeAround(gp);
         interpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
         this->computeNuMatrix(n, gp);
@@ -471,13 +451,10 @@ Tet1_3D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
 double
 Tet1_3D_SUPG :: LS_PCS_computeVolume()
 {
-    int k;
     double answer = 0.0;
-    GaussPoint *gp;
-
+ 
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    for ( k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        gp = iRule->getIntegrationPoint(k);
+    for ( GaussPoint *gp: *iRule ) {
         answer += this->computeVolumeAround(gp);
     }
 
@@ -487,9 +464,8 @@ Tet1_3D_SUPG :: LS_PCS_computeVolume()
 double
 Tet1_3D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep)
 {
-    int i;
     FloatArray voff(2), fi(4);
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
     }
 
@@ -503,20 +479,16 @@ Tet1_3D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep)
 void
 Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 {
-    int i, neg = 0, pos = 0, zero = 0, si = 0;
+    int neg = 0, pos = 0, zero = 0, si = 0;
     double x1, y1, z1;
     answer.resize(2);
 
-    for ( i = 1; i <= 4; i++ ) {
-        if ( fi.at(i) >= 0. ) {
+    for ( int ifi: fi ) {
+        if ( ifi >= 0. ) {
             pos++;
-        }
-
-        if ( fi.at(i) < 0.0 ) {
+        } else if ( ifi < 0. ) {
             neg++;
-        }
-
-        if ( fi.at(i) == 0. ) {
+        } else {
             zero++;
         }
     }
@@ -539,7 +511,7 @@ Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
         // distinguish two poosible cases
         if ( max(pos, neg) == 3 ) {
             // find the vertex vith level set sign different from other three
-            for ( i = 1; i <= 4; i++ ) {
+            for ( int i = 1; i <= 4; i++ ) {
                 if ( ( pos > neg ) && ( fi.at(i) < 0.0 ) ) {
                     si = i;
                     break;
@@ -560,7 +532,7 @@ Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
                 int ii;
                 double t, xi [ 3 ], yi [ 3 ], zi [ 3 ];
                 // compute intersections with element sides originating from this vertex
-                for ( i = 0; i < 3; i++ ) {
+                for ( int i = 0; i < 3; i++ ) {
                     ii = ( si + i ) % 4 + 1;
                     t = fi.at(si) / ( fi.at(si) - fi.at(ii) );
                     xi [ i ] = x1 + t * ( this->giveNode(ii)->giveCoordinate(1) - x1 );
@@ -599,7 +571,7 @@ Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             // two vertices positive; two negative; compute positive volume
             int p1 = 0, p2 = 0;
             // find the vertex vith level set sign different from other three
-            for ( i = 1; i <= 4; i++ ) {
+            for ( int i = 1; i <= 4; i++ ) {
                 if ( fi.at(i) >= 0.0 ) {
                     if ( p1 ) {
                         p2 = i;
@@ -626,7 +598,7 @@ Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
                 p2i_z [ 0 ] = this->giveNode(p2)->giveCoordinate(3);
 
                 _ind = 1;
-                for ( i = 0; i < 3; i++ ) {
+                for ( int i = 0; i < 3; i++ ) {
                     ii = ( p1 + i ) % 4 + 1;
                     if ( ( ii == p2 ) || ( ii == p1 ) ) {
                         continue;

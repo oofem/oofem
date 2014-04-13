@@ -38,14 +38,13 @@
 #include "oofemcfg.h"
 #include "spatiallocalizer.h"
 #include "floatarray.h"
-#include "alist.h"
 #include "intarray.h"
 
 #include <set>
 #include <list>
+#include <vector>
 
 namespace oofem {
-template< class T > class AList;
 class Domain;
 class Element;
 class TimeStep;
@@ -79,11 +78,11 @@ protected:
     int depth;
 
     /// Octant node list.
-    std :: list< int > *nodeList;
+    std :: list< int > nodeList;
     /// Element list, containing all elements having IP in cell.
-    std :: set< int > *elementIPList;
+    std :: set< int > elementIPList;
     /// Element list of all elements close to the cell.
-    AList< std :: list< int > >elementList;
+    std :: vector< std :: list< int > >elementList;
 
 public:
     enum BoundingBoxStatus { BBS_OutsideCell, BBS_InsideCell, BBS_ContainsCell };
@@ -100,7 +99,7 @@ public:
      * Gives the cell origin.
      * @param answer Cell origin.
      */
-    void giveOrigin(FloatArray &answer) { answer = this->origin; }
+    const FloatArray & giveOrigin() { return this->origin; }
     /// @return Half the cell width.
     double giveWidth() { return 2. * this->halfWidth; }
     /// @return Depth in the tree for this octant.
@@ -127,11 +126,11 @@ public:
     /// @return True if octant is terminal (no children).
     bool isTerminalOctant();
     /// @return Reference to node List.
-    std :: list< int > *giveNodeList();
+    std :: list< int > &giveNodeList();
     /// @return Reference to IPelement set.
-    std :: set< int > *giveIPElementList();
+    std :: set< int > &giveIPElementList();
     /// @return Reference to closeElement list.
-    std :: list< int > *giveElementList(int region);
+    std :: list< int > &giveElementList(int region);
 
     /**
      * Divide receiver further, creating corresponding children.
@@ -150,26 +149,23 @@ public:
      * Adds given element to cell list of elements having IP within this cell.
      * @param elementNum Element number to add.
      */
-    void addElementIP(int elementNum) { this->giveIPElementList()->insert(elementNum); }
+    void addElementIP(int elementNum) { this->giveIPElementList().insert(elementNum); }
     /**
      * Adds given element to cell list of elements having IP within this cell.
      * @param region Element region number (0 for global).
      * @param elementNum Element number to add.
      */
-    void addElement(int region, int elementNum) { this->giveElementList(region)->push_back(elementNum); }
+    void addElement(int region, int elementNum) { this->giveElementList(region).push_back(elementNum); }
     /**
      * Adds given Node to node list of nodes contained by receiver.
      * @param nodeNum Node number to add.
      */
-    void addNode(int nodeNum) { this->giveNodeList()->push_back(nodeNum); }
+    void addNode(int nodeNum) { this->giveNodeList().push_back(nodeNum); }
     /**
      * Clears and deletes the nodeList.
      */
     void deleteNodeList() {
-        if ( nodeList ) {
-            delete nodeList;
-        }
-        nodeList = NULL;
+        nodeList.clear();
     }
     /// Recursively prints structure.
     void printYourself();

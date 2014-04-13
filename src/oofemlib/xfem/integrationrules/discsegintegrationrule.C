@@ -55,7 +55,7 @@ int DiscontinuousSegmentIntegrationRule :: SetUpPointsOnLine(int iNumPointsPerSe
     // Allocate Gauss point array
     FloatArray coords_xi, weights;
     this->giveLineCoordsAndWeights(iNumPointsPerSeg, coords_xi, weights);
-    this->gaussPointArray = new GaussPoint * [ numPointsTot ];
+    this->gaussPoints.resize( numPointsTot );
     ////////////////////////////////////////////
 
     double totalLength = mXS.distance(mXE);
@@ -68,7 +68,7 @@ int DiscontinuousSegmentIntegrationRule :: SetUpPointsOnLine(int iNumPointsPerSe
     for ( size_t i = 0; i < mSegments.size(); i++ ) {
         for ( int j = 0; j < iNumPointsPerSeg; j++ ) {
             FloatArray global;
-            GaussPoint * &gp = this->gaussPointArray [ pointsPassed ];
+            GaussPoint * &gp = this->gaussPoints [ pointsPassed ];
 
             FloatArray *coord = new FloatArray(1);
             coord->at(1) = coords_xi.at(j + 1);
@@ -83,11 +83,9 @@ int DiscontinuousSegmentIntegrationRule :: SetUpPointsOnLine(int iNumPointsPerSe
             newGPCoord.push_back(global);
 
 
-            FloatArray local;
             // Local coordinate along the line segment
             double xi = 2.0 * ( global.distance(mXS) / totalLength - 0.5 );
-            local.setValues(1, xi);
-            gp->setCoordinates(local);
+            gp->setCoordinates({xi});
 
             gp->setWeight(1.0 * gp->giveWeight() * mSegments [ i ].giveLength() / totalLength);  // update integration weight
 
@@ -95,8 +93,6 @@ int DiscontinuousSegmentIntegrationRule :: SetUpPointsOnLine(int iNumPointsPerSe
         }
     }
 
-    numberOfIntegrationPoints = pointsPassed;
-
-    return numberOfIntegrationPoints;
+    return this->giveNumberOfIntegrationPoints();
 }
 } /* namespace oofem */

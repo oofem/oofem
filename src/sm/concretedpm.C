@@ -933,7 +933,7 @@ ConcreteDPM :: performRegularReturn(StressVector &effectiveStress,
 
     while ( residualNorm > yieldTol ) {
         if ( ++iterationCount == newtonIter ) {
-            OOFEM_ERROR("Closest point projection did not converge.\n");
+            OOFEM_ERROR("Closest point projection did not converge.");
         }
 
         //compute the stress, yield value and residuals

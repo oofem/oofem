@@ -65,15 +65,9 @@ IRResultType ElementSide :: initializeFrom(InputRecord *ir)
 void ElementSide :: printYourself()
 // Prints the receiver on screen.
 {
-    int i;
-
     printf("Element side %d \n", number);
-    for ( i = 0; i < numberOfDofs; i++ ) {
-        if ( dofArray [ i ] ) {
-            dofArray [ i ]->printYourself();
-        } else {
-            printf("dof %d is nil \n", i + 1);
-        }
+    for ( Dof *dof: *this ) {
+        dof->printYourself();
     }
 
     loadArray.printYourself();
@@ -91,10 +85,10 @@ void ElementSide :: computeTransformation(FloatMatrix &answer, const IntArray *m
     //
     //
 
-    int i, size;
+    int size;
 
     if ( map == NULL ) {
-        size = numberOfDofs;
+        size = this->giveNumberOfDofs();
     } else {
         size = map->giveSize();
     }
@@ -103,9 +97,6 @@ void ElementSide :: computeTransformation(FloatMatrix &answer, const IntArray *m
 
     answer.resize(size, size);
     answer.zero();
-
-    for ( i = 1; i <= size; i++ ) {
-        answer.at(i, i) = 1.0;
-    }
+    answer.beUnitMatrix();
 }
 } // end namespace oofem

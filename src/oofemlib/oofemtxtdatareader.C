@@ -43,7 +43,7 @@ OOFEMTXTDataReader :: OOFEMTXTDataReader(const char *inputfilename) : DataReader
 {
     inputStream.open(inputfilename);
     if ( !inputStream.is_open() ) {
-        OOFEM_SIMPLE_ERROR("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't open input stream (%s)", inputfilename);
+        OOFEM_ERROR("Can't open input stream (%s)", inputfilename);
     }
     dataSourceName = inputfilename;
     lineNumber = 0;
@@ -57,7 +57,7 @@ OOFEMTXTDataReader :: OOFEMTXTDataReader(const OOFEMTXTDataReader &x) : DataRead
 {
     inputStream.open( dataSourceName.c_str() );
     if ( !inputStream.is_open() ) {
-        OOFEM_SIMPLE_ERROR( "OOFEMTXTDataReader::OOFEMTXTDataReader: Can't copy open input stream (%s)", dataSourceName.c_str() );
+        OOFEM_ERROR("Can't copy open input stream (%s)", dataSourceName.c_str());
     }
     lineNumber = 0;
 
@@ -125,7 +125,6 @@ OOFEMTXTDataReader :: giveRawLineFromInput(std :: string &line)
     do {
         this->lineNumber++;
         std :: getline(this->inputStream, line);
-#if __cplusplus > 199711L
         if ( line.back() == '\\' ) {
             line.pop_back();
             std :: string continuedLine;
@@ -136,7 +135,6 @@ OOFEMTXTDataReader :: giveRawLineFromInput(std :: string &line)
                 line += continuedLine;
             } while ( continuedLine.back() == '\\' );
         }
-#endif
     } while ( line [ 0 ] == '#' ); // skip comments
 }
 } // end namespace oofem

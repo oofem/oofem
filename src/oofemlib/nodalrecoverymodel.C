@@ -145,7 +145,7 @@ NodalRecoveryModel :: giveRegionRecordSize()
         // the container is not empty
         return this->nodalValList.begin()->second.giveSize();
     } else {
-        OOFEM_WARNING("data not yet initialized\n");
+        OOFEM_WARNING("data not yet initialized");
         return 0;
     }
 }

@@ -1600,12 +1600,12 @@ ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK%
 ##Solution time at step 4
-#NODE tStep 1.73057456e-02  number 1 dof 3 unknown p value  3.80460826e+02
-#NODE tStep 1.73057456e-02  number 2 dof 1 unknown v value  4.06807867e-01
-#NODE tStep 1.73057456e-02  number 4 dof 2 unknown v value -9.33888921e-02
+#NODE tStep 1.73057456e-02  number 1 dof 11 unknown d value  3.80460826e+02
+#NODE tStep 1.73057456e-02  number 2 dof 7 unknown d value  4.06807867e-01
+#NODE tStep 1.73057456e-02  number 4 dof 8 unknown d value -9.33888921e-02
 ##Solution time at step 20
-##NODE tStep 3.24171062e-02  number 1 dof 3 unknown p value  4.19138564e+02
-##NODE tStep 3.24171062e-02  number 2 dof 1 unknown v value  6.32980127e-01
-##NODE tStep 3.24171062e-02  number 4 dof 2 unknown v value -5.06245980e-01
+##NODE tStep 3.24171062e-02  number 1 dof 11 unknown d value  4.19138564e+02
+##NODE tStep 3.24171062e-02  number 2 dof 7 unknown d value  6.32980127e-01
+##NODE tStep 3.24171062e-02  number 4 dof 8 unknown d value -5.06245980e-01
 #%END_CHECK%
 

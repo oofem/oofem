@@ -38,7 +38,6 @@
 #include "femcmpnn.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
-#include "alist.h"
 #include "intarray.h"
 #include "error.h"
 #include "integrationrule.h"
@@ -162,8 +161,6 @@ protected:
      * that apply on receiver.
      */
     IntArray bodyLoadArray, boundaryLoadArray;
-    /// Number of integration rules used by receiver.
-    int numberOfIntegrationRules;
     /**
      * List of integration rules of receiver (each integration rule contains associated
      * integration points also). This list should contain only such integration rules,
@@ -173,7 +170,7 @@ protected:
      * (mass matrix integration) and different integration rule is needed, one should preferably
      * use temporarily created integration rule.
      */
-    IntegrationRule **integrationRulesArray;
+    std::vector< IntegrationRule * > integrationRulesArray;
 
     /// Transformation material matrix, used in orthotropic and anisotropic materials, global->local transformation
     FloatMatrix elemLocalCS;
@@ -576,7 +573,7 @@ public:
      * Sets integration rules.
      * @param irlist List of integration rules.
      */
-    void setIntegrationRules(AList< IntegrationRule > *irlist);
+    void setIntegrationRules(const std :: vector< IntegrationRule * > &irlist);
     /**
      * Returns integration domain for receiver, used to initialize
      * integration point over receiver volume.
@@ -714,7 +711,7 @@ public:
         }
     }
     /// @return Number of integration rules for element.
-    int giveNumberOfIntegrationRules() { return this->numberOfIntegrationRules; }
+    int giveNumberOfIntegrationRules() { return (int)this->integrationRulesArray.size(); }
     /**
      * @param i Index of integration rule.
      * @return Requested integration rule.
@@ -1019,7 +1016,7 @@ public:
 
 protected:
     /**
-     * Initializes the array of integration rules and numberOfIntegrationRules member variable.
+     * Initializes the array of integration rules member variable.
      * Element can have multiple integration rules for different tasks.
      * For example structural element family class uses this feature to implement
      * transparent support for reduced and selective integration of some strain components.
@@ -1032,13 +1029,8 @@ protected:
 template< class T > void
 Element :: ipEvaluator( T *src, void ( T :: *f )( GaussPoint *gp ) )
 {
-    int ir, ip, nip;
-    GaussPoint *gp;
-
-    for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        nip = integrationRulesArray [ ir ]->giveNumberOfIntegrationPoints();
-        for ( ip = 0; ip < nip; ip++ ) {
-            gp = integrationRulesArray [ ir ]->getIntegrationPoint(ip);
+    for ( auto &ir: integrationRulesArray ) {
+        for ( GaussPoint *gp: *ir ) {
             ( src->*f )(gp);
         }
     }
@@ -1047,13 +1039,8 @@ Element :: ipEvaluator( T *src, void ( T :: *f )( GaussPoint *gp ) )
 template< class T, class S > void
 Element :: ipEvaluator(T *src, void ( T :: *f )( GaussPoint *, S & ), S &_val)
 {
-    int ir, ip, nip;
-    GaussPoint *gp;
-
-    for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        nip = integrationRulesArray [ ir ]->giveNumberOfIntegrationPoints();
-        for ( ip = 0; ip < nip; ip++ ) {
-            gp = integrationRulesArray [ ir ]->getIntegrationPoint(ip);
+    for ( auto &ir: integrationRulesArray ) {
+        for ( GaussPoint *gp: *ir ) {
             ( src->*f )(gp, _val);
         }
     }

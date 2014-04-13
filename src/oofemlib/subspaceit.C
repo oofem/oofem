@@ -88,11 +88,11 @@ SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Floa
     // check matrix size
     //
     if ( ( !a ) || ( !b ) ) {
-        OOFEM_ERROR("matrices are not defined\n");
+        OOFEM_ERROR("matrices are not defined");
     }
 
     if ( a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
-        OOFEM_ERROR("matrices size mismatch\n");
+        OOFEM_ERROR("matrices size mismatch");
     }
 
     // check matrix for factorization support

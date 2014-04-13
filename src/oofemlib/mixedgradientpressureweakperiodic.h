@@ -77,8 +77,11 @@ protected:
 
     /// DOF-manager containing the unknown volumetric gradient (always exactly one dof).
     Node *voldman;
+    IntArray v_id;
+
     /// DOF-manager containing the unknown tractions (Lagrange mult. for micro-periodic velocity)
     Node *tractionsdman;
+    IntArray t_id;
 
 public:
     /**

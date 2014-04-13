@@ -146,12 +146,12 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
 	Domain *domain = emodel->giveDomain(1);
 	StructuralEngngModel *seMod = dynamic_cast<StructuralEngngModel* >(emodel);
 	if(seMod == NULL) {
-		OOFEM_ERROR("failed to cast to StructuralEngngModel.\n");
+		OOFEM_ERROR("failed to cast to StructuralEngngModel.");
 	}
 
     IntArray ielemDofMask;
     FloatArray reactions;
-    IntArray dofManMap, dofMap, eqnMap;
+    IntArray dofManMap, dofidMap, eqnMap;
 
     // test if solution step output is active
     if ( !domain->giveOutputManager()->testTimeStepOutput(tStep) ) {
@@ -161,7 +161,7 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
     // map contains corresponding dofmanager and dofs numbers corresponding to prescribed equations
     // sorted according to dofmanger number and as a minor crit. according to dof number
     // this is necessary for extractor, since the sorted output is expected
-    seMod->buildReactionTable(dofManMap, dofMap, eqnMap, tStep, 1);
+    seMod->buildReactionTable(dofManMap, dofidMap, eqnMap, tStep, 1);
 
     // compute reaction forces
     seMod->computeReaction(reactions, tStep, 1);
@@ -169,7 +169,7 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
     // Find highest index of prescribed dofs
     int maxIndPresDof = 0;
     for ( int i = 1; i <= dofManMap.giveSize(); i++ ) {
-        maxIndPresDof = std::max(maxIndPresDof, dofMap.at(i));
+        maxIndPresDof = std::max(maxIndPresDof, dofidMap.at(i));
     }
 
     int numBC = domain->giveNumberOfBoundaryConditions();
@@ -191,10 +191,10 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
 
         for ( int i = 1; i <= dofManMap.giveSize(); i++ ) {
         	DofManager *dMan = domain->giveDofManager( dofManMap.at(i) );
-        	Dof *dof = dMan->giveDof( dofMap.at(i) );
+        	Dof *dof = dMan->giveDofWithID( dofidMap.at(i) );
 
         	if( dof->giveBcId() == bcInd+1) {
-        		fR.at( dofMap.at(i) ) += reactions.at( eqnMap.at(i) );
+        		fR.at( dofidMap.at(i) ) += reactions.at( eqnMap.at(i) );
 
         		// Slightly dirty
         		BoundaryCondition *bc = dynamic_cast<BoundaryCondition*> (domain->giveBc(bcInd+1));
@@ -250,14 +250,12 @@ void GnuplotExportModule::outputXFEM(EnrichmentItem &iEI)
 void GnuplotExportModule::outputXFEM(Crack &iCrack)
 {
 	const std::vector<GaussPoint*> &czGaussPoints = iCrack.giveCohesiveZoneGaussPoints();
-	size_t numPoints = czGaussPoints.size();
 
 	std::vector<double> arcLengthPositions, normalJumps, tangJumps;
 
 	const EnrichmentDomain *ed = iCrack.giveEnrichmentDomain();
 
-	for(size_t i = 0; i < numPoints; i++) {
-		GaussPoint *gp = czGaussPoints[i];
+	for( GaussPoint *gp: czGaussPoints ) {
 
 		StructuralInterfaceMaterialStatus *matStat = dynamic_cast<StructuralInterfaceMaterialStatus*> ( gp->giveMaterialStatus() );
 		if(matStat != NULL) {
@@ -337,13 +335,10 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradient &iBC, TimeS
 
 void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCNeumann &iBC, TimeStep *tStep)
 {
-	int numDofs = iBC.giveInternalDofManager(1)->giveNumberOfDofs();
-	FloatArray stress(numDofs);
-	for(int dofInd = 1; dofInd <= numDofs; dofInd++) {
-		stress.at(dofInd) = iBC.giveInternalDofManager(1)->giveDof(dofInd)->giveUnknown(VM_Total, tStep);
-	}
+    FloatArray stress;
+    //iBC.computeStress(stress, EID_MomentumBalance, tStep);
 	
-		printf("Mean stress computed in Gnuplot export module: "); stress.printYourself();
+    printf("Mean stress computed in Gnuplot export module: "); stress.printYourself();
 
 	double time = 0.0;
 

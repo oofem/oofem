@@ -33,7 +33,6 @@
  */
 
 #include "mathfem.h"
-#include "alist.h"
 #include "enrichmentdomain.h"
 #include "enrichmentitem.h"
 #include "element.h"

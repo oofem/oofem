@@ -207,8 +207,7 @@ void CohesiveSurface3d :: computeGaussPoints()
 {
     // The Gauss point is used only when methods from crosssection and/or material
     // classes are requested.
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
+    integrationRulesArray.resize( 1 );
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
     this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
 }
@@ -412,14 +411,10 @@ CohesiveSurface3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArr
 void
 CohesiveSurface3d :: printOutputAt(FILE *File, TimeStep *tStep)
 {
-    // Performs end-of-step operations.
-    FloatArray rg, rl, Fg, Fl;
-    FloatMatrix T;
-
     fprintf(File, "element %d :\n", number);
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        integrationRulesArray [ i ]->printOutputAt(File, tStep);
+    for ( auto &iRule: integrationRulesArray ) {
+        iRule->printOutputAt(File, tStep);
     }
 
     fprintf(File, "\n");
@@ -509,9 +504,9 @@ void CohesiveSurface3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownT
     // take into account periodic conditions
     if ( giveNumberOfNodes() == 3 ) {
         Node *nodeC = ( Particle * ) giveNode(3);
-        p [ 1 ].x += kxa + kxa * defScale * ( nodeC->giveDof(1)->giveUnknown(VM_Total, tStep) ) + kyb * defScale * ( nodeC->giveDof(4)->giveUnknown(VM_Total, tStep) );
-        p [ 1 ].y += kyb + kyb * defScale * ( nodeC->giveDof(2)->giveUnknown(VM_Total, tStep) ) + kzc * defScale * ( nodeC->giveDof(5)->giveUnknown(VM_Total, tStep) );
-        p [ 1 ].z += kzc + kzc * defScale * ( nodeC->giveDof(3)->giveUnknown(VM_Total, tStep) ) + kxa * defScale * ( nodeC->giveDof(6)->giveUnknown(VM_Total, tStep) );
+        p [ 1 ].x += kxa + kxa * defScale * ( nodeC->giveDofWithID(D_u)->giveUnknown(VM_Total, tStep) ) + kyb * defScale * ( nodeC->giveDofWithID(R_u)->giveUnknown(VM_Total, tStep) );
+        p [ 1 ].y += kyb + kyb * defScale * ( nodeC->giveDofWithID(D_v)->giveUnknown(VM_Total, tStep) ) + kzc * defScale * ( nodeC->giveDofWithID(R_v)->giveUnknown(VM_Total, tStep) );
+        p [ 1 ].z += kzc + kzc * defScale * ( nodeC->giveDofWithID(D_w)->giveUnknown(VM_Total, tStep) ) + kxa * defScale * ( nodeC->giveDofWithID(R_w)->giveUnknown(VM_Total, tStep) );
         EASValsSetMType(CIRCLE_MARKER);
     }
 
@@ -560,9 +555,9 @@ CohesiveSurface3d :: drawScalar(oofegGraphicContext &context)
         // handle special elements crossing the boundary of the periodic cell
         if ( giveNumberOfNodes() == 3 ) {
             Node *nodeC = ( Particle * ) giveNode(3);
-            p [ 2 ].x += kxa + kxa * defScale * ( nodeC->giveDof(1)->giveUnknown(VM_Total, tStep) ) + kyb * defScale * ( nodeC->giveDof(4)->giveUnknown(VM_Total, tStep) );
-            p [ 2 ].y += kyb + kyb * defScale * ( nodeC->giveDof(2)->giveUnknown(VM_Total, tStep) ) + kzc * defScale * ( nodeC->giveDof(5)->giveUnknown(VM_Total, tStep) );
-            p [ 2 ].z += kzc + kzc * defScale * ( nodeC->giveDof(3)->giveUnknown(VM_Total, tStep) ) + kxa * defScale * ( nodeC->giveDof(6)->giveUnknown(VM_Total, tStep) );
+            p [ 2 ].x += kxa + kxa * defScale * ( nodeC->giveDofWithID(D_u)->giveUnknown(VM_Total, tStep) ) + kyb * defScale * ( nodeC->giveDofWithID(R_u)->giveUnknown(VM_Total, tStep) );
+            p [ 2 ].y += kyb + kyb * defScale * ( nodeC->giveDofWithID(D_v)->giveUnknown(VM_Total, tStep) ) + kzc * defScale * ( nodeC->giveDofWithID(R_v)->giveUnknown(VM_Total, tStep) );
+            p [ 2 ].z += kzc + kzc * defScale * ( nodeC->giveDofWithID(D_w)->giveUnknown(VM_Total, tStep) ) + kxa * defScale * ( nodeC->giveDofWithID(R_w)->giveUnknown(VM_Total, tStep) );
         }
     } else {
         // use initial geometry

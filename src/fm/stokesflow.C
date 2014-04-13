@@ -271,14 +271,12 @@ void StokesFlow :: initParallelContexts()
 
 int StokesFlow :: checkConsistency()
 {
-    int nelem;
-    FMElement *sePtr;
     Domain *domain = this->giveDomain(1);
-    nelem = domain->giveNumberOfElements();
+    int nelem = domain->giveNumberOfElements();
 
     // check for proper element type
     for ( int i = 1; i <= nelem; i++ ) {
-        sePtr = dynamic_cast< FMElement * >( domain->giveElement(i) );
+        FMElement *sePtr = dynamic_cast< FMElement * >( domain->giveElement(i) );
         if ( sePtr == NULL ) {
             OOFEM_WARNING("Element %d has no FMElement base", i);
             return false;
@@ -290,22 +288,13 @@ int StokesFlow :: checkConsistency()
 
 void StokesFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
-    DofIDItem type = iDof->giveDofID();
-    ///@todo This won't work with slave dofs, xfem etc.
-    if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-        iDof->printSingleOutputAt(stream, tStep, 'v', VM_Total, 1);
-    } else if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, 1);
-    } else {
-        OOFEM_ERROR("unsupported dof type");
-    }
+    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 void StokesFlow :: updateInternalState(TimeStep *tStep)
 {
-    Domain *domain;
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        domain = this->giveDomain(idomain);
+        Domain *domain = this->giveDomain(idomain);
         if ( domain->giveTopology() ) {
             // Must be done before updating nodal positions
             this->ts = domain->giveTopology()->updateYourself(tStep);
@@ -350,7 +339,7 @@ TimeStep *StokesFlow :: giveNextStep()
         previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -this->deltaT, this->deltaT, 0);
         currentStep = new TimeStep(istep, this, 1, 0.0, this->deltaT, 1);
     } else {
-        int istep =  currentStep->giveNumber() + 1;
+        int istep = currentStep->giveNumber() + 1;
         StateCounterType counter = currentStep->giveSolutionStateCounter() + 1;
         previousStep = currentStep;
         double dt = currentStep->giveTimeIncrement();

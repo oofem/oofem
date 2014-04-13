@@ -285,9 +285,9 @@ DynamicInputRecord :: printYourself()
 }
 
 // Setters
-void DynamicInputRecord :: setRecordKeywordField(const std :: string &keyword, int value)
+void DynamicInputRecord :: setRecordKeywordField(std :: string keyword, int value)
 {
-    this->recordKeyword = keyword;
+    this->recordKeyword = std :: move(keyword);
     this->recordNumber = value;
 }
 
@@ -311,41 +311,41 @@ void DynamicInputRecord :: setField(bool item, InputFieldType id)
     this->boolRecord [ id ] = item;
 }
 
-void DynamicInputRecord :: setField(const std :: string &item, InputFieldType id)
+void DynamicInputRecord :: setField(std :: string item, InputFieldType id)
 {
     this->stringRecord [ id ] = item;
 }
 
-void DynamicInputRecord :: setField(const FloatArray &item, InputFieldType id)
+void DynamicInputRecord :: setField(FloatArray item, InputFieldType id)
 {
-    this->floatArrayRecord [ id ] = item;
+    this->floatArrayRecord.insert({id, std :: move(item)});
 }
 
 void DynamicInputRecord :: setField(std :: initializer_list< double > item, InputFieldType id)
 {
-  //this->floatArrayRecord.emplace(id, item);
-  this->floatArrayRecord.insert(std::make_pair(id, FloatArray(item)));
+    //this->floatArrayRecord.emplace(id, item);
+    this->floatArrayRecord.insert(std :: make_pair(id, FloatArray(item)));
 }
 
-void DynamicInputRecord :: setField(const IntArray &item, InputFieldType id)
+void DynamicInputRecord :: setField(IntArray item, InputFieldType id)
 {
-    this->intArrayRecord [ id ] = item;
+    this->intArrayRecord.insert({id, std :: move(item)});
 }
 
 void DynamicInputRecord :: setField(std :: initializer_list< int > item, InputFieldType id)
 {
-  //this->intArrayRecord.emplace(id, item);
-  this->intArrayRecord.insert(std::make_pair(id, IntArray(item)));
+    //this->intArrayRecord.emplace(id, item);
+    this->intArrayRecord.insert({id, IntArray(item)});
 }
 
-void DynamicInputRecord :: setField(const FloatMatrix &item, InputFieldType id)
+void DynamicInputRecord :: setField(FloatMatrix item, InputFieldType id)
 {
-    this->matrixRecord [ id ] = item;
+    this->matrixRecord.insert({id, std :: move(item)});
 }
 
-void DynamicInputRecord :: setField(const std :: vector< std :: string > &item, InputFieldType id)
+void DynamicInputRecord :: setField(std :: vector< std :: string > item, InputFieldType id)
 {
-    this->stringListRecord [ id ] = item;
+    this->stringListRecord.insert({id, std :: move(item)});
 }
 
 void DynamicInputRecord :: setField(const Dictionary &item, InputFieldType id)

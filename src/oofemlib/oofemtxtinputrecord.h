@@ -77,7 +77,7 @@ public:
 
 public:
     /// Sets the record string.
-    void setRecordString(const std :: string &newStr);
+    void setRecordString(std :: string newStr);
     /// Returns record string.
     virtual std :: string giveRecordAsString() const { return this->record; }
 

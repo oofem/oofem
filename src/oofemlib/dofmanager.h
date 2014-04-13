@@ -37,7 +37,6 @@
 
 #include <cstdio>
 
-#include "alist.h"
 #include "femcmpnn.h"
 #include "intarray.h"
 #include "equationid.h"
@@ -110,7 +109,7 @@ class IntArray;
  * based on domain type of problem.
  *
  * Tasks:
- * - managing its degrees of freedom (giveDof).
+ * - managing its degrees of freedom.
  * - calculating its nodal vector.
  * - printing and updating at end of step .
  * - managing its swapping to and from disk.
@@ -120,10 +119,8 @@ class IntArray;
 class OOFEM_EXPORT DofManager : public FEMComponent
 {
 protected:
-    /// Total number of DOFs.
-    int numberOfDofs;
     /// Array of DOFs.
-    Dof **dofArray;
+    std::vector< Dof * > dofArray;
     /// List of applied loads.
     IntArray loadArray;
     /**
@@ -163,6 +160,11 @@ protected:
     IntArray mBC;
 
 public:
+    std::vector< Dof* > :: iterator begin() { return dofArray.begin(); }
+    std::vector< Dof* > :: iterator end() { return dofArray.end(); }
+    std::vector< Dof* > :: const_iterator begin() const { return dofArray.begin(); }
+    std::vector< Dof* > :: const_iterator end() const { return dofArray.end(); }
+
     /**
      * Constructor. Creates DofManager with given number belonging to domain aDomain.
      * @param n DofManager's number in domain
@@ -174,16 +176,6 @@ public:
 
     /**@name Dof management methods */
     //@{
-
-    /**
-     * Returns reference (pointer) to i-th dof of receiver.
-     * Index of Dof with required physical meaning can be obtained by invoking
-     * method findDofWithDofId.
-     * @param i The index of the DOF.
-     * @return The requested DOF.
-     * @see DofManager::findDofWithDofId
-     */
-    Dof *giveDof(int i) const;
     /**
      * Returns DOF with given dofID; issues error if not present.
      * @param dofID The ID for the requested DOF.
@@ -199,10 +191,10 @@ public:
     /**
      * Returns the number of primary dofs on which receiver dofs (given in dofArray) depend on.
      * If receiver has only primary dofs, the answer is the size of dofArray.
-     * @param dofArray Array with indices to DOFs.
+     * @param dofArray Array with Dof IDs.
      * @return Number of primary dofs from given array.
      */
-    int giveNumberOfPrimaryMasterDofs(IntArray &dofArray) const;
+    int giveNumberOfPrimaryMasterDofs(const IntArray &dofIDArray) const;
     /**
      * Returns location array (array containing for each requested dof related equation number) for
      * given numbering scheme.
@@ -240,21 +232,12 @@ public:
      */
     void giveCompleteMasterDofIDArray(IntArray &dofIDArray) const;
     /**
-     * Returns DOFs numbers of receiver with required physical meaning.
-     * @param dofIDArray Array containing DofIDItem-type values (this is enumeration
-     * identifying physical meaning of particular DOF, see cltypes.h).
-     * @param answer Array with DOF numbers. They are ordered according to dofIDArry.
-     * @see DofIDItem
-     * @see cltypes.h
-     */
-    void giveDofArray(const IntArray &dofIDArray, IntArray &answer) const;
-    /**
      * Finds index of DOF with required physical meaning of receiver. This index can be different
      * for different DOFManagers (user can alter dof order and type in input file).
      * @param dofID Physical meaning of DOF.
      * @return Index of requested DOF. If such DOF with dofID does not exists, returns zero.
      */
-    int findDofWithDofId(DofIDItem dofID) const;
+    std :: vector< Dof* > :: const_iterator findDofWithDofId(DofIDItem dofID) const;
     /**
      * Assembles the vector of unknowns in global c.s for given dofs of receiver.
      * @param answer Result (in global c.s.)
@@ -497,8 +480,6 @@ public:
      * Resizes the dofArray accordingly
      */
     void setNumberOfDofs(int _ndofs);
-    /** Sets i-th DOF of receiver to given DOF */
-    void setDof(int i, Dof *dof);
     //@}
 
     /**
@@ -584,12 +565,6 @@ public:
         }
     }
 #endif
-
-    IntArray *giveCompleteGlobalDofIDArray() const; // JB - made it public
-
-protected:
-    /// Computes transformation matrix between DOFs in nodal c.s. and master DOFs.
-    void computeSlaveDofTransformation(FloatMatrix &answer, const IntArray *dofMask);
 };
 } // end namespace oofem
 #endif // dofmanager_h

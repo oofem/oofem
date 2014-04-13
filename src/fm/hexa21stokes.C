@@ -57,12 +57,19 @@ REGISTER_Element(Hexa21Stokes);
 FEI3dHexaLin Hexa21Stokes :: interpolation_lin;
 FEI3dHexaTriQuad Hexa21Stokes :: interpolation_quad;
 // Set up ordering vectors (for assembling)
-IntArray Hexa21Stokes :: momentum_ordering(81);
-IntArray Hexa21Stokes :: conservation_ordering(8);
+IntArray Hexa21Stokes :: momentum_ordering = {
+     1,  2,  3,  5,  6,  7,  9, 10, 11, 13, 14, 15, 17, 18, 19, 21, 22, 23, 25, 26, 27, 29, 30, 31, 33, 34, 35,
+    37, 38, 39, 41, 42, 43, 45, 46, 47, 49, 50, 51, 53, 54, 55, 57, 58, 59, 61, 62, 63, 65, 66, 67, 69, 70, 71,
+    73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89, 90, 91, 93, 94, 95, 97, 98, 99, 101, 102, 103, 105, 106, 107};
+IntArray Hexa21Stokes :: conservation_ordering = {4, 8, 12, 16, 20, 24, 28, 32};
 IntArray Hexa21Stokes :: surf_ordering [ 6 ] = {
-    IntArray(), IntArray(), IntArray(), IntArray(), IntArray(), IntArray()
+    { 5,  6,  7,  1,  2,  3, 13, 14, 15,  9, 10, 11, 33, 34, 35, 42, 43, 44, 39, 40, 41, 36, 37, 38, 69, 70, 71},
+    {17, 18, 19, 21, 22, 23, 25, 26, 27, 29, 30, 31, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 72, 73, 74},
+    { 1,  2,  3, 17, 18, 19, 21, 22, 23,  5,  6,  7, 57, 58, 59, 45, 46, 47, 60, 61, 62, 33, 34, 35, 75, 76, 77},
+    { 5,  6,  7,  9, 10, 11, 25, 26, 27, 21, 22, 23, 36, 37, 38, 63, 64, 65, 48, 49, 50, 60, 61, 62, 78, 79, 80},
+    { 9, 10, 11, 13, 14, 15, 29, 30, 31, 25, 26, 27, 39, 40, 41, 66, 67, 68, 51, 52, 53, 63, 64, 65, 81, 82, 83},
+    {13, 14, 15,  1,  2,  3, 17, 18, 19, 29, 30, 31, 42, 43, 44, 57, 58, 59, 54, 55, 56, 66, 67, 68, 84, 85, 86}
 };
-bool Hexa21Stokes :: __initialized = Hexa21Stokes :: initOrdering();
 
 Hexa21Stokes :: Hexa21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 {
@@ -75,9 +82,8 @@ Hexa21Stokes :: ~Hexa21Stokes()
 
 void Hexa21Stokes :: computeGaussPoints()
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(1);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -151,8 +157,7 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
     FloatArray momentum, conservation;
 
     B.zero();
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         const FloatArray &lcoords = * gp->giveCoordinates();
 
         double detJ = fabs( this->interpolation_quad.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
@@ -222,8 +227,7 @@ void Hexa21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType 
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(k);
+        for ( GaussPoint *gp: *iRule ) {
             FloatArray *lcoords = gp->giveCoordinates();
 
             double rho = mat->give('d', gp);
@@ -257,24 +261,22 @@ void Hexa21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad 
         int numberOfSurfaceIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2; ///@todo Check this.
 
         GaussIntegrationRule iRule(1, this, 1, 1);
-        GaussPoint *gp;
         FloatArray N, t, f(27);
 
         f.zero();
         iRule.SetUpPointsOnTriangle(numberOfSurfaceIPs, _Unknown);
 
-        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
-            gp = iRule.getIntegrationPoint(i);
-            FloatArray *lcoords = gp->giveCoordinates();
+        for ( GaussPoint *gp: iRule ) {
+            FloatArray &lcoords = * gp->giveCoordinates();
 
-            this->interpolation_quad.surfaceEvalN( N, iSurf, * lcoords, FEIElementGeometryWrapper(this) );
-            double dA = gp->giveWeight() * this->interpolation_quad.surfaceGiveTransformationJacobian( iSurf, * lcoords, FEIElementGeometryWrapper(this) );
+            this->interpolation_quad.surfaceEvalN( N, iSurf, lcoords, FEIElementGeometryWrapper(this) );
+            double dA = gp->giveWeight() * this->interpolation_quad.surfaceGiveTransformationJacobian( iSurf, lcoords, FEIElementGeometryWrapper(this) );
 
             if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) { // load in xi-eta system
-                boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
+                boundaryLoad->computeValueAt(t, tStep, lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;
-                this->interpolation_quad.surfaceLocal2global( gcoords, iSurf, * lcoords, FEIElementGeometryWrapper(this) );
+                this->interpolation_quad.surfaceLocal2global( gcoords, iSurf, lcoords, FEIElementGeometryWrapper(this) );
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 
@@ -304,9 +306,8 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
 
     B.zero();
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+    for ( GaussPoint *gp: *iRule ) {
         // Compute Gauss point and determinant at current element
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
         const FloatArray &lcoords = * gp->giveCoordinates();
 
         double detJ = fabs( this->interpolation_quad.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );

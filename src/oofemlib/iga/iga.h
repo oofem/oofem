@@ -92,7 +92,7 @@ public:
         GaussIntegrationRule(_n, _e, 0, 0, false),
         knotSpan(_knotSpan) { }
     const IntArray *giveKnotSpan() { return & this->knotSpan; }
-    void setKnotSpan(IntArray &src) { this->knotSpan = src; }
+    void setKnotSpan1(IntArray &src) { this->knotSpan = src; }
 };
 
 

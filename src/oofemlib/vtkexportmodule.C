@@ -414,18 +414,17 @@ VTKExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
 void
 VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tStep)
 {
-    int i, ielem, pos;
+    int ielem, pos;
     InternalStateType type;
     Element *elem;
     Domain *d  = emodel->giveDomain(1);
     int nelem = d->giveNumberOfElements();
     FloatMatrix mtrx(3, 3);
     FloatArray temp, vec;
-    GaussPoint *gp;
     double gptot;
 
     fprintf(stream, "\nCELL_DATA %d\n", elemToProcess);
-    for ( i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
+    for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
         type = ( InternalStateType ) cellVarsToExport.at(i);
         switch ( type ) {
         case IST_MaterialNumber:
@@ -493,8 +492,7 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
 #endif
                     gptot = 0;
                     vec.clear();
-                    for ( int i = 0; i < elem->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(); ++i ) {
-                        gp = elem->giveDefaultIntegrationRulePtr()->getIntegrationPoint(i);
+                    for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
                         elem->giveIPValue(temp, gp, type, tStep);
                         gptot += gp->giveWeight();
                         vec.add(gp->giveWeight(), temp);
@@ -852,9 +850,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
         fprintf(stream, "LOOKUP_TABLE default\n");
     }
 
-    DofManager *dman;
     DofIDItem id;
-    int numberOfDofs;
 
     IntArray regionNodalNumbers(nnodes);
     int regionDofMans = 0, offset = 0;
@@ -868,39 +864,38 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
     this->giveSmoother();
 
     for ( inode = 1; inode <= regionDofMans; inode++ ) {
-        dman = d->giveNode( regionNodalNumbers.at(inode) );
-        numberOfDofs = dman->giveNumberOfDofs();
+        DofManager *dman = d->giveNode( regionNodalNumbers.at(inode) );
 
         if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
             iVal.resize(3);
             iVal.zero();
 
-            for ( j = 1; j <= numberOfDofs; j++ ) {
-                id = dman->giveDof(j)->giveDofID();
+            for ( Dof *dof: *dman ) {
+                id = dof->giveDofID();
                 if ( ( id == V_u ) || ( id == D_u ) ) {
-                    iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
+                    iVal.at(1) = dof->giveUnknown(VM_Total, tStep);
                 } else if ( ( id == V_v ) || ( id == D_v ) ) {
-                    iVal.at(2) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
+                    iVal.at(2) = dof->giveUnknown(VM_Total, tStep);
                 } else if ( ( id == V_w ) || ( id == D_w ) ) {
-                    iVal.at(3) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
+                    iVal.at(3) = dof->giveUnknown(VM_Total, tStep);
                 }
             }
         } else if ( valID == FluxVector ) {
             iVal.resize(1);
 
-            for ( j = 1; j <= numberOfDofs; j++ ) {
-                id = dman->giveDof(j)->giveDofID();
+            for ( Dof *dof: *dman ) {
+                id = dof->giveDofID();
                 if ( id == C_1 ) {
-                    iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
+                    iVal.at(1) = dof->giveUnknown(VM_Total, tStep);
                 }
             }
         } else if ( valID == Temperature ) {
             iVal.resize(1);
 
-            for ( j = 1; j <= numberOfDofs; j++ ) {
-                id = dman->giveDof(j)->giveDofID();
+            for ( Dof *dof: *dman ) {
+                id = dof->giveDofID();
                 if ( id == T_f ) {
-                    iVal.at(1) = dman->giveDof(j)->giveUnknown(VM_Total, tStep);
+                    iVal.at(1) = dof->giveUnknown(VM_Total, tStep);
                 }
             }
         } else if ( valID == PressureVector ) {
@@ -947,7 +942,7 @@ void
 VTKExportModule :: getDofManPrimaryVariable(FloatArray &answer, DofManager *dman, IntArray &dofIDMask,
                                             ValueModeType mode, TimeStep *tStep, InternalStateType iType)
 {
-    int j, indx, size = dofIDMask.giveSize();
+    int size = dofIDMask.giveSize();
     const FloatArray *recoveredVal;
     answer.resize(size);
     // all values zero by default
@@ -955,10 +950,10 @@ VTKExportModule :: getDofManPrimaryVariable(FloatArray &answer, DofManager *dman
 
 
 
-    for ( j = 1; j <= size; j++ ) {
-        if ( ( indx = dman->findDofWithDofId( ( DofIDItem ) dofIDMask.at(j) ) ) ) {
+    for ( int j = 1; j <= size; j++ ) {
+        if ( dman->hasDofID( ( DofIDItem ) dofIDMask.at(j) ) ) {
             // primary variable available directly in dof manager
-            answer.at(j) = dman->giveDof(indx)->giveUnknown(VM_Total, tStep);
+            answer.at(j) = dman->giveDofWithID( dofIDMask.at(j) )->giveUnknown(VM_Total, tStep);
         } else if ( iType != IST_Undefined ) {
             // ok primary variable not directly available
             // but equivalent InternalStateType provided

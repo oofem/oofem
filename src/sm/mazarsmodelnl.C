@@ -114,13 +114,10 @@ MazarsNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &str
     this->updateDomainBeforeNonlocAverage(tStep);
 
     // compute nonlocal strain increment first
-    std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
-    std :: list< localIntegrationRecord > :: iterator pos;
-
-    for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        nonlocStatus = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(pos->nearGp) );
+    for ( auto &lir: *this->giveIPIntegrationList(gp) ) {
+        nonlocStatus = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(lir.nearGp) );
         nonlocalContribution = nonlocStatus->giveLocalEquivalentStrainForAverage();
-        nonlocalContribution *= pos->weight;
+        nonlocalContribution *= lir.weight;
 
         nonlocalEquivalentStrain += nonlocalContribution;
     }

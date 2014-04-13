@@ -394,11 +394,8 @@ NonStationaryTransportProblem :: updateYourself(TimeStep *tStep)
 void
 NonStationaryTransportProblem :: updateInternalState(TimeStep *tStep)
 {
-    int nelem;
-    Domain *domain;
-
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        domain = this->giveDomain(idomain);
+        Domain *domain = this->giveDomain(idomain);
 
         if ( requiresUnknownsDictionaryUpdate() ) {
             //update temperature vector
@@ -408,7 +405,7 @@ NonStationaryTransportProblem :: updateInternalState(TimeStep *tStep)
         }
 
         if ( internalVarUpdateStamp != tStep->giveSolutionStateCounter() ) {
-            nelem = domain->giveNumberOfElements();
+            int nelem = domain->giveNumberOfElements();
             for ( int j = 1; j <= nelem; j++ ) {
                 domain->giveElement(j)->updateInternalState(tStep);
             }
@@ -507,18 +504,16 @@ NonStationaryTransportProblem :: checkConsistency()
     // check internal consistency
     // if success returns nonzero
     int nelem;
-    Element *ePtr;
-    TransportElement *sePtr;
     Domain *domain = this->giveDomain(1);
 
     nelem = domain->giveNumberOfElements();
     // check for proper element type
 
     for ( int i = 1; i <= nelem; i++ ) {
-        ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< TransportElement * >(ePtr);
+        Element *ePtr = domain->giveElement(i);
+        TransportElement *sePtr = dynamic_cast< TransportElement * >(ePtr);
         if ( sePtr == NULL ) {
-            OOFEM_WARNING("Element %d has no TransportElement base", i);
+            OOFEM_WARNING("Element %d has no TransportElement base", ePtr->giveNumber());
             return 0;
         }
     }
@@ -639,7 +634,7 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
 void
 NonStationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
-    iDof->printSingleOutputAt(stream, tStep, 'f', VM_Total);
+    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 void
@@ -653,7 +648,6 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Applying initial conditions\n");
 #endif
-    int nDofs;
     int nman  = domain->giveNumberOfDofManagers();
 
     UnknownsField->advanceSolution(stepWhenIcApply);
@@ -663,23 +657,21 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 
     for ( int j = 1; j <= nman; j++ ) {
         DofManager *node = domain->giveDofManager(j);
-        nDofs = node->giveNumberOfDofs();
 
-        for ( int k = 1; k <= nDofs; k++ ) {
+        for ( Dof *dof: *node ) {
             // ask for initial values obtained from
             // bc (boundary conditions) and ic (initial conditions)
-            Dof *iDof = node->giveDof(k);
-            if ( !iDof->isPrimaryDof() ) {
+            if ( !dof->isPrimaryDof() ) {
                 continue;
             }
 
-            int jj = iDof->__giveEquationNumber();
+            int jj = dof->__giveEquationNumber();
             if ( jj ) {
-                val = iDof->giveUnknown(VM_Total, stepWhenIcApply);
+                val = dof->giveUnknown(VM_Total, stepWhenIcApply);
                 solutionVector->at(jj) = val;
                 //update in dictionary, if the problem is growing/decreasing
                 if ( this->changingProblemSize ) {
-                    iDof->updateUnknownsDictionary(stepWhenIcApply, VM_Total, val);
+                    dof->updateUnknownsDictionary(stepWhenIcApply, VM_Total, val);
                 }
             }
         }
@@ -762,19 +754,13 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
     ///@todo Verify this, the function is completely unused.
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
-    TransportElement *element;
-    IntegrationRule *iRule;
-    GaussPoint *gp;
     FloatArray vecTemperature;
-    TransportMaterial *mat;
 
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        element = static_cast< TransportElement * >( domain->giveElement(ielem) );
-        mat = static_cast< CemhydMat * >( element->giveMaterial() );
+        TransportElement *element = static_cast< TransportElement * >( domain->giveElement(ielem) );
+        TransportMaterial *mat = static_cast< CemhydMat * >( element->giveMaterial() );
         if ( mat ) {
-            iRule = element->giveDefaultIntegrationRulePtr();
-            for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-                gp  = iRule->getIntegrationPoint(i);
+            for ( GaussPoint *gp: element->giveDefaultIntegrationRulePtr() ) {
                 element->giveIPValue(vecTemperature, gp, IST_Temperature, tStep);
                 //mat->IP_volume += dV;
                 //mat->average_temp += vecState.at(1) * dV;
@@ -783,7 +769,7 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
     }
 
     for ( int i = 1; i <= domain->giveNumberOfMaterialModels(); i++ ) {
-        mat = static_cast< CemhydMat * >( domain->giveMaterial(i) );
+        CemhydMat *mat = static_cast< CemhydMat * >( domain->giveMaterial(i) );
         if ( mat ) {
             //mat->average_temp /= mat->IP_volume;
         }

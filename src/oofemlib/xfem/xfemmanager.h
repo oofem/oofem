@@ -36,15 +36,18 @@
 #define xfemmanager_h
 
 #include "oofemcfg.h"
-#include "alist.h"
 #include "datareader.h"
 #include "inputrecord.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "enrichmentitem.h"
 #include "enumitem.h"
-#include <unordered_map>
 #include "internalstatevaluetype.h"
+
+#include <unordered_map>
+#include <list>
+#include <vector>
+#include <memory>
 
 ///@name Input fields for XfemManager
 //@{
@@ -100,7 +103,7 @@ class OOFEM_EXPORT XfemManager
 protected:
     Domain *domain;
     /// Enrichment item list.
-    AList< EnrichmentItem > *enrichmentItemList;
+    std :: vector< std :: unique_ptr< EnrichmentItem > > enrichmentItemList;
 
     int numberOfEnrichmentItems;
 
@@ -144,8 +147,8 @@ public:
 
     bool isElementEnriched(const Element *elem);
 
-    inline EnrichmentItem *giveEnrichmentItem(int n) { return enrichmentItemList->at(n); }
-    int giveNumberOfEnrichmentItems() const { return enrichmentItemList->giveSize(); }
+    inline EnrichmentItem *giveEnrichmentItem(int n) { return enrichmentItemList[n-1].get(); }
+    int giveNumberOfEnrichmentItems() const { return enrichmentItemList.size(); }
 
     void createEnrichedDofs();
 

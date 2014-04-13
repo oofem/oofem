@@ -48,18 +48,15 @@ void
 MMAContainingElementProjection :: __init(Domain *dold, IntArray &type, FloatArray &coords, Set &elemSet, TimeStep *tStep, bool iCohesiveZoneGP)
 {
     SpatialLocalizer *sl = dold->giveSpatialLocalizer();
-    GaussPoint *jGp;
     FloatArray jGpCoords;
     double distance, minDist = 1.e6;
-    IntegrationRule *iRule;
     Element *srcElem;
 
     if ( ( srcElem = sl->giveElementContainingPoint(coords, elemSet) ) ) {
-        iRule = srcElem->giveDefaultIntegrationRulePtr();
+        IntegrationRule *iRule = srcElem->giveDefaultIntegrationRulePtr();
 
         this->source = NULL;
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            jGp = iRule->getIntegrationPoint(j);
+        for ( GaussPoint *jGp: *iRule ) {
             if ( srcElem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
                 distance = coords.distance(jGpCoords);
                 if ( distance < minDist ) {

@@ -61,7 +61,9 @@ REGISTER_BoundaryCondition(MixedGradientPressureWeakPeriodic);
 MixedGradientPressureWeakPeriodic :: MixedGradientPressureWeakPeriodic(int n, Domain *d) : MixedGradientPressureBC(n, d)
 {
     this->voldman = new Node(0, d); // Node number lacks meaning here.
-    this->voldman->appendDof( new MasterDof( 1, voldman, ( DofIDItem ) d->giveNextFreeDofID() ) );
+    int dofid = this->domain->giveNextFreeDofID();
+    v_id.followedBy(dofid);
+    this->voldman->appendDof( new MasterDof( 1, voldman, ( DofIDItem ) dofid ) );
     this->tractionsdman = new Node(0, this->domain); // Node number lacks meaning here.
 }
 
@@ -102,11 +104,14 @@ IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir
 
     int nsd = this->domain->giveNumberOfSpatialDimensions();
     int total = nsd * nsd * ( int ) pow(double ( order + 1 ), nsd - 1);
-    this->tractionsdman->setNumberOfDofs(total);
+    this->tractionsdman->setNumberOfDofs(0);
+    t_id.clear();
     for ( int i = 1; i <= total; ++i ) {
+        int dofid = this->domain->giveNextFreeDofID();
+        t_id.followedBy(dofid);
         // Simply use t_i = S_i . n, where S_1 = [1,0,0;0,0,0;0,0,0], S_2 = [0,1,0;0,0,0;0,0,0], etc.
         // then the linear terms, [x,0,0], [0,x,0] ... and so on
-        this->tractionsdman->setDof( i, new MasterDof( i, tractionsdman, ( DofIDItem ) this->domain->giveNextFreeDofID() ) );
+        this->tractionsdman->appendDof( new MasterDof( i, tractionsdman, ( DofIDItem ) dofid ) );
     }
 
     return IRRT_OK;
@@ -163,12 +168,12 @@ void MixedGradientPressureWeakPeriodic :: giveLocationArrays(std :: vector< IntA
     IntArray loc_r, loc_c, t_loc_r, t_loc_c, e_loc_r, e_loc_c;
 
     // Fetch the columns/rows for the tractions;
-    this->tractionsdman->giveCompleteLocationArray(t_loc_r, r_s);
-    this->tractionsdman->giveCompleteLocationArray(t_loc_c, c_s);
+    this->tractionsdman->giveLocationArray(t_id, t_loc_r, r_s);
+    this->tractionsdman->giveLocationArray(t_id, t_loc_c, c_s);
 
     // Fetch the columns/rows for dvol;
-    this->voldman->giveCompleteLocationArray(e_loc_r, r_s);
-    this->voldman->giveCompleteLocationArray(e_loc_c, c_s);
+    this->voldman->giveLocationArray(v_id, e_loc_r, r_s);
+    this->voldman->giveLocationArray(v_id, e_loc_c, c_s);
 
     Set *set = this->giveDomain()->giveSet(this->set);
     IntArray bNodes;
@@ -223,8 +228,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(Float
     mMatrix.resize(nsd, total);
 
     answer.clear();
-    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-        GaussPoint *gp = ir->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *ir ) {
         FloatArray &lcoords = * gp->giveCoordinates();
         FEIElementGeometryWrapper cellgeo(el);
 
@@ -275,8 +279,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionXTangent(FloatMatrix 
     surfCoords.resize(nsd - 1);
 
     FloatArray tmpAnswer;
-    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-        GaussPoint *gp = ir->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *ir ) {
         FloatArray &lcoords = * gp->giveCoordinates();
         FEIElementGeometryWrapper cellgeo(el);
 
@@ -326,8 +329,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answe
     contrib.resize(total);
     answer.clear();
 
-    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-        GaussPoint *gp = ir->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *ir ) {
         FloatArray &lcoords = * gp->giveCoordinates();
         FEIElementGeometryWrapper cellgeo(el);
 
@@ -399,11 +401,9 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
     const IntArray &boundaries = set->giveBoundaryList();
 
     IntArray v_loc, t_loc, e_loc;  // For the velocities and stress respectively
-    IntArray velocityDofIDs, tractionDofIDs, dvolDofID, bNodes;
-    this->tractionsdman->giveCompleteLocationArray(t_loc, s);
-    this->voldman->giveCompleteLocationArray(e_loc, s);
-    this->tractionsdman->giveCompleteMasterDofIDArray(tractionDofIDs);
-    this->voldman->giveCompleteMasterDofIDArray(dvolDofID);
+    IntArray velocityDofIDs, bNodes;
+    this->tractionsdman->giveLocationArray(t_id, t_loc, s);
+    this->voldman->giveLocationArray(v_id, e_loc, s);
 
     if ( type == ExternalForcesVector ) {
         // The external forces have two contributions. on the traction and on dvol.
@@ -412,7 +412,7 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
         if ( e_loc.at(1) ) {
             answer.at( e_loc.at(1) ) -= rve_size * pressure; // Note the negative sign (pressure as opposed to mean stress)
             if ( eNorms ) {
-                eNorms->at( dvolDofID.at(1) ) = rve_size * pressure * rve_size * pressure;
+                eNorms->at( v_id.at(1) ) += rve_size * pressure * rve_size * pressure;
             }
         }
 
@@ -436,8 +436,8 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
         FloatArray t, e, v;
 
         // Fetch the current values of internal dofs and their master dof ids;
-        this->tractionsdman->giveCompleteUnknownVector(t, mode, tStep);
-        this->voldman->giveCompleteUnknownVector(e, mode, tStep);
+        this->tractionsdman->giveUnknownVector(t, t_id, mode, tStep);
+        this->voldman->giveUnknownVector(e, v_id, mode, tStep);
 
         // Assemble: -int       t . [[ delta_v ]] dA
         //            int delta_t . [[ e.x - v ]] dA
@@ -469,8 +469,8 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
             answer.assemble(fe_e, e_loc); // Contribution to delta_e equations
             if ( eNorms ) {
                 eNorms->assembleSquared(fe_v, velocityDofIDs);
-                eNorms->assembleSquared(fe_t, tractionDofIDs);
-                eNorms->assembleSquared(fe_e, dvolDofID);
+                eNorms->assembleSquared(fe_t, t_id);
+                eNorms->assembleSquared(fe_e, v_id);
             }
         }
     }
@@ -496,11 +496,11 @@ void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx *answer, TimeStep 
         const IntArray &boundaries = set->giveBoundaryList();
 
         // Fetch the columns/rows for the stress contributions;
-        this->tractionsdman->giveCompleteLocationArray(t_loc_r, r_s);
-        this->tractionsdman->giveCompleteLocationArray(t_loc_c, c_s);
+        this->tractionsdman->giveLocationArray(t_id, t_loc_r, r_s);
+        this->tractionsdman->giveLocationArray(t_id, t_loc_c, c_s);
 
-        this->voldman->giveCompleteLocationArray(e_loc_r, r_s);
-        this->voldman->giveCompleteLocationArray(e_loc_c, c_s);
+        this->voldman->giveLocationArray(v_id, e_loc_r, r_s);
+        this->voldman->giveLocationArray(v_id, e_loc_c, c_s);
 
         for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
             Element *el = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
@@ -534,7 +534,7 @@ void MixedGradientPressureWeakPeriodic :: computeFields(FloatArray &sigmaDev, do
     double rve_size = this->domainSize();
     FloatArray tractions, t, normal, surfCoords, coords;
     FloatMatrix sigma;
-    this->tractionsdman->giveCompleteUnknownVector(tractions, VM_Total, tStep);
+    this->tractionsdman->giveUnknownVector(tractions, t_id, VM_Total, tStep);
     ///@todo This would be a lot simpler if I bothered to create orthogonal basis functions for the tractions. If so, it would just be the constant terms.
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();
@@ -552,8 +552,7 @@ void MixedGradientPressureWeakPeriodic :: computeFields(FloatArray &sigmaDev, do
         IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
 
         surfCoords.resize(nsd - 1);
-        for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-            GaussPoint *gp = ir->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *ir ) {
             FloatArray &lcoords = * gp->giveCoordinates();
             FEIElementGeometryWrapper cellgeo(el);
 
@@ -612,7 +611,7 @@ void MixedGradientPressureWeakPeriodic :: computeFields(FloatArray &sigmaDev, do
     }
 
     // And the volumetric part is much easier.
-    vol = this->voldman->giveDof(1)->giveUnknown(VM_Total, tStep);
+    vol = (*this->voldman->begin())->giveUnknown(VM_Total, tStep);
     vol /= rve_size;
     vol -= volGradient; // This is needed for consistency; We return the volumetric "residual" if a gradient with volumetric contribution is set.
 }
@@ -650,8 +649,8 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
     IntArray t_loc, e_loc;
 
     // Fetch the positions;
-    this->tractionsdman->giveCompleteLocationArray( t_loc, EModelDefaultEquationNumbering() );
-    this->voldman->giveCompleteLocationArray( e_loc, EModelDefaultEquationNumbering() );
+    this->tractionsdman->giveLocationArray( t_id, t_loc, fnum );
+    this->voldman->giveLocationArray( v_id, e_loc, fnum );
 
     // Matrices and arrays for sensitivities
     FloatMatrix ddev_pert(neq, nd);
@@ -731,8 +730,7 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
             IntegrationRule *ir = interp->giveBoundaryIntegrationRule(maxorder, boundary);
 
             surfCoords.resize(nsd - 1);
-            for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-                GaussPoint *gp = ir->getIntegrationPoint(i);
+            for ( GaussPoint *gp: *ir ) {
                 FloatArray &lcoords = * gp->giveCoordinates();
                 FEIElementGeometryWrapper cellgeo(el);
 
@@ -808,7 +806,7 @@ void MixedGradientPressureWeakPeriodic :: giveInputRecord(DynamicInputRecord &in
 {
     MixedGradientPressureBC :: giveInputRecord(input);
     input.setField(this->pressure, _IFT_MixedGradientPressure_pressure);
-    OOFEM_ERROR("Not supported yet\n");
+    OOFEM_ERROR("Not supported yet");
     //FloatArray devGradientVoigt;
     //input.setField(devGradientVoigt, _IFT_MixedGradientPressure_devGradient);
 }

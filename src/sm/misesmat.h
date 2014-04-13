@@ -196,12 +196,12 @@ public:
     MisesMatStatus(int n, Domain * d, GaussPoint * g);
     virtual ~MisesMatStatus();
 
-    void givePlasticStrain(FloatArray &answer) { answer = plasticStrain; }
+    const FloatArray &givePlasticStrain() { return plasticStrain; }
 
-    void giveTrialStressDev(FloatArray &answer) { answer = trialStressD; }
+    const FloatArray &giveTrialStressDev() { return trialStressD; }
 
     /*******************************************/
-    void giveTrialStressVol(double &answer) { answer = trialStressV; }
+    double giveTrialStressVol() { return trialStressV; }
     /*******************************************/
     double giveDamage() { return damage; }
     double giveTempDamage() { return tempDamage; }
@@ -209,19 +209,19 @@ public:
     double giveCumulativePlasticStrain() { return kappa; }
     double giveTempCumulativePlasticStrain() { return tempKappa; }
 
-    void giveTempLeftCauchyGreen(FloatMatrix &answer) { answer = tempLeftCauchyGreen; }
-    void giveLeftCauchyGreen(FloatMatrix &answer) { answer = leftCauchyGreen; }
+    const FloatMatrix & giveTempLeftCauchyGreen() { return tempLeftCauchyGreen; }
+    const FloatMatrix & giveLeftCauchyGreen() { return leftCauchyGreen; }
 
-    void giveTempEffectiveStress(FloatArray &answer) { answer = tempEffStress; }
-    void giveEffectiveStress(FloatArray &answer) { answer = effStress; }
+    const FloatArray & giveTempEffectiveStress() { return tempEffStress; }
+    const FloatArray & giveEffectiveStress() { return effStress; }
 
-    void letTempPlasticStrainBe(FloatArray &values) { tempPlasticStrain = values; }
+    void letTempPlasticStrainBe(FloatArray values) { tempPlasticStrain = std :: move(values); }
 
-    void letTrialStressDevBe(FloatArray &values) { trialStressD = values; }
+    void letTrialStressDevBe(FloatArray values) { trialStressD = std :: move(values); }
 
-    void letEffectiveStressBe(FloatArray &values) { effStress = values; }
+    void letEffectiveStressBe(FloatArray values) { effStress = std :: move(values); }
 
-    void letTempEffectiveStressBe(FloatArray &values) { tempEffStress = values; }
+    void letTempEffectiveStressBe(FloatArray values) { tempEffStress = std :: move(values); }
 
 
     void setTrialStressVol(double value) { trialStressV = value; }
@@ -231,8 +231,8 @@ public:
     void setTempDamage(double value) { tempDamage = value; }
     /************************************************/
 
-    void letTempLeftCauchyGreenBe(FloatMatrix values) { tempLeftCauchyGreen = values; }
-    void letLeftCauchyGreenBe(FloatMatrix values) { leftCauchyGreen = values; }
+    void letTempLeftCauchyGreenBe(FloatMatrix values) { tempLeftCauchyGreen = std :: move(values); }
+    void letLeftCauchyGreenBe(FloatMatrix values) { leftCauchyGreen = std :: move(values); }
 
     const FloatArray &givePlasDef() { return plasticStrain; }
 

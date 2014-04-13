@@ -50,11 +50,9 @@
 
 namespace oofem {
 DofManager :: DofManager(int n, Domain *aDomain) :
-    FEMComponent(n, aDomain), loadArray()
+    FEMComponent(n, aDomain), dofArray(), loadArray()
     // Constructor. Creates a node with number n, belonging to aDomain.
 {
-    numberOfDofs  = 0;
-    dofArray      = NULL;
     isBoundaryFlag = false;
     hasSlaveDofs  = false;
     dofidmask = NULL;
@@ -72,14 +70,8 @@ DofManager :: DofManager(int n, Domain *aDomain) :
 DofManager :: ~DofManager()
 // Destructor.
 {
-    int i = numberOfDofs;
-
-    if ( numberOfDofs ) {
-        while ( i-- ) {
-            delete dofArray [ i ];
-        }
-
-        delete[] dofArray;
+    for ( Dof *dof: dofArray ) {
+        delete dof;
     }
 
     delete dofidmask;
@@ -108,13 +100,12 @@ void DofManager :: setLoadArray(IntArray &la)
 void DofManager :: computeLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 // Computes the vector of the nodal loads of the receiver.
 {
-    FloatArray contribution;
+    answer.clear();
 
     if ( this->giveLoadArray()->isEmpty() ) {
-        answer.clear();
         return;
     } else {
-        answer.clear();
+        FloatArray contribution;
         int nLoads = loadArray.giveSize();     // the node may be subjected
         for ( int i = 1; i <= nLoads; i++ ) {   // to more than one load
             int n = loadArray.at(i);
@@ -135,45 +126,18 @@ void DofManager :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
 }
 
 
-Dof *DofManager :: giveDof(int i) const
-// Returns the i-th degree of freedom of the receiver.
-{
-#ifdef DEBUG
-    if ( !dofArray ) {
-        OOFEM_ERROR("dof is not defined");
-    }
-#endif
-
-    return dofArray [ i - 1 ];
-}
-
-
 Dof *DofManager :: giveDofWithID(int dofID) const
 // Returns the degree of freedom of the receiver with 'dofID'.
 {
-    int indx = this->findDofWithDofId( ( DofIDItem ) dofID );
+    auto pos = this->findDofWithDofId( ( DofIDItem ) dofID );
 
 #ifdef DEBUG
-    if ( !indx ) {
+    if ( pos == this->end() ) {
         OOFEM_ERROR("dof with given DofID does not exists");
     }
 #endif
 
-    return dofArray [ indx - 1 ];
-}
-
-
-void DofManager :: setDof(int i, Dof *dof)
-{
-    if ( i <= numberOfDofs ) {
-        if ( dofArray [ i - 1 ] ) {
-            delete dofArray [ i - 1 ];
-        }
-
-        dofArray [ i - 1 ] = dof;
-    } else {
-        OOFEM_ERROR("DOF index out of range");
-    }
+    return *pos;
 }
 
 
@@ -185,49 +149,34 @@ void DofManager :: appendDof(Dof *dof)
 {
 #ifdef DEBUG
     // check if dofID of DOF to be added not already present
-    if ( this->findDofWithDofId( dof->giveDofID() ) != 0 ) {
+    if ( this->findDofWithDofId( dof->giveDofID() ) != this->end() ) {
         OOFEM_ERROR("DOF with dofID %d already present (dofman %d)", dof->giveDofID(), this->number);
     }
 #endif
 
-    Dof **dofArray_new = new Dof * [ numberOfDofs + 1 ];
-    for ( int j = 0; j < numberOfDofs; j++ ) {
-        dofArray_new [ j ] = dofArray [ j ];
-    }
-    dofArray_new [ numberOfDofs ] = dof;
-    delete [] dofArray;
-    this->dofArray = dofArray_new;
-    numberOfDofs++;
+    this->dofArray.push_back(dof);
 }
 
 
 void DofManager :: removeDof(DofIDItem id)
 {
-    int position = this->findDofWithDofId(id);
-    if ( position ) { // dof id found
-        Dof **dofArray_new = new Dof * [ numberOfDofs - 1 ];
-        for ( int j = 0; j < position - 1; j++ ) {
-            dofArray_new [ j ] = dofArray [ j ];
+    int i = 0;
+    for ( Dof *dof: *this ) {
+        if ( dof->giveDofID() == id ) {
+            delete dof;
+            this->dofArray.erase( i + this->begin() );
+            return;
         }
-
-        for ( int j = position; j < numberOfDofs; j++ ) {
-            dofArray_new [ j - 1 ] = dofArray [ j ];
-        }
-        // delete dof
-        delete dofArray [ position - 1 ];
-        delete [] dofArray;
-        dofArray = dofArray_new;
-        numberOfDofs--;
-    } else {
-        OOFEM_ERROR("no DOF with dofID %d found", id);
+        i++;
     }
+    OOFEM_WARNING("no DOF with dofID %d found", id);
 }
 
 
 bool DofManager :: hasDofID(DofIDItem id)
 {
-    for ( int l = 1; l <= giveNumberOfDofs(); l++ ) {
-        if ( dofArray [ l - 1 ]->giveDofID() == id ) {
+    for ( Dof *dof: *this ) {
+        if ( dof->giveDofID() == id ) {
             return true;
         }
     }
@@ -238,27 +187,29 @@ bool DofManager :: hasDofID(DofIDItem id)
 void DofManager :: giveLocationArray(const IntArray &dofIDArry, IntArray &locationArray, const UnknownNumberingScheme &s) const
 {
     if ( !hasSlaveDofs ) {
-        int size, indx;
+        int size;
         // prevents some size problem when connecting different elements with
         // different number of dofs
         size = dofIDArry.giveSize();
         locationArray.resize(size);
         for ( int i = 1; i <= size; i++ ) {
-            if ( ( indx = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) ) ) == 0 ) {
+            auto pos = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) );
+            if ( pos == this->end() ) {
                 OOFEM_ERROR("incompatible dof (%d) requested", dofIDArry.at(i));
             }
 
-            locationArray.at(i) = s.giveDofEquationNumber( this->giveDof(indx) );
+            locationArray.at(i) = s.giveDofEquationNumber( *pos );
         }
     } else {
-        IntArray dofArray, mstrEqNmbrs;
-        this->giveDofArray(dofIDArry, dofArray);
-        int masterDofs = giveNumberOfPrimaryMasterDofs(dofArray);
-        locationArray.preallocate(masterDofs);
+        IntArray mstrEqNmbrs;
         locationArray.clear();
 
-        for ( int i = 1; i <= dofArray.giveSize(); i++ ) {
-            this->giveDof( dofArray.at(i) )->giveEquationNumbers(mstrEqNmbrs, s);
+        for ( int dofid: dofIDArry ) {
+            auto pos = this->findDofWithDofId( ( DofIDItem ) dofid );
+            if ( pos == this->end() ) {
+                OOFEM_ERROR("incompatible dof (%d) requested", dofid);
+            }
+            (*pos)->giveEquationNumbers(mstrEqNmbrs, s);
             locationArray.followedBy(mstrEqNmbrs);
         }
     }
@@ -270,14 +221,15 @@ void DofManager :: giveMasterDofIDArray(const IntArray &dofIDArry, IntArray &mas
     if ( !hasSlaveDofs ) {
         masterDofIDs = dofIDArry;
     } else {
-        IntArray dofArray, temp;
-        this->giveDofArray(dofIDArry, dofArray);
-        int masterDofs = giveNumberOfPrimaryMasterDofs(dofArray);
-        masterDofIDs.preallocate(masterDofs);
+        IntArray temp;
         masterDofIDs.clear();
 
-        for ( int i = 1; i <= numberOfDofs; i++ ) {
-            this->giveDof(i)->giveDofIDs(temp);
+        for ( int dofid: dofIDArry ) {
+            auto pos = this->findDofWithDofId( ( DofIDItem ) dofid );
+            if ( pos == this->end() ) {
+                OOFEM_ERROR("incompatible dof (%d) requested", dofid);
+            }
+            (*pos)->giveDofIDs(temp);
             masterDofIDs.followedBy(temp);
         }
     }
@@ -289,20 +241,14 @@ void DofManager :: giveCompleteLocationArray(IntArray &locationArray, const Unkn
     if ( !hasSlaveDofs ) {
         // prevents some size problem when connecting different elements with
         // different number of dofs
-        locationArray.resize(numberOfDofs);
-        for ( int i = 1; i <= numberOfDofs; i++ ) {
-            locationArray.at(i) = s.giveDofEquationNumber( this->giveDof(i) );
+        locationArray.resizeWithValues(0, this->giveNumberOfDofs());
+        for ( Dof *dof: *this ) {
+            locationArray.followedBy( s.giveDofEquationNumber( dof ) );
         }
     } else {
         IntArray temp;
-        int nMasterDofs = 0;
-        for ( int i = 1; i <= numberOfDofs; i++ ) {
-            nMasterDofs += this->giveDof(i)->giveNumberOfPrimaryMasterDofs();
-        }
-        locationArray.preallocate(nMasterDofs);
-        locationArray.clear();
-        for ( int i = 1; i <= numberOfDofs; i++ ) {
-            this->giveDof(i)->giveEquationNumbers(temp, s);
+        for ( Dof *dof: *this ) {
+            dof->giveEquationNumbers(temp, s);
             locationArray.followedBy(temp);
         }
     }
@@ -312,109 +258,73 @@ void DofManager :: giveCompleteLocationArray(IntArray &locationArray, const Unkn
 void DofManager :: giveCompleteMasterDofIDArray(IntArray &dofIDArray) const
 {
     if ( !hasSlaveDofs ) {
-        dofIDArray.resize(numberOfDofs);
-        for ( int i = 1; i <= numberOfDofs; i++ ) {
-            dofIDArray.at(i) = this->giveDof(i)->giveDofID();
+        dofIDArray.resizeWithValues(0, this->giveNumberOfDofs());
+        for ( Dof *dof: *this ) {
+            dofIDArray.followedBy( dof->giveDofID() );
         }
     } else {
         IntArray temp;
-        int nMasterDofs = 0;
-        for ( int i = 1; i <= numberOfDofs; i++ ) {
-            nMasterDofs += this->giveDof(i)->giveNumberOfPrimaryMasterDofs();
-        }
-        dofIDArray.preallocate(nMasterDofs);
-        dofIDArray.clear();
-        for ( int i = 1; i <= numberOfDofs; i++ ) {
-            this->giveDof(i)->giveDofIDs(temp);
+        for ( Dof *dof: *this ) {
+            dof->giveDofIDs(temp);
             dofIDArray.followedBy(temp);
         }
     }
 }
 
 
-void DofManager :: giveDofArray(const IntArray &dofIDArry, IntArray &answer) const
-// Returns the dof index array of the receiver.
-// The location array contains the indexes of particular requsted DOFs
-// In dofIDArray are stored DofID's of requsted DOFs in receiver.
-// The DofID's are determining the physical meaning of particular DOFs
+std :: vector< Dof* > :: const_iterator  DofManager :: findDofWithDofId(DofIDItem dofID) const
 {
-    int size;
-    // prevents some size problem when connecting different elements with
-    // different number of dofs
-    size = dofIDArry.giveSize();
-    answer.resize(size);
-    for ( int i = 1; i <= size; i++ ) {
-        if ( ( answer.at(i) = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) ) ) == 0 ) {
-            OOFEM_ERROR("incompatible dof requested");
+    int i = 0;
+    for ( Dof *dof: *this ) {
+        if ( dof->giveDofID() == dofID ) {
+            return this->begin() + i;
         }
+        i++;
     }
-}
-
-
-int DofManager :: findDofWithDofId(DofIDItem dofID) const
-{
-    // finds index of DOF in receivers node with dofID
-    // if such DOF does not exists, returns zero value
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        if ( this->giveDof(i)->giveDofID() == dofID ) {
-            return i;
-        }
-    }
-
-    // nothing found
-    return 0;
+    return this->end();
 }
 
 
 int DofManager :: giveNumberOfDofs() const
 // Returns the number of degrees of freedom of the receiver.
 {
-    return numberOfDofs;
+    return (int)dofArray.size();
 }
 
 
 void DofManager :: setNumberOfDofs(int _ndofs)
 {
-    if ( _ndofs != this->giveNumberOfDofs() ) {
-        if ( dofArray ) {
-            int i = numberOfDofs;
-            if ( numberOfDofs ) {
-                while ( i-- ) {
-                    delete dofArray [ i ];
-                }
-
-                delete[] dofArray;
-            }
-        }
-
-        dofArray = new Dof * [ _ndofs ];
-        for ( int i = 0; i < _ndofs; i++ ) {
-            dofArray [ i ] = NULL;
-        }
-
-        this->numberOfDofs = _ndofs;
+    for ( Dof *dof: *this ) {
+        delete dof;
     }
+    this->dofArray.assign(_ndofs, NULL);
 }
 
 
 void DofManager :: askNewEquationNumbers(TimeStep *tStep)
 {
-    for ( int i = 1; i <= this->numberOfDofs; i++ ) {
-        this->giveDof(i)->askNewEquationNumber(tStep);
+    for ( Dof *dof: *this ) {
+        dof->askNewEquationNumber(tStep);
     }
 }
 
 
-int DofManager :: giveNumberOfPrimaryMasterDofs(IntArray &dofArray) const
+int DofManager :: giveNumberOfPrimaryMasterDofs(const IntArray &dofIDArray) const
 {
     if ( !hasSlaveDofs ) {
-        return dofArray.giveSize();
+        return dofIDArray.giveSize();
     }
 
     int answer = 0;
 
-    for ( int i = 1; i <= dofArray.giveSize(); i++ ) {
-        answer += this->giveDof( dofArray.at(i) )->giveNumberOfPrimaryMasterDofs();
+    for ( int dofid: dofIDArray ) {
+        auto pos = this->findDofWithDofId((DofIDItem)dofid);
+#ifdef DEBUG
+        if ( pos == this->end() ) {
+            OOFEM_ERROR("Dof with ID %d doesn't exist", dofid);
+        }
+#endif
+        answer += (*pos)->giveNumberOfPrimaryMasterDofs();
     }
 
     return answer;
@@ -610,8 +520,8 @@ void DofManager :: printOutputAt(FILE *stream, TimeStep *tStep)
     EngngModel *emodel = this->giveDomain()->giveEngngModel();
 
     fprintf( stream, "%-8s%8d (%8d):\n", this->giveClassName(), this->giveLabel(), this->giveNumber() );
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        emodel->printDofOutputAt(stream, this->giveDof(i), tStep);
+    for ( Dof *dof: *this ) {
+        emodel->printDofOutputAt(stream, dof, tStep);
     }
 }
 
@@ -620,12 +530,8 @@ void DofManager :: printYourself()
 // Prints the receiver on screen.
 {
     printf("DofManager %d\n", number);
-    for ( int i = 0; i < numberOfDofs; i++ ) {
-        if ( dofArray [ i ] ) {
-            dofArray [ i ]->printYourself();
-        } else {
-            printf("dof %d is nil \n", i + 1);
-        }
+    for ( Dof *dof: *this ) {
+        dof->printYourself();
     }
 
     loadArray.printYourself();
@@ -636,8 +542,8 @@ void DofManager :: printYourself()
 void DofManager :: updateYourself(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        this->giveDof(i)->updateYourself(tStep);
+    for ( Dof *dof: *this ) {
+        dof->updateYourself(tStep);
     }
 }
 
@@ -656,13 +562,14 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
     }
 
 
+    int numberOfDofs = this->giveNumberOfDofs();
     if ( !stream->write(& numberOfDofs, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // store dof types
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        _val = this->giveDof(i)->giveDofType();
+    for ( Dof *dof: *this ) {
+        _val = dof->giveDofType();
         if ( !stream->write(& _val, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
@@ -698,8 +605,8 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
 #endif
     }
 
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        if ( ( iores = this->giveDof(i)->saveContext(stream, mode, obj) ) != CIO_OK ) {
+    for ( Dof *dof: *this ) {
+        if ( ( iores = dof->saveContext(stream, mode, obj) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -733,36 +640,11 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
         }
     }
 
-    // create new dofs if necessary
-    bool samedofs = ( numberOfDofs == _numberOfDofs );
-    if ( samedofs ) {
-        // if size match, check types
-        for ( int i = 1; i <= _numberOfDofs; i++ ) {
-            if ( this->giveDof(i)->giveDofType() != dtypes.at(i) ) {
-                samedofs = false;
-                break;
-            }
-        }
-    }
-
-    if ( !samedofs ) {
-        // delete old dofs
-        if ( numberOfDofs ) {
-            int i = numberOfDofs;
-            while ( i-- ) {
-                delete dofArray [ i ];
-            }
-
-            delete[] dofArray;
-        }
-
-        // allocate new ones
-        dofArray = new Dof * [ _numberOfDofs ];
-        for ( int i = 0; i < _numberOfDofs; i++ ) {
-            dofArray [ i ] = classFactory.createDof( ( dofType ) dtypes(i), i + 1, this );
-        }
-
-        numberOfDofs = _numberOfDofs;
+    // allocate new ones
+    dofArray.resize(_numberOfDofs);
+    for ( int i = 0; i < _numberOfDofs; i++ ) {
+        Dof *dof = classFactory.createDof( ( dofType ) dtypes(i), i + 1, this );
+        this->appendDof(dof);
     }
 
     if ( mode & CM_Definition ) {
@@ -796,8 +678,8 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
 #endif
     }
 
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        if ( ( iores = this->giveDof(i)->restoreContext(stream, mode, obj) ) != CIO_OK ) {
+    for ( Dof *dof: *this ) {
+        if ( ( iores = dof->restoreContext(stream, mode, obj) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -814,13 +696,13 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
     answer.resize( size = dofIDArry.giveSize() );
 
     for ( int i = 1; i <= size; i++ ) {
-        int pos = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) );
+        auto pos = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) );
 #ifdef DEBUG
-        if ( pos == 0 ) {
+        if ( pos == this->end() ) {
             OOFEM_ERROR("Couldn't find dof with Dof ID %d", dofIDArry.at(i));
         }
 #endif
-        answer.at(i) = this->giveDof(pos)->giveUnknown(mode, tStep);
+        answer.at(i) = (*pos)->giveUnknown(mode, tStep);
     }
 
     // Transform to global c.s.
@@ -840,13 +722,13 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
     answer.resize( size = dofIDArry.giveSize() );
 
     for ( int i = 1; i <= size; i++ ) {
-        int pos = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) );
+        auto pos = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) );
 #ifdef DEBUG
-        if ( pos == 0 ) {
+        if ( pos == this->end() ) {
             OOFEM_ERROR("Couldn't find dof with Dof ID %d", dofIDArry.at(i));
         }
 #endif
-        answer.at(i) = this->giveDof(pos)->giveUnknown(field, mode, tStep);
+        answer.at(i) = (*pos)->giveUnknown(field, mode, tStep);
     }
 
     // Transform to global c.s.
@@ -859,9 +741,11 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
 
 void DofManager :: giveCompleteUnknownVector(FloatArray &answer, ValueModeType mode, TimeStep *tStep)
 {
-    answer.resize(this->numberOfDofs);
-    for ( int i = 1; i <= this->numberOfDofs; i++ ) {
-        answer.at(i) = this->giveDof(i)->giveUnknown(mode, tStep);
+    int i = 1;
+    answer.resize(this->giveNumberOfDofs());
+    for ( Dof *dof: *this ) {
+        answer.at(i) = dof->giveUnknown(mode, tStep);
+        i++;
     }
 }
 
@@ -869,14 +753,11 @@ void DofManager :: giveCompleteUnknownVector(FloatArray &answer, ValueModeType m
 void DofManager :: givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
                                                ValueModeType mode, TimeStep *tStep)
 {
-    int size;
-    IntArray dofArray;
+    answer.resize(dofIDArry.giveSize());
 
-    answer.resize( size = dofIDArry.giveSize() );
-    this->giveDofArray(dofIDArry, dofArray);
-
-    for ( int j = 1; j <= size; j++ ) {
-        answer.at(j) = this->giveDof( dofArray.at(j) )->giveBcValue(mode, tStep);
+    int j = 1;
+    for ( int dofid: dofIDArry ) {
+        answer.at(j++) = this->giveDofWithID( dofid )->giveBcValue(mode, tStep);
     }
 
     // Transform to global c.s.
@@ -895,8 +776,7 @@ void DofManager :: giveUnknownVectorOfType(FloatArray &answer, UnknownType ut, V
 
     // This is a bit cumbersome. I first construct the local vector, which might have a odd order, e.g [D_w, D_u], which is later added to the global vector "answer"
     // I also store the dof id's, so that I can construct the local 2 global transformation afterwards (if its necessary). / Mikael
-    for ( int i = 1; i <= this->numberOfDofs; i++ ) {
-        Dof *d = this->giveDof(i);
+    for ( Dof *d: *this ) {
         double val = d->giveUnknown(mode, tStep);
         if ( ut == DisplacementVector || ut == EigenVector ) { // Just treat eigenvectors as displacement vectors (they are redundant)
             if      ( d->giveDofID() == D_u ) {
@@ -954,8 +834,8 @@ void DofManager :: giveUnknownVectorOfType(FloatArray &answer, UnknownType ut, V
 
 bool DofManager :: hasAnySlaveDofs()
 {
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        if ( !this->giveDof(i)->isPrimaryDof() ) {
+    for ( Dof *dof: *this ) {
+        if ( !dof->isPrimaryDof() ) {
             return true;
         }
     }
@@ -970,10 +850,10 @@ bool DofManager :: giveMasterDofMans(IntArray &masters)
     bool answer = false;
 
     masters.clear();
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        if ( !this->giveDof(i)->isPrimaryDof() ) {
+    for ( Dof *dof: *this ) {
+        if ( !dof->isPrimaryDof() ) {
             answer = true;
-            this->giveDof(i)->giveMasterDofManArray(_dof_masters);
+            dof->giveMasterDofManArray(_dof_masters);
             for ( int j = 1; j <= _dof_masters.giveSize(); j++ ) {
                 masters.insertSortedOnce(_dof_masters.at(j), 2);
             }
@@ -987,8 +867,8 @@ bool DofManager :: giveMasterDofMans(IntArray &masters)
 void DofManager :: postInitialize()
 {
     hasSlaveDofs = false;
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        if ( !this->giveDof(i)->isPrimaryDof() ) {
+    for ( Dof *dof: *this ) {
+        if ( !dof->isPrimaryDof() ) {
             hasSlaveDofs = true;
             continue;
         }
@@ -1033,27 +913,34 @@ bool DofManager :: computeM2LTransformation(FloatMatrix &answer, const IntArray 
         return false;
     }
 
-    IntArray dofArray;
     FloatArray mstrContrs;
 
     if ( dofIDArry.isEmpty() ) {
-        dofArray.resize(numberOfDofs);
-        for ( int i = 1; i <= numberOfDofs; i++ ) {
-            dofArray.at(i) = i;
+        ///@todo I don't think this should be called like this since it relies on the order of the dofs.
+        int cols = 0;
+        for ( Dof *dof: *this ) {
+            cols += dof->giveNumberOfPrimaryMasterDofs();
+        }
+        answer.resize( this->giveNumberOfDofs(), cols );
+        answer.zero();
+
+        int k = 1, i = 1;
+        for ( Dof *dof: *this ) {
+            dof->computeDofTransformation(mstrContrs);
+            answer.copySubVectorRow(mstrContrs, i, k);
+            k += mstrContrs.giveSize();
+            i++;
         }
     } else {
-        this->giveDofArray(dofIDArry, dofArray);
-    }
+        answer.resize( dofIDArry.giveSize(), giveNumberOfPrimaryMasterDofs(dofIDArry) );
+        answer.zero();
 
-    answer.resize( dofArray.giveSize(), giveNumberOfPrimaryMasterDofs(dofArray) );
-    answer.zero();
-
-    int indx;
-    for ( int k = 1, i = 1; i <= dofArray.giveSize(); i++ ) {
-        indx = dofArray.at(i);
-        this->giveDof(indx)->computeDofTransformation(mstrContrs);
-        answer.copySubVectorRow(mstrContrs, i, k);
-        k += mstrContrs.giveSize();
+        int k = 1;
+        for ( int i = 1; i <= dofIDArry.giveSize(); i++ ) {
+            this->giveDofWithID(dofIDArry.at(i))->computeDofTransformation(mstrContrs);
+            answer.copySubVectorRow(mstrContrs, i, k);
+            k += mstrContrs.giveSize();
+        }
     }
     return true;
 }
@@ -1073,8 +960,8 @@ void DofManager :: updateLocalNumbering(EntityRenumberingFunctor &f)
             mapper.second = f( mapper.second, ERS_DofManager );
         }
     }
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        this->giveDof(i)->updateLocalNumbering(f);
+    for ( Dof *dof: *this ) {
+        dof->updateLocalNumbering(f);
     }
 }
 
@@ -1095,8 +982,8 @@ DofManager :: packDOFsUnknowns(CommunicationBuffer &buff,
                                ValueModeType mode, TimeStep *tStep)
 {
     int result = 1;
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        result &= this->giveDof(i)->packUnknowns(buff, mode, tStep);
+    for ( Dof *dof: *this ) {
+        result &= dof->packUnknowns(buff, mode, tStep);
     }
 
     return result;

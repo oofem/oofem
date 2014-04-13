@@ -81,9 +81,11 @@ protected:
 
     /// DOF-manager containing the unknown volumetric strain(rate).
     Node *voldman;
+    int vol_id;
 
     /// DOF-manager containing the known deviatoric strain(rate).
     Node *devdman;
+    IntArray dev_id;
 
     Dof *giveVolDof();
 

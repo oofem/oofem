@@ -142,13 +142,8 @@ SUPG :: initializeFrom(InputRecord *ir)
         IntArray mask;
         mask = {V_u, V_v, V_w};
 
-#ifdef  FIELDMANAGER_USE_SHARED_PTR
-        std :: tr1 :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, this->VelocityPressureField, mask ) );
+        std :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, this->VelocityPressureField, mask ) );
         fm->registerField(_velocityField, FT_Velocity);
-#else
-        MaskedPrimaryField *_velocityField = new MaskedPrimaryField(FT_Velocity, this->VelocityPressureField, mask);
-        fm->registerField(_velocityField, FT_Velocity, true);
-#endif
 
         //fsflag = 0;
         //IR_GIVE_OPTIONAL_FIELD (ir, fsflag, _IFT_SUPG_fsflag, "fsflag");
@@ -282,10 +277,9 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     double _absErrResid, err, avn = 0.0, aivn = 0.0, rnorm;
     FloatArray *solutionVector = NULL, *prevSolutionVector = NULL;
     FloatArray rhs(neq), externalForces(neq), internalForces(neq);
-    int jj, ndofs, nnodes = this->giveDomain(1)->giveNumberOfDofManagers();
+    int jj, nnodes = this->giveDomain(1)->giveNumberOfDofManagers();
     double val, rnorm_mb, rnorm_mc;
     DofManager *inode;
-    Dof *jDof;
     DofIDItem type;
 
 
@@ -509,11 +503,9 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         rnorm_mb = rnorm_mc = 0.0;
         for ( int i = 1; i <= nnodes; i++ ) {
             inode = this->giveDomain(1)->giveDofManager(i);
-            ndofs = inode->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                jDof  =  inode->giveDof(j);
-                type  =  jDof->giveDofID();
-                if ( ( jj = jDof->__giveEquationNumber() ) ) {
+            for ( Dof *dof: *inode ) {
+                type  =  dof->giveDofID();
+                if ( ( jj = dof->__giveEquationNumber() ) ) {
                     val = rhs.at(jj);
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
                         rnorm_mb += val * val;
@@ -759,7 +751,7 @@ SUPG :: checkConsistency()
             } else if ( bcPtr->giveBCValType() == ForceLoadBVT ) {
                 bcPtr->scale( 1. / this->giveVariableScale(VST_Force) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type\n");
+                OOFEM_ERROR("unknown bc/ic type");
             }
         }
 
@@ -771,7 +763,7 @@ SUPG :: checkConsistency()
             } else if ( icPtr->giveICValType() == PressureBVT ) {
                 icPtr->scale( VM_Total, 1. / this->giveVariableScale(VST_Pressure) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type\n");
+                OOFEM_ERROR("unknown bc/ic type");
             }
         }
     }
@@ -795,9 +787,9 @@ SUPG :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 
     DofIDItem type = iDof->giveDofID();
     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-        iDof->printSingleOutputAt(stream, tStep, 'v', VM_Total, uscale);
+        iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total, uscale);
     } else if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, pscale);
+        iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total, pscale);
     } else {
         OOFEM_ERROR("unsupported dof type");
     }
@@ -828,23 +820,21 @@ SUPG :: applyIC(TimeStep *stepWhenIcApply)
     if ( !requiresUnknownsDictionaryUpdate() ) {
         for ( int j = 1; j <= nman; j++ ) {
             DofManager *node = domain->giveDofManager(j);
-            int nDofs = node->giveNumberOfDofs();
 
-            for ( int k = 1; k <= nDofs; k++ ) {
+            for ( Dof *dof: *node ) {
                 // ask for initial values obtained from
                 // bc (boundary conditions) and ic (initial conditions)
-                Dof *iDof = node->giveDof(k);
-                if ( !iDof->isPrimaryDof() ) {
+                if ( !dof->isPrimaryDof() ) {
                     continue;
                 }
 
-                int jj = iDof->__giveEquationNumber();
-                DofIDItem type = iDof->giveDofID();
+                int jj = dof->__giveEquationNumber();
+                DofIDItem type = dof->giveDofID();
                 if ( jj ) {
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-                        vp_vector->at(jj) = iDof->giveUnknown(VM_Total, stepWhenIcApply);
+                        vp_vector->at(jj) = dof->giveUnknown(VM_Total, stepWhenIcApply);
                     } else {
-                        vp_vector->at(jj) = iDof->giveUnknown(VM_Total, stepWhenIcApply);
+                        vp_vector->at(jj) = dof->giveUnknown(VM_Total, stepWhenIcApply);
                     }
                 }
             }
@@ -949,7 +939,7 @@ SUPG :: giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType t
         } else if ( type == SecantStiffnessMatrix ) {
             element->computeDiffusionDerivativeTerm_MB(h, SecantStiffness, tStep);
         } else {
-            OOFEM_ERROR("CharType not supported\n");
+            OOFEM_ERROR("CharType not supported");
         }
 
         h.times( alpha * tStep->giveTimeIncrement() );
@@ -1117,27 +1107,25 @@ SUPG :: updateDofUnknownsDictionary_predictor(TimeStep *tStep)
     if ( requiresUnknownsDictionaryUpdate() ) {
         for ( int j = 1; j <= nnodes; j++ ) {
             DofManager *inode = domain->giveDofManager(j);
-            int ndofs = inode->giveNumberOfDofs();
-            for ( int i = 1; i <= ndofs; i++ ) {
+            for ( Dof *dof: *inode ) {
                 double val, prev_val, accel;
-                Dof *iDof = inode->giveDof(i);
-                DofIDItem type = iDof->giveDofID();
-                if ( !iDof->hasBc(tStep) ) {
-                    prev_val = iDof->giveUnknown( VM_Total, tStep->givePreviousStep() );
-                    accel    = iDof->giveUnknown( VM_Acceleration, tStep->givePreviousStep() );
+                DofIDItem type = dof->giveDofID();
+                if ( !dof->hasBc(tStep) ) {
+                    prev_val = dof->giveUnknown( VM_Total, tStep->givePreviousStep() );
+                    accel    = dof->giveUnknown( VM_Acceleration, tStep->givePreviousStep() );
                     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
                         val = prev_val +  deltaT * accel;
                     } else {
                         val = prev_val;
                     }
 
-                    iDof->updateUnknownsDictionary(tStep, VM_Total, val); // velocity
-                    iDof->updateUnknownsDictionary(tStep, VM_Acceleration, accel); // acceleration
+                    dof->updateUnknownsDictionary(tStep, VM_Total, val); // velocity
+                    dof->updateUnknownsDictionary(tStep, VM_Acceleration, accel); // acceleration
                 } else {
-                    val = iDof->giveBcValue(VM_Total, tStep);
-                    iDof->updateUnknownsDictionary(tStep, VM_Total, val); // velocity
+                    val = dof->giveBcValue(VM_Total, tStep);
+                    dof->updateUnknownsDictionary(tStep, VM_Total, val); // velocity
                     //val = iDof -> giveBcValue (VM_Velocity,tStep) ; //velocity of velocity is acceleration
-                    iDof->updateUnknownsDictionary(tStep, VM_Acceleration, 0.0); // acceleration
+                    dof->updateUnknownsDictionary(tStep, VM_Acceleration, 0.0); // acceleration
                 }
             }
         }
@@ -1155,9 +1143,7 @@ SUPG :: updateDofUnknownsDictionary_corrector(TimeStep *tStep)
     if ( requiresUnknownsDictionaryUpdate() ) {
         for ( int j = 1; j <= nnodes; j++ ) {
             DofManager *inode = domain->giveDofManager(j);
-            int ndofs = inode->giveNumberOfDofs();
-            for ( int i = 1; i <= ndofs; i++ ) {
-                Dof *iDof = inode->giveDof(i);
+            for ( Dof *iDof: *inode ) {
                 DofIDItem type = iDof->giveDofID();
                 if ( !iDof->hasBc(tStep) ) {
                     double val, prev_val;
@@ -1200,10 +1186,8 @@ SUPG :: updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &
 
     for ( int j = 1; j <= nman; j++ ) {
         DofManager *node = domain->giveDofManager(j);
-        int nDofs = node->giveNumberOfDofs();
 
-        for ( int k = 1; k <= nDofs; k++ ) {
-            Dof *iDof = node->giveDof(k);
+        for ( Dof *iDof: *node ) {
             if ( !iDof->isPrimaryDof() ) {
                 continue;
             }
@@ -1224,9 +1208,7 @@ SUPG :: updateSolutionVectors_predictor(FloatArray &solutionVector, FloatArray &
         int ndofman = elem->giveNumberOfInternalDofManagers();
         for ( int ji = 1; ji <= ndofman; ji++ ) {
             DofManager *dofman = elem->giveInternalDofManager(ji);
-            int nDofs = dofman->giveNumberOfDofs();
-            for ( int k = 1; k <= nDofs; k++ ) {
-                Dof *iDof = dofman->giveDof(k);
+            for ( Dof *iDof: *dofman ) {
                 if ( !iDof->isPrimaryDof() ) {
                     continue;
                 }
@@ -1257,10 +1239,8 @@ SUPG :: updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerati
 
     for ( int j = 1; j <= nman; j++ ) {
         DofManager *node = domain->giveDofManager(j);
-        int nDofs = node->giveNumberOfDofs();
 
-        for ( int k = 1; k <= nDofs; k++ ) {
-            Dof *iDof = node->giveDof(k);
+        for ( Dof *iDof: *node ) {
             if ( !iDof->isPrimaryDof() ) {
                 continue;
             }
@@ -1283,9 +1263,7 @@ SUPG :: updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerati
         int ndofman = elem->giveNumberOfInternalDofManagers();
         for ( int ji = 1; ji <= ndofman; ji++ ) {
             DofManager *dofman = elem->giveInternalDofManager(ji);
-            int nDofs = dofman->giveNumberOfDofs();
-            for ( int k = 1; k <= nDofs; k++ ) {
-                Dof *iDof = dofman->giveDof(k);
+            for ( Dof *iDof: *dofman ) {
                 if ( !iDof->isPrimaryDof() ) {
                     continue;
                 }
@@ -1426,9 +1404,7 @@ SUPG :: initParallelContexts()
  *    }
  *    if (_cnt) printf ("%d ", inode);
  *    vx /= _cnt; vy /= _cnt; // average
- *    int ndofs = domain->giveDofManager(inode)->giveNumberOfDofs();
- *    for (_d=1;_d<=ndofs;_d++)  {
- *      iDof = domain->giveDofManager(inode)->giveDof(_d);
+ *    for (Dof *iDof: domain->giveDofManager(inode))  {
  *      DofIDItem type = iDof->giveDofID();
  *      if (!iDof->hasBc(tStep)) {
  *        if (type == V_u)
@@ -1451,14 +1427,15 @@ SUPG :: initParallelContexts()
  * {
  * Domain* domain = this->giveDomain(1);
  * int nnodes = domain->giveNumberOfDofManagers();
- * int inode, pdof, _code;
+ * int inode, _code;
+ * auto pdof;
  *
  * IntArray inMask(nnodes); inMask.zero();
  * for (inode=1;inode<=nnodes;inode++) {
  *  _code = __DofManActivityMask.at(inode);
  *  if ((_code == __NODE_OUT_ACTIVE) || (_code == __NODE_INTERPOL_CANDIDATE) || (_code == __NODE_OUT)) {
- *    if ((pdof=domain->giveDofManager(inode)->findDofWithDofId(P_f))) {
- *      int _eq = domain->giveDofManager(inode)->giveDof(pdof)->giveEquationNumber();
+ *    if ((pdof=domain->giveDofManager(inode)->findDofWithDofId(P_f)) != domain->giveDofManager(inode)->end() ) {
+ *      int _eq = (*pdof)->giveEquationNumber();
  *      if (_eq) {
  *        if (fabs(lhs->at(_eq,_eq)) > 0.0) {
  *          lhs->at(_eq,_eq) *= 1.e6;

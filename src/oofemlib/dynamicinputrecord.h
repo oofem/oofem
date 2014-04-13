@@ -110,25 +110,25 @@ public:
     virtual bool hasField(InputFieldType id);
     virtual void printYourself();
     // Setters, unique for the dynamic input record
-    virtual void setRecordKeywordField(const std :: string &keyword, int number);
-    virtual void setRecordKeywordNumber(int number);
-    virtual void setField(int item, InputFieldType id);
-    virtual void setField(double item, InputFieldType id);
-    virtual void setField(bool item, InputFieldType id);
-    virtual void setField(const std :: string &item, InputFieldType id);
-    virtual void setField(const FloatArray &item, InputFieldType id);
-    virtual void setField(std :: initializer_list< double > item, InputFieldType id);
-    virtual void setField(const IntArray &item, InputFieldType id);
-    virtual void setField(std :: initializer_list< int > item, InputFieldType id);
-    virtual void setField(const FloatMatrix &item, InputFieldType id);
-    virtual void setField(const std :: vector< std :: string > &item, InputFieldType id);
-    virtual void setField(const Dictionary &item, InputFieldType id);
-    virtual void setField(const std :: list< Range > &item, InputFieldType id);
-    virtual void setField(const ScalarFunction &function, InputFieldType id);
+    void setRecordKeywordField(std :: string keyword, int number);
+    void setRecordKeywordNumber(int number);
+    void setField(int item, InputFieldType id);
+    void setField(double item, InputFieldType id);
+    void setField(bool item, InputFieldType id);
+    void setField(std :: string item, InputFieldType id);
+    void setField(FloatArray item, InputFieldType id);
+    void setField(std :: initializer_list< double > item, InputFieldType id);
+    void setField(IntArray item, InputFieldType id);
+    void setField(std :: initializer_list< int > item, InputFieldType id);
+    void setField(FloatMatrix item, InputFieldType id);
+    void setField(std :: vector< std :: string > item, InputFieldType id);
+    void setField(const Dictionary &item, InputFieldType id);
+    void setField(const std :: list< Range > &item, InputFieldType id);
+    void setField(const ScalarFunction &function, InputFieldType id);
     /// Sets an empty field with given id.
-    virtual void setField(InputFieldType id);
+    void setField(InputFieldType id);
     /// Removes given field from record.
-    virtual void unsetField(InputFieldType id);
+    void unsetField(InputFieldType id);
 
     virtual void report_error(const char *_class, const char *proc, InputFieldType id,
                               IRResultType result, const char *file, int line);

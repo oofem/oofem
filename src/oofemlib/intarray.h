@@ -296,11 +296,6 @@ public:
      */
     void erase(int pos);
     /**
-     * Sets the array to be a sequence of values.
-     * @param n Number of integers in the sequence to follow.
-     */
-    void setValues(int n, ...);
-    /**
      * Adds given scalar to all values of receiver
      * @param val Value to add.
      */

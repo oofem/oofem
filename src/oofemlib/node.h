@@ -116,7 +116,7 @@ public:
      * Sets node coordinates to given array.
      * @param coords New coordinates for node.
      */
-    void setCoordinates(const FloatArray &coords) { this->coordinates = coords; }
+    void setCoordinates(FloatArray coords) { this->coordinates = std :: move(coords); }
     /**
      * Returns updated ic-th coordinate of receiver. Return value is computed
      * as coordinate + scale * displacement, where corresponding displacement is obtained

@@ -46,4 +46,10 @@ void oofem_exit(int code)
     fprintf(stderr, "oofem exit code %d\n", code);
     exit(code);
 }
+
+std::string errorInfo(const char *func)
+{
+    return std :: string(func);
+}
+
 } // end namespace oofem

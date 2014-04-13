@@ -155,9 +155,8 @@ QTrPlaneStrain :: computeVolumeAround(GaussPoint *gp)
 void QTrPlaneStrain :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -439,12 +438,9 @@ QTrPlaneStrain :: SPRNodalRecoveryMI_givePatchType()
 double
 QTrPlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 {
-    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
-    GaussPoint *gp;
     double volume = 0.0;
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
         volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
     }
 
@@ -457,17 +453,14 @@ QTrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType
                                                                    FloatArray &answer)
 {
     FloatArray lcoords, u, nn;
-    FloatMatrix n(2, 12);
+    FloatMatrix n;
     int result;
 
     result = this->computeLocalCoordinates(lcoords, coords);
 
     this->interpolation.evalN( nn, lcoords, FEIElementGeometryWrapper(this) );
 
-    for ( int i = 1; i <= 6; i++ ) {
-        n.at(1, 2 * i - 1) = nn.at(i);
-        n.at(2, 2 * i - 0) = nn.at(i);
-    }
+    n.beNMatrixOf(nn, 2);
 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);

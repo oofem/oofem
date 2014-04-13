@@ -217,28 +217,27 @@ XFEMStatic :: terminate(TimeStep *tStep)
 
                         for ( size_t czIndex = 0; czIndex < numCzRules; czIndex++ ) {
                             if ( xFemEl->mpCZIntegrationRules [ czIndex ] != NULL ) {
-                                for ( int j = 0; j < xFemEl->mpCZIntegrationRules [ czIndex ]->giveNumberOfIntegrationPoints(); j++ ) {
-                                    GaussPoint &gp = * ( xFemEl->mpCZIntegrationRules [ czIndex ]->getIntegrationPoint(j) );
+                                for ( GaussPoint *gp: *xFemEl->mpCZIntegrationRules [ czIndex ] ) {
 
-                                    MaterialStatus *ms = xFemEl->mpCZMat->giveStatus(& gp);
+                                    MaterialStatus *ms = xFemEl->mpCZMat->giveStatus(gp);
                                     if ( ms == NULL ) {
-                                        OOFEM_ERROR("Failed to fetch material status.\n");
+                                        OOFEM_ERROR("Failed to fetch material status.");
                                     }
 
                                     MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * >
-                                                                               ( xFemEl->mpCZMat->giveStatus(& gp) );
+                                                                               ( xFemEl->mpCZMat->giveStatus(gp) );
 
                                     if ( interface == NULL ) {
-                                        OOFEM_ERROR("Failed to fetch MaterialStatusMapperInterface.\n");
+                                        OOFEM_ERROR("Failed to fetch MaterialStatusMapperInterface.");
                                     }
 
 
-                                    MaterialStatus *matStat = dynamic_cast< MaterialStatus * >( xFemEl->mpCZMat->giveStatus(& gp) );
+                                    MaterialStatus *matStat = dynamic_cast< MaterialStatus * >( xFemEl->mpCZMat->giveStatus(gp) );
                                     StructuralInterfaceMaterialStatus *siMatStat = dynamic_cast< StructuralInterfaceMaterialStatus * >(matStat);
                                     if ( siMatStat == NULL ) {
-                                        OOFEM_ERROR("Failed to cast to StructuralInterfaceMaterialStatus.\n");
+                                        OOFEM_ERROR("Failed to cast to StructuralInterfaceMaterialStatus.");
                                     }
-                                    interface->MSMI_map_cz(gp, * domain, elemSet, * tStep, * siMatStat);
+                                    interface->MSMI_map_cz(* gp, * domain, elemSet, * tStep, * siMatStat);
                                 }
                             }
                         }
@@ -450,21 +449,13 @@ void
 XFEMStatic :: initializeDofUnknownsDictionary(TimeStep *tStep)
 {
     // Initializes all dof values to zero
-
-    Domain *domain;
-    Dof *iDof;
-    DofManager *node;
-
-    int nDofs;
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        domain = this->giveDomain(idomain);
+        Domain *domain = this->giveDomain(idomain);
         int nnodes = domain->giveNumberOfDofManagers();
         for ( int inode = 1; inode <= nnodes; inode++ ) {
-            node = domain->giveDofManager(inode);
-            nDofs = node->giveNumberOfDofs();
-            for ( int i = 1; i <= nDofs; i++ ) {
-                iDof = node->giveDof(i);
-                iDof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, 0.0);
+            DofManager *node = domain->giveDofManager(inode);
+            for ( Dof *dof: *node ) {
+                dof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, 0.0);
             }
         }
     }
@@ -477,19 +468,15 @@ XFEMStatic :: setTotalDisplacementFromUnknownsInDictionary(EquationID type, Valu
 
     // Sets the values in the displacement vector based on stored values in the unknowns dictionaries.
     // Used in the beginning of each time step.
-    Domain *domain;
-    DofManager *inode;
-    Dof *iDof;
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        domain = this->giveDomain(idomain);
+        Domain *domain = this->giveDomain(idomain);
         for ( int j = 1; j <= domain->giveNumberOfDofManagers(); j++ ) {
-            inode = domain->giveDofManager(j);
+            DofManager *inode = domain->giveDofManager(j);
             int eqNum;
-            for ( int i = 1; i <= inode->giveNumberOfDofs(); i++ ) {
-                iDof = inode->giveDof(i);
-                eqNum = iDof->giveEqn();
+            for ( Dof *dof: *inode ) {
+                eqNum = dof->giveEqn();
                 if ( eqNum > 0 ) {
-                    double val = iDof->giveUnknown(mode, tStep);
+                    double val = dof->giveUnknown(mode, tStep);
                     totalDisplacement.at(eqNum) = val;
                 }
             }
@@ -501,13 +488,11 @@ void
 XFEMStatic :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
 {
     // update DoF unknowns dictionary.
-    Dof *iDof;
     double val;
-    for ( int i = 1; i <= inode->giveNumberOfDofs(); i++ ) {
-        iDof = inode->giveDof(i);
-        int eqNum = iDof->__giveEquationNumber();
-        if ( iDof->hasBc(tStep) ) {
-            val = iDof->giveBcValue(VM_Total, tStep);
+    for ( Dof *dof: *inode ) {
+        int eqNum = dof->__giveEquationNumber();
+        if ( dof->hasBc(tStep) ) {
+            val = dof->giveBcValue(VM_Total, tStep);
         } else {
             if ( eqNum > 0 ) {
                 val = totalDisplacement.at(eqNum);
@@ -516,11 +501,12 @@ XFEMStatic :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
             }
         }
 
-        iDof->updateUnknownsDictionary(tStep, VM_Total, val);
+        dof->updateUnknownsDictionary(tStep, VM_Total, val);
     }
 }
 
-void XFEMStatic :: buildDofMap() {
+void XFEMStatic :: buildDofMap()
+{
     printf("Building dof map.\n");
     mDofEqnNumMap.clear();
 
@@ -530,15 +516,14 @@ void XFEMStatic :: buildDofMap() {
         for ( int dManIndex = 1; dManIndex <= domain->giveNumberOfDofManagers(); dManIndex++ ) {
             DofManager *dMan = domain->giveDofManager(dManIndex);
 
-            for ( int k = 1; k <= dMan->giveNumberOfDofs(); k++ ) {
-                Dof *dof = dMan->giveDof(k);
+            for ( Dof *dof: *dMan ) {
                 int eqNum = dof->giveEqn();
 
                 if ( eqNum > 0 ) {
                     std :: vector< int > key(3);
                     key [ 0 ] = domainIndex;
                     key [ 1 ] = dManIndex;
-                    key [ 2 ] = k;
+                    key [ 2 ] = dof->giveDofID();
 
                     mDofEqnNumMap [ key ] = eqNum;
                 }
@@ -547,7 +532,8 @@ void XFEMStatic :: buildDofMap() {
     }
 }
 
-void XFEMStatic :: setValsFromDofMap(FloatArray &oArray, const FloatArray &iArray) {
+void XFEMStatic :: setValsFromDofMap(FloatArray &oArray, const FloatArray &iArray)
+{
     int neq = 0;
     for ( int domainIndex = 1; domainIndex <= this->giveNumberOfDomains(); domainIndex++ ) {
         neq += this->giveNumberOfDomainEquations( domainIndex, EModelDefaultEquationNumbering() );
@@ -566,15 +552,14 @@ void XFEMStatic :: setValsFromDofMap(FloatArray &oArray, const FloatArray &iArra
         for ( int dManIndex = 1; dManIndex <= domain->giveNumberOfDofManagers(); dManIndex++ ) {
             DofManager *dMan = domain->giveDofManager(dManIndex);
 
-            for ( int k = 1; k <= dMan->giveNumberOfDofs(); k++ ) {
-                Dof *dof = dMan->giveDof(k);
+            for ( Dof *dof: *dMan ) {
                 int eqNumNew = dof->giveEqn();
 
                 if ( eqNumNew > 0 ) {
                     std :: vector< int > key(3);
                     key [ 0 ] = domainIndex;
                     key [ 1 ] = dManIndex;
-                    key [ 2 ] = k;
+                    key [ 2 ] = dof->giveDofID();
 
                     if ( mDofEqnNumMap.find(key) != mDofEqnNumMap.end() ) {
                         int eqNumOld = mDofEqnNumMap [ key ];

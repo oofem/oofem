@@ -140,7 +140,7 @@ void PrescribedGradientBCNeumann::assemble(SparseMtrx *answer, TimeStep *tStep, 
     }
 
     if ( eid != EID_MomentumBalance ) {
-    	printf("Int PrescribedGradientBCNeumann::assemble(): returning.\n");
+    	printf("returning.");
         return;
     }
 
@@ -244,7 +244,7 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
     IntArray edgeNodes;
     FEInterpolation2d *interp2d = dynamic_cast<FEInterpolation2d*> (interp);
     if(interp2d == NULL) {
-    	OOFEM_ERROR("In PrescribedGradientBCNeumann::integrateTangent: failed to cast to FEInterpolation2d.\n")
+    	OOFEM_ERROR("failed to cast to FEInterpolation2d.")
     }
     interp2d->computeLocalEdgeMapping(edgeNodes, iBndIndex);
 
@@ -265,8 +265,7 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
 
     oTangent.clear();
 
-    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = ir->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *ir ) {
         FloatArray &lcoords = * gp->giveCoordinates();
         FEIElementGeometryWrapper cellgeo(e);
 
@@ -279,34 +278,21 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
         if(xfemElInt != NULL && domain->hasXfemManager()) {
             // Compute global coordinates of Gauss point
             FloatArray globalCoord;
-            globalCoord.setValues(2, 0.0, 0.0);
 
-            for(int j = 1; j <= n.giveSize(); j++) {
-            	globalCoord.at(1) += n.at(j)*(e->giveDofManager(edgeNodes.at(j))->giveCoordinate(1));
-            	globalCoord.at(2) += n.at(j)*(e->giveDofManager(edgeNodes.at(j))->giveCoordinate(2));
-            }
+            interp->boundaryLocal2Global(globalCoord, iBndIndex, lcoords, cellgeo);
 
-        	// Compute local coordinates on the element
+            // Compute local coordinates on the element
             FloatArray locCoord;
             e->computeLocalCoordinates(locCoord, globalCoord);
 
-            std::vector<int> edgeNodesVec;
-            for(int j = 1; j <= edgeNodes.giveSize(); j++) {
-            	edgeNodesVec.push_back(edgeNodes.at(j));
-            }
-
             xfemElInt->XfemElementInterface_createEnrNmatrixAt(nMatrix, locCoord, *e);
-
-            FloatMatrix NmatrixAlt;
-            NmatrixAlt.beNMatrixOf(n, nsd);
-        }
-        else {
+        } else {
             // Evaluate the velocity/displacement coefficients
             nMatrix.beNMatrixOf(n, nsd);
         }
 
         if ( nsd == 3 ) {
-        	OOFEM_ERROR("PrescribedGradientBCNeumann::integrateTangent() not implemented for nsd == 3.\n")
+        	OOFEM_ERROR("not implemented for nsd == 3.")
         } else if ( nsd == 2 ) {
 
             E_n.resize(4, 2);

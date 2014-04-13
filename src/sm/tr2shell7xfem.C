@@ -91,7 +91,7 @@ FEInterpolation *Tr2Shell7XFEM :: giveInterpolation() const { return & interpola
 void
 Tr2Shell7XFEM :: computeGaussPoints()
 {
-    if ( !integrationRulesArray ) {
+    if ( integrationRulesArray.size() == 0 ) {
         int nPointsTri  = 6;   // points in the plane
         int nPointsEdge = 2;   // edge integration
 
@@ -101,7 +101,7 @@ Tr2Shell7XFEM :: computeGaussPoints()
             Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) );
             if ( dei ) {
                 int numberOfInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
-                czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
+                czIntegrationRulesArray.resize( numberOfInterfaces );
                 for ( int i = 0; i < numberOfInterfaces; i++ ) {
                     czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
                     czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
@@ -110,7 +110,7 @@ Tr2Shell7XFEM :: computeGaussPoints()
         }
 
 
-        specialIntegrationRulesArray = new IntegrationRule * [ 3 ];
+        specialIntegrationRulesArray.resize(3);
 
         // Midplane (Mass matrix integrated analytically through the thickness)
         specialIntegrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
@@ -121,7 +121,6 @@ Tr2Shell7XFEM :: computeGaussPoints()
         specialIntegrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
 
         // Layered cross section for bulk integration
-        this->numberOfIntegrationRules = this->layeredCS->giveNumberOfLayers();
         this->numberOfGaussPoints = this->layeredCS->giveNumberOfLayers() * nPointsTri * this->layeredCS->giveNumIntegrationPointsInLayer();
         this->layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
 

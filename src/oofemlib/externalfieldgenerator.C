@@ -71,9 +71,9 @@ void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *gl
         while ( exitFlag == 0 ) {
             if ( field( 3 * i * numberReal(1) ) > globalCoordinates->at(1) ) {
                 if ( i == 0 ) { //Check soundness
-                    OOFEM_ERROR("error in externalfieldgenerator.C: i is zero");
+                    OOFEM_ERROR("i is zero");
                 } else if ( i == numberReal(0) ) {
-                    OOFEM_ERROR("error in externalfieldgenerator.C: i is equal to realNumber");
+                    OOFEM_ERROR("i is equal to realNumber");
                 }
 
                 exitFlag = 1;
@@ -91,9 +91,9 @@ void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *gl
         while ( exitFlag == 0 ) {
             if ( field(3 * i + 1) > globalCoordinates->at(2) ) {
                 if ( i == 0 ) {
-                    OOFEM_ERROR("error in externalfieldgenerator.C: i is zero");
+                    OOFEM_ERROR("i is zero");
                 } else if ( i == numberReal(0) ) {
-                    OOFEM_ERROR("error in externalfieldgenerator.C: i is equal to realNumber");
+                    OOFEM_ERROR("i is equal to realNumber");
                 }
 
                 exitFlag = 1;

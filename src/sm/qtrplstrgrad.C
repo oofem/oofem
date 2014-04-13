@@ -60,6 +60,7 @@ QTrPlaneStressGrad :: QTrPlaneStressGrad(int n, Domain *aDomain) : QTrPlaneStres
     totalSize = nPrimVars * nPrimNodes + nSecVars * nSecNodes;
     locSize   = nPrimVars * nPrimNodes;
     nlSize    = nSecVars * nSecNodes;
+    numberOfGaussPoints = 4;
 }
 
 
@@ -78,29 +79,15 @@ QTrPlaneStressGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &an
 IRResultType
 QTrPlaneStressGrad :: initializeFrom(InputRecord *ir)
 {
-    numberOfGaussPoints = 4;
-    IRResultType result = this->StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
-        numberOfGaussPoints = 4;
-    }
-
-    return IRRT_OK;
+    return StructuralElement :: initializeFrom(ir);
 }
 
 
 void
 QTrPlaneStressGrad :: computeGaussPoints()
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -111,15 +98,11 @@ QTrPlaneStressGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp.
 {
-    FloatArray n(3);
+    FloatArray n;
 
-    answer.resize(1, 3);
-    answer.zero();
     this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-    for ( int i = 1; i <= 3; i++ ) {
-        answer.at(1, i) = n.at(i);
-    }
+    answer.beNMatrixOf(n, 1);
 }
 
 void

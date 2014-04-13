@@ -102,7 +102,7 @@ FEI3dTetLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
 void
 FEI3dTetLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatArray n(4);
+    FloatArray n;
     this->evalN(n, lcoords, cellgeo);
 
     answer.clear();

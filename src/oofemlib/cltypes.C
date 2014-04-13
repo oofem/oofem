@@ -66,7 +66,7 @@ char cltypesGiveUnknownTypeModeKey(ValueModeType mode)
 
     case VM_Acceleration: return 'a';
 
-    default: OOFEM_SIMPLE_ERROR("cltypesGiveUnknownTypeModeKey : unsupported ValueModeType");
+    default: OOFEM_ERROR("unsupported ValueModeType");
     }
 
     return 0;
@@ -208,7 +208,7 @@ InternalStateValueType giveInternalStateValueType(UnknownType type)
     } else if ( ( type == FluxVector ) || ( type == PressureVector ) || ( type == Temperature ) ) {
         return ISVT_SCALAR;
     } else {
-        OOFEM_SIMPLE_ERROR( "giveInternalStateValueType: unsupported UnknownType %s", __UnknownTypeToString(type) );
+        OOFEM_ERROR( "unsupported UnknownType %s", __UnknownTypeToString(type) );
         return ISVT_SCALAR; // To make compiler happy.
     }
 }

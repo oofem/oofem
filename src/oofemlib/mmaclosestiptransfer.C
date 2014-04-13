@@ -50,13 +50,20 @@ MMAClosestIPTransfer :: __init(Domain *dold, IntArray &type, FloatArray &coords,
     SpatialLocalizer *sl = dold->giveSpatialLocalizer();
     this->source = sl->giveClosestIP(coords, elemSet, iCohesiveZoneGP);
 
-    if ( !source ) {
-        OOFEM_ERROR("no suitable source found");
+    if ( iCohesiveZoneGP ) {
+        XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >( source->giveElement() );
+
+        if ( xFemEl == NULL ) {
+            OOFEM_ERROR("xFemEl == NULL.");
+        }
+
+        mpMaterialStatus = xFemEl->giveCohesiveZoneMaterialStatus(*source);
+    } else {
+        mpMaterialStatus = source->giveMaterial()->giveStatus(source);
     }
 
-    mpMaterialStatus = dynamic_cast<MaterialStatus*>(source->giveMaterialStatus());
-    if( mpMaterialStatus == NULL ) {
-        OOFEM_ERROR("Could not find material status.");
+    if ( !source ) {
+        OOFEM_ERROR("no suitable source found");
     }
 }
 
@@ -81,7 +88,7 @@ MMAClosestIPTransfer :: mapStatus(MaterialStatus &oStatus) const
 
         return 1;
     } else {
-        OOFEM_ERROR("source not set.\n");
+        OOFEM_ERROR("source not set.");
     }
 
     return 0;

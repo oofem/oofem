@@ -54,6 +54,7 @@
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
  #include "communicator.h"
+ #include "loadbalancer.h"
 #endif
 
 namespace oofem {
@@ -875,24 +876,21 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
 int
 NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
 {
-    int mapSize = commMap.giveSize();
     int count = 0, pcount = 0;
     IntArray locationArray;
     Domain *domain = this->giveDomain(1);
 
     if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            count += domain->giveDofManager( commMap.at(i) )->giveNumberOfDofs();
+        for ( int map: commMap ) {
+            count += domain->giveDofManager( map )->giveNumberOfDofs();
         }
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
     } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            DofManager *dman;
-            int ndofs = ( dman = domain->giveDofManager( commMap.at(i) ) )->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                Dof *jdof = dman->giveDof(j);
-                if ( jdof->isPrimaryDof() && ( jdof->__giveEquationNumber() ) ) {
+        for ( int map: commMap ) {
+            DofManager *dman = domain->giveDofManager( map );
+            for ( Dof *dof: *dman ) {
+                if ( dof->isPrimaryDof() && ( dof->__giveEquationNumber() ) ) {
                     count++;
                 } else {
                     pcount++;
@@ -903,8 +901,8 @@ NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &b
         //printf ("\nestimated count is %d\n",count);
         return ( buff.givePackSize(MPI_DOUBLE, 1) * max(count, pcount) );
     } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            count += domain->giveElement( commMap.at(i) )->estimatePackSize(buff);
+        for ( int map: commMap ) {
+            count += domain->giveElement( map )->estimatePackSize(buff);
         }
 
         return count;
@@ -957,9 +955,7 @@ NonLinearStatic :: packMigratingData(TimeStep *tStep)
 
     for ( int idofman = 1; idofman <= ndofman; idofman++ ) {
         DofManager *_dm = domain->giveDofManager(idofman);
-        int ndofs = _dm->giveNumberOfDofs();
-        for ( int idof = 1; idof <= ndofs; idof++ ) {
-            Dof *_dof = _dm->giveDof(idof);
+        for ( Dof *_dof: *_dm ) {
             if ( _dof->isPrimaryDof() ) {
                 int _eq;
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
@@ -1006,9 +1002,7 @@ NonLinearStatic :: unpackMigratingData(TimeStep *tStep)
 
     for ( int idofman = 1; idofman <= ndofman; idofman++ ) {
         DofManager *_dm = domain->giveDofManager(idofman);
-        int ndofs = _dm->giveNumberOfDofs();
-        for ( int idof = 1; idof <= ndofs; idof++ ) {
-            Dof *_dof = _dm->giveDof(idof);
+        for ( Dof *_dof: *_dm ) {
             if ( _dof->isPrimaryDof() ) {
                 int _eq;
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {

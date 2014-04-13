@@ -160,9 +160,8 @@ LSpace :: giveMaterialMode()
 void LSpace :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -174,7 +173,7 @@ LSpace :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp.
 {
-    FloatArray n(8);
+    FloatArray n;
 
     answer.resize(3, 24);
     answer.zero();
@@ -235,12 +234,10 @@ LSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCra
         return this->giveLenghtInDir(normalToCrackPlane) / factor;
     } else {
         IntegrationRule *iRule;
-        GaussPoint *gp;
         double volume = 0.0;
 
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            gp  = iRule->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *iRule ) {
             volume += this->computeVolumeAround(gp);
         }
 
@@ -298,7 +295,6 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
                                                      InternalStateType type, TimeStep *tStep)
 {
     double x1 = 0.0, x2 = 0.0, x3 = 0.0, y = 0.0;
-    GaussPoint *gp;
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FloatMatrix A(4, 4);
     FloatMatrix b, r;
@@ -307,12 +303,10 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
 
     int size = 0;
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         giveIPValue(val, gp, type, tStep);
-        if ( i == 0 ) {
+        if ( size == 0 ) {
             size = val.giveSize();
-            answer.resize(size);
             b.resize(4, size);
             r.resize(4, size);
             A.zero();
@@ -452,26 +446,13 @@ LSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
                                                            TimeStep *tStep, const FloatArray &coords,
                                                            FloatArray &answer)
 {
-    FloatArray lcoords, u;
+    FloatArray lcoords, u, ni;
     FloatMatrix n;
-    FloatArray ni(8);
     int result;
 
     result = this->computeLocalCoordinates(lcoords, coords);
 
     this->interpolation.evalN( ni, lcoords, FEIElementGeometryWrapper(this) );
-
-    n.resize(3, 24);
-    n.zero();
-
-    n.at(1, 1)  = n.at(2, 2)  = n.at(3, 3)  = ni.at(1);
-    n.at(1, 4)  = n.at(2, 5)  = n.at(3, 6)  = ni.at(2);
-    n.at(1, 7)  = n.at(2, 8)  = n.at(3, 9)  = ni.at(3);
-    n.at(1, 10) = n.at(2, 11) = n.at(3, 12) = ni.at(4);
-    n.at(1, 13) = n.at(2, 14) = n.at(3, 15) = ni.at(5);
-    n.at(1, 16) = n.at(2, 17) = n.at(3, 18) = ni.at(6);
-    n.at(1, 19) = n.at(2, 20) = n.at(3, 21) = ni.at(7);
-    n.at(1, 22) = n.at(2, 23) = n.at(3, 24) = ni.at(8);
 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
@@ -567,15 +548,11 @@ LSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refin
 
 
 double
-LSpace :: HuertaRemeshingCriteriaI_giveCharacteristicSize() {
-    int i;
-    IntegrationRule *iRule;
-    GaussPoint *gp;
+LSpace :: HuertaRemeshingCriteriaI_giveCharacteristicSize()
+{
     double volume = 0.0;
 
-    iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
         volume += this->computeVolumeAround(gp);
     }
 
@@ -815,11 +792,10 @@ void LSpace :: drawScalar(oofegGraphicContext &context)
 void
 LSpace :: drawSpecial(oofegGraphicContext &gc)
 {
-    int igp, i, j, k;
+    int i, j, k;
     WCRec q [ 4 ];
     GraphicObj *tr;
     IntegrationRule *iRule;
-    GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     FloatArray crackStatuses, cf;
 
@@ -834,8 +810,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
         FloatArray crackDir;
 
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        for ( igp = 0; igp < iRule->giveNumberOfIntegrationPoints(); igp++ ) {
-            gp = iRule->getIntegrationPoint(igp);
+        for ( GaussPoint *gp: *iRule ) {
             if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }

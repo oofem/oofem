@@ -292,12 +292,11 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
     FloatArray v, aux;
-    GaussPoint *gp, *membraneGP;
+    GaussPoint *membraneGP;
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         fprintf( file, "  GP %2d.%-2d :", iRule->giveNumber(), gp->giveNumber() );
         membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         // Strain - Curvature
@@ -604,13 +603,14 @@ TR_SHELL01 :: drawScalar(oofegGraphicContext &context)
         result += this->giveInternalStateAtNode(v2, context.giveIntVarType(), context.giveIntVarMode(), 2, tStep);
         result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
     } else if ( context.giveIntVarMode() == ISM_local ) {
-        int nip = plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
+        double tot_w = 0.;
         FloatArray a, v;
-        for ( int _i = 1; _i <= nip; _i++ ) {
-            this->giveIPValue(a, plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(_i - 1), IST_ShellMomentumTensor, tStep);
-            v.add(a);
+        for ( GaussPoint *gp: *plate->giveDefaultIntegrationRulePtr() ) {
+            this->giveIPValue(a, gp, IST_ShellMomentumTensor, tStep);
+            v.add(gp->giveWeight(), a);
+            tot_w += gp->giveWeight();
         }
-        v.times(1. / nip);
+        v.times(1. / tot_w);
         v1 = v;
         v2 = v;
         v3 = v;

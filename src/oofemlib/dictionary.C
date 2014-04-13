@@ -85,7 +85,7 @@ Pair *Dictionary :: add(int k, double v)
 
 #  ifdef DEBUG
     if ( this->includes(k) ) {
-        OOFEM_SIMPLE_ERROR("Dictionary::add: key (%d) already exists", k);
+        OOFEM_ERROR("key (%d) already exists", k);
     }
 
 #  endif
@@ -184,7 +184,7 @@ contextIOResultType Dictionary :: saveContext(DataStream *stream, ContextMode mo
     Pair *next;
 
     if ( stream == NULL ) {
-        OOFEM_SIMPLE_ERROR("Dictionary::saveContex : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     next = first;

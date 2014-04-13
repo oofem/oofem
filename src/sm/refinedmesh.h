@@ -35,8 +35,7 @@
 #ifndef refinedmesh_h
 #define refinedmesh_h
 
-#include "alist.h"
-
+#include <vector>
 #include <cstdlib>
 
 namespace oofem {
@@ -149,7 +148,7 @@ public:
 
     ~RefinedMesh() { };
 
-    int refineMeshGlobally(Domain *d, int level, AList< RefinedElement > &refinedElementList);
+    int refineMeshGlobally(Domain *d, int level, std :: vector< RefinedElement > &refinedElementList);
 };
 } // end namespace oofem
 #endif // refinedmesh_h

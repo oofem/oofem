@@ -67,7 +67,7 @@ public:
     virtual bcValType giveBCValType() const { return ForceLoadBVT; }
     virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
 
-    void setDeadWeighComponents(const FloatArray &newComponents);
+    void setDeadWeighComponents(FloatArray newComponents);
 
     virtual const char *giveClassName() const { return "DeadWeight"; }
     virtual const char *giveInputRecordName() const { return _IFT_DeadWeight_Name; }

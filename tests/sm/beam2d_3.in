@@ -31,15 +31,15 @@ ConstantFunction 1 f(t) 1.
 #%BEGIN_CHECK% tolerance 1.e-8
 ## check reactions 
 #REACTION tStep 1 number 1 dof 1 value -2.1742e+01
-#REACTION tStep 1 number 1 dof 2 value -8.7045e+00
-#REACTION tStep 1 number 1 dof 3 value  5.2300e+01
-#REACTION tStep 1 number 5 dof 3 value  0.0
+#REACTION tStep 1 number 1 dof 3 value -8.7045e+00
+#REACTION tStep 1 number 1 dof 5 value  5.2300e+01
+#REACTION tStep 1 number 5 dof 5 value  0.0
 #REACTION tStep 1 number 6 dof 1 value -8.7578e+00
-#REACTION tStep 1 number 6 dof 2 value -1.2955e+00
-#REACTION tStep 1 number 6 dof 3 value  4.1161e+01
+#REACTION tStep 1 number 6 dof 3 value -1.2955e+00
+#REACTION tStep 1 number 6 dof 5 value  4.1161e+01
 ##
 ## check all nodes
-#NODE tStep 1 number 3 dof 3 unknown d value  -1.40503831e-03
+#NODE tStep 1 number 3 dof 5 unknown d value  -1.40503831e-03
 #NODE tStep 1 number 3 dof 1 unknown d value   4.61950515e-03
 ## check element no. 1 force vector
 #BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 1  value 8.7045e+00

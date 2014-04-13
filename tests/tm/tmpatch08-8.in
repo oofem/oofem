@@ -40,7 +40,7 @@ ConstantFunction 1 f(t) 1.0
 
 
 #%BEGIN_CHECK% tolerance 1.e-5
-#NODE tStep 5.94000000e+07 number 17 dof 1 unknown f value 4.95963195 // 5.0
-#NODE tStep 5.94000000e+07 number 18 dof 1 unknown f value 4.95963195 // 5.0
+#NODE tStep 5.94000000e+07 number 17 dof 10 unknown d value 4.95963195 // 5.0
+#NODE tStep 5.94000000e+07 number 18 dof 10 unknown d value 4.95963195 // 5.0
 #%END_CHECK%
 

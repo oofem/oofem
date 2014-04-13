@@ -208,9 +208,8 @@ LTRSpace :: giveMaterialMode()
 void LTRSpace :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -545,7 +544,7 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
             return;
         }
 
-        //   for (igp=1 ; igp<= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() ; igp++) {
+        //   for (GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         {
             gp = iRule->getIntegrationPoint(0);
             if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {

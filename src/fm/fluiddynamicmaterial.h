@@ -80,8 +80,8 @@ public:
     /**
      * Sets the deviatoric stress.
      */
-    void letDeviatoricStressVectorBe(const FloatArray &v) { deviatoricStressVector = v; }
-    void letDeviatoricStrainRateVectorBe(const FloatArray &v) { deviatoricStrainRateVector = v; }
+    void letDeviatoricStressVectorBe(FloatArray v) { deviatoricStressVector = std :: move(v); }
+    void letDeviatoricStrainRateVectorBe(FloatArray v) { deviatoricStrainRateVector = std :: move(v); }
 };
 
 

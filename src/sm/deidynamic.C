@@ -144,8 +144,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     IntArray loc;
     Element *element;
     DofManager *node;
-    Dof *iDof;
-    int nDofs, neq;
+    int neq;
     int i, k, n, j, jj, kk, init = 0;
     double coeff, maxDt, maxOmi, maxOm = 0., maxOmEl, c1, c2, c3;
     FloatMatrix charMtrx, charMtrx2;
@@ -238,13 +237,11 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
         for ( j = 1; j <= nman; j++ ) {
             node = domain->giveDofManager(j);
-            nDofs = node->giveNumberOfDofs();
 
-            for ( k = 1; k <= nDofs; k++ ) {
+            for ( Dof *iDof: *node ) {
                 // ask for initial values obtained from
                 // bc (boundary conditions) and ic (initial conditions)
                 // now we are setting initial cond. for step -1.
-                iDof  =  node->giveDof(k);
                 if ( !iDof->isPrimaryDof() ) {
                     continue;
                 }

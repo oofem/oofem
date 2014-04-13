@@ -117,14 +117,9 @@ CBS :: initializeFrom(InputRecord *ir)
         FieldManager *fm = this->giveContext()->giveFieldManager();
         IntArray mask = {V_u, V_v, V_w};
 
-#ifdef FIELDMANAGER_USE_SHARED_PTR
-        //std::tr1::shared_ptr<Field> _velocityField = make_shared<MaskedPrimaryField>(FT_Velocity, &this->VelocityField, mask);
-        std :: tr1 :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, &this->VelocityField, mask ) );
+        //std::shared_ptr<Field> _velocityField = make_shared<MaskedPrimaryField>(FT_Velocity, &this->VelocityField, mask);
+        std :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, &this->VelocityField, mask ) );
         fm->registerField(_velocityField, FT_Velocity);
-#else
-        MaskedPrimaryField *_velocityField = new MaskedPrimaryField(FT_Velocity, &this->VelocityField, mask);
-        fm->registerField(_velocityField, FT_Velocity, true);
-#endif
     }
 
     //</RESTRICTED_SECTION>
@@ -574,7 +569,7 @@ CBS :: checkConsistency()
             } else if ( bcPtr->giveBCValType() == ForceLoadBVT ) {
                 bcPtr->scale( 1. / this->giveVariableScale(VST_Force) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type\n");
+                OOFEM_ERROR("unknown bc/ic type");
             }
         }
 
@@ -586,7 +581,7 @@ CBS :: checkConsistency()
             } else if ( icPtr->giveICValType() == PressureBVT ) {
                 icPtr->scale( VM_Total, 1. / this->giveVariableScale(VST_Pressure) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type\n");
+                OOFEM_ERROR("unknown bc/ic type");
             }
         }
     }
@@ -610,9 +605,9 @@ CBS :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 
     DofIDItem type = iDof->giveDofID();
     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-        iDof->printSingleOutputAt(stream, tStep, 'v', VM_Total, uscale);
+        iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total, uscale);
     } else if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, pscale);
+        iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total, pscale);
     } else {
         OOFEM_ERROR("unsupported dof type");
     }
@@ -644,12 +639,10 @@ CBS :: applyIC(TimeStep *stepWhenIcApply)
     int nman  = domain->giveNumberOfDofManagers();
     for ( int j = 1; j <= nman; j++ ) {
         DofManager *node = domain->giveDofManager(j);
-        int nDofs = node->giveNumberOfDofs();
 
-        for ( int k = 1; k <= nDofs; k++ ) {
+        for ( Dof *iDof: *node ) {
             // ask for initial values obtained from
             // bc (boundary conditions) and ic (initial conditions)
-            Dof *iDof = node->giveDof(k);
             if ( !iDof->isPrimaryDof() ) {
                 continue;
             }

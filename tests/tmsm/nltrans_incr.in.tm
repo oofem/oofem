@@ -27,11 +27,11 @@ InitialCondition 1 Conditions 1 u 0.0
 ConstantFunction 1 f(t) 1.0
 UsrDefLTF 2 f(t) h(1.*36000+1.)
 #%BEGIN_CHECK%
-#NODE tStep 0.0 number 5 dof 1 unknown f value 9.98146959e-01
-#NODE tStep 0.0 number 9 dof 1 unknown f value 7.29756332e+01
-#NODE tStep 36000 number 5 dof 1 unknown f value 3.88482167e+00
-#NODE tStep 36000 number 9 dof 1 unknown f value 1.42064950e+02
-#NODE tStep 72000 number 5 dof 1 unknown f value 1.50000000e+02
-#NODE tStep 72000 number 9 dof 1 unknown f value 2.11450343e+02
+#NODE tStep 0.0 number 5 dof 10 unknown d value 9.98146959e-01
+#NODE tStep 0.0 number 9 dof 10 unknown d value 7.29756332e+01
+#NODE tStep 36000 number 5 dof 10 unknown d value 3.88482167e+00
+#NODE tStep 36000 number 9 dof 10 unknown d value 1.42064950e+02
+#NODE tStep 72000 number 5 dof 10 unknown d value 1.50000000e+02
+#NODE tStep 72000 number 9 dof 10 unknown d value 2.11450343e+02
 #%END_CHECK%
 

@@ -72,7 +72,7 @@ public SPRNodalRecoveryModelInterface
 {
 protected:
     /// Cached nodal coordinates in local c.s.,
-    FloatArray *lnodes [ 4 ];
+    std::vector< FloatArray > lnodes;
     /// Cached coordinates in local c.s.,
     FloatMatrix lcsMatrix;
     /// Flag controlling reduced (one - point) integration for shear

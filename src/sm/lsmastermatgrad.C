@@ -160,7 +160,6 @@ LargeStrainMasterMaterialGrad :: give3dGprime(FloatMatrix &answer, MatResponseMo
 {
     LargeStrainMasterMaterialGradStatus *status = static_cast< LargeStrainMasterMaterialGradStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
-    FloatMatrix P;
     FloatMatrix gPrime;
     GradDpMaterialExtensionInterface *graddpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( domain->giveMaterial(slaveMat)->giveInterface(GradDpMaterialExtensionInterfaceType) );
     if ( graddpmat == NULL ) {
@@ -172,8 +171,7 @@ LargeStrainMasterMaterialGrad :: give3dGprime(FloatMatrix &answer, MatResponseMo
     gPrime.at(4, 1) =  2. * gPrime.at(4, 1);
     gPrime.at(5, 1) =  2. * gPrime.at(5, 1);
     gPrime.at(6, 1) =  2. * gPrime.at(6, 1);
-    status->givePmatrix(P);
-    answer.beProductOf(P, gPrime);
+    answer.beProductOf(status->givePmatrix(), gPrime);
 }
 
 
@@ -182,7 +180,7 @@ LargeStrainMasterMaterialGrad :: give3dKappaMatrix(FloatMatrix &answer, MatRespo
 {
     LargeStrainMasterMaterialGradStatus *status = static_cast< LargeStrainMasterMaterialGradStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
-    FloatMatrix kappaMatrix, kappaTMatrix, P;
+    FloatMatrix kappaMatrix;
     GradDpMaterialExtensionInterface *graddpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( domain->giveMaterial(slaveMat)->giveInterface(GradDpMaterialExtensionInterfaceType) );
     if ( graddpmat == NULL ) {
         OOFEM_WARNING("material %d has no Structural support", slaveMat);
@@ -190,13 +188,10 @@ LargeStrainMasterMaterialGrad :: give3dKappaMatrix(FloatMatrix &answer, MatRespo
     }
 
     graddpmat->givePDGradMatrix_ku(kappaMatrix, mode, gp, tStep);
-    status->givePmatrix(P);
     kappaMatrix.at(1, 4) = 2. * kappaMatrix.at(1, 4);
     kappaMatrix.at(1, 5) = 2. * kappaMatrix.at(1, 5);
     kappaMatrix.at(1, 6) = 2. * kappaMatrix.at(1, 6);
-    kappaTMatrix.beTranspositionOf(kappaMatrix);
-    kappaMatrix.beProductOf(P, kappaTMatrix);
-    answer.beTranspositionOf(kappaMatrix);
+    answer.beProductTOf(kappaMatrix, status->givePmatrix());
 }
 
 

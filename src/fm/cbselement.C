@@ -182,14 +182,12 @@ CBSElement :: checkConsistency()
 void
 CBSElement :: updateInternalState(TimeStep *tStep)
 {
-    IntegrationRule *iRule;
     FloatArray stress;
 
     // force updating strains & stresses
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            computeDeviatoricStress(stress, iRule->getIntegrationPoint(j), tStep);
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( GaussPoint *gp: *iRule ) {
+            computeDeviatoricStress(stress, gp, tStep);
         }
     }
 }
@@ -205,25 +203,21 @@ CBSElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type
 
     if ( type == IST_Velocity ) {
         answer.resize( this->giveSpatialDimension() );
-        int dofindx;
-        if ( ( dofindx = n->findDofWithDofId(V_u) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
-        }
-
-        if ( ( dofindx = n->findDofWithDofId(V_v) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
-        }
-
-        if ( ( dofindx = n->findDofWithDofId(V_w) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
+        std::vector< Dof* >::const_iterator dofindx;
+        if ( ( dofindx = n->findDofWithDofId(V_u) ) != n->end() ) {
+            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Total, tStep);
+        } else if ( ( dofindx = n->findDofWithDofId(V_v) ) != n->end() ) {
+            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Total, tStep);
+        } else if ( ( dofindx = n->findDofWithDofId(V_w) ) != n->end() ) {
+            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Total, tStep);
         }
 
         return 1;
     } else if ( type == IST_Pressure ) {
-        int dofindx;
-        if ( ( dofindx = n->findDofWithDofId(P_f) ) ) {
+        auto dofindx = n->findDofWithDofId(P_f);
+        if ( dofindx != n->end() ) {
             answer.resize(1);
-            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
+            answer.at(1) = (*dofindx)->giveUnknown(VM_Total, tStep);
             return 1;
         } else {
             return 0;

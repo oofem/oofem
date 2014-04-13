@@ -46,8 +46,6 @@ GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, Ma
     number       = n;
     coordinates  = a;
     weight       = w;
-    numberOfGp   = 0;
-    gaussPointArray = NULL;
     materialMode = mode;
 
     localCoordinates = NULL;
@@ -60,12 +58,8 @@ GaussPoint :: ~GaussPoint()
 {
     delete coordinates;
 
-    if ( gaussPointArray ) {
-        for ( int i = 0; i < numberOfGp; i++ ) {
-            delete gaussPointArray [ i ];
-        }
-
-        delete [] gaussPointArray;
+    for ( GaussPoint *gp: gaussPoints ) {
+        delete gp;
     }
 
     if ( localCoordinates ) {
@@ -96,10 +90,10 @@ void GaussPoint :: printOutputAt(FILE *File, TimeStep *tStep)
         status->printOutputAt(File, tStep);
     }
 
-    if ( numberOfGp != 0 ) { // layered material
+    if ( gaussPoints.size() != 0 ) { // layered material
         fprintf(File, "Layers report \n{\n");
-        for ( int i = 0; i < numberOfGp; i++ ) {
-            gaussPointArray [ i ]->printOutputAt(File, tStep);
+        for ( GaussPoint *gp: gaussPoints ) {
+            gp->printOutputAt(File, tStep);
         }
 
         fprintf(File, "} end layers report\n");
@@ -114,15 +108,15 @@ GaussPoint *GaussPoint :: giveSlaveGaussPoint(int index)
 // each separate layer has its own slave gp.)
 //
 {
-    if ( gaussPointArray == NULL ) {
+    if ( gaussPoints.size() == 0 ) {
         return NULL;
     }
 
-    if ( ( index < 0 ) || ( index >= numberOfGp ) ) {
-        OOFEM_SIMPLE_ERROR("giveSlaveGaussPoint: index out of range");
+    if ( ( index < 0 ) || ( index >= (int)gaussPoints.size() ) ) {
+        OOFEM_ERROR("index out of range");
     }
 
-    return gaussPointArray [ index ];
+    return gaussPoints [ index ];
 }
 
 
@@ -134,10 +128,8 @@ void GaussPoint :: updateYourself(TimeStep *tStep)
         status->updateYourself(tStep);
     }
 
-    if ( numberOfGp != 0 ) { // layered material
-        for ( int i = 0; i < numberOfGp; i++ ) {
-            gaussPointArray [ i ]->updateYourself(tStep);
-        }
+    for ( GaussPoint *gp: gaussPoints ) {
+        gp->updateYourself(tStep);
     }
 }
 

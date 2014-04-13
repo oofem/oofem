@@ -314,8 +314,8 @@ int EnrichmentItem :: giveNumEnrichedDofs(const DofManager &iDMan) const
     int startId = giveStartOfDofIdPool();
     int endId = this->giveEndOfDofIdPool();
 
-    for ( int i = 1; i <= iDMan.giveNumberOfDofs(); i++ ) {
-        int dofId = iDMan.giveDof(i)->giveDofID();
+    for( Dof *dof: iDMan ) {
+        int dofId = dof->giveDofID();
 
         // If the dof belongs to this enrichment item
         if ( dofId >= startId && dofId <= endId ) {
@@ -546,8 +546,8 @@ void EnrichmentItem :: updateLevelSets(XfemManager &ixFemMan)
     std :: list< int >nodeList;
     localizer->giveAllNodesWithinBox(nodeList, center, radius);
 
-    for ( auto i = nodeList.begin(); i != nodeList.end(); i++ ) {
-        Node *node = ixFemMan.giveDomain()->giveNode(* i);
+    for ( int nodeNum: nodeList ) {
+        Node *node = ixFemMan.giveDomain()->giveNode(nodeNum);
 
         // Extract node coord
         const FloatArray &pos( * node->giveCoordinates() );
@@ -555,12 +555,12 @@ void EnrichmentItem :: updateLevelSets(XfemManager &ixFemMan)
         // Calc normal sign dist
         double phi = 0.0;
         mpEnrichmentDomain->computeNormalSignDist(phi, pos);
-        mLevelSetNormalDirMap [ * i ] = phi;
+        mLevelSetNormalDirMap [ nodeNum ] = phi;
 
         // Calc tangential sign dist
         double gamma = 0.0, arcPos = -1.0;
         mpEnrichmentDomain->computeTangentialSignDist(gamma, pos, arcPos);
-        mLevelSetTangDirMap [ * i ] = gamma;
+        mLevelSetTangDirMap [ nodeNum ] = gamma;
     }
 
     mLevelSetsNeedUpdate = false;
@@ -590,8 +590,8 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
     localizer->giveAllElementsWithNodesWithinBox(elList, center, radius);
 
     // Loop over elements and use the level sets to mark nodes belonging to completely cut elements.
-    for ( auto elIndex = elList.begin(); elIndex != elList.end(); elIndex++ ) {
-        Element *el = d->giveElement(* elIndex);
+    for ( int elNum: elList ) {
+        Element *el = d->giveElement(elNum);
         int nElNodes = el->giveNumberOfNodes();
 
         double minSignPhi  = 1, maxSignPhi         = -1;
@@ -733,12 +733,8 @@ void EnrichmentItem :: createEnrichedDofs()
                         // Check if the other dofs in the dof manager have
                         // Dirichlet BCs. If so, let the new enriched dof
                         // inherit the same BC.
-                        IntArray nodeDofIdArray;
-                        dMan->giveCompleteMasterDofIDArray(nodeDofIdArray);
-                        int nDofs = nodeDofIdArray.giveSize();
                         bool foundBC = false;
-                        for ( int n = 1; n <= nDofs; n++ ) {
-                            Dof *dof = dMan->giveDofWithID( nodeDofIdArray.at(n) );
+                        for( Dof *dof: *dMan ) {
                             if ( dof->giveBcId() > 0 ) {
                                 foundBC = true;
                                 bcIndex = dof->giveBcId();
@@ -771,15 +767,8 @@ void EnrichmentItem :: createEnrichedDofs()
 
         computeEnrichedDofManDofIdArray(dofIdArray, * dMan);
         std :: vector< DofIDItem >dofsToRemove;
-
-        IntArray nodeDofIdArray;
-        dMan->giveCompleteMasterDofIDArray(nodeDofIdArray);
-        int nDofs = nodeDofIdArray.giveSize();
-
-        for ( int j = 1; j <= nDofs; j++ ) {
-            //            Dof *dof = dMan->giveDof(j);
-            //            DofIDItem dofID = dof->giveDofID();
-            DofIDItem dofID = DofIDItem( nodeDofIdArray.at(j) );
+        for ( Dof *dof: *dMan ) {
+            DofIDItem dofID = dof->giveDofID();
 
             if ( dofID >= DofIDItem(poolStart) && dofID <= DofIDItem(poolEnd) ) {
                 bool dofIsInIdArray = false;

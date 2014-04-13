@@ -237,9 +237,9 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
             break;
         }
 
-        for ( i = 1; i <= _ndofs; i++ ) {
-            if ( dman->giveDof(i)->isPrimaryDof() ) {
-                _neq = dman->giveDof(i)->giveEquationNumber(s);
+        for ( Dof *dof: *dman ) {
+            if ( dof->isPrimaryDof() ) {
+                _neq = dof->giveEquationNumber(s);
                 if ( _neq > 0 ) {
                     mcn [ _c++ ] = _neq - 1;
                 } else {
@@ -257,28 +257,28 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
     for (int ibc=1; ibc<=nbc; ibc++) {
       int ndman = domain->giveBc(ibc)->giveNumberOfInternalDofManagers();
       for (int idman = 1; idman <= ndman; idman ++) {
-	dman = domain->giveBc(ibc)->giveInternalDofManager(idman);
-	_ndofs = dman->giveNumberOfDofs();
-        if ( _ndofs > bsize ) {
-	  _succ = false;
-	  break;
-        }
+            dman = domain->giveBc(ibc)->giveInternalDofManager(idman);
+            _ndofs = dman->giveNumberOfDofs();
+            if ( _ndofs > bsize ) {
+                _succ = false;
+                break;
+            }
 
-        for ( i = 1; i <= _ndofs; i++ ) {
-	  if ( dman->giveDof(i)->isPrimaryDof() ) {
-	    _neq = dman->giveDof(i)->giveEquationNumber(s);
-	    if ( _neq > 0 ) {
-	      mcn [ _c++ ] = _neq - 1;
-	    } else {
-	      mcn [ _c++ ] = -1; // no corresponding row in sparse mtrx structure
-	    }
-	  }
-        }
+            for ( Dof *dof: *dman ) {
+                if ( dof->isPrimaryDof() ) {
+                    _neq = dof->giveEquationNumber(s);
+                    if ( _neq > 0 ) {
+                    mcn [ _c++ ] = _neq - 1;
+                    } else {
+                    mcn [ _c++ ] = -1; // no corresponding row in sparse mtrx structure
+                    }
+                }
+            }
 
-        for ( i = _ndofs + 1; i <= bsize; i++ ) {
-	  mcn [ _c++ ] = -1;                         // no corresponding row in sparse mtrx structure
+            for ( i = _ndofs + 1; i <= bsize; i++ ) {
+                mcn [ _c++ ] = -1;                         // no corresponding row in sparse mtrx structure
+            }
         }
-      }
     }
     
     if ( _succ ) {

@@ -110,17 +110,14 @@ public:
 class OOFEM_EXPORT FEIVertexListGeometryWrapper : public FEICellGeometry
 {
 protected:
-    const FloatArray **coords;
-    int nvertices;
+    const std::vector< FloatArray > &coords;
+
 public:
-    FEIVertexListGeometryWrapper(int nvertices, const FloatArray * * coords) : FEICellGeometry()
-    {
-        this->nvertices = nvertices;
-        this->coords = coords;
-    }
+    FEIVertexListGeometryWrapper(const std::vector< FloatArray > &coords) : 
+        FEICellGeometry(), coords(coords) { }
     virtual ~FEIVertexListGeometryWrapper() { }
-    int giveNumberOfVertices() const { return this->nvertices; }
-    const FloatArray *giveVertexCoordinates(int i) const { return this->coords [ i - 1 ]; }
+    int giveNumberOfVertices() const { return (int)this->coords.size(); }
+    const FloatArray *giveVertexCoordinates(int i) const { return &this->coords [ i - 1 ]; }
 };
 
 /**

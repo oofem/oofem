@@ -119,23 +119,23 @@ public:
     /// Returns const reference to normal vector.
     const FloatArray &giveNormal() const { return mNormalDir; }
     /// Assigns jump to given vector v.
-    void letJumpBe(const FloatArray &v) { jump = v; }
+    void letJumpBe(FloatArray v) { jump = std :: move(v); }
     /// Assigns traction to given vector v.
-    void letTractionBe(const FloatArray &v) { traction = v; }
+    void letTractionBe(FloatArray v) { traction = std :: move(v); }
     /// Assigns firstPKTraction to given vector v.
-    void letFirstPKTractionBe(const FloatArray &v) { firstPKTraction = v; }
+    void letFirstPKTractionBe(FloatArray v) { firstPKTraction = std :: move(v); }
     /// Assigns FVector to given vector v.
-    void letFBe(const FloatMatrix &v) { F = v; }
+    void letFBe(FloatMatrix v) { F = std :: move(v); }
     /// Assigns tempTraction to given vector v.
-    void letTempTractionBe(const FloatArray &v) { tempTraction = v; }
+    void letTempTractionBe(FloatArray v) { tempTraction = std :: move(v); }
     /// Assigns tempJump to given vector v
-    void letTempJumpBe(const FloatArray &v) { tempJump = v; }
+    void letTempJumpBe(FloatArray v) { tempJump = std :: move(v); }
     /// Assigns tempFirstPKTraction to given vector v
-    void letTempFirstPKTractionBe(const FloatArray &v) { tempFirstPKTraction = v; }
+    void letTempFirstPKTractionBe(FloatArray v) { tempFirstPKTraction = std :: move(v); }
     /// Assigns tempFVector to given vector v
-    void letTempFBe(const FloatMatrix &v) { tempF = v; }
+    void letTempFBe(FloatMatrix v) { tempF = std :: move(v); }
     /// Assigns normal vector
-    void letNormalBe(const FloatArray &iN) { mNormalDir = iN; }
+    void letNormalBe(FloatArray iN) { mNormalDir = std :: move(iN); }
 
     virtual const char *giveClassName() const { return "StructuralInterfaceMaterialStatus"; }
 

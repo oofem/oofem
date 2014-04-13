@@ -76,8 +76,8 @@ public:
     const FloatArray &giveTempDeviatoricStressVector() { return temp_deviatoricStressVector; }
     const FloatArray &giveTempDeviatoricStrainVector() { return temp_deviatoricStrainVector; }
     double giveTempStrainNorm2() { return temp_norm2; }
-    void letTempDeviatoricStressVectorBe(const FloatArray &v) { temp_deviatoricStressVector = v; }
-    void letTempDeviatoricStrainVectorBe(const FloatArray &v) { temp_deviatoricStrainVector = v; }
+    void letTempDeviatoricStressVectorBe(FloatArray v) { temp_deviatoricStressVector = std :: move(v); }
+    void letTempDeviatoricStrainVectorBe(FloatArray v) { temp_deviatoricStrainVector = std :: move(v); }
     void letTempStrainNorm2Be(double v) { temp_norm2 = v; }
 
     virtual const char *giveClassName() const { return "NonlinearFluidMaterialStatus"; }

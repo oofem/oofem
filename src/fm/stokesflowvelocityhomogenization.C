@@ -120,15 +120,12 @@ StokesFlowVelocityHomogenization :: rveSetBoundaryConditions(int BCType, FloatAr
 void
 StokesFlowVelocityHomogenization :: getMeans(FloatArray &gradP, FloatArray &v, TimeStep *tStep)
 {
-    FloatMatrix gradPTemp, v_hatTemp;
+    FloatArray gradPTemp, v_hatTemp;
     double Area = 0, AreaFull = 0; //(xmax-xmin)*(ymax-ymin);
     double xmax = 0, xmin = 0, ymax = 0, ymin = 0;
 
-    gradP.resize(2);
-    gradP.zero();
-
-    v.resize(2);
-    v.zero();
+    gradP.clear();
+    v.clear();
 
     for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfElements(); i++ ) {
         if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( this->giveDomain(1)->giveElement(i) ) ) {
@@ -155,11 +152,8 @@ StokesFlowVelocityHomogenization :: getMeans(FloatArray &gradP, FloatArray &v, T
             T->giveGradP(gradPTemp, tStep);
             T->giveIntegratedVelocity(v_hatTemp, tStep);
 
-            gradP.at(1) = gradP.at(1) + gradPTemp.at(1, 1);
-            gradP.at(2) = gradP.at(2) + gradPTemp.at(2, 1);
-
-            v.at(1) = v.at(1) + v_hatTemp.at(1, 1);
-            v.at(2) = v.at(2) + v_hatTemp.at(2, 1);
+            gradP.add(gradPTemp);
+            v.add(v_hatTemp);
 
             Area = Area + T->computeArea();
         }

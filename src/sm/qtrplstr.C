@@ -114,7 +114,7 @@ QTrPlaneStress2d :: initializeFrom(InputRecord *ir)
            ( numberOfGaussPoints == 4 ) ||
            ( numberOfGaussPoints == 7 ) ||
            ( numberOfGaussPoints == 13 ) ) ) {
-        OOFEM_WARNING("number of Gauss points in QTrPlaneStress2d changed to 4\n");
+        OOFEM_WARNING("number of Gauss points in QTrPlaneStress2d changed to 4");
         numberOfGaussPoints = 4;
     }
 
@@ -181,9 +181,8 @@ QTrPlaneStress2d :: computeVolumeAround(GaussPoint *gp)
 void QTrPlaneStress2d :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -415,8 +414,6 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        int ip;
-        GaussPoint *gp;
         IntArray ind(3);
         WCRec pp [ 6 ];
 
@@ -435,26 +432,25 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
             }
         }
 
-        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
+        for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
             //gpCoords = gp->giveCoordinates();
-            switch ( ip ) {
-            case 2:
+            switch ( gp->giveNumber() ) {
+            case 3:
                 ind.at(1) = 0;
                 ind.at(2) = 3;
                 ind.at(3) = 5;
                 break;
-            case 3:
+            case 4:
                 ind.at(1) = 1;
                 ind.at(2) = 4;
                 ind.at(3) = 3;
                 break;
-            case 1:
+            case 2:
                 ind.at(1) = 2;
                 ind.at(2) = 5;
                 ind.at(3) = 4;
                 break;
-            case 4:
+            case 5:
             default:
                 ind.at(1) = 3;
                 ind.at(2) = 4;
@@ -542,12 +538,9 @@ QTrPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 double
 QTrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 {
-    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
-    GaussPoint *gp;
     double volume = 0.0;
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
         volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
     }
 
@@ -561,18 +554,14 @@ QTrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeTy
                                                                      FloatArray &answer)
 {
     FloatArray lcoords, u, nn;
-    FloatMatrix n(2, 12);
+    FloatMatrix n;
     int result;
 
     result = this->computeLocalCoordinates(lcoords, coords);
 
     this->interpolation.evalN( nn, lcoords, FEIElementGeometryWrapper(this) );
 
-    n.zero();
-    for ( int i = 1; i <= 6; i++ ) {
-        n.at(1, 2 * i - 1) = nn.at(i);
-        n.at(2, 2 * i - 0) = nn.at(i);
-    }
+    n.beNMatrixOf(nn, 2);
 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);

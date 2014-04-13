@@ -26,6 +26,6 @@ Set 2 nodes 2 1 4
 Set 3 elementranges {(1 2)}
 
 #%BEGIN_CHECK%
-#NODE tStep 0.00000000e00 number 4 dof 2 unknown v value 6.93923170e-01
-#NODE tStep 0.00000000e00 number 4 dof 3 unknown p value -2.84508267e00
+#NODE tStep 0.00000000e00 number 4 dof 8 unknown d value 6.93923170e-01
+#NODE tStep 0.00000000e00 number 4 dof 11 unknown d value -2.84508267e00
 #%END_CHECK%

@@ -250,7 +250,7 @@ Concrete2 :: giveRealStressVector_PlateLayer(FloatArray &answer,
         status->giveCurrentTensionStrength() = this->give(c2_SCCT, gp);
     }
 
-    status->givePlasticStrainVector(plasticStrainVector);
+    plasticStrainVector = status->givePlasticStrainVector();
     StructuralMaterial :: giveFullSymVectorForm( plasticStrain, plasticStrainVector, gp->giveMaterialMode() );
 
     ep.resize(3);
@@ -320,7 +320,7 @@ Concrete2 :: giveRealStressVector_PlateLayer(FloatArray &answer,
 
         StructuralMaterial :: giveReducedSymVectorForm( help, plasticStrain, gp->giveMaterialMode() );
 
-        status->givePlasticStrainIncrementVector(plasticStrainIncrementVector);
+        plasticStrainIncrementVector = status->givePlasticStrainIncrementVector();
         plasticStrainIncrementVector.subtract(plasticStrainVector);
         plasticStrainIncrementVector.add(help);
         status->letPlasticStrainIncrementVectorBe(plasticStrainIncrementVector);
@@ -641,7 +641,7 @@ label18:
     status->letTempStressVectorBe(helpR);
 
     StructuralMaterial :: giveFullSymVectorForm( help, plasticStrain, gp->giveMaterialMode() );
-    status->givePlasticStrainIncrementVector(plasticStrainIncrementVector);
+    plasticStrainIncrementVector = status->givePlasticStrainIncrementVector();
     plasticStrainIncrementVector.subtract(plasticStrainVector);
     plasticStrainIncrementVector.add(help);
     status->letPlasticStrainIncrementVectorBe(plasticStrainIncrementVector);

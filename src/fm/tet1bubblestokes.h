@@ -69,19 +69,6 @@ protected:
     static IntArray edge_ordering [ 6 ];
     /// Ordering of dofs on surfaces. Used to assemble surface loads
     static IntArray surf_ordering [ 4 ];
-    /// Dummy variable
-    static bool __initialized;
-    /// Convenient vectors for the ordering of the dofs in the local stiffness matrix.
-    static bool initOrdering() {
-        momentum_ordering = {1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19};
-        conservation_ordering = {4, 8, 12, 16};
-
-        surf_ordering [ 0 ] = {1, 2, 3,  9, 10, 11,  5,  6,  7};
-        surf_ordering [ 1 ] = {1, 2, 3,  5,  6,  7, 13, 14, 15};
-        surf_ordering [ 2 ] = {5, 6, 7,  9, 10, 11, 13, 14, 15};
-        surf_ordering [ 3 ] = {1, 2, 3, 13, 14, 15,  9, 10, 11};
-        return true;
-    }
 
     /// The extra dofs from the bubble
     ElementDofManager *bubble;

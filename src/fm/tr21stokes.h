@@ -70,25 +70,14 @@ protected:
     static IntArray momentum_ordering, conservation_ordering;
     /// Ordering of dofs on edges. Used to assemble edge loads
     static IntArray edge_ordering [ 3 ];
-    /// Dummy variable
-    static bool __initialized;
-    /// Defines the ordering of the dofs in the local stiffness matrix.
-    static bool initOrdering() {
-        momentum_ordering = {1, 2, 4, 5, 7, 8, 10, 11, 12, 13, 14, 15};
-        conservation_ordering = {3, 6, 9};
-        edge_ordering [ 0 ] = {1, 2, 4, 5, 10, 11};
-        edge_ordering [ 1 ] = {4, 5, 7, 8, 12, 13};
-        edge_ordering [ 2 ] = {7, 8, 1, 2, 14, 15};
-        return true;
-    }
 
 public:
     Tr21Stokes(int n, Domain * d);
     virtual ~Tr21Stokes();
 
     // ** To be removed
-    void giveGradP(FloatMatrix &answer, TimeStep *tStep);
-    void giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep);
+    void giveGradP(FloatArray &answer, TimeStep *tStep);
+    void giveIntegratedVelocity(FloatArray &answer, TimeStep *tStep);
     void giveElementFMatrix(FloatMatrix &answer);
     // **
 

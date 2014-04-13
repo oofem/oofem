@@ -20,7 +20,7 @@ NodalLoad 2 loadTimeFunction 1 Components 2 0. 1.0
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK% tolerance 1.e-8
-#NODE tStep 2.0 number 1 dof 2 unknown v value 0.0
-#NODE tStep 2.0 number 2 dof 2 unknown v value 1.25e-3
+#NODE tStep 2.0 number 1 dof 3 unknown v value 0.0
+#NODE tStep 2.0 number 2 dof 3 unknown v value 1.25e-3
 ##
 #%END_CHECK%

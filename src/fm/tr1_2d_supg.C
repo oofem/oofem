@@ -146,9 +146,8 @@ void
 TR1_2D_SUPG :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(1);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
@@ -2032,7 +2031,7 @@ double
 TR1_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
 {
     double answer;
-    FloatArray fi(3), un(6);
+    FloatArray fi(3), un;
 
     this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, un);
 
@@ -2253,22 +2252,13 @@ TR1_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 void
 TR1_2D_SUPG :: giveLocalVelocityDofMap(IntArray &map)
 {
-    map.resize(6);
-    map.at(1) = 1;
-    map.at(2) = 2;
-    map.at(3) = 4;
-    map.at(4) = 5;
-    map.at(5) = 7;
-    map.at(6) = 8;
+    map = {1, 2, 4, 5, 7, 8};
 }
 
 void
 TR1_2D_SUPG :: giveLocalPressureDofMap(IntArray &map)
 {
-    map.resize(3);
-    map.at(1) = 3;
-    map.at(2) = 6;
-    map.at(3) = 9;
+    map = {3, 6, 9};
 }
 
 

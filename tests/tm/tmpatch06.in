@@ -21,8 +21,8 @@ deadweight 2 loadTimeFunction 1 components 1 0.5
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK%
-#NODE tStep 1 number 3 dof 1 unknown f value 3.75
-#NODE tStep 1 number 4 dof 1 unknown f value 3.75
-#NODE tStep 1 number 5 dof 1 unknown f value 16.0
-#NODE tStep 1 number 6 dof 1 unknown f value 16.0
+#NODE tStep 1 number 3 dof 10 unknown d value 3.75
+#NODE tStep 1 number 4 dof 10 unknown d value 3.75
+#NODE tStep 1 number 5 dof 10 unknown d value 16.0
+#NODE tStep 1 number 6 dof 10 unknown d value 16.0
 #%END_CHECK%

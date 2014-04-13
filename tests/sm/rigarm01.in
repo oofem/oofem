@@ -23,22 +23,22 @@ ConstantFunction 1 f(t) 1.
 #%BEGIN_CHECK% tolerance 1.e-8
 ## check reactions 
 #REACTION tStep 1 number 1 dof 1 value -2.0000e+00
-#REACTION tStep 1 number 1 dof 2 value  0.0
-#REACTION tStep 1 number 1 dof 3 value  4.0000e+00
+#REACTION tStep 1 number 1 dof 3 value  0.0
+#REACTION tStep 1 number 1 dof 5 value  4.0000e+00
 ##
 ## check all nodes
 #NODE tStep 1 number 1 dof 1 unknown d value 0.0
-#NODE tStep 1 number 1 dof 2 unknown d value 0.0
 #NODE tStep 1 number 1 dof 3 unknown d value 0.0
+#NODE tStep 1 number 1 dof 5 unknown d value 0.0
 #NODE tStep 1 number 2 dof 1 unknown d value 3.0
-#NODE tStep 1 number 2 dof 2 unknown d value 9.0
-#NODE tStep 1 number 2 dof 3 unknown d value -6.0
+#NODE tStep 1 number 2 dof 3 unknown d value 9.0
+#NODE tStep 1 number 2 dof 5 unknown d value -6.0
 #NODE tStep 1 number 3 dof 1 unknown d value 15.0
-#NODE tStep 1 number 3 dof 2 unknown d value 9.0
-#NODE tStep 1 number 3 dof 3 unknown d value -6.0
+#NODE tStep 1 number 3 dof 3 unknown d value 9.0
+#NODE tStep 1 number 3 dof 5 unknown d value -6.0
 #NODE tStep 1 number 4 dof 1 unknown d value 18.0
-#NODE tStep 1 number 4 dof 2 unknown d value 27.0
-#NODE tStep 1 number 4 dof 3 unknown d value -6.0
+#NODE tStep 1 number 4 dof 3 unknown d value 27.0
+#NODE tStep 1 number 4 dof 5 unknown d value -6.0
 ## check element no. 1,2 force vector
 #BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 1  value -2.0000e+00
 #BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 2  value  0.0

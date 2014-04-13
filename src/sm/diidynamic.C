@@ -160,7 +160,7 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
             theta = 1.37;
         }
     } else {
-        OOFEM_ERROR("Time-stepping scheme not found!\n");
+        OOFEM_ERROR("Time-stepping scheme not found!");
     }
 
     IR_GIVE_FIELD(ir, deltaT, _IFT_DIIDynamic_deltat);
@@ -259,20 +259,17 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         previousIncrementOfDisplacement.resize(neq);
         previousIncrementOfDisplacement.zero();
 
-        int nDofs, j, k, jj;
+        int j, jj;
         int nman  = domain->giveNumberOfDofManagers();
         DofManager *node;
-        Dof *iDof;
 
         for ( j = 1; j <= nman; j++ ) {
             node = domain->giveDofManager(j);
-            nDofs = node->giveNumberOfDofs();
 
-            for ( k = 1; k <= nDofs; k++ ) {
+            for ( Dof *iDof: *node ) {
                 //
                 // Ask for initial values obtained from boundary conditions and initial conditions.
                 //
-                iDof  =  node->giveDof(k);
                 if ( !iDof->isPrimaryDof() ) {
                     continue;
                 }
@@ -609,7 +606,7 @@ DIIDynamic :: determineConstants(TimeStep *tStep)
         a10 = deltaT * deltaT / 6;
         a11 = 0;
     } else {
-        OOFEM_ERROR("Time-stepping scheme not found!\n");
+        OOFEM_ERROR("Time-stepping scheme not found!");
     }
 }
 

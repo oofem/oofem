@@ -148,9 +148,8 @@ TrPlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 void TrPlaneStrain :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -418,11 +417,7 @@ TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType 
 
     this->interp.evalN( nv, lcoords, FEIElementGeometryWrapper(this) );
 
-    n.resize(2, 6);
-    n.zero();
-    n.at(1, 1) = n.at(2, 2) = nv.at(1);
-    n.at(1, 3) = n.at(2, 4) = nv.at(2);
-    n.at(1, 5) = n.at(2, 6) = nv.at(3);
+    n.beNMatrixOf(nv, 2);
 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
 

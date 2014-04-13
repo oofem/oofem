@@ -78,9 +78,8 @@ void
 QDKTPlate :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -287,10 +286,8 @@ QDKTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Note: the interpolation of rotations is quadratic
 // NOTE: linear interpolation returned instead
 {
-    FloatArray N(4);
+    FloatArray N;
 
-    answer.resize(3, 12);
-    answer.zero();
     giveInterpolation()->evalN( N, iLocCoord, FEIElementGeometryWrapper(this) );
 
     answer.beNMatrixOf(N, 3);
@@ -419,10 +416,8 @@ QDKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep
 //  different coordinate system in each node)
 {
     double dens, dV;
-    GaussPoint *gp;
     FloatArray force, ntf;
     FloatMatrix n, T;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
         OOFEM_ERROR("unknown load type");
@@ -438,8 +433,7 @@ QDKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep
     answer.clear();
 
     if ( force.giveSize() ) {
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            gp  = iRule->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
             this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), n);
             dV  = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
             dens = this->giveCrossSection()->give('d', gp);
@@ -929,8 +923,6 @@ QDKTPlate :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        int ip;
-        GaussPoint *gp;
         IntArray ind(4);
         FloatArray *gpCoords;
         WCRec pp [ 9 ];
@@ -963,8 +955,7 @@ QDKTPlate :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
-        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
             gpCoords = gp->giveCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;

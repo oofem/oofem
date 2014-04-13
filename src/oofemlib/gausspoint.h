@@ -107,10 +107,8 @@ private:
 
 protected:
     // layer and fibered material support
-    /// Number of slaves.
-    int numberOfGp;
     /// List of slave integration points.
-    GaussPoint **gaussPointArray;
+    std::vector< GaussPoint * >gaussPoints;
     /// Status of e.g. material in point
     IntegrationPointStatus *materialStatus;
 
@@ -132,7 +130,7 @@ public:
     double giveCoordinate(int i) { return coordinates->at(i); }
     /// Returns coordinate array of receiver.
     FloatArray *giveCoordinates() { return coordinates; }
-    void setCoordinates(const FloatArray &c) { * coordinates = c; }
+    void setCoordinates(FloatArray c) { * coordinates = std :: move(c); }
 
     /// Returns local sub-patch coordinates of the receiver
     FloatArray *giveLocalCoordinates() {
@@ -142,12 +140,12 @@ public:
             return coordinates;
         }
     }
-    void setLocalCoordinates(const FloatArray &c)
+    void setLocalCoordinates(FloatArray c)
     {
         if ( localCoordinates ) {
-            * localCoordinates = c;
+            * localCoordinates = std :: move(c);
         } else {
-            localCoordinates = new FloatArray(c);
+            localCoordinates = new FloatArray(std :: move(c));
         }
     }
 
@@ -197,7 +195,7 @@ public:
     IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr)
     {
         if ( this->materialStatus != NULL ) {
-            OOFEM_SIMPLE_ERROR(" MaterialStatus :: setMaterialStatus status already exist");
+            OOFEM_ERROR("status already exist");
         }
         this->materialStatus = ptr;
         return ptr;

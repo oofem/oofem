@@ -383,7 +383,7 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
 
         return;
     }  else {
-        OOFEM_ERROR("giveDeviatoricStiffnessMatrix: unsupportted material mode");
+        OOFEM_ERROR("unsupportted material mode");
     }
 }
 
@@ -475,30 +475,33 @@ BinghamFluidMaterial2 :: computeDeviatoricStrain(FloatArray &answer, const Float
         //double ekk=(eps.at(1)+eps.at(2))/3.0;
         double ekk = 0.0;
 
-        answer.resize(3);
-        answer.at(1) = eps.at(1) - ekk;
-        answer.at(2) = eps.at(2) - ekk;
-        answer.at(3) = eps.at(3);
+        answer = {
+            eps.at(1) - ekk,
+            eps.at(2) - ekk,
+            eps.at(3)
+        };
     } else if ( mmode == _2dAxiFlow ) {
         //double ekk=(eps.at(1)+eps.at(2)+eps.at(3))/3.0;
         double ekk = 0.0;
 
-        answer.resize(4);
-        answer.at(1) = eps.at(1) - ekk;
-        answer.at(2) = eps.at(2) - ekk;
-        answer.at(3) = eps.at(3) - ekk;
-        answer.at(4) = eps.at(4);
+        answer = {
+            eps.at(1) - ekk,
+            eps.at(2) - ekk,
+            eps.at(3) - ekk,
+            eps.at(4)
+        };
     } else if ( mmode == _3dFlow ) {
         //double ekk=(eps.at(1)+eps.at(2)+eps.at(3))/3.0;
         double ekk = 0.0;
 
-        answer.resize(6);
-        answer.at(1) = eps.at(1) - ekk;
-        answer.at(2) = eps.at(2) - ekk;
-        answer.at(3) = eps.at(3) - ekk;
-        answer.at(4) = eps.at(4);
-        answer.at(5) = eps.at(5);
-        answer.at(6) = eps.at(6);
+        answer  = {
+            eps.at(1) - ekk,
+            eps.at(2) - ekk,
+            eps.at(3) - ekk,
+            eps.at(4),
+            eps.at(5),
+            eps.at(6)
+        };
     } else {
         OOFEM_ERROR("unsupported material mode");
     }
@@ -510,21 +513,27 @@ BinghamFluidMaterial2 :: computeDeviatoricStress(FloatArray &answer, const Float
                                                  double _nu, MaterialMode mmode)
 {
     if ( mmode == _2dFlow ) {
-        answer.at(1) = 2.0 * _nu * ( deps.at(1) );
-        answer.at(2) = 2.0 * _nu * ( deps.at(2) );
-        answer.at(3) = deps.at(3) * _nu;
+        answer = {
+            2.0 * _nu * ( deps.at(1) ),
+            2.0 * _nu * ( deps.at(2) ),
+            deps.at(3) * _nu
+        };
     } else if ( mmode == _2dAxiFlow ) {
-        answer.at(1) = 2.0 * _nu * ( deps.at(1) );
-        answer.at(2) = 2.0 * _nu * ( deps.at(2) );
-        answer.at(3) = 2.0 * _nu * ( deps.at(3) );
-        answer.at(4) = deps.at(4) * _nu;
+        answer = {
+            answer.at(1) = 2.0 * _nu * ( deps.at(1) ),
+            answer.at(2) = 2.0 * _nu * ( deps.at(2) ),
+            answer.at(3) = 2.0 * _nu * ( deps.at(3) ),
+            answer.at(4) = deps.at(4) * _nu,
+        };
     } else if ( mmode == _3dFlow ) {
-        answer.at(1) = 2.0 * _nu * ( deps.at(1) );
-        answer.at(2) = 2.0 * _nu * ( deps.at(2) );
-        answer.at(3) = 2.0 * _nu * ( deps.at(3) );
-        answer.at(4) = deps.at(4) * _nu;
-        answer.at(5) = deps.at(5) * _nu;
-        answer.at(6) = deps.at(6) * _nu;
+        answer = {
+            2.0 * _nu * ( deps.at(1) ),
+            2.0 * _nu * ( deps.at(2) ),
+            2.0 * _nu * ( deps.at(3) ),
+            deps.at(4) * _nu,
+            deps.at(5) * _nu,
+            deps.at(6) * _nu
+        };
     } else {
         OOFEM_ERROR("unsuported material mode");
     }
@@ -562,13 +571,13 @@ BinghamFluidMaterial2Status :: printOutputAt(FILE *File, TimeStep *tNow)
 // Prints the strains and stresses on the data file.
 {
     fprintf(File, " strains ");
-    for ( int i = 1; i <= deviatoricStrainRateVector.giveSize(); i++ ) {
-        fprintf( File, " % .4e", deviatoricStrainRateVector.at(i) );
+    for ( double e: deviatoricStrainRateVector ) {
+        fprintf( File, " % .4e", e );
     }
 
     fprintf(File, "\n deviatoric stresses");
-    for ( int i = 1; i <= deviatoricStressVector.giveSize(); i++ ) {
-        fprintf( File, " % .4e", deviatoricStressVector.at(i) );
+    for ( double e: deviatoricStressVector ) {
+        fprintf( File, " % .4e", e );
     }
 
     fprintf(File, "\n          status { gamma %e, tau %e }", devStrainMagnitude, devStressMagnitude);

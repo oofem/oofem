@@ -65,8 +65,8 @@ set 6 nodes 6 6 7 8 22 23 24
 set 7 elementranges {(1 8)}
 
 #%BEGIN_CHECK%
-#NODE tStep 0 number 5 dof 1 unknown v value -1.10902370e-01
-#NODE tStep 0 number 5 dof 2 unknown v value 2.25887023e-08
-#NODE tStep 0 number 6 dof 3 unknown p value -2.77499368e-01
+#NODE tStep 0 number 5 dof 7 unknown d value -1.10902370e-01
+#NODE tStep 0 number 5 dof 8 unknown d value 2.25887023e-08
+#NODE tStep 0 number 6 dof 11 unknown d value -2.77499368e-01
 #%END_CHECK%
 

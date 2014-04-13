@@ -102,9 +102,7 @@ protected:
     integrationDomain intdomain;
 
     /// Array containing integration points.
-    GaussPoint **gaussPointArray;
-    /// Number of integration point of receiver.
-    int numberOfIntegrationPoints;
+    std::vector< GaussPoint * > gaussPoints;
     /**
      * firstLocalStrainIndx and lastLocalStrainIndx indexes describe range of components (strains for example)
      * for which receiver integration points apply.
@@ -118,27 +116,8 @@ protected:
     bool isDynamic;
 
 public:
-    /// @name Iterator for for-each loops:
-    //@{
-    class iterator
-    {
-private:
-        int pos;
-        IntegrationRule *ir;
-
-public:
-        iterator(IntegrationRule * ir, int pos);
-
-        bool operator != ( const IntegrationRule :: iterator & other ) const;
-
-        GaussPoint &operator *( ) const;
-
-        const IntegrationRule :: iterator &operator++ ( );
-    };
-
-    IntegrationRule :: iterator begin();
-    IntegrationRule :: iterator end();
-    //@}
+    std::vector< GaussPoint *> :: iterator begin() { return gaussPoints.begin(); }
+    std::vector< GaussPoint *> :: iterator end() { return gaussPoints.end(); }
 
     /**
      * Constructor.
@@ -161,7 +140,7 @@ public:
     /**
      * Returns number of integration points of receiver.
      */
-    int giveNumberOfIntegrationPoints() const { return numberOfIntegrationPoints; }
+    int giveNumberOfIntegrationPoints() const { return (int)gaussPoints.size(); }
     /**
      * Access particular integration point of receiver.
      * @param n Integration point number (should be in range 0,.., giveNumberOfIntegrationPoints()-1).

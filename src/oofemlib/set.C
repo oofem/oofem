@@ -110,9 +110,9 @@ void Set :: computeIntArray(IntArray &answer, const IntArray &specified, std :: 
 {
     // Find the max value;
     int maxIndex = specified.giveSize() == 0 ? 0 : specified.maximum();
-    for ( std :: list< Range > :: iterator it = ranges.begin(); it != ranges.end(); ++it ) {
-        if ( it->giveEnd() > maxIndex ) {
-            maxIndex = it->giveEnd();
+    for ( auto &range: ranges ) {
+        if ( range.giveEnd() > maxIndex ) {
+            maxIndex = range.giveEnd();
         }
     }
     IntArray afflictedNodes(maxIndex);
@@ -122,8 +122,8 @@ void Set :: computeIntArray(IntArray &answer, const IntArray &specified, std :: 
         afflictedNodes.at( specified.at(i) ) = 1;
     }
 
-    for ( std :: list< Range > :: iterator it = ranges.begin(); it != ranges.end(); ++it ) {
-        for ( int i = it->giveStart(); i <= it->giveEnd(); ++i ) {
+    for ( auto &range: ranges ) {
+        for ( int i = range.giveStart(); i <= range.giveEnd(); ++i ) {
             afflictedNodes.at(i) = 1;
         }
     }
@@ -182,13 +182,13 @@ const IntArray &Set :: giveNodeList()
 
 const IntArray &Set :: giveSpecifiedNodeList() { return this->nodes; }
 
-void Set :: setElementList(const IntArray &newElements) { this->elements = newElements; }
+void Set :: setElementList(IntArray newElements) { this->elements = std :: move(newElements); }
 
-void Set :: setBoundaryList(const IntArray &newBoundaries) { this->elementBoundaries = newBoundaries; }
+void Set :: setBoundaryList(IntArray newBoundaries) { this->elementBoundaries = std :: move(newBoundaries); }
 
-void Set :: setEdgeList(const IntArray &newEdges) { this->elementEdges = newEdges; }
+void Set :: setEdgeList(IntArray newEdges) { this->elementEdges = std :: move(newEdges); }
 
-void Set :: setNodeList(const IntArray &newNodes) { this->nodes = newNodes; }
+void Set :: setNodeList(IntArray newNodes) { this->nodes = std :: move(newNodes); }
 
 void Set :: addAllElements()
 {

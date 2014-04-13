@@ -192,8 +192,8 @@ public:
     const FloatArray &giveTempStateVector() const { return tempStateVector; }
     FloatArray &letTempStateVectorBe(FloatArray &s) { return tempStateVector = s; }
     const FloatMatrix &giveTempTangent() { return tempTangent; }
-    void letTempTangentBe(FloatMatrix &t) {
-        tempTangent = t;
+    void letTempTangentBe(FloatMatrix t) {
+        tempTangent = std :: move(t);
         hasTangentFlag = true;
     }
 

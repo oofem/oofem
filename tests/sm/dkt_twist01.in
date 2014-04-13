@@ -39,11 +39,11 @@ ConstantFunction 1 f(t) 1.0
 #
 #%BEGIN_CHECK% tolerance 1.e-4
 ## check reactions 
-#REACTION tStep 1 number 1 dof 1 value 5.0
-#REACTION tStep 1 number 2 dof 1 value -5.0
-#REACTION tStep 1 number 4 dof 1 value -5.0
+#REACTION tStep 1 number 1 dof 3 value 5.0
+#REACTION tStep 1 number 2 dof 3 value -5.0
+#REACTION tStep 1 number 4 dof 3 value -5.0
 ## check all nodes
-#NODE tStep 1 number 3 dof 1 unknown d value 0.2496
+#NODE tStep 1 number 3 dof 3 unknown d value 0.2496
 ## check element no. 1 stress vector
 #ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 4  value 0.0
 #ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 5  value 0.0

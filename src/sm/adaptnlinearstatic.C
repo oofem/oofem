@@ -55,6 +55,7 @@
 
 #ifdef __PARALLEL_MODE
  #include "parallelcontext.h"
+ #include "loadbalancer.h"
 #endif
 
 #ifdef __OOFEG
@@ -158,7 +159,7 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep)
             this->terminateAnalysis();
             throw OOFEM_Terminate();
         } else {
-            OOFEM_ERROR("MesherInterface::createMesh failed");
+            OOFEM_ERROR("createMesh failed");
         }
     }
 }

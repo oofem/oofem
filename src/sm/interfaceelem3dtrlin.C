@@ -69,7 +69,7 @@ InterfaceElement3dTrLin :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 // Returns the linear part of the B matrix
 //
 {
-    FloatArray n(3);
+    FloatArray n;
     this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 18);
@@ -90,9 +90,8 @@ void
 InterfaceElement3dTrLin :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
 
@@ -104,7 +103,7 @@ InterfaceElement3dTrLin :: computeGaussPoints()
 int
 InterfaceElement3dTrLin :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    FloatArray n(6);
+    FloatArray n;
 
     this->interpolation.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
 
@@ -135,20 +134,14 @@ InterfaceElement3dTrLin :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant, weight, thickness, volume;
     // first compute local nodal coordinates in element plane
-    FloatArray gnc(3), lnc [ 3 ];
-    const FloatArray *lncp [ 3 ];
+    std::vector< FloatArray > lncp(3);
     FloatMatrix lcs(3, 3);
     this->computeLCS(lcs);
     for ( int i = 1; i <= 3; i++ ) {
-        gnc.at(1) = this->giveNode(i)->giveCoordinate(1);
-        gnc.at(2) = this->giveNode(i)->giveCoordinate(2);
-        gnc.at(3) = this->giveNode(i)->giveCoordinate(3);
-
-        lnc [ i - 1 ].beProductOf(lcs, gnc);
-        lncp [ i - 1 ] = & lnc [ i - 1 ];
+        lncp[ i - 1 ].beProductOf(lcs, *this->giveNode(i)->giveCoordinates());
     }
 
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIVertexListGeometryWrapper(3, lncp) ) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIVertexListGeometryWrapper(lncp) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
     volume      = determinant * weight * thickness;

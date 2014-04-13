@@ -88,7 +88,7 @@ FEI1dHermite :: evald2Ndx2(FloatMatrix &answer, const FloatArray &lcoords, const
 void
 FEI1dHermite :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatArray n(3);
+    FloatArray n;
     answer.resize(1);
 
     this->evalN(n, lcoords, cellgeo);

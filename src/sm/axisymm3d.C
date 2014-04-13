@@ -217,14 +217,13 @@ Axisymm3d :: giveArea()
 double
 Axisymm3d :: computeVolumeAround(GaussPoint *gp)
 {
-    int i;
     double determinant, weight, volume, r, x;
-    FloatArray n(4);
+    FloatArray n;
 
     this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     r = 0.;
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         x  = this->giveNode(i)->giveCoordinate(1);
         r += x * n.at(i);
     }
@@ -242,9 +241,8 @@ Axisymm3d :: computeVolumeAround(GaussPoint *gp)
 void
 Axisymm3d :: computeGaussPoints()
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 2;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(2);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);

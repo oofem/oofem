@@ -95,6 +95,8 @@ public:
 
     /// Constructor for sized array. Data is zeroed.
     FloatArray(int n = 0) : values(n) { }
+    /// Disallow double parameter, which can otherwise give unexpected results.
+    FloatArray(double)  = delete;
     /// Copy constructor. Creates the array from another array.
     FloatArray(const FloatArray &src) : values(src.values) { }
     /// Move constructor. Creates the array from another array.
@@ -110,9 +112,6 @@ public:
     FloatArray &operator = (FloatArray &&src) { values = std::move(src.values); return *this; }
     /// Assignment operator.
     inline FloatArray &operator = (std :: initializer_list< double >list) { values = list; return *this; }
-
-    /// Sets values in array. Convenient for writing small specific vectors.
-    void setValues(int n, ...);
 
     /**
      * Coefficient access function. Returns value of coefficient at given

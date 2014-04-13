@@ -99,7 +99,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
         for ( int elIndex = 1; elIndex <= numElNew; elIndex++ ) {
             StructuralElement *elNew = dynamic_cast< StructuralElement * >( iNewDom.giveElement(elIndex) );
             if ( elNew == NULL ) {
-                OOFEM_SIMPLE_ERROR("In LSPrimaryVariableMapper::mapPrimaryVariables(): Failed to cast Element new to StructuralElement.\n");
+                OOFEM_ERROR("Failed to cast Element new to StructuralElement.");
             }
 
             ///////////////////////////////////
@@ -122,10 +122,8 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
             // Loop over Gauss points
             for ( int intRuleInd = 0; intRuleInd < elNew->giveNumberOfIntegrationRules(); intRuleInd++ ) {
                 IntegrationRule *iRule = elNew->giveIntegrationRule(intRuleInd);
-                int numGP = iRule->giveNumberOfIntegrationPoints();
 
-                for ( int gpInd = 0; gpInd < numGP; gpInd++ ) {
-                    GaussPoint *gp = iRule->getIntegrationPoint(gpInd);
+                for ( GaussPoint *gp: *iRule ) {
 
                     // New N-matrix
                     FloatMatrix NNew;
@@ -160,7 +158,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                     FloatArray localCoordOld(dim), pointCoordOld(dim);
                     StructuralElement *elOld = dynamic_cast< StructuralElement * >( iOldDom.giveSpatialLocalizer()->giveElementClosestToPoint(localCoordOld, pointCoordOld, globalCoord, 0) );
                     if ( elOld == NULL ) {
-                        OOFEM_SIMPLE_ERROR("In LSPrimaryVariableMapper::mapPrimaryVariables(): Failed to cast Element old to StructuralElement.\n");
+                        OOFEM_ERROR("Failed to cast Element old to StructuralElement.");
                     }
 
 
@@ -176,12 +174,10 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                     for ( int i = 1; i <= elNodes.giveSize(); i++ ) {
                         DofManager *dMan = elNew->giveDofManager(i);
 
-                        for ( int j = 1; j <= dMan->giveNumberOfDofs(); j++ ) {
+                        for ( Dof *dof: *dMan ) {
                             if ( elDofsGlob.at(dofsPassed) != 0 ) {
                                 nodeDispNew.at(dofsPassed) = oU.at( elDofsGlob.at(dofsPassed) );
                             } else {
-                                Dof *dof = dMan->giveDof(j);
-
                                 if ( dof->hasBc(& iTStep) ) {
                                     nodeDispNew.at(dofsPassed) = dof->giveBcValue(iMode, & iTStep);
                                 }

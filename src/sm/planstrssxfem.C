@@ -41,6 +41,7 @@
 #include "structuralcrosssection.h"
 #include "vtkxmlexportmodule.h"
 #include "dynamicinputrecord.h"
+#include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -199,12 +200,12 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
     if ( !xf->isElementEnriched(this) ) {
         PlaneStress2d :: drawRawGeometry(context);
     } else {
-        if ( numberOfIntegrationRules > 1 ) {
+        if ( integrationRulesArray.size() > 1 ) {
             // TODO: Implement visualization
             /*
              *          PatchIntegrationRule *iRule;
-             *          for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-             *              iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
+             *          for ( auto &iRule: integrationRulesArray ) {
+             *              iRule = dynamic_cast< PatchIntegrationRule * >( ir );
              *              if ( iRule ) {
              *                  iRule->givePatch()->draw(context);
              *              }
@@ -235,16 +236,14 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
             indx = context.giveIntVarIndx();
 
             TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
-            PatchIntegrationRule *iRule;
-            for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-                iRule = dynamic_cast< PatchIntegrationRule * >(integrationRulesArray [ i ]);
+            for ( auto &ir: integrationRulesArray ) {
+                PatchIntegrationRule *iRule = dynamic_cast< PatchIntegrationRule * >(ir);
 
  #if 0
                 val = iRule->giveMaterial();
  #else
                 val = 0.0;
-                for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                    GaussPoint *gp = iRule->getIntegrationPoint(0);
+                for ( GaussPoint *gp: *iRule ) {
                     giveIPValue(v, gp, context.giveIntVarType(), tStep);
                     val += v.at(indx);
                 }

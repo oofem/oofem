@@ -291,13 +291,6 @@ public:
      */
     void setDofID(DofIDItem id) { this->dofID = id; }
     /**
-     * Returns char representation of DofID value of receiver, which determines physical meaning
-     * of unknown connected to receiver. Useful only for printing. More conveniently,
-     * one should use giveDofID function.
-     * @see giveDofID
-     */
-    char *giveDofIDName(char *s);
-    /**
      * Tests if receiver is primary DOF. Dof is primary if it possess or directly represent
      * certain DOF. If it is linked somehow (rigid arm, doubled node) to other DOF(s) then it is not
      * primary DOF.

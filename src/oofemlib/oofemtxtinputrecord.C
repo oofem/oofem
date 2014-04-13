@@ -88,9 +88,9 @@ OOFEMTXTInputRecord :: operator = ( const OOFEMTXTInputRecord & src )
 }
 
 void
-OOFEMTXTInputRecord :: setRecordString(const std :: string &newRec)
+OOFEMTXTInputRecord :: setRecordString(std :: string newRec)
 {
-    this->record = newRec;
+    this->record = std :: move(newRec);
     tokenizer.tokenizeLine( this->record.c_str() );
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);
@@ -367,7 +367,7 @@ OOFEMTXTInputRecord :: giveField(std :: list< Range > &list, InputFieldType id)
         setReadFlag(indx);
         rec = tokenizer.giveToken(++indx);
         if ( * rec != '{' ) {
-            OOFEM_SIMPLE_WARNING("OOFEMTXTInputRecord::readRangeList: parse error - missing left '{'");
+            OOFEM_WARNING("missing left '{'");
             list.clear();
             return IRRT_BAD_FORMAT;
         }
@@ -387,7 +387,7 @@ OOFEMTXTInputRecord :: giveField(std :: list< Range > &list, InputFieldType id)
 
         // test for enclosing bracket
         if ( * rec != '}' ) {
-            OOFEM_SIMPLE_WARNING("OOFEMTXTInputRecord::readRangeList: parse error - missing end '}'");
+            OOFEM_WARNING("missing end '}'");
             list.clear();
             return IRRT_BAD_FORMAT;
         }
@@ -552,7 +552,7 @@ OOFEMTXTInputRecord :: finish(bool wrn)
     }
 
     if ( wf ) {
-        OOFEM_SIMPLE_WARNING( buff.str().c_str() );
+        OOFEM_WARNING( buff.str().c_str() );
     }
 }
 
@@ -578,7 +578,7 @@ OOFEMTXTInputRecord :: __readSimpleString(const char *source, char *simpleString
     }
 
     if ( !curr ) {
-        OOFEM_SIMPLE_ERROR("OOFEMTXTInputRecord::readSimpleString : unexpected end-of-line");
+        OOFEM_ERROR("unexpected end-of-line");
     }
 
     while ( ( !( isspace(* curr) || ! * curr ) ) && ( ++count < maxchar ) ) {
@@ -712,7 +712,7 @@ OOFEMTXTInputRecord :: readRange(const char **helpSource, int &li, int &hi)
         * helpSource = endptr;
         // test whitespaces
         if ( * * helpSource != ' ' && * * helpSource != '\t' ) {
-            OOFEM_SIMPLE_WARNING("OOFEMTXTInputRecord::readRange: unexpected token while reading range value");
+            OOFEM_WARNING("unexpected token while reading range value");
             return 0;
         }
 
@@ -729,7 +729,7 @@ OOFEMTXTInputRecord :: readRange(const char **helpSource, int &li, int &hi)
             ( * helpSource )++;
             return 1;
         } else {
-            OOFEM_SIMPLE_WARNING("OOFEMTXTInputRecord::readRange: end ')' missing while parsing range value");
+            OOFEM_WARNING("end ')' missing while parsing range value");
             return 0;
         }
     }
@@ -772,7 +772,7 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
                 if ( * endptr == ';' ) {
                     ( endptr )++;
                 } else {
-                    OOFEM_SIMPLE_WARNING("OOFEMTXTInputRecord::readMatrix: missing row terminating semicolon");
+                    OOFEM_WARNING("missing row terminating semicolon");
                     return 0;
                 }
             }
@@ -789,7 +789,7 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
             helpSource = endptr;
             return 1;
         } else {
-            OOFEM_SIMPLE_WARNING("OOFEMTXTInputRecord::readMatrix: end '}' missing while parsing matrix value");
+            OOFEM_WARNING("end '}' missing while parsing matrix value");
             return 0;
         }
     } else {

@@ -136,10 +136,8 @@ void
 TR21_2D_SUPG :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 3;
-        integrationRulesArray = new IntegrationRule * [ 3 ];
-
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(3);
 
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 3, this);
@@ -212,7 +210,7 @@ TR21_2D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 TR21_2D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    FloatMatrix dn(6, 2);
+    FloatMatrix dn;
     velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 12);
@@ -227,7 +225,7 @@ TR21_2D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 void
 TR21_2D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
-    FloatArray n(3);
+    FloatArray n;
     this->pressureInterpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 3);
@@ -293,14 +291,11 @@ void
 TR21_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
 {
     double mu_min, norm_N, norm_N_d, norm_M_d, norm_LSIC;
-    FloatMatrix dn, N, N_d, M_d, LSIC;
-    FloatArray dN, s, lcoords_nodes, u, lcn, dn_a(2), n, u1(6), u2(6);
-    IntegrationRule *iRule;
-
-    iRule = integrationRulesArray [ 1 ];
+    FloatMatrix N, N_d, M_d, LSIC;
+    FloatArray u;
+    IntegrationRule *iRule = integrationRulesArray [ 1 ];
     mu_min = 1;
-    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(j);
+    for ( GaussPoint *gp: *iRule ) {
         double mu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity(gp, tStep);
         if ( mu_min > mu ) {
             mu_min = mu;
@@ -349,8 +344,7 @@ TR21_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *tStep)
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
-    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(k);
+    for ( GaussPoint *gp: *iRule ) {
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
@@ -369,8 +363,7 @@ TR21_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *tStep)
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
-    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(k);
+    for ( GaussPoint *gp: *iRule ) {
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
@@ -391,8 +384,7 @@ TR21_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *tStep)
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* mtrx for computing t_supg, norm of this mtrx is computed */
-    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(k);
+    for ( GaussPoint *gp: *iRule ) {
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
@@ -410,8 +402,7 @@ TR21_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *tStep)
     answer.clear();
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(k);
+    for ( GaussPoint *gp: *iRule ) {
         double dV  = this->computeVolumeAround(gp);
         double rho = this->giveMaterial()->give('d', gp);
         this->computeDivUMatrix(b, gp);
@@ -451,8 +442,7 @@ TR21_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
     }
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(k);
+    for ( GaussPoint *gp: *iRule ) {
         double dV = this->computeVolumeAround(gp);
         velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
         this->computeNuMatrix(n, gp);
@@ -474,8 +464,7 @@ TR21_2D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
 
     answer.clear();
 
-    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(k);
+    for ( GaussPoint *gp: *iRule ) {
 
         velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
@@ -490,12 +479,10 @@ TR21_2D_SUPG :: LS_PCS_computeVolume(double &answer, const FloatArray **coordina
     answer = 0.0;
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(k);
+    for ( GaussPoint *gp: *iRule ) {
         //answer += this->computeVolumeAround(gp);
 
         double determinant, weight, volume;
-        FloatArray dxi(6), deta(6), lcoords;
 
         determinant = fabs( this->velocityInterpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
 
@@ -513,8 +500,7 @@ TR21_2D_SUPG :: LS_PCS_computeVolume()
     double answer = 0.0;
 
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(k);
+    for ( GaussPoint *gp: *iRule ) {
         answer += this->computeVolumeAround(gp);
     }
 
@@ -524,7 +510,7 @@ TR21_2D_SUPG :: LS_PCS_computeVolume()
 double
 TR21_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep)
 {
-    FloatArray voff(2), fi(6), un, n;
+    FloatArray fi(6), un, n;
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
     double vol = 0.0, eps = 0.0, _fi, S = 0.0;
@@ -533,8 +519,7 @@ TR21_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep)
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
     }
 
-    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(k);
+    for ( GaussPoint *gp: *iRule ) {
         double dV = this->computeVolumeAround(gp);
         velocityInterpolation.evalN( n,  * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
         vol += dV;
@@ -555,16 +540,12 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
     answer.resize(2);
 
-    for ( int i = 1; i <= 3; i++ ) {  //comparing values of fi in vertices
-        if ( fi.at(i) > 0. ) {
+    for ( int ifi: fi ) {  //comparing values of fi in vertices
+        if ( ifi > 0. ) {
             pos++;
-        }
-
-        if ( fi.at(i) < 0.0 ) {
+        } else if ( ifi < 0.0 ) {
             neg++;
-        }
-
-        if ( fi.at(i) == 0. ) {
+        } else {
             zero++;
         }
     }
@@ -592,16 +573,12 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
         int inter_case, negq = 0, posq = 0, zeroq = 0; //inter_case is variable that differs type of which fi crosses the triangle
 
-        for ( int i = 4; i <= 6; i++ ) { //loop over edge nodes
-            if ( fi.at(i) > 0. ) {
+        for ( int ifi: fi ) { //loop over edge nodes
+            if ( ifi > 0. ) {
                 posq++;
-            }
-
-            if ( fi.at(i) < 0.0 ) {
+            } else if ( ifi < 0.0 ) {
                 negq++;
-            }
-
-            if ( fi.at(i) == 0. ) {
+            } else {
                 zeroq++;
             }
         }
@@ -689,7 +666,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
 
 
-            OOFEM_LOG_INFO("TR21_2D_SUPG :: LS_PCS_computeVOFFractions - case 1 - after intersections of LS and edges, element no. %d", second_control1);
+            OOFEM_LOG_INFO("case 1 - after intersections of LS and edges, element no. %d", second_control1);
 
 
 
@@ -751,7 +728,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             M.at(2) = ysi + t * ( _Mid.at(2) - ysi );
 
 
-            OOFEM_LOG_INFO("TR21_2D_SUPG :: LS_PCS_computeVOFFractions - case 1 - after computing third point on zero level set curve inside element, element no. %d", second_control1);
+            OOFEM_LOG_INFO("case 1 - after computing third point on zero level set curve inside element, element no. %d", second_control1);
 
 
 
@@ -809,7 +786,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             //kontrola!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             int second_control2 = 0;
             second_control2 = this->giveNumber();
-            OOFEM_LOG_INFO("TR21_2D_SUPG :: LS_PCS_computeVOFFractions - case 2 - second type of element deviation by LS, element no. %d", second_control2);
+            OOFEM_LOG_INFO("case 2 - second type of element deviation by LS, element no. %d", second_control2);
 
 
             FloatArray inter1(2), inter2(2), crosssect(4);
@@ -993,7 +970,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             //kontrola!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             int second_control3 = 0;
             second_control3 = this->giveNumber();
-            OOFEM_LOG_INFO("TR21_2D_SUPG :: LS_PCS_computeVOFFractions - case 3 - third type of element deviation by LS, element no. %d", second_control3);
+            OOFEM_LOG_INFO("case 3 - third type of element deviation by LS, element no. %d", second_control3);
 
 
             FloatArray inter1(2), inter2(2), crosssect(4);
@@ -1499,28 +1476,13 @@ TR21_2D_SUPG :: giveInterface(InterfaceType interface)
 void
 TR21_2D_SUPG :: giveLocalVelocityDofMap(IntArray &map)
 {
-    map.resize(12);
-    map.at(1) = 1;
-    map.at(2) = 2;
-    map.at(3) = 4;
-    map.at(4) = 5;
-    map.at(5) = 7;
-    map.at(6) = 8;
-    map.at(7) = 10;
-    map.at(8) = 11;
-    map.at(9) = 12;
-    map.at(10) = 13;
-    map.at(11) = 14;
-    map.at(12) = 15;
+    map = {1, 2, 4, 5, 7, 8, 10, 11, 12, 13, 14, 15};
 }
 
 void
 TR21_2D_SUPG :: giveLocalPressureDofMap(IntArray &map)
 {
-    map.resize(3);
-    map.at(1) = 3;
-    map.at(2) = 6;
-    map.at(3) = 9;
+    map = {3, 6, 9};
 }
 
 

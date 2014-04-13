@@ -36,7 +36,6 @@
 #define staggeredproblem_h
 
 #include "engngm.h"
-#include "alist.h"
 #include "inputrecord.h"
 
 ///@name Input fields for StaggeredProblem
@@ -82,12 +81,10 @@ namespace oofem {
 class OOFEM_EXPORT StaggeredProblem : public EngngModel
 {
 protected:
-    /// Number of engineering models to run.
-    int nModels;
     /// List of engineering models to solve sequentially.
-    AList< EngngModel > *emodelList;
+    std :: vector< std :: unique_ptr< EngngModel > >emodelList;
     double deltaT;
-    std :: string *inputStreamNames;
+    std :: vector< std :: string >inputStreamNames;
     /// Associated time function for time step increment
     int dtFunction;
     /**
@@ -180,7 +177,7 @@ public:
     virtual int checkProblemConsistency();
 
     virtual EngngModel *giveSlaveProblem(int i);
-    virtual int giveNumberOfSlaveProblems() { return nModels; }
+    virtual int giveNumberOfSlaveProblems() { return (int)inputStreamNames.size(); }
 
     virtual int giveNumberOfFirstStep() {
         if ( master ) {

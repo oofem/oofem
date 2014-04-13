@@ -71,8 +71,8 @@ InterfaceElem2dLin :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int 
 // Returns the linear part of the B matrix
 //
 {
-  FloatArray n(2);
-  this->interp.evalN (n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    FloatArray n;
+    this->interp.evalN (n, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
 
     answer.resize(2, 8);
     answer.zero();
@@ -89,9 +89,8 @@ void
 InterfaceElem2dLin :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         integrationRulesArray [ 0 ]->SetUpPointsOnLine(2, _2dInterface); 
     }
@@ -103,16 +102,16 @@ InterfaceElem2dLin :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-  double r = 1.0;
-  if (this->axisymmode) {
-    FloatArray n(2);
-    this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    r = n.at(1)*this->giveNode(1)->giveCoordinate(1) + n.at(2)*this->giveNode(2)->giveCoordinate(1);
-  }
+    double r = 1.0;
+    if (this->axisymmode) {
+        FloatArray n(2);
+        this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+        r = n.at(1)*this->giveNode(1)->giveCoordinate(1) + n.at(2)*this->giveNode(2)->giveCoordinate(1);
+    }
 
 
-  double result = this->interp.giveTransformationJacobian(* gp->giveCoordinates(), FEIElementGeometryWrapper(this));
-  return result * gp->giveWeight() * r;
+    double result = this->interp.giveTransformationJacobian(* gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    return result * gp->giveWeight() * r;
 }
 
 
@@ -224,8 +223,7 @@ void InterfaceElem2dLin :: drawDeformedGeometry(oofegGraphicContext &gc, Unknown
 
 void InterfaceElem2dLin :: drawScalar(oofegGraphicContext &context)
 {
-    int i, indx, result = 0;
-    GaussPoint *gp;
+    int indx, result = 0;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray gcoord(3), v1;
@@ -241,9 +239,8 @@ void InterfaceElem2dLin :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+    for ( GaussPoint *gp: *iRule ) {
         result = 0;
-        gp  = iRule->getIntegrationPoint(i);
         result += giveIPValue(v1, gp, context.giveIntVarType(), tStep);
         if ( result != 1 ) {
             continue;

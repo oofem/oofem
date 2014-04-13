@@ -110,8 +110,8 @@ public:
     MDMStatus(int n, int nsd, int nmplanes, Domain * d, GaussPoint * g);
     virtual ~MDMStatus();
 
-    void setTempDamageTensorEigenVals(const FloatArray &src) { tempDamageTensorEigenValues = src; }
-    void setTempDamageTensorEigenVec(const FloatMatrix &src) { tempDamageTensorEigenVectors = src; }
+    void setTempDamageTensorEigenVals(FloatArray src) { tempDamageTensorEigenValues = std :: move(src); }
+    void setTempDamageTensorEigenVec(FloatMatrix src) { tempDamageTensorEigenVectors = std :: move(src); }
     const FloatArray &giveTempDamageTensorEigenVals() { return tempDamageTensorEigenValues; }
     const FloatArray &giveDamageTensorEigenVals() { return damageTensorEigenValues; }
     const FloatMatrix &giveTempDamageTensorEigenVec() { return tempDamageTensorEigenVectors; }
@@ -120,14 +120,14 @@ public:
     double giveMicroplaneTempDamage(int m) { return PsiTemp.at(m); }
     double giveMicroplaneDamage(int m) { return Psi.at(m); }
     void setMicroplaneTempDamage(int m, double val) { PsiTemp.at(m) = val; }
-    void giveMicroplaneDamageValues(FloatArray &answer) { answer = Psi; }
-    void setMicroplaneTempDamageValues(FloatArray &src) { PsiTemp = src; }
+    const FloatArray & giveMicroplaneDamageValues() { return Psi; }
+    void setMicroplaneTempDamageValues(FloatArray src) { PsiTemp = std :: move(src); }
 
-    void giveTempDamageTensor(FloatMatrix &answer) { answer = DamageTensorTemp; }
-    void giveDamageTensor(FloatMatrix &answer) { answer = DamageTensor; }
-    void setTempDamageTensor(FloatMatrix &src) { DamageTensorTemp = src; }
-    void setLocalDamageTensorForAverage(FloatMatrix &src) { localDamageTensor = src; }
-    void giveLocalDamageTensorForAverage(FloatMatrix &answer) { answer = localDamageTensor; }
+    const FloatMatrix &giveTempDamageTensor() { return DamageTensorTemp; }
+    const FloatMatrix &giveDamageTensor() { return DamageTensor; }
+    void setTempDamageTensor(FloatMatrix src) { DamageTensorTemp = std :: move(src); }
+    void setLocalDamageTensorForAverage(FloatMatrix src) { localDamageTensor = std :: move(src); }
+    const FloatMatrix &giveLocalDamageTensorForAverage() { return localDamageTensor; }
     const FloatMatrix *giveLocalDamageTensorForAveragePtr() { return & localDamageTensor; }
 
 

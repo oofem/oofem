@@ -82,7 +82,7 @@ public:
      * @param coords Coordinates of nodes defining the interpolation geometry.
      * @param gcoords Global coordinates of point of interest.
      */
-    virtual void evalInterpolation(FloatArray &answer, const FloatArray **coords, const FloatArray &gcoords);
+    virtual void evalInterpolation(FloatArray &answer, const std::vector< FloatArray > &coords, const FloatArray &gcoords);
 
     virtual void updateYourself(TimeStep *tStep);
 

@@ -167,9 +167,8 @@ void
 RerShell :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 8);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -654,15 +653,11 @@ void
 RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
-    GaussPoint *gp;
     FloatArray v;
 
     fprintf(file, "element %d :\n", number);
 
-    for ( int i = 1; i <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i - 1);
-        //gp->printOutputAt(file,tStep);
-
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
 
         fprintf( file, "  GP %d :", gp->giveNumber() );
         this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);

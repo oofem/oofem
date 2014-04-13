@@ -133,8 +133,7 @@ NLStructuralElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     answer.clear();
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
 
         // Engineering (small strain) stress
@@ -239,11 +238,8 @@ NLStructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray 
 
 
     // loop over individual integration rules
-    for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ ir ];
-
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( GaussPoint *gp: *iRule ) {
             StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
 
             if ( nlGeometry == 0 ) {
@@ -316,11 +312,10 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
     }
 
     // Compute matrix from material stiffness (total stiffness for small def.) - B^T * dS/dE * B
-    if ( numberOfIntegrationRules == 1 ) {
+    if ( integrationRulesArray.size() == 1 ) {
         FloatMatrix B, D, DB;
         IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(j);
+        for ( GaussPoint *gp: *iRule ) {
 
             // Engineering (small strain) stiffness
             if ( nlGeometry == 0 ) {
@@ -359,10 +354,10 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
 
         int iStartIndx, iEndIndx, jStartIndx, jEndIndx;
         FloatMatrix Bi, Bj, D, Dij, DBj;
-        for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+        for ( int i = 0; i < (int)integrationRulesArray.size(); i++ ) {
             iStartIndx = integrationRulesArray [ i ]->getStartIndexOfLocalStrainWhereApply();
             iEndIndx   = integrationRulesArray [ i ]->getEndIndexOfLocalStrainWhereApply();
-            for ( int j = 0; j < numberOfIntegrationRules; j++ ) {
+            for ( int j = 0; j < (int)integrationRulesArray.size(); j++ ) {
                 IntegrationRule *iRule;
                 jStartIndx = integrationRulesArray [ j ]->getStartIndexOfLocalStrainWhereApply();
                 jEndIndx   = integrationRulesArray [ j ]->getEndIndexOfLocalStrainWhereApply();
@@ -374,8 +369,7 @@ NLStructuralElement :: computeStiffnessMatrix(FloatMatrix &answer,
                     iRule = integrationRulesArray [ j ];
                 }
 
-                for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-                    GaussPoint *gp = iRule->getIntegrationPoint(k);
+                for ( GaussPoint *gp: *iRule ) {
 
                     // Engineering (small strain) stiffness dSig/dEps
                     if ( nlGeometry == 0 ) {
@@ -446,10 +440,8 @@ NLStructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatrix &
     // Compute matrix from material stiffness
     FloatMatrix B, D, DB;
     IntArray irlocnum;
-    for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ ir ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(j);
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( GaussPoint *gp: *iRule ) {
 
             if ( nlGeometry == 0 ) {
                 this->computeBmatrixAt(gp, B);
@@ -497,8 +489,7 @@ NLStructuralElement :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep 
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     // assemble initial stress matrix
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         // This function fetches the full form of the tensor
         this->giveIPValue(stress, gp, IST_StressTensor, tStep);
         if ( stress.giveSize() ) {

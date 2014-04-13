@@ -65,7 +65,7 @@ GravityPressure :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArra
     //This assumes that the z-direction represents gravity.
 
     //Use normal input normal vector to set up the local coordinate system
-    FloatArray s(3), t(3);
+    FloatArray s(3), t;
 
     if ( this->normalVector.at(1) == 0 ) {
         s.at(1) = 0.;
@@ -95,7 +95,7 @@ GravityPressure :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArra
     }
 
     //Express integration point in local coordinate system
-    FloatArray coordsLocal(3);
+    FloatArray coordsLocal;
     coordsLocal.beProductOf(lcs, coords);
 
     //Subtract zero level. Assume that pressure is positive.

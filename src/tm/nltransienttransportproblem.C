@@ -277,12 +277,12 @@ NLTransientTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 }
 
 void
-NLTransientTransportProblem :: createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep) {
+NLTransientTransportProblem :: createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep)
+{
     //Copy the last known temperature to be a previous solution
-    int nnodes, nDofs;
+    int nnodes;
     double val;
     Domain *domain;
-    Dof *iDof;
     DofManager *node;
 
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
@@ -291,11 +291,9 @@ NLTransientTransportProblem :: createPreviousSolutionInDofUnknownsDictionary(Tim
         if ( requiresUnknownsDictionaryUpdate() ) {
             for ( int inode = 1; inode <= nnodes; inode++ ) {
                 node = domain->giveDofManager(inode);
-                nDofs = node->giveNumberOfDofs();
-                for ( int i = 1; i <= nDofs; i++ ) {
-                    iDof = node->giveDof(i);
-                    val = iDof->giveUnknown(VM_Total, tStep); //get number on hash=0(current)
-                    iDof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, val);
+                for ( Dof *dof: *node ) {
+                    val = dof->giveUnknown(VM_Total, tStep); //get number on hash=0(current)
+                    dof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, val);
                 }
             }
         }
@@ -332,21 +330,18 @@ void
 NLTransientTransportProblem :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
 {
     // update DoF unknowns dictionary. Store the last and previous temperature only, see giveUnknownDictHashIndx
-    int ndofs = inode->giveNumberOfDofs();
-
-    for ( int i = 1; i <= ndofs; i++ ) {
-        Dof *iDof = inode->giveDof(i);
-        int eqNum = iDof->__giveEquationNumber();
+    for ( Dof *dof: *inode ) {
+        int eqNum = dof->__giveEquationNumber();
         double val;
-        if ( iDof->hasBc(tStep) ) { // boundary condition
-            val = iDof->giveBcValue(VM_Total, tStep);
+        if ( dof->hasBc(tStep) ) { // boundary condition
+            val = dof->giveBcValue(VM_Total, tStep);
         } else {
             FloatArray *vect = this->UnknownsField->giveSolutionVector(tStep);
             val = vect->at(eqNum);
         }
 
         //update temperature, which is present in every node
-        iDof->updateUnknownsDictionary(tStep, VM_Total, val);
+        dof->updateUnknownsDictionary(tStep, VM_Total, val);
     }
 }
 
@@ -359,11 +354,9 @@ NLTransientTransportProblem :: copyUnknownsInDictionary(ValueModeType mode, Time
 
     for ( int j = 1; j <= nnodes; j++ ) {
         DofManager *inode = domain->giveDofManager(j);
-        int ndofs = inode->giveNumberOfDofs();
-        for ( int i = 1; i <= ndofs; i++ ) {
-            Dof *iDof = inode->giveDof(i);
-            double val = iDof->giveUnknown(mode, fromTime);
-            iDof->updateUnknownsDictionary(toTime, mode, val);
+        for ( Dof *dof: *inode ) {
+            double val = dof->giveUnknown(mode, fromTime);
+            dof->updateUnknownsDictionary(toTime, mode, val);
         }
     }
 }

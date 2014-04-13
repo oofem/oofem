@@ -57,12 +57,15 @@ REGISTER_Element(Tet21Stokes);
 FEI3dTetLin Tet21Stokes :: interpolation_lin;
 FEI3dTetQuad Tet21Stokes :: interpolation_quad;
 // Set up ordering vectors (for assembling)
-IntArray Tet21Stokes :: momentum_ordering(30);
-IntArray Tet21Stokes :: conservation_ordering(4);
+IntArray Tet21Stokes :: momentum_ordering = {1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19, 21,
+                                             22, 23, 25, 26, 27, 29, 30, 31, 33, 34, 35, 37, 38, 39};
+IntArray Tet21Stokes :: conservation_ordering = {4, 8, 12, 16};
 IntArray Tet21Stokes :: surf_ordering [ 4 ] = {
-    IntArray(18), IntArray(18), IntArray(18), IntArray(18)
+    { 1,  2,  3,  9, 10, 11,  5,  6,  7, 23, 24, 25, 20, 21, 22, 17, 18, 19},
+    { 1,  2,  3,  5,  6,  7, 13, 14, 15, 17, 18, 19, 29, 30, 31, 26, 27, 28},
+    { 5,  6,  7,  9, 10, 11, 13, 14, 15, 20, 21, 22, 32, 33, 34, 29, 30, 31},
+    { 1,  2,  3, 13, 14, 15,  9, 10, 11, 26, 27, 28, 32, 33, 34, 23, 24, 25}
 };
-bool Tet21Stokes :: __initialized = Tet21Stokes :: initOrdering();
 
 Tet21Stokes :: Tet21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
 {
@@ -75,9 +78,8 @@ Tet21Stokes :: ~Tet21Stokes()
 
 void Tet21Stokes :: computeGaussPoints()
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(1);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
@@ -151,8 +153,7 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
     FloatArray momentum, conservation;
 
     B.zero();
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         FloatArray *lcoords = gp->giveCoordinates();
 
         double detJ = fabs( this->interpolation_quad.evaldNdx( dN, * lcoords, FEIElementGeometryWrapper(this) ) );
@@ -227,8 +228,7 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType t
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(k);
+        for ( GaussPoint *gp: *iRule ) {
             FloatArray *lcoords = gp->giveCoordinates();
 
             double rho = mat->give('d', gp);
@@ -265,14 +265,12 @@ void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
         int numberOfSurfaceIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2; ///@todo Check this.
 
         GaussIntegrationRule iRule(1, this, 1, 1);
-        GaussPoint *gp;
         FloatArray N, t, f(18);
 
         f.zero();
         iRule.SetUpPointsOnTriangle(numberOfSurfaceIPs, _Unknown);
 
-        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
-            gp = iRule.getIntegrationPoint(i);
+        for ( GaussPoint *gp: iRule ) {
             FloatArray *lcoords = gp->giveCoordinates();
 
             this->interpolation_quad.surfaceEvalN( N, iSurf, * lcoords, FEIElementGeometryWrapper(this) );
@@ -310,9 +308,8 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     B.zero();
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+    for ( GaussPoint *gp: *iRule ) {
         // Compute Gauss point and determinant at current element
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
         FloatArray *lcoords = gp->giveCoordinates();
 
         double detJ = fabs( this->interpolation_quad.evaldNdx( dN, * lcoords, FEIElementGeometryWrapper(this) ) );
@@ -476,60 +473,42 @@ void Tet21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answe
     }
 }
 
-void Tet21Stokes :: giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep)
+void Tet21Stokes :: giveIntegratedVelocity(FloatArray &answer, TimeStep *tStep)
 {
     /*
      * Integrate velocity over element
      */
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    FloatMatrix v, v_gamma, ThisAnswer, Nmatrix;
-    FloatArray *lcoords, N;
-    int i, j, k = 0;
-    Dof *d;
-    GaussPoint *gp;
+    FloatMatrix Nmatrix;
+    FloatArray v, N, tmp;
+    int k = 0;
 
-    v.resize(30, 1);
+    v.resize(30);
     v.zero();
 
-    FloatArray test;
-
-    for ( i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
-        for ( j = 1; j <= this->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
-            d = this->giveDofManager(i)->giveDof(j);
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
+        for ( Dof *d: *this->giveDofManager(i) ) {
             if ( ( d->giveDofID() == V_u ) || ( d->giveDofID() == V_v ) || ( d->giveDofID() == V_w ) ) {
                 k = k + 1;
-                v.at(k, 1) = d->giveUnknown(VM_Total, tStep);
+                v.at(k) = d->giveUnknown(VM_Total, tStep);
             }
         }
     }
 
-    answer.resize(3, 1);
-    answer.zero();
+    answer.clear();
 
-    Nmatrix.resize(3, 30);
-    Nmatrix.zero();
+    for ( GaussPoint *gp: *iRule ) {
+        const FloatArray &lcoords = * gp->giveCoordinates();
 
-    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
-
-        lcoords = gp->giveCoordinates();
-
-        this->interpolation_quad.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
-        double detJ = this->interpolation_quad.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
+        this->interpolation_quad.evalN( N, lcoords, FEIElementGeometryWrapper(this) );
+        double detJ = this->interpolation_quad.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) );
         double dA = detJ * gp->giveWeight();
 
-        for ( j = 0; j < N.giveSize(); j++ ) {
-            Nmatrix.at(1, j * 3 + 1) += N.at(j + 1) * dA;
-            Nmatrix.at(2, j * 3 + 2) += N.at(j + 1) * dA;
-            Nmatrix.at(3, j * 3 + 3) += N.at(j + 1) * dA;
-        }
+        Nmatrix.beNMatrixOf(N, 3);
 
-        //        N.printYourself();
-        //        Nmatrix.printYourself();
+        tmp.beProductOf(Nmatrix, v);
+        answer.add(dA, tmp);
     }
-
-    ThisAnswer.beProductOf(Nmatrix, v);
-    answer.add(ThisAnswer);
 }
 } // end namespace oofem

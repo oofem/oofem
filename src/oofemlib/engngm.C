@@ -70,6 +70,7 @@
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
  #include "processcomm.h"
+ #include "loadbalancer.h"
 #endif
 
 #include <cstdio>
@@ -1160,11 +1161,11 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                     node->computeLoadVector(charVec, nLoad, type, tStep, mode);
 
                     if ( charVec.isNotEmpty() ) {
-                        if ( node->computeM2LTransformation(R, dofIDarry) ) {
+                        if ( node->computeM2LTransformation(R, nLoad->giveDofIDs()) ) {
                             charVec.rotatedWith(R, 't');
                         }
 
-                        node->giveCompleteLocationArray(loc, s);
+                        node->giveLocationArray(nLoad->giveDofIDs(), loc, s);
                         answer.assemble(charVec, loc);
 
                         if ( eNorms ) {
@@ -1882,8 +1883,8 @@ EngngModel :: balanceLoad(TimeStep *tStep)
                     fprintf( stderr, "[%d]: %5d[%d] shared ", myrank, i, giveDomain(1)->giveDofManager(i)->giveGlobalNumber() );
                 }
 
-                for ( int j = 1; j <= giveDomain(1)->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
-                    fprintf( stderr, "(%d)", giveDomain(1)->giveDofManager(i)->giveDof(j)->giveEquationNumber(dn) );
+                for ( Dof *dof: *giveDomain(1)->giveDofManager(i) ) {
+                    fprintf( stderr, "(%d)", dof->giveEquationNumber(dn) );
                 }
 
                 fprintf(stderr, "\n");
@@ -2033,9 +2034,7 @@ EngngModel :: packDofManagers(ArrayWithNumbering *srcData, ProcessCommunicator &
     ///@todo Must fix: Internal dofmanagers in xfem and bc
     for ( int i = 1; i <= toSendMap->giveSize(); i++ ) {
         DofManager *dman = domain->giveDofManager( toSendMap->at(i) );
-        int ndofs = dman->giveNumberOfDofs();
-        for ( int j = 1; j <= ndofs; j++ ) {
-            Dof *jdof = dman->giveDof(j);
+        for ( Dof *jdof: *dman ) {
             if ( jdof->isPrimaryDof() ) {
                 int eqNum = jdof->giveEquationNumber(s);
                 if ( eqNum ) {
@@ -2061,13 +2060,11 @@ EngngModel :: unpackDofManagers(ArrayWithNumbering *destData, ProcessCommunicato
     double value;
 
     ///@todo Shouldn't hardcode domain number 1
-    ///@todo Must fix: Internal dofmanagers in xfem and bc
+    ///@todo Must fix: Internal dofmanagers in bc
     for ( int i = 1; i <= toRecvMap->giveSize(); i++ ) {
         DofManager *dman = domain->giveDofManager( toRecvMap->at(i) );
-        int ndofs = dman->giveNumberOfDofs();
         dofManagerParallelMode dofmanmode = dman->giveParallelMode();
-        for ( int j = 1; j <= ndofs; j++ ) {
-            Dof *jdof = dman->giveDof(j);
+        for ( Dof *jdof: *dman ) {
             int eqNum = jdof->giveEquationNumber(s);
             if ( jdof->isPrimaryDof() && eqNum ) {
                 result &= pcbuff->unpackDouble(value);

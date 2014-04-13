@@ -66,24 +66,18 @@
 
 namespace oofem {
 Element :: Element(int n, Domain *aDomain) :
-    FEMComponent(n, aDomain), dofManArray(), bodyLoadArray(), boundaryLoadArray()
+    FEMComponent(n, aDomain), dofManArray(), bodyLoadArray(), boundaryLoadArray(), integrationRulesArray()
 {
     material           = 0;
     numberOfDofMans    = 0;
-    numberOfIntegrationRules = 0;
     activityTimeFunction = 0;
-    integrationRulesArray  = NULL;
 }
 
 
 Element :: ~Element()
 {
-    if ( integrationRulesArray ) {
-        for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-            delete integrationRulesArray [ i ];
-        }
-
-        delete[] integrationRulesArray;
+    for ( auto &iRule: integrationRulesArray ) {
+        delete iRule;
     }
 }
 
@@ -281,14 +275,12 @@ Element :: computeNumberOfPrimaryMasterDofs(EquationID ut)
 
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
         this->giveDofManDofIDMask(i, ut, nodeDofIDMask);
-        this->giveDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
-        answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
+        answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(nodeDofIDMask);
     }
 
     for ( int i = 1; i <= giveNumberOfInternalDofManagers(); i++ ) {
         this->giveInternalDofManDofIDMask(i, ut, nodeDofIDMask);
-        this->giveInternalDofManager(i)->giveDofArray(nodeDofIDMask, dofMask);
-        answer += this->giveInternalDofManager(i)->giveNumberOfPrimaryMasterDofs(dofMask);
+        answer += this->giveInternalDofManager(i)->giveNumberOfPrimaryMasterDofs(nodeDofIDMask);
     }
     return answer;
 }
@@ -611,23 +603,13 @@ Element :: setDofManagers(const IntArray &_dmans)
 
 
 void
-Element :: setIntegrationRules(AList< IntegrationRule > *irlist)
+Element :: setIntegrationRules(const std :: vector< IntegrationRule * > &irlist)
 {
-    if ( integrationRulesArray ) {
-        for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-            delete integrationRulesArray [ i ];
-        }
-
-        delete[] integrationRulesArray;
+    for ( auto &iRule: integrationRulesArray ) {
+        delete iRule;
     }
 
-    numberOfIntegrationRules = irlist->giveSize();
-    integrationRulesArray = new IntegrationRule * [ irlist->giveSize() ];
-
-    for ( int j = 0; j < irlist->giveSize(); j++ ) {
-        integrationRulesArray [ j ] =  irlist->at(j + 1);
-        irlist->unlink(j + 1);
-    }
+    integrationRulesArray = irlist;
 }
 
 
@@ -816,8 +798,8 @@ Element :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        integrationRulesArray [ i ]->printOutputAt(file, tStep);
+    for ( auto &iRule: integrationRulesArray ) {
+        iRule->printOutputAt(file, tStep);
     }
 }
 
@@ -830,8 +812,8 @@ Element :: updateYourself(TimeStep *tStep)
     // VERBOSE_PRINT1("Updating Element ",number)
 #  endif
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        integrationRulesArray [ i ]->updateYourself(tStep);
+    for ( auto &iRule: integrationRulesArray ) {
+        iRule->updateYourself(tStep);
     }
 }
 
@@ -855,8 +837,8 @@ Element :: initForNewStep()
 // initializes receiver to new time step or can be used
 // if current time step must be restarted
 {
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        integrationRulesArray [ i ]->initForNewStep();
+    for ( auto &iRule: integrationRulesArray ) {
+        iRule->initForNewStep();
     }
 }
 
@@ -919,12 +901,13 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
             THROW_CIOERR(iores);
         }
 
+        int numberOfIntegrationRules = (int)integrationRulesArray.size();
         if ( !stream->write(& numberOfIntegrationRules, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-            _val = integrationRulesArray [ i ]->giveIntegrationRuleType();
+        for ( auto &iRule: integrationRulesArray ) {
+            _val = iRule->giveIntegrationRuleType();
             if ( !stream->write(& _val, 1) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
@@ -948,8 +931,8 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
 #endif
     }
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        if ( ( iores = integrationRulesArray [ i ]->saveContext(stream, mode, obj) ) != CIO_OK ) {
+    for ( auto &iRule: integrationRulesArray ) {
+        if ( ( iores = iRule->saveContext(stream, mode, obj) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -1008,25 +991,19 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
             }
         }
 
-        if ( _nrules != numberOfIntegrationRules ) {
+        if ( _nrules != (int)integrationRulesArray.size() ) {
             // delete old int rule array
-            if ( integrationRulesArray ) {
-                for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-                    delete integrationRulesArray [ i ];
-                }
-
-                delete[] integrationRulesArray;
+            for ( auto &iRule: integrationRulesArray ) {
+                delete iRule;
             }
 
             // AND ALLOCATE NEW ONE
-            integrationRulesArray = new IntegrationRule * [ _nrules ];
+            integrationRulesArray.resize( _nrules );
             for ( int i = 0; i < _nrules; i++ ) {
                 integrationRulesArray [ i ] = classFactory.createIRule( ( IntegrationRuleType ) dtypes(i), i + 1, this );
             }
-
-            numberOfIntegrationRules = _nrules;
         } else {
-            for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+            for ( int i = 0; i < _nrules; i++ ) {
                 if ( integrationRulesArray [ i ]->giveIntegrationRuleType() != dtypes(i) ) {
                     delete integrationRulesArray [ i ];
                     integrationRulesArray [ i ] = classFactory.createIRule( ( IntegrationRuleType ) dtypes(i), i + 1, this );
@@ -1053,8 +1030,8 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
     }
 
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        if ( ( iores = integrationRulesArray [ i ]->restoreContext(stream, mode, this) ) != CIO_OK ) {
+    for ( auto &iRule: integrationRulesArray ) {
+        if ( ( iores = iRule->restoreContext(stream, mode, this) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -1068,12 +1045,10 @@ Element :: computeVolumeAreaOrLength()
 // the element computes its volume, area or length
 // (depending on the spatial dimension of that element)
 {
-    GaussPoint *gp;
     double answer = 0.;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     if ( iRule ) {
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            gp  = iRule->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *iRule ) {
             answer += this->computeVolumeAround(gp);
         }
 
@@ -1374,7 +1349,6 @@ int
 Element :: adaptiveMap(Domain *oldd, TimeStep *tStep)
 {
     int result = 1;
-    IntegrationRule *iRule;
     MaterialModelMapperInterface *interface = static_cast< MaterialModelMapperInterface * >
                                               ( this->giveMaterial()->giveInterface(MaterialModelMapperInterfaceType) );
 
@@ -1382,10 +1356,9 @@ Element :: adaptiveMap(Domain *oldd, TimeStep *tStep)
         return 0;
     }
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            result &= interface->MMI_map(iRule->getIntegrationPoint(j), oldd, tStep);
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( GaussPoint *gp: *iRule ) {
+            result &= interface->MMI_map(gp, oldd, tStep);
         }
     }
 
@@ -1410,22 +1383,20 @@ Element :: mapStateVariables(Domain &iOldDom, const TimeStep &iTStep)
     }
     sourceElemSet.setElementList(el);
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint &gp = * ( iRule->getIntegrationPoint(j) );
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( GaussPoint *gp: *iRule ) {
 
-            MaterialStatus *ms = dynamic_cast< MaterialStatus * >( gp.giveMaterialStatus() );
+            MaterialStatus *ms = dynamic_cast< MaterialStatus * >( gp->giveMaterialStatus() );
             if ( ms == NULL ) {
-                OOFEM_ERROR("failed to fetch MaterialStatus.\n");
+                OOFEM_ERROR("failed to fetch MaterialStatus.");
             }
 
             MaterialStatusMapperInterface *interface = dynamic_cast< MaterialStatusMapperInterface * >(ms);
             if ( interface == NULL ) {
-                OOFEM_ERROR("Failed to fetch MaterialStatusMapperInterface.\n");
+                OOFEM_ERROR("Failed to fetch MaterialStatusMapperInterface.");
             }
 
-            result &= interface->MSMI_map( gp, iOldDom, sourceElemSet, iTStep, * ( ms ) );
+            result &= interface->MSMI_map( *gp, iOldDom, sourceElemSet, iTStep, * ( ms ) );
         }
     }
 
@@ -1436,23 +1407,24 @@ Element :: mapStateVariables(Domain &iOldDom, const TimeStep &iTStep)
 int
 Element :: adaptiveFinish(TimeStep *tStep)
 {
-    int result = 1;
-    IntegrationRule *iRule;
     MaterialModelMapperInterface *interface = static_cast< MaterialModelMapperInterface * >
                                               ( this->giveMaterial()->giveInterface(MaterialModelMapperInterfaceType) );
 
     if ( !interface ) {
         return 0;
     }
-
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
+#if 0
+    int result = 1;
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( GaussPoint *gp: *iRule ) {
             result &= interface->MMI_finish(tStep);
         }
     }
 
     return result;
+#else
+    return interface->MMI_finish(tStep);
+#endif
 }
 
 
@@ -1494,12 +1466,10 @@ int
 Element :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep)
 {
     int result = 1;
-    IntegrationRule *iRule;
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            result &= this->giveCrossSection()->packUnknowns( buff, tStep, iRule->getIntegrationPoint(j) );
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( GaussPoint *gp: *iRule ) {
+            result &= this->giveCrossSection()->packUnknowns( buff, tStep, gp );
         }
     }
 
@@ -1511,12 +1481,10 @@ int
 Element :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep)
 {
     int result = 1;
-    IntegrationRule *iRule;
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            result &= this->giveCrossSection()->unpackAndUpdateUnknowns( buff, tStep, iRule->getIntegrationPoint(j) );
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( GaussPoint *gp: *iRule ) {
+            result &= this->giveCrossSection()->unpackAndUpdateUnknowns( buff, tStep, gp );
         }
     }
 
@@ -1528,12 +1496,10 @@ int
 Element :: estimatePackSize(CommunicationBuffer &buff)
 {
     int result = 0;
-    IntegrationRule *iRule;
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            result += this->giveCrossSection()->estimatePackSize( buff, iRule->getIntegrationPoint(j) );
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( GaussPoint *gp: *iRule ) {
+            result += this->giveCrossSection()->estimatePackSize( buff, gp );
         }
     }
 
@@ -1544,12 +1510,10 @@ Element :: estimatePackSize(CommunicationBuffer &buff)
 double
 Element :: predictRelativeComputationalCost()
 {
-    int nip;
     double wgt = 0;
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
-    nip = iRule->giveNumberOfIntegrationPoints();
-    for ( int j = 0; j < nip; j++ ) {
-        wgt += this->giveCrossSection()->predictRelativeComputationalCost( iRule->getIntegrationPoint(j) );
+    for ( GaussPoint *gp: *iRule ) {
+        wgt += this->giveCrossSection()->predictRelativeComputationalCost( gp );
     }
 
     return ( this->giveRelativeSelfComputationalCost() * wgt );

@@ -39,8 +39,8 @@ InitialCondition 1 Conditions 1 u 0.0
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK% tolerance 1.e-5
-#NODE tStep 5.94000000e+07 number 17 dof 1 unknown f value 11.08688 // 11.086956522
-#NODE tStep 5.94000000e+07 number 18 dof 1 unknown f value 11.08688 // 11.086956522
+#NODE tStep 5.94000000e+07 number 17 dof 10 unknown d value 11.08688 // 11.086956522
+#NODE tStep 5.94000000e+07 number 18 dof 10 unknown d value 11.08688 // 11.086956522
 #%END_CHECK%
 
 

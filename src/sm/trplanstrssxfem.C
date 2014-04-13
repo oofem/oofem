@@ -183,18 +183,16 @@ void TrPlaneStress2dXFEM :: drawRawGeometry(oofegGraphicContext &context)
     if ( !xf->isElementEnriched(this) ) {
         TrPlaneStress2d :: drawRawGeometry(context);
     } else {
-        if ( numberOfIntegrationRules > 1 ) {
-            int i;
-            //            PatchIntegrationRule *iRule;
-            for ( i = 0; i < numberOfIntegrationRules; i++ ) {
+        if ( integrationRulesArray.size() > 1 ) {
+#if 0
+            for ( auto &ir: integrationRulesArray ) {
                 // TODO: Implement visualization.
-                /*
-                 *              iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
-                 *              if ( iRule ) {
-                 *                  iRule->givePatch()->draw(context);
-                 *              }
-                 */
+                PatchIntegrationRule *iRule = dynamic_cast< PatchIntegrationRule * >( ir );
+                if ( iRule ) {
+                    iRule->givePatch()->draw(context);
+                }
             }
+#endif
         } else {
             TrPlaneStress2d :: drawRawGeometry(context);
         }
@@ -219,16 +217,14 @@ void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &context)
             indx = context.giveIntVarIndx();
 
             TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
-            PatchIntegrationRule *iRule;
-            for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-                iRule = dynamic_cast< PatchIntegrationRule * >(integrationRulesArray [ i ]);
+            for ( auto &ir: integrationRulesArray ) {
+                PatchIntegrationRule *iRule = dynamic_cast< PatchIntegrationRule * >(ir);
 
  #if 0
                 val = iRule->giveMaterial();
  #else
                 val = 0.0;
-                for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                    GaussPoint *gp = iRule->getIntegrationPoint(0);
+                for ( GaussPoint *gp: *iRule ) {
                     giveIPValue(v, gp, context.giveIntVarType(), tStep);
                     val += v.at(indx);
                 }

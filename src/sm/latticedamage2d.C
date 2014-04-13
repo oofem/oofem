@@ -165,7 +165,7 @@ LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const Flo
             //linear stress-crack opening relation
             //check if input parameter make sense
             if ( this->wf / status->giveLe() <= e0 ) {
-                OOFEM_ERROR("e0>wf/Le \n Possible solutions: Increase fracture energy or reduce element size\n");
+                OOFEM_ERROR("e0>wf/Le \n Possible solutions: Increase fracture energy or reduce element size");
             }
 
             omega = ( 1. - e0 / tempKappa ) / ( 1. - e0 / ( this->wf / status->giveLe() ) );
@@ -228,7 +228,7 @@ LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const Flo
             } while ( fabs(R) >= 1.e-4 );
 
             if ( ( omega > 1.0 ) || ( omega < 0.0 ) ) {
-                OOFEM_ERROR("internal error\n");
+                OOFEM_ERROR("internal error");
             }
         }
     } else {
@@ -556,7 +556,7 @@ void LatticeDamage2d :: giveRandomParameters(FloatArray &param)
     if ( localRandomType == 1 ) { //Gaussian
         param.at(2) = coefficientOfVariation;
     } else {
-        OOFEM_ERROR("Unknown local random type:\n randomtype 1 = Gaussian\n");
+        OOFEM_ERROR("Unknown local random type:\n randomtype 1 = Gaussian");
     }
 }
 
@@ -584,7 +584,7 @@ LatticeDamage2d :: giveStiffnessMatrix(FloatMatrix &answer,
         } else if ( rMode == TangentStiffness ) {
             this->giveSecantStiffnessMatrix(answer, gp, tStep);
         } else {
-            OOFEM_ERROR("Unsupported stiffness mode\n");
+            OOFEM_ERROR("Unsupported stiffness mode");
         }
 
         break;
@@ -621,7 +621,7 @@ LatticeDamage2d :: giveTangentStiffnessMatrix(FloatMatrix &answer,
                                               GaussPoint *gp,
                                               TimeStep *tStep)
 {
-    OOFEM_ERROR("tangent stiffness not implemented\n");
+    OOFEM_ERROR("tangent stiffness not implemented");
 }
 
 

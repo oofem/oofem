@@ -33,7 +33,6 @@
  */
 
 #include "mathfem.h"
-#include "alist.h"
 #include "geometry.h"
 #include "element.h"
 #include "dofmanager.h"
@@ -271,7 +270,7 @@ Triangle :: Triangle(const FloatArray &iP1, const FloatArray &iP2, const FloatAr
 
     for(size_t i = 0; i < mVertices.size(); i++) {
     	if( mVertices[i].giveSize() == 2 ) {
-    		mVertices[i].setValues(3, mVertices[i].at(1), mVertices[i].at(2), 0.0 );
+    		mVertices[i] = {mVertices[i].at(1), mVertices[i].at(2), 0.0};
     	}
     }
 }
@@ -355,7 +354,7 @@ bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
 {
 	FloatArray P(iP);
 	if(iP.giveSize() == 2) {
-		P.setValues(3, iP.at(1), iP.at(2), 0.0);
+		P = {iP.at(1), iP.at(2), 0.0};
 	}
 
 	const double tol2 = 1.0e-18;
@@ -744,8 +743,7 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
             FloatArray t;
             t.beDifferenceOf(crackP2, crackP1, dim);
 
-            FloatArray n;
-            n.setValues( 2, -t.at(2), t.at(1) );
+            FloatArray n = {-t.at(2), t.at(1)};
 
             oDist = sgn( lineToP.dotProduct(n) ) * sqrt(dist2);
         }

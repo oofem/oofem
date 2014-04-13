@@ -59,7 +59,7 @@ SmoothedNodalInternalVariableField :: ~SmoothedNodalInternalVariableField()
 int
 SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *tStep)
 {
-    int i, result = 0; // assume ok
+    int result = 0; // assume ok
     FloatArray lc, n;
     const FloatArray *nodalValue;
 
@@ -78,7 +78,7 @@ SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, FloatArray 
                 // evaluate interpolation functions at target point
                 interp->evalN( n, lc, FEIElementGeometryWrapper(elem) );
                 // loop over element nodes
-                for ( i = 1; i <= n.giveSize(); i++ ) {
+                for ( int i = 1; i <= n.giveSize(); i++ ) {
                     // request nodal value
                     this->smoother->giveNodalVector( nodalValue, elem->giveDofManagerNumber(i) );
                     // multiply nodal value by value of corresponding shape function and add this to answer

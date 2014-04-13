@@ -163,7 +163,7 @@ Logger :: appendLogTo(const std :: string &fname)
     }
 
     if ( stream == NULL ) {
-        OOFEM_SIMPLE_WARNING( "Logger::appendLogTo : file opening error (%s)", fname.c_str() );
+        OOFEM_WARNING( "file opening error (%s)", fname.c_str() );
     } else {
         this->logStream = stream;
     }
@@ -182,7 +182,7 @@ Logger :: appendErrorTo(const std :: string &fname)
     }
 
     if ( stream == NULL ) {
-        OOFEM_SIMPLE_WARNING( "Logger::appendErrorTo : file opening error (%s)", fname.c_str() );
+        OOFEM_WARNING( "file opening error (%s)", fname.c_str() );
     } else {
         this->errStream = stream;
     }

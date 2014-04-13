@@ -348,23 +348,20 @@ StaticStructural :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 int
 StaticStructural :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
 {
-    int mapSize = commMap.giveSize();
     int count = 0, pcount = 0;
     Domain *domain = this->giveDomain(1);
 
     if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            count += domain->giveDofManager( commMap.at(i) )->giveNumberOfDofs();
+        for ( int map: commMap ) {
+            count += domain->giveDofManager( map )->giveNumberOfDofs();
         }
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
     } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            DofManager *dman = domain->giveDofManager( commMap.at(i) );
-            int ndofs = dman->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                Dof *jdof = dman->giveDof(j);
-                if ( jdof->isPrimaryDof() && jdof->__giveEquationNumber() > 0 ) {
+        for ( int map: commMap ) {
+            DofManager *dman = domain->giveDofManager( map );
+            for ( Dof *dof: *dman ) {
+                if ( dof->isPrimaryDof() && dof->__giveEquationNumber() > 0 ) {
                     count++;
                 } else {
                     pcount++;
@@ -378,8 +375,8 @@ StaticStructural :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * pcount );
     } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            count += domain->giveElement( commMap.at(i) )->estimatePackSize(buff);
+        for ( int map: commMap ) {
+            count += domain->giveElement( map )->estimatePackSize(buff);
         }
 
         return count;

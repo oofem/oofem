@@ -19,7 +19,7 @@ ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK% tolerance 1.e-3
 #TIME
-##NODE tStep 1.044000e+05 number 1 dof 1 unknown f value 1.84748043e+01
+##NODE tStep 1.044000e+05 number 1 dof 10 unknown d value 1.84748043e+01
 #ELEMENT tStep 7.200000e+03 number 1 gp 1 keyword "DoH" component 1 value 0.0
 #ELEMENT tStep 1.044000e+05 number 1 gp 1 keyword "DoH" component 1 value 4.973780e-01
 #%END_CHECK%

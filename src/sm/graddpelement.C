@@ -122,7 +122,7 @@ GradDpElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, 
         cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );
 
     if ( !dpmat ) {
-        OOFEM_SIMPLE_ERROR("GradDpElement :: computeStiffnessMatrix_uu - Material doesn't implement the required DpGrad interface!");
+        OOFEM_ERROR("Material doesn't implement the required DpGrad interface!");
     }
 
     this->computeNonlocalCumulatedStrain(nlCumulatedStrain, gp, tStep);
@@ -133,7 +133,7 @@ GradDpElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, 
             dpmat->giveRealStressVectorGrad(answer, localCumulatedStrain, gp, Epsilon, nlCumulatedStrain, tStep);
             return;
         } else {
-            OOFEM_SIMPLE_ERROR("computeStressVectorAndLocalCumulatedStrain : unsupported mode");
+            OOFEM_ERROR("unsupported mode");
         }
     } else if ( nlGeo == 1 ) {
         if ( elem->giveDomain()->giveEngngModel()->giveFormulation() == TL ) {
@@ -143,7 +143,7 @@ GradDpElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, 
                 dpmat->giveFirstPKStressVectorGrad(answer, localCumulatedStrain, gp, vF, nlCumulatedStrain, tStep);
                 return;
             } else {
-                OOFEM_SIMPLE_ERROR("computeStressVectorAndLocalCumulatedStrain : unsupported mode");
+                OOFEM_ERROR("unsupported mode");
             }
         } else {
             FloatArray vF;
@@ -152,7 +152,7 @@ GradDpElement :: computeStressVectorAndLocalCumulatedStrain(FloatArray &answer, 
                 dpmat->giveCauchyStressVectorGrad(answer, localCumulatedStrain, gp, vF, nlCumulatedStrain, tStep);
                 return;
             } else {
-                OOFEM_SIMPLE_ERROR("computeStressVectorAndLocalCumulatedStrain : unsupported mode");
+                OOFEM_ERROR("unsupported mode");
             }
         }
     }
@@ -200,7 +200,7 @@ GradDpElement :: computeDeformationGradientVector(FloatArray &answer, GaussPoint
     } else if ( matMode == _1dMat ) {
         answer.at(1) += 1.0;
     } else {
-        OOFEM_SIMPLE_ERROR( "computeDeformationGradientVector : MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
+        OOFEM_ERROR( "MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
     }
 }
 
@@ -235,7 +235,6 @@ void
 GradDpElement :: giveNonlocalInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     double dV, localCumulatedStrain = 0.;
-    GaussPoint *gp;
     NLStructuralElement *elem = this->giveNLStructuralElement();
     IntegrationRule *iRule =  elem->giveIntegrationRule(0);
     FloatMatrix stiffKappa, Nk;
@@ -249,8 +248,7 @@ GradDpElement :: giveNonlocalInternalForcesVector(FloatArray &answer, TimeStep *
     this->setNonlocalLocationArray(locK, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
 
     answer.resize(size);
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         this->computeNkappaMatrixAt(gp, Nk);
         for ( int j = 1; j <= nlSize; j++ ) {
             fKappa.at(j) = Nk.at(1, j);
@@ -278,8 +276,7 @@ GradDpElement :: giveLocalInternalForcesVector(FloatArray &answer, TimeStep *tSt
     int nlGeo = elem->giveGeometryMode();
     FloatArray BS, vStress;
     FloatMatrix B;
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
 
         if ( nlGeo == 0 || elem->domain->giveEngngModel()->giveFormulation() == AL ) {
             elem->computeBmatrixAt(gp, B);
@@ -398,13 +395,12 @@ GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode 
     IntegrationRule *iRule = elem->giveIntegrationRule(0);
     bool matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
     answer.clear();
-    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(j);
+    for ( GaussPoint *gp: *iRule ) {
 
         GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(
             cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );
         if ( !dpmat ) {
-            OOFEM_SIMPLE_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
+            OOFEM_ERROR("Material doesn't implement the required DpGrad interface!");
         }
         if ( nlGeo == 0 ) {
             elem->computeBmatrixAt(gp, B);
@@ -452,13 +448,12 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
     IntegrationRule *iRule = elem->giveIntegrationRule(0);
     int nlGeo = elem->giveGeometryMode();
 
-    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(j);
+    for ( GaussPoint *gp: *iRule ) {
 
         GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(
             cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );
         if ( !dpmat ) {
-            OOFEM_SIMPLE_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
+            OOFEM_ERROR("Material doesn't implement the required DpGrad interface!");
         }
 
         elem->computeBmatrixAt(gp, B);
@@ -557,13 +552,12 @@ GradDpElement :: computeStiffnessMatrix_kk(FloatMatrix &answer, MatResponseMode 
 
     answer.clear();
 
-    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(j);
+    for ( GaussPoint *gp: *iRule ) {
 
         GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(
             cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );
         if ( !dpmat ) {
-            OOFEM_SIMPLE_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
+            OOFEM_ERROR("Material doesn't implement the required DpGrad interface!");
         }
 
         this->computeNkappaMatrixAt(gp, Nk);
@@ -595,13 +589,12 @@ GradDpElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode 
 
     answer.clear();
 
-    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(j);
+    for ( GaussPoint *gp: *iRule ) {
 
         GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(
             cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );
         if ( !dpmat ) {
-            OOFEM_SIMPLE_ERROR("GradDpElement :: computeStiffnessMatrix_uk - Material doesn't implement the required DpGrad interface!");
+            OOFEM_ERROR("Material doesn't implement the required DpGrad interface!");
         }
         dpmat->givePDGradMatrix_uk(gPSigma, rMode, gp, tStep);
         this->computeNkappaMatrixAt(gp, Nk);

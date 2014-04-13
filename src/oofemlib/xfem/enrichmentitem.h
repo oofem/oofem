@@ -69,7 +69,6 @@
 
 
 namespace oofem {
-template< class T >class AList;
 class BasicGeometry;
 class EnrichmentFunction;
 class EnrichmentDomain;
@@ -114,7 +113,7 @@ public:
      * EnrichmentDomain, EnrichmentFront and PropagationLaw
      * without have to keep track of them globally.
      */
-    virtual void giveInputRecord(DynamicInputRecord &input) { OOFEM_ERROR("This function must be called with DynamicDataReader as input.\n"); }
+    virtual void giveInputRecord(DynamicInputRecord &input) { OOFEM_ERROR("This function must be called with DynamicDataReader as input."); }
     virtual void appendInputRecords(DynamicDataReader &oDR);
 
     int instanciateYourself(DataReader *dr);

@@ -36,7 +36,7 @@
 #define delaunay_h
 
 #include "oofemcfg.h"
-#include "alist.h"
+
 #include <vector>
 
 namespace oofem {
@@ -57,7 +57,7 @@ public:
     Delaunay() : mTol(1.0e-12) { }
 
     bool colinear(const FloatArray &iP1, const FloatArray &iP2, const FloatArray &iP3) const;
-    void printTriangles(AList< Triangle > *triangles);
+    void printTriangles(std :: vector< Triangle > &triangles);
     bool isInsideCC(const FloatArray &iP, const FloatArray &iP1, const FloatArray &iP2, const FloatArray &iP3) const;
     void triangulate(const std :: vector< FloatArray > &iVertices, std :: vector< Triangle > &oTriangles) const;
 

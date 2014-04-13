@@ -20,8 +20,8 @@ ConstantFunction 1 f(t) 1.0
 #%BEGIN_CHECK% tolerance 1.e-4
 ## check reactions 
 #REACTION tStep 1 number 1 dof 1 value -4.7254e+00
-#REACTION tStep 1 number 1 dof 2 value -1.1180e+01
-#REACTION tStep 1 number 2 dof 2 value 1.2910e+01
+#REACTION tStep 1 number 1 dof 3 value -1.1180e+01
+#REACTION tStep 1 number 2 dof 3 value 1.2910e+01
 ## check all nodes
 ## check element  strain vector
 #ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 1  value 4.7254e+01

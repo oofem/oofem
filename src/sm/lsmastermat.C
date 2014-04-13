@@ -398,10 +398,7 @@ LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, 
         }
 
         sMat->give3dMaterialStiffnessMatrix(stiffness, mode, gp, tStep);
-        FloatMatrix P, TL, F, junk;
-        FloatArray stress;
-        stress =   status->giveTempStressVector();
-        status->giveTransformationMatrix(F);
+        FloatMatrix junk;
         ///////////////////////////////////////////////////////////
         stiffness.at(1, 4) = 2. * stiffness.at(1, 4);
         stiffness.at(4, 1) = 2. * stiffness.at(4, 1);
@@ -431,13 +428,9 @@ LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer, 
         stiffness.at(6, 5) = 4. * stiffness.at(6, 5);
         stiffness.at(6, 6) = 4. * stiffness.at(6, 6);
         /////////////////////////////////////////////////////////////
-        status->givePmatrix(P);
-        status->giveTLmatrix(TL);
-        junk.resize(6, 6);
-        junk.zero();
-        junk.beProductOf(stiffness, P);
-        stiffness.beProductOf(P, junk);
-        stiffness.add(TL);
+        junk.beProductOf(stiffness, status->givePmatrix());
+        stiffness.beProductOf(status->givePmatrix(), junk);
+        stiffness.add(status->giveTLmatrix());
 
 
         FloatArray vF = status->giveTempFVector();

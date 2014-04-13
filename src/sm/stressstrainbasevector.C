@@ -51,7 +51,7 @@ StressStrainBaseVector :: StressStrainBaseVector(MaterialMode m) : FloatArray()
 StressStrainBaseVector :: StressStrainBaseVector(const FloatArray &src, MaterialMode m) : FloatArray(src)
 {
     if ( StructuralMaterial :: giveSizeOfVoigtSymVector(m) != src.giveSize() ) {
-        OOFEM_SIMPLE_ERROR( "StressStrainBaseVector::StressStrainBaseVector: size mismatch. The source has size %d and a new MaterialMode %s has reduced size %d", src.giveSize(), __MaterialModeToString(m), StructuralMaterial :: giveSizeOfVoigtSymVector(m) );
+        OOFEM_ERROR( "The source has size %d and a new MaterialMode %s has reduced size %d", src.giveSize(), __MaterialModeToString(m), StructuralMaterial :: giveSizeOfVoigtSymVector(m) );
     }
 
     this->mode = m;
@@ -93,7 +93,7 @@ StressStrainBaseVector :: convertFromFullForm(const FloatArray &vector, Material
 
     if ( mode == _3dMat ) {
         if ( this->giveSize() != 6 ) {
-            OOFEM_SIMPLE_ERROR("convertFromFullForm - full vector size mismatch");
+            OOFEM_ERROR("full vector size mismatch");
         }
 
         this->resize(6);
@@ -170,7 +170,7 @@ StressStrainBaseVector :: transformTo(StressStrainBaseVector &answer, const Floa
 
 {
     FloatMatrix tt;
-    FloatArray fullReceiver(6), fullAnswer(6);
+    FloatArray fullReceiver, fullAnswer;
 
     this->giveTranformationMtrx(tt, base, transpose);
     // convert receiver to full mode
@@ -187,11 +187,11 @@ StressStrainBaseVector :: computeVolumetricPart() const
 
     if ( myMode == _1dMat ) {
         // 1D model
-        OOFEM_SIMPLE_ERROR("StressStrainBaseVector::computeVolumetricPart: No Split for 1D!");
+        OOFEM_ERROR("No Split for 1D!");
         return 0.0;
     } else if ( myMode == _PlaneStress ) {
         // plane stress problem
-        OOFEM_SIMPLE_ERROR("StressStrainBaseVector::computeVolumetricPart: No Split for plane stress!");
+        OOFEM_ERROR("No Split for plane stress!");
         return 0.0;
     } else {
         // 3d, plane strain or axisymmetric problem

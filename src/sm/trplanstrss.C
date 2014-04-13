@@ -210,9 +210,8 @@ TrPlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 void TrPlaneStress2d :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -688,7 +687,6 @@ TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
 {
     WCRec l [ 2 ];
     GraphicObj *tr;
-    GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     FloatArray crackStatuses, cf;
@@ -703,8 +701,7 @@ TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
         double ax, ay, bx, by, norm, xc, yc, length;
         FloatArray crackDir;
 
-        for ( int i = 1; i <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); i++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i - 1);
+        for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
             if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }
@@ -715,7 +712,7 @@ TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
 
             if ( this->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
                 this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
-                for ( i = 1; i <= 3; i++ ) {
+                for ( int i = 1; i <= 3; i++ ) {
                     crackStatus = ( int ) crackStatuses.at(i);
                     if ( ( crackStatus != pscm_NONE ) && ( crackStatus != pscm_CLOSED ) ) {
                         // draw a crack
@@ -738,14 +735,14 @@ TrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
                         // obtain gp global coordinates - here only one exists
                         // it is in centre of gravity.
                         xc = yc = 0.;
-                        for ( i = 0; i < 3; i++ ) {
+                        for ( int j = 1; j <= 3; j++ ) {
                             if ( gc.getInternalVarsDefGeoFlag() ) {
                                 // use deformed geometry
-                                xc += ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
-                                yc += ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
+                                xc += ( FPNum ) this->giveNode(j)->giveUpdatedCoordinate(1, tStep, defScale);
+                                yc += ( FPNum ) this->giveNode(j)->giveUpdatedCoordinate(2, tStep, defScale);
                             } else {
-                                xc += ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-                                yc += ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+                                xc += ( FPNum ) this->giveNode(j)->giveCoordinate(1);
+                                yc += ( FPNum ) this->giveNode(j)->giveCoordinate(2);
                             }
                         }
 

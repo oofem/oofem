@@ -69,7 +69,7 @@ public:
 
     const FloatMatrix &giveTangentMatrix() { return tangentMatrix; }
     const FloatMatrix &giveTempTangentMatrix() { return temp_TangentMatrix; }
-    void letTempTangentMatrixBe(const FloatMatrix &K) { temp_TangentMatrix = K; }
+    void letTempTangentMatrixBe(FloatMatrix K) { temp_TangentMatrix = std :: move(K); }
 
     /**
      * Export this RVE. The files produced is named ./[.in-file].rve/Rve_[ID]_[GP number] where is is the global element number any GP number is

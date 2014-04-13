@@ -70,10 +70,10 @@ public:
 
     const FloatArray &giveNonlocalStrainVector() { return nonlocalStrainVector; }
     const FloatArray &giveTempNonlocalStrainVector() { return tempNonlocalStrainVector; }
-    void   setTempNonlocalStrainVector(const FloatArray &ls) { tempNonlocalStrainVector = ls; }
+    void setTempNonlocalStrainVector(FloatArray ls) { tempNonlocalStrainVector = std :: move(ls); }
 
     const FloatArray &giveLocalStrainVectorForAverage() { return localStrainVectorForAverage; }
-    void setLocalStrainVectorForAverage(const FloatArray &ls) { localStrainVectorForAverage = ls; }
+    void setLocalStrainVectorForAverage(FloatArray ls) { localStrainVectorForAverage = std :: move(ls); }
 
     // definition
     virtual const char *giveInputRecordName() const { return _IFT_RCSDNLMaterial_Name; }

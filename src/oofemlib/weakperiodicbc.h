@@ -118,6 +118,7 @@ private:
     double computeBaseFunctionValue2D(int baseID, FloatArray coordinate);
 
     Node *gammaDman;
+    IntArray gamma_ids;
 
     double factorial(int n);
 

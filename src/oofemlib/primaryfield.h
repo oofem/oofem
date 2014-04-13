@@ -103,7 +103,7 @@ protected:
     int actualStepIndx;
     int nHistVectors;
     std :: vector< FloatArray >solutionVectors;
-    AList< TimeStep >solStepList;
+    std :: vector< std :: unique_ptr< TimeStep > >solStepList;
     EngngModel *emodel;
     int domainIndx;
     EquationID ut;

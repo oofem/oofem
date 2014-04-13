@@ -37,7 +37,6 @@
 
 #include "oofemcfg.h"
 #include "inputrecord.h"
-#include "alist.h"
 #include "intarray.h"
 #include "fieldmanager.h"
 #include "timer.h"
@@ -58,7 +57,6 @@
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
  #include "problemcommunicatormode.h"
- #include "loadbalancer.h"
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -103,6 +101,8 @@ class InitModuleManager;
 class ExportModuleManager;
 class FloatMatrix;
 class FloatArray;
+class LoadBalancer;
+class LoadBalancerMonitor;
 class oofegGraphicContext;
 
 #ifdef __PARALLEL_MODE

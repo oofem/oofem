@@ -94,7 +94,7 @@ double Parser :: term(bool get) // multiply and divide
                 left /= d;
                 break;
             }
-            error("divide by 0");
+            OOFEM_ERROR("divide by 0");
             return 1;
 
         case POW:
@@ -139,7 +139,7 @@ double Parser :: prim(bool get) // handle primaries
     {
         double e = expr(true);
         if ( curr_tok != RP ) {
-            error(") expected");
+            OOFEM_ERROR(") expected");
             return 1;
         }
 
@@ -195,7 +195,7 @@ double Parser :: prim(bool get) // handle primaries
     }
 
     default:
-        error("primary expected");
+        OOFEM_ERROR("primary expected");
         return 1;
     }
 }
@@ -211,7 +211,7 @@ double Parser :: agr(bool get)
     {
         double e = expr(true);
         if ( curr_tok != RP ) {
-            error(") expected");
+            OOFEM_ERROR(") expected");
             return 1;
         }
 
@@ -219,7 +219,7 @@ double Parser :: agr(bool get)
         return e;
     }
     default:
-        error("function argument expected");
+        OOFEM_ERROR("function argument expected");
         return 1;
     }
 }
@@ -301,7 +301,7 @@ Parser :: Token_value Parser :: get_token()
             while ( ( ch = * ( parsedLine++ ) ) && isalnum(ch) ) {
                 * p++ = ch;
                 if ( len++ >= Parser_CMD_LENGTH ) {
-                    error("command too long");
+                    OOFEM_ERROR("command too long");
                 }
             }
 
@@ -335,7 +335,7 @@ Parser :: Token_value Parser :: get_token()
             }
         }
 
-        error("bad token");
+        OOFEM_ERROR("bad token");
         return curr_tok = PRINT;
     }
 }
@@ -362,7 +362,7 @@ Parser :: name *Parser :: look(const char *p, int ins)
     }
 
     if ( ins == 0 ) {
-        error("name not found");
+        OOFEM_ERROR("name not found");
     }
 
     name *nn = new name;
@@ -374,12 +374,6 @@ Parser :: name *Parser :: look(const char *p, int ins)
     return nn;
 }
 
-
-void Parser :: error(const char *s)
-{
-    no_of_errors++;
-    OOFEM_SIMPLE_WARNING("Parser :: error: %s", s);
-}
 
 double Parser :: eval(const char *string, int &err)
 {

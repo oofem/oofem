@@ -80,16 +80,15 @@ DofManExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     DofManager *dm;
     double x, y, z, displacement;
-    Dof *dof;
     int domainIndex = 1;
     Domain *d  = emodel->giveDomain(domainIndex);
     FloatArray reactions;
 
 
-    IntArray dofManMap, dofMap, eqnMap;
+    IntArray dofManMap, dofidMap, eqnMap;
     StructuralEngngModel *strEngMod = dynamic_cast< StructuralEngngModel * >(emodel);
     if ( strEngMod ) {
-        strEngMod->buildReactionTable(dofManMap, dofMap, eqnMap, tStep, domainIndex);
+        strEngMod->buildReactionTable(dofManMap, dofidMap, eqnMap, tStep, domainIndex);
         strEngMod->computeReaction(reactions, tStep, 1);
     }
 
@@ -111,9 +110,7 @@ DofManExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         y = dm->giveCoordinate(2);
         z = dm->giveCoordinate(3);
         fprintf(stream, "%d %g %g %g ", dm->giveNumber(), x, y, z);
-        int ndofs = dm->giveNumberOfDofs();
-        for ( int idof = 1; idof <= ndofs; idof++ ) {
-            dof = dm->giveDof(idof);
+        for ( Dof *dof: *dm ) {
             displacement = dof->giveUnknown(VM_Total, tStep);
             fprintf(stream, " %g", displacement);
         }

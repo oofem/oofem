@@ -65,8 +65,8 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
 
 #if 1
             bool hasBc = false;
-            for ( int j = 1; j <= el->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
-                if ( el->giveDofManager(i)->giveDof(j)->hasBc(tStep) ) {
+            for ( Dof *dof: *el->giveDofManager(i) ) {
+                if ( dof->hasBc(tStep) ) {
                     hasBc = true;
                     continue;
                 }

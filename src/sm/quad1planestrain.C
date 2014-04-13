@@ -115,9 +115,8 @@ void
 Quad1PlaneStrain :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -131,14 +130,7 @@ Quad1PlaneStrain :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &a
 {
     FloatArray n;
     this->interp.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
-
-    answer.resize(2, 8);
-    answer.zero();
-
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, 2 * i - 1) = n.at(i);
-        answer.at(2, 2 * i - 0) = n.at(i);
-    }
+    answer.beNMatrixOf(n, 2);
 }
 
 
@@ -562,8 +554,6 @@ void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        int ip;
-        GaussPoint *gp;
         IntArray ind(4);
         FloatArray *gpCoords;
         WCRec pp [ 9 ];
@@ -596,8 +586,7 @@ void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
-        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
             gpCoords = gp->giveCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;
@@ -652,7 +641,6 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
     int i;
     WCRec l [ 2 ];
     GraphicObj *tr;
-    GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     FloatArray crackStatuses, cf;
@@ -663,13 +651,12 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
 
     if ( gc.giveIntVarType() == IST_CrackState ) {
         // ask if any active crack exist
-        int igp, crackStatus;
+        int crackStatus;
         double ax, ay, bx, by, norm, xc, yc, length;
         FloatArray crackDir;
         FloatArray gpglobalcoords;
 
-        for ( igp = 1; igp <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); igp++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(igp - 1);
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
 
             if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
@@ -841,14 +828,9 @@ Quad1PlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
 double
 Quad1PlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
 {
-    int i;
-    IntegrationRule *iRule;
-    GaussPoint *gp;
     double volume = 0.0;
 
-    iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
         volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
     }
 
@@ -869,13 +851,7 @@ Quad1PlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeTy
 
     this->interp.evalN( nv, lcoords, FEIElementGeometryWrapper(this) );
 
-    n.resize(2, 8);
-    n.zero();
-
-    n.at(1, 1) = n.at(2, 2) = nv.at(1);
-    n.at(1, 3) = n.at(2, 4) = nv.at(2);
-    n.at(1, 5) = n.at(2, 6) = nv.at(3);
-    n.at(1, 7) = n.at(2, 8) = nv.at(4);
+    n.beNMatrixOf(nv, 2);
 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
