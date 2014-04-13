@@ -299,7 +299,7 @@ int FE2FluidMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
             OOFEM_ERROR("Error in volumetric pressure tangent");
         }
 #endif
-        answer.setValues( 1, status->giveVolumetricPressureTangent() );
+        answer = {status->giveVolumetricPressureTangent()};
         return true;
     } else {
         return FluidDynamicMaterial :: giveIPValue(answer, gp, type, tStep);
