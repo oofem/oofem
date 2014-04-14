@@ -128,6 +128,7 @@ set (core_export
     outputmanager.C
     exportmodule.C
     exportmodulemanager.C
+    outputexportmodule.C
     vtkexportmodule.C
     vtkxmlexportmodule.C
     homexportmodule.C

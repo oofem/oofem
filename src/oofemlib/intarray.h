@@ -289,6 +289,10 @@ public:
      */
     int insertOnce(int p);
     /**
+     * Sorts array.
+     */
+    void sort();
+    /**
      * Erase the element at given position (1-based index)
      * Receiver will shrink accordingly, the values at positions (pos+1,...,size)
      * will be moved to positions (pos,...,size-1)

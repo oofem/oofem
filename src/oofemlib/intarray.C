@@ -366,6 +366,12 @@ int IntArray :: insertOnce(int _p)
 }
 
 
+void IntArray :: sort()
+{
+    std::sort(this->begin(), this->end());
+}
+
+
 #ifdef __PARALLEL_MODE
 int IntArray :: packToCommBuffer(CommunicationBuffer &buff) const
 {
