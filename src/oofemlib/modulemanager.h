@@ -135,7 +135,7 @@ public:
     M *giveModule(int num) {
         M *elem = NULL;
 
-        if ( num >= 1 && num < (int)moduleList.size() ) {
+        if ( num >= 1 && num <= (int)moduleList.size() ) {
             elem = moduleList[num-1].get();
         } else {
             OOFEM_ERROR("No module no. %d defined", num);
