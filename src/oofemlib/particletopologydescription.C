@@ -875,7 +875,7 @@ void ParticleTopologyDescription :: writeVTKFile(const char *name) const
     //writer->SetDataModeToAscii();
     writer->Write();
 #else
-    OOFEM_WARNING("ParticleTopologyDescription :: writeVTKFile - Not compiled with VTK support.");
+    OOFEM_WARNING("Not compiled with VTK support.");
 #endif
 }
 
