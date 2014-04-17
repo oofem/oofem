@@ -760,7 +760,7 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
         TransportElement *element = static_cast< TransportElement * >( domain->giveElement(ielem) );
         TransportMaterial *mat = static_cast< CemhydMat * >( element->giveMaterial() );
         if ( mat ) {
-            for ( GaussPoint *gp: element->giveDefaultIntegrationRulePtr() ) {
+            for ( GaussPoint *gp: *element->giveDefaultIntegrationRulePtr() ) {
                 element->giveIPValue(vecTemperature, gp, IST_Temperature, tStep);
                 //mat->IP_volume += dV;
                 //mat->average_temp += vecState.at(1) * dV;
