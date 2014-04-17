@@ -153,11 +153,15 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 
     int counter = nDofMan * dim;
 
+    int numEnrNode = 0;
+
     for ( int j = 1; j <= nDofMan; j++ ) {
         DofManager *dMan = iEl.giveDofManager(j);
 
         // Compute the total number of enrichments for node j
-        int numEnrNode = XfemElementInterface_giveNumDofManEnrichments(* dMan, * xMan);
+        if( iEl.giveDomain()->hasXfemManager() ) {
+            numEnrNode = XfemElementInterface_giveNumDofManEnrichments(* dMan, * xMan);
+        }
 
         if ( numEnrNode > 0 ) {
             FloatMatrix &BdNode = Bd [ j - 1 ];
