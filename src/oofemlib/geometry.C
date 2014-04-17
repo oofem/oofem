@@ -138,7 +138,8 @@ int Line :: computeNumberOfIntersectionPoints(Element *element)
         }
     }
 
-    if ( ( maxDist * minDist ) < 0.0 ) {
+    const double tol = 1.0e-12;
+    if ( ( maxDist * minDist ) < tol ) {
         if ( maxTanDist <= 0.0 ) {
             count = 2;
         } else if ( ( maxTanDist * minTanDist ) <= 0 ) {
