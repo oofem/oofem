@@ -104,6 +104,7 @@ VTKXMLExportModule :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, cellVarsToExport, _IFT_VTKXMLExportModule_cellvars); // Macro - see internalstatetype.h
     IR_GIVE_OPTIONAL_FIELD(ir, internalVarsToExport, _IFT_VTKXMLExportModule_vars); // Macro - see internalstatetype.h
     IR_GIVE_OPTIONAL_FIELD(ir, primaryVarsToExport, _IFT_VTKXMLExportModule_primvars); // Macro - see unknowntype.h
+    IR_GIVE_OPTIONAL_FIELD(ir, externalForcesToExport, _IFT_VTKXMLExportModule_externalForces); // Macro - see unknowntype.h
     IR_GIVE_OPTIONAL_FIELD(ir, ipInternalVarsToExport, _IFT_VTKXMLExportModule_ipvars); // Macro - see internalstatetype.h
 
     val = 1;
@@ -154,8 +155,6 @@ VTKXMLExportModule :: makeFullForm(FloatArray &answer, const FloatArray &reduced
     answer.at(7) = answer.at(3);
     answer.at(8) = answer.at(6);
 }
-
-
 
 
 std :: string
@@ -555,6 +554,15 @@ VTKPiece :: setNumberOfPrimaryVarsToExport(int numVars, int numNodes)
 }
 
 void
+VTKPiece :: setNumberOfLoadsToExport(int numVars, int numNodes)
+{
+    this->nodeLoads.resize(numVars);
+    for ( int i = 1; i <= numVars; i++ ) {
+        this->nodeLoads [ i - 1 ].resize(numNodes);
+    }
+}
+
+void
 VTKPiece :: setNumberOfInternalVarsToExport(int numVars, int numNodes)
 {
     this->nodeVarsFromIS.resize(numVars);
@@ -587,26 +595,32 @@ VTKPiece :: setNumberOfCellVarsToExport(int numVars, int numCells)
 void
 VTKPiece :: setPrimaryVarInNode(int varNum, int nodeNum, FloatArray valueArray)
 {
-    this->nodeVars [ varNum - 1 ] [ nodeNum - 1 ] = valueArray;
+    this->nodeVars [ varNum - 1 ] [ nodeNum - 1 ] = std :: move( valueArray );
+}
+
+void
+VTKPiece :: setLoadInNode(int varNum, int nodeNum, FloatArray valueArray)
+{
+    this->nodeLoads [ varNum - 1 ] [ nodeNum - 1 ] = std :: move( valueArray );
 }
 
 void
 VTKPiece :: setInternalVarInNode(int varNum, int nodeNum, FloatArray valueArray)
 {
-    this->nodeVarsFromIS [ varNum - 1 ] [ nodeNum - 1 ] = valueArray;
+    this->nodeVarsFromIS [ varNum - 1 ] [ nodeNum - 1 ] = std :: move( valueArray );
 }
 
 void
 VTKPiece :: setInternalXFEMVarInNode(int varNum, int eiNum, int nodeNum, FloatArray valueArray)
 {
-    this->nodeVarsFromXFEMIS [ varNum - 1 ] [ eiNum - 1 ] [ nodeNum - 1 ] = valueArray;
+    this->nodeVarsFromXFEMIS [ varNum - 1 ] [ eiNum - 1 ] [ nodeNum - 1 ] = std :: move( valueArray );
 }
 
 
 void
 VTKPiece :: setCellVar(int varNum, int cellNum, FloatArray valueArray)
 {
-    this->elVars [ varNum - 1 ] [ cellNum - 1 ] = valueArray;
+    this->elVars [ varNum - 1 ] [ cellNum - 1 ] = std :: move( valueArray );
 }
 
 
@@ -692,8 +706,9 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
 
 
         // Export primary, internal and XFEM variables as nodal quantities
-        this->exportPrimaryVars(vtkPiece, mapG2L, mapL2G, numNodes, region, tStep);
-        this->exportIntVars(vtkPiece, mapG2L, mapL2G, numNodes, region, tStep);
+        this->exportPrimaryVars(vtkPiece, mapG2L, mapL2G, region, tStep);
+        this->exportIntVars(vtkPiece, mapG2L, mapL2G, region, tStep);
+        this->exportExternalForces(vtkPiece, mapG2L, mapL2G, region, tStep);
 
         this->exportCellVars(vtkPiece, numRegionEl, tStep);
     } // end of default piece for simple geometry elements
@@ -809,8 +824,9 @@ VTKXMLExportModule :: writeVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep)
     fprintf( this->fileStream, "%s", pointHeader.c_str() );
 #endif
 
-    this->writePrimaryVars(vtkPiece);       // Variables availablie in the nodes
+    this->writePrimaryVars(vtkPiece);       // Primary field
     this->writeIntVars(vtkPiece);           // Internal State Type variables smoothed to the nodes
+    this->writeExternalForces(vtkPiece);           // External forces
 
     if ( emodel->giveDomain(1)->hasXfemManager() ) {
         this->writeXFEMVars(vtkPiece);      // XFEM State Type variables associated with XFEM structure
@@ -843,16 +859,12 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
 {
     std :: string scalars, vectors, tensors;
 
-    int n = primaryVarsToExport.giveSize();
-
-    UnknownType type;
-
-    for ( int i = 1; i <= n; i++ ) {
-        type = ( UnknownType ) primaryVarsToExport.at(i);
-        if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) || ( type == DirectorField ) ) {
+    for ( int i = 1; i <= primaryVarsToExport.giveSize(); i++ ) {
+        UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
+        if ( type == DisplacementVector || type == EigenVector || type == VelocityVector || type == DirectorField ) {
             vectors += __UnknownTypeToString(type);
             vectors.append(" ");
-        } else if ( ( type == FluxVector ) || ( type == PressureVector ) || ( type == Temperature ) ) {
+        } else if ( type == FluxVector || type == PressureVector || type == Temperature ) {
             scalars += __UnknownTypeToString(type);
             scalars.append(" ");
         } else {
@@ -860,16 +872,9 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
         }
     }
 
-    InternalStateType isttype;
-    InternalStateValueType vtype;
-
-
-    n = internalVarsToExport.giveSize();
-
-    // prepare header
-    for ( int i = 1; i <= n; i++ ) {
-        isttype = ( InternalStateType ) internalVarsToExport.at(i);
-        vtype = giveInternalStateValueType(isttype);
+    for ( int i = 1; i <= internalVarsToExport.giveSize(); i++ ) {
+        InternalStateType isttype = ( InternalStateType ) internalVarsToExport.at(i);
+        InternalStateValueType vtype = giveInternalStateValueType(isttype);
 
         if ( vtype == ISVT_SCALAR ) {
             scalars += __InternalStateTypeToString(isttype);
@@ -877,14 +882,27 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
         } else if ( vtype == ISVT_VECTOR ) {
             vectors += __InternalStateTypeToString(isttype);
             vectors.append(" ");
-        } else if ( ( vtype == ISVT_TENSOR_S3 ) || ( vtype == ISVT_TENSOR_S3E ) ) {
+        } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E ) {
             tensors += __InternalStateTypeToString(isttype);
             tensors.append(" ");
         } else if ( vtype == ISVT_TENSOR_G ) { //@todo shouldn't this go under tensor?
             vectors += __InternalStateTypeToString(isttype);
             vectors.append(" ");
         } else {
-            fprintf( stderr, "VTKXMLExportModule::exportIntVars: unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
+            OOFEM_ERROR("unsupported variable type %s\n", __InternalStateTypeToString(isttype) );
+        }
+    }
+
+    for ( int i = 1; i <= externalForcesToExport.giveSize(); i++ ) {
+        UnknownType type = ( UnknownType ) externalForcesToExport.at(i);
+        if ( type == DisplacementVector || type == VelocityVector || type == DirectorField ) {
+            vectors += std :: string("Load") + __UnknownTypeToString(type);
+            vectors.append(" ");
+        } else if ( type == FluxVector || type == PressureVector || type == Temperature ) {
+            scalars += std :: string("Load") + __UnknownTypeToString(type);
+            scalars.append(" ");
+        } else {
+            OOFEM_ERROR("unsupported UnknownType %s", __UnknownTypeToString(type) );
         }
     }
 
@@ -897,11 +915,10 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
     scalars.clear();
     vectors.clear();
     tensors.clear();
-    n = this->cellVarsToExport.giveSize();
     // prepare header
-    for ( int i = 1; i <= n; i++ ) {
-        isttype = ( InternalStateType ) cellVarsToExport.at(i);
-        vtype = giveInternalStateValueType(isttype);
+    for ( int i = 1; i <= this->cellVarsToExport.giveSize(); i++ ) {
+        InternalStateType isttype = ( InternalStateType ) cellVarsToExport.at(i);
+        InternalStateValueType vtype = giveInternalStateValueType(isttype);
 
         if ( vtype == ISVT_SCALAR ) {
             scalars += __InternalStateTypeToString(isttype);
@@ -909,7 +926,7 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
         } else if ( vtype == ISVT_VECTOR ) {
             vectors += __InternalStateTypeToString(isttype);
             vectors.append(" ");
-        } else if ( ( vtype == ISVT_TENSOR_S3 ) || ( vtype == ISVT_TENSOR_S3E ) ) {
+        } else if ( vtype == ISVT_TENSOR_S3 || vtype == ISVT_TENSOR_S3E ) {
             tensors += __InternalStateTypeToString(isttype);
             tensors.append(" ");
         } else if ( vtype == ISVT_TENSOR_G ) { //@todo shouldn't this go under tensor?
@@ -937,7 +954,7 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
 // Internal variables and XFEM realted fields (keyword "vars" in OOFEM input file)
 //----------------------------------------------------
 void
-VTKXMLExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int numNodes, int region, TimeStep *tStep)
+VTKXMLExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     InternalStateType isType;
@@ -946,11 +963,11 @@ VTKXMLExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArr
     this->giveSmoother()->clear(); // Makes sure smoother is up-to-date with potentially new mesh.
 
     // Export of Internal State Type fields
-    vtkPiece.setNumberOfInternalVarsToExport(internalVarsToExport.giveSize(), numNodes);
+    vtkPiece.setNumberOfInternalVarsToExport(internalVarsToExport.giveSize(), mapL2G.giveSize());
     for ( int field = 1; field <= internalVarsToExport.giveSize(); field++ ) {
         isType = ( InternalStateType ) internalVarsToExport.at(field);
 
-        for ( int nodeNum = 1; nodeNum <= numNodes; nodeNum++ ) {
+        for ( int nodeNum = 1; nodeNum <= mapL2G.giveSize(); nodeNum++ ) {
             Node *node = d->giveNode( mapL2G.at(nodeNum) );
             this->getNodalVariableFromIS(answer, node, tStep, isType, region);
             vtkPiece.setInternalVarInNode(field, nodeNum, answer);
@@ -962,12 +979,12 @@ VTKXMLExportModule :: exportIntVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArr
         XfemManager *xFemMan = d->giveXfemManager();
         int nEnrIt = xFemMan->giveNumberOfEnrichmentItems();
 
-        vtkPiece.setNumberOfInternalXFEMVarsToExport(xFemMan->vtkExportFields.giveSize(), nEnrIt, numNodes);
+        vtkPiece.setNumberOfInternalXFEMVarsToExport(xFemMan->vtkExportFields.giveSize(), nEnrIt, mapL2G.giveSize());
         for ( int field = 1; field <= xFemMan->vtkExportFields.giveSize(); field++ ) {
             XFEMStateType xfemstype = ( XFEMStateType ) xFemMan->vtkExportFields [ field - 1 ];
 
             for ( int enrItIndex = 1; enrItIndex <= nEnrIt; enrItIndex++ ) {
-                for ( int nodeIndx = 1; nodeIndx <= numNodes; nodeIndx++ ) {
+                for ( int nodeIndx = 1; nodeIndx <= mapL2G.giveSize(); nodeIndx++ ) {
                     Node *node = d->giveNode( mapL2G.at(nodeIndx) );
                     getNodalVariableFromXFEMST( answer, node, tStep, xfemstype, region, xFemMan->giveEnrichmentItem(enrItIndex) );
                     vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeIndx, answer);
@@ -1358,21 +1375,21 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
 // Primary variables - readily available in the nodes
 //----------------------------------------------------
 void
-VTKXMLExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int numNodes, int region, TimeStep *tStep)
+VTKXMLExportModule :: exportPrimaryVars(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
     FloatArray valueArray;
     this->givePrimVarSmoother()->clear(); // Makes sure primary smoother is up-to-date with potentially new mesh.
 
-    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numNodes);
+    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), mapL2G.giveSize());
     for ( int i = 1, n = primaryVarsToExport.giveSize(); i <= n; i++ ) {
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
 
-        for ( int inode = 1; inode <= numNodes; inode++ ) {
+        for ( int inode = 1; inode <= mapL2G.giveSize(); inode++ ) {
             DofManager *dman = d->giveNode( mapL2G.at(inode) );
 
             this->getNodalVariableFromPrimaryField(valueArray, dman, tStep, type, region);
-            vtkPiece.setPrimaryVarInNode(i, inode, valueArray);
+            vtkPiece.setPrimaryVarInNode(i, inode, std :: move(valueArray));
         }
     }
 }
@@ -1489,13 +1506,12 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
 void
 VTKXMLExportModule :: writePrimaryVars(VTKPiece &vtkPiece)
 {
-    for ( int i = 1, n = primaryVarsToExport.giveSize(); i <= n; i++ ) {
+    for ( int i = 1; i <= primaryVarsToExport.giveSize(); i++ ) {
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(i);
         InternalStateValueType valType = giveInternalStateValueType(type);
         int ncomponents = giveInternalStateTypeSize(valType);
         int numNodes = vtkPiece.giveNumberOfNodes();
         const char *name = __UnknownTypeToString(type);
-        FloatArray valueArray;
 
         // Header
 #ifdef __VTK_MODULE
@@ -1505,9 +1521,9 @@ VTKXMLExportModule :: writePrimaryVars(VTKPiece &vtkPiece)
         varArray->SetNumberOfTuples(numNodes);
 
         for ( int inode = 1; inode <= numNodes; inode++ ) {
-            valueArray = vtkPiece.givePrimaryVarInNode(i, inode);
-            for ( int i = 1; i <= ncomponents; ++i ) {
-                varArray->SetComponent( inode - 1, i - 1, valueArray.at(i) );
+            FloatArray &valueArray = vtkPiece.givePrimaryVarInNode(i, inode);
+            for ( int j = 1; j <= ncomponents; ++j ) {
+                varArray->SetComponent( inode - 1, j - 1, valueArray.at(j) );
             }
         }
 
@@ -1516,7 +1532,100 @@ VTKXMLExportModule :: writePrimaryVars(VTKPiece &vtkPiece)
 #else
         fprintf(this->fileStream, " <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\"> ", name, ncomponents);
         for ( int inode = 1; inode <= numNodes; inode++ ) {
-            valueArray = vtkPiece.givePrimaryVarInNode(i, inode);
+            FloatArray &valueArray = vtkPiece.givePrimaryVarInNode(i, inode);
+            this->writeVTKPointData(valueArray);
+        }
+        fprintf(this->fileStream, "</DataArray>\n");
+#endif
+    }
+}
+
+
+//----------------------------------------------------
+// Load vectors
+//----------------------------------------------------
+void
+VTKXMLExportModule :: exportExternalForces(VTKPiece &vtkPiece, IntArray &mapG2L, IntArray &mapL2G, int region, TimeStep *tStep)
+{
+    Domain *d = emodel->giveDomain(1);
+    this->givePrimVarSmoother()->clear(); // Makes sure primary smoother is up-to-date with potentially new mesh.
+
+    if ( externalForcesToExport.giveSize() == 0 ) return;
+
+    ///@todo Add a more flexible solution here, ask the Engineering model for the equivalent to this (perhaps as part of the primary field?)
+    /// This should be looked into, just as "getNodalVariableFromPrimaryField" is particularly complicated.
+    int neq = emodel->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
+    int npeq = emodel->giveNumberOfDomainEquations( 1, EModelDefaultPrescribedEquationNumbering() );
+    FloatArray extForces(neq), extForcesP(npeq);
+    emodel->assembleVector(extForces, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), d);
+    emodel->assembleVector(extForcesP, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), d);
+
+    vtkPiece.setNumberOfLoadsToExport(externalForcesToExport.giveSize(), mapL2G.giveSize());
+    for ( int i = 1; i <= externalForcesToExport.giveSize(); i++ ) {
+        UnknownType type = ( UnknownType ) externalForcesToExport.at(i);
+        ///@todo Have some mapping for UnknownType -> DofID array
+        IntArray dofids;
+        if ( type == VelocityVector ) {
+            dofids = {V_u, V_v, V_w};
+        } else if ( type == DisplacementVector ) {
+            dofids = {D_u, D_v, D_w};
+        } else if ( type == PressureVector ) {
+            dofids = {P_f};
+        } else {
+            OOFEM_WARNING("Unrecognized UnknownType (%d), no external forces exported", type);
+        }
+
+        for ( int inode = 1; inode <= mapL2G.giveSize(); inode++ ) {
+            DofManager *dman = d->giveNode( mapL2G.at(inode) );
+
+            FloatArray valueArray(dofids.giveSize());
+            for ( int k = 1; k <= dofids.giveSize(); ++k ) {
+                Dof *dof = dman->giveDofWithID(dofids.at(k));
+                ///@todo Have to make more assumptions here.. we shouldn't assume EModelDefaultEquationNumbering. Do something nicer than extForces and extForcesP instead.
+                int eq;
+                if ( ( eq = dof->giveEquationNumber(EModelDefaultEquationNumbering()) ) > 0 ) {
+                    valueArray.at(k) = extForces.at(eq);
+                } else if ( ( eq = dof->giveEquationNumber(EModelDefaultPrescribedEquationNumbering()) ) > 0 ) {
+                    valueArray.at(k) = extForcesP.at(eq);
+                }
+            }
+            //this->getNodalVariableFromPrimaryField(valueArray, dman, tStep, type, region);
+            vtkPiece.setLoadInNode(i, inode, std :: move(valueArray));
+        }
+    }
+}
+
+
+void
+VTKXMLExportModule :: writeExternalForces(VTKPiece &vtkPiece)
+{
+    for ( int i = 1; i <= externalForcesToExport.giveSize(); i++ ) {
+        UnknownType type = ( UnknownType ) externalForcesToExport.at(i);
+        InternalStateValueType valType = giveInternalStateValueType(type);
+        int ncomponents = giveInternalStateTypeSize(valType);
+        int numNodes = vtkPiece.giveNumberOfNodes();
+        std :: string name = std :: string("Load") + __UnknownTypeToString(type);
+
+        // Header
+#ifdef __VTK_MODULE
+        vtkSmartPointer< vtkDoubleArray >varArray = vtkSmartPointer< vtkDoubleArray > :: New();
+        varArray->SetName(name);
+        varArray->SetNumberOfComponents(ncomponents);
+        varArray->SetNumberOfTuples(numNodes);
+
+        for ( int inode = 1; inode <= numNodes; inode++ ) {
+            FloatArray &valueArray = vtkPiece.giveLoadInNode(i, inode);
+            for ( int j = 1; j <= ncomponents; ++j ) {
+                varArray->SetComponent( inode - 1, j - 1, valueArray.at(j) );
+            }
+        }
+
+        this->writeVTKPointData(name.c_str(), varArray);
+
+#else
+        fprintf(this->fileStream, " <DataArray type=\"Float64\" Name=\"%s\" NumberOfComponents=\"%d\" format=\"ascii\"> ", name.c_str(), ncomponents);
+        for ( int inode = 1; inode <= numNodes; inode++ ) {
+            FloatArray &valueArray = vtkPiece.giveLoadInNode(i, inode);
             this->writeVTKPointData(valueArray);
         }
         fprintf(this->fileStream, "</DataArray>\n");
@@ -1536,12 +1645,10 @@ VTKXMLExportModule :: exportCellVars(VTKPiece &vtkPiece, int numCells, TimeStep 
 {
     Domain *d = emodel->giveDomain(1);
     FloatArray valueArray;
-    InternalStateType type;
 
-    int n = cellVarsToExport.giveSize();
     vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
-    for ( int field = 1; field <= n; field++ ) {
-        type = ( InternalStateType ) cellVarsToExport.at(field);
+    for ( int field = 1; field <= cellVarsToExport.giveSize(); field++ ) {
+        InternalStateType type = ( InternalStateType ) cellVarsToExport.at(field);
 
         for ( int ielem = 1; ielem <= numCells; ielem++ ) {
             Element *el = d->giveElement(ielem); ///@todo should be a pointer to an element in the region /JB
@@ -1706,9 +1813,6 @@ VTKXMLExportModule :: computeIPAverage(FloatArray &answer, IntegrationRule *iRul
 }
 
 
-
-
-
 void
 VTKXMLExportModule :: writeVTKCollection()
 {
@@ -1774,7 +1878,6 @@ VTKPiece :: clear()
     this->nodeVarsFromIS.clear();
     this->nodeVarsFromXFEMIS.clear();
 }
-
 
 
 NodalRecoveryModel *
@@ -1949,7 +2052,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
 
 int VTKXMLExportModule :: giveNumberOfRegions()
 {
-    /// Returns number of regions (aka sets)
+    // Returns number of regions (aka sets)
     return this->regionSets.giveSize();
 }
 
