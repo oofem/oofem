@@ -146,68 +146,64 @@ FEI3dTetQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICe
 double
 FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatMatrix jacobianMatrix;
-    FloatMatrix jinv;
-    FloatMatrix dNdxi;
-    FloatMatrix coords(10, 3);
-    this->evaldNdxi(dNdxi, lcoords, cellgeo);
-    for ( int i = 1; i <= 10; ++i ) {
-        const FloatArray *c = cellgeo.giveVertexCoordinates(i);
-        coords.at(i, 1) = c->at(1);
-        coords.at(i, 2) = c->at(2);
-        coords.at(i, 3) = c->at(3);
+    FloatMatrix jacobianMatrix, inv, dNduvw, coords;
+    this->evaldNdxi(dNduvw, lcoords);
+    coords.resize( 3, dNduvw.giveNumberOfRows() );
+    for ( int i = 1; i <= dNduvw.giveNumberOfRows(); i++ ) {
+        coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
     }
-    jacobianMatrix.beProductOf(dNdxi, coords);
-    jinv.beInverseOf(jacobianMatrix);
-    answer.beProductOf(jinv, dNdxi);
+    jacobianMatrix.beProductOf(coords, dNduvw);
+    inv.beInverseOf(jacobianMatrix);
+
+    answer.beProductOf(dNduvw, inv);
     return jacobianMatrix.giveDeterminant();
 }
 
 void
-FEI3dTetQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+FEI3dTetQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords)
 {
     double x1 = lcoords(0);
     double x2 = lcoords(1);
     double x3 = lcoords(2);
     double x4 = 1.0 - x1 - x2 - x3;
 
-    answer.resize(3, 10);
+    answer.resize(10, 3);
 
     // dNj/dx1
     answer(0, 0) = 4 * x1 - 1;
-    answer(0, 1) = 0;
-    answer(0, 2) = 0;
-    answer(0, 3) = -4 * x4 + 1;
-    answer(0, 4) = 4 * x2;
-    answer(0, 5) = 0;
-    answer(0, 6) = 4 * x3;
-    answer(0, 7) = 4 * ( x4 - x1 );
-    answer(0, 8) = -4 * x2;
-    answer(0, 9) = -4 * x3;
+    answer(1, 0) = 0;
+    answer(2, 0) = 0;
+    answer(3, 0) = -4 * x4 + 1;
+    answer(4, 0) = 4 * x2;
+    answer(5, 0) = 0;
+    answer(6, 0) = 4 * x3;
+    answer(7, 0) = 4 * ( x4 - x1 );
+    answer(8, 0) = -4 * x2;
+    answer(9, 0) = -4 * x3;
 
     // dNj/dx2
-    answer(1, 0) = 0;
+    answer(0, 1) = 0;
     answer(1, 1) = 4 * x2 - 1;
-    answer(1, 2) = 0;
-    answer(1, 3) = -4 * x4 + 1;
-    answer(1, 4) = 4 * x1;
-    answer(1, 5) = 4 * x3;
-    answer(1, 6) = 0;
-    answer(1, 7) = -4 * x1;
-    answer(1, 8) = 4 * ( x4 - x2 );
-    answer(1, 9) = -4 * x3;
+    answer(2, 1) = 0;
+    answer(3, 1) = -4 * x4 + 1;
+    answer(4, 1) = 4 * x1;
+    answer(5, 1) = 4 * x3;
+    answer(6, 1) = 0;
+    answer(7, 1) = -4 * x1;
+    answer(8, 1) = 4 * ( x4 - x2 );
+    answer(9, 1) = -4 * x3;
 
     // dNj/dx3
-    answer(2, 0) = 0;
-    answer(2, 1) = 0;
+    answer(0, 2) = 0;
+    answer(1, 2) = 0;
     answer(2, 2) = 4 * x3 - 1;
-    answer(2, 3) = -4 * x4 + 1;
-    answer(2, 4) = 0;
-    answer(2, 5) = 4 * x2;
-    answer(2, 6) = 4 * x1;
-    answer(2, 7) = -4 * x1;
-    answer(2, 8) = -4 * x2;
-    answer(2, 9) = 4 * ( x4 - x3 );
+    answer(3, 2) = -4 * x4 + 1;
+    answer(4, 2) = 0;
+    answer(5, 2) = 4 * x2;
+    answer(6, 2) = 4 * x1;
+    answer(7, 2) = -4 * x1;
+    answer(8, 2) = -4 * x2;
+    answer(9, 2) = 4 * ( x4 - x3 );
 }
 
 
@@ -306,18 +302,13 @@ FEI3dTetQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEIC
 void
 FEI3dTetQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatMatrix dNdxi;
-    FloatMatrix coords;
-    this->evaldNdxi(dNdxi, lcoords, cellgeo);
-    jacobianMatrix.resize(3, 3);
-    coords.resize(10, 3);
-    for ( int i = 1; i <= 10; ++i ) {
-        const FloatArray *c = cellgeo.giveVertexCoordinates(i);
-        coords.at(i, 1) = c->at(1);
-        coords.at(i, 2) = c->at(2);
-        coords.at(i, 3) = c->at(3);
+    FloatMatrix inv, dNduvw, coords;
+    this->evaldNdxi(dNduvw, lcoords);
+    coords.resize( 3, dNduvw.giveNumberOfRows() );
+    for ( int i = 1; i <= dNduvw.giveNumberOfRows(); i++ ) {
+        coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
     }
-    jacobianMatrix.beProductOf(dNdxi, coords);
+    jacobianMatrix.beProductOf(coords, dNduvw);
 }
 
 
@@ -398,7 +389,7 @@ FEI3dTetQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         edgeNodes(1) = 4;
         edgeNodes(2) = 10;
     } else {
-        OOFEM_ERROR("wrong egde number (%d)", iedge);
+        OOFEM_ERROR("wrong edge number (%d)", iedge);
     }
 }
 
@@ -445,31 +436,22 @@ FEI3dTetQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
 void
 FEI3dTetQuad :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    // Translate the local surface coordinate to the volume coordinates and compute the gradient there.
-    double a, b, c;
-    a = lcoords.at(1);
-    b = lcoords.at(2);
-    c = 1.0 - a - b;
+    IntArray snodes;
+    this->computeLocalSurfaceMapping(snodes, isurf);
+
     FloatArray lcoords_tet(4);
-    lcoords_tet.at(isurf) = 0.0;
-    if ( isurf == 1 ) {
-        lcoords_tet.at(4) = a;
-        lcoords_tet.at(3) = b;
-        lcoords_tet.at(2) = c;
-    } else if ( isurf == 2 ) {
-        lcoords_tet.at(1) = a;
-        lcoords_tet.at(3) = b;
-        lcoords_tet.at(4) = c;
-    } else if ( isurf == 3 ) {
-        lcoords_tet.at(1) = a;
-        lcoords_tet.at(4) = b;
-        lcoords_tet.at(2) = c;
-    } else if ( isurf == 4 ) {
-        lcoords_tet.at(2) = a;
-        lcoords_tet.at(3) = b;
-        lcoords_tet.at(1) = c;
+    lcoords_tet.at(snodes.at(1)) = lcoords.at(1);
+    lcoords_tet.at(snodes.at(2)) = lcoords.at(2);
+    lcoords_tet.at(snodes.at(3)) = 1. - lcoords.at(1) - lcoords.at(2);
+
+    FloatMatrix fullB;
+    this->evaldNdx(fullB, lcoords_tet, cellgeo);
+    answer.resize(snodes.giveSize(), 3);
+    for ( int i = 1; i <= snodes.giveSize(); ++i ) {
+        for ( int j = 1; j <= 3; ++j ) {
+            answer.at(i, j) = fullB.at(snodes.at(i), j);
+        }
     }
-    this->evaldNdx(answer, lcoords_tet, cellgeo);
 }
 
 double
