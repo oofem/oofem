@@ -123,7 +123,7 @@ public:
      * the boundary. This is a necessary step to evaluate integrals
      * along an edge cut by one or several cracks.
      */
-    void partitionEdgeSegment(int iBndIndex, std :: vector< Line > &oSegments);
+    void partitionEdgeSegment(int iBndIndex, std :: vector< Line > &oSegments, std::vector<FloatArray> &oIntersectionPoints);
 
     // TODO: Move to XfemStructuralElementInterface
     std :: vector< IntegrationRule * >mpCZIntegrationRules;

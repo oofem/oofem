@@ -253,7 +253,8 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
 
     if(xfemElInt != NULL && domain->hasXfemManager() ) {
     	std::vector<Line> segments;
-    	xfemElInt->partitionEdgeSegment( iBndIndex, segments );
+    	std::vector<FloatArray> intersecPoints;
+    	xfemElInt->partitionEdgeSegment( iBndIndex, segments, intersecPoints );
         MaterialMode matMode = e->giveMaterialMode();
     	ir = new DiscontinuousSegmentIntegrationRule(1, e, segments, xS, xE);
     	int numPointsPerSeg = 1;

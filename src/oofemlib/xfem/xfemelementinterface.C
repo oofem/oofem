@@ -786,7 +786,7 @@ void XfemElementInterface :: putPointsInCorrectPartition(std :: vector< std :: v
     }
 }
 
-void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< Line > &oSegments)
+void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< Line > &oSegments, std::vector<FloatArray> &oIntersectionPoints)
 {
     const double levelSetTol2 = 1.0e-12;
 
@@ -875,6 +875,9 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< 
                     newSegments.push_back(segA);
                     Line segB(p, seg_xE);
                     newSegments.push_back(segB);
+
+                    // Export the intersection point
+                    oIntersectionPoints.push_back(p);
                 } else   {
                     newSegments.push_back(oSegments [ segInd ]);
                 }
