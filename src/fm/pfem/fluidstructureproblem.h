@@ -105,6 +105,10 @@ protected:
     /// List of slave models to which this model is coupled    
 ///    IntArray coupledModels;
 
+	IntArray interactionParticles;
+	double tol;
+	int iterationNumber;
+
 public:
     /**
      * Constructor. Creates an engineering model with number i belonging to domain d.
@@ -192,6 +196,8 @@ public:
         if ( master ) { return master->giveNumberOfTimeStepWhenIcApply(); } else { return 0; }
     }
     virtual int instanciateDefaultMetaStep(InputRecord *ir);
+
+	int giveIterationNumber() {return iterationNumber;}
 
 protected:
     int instanciateSlaveProblems();

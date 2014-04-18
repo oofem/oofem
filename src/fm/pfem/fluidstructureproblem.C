@@ -44,6 +44,8 @@
 #include "verbose.h"
 #include "classfactory.h"
 
+#include "pfem.h"
+#include "interactionpfemparticle.h"
 #include "diidynamic.h"
 
 #include <stdlib.h>
@@ -66,6 +68,8 @@ FluidStructureProblem :: FluidStructureProblem(int i, EngngModel *_master) : Sta
 ///    dtTimeFunction = 0;
 ///    stepMultiplier = 1.;
 ///    timeDefinedByProb = 0;
+		tol = 1.e-6;
+		iterationNumber = 0;
 }
 
 FluidStructureProblem :: ~FluidStructureProblem()
@@ -347,15 +351,68 @@ FluidStructureProblem :: solveYourself()
 void
 FluidStructureProblem :: solveYourselfAt(TimeStep *stepN)
 {
-#ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %5d, time %e]\n", stepN->giveNumber(), stepN->giveTargetTime() );
-#endif
-    for ( int i = 1; i <= nModels; i++ ) {
-        EngngModel *emodel = this->giveSlaveProblem(i);
-        emodel->solveYourselfAt(stepN);
-    }
+	PFEM* pfemProblem = dynamic_cast<PFEM*>(this->giveSlaveProblem(1));
+	Domain* pfemDomain = pfemProblem->giveDomain(1);
 
-    stepN->incrementStateCounter();
+#ifdef VERBOSE
+	OOFEM_LOG_RELEVANT( "Solving [step number %5d, time %e]\n", stepN->giveNumber(), stepN->giveTargetTime() );
+#endif
+
+	FloatArray currentInteractionParticlesVelocities;
+	FloatArray currentInteractionParticlesPressures;
+	FloatArray previousInteractionParticlesVelocities;
+	FloatArray previousInteractionParticlesPressures;
+
+	if (stepN->isTheFirstStep()) {
+		int ndman = pfemDomain->giveNumberOfDofManagers();
+		for (int i = 1; i <= ndman; i++) {
+			if(dynamic_cast<InteractionPFEMParticle*>(pfemDomain->giveDofManager(i))) {
+				interactionParticles.followedBy(i, 10);
+			}
+		}
+	}
+
+	currentInteractionParticlesVelocities.resize(2 * interactionParticles.giveSize());
+	previousInteractionParticlesVelocities.resize(2 * interactionParticles.giveSize());
+	currentInteractionParticlesPressures.resize(interactionParticles.giveSize());
+	previousInteractionParticlesPressures.resize(interactionParticles.giveSize());
+
+	double velocityDifference = 1.0;
+	double pressureDifference = 1.0;
+
+	iterationNumber = 0;
+	while ( ( (velocityDifference > tol) || (pressureDifference > tol) ) && iterationNumber < 2 )
+	{
+		previousInteractionParticlesPressures = currentInteractionParticlesPressures;
+		previousInteractionParticlesVelocities = currentInteractionParticlesVelocities;
+
+		for ( int i = 1; i <= nModels; i++ ) {
+			EngngModel *emodel = this->giveSlaveProblem(i);
+			emodel->solveYourselfAt(stepN);
+		}
+
+		for (int i = 1; i <= interactionParticles.giveSize(); i++) {
+			currentInteractionParticlesPressures.at(i) = pfemProblem->giveUnknownComponent(VM_Total, stepN, pfemDomain, pfemDomain->giveDofManager(i)->giveDofWithID(P_f));
+			currentInteractionParticlesVelocities.at(2*(i - 1) + 1) = pfemProblem->giveUnknownComponent(VM_Total, stepN, pfemDomain, pfemDomain->giveDofManager(i)->giveDofWithID(V_u));
+			currentInteractionParticlesVelocities.at(2*(i - 1) + 2) = pfemProblem->giveUnknownComponent(VM_Total, stepN, pfemDomain, pfemDomain->giveDofManager(i)->giveDofWithID(V_v));
+		}
+
+		pressureDifference = 0.0;
+		velocityDifference = 0.0;
+		for (int i = 1; i <= currentInteractionParticlesPressures.giveSize(); i++) {
+			pressureDifference += (currentInteractionParticlesPressures.at(i) - previousInteractionParticlesPressures.at(i))*(currentInteractionParticlesPressures.at(i) - previousInteractionParticlesPressures.at(i));
+			velocityDifference += (currentInteractionParticlesVelocities.at(2*(i - 1) + 1) - previousInteractionParticlesVelocities.at(2*(i -1) + 1))*(currentInteractionParticlesVelocities.at(2*(i - 1) + 1) - previousInteractionParticlesVelocities.at(2*(i -1) + 1));
+			velocityDifference += (currentInteractionParticlesVelocities.at(2*(i - 1) + 2) - previousInteractionParticlesVelocities.at(2*(i -1) + 2))*(currentInteractionParticlesVelocities.at(2*(i - 1) + 2) - previousInteractionParticlesVelocities.at(2*(i -1) + 2));
+		}
+		pressureDifference = sqrt(pressureDifference);
+		velocityDifference = sqrt(velocityDifference);
+
+		OOFEM_LOG_RELEVANT("%3d %le %le\n", iterationNumber++, pressureDifference, velocityDifference );
+	}
+	if ( iterationNumber > 49 ) {
+		OOFEM_ERROR("Maximal iteration count exceded");
+	}
+	stepN->incrementStateCounter();
 }
 
 int
