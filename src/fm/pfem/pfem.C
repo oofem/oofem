@@ -420,8 +420,13 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
         this->applyIC(stepWhenIcApply);
     }
 
-    VelocityField.advanceSolution(tStep);
+	if (VelocityField.giveActualStepNumber() < tStep->giveNumber()) {
+		VelocityField.advanceSolution(tStep);
+	}
+
+	if (PressureField.giveActualStepNumber() < tStep->giveNumber()) {
     PressureField.advanceSolution(tStep);
+	}
 
     FloatArray *velocityVector = VelocityField.giveSolutionVector(tStep);
     FloatArray *pressureVector = PressureField.giveSolutionVector(tStep);
@@ -945,12 +950,21 @@ PFEM :: applyIC(TimeStep *stepWhenIcApply)
     Dof *iDof;
     DofIDItem type;
 
+	int velocityFieldStepNumber = VelocityField.giveActualStepNumber();
+
+	if (velocityFieldStepNumber < stepWhenIcApply->giveNumber())
+	{
     VelocityField.advanceSolution(stepWhenIcApply);
+	}
     velocityVector = VelocityField.giveSolutionVector(stepWhenIcApply);
     velocityVector->resize(mbneq);
     velocityVector->zero();
 
+	int pressureFieldStepNumber = PressureField.giveActualStepNumber();
+	if (pressureFieldStepNumber < stepWhenIcApply->giveNumber())
+	{
     PressureField.advanceSolution(stepWhenIcApply);
+	}
     pressureVector = PressureField.giveSolutionVector(stepWhenIcApply);
     pressureVector->resize(pdneq);
     pressureVector->zero();
