@@ -104,9 +104,6 @@ private:
     /** Keeps track of which coordinate(s) are changing on the surface/edge */
     std :: vector< double >directions;
 
-    /** Type of surface/edge */
-    integrationDomain sideGeom;
-
     void giveEdgeNormal(FloatArray &answer, int element, int side);
 
     void updateSminmax();
