@@ -36,6 +36,9 @@
 #include "interactionpfemparticle.h"
 #include "timestep.h"
 #include "classfactory.h"
+#include "floatmatrix.h"
+#include "fluidstructureproblem.h"
+#include "structengngmodel.h"
 //#include "inputrecord.h"
 
 #ifndef __MAKEDEPEND
@@ -81,6 +84,61 @@ void
 InteractionPFEMParticle :: updateYourself(TimeStep *tStep)
 {
     PFEMParticle :: updateYourself(tStep);
+}
+
+void
+InteractionPFEMParticle :: givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
+                                                       ValueModeType mode, TimeStep *stepN)
+{
+  /*if (stepN->isTheFirstStep())
+  {
+    DofManager::givePrescribedUnknownVector(answer, dofIDArry, mode, stepN);
+  } 
+  else*/
+  {
+    int size;
+    IntArray dofArray;
+
+    answer.resize( size = dofIDArry.giveSize() );
+    this->giveDofArray(dofIDArry, dofArray);
+
+    //   for ( int j = 1; j <= size; j++ ) {
+    //     answer.at(j) = this->giveDof( dofArray.at(j) )->giveBcValue(mode, stepN);
+    //   }
+    FloatArray velocities;
+    FluidStructureProblem *fsiProblem = dynamic_cast<FluidStructureProblem*>(domain->giveEngngModel()->giveMasterEngngModel());
+    if (fsiProblem) {
+      for ( int i = 1; i <= fsiProblem->giveNumberOfSlaveProblems(); i++ ) {
+        StructuralEngngModel *structuralProblem = dynamic_cast<StructuralEngngModel*>(fsiProblem->giveSlaveProblem(i));
+        if (structuralProblem)
+        {
+			if (fsiProblem->giveIterationNumber() < 1) {
+				for ( int j = 1; j <= size; j++ ) {
+					answer.at(j) = this->giveDof( dofArray.at(j) )->giveBcValue(mode, stepN);
+				}
+			}
+			else
+			{
+				DofManager *dman = structuralProblem->giveDomain(1)->giveDofManager(coupledNode);
+				//dman->giveUnknownVectorOfType(velocities, VelocityVector, VM_Velocity, stepN);
+				//dman->giveUnknownVector(velocities, dofIDArry, VM_Velocity, stepN);
+				dman->giveCompleteUnknownVector(velocities, VM_Velocity, stepN);
+				for ( int j = 1; j <= size; j++ ) {
+					answer.at(j) = velocities.at( dofArray.at(j));
+				}
+			}
+
+		  
+        }
+      }
+    }
+
+    // Transform to global c.s.
+    FloatMatrix L2G;
+    if (this->computeL2GTransformation(L2G, dofIDArry)) {
+      answer.rotatedWith(L2G, 'n');
+    }
+  }
 }
 
 void

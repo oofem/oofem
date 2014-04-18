@@ -85,6 +85,9 @@ public:
 
     virtual void updateYourself(TimeStep *tStep);
 
+    virtual void givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofMask,
+                                             ValueModeType mode, TimeStep *stepN);
+
     virtual void printOutputAt(FILE *stream, TimeStep *stepN);
 
     /**
