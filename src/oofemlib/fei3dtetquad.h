@@ -60,7 +60,7 @@ public:
     virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
-    virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
+    virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
 
     /**
      * Returns a characteristic length of the geometry, typically a diagonal or edge length.

@@ -147,7 +147,7 @@ double
 FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatMatrix jacobianMatrix, inv, dNduvw, coords;
-    this->evaldNdxi(dNduvw, lcoords);
+    this->evaldNdxi(dNduvw, lcoords, cellgeo);
     coords.resize( 3, dNduvw.giveNumberOfRows() );
     for ( int i = 1; i <= dNduvw.giveNumberOfRows(); i++ ) {
         coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
@@ -160,7 +160,7 @@ FEI3dTetQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const F
 }
 
 void
-FEI3dTetQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords)
+FEI3dTetQuad :: evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords , const FEICellGeometry &cellgeo)
 {
     double x1 = lcoords(0);
     double x2 = lcoords(1);
@@ -303,7 +303,7 @@ void
 FEI3dTetQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatMatrix inv, dNduvw, coords;
-    this->evaldNdxi(dNduvw, lcoords);
+    this->evaldNdxi(dNduvw, lcoords, cellgeo);
     coords.resize( 3, dNduvw.giveNumberOfRows() );
     for ( int i = 1; i <= dNduvw.giveNumberOfRows(); i++ ) {
         coords.setColumn(* cellgeo.giveVertexCoordinates(i), i);
