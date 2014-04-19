@@ -54,7 +54,7 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : InputRecord(), tokenizer(), recor
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : InputRecord(src), tokenizer(),
     record(src.record)
 {
-    tokenizer.tokenizeLine( this->record.c_str() );
+    tokenizer.tokenizeLine( this->record );
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);
     for ( int i = 0; i < ntok; i++ ) {
@@ -65,7 +65,7 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : Inp
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const char *source) : InputRecord(), tokenizer(),
     record(source)
 {
-    tokenizer.tokenizeLine( this->record.c_str() );
+    tokenizer.tokenizeLine( this->record );
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);
     for ( int i = 0; i < ntok; i++ ) {
@@ -77,7 +77,7 @@ OOFEMTXTInputRecord &
 OOFEMTXTInputRecord :: operator = ( const OOFEMTXTInputRecord & src )
 {
     this->record = src.record;
-    tokenizer.tokenizeLine( this->record.c_str() );
+    tokenizer.tokenizeLine( this->record );
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);
     for ( int i = 0; i < ntok; i++ ) {
@@ -91,7 +91,7 @@ void
 OOFEMTXTInputRecord :: setRecordString(std :: string newRec)
 {
     this->record = std :: move(newRec);
-    tokenizer.tokenizeLine( this->record.c_str() );
+    tokenizer.tokenizeLine( this->record );
     int ntok = tokenizer.giveNumberOfTokens();
     readFlag.resize(ntok);
     for ( int i = 0; i < ntok; i++ ) {

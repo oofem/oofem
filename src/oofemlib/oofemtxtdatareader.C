@@ -45,8 +45,6 @@ OOFEMTXTDataReader :: OOFEMTXTDataReader(const char *inputfilename) : DataReader
     if ( !inputStream.is_open() ) {
         OOFEM_ERROR("Can't open input stream (%s)", inputfilename);
     }
-    dataSourceName = inputfilename;
-    lineNumber = 0;
 
     this->giveRawLineFromInput(outputFileName);
     this->giveRawLineFromInput(description);
@@ -59,7 +57,6 @@ OOFEMTXTDataReader :: OOFEMTXTDataReader(const OOFEMTXTDataReader &x) : DataRead
     if ( !inputStream.is_open() ) {
         OOFEM_ERROR("Can't copy open input stream (%s)", dataSourceName.c_str());
     }
-    lineNumber = 0;
 
     this->giveRawLineFromInput(outputFileName);
     this->giveRawLineFromInput(description);
@@ -105,13 +102,13 @@ OOFEMTXTDataReader :: giveLineFromInput(std :: string &line)
 
     this->giveRawLineFromInput(line);
 
-    for ( std :: size_t i = 0; i < line.size(); i++ ) {
-        if ( line [ i ] == '"' ) { //do not change to lowercase inside quotation marks
+    for ( auto &c: line ) {
+        if ( c == '"' ) { //do not change to lowercase inside quotation marks
             flag = !flag; // switch flag
         }
 
         if ( !flag ) {
-            line [ i ] = tolower(line [ i ]); // convert line to lowercase
+            c = tolower(c); // convert line to lowercase
         }
     }
 }
