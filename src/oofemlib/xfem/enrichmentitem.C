@@ -812,12 +812,12 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
             int neGlob = element->giveNode(neLoc)->giveGlobalNumber();
 
             double phiS = 1.0;
-            evalLevelSetNormalInNode(phiS, nsGlob);
+            bool foundPhiS = evalLevelSetNormalInNode(phiS, nsGlob);
 
             double phiE = 1.0;
-            evalLevelSetNormalInNode(phiE, neGlob);
+            bool foundPhiE = evalLevelSetNormalInNode(phiE, neGlob);
 
-            if ( phiS * phiE < mLevelSetTol2 ) {
+            if ( (foundPhiS && foundPhiE) && phiS * phiE < mLevelSetTol2 ) {
                 // Intersection detected
 
                 double xi = calcXiZeroLevel(phiS, phiE);
