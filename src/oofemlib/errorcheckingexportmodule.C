@@ -405,7 +405,10 @@ ErrorCheckingExportModule :: scanToErrorChecks(std :: ifstream &stream, double &
         std :: string line;
         std :: getline(stream, line);
         if ( line.compare(0, 14, "#%BEGIN_CHECK%") == 0 ) {
-            errorTolerance = std :: stod( line.substr(25) );
+            errorTolerance = 1e-6;
+            if ( line.size() >= 25 ) {
+                errorTolerance = std :: stod( line.substr(25) );
+            }
             return true;
         }
     }
