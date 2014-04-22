@@ -494,6 +494,12 @@ public:
     ///Returns the master engnmodel
     EngngModel *giveMasterEngngModel() { return this->master; }
 
+    /// Returns the current load level.
+    virtual double giveLoadLevel() { return 1.0; }
+
+    /// Only relevant for eigen value analysis. Otherwise returns zero.
+    virtual double giveEigenValue(int eigNum) { return 0.0; }
+
 #ifdef __PARALLEL_MODE
     /// Returns the communication object of reciever.
     MPI_Comm giveParallelComm() { return this->comm; }

@@ -123,6 +123,8 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual TimeStep *giveNextStep();
 
+    virtual double giveEigenValue(int eigNum) { return eigVal.at(eigNum); }
+
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
     SparseLinearSystemNM *giveNumericalMethodForLinStaticProblem(TimeStep *tStep);
 

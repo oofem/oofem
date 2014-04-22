@@ -43,6 +43,7 @@
 #include "floatarray.h"
 #include "engngm.h"
 #include "boundaryload.h"
+#include "structuralms.h"
 #include "mathfem.h"
 #include "classfactory.h"
 
@@ -265,6 +266,22 @@ Beam3d :: computeVolumeAround(GaussPoint *gp)
 {
     double weight  = gp->giveWeight();
     return weight * 0.5 * this->computeLength();
+}
+
+
+int
+Beam3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    if ( type == IST_BeamForceMomentumTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        answer.printYourself();
+        return 1;
+    } else if ( type == IST_BeamStrainCurvatureTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        return 1;
+    } else {
+        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+    }
 }
 
 
