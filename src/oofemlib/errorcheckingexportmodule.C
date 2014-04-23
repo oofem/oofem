@@ -85,14 +85,14 @@ NodeErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
         return true;
     }
 
-    DofManager *dman = domain->giveDofManager(number);
+    DofManager *dman = domain->giveGlobalDofManager(number);
     Dof *dof = dman->giveDofWithID(dofid);
 
     double dmanValue = dof->giveUnknown(mode, tStep);
     bool check = checkValue(dmanValue);
     if ( !check ) {
         OOFEM_WARNING("Check failed in: tstep %d, node %d, dof %d, mode %d:\n"
-                      "value is %e, but should be %e ( error is %e but tolerance is %e )",
+                      "value is %.8e, but should be %.8e ( error is %e but tolerance is %e )",
                       tstep, number, dofid, mode,
                       dmanValue, value, fabs(dmanValue-value), tolerance );
     }
@@ -155,7 +155,7 @@ ElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     bool check = checkValue(elementValue);
     if ( !check ) {
         OOFEM_WARNING("Check failed in: tstep %d, element %d, gpnum %d, ist %d, component %d:\n"
-                      "value is %e, but should be %e ( error is %e but tolerance is %e )",
+                      "value is %.8e, but should be %.8e ( error is %e but tolerance is %e )",
                       tstep, number, gpnum, ist, component,
                       elementValue, value, fabs(elementValue-value), tolerance );
         ipval.printYourself();
@@ -195,7 +195,7 @@ ReactionErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 
     int index;
     for ( index = 1; index <= restrDofs.giveSize(); ++index ) {
-        if ( restrDofs.at(index) == dofid && restrDofMans.at(index) == number ) {
+        if ( restrDofs.at(index) == dofid && domain->giveNode(restrDofMans.at(index))->giveLabel() == number ) {
             break;
         }
     }
@@ -204,7 +204,7 @@ ReactionErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     bool check = checkValue(reactionForce);
     if ( !check ) {
         OOFEM_WARNING("Check failed in: tstep %d, reaction forces number %d, dof %d:\n"
-                      "value is %e, but should be %e ( error is %e but tolerance is %e )",
+                      "value is %.8e, but should be %.8e ( error is %e but tolerance is %e )",
                       tstep, number, dofid,
                       reactionForce, value, fabs(reactionForce-value), tolerance );
     }
@@ -235,7 +235,7 @@ LoadLevelErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     bool check = checkValue(loadLevel);
     if ( !check ) {
         OOFEM_WARNING("Check failed in: tstep %d, load level:\n"
-                      "value is %e, but should be %e ( error is %e but tolerance is %e )",
+                      "value is %.8e, but should be %.8e ( error is %e but tolerance is %e )",
                       tstep,
                       loadLevel, value, fabs(loadLevel-value), tolerance );
     }
@@ -265,7 +265,7 @@ EigenValueErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     bool check = checkValue(eig);
     if ( !check ) {
         OOFEM_WARNING("Check failed in: tstep %d, eigen value %d:\n"
-                      "value is %e, but should be %e ( error is %e but tolerance is %e )",
+                      "value is %.8e, but should be %.8e ( error is %e but tolerance is %e )",
                       tstep, number,
                       eig, value, fabs(eig-value), tolerance );
     }

@@ -522,6 +522,21 @@ Domain :: giveDofManager(int n)
 }
 
 
+DofManager *
+Domain :: giveGlobalDofManager(int n)
+// Returns the global element with id n. Generates error if it is not defined yet.
+{
+    for ( int i = 1; i <= dofManagerList->giveSize(); i++ ) {
+        if ( dofManagerList->at(i)->giveGlobalNumber() == n ) {
+            return dofManagerList->at(i);
+        }
+    }
+
+    OOFEM_ERROR("undefined element id (%d)", n);
+    return NULL;
+}
+
+
 CrossSection *
 Domain :: giveCrossSection(int n)
 // Returns the n-th cross section.
