@@ -715,7 +715,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
                 oPointPartitions [ 2 * i - 1 ].push_back(tipCoord);
 
                 // Take node
-                oPointPartitions [ 2 * i - 1 ].push_back( * ( element->giveDofManager(i)->giveCoordinates() ) );
+                oPointPartitions [ 2 * i - 1 ].push_back( iTri.giveVertex(i) );
 
                 ////////////////
                 // Take edge center or intersection point
