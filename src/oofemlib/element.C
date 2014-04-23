@@ -1218,7 +1218,9 @@ Element :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType typ
         ErrorEstimator *ee = this->giveDomain()->giveErrorEstimator();
         if ( ee ) {
             answer.resize(1);
-            answer.at(1) = ee->giveElementError(indicatorET, this, tStep);
+            ///@todo Which "error type" should be used? Why are there several? I don't see the point of this enum when 
+            /// there could be different function calls just as well (and different IST values)
+            answer.at(1) = ee->giveElementError(internalStressET, this, tStep);
         } else {
             answer.clear();
             return 0;
