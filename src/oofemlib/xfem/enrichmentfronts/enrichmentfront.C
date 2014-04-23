@@ -34,6 +34,10 @@
 
 #include "enrichmentfront.h"
 #include "xfem/tipinfo.h"
+#include "domain.h"
+#include "xfem/xfemmanager.h"
+#include "spatiallocalizer.h"
+#include "element.h"
 
 namespace oofem {
 void EnrichmentFront :: addTipIndexToNode(int iNodeInd, int iTipInd)
@@ -71,4 +75,26 @@ void EnrichmentFront :: giveNodeTipIndices(int iNodeInd, std :: vector< int > &o
         }
     }
 }
+
+void EnrichmentFront :: MarkTipElementNodesAsFront(std :: unordered_map< int, int > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo)
+{
+    mTipInfo = iTipInfo;
+    mNodeTipIndices.clear();
+
+    Domain &d = * ( ixFemMan.giveDomain() );
+
+    for ( size_t tipInd = 0; tipInd < iTipInfo.size(); tipInd++ ) {
+        Element *el = d.giveSpatialLocalizer()->giveElementContainingPoint(iTipInfo [ tipInd ].mGlobalCoord);
+
+        if ( el != NULL ) {
+            const IntArray &elNodes = el->giveDofManArray();
+
+            for ( int i = 1; i <= elNodes.giveSize(); i++ ) {
+                ioNodeEnrMarkerMap [ elNodes.at(i) ] = 2;
+                addTipIndexToNode(elNodes.at(i), tipInd);
+            }
+        }
+    }
+}
+
 } // end namespace oofem

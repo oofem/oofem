@@ -115,6 +115,14 @@ protected:
 
     void addTipIndexToNode(int iNodeInd, int iTipInd); // Help function for updating mNodeTipIndices
     void giveNodeTipIndices(int iNodeInd, std :: vector< int > &oTipIndices) const;
+
+
+    /**
+     * Several enrichment fronts enrich all nodes in the tip element.
+     * This help function accomplishes that.
+     */
+    void MarkTipElementNodesAsFront(std :: unordered_map< int, int > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo);
+
 };
 } // end namespace oofem
 
