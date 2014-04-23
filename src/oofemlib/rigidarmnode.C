@@ -90,8 +90,6 @@ RigidArmNode :: postInitialize()
         SlaveDof *sdof = dynamic_cast< SlaveDof * >(dof);
         if ( sdof ) {
             DofIDItem id = sdof->giveDofID();
-            masterDofID[ id ].printYourself();
-            masterContribution[ id ].printYourself();
             sdof->initialize(masterNodes, masterDofID [ id ], masterContribution [ id ]);
         }
     }
