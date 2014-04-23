@@ -73,7 +73,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
-
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     // Fibered cross section support functions

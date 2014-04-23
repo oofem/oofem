@@ -67,6 +67,8 @@ public:
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
                                             GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
 
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     virtual Interface *giveInterface(InterfaceType it);

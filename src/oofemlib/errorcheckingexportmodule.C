@@ -138,7 +138,7 @@ ElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     }
 
     FloatArray ipval;
-    Element *element = domain->giveElement(number);
+    Element *element = domain->giveGlobalElement(number);
     // note! GPs are numbered from 0 internally, but written with 1-index, inconsistent!
     GaussPoint *gp = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gpnum-1);
     element->giveIPValue(ipval, gp, ist, tStep);

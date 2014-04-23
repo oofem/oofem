@@ -38,6 +38,7 @@
 #include "crosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
+#include "structuralms.h"
 #include "floatmatrix.h"
 #include "intarray.h"
 #include "floatarray.h"
@@ -246,6 +247,21 @@ LIBeam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 
     answer.at(1) = masterGpStrain.at(1) + masterGpStrain.at(2) * layerZCoord;
     answer.at(2) = masterGpStrain.at(3);
+}
+
+
+int
+LIBeam2d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    if ( type == IST_BeamForceMomentumTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        return 1;
+    } else if ( type == IST_BeamStrainCurvatureTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        return 1;
+    } else {
+        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+    }
 }
 
 
