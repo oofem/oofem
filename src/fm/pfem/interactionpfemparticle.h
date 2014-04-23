@@ -52,11 +52,13 @@
 namespace oofem {
 class FloatArray;
 class IntArray;
+class StructuralEngngModel;
+class FluidStructureProblem;
 
 /**
  * Particle class being used in PFEM computations
  */
-class InteractionPFEMParticle : public PFEMParticle
+class OOFEM_EXPORT InteractionPFEMParticle : public PFEMParticle
 {
 protected:
 	int coupledNode;
@@ -88,6 +90,8 @@ public:
     virtual void givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofMask,
                                              ValueModeType mode, TimeStep *stepN);
 
+	void giveCoupledVelocities(FloatArray &answer, TimeStep *stepN);
+
     virtual void printOutputAt(FILE *stream, TimeStep *stepN);
 
     /**
@@ -105,6 +109,10 @@ public:
 #ifdef __OOFEG
     virtual void drawScalar(oofegGraphicContext &gc);
 #endif
+
+private:
+	StructuralEngngModel* giveStructuralProblem();
+	FluidStructureProblem* giveFluidStructureMasterProblem();
 };
 } // end namespace oofem
 #endif // interactionpfemparticle_h

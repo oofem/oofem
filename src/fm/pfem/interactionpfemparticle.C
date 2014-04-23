@@ -90,28 +90,18 @@ void
 InteractionPFEMParticle :: givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
                                                        ValueModeType mode, TimeStep *stepN)
 {
-  /*if (stepN->isTheFirstStep())
-  {
-    DofManager::givePrescribedUnknownVector(answer, dofIDArry, mode, stepN);
-  } 
-  else*/
-  {
-    int size;
-    IntArray dofArray;
+	int size;
+	IntArray dofArray;
 
-    answer.resize( size = dofIDArry.giveSize() );
-    this->giveDofArray(dofIDArry, dofArray);
+	answer.resize( size = dofIDArry.giveSize() );
+	this->giveDofArray(dofIDArry, dofArray);
 
-    //   for ( int j = 1; j <= size; j++ ) {
-    //     answer.at(j) = this->giveDof( dofArray.at(j) )->giveBcValue(mode, stepN);
-    //   }
-    FloatArray velocities;
-    FluidStructureProblem *fsiProblem = dynamic_cast<FluidStructureProblem*>(domain->giveEngngModel()->giveMasterEngngModel());
-    if (fsiProblem) {
-      for ( int i = 1; i <= fsiProblem->giveNumberOfSlaveProblems(); i++ ) {
-        StructuralEngngModel *structuralProblem = dynamic_cast<StructuralEngngModel*>(fsiProblem->giveSlaveProblem(i));
-        if (structuralProblem)
-        {
+	FloatArray velocities;
+	FluidStructureProblem *fsiProblem = this->giveFluidStructureMasterProblem();
+	if (fsiProblem) {
+		StructuralEngngModel *structuralProblem = this->giveStructuralProblem();
+		if (structuralProblem)
+		{
 			if (fsiProblem->giveIterationNumber() < 1) {
 				for ( int j = 1; j <= size; j++ ) {
 					answer.at(j) = this->giveDof( dofArray.at(j) )->giveBcValue(mode, stepN);
@@ -127,18 +117,25 @@ InteractionPFEMParticle :: givePrescribedUnknownVector(FloatArray &answer, const
 					answer.at(j) = velocities.at( dofArray.at(j));
 				}
 			}
+		}
+	}
 
-		  
-        }
-      }
-    }
+	// Transform to global c.s.
+	FloatMatrix L2G;
+	if (this->computeL2GTransformation(L2G, dofIDArry)) {
+		answer.rotatedWith(L2G, 'n');
+	}
+}
 
-    // Transform to global c.s.
-    FloatMatrix L2G;
-    if (this->computeL2GTransformation(L2G, dofIDArry)) {
-      answer.rotatedWith(L2G, 'n');
-    }
-  }
+void
+InteractionPFEMParticle::giveCoupledVelocities(FloatArray &answer, TimeStep *stepN)
+{
+	StructuralEngngModel* structuralProblem = this->giveStructuralProblem();
+	if (structuralProblem)
+	{
+		DofManager *dman = structuralProblem->giveDomain(1)->giveDofManager(coupledNode);
+		dman->giveCompleteUnknownVector(answer, VM_Velocity, stepN);
+	}
 }
 
 void
@@ -153,4 +150,26 @@ void InteractionPFEMParticle :: drawScalar(oofegGraphicContext &gc)
 	PFEMParticle :: drawScalar(gc);
 }
 #endif
+
+StructuralEngngModel*
+InteractionPFEMParticle :: giveStructuralProblem()
+{
+	StructuralEngngModel *structuralProblem = NULL;
+	FluidStructureProblem *fsiProblem = this->giveFluidStructureMasterProblem();
+	if (fsiProblem)
+	{
+		for ( int i = 1; i <= fsiProblem->giveNumberOfSlaveProblems(); i++ ) {
+			 structuralProblem = dynamic_cast<StructuralEngngModel*>(fsiProblem->giveSlaveProblem(i));
+		}
+	}
+	return structuralProblem;
+}
+
+FluidStructureProblem*
+InteractionPFEMParticle :: giveFluidStructureMasterProblem()
+{
+	FluidStructureProblem *fsiProblem = dynamic_cast<FluidStructureProblem*>(domain->giveEngngModel()->giveMasterEngngModel());
+
+	return fsiProblem;
+}
 } // end namespace oofem

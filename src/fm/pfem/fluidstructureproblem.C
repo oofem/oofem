@@ -381,7 +381,7 @@ FluidStructureProblem :: solveYourselfAt(TimeStep *stepN)
 	double pressureDifference = 1.0;
 
 	iterationNumber = 0;
-	while ( ( (velocityDifference > tol) || (pressureDifference > tol) ) && iterationNumber < 2 )
+	while ( ( (velocityDifference > tol) || (pressureDifference > tol) ) && iterationNumber < 10 )
 	{
 		previousInteractionParticlesPressures = currentInteractionParticlesPressures;
 		previousInteractionParticlesVelocities = currentInteractionParticlesVelocities;
@@ -392,9 +392,12 @@ FluidStructureProblem :: solveYourselfAt(TimeStep *stepN)
 		}
 
 		for (int i = 1; i <= interactionParticles.giveSize(); i++) {
-			currentInteractionParticlesPressures.at(i) = pfemProblem->giveUnknownComponent(VM_Total, stepN, pfemDomain, pfemDomain->giveDofManager(i)->giveDofWithID(P_f));
-			currentInteractionParticlesVelocities.at(2*(i - 1) + 1) = pfemProblem->giveUnknownComponent(VM_Total, stepN, pfemDomain, pfemDomain->giveDofManager(i)->giveDofWithID(V_u));
-			currentInteractionParticlesVelocities.at(2*(i - 1) + 2) = pfemProblem->giveUnknownComponent(VM_Total, stepN, pfemDomain, pfemDomain->giveDofManager(i)->giveDofWithID(V_v));
+			currentInteractionParticlesPressures.at(i) = pfemProblem->giveUnknownComponent(VM_Total, stepN, pfemDomain, pfemDomain->giveDofManager(interactionParticles.at(i))->giveDofWithID(P_f));
+			InteractionPFEMParticle *interactionParticle = dynamic_cast<InteractionPFEMParticle*>(pfemDomain->giveDofManager(interactionParticles.at(i)));
+			FloatArray velocities;
+			interactionParticle->giveCoupledVelocities(velocities, stepN);
+			currentInteractionParticlesVelocities.at(2*(i - 1) + 1) = velocities.at(1);
+			currentInteractionParticlesVelocities.at(2*(i - 1) + 2) = velocities.at(2);
 		}
 
 		pressureDifference = 0.0;
