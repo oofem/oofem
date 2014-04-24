@@ -22,6 +22,7 @@ BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.2e-1
 #
 PiecewiseLinFunction 1 npoints 2 t 2 0.0 5.0 f(t) 2 0.0 1.0
 XfemManager 1 numberofenrichmentitems 3 numberofgppertri 1
+#XfemManager 1 numberofenrichmentitems 3 numberofgppertri 1 debugvtk 1 vtkexport 1 exportfields 1 4
 #DiscontinuousFunction 1
 #polygoncrack 1 points 6 -0.1 0.3 0.5 0.3 1.1 0.3
 # Crack 1
@@ -46,12 +47,12 @@ polygoncrack 2 points 8 -0.1 0.8 0.4 0.5 0.7 -0.1 0.8 -0.2
 #
 #%BEGIN_CHECK% tolerance 1.e-12
 ## step 2
-#REACTION tStep 1. number 3 dof 1 value 5.0145e+01
-#REACTION tStep 1. number 4 dof 1 value -2.3630e+01
+#REACTION tStep 1. number 3 dof 1 value 4.7942e+01
+#REACTION tStep 1. number 4 dof 1 value -2.1513e+01
 ## step 3
-#REACTION tStep 2. number 3 dof 1 value 4.8468e+01
-#REACTION tStep 2. number 4 dof 1 value -2.1286e+01
+#REACTION tStep 2. number 3 dof 1 value 4.8483e+01
+#REACTION tStep 2. number 4 dof 1 value -8.6860e-01
 ## step 4
-#REACTION tStep 3. number 3 dof 1 value 4.1057e+01
-#REACTION tStep 3. number 4 dof 1 value -1.7596e+01
+#REACTION tStep 3. number 3 dof 1 value 4.7606e+01
+#REACTION tStep 3. number 4 dof 1 value 4.2613e-01
 #%END_CHECK%

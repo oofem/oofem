@@ -237,6 +237,10 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                     gw *= 0.5 * segLength;
                                     gp->setWeight(gw);
 
+                                    FloatArray locCoord;
+                                    element->computeLocalCoordinates(locCoord, *(gp->giveCoordinates()) );
+                                    gp->setLocalCoordinates(locCoord);
+
                                     // Fetch material status and set normal
                                     StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
                                     if ( ms == NULL ) {
