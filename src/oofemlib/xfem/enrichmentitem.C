@@ -67,7 +67,8 @@ REGISTER_EnrichmentItem(Inclusion)
 EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FEMComponent(n, aDomain),
     mpEnrichmentDomain(NULL),
     mpEnrichmentFunc(NULL),
-    mpEnrichmentFront(NULL),
+    mpEnrichmentFrontStart(NULL),
+    mpEnrichmentFrontEnd(NULL),
     mEnrFrontIndex(0),
     mpPropagationLaw(NULL),
     mPropLawIndex(0),
@@ -91,9 +92,14 @@ EnrichmentItem :: ~EnrichmentItem()
         mpEnrichmentFunc = NULL;
     }
 
-    if ( mpEnrichmentFront != NULL ) {
-        delete mpEnrichmentFront;
-        mpEnrichmentFront = NULL;
+    if ( mpEnrichmentFrontStart != NULL ) {
+        delete mpEnrichmentFrontStart;
+        mpEnrichmentFrontStart = NULL;
+    }
+
+    if ( mpEnrichmentFrontEnd != NULL ) {
+        delete mpEnrichmentFrontEnd;
+        mpEnrichmentFrontEnd = NULL;
     }
 
     if ( mpPropagationLaw != NULL ) {
@@ -149,9 +155,13 @@ void EnrichmentItem :: appendInputRecords(DynamicDataReader &oDR)
 
     // Enrichment front
     if ( mEnrFrontIndex != 0 ) {
-        DynamicInputRecord *efrRec = new DynamicInputRecord();
-        mpEnrichmentFront->giveInputRecord(* efrRec);
-        oDR.insertInputRecord(DataReader :: IR_enrichFrontRec, efrRec);
+        DynamicInputRecord *efrRecStart = new DynamicInputRecord();
+        mpEnrichmentFrontStart->giveInputRecord(* efrRecStart);
+        oDR.insertInputRecord(DataReader :: IR_enrichFrontRec, efrRecStart);
+
+        DynamicInputRecord *efrRecEnd = new DynamicInputRecord();
+        mpEnrichmentFrontEnd->giveInputRecord(* efrRecEnd);
+        oDR.insertInputRecord(DataReader :: IR_enrichFrontRec, efrRecEnd);
     }
 
     // Propagation law
@@ -205,16 +215,27 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
 
     // Instantiate EnrichmentFront
     if ( mEnrFrontIndex == 0 ) {
-        mpEnrichmentFront = new EnrFrontDoNothing();
+        mpEnrichmentFrontStart = new EnrFrontDoNothing();
+        mpEnrichmentFrontEnd = new EnrFrontDoNothing();
     } else {
         std :: string enrFrontName;
 
-        InputRecord *enrFrontir = dr->giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
-        result = enrFrontir->giveRecordKeywordField(enrFrontName);
+        InputRecord *enrFrontStartIr = dr->giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
+        result = enrFrontStartIr->giveRecordKeywordField(enrFrontName);
 
-        mpEnrichmentFront = classFactory.createEnrichmentFront( enrFrontName.c_str() );
-        if ( mpEnrichmentFront != NULL ) {
-            mpEnrichmentFront->initializeFrom(enrFrontir);
+        mpEnrichmentFrontStart = classFactory.createEnrichmentFront( enrFrontName.c_str() );
+        if ( mpEnrichmentFrontStart != NULL ) {
+            mpEnrichmentFrontStart->initializeFrom(enrFrontStartIr);
+        } else {
+            OOFEM_ERROR( "Failed to create enrichment front (%s)", enrFrontName.c_str() );
+        }
+
+        InputRecord *enrFrontEndIr = dr->giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
+        result = enrFrontEndIr->giveRecordKeywordField(enrFrontName);
+
+        mpEnrichmentFrontEnd = classFactory.createEnrichmentFront( enrFrontName.c_str() );
+        if ( mpEnrichmentFrontEnd != NULL ) {
+            mpEnrichmentFrontEnd->initializeFrom(enrFrontEndIr);
         } else {
             OOFEM_ERROR( "Failed to create enrichment front (%s)", enrFrontName.c_str() );
         }
@@ -271,8 +292,12 @@ EnrichmentItem :: giveNumberOfEnrDofs() const
 {
     int numEnrDofs = mpEnrichmentFunc->giveNumberOfDofs();
 
-    if ( mpEnrichmentFront != NULL ) {
-        numEnrDofs = max( numEnrDofs, mpEnrichmentFront->giveMaxNumEnrichments() );
+    if ( mpEnrichmentFrontStart != NULL ) {
+        numEnrDofs = max( numEnrDofs, mpEnrichmentFrontStart->giveMaxNumEnrichments() );
+    }
+
+    if ( mpEnrichmentFrontEnd != NULL ) {
+        numEnrDofs = max( numEnrDofs, mpEnrichmentFrontEnd->giveMaxNumEnrichments() );
     }
 
     return numEnrDofs;
@@ -295,16 +320,28 @@ int EnrichmentItem :: giveNumDofManEnrichments(const DofManager &iDMan) const
     auto res = mNodeEnrMarkerMap.find(nodeInd);
 
     if ( res != mNodeEnrMarkerMap.end() ) {
-        if ( res->second == 1 ) {
-            // Bulk enrichment
+
+        switch(res->second) {
+        case NodeEnr_NONE:
+            return 0;
+            break;
+        case NodeEnr_BULK:
             return 1;
-        } else {
-            // Front enrichment
-            return mpEnrichmentFront->giveNumEnrichments(iDMan);
+            break;
+        case NodeEnr_START_TIP:
+            return mpEnrichmentFrontStart->giveNumEnrichments(iDMan);
+            break;
+        case NodeEnr_END_TIP:
+            return mpEnrichmentFrontEnd->giveNumEnrichments(iDMan);
+            break;
+        case NodeEnr_START_AND_END_TIP:
+            return mpEnrichmentFrontStart->giveNumEnrichments(iDMan) + mpEnrichmentFrontEnd->giveNumEnrichments(iDMan);
+            break;
         }
-    } else   {
-        return 0;
+
     }
+
+    return 0;
 }
 
 int EnrichmentItem :: giveNumEnrichedDofs(const DofManager &iDMan) const
@@ -420,13 +457,25 @@ void EnrichmentItem :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, cons
     } else {
         auto res = mNodeEnrMarkerMap.find(iNodeInd);
         if ( res != mNodeEnrMarkerMap.end() ) {
-            if ( res->second == 1 ) {
+
+            switch(res->second) {
+            case NodeEnr_NONE:
+                break;
+            case NodeEnr_BULK:
                 // Bulk enrichment
                 oEnrFunc.resize(1, 0.0);
                 mpEnrichmentFunc->evaluateEnrFuncAt(oEnrFunc [ 0 ], iPos, iLevelSet, mpEnrichmentDomain);
-            } else   {
-                // Front enrichment
-                mpEnrichmentFront->evaluateEnrFuncAt(oEnrFunc, iPos, iLevelSet, iNodeInd);
+                break;
+            case NodeEnr_START_TIP:
+                mpEnrichmentFrontStart->evaluateEnrFuncAt(oEnrFunc, iPos, iLevelSet, iNodeInd);
+                break;
+            case NodeEnr_END_TIP:
+                mpEnrichmentFrontEnd->evaluateEnrFuncAt(oEnrFunc, iPos, iLevelSet, iNodeInd);
+                break;
+            case NodeEnr_START_AND_END_TIP:
+                mpEnrichmentFrontStart->evaluateEnrFuncAt(oEnrFunc, iPos, iLevelSet, iNodeInd);
+                mpEnrichmentFrontEnd->evaluateEnrFuncAt(oEnrFunc, iPos, iLevelSet, iNodeInd);
+                break;
             }
         } else   {
             printf("In EnrichmentItem :: evaluateEnrFuncAt: mNodeEnrMarkerMap not found for iNodeInd %d\n", iNodeInd);
@@ -441,13 +490,24 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrF
 {
     auto res = mNodeEnrMarkerMap.find(iNodeInd);
     if ( res != mNodeEnrMarkerMap.end() ) {
-        if ( res->second == 1 ) {
-            // Bulk enrichment
+
+        switch(res->second) {
+        case NodeEnr_NONE:
+            break;
+        case NodeEnr_BULK:
             oEnrFuncDeriv.resize(1);
             mpEnrichmentFunc->evaluateEnrFuncDerivAt(oEnrFuncDeriv [ 0 ], iPos, iLevelSet, iGradLevelSet, mpEnrichmentDomain);
-        } else   {
-            // Front enrichment
-            mpEnrichmentFront->evaluateEnrFuncDerivAt(oEnrFuncDeriv, iPos, iLevelSet, iGradLevelSet, iNodeInd);
+            break;
+        case NodeEnr_START_TIP:
+            mpEnrichmentFrontStart->evaluateEnrFuncDerivAt(oEnrFuncDeriv, iPos, iLevelSet, iGradLevelSet, iNodeInd);
+            break;
+        case NodeEnr_END_TIP:
+            mpEnrichmentFrontEnd->evaluateEnrFuncDerivAt(oEnrFuncDeriv, iPos, iLevelSet, iGradLevelSet, iNodeInd);
+            break;
+        case NodeEnr_START_AND_END_TIP:
+            mpEnrichmentFrontStart->evaluateEnrFuncDerivAt(oEnrFuncDeriv, iPos, iLevelSet, iGradLevelSet, iNodeInd);
+            mpEnrichmentFrontEnd->evaluateEnrFuncDerivAt(oEnrFuncDeriv, iPos, iLevelSet, iGradLevelSet, iNodeInd);
+            break;
         }
     } else   {
         printf("In EnrichmentItem :: evaluateEnrFuncDerivAt: mNodeEnrMarkerMap not found for iNodeInd %d\n", iNodeInd);
@@ -458,13 +518,24 @@ void EnrichmentItem :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJum
 {
     auto res = mNodeEnrMarkerMap.find(iNodeInd);
     if ( res != mNodeEnrMarkerMap.end() ) {
-        if ( res->second == 1 ) {
-            // Bulk enrichment
+
+        switch(res->second) {
+        case NodeEnr_NONE:
+            break;
+        case NodeEnr_BULK:
             oEnrFuncJumps.resize(1);
             mpEnrichmentFunc->giveJump(oEnrFuncJumps);
-        } else   {
-            // Front enrichment
-            mpEnrichmentFront->evaluateEnrFuncJumps(oEnrFuncJumps, iGP, iNodeInd);
+            break;
+        case NodeEnr_START_TIP:
+            mpEnrichmentFrontStart->evaluateEnrFuncJumps(oEnrFuncJumps, iGP, iNodeInd);
+            break;
+        case NodeEnr_END_TIP:
+            mpEnrichmentFrontEnd->evaluateEnrFuncJumps(oEnrFuncJumps, iGP, iNodeInd);
+            break;
+        case NodeEnr_START_AND_END_TIP:
+            mpEnrichmentFrontStart->evaluateEnrFuncJumps(oEnrFuncJumps, iGP, iNodeInd);
+            mpEnrichmentFrontEnd->evaluateEnrFuncJumps(oEnrFuncJumps, iGP, iNodeInd);
+            break;
         }
     } else   {
         printf("In EnrichmentItem :: evaluateEnrFuncDerivAt: evaluateEnrFuncJumps not found for iNodeInd %d\n", iNodeInd);
@@ -499,7 +570,7 @@ bool EnrichmentItem :: evalNodeEnrMarkerInNode(double &oNodeEnrMarker, int iNode
 {
     auto res = mNodeEnrMarkerMap.find(iNodeInd);
     if ( res != mNodeEnrMarkerMap.end() ) {
-        oNodeEnrMarker = res->second;
+        oNodeEnrMarker = double(res->second);
         return true;
     } else   {
         oNodeEnrMarker = 0.0;
@@ -575,8 +646,8 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
     Domain *d = ixFemMan.giveDomain();
     mNodeEnrMarkerMap.clear();
-    std :: vector< TipInfo >tipInfoArray;
-    mpEnrichmentDomain->giveTipInfos(tipInfoArray);
+    TipInfo tipInfoStart, tipInfoEnd;
+    mpEnrichmentDomain->giveTipInfos(tipInfoStart, tipInfoEnd);
 
 
     FloatArray center;
@@ -665,7 +736,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
                     auto res = mNodeEnrMarkerMap.find(nGlob);
                     if ( res == mNodeEnrMarkerMap.end() ) {
-                        mNodeEnrMarkerMap [ nGlob ] = 1;
+                        mNodeEnrMarkerMap [ nGlob ] = NodeEnr_BULK;
                     }
                 }
             }
@@ -674,7 +745,8 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
     // Mark tip nodes for special treatment.
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    mpEnrichmentFront->MarkNodesAsFront(mNodeEnrMarkerMap, * xMan, mLevelSetNormalDirMap, mLevelSetTangDirMap, tipInfoArray);
+    mpEnrichmentFrontStart->MarkNodesAsFront(mNodeEnrMarkerMap, * xMan, mLevelSetNormalDirMap, mLevelSetTangDirMap, tipInfoStart);
+    mpEnrichmentFrontEnd->MarkNodesAsFront(mNodeEnrMarkerMap, * xMan, mLevelSetNormalDirMap, mLevelSetTangDirMap, tipInfoEnd);
 }
 
 void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const DofManList &iDofManList)
@@ -687,7 +759,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const DofManLi
     // Loop over nodes in the DofManList and mark nodes as enriched.
     const std :: vector< int > &dofList = iDofManList.giveDofManList();
     for ( int i = 0; i < int ( dofList.size() ); i++ ) {
-        mNodeEnrMarkerMap [ dofList [ i ] ] = 1;
+        mNodeEnrMarkerMap [ dofList [ i ] ] = NodeEnr_BULK;
         //  printf(" %i", dofList [ i ]);
     }
 
@@ -703,7 +775,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const WholeDom
 
     mNodeEnrMarkerMap.clear();
     for ( int i = 1; i <= nNodes; i++ ) {
-        mNodeEnrMarkerMap [ i ] = 1;
+        mNodeEnrMarkerMap [ i ] = NodeEnr_BULK;
     }
 }
 
@@ -1114,8 +1186,10 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
 
 bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const FloatArray &iElCenter) const
 {
-    std :: vector< TipInfo >tipInfos;
-    mpEnrichmentDomain->giveTipInfos(tipInfos);
+    TipInfo tipInfoStart, tipInfoEnd;
+    mpEnrichmentDomain->giveTipInfos(tipInfoStart, tipInfoEnd);
+
+    std :: vector< TipInfo >tipInfos = {tipInfoStart, tipInfoEnd};
 
     double minDist2 = std :: numeric_limits< double > :: max();
     size_t minIndex = 0;
@@ -1140,8 +1214,10 @@ bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, 
 
 bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const Triangle &iTri, const FloatArray &iElCenter) const
 {
-    std :: vector< TipInfo >tipInfos;
-    mpEnrichmentDomain->giveTipInfos(tipInfos);
+    TipInfo tipInfoStart, tipInfoEnd;
+    mpEnrichmentDomain->giveTipInfos(tipInfoStart, tipInfoEnd);
+
+    std :: vector< TipInfo >tipInfos = {tipInfoStart, tipInfoEnd};
 
     double minDist2 = std :: numeric_limits< double > :: max();
     size_t minIndex = 0;
@@ -1224,7 +1300,17 @@ void EnrichmentItem :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
 
     // ... increase the radius to cover the support of
     //	   the enrichment front ...
-    oRadius += mpEnrichmentFront->giveSupportRadius();
+    oRadius += max(mpEnrichmentFrontStart->giveSupportRadius(), mpEnrichmentFrontEnd->giveSupportRadius());
+
+
+    if(domain->giveNumberOfSpatialDimensions() == 2) {
+        // Compute mean area if applicable
+        double meanArea = domain->giveArea()/domain->giveNumberOfElements();
+        double meanLength = sqrt(meanArea);
+        //printf("meanLength: %e\n", meanLength );
+
+        oRadius = max(oRadius, meanLength);
+    }
 
     // ... and make sure that all nodes of partly cut elements are included.
     oRadius *= 2.0;     // TODO: Compute a better estimate based on maximum element size. /ES

@@ -63,7 +63,7 @@ public:
     EnrFrontLinearBranchFuncOneEl();
     virtual ~EnrFrontLinearBranchFuncOneEl();
 
-    virtual void MarkNodesAsFront(std :: unordered_map< int, int > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo);
+    virtual void MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo);
 
     virtual int  giveNumEnrichments(const DofManager &iDMan) const;
     virtual int  giveMaxNumEnrichments() const { return 4; }

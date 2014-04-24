@@ -40,61 +40,36 @@
 #include "element.h"
 
 namespace oofem {
-void EnrichmentFront :: addTipIndexToNode(int iNodeInd, int iTipInd)
-{
-    // If the node is already enriched by the tip,
-    // append the new index to the list.
-    for ( size_t i = 0; i < mNodeTipIndices.size(); i++ ) {
-        if ( mNodeTipIndices [ i ].first == iNodeInd ) {
-            for ( size_t j = 0; j < mNodeTipIndices [ i ].second.size(); j++ ) {
-                if ( mNodeTipIndices [ i ].second [ j ] == iTipInd ) {
-                    // If the index is already present, we do not
-                    // need to do anything
-                    return;
-                }
-            }
 
-            mNodeTipIndices [ i ].second.push_back(iTipInd);
-            return;
-        }
-    }
-
-    // If not, create a new pair
-    std :: vector< int >tipIndices;
-    tipIndices.push_back(iTipInd);
-    std :: pair< int, std :: vector< int > >nodeTipInd = make_pair(iNodeInd, tipIndices);
-    mNodeTipIndices.push_back(nodeTipInd);
-}
-
-void EnrichmentFront :: giveNodeTipIndices(int iNodeInd, std :: vector< int > &oTipIndices) const
-{
-    for ( size_t i = 0; i < mNodeTipIndices.size(); i++ ) {
-        if ( mNodeTipIndices [ i ].first == iNodeInd ) {
-            oTipIndices = mNodeTipIndices [ i ].second;
-            return;
-        }
-    }
-}
-
-void EnrichmentFront :: MarkTipElementNodesAsFront(std :: unordered_map< int, int > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo)
+void EnrichmentFront :: MarkTipElementNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo)
 {
     mTipInfo = iTipInfo;
-    mNodeTipIndices.clear();
 
     Domain &d = * ( ixFemMan.giveDomain() );
 
-    for ( size_t tipInd = 0; tipInd < iTipInfo.size(); tipInd++ ) {
-        Element *el = d.giveSpatialLocalizer()->giveElementContainingPoint(iTipInfo [ tipInd ].mGlobalCoord);
+    Element *el = d.giveSpatialLocalizer()->giveElementContainingPoint(mTipInfo.mGlobalCoord);
 
-        if ( el != NULL ) {
-            const IntArray &elNodes = el->giveDofManArray();
+    if ( el != NULL ) {
+        const IntArray &elNodes = el->giveDofManArray();
 
-            for ( int i = 1; i <= elNodes.giveSize(); i++ ) {
-                ioNodeEnrMarkerMap [ elNodes.at(i) ] = 2;
-                addTipIndexToNode(elNodes.at(i), tipInd);
+        for ( int i = 1; i <= elNodes.giveSize(); i++ ) {
+
+            if( ioNodeEnrMarkerMap [ elNodes.at(i) ] == NodeEnr_START_TIP || ioNodeEnrMarkerMap [ elNodes.at(i) ] == NodeEnr_END_TIP )
+            {
+                ioNodeEnrMarkerMap [ elNodes.at(i) ] = NodeEnr_START_AND_END_TIP;
+            }
+            else {
+                if( mTipInfo.mTipIndex == 0) {
+                    ioNodeEnrMarkerMap [ elNodes.at(i) ] = NodeEnr_START_TIP;
+                }
+
+                if( mTipInfo.mTipIndex == 1) {
+                    ioNodeEnrMarkerMap [ elNodes.at(i) ] = NodeEnr_END_TIP;
+                }
+            }
+
             }
         }
-    }
 }
 
 } // end namespace oofem

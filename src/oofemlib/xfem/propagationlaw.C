@@ -86,14 +86,9 @@ void PLCrackPrescribedDir :: giveInputRecord(DynamicInputRecord &input)
 
 void PLCrackPrescribedDir :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &ioEnrDom)
 {
-    // Fetch crack tip data
-    std :: vector< TipInfo >tipInfo;
-    ioEnrDom.giveTipInfos(tipInfo);
-
     int tipIndex = 1;
     double angleRad = mAngle * M_PI / 180.0;
     FloatArray dir = {cos(angleRad), sin(angleRad)};
-    dir.normalize(); ///@todo Why? /Mikael
 
 
     std :: vector< TipPropagation >tipPropagations;

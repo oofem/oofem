@@ -53,72 +53,52 @@ EnrFrontIntersection::~EnrFrontIntersection() {
 
 }
 
-void EnrFrontIntersection::MarkNodesAsFront(std :: unordered_map< int, int > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo)
+void EnrFrontIntersection::MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo)
 {
     MarkTipElementNodesAsFront(ioNodeEnrMarkerMap, ixFemMan, iLevelSetNormalDirMap, iLevelSetTangDirMap, iTipInfo);
 }
 
 int EnrFrontIntersection :: giveNumEnrichments(const DofManager &iDMan) const
 {
-    std :: vector< int >tipIndices;
-    int nodeInd = iDMan.giveGlobalNumber();
-    giveNodeTipIndices(nodeInd, tipIndices);
-
-    return 1 * tipIndices.size();
+    return 1;
 }
 
 void EnrFrontIntersection :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const
 {
     oEnrFunc.clear();
 
-    std :: vector< int >tipIndices;
-    giveNodeTipIndices(iNodeInd, tipIndices);
+    FloatArray xTip = { mTipInfo.mGlobalCoord.at(1), mTipInfo.mGlobalCoord.at(2) };
 
-    for ( size_t i = 0; i < tipIndices.size(); i++ ) {
-        int tipInd = tipIndices [ i ];
-        FloatArray xTip = {
-            mTipInfo [ tipInd ].mGlobalCoord.at(1), mTipInfo [ tipInd ].mGlobalCoord.at(2)
-        };
+    FloatArray pos = { iPos.at(1), iPos.at(2) };
 
-        FloatArray pos = {
-            iPos.at(1), iPos.at(2)
-        };
+    // Crack tip normal and use defined tangent
+    // Note that mTangent is not necessarily equal to mTipInfo.mTangDir!
+    const FloatArray &t = mTangent;
+    const FloatArray &n = mTipInfo.mNormalDir;
 
-        // Crack tip tangent and normal
-        // TODO: We may wish to have a user defined tangential direction here!
-        const FloatArray &t = mTipInfo [ tipInd ].mTangDir;
-        const FloatArray &n = mTipInfo [ tipInd ].mNormalDir;
+    FloatArray tipToPos = { iPos(0)-xTip(0), iPos(1)-xTip(1) };
 
-        FloatArray tipToPos = { iPos(0)-xTip(0), iPos(1)-xTip(1) };
-
-        // Heaviside in normal direction
-        double Hn = 0.0;
-        if( tipToPos.dotProduct(n) > 0.0 ) {
-            Hn = 1.0;
-        }
-
-        // Heaviside in tangential direction
-        double Ht = 0.0;
-        if( tipToPos.dotProduct(t) < 0.0 ) {
-            Ht = 1.0;
-        }
-
-        oEnrFunc.push_back(Hn*Ht);
+    // Heaviside in normal direction
+    double Hn = 0.0;
+    if( tipToPos.dotProduct(n) > 0.0 ) {
+        Hn = 1.0;
     }
+
+    // Heaviside in tangential direction
+    double Ht = 0.0;
+    if( tipToPos.dotProduct(t) < 0.0 ) {
+        Ht = 1.0;
+    }
+
+    oEnrFunc.push_back(Hn*Ht);
 }
 
 void EnrFrontIntersection :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const
 {
     oEnrFuncDeriv.clear();
 
-    std :: vector< int >tipIndices;
-    giveNodeTipIndices(iNodeInd, tipIndices);
-
-    for ( size_t i = 0; i < tipIndices.size(); i++ ) {
-        FloatArray enrFuncDeriv = {0.0, 0.0};
-        oEnrFuncDeriv.push_back(enrFuncDeriv);
-    }
-
+    FloatArray enrFuncDeriv = {0.0, 0.0};
+    oEnrFuncDeriv.push_back(enrFuncDeriv);
 }
 
 void EnrFrontIntersection :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd) const
@@ -128,21 +108,15 @@ void EnrFrontIntersection :: evaluateEnrFuncJumps(std :: vector< double > &oEnrF
 
     oEnrFuncJumps.clear();
 
-    std :: vector< int >tipIndices;
-    giveNodeTipIndices(iNodeInd, tipIndices);
+    const FloatArray &xTip = mTipInfo.mGlobalCoord;
+    const FloatArray &gpCoord = *(iGP.giveCoordinates());
 
-    for ( size_t i = 0; i < tipIndices.size(); i++ ) {
-        int tipInd = tipIndices [ i ];
-        const FloatArray &xTip = mTipInfo [ tipInd ].mGlobalCoord;
-        const FloatArray &gpCoord = *(iGP.giveCoordinates());
+    double radius = gpCoord.distance(xTip);
 
-        double radius = gpCoord.distance(xTip);
+    std :: vector< double > jumps;
+    jumps.push_back(0.0);
 
-        std :: vector< double > jumps;
-        jumps.push_back(0.0);
-
-        oEnrFuncJumps.insert( oEnrFuncJumps.end(), jumps.begin(), jumps.end() );
-    }
+    oEnrFuncJumps.insert( oEnrFuncJumps.end(), jumps.begin(), jumps.end() );
 }
 
 IRResultType EnrFrontIntersection :: initializeFrom(InputRecord *ir)
