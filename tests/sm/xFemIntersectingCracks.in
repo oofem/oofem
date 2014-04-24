@@ -1,0 +1,80 @@
+xFemIntersectingCracks.out
+Test of enrichment front for intersecting cracks. Written by Erik Svenning, Chalmers University of Technology, February 2014
+XFEMStatic nsteps 1 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 40 minIter 2 stiffmode 0 nmodules 0 manrmsteps 1 forceremap 0
+#vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
+#gnuplot tstep_all reactionforces boundaryconditions
+domain 2dPlaneStress
+OutputManager tstep_all dofman_all element_all
+ndofman 16 nelem 9 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 0 nxfemman 1
+node 1     coords 3  0        0        0       bc 2 1 1
+node 2     coords 3  1        0        0       bc 2 1 1
+node 3     coords 3  1        1        0       bc 2 2 3 
+node 4     coords 3  0        1        0       bc 2 1 1
+node 5     coords 3  0.333333  0        0       bc 2 1 1
+node 6     coords 3  0.666667  0        0       bc 2 1 1
+node 7     coords 3  1        0.333333  0       bc 2 1 1
+node 8     coords 3  1        0.666667  0       bc 2 2 3
+node 9     coords 3  0.666667  1        0       bc 2 2 3
+node 10    coords 3  0.333333  1        0       bc 2 1 1
+node 11    coords 3  0        0.666667  0       bc 2 1 1
+node 12    coords 3  0        0.333333  0       bc 2 1 1
+node 13    coords 3  0.666667  0.333333  0       
+node 14    coords 3  0.666667  0.666667  0       
+node 15    coords 3  0.333333  0.333333  0       
+node 16    coords 3  0.333333  0.666667  0       
+PlaneStress2DXFEM 13    nodes 4   2   6   13  7   mat 1 crosssect 1 nip 4 nlgeo 0 useplanestrain 1
+PlaneStress2DXFEM 14    nodes 4   7   13  14  8   mat 1 crosssect 1 nip 4 nlgeo 0 useplanestrain 1
+PlaneStress2DXFEM 15    nodes 4   8   14  9   3   mat 1 crosssect 1 nip 4 nlgeo 0 useplanestrain 1
+PlaneStress2DXFEM 16    nodes 4   6   5   15  13  mat 1 crosssect 1 nip 4 nlgeo 0 useplanestrain 1
+PlaneStress2DXFEM 17    nodes 4   13  15  16  14  mat 1 crosssect 1 nip 4 nlgeo 0 useplanestrain 1
+PlaneStress2DXFEM 18    nodes 4   14  16  10  9   mat 1 crosssect 1 nip 4 nlgeo 0 useplanestrain 1
+PlaneStress2DXFEM 19    nodes 4   5   1   12  15  mat 1 crosssect 1 nip 4 nlgeo 0 useplanestrain 1
+PlaneStress2DXFEM 20    nodes 4   15  12  11  16  mat 1 crosssect 1 nip 4 nlgeo 0 useplanestrain 1
+PlaneStress2DXFEM 21    nodes 4   16  11  4   10  mat 1 crosssect 1 nip 4 nlgeo 0 useplanestrain 1
+SimpleCS 1 thick 1.0 material 1
+#
+#Linear elasticity
+IsoLE 1 d 1.0 E 1.0e6 n 0.3 tAlpha 0.0
+#Cohesive zone
+#IntMatBilinearCZElastic 2 kn 1.0e-6 ks 1.0e-6 knc 1.0e-6 g1c 1.0e6 sigfn 1.0e6 sigfs 1.0e6
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+# BC 2: x-displacement
+BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.1e-1
+# BC 3: y-displacement
+BoundaryCondition 3 loadTimeFunction 1 prescribedvalue 0.2e-1
+#
+ConstantFunction 1 f(t) 1.0
+#XfemManager 1 numberofenrichmentitems 3 numberofgppertri 3 debugvtk 1 vtkexport 1 exportfields 1 4
+XfemManager 1 numberofenrichmentitems 3 numberofgppertri 3
+crack 1 
+HeavisideFunction 1
+polygoncrack 1 points 6 -0.5 0.5 -0.2 0.5 1.1 0.5
+###################################
+# Crack 2
+crack 2 enrichmentfront 1
+HeavisideFunction 1
+polygoncrack 2 points 6 0.5 1.1 0.5 1.0 0.5 0.5
+enrfrontdonothing
+enrfrontintersection tangent 2 0.0 -1.0
+#####################################
+# Crack 3
+crack 3 enrichmentfront 1
+HeavisideFunction 1
+polygoncrack 3 points 6 0.5 0.5 0.5 0.1 0.5 -0.1
+enrfrontintersection tangent 2 0.0 1.0
+enrfrontdonothing
+##
+
+#%BEGIN_CHECK% tolerance 1.e-6
+## Node displacements
+#NODE tStep 0 number 14 dof 1 unknown d value 1.00000000e-02
+#NODE tStep 0 number 14 dof 2 unknown d value 2.00000000e-02
+#NODE tStep 0 number 14 dof 23 unknown d value 0.0
+#NODE tStep 0 number 14 dof 24 unknown d value 0.0
+#NODE tStep 0 number 14 dof 31 unknown d value 1.00000000e-02
+#NODE tStep 0 number 14 dof 32 unknown d value 2.00000000e-02
+#NODE tStep 0 number 14 dof 39 unknown d value 0.0
+#NODE tStep 0 number 14 dof 40 unknown d value 0.0
+#%END_CHECK%
+
+
