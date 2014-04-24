@@ -368,7 +368,6 @@ Domain :: giveGlobalElement(int n)
         }
     }
 
-    OOFEM_ERROR("undefined element id (%d)", n);
     return NULL;
 }
 
@@ -532,7 +531,6 @@ Domain :: giveGlobalDofManager(int n)
         }
     }
 
-    OOFEM_ERROR("undefined element id (%d)", n);
     return NULL;
 }
 

@@ -86,6 +86,20 @@ NodeErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     }
 
     DofManager *dman = domain->giveGlobalDofManager(number);
+    if ( !dman ) {
+        if ( domain->giveEngngModel()->isParallel() ) {
+            return true;
+        } else {
+            OOFEM_WARNING("Dof manager %d not found.", number);
+            return false;
+        }
+    }
+#ifdef __PARALLEL_MODE
+    if ( dman->giveParallelMode() == DofManager_remote || dman->giveParallelMode() == DofManager_null ) {
+        return true;
+    }
+#endif
+
     Dof *dof = dman->giveDofWithID(dofid);
 
     double dmanValue = dof->giveUnknown(mode, tStep);
@@ -101,32 +115,19 @@ NodeErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 
 
 ElementErrorCheckingRule :: ElementErrorCheckingRule(const std :: string &line, double tol) :
-    ErrorCheckingRule(tol)
+    ErrorCheckingRule(tol), irule(0)
 {
-    int ret = std :: sscanf(line.c_str(), "#ELEMENT tStep %d number %d gp %d keyword %d component %d value %le tolerance %le",
-                  &tstep, & number, & gpnum, & ist, & component, & value, & tolerance);
+    int istnum;
+    int ret = std :: sscanf(line.c_str(), "#ELEMENT tStep %d number %d irule %d gp %d keyword %d component %d value %le tolerance %le",
+                  &tstep, & number, & irule, & gpnum, & istnum, & component, & value, & tolerance);
+    if ( ret < 3 ) {
+        ret = std :: sscanf(line.c_str(), "#ELEMENT tStep %d number %d gp %d keyword %d component %d value %le tolerance %le",
+                    &tstep, & number, & gpnum, & istnum, & component, & value, & tolerance);
+    }
     if ( ret < 6 ) {
         OOFEM_ERROR("Something wrong in the error checking rule: %s\n", line.c_str());
     }
-#if 0
-    std :: sscanf(line.c_str(), "#ELEMENT tStep %d number %d gp %d keyword %s component %d value %le tolerance %le",
-                  &tstep, & number, & gpnum, (char*)& unknown, & component, & value, & tolerance);
-    if ( std :: string("\"stresses\"").compare(unknown) == 0 ) {
-        ist = IST_StressTensor;
-    } else if ( std :: string("\"strains\"").compare(unknown) == 0 ) {
-        ist = IST_StrainTensor;
-    } else if ( std :: string("\"forces\"").compare(unknown) == 0 ) {
-        ist = IST_ShellForceTensor;
-    }  else if ( std :: string("\"moments\"").compare(unknown) == 0 ) {
-        ist = IST_ShellMomentumTensor;
-    } else if ( std :: string("\"VOF\"").compare(unknown) == 0 ) {
-        ist = IST_VOFFraction;
-    } else if ( std :: string("\"DoH\"").compare(unknown) == 0 ) {
-        ist = IST_HydrationDegree;
-    } else {
-        OOFEM_WARNING("Can't recognize unknown '%s'", unknown);
-    }
-#endif
+    ist = (InternalStateType)istnum;
 }
 
 bool
@@ -139,8 +140,22 @@ ElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
 
     FloatArray ipval;
     Element *element = domain->giveGlobalElement(number);
+    if ( !element ) {
+        if ( domain->giveEngngModel()->isParallel() ) {
+            return true;
+        } else {
+            OOFEM_WARNING("Element %d not found.", number);
+            return false;
+        }
+    }
+#ifdef __PARALLEL_MODE
+    if ( element->giveParallelMode() == Element_remote ) {
+        return true;
+    }
+#endif
+
     // note! GPs are numbered from 0 internally, but written with 1-index, inconsistent!
-    GaussPoint *gp = element->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gpnum-1);
+    GaussPoint *gp = element->giveIntegrationRule(irule)->getIntegrationPoint(gpnum-1);
     element->giveIPValue(ipval, gp, ist, tStep);
 
     if ( component > ipval.giveSize() || component < 1 ) {
@@ -193,10 +208,20 @@ ReactionErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
     emodel->buildReactionTable(restrDofMans, restrDofs, eqn, tStep, domain->giveNumber());
     emodel->computeReaction(reactionForces, tStep, domain->giveNumber());
 
+    bool found = false;
     int index;
     for ( index = 1; index <= restrDofs.giveSize(); ++index ) {
         if ( restrDofs.at(index) == dofid && domain->giveNode(restrDofMans.at(index))->giveLabel() == number ) {
+            found = true;
             break;
+        }
+    }
+    if ( !found ) {
+        if ( domain->giveEngngModel()->isParallel() ) {
+            return true;
+        } else {
+            OOFEM_WARNING("Reaction force node: %d dof: %d not found.", number, dofid);
+            return false;
         }
     }
 
