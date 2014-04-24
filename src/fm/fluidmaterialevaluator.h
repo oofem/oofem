@@ -79,7 +79,7 @@ protected:
 
     IntArray vars;
 
-    std::vector< GaussPoint >gps;
+    std::vector< std :: unique_ptr< GaussPoint > >gps;
 
     std :: ofstream outfile;
 
