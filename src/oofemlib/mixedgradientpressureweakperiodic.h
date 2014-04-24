@@ -120,6 +120,7 @@ public:
     virtual void scale(double s);
 
     virtual void computeFields(FloatArray &sigmaDev, double &vol, EquationID eid, TimeStep *tStep);
+    void computeStress(FloatArray &sigmaDev, FloatArray &tractions, double rve_size);
     virtual void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep);
 
     virtual void setPrescribedPressure(double p) { pressure = p; }
