@@ -38,6 +38,7 @@
 #include "crosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
+#include "structuralms.h"
 #include "floatmatrix.h"
 #include "intarray.h"
 #include "floatarray.h"
@@ -209,6 +210,23 @@ LIBeam3d :: computeVolumeAround(GaussPoint *gp)
 {
     double weight  = gp->giveWeight();
     return weight * 0.5 * this->computeLength();
+}
+
+
+int
+LIBeam3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    ///@todo This should be a common inheritance for all 3d beams (and a similar one for 2D beams) 
+    /// to support all the sensible moment/force tensors. 
+    if ( type == IST_BeamForceMomentumTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        return 1;
+    } else if ( type == IST_BeamStrainCurvatureTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        return 1;
+    } else {
+        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+    }
 }
 
 

@@ -2,7 +2,8 @@ rigarm01.out
 Test of rigid arm node
 #only momentum influence to the displacements is taken into account
 #beamShearCoeff is artificially enlarged.
-LinearStatic nsteps 1
+LinearStatic nsteps 1 nmodules 1
+errorcheck filename "rigarm01.in"
 domain 2dBeam
 OutputManager tstep_all dofman_all element_all
 ndofman 4 nelem 2 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
@@ -20,7 +21,7 @@ ConstantFunction 1 f(t) 1.
 #
 # exact solution
 #
-#%BEGIN_CHECK% tolerance 1.e-8
+#%BEGIN_CHECK% tolerance 1.e-6
 ## check reactions 
 #REACTION tStep 1 number 1 dof 1 value -2.0000e+00
 #REACTION tStep 1 number 1 dof 3 value  0.0
@@ -40,10 +41,10 @@ ConstantFunction 1 f(t) 1.
 #NODE tStep 1 number 4 dof 3 unknown d value 27.0
 #NODE tStep 1 number 4 dof 5 unknown d value -6.0
 ## check element no. 1,2 force vector
-#BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 1  value -2.0000e+00
-#BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 2  value  0.0
-#BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 3  value  4.0000e+00
-#BEAM_ELEMENT tStep 1 number 2  keyword "forces" component 4  value  2.0000e+00
-#BEAM_ELEMENT tStep 1 number 2  keyword "forces" component 5  value  0.0
-#BEAM_ELEMENT tStep 1 number 2  keyword "forces" component 6  value  0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 1  value 2.0000e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 2  value -4.00000000e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 3  value 5.33333333e+00
+#ELEMENT tStep 1 number 2 gp 1 keyword 7 component 1  value  2.0000e+00
+#ELEMENT tStep 1 number 2 gp 1 keyword 7 component 2  value  0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword 7 component 3  value 1.06666667e+01
 #%END_CHECK%

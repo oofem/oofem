@@ -47,9 +47,7 @@ FEI2dLineQuad Line2BoundaryElement :: fei(1, 2);
 Line2BoundaryElement :: Line2BoundaryElement(int n, Domain *aDomain) : FMElement(n, aDomain)
 {
     this->numberOfDofMans = 3;
-    integrationRulesArray.resize( 1 );
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
-    this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 2, this);
+    integrationRulesArray.resize( 0 );
 }
 
 Line2BoundaryElement :: ~Line2BoundaryElement()

@@ -3,7 +3,8 @@ Test of 1D relaxation behaviour using Truss2d elements and B3 material model
 #
 # example from dissertation
 #
-IncrLinearStatic endOfTimeOfInterest 1000.0  prescribedTimes 30 0.10 0.1373 0.1887 0.2592 0.3562 0.4893 0.6723 0.9236 1.2689 1.7433 2.3950 3.2903 4.5203 6.2101 8.5316 11.7210 16.1026 22.1221 30.3919 41.7531 57.3615 78.8046 108.2636 148.7352 204.3359 280.7216 3.856620e+02 5.298317e+02 7.278954e+02 1.000000e+03 
+IncrLinearStatic endOfTimeOfInterest 1000.0  prescribedTimes 30 0.10 0.1373 0.1887 0.2592 0.3562 0.4893 0.6723 0.9236 1.2689 1.7433 2.3950 3.2903 4.5203 6.2101 8.5316 11.7210 16.1026 22.1221 30.3919 41.7531 57.3615 78.8046 108.2636 148.7352 204.3359 280.7216 3.856620e+02 5.298317e+02 7.278954e+02 1.000000e+03 nmodules 1
+errorcheck filename "trussb3_relax.in"
 domain 2dTruss
 OutputManager tstep_all dofman_all element_all
 ndofman 3 nelem 2 ncrosssect  1 nmat 1 nbc 4 nic 0 nltf 2
@@ -26,12 +27,12 @@ HeavisideLTF 2 origin 400. value 1.0
 #
 #%BEGIN_CHECK% tolerance 1.e-12
 ## check nodal values at the end of time interest
-#NODE tStep 1000. number 2 dof 3 unknown d value 1.00000000e-03
-#NODE tStep 1000. number 3 dof 3 unknown d value 2.00000000e-03
+#NODE tStep 1000 number 2 dof 3 unknown d value 1.00000000e-03
+#NODE tStep 1000 number 3 dof 3 unknown d value 2.00000000e-03
 ## check element no. 1 strain vector
-#ELEMENT tStep 1000.  number 1 gp 1 keyword "strains" component 1  value 1.0000e-03
-#ELEMENT tStep 1000.  number 1 gp 1 keyword "stresses" component 1  value 1.1055e+01
-#ELEMENT tStep 1000.  number 2 gp 1 keyword "strains" component 1  value 1.0000e-03
-#ELEMENT tStep 1000.  number 2 gp 1 keyword "stresses" component 1  value 1.1055e+01
+#ELEMENT tStep 1000 number 1 gp 1 keyword 4 component 1  value 1.0000e-03
+#ELEMENT tStep 1000 number 1 gp 1 keyword 1 component 1  value 1.1055e+01
+#ELEMENT tStep 1000 number 2 gp 1 keyword 4 component 1  value 1.0000e-03
+#ELEMENT tStep 1000 number 2 gp 1 keyword 1 component 1  value 1.1055e+01
 #%END_CHECK%
 #

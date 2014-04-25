@@ -73,6 +73,8 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
 
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LIBeam2dNL_Name; }
     virtual const char *giveClassName() const { return "LIBeam2dNL"; }

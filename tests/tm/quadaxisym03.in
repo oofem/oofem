@@ -1,6 +1,7 @@
 quadaxisym03.out
 Test of one QuadAxisym1_ht element, stationary case, prescribed temperature at right edge
-StationaryProblem nsteps 1 nmodules 0
+StationaryProblem nsteps 1 nmodules 1
+errorcheck filename "quadaxisym03.in"
 #vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
@@ -24,9 +25,9 @@ ConstantFunction 1 f(t) 1.0
 
 #Exact solution T(r)=20*(1-log(1.1/r)/log(1.1/0.1)), but here linear interpolation of temperature
 #%BEGIN_CHECK%
-#ELEMENT tStep 1 number 1 gp 1 keyword "flow" component 1 value -3.0000e+01
-#ELEMENT tStep 1 number 1 gp 2 keyword "flow" component 1 value -3.0000e+01
-#ELEMENT tStep 1 number 1 gp 3 keyword "flow" component 1 value -3.0000e+01
-#ELEMENT tStep 1 number 1 gp 4 keyword "flow" component 1 value -3.0000e+01
+#ELEMENT tStep 1 number 1 gp 1 keyword 56 component 1 value -3.0000e+01
+#ELEMENT tStep 1 number 1 gp 2 keyword 56 component 1 value -3.0000e+01
+#ELEMENT tStep 1 number 1 gp 3 keyword 56 component 1 value -3.0000e+01
+#ELEMENT tStep 1 number 1 gp 4 keyword 56 component 1 value -3.0000e+01
 #%END_CHECK%
 

@@ -1,6 +1,7 @@
 qbrick_01.out
 Patch test of QBrick1ht element, constant heat flow in x direction and linear temperature in x direction
-StationaryProblem nsteps 1 nmodules 0
+StationaryProblem nsteps 1 nmodules 1
+errorcheck filename "qbrick_01.in"
 #vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 2
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all

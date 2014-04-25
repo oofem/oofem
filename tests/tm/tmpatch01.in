@@ -1,6 +1,7 @@
 tmpatch01.out
 Patch test of Quad1_ht elements 
-StationaryProblem nsteps 1
+StationaryProblem nsteps 1 nmodules 1
+errorcheck filename "tmpatch01.in"
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 2 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
@@ -21,7 +22,7 @@ ConstantFunction 1 f(t) 1.0
 #%BEGIN_CHECK%
 #NODE tStep 1 number 3 dof 10 unknown d value 7.5
 #NODE tStep 1 number 4 dof 10 unknown d value 7.5
-#ELEMENT tStep 1 number 1 gp 1 keyword "state" component 1 value 5.9151e+00
-#ELEMENT tStep 1 number 1 gp 3 keyword "state" component 1 value 1.5849e+00
-#ELEMENT tStep 1 number 1 gp 1 keyword "flow" component 1 value -3.75
+#ELEMENT tStep 1 number 1 gp 1 keyword 37 component 1 value 5.91506351e+00
+#ELEMENT tStep 1 number 1 gp 3 keyword 37 component 1 value 1.58493649e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 56 component 1 value -3.75
 #%END_CHECK%

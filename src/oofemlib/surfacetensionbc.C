@@ -51,6 +51,7 @@
 
 #include <utility>
 #include <list>
+#include <memory>
 
 namespace oofem {
 REGISTER_BoundaryCondition(SurfaceTensionBoundaryCondition);
@@ -129,7 +130,7 @@ void SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeS
                                                        CharType type, ValueModeType mode,
                                                        const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
-    if ( type != InternalForcesVector ) {
+    if ( type != ExternalForcesVector ) {
         return;
     }
     if ( eid == EID_MomentumBalance_ConservationEquation ) {
@@ -155,11 +156,7 @@ void SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeS
         this->computeLoadVectorFromElement(fe, e, boundary, tStep);
         answer.assemble(fe, loc);
         if ( eNorms ) {
-            for ( int i = 1; i <= loc.giveSize(); ++i ) {
-                if ( loc.at(i) > 0 ) {
-                    eNorms->at( masterdofids.at(1) ) += fe.at(i) * fe.at(i);
-                }
-            }
+            eNorms->assembleSquared(fe, masterdofids);
         }
     }
 }
@@ -167,23 +164,20 @@ void SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeS
 void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &answer, Element *e, int side, TimeStep *tStep)
 {
     FEInterpolation *fei = e->giveInterpolation();
-    IntegrationRule *iRule = e->giveDefaultIntegrationRulePtr();
-    if ( !fei || !iRule ) {
+    if ( !fei ) {
         OOFEM_ERROR("No interpolation available for element.");
     }
+    std :: unique_ptr< IntegrationRule > iRule( fei->giveBoundaryIntegrationRule(fei->giveInterpolationOrder()-1, side) );
 
     int nsd = e->giveDomain()->giveNumberOfSpatialDimensions();
-    integrationDomain id = e->giveIntegrationDomain();
     int nodes = e->giveNumberOfNodes();
+    if ( side == -1 ) {
+        side = 1;
+    }
+
+    answer.clear();
 
     if ( nsd == 2 ) {
-        if ( !( ( side == -1 && id == _Line ) || ( side > 0 && ( id == _Triangle || id == _Square ) ) ) ) {
-            OOFEM_ERROR("Not a surface element.");
-        }
-        if ( side == -1 ) {
-            side = 1;
-        }
-
         FEInterpolation2d *fei2d = static_cast< FEInterpolation2d * >(fei);
 
         ///@todo More of this grunt work should be moved to the interpolation classes
@@ -200,8 +194,6 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
         FloatArray dNds;
         FloatMatrix B(2, 2 *nodes);
         B.zero();
-        answer.resize(2 * nodes, 2 * nodes);
-        answer.zero();
 
         if ( e->giveDomain()->isAxisymmetric() ) {
             FloatArray N;
@@ -254,12 +246,6 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
 
         answer.symmetrized();
     }  else if ( nsd ==  3 ) {
-        if ( !( ( ( id == _Triangle || id == _Square ) && side == -1 ) || ( ( id == _Tetrahedra || id == _Cube ) && side > 0 ) ) ) {
-            OOFEM_ERROR("Not a surface element.");
-        }
-        if ( side == -1 ) {
-            side = 1;
-        }
 
         FEInterpolation3d *fei3d = static_cast< FEInterpolation3d * >(fei);
 
@@ -268,8 +254,6 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
         FloatMatrix tmp(3 *nodes, 3 *nodes);
         FloatMatrix dNdx;
         FloatArray n;
-        answer.resize(3 * nodes, 3 * nodes);
-        answer.zero();
         for ( GaussPoint *gp: *iRule ) {
             fei3d->surfaceEvaldNdx( dNdx, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
             /*double J = */ fei->boundaryEvalNormal( n, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
@@ -291,39 +275,38 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
 void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray &answer, Element *e, int side, TimeStep *tStep)
 {
     FEInterpolation *fei = e->giveInterpolation();
-    IntegrationRule *iRule = e->giveDefaultIntegrationRulePtr();
-    if ( !fei || !iRule ) {
+    if ( !fei ) {
         OOFEM_ERROR("No interpolation or default integration available for element.");
     }
+    std :: unique_ptr< IntegrationRule > iRule( fei->giveBoundaryIntegrationRule(fei->giveInterpolationOrder()-1, side) );
 
     int nsd = e->giveDomain()->giveNumberOfSpatialDimensions();
-    integrationDomain id = iRule->giveIntegrationDomain();
-    int nodes = e->giveNumberOfNodes();
+
+    if ( side == -1 ) {
+        side = 1;
+    }
+
+    answer.clear();
 
     if ( nsd == 2 ) {
-        if ( !( ( side == -1 && id == _Line ) || ( side > 0 && ( id == _Triangle || id == _Square ) ) ) ) {
-            OOFEM_ERROR("Not a surface element.");
-        }
-        if ( side == -1 ) {
-            side = 1;
-        }
 
         FEInterpolation2d *fei2d = static_cast< FEInterpolation2d * >(fei);
 
         ///@todo More of this grunt work should be moved to the interpolation classes
+        IntArray bnodes;
+        fei2d->boundaryGiveNodes(bnodes, side);
+        int nodes = bnodes.giveSize();
         FloatMatrix xy(2, nodes);
-        Node *node;
         for ( int i = 1; i <= nodes; i++ ) {
-            node = e->giveNode(i);
+            Node *node = e->giveNode(bnodes.at(i));
+            ///@todo This should rely on the xindex and yindex in the interpolator..
             xy.at(1, i) = node->giveCoordinate(1);
             xy.at(2, i) = node->giveCoordinate(2);
         }
 
-        FloatArray tmp(2 *nodes); // Integrand
+        FloatArray tmp; // Integrand
         FloatArray es; // Tangent vector to curve
         FloatArray dNds;
-        answer.resize(2 * nodes);
-        answer.zero();
 
         if ( e->giveDomain()->isAxisymmetric() ) {
             FloatArray N;
@@ -336,13 +319,14 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
                 double r = gcoords(0); // First coordinate is the radial coord.
 
                 es.beProductOf(xy, dNds);
+
+                tmp.resize( 2 * nodes);
                 for ( int i = 0; i < nodes; i++ ) {
                     tmp(2 * i)   = dNds(i) * es(0) * r + N(i);
                     tmp(2 * i + 1) = dNds(i) * es(1) * r;
                 }
 
-                double dA = 2 *M_PI *gamma *J *gp->giveWeight();
-                answer.add(dA, tmp);
+                answer.add(- 2 * M_PI * gamma * J * gp->giveWeight(), tmp);
             }
         } else {
             for ( GaussPoint *gp: *iRule ) {
@@ -351,6 +335,7 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
                 double J = fei->boundaryGiveTransformationJacobian( side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
                 es.beProductOf(xy, dNds);
 
+                tmp.resize( 2 * nodes);
                 for ( int i = 0; i < nodes; i++ ) {
                     tmp(2 * i)   = dNds(i) * es(0);
                     tmp(2 * i + 1) = dNds(i) * es(1);
@@ -358,36 +343,37 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
                 }
                 //tmp.beTProductOf(B, es);
 
-                double dA = t * gamma * J * gp->giveWeight();
-                answer.add(dA, tmp);
+                answer.add(- t * gamma * J * gp->giveWeight(), tmp);
             }
         }
     } else if ( nsd ==  3 ) {
-        if ( !( ( ( id == _Triangle || id == _Square ) && side == -1 ) || ( ( id == _Tetrahedra || id == _Cube ) && side > 0 ) ) ) {
-            OOFEM_ERROR("Not a surface element.");
-        }
-        if ( side == -1 ) {
-            side = 1;
-        }
 
         FEInterpolation3d *fei3d = static_cast< FEInterpolation3d * >(fei);
-        FloatArray tmp(3 *nodes);
-        FloatMatrix dNdx;
-        FloatArray n;
-        answer.resize(3 * nodes);
-        answer.zero();
+        FloatArray n, surfProj;
+        FloatMatrix dNdx, B;
         for ( GaussPoint *gp: *iRule ) {
             fei3d->surfaceEvaldNdx( dNdx, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
             double J = fei->boundaryEvalNormal( n, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
 
-            for ( int i = 0; i < nodes; i++ ) {
-                tmp(3 * i + 0) = dNdx(i, 0) - ( dNdx(i, 0) * n(0) * +dNdx(i, 1) * n(1) + dNdx(i, 2) * n(2) ) * n(0);
-                tmp(3 * i + 1) = dNdx(i, 1) - ( dNdx(i, 0) * n(0) * +dNdx(i, 1) * n(1) + dNdx(i, 2) * n(2) ) * n(1);
-                tmp(3 * i + 2) = dNdx(i, 2) - ( dNdx(i, 0) * n(0) * +dNdx(i, 1) * n(1) + dNdx(i, 2) * n(2) ) * n(2);
+            // [I - n(x)n]  in voigt form:
+            surfProj = {1. - n(0)*n(0), 1. - n(1)*n(1), 1. - n(2)*n(2),
+                        - n(1)*n(2), - n(0)*n(2), - n(0)*n(1),
+            };
+
+            // Construct B matrix of the surface nodes
+            B.resize(6, 3 * dNdx.giveNumberOfRows());
+            for ( int i = 1; i <= dNdx.giveNumberOfRows(); i++ ) {
+                B.at(1, 3 * i - 2) = dNdx.at(i, 1);
+                B.at(2, 3 * i - 1) = dNdx.at(i, 2);
+                B.at(3, 3 * i - 0) = dNdx.at(i, 3);
+
+                B.at(5, 3 * i - 2) = B.at(4, 3 * i - 1) = dNdx.at(i, 3);
+                B.at(6, 3 * i - 2) = B.at(4, 3 * i - 0) = dNdx.at(i, 2);
+                B.at(6, 3 * i - 1) = B.at(5, 3 * i - 0) = dNdx.at(i, 1);
             }
-            answer.add(-gamma * J * gp->giveWeight(), tmp);
+
+            answer.plusProduct(B, surfProj, -gamma * J * gp->giveWeight() );
         }
-        OOFEM_WARNING("3D Completely untested!");
     }
 }
 } // end namespace oofem

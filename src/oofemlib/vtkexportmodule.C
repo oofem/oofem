@@ -903,7 +903,6 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
             this->getDofManPrimaryVariable(iVal, dman, dofIDMask, VM_Total, tStep, IST_Pressure);
         } else {
             OOFEM_ERROR("unsupported unknownType (%s)", __UnknownTypeToString(valID) );
-            //d->giveDofManager(regionNodalNumbers.at(inode))->giveUnknownVector(iVal, d->giveDefaultNodeDofIDArry(), valID, VM_Total, tStep);
         }
 
         if ( type == ISVT_SCALAR ) {

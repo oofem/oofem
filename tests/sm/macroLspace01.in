@@ -1,6 +1,7 @@
 macroLspace01.out
 test of one MacroLSpace element with embedded problem from file micromaterial01.in
-NonLinearStatic nsteps 3 controlmode 1 rtolv 0.01 MaxIter 300 stiffmode 1 deltaT 1.0 nmodules 0
+NonLinearStatic nsteps 3 controlmode 1 rtolv 0.01 MaxIter 300 stiffmode 1 deltaT 1.0 nmodules 1
+errorcheck filename "macroLspace01.in"
 #vtk tstep_all domain_all primvars 1 1
 domain 3d
 OutputManager tstep_all dofman_all element_all
@@ -26,10 +27,9 @@ PiecewiseLinFunction 2 nPoints 2 t 2 0.0 100.0 f(t) 2 0.0 100.0
 # strains and stresses are not transferred from the subproblem, check only reactions.
 #
 #%BEGIN_CHECK% tolerance 1.e-4
-#TIME
-#REACTION tStep 1 number 1 dof 2 value -3.3333e-01
-#REACTION tStep 1 number 2 dof 2 value 3.3333e-01
-#REACTION tStep 2 number 1 dof 2 value -6.6667e-01
-#REACTION tStep 2 number 2 dof 2 value 6.6667e-01
+#REACTION tStep 2 number 1 dof 2 value -3.3333e-01
+#REACTION tStep 2 number 2 dof 2 value 3.3333e-01
+#REACTION tStep 3 number 1 dof 2 value -6.6667e-01
+#REACTION tStep 3 number 2 dof 2 value 6.6667e-01
 #%END_CHECK%
 

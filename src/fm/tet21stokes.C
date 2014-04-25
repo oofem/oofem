@@ -57,8 +57,8 @@ REGISTER_Element(Tet21Stokes);
 FEI3dTetLin Tet21Stokes :: interpolation_lin;
 FEI3dTetQuad Tet21Stokes :: interpolation_quad;
 // Set up ordering vectors (for assembling)
-IntArray Tet21Stokes :: momentum_ordering = {1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19, 21,
-                                             22, 23, 25, 26, 27, 29, 30, 31, 33, 34, 35, 37, 38, 39};
+IntArray Tet21Stokes :: momentum_ordering = {1, 2, 3,  5, 6, 7,  9, 10, 11,  13, 14, 15,  17, 18, 19,
+                                             20, 21, 22,  23, 24, 25,  26, 27, 28,  29, 30, 31,  32, 33, 34};
 IntArray Tet21Stokes :: conservation_ordering = {4, 8, 12, 16};
 IntArray Tet21Stokes :: surf_ordering [ 4 ] = {
     { 1,  2,  3,  9, 10, 11,  5,  6,  7, 23, 24, 25, 20, 21, 22, 17, 18, 19},
@@ -160,10 +160,10 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
         this->interpolation_lin.evalN( Nh, * lcoords, FEIElementGeometryWrapper(this) );
         double dV = detJ * gp->giveWeight();
 
-        for ( int j = 0, k = 0; j < dN.giveNumberOfColumns(); j++, k += 3 ) {
-            dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(0, j);
-            dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(1, j);
-            dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(2, j);
+        for ( int j = 0, k = 0; j < dN.giveNumberOfRows(); j++, k += 3 ) {
+            dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(j, 0);
+            dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(j, 1);
+            dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(j, 2);
         }
 
         epsp.beProductOf(B, a_velocity);
@@ -316,13 +316,10 @@ void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
         double dV = detJ * gp->giveWeight();
         this->interpolation_lin.evalN( Nlin, * lcoords, FEIElementGeometryWrapper(this) );
 
-        //        dN.printYourself();
-
-        for ( int j = 0, k = 0; j < dN.giveNumberOfColumns(); j++, k += 3 ) {
-            ///@todo This column-row order of dN is inconsistent with every other interpolator class:
-            dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(0, j);
-            dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(1, j);
-            dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(2, j);
+        for ( int j = 0, k = 0; j < dN.giveNumberOfRows(); j++, k += 3 ) {
+            dN_V(k + 0) = B(0, k + 0) = B(3, k + 1) = B(4, k + 2) = dN(j, 0);
+            dN_V(k + 1) = B(1, k + 1) = B(3, k + 0) = B(5, k + 2) = dN(j, 1);
+            dN_V(k + 2) = B(2, k + 2) = B(4, k + 0) = B(5, k + 1) = dN(j, 2);
         }
 
         // Computing the internal forces should have been done first.

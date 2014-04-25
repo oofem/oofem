@@ -46,7 +46,7 @@
 #include "masterdof.h"
 #include "sparsemtrx.h"
 #include "gausspoint.h"
-#include "gaussintegrationrule.h"
+#include "integrationrule.h"
 #include "mathfem.h"
 #include "fei2dtrlin.h"
 #include "fei2dtrquad.h"
@@ -247,12 +247,10 @@ void WeakPeriodicBoundaryCondition :: updateDirection()
         surfaceIndexes.resize(1);
         smin.resize(1);
         smax.resize(1);
-        sideGeom = _Line;
     } else {
         surfaceIndexes.resize(2);
         smin.resize(2);
         smax.resize(2);
-        sideGeom = _Triangle;
     }
 
     giveEdgeNormal( normal, element [ 0 ].at(0), side [ 0 ].at(0) );
@@ -387,10 +385,8 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
 
     B.resize(bnodes.giveSize(), ndof);
     B.zero();
-    ///@todo Add this to all interpolators, should return _Point, _Line, _Triangle, ... etc.
-    //integrationDomain sideGeom = geoInterpolation->boundaryGiveGeometry(boundary);
 
-    std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(2 + orderOfPolygon, boundary));
+    std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, boundary));
 
     for ( GaussPoint *gp: *iRule ) {
         FloatArray *lcoords = gp->giveCoordinates();
@@ -419,7 +415,7 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
             }
 
             for ( int k = 0; k < B.giveNumberOfRows(); k++ ) {
-                B(k, j) += +N(k) * fVal * detJ * gp->giveWeight();
+                B(k, j) += N(k) * fVal * detJ * gp->giveWeight();
             }
         }
     }

@@ -355,6 +355,12 @@ public:
      */
     DofManager *giveDofManager(int n);
     /**
+     * Service for accessing particular domain dof manager.
+     * Generates error if no such element is defined.
+     * @param n Pointer to the element with id n
+     */
+    DofManager *giveGlobalDofManager(int n);
+    /**
      * Reads receiver description from input stream and creates corresponding components accordingly.
      * It scans input file, each line is assumed to be single record describing type and parameters for
      * specific entity in domain. The record line is converted to lower case letters.
