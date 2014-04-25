@@ -1,6 +1,7 @@
 nltrans_incr.out.sm
 Quadrilateral elements subjected to temperature strains, changes in static system
-IncrLinearStatic endOfTimeOfInterest 5.0  prescribedTimes 3. 1. 2. 3. nmodules 0
+IncrLinearStatic endOfTimeOfInterest 5.0  prescribedTimes 3. 1. 2. 3. nmodules 1
+errorcheck filename "nltrans_incr.in.sm"
 #vtkxml tstep_all vars 2 1 4 primvars 1 1 stype 1
 domain 2dplanestress
 OutputManager tstep_all dofman_all element_all
@@ -27,23 +28,23 @@ ConstantFunction 1 f(t) 1.0
 UsrDefLTF 2 f(t) h(72000.)
 #
 #%BEGIN_CHECK% tolerance 1.e-8
-#NODE tStep 0.0 number 4 dof 1 unknown d value 3.50423014e-06
-#NODE tStep 0.0 number 4 dof 2 unknown d value 7.34035089e-06
-#NODE tStep 0.0 number 8 dof 1 unknown d value 1.51530288e-06
-#NODE tStep 0.0 number 8 dof 2 unknown d value 4.54612108e-04
-#ELEMENT tStep 0.0  number 1 gp 1 keyword "strains"  component 1  value -1.2484e-05
-#ELEMENT tStep 0.0  number 1 gp 1 keyword "stresses" component 1  value -2.2782e-01
-#NODE tStep 36000 number 4 dof 1 unknown d value 4.14372950e-06
-#NODE tStep 36000 number 4 dof 2 unknown d value 2.58129215e-05
-#NODE tStep 36000 number 8 dof 1 unknown d value 2.77592727e-06
-#NODE tStep 36000 number 8 dof 2 unknown d value 9.08056287e-04
-#ELEMENT tStep 36000  number 1 gp 1 keyword "strains"  component 1  value -4.9213e-06
-#ELEMENT tStep 36000  number 1 gp 1 keyword "stresses" component 1  value -4.4343e-01
-#NODE tStep 72000 number 4 dof 1 unknown d value -1.90901612e-04
-#NODE tStep 72000 number 4 dof 2 unknown d value -1.83297188e-04
-#NODE tStep 72000 number 8 dof 1 unknown d value 8.40163335e-06
-#NODE tStep 72000 number 8 dof 2 unknown d value 9.08056287e-04
-#ELEMENT tStep 72000  number 1 gp 1 keyword "strains"  component 1  value 1.5896e-03
-#ELEMENT tStep 72000  number 1 gp 1 keyword "stresses" component 1  value -7.1560e-01
+#NODE tStep 1 number 4 dof 1 unknown d value 3.50423014e-06
+#NODE tStep 1 number 4 dof 2 unknown d value 7.34035089e-06
+#NODE tStep 1 number 8 dof 1 unknown d value 1.51530288e-06
+#NODE tStep 1 number 8 dof 2 unknown d value 4.54612108e-04
+#ELEMENT tStep 1 number 1 gp 1 keyword 4  component 1  value -1.2484e-05
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value -2.27822271e-01
+#NODE tStep 2 number 4 dof 1 unknown d value 4.14372950e-06
+#NODE tStep 2 number 4 dof 2 unknown d value 2.58129215e-05
+#NODE tStep 2 number 8 dof 1 unknown d value 2.77592727e-06
+#NODE tStep 2 number 8 dof 2 unknown d value 9.08056287e-04
+#ELEMENT tStep 2 number 1 gp 1 keyword 4  component 1  value -4.9213e-06
+#ELEMENT tStep 2 number 1 gp 1 keyword 1 component 1  value -4.43434627e-01
+#NODE tStep 3 number 4 dof 1 unknown d value -1.90901612e-04
+#NODE tStep 3 number 4 dof 2 unknown d value -1.83297188e-04
+#NODE tStep 3 number 8 dof 1 unknown d value 8.40163335e-06
+#NODE tStep 3 number 8 dof 2 unknown d value 9.08056287e-04
+#ELEMENT tStep 3 number 1 gp 1 keyword 4  component 1  value 1.5896e-03
+#ELEMENT tStep 3 number 1 gp 1 keyword 1 component 1  value -7.15601165e-01
 #%END_CHECK%
 

@@ -1,6 +1,7 @@
 spring06.out
 Patch test of torsional spring element in 3D space
-LinearStatic nsteps 1
+LinearStatic nsteps 1 nmodules 1
+errorcheck filename "spring06.in"
 domain 3dshell
 OutputManager tstep_all dofman_all element_all
 ndofman 4 nelem 3 ncrosssect  1 nmat 2 nbc 3 nic 0 nltf  1
@@ -29,19 +30,17 @@ ConstantFunction 1 f(t) 1.0
 ##
 ##
 #
-#%BEGIN_CHECK% tolerance 2.e-3
+#%BEGIN_CHECK% tolerance 1.e-5
 ## check nodal displacements
 #NODE tStep 1 number 2 dof 5 unknown d value -0.56250
 #NODE tStep 1 number 3 dof 5 unknown d value  0.65625
 ## element stresses and strains
-#BEAM_ELEMENT tStep 1 number 1 keyword "forces" component 3  value -1.5938e+01
-#BEAM_ELEMENT tStep 1 number 1 keyword "forces" component 5  value  2.8125e+00
-#BEAM_ELEMENT tStep 1 number 1 keyword "forces" component 9  value -1.4062e+01
-#BEAM_ELEMENT tStep 1 number 1 keyword "forces" component 12  value  0.0
-#BEAM_ELEMENT tStep 1 number 2 keyword "moment" component 1  value  -2.8125
+#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 3  value 3.12500000e-01
+#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 5  value 5.00447343e+00
+##ELEMENT tStep 1 number 2 keyword "moment" component 1  value  -2.8125
 #REACTION tStep 1 number 1 dof 5 value 2.8125e+00
-#REACTION tStep 1 number 2 dof 3 value -1.5938e+01
-#REACTION tStep 1 number 3 dof 3 value -1.4062e+01
+#REACTION tStep 1 number 2 dof 3 value -1.59375000e+01
+#REACTION tStep 1 number 3 dof 3 value -1.40625000e+01
 #%END_CHECK%
 
 

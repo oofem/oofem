@@ -2,7 +2,8 @@ libean3dnl.out
 Non-Linear cantiliver
 #LinearStatic 1 nsteps 1
 #LinearStability nroot 4 rtolv 1.e-8
-NonLinearStatic nsteps 6 maxiter 30 stepLength 1.0471976 minStepLength 1.0471976  rtolv 0.0001 Psi 0.0 manrmsteps 1 HPC 2 9 6
+NonLinearStatic nsteps 6 maxiter 30 stepLength 1.0471976 minStepLength 1.0471976  rtolv 0.0001 Psi 0.0 manrmsteps 1 HPC 2 9 6 nmodules 1
+errorcheck filename "libean3dnl.in"
 domain 3dShell 
 OutputManager tstep_all dofman_all element_all
 ndofman 10 nelem 8 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
@@ -35,23 +36,23 @@ ConstantFunction 1 f(t) 1.
 #
 #
 #%BEGIN_CHECK%
-#LOADLEVEL tStep 5 value 1.0
+#LOADLEVEL tStep 6 value 1.0
 ##
-#NODE tStep 5 number 9 dof 1 unknown d value -8.0
-#NODE tStep 5 number 9 dof 2 unknown d value  0.0
+#NODE tStep 6 number 9 dof 1 unknown d value -8.0
+#NODE tStep 6 number 9 dof 2 unknown d value  0.0
 ##
-#ELEMENT tStep 5 number 1 gp 1 keyword "stresses" component 1  value 0.0
-#ELEMENT tStep 5 number 1 gp 1 keyword "stresses" component 2  value 0.0
-#ELEMENT tStep 5 number 1 gp 1 keyword "stresses" component 6  value 7.854e-1
+#ELEMENT tStep 6 number 1 gp 1 keyword 1 component 1  value 0.0
+#ELEMENT tStep 6 number 1 gp 1 keyword 1 component 2  value 0.0
+#ELEMENT tStep 6 number 1 gp 1 keyword 1 component 6  value 7.85398200e-01
 ##
-#ELEMENT tStep 5 number 8 gp 1 keyword "stresses" component 1  value 0.0
-#ELEMENT tStep 5 number 8 gp 1 keyword "stresses" component 2  value 0.0
-#ELEMENT tStep 5 number 8 gp 1 keyword "stresses" component 6  value 7.854e-1
+#ELEMENT tStep 6 number 8 gp 1 keyword 1 component 1  value 0.0
+#ELEMENT tStep 6 number 8 gp 1 keyword 1 component 2  value 0.0
+#ELEMENT tStep 6 number 8 gp 1 keyword 1 component 6  value 7.85398200e-01
 ##
-#REACTION tStep 5 number 1 dof 1 value 0.0
-#REACTION tStep 5 number 1 dof 2 value 0.0
-#REACTION tStep 5 number 1 dof 3 value 0.0
-#REACTION tStep 5 number 1 dof 4 value 0.0
-#REACTION tStep 5 number 1 dof 5 value 0.0
-#REACTION tStep 5 number 1 dof 6 value -7.854e-1
+#REACTION tStep 6 number 1 dof 1 value 0.0
+#REACTION tStep 6 number 1 dof 2 value 0.0
+#REACTION tStep 6 number 1 dof 3 value 0.0
+#REACTION tStep 6 number 1 dof 4 value 0.0
+#REACTION tStep 6 number 1 dof 5 value 0.0
+#REACTION tStep 6 number 1 dof 6 value -7.853982e-01
 #%END_CHECK%

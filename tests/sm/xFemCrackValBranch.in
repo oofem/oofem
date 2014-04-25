@@ -1,6 +1,7 @@
 xFemCrackValBranch.out
 XFEM simulation: A crack with branch functions. Written by Erik Svenning, Chalmers University of Technology.
-XFEMStatic nsteps 3 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 20 minIter 2 stiffmode 0 nmodules 0
+XFEMStatic nsteps 3 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 20 minIter 2 stiffmode 0 nmodules 1
+errorcheck filename "xFemCrackValBranch.in"
 #LinearStatic nsteps 1 lstype 3 smtype 7 nmodules 0
 #LinearStatic nsteps 1 nmodules 1
 #vtkxml tstep_all domain_all vars 1 94 primvars 1 1 cellvars 3 1 92 93
@@ -74,25 +75,25 @@ EnrFrontLinearBranchFuncRadius radius 0.5
 PropagationLawCrackPrescribedDir 1 angle 0.0 incrementLength 0.55
 #%BEGIN_CHECK% tolerance 1.e-8
 ## Node displacements
-#NODE tStep 2 number 7 dof 1 unknown d value 4.50638159e-05
-#NODE tStep 2 number 7 dof 2 unknown d value -1.86660437e-05
-#NODE tStep 2 number 7 dof 23 unknown d value -5.77917771e-05
-#NODE tStep 2 number 7 dof 24 unknown d value 1.13878975e-04
-#NODE tStep 2 number 7 dof 25 unknown d value -2.57664969e-05
-#NODE tStep 2 number 7 dof 26 unknown d value 1.30029107e-05
-#NODE tStep 2 number 7 dof 27 unknown d value -1.79096023e-06
-#NODE tStep 2 number 7 dof 28 unknown d value 3.37303917e-05
-#NODE tStep 2 number 7 dof 29 unknown d value -4.94957052e-05
-#NODE tStep 2 number 7 dof 30 unknown d value -6.55577687e-05
+#NODE tStep 3 number 7 dof 1 unknown d value 4.50638159e-05
+#NODE tStep 3 number 7 dof 2 unknown d value -1.86660437e-05
+#NODE tStep 3 number 7 dof 23 unknown d value -5.77917771e-05
+#NODE tStep 3 number 7 dof 24 unknown d value 1.13878975e-04
+#NODE tStep 3 number 7 dof 25 unknown d value -2.57664969e-05
+#NODE tStep 3 number 7 dof 26 unknown d value 1.30029107e-05
+#NODE tStep 3 number 7 dof 27 unknown d value -1.79096023e-06
+#NODE tStep 3 number 7 dof 28 unknown d value 3.37303917e-05
+#NODE tStep 3 number 7 dof 29 unknown d value -4.94957052e-05
+#NODE tStep 3 number 7 dof 30 unknown d value -6.55577687e-05
 ##
-#NODE tStep 2 number 12 dof 1 unknown d value 2.03706640e-05
-#NODE tStep 2 number 12 dof 2 unknown d value -2.05723734e-04
-#NODE tStep 2 number 12 dof 23 unknown d value -2.09655168e-05
-#NODE tStep 2 number 12 dof 24 unknown d value 2.05774314e-04
+#NODE tStep 3 number 12 dof 1 unknown d value 2.03706640e-05
+#NODE tStep 3 number 12 dof 2 unknown d value -2.05723734e-04
+#NODE tStep 3 number 12 dof 23 unknown d value -2.09655168e-05
+#NODE tStep 3 number 12 dof 24 unknown d value 2.05774314e-04
 ##
-#NODE tStep 2 number 15 dof 1 unknown d value 2.57315333e-05
-#NODE tStep 2 number 15 dof 2 unknown d value -1.56809356e-04
-#NODE tStep 2 number 15 dof 23 unknown d value -2.35791345e-05
-#NODE tStep 2 number 15 dof 24 unknown d value 1.57522831e-04
+#NODE tStep 3 number 15 dof 1 unknown d value 2.57315333e-05
+#NODE tStep 3 number 15 dof 2 unknown d value -1.56809356e-04
+#NODE tStep 3 number 15 dof 23 unknown d value -2.35791345e-05
+#NODE tStep 3 number 15 dof 24 unknown d value 1.57522831e-04
 #%END_CHECK%
 

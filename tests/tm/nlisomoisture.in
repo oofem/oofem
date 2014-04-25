@@ -1,7 +1,8 @@
 nlisomoisture.out
 test of nonlinear isotropic material for moisture transport
 #
-nltransienttransportproblem nsteps 5 alpha 0.5 rtol 1.e-10 lumpedcapa nsmax 1000 prescribedtimes 5 0.01 0.1 0.2 0.3 0.4
+nltransienttransportproblem nsteps 5 alpha 0.5 rtol 1.e-10 lumpedcapa nsmax 1000 prescribedtimes 5 0.01 0.1 0.2 0.3 0.4 nmodules 1
+errorcheck filename "nlisomoisture.in"
 # nmodules 1
 # vtkxml tstep_all domain_all primvars 1 3
 #
@@ -106,18 +107,12 @@ ConstantFunction 1 f(t) 0.5
 #
 #
 #%BEGIN_CHECK% tolerance 1.e-5
-#NODE tStep 3.900000e-01 number 1  dof 14 unknown d value 7.164393e-01
-#NODE tStep 3.900000e-01 number 7  dof 14 unknown d value 7.629528e-01
-#NODE tStep 3.900000e-01 number 13 dof 14 unknown d value 9.092467e-01
-#NODE tStep 3.900000e-01 number 19 dof 14 unknown d value 7.948855e-01
-#NODE tStep 3.900000e-01 number 25 dof 14 unknown d value 7.785578e-01
-#NODE tStep 3.900000e-01 number 31 dof 14 unknown d value 7.832541e-01
-#NODE tStep 3.900000e-01 number 37 dof 14 unknown d value 8.468254e-01
+#NODE tStep 5 number 1  dof 14 unknown d value 7.164393e-01
+#NODE tStep 5 number 7  dof 14 unknown d value 7.629528e-01
+#NODE tStep 5 number 13 dof 14 unknown d value 9.092467e-01
+#NODE tStep 5 number 19 dof 14 unknown d value 7.948855e-01
+#NODE tStep 5 number 25 dof 14 unknown d value 7.785578e-01
+#NODE tStep 5 number 31 dof 14 unknown d value 7.832541e-01
+#NODE tStep 5 number 37 dof 14 unknown d value 8.468254e-01
 #%END_CHECK%
-
-
-
-
-
-
 

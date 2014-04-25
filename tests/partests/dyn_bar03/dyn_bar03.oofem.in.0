@@ -1,6 +1,7 @@
-bar03.oofem.out.0
+dyn_bar03.oofem.out.0
 dynamic relaxation of a spring
-nldeidynamic nsteps 1000 deltat 0.01 dumpcoef 0.0 drflag 1 tau 10.0 py 0.0666666666667 NodeCutMode
+nldeidynamic nsteps 1000 deltat 0.01 dumpcoef 0.0 drflag 1 tau 10.0 py 0.0666666666667 NodeCutMode nmodules 1
+errorcheck filename "dyn_bar03.oofem.in"
 domain 3d
 OutputManager tstep_all dofman_all element_all
 ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
@@ -13,12 +14,3 @@ idm1 1 d 1.0 E 15.0 n 0.2 e0 0.02 wf 0.04 tAlpha 0.0 equivstraintype 0
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 NodalLoad 2 loadTimeFunction 1 components 1 1.0
 ConstantFunction 1 f(t) 1.0 
-
-#%BEGIN_CHECK%
-#NODE tStep 9.990e+00 number 2 dof 1 unknown d value 6.64668000e-02
-#NODE tStep 9.990e+00 number 2 dof 1 unknown v value 9.98999000e-03
-#ELEMENT tStep 9.990e+00 number 1 gp 1 keyword "stresses" component 1  value 6.3281e-02
-#%END_CHECK%
-
-
-

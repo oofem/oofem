@@ -1,7 +1,8 @@
 beam44.out
 TEST OF trplanestressrotallman ELEMENTS (clamped beam loaded by uniform load)
 #domain section
-LinearStatic nsteps 1
+LinearStatic nsteps 1 nmodules 1
+errorcheck filename "beam44.in"
 domain 2dPlaneStressrot
 OutputManager tstep_all dofman_all element_all
 #nnode nelem ncrosssect nyield nmat nloa nloatime

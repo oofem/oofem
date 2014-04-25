@@ -1,6 +1,7 @@
 hydratingConcreteMat01.out
 Test of hydrating concrete material, linear triangluar element with a heat source, transient linear solver, isothermal conditions, exponential model
-NonStationaryProblem nsteps 30 deltat 3600.0 alpha 0.5 nmodules 0
+NonStationaryProblem nsteps 30 deltat 3600.0 alpha 0.5 nmodules 1
+errorcheck filename "hydratingConcreteMat01.in"
 #NlTransientTransportProblem nsteps 30 deltat 3600.0 rtol 1.e-5 alpha 0.5 nsmax 30 nmodules 1
 #vtkxml tstep_step 1 domain_all primvars 1 6 vars 3 37 39 56 stype 1
 domain HeatTransfer
@@ -18,8 +19,7 @@ InitialCondition 1 Conditions 1 u 25.0
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK% tolerance 1.e-3
-#TIME
-##NODE tStep 1.044000e+05 number 1 dof 10 unknown d value 1.84748043e+01
-#ELEMENT tStep 7.200000e+03 number 1 gp 1 keyword "DoH" component 1 value 0.0
-#ELEMENT tStep 1.044000e+05 number 1 gp 1 keyword "DoH" component 1 value 4.973780e-01
+##NODE tStep 30 number 1 dof 10 unknown d value 1.84748043e+01
+#ELEMENT tStep 1 number 1 gp 1 keyword 39 component 1 value 0.0
+#ELEMENT tStep 30 number 1 gp 1 keyword 39 component 1 value 4.973780e-01
 #%END_CHECK%

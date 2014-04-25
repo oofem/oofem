@@ -1,6 +1,7 @@
 ex-bspline-05.out
 Two bspline patches together, skewed, constant strain
-LinearStatic nsteps 1
+LinearStatic nsteps 1 nmodules 1
+errorcheck filename "ex-bspline-05.in"
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 10 nelem 2 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
@@ -52,30 +53,30 @@ ConstantFunction 1 f(t) 1.0
 #NODE tStep 1 number 8 dof 2 unknown d value -9.37500000e-02
 #NODE tStep 1 number 9 dof 2 unknown d value -9.37500000e-02
 ## check element no. 1 strain vector
-#ELEMENT tStep 1 number 1 irule 0 gp 1 keyword "strains" component 1  value 0.125
-#ELEMENT tStep 1 number 1 irule 0 gp 1 keyword "strains" component 2  value -0.03125
-#ELEMENT tStep 1 number 1 irule 0 gp 1 keyword "strains" component 6  value 0.0
-#ELEMENT tStep 1 number 1 irule 0 gp 2 keyword "strains" component 1  value 0.125
-#ELEMENT tStep 1 number 1 irule 0 gp 2 keyword "strains" component 2  value -0.03125
-#ELEMENT tStep 1 number 1 irule 0 gp 2 keyword "strains" component 6  value 0.0
-#ELEMENT tStep 1 number 2 irule 0 gp 3 keyword "strains" component 1  value 0.125
-#ELEMENT tStep 1 number 2 irule 0 gp 3 keyword "strains" component 2  value -0.03125
-#ELEMENT tStep 1 number 2 irule 0 gp 3 keyword "strains" component 6  value 0.0
-#ELEMENT tStep 1 number 2 irule 0 gp 16 keyword "strains" component 1  value 0.125
-#ELEMENT tStep 1 number 2 irule 0 gp 16 keyword "strains" component 2  value -0.03125
-#ELEMENT tStep 1 number 2 irule 0 gp 16 keyword "strains" component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1  value 0.125
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 2  value -0.03125
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 2 keyword 4 component 1  value 0.125
+#ELEMENT tStep 1 number 1 gp 2 keyword 4 component 2  value -0.03125
+#ELEMENT tStep 1 number 1 gp 2 keyword 4 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 3 keyword 4 component 1  value 0.125
+#ELEMENT tStep 1 number 2 gp 3 keyword 4 component 2  value -0.03125
+#ELEMENT tStep 1 number 2 gp 3 keyword 4 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 16 keyword 4 component 1  value 0.125
+#ELEMENT tStep 1 number 2 gp 16 keyword 4 component 2  value -0.03125
+#ELEMENT tStep 1 number 2 gp 16 keyword 4 component 6  value 0.0
 ## check element no. 1 stress vector
-#ELEMENT tStep 1 number 1 irule 0 gp 1 keyword "stresses" component 1  value 1.875
-#ELEMENT tStep 1 number 1 irule 0 gp 1 keyword "stresses" component 2  value 0.0
-#ELEMENT tStep 1 number 1 irule 0 gp 1 keyword "stresses" component 6  value 0.0
-#ELEMENT tStep 1 number 1 irule 0 gp 2 keyword "stresses" component 1  value 1.875
-#ELEMENT tStep 1 number 1 irule 0 gp 2 keyword "stresses" component 2  value 0.0
-#ELEMENT tStep 1 number 1 irule 0 gp 2 keyword "stresses" component 6  value 0.0
-#ELEMENT tStep 1 number 2 irule 0 gp 3 keyword "stresses" component 1  value 1.875
-#ELEMENT tStep 1 number 2 irule 0 gp 3 keyword "stresses" component 2  value 0.0
-#ELEMENT tStep 1 number 2 irule 0 gp 3 keyword "stresses" component 6  value 0.0
-#ELEMENT tStep 1 number 2 irule 0 gp 16 keyword "stresses" component 1  value 1.875
-#ELEMENT tStep 1 number 2 irule 0 gp 16 keyword "stresses" component 2  value 0.0
-#ELEMENT tStep 1 number 2 irule 0 gp 16 keyword "stresses" component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value 1.875
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 2 keyword 1 component 1  value 1.875
+#ELEMENT tStep 1 number 1 gp 2 keyword 1 component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 2 keyword 1 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 3 keyword 1 component 1  value 1.875
+#ELEMENT tStep 1 number 2 gp 3 keyword 1 component 2  value 0.0
+#ELEMENT tStep 1 number 2 gp 3 keyword 1 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 16 keyword 1 component 1  value 1.875
+#ELEMENT tStep 1 number 2 gp 16 keyword 1 component 2  value 0.0
+#ELEMENT tStep 1 number 2 gp 16 keyword 1 component 6  value 0.0
 ##
 #%END_CHECK%

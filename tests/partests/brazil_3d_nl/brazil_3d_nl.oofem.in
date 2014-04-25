@@ -22,7 +22,8 @@ brazil_3d_nl.oofem.out
 # incomplete cholesky    3 (only for smtype 4)
 # incomplete LU          2 (only for smtype 2)       droptol (default 1.0e-9) partfill (default 5)
 #
-linearstatic nsteps 1 renumber 1
+linearstatic nsteps 1 renumber 1 nmodules 1
+errorcheck filename "brazil_3d_nl.oofem.in"
 domain 3d
 OutputManager tstep_all dofman_all element_all
 ndofman 3508 nelem 16980 ncrosssect 2 nmat 2 nbc 2 nltf 1 nic 0

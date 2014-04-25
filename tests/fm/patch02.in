@@ -1,6 +1,7 @@
 patch02.out
 pipe test,  inlet velocity (constant), outlet: pressure, no friction
-cbs nsteps 10 lstype 0 smtype 0 deltaT 0.01 cmflag 0 theta1 0.5 theta2 0.5
+cbs nsteps 10 lstype 0 smtype 0 deltaT 0.01 cmflag 0 theta1 0.5 theta2 0.5 nmodules 1
+errorcheck filename "patch02.in"
 domain 2dIncompFlow
 OutputManager tstep_all dofman_all element_all
 ndofman 9 nelem 8 ncrosssect 1 nmat 1 nbc 3 nic 1 nltf 1 nset 4
@@ -39,9 +40,9 @@ Set 4 elementranges {(1 8)}
 
 
 #%BEGIN_CHECK%
-#NODE tStep 6.00000000e-02  number 5 dof 7 unknown d value 9.71223560e-01
-#NODE tStep 6.00000000e-02  number 8 dof 7 unknown d value 9.62772706e-01
-#NODE tStep 6.00000000e-02  number 5 dof 11 unknown d value -3.03667947e+01
+#NODE tStep 10 number 5 dof 7 unknown d value 9.71223560e-01
+#NODE tStep 10 number 8 dof 7 unknown d value 9.62772706e-01
+#NODE tStep 10 number 5 dof 11 unknown d value -3.03667947e+01
 #%END_CHECK%
 
 

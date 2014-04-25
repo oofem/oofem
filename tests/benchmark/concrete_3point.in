@@ -1322,17 +1322,17 @@ ConstantFunction 1 f(t) 2.0
 ##
 ##
 ## check some arbitrary element
-#ELEMENT tStep 9 number 338 gp 1 keyword "strains" component 1  value 1.9395e-03 tolerance 1.e-8
-#ELEMENT tStep 9 number 338 gp 1 keyword "strains" component 2  value 1.2654e-05 tolerance 1.e-8
-#ELEMENT tStep 9 number 338 gp 1 keyword "strains" component 6  value 3.4092e-04 tolerance 1.e-8
-#ELEMENT tStep 9 number 338 gp 1 keyword "stresses" component 1  value 1.0173e+00 tolerance 1.e-8
-#ELEMENT tStep 9 number 338 gp 1 keyword "stresses" component 2  value 1.6522e-01 tolerance 1.e-8
-#ELEMENT tStep 9 number 338 gp 1 keyword "stresses" component 6  value 7.5383e-02 tolerance 1.e-8
+#ELEMENT tStep 9 number 338 gp 1 keyword 4 component 1  value 1.9395e-03 tolerance 1.e-8
+#ELEMENT tStep 9 number 338 gp 1 keyword 4 component 2  value 1.2654e-05 tolerance 1.e-8
+#ELEMENT tStep 9 number 338 gp 1 keyword 4 component 6  value 3.4092e-04 tolerance 1.e-8
+#ELEMENT tStep 9 number 338 gp 1 keyword 1 component 1  value 1.0173e+00 tolerance 1.e-8
+#ELEMENT tStep 9 number 338 gp 1 keyword 1 component 2  value 1.6522e-01 tolerance 1.e-8
+#ELEMENT tStep 9 number 338 gp 1 keyword 1 component 6  value 7.5383e-02 tolerance 1.e-8
 ##
-#ELEMENT tStep 19 number 338 gp 1 keyword "strains" component 1  value 6.4979e-03 tolerance 1.e-8
-#ELEMENT tStep 19 number 338 gp 1 keyword "strains" component 2  value 6.0256e-05 tolerance 1.e-8
-#ELEMENT tStep 19 number 338 gp 1 keyword "strains" component 6  value 1.9261e-03 tolerance 1.e-8
-#ELEMENT tStep 19 number 338 gp 1 keyword "stresses" component 1  value -3.3874e-02 tolerance 1.e-8
-#ELEMENT tStep 19 number 338 gp 1 keyword "stresses" component 2  value -1.5807e+00 tolerance 1.e-8
-#ELEMENT tStep 19 number 338 gp 1 keyword "stresses" component 6  value 2.3139e-01 tolerance 1.e-8
+#ELEMENT tStep 19 number 338 gp 1 keyword 4 component 1  value 6.4979e-03 tolerance 1.e-8
+#ELEMENT tStep 19 number 338 gp 1 keyword 4 component 2  value 6.0256e-05 tolerance 1.e-8
+#ELEMENT tStep 19 number 338 gp 1 keyword 4 component 6  value 1.9261e-03 tolerance 1.e-8
+#ELEMENT tStep 19 number 338 gp 1 keyword 1 component 1  value -3.3874e-02 tolerance 1.e-8
+#ELEMENT tStep 19 number 338 gp 1 keyword 1 component 2  value -1.5807e+00 tolerance 1.e-8
+#ELEMENT tStep 19 number 338 gp 1 keyword 1 component 6  value 2.3139e-01 tolerance 1.e-8
 #%END_CHECK%

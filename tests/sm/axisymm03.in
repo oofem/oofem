@@ -1,6 +1,7 @@
 axisymm03.out
 Test of linear axisymmetric quadrilateral elements, a thin ring loaded only in radial direction (y direction)
-LinearStatic nsteps 1 nmodules 0
+LinearStatic nsteps 1 nmodules 1
+errorcheck filename "axisymm03.in"
 #vtkxml tstep_step 1 cellvars 1 46 vars 3 1 2 4 primvars 1 1 stype 2
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
@@ -25,36 +26,36 @@ ConstantFunction 1 f(t) 1.0
 #NODE tStep 1 number 6 dof 2 unknown d value 1.84022940e-02
 ##Constant strains and stresses over an element
 ##Element 1
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 1  value -5.3613e-05
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1  value -5.3613e-05
 ##Exact solution for is 1.0e-1
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 2  value 1.0293e-02
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 3  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 6  value -4.1271e-05
-#ELEMENT tStep 1 number 1 gp 4 keyword "strains" component 1  value 5.3613e-05
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 2  value 1.0293e-02
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 3  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 6  value -4.1271e-05
+#ELEMENT tStep 1 number 1 gp 4 keyword 4 component 1  value 5.3613e-05
 ##Exact solution for is 1.0e-1
-#ELEMENT tStep 1 number 1 gp 4 keyword "strains" component 2  value 1.1239e-02
-#ELEMENT tStep 1 number 1 gp 4 keyword "strains" component 3  value 0.0
-#ELEMENT tStep 1 number 1 gp 4 keyword "strains" component 6  value -4.1271e-05
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 1  value -5.3613e-02
+#ELEMENT tStep 1 number 1 gp 4 keyword 4 component 2  value 1.1239e-02
+#ELEMENT tStep 1 number 1 gp 4 keyword 4 component 3  value 0.0
+#ELEMENT tStep 1 number 1 gp 4 keyword 4 component 6  value -4.1271e-05
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value -5.3613e-02
 ##Exact solution is sig_y=10.0
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 2  value 1.0293e+01
-#ELEMENT tStep 1 number 1 gp 4 keyword "stresses" component 1  value 5.3613e-02
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 2  value 1.02934853e+01
+#ELEMENT tStep 1 number 1 gp 4 keyword 1 component 1  value 5.3613e-02
 ##Exact solution is sig_y=10.0
-#ELEMENT tStep 1 number 1 gp 4 keyword "stresses" component 2  value 1.1239e+01
+#ELEMENT tStep 1 number 1 gp 4 keyword 1 component 2  value 1.12393656e+01
 ##Element 2
-#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 1  value -3.4691e-05
-#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 2  value 9.3588e-03
+#ELEMENT tStep 1 number 2 gp 1 keyword 4 component 1  value -3.4691e-05
+#ELEMENT tStep 1 number 2 gp 1 keyword 4 component 2  value 9.3588e-03
 ##Exact solution is 2.05e-1
-#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 3  value 0.0
-#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 6  value 2.6705e-05
-#ELEMENT tStep 1 number 2 gp 4 keyword "strains" component 1  value 3.4691e-05
-#ELEMENT tStep 1 number 2 gp 4 keyword "strains" component 2  value 9.7896e-03
-#ELEMENT tStep 1 number 2 gp 4 keyword "strains" component 3  value 0.0
-#ELEMENT tStep 1 number 2 gp 4 keyword "strains" component 6  value 2.6705e-05
-#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 1  value -3.4691e-02
+#ELEMENT tStep 1 number 2 gp 1 keyword 4 component 3  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword 4 component 6  value 2.6705e-05
+#ELEMENT tStep 1 number 2 gp 4 keyword 4 component 1  value 3.4691e-05
+#ELEMENT tStep 1 number 2 gp 4 keyword 4 component 2  value 9.7896e-03
+#ELEMENT tStep 1 number 2 gp 4 keyword 4 component 3  value 0.0
+#ELEMENT tStep 1 number 2 gp 4 keyword 4 component 6  value 2.6705e-05
+#ELEMENT tStep 1 number 2 gp 1 keyword 1 component 1  value -3.4691e-02
 ##Exact solution is sig_y=10.0
-#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 2  value 9.3588e+00
-#ELEMENT tStep 1 number 2 gp 4 keyword "stresses" component 1  value 3.4691e-02
+#ELEMENT tStep 1 number 2 gp 1 keyword 1 component 2  value 9.358821e+00
+#ELEMENT tStep 1 number 2 gp 4 keyword 1 component 1  value 3.4691e-02
 ##Exact solution is sig_y=10.0
-#ELEMENT tStep 1 number 2 gp 4 keyword "stresses" component 2  value 9.7896e+00
+#ELEMENT tStep 1 number 2 gp 4 keyword 1 component 2  value 9.789595e+00
 #%END_CHECK%

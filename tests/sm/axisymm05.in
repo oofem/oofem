@@ -3,7 +3,8 @@ Test of linear axisymmetric triangular elements, thick ring with internal overpr
 #Exact solution for radial displacement u_r = (100+r^2)/(525*r)
 #Exact solution for radial stress sig_r = 40./21.*(1-100./r^2)
 #Exact solution for hoop stress sig_theta = 40./21.*(1+100./r^2)
-LinearStatic nsteps 1 nmodules 0
+LinearStatic nsteps 1 nmodules 1
+errorcheck filename "axisymm05.in"
 #vtkxml tstep_step 1 cellvars 1 46 vars 3 1 2 4 primvars 1 1 stype 2
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
@@ -38,23 +39,23 @@ ConstantFunction 1 f(t) 1.0
 #NODE tStep 1 number 6 dof 1 unknown d value 3.75270371e-02
 ##Constant strains and stresses over an element
 ##Element 1
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 1  value -5.2467e-03
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 2  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 3  value 9.9704e-03
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 6  value 1.0123e-03
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1  value -5.2467e-03
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 3  value 9.9704e-03
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 6  value 1.0123e-03
 ##Exact solution at r=5.0 sig_r=-5.71, sig_theta=9.52
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 1  value -5.2467e+00
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 2  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 3  value 9.9704e+00
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 6  value 5.0614e-01
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value -5.2467e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 3  value 9.97042178e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 6  value 5.06144011e-01
 ##Element 4
-#ELEMENT tStep 1 number 4 gp 1 keyword "strains" component 1  value -7.6205e-04
-#ELEMENT tStep 1 number 4 gp 1 keyword "strains" component 2  value 0.0
-#ELEMENT tStep 1 number 4 gp 1 keyword "strains" component 3  value 4.3103e-03
-#ELEMENT tStep 1 number 4 gp 1 keyword "strains" component 6  value -3.7751e-04
+#ELEMENT tStep 1 number 4 gp 1 keyword 4 component 1  value -7.6205e-04
+#ELEMENT tStep 1 number 4 gp 1 keyword 4 component 2  value 0.0
+#ELEMENT tStep 1 number 4 gp 1 keyword 4 component 3  value 4.3103e-03
+#ELEMENT tStep 1 number 4 gp 1 keyword 4 component 6  value -3.7751e-04
 ##Exact solution at r=9.0 sig_r=-0.45, sig_theta=4.26
-#ELEMENT tStep 1 number 4 gp 1 keyword "stresses" component 1  value -7.6205e-01
-#ELEMENT tStep 1 number 4 gp 1 keyword "stresses" component 2  value 0.0
-#ELEMENT tStep 1 number 4 gp 1 keyword "stresses" component 3  value 4.3103e+00
-#ELEMENT tStep 1 number 4 gp 1 keyword "stresses" component 6  value -1.8876e-01
+#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 1  value -7.62054992e-01
+#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 2  value 0.0
+#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 3  value 4.31027165e+00
+#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 6  value -1.88757280e-01
 #%END_CHECK%

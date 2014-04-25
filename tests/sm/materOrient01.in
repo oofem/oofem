@@ -11,7 +11,8 @@ materOrient01.out
 # o----------------------------------->x
 #
 test of local coordinate system with material orientation on element
-NonLinearStatic nsteps 1 controlmode 1 rtolv 0.00001 MaxIter 30 stiffmode 0 deltaT 1.0 nmodules 0
+NonLinearStatic nsteps 1 controlmode 1 rtolv 0.00001 MaxIter 30 stiffmode 0 deltaT 1.0 nmodules 1
+errorcheck filename "materOrient01.in"
 #vtk tstep_all domain_all primvars 1 1 vars 2 1 4 stype 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
@@ -29,11 +30,10 @@ ConstantFunction 1 f(t) 1.0
 #
 #
 #%BEGIN_CHECK% tolerance 1.e-4
-#TIME
 ## check element no. 1 strain vector
-#ELEMENT tStep 0 number 1 gp 1 keyword "strains" component 1  value 1.0000e-01
-#ELEMENT tStep 0 number 1 gp 1 keyword "strains" component 2  value -2.0000e-01
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1  value 1.0000e-01
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 2  value -2.0000e-01
 ## check element no. 1 stress vector
-#ELEMENT tStep 0 number 1 gp 1 keyword "stresses" component 1  value 1.0000e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value 1.0000e+00
 ##
 #%END_CHECK%

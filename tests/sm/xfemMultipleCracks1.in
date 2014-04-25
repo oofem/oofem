@@ -1,6 +1,7 @@
 xfemMultipleCracks1.out
 XFEM simulation: A single element with three cracks and cohesive zones, loaded in shear. Written by Erik Svenning, Chalmers University of Technology.
-XFEMStatic nsteps 5 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 25 minIter 2 stiffmode 0 nmodules 0 lstype 0 smtype 1 manrmsteps 1 forceremap 1
+XFEMStatic nsteps 5 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 25 minIter 2 stiffmode 0 nmodules 1 lstype 0 smtype 1 manrmsteps 1 forceremap 1
+errorcheck filename "xfemMultipleCracks1.in"
 #vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
@@ -44,14 +45,14 @@ polygoncrack 2 points 8 -0.1 0.8 0.4 0.5 0.7 -0.1 0.8 -0.2
 ###################################
 #
 #
-#%BEGIN_CHECK% tolerance 1.e-12
+#%BEGIN_CHECK% tolerance 1.e-7
 ## step 2
-#REACTION tStep 1. number 3 dof 1 value 5.0145e+01
-#REACTION tStep 1. number 4 dof 1 value -2.3630e+01
+#REACTION tStep 2 number 3 dof 1 value 5.01446686e+01
+#REACTION tStep 2 number 4 dof 1 value -2.36298729e+01
 ## step 3
-#REACTION tStep 2. number 3 dof 1 value 4.8468e+01
-#REACTION tStep 2. number 4 dof 1 value -2.1286e+01
+#REACTION tStep 3 number 3 dof 1 value 4.84677962e+01
+#REACTION tStep 3 number 4 dof 1 value -2.12860077e+01
 ## step 4
-#REACTION tStep 3. number 3 dof 1 value 4.1057e+01
-#REACTION tStep 3. number 4 dof 1 value -1.7596e+01
+#REACTION tStep 4 number 3 dof 1 value 4.10571163e+01
+#REACTION tStep 4 number 4 dof 1 value -1.75956153e+01
 #%END_CHECK%
