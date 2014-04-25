@@ -138,7 +138,8 @@ int Line :: computeNumberOfIntersectionPoints(Element *element)
         }
     }
 
-    if ( ( maxDist * minDist ) < 0.0 ) {
+    const double tol = 1.0e-12;
+    if ( ( maxDist * minDist ) < tol ) {
         if ( maxTanDist <= 0.0 ) {
             count = 2;
         } else if ( ( maxTanDist * minTanDist ) <= 0 ) {
@@ -877,7 +878,7 @@ void PolygonLine :: giveSubPolygon(std :: vector< FloatArray > &oPoints, const d
         xiSegStart = xSegStart / L;
         xiSegEnd        = xSegEnd / L;
 
-        if ( iXiStart > xiSegStart && iXiStart < xiSegEnd ) {
+        if ( iXiStart > xiSegStart-xiTol && iXiStart < xiSegEnd+xiTol ) {
             // Start point is within the segment
             FloatArray p;
             double elXi = ( iXiStart - xiSegStart ) / ( xiSegEnd - xiSegStart );

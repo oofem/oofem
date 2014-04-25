@@ -32,17 +32,14 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef ENRICHMENTFRONTLINBRANCHFUNCONEEL_H_
-#define ENRICHMENTFRONTLINBRANCHFUNCONEEL_H_
-
-#define _IFT_EnrFrontLinearBranchFuncOneEl_Name "enrfrontlinearbranchfunconeel"
-
-#include "oofemcfg.h"
-#include <vector>
-#include "inputrecord.h"
 #include "xfem/enrichmentfronts/enrichmentfront.h"
-#include "xfem/tipinfo.h"
-#include "xfem/enrichmentfunction.h"
+#include "floatarray.h"
+
+#ifndef ENRICHMENTFRONTINTERSECTION_H_
+#define ENRICHMENTFRONTINTERSECTION_H_
+
+#define _IFT_EnrFrontIntersection_Name "enrfrontintersection"
+#define _IFT_EnrFrontIntersection_Tangent "tangent"
 
 namespace oofem {
 class XfemManager;
@@ -53,38 +50,41 @@ class DynamicInputRecord;
 class LinElBranchFunction;
 
 /**
- * EnrFrontLinearBranchFuncOneEl
+ * EnrFrontIntersection
+ *
+ * An enrichment front capable of handling crack intersections.
+ *
  * @author Erik Svenning
- * @date Feb 14, 2014
+ * @date Apr 23, 2014
  */
-class OOFEM_EXPORT EnrFrontLinearBranchFuncOneEl : public EnrichmentFront
-{
+class EnrFrontIntersection : public EnrichmentFront {
 public:
-    EnrFrontLinearBranchFuncOneEl();
-    virtual ~EnrFrontLinearBranchFuncOneEl();
+    EnrFrontIntersection();
+    virtual ~EnrFrontIntersection();
 
     virtual void MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo);
 
     virtual int  giveNumEnrichments(const DofManager &iDMan) const;
-    virtual int  giveMaxNumEnrichments() const { return 4; }
+    virtual int  giveMaxNumEnrichments() const { return 1; }
 
     // Evaluate the enrichment function and its derivative in front nodes.
     virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const;
     virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const;
     virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const;
 
-    virtual const char *giveClassName() const { return "EnrFrontLinearBranchFuncOneEl"; }
-    virtual const char *giveInputRecordName() const { return _IFT_EnrFrontLinearBranchFuncOneEl_Name; }
+    virtual const char *giveClassName() const { return "EnrFrontIntersection"; }
+    virtual const char *giveInputRecordName() const { return _IFT_EnrFrontIntersection_Name; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual double giveSupportRadius() const { return 0.0; }
 
-private:
-    LinElBranchFunction *mpBranchFunc;
+protected:
+    FloatArray mTangent;
+
 };
-} // end namespace oofem
 
+} /* namespace oofem */
 
-#endif /* ENRICHMENTFRONTLINBRANCHFUNCONEEL_H_ */
+#endif /* ENRICHMENTFRONTINTERSECTION_H_ */

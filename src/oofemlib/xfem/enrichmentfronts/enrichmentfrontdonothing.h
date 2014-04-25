@@ -61,7 +61,7 @@ public:
     EnrFrontDoNothing() { };
     virtual ~EnrFrontDoNothing() { };
 
-    virtual void MarkNodesAsFront(std :: unordered_map< int, int > &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo) { /*printf("Entering EnrFrontDoNothing::MarkNodesAsFront().\n");*/ }
+    virtual void MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo) { /*printf("Entering EnrFrontDoNothing::MarkNodesAsFront().\n");*/ }
 
     // No special tip enrichments are applied with this model.
     virtual int  giveNumEnrichments(const DofManager &iDMan) const { return 0; }
@@ -70,7 +70,7 @@ public:
     // Evaluate the enrichment function and its derivative in front nodes.
     virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const { };
     virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const { };
-    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd) const { };
+    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const { };
 
     virtual const char *giveClassName() const { return "EnrFrontDoNothing"; }
     virtual const char *giveInputRecordName() const { return _IFT_EnrFrontDoNothing_Name; }

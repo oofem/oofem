@@ -84,6 +84,16 @@ class DynamicDataReader;
 class Triangle;
 class GnuplotExportModule;
 class GaussPoint;
+
+
+enum NodeEnrichmentType : int {
+    NodeEnr_NONE = 0,
+    NodeEnr_BULK = 1,
+    NodeEnr_START_TIP = 2,
+    NodeEnr_END_TIP = 3,
+    NodeEnr_START_AND_END_TIP = 4
+};
+
 /**
  * Abstract class representing entity, which is included in the FE model using one (or more)
  * global functions. Such entity may represent crack, material interface, etc.
@@ -156,13 +166,15 @@ public:
 
     void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd = -1) const;
     void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const;
-    void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, int iNodeInd, GaussPoint &iGP) const;
+    void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, int iNodeInd, GaussPoint &iGP, bool iGPLivesOnCurrentCrack) const;
 
     bool evalLevelSetNormalInNode(double &oLevelSet, int iNodeInd) const;
     bool evalLevelSetTangInNode(double &oLevelSet, int iNodeInd) const;
     bool evalNodeEnrMarkerInNode(double &oNodeEnrMarker, int iNodeInd) const;
 
     bool levelSetChangesSignInEl(const IntArray &iElNodes) const;
+
+    void interpLevelSet(double &oLevelSet, const FloatArray &iGlobalCoord) const;
 
     // By templating the function this way, we may choose if we want to pass iNodeInd as
     // an IntArray, a std::vector<int> or something else.
@@ -212,9 +224,12 @@ public:
 
     const EnrichmentDomain *giveEnrichmentDomain() const { return mpEnrichmentDomain; }
 
-    const std :: unordered_map< int, int > &giveEnrNodeMap() const { return mNodeEnrMarkerMap; }
+    const std :: unordered_map< int, NodeEnrichmentType > &giveEnrNodeMap() const { return mNodeEnrMarkerMap; }
 
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
+
+    EnrichmentFront *giveEnrichmentFrontStart() {return mpEnrichmentFrontStart;}
+    EnrichmentFront *giveEnrichmentFrontEnd() {return mpEnrichmentFrontEnd;}
 
 protected:
 
@@ -222,7 +237,7 @@ protected:
 
     EnrichmentFunction *mpEnrichmentFunc;
 
-    EnrichmentFront *mpEnrichmentFront;
+    EnrichmentFront *mpEnrichmentFrontStart, *mpEnrichmentFrontEnd;
 
     /// mEnrFrontIndex: nonzero if an enrichment front is present, zero otherwise.
     int mEnrFrontIndex;
@@ -262,7 +277,7 @@ protected:
     std :: vector< double >mLevelSetSurfaceNormalDir;
 
     // Field with desired node enrichment types
-    std :: unordered_map< int, int >mNodeEnrMarkerMap;
+    std :: unordered_map< int, NodeEnrichmentType >mNodeEnrMarkerMap;
 
     bool mLevelSetsNeedUpdate;
 

@@ -157,11 +157,15 @@ Delamination :: appendInputRecords(DynamicDataReader &oDR)
     mpEnrichmentDomain->giveInputRecord(* edRec);
     oDR.insertInputRecord(DataReader :: IR_geoRec, edRec);
 
+    // Enrichment front
     if ( mEnrFrontIndex != 0 ) {
-        // Enrichment front
-        DynamicInputRecord *efrRec = new DynamicInputRecord();
-        mpEnrichmentFront->giveInputRecord(* efrRec);
-        oDR.insertInputRecord(DataReader :: IR_enrichFrontRec, efrRec);
+        DynamicInputRecord *efrRecStart = new DynamicInputRecord();
+        mpEnrichmentFrontStart->giveInputRecord(* efrRecStart);
+        oDR.insertInputRecord(DataReader :: IR_enrichFrontRec, efrRecStart);
+
+        DynamicInputRecord *efrRecEnd = new DynamicInputRecord();
+        mpEnrichmentFrontEnd->giveInputRecord(* efrRecEnd);
+        oDR.insertInputRecord(DataReader :: IR_enrichFrontRec, efrRecEnd);
     }
 
     if ( mPropLawIndex != 0 ) {
