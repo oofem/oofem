@@ -121,7 +121,7 @@ void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncDerivAt(std :: vector< Floa
     }
 }
 
-void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd) const
+void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const
 {
 	oEnrFuncJumps.clear();
 

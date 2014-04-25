@@ -878,7 +878,7 @@ void PolygonLine :: giveSubPolygon(std :: vector< FloatArray > &oPoints, const d
         xiSegStart = xSegStart / L;
         xiSegEnd        = xSegEnd / L;
 
-        if ( iXiStart > xiSegStart && iXiStart < xiSegEnd ) {
+        if ( iXiStart > xiSegStart-xiTol && iXiStart < xiSegEnd+xiTol ) {
             // Start point is within the segment
             FloatArray p;
             double elXi = ( iXiStart - xiSegStart ) / ( xiSegEnd - xiSegStart );

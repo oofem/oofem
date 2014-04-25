@@ -166,13 +166,15 @@ public:
 
     void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd = -1) const;
     void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const;
-    void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, int iNodeInd, GaussPoint &iGP) const;
+    void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, int iNodeInd, GaussPoint &iGP, bool iGPLivesOnCurrentCrack) const;
 
     bool evalLevelSetNormalInNode(double &oLevelSet, int iNodeInd) const;
     bool evalLevelSetTangInNode(double &oLevelSet, int iNodeInd) const;
     bool evalNodeEnrMarkerInNode(double &oNodeEnrMarker, int iNodeInd) const;
 
     bool levelSetChangesSignInEl(const IntArray &iElNodes) const;
+
+    void interpLevelSet(double &oLevelSet, const FloatArray &iGlobalCoord) const;
 
     // By templating the function this way, we may choose if we want to pass iNodeInd as
     // an IntArray, a std::vector<int> or something else.
@@ -225,6 +227,9 @@ public:
     const std :: unordered_map< int, NodeEnrichmentType > &giveEnrNodeMap() const { return mNodeEnrMarkerMap; }
 
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
+
+    EnrichmentFront *giveEnrichmentFrontStart() {return mpEnrichmentFrontStart;}
+    EnrichmentFront *giveEnrichmentFrontEnd() {return mpEnrichmentFrontEnd;}
 
 protected:
 

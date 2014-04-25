@@ -101,11 +101,8 @@ void EnrFrontIntersection :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > 
     oEnrFuncDeriv.push_back(enrFuncDeriv);
 }
 
-void EnrFrontIntersection :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd) const
+void EnrFrontIntersection :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const
 {
-    // TODO: Implement
-    printf("Warning:EnrFrontIntersection :: evaluateEnrFuncJumps() is not implemented yet.\n ");
-
     oEnrFuncJumps.clear();
 
     const FloatArray &xTip = mTipInfo.mGlobalCoord;
@@ -114,7 +111,21 @@ void EnrFrontIntersection :: evaluateEnrFuncJumps(std :: vector< double > &oEnrF
     double radius = gpCoord.distance(xTip);
 
     std :: vector< double > jumps;
-    jumps.push_back(0.0);
+
+    if(iGPLivesOnCurrentCrack) {
+        jumps.push_back(1.0);
+    }
+    else {
+
+//        printf("iNormalSignDist: %e\n", iNormalSignDist );
+
+        if(iNormalSignDist > 0.0) {
+            jumps.push_back(1.0);
+        }
+        else {
+            jumps.push_back(0.0);
+        }
+    }
 
     oEnrFuncJumps.insert( oEnrFuncJumps.end(), jumps.begin(), jumps.end() );
 }

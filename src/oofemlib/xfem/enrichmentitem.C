@@ -514,8 +514,11 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrF
     }
 }
 
-void EnrichmentItem :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, int iNodeInd, GaussPoint &iGP) const
+void EnrichmentItem :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, int iNodeInd, GaussPoint &iGP, bool iGPLivesOnCurrentCrack) const
 {
+    double normalSignDist = 0.0;
+    this->interpLevelSet(normalSignDist, *(iGP.giveCoordinates()) );
+
     auto res = mNodeEnrMarkerMap.find(iNodeInd);
     if ( res != mNodeEnrMarkerMap.end() ) {
 
@@ -527,14 +530,14 @@ void EnrichmentItem :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJum
             mpEnrichmentFunc->giveJump(oEnrFuncJumps);
             break;
         case NodeEnr_START_TIP:
-            mpEnrichmentFrontStart->evaluateEnrFuncJumps(oEnrFuncJumps, iGP, iNodeInd);
+            mpEnrichmentFrontStart->evaluateEnrFuncJumps(oEnrFuncJumps, iGP, iNodeInd, iGPLivesOnCurrentCrack, normalSignDist);
             break;
         case NodeEnr_END_TIP:
-            mpEnrichmentFrontEnd->evaluateEnrFuncJumps(oEnrFuncJumps, iGP, iNodeInd);
+            mpEnrichmentFrontEnd->evaluateEnrFuncJumps(oEnrFuncJumps, iGP, iNodeInd, iGPLivesOnCurrentCrack, normalSignDist);
             break;
         case NodeEnr_START_AND_END_TIP:
-            mpEnrichmentFrontStart->evaluateEnrFuncJumps(oEnrFuncJumps, iGP, iNodeInd);
-            mpEnrichmentFrontEnd->evaluateEnrFuncJumps(oEnrFuncJumps, iGP, iNodeInd);
+            mpEnrichmentFrontStart->evaluateEnrFuncJumps(oEnrFuncJumps, iGP, iNodeInd, iGPLivesOnCurrentCrack, normalSignDist);
+            mpEnrichmentFrontEnd->evaluateEnrFuncJumps(oEnrFuncJumps, iGP, iNodeInd, iGPLivesOnCurrentCrack, normalSignDist);
             break;
         }
     } else   {
@@ -600,6 +603,24 @@ bool EnrichmentItem :: levelSetChangesSignInEl(const IntArray &iElNodes) const
     }
 
     return false;
+}
+
+void EnrichmentItem :: interpLevelSet(double &oLevelSet, const FloatArray &iGlobalCoord) const
+{
+    SpatialLocalizer *localizer = this->giveDomain()->giveSpatialLocalizer();
+
+    Element *tipEl = localizer->giveElementContainingPoint(iGlobalCoord);
+    if(tipEl != NULL) {
+
+        FloatArray N;
+        FloatArray locCoord;
+        tipEl->computeLocalCoordinates(locCoord, iGlobalCoord);
+        FEInterpolation *interp = tipEl->giveInterpolation();
+        interp->evalN( N, locCoord, FEIElementGeometryWrapper(tipEl) );
+
+        interpLevelSet(oLevelSet, N, tipEl->giveDofManArray() );
+    }
+
 }
 
 void EnrichmentItem :: updateLevelSets(XfemManager &ixFemMan)
@@ -1055,29 +1076,42 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
         double phiS         = 0.0, phiE     = 0.0;
         double gammaS       = 0.0, gammaE   = 0.0;
 
+        bool levelSetDefinedInAllNodes = true;
         for ( int i = 1; i <= Ns.giveSize(); i++ ) {
             double phiSNode = 0.0;
             if ( evalLevelSetNormalInNode(phiSNode, elNodes [ i - 1 ]) ) {
                 phiS += Ns.at(i) * phiSNode;
+            }
+            else {
+                levelSetDefinedInAllNodes = false;
             }
 
             double gammaSNode = 0.0;
             if ( evalLevelSetTangInNode(gammaSNode, elNodes [ i - 1 ]) ) {
                 gammaS += Ns.at(i) * gammaSNode;
             }
+            else {
+                levelSetDefinedInAllNodes = false;
+            }
 
             double phiENode = 0.0;
             if ( evalLevelSetNormalInNode(phiENode, elNodes [ i - 1 ]) ) {
                 phiE += Ne.at(i) * phiENode;
+            }
+            else {
+                levelSetDefinedInAllNodes = false;
             }
 
             double gammaENode = 0.0;
             if ( evalLevelSetTangInNode(gammaENode, elNodes [ i - 1 ]) ) {
                 gammaE += Ne.at(i) * gammaENode;
             }
+            else {
+                levelSetDefinedInAllNodes = false;
+            }
         }
 
-        if ( phiS * phiE < mLevelSetTol2 ) {
+        if ( phiS * phiE < mLevelSetTol2 && levelSetDefinedInAllNodes ) {
             // Intersection detected
 
             double xi = calcXiZeroLevel(phiS, phiE);
@@ -1339,7 +1373,7 @@ bool Inclusion :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection
 
     FloatArray N;
     FEInterpolation *interp = iEl.giveInterpolation();
-    interp->evalN( N, * iGP.giveCoordinates(), FEIElementGeometryWrapper(& iEl) );
+    interp->evalN( N, * iGP.giveLocalCoordinates(), FEIElementGeometryWrapper(& iEl) );
 
     const IntArray &elNodes = iEl.giveDofManArray();
 

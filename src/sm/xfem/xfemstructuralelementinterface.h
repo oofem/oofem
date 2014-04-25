@@ -71,6 +71,13 @@ public:
 
     virtual void initializeCZMaterial();
 
+    /**
+     * Identify enrichment items with an intersection enrichment
+     * front that touches a given enrichment item.
+     */
+    void giveIntersectionsTouchingCrack(std::vector<int> &oTouchingEnrItemIndices, const std::vector<int> &iCandidateIndices, int iEnrItemIndex, XfemManager &iXMan);
+    bool tipIsTouchingEI(const TipInfo &iTipInfo, EnrichmentItem *iEI);
+
     // Cohesive Zone variables
     StructuralInterfaceMaterial *mpCZMat;
     int mCZMaterialNum;

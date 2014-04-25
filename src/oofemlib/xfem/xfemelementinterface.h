@@ -69,6 +69,13 @@ public:
     /// Index of enrichment items associated with cohesive zones
     std :: vector< int >mCZEnrItemIndices; // TODO: Not nice. /ES
 
+    /**
+     * Indices of enrichment items that give cohesive zone contributions
+     * to a given GP, even though the GP is not located on any
+     * of these enrichment items.
+     */
+    std :: vector< std::vector<int> > mCZTouchingEnrItemIndices;
+
     /// Flag that tells if plane stress or plane strain is assumed
     bool mUsePlaneStrain;
 
@@ -137,7 +144,7 @@ public:
     /**
      * Compute N-matrix for cohesive zone.
      */
-    void computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, int iEnrItemIndex);
+    void computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, int iEnrItemIndex, const std::vector<int> &iTouchingEnrItemIndices);
 };
 } // end namespace oofem
 #endif // xfemelementinterface_h

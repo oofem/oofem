@@ -153,7 +153,7 @@ void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncDerivAt(std :: vector< Flo
     }
 }
 
-void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd) const
+void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const
 {
 	oEnrFuncJumps.clear();
 

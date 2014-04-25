@@ -92,7 +92,7 @@ public:
     // Evaluate the enrichment function and its derivative in front nodes.
     virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const = 0;
     virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const = 0;
-    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd) const = 0;
+    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const = 0;
 
     std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
 
@@ -103,6 +103,8 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input) = 0;
 
     virtual double giveSupportRadius() const = 0;
+
+    const TipInfo &giveTipInfo() const {return mTipInfo;}
 
 protected:
     TipInfo mTipInfo;

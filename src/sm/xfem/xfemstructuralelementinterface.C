@@ -41,10 +41,14 @@
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "dynamicinputrecord.h"
+#include "feinterpol.h"
+#include "spatiallocalizer.h"
 
 #include "xfem/patchintegrationrule.h"
 #include "xfem/enrichmentitems/crack.h"
 #include "xfem/XFEMDebugTools.h"
+
+#include "xfem/enrichmentfronts/enrichmentfrontintersection.h"
 
 #include <string>
 #include <sstream>
@@ -75,6 +79,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
         mpCZIntegrationRules.clear();
         mCZEnrItemIndices.clear();
+        mCZTouchingEnrItemIndices.clear();
     }
 
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
@@ -97,7 +102,13 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
 
         for ( size_t p = 0; p < enrichingEIs.size(); p++ ) {
+
+            // Index of current ei
             int eiIndex = enrichingEIs [ p ];
+
+            // Indices of other ei interaction with this ei through intersection enrichment fronts.
+            std::vector<int> touchingEiIndices;
+            giveIntersectionsTouchingCrack(touchingEiIndices, enrichingEIs, eiIndex, *xMan);
 
             if ( firstIntersection ) {
                 // Get the points describing each subdivision of the element
@@ -132,7 +143,13 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                         for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
                             int czRuleNum = 1;
                             mpCZIntegrationRules.push_back( new GaussIntegrationRule(czRuleNum, element) );
+
+                            // Add index of current ei
                             mCZEnrItemIndices.push_back(eiIndex);
+
+                            // Add indices of other ei, that cause interaction through
+                            // intersection enrichment fronts
+                            mCZTouchingEnrItemIndices.push_back(touchingEiIndices);
 
                             // Compute crack normal
                             FloatArray crackTang;
@@ -215,6 +232,8 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 mpCZIntegrationRules.push_back( new GaussIntegrationRule(czRuleNum, element) );
                                 size_t newRuleInd = mpCZIntegrationRules.size() - 1;
                                 mCZEnrItemIndices.push_back(eiIndex);
+
+                                mCZTouchingEnrItemIndices.push_back(touchingEiIndices);
 
                                 // Compute crack normal
                                 FloatArray crackTang;
@@ -415,7 +434,7 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
                 // Compute a (slightly modified) N-matrix
 
                 FloatMatrix NMatrix;
-                computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ]);
+                computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ], mCZTouchingEnrItemIndices[segIndex]);
                 ////////////////////////////////////////////////////////
 
 
@@ -515,7 +534,7 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
                 // Compute a (slightly modified) N-matrix
 
                 FloatMatrix NMatrix;
-                computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ]);
+                computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ], mCZTouchingEnrItemIndices[segIndex]);
 
                 ////////////////////////////////////////////////////////
 
@@ -755,4 +774,85 @@ void XfemStructuralElementInterface :: initializeCZMaterial()
         }
     }
 }
+
+void XfemStructuralElementInterface :: giveIntersectionsTouchingCrack(std::vector<int> &oTouchingEnrItemIndices, const std::vector<int> &iCandidateIndices, int iEnrItemIndex, XfemManager &iXMan)
+{
+    EnrichmentItem *ei = iXMan.giveEnrichmentItem(iEnrItemIndex);
+
+
+    for( int candidateIndex : iCandidateIndices ) {
+
+        if( candidateIndex != iEnrItemIndex ) {
+
+            // Fetch candidate enrichment item
+            EnrichmentItem *eiCandidate = iXMan.giveEnrichmentItem(candidateIndex);
+
+            // This treatment is only necessary if the enrichment front
+            // is an EnrFrontIntersection. Therefore, start by trying a
+            // dynamic cast.
+
+            // Check start tip
+            EnrFrontIntersection *efStart = dynamic_cast<EnrFrontIntersection*>( eiCandidate->giveEnrichmentFrontStart() );
+            if(efStart != NULL) {
+                const TipInfo &tipInfo = efStart->giveTipInfo();
+
+                if(tipIsTouchingEI(tipInfo, ei)) {
+                    //printf("Crack %d is touched by a tip on crack %d.\n", iEnrItemIndex, candidateIndex);
+                    oTouchingEnrItemIndices.push_back(candidateIndex);
+                }
+            }
+
+            // Check end tip
+            EnrFrontIntersection *efEnd = dynamic_cast<EnrFrontIntersection*>( eiCandidate->giveEnrichmentFrontEnd() );
+            if(efEnd != NULL) {
+                const TipInfo &tipInfo = efEnd->giveTipInfo();
+
+                if(tipIsTouchingEI(tipInfo, ei)) {
+                    //printf("Crack %d is touched by a tip on crack %d.\n", iEnrItemIndex, candidateIndex);
+                    oTouchingEnrItemIndices.push_back(candidateIndex);
+                }
+            }
+        }
+
+    }
+
+}
+
+bool XfemStructuralElementInterface :: tipIsTouchingEI(const TipInfo &iTipInfo, EnrichmentItem *iEI)
+{
+    // TODO: Move this function to EnrichmentItem.
+
+    double tol = 1.0e-9;
+    SpatialLocalizer *localizer = element->giveDomain()->giveSpatialLocalizer();
+
+    //                printf("tipInfo.mGlobalCoord: "); tipInfo.mGlobalCoord.printYourself();
+
+    Element *tipEl = localizer->giveElementContainingPoint(iTipInfo.mGlobalCoord);
+    if(tipEl != NULL) {
+
+        // Check if the candidate tip is located on the current crack
+        FloatArray N;
+        FloatArray locCoord;
+        tipEl->computeLocalCoordinates(locCoord, iTipInfo.mGlobalCoord);
+        FEInterpolation *interp = tipEl->giveInterpolation();
+        interp->evalN( N, locCoord, FEIElementGeometryWrapper(tipEl) );
+
+        double normalSignDist;
+        iEI->interpLevelSet(normalSignDist, N, tipEl->giveDofManArray() );
+    //                    printf("normalSignDist: %e\n", normalSignDist );
+
+        double tangSignDist;
+        iEI->interpLevelSetTangential(tangSignDist, N, tipEl->giveDofManArray() );
+    //                    printf("tangSignDist: %e\n", tangSignDist );
+
+        if( fabs(normalSignDist) < tol && tangSignDist > tol ) {
+    //                        printf("normalSignDist: %e\n", normalSignDist );
+    //                        printf("tangSignDist: %e\n", tangSignDist );
+            return true;
+        }
+    }
+
+    return false;
+}
+
 } /* namespace oofem */
