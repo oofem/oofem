@@ -30,15 +30,15 @@ PiecewiseLinFunction 2 nPoints 4 t 4 -1.e+5 15000 15001 1.e+7 f(t) 4 1.0 1.0 0.0
 #%BEGIN_CHECK% tolerance 1.e-3
 ## TIME
 ## Check temperature
-#NODE tStep 3.60000000e+03 number 1 dof 10 unknown d value 2.00000000e+01
-#NODE tStep 3.60000000e+03 number 3 dof 10 unknown d value 2.12548479e+01
-#NODE tStep 3.24000000e+04 number 1 dof 10 unknown d value 5.25429658e+01
-#NODE tStep 3.24000000e+04 number 3 dof 10 unknown d value 5.28935338e+01
+#NODE tStep 2 number 1 dof 10 unknown d value 2.00000000e+01
+#NODE tStep 2 number 3 dof 10 unknown d value 2.12548479e+01
+#NODE tStep 10 number 1 dof 10 unknown d value 5.25429658e+01
+#NODE tStep 10 number 3 dof 10 unknown d value 5.28935338e+01
 ## Check degree of hydration
-#ELEMENT tStep 3.60000000e+03 number 1 gp 1 keyword 39 component 1 value 0.011853
-#ELEMENT tStep 3.60000000e+03 number 1 gp 5 keyword 39 component 1 value 0.011853
-#ELEMENT tStep 3.24000000e+04 number 1 gp 1 keyword 39 component 1 value 0.522685
-#ELEMENT tStep 3.24000000e+04 number 1 gp 5 keyword 39 component 1 value 0.594808
+#ELEMENT tStep 2 number 1 gp 1 keyword 39 component 1 value 0.011853
+#ELEMENT tStep 2 number 1 gp 5 keyword 39 component 1 value 0.011853
+#ELEMENT tStep 10 number 1 gp 1 keyword 39 component 1 value 0.522685
+#ELEMENT tStep 10 number 1 gp 5 keyword 39 component 1 value 0.594808
 #%END_CHECK%
 
 
