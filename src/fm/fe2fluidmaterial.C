@@ -98,6 +98,8 @@ void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, d
     ms->letDeviatoricStressVectorBe(stress_dev);
     ms->letDeviatoricStrainRateVectorBe(eps);
 
+    ms->letPressureBe(pressure);
+
     ms->markOldTangents(); // Mark this so that tangents are reevaluated if they are needed.
     // One could also just compute them here, but you don't actually need them if the problem has converged, so this method saves on that iteration.
     // Computing the tangents are often *more* expensive than computeFields, so this is well worth the time it saves
@@ -275,6 +277,9 @@ int FE2FluidMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
     FE2FluidMaterialStatus *status = static_cast< FE2FluidMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_VOFFraction ) {
         answer = {status->giveVOFFraction()};
+        return true;
+    } else if ( type == IST_Pressure ) {
+        answer = {status->givePressure()};
         return true;
     } else if ( type == IST_Undefined ) { ///@todo What should one call this value? Relation between pressure and volumetric strain-rate.
 #if 0
