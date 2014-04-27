@@ -133,7 +133,7 @@ private:
     FloatMatrix gsMatrix;
 public:
     WeakPeriodicBoundaryCondition(int n, Domain * d);
-    virtual ~WeakPeriodicBoundaryCondition() { }
+    virtual ~WeakPeriodicBoundaryCondition();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

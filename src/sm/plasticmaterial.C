@@ -132,7 +132,7 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
     // tady konec debugovani - strainSpaceHardeningVariables ve statusu neinicializovany
     // to musi udelat material.
 
-    dGamma = Gamma = 0.;
+    Gamma = 0.;
     strSize = strainVectorR.giveSize(); // size of reducedStrain Vector
     totSize = strSize + strainSpaceHardeningVariables.giveSize();
 

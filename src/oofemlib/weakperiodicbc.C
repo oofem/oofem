@@ -60,6 +60,12 @@ WeakPeriodicBoundaryCondition :: WeakPeriodicBoundaryCondition(int n, Domain *d)
 {
     useBasisType = monomial;
     doUpdateSminmax = true;
+    gammaDman = NULL;
+}
+
+WeakPeriodicBoundaryCondition :: ~WeakPeriodicBoundaryCondition()
+{
+    delete gammaDman;
 }
 
 IRResultType

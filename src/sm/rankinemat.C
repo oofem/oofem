@@ -501,19 +501,15 @@ void
 RankineMat :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
-    double om;
+    answer.resize(1, 1);
+    answer.at(1, 1) = this->E;
     if ( mode == ElasticStiffness ) {
-        om = 0.0;
     } else if ( mode == SecantStiffness ) {
-        om = status->giveTempDamage();
-        answer.resize(1, 1);
-        answer.at(1, 1) = this->E;
+        double om = status->giveTempDamage();
         answer.times(1.0 - om);
     } else {
         OOFEM_ERROR("unknown type of stiffness (secant stiffness not implemented for 1d)");
     }
-
-    return;
 }
 
 // this method is also used by the gradient version,
