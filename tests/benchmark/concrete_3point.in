@@ -1,6 +1,7 @@
 concrete_3point.out
 Test: 3-point bending, triangular elements, 1 loaded point
-NonLinearStatic nsteps 20 stepLength 0.025  rtolv 0.0001 Psi 0.0 MaxIter 200 reqIterations 80 HPC 2 1 2 stiffmode 1 
+NonLinearStatic nsteps 20 stepLength 0.025  rtolv 0.0001 Psi 0.0 MaxIter 200 reqIterations 80 HPC 2 1 2 stiffmode 1 nmodules 1
+errorcheck filename "concrete_3point.in"
 domain 2dPlaneStress
 #
 # zkracena verze vypoctu z me disertace
@@ -1278,61 +1279,61 @@ ConstantFunction 1 f(t) 2.0
 #
 #%BEGIN_CHECK% tolerance 1.e-6
 ## check load levels
-#LOADLEVEL tStep 0 value 6.105389
-#LOADLEVEL tStep 1 value 12.210779
-#LOADLEVEL tStep 2 value 18.160715
-#LOADLEVEL tStep 3 value 23.798851
-#LOADLEVEL tStep 4 value 28.987424
-#LOADLEVEL tStep 5 value 33.733775
-#LOADLEVEL tStep 6 value 38.101680
-#LOADLEVEL tStep 7 value 41.454458
-#LOADLEVEL tStep 8 value 43.523632
-#LOADLEVEL tStep 9 value 43.944412
-#LOADLEVEL tStep 10 value 40.616307
-#LOADLEVEL tStep 11 value 35.640997
-#LOADLEVEL tStep 12 value 33.458921
-#LOADLEVEL tStep 13 value 30.429273
-#LOADLEVEL tStep 14 value 28.534107
-#LOADLEVEL tStep 15 value 26.685269
-#LOADLEVEL tStep 16 value 25.713360
-#LOADLEVEL tStep 17 value 23.581970
-#LOADLEVEL tStep 18 value 22.329408
-#LOADLEVEL tStep 19 value 21.473918
+#LOADLEVEL tStep 1 value 6.105389
+#LOADLEVEL tStep 2 value 12.210779
+#LOADLEVEL tStep 3 value 18.160715
+#LOADLEVEL tStep 4 value 23.798851
+#LOADLEVEL tStep 5 value 28.987424
+#LOADLEVEL tStep 6 value 33.733775
+#LOADLEVEL tStep 7 value 38.101680
+#LOADLEVEL tStep 8 value 41.454458
+#LOADLEVEL tStep 9 value 43.523632
+#LOADLEVEL tStep 10 value 43.944412
+#LOADLEVEL tStep 11 value 40.616307
+#LOADLEVEL tStep 12 value 35.640997
+#LOADLEVEL tStep 13 value 33.458921
+#LOADLEVEL tStep 14 value 30.429273
+#LOADLEVEL tStep 15 value 28.534107
+#LOADLEVEL tStep 16 value 26.685269
+#LOADLEVEL tStep 17 value 25.713360
+#LOADLEVEL tStep 18 value 23.581970
+#LOADLEVEL tStep 19 value 22.329408
+#LOADLEVEL tStep 20 value 21.473918
 ## check node displacement at final step
-#NODE tStep 0 number 1 dof 2 unknown d value -2.50000000e-02 tolerance 1.e-9
-#NODE tStep 1 number 1 dof 2 unknown d value -5.00000000e-02 tolerance 1.e-9
-#NODE tStep 2 number 1 dof 2 unknown d value -7.50000000e-02 tolerance 1.e-9
-#NODE tStep 3 number 1 dof 2 unknown d value -1.00000000e-01 tolerance 1.e-9
-#NODE tStep 4 number 1 dof 2 unknown d value -1.25000000e-01 tolerance 1.e-9
-#NODE tStep 5 number 1 dof 2 unknown d value -1.50000000e-01 tolerance 1.e-9
-#NODE tStep 6 number 1 dof 2 unknown d value -1.75000000e-01 tolerance 1.e-9
-#NODE tStep 7 number 1 dof 2 unknown d value -2.00000000e-01 tolerance 1.e-9
-#NODE tStep 8 number 1 dof 2 unknown d value -2.23529412e-01 tolerance 1.e-9
-#NODE tStep 9  number 1 dof 2 unknown d value -2.48506881e-01 tolerance 1.e-9
-#NODE tStep 10 number 1 dof 2 unknown d value -2.73484350e-01 tolerance 1.e-9
-#NODE tStep 11 number 1 dof 2 unknown d value -2.88622210e-01 tolerance 1.e-9
-#NODE tStep 12 number 1 dof 2 unknown d value -2.99732566e-01 tolerance 1.e-9
-#NODE tStep 13 number 1 dof 2 unknown d value -3.11434890e-01 tolerance 1.e-9
-#NODE tStep 14 number 1 dof 2 unknown d value -3.23957999e-01 tolerance 1.e-9
-#NODE tStep 15 number 1 dof 2 unknown d value -3.37148350e-01 tolerance 1.e-9
-#NODE tStep 16 number 1 dof 2 unknown d value -3.51381985e-01 tolerance 1.e-9
-#NODE tStep 17 number 1 dof 2 unknown d value -3.65945211e-01 tolerance 1.e-9
-#NODE tStep 18 number 1 dof 2 unknown d value -3.80153237e-01 tolerance 1.e-9
-#NODE tStep 19 number 1 dof 2 unknown d value -3.96213669e-01 tolerance 1.e-9
+#NODE tStep 1 number 1 dof 2 unknown d value -2.50000000e-02 tolerance 1.e-9
+#NODE tStep 2 number 1 dof 2 unknown d value -5.00000000e-02 tolerance 1.e-9
+#NODE tStep 3 number 1 dof 2 unknown d value -7.50000000e-02 tolerance 1.e-9
+#NODE tStep 4 number 1 dof 2 unknown d value -1.00000000e-01 tolerance 1.e-9
+#NODE tStep 5 number 1 dof 2 unknown d value -1.25000000e-01 tolerance 1.e-9
+#NODE tStep 6 number 1 dof 2 unknown d value -1.50000000e-01 tolerance 1.e-9
+#NODE tStep 7 number 1 dof 2 unknown d value -1.75000000e-01 tolerance 1.e-9
+#NODE tStep 8 number 1 dof 2 unknown d value -2.00000000e-01 tolerance 1.e-9
+#NODE tStep 9 number 1 dof 2 unknown d value -2.23529412e-01 tolerance 1.e-9
+#NODE tStep 10 number 1 dof 2 unknown d value -2.48506881e-01 tolerance 1.e-9
+#NODE tStep 11 number 1 dof 2 unknown d value -2.73484350e-01 tolerance 1.e-9
+#NODE tStep 12 number 1 dof 2 unknown d value -2.88622210e-01 tolerance 1.e-9
+#NODE tStep 13 number 1 dof 2 unknown d value -2.99732566e-01 tolerance 1.e-9
+#NODE tStep 14 number 1 dof 2 unknown d value -3.11434890e-01 tolerance 1.e-9
+#NODE tStep 15 number 1 dof 2 unknown d value -3.23957999e-01 tolerance 1.e-9
+#NODE tStep 16 number 1 dof 2 unknown d value -3.37148350e-01 tolerance 1.e-9
+#NODE tStep 17 number 1 dof 2 unknown d value -3.51381985e-01 tolerance 1.e-9
+#NODE tStep 18 number 1 dof 2 unknown d value -3.65945211e-01 tolerance 1.e-9
+#NODE tStep 19 number 1 dof 2 unknown d value -3.80153237e-01 tolerance 1.e-9
+#NODE tStep 20 number 1 dof 2 unknown d value -3.96213669e-01 tolerance 1.e-9
 ##
 ##
 ## check some arbitrary element
-#ELEMENT tStep 9 number 338 gp 1 keyword 4 component 1  value 1.9395e-03 tolerance 1.e-8
-#ELEMENT tStep 9 number 338 gp 1 keyword 4 component 2  value 1.2654e-05 tolerance 1.e-8
-#ELEMENT tStep 9 number 338 gp 1 keyword 4 component 6  value 3.4092e-04 tolerance 1.e-8
-#ELEMENT tStep 9 number 338 gp 1 keyword 1 component 1  value 1.0173e+00 tolerance 1.e-8
-#ELEMENT tStep 9 number 338 gp 1 keyword 1 component 2  value 1.6522e-01 tolerance 1.e-8
-#ELEMENT tStep 9 number 338 gp 1 keyword 1 component 6  value 7.5383e-02 tolerance 1.e-8
+#ELEMENT tStep 10 number 338 gp 1 keyword 4 component 1 value 1.93951745e-03 tolerance 1.e-8
+#ELEMENT tStep 10 number 338 gp 1 keyword 4 component 2 value 1.26544635e-05 tolerance 1.e-8
+#ELEMENT tStep 10 number 338 gp 1 keyword 4 component 6 value 3.40924245e-04 tolerance 1.e-8
+#ELEMENT tStep 10 number 338 gp 1 keyword 1 component 1 value 1.01732715e+00 tolerance 1.e-8
+#ELEMENT tStep 10 number 338 gp 1 keyword 1 component 2 value 1.65217303e-01 tolerance 1.e-8
+#ELEMENT tStep 10 number 338 gp 1 keyword 1 component 6 value 7.53828658e-02 tolerance 1.e-8
 ##
-#ELEMENT tStep 19 number 338 gp 1 keyword 4 component 1  value 6.4979e-03 tolerance 1.e-8
-#ELEMENT tStep 19 number 338 gp 1 keyword 4 component 2  value 6.0256e-05 tolerance 1.e-8
-#ELEMENT tStep 19 number 338 gp 1 keyword 4 component 6  value 1.9261e-03 tolerance 1.e-8
-#ELEMENT tStep 19 number 338 gp 1 keyword 1 component 1  value -3.3874e-02 tolerance 1.e-8
-#ELEMENT tStep 19 number 338 gp 1 keyword 1 component 2  value -1.5807e+00 tolerance 1.e-8
-#ELEMENT tStep 19 number 338 gp 1 keyword 1 component 6  value 2.3139e-01 tolerance 1.e-8
+#ELEMENT tStep 20 number 338 gp 1 keyword 4 component 1 value 6.49791757e-03 tolerance 1.e-8
+#ELEMENT tStep 20 number 338 gp 1 keyword 4 component 2 value 6.02559845e-05 tolerance 1.e-8
+#ELEMENT tStep 20 number 338 gp 1 keyword 4 component 6 value 1.92610989e-03 tolerance 1.e-8
+#ELEMENT tStep 20 number 338 gp 1 keyword 1 component 1 value -3.38740932e-02 tolerance 1.e-8
+#ELEMENT tStep 20 number 338 gp 1 keyword 1 component 2 value -1.58065960e+00 tolerance 1.e-8
+#ELEMENT tStep 20 number 338 gp 1 keyword 1 component 6 value 2.31394491e-01 tolerance 1.e-8
 #%END_CHECK%
