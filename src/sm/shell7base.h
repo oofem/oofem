@@ -43,6 +43,7 @@
 #include "zznodalrecoverymodel.h"
 #include "fei3dwedgequad.h"
 #include "fracturemanager.h"
+
 #include <vector>
 
 namespace oofem {
@@ -60,7 +61,7 @@ public VTKXMLExportModuleElementInterface, public ZZNodalRecoveryModelInterface,
 {
 public:
     Shell7Base(int n, Domain * d); // constructor
-    virtual ~Shell7Base() { }
+    virtual ~Shell7Base();
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeNumberOfDofs() { return this->giveNumberOfDofs(); }

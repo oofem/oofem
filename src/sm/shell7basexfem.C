@@ -49,6 +49,13 @@ Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain
     czMat = NULL;
 }
 
+Shell7BaseXFEM :: ~Shell7BaseXFEM()
+{
+    for ( auto &iRule: czIntegrationRulesArray ) {
+        delete iRule;
+    }
+}
+
 int
 Shell7BaseXFEM :: checkConsistency()
 {
