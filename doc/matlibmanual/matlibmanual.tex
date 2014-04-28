@@ -285,7 +285,7 @@ Supported modes& 2dPlateSubSoil\\
 \hline
 \end{mmt}
 \caption{Winkler Pasternak material - summary.}
-\label{hyperElMat_table}
+\label{WinklerPasternak_table}
 %\end{center}
 \end{table}
 
@@ -557,7 +557,7 @@ Supported modes& 1dMat, 3dMat, PlaneStrain\\
 \hline
 \end{mmt}
 \caption{Drucker Prager material with tension cut-off - summary.}
-\label{DP_table}
+\label{DP_table_cut}
 %\end{center}
 \end{table}
 
@@ -2310,7 +2310,7 @@ in the strain space and plays a similar role to the choice of a yield
 condition in plasticity.
 Currently, in the present implementation,  the equivalent strain is given by
 $$
-\tilde\varepsilon = \sqrt{\langle w_n\rangle^2 + \beta w_t^2}}
+\tilde\varepsilon = \sqrt{\langle w_n\rangle^2 + \beta w_t^2}
 $$ 
 where $\langle w_n\rangle$ is the positive part of the normal displacement jump (opening of the interface)
 and $w_t$ is the norm of the tangential part of displacement jump (sliding of the interface). Parameter $\beta$
@@ -2349,7 +2349,7 @@ Features & \\
 \end{table}
 
 \subsubsection{Isotropic damage model for interfaces using tabulated data for damage}
-\label{sec:idmfi}
+\label{sec:idmfiTabulated}
 
 The model provides an interface law, which can be used to describe a damageable interface between two materials (e.g.\ between steel reinforcement and concrete). The law is formulated in terms of the traction vector and the displacement jump vector. The basic response is elastic, with stiffness \param{kn} in 
 the normal direction and \param{ks} in the tangential direction.
@@ -2365,7 +2365,7 @@ Currently, in the present implementation,  $\tilde\varepsilon$ is equal to the p
 The damage evolution law is postulated in a separate file that should have the following format. Each line should contain one strain, damage pair separated by a whitespace character. The exception to this is the first line which should contain a single integer stating how many strain, damage pairs that the file will contain. The strains given in the file is defined as the equivalent strain minus the limit of elastic deformation.
 To find the damage for arbitrary strains linear interpolation between the tabulated values is used. If a strain larger than one in the given table is achieved the respective damage for the largest tabulated strain will be used. Both the strains and damages must be given in a strictly increasing order.
 
-The model parameters are summarized in Tab.~\ref{iid_table}. 
+The model parameters are summarized in Tab.~\ref{iidTabulated_table}. 
 \begin{table}[!htb]
 %\begin{center}
   \small
@@ -2388,8 +2388,8 @@ Supported modes& 2dInterface, 3dInterface\\
 Features & \\
 \hline
 \end{mmt}
-\caption{Isotropic damage model for interface elements  using tabulated data for damage -- summary.}
-\label{iid_table}
+\caption{Isotropic damage model for interface elements using tabulated data for damage -- summary.}
+\label{iidTabulated_table}
 %\end{center}
 \end{table}
 
@@ -4592,7 +4592,7 @@ Supported modes&  2d, 3d flow\\
 \hline
 \end{mmt}
 \caption{FE\textsuperscript{2} fluid material - summary.}
-\label{NewtonianFluidMaterial_table}
+\label{FE2FluidMaterial_table}
 \end{table}
 
 \clearpage
@@ -4999,36 +4999,62 @@ documentation of MPlasticMaterial class):
  initialization, update, and store/restore operations are overloaded, to
  handle the history parameters properly.
 
-\subsection{Nonstationary nonlinear transport model - NLTransientTransportProblem class}
-\label{NonNonTrans}
+\subsection{Nonstationary linear transport model}
+\label{NonLinTrans}
+The weak form of diffusion-type differential equation leads to
+\begin{eqnarray}
+\mbf{K} \mbf{r} + \mbf{C}\frac{{\rm d}\mbf{r}}{{\rm d} t} = \mbf{F}\label{NonLinTrans:1},
+\end{eqnarray}
+where the matrix $\mbf{K}$ is a general non-symmetric conductivity matrix, $\mbf{C}$ is a general capacity matrix and the vector $\mbf{F}$ contains contributions from external and internal sources. The vector of unknowns, $\mbf{r}$, can hold nodal values of temperature, humidity, or concentration fields, for example.
 
-Several differential equations of diffusion-type lead to the following nonlinear system
+Time discretization is based on a generalized trapezoidal rule. Let us assume that the solution is known at time $t$ and the time increment is $\Delta t$. The parameter $\alpha\in\langle 0, 1\rangle$ defines a type of integration scheme; $\alpha=0$ results in an explicit (forward) method, $\alpha=0.5$ refers to the Crank-Nicolson method, and $\alpha=1$ means an implicit (backward) method. The appromation of solution vector and its time derivative yield
+\begin{eqnarray}
+\tau &=& t+\alpha\Delta t = (t+\Delta t) - (1-\alpha)\Delta t,\label{NonLinTrans:2}\\
+\mbf{r}_{\tau} &=& (1-\alpha)\mbf{r}_t+\alpha\mbf{r}_{t+\Delta t},\label{NonLinTrans:3}\\
+\frac{{\rm d}\mbf{r}}{{\rm d} t} &=& \frac{1}{\Delta t}\left(\mbf{r}_{t+\Delta t}-\mbf{r}_t\right).\label{NonLinTrans:4}\\
+\mbf{F}_{\tau} &=& (1-\alpha)\mbf{F}_t+\alpha\mbf{F}_{t+\Delta t},\label{NonLinTrans:5}
+\end{eqnarray}
+
+Let us assume that \refeq{NonLinTrans:1} should be satisfied at time $\tau$. Inserting \refeqsr{NonLinTrans:3}{NonLinTrans:5}
+into \refeq{NonLinTrans:1} leads to
+\begin{eqnarray}
+\left[\alpha \mbf{K} + \frac{1}{\Delta t} \mbf{C} \right] \mbf{r}_{t+\Delta t} = 
+\left[(\alpha-1) \mbf{K} + \frac{1}{\Delta t} \mbf{C} \right] \mbf{r}_{t} +
+(1-\alpha) \mbf{F}_{t} + \alpha \mbf{F}_{t+\Delta t}\label{NonLinTrans:6}
+\end{eqnarray}
+where the conductivity matrix $\mbf{K}$ contains also a contribution from convection, since it depends on
+$\mbf{r}_{t+\Delta t}$
+\begin{eqnarray}
+\mbf{K} = \int_{\Omega}\mbf{B}^T \lambda \mbf{B} \ud\Omega + \underbrace{\int_{{\Gamma}_{\overline{c}}} \mbf{N}^T h \mbf{N} \ud \Gamma}_{\textrm{Convection}}\label{NonLinTrans:7}
+\end{eqnarray}
+The vectors $\mbf{F}_t$ or $\mbf{F}_{t+\Delta t}$ contain all known contributions
+\begin{eqnarray}
+\mbf{F}_t = - \underbrace{\int_{\Gamma_{\overline{q}}} \mbf{N}^T \overline{q}_t \ud \Gamma}_{\textrm{Given flow}} +
+\underbrace{\int_{\Gamma_{\overline{c}}} \mbf{N}^T h T_{\infty,t} \ud \Gamma}_{\textrm{Convection}} +
+\underbrace{\int_{\Omega}\mbf{N}^T\overline{Q}_t\ud\Omega}_{\textrm{Source}}\label{NonLinTrans:8}
+\end{eqnarray}
+
+\subsection{Nonstationary nonlinear transport model}
+\label{NonNonTrans}
+In a nonlinear model, \refeq{NonLinTrans:1} is modified to
 \begin{eqnarray}
 \mbf{K}(\mbf{r}) \mbf{r} + \mbf{C}(\mbf{r})\frac{{\rm d}\mbf{r}}{{\rm d} t} = \mbf{F}(\mbf{r})\label{NonNonTrans:1},
 \end{eqnarray}
-where the matrix $\mbf{K}(\mbf{r})$ is a general non-symmetric conductivity matrix, $\mbf{C}(\mbf{r})$ is a general capacity matrix and the vector $\mbf{F}(\mbf{r})$ contains contributions from external and internal sources. The vector of unknowns, $\mbf{r}$, can hold discretized temperature, humidity, or concentration fields, for example.
 
-Time discretization is based on a generalized trapezoidal rule. Let us assume that solution is known at time $t$ and the time increment is provided with $\Delta t$. Equilibrium of nonlinear constitutive laws is required at a new time $\tau\in\langle t,t+\Delta t \rangle$. The parameter $\alpha\in\langle 0, 1\rangle$ defines a type of integration scheme; $\alpha=0$ results in an explicit (forward) method, $\alpha=0.5$ refers to the Crank-Nicolson method, and $\alpha=1$ means an implicit (backward) method. The appromation of solution vector and its time derivative yields
-\begin{eqnarray}
-\tau &=& t+\alpha\Delta t = (t+\Delta t) - (1-\alpha)\Delta t,\label{NonNonTrans:2}\\
-\mbf{r}_{\tau} &=& (1-\alpha)\mbf{r}_t+\alpha\mbf{r}_{t+\Delta t},\label{NonNonTrans:3}\\
-\frac{\partial{\mbf{r}_{\tau}}}{\partial t} &=& \frac{1}{\Delta t}\left(\mbf{r}_{t+\Delta t}-\mbf{r}_t\right).\label{NonNonTrans:4}
-\end{eqnarray}
-
-By substituting of \refeqsr{NonNonTrans:3}{NonNonTrans:4} into \refeq{NonNonTrans:1} leads to the following equation, which is solved at time $\tau$
+Time discretization is the same as in \refeqsr{NonLinTrans:2}{NonLinTrans:4} but the assumption in \refeq{NonLinTrans:8} is not true anymore. Let us assume that \refeq{NonNonTrans:1} should be satisfied at time $\tau\in\langle t,t+\Delta t \rangle$. By substituting of \refeqsr{NonLinTrans:3}{NonLinTrans:4} into \refeq{NonNonTrans:1} leads to the following equation
 \begin{equation}
-\left[(1-\alpha)\mbf{r}_t + \alpha\mbf{r}_{t+\Delta t} \right] \mbf{K}_{\tau}(\mbf{r}) +
-\left[\del{\mbf{r}_{t+\Delta t}-\mbf{r}_t}{\Delta t}\right] \mbf{C}_{\tau}(\mbf{r}) = 
-\mbf{F}_{\tau}(\mbf{r}).\label{NonNonTrans:5}
+\left[(1-\alpha)\mbf{r}_t + \alpha\mbf{r}_{t+\Delta t} \right] \mbf{K}_{\tau}(\mbf{r}_\tau) +
+\left[\del{\mbf{r}_{t+\Delta t}-\mbf{r}_t}{\Delta t}\right] \mbf{C}_{\tau}(\mbf{r}_\tau) = 
+\mbf{F}_{\tau}(\mbf{r}_\tau).\label{NonNonTrans:5}
 \end{equation}
 
 \refeq{NonNonTrans:5} is non-linear and the Newton method is used to obtain the solution. First, the \refeq{NonNonTrans:5} is 
-transformed into a residual form with the residuum vector $\mbf{R}_{\tau}$, which converges to the zero vector
+transformed into a residual form with the residuum vector $\mbf{R}_{\tau}$, which should converge to the zero vector
 \begin{equation}
 \mbf{R}_{\tau} = 
-\left[(1-\alpha)\mbf{r}_t + \alpha\mbf{r}_{t+\Delta t} \right] \mbf{K}_{\tau}(\mbf{r}) +
-\left[\del{\mbf{r}_{t+\Delta t}-\mbf{r}_t}{\Delta t}\right] \mbf{C}_{\tau}(\mbf{r}) -
-\mbf{F}_{\tau}(\mbf{r}) \to \mbf{0}.\label{NonNonTrans:6}
+\left[(1-\alpha)\mbf{r}_t + \alpha\mbf{r}_{t+\Delta t} \right] \mbf{K}_{\tau}(\mbf{r}_\tau) +
+\left[\del{\mbf{r}_{t+\Delta t}-\mbf{r}_t}{\Delta t}\right] \mbf{C}_{\tau}(\mbf{r}_\tau) -
+\mbf{F}_{\tau}(\mbf{r}_\tau) \to \mbf{0}.\label{NonNonTrans:6}
 \end{equation}
 
 A new residual vector at the next iteration, $\mbf{R}_\tau^{i+1}$, can determined from the previous residual vector, $\mbf{R}_{\tau}^i$, and its derivative simply by linearization. Since the aim is getting an increment of solution vector, $\Delta\mbf{r}_{\tau}^i$, the new residual vector $\mbf{R}_{\tau}^{i+1}$ is set to zero
@@ -5045,8 +5071,8 @@ t}\mbf{C}_{\tau}^i(\mbf{r})\label{NonNonTrans:9},\\
 which gives the resulting increment of the solution vector $\Delta \mbf{r}_{\tau}^i$
 \begin{equation}
 \begin{split}
-\Delta \mbf{r}_{\tau}^i = - \left[\mbf{\tilde K}_\tau^i\right]^{-1} \Big\{ &\left[(1-\alpha)\mbf{r}_t + \alpha\mbf{r}_{t+\Delta t} \right] \mbf{K}_{\tau}^i(\mbf{r}) +\\
-&\left[\del{\mbf{r}_{t+\Delta t}-\mbf{r}_t}{\Delta t}\right] \mbf{C}_{\tau}^i(\mbf{r}) - \mbf{F}_{\tau}(\mbf{r}) \Big\},\label{NonNonTrans:11}
+\Delta \mbf{r}_{\tau}^i = - \left[\mbf{\tilde K}_\tau^i\right]^{-1} \Big\{ &\left[(1-\alpha)\mbf{r}_t + \alpha\mbf{r}_{t+\Delta t} \right] \mbf{K}_{\tau}^i(\mbf{r}_\tau) +\\
+&\left[\del{\mbf{r}_{t+\Delta t}-\mbf{r}_t}{\Delta t}\right] \mbf{C}_{\tau}^i(\mbf{r}_\tau) - \mbf{F}_{\tau}(\mbf{r}_\tau) \Big\},\label{NonNonTrans:11}
 \end{split}
 \end{equation}
 and the new total solution vector at time $t + \Delta t$ is obtained in each iteration
@@ -5060,7 +5086,7 @@ There are two options how to initialize the solution vector at time $t + \Delta 
 \mbf{r}_{t+\Delta t}^{0} = \mbf{r}_t.\label{NonNonTrans:14}
 \end{eqnarray}
 
-Note that the matrices $\mbf{K}(\mbf{r}), \mbf{C}(\mbf{r})$ and the vector $\mbf{F}(\mbf{r})$ depend on the solution vector $\mbf{r}$. For this reason, the matrices are updated in each iteration step (Newton method) or only after several steps (modified Newton method). The residuum $\mbf{R}_\tau^{i}$ and the vector $\mbf{F}(\mbf{r})$ are updated in each iteration, using the most recent capacity and conductivity matrices.
+Note that the matrices $\mbf{K}(\mbf{r}_\tau), \mbf{C}(\mbf{r}_\tau)$ and the vector $\mbf{F}(\mbf{r}_\tau)$ depend on the solution vector $\mbf{r}_\tau$. For this reason, the matrices are updated in each iteration step (Newton method) or only after several steps (modified Newton method). The residuum $\mbf{R}_\tau^{i}$ and the vector $\mbf{F}_\tau(\mbf{r}_\tau)$ are updated in each iteration, using the most recent capacity and conductivity matrices.
 
 %\subsection{Other Elements}
 \begin{thebibliography}{99}

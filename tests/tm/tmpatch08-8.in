@@ -33,7 +33,7 @@ quad1ht 8 nodes 4 15 17 18 16 crosssect 1 mat 1 boundaryloads 2 2 2
 SimpleCS 1 thick 1.0
 IsoHeat 1 d 2400. k 1.5 c 800.0
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
-# Neumann bc
+#Neumann bc
 constantedgeload 2 loadTimeFunction 1 ndofs 1 components 1 -1.5 loadtype 2 
 InitialCondition 1 Conditions 1 u 0.0
 ConstantFunction 1 f(t) 1.0

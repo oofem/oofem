@@ -39,6 +39,7 @@
 #include "materialinterface.h"
 #include "gausspoint.h"
 #include "classfactory.h"
+#include "crosssection.h"
 
 #ifdef __SM_MODULE
  #include "../sm/structuralelement.h"
@@ -60,6 +61,8 @@ REGISTER_ExportModule(HOMExportModule)
 HOMExportModule :: HOMExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {
     this->matnum.clear();
+    this->internalSourceEnergy.clear();
+    this->capacityEnergy.clear();
 }
 
 
@@ -79,6 +82,7 @@ HOMExportModule :: initializeFrom(InputRecord *ir)
     }
 
     val = IR_GIVE_OPTIONAL_FIELD(ir, this->matnum, _IFT_HOMExportModule_matnum);
+    internalSourceEnergy.resize( emodel->giveDomain(1)->giveNumberOfCrossSectionModels() );
     return IRRT_OK;
 }
 
@@ -87,6 +91,7 @@ void
 HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
     Element *elem;
+    TransportElement *transpElem;
     if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
         return;
     }
@@ -96,6 +101,9 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     double dV, VolTot = 0.;
     double sumState = 0.;
     FloatArray vecState, vecFlow, sumFlow(3);
+    FloatArray internalSource, capacity;
+    FloatArray answerArr, answerArr1;
+    FloatMatrix answerMtrx;
     GaussPoint *gp;
     IntegrationRule *iRule;
     IntArray Mask;
@@ -126,7 +134,31 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         sumState *= ( 1. / VolTot * this->scale );
         fprintf(this->stream, "%e  % e       ", tStep->giveTargetTime(), sumState);
         sumFlow.times(1. / VolTot * this->scale);
-        fprintf( this->stream, "% e  % e  % e\n", sumFlow.at(1), sumFlow.at(2), sumFlow.at(3) );
+        fprintf( this->stream, "% e  % e  % e       ", sumFlow.at(1), sumFlow.at(2), sumFlow.at(3) );
+        //add total heat for each material - accumulated energy due to material capacity (J for heat) and internal source (J for heat)
+        internalSource.resize( d->giveNumberOfCrossSectionModels() );
+        capacity.resize( d->giveNumberOfCrossSectionModels() );
+        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+            transpElem = static_cast< TransportElement* >( d->giveElement(ielem) );
+            transpElem->computeInternalSourceRhsVectorAt(answerArr, tStep, VM_Total);
+            internalSource.at( transpElem->giveCrossSection()->giveNumber() ) += answerArr.sum();
+            
+            transpElem->giveCharacteristicMatrix(answerMtrx,CapacityMatrix,tStep);
+            transpElem->computeVectorOf(EID_ConservationEquation, VM_Incremental, tStep, answerArr);
+            answerArr1.beProductOf(answerMtrx,answerArr);
+            capacity.at( transpElem->giveCrossSection()->giveNumber() ) -= answerArr1.sum();
+        }
+        internalSource.times(tStep->giveTimeIncrement());
+        internalSourceEnergy.add(internalSource);
+        capacityEnergy.add(capacity);
+        for ( int i = 1; i <= internalSourceEnergy.giveSize(); i++ ) {
+            fprintf( this->stream, "% e ", internalSourceEnergy.at(i) );
+        }
+        fprintf( this->stream, "     " );
+        for ( int i = 1; i <= capacityEnergy.giveSize(); i++ ) {
+            fprintf( this->stream, "% e ", capacityEnergy.at(i) );
+        }
+        fprintf( this->stream, "\n" );
     } else { //structural analysis
 #ifdef __SM_MODULE
         StructuralElement *structElem;
@@ -255,7 +287,7 @@ HOMExportModule :: initialize()
     }
 
     if ( domType == _HeatTransferMode || domType == _HeatMass1Mode ) {
-        fprintf(this->stream, "#Time          AvrState           AvrFlow (xx,yy,zz)\n");
+        fprintf(this->stream, "#Time          AvrState           AvrFlow (xx,yy,zz)                               internalSourceEnergy(over_each_crosssection)   capacityEnergy(over_each_crosssection)\n");
     } else {
         fprintf(this->stream, "#Time   AvrStrain (xx, yy, zz, yz, zx, xy)                                           AvrStress (xx, yy, zz, yz, zx, xy)                                             AvrEigenstrain (xx, yy, zz, yz, zx, xy)\n");
     }

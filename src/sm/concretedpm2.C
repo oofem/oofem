@@ -661,7 +661,7 @@ ConcreteDPM2 :: giveRealStressVector_1d(FloatArray &answer,
 
     StressVector effectiveStressTension(matMode);
     StressVector effectiveStressCompression(matMode);
-    double alpha;
+    double alpha=0.;
     if ( effectiveStress.at(1) >= 0 ) { //1D tensile stress state
         alpha = 0.;
         effectiveStressTension = effectiveStress;
@@ -1168,7 +1168,7 @@ ConcreteDPM2 :: computeEquivalentStrain(double &tempEquivStrain,
 double
 ConcreteDPM2 :: computeDamageParamTension(double equivStrain, double kappaOne, double kappaTwo, double le, double omegaOld)
 {
-    double omega;
+    double omega=0.;
 
     double help;
     if ( equivStrain > e0 * ( 1. - yieldTolDamage ) ) {

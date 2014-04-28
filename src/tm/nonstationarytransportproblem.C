@@ -236,7 +236,8 @@ NonStationaryTransportProblem :: giveNextStep()
     previousStep = currentStep;
     currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT ( istep ), counter);
     //set intrinsic time to time of integration
-    intrinsicTime = previousStep->giveTargetTime() + this->alpha *this->giveDeltaT(istep);
+    intrinsicTime = currentStep->giveTargetTime();
+//     intrinsicTime = previousStep->giveTargetTime() + this->alpha *this->giveDeltaT(istep);
     currentStep->setIntrinsicTime(intrinsicTime);
     // time and dt variables are set eq to 0 for statics - has no meaning
     return currentStep;
@@ -266,7 +267,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         this->applyIC(stepWhenIcApply);
 
-        //project initial conditions to have temorary temperature in integration points
+        //project initial conditions to have temporary temperature in integration points
 
         //edge or surface load on elements
         this->assembleVectorFromElements( bcRhs, stepWhenIcApply, EID_ConservationEquation, ElementBCTransportVector,
@@ -299,14 +300,16 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
         OOFEM_LOG_INFO("Assembling conductivity and capacity matrices\n");
 #endif
 
+        //Left hand side matrix due to convection
         this->assemble( conductivityMatrix, stepWhenIcApply, EID_ConservationEquation, LHSBCMatrix,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
         conductivityMatrix->times(alpha);
+        //Add contribution of alpha*K+C/dt
         this->assemble( conductivityMatrix, stepWhenIcApply, EID_ConservationEquation, NSTP_MidpointLhs,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 
-    //obtain the last Rhs vector from DoFs directly
+    //get the previous Rhs vector
     if ( !tStep->isTheFirstStep() && this->changingProblemSize ) {
         UnknownsField->initialize( VM_RhsTotal, tStep, bcRhs, EModelDefaultEquationNumbering() );
     }
@@ -325,6 +328,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     rhs = bcRhs;
     rhs.times(1. - alpha);
     bcRhs.zero();
+    //boundary conditions evaluated at targetTime
     this->assembleVectorFromElements( bcRhs, tStep, EID_ConservationEquation, ElementBCTransportVector,
                                      VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
     this->assembleDirichletBcRhsVector( bcRhs, tStep, EID_ConservationEquation, VM_Total, NSTP_MidpointLhs,
@@ -602,7 +606,7 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
 {
     IntArray loc;
     FloatMatrix charMtrx, bcMtrx;
-    FloatArray unknownVec, contrib;
+    FloatArray unknownVec, contrib, intSource;
     Element *element;
 
     Domain *domain = this->giveDomain(1);
@@ -620,7 +624,9 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
 
 #endif
         element->giveLocationArray(loc, ut, s);
+        //(alpha-1)*K+C/dt
         this->giveElementCharacteristicMatrix(charMtrx, i, NSTP_MidpointRhs, tStep, domain);
+        //contribution from previous boundary convection
         element->giveCharacteristicMatrix(bcMtrx, LHSBCMatrix, tStep);
         bcMtrx.times(this->alpha - 1.0);
         if ( bcMtrx.isNotEmpty() ) {

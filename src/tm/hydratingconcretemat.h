@@ -121,7 +121,7 @@ public:
     double DoH1, P1;
 
 protected:
-    double GivePower(TimeStep *tStep, GaussPoint *gp);
+    double GivePower(TimeStep *tStep, GaussPoint *gp, ValueModeType mode);
     double scaleTemperature(GaussPoint *gp);
     /// Return affinity scaled to 25C.
     double affinity25(double alpha);
@@ -146,7 +146,7 @@ public:
     virtual void updateYourself(TimeStep *tStep);
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     double power;
-    double lastIntrinsicTime;
+    double lastEvalTime;
     double lastEquivalentTime, equivalentTime, degreeOfHydration, lastDegreeOfHydration;
 };
 } // end namespace oofem
