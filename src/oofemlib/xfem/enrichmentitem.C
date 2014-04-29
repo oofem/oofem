@@ -217,26 +217,26 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
         mpEnrichmentFrontStart = new EnrFrontDoNothing();
         mpEnrichmentFrontEnd = new EnrFrontDoNothing();
     } else {
-        std :: string enrFrontName;
+        std :: string enrFrontNameStart, enrFrontNameEnd;
 
         InputRecord *enrFrontStartIr = dr->giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
-        result = enrFrontStartIr->giveRecordKeywordField(enrFrontName);
+        result = enrFrontStartIr->giveRecordKeywordField(enrFrontNameStart);
 
-        mpEnrichmentFrontStart = classFactory.createEnrichmentFront( enrFrontName.c_str() );
+        mpEnrichmentFrontStart = classFactory.createEnrichmentFront( enrFrontNameStart.c_str() );
         if ( mpEnrichmentFrontStart != NULL ) {
             mpEnrichmentFrontStart->initializeFrom(enrFrontStartIr);
         } else {
-            OOFEM_ERROR( "Failed to create enrichment front (%s)", enrFrontName.c_str() );
+            OOFEM_ERROR( "Failed to create enrichment front (%s)", enrFrontNameStart.c_str() );
         }
 
         InputRecord *enrFrontEndIr = dr->giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
-        result = enrFrontEndIr->giveRecordKeywordField(enrFrontName);
+        result = enrFrontEndIr->giveRecordKeywordField(enrFrontNameEnd);
 
-        mpEnrichmentFrontEnd = classFactory.createEnrichmentFront( enrFrontName.c_str() );
+        mpEnrichmentFrontEnd = classFactory.createEnrichmentFront( enrFrontNameEnd.c_str() );
         if ( mpEnrichmentFrontEnd != NULL ) {
             mpEnrichmentFrontEnd->initializeFrom(enrFrontEndIr);
         } else {
-            OOFEM_ERROR( "Failed to create enrichment front (%s)", enrFrontName.c_str() );
+            OOFEM_ERROR( "Failed to create enrichment front (%s)", enrFrontNameEnd.c_str() );
         }
     }
 
