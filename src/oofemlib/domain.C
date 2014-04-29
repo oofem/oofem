@@ -1067,8 +1067,11 @@ Domain :: instanciateYourself(DataReader *dr)
 #  endif
 
     if ( nxfemman ) {
-        xfemManager = new XfemManager(this);
         ir = dr->giveInputRecord(DataReader :: IR_xfemManRec, 1);
+
+        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
+        xfemManager = classFactory.createXfemManager(name.c_str(), this);
+
         xfemManager->initializeFrom(ir);
         xfemManager->instanciateYourself(dr);
     }

@@ -212,7 +212,6 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
 
     mpEnrichmentDomain->initializeFrom(mir);
 
-
     // Instantiate EnrichmentFront
     if ( mEnrFrontIndex == 0 ) {
         mpEnrichmentFrontStart = new EnrFrontDoNothing();
@@ -268,7 +267,11 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
     mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
 
+    return 1;
+}
 
+void EnrichmentItem :: writeVtkDebug() const
+{
     // For debugging only
     if ( mpEnrichmentDomain->getVtkDebug() ) {
         int tStepInd = 0; //this->domain->giveEngngModel()->giveCurrentStep()->giveNumber();
@@ -281,10 +284,8 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
                 pl->printVTK(tStepInd, number);
             }
         }
+
     }
-
-
-    return 1;
 }
 
 int
@@ -1350,6 +1351,17 @@ void EnrichmentItem :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
     oRadius *= 2.0;     // TODO: Compute a better estimate based on maximum element size. /ES
 }
 
+void EnrichmentItem :: setEnrichmentFrontStart(EnrichmentFront *ipEnrichmentFrontStart)
+{
+    delete mpEnrichmentFrontStart;
+    mpEnrichmentFrontStart = ipEnrichmentFrontStart;
+}
+
+void EnrichmentItem :: setEnrichmentFrontEnd(EnrichmentFront *ipEnrichmentFrontEnd)
+{
+    delete mpEnrichmentFrontEnd;
+    mpEnrichmentFrontEnd = ipEnrichmentFrontEnd;
+}
 
 Inclusion :: Inclusion(int n, XfemManager *xm, Domain *aDomain) :
     EnrichmentItem(n, xm, aDomain),

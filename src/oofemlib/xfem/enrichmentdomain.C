@@ -254,6 +254,22 @@ bool EDCrack :: propagateTips(const std :: vector< TipPropagation > &iTipProp) {
     return true;
 }
 
+void EDCrack :: cropPolygon(const double &iArcPosStart, const double &iArcPosEnd)
+{
+    PolygonLine *pl = dynamic_cast<PolygonLine*> (bg);
+
+    if(pl == NULL) {
+        OOFEM_ERROR("Failed to cast bg to PolygonLine.")
+    }
+
+    std::vector<FloatArray> points;
+    pl->giveSubPolygon(points, iArcPosStart, iArcPosEnd);
+    pl->setVertices(points);
+
+    const double tol2 = 1.0e-18;
+    pl->removeDuplicatePoints(tol2);
+
+}
 
 void DofManList :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {

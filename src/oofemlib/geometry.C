@@ -65,6 +65,19 @@ void BasicGeometry :: setVertex(FloatArray *vertex)
     delete vertex;
 }
 
+void  BasicGeometry :: removeDuplicatePoints(const double &iTolSquare)
+{
+    if(mVertices.size() > 1) {
+        for(size_t i = mVertices.size()-1; i > 0; i--) {
+
+            if( mVertices[i].distance_square(mVertices[i-1]) < iTolSquare ) {
+                mVertices.erase( mVertices.begin()+i );
+            }
+
+        }
+    }
+}
+
 bool Line :: intersects(Element *element)
 {
     int ip = this->computeNumberOfIntersectionPoints(element);
@@ -906,6 +919,71 @@ void PolygonLine :: giveSubPolygon(std :: vector< FloatArray > &oPoints, const d
     }
 }
 
+void PolygonLine :: giveNormal(FloatArray &oNormal, const double &iArcPosition) const
+{
+    double L = computeLength();
+    double xSegStart = 0.0, xSegEnd = 0.0;
+    double xiSegStart = 0.0, xiSegEnd = 0.0;
+    size_t numSeg = mVertices.size() - 1;
+    const double xiTol = 1.0e-9;
+
+    for ( size_t i = 0; i < numSeg; i++ ) {
+        xSegEnd += mVertices [ i ].distance(mVertices [ i + 1 ]);
+
+        xiSegStart      = xSegStart / L;
+        xiSegEnd        = xSegEnd / L;
+
+        if ( iArcPosition > xiSegStart-xiTol && iArcPosition < xiSegEnd+xiTol ) {
+            // The given point is within the segment
+
+            const FloatArray &p1 = mVertices [ i ];
+            const FloatArray &p2 = mVertices [ i+1 ];
+
+            FloatArray t = {p2(0) - p1(0), p2(1) - p1(1)};
+
+            oNormal.resize(2);
+            oNormal(0) = -t(1);
+            oNormal(1) =  t(0);
+            oNormal.normalize();
+
+            return;
+        }
+
+    }
+
+    OOFEM_ERROR("Arc position not found.")
+}
+
+void PolygonLine :: giveTangent(FloatArray &oTangent, const double &iArcPosition) const
+{
+    double L = computeLength();
+    double xSegStart = 0.0, xSegEnd = 0.0;
+    double xiSegStart = 0.0, xiSegEnd = 0.0;
+    size_t numSeg = mVertices.size() - 1;
+    const double xiTol = 1.0e-9;
+
+    for ( size_t i = 0; i < numSeg; i++ ) {
+        xSegEnd += mVertices [ i ].distance(mVertices [ i + 1 ]);
+
+        xiSegStart      = xSegStart / L;
+        xiSegEnd        = xSegEnd / L;
+
+        if ( iArcPosition > xiSegStart-xiTol && iArcPosition < xiSegEnd+xiTol ) {
+            // The given point is within the segment
+
+            const FloatArray &p1 = mVertices [ i ];
+            const FloatArray &p2 = mVertices [ i+1 ];
+
+            oTangent = {p2(0) - p1(0), p2(1) - p1(1)};
+
+            return;
+        }
+
+    }
+
+    OOFEM_ERROR("Arc position not found.")
+}
+
 IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
 {
     IRResultType result; // Required by IR_GIVE_FIELD macro
@@ -1163,6 +1241,69 @@ void PolygonLine :: computeIntersectionPoints(Line *l, std :: vector< FloatArray
     }
 
 #endif
+}
+
+void PolygonLine :: computeIntersectionPoints(const PolygonLine &iPolygonLine, std :: vector< FloatArray > &oIntersectionPoints) const
+{
+    int numSeg = this->giveNrVertices() - 1;
+    for(int segIndex = 1; segIndex <= numSeg; segIndex++) {
+
+        const FloatArray &xStart = this->giveVertex(segIndex);
+        const FloatArray &xEnd = this->giveVertex(segIndex+1);
+
+        iPolygonLine.computeIntersectionPoints(xStart, xEnd, oIntersectionPoints);
+    }
+}
+
+void PolygonLine :: computeIntersectionPoints(const FloatArray &iXStart, const FloatArray &iXEnd, std :: vector< FloatArray > &oIntersectionPoints) const
+{
+    int numSeg = this->giveNrVertices() - 1;
+    for(int segIndex = 1; segIndex <= numSeg; segIndex++) {
+
+        const FloatArray &xStart = this->giveVertex(segIndex);
+        const FloatArray &xEnd = this->giveVertex(segIndex+1);
+
+        const FloatArray t1 = {xEnd(0) - xStart(0), xEnd(1) - xStart(1)};
+        const FloatArray t2 = {iXEnd(0) - iXStart(0), iXEnd(1) - iXStart(1)};
+
+        double xi1 = 0.0, xi2 = 0.0;
+        int maxIter = 1;
+        double tol = 1.0e-12;
+
+        for(int iter = 0; iter < maxIter; iter++) {
+            FloatArray temp = {iXStart(0) + xi2*t2(0) - xStart(0) - xi1*t1(0), iXStart(1) + xi2*t2(1) - xStart(1) - xi1*t1(1)};
+            FloatArray res = {-t1.dotProduct(temp), t2.dotProduct(temp)};
+
+//            printf("res: %e\n", res.computeNorm() );
+
+            FloatMatrix K(2,2);
+            K(0,0) = t1.dotProduct(t1);
+            K(0,1) = t1.dotProduct(t2);
+            K(1,0) = t1.dotProduct(t2);
+            K(1,1) = t2.dotProduct(t2);
+
+            FloatMatrix KInv;
+            KInv.beInverseOf(K);
+
+            FloatArray dxi;
+            dxi.beProductOf(KInv, res);
+
+            xi1 -= dxi(0);
+            xi2 -= dxi(1);
+        }
+
+//        printf("xi1: %e xi2: %e\n", xi1, xi2);
+
+
+        if(xi1 >= 0.0 && xi1 <= 1.0 && xi2 >= 0.0 && xi2 <= 1.0) {
+            FloatArray pos = xStart;
+            pos.add(xi1, t1);
+//            printf("Intersection found at "); pos.printYourself();
+            oIntersectionPoints.push_back(pos);
+        }
+
+    }
+
 }
 
 int

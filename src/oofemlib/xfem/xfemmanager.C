@@ -53,6 +53,8 @@
 #include "XFEMDebugTools.h"
 
 namespace oofem {
+REGISTER_XfemManager(XfemManager)
+
 XfemManager :: XfemManager(Domain *domain)
 {
     this->domain = domain;

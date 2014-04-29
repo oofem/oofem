@@ -131,6 +131,8 @@ public:
     const IntArray *giveEnrichesDofsWithIdArray() const { return & mpEnrichesDofsWithIdArray; }
     int giveNumberOfEnrDofs() const;
 
+    void writeVtkDebug() const;
+
     // Spatial query
     bool isElementEnriched(const Element *element) const;
     inline bool isDofManEnriched(const DofManager &iDMan) const;
@@ -222,14 +224,17 @@ public:
 
     virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod);
 
-    const EnrichmentDomain *giveEnrichmentDomain() const { return mpEnrichmentDomain; }
+    EnrichmentDomain *giveEnrichmentDomain() const { return mpEnrichmentDomain; }
 
     const std :: unordered_map< int, NodeEnrichmentType > &giveEnrNodeMap() const { return mNodeEnrMarkerMap; }
 
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
 
     EnrichmentFront *giveEnrichmentFrontStart() {return mpEnrichmentFrontStart;}
+    void setEnrichmentFrontStart(EnrichmentFront *ipEnrichmentFrontStart);
+
     EnrichmentFront *giveEnrichmentFrontEnd() {return mpEnrichmentFrontEnd;}
+    void setEnrichmentFrontEnd(EnrichmentFront *ipEnrichmentFrontEnd);
 
 protected:
 

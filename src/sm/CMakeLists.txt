@@ -174,6 +174,7 @@ set (sm_xfem
 	xfem/enrichmentitems/crack.C
 	xfem/enrichmentitems/delamination.C
 	xfem/propagationlaws/plhoopstresscirc.C
+	xfem/xfemstructuremanager.C
 	)
 
 set (sm_unsorted

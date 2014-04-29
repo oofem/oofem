@@ -80,6 +80,8 @@ public:
 
     virtual double giveSupportRadius() const { return 0.0; }
 
+    void setTangent(const FloatArray &iTangent) {mTangent = iTangent;}
+
 protected:
     FloatArray mTangent;
 

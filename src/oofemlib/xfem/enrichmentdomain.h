@@ -175,6 +175,12 @@ public:
     virtual bool giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const;
     virtual bool giveTipInfos(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const;
     virtual bool propagateTips(const std :: vector< TipPropagation > &iTipProp);
+
+    /**
+     * Keep only a part of the underlying geometry,
+     * characterized by iArcPosStart and iArcPosEnd.
+     */
+    void cropPolygon(const double &iArcPosStart, const double &iArcPosEnd);
 };
 
 
