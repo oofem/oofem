@@ -541,7 +541,7 @@ void
 StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver.
 {
-    double mass;
+    double mass = 0.;
 
     IntArray nodeDofIDMask, dimFlag(3);
     IntArray nodalArray;

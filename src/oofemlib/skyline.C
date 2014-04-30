@@ -852,7 +852,7 @@ void Skyline :: ldl_feti_sky(FloatArray &x, FloatArray &y,
     /*  pro vektor z se nealokuje nove pole                */
     /*  slozky vektoru y se prepisuji na slozky vektoru z  */
     /*******************************************************/
-    k = 0;
+    //k = 0;
     for ( i = 1; i <= neq; i++ ) {
         lj = adr.at(i);
         uj = adr.at(i + 1) - 1;

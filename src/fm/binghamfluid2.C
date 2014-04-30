@@ -205,11 +205,10 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
     BinghamFluidMaterial2Status *status = static_cast< BinghamFluidMaterial2Status * >( this->giveStatus(gp) );
     MaterialMode mmode = gp->giveMaterialMode();
     const FloatArray &epsd = status->giveTempDeviatoricStrainVector(); //status->giveTempDeviatoricStrainVector();
-    double tau = status->giveTempDevStressMagnitude();
-    double temp_tau = tau; //status->giveTempDevStressMagnitude();
+    ///@note This variable was actually never used:
+    //double tau = status->giveTempDevStressMagnitude();
     double gamma = status->giveTempDevStrainMagnitude(); //status->giveTempDevStrainMagnitude();
     // determine actual viscosity
-    double _nu = this->computeActualViscosity(temp_tau, gamma);
     double gamma2 = gamma * gamma;
 
     if ( mmode == _2dFlow ) {
@@ -220,7 +219,7 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
         double dmudg, mu;
 
         if ( 0 ) {
-            _nu = computeActualViscosity(tau_0, gamma);
+            double _nu = computeActualViscosity(tau_0, gamma);
 
             answer.at(1, 1) = answer.at(2, 2) = 2.0 * _nu;
             answer.at(3, 3) = _nu;
@@ -231,7 +230,7 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
         }
 
         if ( ( mode == ElasticStiffness ) || ( mode == SecantStiffness ) ) {
-            _nu = computeActualViscosity(tau_0, gamma);
+            double _nu = computeActualViscosity(tau_0, gamma);
             answer.at(1, 1) = answer.at(2, 2) = 2.0 * _nu;
             answer.at(3, 3) = _nu;
             return;
@@ -281,7 +280,7 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
         double dmudg, mu;
 
         if ( 0 ) {
-            _nu = computeActualViscosity(tau_0, gamma);
+            double _nu = computeActualViscosity(tau_0, gamma);
 
             answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = 2.0 * _nu;
             answer.at(4, 4) = _nu;
@@ -292,7 +291,7 @@ BinghamFluidMaterial2 :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatR
         }
 
         if ( ( mode == ElasticStiffness ) || ( mode == SecantStiffness ) ) {
-            _nu = computeActualViscosity(tau_0, gamma);
+            double _nu = computeActualViscosity(tau_0, gamma);
             answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = 2.0 * _nu;
             answer.at(4, 4) = _nu;
             return;
