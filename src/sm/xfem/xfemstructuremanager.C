@@ -133,6 +133,9 @@ void XfemStructureManager :: splitCracks()
 
                         arcPositions_i.insert(arcPositions_i.begin(), 0.0);
                         arcPositions_i.push_back(1.0);
+                        arcPositions_j.insert(arcPositions_j.begin(), 0.0);
+                        arcPositions_j.push_back(1.0);
+
                         for(int k = 1; k < int(arcPositions_i.size()); k++) {
 
                             // Only include segments of finite length

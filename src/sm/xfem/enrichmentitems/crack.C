@@ -110,6 +110,12 @@ void Crack :: computeIntersectionPoints(Crack &iCrack, std::vector<FloatArray> &
         for(FloatArray pos:oIntersectionPoints) {
             double tangDist, arcPos;
             polygonLine1->computeTangentialSignDist(tangDist, pos, arcPos);
+
+            if(arcPos < 0.0 || arcPos > 1.0) {
+                printf("arcPos: %e\n", arcPos);
+                OOFEM_ERROR("arcPos is outside the allowed range [0,1].")
+            }
+
             oArcPositions.push_back(arcPos);
         }
 
@@ -130,6 +136,12 @@ void Crack :: computeArcPoints(const std::vector<FloatArray> &iIntersectionPoint
         for(FloatArray pos:iIntersectionPoints) {
             double tangDist, arcPos;
             polygonLine1->computeTangentialSignDist(tangDist, pos, arcPos);
+
+            if(arcPos < 0.0 || arcPos > 1.0) {
+                printf("arcPos: %e\n", arcPos);
+                OOFEM_ERROR("arcPos is outside the allowed range [0,1].")
+            }
+
             oArcPositions.push_back(arcPos);
         }
     }
