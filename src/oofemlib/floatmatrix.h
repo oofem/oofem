@@ -95,7 +95,7 @@ protected:
     /// Number of columns.
     int nColumns;
     /// Values of matrix stored column wise.
-    std::vector<double> values;
+    std :: vector< double >values;
 
 public:
     /**
@@ -103,7 +103,7 @@ public:
      * @param n Number of rows.
      * @param m Requested number of columns.
      */
-    FloatMatrix(int n, int m) : nRows(n), nColumns(m), values(n*m) {}
+    FloatMatrix(int n, int m) : nRows(n), nColumns(m), values(n * m) {}
     /// Creates zero sized matrix.
     FloatMatrix() : nRows(0), nColumns(0), values() {}
     /**
@@ -118,23 +118,23 @@ public:
     /// Copy constructor.
     FloatMatrix(const FloatMatrix &mat) : nRows(mat.nRows), nColumns(mat.nColumns), values(mat.values) {}
     /// Copy constructor.
-    FloatMatrix(FloatMatrix &&mat) : nRows(mat.nRows), nColumns(mat.nColumns), values(std::move(mat.values)) {}
+    FloatMatrix(FloatMatrix && mat) : nRows(mat.nRows), nColumns(mat.nColumns), values( std :: move(mat.values) ) {}
     /// Initializer list constructor.
     FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat);
     /// Assignment operator.
-    FloatMatrix &operator = ( std :: initializer_list< std :: initializer_list< double > >mat );
+    FloatMatrix &operator=(std :: initializer_list< std :: initializer_list< double > >mat);
     /// Assignment operator, adjusts size of the receiver if necessary.
-    FloatMatrix &operator = ( const FloatMatrix &mat) { 
+    FloatMatrix &operator=(const FloatMatrix &mat) {
         nRows = mat.nRows;
         nColumns = mat.nColumns;
         values = mat.values;
-        return *this;
+        return * this;
     }
-    FloatMatrix &operator = ( FloatMatrix &&mat) { 
-        nRows = std::move(mat.nRows);
-        nColumns = std::move(mat.nColumns);
-        values = std::move(mat.values);
-        return *this;
+    FloatMatrix &operator=(FloatMatrix && mat) {
+        nRows = std :: move(mat.nRows);
+        nColumns = std :: move(mat.nColumns);
+        values = std :: move(mat.values);
+        return * this;
     }
     /// Destructor.
     ~FloatMatrix() {};
@@ -185,9 +185,9 @@ public:
      * @param j Column position of coefficient.
      */
 #ifdef DEBUG
-    double &operator() (int i, int j);
+    double &operator()(int i, int j);
 #else
-    inline double &operator() (int i, int j) { return values [ j * nRows + i ]; }
+    inline double &operator()(int i, int j) { return values [ j * nRows + i ]; }
 #endif
     /**
      * Coefficient access function. Implements 0-based indexing.
@@ -195,9 +195,9 @@ public:
      * @param j Column position of coefficient.
      */
 #ifdef DEBUG
-    double operator() (int i, int j) const;
+    double operator()(int i, int j) const;
 #else
-    inline double operator() (int i, int j) const { return values [ j * nRows + i ]; }
+    inline double operator()(int i, int j) const { return values [ j * nRows + i ]; }
 #endif
     /**
      * Assembles the contribution using localization array into receiver. The receiver must
@@ -253,9 +253,14 @@ public:
      */
     //bool computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix &v, int neigs = 0) const;
     /**
-     * Returns determinant of the receiver. Receiver should be square matrix.
+     * Returns the determinant of the receiver. The receiver should be a square matrix.
      * Current implementation works for (3,3) and smaller matrices.
      * @return Determinant of receiver.
+     */
+    double giveTrace() const;
+    /**
+     * Returns the trace (sum of diagonal components) of the receiver. The receiver should be a square matrix.
+     * @return Trace of receiver.
      */
     double giveDeterminant() const;
 
@@ -494,8 +499,10 @@ public:
      */
     void hardResize(int r, int c);
     /// Sets size of receiver to be an empty matrix. It will have zero rows and zero columns size.
-    void clear() { this->nRows = 0;
-                   this->nColumns = 0; }
+    void clear() {
+        this->nRows = 0;
+        this->nColumns = 0;
+    }
     /**
      * Computes eigenvalues and eigenvectors of receiver (must be symmetric)
      * The receiver is preserved.
@@ -515,7 +522,7 @@ public:
      * Exposes the internal values of the matrix. Should typically not be used outside of matrix classes.
      * @return Pointer to the values of the matrix.
      */
-    double *givePointer() const { return const_cast< double* >(values.data()); }
+    double *givePointer() const { return const_cast< double * >( values.data() ); }
 
     /**
      * Reciever will be a 3x3 matrix formed from a vector with either 9 or 6 components.
@@ -537,7 +544,7 @@ public:
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
     contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
 
-    friend std :: ostream &operator << ( std :: ostream & out, const FloatMatrix & r );
+    friend std :: ostream &operator<<(std :: ostream &out, const FloatMatrix &r);
 
 #ifdef __PARALLEL_MODE
     int packToCommBuffer(CommunicationBuffer &buff) const;
@@ -548,7 +555,7 @@ public:
 #ifdef BOOST_PYTHON
     void __setitem__(boost :: python :: api :: object t, double val);
     double __getitem__(boost :: python :: api :: object t);
-    void beCopyOf(const FloatMatrix &src) { this->operator = ( src ); }
+    void beCopyOf(const FloatMatrix &src) { this->operator=(src); }
 #endif
 };
 } // end namespace oofem

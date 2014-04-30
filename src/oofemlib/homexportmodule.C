@@ -91,7 +91,6 @@ void
 HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
     Element *elem;
-    TransportElement *transpElem;
     if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
         return;
     }
@@ -99,7 +98,6 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     Domain *d  = emodel->giveDomain(1);
     int nelem = d->giveNumberOfElements();
     double dV, VolTot = 0.;
-    double sumState = 0.;
     FloatArray vecState, vecFlow, sumFlow(3);
     FloatArray internalSource, capacity;
     FloatArray answerArr, answerArr1;
@@ -113,6 +111,9 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     domainType domType = d->giveDomainType();
 
     if ( domType == _HeatTransferMode || domType == _HeatMass1Mode ) {
+#ifdef __TM_MODULE
+        double sumState = 0.;
+        TransportElement *transpElem;
         for ( int ielem = 1; ielem <= nelem; ielem++ ) {
             elem = d->giveElement(ielem);
             if ( this->matnum.giveSize() == 0 || this->matnum.contains( elem->giveMaterial()->giveNumber() ) ) {
@@ -139,26 +140,27 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         internalSource.resize( d->giveNumberOfCrossSectionModels() );
         capacity.resize( d->giveNumberOfCrossSectionModels() );
         for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-            transpElem = static_cast< TransportElement* >( d->giveElement(ielem) );
+            transpElem = static_cast< TransportElement * >( d->giveElement(ielem) );
             transpElem->computeInternalSourceRhsVectorAt(answerArr, tStep, VM_Total);
             internalSource.at( transpElem->giveCrossSection()->giveNumber() ) += answerArr.sum();
-            
-            transpElem->giveCharacteristicMatrix(answerMtrx,CapacityMatrix,tStep);
+
+            transpElem->giveCharacteristicMatrix(answerMtrx, CapacityMatrix, tStep);
             transpElem->computeVectorOf(EID_ConservationEquation, VM_Incremental, tStep, answerArr);
-            answerArr1.beProductOf(answerMtrx,answerArr);
+            answerArr1.beProductOf(answerMtrx, answerArr);
             capacity.at( transpElem->giveCrossSection()->giveNumber() ) -= answerArr1.sum();
         }
-        internalSource.times(tStep->giveTimeIncrement());
+        internalSource.times( tStep->giveTimeIncrement() );
         internalSourceEnergy.add(internalSource);
         capacityEnergy.add(capacity);
         for ( int i = 1; i <= internalSourceEnergy.giveSize(); i++ ) {
             fprintf( this->stream, "% e ", internalSourceEnergy.at(i) );
         }
-        fprintf( this->stream, "     " );
+        fprintf(this->stream, "     ");
         for ( int i = 1; i <= capacityEnergy.giveSize(); i++ ) {
             fprintf( this->stream, "% e ", capacityEnergy.at(i) );
         }
-        fprintf( this->stream, "\n" );
+        fprintf(this->stream, "\n");
+#endif
     } else { //structural analysis
 #ifdef __SM_MODULE
         StructuralElement *structElem;
@@ -183,10 +185,10 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                     structElem = static_cast< StructuralElement * >(elem);
                     // structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
                     structElem->computeResultingIPEigenstrainAt(VecEigStrainReduced, tStep, gp, VM_Total);
-		    if( VecEigStrainReduced.giveSize() == 0 ){
+                    if ( VecEigStrainReduced.giveSize() == 0 ) {
                         VecEigStrain.resize(0);
                     } else {
-                        ((StructuralMaterial*)structElem->giveMaterial())->giveFullSymVectorForm(VecEigStrain, VecEigStrainReduced,  gp->giveMaterialMode());
+                        ( ( StructuralMaterial * ) structElem->giveMaterial() )->giveFullSymVectorForm( VecEigStrain, VecEigStrainReduced,  gp->giveMaterialMode() );
                     }
                     dV  = elem->computeVolumeAround(gp);
                     elem->giveIPValue(VecStrain, gp, IST_StrainTensor, tStep);
@@ -283,7 +285,7 @@ HOMExportModule :: initialize()
 
     std :: string fileName = emodel->giveOutputBaseFileName() + ".hom";
     if ( ( this->stream = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR("failed to open file %s", fileName.c_str());
+        OOFEM_ERROR( "failed to open file %s", fileName.c_str() );
     }
 
     if ( domType == _HeatTransferMode || domType == _HeatMass1Mode ) {

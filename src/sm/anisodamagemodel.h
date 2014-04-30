@@ -42,7 +42,7 @@
 
 #include "material.h"
 #include "structuralmaterial.h"
-#include "linearelasticmaterial.h"
+#include "isolinearelasticmaterial.h"
 #include "structuralmaterial.h"
 #include "structuralms.h"
 #include "idm1.h"
@@ -51,10 +51,11 @@
 //@{
 // @todo add input parametres which are read from input file here
 #define _IFT_AnisotropicDamageMaterial_Name "adm"
-#define _IFT_AnisotropicDamageMaterial_A "a"
-#define _IFT_AnisotropicDamageMaterial_kappa0 "kappa0"
 #define _IFT_AnisotropicDamageMaterial_equivStrainType "equivstraintype"
-//#define _IFT_AnisotropicDamageMaterial_a "a"
+#define _IFT_AnisotropicDamageMaterial_damageLawType "damlaw"
+#define _IFT_AnisotropicDamageMaterial_kappa0 "kappa0"
+#define _IFT_AnisotropicDamageMaterial_kappaf "kappaf"
+#define _IFT_AnisotropicDamageMaterial_aA "aa"
 //@}
 
 namespace oofem {
@@ -122,7 +123,7 @@ public:
     /// Returns the last equilibrated scalar measure of the out-of-plane strain to given value (for 2dPlaneStress mode).
     double giveStrainZ() { return strainZ; }
     /// Returns the temp scalar measure of the out-of-plane strain to given value (for 2dPlaneStress mode).
-    double giveTempStrainZ() { return tempStrainZ; }
+    double giveTempStrainZ() {  return tempStrainZ;     }
     /// Sets the temp scalar measure of the out-of-plane strain to given value (for 2dPlaneStress mode).
     void setTempStrainZ(double newStrainZ) { tempStrainZ = newStrainZ; }
     /// Returns the value of the flag.
@@ -175,24 +176,35 @@ public:
  * Class representing anisotropic damage model.
  * Based on the paper : "Nonlocal anisotropic damage model and related
  * computational aspects for quasi-brittle materials" by R. Desmorat, F. Gatuingt, and F. Ragueneau
+ * Plane stress case implemented by the algorithm described in a report by M. Jirasek & F. Suarez, 25 April 2014
  * @author : Martin Horak : nitramkaroh@seznam.cz
  * @author : Fernando Suarez : fernando.suarez@fsv.cvut.cz
+ * @author : Milan Jirasek : milan.jirasek@fsv.cvut.cz
  */
 class AnisotropicDamageMaterial : public StructuralMaterial
 {
 protected:
 
     /// Reference to bulk (undamaged) material
-    LinearElasticMaterial *linearElasticMaterial;
-    /// Damage parameters A and a, needed to obtain Kappa(trD), according to eq. 33 in the paper mentioned above.
-    double a;
-    double A;
+    IsotropicLinearElasticMaterial *linearElasticMaterial;
+    /// Young's modulus
+    double E;
+    /// Poisson's ratio
+    double nu;
     /// Damage threshold kappa0, as defined in the paper mentioned above.
     double kappa0;
+    /// Damage parameter kappa_f (in the paper denoted as "a")
+    double kappaf;
+    /// Damage parameter a*A, needed to obtain Kappa(trD), according to eq. 33 in the paper mentioned above.
+    double aA;
     /// Type characterizing the algorithm used to compute equivalent strain measure.
     enum EquivStrainType { EST_Unknown, EST_Mazars, EST_Rankine_Smooth, EST_Rankine_Standard, EST_ElasticEnergy, EST_ElasticEnergyPositiveStress, EST_ElasticEnergyPositiveStrain, EST_Mises, EST_Griffith };
     /// Parameter specifying the definition of equivalent strain.
     EquivStrainType equivStrainType;
+    /// Type characterizing the damage law.
+    enum DamLawType { DLT_Unknown, DLT_Desmorat1, DLT_Desmorat2, DLT_Linear, DLT_Exponential };
+    /// Parameter specifying the damage law.
+    DamLawType damageLawType;
 
 public:
     /// Constructor
@@ -209,8 +221,17 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_AnisotropicDamageMaterial_Name; }
 
     /// Returns reference to undamaged (bulk) material
-    LinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
+    IsotropicLinearElasticMaterial *giveLinearElasticMaterial() { return linearElasticMaterial; }
 
+    /// Plane-stress version of the stress evaluation algorithm
+    virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    void computePrincValDir2D(double &D1, double &D2, double &c, double &s, double Dx, double Dy, double Dxy);
+    bool checkPrincVal2D(double Dx, double Dy, double Dxy);
+    void computeDamage(FloatMatrix &tempDamage, const FloatMatrix &damage, double kappa, double eps1, double eps2, double ceps, double seps, double epsZ);
+    double computeTraceD(double equivStrain);
+    double computeOutOfPlaneStrain(const FloatArray &inplaneStrain, const FloatMatrix &dam, bool tens_flag);
+    double computeDimensionlessOutOfPlaneStress(const FloatArray &inplaneStrain, double epsZ, const FloatMatrix &dam);
+    void computeInplaneStress(FloatArray &inplaneStress, const FloatArray &inplaneStrain, double epsZ, const FloatMatrix &dam);
 
 
     // Obtains the proportion of the damage tensor that is needed to get the first eigenvalue equal to the damage threshold
@@ -242,12 +263,9 @@ public:
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
     virtual void giveRealStressVector_StressControl(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, const IntArray &strainControl, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
-    virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
-    { this->giveRealStressVector(answer, gp, reducedE, tStep); }
     virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep)
     { this->giveRealStressVector(answer, gp, reducedE, tStep); }
 
-    //virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *aGaussPoint, InternalStateType type, TimeStep *atTime);
 
     //    virtual InternalStateValueType giveIPValueType(InternalStateType type);
@@ -264,6 +282,9 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
+    virtual void computeDamageTensor(FloatMatrix &answer, GaussPoint *gp,
+                                     const FloatArray &totalStrain, double equivStrain,
+                                     TimeStep *atTime);
 
     MaterialStatus *CreateStatus(GaussPoint *gp) const { return new AnisotropicDamageMaterialStatus(1, domain, gp); }
 
@@ -281,13 +302,15 @@ protected:
     virtual void give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mmode,
                                        GaussPoint *gp,
                                        TimeStep *tStep);
-    virtual void computePlaneStressStrain(FloatMatrix &answer, FloatMatrix damageTensor, FloatArray totalStrain,        GaussPoint *gp,
+    virtual void computePlaneStressStrain(FloatMatrix &answer, FloatMatrix damageTensor, FloatArray totalStrain, GaussPoint *gp,
                                           TimeStep *atTime);
+    virtual void computePlaneStressSigmaZ(double &answer, FloatMatrix damageTensor, FloatArray reducedTotalStrainVector,
+                                          double epsZ, GaussPoint *gp, TimeStep *atTime);
 
-    virtual void computeDamageTensor(FloatMatrix &answer, GaussPoint *gp,
-                                     const FloatArray &totalStrain, double equivStrain,
-                                     TimeStep *atTime);
-
+    /*    virtual void computeDamageTensor(FloatMatrix &answer, GaussPoint *gp,
+     *                                   const FloatArray &totalStrain, double equivStrain,
+     *                                   TimeStep *atTime);
+     */
 
     virtual void computeSecantOperator(FloatMatrix &answer, FloatMatrix strainTensor,
                                        FloatMatrix damageTensor, GaussPoint *gp);
@@ -295,8 +318,6 @@ protected:
     double computeK(GaussPoint *gp);
 
     double computeKappa(FloatMatrix damageTensor);
-
-    double computeTraceTempD(double equivStrain);
 };
 } // end namespace oofem
 #endif // anisodamagemodel_h
