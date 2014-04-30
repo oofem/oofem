@@ -78,6 +78,14 @@ SimpleCrossSection :: giveRealStress_1d(FloatArray &answer, GaussPoint *gp, cons
 
 
 void
+SimpleCrossSection :: giveRealStress_Warping(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+    mat->giveRealStressVector_Warping(answer, gp, strain, tStep);
+}
+
+
+void
 SimpleCrossSection :: giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );

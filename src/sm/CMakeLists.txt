@@ -51,6 +51,7 @@ set (sm_element
     dkt.C qdkt.C
     quad1platesubsoil.C tria1platesubsoil.C
     interfaceelem2dlin.C
+    trwarp.C
     )
 
 set (sm_crosssection
@@ -77,6 +78,7 @@ set (sm_emodel
     diidynamic.C
     nldeidynamic.C
     incrementallinearstatic.C
+    freewarping.C
     )
 
 set (sm_loads

@@ -76,6 +76,7 @@ namespace oofem {
     ENUM_ITEM(_3dFlow) \
 \
     ENUM_ITEM(_2dLattice) \
+    ENUM_ITEM(_Warping) \
     /**
      * Type representing material mode of integration point.
      */

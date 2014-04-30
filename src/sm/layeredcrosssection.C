@@ -137,6 +137,13 @@ LayeredCrossSection :: giveRealStress_1d(FloatArray &answer, GaussPoint *gp, con
 
 
 void
+LayeredCrossSection :: giveRealStress_Warping(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("Not supported");
+}
+
+
+void
 LayeredCrossSection :: giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     if ( gp->giveIntegrationRule()->giveIntegrationDomain() == _Cube || gp->giveIntegrationRule()->giveIntegrationDomain() == _Wedge ) {
