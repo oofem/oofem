@@ -42,6 +42,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "load.h"
 
 
 namespace oofem {
@@ -116,6 +117,68 @@ Tr_Warp :: computeVolumeAround(GaussPoint *gp)
     volume = determinant * weight;
 
     return volume;
+}
+
+void
+Tr_Warp :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
+{
+    /*
+     * provides dof mapping of local edge dofs (only nonzero are taken into account)
+     * to global element dofs
+     */
+
+    answer.resize(2);
+    if ( iEdge == 1 ) { // edge between nodes 1,2
+        answer.at(1) = 1;
+        answer.at(2) = 2;
+    } else if ( iEdge == 2 ) { // edge between nodes 2 3
+        answer.at(1) = 2;
+        answer.at(2) = 3;
+    } else if ( iEdge == 3 ) { // edge between nodes 3 1
+        answer.at(1) = 3;
+        answer.at(2) = 1;
+    } else {
+        OOFEM_ERROR("wrong edge number");
+    }
+}
+
+
+void
+Tr_Warp :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
+                                             int iEdge, TimeStep *tStep, ValueModeType mode)
+{
+    // computes the edge load vector of the receiver corresponding to the inhomogeneous Neumann condition
+    // the given load is a dummy variable because the boundary condition for the warping equation 
+    // is determined by the geometry and thus the load intensity is not needed
+    // (what is needed is just the indication that the given element edge is a part of the domain boundary)
+
+    IntArray mask;
+    this->giveEdgeDofMapping(mask, iEdge);
+
+    // coordinates of the initial and final node of the edge
+    FloatArray* coord1 = giveNode(mask.at(1)) -> giveCoordinates();
+    FloatArray* coord2 = giveNode(mask.at(2)) -> giveCoordinates();
+    // components of the edge vector (from the initial to the final node)
+    double dx = coord2 -> at(1) - coord1 -> at(1); 
+    double dy = coord2 -> at(2) - coord1 -> at(2); 
+    // coordinates of the edge center
+    double x = ( coord2 -> at(1) + coord1 -> at(1) ) / 2.; 
+    double y = ( coord2 -> at(2) + coord1 -> at(2) ) / 2.; 
+    
+    // scalar product of the edge vector and the position vector of the edge center
+    double f = dx * x + dy * y;
+
+    // the load value has the meaning of relative twist
+    FloatArray theta, dummy;
+    load -> computeValueAt(theta, tStep, dummy, VM_Total);
+
+    // equivalent nodal "loads" 
+    FloatArray reducedAnswer;
+    reducedAnswer.resize(2);
+    reducedAnswer.at(1) = reducedAnswer.at(2) = theta.at(1) * f / 2.;
+    answer.resize( this->computeNumberOfDofs() );
+    answer.zero();
+    answer.assemble(reducedAnswer, mask);
 }
 
 

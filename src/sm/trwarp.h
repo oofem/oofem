@@ -58,6 +58,8 @@ public:
     virtual ~Tr_Warp();
 
     virtual double computeVolumeAround(GaussPoint *gp);
+    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode);
 
     // definition
     virtual const char *giveInputRecordName() const { return _IFT_Tr_Warp_Name; }
