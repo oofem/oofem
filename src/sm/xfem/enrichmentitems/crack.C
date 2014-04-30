@@ -116,4 +116,24 @@ void Crack :: computeIntersectionPoints(Crack &iCrack, std::vector<FloatArray> &
     }
 }
 
+void Crack :: computeArcPoints(const std::vector<FloatArray> &iIntersectionPoints, std::vector<double> &oArcPositions)
+{
+    // Enrichment domain of the current crack
+    const EnrichmentDomain_BG *ed1 = dynamic_cast<const EnrichmentDomain_BG*>( giveEnrichmentDomain() );
+    PolygonLine *polygonLine1 = NULL;
+    if(ed1 != NULL) {
+        polygonLine1 = dynamic_cast<PolygonLine*>( ed1->bg );
+    }
+
+    if( polygonLine1 != NULL ) {
+
+        for(FloatArray pos:iIntersectionPoints) {
+            double tangDist, arcPos;
+            polygonLine1->computeTangentialSignDist(tangDist, pos, arcPos);
+            oArcPositions.push_back(arcPos);
+        }
+    }
+
+}
+
 } // end namespace oofem

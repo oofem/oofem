@@ -104,8 +104,6 @@ int EnrFrontLinearBranchFuncRadius :: giveNumEnrichments(const DofManager &iDMan
 
 void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const
 {
-    oEnrFunc.clear();
-
     FloatArray xTip = { mTipInfo.mGlobalCoord.at(1), mTipInfo.mGlobalCoord.at(2) };
 
     FloatArray pos = { iPos.at(1), iPos.at(2) };
@@ -122,8 +120,6 @@ void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncAt(std :: vector< double >
 
 void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const
 {
-    oEnrFuncDeriv.clear();
-
     const FloatArray &xTip = mTipInfo.mGlobalCoord;
 
     // Crack tip tangent and normal
@@ -155,8 +151,6 @@ void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncDerivAt(std :: vector< Flo
 
 void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const
 {
-	oEnrFuncJumps.clear();
-
 	const FloatArray &xTip = mTipInfo.mGlobalCoord;
 	const FloatArray &gpCoord = *(iGP.giveCoordinates());
 	double radius = gpCoord.distance(xTip);

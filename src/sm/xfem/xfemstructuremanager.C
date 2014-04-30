@@ -97,8 +97,7 @@ void XfemStructureManager :: splitCracks()
     std::vector<size_t> eiToRemove;
 
     // Loop over cracks
-    int numEI = giveNumberOfEnrichmentItems();
-    for(int i = 1; i <= numEI; i++) {
+    for(int i = 1; i <= giveNumberOfEnrichmentItems(); i++) {
 
         Crack *crack_i = dynamic_cast<Crack*>( this->giveEnrichmentItem(i) );
         if( crack_i != NULL ) {
@@ -107,6 +106,7 @@ void XfemStructureManager :: splitCracks()
             for(int j = 1; j < i; j++) {
                 // TODO: To improve performance, we may wish to use
                 //       a tree structure here.
+                bool splittedCrack = false;
 
                 Crack *crack_j = dynamic_cast<Crack*>( this->giveEnrichmentItem(j) );
                 if( crack_j != NULL ) {
@@ -114,18 +114,29 @@ void XfemStructureManager :: splitCracks()
                     // If so, find the arc length positions of the intersections on crack i ...
 
                     std::vector<FloatArray> intersectionPoints;
-                    std::vector<double> arcPositions;
-                    crack_i->computeIntersectionPoints(*crack_j, intersectionPoints, arcPositions);
+                    std::vector<double> arcPositions_i, arcPositions_j;
+                    crack_i->computeIntersectionPoints(*crack_j, intersectionPoints, arcPositions_i);
+                    crack_j->computeArcPoints(intersectionPoints, arcPositions_j);
 
-                    if(arcPositions.size() > 0) {
+                    const double arcLengthTol = 1.0e-9;
 
-                        arcPositions.insert(arcPositions.begin(), 0.0);
-                        arcPositions.push_back(1.0);
-                        for(int k = 1; k < int(arcPositions.size()); k++) {
+                    for(int k = 0; k < int(arcPositions_i.size()); k++) {
+
+                        if( arcPositions_i[k] < arcLengthTol || arcPositions_i[k] > (1.0-arcLengthTol) || arcPositions_j[k] < arcLengthTol || arcPositions_j[k] > (1.0-arcLengthTol) ) {
+                            arcPositions_i.erase( arcPositions_i.begin()+k );
+                            arcPositions_j.erase( arcPositions_j.begin()+k );
+                            k--;
+                        }
+                    }
+
+                    if(arcPositions_i.size() > 0 ) {
+
+                        arcPositions_i.insert(arcPositions_i.begin(), 0.0);
+                        arcPositions_i.push_back(1.0);
+                        for(int k = 1; k < int(arcPositions_i.size()); k++) {
 
                             // Only include segments of finite length
-                            const double arcLengthTol = 1.0e-9;
-                            if( fabs(arcPositions[k] - arcPositions[k-1]) > arcLengthTol ) {
+                            if( fabs(arcPositions_i[k] - arcPositions_i[k-1]) > arcLengthTol ) {
 
                                 //printf("arcPositions.size(): %lu\n", arcPositions.size() );
 
@@ -145,21 +156,9 @@ void XfemStructureManager :: splitCracks()
                                 EDCrack *ed = dynamic_cast<EDCrack*>( newEI_1->giveEnrichmentDomain() );
                                 if(ed != NULL) {
                                     //printf("arcPositions[k-1]: %e arcPositions[k]: %e\n", arcPositions[k-1], arcPositions[k] );
-                                    ed->cropPolygon(arcPositions[k-1], arcPositions[k]);
+                                    ed->cropPolygon(arcPositions_i[k-1], arcPositions_i[k]);
 
-    #if 0
-                                    // For debugging only
-                                    if ( ed->getVtkDebug() ) {
-                                        int tStepInd = 0; //this->domain->giveEngngModel()->giveCurrentStep()->giveNumber();
 
-                                        PolygonLine *pl = dynamic_cast< PolygonLine * >( ed->bg );
-                                        if ( pl != NULL ) {
-                                            pl->printVTK(tStepInd, n1);
-                                        }
-                                    }
-    #endif
-
-    #if 1
                                     // Take enrichment front tangent direction
                                     // as the normal direction of crack_j
                                     EnrichmentDomain_BG *ed_crack_j = dynamic_cast<EnrichmentDomain_BG*>( crack_j->giveEnrichmentDomain() );
@@ -187,10 +186,10 @@ void XfemStructureManager :: splitCracks()
                                     if( k-1 > 0 ) {
 
                                         FloatArray frontTangent1;
-                                        polygonLine_j->giveNormal(frontTangent1, arcPositions[k-1]);
+                                        polygonLine_j->giveNormal(frontTangent1, arcPositions_j[k-1]);
 
                                         FloatArray crackTangent1;
-                                        polygonLine_i->giveTangent(crackTangent1, arcPositions[k-1]);
+                                        polygonLine_i->giveTangent(crackTangent1, arcPositions_i[k-1]);
                                         crackTangent1.times(-1.0);
 
                                         EnrFrontIntersection *ef = new EnrFrontIntersection();
@@ -199,18 +198,17 @@ void XfemStructureManager :: splitCracks()
                                             frontTangent1.times(-1.0);
                                         }
                                         ef->setTangent(frontTangent1);
-//                                        printf("frontTangent1: "); frontTangent1.printYourself();
 
                                         newEI_1->setEnrichmentFrontStart(ef);
                                     }
 
-                                    if( k < int(arcPositions.size())-1) {
+                                    if( k < int(arcPositions_i.size())-1) {
 
                                         FloatArray frontTangent1;
-                                        polygonLine_j->giveNormal(frontTangent1, arcPositions[k]);
+                                        polygonLine_j->giveNormal(frontTangent1, arcPositions_j[k]);
 
                                         FloatArray crackTangent1;
-                                        polygonLine_i->giveTangent(crackTangent1, arcPositions[k]);
+                                        polygonLine_i->giveTangent(crackTangent1, arcPositions_i[k]);
 
                                         EnrFrontIntersection *ef = new EnrFrontIntersection();
 
@@ -218,13 +216,9 @@ void XfemStructureManager :: splitCracks()
                                             frontTangent1.times(-1.0);
                                         }
                                         ef->setTangent(frontTangent1);
-//                                        printf("frontTangent1: "); frontTangent1.printYourself();
 
                                         newEI_1->setEnrichmentFrontEnd(ef);
                                     }
-
-
-    #endif
 
 
 
@@ -232,33 +226,31 @@ void XfemStructureManager :: splitCracks()
                                 //this->enrichmentItemList[i-1] = std :: move(ei);
 
                                 this->enrichmentItemList.push_back(NULL);
+                                newEI_1->updateGeometry();
                                 this->enrichmentItemList[ enrichmentItemList.size()-1 ] = std :: move(newEI_1);
 
-                                // Mark crack i for removal
-                                eiToRemove.push_back(i-1);
 
-        //                        delete newEI_1;
+                                splittedCrack = true;
                             }
                         }
                     }
                 }
 
+                if(splittedCrack) {
+                    enrichmentItemList.erase( enrichmentItemList.begin() + i-1 );
+                    numberOfEnrichmentItems = giveNumberOfEnrichmentItems();
+                    i--;
+                    break;
+                }
             }
 
         }
     }
 
-    // Create a new enrichment item list with the new cracks and without
-    // the splitted cracks.
-
-    for(int i = eiToRemove.size()-1; i > 0; i--) {
-//        printf("Removeing ei %d\n", eiToRemove[i] );
-        enrichmentItemList.erase( enrichmentItemList.begin() + eiToRemove[i] );
-    }
-
     numberOfEnrichmentItems = giveNumberOfEnrichmentItems();
 
     for( size_t i = 0; i < enrichmentItemList.size(); i++ ) {
+        enrichmentItemList[i]->setNumber(i+1);
         enrichmentItemList[i]->writeVtkDebug();
         enrichmentItemList[i]->updateGeometry();
     }

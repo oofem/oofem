@@ -1257,6 +1257,8 @@ void PolygonLine :: computeIntersectionPoints(const PolygonLine &iPolygonLine, s
 
 void PolygonLine :: computeIntersectionPoints(const FloatArray &iXStart, const FloatArray &iXEnd, std :: vector< FloatArray > &oIntersectionPoints) const
 {
+    const double detTol = 1.0e-15;
+
     int numSeg = this->giveNrVertices() - 1;
     for(int segIndex = 1; segIndex <= numSeg; segIndex++) {
 
@@ -1274,13 +1276,19 @@ void PolygonLine :: computeIntersectionPoints(const FloatArray &iXStart, const F
             FloatArray temp = {iXStart(0) + xi2*t2(0) - xStart(0) - xi1*t1(0), iXStart(1) + xi2*t2(1) - xStart(1) - xi1*t1(1)};
             FloatArray res = {-t1.dotProduct(temp), t2.dotProduct(temp)};
 
-//            printf("res: %e\n", res.computeNorm() );
+            //printf("iter: %d res: %e\n", iter, res.computeNorm() );
 
             FloatMatrix K(2,2);
             K(0,0) = t1.dotProduct(t1);
-            K(0,1) = t1.dotProduct(t2);
-            K(1,0) = t1.dotProduct(t2);
+            K(0,1) = -t1.dotProduct(t2);
+            K(1,0) = -t1.dotProduct(t2);
             K(1,1) = t2.dotProduct(t2);
+
+            double detK = K.giveDeterminant();
+
+            if(detK < detTol) {
+                return;
+            }
 
             FloatMatrix KInv;
             KInv.beInverseOf(K);
@@ -1298,7 +1306,6 @@ void PolygonLine :: computeIntersectionPoints(const FloatArray &iXStart, const F
         if(xi1 >= 0.0 && xi1 <= 1.0 && xi2 >= 0.0 && xi2 <= 1.0) {
             FloatArray pos = xStart;
             pos.add(xi1, t1);
-//            printf("Intersection found at "); pos.printYourself();
             oIntersectionPoints.push_back(pos);
         }
 

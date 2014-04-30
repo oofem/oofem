@@ -65,8 +65,6 @@ int EnrFrontIntersection :: giveNumEnrichments(const DofManager &iDMan) const
 
 void EnrFrontIntersection :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const
 {
-    oEnrFunc.clear();
-
     FloatArray xTip = { mTipInfo.mGlobalCoord.at(1), mTipInfo.mGlobalCoord.at(2) };
 
     FloatArray pos = { iPos.at(1), iPos.at(2) };
@@ -95,16 +93,12 @@ void EnrFrontIntersection :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc
 
 void EnrFrontIntersection :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const
 {
-    oEnrFuncDeriv.clear();
-
     FloatArray enrFuncDeriv = {0.0, 0.0};
     oEnrFuncDeriv.push_back(enrFuncDeriv);
 }
 
 void EnrFrontIntersection :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const
 {
-    oEnrFuncJumps.clear();
-
     const FloatArray &xTip = mTipInfo.mGlobalCoord;
     const FloatArray &gpCoord = *(iGP.giveCoordinates());
 
@@ -134,7 +128,6 @@ IRResultType EnrFrontIntersection :: initializeFrom(InputRecord *ir)
 {
     IRResultType result; // Required by IR_GIVE_FIELD macro
     IR_GIVE_FIELD(ir, mTangent, _IFT_EnrFrontIntersection_Tangent);
-    printf("mTangent: "); mTangent.printYourself();
 
     return IRRT_OK;
 }
