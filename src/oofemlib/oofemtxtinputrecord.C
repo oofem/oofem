@@ -151,7 +151,7 @@ OOFEMTXTInputRecord :: giveField(double &answer, InputFieldType id)
 {
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
-        if ( scanDouble(tokenizer.giveToken(indx + 1), answer) == 0 ) {
+        if ( scanDouble(tokenizer.giveToken(indx + 1), answer) == NULL ) {
             return IRRT_BAD_FORMAT;
         }
 
@@ -237,7 +237,6 @@ OOFEMTXTInputRecord :: giveField(IntArray &answer, InputFieldType id)
     }
 }
 
-
 IRResultType
 OOFEMTXTInputRecord :: giveField(FloatArray &answer, InputFieldType id)
 {
@@ -246,7 +245,7 @@ OOFEMTXTInputRecord :: giveField(FloatArray &answer, InputFieldType id)
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         setReadFlag(indx);
-        if ( scanInteger(tokenizer.giveToken(++indx), size) == 0 ) {
+        if ( scanInteger(tokenizer.giveToken(++indx), size) == NULL ) {
             return IRRT_BAD_FORMAT;
         }
 
@@ -254,7 +253,7 @@ OOFEMTXTInputRecord :: giveField(FloatArray &answer, InputFieldType id)
         setReadFlag(indx);
 
         for ( int i = 1; i <= size; i++ ) {
-            if ( scanDouble(tokenizer.giveToken(indx + i), value) == 0 ) {
+            if ( scanDouble(tokenizer.giveToken(indx + i), value) == NULL ) {
                 return IRRT_BAD_FORMAT;
             }
 
@@ -267,7 +266,6 @@ OOFEMTXTInputRecord :: giveField(FloatArray &answer, InputFieldType id)
         return IRRT_NOTFOUND;
     }
 }
-
 
 IRResultType
 OOFEMTXTInputRecord :: giveField(FloatMatrix &answer, InputFieldType id)
@@ -299,7 +297,6 @@ OOFEMTXTInputRecord :: giveField(FloatMatrix &answer, InputFieldType id)
     }
 }
 
-
 IRResultType
 OOFEMTXTInputRecord :: giveField(std :: vector< std :: string > &answer, InputFieldType id)
 {
@@ -323,7 +320,6 @@ OOFEMTXTInputRecord :: giveField(std :: vector< std :: string > &answer, InputFi
     }
 }
 
-
 IRResultType
 OOFEMTXTInputRecord :: giveField(Dictionary &answer, InputFieldType id)
 {
@@ -333,7 +329,7 @@ OOFEMTXTInputRecord :: giveField(Dictionary &answer, InputFieldType id)
     int indx = this->giveKeywordIndx(id);
     if ( indx ) {
         setReadFlag(indx);
-        if ( scanInteger(tokenizer.giveToken(++indx), size) == 0 ) {
+        if ( scanInteger(tokenizer.giveToken(++indx), size) == NULL ) {
             return IRRT_BAD_FORMAT;
         }
 
@@ -343,7 +339,7 @@ OOFEMTXTInputRecord :: giveField(Dictionary &answer, InputFieldType id)
         for ( int i = 1; i <= size; i++ ) {
             key = ( tokenizer.giveToken(++indx) ) [ 0 ];
             setReadFlag(indx);
-            if ( scanDouble(tokenizer.giveToken(++indx), value) == 0 ) {
+            if ( scanDouble(tokenizer.giveToken(++indx), value) == NULL ) {
                 return IRRT_BAD_FORMAT;
             }
 
@@ -426,7 +422,7 @@ OOFEMTXTInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
             answer.setSimpleExpression(_v); // get rid of enclosing '$'
         } else {
             double val;
-            if ( scanDouble(tokenizer.giveToken(indx), val) == 0 ) {
+            if ( scanDouble(tokenizer.giveToken(indx), val) == NULL ) {
                 return IRRT_BAD_FORMAT;
             }
 
@@ -439,8 +435,6 @@ OOFEMTXTInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
         return IRRT_NOTFOUND;
     }
 }
-
-
 
 bool
 OOFEMTXTInputRecord :: hasField(InputFieldType id)
@@ -461,46 +455,39 @@ OOFEMTXTInputRecord :: printYourself()
 }
 
 
-int
+const char *
 OOFEMTXTInputRecord :: scanInteger(const char *source, int &value)
-{
-    //
-    // reads integer value from source, returns nonzero if o.k.
-    //
-    if ( source == NULL ) {
-        value = 0;
-        return 0;
-    }
-
-    int i = sscanf(source, "%d", & value);
-    if ( ( i == EOF ) || ( i == 0 ) ) {
-        value = 0;
-        return 0;
-    }
-
-    return 1;
-}
-
-
-int
-OOFEMTXTInputRecord :: scanDouble(const char *source, double &value)
 {
     //
     // reads integer value from source, returns pointer to char after this number
     //
+    char *endptr;
 
     if ( source == NULL ) {
-        value = 0.0;
-        return 0;
+        value = 0;
+        return NULL;
     }
 
-    int i = sscanf(source, "%lf", & value);
-    if ( ( i == EOF ) || ( i == 0 ) ) {
-        value = 0.0;
-        return 0;
+    value = strtol(source, & endptr, 10);
+    return endptr;
+}
+
+
+const char *
+OOFEMTXTInputRecord :: scanDouble(const char *source, double &value)
+{
+    //
+    // reads double value from source, returns pointer to char after this number
+    //
+    char *endptr;
+
+    if ( source == NULL ) {
+        value = 0;
+        return NULL;
     }
 
-    return 1;
+    value = strtod(source, & endptr);
+    return endptr;
 }
 
 int
@@ -554,139 +541,6 @@ OOFEMTXTInputRecord :: finish(bool wrn)
     if ( wf ) {
         OOFEM_WARNING( buff.str().c_str() );
     }
-}
-
-char *
-OOFEMTXTInputRecord :: __readSimpleString(const char *source, char *simpleString, int maxchar, const char **remain)
-// reads Simple string from source according to following rules:
-// at beginning skips whitespace (blank, tab)
-// read string terminated by whitespace or end-of-line
-// remain is unread remain of source string.
-// maximum of maxchar (including terminating '\0') is copied into simpleString.
-{
-    const char *curr = source;
-    char *ss = simpleString;
-    int count = 0;
-
-    if ( source == NULL ) {
-        * remain = NULL;
-        return NULL;
-    }
-
-    while ( isspace(* curr) || ! * curr ) {
-        curr++;
-    }
-
-    if ( !curr ) {
-        OOFEM_ERROR("unexpected end-of-line");
-    }
-
-    while ( ( !( isspace(* curr) || ! * curr ) ) && ( ++count < maxchar ) ) {
-        * ss++ = * curr++;
-    }
-
-    * ss = '\0';
-    * remain = curr;
-    return simpleString;
-}
-
-const char *
-OOFEMTXTInputRecord :: __readKeyAndVal(const char *source, char *key, int *val, int maxchar, const char **remain)
-{
-    key = __readSimpleString(source, key, maxchar, remain);
-    * remain = __scanInteger(* remain, val);
-    return * remain;
-}
-
-const char *
-OOFEMTXTInputRecord :: __readKeyAndVal(const char *source, char *key, double *val, int maxchar, const char **remain)
-{
-    key = __readSimpleString(source, key, maxchar, remain);
-    * remain = __scanDouble(* remain, val);
-    return * remain;
-}
-
-const char *
-OOFEMTXTInputRecord :: __getPosAfter(const char *source, const char *id)
-{
-    const char *str1;
-    const char *helpSource = source;
-    int len = strlen(id);
-    int whitespaceBefore, whitespaceAfter;
-
-    do {
-        if ( ( str1 = strstr(helpSource, id) ) == NULL ) {
-            return NULL;
-        }
-
-        helpSource = str1 + 1;
-        whitespaceAfter = isspace( * ( helpSource + len - 1 ) );
-        if ( str1 == source ) {
-            whitespaceBefore = 1;
-        } else {
-            whitespaceBefore = isspace( * ( str1 - 1 ) );
-        }
-    } while ( !( whitespaceBefore && whitespaceAfter ) );
-
-    return str1 + len;
-}
-
-const char *
-OOFEMTXTInputRecord :: __skipNextWord(const char *src)
-//
-// skips next word in src ; returns pointer after it
-//
-{
-    while ( isspace(* src) || ! * src ) {
-        src++;
-    }
-
-    // skips whitespaces if any
-    while ( !( isspace(* src) || ! * src ) ) {
-        src++;
-    }
-
-    // skips one word
-    return src;
-}
-
-const char *
-OOFEMTXTInputRecord :: __scanInteger(const char *source, int *value)
-{
-    //
-    // reads integer value from source, returns pointer to char after this number
-    //
-    char *endptr;
-
-    if ( source == NULL ) {
-        * value = 0;
-        return NULL;
-    }
-
-    * value = ( int ) strtol(source, & endptr, 10);
-    //  i = sscanf (source,"%d",value);
-    // if (i == EOF ){ *value =0 ; return NULL ;}
-    return endptr;
-}
-
-const char *
-OOFEMTXTInputRecord :: __scanDouble(const char *source, double *value)
-{
-    //
-    // reads integer value from source, returns pointer to char after this number
-    //
-    char *endptr;
-
-    if ( source == NULL ) {
-        * value = 0;
-        return NULL;
-    }
-
-    * value = strtod(source, & endptr);
-    //i = sscanf (source,"%lf",value);
-    //if (i == EOF ){ *value =0 ; return NULL ;}
-    //return __skipNextWord(source);
-    return endptr;
 }
 
 int
@@ -759,7 +613,7 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
         // read row by row separated by semicolon
         for ( int i = 1; i <= r; i++ ) {
             for ( int j = 1; j <= c; j++ ) {
-                endptr = __scanDouble( endptr, & ans.at(i, j) );
+                endptr = scanDouble( endptr, ans.at(i, j) );
             }
 
             if ( i < r ) {
@@ -785,8 +639,6 @@ OOFEMTXTInputRecord :: readMatrix(const char *helpSource, int r, int c, FloatMat
 
         // test for enclosing bracket
         if ( * endptr == '}' ) {
-            ( endptr )++;
-            helpSource = endptr;
             return 1;
         } else {
             OOFEM_WARNING("end '}' missing while parsing matrix value");
