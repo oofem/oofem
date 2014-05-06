@@ -275,7 +275,7 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
     oTangent.clear();
 
     for ( GaussPoint *gp: *ir ) {
-        FloatArray &lcoords = * gp->giveCoordinates();
+        FloatArray &lcoords = * gp->giveLocalCoordinates();
         FEIElementGeometryWrapper cellgeo(e);
 
         // Evaluate the normal;

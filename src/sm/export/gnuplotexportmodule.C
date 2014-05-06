@@ -53,6 +53,7 @@
 #include "xfem/XFEMDebugTools.h"
 #include "prescribedgradient.h"
 #include "prescribedgradientbcneumann.h"
+#include "prescribedgradientbcweak.h"
 #include "gausspoint.h"
 #include "timestep.h"
 #include "xfem/enrichmentitems/crack.h"
@@ -110,6 +111,11 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 			if(presGradBCNeumann != NULL) {
 				outputBoundaryCondition(*presGradBCNeumann, tStep);
 			}
+
+            PrescribedGradientBCWeak *presGradBCWeak = dynamic_cast<PrescribedGradientBCWeak*>( domain->giveBc(i) );
+            if(presGradBCWeak != NULL) {
+                outputBoundaryCondition(*presGradBCWeak, tStep);
+            }
 
 		}
 	}
@@ -178,6 +184,8 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
     	std::vector<FloatArray> emptyArray;
     	mReactionForceHistory.push_back( emptyArray );
     }
+
+    maxIndPresDof = domain->giveNumberOfSpatialDimensions();
 
     while ( mDispHist.size() < size_t(numBC) ) {
     	std::vector<double> emptyArray;
@@ -361,6 +369,36 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCNeumann &i
 
 	XFEMDebugTools::WriteArrayToGnuplot(nameMeanStress, componentArray, stressArray);
 	
+}
+
+void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC, TimeStep *tStep)
+{
+    FloatArray stress;
+    iBC.computeField(stress, EID_MomentumBalance, tStep);
+
+    printf("Mean stress computed in Gnuplot export module: "); stress.printYourself();
+
+    double time = 0.0;
+
+    TimeStep *ts = emodel->giveCurrentStep();
+    if ( ts != NULL ) {
+        time = ts->giveTargetTime();
+    }
+
+    int bcIndex = iBC.giveNumber();
+
+    std :: stringstream strMeanStress;
+    strMeanStress << "PrescribedGradientGnuplotMeanStress" << bcIndex << "Time" << time << ".dat";
+    std :: string nameMeanStress = strMeanStress.str();
+    std::vector<double> componentArray, stressArray;
+
+    for(int i = 1; i <= stress.giveSize(); i++) {
+        componentArray.push_back(i);
+        stressArray.push_back(stress.at(i));
+    }
+
+    XFEMDebugTools::WriteArrayToGnuplot(nameMeanStress, componentArray, stressArray);
+
 }
 
 

@@ -89,6 +89,8 @@ void Crack :: callGnuplotExportModule(GnuplotExportModule &iExpMod)
 
 void Crack :: computeIntersectionPoints(Crack &iCrack, std::vector<FloatArray> &oIntersectionPoints, std::vector<double> &oArcPositions)
 {
+    const double tol = 1.0e-12;
+
     // Enrichment domain of the current crack
     const EnrichmentDomain_BG *ed1 = dynamic_cast<const EnrichmentDomain_BG*>( giveEnrichmentDomain() );
     PolygonLine *polygonLine1 = NULL;
@@ -111,7 +113,7 @@ void Crack :: computeIntersectionPoints(Crack &iCrack, std::vector<FloatArray> &
             double tangDist, arcPos;
             polygonLine1->computeTangentialSignDist(tangDist, pos, arcPos);
 
-            if(arcPos < 0.0 || arcPos > 1.0) {
+            if(arcPos < -tol || arcPos > (1.0+tol)) {
                 printf("arcPos: %e\n", arcPos);
                 OOFEM_ERROR("arcPos is outside the allowed range [0,1].")
             }
@@ -124,6 +126,8 @@ void Crack :: computeIntersectionPoints(Crack &iCrack, std::vector<FloatArray> &
 
 void Crack :: computeArcPoints(const std::vector<FloatArray> &iIntersectionPoints, std::vector<double> &oArcPositions)
 {
+    const double tol = 1.0e-12;
+
     // Enrichment domain of the current crack
     const EnrichmentDomain_BG *ed1 = dynamic_cast<const EnrichmentDomain_BG*>( giveEnrichmentDomain() );
     PolygonLine *polygonLine1 = NULL;
@@ -137,7 +141,7 @@ void Crack :: computeArcPoints(const std::vector<FloatArray> &iIntersectionPoint
             double tangDist, arcPos;
             polygonLine1->computeTangentialSignDist(tangDist, pos, arcPos);
 
-            if(arcPos < 0.0 || arcPos > 1.0) {
+            if(arcPos < -tol || arcPos > (1.0+tol)) {
                 printf("arcPos: %e\n", arcPos);
                 OOFEM_ERROR("arcPos is outside the allowed range [0,1].")
             }

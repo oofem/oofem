@@ -776,8 +776,8 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
     FloatArray point = {iPoint.at(1), iPoint.at(2)};
 
 
-    const FloatArray &crackPS( this->giveVertex(1) );
-    const FloatArray &crackPE( this->giveVertex ( numSeg + 1 ) );
+    const FloatArray &crackPS = {this->giveVertex(1)[0], this->giveVertex(1)[1]};
+    const FloatArray &crackPE = {this->giveVertex ( numSeg + 1 )[0], this->giveVertex ( numSeg + 1 )[1]};
 
     double minDist = min( point.distance(crackPS), point.distance(crackPE) );
     double xiEl = 0.0;
@@ -788,9 +788,9 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
     double arcDistPassed = 0.0, minArcDist = 0.0;
     for ( int segId = 1; segId <= numSeg; segId++ ) {
         // Crack segment
-        const FloatArray &crackP1( this->giveVertex ( segId ) );
+        const FloatArray &crackP1 = {this->giveVertex ( segId )[0], this->giveVertex ( segId )[1]};
 
-        const FloatArray &crackP2( this->giveVertex ( segId + 1 ) );
+        const FloatArray &crackP2 = {this->giveVertex ( segId + 1 )[0], this->giveVertex ( segId + 1 )[1]};
 
         double distSeg = point.distance(crackP1, crackP2, xiEl);
 
@@ -820,8 +820,8 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
         return;
     } else {
         if ( minDistSegIndex == 1 ) {
-            const FloatArray &P1( this->giveVertex(1) );
-            const FloatArray &P2( this->giveVertex(2) );
+            const FloatArray &P1 = {this->giveVertex(1)[0], this->giveVertex(1)[1]};
+            const FloatArray &P2 = {this->giveVertex(2)[0], this->giveVertex(2)[1]};
 
             FloatArray t;
             t.beDifferenceOf(P1, P2);
@@ -836,8 +836,8 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
             oDist = sign * minDist;
             return;
         } else if ( minDistSegIndex == numSeg ) {
-            const FloatArray &P1( this->giveVertex ( minDistSegIndex ) );
-            const FloatArray &P2( this->giveVertex ( minDistSegIndex + 1 ) );
+            const FloatArray &P1 = {this->giveVertex ( minDistSegIndex )[0], this->giveVertex ( minDistSegIndex )[1]};
+            const FloatArray &P2 = {this->giveVertex ( minDistSegIndex + 1 )[0], this->giveVertex ( minDistSegIndex + 1 )[1]};
 
             FloatArray t;
             t.beDifferenceOf(P2, P1);

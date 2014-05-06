@@ -46,6 +46,8 @@
 namespace oofem {
 
 class TractionElement;
+class Line;
+class IntegrationRule;
 
 /*
  * Imposes a prescribed gradient weakly on the boundary
@@ -88,8 +90,25 @@ public:
     virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
+    virtual void giveLocationArrays(int iTracElInd, std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
+                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
+
+    virtual void giveTractionLocationArrays(int iTracElInd, IntArray &rows, EquationID eid, CharType type,
+                                    const UnknownNumberingScheme &s);
+
+    virtual void giveDisplacementLocationArrays(int iTracElInd, IntArray &rows, EquationID eid, CharType type,
+                                    const UnknownNumberingScheme &s);
+
     virtual const char *giveClassName() const { return "PrescribedGradientBCWeak"; }
     virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradientBCWeak_Name; }
+
+    /**
+     * Computes the homogenized, macroscopic, field (stress).
+     * @param sigma Output quantity (typically stress).
+     * @param eid Equation ID to which sigma belongs.
+     * @param tStep Active time step.
+     */
+    void computeField(FloatArray &sigma, EquationID eid, TimeStep *tStep);
 
 protected:
 
@@ -154,21 +173,50 @@ protected:
     std :: unordered_map< int, std :: vector< int > > mMapTractionElDispElGammaMinus;
 
     /**
-     * Map from a nodes global number to its local index
-     * in the traction element.
+     * Map from a nodes global number to its local (zero based) index
+     * in the traction element. One map for each traction element!
+     * First index: Traction el index.
+     * Second index: Global node number.
      */
-    std :: unordered_map< int, int > mNodeTractionElLocalInd;
+    std :: unordered_map< int, std :: unordered_map< int, int > > mNodeTractionElLocalInd;
+
+    /**
+     * Map from a traction element to displacement node and
+     * crack intersection coordinates inside the element.
+     * This map is used when creating the integration rule.
+     */
+    std :: unordered_map<int, std::vector<FloatArray> > mTractionElInteriorCoordinates;
 
 
+    std :: unordered_map<int, std::vector<int> > mTracElDispNodes;
 
     void createTractionMesh();
+
+    void integrateTangent(FloatMatrix &oTangent, size_t iTracElInd);
+
+    IntegrationRule *createNewIntegrationRule(int iTracElInd);
+
+    void computeNTraction(FloatArray &oN, const double &iXi, const TractionElement &iEl) const;
+
+    void giveTractionUnknows(FloatArray &oTracUnknowns, ValueModeType mode, TimeStep *tStep, int iTracElInd);
+    void giveDisplacementUnknows(FloatArray &oDispUnknowns, ValueModeType mode, TimeStep *tStep, int iTracElInd);
+
+    double domainSize();
+
 };
 
 class TractionElement {
 public:
     TractionElement() {}
     virtual ~TractionElement() {}
+
+    void computeN_Constant(FloatArray &oN, const double &iXi) const {oN = {1.0};}
+    void computeN_Linear(FloatArray &oN, const double &iXi) const {oN = {0.5*(1.0-iXi), 0.5*(1.0+iXi)};}
+
     std::vector<int> mTractionNodeInd;
+
+    // Interior segments used for Gaussian quadrature
+    std::vector<Line> mInteriorSegments;
 
     FloatArray mStartCoord;
     FloatArray mEndCoord;
