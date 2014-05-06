@@ -1,7 +1,7 @@
 ex-bspline-09.out
 Two high order bspline patches together, skewed, constant strain
 LinearStatic nsteps 1 nmodules 1
-errorcheck filename "ex-bspline-09.in"
+errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 12 nelem 2 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1

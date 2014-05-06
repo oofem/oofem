@@ -1,7 +1,7 @@
 tmpatch01.out
 Patch test of Quad1_ht elements 
 StationaryProblem nsteps 1 nmodules 1
-errorcheck filename "tmpatch01.in"
+errorcheck
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 2 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1

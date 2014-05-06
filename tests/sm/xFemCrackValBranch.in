@@ -1,7 +1,7 @@
 xFemCrackValBranch.out
 XFEM simulation: A crack with branch functions. Written by Erik Svenning, Chalmers University of Technology.
 XFEMStatic nsteps 3 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 20 minIter 2 stiffmode 0 nmodules 1
-errorcheck filename "xFemCrackValBranch.in"
+errorcheck
 #LinearStatic nsteps 1 lstype 3 smtype 7 nmodules 0
 #LinearStatic nsteps 1 nmodules 1
 #vtkxml tstep_all domain_all vars 1 94 primvars 1 1 cellvars 3 1 92 93

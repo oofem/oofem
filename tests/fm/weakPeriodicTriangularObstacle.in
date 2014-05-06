@@ -1,7 +1,7 @@
 weakPeriodicTriangularObstacle.out
 Test for SolutionbasedFormFunction
 stokesflow nsteps 1 lstype 0  smtype 1  rtolv 0.01  linesearch 0  maxiter 1000 nmodules 1
-errorcheck filename "weakPeriodicTriangularObstacle.in"
+errorcheck
 #vtkxml tstep_all domain_all primvars 2 4 5
 domain 2dIncompFlow
 OutputManager tstep_all dofman_all element_all

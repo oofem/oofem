@@ -1,7 +1,7 @@
 dkt_bending01.out
 "Patch test of DKT elements -> pure bending of a square clamped plate"
 LinearStatic nsteps 2 nmodules 1
-errorcheck filename "dkt_bending01.in"
+errorcheck
 domain 2dMindlinPlate
 OutputManager tstep_all dofman_all element_all
 ndofman 4 nelem 2 ncrosssect  1 nmat 1 nbc 3 nic 0 nltf 3

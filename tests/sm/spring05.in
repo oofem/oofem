@@ -1,7 +1,7 @@
 spring05.out
 Patch test of torsional spring element in xz plane
 LinearStatic nsteps 1 nmodules 1
-errorcheck filename "spring05.in"
+errorcheck
 domain 2dbeam
 OutputManager tstep_all dofman_all element_all
 ndofman 3 nelem 2 ncrosssect  1 nmat 2 nbc 3 nic 0 nltf  1

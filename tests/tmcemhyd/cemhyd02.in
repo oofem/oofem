@@ -4,7 +4,7 @@ Test of CEMHYD3D hydration model, Q_pot = 534 J/g_cem, 300 kg cem/m3_con, i.e. m
 #8 independent CEMHYD3D models are used, for each integration point one instance.
 #NonStationaryProblem nsteps 21 deltat 3600.0 alpha 0.5 nmodules 1
 NlTransientTransportProblem nsteps 10 deltat 3600.0 rtol 1.e-5 alpha 0.5 nsmax 30 changingProblemSize nmodules 1
-errorcheck filename "cemhyd02.in"
+errorcheck
 #vtkxml tstep_all domain_all vars 11 37 39 44 56 67 68 69 70 71 72 73 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all

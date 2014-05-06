@@ -3,7 +3,7 @@ con2dpm2.out
 Con2DPM Tension in plane strain
 NonLinearStatic nmsteps 1 nsteps 1 nmodules 1
 nsteps 1 rtolv 1.e-4 reqIterations 4000 stiffMode 2 maxiter 4000 controllmode 0 stepLength 2.e-5 minsteplength 2.e-5 Psi 0. hpcmode 2 hpc 2 2 1 hpcw 1 1. donotfixload
-errorcheck filename "con2dpm2.in"
+errorcheck
 #
 domain 3d
 #

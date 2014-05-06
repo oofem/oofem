@@ -109,6 +109,8 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
 
     outputStream          = NULL;
 
+    referenceFileName     = "";
+
     domainList            = new AList< Domain >(0);
     metaStepList          = new AList< MetaStep >(0);
 
@@ -319,6 +321,11 @@ EngngModel :: Instanciate_init(const char *dataOutputFileName, int ndomains)
 int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const char *dataOutputFileName, const char *desc)
 // simple input - only number of steps variable is read
 {
+    OOFEMTXTDataReader *txtReader = dynamic_cast<OOFEMTXTDataReader*> (dr);
+    if(txtReader != NULL) {
+        referenceFileName = std :: string(txtReader->giveDataSourceName());
+    }
+
     bool inputReaderFinish = true;
 
     this->Instanciate_init(dataOutputFileName, this->ndomains);

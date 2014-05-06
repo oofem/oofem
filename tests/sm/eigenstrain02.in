@@ -1,7 +1,7 @@
 eigenstrain02.out
 Eigenstrain test of PlaneStress2d elements -> imposed shear with horizontal strain
 LinearStatic nsteps 1 nmodules 1
-errorcheck filename "eigenstrain02.in"
+errorcheck
 #LinearStatic nsteps 1 nmodules 2
 #vtk tstep_all domain_all primvars 1 1 vars 2 1 4 stype 1
 #hom tstep_all

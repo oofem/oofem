@@ -1,7 +1,7 @@
 axisymm06.out
 Test of linear axisymmetric triangular elements, a thin ring loaded only in radial direction (y direction)
 LinearStatic nsteps 1 nmodules 1
-errorcheck filename "axisymm06.in"
+errorcheck
 #vtkxml tstep_step 1 cellvars 1 46 vars 3 1 2 4 primvars 1 1 stype 2
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all

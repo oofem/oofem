@@ -1,7 +1,7 @@
 macroLspace01.out
 test of one MacroLSpace element with embedded problem from file micromaterial01.in
 NonLinearStatic nsteps 3 controlmode 1 rtolv 0.01 MaxIter 300 stiffmode 1 deltaT 1.0 nmodules 1
-errorcheck filename "macroLspace01.in"
+errorcheck
 #vtk tstep_all domain_all primvars 1 1
 domain 3d
 OutputManager tstep_all dofman_all element_all

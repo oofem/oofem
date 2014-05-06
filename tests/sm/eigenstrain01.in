@@ -1,7 +1,7 @@
 eigenstrain01.out
 Test of Truss1d elements with prescribed eigenstrain load
 LinearStatic nsteps 1 nmodules 1
-errorcheck filename "eigenstrain01.in"
+errorcheck
 domain 1dtruss
 OutputManager tstep_all dofman_all element_all
 ndofman 3 nelem 2 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1

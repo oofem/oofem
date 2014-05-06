@@ -1,7 +1,7 @@
 ex3d-nurbs-01.out
 tri-linear IGA brick, constant deformation
 LinearStatic nsteps 1 nmodules 1
-errorcheck filename "ex3d-nurbs-01.in"
+errorcheck
 domain 3d
 OutputManager tstep_all dofman_all element_all
 ndofman 8 nelem 1 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1

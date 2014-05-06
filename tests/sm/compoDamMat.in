@@ -1,7 +1,7 @@
 compoDamMat.out
 test of orthotropic damage material on one LSpace element stretched in the y direction
 NonLinearStatic nsteps 47 controlmode 1 rtolv 0.00001 MaxIter 30 stiffmode 0 deltaT 1.0 nmodules 1
-errorcheck filename "compoDamMat.in"
+errorcheck
 #vtk tstep_all domain_all primvars 1 1 vars 3 1 4 13
 #hom tstep_all scale 1.
 domain 3d

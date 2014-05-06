@@ -1,7 +1,7 @@
 patch110.out
 Patch test of QPlaneStress2d elements -> pure compression 
 LinearStatic nsteps 1 nmodules 1
-errorcheck filename "patch110.in"
+errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 20 nelem 5 ncrosssect  1 nmat 1 nbc 3 nic 0 nltf 1

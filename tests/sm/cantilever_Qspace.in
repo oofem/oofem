@@ -1,7 +1,7 @@
 cantilever_Qspace.out
 Cantilever 'beam' test from 3 Qspace elements
 NonLinearStatic nsteps 3 controlmode 1 rtolv 0.0001 MaxIter 100 MinIter 3 stiffmode 0 deltaT 1.0 lstype 0 nmodules 1
-errorcheck filename "cantilever_Qspace.in"
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 1 vars 2 1 4 stype 2
 domain 3d
 OutputManager tstep_all dofman_all element_all

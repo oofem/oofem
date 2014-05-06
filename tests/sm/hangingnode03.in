@@ -1,7 +1,7 @@
 hangingnode03.out
 Test of hanging node in with automatic element detection.
 LinearStatic nsteps 1 nmodules 1
-errorcheck filename "hangingnode03.in"
+errorcheck
 #LinearStatic nsteps 1 nmodules 1
 #vtkxml tstep_all domain_all primvars 1 1 vars 2 1 4 stype 1
 domain 2dPlaneStress

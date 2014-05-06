@@ -3,7 +3,7 @@ Test of nodal coordinate system
 #only momentum influence to the displacements is taken into account
 #beamShearCoeff is artificially enlarged.
 LinearStatic nsteps 1 nmodules 1
-errorcheck filename "beam3d_2.in"
+errorcheck
 domain 3dShell
 OutputManager tstep_all dofman_all element_all
 ndofman 4 nelem 3 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1

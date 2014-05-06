@@ -1,7 +1,7 @@
 axisymm01.out
 Test of linear axisymmetric quadrilateral elements, a thin ring with internal overpressure.
 LinearStatic nsteps 1 nmodules 1
-errorcheck filename "axisymm01.in"
+errorcheck
 #vtkxml tstep_step 1 cellvars 1 46 vars 3 1 2 4 primvars 1 1 stype 2
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all

@@ -1,7 +1,7 @@
 patch_dkt.out
 "Complex Patch test of DKT elements, four cases pure bending in x, and y, twist, and shear in one"
 LinearStatic nsteps 1 nmodules 1
-errorcheck filename "patch_dkt.in"
+errorcheck
 domain 2dMindlinPlate
 OutputManager tstep_all dofman_all element_all
 ndofman 20 nelem 10 ncrosssect  1 nmat 1 nbc 5 nic 0 nltf 1

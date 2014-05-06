@@ -1,7 +1,7 @@
 tmpatch44-2.out
 Patch test of axisymmetric linear triangle elements, steady-state solution, prescribed constant edge flux, no heat source
 StationaryProblem nsteps 1 nmodules 1
-errorcheck filename "tmpatch44-2.in"
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all

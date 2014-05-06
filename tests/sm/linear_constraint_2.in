@@ -1,7 +1,7 @@
 linear_constraint_2.out
 Test of linear constraint condition on a Truss2d element
 nonLinearStatic nsteps 1 controlmode 1 nmodules 1
-errorcheck filename "linear_constraint_2.in"
+errorcheck
 domain 2dTruss
 OutputManager tstep_all dofman_all element_all
 ndofman 2 nelem 1 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 2

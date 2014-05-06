@@ -1,7 +1,7 @@
 hangingnode02.out
 Test of hanging node in PlaneStress2d element, offset numbering, results are the same as in hangingnode01.in
 LinearStatic nsteps 1 nmodules 1
-errorcheck filename "hangingnode02.in"
+errorcheck
 #LinearStatic nsteps 1 nmodules 1
 #vtkxml tstep_all domain_all primvars 1 1 vars 2 1 4 stype 1
 domain 2dPlaneStress

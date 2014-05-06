@@ -2,7 +2,7 @@ bazantnajjar.out
 drying at 50% RH - axisymmetric
 #
 nltransienttransportproblem nsteps 8 alpha 0.5 rtol 1.e-10 lumpedcapa nsmax 1000 prescribedtimes 8 0.01 0.1 0.5 1. 2. 4. 6. 8. nmodules 1
-errorcheck filename "bazantnajjar.in"
+errorcheck
 # nmodules 1
 # vtkxml tstep_all domain_all primvars 1 3
 #

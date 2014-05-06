@@ -1,7 +1,7 @@
 spring01.out
 Patch test of 1D spring element along x axis
 LinearStatic nsteps 1 nmodules 1
-errorcheck filename "spring01.in"
+errorcheck
 domain 1dtruss
 OutputManager tstep_all dofman_all element_all
 ndofman 2 nelem 1 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf  1

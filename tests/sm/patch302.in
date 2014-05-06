@@ -1,7 +1,7 @@
 patch302.out
 test of b-bar lspace element, cantiliver, plane strain, incompressible
 linearstatic nsteps 1 nmodules 1
-errorcheck filename "patch302.in"
+errorcheck
 domain 3d
 outputmanager tstep_all dofman_all element_all
 ndofman 90 nelem 32 ncrosssect 1 nmat 1 nbc 6 nic 0 nltf 1

@@ -4,7 +4,7 @@ Test of linear axisymmetric quadrilateral elements, thick ring with internal ove
 #Exact solution for radial stress sig_r = 40./21.*(1-100./r^2)
 #Exact solution for hoop stress sig_theta = 40./21.*(1+100./r^2)
 LinearStatic nsteps 1 nmodules 1
-errorcheck filename "axisymm02.in"
+errorcheck
 #vtkxml tstep_step 1 cellvars 1 46 vars 3 1 2 4 primvars 1 1 stype 2
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all

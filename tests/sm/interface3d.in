@@ -1,7 +1,7 @@
 interface3d.out
 patch test of interface 3d elements
 LinearStatic nsteps 1 nmodules 1
-errorcheck filename "interface3d.in"
+errorcheck
 domain 3d
 OutputManager tstep_all dofman_all element_all
 ndofman 16 nelem 14 ncrosssect  1 nmat 2 nbc 2 nic 0 nltf 1

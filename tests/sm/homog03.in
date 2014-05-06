@@ -1,7 +1,7 @@
 homog03.out
 Elastic homogenization of 2x2 quad elements with periodic boudnary conditions using master-slave and kinematic constrains, loaded by displacement
 NonLinearStatic nsteps 2 rtolv 0.001 MaxIter 100 stiffmode 0 controllmode 1 nmodules 2
-errorcheck filename "homog03.in"
+errorcheck
 #vtkxml tstep_all domain_all cellvars 1 46 primvars 1 1 vars 2 1 4 stype 2
 hom tstep_all
 domain 2dPlaneStress

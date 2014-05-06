@@ -1,7 +1,7 @@
 nltrans_nonlin.out.tm
 Quadrilateral element subjected to heat flux (Newton b.c)
 NlTransientTransportProblem nsteps 3 deltat 3600 rtol 1.e-5 alpha 0.5 lumpedcapa exportfields 1 5 nmodules 1
-errorcheck filename "nltrans_nonlin.in.tm"
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 6
 domain heattransfer
 OutputManager tstep_all dofman_all element_all

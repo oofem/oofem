@@ -1,7 +1,7 @@
 simpleNonlinearDarcy.out
 Test for stokes flow on triangular Taylor-Hood element
 darcyflow nsteps 1 rtolv 0.000010  linesearch 0  maxiter 100000  manrmsteps 1.000000 nmodules 1
-errorcheck filename "simpleNonlinearDarcy.in"
+errorcheck
 # vtkxml tstep_all domain_all  primvars 1 5 cellvars 1 41
 domain 2dIncompFlow
 OutputManager tstep_all dofman_all element_all

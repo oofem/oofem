@@ -1,7 +1,7 @@
 patch106.out
 Rotated Patch test of PlaneStress2d elements -> pure compression in x direction.
 LinearStatic nsteps 1 nmodules 1
-errorcheck filename "patch106.in"
+errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 8 nelem 5 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1

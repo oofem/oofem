@@ -12,7 +12,7 @@ materOrient01.out
 #
 test of local coordinate system with material orientation on element
 NonLinearStatic nsteps 1 controlmode 1 rtolv 0.00001 MaxIter 30 stiffmode 0 deltaT 1.0 nmodules 1
-errorcheck filename "materOrient01.in"
+errorcheck
 #vtk tstep_all domain_all primvars 1 1 vars 2 1 4 stype 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all

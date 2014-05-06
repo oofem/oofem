@@ -1,7 +1,7 @@
 nonstat_nonlin_01.out.tm
 Quadrilateral element subjected to heat flux (Newton b.c)
 NonStationaryProblem nsteps 3 deltat 3600 alpha 0.5 lumpedcapa exportfields 1 5 nmodules 1
-errorcheck filename "nonstat_nonlin_01.in.tm"
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 6
 domain heattransfer
 OutputManager tstep_all dofman_all element_all

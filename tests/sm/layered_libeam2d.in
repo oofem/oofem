@@ -4,7 +4,7 @@ Test of LIBeam2d elements -> cantilever loaded by end moment, with plastic layer
 ##NonLinearStatic nsteps 180 stepLength 0.015 minStepLength 0.001 rtolv 0.0001 Psi 1.0 nmodules 1
 NonLinearStatic nsteps 11 stepLength 0.00020 minStepLength 0.0001 rtolv 0.0001 Psi 0.0 nmodules 1
 #NonLinearStatic nsteps 2 stepLength 150 minStepLength 0.00001 rtolv 0.0001 Psi 1.0 nmodules 1
-errorcheck filename "layered_libeam2d.in"
+errorcheck
 domain 2dBeam
 OutputManager tstep_all dofman_all element_all
 ndofman 4 nelem 3 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1

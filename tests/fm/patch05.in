@@ -1,7 +1,7 @@
 patch05.out
 pipe test, with friction on pipe surface
 cbs nsteps 10 lstype 0 smtype 0 deltaT 0.01 cmflag 0 theta1 0.5 theta2 0.5 nmodules 1
-errorcheck filename "patch05.in"
+errorcheck
 domain 2dIncompFlow
 OutputManager tstep_all dofman_all element_all
 ndofman 9 nelem 8 ncrosssect 1 nmat 1 nbc 3 nltf 1 nic 1 nset 4

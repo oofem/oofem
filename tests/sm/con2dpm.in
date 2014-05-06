@@ -3,7 +3,7 @@ con2dpm.out
 Concrete Plasticity Uniaxial Compression
 NonLinearStatic nmsteps 1 nsteps 1 nmodules 1
 nsteps 1 rtolf 0 rtold 1.e-6 miniter 1 stiffMode 2 controllmode 1
-errorcheck filename "con2dpm.in"
+errorcheck
 #
 domain 3d
 #

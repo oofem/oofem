@@ -1,7 +1,7 @@
 simpleNonlinearStokes.out
 Test for stokes flow on triangular Taylor-Hood element
 stokesflow nsteps 1 lstype 0  smtype 0  rtolv 0.000010  linesearch 0  maxiter 1000  nmodules 1
-errorcheck filename "simpleNonlinearStokes.in"
+errorcheck
 # vtkxml tstep_all domain_all primvars 2 4 5
 domain 2dIncompFlow
 OutputManager tstep_all dofman_all element_all

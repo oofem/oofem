@@ -3,7 +3,7 @@ Homework www sm40 no. 1
 #only momentum influence to the displacements is taken into account
 #beamShearCoeff is artificially enlarged.
 LinearStatic nsteps 3 nmodules 1
-errorcheck filename "beam2d_1.in"
+errorcheck
 domain 2dBeam
 OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 5 ncrosssect  1 nmat 1 nbc 5 nic 0 nltf 3

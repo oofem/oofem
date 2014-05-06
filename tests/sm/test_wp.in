@@ -1,7 +1,7 @@
 test_wp.out
 "Winkler pasternak model: test of settlement profile"
 LinearStatic nsteps 1 nmodules 1
-errorcheck filename "test_wp.in"
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 1
 domain 2dMindlinPlate
 OutputManager tstep_all dofman_all element_all

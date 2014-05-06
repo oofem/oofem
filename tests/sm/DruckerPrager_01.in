@@ -1,7 +1,7 @@
 DruckerPrager_01.out
 Test of DruckerPrager material under plane-strain conditions
 NonLinearStatic nsteps 10 rtolv 1.e-6 controlmode 1 maxiter 100 nmodules 1
-errorcheck filename "DruckerPrager_01.in"
+errorcheck
 #vtkxml tstep_step 1 domain_all primvars 1 1 vars 3 1 4 27 stype 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all

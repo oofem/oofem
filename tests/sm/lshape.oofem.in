@@ -1,7 +1,7 @@
 lshape.oofem.out
 Plane stress example
 adaptlinearstatic nsteps 1 meshpackage 3 eetype 1 normtype 1 requiredError 0.1 minelemsize 0.0001 nmodules 1
-errorcheck filename "lshape.oofem.in"
+errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 29 nelem 39 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1

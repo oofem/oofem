@@ -1,7 +1,7 @@
 Mises01.out
 Test of Mises plasticity model with linear hardening/softening
 NonLinearStatic nsteps 20 rtolv 0.0001 MaxIter 20 stiffMode 1 controlmode 1 nmodules 1
-errorcheck filename "Mises01.in"
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 1
 domain 1dtruss
 OutputManager tstep_all dofman_all element_all

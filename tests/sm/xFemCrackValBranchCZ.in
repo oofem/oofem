@@ -1,7 +1,7 @@
 xFemCrackValBranchCZ.out
 XFEM simulation: A crack with branch functions and elastic cohesive zone. Written by Erik Svenning, Chalmers University of Technology.
 XFEMStatic nsteps 3 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 20 minIter 2 stiffmode 0 nmodules 1
-errorcheck filename "xFemCrackValBranchCZ.in"
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all

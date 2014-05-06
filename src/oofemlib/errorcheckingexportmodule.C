@@ -315,25 +315,31 @@ ErrorCheckingExportModule :: initializeFrom(InputRecord *ir)
     allPassed = true;
     this->errorCheckingRules.clear();
 
+    filename = std::string("");
+
     if ( ir->hasField(_IFT_ErrorCheckingExportModule_filename) ) {
         IR_GIVE_FIELD(ir, this->filename, _IFT_ErrorCheckingExportModule_filename);
-        // Reads all the rules;
-        std :: ifstream inputStream(this->filename);
-        if ( !inputStream ) {
-            OOFEM_ERROR("Couldn't open file '%s'\n", this->filename.c_str());
-        }
-        double tol = 0.;
-        if ( this->scanToErrorChecks(inputStream,  tol) ) {
-            while ( true ) {
-                std :: unique_ptr< ErrorCheckingRule > rule(this->giveErrorCheck(inputStream, tol));
-                if ( !rule ) {
-                    break;
-                }
-                errorCheckingRules.push_back(std :: move(rule));
+    }
+    else {
+        filename = emodel->giveReferenceFileName();
+    }
+
+    // Reads all the rules;
+    std :: ifstream inputStream(this->filename);
+    if ( !inputStream ) {
+        OOFEM_ERROR("Couldn't open file '%s'\n", this->filename.c_str());
+    }
+    double tol = 0.;
+    if ( this->scanToErrorChecks(inputStream,  tol) ) {
+        while ( true ) {
+            std :: unique_ptr< ErrorCheckingRule > rule(this->giveErrorCheck(inputStream, tol));
+            if ( !rule ) {
+                break;
             }
-        } else {
-            OOFEM_WARNING("No rules found!");
+            errorCheckingRules.push_back(std :: move(rule));
         }
+    } else {
+        OOFEM_WARNING("No rules found!");
     }
 
     this->writeIST.clear();

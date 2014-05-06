@@ -2,7 +2,7 @@ isolinmoisture.out
 drying at 50% RH - axisymmetric
 #
 nltransienttransportproblem nsteps 8 alpha 0.5 rtol 1.e-10 lumpedcapa nsmax 1000 prescribedtimes 8 0.005 0.05 0.1 0.2 0.3 0.4 0.5 0.6 nmodules 1
-errorcheck filename "isolinmoisture.in"
+errorcheck
 # nmodules 1
 # vtkxml tstep_all domain_all primvars 1 3
 #
