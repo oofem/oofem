@@ -76,6 +76,7 @@ class CommunicationBuffer;
  *   initialize.
  * 
  * @author Mikael Öhman
+ * @author Erik Svenning
  * @author many others (please add yourselves)
  */
 class OOFEM_EXPORT FloatArray
@@ -112,6 +113,12 @@ public:
     FloatArray &operator = (FloatArray &&src) { values = std::move(src.values); return *this; }
     /// Assignment operator.
     inline FloatArray &operator = (std :: initializer_list< double >list) { values = list; return *this; }
+
+    /// Add one element
+    void push_back(const double &iVal) {values.push_back(iVal);}
+
+    /// Append an array
+    void append(const FloatArray &iArray) { values.insert(values.end(), iArray.begin(), iArray.end()); }
 
     /**
      * Coefficient access function. Returns value of coefficient at given
