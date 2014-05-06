@@ -1270,7 +1270,6 @@ void PolygonLine :: computeIntersectionPoints(const FloatArray &iXStart, const F
 
         double xi1 = 0.0, xi2 = 0.0;
         int maxIter = 1;
-        double tol = 1.0e-12;
 
         for(int iter = 0; iter < maxIter; iter++) {
             FloatArray temp = {iXStart(0) + xi2*t2(0) - xStart(0) - xi1*t1(0), iXStart(1) + xi2*t2(1) - xStart(1) - xi1*t1(1)};
