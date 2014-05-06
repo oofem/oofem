@@ -807,17 +807,15 @@ SUPG :: applyIC(TimeStep *stepWhenIcApply)
 #endif
     int nman  = domain->giveNumberOfDofManagers();
 
+    accelerationVector.resize(neq);
+    accelerationVector.zero();
+
     if ( !requiresUnknownsDictionaryUpdate() ) {
         VelocityPressureField->advanceSolution(stepWhenIcApply);
         vp_vector = VelocityPressureField->giveSolutionVector(stepWhenIcApply);
         vp_vector->resize(neq);
         vp_vector->zero();
-    }
 
-    accelerationVector.resize(neq);
-    accelerationVector.zero();
-
-    if ( !requiresUnknownsDictionaryUpdate() ) {
         for ( int j = 1; j <= nman; j++ ) {
             DofManager *node = domain->giveDofManager(j);
 

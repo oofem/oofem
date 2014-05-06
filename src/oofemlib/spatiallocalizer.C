@@ -49,13 +49,11 @@ void
 SpatialLocalizerInterface :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
 {
     Element *element = this->SpatialLocalizerI_giveElement();
-    FloatArray *coordinates;
 
-    coordinates = element->giveNode(1)->giveCoordinates();
     bb1 = bb0 = * element->giveNode(1)->giveCoordinates();
 
     for ( int i = 2; i <= element->giveNumberOfNodes(); ++i ) {
-        coordinates = element->giveNode(i)->giveCoordinates();
+        FloatArray *coordinates = element->giveNode(i)->giveCoordinates();
         bb0.beMinOf(bb0, * coordinates);
         bb1.beMaxOf(bb1, * coordinates);
     }

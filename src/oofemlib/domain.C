@@ -1805,13 +1805,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
         nnodes = this->giveNumberOfDofManagers();
         nelem = this->giveNumberOfElements();
-        nmat = this->giveNumberOfMaterialModels();
-        ncs = this->giveNumberOfCrossSectionModels();
         nbc = this->giveNumberOfBoundaryConditions();
-        nic = this->giveNumberOfInitialConditions();
-        nfunc = this->giveNumberOfFunctions();
-        nnlb = this->giveNumberOfNonlocalBarriers();
-        nrfg = this->giveNumberOfRandomFieldGenerators();
     }
 
     RESTORE_COMPONENTS(nnodes, DofManager, this->resizeDofManagers, classFactory.createDofManager, this->giveDofManager, this->setDofManager);

@@ -54,6 +54,13 @@ FEI3dWedgeQuad Shell7Base :: interpolationForExport;
 Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface(),
     VTKXMLExportModuleElementInterface(), ZZNodalRecoveryModelInterface(), FailureModuleElementInterface() { }
 
+Shell7Base :: ~Shell7Base()
+{
+    for ( auto &iRule: specialIntegrationRulesArray ) {
+        delete iRule;
+    }
+}
+
 IRResultType Shell7Base :: initializeFrom(InputRecord *ir)
 {
     this->NLStructuralElement :: initializeFrom(ir);

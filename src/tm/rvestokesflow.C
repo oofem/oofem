@@ -67,7 +67,9 @@ RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, Domain *d, Gau
 }
 
 RVEStokesFlowMaterialStatus :: ~RVEStokesFlowMaterialStatus()
-{ }
+{
+    delete solutionVector;
+}
 
 void
 RVEStokesFlowMaterialStatus :: exportFilter(GaussPoint *gp, TimeStep *tStep)

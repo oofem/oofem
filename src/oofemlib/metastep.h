@@ -84,9 +84,7 @@ public:
     MetaStep(int n, EngngModel * e, int nsteps, InputRecord & attrib);
     /// Destructor.
     ~MetaStep() {
-        if ( attributes ) {
-            delete attributes;
-        }
+        delete attributes;
     }
 
     /// Returns receiver's number.

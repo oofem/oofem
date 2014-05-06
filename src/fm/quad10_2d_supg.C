@@ -299,8 +299,6 @@ Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
         if ( mu_min > mu ) {
             mu_min = mu;
         }
-
-        nu = mu_min / rho;
     }
 
     nu = mu_min / rho;

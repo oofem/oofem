@@ -329,9 +329,7 @@ NumericalMethod *StokesFlow :: giveNumericalMethod(MetaStep *mStep)
 
 TimeStep *StokesFlow :: giveNextStep()
 {
-    if ( previousStep ) {
-        delete previousStep;
-    }
+    delete previousStep;
 
     if ( currentStep == NULL ) {
         int istep = this->giveNumberOfFirstStep();

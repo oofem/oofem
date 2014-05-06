@@ -981,24 +981,24 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
                 this->computeIntersection(3, inter2, fi);
 
-                edge1 = 1;
-                edge2 = 3;
+                //edge1 = 1;
+                //edge2 = 3;
             } else if ( si == 2 ) {
                 this->computeIntersection(2, inter1, fi);
 
 
                 this->computeIntersection(1, inter2, fi);
 
-                edge1 = 2;
-                edge2 = 1;
+                //edge1 = 2;
+                //edge2 = 1;
             } else if ( si == 3 ) {
                 this->computeIntersection(3, inter1, fi);
 
 
                 this->computeIntersection(2, inter2, fi);
 
-                edge1 = 3;
-                edge2 = 2;
+                //edge1 = 3;
+                //edge2 = 2;
             }
 
             //computing point on zero level set curve: [xM, yM]

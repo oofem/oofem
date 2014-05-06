@@ -619,11 +619,12 @@ add_custom_target (
 #######################################################################
 ######################## Tests ########################################
 #######################################################################
-enable_testing ()
-include (CTest)
-
 set (oofem_TEST_DIR "${oofem_SOURCE_DIR}/tests/")
 set (oofem_cmd  $<TARGET_FILE:oofem>)
+file(TO_CMAKE_PATH "${oofem_TEST_DIR}/valgrind.supp" MEMORYCHECK_SUPPRESSIONS_FILE)
+include (CTest)
+
+#set (CTEST_MEMORYCHECK_SUPPRESSIONS_FILE ${oofem_TEST_DIR}/tests/valgrind.supp)
 
 if (USE_PARALLEL)
     set (par_dir ${oofem_TEST_DIR}/partests)
@@ -745,15 +746,8 @@ set (CPACK_SOURCE_IGNORE_FILES "~$;/build/;tags;cscope.*;.*\\\\.out$;\\\\.out\\\
 ### deb package options
 set (CPACK_DEBIAN_PACKAGE_MAINTAINER "Mikael Öhman <micketeer@gmail.com>")
 set (CPACK_DEBIAN_PACKAGE_SECTION "Mathematics")
-if (CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
-else ()
-    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "i386") # Crude assumption. (Why can't cmake figure this out itself?)
-endif ()
 # autogenerate dependency information
 set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-# Comma separated list here is really bothersome.
-#set (CPACK_DEBIAN_PACKAGE_DEPENDS "libpetsc3.3 (>=3.3), libslepc3.3 (>=3.3), libparmetis3.1 (>=3.1), libvtk5.8 (>=5.8), liblapack3 (>=3.2), libtriangle-1.6 (>=1.6)")
 
 set(CPACK_DEBIAN_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}.${CPACK_PACKAGE_VERSION_PATCH}+sid1")
 

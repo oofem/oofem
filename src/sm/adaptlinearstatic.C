@@ -60,7 +60,7 @@ AdaptiveLinearStatic :: updateYourself(TimeStep *tStep)
         return;
     } else {
         // do remeshing
-        MesherInterface *mesher = classFactory.createMesherInterface( meshPackage, this->giveDomain(1) );
+        std :: unique_ptr< MesherInterface >mesher( classFactory.createMesherInterface( meshPackage, this->giveDomain(1) ) );
         Domain *newDomain;
 
         MesherInterface :: returnCode result =

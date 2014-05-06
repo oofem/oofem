@@ -82,30 +82,11 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
 
 EnrichmentItem :: ~EnrichmentItem()
 {
-    if ( mpEnrichmentDomain != NULL ) {
-        delete mpEnrichmentDomain;
-        mpEnrichmentDomain = NULL;
-    }
-
-    if ( mpEnrichmentFunc != NULL ) {
-        delete mpEnrichmentFunc;
-        mpEnrichmentFunc = NULL;
-    }
-
-    if ( mpEnrichmentFrontStart != NULL ) {
-        delete mpEnrichmentFrontStart;
-        mpEnrichmentFrontStart = NULL;
-    }
-
-    if ( mpEnrichmentFrontEnd != NULL ) {
-        delete mpEnrichmentFrontEnd;
-        mpEnrichmentFrontEnd = NULL;
-    }
-
-    if ( mpPropagationLaw != NULL ) {
-        delete mpPropagationLaw;
-        mpPropagationLaw = NULL;
-    }
+    delete mpEnrichmentDomain;
+    delete mpEnrichmentFunc;
+    delete mpEnrichmentFrontStart;
+    delete mpEnrichmentFrontEnd;
+    delete mpPropagationLaw;
 }
 
 IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)

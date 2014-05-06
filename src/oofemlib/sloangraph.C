@@ -198,7 +198,6 @@ SloanGraph :: findPeripheralNodes()
     Spine = new SloanLevelStructure(this, InitialRoot);
     this->startNode = InitialRoot;
 
-    int MinimumWidth = domain->giveNumberOfDofManagers();
     int CurrentDiameter = Spine->giveDepth();
     int TrialDepth, TrialWidth;
     std :: list< int >candidates;
@@ -208,7 +207,7 @@ SloanGraph :: findPeripheralNodes()
         newStartNode = 0;
 
         this->extractCandidates(candidates, Spine);
-        MinimumWidth = domain->giveNumberOfDofManagers();
+        int MinimumWidth = domain->giveNumberOfDofManagers();
 
         for ( int Root: candidates ) {
             SloanLevelStructure *TrialSpine = new SloanLevelStructure(this, Root);

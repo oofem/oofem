@@ -30,6 +30,7 @@ REGISTER_EngngModel(DarcyFlow);
 
 DarcyFlow :: DarcyFlow(int i, EngngModel *_master) : EngngModel(i, _master)
 {
+    this->PressureField = NULL;
     this->nMethod = NULL;
     this->ndomains = 1;
     this->hasAdvanced = false;
@@ -40,6 +41,7 @@ DarcyFlow :: ~DarcyFlow()
 {
     delete PressureField;
     delete nMethod;
+    delete stiffnessMatrix;
 }
 
 IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)

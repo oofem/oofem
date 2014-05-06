@@ -107,23 +107,9 @@ public:
 
 protected:
     int giveKeywordIndx(const char *kwd);
-    int scanInteger(const char *source, int &value);
-    int scanDouble(const char *source, double &value);
+    const char *scanInteger(const char *source, int &value);
+    const char *scanDouble(const char *source, double &value);
     void setReadFlag(int itok) { readFlag [ itok - 1 ] = true; }
-
-    /**
-     * Returns position of substring id in source.
-     * Id must be separated from rest by blank or by tabulator.
-     * @return Value pointer at the end of occurrence id in source. If string not found, returns NULL.
-     */
-    const char *__getPosAfter(const char *, const char *);
-    const char *__scanInteger(const char *source, int *value);
-    const char *__scanDouble(const char *source, double *value);
-    const char *__skipNextWord(const char *src);
-
-    char *__readSimpleString(const char *source, char *simpleString, int maxchar, const char **remain);
-    const char *__readKeyAndVal(const char *source, char *key, int *val, int maxchar, const char **remain);
-    const char *__readKeyAndVal(const char *source, char *key, double *val, int maxchar, const char **remain);
 
     /**
      * Reads single range record from input record represented by *helpSource  string.

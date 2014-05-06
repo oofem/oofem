@@ -185,11 +185,11 @@ public:
     }
     virtual ~CBS() {
         //<RESTRICTED_SECTION>
-        if ( materialInterface ) {
-            delete materialInterface;
-        }
+        delete materialInterface;
 
         //</RESTRICTED_SECTION>
+        delete this->nMethod;
+        delete this->lhs;
     }
 
     virtual void solveYourselfAt(TimeStep *tStep);

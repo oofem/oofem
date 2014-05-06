@@ -1,5 +1,5 @@
 patch302.out
-test of b-bar lspace element, cantiliver, plane strain, incompressible
+test of b-bar lspace element, cantilever, plane strain, incompressible
 linearstatic nsteps 1 nmodules 1
 errorcheck
 domain 3d
@@ -138,5 +138,5 @@ nodalload 6 loadTimeFunction 1 Components 3 0.0 0.0 -0.125
 constantfunction 1 f(t) 0.25
 #
 #%BEGIN_CHECK%
-#NODE tStep 1 number 41 dof 3 unknown d value -9.61512810e-01
+#NODE tStep 1 number 41 dof 3 unknown d value -9.61512810e-01 tolerance 1e-5
 #%END_CHECK%
