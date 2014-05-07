@@ -460,6 +460,25 @@ Shell7BaseXFEM :: edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem
     return levelSet;
 }
 
+
+
+double 
+Shell7BaseXFEM :: evaluateHeavisideGamma(const FloatArray &lCoords, EnrichmentItem *ei)
+{
+    // Evaluates the corresponding gamma level set depending on the type of enrichment
+    // DEBUG - HARD CODED FOR TWO LAYERS!!
+    double levelSet = 0.0;
+    if ( ei->giveNumber() == 2 && lCoords.at(3) > 0.0 ) {
+        return 0.0;
+    } else if (ei->giveNumber() == 3 && lCoords.at(3) < 0.0) {
+        return 0.0;
+    } else {
+        return 1.0;
+    }          
+
+}
+
+
 void
 Shell7BaseXFEM :: giveMaxCZDamages(FloatArray &answer, TimeStep *tStep)
 {
@@ -1409,7 +1428,9 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &ans
             answer.at(17, ndofs_xm * 2 + 1 + j) = dNdxi.at(i, 2) * factor;
             answer.at(18, ndofs_xm * 2 + 1 + j) = N.at(i) * factor;
         }
+        
 
+        answer.times( this->evaluateHeavisideGamma(lcoords, ei) ); 
         answer.times(DISC_DOF_SCALE_FAC);
 
     } else if ( ei && dynamic_cast< Delamination*>(ei) ){
@@ -1481,7 +1502,10 @@ Shell7BaseXFEM :: computeEnrichedNmatrixAt(const FloatArray &lcoords, FloatMatri
             answer.at(6, ndofs_xm + 3 + j) = N.at(i) * factor;
             answer.at(7, ndofs_xm * 2 + i) = N.at(i) * factor;
         }
+        
+        answer.times( this->evaluateHeavisideGamma(lcoords, ei) ); 
         answer.times(DISC_DOF_SCALE_FAC);
+
     } else if ( ei && dynamic_cast< Delamination*>(ei) ) {
         Shell7Base :: computeNmatrixAt(lcoords, answer);
         std :: vector< double > efGP;
@@ -1533,6 +1557,7 @@ Shell7BaseXFEM :: edgeComputeEnrichedNmatrixAt(FloatArray &lcoords, FloatMatrix 
             answer.at(6, ndofs_xm + 3 + j) = N.at(i) * factor;
             answer.at(7, ndofs_xm * 2 + i) = N.at(i) * factor;
         }
+        answer.times( this->evaluateHeavisideGamma(lcoords, ei) ); 
         answer.times(DISC_DOF_SCALE_FAC);
 
     } else if ( ei && dynamic_cast< Delamination*>(ei) ) {
@@ -1616,7 +1641,7 @@ Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix 
             answer.at(11, ndofs_xm * 2 + 1 + j) = N.at(i) * factor;
         }
 
-
+        answer.times( this->evaluateHeavisideGamma(lcoords, ei) ); 
         answer.times(DISC_DOF_SCALE_FAC);
 
     } else if ( ei && dynamic_cast< Delamination*>(ei) ){
