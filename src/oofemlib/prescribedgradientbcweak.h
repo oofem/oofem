@@ -42,6 +42,7 @@
 #define _IFT_PrescribedGradientBCWeak_NumTractionNodesAtIntersections   "numnodesatintersections"
 #define _IFT_PrescribedGradientBCWeak_NumTractionNodeSpacing   "tractionnodespacing"
 #define _IFT_PrescribedGradientBCWeak_TractionOnGammaPlus   "periodic"
+#define _IFT_PrescribedGradientBCWeak_DuplicateCornerNodes   "duplicatecornernodes"
 
 namespace oofem {
 
@@ -140,6 +141,13 @@ protected:
      */
     bool mTractionLivesOnGammaPlus;
 
+
+    /**
+     * 0 -> Do not duplicate corner traction nodes
+     * 1 -> Duplicate corner traction nodes
+     */
+    bool mDuplicateCornerNodes;
+
     /// Lower corner of domain (assuming a rectangular RVE)
     FloatArray mLC;
 
@@ -220,6 +228,20 @@ public:
 
     FloatArray mStartCoord;
     FloatArray mEndCoord;
+};
+
+class ArcPosSortFunction {
+public:
+    ArcPosSortFunction(const FloatArray &iStartPos):mStartPos(iStartPos) {};
+    ~ArcPosSortFunction() {};
+
+    bool operator()(const FloatArray &iVec1, const FloatArray &iVec2) const
+    {
+                return mStartPos.distance_square(iVec1) < mStartPos.distance_square(iVec2);
+    }
+
+private:
+    const FloatArray mStartPos;
 };
 
 

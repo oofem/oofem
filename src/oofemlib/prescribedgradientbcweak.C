@@ -46,7 +46,11 @@
 #include "spatiallocalizer.h"
 #include "geometry.h"
 
+#include "xfem/XFEMDebugTools.h"
+
 #include <cmath>
+#include <string>
+#include <sstream>
 
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGradientBCWeak);
@@ -56,7 +60,8 @@ PrescribedGradientBC(n, d),
 mTractionInterpOrder(0),
 mNumTractionNodesAtIntersections(1),
 mTractionNodeSpacing(1),
-mTractionLivesOnGammaPlus(false)
+mTractionLivesOnGammaPlus(false),
+mDuplicateCornerNodes(false)
 {
 
     // Compute LC and UC by assuming a rectangular domain.
@@ -147,7 +152,16 @@ IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
         mTractionLivesOnGammaPlus = false;
     }
 
+    int duplicateCorners = 0;
+    IR_GIVE_FIELD(ir, duplicateCorners, _IFT_PrescribedGradientBCWeak_DuplicateCornerNodes);
+    printf("duplicateCorners: %d\n", duplicateCorners);
 
+    if(duplicateCorners == 1) {
+        mDuplicateCornerNodes = true;
+    }
+    else {
+        mDuplicateCornerNodes = false;
+    }
 
     return IRRT_OK;
 }
@@ -560,7 +574,8 @@ void PrescribedGradientBCWeak::createTractionMesh()
 {
     const double nodeDistTol = 1.0e-15;
 
-    std::vector<FloatArray> bndNodeCoords;
+    std::vector<FloatArray> bndNodeCoords, bndNodeCoordsFull;
+    std::vector<bool> mandatoryToKeep;
 
     if(!mTractionLivesOnGammaPlus) {
         //printf("Creating Dirichlet tractions.\n");
@@ -569,7 +584,7 @@ void PrescribedGradientBCWeak::createTractionMesh()
         const IntArray &boundaries = setPointer->giveBoundaryList();
         IntArray bNodes;
 
-        bool duplicateAtCorner = false;
+        bool duplicateAtCorner = mDuplicateCornerNodes;
 
         // Loop over all boundary segments
         for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
@@ -581,10 +596,10 @@ void PrescribedGradientBCWeak::createTractionMesh()
             // Add the start node of the segment
             DofManager *startNode = e->giveDofManager( bNodes[0] );
             bndNodeCoords.push_back( *(startNode->giveCoordinates()) );
-
+            bndNodeCoordsFull.push_back( *(startNode->giveCoordinates()) );
 
             bool isCorner = false;
-#if 0
+#if 1
             FloatArray cornerPos = mLC;
             if( startNode->giveCoordinates()->distance(cornerPos) < nodeDistTol ) {
                 isCorner = true;
@@ -613,7 +628,16 @@ void PrescribedGradientBCWeak::createTractionMesh()
                     printf("Found corner: "); startNode->giveCoordinates()->printYourself();
                     printf("Duplicating...\n");
                     bndNodeCoords.push_back( *(startNode->giveCoordinates()) );
+                    bndNodeCoordsFull.push_back( *(startNode->giveCoordinates()) );
+                    mandatoryToKeep.push_back(true);
                 }
+            }
+
+            if(isCorner) {
+                mandatoryToKeep.push_back(true);
+            }
+            else {
+                mandatoryToKeep.push_back(false);
             }
 
             // Add traction nodes where cracks intersect the boundary if desired
@@ -627,13 +651,30 @@ void PrescribedGradientBCWeak::createTractionMesh()
                 for(size_t i = 0; i < intersecPoints.size(); i++) {
                     for(int j = 0; j < mNumTractionNodesAtIntersections; j++) {
                         bndNodeCoords.push_back( intersecPoints[i] );
+                        mandatoryToKeep.push_back(true);
                     }
+
+                    bndNodeCoordsFull.push_back( intersecPoints[i] );
+
                 }
             }
 
         }
 
-        // TODO: Sort bndNodeCoords and pick every n:th node.
+        std::vector<FloatArray> bndNodeCoordsToKeep;
+        int numPointsPassed = 0;
+        for(size_t i = 0; i < bndNodeCoords.size(); i++) {
+            numPointsPassed++;
+            if( mandatoryToKeep[i] || numPointsPassed >= mTractionNodeSpacing ) {
+                bndNodeCoordsToKeep.push_back(bndNodeCoords[i]);
+                //printf("Keeping node %lu located at: ", i); bndNodeCoords[i].printYourself();
+                numPointsPassed = 0;
+            }
+
+        }
+
+        bndNodeCoords = bndNodeCoordsToKeep;
+
 
 #if 0
         printf("bndNodeCoords: \n");
@@ -777,7 +818,7 @@ void PrescribedGradientBCWeak::createTractionMesh()
         pl.insertVertexBack(xS);
         pl.insertVertexBack(xE);
 
-        for(FloatArray x :  bndNodeCoords) {
+        for(FloatArray x :  bndNodeCoordsFull) {
 
             double distN;
             pl.computeNormalSignDist(distN, x);
@@ -786,12 +827,14 @@ void PrescribedGradientBCWeak::createTractionMesh()
             pl.computeTangentialSignDist(distT, x, arcPos);
 
             if( fabs(distN) < distTol && distT > -distTol && distT < (1.0+distTol) ) {
-                //printf("Found point inside: "); x.printYourself();
+//                printf("Found point inside: "); x.printYourself();
                 mTractionElInteriorCoordinates[i].push_back(x);
             }
 
         }
 
+        // Sort based on distance to start point
+        std::sort(mTractionElInteriorCoordinates[i].begin(), mTractionElInteriorCoordinates[i].end(), ArcPosSortFunction(xS) );
 
     }
 
@@ -842,6 +885,16 @@ void PrescribedGradientBCWeak::createTractionMesh()
 
         mTracElDispNodes[i] = tracElDispNodes;
     }
+
+
+    // Write traction nodes to debug vtk
+    std :: vector<FloatArray> nodeCoord;
+    for( Node *node : mpTractionNodes ) {
+        nodeCoord.push_back( *(node->giveCoordinates()) );
+    }
+
+    std :: string fileName("TractionNodeCoord.vtk");
+    XFEMDebugTools::WritePointsToVTK(fileName, nodeCoord);
 
 }
 
@@ -948,6 +1001,8 @@ void PrescribedGradientBCWeak::integrateTangent(FloatMatrix &oTangent, size_t iT
 
 IntegrationRule *PrescribedGradientBCWeak::createNewIntegrationRule(int iTracElInd)
 {
+    std::vector<FloatArray> tracGpCoord;
+
     // Create integration rule
     // -> need segments defined by displacement nodes, traction nodes and cracks.
     int numSeg = int(mTractionElInteriorCoordinates[iTracElInd].size())-1;
@@ -970,6 +1025,16 @@ IntegrationRule *PrescribedGradientBCWeak::createNewIntegrationRule(int iTracElI
 
     int numPointsPerSeg = 3;
     ir->SetUpPointsOnLine(numPointsPerSeg, matMode);
+
+    for(GaussPoint *gp : *ir) {
+        tracGpCoord.push_back( *(gp->giveCoordinates()) );
+    }
+
+    std :: stringstream str3;
+    str3 << "tracGpCoordEl" << iTracElInd << ".vtk";
+    std :: string name3 = str3.str();
+
+    XFEMDebugTools::WritePointsToVTK(name3, tracGpCoord);
 
     return ir;
 }
