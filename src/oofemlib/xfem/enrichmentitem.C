@@ -1222,6 +1222,15 @@ bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, 
     if ( !foundTip ) {
         return false;
     } else   {
+
+        // Check if the tip point is inside the element
+        Element *el = domain->giveElement(iElIndex);
+        const FloatArray &globCoord = tipInfos [ minIndex ].mGlobalCoord;
+        FloatArray locCoord;
+        if(!el->computeLocalCoordinates(locCoord, globCoord)) {
+            return false;
+        }
+
         oCoord = tipInfos [ minIndex ].mGlobalCoord;
         oArcPos = tipInfos [ minIndex ].mArcPos;
         return true;

@@ -62,7 +62,7 @@ public:
     PrescribedGradientBCWeak(int n, Domain * d);
     virtual ~PrescribedGradientBCWeak();
 
-    virtual int giveNumberOfInternalDofManagers() {return mpTractionNodes.size();}
+    virtual int giveNumberOfInternalDofManagers();
     virtual DofManager *giveInternalDofManager(int i);
 
     virtual bcType giveType() const { return UnknownBT; }
@@ -89,10 +89,7 @@ public:
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
-                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
-
-    virtual void giveLocationArrays(int iTracElInd, std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
-                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
+                               		const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual void giveTractionLocationArrays(int iTracElInd, IntArray &rows, EquationID eid, CharType type,
                                     const UnknownNumberingScheme &s);
@@ -158,6 +155,9 @@ protected:
     /// DOF-managers for the independent traction discretization
     std::vector<Node*> mpTractionNodes;
 
+    /// Lock displacements in one node i periodic
+    Node *mpDisplacementLock;
+
     /// Elements for the independent traction discretization
     std::vector<TractionElement*> mpTractionElements;
 
@@ -211,6 +211,8 @@ protected:
 
     double domainSize();
 
+    bool pointIsOnGammaPlus(const FloatArray &iPos) const;
+    void giveMirroredPointOnGammaMinus(FloatArray &oPosMinus, const FloatArray &iPosPlus) const;
 };
 
 class TractionElement {

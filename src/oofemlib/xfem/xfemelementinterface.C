@@ -108,8 +108,8 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
     FloatMatrix dNdx;
     FloatArray N;
     FEInterpolation *interp = iEl.giveInterpolation();
-    interp->evaldNdx( dNdx, * iGP.giveCoordinates(), FEIElementGeometryWrapper(& iEl) );
-    interp->evalN( N, * iGP.giveCoordinates(), FEIElementGeometryWrapper(& iEl) );
+    interp->evaldNdx( dNdx, * iGP.giveLocalCoordinates(), FEIElementGeometryWrapper(& iEl) );
+    interp->evalN( N, * iGP.giveLocalCoordinates(), FEIElementGeometryWrapper(& iEl) );
 
     const IntArray &elNodes = iEl.giveDofManArray();
 
@@ -826,11 +826,17 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< 
             const FloatArray &seg_xS = oSegments [ segInd ].giveVertex(1);
             const FloatArray &seg_xE = oSegments [ segInd ].giveVertex(2);
 
+
             // Local coordinates of vertices
             FloatArray xiS;
-            element->computeLocalCoordinates(xiS, seg_xS);
+            bool evaluationSucceeded = true;
+            if(!element->computeLocalCoordinates(xiS, seg_xS)) {
+                evaluationSucceeded = false;
+            }
             FloatArray xiE;
-            element->computeLocalCoordinates(xiE, seg_xE);
+            if(!element->computeLocalCoordinates(xiE, seg_xE)) {
+                evaluationSucceeded = false;
+            }
 
             const IntArray &elNodes = element->giveDofManArray();
             FloatArray Ns, Ne;
@@ -840,12 +846,17 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< 
             double phiS         = 0.0, phiE     = 0.0;
             double gammaS       = 0.0, gammaE   = 0.0;
 
+
             for ( int i = 1; i <= Ns.giveSize(); i++ ) {
                 double phiNode = 0.0;
-                ei->evalLevelSetNormalInNode(phiNode, elNodes [ i - 1 ]);
+                if(!ei->evalLevelSetNormalInNode(phiNode, elNodes [ i - 1 ])) {
+                    evaluationSucceeded = false;
+                }
 
                 double gammaNode = 0.0;
-                ei->evalLevelSetTangInNode(gammaNode, elNodes [ i - 1 ]);
+                if(!ei->evalLevelSetTangInNode(gammaNode, elNodes [ i - 1 ])) {
+                    evaluationSucceeded = false;
+                }
 
                 phiS += Ns.at(i) * phiNode;
                 gammaS += Ns.at(i) * gammaNode;
@@ -854,7 +865,8 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< 
                 gammaE += Ne.at(i) * gammaNode;
             }
 
-            if ( phiS * phiE < levelSetTol2 ) {
+
+            if ( phiS * phiE < levelSetTol2 && evaluationSucceeded ) {
                 double xi = EnrichmentItem :: calcXiZeroLevel(phiS, phiE);
                 double gamma = 0.5 * ( 1.0 - xi ) * gammaS + 0.5 * ( 1.0 + xi ) * gammaE;
 
