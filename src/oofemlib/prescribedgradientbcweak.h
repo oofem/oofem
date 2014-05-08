@@ -157,6 +157,7 @@ protected:
 
     /// Lock displacements in one node i periodic
     Node *mpDisplacementLock;
+    double mDispLockScaling;
 
     /// Elements for the independent traction discretization
     std::vector<TractionElement*> mpTractionElements;
