@@ -64,7 +64,6 @@ Axisymm3d :: Axisymm3d(int n, Domain *aDomain) :
     numberOfDofMans = 3;
     area = -1;
     numberOfGaussPoints = 1;
-    numberOfFiAndShGaussPoints = 1;
 }
 
 Axisymm3d :: ~Axisymm3d()
@@ -243,12 +242,12 @@ void
 Axisymm3d :: computeGaussPoints()
 {
     if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 2;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+        numberOfIntegrationRules = 1;
+        integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
-        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], numberOfFiAndShGaussPoints, this);
+        //integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
+        //this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], numberOfFiAndShGaussPoints, this);
     }
 }
 
@@ -264,19 +263,10 @@ Axisymm3d :: initializeFrom(InputRecord *ir)
         return result;
     }
 
-    numberOfFiAndShGaussPoints = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, _IFT_Axisymm3d_nipfish);
-
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 4 ) ||
            ( numberOfGaussPoints == 7 ) ) ) {
         numberOfGaussPoints = 1;
-    }
-
-    if ( !( ( numberOfFiAndShGaussPoints == 1 ) ||
-           ( numberOfFiAndShGaussPoints == 4 ) ||
-           ( numberOfFiAndShGaussPoints == 7 ) ) ) {
-        numberOfFiAndShGaussPoints = 1;
     }
 
     return IRRT_OK;
@@ -300,8 +290,9 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
         this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
         // linear part of strain tensor (in vector form)
 
-        this->computeBmatrixAt(gp, b, 1, 2);
-        Epsilon.beProductOf(b, u);
+        this->computeBmatrixAt(gp, b, 1, 6);
+        answer.beProductOf(b, u);
+	/*
         answer.at(1) = Epsilon.at(1);
         answer.at(2) = Epsilon.at(2);
         // delete Epsilon; // delete b;
@@ -323,6 +314,7 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
         Epsilon.beProductOf(b, u);
         answer.at(3) = Epsilon.at(1);
         answer.at(6) = Epsilon.at(4);
+	*/
 
         if ( nlGeometry ) {
             OOFEM_ERROR("only supports nlGeometry = 0");
