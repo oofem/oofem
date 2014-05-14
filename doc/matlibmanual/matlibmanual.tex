@@ -2296,10 +2296,10 @@ Features & Adaptivity support\\
 \subsubsection{Isotropic damage model for interfaces}
 \label{sec:idmfi}
 
-The model provides an interface law, which can be used to describe a damageable interface between two materials (e.g.\ between steel reinforcement and concrete). The law is formulated in terms of the traction vector and the displacement jump vector. The basic response is elastic, with stiffness \param{kn} in 
+The model provides an interface law which can be used to describe a damageable interface between two materials (e.g.\ between steel reinforcement and concrete). The law is formulated in terms of the traction vector and the displacement jump vector. The basic response is elastic, with stiffness \param{kn} in 
 the normal direction and \param{ks} in the tangential direction.
 Similar to other isotropic damage models, this model assumes that the stiffness degradation is isotropic, i.e., both stiffness moduli decrease proportionally and independently of the loading 
-direction. The damaged stiffnesses are \param{kn}$\times\omega$ and \param{ks}$\times\omega$ where $\omega$ is a scalar damage variable.
+direction. The damaged stiffnesses are \param{kn}$\times(1-\omega)$ and \param{ks}$\times(1-\omega)$ where $\omega$ is a scalar damage variable.
 The damage evolution law is postulated in an explicit form, relating
 the damage variable $\omega$ to the largest previously reached 
 equivalent ``strain'' level, $\kappa$.
@@ -2310,15 +2310,29 @@ in the strain space and plays a similar role to the choice of a yield
 condition in plasticity.
 Currently, in the present implementation,  the equivalent strain is given by
 $$
-\tilde\varepsilon = \sqrt{\langle w_n\rangle^2 + \beta w_t^2}
+\tilde\varepsilon = \sqrt{\langle w_n\rangle^2 + \beta w_s^2}
 $$ 
 where $\langle w_n\rangle$ is the positive part of the normal displacement jump (opening of the interface)
-and $w_t$ is the norm of the tangential part of displacement jump (sliding of the interface). Parameter $\beta$
+and $w_s$ is the norm of the tangential part of displacement jump (sliding of the interface). Parameter $\beta$
 is optional and its default value is 0, in which case damage depends on the opening only (not on the sliding).
-Only the exponential softening damage law is supported:
+The dependence of damage $\omega$ on maximum equivalent strain $\kappa$ is described by the following damage
+law which corresponds to exponential softening:
 $$
-\omega = 1 - \frac{\varepsilon_0}{\kappa}  \exp\left( - \frac{f_t( \kappa - \varepsilon_0 )}{G_f} \right)
+\omega = \left\{ \begin{array}{ll}
+0 & \mbox{ for } \kappa\le \varepsilon_0 \\
+1 - \displaystyle\frac{\varepsilon_0}{\kappa}  \exp\left( - \displaystyle\frac{f_t( \kappa - \varepsilon_0 )}{G_f} \right) & \mbox{ for } \kappa> \varepsilon_0
+\end{array}\right.
 $$
+Here, $\varepsilon_0=f_t/k_n$ is the value of equivalent strain at the onset of damage.
+Note that if the interface is subjected to shear traction only (with zero or negative normal traction),
+the propagation of damage starts when the magnitude of the sliding displacement is $\vert w_s\vert=\varepsilon_0/\sqrt{\beta}$, i.e.,
+when the magnitude of the shear traction is equal to 
+$$
+f_s = \frac{k_s \varepsilon_0}{\sqrt{\beta}} = f_t\frac{k_s }{k_n\sqrt{\beta}}
+$$
+So the ratio between the shear strength and tensile strength of the interface, $f_s/f_t$,
+is equal to $k_s/k_n\sqrt{\beta}$.
+
 The model parameters are summarized in Tab.~\ref{iid_table}. 
 \begin{table}[!htb]
 %\begin{center}
@@ -2351,10 +2365,10 @@ Features & \\
 \subsubsection{Isotropic damage model for interfaces using tabulated data for damage}
 \label{sec:idmfiTabulated}
 
-The model provides an interface law, which can be used to describe a damageable interface between two materials (e.g.\ between steel reinforcement and concrete). The law is formulated in terms of the traction vector and the displacement jump vector. The basic response is elastic, with stiffness \param{kn} in 
+The model provides an interface law which can be used to describe a damageable interface between two materials (e.g.\ between steel reinforcement and concrete). The law is formulated in terms of the traction vector and the displacement jump vector. The basic response is elastic, with stiffness \param{kn} in 
 the normal direction and \param{ks} in the tangential direction.
 Similar to other isotropic damage models, this model assumes that the stiffness degradation is isotropic, i.e., both stiffness moduli decrease proportionally and independently of the loading 
-direction. The damaged stiffnesses are \param{kn}$\times\omega$ and \param{ks}$\times\omega$ where $\omega$ is a scalar damage variable.
+direction. The damaged stiffnesses are \param{kn}$\times(1-\omega)$ and \param{ks}$\times(1-\omega)$ where $\omega$ is a scalar damage variable.
 
 The equivalent ``strain'', $\tilde\varepsilon$, is a scalar measure derived from the displacement jump vector. The choice of the specific expression
 for the equivalent strain affects the shape of the elastic domain
@@ -2373,7 +2387,7 @@ The model parameters are summarized in Tab.~\ref{iidTabulated_table}.
 \hline
 Description & Isotropic damage model for concrete in tension\\
 \hline
-Record Format & \descitem{isointrfdm01} 
+Record Format & \descitem{isointrfdm02} 
 \elemparam{kn}{rn} \elemparam{ks}{rn} \elemparam{ft}{rn} \elemparam{tablename}{rn} \optelemparam{maxomega}{rn} \elemparam{talpha}{rn} \elemparam{d}{rn}\\
 Parameters & - \param{d} material density\\
 &- \param{tAlpha} thermal dilatation coefficient\\
@@ -3889,9 +3903,9 @@ The strength envelope is elliptic (Figure~\ref{StrengthLatticeDamage2d}) and det
 
 \begin{figure}[!htb]
 \begin{tabular}{ccc}
-\begin{htmlonly}
-  \includegraphics[width=0.7\textwidth]{figSofteningLatticeDamage2da.eps} & \includegraphics[width=0.7\textwidth]{figSofteningLatticeDamage2db.eps} & \includegraphics[width=0.7\textwidth]{figSofteningLatticeDamage2dc.eps}\\
-\end{htmlonly}
+%\begin{htmlonly}
+%  \includegraphics[width=0.7\textwidth]{figSofteningLatticeDamage2da.eps} & \includegraphics[width=0.7\textwidth]{figSofteningLatticeDamage2db.eps} & \includegraphics[width=0.7\textwidth]{figSofteningLatticeDamage2dc.eps}\\
+%\end{htmlonly}
 %begin{latexonly}
 \includegraphics[width=0.3\textwidth]{figSofteningLatticeDamage2da} & \includegraphics[width=0.3\textwidth]{figSofteningLatticeDamage2db} & \includegraphics[width=0.3\textwidth]{figSofteningLatticeDamage2dc}\\
 %end{latexonly}
