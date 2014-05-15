@@ -151,9 +151,6 @@ protected:
     double damageCompression;
     double tempDamageCompression;
 
-    double damage;
-    double tempDamage;
-
     double deltaEquivStrain;
 
     double rateFactor;
@@ -179,7 +176,7 @@ protected:
 
 public:
     /// Constructor
-    ConcreteDPM2Status(int n, Domain * d, GaussPoint * gp);
+    ConcreteDPM2Status(int n, Domain *d, GaussPoint *gp);
 
     /// Destructor
     virtual ~ConcreteDPM2Status();
@@ -212,7 +209,7 @@ public:
 
     /**
      * Get the deviatoric plastic strain norm from the material status.
-     * @return Deviatoric plasticStrainNorm.
+     * @return DeviatoricPlasticStrainNorm.
      */
     double giveDeviatoricPlasticStrainNorm()
     {
@@ -223,12 +220,14 @@ public:
         return deviatoricPlasticStrain.computeStrainNorm();
     }
 
-
+    /**
+     * Get the volumetric plastic strain from the material status.
+     * @return volumetricPlasticStrainNorm.
+     */
     double giveVolumetricPlasticStrain() const
     {
         return 1. / 3. * ( plasticStrain(0) + plasticStrain(1) + plasticStrain(2) );
     }
-
 
     /**
      * Get the hardening variable of the plasticity model.
@@ -246,53 +245,70 @@ public:
     { return kappaDTensionOne; }
 
     /**
-     * Get the hardening variable of the damage model from the
+     * Get the compression hardening variable one of the damage model from the
      * material status.
-     * @return Hardening variable kappaD.
+     * @return Hardening variable kappaDCompressionOne.
      */
     double giveKappaDCompressionOne() const
     { return kappaDCompressionOne; }
 
 
     /**
-     * Get the hardening variable of the damage model from the
+     * Get the tension hardening variable two of the damage model from the
      * material status.
-     * @return Hardening variable kappaD.
+     * @return Hardening variable kappaDTensionTwo.
      */
     double giveKappaDTensionTwo() const
     { return kappaDTensionTwo; }
 
 
     /**
-     * Get the hardening variable of the damage model from the
+     * Get the compression hardening variable two of the damage model from the
      * material status.
-     * @return Hardening variable kappaD.
+     * @return Hardening variable kappaDCompressionTwo.
      */
     double giveKappaDCompressionTwo() const
     { return kappaDCompressionTwo; }
 
+
+    /**
+     * Get the equivalent strain from the
+     * material status.
+     * @return Equivalent strain equivStrain.
+     */
     double giveEquivStrain() const
     { return equivStrain; }
 
+    /**
+     * Get the tension equivalent strain from the
+     * material status.
+     * @return Equivalent strain equivStrainTension.
+     */
     double giveEquivStrainTension() const
     { return equivStrainTension; }
 
+
+    /**
+     * Get the compression equivalent strain from the
+     * material status.
+     * @return Equivalent strain equivStrainCompression.
+     */
     double giveEquivStrainCompression() const
     { return equivStrainCompression; }
 
     /**
-     * Get the damage variable of the damage model from the
+     * Get the tension damage variable of the damage model from the
      * material status.
-     * @return Damage variable damage.
+     * @return Tension damage variable damageTension.
      */
     double giveDamageTension() const
     { return damageTension; }
 
 
     /**
-     * Get the damage variable of the damage model from the
+     * Get the compressive damage variable of the damage model from the
      * material status.
-     * @return Damage variable damage.
+     * @return Compressive damage variable damageCompression.
      */
     double giveDamageCompression() const
     { return damageCompression; }
@@ -300,13 +316,18 @@ public:
 
 
     /**
-     * Get the damage variable of the damage model from the
+     * Get the rate factor of the damage model from the
      * material status.
-     * @return Damage variable damage.
+     * @return rate factor rateFactor.
      */
     double giveRateFactor() const
     { return rateFactor; }
 
+    /**
+     * Get the temp variable of the damage model from the
+     * material status.
+     * @return Damage variable damage.
+     */
     double giveTempRateFactor() const
     { return tempRateFactor; }
 
@@ -995,10 +1016,17 @@ public:
 
 
     /**
-     * Perform stress return for the damage model, i.e. if the trial stress state does not violate the plasticity surface.
+     * Compute damage parameters
      */
     void  computeDamage(FloatArray &answer, const StrainVector &strain, const double timeFactor, GaussPoint *gp, TimeStep *tStep, const double alpha);
 
+
+    /**
+     * Check for un- and reloading in the damage part
+     */
+    int checkForUnAndReloading(double &tempEquivStrain,
+                               double &minEquivStrain,
+                               GaussPoint *gp);
 
     double computeAlpha(StressVector &effectiveStressTension, StressVector &effectiveStressCompression, StressVector &effectiveStress);
 
@@ -1012,7 +1040,8 @@ public:
 
     double computeDeltaPlasticStrainNormCompression(const double tempAlpha, double tempKappaD, double kappaD, GaussPoint *gp);
 
-    virtual void computeEquivalentStrain(double &kappaD, const StrainVector &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual double computeEquivalentStrain(double sig, double rho, double theta);
+
 
     /// Compute the ductility measure for the damage model.
     double computeDuctilityMeasureDamage(const StrainVector &strain, GaussPoint *gp);
