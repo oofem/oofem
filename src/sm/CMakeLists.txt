@@ -139,6 +139,7 @@ set (sm_material
     anisodamagemodel.C
     winklerpasternak.C
     structmatsettable.C
+    bondceb.C
     )
 
 set (sm_error
