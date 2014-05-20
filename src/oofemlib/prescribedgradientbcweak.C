@@ -53,63 +53,31 @@
 #include <sstream>
 
 namespace oofem {
-REGISTER_BoundaryCondition(PrescribedGradientBCWeak);
+//REGISTER_BoundaryCondition(PrescribedGradientBCWeak);
 
 PrescribedGradientBCWeak::PrescribedGradientBCWeak(int n, Domain * d):
 PrescribedGradientBC(n, d),
 mTractionInterpOrder(0),
 mNumTractionNodesAtIntersections(1),
 mTractionNodeSpacing(1),
-mTractionLivesOnGammaPlus(false),
+mMeshIsPeriodic(false),
 mDuplicateCornerNodes(false),
 mpDisplacementLock(NULL),
 mDispLockScaling(1.0)
 {
-
-    // Compute LC and UC by assuming a rectangular domain.
-    int numNodes = d->giveNumberOfDofManagers();
-    int nsd = d->giveNumberOfSpatialDimensions();
-
-    mLC = *(d->giveDofManager(1)->giveCoordinates());
-    mUC = *(d->giveDofManager(1)->giveCoordinates());
-
-    for(int i = 1; i <= numNodes; i++) {
-        DofManager *dMan = d->giveDofManager(i);
-        const FloatArray &coord = *(dMan->giveCoordinates());
-        bool nodeIsLC = true;
-        bool nodeIsUC = true;
-        for(int j = 0; j < nsd; j++) {
-
-            if( coord[j] > mLC[j] ) {
-                nodeIsLC = false;
-            }
-
-            if( coord[j] < mUC[j] ) {
-                nodeIsUC = false;
-            }
-
-        }
-
-        if(nodeIsLC) {
-            mLC = coord;
-        }
-
-        if(nodeIsUC) {
-            mUC = coord;
-        }
-
-    }
+	// Compute bounding box of the domain
+    computeDomainBoundingBox(*d, mLC, mUC);
 }
 
 PrescribedGradientBCWeak::~PrescribedGradientBCWeak() {
 
-    for(size_t i = 0; i < mpTractionNodes.size(); i++) {
-        if(mpTractionNodes[i] != NULL) {
-            delete mpTractionNodes[i];
-            mpTractionNodes[i] = NULL;
+    for(size_t i = 0; i < mpTractionMasterNodes.size(); i++) {
+        if(mpTractionMasterNodes[i] != NULL) {
+            delete mpTractionMasterNodes[i];
+            mpTractionMasterNodes[i] = NULL;
         }
     }
-    mpTractionNodes.clear();
+    mpTractionMasterNodes.clear();
 
     for(size_t i = 0; i < mpTractionElements.size(); i++) {
         if(mpTractionElements[i] != NULL) {
@@ -127,7 +95,7 @@ PrescribedGradientBCWeak::~PrescribedGradientBCWeak() {
 
 int PrescribedGradientBCWeak::giveNumberOfInternalDofManagers()
 {
-    int numDMan = mpTractionNodes.size();
+    int numDMan = mpTractionMasterNodes.size();
 
     if(mpDisplacementLock != NULL) {
         numDMan++;
@@ -138,8 +106,8 @@ int PrescribedGradientBCWeak::giveNumberOfInternalDofManagers()
 
 DofManager* PrescribedGradientBCWeak::giveInternalDofManager(int i)
 {
-    if(i-1 < int(mpTractionNodes.size()) ) {
-        return mpTractionNodes[i-1];
+    if(i-1 < int(mpTractionMasterNodes.size()) ) {
+        return mpTractionMasterNodes[i-1];
     }
     else {
         return mpDisplacementLock;
@@ -164,17 +132,6 @@ IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, mTractionNodeSpacing, _IFT_PrescribedGradientBCWeak_NumTractionNodeSpacing);
     printf("mTractionNodeSpacing: %d\n", mTractionNodeSpacing);
 
-    int periodic = 0;
-    IR_GIVE_FIELD(ir, periodic, _IFT_PrescribedGradientBCWeak_TractionOnGammaPlus);
-    printf("periodic: %d\n", periodic);
-
-    if(periodic == 1) {
-        mTractionLivesOnGammaPlus = true;
-    }
-    else {
-        mTractionLivesOnGammaPlus = false;
-    }
-
     int duplicateCorners = 0;
     IR_GIVE_FIELD(ir, duplicateCorners, _IFT_PrescribedGradientBCWeak_DuplicateCornerNodes);
     printf("duplicateCorners: %d\n", duplicateCorners);
@@ -196,7 +153,7 @@ void PrescribedGradientBCWeak :: giveInputRecord(DynamicInputRecord &input)
 
 void PrescribedGradientBCWeak::postInitialize()
 {
-    createTractionMesh();
+
 }
 
 
@@ -249,28 +206,7 @@ void PrescribedGradientBCWeak::assembleVector(FloatArray &answer, TimeStep *tSte
 
                 // Compute H.(x - x_c) or H.[x]
                 FloatArray temp;
-
-                if(mTractionLivesOnGammaPlus) {
-                    FloatArray xMinus;
-                    giveMirroredPointOnGammaMinus(xMinus, x);
-
-                    if(mGradient.giveNumberOfRows() == 2) {
-                        temp = {x[0]-xMinus[0], x[1]-xMinus[1]};
-                    }
-                    else {
-                        temp.beDifferenceOf(x, xMinus);
-                    }
-
-                }
-                else {
-
-                    if(mGradient.giveNumberOfRows() == 2) {
-                        temp = {x[0]-mCenterCoord[0], x[1]-mCenterCoord[1]};
-                    }
-                    else {
-                        temp.beDifferenceOf(x, mCenterCoord);
-                    }
-                }
+                giveBoundaryCoordVector(temp, x);
 
                 FloatArray Hx;
                 Hx.beProductOf(mGradient, temp);
@@ -577,17 +513,8 @@ void PrescribedGradientBCWeak::computeField(FloatArray &sigma, EquationID eid, T
             traction.beProductOf(Nmat, tracUnknowns);
 
             FloatArray tmp;
-            if(mTractionLivesOnGammaPlus) {
-                FloatArray xMinus;
-                giveMirroredPointOnGammaMinus(xMinus, x);
-                tmp.beDifferenceOf(x, xMinus);
-            }
-            else {
-                tmp.resize(dim);
-                for(int m = 0; m < dim; m++) {
-                    tmp[m] = x[m] - mCenterCoord[m];
-                }
-            }
+            giveBoundaryCoordVector(tmp, x);
+
             FloatMatrix contrib;
             contrib.beDyadicProductOf(traction, tmp);
 
@@ -631,515 +558,345 @@ void PrescribedGradientBCWeak::computeField(FloatArray &sigma, EquationID eid, T
 #endif
 }
 
-void PrescribedGradientBCWeak::createTractionMesh()
+void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity)
 {
     const double nodeDistTol = 1.0e-15;
+    const double meshTol = 1.0e-9; // Minimum distance between traction nodes
 
-    // TODO: Add mapped crack points from gamma minus to bndNodeCoordsFull
-    // if periodic tractions are used.
-    std::vector<FloatArray> bndNodeCoords, bndNodeCoordsFull;
-    std::vector<bool> mandatoryToKeep;
+//    std::vector<FloatArray> bndNodeCoords;
+//    std::vector<bool> mandatoryToKeep;
 
-    if(!mTractionLivesOnGammaPlus) {
-        //printf("Creating Dirichlet tractions.\n");
+    /**
+     * first: 	coordinates
+     * second: 	bool telling if the point must be included in the
+     * 			traction mesh (e.g. a corner node),
+     * 			or if it can be omitted.
+     */
+    std::vector< std::pair<FloatArray, bool> > bndNodeCoords;
 
-        Set *setPointer = this->giveDomain()->giveSet(this->set);
-        const IntArray &boundaries = setPointer->giveBoundaryList();
-        IntArray bNodes;
+    Set *setPointer = this->giveDomain()->giveSet(this->set);
+    const IntArray &boundaries = setPointer->giveBoundaryList();
+    IntArray bNodes;
 
-        bool duplicateAtCorner = mDuplicateCornerNodes;
+    bool duplicateAtCorner = mDuplicateCornerNodes;
 
-        // Loop over all boundary segments
-        for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-            Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
-            int boundary = boundaries.at(pos * 2);
+    // Loop over all boundary segments
+    for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
 
-            e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+        int boundary = boundaries.at(pos * 2);
 
-            // Add the start node of the segment
-            DofManager *startNode = e->giveDofManager( bNodes[0] );
-            bndNodeCoords.push_back( *(startNode->giveCoordinates()) );
-            bndNodeCoordsFull.push_back( *(startNode->giveCoordinates()) );
+        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+
+        // Add the start node of the segment
+        DofManager *startNode = e->giveDofManager( bNodes[0] );
+        const FloatArray &x = *(startNode->giveCoordinates());
+
+    	printf("\nChecking boundary %d with start point: ", pos);
+    	x.printYourself();
+    	printf("and end point: ");
+    	e->giveDofManager( bNodes[1] )->giveCoordinates()->printYourself();
+    	printf("\n");
+
+        if( boundaryPointIsOnActiveBoundary(x) ) {
+
+        	printf("Adding point: "); x.printYourself();
 
             bool isCorner = false;
-#if 1
-            FloatArray cornerPos = mLC;
-            if( startNode->giveCoordinates()->distance(cornerPos) < nodeDistTol ) {
-                isCorner = true;
-            }
+            bool duplicatable = false;
 
-            cornerPos = {mUC[0], mLC[1]};
-            if( startNode->giveCoordinates()->distance( cornerPos ) < nodeDistTol ) {
-                isCorner = true;
-            }
-
-            cornerPos = {mUC[0], mUC[1]};
-            if( startNode->giveCoordinates()->distance( cornerPos ) < nodeDistTol ) {
-                isCorner = true;
-            }
-
-            cornerPos = {mLC[0], mUC[1]};
-            if( startNode->giveCoordinates()->distance( cornerPos ) < nodeDistTol ) {
-                isCorner = true;
-            }
-#endif
-
+            checkIfCorner(isCorner, duplicatable, x, nodeDistTol);
 
             if(isCorner) {
-
-                if(duplicateAtCorner) {
-                    printf("Found corner: "); startNode->giveCoordinates()->printYourself();
-                    printf("Duplicating...\n");
-                    bndNodeCoords.push_back( *(startNode->giveCoordinates()) );
-                    bndNodeCoordsFull.push_back( *(startNode->giveCoordinates()) );
-                    mandatoryToKeep.push_back(true);
-                }
-            }
-
-            if(isCorner) {
-                mandatoryToKeep.push_back(true);
+            	std::pair<FloatArray, bool> nodeCoord = {x, true};
+                bndNodeCoords.push_back( nodeCoord );
             }
             else {
-                mandatoryToKeep.push_back(false);
+            	std::pair<FloatArray, bool> nodeCoord = {x, false};
+                bndNodeCoords.push_back( nodeCoord );
             }
 
-            // Add traction nodes where cracks intersect the boundary if desired
-            XfemElementInterface *xfemElInt = dynamic_cast<XfemElementInterface*> (e);
 
-            if(xfemElInt != NULL && domain->hasXfemManager() ) {
-                std::vector<Line> segments;
-                std::vector<FloatArray> intersecPoints;
-                xfemElInt->partitionEdgeSegment( boundary, segments, intersecPoints );
+            if(isCorner) {
 
-                for(size_t i = 0; i < intersecPoints.size(); i++) {
+
+            	if(duplicatable) {
+					if(duplicateAtCorner) {
+						printf("Found corner: "); startNode->giveCoordinates()->printYourself();
+						printf("Duplicating...\n");
+
+						// Here, we have the additional constraint of
+						// periodicity along each edge:
+						// We require: t(edge_start) = t(edge_end)
+
+			        	printf("Adding duplicated point: "); startNode->giveCoordinates()->printYourself();
+		            	std::pair<FloatArray, bool> nodeCoord = {x, true};
+		                bndNodeCoords.push_back( nodeCoord );
+					}
+            	}
+            }
+
+        } // if pointIsOnGammaPlus
+
+        // Add traction nodes where cracks intersect the boundary if desired
+        XfemElementInterface *xfemElInt = dynamic_cast<XfemElementInterface*> (e);
+
+        if(xfemElInt != NULL && domain->hasXfemManager() ) {
+            std::vector<Line> segments;
+            std::vector<FloatArray> intersecPoints;
+            xfemElInt->partitionEdgeSegment( boundary, segments, intersecPoints );
+
+            for(size_t i = 0; i < intersecPoints.size(); i++) {
+
+                if( boundaryPointIsOnActiveBoundary(intersecPoints[i]) ) {
+
                     for(int j = 0; j < mNumTractionNodesAtIntersections; j++) {
-                        bndNodeCoords.push_back( intersecPoints[i] );
-                        mandatoryToKeep.push_back(true);
+		            	std::pair<FloatArray, bool> nodeCoord = {intersecPoints[i], true};
+		                bndNodeCoords.push_back( nodeCoord );
                     }
 
-                    bndNodeCoordsFull.push_back( intersecPoints[i] );
-
-                }
-            }
-
-        }
-
-        std::vector<FloatArray> bndNodeCoordsToKeep;
-        int numPointsPassed = 0;
-        for(size_t i = 0; i < bndNodeCoords.size(); i++) {
-            numPointsPassed++;
-            if( mandatoryToKeep[i] || numPointsPassed >= mTractionNodeSpacing ) {
-                bndNodeCoordsToKeep.push_back(bndNodeCoords[i]);
-                //printf("Keeping node %lu located at: ", i); bndNodeCoords[i].printYourself();
-                numPointsPassed = 0;
-            }
-
-        }
-
-        bndNodeCoords = bndNodeCoordsToKeep;
-
-
-#if 0
-        printf("bndNodeCoords: \n");
-        for(FloatArray x :  bndNodeCoords) {
-            x.printYourself();
-        }
-#endif
-
-        // Create traction dofs
-        int nsd = domain->giveNumberOfSpatialDimensions();
-        std::vector<int> dofIds;
-        for(int j = 0; j < nsd; j++) {
-            dofIds.push_back( this->domain->giveNextFreeDofID() );
-        }
-        for(size_t i = 0; i < bndNodeCoords.size(); i++) {
-
-            int numNodes = domain->giveNumberOfDofManagers();
-            Node *node = new Node(numNodes+1, domain);
-            for(int j = 0; j < nsd; j++) {
-                node->appendDof( new MasterDof( j + 1, node, ( DofIDItem ) ( dofIds[j] ) ) );
-            }
-
-            node->setCoordinates(bndNodeCoords[i]);
-            mpTractionNodes.push_back(node);
-        }
-
-        // Create traction elements
-        if(mTractionInterpOrder == 0) {
-            for(size_t i = 0; i < mpTractionNodes.size(); i++) {
-
-                TractionElement *tractionEl = new TractionElement();
-
-                tractionEl->mTractionNodeInd.push_back( i );
-                tractionEl->mStartCoord = *(mpTractionNodes[i]->giveCoordinates());
-
-                if( i < mpTractionNodes.size()-1) {
-                    tractionEl->mEndCoord = *(mpTractionNodes[i+1]->giveCoordinates());
+                    printf("Adding intersection point: "); intersecPoints[i].printYourself();
                 }
                 else {
-                    tractionEl->mEndCoord = *(mpTractionNodes[0]->giveCoordinates());
-                }
+                	if(mMeshIsPeriodic) {
+                		FloatArray xPlus;
+                		giveMirroredPointOnGammaPlus(xPlus, intersecPoints[i]);
 
-                mpTractionElements.push_back(tractionEl);
-            }
-        }
-        else if(mTractionInterpOrder == 1) {
-            for(size_t i = 0; i < mpTractionNodes.size(); i++) {
-
-                TractionElement *tractionEl = new TractionElement();
-
-                if( i < mpTractionNodes.size()-1) {
-                    tractionEl->mStartCoord = *(mpTractionNodes[i]->giveCoordinates());
-                    tractionEl->mTractionNodeInd.push_back( i );
-
-                    tractionEl->mEndCoord = *(mpTractionNodes[i+1]->giveCoordinates());
-                    tractionEl->mTractionNodeInd.push_back( i+1 );
-                }
-                else {
-#if 1
-                    tractionEl->mStartCoord = *(mpTractionNodes[0]->giveCoordinates());
-                    tractionEl->mTractionNodeInd.push_back( 0 );
-
-                    tractionEl->mEndCoord = *(mpTractionNodes[i]->giveCoordinates());
-                    tractionEl->mTractionNodeInd.push_back( i );
-#else
-                    tractionEl->mStartCoord = *(mpTractionNodes[i]->giveCoordinates());
-                    tractionEl->mTractionNodeInd.push_back( i );
-
-                    tractionEl->mEndCoord = *(mpTractionNodes[0]->giveCoordinates());
-                    tractionEl->mTractionNodeInd.push_back( 0 );
-#endif
-                }
-
-
-                // Take care of duplicated nodes at crack intersections
-                if( tractionEl->mStartCoord.distance( tractionEl->mEndCoord ) > nodeDistTol ) {
-                    mpTractionElements.push_back(tractionEl);
-                }
-                else {
-                    printf("Skipping traction el with start coord: "); tractionEl->mStartCoord.printYourself();
-                    delete tractionEl;
-                }
-
-            }
-        }
-
-
-        // Create map from a traction element to displacement elements it
-        // interacts with everywhere on gamma.
-        SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
-        mMapTractionElDispElGamma.clear();
-        for(size_t i = 0; i < mpTractionElements.size(); i++) {
-            const FloatArray &xS = mpTractionElements[i]->mStartCoord;
-            const FloatArray &xE = mpTractionElements[i]->mEndCoord;
-            FloatArray xC;
-            xC.beScaled(0.5, xS);
-            xC.add(0.5, xE);
-
-            double elLength = xS.distance(xE);
-            std :: set< int >elList;
-            // TODO: What if an element is cut by two cracks, so that the
-            // traction element becomes shorter than the displacement element?
-            // Make sure that the search radius is never smaller than the
-            // largest displacement element length along the boundary.
-            localizer->giveAllElementsWithNodesWithinBox(elList, xC, 0.51*elLength );
-
-            std :: vector< int > displacementElements;
-            for ( int elNum: elList ) {
-
-                // Check if the traction element and the displacement element intersect
-                // Intersection occurs if at least one displacement element node is
-                // on the traction element.
-                Element *el = domain->giveElement(elNum);
-
-                Line line(xS, xE);
-                if( line.intersects(el) ) {
-                    displacementElements.push_back(elNum);
-                }
-            }
-
-            mMapTractionElDispElGamma[i] = displacementElements;
-        }
-    }
-    else{
-        printf("Creating periodic tractions.\n");
-        //OOFEM_ERROR("Not implemented.");
-
-        Set *setPointer = this->giveDomain()->giveSet(this->set);
-        const IntArray &boundaries = setPointer->giveBoundaryList();
-        IntArray bNodes;
-
-        bool duplicateAtCorner = mDuplicateCornerNodes;
-
-        // Loop over all boundary segments
-        for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-            Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
-            int boundary = boundaries.at(pos * 2);
-
-            e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-
-            // Add the start node of the segment
-            DofManager *startNode = e->giveDofManager( bNodes[0] );
-            const FloatArray &x = *(startNode->giveCoordinates());
-
-            if(pointIsOnGammaPlus(x)) {
-
-                bndNodeCoords.push_back( x );
-                bndNodeCoordsFull.push_back( x );
-
-                bool isCorner = false;
-                bool duplicatable = false;
-#if 1
-                FloatArray cornerPos = {mUC[0], mUC[1]};
-                if( startNode->giveCoordinates()->distance( cornerPos ) < nodeDistTol ) {
-                    isCorner = true;
-                    duplicatable = true;
-                }
-
-
-                cornerPos = {mUC[0], mLC[1]};
-                if( startNode->giveCoordinates()->distance( cornerPos ) < nodeDistTol ) {
-                    isCorner = true;
-                }
-
-                cornerPos = {mLC[0], mUC[1]};
-                if( startNode->giveCoordinates()->distance( cornerPos ) < nodeDistTol ) {
-                    isCorner = true;
-                }
-
-#endif
-
-
-                if(isCorner && duplicatable) {
-
-                    if(duplicateAtCorner) {
-                        printf("Found corner: "); startNode->giveCoordinates()->printYourself();
-                        printf("Duplicating...\n");
-                        bndNodeCoords.push_back( *(startNode->giveCoordinates()) );
-                        bndNodeCoordsFull.push_back( *(startNode->giveCoordinates()) );
-                        mandatoryToKeep.push_back(true);
-                    }
-                }
-
-                if(isCorner) {
-                    mandatoryToKeep.push_back(true);
-                }
-                else {
-                    mandatoryToKeep.push_back(false);
-                }
-            } // if pointIsOnGammaPlus
-
-            // Add traction nodes where cracks intersect the boundary if desired
-            XfemElementInterface *xfemElInt = dynamic_cast<XfemElementInterface*> (e);
-
-            if(xfemElInt != NULL && domain->hasXfemManager() ) {
-                std::vector<Line> segments;
-                std::vector<FloatArray> intersecPoints;
-                xfemElInt->partitionEdgeSegment( boundary, segments, intersecPoints );
-
-                for(size_t i = 0; i < intersecPoints.size(); i++) {
-
-                    if(pointIsOnGammaPlus(intersecPoints[i])) {
+                		// TODO: Implement proper search and check
 
                         for(int j = 0; j < mNumTractionNodesAtIntersections; j++) {
-                            bndNodeCoords.push_back( intersecPoints[i] );
-                            mandatoryToKeep.push_back(true);
+    		            	std::pair<FloatArray, bool> nodeCoord = {xPlus, true};
+    		                bndNodeCoords.push_back( nodeCoord );
                         }
 
-                        printf("Adding intersection point: "); intersecPoints[i].printYourself();
-
-                        bndNodeCoordsFull.push_back( intersecPoints[i] );
-                    }
+                	}
                 }
             }
-
         }
 
-        std::vector<FloatArray> bndNodeCoordsToKeep;
-        int numPointsPassed = 0;
-        for(size_t i = 0; i < bndNodeCoords.size(); i++) {
-            numPointsPassed++;
-            if( mandatoryToKeep[i] || numPointsPassed >= mTractionNodeSpacing ) {
-                bndNodeCoordsToKeep.push_back(bndNodeCoords[i]);
-                //printf("Keeping node %lu located at: ", i); bndNodeCoords[i].printYourself();
-                numPointsPassed = 0;
+    }
+
+    // Sort boundary nodes
+    std::sort(bndNodeCoords.begin(), bndNodeCoords.end(), ArcPosSortFunction2<bool>(mLC, mUC, nodeDistTol) );
+
+    EdgeTracker edgeTracker;
+    for(size_t i = 0; i < bndNodeCoords.size()-1; i++) {
+    	bool isCorner, dummyBool;
+    	checkIfCorner(isCorner, dummyBool, bndNodeCoords[i].first, nodeDistTol);
+
+    	if(isCorner) {
+    		if( (bndNodeCoords[i].first).distance(bndNodeCoords[i+1].first) < nodeDistTol ) {
+    			edgeTracker.addPoint(i, true, mMeshIsPeriodic);
+    			edgeTracker.addPoint(i, false, mMeshIsPeriodic);
+    		}
+    		else {
+    			edgeTracker.addPoint(i, false, mMeshIsPeriodic);
+    		}
+
+    	}
+    }
+	edgeTracker.addPoint(bndNodeCoords.size()-1, true, mMeshIsPeriodic);
+	edgeTracker.addStoredSecondIndex();
+
+
+    // Create traction dofs
+    int nsd = domain->giveNumberOfSpatialDimensions();
+    std::vector<int> dofIds;
+    for(int j = 0; j < nsd; j++) {
+        dofIds.push_back( this->domain->giveNextFreeDofID() );
+    }
+
+    std::vector<FloatArray> tractionNodeCoord;
+    int numNodes = domain->giveNumberOfDofManagers();
+    int numPointsPassed = 0;
+    std::unordered_map<int,int> originalNodeToReducedNode;
+    for(size_t i = 0; i < bndNodeCoords.size(); i++) {
+        numPointsPassed++;
+        if( bndNodeCoords[i].second || numPointsPassed >= mTractionNodeSpacing ) {
+
+        	originalNodeToReducedNode[i] = mpTractionNodes.size();
+
+            //printf("Keeping node %lu located at: ", i); bndNodeCoords[i].printYourself();
+            numPointsPassed = 0;
+
+        	bool createSlaveNode = false;
+        	int masterInd = -1;
+
+        	if( edgeTracker.giveMasterIndex(masterInd, i) ){
+        		masterInd = originalNodeToReducedNode[masterInd];
+				createSlaveNode = true;
+        	}
+
+        	if(!iEnforceCornerPeriodicity) {
+        		createSlaveNode = false;
+        	}
+
+            if(createSlaveNode) {
+
+            	printf("Slave: %lu Master: %d mpTractionNodes.size(): %lu\n", i, masterInd, mpTractionNodes.size() );
+                Node *masterNode = mpTractionNodes[masterInd];
+
+                mpTractionNodes.push_back(masterNode);
+                tractionNodeCoord.push_back(bndNodeCoords[i].first);
             }
+            else {
+                Node *node = new Node(numNodes+1, domain);
+                node->setGlobalNumber(numNodes+1);
+                for(int j = 0; j < nsd; j++) {
+                    node->appendDof( new MasterDof( j + 1, node, ( DofIDItem ) ( dofIds[j] ) ) );
+                }
 
+                node->setCoordinates(bndNodeCoords[i].first);
+                mpTractionNodes.push_back(node);
+                mpTractionMasterNodes.push_back(node);
+
+                tractionNodeCoord.push_back(bndNodeCoords[i].first);
+
+                numNodes++;
+            }
         }
+    }
 
-        bndNodeCoords = bndNodeCoordsToKeep;
-
-
-#if 0
-        printf("bndNodeCoords: \n");
-        for(FloatArray x :  bndNodeCoords) {
-            x.printYourself();
-        }
+#if 1
+    printf("bndNodeCoords: \n");
+    for(auto x :  bndNodeCoords) {
+        x.first.printYourself();
+    }
 #endif
 
-        // Create traction dofs
+    // Create traction elements
+    createTractionElements(tractionNodeCoord, nodeDistTol);
+
+    // Construct maps necessary for assembly
+    buildMaps(bndNodeCoords);
+
+    // Write traction nodes to debug vtk
+    std :: vector<FloatArray> nodeCoord;
+    for( Node *node : mpTractionNodes ) {
+        nodeCoord.push_back( *(node->giveCoordinates()) );
+    }
+
+    std :: string fileName("TractionNodeCoord.vtk");
+    XFEMDebugTools::WritePointsToVTK(fileName, nodeCoord);
+
+
+    if(mMeshIsPeriodic) {
+        // Lock displacement in one node if we use periodic BCs
+
+        int numNodes = domain->giveNumberOfDofManagers();
+        mpDisplacementLock = new Node(numNodes+1, domain);
+
+
         int nsd = domain->giveNumberOfSpatialDimensions();
         std::vector<int> dofIds;
         for(int j = 0; j < nsd; j++) {
             dofIds.push_back( this->domain->giveNextFreeDofID() );
         }
-        for(size_t i = 0; i < bndNodeCoords.size(); i++) {
 
-            int numNodes = domain->giveNumberOfDofManagers();
-            Node *node = new Node(numNodes+1, domain);
-            for(int j = 0; j < nsd; j++) {
-                node->appendDof( new MasterDof( j + 1, node, ( DofIDItem ) ( dofIds[j] ) ) );
-            }
-
-            node->setCoordinates(bndNodeCoords[i]);
-            mpTractionNodes.push_back(node);
+        for(int j = 0; j < nsd; j++) {
+            mpDisplacementLock->appendDof( new MasterDof( j + 1, mpDisplacementLock, ( DofIDItem ) ( dofIds[j] ) ) );
         }
-
-        // Create traction elements
-        if(mTractionInterpOrder == 0) {
-            for(size_t i = 0; i < mpTractionNodes.size(); i++) {
-
-                TractionElement *tractionEl = new TractionElement();
-
-                tractionEl->mTractionNodeInd.push_back( i );
-                tractionEl->mStartCoord = *(mpTractionNodes[i]->giveCoordinates());
-
-                if( i < mpTractionNodes.size()-1) {
-                    tractionEl->mEndCoord = *(mpTractionNodes[i+1]->giveCoordinates());
-                }
-                else {
-                    tractionEl->mEndCoord = *(mpTractionNodes[0]->giveCoordinates());
-                }
-
-                mpTractionElements.push_back(tractionEl);
-            }
-        }
-        else if(mTractionInterpOrder == 1) {
-            for(size_t i = 0; i < mpTractionNodes.size()-1; i++) {
-
-                TractionElement *tractionEl = new TractionElement();
-
-                if( i < mpTractionNodes.size()-1) {
-                    tractionEl->mStartCoord = *(mpTractionNodes[i]->giveCoordinates());
-                    tractionEl->mTractionNodeInd.push_back( i );
-
-                    tractionEl->mEndCoord = *(mpTractionNodes[i+1]->giveCoordinates());
-                    tractionEl->mTractionNodeInd.push_back( i+1 );
-
-                    if( tractionEl->mStartCoord.distance( tractionEl->mEndCoord ) > nodeDistTol ) {
-                        mpTractionElements.push_back(tractionEl);
-                    }
-                    else {
-                        printf("Skipping traction el with start coord: "); tractionEl->mStartCoord.printYourself();
-                        delete tractionEl;
-                    }
-                }
-
-            }
-        }
-
-
-        // Create map from a traction element to displacement elements it
-        // interacts with everywhere on gamma.
-        SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
-        mMapTractionElDispElGamma.clear();
-        mMapTractionElDispElGammaPlus.clear();
-        mMapTractionElDispElGammaMinus.clear();
-        for(size_t i = 0; i < mpTractionElements.size(); i++) {
-
-
-            // Elements interacting on Gamma plus
-            FloatArray xS_plus = mpTractionElements[i]->mStartCoord;
-            FloatArray xE_plus = mpTractionElements[i]->mEndCoord;
-            FloatArray xC_plus;
-            xC_plus.beScaled(0.5, xS_plus);
-            xC_plus.add(0.5, xE_plus);
-
-            double elLength_plus = xS_plus.distance(xE_plus);
-            std :: set< int >elList_plus;
-            // TODO: What if an element is cut by two cracks, so that the
-            // traction element becomes shorter than the displacement element?
-            // Make sure that the search radius is never smaller than the
-            // largest displacement element length along the boundary.
-            localizer->giveAllElementsWithNodesWithinBox(elList_plus, xC_plus, 0.51*elLength_plus );
-
-            std :: vector< int > displacementElements, displacementElements_plus;
-            for ( int elNum: elList_plus ) {
-
-                // Check if the traction element and the displacement element intersect
-                // Intersection occurs if at least one displacement element node is
-                // on the traction element.
-                Element *el = domain->giveElement(elNum);
-
-                Line line_plus(xS_plus, xE_plus);
-                if( line_plus.intersects(el) ) {
-                    displacementElements.push_back(elNum);
-                    displacementElements_plus.push_back(elNum);
-                }
-            }
-
-            //mMapTractionElDispElGamma[i] = displacementElements;
-            mMapTractionElDispElGammaPlus[i] = displacementElements_plus;
-
-            if(xS_plus.distance(mUC) < 1.0e-12) {
-                // Perturb in direction of xE
-                FloatArray t;
-                t.beDifferenceOf(xE_plus, xS_plus);
-                xS_plus.add(1.0e-9, t);
-                printf("xS_plus: %.12e %.12e\n", xS_plus[0], xS_plus[1]);
-            }
-
-            if(xE_plus.distance(mUC) < 1.0e-12) {
-                // Perturb in direction of xS
-                FloatArray t;
-                t.beDifferenceOf(xS_plus, xE_plus);
-                xE_plus.add(1.0e-9, t);
-                printf("xE_plus: %.12e %.12e\n", xE_plus[0], xE_plus[1]);
-            }
-
-            // Elements interacting on Gamma minus
-            FloatArray xS_minus;
-            giveMirroredPointOnGammaMinus(xS_minus, xS_plus);
-            FloatArray xE_minus;
-            giveMirroredPointOnGammaMinus(xE_minus, xE_plus);
-            FloatArray xC_minus;
-            xC_minus.beScaled(0.5, xS_minus);
-            xC_minus.add(0.5, xE_minus);
-
-            double elLength_minus = xS_minus.distance(xE_minus);
-            std :: set< int >elList_minus;
-            // TODO: What if an element is cut by two cracks, so that the
-            // traction element becomes shorter than the displacement element?
-            // Make sure that the search radius is never smaller than the
-            // largest displacement element length along the boundary.
-            localizer->giveAllElementsWithNodesWithinBox(elList_minus, xC_minus, 0.51*elLength_minus );
-
-            std :: vector< int > displacementElements_minus;
-            for ( int elNum: elList_minus ) {
-
-                // Check if the traction element and the displacement element intersect
-                // Intersection occurs if at least one displacement element node is
-                // on the traction element.
-                Element *el = domain->giveElement(elNum);
-
-                Line line_minus(xS_minus, xE_minus);
-                if( line_minus.intersects(el) ) {
-                    displacementElements.push_back(elNum);
-                    displacementElements_minus.push_back(elNum);
-                }
-            }
-
-            mMapTractionElDispElGamma[i] = displacementElements;
-            mMapTractionElDispElGammaMinus[i] = displacementElements_minus;
-
-
-        }
-
-
     }
 
+}
+
+void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray, bool> > &iBndNodeCoordsFull)
+{
+    // Create map from a traction element to displacement elements it
+    // interacts with everywhere on gamma.
+    SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
+    mMapTractionElDispElGamma.clear();
+    for(size_t i = 0; i < mpTractionElements.size(); i++) {
 
 
+        // Elements interacting on Gamma plus
+        FloatArray xS_plus = mpTractionElements[i]->mStartCoord;
+        FloatArray xE_plus = mpTractionElements[i]->mEndCoord;
+        FloatArray xC_plus;
+        xC_plus.beScaled(0.5, xS_plus);
+        xC_plus.add(0.5, xE_plus);
+
+        double elLength_plus = xS_plus.distance(xE_plus);
+        std :: set< int >elList_plus;
+        // TODO: What if an element is cut by two cracks, so that the
+        // traction element becomes shorter than the displacement element?
+        // Make sure that the search radius is never smaller than the
+        // largest displacement element length along the boundary.
+        localizer->giveAllElementsWithNodesWithinBox(elList_plus, xC_plus, 0.51*elLength_plus );
+
+        std :: vector< int > displacementElements, displacementElements_plus;
+        for ( int elNum: elList_plus ) {
+
+            // Check if the traction element and the displacement element intersect
+            // Intersection occurs if at least one displacement element node is
+            // on the traction element.
+            Element *el = domain->giveElement(elNum);
+
+            Line line_plus(xS_plus, xE_plus);
+            if( line_plus.intersects(el) ) {
+                displacementElements.push_back(elNum);
+                displacementElements_plus.push_back(elNum);
+            }
+        }
+
+        if(mMeshIsPeriodic) {
+        	//mMapTractionElDispElGamma[i] = displacementElements;
+
+			if(xS_plus.distance(mUC) < 1.0e-12) {
+				// Perturb in direction of xE
+				FloatArray t;
+				t.beDifferenceOf(xE_plus, xS_plus);
+				xS_plus.add(1.0e-9, t);
+//				printf("xS_plus: %.12e %.12e\n", xS_plus[0], xS_plus[1]);
+			}
+
+			if(xE_plus.distance(mUC) < 1.0e-12) {
+				// Perturb in direction of xS
+				FloatArray t;
+				t.beDifferenceOf(xS_plus, xE_plus);
+				xE_plus.add(1.0e-9, t);
+//				printf("xE_plus: %.12e %.12e\n", xE_plus[0], xE_plus[1]);
+			}
+
+			// Elements interacting on Gamma minus
+			FloatArray xS_minus;
+			giveMirroredPointOnGammaMinus(xS_minus, xS_plus);
+			FloatArray xE_minus;
+			giveMirroredPointOnGammaMinus(xE_minus, xE_plus);
+			FloatArray xC_minus;
+			xC_minus.beScaled(0.5, xS_minus);
+			xC_minus.add(0.5, xE_minus);
+
+			double elLength_minus = xS_minus.distance(xE_minus);
+			std :: set< int >elList_minus;
+			// TODO: What if an element is cut by two cracks, so that the
+			// traction element becomes shorter than the displacement element?
+			// Make sure that the search radius is never smaller than the
+			// largest displacement element length along the boundary.
+			localizer->giveAllElementsWithNodesWithinBox(elList_minus, xC_minus, 0.51*elLength_minus );
+
+			std :: vector< int > displacementElements_minus;
+			for ( int elNum: elList_minus ) {
+
+				// Check if the traction element and the displacement element intersect
+				// Intersection occurs if at least one displacement element node is
+				// on the traction element.
+				Element *el = domain->giveElement(elNum);
+
+				Line line_minus(xS_minus, xE_minus);
+				if( line_minus.intersects(el) ) {
+					displacementElements.push_back(elNum);
+					displacementElements_minus.push_back(elNum);
+				}
+			}
+
+        }
+
+
+
+        mMapTractionElDispElGamma[i] = displacementElements;
+
+    }
 
 
     // Create map from a traction element to displacement element and crack
@@ -1156,16 +913,16 @@ void PrescribedGradientBCWeak::createTractionMesh()
         pl.insertVertexBack(xS);
         pl.insertVertexBack(xE);
 
-        for(FloatArray x :  bndNodeCoordsFull) {
+        for(auto x :  iBndNodeCoordsFull) {
 
             double distN;
-            pl.computeNormalSignDist(distN, x);
+            pl.computeNormalSignDist(distN, x.first);
 
             double distT, arcPos;
-            pl.computeTangentialSignDist(distT, x, arcPos);
+            pl.computeTangentialSignDist(distT, x.first, arcPos);
 
             if( fabs(distN) < distTol && distT > -distTol && distT < (1.0+distTol) ) {
-                mTractionElInteriorCoordinates[i].push_back(x);
+                mTractionElInteriorCoordinates[i].push_back(x.first);
             }
 
         }
@@ -1178,7 +935,6 @@ void PrescribedGradientBCWeak::createTractionMesh()
 
     // Create map from a nodes global number to its local index
     // in the traction element.
-    mNodeTractionElLocalInd.clear();
     mTracElDispNodes.clear();
     for(size_t i = 0; i < mpTractionElements.size(); i++) {
 
@@ -1202,54 +958,84 @@ void PrescribedGradientBCWeak::createTractionMesh()
         // Remove duplicates
         tracElDispNodes.erase( std::unique( tracElDispNodes.begin(), tracElDispNodes.end() ), tracElDispNodes.end() );
 
-        //printf("tracElDispNodes unique: ");
-        for(int j = 0; j < int(tracElDispNodes.size()); j++) {
-            //printf("%d ", tracElDispNodes[j]);
-            mNodeTractionElLocalInd[i][tracElDispNodes[j]] = j;
-        }
-        //printf("\n");
-
         mTracElDispNodes[i] = tracElDispNodes;
     }
 
+}
 
-    // Write traction nodes to debug vtk
-    std :: vector<FloatArray> nodeCoord;
-    for( Node *node : mpTractionNodes ) {
-        nodeCoord.push_back( *(node->giveCoordinates()) );
+void PrescribedGradientBCWeak::createTractionElements(const std::vector<FloatArray> &iTractionNodeCoord, const double &iNodeDistTol)
+{
+    if(mTractionInterpOrder == 0) {
+    	// Piecewise constant traction
+    	// (Not stable in terms of the LBB condition,
+    	//  but interesting for comparison.)
+        for(size_t i = 0; i < mpTractionNodes.size(); i++) {
+
+            TractionElement *tractionEl = new TractionElement();
+
+            tractionEl->mTractionNodeInd.push_back( i );
+            tractionEl->mStartCoord = iTractionNodeCoord[i];
+
+            if( i < mpTractionNodes.size()-1) {
+                tractionEl->mEndCoord = iTractionNodeCoord[i+1];
+            }
+            else {
+                tractionEl->mEndCoord = iTractionNodeCoord[0];
+            }
+
+            mpTractionElements.push_back(tractionEl);
+        }
     }
+    else if(mTractionInterpOrder == 1) {
+    	// Piecewise linear traction
+        for(size_t i = 0; i < (mpTractionNodes.size()-1); i++) {
 
-    std :: string fileName("TractionNodeCoord.vtk");
-    XFEMDebugTools::WritePointsToVTK(fileName, nodeCoord);
+        	TractionElement *tractionEl = new TractionElement();
+        	tractionEl->mStartCoord = iTractionNodeCoord[i];
+        	tractionEl->mTractionNodeInd.push_back( i );
 
+        	tractionEl->mEndCoord = iTractionNodeCoord[i+1];
+        	tractionEl->mTractionNodeInd.push_back( i+1 );
 
-    if(mTractionLivesOnGammaPlus) {
-        // Lock displacement in one node if we use periodic BCs
-
-        int numNodes = domain->giveNumberOfDofManagers();
-        mpDisplacementLock = new Node(numNodes+1, domain);
-
-
-        int nsd = domain->giveNumberOfSpatialDimensions();
-        std::vector<int> dofIds;
-        for(int j = 0; j < nsd; j++) {
-            dofIds.push_back( this->domain->giveNextFreeDofID() );
+        	if( tractionEl->mStartCoord.distance( tractionEl->mEndCoord ) > iNodeDistTol ) {
+        		mpTractionElements.push_back(tractionEl);
+        	}
+        	else {
+        		printf("Skipping traction el with start coord: "); tractionEl->mStartCoord.printYourself();
+        		delete tractionEl;
+        	}
         }
 
-        for(int j = 0; j < nsd; j++) {
-            mpDisplacementLock->appendDof( new MasterDof( j + 1, mpDisplacementLock, ( DofIDItem ) ( dofIds[j] ) ) );
+        if(!mMeshIsPeriodic) {
+        	// If weak Dirichlet BCs are employed, the traction
+        	// mesh is created along the whole boundary
+        	// (instead of only on the mirror side).
+        	// Then, the last element needs to be treated separately as below.
+        	TractionElement *tractionEl = new TractionElement();
+        	tractionEl->mStartCoord = iTractionNodeCoord[0];
+        	tractionEl->mTractionNodeInd.push_back( 0 );
+
+        	tractionEl->mEndCoord = iTractionNodeCoord[mpTractionNodes.size()-1];
+        	tractionEl->mTractionNodeInd.push_back( mpTractionNodes.size()-1 );
+
+        	if( tractionEl->mStartCoord.distance( tractionEl->mEndCoord ) > iNodeDistTol ) {
+        		mpTractionElements.push_back(tractionEl);
+        	}
+        	else {
+        		printf("Skipping traction el with start coord: "); tractionEl->mStartCoord.printYourself();
+        		delete tractionEl;
+        	}
         }
+
     }
 
 }
+
 
 void PrescribedGradientBCWeak::integrateTangent(FloatMatrix &oTangent, size_t iTracElInd)
 {
     // Compute the tangent stiffness contribution
     // K = int (N^trac)^T . N^disp dGamma
-
-    //printf("Entering PrescribedGradientBCWeak::integrateTangent.\n");
-    const TractionElement &tEl = *(mpTractionElements[iTracElInd]);
 
     int dim = domain->giveNumberOfSpatialDimensions();
 
@@ -1278,7 +1064,6 @@ void PrescribedGradientBCWeak::integrateTangent(FloatMatrix &oTangent, size_t iT
 
     oTangent.resize(numRows, numCols);
 
-    SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
 
     for ( GaussPoint *gp: *ir ) {
 
@@ -1287,119 +1072,86 @@ void PrescribedGradientBCWeak::integrateTangent(FloatMatrix &oTangent, size_t iT
          * or Gamma_plus is Periodic
          */
 
-        // Fetch local coordinates on traction element
-        const FloatArray &locCoordsOnLine = * gp->giveLocalCoordinates();
+        // Fetch GP coordinates
         const FloatArray &globalCoord = * gp->giveCoordinates();
 
-        //////////////////////////////////
-        // Compute traction N-matrix
-        FloatArray N, Ntrac;
-        computeNTraction(Ntrac, locCoordsOnLine[0], tEl);
-        tEl.computeN_Linear(N, locCoordsOnLine[0]);
-
-
-        FloatMatrix NtracMat;
-        NtracMat.beNMatrixOf(Ntrac, dim);
-
-
-        //////////////////////////////////
-        // Compute displacement N-matrix
-
-        // Identify the displacement element
-        // we are currently standing in
-        // and compute local coordinates on
-        // the displacement element
-        FloatArray dispElLocCoord, closestPoint;
-        Element *dispEl = localizer->giveElementClosestToPoint(dispElLocCoord, closestPoint, globalCoord);
-
-        // Compute basis functions
-        XfemElementInterface *xfemElInt = dynamic_cast<XfemElementInterface*> (dispEl);
-        FloatMatrix NdispMat;
-
-        if(xfemElInt != NULL && domain->hasXfemManager()) {
-            //printf("Computing enriched N-matrix.\n");
-            xfemElInt->XfemElementInterface_createEnrNmatrixAt(NdispMat, dispElLocCoord, *dispEl);
-        }
-        else {
-            OOFEM_ERROR("Unable to compute N-matrix.")
-        }
-
-
-        FloatMatrix contrib;
-        contrib.beTProductOf(NtracMat, NdispMat);
-        double detJ = 0.5*tEl.mStartCoord.distance(tEl.mEndCoord);
-        //printf("detJ: %e\n", detJ);
-        //printf("gp->giveWeight(): %e\n", gp->giveWeight());
-        contrib.times( detJ * gp->giveWeight() );
-
-
-        // Create local location arrays
-        IntArray rows, cols;
-        for(int i = 1; i <= (mTractionInterpOrder+1)*dim; i++) {
-            rows.followedBy(i);
-        }
-
-        const IntArray &dispElNodes = dispEl->giveDofManArray();
-        for(int nodeInd : dispElNodes) {
-            cols.followedBy( globalNodeIndToPosInLocalLocArray[nodeInd] );
-        }
-
-        oTangent.assemble(contrib, rows, cols);
-
+        assembleTangentGPContribution(oTangent, iTracElInd, *gp, globalCoord, globalNodeIndToPosInLocalLocArray, 1.0);
 
         /*
          * Contribution from Gamma_minus if periodic.
          */
-        if(mTractionLivesOnGammaPlus) {
-
+        if(mMeshIsPeriodic) {
             FloatArray globalCoord_minus;
             giveMirroredPointOnGammaMinus(globalCoord_minus, globalCoord);
-
-            //////////////////////////////////
-            // Compute displacement N-matrix
-
-            // Identify the displacement element
-            // we are currently standing in
-            // and compute local coordinates on
-            // the displacement element
-            FloatArray dispElLocCoord_minus, closestPoint_minus;
-            Element *dispEl_minus = localizer->giveElementClosestToPoint(dispElLocCoord_minus, closestPoint_minus, globalCoord_minus);
-
-            // Compute basis functions
-            XfemElementInterface *xfemElInt_minus = dynamic_cast<XfemElementInterface*> (dispEl_minus);
-            FloatMatrix NdispMat_minus;
-
-            if(xfemElInt_minus != NULL && domain->hasXfemManager()) {
-                //printf("Computing enriched N-matrix.\n");
-                xfemElInt_minus->XfemElementInterface_createEnrNmatrixAt(NdispMat_minus, dispElLocCoord_minus, *dispEl_minus);
-            }
-            else {
-                OOFEM_ERROR("Unable to compute N-matrix.")
-            }
-
-            contrib.beTProductOf(NtracMat, NdispMat_minus);
-            contrib.times( -detJ * gp->giveWeight() );
-
-
-            // Create local location arrays
-            rows.clear();
-            cols.clear();
-            for(int i = 1; i <= (mTractionInterpOrder+1)*dim; i++) {
-                rows.followedBy(i);
-            }
-
-            const IntArray &dispElNodes_minus = dispEl_minus->giveDofManArray();
-            for(int nodeInd : dispElNodes_minus) {
-                cols.followedBy( globalNodeIndToPosInLocalLocArray[nodeInd] );
-            }
-
-            oTangent.assemble(contrib, rows, cols);
+        	assembleTangentGPContribution(oTangent, iTracElInd, *gp, globalCoord_minus, globalNodeIndToPosInLocalLocArray, -1.0);
         }
 
 
     }
 
     delete ir;
+}
+
+void PrescribedGradientBCWeak::assembleTangentGPContribution(FloatMatrix &oTangent, size_t iTracElInd, GaussPoint &iGP, const FloatArray &iBndCoord, std :: unordered_map<int, IntArray > &iGlobalNodeIndToPosInLocalLocArray, const double &iScaleFactor)
+{
+    int dim = domain->giveNumberOfSpatialDimensions();
+
+    const TractionElement &tEl = *(mpTractionElements[iTracElInd]);
+    double detJ = 0.5*tEl.mStartCoord.distance(tEl.mEndCoord);
+    const FloatArray &locCoordsOnLine = * iGP.giveLocalCoordinates();
+
+    //////////////////////////////////
+    // Compute traction N-matrix
+    FloatArray N, Ntrac;
+    computeNTraction(Ntrac, locCoordsOnLine[0], tEl);
+    tEl.computeN_Linear(N, locCoordsOnLine[0]);
+
+
+    FloatMatrix NtracMat;
+    NtracMat.beNMatrixOf(Ntrac, dim);
+
+
+    //////////////////////////////////
+    // Compute displacement N-matrix
+
+    // Identify the displacement element
+    // we are currently standing in
+    // and compute local coordinates on
+    // the displacement element
+    SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
+    FloatArray dispElLocCoord_minus, closestPoint_minus;
+    Element *dispEl_minus = localizer->giveElementClosestToPoint(dispElLocCoord_minus, closestPoint_minus, iBndCoord);
+
+    // Compute basis functions
+    XfemElementInterface *xfemElInt_minus = dynamic_cast<XfemElementInterface*> (dispEl_minus);
+    FloatMatrix NdispMat_minus;
+
+    if(xfemElInt_minus != NULL && domain->hasXfemManager()) {
+        //printf("Computing enriched N-matrix.\n");
+        xfemElInt_minus->XfemElementInterface_createEnrNmatrixAt(NdispMat_minus, dispElLocCoord_minus, *dispEl_minus);
+    }
+    else {
+        OOFEM_ERROR("Unable to compute N-matrix.")
+    }
+
+    FloatMatrix contrib;
+    contrib.beTProductOf(NtracMat, NdispMat_minus);
+    contrib.times( iScaleFactor*detJ * iGP.giveWeight() );
+
+
+    // Create local location arrays
+    IntArray rows, cols;
+    for(int i = 1; i <= (mTractionInterpOrder+1)*dim; i++) {
+        rows.followedBy(i);
+    }
+
+    const IntArray &dispElNodes_minus = dispEl_minus->giveDofManArray();
+    for(int nodeInd : dispElNodes_minus) {
+        cols.followedBy( iGlobalNodeIndToPosInLocalLocArray[nodeInd] );
+    }
+
+    oTangent.assemble(contrib, rows, cols);
+
 }
 
 IntegrationRule *PrescribedGradientBCWeak::createNewIntegrationRule(int iTracElInd)
@@ -1536,11 +1288,77 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosM
     }
 
     if(!mappingPerformed) {
+    	iPosPlus.printYourself();
         OOFEM_ERROR("Mapping failed.")
     }
 
 //    printf("iPosPlus: "); iPosPlus.printYourself();
 //    printf("oPosMinus: "); oPosMinus.printYourself();
+}
+
+void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPlus, const FloatArray &iPosMinus) const
+{
+    oPosPlus = iPosMinus;
+    const double distTol = 1.0e-13;
+
+    if(iPosMinus.distance(mLC) < distTol) {
+        printf("iPosMinus: %.12e %.12e\n", iPosMinus[0], iPosMinus[1]);
+        OOFEM_ERROR("Unmappable point.")
+    }
+
+    double mappingPerformed = false;
+
+    if( iPosMinus[0] < mLC[0]+distTol ) {
+        oPosPlus[0] = mUC[0];
+        mappingPerformed = true;
+    }
+
+    if( iPosMinus[1] < mLC[1]+distTol ) {
+        oPosPlus[1] = mUC[1];
+        mappingPerformed = true;
+    }
+
+    if(!mappingPerformed) {
+    	iPosMinus.printYourself();
+        OOFEM_ERROR("Mapping failed.")
+    }
+}
+
+void PrescribedGradientBCWeak :: computeDomainBoundingBox(Domain &iDomain, FloatArray &oLC, FloatArray &oUC)
+{
+    // Compute LC and UC by assuming a rectangular domain.
+    int numNodes = iDomain.giveNumberOfDofManagers();
+    int nsd = iDomain.giveNumberOfSpatialDimensions();
+
+    oLC = *(iDomain.giveDofManager(1)->giveCoordinates());
+    oUC = *(iDomain.giveDofManager(1)->giveCoordinates());
+
+    for(int i = 1; i <= numNodes; i++) {
+        DofManager *dMan = iDomain.giveDofManager(i);
+        const FloatArray &coord = *(dMan->giveCoordinates());
+        bool nodeIsLC = true;
+        bool nodeIsUC = true;
+        for(int j = 0; j < nsd; j++) {
+
+            if( coord[j] > oLC[j] ) {
+                nodeIsLC = false;
+            }
+
+            if( coord[j] < oUC[j] ) {
+                nodeIsUC = false;
+            }
+
+        }
+
+        if(nodeIsLC) {
+            oLC = coord;
+        }
+
+        if(nodeIsUC) {
+            oUC = coord;
+        }
+
+    }
 }
 
 } /* namespace oofem */
