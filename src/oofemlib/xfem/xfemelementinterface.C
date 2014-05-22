@@ -458,7 +458,9 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
             str3 << "TriEl" << elIndex << ".vtk";
             std :: string name3 = str3.str();
 
-            XFEMDebugTools :: WriteTrianglesToVTK(name3, allTri);
+            if(allTri.size() > 0) {
+                XFEMDebugTools :: WriteTrianglesToVTK(name3, allTri);
+            }
         }
 
 
@@ -588,7 +590,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
             oCrackEndXi     = std :: max(minDistArcPos [ 0 ], tipArcPos);
         }             // If a tip was found
         else {
-            printf( "Warning: no tip found in element %d with only one edge intersection.\n", element->giveGlobalNumber() );
+//            printf( "Warning: no tip found in element %d with only one edge intersection.\n", element->giveGlobalNumber() );
 
             oPointPartitions.resize(1);
 

@@ -335,6 +335,12 @@ void PrescribedGradientBCWeak::assemble(SparseMtrx *answer, TimeStep *tStep, Equ
 
             answer->assemble(tracRows, dispCols, Ke);
             answer->assemble(dispRows, tracCols, KeT);
+
+
+            FloatMatrix KZero(tracRows.giveSize(), tracCols.giveSize());
+            KZero.zero();
+            answer->assemble(tracRows, tracCols, KZero);
+
         }
 
 
@@ -367,6 +373,10 @@ void PrescribedGradientBCWeak::assemble(SparseMtrx *answer, TimeStep *tStep, Equ
 
             answer->assemble(lockRows, nodeColsRed, KeDispLock);
             answer->assemble(nodeRowsRed, lockCols, KeDispLock);
+
+            FloatMatrix KZero(lockRows.giveSize(), lockCols.giveSize());
+            KZero.zero();
+            answer->assemble(lockRows, lockCols, KZero);
 
         }
 
@@ -563,9 +573,6 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
     const double nodeDistTol = 1.0e-15;
     const double meshTol = 1.0e-9; // Minimum distance between traction nodes
 
-//    std::vector<FloatArray> bndNodeCoords;
-//    std::vector<bool> mandatoryToKeep;
-
     /**
      * first: 	coordinates
      * second: 	bool telling if the point must be included in the
@@ -592,15 +599,8 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
         DofManager *startNode = e->giveDofManager( bNodes[0] );
         const FloatArray &x = *(startNode->giveCoordinates());
 
-    	printf("\nChecking boundary %d with start point: ", pos);
-    	x.printYourself();
-    	printf("and end point: ");
-    	e->giveDofManager( bNodes[1] )->giveCoordinates()->printYourself();
-    	printf("\n");
 
         if( boundaryPointIsOnActiveBoundary(x) ) {
-
-        	printf("Adding point: "); x.printYourself();
 
             bool isCorner = false;
             bool duplicatable = false;
@@ -622,14 +622,11 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
 
             	if(duplicatable) {
 					if(duplicateAtCorner) {
-						printf("Found corner: "); startNode->giveCoordinates()->printYourself();
-						printf("Duplicating...\n");
 
 						// Here, we have the additional constraint of
 						// periodicity along each edge:
 						// We require: t(edge_start) = t(edge_end)
 
-			        	printf("Adding duplicated point: "); startNode->giveCoordinates()->printYourself();
 		            	std::pair<FloatArray, bool> nodeCoord = {x, true};
 		                bndNodeCoords.push_back( nodeCoord );
 					}
@@ -655,7 +652,6 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
 		                bndNodeCoords.push_back( nodeCoord );
                     }
 
-                    printf("Adding intersection point: "); intersecPoints[i].printYourself();
                 }
                 else {
                 	if(mMeshIsPeriodic) {
@@ -733,7 +729,6 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
 
             if(createSlaveNode) {
 
-            	printf("Slave: %lu Master: %d mpTractionNodes.size(): %lu\n", i, masterInd, mpTractionNodes.size() );
                 Node *masterNode = mpTractionNodes[masterInd];
 
                 mpTractionNodes.push_back(masterNode);
@@ -757,7 +752,7 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
         }
     }
 
-#if 1
+#if 0
     printf("bndNodeCoords: \n");
     for(auto x :  bndNodeCoords) {
         x.first.printYourself();
@@ -1001,7 +996,6 @@ void PrescribedGradientBCWeak::createTractionElements(const std::vector<FloatArr
         		mpTractionElements.push_back(tractionEl);
         	}
         	else {
-        		printf("Skipping traction el with start coord: "); tractionEl->mStartCoord.printYourself();
         		delete tractionEl;
         	}
         }
@@ -1022,7 +1016,6 @@ void PrescribedGradientBCWeak::createTractionElements(const std::vector<FloatArr
         		mpTractionElements.push_back(tractionEl);
         	}
         	else {
-        		printf("Skipping traction el with start coord: "); tractionEl->mStartCoord.printYourself();
         		delete tractionEl;
         	}
         }

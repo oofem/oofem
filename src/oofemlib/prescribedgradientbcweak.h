@@ -319,7 +319,6 @@ public:
 
 	void addPoint(int iPointIndex, bool iIsDuplicated, bool iPeriodic)
 	{
-		printf("Entering EdgeTracker::addPoint().\n");
 		if( iIsDuplicated || (iPeriodic && mIsFirstPoint) ) {
 			// Will be added in first position (i.e. master node)
 

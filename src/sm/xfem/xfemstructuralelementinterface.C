@@ -296,7 +296,9 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
             str3 << "TriEl" << elIndex << ".vtk";
             std :: string name3 = str3.str();
 
-            XFEMDebugTools :: WriteTrianglesToVTK(name3, allTri);
+            if(allTri.size() > 0) {
+                XFEMDebugTools :: WriteTrianglesToVTK(name3, allTri);
+            }
         }
 
 
