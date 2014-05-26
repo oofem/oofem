@@ -465,15 +465,15 @@ Shell7BaseXFEM :: edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem
 double 
 Shell7BaseXFEM :: evaluateHeavisideGamma(const FloatArray &lCoords, EnrichmentItem *ei)
 {
-    // Evaluates the corresponding gamma level set depending on the type of enrichment
-    // DEBUG - HARD CODED FOR TWO LAYERS!!
-    double levelSet = 0.0;
-    if ( ei->giveNumber() == 2 && lCoords.at(3) > 0.0 ) {
-        return 0.0;
-    } else if (ei->giveNumber() == 3 && lCoords.at(3) < 0.0) {
-        return 0.0;
+    // Evaluates the Heaviside product H(gamma_1) * H(gamma_2)
+
+    double xiBottom = dynamic_cast< ShellCrack * >( ei )->xiBottom;
+    double xiTop    = dynamic_cast< ShellCrack * >( ei )->xiTop;
+
+    if ( ( xiBottom <= lCoords.at(3) ) && ( lCoords.at(3) <= xiTop ) ) {
+            return 1.0;
     } else {
-        return 1.0;
+            return 0.0;
     }          
 
 }

@@ -63,8 +63,13 @@
 #define _IFT_Delamination_interfacenum "interfacenum"
 #define _IFT_Delamination_csnum "csnum"
 #define _IFT_Delamination_CohesiveZoneMaterial "czmaterial"
-//#define _IFT_MultipleDelamination_Name "multipledelamination"
 //@}
+
+#define _IFT_ShellCrack_Name "shellcrack"
+#define _IFT_ShellCrack_xiBottom "xibottom"
+#define _IFT_ShellCrack_xiTop "xitop"
+
+
 
 #define _IFT_Crack_Name "crack"
 
@@ -300,6 +305,9 @@ public:
     //virtual Material *giveMaterial() { return mat; }
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
 };
+
+
+
 
 
 
@@ -568,7 +576,42 @@ private:
     LinElBranchFunction *mpBranchFunc;
 };
 
+
+
+
+
+
+
+
+/**
+ * Shell crack. New class that should handle cracks in different layers
+ * @author Jim Brouzoulis
+ */
+class OOFEM_EXPORT ShellCrack : public Crack
+{
+public:
+    ShellCrack(int n, XfemManager *xm, Domain *aDomain);
+
+    virtual const char *giveClassName() const { return "ShellCrack"; }
+    virtual const char *giveInputRecordName() const { return _IFT_ShellCrack_Name; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+
+    double xiBottom;
+    double xiTop;
+
+};
+
+
+
+
+
+
 } // end namespace oofem
+
+
+
+
+
 
 
 
