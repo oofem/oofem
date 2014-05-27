@@ -1712,6 +1712,10 @@ Record Format & \descitem{Idm1}
 [\elemparam{wf}{rn}] 
 [\elemparam{ef}{rn}]
 [\elemparam{ek}{rn}]
+[\elemparam{wk}{rn}]
+[\elemparam{sk}{rn}]
+[\elemparam{wkwf}{rn}]
+[\elemparam{skft}{rn}]
 [\elemparam{gf}{rn}]
 [\elemparam{gft}{rn}]
 [\elemparam{At}{rn}] 
@@ -1747,7 +1751,7 @@ of equivalent strain:
 \begin{itemize}\setlength{\itemsep}{-3pt}
 \item[0 -] exponential softening (default) with parameters e0 and wf $\vert$ ef $\vert$ gf
 \item[1 -] linear softening with parameters e0 and wf $\vert$ ef $\vert$ gf
-\item[2 -] bilinear softening with gf, gft, ek
+\item[2 -] bilinear softening with (e0, gf, gft, ek) $\vert$ (e0, wk, sk, wf) $\vert$ (e0, wkwf, skft, wf) $\vert$ (e0, gf, gft, wk)
 \item[3 -] Hordijk softening (not implemented yet)
 \item[4 -] Mazars damage law with parameters At and Bt
 \item[5 -] smooth stress-strain curve with parameters e0 and md
@@ -1758,6 +1762,10 @@ of equivalent strain:
 &- \param{wf} parameter controling ductility, has the meaning of crack opening (for damage laws 0 and 1)\\
 &- \param{ef} parameter controling ductility, has the meaning of strain (for damage laws 0 and 1)\\
 &- \param{ek} strain at knee point in bilinear softening type (for damage law 2)\\
+&- \param{wk} crack opening at knee point in bilinear softening type (for damage law 2)\\
+&- \param{sk} stress at knee point in bilinear softening type (for damage law 2)\\
+&- \param{wkwf} ratio of wk/wf $<0,1>$ in bilinear softening type (for damage law 2)\\
+&- \param{skft} ratio of sk/ft $<0,1>$ in bilinear softening type (for damage law 2)\\
 &- \param{gf} fracture energy (for damage laws 0--2)\\
 &- \param{gft} total fracture energy (for damage law 2)\\
 &- \param{At} parameter of Mazars damage law, used only by law 4\\
