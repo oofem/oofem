@@ -657,13 +657,13 @@ EngngModel :: solveYourself()
 
 			this->preInitializeNextStep();
             this->giveNextStep();
-			this->postInitializeCurrentStep();
 
             // renumber equations if necessary. Ensure to call forceEquationNumbering() for staggered problems
             if ( this->requiresEquationRenumbering( this->giveCurrentStep() ) ) {
                 this->forceEquationNumbering();
             }
 
+			this->initializeYourself( this->giveCurrentStep() );
             this->solveYourselfAt( this->giveCurrentStep() );
             this->updateYourself( this->giveCurrentStep() );
             this->terminate( this->giveCurrentStep() );
