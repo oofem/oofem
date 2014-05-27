@@ -49,6 +49,8 @@
 #include "enrichmentitem.h"
 #include "enrichmentdomain.h"
 
+#include "pfem/pfemparticle.h"
+
 #include <string>
 #include <sstream>
 #include <fstream>
@@ -449,26 +451,43 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 #endif
         }
     }  // end loop over composite elements
-	} else { // if (particleExoportFlag)
+	} else { // if (particleExportFlag)
 	// write out the particles (nodes exported as vertices = VTK_VERTEX)
 	Domain *d  = emodel->giveDomain(1);
 	int nnode = d->giveNumberOfDofManagers();
+
+	int nActiveNode = 0;
+	for (int inode = 1; inode<=nnode; inode++) {
+		PFEMParticle *particle = dynamic_cast<PFEMParticle*>(d->giveNode(inode));
+		if (particle) {
+			if (particle->isActive())
+				nActiveNode++;
+		}
+	}
+
 	DofManager *node;
 	FloatArray *coords;
-	fprintf(this->fileStream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", nnode, nnode);
+	fprintf(this->fileStream, "<Piece NumberOfPoints=\"%d\" NumberOfCells=\"%d\">\n", nActiveNode, nActiveNode);
     fprintf(this->fileStream, "<Points>\n <DataArray type=\"Float64\" NumberOfComponents=\"3\" format=\"ascii\"> ");
 
 	for (int inode = 1; inode<=nnode; inode++) {
 		node = d->giveNode(inode);
-        coords = node->giveCoordinates();
-        ///@todo move this below into setNodeCoords since it should alwas be 3 components anyway
-        for ( int i = 1; i <= coords->giveSize(); i++ ) {
-            fprintf( this->fileStream, "%e ", coords->at(i) );
-        }
+		PFEMParticle *particle = dynamic_cast<PFEMParticle*>(node);
+		if (particle)
+		{
+			if (particle->isActive())
+			{
+				coords = node->giveCoordinates();
+				///@todo move this below into setNodeCoords since it should alwas be 3 components anyway
+				for ( int i = 1; i <= coords->giveSize(); i++ ) {
+					fprintf( this->fileStream, "%e ", coords->at(i) );
+				}
 
-        for ( int i = coords->giveSize() + 1; i <= 3; i++ ) {
-            fprintf(this->fileStream, "%e ", 0.0);
-        }
+				for ( int i = coords->giveSize() + 1; i <= 3; i++ ) {
+					fprintf(this->fileStream, "%e ", 0.0);
+				}
+			}
+		}
     }
 
     fprintf(this->fileStream, "</DataArray>\n</Points>\n");
@@ -478,7 +497,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     fprintf(this->fileStream, "<Cells>\n");
     fprintf(this->fileStream, " <DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\"> ");
 
-    for ( int ielem = 1; ielem <= nnode; ielem++ ) {
+    for ( int ielem = 1; ielem <= nActiveNode; ielem++ ) {
             fprintf(this->fileStream, "%d ", ielem - 1);
         }
 
@@ -487,7 +506,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     // output the offsets (index of individual element data in connectivity array)
     fprintf(this->fileStream, " <DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\"> ");
 
-    for ( int ielem = 1; ielem <= nnode; ielem++ ) {
+    for ( int ielem = 1; ielem <= nActiveNode; ielem++ ) {
         fprintf( this->fileStream, "%d ", ielem);
     }
     fprintf(this->fileStream, "</DataArray>\n");
@@ -495,7 +514,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     // output cell (element) types
     fprintf(this->fileStream, " <DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\"> ");
-    for ( int ielem = 1; ielem <= nnode; ielem++ ) {
+    for ( int ielem = 1; ielem <= nActiveNode; ielem++ ) {
         fprintf( this->fileStream, "%d ", 1);
     }
 
