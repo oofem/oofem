@@ -67,6 +67,7 @@ enum classType {
     BoundaryLoadClass,
     LinearEdgeLoadClass,
 	InteractionLoadClass,
+	InteractionBoundaryConditionClass,
     ConstantEdgeLoadClass,
     ConstantSurfaceLoadClass,
     ConstantPressureLoadClass,

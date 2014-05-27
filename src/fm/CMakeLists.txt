@@ -69,6 +69,7 @@ set (fm_pfem
 	pfem/fluidstructureproblem.C
 	pfem/interactionload.C
 	pfem/interactionpfemparticle.C
+	pfem/interactionboundarycondition.C
     )
 
 set (fm
