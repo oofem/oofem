@@ -126,7 +126,7 @@ public:
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual int forceEquationNumbering();
     virtual void updateYourself(TimeStep *stepN);
-    virtual void initializeYourself(TimeStep *tStep) { }
+    virtual void initializeYourself(TimeStep *tStep);
     virtual int initializeAdaptive(int stepNumber) { return 0; }
     virtual void terminate(TimeStep *tStep);
     virtual void doStepOutput(TimeStep *tStep);
@@ -146,8 +146,7 @@ public:
     virtual TimeStep *giveSolutionStepWhenIcApply();
 
 	virtual void preInitializeNextStep();
-	virtual void postInitializeCurrentStep();
-
+	
     // identification
     virtual const char *giveClassName() const { return "FluidStructureProblem"; }
     virtual const char *giveInputRecordName() const { return _IFT_FluidStructureProblem_Name; }

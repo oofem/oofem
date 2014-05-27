@@ -578,7 +578,7 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
 
             d_vnorm = 0.0;
             for ( int i = 1; i <= diffVelocity.giveSize(); i++ ) {
-                d_vnorm = max( d_vnorm, fabs( diffVelocity.at(i) / velocityVectorLastStep.at(i) ) );
+                d_vnorm = max( d_vnorm, fabs(diffVelocity.at(i)) > 1.e-6 ? fabs( diffVelocity.at(i) / velocityVectorLastStep.at(i) ) : 0);
             }
 
             //d_vnorm = diffVelocity.computeNorm() / velocityVectorLastStep.computeNorm();
@@ -592,9 +592,11 @@ PFEM :: solveYourselfAt(TimeStep *tStep)
              *      d_pnorm = normDiffPressure / pressureVectorLastStep.computeNorm();*/
             d_pnorm = 0.0;
             for ( int i = 1; i <= diffPressure.giveSize(); i++ ) {
-                d_pnorm = max( d_pnorm, fabs( diffPressure.at(i) / pressureVectorLastStep.at(i) ) );
+				// TODO : what about divide by zero ????
+                d_pnorm = max( d_pnorm, fabs( diffPressure.at(i) ) > 1.e-6 ? fabs( diffPressure.at(i) / pressureVectorLastStep.at(i) ) : 0);
             }
         }
+		
 
 //        velocityResiduum.zero();
 //
@@ -1088,7 +1090,23 @@ PFEM :: deactivateTooCloseParticles()
             if ( minLength / maxLength < particleRemovalRatio ) {
                 if ( fabs(l12 - minLength) < 1.e-6 ) {             // ==
                     if ( particle1->isActive() && particle2->isActive() ) {
-                        particle1->deactivate();
+						bool isSupported = false;
+
+						for ( int j = 1; j <= particle1->giveNumberOfDofs(); j++ ) {
+							Dof* jDof  =  particle1->giveDof(j);
+							DofIDItem type  =  jDof->giveDofID();
+							if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+								if ( jDof->giveBcId() ) {
+									isSupported = true;
+								}
+							}
+						}
+						if (isSupported == false) {
+							particle1->deactivate();
+						}
+						else {
+							particle2->deactivate();
+						}
                     } else if ( particle1->isActive() == false || particle2->isActive() == false )     {
                         ;                        // it was deactivated by other element
                     } else   {
@@ -1098,7 +1116,23 @@ PFEM :: deactivateTooCloseParticles()
 
                 if ( fabs(l23 - minLength) < 1.e-6 ) {             // ==
                     if ( particle2->isActive() && particle3->isActive() ) {
-                        particle2->deactivate();
+						bool isSupported = false;
+
+						for ( int j = 1; j <= particle2->giveNumberOfDofs(); j++ ) {
+							Dof* jDof  =  particle2->giveDof(j);
+							DofIDItem type  =  jDof->giveDofID();
+							if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+								if ( jDof->giveBcId() ) {
+									isSupported = true;
+								}
+							}
+						}
+						if (isSupported == false) {
+							particle2->deactivate();
+						}
+						else {
+							particle3->deactivate();
+						}
                     } else if ( particle2->isActive() == false || particle3->isActive() == false )     {
                         ;                        // it was deactivated by other element
                     } else   {
@@ -1108,7 +1142,22 @@ PFEM :: deactivateTooCloseParticles()
 
                 if ( fabs(l31 - minLength) < 1.e-6 ) {             // ==
                     if ( particle3->isActive() && particle1->isActive() ) {
-                        particle3->deactivate();
+						bool isSupported = false;
+						for ( int j = 1; j <= particle3->giveNumberOfDofs(); j++ ) {
+							Dof* jDof  =  particle3->giveDof(j);
+							DofIDItem type  =  jDof->giveDofID();
+							if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
+								if ( jDof->giveBcId() ) {
+									isSupported = true;
+								}
+							}
+						}
+						if (isSupported == false) {
+							particle3->deactivate();
+						}
+						else {
+							particle1->deactivate();
+						}
                     } else if ( particle3->isActive() == false || particle1->isActive() == false )     {
                         ;                        // it was deactivated by other element
                     } else   {

@@ -230,20 +230,12 @@ TimeStep *DIIDynamic :: giveNextStep()
     return currentStep;
 }
 
-void DIIDynamic :: solveYourself()
+void DIIDynamic :: initializeYourself(TimeStep *tStep)
 {
-    StructuralEngngModel :: solveYourself();
-}
+	Domain *domain = this->giveDomain(1);
+	int neq =  this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
 
-void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
-{
-    // Determine the constants.
-    this->determineConstants(tStep);
-
-    Domain *domain = this->giveDomain(1);
-    int neq =  this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
-
-    if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
+	if ( tStep->giveNumber() == giveNumberOfFirstStep() ) {
         TimeStep *stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
                                                  -deltaT, deltaT, 0);
         //
@@ -289,6 +281,22 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
 
         delete stepWhenIcApply;
     }   // End of initialization.
+}
+
+void DIIDynamic :: solveYourself()
+{
+    StructuralEngngModel :: solveYourself();
+}
+
+void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
+{
+    // Determine the constants.
+    this->determineConstants(tStep);
+
+    Domain *domain = this->giveDomain(1);
+    int neq =  this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+
+    
 
     if ( initFlag ) {
 #ifdef VERBOSE
@@ -357,8 +365,8 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
     if ( delta != 0 ) {
         for ( int i = 1; i <= neq; i++ ) {
             help.at(i) = delta * ( a1 * previousDisplacementVector.at(i)
-                                   + a4 * velocityVector.at(i)
-                                   + a5 * accelerationVector.at(i)
+                                   + a4 * previousVelocityVector.at(i)
+                                   + a5 * previousAccelerationVector.at(i)
                                    + a6 * previousIncrementOfDisplacement.at(i) );
         }
         this->timesMtrx(help, rhs2, StiffnessMatrix, domain, tStep);

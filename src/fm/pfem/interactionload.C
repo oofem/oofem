@@ -101,8 +101,10 @@ InteractionLoad::computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray 
 					DofManager *dman = pfem->giveDomain(1)->giveDofManager(coupledParticles.at(j));
 					Dof *pressureDof = dman->giveDofWithID(P_f);
 					double pressureValue = pfem->giveUnknownComponent(VM_Total, tStep, pfem->giveDomain(1), pressureDof);
-					pressureArray.at(j) *= pressureValue;
-					pressureArray.at(j+1) *= pressureValue;
+					pressureValue = pressureValue > 0 ? pressureValue : 0.0;
+					for ( int k = 1; k <= nDofs; k++) {
+						pressureArray.at(nDofs * (j - 1) + k) *= pressureValue;
+					}
 				}
 			}
 		}

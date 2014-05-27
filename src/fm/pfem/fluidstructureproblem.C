@@ -68,7 +68,7 @@ FluidStructureProblem :: FluidStructureProblem(int i, EngngModel *_master) : Sta
 ///    dtTimeFunction = 0;
 ///    stepMultiplier = 1.;
 ///    timeDefinedByProb = 0;
-		tol = 1.e-6;
+		tol = 1.e-3;
 		iterationNumber = 0;
 }
 
@@ -287,12 +287,11 @@ FluidStructureProblem :: giveNextStep()
     return currentStep;
 }
 
-
 void
 FluidStructureProblem :: solveYourself()
 {
     if ( !timeDefinedByProb ) {
-        EngngModel :: solveYourself();
+		EngngModel :: solveYourself();
     } else { //time dictated by slave problem
         int imstep, jstep, nTimeSteps;
         int smstep = 1, sjstep = 1;
@@ -325,6 +324,7 @@ FluidStructureProblem :: solveYourself()
                     this->forceEquationNumbering();
                 }
 
+				this->initializeYourself( sp->giveCurrentStep() );
                 this->solveYourselfAt( sp->giveCurrentStep() );
                 this->updateYourself( sp->giveCurrentStep() );
                 this->terminate( sp->giveCurrentStep() );
@@ -346,6 +346,19 @@ FluidStructureProblem :: solveYourself()
             }
         }
     }
+}
+
+void
+FluidStructureProblem :: initializeYourself(TimeStep *tStep)
+{
+	for ( int i = 1; i <= nModels; i++ ) {
+		this->giveSlaveProblem(i)->initializeYourself(tStep);
+		
+		DIIDynamic* dynamicProblem = dynamic_cast<DIIDynamic*>(this->giveSlaveProblem(i));
+		if (dynamicProblem) {
+			this->giveCurrentStep()->setTimeDiscretization(dynamicProblem->giveInitialTimeDiscretization());
+		}
+	}
 }
 
 void
@@ -381,7 +394,7 @@ FluidStructureProblem :: solveYourselfAt(TimeStep *stepN)
 	double pressureDifference = 1.0;
 
 	iterationNumber = 0;
-	while ( ( (velocityDifference > tol) || (pressureDifference > tol) ) && iterationNumber < 10 )
+	while ( ( (velocityDifference > tol) || (pressureDifference > tol) ) && iterationNumber < 50 )
 	{
 		previousInteractionParticlesPressures = currentInteractionParticlesPressures;
 		previousInteractionParticlesVelocities = currentInteractionParticlesVelocities;
@@ -410,10 +423,15 @@ FluidStructureProblem :: solveYourselfAt(TimeStep *stepN)
 		pressureDifference = sqrt(pressureDifference);
 		velocityDifference = sqrt(velocityDifference);
 
+		if (iterationNumber > 0) {
+			pressureDifference /= previousInteractionParticlesPressures.computeNorm();
+			velocityDifference /= previousInteractionParticlesVelocities.computeNorm();
+		}
+
 		OOFEM_LOG_RELEVANT("%3d %le %le\n", iterationNumber++, pressureDifference, velocityDifference );
 	}
 	if ( iterationNumber > 49 ) {
-		OOFEM_ERROR("Maximal iteration count exceded");
+		OOFEM_ERROR("Maximal fluid-structure interface iteration count exceded");
 	}
 	stepN->incrementStateCounter();
 }
@@ -562,16 +580,17 @@ FluidStructureProblem :: preInitializeNextStep()
     }
 }
 
-void
-FluidStructureProblem :: postInitializeCurrentStep()
-{
-	for ( int i = 1; i <= nModels; i++ ) {
-        DIIDynamic* dynamicProblem = dynamic_cast<DIIDynamic*>(this->giveSlaveProblem(i));
-		if (dynamicProblem) {
-			this->giveCurrentStep()->setTimeDiscretization(dynamicProblem->giveInitialTimeDiscretization());
-		}
-    }
-}
+//void
+//FluidStructureProblem :: postInitializeCurrentStep()
+//{
+//	for ( int i = 1; i <= nModels; i++ ) {
+//        DIIDynamic* dynamicProblem = dynamic_cast<DIIDynamic*>(this->giveSlaveProblem(i));
+//		if (dynamicProblem) {
+//			this->giveCurrentStep()->setTimeDiscretization(dynamicProblem->giveInitialTimeDiscretization());
+//		}
+//    }
+//}
+
 
 
 #ifdef __OOFEG
