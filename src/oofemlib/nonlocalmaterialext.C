@@ -141,7 +141,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
 
     //If nonlocal variation is set to the distance-based approach, a new nonlocal radius
     // is calculated as a function of the distance from the gausspoint to the nonlocal boundaries
-    if ( nlvar == NLVT_DistanceBased ) {
+    if ( nlvar == NLVT_DistanceBasedLinear || nlvar == NLVT_DistanceBasedExponential ) {
         //      cl=cl0;
         cl = giveDistanceBasedInteractionRadius(gpCoords);
         suprad = evaluateSupportRadius();
@@ -264,7 +264,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
 
         //If nonlocal variation is set to the distance-based approach calculates  new nonlocal radius
         // based on the distance from the nonlocal boundaries
-        if ( nlvar == NLVT_DistanceBased ) {
+        if ( nlvar == NLVT_DistanceBasedLinear || nlvar == NLVT_DistanceBasedExponential ) {
             cl = cl0;
             cl = giveDistanceBasedInteractionRadius(gpCoords);
             suprad = evaluateSupportRadius();
@@ -559,12 +559,16 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     int nlvariation = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nlvariation, _IFT_NonlocalMaterialExtensionInterface_nonlocalvariation);
     if ( nlvariation == 1 ) {
-        nlvar = NLVT_DistanceBased;
+        nlvar = NLVT_DistanceBasedLinear;
         IR_GIVE_FIELD(ir, beta, _IFT_NonlocalMaterialExtensionInterface_beta);
         IR_GIVE_FIELD(ir, zeta, _IFT_NonlocalMaterialExtensionInterface_zeta);
     } else if ( nlvariation == 2 ) {
         nlvar = NLVT_StressBased;
         IR_GIVE_FIELD(ir, beta, _IFT_NonlocalMaterialExtensionInterface_beta);
+    } else if ( nlvariation == 3 ) {
+        nlvar = NLVT_DistanceBasedExponential;
+        IR_GIVE_FIELD(ir, beta, _IFT_NonlocalMaterialExtensionInterface_beta);
+        IR_GIVE_FIELD(ir, zeta, _IFT_NonlocalMaterialExtensionInterface_zeta);
     }
 
     return IRRT_OK;
@@ -583,7 +587,8 @@ void NonlocalMaterialExtensionInterface :: giveInputRecord(DynamicInputRecord &i
     input.setField(this->scaling, _IFT_NonlocalMaterialExtensionInterface_scalingtype);
     input.setField(this->averagedVar, _IFT_NonlocalMaterialExtensionInterface_averagedquantity);
     input.setField(this->nlvar, _IFT_NonlocalMaterialExtensionInterface_nonlocalvariation);
-    if ( nlvar == NLVT_DistanceBased ) {
+
+    if ( nlvar == NLVT_DistanceBasedLinear ||  nlvar == NLVT_DistanceBasedExponential ) {
         input.setField(this->beta, _IFT_NonlocalMaterialExtensionInterface_beta);
         input.setField(this->zeta, _IFT_NonlocalMaterialExtensionInterface_zeta);
     } else if ( nlvar == NLVT_StressBased ) {
@@ -643,18 +648,28 @@ NonlocalMaterialExtensionInterface :: manipulateWeight(double &weight, GaussPoin
 double
 NonlocalMaterialExtensionInterface :: giveDistanceBasedInteractionRadius(const FloatArray &gpCoords)
 {
-    double distance = zeta * cl0; // Initially distance from the boundary is set to the maximum value
+    double distance = 1.e10; // Initially distance from the boundary is set to the maximum value
     double temp;
     int ib, nbarrier = domain->giveNumberOfNonlocalBarriers();
     for ( ib = 1; ib <= nbarrier; ib++ ) { //Loop over all the nonlocal barriers to find minimum distance from the boundary
-        temp = domain->giveNonlocalBarrier(ib)->calculateMinimumDistanceFromBoundary(gpCoords, zeta * cl0);
+        temp = domain->giveNonlocalBarrier(ib)->calculateMinimumDistanceFromBoundary(gpCoords);
         if ( distance > temp ) { //Check to find minimum distance from boundary from all nonlocal boundaries
             distance = temp;
         }
     }
 
     //Calculate interaction radius based on the minimum distance from the nonlocal boundaries
-    return ( ( 1 - beta ) / ( zeta * cl0 ) * distance + beta ) * cl0;
+    double newradius;
+    if ( nlvar == NLVT_DistanceBasedLinear ) {
+        if ( distance < zeta * cl0 ) {
+            newradius = ( 1. - beta ) / ( zeta * cl0 ) * distance + beta;
+        } else   {
+            newradius = 1.;
+        }
+    } else if ( nlvar == NLVT_DistanceBasedExponential ) {
+        newradius = 1. - ( 1. - beta ) * exp( -distance / ( zeta * cl0 ) );
+    }
+    return newradius * cl0;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
