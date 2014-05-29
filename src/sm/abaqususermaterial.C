@@ -261,10 +261,10 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
     int nshr = 3;
 
     int ntens = ndi + nshr;
-    FloatArray stress(ntens);
-    FloatArray strain = ms->giveStrainVector();
+    FloatArray strain = reducedStrain;
+    FloatArray stress = ms->giveStressVector();
     FloatArray strainIncrement;
-    strainIncrement.beDifferenceOf(reducedStrain, strain);
+    strainIncrement.beDifferenceOf(reducedStrain, ms->giveStrainVector());
     FloatArray state = ms->giveStateVector();
     FloatMatrix jacobian(ntens, ntens);
     int numProperties = this->properties.giveSize();
@@ -415,11 +415,10 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
 
     int ntens = ndi + nshr;
     FloatArray stress(9); // PK1
-    FloatArray strain = ms->giveStrainVector();
     FloatArray strainIncrement;
 
     // compute Green-Lagrange strain
-    FloatArray reducedStrain;
+    FloatArray strain;
     FloatArray vE, vS;
     FloatMatrix F, E;
     F.beMatrixForm(vF);
@@ -428,9 +427,9 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
     E.at(2, 2) -= 1.0;
     E.at(3, 3) -= 1.0;
     E.times(0.5);
-    reducedStrain.beSymVectorFormOfStrain(E);
+    strain.beSymVectorFormOfStrain(E);
 
-    strainIncrement.beDifferenceOf(reducedStrain, strain);
+    strainIncrement.beDifferenceOf(strain, ms->giveStrainVector());
     FloatArray state = ms->giveStateVector();
     FloatMatrix jacobian(9, 9); // dPdF
     int numProperties = this->properties.giveSize();
