@@ -55,7 +55,7 @@ REGISTER_Element(QTrPlaneStress2d);
 FEI2dTrQuad QTrPlaneStress2d :: interpolation(1, 2);
 
 QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), SpatialLocalizerInterface(),
+    NLStructuralElement(n, aDomain), SpatialLocalizerInterface(this),
     DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface()
 {
     numberOfDofMans  = 6;

@@ -51,7 +51,7 @@ REGISTER_Element(QBrick1_hmt);
 
 FEI3dHexaQuad QBrick1_ht :: interpolation;
 
-QBrick1_ht :: QBrick1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(), ZZNodalRecoveryModelInterface(), SPRNodalRecoveryModelInterface()
+QBrick1_ht :: QBrick1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface()
 {
     numberOfDofMans  = 20;
     numberOfGaussPoints = 27;

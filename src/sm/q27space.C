@@ -55,7 +55,7 @@ FEInterpolation *Q27Space :: giveInterpolation() const
     return & interpolation;
 }
 
-Q27Space :: Q27Space(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+Q27Space :: Q27Space(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 27;
 }

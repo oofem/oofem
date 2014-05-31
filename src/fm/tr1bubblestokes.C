@@ -62,7 +62,7 @@ IntArray Tr1BubbleStokes :: edge_ordering [ 3 ] = {
     {7, 8, 1, 2}
 };
 
-Tr1BubbleStokes :: Tr1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomain)
+Tr1BubbleStokes :: Tr1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomain), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this)
 {
     this->numberOfDofMans = 3;
     this->numberOfGaussPoints = 7;

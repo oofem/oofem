@@ -75,7 +75,6 @@ public:
     virtual const char *giveClassName() const { return "Q4axisymm"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

@@ -51,7 +51,7 @@ REGISTER_Element(Tr_Warp);
 FEI2dTrLin Tr_Warp :: interp(1, 2);
 
 Tr_Warp :: Tr_Warp(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain)
+    StructuralElement(n, aDomain), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this)
     // Constructor.
 {
     numberOfDofMans  = 3;

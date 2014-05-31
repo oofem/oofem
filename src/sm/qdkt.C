@@ -59,8 +59,9 @@ FEI2dQuadLin QDKTPlate :: interp_lin(1, 2);
 
 QDKTPlate :: QDKTPlate(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain),
-    ZZNodalRecoveryModelInterface(),
-    SPRNodalRecoveryModelInterface()
+    ZZNodalRecoveryModelInterface(this),
+    SPRNodalRecoveryModelInterface(),
+    ZZErrorEstimatorInterface(this)
 {
     numberOfDofMans = 4;
     numberOfGaussPoints = 4;

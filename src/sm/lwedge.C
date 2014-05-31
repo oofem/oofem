@@ -54,7 +54,7 @@ REGISTER_Element(LWedge);
 
 FEI3dWedgeLin LWedge :: interpolation;
 
-LWedge :: LWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+LWedge :: LWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
     // Constructor.
 {
     numberOfDofMans = 6;

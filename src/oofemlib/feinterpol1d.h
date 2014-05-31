@@ -47,6 +47,8 @@ public:
     FEInterpolation1d(int o) : FEInterpolation(o) { }
     virtual int giveNsd() { return 1; }
 
+    //virtual FloatArray giveParametricCenter() const { return {0.}; }
+
     virtual void boundaryEdgeGiveNodes(IntArray &answer, int boundary)
     { OOFEM_ERROR("Functions not supported for this interpolator."); }
     virtual void boundaryEdgeEvalN(FloatArray &answer, int boundary, const FloatArray &lcoords, const FEICellGeometry &cellgeo)

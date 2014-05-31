@@ -249,18 +249,17 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
                                                                            TimeStep *tStep)
 {
     int nDofMans;
-    Element *elem = this->ZZErrorEstimatorI_giveElement();
     IntegrationRule *iRule = this->ZZErrorEstimatorI_giveIntegrationRule();
-    FEInterpolation *interpol = elem->giveInterpolation();
+    FEInterpolation *interpol = element->giveInterpolation();
     const FloatArray *recoveredStress;
     FloatArray sig, lsig, diff, ldiff, n;
     FloatMatrix nodalRecoveredStreses;
 
-    nDofMans = elem->giveNumberOfDofManagers();
+    nDofMans = element->giveNumberOfDofManagers();
     // assemble nodal recovered stresses
-    for ( int i = 1; i <= elem->giveNumberOfNodes(); i++ ) {
-        elem->giveDomain()->giveSmoother()->giveNodalVector( recoveredStress,
-                                                            elem->giveDofManager(i)->giveNumber() );
+    for ( int i = 1; i <= element->giveNumberOfNodes(); i++ ) {
+        element->giveDomain()->giveSmoother()->giveNodalVector( recoveredStress,
+                                                            element->giveDofManager(i)->giveNumber() );
         if ( i == 1 ) {
             nodalRecoveredStreses.resize( nDofMans, recoveredStress->giveSize() );
         }
@@ -278,12 +277,12 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
     // compute  the e-norm and s-norm
     if ( norm == ZZErrorEstimator :: L2Norm ) {
         for ( GaussPoint *gp: *iRule ) {
-            double dV = elem->computeVolumeAround(gp);
-            interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(elem) );
+            double dV = element->computeVolumeAround(gp);
+            interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(element) );
 
             diff.beTProductOf(nodalRecoveredStreses, n);
 
-            elem->giveIPValue(sig, gp, type, tStep);
+            element->giveIPValue(sig, gp, type, tStep);
             /* the internal stress difference is in global coordinate system */
             diff.subtract(sig);
 
@@ -293,17 +292,17 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
     } else if ( norm == ZZErrorEstimator :: EnergyNorm ) {
         FloatArray help, ldiff_reduced, lsig_reduced;
         FloatMatrix D, DInv;
-        StructuralElement *selem = static_cast< StructuralElement * >(elem);
+        StructuralElement *selem = static_cast< StructuralElement * >(element);
 
         for ( GaussPoint *gp: *iRule ) {
-            double dV = elem->computeVolumeAround(gp);
-            interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(elem) );
+            double dV = element->computeVolumeAround(gp);
+            interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(element) );
             selem->computeConstitutiveMatrixAt(D, TangentStiffness, gp, tStep);
             DInv.beInverseOf(D);
 
             diff.beTProductOf(nodalRecoveredStreses, n);
 
-            elem->giveIPValue(sig, gp, type, tStep); // returns full value now
+            element->giveIPValue(sig, gp, type, tStep); // returns full value now
             diff.subtract(sig);
             /* the internal stress difference is in global coordinate system */
             /* needs to be transformed into local system to compute associated energy */

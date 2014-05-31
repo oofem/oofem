@@ -133,12 +133,13 @@ public:
  */
 class ZZErrorEstimatorInterface : public Interface
 {
+private:
+    Element *element;
+
 public:
     /// Constructor
-    ZZErrorEstimatorInterface() { }
+    ZZErrorEstimatorInterface(Element *element): element(element) { }
 
-    /// Returns reference to corresponding element
-    virtual Element *ZZErrorEstimatorI_giveElement() = 0;
     /**
      * Computes the element contributions to global norms.
      * @param eNorm Element contribution to error norm.
@@ -154,7 +155,7 @@ public:
      * Default implementation returns element default rule.
      */
     virtual IntegrationRule *ZZErrorEstimatorI_giveIntegrationRule() {
-        return this->ZZErrorEstimatorI_giveElement()->giveDefaultIntegrationRulePtr();
+        return this->element->giveDefaultIntegrationRulePtr();
     }
 
     /**

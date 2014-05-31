@@ -49,14 +49,12 @@ int
 SpatialLocalizerInterface :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
 {
     FloatArray lcoords;
-    return this->SpatialLocalizerI_giveElement()->computeLocalCoordinates(lcoords, coords);
+    return this->element->computeLocalCoordinates(lcoords, coords);
 }
 
 void
 SpatialLocalizerInterface :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
 {
-    Element *element = this->SpatialLocalizerI_giveElement();
-
     bb1 = bb0 = * element->giveNode(1)->giveCoordinates();
 
     for ( int i = 2; i <= element->giveNumberOfNodes(); ++i ) {
@@ -70,11 +68,10 @@ SpatialLocalizerInterface :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatAr
 double
 SpatialLocalizerInterface :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords)
 {
-    Element *e = this->SpatialLocalizerI_giveElement();
-    FEInterpolation *interp = e->giveInterpolation();
+    FEInterpolation *interp = element->giveInterpolation();
 
-    if ( !interp->global2local( lcoords, gcoords, FEIElementGeometryWrapper(e) ) ) { // Outside element
-        interp->local2global( closest, lcoords, FEIElementGeometryWrapper(e) );
+    if ( !interp->global2local( lcoords, gcoords, FEIElementGeometryWrapper(element) ) ) { // Outside element
+        interp->local2global( closest, lcoords, FEIElementGeometryWrapper(element) );
         return closest.distance(gcoords);
     } else {
         closest = gcoords;

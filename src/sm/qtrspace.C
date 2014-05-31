@@ -56,7 +56,7 @@ REGISTER_Element(QTRSpace);
 
 FEI3dTetQuad QTRSpace :: interpolation;
 
-QTRSpace :: QTRSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+QTRSpace :: QTRSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 10;
 }

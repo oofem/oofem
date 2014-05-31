@@ -67,7 +67,9 @@ REGISTER_Element(TR1_2D_CBS);
 FEI2dTrLin TR1_2D_CBS :: interp(1, 2);
 
 TR1_2D_CBS :: TR1_2D_CBS(int n, Domain *aDomain) :
-    CBSElement(n, aDomain)
+    CBSElement(n, aDomain),
+    SpatialLocalizerInterface(this),
+    ZZNodalRecoveryModelInterface(this)
     //<RESTRICTED_SECTION>
     , LEPlicElementInterface()
     //</RESTRICTED_SECTION>

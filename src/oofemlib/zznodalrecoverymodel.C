@@ -206,19 +206,18 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNValProduct(FloatMatri
    // N(nsigma, nsigma*nnodes)
    // Definition : sigmaVector = N * nodalSigmaVector
     FloatArray stressVector, n;
-    Element *elem  = this->ZZNodalRecoveryMI_giveElement();
-    FEInterpolation *interpol = elem->giveInterpolation();
-    IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
+    FEInterpolation *interpol = element->giveInterpolation();
+    IntegrationRule *iRule = element->giveDefaultIntegrationRulePtr();
 
     answer.clear();
     for ( GaussPoint *gp: *iRule ) {
-        double dV = elem->computeVolumeAround(gp);
+        double dV = element->computeVolumeAround(gp);
         //this-> computeStressVector(stressVector, gp, tStep);
-        if ( !elem->giveIPValue(stressVector, gp, type, tStep) ) {
+        if ( !element->giveIPValue(stressVector, gp, type, tStep) ) {
             continue;
         }
 
-        interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(elem) );
+        interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(element) );
         answer.plusDyadUnsym(n, stressVector, dV);
 
         //  help.beTProductOf(n,stressVector);
@@ -237,22 +236,21 @@ ZZNodalRecoveryModelInterface :: ZZNodalRecoveryMI_computeNNMatrix(FloatArray &a
     double volume = 0.0;
     FloatMatrix fullAnswer;
     FloatArray n;
-    Element *elem  = this->ZZNodalRecoveryMI_giveElement();
-    FEInterpolation *interpol = elem->giveInterpolation();
-    IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
+    FEInterpolation *interpol = element->giveInterpolation();
+    IntegrationRule *iRule = element->giveDefaultIntegrationRulePtr();
 
     if ( !interpol ) {
-        OOFEM_ERROR( "Element %d not providing interpolation", elem->giveNumber() );
+        OOFEM_ERROR( "Element %d not providing interpolation", element->giveNumber() );
     }
 
-    int size = elem->giveNumberOfDofManagers();
+    int size = element->giveNumberOfDofManagers();
     fullAnswer.resize(size, size);
     fullAnswer.zero();
     double pok = 0.0;
 
     for ( GaussPoint *gp: *iRule ) {
-        double dV = elem->computeVolumeAround(gp);
-        interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(elem) );
+        double dV = element->computeVolumeAround(gp);
+        interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(element) );
         fullAnswer.plusDyadSymmUpper(n, dV);
         pok += ( n.at(1) * dV ); ///@todo What is this? Completely unused.
         volume += dV;

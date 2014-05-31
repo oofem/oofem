@@ -24,7 +24,7 @@ REGISTER_Element(Q9PlaneStress2d);
 FEI2dQuadBiQuad Q9PlaneStress2d :: interpolation(1, 2);
 
 Q9PlaneStress2d :: Q9PlaneStress2d(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface()
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface()
     // Constructor.
 {
     //	printf("Entering Q9PlaneStress2d :: Q9PlaneStress2d().\n");

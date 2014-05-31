@@ -49,7 +49,7 @@
 namespace oofem {
 REGISTER_Element(TR_SHELL01);
 
-TR_SHELL01 :: TR_SHELL01(int n, Domain *aDomain) : StructuralElement(n, aDomain)
+TR_SHELL01 :: TR_SHELL01(int n, Domain *aDomain) : StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), ZZErrorEstimatorInterface(this), SpatialLocalizerInterface(this)
 {
     plate    = new CCTPlate3d(-1, aDomain);
     membrane = new TrPlaneStrRot3d(-1, aDomain);

@@ -85,10 +85,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);

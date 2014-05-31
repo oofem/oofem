@@ -57,15 +57,16 @@ class IntArray;
  */
 class OOFEM_EXPORT SpatialLocalizerInterface : public Interface
 {
+private:
+    Element *element;
+
 public:
-    SpatialLocalizerInterface() : Interface() { }
+    SpatialLocalizerInterface(Element *element) : Interface(), element(element) { }
 
     /**
      * @name The element interface required by SpatialLocalizerInterface
      */
     //@{
-    /// @return Reference to corresponding element.
-    virtual Element *SpatialLocalizerI_giveElement() = 0;
     /**
      * Checks if element contains specified coordinate.
      * Default implementation uses Element::computeLocalCoordinates.

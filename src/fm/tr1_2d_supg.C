@@ -69,7 +69,7 @@ REGISTER_Element(TR1_2D_SUPG);
 FEI2dTrLin TR1_2D_SUPG :: interp(1, 2);
 
 TR1_2D_SUPG :: TR1_2D_SUPG(int n, Domain *aDomain) :
-    SUPGElement(n, aDomain), LEPlicElementInterface()
+    SUPGElement(n, aDomain), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this), LEPlicElementInterface()
     // Constructor.
 {
     numberOfDofMans  = 3;

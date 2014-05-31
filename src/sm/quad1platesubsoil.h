@@ -102,7 +102,6 @@ protected:
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP() { return this->numberOfGaussPoints; }
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType() { return SPRPatchType_2dxy; }
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
     /**
      * @name Surface load support
      */

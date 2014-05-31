@@ -62,7 +62,7 @@ IntArray Tet1BubbleStokes :: surf_ordering [ 4 ] = {
     {1, 2, 3, 13, 14, 15,  9, 10, 11}
 };
 
-Tet1BubbleStokes :: Tet1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomain)
+Tet1BubbleStokes :: Tet1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SpatialLocalizerInterface(this)
 {
     this->numberOfDofMans = 4;
     this->numberOfGaussPoints = 24;

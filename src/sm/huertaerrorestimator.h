@@ -236,9 +236,6 @@ public:
     /// Constructor
     HuertaErrorEstimatorInterface() { }
 
-    /// Returns reference to corresponding element
-    virtual Element *HuertaErrorEstimatorI_giveElement() = 0;
-
     virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                                   IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                                                   HuertaErrorEstimatorInterface :: SetupMode mode, TimeStep *tStep,

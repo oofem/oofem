@@ -71,9 +71,6 @@ public:
 
     virtual Interface *giveInterface(InterfaceType t);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     virtual FEInterpolation *giveInterpolation() const { return & this->interp; }

@@ -64,7 +64,7 @@ IntArray Tr21Stokes :: edge_ordering [ 3 ] = {
     {7, 8, 1, 2, 14, 15}
 };
 
-Tr21Stokes :: Tr21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
+Tr21Stokes :: Tr21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this)
 {
     this->numberOfDofMans = 6;
     if ( aDomain->giveEngngModel()->giveProblemScale() == macroScale ) { // Pick the lowest default value for multiscale computations.

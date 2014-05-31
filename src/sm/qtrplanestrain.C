@@ -56,7 +56,7 @@ REGISTER_Element(QTrPlaneStrain);
 FEI2dTrQuad QTrPlaneStrain :: interpolation(1, 2);
 
 QTrPlaneStrain :: QTrPlaneStrain(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), SpatialLocalizerInterface(),
+    NLStructuralElement(n, aDomain), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this),
     DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface()
     // Constructor.
 {

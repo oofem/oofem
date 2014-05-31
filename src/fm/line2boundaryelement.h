@@ -81,7 +81,6 @@ public:
     // Interfaces
     virtual Interface *giveInterface(InterfaceType it);
 
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &gcoords);
 
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,

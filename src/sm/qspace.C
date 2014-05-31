@@ -49,7 +49,7 @@ REGISTER_Element(QSpace);
 
 FEI3dHexaQuad QSpace :: interpolation;
 
-QSpace :: QSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+QSpace :: QSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 20;
 }
