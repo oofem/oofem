@@ -631,13 +631,6 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
 
 #endif
 
-int
-LTRSpace :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
 
 double
 LTRSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)

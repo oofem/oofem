@@ -45,6 +45,13 @@
 namespace oofem {
 #define POINT_TOL 1.e-6
 
+int
+SpatialLocalizerInterface :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
+{
+    FloatArray lcoords;
+    return this->SpatialLocalizerI_giveElement()->computeLocalCoordinates(lcoords, coords);
+}
+
 void
 SpatialLocalizerInterface :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
 {

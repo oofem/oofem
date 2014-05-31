@@ -549,14 +549,6 @@ Axisymm3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
 }
 
 
-int
-Axisymm3d :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->interpolation.global2local( lcoords, coords, FEIElementGeometryWrapper(this) );
-}
-
-
 double
 Axisymm3d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {

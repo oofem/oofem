@@ -401,12 +401,6 @@ Interface *Tr1BubbleStokes :: giveInterface(InterfaceType it)
     }
 }
 
-int Tr1BubbleStokes :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
 void Tr1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                               TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {

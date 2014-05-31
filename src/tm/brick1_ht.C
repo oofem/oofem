@@ -207,14 +207,6 @@ Brick1_ht :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-int
-Brick1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
-
 double
 Brick1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {

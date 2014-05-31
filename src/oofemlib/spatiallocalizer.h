@@ -68,10 +68,11 @@ public:
     virtual Element *SpatialLocalizerI_giveElement() = 0;
     /**
      * Checks if element contains specified coordinate.
+     * Default implementation uses Element::computeLocalCoordinates.
      * @param coords Global coordinate.
      * @return Nonzero if given element contains given point.
      */
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords) = 0;
+    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     /**
      * Creates a bounding box of the nodes and checks if it includes the given coordinate.
      * @param coords Global coordinate.

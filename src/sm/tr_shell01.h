@@ -134,13 +134,16 @@ public:
 
     // SpatialLocalizerI
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
     virtual void SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1);
 
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) {
         return this->plate->computeGlobalCoordinates(answer, lcoords);
+    }
+
+    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords) {
+        return this->plate->computeLocalCoordinates(answer, gcoords);
     }
 
 protected:

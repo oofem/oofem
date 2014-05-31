@@ -411,14 +411,6 @@ Truss1d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int sid
 }
 
 
-int
-Truss1d :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lc;
-    return this->computeLocalCoordinates(lc, coords);
-}
-
-
 double
 Truss1d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {

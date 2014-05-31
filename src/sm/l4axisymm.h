@@ -86,7 +86,6 @@ public:
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
     virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);

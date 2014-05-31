@@ -392,17 +392,6 @@ L4Axisymm :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-int
-L4Axisymm :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    int result;
-    FloatArray lcoords;
-    result = this->computeLocalCoordinates(lcoords, coords);
-
-    return result;
-}
-
-
 void
 L4Axisymm :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {

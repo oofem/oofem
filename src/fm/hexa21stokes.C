@@ -390,11 +390,6 @@ Interface *Hexa21Stokes :: giveInterface(InterfaceType it)
     }
 }
 
-int Hexa21Stokes :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
 
 void Hexa21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                            TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)

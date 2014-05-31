@@ -693,13 +693,6 @@ TR1_2D_CBS :: giveInterface(InterfaceType interface)
 }
 
 
-int
-TR1_2D_CBS :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
 double
 TR1_2D_CBS :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {

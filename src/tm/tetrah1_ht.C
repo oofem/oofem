@@ -165,13 +165,6 @@ Tetrah1_ht :: giveInterface(InterfaceType interface)
     return NULL;
 }
 
-int
-Tetrah1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
 
 double
 Tetrah1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)

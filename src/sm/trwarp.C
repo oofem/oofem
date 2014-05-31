@@ -217,14 +217,6 @@ Tr_Warp :: giveInterface(InterfaceType interface)
     return NULL;
 }
 
-int
-Tr_Warp :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
-
 double
 Tr_Warp :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {

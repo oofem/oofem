@@ -362,14 +362,6 @@ TrPlaneStrain :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-int
-TrPlaneStrain :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
-
 double
 TrPlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {

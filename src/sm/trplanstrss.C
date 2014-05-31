@@ -811,13 +811,6 @@ TrPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-int
-TrPlaneStress2d :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
 double
 TrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {

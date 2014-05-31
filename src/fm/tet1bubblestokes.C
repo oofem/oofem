@@ -417,11 +417,6 @@ Interface *Tet1BubbleStokes :: giveInterface(InterfaceType it)
     }
 }
 
-int Tet1BubbleStokes :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
 
 void Tet1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                                TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)

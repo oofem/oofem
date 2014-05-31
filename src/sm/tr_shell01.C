@@ -450,12 +450,6 @@ TR_SHELL01 :: ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArra
     answer.at(6) = globTensor.at(1, 2); //mxyForce
 }
 
-int
-TR_SHELL01 :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return plate->computeLocalCoordinates(lcoords, coords);
-}
 
 double
 TR_SHELL01 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)

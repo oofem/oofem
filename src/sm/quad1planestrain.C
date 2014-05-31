@@ -787,17 +787,6 @@ Quad1PlaneStrain :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-int
-Quad1PlaneStrain :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    int result;
-    FloatArray lcoords;
-    result = this->computeLocalCoordinates(lcoords, coords);
-
-    return result;
-}
-
-
 double
 Quad1PlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {

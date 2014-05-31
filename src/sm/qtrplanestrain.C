@@ -169,14 +169,6 @@ QTrPlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) c
 }
 
 
-int
-QTrPlaneStrain :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
-
 double
 QTrPlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {

@@ -195,14 +195,6 @@ QTrPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer)
 }
 
 
-int
-QTrPlaneStress2d :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
-
 double
 QTrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {

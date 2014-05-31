@@ -197,14 +197,6 @@ QBrick1_ht :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-int
-QBrick1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
-
 double
 QBrick1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {

@@ -1225,13 +1225,6 @@ TR1_2D_SUPG2 :: giveInterface(InterfaceType interface)
 }
 
 
-int
-TR1_2D_SUPG2 :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
 double
 TR1_2D_SUPG2 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {

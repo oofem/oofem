@@ -406,14 +406,6 @@ LSpace :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side
 }
 
 
-int
-LSpace :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
-
 double
 LSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
