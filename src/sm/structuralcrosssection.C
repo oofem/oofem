@@ -60,6 +60,8 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
         this->giveRealStress_PlaneStress(answer, gp, strain, tStep);
     } else if ( mode == _1dMat ) {
         this->giveRealStress_1d(answer, gp, strain, tStep);
+    } else if ( mode == _Warping ) {
+        this->giveRealStress_Warping(answer, gp, strain, tStep);
     } else {
         // This should never happen ?
         ///@todo this part only works for simple cross section and will be removed soon when new interface elements are done /JB

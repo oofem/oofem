@@ -134,7 +134,7 @@ void AbaqusUserMaterial :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->numState, _IFT_AbaqusUserMaterial_numState);
     input.setField(this->properties, _IFT_AbaqusUserMaterial_properties);
     input.setField(this->filename, _IFT_AbaqusUserMaterial_userMaterial);
-    input.setField(this->cmname, _IFT_AbaqusUserMaterial_name);
+    input.setField(std::string(this->cmname), _IFT_AbaqusUserMaterial_name);
 }
 
 MaterialStatus *AbaqusUserMaterial :: CreateStatus(GaussPoint *gp) const
@@ -570,7 +570,7 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
         FloatArray vCauchyStress;
         vCauchyStress.beSymVectorForm(cauchyStress);
 
-        ms->letTempStrainVectorBe(reducedStrain);
+        ms->letTempStrainVectorBe(strain);
         ms->letTempStressVectorBe(vCauchyStress);
         ms->letTempStateVectorBe(state);
         ms->letTempTangentBe(jacobian);
@@ -596,7 +596,7 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
         // @todo Should convert from dsigmadE to dSdE here
         // L2=detF*matmul( matmul ( inv(op_a_V9(F,F), cm-op_a_V9(ident,Tau)-op_b_V9(Tau,ident) ), inv(op_a_V9(Ft,Ft)))
 
-        ms->letTempStrainVectorBe(reducedStrain);
+        ms->letTempStrainVectorBe(strain);
         ms->letTempStressVectorBe(vS);
         ms->letTempStateVectorBe(state);
         ms->letTempTangentBe(jacobian);

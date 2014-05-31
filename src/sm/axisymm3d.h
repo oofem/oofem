@@ -45,7 +45,7 @@
 ///@name Input fields for Axisymm3d
 //@{
 #define _IFT_Axisymm3d_Name "axisymm3d"
-#define _IFT_Axisymm3d_nipfish "nipfish"
+//#define _IFT_Axisymm3d_nipfish "nipfish"
 //@}
 
 namespace oofem {
@@ -63,7 +63,6 @@ public SpatialLocalizerInterface
 protected:
     static FEI2dTrLin interpolation;
 
-    int numberOfGaussPoints, numberOfFiAndShGaussPoints;
     double area;
 
 public:

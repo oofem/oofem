@@ -889,6 +889,14 @@ Beam3d :: giveInterface(InterfaceType interface)
 }
 
 
+void
+Beam3d :: updateLocalNumbering(EntityRenumberingFunctor &f)
+{
+  StructuralElement::updateLocalNumbering(f);
+  this->referenceNode = f(this->referenceNode, ERS_DofManager);
+}
+
+
 #ifdef __OOFEG
 void Beam3d :: drawRawGeometry(oofegGraphicContext &gc)
 {

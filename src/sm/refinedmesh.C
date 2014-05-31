@@ -1452,7 +1452,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedEl
     mesh_edge = mesh_edge_array;
     for ( i = 0; i < mesh_edges; i++, mesh_edge++ ) {
         for ( j = 0; j < 2; j++ ) {
-            if ( ( mesh_edge->fine_id [ j ] = ( long * ) calloc( level + 2, sizeof( long ) ) ) == NULL ) {
+            if ( ( mesh_edge->fine_id [ j ] = ( int * ) calloc( level + 2, sizeof( int ) ) ) == NULL ) {
                 error_message("Memory allocation error");
             }
 
@@ -1539,7 +1539,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedEl
         }
 
         for ( j = 0; j < 3; j++ ) {
-            if ( ( mesh_face->fine_id [ j ] = ( long * ) calloc( ( level + 2 ) * ( level + 2 ), sizeof( long ) ) ) == NULL ) {
+            if ( ( mesh_face->fine_id [ j ] = ( int * ) calloc( ( level + 2 ) * ( level + 2 ), sizeof( int ) ) ) == NULL ) {
                 error_message("Memory allocation error");
             }
 
@@ -1618,7 +1618,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedEl
         }
 
         for ( j = 0; j < 4; j++ ) {
-            if ( ( mesh_quad->fine_id [ j ] = ( long * ) calloc( ( level + 2 ) * ( level + 2 ), sizeof( long ) ) ) == NULL ) {
+            if ( ( mesh_quad->fine_id [ j ] = ( int * ) calloc( ( level + 2 ) * ( level + 2 ), sizeof( int ) ) ) == NULL ) {
                 error_message("Memory allocation error");
             }
 
@@ -1671,7 +1671,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedEl
     for ( i = 0; i < fe_edges; i++, mesh_edge++ ) {
         for ( j = 0; j < 2; j++ ) {
             fine_edge = & ( fine_edge_array [ fine_edge_id++ ] );
-            if ( ( fine_edge->fine_id = ( long * ) calloc( ( level + 2 ), sizeof( long ) ) ) == NULL ) {
+            if ( ( fine_edge->fine_id = ( int * ) calloc( ( level + 2 ), sizeof( int ) ) ) == NULL ) {
                 error_message("Memory allocation error");
             }
 
@@ -1748,7 +1748,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedEl
 
         for ( j = 0; j < 3; j++ ) {
             fine_quad = & ( fine_quad_array [ fine_quad_id++ ] );
-            if ( ( fine_quad->fine_id = ( long * ) calloc( ( level + 2 ) * ( level + 2 ), sizeof( long ) ) ) == NULL ) {
+            if ( ( fine_quad->fine_id = ( int * ) calloc( ( level + 2 ) * ( level + 2 ), sizeof( int ) ) ) == NULL ) {
                 error_message("Memory allocation error");
             }
 
@@ -1842,7 +1842,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedEl
 
         for ( j = 0; j < 4; j++ ) {
             fine_quad = & ( fine_quad_array [ fine_quad_id++ ] );
-            if ( ( fine_quad->fine_id = ( long * ) calloc( ( level + 2 ) * ( level + 2 ), sizeof( long ) ) ) == NULL ) {
+            if ( ( fine_quad->fine_id = ( int * ) calloc( ( level + 2 ) * ( level + 2 ), sizeof( int ) ) ) == NULL ) {
                 error_message("Memory allocation error");
             }
 
@@ -2104,7 +2104,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedEl
 
         for ( j = 0; j < 3; j++ ) {
             fine_hexa = & ( fine_hexa_array [ fine_hexa_id++ ] );
-            if ( ( fine_hexa->fine_id = ( long * ) calloc( ( level + 2 ) * ( level + 2 ) * ( level + 2 ), sizeof( long ) ) ) == NULL ) {
+            if ( ( fine_hexa->fine_id = ( int * ) calloc( ( level + 2 ) * ( level + 2 ) * ( level + 2 ), sizeof( int ) ) ) == NULL ) {
                 error_message("Memory allocation error");
             }
 
@@ -2197,7 +2197,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedEl
         /* form top hexa */
 
         fine_hexa = & ( fine_hexa_array [ fine_hexa_id++ ] );
-        if ( ( fine_hexa->fine_id = ( long * ) calloc( ( level + 2 ) * ( level + 2 ) * ( level + 2 ), sizeof( long ) ) ) == NULL ) {
+        if ( ( fine_hexa->fine_id = ( int * ) calloc( ( level + 2 ) * ( level + 2 ) * ( level + 2 ), sizeof( int ) ) ) == NULL ) {
             error_message("Memory allocation error");
         }
 
@@ -2515,7 +2515,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedEl
 
         for ( j = 0; j < 4; j++ ) {
             fine_hexa = & ( fine_hexa_array [ fine_hexa_id++ ] );
-            if ( ( fine_hexa->fine_id = ( long * ) calloc( ( level + 2 ) * ( level + 2 ) * ( level + 2 ), sizeof( long ) ) ) == NULL ) {
+            if ( ( fine_hexa->fine_id = ( int * ) calloc( ( level + 2 ) * ( level + 2 ) * ( level + 2 ), sizeof( int ) ) ) == NULL ) {
                 error_message("Memory allocation error");
             }
 
@@ -2609,7 +2609,7 @@ RefinedMesh :: refineMeshGlobally(Domain *d, int level, std :: vector< RefinedEl
 
         for ( j = 0; j < 4; j++ ) {
             fine_hexa = & ( fine_hexa_array [ fine_hexa_id++ ] );
-            if ( ( fine_hexa->fine_id = ( long * ) calloc( ( level + 2 ) * ( level + 2 ) * ( level + 2 ), sizeof( long ) ) ) == NULL ) {
+            if ( ( fine_hexa->fine_id = ( int * ) calloc( ( level + 2 ) * ( level + 2 ) * ( level + 2 ), sizeof( int ) ) ) == NULL ) {
                 error_message("Memory allocation error");
             }
 

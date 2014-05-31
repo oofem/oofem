@@ -52,9 +52,9 @@
     { \
         this->nRows = nr; this->nColumns = nc; \
         int nsize = this->nRows * this->nColumns; \
-        if ( nsize < (int)this->values.size() ) { \
+        if ( nsize < ( int ) this->values.size() ) { \
             this->values.resize(nsize); \
-        } else if ( nsize > (int)this->values.size() ) { \
+        } else if ( nsize > ( int ) this->values.size() ) { \
             this->values.assign(nsize, 0.); \
         } \
     }
@@ -67,40 +67,40 @@
 // Some forward declarations for LAPACK. Remember to append the underscore to the function name.
 #ifdef __LAPACK_MODULE
 extern "C" {
-    /// Computes the reciprocal condition number for a LU decomposed function.
-    extern void dgecon_(const char *norm, const int *n, const double *a, const int *lda,
-                        const double *anorm, double *rcond, double *work, int *iwork, int *info, int norm_len);
-    /// Replaces a with the LU-decomposition.
-    extern int dgetrf_(const int *m, const int *n, double *a, const int *lda, int *lpiv, int *info);
-    /// Replaces a with its inverse.
-    extern int dgetri_(const int *n, double *a, const int *lda, int *ipiv, double *work, const int *lwork, int *info);
-    /// Solves a system of equations.
-    extern int dgesv_(const int *n, const int *nrhs, double *a, const int *lda, int *ipiv, const double *b, const int *ldb, int *info);
-    /// Computes the norm.
-    extern double dlange_(const char *norm, const int *m, const int *n, const double *a, const int *lda, double *work, int norm_len);
-    /// Computes eigenvalues and vectors.
-    extern int dsyevx_(const char *jobz,  const char *range, const char *uplo, const int *n, double *a, const int *lda,
-                       const double *vl, const double *vu, const int *il, const int *iu,
-                       const double *abstol, int *m, double *w, double *z, const int *ldz,
-                       double *work, int *lwork, int *iwork, int *ifail, int *info,
-                       int jobz_len, int range_len, int uplo_len);
-    /// Solves system which has been LU-factorized.
-    extern void dgetrs_(const char *trans, const int *n, const int *nrhs, double *a, const int *lda, int *ipiv, const double *b, const int *ldb, int *info);
-    /// General matrix multiplication
-    extern void dgemm_(const char *transa, const char *transb, const int *m, const int *n, const int *k, const double *alpha,
-                       const double *a, const int *lda, const double *b, const int *ldb, const double *beta, double *c, const int *ldc,
-                       int a_columns, int b_columns, int c_columns);
-    /// General dyad product of vectors
-    extern void dger_(const int *m, const int *n, const double *alpha, const double *x, const int *incx,
-                      const double *y, const int *incy, double *a, const int *lda,
-                      int x_len, int y_len, int a_columns);
-    /// Symmetric dyad product of vector
-    extern void dsyr_(const char *uplo, const int *n, const double *alpha, const double *x, const int *incx,
-                      double *a, const int *lda, int x_len, int a_columns);
-    /// Y = Y + alpha * X
-    extern void daxpy_(const int *n, const double *alpha, const double *x, const int *incx, double *y, const int *incy, int xsize, int ysize);
-    /// X = alpha * X
-    extern void dscal_(const int *n, const double *alpha, const double *x, const int *incx, int size);
+/// Computes the reciprocal condition number for a LU decomposed function.
+extern void dgecon_(const char *norm, const int *n, const double *a, const int *lda,
+                    const double *anorm, double *rcond, double *work, int *iwork, int *info, int norm_len);
+/// Replaces a with the LU-decomposition.
+extern int dgetrf_(const int *m, const int *n, double *a, const int *lda, int *lpiv, int *info);
+/// Replaces a with its inverse.
+extern int dgetri_(const int *n, double *a, const int *lda, int *ipiv, double *work, const int *lwork, int *info);
+/// Solves a system of equations.
+extern int dgesv_(const int *n, const int *nrhs, double *a, const int *lda, int *ipiv, const double *b, const int *ldb, int *info);
+/// Computes the norm.
+extern double dlange_(const char *norm, const int *m, const int *n, const double *a, const int *lda, double *work, int norm_len);
+/// Computes eigenvalues and vectors.
+extern int dsyevx_(const char *jobz,  const char *range, const char *uplo, const int *n, double *a, const int *lda,
+                   const double *vl, const double *vu, const int *il, const int *iu,
+                   const double *abstol, int *m, double *w, double *z, const int *ldz,
+                   double *work, int *lwork, int *iwork, int *ifail, int *info,
+                   int jobz_len, int range_len, int uplo_len);
+/// Solves system which has been LU-factorized.
+extern void dgetrs_(const char *trans, const int *n, const int *nrhs, double *a, const int *lda, int *ipiv, const double *b, const int *ldb, int *info);
+/// General matrix multiplication
+extern void dgemm_(const char *transa, const char *transb, const int *m, const int *n, const int *k, const double *alpha,
+                   const double *a, const int *lda, const double *b, const int *ldb, const double *beta, double *c, const int *ldc,
+                   int a_columns, int b_columns, int c_columns);
+/// General dyad product of vectors
+extern void dger_(const int *m, const int *n, const double *alpha, const double *x, const int *incx,
+                  const double *y, const int *incy, double *a, const int *lda,
+                  int x_len, int y_len, int a_columns);
+/// Symmetric dyad product of vector
+extern void dsyr_(const char *uplo, const int *n, const double *alpha, const double *x, const int *incx,
+                  double *a, const int *lda, int x_len, int a_columns);
+/// Y = Y + alpha * X
+extern void daxpy_(const int *n, const double *alpha, const double *x, const int *incx, double *y, const int *incy, int xsize, int ysize);
+/// X = alpha * X
+extern void dscal_(const int *n, const double *alpha, const double *x, const int *incx, int size);
 }
 #endif
 
@@ -110,7 +110,6 @@ extern "C" {
 #endif
 
 namespace oofem {
-
 FloatMatrix :: FloatMatrix(const FloatArray &vector, bool transpose)
 //
 // constructor : creates (vector->giveSize(),1) FloatMatrix
@@ -131,14 +130,14 @@ FloatMatrix :: FloatMatrix(const FloatArray &vector, bool transpose)
 
 FloatMatrix :: FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat)
 {
-    RESIZE(mat.size(), mat.begin()->size())
+    RESIZE( mat.size(), mat.begin()->size() )
     auto p = this->values.begin();
     for ( auto col : mat ) {
- #if DEBUG
-        if ( this->nRows != (int)col.size() ) {
+#if DEBUG
+        if ( this->nRows != ( int ) col.size() ) {
             OOFEM_ERROR("Initializer list has inconsistent column sizes.");
         }
- #endif
+#endif
         for ( auto x : col ) {
             * p = x;
             p++;
@@ -153,10 +152,10 @@ FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< std :: initial
     auto p = this->values.begin();
     for ( auto col : mat ) {
 #if DEBUG
-            if ( this->nRows != (int)col.size() ) {
+        if ( this->nRows != ( int ) col.size() ) {
                 OOFEM_ERROR("Initializer list has inconsistent column sizes.");
-            }
- #endif
+        }
+#endif
         for ( auto x : col ) {
             * p = x;
             p++;
@@ -497,7 +496,9 @@ void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
         this->at(2, 2) = normal(1);
     } else if ( normal.giveSize() == 3 ) {
         // Create a permutated vector of n, *always* length 1 and significantly different from n.
-        FloatArray b, t = {normal(1), -normal(2), normal(0)}; // binormal and tangent
+        FloatArray b, t = {
+            normal(1), -normal(2), normal(0)
+        };                                                    // binormal and tangent
 
         // Construct orthogonal vector
         double npn = t.dotProduct(normal);
@@ -639,7 +640,7 @@ void FloatMatrix :: copyColumn(FloatArray &dest, int c) const
 
     dest.resize(nr);
     auto P = this->values.begin() + ( c - 1 ) * nr;
-    std :: copy(P, P+nr, dest.begin());
+    std :: copy( P, P + nr, dest.begin() );
 }
 
 
@@ -673,7 +674,8 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
 // not compute the transposition of matrix a.
 {
     if ( !this->isNotEmpty() ) {
-        this->nRows = a.nColumns; this->nColumns = b.nColumns;
+        this->nRows = a.nColumns;
+        this->nColumns = b.nColumns;
         this->values.assign(a.nColumns * b.nColumns, 0.);
     }
 
@@ -724,7 +726,8 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
 void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, double dV)
 {
     if ( !this->isNotEmpty() ) {
-        this->nRows = a.giveSize(); this->nColumns = a.giveSize();
+        this->nRows = a.giveSize();
+        this->nColumns = a.giveSize();
         this->values.assign(this->nRows * this->nColumns, 0.);
     }
 #ifdef __LAPACK_MODULE
@@ -750,7 +753,8 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
 // Advantage : does not compute the transposition of matrix a.
 {
     if ( !this->isNotEmpty() ) {
-        this->nRows = a.nColumns; this->nColumns = b.nColumns;
+        this->nRows = a.nColumns;
+        this->nColumns = b.nColumns;
         this->values.assign(this->nRows * this->nColumns, 0.);
     }
 #ifdef __LAPACK_MODULE
@@ -777,7 +781,8 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
 void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, double dV)
 {
     if ( !this->isNotEmpty() ) {
-        this->nRows = a.giveSize(); this->nColumns = b.giveSize();
+        this->nRows = a.giveSize();
+        this->nColumns = b.giveSize();
         this->values.assign(this->nRows * this->nColumns, 0.);
     }
 #ifdef __LAPACK_MODULE
@@ -822,8 +827,8 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         return;
     } else if ( nRows == 3 ) {
         det = src.at(1, 1) * src.at(2, 2) * src.at(3, 3) + src.at(1, 2) * src.at(2, 3) * src.at(3, 1) +
-        src.at(1, 3) * src.at(2, 1) * src.at(3, 2) - src.at(1, 3) * src.at(2, 2) * src.at(3, 1) -
-        src.at(2, 3) * src.at(3, 2) * src.at(1, 1) - src.at(3, 3) * src.at(1, 2) * src.at(2, 1);
+              src.at(1, 3) * src.at(2, 1) * src.at(3, 2) - src.at(1, 3) * src.at(2, 2) * src.at(3, 1) -
+              src.at(2, 3) * src.at(3, 2) * src.at(1, 1) - src.at(3, 3) * src.at(1, 2) * src.at(2, 1);
 
         this->at(1, 1) = ( src.at(2, 2) * src.at(3, 3) - src.at(2, 3) * src.at(3, 2) ) / det;
         this->at(2, 1) = ( src.at(2, 3) * src.at(3, 1) - src.at(2, 1) * src.at(3, 3) ) / det;
@@ -938,7 +943,7 @@ void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
     }
 
     if ( ( src.nRows < bottomRow ) || ( src.nColumns < bottomCol ) || ( ( bottomRow - topRow ) > src.nRows ) ||
-        ( ( bottomCol - topCol ) > src.nColumns ) ) {
+         ( ( bottomCol - topCol ) > src.nColumns ) ) {
         OOFEM_ERROR("subindexes size mismatch");
     }
 #endif
@@ -1288,7 +1293,7 @@ void FloatMatrix :: initFromVector(const FloatArray &vector, bool transposed)
 
 void FloatMatrix :: zero()
 {
-    std::fill(this->values.begin(), this->values.end(), 0.);
+    std :: fill(this->values.begin(), this->values.end(), 0.);
 }
 
 
@@ -1325,7 +1330,7 @@ void FloatMatrix :: resize(int rows, int columns)
 {
     this->nRows = rows;
     this->nColumns = columns;
-    this->values.assign(rows*columns, 0.);
+    this->values.assign(rows * columns, 0.);
 }
 
 
@@ -1339,11 +1344,11 @@ void FloatMatrix :: resizeWithData(int rows, int columns)
         return;
     }
 
-    FloatMatrix old(std::move(*this));
+    FloatMatrix old( std :: move(* this) );
 
     this->nRows = rows;
     this->nColumns = columns;
-    this->values.resize(rows*columns);
+    this->values.resize(rows * columns);
 
     int ii = min( rows, old.giveNumberOfRows() );
     int jj = min( columns, old.giveNumberOfColumns() );
@@ -1363,7 +1368,7 @@ void FloatMatrix :: hardResize(int rows, int columns)
 {
     this->nRows = rows;
     this->nColumns = columns;
-    values.assign(rows*columns, 0.);
+    values.assign(rows * columns, 0.);
     this->values.shrink_to_fit();
 }
 
@@ -1373,21 +1378,46 @@ double FloatMatrix :: giveDeterminant() const
 {
 #  ifdef DEBUG
     if ( !this->isSquare() ) {
-        OOFEM_ERROR("cannot compute determinant of a %d by %d matrix", nRows, nColumns);
+        OOFEM_ERROR("cannot compute the determinant of a non-square %d by %d matrix", nRows, nColumns);
     }
-
 #  endif
 
     if ( nRows == 1 ) {
         return values [ 0 ];
     } else if ( nRows == 2 ) {
-        return  ( values [ 0 ] * values [ 3 ] - values [ 1 ] * values [ 2 ] );
+        return ( values [ 0 ] * values [ 3 ] - values [ 1 ] * values [ 2 ] );
     } else if ( nRows == 3 ) {
         return ( values [ 0 ] * values [ 4 ] * values [ 8 ] + values [ 3 ] * values [ 7 ] * values [ 2 ] +
                  values [ 6 ] * values [ 1 ] * values [ 5 ] - values [ 6 ] * values [ 4 ] * values [ 2 ] -
                  values [ 7 ] * values [ 5 ] * values [ 0 ] - values [ 8 ] * values [ 3 ] * values [ 1 ] );
     } else {
-        OOFEM_ERROR("sorry, cannot inverse %d by %d matrices", nRows, nColumns);
+        OOFEM_ERROR("sorry, cannot compute the determinant of a matrix larger than 3x3");
+    }
+
+    return 0.;
+}
+
+double FloatMatrix :: giveTrace() const
+// Returns the trace (sum of diagonal terms) of the receiver.
+{
+#  ifdef DEBUG
+    if ( !this->isSquare() ) {
+        OOFEM_ERROR("cannot compute the trace of a non-square %d by %d matrix", nRows, nColumns);
+    }
+#  endif
+
+    if ( nRows == 1 ) {
+        return values [ 0 ];
+    } else if ( nRows == 2 ) {
+        return ( values [ 0 ] + values [ 3 ] );
+    } else if ( nRows == 3 ) {
+        return ( values [ 0 ] + values [ 4 ] + values [ 8 ] );
+    } else {
+        double answer = 0.;
+        for ( int k = 0; k < nRows; k++ ) {
+            answer += values [ k * ( nRows + 1 ) ];
+        }
+        return answer;
     }
 
     return 0.;
@@ -1473,7 +1503,7 @@ void FloatMatrix :: times(double factor)
 // Multiplies every coefficient of the receiver by factor. Answers the
 // modified receiver.
 {
-    for ( double &x: this->values ) {
+    for ( double &x : this->values ) {
         x *= factor;
     }
     // dscal_ seemed to be slower for typical usage of this function.
@@ -1482,7 +1512,7 @@ void FloatMatrix :: times(double factor)
 
 void FloatMatrix :: negated()
 {
-    for ( double &x: this->values ) {
+    for ( double &x : this->values ) {
         x = -x;
     }
 }
@@ -1490,7 +1520,7 @@ void FloatMatrix :: negated()
 
 double FloatMatrix :: computeFrobeniusNorm() const
 {
-    return sqrt(std::inner_product(this->values.begin(), this->values.end(), this->values.begin(), 0.));
+    return sqrt( std :: inner_product(this->values.begin(), this->values.end(), this->values.begin(), 0.) );
 }
 
 double FloatMatrix :: computeNorm(char p) const
@@ -1592,8 +1622,8 @@ void FloatMatrix :: changeComponentOrder()
         std :: swap( this->at(6, 4), this->at(4, 6) );
 
         std :: swap( this->at(4, 5), this->at(6, 5) );
-    } else if ( nRows == 9 && nColumns == 9 )    {
-        // OOFEM: 			11, 22, 33, 23, 13, 12, 32, 31, 21
+    } else if ( nRows == 9 && nColumns == 9 ) {
+        // OOFEM:           11, 22, 33, 23, 13, 12, 32, 31, 21
         // UMAT:			11, 22, 33, 12, 13, 23, 32, 21, 31
         const int abq2oo [ 9 ] = {
             1,  2,  3,  6,  5,  4,  7,  9,  8

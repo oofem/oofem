@@ -90,7 +90,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual double calculateMinimumDistanceFromBoundary(const FloatArray &coords, double maxPossibleDistance);
+    virtual double calculateMinimumDistanceFromBoundary(const FloatArray &coords);
 
     /**
      * This function computes the length of the normal to the line defined by 2 vertices that passes through

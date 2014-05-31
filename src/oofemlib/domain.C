@@ -721,9 +721,10 @@ Domain :: instanciateYourself(DataReader *dr)
 
     ///@todo Eventually remove this backwards compatibility:
     //_HeatTransferMode _HeatMass1Mode // Are these deprecated?
+    // set the number of spatial dimensions
     if ( dType == _1dTrussMode ) {
         nsd = 1;
-    } else if ( dType == _2dIncompressibleFlow || dType == _2dBeamMode || dType == _2dTrussMode || dType == _2dMindlinPlateMode || dType == _PlaneStrainMode || dType == _2dPlaneStressMode || dType == _2dPlaneStressRotMode ) {
+    } else if ( dType == _2dIncompressibleFlow || dType == _2dBeamMode || dType == _2dTrussMode || dType == _2dMindlinPlateMode || dType == _PlaneStrainMode || dType == _2dPlaneStressMode || dType == _2dPlaneStressRotMode || dType == _WarpingMode ) {
         nsd = 2;
     } else if ( dType == _3dIncompressibleFlow || dType == _3dShellMode || dType == _3dMode || dType == _3dDirShellMode ) {
         nsd = 3;
@@ -1215,6 +1216,8 @@ Domain :: giveDefaultNodeDofIDArry()
         defaultNodeDofIDArry = {D_u, D_v, D_w, W_u, W_v, W_w, Gamma};
     }  else if ( dType == _2dLatticeMassTransportMode ) {
         defaultNodeDofIDArry = {P_f};
+    }  else if ( dType == _WarpingMode ) {
+        defaultNodeDofIDArry = {D_w};
     } else {
         OOFEM_ERROR("unknown domainType (%s)", __domainTypeToString(dType));
     }
@@ -1280,6 +1283,8 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
         dType = _2dLatticeMassTransportMode;
     } else if  ( !strncmp(typeName, "3d", 2) ) {
         dType = _3dMode;
+    } else if  ( !strncmp(typeName, "warping", 7) ) {
+        dType = _WarpingMode;
     } else {
         OOFEM_ERROR("unknown domainType (%s)", typeName);
         return;

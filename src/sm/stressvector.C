@@ -104,58 +104,33 @@ void
 StressVector :: computePrincipalValues(FloatArray &answer) const
 {
     //
-    // This function cumputes Principal values of stress vector.
+    // This function computes sorted principal values of a stress vector.
     // Engineering notation is used.
     //
     MaterialMode myMode = this->giveStressStrainMode();
     int size = this->giveSize();
-    int nonzeroFlag = 0;
 
     if ( myMode == _1dMat ) {
         answer = * this;
     } else if ( myMode == _PlaneStress ) {
         // 2D problem
-        double ast, dst, D = 0.0;
+        double ast, dst, D;
         answer.resize(2);
-
-        for ( int i = 1; i <= size; i++ ) {
-            if ( fabs( this->at(i) ) > 1.e-20 ) {
-                nonzeroFlag = 1;
-            }
-        }
-
-        if ( nonzeroFlag == 0 ) {
-            answer.zero();
-            return;
-        }
 
         ast = this->at(1) + this->at(2);
         dst = this->at(1) - this->at(2);
-        D = dst * dst + 4.0 * this->at(3) * this->at(3);
-
-        if ( D < 0. ) {
-            OOFEM_ERROR("Imaginar roots ");
-        }
-
-        D = sqrt(D);
-        answer.at(1) = 0.5 * ( ast - D );
-        answer.at(2) = 0.5 * ( ast + D );
-
-        // sort result
-        if ( answer.at(1) > answer.at(2) ) {
-            return;
-        } else {
-            std::swap(answer.at(1), answer.at(2));
-            return;
-        }
+        D = sqrt( dst * dst + 4.0 * this->at(3) * this->at(3) );
+        answer.at(1) = 0.5 * ( ast + D );
+        answer.at(2) = 0.5 * ( ast - D );
     } else {
         // 3D problem
         double I1 = 0.0, I2 = 0.0, I3 = 0.0, s1, s2, s3;
         FloatArray s;
+        int nonzeroFlag = 0;
 
         this->convertToFullForm(s);
-        for ( int i = 1; i <= size; i++ ) {
-            if ( fabs( s.at(i) ) > 1.e-20 ) {
+        for ( int i = 1; i <= size; i++ ) { // is this really needed?
+            if ( fabs( s.at(i) ) > 1.e-20 ) { // is there an underflow problem for small values?
                 nonzeroFlag = 1;
             }
         }
@@ -168,13 +143,13 @@ StressVector :: computePrincipalValues(FloatArray &answer) const
 
         I1 = s.at(1) + s.at(2) + s.at(3);
         I2 = s.at(1) * s.at(2) + s.at(2) * s.at(3) + s.at(3) * s.at(1) -
-        ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
+             ( s.at(4) * s.at(4) + s.at(5) * s.at(5) + s.at(6) * s.at(6) );
         I3 = s.at(1) * s.at(2) * s.at(3) + 2. * s.at(4) * s.at(5) * s.at(6) -
-        ( s.at(1) * s.at(4) * s.at(4) + s.at(2) * s.at(5) * s.at(5) +
-         s.at(3) * s.at(6) * s.at(6) );
+             ( s.at(1) * s.at(4) * s.at(4) + s.at(2) * s.at(5) * s.at(5) +
+               s.at(3) * s.at(6) * s.at(6) );
 
         /*
-         * Call cubic3r to ensure, that all three real eigenvalues will be found, because we have symmetric tensor.
+         * Call cubic3r to ensure that all three real eigenvalues will be found, because we have a symmetric tensor.
          * This allows to overcome various rounding errors when solving general cubic equation.
          */
         int i;
@@ -196,7 +171,7 @@ StressVector :: computePrincipalValues(FloatArray &answer) const
         for ( int i = 1; i < 3; i++ ) {
             for ( int j = 1; j < 3; j++ ) {
                 if ( answer.at(j + 1) > answer.at(j) ) {
-                    std::swap(answer.at(j + 1), answer.at(j));
+                    std :: swap( answer.at(j + 1), answer.at(j) );
                 }
             }
         }
@@ -290,9 +265,9 @@ StressVector :: computePrincipalValDir(FloatArray &answer, FloatMatrix &dir) con
         for ( int jj = 1; jj < nval; jj++ ) {
             if ( answer.at(jj + 1) > answer.at(jj) ) {
                 // swap eigen values and eigen vectors
-                std::swap(answer.at(jj + 1), answer.at(jj));
+                std :: swap( answer.at(jj + 1), answer.at(jj) );
                 for ( int kk = 1; kk <= nval; kk++ ) {
-                    std::swap(dir.at(kk, jj + 1), dir.at(kk, jj));
+                    std :: swap( dir.at(kk, jj + 1), dir.at(kk, jj) );
                 }
             }
         }
@@ -303,8 +278,8 @@ void
 StressVector :: printYourself() const
 {
     printf("StressVector (MaterialMode %d)\n", mode);
-    for ( double x: *this ) {
-        printf( "%10.3e  ", x );
+    for ( double x : *this ) {
+        printf("%10.3e  ", x);
     }
 
     printf("\n");

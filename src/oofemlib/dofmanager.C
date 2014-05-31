@@ -694,6 +694,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
     IntArray dofArray;
 
     answer.resize( size = dofIDArry.giveSize() );
+    if (size == 0) return;
 
     for ( int i = 1; i <= size; i++ ) {
         auto pos = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) );
