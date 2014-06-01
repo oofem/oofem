@@ -215,19 +215,5 @@ public:
     virtual const char *giveClassName() const { return "ZZErrorEstimator"; }
 };
 
-/**
- * The corresponding element interface to ZZRemeshingCriteria class.
- * Declares the necessary services, which have to be provided by particular elements.
- */
-class ZZRemeshingCriteriaInterface : public Interface
-{
-public:
-    /// Constructor
-    ZZRemeshingCriteriaInterface() : Interface() { }
-    /**
-     * Returns the polynomial order of receiver trial functions.
-     */
-    virtual int ZZRemeshingCriteriaI_givePolynOrder() = 0;
-};
 } // end namespace oofem
 #endif // zzerrorestimator_h

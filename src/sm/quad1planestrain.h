@@ -58,7 +58,7 @@ namespace oofem {
 class Quad1PlaneStrain : public StructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
 public EIPrimaryUnknownMapperInterface,
-public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
+public HuertaErrorEstimatorInterface
 {
 protected:
     static FEI2dQuadLin interp;
@@ -104,9 +104,6 @@ public:
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
-
-    // HuertaRemeshingCriteriaInterface
-    virtual int HuertaRemeshingCriteriaI_givePolynOrder() { return 1; };
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);

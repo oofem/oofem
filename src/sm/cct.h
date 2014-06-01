@@ -57,7 +57,7 @@ namespace oofem {
 class CCTPlate : public NLStructuralElement,
 public LayeredCrossSectionInterface, public ZZNodalRecoveryModelInterface,
 public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface
+public ZZErrorEstimatorInterface
 {
 protected:
     static FEI2dTrLin interp_lin;
@@ -132,9 +132,6 @@ public:
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP() { return 1; }
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
-
-    // ZZRemeshingCriteriaInterface
-    virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     // layered cross section support functions
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,

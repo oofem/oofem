@@ -58,7 +58,7 @@ namespace oofem {
 class PlaneStress2d : public NLStructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
 public EIPrimaryUnknownMapperInterface,
-public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
+public HuertaErrorEstimatorInterface
 {
 protected:
     static FEI2dQuadLin interpolation;
@@ -98,10 +98,6 @@ public:
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
-
-    // HuertaRemeshingCriteriaInterface
-    virtual int HuertaRemeshingCriteriaI_givePolynOrder() { return 1; };
-
 
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                        TimeStep *tStep, const FloatArray &lcoords,

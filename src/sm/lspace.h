@@ -62,7 +62,7 @@ class LSpace  : public NLStructuralElement, public ZZNodalRecoveryModelInterface
 public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface,
 public SpatialLocalizerInterface,
 public EIPrimaryUnknownMapperInterface,
-public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
+public HuertaErrorEstimatorInterface
 {
 protected:
     static FEI3dHexaLin interpolation;
@@ -107,9 +107,6 @@ public:
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
-
-    // HuertaRemeshingCriteriaInterface
-    virtual int HuertaRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LSpace_Name; }

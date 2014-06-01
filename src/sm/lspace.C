@@ -58,7 +58,7 @@ FEI3dHexaLin LSpace :: interpolation;
 
 LSpace :: LSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
-    EIPrimaryUnknownMapperInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
+    EIPrimaryUnknownMapperInterface(), HuertaErrorEstimatorInterface()
     // Constructor.
 {
     numberOfDofMans  = 8;
@@ -81,8 +81,6 @@ LSpace :: giveInterface(InterfaceType interface)
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
-    } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return static_cast< HuertaRemeshingCriteriaInterface * >(this);
     }
 
     return NULL;

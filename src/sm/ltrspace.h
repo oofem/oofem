@@ -60,8 +60,8 @@ class LTRSpace : public NLStructuralElement, public ZZNodalRecoveryModelInterfac
 public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
 public EIPrimaryUnknownMapperInterface,
-public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface, public MMAShapeFunctProjectionInterface,
-public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
+public ZZErrorEstimatorInterface, public MMAShapeFunctProjectionInterface,
+public HuertaErrorEstimatorInterface
 {
 protected:
     static FEI3dTetLin interpolation;
@@ -132,12 +132,6 @@ public:
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
-
-    // ZZRemeshingCriteriaInterface
-    virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
-
-    // HuertaRemeshingCriteriaInterface
-    virtual int HuertaRemeshingCriteriaI_givePolynOrder() { return 1; };
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

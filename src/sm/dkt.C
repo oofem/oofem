@@ -422,8 +422,6 @@ DKTPlate :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     }
 
 

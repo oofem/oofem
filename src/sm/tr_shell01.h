@@ -52,7 +52,7 @@ namespace oofem {
  *
  * @author Ladislav Svoboda
  */
-class TR_SHELL01 : public StructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface, public SpatialLocalizerInterface
+class TR_SHELL01 : public StructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public ZZErrorEstimatorInterface, public SpatialLocalizerInterface
 {
 protected:
     /// Pointer to plate element.
@@ -121,9 +121,6 @@ public:
 
     virtual IntegrationRule *ZZErrorEstimatorI_giveIntegrationRule();
     virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArray &sig);
-
-    // ZZRemeshingCriteriaInterface
-    virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     // SpatialLocalizerI
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);

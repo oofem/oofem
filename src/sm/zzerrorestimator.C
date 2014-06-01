@@ -366,7 +366,6 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     double globValNorm = 0.0, globValErrorNorm = 0.0, elemErrLimit, eerror, iratio, currDensity, elemSize;
     Element *ielem;
     EE_ErrorType errorType = indicatorET;
-    ZZRemeshingCriteriaInterface *interface;
     double pe, coeff = 2.0;
 
     if ( stateCounter == tStep->giveSolutionStateCounter() ) {
@@ -417,12 +416,6 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
             continue;
         }
 
-        interface = static_cast< ZZRemeshingCriteriaInterface * >
-                    ( ielem->giveInterface(ZZRemeshingCriteriaInterfaceType) );
-        if ( !interface ) {
-            OOFEM_ERROR("element does not support ZZRemeshingCriteriaInterface");
-        }
-
         eerror = this->ee->giveElementError(errorType, ielem, tStep);
         iratio = eerror / elemErrLimit;
         if ( fabs(iratio) < 1.e-3 ) {
@@ -440,7 +433,7 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
         //  if (iratio > 5.0)iratio = 5.0;
 
         currDensity = ielem->computeMeanSize();
-        elemPolyOrder = interface->ZZRemeshingCriteriaI_givePolynOrder();
+        elemPolyOrder = ielem->giveInterpolation()->giveInterpolationOrder();
         elemSize = currDensity / pow(iratio, 1.0 / elemPolyOrder);
 
         ielemNodes = ielem->giveNumberOfDofManagers();
@@ -491,19 +484,16 @@ ZZRemeshingCriteria :: giveDofManDensity(int num)
     con = ct->giveDofManConnectivityArray(num);
     isize = con->giveSize();
 
-    /*
-     * // Minimum density
-     *
-     * for (i=1; i<=isize; i++) {
-     * interface = (ZZRemeshingCriteriaInterface*)
-     * domain->giveElement(con->at(i))->giveInterface (ZZRemeshingCriteriaInterfaceType);
-     * if (!interface) {
-     * OOFEM_ERROR("element does not support ZZRemeshingCriteriaInterface");
-     * }
-     * if (i==1) density = interface->ZZRemeshingCriteriaI_giveCharacteristicSize ();
-     * else density = min (density, interface->ZZRemeshingCriteriaI_giveCharacteristicSize ());
-     * }
-     */
+#if 0
+     // Minimum density
+     for ( int i = 1; i <= isize; i++ ) {
+        Element *ielem = domain->giveElement( con->at(i) );
+        if (i==1)
+            density = ielem->computeMeanSize();
+        else
+            density = min(density, ielem->computeMeanSize());
+     }
+#endif
 
     // Average density
 

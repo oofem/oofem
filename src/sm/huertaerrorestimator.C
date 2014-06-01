@@ -741,7 +741,6 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     double eerror, iratio, currDensity, elemSize, elemErrLimit, percentError;
     Element *ielem;
     EE_ErrorType errorType = unknownET;
-    HuertaRemeshingCriteriaInterface *interface;
     bool refine = false;
     int result;
     double sval, maxVal;
@@ -913,10 +912,6 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
          * if(this -> ee -> skipRegion(ielem -> giveRegionNumber()) != 0)continue;
          * }
          */
-        interface = static_cast< HuertaRemeshingCriteriaInterface * >( ielem->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
-        if ( !interface ) {
-            OOFEM_ERROR("element does not support HuertaRemeshingCriteriaInterface");
-        }
 
         eerror = this->ee->giveElementError(errorType, ielem, tStep);
         iratio = eerror / elemErrLimit;
@@ -937,7 +932,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
         }
 
         currDensity = ielem->computeMeanSize();
-        elemPolyOrder = interface->HuertaRemeshingCriteriaI_givePolynOrder();
+        elemPolyOrder = ielem->giveInterpolation()->giveInterpolationOrder();
         elemSize = currDensity / pow(iratio, 1.0 / elemPolyOrder);
         //#ifdef HUHU
         // toto je treba udelat obecne
@@ -1040,15 +1035,11 @@ HuertaRemeshingCriteria :: giveDofManDensity(int num)
 #if 0
     // Minimum density
     for ( i = 1; i <= isize; i++ ) {
-        interface = static_cast< HuertaRemeshingCriteriaInterface * >
-                    ( domain->giveElement( con->at(i) )->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
-        if ( !interface ) {
-            OOFEM_ERROR("element does not support HuertaRemeshingCriteriaInterface");
-        }
+        Element *ielem = domain->giveElement( con->at(i) );
         if ( i == 1 ) {
-            density = interface->HuertaRemeshingCriteriaI_giveCharacteristicSize();
+            density = ielem->computeMeanSize();
         } else {
-            density = min( density, interface->HuertaRemeshingCriteriaI_giveCharacteristicSize() );
+            density = min( density, ielem->computeMeanSize() );
         }
     }
 #endif

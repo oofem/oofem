@@ -54,9 +54,6 @@ enum InterfaceType {
     HuertaErrorEstimatorInterfaceType,
     Huerta1dErrorEstimatorInterfaceType, // experimental
 
-    ZZRemeshingCriteriaInterfaceType,
-    HuertaRemeshingCriteriaInterfaceType,
-
     SpatialLocalizerInterfaceType,
 
     EIPrimaryUnknownMapperInterfaceType,

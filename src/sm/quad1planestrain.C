@@ -59,7 +59,7 @@ Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
     StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface(),
     SpatialLocalizerInterface(this),
     EIPrimaryUnknownMapperInterface(),
-    HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
+    HuertaErrorEstimatorInterface()
 {
     numberOfDofMans  = 4;
     numberOfGaussPoints = 4;
@@ -323,8 +323,6 @@ Quad1PlaneStrain :: giveInterface(InterfaceType interface)
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
-    } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return static_cast< HuertaRemeshingCriteriaInterface * >(this);
     }
 
     return NULL;

@@ -62,8 +62,8 @@ class TrPlaneStress2d : public NLStructuralElement, public ZZNodalRecoveryModelI
 public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
 public EIPrimaryUnknownMapperInterface,
-public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface, public MMAShapeFunctProjectionInterface,
-public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
+public ZZErrorEstimatorInterface, public MMAShapeFunctProjectionInterface,
+public HuertaErrorEstimatorInterface
 {
 protected:
     static FEI2dTrLin interp;
@@ -128,12 +128,6 @@ public:
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
-
-    // ZZRemeshingCriteriaInterface
-    virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
-
-    // HuertaRemeshingCriteriaInterface
-    virtual int HuertaRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
                                                                       coordType ct, nodalValContainerType &list,

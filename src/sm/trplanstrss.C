@@ -57,8 +57,8 @@ FEI2dTrLin TrPlaneStress2d :: interp(1, 2);
 TrPlaneStress2d :: TrPlaneStress2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
-    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this), ZZRemeshingCriteriaInterface(),
-    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
+    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
+    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface()
 {
     numberOfDofMans  = 3;
     area = -1;
@@ -80,14 +80,10 @@ TrPlaneStress2d :: giveInterface(InterfaceType interface)
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
         return static_cast< MMAShapeFunctProjectionInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
-    } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return static_cast< HuertaRemeshingCriteriaInterface * >(this);
     }
 
     return NULL;

@@ -64,8 +64,7 @@ class QDKTPlate : public NLStructuralElement,
 public ZZNodalRecoveryModelInterface,
 public SPRNodalRecoveryModelInterface,
 public LayeredCrossSectionInterface, 
-public ZZErrorEstimatorInterface, 
-public ZZRemeshingCriteriaInterface
+public ZZErrorEstimatorInterface
 {
 protected:
     /// Element geometry approximation
@@ -145,9 +144,6 @@ public:
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP() { return this->numberOfGaussPoints; }
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
-
-    // ZZRemeshingCriteriaInterface
-    virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     // layered cross section support functions
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,

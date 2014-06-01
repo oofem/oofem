@@ -56,8 +56,8 @@ FEI2dTrLin TrPlaneStrain :: interp(1, 2);
 TrPlaneStrain :: TrPlaneStrain(int n, Domain *aDomain) :
     StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
-    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this), ZZRemeshingCriteriaInterface(),
-    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
+    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
+    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface()
     // Constructor.
 {
     numberOfDofMans  = 3;
@@ -81,14 +81,10 @@ TrPlaneStrain :: giveInterface(InterfaceType interface)
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
         return static_cast< MMAShapeFunctProjectionInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
-    } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return static_cast< HuertaRemeshingCriteriaInterface * >(this);
     }
 
     return NULL;

@@ -324,20 +324,5 @@ public:
     virtual const char *giveClassName() const { return "HuertaErrorEstimator"; }
 };
 
-
-/**
- * The corresponding element interface to HuertaRemeshingCriteria class.
- * Declares the necessary services, which have to be provided by particular elements.
- */
-class HuertaRemeshingCriteriaInterface : public Interface
-{
-public:
-    /// Constructor
-    HuertaRemeshingCriteriaInterface() : Interface() { }
-    /**
-     * Returns the polynomial order of receiver trial functions.
-     */
-    virtual int HuertaRemeshingCriteriaI_givePolynOrder() = 0;
-};
 } // end namespace oofem
 #endif // huertaerrorestimator_h
