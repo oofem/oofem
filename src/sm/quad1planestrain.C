@@ -58,7 +58,7 @@ FEI2dQuadLin Quad1PlaneStrain :: interp(1, 2);
 Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
     StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface(),
     SpatialLocalizerInterface(this),
-    DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface(),
+    EIPrimaryUnknownMapperInterface(),
     HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
 {
     numberOfDofMans  = 4;
@@ -319,8 +319,6 @@ Quad1PlaneStrain :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
@@ -810,19 +808,6 @@ Quad1PlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
     }
 
     return dist;
-}
-
-
-double
-Quad1PlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
-{
-    double volume = 0.0;
-
-    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-        volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
-    }
-
-    return sqrt(volume);
 }
 
 

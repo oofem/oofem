@@ -822,12 +822,8 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
                  * if(this -> ee -> skipRegion(ielem -> giveRegionNumber()) != 0)continue;
                  * }
                  */
-                interface = static_cast< HuertaRemeshingCriteriaInterface * >( ielem->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
-                if ( !interface ) {
-                    OOFEM_ERROR("element does not support HuertaRemeshingCriteriaInterface");
-                }
 
-                currDensity = interface->HuertaRemeshingCriteriaI_giveCharacteristicSize();
+                currDensity = ielem->computeMeanSize();
 
                 //#ifdef HUHU
                 // toto je treba udelat obecne
@@ -940,7 +936,7 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
             }
         }
 
-        currDensity = interface->HuertaRemeshingCriteriaI_giveCharacteristicSize();
+        currDensity = ielem->computeMeanSize();
         elemPolyOrder = interface->HuertaRemeshingCriteriaI_givePolynOrder();
         elemSize = currDensity / pow(iratio, 1.0 / elemPolyOrder);
         //#ifdef HUHU
@@ -1036,7 +1032,6 @@ HuertaRemeshingCriteria :: giveDofManDensity(int num)
     int isize;
     ConnectivityTable *ct = domain->giveConnectivityTable();
     const IntArray *con;
-    HuertaRemeshingCriteriaInterface *interface;
     double density;
 
     con = ct->giveDofManConnectivityArray(num);
@@ -1062,13 +1057,9 @@ HuertaRemeshingCriteria :: giveDofManDensity(int num)
 
     density = 0.0;
     for ( int i = 1; i <= isize; i++ ) {
-        interface = static_cast< HuertaRemeshingCriteriaInterface * >
-                    ( domain->giveElement( con->at(i) )->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
-        if ( !interface ) {
-            OOFEM_ERROR("element does not support HuertaRemeshingCriteriaInterface");
-        }
+        Element *ielem = domain->giveElement( con->at(i) );
 
-        density += interface->HuertaRemeshingCriteriaI_giveCharacteristicSize();
+        density += ielem->computeMeanSize();
     }
 
     density /= isize;

@@ -125,7 +125,6 @@ public:
     virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArray &sig);
 
     // ZZRemeshingCriteriaInterface
-    virtual double ZZRemeshingCriteriaI_giveCharacteristicSize();
     virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     // SpatialLocalizerI

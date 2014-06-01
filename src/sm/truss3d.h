@@ -51,7 +51,6 @@ namespace oofem {
  * analysis.
  */
 class Truss3d : public NLStructuralElement,
-public DirectErrorIndicatorRCInterface,
 public ZZNodalRecoveryModelInterface,
 public NodalAveragingRecoveryModelInterface
 {
@@ -85,8 +84,6 @@ public:
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
     virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
-
-    virtual double DirectErrorIndicatorRCI_giveCharacteristicSize() { return this->computeLength(); }
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);

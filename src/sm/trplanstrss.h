@@ -61,7 +61,7 @@ namespace oofem {
 class TrPlaneStress2d : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
 public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
-public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface,
+public EIPrimaryUnknownMapperInterface,
 public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface, public MMAShapeFunctProjectionInterface,
 public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
@@ -114,7 +114,6 @@ public:
 
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
-    virtual double DirectErrorIndicatorRCI_giveCharacteristicSize();
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
                                                                  TimeStep *tStep, const FloatArray &coords,
                                                                  FloatArray &answer);
@@ -133,11 +132,9 @@ public:
     { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
 
     // ZZRemeshingCriteriaInterface
-    virtual double ZZRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); }
     virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     // HuertaRemeshingCriteriaInterface
-    virtual double HuertaRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); };
     virtual int HuertaRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,

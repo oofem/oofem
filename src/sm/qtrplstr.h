@@ -52,7 +52,7 @@ namespace oofem {
  */
 class QTrPlaneStress2d : public NLStructuralElement, public SpatialLocalizerInterface,
 public SPRNodalRecoveryModelInterface,
-public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface
+public EIPrimaryUnknownMapperInterface
 {
 protected:
     static FEI2dTrQuad interpolation;
@@ -91,8 +91,6 @@ public:
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
-
-    virtual double DirectErrorIndicatorRCI_giveCharacteristicSize();
 
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
                                                                  TimeStep *tStep, const FloatArray &coords,

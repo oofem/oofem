@@ -57,7 +57,7 @@ namespace oofem {
  */
 class Quad1PlaneStrain : public StructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
-public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface,
+public EIPrimaryUnknownMapperInterface,
 public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
 protected:
@@ -87,7 +87,6 @@ public:
 
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
-    virtual double DirectErrorIndicatorRCI_giveCharacteristicSize();
 
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
                                                                  TimeStep *tStep, const FloatArray &coords,
@@ -107,7 +106,6 @@ public:
     { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
 
     // HuertaRemeshingCriteriaInterface
-    virtual double HuertaRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); };
     virtual int HuertaRemeshingCriteriaI_givePolynOrder() { return 1; };
 
 #ifdef __OOFEG

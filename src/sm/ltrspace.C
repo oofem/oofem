@@ -61,7 +61,7 @@ FEI3dTetLin LTRSpace :: interpolation;
 
 LTRSpace :: LTRSpace(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
-    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this), DirectErrorIndicatorRCInterface(),
+    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
     EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this), ZZRemeshingCriteriaInterface(),
     MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
 
@@ -82,8 +82,6 @@ LTRSpace :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
@@ -655,15 +653,6 @@ LTRSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray 
     }
 
     return dist;
-}
-
-
-double
-LTRSpace :: DirectErrorIndicatorRCI_giveCharacteristicSize()
-{
-    FloatArray lc(4);
-    double volume = interpolation.giveTransformationJacobian( lc, FEIElementGeometryWrapper(this) );
-    return pow(volume * 6.0, 1. / 3.);
 }
 
 

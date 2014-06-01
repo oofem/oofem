@@ -310,7 +310,7 @@ TrabBoneNL3D :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
     totalStress = ( 1 - tempDam ) * effStress;
 
     for ( int i = 1; i <= 6; i++ ) {
-        if ( sqrt( totalStress.at(i) * totalStress.at(i) ) < pow(10.0, -8.0) ) {
+        if ( sqrt( totalStress.at(i) * totalStress.at(i) ) < 1e-8 ) {
             totalStress.at(i) = 0.;
         }
     }

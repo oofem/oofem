@@ -111,7 +111,6 @@ public:
     { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
 
     // HuertaRemeshingCriteriaInterface
-    virtual double HuertaRemeshingCriteriaI_giveCharacteristicSize();
     virtual int HuertaRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     // definition & identification

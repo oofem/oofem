@@ -471,7 +471,7 @@ public:
      */
     virtual double computeVolumeAround(GaussPoint *gp) { return 0.; }
     /// Computes the volume, area or length of the element depending on its spatial dimension.
-    double computeVolumeAreaOrLength();
+    virtual double computeVolumeAreaOrLength();
     /**
      * Computes the size of the element defined as its length.
      * @return Length, square root of area or cube root of volume (depending on spatial dimension).

@@ -219,17 +219,11 @@ public:
  * The corresponding element interface to ZZRemeshingCriteria class.
  * Declares the necessary services, which have to be provided by particular elements.
  */
-
 class ZZRemeshingCriteriaInterface : public Interface
 {
 public:
     /// Constructor
     ZZRemeshingCriteriaInterface() : Interface() { }
-    /**
-     * Determines the characteristic size of element. This quantity is defined as follows:
-     * For 1D it is the element length, for 2D it is the square root of element area.
-     */
-    virtual double ZZRemeshingCriteriaI_giveCharacteristicSize() = 0;
     /**
      * Returns the polynomial order of receiver trial functions.
      */

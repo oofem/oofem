@@ -538,19 +538,6 @@ LSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refin
 }
 
 
-double
-LSpace :: HuertaRemeshingCriteriaI_giveCharacteristicSize()
-{
-    double volume = 0.0;
-
-    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-        volume += this->computeVolumeAround(gp);
-    }
-
-    return pow(volume, 1. / 3.);
-}
-
-
 #ifdef __OOFEG
  #define TR_LENGHT_REDUCT 0.3333
 
@@ -813,7 +800,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
             //
             // obtain gp global coordinates
             this->computeGlobalCoordinates( gpc, * gp->giveCoordinates() );
-            length = 0.3333 * pow(this->computeVolumeAround(gp), 1. / 3.);
+            length = 0.3333 * cbrt(this->computeVolumeAround(gp));
             if ( this->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
                 this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
 

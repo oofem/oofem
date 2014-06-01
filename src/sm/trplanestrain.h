@@ -58,7 +58,6 @@ namespace oofem {
 class TrPlaneStrain : public StructuralElement, public ZZNodalRecoveryModelInterface,
 public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
-public DirectErrorIndicatorRCInterface,
 public EIPrimaryUnknownMapperInterface,
 public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface,
 public MMAShapeFunctProjectionInterface,
@@ -94,8 +93,6 @@ public:
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
-    virtual double DirectErrorIndicatorRCI_giveCharacteristicSize();
-
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
@@ -116,11 +113,9 @@ public:
     { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
 
     // ZZRemeshingCriteriaInterface
-    virtual double ZZRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); }
     virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     // HuertaRemeshingCriteriaInterface
-    virtual double HuertaRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); };
     virtual int HuertaRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,

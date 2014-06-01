@@ -63,9 +63,7 @@ Truss3d :: Truss3d(int n, Domain *aDomain) :
 Interface *
 Truss3d :: giveInterface(InterfaceType interface)
 {
-    if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
-    } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+    if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
         return static_cast< NodalAveragingRecoveryModelInterface * >(this);

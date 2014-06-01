@@ -57,7 +57,7 @@ namespace oofem {
  */
 class PlaneStress2d : public NLStructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
-public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface,
+public EIPrimaryUnknownMapperInterface,
 public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
 {
 protected:
@@ -100,10 +100,8 @@ public:
     { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
 
     // HuertaRemeshingCriteriaInterface
-    virtual double HuertaRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); }
     virtual int HuertaRemeshingCriteriaI_givePolynOrder() { return 1; };
 
-    virtual double DirectErrorIndicatorRCI_giveCharacteristicSize();
 
     virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
                                                                  TimeStep *tStep, const FloatArray &coords,

@@ -152,7 +152,7 @@ MisesMat :: giveFirstPKStressVector_3d(FloatArray &answer,
     //compute elastic predictor
     FloatMatrix trialLeftCauchyGreen, help;
 
-    f.times( pow(f.giveDeterminant(), -1. / 3.) );
+    f.times( 1./cbrt(f.giveDeterminant()) );
 
     help.beProductOf(f, status->giveTempLeftCauchyGreen());
     trialLeftCauchyGreen.beProductTOf(help, f);

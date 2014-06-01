@@ -232,7 +232,7 @@ void cubic3r(double a, double b, double c, double d, double *r1, double *r2, dou
         /*  } else {
          *
          * help = fabs(r) + sqrt(-D);
-         * A = -sgn(r)*pow(D, 1./3.);
+         * A = -sgn(r)*cbrt(D);
          * if (fabs(A) > CUBIC_ZERO)
          * B = q/A;
          * else

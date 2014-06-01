@@ -535,14 +535,6 @@ DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 }
 
 
-double
-DKTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize()
-{
-    return sqrt(this->computeArea() * 2.0);
-}
-
-
-
 //
 // The element interface required by NodalAveragingRecoveryModel
 //

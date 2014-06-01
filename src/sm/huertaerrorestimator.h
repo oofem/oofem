@@ -335,11 +335,6 @@ public:
     /// Constructor
     HuertaRemeshingCriteriaInterface() : Interface() { }
     /**
-     * Determines the characteristic size of element. This quantity is defined as follows:
-     * For 1D it is the element length, for 2D it is the square root of element area.
-     */
-    virtual double HuertaRemeshingCriteriaI_giveCharacteristicSize() = 0;
-    /**
      * Returns the polynomial order of receiver trial functions.
      */
     virtual int HuertaRemeshingCriteriaI_givePolynOrder() = 0;

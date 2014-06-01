@@ -60,7 +60,6 @@ Truss1d :: Truss1d(int n, Domain *aDomain) :
     StructuralElement(n, aDomain),
     ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SpatialLocalizerInterface(this),
-    DirectErrorIndicatorRCInterface(),
     EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this), ZZRemeshingCriteriaInterface(),
     MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
 {
@@ -373,8 +372,6 @@ Truss1d :: giveInterface(InterfaceType interface)
         return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
@@ -434,13 +431,6 @@ Truss1d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &
     }
 
     return dist;
-}
-
-
-double
-Truss1d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
-{
-    return this->computeLength();
 }
 
 

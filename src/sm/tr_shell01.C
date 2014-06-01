@@ -253,19 +253,6 @@ TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
 
 //
-// The element interface required by ZZNodalRecoveryModel
-//
-
-
-double
-TR_SHELL01 :: ZZRemeshingCriteriaI_giveCharacteristicSize()
-{
-    return sqrt(plate->computeArea() * 2.0);
-}
-
-
-
-//
 // The element interface required by NodalAveragingRecoveryModel
 //
 void

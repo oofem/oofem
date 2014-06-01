@@ -54,7 +54,6 @@ enum InterfaceType {
     HuertaErrorEstimatorInterfaceType,
     Huerta1dErrorEstimatorInterfaceType, // experimental
 
-    DirectErrorIndicatorRCInterfaceType,
     ZZRemeshingCriteriaInterfaceType,
     HuertaRemeshingCriteriaInterfaceType,
 

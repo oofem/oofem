@@ -61,7 +61,7 @@ FEI2dQuadLin PlaneStress2d :: interpolation(1, 2);
 PlaneStress2d :: PlaneStress2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
-    DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface(),
+    EIPrimaryUnknownMapperInterface(),
     HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
     // Constructor.
 {
@@ -315,7 +315,7 @@ PlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &norm
     if ( normalToCrackPlane.at(3) < 0.999999 ) { //ensure that characteristic length is in the plane of element
         return this->giveLenghtInDir(normalToCrackPlane);
     } else { //otherwise compute out-of-plane characteristic length from element area
-        return DirectErrorIndicatorRCI_giveCharacteristicSize();
+        return this->computeMeanSize();
     }
 }
 
@@ -329,7 +329,7 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
 {
     if ( method == ECSM_SquareRootOfArea ) {
         // square root of element area
-        return DirectErrorIndicatorRCI_giveCharacteristicSize();
+        return this->computeMeanSize();
     }
 
     if ( method == ECSM_Projection ) {
@@ -429,8 +429,6 @@ PlaneStress2d :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
@@ -943,19 +941,6 @@ PlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatA
     }
 
     return dist;
-}
-
-
-double
-PlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
-{
-    double volume = 0.0;
-
-    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-        volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
-    }
-
-    return sqrt(volume);
 }
 
 

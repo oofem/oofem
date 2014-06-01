@@ -56,7 +56,6 @@ FEI2dTrLin TrPlaneStrain :: interp(1, 2);
 TrPlaneStrain :: TrPlaneStrain(int n, Domain *aDomain) :
     StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
-    DirectErrorIndicatorRCInterface(),
     EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this), ZZRemeshingCriteriaInterface(),
     MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
     // Constructor.
@@ -78,8 +77,6 @@ TrPlaneStrain :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
@@ -386,13 +383,6 @@ TrPlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatA
     }
 
     return dist;
-}
-
-
-double
-TrPlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
-{
-    return sqrt(this->computeArea() * 2.0);
 }
 
 

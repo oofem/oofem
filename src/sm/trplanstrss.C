@@ -57,7 +57,6 @@ FEI2dTrLin TrPlaneStress2d :: interp(1, 2);
 TrPlaneStress2d :: TrPlaneStress2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
-    DirectErrorIndicatorRCInterface(),
     EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this), ZZRemeshingCriteriaInterface(),
     MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
 {
@@ -77,8 +76,6 @@ TrPlaneStress2d :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
@@ -836,12 +833,6 @@ TrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Floa
     return dist;
 }
 
-
-double
-TrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
-{
-    return sqrt(this->giveArea() * 2.0);
-}
 
 int
 TrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,

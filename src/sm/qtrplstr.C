@@ -56,7 +56,7 @@ FEI2dTrQuad QTrPlaneStress2d :: interpolation(1, 2);
 
 QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), SpatialLocalizerInterface(this),
-    DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface()
+    EIPrimaryUnknownMapperInterface()
 {
     numberOfDofMans  = 6;
     numberOfGaussPoints = 4;
@@ -78,8 +78,6 @@ QTrPlaneStress2d :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     }
@@ -524,19 +522,6 @@ SPRPatchType
 QTrPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_2dquadratic;
-}
-
-
-double
-QTrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
-{
-    double volume = 0.0;
-
-    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-        volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
-    }
-
-    return sqrt(volume * 2.0);
 }
 
 

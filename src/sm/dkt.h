@@ -159,7 +159,6 @@ public:
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
     // ZZRemeshingCriteriaInterface
-    virtual double ZZRemeshingCriteriaI_giveCharacteristicSize();
     virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     // layered cross section support functions

@@ -418,7 +418,7 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
         }
 
         interface = static_cast< ZZRemeshingCriteriaInterface * >
-                    ( domain->giveElement(i)->giveInterface(ZZRemeshingCriteriaInterfaceType) );
+                    ( ielem->giveInterface(ZZRemeshingCriteriaInterfaceType) );
         if ( !interface ) {
             OOFEM_ERROR("element does not support ZZRemeshingCriteriaInterface");
         }
@@ -439,7 +439,7 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 
         //  if (iratio > 5.0)iratio = 5.0;
 
-        currDensity = interface->ZZRemeshingCriteriaI_giveCharacteristicSize();
+        currDensity = ielem->computeMeanSize();
         elemPolyOrder = interface->ZZRemeshingCriteriaI_givePolynOrder();
         elemSize = currDensity / pow(iratio, 1.0 / elemPolyOrder);
 
@@ -486,7 +486,6 @@ ZZRemeshingCriteria :: giveDofManDensity(int num)
     bool init = false;
     ConnectivityTable *ct = domain->giveConnectivityTable();
     const IntArray *con;
-    ZZRemeshingCriteriaInterface *interface;
     double density;
 
     con = ct->giveDofManConnectivityArray(num);
@@ -510,12 +509,9 @@ ZZRemeshingCriteria :: giveDofManDensity(int num)
 
     density = 0.0;
     for ( int i = 1; i <= isize; i++ ) {
-        interface = static_cast< ZZRemeshingCriteriaInterface * >
-                    ( domain->giveElement( con->at(i) )->giveInterface(ZZRemeshingCriteriaInterfaceType) );
-        if ( interface ) {
-            init = true;
-            density += interface->ZZRemeshingCriteriaI_giveCharacteristicSize();
-        }
+        Element *ielem = domain->giveElement( con->at(i) );
+        init = true;
+        density += ielem->computeMeanSize();
     }
     if ( init ) {
         density /= isize;
