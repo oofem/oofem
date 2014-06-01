@@ -77,7 +77,6 @@ public:
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Q27Space_Name; }

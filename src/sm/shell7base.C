@@ -1772,11 +1772,6 @@ Shell7Base :: giveBondTransMatrix(FloatMatrix &answer, FloatMatrix &Q)
 
 #if 1
 
-void Shell7Base :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    // what is this?
-    answer.clear();
-}
 
 void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {

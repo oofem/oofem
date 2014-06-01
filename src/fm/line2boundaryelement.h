@@ -83,8 +83,6 @@ public:
 
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &gcoords);
 
-    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                 TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer);
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                        TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);

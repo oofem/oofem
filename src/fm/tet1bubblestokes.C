@@ -437,18 +437,6 @@ void Tet1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(V
     }
 }
 
-int Tet1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode, TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
-{
-    FloatArray lcoords, n, n_lin;
-    bool ok = this->computeLocalCoordinates(lcoords, gcoords);
-    if ( !ok ) {
-        answer.clear();
-        return false;
-    }
-
-    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    return true;
-}
 
 void Tet1BubbleStokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {

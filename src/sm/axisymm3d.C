@@ -379,14 +379,6 @@ Axisymm3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int 
 }
 
 void
-Axisymm3d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                       InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
-
-void
 Axisymm3d :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
     pap.resize(3);

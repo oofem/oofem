@@ -264,13 +264,6 @@ LTRSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
     giveIPValue(answer, gp, type, tStep);
 }
 
-void
-LTRSpace :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                      InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
 
 void
 LTRSpace :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
@@ -656,40 +649,19 @@ LTRSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray 
 }
 
 
-int
-LTRSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                             TimeStep *tStep, const FloatArray &coords,
+void
+LTRSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                             TimeStep *tStep, const FloatArray &lcoords,
                                                              FloatArray &answer)
 {
-    FloatArray lcoords, u;
+    FloatArray u;
     FloatMatrix n;
-    int result;
-
-    result = this->computeLocalCoordinates(lcoords, coords);
-
-    n.resize(3, 12);
-    n.zero();
-
-    n.at(1, 1)  = lcoords.at(1);
-    n.at(1, 4)  = lcoords.at(2);
-    n.at(1, 7)  = lcoords.at(3);
-    n.at(1, 10) = lcoords.at(4);
-
-    n.at(2, 2)  = lcoords.at(1);
-    n.at(2, 5)  = lcoords.at(2);
-    n.at(2, 8)  = lcoords.at(3);
-    n.at(2, 11) = lcoords.at(4);
-
-    n.at(3, 3)  = lcoords.at(1);
-    n.at(3, 6)  = lcoords.at(2);
-    n.at(3, 9)  = lcoords.at(3);
-    n.at(3, 12) = lcoords.at(4);
+    n.beNMatrixOf(lcoords, 3);
 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
-
-    return result;
 }
+
 
 void
 LTRSpace :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)

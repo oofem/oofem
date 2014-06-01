@@ -811,16 +811,13 @@ Quad1PlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
 }
 
 
-int
-Quad1PlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                     TimeStep *tStep, const FloatArray &coords,
+void
+Quad1PlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                     TimeStep *tStep, const FloatArray &lcoords,
                                                                      FloatArray &answer)
 {
-    FloatArray lcoords, u, nv;
+    FloatArray u, nv;
     FloatMatrix n;
-    int result;
-
-    result = this->computeLocalCoordinates(lcoords, coords);
 
     this->interp.evalN( nv, lcoords, FEIElementGeometryWrapper(this) );
 
@@ -828,9 +825,8 @@ Quad1PlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeTy
 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
-
-    return result;
 }
+
 
 void
 Quad1PlaneStrain :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)

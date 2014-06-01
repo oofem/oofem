@@ -424,25 +424,20 @@ QTrPlaneStrain :: SPRNodalRecoveryMI_givePatchType()
     return SPRPatchType_2dquadratic;
 }
 
-int
-QTrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                   TimeStep *tStep, const FloatArray &coords,
+void
+QTrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                   TimeStep *tStep, const FloatArray &lcoords,
                                                                    FloatArray &answer)
 {
-    FloatArray lcoords, u, nn;
+    FloatArray u, ni;
     FloatMatrix n;
-    int result;
 
-    result = this->computeLocalCoordinates(lcoords, coords);
+    this->interpolation.evalN( ni, lcoords, FEIElementGeometryWrapper(this) );
 
-    this->interpolation.evalN( nn, lcoords, FEIElementGeometryWrapper(this) );
-
-    n.beNMatrixOf(nn, 2);
+    n.beNMatrixOf(ni, 2);
 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
-
-    return result;
 }
 
 void

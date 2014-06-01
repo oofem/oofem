@@ -415,19 +415,6 @@ void Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueM
     }
 }
 
-int Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode, TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
-{
-    bool ok;
-    FloatArray lcoords, n, n_lin;
-    ok = this->computeLocalCoordinates(lcoords, gcoords);
-    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    if ( !ok ) {
-        return false;
-    }
-
-    return true;
-}
-
 void Tet21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
     answer = {V_u, V_v, V_w, P_f};
@@ -439,11 +426,6 @@ double Tet21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const F
     FloatArray lcoords = {0.3333333, 0.3333333, 0.3333333};
     this->computeGlobalCoordinates(center, lcoords);
     return center.distance(coords);
-}
-
-void Tet21Stokes :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 void Tet21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)

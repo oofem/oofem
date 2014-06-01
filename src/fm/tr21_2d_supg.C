@@ -1361,13 +1361,6 @@ TR21_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, i
     this->giveIPValue(answer, gp, type, tStep);
 }
 
-void
-TR21_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                          InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
 
 void
 TR21_2D_SUPG :: initGeometry()

@@ -166,11 +166,7 @@ public:
      * @return The element belonging to associated domain, close to given point, NULL otherwise.
      */
     virtual Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest,
-                                               const FloatArray &coords, int region = 0)
-    {
-        OOFEM_ERROR( "Not implemented for %s", this->giveClassName() );
-        return NULL;
-    }
+                                               const FloatArray &coords, int region = 0) = 0;
     /**
      * Returns the integration point in associated domain, which is closest
      * to given point. Since IP holds the information about its element,

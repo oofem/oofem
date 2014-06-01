@@ -263,15 +263,6 @@ TR_SHELL01 :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int
 }
 
 
-void
-TR_SHELL01 :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                        InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
-
-
 
 
 void

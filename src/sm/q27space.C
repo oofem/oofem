@@ -367,9 +367,4 @@ Q27Space :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
     OOFEM_WARNING("IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
-void
-Q27Space :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
 } // end namespace oofem

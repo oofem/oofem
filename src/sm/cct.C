@@ -505,14 +505,6 @@ CCTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
 }
 
 
-void
-CCTPlate :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                      InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
-
 //
 // The element interface required by SPRNodalRecoveryModelInterface
 //

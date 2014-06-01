@@ -419,20 +419,6 @@ void Tr1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(Va
     }
 }
 
-int Tr1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode, TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
-{
-    bool ok;
-    FloatArray lcoords, n, n_lin;
-    ok = this->computeLocalCoordinates(lcoords, gcoords);
-    if ( !ok ) {
-        answer.clear();
-        return false;
-    }
-
-    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    return true;
-}
-
 void Tr1BubbleStokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
     answer = {V_u, V_v, P_f};

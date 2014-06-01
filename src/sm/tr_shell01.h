@@ -118,8 +118,6 @@ public:
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep);
 
     virtual IntegrationRule *ZZErrorEstimatorI_giveIntegrationRule();
     virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArray &sig);

@@ -545,14 +545,6 @@ Quad10_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer,
 }
 
 
-void
-Quad10_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                            InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
-
 int
 Quad10_2D_SUPG :: checkConsistency()
 {

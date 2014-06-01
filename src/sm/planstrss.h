@@ -103,9 +103,9 @@ public:
     virtual int HuertaRemeshingCriteriaI_givePolynOrder() { return 1; };
 
 
-    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-                                                                 TimeStep *tStep, const FloatArray &coords,
-                                                                 FloatArray &answer);
+    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                       TimeStep *tStep, const FloatArray &lcoords,
+                                                                       FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
 #ifdef __OOFEG

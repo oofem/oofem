@@ -399,14 +399,6 @@ Truss1d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int no
 }
 
 
-void
-Truss1d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                     InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
-
 double
 Truss1d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
@@ -434,19 +426,16 @@ Truss1d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &
 }
 
 
-int
-Truss1d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                            TimeStep *tStep, const FloatArray &coords,
+void
+Truss1d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                            TimeStep *tStep, const FloatArray &lcoords,
                                                             FloatArray &answer)
 {
-    FloatArray n, u, ksi;
-    int result;
+    FloatArray n, u;
 
-    result = this->computeLocalCoordinates(ksi, coords);
-    this->interp.evalN( n, ksi, FEIElementGeometryWrapper(this) );
+    this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
-    answer = {n.dotProduct(u) };
-    return result;
+    answer = {n.dotProduct(u)};
 }
 
 

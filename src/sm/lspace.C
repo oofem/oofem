@@ -398,14 +398,6 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
 }
 
 
-void
-LSpace :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                    InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
-
 double
 LSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
@@ -433,23 +425,17 @@ LSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &c
 }
 
 
-int
-LSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                           TimeStep *tStep, const FloatArray &coords,
+void
+LSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                           TimeStep *tStep, const FloatArray &lcoords,
                                                            FloatArray &answer)
 {
-    FloatArray lcoords, u, ni;
+    FloatArray u, ni;
     FloatMatrix n;
-    int result;
-
-    result = this->computeLocalCoordinates(lcoords, coords);
-
     this->interpolation.evalN( ni, lcoords, FEIElementGeometryWrapper(this) );
-
+    n.beNMatrixOf(ni, 3);
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
-
-    return result;
 }
 
 

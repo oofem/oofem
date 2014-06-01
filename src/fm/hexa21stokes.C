@@ -410,20 +410,6 @@ void Hexa21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(Value
     }
 }
 
-int Hexa21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode, TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
-{
-    bool ok;
-    FloatArray lcoords, n, n_lin;
-    ok = this->computeLocalCoordinates(lcoords, gcoords);
-    if ( !ok ) {
-        answer.clear();
-        return false;
-    }
-
-    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    return true;
-}
-
 void Hexa21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
     answer = {V_u, V_v, V_w, P_f};
@@ -435,11 +421,6 @@ double Hexa21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const 
     FloatArray lcoords = {0.25, 0.25, 0.25};
     this->computeGlobalCoordinates(center, lcoords);
     return center.distance(coords);
-}
-
-void Hexa21Stokes :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 void Hexa21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)

@@ -81,7 +81,6 @@ public:
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
 
     //
     // definition & identification

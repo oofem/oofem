@@ -83,13 +83,6 @@ Truss3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int no
 
 
 void
-Truss3d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
-
-void
 Truss3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 // Returns linear part of geometrical equations of the receiver at gp.

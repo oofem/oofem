@@ -1731,13 +1731,6 @@ TR1_2D_SUPG2_AXI :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answe
 }
 
 void
-TR1_2D_SUPG2_AXI :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                              InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
-void
 TR1_2D_SUPG2_AXI :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
     pap.resize(3);

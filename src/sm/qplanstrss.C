@@ -528,12 +528,6 @@ QPlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer,
     }
 }
 
-void
-QPlaneStress2d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                            InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
 
 void
 QPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)

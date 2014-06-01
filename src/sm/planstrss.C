@@ -944,16 +944,13 @@ PlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatA
 }
 
 
-int
-PlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                  TimeStep *tStep, const FloatArray &coords,
+void
+PlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                  TimeStep *tStep, const FloatArray &lcoords,
                                                                   FloatArray &answer)
 {
-    FloatArray lcoords, u, ni;
+    FloatArray u, ni;
     FloatMatrix n;
-    int result;
-
-    result = this->computeLocalCoordinates(lcoords, coords);
 
     this->interpolation.evalN( ni, lcoords, FEIElementGeometryWrapper(this) );
 
@@ -961,8 +958,6 @@ PlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType 
 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
-
-    return result;
 }
 
 

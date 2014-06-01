@@ -457,13 +457,6 @@ TrPlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
     this->giveIPValue(answer, gp, type, tStep);
 }
 
-void
-TrPlaneStress2d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                             InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
 
 
 void
@@ -834,33 +827,20 @@ TrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Floa
 }
 
 
-int
-TrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                    TimeStep *tStep, const FloatArray &coords,
+void
+TrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                    TimeStep *tStep, const FloatArray &lcoords,
                                                                     FloatArray &answer)
 {
-    FloatArray lcoords, u;
+    FloatArray u;
     FloatMatrix n;
-    int result;
 
-    result = this->computeLocalCoordinates(lcoords, coords);
-
-    n.resize(2, 6);
-    n.zero();
-
-    n.at(1, 1) = lcoords.at(1);
-    n.at(1, 3) = lcoords.at(2);
-    n.at(1, 5) = lcoords.at(3);
-
-    n.at(2, 2) = lcoords.at(1);
-    n.at(2, 4) = lcoords.at(2);
-    n.at(2, 6) = lcoords.at(3);
+    n.beNMatrixOf(lcoords, 2);
 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
-
-    return result;
 }
+
 
 void
 TrPlaneStress2d :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)

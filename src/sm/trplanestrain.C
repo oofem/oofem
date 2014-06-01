@@ -314,14 +314,6 @@ TrPlaneStrain :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, 
 
 
 void
-TrPlaneStrain :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
-
-void
 TrPlaneStrain :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
     pap.resize(3);
@@ -386,16 +378,13 @@ TrPlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatA
 }
 
 
-int
-TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                  TimeStep *tStep, const FloatArray &coords,
+void
+TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                  TimeStep *tStep, const FloatArray &lcoords,
                                                                   FloatArray &answer)
 {
-    FloatArray lcoords, u, nv;
+    FloatArray u, nv;
     FloatMatrix n;
-    int result;
-
-    result = this->computeLocalCoordinates(lcoords, coords);
 
     this->interp.evalN( nv, lcoords, FEIElementGeometryWrapper(this) );
 
@@ -404,8 +393,6 @@ TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
 
     answer.beProductOf(n, u);
-
-    return result;
 }
 
 

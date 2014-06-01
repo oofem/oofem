@@ -420,19 +420,6 @@ void Tr21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueMo
     }
 }
 
-int Tr21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode, TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
-{
-    bool ok;
-    FloatArray lcoords, n, n_lin;
-    ok = this->computeLocalCoordinates(lcoords, gcoords);
-    if ( !ok ) {
-        answer.clear();
-        return false;
-    }
-
-    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    return true;
-}
 
 void Tr21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
@@ -445,11 +432,6 @@ double Tr21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Fl
     FloatArray lcoords = {0.333333, 0.333333, 0.333333};
     interpolation_quad.local2global( center, lcoords, FEIElementGeometryWrapper(this) );
     return center.distance(coords);
-}
-
-void Tr21Stokes :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 void Tr21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
