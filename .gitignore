@@ -10,6 +10,7 @@ targets/
 *.vtu
 *.pvd
 *.out.*
+t3d.bmf*
 
 # documentation aux-files.
 *.aux
