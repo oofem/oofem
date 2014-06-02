@@ -64,6 +64,7 @@
 #include "heavisidetimefunction.h"
 #include "outputmanager.h"
 #include "boundarycondition.h"
+#include "feinterpol.h"
 
 #include <vector>
 #include <string>
