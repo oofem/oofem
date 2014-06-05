@@ -77,7 +77,7 @@ protected:
     void discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei);
     double evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
     double edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
-    double evaluateHeavisideGamma(const FloatArray &lCoords, EnrichmentItem *ei);
+    double evaluateHeavisideGamma(double xi, EnrichmentItem *ei);
     void computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei);
 
     // Tangent matrices
@@ -126,14 +126,16 @@ protected:
 
     // Subdivision
     std :: vector< Triangle > allTri;
+
+    std :: vector < std :: vector< Triangle > > crackSubdivisions;
+
     void giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, int subCell);
     void giveFictiousCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, int subCell);
     void giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep, int subCell);
     void giveFictiousUpdatedCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep, int subCell);
-    void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell, FloatMatrix &localNodeCoords);
+    void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell, int layer, FloatMatrix &localNodeCoords);
     void giveLocalCZNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell, FloatMatrix &localNodeCoords);
-    //void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords);
-    void mapXi3FromLocalToShell(FloatArray &answer, FloatArray &local, int layer);
+        void mapXi3FromLocalToShell(FloatArray &answer, FloatArray &local, int layer);
     void recoverValuesFromCZIP(std::vector<FloatArray> &recoveredValues, int interfce, InternalStateType type, TimeStep *tStep);
 
     FEI3dTrQuad Shell7BaseXFEM    :: interpolationForCZExport;

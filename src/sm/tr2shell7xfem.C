@@ -104,7 +104,8 @@ Tr2Shell7XFEM :: computeGaussPoints()
 
     if ( !integrationRulesArray ) {  
         if( this->xMan->isElementEnriched(this) ) {
-            this->updateIntegrationRule();
+            //this->updateIntegrationRule();
+            this->updateIntegrationRuleMultiCrack();
         }
     }
     
@@ -153,7 +154,6 @@ Tr2Shell7XFEM :: computeGaussPoints()
 bool Tr2Shell7XFEM :: updateIntegrationRule()
 {
     bool partitionSucceeded = false;
-    //XfemManager *xMan = this->giveDomain()->giveXfemManager();
 
     if ( this->xMan->isElementEnriched(this) ) {
 
@@ -175,28 +175,18 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
                     // Use XfemElementInterface_partitionElement to subdivide the element
                     for ( int i = 0; i < int( pointPartitions.size() ); i++ ) {
                         // Triangulate the subdivisions
-                        //this->XfemElementInterface_partitionElement(allTri, pointPartitions [ i ]);
                         this->XfemElementInterface_partitionElement(this->allTri, pointPartitions [ i ]);
                     }
 
                     partitionSucceeded = true;
                 }
             
-
-                // For debugging only
-                /*EDCrack *edCrack =  dynamic_cast< EDCrack* > ( ei->giveEnrichmentDomain() );
-                PolygonLine *pl = dynamic_cast< PolygonLine * >( edCrack->bg );
-                if ( pl != NULL ) {
-                    pl->printVTK();
-                }*/
             }
         }
 
         ////////////////////////////////////////
-        // When we reach this point, we have a
-        // triangulation that is adapted to all
-        // cracks passing through the element.
-        // Therefore, we can set up integration
+        // When we reach this point, we have a triangulation that is adapted to all
+        // cracks passing through the element. Therefore, we can set up integration
         // points on each triangle.
 
         if ( this->xMan->giveVtkDebug() ) {
@@ -212,7 +202,6 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
         // Create integrationrule based on a 'wedge patch'
         int nPointsTri  = 6;   // points in the plane
 
-        //if ( allTri.size() == 0 ) { // No subdivision, return and create iRule as normal
         if ( this->allTri.size() == 0 ) { // No subdivision, return and create iRule as normal
             return partitionSucceeded;
 
@@ -222,13 +211,10 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
 
             integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
             for ( int i = 0; i < numberOfLayers; i++ ) {
-                //integrationRulesArray [ i ] = new PatchIntegrationRule(1, this, allTri);
                 integrationRulesArray [ i ] = new PatchIntegrationRule(1, this, this->allTri);
-                integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, numPointsThickness, _3dMat);
-                
+                integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, numPointsThickness, _3dMat);             
             }
             this->layeredCS->mapLayerGpCoordsToShellCoords(integrationRulesArray);
-            
             
         }
     }
@@ -238,18 +224,88 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
     // Cohesive zone
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
         Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
-        //if (dei) {
             int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
             czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
             for ( int i = 0; i < numberOfInterfaces; i++ ) {
                 czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
                 czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
             }
-        //}
     }
 
     return partitionSucceeded;
 }
+
+
+
+
+bool Tr2Shell7XFEM :: updateIntegrationRuleMultiCrack()
+{
+    bool partitionSucceeded = false;
+    int nPointsTri  = 6;   // points in the plane
+
+    if ( this->xMan->isElementEnriched(this) ) {
+
+
+        int numberOfLayers     = this->layeredCS->giveNumberOfLayers();
+        int numPointsThickness = this->layeredCS->giveNumIntegrationPointsInLayer();
+        double totalThickness  = this->layeredCS->computeIntegralThick();
+        int numEI = this->xMan->giveNumberOfEnrichmentItems();
+        std :: vector< std :: vector< FloatArray > >pointPartitions;
+
+
+        integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
+        this->crackSubdivisions.resize(numberOfLayers);
+        for ( int i = 0; i < numberOfLayers; i++ ) {
+            double zMid_i = this->layeredCS->giveLayerMidZ(i+1); // global z-coord
+            double xiMid_i = 1.0 - 2.0 * ( totalThickness - this->layeredCS->giveMidSurfaceZcoordFromBottom() - zMid_i ) / totalThickness; // local z-coord
+
+            for ( int eiIndex = 1; eiIndex <= numEI; eiIndex++ ) {
+                
+                EnrichmentItem *ei = this->xMan->giveEnrichmentItem(eiIndex);
+                if ( dynamic_cast< ShellCrack*> (ei) ) {
+
+                    // Determine if the crack goes through the current layer
+                    if( this->evaluateHeavisideGamma(xiMid_i, ei) > 0) {
+
+                        // Get the points describing each subdivision of the element
+                        double startXi, endXi;
+                        bool intersection = false;
+                        pointPartitions.resize(0);
+                        this->XfemElementInterface_prepareNodesForDelaunay(pointPartitions, startXi, endXi, eiIndex, intersection);
+
+                        if ( intersection ) {
+                            for ( int j = 0; j < int( pointPartitions.size() ); j++ ) {
+                                // Triangulate the subdivisions
+                                this->XfemElementInterface_partitionElement(this->crackSubdivisions [ i ], pointPartitions [ j ]);
+                            }
+
+                            partitionSucceeded = true;
+                        }
+
+                        integrationRulesArray [ i ] = new PatchIntegrationRule(1, this, this->crackSubdivisions [ i ]);
+                        integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, numPointsThickness, _3dMat);             
+                    }
+                }
+            }                 
+        }
+    
+        this->layeredCS->mapLayerGpCoordsToShellCoords(integrationRulesArray);
+    }
+        
+    // Cohesive zone
+    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
+        Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
+            int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
+            czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
+            for ( int i = 0; i < numberOfInterfaces; i++ ) {
+                czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
+                czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
+            }
+    }
+
+    return partitionSucceeded;
+}
+
 
 
 void

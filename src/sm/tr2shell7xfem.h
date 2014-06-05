@@ -85,6 +85,8 @@ protected:
 
     virtual void computeGaussPoints();
     bool updateIntegrationRule();
+    bool updateIntegrationRuleMultiCrack();
+
     virtual void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords);
 
     virtual FEInterpolation *giveInterpolation() const;

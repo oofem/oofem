@@ -463,14 +463,14 @@ Shell7BaseXFEM :: edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem
 
 
 double 
-Shell7BaseXFEM :: evaluateHeavisideGamma(const FloatArray &lCoords, EnrichmentItem *ei)
+Shell7BaseXFEM :: evaluateHeavisideGamma(double xi, EnrichmentItem *ei)
 {
     // Evaluates the Heaviside product H(gamma_1) * H(gamma_2)
 
     double xiBottom = dynamic_cast< ShellCrack * >( ei )->xiBottom;
     double xiTop    = dynamic_cast< ShellCrack * >( ei )->xiTop;
 
-    if ( ( xiBottom <= lCoords.at(3) ) && ( lCoords.at(3) <= xiTop ) ) {
+    if ( ( xiBottom <= xi ) && ( xi <= xiTop ) ) {
             return 1.0;
     } else {
             return 0.0;
@@ -1430,7 +1430,7 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &ans
         }
         
 
-        answer.times( this->evaluateHeavisideGamma(lcoords, ei) ); 
+        answer.times( this->evaluateHeavisideGamma(lcoords.at(3), ei) ); 
         answer.times(DISC_DOF_SCALE_FAC);
 
     } else if ( ei && dynamic_cast< Delamination*>(ei) ){
@@ -1503,7 +1503,7 @@ Shell7BaseXFEM :: computeEnrichedNmatrixAt(const FloatArray &lcoords, FloatMatri
             answer.at(7, ndofs_xm * 2 + i) = N.at(i) * factor;
         }
         
-        answer.times( this->evaluateHeavisideGamma(lcoords, ei) ); 
+        answer.times( this->evaluateHeavisideGamma(lcoords.at(3), ei) ); 
         answer.times(DISC_DOF_SCALE_FAC);
 
     } else if ( ei && dynamic_cast< Delamination*>(ei) ) {
@@ -1557,7 +1557,7 @@ Shell7BaseXFEM :: edgeComputeEnrichedNmatrixAt(FloatArray &lcoords, FloatMatrix 
             answer.at(6, ndofs_xm + 3 + j) = N.at(i) * factor;
             answer.at(7, ndofs_xm * 2 + i) = N.at(i) * factor;
         }
-        answer.times( this->evaluateHeavisideGamma(lcoords, ei) ); 
+        answer.times( this->evaluateHeavisideGamma(lcoords.at(3), ei) ); 
         answer.times(DISC_DOF_SCALE_FAC);
 
     } else if ( ei && dynamic_cast< Delamination*>(ei) ) {
@@ -1641,7 +1641,7 @@ Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix 
             answer.at(11, ndofs_xm * 2 + 1 + j) = N.at(i) * factor;
         }
 
-        answer.times( this->evaluateHeavisideGamma(lcoords, ei) ); 
+        answer.times( this->evaluateHeavisideGamma(lcoords.at(3), ei) ); 
         answer.times(DISC_DOF_SCALE_FAC);
 
     } else if ( ei && dynamic_cast< Delamination*>(ei) ){
@@ -1732,9 +1732,9 @@ Shell7BaseXFEM :: giveDisUnknownsAt(FloatArray &lcoords, EnrichmentItem *ei, Flo
 void
 Shell7BaseXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
 {
-    vtkPieces.resize(2);
+    vtkPieces.resize(1);
     this->giveShellExportData(vtkPieces[0], primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
-    this->giveCZExportData(vtkPieces[1], primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
+    //this->giveCZExportData(vtkPieces[1], primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep );
     
 }
 
@@ -1753,14 +1753,19 @@ void
 Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
 {
     int numSubCells = 1;
-    if ( this->allTri.size() ) {
-        numSubCells = (int)this->allTri.size();
-    }
+    //if ( this->crackSubdivisions[0].size() ) {
+    //    numSubCells = (int)this->crackSubdivisions[0].size();
+    //}
     
     int numLayers = this->layeredCS->giveNumberOfLayers();
-    int numCells = numLayers * numSubCells;
-    
-    int    numCellNodes  = 15; // quadratic wedge
+    //int numCells = numLayers * numSubCells;
+    // Go through each layer and count the number of subcells
+    int numCells = 0;
+    for ( int i = 0; i < numLayers; i++ ) {
+        numCells += (int)this->crackSubdivisions[i].size();
+    }
+
+    int numCellNodes  = 15; // quadratic wedge
 
     int numTotalNodes = numCellNodes*numCells;
 
@@ -1776,7 +1781,8 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
     // Compute fictious node coords
     int nodeNum = 1;
     for ( int layer = 1; layer <= numLayers; layer++ ) {
-        
+
+        numSubCells = (int)this->crackSubdivisions[layer - 1].size();
         for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
 
             // Node coordinates
@@ -1822,8 +1828,9 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(fieldNum);
         nodeNum = 1;
         int currentCell = 1;
-        for ( int layer = 1; layer <= numLayers; layer++ ) {            
-            
+        for ( int layer = 1; layer <= numLayers; layer++ ) {          
+
+            numSubCells = (int)this->crackSubdivisions[layer - 1].size();
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
 
                 if ( type == DisplacementVector ) { // compute displacement as u = x - X
@@ -1864,7 +1871,9 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
         nodeNum = 1;
         //this->recoverShearStress(tStep);
         int currentCell = 1;
-        for ( int layer = 1; layer <= numLayers; layer++ ) {            
+        for ( int layer = 1; layer <= numLayers; layer++ ) {   
+            numSubCells = (int)this->crackSubdivisions[layer - 1].size();
+
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
                 recoverValuesFromIP(values, layer, type, tStep);        
                 
@@ -1887,6 +1896,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
         InternalStateValueType valueType =  giveInternalStateValueType(type);
         int currentCell = 1;
         for ( int layer = 1; layer <= numLayers; layer++ ) {  
+            numSubCells = (int)this->crackSubdivisions[layer - 1].size();
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
                 IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
                 VTKXMLExportModule::computeIPAverage(average, iRuleL, this, type, tStep);
@@ -1924,13 +1934,14 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
             int nodeNum = 1;
             for ( int layer = 1; layer <= numLayers; layer++ ) {
                 FloatMatrix localNodeCoords;
-                
+
+                numSubCells = (int)this->crackSubdivisions[layer - 1].size();
                 for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
                     FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, nodeLocalXi3CoordsMapped;
                     if ( numSubCells == 1) {
                         this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
                     } else {
-                        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, localNodeCoords);
+                        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, layer, localNodeCoords);
                     }
                     mapXi3FromLocalToShell(nodeLocalXi3CoordsMapped, nodeLocalXi3Coords, layer);
                     for ( int nodeIndx = 1; nodeIndx <= numCellNodes; nodeIndx++ ) {
@@ -1979,7 +1990,7 @@ Shell7BaseXFEM :: giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes
     FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords;
     FloatMatrix localNodeCoords;
     // need to return local coordinates corresponding to the nodes of the sub triangles
-    giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, localNodeCoords);
+    giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, layer, localNodeCoords);
 
     //this->interpolationForExport.giveLocalNodeCoords(localNodeCoords);
 
@@ -2035,7 +2046,7 @@ Shell7BaseXFEM :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray>
         // must get local z-coord in terms of the total thickness not layerwise
         
     } else {
-        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, localNodeCoords);
+        giveLocalNodeCoordsForExport(nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, subCell, layer, localNodeCoords);
     }
     nodes.resize(localNodeCoords.giveNumberOfColumns());
     for ( int i = 1; i <= localNodeCoords.giveNumberOfColumns(); i++ ){
@@ -2112,7 +2123,7 @@ Shell7BaseXFEM :: mapXi3FromLocalToShell(FloatArray &answer, FloatArray &local, 
 
 
 void
-Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell, FloatMatrix &localNodeCoords) 
+Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords, int subCell, int layer, FloatMatrix &localNodeCoords) 
 {
     // Local coords for a quadratic wedge element - coords for subtriangles
     double scale = 0.9999;
@@ -2120,9 +2131,12 @@ Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, F
 
     // Triangle coordinates
     FloatArray g1, g2, g3;
-    g1 = this->allTri[subCell-1].giveVertex(1);
-    g2 = this->allTri[subCell-1].giveVertex(2);
-    g3 = this->allTri[subCell-1].giveVertex(3);
+    //g1 = this->allTri[subCell-1].giveVertex(1);
+    //g2 = this->allTri[subCell-1].giveVertex(2);
+    //g3 = this->allTri[subCell-1].giveVertex(3);
+    g1 = this->crackSubdivisions[layer-1][subCell-1].giveVertex(1);
+    g2 = this->crackSubdivisions[layer-1][subCell-1].giveVertex(2);
+    g3 = this->crackSubdivisions[layer-1][subCell-1].giveVertex(3);
 
     FloatArray gs1, gs2, gs3;
     // Move the triangle nodes slightly towards the center to avoid numerical problems - controlled by 'scale' 
@@ -2386,7 +2400,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
 
 
 
-#if 1
+#if 0
 
 
     // Export of XFEM related quantities
