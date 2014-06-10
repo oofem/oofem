@@ -330,17 +330,12 @@ NonLinearDynamic :: terminate(TimeStep *tStep)
     this->saveStepContext(tStep);
 }
 
-void
-NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
+void 
+NonLinearDynamic :: initializeYourself(TimeStep *tStep)
 {
-    // creates system of governing eq's and solves them at given time step
-    // first assemble problem at current time step
-
-    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
-
-    // Time-stepping constants
-    this->determineConstants(tStep);
-
+	Domain *domain = this->giveDomain(1);
+	int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+	
     if ( ( tStep->giveNumber() == giveNumberOfFirstStep() ) && initFlag ) {
         // Initialization
         incrementOfDisplacement.resize(neq);
@@ -368,13 +363,13 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
                                                  -deltaT, deltaT, 0);
 
         int nDofs, j, k, jj;
-        int nman = this->giveDomain(di)->giveNumberOfDofManagers();
+        int nman = domain->giveNumberOfDofManagers();
         DofManager *node;
         Dof *iDof;
 
         // Considering initial conditions.
         for ( j = 1; j <= nman; j++ ) {
-            node = this->giveDomain(di)->giveDofManager(j);
+            node = domain->giveDofManager(j);
             nDofs = node->giveNumberOfDofs();
 
             for ( k = 1; k <= nDofs; k++ ) {
@@ -393,9 +388,76 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
                 }
             }
         }
+		this->giveInternalForces(internalForces, true, 1, tStep);
+	}
+}
 
-        this->giveInternalForces(internalForces, true, di, tStep);
-    }
+void
+NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
+{
+    // creates system of governing eq's and solves them at given time step
+    // first assemble problem at current time step
+
+    int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
+
+    // Time-stepping constants
+    this->determineConstants(tStep);
+
+    //if ( ( tStep->giveNumber() == giveNumberOfFirstStep() ) && initFlag ) {
+    //    // Initialization
+    //    incrementOfDisplacement.resize(neq);
+    //    incrementOfDisplacement.zero();
+    //    totalDisplacement.resize(neq);
+    //    totalDisplacement.zero();
+    //    velocityVector.resize(neq);
+    //    velocityVector.zero();
+    //    accelerationVector.resize(neq);
+    //    accelerationVector.zero();
+    //    internalForces.resize(neq);
+    //    internalForces.zero();
+    //    previousIncrementOfDisplacement.resize(neq);
+    //    previousIncrementOfDisplacement.zero();
+    //    previousTotalDisplacement.resize(neq);
+    //    previousTotalDisplacement.zero();
+    //    previousVelocityVector.resize(neq);
+    //    previousVelocityVector.zero();
+    //    previousAccelerationVector.resize(neq);
+    //    previousAccelerationVector.zero();
+    //    previousInternalForces.resize(neq);
+    //    previousInternalForces.zero();
+
+    //    TimeStep *stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
+    //                                             -deltaT, deltaT, 0);
+
+    //    int nDofs, j, k, jj;
+    //    int nman = this->giveDomain(di)->giveNumberOfDofManagers();
+    //    DofManager *node;
+    //    Dof *iDof;
+
+    //    // Considering initial conditions.
+    //    for ( j = 1; j <= nman; j++ ) {
+    //        node = this->giveDomain(di)->giveDofManager(j);
+    //        nDofs = node->giveNumberOfDofs();
+
+    //        for ( k = 1; k <= nDofs; k++ ) {
+    //            // Ask for initial values obtained from
+    //            // bc (boundary conditions) and ic (initial conditions).
+    //            iDof  =  node->giveDof(k);
+    //            if ( !iDof->isPrimaryDof() ) {
+    //                continue;
+    //            }
+
+    //            jj = iDof->__giveEquationNumber();
+    //            if ( jj ) {
+    //                totalDisplacement.at(jj)  = iDof->giveUnknown(VM_Total, stepWhenIcApply);
+    //                velocityVector.at(jj)     = iDof->giveUnknown(VM_Velocity, stepWhenIcApply);
+    //                accelerationVector.at(jj) = iDof->giveUnknown(VM_Acceleration, stepWhenIcApply);
+    //            }
+    //        }
+    //    }
+
+    //    this->giveInternalForces(internalForces, true, di, tStep);
+    //}
 
     if ( initFlag ) {
         // First assemble problem at current time step.

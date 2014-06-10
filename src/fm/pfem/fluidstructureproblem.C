@@ -47,6 +47,7 @@
 #include "pfem.h"
 #include "interactionpfemparticle.h"
 #include "diidynamic.h"
+#include "nlineardynamic.h"
 
 #include <stdlib.h>
 
@@ -357,6 +358,10 @@ FluidStructureProblem :: initializeYourself(TimeStep *tStep)
 		DIIDynamic* dynamicProblem = dynamic_cast<DIIDynamic*>(this->giveSlaveProblem(i));
 		if (dynamicProblem) {
 			this->giveCurrentStep()->setTimeDiscretization(dynamicProblem->giveInitialTimeDiscretization());
+		}
+		NonLinearDynamic* nonlinearDynamicProblem = dynamic_cast<NonLinearDynamic*>(this->giveSlaveProblem(i));
+		if (nonlinearDynamicProblem) {
+			this->giveCurrentStep()->setTimeDiscretization(nonlinearDynamicProblem->giveInitialTimeDiscretization());
 		}
 	}
 }
