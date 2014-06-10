@@ -184,9 +184,9 @@ AList< T > :: growTo(int newSize)
 
 
     if ( newSize < size ) {
-//#ifdef DEBUG
-//        OOFEM_WARNING3("AList::growTo : new list size (%d) not larger than current size (%d)", newSize, size);
-//#endif
+#ifdef DEBUG
+        OOFEM_WARNING3("AList::growTo : new list size (%d) not larger than current size (%d)", newSize, size);
+#endif
         // delete entities in indexes in the range (newSize, size)
         i = size;
         if ( size ) {
