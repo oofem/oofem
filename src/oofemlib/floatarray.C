@@ -587,6 +587,13 @@ void FloatArray :: checkSizeTowards(const IntArray &loc)
 }
 
 
+void FloatArray :: reserve(int s)
+{
+    this->values.reserve(s);
+    this->values.clear();
+}
+
+
 void FloatArray :: resizeWithValues(int n, int allocChunk)
 {
 #ifdef DEBUG
@@ -633,6 +640,18 @@ bool FloatArray :: containsOnlyZeroes() const
 void FloatArray :: zero()
 {
     std::fill(this->begin(), this->end(), 0.);
+}
+
+
+void FloatArray :: append(const FloatArray &a)
+{
+    this->values.insert(this->end(), a.begin(), a.end());
+}
+
+
+void FloatArray :: append(double a)
+{
+    this->values.push_back(a);
 }
 
 
