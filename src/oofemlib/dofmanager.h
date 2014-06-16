@@ -249,9 +249,10 @@ public:
      * @param tStep Time step when unknown requested. See documentation of particular EngngModel
      * class for valid tStep values (most implementation can return only values for current
      * and possibly for previous time step).
+     * @param padding Determines if zero value should be inserted when a dof isn't found (otherwise it is just skipped).
      * @see Dof::giveUnknown
      */
-    virtual void giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *tStep);
+    void giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *tStep, bool padding = false);
     /**
      * Assembles the vector of unknowns of given filed in global c.s for given dofs of receiver.
      * @param answer Result (in nodal cs.)
@@ -264,10 +265,11 @@ public:
      * @param tStep Time step when unknown is requested. See documentation of particular EngngModel
      * class for valid tStep values (most implementation can return only values for current
      * and possibly for previous time step).
+     * @param padding Determines if zero value should be inserted when a dof isn't found (otherwise it is just skipped).
      * @see Dof::giveUnknown
      */
-    virtual void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
-                                   PrimaryField &field, ValueModeType mode, TimeStep *tStep);
+    void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
+                           PrimaryField &field, ValueModeType mode, TimeStep *tStep, bool padding = false);
     /**
      * Assembles the complete unknown vector in node. Does not transform and local->global coordinate systems.
      * @param answer Complete vector of all dof values in receiver.
@@ -303,8 +305,8 @@ public:
      * @see Dof::hasBc
      * @todo Remove all usage of this. Just ask for the unknown vector instead, they are the same.
      */
-    virtual void givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofMask,
-                                             ValueModeType mode, TimeStep *tStep);
+    void givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofMask,
+                                     ValueModeType mode, TimeStep *tStep);
     //@}
 
     /**@name Transformation functions
