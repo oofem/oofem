@@ -94,7 +94,7 @@ void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, d
     // Solve subscale problem
     rve->solveYourselfAt(tStep);
 
-    bc->computeFields(stress_dev, r_vol, EID_MomentumBalance_ConservationEquation, tStep);
+    bc->computeFields(stress_dev, r_vol, tStep);
     ms->letDeviatoricStressVectorBe(stress_dev);
     ms->letDeviatoricStrainRateVectorBe(eps);
 
@@ -425,7 +425,7 @@ void FE2FluidMaterialStatus :: computeTangents(TimeStep *tStep)
                             this->giveDeviatoricPressureTangent(),
                             this->giveVolumetricDeviatoricTangent(),
                             this->giveVolumetricPressureTangent(),
-                            EID_MomentumBalance_ConservationEquation, tStep);
+                            tStep);
     }
 
     this->oldTangents = false;

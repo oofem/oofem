@@ -186,7 +186,7 @@ Lattice2d_mt :: updateInternalState(TimeStep *tStep)
     for ( auto &iRule: integrationRulesArray ) {
         for ( GaussPoint *gp: *iRule ) {
             this->computeNmatrixAt( n, * gp->giveCoordinates() );
-            this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, r);
+            this->computeVectorOf({P_f}, VM_Total, tStep, r);
             f.beProductOf(n, r);
             mat->updateInternalState(f, gp, tStep);
         }

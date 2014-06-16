@@ -89,13 +89,13 @@ void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *t
             int boundary = boundaries.at(pos * 2);
 
             // Fetch the element information;
-            e->giveLocationArray(loc, eid, s, &masterDofIDs);
+            e->giveLocationArray(loc, this->dofs, s, &masterDofIDs);
             // Here, we could use only the nodes actually located on the boundary, but we don't.
             // Instead, we use all nodes belonging to the element, which is allowed because the
             // basis functions related to the interior nodes will be zero on the boundary.
             // Obviously, this is less efficient, so why do we want to do it this way?
             // Because it is easier when XFEM enrichments are present. /ES
-            e->computeVectorOf(eid, mode, tStep, e_u);
+            e->computeVectorOf(this->dofs, mode, tStep, e_u);
             this->integrateTangent(Ke, e, boundary);
 
             // We just use the tangent, less duplicated code (the addition of sigmaDev is linear).
@@ -119,15 +119,6 @@ void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *t
 void PrescribedGradientBCNeumann::assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                       CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if ( eid == EID_MomentumBalance_ConservationEquation ) {
-        eid = EID_MomentumBalance;
-    }
-
-    if ( eid != EID_MomentumBalance ) {
-    	printf("returning.");
-        return;
-    }
-
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke, KeT;
         IntArray loc_r, loc_c, sigma_loc_r, sigma_loc_c;
@@ -147,8 +138,8 @@ void PrescribedGradientBCNeumann::assemble(SparseMtrx *answer, TimeStep *tStep, 
             // basis functions related to the interior nodes will be zero on the boundary.
             // Obviously, this is less efficient, so why do we want to do it this way?
             // Because it is easier when XFEM enrichments are present. /ES
-            e->giveLocationArray(loc_r, eid, r_s);
-            e->giveLocationArray(loc_c, eid, c_s);
+            e->giveLocationArray(loc_r, this->dofs, r_s);
+            e->giveLocationArray(loc_c, this->dofs, c_s);
 
             this->integrateTangent(Ke, e, boundary);
             Ke.negated();
@@ -194,8 +185,8 @@ void PrescribedGradientBCNeumann::giveLocationArrays(std :: vector< IntArray > &
         // basis functions related to the interior nodes will be zero on the boundary.
         // Obviously, this is less efficient, so why do we want to do it this way?
         // Because it is easier when XFEM enrichments are present. /ES
-        e->giveLocationArray(loc_r, eid, r_s);
-        e->giveLocationArray(loc_c, eid, c_s);
+        e->giveLocationArray(loc_r, this->dofs, r_s);
+        e->giveLocationArray(loc_c, this->dofs, c_s);
 
         // For most uses, loc_r == loc_c, and sigma_loc_r == sigma_loc_c.
         rows [ i ] = loc_r;

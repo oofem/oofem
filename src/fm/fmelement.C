@@ -47,14 +47,14 @@ FMElement :: ~FMElement()
 void
 FMElement :: computeVectorOfVelocities(ValueModeType mode, TimeStep *tStep, FloatArray &velocities)
 {
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, velocities);
+    this->computeVectorOf({V_u, V_v, V_w}, mode, tStep, velocities);
 }
 
 
 void
 FMElement :: computeVectorOfPressures(ValueModeType mode, TimeStep *tStep, FloatArray &pressures)
 {
-    this->computeVectorOf(EID_ConservationEquation, mode, tStep, pressures);
+    this->computeVectorOf({P_f}, mode, tStep, pressures);
 }
 
 } // end namespace oofem

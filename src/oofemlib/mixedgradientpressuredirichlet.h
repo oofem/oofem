@@ -129,8 +129,8 @@ public:
         pressure *= s;
     }
 
-    virtual void computeFields(FloatArray &stressDev, double &vol, EquationID eid, TimeStep *tStep);
-    virtual void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep);
+    virtual void computeFields(FloatArray &stressDev, double &vol, TimeStep *tStep);
+    virtual void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, TimeStep *tStep);
 
     virtual void setPrescribedPressure(double p) { pressure = p; }
     virtual void setPrescribedDeviatoricGradientFromVoigt(const FloatArray &ddev);

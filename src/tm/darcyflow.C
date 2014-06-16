@@ -58,7 +58,7 @@ IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
-    // Create solution space for EID_ConservationEquation
+    // Create solution space for pressure field
     PressureField = new PrimaryField(this, 1, FT_Pressure, EID_ConservationEquation, 1);
 #if 0
  #ifdef __PARALLEL_MODE

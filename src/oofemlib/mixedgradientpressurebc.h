@@ -94,7 +94,7 @@ public:
      * @param eid Equation ID that fields belong to.
      * @param tStep Time step for which field to obtain.
      */
-    virtual void computeFields(FloatArray &stressDev, double &vol, EquationID eid, TimeStep *tStep) = 0;
+    virtual void computeFields(FloatArray &stressDev, double &vol, TimeStep *tStep) = 0;
 
     /**
      * Computes the macroscopic tangents through sensitivity analysis.
@@ -105,7 +105,7 @@ public:
      * @param eid Equation ID for which the tangents belong.
      * @param tStep Time step for the tangents.
      */
-    virtual void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep) = 0;
+    virtual void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, TimeStep *tStep) = 0;
 
     /**
      * Set prescribed pressure.

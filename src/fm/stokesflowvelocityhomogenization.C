@@ -248,7 +248,7 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
     for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
         if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( this->giveDomain(1)->giveElement(i) ) ) {
             T->giveElementFMatrix(Fe);
-            T->giveLocationArray( loc, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering() );
+            T->giveLocationArray( loc, {V_u, V_v}, EModelDefaultEquationNumbering() );
 
             F.assemble(Fe, loc, col);
         }

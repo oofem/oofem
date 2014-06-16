@@ -240,14 +240,9 @@ void MixedGradientPressureNeumann :: giveLocationArrays(std :: vector< IntArray 
         return;
     }
 
-    IntArray bNodes, dofids;
+    IntArray bNodes;
     IntArray loc_r, loc_c, sigma_loc_r, sigma_loc_c;
     int nsd = this->domain->giveNumberOfSpatialDimensions();
-    DofIDItem id0 = this->domain->giveDofManager(1)->hasDofID(V_u) ? V_u : D_u; // Just check the first node if it has V_u or D_u.
-    dofids.resize(nsd);
-    for ( int i = 0; i < nsd; ++i ) {
-        dofids(i) = id0 + i;
-    }
 
     // Fetch the columns/rows for the stress contributions;
     this->sigmaDev->giveLocationArray(dev_id, sigma_loc_r, r_s);
@@ -264,8 +259,8 @@ void MixedGradientPressureNeumann :: giveLocationArrays(std :: vector< IntArray 
         int boundary = boundaries.at(pos * 2);
 
         e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-        e->giveBoundaryLocationArray(loc_r, bNodes, dofids, r_s);
-        e->giveBoundaryLocationArray(loc_c, bNodes, dofids, c_s);
+        e->giveBoundaryLocationArray(loc_r, bNodes, this->dofs, r_s);
+        e->giveBoundaryLocationArray(loc_c, bNodes, this->dofs, c_s);
         // For most uses, loc_r == loc_c, and sigma_loc_r == sigma_loc_c.
         rows [ i ] = loc_r;
         cols [ i ] = sigma_loc_c;
@@ -505,7 +500,7 @@ void MixedGradientPressureNeumann :: assemble(SparseMtrx *answer, TimeStep *tSte
 }
 
 
-void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double &vol, EquationID eid, TimeStep *tStep)
+void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double &vol, TimeStep *tStep)
 {
     int nsd = this->giveDomain()->giveNumberOfSpatialDimensions();
     FloatArray sigmaDevBase;
@@ -545,7 +540,7 @@ void MixedGradientPressureNeumann :: computeFields(FloatArray &sigmaDev, double 
 }
 
 
-void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep)
+void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, TimeStep *tStep)
 {
     //double size = this->domainSize();
     // Fetch some information from the engineering model
@@ -565,8 +560,8 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
     if ( !Kff ) {
         OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
-    Kff->buildInternalStructure(rve, this->domain->giveNumber(), eid, fnum);
-    rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, fnum, this->domain);
+    Kff->buildInternalStructure(rve, this->domain->giveNumber(), EID_MomentumBalance_ConservationEquation, fnum);
+    rve->assemble(Kff, tStep, EID_MomentumBalance_ConservationEquation, StiffnessMatrix, fnum, fnum, this->domain);
 
     // Setup up indices and locations
     int neq = Kff->giveNumberOfRows();

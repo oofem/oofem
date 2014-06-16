@@ -462,14 +462,14 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
             interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
 
             ///@todo See todo on assembleVector
-            //thisElement->giveBoundaryLocationArray(r_sideLoc, bNodes, dofids, eid, r_s);
-            //thisElement->giveBoundaryLocationArray(c_sideLoc, bNodes, dofids, eid, c_s);
+            //thisElement->giveBoundaryLocationArray(r_sideLoc, bNodes, this->dofs, r_s);
+            //thisElement->giveBoundaryLocationArray(c_sideLoc, bNodes, this->dofs, c_s);
 
             r_sideLoc.clear();
             c_sideLoc.clear();
             dofCountOnBoundary = 0;
             for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
-                thisElement->giveDofManDofIDMask(bNodes.at(i), EID_MomentumBalance_ConservationEquation, nodeDofIDMask);
+                thisElement->giveDefaultDofManDofIDMask(bNodes.at(i), nodeDofIDMask);
 
                 for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
                     if ( nodeDofIDMask.at(j) == dofid ) {
@@ -585,7 +585,7 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
             interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
 
             ///@todo Carl, change to this?
-            //thisElement->giveBoundaryLocationArray(sideLocation, bNodes, &dofids, eid, s, &masterDofIDs);
+            //thisElement->giveBoundaryLocationArray(sideLocation, bNodes, &dofids, this->dofs, s, &masterDofIDs);
             //thisElement->computeBoundaryVectorOf(bNodes, this->dofs, VM_Total, tStep, a);
 
             sideLocation.clear();

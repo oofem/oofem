@@ -70,10 +70,7 @@ IRResultType SurfaceTensionBoundaryCondition :: initializeFrom(InputRecord *ir)
 void SurfaceTensionBoundaryCondition :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
                                                            const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if ( eid == EID_MomentumBalance_ConservationEquation ) {
-        eid = EID_MomentumBalance;
-    }
-    if ( !this->useTangent || eid != EID_MomentumBalance || type != TangentStiffnessMatrix ) {
+    if ( !this->useTangent || type != TangentStiffnessMatrix ) {
         return;
     }
 
@@ -90,18 +87,15 @@ void SurfaceTensionBoundaryCondition :: giveLocationArrays(std :: vector< IntArr
 
         e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
 
-        e->giveBoundaryLocationArray(rows [ pos ], bNodes, eid, r_s);
-        e->giveBoundaryLocationArray(cols [ pos ], bNodes, eid, c_s);
+        e->giveBoundaryLocationArray(rows [ pos ], bNodes, this->dofs, r_s);
+        e->giveBoundaryLocationArray(cols [ pos ], bNodes, this->dofs, c_s);
     }
 }
 
 void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                                                  CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if ( eid == EID_MomentumBalance_ConservationEquation ) {
-        eid = EID_MomentumBalance;
-    }
-    if ( !this->useTangent || eid != EID_MomentumBalance || type != TangentStiffnessMatrix ) {
+    if ( !this->useTangent || type != TangentStiffnessMatrix ) {
         return;
     }
 
@@ -119,8 +113,8 @@ void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *t
 
         e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
 
-        e->giveBoundaryLocationArray(r_loc, bNodes, eid, r_s);
-        e->giveBoundaryLocationArray(c_loc, bNodes, eid, c_s);
+        e->giveBoundaryLocationArray(r_loc, bNodes, this->dofs, r_s);
+        e->giveBoundaryLocationArray(c_loc, bNodes, this->dofs, c_s);
         this->computeTangentFromElement(Ke, e, boundary, tStep);
         answer->assemble(r_loc, c_loc, Ke);
     }
@@ -131,12 +125,6 @@ void SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeS
                                                        const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
     if ( type != ExternalForcesVector ) {
-        return;
-    }
-    if ( eid == EID_MomentumBalance_ConservationEquation ) {
-        eid = EID_MomentumBalance;
-    }
-    if ( eid != EID_MomentumBalance || mode != VM_Total ) {
         return;
     }
 
@@ -152,7 +140,7 @@ void SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeS
 
         e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
 
-        e->giveBoundaryLocationArray(loc, bNodes, eid, s, & masterdofids);
+        e->giveBoundaryLocationArray(loc, bNodes, this->dofs, s, & masterdofids);
         this->computeLoadVectorFromElement(fe, e, boundary, tStep);
         answer.assemble(fe, loc);
         if ( eNorms ) {

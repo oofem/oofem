@@ -230,7 +230,7 @@ double MixedGradientPressureDirichlet :: giveUnknown(double vol, const FloatArra
 }
 
 
-void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, double &vol, EquationID eid, TimeStep *tStep)
+void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, double &vol, TimeStep *tStep)
 {
     EngngModel *emodel = this->giveDomain()->giveEngngModel();
     FloatArray tmp;
@@ -239,10 +239,10 @@ void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, doubl
     // sigma = residual (since we use the slave dofs) = f_ext - f_int
     sigmaDev.resize(npeq);
     sigmaDev.zero();
-    emodel->assembleVector(sigmaDev, tStep, eid, InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    emodel->assembleVector(sigmaDev, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
     tmp.resize(npeq);
     tmp.zero();
-    emodel->assembleVector(tmp, tStep, eid, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    emodel->assembleVector(tmp, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
     sigmaDev.subtract(tmp);
     // Divide by the RVE-volume
     sigmaDev.times( 1.0 / this->domainSize() );
@@ -254,7 +254,7 @@ void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, doubl
 }
 
 
-void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep)
+void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, TimeStep *tStep)
 {
     double rve_size = this->domainSize();
     // Fetch some information from the engineering model
@@ -279,8 +279,8 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
     {
         // Sets up RHS for all sensitivity problems;
         SparseMtrx *Kfp = classFactory.createSparseMtrx(stype);
-        Kfp->buildInternalStructure(rve, 1, eid, fnum, pnum);
-        rve->assemble(Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain);
+        Kfp->buildInternalStructure(rve, 1, EID_MomentumBalance_ConservationEquation, fnum, pnum);
+        rve->assemble(Kfp, tStep, EID_MomentumBalance_ConservationEquation, StiffnessMatrix, fnum, pnum, this->domain);
 
         // Setup up indices and locations
         int neq = Kfp->giveNumberOfRows();
@@ -312,11 +312,11 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
     {
         // Solve all sensitivities
         SparseMtrx *Kff = classFactory.createSparseMtrx(stype);
-        Kff->buildInternalStructure(rve, 1, eid, fnum);
+        Kff->buildInternalStructure(rve, 1, EID_MomentumBalance_ConservationEquation, fnum);
         if ( !Kff ) {
             OOFEM_ERROR("MixedGradientPressureDirichlet :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
         }
-        rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, this->domain);
+        rve->assemble(Kff, tStep, EID_MomentumBalance_ConservationEquation, StiffnessMatrix, fnum, this->domain);
         solver->solve(Kff, & rhs_p, & s_p);
         solver->solve(Kff, rhs_d, s_d);
         delete Kff;
@@ -333,10 +333,10 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
         // Sensitivities for d_dev is obtained as reactions forces;
         SparseMtrx *Kpf = classFactory.createSparseMtrx(stype);
         SparseMtrx *Kpp = classFactory.createSparseMtrx(stype);
-        Kpf->buildInternalStructure(rve, 1, eid, pnum, fnum);
-        Kpp->buildInternalStructure(rve, 1, eid, pnum);
-        rve->assemble(Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain);
-        rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, this->domain);
+        Kpf->buildInternalStructure(rve, 1, EID_MomentumBalance_ConservationEquation, pnum, fnum);
+        Kpp->buildInternalStructure(rve, 1, EID_MomentumBalance_ConservationEquation, pnum);
+        rve->assemble(Kpf, tStep, EID_MomentumBalance_ConservationEquation, StiffnessMatrix, pnum, fnum, this->domain);
+        rve->assemble(Kpp, tStep, EID_MomentumBalance_ConservationEquation, StiffnessMatrix, pnum, this->domain);
 
         FloatMatrix tmpMat;
         Kpp->times(ddev_pert, tmpMat);

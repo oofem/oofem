@@ -507,7 +507,7 @@ void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx *answer, TimeStep 
 }
 
 
-void MixedGradientPressureWeakPeriodic :: computeFields(FloatArray &sigmaDev, double &vol, EquationID eid, TimeStep *tStep)
+void MixedGradientPressureWeakPeriodic :: computeFields(FloatArray &sigmaDev, double &vol, TimeStep *tStep)
 {
     int nsd = domain->giveNumberOfSpatialDimensions();
     double rve_size = this->domainSize();
@@ -596,7 +596,7 @@ void MixedGradientPressureWeakPeriodic :: computeFields(FloatArray &sigmaDev, do
 }
 
 
-void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep)
+void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, TimeStep *tStep)
 {
     //double size = this->domainSize();
     // Fetch some information from the engineering model
@@ -615,8 +615,8 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
     if ( !Kff ) {
         OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
-    Kff->buildInternalStructure(rve, this->domain->giveNumber(), eid, fnum);
-    rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, fnum, this->domain);
+    Kff->buildInternalStructure(rve, this->domain->giveNumber(), EID_MomentumBalance_ConservationEquation, fnum);
+    rve->assemble(Kff, tStep, EID_MomentumBalance_ConservationEquation, StiffnessMatrix, fnum, fnum, this->domain);
 
     // Setup up indices and locations
     int neq = Kff->giveNumberOfRows();
