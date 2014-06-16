@@ -26,21 +26,7 @@ PrescribedGradientBCNeumann::PrescribedGradientBCNeumann(int n, Domain * d):
 PrescribedGradientBC(n, d)
 {
     int nsd = d->giveNumberOfSpatialDimensions();
-    int numComponents = 0;
-
-    switch(nsd){
-    case 1:
-    	numComponents = 1;
-    	break;
-
-    case 2:
-    	numComponents = 4;
-    	break;
-
-    case 3:
-    	numComponents = 9;
-    	break;
-    }
+    int numComponents = nsd*nsd;
 
     mSigmaIds.clear();
     mpSigmaHom = new Node(0, d); // Node number lacks meaning here.
@@ -55,15 +41,12 @@ PrescribedGradientBC(n, d)
 
 PrescribedGradientBCNeumann::~PrescribedGradientBCNeumann()
 {
-	if(mpSigmaHom != NULL) {
-		delete mpSigmaHom;
-		mpSigmaHom = NULL;
-	}
+    delete mpSigmaHom;
 }
 
 DofManager* PrescribedGradientBCNeumann::giveInternalDofManager(int i)
 {
-	return mpSigmaHom;
+    return mpSigmaHom;
 }
 
 void PrescribedGradientBCNeumann::scale(double s)
@@ -79,8 +62,8 @@ void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *t
     const IntArray &boundaries = setPointer->giveBoundaryList();
 
     IntArray loc, sigma_loc;  // For the displacements and stress respectively
-    IntArray masterDofIDs, sigmaMasterDofIDs;
-    mpSigmaHom->giveCompleteLocationArray(sigma_loc, s);
+    IntArray masterDofIDs;
+    mpSigmaHom->giveLocationArray(mSigmaIds, sigma_loc, s);
 
     if ( type == ExternalForcesVector ) {
         // The external forces have two contributions. On the additional equations for sigma, the load is simply the prescribed gradient.
@@ -98,9 +81,7 @@ void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *t
         FloatArray sigmaHom, e_u;
 
         // Fetch the current values of the stress;
-        mpSigmaHom->giveCompleteUnknownVector(sigmaHom, mode, tStep);
-        // and the master dof ids for sigmadev used for the internal norms
-        mpSigmaHom->giveCompleteMasterDofIDArray(sigmaMasterDofIDs);
+        mpSigmaHom->giveUnknownVector(sigmaHom, this->mSigmaIds, mode, tStep);
 
         // Assemble
         for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
@@ -129,7 +110,7 @@ void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *t
             answer.assemble(fe_v, sigma_loc); // Contribution to delta_s_i equations
             if ( eNorm != NULL ) {
                 eNorm->assembleSquared(fe_s, masterDofIDs);
-                eNorm->assembleSquared(fe_v, sigmaMasterDofIDs);
+                eNorm->assembleSquared(fe_v, mSigmaIds);
             }
         }
     }
@@ -154,8 +135,8 @@ void PrescribedGradientBCNeumann::assemble(SparseMtrx *answer, TimeStep *tStep, 
         const IntArray &boundaries = set->giveBoundaryList();
 
         // Fetch the columns/rows for the stress contributions;
-        mpSigmaHom->giveCompleteLocationArray(sigma_loc_r, r_s);
-        mpSigmaHom->giveCompleteLocationArray(sigma_loc_c, c_s);
+        mpSigmaHom->giveLocationArray(mSigmaIds, sigma_loc_r, r_s);
+        mpSigmaHom->giveLocationArray(mSigmaIds, sigma_loc_c, c_s);
 
         for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
             Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
@@ -196,8 +177,8 @@ void PrescribedGradientBCNeumann::giveLocationArrays(std :: vector< IntArray > &
     }
 
     // Fetch the columns/rows for the stress contributions;
-    mpSigmaHom->giveCompleteLocationArray(sigma_loc_r, r_s);
-    mpSigmaHom->giveCompleteLocationArray(sigma_loc_c, c_s);
+    mpSigmaHom->giveLocationArray(mSigmaIds, sigma_loc_r, r_s);
+    mpSigmaHom->giveLocationArray(mSigmaIds, sigma_loc_c, c_s);
 
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();

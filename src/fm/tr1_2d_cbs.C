@@ -416,7 +416,7 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
     // The patch05.in test has a Dirichlet V_v = 1.0 on node 2, but this will produce the value V_v 1.5 for that dof.
     // It also requires knowing theta1, which we could otherwise do without.
     // It is added for now to mirror the old code below.
-    this->computeVectorOfPrescribed(EID_MomentumBalance, VM_Incremental, tStep, ustar);
+    this->computeVectorOfPrescribed({V_u, V_v}, VM_Incremental, tStep, ustar);
     u.add(theta1, ustar);
 
     //this->computeVectorOfVelocities(VM_Incremental, tStep, ustar);
@@ -451,7 +451,7 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
         if ( ( code & FMElement_PrescribedPressureBC ) ) {
             continue;
         } else if ( ( code & FMElement_PrescribedUnBC ) ) {
-            this->computeVectorOfPrescribed(EID_MomentumBalance, VM_Total, tStep, u);
+            this->computeVectorOfPrescribed({V_u, V_v}, VM_Total, tStep, u);
 
             n1 = boundarySides.at(j);
             n2 = ( n1 == 3 ? 1 : n1 + 1 );

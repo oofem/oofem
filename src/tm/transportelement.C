@@ -608,7 +608,7 @@ TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
     if ( load->giveType() == ConvectionBC ) {
         IntArray bNodes;
         fieldInterp->boundaryGiveNodes(bNodes, boundary);
-        this->computeBoundaryVectorOf(bNodes, EID_ConservationEquation, VM_Total, tStep, unknowns);
+        this->computeBoundaryVectorOf(bNodes, dofid, VM_Total, tStep, unknowns);
     }
 
     for ( GaussPoint *gp: *iRule ) {
@@ -667,7 +667,7 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
     if ( load->giveType() == ConvectionBC ) {
         IntArray bNodes;
         fieldInterp->boundaryGiveNodes(bNodes, boundary);
-        this->computeBoundaryVectorOf(bNodes, EID_ConservationEquation, VM_Total, tStep, unknowns);
+        this->computeBoundaryVectorOf(bNodes, dofid, VM_Total, tStep, unknowns);
     }
 
     for ( GaussPoint *gp: *iRule ) {

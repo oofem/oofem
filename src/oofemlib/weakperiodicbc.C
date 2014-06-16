@@ -586,7 +586,7 @@ void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeSte
 
             ///@todo Carl, change to this?
             //thisElement->giveBoundaryLocationArray(sideLocation, bNodes, &dofids, eid, s, &masterDofIDs);
-            //thisElement->computeBoundaryVectorOf(bNodes, eid, VM_Total, tStep, a);
+            //thisElement->computeBoundaryVectorOf(bNodes, this->dofs, VM_Total, tStep, a);
 
             sideLocation.clear();
             masterDofIDs.clear();

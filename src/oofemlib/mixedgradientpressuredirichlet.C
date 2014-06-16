@@ -406,10 +406,6 @@ void MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, TimeSt
         return;
     }
 
-    if ( eid != EID_MomentumBalance_ConservationEquation && eid != EID_MomentumBalance ) {
-        return;
-    }
-
     Dof *vol = this->giveVolDof();
     int vol_loc = vol->giveEquationNumber(s);
     if ( vol_loc ) {

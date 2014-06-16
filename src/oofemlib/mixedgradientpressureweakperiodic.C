@@ -157,11 +157,7 @@ void MixedGradientPressureWeakPeriodic :: constructFullMatrixForm(FloatMatrix &d
 void MixedGradientPressureWeakPeriodic :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
                                                              const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if ( eid == EID_MomentumBalance_ConservationEquation ) {
-        eid = EID_MomentumBalance;
-    }
-
-    if ( eid != EID_MomentumBalance || type != TangentStiffnessMatrix ) {
+    if ( type != TangentStiffnessMatrix ) {
         return;
     }
 
@@ -187,8 +183,8 @@ void MixedGradientPressureWeakPeriodic :: giveLocationArrays(std :: vector< IntA
         int boundary = boundaries.at(pos * 2);
 
         e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-        e->giveBoundaryLocationArray(loc_r, bNodes, eid, r_s);
-        e->giveBoundaryLocationArray(loc_c, bNodes, eid, c_s);
+        e->giveBoundaryLocationArray(loc_r, bNodes, this->dofs, r_s);
+        e->giveBoundaryLocationArray(loc_c, bNodes, this->dofs, c_s);
         // For most uses, *loc_r == *loc_c
         rows [ i ] = loc_r;
         cols [ i ] = t_loc_c;
@@ -388,15 +384,6 @@ MixedGradientPressureWeakPeriodic :: evaluateTractionBasisFunctions(FloatArray &
 void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
                                                          CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
-    // Boundary condition only acts on the momentumbalance part.
-    if ( eid == EID_MomentumBalance_ConservationEquation ) {
-        eid = EID_MomentumBalance;
-    }
-
-    if ( eid != EID_MomentumBalance ) {
-        return;
-    }
-
     Set *set = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = set->giveBoundaryList();
 
@@ -448,8 +435,8 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
 
             // Fetch the element information;
             el->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-            el->giveBoundaryLocationArray(v_loc, bNodes, eid, s, & velocityDofIDs);
-            el->computeBoundaryVectorOf(bNodes, eid, mode, tStep, v);
+            el->giveBoundaryLocationArray(v_loc, bNodes, this->dofs, s, & velocityDofIDs);
+            el->computeBoundaryVectorOf(bNodes, this->dofs, mode, tStep, v);
 
             // Integrate the tangents;
             this->integrateTractionVelocityTangent(Ke_v, el, boundary);
@@ -480,14 +467,6 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
 void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
                                                    CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if ( eid == EID_MomentumBalance_ConservationEquation ) {
-        eid = EID_MomentumBalance;
-    }
-
-    if ( eid != EID_MomentumBalance ) {
-        return;
-    }
-
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke_v, Ke_vT, Ke_e, Ke_eT;
         IntArray v_loc_r, v_loc_c, t_loc_r, t_loc_c, e_loc_r, e_loc_c;
@@ -508,8 +487,8 @@ void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx *answer, TimeStep 
 
             // Fetch the element information;
             el->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-            el->giveBoundaryLocationArray(v_loc_r, bNodes, eid, r_s);
-            el->giveBoundaryLocationArray(v_loc_c, bNodes, eid, c_s);
+            el->giveBoundaryLocationArray(v_loc_r, bNodes, this->dofs, r_s);
+            el->giveBoundaryLocationArray(v_loc_c, bNodes, this->dofs, c_s);
 
             this->integrateTractionVelocityTangent(Ke_v, el, boundary);
             this->integrateTractionXTangent(Ke_e, el, boundary);

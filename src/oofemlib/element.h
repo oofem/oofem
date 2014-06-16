@@ -328,21 +328,22 @@ public:
      * should be able return supported unknowns at current and previous time step. Consult
      * reference manual for particular engineering model.
      *
-     * @param type   Identifies unknown type (eg. displacement or temperature vector).
+     * @param dofIDMask Dof IDs for unknowns.
      * @param u      Identifies mode of unknown (eg. total value or velocity of unknown).
      * @param tStep  Time step, when vector of unknowns is requested.
      * @param answer Local vector of unknowns.
      */
-    virtual void computeVectorOf(EquationID type, ValueModeType u, TimeStep *tStep, FloatArray &answer);
+    void computeVectorOf(EquationID type, ValueModeType u, TimeStep *tStep, FloatArray &answer);
+    void computeVectorOf(const IntArray &dofIDMask, ValueModeType u, TimeStep *tStep, FloatArray &answer, double padding = false);
     /**
      * Boundary version of computeVectorOf.
      * @param bNodes Boundary nodes.
-     * @param eid Equation ID for unknowns.
+     * @param dofIDMask Dof IDs for unknowns.
      * @param u Identifies mode of unknown (eg. total value or velocity of unknown).
      * @param tStep Time step, when vector of unknowns is requested.
      * @param answer Local vector of unknowns.
      */
-    virtual void computeBoundaryVectorOf(const IntArray &bNodes, EquationID eid, ValueModeType u, TimeStep *tStep, FloatArray &answer);
+    void computeBoundaryVectorOf(const IntArray &bNodes, const IntArray &dofIDMask, ValueModeType u, TimeStep *tStep, FloatArray &answer, double padding = false);
     /**
      * Returns local vector of unknowns. Local vector of unknowns is extracted from
      * given field and from boundary conditions (if dof has active boundary
@@ -354,18 +355,18 @@ public:
      * @param tStep  Time step, when vector of unknowns is requested.
      * @param answer Local vector of unknowns.
      */
-    virtual void computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *tStep, FloatArray &answer);
+    void computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *tStep, FloatArray &answer);
     /**
      * Returns local vector of prescribed unknowns. Local vector of prescribed unknowns is
      * extracted from nodal (and side - if they hold unknowns) boundary conditions.
      *
+     * @param dofIDMask Dof IDs for unknowns.
      * @param ut     Identifies mode of unknown (eg. total values or velocity of unknown).
-     * @param type   Value mode of unknown (incremental, total, ...).
      * @param tStep  Time step, when vector of prescribed unknowns is requested.
      * @param answer Local vector of prescribed unknowns. If unknown is not prescribed,
      * zero value is placed on position of free dof.
      */
-    void computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *tStep, FloatArray &answer);
+    void computeVectorOfPrescribed(const IntArray &dofIDMask, ValueModeType type, TimeStep *tStep, FloatArray &answer);
 
     /**
      * Computes or simply returns total number of element's local DOFs.

@@ -726,7 +726,7 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
                                                               ValueModeType mode, CharType lhsType,
                                                               const UnknownNumberingScheme &ns, Domain *d)
 {
-    IntArray loc;
+    IntArray loc, dofids;
     Element *element;
     FloatArray rp, charVec;
     FloatMatrix s, bcMtrx;
@@ -736,7 +736,8 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         element = d->giveElement(ielem);
 
-        element->computeVectorOfPrescribed(EID_ConservationEquation, mode, tStep, rp);
+        element->giveDefaultDofManDofIDMask(1, dofids);
+        element->computeVectorOfPrescribed(dofids, mode, tStep, rp);
         if ( rp.containsOnlyZeroes() ) {
             continue;
         } else {
