@@ -159,8 +159,8 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
     FloatMatrix dN, B(3, 12);
     B.zero();
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
+    this->computeVectorOfVelocities(VM_Total, tStep, a_velocity);
+    this->computeVectorOfPressures(VM_Total, tStep, a_pressure);
 
     FloatArray momentum, conservation;
 
@@ -477,7 +477,7 @@ void Tr21Stokes :: giveGradP(FloatArray &answer, TimeStep *tStep)
 
     iRuleEdge.setUpPointsOnLine(this->numberOfGaussPoints, _Unknown);
 
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, p);
+    this->computeVectorOfPressures(VM_Total, tStep, p);
 
     answer.clear();
 

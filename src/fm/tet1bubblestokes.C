@@ -153,8 +153,8 @@ void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSte
     FloatMatrix dN, B(6, 15);
     B.zero();
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
+    this->computeVectorOfVelocities(VM_Total, tStep, a_velocity);
+    this->computeVectorOfPressures(VM_Total, tStep, a_pressure);
 
     FloatArray momentum, conservation;
 

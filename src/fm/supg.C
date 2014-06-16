@@ -998,9 +998,9 @@ SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType ty
         answer.resize(size);
         answer.zero();
 
-        eptr->computeVectorOf(EID_MomentumBalance, VM_Acceleration, tStep, vacc);
-        eptr->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, vtot);
-        eptr->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, ptot);
+        eptr->computeVectorOfVelocities(VM_Acceleration, tStep, vacc);
+        eptr->computeVectorOfVelocities(VM_Total, tStep, vtot);
+        eptr->computeVectorOfPressures(VM_Total, tStep, ptot);
 
         // MB contributions:
         // add (M+M_delta)*a
@@ -1026,9 +1026,7 @@ SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType ty
 
         // add pressure term
         eptr->computePressureTerm_MB(m1, tStep);
-        h.beProductOf(m1, ptot);
-        //eptr->computeVectorOfPrescribed (EID_ConservationEquation, VM_Total, tStep, vp);
-        //h.beProductOf(m1,vp); // term due to prescribed pressure
+        h.beProductOf(m1, ptot); // term due to prescribed pressure
         answer.assemble(h, vloc);
         eptr->computeBCLhsPressureTerm_MB(m1, tStep);
         if ( m1.isNotEmpty() ) {
@@ -1041,17 +1039,12 @@ SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType ty
         eptr->computeLinearAdvectionTerm_MC(m1, tStep);
         //m1.times(uscale/lscale);
         m1.times( 1. / ( dscale * uscale ) );
-        eptr->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, vtot);
-        //eptr->computeVectorOfPrescribed (EID_MomentumBalance, VM_Velocity, tStep, vp);
-        h.beProductOf(m1, vtot);
+        eptr->computeVectorOfVelocities(VM_Total, tStep, vtot);
+        h.beProductOf(m1, vtot); // term due to prescribed velocity
         answer.assemble(h, ploc);
-        //h.beProductOf(m1,vp); // term due to prescribed velocity
-        //answer.assemble(h, ploc);
         // Diffusion term
         eptr->computeDiffusionTerm_MC(h, tStep);
         answer.assemble(h, ploc);
-        //h.beProductOf(m1,vp);// term due to prescribed velocity
-        //answer.assemble(h, ploc);
         // AccelerationTerm
         eptr->computeAccelerationTerm_MC(m1, tStep);
         h.beProductOf(m1, vacc);
@@ -1067,11 +1060,8 @@ SUPG :: giveElementCharacteristicVector(FloatArray &answer, int num, CharType ty
         answer.assemble(h, ploc);
         // pressure term
         eptr->computePressureTerm_MC(m1, tStep);
-        //eptr->computeVectorOfPrescribed (EID_ConservationEquation, VM_Total, tStep, vp);
-        h.beProductOf(m1, ptot);
+        h.beProductOf(m1, ptot);// term due to prescribed pressure
         answer.assemble(h, ploc);
-        //h.beProductOf(m1,vp); // term due to prescribed pressure
-        //answer.assemble(h, ploc);
     } else {
         EngngModel :: giveElementCharacteristicVector(answer, num, type, mode, tStep, domain);
     }

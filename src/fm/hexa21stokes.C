@@ -152,8 +152,8 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
     FloatArray a_pressure, a_velocity, devStress, epsp, Nh, dN_V(81);
     FloatMatrix dN, B(6, 81);
     double r_vol, pressure;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
+    this->computeVectorOfVelocities(VM_Total, tStep, a_velocity);
+    this->computeVectorOfPressures(VM_Total, tStep, a_pressure);
     FloatArray momentum, conservation;
 
     B.zero();

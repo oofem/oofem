@@ -221,7 +221,7 @@ TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *tStep)
     ar12 = area / 12.;
     ar3 = area / 3.0;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), u);
 
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
     dudy = c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5);
@@ -409,7 +409,7 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
     answer.resize(9);
     answer.zero();
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
     ///@todo Check the following again:
     // Should we really want to add this term?
     // This will produce velocities that differs from their actual Dirichlet b.c.s;
@@ -419,11 +419,11 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
     this->computeVectorOfPrescribed(EID_MomentumBalance, VM_Incremental, tStep, ustar);
     u.add(theta1, ustar);
 
-    //this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, ustar);
+    //this->computeVectorOfVelocities(VM_Incremental, tStep, ustar);
     //u.add((theta1-1, ustar);
     /*
      *  printf("u_new = "); u.printYourself();
-     *  this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
+     *  this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), u);
      *  this->computeVectorOf(EID_AuxMomentumBalance, VM_Incremental, tStep, ustar);
      *  u.add(theta1, ustar);
      *  printf("u_corr = "); u.printYourself();
@@ -589,7 +589,7 @@ TR1_2D_CBS :: computeDensityRhsPressureTerms(FloatArray &answer, TimeStep *tStep
     FloatArray p;
     double theta1 = static_cast< CBS * >( domain->giveEngngModel() )->giveTheta1();
 
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep->givePreviousStep(), p);
+    this->computeVectorOfPressures(VM_Total, tStep->givePreviousStep(), p);
     answer.resize(9);
     answer.zero();
 
@@ -632,7 +632,7 @@ TR1_2D_CBS :: computeCorrectionRhs(FloatArray &answer, TimeStep *tStep)
     double usum, vsum, coeff;
 
 
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, p);
+    this->computeVectorOfPressures(VM_Total, tStep, p);
 
     double dpdx = 0.0, dpdy = 0.0;
     for ( int i = 0; i < 3; i++ ) {
@@ -649,8 +649,8 @@ TR1_2D_CBS :: computeCorrectionRhs(FloatArray &answer, TimeStep *tStep)
     answer.at(2) = answer.at(5) = answer.at(8) = -ar3 * dpdy;
 
 
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep->givePreviousStep(), p);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
+    this->computeVectorOfPressures(VM_Total, tStep->givePreviousStep(), p);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), u);
     dpdx = 0.0, dpdy = 0.0;
     for ( int i = 0; i < 3; i++ ) {
         pn1 = p.at(i + 1);
@@ -728,7 +728,7 @@ TR1_2D_CBS :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeSt
     /* one should call material driver instead */
     FloatArray u, eps(3);
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     eps.at(1) = ( b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5) );
     eps.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
@@ -774,7 +774,7 @@ TR1_2D_CBS :: computeCriticalTimeStep(TimeStep *tStep)
     double dt1, dt2, dt;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     double vn1 = sqrt( u.at(1) * u.at(1) + u.at(2) * u.at(2) );
     double vn2 = sqrt( u.at(3) * u.at(3) + u.at(4) * u.at(4) );

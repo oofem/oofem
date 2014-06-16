@@ -151,8 +151,8 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
     FloatMatrix dN, B(3, 8);
     B.zero();
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
+    this->computeVectorOfVelocities(VM_Total, tStep, a_velocity);
+    this->computeVectorOfPressures(VM_Total, tStep, a_pressure);
 
     FloatArray momentum, conservation;
 

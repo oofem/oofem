@@ -182,7 +182,7 @@ Quad10_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Ti
     FloatArray u, un;
     this->velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     this->computeNuMatrix(n, gp);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, un);
+    this->computeVectorOfVelocities(VM_Total, tStep, un);
 
     u.beProductOf(n, un);
 
@@ -248,7 +248,7 @@ Quad10_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeSt
     answer.resize(2, 2);
     answer.zero();
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= 4; i++ ) {
@@ -303,8 +303,8 @@ Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
 
     nu = mu_min / rho;
 
-    //this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    //this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     norm_un = u.computeNorm();
 
@@ -496,7 +496,7 @@ Quad10_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
 #if 0
     FloatArray fi(3), un;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, un);
+    this->computeVectorOfVelocities(VM_Total, tStep, un);
     for ( int i = 1; i <= 3; i++ ) {
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
     }

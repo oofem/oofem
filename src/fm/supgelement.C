@@ -190,7 +190,7 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         // add lsic stabilization term
         //this->giveCharacteristicMatrix(m1, LSICStabilizationTerm_MB, tStep);
         //m1.times( lscale / ( dscale * uscale * uscale ) );
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, v);
+        this->computeVectorOfVelocities(VM_Total, tStep, v);
         //h.beProductOf(m1, v);
         //answer.assemble(h, vloc);
         this->computeLinearAdvectionTerm_MC(m1, tStep);
@@ -200,13 +200,13 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
 
         // add pressure term
         this->computePressureTerm_MB(m1, tStep);
-        this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
+        this->computeVectorOfPressures(VM_Total, tStep, v);
         h.beProductOf(m1, v);
         answer.assemble(h, vloc);
 
         // pressure term
         this->computePressureTerm_MC(m1, tStep);
-        this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
+        this->computeVectorOfPressures(VM_Total, tStep, v);
         h.beProductOf(m1, v);
         answer.assemble(h, ploc);
     }
@@ -426,24 +426,4 @@ SUPGElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
 
 #endif
 
-
-#if 0
-void
-SUPGElement :: computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *tStep, FloatArray &answer)
-{
-    double scale;
-    Element :: computeVectorOfPrescribed(ut, type, tStep, answer);
-    if ( domain->giveEngngModel()->giveEquationScalingFlag() ) {
-        if ( ut == EID_MomentumBalance ) {
-            scale = domain->giveEngngModel()->giveVariableScale(VST_Velocity);
-        } else if ( ut == EID_ConservationEquation ) {
-            scale = domain->giveEngngModel()->giveVariableScale(VST_Pressure);
-        } else {
-            scale = 1.0;
-        }
-
-        answer.times(1.0 / scale);
-    }
-}
-#endif
 } // end namespace oofem
