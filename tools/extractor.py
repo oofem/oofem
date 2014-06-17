@@ -119,10 +119,10 @@ errorestimate_re = re.compile(r"""
         """, re.X)
 
 
-gpstress_re = re.compile (r"""[ ]stresses\s*([\s+-e\d]+)""",re.X)
-gpstrain_re = re.compile (r"""[ ]strains\s*([\s+-e\d]+)""",re.X)
-gpstatus_re = re.compile (r"""status\s.*""", re.X)
-gpelementstatus_re = re.compile (r"""element_status\s.*""", re.X)
+gprecord_re = re.compile (r"""[ ]*(stresses|strains|status|element_status|curvatures|moments)\s*""",re.X)
+#gpstrain_re = re.compile (r"""[ ]strains\s*([\s+-e\d]+)""",re.X)
+#gpstatus_re = re.compile (r"""status\s.*""", re.X)
+#gpelementstatus_re = re.compile (r"""element_status\s.*""", re.X)
 
 # following element reported keywors are obsolete; should be reported inside gpelementstatus
 gpDamage_re = re.compile (r"""damage\s*([\s+-e\d]+)""",re.X)
@@ -430,26 +430,10 @@ def match_dofrec (context):
 
 def match_gpsubrec (context, aline):
     global debug
-    pmatch=gpstress_re.search(aline)
+    pmatch=gprecord_re.search(aline)
     if pmatch:
-        check_element_rec (context, 'stresses', aline)
-        if debug: print ( "     stress rec %s" % aline )
-        return 1
-    ppmatch = gpstrain_re.search(aline)
-    if ppmatch:
-        check_element_rec (context, 'strains', aline)
-        if debug: print ( "     strain rec %s" % aline )
-        return 1
-    ppmatch = gpstatus_re.search(aline)
-    if ppmatch:
-        check_element_rec (context, 'status', aline)
-        if debug: print ( "     status rec %s" % aline )
-        return 1
-    #check element status 
-    ppmatch = gpelementstatus_re.search(aline)
-    if ppmatch:
-        check_element_rec (context, 'elementstatus', aline)
-        if debug: print ( "     element_status rec %s" % aline )
+        check_element_rec (context, 'gp_subrecord', aline)
+        if debug: print ( "     gp_subrecord %s" % aline )
         return 1
     #get omega (damage)
     ppmatch = gpDamage_re.search(aline)
