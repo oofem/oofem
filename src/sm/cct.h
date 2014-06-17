@@ -75,6 +75,8 @@ public:
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
     virtual int giveApproxOrder() { return 2; }
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
+    // overloaded to take into account possible element local cs (in derived cct3d)
+    virtual double computeArea();
 
 protected:
     virtual void computeGaussPoints();

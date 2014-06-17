@@ -305,7 +305,7 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer.at(6) = globTensor.at(2, 3); //syzForce
         answer.at(7) = globTensor.at(1, 3); //qxzForce
         answer.at(8) = globTensor.at(2, 3); //syzForce
-        answer.at(9) = 0.0;
+        answer.at(9) = globTensor.at(3, 3); //szForce
 
         return 1;
     } else if ( ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
@@ -319,12 +319,12 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
         answer.at(1)  = globTensor.at(1, 1); //mxForce
         answer.at(2)  = globTensor.at(1, 2); //mxyForce
-        answer.at(3)  = 0.0;
+        answer.at(3)  = globTensor.at(1, 3); //mxzForce
         answer.at(4)  = globTensor.at(1, 2); //mxyForce
         answer.at(5)  = globTensor.at(2, 2); //myForce
-        answer.at(6)  = 0.0;
-        answer.at(7)  = 0.0;
-        answer.at(8)  = 0.0;
+        answer.at(6)  = globTensor.at(2, 3); //myzForce
+        answer.at(7)  = globTensor.at(1, 3); //mxzForce
+        answer.at(8)  = globTensor.at(2, 3); //myzForce
         answer.at(9)  = globTensor.at(3, 3); //mzForce
 
         return 1;

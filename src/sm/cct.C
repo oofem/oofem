@@ -293,6 +293,19 @@ CCTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
     }
 }
 
+double
+CCTPlate :: computeArea ()
+// returns the area occupied by the receiver
+{
+  // get node coordinates
+  double x1, x2, x3, y1, y2, y3;
+  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3);
+  
+  if (area > 0) return area;  // check if previously computed
+
+  return (area = 0.5*(x2*y3+x1*y2+y1*x3-x2*y1-x3*y2-x1*y3)) ;
+ 
+}
 
 IRResultType
 CCTPlate :: initializeFrom(InputRecord *ir)
@@ -337,8 +350,14 @@ CCTPlate :: computeVolumeAround(GaussPoint *gp)
 {
     double detJ, weight;
 
+    FloatArray lc0(3), lc1(3), lc2(3);  
+    const FloatArray* lcp[]={&lc0, &lc1, &lc2};
+    double z [ 3 ];
+    this->giveNodeCoordinates(lc0.at(1), lc1.at(1), lc2.at(1), 
+			      lc0.at(2), lc1.at(2), lc2.at(2), z);
+
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveCoordinates(), FEIVertexListGeometryWrapper(3, lcp) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
