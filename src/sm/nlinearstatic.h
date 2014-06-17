@@ -43,10 +43,6 @@
 #define _IFT_NonLinearStatic_Name "nonlinearstatic"
 #define _IFT_NonLinearStatic_controlmode "controlmode"
 #define _IFT_NonLinearStatic_deltat "deltat"
-#define _IFT_NonLinearStatic_randPertAmplitude "rpa"
-#define _IFT_NonLinearStatic_randSeed "rseed"
-#define _IFT_NonLinearStatic_pert "pert"
-#define _IFT_NonLinearStatic_pertw "pertw"
 #define _IFT_NonLinearStatic_stiffmode "stiffmode"
 #define _IFT_NonLinearStatic_refloadmode "refloadmode"
 #define _IFT_NonLinearStatic_keepll "keepll"
@@ -120,14 +116,6 @@ protected:
     NonLinearStatic_controlType controlMode;
     /// Intrinsic time increment.
     double deltaT;
-    /// Amplitude of a random perturbation applied on the solution before the iteration process
-    double randPertAmplitude;
-    int randSeed;
-    bool pert_init_needed;
-    IntArray igp_PertDmanDofSrcArray;
-    FloatArray igp_PertWeightArray;
-    IntArray igp_Map;
-    FloatArray igp_Weight;
 
    /**
      * The following parameter allows to specify how the reference load vector
@@ -155,8 +143,6 @@ public:
 
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d);
     virtual void updateAttributes(MetaStep *mStep);
-    virtual void convertPertMap();
-    virtual void applyPerturbation(FloatArray* totalDisplacement);
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual IRResultType initializeFrom(InputRecord *ir);

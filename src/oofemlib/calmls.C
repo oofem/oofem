@@ -194,7 +194,7 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     //
 
     //
-    // A.2.   We assume positive-definitive (0)Kt (tangent stiffness mtrx).
+    // A.2.   We assume positive-definite (0)Kt (tangent stiffness mtrx).
     //
 #ifdef __PARALLEL_MODE
     RR = parallel_context->localNorm(* R);
@@ -211,6 +211,14 @@ restart:
     //engngModel->updateComponent(tNow, InternalRhs, domain); // By not updating this, one obtains the old equilibrated tangent.
     engngModel->updateComponent(tNow, NonLinearLhs, domain);
     linSolver->solve(k, R, & deltaXt);
+
+    // If desired by the user, the solution is (slightly) perturbed, so that various symmetries can be broken.
+    // This is useful e.g. to trigger localization in a homogeneous material under uniform stress without
+    // the need to introduce material imperfections. The problem itself remains symmetric but the iterative
+    // solution is brought to a nonsymmetric state and it gets a chance to converge to a nonsymmetric solution.
+    // Parameters of the perturbation technique are specified by the user and by default no perturbation is done. 
+    // Milan Jirasek
+    SparseNonLinearSystemNM :: applyPerturbation(&deltaXt);
 
     if ( calm_Control == calm_hpc_off ) {
 #ifdef __PARALLEL_MODE
@@ -830,7 +838,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         calm_NR_Mode = calm_modifiedNRM;
     }
 
-    // read if HPC is requsted
+    // read if HPC is requested
     hpcMode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, hpcMode, _IFT_CylindricalALM_hpcmode);
 
@@ -923,7 +931,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         char name [ 12 ];
         // create an empty set
         __DofIDSet _set;
-        // resize gof group vector
+        // resize dof group vector
         this->ccDofGroups.resize(nccdg, _set);
         for ( _i = 0; _i < nccdg; _i++ ) {
             sprintf(name, "%s%d", _IFT_CylindricalALM_ccdg, _i + 1);
@@ -963,6 +971,9 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
 
     this->giveLinearSolver()->initializeFrom(ir);
     //refLoadInputMode = (calm_referenceLoadInputModeType) readInteger  (initString, "refloadmode");
+
+    SparseNonLinearSystemNM :: initializeFrom(ir);
+
     return IRRT_OK;
 }
 

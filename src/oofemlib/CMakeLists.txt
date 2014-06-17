@@ -72,6 +72,7 @@ set (core_dofs
 
 set (core_nm
     sparselinsystemnm.C
+    sparsenonlinsystemnm.C
     nrsolver.C
     linesearch.C
     calmls.C

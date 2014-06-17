@@ -50,7 +50,6 @@
 #include "sparsemtrx.h"
 #include "errorestimator.h"
 #include "mathfem.h"
-#include "node.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
@@ -62,7 +61,7 @@ REGISTER_EngngModel(NonLinearStatic);
 
 NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i, _master),
     totalDisplacement(), incrementOfDisplacement(), internalForces(), initialLoadVector(), incrementalLoadVector(),
-								 initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed(), igp_PertDmanDofSrcArray(), igp_PertWeightArray(), igp_Map(), igp_Weight()
+								 initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed()
 {
     //
     // constructor
@@ -79,7 +78,6 @@ NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i,
     refLoadInputMode = SparseNonLinearSystemNM :: rlm_total;
     nMethod = NULL;
     initialGuessType = IG_None;
-    pert_init_needed = false;
 
 #ifdef __PARALLEL_MODE
     commMode = ProblemCommMode__NODE_CUT;
@@ -180,32 +178,6 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_NonLinearStatic_deltat);
     if ( deltaT < 0. ) {
         OOFEM_ERROR("deltaT < 0");
-    }
-
-    randPertAmplitude = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, randPertAmplitude, _IFT_NonLinearStatic_randPertAmplitude);
-    if ( randPertAmplitude < 0. ) {
-        OOFEM_ERROR("rpa < 0");
-    }
-    randSeed = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, randSeed, _IFT_NonLinearStatic_randSeed);
- 
-    // optional parameters related to perturbations of the initial guess (first iteration)
-    igp_PertDmanDofSrcArray.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, igp_PertDmanDofSrcArray, _IFT_NonLinearStatic_pert);
-    igp_PertWeightArray.clear();
-    IR_GIVE_OPTIONAL_FIELD(ir, igp_PertWeightArray, _IFT_NonLinearStatic_pertw);
-    if ( igp_PertDmanDofSrcArray.giveSize() ) {
-        if ( ( igp_PertDmanDofSrcArray.giveSize() % 2 ) != 0 ) {
-            OOFEM_ERROR("Pert map size must be an even number, it contains pairs <node, nodeDof>");
-        }
-        int nsize = igp_PertDmanDofSrcArray.giveSize() / 2;
-	if ( igp_PertWeightArray.giveSize() != nsize ) {
-            OOFEM_ERROR("Pert map size and weight array size mismatch");
-        }
-	pert_init_needed = true;
-    } else {
-      pert_init_needed = false;
     }
 
     _val = nls_tangentStiffness;
@@ -537,8 +509,6 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     } else {
         incrementOfDisplacement.zero();
     }
-    // apply perturbation of the initial guess, if desired by the user
-    applyPerturbation(& totalDisplacement);
 
     //totalDisplacement.printYourself();
     if ( initialLoadVector.isNotEmpty() ) {
@@ -555,55 +525,6 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     ///@todo Use temporary variables. updateYourself() should set the final values, while proceedStep should be callable multiple times for each step (if necessary). / Mikael
     OOFEM_LOG_RELEVANT("Equilibrium reached at load level = %f in %d iterations\n", cumulatedLoadLevel + loadLevel, currentIterations);
     prevStepLength =  currentStepLength;
-}
-
-void
-NonLinearStatic :: convertPertMap()
-{
-    EModelDefaultEquationNumbering dn;
-    int i, j, inode, idof, jglobnum, count = 0, ndofman = this -> giveDomain(1) -> giveNumberOfDofManagers();
-    int size = igp_PertDmanDofSrcArray.giveSize() / 2;
-    igp_Map.resize(size);
-    igp_Weight.resize(size);
-
-    for ( j = 1; j <= ndofman; j++ ) {
-      jglobnum = this->giveDomain(1)->giveNode(j)->giveLabel();
-        for ( i = 1; i <= size; i++ ) {
-            inode = igp_PertDmanDofSrcArray.at(2 * i - 1);
-            idof  = igp_PertDmanDofSrcArray.at(2 * i);
-            if ( inode == jglobnum ) {
-                igp_Map.at(++count) = this -> giveDomain(1) ->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
-		igp_Weight.at(count) = igp_PertWeightArray.at(i);
-		continue;
-	    }
-	}
-    }
-}
-
-void
-NonLinearStatic :: applyPerturbation(FloatArray* totalDisplacement)
-{ 
-  int i, nsize;   
-    if (randPertAmplitude > 0.) {
-      nsize = totalDisplacement -> giveSize();
-      srand(randSeed);
-      for (i=1; i<=nsize; i++) {
-	double pert = randPertAmplitude * (2. * rand() / RAND_MAX - 1.);
-	totalDisplacement -> at(i) += pert;
-      }
-    }
-
-    if (pert_init_needed) {
-      convertPertMap();
-      pert_init_needed = false;
-    }
-      
-    nsize = igp_Weight.giveSize();
-    for (i=1; i<=nsize; i++) {
-      int iDof = igp_Map.at(i);
-      double w = igp_Weight.at(i);
-      totalDisplacement -> at(iDof) += w;
-    }	
 }
 
 void
