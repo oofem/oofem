@@ -144,8 +144,8 @@ CCTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 // evaluated at gp.
 {
     // get node coordinates
-    double x1, x2, x3, y1, y2, y3;
-    this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3);
+  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
     //
     double area, b1, b2, b3, c1, c2, c3, l1, l2, l3;
@@ -212,8 +212,8 @@ CCTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // evaluated at gp.
 {
     // get node coordinates
-    double x1, x2, x3, y1, y2, y3;
-    this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3);
+  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
     //
     double l1, l2, l3, b1, b2, b3, c1, c2, c3;
@@ -271,7 +271,7 @@ CCTPlate :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMo
 void
 CCTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
                                 double &y1, double &y2, double &y3,
-                                double *z)
+                                double &z1, double &z2, double &z3)
 {
     FloatArray *nc1, *nc2, *nc3;
     nc1 = this->giveNode(1)->giveCoordinates();
@@ -286,11 +286,10 @@ CCTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
     y2 = nc2->at(2);
     y3 = nc3->at(2);
 
-    if ( z ) {
-        z [ 0 ] = nc1->at(3);
-        z [ 1 ] = nc2->at(3);
-        z [ 2 ] = nc3->at(3);
-    }
+    z1 = nc1->at(3);
+    z2 = nc2->at(3);
+    z3 = nc3->at(3);
+    
 }
 
 double
@@ -298,8 +297,8 @@ CCTPlate :: computeArea ()
 // returns the area occupied by the receiver
 {
   // get node coordinates
-  double x1, x2, x3, y1, y2, y3;
-  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3);
+  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
   
   if (area > 0) return area;  // check if previously computed
 
@@ -354,7 +353,8 @@ CCTPlate :: computeVolumeAround(GaussPoint *gp)
     const FloatArray* lcp[]={&lc0, &lc1, &lc2};
     double z [ 3 ];
     this->giveNodeCoordinates(lc0.at(1), lc1.at(1), lc2.at(1), 
-			      lc0.at(2), lc1.at(2), lc2.at(2), z);
+			      lc0.at(2), lc1.at(2), lc2.at(2), 
+			      lc0.at(3), lc1.at(3), lc2.at(3));
 
     weight = gp->giveWeight();
     detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveCoordinates(), FEIVertexListGeometryWrapper(3, lcp) ) );
@@ -413,15 +413,15 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 //does check that the point is in the element thickness
 {
     // get node coordinates
-    double x1, x2, x3, y1, y2, y3, z [ 3 ];
-    this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z);
+  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
     // Fetch local coordinates.
     bool ok = this->interp_lin.global2local( answer, coords, FEIElementGeometryWrapper(this) ) > 0;
 
     //get midplane location at this point
     double midplZ;
-    midplZ = z [ 0 ] * answer.at(1) + z [ 1 ] * answer.at(2) + z [ 2 ] * answer.at(3);
+    midplZ = z1 * answer.at(1) + z2 * answer.at(2) + z3 * answer.at(3);
 
     //check that the z is within the element
     GaussPoint _gp(NULL, 1, new FloatArray ( answer ), 1.0, _2dPlate);

@@ -78,7 +78,7 @@ CCTPlate3d :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
 void
 CCTPlate3d :: giveNodeCoordinates(double &x1, double &x2, double &x3,
                                   double &y1, double &y2, double &y3,
-                                  double *z)
+                                  double &z1, double &z2, double &z3)
 {
     FloatArray nc1(3), nc2(3), nc3(3);
 
@@ -94,11 +94,10 @@ CCTPlate3d :: giveNodeCoordinates(double &x1, double &x2, double &x3,
     y2 = nc2.at(2);
     y3 = nc3.at(2);
 
-    if ( z ) {
-        z [ 0 ] = nc1.at(3);
-        z [ 1 ] = nc2.at(3);
-        z [ 2 ] = nc3.at(3);
-    }
+    z1 = nc1.at(3);
+    z2 = nc2.at(3);
+    z3 = nc3.at(3);
+
 }
 
 
