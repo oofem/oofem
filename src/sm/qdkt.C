@@ -92,8 +92,8 @@ QDKTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
 // evaluated at gp.
 {
     // get node coordinates
-    double x1, x2, x3, x4, y1, y2, y3, y4;
-    this->giveNodeCoordinates(x1, x2, x3, x4, y1, y2, y3, y4);
+  double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4;
+  this->giveNodeCoordinates(x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4);
 
     // get gp coordinates
     double ksi = gp->giveCoordinate(1);
@@ -315,7 +315,7 @@ QDKTPlate :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rM
 void
 QDKTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3, double &x4,
 				 double &y1, double &y2, double &y3, double &y4,
-				 double *z)
+				 double &z1, double &z2, double &z3, double &z4)
 {
   FloatArray *nc1, *nc2, *nc3, *nc4;
     nc1 = this->giveNode(1)->giveCoordinates();
@@ -333,12 +333,11 @@ QDKTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3, double &x4,
     y3 = nc3->at(2);
     y4 = nc4->at(2);
 
-    if ( z ) {
-        z [ 0 ] = nc1->at(3);
-        z [ 1 ] = nc2->at(3);
-        z [ 2 ] = nc3->at(3);
-        z [ 3 ] = nc4->at(3);
-    }
+    z1 = nc1->at(3);
+    z2 = nc2->at(3);
+    z3 = nc3->at(3);
+    z4 = nc4->at(3);
+    
 }
 
 
@@ -461,8 +460,8 @@ QDKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coord
 //does check that the point is in the element thickness
 {
     // get node coordinates
-    double x1, x2, x3, x4, y1, y2, y3, y4, z [ 4 ];
-    this->giveNodeCoordinates(x1, x2, x3, x4, y1, y2, y3, y4, z);
+  double x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4;
+    this->giveNodeCoordinates(x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4);
 
     // Fetch local coordinates.
     bool ok = this->interp_lin.global2local( answer, coords, FEIElementGeometryWrapper(this) ) > 0;
@@ -480,7 +479,7 @@ QDKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coord
 
     //get midplane location at this point
     double midplZ;
-    midplZ = z [ 0 ] * answer.at(1) + z [ 1 ] * answer.at(2) + z [ 2 ] * answer.at(3) + z [ 3 ] * answer.at(4);
+    midplZ = z1 * answer.at(1) + z2 * answer.at(2) + z3 * answer.at(3) + z4 * answer.at(4);
 
     //check that the z is within the element
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
