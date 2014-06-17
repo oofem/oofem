@@ -97,7 +97,7 @@ void LinearConstraintBC :: giveLocArray(const UnknownNumberingScheme &r_s,  IntA
 }
 
 
-void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep,
                                     CharType type, const UnknownNumberingScheme &r_s,
                                     const UnknownNumberingScheme &c_s)
 {
@@ -133,7 +133,7 @@ void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep, Equatio
     }
 }
 
-void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                           CharType type, ValueModeType mode,
                                           const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
@@ -180,7 +180,7 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
     }
 }
 
-void LinearConstraintBC :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+void LinearConstraintBC :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     rows.resize(3);
     cols.resize(3);

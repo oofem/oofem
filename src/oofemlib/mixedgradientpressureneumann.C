@@ -233,7 +233,7 @@ void MixedGradientPressureNeumann :: setPrescribedDeviatoricGradientFromVoigt(co
 }
 
 
-void MixedGradientPressureNeumann :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
+void MixedGradientPressureNeumann :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                                                         const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if ( type != TangentStiffnessMatrix ) {
@@ -242,7 +242,6 @@ void MixedGradientPressureNeumann :: giveLocationArrays(std :: vector< IntArray 
 
     IntArray bNodes;
     IntArray loc_r, loc_c, sigma_loc_r, sigma_loc_c;
-    int nsd = this->domain->giveNumberOfSpatialDimensions();
 
     // Fetch the columns/rows for the stress contributions;
     this->sigmaDev->giveLocationArray(dev_id, sigma_loc_r, r_s);
@@ -396,7 +395,7 @@ void MixedGradientPressureNeumann :: integrateDevTangent(FloatMatrix &answer, El
 }
 
 
-void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                                     CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
     Set *set = this->giveDomain()->giveSet(this->set);
@@ -467,7 +466,7 @@ void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep
 }
 
 
-void MixedGradientPressureNeumann :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+void MixedGradientPressureNeumann :: assemble(SparseMtrx *answer, TimeStep *tStep,
                                               CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix ) {

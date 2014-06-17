@@ -54,7 +54,7 @@ void PrescribedGradientBCNeumann::scale(double s)
 
 }
 
-void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *tStep,
                             CharType type, ValueModeType mode,
                             const UnknownNumberingScheme &s, FloatArray *eNorm)
 {
@@ -116,7 +116,7 @@ void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *t
     }
 }
 
-void PrescribedGradientBCNeumann::assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+void PrescribedGradientBCNeumann::assemble(SparseMtrx *answer, TimeStep *tStep,
                       CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix ) {
@@ -155,17 +155,11 @@ void PrescribedGradientBCNeumann::assemble(SparseMtrx *answer, TimeStep *tStep, 
 
 }
 
-void PrescribedGradientBCNeumann::giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
+void PrescribedGradientBCNeumann::giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                                 const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    IntArray bNodes, dofids;
+    IntArray bNodes;
     IntArray loc_r, loc_c, sigma_loc_r, sigma_loc_c;
-    int nsd = this->domain->giveNumberOfSpatialDimensions();
-    DofIDItem id0 = this->domain->giveDofManager(1)->hasDofID(V_u) ? V_u : D_u; // Just check the first node if it has V_u or D_u.
-    dofids.resize(nsd);
-    for ( int i = 0; i < nsd; ++i ) {
-        dofids(i) = id0 + i;
-    }
 
     // Fetch the columns/rows for the stress contributions;
     mpSigmaHom->giveLocationArray(mSigmaIds, sigma_loc_r, r_s);

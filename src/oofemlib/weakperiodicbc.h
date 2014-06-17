@@ -139,10 +139,10 @@ public:
 
     basisType giveBasisType() { return useBasisType; }
 
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type,
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
                           const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
 

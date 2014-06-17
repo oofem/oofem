@@ -340,7 +340,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         for ( int n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
             ActiveBoundaryCondition *activebc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(n) );
             if ( activebc ) {
-                activebc->giveLocationArrays(r_locs, c_locs, ut, TangentStiffnessMatrix, r_s, c_s);
+                activebc->giveLocationArrays(r_locs, c_locs, TangentStiffnessMatrix, r_s, c_s);
                 for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                     IntArray &krloc = r_locs [ k ];
                     IntArray &kcloc = c_locs [ k ];
@@ -564,7 +564,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         for ( int n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
             ActiveBoundaryCondition *activebc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(n) );
             if ( activebc ) {
-                activebc->giveLocationArrays(r_locs, c_locs, ut, TangentStiffnessMatrix, s, s);
+                activebc->giveLocationArrays(r_locs, c_locs, TangentStiffnessMatrix, s, s);
                 for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                     IntArray &krloc = r_locs [ k ];
                     IntArray &kcloc = c_locs [ k ];

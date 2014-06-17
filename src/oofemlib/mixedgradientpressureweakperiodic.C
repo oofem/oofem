@@ -154,7 +154,7 @@ void MixedGradientPressureWeakPeriodic :: constructFullMatrixForm(FloatMatrix &d
 }
 
 
-void MixedGradientPressureWeakPeriodic :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
+void MixedGradientPressureWeakPeriodic :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                                                              const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if ( type != TangentStiffnessMatrix ) {
@@ -381,7 +381,7 @@ MixedGradientPressureWeakPeriodic :: evaluateTractionBasisFunctions(FloatArray &
 }
 
 
-void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                                          CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
     Set *set = this->giveDomain()->giveSet(this->set);
@@ -464,7 +464,7 @@ void MixedGradientPressureWeakPeriodic :: assembleVector(FloatArray &answer, Tim
 }
 
 
-void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+void MixedGradientPressureWeakPeriodic :: assemble(SparseMtrx *answer, TimeStep *tStep,
                                                    CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix ) {

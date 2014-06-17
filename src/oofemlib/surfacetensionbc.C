@@ -67,7 +67,7 @@ IRResultType SurfaceTensionBoundaryCondition :: initializeFrom(InputRecord *ir)
     return ActiveBoundaryCondition :: initializeFrom(ir);
 }
 
-void SurfaceTensionBoundaryCondition :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
+void SurfaceTensionBoundaryCondition :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                                                            const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if ( !this->useTangent || type != TangentStiffnessMatrix ) {
@@ -92,7 +92,7 @@ void SurfaceTensionBoundaryCondition :: giveLocationArrays(std :: vector< IntArr
     }
 }
 
-void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tStep,
                                                  CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if ( !this->useTangent || type != TangentStiffnessMatrix ) {
@@ -120,7 +120,7 @@ void SurfaceTensionBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *t
     }
 }
 
-void SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void SurfaceTensionBoundaryCondition :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                                        CharType type, ValueModeType mode,
                                                        const UnknownNumberingScheme &s, FloatArray *eNorms)
 {

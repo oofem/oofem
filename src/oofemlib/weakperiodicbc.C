@@ -427,7 +427,7 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
     }
 }
 
-void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if ( type != StiffnessMatrix ) {
         return;
@@ -543,7 +543,7 @@ double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue1D(int baseID, d
     return fVal;
 }
 
-void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void WeakPeriodicBoundaryCondition :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                                      CharType type, ValueModeType mode,
                                                      const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
