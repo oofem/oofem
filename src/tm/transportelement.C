@@ -66,7 +66,7 @@ TransportElement :: ~TransportElement()
 
 
 void
-TransportElement :: giveElementDofIDMask(EquationID, IntArray &answer) const
+TransportElement :: giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const
 {
     if ( emode == HeatTransferEM ) {
         answer = {T_f};
@@ -76,25 +76,6 @@ TransportElement :: giveElementDofIDMask(EquationID, IntArray &answer) const
         answer = {C_1};
     } else {
         OOFEM_ERROR("Unknown ElementMode");
-    }
-}
-
-
-void
-TransportElement :: giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const
-{
-    if ( eid == EID_ConservationEquation ) {
-        if ( emode == HeatTransferEM ) {
-            answer = {T_f};
-        } else if ( emode == HeatMass1TransferEM ) {
-            answer = {T_f, C_1};
-        } else if ( emode == Mass1TransferEM ) {
-            answer = {C_1};
-        } else {
-            OOFEM_ERROR("Unknown ElementMode");
-        }
-    } else {
-        answer.clear();
     }
 }
 
@@ -505,10 +486,12 @@ TransportElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 void
 TransportElement :: computeInternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
+    IntArray dofids;
     FloatArray tmp;
     FloatArray unknowns;
     FloatMatrix s;
-    this->computeVectorOf(EID_ConservationEquation, mode, tStep, unknowns);
+    this->giveElementDofIDMask(dofids);
+    this->computeVectorOf(dofids, mode, tStep, unknowns);
     ///@todo Integrate and compute as a nonlinear problem instead of doing this tangent.
     this->computeConductivityMatrix(s, Conductivity, tStep);
     answer.beProductOf(s, unknowns);
@@ -539,7 +522,7 @@ TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType t
     FloatArray gcoords, val, n, unknowns;
     IntArray dofid;
 
-    this->giveDefaultDofManDofIDMask(1, dofid);
+    this->giveElementDofIDMask(dofid);
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *fieldInterp = this->giveInterpolation( ( DofIDItem ) dofid.at(1) );
@@ -547,7 +530,7 @@ TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType t
     IntegrationRule *iRule = interp->giveIntegrationRule( load->giveApproxOrder() + fieldInterp->giveInterpolationOrder() );
 
     if ( load->giveType() == ConvectionBC ) {
-        this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, unknowns);
+        this->computeVectorOf(dofid, VM_Total, tStep, unknowns);
     }
 
     for ( GaussPoint *gp: *iRule ) {
@@ -598,7 +581,7 @@ TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
     FloatArray gcoords, val, n, unknowns;
     IntArray dofid;
 
-    this->giveDefaultDofManDofIDMask(1, dofid);
+    this->giveElementDofIDMask(dofid);
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *fieldInterp = this->giveInterpolation( ( DofIDItem ) dofid.at(1) );
@@ -657,7 +640,7 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
     FloatArray gcoords, val, n, unknowns;
     IntArray dofid;
 
-    this->giveDefaultDofManDofIDMask(1, dofid);
+    this->giveElementDofIDMask(dofid);
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *fieldInterp = this->giveInterpolation( ( DofIDItem ) dofid.at(1) );
@@ -999,8 +982,10 @@ TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tS
 {
     FloatArray r, br;
     FloatMatrix b, d;
+    IntArray dofid;
 
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, r);
+    this->giveElementDofIDMask(dofid);
+    this->computeVectorOf(dofid, VM_Total, tStep, r);
     this->computeGradientMatrixAt(b, gp);
 
     if ( emode == HeatTransferEM ||  emode == Mass1TransferEM ) {
@@ -1051,9 +1036,11 @@ TransportElement :: updateInternalState(TimeStep *tStep)
     FloatArray stateVector, r;
     FloatArray gradient, flux;
     FloatMatrix n, B;
+    IntArray dofid;
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, r);
+    this->giveElementDofIDMask(dofid);
+    this->computeVectorOf(dofid, VM_Total, tStep, r);
     // force updating ip values
     for ( auto &iRule: integrationRulesArray ) {
         for ( GaussPoint *gp: *iRule ) {
@@ -1083,7 +1070,7 @@ TransportElement :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Pr
     FloatMatrix n;
     IntArray elemdofs;
     // determine element dof ids
-    this->giveElementDofIDMask(pf.giveEquationID(), elemdofs);
+    this->giveElementDofIDMask(elemdofs);
     // first evaluate element unknown vector
     this->computeVectorOf(pf, mode, tStep, elemvector);
     // determine corresponding local coordinates

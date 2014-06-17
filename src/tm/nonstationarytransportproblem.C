@@ -736,7 +736,7 @@ NonStationaryTransportProblem :: assembleDirichletBcRhsVector(FloatArray &answer
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         element = d->giveElement(ielem);
 
-        element->giveDefaultDofManDofIDMask(1, dofids);
+        element->giveElementDofIDMask(dofids);
         element->computeVectorOfPrescribed(dofids, mode, tStep, rp);
         if ( rp.containsOnlyZeroes() ) {
             continue;

@@ -113,13 +113,6 @@ TR1_2D_SUPG2 :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) 
     }
 }
 
-void
-TR1_2D_SUPG2 :: giveElementDofIDMask(EquationID ut, IntArray &answer) const
-{
-    this->giveDofManDofIDMask(1, ut, answer);
-}
-
-
 IRResultType
 TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
 {
@@ -1660,7 +1653,7 @@ TR1_2D_SUPG2 :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Primar
     //FloatMatrix n;
     IntArray elemdofs;
     // determine element dof ids
-    this->giveElementDofIDMask(pf.giveEquationID(), elemdofs);
+    this->giveElementDofIDMask(elemdofs);
     es = elemdofs.giveSize();
     // first evaluate element unknown vector
     this->computeVectorOf(pf, mode, tStep, elemvector);

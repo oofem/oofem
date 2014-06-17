@@ -136,7 +136,7 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray &coords,
             return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, * dofId, mode, tStep);
         } else { // use element default dof id mask
             IntArray elemDofId;
-            bgelem->giveElementDofIDMask(this->giveEquationID(), elemDofId);
+            bgelem->giveElementDofIDMask(elemDofId);
             return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, elemDofId, mode, tStep);
         }
     } else {

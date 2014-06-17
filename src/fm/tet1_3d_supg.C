@@ -88,12 +88,6 @@ Tet1_3D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) 
     }
 }
 
-void
-Tet1_3D_SUPG :: giveElementDofIDMask(EquationID ut, IntArray &answer) const
-{
-    this->giveDofManDofIDMask(1, ut, answer);
-}
-
 
 void
 Tet1_3D_SUPG :: computeGaussPoints()

@@ -461,7 +461,7 @@ public:
      * @param ut Equation DOFs belong to.
      * @param answer DOF mask for receiver.
      */
-    virtual void giveElementDofIDMask(EquationID ut, IntArray &answer) const { answer.clear(); }
+    virtual void giveElementDofIDMask(IntArray &answer) const { this->giveDefaultDofManDofIDMask(1, answer); }
     /**
      * Returns volume related to given integration point. Used typically in subroutines,
      * that perform integration over element volume. Should be implemented by particular

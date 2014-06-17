@@ -114,13 +114,6 @@ TR21_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) 
     }
 }
 
-void
-TR21_2D_SUPG :: giveElementDofIDMask(EquationID ut, IntArray &answer) const
-{
-    this->giveDofManDofIDMask(1, ut, answer);
-}
-
-
 IRResultType
 TR21_2D_SUPG :: initializeFrom(InputRecord *ir)
 {

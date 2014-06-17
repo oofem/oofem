@@ -110,8 +110,6 @@ public:
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual int checkConsistency();
 
-    virtual void giveElementDofIDMask(EquationID, IntArray &answer) const;
-
     virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
                                                       FloatArray &coords, IntArray &dofId, ValueModeType mode,
                                                       TimeStep *tStep);

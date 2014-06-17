@@ -106,7 +106,6 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_CBS_Name; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
-    virtual void giveElementDofIDMask(EquationID, IntArray &answer) const;
     virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
     virtual int computeNumberOfDofs();
     virtual IRResultType initializeFrom(InputRecord *ir);
