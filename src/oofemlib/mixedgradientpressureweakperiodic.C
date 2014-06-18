@@ -267,8 +267,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionVelocityTangent(Float
 
     FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
 
-    ///@todo Check the order here:
-    int maxorder = this->order + interp->giveInterpolationOrder() * 3 - 2;
+    int maxorder = this->order + interp->giveInterpolationOrder() * 3;
     std :: unique_ptr< IntegrationRule >ir( interp->giveBoundaryIntegrationRule(maxorder, boundary) );
     int nsd = this->giveDomain()->giveNumberOfSpatialDimensions();
 
@@ -298,7 +297,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionXTangent(FloatMatrix 
 
     FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
 
-    int maxorder = this->order + interp->giveInterpolationOrder() * 3 - 2;
+    int maxorder = this->order + interp->giveInterpolationOrder() * 3;
     std :: unique_ptr< IntegrationRule >ir( interp->giveBoundaryIntegrationRule(maxorder, boundary) );
 
     FloatArray tmpAnswer;
@@ -327,7 +326,7 @@ void MixedGradientPressureWeakPeriodic :: integrateTractionDev(FloatArray &answe
 
     FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
 
-    int maxorder = this->order + interp->giveInterpolationOrder() * 3 - 2;
+    int maxorder = this->order + interp->giveInterpolationOrder() * 3;
     std :: unique_ptr< IntegrationRule >ir( interp->giveBoundaryIntegrationRule(maxorder, boundary) );
     answer.clear();
 
@@ -523,7 +522,7 @@ void MixedGradientPressureWeakPeriodic :: computeStress(FloatArray &sigmaDev, Fl
 
         FEInterpolation *interp = el->giveInterpolation(); // Geometry interpolation. The displacements or velocities must have the same interpolation scheme (on the boundary at least).
 
-        int maxorder = this->order + interp->giveInterpolationOrder() * 3 - 2;
+        int maxorder = this->order + interp->giveInterpolationOrder() * 3;
         std :: unique_ptr< IntegrationRule >ir( interp->giveBoundaryIntegrationRule(maxorder, boundary) );
 
         for ( GaussPoint *gp: *ir ) {
