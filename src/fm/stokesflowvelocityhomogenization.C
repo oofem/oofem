@@ -241,9 +241,7 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
 
     F.resize(ndof, 2);
     F.zero();
-    col.resize(2);
-    col.at(1) = 1;
-    col.at(2) = 2;
+    col = {1,2};
 
     for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
         if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( this->giveDomain(1)->giveElement(i) ) ) {

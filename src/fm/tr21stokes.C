@@ -551,7 +551,6 @@ void Tr21Stokes :: giveElementFMatrix(FloatMatrix &answer)
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     double detJ;
     FloatArray N, N2;
-    FloatMatrix temp;
 
     N2.clear();
 
@@ -565,16 +564,12 @@ void Tr21Stokes :: giveElementFMatrix(FloatMatrix &answer)
         N2.add(N);
     }
 
-    temp.resize(12, 2);
-    temp.zero();
+    answer.resize(12, 2);
+    answer.zero();
 
     for ( int i = 1; i <= 6; i++ ) {
-        temp.at(i * 2 - 1, 1) = N2.at(i);
-        temp.at(i * 2, 2) = N2.at(i);
+        answer.at(i * 2 - 1, 1) = N2.at(i);
+        answer.at(i * 2, 2) = N2.at(i);
     }
-
-    answer.resize(15, 2);
-    answer.zero();
-    answer.assemble(temp, this->momentum_ordering, {1, 2});
 }
 } // end namespace oofem
