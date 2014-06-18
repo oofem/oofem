@@ -34,41 +34,42 @@
 
 #include "enrichmentfront.h"
 #include "xfem/tipinfo.h"
+#include "domain.h"
+#include "xfem/xfemmanager.h"
+#include "spatiallocalizer.h"
+#include "element.h"
 
 namespace oofem {
-void EnrichmentFront :: addTipIndexToNode(int iNodeInd, int iTipInd)
+
+void EnrichmentFront :: MarkTipElementNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo)
 {
-    // If the node is already enriched by the tip,
-    // append the new index to the list.
-    for ( size_t i = 0; i < mNodeTipIndices.size(); i++ ) {
-        if ( mNodeTipIndices [ i ].first == iNodeInd ) {
-            for ( size_t j = 0; j < mNodeTipIndices [ i ].second.size(); j++ ) {
-                if ( mNodeTipIndices [ i ].second [ j ] == iTipInd ) {
-                    // If the index is already present, we do not
-                    // need to do anything
-                    return;
+    mTipInfo = iTipInfo;
+
+    Domain &d = * ( ixFemMan.giveDomain() );
+
+    Element *el = d.giveSpatialLocalizer()->giveElementContainingPoint(mTipInfo.mGlobalCoord);
+
+    if ( el != NULL ) {
+        const IntArray &elNodes = el->giveDofManArray();
+
+        for ( int i = 1; i <= elNodes.giveSize(); i++ ) {
+
+            if( ioNodeEnrMarkerMap [ elNodes.at(i) ] == NodeEnr_START_TIP || ioNodeEnrMarkerMap [ elNodes.at(i) ] == NodeEnr_END_TIP )
+            {
+                ioNodeEnrMarkerMap [ elNodes.at(i) ] = NodeEnr_START_AND_END_TIP;
+            }
+            else {
+                if( mTipInfo.mTipIndex == 0) {
+                    ioNodeEnrMarkerMap [ elNodes.at(i) ] = NodeEnr_START_TIP;
+                }
+
+                if( mTipInfo.mTipIndex == 1) {
+                    ioNodeEnrMarkerMap [ elNodes.at(i) ] = NodeEnr_END_TIP;
                 }
             }
 
-            mNodeTipIndices [ i ].second.push_back(iTipInd);
-            return;
+            }
         }
-    }
-
-    // If not, create a new pair
-    std :: vector< int >tipIndices;
-    tipIndices.push_back(iTipInd);
-    std :: pair< int, std :: vector< int > >nodeTipInd = make_pair(iNodeInd, tipIndices);
-    mNodeTipIndices.push_back(nodeTipInd);
 }
 
-void EnrichmentFront :: giveNodeTipIndices(int iNodeInd, std :: vector< int > &oTipIndices) const
-{
-    for ( size_t i = 0; i < mNodeTipIndices.size(); i++ ) {
-        if ( mNodeTipIndices [ i ].first == iNodeInd ) {
-            oTipIndices = mNodeTipIndices [ i ].second;
-            return;
-        }
-    }
-}
 } // end namespace oofem

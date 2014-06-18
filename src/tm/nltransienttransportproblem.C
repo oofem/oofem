@@ -79,6 +79,16 @@ NLTransientTransportProblem :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+TimeStep *
+NLTransientTransportProblem :: giveNextStep()
+{
+    double intrinsicTime;
+    NonStationaryTransportProblem :: giveNextStep();
+    intrinsicTime = previousStep->giveTargetTime() + this->alpha*(currentStep->giveTargetTime()-previousStep->giveTargetTime());
+    currentStep->setIntrinsicTime(intrinsicTime);
+    return currentStep;
+}
+
 
 void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
 {
@@ -135,10 +145,10 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
             copyUnknownsInDictionary( VM_Total, tStep, tStep->givePreviousStep() );
         }
 
-        UnknownsField->initialize( VM_Total, tStep->givePreviousStep(), * solutionVector, EModelDefaultEquationNumbering() );
+        UnknownsField->initialize( VM_Total, tStep->givePreviousStep(), *solutionVector, EModelDefaultEquationNumbering() );
     } else {
         //copy previous solution vector to actual
-        * solutionVector = * UnknownsField->giveSolutionVector( tStep->givePreviousStep() );
+        *solutionVector = *UnknownsField->giveSolutionVector( tStep->givePreviousStep() );
     }
 
     this->updateInternalState(& TauStep); //insert to hash=0(current), if changes in equation numbering
@@ -247,6 +257,12 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
             return ( rtdt - rt ) / currentStep->giveTimeIncrement();
         } else if ( mode == VM_Total ) {
             return psi * rtdt + ( 1. - psi ) * rt;
+        } else if ( mode == VM_Incremental ) {
+            if ( previousStep->isIcApply() ) {
+                return 0;
+            } else {
+                return ( rtdt - rt );
+            }
         } else {
             OOFEM_ERROR("Unknown mode %s is undefined for this problem", __ValueModeTypeToString(mode) );
         }

@@ -2,7 +2,8 @@ tmpatch11.out
 Patch test of Quad1_ht elements 
 #StationaryProblem nsteps 1 
 #NonStationaryProblem nsteps 200 deltat 600000.0 alpha 0.5
-nltransienttransportproblem nsteps 200 deltat 600000.0 rtol 0.001 alpha 0.5 nsmax 300 nmodules 0
+nltransienttransportproblem nsteps 200 deltat 600000.0 rtol 0.001 alpha 0.5 nsmax 300 nmodules 1
+errorcheck
 #hom tstep_all
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
@@ -21,6 +22,6 @@ BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 15.0 
 ConstantFunction 1 f(t) 1.0
 #%BEGIN_CHECK%
-#NODE tStep 4.80000000e+06 number 3 dof 10 unknown d value 6.11951769e+00
-#NODE tStep 1.19400000e+08 number 3 dof 10 unknown d value 7.5
+#NODE tStep 9 number 3 dof 10 unknown d value 6.11951769e+00
+#NODE tStep 200 number 3 dof 10 unknown d value 7.5
 #%END_CHECK%

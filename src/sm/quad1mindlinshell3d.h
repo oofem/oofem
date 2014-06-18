@@ -84,14 +84,6 @@ protected:
     static IntArray shellOrdering;
     /// Ordering for the drilling dofs (the out-of-plane rotations)
     static IntArray drillOrdering;
-    /// Dummy variable
-    static bool __initialized;
-    /// Defines the ordering of the dofs in the local stiffness matrix.
-    static bool initOrdering() {
-        shellOrdering = { 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23};
-        drillOrdering = { 6, 12, 18, 24};
-        return true;
-    }
 
 public:
     Quad1MindlinShell3D(int n, Domain * d);
@@ -136,9 +128,6 @@ public:
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP() { return this->numberOfGaussPoints; }
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType() { return SPRPatchType_2dxy; }
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
-
 
 
 protected:

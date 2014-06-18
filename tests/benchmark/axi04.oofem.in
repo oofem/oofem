@@ -1,6 +1,7 @@
 axi04.oofem.out
 axisymmetric 2D pipe test, gravity load in cylinder; no friction
-supg nsteps 4 lstype 0 smtype 1 deltaT 0.00001 rtolv 1.e-4 alpha 0.5 nmodules 0
+supg nsteps 4 lstype 0 smtype 1 deltaT 0.00001 rtolv 1.e-4 alpha 0.5 nmodules 1
+errorcheck filename "axi04.oofem.in"
 #vtk tstep_step 1 domain_all primvars 2 1 5 vars 1 43
 domain 2dIncompFlow
 OutputManager tstep_all dofman_all element_all
@@ -649,12 +650,12 @@ deadweight 4 components 2 0.0 -9.81 loadTimeFunction 1 valtype 2
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK% tolerance 1.e-2
-#NODE tStep 1.e-5 number 1 dof 11 unknown d value 19.62
-#NODE tStep 1.e-5 number 2 dof 11 unknown d value 19.62
-#NODE tStep 1.e-5 number 7 dof 11 unknown d value 19.62
-#NODE tStep 1.e-5 number 11 dof 11 unknown d value 19.62
-#NODE tStep 4.e-5 number 1 dof 11 unknown d value 19.62
-#NODE tStep 4.e-5 number 2 dof 11 unknown d value 19.62
-#NODE tStep 4.e-5 number 7 dof 11 unknown d value 19.62
-#NODE tStep 4.e-5 number 11 dof 11 unknown d value 19.62
+#NODE tStep 1 number 1 dof 11 unknown d value 19.62
+#NODE tStep 1 number 2 dof 11 unknown d value 19.62
+#NODE tStep 1 number 7 dof 11 unknown d value 19.62
+#NODE tStep 1 number 11 dof 11 unknown d value 19.62
+#NODE tStep 4 number 1 dof 11 unknown d value 19.62
+#NODE tStep 4 number 2 dof 11 unknown d value 19.62
+#NODE tStep 4 number 7 dof 11 unknown d value 19.62
+#NODE tStep 4 number 11 dof 11 unknown d value 19.62
 #%END_CHECK%

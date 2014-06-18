@@ -277,13 +277,6 @@ Tr1Darcy :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
     mat->giveIPValue(answer, gp, type, tStep);
 }
 
-void
-Tr1Darcy :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                      InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
 Interface *
 Tr1Darcy :: giveInterface(InterfaceType interface)
 {

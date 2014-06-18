@@ -104,18 +104,22 @@ GradDpMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
 void
 GradDpMaterialExtensionInterface :: giveDistanceBasedCharacteristicLength(const FloatArray &gpCoords)
 {
-    double distance = zeta * cl0; // Initially distance from the boundary is set to the maximum value
+    double distance = 1.e20; // Initially distance from the boundary is set to the maximum value
     double temp;
     int ib, nbarrier = dom->giveNumberOfNonlocalBarriers();
     for ( ib = 1; ib <= nbarrier; ib++ ) { //Loop over all the nonlocal barriers to find minimum distance from the boundary
-        temp = dom->giveNonlocalBarrier(ib)->calculateMinimumDistanceFromBoundary(gpCoords, zeta * cl0);
+        temp = dom->giveNonlocalBarrier(ib)->calculateMinimumDistanceFromBoundary(gpCoords);
         if ( distance > temp ) { //Check to find minimum distance from boundary from all nonlocal boundaries
             distance = temp;
         }
     }
 
     //Calculate interaction radius based on the minimum distance from the nonlocal boundaries
-    cl = ( ( 1 - beta ) / ( zeta * cl0 ) * distance + beta ) * cl0;
+    if ( distance < zeta * cl0 ) {
+        cl = ( ( 1 - beta ) / ( zeta * cl0 ) * distance + beta ) * cl0;
+    } else   {
+        cl = cl0;
+    }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 } // end namespace oofem

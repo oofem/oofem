@@ -183,7 +183,7 @@ DofManList :: addDofManagers(IntArray &dofManNumbers)
     std :: sort( dofManList.begin(), this->dofManList.end() );
 }
 
-bool EDCrack :: giveTipInfos(std :: vector< TipInfo > &oInfo) const
+bool EDCrack :: giveTipInfos(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const
 {
     int nVert = bg->giveNrVertices();
     if ( nVert > 1 ) {
@@ -207,7 +207,7 @@ bool EDCrack :: giveTipInfos(std :: vector< TipInfo > &oInfo) const
         info1.mTipIndex = 0;
         info1.mArcPos = 0.0;
 
-        oInfo.push_back(info1);
+        oStartTipInfo = info1;
 
         // End tip
         TipInfo info2;
@@ -229,7 +229,7 @@ bool EDCrack :: giveTipInfos(std :: vector< TipInfo > &oInfo) const
         info2.mTipIndex = 1;
         info2.mArcPos = 1.0;
 
-        oInfo.push_back(info2);
+        oEndTipInfo = info2;
 
         return true;
     }
@@ -254,6 +254,22 @@ bool EDCrack :: propagateTips(const std :: vector< TipPropagation > &iTipProp) {
     return true;
 }
 
+void EDCrack :: cropPolygon(const double &iArcPosStart, const double &iArcPosEnd)
+{
+    PolygonLine *pl = dynamic_cast<PolygonLine*> (bg);
+
+    if(pl == NULL) {
+        OOFEM_ERROR("Failed to cast bg to PolygonLine.")
+    }
+
+    std::vector<FloatArray> points;
+    pl->giveSubPolygon(points, iArcPosStart, iArcPosEnd);
+    pl->setVertices(points);
+
+    const double tol2 = 1.0e-18;
+    pl->removeDuplicatePoints(tol2);
+
+}
 
 void DofManList :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {

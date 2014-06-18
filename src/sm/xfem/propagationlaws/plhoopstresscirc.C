@@ -90,8 +90,9 @@ void PLHoopStressCirc :: giveInputRecord(DynamicInputRecord &input)
 void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &ioEnrDom)
 {
     // Fetch crack tip data
-    std :: vector< TipInfo >tipInfo;
-    ioEnrDom.giveTipInfos(tipInfo);
+    TipInfo tipInfoStart, tipInfoEnd;
+    ioEnrDom.giveTipInfos(tipInfoStart, tipInfoEnd);
+    std :: vector< TipInfo >tipInfo = {tipInfoStart, tipInfoEnd};
 
     SpatialLocalizer *localizer = iDomain.giveSpatialLocalizer();
 

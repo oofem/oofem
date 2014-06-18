@@ -154,9 +154,6 @@ LatticeTransportMaterial :: computeConductivity(double suction,
     double relativePermeability;
     double conductivity;
 
-    relativePermeability = 0.;
-    conductivity = 0.;
-
     double crackWidth = 0.;
 
 #ifdef __SM_MODULE

@@ -86,11 +86,12 @@
 #define _IFT_IsotropicDamageMaterial1_At "at"
 #define _IFT_IsotropicDamageMaterial1_Bt "bt"
 #define _IFT_IsotropicDamageMaterial1_ft "ft"
-#define _IFT_IsotropicDamageMaterial1_w1wf "w1wf"
+#define _IFT_IsotropicDamageMaterial1_wkwf "wkwf"
 #define _IFT_IsotropicDamageMaterial1_e1ef "e1ef"
-#define _IFT_IsotropicDamageMaterial1_s1ft "s1ft"
+#define _IFT_IsotropicDamageMaterial1_skft "skft"
 #define _IFT_IsotropicDamageMaterial1_s1 "s1"
-#define _IFT_IsotropicDamageMaterial1_w1 "w1"
+#define _IFT_IsotropicDamageMaterial1_sk "sk"
+#define _IFT_IsotropicDamageMaterial1_wk "wk"
 #define _IFT_IsotropicDamageMaterial1_e1 "e1"
 #define _IFT_IsotropicDamageMaterial1_ek "ek"
 #define _IFT_IsotropicDamageMaterial1_gf "gf"
@@ -160,6 +161,12 @@ protected:
 
     /// Determines the softening for the bilinear law -> corresponds to the strain at the knee point.
     double ek;
+
+    /// Determines the softening for the bilinear law -> corresponds to the crack opening at the knee point.
+    double wk;
+
+    /// Determines the softening for the bilinear law -> corresponds to the stress at the knee point.
+    double sk;
 
     /// Type characterizing the algorithm used to compute equivalent strain measure.
     enum EquivStrainType { EST_Unknown, EST_Mazars, EST_Rankine_Smooth, EST_Rankine_Standard, EST_ElasticEnergy, EST_ElasticEnergyPositiveStress, EST_ElasticEnergyPositiveStrain, EST_Mises, EST_Griffith };
@@ -237,7 +244,7 @@ public:
      */
     static void computeStrainInvariants(const FloatArray &strainVector, double &I1e, double &J2e);
 
-    bool isCrackBandApproachUsed() { return ( this->softType == ST_Exponential_Cohesive_Crack || this->softType == ST_Linear_Cohesive_Crack || this->gf != 0. ); }
+    bool isCrackBandApproachUsed() { return ( this->softType == ST_Exponential_Cohesive_Crack || this->softType == ST_Linear_Cohesive_Crack || this->softType == ST_BiLinear_Cohesive_Crack || this->gf != 0. ); }
     virtual void computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
     virtual void computeEta(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);

@@ -57,8 +57,8 @@ namespace oofem {
  */
 class Quad1PlaneStrain : public StructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
-public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface,
-public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
+public EIPrimaryUnknownMapperInterface,
+public HuertaErrorEstimatorInterface
 {
 protected:
     static FEI2dQuadLin interp;
@@ -80,27 +80,20 @@ public:
 
     virtual double computeVolumeAround(GaussPoint *gp);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
-    virtual double DirectErrorIndicatorRCI_giveCharacteristicSize();
 
-    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-                                                                 TimeStep *tStep, const FloatArray &coords,
-                                                                 FloatArray &answer);
+    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                       TimeStep *tStep, const FloatArray &lcoords,
+                                                                       FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
     // HuertaErrorEstimatorInterface
-    virtual Element *HuertaErrorEstimatorI_giveElement() { return this; }
-
     virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                                   IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                                                   HuertaErrorEstimatorInterface :: SetupMode sMode, TimeStep *tStep,
@@ -111,10 +104,6 @@ public:
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
-
-    // HuertaRemeshingCriteriaInterface
-    virtual double HuertaRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); };
-    virtual int HuertaRemeshingCriteriaI_givePolynOrder() { return 1; };
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);

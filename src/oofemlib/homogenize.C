@@ -382,7 +382,7 @@ void Homogenize :: herveZaoui(FloatMatrix &PhaseMatrix)
     temp1 = 0.;
     for ( i = 0; i < NumPhases - 1; i++ ) {
         temp1 += PhaseMatrix1(i, 0);
-        r(i) = 1. * pow(temp1, 1. / 3.);
+        r(i) = 1. * cbrt(temp1);
         //printf( "r(%d)=%f\n", i, r(i) );
     }
 

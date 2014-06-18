@@ -1,6 +1,7 @@
 tmpatch21-8.out
 Test of QuadAxisym1_ht elements; nonstationary case
-NonStationaryProblem nsteps 100 deltat 600000.0 alpha 0.5 lumpedcapa
+NonStationaryProblem nsteps 100 deltat 600000.0 alpha 0.5 lumpedcapa nmodules 1
+errorcheck
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
 ndofman 18 nelem 8 ncrosssect  1 nmat 1 nbc 2 nic 1 nltf 1
@@ -39,7 +40,7 @@ InitialCondition 1 Conditions 1 u 0.0
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK% 
-#NODE tStep 5.94000000e+07 number 1 dof 10 unknown d value 5.69682953e+00
-#NODE tStep 5.94000000e+07 number 2 dof 10 unknown d value 5.69682953e+00
+#NODE tStep 100 number 1 dof 10 unknown d value 5.69682953e+00
+#NODE tStep 100 number 2 dof 10 unknown d value 5.69682953e+00
 #%END_CHECK%
 

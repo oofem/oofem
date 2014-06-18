@@ -55,7 +55,7 @@ REGISTER_Element(Quad1_mt);
 
 FEI2dQuadLin Quad1_ht :: interpolation(1, 2);
 
-Quad1_ht :: Quad1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM)
+Quad1_ht :: Quad1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans  = 4;
     numberOfGaussPoints = 4;
@@ -148,13 +148,6 @@ Quad1_ht :: giveInterface(InterfaceType interface)
     }
 
     return NULL;
-}
-
-int
-Quad1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
 }
 
 

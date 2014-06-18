@@ -153,10 +153,10 @@ public:
     void createEnrichedDofs();
 
     /// Initializes receiver according to object description stored in input record.
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    int instanciateYourself(DataReader *dr);
+    virtual int instanciateYourself(DataReader *dr);
     const char *giveClassName() const { return "XfemManager"; }
     const char *giveInputRecordName() const { return _IFT_XfemManager_Name; }
 

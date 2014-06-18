@@ -416,7 +416,7 @@ void
 IsoInterfaceDamageMaterial_2 :: computeDamageParam(double &omega, double kappa, const FloatArray &strain, GaussPoint *gp)
 {
     if ( kappa > this->e0 ) {
-        // Linear interpolation between able values.
+        // Linear interpolation between table values.
 
         // If out of bounds damage is set to the last given damage value in the table
         if ( kappa >= strains.at( strains.giveSize() ) ) {

@@ -267,26 +267,22 @@ void TrPlaneStress2dXFEM :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-int
-TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                        TimeStep *tStep, const FloatArray &coords,
+void
+TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                        TimeStep *tStep, const FloatArray &lcoords,
                                                                         FloatArray &answer)
 {
     // TODO: Validate implementation.
 
-    FloatArray lcoords, u;
+    FloatArray u;
     FloatMatrix n;
-    int result;
-
-    result = this->computeLocalCoordinates(lcoords, coords);
 
     XfemElementInterface_createEnrNmatrixAt(n, lcoords, * this);
 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
-
-    return result;
 }
+
 
 void
 TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)

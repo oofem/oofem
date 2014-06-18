@@ -52,7 +52,7 @@ namespace oofem {
  *
  * @author Ladislav Svoboda
  */
-class TR_SHELL01 : public StructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface, public SpatialLocalizerInterface
+class TR_SHELL01 : public StructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public ZZErrorEstimatorInterface, public SpatialLocalizerInterface
 {
 protected:
     /// Pointer to plate element.
@@ -116,31 +116,23 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep);
-    // ZZErrorEstimatorInterface
-    virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
 
     virtual IntegrationRule *ZZErrorEstimatorI_giveIntegrationRule();
     virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArray &sig);
 
-    // ZZRemeshingCriteriaInterface
-    virtual double ZZRemeshingCriteriaI_giveCharacteristicSize();
-    virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
-
     // SpatialLocalizerI
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
     virtual void SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1);
 
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords) {
         return this->plate->computeGlobalCoordinates(answer, lcoords);
+    }
+
+    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords) {
+        return this->plate->computeLocalCoordinates(answer, gcoords);
     }
 
 protected:

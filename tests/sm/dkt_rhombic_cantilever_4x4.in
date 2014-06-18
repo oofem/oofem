@@ -1,7 +1,8 @@
 dkt_rhombic_cantilever_4x4.out
-"Rhombic cantilever loaded by uniform load"
+Rhombic cantilever loaded by uniform load
 # (see J.L. Batoz, K.J.Bathe, L.W.Ho: A study of thee node triangular plate elements, IJNME, vol. 15, 1771-1812, 1980.)
-LinearStatic nsteps 1
+LinearStatic nsteps 1 nmodules 1
+errorcheck
 domain 2dMindlinPlate
 OutputManager tstep_all dofman_all element_all
 ndofman 25 nelem 32 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1

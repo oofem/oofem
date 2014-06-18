@@ -1,6 +1,7 @@
 lshape.oofem.out
 Plane stress example
-adaptlinearstatic nsteps 1 meshpackage 3 eetype 1 normtype 1 requiredError 0.1 minelemsize 0.0001
+adaptlinearstatic nsteps 1 meshpackage 3 eetype 1 normtype 1 requiredError 0.1 minelemsize 0.0001 nmodules 1
+errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 29 nelem 39 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
@@ -79,5 +80,44 @@ Constantedgeload 2 loadTimeFunction 1 ndofs 2 loadtype 2 Components 2 1.0 0.0
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK% tolerance 1.e-4
-#ERRORESTIMATE tStep 1 value 38.63
+##ERRORESTIMATE tStep 1 value 38.63
+#ELEMENT tStep 1 number 1 gp 1 keyword 32 component 1 value 0.000571994
+#ELEMENT tStep 1 number 2 gp 1 keyword 32 component 1 value 0.000370381
+#ELEMENT tStep 1 number 3 gp 1 keyword 32 component 1 value 0.000368235
+#ELEMENT tStep 1 number 4 gp 1 keyword 32 component 1 value 0.000606187
+#ELEMENT tStep 1 number 5 gp 1 keyword 32 component 1 value 0.000921584
+#ELEMENT tStep 1 number 6 gp 1 keyword 32 component 1 value 0.000534946
+#ELEMENT tStep 1 number 7 gp 1 keyword 32 component 1 value 0.000153139
+#ELEMENT tStep 1 number 8 gp 1 keyword 32 component 1 value 6.40333e-05
+#ELEMENT tStep 1 number 9 gp 1 keyword 32 component 1 value 0.000137147
+#ELEMENT tStep 1 number 10 gp 1 keyword 32 component 1 value 0.000254306
+#ELEMENT tStep 1 number 11 gp 1 keyword 32 component 1 value 0.000541737
+#ELEMENT tStep 1 number 12 gp 1 keyword 32 component 1 value 0.000804436
+#ELEMENT tStep 1 number 13 gp 1 keyword 32 component 1 value 0.00133789
+#ELEMENT tStep 1 number 14 gp 1 keyword 32 component 1 value 0.000723566
+#ELEMENT tStep 1 number 15 gp 1 keyword 32 component 1 value 0.00014037
+#ELEMENT tStep 1 number 16 gp 1 keyword 32 component 1 value 0.000498725
+#ELEMENT tStep 1 number 17 gp 1 keyword 32 component 1 value 0.0012754
+#ELEMENT tStep 1 number 18 gp 1 keyword 32 component 1 value 0.000619201
+#ELEMENT tStep 1 number 19 gp 1 keyword 32 component 1 value 0.000559778
+#ELEMENT tStep 1 number 20 gp 1 keyword 32 component 1 value 0.000397925
+#ELEMENT tStep 1 number 21 gp 1 keyword 32 component 1 value 0.000145453
+#ELEMENT tStep 1 number 22 gp 1 keyword 32 component 1 value 0.000164799
+#ELEMENT tStep 1 number 23 gp 1 keyword 32 component 1 value 0.000170869
+#ELEMENT tStep 1 number 24 gp 1 keyword 32 component 1 value 0.000138412
+#ELEMENT tStep 1 number 25 gp 1 keyword 32 component 1 value 0.000354673
+#ELEMENT tStep 1 number 26 gp 1 keyword 32 component 1 value 0.000377469
+#ELEMENT tStep 1 number 27 gp 1 keyword 32 component 1 value 0.000242053
+#ELEMENT tStep 1 number 28 gp 1 keyword 32 component 1 value 0.000234716
+#ELEMENT tStep 1 number 29 gp 1 keyword 32 component 1 value 0.000438446
+#ELEMENT tStep 1 number 30 gp 1 keyword 32 component 1 value 0.000566697
+#ELEMENT tStep 1 number 31 gp 1 keyword 32 component 1 value 0.000508455
+#ELEMENT tStep 1 number 32 gp 1 keyword 32 component 1 value 0.000419725
+#ELEMENT tStep 1 number 33 gp 1 keyword 32 component 1 value 0.000252578
+#ELEMENT tStep 1 number 34 gp 1 keyword 32 component 1 value 0.000234995
+#ELEMENT tStep 1 number 35 gp 1 keyword 32 component 1 value 0.000385143
+#ELEMENT tStep 1 number 36 gp 1 keyword 32 component 1 value 0.000323419
+#ELEMENT tStep 1 number 37 gp 1 keyword 32 component 1 value 0.000400668
+#ELEMENT tStep 1 number 38 gp 1 keyword 32 component 1 value 0.000332213
+#ELEMENT tStep 1 number 39 gp 1 keyword 32 component 1 value 0.000288429
 #%END_CHECK%

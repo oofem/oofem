@@ -1,6 +1,7 @@
 tmpatch05.out
 Patch test of Quad1_ht elements. Convection as the Newton law (Cauchy's b.c.) via a heat transfer coefficient.
-StationaryProblem nsteps 1 nmodules 0
+StationaryProblem nsteps 1 nmodules 1
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 6 vars 1 56 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all

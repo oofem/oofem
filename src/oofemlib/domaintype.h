@@ -58,6 +58,7 @@ namespace oofem {
     ENUM_ITEM(_2dLatticeMode) \
     ENUM_ITEM(_2dLatticeMassTransportMode) \
     ENUM_ITEM(_3dDirShellMode) /* 7 parameter shell based on director fields */ \
+    ENUM_ITEM(_WarpingMode) /* free warping of a cross section */ \
     /**
      * Type representing type of domain.
      * Domain type (the member value of Domain class) is used to determine the default

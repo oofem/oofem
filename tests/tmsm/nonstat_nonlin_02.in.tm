@@ -1,6 +1,7 @@
 nonstat_nonlin_02.out.tm
 Quadrilateral elements subjected to heat flux (Newton b.c)
-NonStationaryProblem nsteps 3 deltat 36000 alpha 0.5 lumpedcapa exportfields 1 5 nmodules 0
+NonStationaryProblem nsteps 3 deltat 36000 alpha 0.5 lumpedcapa exportfields 1 5 nmodules 1
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 6
 domain heattransfer
 OutputManager tstep_all dofman_all element_all
@@ -25,11 +26,11 @@ BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.0
 InitialCondition 1 Conditions 1 u 0.0
 ConstantFunction 1 f(t) 1.0
 #%BEGIN_CHECK%
-#NODE tStep 0.0 number 5 dof 10 unknown d value 9.98146959e-01
-#NODE tStep 0.0 number 9 dof 10 unknown d value 7.29756332e+01
-#NODE tStep 36000 number 5 dof 10 unknown d value 3.88482167e+00
-#NODE tStep 36000 number 9 dof 10 unknown d value 1.42064950e+02
-#NODE tStep 72000 number 5 dof 10 unknown d value 8.45463247e+00
-#NODE tStep 72000 number 9 dof 10 unknown d value 2.07578282e+02
+#NODE tStep 1 number 5 dof 10 unknown d value 9.98146959e-01
+#NODE tStep 1 number 9 dof 10 unknown d value 7.29756332e+01
+#NODE tStep 2 number 5 dof 10 unknown d value 3.88482167e+00
+#NODE tStep 2 number 9 dof 10 unknown d value 1.42064950e+02
+#NODE tStep 3 number 5 dof 10 unknown d value 8.45463247e+00
+#NODE tStep 3 number 9 dof 10 unknown d value 2.07578282e+02
 #%END_CHECK%
 

@@ -72,6 +72,7 @@ public:
     /// Destructor.
     virtual ~NLTransientTransportProblem();
 
+    virtual TimeStep* giveNextStep();
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
     virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);

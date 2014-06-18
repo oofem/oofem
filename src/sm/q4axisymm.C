@@ -58,7 +58,7 @@ REGISTER_Element(Q4Axisymm);
 FEI2dQuadQuad Q4Axisymm :: interp(1, 2);
 
 Q4Axisymm :: Q4Axisymm(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain)
+    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 8;
     numberOfGaussPoints          = 4;

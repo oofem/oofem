@@ -134,7 +134,7 @@ void AbaqusUserMaterial :: giveInputRecord(DynamicInputRecord &input)
     input.setField(this->numState, _IFT_AbaqusUserMaterial_numState);
     input.setField(this->properties, _IFT_AbaqusUserMaterial_properties);
     input.setField(this->filename, _IFT_AbaqusUserMaterial_userMaterial);
-    input.setField(this->cmname, _IFT_AbaqusUserMaterial_name);
+    input.setField(std::string(this->cmname), _IFT_AbaqusUserMaterial_name);
 }
 
 MaterialStatus *AbaqusUserMaterial :: CreateStatus(GaussPoint *gp) const
@@ -261,10 +261,10 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
     int nshr = 3;
 
     int ntens = ndi + nshr;
-    FloatArray stress(ntens);
-    FloatArray strain = ms->giveStrainVector();
+    FloatArray strain = reducedStrain;
+    FloatArray stress = ms->giveStressVector();
     FloatArray strainIncrement;
-    strainIncrement.beDifferenceOf(reducedStrain, strain);
+    strainIncrement.beDifferenceOf(reducedStrain, ms->giveStrainVector());
     FloatArray state = ms->giveStateVector();
     FloatMatrix jacobian(ntens, ntens);
     int numProperties = this->properties.giveSize();
@@ -415,11 +415,10 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
 
     int ntens = ndi + nshr;
     FloatArray stress(9); // PK1
-    FloatArray strain = ms->giveStrainVector();
     FloatArray strainIncrement;
 
     // compute Green-Lagrange strain
-    FloatArray reducedStrain;
+    FloatArray strain;
     FloatArray vE, vS;
     FloatMatrix F, E;
     F.beMatrixForm(vF);
@@ -428,9 +427,9 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
     E.at(2, 2) -= 1.0;
     E.at(3, 3) -= 1.0;
     E.times(0.5);
-    reducedStrain.beSymVectorFormOfStrain(E);
+    strain.beSymVectorFormOfStrain(E);
 
-    strainIncrement.beDifferenceOf(reducedStrain, strain);
+    strainIncrement.beDifferenceOf(strain, ms->giveStrainVector());
     FloatArray state = ms->giveStateVector();
     FloatMatrix jacobian(9, 9); // dPdF
     int numProperties = this->properties.giveSize();
@@ -571,7 +570,7 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
         FloatArray vCauchyStress;
         vCauchyStress.beSymVectorForm(cauchyStress);
 
-        ms->letTempStrainVectorBe(reducedStrain);
+        ms->letTempStrainVectorBe(strain);
         ms->letTempStressVectorBe(vCauchyStress);
         ms->letTempStateVectorBe(state);
         ms->letTempTangentBe(jacobian);
@@ -597,7 +596,7 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
         // @todo Should convert from dsigmadE to dSdE here
         // L2=detF*matmul( matmul ( inv(op_a_V9(F,F), cm-op_a_V9(ident,Tau)-op_b_V9(Tau,ident) ), inv(op_a_V9(Ft,Ft)))
 
-        ms->letTempStrainVectorBe(reducedStrain);
+        ms->letTempStrainVectorBe(strain);
         ms->letTempStressVectorBe(vS);
         ms->letTempStateVectorBe(state);
         ms->letTempTangentBe(jacobian);

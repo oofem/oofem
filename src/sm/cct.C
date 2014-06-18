@@ -59,8 +59,8 @@ FEI2dTrLin CCTPlate :: interp_lin(1, 2);
 
 CCTPlate :: CCTPlate(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain),
-    LayeredCrossSectionInterface(), ZZNodalRecoveryModelInterface(),
-    NodalAveragingRecoveryModelInterface(), SPRNodalRecoveryModelInterface()
+    LayeredCrossSectionInterface(), ZZNodalRecoveryModelInterface(this),
+    NodalAveragingRecoveryModelInterface(), SPRNodalRecoveryModelInterface(), ZZErrorEstimatorInterface(this)
 {
     numberOfDofMans = 3;
     numberOfGaussPoints = 1;
@@ -374,8 +374,6 @@ CCTPlate :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     }
 
 
@@ -486,13 +484,6 @@ CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 }
 
 
-double
-CCTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize()
-{
-    return sqrt(this->computeArea() * 2.0);
-}
-
-
 
 //
 // The element interface required by NodalAveragingRecoveryModel
@@ -509,14 +500,6 @@ CCTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
     } else {
         answer.clear();
     }
-}
-
-
-void
-CCTPlate :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                      InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 

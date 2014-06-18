@@ -74,9 +74,6 @@ public:
     virtual int giveApproxOrder() { return 1; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 9; }
 
-
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
@@ -84,7 +81,6 @@ public:
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
 
     //
     // definition & identification

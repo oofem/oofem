@@ -108,8 +108,11 @@ void
 StokesFlowVelocityHomogenization :: solveYourselfAt(TimeStep *tStep)
 {
     handlePrescribedValues();
-    currentStep = tStep;
-    StokesFlow :: solveYourselfAt(tStep);
+    this->giveCurrentStep();
+    currentStep->setNumber( tStep->giveNumber() );
+    currentStep->setTime( tStep->giveTargetTime() );
+    currentStep->setTimeIncrement( tStep->giveTimeIncrement() );
+    StokesFlow :: solveYourselfAt(currentStep);
 }
 
 

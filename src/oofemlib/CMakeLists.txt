@@ -203,6 +203,7 @@ set (core_xfem
     xfem/enrichmentfronts/enrichmentfrontreducefront.C
     xfem/enrichmentfronts/enrichmentfrontlinbranchfuncradius.C
     xfem/enrichmentfronts/enrichmentfrontlinbranchfunconeel.C
+    xfem/enrichmentfronts/enrichmentfrontintersection.C
     xfem/integrationrules/discsegintegrationrule.C
     )
 
@@ -226,6 +227,7 @@ set (core_bc
     prescribedgradient.C
     prescribedgradientbc.C
     prescribedgradientbcneumann.C
+    prescribedgradientbcweak.C
     mixedgradientpressurebc.C
     mixedgradientpressuredirichlet.C
     mixedgradientpressureneumann.C

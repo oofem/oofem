@@ -60,122 +60,74 @@ EnrFrontLinearBranchFuncOneEl :: ~EnrFrontLinearBranchFuncOneEl()
 }
 
 
-void EnrFrontLinearBranchFuncOneEl :: MarkNodesAsFront(std :: unordered_map< int, int > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo)
+void EnrFrontLinearBranchFuncOneEl :: MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo)
 {
-    mTipInfo = iTipInfo;
-    mNodeTipIndices.clear();
-
-    Domain &d = * ( ixFemMan.giveDomain() );
-
-    for ( size_t tipInd = 0; tipInd < iTipInfo.size(); tipInd++ ) {
-        Element *el = d.giveSpatialLocalizer()->giveElementContainingPoint(iTipInfo [ tipInd ].mGlobalCoord);
-
-        if ( el != NULL ) {
-            const IntArray &elNodes = el->giveDofManArray();
-
-            for ( int i = 1; i <= elNodes.giveSize(); i++ ) {
-                ioNodeEnrMarkerMap [ elNodes.at(i) ] = 2;
-                addTipIndexToNode(elNodes.at(i), tipInd);
-            }
-        }
-    }
+    MarkTipElementNodesAsFront(ioNodeEnrMarkerMap, ixFemMan, iLevelSetNormalDirMap, iLevelSetTangDirMap, iTipInfo);
 }
 
 int EnrFrontLinearBranchFuncOneEl :: giveNumEnrichments(const DofManager &iDMan) const
 {
-    std :: vector< int >tipIndices;
-    int nodeInd = iDMan.giveGlobalNumber();
-    giveNodeTipIndices(nodeInd, tipIndices);
-
-    return 4 * tipIndices.size();
+    return 4;
 }
 
 void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const
 {
-    oEnrFunc.clear();
+    FloatArray xTip = { mTipInfo.mGlobalCoord.at(1), mTipInfo.mGlobalCoord.at(2) };
 
-    std :: vector< int >tipIndices;
-    giveNodeTipIndices(iNodeInd, tipIndices);
+    FloatArray pos = { iPos.at(1), iPos.at(2) };
 
-    for ( size_t i = 0; i < tipIndices.size(); i++ ) {
-        int tipInd = tipIndices [ i ];
-        FloatArray xTip = {
-            mTipInfo [ tipInd ].mGlobalCoord.at(1), mTipInfo [ tipInd ].mGlobalCoord.at(2)
-        };
+    // Crack tip tangent and normal
+    const FloatArray &t = mTipInfo.mTangDir;
+    const FloatArray &n = mTipInfo.mNormalDir;
 
-        FloatArray pos = {
-            iPos.at(1), iPos.at(2)
-        };
+    double r = 0.0, theta = 0.0;
+    EnrichmentItem :: calcPolarCoord(r, theta, xTip, pos, n, t);
 
-        // Crack tip tangent and normal
-        const FloatArray &t = mTipInfo [ tipInd ].mTangDir;
-        const FloatArray &n = mTipInfo [ tipInd ].mNormalDir;
-
-        double r = 0.0, theta = 0.0;
-        EnrichmentItem :: calcPolarCoord(r, theta, xTip, pos, n, t);
-
-        mpBranchFunc->evaluateEnrFuncAt(oEnrFunc, r, theta);
-    }
+    mpBranchFunc->evaluateEnrFuncAt(oEnrFunc, r, theta);
 }
 
 void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const
 {
-    oEnrFuncDeriv.clear();
+    const FloatArray &xTip = mTipInfo.mGlobalCoord;
 
-    std :: vector< int >tipIndices;
-    giveNodeTipIndices(iNodeInd, tipIndices);
+    // Crack tip tangent and normal
+    const FloatArray &t = mTipInfo.mTangDir;
+    const FloatArray &n = mTipInfo.mNormalDir;
 
-    for ( size_t i = 0; i < tipIndices.size(); i++ ) {
-        int tipInd = tipIndices [ i ];
-        const FloatArray &xTip = mTipInfo [ tipInd ].mGlobalCoord;
-
-        // Crack tip tangent and normal
-        const FloatArray &t = mTipInfo [ tipInd ].mTangDir;
-        const FloatArray &n = mTipInfo [ tipInd ].mNormalDir;
-
-        double r = 0.0, theta = 0.0;
-        EnrichmentItem :: calcPolarCoord(r, theta, xTip, iPos, n, t);
+    double r = 0.0, theta = 0.0;
+    EnrichmentItem :: calcPolarCoord(r, theta, xTip, iPos, n, t);
 
 
-        size_t sizeStart = oEnrFuncDeriv.size();
-        mpBranchFunc->evaluateEnrFuncDerivAt(oEnrFuncDeriv, r, theta);
+    size_t sizeStart = oEnrFuncDeriv.size();
+    mpBranchFunc->evaluateEnrFuncDerivAt(oEnrFuncDeriv, r, theta);
 
-        /**
-         * Transform to global coordinates.
-         */
-        FloatMatrix E;
-        E.resize(2, 2);
-        E.setColumn(t, 1);
-        E.setColumn(n, 2);
+    /**
+     * Transform to global coordinates.
+     */
+    FloatMatrix E;
+    E.resize(2, 2);
+    E.setColumn(t, 1);
+    E.setColumn(n, 2);
 
 
-        for ( size_t j = sizeStart; j < oEnrFuncDeriv.size(); j++ ) {
-            FloatArray enrFuncDerivGlob;
-            enrFuncDerivGlob.beProductOf(E, oEnrFuncDeriv [ j ]);
-            oEnrFuncDeriv [ j ] = enrFuncDerivGlob;
-        }
+    for ( size_t j = sizeStart; j < oEnrFuncDeriv.size(); j++ ) {
+        FloatArray enrFuncDerivGlob;
+        enrFuncDerivGlob.beProductOf(E, oEnrFuncDeriv [ j ]);
+        oEnrFuncDeriv [ j ] = enrFuncDerivGlob;
     }
 }
 
-void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd) const
+void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const
 {
-	oEnrFuncJumps.clear();
+	const FloatArray &xTip = mTipInfo.mGlobalCoord;
+	const FloatArray &gpCoord = *(iGP.giveCoordinates());
 
-    std :: vector< int >tipIndices;
-    giveNodeTipIndices(iNodeInd, tipIndices);
+	double radius = gpCoord.distance(xTip);
 
-    for ( size_t i = 0; i < tipIndices.size(); i++ ) {
-        int tipInd = tipIndices [ i ];
-        const FloatArray &xTip = mTipInfo [ tipInd ].mGlobalCoord;
-        const FloatArray &gpCoord = *(iGP.giveCoordinates());
+	std :: vector< double > jumps;
+	mpBranchFunc->giveJump(jumps, radius);
 
-        double radius = gpCoord.distance(xTip);
-
-        std :: vector< double > jumps;
-        mpBranchFunc->giveJump(jumps, radius);
-
-        oEnrFuncJumps.insert( oEnrFuncJumps.end(), jumps.begin(), jumps.end() );
-    }
+	oEnrFuncJumps.insert( oEnrFuncJumps.end(), jumps.begin(), jumps.end() );
 }
 
 IRResultType EnrFrontLinearBranchFuncOneEl :: initializeFrom(InputRecord *ir)

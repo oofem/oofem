@@ -57,10 +57,9 @@ namespace oofem {
  */
 class Truss1d : public StructuralElement,
 public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SpatialLocalizerInterface,
-public DirectErrorIndicatorRCInterface,
 public EIPrimaryUnknownMapperInterface,
-public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface, public MMAShapeFunctProjectionInterface,
-public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
+public ZZErrorEstimatorInterface, public MMAShapeFunctProjectionInterface,
+public HuertaErrorEstimatorInterface
 {
 protected:
     static FEI1dLin interp;
@@ -103,33 +102,21 @@ public:
     // ZZNodalRecoveryMInterface
     //void ZZNodalRecoveryMI_computeNValProduct (FloatArray& answer, InternalStateType type, TimeStep* tStep);
     //void ZZNodalRecoveryMI_computeNNMatrix (FloatArray& answer, InternalStateType type);
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     // NodalAveragingRecoveryMInterface
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
 
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep);
-
     // SpatialLocalizerInterface
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
-    virtual double DirectErrorIndicatorRCI_giveCharacteristicSize();
-
     // EIPrimaryUnknownMInterface
-    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-                                                                 TimeStep *tStep, const FloatArray &coords,
-                                                                 FloatArray &answer);
+    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                       TimeStep *tStep, const FloatArray &lcoords,
+                                                                       FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
-    // ZZErrorEstimatorInterface
-    virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
-
     // HuertaErrorEstimatorInterface
-    virtual Element *HuertaErrorEstimatorI_giveElement() { return this; }
     virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                                   IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                                                   HuertaErrorEstimatorInterface :: SetupMode sMode, TimeStep *tStep,
@@ -140,14 +127,6 @@ public:
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
-
-    // ZZRemeshingCriteriaInterface
-    virtual double ZZRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); }
-    virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
-
-    // HuertaRemeshingCriteriaInterface
-    virtual double HuertaRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); }
-    virtual int HuertaRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
                                                                       coordType ct, nodalValContainerType &list,

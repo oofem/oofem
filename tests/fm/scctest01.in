@@ -1,7 +1,8 @@
 scctest01.out
 scc specimen, gravity colapse
 #supg nsteps 20 lstype 1 smtype 2 stype 1 lsprecond 2 deltaT 1.0e-2 rtolv 5.e-3 alpha 0.5 miflag 1 nmodules 0 stopmaxiter 0
-supg nsteps 20 lstype 0 smtype 1 deltaT 1.0e-2 rtolv 5.e-3 alpha 0.5 miflag 1 nmodules 0 stopmaxiter 0
+supg nsteps 20 lstype 0 smtype 1 deltaT 1.0e-2 rtolv 5.e-3 alpha 0.5 miflag 1 nmodules 1 stopmaxiter 0
+errorcheck
 #vtkxml tstep_step 1 domain_all primvars 2 1 5 vars 1 43
 domain 2dIncompFlow
 OutputManager tstep_all dofman_all element_all
@@ -261,8 +262,8 @@ deadweight 3 components 2 0.0 -9.81 loadTimeFunction 1 valtype 2
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK%
-#ELEMENT tStep 1.91754642e-01 number 1 gp 1 keyword "VOF" component 1 value 1.0
-#ELEMENT tStep 1.91754642e-01 number 2 gp 1 keyword "VOF" component 1 value 1.0
-#ELEMENT tStep 1.91754642e-01 number 3 gp 1 keyword "VOF" component 1 value 1.951728e-01
-#ELEMENT tStep 1.91754642e-01 number 4 gp 1 keyword "VOF" component 1 value 0.0
+#ELEMENT tStep 20 number 1 gp 1 keyword 43 component 1 value 1.0
+#ELEMENT tStep 20 number 2 gp 1 keyword 43 component 1 value 1.0
+#ELEMENT tStep 20 number 3 gp 1 keyword 43 component 1 value 1.951728e-01
+#ELEMENT tStep 20 number 4 gp 1 keyword 43 component 1 value 0.0
 #%END_CHECK%

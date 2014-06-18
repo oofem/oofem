@@ -199,8 +199,8 @@ TR1_2D_SUPG_AXI :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeSt
                     for ( int m = 1; m <= 3; m++ ) { //  nodal components
                         w_dof_addr = ( k - 1 ) * 2 + i;
                         u_dof_addr = ( m - 1 ) * 2 + j;
-                        d1j = ( j == 1 );
-                        d2j = ( j == 2 );
+                        //d1j = ( j == 1 );
+                        //d2j = ( j == 2 );
                         dij = ( i == j );
                         answer.at(w_dof_addr, u_dof_addr) += dV * t_supg * rho *
                                                              ( _u * b [ k - 1 ] + _v * c [ k - 1 ] ) * ( dij * _u * b [ m - 1 ] + dij * _v * c [ m - 1 ] );

@@ -57,7 +57,7 @@ namespace oofem {
 class CCTPlate : public NLStructuralElement,
 public LayeredCrossSectionInterface, public ZZNodalRecoveryModelInterface,
 public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface
+public ZZErrorEstimatorInterface
 {
 protected:
     static FEI2dTrLin interp_lin;
@@ -125,23 +125,13 @@ public:
     virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP() { return 1; }
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
-    // ZZErrorEstimatorInterface
-    virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
-
-    // ZZRemeshingCriteriaInterface
-    virtual double ZZRemeshingCriteriaI_giveCharacteristicSize();
-    virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     // layered cross section support functions
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,

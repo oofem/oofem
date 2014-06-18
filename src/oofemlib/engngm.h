@@ -78,6 +78,7 @@
 #define _IFT_EngngModel_loadBalancingFlag "lbflag"
 #define _IFT_EngngModel_forceloadBalancingFlag "forcelb1"
 #define _IFT_EngngModel_initialGuess "initialguess"
+#define _IFT_EngngModel_referenceFile "referencefile"
 
 #define _IFT_EngngModel_lstype "lstype"
 #define _IFT_EngngModel_smtype "smtype"
@@ -248,6 +249,8 @@ protected:
     std :: string coreOutputFileName;
     /// Output stream.
     FILE *outputStream;
+    /// String with reference file name
+    std :: string referenceFileName;
     /// Domain context output mode.
     ContextOutputMode contextOutputMode;
     int contextOutputStep;
@@ -359,6 +362,12 @@ public:
      * to which extensions, like .out .vtu .osf should be added.
      */
     std :: string giveOutputBaseFileName() { return dataOutputFileName; }
+
+    /**
+     * Returns reference file name.
+     */
+    std :: string giveReferenceFileName()  { return referenceFileName;}
+
     /**
      * Sets the base output file name.
      * @see giveOutputBaseFileName

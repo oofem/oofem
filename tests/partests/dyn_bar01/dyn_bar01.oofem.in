@@ -19,10 +19,10 @@ NodalLoad 2 loadTimeFunction 1 Components 2 0. 1.0
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK% tolerance 1.e-8
-#NODE tStep 2.0 number 1 dof 2 unknown v value 0.0
-#NODE tStep 2.0 number 2 dof 2 unknown v value 1.25e-3
-#NODE tStep 2.0 number 3 dof 2 unknown v value 1.475e-1
-#NODE tStep 2.0 number 3 dof 2 unknown a value 9.5e-2
+#NODE tStep 3 number 1 dof 2 unknown v value 0.0
+#NODE tStep 3 number 2 dof 2 unknown v value 1.25e-3
+#NODE tStep 3 number 3 dof 2 unknown v value 1.475e-1
+#NODE tStep 3 number 3 dof 2 unknown a value 9.5e-2
 ##
-#ELEMENT tStep 2.0 number 2 gp 1 keyword "stresses" component 1  value 5.e-2
+#ELEMENT tStep 3 number 2 gp 1 keyword 1 component 1  value 5.e-2
 #%END_CHECK%

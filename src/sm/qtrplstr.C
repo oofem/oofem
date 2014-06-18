@@ -55,8 +55,8 @@ REGISTER_Element(QTrPlaneStress2d);
 FEI2dTrQuad QTrPlaneStress2d :: interpolation(1, 2);
 
 QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), SpatialLocalizerInterface(),
-    DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface()
+    NLStructuralElement(n, aDomain), SpatialLocalizerInterface(this),
+    EIPrimaryUnknownMapperInterface()
 {
     numberOfDofMans  = 6;
     numberOfGaussPoints = 4;
@@ -78,8 +78,6 @@ QTrPlaneStress2d :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     }
@@ -192,14 +190,6 @@ void
 QTrPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
     answer = {D_u, D_v};
-}
-
-
-int
-QTrPlaneStress2d :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
 }
 
 
@@ -535,38 +525,20 @@ QTrPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-double
-QTrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
-{
-    double volume = 0.0;
-
-    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-        volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
-    }
-
-    return sqrt(volume * 2.0);
-}
-
-
-int
-QTrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                     TimeStep *tStep, const FloatArray &coords,
+void
+QTrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                     TimeStep *tStep, const FloatArray &lcoords,
                                                                      FloatArray &answer)
 {
-    FloatArray lcoords, u, nn;
+    FloatArray u, ni;
     FloatMatrix n;
-    int result;
 
-    result = this->computeLocalCoordinates(lcoords, coords);
+    this->interpolation.evalN( ni, lcoords, FEIElementGeometryWrapper(this) );
 
-    this->interpolation.evalN( nn, lcoords, FEIElementGeometryWrapper(this) );
-
-    n.beNMatrixOf(nn, 2);
+    n.beNMatrixOf(ni, 2);
 
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
-
-    return result;
 }
 
 

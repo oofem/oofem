@@ -51,6 +51,7 @@ set (sm_element
     dkt.C qdkt.C
     quad1platesubsoil.C tria1platesubsoil.C
     interfaceelem2dlin.C
+    trwarp.C
     )
 
 set (sm_crosssection
@@ -77,6 +78,7 @@ set (sm_emodel
     diidynamic.C
     nldeidynamic.C
     incrementallinearstatic.C
+    freewarping.C
     )
 
 set (sm_loads
@@ -136,6 +138,8 @@ set (sm_material
     simplevitrificationmaterial.C
     anisodamagemodel.C
     winklerpasternak.C
+    structmatsettable.C
+    bondceb.C
     )
 
 set (sm_error
@@ -174,6 +178,7 @@ set (sm_xfem
 	xfem/enrichmentitems/crack.C
 	xfem/enrichmentitems/delamination.C
 	xfem/propagationlaws/plhoopstresscirc.C
+	xfem/xfemstructuremanager.C
 	)
 
 set (sm_unsorted

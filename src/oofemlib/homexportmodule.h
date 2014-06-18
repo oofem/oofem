@@ -86,6 +86,11 @@ protected:
     FILE *stream;
     /// Material numbers over which averaging is performed.
     IntArray matnum;
+    /// Stores total internal energy released on a specific crosssection.
+    FloatArray internalSourceEnergy;
+    /// Stores total energy from material capacity released on a specific crosssection.
+    FloatArray capacityEnergy;
+    
 };
 } // end namespace oofem
 

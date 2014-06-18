@@ -1064,15 +1064,6 @@ Element :: computeMeanSize()
 // Computes the size of the element defined as its length,
 // square root of area or cube root of volume (depending on spatial dimension)
 {
-    // if the method "giveArea" is properly implemented
-    // for the particular type of element, the mean size is the square root of area
-    // 8 July 2010 - does not seem to work any more (Element does not inherit from ElementGeometry)
-    // double area = this->giveArea();
-    // if (area>0.)
-    //  return sqrt(area);
-
-    // if "giveArea" is not implemented (default value 0.),
-    // then the contributing areas or volumes are collected from Gauss points
     double volume = this->computeVolumeAreaOrLength();
     if ( volume < 0. ) {
         return -1.; // means "cannot be evaluated"
@@ -1084,7 +1075,7 @@ Element :: computeMeanSize()
 
     case 2: return sqrt(volume);
 
-    case 3: return pow(volume, 1. / 3.);
+    case 3: return cbrt(volume);
     }
 
     return -1.; // means "cannot be evaluated"
@@ -1218,7 +1209,9 @@ Element :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType typ
         ErrorEstimator *ee = this->giveDomain()->giveErrorEstimator();
         if ( ee ) {
             answer.resize(1);
-            answer.at(1) = ee->giveElementError(indicatorET, this, tStep);
+            ///@todo Which "error type" should be used? Why are there several? I don't see the point of this enum when 
+            /// there could be different function calls just as well (and different IST values)
+            answer.at(1) = ee->giveElementError(internalStressET, this, tStep);
         } else {
             answer.clear();
             return 0;

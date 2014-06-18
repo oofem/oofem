@@ -1,6 +1,7 @@
 lb03.out
 Test of dynamic load balancing with nonlocal extension 
-NonLinearStatic nsteps 2 stepLength 10.e-3 rtolv 1.e-4 refloadmode 0 lstype 3 smtype 7 lbflag 1 hpcmode 1 hpc 4 45 2 46 2 reqIterations 30 maxiter 60
+NonLinearStatic nsteps 2 stepLength 10.e-3 rtolv 1.e-4 refloadmode 0 lstype 3 smtype 7 lbflag 1 hpcmode 1 hpc 4 45 2 46 2 reqIterations 30 maxiter 60 nmodules 1
+errorcheck filename "lb03.oofem.in"
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 50 nelem 35 ncrosssect  1 nmat 1 nbc 3 nic 0 nltf 1
@@ -112,16 +113,16 @@ ConstantFunction 1 f(t) 1.0
 #REACTION tStep 1 number 1 dof 2 value 6.3635e-02
 #REACTION tStep 1 number 10 dof 2 value 6.3635e-02
 ## check nodes
-#NODE tStep 1 number 41 dof 1 unknown d value 1.35314724e-04
-#NODE tStep 1 number 41 dof 2 unknown d value -6.62280919e-05
-#NODE tStep 1 number 45 dof 1 unknown d value 1.03512570e-04
-#NODE tStep 1 number 45 dof 2 unknown d value -1.68241216e-04
-#NODE tStep 1 number 50 dof 1 unknown d value 5.19741733e-05
-#NODE tStep 1 number 50 dof 2 unknown d value -6.62280919e-05
+#NODE tStep 2 number 41 dof 1 unknown d value 1.35314724e-04
+#NODE tStep 2 number 41 dof 2 unknown d value -6.62280919e-05
+#NODE tStep 2 number 45 dof 1 unknown d value 1.03512570e-04
+#NODE tStep 2 number 45 dof 2 unknown d value -1.68241216e-04
+#NODE tStep 2 number 50 dof 1 unknown d value 5.19741733e-05
+#NODE tStep 2 number 50 dof 2 unknown d value -6.62280919e-05
 ## check elements
-#ELEMENT tStep 1 number 5 gp 3 keyword "strains" component 1  value 7.6643e-05
-#ELEMENT tStep 1 number 5 gp 3 keyword "strains" component 2  value 2.5445e-05 
-#ELEMENT tStep 1 number 5 gp 3 keyword "stresses" component 1  value 2.4368e+00
-#ELEMENT tStep 1 number 5 gp 3 keyword "stresses" component 2  value 1.1773e+00
-#ELEMENT tStep 1 number 5 gp 3 keyword "damage" component 1  value 0.032358
+#ELEMENT tStep 2 number 5 gp 3 keyword 4 component 1  value 7.6643e-05
+#ELEMENT tStep 2 number 5 gp 3 keyword 4 component 2  value 2.5445e-05 
+#ELEMENT tStep 2 number 5 gp 3 keyword 1 component 1  value 2.4368e+00
+#ELEMENT tStep 2 number 5 gp 3 keyword 1 component 2  value 1.1773e+00
+#ELEMENT tStep 2 number 5 gp 3 keyword 52 component 1  value 0.032358
 #%END_CHECK%

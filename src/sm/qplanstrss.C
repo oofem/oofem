@@ -53,7 +53,7 @@ REGISTER_Element(QPlaneStress2d);
 FEI2dQuadQuad QPlaneStress2d :: interpolation(1, 2);
 
 QPlaneStress2d :: QPlaneStress2d(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface()
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface()
     // Constructor.
 {
     numberOfDofMans  = 8;
@@ -528,12 +528,6 @@ QPlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer,
     }
 }
 
-void
-QPlaneStress2d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                            InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
 
 void
 QPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)

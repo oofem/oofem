@@ -57,7 +57,7 @@ REGISTER_Element(L4Axisymm);
 FEI2dQuadLin L4Axisymm :: interpolation(1, 2);
 
 L4Axisymm :: L4Axisymm(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain)
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SpatialLocalizerInterface(this)
 {
     numberOfDofMans  = 4;
     numberOfGaussPoints = 4;
@@ -389,17 +389,6 @@ SPRPatchType
 L4Axisymm :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_2dxy;
-}
-
-
-int
-L4Axisymm :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    int result;
-    FloatArray lcoords;
-    result = this->computeLocalCoordinates(lcoords, coords);
-
-    return result;
 }
 
 

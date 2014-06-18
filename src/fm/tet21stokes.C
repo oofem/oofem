@@ -67,7 +67,7 @@ IntArray Tet21Stokes :: surf_ordering [ 4 ] = {
     { 1,  2,  3, 13, 14, 15,  9, 10, 11, 26, 27, 28, 32, 33, 34, 23, 24, 25}
 };
 
-Tet21Stokes :: Tet21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
+Tet21Stokes :: Tet21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain), SpatialLocalizerInterface(this)
 {
     this->numberOfDofMans = 10;
     this->numberOfGaussPoints = 5;
@@ -396,12 +396,6 @@ Interface *Tet21Stokes :: giveInterface(InterfaceType it)
     }
 }
 
-int Tet21Stokes :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
 void Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                           TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
@@ -421,19 +415,6 @@ void Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueM
     }
 }
 
-int Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode, TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
-{
-    bool ok;
-    FloatArray lcoords, n, n_lin;
-    ok = this->computeLocalCoordinates(lcoords, gcoords);
-    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    if ( !ok ) {
-        return false;
-    }
-
-    return true;
-}
-
 void Tet21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
     answer = {V_u, V_v, V_w, P_f};
@@ -445,11 +426,6 @@ double Tet21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const F
     FloatArray lcoords = {0.3333333, 0.3333333, 0.3333333};
     this->computeGlobalCoordinates(center, lcoords);
     return center.distance(coords);
-}
-
-void Tet21Stokes :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 void Tet21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)

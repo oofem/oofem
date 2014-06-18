@@ -747,7 +747,7 @@ bool ParticleTopologyDescription :: findDisplacement(FloatArray &displacement, i
     }
 
     if ( this->useDisplacements ) {
-        em->EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(VM_Incremental, tStep, closest, displacement);    // Displacement
+        em->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(VM_Incremental, tStep, lcoords, displacement);    // Displacement
     } else {
         FloatArray fields;
         IntArray dofIds;

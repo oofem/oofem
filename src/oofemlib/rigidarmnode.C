@@ -90,8 +90,6 @@ RigidArmNode :: postInitialize()
         SlaveDof *sdof = dynamic_cast< SlaveDof * >(dof);
         if ( sdof ) {
             DofIDItem id = sdof->giveDofID();
-            masterDofID[ id ].printYourself();
-            masterContribution[ id ].printYourself();
             sdof->initialize(masterNodes, masterDofID [ id ], masterContribution [ id ]);
         }
     }
@@ -216,4 +214,14 @@ RigidArmNode :: computeMasterContribution(std::map< DofIDItem, IntArray > &maste
         masterContribution [ id ].resizeWithValues(k);
     }
 }
+
+
+void RigidArmNode :: updateLocalNumbering(EntityRenumberingFunctor &f)
+{
+    Node::updateLocalNumbering (f);
+    //update masterNode numbering
+    this->masterDofMngr = f( this->masterDofMngr, ERS_DofManager );
+}
+
+
 } // end namespace oofem

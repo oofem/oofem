@@ -177,7 +177,6 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
 
     //dofManArray has the node order as specified in input file
     for ( int i = 1; i <= this->giveNumberOfNodes(); i++ ) { //8 nodes
-        DofMan = microDomain->giveDofManager(i);
         //global displacements
         displ_x.at(i) = this->giveNode(i)->giveDofWithID(D_u)->giveUnknown(VM_Total, tStep);
         displ_y.at(i) = this->giveNode(i)->giveDofWithID(D_v)->giveUnknown(VM_Total, tStep);

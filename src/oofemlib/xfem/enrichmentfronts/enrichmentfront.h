@@ -38,17 +38,18 @@
 #include "oofemcfg.h"
 #include <vector>
 #include "inputrecord.h"
+#include "xfem/tipinfo.h"
 
 #include <unordered_map>
 
 namespace oofem {
 class XfemManager;
-class TipInfo;
 class DofManager;
 class FloatArray;
 class InputRecord;
 class DynamicInputRecord;
 class GaussPoint;
+enum NodeEnrichmentType : int;
 /*
  * Class EnrichmentFront: describes the edge or tip of an XFEM enrichment.
  * The purpose is to add a different treatment of the front than the "interior"
@@ -81,7 +82,7 @@ public:
      *                      should get special treatment. May also modify the set of nodes
      *                      enriched by the interior enrichment.
      */
-    virtual void MarkNodesAsFront(std :: unordered_map< int, int > &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const std :: vector< TipInfo > &iTipInfo) = 0;
+    virtual void MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo) = 0;
 
     // The number of enrichment functions applied to tip nodes.
     virtual int  giveNumEnrichments(const DofManager &iDMan) const = 0;
@@ -91,7 +92,7 @@ public:
     // Evaluate the enrichment function and its derivative in front nodes.
     virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const = 0;
     virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const = 0;
-    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd) const = 0;
+    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const = 0;
 
     std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
 
@@ -103,18 +104,17 @@ public:
 
     virtual double giveSupportRadius() const = 0;
 
+    const TipInfo &giveTipInfo() const {return mTipInfo;}
+
 protected:
-    std :: vector< TipInfo >mTipInfo;
+    TipInfo mTipInfo;
 
     /**
-     * Keep record of the tips associated with an enriched node:
-     * pair.first -> node index
-     * pair.second-> tip indices
+     * Several enrichment fronts enrich all nodes in the tip element.
+     * This help function accomplishes that.
      */
-    std :: vector< std :: pair< int, std :: vector< int > > >mNodeTipIndices;
+    void MarkTipElementNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan,  const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo);
 
-    void addTipIndexToNode(int iNodeInd, int iTipInd); // Help function for updating mNodeTipIndices
-    void giveNodeTipIndices(int iNodeInd, std :: vector< int > &oTipIndices) const;
 };
 } // end namespace oofem
 

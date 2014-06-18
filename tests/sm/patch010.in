@@ -1,6 +1,7 @@
 patch010.out
 Patch test of Truss2d elements -> temperature load
-LinearStatic nsteps 1
+LinearStatic nsteps 1 nmodules 1
+errorcheck
 domain 2dTruss
 OutputManager tstep_all dofman_all element_all
 ndofman 5 nelem 4 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
@@ -42,14 +43,14 @@ ConstantFunction 1 f(t) 1.0
 #NODE tStep 1 number 4 dof 3 unknown d value 0.0
 #NODE tStep 1 number 5 dof 3 unknown d value 0.0
 ## check element no. 1 strain vector
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 1  value 0.0
-#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 1  value 0.0
-#ELEMENT tStep 1 number 3 gp 1 keyword "strains" component 1  value 0.0
-#ELEMENT tStep 1 number 4 gp 1 keyword "strains" component 1  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword 4 component 1  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword 4 component 1  value 0.0
+#ELEMENT tStep 1 number 4 gp 1 keyword 4 component 1  value 0.0
 ## check element no. 1 stress vector
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 1  value -3.6000e-04
-#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 1  value -3.6000e-04
-#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 1  value -3.6000e-04
-#ELEMENT tStep 1 number 4 gp 1 keyword "stresses" component 1  value -3.6000e-04
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value -3.6000e-04
+#ELEMENT tStep 1 number 2 gp 1 keyword 1 component 1  value -3.6000e-04
+#ELEMENT tStep 1 number 3 gp 1 keyword 1 component 1  value -3.6000e-04
+#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 1  value -3.6000e-04
 ##
 #%END_CHECK%

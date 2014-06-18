@@ -233,8 +233,11 @@ void StokesFlow :: updateYourself(TimeStep *tStep)
 
 int StokesFlow :: forceEquationNumbering(int id)
 {
-    int neq = FluidModel :: forceEquationNumbering(id);
 
+  /*
+    int neq = FluidModel :: forceEquationNumbering(id);
+  */
+    int neq = EngngModel::forceEquationNumbering(id);
     this->equationNumberingCompleted = false;
     if ( this->stiffnessMatrix ) {
         delete this->stiffnessMatrix;
@@ -329,9 +332,7 @@ NumericalMethod *StokesFlow :: giveNumericalMethod(MetaStep *mStep)
 
 TimeStep *StokesFlow :: giveNextStep()
 {
-    if ( previousStep ) {
-        delete previousStep;
-    }
+    delete previousStep;
 
     if ( currentStep == NULL ) {
         int istep = this->giveNumberOfFirstStep();

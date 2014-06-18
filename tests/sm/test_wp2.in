@@ -1,7 +1,8 @@
 test_wp2.out
 "Winkler pasternak model: test of settlement profile, Tria1PlateSubSoil elements"
 LinearStatic nsteps 1 nmodules 1
-vtkxml tstep_all domain_all primvars 1 1
+errorcheck
+#vtkxml tstep_all domain_all primvars 1 1
 domain 2dMindlinPlate
 OutputManager tstep_all dofman_all element_all
 ndofman 24 nelem 22 ncrosssect  1 nmat 1 nbc 1 nic 0 nltf 1

@@ -53,7 +53,7 @@ namespace oofem {
  */
 class QTrPlaneStrain : public NLStructuralElement, public SpatialLocalizerInterface,
 public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface,
-public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface
+public EIPrimaryUnknownMapperInterface
 {
 protected:
     static FEI2dTrQuad interpolation;
@@ -85,22 +85,16 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
-    virtual double DirectErrorIndicatorRCI_giveCharacteristicSize();
-
-    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-                                                                 TimeStep *tStep, const FloatArray &coords,
-                                                                 FloatArray &answer);
+    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                       TimeStep *tStep, const FloatArray &lcoords,
+                                                                       FloatArray &answer);
 
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 

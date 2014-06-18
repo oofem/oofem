@@ -274,7 +274,6 @@ Beam3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type
 {
     if ( type == IST_BeamForceMomentumTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
-        answer.printYourself();
         return 1;
     } else if ( type == IST_BeamStrainCurvatureTensor ) {
         answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
@@ -887,6 +886,14 @@ Beam3d :: giveInterface(InterfaceType interface)
     }
 
     return NULL;
+}
+
+
+void
+Beam3d :: updateLocalNumbering(EntityRenumberingFunctor &f)
+{
+  StructuralElement::updateLocalNumbering(f);
+  this->referenceNode = f(this->referenceNode, ERS_DofManager);
 }
 
 

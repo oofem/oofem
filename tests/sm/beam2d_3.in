@@ -2,7 +2,8 @@ beam2d_3.out
 Homework www sm40 no. 8
 #only momentum influence to the displacements is taken into account
 #beamShearCoeff is artificially enlarged.
-LinearStatic nsteps 1
+LinearStatic nsteps 1 nmodules 1
+errorcheck
 domain 2dBeam
 OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 5 ncrosssect  1 nmat 1 nbc 5 nic 0 nltf 1
@@ -28,31 +29,25 @@ ConstantFunction 1 f(t) 1.
 #
 # exact solution
 #
-#%BEGIN_CHECK% tolerance 1.e-8
+#%BEGIN_CHECK% tolerance 1.e-5
 ## check reactions 
-#REACTION tStep 1 number 1 dof 1 value -2.1742e+01
-#REACTION tStep 1 number 1 dof 3 value -8.7045e+00
-#REACTION tStep 1 number 1 dof 5 value  5.2300e+01
+#REACTION tStep 1 number 1 dof 1 value -2.174224e+01
+#REACTION tStep 1 number 1 dof 3 value -8.704485e+00
+#REACTION tStep 1 number 1 dof 5 value  5.229966e+01
 #REACTION tStep 1 number 5 dof 5 value  0.0
-#REACTION tStep 1 number 6 dof 1 value -8.7578e+00
-#REACTION tStep 1 number 6 dof 3 value -1.2955e+00
-#REACTION tStep 1 number 6 dof 5 value  4.1161e+01
+#REACTION tStep 1 number 6 dof 1 value -8.757762e+00
+#REACTION tStep 1 number 6 dof 3 value -1.295515e+00
+#REACTION tStep 1 number 6 dof 5 value  4.116148e+01
 ##
 ## check all nodes
 #NODE tStep 1 number 3 dof 5 unknown d value  -1.40503831e-03
 #NODE tStep 1 number 3 dof 1 unknown d value   4.61950515e-03
 ## check element no. 1 force vector
-#BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 1  value 8.7045e+00
-#BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 2  value -2.1742e+01
-#BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 3  value 5.2300e+01
-#BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 4  value -8.7045e+00
-#BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 5  value 1.1742e+01
-#BEAM_ELEMENT tStep 1 number 1  keyword "forces" component 6  value -1.8815e+01
+#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 1  value -8.70448470e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 2  value -4.68592395e+01
+#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 3  value 6.75783746e+01
 ## element 5
-#BEAM_ELEMENT tStep 1 number 5  keyword "forces" component 1  value 1.2955e+00
-#BEAM_ELEMENT tStep 1 number 5  keyword "forces" component 2  value -8.7578e+00
-#BEAM_ELEMENT tStep 1 number 5  keyword "forces" component 3  value 0.0
-#BEAM_ELEMENT tStep 1 number 5  keyword "forces" component 4  value -1.2955e+00
-#BEAM_ELEMENT tStep 1 number 5  keyword "forces" component 5  value 8.7578e+00
-#BEAM_ELEMENT tStep 1 number 5  keyword "forces" component 6  value 4.1161e+01
+#ELEMENT tStep 1 number 5 gp 1 keyword 7 component 1  value -1.29551530e+00
+#ELEMENT tStep 1 number 5 gp 1 keyword 7 component 2  value -6.37670945e+01
+#ELEMENT tStep 1 number 5 gp 1 keyword 7 component 3  value 3.50310490e+01
 #%END_CHECK%

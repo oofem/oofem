@@ -709,14 +709,6 @@ RerShell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
 }
 
 
-void
-RerShell :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                      InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
-
 int
 RerShell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {

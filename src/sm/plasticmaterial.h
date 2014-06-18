@@ -248,10 +248,10 @@ protected:
                                          GaussPoint *gp,
                                          TimeStep *tStep);
 
-    virtual void give1dFiberStiffMtrx(FloatMatrix &answer,
-                                      MatResponseMode mode,
-                                      GaussPoint *gp,
-                                      TimeStep *tStep);
+    virtual void giveFiberStiffMtrx(FloatMatrix &answer,
+                                    MatResponseMode mode,
+                                    GaussPoint *gp,
+                                    TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // plasticmaterial_h

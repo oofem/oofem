@@ -82,7 +82,6 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Tr1Darcy_Name; }
     virtual const char *giveClassName() const { return "Tr1Darcy"; }
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
     virtual Interface *giveInterface(InterfaceType interface);
 };
 }

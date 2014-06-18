@@ -93,6 +93,7 @@ public:
 class OOFEM_EXPORT ElementErrorCheckingRule : public ErrorCheckingRule
 {
 protected:
+    int irule;
     int gpnum;
     InternalStateType ist;
     int component;

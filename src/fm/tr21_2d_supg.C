@@ -60,7 +60,7 @@ FEI2dTrLin TR21_2D_SUPG :: pressureInterpolation(1, 2);
 
 
 TR21_2D_SUPG :: TR21_2D_SUPG(int n, Domain *aDomain) :
-    SUPGElement2(n, aDomain)
+    SUPGElement2(n, aDomain), ZZNodalRecoveryModelInterface(this)
     // Constructor.
 {
     numberOfDofMans  = 6;
@@ -981,24 +981,24 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
                 this->computeIntersection(3, inter2, fi);
 
-                edge1 = 1;
-                edge2 = 3;
+                //edge1 = 1;
+                //edge2 = 3;
             } else if ( si == 2 ) {
                 this->computeIntersection(2, inter1, fi);
 
 
                 this->computeIntersection(1, inter2, fi);
 
-                edge1 = 2;
-                edge2 = 1;
+                //edge1 = 2;
+                //edge2 = 1;
             } else if ( si == 3 ) {
                 this->computeIntersection(3, inter1, fi);
 
 
                 this->computeIntersection(2, inter2, fi);
 
-                edge1 = 3;
-                edge2 = 2;
+                //edge1 = 3;
+                //edge2 = 2;
             }
 
             //computing point on zero level set curve: [xM, yM]
@@ -1359,13 +1359,6 @@ TR21_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, i
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);
-}
-
-void
-TR21_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                          InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 

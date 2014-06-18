@@ -1,6 +1,7 @@
 tmpatch43-3.out
 Patch test of linear triangle elements, steady-state solution, prescribed constant heat source
-StationaryProblem nsteps 1 nmodules 0
+StationaryProblem nsteps 1 nmodules 1
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
@@ -28,8 +29,8 @@ ConstantFunction 1 f(t) 1.0
 #NODE tStep 1 number 3 dof 10 unknown d value 8.61849641e+01
 #NODE tStep 1 number 5 dof 10 unknown d value 5.81364689e+01
 #NODE tStep 1 number 6 dof 10 unknown d value 8.38150359e+01
-#ELEMENT tStep 1 number 1 gp 1 keyword "flow" component 1 value -1.1966e+02
-#ELEMENT tStep 1 number 2 gp 1 keyword "flow" component 1 value -1.2034e+02
-#ELEMENT tStep 1 number 3 gp 1 keyword "flow" component 1 value -4.7202e+01
-#ELEMENT tStep 1 number 4 gp 1 keyword "flow" component 1 value -4.2798e+01
+#ELEMENT tStep 1 number 1 gp 1 keyword 56 component 1 value -1.19658828e+02
+#ELEMENT tStep 1 number 2 gp 1 keyword 56 component 1 value -1.20341172e+02
+#ELEMENT tStep 1 number 3 gp 1 keyword 56 component 1 value -4.72023882e+01
+#ELEMENT tStep 1 number 4 gp 1 keyword 56 component 1 value -4.27976118e+01
 #%END_CHECK%

@@ -132,7 +132,7 @@ PlasticMaterial :: giveRealStressVector(FloatArray &answer,
     // tady konec debugovani - strainSpaceHardeningVariables ve statusu neinicializovany
     // to musi udelat material.
 
-    dGamma = Gamma = 0.;
+    Gamma = 0.;
     strSize = strainVectorR.giveSize(); // size of reducedStrain Vector
     totSize = strSize + strainSpaceHardeningVariables.giveSize();
 
@@ -665,12 +665,12 @@ PlasticMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 
 
 void
-PlasticMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mode,
-                                        GaussPoint *gp,
-                                        TimeStep *tStep)
+PlasticMaterial :: giveFiberStiffMtrx(FloatMatrix &answer,
+                                      MatResponseMode mode,
+                                      GaussPoint *gp,
+                                      TimeStep *tStep)
 //
-// returns receiver's 1dFiber
+// returns receiver's Fiber
 // (1dFiber ==> sigma_y = sigma_z = tau_yz = 0.)
 //
 // standard method from Material Class overloaded, because no inversion is needed.

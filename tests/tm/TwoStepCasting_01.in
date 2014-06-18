@@ -14,7 +14,8 @@ MAT1 is cast, MAT2 is cast after 10 hours
 #   |         |        |
 #   1 ------- 3 -------5
 #
-NlTransientTransportProblem nsteps 10 deltat 7200 rtol 0.001 alpha 0.5 nsmax 30 changingProblemSize nmodules 0
+NlTransientTransportProblem nsteps 10 deltat 7200 rtol 0.001 alpha 0.5 nsmax 30 changingProblemSize nmodules 1
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
@@ -40,11 +41,11 @@ UsrDefLTF 2 f(t) 1-h(36000.)
 UsrDefLTF 3 f(t) h(36000.)
 
 #%BEGIN_CHECK%
-#NODE tStep 7.20000000e+03 number 1 dof 10 unknown d value 2.52431928e+01
-#NODE tStep 7.20000000e+03 number 6 dof 10 unknown d value 2.00000000e+01
-#ELEMENT tStep 7.200000e+03 number 2 gp 3 keyword "DoH" component 1 value 0.0
-#NODE tStep 6.48000000e+04 number 1 dof 10 unknown d value 5.73913380e+01
-#NODE tStep 6.48000000e+04 number 6 dof 10 unknown d value 4.21978609e+01
-#ELEMENT tStep 6.48000000e+04 number 1 gp 3 keyword "DoH" component 1 value 0.502450
-#ELEMENT tStep 6.48000000e+04 number 2 gp 3 keyword "DoH" component 1 value 0.363599
+#NODE tStep 2 number 1 dof 10 unknown d value 2.52431928e+01
+#NODE tStep 2 number 6 dof 10 unknown d value 2.00000000e+01
+#ELEMENT tStep 2 number 2 gp 3 keyword 39 component 1 value 0.0
+#NODE tStep 10 number 1 dof 10 unknown d value 5.73913380e+01
+#NODE tStep 10 number 6 dof 10 unknown d value 4.21978609e+01
+#ELEMENT tStep 10 number 1 gp 3 keyword 39 component 1 value 0.502450
+#ELEMENT tStep 10 number 2 gp 3 keyword 39 component 1 value 0.363599
 #%END_CHECK%

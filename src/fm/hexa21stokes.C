@@ -71,7 +71,7 @@ IntArray Hexa21Stokes :: surf_ordering [ 6 ] = {
     {13, 14, 15,  1,  2,  3, 17, 18, 19, 29, 30, 31, 42, 43, 44, 57, 58, 59, 54, 55, 56, 66, 67, 68, 84, 85, 86}
 };
 
-Hexa21Stokes :: Hexa21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
+Hexa21Stokes :: Hexa21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain), SpatialLocalizerInterface(this)
 {
     this->numberOfDofMans = 27;
     this->numberOfGaussPoints = 27;
@@ -390,11 +390,6 @@ Interface *Hexa21Stokes :: giveInterface(InterfaceType it)
     }
 }
 
-int Hexa21Stokes :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
 
 void Hexa21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                            TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
@@ -415,20 +410,6 @@ void Hexa21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(Value
     }
 }
 
-int Hexa21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode, TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
-{
-    bool ok;
-    FloatArray lcoords, n, n_lin;
-    ok = this->computeLocalCoordinates(lcoords, gcoords);
-    if ( !ok ) {
-        answer.clear();
-        return false;
-    }
-
-    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    return true;
-}
-
 void Hexa21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
 {
     answer = {V_u, V_v, V_w, P_f};
@@ -440,11 +421,6 @@ double Hexa21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const 
     FloatArray lcoords = {0.25, 0.25, 0.25};
     this->computeGlobalCoordinates(center, lcoords);
     return center.distance(coords);
-}
-
-void Hexa21Stokes :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 void Hexa21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)

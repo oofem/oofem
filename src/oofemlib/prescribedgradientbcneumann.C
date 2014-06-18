@@ -42,10 +42,13 @@ PrescribedGradientBC(n, d)
     	break;
     }
 
+    mSigmaIds.clear();
     mpSigmaHom = new Node(0, d); // Node number lacks meaning here.
     for ( int i = 0; i < numComponents; i++ ) {
         // Just putting in X_i id-items since they don't matter.
-    	mpSigmaHom->appendDof( new MasterDof( i + 1, mpSigmaHom, ( DofIDItem ) ( d->giveNextFreeDofID() ) ) );
+        int dofId = d->giveNextFreeDofID();
+        mSigmaIds.followedBy(dofId);
+    	mpSigmaHom->appendDof( new MasterDof( i + 1, mpSigmaHom, ( DofIDItem ) ( dofId ) ) );
     }
 
 }
@@ -224,6 +227,11 @@ void PrescribedGradientBCNeumann::giveLocationArrays(std :: vector< IntArray > &
     }
 }
 
+void PrescribedGradientBCNeumann::computeField(FloatArray &sigma, EquationID eid, TimeStep *tStep)
+{
+    mpSigmaHom->giveUnknownVector(sigma, mSigmaIds, VM_Total, tStep);
+}
+
 void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Element *e, int iBndIndex)
 {
     FloatArray normal, n;
@@ -253,7 +261,8 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
 
     if(xfemElInt != NULL && domain->hasXfemManager() ) {
     	std::vector<Line> segments;
-    	xfemElInt->partitionEdgeSegment( iBndIndex, segments );
+    	std::vector<FloatArray> intersecPoints;
+    	xfemElInt->partitionEdgeSegment( iBndIndex, segments, intersecPoints );
         MaterialMode matMode = e->giveMaterialMode();
     	ir = new DiscontinuousSegmentIntegrationRule(1, e, segments, xS, xE);
     	int numPointsPerSeg = 1;

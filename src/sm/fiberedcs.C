@@ -75,6 +75,13 @@ FiberedCrossSection :: giveRealStress_1d(FloatArray &answer, GaussPoint *gp, con
 
 
 void
+FiberedCrossSection :: giveRealStress_Warping(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
+{
+    OOFEM_ERROR("Not supported\n");
+}
+
+
+void
 FiberedCrossSection :: giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
     OOFEM_ERROR("Not supported");

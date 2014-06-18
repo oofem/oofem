@@ -92,6 +92,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void postInitialize();
+    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
     virtual int checkConsistency();
     /**
      * Compute vector of master contribution coefficients - SUMA of contributions == 1.0

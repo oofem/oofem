@@ -109,6 +109,8 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
 
     outputStream          = NULL;
 
+    referenceFileName     = "";
+
     domainList            = new AList< Domain >(0);
     metaStepList          = new AList< MetaStep >(0);
 
@@ -198,22 +200,13 @@ EngngModel :: ~EngngModel()
 // destructor
 {
     if ( previousStep == currentStep ) {
-        if ( previousStep != NULL ) {
-            delete this->currentStep;
-        }
+        delete this->currentStep;
     } else {
-        if ( currentStep != NULL ) {
-            delete currentStep;
-        }
-
-        if ( previousStep != NULL ) {
-            delete previousStep;
-        }
+        delete currentStep;
+        delete previousStep;
     }
 
-    if ( stepWhenIcApply != NULL ) {
-        delete stepWhenIcApply;
-    }
+    delete stepWhenIcApply;
 
     delete domainList;
     delete metaStepList;
@@ -222,13 +215,9 @@ EngngModel :: ~EngngModel()
     delete parallelContextList;
 #endif
 
-    if ( exportModuleManager ) {
-        delete exportModuleManager;
-    }
+    delete exportModuleManager;
 
-    if ( initModuleManager ) {
-        delete initModuleManager;
-    }
+    delete initModuleManager;
 
     // master deletes the context
     if ( master == NULL ) {
@@ -240,30 +229,17 @@ EngngModel :: ~EngngModel()
         fclose(outputStream);
     }
 
-    if ( defaultErrEstimator ) {
-        delete defaultErrEstimator;
-    }
+    delete defaultErrEstimator;
 
 #ifdef __PARALLEL_MODE
     if ( loadBalancingFlag ) {
-        if ( lb ) {
-            delete lb;
-        }
-
-        if ( lbm ) {
-            delete lbm;
-        }
+        delete lb;
+        delete lbm;
     }
 
-    if ( communicator ) {
-        delete communicator;
-    }
-    if ( nonlocCommunicator ) {
-        delete nonlocCommunicator;
-    }
-    if ( commBuff ) {
-        delete commBuff;
-    }
+    delete communicator;
+    delete nonlocCommunicator;
+    delete commBuff;
 #endif
 }
 
@@ -319,6 +295,11 @@ EngngModel :: Instanciate_init(const char *dataOutputFileName, int ndomains)
 int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const char *dataOutputFileName, const char *desc)
 // simple input - only number of steps variable is read
 {
+    OOFEMTXTDataReader *txtReader = dynamic_cast<OOFEMTXTDataReader*> (dr);
+    if(txtReader != NULL) {
+        referenceFileName = std :: string(txtReader->giveDataSourceName());
+    }
+
     bool inputReaderFinish = true;
 
     this->Instanciate_init(dataOutputFileName, this->ndomains);

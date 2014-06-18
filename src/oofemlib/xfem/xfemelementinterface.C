@@ -153,11 +153,15 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 
     int counter = nDofMan * dim;
 
+    int numEnrNode = 0;
+
     for ( int j = 1; j <= nDofMan; j++ ) {
         DofManager *dMan = iEl.giveDofManager(j);
 
         // Compute the total number of enrichments for node j
-        int numEnrNode = XfemElementInterface_giveNumDofManEnrichments(* dMan, * xMan);
+        if( iEl.giveDomain()->hasXfemManager() ) {
+            numEnrNode = XfemElementInterface_giveNumDofManEnrichments(* dMan, * xMan);
+        }
 
         if ( numEnrNode > 0 ) {
             FloatMatrix &BdNode = Bd [ j - 1 ];
@@ -711,7 +715,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
                 oPointPartitions [ 2 * i - 1 ].push_back(tipCoord);
 
                 // Take node
-                oPointPartitions [ 2 * i - 1 ].push_back( * ( element->giveDofManager(i)->giveCoordinates() ) );
+                oPointPartitions [ 2 * i - 1 ].push_back( iTri.giveVertex(i) );
 
                 ////////////////
                 // Take edge center or intersection point
@@ -782,7 +786,7 @@ void XfemElementInterface :: putPointsInCorrectPartition(std :: vector< std :: v
     }
 }
 
-void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< Line > &oSegments)
+void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< Line > &oSegments, std::vector<FloatArray> &oIntersectionPoints)
 {
     const double levelSetTol2 = 1.0e-12;
 
@@ -871,6 +875,9 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< 
                     newSegments.push_back(segA);
                     Line segB(p, seg_xE);
                     newSegments.push_back(segB);
+
+                    // Export the intersection point
+                    oIntersectionPoints.push_back(p);
                 } else   {
                     newSegments.push_back(oSegments [ segInd ]);
                 }
@@ -911,7 +918,7 @@ void XfemElementInterface :: computeDisplacementJump(GaussPoint &iGP, FloatArray
     oJump.beProductOf(iNMatrix, iSolVec);
 }
 
-void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, int iEnrItemIndex)
+void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, int iEnrItemIndex, const std::vector<int> &iTouchingEnrItemIndices)
 {
     const int dim = 2;
 
@@ -952,10 +959,21 @@ void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, 
                 int numEnr = ei->giveNumDofManEnrichments(* dMan);
 
                 std :: vector< double >efJumps;
-                ei->evaluateEnrFuncJumps(efJumps, globalNodeInd, iGP);
+                bool gpLivesOnCurrentCrack = (nodeEiIndices [ i ] == iEnrItemIndex);
+
+                bool gpLivesOnInteractingCrack = false;
+                for( int touchingEIIndex : iTouchingEnrItemIndices ) {
+                    if( nodeEiIndices [ i ] == touchingEIIndex ) {
+                        gpLivesOnInteractingCrack = true;
+                    }
+                }
+
+                if ( nodeEiIndices [ i ] == iEnrItemIndex || gpLivesOnInteractingCrack) {
+                    ei->evaluateEnrFuncJumps(efJumps, globalNodeInd, iGP, gpLivesOnCurrentCrack);
+                }
 
                 for ( int k = 0; k < numEnr; k++ ) {
-                    if ( nodeEiIndices [ i ] == iEnrItemIndex ) {
+                    if ( nodeEiIndices [ i ] == iEnrItemIndex || gpLivesOnInteractingCrack) {
                         NdNode [ ndNodeInd ] = efJumps [ k ] * Nc.at(j);
                     } else {
                         NdNode [ ndNodeInd ] = 0.0;

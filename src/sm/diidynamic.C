@@ -353,8 +353,8 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
     if ( delta != 0 ) {
         for ( int i = 1; i <= neq; i++ ) {
             help.at(i) = delta * ( a1 * previousDisplacementVector.at(i)
-                                  + a4 * velocityVector.at(i)
-                                  + a5 * accelerationVector.at(i)
+                                  + a4 * previousVelocityVector.at(i)
+                                  + a5 * previousAccelerationVector.at(i)
                                   + a6 * previousIncrementOfDisplacement.at(i) );
         }
         this->timesMtrx(help, rhs2, StiffnessMatrix, domain, tStep);

@@ -55,7 +55,7 @@ REGISTER_Element(QWedge);
 
 FEI3dWedgeQuad QWedge :: interpolation;
 
-QWedge :: QWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+QWedge :: QWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
     // Constructor.
 {
     numberOfDofMans = 15;
@@ -376,7 +376,6 @@ QWedge :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-
 void
 QWedge :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
@@ -384,9 +383,4 @@ QWedge :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
     OOFEM_WARNING("IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
-void
-QWedge :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
 } // end namespace oofem

@@ -51,7 +51,7 @@ REGISTER_Element(Tr1_hmt);
 FEI2dTrLin Tr1_ht :: interp(1, 2);
 
 Tr1_ht :: Tr1_ht(int n, Domain *aDomain) :
-    TransportElement(n, aDomain, HeatTransferEM)
+    TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this)
     // Constructor.
 {
     numberOfDofMans  = 3;
@@ -138,13 +138,6 @@ Tr1_ht :: giveInterface(InterfaceType interface)
     }
 
     return NULL;
-}
-
-int
-Tr1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
 }
 
 

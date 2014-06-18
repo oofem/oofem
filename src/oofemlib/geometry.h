@@ -108,6 +108,9 @@ public:
     inline const FloatArray &giveVertex(int n) const { return mVertices [ n - 1 ]; }
 
     void setVertex(FloatArray *vertex);
+    void setVertices(const std::vector<FloatArray> &iVertices) {mVertices = iVertices;}
+
+    void removeDuplicatePoints(const double &iTolSquare);
 
     void insertVertexFront(const FloatArray &iP) { mVertices.insert(mVertices.begin(), iP); }
     void insertVertexBack(const FloatArray &iP) { mVertices.push_back(iP); }
@@ -257,6 +260,8 @@ public:
     double computeLength() const;
 
     virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const;
+    void giveNormal(FloatArray &oNormal, const double &iArcPosition) const;
+    void giveTangent(FloatArray &oTangent, const double &iArcPosition) const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
@@ -269,6 +274,9 @@ public:
     virtual bool intersects(Element *element);
     virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints);
     virtual void computeIntersectionPoints(Line *l, std :: vector< FloatArray > &oIntersectionPoints);
+    void computeIntersectionPoints(const PolygonLine &iPolygonLine, std :: vector< FloatArray > &oIntersectionPoints) const;
+    void computeIntersectionPoints(const FloatArray &iXStart, const FloatArray &iXEnd, std :: vector< FloatArray > &oIntersectionPoints) const;
+
     virtual int computeNumberOfIntersectionPoints(Element *element);
     virtual bool isOutside(BasicGeometry *bg);
     virtual bool isInside(Element *element);

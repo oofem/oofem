@@ -619,115 +619,73 @@ add_custom_target (
 #######################################################################
 ######################## Tests ########################################
 #######################################################################
-# This isn't perfect/elegant, partly due to the how tests work.
-# TODO: Would like to run oofem from the binary dir (avoids creating *.out files in the source dir)
-# unfortunately, that doesn't work for some tests that require sub-files using relative paths.
-enable_testing ()
-#set (MEMORYCHECK_COMMAND "${CMAKE_CURRENT_BINARY_DIR}/memcheckhelper.py")
-include (CTest)
-
 set (oofem_TEST_DIR "${oofem_SOURCE_DIR}/tests/")
 set (oofem_cmd  $<TARGET_FILE:oofem>)
-set (test_cmd  ${PYTHON_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/testhelper.py")
-set (extractor_cmd "${oofem_SOURCE_DIR}/tools/extractor.py")
+file(TO_CMAKE_PATH "${oofem_TEST_DIR}/valgrind.supp" MEMORYCHECK_SUPPRESSIONS_FILE)
+include (CTest)
 
-# Helper script (perhaps one could do without this one)
-# Some input files requier other files, so I didn't feel that there were any option to just running them in the main tree.
-file (WRITE ${CMAKE_CURRENT_BINARY_DIR}/testhelper.py
-"import subprocess,sys,glob
-if sys.argv[3] == 'p':
-    files = glob.glob(sys.argv[2]+'.[0-9]*')
-    command = ['mpirun','-np',str(len(files)),sys.argv[1],'-p','-f',sys.argv[2],'-l','2','-ksp_type','cg']
-else:
-    files = [sys.argv[2]]
-    command = [sys.argv[1],'-f',sys.argv[2],'-l','2']
-command.extend(sys.argv[4:])
-print('Executing: ', command)
-if subprocess.call(command):
-    exit(1)
-else:
-    for f in files:
-        python=\"${PYTHON_EXECUTABLE}\"
-        extractor = \"${extractor_cmd}\"
-        print('Executing: ', [python, extractor, '-f', f, '-c'])
-        if subprocess.call([python, extractor, '-f', f, '-c']):
-            exit(2)
-exit(0)
-")
+#set (CTEST_MEMORYCHECK_SUPPRESSIONS_FILE ${oofem_TEST_DIR}/tests/valgrind.supp)
 
 if (USE_PARALLEL)
     set (par_dir ${oofem_TEST_DIR}/partests)
     file (GLOB parallel_tests RELATIVE "${par_dir}" "${par_dir}/*/")
     foreach (case ${parallel_tests})
-        add_test (NAME "partest_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND ${test_cmd} ${oofem_cmd} ${case}.oofem.in "p")
-        #file (GLOB files "${par_dir}/${case}/${case}.oofem.in.*")
-        #list (LENGTH files num_files)
-        #add_test (NAME "partest_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND "mpirun" "-np" ${num_files} ${oofem_cmd} "-p" "-f" "${case}.oofem.in" "-l" "2")
-        #add_test (NAME "parextr_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND ${PYTHON_EXECUTABLE} ${extractor_cmd} "-p" "-f" "${case}.oofem.in" "-c")
-        #set_tests_properties ("parextr_${case}" PROPERTIES DEPENDS "partest_${case}")
-        #list (APPEND CTEST_CUSTOM_MEMCHECK_IGNORE "parextr_${case}")
+        file (GLOB files "${par_dir}/${case}/${case}.oofem.in.*")
+        list (LENGTH files num_files)
+        add_test (NAME "partest_${case}" WORKING_DIRECTORY ${par_dir}/${case} COMMAND "mpirun" "-np" ${num_files} ${oofem_cmd} "-p" "-f" ${case}.oofem.in "-ksp_type" "cg")
     endforeach (case)
     # partest_brazil_2d_nl7 requires more time on testing server than default 1500
     set_tests_properties(partest_brazil_2d_nl7 PROPERTIES TIMEOUT 2500)
 endif ()
+
 # Sequential test cases
-file (GLOB sm_tests RELATIVE "${oofem_TEST_DIR}/sm" "${oofem_TEST_DIR}/sm/*.in")
-file (GLOB fm_tests RELATIVE "${oofem_TEST_DIR}/fm" "${oofem_TEST_DIR}/fm/*.in")
-file (GLOB tm_tests RELATIVE "${oofem_TEST_DIR}/tm" "${oofem_TEST_DIR}/tm/*.in")
-file (GLOB tmsm_tests RELATIVE "${oofem_TEST_DIR}/tmsm" "${oofem_TEST_DIR}/tmsm/*.in")
-file (GLOB tmfm_tests RELATIVE "${oofem_TEST_DIR}/tmfm" "${oofem_TEST_DIR}/tmfm/*.in")
-file (GLOB tmcemhyd_tests RELATIVE "${oofem_TEST_DIR}/tmcemhyd" "${oofem_TEST_DIR}/tmcemhyd/*.in")
-foreach (case ${sm_tests})
-    add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
-    # Separate commands so that we can use valgrind and gcov versions
-    #add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND ${oofem_cmd} "-f" ${case} "-l" "2")
-    #add_test (NAME "extr_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND ${PYTHON_EXECUTABLE} ${extractor_cmd} "-f" ${case} "-c")
-    #set_tests_properties ("extr_${case}" PROPERTIES DEPENDS "test_${case}")
-    #list (APPEND CTEST_CUSTOM_MEMCHECK_IGNORE "extr_${case}")
-endforeach (case)
+if (USE_SM)
+    file (GLOB sm_tests RELATIVE "${oofem_TEST_DIR}/sm" "${oofem_TEST_DIR}/sm/*.in")
+    foreach (case ${sm_tests})
+        add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/sm COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
+endif ()
+
 if (USE_FM)
-  foreach (case ${fm_tests})
-    add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/fm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
-  endforeach (case)
+    file (GLOB fm_tests RELATIVE "${oofem_TEST_DIR}/fm" "${oofem_TEST_DIR}/fm/*.in")
+    foreach (case ${fm_tests})
+        add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/fm COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
 endif()
 
 if (USE_TM)
-  foreach (case ${tm_tests})
-    add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
-  endforeach (case)
+    file (GLOB tm_tests RELATIVE "${oofem_TEST_DIR}/tm" "${oofem_TEST_DIR}/tm/*.in")
+    foreach (case ${tm_tests})
+        add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tm COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
 endif()
 
 if (USE_TM AND USE_SM)
-  foreach (case ${tmsm_tests})
-    add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tmsm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
-  endforeach (case)
+    file (GLOB tmsm_tests RELATIVE "${oofem_TEST_DIR}/tmsm" "${oofem_TEST_DIR}/tmsm/*.in")
+    foreach (case ${tmsm_tests})
+        add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tmsm COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
 endif()
 
 if (USE_TM AND USE_FM)
-  foreach (case ${tmfm_tests})
-    add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tmfm COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
-  endforeach (case)
+    file (GLOB tmfm_tests RELATIVE "${oofem_TEST_DIR}/tmfm" "${oofem_TEST_DIR}/tmfm/*.in")
+    foreach (case ${tmfm_tests})
+        add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tmfm COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
 endif()
 
-
 if (USE_TM AND USE_CEMHYD)
-  foreach (case ${tmcemhyd_tests})
-    add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tmcemhyd COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
-  endforeach (case)
+    file (GLOB tmcemhyd_tests RELATIVE "${oofem_TEST_DIR}/tmcemhyd" "${oofem_TEST_DIR}/tmcemhyd/*.in")
+    foreach (case ${tmcemhyd_tests})
+        add_test (NAME "test_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/tmcemhyd COMMAND ${oofem_cmd} "-f" ${case})
+    endforeach (case)
 endif()
 
 # Benchmarks
 file (GLOB benchmarks RELATIVE "${oofem_TEST_DIR}/benchmark" "${oofem_TEST_DIR}/benchmark/*.in")
 foreach (case ${benchmarks})
-    add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/benchmark COMMAND ${test_cmd} ${oofem_cmd} ${case} "s")
+    add_test (NAME "benchmark_${case}" WORKING_DIRECTORY ${oofem_TEST_DIR}/benchmark COMMAND ${oofem_cmd} "-f" ${case})
 endforeach (case)
-
-
-#file (GLOB par_tests RELATIVE "${oofem_TEST_DIR}/tests/partests" "${oofem_SOURCE_DIR}/tests/tm/*.in.*")
-#runandcheck ("${oofem_TEST_DIR}/sm" ${case})
-#add_test (test-${case} ${CMAKE_COMMAND} -E runcheckclean ${oofem_TEST_DIR} "sm" ${case} )
-#add_test (test-${case} "${EXECUTABLE_OUTPUT_PATH}/oofem" "-f" ${case} "-l" "2")
-#add_test (test-${case}-check "python" "${oofem_SOURCE_DIR}/tools/extractor.py" "-f" ${case} "-c")
 
 # Custom targets for test and benchmarks (which can conveniently be accessed from IDEs)
 
@@ -751,7 +709,6 @@ else ()
         WORKING_DIRECTORY ${oofem_BINARY_DIR}
         )
 endif ()
-    
 
 
 #######################################################################
@@ -789,15 +746,8 @@ set (CPACK_SOURCE_IGNORE_FILES "~$;/build/;tags;cscope.*;.*\\\\.out$;\\\\.out\\\
 ### deb package options
 set (CPACK_DEBIAN_PACKAGE_MAINTAINER "Mikael Öhman <micketeer@gmail.com>")
 set (CPACK_DEBIAN_PACKAGE_SECTION "Mathematics")
-if (CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
-else ()
-    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "i386") # Crude assumption. (Why can't cmake figure this out itself?)
-endif ()
 # autogenerate dependency information
 set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-# Comma separated list here is really bothersome.
-#set (CPACK_DEBIAN_PACKAGE_DEPENDS "libpetsc3.3 (>=3.3), libslepc3.3 (>=3.3), libparmetis3.1 (>=3.1), libvtk5.8 (>=5.8), liblapack3 (>=3.2), libtriangle-1.6 (>=1.6)")
 
 set(CPACK_DEBIAN_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}.${CPACK_PACKAGE_VERSION_PATCH}+sid1")
 

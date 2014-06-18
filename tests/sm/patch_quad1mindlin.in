@@ -1,6 +1,7 @@
 patch_quad1mindlin.out
 "Complex Patch test of quad1mindlin elements, four cases pure bending in x, and y, twist, and shear in one"
-LinearStatic nsteps 1
+LinearStatic nsteps 1 nmodules 1
+errorcheck
 domain 2dMindlinPlate
 OutputManager tstep_all dofman_all element_all
 ndofman 20 nelem 5 ncrosssect  1 nmat 1 nbc 5 nic 0 nltf 1
@@ -53,128 +54,128 @@ ConstantFunction 1 f(t) 1.0
 #REACTION tStep 1 number 1 dof 4 value 2.5
 #REACTION tStep 1 number 2 dof 3 value 0.0
 #REACTION tStep 1 number 2 dof 4 value 2.5
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 4  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 5  value 34.722
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 6  value 0.0
-#ELEMENT tStep 1 number 1 gp 2 keyword "strains" component 4  value 0.0
-#ELEMENT tStep 1 number 1 gp 2 keyword "strains" component 5  value 34.722
-#ELEMENT tStep 1 number 1 gp 2 keyword "strains" component 6  value 0.0
-#ELEMENT tStep 1 number 1 gp 3 keyword "strains" component 4  value 0.0
-#ELEMENT tStep 1 number 1 gp 3 keyword "strains" component 5  value 34.722
-#ELEMENT tStep 1 number 1 gp 3 keyword "strains" component 6  value 0.0
-#ELEMENT tStep 1 number 1 gp 4 keyword "strains" component 4  value 0.0
-#ELEMENT tStep 1 number 1 gp 4 keyword "strains" component 5  value 34.722
-#ELEMENT tStep 1 number 1 gp 4 keyword "strains" component 6  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 4  value 3.1250e-01
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 5  value 1.2500e+0
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 6  value 0.0
-#ELEMENT tStep 1 number 1 gp 2 keyword "stresses" component 4  value 3.1250e-01
-#ELEMENT tStep 1 number 1 gp 2 keyword "stresses" component 5  value 1.2500e+0
-#ELEMENT tStep 1 number 1 gp 2 keyword "stresses" component 6  value 0.0
-#ELEMENT tStep 1 number 1 gp 3 keyword "stresses" component 4  value 3.1250e-01
-#ELEMENT tStep 1 number 1 gp 3 keyword "stresses" component 5  value 1.2500e+0
-#ELEMENT tStep 1 number 1 gp 3 keyword "stresses" component 6  value 0.0
-#ELEMENT tStep 1 number 1 gp 4 keyword "stresses" component 4  value 3.1250e-01
-#ELEMENT tStep 1 number 1 gp 4 keyword "stresses" component 5  value 1.2500e+0
-#ELEMENT tStep 1 number 1 gp 4 keyword "stresses" component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 5  value 34.722
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 2 keyword 4 component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 2 keyword 4 component 5  value 34.722
+#ELEMENT tStep 1 number 1 gp 2 keyword 4 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 3 keyword 4 component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 3 keyword 4 component 5  value 34.722
+#ELEMENT tStep 1 number 1 gp 3 keyword 4 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 4 keyword 4 component 4  value 0.0
+#ELEMENT tStep 1 number 1 gp 4 keyword 4 component 5  value 34.722
+#ELEMENT tStep 1 number 1 gp 4 keyword 4 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 4  value 3.1250e-01
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 5  value 1.2500e+0
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 2 keyword 1 component 4  value 3.1250e-01
+#ELEMENT tStep 1 number 1 gp 2 keyword 1 component 5  value 1.2500e+0
+#ELEMENT tStep 1 number 1 gp 2 keyword 1 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 3 keyword 1 component 4  value 3.1250e-01
+#ELEMENT tStep 1 number 1 gp 3 keyword 1 component 5  value 1.2500e+0
+#ELEMENT tStep 1 number 1 gp 3 keyword 1 component 6  value 0.0
+#ELEMENT tStep 1 number 1 gp 4 keyword 1 component 4  value 3.1250e-01
+#ELEMENT tStep 1 number 1 gp 4 keyword 1 component 5  value 1.2500e+0
+#ELEMENT tStep 1 number 1 gp 4 keyword 1 component 6  value 0.0
 ## pure bending along y axis
 #REACTION tStep 1 number 11 dof 3 value 0.0
 #REACTION tStep 1 number 11 dof 5 value 2.5
 #REACTION tStep 1 number 14 dof 3 value 0.0
 #REACTION tStep 1 number 14 dof 5 value 2.5
-#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 4  value -34.722
-#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 5  value 0.0
-#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 6  value 0.0
-#ELEMENT tStep 1 number 2 gp 2 keyword "strains" component 4  value -34.722
-#ELEMENT tStep 1 number 2 gp 2 keyword "strains" component 5  value 0.0
-#ELEMENT tStep 1 number 2 gp 2 keyword "strains" component 6  value 0.0
-#ELEMENT tStep 1 number 2 gp 3 keyword "strains" component 4  value -34.722
-#ELEMENT tStep 1 number 2 gp 3 keyword "strains" component 5  value 0.0
-#ELEMENT tStep 1 number 2 gp 3 keyword "strains" component 6  value 0.0
-#ELEMENT tStep 1 number 2 gp 4 keyword "strains" component 4  value -34.722
-#ELEMENT tStep 1 number 2 gp 4 keyword "strains" component 5  value 0.0
-#ELEMENT tStep 1 number 2 gp 4 keyword "strains" component 6  value 0.0
-#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 4  value -1.2500e+00
-#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 5  value -3.1250e-01
-#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 6  value 0.0
-#ELEMENT tStep 1 number 2 gp 2 keyword "stresses" component 4  value -1.2500e+00
-#ELEMENT tStep 1 number 2 gp 2 keyword "stresses" component 5  value -3.1250e-01
-#ELEMENT tStep 1 number 2 gp 2 keyword "stresses" component 6  value 0.0
-#ELEMENT tStep 1 number 2 gp 3 keyword "stresses" component 4  value -1.2500e+00
-#ELEMENT tStep 1 number 2 gp 3 keyword "stresses" component 5  value -3.1250e-01
-#ELEMENT tStep 1 number 2 gp 3 keyword "stresses" component 6  value 0.0
-#ELEMENT tStep 1 number 2 gp 4 keyword "stresses" component 4  value -1.2500e+00
-#ELEMENT tStep 1 number 2 gp 4 keyword "stresses" component 5  value -3.1250e-01
-#ELEMENT tStep 1 number 2 gp 4 keyword "stresses" component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword 4 component 4  value -34.722
+#ELEMENT tStep 1 number 2 gp 1 keyword 4 component 5  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword 4 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 4 component 4  value -34.722
+#ELEMENT tStep 1 number 2 gp 2 keyword 4 component 5  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 4 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 3 keyword 4 component 4  value -34.722
+#ELEMENT tStep 1 number 2 gp 3 keyword 4 component 5  value 0.0
+#ELEMENT tStep 1 number 2 gp 3 keyword 4 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 4 keyword 4 component 4  value -34.722
+#ELEMENT tStep 1 number 2 gp 4 keyword 4 component 5  value 0.0
+#ELEMENT tStep 1 number 2 gp 4 keyword 4 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword 1 component 4  value -1.2500e+00
+#ELEMENT tStep 1 number 2 gp 1 keyword 1 component 5  value -3.1250e-01
+#ELEMENT tStep 1 number 2 gp 1 keyword 1 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 2 keyword 1 component 4  value -1.2500e+00
+#ELEMENT tStep 1 number 2 gp 2 keyword 1 component 5  value -3.1250e-01
+#ELEMENT tStep 1 number 2 gp 2 keyword 1 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 3 keyword 1 component 4  value -1.2500e+00
+#ELEMENT tStep 1 number 2 gp 3 keyword 1 component 5  value -3.1250e-01
+#ELEMENT tStep 1 number 2 gp 3 keyword 1 component 6  value 0.0
+#ELEMENT tStep 1 number 2 gp 4 keyword 1 component 4  value -1.2500e+00
+#ELEMENT tStep 1 number 2 gp 4 keyword 1 component 5  value -3.1250e-01
+#ELEMENT tStep 1 number 2 gp 4 keyword 1 component 6  value 0.0
 ## pure twist
 #REACTION tStep 1 number 21 dof 3 value 0.5
 #REACTION tStep 1 number 22 dof 3 value -0.5
 #REACTION tStep 1 number 24 dof 3 value -0.5
-#ELEMENT tStep 1 number 3 gp 1 keyword "strains" component 4  value 0.0
-#ELEMENT tStep 1 number 3 gp 1 keyword "strains" component 5  value 0.0
-#ELEMENT tStep 1 number 3 gp 1 keyword "strains" component 6  value -18.51852
-#ELEMENT tStep 1 number 3 gp 2 keyword "strains" component 4  value 0.0
-#ELEMENT tStep 1 number 3 gp 2 keyword "strains" component 5  value 0.0
-#ELEMENT tStep 1 number 3 gp 2 keyword "strains" component 6  value -18.51852
-#ELEMENT tStep 1 number 3 gp 3 keyword "strains" component 4  value 0.0
-#ELEMENT tStep 1 number 3 gp 3 keyword "strains" component 5  value 0.0
-#ELEMENT tStep 1 number 3 gp 3 keyword "strains" component 6  value -18.51852
-#ELEMENT tStep 1 number 3 gp 4 keyword "strains" component 4  value 0.0
-#ELEMENT tStep 1 number 3 gp 4 keyword "strains" component 5  value 0.0
-#ELEMENT tStep 1 number 3 gp 4 keyword "strains" component 6  value -18.51852
-#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 4  value 0.0
-#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 5  value 0.0
-#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 6  value -0.25
-#ELEMENT tStep 1 number 3 gp 2 keyword "stresses" component 4  value 0.0
-#ELEMENT tStep 1 number 3 gp 2 keyword "stresses" component 5  value 0.0
-#ELEMENT tStep 1 number 3 gp 2 keyword "stresses" component 6  value -0.25
-#ELEMENT tStep 1 number 3 gp 3 keyword "stresses" component 4  value 0.0
-#ELEMENT tStep 1 number 3 gp 3 keyword "stresses" component 5  value 0.0
-#ELEMENT tStep 1 number 3 gp 3 keyword "stresses" component 6  value -0.25
-#ELEMENT tStep 1 number 3 gp 4 keyword "stresses" component 4  value 0.0
-#ELEMENT tStep 1 number 3 gp 4 keyword "stresses" component 5  value 0.0
-#ELEMENT tStep 1 number 3 gp 4 keyword "stresses" component 6  value -0.25
-# shear x
-#ELEMENT tStep 1 number 4 gp 1 keyword "strains" component 7  value 1.6667e-01
-#ELEMENT tStep 1 number 4 gp 1 keyword "strains" component 8  value 0.0
-#ELEMENT tStep 1 number 4 gp 2 keyword "strains" component 7  value 1.6667e-01
-#ELEMENT tStep 1 number 4 gp 2 keyword "strains" component 8  value 0.0
-#ELEMENT tStep 1 number 4 gp 3 keyword "strains" component 7  value 1.6667e-01
-#ELEMENT tStep 1 number 4 gp 3 keyword "strains" component 8  value 0.0
-#ELEMENT tStep 1 number 4 gp 4 keyword "strains" component 7  value 1.6667e-01
-#ELEMENT tStep 1 number 4 gp 4 keyword "strains" component 8  value 0.0
-#ELEMENT tStep 1 number 4 gp 1 keyword "stresses" component 7  value 0.25
-#ELEMENT tStep 1 number 4 gp 1 keyword "stresses" component 8  value 0.0
-#ELEMENT tStep 1 number 4 gp 2 keyword "stresses" component 7  value 0.25
-#ELEMENT tStep 1 number 4 gp 2 keyword "stresses" component 8  value 0.0
-#ELEMENT tStep 1 number 4 gp 3 keyword "stresses" component 7  value 0.25
-#ELEMENT tStep 1 number 4 gp 3 keyword "stresses" component 8  value 0.0
-#ELEMENT tStep 1 number 4 gp 4 keyword "stresses" component 7  value 0.25
-#ELEMENT tStep 1 number 4 gp 4 keyword "stresses" component 8  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword 4 component 4  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword 4 component 5  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword 4 component 6  value -18.51852
+#ELEMENT tStep 1 number 3 gp 2 keyword 4 component 4  value 0.0
+#ELEMENT tStep 1 number 3 gp 2 keyword 4 component 5  value 0.0
+#ELEMENT tStep 1 number 3 gp 2 keyword 4 component 6  value -18.51852
+#ELEMENT tStep 1 number 3 gp 3 keyword 4 component 4  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 4 component 5  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 4 component 6  value -18.51852
+#ELEMENT tStep 1 number 3 gp 4 keyword 4 component 4  value 0.0
+#ELEMENT tStep 1 number 3 gp 4 keyword 4 component 5  value 0.0
+#ELEMENT tStep 1 number 3 gp 4 keyword 4 component 6  value -18.51852
+#ELEMENT tStep 1 number 3 gp 1 keyword 1 component 4  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword 1 component 5  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword 1 component 6  value -0.25
+#ELEMENT tStep 1 number 3 gp 2 keyword 1 component 4  value 0.0
+#ELEMENT tStep 1 number 3 gp 2 keyword 1 component 5  value 0.0
+#ELEMENT tStep 1 number 3 gp 2 keyword 1 component 6  value -0.25
+#ELEMENT tStep 1 number 3 gp 3 keyword 1 component 4  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 1 component 5  value 0.0
+#ELEMENT tStep 1 number 3 gp 3 keyword 1 component 6  value -0.25
+#ELEMENT tStep 1 number 3 gp 4 keyword 1 component 4  value 0.0
+#ELEMENT tStep 1 number 3 gp 4 keyword 1 component 5  value 0.0
+#ELEMENT tStep 1 number 3 gp 4 keyword 1 component 6  value -0.25
+## shear x
+#ELEMENT tStep 1 number 4 gp 1 keyword 4 component 7  value 1.6667e-01
+#ELEMENT tStep 1 number 4 gp 1 keyword 4 component 8  value 0.0
+#ELEMENT tStep 1 number 4 gp 2 keyword 4 component 7  value 1.6667e-01
+#ELEMENT tStep 1 number 4 gp 2 keyword 4 component 8  value 0.0
+#ELEMENT tStep 1 number 4 gp 3 keyword 4 component 7  value 1.6667e-01
+#ELEMENT tStep 1 number 4 gp 3 keyword 4 component 8  value 0.0
+#ELEMENT tStep 1 number 4 gp 4 keyword 4 component 7  value 1.6667e-01
+#ELEMENT tStep 1 number 4 gp 4 keyword 4 component 8  value 0.0
+#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 7  value 0.25
+#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 8  value 0.0
+#ELEMENT tStep 1 number 4 gp 2 keyword 1 component 7  value 0.25
+#ELEMENT tStep 1 number 4 gp 2 keyword 1 component 8  value 0.0
+#ELEMENT tStep 1 number 4 gp 3 keyword 1 component 7  value 0.25
+#ELEMENT tStep 1 number 4 gp 3 keyword 1 component 8  value 0.0
+#ELEMENT tStep 1 number 4 gp 4 keyword 1 component 7  value 0.25
+#ELEMENT tStep 1 number 4 gp 4 keyword 1 component 8  value 0.0
 #REACTION tStep 1 number 31 dof 3 value -0.5
 #REACTION tStep 1 number 31 dof 5 value  2.0
 #REACTION tStep 1 number 34 dof 3 value -0.5
-#REACTION tStep 1 number 31 dof 5 value  2.0
-#shear y
-#ELEMENT tStep 1 number 5 gp 1 keyword "strains" component 8  value 1.6667e-01
-#ELEMENT tStep 1 number 5 gp 1 keyword "strains" component 7  value 0.0
-#ELEMENT tStep 1 number 5 gp 2 keyword "strains" component 8  value 1.6667e-01
-#ELEMENT tStep 1 number 5 gp 2 keyword "strains" component 7  value 0.0
-#ELEMENT tStep 1 number 5 gp 3 keyword "strains" component 8  value 1.6667e-01
-#ELEMENT tStep 1 number 5 gp 3 keyword "strains" component 7  value 0.0
-#ELEMENT tStep 1 number 5 gp 4 keyword "strains" component 8  value 1.6667e-01
-#ELEMENT tStep 1 number 5 gp 4 keyword "strains" component 7  value 0.0
-#ELEMENT tStep 1 number 5 gp 1 keyword "stresses" component 8  value 0.25
-#ELEMENT tStep 1 number 5 gp 1 keyword "stresses" component 7  value 0.0
-#ELEMENT tStep 1 number 5 gp 2 keyword "stresses" component 8  value 0.25
-#ELEMENT tStep 1 number 5 gp 2 keyword "stresses" component 7  value 0.0
-#ELEMENT tStep 1 number 5 gp 3 keyword "stresses" component 8  value 0.25
-#ELEMENT tStep 1 number 5 gp 3 keyword "stresses" component 7  value 0.0
-#ELEMENT tStep 1 number 5 gp 4 keyword "stresses" component 8  value 0.25
-#ELEMENT tStep 1 number 5 gp 4 keyword "stresses" component 7  value 0.0
+#REACTION tStep 1 number 34 dof 5 value  2.0
+## shear y
+#ELEMENT tStep 1 number 5 gp 1 keyword 4 component 8  value 1.6667e-01
+#ELEMENT tStep 1 number 5 gp 1 keyword 4 component 7  value 0.0
+#ELEMENT tStep 1 number 5 gp 2 keyword 4 component 8  value 1.6667e-01
+#ELEMENT tStep 1 number 5 gp 2 keyword 4 component 7  value 0.0
+#ELEMENT tStep 1 number 5 gp 3 keyword 4 component 8  value 1.6667e-01
+#ELEMENT tStep 1 number 5 gp 3 keyword 4 component 7  value 0.0
+#ELEMENT tStep 1 number 5 gp 4 keyword 4 component 8  value 1.6667e-01
+#ELEMENT tStep 1 number 5 gp 4 keyword 4 component 7  value 0.0
+#ELEMENT tStep 1 number 5 gp 1 keyword 1 component 8  value 0.25
+#ELEMENT tStep 1 number 5 gp 1 keyword 1 component 7  value 0.0
+#ELEMENT tStep 1 number 5 gp 2 keyword 1 component 8  value 0.25
+#ELEMENT tStep 1 number 5 gp 2 keyword 1 component 7  value 0.0
+#ELEMENT tStep 1 number 5 gp 3 keyword 1 component 8  value 0.25
+#ELEMENT tStep 1 number 5 gp 3 keyword 1 component 7  value 0.0
+#ELEMENT tStep 1 number 5 gp 4 keyword 1 component 8  value 0.25
+#ELEMENT tStep 1 number 5 gp 4 keyword 1 component 7  value 0.0
 #REACTION tStep 1 number 41 dof 3 value -0.5
 #REACTION tStep 1 number 41 dof 4 value -2.0
 #REACTION tStep 1 number 42 dof 3 value -0.5
-#REACTION tStep 1 number 41 dof 4 value -2.0
+#REACTION tStep 1 number 42 dof 4 value -2.0
 #%END_CHECK%
 #

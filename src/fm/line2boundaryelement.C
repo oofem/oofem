@@ -44,7 +44,7 @@ REGISTER_Element(Line2BoundaryElement);
 
 FEI2dLineQuad Line2BoundaryElement :: fei(1, 2);
 
-Line2BoundaryElement :: Line2BoundaryElement(int n, Domain *aDomain) : FMElement(n, aDomain)
+Line2BoundaryElement :: Line2BoundaryElement(int n, Domain *aDomain) : FMElement(n, aDomain), SpatialLocalizerInterface(this)
 {
     this->numberOfDofMans = 3;
     integrationRulesArray.resize( 0 );
@@ -84,20 +84,6 @@ Interface *Line2BoundaryElement :: giveInterface(InterfaceType it)
 double Line2BoundaryElement :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
     return this->giveNode(3)->giveCoordinates()->distance(coords);
-}
-
-int Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                             TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
-{
-    FloatArray lcoords, closest;
-    double distance = this->SpatialLocalizerI_giveClosestPoint(lcoords, closest, gcoords);
-    if ( distance < 0 ) {
-        answer.clear();
-        return false;
-    }
-
-    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    return true;
 }
 
 void Line2BoundaryElement :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)

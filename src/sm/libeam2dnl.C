@@ -373,6 +373,23 @@ double LIBeam2dNL :: computeVolumeAround(GaussPoint *gp)
 }
 
 
+int
+LIBeam2dNL :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    ///@todo This should be a common inheritance for all 3d beams (and a similar one for 2D beams) 
+    /// to support all the sensible moment/force tensors. 
+    if ( type == IST_BeamForceMomentumTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        return 1;
+    } else if ( type == IST_BeamStrainCurvatureTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        return 1;
+    } else {
+        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+    }
+}
+
+
 void
 LIBeam2dNL :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 //

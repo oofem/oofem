@@ -1,6 +1,7 @@
 tmpatch11dtf.out
 Patch test of Quad1_ht elements 
-nltransienttransportproblem nsteps 20 deltaTfunction 2 rtol 0.001 alpha 0.5 nsmax 300 nmodules 0
+nltransienttransportproblem nsteps 20 deltaTfunction 2 rtol 0.001 alpha 0.5 nsmax 300 nmodules 1
+errorcheck
 #NonStationaryProblem nsteps 20 deltaT 6000. alpha 0.5 nmodules 1
 #vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 1
 domain HeatTransfer
@@ -21,7 +22,6 @@ BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 15.0
 ConstantFunction 1 f(t) 1.0
 UsrDefLTF 2 f(t) 2^(t-2)
 #%BEGIN_CHECK%
-#TIME
-#NODE tStep 5.24287000e+05 number 3 dof 10 unknown d value 1.13374890e+00
-#ELEMENT tStep 5.24287000e+05 number 1 gp 1 keyword "flow" component 1 value -5.6687e-01
+#NODE tStep 20 number 3 dof 10 unknown d value 1.13374890e+00
+#ELEMENT tStep 20 number 1 gp 1 keyword 56 component 1 value -5.66874452e-01
 #%END_CHECK%

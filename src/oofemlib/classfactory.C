@@ -375,6 +375,16 @@ bool ClassFactory :: registerGeometry( const char *name, BasicGeometry * ( *crea
     return true;
 }
 
+XfemManager *ClassFactory :: createXfemManager(const char *name, Domain *domain)
+{
+    return ( xManList.count(name) == 1 ) ? xManList [ conv2lower(name) ](domain) : NULL;
+}
+bool ClassFactory :: registerXfemManager( const char *name, XfemManager * ( *creator )( Domain * ) )
+{
+    xManList [ conv2lower(name) ] = creator;
+    return true;
+}
+
 
 // Failure module:
 

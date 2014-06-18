@@ -1,6 +1,7 @@
 slavedofs.out
 Patch test of Truss2d elements -> simple structure with slave dofs 
-LinearStatic nsteps 1
+LinearStatic nsteps 1 nmodules 1
+errorcheck
 domain 2dBeam
 OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 3 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf  1
@@ -27,9 +28,9 @@ ConstantFunction 1 f(t) 1.0
 #REACTION tStep 1 number 2 dof 3 value 2.5e-1
 ## check all nodes
 ## check element stress vector
-#BEAM_ELEMENT tStep 1 number 1 gp 1 keyword "forces" component 1  value -0.5
-#BEAM_ELEMENT tStep 1 number 2 gp 1 keyword "forces" component 1  value 9.0139e-1
-#BEAM_ELEMENT tStep 1 number 3 gp 1 keyword "forces" component 1  value 5.5902e-1
+#ELEMENT tStep 1 number 1 gp 1 keyword 7 component 1  value 5.000000e-01
+#ELEMENT tStep 1 number 2 gp 1 keyword 7 component 1  value -9.013878e-01
+#ELEMENT tStep 1 number 3 gp 1 keyword 7 component 1  value -5.590170e-01
 #%END_CHECK%
 #
 

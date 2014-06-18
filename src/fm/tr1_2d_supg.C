@@ -69,7 +69,7 @@ REGISTER_Element(TR1_2D_SUPG);
 FEI2dTrLin TR1_2D_SUPG :: interp(1, 2);
 
 TR1_2D_SUPG :: TR1_2D_SUPG(int n, Domain *aDomain) :
-    SUPGElement(n, aDomain), LEPlicElementInterface()
+    SUPGElement(n, aDomain), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this), LEPlicElementInterface()
     // Constructor.
 {
     numberOfDofMans  = 3;
@@ -1436,13 +1436,6 @@ TR1_2D_SUPG :: giveInterface(InterfaceType interface)
 }
 
 
-int
-TR1_2D_SUPG :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
 double
 TR1_2D_SUPG :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
@@ -1931,13 +1924,6 @@ TR1_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, in
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);
-}
-
-void
-TR1_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                         InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 void

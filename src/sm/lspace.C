@@ -56,9 +56,9 @@ REGISTER_Element(LSpace);
 
 FEI3dHexaLin LSpace :: interpolation;
 
-LSpace :: LSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(),
-    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(),
-    EIPrimaryUnknownMapperInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
+LSpace :: LSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this),
+    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
+    EIPrimaryUnknownMapperInterface(), HuertaErrorEstimatorInterface()
     // Constructor.
 {
     numberOfDofMans  = 8;
@@ -81,8 +81,6 @@ LSpace :: giveInterface(InterfaceType interface)
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
-    } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return static_cast< HuertaRemeshingCriteriaInterface * >(this);
     }
 
     return NULL;
@@ -398,22 +396,6 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
 }
 
 
-void
-LSpace :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                    InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
-
-int
-LSpace :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
-
 double
 LSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
@@ -441,23 +423,17 @@ LSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &c
 }
 
 
-int
-LSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                           TimeStep *tStep, const FloatArray &coords,
+void
+LSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                           TimeStep *tStep, const FloatArray &lcoords,
                                                            FloatArray &answer)
 {
-    FloatArray lcoords, u, ni;
+    FloatArray u, ni;
     FloatMatrix n;
-    int result;
-
-    result = this->computeLocalCoordinates(lcoords, coords);
-
     this->interpolation.evalN( ni, lcoords, FEIElementGeometryWrapper(this) );
-
+    n.beNMatrixOf(ni, 3);
     this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
     answer.beProductOf(n, u);
-
-    return result;
 }
 
 
@@ -476,7 +452,6 @@ LSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refin
                                                            IntArray &controlNode, IntArray &controlDof,
                                                            HuertaErrorEstimator :: AnalysisMode aMode)
 {
-    Element *element = this->HuertaErrorEstimatorI_giveElement();
     FloatArray *corner [ 8 ], midSide [ 12 ], midFace [ 6 ], midNode;
     double x = 0.0, y = 0.0, z = 0.0;
     int inode, nodes = 8, iside, sides = 12, iface, faces = 6, nd, nd1, nd2;
@@ -499,7 +474,7 @@ LSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refin
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
-            corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
+            corner [ inode ] = this->giveNode(inode + 1)->giveCoordinates();
 
             x += corner [ inode ]->at(1);
             y += corner [ inode ]->at(2);
@@ -540,23 +515,10 @@ LSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refin
         }
     }
 
-    this->setupRefinedElementProblem3D(element, refinedElement, level, nodeId, localNodeIdArray, globalNodeIdArray,
+    this->setupRefinedElementProblem3D(this, refinedElement, level, nodeId, localNodeIdArray, globalNodeIdArray,
                                        sMode, tStep, nodes, corner, midSide, midFace, midNode,
                                        localNodeId, localElemId, localBcId, hexaSideNode, hexaFaceNode,
                                        controlNode, controlDof, aMode, "LSpace");
-}
-
-
-double
-LSpace :: HuertaRemeshingCriteriaI_giveCharacteristicSize()
-{
-    double volume = 0.0;
-
-    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-        volume += this->computeVolumeAround(gp);
-    }
-
-    return pow(volume, 1. / 3.);
 }
 
 
@@ -822,7 +784,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
             //
             // obtain gp global coordinates
             this->computeGlobalCoordinates( gpc, * gp->giveCoordinates() );
-            length = 0.3333 * pow(this->computeVolumeAround(gp), 1. / 3.);
+            length = 0.3333 * cbrt(this->computeVolumeAround(gp));
             if ( this->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
                 this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
 

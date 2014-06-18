@@ -92,7 +92,6 @@ public:
     virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
 
     Interface *giveInterface(InterfaceType interface);
-    virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 2; };
 
     void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const;

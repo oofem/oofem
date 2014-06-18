@@ -4,7 +4,7 @@ brazil_2d_nl7.oofem.out.0
 #
 #nonlinearstatic nsteps 100 renumber 1 stiffMode 1 controlmode 0 psi 0.0 steplength 0.0001 initialsteplength 0.0002 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 nonlocalext lstype 3 smtype 7
 #
-nonlinearstatic nsteps 1 nmsteps 5 renumber 0 profileopt 1 nonlocalext lstype 4 smtype 7
+nonlinearstatic nsteps 1 nmsteps 5 renumber 0 profileopt 1 nonlocalext lstype 4 smtype 7 nmodules 1
 #
 #metastep 1
 nsteps 4 stiffMode 2 controlmode 0 psi 0.0 steplength 0.0001 initialsteplength 0.0002 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
@@ -17,6 +17,7 @@ nsteps 9 stiffMode 2 controlmode 0 psi 0.0 steplength 0.0001 rtolv 0.0001 MaxIte
 #metastep 5
 nsteps 10 stiffMode 2 controlmode 0 psi 0.0 steplength 0.001 rtolv 0.0001 MaxIter 200 reqIterations 30 manrmsteps 10 hpcmode 1 hpc 2 3 1 keepll lstype 3
 #
+errorcheck "brazil_2d_nl.oofem.in"
 domain PlaneStrain
 OutputManager tstep_all dofman_all element_all
 ndofman 188 nelem 162 ncrosssect 2 nmat 2 nbc 2 nic 0 nltf 1
@@ -379,6 +380,3 @@ IsoLE  2 d 1.0 E 300.e3 n 0.2 talpha 0.0
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 
 ConstantEdgeLoad 2 loadTimeFunction 1 components 2 0 -1.0 loadType 3 ndofs 2
 ConstantFunction 1 f(t) 1.0
-#%BEGIN_CHECK% tolerance 1.e-5
-#LOADLEVEL tStep 29 value 110.857521
-#%END_CHECK%

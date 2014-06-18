@@ -57,7 +57,7 @@ REGISTER_Element(Brick1_mt);
 
 FEI3dHexaLin Brick1_ht :: interpolation;
 
-Brick1_ht :: Brick1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(), ZZNodalRecoveryModelInterface(), SPRNodalRecoveryModelInterface()
+Brick1_ht :: Brick1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface()
 {
     numberOfDofMans  = 8;
     numberOfGaussPoints = 8;
@@ -204,14 +204,6 @@ SPRPatchType
 Brick1_ht :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_3dBiLin;
-}
-
-
-int
-Brick1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
 }
 
 

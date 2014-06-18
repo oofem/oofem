@@ -86,4 +86,66 @@ void Crack :: callGnuplotExportModule(GnuplotExportModule &iExpMod)
 {
     iExpMod.outputXFEM(* this);
 }
+
+void Crack :: computeIntersectionPoints(Crack &iCrack, std::vector<FloatArray> &oIntersectionPoints, std::vector<double> &oArcPositions)
+{
+    // Enrichment domain of the current crack
+    const EnrichmentDomain_BG *ed1 = dynamic_cast<const EnrichmentDomain_BG*>( giveEnrichmentDomain() );
+    PolygonLine *polygonLine1 = NULL;
+    if(ed1 != NULL) {
+        polygonLine1 = dynamic_cast<PolygonLine*>( ed1->bg );
+    }
+
+    // Enrichment domain of the crack given as input
+    const EnrichmentDomain_BG *ed2 = dynamic_cast<const EnrichmentDomain_BG*>( iCrack.giveEnrichmentDomain() );
+    PolygonLine *polygonLine2 = NULL;
+    if(ed2 != NULL) {
+        polygonLine2 = dynamic_cast<PolygonLine*>( ed2->bg );
+    }
+
+    if( polygonLine1 != NULL && polygonLine2 != NULL ) {
+
+        polygonLine2->computeIntersectionPoints(*polygonLine1, oIntersectionPoints);
+
+        for(FloatArray pos:oIntersectionPoints) {
+            double tangDist, arcPos;
+            polygonLine1->computeTangentialSignDist(tangDist, pos, arcPos);
+
+            if(arcPos < 0.0 || arcPos > 1.0) {
+                printf("arcPos: %e\n", arcPos);
+                OOFEM_ERROR("arcPos is outside the allowed range [0,1].")
+            }
+
+            oArcPositions.push_back(arcPos);
+        }
+
+    }
+}
+
+void Crack :: computeArcPoints(const std::vector<FloatArray> &iIntersectionPoints, std::vector<double> &oArcPositions)
+{
+    // Enrichment domain of the current crack
+    const EnrichmentDomain_BG *ed1 = dynamic_cast<const EnrichmentDomain_BG*>( giveEnrichmentDomain() );
+    PolygonLine *polygonLine1 = NULL;
+    if(ed1 != NULL) {
+        polygonLine1 = dynamic_cast<PolygonLine*>( ed1->bg );
+    }
+
+    if( polygonLine1 != NULL ) {
+
+        for(FloatArray pos:iIntersectionPoints) {
+            double tangDist, arcPos;
+            polygonLine1->computeTangentialSignDist(tangDist, pos, arcPos);
+
+            if(arcPos < 0.0 || arcPos > 1.0) {
+                printf("arcPos: %e\n", arcPos);
+                OOFEM_ERROR("arcPos is outside the allowed range [0,1].")
+            }
+
+            oArcPositions.push_back(arcPos);
+        }
+    }
+
+}
+
 } // end namespace oofem

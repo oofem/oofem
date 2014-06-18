@@ -67,7 +67,9 @@ REGISTER_Element(TR1_2D_CBS);
 FEI2dTrLin TR1_2D_CBS :: interp(1, 2);
 
 TR1_2D_CBS :: TR1_2D_CBS(int n, Domain *aDomain) :
-    CBSElement(n, aDomain)
+    CBSElement(n, aDomain),
+    SpatialLocalizerInterface(this),
+    ZZNodalRecoveryModelInterface(this)
     //<RESTRICTED_SECTION>
     , LEPlicElementInterface()
     //</RESTRICTED_SECTION>
@@ -693,13 +695,6 @@ TR1_2D_CBS :: giveInterface(InterfaceType interface)
 }
 
 
-int
-TR1_2D_CBS :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
 double
 TR1_2D_CBS :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
@@ -1113,13 +1108,6 @@ TR1_2D_CBS :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);
-}
-
-void
-TR1_2D_CBS :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                        InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 void

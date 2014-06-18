@@ -5,7 +5,8 @@ Test of deadweight on quadratic QPlaneStress2d element
 #sigma(x)=10x
 #epsilon(x)=0.1x
 #displacement_x(x)=0.05x^2-0.8
-LinearStatic nsteps 1 nmodules 0
+LinearStatic nsteps 1 nmodules 1
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 1 vars 2 4 1 stype 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
@@ -36,12 +37,12 @@ ConstantFunction 1 f(t) 1.0
 #NODE tStep 1 number 4 dof 2 unknown d value -1.95877842e-03
 #NODE tStep 1 number 6 dof 1 unknown d value 8.00063794e-01
 ## check element No. 1 strain vector
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 1  value 4.5068e-02
-#ELEMENT tStep 1 number 1 gp 4 keyword "strains" component 1  value 1.9999e-01
-#ELEMENT tStep 1 number 1 gp 7 keyword "strains" component 1  value 3.5491e-01
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1  value 4.5068e-02
+#ELEMENT tStep 1 number 1 gp 4 keyword 4 component 1  value 1.9999e-01
+#ELEMENT tStep 1 number 1 gp 7 keyword 4 component 1  value 3.5491e-01
 ## check element No. 1 stress vector
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 1  value 4.5068e+00 
-#ELEMENT tStep 1 number 1 gp 4 keyword "stresses" component 1  value 1.9999e+01
-#ELEMENT tStep 1 number 1 gp 7 keyword "stresses" component 1  value 3.5491e+01
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value 4.5068e+00 
+#ELEMENT tStep 1 number 1 gp 4 keyword 1 component 1  value 1.9999e+01
+#ELEMENT tStep 1 number 1 gp 7 keyword 1 component 1  value 3.5491e+01
 ##
 #%END_CHECK%

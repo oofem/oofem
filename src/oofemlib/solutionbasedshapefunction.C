@@ -578,14 +578,10 @@ SolutionbasedShapeFunction :: giveValueAtPoint(FloatArray &answer, const FloatAr
 
     FloatArray closest, lcoords, values;
 
-    Element *elementAtCoords = myEngngModel.giveDomain(1)->giveSpatialLocalizer()->giveElementContainingPoint(coords);
-
+    Element *elementAtCoords = myEngngModel.giveDomain(1)->giveSpatialLocalizer()->giveElementClosestToPoint(lcoords, closest, coords, 1);
     if ( elementAtCoords == NULL ) {
-        elementAtCoords = myEngngModel.giveDomain(1)->giveSpatialLocalizer()->giveElementClosestToPoint(lcoords, closest, coords, 1);
-        if ( elementAtCoords == NULL ) {
-            OOFEM_WARNING("Cannot find element closest to point");
-            coords.pY();
-        }
+        OOFEM_WARNING("Cannot find element closest to point");
+        coords.pY();
     }
 
     EIPrimaryUnknownMapperInterface *em = dynamic_cast< EIPrimaryUnknownMapperInterface * >( elementAtCoords->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
@@ -593,7 +589,7 @@ SolutionbasedShapeFunction :: giveValueAtPoint(FloatArray &answer, const FloatAr
     IntArray eldofids;
 
     em->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(eldofids);
-    em->EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(VM_Total, thisTimestep, coords, values);
+    em->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(VM_Total, thisTimestep, lcoords, values);
 
     for ( int i = 1; i <= dofIDs.giveSize(); i++ ) {
         for ( int j = 1; j <= eldofids.giveSize(); j++ ) {

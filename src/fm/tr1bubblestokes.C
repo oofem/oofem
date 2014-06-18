@@ -62,7 +62,7 @@ IntArray Tr1BubbleStokes :: edge_ordering [ 3 ] = {
     {7, 8, 1, 2}
 };
 
-Tr1BubbleStokes :: Tr1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomain)
+Tr1BubbleStokes :: Tr1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SpatialLocalizerInterface(this)
 {
     this->numberOfDofMans = 3;
     this->numberOfGaussPoints = 7;
@@ -401,12 +401,6 @@ Interface *Tr1BubbleStokes :: giveInterface(InterfaceType it)
     }
 }
 
-int Tr1BubbleStokes :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
 void Tr1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                               TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
@@ -423,20 +417,6 @@ void Tr1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(Va
     for ( int i = 1; i <= n_lin.giveSize(); i++ ) {
         answer(2) += n_lin.at(i) * this->giveNode(i)->giveDofWithID(P_f)->giveUnknown(mode, tStep);
     }
-}
-
-int Tr1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode, TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
-{
-    bool ok;
-    FloatArray lcoords, n, n_lin;
-    ok = this->computeLocalCoordinates(lcoords, gcoords);
-    if ( !ok ) {
-        answer.clear();
-        return false;
-    }
-
-    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    return true;
 }
 
 void Tr1BubbleStokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)

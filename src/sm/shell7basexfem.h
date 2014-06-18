@@ -108,7 +108,7 @@ protected:
 
 public:
     Shell7BaseXFEM(int n, Domain * d);
-    virtual ~Shell7BaseXFEM() { };
+    virtual ~Shell7BaseXFEM();
     virtual int checkConsistency();
 
     void giveMaxCZDamages(FloatArray &answer, TimeStep *tStep);

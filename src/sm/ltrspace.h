@@ -59,9 +59,9 @@ class FEI3dTetLin;
 class LTRSpace : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
 public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
-public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface,
-public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface, public MMAShapeFunctProjectionInterface,
-public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
+public EIPrimaryUnknownMapperInterface,
+public ZZErrorEstimatorInterface, public MMAShapeFunctProjectionInterface,
+public HuertaErrorEstimatorInterface
 {
 protected:
     static FEI3dTetLin interpolation;
@@ -102,40 +102,26 @@ public:
     virtual double giveRelativeSelfComputationalCost() { return 2.15; }
 #endif
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
-    virtual double DirectErrorIndicatorRCI_giveCharacteristicSize();
-
-    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-                                                                 TimeStep *tStep, const FloatArray &coords,
-                                                                 FloatArray &answer);
+    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                       TimeStep *tStep, const FloatArray &lcoords,
+                                                                       FloatArray &answer);
     virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
     virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
                                                                       coordType ct, nodalValContainerType &list,
                                                                       InternalStateType type, TimeStep *tStep);
 
-    // ZZErrorEstimatorInterface
-    virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
-
-
     // HuertaErrorEstimatorInterface
-    virtual Element *HuertaErrorEstimatorI_giveElement() { return this; }
-
     virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                                   IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                                                   HuertaErrorEstimatorInterface :: SetupMode sMode, TimeStep *tStep,
@@ -146,14 +132,6 @@ public:
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
-
-    // ZZRemeshingCriteriaInterface
-    virtual double ZZRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); }
-    virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
-
-    // HuertaRemeshingCriteriaInterface
-    virtual double HuertaRemeshingCriteriaI_giveCharacteristicSize() { return DirectErrorIndicatorRCI_giveCharacteristicSize(); }
-    virtual int HuertaRemeshingCriteriaI_givePolynOrder() { return 1; };
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

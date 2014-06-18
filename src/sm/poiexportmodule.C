@@ -255,7 +255,7 @@ void
 POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tStep)
 {
     Domain *d = emodel->giveDomain(1);
-    FloatArray pv, coords(3);
+    FloatArray pv, coords(3), lcoords, closest;
     InternalStateValueType type = ISVT_UNDEFINED;
 
     if ( valID == DisplacementVector ) {
@@ -272,7 +272,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
     } else if ( type == ISVT_VECTOR ) {
         fprintf(stream, "VECTORS vector_%d float\n", ( int ) valID);
     } else {
-        fprintf(stderr, "POIExportModule::exportPrimVarAs: unsupported variable type\n");
+        OOFEM_ERROR("unsupported variable type");
     }
 
 
@@ -283,13 +283,13 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
         coords.at(3) = poi.z;
         //region = poi.region;
 
-        Element *source = sl->giveElementContainingPoint(coords, NULL);
+        Element *source = sl->giveElementClosestToPoint(lcoords, closest, coords);
         if ( source ) {
             // ask interface
             EIPrimaryUnknownMapperInterface *interface =
                 static_cast< EIPrimaryUnknownMapperInterface * >( source->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
             if ( interface ) {
-                interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(VM_Total, tStep, coords, pv);
+                interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(VM_Total, tStep, lcoords, pv);
             } else {
                 pv.clear();
                 OOFEM_WARNING("element %d with no EIPrimaryUnknownMapperInterface support",

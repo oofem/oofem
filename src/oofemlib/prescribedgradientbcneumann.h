@@ -73,9 +73,18 @@ public:
     virtual const char *giveClassName() const { return "PrescribedGradientBCNeumann"; }
     virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradientBCNeumann_Name; }
 
+    /**
+     * Computes the homogenized, macroscopic, field (stress).
+     * @param sigma Output quantity (typically stress).
+     * @param eid Equation ID to which sigma belongs.
+     * @param tStep Active time step.
+     */
+    void computeField(FloatArray &sigma, EquationID eid, TimeStep *tStep);
+
 protected:
 	/// DOF-manager containing the unknown homogenized stress.
 	Node *mpSigmaHom;
+	IntArray mSigmaIds;
 
     /// Help function that integrates the tangent contribution from a single element boundary.
     void integrateTangent(FloatMatrix &oTangent, Element *e, int iBndIndex);
