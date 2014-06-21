@@ -77,15 +77,7 @@ Tet1_3D_SUPG :: computeNumberOfDofs()
 void
 Tet1_3D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    if ( ut == EID_MomentumBalance ) {
-        answer = {V_u, V_v, V_w};
-    } else if ( ut == EID_ConservationEquation ) {
-        answer = {P_f};
-    } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        answer = {V_u, V_v, V_w, P_f};
-    } else {
-        OOFEM_ERROR("Unknown equation id encountered");
-    }
+    answer = {V_u, V_v, V_w, P_f};
 }
 
 

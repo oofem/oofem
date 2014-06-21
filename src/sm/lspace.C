@@ -438,13 +438,6 @@ LSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mo
 
 
 void
-LSpace :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    giveDofManDofIDMask(1, EID_MomentumBalance, answer);
-}
-
-
-void
 LSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                            IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                                            HuertaErrorEstimatorInterface :: SetupMode sMode, TimeStep *tStep,

@@ -755,7 +755,7 @@ bool ParticleTopologyDescription :: findDisplacement(FloatArray &displacement, i
         displacement.zero();
         double dt = tStep->giveTimeIncrement();
         em->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(VM_Total, tStep, lcoords, fields);    // Velocities + pressures most likely.
-        em->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(dofIds);
+        e->giveElementDofIDMask(dofIds);
         for ( int i = 0; i < dofIds.giveSize(); i++ ) {
             if ( dofIds(i) == V_u ) {
                 displacement(0) = fields(i) * dt;

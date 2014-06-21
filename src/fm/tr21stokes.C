@@ -93,30 +93,10 @@ int Tr21Stokes :: computeNumberOfDofs()
 
 void Tr21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    // Returns the mask for node number inode of this element. The mask tells what quantities
-    // are held by each node. Since this element holds velocities (both in x and y direction),
-    // in six nodes and pressure in three nodes the answer depends on which node is requested.
-
     if ( inode <= 3 ) {
-        if ( ut == EID_MomentumBalance ) {
-            answer = {V_u, V_v};
-        } else if ( ut == EID_ConservationEquation ) {
-            answer = {P_f};
-        } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-            answer = {V_u, V_v, P_f};
-        } else {
-            OOFEM_ERROR("Unknown equation id encountered");
-        }
+        answer = {V_u, V_v, P_f};
     } else {
-        if ( ut == EID_MomentumBalance ) {
-            answer = {V_u, V_v};
-        } else if ( ut == EID_ConservationEquation ) {
-            answer.clear();
-        } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-            answer = {V_u, V_v};
-        } else {
-            OOFEM_ERROR("Unknown equation id encountered");
-        }
+        answer = {V_u, V_v};
     }
 }
 
@@ -420,11 +400,6 @@ void Tr21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueMo
     }
 }
 
-
-void Tr21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    answer = {V_u, V_v, P_f};
-}
 
 double Tr21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {

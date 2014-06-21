@@ -120,6 +120,7 @@ public:
     virtual void scale(double s);
 
     virtual void computeFields(FloatArray &sigmaDev, double &vol, TimeStep *tStep);
+    void computeStress(FloatArray &sigmaDev, FloatArray &tractions, double rve_size);
     virtual void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, TimeStep *tStep);
 
     virtual void setPrescribedPressure(double p) { pressure = p; }
@@ -142,8 +143,8 @@ protected:
     void integrateTractionVelocityTangent(FloatMatrix &answer, Element *el, int boundary);
     void integrateTractionXTangent(FloatMatrix &answer, Element *el, int boundary);
     void integrateTractionDev(FloatArray &answer, Element *el, int boundary, const FloatMatrix &ddev);
+    void constructMMatrix(FloatMatrix &mMatrix, FloatArray &coords, FloatArray &normal);
     void evaluateTractionBasisFunctions(FloatArray &answer, const FloatArray &coords);
-
     void constructFullMatrixForm(FloatMatrix &d, const FloatArray &d_voigt) const;
 };
 } // end namespace oofem

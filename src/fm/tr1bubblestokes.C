@@ -93,24 +93,12 @@ int Tr1BubbleStokes :: computeNumberOfDofs()
 
 void Tr1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    if ( ut == EID_MomentumBalance ) {
-        answer = {V_u, V_v};
-    } else if ( ut == EID_ConservationEquation ) {
-        answer = {P_f};
-    } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        answer = {V_u, V_v, P_f};
-    } else {
-        answer.clear();
-    }
+    answer = {V_u, V_v, P_f};
 }
 
 void Tr1BubbleStokes :: giveInternalDofManDofIDMask(int i, EquationID eid, IntArray &answer) const
 {
-    if ( eid == EID_MomentumBalance_ConservationEquation || eid == EID_MomentumBalance ) {
-        answer = {V_u, V_v};
-    } else {
-        answer.clear();
-    }
+    answer = {V_u, V_v};
 }
 
 double Tr1BubbleStokes :: computeVolumeAround(GaussPoint *gp)
@@ -417,11 +405,6 @@ void Tr1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(Va
     for ( int i = 1; i <= n_lin.giveSize(); i++ ) {
         answer(2) += n_lin.at(i) * this->giveNode(i)->giveDofWithID(P_f)->giveUnknown(mode, tStep);
     }
-}
-
-void Tr1BubbleStokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    answer = {V_u, V_v, P_f};
 }
 
 double Tr1BubbleStokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)

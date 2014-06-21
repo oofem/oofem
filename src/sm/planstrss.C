@@ -958,10 +958,4 @@ PlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueMode
     answer.beProductOf(n, u);
 }
 
-
-void
-PlaneStress2d :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    giveDofManDofIDMask(1, EID_MomentumBalance, answer);
-}
 } // end namespace oofem

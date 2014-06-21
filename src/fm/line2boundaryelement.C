@@ -60,11 +60,7 @@ FEInterpolation *Line2BoundaryElement :: giveInterpolation() const
 
 void Line2BoundaryElement :: giveDofManDofIDMask(int i, EquationID eid, IntArray &nodeDofIDMask) const
 {
-    if ( eid == EID_MomentumBalance || eid == EID_MomentumBalance_ConservationEquation ) {
-        nodeDofIDMask = {V_u, V_v};
-    } else {
-        nodeDofIDMask.clear();
-    }
+    nodeDofIDMask = {V_u, V_v};
 }
 
 Interface *Line2BoundaryElement :: giveInterface(InterfaceType it)
@@ -86,11 +82,6 @@ double Line2BoundaryElement :: SpatialLocalizerI_giveDistanceFromParametricCente
     return this->giveNode(3)->giveCoordinates()->distance(coords);
 }
 
-void Line2BoundaryElement :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    answer = {V_u, V_v};
-}
-
 void Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                                    TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
@@ -98,7 +89,7 @@ void Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLoc
     this->fei.evalN( answer, lcoords, FEIElementGeometryWrapper(this) );
 
     IntArray dofIDs;
-    this->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(dofIDs);
+    this->giveElementDofIDMask(dofIDs);
 
     answer.resize( dofIDs.giveSize() );
     answer.zero();

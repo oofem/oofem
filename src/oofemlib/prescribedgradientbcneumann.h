@@ -40,14 +40,13 @@
 #define _IFT_PrescribedGradientBCNeumann_Name   "prescribedgradientbcneumann"
 
 namespace oofem {
-/*
+/**
  * Imposes a prescribed gradient weakly on the boundary
  * with a Neumann boundary condition.
  *
  * @author Erik Svenning
  * @date Mar 5, 2014
  */
-
 class PrescribedGradientBCNeumann : public PrescribedGradientBC {
 public:
 	PrescribedGradientBCNeumann(int n, Domain * d);
@@ -76,10 +75,9 @@ public:
     /**
      * Computes the homogenized, macroscopic, field (stress).
      * @param sigma Output quantity (typically stress).
-     * @param eid Equation ID to which sigma belongs.
      * @param tStep Active time step.
      */
-    void computeField(FloatArray &sigma, EquationID eid, TimeStep *tStep);
+    void computeField(FloatArray &sigma, TimeStep *tStep);
 
 protected:
 	/// DOF-manager containing the unknown homogenized stress.

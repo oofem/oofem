@@ -588,7 +588,7 @@ SolutionbasedShapeFunction :: giveValueAtPoint(FloatArray &answer, const FloatAr
 
     IntArray eldofids;
 
-    em->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(eldofids);
+    elementAtCoords->giveElementDofIDMask(eldofids);
     em->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(VM_Total, thisTimestep, lcoords, values);
 
     for ( int i = 1; i <= dofIDs.giveSize(); i++ ) {

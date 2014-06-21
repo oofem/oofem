@@ -64,12 +64,6 @@ public:
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                        TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
     { OOFEM_ERROR("Not implemented"); }
-
-    /**
-     * Returns the dof meaning of element vector of primary unknowns.
-     * @param answer Values of DofIDItem type that identify physical meaning of DOFs.
-     */
-    virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer) = 0;
 };
 } // end namespace oofem
 #endif // eleminterpmapperinterface_h

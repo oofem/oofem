@@ -108,7 +108,7 @@ public:
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                        TimeStep *tStep, const FloatArray &lcoords,
                                                                        FloatArray &answer);
-    virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
+    virtual void giveElementDofIDMask(IntArray &answer) const;
 };
 } /* namespace oofem */
 #endif /* TRPLANSTRSSXFEM_H_ */

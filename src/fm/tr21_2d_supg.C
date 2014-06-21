@@ -95,22 +95,10 @@ TR21_2D_SUPG :: computeNumberOfDofs()
 void
 TR21_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    if ( ut == EID_MomentumBalance ) {
-        answer = {V_u, V_v};
-    } else if ( ut == EID_ConservationEquation ) {
-        if ( ( inode >= 1 ) && ( inode < 4 ) ) {
-            answer = {P_f};
-        } else {
-            answer.clear();
-        }
-    } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        if ( ( inode >= 1 ) && ( inode < 4 ) ) {
-            answer = {V_u, V_v, P_f};
-        } else {
-            answer = {V_u, V_v};
-        }
+    if ( inode < 4 ) {
+        answer = {V_u, V_v, P_f};
     } else {
-        OOFEM_ERROR("Unknown equation id encountered");
+        answer = {V_u, V_v};
     }
 }
 

@@ -92,28 +92,10 @@ int Tet21Stokes :: computeNumberOfDofs()
 
 void Tet21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    // Returns the mask for node number inode of this element. The mask tells what quantities
-    // are held by each node. Since this element holds velocities (both in x and y direction),
-    // in six nodes and pressure in three nodes the answer depends on which node is requested.
-
     if ( inode <= 4 ) {
-        if ( ut == EID_MomentumBalance ) {
-            answer = {V_u, V_v, V_w};
-        } else if ( ut == EID_ConservationEquation ) {
-            answer = {P_f};
-        } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-            answer = {V_u, V_v, V_w, P_f};
-        } else {
-            OOFEM_ERROR("Unknown equation id encountered");
-        }
+        answer = {V_u, V_v, V_w, P_f};
     } else {
-        if ( ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
-            answer = {V_u, V_v, V_w};
-        } else if ( ut == EID_ConservationEquation ) {
-            answer.clear();
-        } else {
-            OOFEM_ERROR("Unknown equation id encountered");
-        }
+        answer = {V_u, V_v, V_w};
     }
 }
 
@@ -413,11 +395,6 @@ void Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueM
     for ( int i = 1; i <= n_lin.giveSize(); i++ ) {
         answer(3) += n_lin.at(i) * this->giveNode(i)->giveDofWithID(P_f)->giveUnknown(mode, tStep);
     }
-}
-
-void Tet21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    answer = {V_u, V_v, V_w, P_f};
 }
 
 double Tet21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)

@@ -285,11 +285,9 @@ TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(Val
 
 
 void
-TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
+TrPlaneStress2dXFEM :: giveElementDofIDMask(IntArray &answer) const
 {
-    //    giveDofManDofIDMask(1, EID_MomentumBalance, answer);
     // TODO: For now, take only the continuous part
-    int nodeInd = 1;
-    TrPlaneStress2d :: giveDofManDofIDMask(nodeInd, EID_MomentumBalance, answer);
+    TrPlaneStress2d :: giveElementDofIDMask(answer);
 }
 } /* namespace oofem */

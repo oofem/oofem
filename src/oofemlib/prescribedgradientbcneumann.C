@@ -193,7 +193,7 @@ void PrescribedGradientBCNeumann::giveLocationArrays(std :: vector< IntArray > &
     }
 }
 
-void PrescribedGradientBCNeumann::computeField(FloatArray &sigma, EquationID eid, TimeStep *tStep)
+void PrescribedGradientBCNeumann :: computeField(FloatArray &sigma, TimeStep *tStep)
 {
     mpSigmaHom->giveUnknownVector(sigma, mSigmaIds, VM_Total, tStep);
 }

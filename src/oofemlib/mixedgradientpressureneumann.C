@@ -102,10 +102,12 @@ void MixedGradientPressureNeumann :: fromDeviatoricBase2D(FloatArray &cartesian,
 
 void MixedGradientPressureNeumann :: fromDeviatoricBase3D(FloatArray &cartesian, FloatArray &deviatoric)
 {
+    double s6 = sqrt(6.);
+    double s2 = sqrt(2.);
     cartesian.resize(6);
-    cartesian.at(1) = 2.0 * deviatoric.at(1) / sqrt(6.0);
-    cartesian.at(2) = ( -deviatoric.at(1) + deviatoric.at(2) ) / sqrt(2.0);
-    cartesian.at(3) = ( -deviatoric.at(1) - deviatoric.at(2) ) / sqrt(2.0);
+    cartesian.at(1) = 2.0 * deviatoric.at(1) / s6;
+    cartesian.at(2) = -deviatoric.at(1) / s6 + deviatoric.at(2) / s2;
+    cartesian.at(3) = -deviatoric.at(1) / s6 - deviatoric.at(2) / s2;
     //
     cartesian.at(4) = ( deviatoric.at(3) + deviatoric.at(6) ) * 0.5;
     cartesian.at(5) = ( deviatoric.at(4) + deviatoric.at(7) ) * 0.5;

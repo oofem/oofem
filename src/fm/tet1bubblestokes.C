@@ -94,24 +94,12 @@ int Tet1BubbleStokes :: computeNumberOfDofs()
 
 void Tet1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
 {
-    if ( ut == EID_MomentumBalance ) {
-        answer = {V_u, V_v, V_w};
-    } else if ( ut == EID_ConservationEquation ) {
-        answer = {P_f};
-    } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        answer = {V_u, V_v, V_w, P_f};
-    } else {
-        answer.clear();
-    }
+    answer = {V_u, V_v, V_w, P_f};
 }
 
 void Tet1BubbleStokes :: giveInternalDofManDofIDMask(int i, EquationID eid, IntArray &answer) const
 {
-    if ( eid == EID_MomentumBalance_ConservationEquation || eid == EID_MomentumBalance ) {
-        answer = {V_u, V_v, V_w};
-    } else {
-        answer.clear();
-    }
+    answer = {V_u, V_v, V_w};
 }
 
 double Tet1BubbleStokes :: computeVolumeAround(GaussPoint *gp)
@@ -437,11 +425,6 @@ void Tet1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(V
     }
 }
 
-
-void Tet1BubbleStokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    answer = {V_u, V_v, V_w, P_f};
-}
 
 double Tet1BubbleStokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
