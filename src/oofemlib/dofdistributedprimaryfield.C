@@ -40,8 +40,8 @@
 
 namespace oofem {
 DofDistributedPrimaryField :: DofDistributedPrimaryField(EngngModel *a, int idomain,
-                                                         FieldType ft, EquationID ut, int nHist) :
-    PrimaryField(a, idomain, ft, ut, nHist)
+                                                         FieldType ft, int nHist) :
+    PrimaryField(a, idomain, ft, nHist)
 { }
 
 DofDistributedPrimaryField :: ~DofDistributedPrimaryField()

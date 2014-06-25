@@ -93,7 +93,7 @@ TR21_2D_SUPG :: computeNumberOfDofs()
 }
 
 void
-TR21_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+TR21_2D_SUPG :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode < 4 ) {
         answer = {V_u, V_v, P_f};

@@ -301,7 +301,7 @@ CCTPlate :: initializeFrom(InputRecord *ir)
 
 
 void
-CCTPlate :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+CCTPlate :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_w, R_u, R_v};
 }

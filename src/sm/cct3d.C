@@ -103,7 +103,7 @@ CCTPlate3d :: giveNodeCoordinates(double &x1, double &x2, double &x3,
 
 
 void
-CCTPlate3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+CCTPlate3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }

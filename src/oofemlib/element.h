@@ -43,7 +43,6 @@
 #include "integrationrule.h"
 #include "chartype.h"
 #include "elementgeometrytype.h"
-#include "equationid.h"
 #include "valuemodetype.h"
 #include "internalstatemode.h"
 #include "internalstatetype.h"
@@ -215,13 +214,13 @@ public:
      * Returns the location array (array of code numbers) of receiver for given numbering scheme.
      * Results are cached at receiver for default scheme in locationArray attribute.
      */
-    void giveLocationArray(IntArray &locationArray, EquationID, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) const;
+    void giveLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) const;
     void giveLocationArray(IntArray &locationArray, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) const;
     /**
      * Returns the location array for the boundary of the element.
      * Only takes into account nodes in the bNodes vector.
      */
-    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIds = NULL);
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const UnknownNumberingScheme &s, IntArray *dofIds = NULL);
     void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL);
     /**
      * @return Number of DOFs in element.
@@ -333,7 +332,7 @@ public:
      * @param tStep  Time step, when vector of unknowns is requested.
      * @param answer Local vector of unknowns.
      */
-    void computeVectorOf(EquationID type, ValueModeType u, TimeStep *tStep, FloatArray &answer);
+    void computeVectorOf(ValueModeType u, TimeStep *tStep, FloatArray &answer);
     void computeVectorOf(const IntArray &dofIDMask, ValueModeType u, TimeStep *tStep, FloatArray &answer, double padding = false);
     /**
      * Boundary version of computeVectorOf.
@@ -351,18 +350,19 @@ public:
      * model, this must support queries for given unknown.
      *
      * @param field  Source field (eg. displacement or temperature vector).
-     * @param u      Value mode of unknown (incremental, total, ...).
-     * @param tStep  Time step, when vector of unknowns is requested.
+     * @param dofIDMask Dof IDs for unknowns.
+     * @param u Value mode of unknown (incremental, total, ...).
+     * @param tStep Time step, when vector of unknowns is requested.
      * @param answer Local vector of unknowns.
      */
-    void computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *tStep, FloatArray &answer);
+    void computeVectorOf(PrimaryField &field, const IntArray &dofIDMask, ValueModeType u, TimeStep *tStep, FloatArray &answer, double padding = false);
     /**
      * Returns local vector of prescribed unknowns. Local vector of prescribed unknowns is
      * extracted from nodal (and side - if they hold unknowns) boundary conditions.
      *
      * @param dofIDMask Dof IDs for unknowns.
-     * @param ut     Identifies mode of unknown (eg. total values or velocity of unknown).
-     * @param tStep  Time step, when vector of prescribed unknowns is requested.
+     * @param ut Identifies mode of unknown (eg. total values or velocity of unknown).
+     * @param tStep Time step, when vector of prescribed unknowns is requested.
      * @param answer Local vector of prescribed unknowns. If unknown is not prescribed,
      * zero value is placed on position of free dof.
      */
@@ -382,10 +382,9 @@ public:
     virtual int computeNumberOfGlobalDofs();
     /**
      * Computes the total number of element's primary master DOFs.
-     * @param eid ID of equation that DOFs belong to.
      * @return Total number of DOFs belonging to eid.
      */
-    int computeNumberOfPrimaryMasterDofs(EquationID eid);
+    int computeNumberOfPrimaryMasterDofs();
     /**
      * Returns transformation matrix from global c.s. to local element
      * c.s., i.e. @f$ r_l =T r_g @f$.
@@ -398,10 +397,9 @@ public:
      * Transformation matrices updates rotation matrix between element-local and primary DOFs,
      * taking into account nodal c.s. and master DOF weights.
      * @param answer Contains the rotation matrix on exit.
-     * @param eid Equation ID to compute rotation matrix for.
      * @return True if there is a rotation required, false otherwise.
      */
-    virtual bool giveRotationMatrix(FloatMatrix &answer, EquationID eid);
+    virtual bool giveRotationMatrix(FloatMatrix &answer);
     /**
      * Returns transformation matrix for DOFs from global coordinate system
      * to local coordinate system in nodes.
@@ -412,10 +410,9 @@ public:
      * @param answer Computed rotation matrix.
      * @param nodes Nodes to include in element local ordering.
      * @param includeInternal Determines whether or not to include internal dof managers.
-     * @param eid Equation ID.
      * @return True if transformation is necessary, false otherwise.
      */
-    virtual bool computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &nodes, bool includeInternal, EquationID eid);
+    virtual bool computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &nodes, bool includeInternal);
     /**
      * Returns dofmanager dof mask for node. This mask defines the dofs which are used by element
      * in node. Mask influences the code number ordering for particular node. Code numbers are
@@ -426,15 +423,9 @@ public:
      * this mask. Must be defined by particular element.
      *
      * @param inode  Mask is computed for local dofmanager with inode number.
-     * @param ut     Equation DOFs belong to.
      * @param answer Mask for node.
      */
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const { answer.clear(); }
-    /**
-     * Calls giveDofManDofIDMask with the default equation id for the type of problem.
-     * @todo Cant have a pure virtual method because of the hacks in HellmichMaterial :: createMaterialGp()
-     */
-    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { }
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const { answer.clear(); }
     /**
      * Returns internal  dofmanager dof mask for node. This mask defines the dofs which are used by element
      * in node. Mask influences the code number ordering for particular node. Code numbers are
@@ -445,15 +436,10 @@ public:
      * this mask. Must be defined by particular element.
      *
      * @param inode Mask is computed for local dofmanager with inode number.
-     * @param ut Unknown type (support for several independent numberings within problem)
      * @param answer mask for node.
      */
-    virtual void giveInternalDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+    virtual void giveInternalDofManDofIDMask(int inode, IntArray &answer) const
     { answer.clear(); }
-    /**
-     * Calls giveInternalDofManDofIDMask with the default equation id for the type of problem.
-     */
-    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { answer.clear(); }
     /**
      * Returns element dof mask for node. This mask defines the dof ordering of the element interpolation.
      * Must be defined by particular element.
@@ -461,7 +447,7 @@ public:
      * @param ut Equation DOFs belong to.
      * @param answer DOF mask for receiver.
      */
-    virtual void giveElementDofIDMask(IntArray &answer) const { this->giveDefaultDofManDofIDMask(1, answer); }
+    virtual void giveElementDofIDMask(IntArray &answer) const { this->giveDofManDofIDMask(1, answer); }
     /**
      * Returns volume related to given integration point. Used typically in subroutines,
      * that perform integration over element volume. Should be implemented by particular
@@ -593,8 +579,9 @@ public:
      * by collecting the code numbers of nodes corresponding to these
      * shape functions.
      * @return Nonzero if integration rule code numbers differ from element code numbers.
+     * @todo This is currently not used. It is intended for IGA elements? This seems redundant.
      */
-    virtual int giveIntegrationRuleLocalCodeNumbers(IntArray &answer, IntegrationRule *ie, EquationID ut)
+    virtual int giveIntegrationRuleLocalCodeNumbers(IntArray &answer, IntegrationRule *ie)
     { return 0; }
 
     // Returns number of sides (which have unknown dofs) of receiver

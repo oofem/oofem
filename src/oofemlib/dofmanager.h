@@ -39,7 +39,6 @@
 
 #include "femcmpnn.h"
 #include "intarray.h"
-#include "equationid.h"
 #include "valuemodetype.h"
 #include "doftype.h"
 #include "dofiditem.h"

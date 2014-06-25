@@ -61,7 +61,7 @@ QPlaneStressGrad :: QPlaneStressGrad(int n, Domain *aDomain) : QPlaneStress2d(n,
 
 
 void
-QPlaneStressGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+QPlaneStressGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode <= nSecNodes ) {
         answer = {D_u, D_v, G_0};

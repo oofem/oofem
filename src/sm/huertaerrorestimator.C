@@ -1401,7 +1401,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                 refinedElement->giveBoundaryFlagArray(inode, element, boundary);
 
                 // get corner displacements
-                element->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, uCoarse);
+                element->computeVectorOf(VM_Total, tStep, uCoarse);
 
                 pos = 1;
                 u = 0.0;
@@ -1923,7 +1923,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                 refinedElement->giveBoundaryFlagArray(inode, element, boundary);
 
                 // get corner displacements
-                element->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, uCoarse);
+                element->computeVectorOf(VM_Total, tStep, uCoarse);
 
                 pos = 1;
                 v = 0.0;
@@ -2629,7 +2629,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                 refinedElement->giveBoundaryFlagArray(inode, element, boundary);
 
                 // get corner displacements
-                element->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, uCoarse);
+                element->computeVectorOf(VM_Total, tStep, uCoarse);
 
                 pos = 1;
                 w = 0.0;

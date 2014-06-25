@@ -229,12 +229,12 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     // Assembling the element part of load vector
     internalLoadVector.resize(neq);
     internalLoadVector.zero();
-    this->assembleVector( internalLoadVector, tStep, EID_MomentumBalance, InternalForcesVector,
+    this->assembleVector( internalLoadVector, tStep, InternalForcesVector,
                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.resize(neq);
     loadVector.zero();
-    this->assembleVector( loadVector, tStep, EID_MomentumBalance, ExternalForcesVector,
+    this->assembleVector( loadVector, tStep, ExternalForcesVector,
                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalLoadVector);
@@ -256,9 +256,9 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
         OOFEM_ERROR("sparse matrix creation failed");
     }
 
-    stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+    stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
     stiffnessMatrix->zero();
-    this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
+    this->assemble( stiffnessMatrix, tStep, StiffnessMatrix,
                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
 #ifdef VERBOSE

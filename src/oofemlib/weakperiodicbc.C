@@ -469,7 +469,7 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
             c_sideLoc.clear();
             dofCountOnBoundary = 0;
             for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
-                thisElement->giveDefaultDofManDofIDMask(bNodes.at(i), nodeDofIDMask);
+                thisElement->giveDofManDofIDMask(bNodes.at(i), nodeDofIDMask);
 
                 for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
                     if ( nodeDofIDMask.at(j) == dofid ) {

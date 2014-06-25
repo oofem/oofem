@@ -188,12 +188,12 @@ Interface
 
 
 void
-Shell7BaseXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+Shell7BaseXFEM :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     // Returns the total id mask of the dof manager - regular id's + enriched id's
 
     // Continuous part
-    Shell7Base :: giveDofManDofIDMask(inode, ut, answer);
+    Shell7Base :: giveDofManDofIDMask(inode, answer);
     XfemManager *xMan = this->giveDomain()->giveXfemManager(); // xman not initialized on el. level??
 
     // Discontinuous part
@@ -283,7 +283,7 @@ Shell7BaseXFEM :: computeOrderingArray(IntArray &orderingArray, IntArray &active
 
     const IntArray &ordering_cont = this->giveOrdering(All);
     IntArray fieldDofId;
-    Shell7Base :: giveDofManDofIDMask(0, EID_MomentumBalance, fieldDofId);
+    Shell7Base :: giveDofManDofIDMask(0, fieldDofId);
 
 
     IntArray ordering_temp, activeDofsArrayTemp;
@@ -299,7 +299,7 @@ Shell7BaseXFEM :: computeOrderingArray(IntArray &orderingArray, IntArray &active
 
 
         if ( ei == NULL ) { // return mask corresponding to the regular id's
-            Shell7Base :: giveDofManDofIDMask(i, EID_MomentumBalance, dofManDofIdMask);
+            Shell7Base :: giveDofManDofIDMask(i, dofManDofIdMask);
         } else {
             if ( ei->isDofManEnriched(* dMan) ) {
                 ei->giveEIDofIdArray(dofManDofIdMask);
@@ -312,7 +312,7 @@ Shell7BaseXFEM :: computeOrderingArray(IntArray &orderingArray, IntArray &active
             ordering_temp.at(activeDofPos) = orderingDofIndex + pos;
             activeDofsArrayTemp.at(activeDofPos) = activeDofIndex   + j;
         }
-        this->giveDofManDofIDMask(i, EID_MomentumBalance, dofManDofIdMaskAll);
+        this->giveDofManDofIDMask(i, dofManDofIdMaskAll);
         orderingDofIndex += dofManDofIdMaskAll.giveSize();
         activeDofIndex   += fieldDofId.giveSize();
 

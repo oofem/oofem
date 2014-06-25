@@ -81,8 +81,8 @@ public:
     virtual FEInterpolation *giveInterpolation() const { return plate->giveInterpolation(); }
 
     virtual int computeNumberOfDofs() { return 18; }
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
-    { plate->giveDofManDofIDMask(inode, ut, answer); }
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const
+    { plate->giveDofManDofIDMask(inode, answer); }
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TR_SHELL01_Name; }
     virtual const char *giveClassName() const { return "TR_SHELL01"; }
@@ -91,7 +91,7 @@ public:
     virtual void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
     virtual double computeVolumeAround(GaussPoint *gp);
-    virtual bool giveRotationMatrix(FloatMatrix &answer, EquationID eid);
+    virtual bool giveRotationMatrix(FloatMatrix &answer);
 
     virtual void updateYourself(TimeStep *tStep);
     virtual void updateInternalState(TimeStep *tStep);

@@ -285,7 +285,7 @@ Beam3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type
 
 
 void
-Beam3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Beam3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
@@ -433,7 +433,7 @@ Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
     FloatArray u;
 
     this->computeStiffnessMatrix(stiffness, SecantStiffness, tStep);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
     answer.beProductOf(stiffness, u);
 #else
     StructuralElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
@@ -648,7 +648,7 @@ Beam3d :: printOutputAt(FILE *File, TimeStep *tStep)
     fprintf(File, "beam element %d :\n", number);
 
     // ask for global element displacement vector
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, rl);
+    this->computeVectorOf(VM_Total, tStep, rl);
     // ask for global element end forces vector
     this->giveEndForcesVector(Fl, tStep);
 

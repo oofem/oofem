@@ -240,7 +240,7 @@ Lattice2d :: computeVolumeAround(GaussPoint *gp)
 
 
 void
-Lattice2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Lattice2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, R_w};
 }

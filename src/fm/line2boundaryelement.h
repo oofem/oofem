@@ -70,7 +70,7 @@ public:
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) { answer.clear(); }
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) { answer.clear(); }
 
-    virtual void giveDofManDofIDMask(int i, EquationID eid, IntArray &nodeDofIDMask) const;
+    virtual void giveDofManDofIDMask(int i, IntArray &nodeDofIDMask) const;
 
     virtual FEInterpolation *giveInterpolation() const;
     virtual int computeNumberOfDofs() { return 6; }

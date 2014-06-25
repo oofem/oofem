@@ -1407,7 +1407,7 @@ Domain :: createDofs()
         // Scan for all dofs needed by element.
         Element *element = this->giveElement(i);
         for ( int j = 1; j <= element->giveNumberOfNodes(); ++j ) {
-            element->giveDefaultDofManDofIDMask(j, dofids);
+            element->giveDofManDofIDMask(j, dofids);
             for ( int k = 1; k <= dofids.giveSize(); k++ ) {
                 node_dofs [ element->giveNode(j)->giveNumber() - 1 ].insert( dofids.at(k) );
             }

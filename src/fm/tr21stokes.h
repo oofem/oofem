@@ -108,10 +108,9 @@ public:
      * Gives the dof ID mask for the element.
      * This element (Taylor-Hood) has V_u, V_v, P_f in node 1,2,3 and V_u, V_v in node 4,5,6.
      * @param inode Node to check.
-     * @param ut Equation ID to check.
      * @param answer List of dof IDs.
      */
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
     virtual void updateYourself(TimeStep *tStep);
 

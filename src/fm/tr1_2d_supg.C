@@ -87,7 +87,7 @@ TR1_2D_SUPG :: computeNumberOfDofs()
 }
 
 void
-TR1_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+TR1_2D_SUPG :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {V_u, V_v, P_f};
 }
@@ -1847,7 +1847,7 @@ TR1_2D_SUPG :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Primary
     this->giveElementDofIDMask(elemdofs);
     es = elemdofs.giveSize();
     // first evaluate element unknown vector
-    this->computeVectorOf(pf, mode, tStep, elemvector);
+    this->computeVectorOf(pf, elemdofs, mode, tStep, elemvector);
     // determine corresponding local coordinates
     if ( this->computeLocalCoordinates(lc, coords) ) {
         // compute interpolation matrix

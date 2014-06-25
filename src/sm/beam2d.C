@@ -280,7 +280,7 @@ Beam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &maste
 
 
 void
-Beam2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Beam2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_w, R_v};
 }
@@ -582,7 +582,7 @@ Beam2d :: printOutputAt(FILE *File, TimeStep *tStep)
     fprintf(File, "beam element %d :\n", number);
 
     // ask for global element displacement vector
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, rl);
+    this->computeVectorOf(VM_Total, tStep, rl);
 
     // ask for global element end forces vector
     this->giveEndForcesVector(Fl, tStep);

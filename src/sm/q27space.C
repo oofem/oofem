@@ -75,7 +75,7 @@ Q27Space :: initializeFrom(InputRecord *ir)
 
 
 void
-Q27Space :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+Q27Space :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w};
 }

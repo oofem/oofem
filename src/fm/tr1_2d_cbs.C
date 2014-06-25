@@ -91,7 +91,7 @@ TR1_2D_CBS :: computeNumberOfDofs()
 }
 
 void
-TR1_2D_CBS :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+TR1_2D_CBS :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {V_u, V_v, P_f};
 }
@@ -410,7 +410,7 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
     /*
      *  printf("u_new = "); u.printYourself();
      *  this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), u);
-     *  this->computeVectorOf(EID_AuxMomentumBalance, VM_Incremental, tStep, ustar);
+     *  this->computeVectorOfAuxVelocities(VM_Incremental, tStep, ustar);
      *  u.add(theta1, ustar);
      *  printf("u_corr = "); u.printYourself();
      */
@@ -1029,6 +1029,18 @@ TR1_2D_CBS :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryF
                                                     FloatArray &coords, IntArray &dofId, ValueModeType mode,
                                                     TimeStep *tStep)
 {
+#if 0
+    ///@todo Change to this (very experimental, untested code) in all EIPrimaryFieldI_evaluateFieldVectorAt functions:
+    int es = dofId.giveSize();
+    this->computeVectorOf(pf, dofId, mode, tStep, elemvector, true);
+    answer.resize( es );
+    answer.zero();
+    for ( int i = 1; i <= es; i++ ) {
+        for ( int j = 1; j <= lc.giveSize(); j++ ) {
+            answer.at(i) += lc.at(j) * elemvector.at( es * ( j -  1 ) + i );
+        }
+    }
+#endif
     int indx, es;
     double sum;
     FloatArray elemvector, f, lc;
@@ -1038,7 +1050,7 @@ TR1_2D_CBS :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryF
     this->giveElementDofIDMask(elemdofs);
     es = elemdofs.giveSize();
     // first evaluate element unknown vector
-    this->computeVectorOf(pf, mode, tStep, elemvector);
+    this->computeVectorOf(pf, elemdofs, mode, tStep, elemvector);
     // determine corresponding local coordinates
     if ( this->computeLocalCoordinates(lc, coords) ) {
         // compute interpolation matrix

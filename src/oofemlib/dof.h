@@ -41,7 +41,6 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "unknowntype.h"
-#include "equationid.h"
 #include "valuemodetype.h"
 #include "dofiditem.h"
 #include "doftype.h"

@@ -71,7 +71,7 @@ public:
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
 
     virtual int computeNumberOfDofs() { return 6; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
     { return this->computeLength(); }

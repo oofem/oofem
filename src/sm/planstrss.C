@@ -414,7 +414,7 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
 }
 
 void
-PlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+PlaneStress2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v};
 }
@@ -954,7 +954,7 @@ PlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueMode
 
     n.beNMatrixOf(ni, 2);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf({D_u, D_v}, mode, tStep, u);
     answer.beProductOf(n, u);
 }
 

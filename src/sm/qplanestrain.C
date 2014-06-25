@@ -156,7 +156,7 @@ QPlaneStrain :: computeVolumeAround(GaussPoint *gp)
 
 
 void
-QPlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+QPlaneStrain :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v};
 }

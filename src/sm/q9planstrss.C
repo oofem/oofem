@@ -112,7 +112,7 @@ Q9PlaneStress2d :: computeVolumeAround(GaussPoint *gp)
 
 
 void
-Q9PlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Q9PlaneStress2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v};
 }

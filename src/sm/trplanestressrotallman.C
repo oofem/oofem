@@ -220,7 +220,7 @@ TrPlanestressRotAllman :: computeStiffnessMatrixZeroEnergyStabilization(FloatMat
 
 
 void
-TrPlanestressRotAllman :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+TrPlanestressRotAllman :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, R_w};
 }

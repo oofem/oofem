@@ -133,7 +133,7 @@ Tria1PlateSubSoil :: initializeFrom(InputRecord *ir)
 
 
 void
-Tria1PlateSubSoil :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Tria1PlateSubSoil :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_w};
 }

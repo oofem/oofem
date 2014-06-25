@@ -66,7 +66,7 @@ TransportElement :: ~TransportElement()
 
 
 void
-TransportElement :: giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const
+TransportElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( emode == HeatTransferEM ) {
         answer = {T_f};
@@ -1072,7 +1072,7 @@ TransportElement :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Pr
     // determine element dof ids
     this->giveElementDofIDMask(elemdofs);
     // first evaluate element unknown vector
-    this->computeVectorOf(pf, mode, tStep, elemvector);
+    this->computeVectorOf(pf, elemdofs, mode, tStep, elemvector);
     // determine corresponding local coordinates
     if ( this->computeLocalCoordinates(lc, coords) ) {
         // compute interpolation matrix

@@ -185,7 +185,7 @@ Quad1Mindlin :: initializeFrom(InputRecord *ir)
 
 
 void
-Quad1Mindlin :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Quad1Mindlin :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_w, R_u, R_v};
 }

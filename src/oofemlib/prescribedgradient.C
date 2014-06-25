@@ -213,9 +213,9 @@ void PrescribedGradient :: computeField(FloatArray &sigma, TimeStep *tStep)
 
     R_c.zero();
     R_ext.zero();
-    emodel->assembleVector( R_c, tStep, EID_MomentumBalance, InternalForcesVector, VM_Total,
+    emodel->assembleVector( R_c, tStep, InternalForcesVector, VM_Total,
                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
-    emodel->assembleVector( R_ext, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
+    emodel->assembleVector( R_ext, tStep, ExternalForcesVector, VM_Total,
                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
     R_c.subtract(R_ext);
 
@@ -253,14 +253,14 @@ void PrescribedGradient :: computeTangent(FloatMatrix &tangent, TimeStep *tStep)
     if ( !Kff ) {
         OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
-    Kff->buildInternalStructure(rve, 1, EID_MomentumBalance, fnum);
-    Kfp->buildInternalStructure(rve, 1, EID_MomentumBalance, fnum, pnum);
-    Kpf->buildInternalStructure(rve, 1, EID_MomentumBalance, pnum, fnum);
-    Kpp->buildInternalStructure(rve, 1, EID_MomentumBalance, pnum);
-    rve->assemble(Kff, tStep, EID_MomentumBalance, StiffnessMatrix, fnum, this->domain);
-    rve->assemble(Kfp, tStep, EID_MomentumBalance, StiffnessMatrix, fnum, pnum, this->domain);
-    rve->assemble(Kpf, tStep, EID_MomentumBalance, StiffnessMatrix, pnum, fnum, this->domain);
-    rve->assemble(Kpp, tStep, EID_MomentumBalance, StiffnessMatrix, pnum, this->domain);
+    Kff->buildInternalStructure(rve, 1, fnum);
+    Kfp->buildInternalStructure(rve, 1, fnum, pnum);
+    Kpf->buildInternalStructure(rve, 1, pnum, fnum);
+    Kpp->buildInternalStructure(rve, 1, pnum);
+    rve->assemble(Kff, tStep, StiffnessMatrix, fnum, this->domain);
+    rve->assemble(Kfp, tStep, StiffnessMatrix, fnum, pnum, this->domain);
+    rve->assemble(Kpf, tStep, StiffnessMatrix, pnum, fnum, this->domain);
+    rve->assemble(Kpp, tStep, StiffnessMatrix, pnum, this->domain);
 
     FloatMatrix C, X, Kpfa, KfpC, a;
 

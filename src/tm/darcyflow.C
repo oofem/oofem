@@ -59,7 +59,7 @@ IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
     sparseMtrxType = ( SparseMtrxType ) val;
 
     // Create solution space for pressure field
-    PressureField = new PrimaryField(this, 1, FT_Pressure, EID_ConservationEquation, 1);
+    PressureField = new PrimaryField(this, 1, FT_Pressure, 1);
 #if 0
  #ifdef __PARALLEL_MODE
 
@@ -103,14 +103,14 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     // Create "stiffness matrix"
     if ( !this->stiffnessMatrix ) {
         this->stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        this->stiffnessMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
+        this->stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
     }
 
 
     // Build initial/external load (LoadVector)
     this->externalForces.resize(neq);
     this->externalForces.zero();
-    this->assembleVectorFromElements( this->externalForces, tStep, EID_ConservationEquation, ExternalForcesVector, VM_Total,
+    this->assembleVectorFromElements( this->externalForces, tStep, ExternalForcesVector, VM_Total,
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
@@ -206,7 +206,7 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
     switch ( cmpn ) {
     case InternalRhs:
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep, EID_ConservationEquation,  InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep,  InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), d, & this->ebeNorm);
 #ifdef __PARALLEL_MODE
         this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
@@ -216,7 +216,7 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
     case NonLinearLhs:
 
         this->stiffnessMatrix->zero();
-        this->assemble( this->stiffnessMatrix, tStep, EID_ConservationEquation, StiffnessMatrix,
+        this->assemble( this->stiffnessMatrix, tStep, StiffnessMatrix,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
         break;
 

@@ -128,7 +128,7 @@ IntElLine1 :: initializeFrom(InputRecord *ir)
 
 
 void
-IntElLine1 :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+IntElLine1 :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v};
 }

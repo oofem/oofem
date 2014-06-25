@@ -304,7 +304,7 @@ Quad1PlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &n
 }
 
 void
-Quad1PlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Quad1PlaneStrain :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v};
 }
@@ -821,7 +821,7 @@ Quad1PlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueM
 
     n.beNMatrixOf(nv, 2);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf({D_u, D_v}, mode, tStep, u);
     answer.beProductOf(n, u);
 }
 

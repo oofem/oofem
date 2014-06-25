@@ -266,7 +266,7 @@ LIBeam2d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 
 
 void
-LIBeam2d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+LIBeam2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_w, R_v};
 }

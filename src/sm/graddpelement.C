@@ -85,28 +85,38 @@ GradDpElement :: setNonlocalLocationArray(IntArray &answer, int nPrimNodes, int 
 void
 GradDpElement :: computeDisplacementDegreesOfFreedom(FloatArray &answer, TimeStep *tStep)
 {
+    ///@todo Just use this instead! (should work, but I don't have any tests right now)
+#if 0
+    this->giveStructuralElement()->computeVectorOf({D_u, D_v, D_w}, VM_Total, tStep, answer);
+#else
     StructuralElement *elem = this->giveStructuralElement();
     FloatArray u;
     answer.resize(locSize);
 
-    elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    elem->computeVectorOf(VM_Total, tStep, u);
     u.resizeWithValues(totalSize);
     for ( int i = 1; i <= locSize; i++ ) {
         answer.at(i) = u.at( locU.at(i) );
     }
+#endif
 }
 
 void GradDpElement :: computeNonlocalDegreesOfFreedom(FloatArray &answer, TimeStep *tStep)
 {
+    ///@todo Just use this instead! (should work, but I don't have any tests right now)
+#if 0
+    this->giveStructuralElement()->computeVectorOf({G_0}, VM_Total, tStep, answer);
+#else
     StructuralElement *elem = this->giveStructuralElement();
     FloatArray u;
     answer.resize(nlSize);
 
-    elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    elem->computeVectorOf(VM_Total, tStep, u);
     u.resizeWithValues(totalSize);
     for  ( int i = 1; i <= nlSize; i++ ) {
         answer.at(i) = u.at( locK.at(i) );
     }
+#endif
 }
 
 void
@@ -307,6 +317,8 @@ GradDpElement :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, i
     FloatArray answerK(nlSize);
     answerK.zero();
 
+    ///@todo This code relies on locU and locK already exists. Design seems highly unsafe.
+    /// Instead locU and locK shoulld be statically determined (cf. with the Taylor-Hood elements) / Mikael
     this->giveNonlocalInternalForcesVector(answerK, tStep, useUpdatedGpRecord);
     this->giveLocalInternalForcesVector(answerU, tStep, useUpdatedGpRecord);
 

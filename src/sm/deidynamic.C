@@ -141,7 +141,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
     int nman = domain->giveNumberOfDofManagers();
-    IntArray loc, dofids;
+    IntArray loc;
     Element *element;
     DofManager *node;
     int neq;
@@ -167,8 +167,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
         EModelDefaultEquationNumbering dn;
         for ( i = 1; i <= nelem; i++ ) {
             element = domain->giveElement(i);
-            element->giveElementDofIDMask(dofids);
-            element->giveLocationArray(loc, dofids, dn);
+            element->giveLocationArray(loc, dn);
             element->giveCharacteristicMatrix(charMtrx,  LumpedMassMatrix, tStep);
             // charMtrx.beLumpedOf(fullCharMtrx);
             element->giveCharacteristicMatrix(charMtrx2, StiffnessMatrix, tStep);
@@ -281,7 +280,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     //
     loadVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     loadVector.zero();
-    this->assembleVector(loadVector, tStep, EID_MomentumBalance, ExternalForcesVector,
+    this->assembleVector(loadVector, tStep, ExternalForcesVector,
                          VM_Total, EModelDefaultEquationNumbering(), domain);
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
@@ -294,8 +293,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     EModelDefaultEquationNumbering dn;
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
-        element->giveElementDofIDMask(dofids);
-        element->giveLocationArray(loc, dofids, dn);
+        element->giveLocationArray(loc, dn);
         element->giveCharacteristicMatrix(charMtrx, StiffnessMatrix, tStep);
         n = loc.giveSize();
         for ( j = 1; j <= n; j++ ) {

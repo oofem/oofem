@@ -177,7 +177,7 @@ void CompCol :: times(double x)
     this->version++;
 }
 
-int CompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
+int CompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
     /*
      * IntArray  loc;
@@ -266,7 +266,7 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
 
     for ( n = 1; n <= nelem; n++ ) {
         elem = domain->giveElement(n);
-        elem->giveLocationArray(loc, ut, s);
+        elem->giveLocationArray(loc, s);
 
         for ( i = 1; i <= loc.giveSize(); i++ ) {
             if ( ( ii = loc.at(i) ) ) {

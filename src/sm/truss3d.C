@@ -207,7 +207,7 @@ Truss3d :: initializeFrom(InputRecord *ir)
 
 
 void
-Truss3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Truss3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w};
 }

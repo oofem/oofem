@@ -140,7 +140,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             internalSource.at( transpElem->giveCrossSection()->giveNumber() ) += answerArr.sum();
 
             transpElem->giveCharacteristicMatrix(answerMtrx, CapacityMatrix, tStep);
-            transpElem->computeVectorOf(EID_ConservationEquation, VM_Incremental, tStep, answerArr);
+            transpElem->computeVectorOf(VM_Incremental, tStep, answerArr);
             answerArr1.beProductOf(answerMtrx, answerArr);
             capacity.at( transpElem->giveCrossSection()->giveNumber() ) -= answerArr1.sum();
         }

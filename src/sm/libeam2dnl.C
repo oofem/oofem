@@ -412,7 +412,7 @@ LIBeam2dNL :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &m
 
 
 void
-LIBeam2dNL :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+LIBeam2dNL :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_w, R_v};
 }

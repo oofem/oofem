@@ -37,7 +37,6 @@
 
 #include "activebc.h"
 #include "intarray.h"
-#include "equationid.h"
 #include "chartype.h"
 #include "valuemodetype.h"
 #include "dofmanager.h"

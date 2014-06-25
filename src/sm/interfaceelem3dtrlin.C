@@ -157,7 +157,7 @@ InterfaceElement3dTrLin :: initializeFrom(InputRecord *ir)
 
 
 void
-InterfaceElement3dTrLin :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+InterfaceElement3dTrLin :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w};
 }

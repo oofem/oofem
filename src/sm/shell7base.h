@@ -62,7 +62,7 @@ public VTKXMLExportModuleElementInterface, public ZZNodalRecoveryModelInterface,
 public:
     Shell7Base(int n, Domain * d); // constructor
     virtual ~Shell7Base();
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeNumberOfDofs() { return this->giveNumberOfDofs(); }
     virtual int checkConsistency();

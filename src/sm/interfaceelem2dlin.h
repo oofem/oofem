@@ -61,7 +61,7 @@ public:
     virtual FEInterpolation *giveInterpolation() const;
 
     virtual int computeNumberOfDofs() { return 8; }
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
     virtual double computeVolumeAround(GaussPoint *gp);
 

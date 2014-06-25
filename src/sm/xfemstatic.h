@@ -75,7 +75,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     void initializeDofUnknownsDictionary(TimeStep *tStep);
-    void setTotalDisplacementFromUnknownsInDictionary(EquationID type, ValueModeType mode, TimeStep *tStep);
+    void setTotalDisplacementFromUnknownsInDictionary(ValueModeType mode, TimeStep *tStep);
     virtual void updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep);
 
     void setUpdateStructureFlag(bool flag) { updateStructureFlag = flag; }

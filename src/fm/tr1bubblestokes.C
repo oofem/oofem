@@ -35,7 +35,6 @@
 #include "tr1bubblestokes.h"
 #include "node.h"
 #include "domain.h"
-#include "equationid.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "bcgeomtype.h"
@@ -91,12 +90,12 @@ int Tr1BubbleStokes :: computeNumberOfDofs()
     return 11;
 }
 
-void Tr1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+void Tr1BubbleStokes :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {V_u, V_v, P_f};
 }
 
-void Tr1BubbleStokes :: giveInternalDofManDofIDMask(int i, EquationID eid, IntArray &answer) const
+void Tr1BubbleStokes :: giveInternalDofManDofIDMask(int i, IntArray &answer) const
 {
     answer = {V_u, V_v};
 }

@@ -559,7 +559,7 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     ldofs = answer.giveNumberOfRows();
 
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        this->giveDofManDofIDMask(i, EID_MomentumBalance, nodeDofIDMask);
+        this->giveDofManDofIDMask(i, nodeDofIDMask);
         //this->giveDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray);
         for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
             indx++;
@@ -756,7 +756,7 @@ void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatri
         }
 
         // localize irule contribution into element matrix
-        if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule, EID_MomentumBalance) ) {
+        if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule) ) {
             answer.assemble(* m, irlocnum);
             m->clear();
         }
@@ -784,7 +784,7 @@ StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
     }
 
     this->computeBmatrixAt(gp, b);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
 
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
@@ -823,7 +823,7 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
     FloatArray u, stress, strain;
 
     // This function can be quite costly to do inside the loops when one has many slave dofs.
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
         u.subtract(* initialDisplacements);
@@ -896,7 +896,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
     IntArray irlocnum;
 
     // This function can be quite costly to do inside the loops when one has many slave dofs.
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
         u.subtract(* initialDisplacements);
@@ -944,7 +944,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
             m->plusProduct(b, stress, dV);
 
             // localize irule contribution into element matrix
-            if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule, EID_MomentumBalance) ) {
+            if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule) ) {
                 answer.assemble(* m, irlocnum);
                 m->clear();
             }
@@ -1019,7 +1019,7 @@ StructuralElement :: updateYourself(TimeStep *tStep)
             initialDisplacements = new FloatArray();
         }
 
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, * initialDisplacements);
+        this->computeVectorOf(VM_Total, tStep, * initialDisplacements);
     }
 }
 
@@ -1216,7 +1216,7 @@ StructuralElement :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSta
     if ( type == IST_DisplacementVector ) {
         FloatArray u;
         FloatMatrix N;
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+        this->computeVectorOf(VM_Total, tStep, u);
         this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), N);
         answer.beProductOf(N, u);
         return 1;
@@ -1251,7 +1251,7 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const Un
                                 NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(ip);
         // loop over IP influencing IPs, extract corresponding element numbers and their code numbers
         for ( auto &lir: *integrationDomainList ) {
-            lir.nearGp->giveElement()->giveLocationArray(elemLocArry, EID_MomentumBalance, s);
+            lir.nearGp->giveElement()->giveLocationArray(elemLocArry, s);
             /*
              * Currently no care given to multiple occurences of code number in locationArray.
              */
@@ -1365,7 +1365,7 @@ StructuralElement :: showSparseMtrxStructure(CharType mtrx, oofegGraphicContext 
         ( mtrx == SecantStiffnessMatrix ) || ( mtrx == ElasticStiffnessMatrix ) ) {
         int i, j, n;
         IntArray loc;
-        this->giveLocationArray( loc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        this->giveLocationArray( loc, EModelDefaultEquationNumbering() );
 
         WCRec p [ 4 ];
         GraphicObj *go;

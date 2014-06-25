@@ -127,7 +127,7 @@ StructuralInterfaceElement :: computeSpatialJump(FloatArray &answer, Integration
     }
 
     this->computeNmatrixAt(ip, N);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
 
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
@@ -156,7 +156,7 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
     FloatMatrix N, rotationMatGtoL;
     FloatArray u, traction, tractionTemp, jump;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
         u.subtract(* initialDisplacements);
@@ -276,7 +276,7 @@ StructuralInterfaceElement :: updateYourself(TimeStep *tStep)
             initialDisplacements = new FloatArray();
         }
 
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, * initialDisplacements);
+        this->computeVectorOf(VM_Total, tStep, * initialDisplacements);
     }
 }
 

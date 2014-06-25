@@ -82,19 +82,12 @@ QTRSpaceGrad :: initializeFrom(InputRecord *ir)
 
 
 void
-QTRSpaceGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+QTRSpaceGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode <= nSecNodes ) {
-        answer.resize(4);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
-        answer.at(3) = D_w;
-        answer.at(4) = G_0;
+        answer = {D_u, D_v, D_w, G_0};
     } else {
-        answer.resize(3);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
-        answer.at(3) = D_w;
+        answer = {D_u, D_v, D_w};
     }
 }
 

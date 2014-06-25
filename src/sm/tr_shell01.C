@@ -155,14 +155,14 @@ TR_SHELL01 :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeS
 }
 
 bool
-TR_SHELL01 :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
+TR_SHELL01 :: giveRotationMatrix(FloatMatrix &answer)
 {
     IntArray loc(9);
     FloatMatrix aux1, aux2;
     int ncol;
 
-    bool t1 = plate->giveRotationMatrix(aux1, eid);
-    bool t2 =  membrane->giveRotationMatrix(aux2, eid);
+    bool t1 = plate->giveRotationMatrix(aux1);
+    bool t2 =  membrane->giveRotationMatrix(aux2);
 
     if ( t1 != t2 ) {
         OOFEM_ERROR("Transformation demand mismatch");

@@ -232,7 +232,7 @@ LTRSpace :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-LTRSpace :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+LTRSpace :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w};
 }
@@ -654,7 +654,7 @@ LTRSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType 
     FloatMatrix n;
     n.beNMatrixOf(lcoords, 3);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf(mode, tStep, u);
     answer.beProductOf(n, u);
 }
 

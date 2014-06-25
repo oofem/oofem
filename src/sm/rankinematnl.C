@@ -321,7 +321,7 @@ RankineMatNl :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
         return 0; // no contribution if damage is not growing
     }
 
-    elem->giveLocationArray(loc, EID_MomentumBalance, s);
+    elem->giveLocationArray(loc, s);
     const FloatArray &stress = status->giveTempEffectiveStress();
     elem->computeBmatrixAt(gp, b);
     this->computeCumPlasticStrain(nlKappa, gp, tStep);
@@ -351,7 +351,7 @@ RankineMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
 {
     RankineMatNlStatus *status = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
     StructuralElement *elem = static_cast< StructuralElement * >( gp->giveElement() );
-    elem->giveLocationArray(rloc, EID_MomentumBalance, s);
+    elem->giveLocationArray(rloc, s);
     FloatMatrix b;
     elem->computeBmatrixAt(gp, b);
     int ncols = b.giveNumberOfColumns();

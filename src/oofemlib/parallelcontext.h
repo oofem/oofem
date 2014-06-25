@@ -36,7 +36,6 @@
 #define parallelcontext_h
 
 #include "oofemcfg.h"
-#include "equationid.h"
 #ifdef __PARALLEL_MODE
  #include "parallelordering.h"
 #endif

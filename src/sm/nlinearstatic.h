@@ -179,7 +179,7 @@ public:
 #endif
 
 protected:
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type,
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
                           const UnknownNumberingScheme &, Domain *domain);
     void proceedStep(int di, TimeStep *tStep);
     virtual void updateLoadVectors(TimeStep *tStep);
@@ -187,7 +187,7 @@ protected:
     void assembleIncrementalReferenceLoadVectors(FloatArray &_incrementalLoadVector,
                                                  FloatArray &_incrementalLoadVectorOfPrescribed,
                                                  SparseNonLinearSystemNM :: referenceLoadInputModeType _refMode,
-                                                 Domain *sourceDomain, EquationID ut, TimeStep *tStep);
+                                                 Domain *sourceDomain, TimeStep *tStep);
 #ifdef __PARALLEL_MODE
     virtual void packMigratingData(TimeStep *tStep);
     virtual void unpackMigratingData(TimeStep *tStep);

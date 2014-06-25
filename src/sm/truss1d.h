@@ -75,7 +75,7 @@ public:
     { computeLumpedMassMatrix(answer, tStep); }
 
     virtual int computeNumberOfDofs() { return 2; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     // characteristic length in gp (for some material models)
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)

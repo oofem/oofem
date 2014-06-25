@@ -830,7 +830,7 @@ void EngngModel :: printYourself()
     printf("number of eq's : %d\n", numberOfEquations);
 }
 
-void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
                             CharType type, const UnknownNumberingScheme &s, Domain *domain)
 //
 // assembles matrix
@@ -866,8 +866,8 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
         this->giveElementCharacteristicMatrix(mat, ielem, type, tStep, domain);
 
         if ( mat.isNotEmpty() ) {
-            element->giveLocationArray(loc, eid, s);
-            if ( element->giveRotationMatrix(R, eid) ) {
+            element->giveLocationArray(loc, s);
+            if ( element->giveRotationMatrix(R) ) {
                 mat.rotatedWith(R);
             }
 
@@ -895,7 +895,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
 }
 
 
-void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
                             CharType type, const UnknownNumberingScheme &rs, const UnknownNumberingScheme &cs,
                             Domain *domain)
 // Same as assemble, but with different numbering for rows and columns
@@ -925,10 +925,10 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
 
         this->giveElementCharacteristicMatrix(mat, ielem, type, tStep, domain);
         if ( mat.isNotEmpty() ) {
-            element->giveLocationArray(r_loc, eid, rs);
-            element->giveLocationArray(c_loc, eid, cs);
+            element->giveLocationArray(r_loc, rs);
+            element->giveLocationArray(c_loc, cs);
             // Rotate it
-            if ( element->giveRotationMatrix(R, eid) ) {
+            if ( element->giveRotationMatrix(R) ) {
                 mat.rotatedWith(R);
             }
 
@@ -956,7 +956,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
 }
 
 
-void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                   CharType type, ValueModeType mode,
                                   const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
@@ -974,8 +974,8 @@ void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationI
     }
 
     this->assembleVectorFromDofManagers(answer, tStep, type, mode, s, domain, eNorms);
-    this->assembleVectorFromElements(answer, tStep, eid, type, mode, s, domain, eNorms);
-    this->assembleVectorFromBC(answer, tStep, eid, type, mode, s, domain, eNorms);
+    this->assembleVectorFromElements(answer, tStep, type, mode, s, domain, eNorms);
+    this->assembleVectorFromBC(answer, tStep, type, mode, s, domain, eNorms);
 
 #ifdef __PARALLEL_MODE
     if ( this->isParallel() ) {
@@ -1045,7 +1045,7 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
 }
 
 
-void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                                         CharType type, ValueModeType mode,
                                         const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
@@ -1078,11 +1078,11 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                     element->computeLoadVector(charVec, bodyLoad, type, mode, tStep);
 
                     if ( charVec.isNotEmpty() ) {
-                        if ( element->giveRotationMatrix(R, eid) ) {
+                        if ( element->giveRotationMatrix(R) ) {
                             charVec.rotatedWith(R, 't');
                         }
 
-                        element->giveLocationArray(loc, eid, s, & dofids);
+                        element->giveLocationArray(loc, s, & dofids);
                         answer.assemble(charVec, loc);
 
                         if ( eNorms ) {
@@ -1100,11 +1100,11 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
 
                     if ( charVec.isNotEmpty() ) {
                         element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-                        if ( element->computeDofTransformationMatrix(R, bNodes, false, eid) ) {
+                        if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
                             charVec.rotatedWith(R, 't');
                         }
 
-                        element->giveBoundaryLocationArray(loc, bNodes, eid, s, & dofids);
+                        element->giveBoundaryLocationArray(loc, bNodes, s, & dofids);
                         answer.assemble(charVec, loc);
 
                         if ( eNorms ) {
@@ -1122,11 +1122,11 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
 
                     if ( charVec.isNotEmpty() ) {
                         element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
-                        if ( element->computeDofTransformationMatrix(R, bNodes, false, eid) ) {
+                        if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
                             charVec.rotatedWith(R, 't');
                         }
 
-                        element->giveBoundaryLocationArray(loc, bNodes, eid, s, & dofids);
+                        element->giveBoundaryLocationArray(loc, bNodes, s, & dofids);
                         answer.assemble(charVec, loc);
 
                         if ( eNorms ) {
@@ -1162,7 +1162,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
 }
 
 
-void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tStep,
                                               CharType type, ValueModeType mode,
                                               const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 //
@@ -1207,10 +1207,10 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
 
         this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
         if ( charVec.isNotEmpty() ) {
-            if ( element->giveRotationMatrix(R, eid) ) {
+            if ( element->giveRotationMatrix(R) ) {
                 charVec.rotatedWith(R, 't');
             }
-            element->giveLocationArray(loc, eid, s, & dofids);
+            element->giveLocationArray(loc, s, & dofids);
 
 #ifdef _OPENMP
  #pragma omp critical
@@ -1229,7 +1229,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
 
 
 void
-EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, EquationID eid, CharType type, Domain *domain)
+EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, CharType type, Domain *domain)
 {
     // Simply assembles contributions from each element in domain
     IntArray loc;
@@ -1259,13 +1259,13 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Eq
             continue;
         }
 
-        element->giveLocationArray(loc, eid, dn);
+        element->giveLocationArray(loc, dn);
 
         // Take the tangent from the previous step
         ///@todo This is not perfect. It is probably no good for viscoelastic materials, and possibly other scenarios that are rate dependent
         ///(tangent will be computed for the previous step, with whatever deltaT it had)
         element->giveCharacteristicMatrix(charMatrix, type, tStep);
-        element->computeVectorOf(eid, VM_Incremental, tStep, delta_u);
+        element->computeVectorOf(VM_Incremental, tStep, delta_u);
         charVec.beProductOf(charMatrix, delta_u);
 
         ///@todo Deal with element deactivation and reactivation properly.

@@ -36,7 +36,6 @@
 #include "fmelement.h"
 #include "node.h"
 #include "domain.h"
-#include "equationid.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "bcgeomtype.h"
@@ -91,7 +90,7 @@ int Tr21Stokes :: computeNumberOfDofs()
     return 15;
 }
 
-void Tr21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+void Tr21Stokes :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode <= 3 ) {
         answer = {V_u, V_v, P_f};

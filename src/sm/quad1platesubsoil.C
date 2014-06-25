@@ -133,7 +133,7 @@ Quad1PlateSubSoil :: initializeFrom(InputRecord *ir)
 
 
 void
-Quad1PlateSubSoil :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Quad1PlateSubSoil :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_w};
 }

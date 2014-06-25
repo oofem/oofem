@@ -221,7 +221,7 @@ CohesiveSurface3d :: computeVolumeAround(GaussPoint *gp)
 
 
 void
-CohesiveSurface3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+CohesiveSurface3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }

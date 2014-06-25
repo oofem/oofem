@@ -127,9 +127,9 @@ SUPG :: initializeFrom(InputRecord *ir)
     }
 
     if ( requiresUnknownsDictionaryUpdate() ) {
-        VelocityPressureField = new DofDistributedPrimaryField(this, 1, FT_VelocityPressure, EID_MomentumBalance_ConservationEquation, 1);
+        VelocityPressureField = new DofDistributedPrimaryField(this, 1, FT_VelocityPressure, 1);
     } else {
-        VelocityPressureField = new PrimaryField(this, 1, FT_VelocityPressure, EID_MomentumBalance_ConservationEquation, 1);
+        VelocityPressureField = new PrimaryField(this, 1, FT_VelocityPressure, 1);
     }
 
     val = 0;
@@ -314,7 +314,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
-        lhs->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering() );
+        lhs->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
         if ( materialInterface ) {
             this->updateElementsForNewInterfacePosition(tStep);
@@ -324,7 +324,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     } else if ( requiresUnknownsDictionaryUpdate() ) {
         // rebuild lhs structure and resize solution vector
         incrementalSolutionVector.resize(neq);
-        lhs->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering() );
+        lhs->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
     }
 
 
@@ -378,7 +378,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     // assemble rhs (residual)
     //
     externalForces.zero();
-    this->assembleVector( externalForces, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
+    this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(),  LoadExchangeTag);
@@ -386,7 +386,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
     // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
     internalForces.zero();
-    this->assembleVector( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+    this->assembleVector( internalForces, tStep, InternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
@@ -409,10 +409,10 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             // momentum balance part
             lhs->zero();
             if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
-                this->assemble( lhs, tStep, EID_MomentumBalance_ConservationEquation, TangentStiffnessMatrix,
+                this->assemble( lhs, tStep, TangentStiffnessMatrix,
                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
             } else {
-                this->assemble( lhs, tStep, EID_MomentumBalance_ConservationEquation, SecantStiffnessMatrix,
+                this->assemble( lhs, tStep, SecantStiffnessMatrix,
                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
             }
         }
@@ -492,7 +492,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         // assemble rhs (residual)
         //
         internalForces.zero();
-        this->assembleVector( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+        this->assembleVector( internalForces, tStep, InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
         this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
@@ -539,7 +539,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             // assemble rhs (residual)
             //
             internalForces.zero();
-            this->assembleVector( internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+            this->assembleVector( internalForces, tStep, InternalForcesVector, VM_Total,
                                  EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
             this->updateSharedDofManagers(internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
@@ -1442,7 +1442,7 @@ SUPG :: initParallelContexts()
  * SUPG::__debug (TimeStep* tStep)
  * {
  * int i, in, id, nincr = 1000;
- * int neq =  this -> giveNumberOfDomainEquations (EID_MomentumBalance_ConservationEquation);
+ * int neq =  this -> giveNumberOfDomainEquations (1, EModelDefaultEquationNumbering());
  * IntArray loc;
  * SUPGElement* element = (SUPGElement*) giveDomain(1)->giveElement(1);
  * FloatArray vincr(6), F(6), fi(6), fprev(6), fapprox(6), *solutionVector;
@@ -1451,7 +1451,7 @@ SUPG :: initParallelContexts()
  * vincr.at(1) = 1.e-2;
  * vincr.at(2) = 1.e-7;
  * vincr.at(3) = 2.e-2;
- * element -> giveLocationArray (loc, EID_MomentumBalance);
+ * element -> giveLocationArray (loc);
  * VelocityPressureField->advanceSolution(tStep);
  * solutionVector = VelocityPressureField->giveSolutionVector(tStep);
  * solutionVector->resize(neq);

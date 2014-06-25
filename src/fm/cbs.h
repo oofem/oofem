@@ -169,8 +169,8 @@ protected:
     //</RESTRICTED_SECTION>
 public:
     CBS(int i, EngngModel * _master = NULL) : FluidModel(i, _master),
-        PressureField(this, 1, FT_Pressure, EID_ConservationEquation, 1),
-        VelocityField(this, 1, FT_Velocity, EID_MomentumBalance, 1),
+        PressureField(this, 1, FT_Pressure, 1),
+        VelocityField(this, 1, FT_Velocity, 1),
         vnum(false), vnumPrescribed(true), pnum(false), pnumPrescribed(true) {
         initFlag = 1;
         lhs = NULL;

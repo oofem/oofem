@@ -293,7 +293,7 @@ TrPlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &norm
 
 
 void
-TrPlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+TrPlaneStrain :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v};
 }
@@ -386,7 +386,7 @@ TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueMode
 
     n.beNMatrixOf(nv, 2);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf(mode, tStep, u);
 
     answer.beProductOf(n, u);
 }

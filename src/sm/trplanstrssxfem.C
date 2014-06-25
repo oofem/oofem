@@ -123,10 +123,10 @@ void TrPlaneStress2dXFEM :: computeNmatrixAt(const FloatArray &iLocCoord, FloatM
 
 
 void
-TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, EquationID iEqnId, IntArray &answer) const
+TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     // Continuous part
-	TrPlaneStress2d::giveDofManDofIDMask(inode, iEqnId, answer);
+    TrPlaneStress2d :: giveDofManDofIDMask(inode, answer);
 
     // Discontinuous part
 	if( this->giveDomain()->hasXfemManager() ) {
@@ -279,7 +279,7 @@ TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(Val
 
     XfemElementInterface_createEnrNmatrixAt(n, lcoords, * this);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf(mode, tStep, u);
     answer.beProductOf(n, u);
 }
 

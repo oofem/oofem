@@ -82,7 +82,7 @@ QSpace :: giveMaterialOrientationAt(FloatArray &x, FloatArray &y, FloatArray &z,
 
 
 void
-QSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+QSpace :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w};
 }

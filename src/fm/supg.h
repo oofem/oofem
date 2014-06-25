@@ -112,8 +112,6 @@ protected:
     // int fsflag;
 
 public:
-    /*  SUPG (int i, EngngModel* _master = NULL) : FluidModel (i,_master), VelocityPressureField(this,1,FBID_VelocityPressureField, EID_MomentumBalance_ConservationEquation, 1),accelerationVector()
-     */
     SUPG(int i, EngngModel * _master = NULL) : FluidModel(i, _master), accelerationVector() {
         initFlag = 1;
         lhs = NULL;
@@ -126,21 +124,10 @@ public:
         materialInterface = NULL;
     }
     virtual ~SUPG() {
-        if ( VelocityPressureField ) {
-            delete VelocityPressureField;
-        }
-
-        if ( materialInterface ) {
-            delete materialInterface;
-        }
-
-        if ( nMethod ) {
-            delete nMethod;
-        }
-
-        if ( lhs ) {
-            delete lhs;
-        }
+        delete VelocityPressureField;
+        delete materialInterface;
+        delete nMethod;
+        delete lhs;
     }
 
     virtual void solveYourselfAt(TimeStep *tStep);

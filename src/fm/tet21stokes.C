@@ -36,7 +36,6 @@
 #include "fmelement.h"
 #include "node.h"
 #include "domain.h"
-#include "equationid.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "bcgeomtype.h"
@@ -90,7 +89,7 @@ int Tet21Stokes :: computeNumberOfDofs()
     return 34;
 }
 
-void Tet21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+void Tet21Stokes :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode <= 4 ) {
         answer = {V_u, V_v, V_w, P_f};

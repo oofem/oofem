@@ -416,7 +416,7 @@ MisesMatNl :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray &l
     tempDamage = status->giveTempDamage();
     if ( ( tempDamage - damage ) > 0 ) {
         const FloatArray &stress = status->giveTempEffectiveStress();
-        elem->giveLocationArray(loc, EID_MomentumBalance, s);
+        elem->giveLocationArray(loc, s);
         elem->computeBmatrixAt(gp, b);
         dDamF = computeDamageParamPrime(nlKappa);
         lcontrib.clear();
@@ -438,7 +438,7 @@ MisesMatNl :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &
     LinearElasticMaterial *lmat = this->giveLinearElasticMaterial();
     double E = lmat->give('E', gp);
 
-    elem->giveLocationArray(rloc, EID_MomentumBalance, s);
+    elem->giveLocationArray(rloc, s);
     elem->computeBmatrixAt(gp, b);
     kappa = status->giveCumulativePlasticStrain();
     tempKappa = status->giveTempCumulativePlasticStrain();

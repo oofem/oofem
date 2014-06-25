@@ -75,7 +75,7 @@ Tet1_3D_SUPG :: computeNumberOfDofs()
 }
 
 void
-Tet1_3D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+Tet1_3D_SUPG :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {V_u, V_v, V_w, P_f};
 }

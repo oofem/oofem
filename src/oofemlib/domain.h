@@ -40,7 +40,6 @@
 #include "domaintype.h"
 #include "statecountertype.h"
 #include "intarray.h"
-#include "equationid.h"
 
 #include <unordered_map>
 #include <map>

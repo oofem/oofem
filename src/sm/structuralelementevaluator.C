@@ -55,7 +55,7 @@ StructuralElementEvaluator :: StructuralElementEvaluator()
 
 /*
  * int StructuralElementEvaluator :: giveIntegrationElementCodeNumbers(IntArray &answer, Element *elem,
- *                                                                  IntegrationRule *ie, EquationID ut) {
+ *                                                                  IntegrationRule *ie) {
  *  int i;
  *  IntArray mask, nodeDofIDMask, nodalArray;
  *
@@ -66,7 +66,7 @@ StructuralElementEvaluator :: StructuralElementEvaluator()
  *      // loop over nonzero shape functions and assemble localization array
  *      answer.clear();
  *      for ( i = 1; i <= mask.giveSize(); i++ ) {
- *          elem->giveDofManDofIDMask(mask.at(i), ut, nodeDofIDMask);
+ *          elem->giveDofManDofIDMask(mask.at(i), nodeDofIDMask);
  *          elem->giveDofManager( mask.at(i) )->giveLocationArray(nodeDofIDMask, nodalArray);
  *          answer.followedBy(nodalArray);
  *      }
@@ -79,14 +79,14 @@ StructuralElementEvaluator :: StructuralElementEvaluator()
  */
 
 int StructuralElementEvaluator :: giveIntegrationElementLocalCodeNumbers(IntArray &answer, Element *elem,
-                                                                         IntegrationRule *ie, EquationID ut)
+                                                                         IntegrationRule *ie)
 {
     int nsd;
     IntArray mask, nodeDofIDMask, nodalArray;
     int dofmandof;
 
     // get number of dofs in node
-    elem->giveDofManDofIDMask(1, ut, nodeDofIDMask);
+    elem->giveDofManDofIDMask(1, nodeDofIDMask);
     dofmandof = nodeDofIDMask.giveSize();
 
     nsd = elem->giveInterpolation()->giveNsd();
@@ -165,7 +165,7 @@ void StructuralElementEvaluator :: computeLumpedMassMatrix(FloatMatrix &answer, 
     ldofs = answer.giveNumberOfRows();
 
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        elem->giveDofManDofIDMask(i, EID_MomentumBalance, nodeDofIDMask);
+        elem->giveDofManDofIDMask(i, nodeDofIDMask);
         for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
             indx++;
             // zero all off-diagonal terms
@@ -265,7 +265,7 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
     FloatArray strain, stress, u, temp;
     IntArray irlocnum;
 
-    elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    elem->computeVectorOf(VM_Total, tStep, u);
 
     answer.resize(ndofs);
     answer.zero();
@@ -297,7 +297,7 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
             m->plusProduct(b, stress, dV);
         }
         // localize irule contribution into element matrix
-        if ( this->giveIntegrationElementLocalCodeNumbers(irlocnum, elem, iRule, EID_MomentumBalance) ) {
+        if ( this->giveIntegrationElementLocalCodeNumbers(irlocnum, elem, iRule) ) {
             answer.assemble(* m, irlocnum);
         }
     } // end loop over irules
@@ -328,7 +328,7 @@ void StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, Gauss
 
     // get local code numbers corresponding to ir
     IntArray lc;
-    this->giveIntegrationElementLocalCodeNumbers(lc, elem, gp->giveIntegrationRule(), EID_MomentumBalance);
+    this->giveIntegrationElementLocalCodeNumbers(lc, elem, gp->giveIntegrationRule());
     ur.resize( b.giveNumberOfColumns() );
     for ( int i = 1; i <= lc.giveSize(); i++ ) {
         ur.at(i) = u.at( lc.at(i) );
@@ -343,7 +343,7 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
     FloatArray u;
     Element *elem = this->giveElement();
 
-    elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    elem->computeVectorOf(VM_Total, tStep, u);
 
 #if 0
     // subtract initial displacements, if defined
@@ -437,7 +437,7 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
         }
 
         // localize irule contribution into element matrix
-        if ( this->giveIntegrationElementLocalCodeNumbers(irlocnum, elem, iRule, EID_MomentumBalance) ) {
+        if ( this->giveIntegrationElementLocalCodeNumbers(irlocnum, elem, iRule) ) {
             answer.assemble(* m, irlocnum);
         }
     } // end loop over irules

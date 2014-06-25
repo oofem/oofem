@@ -68,7 +68,7 @@ public:
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual double computeVolumeAround(GaussPoint *);
 
     /**

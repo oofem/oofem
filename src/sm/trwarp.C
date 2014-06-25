@@ -198,7 +198,7 @@ Tr_Warp :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 
 
 void
-Tr_Warp :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Tr_Warp :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_w};
 }

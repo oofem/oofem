@@ -48,7 +48,6 @@
 #include "dofiditem.h"
 #include "contextioerr.h"
 #include "field.h"
-#include "equationid.h"
 #include "xfem/xfemmanager.h"
 
 #include <cstring>
@@ -313,10 +312,6 @@ const char *__MaterialMappingAlgorithmTypeToString(MaterialMappingAlgorithmType 
 
 const char *__MeshPackageTypeToString(MeshPackageType _value) {
     TO_STRING_BODY(MeshPackageType_DEF)
-}
-
-const char *__EquationIDToString(EquationID _value) {
-    TO_STRING_BODY(EquationID_DEF)
 }
 
 const char *__XFEMStateTypeToString(XFEMStateType _value) {

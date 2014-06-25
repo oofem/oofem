@@ -218,7 +218,7 @@ LSpace :: initializeFrom(InputRecord *ir)
 
 
 void
-LSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+LSpace :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w};
 }
@@ -432,7 +432,7 @@ LSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mo
     FloatMatrix n;
     this->interpolation.evalN( ni, lcoords, FEIElementGeometryWrapper(this) );
     n.beNMatrixOf(ni, 3);
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf({D_u, D_v, D_w}, mode, tStep, u);
     answer.beProductOf(n, u);
 }
 

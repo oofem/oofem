@@ -348,7 +348,7 @@ QDKTPlate :: initializeFrom(InputRecord *ir)
 
 
 void
-QDKTPlate :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+QDKTPlate :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_w, R_u, R_v};
 }

@@ -102,14 +102,14 @@ Quad10_2D_SUPG :: computeNumberOfDofs()
 
 
 void
-Quad10_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+Quad10_2D_SUPG :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {V_u, V_v};
 }
 
 
 void
-Quad10_2D_SUPG :: giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &answer) const
+Quad10_2D_SUPG :: giveInternalDofManDofIDMask(int i, IntArray &answer) const
 {
     answer = {P_f};
 }

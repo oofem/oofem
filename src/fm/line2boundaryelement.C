@@ -58,7 +58,7 @@ FEInterpolation *Line2BoundaryElement :: giveInterpolation() const
     return & this->fei;
 }
 
-void Line2BoundaryElement :: giveDofManDofIDMask(int i, EquationID eid, IntArray &nodeDofIDMask) const
+void Line2BoundaryElement :: giveDofManDofIDMask(int i, IntArray &nodeDofIDMask) const
 {
     nodeDofIDMask = {V_u, V_v};
 }

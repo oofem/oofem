@@ -61,7 +61,7 @@ HTSelement :: HTSelement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 
 
 void
-HTSelement :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+HTSelement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 {
     if ( inode <= numberOfEdges ) {
@@ -254,7 +254,7 @@ HTSelement :: computePrescribedDisplacementLoadVectorAt(FloatArray &answer, Time
     FloatArray u;
     FloatMatrix K;
 
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf(mode, tStep, u);
     if ( u.containsOnlyZeroes() ) {
         answer.clear();
     } else {

@@ -65,7 +65,7 @@ public:
     virtual FEInterpolation *giveInterpolation() const { return & interp; }
 
     virtual int computeNumberOfDofs() { return 16; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 

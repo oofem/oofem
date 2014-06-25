@@ -36,7 +36,6 @@
 #include "tr1darcy.h"
 #include "node.h"
 #include "domain.h"
-#include "equationid.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "bcgeomtype.h"
@@ -124,7 +123,7 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
 
-    this->computeVectorOf({P_f}, VM_Total, tStep, a);
+    this->computeVectorOf(VM_Total, tStep, a);
 
     answer.resize(3);
     answer.zero();
@@ -249,7 +248,7 @@ void Tr1Darcy :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, Ti
     }
 }
 
-void Tr1Darcy :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+void Tr1Darcy :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {P_f};
 }

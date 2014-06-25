@@ -161,7 +161,7 @@ void QTrPlaneStrain :: computeGaussPoints()
 }
 
 void
-QTrPlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+QTrPlaneStrain :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v};
 }
@@ -436,7 +436,7 @@ QTrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueMod
 
     n.beNMatrixOf(ni, 2);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf({D_u, D_v}, mode, tStep, u);
     answer.beProductOf(n, u);
 }
 

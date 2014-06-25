@@ -39,7 +39,6 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "intarray.h"
-#include "equationid.h"
 #include "error.h"
 #include "sparsemtrxtype.h"
 #include "unknownnumberingscheme.h"
@@ -170,10 +169,9 @@ public:
      * @param eModel Pointer to corresponding engineering model.
      * @param di Domain index specify which domain to use.
      * @param s Determines unknown numbering scheme.
-     * @param ut Equation ID.
      * @return Zero iff successful.
      */
-    virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s) = 0;
+    virtual int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s) = 0;
     /**
      * Build internal structure of receiver.
      * @see buildInternalStructure
@@ -181,10 +179,9 @@ public:
      * @param di Domain index specify which domain to use.
      * @param r_s Determines unknown numbering scheme for the rows.
      * @param c_s Determines unknown numbering scheme for the columns.
-     * @param ut Equation ID.
      * @return Zero iff successful.
      */
-    virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &r_s,
+    virtual int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &r_s,
                                        const UnknownNumberingScheme &c_s) {
         OOFEM_ERROR("Not implemented");
         return 0;

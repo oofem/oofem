@@ -187,7 +187,7 @@ void QTrPlaneStress2d :: computeGaussPoints()
 }
 
 void
-QTrPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+QTrPlaneStress2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v};
 }
@@ -537,7 +537,7 @@ QTrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueM
 
     n.beNMatrixOf(ni, 2);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf({D_u, D_v}, mode, tStep, u);
     answer.beProductOf(n, u);
 }
 

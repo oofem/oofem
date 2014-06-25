@@ -65,7 +65,7 @@ QTrPlaneStressGrad :: QTrPlaneStressGrad(int n, Domain *aDomain) : QTrPlaneStres
 
 
 void
-QTrPlaneStressGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+QTrPlaneStressGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 {
     if ( inode <= nSecNodes ) {
