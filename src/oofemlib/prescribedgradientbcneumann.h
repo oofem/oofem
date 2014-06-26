@@ -35,7 +35,7 @@
 #ifndef PRESCRIBEDGRADIENTBCNEUMANN_H_
 #define PRESCRIBEDGRADIENTBCNEUMANN_H_
 
-#include "prescribedgradientbc.h"
+#include "prescribedgradientbcweakperiodic.h"
 
 #define _IFT_PrescribedGradientBCNeumann_Name   "prescribedgradientbcneumann"
 
@@ -44,51 +44,20 @@ namespace oofem {
  * Imposes a prescribed gradient weakly on the boundary
  * with a Neumann boundary condition.
  *
+ * To reduce duplication of code, we exploit the fact that
+ * Neumann boundary conditions can be obtained as a special
+ * case of weakly periodic boundary conditions.
+ *
  * @author Erik Svenning
  * @date Mar 5, 2014
  */
 
-class PrescribedGradientBCNeumann : public PrescribedGradientBC {
+class PrescribedGradientBCNeumann : public PrescribedGradientBCWeakPeriodic {
 public:
 	PrescribedGradientBCNeumann(int n, Domain * d);
 	virtual ~PrescribedGradientBCNeumann();
 
-    virtual int giveNumberOfInternalDofManagers() {return 1;}
-    virtual DofManager *giveInternalDofManager(int i);
-
-    virtual bcType giveType() const { return UnknownBT; }
-
-    virtual void scale(double s);
-
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
-
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
-
-    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
-                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
-
-    virtual const char *giveClassName() const { return "PrescribedGradientBCNeumann"; }
-    virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradientBCNeumann_Name; }
-
-    /**
-     * Computes the homogenized, macroscopic, field (stress).
-     * @param sigma Output quantity (typically stress).
-     * @param eid Equation ID to which sigma belongs.
-     * @param tStep Active time step.
-     */
-    void computeField(FloatArray &sigma, EquationID eid, TimeStep *tStep);
-
-protected:
-	/// DOF-manager containing the unknown homogenized stress.
-	Node *mpSigmaHom;
-	IntArray mSigmaIds;
-
-    /// Help function that integrates the tangent contribution from a single element boundary.
-    void integrateTangent(FloatMatrix &oTangent, Element *e, int iBndIndex);
-
+    virtual IRResultType initializeFrom(InputRecord *ir);
 };
 
 } /* namespace oofem */
