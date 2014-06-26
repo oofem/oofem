@@ -665,7 +665,7 @@ PlasticMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 
 
 void
-PlasticMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
+PlasticMaterial :: giveFiberStiffMtrx(FloatMatrix &answer,
                                         MatResponseMode mode,
                                         GaussPoint *gp,
                                         TimeStep *tStep)

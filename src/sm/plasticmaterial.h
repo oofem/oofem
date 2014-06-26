@@ -248,7 +248,7 @@ protected:
                                          GaussPoint *gp,
                                          TimeStep *tStep);
 
-    virtual void give1dFiberStiffMtrx(FloatMatrix &answer,
+    virtual void giveFiberStiffMtrx(FloatMatrix &answer,
                                       MatResponseMode mode,
                                       GaussPoint *gp,
                                       TimeStep *tStep);
