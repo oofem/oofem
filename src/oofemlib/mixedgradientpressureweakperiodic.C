@@ -231,7 +231,6 @@ void MixedGradientPressureWeakPeriodic :: constructMMatrix(FloatMatrix &mMatrix,
     int total = nsd * nsd * ( int ) pow(double ( this->order + 1 ), nsd - 1);
 
     surfCoords.resize(nsd - 1);
-
     mMatrix.resize(nsd, total);
     mMatrix.zero();
     int pos = 0;
