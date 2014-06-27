@@ -125,10 +125,18 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 
 		int numEI = xMan->giveNumberOfEnrichmentItems();
 
+        std::vector< std::vector<FloatArray> > points;
+
 		for(int i = 1; i <= numEI; i++) {
 			EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
 			ei->callGnuplotExportModule(*this);
+
+			std::vector<FloatArray> eiPoints;
+			ei->giveSubPolygon(eiPoints, 0.0, 1.0);
+			points.push_back(eiPoints);
 		}
+
+		outputXFEMGeometry(points);
 	}
 
 }
@@ -312,6 +320,21 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack)
     }
 }
 
+void GnuplotExportModule::outputXFEMGeometry(const std::vector< std::vector<FloatArray> > &iEnrItemPoints)
+{
+    double time = 0.0;
+
+    TimeStep *ts = emodel->giveCurrentStep();
+    if ( ts != NULL ) {
+        time = ts->giveTargetTime();
+    }
+
+    std :: stringstream strCracks;
+    strCracks << "CracksTime" << time << ".dat";
+    std :: string nameCracks = strCracks.str();
+    WritePointsToGnuplot(nameCracks, iEnrItemPoints);
+}
+
 void GnuplotExportModule::outputBoundaryCondition(PrescribedGradient &iBC, TimeStep *tStep)
 {
 	FloatArray stress;
@@ -398,6 +421,27 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
     }
 
     XFEMDebugTools::WriteArrayToGnuplot(nameMeanStress, componentArray, stressArray);
+
+}
+
+void GnuplotExportModule :: WritePointsToGnuplot(const std :: string &iName, const std :: vector< std::vector<FloatArray> > &iPoints)
+{
+    std :: ofstream file;
+    file.open( iName.data() );
+
+    // Set some output options
+    file << std :: scientific;
+
+    file << "# x y\n";
+
+    for(auto posVec: iPoints) {
+        for(auto pos: posVec) {
+            file << pos[0] << " " << pos[1] << "\n";
+        }
+        file << "\n";
+    }
+
+    file.close();
 
 }
 

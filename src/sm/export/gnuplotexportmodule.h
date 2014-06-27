@@ -80,12 +80,16 @@ public:
     void outputXFEM(EnrichmentItem &iEI);
     void outputXFEM(Crack &iCrack);
 
+    void outputXFEMGeometry(const std::vector< std::vector<FloatArray> > &iEnrItemPoints);
+
     /**
      * Boundary condition output
      */
     void outputBoundaryCondition(PrescribedGradient &iBC, TimeStep *tStep);
     void outputBoundaryCondition(PrescribedGradientBCNeumann &iBC, TimeStep *tStep);
     void outputBoundaryCondition(PrescribedGradientBCWeak &iBC, TimeStep *tStep);
+
+    static void WritePointsToGnuplot(const std :: string &iName, const std :: vector< std::vector<FloatArray> > &iPoints);
 
 
 protected:

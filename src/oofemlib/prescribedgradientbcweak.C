@@ -647,24 +647,42 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
 
                 if( boundaryPointIsOnActiveBoundary(intersecPoints[i]) ) {
 
-                    for(int j = 0; j < mNumTractionNodesAtIntersections; j++) {
-		            	std::pair<FloatArray, bool> nodeCoord = {intersecPoints[i], true};
-		                bndNodeCoords.push_back( nodeCoord );
+                    // TODO: Implement proper search
+                    bool closePointExists = false;
+                    const double meshTol2 = meshTol*meshTol;
+                    for(auto bndPos : bndNodeCoords) {
+                        if( bndPos.first.distance_square(intersecPoints[i]) < meshTol2 ) {
+                            closePointExists = true;
+                        }
                     }
 
+                    if(!closePointExists) {
+                        for(int j = 0; j < mNumTractionNodesAtIntersections; j++) {
+                            std::pair<FloatArray, bool> nodeCoord = {intersecPoints[i], true};
+                            bndNodeCoords.push_back( nodeCoord );
+                        }
+                    }
                 }
                 else {
                 	if(mMeshIsPeriodic) {
                 		FloatArray xPlus;
                 		giveMirroredPointOnGammaPlus(xPlus, intersecPoints[i]);
 
-                		// TODO: Implement proper search and check
+                		// TODO: Implement proper search
+                		bool closePointExists = false;
+                		const double meshTol2 = meshTol*meshTol;
+                		for(auto bndPos : bndNodeCoords) {
+                		    if( bndPos.first.distance_square(xPlus) < meshTol2 ) {
+                		        closePointExists = true;
+                		    }
+                		}
 
-                        for(int j = 0; j < mNumTractionNodesAtIntersections; j++) {
-    		            	std::pair<FloatArray, bool> nodeCoord = {xPlus, true};
-    		                bndNodeCoords.push_back( nodeCoord );
-                        }
-
+                		if(!closePointExists) {
+                            for(int j = 0; j < mNumTractionNodesAtIntersections; j++) {
+                                std::pair<FloatArray, bool> nodeCoord = {xPlus, true};
+                                bndNodeCoords.push_back( nodeCoord );
+                            }
+                		}
                 	}
                 }
             }
@@ -819,6 +837,12 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
         // largest displacement element length along the boundary.
         localizer->giveAllElementsWithNodesWithinBox(elList_plus, xC_plus, 0.51*elLength_plus );
 
+        if( elList_plus.empty() ) {
+            Element *el = localizer->giveElementContainingPoint(xC_plus);
+            int elPlaceInArray = domain->giveElementPlaceInArray(el->giveGlobalNumber());
+            elList_plus.insert( elPlaceInArray );
+        }
+
         std :: vector< int > displacementElements, displacementElements_plus;
         for ( int elNum: elList_plus ) {
 
@@ -869,6 +893,13 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
 			// Make sure that the search radius is never smaller than the
 			// largest displacement element length along the boundary.
 			localizer->giveAllElementsWithNodesWithinBox(elList_minus, xC_minus, 0.51*elLength_minus );
+
+	        if( elList_minus.empty() ) {
+	            Element *el = localizer->giveElementContainingPoint(xC_minus);
+                int elPlaceInArray = domain->giveElementPlaceInArray(el->giveGlobalNumber());
+	            elList_minus.insert( elPlaceInArray );
+	        }
+
 
 			std :: vector< int > displacementElements_minus;
 			for ( int elNum: elList_minus ) {
