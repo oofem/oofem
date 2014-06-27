@@ -94,7 +94,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
         bool firstIntersection = true;
 
         std :: vector< std :: vector< FloatArray > >pointPartitions;
-        std :: vector< Triangle >allTri;
+        mSubTri.clear();
 
         std :: vector< int >enrichingEIs;
         int elPlaceInArray = xMan->giveDomain()->giveElementPlaceInArray( element->giveGlobalNumber() );
@@ -122,7 +122,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                     // Use XfemElementInterface_partitionElement to subdivide the element
                     for ( int i = 0; i < int ( pointPartitions.size() ); i++ ) {
                         // Triangulate the subdivisions
-                        this->XfemElementInterface_partitionElement(allTri, pointPartitions [ i ]);
+                        this->XfemElementInterface_partitionElement(mSubTri, pointPartitions [ i ]);
                     }
 
 
@@ -199,12 +199,12 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
             else {
                 // Loop over triangles
                 std :: vector< Triangle >allTriCopy;
-                for ( size_t triIndex = 0; triIndex < allTri.size(); triIndex++ ) {
+                for ( size_t triIndex = 0; triIndex < mSubTri.size(); triIndex++ ) {
                     // Call alternative version of XfemElementInterface_prepareNodesForDelaunay
                     std :: vector< std :: vector< FloatArray > >pointPartitionsTri;
                     double startXi, endXi;
                     bool intersection = false;
-                    XfemElementInterface_prepareNodesForDelaunay(pointPartitionsTri, startXi, endXi, allTri [ triIndex ], eiIndex, intersection);
+                    XfemElementInterface_prepareNodesForDelaunay(pointPartitionsTri, startXi, endXi, mSubTri [ triIndex ], eiIndex, intersection);
 
                     if ( intersection ) {
                         // Use XfemElementInterface_partitionElement to subdivide triangle j
@@ -275,11 +275,11 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                             }
                         }
                     } else {
-                        allTriCopy.push_back(allTri [ triIndex ]);
+                        allTriCopy.push_back(mSubTri [ triIndex ]);
                     }
                 }
 
-                allTri = allTriCopy;
+                mSubTri = allTriCopy;
             }
         }
 
@@ -296,8 +296,8 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
             str3 << "TriEl" << elIndex << ".vtk";
             std :: string name3 = str3.str();
 
-            if(allTri.size() > 0) {
-                XFEMDebugTools :: WriteTrianglesToVTK(name3, allTri);
+            if(mSubTri.size() > 0) {
+                XFEMDebugTools :: WriteTrianglesToVTK(name3, mSubTri);
             }
         }
 
@@ -305,7 +305,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
         int ruleNum = 1;
 
         if ( partitionSucceeded ) {
-            IntegrationRule *intRule = new PatchIntegrationRule(ruleNum, element, allTri);
+            IntegrationRule *intRule = new PatchIntegrationRule(ruleNum, element, mSubTri);
             intRule->SetUpPointsOnTriangle(xMan->giveNumGpPerTri(), matMode);
             element->setIntegrationRules({intRule});
         }

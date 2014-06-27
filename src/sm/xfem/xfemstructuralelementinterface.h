@@ -82,6 +82,11 @@ public:
     StructuralInterfaceMaterial *mpCZMat;
     int mCZMaterialNum;
     int mCSNumGaussPoints;
+
+
+    // Store element subdivision for postprocessing
+    std :: vector< Triangle > mSubTri;
+
 };
 } /* namespace oofem */
 
