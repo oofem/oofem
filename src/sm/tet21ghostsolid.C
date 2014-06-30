@@ -36,7 +36,7 @@ tet21ghostsolid::tet21ghostsolid(int n, Domain *aDomain) : NLStructuralElement(n
     Dghost.at(4,4) = Dghost.at(5,5) = Dghost.at(6,6) = .5*(1-2*nu);
     Dghost.times(E/(1+nu)/(1-2*nu));
 
-    conservation_ordering.setValues(4, 7, 14, 21, 28);
+    conservation_ordering = { 7, 14, 21, 28};
 
     for ( int i = 0, j = 1; i < 10; ++i ) {
         momentum_ordering(i * 3 + 0) = j++;
@@ -66,9 +66,8 @@ void
 tet21ghostsolid :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(1);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -120,7 +119,7 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
             G.plusDyadUnsym(dNv, Nlin, -detJ*weight);
 
         } else {
-            OOFEM_CLASS_ERROR("No support for large deformations yet!");
+            OOFEM_ERROR ("No support for large deformations yet!");
         }
 
     }
@@ -257,7 +256,7 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
     FloatArray momentum, conservation, auxstress;
     double pressure, epsvol;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a);
+    this->computeVectorOf( VM_Total, tStep, a);
     if (!tStep->isTheFirstStep()) {
         // a.printYourself();
     }
@@ -303,7 +302,7 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
             auxstress.plusProduct(B, Stress, detJ * weight);
 
         } else {
-            OOFEM_CLASS_ERROR("No support for large deformations yet!");
+            OOFEM_ERROR("No support for large deformations yet!");
         }
 
     }
@@ -323,35 +322,27 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
 
     // Test linear
 
-    if (this->giveNumber() == 364) {
+    /*    if (this->giveNumber() == 364) {
         FloatMatrix K;
         FloatArray ans;
         this->computeStiffnessMatrix(K, TangentStiffness, tStep);
         ans.beProductOf(K, a);
         ans.printYourself();
         answer.printYourself();
-    }
+    } */
 
 
 }
 
 void
-tet21ghostsolid :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+tet21ghostsolid :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     // Returns the mask for node number inode of this element.
 
     if ( inode <= 4 ) {
-        if ( ut == EID_MomentumBalance ) {
-            answer.setValues(7, V_u, V_v, V_w, D_u, D_v, D_w, P_f);
-        } else {
-            OOFEM_ERROR("tet21ghostsolid :: giveDofManDofIDMask: Unknown equation id encountered");
-        }
+        answer = { V_u, V_v, V_w, D_u, D_v, D_w, P_f };
     } else {
-        if ( ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
-            answer.setValues(6, V_u, V_v, V_w, D_u, D_v, D_w);
-        } else {
-            OOFEM_ERROR("tet21ghostsolid :: giveDofManDofIDMask: Unknown equation id encountered");
-        }
+        answer = { V_u, V_v, V_w, D_u, D_v, D_w };
     }
 }
 
@@ -396,7 +387,7 @@ tet21ghostsolid :: giveDisplacementsIncrementData(FloatArray &u_prev, FloatArray
         //G.printYourself();
         FloatArray u_n, inc_n;
         IntArray id;
-        id.setValues(3, 1, 2, 3);
+        id = { 1, 2, 3 };
 
         for (int i = 0; i<this->giveNumberOfDofManagers(); i++) {
 

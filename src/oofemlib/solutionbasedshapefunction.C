@@ -815,18 +815,18 @@ SolutionbasedShapeFunction :: copyDofManagersToSurfaceData(modeStruct *mode, Int
 
         computeBaseFunctionValueAt(values, *dman->giveCoordinates(), this->dofs, *mode->myEngngModel );
 
-<<<<<<< HEAD
+/* <<<<<<< HEAD
 =======
         for ( int j = 1; j <= this->dofs.giveSize(); j++ ) {
             SurfaceDataStruct *surfaceData = new(SurfaceDataStruct);
             Dof *d = dman->giveDofWithID( dofs.at(j) );
 >>>>>>> 147f565295394adef603dae296a820af5f28d9cd
-
+*/
         // Check that current node contains current DofID
         for (int j=1; j<=this->dofs.giveSize(); j++) {
-            for (int k=1; k<= dman->giveNumberOfDofs(); k++ ) {
+            for (Dof *d: *dman ){ //int k=1; k<= dman->giveNumberOfDofs(); k++ ) {
 
-                Dof *d = dman->giveDof(k);
+                //Dof *d = dman->dofArray.at(k);// giveDof(k);
 
                 if (d->giveDofID() == this->dofs.at(j)) {
                     SurfaceDataStruct *surfaceData = new(SurfaceDataStruct);
