@@ -60,11 +60,12 @@ class GaussPoint;
 class NonlinearFluidMaterialStatus : public FluidDynamicMaterialStatus
 {
 protected:
-
-    FloatArray deviatoricStrainVector, temp_deviatoricStrainVector;  // reduced form
+    FloatArray temp_deviatoricStressVector;
+    FloatArray temp_deviatoricStrainVector;
+    double temp_norm2;
 
 public:
-    NonlinearFluidMaterialStatus(int n, Domain *d, GaussPoint *g);
+    NonlinearFluidMaterialStatus(int n, Domain * d, GaussPoint * g);
 
     virtual ~NonlinearFluidMaterialStatus() { }
 
@@ -72,9 +73,12 @@ public:
 
     virtual void updateYourself(TimeStep *);
 
-    const FloatArray &giveDeviatoricStrainVector() { return deviatoricStrainVector; }
+    const FloatArray &giveTempDeviatoricStressVector() { return temp_deviatoricStressVector; }
     const FloatArray &giveTempDeviatoricStrainVector() { return temp_deviatoricStrainVector; }
-    void  letTempDeviatoricStrainVectorBe(const FloatArray &v) { temp_deviatoricStrainVector = v; }
+    double giveTempStrainNorm2() { return temp_norm2; }
+    void letTempDeviatoricStressVectorBe(FloatArray v) { temp_deviatoricStressVector = std :: move(v); }
+    void letTempDeviatoricStrainVectorBe(FloatArray v) { temp_deviatoricStrainVector = std :: move(v); }
+    void letTempStrainNorm2Be(double v) { temp_norm2 = v; }
 
     virtual const char *giveClassName() const { return "NonlinearFluidMaterialStatus"; }
 };
@@ -99,22 +103,20 @@ protected:
     double alpha;
 
 public:
-    NonlinearFluidMaterial(int n, Domain *d) : FluidDynamicMaterial(n, d) { }
+    NonlinearFluidMaterial(int n, Domain * d) : FluidDynamicMaterial(n, d) { }
 
     virtual ~NonlinearFluidMaterial() { }
 
     virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
 
-    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp,
-                                               TimeStep * tStep);
+    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp,
+                                               TimeStep *tStep);
 
     virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep);
     virtual double give(int aProperty, GaussPoint *);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
-
-    virtual int hasMaterialModeCapability(MaterialMode mode);
 
     virtual const char *giveClassName() const { return "NewtonianFluidMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_NonlinearFluidMaterial_Name; }

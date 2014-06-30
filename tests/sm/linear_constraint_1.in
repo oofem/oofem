@@ -1,6 +1,7 @@
 linear_constraint_1.out
 Test of linear constraint condition on a Truss2d element
-LinearStatic nsteps 1
+LinearStatic nsteps 1 nmodules 1
+errorcheck
 domain 2dTruss
 OutputManager tstep_all dofman_all element_all
 ndofman 2 nelem 1 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 2
@@ -18,6 +19,6 @@ LinearConstraintBC 2 loadTimeFunction 1 dofmans 1 2 dofs 1 1 weights 1 1 weights
 ConstantFunction 1 f(t) 1.0
 ConstantFunction 2 f(t) 0.5
 #%BEGIN_CHECK% tolerance 1.e-6
-#NODE tStep 1.0 number 2 dof 1 unknown d value -0.30
-#REACTION tStep 1.0 number 1 dof 1 value 3.e-3
+#NODE tStep 1 number 2 dof 1 unknown d value -0.30
+#REACTION tStep 1 number 1 dof 1 value 3.e-3
 #%END_CHECK%

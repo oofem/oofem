@@ -57,7 +57,7 @@ public:
      * @param n Load time function number.
      * @param d Domain to which new object will belongs.
      */
-    TF1(int n, Domain *d) : StructuralTemperatureLoad(n, d) { }
+    TF1(int n, Domain * d) : StructuralTemperatureLoad(n, d) { }
     /// Destructor
     virtual ~TF1()  { }
 

@@ -74,7 +74,7 @@ protected:
 
 public:
     /// Constructor
-    RemeshingCriteria(int n, ErrorEstimator *e);
+    RemeshingCriteria(int n, ErrorEstimator * e);
     /// Destructor
     virtual ~RemeshingCriteria();
     /**
@@ -103,7 +103,7 @@ public:
      */
     virtual int estimateMeshDensities(TimeStep *tStep) = 0;
 
-    virtual void reinitialize() {}
+    virtual void reinitialize() { }
 };
 } // end namespace oofem
 #endif // remeshingcrit_h

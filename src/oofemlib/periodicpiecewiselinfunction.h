@@ -68,7 +68,7 @@ private:
     double period;
 
 public:
-    PeriodicPiecewiseLinFunction(int i, Domain *d) : PiecewiseLinFunction(i, d)
+    PeriodicPiecewiseLinFunction(int i, Domain * d) : PiecewiseLinFunction(i, d)
     {
         period = -1.0;
         addTF = 0;
@@ -80,8 +80,9 @@ public:
     virtual const char *giveClassName() const { return "PeriodicPiecewiseClass"; }
     virtual const char *giveInputRecordName() const { return _IFT_PeriodicPiecewiseLinFunction_Name; }
 
-    virtual double __at(double);
-    virtual double __derAt(double);
+    virtual double evaluateAtTime(double);
+    virtual double evaluateVelocityAtTime(double);
+    virtual double evaluateAccelerationAtTime(double) { return 0.; }
 };
 } // end namespace oofem
 #endif // periodicpiecewiselinfunction_h

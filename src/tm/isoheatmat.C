@@ -53,7 +53,6 @@ IsotropicHeatTransferMaterial :: ~IsotropicHeatTransferMaterial() {
 IRResultType
 IsotropicHeatTransferMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     // double value ;
 
@@ -110,11 +109,6 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     MaterialMode mMode = gp->giveMaterialMode();
     double cond = this->giveIsotropicConductivity(gp);
 
-    /*if ( !isActivated(tStep) ) //element, which is inactive (activityLTF==0), will never go into this function
-     *   cond = 0.;
-     * }
-     */
-
     switch  ( mMode ) {
     case _1dHeat:
         answer.resize(1, 1);
@@ -133,7 +127,7 @@ IsotropicHeatTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
         return;
 
     default:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -146,7 +140,7 @@ IsotropicHeatTransferMaterial :: giveCharacteristicValue(MatResponseMode mode,
     if ( mode == Capacity ) {
         return ( capacity * this->give('d', gp) );
     } else {
-        _error2( "giveCharacteristicValue : unknown mode (%s)", __MatResponseModeToString(mode) );
+        OOFEM_ERROR("unknown mode (%s)", __MatResponseModeToString(mode) );
     }
 
     return 0.;

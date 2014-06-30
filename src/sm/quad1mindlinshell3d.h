@@ -36,10 +36,13 @@
 #define quad1mindlinshell3d_h
 
 #include "nlstructuralelement.h"
+#include "zznodalrecoverymodel.h"
+#include "sprnodalrecoverymodel.h"
 
 ///@name Input fields for Quad1MindlinShell3D element
 //@{
 #define _IFT_Quad1MindlinShell3D_Name "quad1mindlinshell3d"
+#define _IFT_Quad1MindlinShell3D_ReducedIntegration "reducedintegration"
 //@}
 
 namespace oofem {
@@ -63,13 +66,17 @@ class FEI2dQuadLin;
  *
  * @author Mikael Öhman
  */
-class Quad1MindlinShell3D : public NLStructuralElement
+class Quad1MindlinShell3D : public NLStructuralElement,
+public ZZNodalRecoveryModelInterface,
+public SPRNodalRecoveryModelInterface
 {
 protected:
     /// Cached nodal coordinates in local c.s.,
-    FloatArray *lnodes [ 4 ];
+    std::vector< FloatArray > lnodes;
     /// Cached coordinates in local c.s.,
     FloatMatrix lcsMatrix;
+    /// Flag controlling reduced (one - point) integration for shear
+    bool reducedIntegrationFlag;
 
     static FEI2dQuadLin interp;
 
@@ -77,17 +84,9 @@ protected:
     static IntArray shellOrdering;
     /// Ordering for the drilling dofs (the out-of-plane rotations)
     static IntArray drillOrdering;
-    /// Dummy variable
-    static bool __initialized;
-    /// Defines the ordering of the dofs in the local stiffness matrix.
-    static bool initOrdering() {
-        shellOrdering.setValues(20,  1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23);
-        drillOrdering.setValues(4,  6, 12, 18, 24);
-        return true;
-    }
 
 public:
-    Quad1MindlinShell3D(int n, Domain *d);
+    Quad1MindlinShell3D(int n, Domain * d);
     virtual ~Quad1MindlinShell3D();
 
     virtual FEInterpolation *giveInterpolation() const;
@@ -107,7 +106,7 @@ public:
 
     virtual int computeNumberOfDofs() { return 24; }
     virtual int computeNumberOfGlobalDofs() { return 24; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     virtual void computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp);
 
@@ -123,12 +122,21 @@ public:
     virtual void computeLCS();
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 
+    virtual Interface *giveInterface(InterfaceType it);
+
+    virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
+    virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
+    virtual int SPRNodalRecoveryMI_giveNumberOfIP() { return this->numberOfGaussPoints; }
+    virtual SPRPatchType SPRNodalRecoveryMI_givePatchType() { return SPRPatchType_2dxy; }
+
+
 protected:
     virtual void computeGaussPoints();
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
     virtual void computeSurfaceLoadVectorAt(FloatArray &answer, Load *load, int iSurf, TimeStep *tStep, ValueModeType mode);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
 
+    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
@@ -137,11 +145,11 @@ protected:
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
-    //virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp) { answer.resize(0, 0); }
-    //virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.resize(0); }
+    //virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp) { answer.clear(); }
+    //virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.clear(); }
     //virtual IntegrationRule *GetSurfaceIntegrationRule(int i) { return NULL; }
     //virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
-    //virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.resize(0); }
+    //virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.clear(); }
 };
 } // end namespace oofem
 #endif // quad1mindlinshell3d_h

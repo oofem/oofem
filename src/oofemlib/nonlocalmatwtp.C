@@ -55,7 +55,6 @@ namespace oofem {
 void
 NonlocalMaterialWTP :: giveElementNonlocalDepArry(IntArray &answer, Domain *d, int num)
 {
-    int _i;
     std :: set< int >relems;
     std :: set< int > :: const_iterator relemsIter;
     Element *ielem = d->giveElement(num);
@@ -70,11 +69,12 @@ NonlocalMaterialWTP :: giveElementNonlocalDepArry(IntArray &answer, Domain *d, i
         // convert relems set into an int array
         // and store it
         answer.resize( relems.size() );
-        for ( relemsIter = relems.begin(), _i = 1; relemsIter != relems.end(); ++relemsIter, _i++ ) {
-            answer.at(_i) = * relemsIter;
+        int _i = 1;
+        for ( int relem: relems ) {
+            answer.at(_i++) = relem;
         }
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 
@@ -86,13 +86,12 @@ NonlocalMaterialWTP :: giveNonlocalDepArryElementPlugin(GaussPoint *gp, std :: s
 
     NonlocalMaterialStatusExtensionInterface *interface =
         static_cast< NonlocalMaterialStatusExtensionInterface * >( gp->giveMaterialStatus()->
-                                                                   giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
+                                                                  giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
     if ( interface ) {
         std :: list< localIntegrationRecord > *lir = interface->giveIntegrationDomainList();
-        std :: list< localIntegrationRecord > :: iterator listIter;
 
-        for ( listIter = lir->begin(); listIter != lir->end(); ++listIter ) {
-            remoteElemNum = ( ( * listIter ).nearGp )->giveElement()->giveGlobalNumber();
+        for ( auto &intdom: *lir ) {
+            remoteElemNum = ( intdom.nearGp )->giveElement()->giveGlobalNumber();
             s.insert(remoteElemNum);
         }
     }
@@ -114,7 +113,7 @@ NonlocalMaterialWTP :: init(Domain *domain)
     int nproc = emodel->giveNumberOfProcesses();
     int myrank = emodel->giveRank();
     CommunicatorBuff cb(nproc, CBT_dynamic);
-    Communicator com(emodel, & cb, myrank, nproc, CommMode_Dynamic);
+    Communicator com(emodel, &cb, myrank, nproc, CommMode_Dynamic);
     this->nonlocElementDependencyMap.clear();
 
     // build nonlocal element dependency array for each element
@@ -147,7 +146,7 @@ NonlocalMaterialWTP :: migrate()
     int nproc = emodel->giveNumberOfProcesses();
     int myrank = emodel->giveRank();
     CommunicatorBuff cb(nproc, CBT_dynamic);
-    Communicator com(emodel, & cb, myrank, nproc, CommMode_Dynamic);
+    Communicator com(emodel, &cb, myrank, nproc, CommMode_Dynamic);
     StaticCommunicationBuffer commBuff(MPI_COMM_WORLD);
 
     /*
@@ -158,9 +157,7 @@ NonlocalMaterialWTP :: migrate()
     int _globsize, _val;
     Element *elem;
     std :: set< int >domainElementDepSet;
-    std :: set< int > :: const_iterator sit;
     // loop over each element dep list to assemble domain list
-    std :: vector< IntArray > :: const_iterator it;
     for ( ie = 1; ie <= nelems; ie++ ) {
         elem = domain->giveElement(ie);
         if ( ( elem->giveParallelMode() == Element_local ) ) {
@@ -184,9 +181,8 @@ NonlocalMaterialWTP :: migrate()
 
 #if NonlocalMaterialWTP_DEBUG_PRINT
     fprintf(stderr, "[%d] nonlocal domain dependency:", myrank);
-    for ( sit = domainElementDepSet.begin();
-          sit != domainElementDepSet.end(); ++sit ) {
-        fprintf(stderr, "%d ", * sit);
+    for ( int eldep: domainElementDepSet ) {
+        fprintf(stderr, "%d ", eldep);
     }
 
     fprintf(stderr, "\n");
@@ -202,9 +198,8 @@ NonlocalMaterialWTP :: migrate()
 
 #if NonlocalMaterialWTP_DEBUG_PRINT
     fprintf(stderr, "[%d] remote elem wish list:", myrank);
-    for ( sit = domainElementDepSet.begin();
-          sit != domainElementDepSet.end(); ++sit ) {
-        fprintf(stderr, "%d ", * sit);
+    for ( int eldep: domainElementDepSet ) {
+        fprintf(stderr, "%d ", eldep);
     }
 
     fprintf(stderr, "\n");
@@ -214,7 +209,7 @@ NonlocalMaterialWTP :: migrate()
     _locsize = domainElementDepSet.size() + 1;
     result = MPI_Allreduce(& _locsize, & _globsize, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
     if ( result != MPI_SUCCESS ) {
-        OOFEM_ERROR("NonlocalMaterialWTP::migrate: MPI_Allreduce to determine  broadcast buffer size failed");
+        OOFEM_ERROR("MPI_Allreduce to determine  broadcast buffer size failed");
     }
 
     commBuff.resize( commBuff.givePackSize(MPI_INT, _globsize) );
@@ -228,8 +223,8 @@ NonlocalMaterialWTP :: migrate()
         if ( i == myrank ) {
             // current domain has to send its receive wish list to all domains
             commBuff.packInt(_locsize);
-            for ( sit = domainElementDepSet.begin(); sit != domainElementDepSet.end(); ++sit ) {
-                commBuff.packInt(* sit);
+            for ( int eldep: domainElementDepSet ) {
+                commBuff.packInt(eldep);
             }
 
             result = commBuff.bcast(i);
@@ -258,13 +253,12 @@ NonlocalMaterialWTP :: migrate()
     } // end loop over partitions broadcast
 
 #if NonlocalMaterialWTP_DEBUG_PRINT
-    std :: list< int > :: const_iterator lit;
     for ( i = 0; i < nproc; i++ ) { // loop over partitions
         // print some info
         fprintf(stderr, "[%d] elements scheduled for mirroring at [%d]:",
                 myrank, i);
-        for ( lit = toSendList [ i ].begin(); lit != toSendList [ i ].end(); ++lit ) {
-            fprintf( stderr, "%d[%d] ", * lit, domain->giveElement(* lit)->giveGlobalNumber() );
+        for ( int elnum: toSendList [ i ] ) {
+            fprintf( stderr, "%d[%d] ", elnum, domain->giveElement(elnum)->giveGlobalNumber() );
         }
 
         fprintf(stderr, "\n");
@@ -323,7 +317,7 @@ int NonlocalMaterialWTP :: packMigratingElementDependencies(Domain *d, ProcessCo
     for ( ielem = 1; ielem <= nelem; ielem++ ) { // begin loop over elements
         elem = d->giveElement(ielem);
         if ( ( elem->giveParallelMode() == Element_local ) &&
-             ( lb->giveElementPartition(ielem) == iproc ) ) {
+            ( lb->giveElementPartition(ielem) == iproc ) ) {
             // pack local element (node numbers shuld be global ones!!!)
             // pack type
             _globnum = elem->giveGlobalNumber();
@@ -369,7 +363,7 @@ int NonlocalMaterialWTP :: packRemoteElements(Domain *d, ProcessCommunicator &pc
 {
     int myrank = d->giveEngngModel()->giveRank();
     int iproc = pc.giveRank();
-    int i, ie, nnodes, inode;
+    int nnodes, inode;
     DofManager *node, *dofman;
     Element *elem;
 
@@ -380,29 +374,27 @@ int NonlocalMaterialWTP :: packRemoteElements(Domain *d, ProcessCommunicator &pc
     // query process communicator to use
     ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
     ProcessCommDataStream pcDataStream(pcbuff);
-    std :: list< int > :: const_iterator it;
 
     // here we have to pack also nodes that are shared by packed elements !!!
     // assemble set of nodes needed by those elements
     // these have to be send (except those that are shared)
     std :: set< int >nodesToSend;
-    for ( it = toSendList [ iproc ].begin(); it != toSendList [ iproc ].end(); ++it ) {
-        ie = * it; //ie = d->elementGlobal2Local(*it);
+    for ( int ie: toSendList [ iproc ] ) {
+        //ie = d->elementGlobal2Local(gie);
         elem = d->giveElement(ie);
         nnodes = elem->giveNumberOfDofManagers();
-        for ( i = 1; i <= nnodes; i++ ) {
+        for ( int i = 1; i <= nnodes; i++ ) {
             node = elem->giveDofManager(i);
             if ( ( node->giveParallelMode() == DofManager_local ) ||
-                 ( node->isShared() && !node->givePartitionList()->contains(iproc) ) ) {
-                nodesToSend.insert( elem->giveDofManager(i)->giveGlobalNumber() );
+                ( node->isShared() && !node->givePartitionList()->contains(iproc) ) ) {
+                nodesToSend.insert( node->giveGlobalNumber() );
             }
         }
     }
 
     // pack nodes that become null nodes on remote partition
-    std :: set< int > :: const_iterator nit;
-    for ( nit = nodesToSend.begin(); nit != nodesToSend.end(); ++nit ) {
-        inode = d->dofmanGlobal2Local(* nit);
+    for ( int in: nodesToSend ) {
+        inode = d->dofmanGlobal2Local(in);
         dofman = d->giveDofManager(inode);
         pcbuff->packString( dofman->giveInputRecordName() );
         dofman->saveContext(& pcDataStream, CM_Definition | CM_State | CM_UnknownDictState);
@@ -410,8 +402,8 @@ int NonlocalMaterialWTP :: packRemoteElements(Domain *d, ProcessCommunicator &pc
 
     pcbuff->packString("");
 
-    for ( it = toSendList [ iproc ].begin(); it != toSendList [ iproc ].end(); ++it ) {
-        ie = * it; //ie = d->elementGlobal2Local(*it);
+    for ( int ie: toSendList [ iproc ] ) {
+        //ie = d->elementGlobal2Local(gie);
         elem = d->giveElement(ie);
         // pack local element (node numbers shuld be global ones!!!)
         // pack type
@@ -454,10 +446,9 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
             // record already exist
             delete dofman;
         } else {
-            d->giveTransactionManager()->addTransaction(DomainTransactionManager :: DTT_ADD,
-                                                        DomainTransactionManager :: DCT_DofManager,
-                                                        dofman->giveGlobalNumber(),
-                                                        dofman);
+            d->giveTransactionManager()->addDofManTransaction(DomainTransactionManager :: DTT_ADD,
+                                                              dofman->giveGlobalNumber(),
+                                                              dofman);
         }
     } while ( 1 );
 
@@ -476,9 +467,8 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
         elem->restoreContext(& pcDataStream, CM_Definition | CM_State);
         elem->setParallelMode(Element_remote);
         elem->setPartitionList(_partitions);
-        d->giveTransactionManager()->addTransaction(DomainTransactionManager :: DTT_ADD,
-                                                    DomainTransactionManager :: DCT_Element,
-                                                    elem->giveGlobalNumber(), elem);
+        d->giveTransactionManager()->addElementTransaction(DomainTransactionManager :: DTT_ADD,
+                                                           elem->giveGlobalNumber(), elem);
     } while ( 1 );
 
     return 1;

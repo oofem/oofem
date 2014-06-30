@@ -72,7 +72,6 @@ LumpedMassElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
 IRResultType
 LumpedMassElement :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     this->StructuralElement :: initializeFrom(ir);
@@ -91,7 +90,7 @@ LumpedMassElement :: checkConsistency()
     int _result = StructuralElement :: checkConsistency();
     int _ndofs = this->computeNumberOfDofs();
     if ( _ndofs != this->components.giveSize() ) {
-        _warning("checkConsistency : component array size mismatch");
+        OOFEM_WARNING("component array size mismatch");
         _result = 0;
     }
 
@@ -103,15 +102,13 @@ int
 LumpedMassElement :: computeNumberOfDofs()
 {
     DofManager *dman = this->giveDofManager(1);
-    int _i, _ndof = dman->giveNumberOfDofs();
     int answer = 0;
-    DofIDItem _dofid;
 
     // simply count all "structural" dofs of element node
-    for ( _i = 1; _i <= _ndof; _i++ ) {
-        _dofid = dman->giveDof(_i)->giveDofID();
+    for ( Dof *dof: *dman ) {
+        DofIDItem _dofid = dof->giveDofID();
         if ( ( _dofid == D_u ) || ( _dofid == D_v ) || ( _dofid == D_w ) ||
-             ( _dofid == R_u ) || ( _dofid == R_v ) || ( _dofid == R_w ) ) {
+            ( _dofid == R_u ) || ( _dofid == R_v ) || ( _dofid == R_w ) ) {
             answer++;
         }
     }
@@ -121,19 +118,17 @@ LumpedMassElement :: computeNumberOfDofs()
 
 
 void
-LumpedMassElement :: giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const
+LumpedMassElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer.resize(6);
-    answer.resize(0);
+    answer.clear();
     DofManager *dman = this->giveDofManager(inode);
-    int _ndof = dman->giveNumberOfDofs();
-    DofIDItem _dofid;
 
     // simply collect all "structural" dofs of element node
-    for ( int _i = 1; _i <= _ndof; _i++ ) {
-        _dofid = dman->giveDof(_i)->giveDofID();
+    for ( Dof *dof: *dman ) {
+        DofIDItem _dofid = dof->giveDofID();
         if ( ( _dofid == D_u ) || ( _dofid == D_v ) || ( _dofid == D_w ) ||
-             ( _dofid == R_u ) || ( _dofid == R_v ) || ( _dofid == R_w ) ) {
+            ( _dofid == R_u ) || ( _dofid == R_v ) || ( _dofid == R_w ) ) {
             answer.followedBy(_dofid);
         }
     }
@@ -187,7 +182,7 @@ void LumpedMassElement :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownT
 
 
 void LumpedMassElement :: drawScalar(oofegGraphicContext &context)
-{}
+{ }
 
 #endif
 } // end namespace oofem

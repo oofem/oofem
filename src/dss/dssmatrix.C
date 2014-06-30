@@ -64,7 +64,7 @@ DSSMatrix :: DSSMatrix(dssType _t) : SparseMtrx()
     } else if ( _t == unsym_LU ) {
         _st = eDSSFactorizationLU;
     } else {
-        OOFEM_ERROR("DSSMatrix::DSSMatrix() -- unknown dssType");
+        OOFEM_ERROR("unknown dssType");
     }
 
     _dss->Initialize(0, _st);
@@ -85,7 +85,7 @@ DSSMatrix :: DSSMatrix(dssType _t, int n) : SparseMtrx(n, n)
     } else if ( _t == unsym_LU ) {
         _st = eDSSFactorizationLU;
     } else {
-        OOFEM_ERROR("DSSMatrix::DSSMatrix() -- unknown dssType");
+        OOFEM_ERROR("unknown dssType");
     }
 
     _dss->Initialize(0, _st);
@@ -105,26 +105,26 @@ DSSMatrix :: ~DSSMatrix()
 
 DSSMatrix :: DSSMatrix(const DSSMatrix &S) : SparseMtrx(S.nRows, S.nColumns)
 {
-    OOFEM_ERROR("DSSMatrix::DSSMatrix(const DSSMatrix &S) -- not implemented");
+    OOFEM_ERROR("not implemented");
 }
 
 SparseMtrx *DSSMatrix :: GiveCopy() const
 {
-    OOFEM_ERROR("DSSMatrix::GiveCopy -- not implemented");
+    OOFEM_ERROR("not implemented");
     return NULL;
 }
 
 void DSSMatrix :: times(const FloatArray &x, FloatArray &answer) const
 {
-    OOFEM_ERROR("DSSMatrix::times -- not implemented");
+    OOFEM_ERROR("not implemented");
 }
 
 void DSSMatrix :: times(double x)
 {
-    OOFEM_ERROR("DSSMatrix::times -- not implemented");
+    OOFEM_ERROR("not implemented");
 }
 
-int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
+int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
@@ -140,7 +140,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
 
     for ( n = 1; n <= nelem; n++ ) {
         elem = domain->giveElement(n);
-        elem->giveLocationArray(loc, ut, s);
+        elem->giveLocationArray(loc, s);
 
         for ( i = 1; i <= loc.giveSize(); i++ ) {
             if ( ( ii = loc.at(i) ) ) {
@@ -161,7 +161,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
     for ( i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
-            bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
+            bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
 	    for (std::size_t k = 0; k < r_locs.size(); k++) {
 	      IntArray &krloc = r_locs[k];
 	      IntArray &kcloc = c_locs[k];
@@ -185,7 +185,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
     unsigned long *rowind_ = new unsigned long [ nz_ ];
     unsigned long *colptr_ = new unsigned long [ neq + 1 ];
     if ( ( rowind_ == NULL ) || ( colptr_ == NULL ) ) {
-        OOFEM_ERROR("DSSMatrix::buildInternalStructure: free store exhausted, exiting");
+        OOFEM_ERROR("free store exhausted, exiting");
     }
 
     indx = 0;
@@ -205,7 +205,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
     }
 
     if ( ( _sm = new SparseMatrixF(neq, NULL, rowind_, colptr_, 0, 0, true) ) == NULL ) {
-        OOFEM_ERROR("DSSMatrix::buildInternalStructure: free store exhausted, exiting");
+        OOFEM_FATAL("free store exhausted, exiting");
     }
 
     int bsize = eModel->giveDomain(1)->giveDefaultNodeDofIDArry().giveSize();
@@ -226,7 +226,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
     DofManager *dman;
 
     if ( mcn == NULL ) {
-        OOFEM_ERROR("DSSMatrix::buildInternalStructure: free store exhausted, exiting");
+        OOFEM_FATAL("free store exhausted, exiting");
     }
 
     for ( n = 1; n <= ndofmans; n++ ) {
@@ -237,9 +237,9 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
             break;
         }
 
-        for ( i = 1; i <= _ndofs; i++ ) {
-            if ( dman->giveDof(i)->isPrimaryDof() ) {
-                _neq = dman->giveDof(i)->giveEquationNumber(s);
+        for ( Dof *dof: *dman ) {
+            if ( dof->isPrimaryDof() ) {
+                _neq = dof->giveEquationNumber(s);
                 if ( _neq > 0 ) {
                     mcn [ _c++ ] = _neq - 1;
                 } else {
@@ -257,28 +257,28 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, EquationID u
     for (int ibc=1; ibc<=nbc; ibc++) {
       int ndman = domain->giveBc(ibc)->giveNumberOfInternalDofManagers();
       for (int idman = 1; idman <= ndman; idman ++) {
-	dman = domain->giveBc(ibc)->giveInternalDofManager(idman);
-	_ndofs = dman->giveNumberOfDofs();
-        if ( _ndofs > bsize ) {
-	  _succ = false;
-	  break;
-        }
+            dman = domain->giveBc(ibc)->giveInternalDofManager(idman);
+            _ndofs = dman->giveNumberOfDofs();
+            if ( _ndofs > bsize ) {
+                _succ = false;
+                break;
+            }
 
-        for ( i = 1; i <= _ndofs; i++ ) {
-	  if ( dman->giveDof(i)->isPrimaryDof() ) {
-	    _neq = dman->giveDof(i)->giveEquationNumber(s);
-	    if ( _neq > 0 ) {
-	      mcn [ _c++ ] = _neq - 1;
-	    } else {
-	      mcn [ _c++ ] = -1; // no corresponding row in sparse mtrx structure
-	    }
-	  }
-        }
+            for ( Dof *dof: *dman ) {
+                if ( dof->isPrimaryDof() ) {
+                    _neq = dof->giveEquationNumber(s);
+                    if ( _neq > 0 ) {
+                    mcn [ _c++ ] = _neq - 1;
+                    } else {
+                    mcn [ _c++ ] = -1; // no corresponding row in sparse mtrx structure
+                    }
+                }
+            }
 
-        for ( i = _ndofs + 1; i <= bsize; i++ ) {
-	  mcn [ _c++ ] = -1;                         // no corresponding row in sparse mtrx structure
+            for ( i = _ndofs + 1; i <= bsize; i++ ) {
+                mcn [ _c++ ] = -1;                         // no corresponding row in sparse mtrx structure
+            }
         }
-      }
     }
     
     if ( _succ ) {
@@ -310,7 +310,7 @@ int DSSMatrix :: assemble(const IntArray &loc, const FloatMatrix &mat)
  #  ifdef DEBUG
     dim = mat.giveNumberOfRows();
     if ( dim != loc.giveSize() ) {
-        OOFEM_ERROR("CompCol::assemble : dimension of 'k' and 'loc' mismatch");
+        OOFEM_ERROR("dimension of 'k' and 'loc' mismatch");
     }
 
  #  endif

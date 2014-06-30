@@ -33,16 +33,54 @@
  */
 
 #include "dynamicinputrecord.h"
+#include "femcmpnn.h"
 #include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "dictionary.h"
 #include "range.h"
+#include "node.h"
+#include "element.h"
+#include "scalarfunction.h"
 
 #include <sstream>
 
 namespace oofem {
-DynamicInputRecord :: DynamicInputRecord() : InputRecord(),
+DynamicInputRecord *CreateNodeIR(int i, InputFieldType nodeType, const FloatArray &coord)
+{
+    DynamicInputRecord *result = new DynamicInputRecord(nodeType, i);
+    result->setField(coord, _IFT_Node_coords);
+    return result;
+}
+
+DynamicInputRecord *CreateElementIR(int i, InputFieldType elementType, const IntArray &nodes, int cs)
+{
+    DynamicInputRecord *result = new DynamicInputRecord(elementType, i);
+    result->setField(nodes, _IFT_Element_nodes);
+    if ( cs != 0 ) {
+        result->setField(cs, _IFT_Element_crosssect);
+    }
+    return result;
+}
+
+
+DynamicInputRecord :: DynamicInputRecord(std :: string keyword, int value) : InputRecord(),
+    recordKeyword(keyword), ///@todo std::move here
+    recordNumber(value),
+    emptyRecord(),
+    intRecord(),
+    doubleRecord(),
+    boolRecord(),
+    stringRecord(),
+    floatArrayRecord(),
+    intArrayRecord(),
+    matrixRecord(),
+    stringListRecord(),
+    dictionaryRecord(),
+    rangeRecord()
+{ }
+
+DynamicInputRecord :: DynamicInputRecord(FEMComponent &femc) : InputRecord(),
     recordKeyword(),
     recordNumber(0),
     emptyRecord(),
@@ -56,7 +94,9 @@ DynamicInputRecord :: DynamicInputRecord() : InputRecord(),
     stringListRecord(),
     dictionaryRecord(),
     rangeRecord()
-{}
+{
+    femc.giveInputRecord(* this);
+}
 
 DynamicInputRecord :: DynamicInputRecord(const DynamicInputRecord &src) : InputRecord(src),
     recordKeyword(src.recordKeyword),
@@ -72,12 +112,12 @@ DynamicInputRecord :: DynamicInputRecord(const DynamicInputRecord &src) : InputR
     stringListRecord(src.stringListRecord),
     dictionaryRecord(src.dictionaryRecord),
     rangeRecord(src.rangeRecord)
-{}
+{ }
 
 DynamicInputRecord :: ~DynamicInputRecord()
-{}
+{ }
 
-DynamicInputRecord &DynamicInputRecord :: operator=(const DynamicInputRecord &src)
+DynamicInputRecord &DynamicInputRecord :: operator = ( const DynamicInputRecord & src )
 {
     this->recordKeyword = src.recordKeyword;
     this->recordNumber = src.recordNumber;
@@ -214,6 +254,16 @@ IRResultType DynamicInputRecord :: giveField(std :: list< Range > &answer, Input
     return IRRT_OK;
 }
 
+IRResultType DynamicInputRecord :: giveField(ScalarFunction &answer, InputFieldType id)
+{
+    std :: map< std :: string, ScalarFunction > :: iterator it = this->scalarFunctionRecord.find(id);
+    if ( it == this->scalarFunctionRecord.end() ) {
+        return IRRT_NOTFOUND;
+    }
+    answer = it->second;
+    return IRRT_OK;
+}
+
 bool DynamicInputRecord :: hasField(InputFieldType id)
 {
     return this->emptyRecord.find(id) != this->emptyRecord.end() ||
@@ -235,9 +285,9 @@ DynamicInputRecord :: printYourself()
 }
 
 // Setters
-void DynamicInputRecord :: setRecordKeywordField(const std :: string &keyword, int value)
+void DynamicInputRecord :: setRecordKeywordField(std :: string keyword, int value)
 {
-    this->recordKeyword = keyword;
+    this->recordKeyword = std :: move(keyword);
     this->recordNumber = value;
 }
 
@@ -261,29 +311,41 @@ void DynamicInputRecord :: setField(bool item, InputFieldType id)
     this->boolRecord [ id ] = item;
 }
 
-void DynamicInputRecord :: setField(const std :: string &item, InputFieldType id)
+void DynamicInputRecord :: setField(std :: string item, InputFieldType id)
 {
     this->stringRecord [ id ] = item;
 }
 
-void DynamicInputRecord :: setField(const FloatArray &item, InputFieldType id)
+void DynamicInputRecord :: setField(FloatArray item, InputFieldType id)
 {
-    this->floatArrayRecord [ id ] = item;
+    this->floatArrayRecord.insert({id, std :: move(item)});
 }
 
-void DynamicInputRecord :: setField(const IntArray &item, InputFieldType id)
+void DynamicInputRecord :: setField(std :: initializer_list< double > item, InputFieldType id)
 {
-    this->intArrayRecord [ id ] = item;
+    //this->floatArrayRecord.emplace(id, item);
+    this->floatArrayRecord.insert(std :: make_pair(id, FloatArray(item)));
 }
 
-void DynamicInputRecord :: setField(const FloatMatrix &item, InputFieldType id)
+void DynamicInputRecord :: setField(IntArray item, InputFieldType id)
 {
-    this->matrixRecord [ id ] = item;
+    this->intArrayRecord.insert({id, std :: move(item)});
 }
 
-void DynamicInputRecord :: setField(const std :: vector< std :: string > &item, InputFieldType id)
+void DynamicInputRecord :: setField(std :: initializer_list< int > item, InputFieldType id)
 {
-    this->stringListRecord [ id ] = item;
+    //this->intArrayRecord.emplace(id, item);
+    this->intArrayRecord.insert({id, IntArray(item)});
+}
+
+void DynamicInputRecord :: setField(FloatMatrix item, InputFieldType id)
+{
+    this->matrixRecord.insert({id, std :: move(item)});
+}
+
+void DynamicInputRecord :: setField(std :: vector< std :: string > item, InputFieldType id)
+{
+    this->stringListRecord.insert({id, std :: move(item)});
 }
 
 void DynamicInputRecord :: setField(const Dictionary &item, InputFieldType id)
@@ -294,6 +356,11 @@ void DynamicInputRecord :: setField(const Dictionary &item, InputFieldType id)
 void DynamicInputRecord :: setField(const std :: list< Range > &item, InputFieldType id)
 {
     this->rangeRecord [ id ] = item;
+}
+
+void DynamicInputRecord :: setField(const ScalarFunction &item, InputFieldType id)
+{
+    this->scalarFunctionRecord [ id ] = item;
 }
 
 void DynamicInputRecord :: setField(InputFieldType id)
@@ -314,19 +381,23 @@ void DynamicInputRecord :: unsetField(InputFieldType id)
     this->stringListRecord.erase(id);
     this->dictionaryRecord.erase(id);
     this->rangeRecord.erase(id);
+    this->scalarFunctionRecord.erase(id);
 }
 
 void
 DynamicInputRecord :: report_error(const char *_class, const char *proc, InputFieldType id,
                                    IRResultType result, const char *file, int line)
 {
-    __OOFEM_ERROR5(file, line, "Input error: \"%s\", field keyword \"%s\"\n%s::%s", strerror(result), id, _class, proc);
+    oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line,
+                              "Input error: \"%s\", field keyword \"%s\"\n%s::%s",
+                              strerror(result), id, _class, proc);
+    oofem_exit(1); ///@todo We should never directly exit when dealing with user input.
 }
 
 // Helpful macro since we have so many separate records
-#define forRecord(type, name) \
-    for ( std :: map< std :: string, type > :: const_iterator it = name.begin(); it != name.end(); ++it ) { \
-        rec << " " << it->first << " " << it->second; \
+#define forRecord(name) \
+    for ( const auto &x: name ) { \
+        rec << " " << x.first << " " << x.second; \
     }
 
 std :: string DynamicInputRecord :: giveRecordAsString() const
@@ -340,36 +411,37 @@ std :: string DynamicInputRecord :: giveRecordAsString() const
     }
 
     // Empty fields
-    for ( std :: set< std :: string > :: const_iterator it = emptyRecord.begin(); it != emptyRecord.end(); ++it ) {
-        rec << " " << * it;
+    for ( const auto &x: emptyRecord ) {
+        rec << " " << x;
     }
 
     // Standard fields;
-    forRecord(int, intRecord);
-    forRecord(double, doubleRecord);
-    forRecord(bool, boolRecord);
-    forRecord(std :: string, stringRecord);
-    forRecord(FloatArray, floatArrayRecord);
-    forRecord(IntArray, intArrayRecord);
-    forRecord(FloatMatrix, matrixRecord);
-    forRecord(Dictionary, dictionaryRecord);
+    forRecord(intRecord);
+    forRecord(doubleRecord);
+    forRecord(boolRecord);
+    forRecord(stringRecord);
+    forRecord(floatArrayRecord);
+    forRecord(intArrayRecord);
+    forRecord(matrixRecord);
+    forRecord(dictionaryRecord);
+    forRecord(scalarFunctionRecord);
 
     // Have to write special code for std::vector and std::list
-    for ( std :: map< std :: string, std :: vector< std :: string > > :: const_iterator it = stringListRecord.begin(); it != stringListRecord.end(); ++it ) {
-        rec << " " << it->first;
-        std :: vector< std :: string >list = it->second;
+    for ( const auto &x: stringListRecord ) {
+        rec << " " << x.first;
+        const std :: vector< std :: string > &list = x.second;
         rec << " " << list.size();
-        for ( std :: vector< std :: string > :: const_iterator it2 = list.begin(); it2 != list.end(); ++it2 ) {
-            rec << " " << * it2;
+        for ( const auto &y: list ) {
+            rec << " " << y;
         }
     }
 
-    for ( std :: map< std :: string, std :: list< Range > > :: const_iterator it = rangeRecord.begin(); it != rangeRecord.end(); ++it ) {
-        rec << " " << it->first;
-        std :: list< Range >list = it->second;
+    for ( const auto &x: rangeRecord ) {
+        rec << " " << x.first;
+        const std :: list< Range > &list = x.second;
         rec << " " << list.size();
-        for ( std :: list< Range > :: const_iterator it2 = list.begin(); it2 != list.end(); ++it2 ) {
-            rec << " " << * it2;
+        for ( const auto &y: list ) {
+            rec << " " << y;
         }
     }
 

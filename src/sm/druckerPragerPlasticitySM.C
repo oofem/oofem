@@ -41,7 +41,6 @@
 #include "intarray.h"
 #include "structuralmaterial.h"
 #include "isolinearelasticmaterial.h"
-#include "structuralcrosssection.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "mathfem.h"
@@ -219,7 +218,6 @@ IRResultType
 DruckerPragerPlasticitySM :: initializeFrom(InputRecord *ir)
 {
     // Required by IR_GIVE_FIELD macro
-    const char *__proc = "initializeFrom";
     IRResultType result;
     // call the corresponding service of structural material
     StructuralMaterial :: initializeFrom(ir);
@@ -251,7 +249,7 @@ DruckerPragerPlasticitySM :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, limitYieldStress, _IFT_DruckerPragerPlasticitySM_lys);
         break;
     default:
-        _error("Choose hardeningType 1 (linear hardening/softening), 2 (exponential hardening/softening) in input file!");
+        OOFEM_ERROR("Choose hardeningType 1 (linear hardening/softening), 2 (exponential hardening/softening) in input file!");
         break;
     }
 
@@ -428,7 +426,7 @@ DruckerPragerPlasticitySM :: performRegularReturn(double eM, double gM, double k
     // Newton iteration to find deltaLambda
     while ( newtonError > yieldTol ) {
         if ( ++iterationCount > newtonIter ) {
-            _error("Newton iteration for deltaLambda (regular stress return) did not converge after newtonIter iterations. You might want to try increasing the optional parameter newtoniter or yieldtol in the material record of your input file.");
+            OOFEM_ERROR("Newton iteration for deltaLambda (regular stress return) did not converge after newtonIter iterations. You might want to try increasing the optional parameter newtoniter or yieldtol in the material record of your input file.");
         }
 
         yieldValuePrime = yieldValuePrimeZero - kFactor *computeYieldStressPrime(tempKappa, eM);
@@ -461,7 +459,7 @@ DruckerPragerPlasticitySM :: performRegularReturn(double eM, double gM, double k
     OOFEM_LOG_DEBUG("IterationCount in regular return = %d\n", iterationCount);
 
     if ( deltaLambda < 0. ) {
-        _error("Fatal error in the Newton iteration for regular stress return. deltaLambda is evaluated as negative, but should always be positive. This is most likely due to a softening law with local snapback, which is physically inadmissible.n");
+        OOFEM_ERROR("Fatal error in the Newton iteration for regular stress return. deltaLambda is evaluated as negative, but should always be positive. This is most likely due to a softening law with local snapback, which is physically inadmissible.n");
     }
 }
 
@@ -492,7 +490,7 @@ DruckerPragerPlasticitySM :: performVertexReturn(double eM, double gM, double kM
     // Newton iteration to find deltaLambda
     while ( newtonError > yieldTol ) {
         if ( ++iterationCount > newtonIter ) {
-            _error("Newton iteration for deltaLambda (vertex stress return) did not converge after newtonIter iterations. You might want to try increasing the optional parameter newtoniter or yieldtol in the material record of your input file.");
+            OOFEM_ERROR("Newton iteration for deltaLambda (vertex stress return) did not converge after newtonIter iterations. You might want to try increasing the optional parameter newtoniter or yieldtol in the material record of your input file.");
         }
 
         // exclude division by zero
@@ -502,7 +500,7 @@ DruckerPragerPlasticitySM :: performVertexReturn(double eM, double gM, double kM
         } else {
             yieldValuePrime = yieldValuePrimeZero
                               - 2. / 9. / kM / kM *computeYieldStressPrime(tempKappa, eM)
-                              * deltaVolumetricStress / deltaKappa;
+            * deltaVolumetricStress / deltaKappa;
         }
 
         deltaVolumetricStressIncrement = -yieldValue / yieldValuePrime;
@@ -519,7 +517,7 @@ DruckerPragerPlasticitySM :: performVertexReturn(double eM, double gM, double kM
     OOFEM_LOG_DEBUG("Done iteration in vertex return, after %d\n", iterationCount);
 
     if ( deltaKappa < 0. ) {
-        _error("Fatal error in the Newton iteration for vertex stress return. deltaKappa is evaluated as negative, but should always be positive. This is most likely due to a softening law with a local snapback, which is physically inadmissible.\n");
+        OOFEM_ERROR("Fatal error in the Newton iteration for vertex stress return. deltaKappa is evaluated as negative, but should always be positive. This is most likely due to a softening law with a local snapback, which is physically inadmissible.");
     }
 }
 
@@ -550,8 +548,8 @@ DruckerPragerPlasticitySM :: computeYieldStressInShear(double kappa, double eM) 
             limitYieldStress - ( limitYieldStress - initialYieldStress ) * exp(-kappa / kappaC);
         break;
     default:
-        //StructuralMaterial :: _error( "Case failed: choose linear hardening/softening (1), exponential hardening/softening (2) in input file.") ;
-        _error("Case failed: choose linear hardening/softening (1), exponential hardening/softening (2) in input file.");
+        //StructuralMaterial :: OOFEM_ERROR( "Case failed: choose linear hardening/softening (1), exponential hardening/softening (2) in input file.") ;
+        OOFEM_ERROR("Case failed: choose linear hardening/softening (1), exponential hardening/softening (2) in input file.");
         return 0.;
 
         break;
@@ -578,8 +576,8 @@ DruckerPragerPlasticitySM :: computeYieldStressPrime(double kappa, double eM) co
 
         break;
     default:
-        //StructuralMaterial :: _error( "Case failed: choose linear hardening/softening (1), exponential hardening/softening (2) in input file.") ;
-        _error("Case failed: choose linear hardening/softening (1), exponential hardening/softening (2) in input file.");
+        //StructuralMaterial :: OOFEM_ERROR( "Case failed: choose linear hardening/softening (1), exponential hardening/softening (2) in input file.") ;
+        OOFEM_ERROR("Case failed: choose linear hardening/softening (1), exponential hardening/softening (2) in input file.");
         return 0.;
 
         break;
@@ -604,7 +602,7 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 
     case TangentStiffness:
         switch ( ( static_cast< DruckerPragerPlasticitySMStatus * >( this->giveStatus(gp) ) )
-                 ->giveTempStateFlag() ) {
+                ->giveTempStateFlag() ) {
         case DruckerPragerPlasticitySMStatus :: DP_Elastic:        // elastic stiffness
         case DruckerPragerPlasticitySMStatus :: DP_Unloading:        // elastic stiffness
             LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
@@ -620,14 +618,14 @@ DruckerPragerPlasticitySM :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
             giveVertexAlgorithmicStiffMatrix(answer, mode, gp, tStep);
             break;
         default:
-            _error("Case did not match.\n");
+            OOFEM_ERROR("Case did not match.");
             break;
         }
 
         break;
 
     default:
-        _error("Switch failed: Only elastic and tangent stiffness are supported.\n");
+        OOFEM_ERROR("Switch failed: Only elastic and tangent stiffness are supported.");
         break;
     }
 }
@@ -669,7 +667,7 @@ DruckerPragerPlasticitySM :: giveRegAlgorithmicStiffMatrix(FloatMatrix &answer,
 
     //exclude division by zero
     if ( hStar == 0. ) {
-        OOFEM_ERROR("DruckerPragerPlasticitySM :: computeYieldStressPrime is zero. This happens mainly due to excessive softening.");
+        OOFEM_ERROR("computeYieldStressPrime is zero. This happens mainly due to excessive softening.");
     }
 
     double a_const = 1. + deltaLambdaStar;
@@ -766,7 +764,7 @@ DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix(FloatMatrix &answe
         kM * HBar / ( HBar * deltaVolumetricPlasticStrain + 9. / 2. * alpha * kM * deltaKappa );
 
     if ( ( HBar * deltaVolumetricPlasticStrain + 9. / 2. * alpha * kM * deltaKappa ) == 0. ) {
-        OOFEM_ERROR2( "DruckerPragerPlasticitySM :: giveVertexAlgorithmicStiffMatrix of tangent type is singular, material ID %d\n", this->giveNumber() );
+        OOFEM_ERROR("Tangent type is singular, material ID %d\n", this->giveNumber() );
     }
     // compute the algorithmic tangent stiffness
 
@@ -840,7 +838,7 @@ DruckerPragerPlasticitySM :: predictRelativeComputationalCost(GaussPoint *gp)
     const int state_flag = status->giveStateFlag();
 
     if ( ( state_flag == DruckerPragerPlasticitySMStatus :: DP_Vertex ) ||
-         ( state_flag == DruckerPragerPlasticitySMStatus :: DP_Yielding ) ) {
+        ( state_flag == DruckerPragerPlasticitySMStatus :: DP_Yielding ) ) {
         return 20.;
     } else {
         return 1.0;

@@ -40,17 +40,13 @@
 #include "domaintype.h"
 #include "statecountertype.h"
 #include "intarray.h"
-#include "equationid.h"
 
+#include <unordered_map>
 #include <map>
 #include <string>
 #ifdef __PARALLEL_MODE
  #include <list>
  #include "entityrenumberingscheme.h"
-#endif
-
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
 #endif
 
 ///@name Input fields for domains
@@ -62,7 +58,7 @@
 #define _IFT_Domain_ncrosssect "ncrosssect"
 #define _IFT_Domain_nbc "nbc"
 #define _IFT_Domain_nic "nic"
-#define _IFT_Domain_nloadtimefunct "nltf"
+#define _IFT_Domain_nfunct "nltf"
 #define _IFT_Domain_nset "nset"
 #define _IFT_Domain_nbarrier "nbarrier"
 #define _IFT_Domain_nrandgen "nrandgen"
@@ -80,7 +76,7 @@ class Material;
 class GeneralBoundaryCondition;
 class InitialCondition;
 class Load;
-class LoadTimeFunction;
+class Function;
 class CrossSection;
 class ElementSide;
 class DofManager;
@@ -98,6 +94,7 @@ class TopologyDescription;
 class DataReader;
 class Set;
 class FractureManager;
+class oofegGraphicContext;
 
 #ifdef __PARALLEL_MODE
 class ProcessCommunicator;
@@ -133,7 +130,7 @@ private:
     /// Initial condition list.
     AList< InitialCondition > *icList;
     /// Load time function list.
-    AList< LoadTimeFunction > *loadTimeFunctionList;
+    AList< Function > *functionList;
     /// Set list.
     AList< Set > *setList;
     /// Nonlocal barrier list.
@@ -198,6 +195,12 @@ private:
     /// Fracture Manager
     FractureManager *fracManager;
 
+    /**
+     * Map from an element's global number to its place
+     * in the element array. Added by ES 140326.
+     */
+    std::unordered_map< int, int > mElementPlaceInArray;
+
     /// Topology description
     TopologyDescription *topology;
 
@@ -235,7 +238,7 @@ public:
      * @param e Engineering model domain will belong to.
      * @see giveSerialNumber
      */
-    Domain(int n, int serNum, EngngModel *e);
+    Domain(int n, int serNum, EngngModel * e);
 
     /// Create a copy of the domain using the dynamic data reader.
     Domain *Clone();
@@ -264,6 +267,12 @@ public:
      */
     Element *giveGlobalElement(int n);
     /**
+     * Returns the array index of the element with global
+     * number iGlobalElNum, so that it can be fetched by
+     * calling giveElement. Returns -1 if not found.
+     */
+    int giveElementPlaceInArray(int iGlobalElNum) const;
+    /**
      * Returns engineering model to which receiver is associated.
      */
     EngngModel *giveEngngModel();
@@ -291,7 +300,7 @@ public:
      * Generates error if no such load time function is defined.
      * @param n Pointer to n-th load time function is returned.
      */
-    LoadTimeFunction *giveLoadTimeFunction(int n);
+    Function *giveFunction(int n);
     /**
      * Service for accessing particular domain material model.
      * Generates error if no such material model is defined.
@@ -345,6 +354,12 @@ public:
      */
     DofManager *giveDofManager(int n);
     /**
+     * Service for accessing particular domain dof manager.
+     * Generates error if no such element is defined.
+     * @param n Pointer to the element with id n
+     */
+    DofManager *giveGlobalDofManager(int n);
+    /**
      * Reads receiver description from input stream and creates corresponding components accordingly.
      * It scans input file, each line is assumed to be single record describing type and parameters for
      * specific entity in domain. The record line is converted to lower case letters.
@@ -383,7 +398,7 @@ public:
     /// Returns number of initial conditions in domain.
     int giveNumberOfInitialConditions() const { return icList->giveSize(); }
     /// Returns number of load time functions in domain.
-    int giveNumberOfLoadTimeFunctions() const { return loadTimeFunctionList->giveSize(); }
+    int giveNumberOfFunctions() const { return functionList->giveSize(); }
     /// Returns number of regions. Currently regions corresponds to cross section models.
     int giveNumberOfRegions() const { return this->giveNumberOfCrossSectionModels(); }
     /// Returns number of nonlocal integration barriers
@@ -416,7 +431,7 @@ public:
     /// Resizes the internal data structure to accommodate space for _newSize initial conditions.
     void resizeInitialConditions(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize load time functions.
-    void resizeLoadTimeFunctions(int _newSize);
+    void resizeFunctions(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize random field generators.
     void resizeRandomFieldGenerators(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize sets.
@@ -437,7 +452,7 @@ public:
     /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setInitialCondition(int i, InitialCondition *obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
-    void setLoadTimeFunction(int i, LoadTimeFunction *obj);
+    void setFunction(int i, Function *obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setRandomFieldGenerator(int i, RandomFieldGenerator *obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
@@ -644,8 +659,16 @@ public:
 private:
     void resolveDomainDofsDefaults(const char *);
 
-    void error(const char *file, int line, const char *format, ...);
-    void warning(const char *file, int line, const char *format, ...);
+    /// Returns string for prepending output (used by error reporting macros).
+    std :: string errorInfo(const char *func) const;
+
+private:
+    /**
+     * Construct map from an element's global number to
+     * its place the element array.
+     */
+    void BuildElementPlaceInArrayMap();
+
 };
 } // end namespace oofem
 #endif // domain_h

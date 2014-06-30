@@ -64,7 +64,7 @@ protected:
 
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
-    GPExportModule(int n, EngngModel *e);
+    GPExportModule(int n, EngngModel * e);
     /// Destructor
     virtual ~GPExportModule();
 

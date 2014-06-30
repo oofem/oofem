@@ -1,7 +1,8 @@
 steel1.out
 Plane stress - cantilever l=3. h=1. - Nonlinear solution using HMH material.
 #LinearStatic 1
-NonLinearStatic nsteps 8 stepLength 0.000011497039 minStepLength 0.00001 rtolv 0.01 Psi 0.0 MaxIter 120
+NonLinearStatic nsteps 8 stepLength 0.000011497039 minStepLength 0.00001 rtolv 0.01 Psi 0.0 MaxIter 120 nmodules 1
+errorcheck filename "steel1.in"
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 171 nelem 281 ncrosssect  1 nmat  1 nbc 2 nic 0 nltf 1
@@ -470,16 +471,16 @@ ConstantFunction 1 f(t) 1.0
 # 
 #
 #
-#%BEGIN_CHECK% tolerance 1.e-12
+#%BEGIN_CHECK% tolerance 1.e-6
 ## check load levels
-#LOADLEVEL tStep 7 value 1.610709
+#LOADLEVEL tStep 8 value 1.610709
 ## check node displacement at final step
-#NODE tStep 7 number 1 dof 1 unknown d value 2.80734367e-06
-#NODE tStep 7 number 1 dof 2 unknown d value 1.40257208e-05
-#NODE tStep 7 number 2 dof 1 unknown d value -2.82627572e-06
-#NODE tStep 7 number 2 dof 2 unknown d value 1.40448131e-05
+#NODE tStep 8 number 1 dof 1 unknown d value 2.80734367e-06 tolerance 1e-12
+#NODE tStep 8 number 1 dof 2 unknown d value 1.40257208e-05 tolerance 1e-12
+#NODE tStep 8 number 2 dof 1 unknown d value -2.82627572e-06 tolerance 1e-12
+#NODE tStep 8 number 2 dof 2 unknown d value 1.40448131e-05 tolerance 1e-12
 ## check some arbitrary element
-#ELEMENT tStep 7 number 144 gp 1 keyword "stresses" component 1  value -1.0852e+01
-#ELEMENT tStep 7 number 144 gp 1 keyword "stresses" component 2  value -9.2804e+00
-#ELEMENT tStep 7 number 144 gp 1 keyword "stresses" component 6  value  2.1700e-01
+#ELEMENT tStep 8 number 144 gp 1 keyword 1 component 1  value -1.08520930e+01
+#ELEMENT tStep 8 number 144 gp 1 keyword 1 component 2  value -9.28042227e+00
+#ELEMENT tStep 8 number 144 gp 1 keyword 1 component 6  value  2.17002247e-01
 #%END_CHECK%

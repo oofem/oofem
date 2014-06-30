@@ -39,15 +39,14 @@
 
 namespace oofem {
 ExportModuleManager :: ExportModuleManager(EngngModel *emodel) : ModuleManager< ExportModule >(emodel)
-{}
+{ }
 
 ExportModuleManager :: ~ExportModuleManager()
-{}
+{ }
 
 IRResultType
 ExportModuleManager :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
     this->numberOfModules = 0;
@@ -63,13 +62,13 @@ ExportModule *ExportModuleManager :: CreateModule(const char *name, int n, Engng
 void
 ExportModuleManager :: doOutput(TimeStep *tStep, bool substepFlag)
 {
-    for ( int i = 1; i <= numberOfModules; i++ ) {
+    for ( auto &module: moduleList ) {
         if ( substepFlag ) {
-            if ( this->giveModule(i)->testSubStepOutput() ) {
-                this->giveModule(i)->doOutput(tStep);
+            if ( module->testSubStepOutput() ) {
+                module->doOutput(tStep);
             }
         } else {
-            this->giveModule(i)->doOutput(tStep);
+            module->doOutput(tStep);
         }
     }
 }
@@ -77,8 +76,8 @@ ExportModuleManager :: doOutput(TimeStep *tStep, bool substepFlag)
 void
 ExportModuleManager :: initialize()
 {
-    for ( int i = 1; i <= numberOfModules; i++ ) {
-        this->giveModule(i)->initialize();
+    for ( auto &module: moduleList ) {
+        module->initialize();
     }
 }
 
@@ -86,8 +85,8 @@ ExportModuleManager :: initialize()
 void
 ExportModuleManager :: terminate()
 {
-    for ( int i = 1; i <= numberOfModules; i++ ) {
-        this->giveModule(i)->terminate();
+    for ( auto &module: moduleList ) {
+        module->terminate();
     }
 }
 } // end namespace oofem

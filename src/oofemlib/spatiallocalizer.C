@@ -45,17 +45,20 @@
 namespace oofem {
 #define POINT_TOL 1.e-6
 
+int
+SpatialLocalizerInterface :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
+{
+    FloatArray lcoords;
+    return this->element->computeLocalCoordinates(lcoords, coords);
+}
+
 void
 SpatialLocalizerInterface :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
 {
-    Element *element = this->SpatialLocalizerI_giveElement();
-    FloatArray *coordinates;
-
-    coordinates = element->giveNode(1)->giveCoordinates();
     bb1 = bb0 = * element->giveNode(1)->giveCoordinates();
 
     for ( int i = 2; i <= element->giveNumberOfNodes(); ++i ) {
-        coordinates = element->giveNode(i)->giveCoordinates();
+        FloatArray *coordinates = element->giveNode(i)->giveCoordinates();
         bb0.beMinOf(bb0, * coordinates);
         bb1.beMaxOf(bb1, * coordinates);
     }
@@ -65,11 +68,10 @@ SpatialLocalizerInterface :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatAr
 double
 SpatialLocalizerInterface :: SpatialLocalizerI_giveClosestPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords)
 {
-    Element *e = this->SpatialLocalizerI_giveElement();
-    FEInterpolation *interp = e->giveInterpolation();
+    FEInterpolation *interp = element->giveInterpolation();
 
-    if ( !interp->global2local( lcoords, gcoords, FEIElementGeometryWrapper(e) ) ) { // Outside element
-        interp->local2global( closest, lcoords, FEIElementGeometryWrapper(e) );
+    if ( !interp->global2local( lcoords, gcoords, FEIElementGeometryWrapper(element) ) ) { // Outside element
+        interp->local2global( closest, lcoords, FEIElementGeometryWrapper(element) );
         return closest.distance(gcoords);
     } else {
         closest = gcoords;
@@ -105,7 +107,6 @@ SpatialLocalizer :: giveAllElementsWithNodesWithinBox(elementContainerType &elem
                                                       const double radius)
 {
     nodeContainerType nodesWithinBox;
-    nodeContainerType :: iterator it;
     const IntArray *dofmanConnectivity;
 
     elemSet.clear();
@@ -114,8 +115,8 @@ SpatialLocalizer :: giveAllElementsWithNodesWithinBox(elementContainerType &elem
 
     this->giveAllNodesWithinBox(nodesWithinBox, coords, radius);
 
-    for ( it = nodesWithinBox.begin(); it != nodesWithinBox.end(); ++it ) {
-        dofmanConnectivity = ct->giveDofManConnectivityArray(* it);
+    for ( int node: nodesWithinBox ) {
+        dofmanConnectivity = ct->giveDofManConnectivityArray(node);
         for ( int i = 1; i <= dofmanConnectivity->giveSize(); i++ ) {
             elemSet.insert( dofmanConnectivity->at(i) );
         }

@@ -32,8 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef __PARALLEL_MODE
-
 #include "parallelordering.h"
 #include "engngm.h"
 #include "unknownnumberingscheme.h"
@@ -78,7 +76,7 @@ void
 Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberingScheme &n)
 {
     Domain *d = emodel->giveDomain(di);
-    int ndofs, ndofman = d->giveNumberOfDofManagers();
+    int ndofman = d->giveNumberOfDofManagers();
     int myrank = emodel->giveRank();
     DofManager *dman;
     // determine number of local eqs + number of those shared DOFs which are numbered by receiver
@@ -93,10 +91,9 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
         dman = d->giveDofManager(i);
 #if 0
         if ( dman->giveParallelMode() == DofManager_local ) {  // count all dofman eqs
-            ndofs = dman->giveNumberOfDofs();
-            for ( j = 1; j <= ndofs; j++ ) {
-                if ( dman->giveDof(j)->isPrimaryDof() ) {
-                    if ( dman->giveDof(j)->giveEquationNumber() ) {
+            for ( Dof *dof: *dman ) {
+                if ( dof->isPrimaryDof() ) {
+                    if ( dof->giveEquationNumber() ) {
                         l_neqs++;
                     }
                 }
@@ -111,10 +108,9 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
                 minrank = min( minrank, plist->at(j) );
             }
             if ( minrank == myrank ) { // count eqs
-                ndofs = dman->giveNumberOfDofs();
-                for ( j = 1; j <= ndofs; j++ ) {
-                    if ( dman->giveDof(j)->isPrimaryDof() ) {
-                        if ( dman->giveDof(j)->giveEquationNumber() ) {
+                for ( Dof *dof: *dman ) {
+                    if ( dof->isPrimaryDof() ) {
+                        if ( dof->giveEquationNumber() ) {
                             l_neqs++;
                         }
                     }
@@ -123,10 +119,9 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
         }   // end shared dman
 #endif
         if ( isLocal(dman) ) {
-            ndofs = dman->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                if ( dman->giveDof(j)->isPrimaryDof() ) {
-                    if ( dman->giveDof(j)->giveEquationNumber(n) ) {
+            for ( Dof *dof: *dman ) {
+                if ( dof->isPrimaryDof() ) {
+                    if ( dof->giveEquationNumber(n) ) {
                         l_neqs++;
                     }
                 }
@@ -210,10 +205,9 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
             }
 
             if ( minrank == myrank ) { // local
-                ndofs = dman->giveNumberOfDofs();
-                for ( int j = 1; j <= ndofs; j++ ) {
-                    if ( dman->giveDof(j)->isPrimaryDof() ) {
-                        int eq = dman->giveDof(j)->giveEquationNumber(n);
+                for ( Dof *dof: *dman ) {
+                    if ( dof->isPrimaryDof() ) {
+                        int eq = dof->giveEquationNumber(n);
 
                         if ( eq ) {
                             locGlobMap.at(eq) = globeq++;
@@ -224,10 +218,9 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
 
             //} else if (dman->giveParallelMode() == DofManager_local) {
         } else {
-            ndofs = dman->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                if ( dman->giveDof(j)->isPrimaryDof() ) {
-                    int eq = dman->giveDof(j)->giveEquationNumber(n);
+            for ( Dof *dof: *dman ) {
+                if ( dof->isPrimaryDof() ) {
+                    int eq = dof->giveEquationNumber(n);
 
                     if ( eq ) {
                         locGlobMap.at(eq) = globeq++;
@@ -251,8 +244,8 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
         buffs [ p ]->resize( buffs [ p ]->givePackSize(MPI_INT, 1) * sizeToSend(p) );
 
 #if 0
-        OOFEM_LOG_INFO( "[%d]PetscN2G:: init: Send buffer[%d] size %d\n",
-                        myrank, p, sizeToSend(p) );
+        OOFEM_LOG_INFO( "[%d]Natural2GlobalOrdering :: init: Send buffer[%d] size %d\n",
+                       myrank, p, sizeToSend(p) );
 #endif
     }
 
@@ -275,14 +268,13 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
                     }
 
 #if 0
-                    OOFEM_LOG_INFO("[%d]PetscN2G:: init: Sending localShared node %d[%d] to proc %d\n",
+                    OOFEM_LOG_INFO("[%d]Natural2GlobalOrdering :: init: Sending localShared node %d[%d] to proc %d\n",
                                    myrank, i, dman->giveGlobalNumber(), p);
 #endif
                     buffs [ p ]->packInt( dman->giveGlobalNumber() );
-                    ndofs = dman->giveNumberOfDofs();
-                    for ( int k = 1; k <= ndofs; k++ ) {
-                        if ( dman->giveDof(k)->isPrimaryDof() ) {
-                            int eq = dman->giveDof(k)->giveEquationNumber(n);
+                    for ( Dof *dof: *dman ) {
+                        if ( dof->isPrimaryDof() ) {
+                            int eq = dof->giveEquationNumber(n);
 
                             if ( eq ) {
                                 buffs [ p ]->packInt( locGlobMap.at(eq) );
@@ -321,10 +313,9 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
                 }
                 if ( minrank == myrank ) { // do send
                     buffs [ p ]->packInt( dman->giveGlobalNumber() );
-                    ndofs = dman->giveNumberOfDofs();
-                    for ( j = 1; j <= ndofs; j++ ) {
-                        if ( dman->giveDof(j)->isPrimaryDof() ) {
-                            buffs [ p ]->packInt( locGlobMap.at( dman->giveDof(j)->giveEquationNumber() ) );
+                    for ( Dof *dof: *dman ) {
+                        if ( dof->isPrimaryDof() ) {
+                            buffs [ p ]->packInt( locGlobMap.at( dof->giveEquationNumber() ) );
                         }
                     }
                 }
@@ -341,8 +332,8 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
         rbuffs [ p ] = new StaticCommunicationBuffer(MPI_COMM_WORLD, 0);
         rbuffs [ p ]->resize( rbuffs [ p ]->givePackSize(MPI_INT, 1) * sizeToRecv(p) );
 #if 0
-        OOFEM_LOG_INFO( "[%d]PetscN2G:: init: Receive buffer[%d] size %d\n",
-                        myrank, p, sizeToRecv(p) );
+        OOFEM_LOG_INFO( "[%d]Natural2GlobalOrdering :: init: Receive buffer[%d] size %d\n",
+                       myrank, p, sizeToRecv(p) );
 #endif
     }
 
@@ -371,7 +362,7 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
                         rbuffs [ p ]->unpackInt(shdm);
 
 #if 0
-                        OOFEM_LOG_INFO("[%d]PetscN2G:: init: Received shared node [%d] from proc %d\n",
+                        OOFEM_LOG_INFO("[%d]Natural2GlobalOrdering :: init: Received shared node [%d] from proc %d\n",
                                        myrank, shdm, p);
 #endif
                         //
@@ -379,15 +370,14 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
                         if ( globloc.find(shdm) != globloc.end() ) {
                             ldm = globloc [ shdm ];
                         } else {
-                            OOFEM_ERROR3("[%d] Natural2GlobalOrdering :: init: invalid shared dofman received, globnum %d\n", myrank, shdm);
+                            OOFEM_ERROR("[%d] invalid shared dofman received, globnum %d\n", myrank, shdm);
                             ldm = 0;
                         }
 
                         dman = d->giveDofManager(ldm);
-                        ndofs = dman->giveNumberOfDofs();
-                        for ( int j = 1; j <= ndofs; j++ ) {
-                            if ( dman->giveDof(j)->isPrimaryDof() ) {
-                                int eq = dman->giveDof(j)->giveEquationNumber(n);
+                        for ( Dof *dof: *dman ) {
+                            if ( dof->isPrimaryDof() ) {
+                                int eq = dof->giveEquationNumber(n);
 
                                 if ( eq ) {
                                     int val;
@@ -430,11 +420,12 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
             }
 
             ndofs = dman->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                if ( ( _eq = dman->giveDof(j)->giveEquationNumber(dn) ) ) {
-                    fprintf( stderr, "[%d] n:%6s %d[%d] (%d), leq = %d, geq = %d\n", emodel->giveRank(), ptr, i, dman->giveGlobalNumber(), j, _eq, locGlobMap.at(_eq) );
+            for ( Dof *dof: *dman ) {
+                DofIDItem id = dof->giveDofID();
+                if ( ( _eq = dof->giveEquationNumber(dn) ) ) {
+                    fprintf( stderr, "[%d] n:%6s %d[%d] (%d), leq = %d, geq = %d\n", emodel->giveRank(), ptr, i, dman->giveGlobalNumber(), id, _eq, locGlobMap.at(_eq) );
                 } else {
-                    fprintf(stderr, "[%d] n:%6s %d[%d] (%d), leq = %d, geq = %d\n", emodel->giveRank(), ptr, i, dman->giveGlobalNumber(), j, _eq, 0);
+                    fprintf(stderr, "[%d] n:%6s %d[%d] (%d), leq = %d, geq = %d\n", emodel->giveRank(), ptr, i, dman->giveGlobalNumber(), id, _eq, 0);
                 }
             }
         }
@@ -521,9 +512,7 @@ void
 Natural2LocalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberingScheme &n)
 {
     Domain *d = emodel->giveDomain(di);
-    int n_eq = 0, ndofs, ndofman = d->giveNumberOfDofManagers(), loc_eq = 1;
-    bool lFlag;
-    DofManager *dman;
+    int ndofman = d->giveNumberOfDofManagers(), loc_eq = 1;
 
     // determine number of local eqs + number of those shared DOFs which are numbered by receiver
     // shared dofman is numbered on partition with lovest rank number
@@ -531,12 +520,11 @@ Natural2LocalOrdering :: init(EngngModel *emodel, int di, const UnknownNumbering
     n2l.resize( emodel->giveNumberOfDomainEquations(di, n) );
 
     for ( int i = 1; i <= ndofman; i++ ) {
-        dman = d->giveDofManager(i);
-        lFlag = isLocal(dman);
-        ndofs = dman->giveNumberOfDofs();
-        for ( int j = 1; j <= ndofs; j++ ) {
-            if ( dman->giveDof(j)->isPrimaryDof() ) {
-                n_eq = dman->giveDof(j)->giveEquationNumber(n);
+        DofManager *dman = d->giveDofManager(i);
+        bool lFlag = isLocal(dman);
+        for ( Dof *dof: *dman ) {
+            if ( dof->isPrimaryDof() ) {
+                int n_eq = dof->giveEquationNumber(n);
 
                 if ( n_eq == 0 ) {
                     continue;
@@ -591,4 +579,3 @@ Natural2LocalOrdering :: map2Old(IntArray &answer, const IntArray &src, int base
     }
 }
 } // end namespace oofem
-#endif

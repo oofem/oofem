@@ -45,6 +45,9 @@
 #include "dof.h"
 #include "contextioerr.h"
 #include "exportmodulemanager.h"
+#ifdef __PARALLEL_MODE
+ #include "parallelcontext.h"
+#endif
 
 namespace oofem {
 #define CALM_RESET_STEP_REDUCE 0.25
@@ -99,9 +102,7 @@ CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
     maxRestarts = 4;
 
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-    parallel_context = engngModel->givePetscContext( d->giveNumber() );
- #endif
+    parallel_context = engngModel->giveParallelContext( d->giveNumber() );
 #endif
 }
 
@@ -286,7 +287,7 @@ restart:
 
     do {
         nite++;
-        tNow->incrementSubtStepumber();
+        tNow->incrementSubStepNumber();
 
         dXm1 = * dX;
         DeltaLambdam1 = DeltaLambda;
@@ -354,7 +355,7 @@ restart:
                 goto restart;
             } else {
                 status = NM_NoSuccess;
-                OOFEM_ERROR("CALMLS :: solve - can't continue further");
+                OOFEM_ERROR("can't continue further");
             }
         }
 
@@ -376,7 +377,7 @@ restart:
             //
             // update solution vectors
             //
-            ddX.resize(0);
+            ddX.clear();
             ddX.add(eta * deltaLambda, deltaXt);
             ddX.add(eta, deltaX_);
             * dX = dXm1;
@@ -437,7 +438,7 @@ restart:
                 goto restart;
             } else {
                 status = NM_NoSuccess;
-                OOFEM_WARNING2("CALMLS :: solve - Convergence not reached after %d iterations", nsmax);
+                OOFEM_WARNING("Convergence not reached after %d iterations", nsmax);
                 // exit(1);
                 break;
             }
@@ -515,20 +516,17 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
      * std::list<__DofIDSet> __ccDofGroups;
      * int nccdg; // number of Convergence Criteria Dof Groups
      */
-    int _dg, _idofman, _ielem, _idof, _eq, _ndof, _ng = nccdg, ndofman = domain->giveNumberOfDofManagers();
+    int _dg, _idofman, _ielem, _eq, _ng = nccdg, ndofman = domain->giveNumberOfDofManagers();
     int nelem = domain->giveNumberOfElements();
     double forceErr, dispErr, _val;
     DofManager *_idofmanptr;
     Element *_ielemptr;
-    Dof *_idofptr;
     FloatArray rhs; // residual of momentum balance eq (unbalanced nodal forces)
     FloatArray dg_forceErr(nccdg), dg_dispErr(nccdg), dg_totalLoadLevel(nccdg), dg_totalDisp(nccdg);
     bool answer;
     EModelDefaultEquationNumbering dn;
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
     Natural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
- #endif
 #endif
 
     answer = true;
@@ -560,10 +558,8 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
 
 #endif
 
-            _ndof = _idofmanptr->giveNumberOfDofs();
             // loop over individual dofs
-            for ( _idof = 1; _idof <= _ndof; _idof++ ) {
-                _idofptr = _idofmanptr->giveDof(_idof);
+            for ( Dof *_idofptr: *_idofmanptr ) {
                 // loop over dof groups
                 for ( _dg = 1; _dg <= _ng; _dg++ ) {
                     // test if dof ID is in active set
@@ -608,10 +604,8 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
 #endif
             // loop over element internal Dofs
             for ( _idofman = 1; _idofman <= _ielemptr->giveNumberOfInternalDofManagers(); _idofman++ ) {
-                _ndof = _ielemptr->giveInternalDofManager(_idofman)->giveNumberOfDofs();
                 // loop over individual dofs
-                for ( _idof = 1; _idof <= _ndof; _idof++ ) {
-                    _idofptr = _ielemptr->giveInternalDofManager(_idofman)->giveDof(_idof);
+                for ( Dof *_idofptr: *_ielemptr->giveInternalDofManager(_idofman) ) {
                     // loop over dof groups
                     for ( _dg = 1; _dg <= _ng; _dg++ ) {
                         // test if dof ID is in active set
@@ -679,7 +673,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
             }
 
             if ( ( fabs( dg_forceErr.at(_dg) ) > rtolf.at(_dg) * CALM_MAX_REL_ERROR_BOUND ) ||
-                 ( fabs( dg_dispErr.at(_dg) )  > rtold.at(_dg) * CALM_MAX_REL_ERROR_BOUND ) ) {
+                ( fabs( dg_dispErr.at(_dg) )  > rtold.at(_dg) * CALM_MAX_REL_ERROR_BOUND ) ) {
                 errorOutOfRange = true;
             }
 
@@ -734,7 +728,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
         }
 
         if ( ( fabs(forceErr) > rtolf.at(1) * CALM_MAX_REL_ERROR_BOUND ) ||
-             ( fabs(dispErr)  > rtold.at(1) * CALM_MAX_REL_ERROR_BOUND ) ) {
+            ( fabs(dispErr)  > rtold.at(1) * CALM_MAX_REL_ERROR_BOUND ) ) {
             errorOutOfRange = true;
         }
 
@@ -756,7 +750,6 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
 //
 //
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     double oldPsi =  Psi; // default from constructor
@@ -836,10 +829,10 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     hpcMode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, hpcMode, _IFT_CylindricalALM_hpcmode);
 
-    calm_HPCDmanDofSrcArray.resize(0);
+    calm_HPCDmanDofSrcArray.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, calm_HPCDmanDofSrcArray, _IFT_CylindricalALM_hpc);
 
-    calm_HPCDmanWeightSrcArray.resize(0);
+    calm_HPCDmanWeightSrcArray.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, calm_HPCDmanWeightSrcArray, _IFT_CylindricalALM_hpcw);
     // in calm_HPCIndirectDofMask are stored pairs with following meaning:
     // inode idof
@@ -860,7 +853,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         }
 
         if ( ( calm_HPCDmanDofSrcArray.giveSize() % 2 ) != 0 ) {
-            OOFEM_ERROR("CALMSLS :: HPC Map size must be even number, it contains pairs <node, nodeDof>");
+            OOFEM_ERROR("HPC Map size must be even number, it contains pairs <node, nodeDof>");
         }
 
         nsize = calm_HPCDmanDofSrcArray.giveSize() / 2;
@@ -871,13 +864,13 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
                 calm_HPCWeights.at(i) = 1.0;
             }
         } else if ( nsize != calm_HPCWeights.giveSize() ) {
-            OOFEM_ERROR("CALMSLS :: HPC map size and weight array size mismatch");
+            OOFEM_ERROR("HPC map size and weight array size mismatch");
         }
 
         calm_hpc_init = 1;
     } else {
         if ( hpcMode ) {
-            OOFEM_ERROR("CALMSLS :: HPC Map must be specified");
+            OOFEM_ERROR("HPC Map must be specified");
         }
     }
 
@@ -946,7 +939,7 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, rtold, _IFT_CylindricalALM_rtold);
 
         if ( ( rtolf.giveSize() != nccdg ) || ( rtold.giveSize() != nccdg ) ) {
-            OOFEM_ERROR2("CALMLS :: Incompatible size of rtolf or rtold params, expected size %d (nccdg)", nccdg);
+            OOFEM_ERROR("Incompatible size of rtolf or rtold params, expected size %d (nccdg)", nccdg);
         }
     } else {
         nccdg = 0;
@@ -986,31 +979,31 @@ void CylindricalALM :: convertHPCMap()
 {
     IntArray indirectMap;
     FloatArray weights;
-    int size, i;
-    int inode, idof;
+    int size;
+    int inode, idofid;
     EModelDefaultEquationNumbering dn;
 
-    int j, jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
+    int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
     size = calm_HPCDmanDofSrcArray.giveSize() / 2;
     indirectMap.resize(size);
     weights.resize(size);
-    for ( j = 1; j <= ndofman; j++ ) {
+    for ( int j = 1; j <= ndofman; j++ ) {
         jglobnum = domain->giveNode(j)->giveLabel();
-        for ( i = 1; i <= size; i++ ) {
+        for ( int i = 1; i <= size; i++ ) {
             inode = calm_HPCDmanDofSrcArray.at(2 * i - 1);
-            idof  = calm_HPCDmanDofSrcArray.at(2 * i);
+            idofid = calm_HPCDmanDofSrcArray.at(2 * i);
             if ( inode == jglobnum ) {
 #ifdef __PARALLEL_MODE
                 // HUHU hard wired domain no 1
                 if ( parallel_context->isLocal( domain->giveNode(j) ) ) {
-                    indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
+                    indirectMap.at(++count) = domain->giveNode(j)->giveDofWithID(idofid)->giveEquationNumber(dn);
                     if ( calm_Control == calml_hpc ) {
                         weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
                     }
                 }
 
 #else
-                indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
+                indirectMap.at(++count) = domain->giveNode(j)->giveDofWithID(idofid)->giveEquationNumber(dn);
                 if ( calm_Control == calml_hpc ) {
                     weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
                 }
@@ -1024,7 +1017,7 @@ void CylindricalALM :: convertHPCMap()
 
 #ifndef __PARALLEL_MODE
     if ( count != size ) {
-        OOFEM_WARNING("CylindricalALM :: convertHPCMap: some dofmans/Dofs in HPCarray not recognized");
+        OOFEM_WARNING("some dofmans/Dofs in HPCarray not recognized");
     }
 
 #endif
@@ -1034,7 +1027,7 @@ void CylindricalALM :: convertHPCMap()
         calm_HPCWeights.resize(count);
     }
 
-    for ( i = 1; i <= count; i++ ) {
+    for ( int i = 1; i <= count; i++ ) {
         calm_HPCIndirectDofMask.at(i) = indirectMap.at(i);
         calm_HPCWeights.at(i) = weights.at(i);
     }
@@ -1078,7 +1071,7 @@ CylindricalALM :: giveLinearSolver()
 
     linSolver = classFactory.createSparseLinSolver(solverType, domain, engngModel);
     if ( linSolver == NULL ) {
-        OOFEM_ERROR("CALMSLS :: giveLinearSolver: linear solver creation failed");
+        OOFEM_ERROR("linear solver creation failed");
     }
 
     return linSolver;
@@ -1097,12 +1090,6 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
     FloatArray help;
 #ifndef __PARALLEL_MODE
     double XX;
-#endif
-
-#ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-    //Natural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
- #endif
 #endif
     //
     // B.3.
@@ -1180,7 +1167,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
         // solution of quadratic eqn.
         double discr = a2 * a2 - 4.0 * a1 * a3;
         if ( discr < 0.0 ) {
-            OOFEM_ERROR("CALMSLS :: computeDeltaLambda: discriminant is negative, solution failed");
+            OOFEM_ERROR("discriminant is negative, solution failed");
         }
 
         discr = sqrt(discr);
@@ -1251,7 +1238,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
         denom = colv(1);
 #endif
         if ( fabs(denom) < calm_SMALL_NUM ) {
-            OOFEM_ERROR("CALMSLS :: \ncalm: zero denominator in linearized control");
+            OOFEM_ERROR("zero denominator in linearized control");
         }
 
         deltaLambda = ( deltaL - nom ) / denom;
@@ -1371,9 +1358,6 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
     double d6, d7, d8, d9;
 
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
-    //Natural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
- #endif
     d6 = parallel_context->localDotProduct(deltaX_, F);
     d7 = parallel_context->localDotProduct(deltaXt, F);
     d8 = -1.0 * parallel_context->localDotProduct(deltaX_, R);
@@ -1416,7 +1400,7 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
         // update displacements
         drProduct = 0.0; // dotproduct of iterative displacement increment vector
 
-        ddX.resize(0);
+        ddX.clear();
         ddX.add(eta.at(ils) * deltaLambda, deltaXt);
         ddX.add(eta.at(ils), deltaX_);
         dX = dXm1;
@@ -1505,7 +1489,7 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
         deltaLambda = deltaLambdaForEta1;
         drProduct = 0.0; // dotproduct of iterative displacement increment vector
 
-        ddX.resize(0);
+        ddX.clear();
         ddX.add(deltaLambda, deltaXt);
         ddX.add(deltaX_);
         dX = dXm1;

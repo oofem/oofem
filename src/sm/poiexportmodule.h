@@ -64,6 +64,7 @@ protected:
     struct POI_dataType {
         int id;
         double x, y, z;
+        // bp: region is now the set number (which is more flexible)
         int region;
     };
 
@@ -78,10 +79,11 @@ protected:
     enum POIEM_MapperType { POI_CPT, POI_SFT, POI_LST } mtype;
     /// Mapper.
     MaterialMappingAlgorithm *mapper;
+    //
 
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
-    POIExportModule(int n, EngngModel *e);
+    POIExportModule(int n, EngngModel * e);
     /// Destructor
     virtual ~POIExportModule();
 

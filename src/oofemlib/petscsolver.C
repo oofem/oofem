@@ -57,40 +57,37 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
 
     // first check whether Lhs is defined
     if ( !A ) {
-        OOFEM_ERROR("PETScSolver :: solve: unknown Lhs");
+        OOFEM_ERROR("unknown Lhs");
     }
 
     // and whether Rhs
     if ( !b ) {
-        OOFEM_ERROR("PETScSolver :: solve: unknown Rhs");
+        OOFEM_ERROR("unknown Rhs");
     }
 
     // and whether previous Solution exist
     if ( !x ) {
-        OOFEM_ERROR("PETScSolver :: solve: unknown solution array");
+        OOFEM_ERROR("unknown solution array");
     }
 
     if ( x->giveSize() != ( neqs = b->giveSize() ) ) {
-        OOFEM_ERROR("PETScSolver :: solve: size mismatch");
+        OOFEM_ERROR("size mismatch");
     }
 
     if ( A->giveType() != SMT_PetscMtrx ) {
-        OOFEM_ERROR("PETScSolver :: solve: PetscSparseMtrx Expected");
+        OOFEM_ERROR("PetscSparseMtrx Expected");
     }
 
-    PetscSparseMtrx *Lhs = ( PetscSparseMtrx * ) A;
+    PetscSparseMtrx *Lhs = static_cast< PetscSparseMtrx * >(A);
 
     Vec globRhsVec;
     Vec globSolVec;
 
-    // "Parallel" context automatically uses sequential alternative if the engineering problem is sequential.
-    PetscContext *context = engngModel->givePetscContext( Lhs->giveDomainIndex() );
-
     /*
-     * scatter and gather rhs to global representation
+     * scatter and gather rhs to global representation (automatically detects sequential/parallel modes)
      */
-    context->createVecGlobal(& globRhsVec);
-    context->scatter2G(b, globRhsVec, ADD_VALUES);
+    Lhs->createVecGlobal(& globRhsVec);
+    Lhs->scatterL2G(* b, globRhsVec);
 
     VecDuplicate(globRhsVec, & globSolVec);
 
@@ -98,7 +95,7 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     NM_Status s = this->petsc_solve(Lhs, globRhsVec, globSolVec);
     //VecView(globSolVec,PETSC_VIEWER_STDOUT_WORLD);
 
-    context->scatterG2N(globSolVec, x, INSERT_VALUES);
+    Lhs->scatterG2L(globSolVec, * x);
 
     VecDestroy(& globSolVec);
     VecDestroy(& globRhsVec);
@@ -113,7 +110,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     PetscErrorCode err;
     KSPConvergedReason reason;
     if ( Lhs->giveType() != SMT_PetscMtrx ) {
-        OOFEM_ERROR("PETScSolver :: petsc_solve: PetscSparseMtrx Expected");
+        OOFEM_ERROR("PetscSparseMtrx Expected");
     }
 
     Timer timer;
@@ -171,7 +168,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     //MatView(*Lhs->giveMtrx(),PETSC_VIEWER_STDOUT_SELF);
     err = KSPSolve(Lhs->ksp, b, x);
     if ( err != 0 ) {
-        OOFEM_ERROR2("PetscSolver:  Error when solving: %d\n", err);
+        OOFEM_ERROR("Error when solving: %d\n", err);
     }
     KSPGetConvergedReason(Lhs->ksp, & reason);
     KSPGetIterationNumber(Lhs->ksp, & nite);
@@ -179,7 +176,7 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     if ( reason >= 0 ) {
         //OOFEM_LOG_INFO("PetscSolver:  Converged. KSPConvergedReason: %d, number of iterations: %d\n", reason, nite);
     } else {
-        OOFEM_WARNING3("PetscSolver:  Diverged! KSPConvergedReason: %d, number of iterations: %d\n", reason, nite);
+        OOFEM_WARNING("Diverged! KSPConvergedReason: %d, number of iterations: %d\n", reason, nite);
     }
 
     timer.stopTimer();
@@ -199,13 +196,13 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
 NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
 {
     if ( !A ) {
-        OOFEM_ERROR("PETScSolver :: solve: Unknown Lhs");
+        OOFEM_ERROR("Unknown Lhs");
     }
     if ( A->giveType() != SMT_PetscMtrx ) {
-        OOFEM_ERROR("PETScSolver :: solve: PetscSparseMtrx Expected");
+        OOFEM_ERROR("PetscSparseMtrx Expected");
     }
 
-    PetscSparseMtrx *Lhs = ( PetscSparseMtrx * ) A;
+    PetscSparseMtrx *Lhs = static_cast< PetscSparseMtrx * >(A);
 
     Vec globRhsVec;
     Vec globSolVec;
@@ -222,7 +219,7 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
         VecDuplicate(globRhsVec, & globSolVec);
         s = this->petsc_solve(Lhs, globRhsVec, globSolVec, newLhs);
         if ( !( s & NM_Success ) ) {
-            OOFEM_WARNING2("PetscSolver :: solve - No success at solving column %d", i + 1);
+            OOFEM_WARNING("No success at solving column %d", i + 1);
             return s;
         }
         newLhs = false;

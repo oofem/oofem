@@ -175,23 +175,18 @@ CombinedZZSIRemeshingCriteria :: giveDofManDensity(int num)
     int isize;
     ConnectivityTable *ct = domain->giveConnectivityTable();
     const IntArray *con;
-    ZZRemeshingCriteriaInterface *interface;
     double density = 0.0;
 
     con = ct->giveDofManConnectivityArray(num);
     isize = con->giveSize();
 
     for ( int i = 1; i <= isize; i++ ) {
-        interface = static_cast< ZZRemeshingCriteriaInterface * >
-                    ( domain->giveElement( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType) );
-        if ( !interface ) {
-            _error("giveDofManDensity: element does not support ZZRemeshingCriteriaInterface");
-        }
+        Element *element = domain->giveElement( con->at(i) );
 
         if ( i == 1 ) {
-            density = interface->ZZRemeshingCriteriaI_giveCharacteristicSize();
+            density = element->computeMeanSize();
         } else {
-            density = min( density, interface->ZZRemeshingCriteriaI_giveCharacteristicSize() );
+            density = min( density, element->computeMeanSize() );
         }
     }
 

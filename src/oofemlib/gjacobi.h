@@ -58,7 +58,7 @@ private:
     int solved;
 
 public:
-    GJacobi(Domain *d, EngngModel *m);
+    GJacobi(Domain * d, EngngModel * m);
     virtual ~GJacobi();
 
     /**
@@ -72,6 +72,7 @@ public:
     virtual NM_Status solve(FloatMatrix *K, FloatMatrix *M, FloatArray *w, FloatMatrix *x);
 
     virtual const char *giveClassName() const { return "GeneralizedJacobiSolver"; }
+    std :: string errorInfo(const char *func) { return std :: string(this->giveClassName()) + func; }
 };
 } // end namespace oofem
 #endif // gjacobi_h

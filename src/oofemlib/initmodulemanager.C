@@ -38,15 +38,14 @@
 
 namespace oofem {
 InitModuleManager :: InitModuleManager(EngngModel *emodel) : ModuleManager< InitModule >(emodel)
-{}
+{ }
 
 InitModuleManager :: ~InitModuleManager()
-{}
+{ }
 
 IRResultType
 InitModuleManager :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
     this->numberOfModules = 0;
@@ -62,8 +61,8 @@ InitModule *InitModuleManager :: CreateModule(const char *name, int n, EngngMode
 void
 InitModuleManager :: doInit()
 {
-    for ( int i = 1; i <= numberOfModules; i++ ) {
-        this->giveModule(i)->doInit();
+    for ( auto &module: moduleList ) {
+        module->doInit();
     }
 }
 } // end namespace oofem

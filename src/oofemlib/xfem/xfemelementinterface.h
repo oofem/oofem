@@ -36,8 +36,10 @@
 #define xfemelementinterface_h
 
 #include "interface.h"
-#include "alist.h"
 #include "xfemmanager.h"
+#include "geometry.h"
+#include "matresponsemode.h"
+#include "materialmode.h"
 
 #define _IFT_XfemElementInterface_CohesiveZoneMaterial "czmaterial"
 #define _IFT_XfemElementInterface_NumIntPointsCZ "nipcz"
@@ -51,7 +53,8 @@ class Element;
 class GaussPoint;
 class Element;
 class XfemManager;
-class StructuralInterfaceMaterial;
+class IntegrationRule;
+class MaterialStatus;
 
 /**
  * Provides Xfem interface for an element.
@@ -62,17 +65,22 @@ class OOFEM_EXPORT XfemElementInterface : public Interface
 public:
     Element *element;
 
-    // Cohesive Zone variables
-    StructuralInterfaceMaterial *mpCZMat;
-    int mCZMaterialNum;
-    int mCSNumGaussPoints;
-    std :: vector< IntegrationRule * >mpCZIntegrationRules;
 
     /// Index of enrichment items associated with cohesive zones
     std :: vector< int >mCZEnrItemIndices; // TODO: Not nice. /ES
 
+    /**
+     * Indices of enrichment items that give cohesive zone contributions
+     * to a given GP, even though the GP is not located on any
+     * of these enrichment items.
+     */
+    std :: vector< std::vector<int> > mCZTouchingEnrItemIndices;
+
     /// Flag that tells if plane stress or plane strain is assumed
     bool mUsePlaneStrain;
+
+    virtual const char *giveClassName() const { return "XfemElementInterface"; }
+    std :: string errorInfo(const char *func) const { return std :: string( giveClassName() ) + func; }
 
 public:
     /// Constructor.
@@ -83,8 +91,27 @@ public:
     /// Creates enriched B-matrix.
     void XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl);
 
+    /// Creates enriched BH-matrix.
+    void XfemElementInterface_createEnrBHmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl);
+
+    /**
+     * Help function for computation of B and BH.
+     * Avoid duplication of code.
+     */
+    void ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl, bool iComputeBH);
+
     /// Creates enriched N-matrix.
     void XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl);
+
+    /**
+     * Creates enriched N-matrix for a chosen subset of element nodes.
+     */
+    void XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl, const std :: vector< int > &iLocNodeInd);
+
+    /**
+     * Computes total number of enrichments in a node.
+     */
+    int XfemElementInterface_giveNumDofManEnrichments(const DofManager &iDMan, XfemManager &iXMan) const;
 
     /// Partitions the element into patches by a triangulation.
     virtual void XfemElementInterface_partitionElement(std :: vector< Triangle > &oTriangles, const std :: vector< FloatArray > &iPoints);
@@ -99,32 +126,16 @@ public:
     void putPointsInCorrectPartition(std :: vector< std :: vector< FloatArray > > &oPointPartitions, const std :: vector< FloatArray > &iIntersecPoints, const std :: vector< const FloatArray * > &iNodeCoord) const;
 
     /**
-     * XfemElementInterface_computeConstitutiveMatrixAt.
-     * The reason for having a special implementation of this function is
-     * that the enrichment item may have a different material than
-     * the bulk material inside.
+     * Partition a boundary segment to account for cracks cutting
+     * the boundary. This is a necessary step to evaluate integrals
+     * along an edge cut by one or several cracks.
      */
-    virtual void XfemElementInterface_computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *, TimeStep *tStep);
-    virtual void XfemElementInterface_computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    void partitionEdgeSegment(int iBndIndex, std :: vector< Line > &oSegments, std::vector<FloatArray> &oIntersectionPoints);
 
-    /**
-     * Cohesive Zone functions
-     */
-    bool hasCohesiveZone() const { return ( mpCZMat != NULL && mpCZIntegrationRules.size() > 0 ); }
+    // TODO: Move to XfemStructuralElementInterface
+    std :: vector< IntegrationRule * >mpCZIntegrationRules;
 
-    void computeCohesiveForces(FloatArray &answer, TimeStep *tStep);
-    void computeGlobalCohesiveTractionVector(FloatArray &oT, const FloatArray &iJump, const FloatArray &iCrackNormal, const FloatMatrix &iNMatrix, GaussPoint &iGP, TimeStep *tStep);
-
-    void computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep);
-    void computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep);
-
-    void XfemElementInterface_computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
-
-    virtual IRResultType initializeCZFrom(InputRecord *ir);
     MaterialMode giveMaterialMode();
-    virtual void giveCZInputRecord(DynamicInputRecord &input);
-
-    void initializeCZMaterial();
 
     void updateYourselfCZ(TimeStep *tStep);
 
@@ -133,7 +144,7 @@ public:
     /**
      * Compute N-matrix for cohesive zone.
      */
-    void computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, int iEnrItemIndex);
+    void computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, int iEnrItemIndex, const std::vector<int> &iTouchingEnrItemIndices);
 };
 } // end namespace oofem
 #endif // xfemelementinterface_h

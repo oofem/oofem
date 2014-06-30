@@ -42,7 +42,7 @@
 
 ///@name Input fields for IMLSolver
 //@{
-#define _IFT_IMLSolver_lstype "lstype"
+#define _IFT_IMLSolver_stype "stype"
 #define _IFT_IMLSolver_lstol "lstol"
 #define _IFT_IMLSolver_lsiter "lsiter"
 #define _IFT_IMLSolver_lsprecond "lsprecond"
@@ -88,7 +88,7 @@ private:
 
 public:
     /// Constructor. Creates new instance of LDLTFactorization, with number i, belonging to domain d and Engngmodel m.
-    IMLSolver(Domain *d, EngngModel *m);
+    IMLSolver(Domain * d, EngngModel * m);
     /// Destructor
     virtual ~IMLSolver();
 

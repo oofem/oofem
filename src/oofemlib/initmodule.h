@@ -70,7 +70,7 @@ protected:
 
 public:
     /// Constructor. Creates empty Init Module with number n.
-    InitModule(int n, EngngModel *e);
+    InitModule(int n, EngngModel * e);
     /// Destructor
     virtual ~InitModule();
     /// Initializes receiver according to object description stored in input record.
@@ -79,6 +79,8 @@ public:
     virtual void doInit() = 0;
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "InitModule"; }
+    /// Error printing helper.
+    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
 };
 } // end namespace oofem
 #endif // initmodule_h

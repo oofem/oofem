@@ -37,10 +37,8 @@
 
 #include <cstdio>
 
-#include "alist.h"
 #include "femcmpnn.h"
 #include "intarray.h"
-#include "equationid.h"
 #include "valuemodetype.h"
 #include "doftype.h"
 #include "dofiditem.h"
@@ -110,7 +108,7 @@ class IntArray;
  * based on domain type of problem.
  *
  * Tasks:
- * - managing its degrees of freedom (giveDof).
+ * - managing its degrees of freedom.
  * - calculating its nodal vector.
  * - printing and updating at end of step .
  * - managing its swapping to and from disk.
@@ -120,10 +118,8 @@ class IntArray;
 class OOFEM_EXPORT DofManager : public FEMComponent
 {
 protected:
-    /// Total number of DOFs.
-    int numberOfDofs;
     /// Array of DOFs.
-    Dof **dofArray;
+    std::vector< Dof * > dofArray;
     /// List of applied loads.
     IntArray loadArray;
     /**
@@ -163,27 +159,22 @@ protected:
     IntArray mBC;
 
 public:
+    std::vector< Dof* > :: iterator begin() { return dofArray.begin(); }
+    std::vector< Dof* > :: iterator end() { return dofArray.end(); }
+    std::vector< Dof* > :: const_iterator begin() const { return dofArray.begin(); }
+    std::vector< Dof* > :: const_iterator end() const { return dofArray.end(); }
+
     /**
      * Constructor. Creates DofManager with given number belonging to domain aDomain.
      * @param n DofManager's number in domain
      * @param aDomain reference to DofManager's domain
      */
-    DofManager(int n, Domain *aDomain);
+    DofManager(int n, Domain * aDomain);
     /// Destructor.
     virtual ~DofManager();
 
     /**@name Dof management methods */
     //@{
-
-    /**
-     * Returns reference (pointer) to i-th dof of receiver.
-     * Index of Dof with required physical meaning can be obtained by invoking
-     * method findDofWithDofId.
-     * @param i The index of the DOF.
-     * @return The requested DOF.
-     * @see DofManager::findDofWithDofId
-     */
-    Dof *giveDof(int i) const;
     /**
      * Returns DOF with given dofID; issues error if not present.
      * @param dofID The ID for the requested DOF.
@@ -199,10 +190,10 @@ public:
     /**
      * Returns the number of primary dofs on which receiver dofs (given in dofArray) depend on.
      * If receiver has only primary dofs, the answer is the size of dofArray.
-     * @param dofArray Array with indices to DOFs.
+     * @param dofArray Array with Dof IDs.
      * @return Number of primary dofs from given array.
      */
-    int giveNumberOfPrimaryMasterDofs(IntArray &dofArray) const;
+    int giveNumberOfPrimaryMasterDofs(const IntArray &dofIDArray) const;
     /**
      * Returns location array (array containing for each requested dof related equation number) for
      * given numbering scheme.
@@ -240,21 +231,12 @@ public:
      */
     void giveCompleteMasterDofIDArray(IntArray &dofIDArray) const;
     /**
-     * Returns DOFs numbers of receiver with required physical meaning.
-     * @param dofIDArray Array containing DofIDItem-type values (this is enumeration
-     * identifying physical meaning of particular DOF, see cltypes.h).
-     * @param answer Array with DOF numbers. They are ordered according to dofIDArry.
-     * @see DofIDItem
-     * @see cltypes.h
-     */
-    void giveDofArray(const IntArray &dofIDArray, IntArray &answer) const;
-    /**
      * Finds index of DOF with required physical meaning of receiver. This index can be different
      * for different DOFManagers (user can alter dof order and type in input file).
      * @param dofID Physical meaning of DOF.
      * @return Index of requested DOF. If such DOF with dofID does not exists, returns zero.
      */
-    int findDofWithDofId(DofIDItem dofID) const;
+    std :: vector< Dof* > :: const_iterator findDofWithDofId(DofIDItem dofID) const;
     /**
      * Assembles the vector of unknowns in global c.s for given dofs of receiver.
      * @param answer Result (in global c.s.)
@@ -266,9 +248,10 @@ public:
      * @param tStep Time step when unknown requested. See documentation of particular EngngModel
      * class for valid tStep values (most implementation can return only values for current
      * and possibly for previous time step).
+     * @param padding Determines if zero value should be inserted when a dof isn't found (otherwise it is just skipped).
      * @see Dof::giveUnknown
      */
-    virtual void giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *tStep);
+    void giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *tStep, bool padding = false);
     /**
      * Assembles the vector of unknowns of given filed in global c.s for given dofs of receiver.
      * @param answer Result (in nodal cs.)
@@ -281,10 +264,11 @@ public:
      * @param tStep Time step when unknown is requested. See documentation of particular EngngModel
      * class for valid tStep values (most implementation can return only values for current
      * and possibly for previous time step).
+     * @param padding Determines if zero value should be inserted when a dof isn't found (otherwise it is just skipped).
      * @see Dof::giveUnknown
      */
-    virtual void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
-                                   PrimaryField &field, ValueModeType mode, TimeStep *tStep);
+    void giveUnknownVector(FloatArray &answer, const IntArray &dofMask,
+                           PrimaryField &field, ValueModeType mode, TimeStep *tStep, bool padding = false);
     /**
      * Assembles the complete unknown vector in node. Does not transform and local->global coordinate systems.
      * @param answer Complete vector of all dof values in receiver.
@@ -320,8 +304,8 @@ public:
      * @see Dof::hasBc
      * @todo Remove all usage of this. Just ask for the unknown vector instead, they are the same.
      */
-    virtual void givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofMask,
-                                             ValueModeType mode, TimeStep *tStep);
+    void givePrescribedUnknownVector(FloatArray &answer, const IntArray &dofMask,
+                                     ValueModeType mode, TimeStep *tStep);
     //@}
 
     /**@name Transformation functions
@@ -497,8 +481,6 @@ public:
      * Resizes the dofArray accordingly
      */
     void setNumberOfDofs(int _ndofs);
-    /** Sets i-th DOF of receiver to given DOF */
-    void setDof(int i, Dof *dof);
     //@}
 
     /**
@@ -563,7 +545,10 @@ public:
     /// Removes given partition from receiver list.
     void removePartitionFromList(int _part) {
         int _pos = partitions.findFirstIndexOf(_part);
-        if ( _pos ) { partitions.erase(_pos); } }
+        if ( _pos ) {
+            partitions.erase(_pos);
+        }
+    }
     /// Merges receiver partition list with given lists.
     void mergePartitionList(IntArray &_p);
     /**
@@ -573,14 +558,14 @@ public:
     /// Returns true if receiver is locally maintained.
     bool isLocal();
     /// Returns true if receiver is shared.
-    bool isShared() { if ( parallel_mode == DofManager_shared ) { return true; } else { return false; } }
+    bool isShared() {
+        if ( parallel_mode == DofManager_shared ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 #endif
-
-    IntArray *giveCompleteGlobalDofIDArray() const; // JB - made it public
-
-protected:
-    /// Computes transformation matrix between DOFs in nodal c.s. and master DOFs.
-    void computeSlaveDofTransformation(FloatMatrix &answer, const IntArray *dofMask);
 };
 } // end namespace oofem
 #endif // dofmanager_h

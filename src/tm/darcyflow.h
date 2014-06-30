@@ -51,7 +51,7 @@ protected:
     bool hasAdvanced;
 
 public:
-    DarcyFlow(int i, EngngModel *_master);
+    DarcyFlow(int i, EngngModel * _master);
     virtual ~DarcyFlow();
 
     virtual void solveYourselfAt(TimeStep *tStep);
@@ -83,8 +83,8 @@ public:
     ProblemCommunicator *communicator;
 #endif
 
-#ifdef __PETSC_MODULE
-    virtual void initPetscContexts();
+#ifdef __PARALLEL_MODE
+    virtual void initParallelContexts();
 #endif
 };
 }

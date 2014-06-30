@@ -79,7 +79,7 @@ DynCompRow :: DynCompRow(const DynCompRow &S) : SparseMtrx(S.nRows, S.nColumns),
     if ( S.rows_ ) {
         this->rows_ = new FloatArray * [ S.nRows ];
         for ( i = 0; i < S.nRows; i++ ) {
-            this->rows_ [ i ] = new FloatArray(* S.rows_ [ i ]);
+            this->rows_ [ i ] = new FloatArray(*S.rows_ [ i ]);
         }
     } else {
         this->rows_ = NULL;
@@ -88,7 +88,7 @@ DynCompRow :: DynCompRow(const DynCompRow &S) : SparseMtrx(S.nRows, S.nColumns),
     if ( S.colind_ ) {
         this->colind_ = new IntArray * [ S.nRows ];
         for ( i = 0; i < S.nRows; i++ ) {
-            this->colind_ [ i ] = new IntArray(* S.colind_ [ i ]);
+            this->colind_ [ i ] = new IntArray(*S.colind_ [ i ]);
         }
     } else {
         this->colind_ = NULL;
@@ -128,7 +128,7 @@ DynCompRow :: ~DynCompRow()
 /* Assignment operator...  */
 /***************************/
 
-DynCompRow &DynCompRow :: operator=(const DynCompRow &C)
+DynCompRow &DynCompRow :: operator = ( const DynCompRow & C )
 {
     base_   = C.base_;
 
@@ -145,7 +145,7 @@ DynCompRow &DynCompRow :: operator=(const DynCompRow &C)
     if ( C.rows_ ) {
         this->rows_ = new FloatArray * [ C.nRows ];
         for ( i = 0; i < C.nRows; i++ ) {
-            this->rows_ [ i ] = new FloatArray(* C.rows_ [ i ]);
+            this->rows_ [ i ] = new FloatArray(*C.rows_ [ i ]);
         }
     } else {
         this->rows_ = NULL;
@@ -163,7 +163,7 @@ DynCompRow &DynCompRow :: operator=(const DynCompRow &C)
     if ( C.colind_ ) {
         this->colind_ = new IntArray * [ C.nRows ];
         for ( i = 0; i < C.nRows; i++ ) {
-            this->colind_ [ i ] = new IntArray(* C.colind_ [ i ]);
+            this->colind_ [ i ] = new IntArray(*C.colind_ [ i ]);
         }
     } else {
         this->colind_ = NULL;
@@ -177,7 +177,7 @@ DynCompRow &DynCompRow :: operator=(const DynCompRow &C)
 
 SparseMtrx *DynCompRow :: GiveCopy() const
 {
-    DynCompRow *result = new DynCompRow(* this);
+    DynCompRow *result = new DynCompRow(*this);
     return result;
 }
 
@@ -186,7 +186,7 @@ void DynCompRow :: times(const FloatArray &x, FloatArray &answer) const
 {
     //      Check for compatible dimensions:
     if ( x.giveSize() != nColumns ) {
-        OOFEM_ERROR("DynCompRow::times: Error in CompRow -- incompatible dimensions");
+        OOFEM_ERROR("Error in CompRow -- incompatible dimensions");
     }
 
     answer.resize(nRows);
@@ -215,7 +215,7 @@ void DynCompRow :: times(double x)
     this->version++;
 }
 
-int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
+int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
     /*
      * int neq = eModel -> giveNumberOfDomainEquations (di);
@@ -339,7 +339,7 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
 
     for ( n = 1; n <= nelem; n++ ) {
         elem = domain->giveElement(n);
-        elem->giveLocationArray(loc, ut, s);
+        elem->giveLocationArray(loc, s);
 
         for ( i = 1; i <= loc.giveSize(); i++ ) { // row indx
             if ( ( ii = loc.at(i) ) ) {
@@ -361,7 +361,7 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
-            bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
+            bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                 IntArray &krloc = r_locs [ k ];
                 IntArray &kcloc = c_locs [ k ];
@@ -406,7 +406,7 @@ int DynCompRow :: assemble(const IntArray &loc, const FloatMatrix &mat)
 #  ifdef DEBUG
     dim = mat.giveNumberOfRows();
     if ( dim != loc.giveSize() ) {
-        OOFEM_ERROR("DynCompRow::assemble : dimension of 'k' and 'loc' mismatch");
+        OOFEM_ERROR("dimension of 'k' and 'loc' mismatch");
     }
 
 #  endif
@@ -494,7 +494,7 @@ double &DynCompRow :: at(int i, int j)
         return rows_ [ i - 1 ]->at(colIndx);
     }
 
-    OOFEM_ERROR3("DynCompRow::operator at(): Array accessing exception -- (%d,%d) out of bounds", i, j);
+    OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
     return rows_ [ 0 ]->at(1); // return to suppress compiler warning message
 }
 
@@ -509,12 +509,12 @@ double DynCompRow :: at(int i, int j) const
     if ( i <= nRows && j <= nColumns ) {
         return 0.0;
     } else {
-        OOFEM_ERROR3("DynCompRow::operator at(): Array accessing exception -- (%d,%d) out of bounds", i, j);
+        OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
         return rows_ [ 0 ]->at(1); // return to suppress compiler warning message
     }
 }
 
-double DynCompRow :: operator()(int i, int j)  const
+double DynCompRow :: operator() (int i, int j)  const
 {
     int colIndx;
     if ( ( colIndx = this->giveColIndx(i, j) ) ) {
@@ -524,12 +524,12 @@ double DynCompRow :: operator()(int i, int j)  const
     if ( i < nRows && j < nColumns ) {
         return 0.0;
     } else {
-        OOFEM_ERROR3("DynCompRow::operator(): Array accessing exception -- (%d,%d) out of bounds", i, j);
+        OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
         return rows_ [ 0 ]->at(1); // return to suppress compiler warning message
     }
 }
 
-double &DynCompRow :: operator()(int i, int j)
+double &DynCompRow :: operator() (int i, int j)
 {
     int colIndx;
 
@@ -540,7 +540,7 @@ double &DynCompRow :: operator()(int i, int j)
         return rows_ [ i ]->at(colIndx);
     }
 
-    OOFEM_ERROR3("DynCompRow::operator(): Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
+    OOFEM_ERROR("Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
     return rows_ [ 0 ]->at(1); // return to suppress compiler warning message
 }
 
@@ -548,7 +548,7 @@ void DynCompRow :: timesT(const FloatArray &x, FloatArray &answer) const
 {
     //      Check for compatible dimensions:
     if ( x.giveSize() != nRows ) {
-        OOFEM_ERROR("DynCompRow::trans_mult: Error in CompRow -- incompatible dimensions");
+        OOFEM_ERROR("Error in CompRow -- incompatible dimensions");
     }
 
     answer.resize(nColumns);
@@ -821,7 +821,7 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
 
     for ( i = 0; i < nRows; i++ ) { // row loop
         if ( ( diag_rowptr_(i) = giveColIndx(i, i) ) == 0 ) { // giveColIndx returns 1-based indexing
-            OOFEM_ERROR("DynCompRow::ILUPYourself : zero value on diagonal");
+            OOFEM_ERROR("zero value on diagonal");
         }
     }
 
@@ -981,7 +981,7 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
             }
 
             if ( indx == 0 ) {
-                OOFEM_ERROR("DynCompRow::ILUPYourself : internal error");
+                OOFEM_ERROR("internal error");
             }
 
             previndx = iw.at(indx);
@@ -1025,7 +1025,7 @@ DynCompRow :: ILUPYourself(int part_fill, double drop_tol)
          * }
          */
         if ( ( icount - count ) != 1 ) {
-            OOFEM_ERROR4("DynCompRow::ILUPYourself : %d - row errorr (%d,%d)\n", i, icount, count);
+            OOFEM_ERROR("%d - row errorr (%d,%d)\n", i, icount, count);
         }
 
         //Refresh all iw enries to zero

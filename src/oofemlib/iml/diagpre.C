@@ -50,7 +50,7 @@ DiagPreconditioner :: init(const SparseMtrx &C)
     for ( i = 1; i <= n; i++ ) {
         diag = C.at(i, i);
         if ( diag  == 0 ) {
-            OOFEM_ERROR2("DiagPreconditioner::init : failed, zero diagonal detected in equation %d", i);
+            OOFEM_ERROR("failed, zero diagonal detected in equation %d", i);
         }
 
         diag_(i - 1) = 1. / diag;

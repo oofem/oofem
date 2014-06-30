@@ -95,24 +95,25 @@ public:
      */
     SymCompCol();
     /// Copy constructor
-    SymCompCol(const SymCompCol &S);
+    SymCompCol(const SymCompCol & S);
     /// Destructor
     virtual ~SymCompCol() { }
 
     // Overloaded methods
-    SparseMtrx *GiveCopy() const;
-    void times(const FloatArray &x, FloatArray &answer) const;
-    void timesT(const FloatArray &x, FloatArray &answer) const { this->times(x, answer); }
+    virtual SparseMtrx *GiveCopy() const;
+    virtual void times(const FloatArray &x, FloatArray &answer) const;
+    virtual void timesT(const FloatArray &x, FloatArray &answer) const { this->times(x, answer); }
     virtual void times(double x);
-    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme &);
-    int assemble(const IntArray &loc, const FloatMatrix &mat);
-    int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
-    bool canBeFactorized() const { return false; }
+    virtual int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &);
+    virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
+    virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
+    virtual bool canBeFactorized() const { return false; }
     virtual void zero();
     virtual double &at(int i, int j);
     virtual double at(int i, int j) const;
-    SparseMtrxType giveType() const { return SMT_SymCompCol; }
-    bool isAntisymmetric() const { return false; }
+    virtual const char* giveClassName() const { return "SymCompCol"; }
+    virtual SparseMtrxType giveType() const { return SMT_SymCompCol; }
+    virtual bool isAntisymmetric() const { return false; }
 
 
     const double &val(int i) const { return val_(i); }
@@ -137,9 +138,9 @@ protected:
     /*  General access function (slow) */
     /***********************************/
     /// implements 0-based access
-    double operator()(int i, int j) const;
+    double operator() (int i, int j) const;
     /// implements 0-based access
-    double &operator()(int i, int j);
+    double &operator() (int i, int j);
 };
 } // end namespace oofem
 #endif // symcompcol_h

@@ -45,10 +45,10 @@
 
 ///@name Input fields for a general boundary condition
 //@{
-#define _IFT_GeneralBoundaryCondition_LoadTimeFunct "loadtimefunction"
+#define _IFT_GeneralBoundaryCondition_timeFunct "loadtimefunction"
 #define _IFT_GeneralBoundaryCondition_valType "valtype"
 #define _IFT_GeneralBoundaryCondition_dofs "dofs"
-#define _IFT_GeneralBoundaryCondition_IsImposedTimeFunct "isimposedtimefunction"
+#define _IFT_GeneralBoundaryCondition_isImposedTimeFunct "isimposedtimefunction"
 #define _IFT_GeneralBoundaryCondition_set "set"
 //@}
 
@@ -61,8 +61,8 @@ namespace oofem {
  *
  * This base class only declares itself as a base class of all boundary conditions,
  * and declares only very basic services. This base class introduces
- * 'loadTimeFunction' as an attribute of each boundary condition.
- * 'loadTimeFunction' represent time variation, its value is dependent on time step.
+ * 'TimeFunction' as an attribute of each boundary condition.
+ * 'TimeFunction' represent time variation, its value is dependent on time step.
  * The value (or the components) of a boundary condition (load) will be
  * the product of its value by the value of
  * the associated load time function at given time step.
@@ -80,7 +80,7 @@ class OOFEM_EXPORT GeneralBoundaryCondition : public FEMComponent
 {
 protected:
     /// Associated load time function.
-    int loadTimeFunction;
+    int timeFunction;
     /// Physical meaning of BC value.
     bcValType valType;
     /// Dofs that b.c. is applied to (relevant for Dirichlet type b.c.s).
@@ -99,7 +99,7 @@ public:
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    GeneralBoundaryCondition(int n, Domain *d);
+    GeneralBoundaryCondition(int n, Domain * d);
     /// Destructor.
     virtual ~GeneralBoundaryCondition() { }
 
@@ -117,7 +117,7 @@ public:
     /**
      * @return Associated load time function of receiver.
      */
-    LoadTimeFunction *giveLoadTimeFunction();
+    Function *giveTimeFunction();
 
     /**
      * Returns receiver load type. It distinguish particular boundary conditions according to

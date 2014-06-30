@@ -45,7 +45,6 @@ REGISTER_Material(NonlinearMassTransferMaterial);
 IRResultType
 NonlinearMassTransferMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     this->Material :: initializeFrom(ir);
@@ -64,7 +63,7 @@ NonlinearMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
 {
     MaterialMode mMode = gp->giveMaterialMode();
     TransportMaterialStatus *status = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
-    FloatArray eps = status->giveTempGradient();
+    const FloatArray &eps = status->giveTempGradient();
     double gradPNorm;
     FloatMatrix t1, t2;
 
@@ -78,21 +77,19 @@ NonlinearMassTransferMaterial :: giveCharacteristicMatrix(FloatMatrix &answer,
     switch  ( mMode ) {
     case _1dHeat:
         t2.resize(1, 1);
-        t2.at(1, 1) = 1;
         break;
     case _2dHeat:
         t2.resize(2, 2);
-        t2.at(1, 1) = t2.at(2, 2) = 1;
         break;
     case _3dHeat:
         t2.resize(3, 3);
-        t2.at(1, 1) = t2.at(2, 2) = t2.at(3, 3) = 1;
         break;
     default:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode));
     }
+    t2.beUnitMatrix();
 
-    answer.beEmptyMtrx();
+    answer.clear();
     answer.add(t1);
     answer.add(1 + C * pow(gradPNorm, alpha), t2);
 }

@@ -39,7 +39,7 @@ namespace oofem {
 template< class T >
 void logData(T myArray) {
     for ( int xyz = 1; xyz <= myArray.giveSize(); xyz++ ) {
-        if ( dynamic_cast< IntArray * >( & myArray ) ) {
+        if ( dynamic_cast< IntArray * >(& myArray) ) {
             printf( "%u ", myArray.at(xyz) );
         } else {
             printf( "%f ", myArray.at(xyz) );
@@ -81,7 +81,6 @@ SolutionbasedShapeFunction :: ~SolutionbasedShapeFunction()
 IRResultType
 SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     ActiveBoundaryCondition :: initializeFrom(ir);
@@ -119,8 +118,8 @@ SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
 bool
 SolutionbasedShapeFunction :: isCoeff(ActiveDof *dof)
 {
-    for ( int i = 1; i <= myNode->giveNumberOfDofs(); i++ ) {
-        if ( dof == myNode->giveDof(i) ) {
+    for ( Dof *myDof: *myNode ) {
+        if ( dof == myDof ) {
             return true;
         }
     }
@@ -175,13 +174,9 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
         // Change to global ID for bnodes and identify the intersection of bnodes and the zero boundary
         splitBoundaryNodeIDs(myMode, * thisElement, bnodes, pNodes, mNodes, zNodes, nodeValues);
 
-        GaussIntegrationRule iRule(order, thisElement);
+        std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(order, Boundary));
 
-        int n = iRule.getRequiredNumberOfIntegrationPoints(_Triangle, order);
-        iRule.setUpIntegrationPoints(_Triangle, n, _Unknown);
-
-        for ( int j = 0; j < iRule.giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule.getIntegrationPoint(j);
+        for ( GaussPoint *gp: *iRule ) {
             FloatArray *lcoords = gp->giveCoordinates();
             FloatArray gcoords, normal, N;
             FloatArray Phi;
@@ -249,9 +244,9 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
 void
 SolutionbasedShapeFunction :: splitBoundaryNodeIDs(modeStruct &mode, Element &e, IntArray &bnodes, IntArray &pList, IntArray &mList, IntArray &zList, FloatMatrix &nodeValues)
 {
-    pList.resize(0);
-    mList.resize(0);
-    zList.resize(0);
+    pList.clear();
+    mList.clear();
+    zList.clear();
 
     for ( int j = 1; j <= bnodes.giveSize(); j++ ) {
         DofManager *dman = e.giveDofManager( bnodes.at(j) );
@@ -301,7 +296,7 @@ SolutionbasedShapeFunction :: giveUnknown(ValueModeType mode, TimeStep *tStep, A
     computeDofTransformation(dof, shapeFunctionValues);
 
     FloatArray gamma;
-    myNode->giveCompleteUnknownVector(gamma, mode, tStep);  // alpha1, alpha2,...
+    myNode->giveUnknownVector(gamma, myDofIDs, mode, tStep);  // alpha1, alpha2,...
 
     double out = shapeFunctionValues.dotProduct(gamma);
 
@@ -320,8 +315,7 @@ SolutionbasedShapeFunction :: computeDofTransformation(ActiveDof *dof, FloatArra
     masterContribs.resize( this->giveDomain()->giveNumberOfSpatialDimensions() );
     masterContribs2.resize( this->giveDomain()->giveNumberOfSpatialDimensions() );
 
-    IntArray dofIDs;
-    dofIDs.setValues( 1, ( int ) dof->giveDofID() );
+    IntArray dofIDs = {dof->giveDofID()};
 
     bool isPlus, isMinus, isZero, found;
     whichBoundary(* dof->giveDofManager()->giveCoordinates(), isPlus, isMinus, isZero);
@@ -362,7 +356,7 @@ SolutionbasedShapeFunction :: computeDofTransformation(ActiveDof *dof, FloatArra
 Dof *
 SolutionbasedShapeFunction :: giveMasterDof(ActiveDof *dof, int mdof)
 {
-    return myNode->giveDof(mdof);
+    return myNode->giveDofWithID(myDofIDs.at(mdof));
 }
 
 void
@@ -392,14 +386,14 @@ SolutionbasedShapeFunction :: loadProblem()
             for ( int k = 1; k <= e->giveNumberOfDofManagers(); k++ ) {
                 DofManager *dman = e->giveDofManager(k);
                 centerCoord.add( * dman->giveCoordinates() );
-                for ( int l = 1; l <= 3; l++ ) {
-                    if ( dman->giveDof(l)->giveBcId() != 0 ) {
+                for ( Dof *dof: *dman ) {
+                    if ( dof->giveBcId() != 0 ) {
                         vlockCount++;
                     }
                 }
             }
             if ( vlockCount == 30 ) {
-                OOFEM_WARNING5("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", e->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
+                OOFEM_WARNING("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", e->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
             }
         }
 
@@ -418,7 +412,7 @@ SolutionbasedShapeFunction :: loadProblem()
             myEngngModel->doStepOutput(thisTimestep);
         }
 
-        modeStruct *mode = new( modeStruct );
+        modeStruct *mode = new(modeStruct);
         mode->myEngngModel = myEngngModel;
 
         // Check elements
@@ -466,7 +460,7 @@ SolutionbasedShapeFunction :: updateModelWithFactors(modeStruct *m)
         factor = m->SurfaceData.at(j)->isMinus ? m->am : factor;
         factor = m->SurfaceData.at(j)->isZeroBoundary ? 1.0 : factor;
 
-        if ( dynamic_cast< MasterDof * >( d ) && m->SurfaceData.at(j)->isFree ) {
+        if ( dynamic_cast< MasterDof * >(d) && m->SurfaceData.at(j)->isFree ) {
             double u = m->SurfaceData.at(j)->value;
             this->setBoundaryConditionOnDof(dman->giveDofWithID(m->SurfaceData.at(j)->DofID), u * factor);
         }
@@ -485,7 +479,7 @@ SolutionbasedShapeFunction :: setLoads(EngngModel *myEngngModel, int d)
 
     ir.setRecordKeywordField("deadweight", 1);
     ir.setField(gradP, _IFT_Load_components);
-    ir.setField(1, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
+    ir.setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
 
     int bcID = myEngngModel->giveDomain(1)->giveNumberOfBoundaryConditions() + 1;
     GeneralBoundaryCondition *myBodyLoad;
@@ -536,13 +530,14 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, Flo
             if ( ( fabs( maxCoord.at(i) - coords.at(i) ) < TOL ) || ( fabs( minCoord.at(i) - coords.at(i) ) < TOL ) ) {
                 permuteIndex.push_back(i);
                 n++;
-                thisMask = thisMask + pow(2.0, i - 1);
+                //thisMask = thisMask + pow(2.0, i - 1);   // compiler warning on conversion from double to int
+                thisMask = thisMask + ( 0x01 << ( i - 1 ) );
             }
         }
-
-        for ( int i = 0; i < pow(2.0, n); i++ ) {
+        int _s = 0x01 << n;
+        for ( int i = 0; i < _s; i++ ) {
             int mask = i, counter = 1;
-            FloatArray *newCoord = new ( FloatArray ) ( coords.giveSize() );
+            FloatArray *newCoord = new(FloatArray) ( coords.giveSize() );
             * newCoord = coords;
 
             for ( int j = 1; j <= n; j++ ) {
@@ -592,22 +587,18 @@ SolutionbasedShapeFunction :: giveValueAtPoint(FloatArray &answer, const FloatAr
 
     FloatArray closest, lcoords, values;
 
-    Element *elementAtCoords = myEngngModel.giveDomain(1)->giveSpatialLocalizer()->giveElementContainingPoint(coords);
-
+    Element *elementAtCoords = myEngngModel.giveDomain(1)->giveSpatialLocalizer()->giveElementClosestToPoint(lcoords, closest, coords, 1);
     if ( elementAtCoords == NULL ) {
-        elementAtCoords = myEngngModel.giveDomain(1)->giveSpatialLocalizer()->giveElementClosestToPoint(lcoords, closest, coords, 1);
-        if ( elementAtCoords == NULL ) {
-            OOFEM_WARNING("Cannot find element closest to point\n");
-            coords.pY();
-        }
+        OOFEM_WARNING("Cannot find element closest to point");
+        coords.pY();
     }
 
     EIPrimaryUnknownMapperInterface *em = dynamic_cast< EIPrimaryUnknownMapperInterface * >( elementAtCoords->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
 
     IntArray eldofids;
 
-    em->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(eldofids);
-    em->EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(VM_Total, thisTimestep, coords, values);
+    elementAtCoords->giveElementDofIDMask(eldofids);
+    em->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(VM_Total, thisTimestep, lcoords, values);
 
     for ( int i = 1; i <= dofIDs.giveSize(); i++ ) {
         for ( int j = 1; j <= eldofids.giveSize(); j++ ) {
@@ -627,7 +618,7 @@ SolutionbasedShapeFunction :: setBoundaryConditionOnDof(Dof *d, double value)
     if ( bcID == 0 ) {
         DynamicInputRecord ir;
         ir.setRecordKeywordField("boundarycondition", 1);
-        ir.setField(1, _IFT_GeneralBoundaryCondition_LoadTimeFunct);
+        ir.setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
         ir.setField(value, _IFT_BoundaryCondition_PrescribedValue);
 
         bcID = d->giveDofManager()->giveDomain()->giveNumberOfBoundaryConditions() + 1;
@@ -639,8 +630,7 @@ SolutionbasedShapeFunction :: setBoundaryConditionOnDof(Dof *d, double value)
 
         d->setBcId(bcID);
     } else {
-        BoundaryCondition *bc;
-        bc = ( BoundaryCondition * ) d->giveDofManager()->giveDomain()->giveBc(bcID);
+        BoundaryCondition *bc = static_cast< BoundaryCondition * >( d->giveDofManager()->giveDomain()->giveBc(bcID) );
         bc->setPrescribedValue(value);
     }
 }
@@ -825,6 +815,12 @@ SolutionbasedShapeFunction :: copyDofManagersToSurfaceData(modeStruct *mode, Int
 
         computeBaseFunctionValueAt(values, *dman->giveCoordinates(), this->dofs, *mode->myEngngModel );
 
+<<<<<<< HEAD
+=======
+        for ( int j = 1; j <= this->dofs.giveSize(); j++ ) {
+            SurfaceDataStruct *surfaceData = new(SurfaceDataStruct);
+            Dof *d = dman->giveDofWithID( dofs.at(j) );
+>>>>>>> 147f565295394adef603dae296a820af5f28d9cd
 
         // Check that current node contains current DofID
         for (int j=1; j<=this->dofs.giveSize(); j++) {

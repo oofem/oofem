@@ -32,23 +32,23 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <Python.h>
+
 #include "userdefdirichletbc.h"
 
 #include "boundarycondition.h"
 #include "timestep.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "verbose.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
 #include "dofmanager.h"
 
-#include <Python.h>
-
 namespace oofem {
 REGISTER_BoundaryCondition(UserDefDirichletBC);
 
 UserDefDirichletBC :: UserDefDirichletBC(int i, Domain *d) : BoundaryCondition(i, d)
-{}
+{ }
 
 
 UserDefDirichletBC :: ~UserDefDirichletBC()
@@ -62,7 +62,7 @@ UserDefDirichletBC :: ~UserDefDirichletBC()
 double
 UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
-    double factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
+    double factor = this->giveTimeFunction()->evaluate(tStep, mode);
     DofManager *dMan = dof->giveDofManager();
 
 
@@ -99,12 +99,12 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
     PyTuple_SetItem(pArgs, 2, pTargetTime);
 
     // Value returned from the Python function
-    PyObject *pRetVal;
+    PyObject *pRetVal = NULL;
 
     if ( PyCallable_Check(mpFunc) ) {
         pRetVal = PyObject_CallObject(mpFunc, pArgs);
     } else {
-        OOFEM_ERROR("UserDefDirichletBC :: give: Python function is not callable.");
+        OOFEM_ERROR("Python function is not callable.");
     }
 
     // Get return value
@@ -112,7 +112,7 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
     if ( pRetVal != NULL ) {
         retVal = PyFloat_AsDouble(pRetVal);
     } else {
-        OOFEM_ERROR("UserDefDirichletBC :: give: Failed to fetch Python return value.");
+        OOFEM_ERROR("Failed to fetch Python return value.");
     }
 
     // Decrement reference count on pointers
@@ -130,7 +130,6 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
 {
     GeneralBoundaryCondition :: initializeFrom(ir);
 
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, this->mFileName, _IFT_UserDefDirichletBC_filename);
@@ -142,6 +141,9 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
     if ( mpModule != NULL ) {
         // Load and call Python function
         mpFunc = PyObject_GetAttrString(mpModule, "giveUserDefBC");
+    } else   {
+        printf( "this->mFileName.c_str(): %s\n", this->mFileName.c_str() );
+        OOFEM_ERROR("mpModule == NULL")
     }
 
     Py_INCREF(mpName);

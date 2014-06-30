@@ -56,7 +56,7 @@ private:
     int referenceNode;
 
 public:
-    LIBeam3d(int n, Domain *d);
+    LIBeam3d(int n, Domain * d);
     virtual ~LIBeam3d() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -70,10 +70,10 @@ public:
     virtual int testElementExtension(ElementExtension ext);
 
     virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
-
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     // Fibered cross section support functions
@@ -111,7 +111,7 @@ protected:
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
-    double giveLength();
+    virtual double computeLength();
 };
 } // end namespace oofem
 #endif // libeam3d_h

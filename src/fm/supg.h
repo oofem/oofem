@@ -45,7 +45,7 @@
 //@{
 #define _IFT_SUPG_Name "supg"
 #define _IFT_SUPG_deltat "deltat"
-#define _IFT_SUPG_deltatltf "deltatltf"
+#define _IFT_SUPG_deltatFunction "deltatltf"
 #define _IFT_SUPG_cmflag "cmflag"
 #define _IFT_SUPG_alpha "alpha"
 #define _IFT_SUPG_scaleflag "scaleflag"
@@ -80,8 +80,9 @@ protected:
     FloatArray accelerationVector; //, previousAccelerationVector;
     FloatArray incrementalSolutionVector;
 
+    ///@todo Use ScalarFunction here!
     double deltaT;
-    int deltaTLTF;
+    int deltaTF;
     /// Convergence tolerance.
     double atolv, rtolv;
     /// Max number of iterations.
@@ -111,9 +112,7 @@ protected:
     // int fsflag;
 
 public:
-    /*  SUPG (int i, EngngModel* _master = NULL) : FluidModel (i,_master), VelocityPressureField(this,1,FBID_VelocityPressureField, EID_MomentumBalance_ConservationEquation, 1),accelerationVector()
-     */
-    SUPG(int i, EngngModel *_master = NULL) : FluidModel(i, _master), accelerationVector() {
+    SUPG(int i, EngngModel * _master = NULL) : FluidModel(i, _master), accelerationVector() {
         initFlag = 1;
         lhs = NULL;
         ndomains = 1;
@@ -125,13 +124,10 @@ public:
         materialInterface = NULL;
     }
     virtual ~SUPG() {
-        if ( VelocityPressureField ) { delete VelocityPressureField; }
-
-        if ( materialInterface ) { delete materialInterface; }
-
-        if ( nMethod ) { delete nMethod; }
-
-        if ( lhs ) { delete lhs; }
+        delete VelocityPressureField;
+        delete materialInterface;
+        delete nMethod;
+        delete lhs;
     }
 
     virtual void solveYourselfAt(TimeStep *tStep);
@@ -172,8 +168,8 @@ public:
 
     virtual MaterialInterface *giveMaterialInterface(int n) { return materialInterface; }
 
-#ifdef __PETSC_MODULE
-    virtual void initPetscContexts();
+#ifdef __PARALLEL_MODE
+    virtual void initParallelContexts();
 #endif
 
 

@@ -59,11 +59,12 @@
 #define _IFT_NRSolver_lstype "lstype"
 #define _IFT_NRSolver_ddm "ddm"
 #define _IFT_NRSolver_ddv "ddv"
-#define _IFT_NRSolver_ddltf "ddltf"
+#define _IFT_NRSolver_ddfunc "ddltf"
 #define _IFT_NRSolver_linesearch "linesearch"
 #define _IFT_NRSolver_rtolv "rtolv"
 #define _IFT_NRSolver_rtolf "rtolf"
 #define _IFT_NRSolver_rtold "rtold"
+#define _IFT_NRSolver_calcstiffbeforeres "calcstiffbeforeres"
 //@}
 
 namespace oofem {
@@ -120,7 +121,7 @@ private:
     /// Array of prescribed values
     FloatArray prescribedDofsValues;
     /// Load Time Function of prescribed values
-    int prescribedDisplacementLTF;
+    int prescribedDisplacementTF;
     /// Array of prescribed equations
     IntArray prescribedEqs;
     /// Flag indicating that prescribedEqs were initialized
@@ -131,6 +132,8 @@ private:
     int lsFlag;
     /// Line search solver
     LineSearchNM *linesearchSolver;
+    /// Flag indicating if the stiffness should be evaluated before the residual in the first iteration.
+    bool mCalcStiffBeforeRes;
 
 #ifdef __PETSC_MODULE
     IS prescribedEgsIS;
@@ -143,7 +146,7 @@ private:
     FloatArray rtold;
 
 public:
-    NRSolver(Domain *d, EngngModel *m);
+    NRSolver(Domain * d, EngngModel * m);
     virtual ~NRSolver();
 
     // Overloaded methods:

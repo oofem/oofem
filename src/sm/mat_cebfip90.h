@@ -68,7 +68,7 @@ protected:
 
 public:
     /// Constructor.
-    CebFipSlip90MaterialStatus(int n, Domain *d, GaussPoint *g);
+    CebFipSlip90MaterialStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor.
     virtual ~CebFipSlip90MaterialStatus();
 
@@ -116,7 +116,7 @@ protected:
 
 public:
     /// Constructor
-    CebFipSlip90Material(int n, Domain *d);
+    CebFipSlip90Material(int n, Domain * d);
     /// Destructor
     virtual ~CebFipSlip90Material();
 

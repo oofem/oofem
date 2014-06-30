@@ -138,7 +138,7 @@ protected:
 
 
 public:
-    RankineMat(int n, Domain *d);
+    RankineMat(int n, Domain * d);
     virtual ~RankineMat() { }
 
     double evalYieldFunction(const FloatArray &sigPrinc, const double kappa);
@@ -242,10 +242,10 @@ protected:
 #endif
 
 public:
-    RankineMatStatus(int n, Domain *d, GaussPoint *g);
+    RankineMatStatus(int n, Domain * d, GaussPoint * g);
     virtual ~RankineMatStatus();
 
-    void givePlasticStrain(FloatArray &answer) { answer = plasticStrain; }
+    const FloatArray & givePlasticStrain() const { return plasticStrain; }
 
     double giveDamage() { return damage; }
     double giveTempDamage() { return tempDamage; }
@@ -254,19 +254,25 @@ public:
     double giveTempCumulativePlasticStrain() { return tempKappa; }
 
     double giveDKappa(int i)
-    { if ( i == 1 ) { return dKappa1; } else { return dKappa2; } }
+    {
+        if ( i == 1 ) {
+            return dKappa1;
+        } else {
+            return dKappa2;
+        }
+    }
 
     double giveTangentShearStiffness()
     { return tanG; }
 
-    void giveEffectiveStress(FloatArray &answer) { answer = effStress; }
-    void giveTempEffectiveStress(FloatArray &answer) { answer = tempEffStress; }
+    const FloatArray &giveEffectiveStress() const { return effStress; }
+    const FloatArray &giveTempEffectiveStress() const { return tempEffStress; }
 
-    void letTempPlasticStrainBe(FloatArray &values) { tempPlasticStrain = values; }
+    void letTempPlasticStrainBe(FloatArray values) { tempPlasticStrain = std :: move(values); }
 
-    void letEffectiveStressBe(FloatArray &values) { effStress = values; }
+    void letEffectiveStressBe(FloatArray values) { effStress = std :: move(values); }
 
-    void letTempEffectiveStressBe(FloatArray &values) { tempEffStress = values; }
+    void letTempEffectiveStressBe(FloatArray values) { tempEffStress = std :: move(values); }
 
     void setTempCumulativePlasticStrain(double value) { tempKappa = value; }
 

@@ -36,7 +36,6 @@
 #define staggeredproblem_h
 
 #include "engngm.h"
-#include "alist.h"
 #include "inputrecord.h"
 
 ///@name Input fields for StaggeredProblem
@@ -82,14 +81,12 @@ namespace oofem {
 class OOFEM_EXPORT StaggeredProblem : public EngngModel
 {
 protected:
-    /// Number of engineering models to run.
-    int nModels;
     /// List of engineering models to solve sequentially.
-    AList< EngngModel > *emodelList;
+    std :: vector< std :: unique_ptr< EngngModel > >emodelList;
     double deltaT;
-    std :: string *inputStreamNames;
+    std :: vector< std :: string >inputStreamNames;
     /// Associated time function for time step increment
-    int dtTimeFunction;
+    int dtFunction;
     /**
      * Constant multiplier, optional input parameter. This parameter determines the ratio of
      * two consecutive time steps. Efficient for creep and relaxation analyses.
@@ -109,7 +106,7 @@ public:
     /**
      * Constructor. Creates an engineering model with number i belonging to domain d.
      */
-    StaggeredProblem(int i, EngngModel *_master = NULL);
+    StaggeredProblem(int i, EngngModel * _master = NULL);
     /// Destructor.
     virtual ~StaggeredProblem();
 
@@ -123,7 +120,7 @@ public:
     virtual int forceEquationNumbering();
     virtual void updateYourself(TimeStep *tStep);
     virtual void initializeYourself(TimeStep *tStep) { }
-    virtual int initializeAdaptive(int tStepumber) { return 0; }
+    virtual int initializeAdaptive(int tStepNumber) { return 0; }
     virtual void terminate(TimeStep *tStep);
     virtual void doStepOutput(TimeStep *tStep);
 
@@ -152,7 +149,7 @@ public:
      * Used time function should provide step lengths as function of step number.
      * Initial step with number 0 is considered as [ -dt(0), 0 ], first step is [ 0, dt(1) ], ...
      */
-    LoadTimeFunction *giveDtTimeFunction();
+    Function *giveDtFunction();
 
     /**
      * Returns the timestep length for given step number n, initial step is number 0
@@ -180,11 +177,21 @@ public:
     virtual int checkProblemConsistency();
 
     virtual EngngModel *giveSlaveProblem(int i);
-    virtual int giveNumberOfSlaveProblems() { return nModels; }
+    virtual int giveNumberOfSlaveProblems() { return (int)inputStreamNames.size(); }
 
-    virtual int giveNumberOfFirstStep() { if ( master ) { return master->giveNumberOfFirstStep(); } else { return 1; } }
+    virtual int giveNumberOfFirstStep() {
+        if ( master ) {
+            return master->giveNumberOfFirstStep();
+        } else {
+            return 1;
+        }
+    }
     virtual int giveNumberOfTimeStepWhenIcApply() {
-        if ( master ) { return master->giveNumberOfTimeStepWhenIcApply(); } else { return 0; }
+        if ( master ) {
+            return master->giveNumberOfTimeStepWhenIcApply();
+        } else {
+            return 0;
+        }
     }
     virtual int instanciateDefaultMetaStep(InputRecord *ir);
 

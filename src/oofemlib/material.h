@@ -116,9 +116,11 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    Material(int n, Domain *d) : FEMComponent(n, d), propertyDictionary( new Dictionary() ), castingTime(-1.) { }
+    Material(int n, Domain * d) : FEMComponent(n, d), propertyDictionary( new Dictionary() ), castingTime(-1.) { }
     /// Destructor.
-    virtual ~Material() { delete propertyDictionary; }
+    virtual ~Material() {
+        delete propertyDictionary;
+    }
 
     /**
      * Returns true if stiffness matrix of receiver is symmetric
@@ -156,7 +158,13 @@ public:
      * @param tStep Time step to check activity for.
      * @return True if material is activated for given solution step.
      */
-    bool isActivated(TimeStep *tStep) { if ( tStep ) { return ( tStep->giveIntrinsicTime() >= this->castingTime ); } else { return true; } }
+    bool isActivated(TimeStep *tStep) {
+        if ( tStep ) {
+            return ( tStep->giveIntrinsicTime() >= this->castingTime );
+        } else {
+            return true;
+        }
+    }
 
     // identification and auxiliary functions
     /**

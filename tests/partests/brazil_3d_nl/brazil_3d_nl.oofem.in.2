@@ -22,7 +22,8 @@ brazil_3d_nl.oofem.out.2
 # incomplete cholesky    3 (only for smtype 4)
 # incomplete LU          2 (only for smtype 2)       droptol (default 1.0e-9) partfill (default 5)
 #
-linearstatic nsteps 1 lstype 3 smtype 7
+linearstatic nsteps 1 lstype 3 smtype 7 nmodules 1
+errorcheck filename "brazil_3d_nl.oofem.in"
 domain 3d
 OutputManager tstep_all dofman_all element_all
 ndofman 519 nelem 2122 ncrosssect 2 nmat 2 nbc 2 nic 0 nltf 1
@@ -2676,6 +2677,3 @@ IsoLE  2 d 1.0 E 300.e3 n 0.2 talpha 0.0
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0 
 ConstantSurfaceLoad 2 loadTimeFunction 1 components 3 0 0 -1.0 loadType 3 ndofs 3
 ConstantFunction 1 f(t) 1.0
-
-#%BEGIN_CHECK% tolerance 1.e-9
-#%END_CHECK%

@@ -113,13 +113,15 @@ public:
      * @param n Cross section number.
      * @param d Domain.
      */
-    CrossSection(int n, Domain *d) : FEMComponent(n, d)
+    CrossSection(int n, Domain * d) : FEMComponent(n, d)
     {
         propertyDictionary = new Dictionary();
         setNumber = 0;
     }
     /// Destructor.
-    virtual ~CrossSection() { delete propertyDictionary; }
+    virtual ~CrossSection() {
+        delete propertyDictionary;
+    }
 
     int giveSetNumber() const { return this->setNumber; };
 
@@ -186,9 +188,7 @@ public:
      * @param tStep Time step.
      * @return Nonzero if o.k, zero otherwise.
      */
-    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep)
-    { return ip->giveMaterial()->giveIPValue(answer, ip, type, tStep); }
-
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
 
 #ifdef __PARALLEL_MODE
     /**

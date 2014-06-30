@@ -60,7 +60,7 @@ TrAxisym1_ht :: computeVolumeAround(GaussPoint *gp)
     double determinant, weight;
     determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
-    return determinant * weight * this->computeRadiusAt(gp); ///@todo What about 2*pi ?
+    return determinant *weight *this->computeRadiusAt(gp); ///@todo What about 2*pi ?
 }
 
 double
@@ -78,7 +78,7 @@ TrAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
     this->interp.edgeLocal2global( gcoords, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     radius = gcoords.at(1);
-    return determinant * radius * gp->giveWeight();
+    return determinant *radius *gp->giveWeight();
 }
 
 double

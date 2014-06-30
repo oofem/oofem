@@ -66,7 +66,7 @@ Microplane :: printOutputAt(FILE *File, TimeStep *tStep)
      *  fprintf (File,"Layers report \n{\n");
      *  for ( i = 0; i< numberOfGp ; i++)
      *   {
-     *    gaussPointArray[i]->printOutputAt (File,tStep);
+     *    gaussPoints[i]->printOutputAt (File,tStep);
      *   }
      *  fprintf (File,"} end layers report\n");
      * }

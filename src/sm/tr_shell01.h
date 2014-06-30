@@ -52,7 +52,7 @@ namespace oofem {
  *
  * @author Ladislav Svoboda
  */
-class TR_SHELL01 : public StructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface, public SpatialLocalizerInterface
+class TR_SHELL01 : public StructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public ZZErrorEstimatorInterface, public SpatialLocalizerInterface
 {
 protected:
     /// Pointer to plate element.
@@ -68,19 +68,21 @@ protected:
 
 public:
     /// Constructor
-    TR_SHELL01(int n, Domain *d);
+    TR_SHELL01(int n, Domain * d);
     /// Destructor
     virtual ~TR_SHELL01() {
         delete plate;
         delete membrane;
-        if ( this->compositeIR ) { delete this->compositeIR; }
+        if ( this->compositeIR ) {
+            delete this->compositeIR;
+        }
     }
 
     virtual FEInterpolation *giveInterpolation() const { return plate->giveInterpolation(); }
 
     virtual int computeNumberOfDofs() { return 18; }
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
-    { plate->giveDofManDofIDMask(inode, ut, answer); }
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const
+    { plate->giveDofManDofIDMask(inode, answer); }
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TR_SHELL01_Name; }
     virtual const char *giveClassName() const { return "TR_SHELL01"; }
@@ -89,14 +91,16 @@ public:
     virtual void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
     virtual double computeVolumeAround(GaussPoint *gp);
-    virtual bool giveRotationMatrix(FloatMatrix &answer, EquationID eid);
+    virtual bool giveRotationMatrix(FloatMatrix &answer);
 
     virtual void updateYourself(TimeStep *tStep);
     virtual void updateInternalState(TimeStep *tStep);
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-
+    virtual void postInitialize();
+    void updateLocalNumbering(EntityRenumberingFunctor &f);
+    void setCrossSection(int csIndx);
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);
     virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
@@ -112,25 +116,13 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep);
-    // ZZErrorEstimatorInterface
-    virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
 
     virtual IntegrationRule *ZZErrorEstimatorI_giveIntegrationRule();
     virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArray &sig);
 
-    // ZZRemeshingCriteriaInterface
-    virtual double ZZRemeshingCriteriaI_giveCharacteristicSize();
-    virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
-
     // SpatialLocalizerI
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
     virtual void SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1);
 
@@ -139,30 +131,37 @@ public:
         return this->plate->computeGlobalCoordinates(answer, lcoords);
     }
 
+    virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords) {
+        return this->plate->computeLocalCoordinates(answer, gcoords);
+    }
+
 protected:
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS)
-    { _error("TR_SHELL01 :: computeBmatrixAt: calling of this function is not allowed"); }
+    { OOFEM_ERROR("calling of this function is not allowed"); }
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &)
-    { _error("TR_SHELL01 :: computeNmatrixAt: calling of this function is not allowed"); }
+    { OOFEM_ERROR("calling of this function is not allowed"); }
 
     /// @todo In time delete
 protected:
     virtual void computeGaussPoints()
-    { this->membrane->computeGaussPoints(); this->plate->computeGaussPoints(); }
+    {
+        this->membrane->computeGaussPoints();
+        this->plate->computeGaussPoints();
+    }
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
-    { _error("TR_SHELL01 :: computeStressVector: calling of this function is not allowed"); }
+    { OOFEM_ERROR("calling of this function is not allowed"); }
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
-    { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
+    { OOFEM_ERROR("calling of this function is not allowed"); }
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-    { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
+    { OOFEM_ERROR("calling of this function is not allowed"); }
 
 public:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
-    { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
+    { OOFEM_ERROR("calling of this function is not allowed"); }
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
-    { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
+    { OOFEM_ERROR("calling of this function is not allowed"); }
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
-    { _error("TR_SHELL01 :: ...: calling of this function is not allowed"); }
+    { OOFEM_ERROR("calling of this function is not allowed"); }
 };
 } // end namespace oofem
 #endif

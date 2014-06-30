@@ -136,7 +136,7 @@ StructuralInterfaceMaterialStatus :: saveContext(DataStream *stream, ContextMode
 {
     //contextIOResultType iores;
     //if ( stream == NULL ) {
-    //    _error("saveContex : can't write into NULL stream");
+    //    OOFEM_ERROR("can't write into NULL stream");
     //}
 
     //if ( ( iores = MaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -164,7 +164,7 @@ StructuralInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextM
 {
     //contextIOResultType iores;
     //if ( stream == NULL ) {
-    //    _error("saveContex : can't write into NULL stream");
+    //    OOFEM_ERROR("can't write into NULL stream");
     //}
 
     //if ( ( iores = MaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
@@ -184,8 +184,8 @@ StructuralInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextM
 
 void StructuralInterfaceMaterialStatus :: copyStateVariables(const MaterialStatus &iStatus)
 {
-    MaterialStatus &tmpStat = const_cast< MaterialStatus & >( iStatus );
-    const StructuralInterfaceMaterialStatus &structStatus = dynamic_cast< StructuralInterfaceMaterialStatus & >( tmpStat );
+    MaterialStatus &tmpStat = const_cast< MaterialStatus & >(iStatus);
+    const StructuralInterfaceMaterialStatus &structStatus = dynamic_cast< StructuralInterfaceMaterialStatus & >(tmpStat);
 
     jump                            = structStatus.giveJump();
     traction                        = structStatus.giveTraction();
@@ -201,6 +201,6 @@ void StructuralInterfaceMaterialStatus :: copyStateVariables(const MaterialStatu
 
 void StructuralInterfaceMaterialStatus :: addStateVariables(const MaterialStatus &iStatus)
 {
-    OOFEM_ERROR("Error: StructuralInterfaceMaterialStatus :: addStateVariables is not implemented.\n");
+    OOFEM_ERROR("not implemented");
 }
 } // end namespace oofem

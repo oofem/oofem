@@ -36,7 +36,6 @@
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
-#include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "isolinearelasticmaterial.h"
 #include "datastream.h"
@@ -78,7 +77,7 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 {
     FloatMatrix Ds0;
     double equivStrain;
-    FloatArray princStress, crackStrain, reducedAnswer;
+    FloatArray princStress, reducedAnswer;
     FloatArray reducedStrainVector, strainVector, principalStrain;
     FloatArray reducedSpaceStressVector;
     FloatMatrix tempCrackDirs;
@@ -95,7 +94,7 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
     StructuralMaterial :: giveFullSymVectorForm( strainVector, reducedStrainVector, gp->giveMaterialMode() );
 
-    status->giveTempCrackDirs(tempCrackDirs);
+    tempCrackDirs = status->giveTempCrackDirs();
     this->computePrincipalValDir(principalStrain, tempCrackDirs,
                                  strainVector,
                                  principal_strain);
@@ -106,14 +105,13 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
         this->giveRealPrincipalStressVector3d(princStress, gp, principalStrain, tempCrackDirs, tStep);
         princStress.resize(6);
-        status->giveTempCrackDirs(tempCrackDirs);
+        tempCrackDirs = status->giveTempCrackDirs();
         this->transformStressVectorTo(answer, tempCrackDirs, princStress, 1);
 
         StructuralMaterial :: giveReducedSymVectorForm( reducedSpaceStressVector, answer, gp->giveMaterialMode() );
         status->letTempStressVectorBe(reducedSpaceStressVector);
 
-        status->giveCrackStrainVector(crackStrain);
-        this->updateCrackStatus(gp, crackStrain);
+        this->updateCrackStatus(gp, status->giveCrackStrainVector());
 
         StructuralMaterial :: giveReducedSymVectorForm( reducedAnswer, answer, gp->giveMaterialMode() );
         answer = reducedAnswer;
@@ -218,7 +216,7 @@ RCSDMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
             this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, rMode, gp, tStep);
             return;
         } else {
-            _error("giveEffectiveMaterialStiffnessMatrix: usupported mode");
+            OOFEM_ERROR("unsupported mode");
         }
     }
 }
@@ -259,7 +257,6 @@ RCSDMaterial :: computeCurrEquivStrain(GaussPoint *gp, const FloatArray &reduced
 IRResultType
 RCSDMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, SDTransitionCoeff, _IFT_RCSDMaterial_sdtransitioncoeff);
@@ -357,7 +354,7 @@ RCSDMaterial :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i)
  * char errMsg [80];
  * sprintf (errMsg,"Element %d returned zero char length",
  *    gp->giveElement()->giveNumber());
- * _error (errMsg);
+ * OOFEM_ERROR(errMsg);
  * }
  *
  * status -> setCharLength(i, Le);
@@ -398,7 +395,7 @@ RCSDMaterial :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
     if ( rMode == TangentStiffness ) {
         if ( this->checkSizeLimit(gp, Le) ) {
             if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-                 ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+                ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
                 // fully open crack - no stiffness
                 Cf = 0.;
             } else if ( crackStrain >= status->giveTempMaxCrackStrain(i) ) {
@@ -415,7 +412,7 @@ RCSDMaterial :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
     } else {
         if ( this->checkSizeLimit(gp, Le) ) {
             if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-                 ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+                ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
                 // fully open crack - no stiffness
                 Cf = 0.;
             } else {
@@ -449,7 +446,7 @@ RCSDMaterial :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int
 
     if ( this->checkSizeLimit(gp, Le) ) {
         if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-             ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+            ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
             // fully open crack - no stiffness
             answer = 0.;
         } else if ( crackStrain >= status->giveTempMaxCrackStrain(i) ) {
@@ -524,7 +521,7 @@ RCSDMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
                 }
 
                 fprintf( file, "crack %d {status %s, normal to crackplane { %f %f %f }} ",
-                         i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
+                        i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
             }
         }
     } else {

@@ -42,7 +42,6 @@
 #define sparsenonlinsystemnm_h
 
 #include "nummet.h"
-#include "equationid.h"
 #include "nmstatus.h"
 
 namespace oofem {
@@ -50,6 +49,7 @@ class EngngModel;
 class SparseMtrx;
 class FloatArray;
 class TimeStep;
+class SparseLinearSystemNM;
 
 /**
  * This base class is an abstraction for all numerical methods solving sparse
@@ -80,7 +80,7 @@ protected:
 
 public:
     /// Constructor
-    SparseNonLinearSystemNM(Domain *d, EngngModel *m) : NumericalMethod(d, m) { }
+    SparseNonLinearSystemNM(Domain * d, EngngModel * m) : NumericalMethod(d, m) { }
     /// Destructor
     virtual ~SparseNonLinearSystemNM() { }
 
@@ -132,6 +132,8 @@ public:
     virtual SparseLinearSystemNM *giveLinearSolver() { return NULL; }
 
     virtual const char *giveClassName() const { return "SparseNonLinearSystemNM"; }
+    /// Error printing helper.
+    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
 };
 } // end namespace oofem
 #endif // sparsenonlinsystemnm_h

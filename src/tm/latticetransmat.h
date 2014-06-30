@@ -68,7 +68,7 @@ protected:
 
 public:
     ///Constructor
-    LatticeTransportMaterialStatus(int n, Domain *d, GaussPoint *g);
+    LatticeTransportMaterialStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~LatticeTransportMaterialStatus() { }
 
@@ -133,9 +133,9 @@ protected:
     double suctionAirEntry;
 
 public:
-    LatticeTransportMaterial(int n, Domain *d) : TransportMaterial(n, d) {}
+    LatticeTransportMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
 
-    virtual ~LatticeTransportMaterial() {}
+    virtual ~LatticeTransportMaterial() { }
 
     virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
 
@@ -179,8 +179,6 @@ public:
     virtual double give(int, GaussPoint *gp);
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
-
-    virtual MaterialStatus *giveStatus(GaussPoint *gp) const;
 };
 } // end namespace oofem
 #define latticetransmat_h

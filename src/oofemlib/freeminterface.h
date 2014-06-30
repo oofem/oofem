@@ -52,7 +52,7 @@ class OOFEM_EXPORT FreemInterface : public MesherInterface
 {
 public:
     /// Constructor
-    FreemInterface(Domain *d) : MesherInterface(d) { }
+    FreemInterface(Domain * d) : MesherInterface(d) { }
     /// Destructor
     virtual ~FreemInterface() { }
 

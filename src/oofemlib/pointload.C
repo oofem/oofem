@@ -33,7 +33,7 @@
  */
 
 #include "pointload.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "floatarray.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
@@ -49,14 +49,13 @@ PointLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coo
     Load :: computeComponentArrayAt(answer, tStep, mode);
 
     // time distribution
-    factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
+    factor = this->giveTimeFunction()->evaluate(tStep, mode);
     answer.times(factor);
 }
 
 IRResultType
 PointLoad :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     result = Load :: initializeFrom(ir);

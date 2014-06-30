@@ -48,8 +48,7 @@
 #include "dofiditem.h"
 #include "contextioerr.h"
 #include "field.h"
-#include "equationid.h"
-#include "xfemmanager.h"
+#include "xfem/xfemmanager.h"
 
 #include <cstring>
 #include <string>
@@ -66,7 +65,7 @@ char cltypesGiveUnknownTypeModeKey(ValueModeType mode)
 
     case VM_Acceleration: return 'a';
 
-    default: OOFEM_ERROR("cltypesGiveUnknownTypeModeKey : unsupported ValueModeType");
+    default: OOFEM_ERROR("unsupported ValueModeType");
     }
 
     return 0;
@@ -78,7 +77,7 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     switch ( type ) {
     case IST_StressTensor:
     case IST_StrainTensor:
-    case IST_CurvatureTensor:
+        //case IST_CurvatureTensor:
     case IST_DamageTensor:
     case IST_DamageInvTensor:
     case IST_PrincipalDamageTensor:
@@ -100,8 +99,10 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
 
     case IST_BeamForceMomentumTensor:
     case IST_BeamStrainCurvatureTensor:
-    case IST_ShellForceMomentumTensor:
-    case IST_ShellStrainCurvatureTensor:
+    case IST_ShellStrainTensor:
+    case IST_ShellCurvatureTensor:
+    case IST_ShellForceTensor:
+    case IST_ShellMomentumTensor:
     case IST_DeformationGradientTensor:
     case IST_FirstPKStressTensor:
         return ISVT_TENSOR_G;
@@ -206,7 +207,7 @@ InternalStateValueType giveInternalStateValueType(UnknownType type)
     } else if ( ( type == FluxVector ) || ( type == PressureVector ) || ( type == Temperature ) ) {
         return ISVT_SCALAR;
     } else {
-        OOFEM_ERROR2( "giveInternalStateValueType: unsupported UnknownType %s", __UnknownTypeToString(type) );
+        OOFEM_ERROR( "unsupported UnknownType %s", __UnknownTypeToString(type) );
         return ISVT_SCALAR; // To make compiler happy.
     }
 }
@@ -235,10 +236,13 @@ void
 ContextIOERR :: print()
 {
     if ( msg ) {
-        __OOFEM_ERROR3(file, line, "ContextIOERR encountered, error code: %d\n%s", error, msg);
+        oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line, 
+                                  "ContextIOERR encountered, error code: %d\n%s", error, msg);
     }  else {
-        __OOFEM_ERROR2(file, line, "ContextIOERR encountered, error code: %d", error);
+        oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, NULL, file, line, 
+                                  "ContextIOERR encountered, error code: %d", error);
     }
+    oofem_exit(1);
 }
 
 /*
@@ -308,10 +312,6 @@ const char *__MaterialMappingAlgorithmTypeToString(MaterialMappingAlgorithmType 
 
 const char *__MeshPackageTypeToString(MeshPackageType _value) {
     TO_STRING_BODY(MeshPackageType_DEF)
-}
-
-const char *__EquationIDToString(EquationID _value) {
-    TO_STRING_BODY(EquationID_DEF)
 }
 
 const char *__XFEMStateTypeToString(XFEMStateType _value) {

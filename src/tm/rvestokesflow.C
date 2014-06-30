@@ -33,7 +33,6 @@
  */
 
 #include "rvestokesflow.h"
-#include "oofemtxtdatareader.h"
 #include "util.h"
 #include "rveengngmodel.h"
 #include "engngm.h"
@@ -68,7 +67,9 @@ RVEStokesFlowMaterialStatus :: RVEStokesFlowMaterialStatus(int n, Domain *d, Gau
 }
 
 RVEStokesFlowMaterialStatus :: ~RVEStokesFlowMaterialStatus()
-{}
+{
+    delete solutionVector;
+}
 
 void
 RVEStokesFlowMaterialStatus :: exportFilter(GaussPoint *gp, TimeStep *tStep)
@@ -87,7 +88,7 @@ RVEStokesFlowMaterialStatus :: exportFilter(GaussPoint *gp, TimeStep *tStep)
     FloatArray grapP = this->giveTempGradient(), seepageVelocity;
 
     rveEngngModel *rveE;
-    rveE = dynamic_cast< rveEngngModel * >( this->rve );
+    rveE = dynamic_cast< rveEngngModel * >(this->rve);
 
     rveE->rveSetBoundaryConditions(10, grapP);
     rveE->rveGiveCharacteristicData(1, & grapP, & seepageVelocity, tStep);
@@ -121,7 +122,7 @@ RVEStokesFlowMaterialStatus :: saveContext(DataStream *stream, ContextMode mode,
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        _error("saveContex : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     if ( ( iores = TransportMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -137,7 +138,7 @@ RVEStokesFlowMaterialStatus :: restoreContext(DataStream *stream, ContextMode mo
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        _error("saveContex : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     if ( ( iores = TransportMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
@@ -148,7 +149,7 @@ RVEStokesFlowMaterialStatus :: restoreContext(DataStream *stream, ContextMode mo
 }
 
 RVEStokesFlow :: RVEStokesFlow(int n, Domain *d) : RVEMaterial(n, d), TransportMaterial(n, d)
-{}
+{ }
 
 IRResultType RVEStokesFlow :: initializeFrom(InputRecord *ir)
 {
@@ -211,7 +212,7 @@ RVEStokesFlow :: giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatA
         FloatArray X;
         rveEngngModel *rveE;
 
-        rveE = dynamic_cast< rveEngngModel * >( this->rve );
+        rveE = dynamic_cast< rveEngngModel * >(this->rve);
 
         X = grad;
 

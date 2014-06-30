@@ -81,9 +81,11 @@ protected:
 
     /// DOF-manager containing the unknown volumetric strain(rate).
     Node *voldman;
+    int vol_id;
 
     /// DOF-manager containing the known deviatoric strain(rate).
     Node *devdman;
+    IntArray dev_id;
 
     Dof *giveVolDof();
 
@@ -93,7 +95,7 @@ public:
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    MixedGradientPressureDirichlet(int n, Domain *d);
+    MixedGradientPressureDirichlet(int n, Domain * d);
 
     /// Destructor
     virtual ~MixedGradientPressureDirichlet();
@@ -122,10 +124,13 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual void scale(double s) { devGradient.times(s); pressure *= s; }
+    virtual void scale(double s) {
+        devGradient.times(s);
+        pressure *= s;
+    }
 
-    virtual void computeFields(FloatArray &stressDev, double &vol, EquationID eid, TimeStep *tStep);
-    virtual void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep);
+    virtual void computeFields(FloatArray &stressDev, double &vol, TimeStep *tStep);
+    virtual void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, TimeStep *tStep);
 
     virtual void setPrescribedPressure(double p) { pressure = p; }
     virtual void setPrescribedDeviatoricGradientFromVoigt(const FloatArray &ddev);
@@ -138,7 +143,7 @@ public:
     /// Returns the center coordinate
     virtual FloatArray &giveCenterCoordinate() { return centerCoord; }
 
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, FloatArray *eNorms = NULL);
 

@@ -60,7 +60,7 @@ protected:
     double maturityT0;   ///< Baseline for maturity mathod
 
 public:
-    IsotropicHeatTransferMaterial(int n, Domain *d);
+    IsotropicHeatTransferMaterial(int n, Domain * d);
     virtual ~IsotropicHeatTransferMaterial();
 
     virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);

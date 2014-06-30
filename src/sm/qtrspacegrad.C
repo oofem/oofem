@@ -82,19 +82,12 @@ QTRSpaceGrad :: initializeFrom(InputRecord *ir)
 
 
 void
-QTRSpaceGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+QTRSpaceGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode <= nSecNodes ) {
-        answer.resize(4);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
-        answer.at(3) = D_w;
-        answer.at(4) = G_0;
+        answer = {D_u, D_v, D_w, G_0};
     } else {
-        answer.resize(3);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
-        answer.at(3) = D_w;
+        answer = {D_u, D_v, D_w};
     }
 }
 
@@ -102,8 +95,7 @@ void
 QTRSpaceGrad :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    integrationRulesArray.resize(1);
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 7);
     this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 }
@@ -114,14 +106,9 @@ QTRSpaceGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp.
 {
-    FloatArray n(4);
+    FloatArray n;
     this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    answer.resize(1, 4);
-    answer.zero();
-
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, i) = n.at(i);
-    }
+    answer.beNMatrixOf(n, 1);
 }
 
 void

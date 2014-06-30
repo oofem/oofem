@@ -1,7 +1,8 @@
 qbrick_02.out
 Patch test of QBrick1ht element, constant heat source, both ends fixed at 0
 #Exact solution for 1D is T(x)=source/2/lambda*x(L-x) where lambda is the conductivity and L is the bar length
-StationaryProblem nsteps 1 nmodules 0
+StationaryProblem nsteps 1 nmodules 1
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 2
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
@@ -61,12 +62,12 @@ boundarycondition 2 loadtimefunction 1 prescribedvalue 0.0
 deadweight 3 loadTimeFunction 1 components 1 6.
 constantfunction 1 f(t) 1.0
 #%BEGIN_CHECK%
-#NODE tStep 1 number 3 dof 1 unknown f value 64.0
-#NODE tStep 1 number 13 dof 1 unknown f value 64.0
-#NODE tStep 1 number 33 dof 1 unknown f value 40.0
-#NODE tStep 1 number 34 dof 1 unknown f value 40.0
-#NODE tStep 1 number 35 dof 1 unknown f value 72.0
-#NODE tStep 1 number 36 dof 1 unknown f value 72.0
-#NODE tStep 1 number 41 dof 1 unknown f value 72.0
-#NODE tStep 1 number 42 dof 1 unknown f value 72.0
+#NODE tStep 1 number 3 dof 10 unknown d value 64.0
+#NODE tStep 1 number 13 dof 10 unknown d value 64.0
+#NODE tStep 1 number 33 dof 10 unknown d value 40.0
+#NODE tStep 1 number 34 dof 10 unknown d value 40.0
+#NODE tStep 1 number 35 dof 10 unknown d value 72.0
+#NODE tStep 1 number 36 dof 10 unknown d value 72.0
+#NODE tStep 1 number 41 dof 10 unknown d value 72.0
+#NODE tStep 1 number 42 dof 10 unknown d value 72.0
 #%END_CHECK%

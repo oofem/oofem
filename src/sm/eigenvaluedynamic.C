@@ -60,7 +60,7 @@ NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
 
     nMethod = classFactory.createGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
-        _error("giveNumericalMethod:  solver creation failed");
+        OOFEM_ERROR("solver creation failed");
     }
 
     return nMethod;
@@ -69,7 +69,6 @@ NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
 IRResultType
 EigenValueDynamic :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     //EngngModel::instanciateFrom (ir);
 
@@ -109,7 +108,7 @@ double EigenValueDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *t
     int eq = dof->__giveEquationNumber();
 #ifdef DEBUG
     if ( eq == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
+        OOFEM_ERROR("invalid equation number");
     }
 #endif
 
@@ -118,7 +117,7 @@ double EigenValueDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *t
         return eigVec.at( eq, ( int ) tStep->giveTargetTime() );
 
     default:
-        _error("giveUnknownComponent: Unknown is of undefined type for this problem");
+        OOFEM_ERROR("Unknown is of undefined type for this problem");
     }
 
     return 0.;
@@ -161,15 +160,15 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
         //
 
         stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
         massMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        massMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        massMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
-                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
-        this->assemble( massMatrix, tStep, EID_MomentumBalance, MassMatrix,
-                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assemble( stiffnessMatrix, tStep, StiffnessMatrix,
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assemble( massMatrix, tStep, MassMatrix,
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //
         // create resulting objects eigVec and eigVal
         //
@@ -182,7 +181,7 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
     //
     // set-up numerical model
     //
-    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetatStepumber() ) );
+    this->giveNumericalMethod( this->giveMetaStep( tStep->giveMetaStepNumber() ) );
 
     //
     // call numerical model to solve arised problem
@@ -228,8 +227,8 @@ void EigenValueDynamic :: terminate(TimeStep *tStep)
     for ( i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
         fprintf(outputStream, "\nOutput for eigen value no.  % .3e \n", ( double ) i);
         fprintf( outputStream,
-                 "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
-                 i, eigVal.at(i) );
+                "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
+                i, eigVal.at(i) );
         tStep->setTime( ( double ) i ); // we use time as intrinsic eigen value index
 
         if ( this->requiresUnknownsDictionaryUpdate() ) {
@@ -307,7 +306,7 @@ contextIOResultType EigenValueDynamic :: restoreContext(DataStream *stream, Cont
 //
 {
     int closeFlag = 0;
-    int activeVector = this->resolveCorrespondingEigentStepumber(obj);
+    int activeVector = this->resolveCorrespondingEigenStepNumber(obj);
     int istep = 1, iversion = 0;
     contextIOResultType iores;
     FILE *file = NULL;
@@ -355,7 +354,7 @@ contextIOResultType EigenValueDynamic :: restoreContext(DataStream *stream, Cont
 }
 
 
-int EigenValueDynamic :: resolveCorrespondingEigentStepumber(void *obj)
+int EigenValueDynamic :: resolveCorrespondingEigenStepNumber(void *obj)
 {
     //
     // returns corresponding eigen step number
@@ -386,14 +385,14 @@ EigenValueDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 
 #ifdef __SLEPC_MODULE
 void
-EigenValueDynamic :: initPetscContexts()
+EigenValueDynamic :: initParallelContexts()
 {
-    PetscContext *petscContext;
+    ParallelContext *parallelContext;
 
-    petscContextList->growTo(ndomains);
+    parallelContextList->growTo(ndomains);
     for ( int i = 0; i < this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this);
-        petscContextList->put(i + 1, petscContext);
+        parallelContext =  new ParallelContext(this);
+        parallelContextList->put(i + 1, parallelContext);
     }
 }
 #endif

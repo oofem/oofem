@@ -79,7 +79,7 @@ public:
      * @param n Barrier's number
      * @param aDomain Pointer to the domain to which element belongs.
      */
-    PolylineNonlocalBarrier(int n, Domain *aDomain);
+    PolylineNonlocalBarrier(int n, Domain * aDomain);
     /// Virtual destructor.
     virtual ~PolylineNonlocalBarrier();
 
@@ -90,7 +90,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual double calculateMinimumDistanceFromBoundary(const FloatArray &coords, double maxPossibleDistance);
+    virtual double calculateMinimumDistanceFromBoundary(const FloatArray &coords);
 
     /**
      * This function computes the length of the normal to the line defined by 2 vertices that passes through

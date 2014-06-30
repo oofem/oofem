@@ -44,12 +44,12 @@
 namespace oofem {
 #define PiecewiseLinFunction_PRECISION 1.e-12
 
-REGISTER_LoadTimeFunction(PiecewiseLinFunction);
+REGISTER_Function(PiecewiseLinFunction);
 
-PiecewiseLinFunction :: PiecewiseLinFunction(int i, Domain *d) : LoadTimeFunction(i, d), dates(), values()
-{}
+PiecewiseLinFunction :: PiecewiseLinFunction(int i, Domain *d) : Function(i, d), dates(), values()
+{ }
 
-double PiecewiseLinFunction :: __at(double time)
+double PiecewiseLinFunction :: evaluateAtTime(double time)
 // Returns the value of the receiver at time 'time'. 'time' should be
 // one of the dates of the receiver (currently there is no interpola-
 // tion between two points).
@@ -58,7 +58,7 @@ double PiecewiseLinFunction :: __at(double time)
     double xa, xb, ya, yb;
 
     if ( this->dates.giveSize() == 0 ) {
-        _error("at: Undefined dates and values");
+        OOFEM_ERROR("Undefined dates and values");
     }
 
     for ( int i = 1; i <= this->dates.giveSize(); i++ ) {
@@ -66,7 +66,7 @@ double PiecewiseLinFunction :: __at(double time)
             return this->values.at(i);
         } else if ( this->dates.at(i) > time ) {
             if ( i == 1 ) {
-                OOFEM_WARNING3( "PiecewiseLinFunction :: __at: computational time %f is out of given time %f, extrapolating value(s)", time, dates.at(i) );
+                OOFEM_WARNING("computational time %f is out of given time %f, extrapolating value(s)", time, dates.at(i) );
                 return 0.;
             }
 
@@ -82,7 +82,7 @@ double PiecewiseLinFunction :: __at(double time)
     return 0.;
 }
 
-double PiecewiseLinFunction :: __derAt(double time)
+double PiecewiseLinFunction :: evaluateVelocityAtTime(double time)
 // Returns the derivative of the receiver at time 'time'. 'time' should be
 // one of the dates of the receiver (currently there is no interpola-
 // tion between two points).
@@ -91,7 +91,7 @@ double PiecewiseLinFunction :: __derAt(double time)
     double xa, xb, ya, yb;
 
     if ( this->dates.giveSize() == 0 ) {
-        _error("at: Undefined dates and values");
+        OOFEM_ERROR("Undefined dates and values");
     }
 
     for ( int i = 1; i <= this->dates.giveSize(); i++ ) {
@@ -121,10 +121,9 @@ double PiecewiseLinFunction :: __derAt(double time)
 IRResultType
 PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    LoadTimeFunction :: initializeFrom(ir);
+    Function :: initializeFrom(ir);
 
     // Optional means, read data from external file (useful for very large sets of data)
     if ( ir->hasField(_IFT_PiecewiseLinFunction_dataFile) ) {
@@ -134,7 +133,7 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, fname, _IFT_PiecewiseLinFunction_dataFile);
         std :: ifstream file(fname.c_str(), std :: ios :: in);
         if ( !file.is_open() ) {
-            OOFEM_ERROR2( "PieceWiseLinFunction :: initializeFrom - Failed to open data file: %s\n", fname.c_str() );
+            OOFEM_ERROR("Failed to open data file: %s\n", fname.c_str());
         }
         // Data should be stored in two columns (or just interleaved)
         double temp_t, temp_ft;
@@ -171,7 +170,7 @@ PiecewiseLinFunction :: initializeFrom(InputRecord *ir)
 
 void PiecewiseLinFunction :: giveInputRecord(DynamicInputRecord &input)
 {
-    LoadTimeFunction :: giveInputRecord(input);
+    Function :: giveInputRecord(input);
     input.setField(this->dates.giveSize(), _IFT_PiecewiseLinFunction_npoints);
     input.setField(this->dates, _IFT_PiecewiseLinFunction_t);
     input.setField(this->values, _IFT_PiecewiseLinFunction_ft);

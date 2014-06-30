@@ -37,7 +37,6 @@
 
 #include "activebc.h"
 #include "intarray.h"
-#include "equationid.h"
 #include "chartype.h"
 #include "valuemodetype.h"
 #include "dofmanager.h"
@@ -48,9 +47,9 @@
 ///@name Input fields for active boundary condition
 //@{
 #define _IFT_LinearConstraintBC_weights "weights"
-#define _IFT_LinearConstraintBC_weightsltf "weightsltf"
+#define _IFT_LinearConstraintBC_weightsfuncs "weightsltf"
 #define _IFT_LinearConstraintBC_rhs "rhs"
-#define _IFT_LinearConstraintBC_rhsltf "rhsltf"
+#define _IFT_LinearConstraintBC_rhsfuncs "rhsltf"
 #define _IFT_LinearConstraintBC_dofmans "dofmans"
 #define _IFT_LinearConstraintBC_dofs "dofs"
 #define _IFT_LinearConstraintBC_lhstype "lhstype"
@@ -63,7 +62,7 @@ namespace oofem {
  * Class implementing linear constraint on selected DOFs in the form @f$ \sum_i w_i r_i = c @f$,
  * where @f$ r_i @f$ is i-th degree of freedom entering contraint, w_i is corresponding weight,
  * and @f$ c @f$ is given value. The weights and constant can have associated loadtime function,
- * so they can evolve in time. By default, the loadtimefunction value for all weights and
+ * so they can evolve in time. By default, the Function value for all weights and
  * constant is set to 1.0.
  * This boundary condition is introduced as additional stationary condition in energy
  * functional using Lagrange multiplier, which is an additional degree of freedom introduced
@@ -73,9 +72,9 @@ class OOFEM_EXPORT LinearConstraintBC : public ActiveBoundaryCondition
 {
 protected:
     FloatArray weights;
-    IntArray weightsLtf;
+    IntArray weightsTf;
     double rhs;
-    int rhsLtf;
+    int rhsTf;
     IntArray dofmans;
     IntArray dofs;
     DofManager *md;
@@ -87,20 +86,22 @@ protected:
     IntArray rhsType;
 
 public:
-    LinearConstraintBC(int n, Domain *d);
+    LinearConstraintBC(int n, Domain * d);
     /// Destructor.
-    virtual ~LinearConstraintBC() { delete this->md; }
+    virtual ~LinearConstraintBC() {
+        delete this->md;
+    }
 
     IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveInputRecordName() const { return _IFT_LinearConstraintBC_Name; }
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, FloatArray *eNorms = NULL);
 
     virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols,
-                                    EquationID eid, CharType type, const UnknownNumberingScheme &r_s,
+                                    CharType type, const UnknownNumberingScheme &r_s,
                                     const UnknownNumberingScheme &c_s);
 
     /// Gives the number of internal dof managers.

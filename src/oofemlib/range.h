@@ -57,7 +57,9 @@ protected:
 
 public:
     /// Constructor. Creates Range containing only given single number
-    Range(int indx) { startIndx = endIndx = indx; }
+    Range(int indx) {
+        startIndx = endIndx = indx;
+    }
     /// Constructor. Creates range <li, hi>
     Range(int li, int hi) {
         startIndx = li;
@@ -77,7 +79,7 @@ public:
     /// Tests if number is in range.
     bool test(int i) { return ( i >= startIndx ) && ( i <= endIndx ); }
 
-    friend std :: ostream &operator<<(std :: ostream &out, const Range &r) {
+    friend std :: ostream &operator << ( std :: ostream & out, const Range & r ) {
         return out << r.startIndx << " " << r.endIndx;
     }
 };

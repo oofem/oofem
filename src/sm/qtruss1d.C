@@ -71,9 +71,9 @@ QTruss1d :: initializeFrom(InputRecord *ir)
 }
 
 void
-QTruss1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+QTruss1d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(1, D_u);
+    answer = {D_u};
 }
 
 int
@@ -91,16 +91,15 @@ QTruss1d :: computeVolumeAround(GaussPoint *gp)
 {
     double detJ = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
     double weight  = gp->giveWeight();
-    return detJ * weight * this->giveCrossSection()->give(CS_Area, gp);
+    return detJ *weight *this->giveCrossSection()->give(CS_Area, gp);
 }
 
 
 void QTruss1d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.XF
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }

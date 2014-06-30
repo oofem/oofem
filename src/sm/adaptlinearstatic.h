@@ -59,7 +59,7 @@ protected:
     MeshPackageType meshPackage;
 
 public:
-    AdaptiveLinearStatic(int i, EngngModel *_master = NULL) : LinearStatic(i, _master) { }
+    AdaptiveLinearStatic(int i, EngngModel * _master = NULL) : LinearStatic(i, _master) { }
     virtual ~AdaptiveLinearStatic() { }
 
     virtual void updateYourself(TimeStep *tStep);
@@ -69,7 +69,7 @@ public:
      * This process should typically include restoring old solution, instanciating newly
      * generated domain(s) and by mapping procedure.
      */
-    virtual int initializeAdaptive(int tStepumber);
+    virtual int initializeAdaptive(int tStepNumber);
     virtual void terminate(TimeStep *tStep);
 
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);

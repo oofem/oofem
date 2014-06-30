@@ -73,7 +73,9 @@ protected:
 
 public:
     /// Constructor
-    MeshQualityErrorEstimator(int n, Domain *d) : ErrorEstimator(n, d) { this->eeType = EET_MeshQuality; }
+    MeshQualityErrorEstimator(int n, Domain * d) : ErrorEstimator(n, d) {
+        this->eeType = EET_MeshQuality;
+    }
     /// Destructor
     virtual ~MeshQualityErrorEstimator() { }
 

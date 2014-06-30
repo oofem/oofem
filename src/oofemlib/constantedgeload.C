@@ -33,7 +33,7 @@
  */
 
 #include "constantedgeload.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "floatarray.h"
 #include "timestep.h"
 #include "classfactory.h"
@@ -46,7 +46,7 @@ ConstantEdgeLoad :: initializeFrom(InputRecord *ir)
 {
     BoundaryLoad :: initializeFrom(ir);
     if ( componentArray.giveSize() != nDofs ) {
-        _error("instanciateFrom: componentArray size mismatch");
+        OOFEM_ERROR("componentArray size mismatch");
     }
 
     return IRRT_OK;
@@ -61,17 +61,17 @@ ConstantEdgeLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArr
     double factor;
 
     if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
-        _error("computeValueAt: mode not supported");
+        OOFEM_ERROR("mode not supported");
     }
 
     // ask time distribution
     /*
-     * factor = this -> giveLoadTimeFunction() -> at(tStep->giveTime()) ;
+     * factor = this -> giveTimeFunction() -> at(tStep->giveTime()) ;
      * if ((mode==VM_Incremental) && (!tStep->isTheFirstStep()))
-     * //factor -= this->giveLoadTimeFunction()->at(tStep->givePreviousStep()->giveTime()) ;
-     * factor -= this->giveLoadTimeFunction()->at(tStep->giveTime()-tStep->giveTimeIncrement()) ;
+     * //factor -= this->giveTimeFunction()->at(tStep->givePreviousStep()->giveTime()) ;
+     * factor -= this->giveTimeFunction()->at(tStep->giveTime()-tStep->giveTimeIncrement()) ;
      */
-    factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
+    factor = this->giveTimeFunction()->evaluate(tStep, mode);
     answer = componentArray;
     answer.times(factor);
 

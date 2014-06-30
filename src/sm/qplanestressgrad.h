@@ -49,7 +49,7 @@ protected:
     static FEI2dQuadLin interpolation;
 
 public:
-    QPlaneStressGrad(int n, Domain *d);
+    QPlaneStressGrad(int n, Domain * d);
     virtual ~QPlaneStressGrad() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -66,7 +66,7 @@ protected:
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) { GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) { GradDpElement :: computeForceLoadVector(answer, tStep, mode); }
     virtual void computeGaussPoints();
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual StructuralElement *giveStructuralElement() { return this; }
     virtual NLStructuralElement *giveNLStructuralElement() { return this; }
 };

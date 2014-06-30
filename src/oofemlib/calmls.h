@@ -76,7 +76,7 @@
 namespace oofem {
 class Domain;
 class EngngModel;
-class PetscContext;
+class ParallelContext;
 
 #define calm_SMALL_NUM 1.e-20
 #define calm_SMALL_ERROR_NUM 1.e-6
@@ -157,7 +157,7 @@ protected:
         calm_accelNRM, ///< Updates the tangent after a few steps.
     };
 
-    typedef std :: set< DofIDItem >__DofIDSet;
+    typedef std :: set< DofIDItem > __DofIDSet;
 
     int nsmax;
     int maxRestarts;
@@ -207,14 +207,12 @@ protected:
     FloatArray rtold;
 
 #ifdef __PARALLEL_MODE
- #ifdef __PETSC_MODULE
     /// Parallel context for computing norms, dot products and such.
-    PetscContext *parallel_context;
- #endif
+    ParallelContext *parallel_context;
 #endif
 
 public:
-    CylindricalALM(Domain *d, EngngModel *m);
+    CylindricalALM(Domain * d, EngngModel * m);
     virtual ~CylindricalALM();
 
     // Overloaded methods:

@@ -57,7 +57,7 @@ TrabBoneNLEmbed :: TrabBoneNLEmbed(int n, Domain *d) : TrabBoneEmbed(n, d), Stru
 }
 
 TrabBoneNLEmbed :: ~TrabBoneNLEmbed()
-{}
+{ }
 
 void
 TrabBoneNLEmbed :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep)
@@ -72,19 +72,17 @@ TrabBoneNLEmbed :: updateBeforeNonlocAverage(const FloatArray &strainVector, Gau
 
     nlstatus->letTempStrainVectorBe(strainVector);
 
-    StrainVector strain( strainVector, gp->giveMaterialMode() );
-
-    this->performPlasticityReturn(gp, strain);
-    this->computeLocalCumPlastStrain(cumPlastStrain, strain, gp, tStep);
+    this->performPlasticityReturn(gp, strainVector);
+    this->computeLocalCumPlastStrain(cumPlastStrain, strainVector, gp, tStep);
 
     nlstatus->setLocalCumPlastStrainForAverage(cumPlastStrain);
 }
 
 void
-TrabBoneNLEmbed :: giveRealStressVector(FloatArray &answer,
-                                        GaussPoint *gp,
-                                        const FloatArray &strainVector,
-                                        TimeStep *tStep)
+TrabBoneNLEmbed :: giveRealStressVector_3d(FloatArray &answer,
+                                           GaussPoint *gp,
+                                           const FloatArray &strainVector,
+                                           TimeStep *tStep)
 {
     TrabBoneNLEmbedStatus *nlStatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(gp) );
 
@@ -122,12 +120,11 @@ TrabBoneNLEmbed :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep
     this->updateDomainBeforeNonlocAverage(tStep);
 
     std :: list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
-    std :: list< localIntegrationRecord > :: iterator pos;
 
-    for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        nonlocStatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(pos->nearGp) );
+    for ( auto &lir: *list ) {
+        nonlocStatus = static_cast< TrabBoneNLEmbedStatus * >( this->giveStatus(lir.nearGp) );
         nonlocalContribution = nonlocStatus->giveLocalCumPlastStrainForAverage();
-        nonlocalContribution *= pos->weight;
+        nonlocalContribution *= lir.weight;
         nonlocalCumPlastStrain += nonlocalContribution;
     }
 
@@ -142,7 +139,7 @@ Interface *
 TrabBoneNLEmbed :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
     } else {
         return NULL;
     }
@@ -151,7 +148,6 @@ TrabBoneNLEmbed :: giveInterface(InterfaceType type)
 IRResultType
 TrabBoneNLEmbed :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
     TrabBoneEmbed :: initializeFrom(ir);
@@ -198,7 +194,7 @@ TrabBoneNLEmbedStatus :: TrabBoneNLEmbedStatus(int n, Domain *d, GaussPoint *g) 
 }
 
 TrabBoneNLEmbedStatus :: ~TrabBoneNLEmbedStatus()
-{}
+{ }
 
 void
 TrabBoneNLEmbedStatus :: printOutputAt(FILE *file, TimeStep *tStep)

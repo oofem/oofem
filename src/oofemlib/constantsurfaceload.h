@@ -62,7 +62,7 @@ namespace oofem {
 class OOFEM_EXPORT ConstantSurfaceLoad : public BoundaryLoad
 {
 public:
-    ConstantSurfaceLoad(int i, Domain *d) : BoundaryLoad(i, d) { }
+    ConstantSurfaceLoad(int i, Domain * d) : BoundaryLoad(i, d) { }
 
     // Overloaded methods:
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
@@ -81,7 +81,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_ConstantSurfaceLoad_Name; }
 
 private:
-    virtual void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.resize(0); }
+    virtual void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.clear(); }
 };
 } // end namespace oofem
 #endif // constantsurfaceload_h

@@ -60,20 +60,9 @@ class Tr2Shell7XFEM : public Shell7BaseXFEM
 {
 protected:
     static FEI3dTrQuad interpolation;
-    static bool __initialized;
     static IntArray ordering_all;
     static IntArray ordering_gr;
     static IntArray ordering_gr_edge;
-    static bool initOrdering() {
-        ordering_all.setValues(42, 1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30, 31, 36, 37, 38,
-                               4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 32, 33, 34, 39, 40, 41,
-                               7, 14, 21, 28, 35, 42);
-        ordering_gr.setValues(42, 1, 2, 3, 19, 20, 21, 37, 4, 5, 6, 22, 23, 24, 38, 7, 8, 9, 25, 26, 27, 39,
-                              10, 11, 12, 28, 29, 30, 40, 13, 14, 15, 31, 32, 33, 41, 16, 17, 18,
-                              34, 35, 36, 42);
-        ordering_gr_edge.setValues(21, 1, 2, 3, 10, 11, 12, 19, 4, 5, 6, 13, 14, 15, 20, 7, 8, 9, 16, 17, 18, 21);
-        return true;
-    }
 
     virtual const IntArray &giveOrdering(SolutionField fieldType) const;
 
@@ -91,10 +80,10 @@ protected:
     virtual FEInterpolation *giveInterpolation() const;
 
     // VTK
-    void vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords [ 15 ], int layer, TimeStep * tStep);
+    void vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords [ 15 ], int layer, TimeStep *tStep);
 
 public:
-    Tr2Shell7XFEM(int n, Domain *d);
+    Tr2Shell7XFEM(int n, Domain * d);
     virtual ~Tr2Shell7XFEM() { }     // destructor -> declaring as virtual will make each subclass call their respective destr.
     // definition & identification
     virtual int giveNumberOfEdgeDofs()       { return 21; }
@@ -105,9 +94,11 @@ public:
     //virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; } // write new wedge-like type 'layeredWedge'
-    virtual void giveCompositeExportData(IntArray &primaryVarsToExport, IntArray &cellVarsToExport,
-                                         std :: vector< FloatArray > &nodeCoords, std :: vector< IntArray > &cellNodes, IntArray &cellTypes,
-                                         std :: vector< FloatArray > &primaryVars, std :: vector< FloatArray > &cellVars, TimeStep *tStep) {};
+    void giveCompositeExportData(VTKPiece &vtkPiece,
+                                 IntArray &primaryVarsToExport,
+                                 IntArray &internalVarsToExport,
+                                 IntArray cellVarsToExport,
+                                 TimeStep *tStep) { }
 };
 } // end namespace oofem
 #endif

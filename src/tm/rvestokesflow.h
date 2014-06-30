@@ -56,7 +56,7 @@ protected:
     EngngModel *rve;
 
 public:
-    RVEStokesFlowMaterialStatus(int n, Domain *d, GaussPoint *g, EngngModel *rve);
+    RVEStokesFlowMaterialStatus(int n, Domain * d, GaussPoint * g, EngngModel * rve);
 
     virtual ~RVEStokesFlowMaterialStatus();
 
@@ -69,7 +69,7 @@ public:
 
     const FloatMatrix &giveTangentMatrix() { return tangentMatrix; }
     const FloatMatrix &giveTempTangentMatrix() { return temp_TangentMatrix; }
-    void letTempTangentMatrixBe(const FloatMatrix &K) { temp_TangentMatrix = K; }
+    void letTempTangentMatrixBe(FloatMatrix K) { temp_TangentMatrix = std :: move(K); }
 
     /**
      * Export this RVE. The files produced is named ./[.in-file].rve/Rve_[ID]_[GP number] where is is the global element number any GP number is
@@ -96,14 +96,14 @@ private:
     void exportFilter(EngngModel *E, GaussPoint *gp, TimeStep *tStep);
 
 public:
-    RVEStokesFlow(int n, Domain *d);
+    RVEStokesFlow(int n, Domain * d);
 
     virtual ~RVEStokesFlow() { };
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void giveFluxVector(FloatArray &answer, GaussPoint *gp, const FloatArray &grad, const FloatArray &field, TimeStep *tStep);
-    virtual void giveCharacteristicMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep);
     virtual double giveCharacteristicValue(MatResponseMode mode, GaussPoint *gp, TimeStep *tStep) { return 0.0; };
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;

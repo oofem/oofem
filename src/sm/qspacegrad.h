@@ -58,11 +58,11 @@ protected:
     static FEI3dHexaLin interpolation;
 
 public:
-    QSpaceGrad(int n, Domain *d);
-    virtual ~QSpaceGrad() {}
+    QSpaceGrad(int n, Domain * d);
+    virtual ~QSpaceGrad() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QSpaceGrad_Name; }

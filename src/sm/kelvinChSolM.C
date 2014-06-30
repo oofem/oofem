@@ -36,14 +36,13 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
-#include "structuralcrosssection.h"
 #include "timestep.h"
 #include "contextioerr.h"
 
 
 namespace oofem {
 KelvinChainSolidMaterial :: KelvinChainSolidMaterial(int n, Domain *d) : RheoChainMaterial(n, d)
-{}
+{ }
 
 double
 KelvinChainSolidMaterial :: giveEModulus(GaussPoint *gp, TimeStep *tStep)
@@ -111,7 +110,7 @@ KelvinChainSolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint
         answer = reducedAnswer;
     } else {
         /* error - total mode not implemented yet */
-        _error("giveEigenStrainVector - mode is not supported");
+        OOFEM_ERROR("mode is not supported");
     }
 }
 
@@ -235,7 +234,7 @@ KelvinChainSolidMaterial :: initializeFrom(InputRecord *ir)
 double
 KelvinChainSolidMaterial :: computeCreepFunction(double tStep, double ofAge)
 {
-    _error("computeCreepFunction: function has not been yet implemented to KelvinChainSolidMaterialStatus.C");
+    OOFEM_ERROR("function has not been yet implemented to KelvinChainSolidMaterialStatus.C");
     return 0.;
 }
 
@@ -244,7 +243,7 @@ KelvinChainSolidMaterial :: computeCreepFunction(double tStep, double ofAge)
 
 KelvinChainSolidMaterialStatus :: KelvinChainSolidMaterialStatus(int n, Domain *d,
                                                                  GaussPoint *g, int nunits) :
-    RheoChainMaterialStatus(n, d, g, nunits) {}
+    RheoChainMaterialStatus(n, d, g, nunits) { }
 
 void
 KelvinChainSolidMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)

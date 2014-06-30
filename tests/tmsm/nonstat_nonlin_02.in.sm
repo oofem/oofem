@@ -1,6 +1,7 @@
 nonstat_nonlin_02.out.sm
 Quadrilateral elements subjected to temperature strains
-nonlinearstatic nsteps 3 rtolv 0.001 controlmode 1 maxiter 100 nmodules 0
+nonlinearstatic nsteps 3 rtolv 0.001 controlmode 1 maxiter 100 nmodules 1
+errorcheck
 #vtkxml tstep_all vars 2 1 4 primvars 1 1 stype 1
 domain 2dplanestress
 OutputManager tstep_all dofman_all element_all
@@ -24,13 +25,13 @@ BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 ConstantFunction 1 f(t) 1.0
 #
 #%BEGIN_CHECK% tolerance 1.e-8
-#NODE tStep 0.0 number 2 dof 1 unknown d value 1.64138549e-06
-#NODE tStep 0.0 number 4 dof 1 unknown d value 3.56946902e-06
-#NODE tStep 0.0 number 9 dof 2 unknown d value 4.37886192e-04
-#ELEMENT tStep 0.0  number 1 gp 1 keyword "strains" component 1  value -1.1738e-05
-#NODE tStep 72000 number 2 dof 1 unknown d value 4.82998209e-06
-#NODE tStep 72000 number 4 dof 1 unknown d value 2.84066269e-06
-#NODE tStep 72000 number 9 dof 2 unknown d value 1.27956795e-03
-#ELEMENT tStep 72000  number 1 gp 1 keyword "strains" component 1  value 2.5896e-05
+#NODE tStep 1 number 2 dof 1 unknown d value 1.64138549e-06
+#NODE tStep 1 number 4 dof 1 unknown d value 3.56946902e-06
+#NODE tStep 1 number 9 dof 2 unknown d value 4.37886192e-04
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1  value -1.1738e-05
+#NODE tStep 3 number 2 dof 1 unknown d value 4.82998209e-06
+#NODE tStep 3 number 4 dof 1 unknown d value 2.84066269e-06
+#NODE tStep 3 number 9 dof 2 unknown d value 1.27956795e-03
+#ELEMENT tStep 3 number 1 gp 1 keyword 4 component 1  value 2.5896e-05
 #%END_CHECK%
 

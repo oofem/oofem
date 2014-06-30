@@ -56,10 +56,10 @@ REGISTER_Element(Quad1PlaneStrain);
 FEI2dQuadLin Quad1PlaneStrain :: interp(1, 2);
 
 Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), SPRNodalRecoveryModelInterface(),
-    SpatialLocalizerInterface(),
-    DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface(),
-    HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
+    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface(),
+    SpatialLocalizerInterface(this),
+    EIPrimaryUnknownMapperInterface(),
+    HuertaErrorEstimatorInterface()
 {
     numberOfDofMans  = 4;
     numberOfGaussPoints = 4;
@@ -115,9 +115,8 @@ void
 Quad1PlaneStrain :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -131,14 +130,7 @@ Quad1PlaneStrain :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &a
 {
     FloatArray n;
     this->interp.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
-
-    answer.resize(2, 8);
-    answer.zero();
-
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, 2 * i - 1) = n.at(i);
-        answer.at(2, 2 * i - 0) = n.at(i);
-    }
+    answer.beNMatrixOf(n, 2);
 }
 
 
@@ -199,7 +191,7 @@ Quad1PlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(3) = 1;
         answer.at(4) = 2;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 
@@ -208,7 +200,7 @@ double
 Quad1PlaneStrain :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ * gp->giveWeight();
+    return detJ *gp->giveWeight();
 }
 
 
@@ -249,7 +241,7 @@ Quad1PlaneStrain :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdg
         aNode = 4;
         bNode = 1;
     } else {
-        _error("computeLoadLEToLRotationMatrix: wrong egde number");
+        OOFEM_ERROR("wrong egde number");
     }
 
     nodeA = this->giveNode(aNode);
@@ -291,8 +283,8 @@ Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
     }
 
     if ( !( ( numberOfGaussPoints == 4 ) ||
-            ( numberOfGaussPoints == 9 ) ||
-            ( numberOfGaussPoints == 16 ) ) ) {
+           ( numberOfGaussPoints == 9 ) ||
+           ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
@@ -312,9 +304,9 @@ Quad1PlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &n
 }
 
 void
-Quad1PlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Quad1PlaneStrain :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(2, D_u, D_v);
+    answer = {D_u, D_v};
 }
 
 
@@ -322,19 +314,15 @@ Interface *
 Quad1PlaneStrain :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
-    } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
-        return static_cast< HuertaErrorEstimatorInterface * >( this );
-    } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return static_cast< HuertaRemeshingCriteriaInterface * >( this );
+        return static_cast< HuertaErrorEstimatorInterface * >(this);
     }
 
     return NULL;
@@ -349,7 +337,6 @@ Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElem
                                                                      IntArray &controlNode, IntArray &controlDof,
                                                                      HuertaErrorEstimator :: AnalysisMode aMode)
 {
-    Element *element = this->HuertaErrorEstimatorI_giveElement();
     int inode, nodes = 4, iside, sides = 4, nd1, nd2;
     FloatArray *corner [ 4 ], midSide [ 4 ], midNode, cor [ 4 ];
     double x = 0.0, y = 0.0;
@@ -357,9 +344,9 @@ Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElem
     static int sideNode [ 4 ] [ 2 ] = { { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 1 } };
 
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
-         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
+        ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
-            corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
+            corner [ inode ] = this->giveNode(inode + 1)->giveCoordinates();
             if ( corner [ inode ]->giveSize() != 3 ) {
                 cor [ inode ].resize(3);
                 cor [ inode ].at(1) = corner [ inode ]->at(1);
@@ -391,7 +378,7 @@ Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElem
         midNode.at(3) = 0.0;
     }
 
-    this->setupRefinedElementProblem2D(element, refinedElement, level, nodeId, localNodeIdArray, globalNodeIdArray,
+    this->setupRefinedElementProblem2D(this, refinedElement, level, nodeId, localNodeIdArray, globalNodeIdArray,
                                        sMode, tStep, nodes, corner, midSide, midNode,
                                        localNodeId, localElemId, localBcId,
                                        controlNode, controlDof, aMode, "Quad1PlaneStrain");
@@ -562,8 +549,6 @@ void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        int ip;
-        GaussPoint *gp;
         IntArray ind(4);
         FloatArray *gpCoords;
         WCRec pp [ 9 ];
@@ -596,8 +581,7 @@ void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
-        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
             gpCoords = gp->giveCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;
@@ -652,7 +636,6 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
     int i;
     WCRec l [ 2 ];
     GraphicObj *tr;
-    GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     FloatArray crackStatuses, cf;
@@ -663,13 +646,12 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
 
     if ( gc.giveIntVarType() == IST_CrackState ) {
         // ask if any active crack exist
-        int igp, crackStatus;
+        int crackStatus;
         double ax, ay, bx, by, norm, xc, yc, length;
         FloatArray crackDir;
         FloatArray gpglobalcoords;
 
-        for ( igp = 1; igp <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); igp++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(igp - 1);
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
 
             if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
@@ -715,13 +697,13 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
                             gpglobalcoords.resize(2);
 
                             gpglobalcoords.at(1) = ( n1 * this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale) +
-                                                     n2 * this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) +
-                                                     n3 * this->giveNode(3)->giveUpdatedCoordinate(1, tStep, defScale) +
-                                                     n4 * this->giveNode(4)->giveUpdatedCoordinate(1, tStep, defScale) );
+                                                    n2 * this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) +
+                                                    n3 * this->giveNode(3)->giveUpdatedCoordinate(1, tStep, defScale) +
+                                                    n4 * this->giveNode(4)->giveUpdatedCoordinate(1, tStep, defScale) );
                             gpglobalcoords.at(2) = ( n1 * this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale) +
-                                                     n2 * this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) +
-                                                     n3 * this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale) +
-                                                     n4 * this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale) );
+                                                    n2 * this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) +
+                                                    n3 * this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale) +
+                                                    n4 * this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale) );
                         } else {
                             computeGlobalCoordinates( gpglobalcoords, * ( gp->giveCoordinates() ) );
                         }
@@ -781,7 +763,7 @@ Quad1PlaneStrain :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &an
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 
@@ -800,17 +782,6 @@ Quad1PlaneStrain :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-int
-Quad1PlaneStrain :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    int result;
-    FloatArray lcoords;
-    result = this->computeLocalCoordinates(lcoords, coords);
-
-    return result;
-}
-
-
 double
 Quad1PlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
@@ -822,7 +793,7 @@ Quad1PlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -838,54 +809,20 @@ Quad1PlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
 }
 
 
-double
-Quad1PlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
-{
-    int i;
-    IntegrationRule *iRule;
-    GaussPoint *gp;
-    double volume = 0.0;
-
-    iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
-        volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
-    }
-
-    return sqrt(volume);
-}
-
-
-int
-Quad1PlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                     TimeStep *tStep, const FloatArray &coords,
+void
+Quad1PlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                     TimeStep *tStep, const FloatArray &lcoords,
                                                                      FloatArray &answer)
 {
-    FloatArray lcoords, u, nv;
+    FloatArray u, nv;
     FloatMatrix n;
-    int result;
-
-    result = this->computeLocalCoordinates(lcoords, coords);
 
     this->interp.evalN( nv, lcoords, FEIElementGeometryWrapper(this) );
 
-    n.resize(2, 8);
-    n.zero();
+    n.beNMatrixOf(nv, 2);
 
-    n.at(1, 1) = n.at(2, 2) = nv.at(1);
-    n.at(1, 3) = n.at(2, 4) = nv.at(2);
-    n.at(1, 5) = n.at(2, 6) = nv.at(3);
-    n.at(1, 7) = n.at(2, 8) = nv.at(4);
-
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf({D_u, D_v}, mode, tStep, u);
     answer.beProductOf(n, u);
-
-    return result;
 }
 
-void
-Quad1PlaneStrain :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    giveDofManDofIDMask(1, EID_MomentumBalance, answer);
-}
 } // end namespace oofem

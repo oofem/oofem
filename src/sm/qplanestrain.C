@@ -41,13 +41,17 @@
 #include "intarray.h"
 #include "classfactory.h"
 
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
+#endif
+
 namespace oofem {
 REGISTER_Element(QPlaneStrain);
 
 FEI2dQuadQuad QPlaneStrain :: interpolation(1, 2);
 
 QPlaneStrain :: QPlaneStrain(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface()
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
     // Constructor.
 {
     numberOfDofMans  = 8;
@@ -58,7 +62,7 @@ Interface *
 QPlaneStrain :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     }
 
     return NULL;
@@ -112,45 +116,25 @@ QPlaneStrain :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answe
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at gp.
 {
-    FloatArray n(8);
-
-    answer.resize(2, 16);
-    answer.zero();
+    FloatArray n;
 
     this->interpolation.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
 
-    for ( int i = 1; i <= 8; i++ ) {
-        answer.at(1, 2 * i - 1) = n.at(i);
-        answer.at(2, 2 * i - 0) = n.at(i);
-    }
+    answer.beNMatrixOf(n, 2);
 }
 
 IRResultType
 QPlaneStrain :: initializeFrom(InputRecord *ir)
 {
-    numberOfGaussPoints = 4;
-    IRResultType result = this->Element :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( !( ( numberOfGaussPoints == 1 ) ||
-            ( numberOfGaussPoints == 4 ) ||
-            ( numberOfGaussPoints == 9 ) ||
-            ( numberOfGaussPoints == 16 ) ) ) {
-        numberOfGaussPoints = 4;
-    }
-
-    return IRRT_OK;
+    return Element :: initializeFrom(ir);
 }
 
 void
 QPlaneStrain :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -162,7 +146,7 @@ QPlaneStrain :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant, weight, thickness, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) ) );
+                                                                       FEIElementGeometryWrapper(this) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
     volume      = determinant * weight * thickness;
@@ -172,9 +156,9 @@ QPlaneStrain :: computeVolumeAround(GaussPoint *gp)
 
 
 void
-QPlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+QPlaneStrain :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(2, D_u, D_v);
+    answer = {D_u, D_v};
 }
 
 
@@ -350,8 +334,6 @@ void QPlaneStrain :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        int ip;
-        GaussPoint *gp;
         IntArray ind(4);
         FloatArray *gpCoords;
         WCRec pp [ 9 ];
@@ -374,8 +356,7 @@ void QPlaneStrain :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.;
 
-        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
             gpCoords = gp->giveCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;

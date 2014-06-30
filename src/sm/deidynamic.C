@@ -60,7 +60,6 @@ NumericalMethod *DEIDynamic :: giveNumericalMethod(MetaStep *mStep)
 IRResultType
 DEIDynamic :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     StructuralEngngModel :: initializeFrom(ir);
@@ -79,12 +78,12 @@ double DEIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, D
     int eq = dof->__giveEquationNumber();
 #ifdef DEBUG
     if ( eq == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
+        OOFEM_ERROR("invalid equation number");
     }
 #endif
 
     if ( tStep != this->giveCurrentStep() ) {
-        _error("giveUnknownComponent: unknown time step encountered");
+        OOFEM_ERROR("unknown time step encountered");
         return 0.;
     }
 
@@ -99,7 +98,7 @@ double DEIDynamic :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, D
         return accelerationVector.at(eq);
 
     default:
-        _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
+        OOFEM_ERROR("Unknown is of undefined ValueModeType for this problem");
     }
 
     return 0.0;
@@ -145,8 +144,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     IntArray loc;
     Element *element;
     DofManager *node;
-    Dof *iDof;
-    int nDofs, neq;
+    int neq;
     int i, k, n, j, jj, kk, init = 0;
     double coeff, maxDt, maxOmi, maxOm = 0., maxOmEl, c1, c2, c3;
     FloatMatrix charMtrx, charMtrx2;
@@ -169,7 +167,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
         EModelDefaultEquationNumbering dn;
         for ( i = 1; i <= nelem; i++ ) {
             element = domain->giveElement(i);
-            element->giveLocationArray(loc, EID_MomentumBalance, dn);
+            element->giveLocationArray(loc, dn);
             element->giveCharacteristicMatrix(charMtrx,  LumpedMassMatrix, tStep);
             // charMtrx.beLumpedOf(fullCharMtrx);
             element->giveCharacteristicMatrix(charMtrx2, StiffnessMatrix, tStep);
@@ -179,7 +177,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
             //
 #ifdef DEBUG
             if ( ( n = loc.giveSize() ) != charMtrx.giveNumberOfRows() ) {
-                _error("solveYourselfAt : dimension mismatch");
+                OOFEM_ERROR("dimension mismatch");
             }
 
 #endif
@@ -239,13 +237,11 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
 
         for ( j = 1; j <= nman; j++ ) {
             node = domain->giveDofManager(j);
-            nDofs = node->giveNumberOfDofs();
 
-            for ( k = 1; k <= nDofs; k++ ) {
+            for ( Dof *iDof: *node ) {
                 // ask for initial values obtained from
                 // bc (boundary conditions) and ic (initial conditions)
                 // now we are setting initial cond. for step -1.
-                iDof  =  node->giveDof(k);
                 if ( !iDof->isPrimaryDof() ) {
                     continue;
                 }
@@ -284,8 +280,12 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     //
     loadVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     loadVector.zero();
-    this->assembleVector(loadVector, tStep, EID_MomentumBalance, ExternalForcesVector,
+    this->assembleVector(loadVector, tStep, ExternalForcesVector,
                          VM_Total, EModelDefaultEquationNumbering(), domain);
+#ifdef __PARALLEL_MODE
+    this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
+#endif
+
 
     //
     // assembling additional parts of right hand side
@@ -293,7 +293,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     EModelDefaultEquationNumbering dn;
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
-        element->giveLocationArray(loc, EID_MomentumBalance, dn);
+        element->giveLocationArray(loc, dn);
         element->giveCharacteristicMatrix(charMtrx, StiffnessMatrix, tStep);
         n = loc.giveSize();
         for ( j = 1; j <= n; j++ ) {
@@ -321,8 +321,8 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     for ( j = 1; j <= neq; j++ ) {
         coeff =  massMatrix.at(j);
         loadVector.at(j) += coeff * c3 * displacementVector.at(j) -
-                            coeff * ( c1 - dumpingCoef * c2 ) *
-                            previousDisplacementVector.at(j);
+        coeff * ( c1 - dumpingCoef * c2 ) *
+        previousDisplacementVector.at(j);
     }
 
     //
@@ -343,11 +343,11 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     for ( i = 1; i <= neq; i++ ) {
         prevD = previousDisplacementVector.at(i);
         nextDisplacementVector.at(i) = loadVector.at(i) /
-                                       ( massMatrix.at(i) * ( c1 + dumpingCoef * c2 ) );
+        ( massMatrix.at(i) * ( c1 + dumpingCoef * c2 ) );
         velocityVector.at(i) = nextDisplacementVector.at(i) - prevD;
         accelerationVector.at(i) =
             nextDisplacementVector.at(i) -
-            2. * displacementVector.at(i) + prevD;
+        2. * displacementVector.at(i) + prevD;
     }
 
     accelerationVector.times(c1);

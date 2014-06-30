@@ -48,6 +48,9 @@
   #include "range.h"
  #endif
 
+ #include <vector>
+ #include <memory>
+
 ///@name Input fields for LoadBalancer
 //@{
  #define _IFT_LoadBalancer_wtp "wtp"
@@ -94,7 +97,9 @@ protected:
 public:
     enum LoadBalancerDecisionType { LBD_CONTINUE, LBD_RECOVER };
 
-    LoadBalancerMonitor(EngngModel *em) { emodel = em; }
+    LoadBalancerMonitor(EngngModel * em) {
+        emodel = em;
+    }
     virtual ~LoadBalancerMonitor() { }
 
     /// Initializes receiver according to object description stored in input record.
@@ -105,7 +110,7 @@ public:
     /// Returns flag indicating whether rebalancing is necessary; should update node weights as well.
     virtual LoadBalancerDecisionType decide(TimeStep *) = 0;
     /// Returns processor weights; the larger weight means more powerful node, sum of weights should equal to one.
-    void giveProcessorWeights(FloatArray &answer) { answer = nodeWeights; }
+    const FloatArray & giveProcessorWeights() { return nodeWeights; }
     //@}
 
     /// Returns class name of the receiver.
@@ -136,7 +141,7 @@ protected:
     FloatArray processingWeights;
  #endif
 public:
-    WallClockLoadBalancerMonitor(EngngModel *em) : LoadBalancerMonitor(em) {
+    WallClockLoadBalancerMonitor(EngngModel * em) : LoadBalancerMonitor(em) {
         relWallClockImbalanceTreshold = 0.1;
         absWallClockImbalanceTreshold = 10.0;
         minAbsWallClockImbalanceTreshold = 0.0;
@@ -178,7 +183,7 @@ protected:
 
 public:
 
-    LoadBalancer(Domain *d);
+    LoadBalancer(Domain * d);
     virtual ~LoadBalancer() { }
 
 
@@ -233,7 +238,7 @@ public:
 protected:
         LoadBalancer *lb;
 public:
-        WorkTransferPlugin(LoadBalancer *_lb);
+        WorkTransferPlugin(LoadBalancer * _lb);
         virtual ~WorkTransferPlugin();
 
         /**
@@ -268,10 +273,10 @@ public:
 
 protected:
     /// List of work transfer plugins.
-    AList< WorkTransferPlugin >wtpList;
+    std :: vector< std :: unique_ptr< WorkTransferPlugin > >wtpList;
 };
 
-
+/*
 class OOFEM_EXPORT LoadBalancerElementInterface : public Interface
 {
 public:
@@ -279,6 +284,7 @@ public:
 
     virtual double predictRelativeComputationalCost();
 };
+*/
 } // end namespace oofem
 #endif
 #endif // loadbalancer_h

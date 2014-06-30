@@ -55,7 +55,7 @@ protected:
 public:
     double pitch, length;
 
-    LIBeam2d(int n, Domain *aDomain);
+    LIBeam2d(int n, Domain * aDomain);
     virtual ~LIBeam2d() { }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
@@ -67,12 +67,14 @@ public:
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
                                             GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
 
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     virtual Interface *giveInterface(InterfaceType it);
 
     virtual int computeNumberOfDofs() { return 6; }
-    virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
@@ -100,7 +102,7 @@ protected:
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
-    double giveLength();
+    virtual double computeLength();
     double givePitch();
 };
 } // end namespace oofem

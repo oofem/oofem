@@ -37,7 +37,7 @@
 #include "classfactory.h"
 
 namespace oofem {
-REGISTER_LoadTimeFunction(ConstantFunction);
+REGISTER_Function(ConstantFunction);
 
 IRResultType
 ConstantFunction :: initializeFrom(InputRecord *ir)
@@ -45,11 +45,10 @@ ConstantFunction :: initializeFrom(InputRecord *ir)
     //
     // instanciates receiver according to input record
     //
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
-    LoadTimeFunction :: initializeFrom(ir);
-    IR_GIVE_FIELD(ir, value, _IFT_LoadTimeFunction_ft);
+    Function :: initializeFrom(ir);
+    IR_GIVE_FIELD(ir, value, _IFT_ConstantFunction_f);
 
     return IRRT_OK;
 }
@@ -58,7 +57,7 @@ ConstantFunction :: initializeFrom(InputRecord *ir)
 void
 ConstantFunction :: giveInputRecord(DynamicInputRecord &input)
 {
-    LoadTimeFunction :: giveInputRecord(input);
-    input.setField(this->value, _IFT_LoadTimeFunction_ft);
+    Function :: giveInputRecord(input);
+    input.setField(this->value, _IFT_ConstantFunction_f);
 }
 } // end namespace oofem

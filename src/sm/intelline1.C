@@ -81,9 +81,8 @@ void
 IntElLine1 :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         integrationRulesArray [ 0 ]->SetUpPointsOnLine(2, _2dInterface); //@todo - should be a parameter with num of ip
@@ -129,9 +128,9 @@ IntElLine1 :: initializeFrom(InputRecord *ir)
 
 
 void
-IntElLine1 :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+IntElLine1 :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(2, D_u, D_v);
+    answer = {D_u, D_v};
 }
 
 void

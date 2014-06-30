@@ -53,7 +53,7 @@
 namespace oofem {
 #define LoadBalancer_debug_print 0
 
-LoadBalancer :: LoadBalancer(Domain *d)  : wtpList(0)
+LoadBalancer :: LoadBalancer(Domain *d)  : wtpList()
 {
     domain = d;
 }
@@ -62,7 +62,6 @@ LoadBalancer :: LoadBalancer(Domain *d)  : wtpList(0)
 IRResultType
 LoadBalancer :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
     IntArray wtp;
@@ -77,18 +76,19 @@ void
 LoadBalancer :: initializeWtp(IntArray &wtp)
 {
     int size = wtp.giveSize();
-    WorkTransferPlugin *plugin = NULL;
 
     if ( size ) {
-        wtpList.growTo(size);
-        for ( int i = 1; i <= size; i++ ) {
-            if ( wtp.at(i) == 1 ) {
-                plugin = new NonlocalMaterialWTP(this);
+        wtpList.clear();
+        wtpList.reserve(size);
+        for ( int iwtp: wtp ) {
+            std :: unique_ptr< WorkTransferPlugin > plugin;
+            if ( iwtp == 1 ) {
+                plugin.reset( new NonlocalMaterialWTP(this) );
             } else {
-                OOFEM_ERROR("LoadBalancer::initializeWtp: Unknown work transfer plugin type");
+                OOFEM_ERROR("Unknown work transfer plugin type");
             }
 
-            wtpList.put(i, plugin);
+            wtpList.push_back(std :: move( plugin ));
         }
     }
 }
@@ -104,12 +104,12 @@ LoadBalancer :: migrateLoad(Domain *d)
     OOFEM_LOG_RELEVANT("[%d] LoadBalancer: migrateLoad: migrating load\n", myrank);
 
     // initialize work transfer plugins before any transfer
-    for ( int i = 1; i <= wtpList.giveSize(); i++ ) {
-        wtpList.at(i)->init(d);
+    for ( auto &wtp: wtpList ) {
+        wtp->init(d);
     }
 
     CommunicatorBuff cb(nproc, CBT_dynamic);
-    Communicator com(d->giveEngngModel(), & cb, myrank, nproc, CommMode_Dynamic);
+    Communicator com(d->giveEngngModel(), &cb, myrank, nproc, CommMode_Dynamic);
 
     // move existing dofmans and elements, that will be local on current partition,
     // into local map
@@ -160,13 +160,13 @@ LoadBalancer :: migrateLoad(Domain *d)
 #endif
 
     // migrate work transfer plugin data
-    for ( int i = 1; i <= wtpList.giveSize(); i++ ) {
-        wtpList.at(i)->migrate();
+    for ( auto &wtp: wtpList ) {
+        wtp->migrate();
     }
 
     // update work transfer plugin data
-    for ( int i = 1; i <= wtpList.giveSize(); i++ ) {
-        wtpList.at(i)->update();
+    for ( auto &wtp: wtpList ) {
+        wtp->update();
     }
 
     // print some local statistics
@@ -215,7 +215,7 @@ LoadBalancer :: packMigratingData(Domain *d, ProcessCommunicator &pc)
         // if dofman already present on remote partition then there is no need to sync
         //if ((this->giveDofManPartitions(idofman)->findFirstIndexOf(iproc))) {
         if ( ( this->giveDofManPartitions(idofman)->findFirstIndexOf(iproc) ) &&
-             ( !dofman->givePartitionList()->findFirstIndexOf(iproc) ) ) {
+            ( !dofman->givePartitionList()->findFirstIndexOf(iproc) ) ) {
             pcbuff->packString( dofman->giveInputRecordName() );
             pcbuff->packInt( this->giveDofManState(idofman) );
             pcbuff->packInt( dofman->giveGlobalNumber() );
@@ -238,7 +238,7 @@ LoadBalancer :: packMigratingData(Domain *d, ProcessCommunicator &pc)
     for ( int ielem = 1; ielem <= nelem; ielem++ ) { // begin loop over elements
         Element *elem = d->giveElement(ielem);
         if ( ( elem->giveParallelMode() == Element_local ) &&
-             ( this->giveElementPartition(ielem) == iproc ) ) {
+            ( this->giveElementPartition(ielem) == iproc ) ) {
             // pack local element (node numbers should be global ones!!!)
             // pack type
             pcbuff->packString( elem->giveInputRecordName() );
@@ -319,7 +319,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
             dofman->setParallelMode(DofManager_local);
             // add transaction if new entry allocated; otherwise existing one has been modified via returned dofman
             if ( _newentry ) {
-                dtm->addTransaction(DomainTransactionManager :: DTT_ADD, DomainTransactionManager :: DCT_DofManager, _globnum, dofman);
+                dtm->addDofManTransaction(DomainTransactionManager :: DTT_ADD, _globnum, dofman);
             }
 
             //dmanMap[_globnum] = dofman;
@@ -353,14 +353,14 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
 #endif
             // add transaction if new entry allocated; otherwise existing one has been modified via returned dofman
             if ( _newentry ) {
-                dtm->addTransaction(DomainTransactionManager :: DTT_ADD, DomainTransactionManager :: DCT_DofManager, _globnum, dofman);
+                dtm->addDofManTransaction(DomainTransactionManager :: DTT_ADD, _globnum, dofman);
             }
 
             //dmanMap[_globnum] = dofman;
             break;
 
         default:
-            OOFEM_ERROR2("LoadBalancer::unpackMigratingData: unexpected dof manager mode (%d)", _mode);
+            OOFEM_ERROR("unexpected dof manager mode (%d)", _mode);
         }
     } while ( 1 );
 
@@ -376,7 +376,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
         elem = classFactory.createElement(_type.c_str(), 0, d);
         elem->restoreContext(& pcDataStream, CM_Definition | CM_State);
         elem->initForNewStep();
-        dtm->addTransaction(DomainTransactionManager :: DTT_ADD, DomainTransactionManager :: DCT_Element, elem->giveGlobalNumber(), elem);
+        dtm->addElementTransaction(DomainTransactionManager :: DTT_ADD, elem->giveGlobalNumber(), elem);
         nrecv++;
         //recvElemList.push_back(elem);
     } while ( 1 );
@@ -406,7 +406,7 @@ LoadBalancer :: deleteRemoteDofManagers(Domain *d)
         dmode = this->giveDofManState(i);
         if ( dmode == LoadBalancer :: DM_Remote ) {
             // positive candidate found
-            dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_DofManager, d->giveDofManager(i)->giveGlobalNumber(), NULL);
+            dtm->addDofManTransaction(DomainTransactionManager :: DTT_Remove, d->giveDofManager(i)->giveGlobalNumber(), NULL);
             // dmanMap.erase (d->giveDofManager (i)->giveGlobalNumber());
             //dman = dofManagerList->unlink (i);
             //delete dman;
@@ -414,13 +414,13 @@ LoadBalancer :: deleteRemoteDofManagers(Domain *d)
             // positive candidate found; we delete all null dof managers
             // they will be created by nonlocalmatwtp if necessary.
             // potentially, they can be reused, but this will make the code too complex
-            dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_DofManager, d->giveDofManager(i)->giveGlobalNumber(), NULL);
+            dtm->addDofManTransaction(DomainTransactionManager :: DTT_Remove, d->giveDofManager(i)->giveGlobalNumber(), NULL);
         } else if ( dmode == LoadBalancer :: DM_Shared ) {
             dman = d->giveDofManager(i);
             dman->setPartitionList( this->giveDofManPartitions(i) );
             dman->setParallelMode(DofManager_shared);
             if ( !dman->givePartitionList()->findFirstIndexOf(myrank) ) {
-                dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_DofManager, d->giveDofManager(i)->giveGlobalNumber(), NULL);
+                dtm->addDofManTransaction(DomainTransactionManager :: DTT_Remove, d->giveDofManager(i)->giveGlobalNumber(), NULL);
                 //dmanMap.erase (this->giveDofManager (i)->giveGlobalNumber());
                 //dman = dofManagerList->unlink (i);
                 //delete dman;
@@ -431,7 +431,7 @@ LoadBalancer :: deleteRemoteDofManagers(Domain *d)
             dman->setPartitionList(& _empty);
             dman->setParallelMode(DofManager_local);
         } else {
-            OOFEM_ERROR("Domain::deleteRemoteDofManagers: unknown dmode encountered");
+            OOFEM_ERROR("unknown dmode encountered");
         }
     }
 }
@@ -455,12 +455,12 @@ LoadBalancer :: deleteRemoteElements(Domain *d)
         if ( this->giveElementPartition(i) != myrank ) {
             // positive candidate found
             // this->deleteElement (i);  // delete and set entry to NULL
-            dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_Element, d->giveElement(i)->giveGlobalNumber(), NULL);
+            dtm->addElementTransaction(DomainTransactionManager :: DTT_Remove, d->giveElement(i)->giveGlobalNumber(), NULL);
             //elem = elementList->unlink (i);
             //dmanMap.erase (elem->giveGlobalNumber());
             //delete (elem);
         } else if ( d->giveElement(i)->giveParallelMode() != Element_local ) {
-            dtm->addTransaction(DomainTransactionManager :: DTT_Remove, DomainTransactionManager :: DCT_Element, d->giveElement(i)->giveGlobalNumber(), NULL);
+            dtm->addElementTransaction(DomainTransactionManager :: DTT_Remove, d->giveElement(i)->giveGlobalNumber(), NULL);
         }
     }
 }
@@ -514,15 +514,15 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *tStep)
     double neqelems, sum_relcomppowers;
 
     if ( node_solutiontimes == NULL ) {
-        OOFEM_ERROR("LoadBalancer::LoadEvaluation failed to allocate node_solutiontimes array");
+        OOFEM_ERROR("failed to allocate node_solutiontimes array");
     }
 
     if ( node_relcomppowers == NULL ) {
-        OOFEM_ERROR("LoadBalancer::LoadEvaluation failed to allocate node_relcomppowers array");
+        OOFEM_ERROR("failed to allocate node_relcomppowers array");
     }
 
     if ( node_equivelements == NULL ) {
-        OOFEM_ERROR("LoadBalancer::LoadEvaluation failed to allocate node_equivelements array");
+        OOFEM_ERROR("failed to allocate node_equivelements array");
     }
 
 
@@ -532,9 +532,8 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *tStep)
 #ifdef __LB_DEBUG
     // perturb solution time artificially if requested
     bool perturb = false;
-    std :: list< Range > :: iterator perturbedStepsIter;
-    for ( perturbedStepsIter = perturbedSteps.begin(); perturbedStepsIter != perturbedSteps.end(); ++perturbedStepsIter ) {
-        if ( ( * perturbedStepsIter ).test( tStep->giveNumber() ) ) {
+    for ( auto perturbedStep: perturbedSteps ) {
+        if ( perturbedStep.test( tStep->giveNumber() ) ) {
             perturb  = true;
             break;
         }
@@ -650,7 +649,7 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *tStep)
             delete[] procWeights;
 
             if ( fabs(sumWeight - 1.0) > 1.0e-10 ) {
-                OOFEM_ERROR2("[%d] WallClockLoadBalancerMonitor:processing weights do not sum to 1.0 (sum = %e)\n", sumWeight);
+                OOFEM_ERROR("[%d] processing weights do not sum to 1.0 (sum = %e)\n", sumWeight);
             }
 
             OOFEM_LOG_RELEVANT("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, 100 * relWallClockImbalance, absWallClockImbalance);
@@ -665,8 +664,8 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *tStep)
 
     // decide
     if ( ( tStep->giveNumber() % this->lbstep == 0 ) &&
-         ( ( absWallClockImbalance > this->absWallClockImbalanceTreshold ) ||
-           ( ( relWallClockImbalance > this->relWallClockImbalanceTreshold ) && ( absWallClockImbalance > this->minAbsWallClockImbalanceTreshold ) ) ) ) {
+        ( ( absWallClockImbalance > this->absWallClockImbalanceTreshold ) ||
+         ( ( relWallClockImbalance > this->relWallClockImbalanceTreshold ) && ( absWallClockImbalance > this->minAbsWallClockImbalanceTreshold ) ) ) ) {
         OOFEM_LOG_RELEVANT("[%d] LoadBalancer: wall clock imbalance rel=%.2f\%,abs=%.2fs, recovering load\n", myrank, 100 * relWallClockImbalance, absWallClockImbalance);
         return LBD_RECOVER;
     } else {
@@ -678,7 +677,6 @@ WallClockLoadBalancerMonitor :: decide(TimeStep *tStep)
 IRResultType
 LoadBalancerMonitor :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     int nproc = emodel->giveNumberOfProcesses();
     int nodeWeightMode = 0;
@@ -711,7 +709,6 @@ LoadBalancerMonitor :: initializeFrom(InputRecord *ir)
 IRResultType
 WallClockLoadBalancerMonitor :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
     result = LoadBalancerMonitor :: initializeFrom(ir);
@@ -729,12 +726,12 @@ WallClockLoadBalancerMonitor :: initializeFrom(InputRecord *ir)
     perturbFactor = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, perturbFactor, _IFT_WallClockLoadBalancerMonitor_perturbfactor);
 
-    recoveredSteps.resize(0);
+    recoveredSteps.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, recoveredSteps, _IFT_WallClockLoadBalancerMonitor_recoveredsteps);
-    processingWeights.resize(0);
+    processingWeights.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, processingWeights, _IFT_WallClockLoadBalancerMonitor_processingweights);
     if ( recoveredSteps.giveSize() != processingWeights.giveSize() ) {
-        OOFEM_ERROR("WallClockLoadBalancerMonitor::initializeFrom - mismatch size of lbrecoveredsteps and lbprocessingweights");
+        OOFEM_ERROR("mismatch size of lbrecoveredsteps and lbprocessingweights");
     }
 
 #endif

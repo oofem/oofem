@@ -1,0 +1,8 @@
+#%BEGIN_CHECK% tolerance 1.e-5
+#NODE tStep 15 number 2 dof 1 unknown d value 1.45293329e+01
+#NODE tStep 15 number 5 dof 1 unknown d value 4.06591821e+00
+#NODE tStep 15 number 6 dof 1 unknown d value 7.50758455e+00
+#ELEMENT tStep 15 number 4 gp 1 keyword 4  component 1  value 3.44166634e+00
+#ELEMENT tStep 15 number 4 gp 1 keyword 1 component 1  value 7.4049e-01
+#REACTION tStep 15 number 1 dof 1 value -7.4053e-01
+#%END_CHECK%

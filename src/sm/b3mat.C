@@ -35,7 +35,6 @@
 #include "b3mat.h"
 #include "mathfem.h"
 #include "gausspoint.h"
-#include "structuralcrosssection.h"
 #include "timestep.h"
 #include "classfactory.h"
 
@@ -45,7 +44,6 @@ REGISTER_Material(B3Material);
 IRResultType
 B3Material :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //
@@ -196,11 +194,13 @@ B3Material :: predictParametersFrom(double fc, double c, double wc, double ac,
         // Creep at drying
 
         q5 = 7.57e5 * ( 1. / fc ) * pow(EpsSinf, -0.6);
-    }
 
-    char buff [ 1024 ];
-    sprintf(buff, "q1=%lf q2=%lf q3=%lf q4=%lf q5=%lf kt=%lf EpsSinf=%lf", q1, q2, q3, q4, q5, kt, EpsSinf);
-    OOFEM_LOG_DEBUG("B3mat[%d]: estimated params: %s\n", this->number, buff);
+        OOFEM_LOG_DEBUG("B3mat[%d]: estimated params: q1=%lf q2=%lf q3=%lf q4=%lf q5=%lf kt=%lf EpsSinf=%lf\n",
+                this->number, q1, q2, q3, q4, q5, kt, EpsSinf);
+    } else {
+        OOFEM_LOG_DEBUG("B3mat[%d]: estimated params: q1=%lf q2=%lf q3=%lf q4=%lf\n",
+                this->number, q1, q2, q3, q4);
+    }
 }
 
 
@@ -223,7 +223,7 @@ B3Material :: computeCreepFunction(double tStep, double ofAge)
     r  = 1.7 * pow(ofAge, 0.12) + 8.0;
     Q  = Qf * pow( ( 1. + pow( ( Qf / Z ), r ) ), -1. / r );
 
-    C0 = q2 * Q + q3 *log( 1. + pow(tStep - ofAge, n) ) + q4 *log(tStep / ofAge);
+    C0 = q2 * Q + q3 *log( 1. + pow ( tStep - ofAge, n ) ) + q4 *log(tStep / ofAge);
 
 
     if ( this->shMode == B3_AverageShrinkage ) {
@@ -269,7 +269,7 @@ B3Material :: giveShrinkageStrainVector(FloatArray &answer,
     }
 
     if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
-        _error("giveShrinkageStrainVector: unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 
     if ( this->shMode == B3_AverageShrinkage ) {
@@ -367,7 +367,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
         // temperature field registered
         gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Incremental, tStep) ) ) {
-            _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
+            OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
 
         trate = et2.at(1);
@@ -378,11 +378,11 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
         // temperature field registered
         gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
-            _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
+            OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
 
         if ( ( err = tf->evaluateAt(ei2, gcoords, VM_Incremental, tStep) ) ) {
-            _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
+            OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
 
         // convert water mass to relative humidity
@@ -391,7 +391,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
     }
 
     if ( ( tflag == 0 ) || ( wflag == 0 ) ) {
-        _error("computeTotalShrinkageStrainVector: external fields not found");
+        OOFEM_ERROR("external fields not found");
     }
 
     if ( status->giveStressVector().giveSize() ) {
@@ -454,7 +454,7 @@ B3Material :: inverse_sorption_isotherm(double w)
     phi = exp( a * ( 1.0 - pow( ( w_h / w ), ( n ) ) ) );
 
     if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
-        _error3("inverse_sorption_isotherm : Relative humidity h = %e (w=%e) is out of range", phi, w);
+        OOFEM_ERROR("Relative humidity h = %e (w=%e) is out of range", phi, w);
     }
 
     return phi;

@@ -41,7 +41,7 @@ InputRecord :: InputRecord() { }
 InputRecord :: InputRecord(const InputRecord &src) {  }
 
 InputRecord &
-InputRecord :: operator=(const InputRecord &src)
+InputRecord :: operator = ( const InputRecord & src )
 {
     return * this;
 }
@@ -162,6 +162,17 @@ InputRecord :: giveOptionalField(Dictionary &answer, InputFieldType id)
 
 IRResultType
 InputRecord :: giveOptionalField(std :: list< Range > &answer, InputFieldType id)
+{
+    IRResultType r = this->giveField(answer, id);
+    if ( r == IRRT_NOTFOUND ) {
+        return IRRT_OK;
+    } else {
+        return r;
+    }
+}
+
+IRResultType
+InputRecord :: giveOptionalField(ScalarFunction &answer, InputFieldType id)
 {
     IRResultType r = this->giveField(answer, id);
     if ( r == IRRT_NOTFOUND ) {

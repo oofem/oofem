@@ -104,9 +104,6 @@ private:
     /** Keeps track of which coordinate(s) are changing on the surface/edge */
     std :: vector< double >directions;
 
-    /** Type of surface/edge */
-    integrationDomain sideGeom;
-
     void giveEdgeNormal(FloatArray &answer, int element, int side);
 
     void updateSminmax();
@@ -118,6 +115,7 @@ private:
     double computeBaseFunctionValue2D(int baseID, FloatArray coordinate);
 
     Node *gammaDman;
+    IntArray gamma_ids;
 
     double factorial(int n);
 
@@ -134,17 +132,17 @@ private:
     /** gsMatrix contains coefficients for the Gram-Schmidt polynomials*/
     FloatMatrix gsMatrix;
 public:
-    WeakPeriodicBoundaryCondition(int n, Domain *d);
-    virtual ~WeakPeriodicBoundaryCondition() { }
+    WeakPeriodicBoundaryCondition(int n, Domain * d);
+    virtual ~WeakPeriodicBoundaryCondition();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     basisType giveBasisType() { return useBasisType; }
 
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid, CharType type,
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
                           const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
 

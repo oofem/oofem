@@ -1,6 +1,7 @@
 \documentclass[a4paper]{article}
 \usepackage{amsmath}
 \usepackage{ifluatex}
+
 \ifluatex
  \usepackage{fontspec}
   %\setmainfont[Ligatures=TeX]{xits}
@@ -610,14 +611,14 @@ The node numbering is anti-clockwise. The element features are summarized in Tab
 
 
 \subsubsection {DKT Element}
-\label{cct}
+\label{dkt}
 Implementation of Discrete Kirchhoff Triangle (DKT) plate element.
 This element is suitable for thin plates, as the traswerse shear strain energy is neglected.
 The structure should be defined in x,y plane, nodes should be numbered anti-clockwise (positive rotation around
 z-axis). The element features are summarized in Table~\ref{dktplatesummary}.
 
 
-\begin{elementsummary}{dktplate}{2D Discrete Kirchhoff Triangular plate element}{-}{dktplate element summary}{dktplatesummary}
+\begin{elementsummary}{dktplate}{2D Discrete Kirchhoff Triangular plate element}{-}{DKTplate element summary}{dktplatesummary}
 %\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
 \elementDescription{Unknowns}{Three dofs (w-displacement, u and v - rotations) are required in each node.}
 \elementDescription{Approximation}{Quadratic approximation of rotations, cubic approximation of displacement along the edges. Note: there is no need to define interpolation for displacement on the element.}
@@ -625,14 +626,46 @@ z-axis). The element features are summarized in Table~\ref{dktplatesummary}.
 \elementDescription{Features}{Layered cross section support.}
 \elementDescription{CS properties}{Cross section thickness is required.}
 \elementDescription{Loads}{Body loads are supported. Boundary load support is beta.}
-\elementDescription{Output}{On output, the generalized strains are printed in a vector with 8 components, with the following meaning:
-$$e=\{\varepsilon_x, \varepsilon_y, \gamma_{xy}, \kappa_x, \kappa_y, \kappa_{xy}, \gamma_{zx}, \gamma_{zy}\},$$ where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{zy}, \gamma_{zx}, \gamma_{xy}$ are (out of plane and in plane) shear componets, and $\kappa_x, \kappa_y, \kappa_{xy}$ are curvatures.
-The generalized stress vector contains corresponding integral forces/moments:
-$$s=\{n_x, n_y, n_{xy}, m_x, m_y, m_{xy}, v_x, v_y\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
+\elementDescription{Output}{On output, the generalized shell strain/force momentum vectors in global coordinate system are printed, with the following meaning:
+\begin{eqnarray*}
+s_{\varepsilon}&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_{xz}, \kappa_x, \kappa_y, \kappa_{xy}, \gamma_{xz}, \gamma_{yz}\},\\
+s_{\sigma}&=&\{n_x, n_y, n_{xy}, m_x, m_y, m_z, m_{xy}, q_{xz}, q_{yz}\}
+\end{eqnarray*}
+where $\varepsilon_x, \varepsilon_y, \varepsilon_{xy}$ are membrane in plane normal deformations, $\gamma_{zx}, \gamma_{xz}$ are (out of plane and in plane) shear componets, $\kappa_x, \kappa_y, \kappa_{xy}$ are curvatures, $n_x, n_y, n_{xy}, q_{xz}, q_{yz}$ are integral forces (normal and shear forces), and $m_x, m_y, m_{xz}$ are bending moments. 
+Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
+\elementDescription{Reference}{J.L.Batoz, K.J.Bathe, L.W.Ho: A study of three-node triangular plate bending elements, IJNME, 15(12):1771-1812, 1980}
 \end{elementsummary}
 
+
+\subsubsection {QDKT Element}
+\label{qdkt}
+Implementation of Discrete Kirchhoff Theory plate quad element (QDKT) .
+This element is suitable for thin plates, as the traswerse shear strain energy is neglected.
+The structure should be defined in x,y plane, nodes should be numbered anti-clockwise (positive rotation around
+z-axis). The element features are summarized in Table~\ref{qdktplatesummary}.
+
+
+\begin{elementsummary}{qdktplate}{2D Discrete Kirchhoff Quad plate element}{-}{QDKTplate element summary}{qdktplatesummary}
+%\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
+\elementDescription{Unknowns}{Three dofs (w-displacement, u and v - rotations) are required in each node.}
+\elementDescription{Approximation}{Quadratic approximation of rotations, cubic approximation of displacement along the edges. Note: there is no need to define interpolation for displacement on the element.}
+\elementDescription{Integration}{Default integration of all bending terms using four point formula.}
+\elementDescription{Features}{Layered cross section support.}
+\elementDescription{CS properties}{Cross section thickness is required.}
+\elementDescription{Loads}{Body loads are supported.}
+\elementDescription{Output}{On output, the generalized shell strain/force momentum vectors in global coordinate system are printed, with the following meaning:
+\begin{eqnarray*}
+s_{\varepsilon}&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_{xz}, \kappa_x, \kappa_y, \kappa_{xy}, \gamma_{xz}, \gamma_{yz}\},\\
+s_{\sigma}&=&\{n_x, n_y, n_{xy}, m_x, m_y, m_z, m_{xy}, q_{xz}, q_{yz}\}
+\end{eqnarray*}
+where $\varepsilon_x, \varepsilon_y, \varepsilon_{xy}$ are membrane in plane normal deformations, $\gamma_{zx}, \gamma_{xz}$ are (out of plane and in plane) shear componets, $\kappa_x, \kappa_y, \kappa_{xy}$ are curvatures, $n_x, n_y, n_{xy}, q_{xz}, q_{yz}$ are integral forces (normal and shear forces), and $m_x, m_y, m_{xz}$ are bending moments. 
+Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
+\elementDescription{Nlgeo}{0.}
+\elementDescription{Status}{Reliable}
+\elementDescription{Reference}{J.L.Batoz, K.J.Bathe, L.W.Ho: A study of three-node triangular plate bending elements, IJNME, 15(12):1771-1812, 1980}
+\end{elementsummary}
 
 \subsubsection {CCT Element}
 \label{cct}
@@ -650,17 +683,16 @@ z-axis). The element features are summarized in Table~\ref{cctplatesummary}.
 \elementDescription{Features}{Layered cross section support.}
 \elementDescription{CS properties}{Cross section thickness is required.}
 \elementDescription{Loads}{Body loads are supported. Boundary loads are not supported now.}
-\elementDescription{Output}{On output, the generalized strains are printed in a vector with 12 components, with the following meaning:
-$$e=\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}, \kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}\},$$ where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{yz}, \gamma_{zx}, \gamma_{xy}$ are shear componets, and $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}$ are curvatures.
-The generalized stress vector contains corresponding integral forces/moments:
-$$s=\{n_x, n_y, n_y, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
+\elementDescription{Output}{On output, the generalized shell strain/force momentum vectors in global coordinate system are printed, with the following meaning:
+\begin{eqnarray*}
+s_{\varepsilon}&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_{xz}, \kappa_x, \kappa_y, \kappa_{xy}, \gamma_{xz}, \gamma_{yz}\},\\
+s_{\sigma}&=&\{n_x, n_y, n_{xy}, m_x, m_y, m_z, m_{xy}, q_{xz}, q_{yz}\}
+\end{eqnarray*}
+where $\varepsilon_x, \varepsilon_y, \varepsilon_{xy}$ are membrane in plane normal deformations, $\gamma_{zx}, \gamma_{xz}$ are (out of plane and in plane) shear componets, $\kappa_x, \kappa_y, \kappa_{xy}$ are curvatures, $n_x, n_y, n_{xy}, q_{xz}, q_{yz}$ are integral forces (normal and shear forces), and $m_x, m_y, m_{xz}$ are bending moments. 
+Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
 \end{elementsummary}
-
-
-
-
 
 
 \subsubsection {CCT3D Element}
@@ -677,10 +709,15 @@ The element features are summarized in Table~\ref{cctplate3dsummary}.
 \elementDescription{Features}{Layered cross section support.}
 \elementDescription{CS properties}{Cross section thickness is required.}
 \elementDescription{Loads}{Body loads are supported. Boundary loads are not supported now.}
-\elementDescription{Output}{On output, the generalized strains are printed in a vector with 12 components, with the following meaning:
-$$e=\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}, \kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}\},$$where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{yz}, \gamma_{zx}, \gamma_{xy}$ are shear componets, and $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}$ are curvatures.
-The generalized stress vector contains corresponding integral forces/moments:
-$$s=\{n_x, n_y, n_y, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
+\elementDescription{Output}{On output, the shell force ($s_f$), shell strain ($s_s$), shell momentum ($s_m$), and shell curvature ($s_c$) tensors in global coordinate system are printed as vector form with 6 components, with the following meaning:
+\begin{eqnarray*}
+s_f&=&\{n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}\},\\
+s_s&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{xz}, \gamma_{xz}\},\\
+s_m&=&\{m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xz}\},\\
+s_c&=&\{\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xz}\}
+\end{eqnarray*}
+where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{zy}, \gamma_{zx}, \gamma_{xy}$ are (out of plane and in plane) shear componets, $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xz}$ are curvatures, $n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}$ are integral forces (normal and shear forces), and $m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xz}$ are bending moments. 
+Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
 \end{elementsummary}
@@ -701,10 +738,15 @@ The element features are summarized in Table~\ref{rershellsummary}.
 \elementDescription{Features}{Layered cross section support.}
 \elementDescription{CS properties}{Cross section thickness is required.}
 \elementDescription{Loads}{Body loads are supported. Boundary loads are not supported now.}
-\elementDescription{Output}{On output, the generalized strains are printed in a vector with 12 components, with the following meaning:
-$$e=\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}, \kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}\},$$where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{yz}, \gamma_{zx}, \gamma_{xy}$ are shear componets, and $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xy}$ are curvatures.
-The generalized stress vector contains corresponding integral forces/moments:
-$$s=\{n_x, n_y, n_y, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
+\elementDescription{Output}{On output, the shell force ($s_f$), shell strain ($s_s$), shell momentum ($s_m$), and shell curvature ($s_c$) tensors in \textbf{global coordinate system} are printed as vector form with 6 components, with the following meaning:
+\begin{eqnarray*}
+s_f&=&\{n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}\},\\
+s_s&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{xz}, \gamma_{xz}\},\\
+s_m&=&\{m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xz}\},\\
+s_c&=&\{\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xz}\}
+\end{eqnarray*}
+where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{zy}, \gamma_{zx}, \gamma_{xy}$ are (out of plane and in plane) shear componets, $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xz}$ are curvatures, $n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}$ are integral forces (normal and shear forces), and $m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xz}$ are bending moments. 
+Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
 \end{elementsummary}
@@ -730,11 +772,16 @@ The element features are summarized in Table~\ref{trshell01summary}.
 \elementDescription{Integration}{Integration of all terms using one point formula.}
 \elementDescription{Features}{Layered cross section support.}
 \elementDescription{CS properties}{Cross section thickness is required.}
-\elementDescription{Loads}{Body loads are supported. Boundary loads are not supported now.}
-\elementDescription{Output}{On output, the generalized strains are printed in a vector with 12 components, with the following meaning:
-$$e=\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{zx}, \gamma_{xy}, \kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{zx}, \kappa_{xy}\},$$where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{yz}, \gamma_{zx}, \gamma_{xy}$ are shear componets, and $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{zx}, \kappa_{xy}$ are curvatures.
-The generalized stress vector contains corresponding integral forces/moments:
-$$s=\{n_x, n_y, n_z, v_{yz}, v_{zx}, v_{xy}, m_x, m_y, m_z, m_{yz}, m_{zx}, m_{xy}\}.$$ Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
+\elementDescription{Loads}{Body loads are supported. Boundary loads are supported (only surface loads).}
+\elementDescription{Output}{On output, the shell force ($s_f$), shell strain ($s_s$), shell momentum ($s_m$), and shell curvature ($s_c$) tensors in \textbf{global coordinate system} are printed as vector form with 6 components, with the following meaning:
+\begin{eqnarray*}
+s_f&=&\{n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}\},\\
+s_s&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_z, \gamma_{yz}, \gamma_{xz}, \gamma_{xz}\},\\
+s_m&=&\{m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xz}\},\\
+s_c&=&\{\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xz}\}
+\end{eqnarray*}
+where $\varepsilon_x, \varepsilon_y, \varepsilon_z$ are membrane normal deformations, $\gamma_{zy}, \gamma_{zx}, \gamma_{xy}$ are (out of plane and in plane) shear componets, $\kappa_x, \kappa_y, \kappa_z, \kappa_{yz}, \kappa_{xz}, \kappa_{xz}$ are curvatures, $n_x, n_y, n_z, v_{yz}, v_{xz}, v_{xy}$ are integral forces (normal and shear forces), and $m_x, m_y, m_z, m_{yz}, m_{xz}, m_{xz}$ are bending moments. 
+Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Status}{Reliable}
 \end{elementsummary}
@@ -753,6 +800,13 @@ Implements the lumped mass matrix. The element features are summarized in Table~
 \elementDescription{Features}{Layered cross section support.}
 \elementDescription{CS properties}{Cross section thickness is required.}
 \elementDescription{Loads}{Dead weight loads, and edge loads are supported.}
+\elementDescription{Output}{On output, the generalized shell strain/force momentum vectors in global coordinate system are printed, with the following meaning:
+\begin{eqnarray*}
+s_{\varepsilon}&=&\{\varepsilon_x, \varepsilon_y, \varepsilon_{xz}, \kappa_x, \kappa_y, \kappa_{xy}, \gamma_{xz}, \gamma_{yz}\},\\
+s_{\sigma}&=&\{n_x, n_y, n_{xy}, m_x, m_y, m_z, m_{xy}, q_{xz}, q_{yz}\}
+\end{eqnarray*}
+where $\varepsilon_x, \varepsilon_y, \varepsilon_{xy}$ are membrane in plane normal deformations, $\gamma_{zx}, \gamma_{xz}$ are (out of plane and in plane) shear componets, $\kappa_x, \kappa_y, \kappa_{xy}$ are curvatures, $n_x, n_y, n_{xy}, q_{xz}, q_{yz}$ are integral forces (normal and shear forces), and $m_x, m_y, m_{xz}$ are bending moments. 
+Please note, for example, that bending moment $m_x$ is defined as $m_x=\int \sigma_x z\ dz$, so it acts along the y-axis and positive value causes tension in bottom layer.}
 \elementDescription{Nlgeo}{0.}
 \elementDescription{Reference}{\cite{RobertCook1989}}
 \elementDescription{Status}{Experimental}
@@ -781,6 +835,38 @@ The element features are summarized in Table~\ref{quad1mindlinsummary}.
 \end{elementsummary}
 
 
+\subsubsection{Sub-soil Elements}
+\subsubsection{quad1plateSubsoil Element} \label{quad1platesubsoil}
+This class implements an quadrilateral, bilinear, four-node plate subsoil element.
+Typically this element is combined with suitable plate element with quadrilateral geometry to model plate element on 
+(elastic) subsoill foundation, but it can be used alone. The element geometry should be define in xy plane.
+The element features are summarized in Table~\ref{quad1platesubsoilsummary}.
+
+\begin{elementsummary}{quad1plateSubsoil}{Quadrilateral, bilinear, four-node sub-soil plate element}{}{quad1platesubsoil element summary}{quad1platesubsoilsummary}
+%\elementParam{\param{NIP}: allows to set the number of integration points for integration of membrane terms.}
+\elementDescription{Unknowns}{One dof (w-displacement) is required in each node.}
+\elementDescription{Approximation}{Linear for transwersal displacement.}
+\elementDescription{Integration}{4 integration points.}
+\elementDescription{Loads}{Surface load support.}
+\elementDescription{Note}{Requires material model with 2dPlateSubSoil mode support.}
+\elementDescription{Reference}{\cite{BittnarSejnoha1996}}
+\end{elementsummary}
+
+\subsubsection{Tria1PlateSubSoil Element} \label{tria1platesubsoil}
+This class implements an quadrilateral, bilinear, four-node plate subsoil element.
+Typically this element is combined with suitable plate element with quadrilateral geometry to model plate element on 
+(elastic) subsoill foundation, but it can be used alone. The element geometry should be define in xy plane.
+The element features are summarized in Table~\ref{quad1platesubsoilsummary}.
+
+\begin{elementsummary}{tria1platesubsoil}{Tringular, three-node sub-soil plate element with linear interpolation}{}{tria1platesubsoil element summary}{tria1platesubsoilsummary}
+\elementDescription{Unknowns}{One dof (w-displacement) is required in each node.}
+\elementDescription{Approximation}{Linear for transwersal displacement.}
+\elementDescription{Integration}{1 integration points.}
+\elementDescription{Loads}{Surface load support.}
+\elementDescription{Note}{Requires material model with 2dPlateSubSoil mode support.}
+\elementDescription{Reference}{\cite{BittnarSejnoha1996}}
+\end{elementsummary}
+
 
 %-----------------------------------------------------------------------------------------------
 \clearpage
@@ -807,14 +893,10 @@ Node numbering and edge position is the same as in Fig.~\ref{TrPlanestressfig}.
 The element features are summarized in Table~\ref{axisymm3dsummary}. 
 
 \begin{elementsummary}{Axisymm3d}{Triangular axisymmetric linear element}{\optField{NIP}{in} \optField{NIPfish}{in}}{Axisymm3d element summary}{axisymm3dsummary}
-\elementParam{\param{NIP}: allows to set the number of integration points for integration of terms corresponding to $\varepsilon_x$ and $\varepsilon_y$ strains (possible completions are 1 (default), 4 and 7 point integration rule).}
-\elementParam{\param{NIPfish}: allows to set the number of integration points for integration of remain terms (corresponding to $\varepsilon_\theta$ and
-$\gamma_{rz}$) (Supported values include 1 (default)).}
+\elementParam{\param{NIP}: allows to set the number of integration points (possible completions are 1 (default), 4 and 7 point integration rule).}
 \elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
 \elementDescription{Approximation}{Linear approximation of displacement and geometry.}
-\elementDescription{Integration}{The integration of $\varepsilon_x$ and $\varepsilon_y$ strains can be altered using
-\param{NIP} paramter (default is 1 point integration).  The remaining terms corresponding to strain components $\varepsilon_\theta$ and
-$\gamma_{rz}$ are by default evaluated at 1 integration point, this can be changed by \param{NIPfish} parameter.}
+\elementDescription{Integration}{The integration can be altered using \param{NIP} paramter (default is 1 point integration).}
 \elementDescription{Features}{-}
 \elementDescription{CS properties}{-}
 \elementDescription{Loads}{Boundary and body loads are supported.}
@@ -1063,6 +1145,33 @@ w-displacement) are required in each node, according to element mode (determined
 \elementDescription{Note}{Element requires material model with \_1dInterface support.}
 \end{elementsummary}
 
+\subsubsection{Interface2dlin element}
+Implementation of a two dimensional interface element with linear
+approximation of displacement field. Can be used to glue together two elements with linear displacement approximation along the shared edge. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative side are numbered first, followed by nodes on the positive part. Requires material model with \_2dInterface support.  The element features are summarized in Table~\ref{Interface2dlinsummary}.
+
+\begin{figure}[htb]
+ \centering
+ \begin{makeimage}
+ \input{interf2d_lin.tikz}
+ \end{makeimage}
+ \caption{Interface2dlin element with linear interpolation. Definition and node numbering convention}
+ \label{interf2d_quad_fig}
+\end{figure}
+
+\begin{elementsummary}{Interface2dlin}{2D  interface element with linear approximation}{\optField{axisymmode}{}}{Interface2dlin element summary}{Interface2dlinsummary}
+\elementParam{\param{axisymmode}: Flag controlling axisymmetric mode (integration over unit circumferential angle).}
+\elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
+\elementDescription{Approximation}{Linear approximation of displacements and geometry.}
+\elementDescription{Integration}{Full integration of all strain components using two point integration formula.}
+\elementDescription{Features}{-}
+\elementDescription{CS properties}{-}
+\elementDescription{Loads}{-}
+\elementDescription{Nlgeo}{0}
+\elementDescription{Status}{Reliable}
+\elementDescription{Note}{Element requires material model with \_2dInterface support.}
+\end{elementsummary}
+
+
 \subsubsection{Interface2dquad element}
 Implementation of a two dimensional interface element with quadratic
 approximation of displacement field. Can be used to glue together two elements with quadratic displacement approximation along the shared edge. Note, that the nodes along the interface are doubled, each couple with identical coordinates. Nodes on the negative side are numbered first, followed by nodes on the positive part. Requires material model with \_2dInterface support.  The element features are summarized in Table~\ref{Interface2dquadsummary}.
@@ -1076,8 +1185,8 @@ approximation of displacement field. Can be used to glue together two elements w
  \label{interf2d_quad_fig}
 \end{figure}
 
-\begin{elementsummary}{Interface2dquad}{2D  interface element with quadratic approximation}{-}{Interface2dquad element summary}{Interface2dquadsummary}
-%\elementParam{\param{refnode}: determines the reference node, which is used to specify a reference direction (the direction vector is obtained by subtracting the coordinates of the first node from the reference node).}
+\begin{elementsummary}{Interface2dquad}{2D  interface element with quadratic approximation}{\optField{axisymmode}{}}{Interface2dquad element summary}{Interface2dquadsummary}
+\elementParam{\param{axisymmode}: Flag controlling axisymmetric mode (integration over unit circumferential angle).}
 \elementDescription{Unknowns}{Two dofs (u-displacement, v-displacement) are required in each node.}
 \elementDescription{Approximation}{Quadratic approximation of displacements and geometry.}
 \elementDescription{Integration}{Full integration of all strain components using four point integration formula.}
@@ -1253,11 +1362,14 @@ The spring element has no mass associated, the mass can be added using LumpedMas
     1 & 2D spring element in xy plane,\\
     & requires D\_u and D\_v DOFs in each node \\
     & (orientation vector should be in xy plane)\\
-    2 & 2D torsional spring element in xz plane,\\
+    2 & 2D spring element in xz plane,\\
+    & requires D\_u and D\_w DOFs in each node \\
+    & (orientation vector should be in xz plane)\\
+    3 & 2D torsional spring element in xz plane,\\
     & requires R\_v DOFs in each node\\
-    3 & 3D spring element in space,\\
+    4 & 3D spring element in space,\\
     & requires D\_u, D\_v, and D\_w DOFs in each node\\
-    4 & 3D torsional spring in space,\\
+    5 & 3D torsional spring in space,\\
     & requires R\_u, R\_v, and R\_w DOFs in each node\\
     \hline
   \end{tabular}

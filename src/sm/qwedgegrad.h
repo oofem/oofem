@@ -58,10 +58,10 @@ protected:
 
 public:
     QWedgeGrad(int, Domain *);
-    virtual ~QWedgeGrad() {}
+    virtual ~QWedgeGrad() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QWedgeGrad_Name; }
@@ -80,8 +80,6 @@ protected:
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) { GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep) { GradDpElement :: computeStiffnessMatrix(answer, rMode, tStep); }
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) { GradDpElement :: computeForceLoadVector(answer, tStep, mode); }
-    //   virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) { GradDpElement :: computeNonForceLoadVector(answer, tStep, mode); }
-    virtual void computeNonForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) {; }
 };
 }
 #endif // end namespace oofem

@@ -82,12 +82,10 @@ DummySpatialLocalizer :: giveElementContainingPoint(const FloatArray &coords, co
 {
     // Dummy implementation here, to be replaced ASAP
     int nelems = this->giveDomain()->giveNumberOfElements();
-    Element *ielemptr;
-    SpatialLocalizerInterface *interface;
 
     for ( int ielem = 1; ielem <= nelems; ielem++ ) {
-        ielemptr = this->giveDomain()->giveElement(ielem);
-        interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
+        Element *ielemptr = this->giveDomain()->giveElement(ielem);
+        SpatialLocalizerInterface *interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
         if ( interface ) {
             if ( regionList && ( regionList->findFirstIndexOf( ielemptr->giveRegionNumber() ) == 0 ) ) {
                 continue;
@@ -111,19 +109,18 @@ Element *
 DummySpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList)
 {
     int nelems = this->giveDomain()->giveNumberOfElements();
-    Element *ielemptr, *answer = NULL;
-    SpatialLocalizerInterface *interface;
-    double dist = 0.0, currDist;
+    Element *answer = NULL;
+    double dist = 0.0;
 
     for ( int ielem = 1; ielem <= nelems; ielem++ ) {
-        ielemptr = this->giveDomain()->giveElement(ielem);
-        interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
+        Element *ielemptr = this->giveDomain()->giveElement(ielem);
+        SpatialLocalizerInterface *interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
         if ( interface ) {
             if ( regionList && ( regionList->findFirstIndexOf( ielemptr->giveRegionNumber() ) == 0 ) ) {
                 continue;
             }
 
-            currDist = interface->SpatialLocalizerI_giveDistanceFromParametricCenter(coords);
+            double currDist = interface->SpatialLocalizerI_giveDistanceFromParametricCenter(coords);
             if ( answer == NULL || currDist < dist ) {
                 answer = ielemptr;
                 dist = currDist;
@@ -142,20 +139,19 @@ Element *
 DummySpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &coords, int region)
 {
     int nelems;
-    Element *ielemptr, *answer = NULL;
-    SpatialLocalizerInterface *interface;
-    double dist = 0.0, currDist;
+    Element *answer = NULL;
+    double dist = 0.0;
     FloatArray el_coords, el_lcoords;
-    lcoords.resize(0);
-    closest.resize(0);
+    lcoords.clear();
+    closest.clear();
 
     if ( region > 0 ) {
         IntArray &elems = this->region_elements [ region - 1 ];
         for ( int ielem = 1; ielem <= elems.giveSize(); ielem++ ) {
-            ielemptr = this->domain->giveElement( elems.at(ielem) );
-            interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
+            Element *ielemptr = this->domain->giveElement( elems.at(ielem) );
+            SpatialLocalizerInterface *interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
             if ( interface ) {
-                currDist = interface->SpatialLocalizerI_giveClosestPoint(el_lcoords, el_coords, coords);
+                double currDist = interface->SpatialLocalizerI_giveClosestPoint(el_lcoords, el_coords, coords);
                 if ( answer == NULL || ( currDist < dist && currDist >= 0.0 ) ) {
                     answer = ielemptr;
                     lcoords = el_lcoords;
@@ -170,14 +166,14 @@ DummySpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArr
     } else { // Check them all;
         nelems = this->giveDomain()->giveNumberOfElements();
         for ( int ielem = 1; ielem <= nelems; ielem++ ) {
-            ielemptr = this->giveDomain()->giveElement(ielem);
-            interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
+            Element *ielemptr = this->giveDomain()->giveElement(ielem);
+            SpatialLocalizerInterface *interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
             if ( interface ) {
                 if ( region > 0 && region == ielemptr->giveRegionNumber() ) {
                     continue;
                 }
 
-                currDist = interface->SpatialLocalizerI_giveClosestPoint(el_lcoords, el_coords, coords);
+                double currDist = interface->SpatialLocalizerI_giveClosestPoint(el_lcoords, el_coords, coords);
                 if ( answer == NULL || ( currDist < dist && currDist >= 0.0 ) ) {
                     answer = ielemptr;
                     lcoords = el_lcoords;
@@ -196,27 +192,24 @@ DummySpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArr
 
 
 GaussPoint *
-DummySpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region)
+DummySpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP)
 {
-    int nelem, i, j;
-    double minDist = 1.e6, distance;
-    Element *ielem;
-    GaussPoint *jGp, *answer = NULL;
-    IntegrationRule *iRule;
+    int nelem;
+    double minDist = 0.0;
+    GaussPoint *answer = NULL;
     FloatArray jGpCoords;
 
     nelem = this->giveDomain()->giveNumberOfElements();
 
 
-    for ( i = 1; i <= nelem; i++ ) {
-        ielem = this->giveDomain()->giveElement(i);
+    for ( int i = 1; i <= nelem; i++ ) {
+        Element *ielem = this->giveDomain()->giveElement(i);
         if ( ( region < 0 ) || ( region == ielem->giveRegionNumber() ) ) {
-            iRule = ielem->giveDefaultIntegrationRulePtr();
-            for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                jGp = iRule->getIntegrationPoint(j);
+            IntegrationRule *iRule = ielem->giveDefaultIntegrationRulePtr();
+            for ( GaussPoint *jGp: *iRule ) {
                 if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
-                    distance = coords.distance(jGpCoords);
-                    if ( distance < minDist ) {
+                    double distance = coords.distance(jGpCoords);
+                    if ( answer == NULL || distance < minDist ) {
                         minDist = distance;
                         answer = jGp;
                     }
@@ -232,22 +225,16 @@ DummySpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region)
 void
 DummySpatialLocalizer :: giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius)
 {
-    int i, j, nelem;
-    double currDist;
+    int nelem;
     FloatArray jGpCoords;
-    Element *ielem;
-    IntegrationRule *iRule;
-    GaussPoint *jGp;
-
 
     nelem = this->giveDomain()->giveNumberOfElements();
-    for ( i = 1; i <= nelem; i++ ) {
-        ielem = this->giveDomain()->giveElement(i);
-        iRule = ielem->giveDefaultIntegrationRulePtr();
-        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            jGp = iRule->getIntegrationPoint(j);
+    for ( int i = 1; i <= nelem; i++ ) {
+        Element *ielem = this->giveDomain()->giveElement(i);
+        IntegrationRule *iRule = ielem->giveDefaultIntegrationRulePtr();
+        for ( GaussPoint *jGp: *iRule ) {
             if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
-                currDist = coords.distance(jGpCoords);
+                double currDist = coords.distance(jGpCoords);
                 if ( currDist <= radius ) {
                     elemSet.insert(i);
                 }
@@ -260,14 +247,13 @@ DummySpatialLocalizer :: giveAllElementsWithIpWithinBox(elementContainerType &el
 void
 DummySpatialLocalizer :: giveAllNodesWithinBox(nodeContainerType &nodeSet, const FloatArray &coords, const double radius)
 {
-    int i, nnode;
-    DofManager *idofman;
-    Node *inode;
+    int nnode;
 
     nnode = this->giveDomain()->giveNumberOfDofManagers();
-    for ( i = 1; i <= nnode; i++ ) {
-        idofman = this->giveDomain()->giveDofManager(i);
-        if ( ( inode = dynamic_cast< Node * >( idofman ) ) != NULL ) {
+    for ( int i = 1; i <= nnode; i++ ) {
+        DofManager *idofman = this->giveDomain()->giveDofManager(i);
+        Node *inode = dynamic_cast< Node * >(idofman);
+        if ( inode != NULL ) {
             if ( coords.distance( inode->giveCoordinates() ) <= radius ) {
                 nodeSet.push_back(i);
             }

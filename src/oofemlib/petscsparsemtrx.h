@@ -60,6 +60,9 @@ protected:
     /// Flag if matrix has changed since last solve.
     bool newValues;
 
+    /// Context or scattering/collecting parallel PETSc vectors
+    IS localIS, globalIS;
+
 public:
     PetscSparseMtrx(int n, int m);
     PetscSparseMtrx();
@@ -73,8 +76,8 @@ public:
     virtual void times(const FloatMatrix &B, FloatMatrix &answer) const;
     virtual void timesT(const FloatMatrix &B, FloatMatrix &answer) const;
     virtual void times(double x);
-    virtual int buildInternalStructure(EngngModel * eModel, int di, EquationID, const UnknownNumberingScheme & s);
-    virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID eid, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
+    virtual int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s);
+    virtual int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
     virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
     virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
     virtual int assembleBegin();
@@ -92,8 +95,18 @@ public:
     void printMatlab() const;
     virtual SparseMtrxType  giveType() const;
     virtual bool isAsymmetric() const;
-
     virtual void writeToFile(const char *fname) const;
+    virtual const char *giveClassName() const { return "PetscSparseMtrx"; }
+
+    /// Creates a global vector that fits the instance of this matrix.
+    void createVecGlobal(Vec *answer) const;
+    /// Scatters global vector to natural one.
+    int scatterG2L(Vec src, FloatArray &dest) const;
+    /**
+     * Scatters and gathers vector in local form to global (parallel) one.
+     * Only local entries are processed.
+     */
+    int scatterL2G(const FloatArray &src, Vec dest) const;
 
     // Internals (should be documented)
     Mat *giveMtrx();

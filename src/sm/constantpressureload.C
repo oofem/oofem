@@ -33,7 +33,7 @@
  */
 
 #include "constantpressureload.h"
-#include "loadtimefunction.h"
+#include "function.h"
 #include "floatarray.h"
 #include "timestep.h"
 #include "classfactory.h"
@@ -50,10 +50,9 @@ ConstantPressureLoad :: initializeFrom(InputRecord *ir)
 {
     BoundaryLoad :: initializeFrom(ir);
     if ( componentArray.giveSize() != nDofs ) {
-        _error("instanciateFrom: componentArray size mismatch");
+        OOFEM_ERROR("componentArray size mismatch");
     }
 
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     IR_GIVE_OPTIONAL_FIELD(ir, this->loadOffset, _IFT_ConstantPressureLoad_LoadOffset);
     return IRRT_OK;
@@ -68,18 +67,18 @@ ConstantPressureLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, Floa
     double factor;
 
     if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
-        _error("computeValueAt: mode not supported");
+        OOFEM_ERROR("mode not supported");
     }
 
     // ask time distribution
 
     /*
-     * factor = this -> giveLoadTimeFunction() -> at(tStep->giveTime()) ;
+     * factor = this -> giveTimeFunction() -> at(tStep->giveTime()) ;
      * if ((mode==VM_Incremental) && (!tStep->isTheFirstStep()))
-     * //factor -= this->giveLoadTimeFunction()->at(tStep->givePreviousStep()->giveTime()) ;
-     * factor -= this->giveLoadTimeFunction()->at(tStep->giveTime()-tStep->giveTimeIncrement()) ;
+     * //factor -= this->giveTimeFunction()->at(tStep->givePreviousStep()->giveTime()) ;
+     * factor -= this->giveTimeFunction()->at(tStep->giveTime()-tStep->giveTimeIncrement()) ;
      */
-    factor = this->giveLoadTimeFunction()->evaluate(tStep, mode);
+    factor = this->giveTimeFunction()->evaluate(tStep, mode);
     answer = componentArray;
     answer.times(factor);
 }

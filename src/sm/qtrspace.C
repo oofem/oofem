@@ -56,7 +56,7 @@ REGISTER_Element(QTRSpace);
 
 FEI3dTetQuad QTRSpace :: interpolation;
 
-QTRSpace :: QTRSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+QTRSpace :: QTRSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 10;
 }
@@ -87,7 +87,7 @@ QTRSpace :: giveInterpolation() const
 
 
 void
-QTRSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+QTRSpace :: giveDofManDofIDMask(int inode, IntArray &answer) const
 // returns DofId mask array for inode element node.
 // DofId mask array determines the dof ordering requsted from node.
 // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -115,8 +115,7 @@ void
 QTRSpace :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    integrationRulesArray.resize(1);
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
     this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 }
@@ -186,11 +185,11 @@ Interface *
 QTRSpace :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     }
 
     OOFEM_LOG_INFO("Interface on QTRSpace element not supported");
@@ -221,7 +220,7 @@ QTRSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        _error2("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: unknown node number %d", pap);
+        OOFEM_ERROR("unknown node number %d", pap);
     }
 }
 
@@ -236,7 +235,7 @@ void
 QTRSpace :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
 {
     if ( this->computeGlobalCoordinates( coords, * gp->giveCoordinates() ) == 0 ) {
-        _error("SPRNodalRecoveryMI_computeIPGlobalCoordinates: computeGlobalCoordinates failed");
+        OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 }
 
@@ -250,13 +249,8 @@ QTRSpace :: SPRNodalRecoveryMI_givePatchType()
 void
 QTRSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
-    _warning("QTRSpace element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
+    answer.clear();
+    OOFEM_WARNING("IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
-void
-QTRSpace :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.resize(0);
-}
 } // end namespace oofem

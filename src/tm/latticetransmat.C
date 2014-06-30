@@ -49,7 +49,6 @@ REGISTER_Material(LatticeTransportMaterial);
 IRResultType
 LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     this->Material :: initializeFrom(ir);
@@ -79,7 +78,7 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, this->suctionAirEntry, _IFT_LatticeTransportMaterial_paev);
 
         if ( thetaM < thetaS ) {
-            _warning("initializeFrom : thetaM cannot be smaller than thetaS. Choose thetaM=thetaS.");
+            OOFEM_WARNING("thetaM cannot be smaller than thetaS. Choose thetaM=thetaS.");
             thetaM = thetaS;
         }
 
@@ -91,7 +90,7 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
         }
     } //end of contype condition
     else if ( conType != 0 && conType != 1 ) {
-        _error("initializeFrom : unknown conType mode");
+        OOFEM_ERROR("unknown conType mode");
     }
 
     crackTortuosity = 1.;
@@ -128,7 +127,7 @@ LatticeTransportMaterial :: giveCharacteristicValue(MatResponseMode mode,
                                                     GaussPoint *gp,
                                                     TimeStep *tStep)
 {
-    LatticeTransportMaterialStatus *status = ( LatticeTransportMaterialStatus * ) this->giveStatus(gp);
+    LatticeTransportMaterialStatus *status = static_cast< LatticeTransportMaterialStatus * >( this->giveStatus(gp) );
     double suction = status->giveTempField().at(1);
 
     if ( mode == Capacity ) {
@@ -136,7 +135,7 @@ LatticeTransportMaterial :: giveCharacteristicValue(MatResponseMode mode,
     } else if ( mode == Conductivity ) {
         return computeConductivity(suction, gp, tStep);
     } else {
-        _error("giveCharacteristicValue : unknown mode");
+        OOFEM_ERROR("unknown mode");
     }
 
     return 0; // to make compiler happy
@@ -154,9 +153,6 @@ LatticeTransportMaterial :: computeConductivity(double suction,
 
     double relativePermeability;
     double conductivity;
-
-    relativePermeability = 0.;
-    conductivity = 0.;
 
     double crackWidth = 0.;
 
@@ -238,7 +234,6 @@ LatticeTransportMaterial :: computeCapacity(double suction, GaussPoint *gp)
 }
 
 
-
 MaterialStatus *
 LatticeTransportMaterial :: CreateStatus(GaussPoint *gp) const
 {
@@ -247,24 +242,8 @@ LatticeTransportMaterial :: CreateStatus(GaussPoint *gp) const
 }
 
 
-
-MaterialStatus *
-LatticeTransportMaterial :: giveStatus(GaussPoint *gp) const
-{
-    MaterialStatus *status = ( MaterialStatus * ) gp->giveMaterialStatus();
-    if ( status == NULL ) {
-        status = this->CreateStatus(gp);
-
-        if ( status != NULL ) {
-            gp->setMaterialStatus( status, this->giveNumber() );
-        }
-    }
-
-    return status;
-}
-
-
-void LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
+void
+LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
 {
     MaterialStatus :: printOutputAt(File, tNow);
 
@@ -278,7 +257,8 @@ void LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
     fprintf(File, "\n");
 }
 
-void LatticeTransportMaterialStatus :: updateYourself(TimeStep *tStep)
+void
+LatticeTransportMaterialStatus :: updateYourself(TimeStep *tStep)
 {
     TransportMaterialStatus :: updateYourself(tStep);
 }

@@ -58,7 +58,7 @@ protected:
     FloatArray normal;
 
 public:
-    InterfaceElem1d(int n, Domain *d);
+    InterfaceElem1d(int n, Domain * d);
     virtual ~InterfaceElem1d() { }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
@@ -68,7 +68,7 @@ public:
     virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
 
     virtual int computeNumberOfDofs();
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
     virtual double computeVolumeAround(GaussPoint *gp);
 

@@ -12,9 +12,9 @@
 #include "classfactory.h"
 #include "sparselinsystemnm.h"
 #include "mathfem.h"
-#include "tr1darcy.h"
 #include "sparsemtrx.h"
 #include "nrsolver.h"
+#include "primaryfield.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
@@ -30,6 +30,7 @@ REGISTER_EngngModel(DarcyFlow);
 
 DarcyFlow :: DarcyFlow(int i, EngngModel *_master) : EngngModel(i, _master)
 {
+    this->PressureField = NULL;
     this->nMethod = NULL;
     this->ndomains = 1;
     this->hasAdvanced = false;
@@ -40,11 +41,11 @@ DarcyFlow :: ~DarcyFlow()
 {
     delete PressureField;
     delete nMethod;
+    delete stiffnessMatrix;
 }
 
 IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     EngngModel :: initializeFrom(ir);
@@ -57,8 +58,8 @@ IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_EngngModel_smtype);
     sparseMtrxType = ( SparseMtrxType ) val;
 
-    // Create solution space for EID_ConservationEquation
-    PressureField = new PrimaryField(this, 1, FT_Pressure, EID_ConservationEquation, 1);
+    // Create solution space for pressure field
+    PressureField = new PrimaryField(this, 1, FT_Pressure, 1);
 #if 0
  #ifdef __PARALLEL_MODE
 
@@ -102,15 +103,18 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     // Create "stiffness matrix"
     if ( !this->stiffnessMatrix ) {
         this->stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        this->stiffnessMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
+        this->stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
     }
 
 
     // Build initial/external load (LoadVector)
     this->externalForces.resize(neq);
     this->externalForces.zero();
-    this->assembleVectorFromElements( this->externalForces, tStep, EID_ConservationEquation, ExternalForcesVector, VM_Total,
-                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVectorFromElements( this->externalForces, tStep, ExternalForcesVector, VM_Total,
+                                     EModelDefaultEquationNumbering(), this->giveDomain(1) );
+#ifdef __PARALLEL_MODE
+    this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
+#endif
 
     this->incrementOfSolution.resize(neq);
     this->internalForces.resize(neq);
@@ -135,7 +139,7 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
                                             tStep);
 
     if ( status & NM_NoSuccess ) {
-        OOFEM_ERROR2( "DarcyFlow :: couldn't solve for time step %d\n", tStep->giveNumber() );
+        OOFEM_ERROR("couldn't solve for time step %d\n", tStep->giveNumber() );
     }
 
 #define DUMPMATRICES 0
@@ -148,10 +152,9 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     this->updateYourself(tStep);
 }
 
+
 void DarcyFlow :: DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArray *SolutionVector)
 {
-    FloatMatrix K;
-
     FILE *rhsFile = fopen("RHS.txt", "w");
     // rhs.printYourself();
 
@@ -181,14 +184,11 @@ void DarcyFlow :: DumpMatricesToFile(FloatMatrix *LHS, FloatArray *RHS, FloatArr
     }
     fclose(SolutionFile);
 }
+
+
 void DarcyFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
-    DofIDItem type = iDof->giveDofID();
-    if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, 1);
-    } else {
-        _error("printDofOutputAt: unsupported dof type");
-    }
+    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 void DarcyFlow :: updateYourself(TimeStep *tStep)
@@ -206,19 +206,22 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
     switch ( cmpn ) {
     case InternalRhs:
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep, EID_ConservationEquation,  InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep,  InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), d, & this->ebeNorm);
+#ifdef __PARALLEL_MODE
+        this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
+#endif
         break;
 
     case NonLinearLhs:
 
         this->stiffnessMatrix->zero();
-        this->assemble( this->stiffnessMatrix, tStep, EID_ConservationEquation, StiffnessMatrix,
-                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
+        this->assemble( this->stiffnessMatrix, tStep, StiffnessMatrix,
+                       EModelDefaultEquationNumbering(), this->giveDomain(1) );
         break;
 
     default:
-        _error2("updateComponent: Unknown component id (%d)", ( int ) cmpn);
+        OOFEM_ERROR("Unknown component id (%d)", ( int ) cmpn);
     }
 }
 
@@ -248,7 +251,7 @@ NumericalMethod *DarcyFlow :: giveNumericalMethod(MetaStep *mStep)
 
     this->nMethod = new NRSolver(this->giveDomain(1), this);
     if ( !nMethod ) {
-        OOFEM_ERROR("giveNumericalMethod: numerical method creation failed");
+        OOFEM_ERROR("numerical method creation failed");
     }
     return this->nMethod;
 }
@@ -271,14 +274,14 @@ TimeStep *DarcyFlow :: giveNextStep()
     return currentStep;
 }
 
-#ifdef __PETSC_MODULE
-void DarcyFlow :: initPetscContexts()
+#ifdef __PARALLEL_MODE
+void DarcyFlow :: initParallelContexts()
 {
-    PetscContext *petscContext;
-    petscContextList->growTo(ndomains);
+    ParallelContext *parallelContext;
+    parallelContextList->growTo(ndomains);
     for ( int i = 1; i <= this->ndomains; i++ ) {
-        petscContext =  new PetscContext(this);
-        petscContextList->put(i, petscContext);
+        parallelContext =  new ParallelContext(this);
+        parallelContextList->put(i, parallelContext);
     }
 }
 #endif

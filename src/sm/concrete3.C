@@ -159,7 +159,7 @@ Concrete3 :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i)
  * char errMsg [80];
  * sprintf (errMsg,"Element %d returned zero char length",
  *    gp->giveElement()->giveNumber());
- * _error (errMsg);
+ * OOFEM_ERROR(errMsg);
  * }
  *
  * status -> setCharLength(i, Le);
@@ -267,7 +267,7 @@ Concrete3 :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
         if ( this->checkSizeLimit(gp, Le) ) {
             if ( softeningMode == linearSoftening ) {
                 if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-                     ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+                    ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
                     // fully open crack - no stiffness
                     Cf = 0.;
                 } else if ( crackStrain >= status->giveTempMaxCrackStrain(i) ) {
@@ -295,7 +295,7 @@ Concrete3 :: giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
         if ( this->checkSizeLimit(gp, Le) ) {
             if ( softeningMode == linearSoftening ) {
                 if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-                     ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+                    ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
                     // fully open crack - no stiffness
                     Cf = 0.;
                 } else {
@@ -376,7 +376,7 @@ Concrete3 :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int i)
     if ( this->checkSizeLimit(gp, Le) ) {
         if ( softeningMode == linearSoftening ) {
             if ( ( crackStrain >= minEffStrainForFullyOpenCrack ) ||
-                 ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
+                ( status->giveTempMaxCrackStrain(i) >= minEffStrainForFullyOpenCrack ) ) {
                 // fully open crack - no stiffness
                 answer = 0.;
             } else if ( crackStrain >= status->giveTempMaxCrackStrain(i) ) {
@@ -401,7 +401,7 @@ Concrete3 :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int i)
                 // crack closing
                 // or unloading or reloading regime
                 answer = Ft * crackStrain / status->giveTempMaxCrackStrain(i) *
-                         exp(-status->giveTempMaxCrackStrain(i) / ef);
+                exp(-status->giveTempMaxCrackStrain(i) / ef);
             }
         }
     } else {
@@ -439,7 +439,6 @@ Concrete3 :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, int i)
 IRResultType
 Concrete3 :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //double value ;

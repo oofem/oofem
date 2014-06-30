@@ -57,11 +57,12 @@ class OOFEM_EXPORT SparseGeneralEigenValueSystemNM : public NumericalMethod
 {
 public:
     /// Constructor.
-    SparseGeneralEigenValueSystemNM(Domain *d, EngngModel *m) : NumericalMethod(d, m) { };
+    SparseGeneralEigenValueSystemNM(Domain * d, EngngModel * m) : NumericalMethod(d, m) { };
     /// Destructor.
     virtual ~SparseGeneralEigenValueSystemNM() { };
 
-    virtual const char *giveClassName() const { return "SparseGeneralEigenValueSystemNM"; }
+    virtual const char *giveClassName() const = 0;
+    std :: string errorInfo(const char *func) { return std :: string(this->giveClassName()) + func; }
 
     /**
      * Solves the given sparse generalized eigen value system of equations @f$ Av = x^2 Bv @f$.

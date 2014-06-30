@@ -64,10 +64,10 @@ public:
     /**
      * Constructor.
      */
-    RandomMaterialStatusExtensionInterface() : randProperties() {}
+    RandomMaterialStatusExtensionInterface() : randProperties() { }
 
     /// Destructor.
-    virtual ~RandomMaterialStatusExtensionInterface() {}
+    virtual ~RandomMaterialStatusExtensionInterface() { }
 
     /**
      * Returns the value of random property, identified by a key.

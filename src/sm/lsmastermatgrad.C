@@ -40,7 +40,6 @@
 #include "intarray.h"
 #include "stressvector.h"
 #include "strainvector.h"
-#include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "contextioerr.h"
 #include "datastream.h"
@@ -79,7 +78,7 @@ LargeStrainMasterMaterialGrad :: giveStiffnessMatrix(FloatMatrix &answer, MatRes
 // Returns characteristic material stiffness matrix of the receiver
 //
 {
-    _error("giveCharacteristicMatrix : shouldn't be called");
+    OOFEM_ERROR("shouldn't be called");
 }
 
 
@@ -92,7 +91,7 @@ LargeStrainMasterMaterialGrad :: givePDGradMatrix_uu(FloatMatrix &answer, MatRes
         LargeStrainMasterMaterial :: give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         break;
     default:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -105,7 +104,7 @@ LargeStrainMasterMaterialGrad :: givePDGradMatrix_ku(FloatMatrix &answer, MatRes
         give3dKappaMatrix(answer, mode, gp, tStep);
         break;
     default:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -118,7 +117,7 @@ LargeStrainMasterMaterialGrad :: givePDGradMatrix_uk(FloatMatrix &answer, MatRes
         give3dGprime(answer, mode, gp, tStep);
         break;
     default:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -131,7 +130,7 @@ LargeStrainMasterMaterialGrad :: givePDGradMatrix_kk(FloatMatrix &answer, MatRes
         giveInternalLength(answer, mode, gp, tStep);
         break;
     default:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -139,10 +138,7 @@ void
 LargeStrainMasterMaterialGrad :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
-    switch ( mMode ) {
-    default:
-        _error2( "giveCharacteristicMatrix : unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
+    OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
 }
 
 
@@ -152,7 +148,7 @@ LargeStrainMasterMaterialGrad :: giveInternalLength(FloatMatrix &answer, MatResp
     this->initTempStatus(gp);
     GradDpMaterialExtensionInterface *graddpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( domain->giveMaterial(slaveMat)->giveInterface(GradDpMaterialExtensionInterfaceType) );
     if ( graddpmat == NULL ) {
-        _warning2("checkConsistency: material %d has no Structural support", slaveMat);
+        OOFEM_WARNING("material %d has no Structural support", slaveMat);
         return;
     }
 
@@ -164,11 +160,10 @@ LargeStrainMasterMaterialGrad :: give3dGprime(FloatMatrix &answer, MatResponseMo
 {
     LargeStrainMasterMaterialGradStatus *status = static_cast< LargeStrainMasterMaterialGradStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
-    FloatMatrix P;
     FloatMatrix gPrime;
     GradDpMaterialExtensionInterface *graddpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( domain->giveMaterial(slaveMat)->giveInterface(GradDpMaterialExtensionInterfaceType) );
     if ( graddpmat == NULL ) {
-        _warning2("checkConsistency: material %d has no Structural support", slaveMat);
+        OOFEM_WARNING("material %d has no Structural support", slaveMat);
         return;
     }
 
@@ -176,8 +171,7 @@ LargeStrainMasterMaterialGrad :: give3dGprime(FloatMatrix &answer, MatResponseMo
     gPrime.at(4, 1) =  2. * gPrime.at(4, 1);
     gPrime.at(5, 1) =  2. * gPrime.at(5, 1);
     gPrime.at(6, 1) =  2. * gPrime.at(6, 1);
-    status->givePmatrix(P);
-    answer.beProductOf(P, gPrime);
+    answer.beProductOf(status->givePmatrix(), gPrime);
 }
 
 
@@ -186,21 +180,18 @@ LargeStrainMasterMaterialGrad :: give3dKappaMatrix(FloatMatrix &answer, MatRespo
 {
     LargeStrainMasterMaterialGradStatus *status = static_cast< LargeStrainMasterMaterialGradStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
-    FloatMatrix kappaMatrix, kappaTMatrix, P;
+    FloatMatrix kappaMatrix;
     GradDpMaterialExtensionInterface *graddpmat = dynamic_cast< GradDpMaterialExtensionInterface * >( domain->giveMaterial(slaveMat)->giveInterface(GradDpMaterialExtensionInterfaceType) );
     if ( graddpmat == NULL ) {
-        _warning2("checkConsistency: material %d has no Structural support", slaveMat);
+        OOFEM_WARNING("material %d has no Structural support", slaveMat);
         return;
     }
 
     graddpmat->givePDGradMatrix_ku(kappaMatrix, mode, gp, tStep);
-    status->givePmatrix(P);
     kappaMatrix.at(1, 4) = 2. * kappaMatrix.at(1, 4);
     kappaMatrix.at(1, 5) = 2. * kappaMatrix.at(1, 5);
     kappaMatrix.at(1, 6) = 2. * kappaMatrix.at(1, 6);
-    kappaTMatrix.beTranspositionOf(kappaMatrix);
-    kappaMatrix.beProductOf(P, kappaTMatrix);
-    answer.beTranspositionOf(kappaMatrix);
+    answer.beProductTOf(kappaMatrix, status->givePmatrix());
 }
 
 
@@ -215,15 +206,15 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
         Material *mat;
         StructuralMaterial *sMat;
         mat = domain->giveMaterial(slaveMat);
-        sMat = dynamic_cast< StructuralMaterial * >( mat );
+        sMat = dynamic_cast< StructuralMaterial * >(mat);
         if ( sMat == NULL ) {
-            _warning2("checkConsistency: material %d has no Structural support", slaveMat);
+            OOFEM_WARNING("material %d has no Structural support", slaveMat);
             return;
         }
 
         GradDpMaterialExtensionInterface *dpmat = static_cast< GradDpMaterialExtensionInterface * >( sMat->giveInterface(GradDpMaterialExtensionInterfaceType) );
         if ( !dpmat ) {
-            OOFEM_ERROR("LargeStrainMasterMaterial :: giveFirstPKStresVectorGrad Material doesn't implement the required DpGrad interface!");
+            OOFEM_ERROR("Material doesn't implement the required DpGrad interface!");
         }
 
 
@@ -296,7 +287,7 @@ LargeStrainMasterMaterialGrad :: giveFirstPKStressVectorGrad(FloatArray &answer1
         status->setTLmatrix(TL);
         status->letTempStressVectorBe(answer1);
     } else {
-        OOFEM_ERROR("LargeStrainMasterMaterial :: giveFirstPKStressVector - Unknown material mode.");
+        OOFEM_ERROR("Unknown material mode.");
     }
 }
 
@@ -317,7 +308,7 @@ LargeStrainMasterMaterialGrad :: initializeFrom(InputRecord *ir)
 //=============================================================================
 
 LargeStrainMasterMaterialGradStatus :: LargeStrainMasterMaterialGradStatus(int n, Domain *d, GaussPoint *g, int s) : LargeStrainMasterMaterialStatus(n, d, g, s)
-{}
+{ }
 
 LargeStrainMasterMaterialGradStatus :: ~LargeStrainMasterMaterialGradStatus()
 { }
@@ -352,7 +343,7 @@ LargeStrainMasterMaterialGradStatus :: saveContext(DataStream *stream, ContextMo
     contextIOResultType iores;
 
     // save parent class status
-    if ( ( iores = LargeStrainMasterMaterialGradStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+    if ( ( iores = LargeStrainMasterMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

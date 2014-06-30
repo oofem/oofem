@@ -60,7 +60,7 @@ namespace oofem {
 class XFEMStatic : public NonLinearStatic
 {
 public:
-    XFEMStatic(int i, EngngModel *_master = NULL);
+    XFEMStatic(int i, EngngModel * _master = NULL);
     virtual ~XFEMStatic();
     virtual int requiresUnknownsDictionaryUpdate() { return updateStructureFlag; }
     virtual bool requiresEquationRenumbering(TimeStep *) { return updateStructureFlag; }
@@ -75,7 +75,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     void initializeDofUnknownsDictionary(TimeStep *tStep);
-    void setTotalDisplacementFromUnknownsInDictionary(EquationID type, ValueModeType mode, TimeStep *tStep);
+    void setTotalDisplacementFromUnknownsInDictionary(ValueModeType mode, TimeStep *tStep);
     virtual void updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep);
 
     void setUpdateStructureFlag(bool flag) { updateStructureFlag = flag; }
@@ -93,7 +93,7 @@ protected:
 
     // Map for updating initialLoadVector after resize
     // Maps <domain index, node index, local dof index> to global equation number
-    std :: map< std :: vector< int >, int >mDofEqnNumMap;
+    std :: map< std :: vector< int > , int >mDofEqnNumMap;
 
     // Jim
     FractureManager *fMan;

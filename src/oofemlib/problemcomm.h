@@ -65,7 +65,7 @@ public:
      * @param size Number of collaborating processes.
      * @param mode Communicator mode.
      */
-    ProblemCommunicator(EngngModel *emodel, CommunicatorBuff *b, int rank, int size, ProblemCommunicatorMode mode);
+    ProblemCommunicator(EngngModel * emodel, CommunicatorBuff * b, int rank, int size, ProblemCommunicatorMode mode);
     /// Destructor
     virtual ~ProblemCommunicator();
 
@@ -107,11 +107,11 @@ private:
      * @param cmp Comparison function must return a negative value if first argument is less than the second,
      * zero if the arguments are equal, and a positive number otherwise.
      */
-    void sortCommMap( IntArray & map, int ( ProblemCommunicator :: *cmp )( int, int ) );
+    void sortCommMap( IntArray &map, int ( ProblemCommunicator :: *cmp )( int, int ) );
     /// Implementation of quicksort algorithm.
-    void quickSortCommMap( IntArray & map, int l, int r, int ( ProblemCommunicator :: *cmp )( int, int ) );
+    void quickSortCommMap( IntArray &map, int l, int r, int ( ProblemCommunicator :: *cmp )( int, int ) );
     /// Partitioning used in quicksort.
-    int quickSortPartition( IntArray & map, int l, int r, int ( ProblemCommunicator :: *cmp )( int, int ) );
+    int quickSortPartition( IntArray &map, int l, int r, int ( ProblemCommunicator :: *cmp )( int, int ) );
 
     /// Global dofManager number comparison function.
     int DofManCmp(int, int);

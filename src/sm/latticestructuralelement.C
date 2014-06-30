@@ -36,10 +36,10 @@
 
 namespace oofem {
 LatticeStructuralElement :: LatticeStructuralElement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
-{}
+{ }
 
 LatticeStructuralElement :: ~LatticeStructuralElement()
-{}
+{ }
 
 IRResultType
 LatticeStructuralElement :: initializeFrom(InputRecord *ir)

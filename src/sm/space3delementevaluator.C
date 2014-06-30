@@ -44,7 +44,7 @@
 #include "crosssection.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
-#include "iga.h"
+#include "iga/iga.h"
 
 namespace oofem {
 /* 3D Space Elements */
@@ -90,10 +90,10 @@ void Space3dStructuralElementEvaluator :: computeBMatrixAt(FloatMatrix &answer, 
 double Space3dStructuralElementEvaluator :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant = fabs( this->giveElement()->giveInterpolation()
-                               ->giveTransformationJacobian( * gp->giveCoordinates(),
-                                                             FEIIGAElementGeometryWrapper( this->giveElement(),
-                                                                                           gp->giveIntegrationRule()->giveKnotSpan() ) ) );
-    return determinant * gp->giveWeight();
+                              ->giveTransformationJacobian( * gp->giveCoordinates(),
+                                                           FEIIGAElementGeometryWrapper( this->giveElement(),
+                                                                                        gp->giveIntegrationRule()->giveKnotSpan() ) ) );
+    return determinant *gp->giveWeight();
 }
 
 

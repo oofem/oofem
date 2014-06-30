@@ -52,7 +52,7 @@ Material :: give(int aProperty, GaussPoint *gp)
     if ( propertyDictionary->includes(aProperty) ) {
         value = propertyDictionary->at(aProperty);
     } else {
-        OOFEM_ERROR4( "give: property #%d on element %d and GP %d not defined", aProperty, gp->giveElement()->giveNumber(), gp->giveNumber() );
+        OOFEM_ERROR("property #%d on element %d and GP %d not defined", aProperty, gp->giveElement()->giveNumber(), gp->giveNumber() );
     }
 
     return value;
@@ -73,7 +73,7 @@ Material :: modifyProperty(int aProperty, double value, GaussPoint *gp)
     if ( propertyDictionary->includes(aProperty) ) {
         propertyDictionary->at(aProperty) = value;
     } else {
-        OOFEM_ERROR4( "modifyProperty: property #%d on element %d and GP %d not defined", aProperty, gp->giveElement()->giveNumber(), gp->giveNumber() );
+        OOFEM_ERROR("property #%d on element %d and GP %d not defined", aProperty, gp->giveElement()->giveNumber(), gp->giveNumber() );
     }
 }
 
@@ -81,7 +81,6 @@ Material :: modifyProperty(int aProperty, double value, GaussPoint *gp)
 IRResultType
 Material :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     double value;
@@ -122,7 +121,13 @@ Material :: hasMaterialModeCapability(MaterialMode mode)
 int
 Material :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
+    if ( type == IST_MaterialNumber ) {
+        answer.resize(1);
+        answer.at(1) = this->giveNumber();
+        return 1;
+    }
+
+    answer.clear();
     return 0;
 }
 

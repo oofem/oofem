@@ -70,7 +70,7 @@ private:
     int referenceNode;
 
 public:
-    LIBeam3dNL2(int n, Domain *d);
+    LIBeam3dNL2(int n, Domain * d);
     virtual ~LIBeam3dNL2() { }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
@@ -79,7 +79,7 @@ public:
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
@@ -118,7 +118,7 @@ protected:
     virtual void updateYourself(TimeStep *tStep);
     virtual void initForNewStep();
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int, int)
-    { _error("computeBmatrixAt: not implemented"); }
+    { OOFEM_ERROR("not implemented"); }
     //int computeGtoLRotationMatrix(FloatMatrix& answer);
 
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
@@ -126,7 +126,7 @@ protected:
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
-    double giveLength();
+    virtual double computeLength();
     //double givePitch ();
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
 

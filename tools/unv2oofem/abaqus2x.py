@@ -38,12 +38,17 @@ class AbaqusParser:
         oofem_elemProp.append(oofem_elementProperties("None", [0], [], []))#leave this line [0] as it is
         oofem_elemProp.append(oofem_elementProperties("RepresentsBoundaryLoad", [],[],[]))#special element representing boundary load
         oofem_elemProp.append(oofem_elementProperties("tet21stokes", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], [], [[0,1,2,4,5,6],[0,1,3,4,7,8],[1,2,3,5,8,9],[0,2,3,6,7,9]]))
+#        oofem_elemProp.append(oofem_elementProperties("PlaneStress2DXFEM", [0,1,2,3], [], [[0,1],[1,2],[2,3],[3,0]]))
+        oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2DXFEM", [0,2,1], [], [[0,2],[2,1],[1,0]]))
         return oofem_elemProp
     
     def setupElements(self):
         es = [];
         es.append(ElementProperties("c3d10", 118, [], [[0,1,2,4,5,6],[0,1,3,4,7,8],[1,2,3,5,8,9],[0,2,3,6,7,9]], 10, 42))
         # es.append(ElementProperties("c3d20R", 118, [], [[0,1,2,4,5,6],[0,1,3,4,7,8],[1,2,3,5,8,9],[0,2,3,6,7,9]], 20, 42))
+
+        # 3-node triangle
+        es.append(ElementProperties("cpe3", 1, [], [[0,1],[1,2],[2,3],[3,0]], 3, 42))
         return es
         
     def _read_multiple_lines(self):
@@ -54,14 +59,16 @@ class AbaqusParser:
         while True:
             start_of_line = self.file.tell()
             newLine = self.file.readline().strip()
-            if newLine[0]=='*':
-                self.file.seek(start_of_line)
-                if thisLine=="":
-                    thisLine = newLine
-                break
-            thisLine = thisLine + newLine
-            if thisLine[-1] != ',':
-                thisLine = thisLine + ','
+
+            if len(newLine) > 0:
+                if newLine[0]=='*':
+                    self.file.seek(start_of_line)
+                    if thisLine=="":
+                        thisLine = newLine
+                    break
+                thisLine = thisLine + newLine
+                if thisLine[-1] != ',':
+                    thisLine = thisLine + ','
             
         return thisLine
 
@@ -71,15 +78,18 @@ class AbaqusParser:
             start_of_line = self.file.tell()
             nodeData = self.file.readline().strip().split(",")
             
-            if nodeData[0][0] == '*':
-                self.file.seek(start_of_line)
-                break
+            #print 'nodeData: ',nodeData
+            if len(nodeData) > 0:
+                if len(nodeData[0]) > 0:
+                    if nodeData[0][0] == '*':
+                        self.file.seek(start_of_line)
+                        break
             
-            id = int(nodeData[0])
-            coords = map(float, nodeData[1:4])
+                    id = int(nodeData[0])
+                    coords = map(float, nodeData[1:4])
             
-            self.FEM.nodes.append(Node(id, coords))
-            self.FEM.nnodes = self.FEM.nnodes+1            
+                    self.FEM.nodes.append(Node(id, coords))
+                    self.FEM.nnodes = self.FEM.nnodes+1            
 
     def _read_elements(self):
          elementData = self.file.readline().strip().split(",")

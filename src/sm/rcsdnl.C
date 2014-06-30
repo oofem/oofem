@@ -36,7 +36,6 @@
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
-#include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
@@ -62,7 +61,7 @@ Interface *
 RCSDNLMaterial :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
     } else {
         return NULL;
     }
@@ -100,7 +99,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 {
     FloatMatrix Ds0;
     double equivStrain;
-    FloatArray princStress, crackStrain, nonlocalStrain, reducedSpaceStressVector;
+    FloatArray princStress, nonlocalStrain, reducedSpaceStressVector;
     FloatArray reducedNonlocStrainVector, fullNonlocStrainVector, principalStrain;
     FloatMatrix tempCrackDirs;
     RCSDNLMaterialStatus *nonlocStatus, *status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(gp) );
@@ -115,12 +114,11 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
     // compute nonlocal strain increment first
     std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
-    std :: list< localIntegrationRecord > :: iterator listIter;
 
-    for ( listIter = list->begin(); listIter != list->end(); ++listIter ) {
-        nonlocStatus = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(listIter->nearGp) );
+    for ( auto &lir: *list ) {
+        nonlocStatus = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(lir.nearGp) );
         nonlocalContribution = nonlocStatus->giveLocalStrainVectorForAverage();
-        nonlocalContribution.times(listIter->weight);
+        nonlocalContribution.times(lir.weight);
 
         reducedNonlocStrainVector.add(nonlocalContribution);
     }
@@ -144,7 +142,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
     StructuralMaterial :: giveFullSymVectorForm( fullNonlocStrainVector, nonlocalStrain, gp->giveMaterialMode() );
 
-    status->giveTempCrackDirs(tempCrackDirs);
+    tempCrackDirs = status->giveTempCrackDirs();
     this->computePrincipalValDir(principalStrain, tempCrackDirs,
                                  fullNonlocStrainVector,
                                  principal_strain);
@@ -165,8 +163,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
         ////# stressIncrement.subtract (status -> giveStressVector());
         ////#  status -> letStressIncrementVectorBe (stressIncrement);
 
-        status->giveCrackStrainVector(crackStrain);
-        this->updateCrackStatus(gp, crackStrain);
+        this->updateCrackStatus(gp, status->giveCrackStrainVector());
 
         ////#
         this->giveMaterialStiffnessMatrix(Ds0, SecantStiffness, gp, tStep);
@@ -180,7 +177,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
         int anyOpeningCrack = 0;
         for ( int i = 1; i <= 3; i++ ) {
             if ( ( status->giveTempCrackStatus(i) == pscm_SOFTENING ) ||
-                 ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
+                ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
                 anyOpeningCrack++;
             }
         }
@@ -192,7 +189,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
             int ipos = 0;
             for ( int i = 1; i <= 3; i++ ) {
                 if ( ( status->giveTempCrackStatus(i) == pscm_SOFTENING ) ||
-                     ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
+                    ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
                     if ( princStress.at(i) < minSofteningPrincStress ) {
                         minSofteningPrincStress = princStress.at(i);
                         ipos = i;
@@ -228,9 +225,9 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                     }
 
                     princStressDis = princStress.at(ii) -
-                                     princStress.at(jj);
+                    princStress.at(jj);
                     princStrainDis = principalStrain.at(ii) -
-                                     principalStrain.at(jj);
+                    principalStrain.at(jj);
 
                     if ( fabs(princStrainDis) < rcm_SMALL_STRAIN ) {
                         currG = G;
@@ -246,7 +243,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
             ////#
 
             if ( ( minSofteningPrincStress <= this->SDTransitionCoeff * CurrFt ) ||
-                 ( minG <= this->SDTransitionCoeff2 * G ) ) {
+                ( minG <= this->SDTransitionCoeff2 * G ) ) {
                 //   printf ("minSofteningPrincStress=%lf, CurrFt=%lf, SDTransitionCoeff=%lf",minSofteningPrincStress, CurrFt, this->SDTransitionCoeff);
                 //   printf ("\nminG=%lf, G=%lf, SDTransitionCoeff2=%lf\n",minG, G, this->SDTransitionCoeff2);
 
@@ -254,7 +251,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                 if ( ipos == 0 ) {
                     for ( int i = 1; i <= 3; i++ ) {
                         if ( ( status->giveTempCrackStatus(i) == pscm_SOFTENING ) ||
-                             ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
+                            ( status->giveTempCrackStatus(i) == pscm_OPEN ) ) {
                             if ( ipos == 0 ) {
                                 ipos = i;
                                 minSofteningPrincStress = princStress.at(i);
@@ -271,8 +268,8 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                 // test for internal consistency error
                 // we should switch to scalar damage, but no softening take place
                 if ( ipos == 0 ) {
-                    //RCSDEMaterial :: _error ("giveRealStressVector: can not switch to sd mode, while no cracking");
-                    _error("giveRealStressVector: can not switch to sd mode, while no cracking");
+                    //RCSDEMaterial :: OOFEM_ERROR("can not switch to sd mode, while no cracking");
+                    OOFEM_ERROR("can not switch to sd mode, while no cracking");
                 }
 
                 //if (minSofteningPrincStress <= this->SDTransitionCoeff * CurrFt) printf (".");
@@ -353,7 +350,6 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 IRResultType
 RCSDNLMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //RCSDEMaterial::instanciateFrom (ir);
@@ -383,7 +379,7 @@ RCSDNLMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, this->Gf, _IFT_RCSDNLMaterial_gf);
         this->ef = this->Gf / this->Ft;
     } else {
-        _error("initializeFrom: cannont determine Gf and ef from input data");
+        OOFEM_ERROR("cannot determine Gf and ef from input data");
     }
 
     return IRRT_OK;
@@ -425,7 +421,7 @@ RCSDNLMaterial :: computeWeightFunction(const FloatArray &src, const FloatArray 
  * char errMsg [80];
  * sprintf (errMsg,"Element %d returned zero char length",
  *    gp->giveElement()->giveNumber());
- * RCSDMaterial::_error (errMsg);
+ * RCSDMaterial::_error(errMsg);
  * }
  *
  * //status -> setCharLength(i, Le);

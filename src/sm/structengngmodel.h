@@ -97,7 +97,7 @@ protected:
 
 public:
     /// Creates new StructuralEngngModel with number i, associated to domain d.
-    StructuralEngngModel(int i, EngngModel *_master = NULL);
+    StructuralEngngModel(int i, EngngModel * _master = NULL);
     /// Destructor.
     virtual ~StructuralEngngModel();
 
@@ -123,7 +123,7 @@ public:
      * arrays are sorted with increasing dofman number and with increasing dof number as
      * a second minor criterion.
      * @param restrDofMans Contains numbers of restrained Dofmanagers, with size equal to total number of prescribed equations.
-     * @param restrDofs Contains numbers of restrained Dofs, with size equal to total number of prescribed equations.
+     * @param restrDofs Contains IDs of restrained Dofs, with size equal to total number of prescribed equations.
      * @param eqn Contains the corresponding restrained equation numbers.
      * @param tStep Time step.
      * @param di Domain number.
@@ -131,12 +131,8 @@ public:
     void buildReactionTable(IntArray &restrDofMans, IntArray &restrDofs, IntArray &eqn, TimeStep *tStep, int di);
 
 
-#ifdef __PETSC_MODULE
-    /**
-     * Creates PETSc contexts. Must be implemented by derived classes since the governing equation type is required
-     * for context creation.
-     */
-    virtual void initPetscContexts();
+#ifdef __PARALLEL_MODE
+    virtual void initParallelContexts();
 #endif
 
 #ifdef __OOFEG

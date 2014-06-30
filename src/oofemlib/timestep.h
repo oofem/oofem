@@ -99,9 +99,9 @@ protected:
     /**
      * Receiver's substep (iteration) number.
      */
-    int subtStepumber;
+    int subStepNumber;
     /// Corresponding meta step number.
-    int mtStepumber;
+    int mStepNumber;
     /// Time discretization.
     TimeDiscretizationType timeDiscretization;
 
@@ -116,10 +116,10 @@ public:
      * @param counter Solution state counter.
      * @param td Time discretization.
      */
-    TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter, TimeDiscretizationType td = TD_Unspecified);
+    TimeStep(int n, EngngModel * e, int mn, double tt, double dt, StateCounterType counter, TimeDiscretizationType td = TD_Unspecified);
     TimeStep(const TimeStep &);
-    TimeStep(EngngModel *e);
-    TimeStep &operator=(const TimeStep &);
+    TimeStep(EngngModel * e);
+    TimeStep &operator = ( const TimeStep & );
 
     /// Returns receiver's number.
     int giveNumber() { return number; }
@@ -128,9 +128,9 @@ public:
     /// Returns receiver's version.
     int giveVersion() { return version; }
     /// Returns receiver's meta step number.
-    int giveMetatStepumber() { return mtStepumber; }
+    int giveMetaStepNumber() { return mStepNumber; }
     /// Returns receiver's substep number.
-    int giveSubtStepumber() { return subtStepumber; }
+    int giveSubStepNumber() { return subStepNumber; }
     /**
      * Returns class name of receiver.
      * @return Pointer to s parameter filled with name.
@@ -147,7 +147,10 @@ public:
     /// Sets solution step time increment.
     void setTimeIncrement(double newDt) { deltaT = newDt; }
     /// Sets target and intrinsic time to be equal.
-    void setTime(double newt) { targetTime = newt; intrinsicTime = newt; }
+    void setTime(double newt) {
+        targetTime = newt;
+        intrinsicTime = newt;
+    }
     /// Sets only target time.
     void setTargetTime(double newt) { targetTime = newt; }
     /// Sets only intrinsic time.
@@ -184,7 +187,7 @@ public:
     /// Increments receiver's version.
     void incrementVersion() { version++; }
     /// Increments receiver's substep number.
-    void incrementSubtStepumber() { subtStepumber++; }
+    void incrementSubStepNumber() { subStepNumber++; }
     /// Returns time discretization.
     TimeDiscretizationType giveTimeDiscretization() { return timeDiscretization; }
 
@@ -206,6 +209,8 @@ public:
      * @see saveContext member function.
      */
     contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+
+    std :: string errorInfo(const char *func) { return std :: string("TimeStep::") + func; }
 };
 } // end namespace oofem
 #endif // timestep_h

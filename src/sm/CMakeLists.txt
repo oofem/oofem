@@ -43,8 +43,16 @@ set (sm_element
     structuralinterfaceelement.C
     intelline1.C
     intelline2.C
-    dkt.C
     tet21ghostsolid.C
+    graddpelement.C graddpmaterialextensioninterface.C
+    qtruss1d.C qtruss1dgrad.C
+    qplanestrain.C qplanestraingrad.C
+    qtrplanestrain.C qtrplanestraingrad.C
+    qspacegrad.C
+    dkt.C qdkt.C
+    quad1platesubsoil.C tria1platesubsoil.C
+    interfaceelem2dlin.C
+    trwarp.C
     )
 
 set (sm_crosssection
@@ -58,6 +66,7 @@ set (sm_crosssection
 
 set (sm_emodel
     structengngmodel.C
+    staticstructural.C
     linearstatic.C
     nlinearstatic.C
     xfemstatic.C
@@ -70,7 +79,7 @@ set (sm_emodel
     diidynamic.C
     nldeidynamic.C
     incrementallinearstatic.C
-    fracturemanager.C
+    freewarping.C
     )
 
 set (sm_loads
@@ -105,13 +114,11 @@ set (sm_material
     isointerfacedamage02.C
     j2mat.C
     mat_cebfip90.C
-    hellmat.C
     mdm.C
     compodamagemat.C
     micromaterial.C
     hyperelasticmaterial.C
     misesmat.C misesmatgrad.C misesmatnl.C
-    graddpelement.C graddpmaterialextensioninterface.C qtruss1d.C qtruss1dgrad.C qplanestrain.C qplanestraingrad.C qtrplanestrain.C qtrplanestraingrad.C qspacegrad.C
     trabbonematerial.C trabbonenl3d.C trabbonenl.C trabbone3d.C trabboneembed.C trabbonenlembed.C trabbonegrad3d.C
     cohint.C
     mps.C
@@ -128,6 +135,12 @@ set (sm_material
 	intmatbilinczjansson.C
     intmatbilinearcz.C
 	intmatbilinczelastic.C
+	InterfaceMaterials/intmatdummycz.C
+    simplevitrificationmaterial.C
+    anisodamagemodel.C
+    winklerpasternak.C
+    structmatsettable.C
+    bondceb.C
     )
 
 set (sm_error
@@ -141,6 +154,7 @@ set (sm_error
 set (sm_export
     dmexportmodule.C
     poiexportmodule.C
+    export/gnuplotexportmodule.C
     )
 
 set (sm_barrier
@@ -160,12 +174,22 @@ set (sm_status
     microplanematerial.C microplanematerial_bazant.C
     )
 
+set (sm_xfem
+	xfem/xfemstructuralelementinterface.C
+	xfem/enrichmentitems/crack.C
+	xfem/enrichmentitems/delamination.C
+	xfem/propagationlaws/plhoopstresscirc.C
+	xfem/xfemstructuremanager.C
+	)
+
 set (sm_unsorted
     particle.C
     refinedelement.C
     refinedmesh.C
     microplane.C
     gpinitmodule.C
+    stressstrainbasevector.C stressvector.C strainvector.C
+    mappers/primvarmapper.C
     )
 
 set (sm_parallel
@@ -194,6 +218,7 @@ set (sm
     ${sm_export}
     ${sm_barrier}
     ${sm_error}
+    ${sm_xfem}
     ${sm_unsorted}
     ${sm_parallel}
     ${sm_obsolete}

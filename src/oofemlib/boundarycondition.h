@@ -64,7 +64,7 @@ class Dof;
  * store the unknowns types, but this makes sense, when BC is associated to node,
  * but when associated to BC, the physical meaning of unknown is determined by DOF.
  *
- * Boundary condition can change its value in time using its inherited loadTimeFunction.
+ * Boundary condition can change its value in time using its inherited TimeFunction.
  * It can also switch itself on or off depending on nonzero value of
  * isImposedTimeFunction load time function. Please note, that previous option must be
  * supported by particular engineering model (because equation renumbering is necessary,
@@ -91,7 +91,7 @@ public:
      * @param i Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    BoundaryCondition(int i, Domain *d) : GeneralBoundaryCondition(i, d)
+    BoundaryCondition(int i, Domain * d) : GeneralBoundaryCondition(i, d)
     { }
     /// Destructor
     virtual ~BoundaryCondition() { }

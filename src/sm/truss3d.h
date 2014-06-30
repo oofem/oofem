@@ -51,15 +51,14 @@ namespace oofem {
  * analysis.
  */
 class Truss3d : public NLStructuralElement,
-    public DirectErrorIndicatorRCInterface,
-    public ZZNodalRecoveryModelInterface,
-    public NodalAveragingRecoveryModelInterface
+public ZZNodalRecoveryModelInterface,
+public NodalAveragingRecoveryModelInterface
 {
 protected:
     static FEI3dLineLin interp;
 
 public:
-    Truss3d(int n, Domain *d);
+    Truss3d(int n, Domain * d);
     virtual ~Truss3d() { }
 
     virtual FEInterpolation *giveInterpolation() const { return & interp; }
@@ -72,7 +71,7 @@ public:
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
 
     virtual int computeNumberOfDofs() { return 6; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
     { return this->computeLength(); }
@@ -83,12 +82,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
-
-    virtual double DirectErrorIndicatorRCI_giveCharacteristicSize() { return this->computeLength(); }
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);

@@ -53,11 +53,11 @@ protected:
     static FEI2dQuadQuad interpolation;
 
 public:
-    QPlaneStress2d(int n, Domain *d);
+    QPlaneStress2d(int n, Domain * d);
     virtual ~QPlaneStress2d() { }
 
     virtual int computeNumberOfDofs() { return 16; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QPlaneStress2d_Name; }
@@ -75,11 +75,8 @@ public:
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep);
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);

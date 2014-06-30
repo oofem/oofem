@@ -117,7 +117,7 @@ CompCol :: CompCol(const CompCol &S) : SparseMtrx(S.nRows, S.nColumns),
 /* Assignment operator...  */
 /***************************/
 
-CompCol &CompCol :: operator=(const CompCol &C)
+CompCol &CompCol :: operator = ( const CompCol & C )
 {
     dim_ [ 0 ] = C.dim_ [ 0 ];
     dim_ [ 1 ] = C.dim_ [ 1 ];
@@ -138,7 +138,7 @@ CompCol &CompCol :: operator=(const CompCol &C)
 
 SparseMtrx *CompCol :: GiveCopy() const
 {
-    CompCol *result = new CompCol(* this);
+    CompCol *result = new CompCol(*this);
     return result;
 }
 
@@ -150,7 +150,7 @@ void CompCol :: times(const FloatArray &x, FloatArray &answer) const
 
     //      Check for compatible dimensions:
     if ( x.giveSize() != N ) {
-        OOFEM_ERROR("CompCol::times: Error in CompCol -- incompatible dimensions");
+        OOFEM_ERROR("incompatible dimensions");
     }
 
     answer.resize(M);
@@ -177,7 +177,7 @@ void CompCol :: times(double x)
     this->version++;
 }
 
-int CompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
+int CompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
     /*
      * IntArray  loc;
@@ -254,7 +254,7 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
     int i, ii, j, jj, n, indx;
     Element *elem;
     // allocation map
-    std :: vector< std :: set< int > >columns(neq);
+    std :: vector< std :: set< int > > columns(neq);
     /*
      * std::set<int> **columns = new std::set<int>*[neq];
      * for (j=0; j<neq; j++) {
@@ -266,7 +266,7 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
 
     for ( n = 1; n <= nelem; n++ ) {
         elem = domain->giveElement(n);
-        elem->giveLocationArray(loc, ut, s);
+        elem->giveLocationArray(loc, s);
 
         for ( i = 1; i <= loc.giveSize(); i++ ) {
             if ( ( ii = loc.at(i) ) ) {
@@ -288,7 +288,7 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
-            bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
+            bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                 IntArray &krloc = r_locs [ k ];
                 IntArray &kcloc = c_locs [ k ];
@@ -313,11 +313,10 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
     colptr_.resize(neq + 1);
     indx = 0;
 
-    std :: set< int > :: iterator pos;
     for ( j = 0; j < neq; j++ ) { // column loop
         colptr_(j) = indx;
-        for ( pos = columns [ j ].begin(); pos != columns [ j ].end(); ++pos ) { // row loop
-            rowind_(indx++) = * pos;
+        for ( int row: columns [  j ] ) { // row loop
+            rowind_(indx++) = row;
         }
     }
 
@@ -352,7 +351,7 @@ int CompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
 #  ifdef DEBUG
     dim = mat.giveNumberOfRows();
     if ( dim != loc.giveSize() ) {
-        OOFEM_ERROR("CompCol::assemble : dimension of 'k' and 'loc' mismatch");
+        OOFEM_ERROR("dimension of 'k' and 'loc' mismatch");
     }
 
     //this -> checkSizeTowards(loc) ;
@@ -440,7 +439,7 @@ double &CompCol :: at(int i, int j)
         }
     }
 
-    OOFEM_ERROR3("CompCol::operator(): Array accessing exception -- (%d,%d) out of bounds", i, j);
+    OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
     return val_(0); // return to suppress compiler warning message
 }
 
@@ -456,12 +455,12 @@ double CompCol :: at(int i, int j) const
     if ( i <= dim_ [ 0 ] && j <= dim_ [ 1 ] ) {
         return 0.0;
     } else {
-        OOFEM_ERROR3("CompCol::operator(): Array accessing exception -- (%d,%d) out of bounds", i, j);
+        OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
         return ( 0 ); // return to suppress compiler warning message
     }
 }
 
-double CompCol :: operator()(int i, int j)  const
+double CompCol :: operator() (int i, int j)  const
 {
     for ( int t = colptr_(j); t < colptr_(j + 1); t++ ) {
         if ( rowind_(t) == i ) {
@@ -472,12 +471,12 @@ double CompCol :: operator()(int i, int j)  const
     if ( i < dim_ [ 0 ] && j < dim_ [ 1 ] ) {
         return 0.0;
     } else {
-        OOFEM_ERROR3("CompCol::operator(): Array accessing exception -- (%d,%d) out of bounds", i, j);
+        OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
         return ( 0 ); // return to suppress compiler warning message
     }
 }
 
-double &CompCol :: operator()(int i, int j)
+double &CompCol :: operator() (int i, int j)
 {
     // increment version
     this->version++;
@@ -488,7 +487,7 @@ double &CompCol :: operator()(int i, int j)
         }
     }
 
-    OOFEM_ERROR3("CompCol::operator(): Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
+    OOFEM_ERROR("Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
     return val_(0); // return to suppress compiler warning message
 }
 
@@ -499,7 +498,7 @@ void CompCol :: timesT(const FloatArray &x, FloatArray &answer) const
 
     //      Check for compatible dimensions:
     if ( x.giveSize() != M ) {
-        OOFEM_ERROR("CompCol::timesT: Error in CompCol -- incompatible dimensions");
+        OOFEM_ERROR("Error in CompCol -- incompatible dimensions");
     }
 
     answer.resize(N);

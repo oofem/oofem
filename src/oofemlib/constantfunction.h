@@ -35,15 +35,16 @@
 #ifndef constantfunction_h
 #define constantfunction_h
 
-#include "loadtimefunction.h"
+#include "function.h"
 
 #define _IFT_ConstantFunction_Name "constantfunction"
+#define _IFT_ConstantFunction_f "f(t)" ///@todo Rename this to just "f"
 
 namespace oofem {
 /**
  * Class implementing time function that is constant in time; @f$ f(t) = C @f$.
  */
-class OOFEM_EXPORT ConstantFunction : public LoadTimeFunction
+class OOFEM_EXPORT ConstantFunction : public Function
 {
 private:
     /// Value of receiver.
@@ -55,14 +56,19 @@ public:
      * @param i Load time function number.
      * @param d Domain to which new object will belongs.
      */
-    ConstantFunction(int i, Domain *d) : LoadTimeFunction(i, d) { value = 0; }
+    ConstantFunction(int i, Domain * d) : Function(i, d) {
+        value = 0;
+    }
     /// Destructor.
     virtual ~ConstantFunction() { }
 
     /// @return Value of receiver.
     double giveValue() { return value; }
 
-    virtual double __at(double t) { return this->giveValue(); }
+    //virtual FloatArray evaluate(std :: map< std :: string, double > &valDict) { return {this->giveValue()}; }
+    virtual double evaluateAtTime(double t) { return this->giveValue(); }
+    virtual double evaluateVelocityAtTime(double t) { return 0.; }
+    virtual double evaluateAccelerationAtTime(double t) { return 0.; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

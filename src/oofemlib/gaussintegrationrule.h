@@ -65,8 +65,8 @@ public:
      * @param endIndx Last component, for which rule applies.
      * @param dynamic Flag indicating that receiver can change.
      */
-    GaussIntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic = false);
-    GaussIntegrationRule(int n, Element *e);
+    GaussIntegrationRule(int n, Element * e, int startIndx, int endIndx, bool dynamic = false);
+    GaussIntegrationRule(int n, Element * e);
     /// Destructor
     virtual ~GaussIntegrationRule();
 
@@ -85,9 +85,9 @@ public:
     virtual int SetUpPointsOnTetrahedra(int nPoints, MaterialMode mode);
     virtual int SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode);
     virtual int SetUpPointsOnWedgeLayers(int nPointsTri, int nPointsDepth, MaterialMode mode, const FloatArray &layerThickness);
-    virtual int SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode, const FloatArray **coords);
+    virtual int SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode, const FloatArray &coord0, const FloatArray &coord1);
 
-    void giveTetCoordsAndWeights(int nPoints, FloatArray &coords_xi1, FloatArray &coords_xi2, FloatArray &coords_xi3, FloatArray &weights);
+    static void giveTetCoordsAndWeights(int nPoints, FloatArray &coords_xi1, FloatArray &coords_xi2, FloatArray &coords_xi3, FloatArray &weights);
     static void giveTriCoordsAndWeights(int nPoints, FloatArray &coords_xi1, FloatArray &coords_xi2, FloatArray &weights);
     static void giveLineCoordsAndWeights(int nPoints, FloatArray &coords_xi, FloatArray &weights);
 };

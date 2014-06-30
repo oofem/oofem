@@ -35,6 +35,9 @@
 //  MAIN
 //  Solves finite element problems.
 //
+#ifdef __PYTHON_MODULE
+ #include <Python.h>
+#endif
 
 #include "engngm.h"
 #include "oofemcfg.h"
@@ -58,10 +61,11 @@
  #include <slepceps.h>
 #endif
 
-#ifdef __PYTHON_MODULE
- #include <Python.h>
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
 #endif
 
+#include <cstdlib>
 #include <cstdio>
 #include <cstring>
 #include <new>
@@ -77,7 +81,7 @@ using namespace oofem;
 void freeStoreError()
 // This function is called whenever operator "new" is unable to allocate memory.
 {
-    OOFEM_FATAL("freeStoreError : free store exhausted");
+    OOFEM_FATAL("free store exhausted");
 }
 
 // debug
@@ -142,7 +146,7 @@ int main(int argc, char *argv[])
                 if ( i + 1 < argc ) {
                     i++;
                     restartFlag = true;
-                    restartStepInfo [ 0 ] = strtol(argv [ i ] , NULL, 10);
+                    restartStepInfo [ 0 ] = strtol(argv [ i ], NULL, 10);
                     restartStepInfo [ 1 ] = 0;
                 }
             } else if ( strcmp(argv [ i ], "-rn") == 0 ) {
@@ -150,14 +154,13 @@ int main(int argc, char *argv[])
             } else if ( strcmp(argv [ i ], "-ar") == 0 ) {
                 if ( i + 1 < argc ) {
                     i++;
-                    adaptiveRestartFlag = strtol( argv [ i ], NULL, 10);
+                    adaptiveRestartFlag = strtol(argv [ i ], NULL, 10);
                 }
             } else if ( strcmp(argv [ i ], "-l") == 0 ) {
-                if ( i + 1 < argc) {
+                if ( i + 1 < argc ) {
                     i++;
-                    int level = strtol( argv [ i ] , NULL, 10);
+                    int level = strtol(argv [ i ], NULL, 10);
                     oofem_logger.setLogLevel(level);
-                    oofem_errLogger.setLogLevel(level);
                 }
             } else if ( strcmp(argv [ i ], "-qe") == 0 ) {
                 if ( i + 1 < argc ) {
@@ -182,7 +185,7 @@ int main(int argc, char *argv[])
                 exit(EXIT_FAILURE);
 #endif
             } else { // Arguments not handled by OOFEM is to be passed to PETSc
-                modulesArgs.push_back( argv [ i ] );
+                modulesArgs.push_back(argv [ i ]);
             }
         }
     } else {
@@ -236,16 +239,16 @@ int main(int argc, char *argv[])
     }
 #endif
     if ( outputFileFlag ) {
-        oofem_logger.appendlogTo( const_cast < char * > ( outputFileName.str().c_str() ) );
+        oofem_logger.appendLogTo( outputFileName.str() );
     }
     if ( errOutputFileFlag ) {
-        oofem_errLogger.appendlogTo( const_cast < char * > ( errOutputFileName.str().c_str() ) );
+        oofem_logger.appendErrorTo( errOutputFileName.str() );
     }
 
     // print header to redirected output
-    LOG_FORCED_MSG(oofem_logger, PRG_HEADER_SM);
+    OOFEM_LOG_FORCED(PRG_HEADER_SM);
 
-    OOFEMTXTDataReader dr( inputFileName.str().c_str() );
+    OOFEMTXTDataReader dr( inputFileName.str ( ).c_str() );
     problem = :: InstanciateProblem(& dr, _processor, contextFlag, NULL, parallelFlag);
     dr.finish();
 
@@ -287,11 +290,11 @@ int main(int argc, char *argv[])
 
     problem->terminateAnalysis();
 #ifdef __PARALLEL_MODE
-    if (parallelFlag) {
+    if ( parallelFlag ) {
         DynamicCommunicationBuffer :: printInfo();
     }
 #endif
-    oofem_errLogger.printStatistics();
+    oofem_logger.printStatistics();
     delete problem;
 
     oofem_finalize_modules();

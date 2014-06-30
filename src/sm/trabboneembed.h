@@ -66,7 +66,7 @@ protected:
     FloatArray densStress, tempPlasDef, plasDef, tempIncPlasDef;
 
 public:
-    TrabBoneEmbedStatus(int n, Domain *d, GaussPoint *g);
+    TrabBoneEmbedStatus(int n, Domain * d, GaussPoint * g);
     virtual ~TrabBoneEmbedStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -101,7 +101,7 @@ protected:
     double eps0, nu0;
 
 public:
-    TrabBoneEmbed(int n, Domain *d);
+    TrabBoneEmbed(int n, Domain * d);
 
     void performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain);
 
@@ -120,8 +120,6 @@ public:
 
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &reducedStrain, TimeStep *tStep);
-
-    virtual int hasMaterialModeCapability(MaterialMode);
 
     virtual const char *giveInputRecordName() const { return _IFT_TrabBoneEmbed_Name; }
     virtual const char *giveClassName() const { return "TrabBoneEmbed"; }

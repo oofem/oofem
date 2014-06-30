@@ -62,7 +62,7 @@ protected:
     double k;
 
 public:
-    J2Mat(int n, Domain *d);
+    J2Mat(int n, Domain * d);
     virtual ~J2Mat();
 
     virtual IRResultType initializeFrom(InputRecord *ir);

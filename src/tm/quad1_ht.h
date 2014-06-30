@@ -54,7 +54,7 @@ protected:
     static FEI2dQuadLin interpolation;
 
 public:
-    Quad1_ht(int n, Domain *d);
+    Quad1_ht(int n, Domain * d);
     virtual ~Quad1_ht();
 
     virtual double computeVolumeAround(GaussPoint *gp);
@@ -71,10 +71,6 @@ public:
 
     virtual Interface *giveInterface(InterfaceType t);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
 #ifdef __OOFEG
@@ -97,7 +93,7 @@ protected:
 class Quad1_hmt : public Quad1_ht
 {
 public:
-    Quad1_hmt(int n, Domain *d);
+    Quad1_hmt(int n, Domain * d);
 
     virtual const char *giveInputRecordName() const { return _IFT_Quad1_hmt_Name; }
     virtual const char *giveClassName() const { return "Quad1_hmt"; }
@@ -111,7 +107,7 @@ public:
 class Quad1_mt : public Quad1_ht
 {
 public:
-    Quad1_mt(int n, Domain *d);
+    Quad1_mt(int n, Domain * d);
 
     virtual const char *giveInputRecordName() const { return _IFT_Quad1_mt_Name; }
     virtual const char *giveClassName() const { return "Quad1_mt"; }

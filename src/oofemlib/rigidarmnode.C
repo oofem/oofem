@@ -45,44 +45,9 @@ RigidArmNode :: RigidArmNode(int n, Domain *aDomain) : Node(n, aDomain)
 { }
 
 
-void
-RigidArmNode :: allocAuxArrays()
-{
-    countOfMasterDofs = new IntArray(numberOfDofs);
-
-    masterDofID = new IntArray * [ numberOfDofs ];
-    masterContribution = new FloatArray * [ numberOfDofs ];
-
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        if ( dofArray [ i - 1 ]->isPrimaryDof() ) {
-            masterDofID [ i - 1 ] = NULL;
-            masterContribution [ i - 1 ] = NULL;
-        } else {
-            masterDofID [ i - 1 ] = new IntArray;
-            masterContribution [ i - 1 ] = new FloatArray;
-        }
-    }
-}
-
-void
-RigidArmNode :: deallocAuxArrays()
-{
-    delete countOfMasterDofs;
-
-    for ( int i = 0; i < numberOfDofs; i++ ) {
-        delete masterDofID [ i ];
-        delete masterContribution [ i ];
-    }
-
-    delete[] masterDofID;
-    delete[] masterContribution;
-}
-
-
 IRResultType
 RigidArmNode :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
     Node :: initializeFrom(ir);
@@ -91,7 +56,7 @@ RigidArmNode :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, masterMask, _IFT_DofManager_mastermask);
     if ( masterMask.giveSize() != this->dofidmask->giveSize() ) {
-        _error("initializeFrom: mastermask size mismatch");
+        OOFEM_ERROR("mastermask size mismatch");
     }
 
     return IRRT_OK;
@@ -102,36 +67,30 @@ RigidArmNode :: postInitialize()
 {
     Node :: postInitialize();
 
-    // allocate auxiliary arrays
-    allocAuxArrays();
+    // auxiliary arrays
+    std::map< DofIDItem, IntArray > masterDofID;
+    std::map< DofIDItem, FloatArray > masterContribution;
 
     this->masterNode = dynamic_cast< Node * >( this->domain->giveDofManager(masterDofMngr) );
     if ( !masterNode ) {
-        OOFEM_WARNING("RigidArmNode :: postInitialize: master dofManager is not a node");
+        OOFEM_WARNING("master dofManager is not a node");
     }
 
     int masterNdofs = masterNode->giveNumberOfDofs();
 
     IntArray masterNodes(masterNdofs);
-    for ( int i = 1; i <= masterNdofs; i++ ) {
-        masterNodes.at(i) = this->masterNode->giveNumber();
+    for ( int &nodeNum: masterNodes ) {
+        nodeNum = this->masterNode->giveNumber();
     }
 
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        if ( masterDofID [ i - 1 ] ) {
-            countOfMasterDofs->at(i) = 0;
-            masterDofID [ i - 1 ]->resize(masterNdofs);
-            masterContribution [ i - 1 ]->resize(masterNdofs);
-        }
-    }
-
-    this->computeMasterContribution();
+    this->computeMasterContribution(masterDofID, masterContribution);
 
     // initialize slave dofs (inside check of consistency of receiver and master dof)
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        SlaveDof *sdof = dynamic_cast< SlaveDof * >( dofArray [ i - 1 ] );
+    for ( Dof *dof: *this ) {
+        SlaveDof *sdof = dynamic_cast< SlaveDof * >(dof);
         if ( sdof ) {
-            sdof->initialize(countOfMasterDofs->at(i), masterNodes, masterDofID [ i - 1 ], * masterContribution [ i - 1 ]);
+            DofIDItem id = sdof->giveDofID();
+            sdof->initialize(masterNodes, masterDofID [ id ], masterContribution [ id ]);
         }
     }
 
@@ -140,15 +99,12 @@ RigidArmNode :: postInitialize()
     // check if master in same mode
     if ( parallel_mode != DofManager_local ) {
         if ( ( * masterNode )->giveParallelMode() != parallel_mode ) {
-            _warning2("checkConsistency: mismatch in parallel mode of RigidArmNode and master", 1);
+            OOFEM_WARNING("mismatch in parallel mode of RigidArmNode and master", 1);
             result = 0;
         }
     }
  #endif
 #endif
-
-    // deallocate auxiliary arrays
-    deallocAuxArrays();
 }
 
 
@@ -161,14 +117,14 @@ RigidArmNode :: checkConsistency()
 
     // check if receiver has the same coordinate system as master dofManager
     if ( !this->hasSameLCS(this->masterNode) ) {
-        _warning2("checkConsistency: different lcs for master/slave nodes", 1);
+        OOFEM_WARNING("different lcs for master/slave nodes", 1);
         result = 0;
     }
 
     // check if created DOFs (dofType) compatible with mastermask
     for ( int i = 1; i <= this->giveNumberOfDofs(); i++ ) {
         if ( this->masterMask.at(i) && this->dofArray [ i - 1 ]->isPrimaryDof() ) {
-            _error("checkConsistency: incompatible mastermask and doftype data");
+            OOFEM_ERROR("incompatible mastermask and doftype data");
         }
     }
 
@@ -177,29 +133,32 @@ RigidArmNode :: checkConsistency()
 
 
 void
-RigidArmNode :: computeMasterContribution()
+RigidArmNode :: computeMasterContribution(std::map< DofIDItem, IntArray > &masterDofID, 
+                                          std::map< DofIDItem, FloatArray > &masterContribution)
 {
-    int k, sign;
+    int k;
     IntArray R_uvw(3), uvw(3);
     FloatArray xyz(3);
-    DofIDItem id;
+    int numberOfMasterDofs = masterNode->giveNumberOfDofs();
+    //IntArray countOfMasterDofs((int)masterDofID.size());
 
     // decode of masterMask
-    uvw.at(1) = this->findDofWithDofId(R_u);
-    uvw.at(2) = this->findDofWithDofId(R_v);
-    uvw.at(3) = this->findDofWithDofId(R_w);
+    uvw.at(1) = this->dofidmask->findFirstIndexOf(R_u);
+    uvw.at(2) = this->dofidmask->findFirstIndexOf(R_v);
+    uvw.at(3) = this->dofidmask->findFirstIndexOf(R_w);
 
-    for ( int i = 1; i <= 3; i++ ) {
-        xyz.at(i) = this->giveCoordinate(i) - masterNode->giveCoordinate(i);
-    }
+    xyz.beDifferenceOf(*this->giveCoordinates(), *masterNode->giveCoordinates());
 
     if ( hasLocalCS() ) {
         // LCS is stored as global-to-local, so LCS*xyz_glob = xyz_loc
         xyz.rotatedWith(* this->localCoordinateSystem, 'n');
     }
 
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        id = this->giveDof(i)->giveDofID();
+    for ( int i = 1; i <= this->dofidmask->giveSize(); i++ ) {
+        Dof *dof = this->giveDofWithID(dofidmask->at(i));
+        DofIDItem id = dof->giveDofID();
+        masterDofID [ id ].resize(numberOfMasterDofs);
+        masterContribution [ id ].resize(numberOfMasterDofs);
         R_uvw.zero();
 
         switch ( masterMask.at(i) ) {
@@ -234,22 +193,35 @@ RigidArmNode :: computeMasterContribution()
 
             break;
         default:
-            _error("computeMasterContribution: unknown value in masterMask");
+            OOFEM_ERROR("unknown value in masterMask");
         }
 
-        k = ++this->countOfMasterDofs->at(i);
-        this->masterDofID [ i - 1 ]->at(k) = ( int ) id;
-        this->masterContribution [ i - 1 ]->at(k) = 1.0;
+        //k = ++countOfMasterDofs.at(i);
+        k = 1;
+        masterDofID [ id ].at(k) = ( int ) id;
+        masterContribution [ id ].at(k) = 1.0;
 
         for ( int j = 1; j <= 3; j++ ) {
             if ( R_uvw.at(j) != 0 ) {
-                sign = R_uvw.at(j) < 0 ? -1 : 1;
-
-                k = ++this->countOfMasterDofs->at(i);
-                this->masterDofID [ i - 1 ]->at(k) = sign * R_uvw.at(j);
-                this->masterContribution [ i - 1 ]->at(k) = sign * xyz.at(j);
+                int sign = R_uvw.at(j) < 0 ? -1 : 1;
+                //k = ++countOfMasterDofs.at(i);
+                k++;
+                masterDofID [ id ].at(k) = sign * R_uvw.at(j);
+                masterContribution [ id ].at(k) = sign * xyz.at(j);
             }
         }
+        masterDofID [ id ].resizeWithValues(k);
+        masterContribution [ id ].resizeWithValues(k);
     }
 }
+
+
+void RigidArmNode :: updateLocalNumbering(EntityRenumberingFunctor &f)
+{
+    Node::updateLocalNumbering (f);
+    //update masterNode numbering
+    this->masterDofMngr = f( this->masterDofMngr, ERS_DofManager );
+}
+
+
 } // end namespace oofem

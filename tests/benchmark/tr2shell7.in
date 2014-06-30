@@ -1,6 +1,7 @@
-testTrShell7.out
+tr2shell7.out
 Cantilever beam with edge load
-Nonlinearstatic nsteps 1 lstype 0 smtype 0 rtolf 1.0e-4 rtold -1.0 manrmsteps 1 controllmode 1 nmodules 0 initialguess 1 
+Nonlinearstatic nsteps 1 lstype 0 smtype 0 rtolf 1.0e-4 rtold -1.0 manrmsteps 1 controllmode 1 nmodules 1 initialguess 1
+errorcheck filename "tr2shell7.in"
 #vtkxml tstep_all dofman_all element_all primvars 1 1 
 domain 3dDirShell 
 OutputManager tstep_all dofman_all element_all
@@ -34,9 +35,9 @@ ConstantFunction 1 f(t) 1.
 #NODE tStep 0 number 13 dof 1 unknown d value -1.35301025e-007
 #NODE tStep 0 number 13 dof 2 unknown d value 3.78016490e-009
 #NODE tStep 0 number 13 dof 3 unknown d value 4.69760535e-004
-#NODE tStep 0 number 13 dof 4 unknown d value -7.50330505e-004
-#NODE tStep 0 number 13 dof 5 unknown d value -2.37203564e-006
-#NODE tStep 0 number 13 dof 6 unknown d value -2.81536282e-007
-#NODE tStep 0 number 13 dof 7 unknown d value -5.30812682e-007
+#NODE tStep 0 number 13 dof 15 unknown d value -7.50330505e-004
+#NODE tStep 0 number 13 dof 16 unknown d value -2.37203564e-006
+#NODE tStep 0 number 13 dof 17 unknown d value -2.81536282e-007
+#NODE tStep 0 number 13 dof 18 unknown d value -5.30812682e-007
 #%END_CHECK%
   

@@ -83,7 +83,7 @@ public:
      * @param d Domain which solver belongs to.
      * @param m Engineering model which solver belongs to.
      */
-    SpoolesSolver(Domain *d, EngngModel *m);
+    SpoolesSolver(Domain * d, EngngModel * m);
 
     ///Destructor
     virtual ~SpoolesSolver();

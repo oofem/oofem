@@ -36,7 +36,6 @@
 
 #include "communicator.h"
 #include "intarray.h"
-#include "oofem_limits.h"
 
 #include <cstdarg>
 
@@ -63,7 +62,7 @@ CommunicatorBuff :: ~CommunicatorBuff()
 {
     for ( int i = 0; i < size; i++ ) {
         if ( processCommBuffs [ i ] ) {
-            delete( processCommBuffs [ i ] );
+            delete(processCommBuffs [ i ]);
         }
     }
 
@@ -83,7 +82,7 @@ Communicator :: Communicator(EngngModel *emodel, CommunicatorBuff *b, int rank, 
         processComms = new ProcessCommunicator * [ size ];
         for ( int i = 0; i < size; i++ ) {
             processComms [ i ] =
-                new ProcessCommunicator(b->giveProcessCommunicatorBuff(i), i, mode);
+                new ProcessCommunicator(b->giveProcessCommunicatorBuff ( i ), i, mode);
         }
     } else {
         processComms = NULL;
@@ -96,7 +95,7 @@ Communicator :: ~Communicator()
 
     if ( size ) {
         while ( i-- ) {
-            delete( processComms [ i ] );
+            delete(processComms [ i ]);
         }
 
         delete[]  processComms;
@@ -157,17 +156,10 @@ Communicator :: clearBuffers()
     }
 }
 
-void
-Communicator :: error(const char *file, int line, const char *format, ...) const
+std :: string
+Communicator :: errorInfo(const char *func) const
 {
-    char buffer [ MAX_ERROR_MSG_LENGTH ];
-    va_list args;
-
-    va_start(args, format);
-    vsprintf(buffer, format, args);
-    va_end(args);
-
-    __OOFEM_ERROR3(file, line, "Class: Communicator, Rank: %d\n%s", rank, buffer);
+    return std::string("Communicator::") + func + ", Rank: " + std::to_string(rank);
 }
 } // end namespace oofem
 #endif

@@ -71,39 +71,39 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
 
     // first check whether Lhs is defined
     if ( ( !a ) || ( !b ) ) {
-        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt : matrices are not defined\n");
+        OOFEM_ERROR("matrices are not defined");
     }
 
     if ( a->giveNumberOfRows() != a->giveNumberOfColumns() ||
-         b->giveNumberOfRows() != b->giveNumberOfRows() ||
-         a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
-        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt : matrices size mismatch\n");
+        b->giveNumberOfRows() != b->giveNumberOfRows() ||
+        a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
+        OOFEM_ERROR("matrices size mismatch");
     }
 
     if ( a->giveType() != SMT_PetscMtrx || b->giveType() != SMT_PetscMtrx ) {
-        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: PetscSparseMtrx Expected");
+        OOFEM_ERROR("PetscSparseMtrx Expected");
     }
 
-    A = ( PetscSparseMtrx * ) a;
-    B = ( PetscSparseMtrx * ) b;
-    size = engngModel->givePetscContext( A->giveDomainIndex() )->giveNumberOfNaturalEqs(); // A->giveLeqs();
+    A = static_cast< PetscSparseMtrx * >(a);
+    B = static_cast< PetscSparseMtrx * >(b);
+    size = engngModel->giveParallelContext( A->giveDomainIndex() )->giveNumberOfNaturalEqs(); // A->giveLeqs();
 
     // check array for storing eigenvalues
     if ( _eigv == NULL ) {
-        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: unknown eigenvalue array");
+        OOFEM_ERROR("unknown eigenvalue array");
     }
 
     if ( _eigv->giveSize() != nroot ) {
-        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: eigv size mismatch");
+        OOFEM_ERROR("eigv size mismatch");
     }
 
     // check matrix for storing resulted eigen vectors at the end
     if ( _r == NULL ) {
-        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: unknown eigen vectors mtrx");
+        OOFEM_ERROR("unknown eigen vectors mtrx");
     }
 
     if ( ( _r->giveNumberOfRows() != size ) || ( _r->giveNumberOfColumns() != nroot ) ) {
-        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: _r size mismatch");
+        OOFEM_ERROR("_r size mismatch");
     }
 
 
@@ -178,17 +178,14 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
 
     if ( nconv > 0 ) {
         fprintf(outStream, "SLEPcSolver :: solveYourselfAt: Convergence reached for RTOL=%20.15f", rtol);
-        PetscScalar kr, *array;
-        //PetscInt vSize;
+        PetscScalar kr;
         Vec Vr;
 
         ierr = MatGetVecs(* B->giveMtrx(), PETSC_NULL, & Vr);
         CHKERRQ(ierr);
 
 #ifdef __PARALLEL_MODE
-        Vec Vr2;
-        ierr = VecCreateSeq(PETSC_COMM_SELF, size, & Vr2);
-        CHKERRQ(ierr);
+        FloatArray Vr_loc;
 #endif
 
         for ( int i = 0; i < nconv && i < nroot; i++ ) {
@@ -199,37 +196,16 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
             _eigv->at(i + 1) = kr;
 
             //Store the eigenvector
-#ifdef __PARALLEL_MODE
-            engngModel->givePetscContext( A->giveDomainIndex() )->scatterG2N(Vr, Vr2, INSERT_VALUES);
-            ierr = VecGetArray(Vr2, & array);
-            CHKERRQ(ierr);
+            A->scatterG2L(Vr, Vr_loc);
             for ( int j = 0; j < size; j++ ) {
-                _r->at(j + 1, i + 1) = array [ j ];
+                _r->at(j + 1, i + 1) = Vr_loc.at(j + 1);
             }
-
-            ierr = VecRestoreArray(Vr2, & array);
-            CHKERRQ(ierr);
-#else
-            ierr = VecGetArray(Vr, & array);
-            CHKERRQ(ierr);
-            for ( int j = 0; j < size; j++ ) {
-                _r->at(j + 1, i + 1) = array [ j ];
-            }
-
-            ierr = VecRestoreArray(Vr, & array);
-            CHKERRQ(ierr);
-
-#endif
         }
 
         ierr = VecDestroy(Vr);
         CHKERRQ(ierr);
-#ifdef __PARALLEL_MODE
-        ierr = VecDestroy(Vr2);
-        CHKERRQ(ierr);
-#endif
     } else {
-        OOFEM_ERROR("SLEPcSolver :: solveYourselfAt: No converged eigenpairs\n");
+        OOFEM_ERROR("No converged eigenpairs");
     }
 
 #ifdef TIME_REPORT

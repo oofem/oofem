@@ -55,15 +55,11 @@ MetaStep :: MetaStep(int n, EngngModel *e, int nsteps, InputRecord &attrib)
 IRResultType
 MetaStep :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, numberOfSteps, _IFT_MetaStep_nsteps);
 
-    if ( attributes ) {
-        delete attributes;
-    }
-
+    delete attributes;
     this->attributes = ir->GiveCopy();
     /*
      * this->readQuotedString (initString, "attributes", this->attributes, MetaStepAttrRecLenght);
@@ -72,9 +68,9 @@ MetaStep :: initializeFrom(InputRecord *ir)
 }
 
 int
-MetaStep :: setStepBounds(int starttStepumber)
+MetaStep :: setStepBounds(int startStepNumber)
 {
-    sindex = starttStepumber;
+    sindex = startStepNumber;
 
     return sindex + numberOfSteps;
 }
@@ -86,10 +82,10 @@ MetaStep :: setNumberOfSteps(int numberOfSteps)
 }
 
 int
-MetaStep :: isStepValid(int soltStepumber)
+MetaStep :: isStepValid(int solStepNumber)
 {
-    if ( ( soltStepumber >= sindex ) &&
-         ( soltStepumber < ( sindex + numberOfSteps ) ) ) {
+    if ( ( solStepNumber >= sindex ) &&
+        ( solStepNumber < ( sindex + numberOfSteps ) ) ) {
         return 1;
     }
 

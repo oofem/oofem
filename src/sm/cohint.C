@@ -51,7 +51,7 @@ CohesiveInterfaceMaterial :: CohesiveInterfaceMaterial(int n, Domain *d) : Struc
     //
     // constructor
     //
-{}
+{ }
 
 void
 CohesiveInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
@@ -108,7 +108,7 @@ CohesiveInterfaceMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 // computes full constitutive matrix for case of gp stress-strain state.
 //
 {
-    _error("give3dMaterialStiffnessMatrix: not implemented");
+    OOFEM_ERROR("not implemented");
 }
 
 
@@ -149,7 +149,6 @@ CohesiveInterfaceMaterial :: giveThermalDilatationVector(FloatArray &answer,
 IRResultType
 CohesiveInterfaceMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // elastic parameters
@@ -177,10 +176,10 @@ CohesiveInterfaceMaterial :: giveInputRecord(DynamicInputRecord &input)
 //---------------------------------------------------------------------------------------------------
 
 CohesiveInterfaceMaterialStatus :: CohesiveInterfaceMaterialStatus(int n, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g)
-{}
+{ }
 
 CohesiveInterfaceMaterialStatus :: ~CohesiveInterfaceMaterialStatus()
-{}
+{ }
 
 void
 CohesiveInterfaceMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)

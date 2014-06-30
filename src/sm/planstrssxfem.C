@@ -34,15 +34,17 @@
 
 #include "planstrssxfem.h"
 #include "structuralmaterial.h"
-#include "xfemelementinterface.h"
-#include "enrichmentfunction.h"
-#include "enrichmentitem.h"
-#include "enrichmentdomain.h"
+#include "xfem/xfemelementinterface.h"
+#include "xfem/enrichmentfunction.h"
+#include "xfem/enrichmentitem.h"
+#include "xfem/enrichmentdomain.h"
 #include "structuralcrosssection.h"
 #include "vtkxmlexportmodule.h"
 #include "dynamicinputrecord.h"
+#include "classfactory.h"
+
 #ifdef __OOFEG
- #include "patchintegrationrule.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
@@ -51,22 +53,22 @@ REGISTER_Element(PlaneStress2dXfem)
 void PlaneStress2dXfem :: updateYourself(TimeStep *tStep)
 {
     PlaneStress2d :: updateYourself(tStep);
-    XfemElementInterface :: updateYourselfCZ(tStep);
+    XfemStructuralElementInterface :: updateYourselfCZ(tStep);
 }
 
 void PlaneStress2dXfem :: postInitialize()
 {
     PlaneStress2d :: postInitialize();
-    XfemElementInterface :: initializeCZMaterial();
+    XfemStructuralElementInterface :: initializeCZMaterial();
 }
 
 Interface *
 PlaneStress2dXfem :: giveInterface(InterfaceType it)
 {
     if ( it == XfemElementInterfaceType ) {
-        return ( XfemElementInterface * ) this;
+        return static_cast< XfemElementInterface * >(this);
     } else if ( it == VTKXMLExportModuleElementInterfaceType ) {
-        return ( VTKXMLExportModuleElementInterface * ) this;
+        return static_cast< VTKXMLExportModuleElementInterface * >(this);
     } else {
         return PlaneStress2d :: giveInterface(it);
     }
@@ -76,10 +78,14 @@ PlaneStress2dXfem :: giveInterface(InterfaceType it)
 void
 PlaneStress2dXfem :: computeGaussPoints()
 {
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
+    if ( this->giveDomain()->hasXfemManager() ) {
+        XfemManager *xMan = this->giveDomain()->giveXfemManager();
 
-    if ( xMan->isElementEnriched(this) ) {
-        if ( !this->XfemElementInterface_updateIntegrationRule() ) {
+        if ( xMan->isElementEnriched(this) ) {
+            if ( !this->XfemElementInterface_updateIntegrationRule() ) {
+                PlaneStress2d :: computeGaussPoints();
+            }
+        } else {
             PlaneStress2d :: computeGaussPoints();
         }
     } else   {
@@ -90,6 +96,11 @@ PlaneStress2dXfem :: computeGaussPoints()
 void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
     XfemElementInterface_createEnrBmatrixAt(answer, * gp, * this);
+}
+
+void PlaneStress2dXfem :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    XfemElementInterface_createEnrBHmatrixAt(answer, * gp, * this);
 }
 
 
@@ -112,46 +123,66 @@ int PlaneStress2dXfem :: computeNumberOfDofs()
 
 
 void
-PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+PlaneStress2dXfem :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    // Returns the total id mask of the dof manager = regular id's + enriched id's
-    this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
+    // Continuous part
+    PlaneStress2d :: giveDofManDofIDMask(inode, answer);
+
+    // Discontinuous part
+	if( this->giveDomain()->hasXfemManager() ) {
+		DofManager *dMan = giveDofManager(inode);
+		XfemManager *xMan = giveDomain()->giveXfemManager();
+
+        const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices( dMan->giveGlobalNumber() );
+        for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
+            EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices[i]);
+			if ( ei->isDofManEnriched(* dMan) ) {
+				IntArray eiDofIdArray;
+				ei->computeEnrichedDofManDofIdArray(eiDofIdArray, *dMan);
+				answer.followedBy(eiDofIdArray);
+			}
+		}
+	}
 }
 
 
 
 void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
+    XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
 }
 
 void
 PlaneStress2dXfem :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    XfemElementInterface :: XfemElementInterface_computeStressVector(answer, strain, gp, tStep);
+    XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(answer, strain, gp, tStep);
 }
 
 void PlaneStress2dXfem :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
     PlaneStress2d :: computeStiffnessMatrix(answer, rMode, tStep);
-    XfemElementInterface :: computeCohesiveTangent(answer, tStep);
+    XfemStructuralElementInterface :: computeCohesiveTangent(answer, tStep);
 }
 
 void
 PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     PlaneStress2d :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
-    XfemElementInterface :: computeCohesiveForces(answer, tStep);
+    XfemStructuralElementInterface :: computeCohesiveForces(answer, tStep);
 }
 
 Element_Geometry_Type
 PlaneStress2dXfem :: giveGeometryType() const
 {
-    XfemManager *xMan = this->giveDomain()->giveXfemManager();
-    if ( xMan->isElementEnriched(this) ) {
-        //return EGT_Composite;
-        return EGT_quad_1;
-    } else {
+    if ( this->giveDomain()->hasXfemManager() ) {
+        XfemManager *xMan = this->giveDomain()->giveXfemManager();
+        if ( xMan->isElementEnriched(this) ) {
+            //return EGT_Composite;
+            return EGT_quad_1;
+        } else {
+            return EGT_quad_1;
+        }
+    } else   {
         return EGT_quad_1;
     }
 }
@@ -164,17 +195,17 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
     if ( !context.testElementGraphicActivity(this) ) {
         return;
     }
-
+#if 0
     XfemManager *xf = this->giveDomain()->giveXfemManager();
     if ( !xf->isElementEnriched(this) ) {
         PlaneStress2d :: drawRawGeometry(context);
     } else {
-        if ( numberOfIntegrationRules > 1 ) {
+        if ( integrationRulesArray.size() > 1 ) {
             // TODO: Implement visualization
             /*
              *          PatchIntegrationRule *iRule;
-             *          for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-             *              iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
+             *          for ( auto &iRule: integrationRulesArray ) {
+             *              iRule = dynamic_cast< PatchIntegrationRule * >( ir );
              *              if ( iRule ) {
              *                  iRule->givePatch()->draw(context);
              *              }
@@ -184,6 +215,7 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
             PlaneStress2d :: drawRawGeometry(context);
         }
     }
+#endif
 }
 
 void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
@@ -191,7 +223,7 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
     if ( !context.testElementGraphicActivity(this) ) {
         return;
     }
-
+#if 0
     XfemManager *xf = this->giveDomain()->giveXfemManager();
     if ( !xf->isElementEnriched(this) ) {
         PlaneStress2d :: drawScalar(context);
@@ -204,16 +236,14 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
             indx = context.giveIntVarIndx();
 
             TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
-            PatchIntegrationRule *iRule;
-            for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-                iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
+            for ( auto &ir: integrationRulesArray ) {
+                PatchIntegrationRule *iRule = dynamic_cast< PatchIntegrationRule * >(ir);
 
  #if 0
                 val = iRule->giveMaterial();
  #else
                 val = 0.0;
-                for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                    GaussPoint *gp = iRule->getIntegrationPoint(0);
+                for ( GaussPoint *gp: *iRule ) {
                     giveIPValue(v, gp, context.giveIntVarType(), tStep);
                     val += v.at(indx);
                 }
@@ -228,6 +258,7 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
             PlaneStress2d :: drawScalar(context);
         }
     }
+#endif
 }
 #endif
 
@@ -242,18 +273,18 @@ PlaneStress2dXfem :: initializeFrom(InputRecord *ir)
         return result;
     }
 
-    result = XfemElementInterface :: initializeCZFrom(ir);
+    result = XfemStructuralElementInterface :: initializeCZFrom(ir);
     return result;
 }
 
 MaterialMode PlaneStress2dXfem :: giveMaterialMode()
 {
-    return XfemElementInterface :: giveMaterialMode();
+    return XfemStructuralElementInterface :: giveMaterialMode();
 }
 
 void PlaneStress2dXfem :: giveInputRecord(DynamicInputRecord &input)
 {
     PlaneStress2d :: giveInputRecord(input);
-    XfemElementInterface :: giveCZInputRecord(input);
+    XfemStructuralElementInterface :: giveCZInputRecord(input);
 }
 } // end namespace oofem

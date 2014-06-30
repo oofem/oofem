@@ -38,33 +38,25 @@
 #include "material.h"
 #include "gausspoint.h"
 #include "matstatmapperint.h"
-#include "xfemelementinterface.h"
-#include "structuralinterfacematerial.h"
+#include "xfem/xfemelementinterface.h"
 
 namespace oofem {
 MMAClosestIPTransfer :: MMAClosestIPTransfer() : MaterialMappingAlgorithm()
 { }
 
 void
-MMAClosestIPTransfer :: __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP)
+MMAClosestIPTransfer :: __init(Domain *dold, IntArray &type, FloatArray &coords, Set &elemSet, TimeStep *tStep, bool iCohesiveZoneGP)
 {
     SpatialLocalizer *sl = dold->giveSpatialLocalizer();
-    this->source = sl->giveClosestIP(coords, region, iCohesiveZoneGP);
-
-    if ( iCohesiveZoneGP ) {
-        XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >( source->giveElement() );
-
-        if ( xFemEl == NULL ) {
-            OOFEM_ERROR("In MMAClosestIPTransfer :: __init: xFemEl == NULL.\n");
-        }
-
-        mpMaterialStatus = xFemEl->mpCZMat->giveStatus(source);
-    } else {
-        mpMaterialStatus = source->giveMaterial()->giveStatus(source);
-    }
+    this->source = sl->giveClosestIP(coords, elemSet, iCohesiveZoneGP);
 
     if ( !source ) {
-        OOFEM_ERROR("MMAClosestIPTransfer::__init : no suitable source found");
+        OOFEM_ERROR("no suitable source found");
+    }
+
+    mpMaterialStatus = dynamic_cast<MaterialStatus*>(source->giveMaterialStatus());
+    if( mpMaterialStatus == NULL ) {
+        OOFEM_ERROR("Could not find material status.");
     }
 }
 
@@ -84,12 +76,12 @@ int
 MMAClosestIPTransfer :: mapStatus(MaterialStatus &oStatus) const
 {
     if ( mpMaterialStatus != NULL ) {
-        MaterialStatusMapperInterface &interface = dynamic_cast< MaterialStatusMapperInterface & >( oStatus );
+        MaterialStatusMapperInterface &interface = dynamic_cast< MaterialStatusMapperInterface & >(oStatus);
         interface.copyStateVariables(* mpMaterialStatus);
 
         return 1;
     } else {
-        OOFEM_ERROR("Error in MMAClosestIPTransfer :: mapStatus(): source not set.\n");
+        OOFEM_ERROR("source not set.");
     }
 
     return 0;

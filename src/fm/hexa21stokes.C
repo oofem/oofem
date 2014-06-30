@@ -36,7 +36,6 @@
 #include "fmelement.h"
 #include "node.h"
 #include "domain.h"
-#include "equationid.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "bcgeomtype.h"
@@ -57,27 +56,33 @@ REGISTER_Element(Hexa21Stokes);
 FEI3dHexaLin Hexa21Stokes :: interpolation_lin;
 FEI3dHexaTriQuad Hexa21Stokes :: interpolation_quad;
 // Set up ordering vectors (for assembling)
-IntArray Hexa21Stokes :: momentum_ordering(81);
-IntArray Hexa21Stokes :: conservation_ordering(8);
+IntArray Hexa21Stokes :: momentum_ordering = {
+     1,  2,  3,  5,  6,  7,  9, 10, 11, 13, 14, 15, 17, 18, 19, 21, 22, 23, 25, 26, 27, 29, 30, 31, 33, 34, 35,
+    37, 38, 39, 41, 42, 43, 45, 46, 47, 49, 50, 51, 53, 54, 55, 57, 58, 59, 61, 62, 63, 65, 66, 67, 69, 70, 71,
+    73, 74, 75, 77, 78, 79, 81, 82, 83, 85, 86, 87, 89, 90, 91, 93, 94, 95, 97, 98, 99, 101, 102, 103, 105, 106, 107};
+IntArray Hexa21Stokes :: conservation_ordering = {4, 8, 12, 16, 20, 24, 28, 32};
 IntArray Hexa21Stokes :: surf_ordering [ 6 ] = {
-    IntArray(), IntArray(), IntArray(), IntArray(), IntArray(), IntArray()
+    { 5,  6,  7,  1,  2,  3, 13, 14, 15,  9, 10, 11, 33, 34, 35, 42, 43, 44, 39, 40, 41, 36, 37, 38, 69, 70, 71},
+    {17, 18, 19, 21, 22, 23, 25, 26, 27, 29, 30, 31, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 72, 73, 74},
+    { 1,  2,  3, 17, 18, 19, 21, 22, 23,  5,  6,  7, 57, 58, 59, 45, 46, 47, 60, 61, 62, 33, 34, 35, 75, 76, 77},
+    { 5,  6,  7,  9, 10, 11, 25, 26, 27, 21, 22, 23, 36, 37, 38, 63, 64, 65, 48, 49, 50, 60, 61, 62, 78, 79, 80},
+    { 9, 10, 11, 13, 14, 15, 29, 30, 31, 25, 26, 27, 39, 40, 41, 66, 67, 68, 51, 52, 53, 63, 64, 65, 81, 82, 83},
+    {13, 14, 15,  1,  2,  3, 17, 18, 19, 29, 30, 31, 42, 43, 44, 57, 58, 59, 54, 55, 56, 66, 67, 68, 84, 85, 86}
 };
-bool Hexa21Stokes :: __initialized = Hexa21Stokes :: initOrdering();
 
-Hexa21Stokes :: Hexa21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
+Hexa21Stokes :: Hexa21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain), SpatialLocalizerInterface(this)
 {
     this->numberOfDofMans = 27;
     this->numberOfGaussPoints = 27;
 }
 
 Hexa21Stokes :: ~Hexa21Stokes()
-{}
+{ }
 
 void Hexa21Stokes :: computeGaussPoints()
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(1);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -88,30 +93,12 @@ int Hexa21Stokes :: computeNumberOfDofs()
     return 89;
 }
 
-void Hexa21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+void Hexa21Stokes :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    // Returns the mask for node number inode of this element. The mask tells what quantities
-    // are held by each node. Since this element holds velocities (both in x and y direction),
-    // in six nodes and pressure in three nodes the answer depends on which node is requested.
-
     if ( inode <= 8 ) {
-        if ( ut == EID_MomentumBalance ) {
-            answer.setValues(3, V_u, V_v, V_w);
-        } else if ( ut == EID_ConservationEquation ) {
-            answer.setValues(1, P_f);
-        } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-            answer.setValues(4, V_u, V_v, V_w, P_f);
-        } else {
-            OOFEM_ERROR("Hexa21Stokes :: giveDofManDofIDMask: Unknown equation id encountered");
-        }
+        answer = {V_u, V_v, V_w, P_f};
     } else {
-        if ( ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
-            answer.setValues(3, V_u, V_v, V_w);
-        } else if ( ut == EID_ConservationEquation ) {
-            answer.resize(0);
-        } else {
-            OOFEM_ERROR("Hexa21Stokes :: giveDofManDofIDMask: Unknown equation id encountered");
-        }
+        answer = {V_u, V_v, V_w};
     }
 }
 
@@ -124,7 +111,7 @@ void Hexa21Stokes :: giveCharacteristicVector(FloatArray &answer, CharType mtrx,
     } else if ( mtrx == InternalForcesVector ) {
         this->computeInternalForcesVector(answer, tStep);
     } else {
-        OOFEM_ERROR("Hexa21Stokes :: giveCharacteristicVector: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -135,7 +122,7 @@ void Hexa21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
     if ( mtrx == StiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, tStep);
     } else {
-        OOFEM_ERROR("Hexa21Stokes :: giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -146,13 +133,12 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
     FloatArray a_pressure, a_velocity, devStress, epsp, Nh, dN_V(81);
     FloatMatrix dN, B(6, 81);
     double r_vol, pressure;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
+    this->computeVectorOfVelocities(VM_Total, tStep, a_velocity);
+    this->computeVectorOfPressures(VM_Total, tStep, a_pressure);
     FloatArray momentum, conservation;
 
     B.zero();
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         const FloatArray &lcoords = * gp->giveCoordinates();
 
         double detJ = fabs( this->interpolation_quad.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
@@ -185,7 +171,7 @@ void Hexa21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *t
     FloatArray vec;
 
     int nLoads = this->boundaryLoadArray.giveSize() / 2;
-    answer.resize(0);
+    answer.clear();
 
     for ( int i = 1; i <= nLoads; i++ ) {  // For each Neumann boundary condition
         int load_number = this->boundaryLoadArray.at(2 * i - 1);
@@ -193,7 +179,7 @@ void Hexa21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *t
         Load *load = this->domain->giveLoad(load_number);
 
         if ( load->giveBCGeoType() == SurfaceLoadBGT ) {
-            this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >( load ), load_id, ExternalForcesVector, VM_Total, tStep);
+            this->computeBoundaryLoadVector(vec, static_cast< BoundaryLoad * >(load), load_id, ExternalForcesVector, VM_Total, tStep);
             answer.add(vec);
         }
     }
@@ -211,7 +197,7 @@ void Hexa21Stokes :: computeExternalForcesVector(FloatArray &answer, TimeStep *t
 void Hexa21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
@@ -222,8 +208,7 @@ void Hexa21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType 
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(k);
+        for ( GaussPoint *gp: *iRule ) {
             FloatArray *lcoords = gp->giveCoordinates();
 
             double rho = mat->give('d', gp);
@@ -247,34 +232,32 @@ void Hexa21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType 
 void Hexa21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int iSurf, CharType type, ValueModeType mode, TimeStep *tStep)
 {
     if ( type != ExternalForcesVector ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
-        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >( load );
+        BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >(load);
 
         int numberOfSurfaceIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2; ///@todo Check this.
 
         GaussIntegrationRule iRule(1, this, 1, 1);
-        GaussPoint *gp;
         FloatArray N, t, f(27);
 
         f.zero();
         iRule.SetUpPointsOnTriangle(numberOfSurfaceIPs, _Unknown);
 
-        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
-            gp = iRule.getIntegrationPoint(i);
-            FloatArray *lcoords = gp->giveCoordinates();
+        for ( GaussPoint *gp: iRule ) {
+            FloatArray &lcoords = * gp->giveCoordinates();
 
-            this->interpolation_quad.surfaceEvalN( N, iSurf, * lcoords, FEIElementGeometryWrapper(this) );
-            double dA = gp->giveWeight() * this->interpolation_quad.surfaceGiveTransformationJacobian( iSurf, * lcoords, FEIElementGeometryWrapper(this) );
+            this->interpolation_quad.surfaceEvalN( N, iSurf, lcoords, FEIElementGeometryWrapper(this) );
+            double dA = gp->giveWeight() * this->interpolation_quad.surfaceGiveTransformationJacobian( iSurf, lcoords, FEIElementGeometryWrapper(this) );
 
             if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) { // load in xi-eta system
-                boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
+                boundaryLoad->computeValueAt(t, tStep, lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;
-                this->interpolation_quad.surfaceLocal2global( gcoords, iSurf, * lcoords, FEIElementGeometryWrapper(this) );
+                this->interpolation_quad.surfaceLocal2global( gcoords, iSurf, lcoords, FEIElementGeometryWrapper(this) );
                 boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
             }
 
@@ -290,7 +273,7 @@ void Hexa21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad 
         answer.zero();
         answer.assemble(f, this->surf_ordering [ iSurf - 1 ]);
     } else {
-        OOFEM_ERROR("Hexa21Stokes :: Strange boundary condition type");
+        OOFEM_ERROR("Strange boundary condition type");
     }
 }
 
@@ -304,9 +287,8 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
 
     B.zero();
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+    for ( GaussPoint *gp: *iRule ) {
         // Compute Gauss point and determinant at current element
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
         const FloatArray &lcoords = * gp->giveCoordinates();
 
         double detJ = fabs( this->interpolation_quad.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
@@ -320,10 +302,8 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
         }
 
         // Computing the internal forces should have been done first.
-        mat->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep); // dsigma_dev/deps_dev
-        mat->giveDeviatoricPressureStiffness(Ep, TangentStiffness, gp, tStep); // dsigma_dev/dp
-        mat->giveVolumetricDeviatoricStiffness(Cd, TangentStiffness, gp, tStep); // deps_vol/deps_dev
-        mat->giveVolumetricPressureStiffness(Cp, TangentStiffness, gp, tStep); // deps_vol/dp
+        // dsigma_dev/deps_dev  dsigma_dev/dp  deps_vol/deps_dev  deps_vol/dp
+        mat->giveStiffnessMatrices(Ed, Ep, Cd, Cp, TangentStiffness, gp, tStep);
 
         EdB.beProductOf(Ed, B);
         K.plusProductSymmUpper(B, EdB, dV);
@@ -378,24 +358,19 @@ Interface *Hexa21Stokes :: giveInterface(InterfaceType it)
 {
     switch ( it ) {
     case NodalAveragingRecoveryModelInterfaceType:
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
 
     case SpatialLocalizerInterfaceType:
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
 
     case EIPrimaryUnknownMapperInterfaceType:
-        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
 
     default:
         return FMElement :: giveInterface(it);
     }
 }
 
-int Hexa21Stokes :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
 
 void Hexa21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                            TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
@@ -416,37 +391,12 @@ void Hexa21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(Value
     }
 }
 
-int Hexa21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode, TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
-{
-    bool ok;
-    FloatArray lcoords, n, n_lin;
-    ok = this->computeLocalCoordinates(lcoords, gcoords);
-    if ( !ok ) {
-        answer.resize(0);
-        return false;
-    }
-
-    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    return true;
-}
-
-void Hexa21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    answer.setValues(4, V_u, V_v, V_w, P_f);
-}
-
 double Hexa21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
     FloatArray center;
-    FloatArray lcoords;
-    lcoords.setValues(3, 0.25, 0.25, 0.25);
+    FloatArray lcoords = {0.25, 0.25, 0.25};
     this->computeGlobalCoordinates(center, lcoords);
     return center.distance(coords);
-}
-
-void Hexa21Stokes :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.resize(0);
 }
 
 void Hexa21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
@@ -484,7 +434,7 @@ void Hexa21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answ
                 this->giveNode(8)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) );
         }
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 } // end namespace oofem
