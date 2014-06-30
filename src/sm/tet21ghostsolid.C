@@ -92,11 +92,12 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
         this->interpolation.evaldNdx( dNx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
         this->interpolation_lin.evalN( Nlin, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-        dNv.resize(30);
-        for (int k = 0; k<dNx.giveNumberOfColumns(); k++) {
-            dNv.at(k*3+1) = dNx.at(1,k+1);
-            dNv.at(k*3+2) = dNx.at(2,k+1);
-            dNv.at(k*3+3) = dNx.at(3,k+1);
+        dNv.resize(30); // dNv = [dN1/dx dN1/dy dN1/dz dN2/dx dN2/dy dN2/dz ... dN10/dz]
+
+        for (int k = 0; k<dNx.giveNumberOfRows(); k++) {
+            dNv.at(k*3+1) = dNx.at(k+1,1);
+            dNv.at(k*3+2) = dNx.at(k+1,2);
+            dNv.at(k*3+3) = dNx.at(k+1,3);
         }
 
         if (nlGeometry == 0) {
@@ -181,7 +182,6 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatArray N, gVector, temparray(30), dNv, u, inc, u_prev, vload;
     FloatMatrix dNx, G;
-    IntArray *bodyLoads;
 
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
@@ -360,19 +360,20 @@ tet21ghostsolid :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li,
     answer.zero();
 
     for ( int i = 1; i <= 10; i++ ) {
-        answer.at(1, 3 * i - 2) = dnx.at(1, i);
-        answer.at(2, 3 * i - 1) = dnx.at(2, i);
-        answer.at(3, 3 * i - 0) = dnx.at(3, i);
+        answer.at(1, 3 * i - 2) = dnx.at(i, 1);
+        answer.at(2, 3 * i - 1) = dnx.at(i, 2);
+        answer.at(3, 3 * i - 0) = dnx.at(i, 3);
 
-        answer.at(4, 3 * i - 1) = dnx.at(3, i);
-        answer.at(4, 3 * i - 0) = dnx.at(2, i);
+        answer.at(4, 3 * i - 1) = dnx.at(i, 3);
+        answer.at(4, 3 * i - 0) = dnx.at(i, 2);
 
-        answer.at(5, 3 * i - 2) = dnx.at(3, i);
-        answer.at(5, 3 * i - 0) = dnx.at(1, i);
+        answer.at(5, 3 * i - 2) = dnx.at(i, 3);
+        answer.at(5, 3 * i - 0) = dnx.at(i, 1);
 
-        answer.at(6, 3 * i - 2) = dnx.at(2, i);
-        answer.at(6, 3 * i - 1) = dnx.at(1, i);
+        answer.at(6, 3 * i - 2) = dnx.at(i, 2);
+        answer.at(6, 3 * i - 1) = dnx.at(i, 1);
     }
+    //answer.printYourself();
 }
 
 void
