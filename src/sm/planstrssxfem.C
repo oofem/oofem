@@ -348,7 +348,7 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
                         FloatMatrix NMatrix;
                         computeNmatrixAt(locCoord, NMatrix);
                         FloatArray solVec;
-                        computeVectorOf(EID_MomentumBalance, VM_Total, tStep, solVec);
+                        computeVectorOf(VM_Total, tStep, solVec);
                         FloatArray uTemp;
                         uTemp.beProductOf(NMatrix, solVec);
 
@@ -603,12 +603,12 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
                         if(joinNodes) {
                             // if point on edge
                             XfemElementInterface_createEnrNmatrixAt(NMatrix, locCoord, * this, true);
-                            computeVectorOf(EID_MomentumBalance, VM_Total, tStep, solVec);
+                            computeVectorOf(VM_Total, tStep, solVec);
                         }
                         else {
                             // if point on edge
                             XfemElementInterface_createEnrNmatrixAt(NMatrix, locCoord, * this, false);
-                            computeVectorOf(EID_MomentumBalance, VM_Total, tStep, solVec);
+                            computeVectorOf(VM_Total, tStep, solVec);
                         }
 
 

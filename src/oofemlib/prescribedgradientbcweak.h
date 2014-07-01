@@ -107,7 +107,7 @@ public:
      * @param eid Equation ID to which sigma belongs.
      * @param tStep Active time step.
      */
-    void computeField(FloatArray &sigma, EquationID eid, TimeStep *tStep);
+    void computeField(FloatArray &sigma, TimeStep *tStep);
 
 
     // TODO: Consider moving this function to Domain.

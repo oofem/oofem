@@ -117,8 +117,6 @@ public:
     /// Add one element
     void push_back(const double &iVal) {values.push_back(iVal);}
 
-    /// Append an array
-    void append(const FloatArray &iArray) { values.insert(values.end(), iArray.begin(), iArray.end()); }
 
     /**
      * Coefficient access function. Returns value of coefficient at given

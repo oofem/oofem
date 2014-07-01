@@ -226,7 +226,7 @@ void PrescribedGradientBCWeak::assembleVector(FloatArray &answer, TimeStep *tSte
 
             // Fetch location arrays for current traction element
             IntArray rows;
-            giveTractionLocationArrays( i, rows, eid, type, s);
+            giveTractionLocationArrays( i, rows, type, s);
 
             fExt.negated();
 
@@ -265,10 +265,10 @@ void PrescribedGradientBCWeak::assembleVector(FloatArray &answer, TimeStep *tSte
 
             // Fetch location arrays
             IntArray tracRrows;
-            giveTractionLocationArrays( i, tracRrows, eid, type, s);
+            giveTractionLocationArrays( i, tracRrows, type, s);
 
             IntArray dispRrows;
-            giveDisplacementLocationArrays( i, dispRrows, eid, type, s);
+            giveDisplacementLocationArrays( i, dispRrows, type, s);
 
 
             // Assemble
@@ -305,15 +305,6 @@ void PrescribedGradientBCWeak::assembleVector(FloatArray &answer, TimeStep *tSte
 void PrescribedGradientBCWeak::assemble(SparseMtrx *answer, TimeStep *tStep,
                       CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if ( eid == EID_MomentumBalance_ConservationEquation ) {
-        // TODO: Check if this applies here
-        eid = EID_MomentumBalance;
-    }
-
-    if ( eid != EID_MomentumBalance ) {
-        printf("returning.");
-        return;
-    }
 
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix ) {
 
@@ -323,11 +314,11 @@ void PrescribedGradientBCWeak::assemble(SparseMtrx *answer, TimeStep *tStep,
         for(size_t i = 0; i < mpTractionElements.size(); i++) {
 
             // Rows and columns for displacement and traction contributions
-            giveTractionLocationArrays( i, tracRows, eid, type, r_s);
-            giveDisplacementLocationArrays( i, dispRows, eid, type, r_s);
+            giveTractionLocationArrays( i, tracRows, type, r_s);
+            giveDisplacementLocationArrays( i, dispRows, type, r_s);
 
-            giveTractionLocationArrays( i, tracCols, eid, type, c_s);
-            giveDisplacementLocationArrays( i, dispCols, eid, type, c_s);
+            giveTractionLocationArrays( i, tracCols, type, c_s);
+            giveDisplacementLocationArrays( i, dispCols, type, c_s);
 
             this->integrateTangent(Ke, i);
             Ke.negated();
@@ -417,10 +408,10 @@ void PrescribedGradientBCWeak::giveLocationArrays(std :: vector< IntArray > &row
 
         for( int dispElInd : dispElInds ) {
             Element *e = this->giveDomain()->giveElement( dispElInd );
-            e->giveLocationArray(disp_loc_r, eid, r_s);
+            e->giveLocationArray(disp_loc_r, r_s);
             dispElRows.followedBy(disp_loc_r);
 
-            e->giveLocationArray(disp_loc_c, eid, c_s);
+            e->giveLocationArray(disp_loc_c, c_s);
             dispElCols.followedBy(disp_loc_c);
         }
 
@@ -453,7 +444,7 @@ void PrescribedGradientBCWeak::giveLocationArrays(std :: vector< IntArray > &row
 }
 
 
-void PrescribedGradientBCWeak::giveTractionLocationArrays(int iTracElInd, IntArray &rows, EquationID eid, CharType type,
+void PrescribedGradientBCWeak::giveTractionLocationArrays(int iTracElInd, IntArray &rows, CharType type,
                                 const UnknownNumberingScheme &s)
 {
     rows.clear();
@@ -470,7 +461,7 @@ void PrescribedGradientBCWeak::giveTractionLocationArrays(int iTracElInd, IntArr
     rows = tracElRows;
 }
 
-void PrescribedGradientBCWeak::giveDisplacementLocationArrays(int iTracElInd, IntArray &rows, EquationID eid, CharType type,
+void PrescribedGradientBCWeak::giveDisplacementLocationArrays(int iTracElInd, IntArray &rows, CharType type,
                                 const UnknownNumberingScheme &s)
 {
     rows.clear();
@@ -483,7 +474,7 @@ void PrescribedGradientBCWeak::giveDisplacementLocationArrays(int iTracElInd, In
 
 }
 
-void PrescribedGradientBCWeak::computeField(FloatArray &sigma, EquationID eid, TimeStep *tStep)
+void PrescribedGradientBCWeak::computeField(FloatArray &sigma, TimeStep *tStep)
 {
     double dSize = domainSize();
 

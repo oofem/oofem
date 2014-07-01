@@ -397,7 +397,7 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCNeumann &i
 void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC, TimeStep *tStep)
 {
     FloatArray stress;
-    iBC.computeField(stress, EID_MomentumBalance, tStep);
+    iBC.computeField(stress, tStep);
 
     printf("Mean stress computed in Gnuplot export module: "); stress.printYourself();
 
