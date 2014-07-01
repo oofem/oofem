@@ -53,7 +53,7 @@ REGISTER_Element(Quad1Mindlin);
 FEI2dQuadLin Quad1Mindlin :: interp_lin(1, 2);
 
 Quad1Mindlin :: Quad1Mindlin(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(),
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this),
     SPRNodalRecoveryModelInterface()
 {
     numberOfGaussPoints = 4;
@@ -185,7 +185,7 @@ Quad1Mindlin :: initializeFrom(InputRecord *ir)
 
 
 void
-Quad1Mindlin :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Quad1Mindlin :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_w, R_u, R_v};
 }

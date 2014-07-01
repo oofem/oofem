@@ -147,6 +147,10 @@ public:
      */
     GaussPoint *getIntegrationPoint(int n);
     /**
+     * Scans through the integration points and finds the one closest to the given (local) coordinate.
+     */
+    GaussPoint *findIntegrationPointClosestTo(const FloatArray &lcoord);
+    /**
      * Returns starting component index, for which receiver applies.
      * @return First local strain index.
      */

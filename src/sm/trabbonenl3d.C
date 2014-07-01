@@ -216,10 +216,10 @@ TrabBoneNL3D :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
     tempDam = nlStatus->giveTempDam();
 
     if ( ( tempDam - dam ) > 0.0 ) {
-        elem->giveLocationArray(loc, EID_MomentumBalance, s);
+        elem->giveLocationArray(loc, s);
         localNu = nlStatus->giveTempEffectiveStress();
 
-        elem->giveLocationArray( loc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        elem->giveLocationArray(loc, EModelDefaultEquationNumbering() );
         elem->computeBmatrixAt(gp, b);
         dDamFunc = expDam * critDam * exp(-expDam * nlKappa);
 
@@ -254,7 +254,7 @@ TrabBoneNL3D :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     FloatArray remoteNu, plasFlowDirec, prodTensor;
     FloatMatrix b, SSaTensor;
 
-    elem->giveLocationArray(rloc, EID_MomentumBalance, s);
+    elem->giveLocationArray(rloc, s);
     elem->computeBmatrixAt(gp, b);
 
     ncols = b.giveNumberOfColumns();
@@ -310,7 +310,7 @@ TrabBoneNL3D :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
     totalStress = ( 1 - tempDam ) * effStress;
 
     for ( int i = 1; i <= 6; i++ ) {
-        if ( sqrt( totalStress.at(i) * totalStress.at(i) ) < pow(10.0, -8.0) ) {
+        if ( sqrt( totalStress.at(i) * totalStress.at(i) ) < 1e-8 ) {
             totalStress.at(i) = 0.;
         }
     }

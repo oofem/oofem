@@ -124,9 +124,9 @@ PolylineNonlocalBarrier :: isActivated(const FloatArray &c1, const FloatArray &c
 }
 
 double
-PolylineNonlocalBarrier :: calculateMinimumDistanceFromBoundary(const FloatArray &coords, double maxPossibleDistance)
+PolylineNonlocalBarrier :: calculateMinimumDistanceFromBoundary(const FloatArray &coords)
 {
-    double min = maxPossibleDistance;
+    double min = 1.e10;
     double tempDistance;
     //Loop over all linear sections forming the nonlocal boundary to find the minimum distance
     for ( int i = 1; i < vertexNodes.giveSize(); i++ ) {

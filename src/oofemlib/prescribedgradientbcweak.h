@@ -50,10 +50,7 @@
 namespace oofem {
 
 class TractionElement;
-//class Line;
 class IntegrationRule;
-//class GaussPoint;
-
 /*
  * Imposes a prescribed gradient weakly on the boundary
  * with an independent traction discretization.
@@ -85,20 +82,20 @@ public:
 
     virtual void scale(double s);
 
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
 
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
-    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
+    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                                		const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
-    virtual void giveTractionLocationArrays(int iTracElInd, IntArray &rows, EquationID eid, CharType type,
+    virtual void giveTractionLocationArrays(int iTracElInd, IntArray &rows, CharType type,
                                     const UnknownNumberingScheme &s);
 
-    virtual void giveDisplacementLocationArrays(int iTracElInd, IntArray &rows, EquationID eid, CharType type,
+    virtual void giveDisplacementLocationArrays(int iTracElInd, IntArray &rows, CharType type,
                                     const UnknownNumberingScheme &s);
 
     virtual const char *giveClassName() const { return "PrescribedGradientBCWeak"; }

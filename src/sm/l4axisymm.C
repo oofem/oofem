@@ -57,7 +57,7 @@ REGISTER_Element(L4Axisymm);
 FEI2dQuadLin L4Axisymm :: interpolation(1, 2);
 
 L4Axisymm :: L4Axisymm(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain)
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SpatialLocalizerInterface(this)
 {
     numberOfDofMans  = 4;
     numberOfGaussPoints = 4;
@@ -276,7 +276,7 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
     answer.resize(6);
     answer.zero();
     if ( mode == TL ) { // Total Lagrange formulation
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+        this->computeVectorOf({D_u, D_v}, VM_Total, tStep, u);
         // linear part of strain tensor (in vector form)
 
         this->computeBmatrixAt(gp, b, 1, 2);
@@ -345,7 +345,7 @@ L4Axisymm :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalTo
 }
 
 void
-L4Axisymm :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+L4Axisymm :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v};
 }
@@ -389,17 +389,6 @@ SPRPatchType
 L4Axisymm :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_2dxy;
-}
-
-
-int
-L4Axisymm :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    int result;
-    FloatArray lcoords;
-    result = this->computeLocalCoordinates(lcoords, coords);
-
-    return result;
 }
 
 

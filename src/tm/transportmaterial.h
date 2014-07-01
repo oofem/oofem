@@ -54,7 +54,7 @@ class TransportMaterialStatus : public MaterialStatus
 {
 protected:
     FloatArray temp_field; ///< Vector containing the last used field.
-    FloatArray temp_gradient; ///< Vector containing the last used gradient
+    FloatArray temp_gradient; ///< Vector containing the last used gradient.
     FloatArray temp_flux; ///< Vector containing the last computed flux.
 
     FloatArray field; ///< Vector containing the last equilibrated field. The physical meaning corresponds to temperature, concentration etc.

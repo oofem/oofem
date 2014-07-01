@@ -57,7 +57,7 @@ IntArray Quad1MindlinShell3D :: shellOrdering = { 1, 2, 3, 4, 5, 7, 8, 9, 10, 11
 IntArray Quad1MindlinShell3D :: drillOrdering = { 6, 12, 18, 24};
 
 Quad1MindlinShell3D :: Quad1MindlinShell3D(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(),
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this),
     SPRNodalRecoveryModelInterface(),
     lnodes(4)
 {
@@ -254,31 +254,14 @@ Quad1MindlinShell3D :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespo
     this->giveStructuralCrossSection()->give3dShellStiffMtrx(answer, rMode, gp, tStep);
 }
 
-void
-Quad1MindlinShell3D :: splitUnknowns(FloatArray &shellUnknowns, FloatArray &drillUnknowns, FloatArray &unknowns)
-{
-    shellUnknowns.resize(20);
-    drillUnknowns.resize(4);
-    // Split this for practical reasons into normal shell dofs and drilling dofs
-    for ( int i = 0; i < 4; ++i ) {
-        shellUnknowns(0 + i * 5) = unknowns(0 + i * 6);
-        shellUnknowns(1 + i * 5) = unknowns(1 + i * 6);
-        shellUnknowns(2 + i * 5) = unknowns(2 + i * 6);
-        shellUnknowns(3 + i * 5) = unknowns(3 + i * 6);
-        shellUnknowns(4 + i * 5) = unknowns(4 + i * 6);
-        drillUnknowns(i) = unknowns(5 + i * 6);
-    }
-}
-
 
 void
 Quad1MindlinShell3D :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatArray shellUnknowns, drillUnknowns, unknowns;
+    FloatArray shellUnknowns;
     FloatMatrix b;
     /* Here we do compute only the "traditional" part of shell strain vector, the quasi-strain related to rotations is not computed */
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, unknowns);
-    this->splitUnknowns(shellUnknowns, drillUnknowns, unknowns);
+    this->computeVectorOf({D_u, D_v, D_w, R_u, R_v}, VM_Total, tStep, shellUnknowns);
 
     this->computeBmatrixAt(gp, b);
     answer.beProductOf(b, shellUnknowns);
@@ -292,11 +275,12 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     // This elements adds an additional stiffness for the so called drilling dofs, meaning we need to work with all 9 components.
     FloatMatrix b, d;
     FloatArray n, strain, stress;
-    FloatArray shellUnknowns(20), drillUnknowns(4), unknowns;
+    FloatArray shellUnknowns, drillUnknowns, unknowns;
     bool drillCoeffFlag = false;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, unknowns);
-    this->splitUnknowns(shellUnknowns, drillUnknowns, unknowns); // Split this for practical reasons into normal shell dofs and drilling dofs
+    // Split this for practical reasons into normal shell dofs and drilling dofs
+    this->computeVectorOf({D_u, D_v, D_w, R_u, R_v}, VM_Total, tStep, shellUnknowns);
+    this->computeVectorOf({R_w}, VM_Total, tStep, drillUnknowns);
 
     FloatArray shellForces, drillMoment;
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
@@ -391,7 +375,7 @@ Quad1MindlinShell3D :: initializeFrom(InputRecord *ir)
 
 
 void
-Quad1MindlinShell3D :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Quad1MindlinShell3D :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }

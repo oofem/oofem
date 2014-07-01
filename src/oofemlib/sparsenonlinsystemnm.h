@@ -42,7 +42,6 @@
 #define sparsenonlinsystemnm_h
 
 #include "nummet.h"
-#include "equationid.h"
 #include "nmstatus.h"
 
 namespace oofem {

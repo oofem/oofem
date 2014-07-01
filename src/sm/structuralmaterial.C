@@ -92,6 +92,13 @@ StructuralMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp
 
 
 void
+StructuralMaterial :: giveRealStressVector_Warping(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    OOFEM_ERROR("Warping mode not supported");
+}
+
+
+void
 StructuralMaterial :: giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
     FloatArray vE, vS;
@@ -525,6 +532,10 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
     case _Fiber:
         this->giveFiberStiffMtrx(answer, rMode, gp, tStep);
         break;
+    case _Warping:
+        answer.resize(2,2);
+	answer.beUnitMatrix();
+        break;
     default:
         OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
     }
@@ -730,6 +741,12 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
 
     case _1dMat:
         answer = {1};
+        return 6;
+
+    case _Warping:
+        answer.resize(2);
+        answer.at(1) = 4;
+        answer.at(2) = 5;
         return 6;
 
     case _PlateLayer:

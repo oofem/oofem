@@ -665,12 +665,12 @@ PlasticMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 
 
 void
-PlasticMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
-                                        MatResponseMode mode,
-                                        GaussPoint *gp,
-                                        TimeStep *tStep)
+PlasticMaterial :: giveFiberStiffMtrx(FloatMatrix &answer,
+                                      MatResponseMode mode,
+                                      GaussPoint *gp,
+                                      TimeStep *tStep)
 //
-// returns receiver's 1dFiber
+// returns receiver's Fiber
 // (1dFiber ==> sigma_y = sigma_z = tau_yz = 0.)
 //
 // standard method from Material Class overloaded, because no inversion is needed.

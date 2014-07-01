@@ -86,7 +86,7 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_StokesFlow_deltat);
 
     delete this->velocityPressureField;
-    this->velocityPressureField = new PrimaryField(this, 1, FT_VelocityPressure, EID_MomentumBalance_ConservationEquation, 1);
+    this->velocityPressureField = new PrimaryField(this, 1, FT_VelocityPressure, 1);
     delete this->stiffnessMatrix;
     this->stiffnessMatrix = NULL;
     delete this->meshqualityee;
@@ -141,7 +141,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
             OOFEM_ERROR("Couldn't create requested sparse matrix of type %d", sparseMtrxType);
         }
 
-        this->stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering() );
+        this->stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
     }
 
     this->incrementOfSolution.resize(neq);
@@ -150,7 +150,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     // Build initial/external load (LoadVector)
     this->externalForces.resize(neq);
     this->externalForces.zero();
-    this->assembleVector( this->externalForces, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total,
+    this->assembleVector( this->externalForces, tStep, ExternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
@@ -209,7 +209,7 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
 
     if ( cmpn == InternalRhs ) {
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep, EID_MomentumBalance_ConservationEquation, InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
 #ifdef __PARALLEL_MODE
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
@@ -217,7 +217,7 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
         return;
     } else if ( cmpn == NonLinearLhs ) {
         this->stiffnessMatrix->zero();
-        this->assemble(this->stiffnessMatrix, tStep, EID_MomentumBalance_ConservationEquation, StiffnessMatrix,
+        this->assemble(this->stiffnessMatrix, tStep, StiffnessMatrix,
                        EModelDefaultEquationNumbering(), d);
         return;
     } else {
@@ -233,8 +233,11 @@ void StokesFlow :: updateYourself(TimeStep *tStep)
 
 int StokesFlow :: forceEquationNumbering(int id)
 {
-    int neq = FluidModel :: forceEquationNumbering(id);
 
+  /*
+    int neq = FluidModel :: forceEquationNumbering(id);
+  */
+    int neq = EngngModel::forceEquationNumbering(id);
     this->equationNumberingCompleted = false;
     if ( this->stiffnessMatrix ) {
         delete this->stiffnessMatrix;

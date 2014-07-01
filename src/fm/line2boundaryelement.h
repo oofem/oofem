@@ -70,7 +70,7 @@ public:
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep) { answer.clear(); }
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep) { answer.clear(); }
 
-    virtual void giveDofManDofIDMask(int i, EquationID eid, IntArray &nodeDofIDMask) const;
+    virtual void giveDofManDofIDMask(int i, IntArray &nodeDofIDMask) const;
 
     virtual FEInterpolation *giveInterpolation() const;
     virtual int computeNumberOfDofs() { return 6; }
@@ -81,15 +81,10 @@ public:
     // Interfaces
     virtual Interface *giveInterface(InterfaceType it);
 
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords) { return false; }
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &gcoords);
 
-    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                 TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer);
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                        TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer);
-    virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 };
 }
 

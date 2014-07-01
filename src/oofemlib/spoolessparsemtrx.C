@@ -94,7 +94,7 @@ SpoolesSparseMtrx :: timesT(const FloatArray &x, FloatArray &answer) const
 }
 
 int
-SpoolesSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
+SpoolesSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
     // Determine number of equations and estimate number of nonzero entries
     int neq = eModel->giveNumberOfDomainEquations(di, ut);

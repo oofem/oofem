@@ -24,7 +24,7 @@ REGISTER_Element(Q9PlaneStress2d);
 FEI2dQuadBiQuad Q9PlaneStress2d :: interpolation(1, 2);
 
 Q9PlaneStress2d :: Q9PlaneStress2d(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface()
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface()
     // Constructor.
 {
     //	printf("Entering Q9PlaneStress2d :: Q9PlaneStress2d().\n");
@@ -112,7 +112,7 @@ Q9PlaneStress2d :: computeVolumeAround(GaussPoint *gp)
 
 
 void
-Q9PlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Q9PlaneStress2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v};
 }
@@ -181,12 +181,6 @@ Q9PlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
     }
 }
 
-void
-Q9PlaneStress2d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                             InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
 
 void
 Q9PlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)

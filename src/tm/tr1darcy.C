@@ -36,7 +36,6 @@
 #include "tr1darcy.h"
 #include "node.h"
 #include "domain.h"
-#include "equationid.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "bcgeomtype.h"
@@ -124,7 +123,7 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
 
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a);
+    this->computeVectorOf(VM_Total, tStep, a);
 
     answer.resize(3);
     answer.zero();
@@ -249,21 +248,9 @@ void Tr1Darcy :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, Ti
     }
 }
 
-void Tr1Darcy :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+void Tr1Darcy :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    /*
-     * Returns the mask for node number inode of this element. The mask tells what quantities
-     * are held by each node. Since this element holds velocities (both in x and y direction),
-     * in six nodes and pressure in three nodes the answer depends on which node is requested.
-     */
-
-    if ( ( inode == 1 ) || ( inode == 2 ) || ( inode == 3 ) ) {
-        if ( ut == EID_ConservationEquation ) {
-            answer = {P_f};
-        } else {
-            OOFEM_ERROR("Unknown equation id encountered");
-        }
-    }
+    answer = {P_f};
 }
 
 void
@@ -275,13 +262,6 @@ Tr1Darcy :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
     mat->giveIPValue(answer, gp, type, tStep);
-}
-
-void
-Tr1Darcy :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                      InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 Interface *

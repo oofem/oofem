@@ -695,7 +695,7 @@ RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
 
 
 void
-RerShell :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+RerShell :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
@@ -706,14 +706,6 @@ RerShell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
                                                        InternalStateType type, TimeStep *tStep)
 {
     this->giveIPValue(answer, integrationRulesArray [ 0 ]->getIntegrationPoint(0), type, tStep);
-}
-
-
-void
-RerShell :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                      InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 

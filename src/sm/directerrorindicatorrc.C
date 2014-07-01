@@ -92,23 +92,18 @@ DirectErrorIndicatorRC :: giveLocalDofManDensity(int num)
     const IntArray *con;
     Domain *d = this->giveDomain();
     ConnectivityTable *ct = d->giveConnectivityTable();
-    DirectErrorIndicatorRCInterface *interface;
 
     con = ct->giveDofManConnectivityArray(num);
     isize = con->giveSize();
 
     for ( int i = 1; i <= isize; i++ ) {
         // ask for indicator variable value and determine current mesh density
-        interface = static_cast< DirectErrorIndicatorRCInterface * >
-                    ( d->giveElement( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType) );
-        if ( !interface ) {
-            OOFEM_WARNING("elem %d does not support DirectErrorIndicatorRCInterface", con->at(i) );
-        }
+        Element *element = d->giveElement( con->at(i) );
 
         if ( i == 1 ) {
-            currDensity = interface->DirectErrorIndicatorRCI_giveCharacteristicSize();
+            currDensity = element->computeMeanSize();
         } else {
-            currDensity =  max( currDensity, interface->DirectErrorIndicatorRCI_giveCharacteristicSize() );
+            currDensity =  max( currDensity, element->computeMeanSize() );
         }
     }
 
@@ -140,7 +135,6 @@ DirectErrorIndicatorRC :: giveLocalDofManIndicator(int inode, TimeStep *tStep)
     const IntArray *con;
     Domain *d = this->giveDomain();
     ConnectivityTable *ct = d->giveConnectivityTable();
-    DirectErrorIndicatorRCInterface *interface;
     double indicatorVal = 0.0;
 
     con = ct->giveDofManConnectivityArray(inode);
@@ -148,16 +142,12 @@ DirectErrorIndicatorRC :: giveLocalDofManIndicator(int inode, TimeStep *tStep)
 
     for ( int i = 1; i <= isize; i++ ) {
         // ask for indicator variable value and determine current mesh density
-        interface = static_cast< DirectErrorIndicatorRCInterface * >
-                    ( d->giveElement( con->at(i) )->giveInterface(DirectErrorIndicatorRCInterfaceType) );
-        if ( !interface ) {
-            OOFEM_WARNING("element %d does not support DirectErrorIndicatorRCInterface", con->at(i) );
-        }
+        Element *element = d->giveElement( con->at(i) );
 
         if ( i == 1 ) {
-            indicatorVal = ee->giveElementError(indicatorET, d->giveElement( con->at(i) ), tStep);
+            indicatorVal = ee->giveElementError(indicatorET, element, tStep);
         } else {
-            indicatorVal = max( indicatorVal, ee->giveElementError(indicatorET, d->giveElement( con->at(i) ), tStep) );
+            indicatorVal = max( indicatorVal, ee->giveElementError(indicatorET, element, tStep) );
         }
     }
 

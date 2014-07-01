@@ -65,7 +65,7 @@ QTruss1dGrad :: QTruss1dGrad(int n, Domain *aDomain) : QTruss1d(n, aDomain), Gra
 
 
 void
-QTruss1dGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+QTruss1dGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode < 3 ) {
         answer = {D_u, G_0};

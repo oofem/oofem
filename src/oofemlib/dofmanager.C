@@ -688,22 +688,26 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
 }
 
 
-void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry, ValueModeType mode, TimeStep *tStep)
+void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry, ValueModeType mode, TimeStep *tStep, bool padding)
 {
-    int size;
     IntArray dofArray;
 
-    answer.resize( size = dofIDArry.giveSize() );
+    answer.resize( dofIDArry.giveSize() );
+    if ( dofIDArry.giveSize() == 0 ) return;
 
-    for ( int i = 1; i <= size; i++ ) {
-        auto pos = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) );
-#ifdef DEBUG
+    int k = 0;
+    for ( auto &dofid: dofIDArry ) {
+        auto pos = this->findDofWithDofId( ( DofIDItem ) dofid );
         if ( pos == this->end() ) {
-            OOFEM_ERROR("Couldn't find dof with Dof ID %d", dofIDArry.at(i));
+            if ( padding ) {
+                answer.at(++k) = 0.;
+            } else {
+                continue;
+            }
         }
-#endif
-        answer.at(i) = (*pos)->giveUnknown(mode, tStep);
+        answer.at(++k) = (*pos)->giveUnknown(mode, tStep);
     }
+    answer.resizeWithValues(k);
 
     // Transform to global c.s.
     FloatMatrix L2G;
@@ -714,22 +718,25 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
 
 
 void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDArry,
-                                     PrimaryField &field, ValueModeType mode, TimeStep *tStep)
+                                     PrimaryField &field, ValueModeType mode, TimeStep *tStep, bool padding)
 {
-    int size;
     IntArray dofArray;
 
-    answer.resize( size = dofIDArry.giveSize() );
+    answer.resize( dofIDArry.giveSize() );
 
-    for ( int i = 1; i <= size; i++ ) {
-        auto pos = this->findDofWithDofId( ( DofIDItem ) dofIDArry.at(i) );
-#ifdef DEBUG
+    int k = 0;
+    for ( auto &dofid: dofIDArry ) {
+        auto pos = this->findDofWithDofId( ( DofIDItem ) dofid );
         if ( pos == this->end() ) {
-            OOFEM_ERROR("Couldn't find dof with Dof ID %d", dofIDArry.at(i));
+            if ( padding ) {
+                answer.at(++k) = 0.;
+            } else {
+                continue;
+            }
         }
-#endif
-        answer.at(i) = (*pos)->giveUnknown(field, mode, tStep);
+        answer.at(++k) = (*pos)->giveUnknown(field, mode, tStep);
     }
+    answer.resizeWithValues(k);
 
     // Transform to global c.s.
     FloatMatrix L2G;

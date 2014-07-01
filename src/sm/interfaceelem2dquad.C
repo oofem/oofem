@@ -149,7 +149,7 @@ InterfaceElem2dQuad :: initializeFrom(InputRecord *ir)
 
 
 void
-InterfaceElem2dQuad :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+InterfaceElem2dQuad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v};
 }

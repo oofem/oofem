@@ -59,8 +59,9 @@ FEI2dQuadLin QDKTPlate :: interp_lin(1, 2);
 
 QDKTPlate :: QDKTPlate(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain),
-    ZZNodalRecoveryModelInterface(),
-    SPRNodalRecoveryModelInterface()
+    ZZNodalRecoveryModelInterface(this),
+    SPRNodalRecoveryModelInterface(),
+    ZZErrorEstimatorInterface(this)
 {
     numberOfDofMans = 4;
     numberOfGaussPoints = 4;
@@ -347,7 +348,7 @@ QDKTPlate :: initializeFrom(InputRecord *ir)
 
 
 void
-QDKTPlate :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+QDKTPlate :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_w, R_u, R_v};
 }
@@ -398,8 +399,6 @@ QDKTPlate :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     }
 
 
@@ -546,13 +545,6 @@ QDKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType t
     } else {
         return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
     }
-}
-
-
-double
-QDKTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize()
-{
-    return sqrt(this->computeArea() * 2.0);
 }
 
 

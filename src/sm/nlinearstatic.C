@@ -267,6 +267,13 @@ double NonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeStep *tSt
             return 0.;
         }
 
+    case VM_Velocity:
+        if ( incrementOfDisplacement.isNotEmpty() ) {
+            return incrementOfDisplacement.at(eq) / tStep->giveTimeIncrement();
+        } else {
+            return 0.;
+        }
+
     default:
         OOFEM_ERROR("Unknown is of undefined ValueModeType for this problem");
     }
@@ -438,7 +445,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
             }
         }
 
-        stiffnessMatrix->buildInternalStructure( this, di, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        stiffnessMatrix->buildInternalStructure( this, di, EModelDefaultEquationNumbering() );
     }
 
 #if 0
@@ -463,7 +470,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         // assemble the incremental reference load vector
         //
         this->assembleIncrementalReferenceLoadVectors(incrementalLoadVector, incrementalLoadVectorOfPrescribed,
-                                                      refLoadInputMode, this->giveDomain(di), EID_MomentumBalance, tStep);
+                                                      refLoadInputMode, this->giveDomain(di), tStep);
 
         loadInitFlag = 0;
     }
@@ -496,7 +503,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         OOFEM_LOG_RELEVANT("Computing initial guess\n");
 #endif
         FloatArray extrapolatedForces;
-        this->assembleExtrapolatedForces( extrapolatedForces, tStep, EID_MomentumBalance, TangentStiffnessMatrix, this->giveDomain(di) );
+        this->assembleExtrapolatedForces( extrapolatedForces, tStep, TangentStiffnessMatrix, this->giveDomain(di) );
         extrapolatedForces.negated();
 
         this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
@@ -545,14 +552,14 @@ NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
 #ifdef VERBOSE
             OOFEM_LOG_DEBUG("Assembling tangent stiffness matrix\n");
 #endif
-            this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, TangentStiffnessMatrix,
+            this->assemble(stiffnessMatrix, tStep, TangentStiffnessMatrix,
                            EModelDefaultEquationNumbering(), d);
         } else if ( ( stiffMode == nls_secantStiffness ) || ( stiffMode == nls_secantInitialStiffness && initFlag ) ) {
 #ifdef VERBOSE
             OOFEM_LOG_DEBUG("Assembling secant stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, SecantStiffnessMatrix,
+            this->assemble(stiffnessMatrix, tStep, SecantStiffnessMatrix,
                            EModelDefaultEquationNumbering(), d);
             initFlag = 0;
         } else if ( ( stiffMode == nls_elasticStiffness ) && ( initFlag ||
@@ -561,7 +568,7 @@ NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
             OOFEM_LOG_DEBUG("Assembling elastic stiffness matrix\n");
 #endif
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, ElasticStiffnessMatrix,
+            this->assemble(stiffnessMatrix, tStep, ElasticStiffnessMatrix,
                            EModelDefaultEquationNumbering(), d);
             initFlag = 0;
         } else {
@@ -769,7 +776,7 @@ NonLinearStatic :: initParallelContexts()
 
 
 void
-NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type,
+NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
                             const UnknownNumberingScheme &s, Domain *domain)
 {
 #ifdef TIME_REPORT
@@ -777,7 +784,7 @@ NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, 
     timer.startTimer();
 #endif
 
-    LinearStatic :: assemble(answer, tStep, ut, type, s, domain);
+    LinearStatic :: assemble(answer, tStep, type, s, domain);
 
     if ( ( nonlocalStiffnessFlag ) && ( type == TangentStiffnessMatrix ) ) {
         // add nonlocal contribution
@@ -844,7 +851,7 @@ void
 NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incrementalLoadVector,
                                                            FloatArray &_incrementalLoadVectorOfPrescribed,
                                                            SparseNonLinearSystemNM :: referenceLoadInputModeType _refMode,
-                                                           Domain *sourceDomain, EquationID ut, TimeStep *tStep)
+                                                           Domain *sourceDomain, TimeStep *tStep)
 {
     _incrementalLoadVector.resize( sourceDomain->giveEngngModel()->giveNumberOfDomainEquations( sourceDomain->giveNumber(), EModelDefaultEquationNumbering() ) );
     _incrementalLoadVector.zero();
@@ -853,16 +860,16 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
 
     if ( _refMode == SparseNonLinearSystemNM :: rlm_incremental ) {
         ///@todo This was almost definitely wrong before. It never seems to be used. Is this code even relevant?
-        this->assembleVector(_incrementalLoadVector, tStep, ut, ExternalForcesVector,
+        this->assembleVector(_incrementalLoadVector, tStep, ExternalForcesVector,
                              VM_Incremental, EModelDefaultEquationNumbering(), sourceDomain);
 
-        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ut, ExternalForcesVector,
+        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ExternalForcesVector,
                              VM_Incremental, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     } else {
-        this->assembleVector(_incrementalLoadVector, tStep, ut, ExternalForcesVector,
+        this->assembleVector(_incrementalLoadVector, tStep, ExternalForcesVector,
                              VM_Total, EModelDefaultEquationNumbering(), sourceDomain);
 
-        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ut, ExternalForcesVector,
+        this->assembleVector(_incrementalLoadVectorOfPrescribed, tStep, ExternalForcesVector,
                              VM_Total, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     }
 

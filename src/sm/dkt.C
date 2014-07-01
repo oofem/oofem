@@ -58,8 +58,8 @@ FEI2dTrLin DKTPlate :: interp_lin(1, 2);
 
 DKTPlate :: DKTPlate(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain),
-    LayeredCrossSectionInterface(), ZZNodalRecoveryModelInterface(),
-    NodalAveragingRecoveryModelInterface(), SPRNodalRecoveryModelInterface()
+    LayeredCrossSectionInterface(), ZZNodalRecoveryModelInterface(this),
+    NodalAveragingRecoveryModelInterface(), SPRNodalRecoveryModelInterface(), ZZErrorEstimatorInterface(this)
 {
     numberOfDofMans = 3;
     numberOfGaussPoints = 3;
@@ -350,7 +350,7 @@ DKTPlate :: initializeFrom(InputRecord *ir)
 
 
 void
-DKTPlate :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+DKTPlate :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_w, R_u, R_v};
 }
@@ -422,8 +422,6 @@ DKTPlate :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     }
 
 
@@ -535,14 +533,6 @@ DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 }
 
 
-double
-DKTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize()
-{
-    return sqrt(this->computeArea() * 2.0);
-}
-
-
-
 //
 // The element interface required by NodalAveragingRecoveryModel
 //
@@ -558,14 +548,6 @@ DKTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
     } else {
         answer.clear();
     }
-}
-
-
-void
-DKTPlate :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                      InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 

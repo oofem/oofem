@@ -273,7 +273,7 @@ void NonLinearDynamic :: solveYourself()
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
         // Force equation numbering before setting up comm maps.
-        int neq = this->giveNumberOfDomainEquations(EID_MomentumBalance);
+        int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
         OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
         if ( isParallel() ) {
@@ -295,7 +295,7 @@ NonLinearDynamic :: solveYourselfAt(TimeStep *tStep)
 #ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
         // Force equation numbering before setting up comm maps.
-        int neq = this->giveNumberOfDomainEquations(EID_MomentumBalance);
+        int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
         OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
         if ( isParallel() ) {
@@ -402,11 +402,11 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
             }
         }
 
-        effectiveStiffnessMatrix->buildInternalStructure( this, di, EID_MomentumBalance, EModelDefaultEquationNumbering() );
-        massMatrix->buildInternalStructure( this, di, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        effectiveStiffnessMatrix->buildInternalStructure( this, di, EModelDefaultEquationNumbering() );
+        massMatrix->buildInternalStructure( this, di, EModelDefaultEquationNumbering() );
 
         // Assemble mass matrix
-        this->assemble( massMatrix, tStep, EID_MomentumBalance, MassMatrix,
+        this->assemble( massMatrix, tStep, MassMatrix,
                        EModelDefaultEquationNumbering(), this->giveDomain(di) );
 
         // Initialize vectors
@@ -438,7 +438,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     FloatArray loadVector;
     loadVector.resize( this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() ) );
     loadVector.zero();
-    this->assembleVector( loadVector, tStep, EID_MomentumBalance, ExternalForcesVector,
+    this->assembleVector( loadVector, tStep, ExternalForcesVector,
                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(di) );
 
 #ifdef __PARALLEL_MODE
@@ -617,10 +617,10 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
             timer.startTimer();
 #endif
             effectiveStiffnessMatrix->zero();
-            this->assemble(effectiveStiffnessMatrix, tStep, EID_MomentumBalance, EffectiveStiffnessMatrix,
+            this->assemble(effectiveStiffnessMatrix, tStep, EffectiveStiffnessMatrix,
                            EModelDefaultEquationNumbering(), d);
 #if 0
-            this->assemble(effectiveStiffnessMatrix, tStep, EID_MomentumBalance, TangentStiffnessMatrix,
+            this->assemble(effectiveStiffnessMatrix, tStep, TangentStiffnessMatrix,
                            EModelDefaultEquationNumbering(), d);
             effectiveStiffnessMatrix->times(1. + this->delta * a1);
             effectiveStiffnessMatrix->add(this->a0 + this->eta * this->a1, this->massMatrix);
@@ -820,7 +820,7 @@ NonLinearDynamic :: initParallelContexts()
 #endif
 
 void
-NonLinearDynamic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type,
+NonLinearDynamic :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
                              const UnknownNumberingScheme &s, Domain *domain)
 {
 #ifdef TIME_REPORT
@@ -828,7 +828,7 @@ NonLinearDynamic :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut,
     timer.startTimer();
 #endif
 
-    EngngModel :: assemble(answer, tStep, ut, type, s, domain);
+    EngngModel :: assemble(answer, tStep, type, s, domain);
 
     if ( ( nonlocalStiffnessFlag ) && ( type == TangentStiffnessMatrix ) ) {
         // Add nonlocal contribution.
@@ -876,7 +876,7 @@ void
 NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Domain *domain, TimeStep *tStep)
 {
     int nelem = domain->giveNumberOfElements();
-    //int neq = this->giveNumberOfDomainEquations(EID_MomentumBalance);
+    //int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
     int jj, kk, n;
     FloatMatrix charMtrx;
     IntArray loc;
@@ -896,7 +896,7 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
 
 #endif
 
-        element->giveLocationArray(loc, EID_MomentumBalance, en);
+        element->giveLocationArray(loc, en);
         element->giveCharacteristicMatrix(charMtrx, type, tStep);
 
         //

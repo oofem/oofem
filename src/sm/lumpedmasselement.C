@@ -118,7 +118,7 @@ LumpedMassElement :: computeNumberOfDofs()
 
 
 void
-LumpedMassElement :: giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const
+LumpedMassElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer.resize(6);
     answer.clear();

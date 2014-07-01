@@ -344,7 +344,7 @@ J2Mat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf,
         }
 
         f = this->computeJ2InvariantAt(helpVector);
-        f12 = pow(f, 1. / 2.);
+        f12 = sqrt(f);
         f32 = pow(f, 3. / 2.);
 
         ax = helpVector.at(1);

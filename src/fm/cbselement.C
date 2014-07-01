@@ -148,7 +148,7 @@ CBSElement :: computePrescribedTermsI(FloatArray &answer, ValueModeType mode, Ti
     FloatMatrix mass;
     FloatArray usp;
     this->computeConsistentMassMtrx(mass, tStep);
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, usp);
+    this->computeVectorOfVelocities(mode, tStep, usp);
     answer.beProductOf(mass, usp);
     answer.negated();
 }
@@ -160,7 +160,7 @@ CBSElement :: computePrescribedTermsII(FloatArray &answer, ValueModeType mode, T
     FloatMatrix lhs;
     FloatArray usp;
     this->computePressureLhs(lhs, tStep);
-    this->computeVectorOf(EID_ConservationEquation, mode, tStep, usp);
+    this->computeVectorOfPressures(mode, tStep, usp);
     answer.beProductOf(lhs, usp);
     answer.negated();
 }

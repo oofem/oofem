@@ -59,8 +59,7 @@ public:
     virtual const char *giveClassName() const { return "Tet1_3D_SUPG"; }
     virtual const char *giveInputRecordName() const { return _IFT_Tet1_3D_SUPG_Name; }
     virtual MaterialMode giveMaterialMode() { return _3dFlow; }
-    virtual void giveElementDofIDMask(EquationID, IntArray &answer) const;
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual int computeNumberOfDofs();
 
     virtual Interface *giveInterface(InterfaceType t);

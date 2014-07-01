@@ -166,9 +166,14 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
 
     interface = static_cast< EIPrimaryUnknownMapperInterface * >( oelem->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
     if ( interface ) {
-        interface->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(dofMask);
+        oelem->giveElementDofIDMask(dofMask);
 #if 1
-        interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(mode, tStep, coords, answer);
+        FloatArray lcoords;
+        if ( oelem->computeLocalCoordinates(lcoords, coords) ) {
+            interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
+        } else {
+            answer.clear();
+        }
 #else
         interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
 #endif

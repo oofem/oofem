@@ -55,11 +55,10 @@ REGISTER_Element(TrPlaneStress2d);
 FEI2dTrLin TrPlaneStress2d :: interp(1, 2);
 
 TrPlaneStress2d :: TrPlaneStress2d(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
-    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(),
-    DirectErrorIndicatorRCInterface(),
-    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(), ZZRemeshingCriteriaInterface(),
-    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
+    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
+    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
+    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface()
 {
     numberOfDofMans  = 3;
     area = -1;
@@ -77,20 +76,14 @@ TrPlaneStress2d :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
         return static_cast< MMAShapeFunctProjectionInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
-    } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return static_cast< HuertaRemeshingCriteriaInterface * >(this);
     }
 
     return NULL;
@@ -446,7 +439,7 @@ TrPlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCr
 }
 
 void
-TrPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+TrPlaneStress2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v};
 }
@@ -460,13 +453,6 @@ TrPlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
     this->giveIPValue(answer, gp, type, tStep);
 }
 
-void
-TrPlaneStress2d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                             InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
 
 
 void
@@ -477,7 +463,6 @@ TrPlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedEleme
                                                                     IntArray &controlNode, IntArray &controlDof,
                                                                     HuertaErrorEstimator :: AnalysisMode aMode)
 {
-    Element *element = this->HuertaErrorEstimatorI_giveElement();
     int inode, nodes = 3, iside, sides = 3, nd1, nd2;
     FloatArray *corner [ 3 ], midSide [ 3 ], midNode, cor [ 3 ];
     double x = 0.0, y = 0.0;
@@ -487,7 +472,7 @@ TrPlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedEleme
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
-            corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
+            corner [ inode ] = this->giveNode(inode + 1)->giveCoordinates();
             if ( corner [ inode ]->giveSize() != 3 ) {
                 cor [ inode ].resize(3);
                 cor [ inode ].at(1) = corner [ inode ]->at(1);
@@ -519,7 +504,7 @@ TrPlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedEleme
         midNode.at(3) = 0.0;
     }
 
-    this->setupRefinedElementProblem2D(element, refinedElement, level, nodeId, localNodeIdArray, globalNodeIdArray,
+    this->setupRefinedElementProblem2D(this, refinedElement, level, nodeId, localNodeIdArray, globalNodeIdArray,
                                        sMode, tStep, nodes, corner, midSide, midNode,
                                        localNodeId, localElemId, localBcId,
                                        controlNode, controlDof, aMode, "PlaneStress2d");
@@ -811,13 +796,6 @@ TrPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-int
-TrPlaneStress2d :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
 double
 TrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
@@ -845,45 +823,20 @@ TrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Floa
 }
 
 
-double
-TrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
-{
-    return sqrt(this->giveArea() * 2.0);
-}
-
-int
-TrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                    TimeStep *tStep, const FloatArray &coords,
+void
+TrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                    TimeStep *tStep, const FloatArray &lcoords,
                                                                     FloatArray &answer)
 {
-    FloatArray lcoords, u;
+    FloatArray u;
     FloatMatrix n;
-    int result;
 
-    result = this->computeLocalCoordinates(lcoords, coords);
+    n.beNMatrixOf(lcoords, 2);
 
-    n.resize(2, 6);
-    n.zero();
-
-    n.at(1, 1) = lcoords.at(1);
-    n.at(1, 3) = lcoords.at(2);
-    n.at(1, 5) = lcoords.at(3);
-
-    n.at(2, 2) = lcoords.at(1);
-    n.at(2, 4) = lcoords.at(2);
-    n.at(2, 6) = lcoords.at(3);
-
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf({D_u, D_v}, mode, tStep, u);
     answer.beProductOf(n, u);
-
-    return result;
 }
 
-void
-TrPlaneStress2d :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    giveDofManDofIDMask(1, EID_MomentumBalance, answer);
-}
 
 void
 TrPlaneStress2d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,

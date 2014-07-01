@@ -38,7 +38,6 @@
 #include "structuralms.h"
 #include "mathfem.h"
 #include "domain.h"
-#include "equationid.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "feinterpol3d.h"
@@ -52,7 +51,7 @@ namespace oofem {
 FEI3dWedgeQuad Shell7Base :: interpolationForExport;
 
 Shell7Base :: Shell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface(),
-    VTKXMLExportModuleElementInterface(), ZZNodalRecoveryModelInterface(), FailureModuleElementInterface() { }
+    VTKXMLExportModuleElementInterface(), ZZNodalRecoveryModelInterface(this), FailureModuleElementInterface() { }
 
 Shell7Base :: ~Shell7Base()
 {
@@ -115,7 +114,7 @@ Interface *Shell7Base :: giveInterface(InterfaceType it)
 
 
 void
-Shell7Base :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+Shell7Base :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w, W_u, W_v, W_w, Gamma};
 }
@@ -1331,7 +1330,7 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
 void
 Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
 {
-    //@todo: very old version should be checked
+    ///@todo: very old version should be checked
     // Analytically integrated over the thickness. Constant density assumed.
 
     IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];   // rule 2 for mid-plane integration only
@@ -1346,7 +1345,9 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
         this->computeNmatrixAt(lCoords, N);
         this->giveUpdatedSolutionVector(aVec, tStep);
         // Fix for the new numbering in B & N
-        this->computeVectorOfDofIDs(EID_MomentumBalance, VM_Velocity, tStep, daVec);
+        OOFEM_ERROR("Broken code! Should be fixed");
+        ///@todo This was definitely broken before: What dofids should be asked for?
+        //this->computeVectorOfDofIDs(???, VM_Velocity, tStep, daVec);
 
         a.beProductOf(N, aVec);        // [ x,  m,  gam]^T
         da.beProductOf(N, daVec);        // [dx, dm, dgam]^T
@@ -1772,11 +1773,6 @@ Shell7Base :: giveBondTransMatrix(FloatMatrix &answer, FloatMatrix &Q)
 
 #if 1
 
-void Shell7Base :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    // what is this?
-    answer.clear();
-}
 
 void Shell7Base :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
@@ -1803,7 +1799,6 @@ Shell7Base :: ZZNodalRecoveryMI_computeNValProductInLayer(FloatMatrix &answer, i
    // N(nsigma, nsigma*nnodes)
    // Definition : sigmaVector = N * nodalSigmaVector
     FloatArray stressVector, n;
-    Element *elem  = this->ZZNodalRecoveryMI_giveElement();
     IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
 
     //int size = ZZNodalRecoveryMI_giveDofManRecordSize(type);
@@ -1815,7 +1810,7 @@ Shell7Base :: ZZNodalRecoveryMI_computeNValProductInLayer(FloatMatrix &answer, i
     for ( GaussPoint *gp: *iRule ) {
         double dV = this->computeVolumeAroundLayer(gp, layer);
 
-        if ( !elem->giveIPValue(stressVector, gp, type, tStep) ) {
+        if ( !this->giveIPValue(stressVector, gp, type, tStep) ) {
             stressVector.resize(size);
             stressVector.zero();
         }
@@ -1998,7 +1993,7 @@ Shell7Base :: giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep)
     FloatArray temp;
     int dummy = 0;
     IntArray dofIdArray;
-    Shell7Base :: giveDofManDofIDMask(dummy, EID_MomentumBalance, dofIdArray);
+    Shell7Base :: giveDofManDofIDMask(dummy, dofIdArray);
     this->computeVectorOfDofIDs(dofIdArray, VM_Total, tStep, temp);
 
     answer.assemble( temp, this->giveOrdering(AllInv) );
@@ -2035,7 +2030,7 @@ Shell7Base :: edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge,
     FloatArray temp;
     int dummy = 0;
     IntArray dofIdArray;
-    Shell7Base :: giveDofManDofIDMask(dummy, EID_MomentumBalance, dofIdArray);
+    Shell7Base :: giveDofManDofIDMask(dummy, dofIdArray);
     this->temp_computeBoundaryVectorOf(dofIdArray, iedge, VM_Total, tStep, temp);
     answer.assemble( temp, this->giveOrdering(EdgeInv) );
 }

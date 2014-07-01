@@ -187,7 +187,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
         // first step - solve linear static problem
         //
         stiffnessMatrix = classFactory.createSparseMtrx(SMT_Skyline); ///@todo Don't hardcode skyline matrix only
-        stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
         //
         // allocate space for displacement Vector
@@ -204,7 +204,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Assembling stiffness matrix\n");
  #endif
     stiffnessMatrix->zero();
-    this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
+    this->assemble( stiffnessMatrix, tStep, StiffnessMatrix,
                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #endif
 
@@ -217,11 +217,11 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     loadVector.zero();
 
     // Internal forces first, negated;
-    this->assembleVector( loadVector, tStep, EID_MomentumBalance, InternalForcesVector, VM_Total,
+    this->assembleVector( loadVector, tStep, InternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
     loadVector.negated();
 
-    this->assembleVector( loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
+    this->assembleVector( loadVector, tStep, ExternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
 #ifdef __PARALLEL_MODE
@@ -252,12 +252,12 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling stiffness  matrix\n");
 #endif
-    this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
+    this->assemble( stiffnessMatrix, tStep, StiffnessMatrix,
                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Assembling  initial stress matrix\n");
 #endif
-    this->assemble( initialStressMatrix, tStep, EID_MomentumBalance, InitialStressMatrix,
+    this->assemble( initialStressMatrix, tStep, InitialStressMatrix,
                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
     initialStressMatrix->times(-1.0);
 

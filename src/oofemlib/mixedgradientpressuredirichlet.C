@@ -230,7 +230,7 @@ double MixedGradientPressureDirichlet :: giveUnknown(double vol, const FloatArra
 }
 
 
-void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, double &vol, EquationID eid, TimeStep *tStep)
+void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, double &vol, TimeStep *tStep)
 {
     EngngModel *emodel = this->giveDomain()->giveEngngModel();
     FloatArray tmp;
@@ -239,10 +239,10 @@ void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, doubl
     // sigma = residual (since we use the slave dofs) = f_ext - f_int
     sigmaDev.resize(npeq);
     sigmaDev.zero();
-    emodel->assembleVector(sigmaDev, tStep, eid, InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    emodel->assembleVector(sigmaDev, tStep, InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
     tmp.resize(npeq);
     tmp.zero();
-    emodel->assembleVector(tmp, tStep, eid, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    emodel->assembleVector(tmp, tStep, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
     sigmaDev.subtract(tmp);
     // Divide by the RVE-volume
     sigmaDev.times( 1.0 / this->domainSize() );
@@ -254,7 +254,7 @@ void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, doubl
 }
 
 
-void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep)
+void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, TimeStep *tStep)
 {
     double rve_size = this->domainSize();
     // Fetch some information from the engineering model
@@ -279,8 +279,8 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
     {
         // Sets up RHS for all sensitivity problems;
         SparseMtrx *Kfp = classFactory.createSparseMtrx(stype);
-        Kfp->buildInternalStructure(rve, 1, eid, fnum, pnum);
-        rve->assemble(Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain);
+        Kfp->buildInternalStructure(rve, 1, fnum, pnum);
+        rve->assemble(Kfp, tStep, StiffnessMatrix, fnum, pnum, this->domain);
 
         // Setup up indices and locations
         int neq = Kfp->giveNumberOfRows();
@@ -312,11 +312,11 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
     {
         // Solve all sensitivities
         SparseMtrx *Kff = classFactory.createSparseMtrx(stype);
-        Kff->buildInternalStructure(rve, 1, eid, fnum);
+        Kff->buildInternalStructure(rve, 1, fnum);
         if ( !Kff ) {
             OOFEM_ERROR("MixedGradientPressureDirichlet :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
         }
-        rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, this->domain);
+        rve->assemble(Kff, tStep, StiffnessMatrix, fnum, this->domain);
         solver->solve(Kff, & rhs_p, & s_p);
         solver->solve(Kff, rhs_d, s_d);
         delete Kff;
@@ -333,10 +333,10 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
         // Sensitivities for d_dev is obtained as reactions forces;
         SparseMtrx *Kpf = classFactory.createSparseMtrx(stype);
         SparseMtrx *Kpp = classFactory.createSparseMtrx(stype);
-        Kpf->buildInternalStructure(rve, 1, eid, pnum, fnum);
-        Kpp->buildInternalStructure(rve, 1, eid, pnum);
-        rve->assemble(Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain);
-        rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, this->domain);
+        Kpf->buildInternalStructure(rve, 1, pnum, fnum);
+        Kpp->buildInternalStructure(rve, 1, pnum);
+        rve->assemble(Kpf, tStep, StiffnessMatrix, pnum, fnum, this->domain);
+        rve->assemble(Kpp, tStep, StiffnessMatrix, pnum, this->domain);
 
         FloatMatrix tmpMat;
         Kpp->times(ddev_pert, tmpMat);
@@ -399,14 +399,10 @@ void MixedGradientPressureDirichlet :: setPrescribedDeviatoricGradientFromVoigt(
 }
 
 
-void MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                                       CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
     if ( type != ExternalForcesVector ) {
-        return;
-    }
-
-    if ( eid != EID_MomentumBalance_ConservationEquation && eid != EID_MomentumBalance ) {
         return;
     }
 

@@ -286,7 +286,7 @@ InterfaceElem1d :: computeNumberOfDofs()
 
 
 void
-InterfaceElem1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+InterfaceElem1d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     switch ( domain->giveDomainType() ) {
     case _2dPlaneStressMode:

@@ -97,13 +97,13 @@ IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoin
     IsoInterfaceDamageMaterialStatus *status = static_cast< IsoInterfaceDamageMaterialStatus * >( this->giveStatus(gp) );
     FloatArray strainVector, reducedTotalStrainVector;
     FloatMatrix de;
-    double f, equivStrain, tempKappa = 0.0, omega = 0.0;
+    double equivStrain, tempKappa = 0.0, omega = 0.0;
 
     this->initGpForNewStep(gp);
 
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
-    // therefore it is necessary to subtract always the total eigen strain value
+    // therefore it is always necessary to subtract the total eigen strain value
     this->giveStressDependentPartOfStrainVector(reducedTotalStrainVector, gp, totalStrain, tStep, VM_Total);
 
     //crossSection->giveFullCharacteristicVector(totalStrainVector, gp, reducedTotalStrainVector);
@@ -112,16 +112,15 @@ IsoInterfaceDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoin
     this->computeEquivalentStrain(equivStrain, reducedTotalStrainVector, gp, tStep);
 
     // compute value of loading function if strainLevel crit apply
-    f = equivStrain - status->giveKappa();
+    tempKappa = status->giveKappa();
 
-    if ( f <= 0.0 ) {
-        // damage do not grow
-        tempKappa = status->giveKappa();
-        omega     = status->giveDamage();
+    if ( tempKappa >= equivStrain ) {
+        // damage does not grow
+        omega = status->giveDamage();
     } else {
         // damage grows
         tempKappa = equivStrain;
-        // evaluate damage parameter
+        // evaluate damage
         this->computeDamageParam(omega, tempKappa, reducedTotalStrainVector, gp);
     }
 
@@ -369,13 +368,13 @@ IsoInterfaceDamageMaterial :: giveInputRecord(DynamicInputRecord &input)
 void
 IsoInterfaceDamageMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-  // kappa = macbra( strain.at(1) );
+    // kappa = macbra( strain.at(1) );
     double epsNplus = macbra( strain.at(1) );
-    double epsT2 = strain.at(2)*strain.at(2);
-    if (strain.giveSize()==3){
-      epsT2 += strain.at(3)*strain.at(3);
+    double epsT2 = strain.at(2) * strain.at(2);
+    if ( strain.giveSize() == 3 ) {
+        epsT2 += strain.at(3) * strain.at(3);
     }
-    kappa = sqrt(epsNplus*epsNplus + beta*epsT2);
+    kappa = sqrt(epsNplus * epsNplus + beta * epsT2);
 }
 
 void

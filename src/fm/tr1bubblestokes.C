@@ -35,7 +35,6 @@
 #include "tr1bubblestokes.h"
 #include "node.h"
 #include "domain.h"
-#include "equationid.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "bcgeomtype.h"
@@ -62,7 +61,7 @@ IntArray Tr1BubbleStokes :: edge_ordering [ 3 ] = {
     {7, 8, 1, 2}
 };
 
-Tr1BubbleStokes :: Tr1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomain)
+Tr1BubbleStokes :: Tr1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SpatialLocalizerInterface(this)
 {
     this->numberOfDofMans = 3;
     this->numberOfGaussPoints = 7;
@@ -91,26 +90,14 @@ int Tr1BubbleStokes :: computeNumberOfDofs()
     return 11;
 }
 
-void Tr1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+void Tr1BubbleStokes :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    if ( ut == EID_MomentumBalance ) {
-        answer = {V_u, V_v};
-    } else if ( ut == EID_ConservationEquation ) {
-        answer = {P_f};
-    } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        answer = {V_u, V_v, P_f};
-    } else {
-        answer.clear();
-    }
+    answer = {V_u, V_v, P_f};
 }
 
-void Tr1BubbleStokes :: giveInternalDofManDofIDMask(int i, EquationID eid, IntArray &answer) const
+void Tr1BubbleStokes :: giveInternalDofManDofIDMask(int i, IntArray &answer) const
 {
-    if ( eid == EID_MomentumBalance_ConservationEquation || eid == EID_MomentumBalance ) {
-        answer = {V_u, V_v};
-    } else {
-        answer.clear();
-    }
+    answer = {V_u, V_v};
 }
 
 double Tr1BubbleStokes :: computeVolumeAround(GaussPoint *gp)
@@ -151,8 +138,8 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
     FloatMatrix dN, B(3, 8);
     B.zero();
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
+    this->computeVectorOfVelocities(VM_Total, tStep, a_velocity);
+    this->computeVectorOfPressures(VM_Total, tStep, a_pressure);
 
     FloatArray momentum, conservation;
 
@@ -401,12 +388,6 @@ Interface *Tr1BubbleStokes :: giveInterface(InterfaceType it)
     }
 }
 
-int Tr1BubbleStokes :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
 void Tr1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                               TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
@@ -423,25 +404,6 @@ void Tr1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(Va
     for ( int i = 1; i <= n_lin.giveSize(); i++ ) {
         answer(2) += n_lin.at(i) * this->giveNode(i)->giveDofWithID(P_f)->giveUnknown(mode, tStep);
     }
-}
-
-int Tr1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode, TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
-{
-    bool ok;
-    FloatArray lcoords, n, n_lin;
-    ok = this->computeLocalCoordinates(lcoords, gcoords);
-    if ( !ok ) {
-        answer.clear();
-        return false;
-    }
-
-    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    return true;
-}
-
-void Tr1BubbleStokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    answer = {V_u, V_v, P_f};
 }
 
 double Tr1BubbleStokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)

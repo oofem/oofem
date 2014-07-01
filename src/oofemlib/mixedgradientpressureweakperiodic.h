@@ -119,20 +119,21 @@ public:
 
     virtual void scale(double s);
 
-    virtual void computeFields(FloatArray &sigmaDev, double &vol, EquationID eid, TimeStep *tStep);
-    virtual void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep);
+    virtual void computeFields(FloatArray &sigmaDev, double &vol, TimeStep *tStep);
+    void computeStress(FloatArray &sigmaDev, FloatArray &tractions, double rve_size);
+    virtual void computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, TimeStep *tStep);
 
     virtual void setPrescribedPressure(double p) { pressure = p; }
     virtual void setPrescribedDeviatoricGradientFromVoigt(const FloatArray &ddev);
 
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
 
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
-    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
+    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual const char *giveClassName() const { return "MixedGradientPressureWeakPeriodic"; }
@@ -142,8 +143,8 @@ protected:
     void integrateTractionVelocityTangent(FloatMatrix &answer, Element *el, int boundary);
     void integrateTractionXTangent(FloatMatrix &answer, Element *el, int boundary);
     void integrateTractionDev(FloatArray &answer, Element *el, int boundary, const FloatMatrix &ddev);
+    void constructMMatrix(FloatMatrix &mMatrix, FloatArray &coords, FloatArray &normal);
     void evaluateTractionBasisFunctions(FloatArray &answer, const FloatArray &coords);
-
     void constructFullMatrixForm(FloatMatrix &d, const FloatArray &d_voigt) const;
 };
 } // end namespace oofem

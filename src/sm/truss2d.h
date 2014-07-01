@@ -76,7 +76,7 @@ public:
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     virtual int computeNumberOfDofs() { return 4; }
-    virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &)
     { return this->computeLength(); }

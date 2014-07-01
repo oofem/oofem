@@ -150,7 +150,6 @@ public:
     virtual const char *giveClassName() const { return "NonLinearDynamic"; }
     virtual fMode giveFormulation() { return nonLinFormulation; }
     virtual int useNonlocalStiffnessOption() { return this->nonlocalStiffnessFlag; }
-    /// For load balancing purposes we store all values with same EquationID; so hash is computed from mode value only
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) { return ( int ) mode; }
     void timesMtrx(FloatArray &answer, FloatArray &vec, CharType type, Domain *domain, TimeStep *tStep);
 
@@ -175,7 +174,7 @@ public:
 #endif
 
 protected:
-    void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type,
+    void assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
                   const UnknownNumberingScheme &, Domain *domain);
 
     void proceedStep(int di, TimeStep *tStep);

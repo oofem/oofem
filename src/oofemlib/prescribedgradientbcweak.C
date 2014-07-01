@@ -162,7 +162,7 @@ void PrescribedGradientBCWeak::scale(double s)
 
 }
 
-void PrescribedGradientBCWeak::assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void PrescribedGradientBCWeak::assembleVector(FloatArray &answer, TimeStep *tStep,
                             CharType type, ValueModeType mode,
                             const UnknownNumberingScheme &s, FloatArray *eNorm)
 {
@@ -302,7 +302,7 @@ void PrescribedGradientBCWeak::assembleVector(FloatArray &answer, TimeStep *tSte
 }
 
 
-void PrescribedGradientBCWeak::assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+void PrescribedGradientBCWeak::assemble(SparseMtrx *answer, TimeStep *tStep,
                       CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if ( eid == EID_MomentumBalance_ConservationEquation ) {
@@ -387,7 +387,7 @@ void PrescribedGradientBCWeak::assemble(SparseMtrx *answer, TimeStep *tStep, Equ
 
 }
 
-void PrescribedGradientBCWeak::giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
+void PrescribedGradientBCWeak::giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                                 const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     rows.clear();

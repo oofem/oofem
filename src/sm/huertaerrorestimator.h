@@ -236,9 +236,6 @@ public:
     /// Constructor
     HuertaErrorEstimatorInterface() { }
 
-    /// Returns reference to corresponding element
-    virtual Element *HuertaErrorEstimatorI_giveElement() = 0;
-
     virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                                   IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
                                                                   HuertaErrorEstimatorInterface :: SetupMode mode, TimeStep *tStep,
@@ -327,25 +324,5 @@ public:
     virtual const char *giveClassName() const { return "HuertaErrorEstimator"; }
 };
 
-
-/**
- * The corresponding element interface to HuertaRemeshingCriteria class.
- * Declares the necessary services, which have to be provided by particular elements.
- */
-class HuertaRemeshingCriteriaInterface : public Interface
-{
-public:
-    /// Constructor
-    HuertaRemeshingCriteriaInterface() : Interface() { }
-    /**
-     * Determines the characteristic size of element. This quantity is defined as follows:
-     * For 1D it is the element length, for 2D it is the square root of element area.
-     */
-    virtual double HuertaRemeshingCriteriaI_giveCharacteristicSize() = 0;
-    /**
-     * Returns the polynomial order of receiver trial functions.
-     */
-    virtual int HuertaRemeshingCriteriaI_givePolynOrder() = 0;
-};
 } // end namespace oofem
 #endif // huertaerrorestimator_h

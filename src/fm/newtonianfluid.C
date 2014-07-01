@@ -141,7 +141,9 @@ NewtonianFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gaus
         OOFEM_ERROR("unsuported material mode");
     }
 
+
     static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) )->letDeviatoricStressVectorBe(answer);
+    static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) )->letDeviatoricStrainRateVectorBe(eps);
 }
 
 void

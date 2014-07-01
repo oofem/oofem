@@ -54,7 +54,7 @@ REGISTER_Element(Truss3d);
 FEI3dLineLin Truss3d :: interp;
 
 Truss3d :: Truss3d(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain)
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 2;
 }
@@ -63,9 +63,7 @@ Truss3d :: Truss3d(int n, Domain *aDomain) :
 Interface *
 Truss3d :: giveInterface(InterfaceType interface)
 {
-    if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
-    } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+    if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
         return static_cast< NodalAveragingRecoveryModelInterface * >(this);
@@ -81,13 +79,6 @@ Truss3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int no
 {
     answer.clear();
     OOFEM_WARNING("IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
-}
-
-
-void
-Truss3d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 
@@ -216,7 +207,7 @@ Truss3d :: initializeFrom(InputRecord *ir)
 
 
 void
-Truss3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Truss3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w};
 }

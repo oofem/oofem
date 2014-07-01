@@ -43,6 +43,7 @@ set (sm_element
     structuralinterfaceelement.C
     intelline1.C
     intelline2.C
+    tet21ghostsolid.C
     graddpelement.C graddpmaterialextensioninterface.C
     qtruss1d.C qtruss1dgrad.C
     qplanestrain.C qplanestraingrad.C
@@ -51,6 +52,7 @@ set (sm_element
     dkt.C qdkt.C
     quad1platesubsoil.C tria1platesubsoil.C
     interfaceelem2dlin.C
+    trwarp.C
     )
 
 set (sm_crosssection
@@ -77,6 +79,7 @@ set (sm_emodel
     diidynamic.C
     nldeidynamic.C
     incrementallinearstatic.C
+    freewarping.C
     )
 
 set (sm_loads
@@ -136,6 +139,8 @@ set (sm_material
     simplevitrificationmaterial.C
     anisodamagemodel.C
     winklerpasternak.C
+    structmatsettable.C
+    bondceb.C
     )
 
 set (sm_error

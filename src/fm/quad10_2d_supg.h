@@ -73,8 +73,8 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Quad10_2D_SUPG_Name; }
     virtual MaterialMode giveMaterialMode() { return _2dFlow; }
 
-    virtual void giveInternalDofManDofIDMask(int i, EquationID, IntArray &answer) const;
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveInternalDofManDofIDMask(int i, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual int computeNumberOfDofs();
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
@@ -92,12 +92,8 @@ public:
 
     virtual Interface *giveInterface(InterfaceType t);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
-    void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                   InternalStateType type, TimeStep *tStep);
 
     /// @name Helping functions for computing VOFFractions.
     //@{

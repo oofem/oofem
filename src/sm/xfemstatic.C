@@ -104,7 +104,7 @@ XFEMStatic :: solveYourselfAt(TimeStep *tStep)
         }
 
         if ( mSetValsFromDofMap ) {
-            this->setTotalDisplacementFromUnknownsInDictionary(EID_MomentumBalance, VM_Total, tStep);
+            this->setTotalDisplacementFromUnknownsInDictionary(VM_Total, tStep);
         }
 
         if ( incrementalLoadVector.giveSize() != neq ) {
@@ -462,7 +462,7 @@ XFEMStatic :: initializeDofUnknownsDictionary(TimeStep *tStep)
 }
 
 void
-XFEMStatic :: setTotalDisplacementFromUnknownsInDictionary(EquationID type, ValueModeType mode, TimeStep *tStep)
+XFEMStatic :: setTotalDisplacementFromUnknownsInDictionary(ValueModeType mode, TimeStep *tStep)
 {
     printf("Entering XFEMStatic :: setTotalDisplacementFromUnknownsInDictionary().\n");
 

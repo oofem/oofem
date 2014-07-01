@@ -56,7 +56,7 @@ REGISTER_Element(QTRSpace);
 
 FEI3dTetQuad QTRSpace :: interpolation;
 
-QTRSpace :: QTRSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+QTRSpace :: QTRSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 10;
 }
@@ -87,7 +87,7 @@ QTRSpace :: giveInterpolation() const
 
 
 void
-QTRSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+QTRSpace :: giveDofManDofIDMask(int inode, IntArray &answer) const
 // returns DofId mask array for inode element node.
 // DofId mask array determines the dof ordering requsted from node.
 // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -142,18 +142,18 @@ QTRSpace :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
     answer.zero();
 
     for ( int i = 1; i <= 10; i++ ) {
-        answer.at(1, 3 * i - 2) = dnx.at(1, i);
-        answer.at(2, 3 * i - 1) = dnx.at(2, i);
-        answer.at(3, 3 * i - 0) = dnx.at(3, i);
+        answer.at(1, 3 * i - 2) = dnx.at(i, 1);
+        answer.at(2, 3 * i - 1) = dnx.at(i, 2);
+        answer.at(3, 3 * i - 0) = dnx.at(i, 3);
 
-        answer.at(4, 3 * i - 1) = dnx.at(3, i);
-        answer.at(4, 3 * i - 0) = dnx.at(2, i);
+        answer.at(4, 3 * i - 1) = dnx.at(i, 3);
+        answer.at(4, 3 * i - 0) = dnx.at(i, 2);
 
-        answer.at(5, 3 * i - 2) = dnx.at(3, i);
-        answer.at(5, 3 * i - 0) = dnx.at(1, i);
+        answer.at(5, 3 * i - 2) = dnx.at(i, 3);
+        answer.at(5, 3 * i - 0) = dnx.at(i, 1);
 
-        answer.at(6, 3 * i - 2) = dnx.at(2, i);
-        answer.at(6, 3 * i - 1) = dnx.at(1, i);
+        answer.at(6, 3 * i - 2) = dnx.at(i, 2);
+        answer.at(6, 3 * i - 1) = dnx.at(i, 1);
     }
 }
 
@@ -253,9 +253,4 @@ QTRSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
     OOFEM_WARNING("IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
-void
-QTRSpace :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
 } // end namespace oofem

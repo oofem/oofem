@@ -515,7 +515,7 @@ NlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeSt
     //
     // Assemble the nodal part of load vector.
     //
-    this->assembleVector( answer, tStep, EID_MomentumBalance, ExternalForcesVector, mode,
+    this->assembleVector( answer, tStep, ExternalForcesVector, mode,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
@@ -562,7 +562,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
         }
 #endif
 
-        element->giveLocationArray(loc, EID_MomentumBalance, en);
+        element->giveLocationArray(loc, en);
         element->giveCharacteristicMatrix(charMtrx, LumpedMassMatrix, tStep);
 
 #ifdef LOCAL_ZERO_MASS_REPLACEMENT
@@ -620,7 +620,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     // global variant
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
-        element->giveLocationArray(loc, EID_MomentumBalance, en);
+        element->giveLocationArray(loc, en);
         element->giveCharacteristicMatrix(charMtrx, StiffnessMatrix, tStep);
         n = loc.giveSize();
         for ( j = 1; j <= n; j++ ) {

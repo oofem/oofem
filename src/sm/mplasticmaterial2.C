@@ -1844,10 +1844,10 @@ MPlasticMaterial2 :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 }
 
 void
-MPlasticMaterial2 :: give1dFiberStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep)
+MPlasticMaterial2 :: giveFiberStiffMtrx(FloatMatrix &answer,
+                                        MatResponseMode mode,
+                                        GaussPoint *gp,
+                                        TimeStep *tStep)
 //
 // returns receiver's 1dFiber
 // (1dFiber ==> sigma_y = sigma_z = tau_yz = 0.)

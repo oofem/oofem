@@ -86,12 +86,62 @@ SUPGElement :: giveInputRecord(DynamicInputRecord &input)
 
 void
 SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
-                                        CharType mtrx, TimeStep *tStep)
+                                        CharType type, TimeStep *tStep)
 //
 // returns characteristics matrix of receiver according to mtrx
 //
 {
-    OOFEM_ERROR("Unknown Type of characteristic mtrx.");
+
+    if ( type == StiffnessMatrix ) {
+      // stokes flow only
+      double dscale = this->giveDomain()->giveEngngModel()->giveVariableScale(VST_Density);
+      double uscale = this->giveDomain()->giveEngngModel()->giveVariableScale(VST_Velocity);
+
+
+      IntArray vloc, ploc;
+      FloatMatrix h;
+      int size = this->computeNumberOfDofs();
+      this->giveLocalVelocityDofMap(vloc);
+      this->giveLocalPressureDofMap(ploc);
+      answer.resize(size, size);
+      answer.zero();
+
+      //this->computeAccelerationTerm_MB(h, tStep);
+      //answer.assemble(h, vloc);
+      this->computeDiffusionDerivativeTerm_MB(h, TangentStiffness, tStep);
+      answer.assemble(h, vloc);
+      this->computePressureTerm_MB(h, tStep);
+      answer.assemble(h, vloc, ploc);
+      //this->computeLSICStabilizationTerm_MB(h, tStep);
+      //h.times( alpha * tStep->giveTimeIncrement() * lscale / ( dscale * uscale * uscale ) );
+      //answer.assemble(h, vloc);
+      this->computeBCLhsTerm_MB(h, tStep);
+      if ( h.isNotEmpty() ) {
+	answer.assemble(h, vloc);
+      }
+
+      this->computeBCLhsPressureTerm_MB(h, tStep);
+      if ( h.isNotEmpty() ) {
+	answer.assemble(h, vloc, ploc);
+      }
+
+        // conservation eq part
+      this->computeLinearAdvectionTerm_MC(h, tStep);
+      h.times( 1.0 / ( dscale * uscale ) );
+      answer.assemble(h, ploc, vloc);
+      this->computeBCLhsPressureTerm_MC(h, tStep);
+      if ( h.isNotEmpty() ) {
+	answer.assemble(h, ploc, vloc);
+      }
+
+      this->computeDiffusionDerivativeTerm_MC(h, tStep);
+      answer.assemble(h, ploc, vloc);
+      this->computePressureTerm_MC(h, tStep);
+      answer.assemble(h, ploc);
+    } else {
+      OOFEM_ERROR("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
+    }
+   
 }
 
 
@@ -117,7 +167,7 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         answer.assemble(h, ploc);
     }
 
-#if 0
+#if 1
     else if ( mtrx == InternalForcesVector ) {
         // stokes flow
         IntArray vloc, ploc;
@@ -140,23 +190,23 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         // add lsic stabilization term
         //this->giveCharacteristicMatrix(m1, LSICStabilizationTerm_MB, tStep);
         //m1.times( lscale / ( dscale * uscale * uscale ) );
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, v);
+        this->computeVectorOfVelocities(VM_Total, tStep, v);
         //h.beProductOf(m1, v);
         //answer.assemble(h, vloc);
-        this->giveCharacteristicMatrix(m1, LinearAdvectionTerm_MC, tStep);
+        this->computeLinearAdvectionTerm_MC(m1, tStep);
         //m1.times( 1. / ( dscale * uscale ) );
         h.beProductOf(m1, v);
         answer.assemble(h, ploc);
 
         // add pressure term
-        this->giveCharacteristicMatrix(m1, PressureTerm_MB, tStep);
-        this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
+        this->computePressureTerm_MB(m1, tStep);
+        this->computeVectorOfPressures(VM_Total, tStep, v);
         h.beProductOf(m1, v);
         answer.assemble(h, vloc);
 
         // pressure term
-        this->giveCharacteristicMatrix(m1, PressureTerm_MC, tStep);
-        this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
+        this->computePressureTerm_MC(m1, tStep);
+        this->computeVectorOfPressures(VM_Total, tStep, v);
         h.beProductOf(m1, v);
         answer.assemble(h, ploc);
     }
@@ -376,24 +426,4 @@ SUPGElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
 
 #endif
 
-
-#if 0
-void
-SUPGElement :: computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *tStep, FloatArray &answer)
-{
-    double scale;
-    Element :: computeVectorOfPrescribed(ut, type, tStep, answer);
-    if ( domain->giveEngngModel()->giveEquationScalingFlag() ) {
-        if ( ut == EID_MomentumBalance ) {
-            scale = domain->giveEngngModel()->giveVariableScale(VST_Velocity);
-        } else if ( ut == EID_ConservationEquation ) {
-            scale = domain->giveEngngModel()->giveVariableScale(VST_Pressure);
-        } else {
-            scale = 1.0;
-        }
-
-        answer.times(1.0 / scale);
-    }
-}
-#endif
 } // end namespace oofem

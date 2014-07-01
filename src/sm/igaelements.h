@@ -71,10 +71,8 @@ public:
 
     virtual FEInterpolation *giveInterpolation() const { return const_cast< BSplineInterpolation * >(& this->interpolation); }
     virtual Element *giveElement() { return this; }
-    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
-    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { this->giveInternalDofManDofIDMask(inode, EID_MomentumBalance, answer); }
-    virtual void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
-        PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, u, answer);
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const {
+        PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, answer);
     }
     virtual int computeNumberOfDofs() { return numberOfDofMans * 2; }
     virtual void updateInternalState(TimeStep *tStep) { PlaneStressStructuralElementEvaluator :: updateInternalState(tStep); }
@@ -116,10 +114,8 @@ public:
 
     virtual FEInterpolation *giveInterpolation() const { return const_cast< NURBSInterpolation * >(& this->interpolation); }
     virtual Element *giveElement() { return this; }
-    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
-    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { this->giveInternalDofManDofIDMask(inode, EID_MomentumBalance, answer); }
-    virtual void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
-        PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, u, answer);
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const {
+        PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, answer);
     }
     virtual int computeNumberOfDofs() { return numberOfDofMans * 2; }
     virtual void updateInternalState(TimeStep *tStep) { PlaneStressStructuralElementEvaluator :: updateInternalState(tStep); }
@@ -166,10 +162,8 @@ public:
 
     virtual FEInterpolation *giveInterpolation() const { return const_cast< TSplineInterpolation * >(& this->interpolation); }
     virtual Element *giveElement() { return this; }
-    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
-    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { this->giveInternalDofManDofIDMask(inode, EID_MomentumBalance, answer); }
-    virtual void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
-        PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, u, answer);
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const {
+        PlaneStressStructuralElementEvaluator :: giveDofManDofIDMask(inode, answer);
     }
     virtual int computeNumberOfDofs() { return numberOfDofMans * 2; }
     virtual void updateInternalState(TimeStep *tStep) { PlaneStressStructuralElementEvaluator :: updateInternalState(tStep); }
@@ -206,10 +200,8 @@ public:
     virtual FEInterpolation *giveInterpolation() const { return const_cast< NURBSInterpolation * >(& this->interpolation); }
     virtual Element *giveElement() { return this; }
 
-    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
-    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { this->giveInternalDofManDofIDMask(inode, EID_MomentumBalance, answer); }
-    virtual void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
-        Space3dStructuralElementEvaluator :: giveDofManDofIDMask(inode, u, answer);
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const {
+        Space3dStructuralElementEvaluator :: giveDofManDofIDMask(inode, answer);
     }
     virtual int computeNumberOfDofs() { return numberOfDofMans * 3; }
     virtual void updateInternalState(TimeStep *tStep) { Space3dStructuralElementEvaluator :: updateInternalState(tStep); }

@@ -76,7 +76,7 @@ QSpaceGrad :: initializeFrom(InputRecord *ir)
 
 
 void
-QSpaceGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+QSpaceGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode <= nSecNodes ) {
         answer = {D_u, D_v, D_w, G_0};

@@ -58,7 +58,7 @@ REGISTER_Element(Q4Axisymm);
 FEI2dQuadQuad Q4Axisymm :: interp(1, 2);
 
 Q4Axisymm :: Q4Axisymm(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain)
+    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 8;
     numberOfGaussPoints          = 4;
@@ -364,7 +364,7 @@ Q4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
     answer.resize(6);
     answer.zero();
     if ( mode == TL ) { // Total Lagrange formulation
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+        this->computeVectorOf(VM_Total, tStep, u);
 
         // linear part of strain tensor (in vector form)
 
@@ -398,7 +398,7 @@ Q4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
 }
 
 void
-Q4Axisymm :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Q4Axisymm :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v};
 }

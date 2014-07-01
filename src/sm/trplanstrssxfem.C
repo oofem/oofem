@@ -123,10 +123,10 @@ void TrPlaneStress2dXFEM :: computeNmatrixAt(const FloatArray &iLocCoord, FloatM
 
 
 void
-TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, EquationID iEqnId, IntArray &answer) const
+TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     // Continuous part
-	TrPlaneStress2d::giveDofManDofIDMask(inode, iEqnId, answer);
+    TrPlaneStress2d :: giveDofManDofIDMask(inode, answer);
 
     // Discontinuous part
 	if( this->giveDomain()->hasXfemManager() ) {
@@ -267,33 +267,27 @@ void TrPlaneStress2dXFEM :: giveInputRecord(DynamicInputRecord &input)
 }
 
 
-int
-TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                        TimeStep *tStep, const FloatArray &coords,
+void
+TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                        TimeStep *tStep, const FloatArray &lcoords,
                                                                         FloatArray &answer)
 {
     // TODO: Validate implementation.
 
-    FloatArray lcoords, u;
+    FloatArray u;
     FloatMatrix n;
-    int result;
-
-    result = this->computeLocalCoordinates(lcoords, coords);
 
     XfemElementInterface_createEnrNmatrixAt(n, lcoords, * this, false);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf(mode, tStep, u);
     answer.beProductOf(n, u);
-
-    return result;
 }
 
+
 void
-TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
+TrPlaneStress2dXFEM :: giveElementDofIDMask(IntArray &answer) const
 {
-    //    giveDofManDofIDMask(1, EID_MomentumBalance, answer);
     // TODO: For now, take only the continuous part
-    int nodeInd = 1;
-    TrPlaneStress2d :: giveDofManDofIDMask(nodeInd, EID_MomentumBalance, answer);
+    TrPlaneStress2d :: giveElementDofIDMask(answer);
 }
 } /* namespace oofem */

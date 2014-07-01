@@ -35,7 +35,6 @@
 #include "tet1bubblestokes.h"
 #include "node.h"
 #include "domain.h"
-#include "equationid.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "bcgeomtype.h"
@@ -62,7 +61,7 @@ IntArray Tet1BubbleStokes :: surf_ordering [ 4 ] = {
     {1, 2, 3, 13, 14, 15,  9, 10, 11}
 };
 
-Tet1BubbleStokes :: Tet1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomain)
+Tet1BubbleStokes :: Tet1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SpatialLocalizerInterface(this)
 {
     this->numberOfDofMans = 4;
     this->numberOfGaussPoints = 24;
@@ -92,26 +91,14 @@ int Tet1BubbleStokes :: computeNumberOfDofs()
     return 19;
 }
 
-void Tet1BubbleStokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+void Tet1BubbleStokes :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    if ( ut == EID_MomentumBalance ) {
-        answer = {V_u, V_v, V_w};
-    } else if ( ut == EID_ConservationEquation ) {
-        answer = {P_f};
-    } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        answer = {V_u, V_v, V_w, P_f};
-    } else {
-        answer.clear();
-    }
+    answer = {V_u, V_v, V_w, P_f};
 }
 
-void Tet1BubbleStokes :: giveInternalDofManDofIDMask(int i, EquationID eid, IntArray &answer) const
+void Tet1BubbleStokes :: giveInternalDofManDofIDMask(int i, IntArray &answer) const
 {
-    if ( eid == EID_MomentumBalance_ConservationEquation || eid == EID_MomentumBalance ) {
-        answer = {V_u, V_v, V_w};
-    } else {
-        answer.clear();
-    }
+    answer = {V_u, V_v, V_w};
 }
 
 double Tet1BubbleStokes :: computeVolumeAround(GaussPoint *gp)
@@ -153,8 +140,8 @@ void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSte
     FloatMatrix dN, B(6, 15);
     B.zero();
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
+    this->computeVectorOfVelocities(VM_Total, tStep, a_velocity);
+    this->computeVectorOfPressures(VM_Total, tStep, a_pressure);
 
     FloatArray momentum, conservation;
 
@@ -417,11 +404,6 @@ Interface *Tet1BubbleStokes :: giveInterface(InterfaceType it)
     }
 }
 
-int Tet1BubbleStokes :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
 
 void Tet1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                                TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
@@ -442,23 +424,6 @@ void Tet1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(V
     }
 }
 
-int Tet1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode, TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
-{
-    FloatArray lcoords, n, n_lin;
-    bool ok = this->computeLocalCoordinates(lcoords, gcoords);
-    if ( !ok ) {
-        answer.clear();
-        return false;
-    }
-
-    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    return true;
-}
-
-void Tet1BubbleStokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    answer = {V_u, V_v, V_w, P_f};
-}
 
 double Tet1BubbleStokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {

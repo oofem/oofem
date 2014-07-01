@@ -66,6 +66,7 @@ protected:
     FloatArray Ep;
     double Cp;
 
+    double pressure;
     double voffraction;
 
     bool oldTangents;
@@ -100,6 +101,9 @@ public:
     FloatArray &giveDeviatoricPressureTangent() { return Ep; };
     FloatArray &giveVolumetricDeviatoricTangent() { return Cd; };
     double &giveVolumetricPressureTangent() { return Cp; };
+
+    double givePressure() { return this->pressure; }
+    void letPressureBe(double val) { this->pressure = val; }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 

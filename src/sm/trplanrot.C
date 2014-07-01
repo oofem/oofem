@@ -535,7 +535,7 @@ TrPlaneStrRot :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, i
     FloatArray vStress, vStrain, u;
 
     // This function can be quite costly to do inside the loops when one has many slave dofs.
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
         u.subtract(* initialDisplacements);
@@ -602,7 +602,7 @@ TrPlaneStrRot :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeSte
     FloatMatrix b;
     FloatArray u, Epsilon;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
 
     answer.resize(4);
     answer.zero();
@@ -649,7 +649,7 @@ TrPlaneStrRot :: computeStressVector(FloatArray &answer, const FloatArray &strai
 
 
 void
-TrPlaneStrRot :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+TrPlaneStrRot :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, R_w};
 }

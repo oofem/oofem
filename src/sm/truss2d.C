@@ -295,7 +295,7 @@ Truss2d :: initializeFrom(InputRecord *ir)
 
 
 void
-Truss2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Truss2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( cs_mode == 0 ) {
         answer = {D_u, D_w};

@@ -338,7 +338,7 @@ void GnuplotExportModule::outputXFEMGeometry(const std::vector< std::vector<Floa
 void GnuplotExportModule::outputBoundaryCondition(PrescribedGradient &iBC, TimeStep *tStep)
 {
 	FloatArray stress;
-	iBC.computeField(stress, EID_MomentumBalance, tStep);
+	iBC.computeField(stress, tStep);
 	printf("Mean stress computed in Gnuplot export module: "); stress.printYourself();
 
 	double time = 0.0;
@@ -367,7 +367,7 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradient &iBC, TimeS
 void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCNeumann &iBC, TimeStep *tStep)
 {
     FloatArray stress;
-    iBC.computeField(stress, EID_MomentumBalance, tStep);
+    iBC.computeField(stress, tStep);
 
     printf("Mean stress computed in Gnuplot export module: "); stress.printYourself();
 

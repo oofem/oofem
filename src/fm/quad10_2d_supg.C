@@ -63,7 +63,7 @@ FEI2dQuadConst Quad10_2D_SUPG :: pressureInterpolation(1, 2);
 
 
 Quad10_2D_SUPG :: Quad10_2D_SUPG(int n, Domain *aDomain) :
-    SUPGElement2(n, aDomain), pressureNode(1, aDomain, this)
+    SUPGElement2(n, aDomain), ZZNodalRecoveryModelInterface(this), pressureNode(1, aDomain, this)
 {
     numberOfDofMans = 4;
 }
@@ -102,28 +102,16 @@ Quad10_2D_SUPG :: computeNumberOfDofs()
 
 
 void
-Quad10_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+Quad10_2D_SUPG :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    if ( ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
-        answer = {V_u, V_v};
-    } else if ( ut == EID_ConservationEquation ) {
-        answer.clear();
-    } else {
-        OOFEM_ERROR("Unknown equation id encountered");
-    }
+    answer = {V_u, V_v};
 }
 
 
 void
-Quad10_2D_SUPG :: giveInternalDofManDofIDMask(int i, EquationID ut, IntArray &answer) const
+Quad10_2D_SUPG :: giveInternalDofManDofIDMask(int i, IntArray &answer) const
 {
-    if ( ut == EID_MomentumBalance ) {
-        answer.clear();
-    } else if ( ut == EID_ConservationEquation || ut == EID_MomentumBalance_ConservationEquation ) {
-        answer = {P_f};
-    } else {
-        OOFEM_ERROR("Unknown equation id encountered");
-    }
+    answer = {P_f};
 }
 
 
@@ -182,7 +170,7 @@ Quad10_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Ti
     FloatArray u, un;
     this->velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     this->computeNuMatrix(n, gp);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, un);
+    this->computeVectorOfVelocities(VM_Total, tStep, un);
 
     u.beProductOf(n, un);
 
@@ -248,7 +236,7 @@ Quad10_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeSt
     answer.resize(2, 2);
     answer.zero();
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= 4; i++ ) {
@@ -303,8 +291,8 @@ Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
 
     nu = mu_min / rho;
 
-    //this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    //this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     norm_un = u.computeNorm();
 
@@ -496,7 +484,7 @@ Quad10_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
 #if 0
     FloatArray fi(3), un;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, un);
+    this->computeVectorOfVelocities(VM_Total, tStep, un);
     for ( int i = 1; i <= 3; i++ ) {
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
     }
@@ -542,14 +530,6 @@ Quad10_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer,
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);
-}
-
-
-void
-Quad10_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                            InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 

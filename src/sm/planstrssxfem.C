@@ -123,10 +123,10 @@ int PlaneStress2dXfem :: computeNumberOfDofs()
 
 
 void
-PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID iEqnId, IntArray &answer) const
+PlaneStress2dXfem :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     // Continuous part
-	PlaneStress2d::giveDofManDofIDMask(inode, iEqnId, answer);
+    PlaneStress2d :: giveDofManDofIDMask(inode, answer);
 
     // Discontinuous part
 	if( this->giveDomain()->hasXfemManager() ) {

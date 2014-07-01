@@ -106,11 +106,11 @@ StructuralEngngModel :: computeReaction(FloatArray &answer, TimeStep *tStep, int
     answer.zero();
 
     // Add internal forces
-    this->assembleVector( answer, tStep, EID_MomentumBalance, LastEquilibratedInternalForcesVector, VM_Total,
+    this->assembleVector( answer, tStep, LastEquilibratedInternalForcesVector, VM_Total,
                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
     // Subtract external loading
     ///@todo All engineering models should be using this (for consistency)
-    //this->assembleVector( answer, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
+    //this->assembleVector( answer, tStep, ExternalForcesVector, VM_Total,
     //                    EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
     ///@todo This method is overloaded in some functions, it needs to be generalized.
     this->computeExternalLoadReactionContribution(contribution, tStep, di);
@@ -127,7 +127,7 @@ StructuralEngngModel :: computeExternalLoadReactionContribution(FloatArray &reac
 {
     reactions.resize( this->giveNumberOfDomainEquations( di, EModelDefaultPrescribedEquationNumbering() ) );
     reactions.zero();
-    this->assembleVector( reactions, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
+    this->assembleVector( reactions, tStep, ExternalForcesVector, VM_Total,
                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
 }
 
@@ -142,7 +142,7 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
 
     answer.resize( this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() ) );
     answer.zero();
-    this->assembleVector(answer, tStep, EID_MomentumBalance, InternalForcesVector, VM_Total,
+    this->assembleVector(answer, tStep, InternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), domain, normFlag ? & this->internalForcesEBENorm : NULL);
 
 #ifdef __PARALLEL_MODE

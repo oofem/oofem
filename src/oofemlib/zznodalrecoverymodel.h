@@ -96,9 +96,12 @@ private:
  */
 class OOFEM_EXPORT ZZNodalRecoveryModelInterface : public Interface
 {
+private:
+    Element *element;
+
 public:
     /// Constructor
-    ZZNodalRecoveryModelInterface() { }
+    ZZNodalRecoveryModelInterface(Element *element): element(element) { }
 
     /// @name The element interface required by ZZNodalRecoveryModel
     //@{
@@ -118,10 +121,6 @@ public:
      * @param type Determines the type of internal variable to be recovered.
      */
     virtual void ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, InternalStateType type);
-    /**
-     * Returns the corresponding element to interface.
-     */
-    virtual Element *ZZNodalRecoveryMI_giveElement() = 0;
     //@}
 };
 } // end namespace oofem

@@ -36,7 +36,6 @@
 #include "fmelement.h"
 #include "node.h"
 #include "domain.h"
-#include "equationid.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "bcgeomtype.h"
@@ -64,7 +63,7 @@ IntArray Tr21Stokes :: edge_ordering [ 3 ] = {
     {7, 8, 1, 2, 14, 15}
 };
 
-Tr21Stokes :: Tr21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
+Tr21Stokes :: Tr21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SpatialLocalizerInterface(this)
 {
     this->numberOfDofMans = 6;
     if ( aDomain->giveEngngModel()->giveProblemScale() == macroScale ) { // Pick the lowest default value for multiscale computations.
@@ -91,32 +90,12 @@ int Tr21Stokes :: computeNumberOfDofs()
     return 15;
 }
 
-void Tr21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+void Tr21Stokes :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    // Returns the mask for node number inode of this element. The mask tells what quantities
-    // are held by each node. Since this element holds velocities (both in x and y direction),
-    // in six nodes and pressure in three nodes the answer depends on which node is requested.
-
     if ( inode <= 3 ) {
-        if ( ut == EID_MomentumBalance ) {
-            answer = {V_u, V_v};
-        } else if ( ut == EID_ConservationEquation ) {
-            answer = {P_f};
-        } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-            answer = {V_u, V_v, P_f};
-        } else {
-            OOFEM_ERROR("Unknown equation id encountered");
-        }
+        answer = {V_u, V_v, P_f};
     } else {
-        if ( ut == EID_MomentumBalance ) {
-            answer = {V_u, V_v};
-        } else if ( ut == EID_ConservationEquation ) {
-            answer.clear();
-        } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-            answer = {V_u, V_v};
-        } else {
-            OOFEM_ERROR("Unknown equation id encountered");
-        }
+        answer = {V_u, V_v};
     }
 }
 
@@ -159,8 +138,8 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
     FloatMatrix dN, B(3, 12);
     B.zero();
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
+    this->computeVectorOfVelocities(VM_Total, tStep, a_velocity);
+    this->computeVectorOfPressures(VM_Total, tStep, a_pressure);
 
     FloatArray momentum, conservation;
 
@@ -402,12 +381,6 @@ Interface *Tr21Stokes :: giveInterface(InterfaceType it)
     }
 }
 
-int Tr21Stokes :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
 void Tr21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                          TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
@@ -426,24 +399,6 @@ void Tr21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueMo
     }
 }
 
-int Tr21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode, TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
-{
-    bool ok;
-    FloatArray lcoords, n, n_lin;
-    ok = this->computeLocalCoordinates(lcoords, gcoords);
-    if ( !ok ) {
-        answer.clear();
-        return false;
-    }
-
-    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    return true;
-}
-
-void Tr21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    answer = {V_u, V_v, P_f};
-}
 
 double Tr21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
@@ -451,11 +406,6 @@ double Tr21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Fl
     FloatArray lcoords = {0.333333, 0.333333, 0.333333};
     interpolation_quad.local2global( center, lcoords, FEIElementGeometryWrapper(this) );
     return center.distance(coords);
-}
-
-void Tr21Stokes :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 void Tr21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
@@ -501,7 +451,7 @@ void Tr21Stokes :: giveGradP(FloatArray &answer, TimeStep *tStep)
 
     iRuleEdge.setUpPointsOnLine(this->numberOfGaussPoints, _Unknown);
 
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, p);
+    this->computeVectorOfPressures(VM_Total, tStep, p);
 
     answer.clear();
 
@@ -575,7 +525,6 @@ void Tr21Stokes :: giveElementFMatrix(FloatMatrix &answer)
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     double detJ;
     FloatArray N, N2;
-    FloatMatrix temp;
 
     N2.clear();
 
@@ -589,16 +538,12 @@ void Tr21Stokes :: giveElementFMatrix(FloatMatrix &answer)
         N2.add(N);
     }
 
-    temp.resize(12, 2);
-    temp.zero();
+    answer.resize(12, 2);
+    answer.zero();
 
     for ( int i = 1; i <= 6; i++ ) {
-        temp.at(i * 2 - 1, 1) = N2.at(i);
-        temp.at(i * 2, 2) = N2.at(i);
+        answer.at(i * 2 - 1, 1) = N2.at(i);
+        answer.at(i * 2, 2) = N2.at(i);
     }
-
-    answer.resize(15, 2);
-    answer.zero();
-    answer.assemble(temp, this->momentum_ordering, {1, 2});
 }
 } // end namespace oofem

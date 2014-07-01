@@ -105,18 +105,16 @@ public:
     /**
      * Computes the homogenized, macroscopic, field (stress).
      * @param sigma Output quantity (typically stress).
-     * @param eid Equation ID to which sigma belongs.
      * @param tStep Active time step.
      */
-    void computeField(FloatArray &sigma, EquationID eid, TimeStep *tStep);
+    void computeField(FloatArray &sigma, TimeStep *tStep);
 
     /**
      * Computes the macroscopic tangent for homogenization problems through sensitivity analysis.
      * @param tangent Output tangent.
-     * @param eid Equation ID to tangent belongs.
      * @param tStep Active time step.
      */
-    void computeTangent(FloatMatrix &tangent, EquationID eid, TimeStep *tStep);
+    void computeTangent(FloatMatrix &tangent, TimeStep *tStep);
 
     virtual void scale(double s) { gradient.times(s); }
 

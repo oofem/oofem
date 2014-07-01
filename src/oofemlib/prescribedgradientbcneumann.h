@@ -40,7 +40,7 @@
 #define _IFT_PrescribedGradientBCNeumann_Name   "prescribedgradientbcneumann"
 
 namespace oofem {
-/*
+/**
  * Imposes a prescribed gradient weakly on the boundary
  * with a Neumann boundary condition.
  *

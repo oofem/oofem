@@ -72,6 +72,7 @@ public:
     /// Destructor.
     virtual ~NLTransientTransportProblem();
 
+    virtual TimeStep* giveNextStep();
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
     virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
@@ -96,7 +97,7 @@ protected:
     virtual void updateInternalState(TimeStep *tStep);
     virtual void applyIC(TimeStep *tStep);
     void createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep);
-    void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut, const UnknownNumberingScheme &s, TimeStep *tStep);
+    void assembleAlgorithmicPartOfRhs(FloatArray &rhs, const UnknownNumberingScheme &s, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // nltransienttransportproblem_h

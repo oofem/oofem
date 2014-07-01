@@ -182,6 +182,11 @@ public:
      */
     void checkSizeTowards(const IntArray &loc);
     /**
+     * Allocates enough size to fit s, and clears the array.
+     * @param s New reserved size.
+     */
+    void reserve(int s);
+    /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
      * Old values are copied over and new space is zeroed.
@@ -230,6 +235,16 @@ public:
     virtual void pY() const;
     /// Zeroes all coefficients of receiver.
     void zero();
+    /**
+     * Appends array to reciever.
+     * @param a Values to be appended.
+     */
+    void append(const FloatArray &a);
+    /**
+     * Appends value to reciever.
+     * @param a Value to be appended.
+     */
+    void append(double a);
     /**
      * Receiver becomes the result of the product of aMatrix and anArray.
      * Adjusts the size of receiver if necessary.

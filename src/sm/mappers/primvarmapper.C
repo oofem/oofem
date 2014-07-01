@@ -67,6 +67,7 @@ LSPrimaryVariableMapper :: ~LSPrimaryVariableMapper()
 void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOldDom, Domain &iNewDom, ValueModeType iMode, TimeStep &iTStep)
 {
     EngngModel *engngMod = iNewDom.giveEngngModel();
+    EModelDefaultEquationNumbering num;
 
 
     const int dim = iNewDom.giveNumberOfSpatialDimensions();
@@ -74,7 +75,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
     int numElNew = iNewDom.giveNumberOfElements();
 
     // Count dofs
-    int numDofsNew = engngMod->giveNumberOfDomainEquations( 1, engngMod->giveUnknownNumberingScheme(EID_MomentumBalance) );
+    int numDofsNew = engngMod->giveNumberOfDomainEquations( 1, num );
 
 
     oU.resize(numDofsNew);
@@ -88,7 +89,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
     SparseLinearSystemNM *solver = classFactory.createSparseLinSolver(ST_Direct, & iOldDom, engngMod);
 
 
-    K->buildInternalStructure( engngMod, 1, EID_MomentumBalance, engngMod->giveUnknownNumberingScheme(EID_MomentumBalance) );
+    K->buildInternalStructure( engngMod, 1, num );
 
     int maxIter = 1;
 
@@ -116,7 +117,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
             elRes.zero();
 
             IntArray elDofsGlob;
-            elNew->giveLocationArray( elDofsGlob, EID_MomentumBalance, engngMod->giveUnknownNumberingScheme(EID_MomentumBalance) );
+            elNew->giveLocationArray( elDofsGlob, num );
 
 
             // Loop over Gauss points
@@ -194,7 +195,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
                     // Fetch nodal displacements for the old element
                     FloatArray nodeDisp;
-                    elOld->computeVectorOf(EID_MomentumBalance, iMode, & iTStep, nodeDisp);
+                    elOld->computeVectorOf(iMode, & iTStep, nodeDisp);
 
                     FloatArray oldDisp;
                     oldDisp.beProductOf(NOld, nodeDisp);

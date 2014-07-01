@@ -17,7 +17,7 @@ SimpleCS 1 thick 0.15
 IsoHeat 1 d 0. k 1.0 c 1.0
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
 #BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 15.0 
-# Internal source 
+#Internal source 
 deadweight 2 loadTimeFunction 1 components 1 0.5
 ConstantFunction 1 f(t) 1.0
 

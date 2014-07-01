@@ -60,7 +60,7 @@ FEI2dTrLin TR21_2D_SUPG :: pressureInterpolation(1, 2);
 
 
 TR21_2D_SUPG :: TR21_2D_SUPG(int n, Domain *aDomain) :
-    SUPGElement2(n, aDomain)
+    SUPGElement2(n, aDomain), ZZNodalRecoveryModelInterface(this)
     // Constructor.
 {
     numberOfDofMans  = 6;
@@ -93,33 +93,14 @@ TR21_2D_SUPG :: computeNumberOfDofs()
 }
 
 void
-TR21_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+TR21_2D_SUPG :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    if ( ut == EID_MomentumBalance ) {
-        answer = {V_u, V_v};
-    } else if ( ut == EID_ConservationEquation ) {
-        if ( ( inode >= 1 ) && ( inode < 4 ) ) {
-            answer = {P_f};
-        } else {
-            answer.clear();
-        }
-    } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        if ( ( inode >= 1 ) && ( inode < 4 ) ) {
-            answer = {V_u, V_v, P_f};
-        } else {
-            answer = {V_u, V_v};
-        }
+    if ( inode < 4 ) {
+        answer = {V_u, V_v, P_f};
     } else {
-        OOFEM_ERROR("Unknown equation id encountered");
+        answer = {V_u, V_v};
     }
 }
-
-void
-TR21_2D_SUPG :: giveElementDofIDMask(EquationID ut, IntArray &answer) const
-{
-    this->giveDofManDofIDMask(1, ut, answer);
-}
-
 
 IRResultType
 TR21_2D_SUPG :: initializeFrom(InputRecord *ir)
@@ -178,7 +159,7 @@ TR21_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Time
     FloatArray u, un;
     this->velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     this->computeNuMatrix(n, gp);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, un);
+    this->computeVectorOfVelocities(VM_Total, tStep, un);
 
     u.beProductOf(n, un);
 
@@ -242,7 +223,7 @@ TR21_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
 {
     FloatArray u;
     FloatMatrix dn, um(2, 6);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= 6; i++ ) {
@@ -302,8 +283,8 @@ TR21_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
         }
     }
 
-    //this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
+    //this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), u);
 
     this->computeAdvectionTerm(N, tStep);
     this->computeAdvectionDeltaTerm(N_d, tStep);
@@ -435,7 +416,7 @@ TR21_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
     FloatMatrix n(2, 12), dn(6, 2);
     FloatArray fi(6), u, un, gfi;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, un);
+    this->computeVectorOfVelocities(VM_Total, tStep, un);
 
     for ( int i = 1; i <= 6; i++ ) {
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
@@ -1359,13 +1340,6 @@ TR21_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, i
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);
-}
-
-void
-TR21_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                          InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 

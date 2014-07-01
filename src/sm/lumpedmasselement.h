@@ -74,7 +74,7 @@ public:
     { answer.clear(); }
 
     virtual int computeNumberOfDofs();
-    virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
     virtual void updateInternalState(TimeStep *tStep) { }
     virtual void updateYourself(TimeStep *tStep) { }

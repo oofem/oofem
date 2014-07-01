@@ -125,7 +125,7 @@ LIBeam3dNL2 :: updateTempQuaternion(TimeStep *tStep)
         double centreSpinSize;
 
         // ask element's displacement increments
-        this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, u);
+        this->computeVectorOf(VM_Incremental, tStep, u);
 
         // interpolate spin at the centre
         centreSpin.at(1) = 0.5 * ( u.at(4) + u.at(10) );
@@ -323,7 +323,7 @@ LIBeam3dNL2 :: computeXdVector(FloatArray &answer, TimeStep *tStep)
 
     answer.resize(3);
     // ask element's displacements
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
 
     answer.at(1) = ( this->giveNode(2)->giveCoordinate(1) + u.at(7) ) -
                    ( this->giveNode(1)->giveCoordinate(1) + u.at(1) );
@@ -563,7 +563,7 @@ LIBeam3dNL2 :: computeVolumeAround(GaussPoint *gp)
 
 
 void
-LIBeam3dNL2 :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+LIBeam3dNL2 :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
@@ -797,7 +797,7 @@ LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
      * // update curvature at midpoint
      * // first, compute Tmid
      * // ask increments
-     * this -> computeVectorOf(EID_MomentumBalance,UnknownMode_Incremental,tStep, ui) ;
+     * this -> computeVectorOf(UnknownMode_Incremental,tStep, ui) ;
      * ac.at(1) = 0.5*(ui.at(10) - ui.at(4));
      * ac.at(2) = 0.5*(ui.at(11) - ui.at(5));
      * ac.at(3) = 0.5*(ui.at(12) - ui.at(6));
@@ -832,7 +832,7 @@ LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     FloatArray e, om, omp, acp(3), kapgn1(3);
     double acSize, coeff;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, ui);
+    this->computeVectorOf(VM_Incremental, tStep, ui);
 
     ac.at(1) = 0.5 * ( ui.at(10) - ui.at(4) );
     ac.at(2) = 0.5 * ( ui.at(11) - ui.at(5) );

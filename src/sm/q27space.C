@@ -55,7 +55,7 @@ FEInterpolation *Q27Space :: giveInterpolation() const
     return & interpolation;
 }
 
-Q27Space :: Q27Space(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+Q27Space :: Q27Space(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 27;
 }
@@ -75,7 +75,7 @@ Q27Space :: initializeFrom(InputRecord *ir)
 
 
 void
-Q27Space :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+Q27Space :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w};
 }
@@ -367,9 +367,4 @@ Q27Space :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
     OOFEM_WARNING("IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
-void
-Q27Space :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
 } // end namespace oofem

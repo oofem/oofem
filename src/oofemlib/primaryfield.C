@@ -43,12 +43,11 @@
 
 namespace oofem {
 PrimaryField :: PrimaryField(EngngModel *a, int idomain,
-                             FieldType ft, EquationID ut, int nHist) : Field(ft), solutionVectors(nHist + 1), solStepList(nHist + 1)
+                             FieldType ft, int nHist) : Field(ft), solutionVectors(nHist + 1), solStepList(nHist + 1)
 {
     this->actualStepNumber = -999;
     this->actualStepIndx = 0;
     this->nHistVectors = nHist;
-    this->ut = ut;
 
     emodel = a;
     domainIndx = idomain;
@@ -79,11 +78,13 @@ PrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answ
 double
 PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
-    int eq = dof->giveEquationNumber( emodel->giveUnknownNumberingScheme(this->ut) );
+    int eq = dof->giveEqn();
     if ( eq == 0 ) {
         OOFEM_ERROR("invalid equation number");
     }
 
+    ///@todo Mikael: Prescribed values should be stored here too when we extend the usage of fields.
+    /// We should store this in a different way than eqn.-numbers since they may change in-between time steps (requires complicated renumbering).
     if ( mode == VM_Total ) {
         return this->giveSolutionVector(tStep)->at(eq);
     } else if ( mode == VM_Incremental ) {
@@ -136,7 +137,7 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray &coords,
             return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, * dofId, mode, tStep);
         } else { // use element default dof id mask
             IntArray elemDofId;
-            bgelem->giveElementDofIDMask(this->giveEquationID(), elemDofId);
+            bgelem->giveElementDofIDMask(elemDofId);
             return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, elemDofId, mode, tStep);
         }
     } else {
@@ -285,7 +286,7 @@ PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
             if ( ( iores = iStep->restoreContext(stream, mode) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
-            solStepList[i].reset(NULL);
+            solStepList[i] = std::move(iStep);
         } else {
             solStepList[i].reset(NULL);
         }

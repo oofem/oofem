@@ -57,14 +57,13 @@ REGISTER_Element(Axisymm3d);
 FEI2dTrLin Axisymm3d :: interpolation(1, 2);
 
 Axisymm3d :: Axisymm3d(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
-    SPRNodalRecoveryModelInterface()
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
+    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this)
     // Constructor.
 {
     numberOfDofMans = 3;
     area = -1;
     numberOfGaussPoints = 1;
-    numberOfFiAndShGaussPoints = 1;
 }
 
 Axisymm3d :: ~Axisymm3d()
@@ -242,11 +241,11 @@ void
 Axisymm3d :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray.resize(2);
+        integrationRulesArray.resize(1);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
-        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], numberOfFiAndShGaussPoints, this);
+        //integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
+        //this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], numberOfFiAndShGaussPoints, this);
     }
 }
 
@@ -262,19 +261,10 @@ Axisymm3d :: initializeFrom(InputRecord *ir)
         return result;
     }
 
-    numberOfFiAndShGaussPoints = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, _IFT_Axisymm3d_nipfish);
-
     if ( !( ( numberOfGaussPoints == 1 ) ||
            ( numberOfGaussPoints == 4 ) ||
            ( numberOfGaussPoints == 7 ) ) ) {
         numberOfGaussPoints = 1;
-    }
-
-    if ( !( ( numberOfFiAndShGaussPoints == 1 ) ||
-           ( numberOfFiAndShGaussPoints == 4 ) ||
-           ( numberOfFiAndShGaussPoints == 7 ) ) ) {
-        numberOfFiAndShGaussPoints = 1;
     }
 
     return IRRT_OK;
@@ -295,14 +285,14 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
     answer.zero();
 
     if ( mode == TL ) {  // Total Lagrange formulation
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+        this->computeVectorOf({D_u, D_v}, VM_Total, tStep, u);
         // linear part of strain tensor (in vector form)
 
-        this->computeBmatrixAt(gp, b, 1, 2);
-        Epsilon.beProductOf(b, u);
+        this->computeBmatrixAt(gp, b, 1, 6);
+        answer.beProductOf(b, u);
+#if 0
         answer.at(1) = Epsilon.at(1);
         answer.at(2) = Epsilon.at(2);
-        // delete Epsilon; // delete b;
 
         if ( numberOfFiAndShGaussPoints == 1 ) {
             //
@@ -321,6 +311,7 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
         Epsilon.beProductOf(b, u);
         answer.at(3) = Epsilon.at(1);
         answer.at(6) = Epsilon.at(4);
+#endif
 
         if ( nlGeometry ) {
             OOFEM_ERROR("only supports nlGeometry = 0");
@@ -366,7 +357,7 @@ Axisymm3d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalTo
 
 
 void
-Axisymm3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+Axisymm3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v};
 }
@@ -386,14 +377,6 @@ Axisymm3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int 
     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);
 }
-
-void
-Axisymm3d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                       InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
 
 void
 Axisymm3d :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
@@ -555,14 +538,6 @@ Axisymm3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
     answer.at(2, 2) = dx / length;
 
     return 1;
-}
-
-
-int
-Axisymm3d :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->interpolation.global2local( lcoords, coords, FEIElementGeometryWrapper(this) );
 }
 
 

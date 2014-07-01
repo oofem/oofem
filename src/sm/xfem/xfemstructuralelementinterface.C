@@ -426,7 +426,7 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 {
     if ( hasCohesiveZone() ) {
         FloatArray solVec;
-        element->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, solVec);
+        element->computeVectorOf(VM_Total, tStep, solVec);
 
         size_t numSeg = mpCZIntegrationRules.size();
         for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
@@ -525,7 +525,7 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 {
     if ( hasCohesiveZone() ) {
         FloatArray solVec;
-        element->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, solVec);
+        element->computeVectorOf(VM_Total, tStep, solVec);
 
         size_t numSeg = mpCZIntegrationRules.size();
 

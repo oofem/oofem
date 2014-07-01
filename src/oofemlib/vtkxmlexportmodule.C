@@ -55,15 +55,15 @@
 #include <ctime>
 
 #ifdef __VTK_MODULE
- #include <vtkPoints.h>
- #include <vtkPointData.h>
- #include <vtkDoubleArray.h>
- #include <vtkCellArray.h>
- #include <vtkCellData.h>
- #include <vtkXMLUnstructuredGridWriter.h>
- #include <vtkXMLPUnstructuredGridWriter.h>
- #include <vtkUnstructuredGrid.h>
- #include <vtkSmartPointer.h>
+#include <vtkPoints.h>
+#include <vtkPointData.h>
+#include <vtkDoubleArray.h>
+#include <vtkCellArray.h>
+#include <vtkCellData.h>
+#include <vtkXMLUnstructuredGridWriter.h>
+#include <vtkXMLPUnstructuredGridWriter.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkSmartPointer.h>
 #endif
 
 namespace oofem {
@@ -450,7 +450,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     std :: string fname = giveOutputFileName(tStep);
 #ifdef __VTK_MODULE
 
- #if 0
+#if 0
     // Code fragment intended for future support of composite elements in binary format
     // Doesn't as well as I would want it to, interface to VTK is to limited to control this.
     // * The PVTU-file is written by every process (seems to be impossible to avoid).
@@ -462,9 +462,9 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     writer->SetEndPiece( this->emodel->giveRank() );
 
 
- #else
+#else
     vtkSmartPointer< vtkXMLUnstructuredGridWriter >writer = vtkSmartPointer< vtkXMLUnstructuredGridWriter > :: New();
- #endif
+#endif
 
     writer->SetFileName( fname.c_str() );
     writer->SetInput(this->fileStream); // VTK 4
@@ -507,12 +507,12 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         this->writeVTKCollection();
     } else
 #endif
-    if ( !emodel->isParallel() && tStep->giveNumber() >= 1 ) { // For non-parallel enabled OOFEM, then we only check for multiple steps.
-        std :: ostringstream pvdEntry;
-        pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
-        this->pvdBuffer.push_back( pvdEntry.str() );
-        this->writeVTKCollection();
-    }
+        if ( !emodel->isParallel() && tStep->giveNumber() >= 1 ) { // For non-parallel enabled OOFEM, then we only check for multiple steps.
+            std :: ostringstream pvdEntry;
+            pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
+            this->pvdBuffer.push_back( pvdEntry.str() );
+            this->writeVTKCollection();
+        }
 }
 
 
@@ -908,8 +908,8 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
 
     // print header
     pointHeader = "<PointData Scalars=\"" + scalars + "\" "
-                  +  "Vectors=\"" + vectors + "\" "
-                  +  "Tensors=\"" + tensors + "\" >\n";
+            +  "Vectors=\"" + vectors + "\" "
+            +  "Tensors=\"" + tensors + "\" >\n";
 
 
     scalars.clear();
@@ -939,8 +939,8 @@ VTKXMLExportModule :: giveDataHeaders(std :: string &pointHeader, std :: string 
 
     // print header
     cellHeader = "<CellData Scalars=\"" + scalars + "\" "
-                 +  "Vectors=\"" + vectors + "\" "
-                 +  "Tensors=\"" + tensors + "\" >\n";
+            +  "Vectors=\"" + vectors + "\" "
+            +  "Tensors=\"" + tensors + "\" >\n";
 }
 #endif
 
@@ -1557,8 +1557,8 @@ VTKXMLExportModule :: exportExternalForces(VTKPiece &vtkPiece, IntArray &mapG2L,
     int neq = emodel->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
     int npeq = emodel->giveNumberOfDomainEquations( 1, EModelDefaultPrescribedEquationNumbering() );
     FloatArray extForces(neq), extForcesP(npeq);
-    emodel->assembleVector(extForces, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), d);
-    emodel->assembleVector(extForcesP, tStep, EID_MomentumBalance_ConservationEquation, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), d);
+    emodel->assembleVector(extForces, tStep, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), d);
+    emodel->assembleVector(extForcesP, tStep, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), d);
 
     vtkPiece.setNumberOfLoadsToExport(externalForcesToExport.giveSize(), mapL2G.giveSize());
     for ( int i = 1; i <= externalForcesToExport.giveSize(); i++ ) {
@@ -1691,10 +1691,10 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
     case IST_ElementNumber:
         valueArray.at(1) = ( double ) el->giveNumber();
         break;
-    case IST_Pressure: //@todo This case seems redundant, remove? /JB, /// Why this special treatment for pressure? / Mikael
+    case IST_Pressure: ///@todo This case seems redundant, remove? /JB, /// Why this special treatment for pressure? / Mikael
         if ( el->giveNumberOfInternalDofManagers() == 1 ) {
             //IntArray pmask(1); pmask.at(1) = P_f;
-            //el->giveInternalDofManager(1)->giveUnknownVector (answer, pmask,EID_ConservationEquation, VM_Total, tStep);
+            //el->giveInternalDofManager(1)->giveUnknownVector (answer, pmask, VM_Total, tStep);
             //valueArray.at(1) = answer.at(1);
         }
 
@@ -1854,7 +1854,7 @@ VTKXMLExportModule :: writeVTKCollection()
 void VTKXMLExportModule :: exportCompositeElement(VTKPiece &vtkPiece, Element *el, TimeStep *tStep)
 {
     VTKXMLExportModuleElementInterface *interface =
-        static_cast< VTKXMLExportModuleElementInterface * >( el->giveInterface(VTKXMLExportModuleElementInterfaceType) );
+            static_cast< VTKXMLExportModuleElementInterface * >( el->giveInterface(VTKXMLExportModuleElementInterfaceType) );
     if ( interface ) {
         interface->giveCompositeExportData(vtkPiece, this->primaryVarsToExport, this->internalVarsToExport, this->cellVarsToExport, tStep);
 

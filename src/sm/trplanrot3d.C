@@ -98,7 +98,7 @@ TrPlaneStrRot3d :: giveNodeCoordinates(FloatArray &x, FloatArray &y)
 
 
 void
-TrPlaneStrRot3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+TrPlaneStrRot3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }

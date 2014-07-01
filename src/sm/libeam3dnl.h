@@ -80,7 +80,7 @@ public:
     //void computeInitialStressMatrix(FloatMatrix& answer, TimeStep* tStep);
 
     virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);

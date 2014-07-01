@@ -615,14 +615,14 @@ IDNLMaterial :: NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(Gauss
     WCRec p [ 4 ];
     GraphicObj *go;
 
-    gp->giveElement()->giveLocationArray( loc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+    gp->giveElement()->giveLocationArray( loc, EModelDefaultEquationNumbering() );
 
     int n, m;
     std :: list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
     for ( auto &lir: *list ) {
         rmat = dynamic_cast< IDNLMaterial * >( lir.nearGp->giveMaterial() );
         if ( rmat ) {
-            lir.nearGp->giveElement()->giveLocationArray( rloc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+            lir.nearGp->giveElement()->giveLocationArray( rloc, EModelDefaultEquationNumbering() );
         } else {
             continue;
         }
@@ -747,7 +747,7 @@ IDNLMaterial :: giveLocalNonlocalStiffnessContribution(GaussPoint *gp, IntArray 
     }
 
     // request element code numbers
-    elem->giveLocationArray(loc, EID_MomentumBalance, s);
+    elem->giveLocationArray(loc, s);
 
     return 1;
 }
@@ -764,7 +764,7 @@ IDNLMaterial :: giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray
     FloatMatrix b, de, den, princDir(3, 3), t;
     FloatArray stress, fullStress, strain, principalStress, help, nu;
 
-    elem->giveLocationArray(rloc, EID_MomentumBalance, s);
+    elem->giveLocationArray(rloc, s);
     // no support for reduced integration now
     elem->computeBmatrixAt(gp, b);
 

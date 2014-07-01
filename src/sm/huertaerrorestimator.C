@@ -64,6 +64,7 @@
 #include "heavisidetimefunction.h"
 #include "outputmanager.h"
 #include "boundarycondition.h"
+#include "feinterpol.h"
 
 #include <vector>
 #include <string>
@@ -741,7 +742,6 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     double eerror, iratio, currDensity, elemSize, elemErrLimit, percentError;
     Element *ielem;
     EE_ErrorType errorType = unknownET;
-    HuertaRemeshingCriteriaInterface *interface;
     bool refine = false;
     int result;
     double sval, maxVal;
@@ -822,12 +822,8 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
                  * if(this -> ee -> skipRegion(ielem -> giveRegionNumber()) != 0)continue;
                  * }
                  */
-                interface = static_cast< HuertaRemeshingCriteriaInterface * >( ielem->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
-                if ( !interface ) {
-                    OOFEM_ERROR("element does not support HuertaRemeshingCriteriaInterface");
-                }
 
-                currDensity = interface->HuertaRemeshingCriteriaI_giveCharacteristicSize();
+                currDensity = ielem->computeMeanSize();
 
                 //#ifdef HUHU
                 // toto je treba udelat obecne
@@ -917,10 +913,6 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
          * if(this -> ee -> skipRegion(ielem -> giveRegionNumber()) != 0)continue;
          * }
          */
-        interface = static_cast< HuertaRemeshingCriteriaInterface * >( ielem->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
-        if ( !interface ) {
-            OOFEM_ERROR("element does not support HuertaRemeshingCriteriaInterface");
-        }
 
         eerror = this->ee->giveElementError(errorType, ielem, tStep);
         iratio = eerror / elemErrLimit;
@@ -940,8 +932,8 @@ HuertaRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
             }
         }
 
-        currDensity = interface->HuertaRemeshingCriteriaI_giveCharacteristicSize();
-        elemPolyOrder = interface->HuertaRemeshingCriteriaI_givePolynOrder();
+        currDensity = ielem->computeMeanSize();
+        elemPolyOrder = ielem->giveInterpolation()->giveInterpolationOrder();
         elemSize = currDensity / pow(iratio, 1.0 / elemPolyOrder);
         //#ifdef HUHU
         // toto je treba udelat obecne
@@ -1036,7 +1028,6 @@ HuertaRemeshingCriteria :: giveDofManDensity(int num)
     int isize;
     ConnectivityTable *ct = domain->giveConnectivityTable();
     const IntArray *con;
-    HuertaRemeshingCriteriaInterface *interface;
     double density;
 
     con = ct->giveDofManConnectivityArray(num);
@@ -1045,15 +1036,11 @@ HuertaRemeshingCriteria :: giveDofManDensity(int num)
 #if 0
     // Minimum density
     for ( i = 1; i <= isize; i++ ) {
-        interface = static_cast< HuertaRemeshingCriteriaInterface * >
-                    ( domain->giveElement( con->at(i) )->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
-        if ( !interface ) {
-            OOFEM_ERROR("element does not support HuertaRemeshingCriteriaInterface");
-        }
+        Element *ielem = domain->giveElement( con->at(i) );
         if ( i == 1 ) {
-            density = interface->HuertaRemeshingCriteriaI_giveCharacteristicSize();
+            density = ielem->computeMeanSize();
         } else {
-            density = min( density, interface->HuertaRemeshingCriteriaI_giveCharacteristicSize() );
+            density = min( density, ielem->computeMeanSize() );
         }
     }
 #endif
@@ -1062,13 +1049,9 @@ HuertaRemeshingCriteria :: giveDofManDensity(int num)
 
     density = 0.0;
     for ( int i = 1; i <= isize; i++ ) {
-        interface = static_cast< HuertaRemeshingCriteriaInterface * >
-                    ( domain->giveElement( con->at(i) )->giveInterface(HuertaRemeshingCriteriaInterfaceType) );
-        if ( !interface ) {
-            OOFEM_ERROR("element does not support HuertaRemeshingCriteriaInterface");
-        }
+        Element *ielem = domain->giveElement( con->at(i) );
 
-        density += interface->HuertaRemeshingCriteriaI_giveCharacteristicSize();
+        density += ielem->computeMeanSize();
     }
 
     density /= isize;
@@ -1418,7 +1401,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                 refinedElement->giveBoundaryFlagArray(inode, element, boundary);
 
                 // get corner displacements
-                element->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, uCoarse);
+                element->computeVectorOf(VM_Total, tStep, uCoarse);
 
                 pos = 1;
                 u = 0.0;
@@ -1940,7 +1923,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                 refinedElement->giveBoundaryFlagArray(inode, element, boundary);
 
                 // get corner displacements
-                element->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, uCoarse);
+                element->computeVectorOf(VM_Total, tStep, uCoarse);
 
                 pos = 1;
                 v = 0.0;
@@ -2646,7 +2629,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                 refinedElement->giveBoundaryFlagArray(inode, element, boundary);
 
                 // get corner displacements
-                element->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, uCoarse);
+                element->computeVectorOf(VM_Total, tStep, uCoarse);
 
                 pos = 1;
                 w = 0.0;

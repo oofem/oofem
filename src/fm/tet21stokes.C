@@ -36,7 +36,6 @@
 #include "fmelement.h"
 #include "node.h"
 #include "domain.h"
-#include "equationid.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "bcgeomtype.h"
@@ -67,7 +66,7 @@ IntArray Tet21Stokes :: surf_ordering [ 4 ] = {
     { 1,  2,  3, 13, 14, 15,  9, 10, 11, 26, 27, 28, 32, 33, 34, 23, 24, 25}
 };
 
-Tet21Stokes :: Tet21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
+Tet21Stokes :: Tet21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain), SpatialLocalizerInterface(this)
 {
     this->numberOfDofMans = 10;
     this->numberOfGaussPoints = 5;
@@ -90,30 +89,12 @@ int Tet21Stokes :: computeNumberOfDofs()
     return 34;
 }
 
-void Tet21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+void Tet21Stokes :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    // Returns the mask for node number inode of this element. The mask tells what quantities
-    // are held by each node. Since this element holds velocities (both in x and y direction),
-    // in six nodes and pressure in three nodes the answer depends on which node is requested.
-
     if ( inode <= 4 ) {
-        if ( ut == EID_MomentumBalance ) {
-            answer = {V_u, V_v, V_w};
-        } else if ( ut == EID_ConservationEquation ) {
-            answer = {P_f};
-        } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-            answer = {V_u, V_v, V_w, P_f};
-        } else {
-            OOFEM_ERROR("Unknown equation id encountered");
-        }
+        answer = {V_u, V_v, V_w, P_f};
     } else {
-        if ( ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
-            answer = {V_u, V_v, V_w};
-        } else if ( ut == EID_ConservationEquation ) {
-            answer.clear();
-        } else {
-            OOFEM_ERROR("Unknown equation id encountered");
-        }
+        answer = {V_u, V_v, V_w};
     }
 }
 
@@ -148,8 +129,8 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
     FloatArray a_pressure, a_velocity, devStress, epsp, Nh, dN_V(30);
     FloatMatrix dN, B(6, 30);
     double r_vol, pressure;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
+    this->computeVectorOfVelocities(VM_Total, tStep, a_velocity);
+    this->computeVectorOfPressures(VM_Total, tStep, a_pressure);
     FloatArray momentum, conservation;
 
     B.zero();
@@ -396,12 +377,6 @@ Interface *Tet21Stokes :: giveInterface(InterfaceType it)
     }
 }
 
-int Tet21Stokes :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
 void Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                           TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
@@ -421,35 +396,12 @@ void Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueM
     }
 }
 
-int Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode, TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
-{
-    bool ok;
-    FloatArray lcoords, n, n_lin;
-    ok = this->computeLocalCoordinates(lcoords, gcoords);
-    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    if ( !ok ) {
-        return false;
-    }
-
-    return true;
-}
-
-void Tet21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    answer = {V_u, V_v, V_w, P_f};
-}
-
 double Tet21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
     FloatArray center;
     FloatArray lcoords = {0.3333333, 0.3333333, 0.3333333};
     this->computeGlobalCoordinates(center, lcoords);
     return center.distance(coords);
-}
-
-void Tet21Stokes :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 void Tet21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)

@@ -55,7 +55,7 @@ REGISTER_Element(QWedge);
 
 FEI3dWedgeQuad QWedge :: interpolation;
 
-QWedge :: QWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+QWedge :: QWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
     // Constructor.
 {
     numberOfDofMans = 15;
@@ -74,7 +74,7 @@ QWedge :: initializeFrom(InputRecord *ir)
 
 
 void
-QWedge :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+QWedge :: giveDofManDofIDMask(int inode, IntArray &answer) const
 // returns DofId mask array for inode element node.
 // DofId mask array determines the dof ordering requsted from node.
 // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -376,7 +376,6 @@ QWedge :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-
 void
 QWedge :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
@@ -384,9 +383,4 @@ QWedge :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
     OOFEM_WARNING("IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
-void
-QWedge :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
 } // end namespace oofem

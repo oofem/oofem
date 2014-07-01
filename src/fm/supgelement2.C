@@ -159,7 +159,7 @@ SUPGElement2 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
         // add lsic stabilization term
         this->giveCharacteristicMatrix(m1, LSICStabilizationTerm_MB, tStep);
         //m1.times( lscale / ( dscale * uscale * uscale ) );
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, v);
+        this->computeVectorOfVelocities(VM_Total, tStep, v);
         h.beProductOf(m1, v);
         answer.assemble(h, vloc);
         this->giveCharacteristicMatrix(m1, LinearAdvectionTerm_MC, tStep);
@@ -170,13 +170,13 @@ SUPGElement2 :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Valu
 
         // add pressure term
         this->giveCharacteristicMatrix(m1, PressureTerm_MB, tStep);
-        this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
+        this->computeVectorOfPressures(VM_Total, tStep, v);
         h.beProductOf(m1, v);
         answer.assemble(h, vloc);
 
         // pressure term
         this->giveCharacteristicMatrix(m1, PressureTerm_MC, tStep);
-        this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
+        this->computeVectorOfPressures(VM_Total, tStep, v);
         h.beProductOf(m1, v);
         answer.assemble(h, ploc);
     } else
@@ -314,7 +314,7 @@ SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
 
     answer.clear();
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     int rule = 2;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
@@ -373,7 +373,7 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
 
     answer.clear();
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
@@ -503,7 +503,7 @@ SUPGElement2 :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep)
 
     int rule = 1;
     IntegrationRule *iRule = this->integrationRulesArray [ rule ];
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     /* pspg stabilization term */
     for ( GaussPoint *gp: *iRule ) {
@@ -572,7 +572,7 @@ SUPGElement2 :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *tStep)
      * int i,k;
      * FloatArray u, dDB_u;
      *
-     * this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+     * this->computeVectorOfVelocities(VM_Total, tStep, u);
      *
      * for ( GaussPoint *gp: *iRule ) {
      *  dV  = this->computeVolumeAround(gp);
@@ -787,7 +787,7 @@ SUPGElement2 :: computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, Time
 {
     FloatArray u;
     FloatMatrix b;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     this->computeBMatrix(b, gp);
     answer.beProductOf(b, u);

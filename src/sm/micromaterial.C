@@ -282,9 +282,9 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
         Kii1KbiT = new FloatMatrix(totalInternalDofs, totalBoundaryDofs);
         Kii1KbiT->zero();
         Kii = classFactory.createSparseMtrx(sparseMtrxType);
-        Kii->buildInternalStructure(microEngngModel, 1, EID_MomentumBalance, * this);
+        Kii->buildInternalStructure(microEngngModel, 1, * this);
         Kii->zero();
-        microEngngModel->assemble(Kii, tStep, EID_MomentumBalance, type, * this, microDomain);
+        microEngngModel->assemble(Kii, tStep, type, * this, microDomain);
     }
 
 
@@ -295,9 +295,9 @@ void MicroMaterial :: giveMacroStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
 
     stiffnessMatrixMicro = classFactory.createSparseMtrx(sparseMtrxType);
     stiffnessMatrixMicro->zero();
-    stiffnessMatrixMicro->buildInternalStructure(microEngngModel, 1, EID_MomentumBalance, * this);
+    stiffnessMatrixMicro->buildInternalStructure(microEngngModel, 1, * this);
     stiffnessMatrixMicro->zero();
-    microEngngModel->assemble(stiffnessMatrixMicro, tStep, EID_MomentumBalance, type, * this, microDomain);
+    microEngngModel->assemble(stiffnessMatrixMicro, tStep, type, * this, microDomain);
 
 
     for ( int i = 1; i <= totalBoundaryDofs; i++ ) {
@@ -594,8 +594,8 @@ void MicroMaterial :: setMacroProperties(Domain *macroDomain, MacroLSpace *macro
     //   for ( i = 1; i <= problemMicro->giveDomain(1)->giveNumberOfDofManagers(); i++ ) { //for each node
     //     DofMan = problemMicro->giveDomain(1)->giveDofManager(i);
     //         //printf("%d\n",DofMan->giveNumberOfPrimaryMasterDofs(dofIDArry));
-    //         //DofMan->giveLocationArray(dofIDArry, ut, *this );
-    //     DofMan->giveCompleteLocationArray(ut, * this);
+    //         //DofMan->giveLocationArray(dofIDArry, *this );
+    //     DofMan->giveCompleteLocationArray(* this);
     //     for ( j = 1; j <= DofMan->giveNumberOfDofs(); j++ ) {
     //       counter++;
     //     }

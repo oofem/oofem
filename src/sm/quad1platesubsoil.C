@@ -53,7 +53,7 @@ REGISTER_Element(Quad1PlateSubSoil);
 FEI2dQuadLin Quad1PlateSubSoil :: interp_lin(1, 2);
 
 Quad1PlateSubSoil :: Quad1PlateSubSoil(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(),
+    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this),
     SPRNodalRecoveryModelInterface()
 {
     numberOfGaussPoints = 4;
@@ -133,7 +133,7 @@ Quad1PlateSubSoil :: initializeFrom(InputRecord *ir)
 
 
 void
-Quad1PlateSubSoil :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Quad1PlateSubSoil :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_w};
 }

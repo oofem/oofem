@@ -65,7 +65,7 @@ public:
     virtual FEInterpolation *giveInterpolation() const { return & interp; }
 
     virtual int computeNumberOfDofs() { return 16; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
@@ -75,7 +75,6 @@ public:
     virtual const char *giveClassName() const { return "Q4axisymm"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

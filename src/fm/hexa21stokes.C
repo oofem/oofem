@@ -36,7 +36,6 @@
 #include "fmelement.h"
 #include "node.h"
 #include "domain.h"
-#include "equationid.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "bcgeomtype.h"
@@ -71,7 +70,7 @@ IntArray Hexa21Stokes :: surf_ordering [ 6 ] = {
     {13, 14, 15,  1,  2,  3, 17, 18, 19, 29, 30, 31, 42, 43, 44, 57, 58, 59, 54, 55, 56, 66, 67, 68, 84, 85, 86}
 };
 
-Hexa21Stokes :: Hexa21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain)
+Hexa21Stokes :: Hexa21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain), SpatialLocalizerInterface(this)
 {
     this->numberOfDofMans = 27;
     this->numberOfGaussPoints = 27;
@@ -94,30 +93,12 @@ int Hexa21Stokes :: computeNumberOfDofs()
     return 89;
 }
 
-void Hexa21Stokes :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+void Hexa21Stokes :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    // Returns the mask for node number inode of this element. The mask tells what quantities
-    // are held by each node. Since this element holds velocities (both in x and y direction),
-    // in six nodes and pressure in three nodes the answer depends on which node is requested.
-
     if ( inode <= 8 ) {
-        if ( ut == EID_MomentumBalance ) {
-            answer = {V_u, V_v, V_w};
-        } else if ( ut == EID_ConservationEquation ) {
-            answer = {P_f};
-        } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-            answer = {V_u, V_v, V_w, P_f};
-        } else {
-            OOFEM_ERROR("Unknown equation id encountered");
-        }
+        answer = {V_u, V_v, V_w, P_f};
     } else {
-        if ( ut == EID_MomentumBalance || ut == EID_MomentumBalance_ConservationEquation ) {
-            answer = {V_u, V_v, V_w};
-        } else if ( ut == EID_ConservationEquation ) {
-            answer.clear();
-        } else {
-            OOFEM_ERROR("Unknown equation id encountered");
-        }
+        answer = {V_u, V_v, V_w};
     }
 }
 
@@ -152,8 +133,8 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
     FloatArray a_pressure, a_velocity, devStress, epsp, Nh, dN_V(81);
     FloatMatrix dN, B(6, 81);
     double r_vol, pressure;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, a_velocity);
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, a_pressure);
+    this->computeVectorOfVelocities(VM_Total, tStep, a_velocity);
+    this->computeVectorOfPressures(VM_Total, tStep, a_pressure);
     FloatArray momentum, conservation;
 
     B.zero();
@@ -390,11 +371,6 @@ Interface *Hexa21Stokes :: giveInterface(InterfaceType it)
     }
 }
 
-int Hexa21Stokes :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
 
 void Hexa21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                            TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
@@ -415,36 +391,12 @@ void Hexa21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(Value
     }
 }
 
-int Hexa21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode, TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
-{
-    bool ok;
-    FloatArray lcoords, n, n_lin;
-    ok = this->computeLocalCoordinates(lcoords, gcoords);
-    if ( !ok ) {
-        answer.clear();
-        return false;
-    }
-
-    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    return true;
-}
-
-void Hexa21Stokes :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    answer = {V_u, V_v, V_w, P_f};
-}
-
 double Hexa21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
     FloatArray center;
     FloatArray lcoords = {0.25, 0.25, 0.25};
     this->computeGlobalCoordinates(center, lcoords);
     return center.distance(coords);
-}
-
-void Hexa21Stokes :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 void Hexa21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)

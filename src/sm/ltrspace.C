@@ -60,10 +60,10 @@ REGISTER_Element(LTRSpace);
 FEI3dTetLin LTRSpace :: interpolation;
 
 LTRSpace :: LTRSpace(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
-    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(), DirectErrorIndicatorRCInterface(),
-    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(), ZZRemeshingCriteriaInterface(),
-    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
+    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
+    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
+    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface()
 
 {
     numberOfDofMans  = 4;
@@ -82,20 +82,14 @@ LTRSpace :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
         return static_cast< MMAShapeFunctProjectionInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
-    } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return static_cast< HuertaRemeshingCriteriaInterface * >(this);
     }
 
     return NULL;
@@ -238,7 +232,7 @@ LTRSpace :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 void
-LTRSpace :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+LTRSpace :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w};
 }
@@ -264,13 +258,6 @@ LTRSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
 
     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     giveIPValue(answer, gp, type, tStep);
-}
-
-void
-LTRSpace :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                      InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 
@@ -325,7 +312,6 @@ LTRSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *ref
                                                              IntArray &controlNode, IntArray &controlDof,
                                                              HuertaErrorEstimator :: AnalysisMode aMode)
 {
-    Element *element = this->HuertaErrorEstimatorI_giveElement();
     FloatArray *corner [ 4 ], midSide [ 6 ], midFace [ 4 ], midNode;
     double x = 0.0, y = 0.0, z = 0.0;
     int inode, nodes = 4, iside, sides = 6, iface, faces = 4, nd, nd1, nd2;
@@ -343,7 +329,7 @@ LTRSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *ref
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
-            corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
+            corner [ inode ] = this->giveNode(inode + 1)->giveCoordinates();
 
             x += corner [ inode ]->at(1);
             y += corner [ inode ]->at(2);
@@ -384,7 +370,7 @@ LTRSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *ref
         }
     }
 
-    this->setupRefinedElementProblem3D(element, refinedElement, level, nodeId, localNodeIdArray, globalNodeIdArray,
+    this->setupRefinedElementProblem3D(this, refinedElement, level, nodeId, localNodeIdArray, globalNodeIdArray,
                                        sMode, tStep, nodes, corner, midSide, midFace, midNode,
                                        localNodeId, localElemId, localBcId, hexaSideNode, hexaFaceNode,
                                        controlNode, controlDof, aMode, "LSpace");
@@ -631,13 +617,6 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc)
 
 #endif
 
-int
-LTRSpace :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
 
 double
 LTRSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
@@ -666,55 +645,19 @@ LTRSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray 
 }
 
 
-double
-LTRSpace :: DirectErrorIndicatorRCI_giveCharacteristicSize()
-{
-    FloatArray lc(4);
-    double volume = interpolation.giveTransformationJacobian( lc, FEIElementGeometryWrapper(this) );
-    return pow(volume * 6.0, 1. / 3.);
-}
-
-
-int
-LTRSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                             TimeStep *tStep, const FloatArray &coords,
+void
+LTRSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                             TimeStep *tStep, const FloatArray &lcoords,
                                                              FloatArray &answer)
 {
-    FloatArray lcoords, u;
+    FloatArray u;
     FloatMatrix n;
-    int result;
+    n.beNMatrixOf(lcoords, 3);
 
-    result = this->computeLocalCoordinates(lcoords, coords);
-
-    n.resize(3, 12);
-    n.zero();
-
-    n.at(1, 1)  = lcoords.at(1);
-    n.at(1, 4)  = lcoords.at(2);
-    n.at(1, 7)  = lcoords.at(3);
-    n.at(1, 10) = lcoords.at(4);
-
-    n.at(2, 2)  = lcoords.at(1);
-    n.at(2, 5)  = lcoords.at(2);
-    n.at(2, 8)  = lcoords.at(3);
-    n.at(2, 11) = lcoords.at(4);
-
-    n.at(3, 3)  = lcoords.at(1);
-    n.at(3, 6)  = lcoords.at(2);
-    n.at(3, 9)  = lcoords.at(3);
-    n.at(3, 12) = lcoords.at(4);
-
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf(mode, tStep, u);
     answer.beProductOf(n, u);
-
-    return result;
 }
 
-void
-LTRSpace :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    giveDofManDofIDMask(1, EID_MomentumBalance, answer);
-}
 
 void
 LTRSpace :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,

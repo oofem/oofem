@@ -277,7 +277,7 @@ PetscSparseMtrx :: times(double x)
 
 ///@todo I haven't looked at the parallel code yet (lack of time right now, and i want to see it work first). / Mikael
 int
-PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
@@ -318,8 +318,8 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         nelem = domain->giveNumberOfElements();
         for ( int n = 1; n <= nelem; n++ ) {
             Element *elem = domain->giveElement(n);
-            elem->giveLocationArray(r_loc, ut, r_s);
-            elem->giveLocationArray(c_loc, ut, c_s);
+            elem->giveLocationArray(r_loc, r_s);
+            elem->giveLocationArray(c_loc, c_s);
             for ( int i = 1; i <= r_loc.giveSize(); i++ ) {
                 if ( ( ii = r_loc.at(i) ) ) {
                     for ( int j = 1; j <= c_loc.giveSize(); j++ ) {
@@ -340,7 +340,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         for ( int n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
             ActiveBoundaryCondition *activebc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(n) );
             if ( activebc ) {
-                activebc->giveLocationArrays(r_locs, c_locs, ut, TangentStiffnessMatrix, r_s, c_s);
+                activebc->giveLocationArrays(r_locs, c_locs, TangentStiffnessMatrix, r_s, c_s);
                 for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                     IntArray &krloc = r_locs [ k ];
                     IntArray &kcloc = c_locs [ k ];
@@ -391,7 +391,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
 }
 
 int
-PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
+PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
@@ -460,7 +460,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
             for ( int n = 1; n <= nelem; n++ ) {
                 //fprintf (stderr, "(elem %d) ", n);
                 Element *elem = domain->giveElement(n);
-                elem->giveLocationArray(loc, ut, s);
+                elem->giveLocationArray(loc, s);
                 n2l->map2New(lloc, loc, 0); // translate natural->local numbering (remark, 1-based indexing)
                 n2g->map2New(gloc, loc, 0); // translate natural->global numbering (remark, 0-based indexing)
                 // See the petsc manual for details on how this allocation is constructed.
@@ -545,7 +545,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         nelem = domain->giveNumberOfElements();
         for ( int n = 1; n <= nelem; n++ ) {
             Element *elem = domain->giveElement(n);
-            elem->giveLocationArray(loc, ut, s);
+            elem->giveLocationArray(loc, s);
             int ii, jj;
             for ( int i = 1; i <= loc.giveSize(); i++ ) {
                 if ( ( ii = loc.at(i) ) ) {
@@ -564,7 +564,7 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, EquationID
         for ( int n = 1; n <= domain->giveNumberOfBoundaryConditions(); n++ ) {
             ActiveBoundaryCondition *activebc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(n) );
             if ( activebc ) {
-                activebc->giveLocationArrays(r_locs, c_locs, ut, TangentStiffnessMatrix, s, s);
+                activebc->giveLocationArrays(r_locs, c_locs, TangentStiffnessMatrix, s, s);
                 for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                     IntArray &krloc = r_locs [ k ];
                     IntArray &kcloc = c_locs [ k ];

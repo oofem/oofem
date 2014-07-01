@@ -1040,7 +1040,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
     const IntArray *span;
     int nsd = interp->giveNsd();
 
-    se->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    se->computeVectorOf(VM_Total, tStep, u);
 
     if ( nsd == 1 ) {
         FloatArray c [ 2 ], cg [ 2 ];
@@ -1070,7 +1070,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
                     se->computeNMatrixAt(N, & gp);
 
                     // get local code numbers corresponding to ir
-                    se->giveIntegrationElementLocalCodeNumbers(lc, elem, gp.giveIntegrationRule(), EID_MomentumBalance);
+                    se->giveIntegrationElementLocalCodeNumbers(lc, elem, gp.giveIntegrationRule());
                     ur.resize( N.giveNumberOfColumns() );
                     for ( n = 1; n <= lc.giveSize(); n++ ) {
                         ur.at(n) = u.at( lc.at(n) );
@@ -1127,7 +1127,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
                         se->computeNMatrixAt(N, & gp);
 
                         // get local code numbers corresponding to ir
-                        se->giveIntegrationElementLocalCodeNumbers(lc, elem, gp.giveIntegrationRule(), EID_MomentumBalance);
+                        se->giveIntegrationElementLocalCodeNumbers(lc, elem, gp.giveIntegrationRule());
                         ur.resize( N.giveNumberOfColumns() );
                         for ( n = 1; n <= lc.giveSize(); n++ ) {
                             ur.at(n) = u.at( lc.at(n) );
@@ -1203,7 +1203,7 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
                             se->computeNMatrixAt(N, & gp);
 
                             // get local code numbers corresponding to ir
-                            se->giveIntegrationElementLocalCodeNumbers(lc, elem, gp.giveIntegrationRule(), EID_MomentumBalance);
+                            se->giveIntegrationElementLocalCodeNumbers(lc, elem, gp.giveIntegrationRule());
                             ur.resize( N.giveNumberOfColumns() );
                             for ( n = 1; n <= lc.giveSize(); n++ ) {
                                 ur.at(n) = u.at( lc.at(n) );

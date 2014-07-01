@@ -53,7 +53,7 @@ REGISTER_Element(Tria1PlateSubSoil);
 FEI2dTrLin Tria1PlateSubSoil :: interp_lin(1, 2);
 
 Tria1PlateSubSoil :: Tria1PlateSubSoil(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(),
+    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this),
     SPRNodalRecoveryModelInterface()
 {
     numberOfGaussPoints = 1;
@@ -133,7 +133,7 @@ Tria1PlateSubSoil :: initializeFrom(InputRecord *ir)
 
 
 void
-Tria1PlateSubSoil :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Tria1PlateSubSoil :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_w};
 }

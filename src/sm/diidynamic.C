@@ -295,9 +295,9 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
-        stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, EffectiveStiffnessMatrix,
+        this->assemble(stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
                        EModelDefaultEquationNumbering(), domain);
 
         help.resize(neq);
@@ -323,7 +323,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
         stiffnessMatrix->zero();
-        this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, EffectiveStiffnessMatrix,
+        this->assemble(stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
                        EModelDefaultEquationNumbering(), domain);
     }
 
@@ -353,8 +353,8 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
     if ( delta != 0 ) {
         for ( int i = 1; i <= neq; i++ ) {
             help.at(i) = delta * ( a1 * previousDisplacementVector.at(i)
-                                  + a4 * velocityVector.at(i)
-                                  + a5 * accelerationVector.at(i)
+                                  + a4 * previousVelocityVector.at(i)
+                                  + a5 * previousAccelerationVector.at(i)
                                   + a6 * previousIncrementOfDisplacement.at(i) );
         }
         this->timesMtrx(help, rhs2, StiffnessMatrix, domain, tStep);
@@ -501,7 +501,7 @@ DIIDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Doma
 
 #endif
 
-        element->giveLocationArray(loc, EID_MomentumBalance, en);
+        element->giveLocationArray(loc, en);
         element->giveCharacteristicMatrix(charMtrx, type, tStep);
 
 #ifdef DEBUG
@@ -533,7 +533,7 @@ DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueM
     _loadVector.resize( this->giveNumberOfDomainEquations( domain->giveNumber(), EModelDefaultEquationNumbering() ) );
     _loadVector.zero();
 
-    this->assembleVector(_loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, mode,
+    this->assembleVector(_loadVector, tStep, ExternalForcesVector, mode,
                          EModelDefaultEquationNumbering(), domain);
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(_loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);

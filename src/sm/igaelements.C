@@ -171,7 +171,7 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
 
     indx = context.giveIntVarIndx();
 
-    StructuralElementEvaluator :: computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    StructuralElementEvaluator :: computeVectorOf(VM_Total, tStep, u);
 
     // loop over individual integration rules (i.e., knot spans)
     for ( auto &iRule: integrationRulesArray ) {
@@ -285,7 +285,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context)
 
     indx = context.giveIntVarIndx();
 
-    StructuralElementEvaluator :: computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    StructuralElementEvaluator :: computeVectorOf(VM_Total, tStep, u);
 
     //double maxs=-1.0e10, mins=1.0e10;
 
@@ -489,7 +489,7 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
 
     indx = context.giveIntVarIndx();
 
-    StructuralElementEvaluator :: computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    StructuralElementEvaluator :: computeVectorOf(VM_Total, tStep, u);
 
     // loop over individual integration rules (i.e., knot spans)
     for ( auto &iRule: integrationRulesArray ) {
@@ -632,7 +632,7 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context)
     }
  #endif
 
-    StructuralElementEvaluator :: computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    StructuralElementEvaluator :: computeVectorOf(VM_Total, tStep, u);
 
     //double maxs=-1.0e10, mins=1.0e10;
 
