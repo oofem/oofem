@@ -248,7 +248,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
     }
 }
 
-void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl)
+void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl, bool iSetDiscontContribToZero)
 {
     std :: vector< int >elNodes;
 
@@ -258,10 +258,10 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
         elNodes.push_back(i + 1);
     }
 
-    XfemElementInterface_createEnrNmatrixAt(oAnswer, iLocCoord, iEl, elNodes);
+    XfemElementInterface_createEnrNmatrixAt(oAnswer, iLocCoord, iEl, elNodes, iSetDiscontContribToZero);
 }
 
-void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl, const std :: vector< int > &iLocNodeInd)
+void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl, const std :: vector< int > &iLocNodeInd, bool iSetDiscontContribToZero)
 {
     const int dim = 2;
     const int nDofMan = iEl.giveNumberOfDofManagers();
@@ -328,7 +328,12 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
 
 
                 for ( int k = 0; k < numEnr; k++ ) {
-                    NdNode [ nodeCounter ] = ( efGP [ k ] - efNode [ k ] ) * Nc.at(j);
+                    if(iSetDiscontContribToZero) {
+                        NdNode [ nodeCounter ] = 0.0;
+                    }
+                    else {
+                        NdNode [ nodeCounter ] = ( efGP [ k ] - efNode [ k ] ) * Nc.at(j);
+                    }
                     counter++;
                     nodeCounter++;
                 }

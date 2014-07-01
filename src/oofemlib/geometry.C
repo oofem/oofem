@@ -497,6 +497,15 @@ void Circle :: computeNormalSignDist(double &oDist, const FloatArray &iPoint) co
     oDist = mVertices [ 0 ].distance(iPoint) - radius;
 }
 
+void Circle :: giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iArcPos) const
+{
+    const double pi = 3.14159265359;
+    double angle = 2.0*pi*iArcPos;
+
+    oGlobalCoord.resize(2);
+    oGlobalCoord = { mVertices[0][0] + radius*cos(angle), mVertices[0][1] + radius*sin(angle) };
+}
+
 IRResultType Circle :: initializeFrom(InputRecord *ir)
 {
     IRResultType result; // Required by IR_GIVE_FIELD macro
@@ -678,6 +687,8 @@ PolygonLine :: PolygonLine() : BasicGeometry()
 
 void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoint) const
 {
+    const FloatArray &point = {iPoint[0], iPoint[1]};
+
     oDist = std :: numeric_limits< double > :: max();
     int numSeg = this->giveNrVertices() - 1;
 
@@ -694,7 +705,7 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
         double dist2 = 0.0;
         if ( segId == 1 ) {
             // Vector from start P1 to point X
-        	FloatArray u = {iPoint.at(1) - crackP1.at(1), iPoint.at(2) - crackP1.at(2)};
+        	FloatArray u = {point.at(1) - crackP1.at(1), point.at(2) - crackP1.at(2)};
 
             // Line tangent vector
             FloatArray t = {crackP2.at(1) - crackP1.at(1), crackP2.at(2) - crackP1.at(2)};
@@ -706,21 +717,21 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
 
                 if ( s > l ) {
                     // X is closest to P2
-                    dist2 = iPoint.distance_square(crackP2);
+                    dist2 = point.distance_square(crackP2);
                 } else {
                     double xi = s / l;
                     FloatArray q = ( 1.0 - xi ) * crackP1 + xi * crackP2;
-                    dist2 = iPoint.distance_square(q);
+                    dist2 = point.distance_square(q);
                 }
             } else {
                 // If the points P1 and P2 coincide,
                 // we can compute the distance to any
                 // of these points.
-                dist2 = iPoint.distance_square(crackP1);
+                dist2 = point.distance_square(crackP1);
             }
         } else if ( segId == numSeg ) {
             // Vector from start P1 to point X
-        	FloatArray u = {iPoint.at(1) - crackP1.at(1), iPoint.at(2) - crackP1.at(2)};
+        	FloatArray u = {point.at(1) - crackP1.at(1), point.at(2) - crackP1.at(2)};
 
             // Line tangent vector
             FloatArray t = {crackP2.at(1) - crackP1.at(1), crackP2.at(2) - crackP1.at(2)};
@@ -732,27 +743,27 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
 
                 if ( s < 0.0 ) {
                     // X is closest to P1
-                    dist2 = iPoint.distance_square(crackP1);
+                    dist2 = point.distance_square(crackP1);
                 } else {
                     double xi = s / l;
                     FloatArray q = ( 1.0 - xi ) * crackP1 + xi * crackP2;
-                    dist2 = iPoint.distance_square(q);
+                    dist2 = point.distance_square(q);
                     //					}
                 }
             } else {
                 // If the points P1 and P2 coincide,
                 // we can compute the distance to any
                 // of these points.
-                dist2 = iPoint.distance_square(crackP1);
+                dist2 = point.distance_square(crackP1);
             }
         } else {
             double arcPos = -1.0;
-            dist2 = iPoint.distance_square(crackP1, crackP2, arcPos);
+            dist2 = point.distance_square(crackP1, crackP2, arcPos);
         }
 
         if ( dist2 < oDist*oDist ) {
             FloatArray lineToP;
-            lineToP.beDifferenceOf(iPoint, crackP1, dim);
+            lineToP.beDifferenceOf(point, crackP1, dim);
 
             FloatArray t;
             t.beDifferenceOf(crackP2, crackP1, dim);
@@ -919,6 +930,37 @@ void PolygonLine :: giveSubPolygon(std :: vector< FloatArray > &oPoints, const d
     }
 }
 
+void PolygonLine :: giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iArcPos) const
+{
+    double L = computeLength();
+    double xSegStart = 0.0, xSegEnd = 0.0;
+    double xiSegStart = 0.0, xiSegEnd = 0.0;
+    size_t numSeg = mVertices.size() - 1;
+    const double xiTol = 1.0e-9;
+    if ( iArcPos < xiTol ) {
+        oGlobalCoord = mVertices [ 0 ];
+        return;
+    }
+
+    for ( size_t i = 0; i < numSeg; i++ ) {
+        xSegEnd += mVertices [ i ].distance(mVertices [ i + 1 ]);
+
+        xiSegStart = xSegStart / L;
+        xiSegEnd        = xSegEnd / L;
+
+        if ( iArcPos > xiSegStart-xiTol && iArcPos < xiSegEnd+xiTol ) {
+            // Point is within the segment
+            FloatArray p;
+            double elXi = ( iArcPos - xiSegStart ) / ( xiSegEnd - xiSegStart );
+            p.beScaled( ( 1.0 - elXi ), mVertices [ i ] );
+            p.add(elXi, mVertices [ i + 1 ]);
+            oGlobalCoord = p;
+            return;
+        }
+
+    }
+}
+
 void PolygonLine :: giveNormal(FloatArray &oNormal, const double &iArcPosition) const
 {
     double L = computeLength();
@@ -975,6 +1017,8 @@ void PolygonLine :: giveTangent(FloatArray &oTangent, const double &iArcPosition
             const FloatArray &p2 = mVertices [ i+1 ];
 
             oTangent = {p2(0) - p1(0), p2(1) - p1(1)};
+
+            oTangent.normalize();
 
             return;
         }

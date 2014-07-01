@@ -1152,7 +1152,7 @@ void PrescribedGradientBCWeak::assembleTangentGPContribution(FloatMatrix &oTange
 
     if(xfemElInt_minus != NULL && domain->hasXfemManager()) {
         //printf("Computing enriched N-matrix.\n");
-        xfemElInt_minus->XfemElementInterface_createEnrNmatrixAt(NdispMat_minus, dispElLocCoord_minus, *dispEl_minus);
+        xfemElInt_minus->XfemElementInterface_createEnrNmatrixAt(NdispMat_minus, dispElLocCoord_minus, *dispEl_minus, false);
     }
     else {
         OOFEM_ERROR("Unable to compute N-matrix.")

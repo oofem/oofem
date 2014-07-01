@@ -50,6 +50,27 @@ class InputRecord;
 class DynamicInputRecord;
 class GaussPoint;
 enum NodeEnrichmentType : int;
+
+struct EfInput {
+    EfInput() {}
+    EfInput(const FloatArray &iPos, const double &iLevelSet, int iNodeInd, const FloatArray &iClosestPointOnCrack, const double &iArcPos):
+    mPos(iPos),
+    mLevelSet(iLevelSet),
+    mNodeInd(iNodeInd),
+    mClosestPointOnCrack(iClosestPointOnCrack),
+    mArcPos(iArcPos)
+    {}
+
+    ~EfInput() {}
+
+    FloatArray mPos;
+    double mLevelSet;
+    int mNodeInd;
+    FloatArray mClosestPointOnCrack;
+    double mArcPos;
+};
+
+
 /*
  * Class EnrichmentFront: describes the edge or tip of an XFEM enrichment.
  * The purpose is to add a different treatment of the front than the "interior"
@@ -90,8 +111,8 @@ public:
 
 
     // Evaluate the enrichment function and its derivative in front nodes.
-    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const = 0;
-    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const = 0;
+    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const EfInput &iEfInput) const = 0;
+    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const EfInput &iEfInput, const FloatArray &iGradLevelSet) const = 0;
     virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const = 0;
 
     std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
@@ -105,6 +126,8 @@ public:
     virtual double giveSupportRadius() const = 0;
 
     const TipInfo &giveTipInfo() const {return mTipInfo;}
+
+    void computeCrackTangent(FloatArray &oTangent, FloatArray &oNormal, const EfInput &iEfInput) const;
 
 protected:
     TipInfo mTipInfo;

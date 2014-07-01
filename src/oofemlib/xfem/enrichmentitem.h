@@ -215,7 +215,7 @@ public:
 
     // Help functions
     static double calcXiZeroLevel(const double &iQ1, const double &iQ2);
-    static void calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT);
+    static void calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT, const EfInput &iEfInput);
 
     PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; };
     bool hasPropagationLaw() { return this->mPropLawIndex != 0; };

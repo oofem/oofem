@@ -63,18 +63,18 @@ int EnrFrontIntersection :: giveNumEnrichments(const DofManager &iDMan) const
     return 1;
 }
 
-void EnrFrontIntersection :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const
+void EnrFrontIntersection :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const EfInput &iEfInput) const
 {
     FloatArray xTip = { mTipInfo.mGlobalCoord.at(1), mTipInfo.mGlobalCoord.at(2) };
 
-    FloatArray pos = { iPos.at(1), iPos.at(2) };
+    FloatArray pos = { iEfInput.mPos.at(1), iEfInput.mPos.at(2) };
 
     // Crack tip normal and use defined tangent
     // Note that mTangent is not necessarily equal to mTipInfo.mTangDir!
     const FloatArray &t = mTangent;
     const FloatArray &n = mTipInfo.mNormalDir;
 
-    FloatArray tipToPos = { iPos(0)-xTip(0), iPos(1)-xTip(1) };
+    FloatArray tipToPos = { iEfInput.mPos(0)-xTip(0), iEfInput.mPos(1)-xTip(1) };
 
     // Heaviside in normal direction
     double Hn = 0.0;
@@ -91,7 +91,7 @@ void EnrFrontIntersection :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc
     oEnrFunc.push_back(Hn*Ht);
 }
 
-void EnrFrontIntersection :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const
+void EnrFrontIntersection :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const EfInput &iEfInput, const FloatArray &iGradLevelSet) const
 {
     FloatArray enrFuncDeriv = {0.0, 0.0};
     oEnrFuncDeriv.push_back(enrFuncDeriv);

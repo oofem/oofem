@@ -106,7 +106,7 @@ void PlaneStress2dXfem :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 void PlaneStress2dXfem :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 {
-    XfemElementInterface_createEnrNmatrixAt(answer, iLocCoord, * this);
+    XfemElementInterface_createEnrNmatrixAt(answer, iLocCoord, * this, false);
 }
 
 
@@ -292,13 +292,12 @@ void PlaneStress2dXfem :: giveInputRecord(DynamicInputRecord &input)
 void
 PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
 {
-    int numCells = mSubTri.size();
+    const int numCells = mSubTri.size();
 
     if(numCells == 0) {
         // Enriched but uncut element
         // Visualize as a quad
-        numCells = 1;
-        vtkPiece.setNumberOfCells(numCells);
+        vtkPiece.setNumberOfCells(1);
 
         int numTotalNodes = 4;
         vtkPiece.setNumberOfNodes(numTotalNodes);
@@ -322,7 +321,6 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
 
         // Cell types
         vtkPiece.setCellType(1, 9); // Linear quad
-
 
 
 
@@ -380,7 +378,7 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
 
 
         // Export cell variables
-        vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
+        vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), 1);
         for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
             InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
             FloatArray average;
@@ -525,7 +523,13 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
                 triCenter.add( tri.giveVertex(2) );
                 triCenter.add( tri.giveVertex(3) );
                 triCenter.times(1.0/3.0);
-                const double relPertLength = 1.0e-4;
+
+                double meanEdgeLength = 0.0;
+                meanEdgeLength += (1.0/3.0)*tri.giveVertex(1).distance( tri.giveVertex(2) );
+                meanEdgeLength += (1.0/3.0)*tri.giveVertex(2).distance( tri.giveVertex(3) );
+                meanEdgeLength += (1.0/3.0)*tri.giveVertex(3).distance( tri.giveVertex(1) );
+
+                const double relPertLength = 1.0e-5;
 
                 for(int i = 1; i <= 3; i++) {
 
@@ -536,24 +540,78 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
                         // Fetch global coordinates (in undeformed configuration)
                         const FloatArray &x = tri.giveVertex(i);
 
-                        // Perturb towards triangle center, to ensure that
-                        // we end up on the correct side of the crack
+                        FloatArray locCoordNode;
+                        computeLocalCoordinates(locCoordNode, x);
+
+
                         FloatArray pertVec;
-                        pertVec.beDifferenceOf(triCenter, x);
-                        pertVec.times(relPertLength);
-                        FloatArray xPert = x;
-                        xPert.add(pertVec);
-
-
-                        // Compute local coordinates
                         FloatArray locCoord;
-                        computeLocalCoordinates(locCoord, xPert);
+                        double pertLength = relPertLength;
+
+                        int numTries = 1;
+                        for(int j = 0; j < numTries; j++) {
+                            // Perturb towards triangle center, to ensure that
+                            // we end up on the correct side of the crack
+                            pertVec.beDifferenceOf(triCenter, x);
+                            pertVec.times(pertLength);
+                            FloatArray xPert = x;
+                            xPert.add(pertVec);
+
+
+                            // Compute local coordinates
+                            computeLocalCoordinates(locCoord, xPert);
+
+                        }
 
                         // Compute displacement in point
                         FloatMatrix NMatrix;
-                        computeNmatrixAt(locCoord, NMatrix);
                         FloatArray solVec;
-                        computeVectorOf(EID_MomentumBalance, VM_Total, tStep, solVec);
+
+                        // Use only regular basis functions for edge nodes to get linear interpolation
+                        // (to make the visualization look nice)
+                        FloatArray N;
+                        FEInterpolation *interp = giveInterpolation();
+                        interp->evalN( N, locCoordNode, FEIElementGeometryWrapper(this) );
+                        const int nDofMan = giveNumberOfDofManagers();
+
+                        XfemManager *xMan = domain->giveXfemManager();
+                        int numEI =  xMan->giveNumberOfEnrichmentItems();
+
+                        bool joinNodes = false;
+
+                        for(int eiIndex = 1; eiIndex <= numEI; eiIndex++) {
+                            EnrichmentItem *ei = xMan->giveEnrichmentItem(eiIndex);
+
+                            double levelSetTang = 0.0, levelSetNormal = 0.0, levelSetInNode = 0.0;
+
+                            for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
+                                DofManager *dMan = giveDofManager(elNodeInd);
+                                ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber() );
+                                levelSetTang += N.at(elNodeInd)*levelSetInNode;
+
+                                ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber() );
+                                levelSetNormal += N.at(elNodeInd)*levelSetInNode;
+
+                            }
+
+                            if(levelSetTang < (1.0e-2)*meanEdgeLength || fabs(levelSetNormal) > (1.0e-2)*meanEdgeLength) {
+                                joinNodes = true;
+                            }
+
+                        }
+
+                        if(joinNodes) {
+                            // if point on edge
+                            XfemElementInterface_createEnrNmatrixAt(NMatrix, locCoord, * this, true);
+                            computeVectorOf(EID_MomentumBalance, VM_Total, tStep, solVec);
+                        }
+                        else {
+                            // if point on edge
+                            XfemElementInterface_createEnrNmatrixAt(NMatrix, locCoord, * this, false);
+                            computeVectorOf(EID_MomentumBalance, VM_Total, tStep, solVec);
+                        }
+
+
                         FloatArray uTemp;
                         uTemp.beProductOf(NMatrix, solVec);
 
@@ -564,7 +622,9 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
                             u = {uTemp[0], uTemp[1], 0.0};
                         }
 
-                        vtkPiece.setPrimaryVarInNode(fieldNum, nodesPassed, u);
+
+                        FloatArray valuearray = u;
+                        vtkPiece.setPrimaryVarInNode(fieldNum, nodesPassed, valuearray);
                     } else {
                         // TODO: Implement
                         printf("fieldNum: %d\n", fieldNum);

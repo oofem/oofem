@@ -70,6 +70,10 @@ void EnrFrontLinearBranchFuncRadius :: MarkNodesAsFront(std :: unordered_map< in
     Domain *d = ixFemMan.giveDomain();
     int nNodes = d->giveNumberOfDofManagers();
 
+    // Make sure that the tip element gets enriched,
+    // even if the radius is smaller than the element size
+    MarkTipElementNodesAsFront(ioNodeEnrMarkerMap, ixFemMan, iLevelSetNormalDirMap, iLevelSetTangDirMap, iTipInfo);
+
     for ( int i = 1; i <= nNodes; i++ ) {
         DofManager *dMan = d->giveDofManager(i);
         const FloatArray &nodePos = * ( dMan->giveCoordinates() );
@@ -102,32 +106,32 @@ int EnrFrontLinearBranchFuncRadius :: giveNumEnrichments(const DofManager &iDMan
     return 4;
 }
 
-void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const
+void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const EfInput &iEfInput) const
 {
     FloatArray xTip = { mTipInfo.mGlobalCoord.at(1), mTipInfo.mGlobalCoord.at(2) };
 
-    FloatArray pos = { iPos.at(1), iPos.at(2) };
+    FloatArray pos = { iEfInput.mPos.at(1), iEfInput.mPos.at(2) };
 
-    // Crack tip tangent and normal
-    const FloatArray &t = mTipInfo.mTangDir;
-    const FloatArray &n = mTipInfo.mNormalDir;
+    // Crack tangent and normal
+    FloatArray t, n;
+    computeCrackTangent(t, n, iEfInput);
 
     double r = 0.0, theta = 0.0;
-    EnrichmentItem :: calcPolarCoord(r, theta, xTip, pos, n, t);
+    EnrichmentItem :: calcPolarCoord(r, theta, xTip, pos, n, t, iEfInput);
 
     mpBranchFunc->evaluateEnrFuncAt(oEnrFunc, r, theta);
 }
 
-void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const
+void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const EfInput &iEfInput, const FloatArray &iGradLevelSet) const
 {
     const FloatArray &xTip = mTipInfo.mGlobalCoord;
 
-    // Crack tip tangent and normal
-    const FloatArray &t = mTipInfo.mTangDir;
-    const FloatArray &n = mTipInfo.mNormalDir;
+    // Crack tangent and normal
+    FloatArray t, n;
+    computeCrackTangent(t, n, iEfInput);
 
     double r = 0.0, theta = 0.0;
-    EnrichmentItem :: calcPolarCoord(r, theta, xTip, iPos, n, t);
+    EnrichmentItem :: calcPolarCoord(r, theta, xTip, iEfInput.mPos, n, t, iEfInput);
 
 
     size_t sizeStart = oEnrFuncDeriv.size();

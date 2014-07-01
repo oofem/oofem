@@ -72,4 +72,16 @@ void EnrichmentFront :: MarkTipElementNodesAsFront(std :: unordered_map< int, No
         }
 }
 
+void EnrichmentFront :: computeCrackTangent(FloatArray &oTangent, FloatArray &oNormal, const EfInput &iEfInput) const
+{
+    oTangent = {mTipInfo.mGlobalCoord[0]-iEfInput.mClosestPointOnCrack[0], mTipInfo.mGlobalCoord[1]-iEfInput.mClosestPointOnCrack[1]};
+    if(oTangent.computeSquaredNorm() > 1.0e-20 ) {
+        oTangent.normalize();
+    }
+    else {
+        oTangent = mTipInfo.mTangDir;
+    }
+    oNormal = {-oTangent.at(2), oTangent.at(1)};
+}
+
 } // end namespace oofem

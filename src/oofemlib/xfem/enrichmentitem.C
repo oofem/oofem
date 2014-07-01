@@ -248,6 +248,9 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
     mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
 
+
+    writeVtkDebug();
+
     return 1;
 }
 
@@ -432,6 +435,23 @@ EnrichmentItem :: giveEIDofIdArray(IntArray &answer) const
 
 void EnrichmentItem :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const
 {
+    double tangDist = 0.0, minDistArcPos = 0.0;
+    mpEnrichmentDomain->computeTangentialSignDist(tangDist, iPos, minDistArcPos);
+
+    FloatArray edGlobalCoord;
+
+    EnrichmentDomain_BG *edBG = dynamic_cast<EnrichmentDomain_BG*> (mpEnrichmentDomain);
+    if(edBG != NULL) {
+        edBG->bg->giveGlobalCoordinates(edGlobalCoord, minDistArcPos);
+    }
+    else {
+        printf("edBG == NULL.\n");
+    }
+
+
+    const EfInput efInput(iPos, iLevelSet, iNodeInd, edGlobalCoord, minDistArcPos);
+
+
     if ( iNodeInd == -1 ) {
         // Bulk enrichment
         oEnrFunc.resize(1, 0.0);
@@ -449,14 +469,14 @@ void EnrichmentItem :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, cons
                 mpEnrichmentFunc->evaluateEnrFuncAt(oEnrFunc [ 0 ], iPos, iLevelSet, mpEnrichmentDomain);
                 break;
             case NodeEnr_START_TIP:
-                mpEnrichmentFrontStart->evaluateEnrFuncAt(oEnrFunc, iPos, iLevelSet, iNodeInd);
+                mpEnrichmentFrontStart->evaluateEnrFuncAt(oEnrFunc, efInput);
                 break;
             case NodeEnr_END_TIP:
-                mpEnrichmentFrontEnd->evaluateEnrFuncAt(oEnrFunc, iPos, iLevelSet, iNodeInd);
+                mpEnrichmentFrontEnd->evaluateEnrFuncAt(oEnrFunc, efInput);
                 break;
             case NodeEnr_START_AND_END_TIP:
-                mpEnrichmentFrontStart->evaluateEnrFuncAt(oEnrFunc, iPos, iLevelSet, iNodeInd);
-                mpEnrichmentFrontEnd->evaluateEnrFuncAt(oEnrFunc, iPos, iLevelSet, iNodeInd);
+                mpEnrichmentFrontStart->evaluateEnrFuncAt(oEnrFunc, efInput);
+                mpEnrichmentFrontEnd->evaluateEnrFuncAt(oEnrFunc, efInput);
                 break;
             }
         } else   {
@@ -473,6 +493,21 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrF
     auto res = mNodeEnrMarkerMap.find(iNodeInd);
     if ( res != mNodeEnrMarkerMap.end() ) {
 
+        double tangDist = 0.0, minDistArcPos = 0.0;
+        mpEnrichmentDomain->computeTangentialSignDist(tangDist, iPos, minDistArcPos);
+
+        FloatArray edGlobalCoord;
+
+        EnrichmentDomain_BG *edBG = dynamic_cast<EnrichmentDomain_BG*> (mpEnrichmentDomain);
+        if(edBG != NULL) {
+            edBG->bg->giveGlobalCoordinates(edGlobalCoord, minDistArcPos);
+        }
+        else {
+            printf("edBG == NULL.\n");
+        }
+
+        const EfInput efInput(iPos, iLevelSet, iNodeInd, edGlobalCoord, minDistArcPos);
+
         switch(res->second) {
         case NodeEnr_NONE:
             break;
@@ -481,14 +516,14 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrF
             mpEnrichmentFunc->evaluateEnrFuncDerivAt(oEnrFuncDeriv [ 0 ], iPos, iLevelSet, iGradLevelSet, mpEnrichmentDomain);
             break;
         case NodeEnr_START_TIP:
-            mpEnrichmentFrontStart->evaluateEnrFuncDerivAt(oEnrFuncDeriv, iPos, iLevelSet, iGradLevelSet, iNodeInd);
+            mpEnrichmentFrontStart->evaluateEnrFuncDerivAt(oEnrFuncDeriv, efInput, iGradLevelSet);
             break;
         case NodeEnr_END_TIP:
-            mpEnrichmentFrontEnd->evaluateEnrFuncDerivAt(oEnrFuncDeriv, iPos, iLevelSet, iGradLevelSet, iNodeInd);
+            mpEnrichmentFrontEnd->evaluateEnrFuncDerivAt(oEnrFuncDeriv, efInput, iGradLevelSet);
             break;
         case NodeEnr_START_AND_END_TIP:
-            mpEnrichmentFrontStart->evaluateEnrFuncDerivAt(oEnrFuncDeriv, iPos, iLevelSet, iGradLevelSet, iNodeInd);
-            mpEnrichmentFrontEnd->evaluateEnrFuncDerivAt(oEnrFuncDeriv, iPos, iLevelSet, iGradLevelSet, iNodeInd);
+            mpEnrichmentFrontStart->evaluateEnrFuncDerivAt(oEnrFuncDeriv, efInput, iGradLevelSet);
+            mpEnrichmentFrontEnd->evaluateEnrFuncDerivAt(oEnrFuncDeriv, efInput, iGradLevelSet);
             break;
         }
     } else   {
@@ -647,7 +682,9 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 {
     updateLevelSets(ixFemMan);
 
-    Domain *d = ixFemMan.giveDomain();
+    Domain *domain = giveDomain();
+    SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
+
     mNodeEnrMarkerMap.clear();
     TipInfo tipInfoStart, tipInfoEnd;
     mpEnrichmentDomain->giveTipInfos(tipInfoStart, tipInfoEnd);
@@ -657,15 +694,13 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
     double radius = 0.0;
     giveBoundingSphere(center, radius);
 
-    Domain *domain = giveDomain();
-    SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
 
     std :: set< int >elList;
     localizer->giveAllElementsWithNodesWithinBox(elList, center, radius);
 
     // Loop over elements and use the level sets to mark nodes belonging to completely cut elements.
     for ( int elNum: elList ) {
-        Element *el = d->giveElement(elNum);
+        Element *el = domain->giveElement(elNum);
         int nElNodes = el->giveNumberOfNodes();
 
         double minSignPhi  = 1, maxSignPhi         = -1;
@@ -1286,7 +1321,7 @@ double EnrichmentItem :: calcXiZeroLevel(const double &iQ1, const double &iQ2)
     return xi;
 }
 
-void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT)
+void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT, const EfInput &iEfInput)
 {
     FloatArray q = {
         iPos.at(1) - iOrigin.at(1), iPos.at(2) - iOrigin.at(2)
@@ -1301,10 +1336,49 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
         q.times(1.0 / oR);
     }
 
-    if ( q.dotProduct(iN) > 0.0 ) {
-        oTheta =  acos( q.dotProduct(iT) );
+//    if ( q.dotProduct(iN) > 0.0 ) {
+//        oTheta =  acos( q.dotProduct(iT) );
+//    } else {
+//        oTheta = -acos( q.dotProduct(iT) );
+//    }
+
+    const double pi = 3.14159265359;
+
+//    if( q.dotProduct(iT) > 0.0 ) {
+//        oTheta = asin( q.dotProduct(iN) );
+//    } else {
+//        if ( q.dotProduct(iN) > 0.0 ) {
+//            oTheta = pi - asin( q.dotProduct(iN) );
+//        } else {
+//            oTheta = -pi - asin( q.dotProduct(iN) );
+//        }
+//    }
+
+
+//    const double &phi = iEfInput.mLevelSet;
+//
+//    if( q.dotProduct(iT) > 0.0 ) {
+//        oTheta = asin( phi );
+//    } else {
+//        if ( phi > 0.0 ) {
+//            oTheta = pi - asin( phi );
+//        } else {
+//            oTheta = -pi - asin( phi );
+//        }
+//    }
+
+
+    const double tol_q = 1.0e-3;
+    const double &phi = iEfInput.mLevelSet;
+
+    if( q.dotProduct(iT) > tol_q ) {
+        oTheta = asin( q.dotProduct(iN) );
     } else {
-        oTheta = -acos( q.dotProduct(iT) );
+        if ( phi > 0.0 ) {
+            oTheta = pi - asin( fabs(q.dotProduct(iN)) );
+        } else {
+            oTheta = -pi + asin( fabs(q.dotProduct(iN)) );
+        }
     }
 }
 
