@@ -809,7 +809,7 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
             minDistSeg = distSeg;
             minDistSegIndex = segId;
 
-            if ( xiEl >= 0.0 && xiEl <= 1.0 ) {
+            if ( xiEl >= 0.0 && xiEl <= 1.0 ) { //TODO: Always true?! /Erik
                 minArcDist = arcDistPassed + xiEl *crackP1.distance(crackP2) / totalArcLength;
             } else {
                 if ( segId == 1 ) {
@@ -844,7 +844,11 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
 
             double sign = -x_P1.dotProduct(t);
 
-            oDist = sign * minDist;
+            oDist = minDist;
+            if(sign < 0.0) {
+                oDist *= -1.0;
+            }
+
             return;
         } else if ( minDistSegIndex == numSeg ) {
             const FloatArray &P1 = {this->giveVertex ( minDistSegIndex )[0], this->giveVertex ( minDistSegIndex )[1]};
@@ -860,7 +864,11 @@ void PolygonLine :: computeTangentialSignDist(double &oDist, const FloatArray &i
 
             double sign = -x_P2.dotProduct(t);
 
-            oDist = sign * minDist;
+            oDist = minDist;
+            if(sign < 0.0) {
+                oDist *= -1.0;
+            }
+
 
             return;
         } else {
