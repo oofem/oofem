@@ -577,25 +577,34 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
                         XfemManager *xMan = domain->giveXfemManager();
                         int numEI =  xMan->giveNumberOfEnrichmentItems();
 
-                        bool joinNodes = false;
+                        bool joinNodes = true;
 
                         for(int eiIndex = 1; eiIndex <= numEI; eiIndex++) {
                             EnrichmentItem *ei = xMan->giveEnrichmentItem(eiIndex);
 
                             double levelSetTang = 0.0, levelSetNormal = 0.0, levelSetInNode = 0.0;
 
+                            bool evaluationSucceeded = true;
                             for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
                                 DofManager *dMan = giveDofManager(elNodeInd);
-                                ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber() );
+
+                                if(!ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber() )) {
+                                    evaluationSucceeded = false;
+                                }
                                 levelSetTang += N.at(elNodeInd)*levelSetInNode;
 
-                                ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber() );
+                                if(!ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber() )) {
+                                    evaluationSucceeded = false;
+                                }
                                 levelSetNormal += N.at(elNodeInd)*levelSetInNode;
 
                             }
 
-                            if(levelSetTang < (1.0e-2)*meanEdgeLength || fabs(levelSetNormal) > (1.0e-2)*meanEdgeLength) {
-                                joinNodes = true;
+                            double tangSignDist = 0.0, arcPos = 0.0;
+                            ei->giveEnrichmentDomain()->computeTangentialSignDist(tangSignDist, x, arcPos);
+
+                            if(tangSignDist > (1.0e-3)*meanEdgeLength && fabs(levelSetNormal) < (1.0e-2)*meanEdgeLength && evaluationSucceeded) {
+                                joinNodes = false;
                             }
 
                         }
@@ -606,7 +615,6 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
                             computeVectorOf(VM_Total, tStep, solVec);
                         }
                         else {
-                            // if point on edge
                             XfemElementInterface_createEnrNmatrixAt(NMatrix, locCoord, * this, false);
                             computeVectorOf(VM_Total, tStep, solVec);
                         }

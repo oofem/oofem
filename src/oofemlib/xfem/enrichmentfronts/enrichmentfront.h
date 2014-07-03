@@ -53,12 +53,13 @@ enum NodeEnrichmentType : int;
 
 struct EfInput {
     EfInput() {}
-    EfInput(const FloatArray &iPos, const double &iLevelSet, int iNodeInd, const FloatArray &iClosestPointOnCrack, const double &iArcPos):
+    EfInput(const FloatArray &iPos, const double &iLevelSet, int iNodeInd, const FloatArray &iClosestPointOnCrack, const double &iArcPos, const FloatArray &iLocalTangDir):
     mPos(iPos),
     mLevelSet(iLevelSet),
     mNodeInd(iNodeInd),
     mClosestPointOnCrack(iClosestPointOnCrack),
-    mArcPos(iArcPos)
+    mArcPos(iArcPos),
+    mLocalTangDir(iLocalTangDir)
     {}
 
     ~EfInput() {}
@@ -68,6 +69,7 @@ struct EfInput {
     int mNodeInd;
     FloatArray mClosestPointOnCrack;
     double mArcPos;
+    FloatArray mLocalTangDir;
 };
 
 
@@ -127,7 +129,7 @@ public:
 
     const TipInfo &giveTipInfo() const {return mTipInfo;}
 
-    void computeCrackTangent(FloatArray &oTangent, FloatArray &oNormal, const EfInput &iEfInput) const;
+    void computeCrackTangent(FloatArray &oTangent, FloatArray &oNormal, bool &oFlipTangent, const EfInput &iEfInput) const;
 
 protected:
     TipInfo mTipInfo;

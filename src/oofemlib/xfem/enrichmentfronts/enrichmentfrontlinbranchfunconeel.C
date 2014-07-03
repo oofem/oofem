@@ -78,10 +78,11 @@ void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncAt(std :: vector< double > 
 
     // Crack tangent and normal
     FloatArray t, n;
-    computeCrackTangent(t, n, iEfInput);
+    bool flipTangent = false;
+    computeCrackTangent(t, n, flipTangent, iEfInput);
 
     double r = 0.0, theta = 0.0;
-    EnrichmentItem :: calcPolarCoord(r, theta, xTip, pos, n, t, iEfInput);
+    EnrichmentItem :: calcPolarCoord(r, theta, xTip, pos, n, t, iEfInput, flipTangent);
 
     mpBranchFunc->evaluateEnrFuncAt(oEnrFunc, r, theta);
 }
@@ -92,10 +93,11 @@ void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncDerivAt(std :: vector< Floa
 
     // Crack tangent and normal
     FloatArray t, n;
-    computeCrackTangent(t, n, iEfInput);
+    bool flipTangent = false;
+    computeCrackTangent(t, n, flipTangent, iEfInput);
 
     double r = 0.0, theta = 0.0;
-    EnrichmentItem :: calcPolarCoord(r, theta, xTip, iEfInput.mPos, n, t, iEfInput);
+    EnrichmentItem :: calcPolarCoord(r, theta, xTip, iEfInput.mPos, n, t, iEfInput, flipTangent);
 
 
     size_t sizeStart = oEnrFuncDeriv.size();

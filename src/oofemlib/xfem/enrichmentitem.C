@@ -60,6 +60,7 @@
 
 namespace oofem {
 const double EnrichmentItem :: mLevelSetTol = 1.0e-12;
+const double EnrichmentItem :: mLevelSetRelTol = 1.0e-3;
 
 REGISTER_EnrichmentItem(Inclusion)
 
@@ -438,18 +439,19 @@ void EnrichmentItem :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, cons
     double tangDist = 0.0, minDistArcPos = 0.0;
     mpEnrichmentDomain->computeTangentialSignDist(tangDist, iPos, minDistArcPos);
 
-    FloatArray edGlobalCoord;
+    FloatArray edGlobalCoord, localTangDir;
 
     EnrichmentDomain_BG *edBG = dynamic_cast<EnrichmentDomain_BG*> (mpEnrichmentDomain);
     if(edBG != NULL) {
         edBG->bg->giveGlobalCoordinates(edGlobalCoord, minDistArcPos);
+        edBG->bg->giveTangent(localTangDir, minDistArcPos);
     }
     else {
         printf("edBG == NULL.\n");
     }
 
 
-    const EfInput efInput(iPos, iLevelSet, iNodeInd, edGlobalCoord, minDistArcPos);
+    const EfInput efInput(iPos, iLevelSet, iNodeInd, edGlobalCoord, minDistArcPos, localTangDir);
 
 
     if ( iNodeInd == -1 ) {
@@ -496,17 +498,18 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrF
         double tangDist = 0.0, minDistArcPos = 0.0;
         mpEnrichmentDomain->computeTangentialSignDist(tangDist, iPos, minDistArcPos);
 
-        FloatArray edGlobalCoord;
+        FloatArray edGlobalCoord, localTangDir;
 
         EnrichmentDomain_BG *edBG = dynamic_cast<EnrichmentDomain_BG*> (mpEnrichmentDomain);
         if(edBG != NULL) {
             edBG->bg->giveGlobalCoordinates(edGlobalCoord, minDistArcPos);
+            edBG->bg->giveTangent(localTangDir, minDistArcPos);
         }
         else {
             printf("edBG == NULL.\n");
         }
 
-        const EfInput efInput(iPos, iLevelSet, iNodeInd, edGlobalCoord, minDistArcPos);
+        const EfInput efInput(iPos, iLevelSet, iNodeInd, edGlobalCoord, minDistArcPos, localTangDir);
 
         switch(res->second) {
         case NodeEnr_NONE:
@@ -927,7 +930,12 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
             double phiE = 1.0;
             bool foundPhiE = evalLevelSetNormalInNode(phiE, neGlob);
 
-            if ( (foundPhiS && foundPhiE) && phiS * phiE < mLevelSetTol2 ) {
+            const FloatArray &xS = *(element->giveNode(nsLoc)->giveCoordinates() );
+            const FloatArray &xE = *(element->giveNode(neLoc)->giveCoordinates() );
+            const double edgeLength2 = xS.distance_square(xE);
+            const double gammaRelTol = 1.0e-2;
+
+            if ( (foundPhiS && foundPhiE) && phiS * phiE < mLevelSetRelTol*mLevelSetRelTol*edgeLength2 ) {
                 // Intersection detected
 
                 double xi = calcXiZeroLevel(phiS, phiE);
@@ -945,7 +953,7 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
 
 
                 // If we are inside in tangential direction
-                if ( gamma > 0.0 ) {
+                if ( gamma > -gammaRelTol*sqrt(edgeLength2) ) {
                     if ( fabs(phiS - phiE) < mLevelSetTol ) {
                         // If the crack is parallel to the edge.
 
@@ -1321,13 +1329,13 @@ double EnrichmentItem :: calcXiZeroLevel(const double &iQ1, const double &iQ2)
     return xi;
 }
 
-void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT, const EfInput &iEfInput)
+void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT, const EfInput &iEfInput, bool iFlipTangent)
 {
     FloatArray q = {
         iPos.at(1) - iOrigin.at(1), iPos.at(2) - iOrigin.at(2)
     };
 
-    const double tol = 1.0e-12;
+    const double tol = 1.0e-20;
 
     // Compute polar coordinates
     oR = iOrigin.distance(iPos);
@@ -1335,12 +1343,6 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
     if ( oR > tol ) {
         q.times(1.0 / oR);
     }
-
-//    if ( q.dotProduct(iN) > 0.0 ) {
-//        oTheta =  acos( q.dotProduct(iT) );
-//    } else {
-//        oTheta = -acos( q.dotProduct(iT) );
-//    }
 
     const double pi = 3.14159265359;
 
@@ -1355,29 +1357,30 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
 //    }
 
 
-//    const double &phi = iEfInput.mLevelSet;
-//
-//    if( q.dotProduct(iT) > 0.0 ) {
-//        oTheta = asin( phi );
-//    } else {
-//        if ( phi > 0.0 ) {
-//            oTheta = pi - asin( phi );
-//        } else {
-//            oTheta = -pi - asin( phi );
-//        }
-//    }
-
-
     const double tol_q = 1.0e-3;
-    const double &phi = iEfInput.mLevelSet;
+    double phi = iEfInput.mLevelSet;
 
-    if( q.dotProduct(iT) > tol_q ) {
+    if( iFlipTangent ) {
+        phi *= -1.0;
+    }
+
+    double phi_r = 0.0;
+    if ( oR > tol ) {
+        phi_r = fabs(phi/oR);
+    }
+
+    if(phi_r >= 1.0) {
+//        printf("phi/oR: %e\n", phi/oR );
+        phi_r = 0.99999999999999;
+    }
+
+    if( iEfInput.mArcPos < tol_q || iEfInput.mArcPos > (1.0-tol_q) ) {
         oTheta = asin( q.dotProduct(iN) );
     } else {
         if ( phi > 0.0 ) {
-            oTheta = pi - asin( fabs(q.dotProduct(iN)) );
+            oTheta = pi - asin( fabs(phi_r) );
         } else {
-            oTheta = -pi + asin( fabs(q.dotProduct(iN)) );
+            oTheta = -pi + asin( fabs(phi_r) );
         }
     }
 }
