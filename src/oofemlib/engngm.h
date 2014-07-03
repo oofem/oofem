@@ -1012,7 +1012,11 @@ public:
      * invoke initialization by individual init modules.
      */
     virtual void init();
-
+    /**
+     * Performs post-initialization for all the problem  contents (which is called after initializeFrom).
+     * Currently, it calls Domain::postInitialize for all problem domains.
+     */
+    virtual void postInitialize();
     /**
      * Prints output of receiver to output domain stream, for given time step.
      * Corresponding function for element gauss points is invoked

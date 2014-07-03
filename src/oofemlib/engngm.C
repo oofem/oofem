@@ -449,11 +449,12 @@ EngngModel :: instanciateDomains(DataReader *dr)
     // read problem domains
     for ( int i = 1; i <= this->ndomains; i++ ) {
         result &= domainList->at(i)->instanciateYourself(dr);
-        domainList->at(i)->postInitialize();
     }
+    this->postInitialize();
 
     return result;
 }
+
 
 
 int
@@ -1799,6 +1800,15 @@ EngngModel :: checkProblemConsistency()
     return result;
 }
 
+
+void
+EngngModel::postInitialize()
+{
+  for ( int i = 1; i <= this->ndomains; i++ ) {
+    domainList->at(i)->postInitialize();
+  }
+  
+}
 
 void
 EngngModel :: init()
