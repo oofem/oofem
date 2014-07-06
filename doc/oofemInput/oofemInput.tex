@@ -788,7 +788,7 @@ the parameters \param{rtolv},\param{rtolf}, and \param{rtold} are real values. I
 The indirect solver corresponds to \param{controlmode}=0 and the CALM
 solver is used. The value of reference load vector is determined by
 \param{refloadmode} parameter mentioned above at the first step of
-each metastep. {\em However, the user must ensure, that the same value of
+each metastep. {\em However, the user must ensure that the same value of
 reference load vector could be obtained for all solution steps of
 particular metastep (this is necessary for restart and adaptivity to work)}.
 The corresponding meta step solver parameters (\param{solverParams}) are:\\
@@ -803,11 +803,13 @@ The corresponding meta step solver parameters (\param{solverParams}) are:\\
   \recentry{}{\optField{maxrestarts}{in}}
   \recentry{}{\optField{minIter}{in}}
   \recentry{}{\optField{manrmsteps}{in}}
-  \recentry{}{\optField{hpcmode}{in} \optField{hpc}{ia} \optField{hpcw}{ia}}
+  \recentry{}{\optField{hpcmode}{in} \optField{hpc}{ia} \optField{hpcw}{ra}}
   \recentry{}{\optField{linesearch}{in} \optField{lsearchamp}{rn}}
   \recentry{}{\optField{lsearchmaxeta}{rn} \optField{lsearchtol}{rn}}
   \recentry{}{\optional{\field{nccdg}{in} \field{ccdg1}{ia} ... \field{ccdgN}{ia}}}
   \recentry{}{\field{rtolv}{rn} \optField{rtolf}{rn} \optField{rtold}{rn}}
+  \recentry{}{\optField{pert}{ia} \optField{pertw}{ra}}
+  \recentry{}{\optField{rpa}{rn} \optField{rseed}{in}}
 \end{record}
 where
 \begin{itemize}
@@ -838,15 +840,15 @@ only selected dofs (see \param{hpc} param), 2 - linearized constrain
 in displacements only, taking into account only selected dofs with
 given weight (see \param{hpc} and \param{hpcw} parameters).
 \item \param{hpc} - Special parameter for Hyper-plane control, when only
-selected DOFS are taken account in ALM step length
+selected DOFs are taken account in ALM step length
 condition. Important mainly for material nonlinear problems with
 strong localization. This array selects the degrees of freedom,
-which displacements are controlled. Let the number of these DOFs is N.
+which displacements are controlled. Let the number of these DOFs be N.
 The format of \param{ddm} array is 2*N dofman1 idof1
 dofman2 idof2 ... dofmanN idofN, where the dofmani is the number of i-th dof manager  and idofi is the
 corresponding DOF number.
-\item \param{hpcw} - Array of dof weights in linear constraint. The
-dof ordering is determined by \param{hpc} param, size of array should
+\item \param{hpcw} Array of DOF weights in linear constraint. The
+dof ordering is determined by \param{hpc} parameter, the size of the array should
 be N.
 \item \param{linesearch} nonzero value turns on line search
   algorithm. The \param{lsearchtol} defines tolerance, amplification
@@ -860,6 +862,16 @@ iterative change vector and for residual unbalanced force vector). Optionally, t
 independent relative convergence crteria for unbalanced forces and displacement
 iterative change. If the default convergence criteria is used,
 the parameters \param{rtolv},\param{rtolf}, and \param{rtold} are real values. If the convergence criteria DOF groups are used (see bellow the description of \param{nccdg} parameter) then they should be specified as real valued arrays of \param{nccdg} size, and individual values define relative convergence criteria for each individual dof group.
+\item \param{pert} Array specifying DOFs that should be perturbed after the first iteration of each step. 
+Let the number of these DOFs be M.
+The format of \param{ddm} array is 2*M dofman1 idof1
+dofman2 idof2 ... dofmanN idofN, where the dofmani is the number of i-th dof manager  and idofi is the
+corresponding DOF number.
+\item \param{pertw} Array of DOF perturbations. The
+dof ordering is determined by \param{pert} parameter, the size of the array should
+be M.
+\item \param{rpa} Amplitude of random perturbation that is applied to each DOF.
+\item \param{rseed} Seed for the random generator that generates random perturbations.
 \end{itemize}
 
 \subsubsection{Standard syntax}

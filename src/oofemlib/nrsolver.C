@@ -191,6 +191,8 @@ NRSolver :: initializeFrom(InputRecord *ir)
         mCalcStiffBeforeRes = false;
     }
 
+    SparseNonLinearSystemNM :: initializeFrom(ir);
+ 
     return IRRT_OK;
 }
 
