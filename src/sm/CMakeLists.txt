@@ -36,6 +36,7 @@ set (sm_element
     latticestructuralelement.C
     lattice2d.C
     shell7base.C
+    modshell7base.C
     tr2shell7.C
     shell7basexfem.C
     tr2shell7xfem.C
