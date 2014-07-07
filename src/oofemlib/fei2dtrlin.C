@@ -115,11 +115,10 @@ FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const F
 
     answer.at(1) = ( ( x2 * y3 - x3 * y2 ) + ( y2 - y3 ) * coords.at(xind) + ( x3 - x2 ) * coords.at(yind) ) / detJ;
     answer.at(2) = ( ( x3 * y1 - x1 * y3 ) + ( y3 - y1 ) * coords.at(xind) + ( x1 - x3 ) * coords.at(yind) ) / detJ;
-    answer.at(3) = 1. - answer.at(1) - answer.at(2);
 
     // check if point is inside
     bool inside = true;
-    for ( int i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 2; i++ ) {
         if ( answer.at(i) < ( 0. - POINT_TOL ) ) {
             answer.at(i) = 0.;
             inside = false;
@@ -128,6 +127,15 @@ FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const F
             inside = false;
         }
     }
+
+    if( ( answer.at(1) + answer.at(2)) > 1.0 ) {
+        const double temp = 0.5*( answer.at(1) + answer.at(2) - 1.);
+        answer.at(1) -= temp;
+        answer.at(2) -= temp;
+        inside = false;
+    }
+
+    answer.at(3) = 1. - answer.at(1) - answer.at(2);
 
     return inside;
 }
