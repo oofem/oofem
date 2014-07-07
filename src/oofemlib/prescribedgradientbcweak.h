@@ -49,7 +49,23 @@
 
 namespace oofem {
 
-class TractionElement;
+class TractionElement {
+public:
+    TractionElement() {}
+    virtual ~TractionElement() {}
+
+    void computeN_Constant(FloatArray &oN, const double &iXi) const {oN = {1.0};}
+    void computeN_Linear(FloatArray &oN, const double &iXi) const {oN = {0.5*(1.0-iXi), 0.5*(1.0+iXi)};}
+
+    std::vector<int> mTractionNodeInd;
+
+    // Interior segments used for Gaussian quadrature
+    std::vector<Line> mInteriorSegments;
+
+    FloatArray mStartCoord;
+    FloatArray mEndCoord;
+};
+
 class IntegrationRule;
 /*
  * Imposes a prescribed gradient weakly on the boundary
@@ -109,6 +125,8 @@ public:
      */
     void computeField(FloatArray &sigma, TimeStep *tStep);
 
+    size_t giveNumberOfTractionElements() const {return mpTractionElements.size();}
+    void giveTractionElCoord(size_t iElInd, FloatArray &oStartCoord, FloatArray &oEndCoord) const {oStartCoord = mpTractionElements[iElInd]->mStartCoord; oEndCoord = mpTractionElements[iElInd]->mEndCoord;}
 
     // TODO: Consider moving this function to Domain.
     void computeDomainBoundingBox(Domain &iDomain, FloatArray &oLC, FloatArray &oUC);
@@ -210,23 +228,6 @@ protected:
     virtual void giveBoundaryCoordVector(FloatArray &oX, const FloatArray &iPos) const = 0;
     virtual void checkIfCorner(bool &oIsCorner, bool &oDuplicatable, const FloatArray &iPos, const double &iNodeDistTol) const = 0;
     virtual bool boundaryPointIsOnActiveBoundary(const FloatArray &iPos) const = 0;
-};
-
-class TractionElement {
-public:
-    TractionElement() {}
-    virtual ~TractionElement() {}
-
-    void computeN_Constant(FloatArray &oN, const double &iXi) const {oN = {1.0};}
-    void computeN_Linear(FloatArray &oN, const double &iXi) const {oN = {0.5*(1.0-iXi), 0.5*(1.0+iXi)};}
-
-    std::vector<int> mTractionNodeInd;
-
-    // Interior segments used for Gaussian quadrature
-    std::vector<Line> mInteriorSegments;
-
-    FloatArray mStartCoord;
-    FloatArray mEndCoord;
 };
 
 class ArcPosSortFunction {

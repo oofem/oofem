@@ -56,6 +56,7 @@
 #include "prescribedgradientbcweak.h"
 #include "gausspoint.h"
 #include "timestep.h"
+#include "feinterpol.h"
 #include "xfem/enrichmentitems/crack.h"
 
 #include <sstream>
@@ -66,7 +67,8 @@ REGISTER_ExportModule(GnuplotExportModule)
 GnuplotExportModule::GnuplotExportModule(int n, EngngModel *e):
 ExportModule(n, e),
 mExportReactionForces(false),
-mExportBoundaryConditions(false)
+mExportBoundaryConditions(false),
+mExportMesh(false)
 {
 
 }
@@ -79,6 +81,7 @@ IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
 {
     mExportReactionForces = ir->hasField(_IFT_GnuplotExportModule_ReactionForces);
     mExportBoundaryConditions = ir->hasField(_IFT_GnuplotExportModule_BoundaryConditions);
+    mExportMesh = ir->hasField(_IFT_GnuplotExportModule_mesh);
     return ExportModule::initializeFrom(ir);
 }
 
@@ -139,6 +142,9 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 		outputXFEMGeometry(points);
 	}
 
+	if(mExportMesh) {
+	    outputMesh(*domain);
+	}
 }
 
 void GnuplotExportModule::initialize()
@@ -422,6 +428,75 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
 
     XFEMDebugTools::WriteArrayToGnuplot(nameMeanStress, componentArray, stressArray);
 
+
+
+    std::vector< std::vector<FloatArray> > nodePointArray;
+    size_t numTracEl = iBC.giveNumberOfTractionElements();
+    for(size_t i = 0; i < numTracEl; i++) {
+
+        std::vector<FloatArray> points;
+        FloatArray xS, xE;
+        iBC.giveTractionElCoord(i, xS, xE);
+        points.push_back(xS);
+        points.push_back(xE);
+
+        nodePointArray.push_back(points);
+    }
+
+    std :: stringstream strTractionNodes;
+    strTractionNodes << "TractionNodesGnuplotTime" << time << ".dat";
+    std :: string nameTractionNodes = strTractionNodes.str();
+
+    WritePointsToGnuplot(nameTractionNodes, nodePointArray);
+
+}
+
+void GnuplotExportModule::outputMesh(Domain &iDomain)
+{
+    std::vector< std::vector<FloatArray> > pointArray;
+
+    if(iDomain.giveNumberOfSpatialDimensions() == 2) {
+        // Write all element edges to gnuplot
+        int numEl = iDomain.giveNumberOfElements();
+        for(int elInd = 1; elInd <= numEl; elInd++) {
+            Element *el = iDomain.giveElement(elInd);
+
+            int numEdges = el->giveNumberOfNodes();
+
+
+            for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
+                std::vector<FloatArray> points;
+
+                IntArray bNodes;
+                el->giveInterpolation()->boundaryGiveNodes(bNodes, edgeIndex);
+
+                int niLoc = bNodes.at(1);
+                const FloatArray &xS = *(el->giveNode(niLoc)->giveCoordinates() );
+                points.push_back(xS);
+
+                int njLoc = bNodes.at( bNodes.giveSize() );
+                const FloatArray &xE = *(el->giveNode(njLoc)->giveCoordinates() );
+                points.push_back(xE);
+
+                pointArray.push_back(points);
+            }
+
+        }
+
+
+        double time = 0.0;
+
+        TimeStep *ts = emodel->giveCurrentStep();
+        if ( ts != NULL ) {
+            time = ts->giveTargetTime();
+        }
+
+        std :: stringstream strMesh;
+        strMesh << "MeshGnuplotTime" << time << ".dat";
+        std :: string nameMesh = strMesh.str();
+
+        WritePointsToGnuplot(nameMesh, pointArray);
+    }
 }
 
 void GnuplotExportModule :: WritePointsToGnuplot(const std :: string &iName, const std :: vector< std::vector<FloatArray> > &iPoints)

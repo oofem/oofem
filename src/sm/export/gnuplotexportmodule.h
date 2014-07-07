@@ -44,6 +44,8 @@
 #define _IFT_GnuplotExportModule_ReactionForces "reactionforces"
 // Special output from boundary conditions
 #define _IFT_GnuplotExportModule_BoundaryConditions "boundaryconditions"
+// Mesh
+#define _IFT_GnuplotExportModule_mesh "mesh"
 //@}
 
 namespace oofem {
@@ -52,6 +54,7 @@ class Crack;
 class PrescribedGradient;
 class PrescribedGradientBCNeumann;
 class PrescribedGradientBCWeak;
+class Domain;
 
 /**
  * (Under development) The Gnuplot export module enables OOFEM to export some
@@ -89,12 +92,17 @@ public:
     void outputBoundaryCondition(PrescribedGradientBCNeumann &iBC, TimeStep *tStep);
     void outputBoundaryCondition(PrescribedGradientBCWeak &iBC, TimeStep *tStep);
 
-    static void WritePointsToGnuplot(const std :: string &iName, const std :: vector< std::vector<FloatArray> > &iPoints);
+    /**
+     * Mesh output
+     */
+    void outputMesh(Domain &iDomain);
 
+    static void WritePointsToGnuplot(const std :: string &iName, const std :: vector< std::vector<FloatArray> > &iPoints);
 
 protected:
 	bool mExportReactionForces;
 	bool mExportBoundaryConditions;
+    bool mExportMesh;
 
     /**
      * Stores the sum of reaction forces for each BC.

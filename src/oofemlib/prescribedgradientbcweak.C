@@ -636,8 +636,21 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
                 checkIfCorner(isCorner, duplicatable, xPlus, nodeDistTol);
 
                 if(!isCorner) {
-                    std::pair<FloatArray, bool> nodeCoord = {xPlus, false};
-                    bndNodeCoords.push_back( nodeCoord );
+
+                    bool closePointExists = false;
+                    const double meshTol2 = meshTol*meshTol;
+                    for(auto bndPos : bndNodeCoords) {
+                        if( bndPos.first.distance_square(xPlus) < meshTol2 ) {
+                            closePointExists = true;
+                        }
+                    }
+
+                    if(!closePointExists) {
+                        std::pair<FloatArray, bool> nodeCoord = {xPlus, false};
+                        bndNodeCoords.push_back( nodeCoord );
+                    }
+
+
                 }
             }
         }
@@ -908,7 +921,6 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
 	        }
 
 
-			std :: vector< int > displacementElements_minus;
 			for ( int elNum: elList_minus ) {
 
 				// Check if the traction element and the displacement element intersect
@@ -919,7 +931,6 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
 				Line line_minus(xS_minus, xE_minus);
 				if( line_minus.intersects(el) ) {
 					displacementElements.push_back(elNum);
-					displacementElements_minus.push_back(elNum);
 				}
 			}
 
