@@ -205,6 +205,7 @@ protected:
     bool pointIsOnGammaPlus(const FloatArray &iPos) const;
     void giveMirroredPointOnGammaMinus(FloatArray &oPosMinus, const FloatArray &iPosPlus) const;
     void giveMirroredPointOnGammaPlus(FloatArray &oPosPlus, const FloatArray &iPosMinus) const;
+    bool pointIsMapapble(const FloatArray &iPos) const;
 
     virtual void giveBoundaryCoordVector(FloatArray &oX, const FloatArray &iPos) const = 0;
     virtual void checkIfCorner(bool &oIsCorner, bool &oDuplicatable, const FloatArray &iPos, const double &iNodeDistTol) const = 0;

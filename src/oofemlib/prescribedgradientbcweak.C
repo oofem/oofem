@@ -625,6 +625,22 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
             }
 
         } // if pointIsOnGammaPlus
+        else {
+            FloatArray xPlus;
+            if(pointIsMapapble(x)) {
+                giveMirroredPointOnGammaPlus(xPlus, x);
+
+                bool isCorner = false;
+                bool duplicatable = false;
+
+                checkIfCorner(isCorner, duplicatable, xPlus, nodeDistTol);
+
+                if(!isCorner) {
+                    std::pair<FloatArray, bool> nodeCoord = {xPlus, false};
+                    bndNodeCoords.push_back( nodeCoord );
+                }
+            }
+        }
 
         // Add traction nodes where cracks intersect the boundary if desired
         XfemElementInterface *xfemElInt = dynamic_cast<XfemElementInterface*> (e);
@@ -995,12 +1011,18 @@ void PrescribedGradientBCWeak::createTractionElements(const std::vector<FloatArr
 
             if( i < mpTractionNodes.size()-1) {
                 tractionEl->mEndCoord = iTractionNodeCoord[i+1];
+                mpTractionElements.push_back(tractionEl);
             }
             else {
                 tractionEl->mEndCoord = iTractionNodeCoord[0];
+                if(!mMeshIsPeriodic) {
+                    mpTractionElements.push_back(tractionEl);
+                }
+                else {
+                    delete tractionEl;
+                }
             }
 
-            mpTractionElements.push_back(tractionEl);
         }
     }
     else if(mTractionInterpOrder == 1) {
@@ -1337,6 +1359,18 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPl
     	iPosMinus.printYourself();
         OOFEM_ERROR("Mapping failed.")
     }
+}
+
+bool PrescribedGradientBCWeak :: pointIsMapapble(const FloatArray &iPos) const
+{
+    const double distTol = 1.0e-13;
+    if(iPos.distance(mLC) < distTol) {
+        return false;
+    }
+    else {
+        return true;
+    }
+
 }
 
 void PrescribedGradientBCWeak :: computeDomainBoundingBox(Domain &iDomain, FloatArray &oLC, FloatArray &oUC)
