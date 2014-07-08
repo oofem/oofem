@@ -63,7 +63,9 @@ void PrescribedGradientBCWeakPeriodic :: checkIfCorner(bool &oIsCorner, bool &oD
     cornerPos = {mUC[0], mUC[1]};
     if( iPos.distance( cornerPos ) < iNodeDistTol ) {
     	oIsCorner = true;
-    	oDuplicatable = true;
+    	if(mTractionInterpOrder == 1) {
+    	    oDuplicatable = true;
+    	}
     }
 
     cornerPos = {mLC[0], mUC[1]};

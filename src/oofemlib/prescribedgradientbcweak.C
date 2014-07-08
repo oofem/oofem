@@ -559,10 +559,28 @@ void PrescribedGradientBCWeak::computeField(FloatArray &sigma, TimeStep *tStep)
 #endif
 }
 
+void PrescribedGradientBCWeak::giveTractionElNormal(size_t iElInd, FloatArray &oNormal, FloatArray &oTangent) const
+{
+    const FloatArray &xS = mpTractionElements[iElInd]->mStartCoord;
+    const FloatArray &xE = mpTractionElements[iElInd]->mEndCoord;
+
+    oTangent.beDifferenceOf(xE, xS);
+    oTangent.normalize();
+
+    oNormal = {oTangent[1], -oTangent[0]};
+
+}
+
+void PrescribedGradientBCWeak::giveTraction(size_t iElInd, FloatArray &oStartTraction, FloatArray &oEndTraction, ValueModeType mode, TimeStep *tStep)
+{
+    mpTractionNodes[ mpTractionElements[iElInd]->mTractionNodeInd[0] ]->giveCompleteUnknownVector(oStartTraction, mode, tStep);
+    mpTractionNodes[ mpTractionElements[iElInd]->mTractionNodeInd[1] ]->giveCompleteUnknownVector(oEndTraction, mode, tStep);
+}
+
 void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity)
 {
     const double nodeDistTol = 1.0e-15;
-    const double meshTol = 1.0e-9; // Minimum distance between traction nodes
+    const double meshTol = 1.0e-4; // Minimum distance between traction nodes
 
     /**
      * first: 	coordinates

@@ -125,8 +125,12 @@ public:
      */
     void computeField(FloatArray &sigma, TimeStep *tStep);
 
+    /// Routines for postprocessing
     size_t giveNumberOfTractionElements() const {return mpTractionElements.size();}
     void giveTractionElCoord(size_t iElInd, FloatArray &oStartCoord, FloatArray &oEndCoord) const {oStartCoord = mpTractionElements[iElInd]->mStartCoord; oEndCoord = mpTractionElements[iElInd]->mEndCoord;}
+    void giveTractionElNormal(size_t iElInd, FloatArray &oNormal, FloatArray &oTangent) const;
+
+    void giveTraction(size_t iElInd, FloatArray &oStartTraction, FloatArray &oEndTraction, ValueModeType mode, TimeStep *tStep);
 
     // TODO: Consider moving this function to Domain.
     void computeDomainBoundingBox(Domain &iDomain, FloatArray &oLC, FloatArray &oUC);

@@ -430,6 +430,7 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
 
 
 
+    // Traction node coordinates
     std::vector< std::vector<FloatArray> > nodePointArray;
     size_t numTracEl = iBC.giveNumberOfTractionElements();
     for(size_t i = 0; i < numTracEl; i++) {
@@ -448,6 +449,79 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
     std :: string nameTractionNodes = strTractionNodes.str();
 
     WritePointsToGnuplot(nameTractionNodes, nodePointArray);
+
+
+
+    // Traction element normal direction
+    std::vector< std::vector<FloatArray> > nodeNormalArray;
+    for(size_t i = 0; i < numTracEl; i++) {
+
+        std::vector<FloatArray> points;
+        FloatArray n,t;
+        iBC.giveTractionElNormal(i, n,t);
+        points.push_back(n);
+        points.push_back(n);
+
+        nodeNormalArray.push_back(points);
+    }
+
+    std :: stringstream strTractionNodeNormals;
+    strTractionNodeNormals << "TractionNodeNormalsGnuplotTime" << time << ".dat";
+    std :: string nameTractionNodeNormals = strTractionNodeNormals.str();
+
+    WritePointsToGnuplot(nameTractionNodeNormals, nodeNormalArray);
+
+
+
+    // Traction (x,y)
+    std::vector< std::vector<FloatArray> > nodeTractionArray;
+    for(size_t i = 0; i < numTracEl; i++) {
+
+        std::vector<FloatArray> tractions;
+        FloatArray tS, tE;
+
+        iBC.giveTraction(i, tS, tE, VM_Total, tStep);
+
+        tractions.push_back(tS);
+        tractions.push_back(tE);
+        nodeTractionArray.push_back(tractions);
+    }
+
+    std :: stringstream strTractions;
+    strTractions << "TractionsGnuplotTime" << time << ".dat";
+    std :: string nameTractions = strTractions.str();
+
+    WritePointsToGnuplot(nameTractions, nodeTractionArray);
+
+
+
+    // Traction (normal, tangent)
+    std::vector< std::vector<FloatArray> > nodeTractionNTArray;
+    for(size_t i = 0; i < numTracEl; i++) {
+
+        std::vector<FloatArray> tractions;
+        FloatArray tS, tE;
+
+        iBC.giveTraction(i, tS, tE, VM_Total, tStep);
+        FloatArray n,t;
+        iBC.giveTractionElNormal(i, n, t);
+
+
+        double tSn = tS.dotProduct(n);
+        double tSt = tS.dotProduct(t);
+        tractions.push_back( {tSn ,tSt} );
+
+        double tEn = tE.dotProduct(n);
+        double tEt = tE.dotProduct(t);
+        tractions.push_back( {tEn, tEt} );
+        nodeTractionNTArray.push_back(tractions);
+    }
+
+    std :: stringstream strTractionsNT;
+    strTractionsNT << "TractionsNormalTangentGnuplotTime" << time << ".dat";
+    std :: string nameTractionsNT = strTractionsNT.str();
+
+    WritePointsToGnuplot(nameTractionsNT, nodeTractionNTArray);
 
 }
 
