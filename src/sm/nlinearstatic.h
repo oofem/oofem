@@ -116,7 +116,8 @@ protected:
     NonLinearStatic_controlType controlMode;
     /// Intrinsic time increment.
     double deltaT;
-    /**
+
+   /**
      * The following parameter allows to specify how the reference load vector
      * is obtained from given totalLoadVector and initialLoadVector.
      * The initialLoadVector desribes the part of loading which does not scale.

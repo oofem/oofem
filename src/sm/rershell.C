@@ -59,7 +59,7 @@ namespace oofem {
 REGISTER_Element(RerShell);
 
 RerShell :: RerShell(int n, Domain *aDomain) :
-    CCTPlate(n, aDomain)
+    CCTPlate3d(n, aDomain)
 {
     numberOfDofMans  = 3;
     GtoLRotationMatrix = NULL;
@@ -293,6 +293,19 @@ RerShell :: initializeFrom(InputRecord *ir)
 
 
 void
+RerShell :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->give3dShellStiffMtrx(answer, rMode, gp, tStep);
+}
+
+void
+RerShell :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+
+this->giveStructuralCrossSection()->giveGeneralizedStress_Shell(answer, gp, strain, tStep);
+}
+
+void
 RerShell :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver.
 {
@@ -365,56 +378,6 @@ RerShell :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
         return;
     }
 }
-
-
-
-
-FloatMatrix *
-RerShell :: computeGtoLRotationMatrix()
-// Returns the rotation matrix of the receiverof the size [3,3]
-// coords(local) = T * coords(global)
-//
-// local coordinate (described by vector triplet e1',e2',e3') is defined as follows:
-//
-// e1'    : [N2-N1]    Ni - means i - th node
-// help   : [N3-N1]
-// e3'    : e1' x help
-// e2'    : e3' x e1'
-{
-    if ( GtoLRotationMatrix == NULL ) {
-        FloatArray e1(3), e2, e3, help(3);
-
-        for ( int i = 1; i <= 3; i++ ) {
-            e1.at(i) = ( this->giveNode(2)->giveCoordinate(i) - this->giveNode(1)->giveCoordinate(i) );
-            help.at(i) = ( this->giveNode(3)->giveCoordinate(i) - this->giveNode(1)->giveCoordinate(i) );
-        }
-
-        // compute the norm of e1,help in order to normalize them
-        e1.normalize();
-
-        // compute vector product of e1' x help
-
-        e3.beVectorProductOf(e1, help);
-
-        // let us normalize e3'
-        e3.normalize();
-
-        // now from e3' x e1' compute e2'
-
-        e2.beVectorProductOf(e3, e1);
-
-        GtoLRotationMatrix = new FloatMatrix(3, 3);
-
-        for ( int i = 1; i <= 3; i++ ) {
-            GtoLRotationMatrix->at(1, i) = e1.at(i);
-            GtoLRotationMatrix->at(2, i) = e2.at(i);
-            GtoLRotationMatrix->at(3, i) = e3.at(i);
-        }
-    }
-
-    return GtoLRotationMatrix;
-}
-
 
 int
 RerShell :: giveLocalCoordinateSystem(FloatMatrix &answer)
@@ -655,11 +618,11 @@ RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     FloatArray v;
 
-    fprintf(file, "element %d :\n", number);
+    fprintf(file, "element %d ( %d):\n", this->giveLabel(), number);
 
     for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
 
-        fprintf( file, "  GP %d :", gp->giveNumber() );
+        fprintf( file, "  GP 1.%d :", gp->giveNumber() );
         this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
         fprintf(file, "  strains    ");
         // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
@@ -734,7 +697,7 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
         answer.at(6) = globTensor.at(2, 3); //syzForce
         answer.at(7) = globTensor.at(1, 3); //qxzForce
         answer.at(8) = globTensor.at(2, 3); //syzForce
-        answer.at(9) = 0.0;
+        answer.at(9) = globTensor.at(3, 3); //szForce
 
         return 1;
     } else if ( ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
@@ -747,18 +710,17 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 
         answer.at(1)  = globTensor.at(1, 1); //mxForce
         answer.at(2)  = globTensor.at(1, 2); //mxyForce
-        answer.at(3)  = 0.0;
+        answer.at(3)  = globTensor.at(1, 3); //mxzForce
         answer.at(4)  = globTensor.at(1, 2); //mxyForce
         answer.at(5)  = globTensor.at(2, 2); //myForce
-        answer.at(6)  = 0.0;
-        answer.at(7)  = 0.0;
-        answer.at(8)  = 0.0;
+        answer.at(6)  = globTensor.at(2, 3); //myzForce
+        answer.at(7)  = globTensor.at(1, 3); //mxzForce
+        answer.at(8)  = globTensor.at(2, 3); //myzForce
         answer.at(9)  = globTensor.at(3, 3); //mzForce
 
         return 1;
     } else {
-        answer.clear();
-        return 0;
+        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
     }
 }
 

@@ -62,7 +62,7 @@ REGISTER_EngngModel(NonLinearStatic);
 
 NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i, _master),
     totalDisplacement(), incrementOfDisplacement(), internalForces(), initialLoadVector(), incrementalLoadVector(),
-    initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed()
+								 initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed()
 {
     //
     // constructor
@@ -195,7 +195,7 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
         mstepCumulateLoadLevelFlag = false;
     }
 
-    // called just to mart filed as recognized, used later
+    // called just to mark field as recognized, used later
     ir->hasField(_IFT_NonLinearStatic_donotfixload);
 }
 
@@ -534,7 +534,6 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
     OOFEM_LOG_RELEVANT("Equilibrium reached at load level = %f in %d iterations\n", cumulatedLoadLevel + loadLevel, currentIterations);
     prevStepLength =  currentStepLength;
 }
-
 
 void
 NonLinearStatic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)

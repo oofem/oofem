@@ -75,6 +75,8 @@ public:
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
     virtual int giveApproxOrder() { return 2; }
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
+    // overloaded to take into account possible element local cs (in derived cct3d)
+    virtual double computeArea();
 
 protected:
     virtual void computeGaussPoints();
@@ -88,7 +90,7 @@ protected:
 
     virtual void giveNodeCoordinates(double &x1, double &x2, double &x3,
                                      double &y1, double &y2, double &y3,
-                                     double *z = NULL);
+                                     double &z1, double &z2, double &z3);
 
 
     virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
