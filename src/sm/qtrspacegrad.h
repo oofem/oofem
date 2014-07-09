@@ -54,10 +54,6 @@ class FEI3dTetLin;
  */
 class QTRSpaceGrad : public QTRSpace, public GradDpElement
 {
-protected:
-    ///@todo FIXME: Is this really supposed to be the linear interpolator used here?!
-    static FEI3dTetLin interpolation;
-
 public:
     QTRSpaceGrad(int, Domain *);
     virtual ~QTRSpaceGrad() { }
@@ -75,7 +71,6 @@ protected:
     void computeGaussPoints();
     void computeNkappaMatrixAt(GaussPoint *, FloatMatrix &);
     void computeBkappaMatrixAt(GaussPoint *, FloatMatrix &);
-    virtual void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
     StructuralElement *giveStructuralElement() { return this; }
     NLStructuralElement *giveNLStructuralElement() { return this; }
 
