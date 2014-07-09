@@ -97,9 +97,11 @@ private:
     /// Reference to parent integration rule.
     IntegrationRule *irule;
     /// Natural Element Coordinates of receiver.
-    FloatArray *coordinates;
+    FloatArray *naturalCoordinates;
     /// Optional local sub-patch (sub-patches form element volume) coordinates of the receiver.
-    FloatArray *localCoordinates;
+    FloatArray *subPatchCoordinates;
+    /// Optional global (Cartesian) coordinates
+    FloatArray *globalCoordinates;
     /// Integration weight.
     double weight;
     /// Material mode of receiver.
@@ -127,25 +129,44 @@ public:
     virtual ~GaussPoint();
 
     /// Returns i-th natural element coordinate of receiver
-    double giveCoordinate(int i) { return coordinates->at(i); }
+    double giveCoordinate(int i) { return naturalCoordinates->at(i); }
     /// Returns coordinate array of receiver.
-    FloatArray *giveCoordinates() { return coordinates; }
-    void setCoordinates(FloatArray c) { * coordinates = std :: move(c); }
+    FloatArray *giveCoordinates() { return naturalCoordinates; }
+    void setCoordinates(FloatArray c) { * naturalCoordinates = std :: move(c); }
 
     /// Returns local sub-patch coordinates of the receiver
     FloatArray *giveLocalCoordinates() {
-        if ( localCoordinates ) {
-            return localCoordinates;
+        if ( subPatchCoordinates ) {
+            return subPatchCoordinates;
         } else {
-            return coordinates;
+            return naturalCoordinates;
         }
     }
     void setLocalCoordinates(FloatArray c)
     {
-        if ( localCoordinates ) {
-            * localCoordinates = std :: move(c);
+        if ( subPatchCoordinates ) {
+            * subPatchCoordinates = std :: move(c);
         } else {
-            localCoordinates = new FloatArray(std :: move(c));
+            subPatchCoordinates = new FloatArray(std :: move(c));
+        }
+    }
+
+    inline const FloatArray &giveGlobalCoordinates() const {
+        if( globalCoordinates != NULL ) {
+            return *globalCoordinates;
+        }
+        else {
+            OOFEM_ERROR("globalCoordinates == NULL.")
+            return ZeroVector;
+        }
+    }
+
+    void setGlobalCoordinates(const FloatArray &iCoord) {
+        if( globalCoordinates != NULL ) {
+            *globalCoordinates = iCoord;
+        }
+        else {
+            globalCoordinates = new FloatArray(iCoord);
         }
     }
 
