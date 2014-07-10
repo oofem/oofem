@@ -36,17 +36,13 @@
 #define qwedgegrad_h
 
 #include "qwedge.h"
-#include "fei3dwedgelin.h"
 #include "graddpelement.h"
-#include "zznodalrecoverymodel.h"
-#include "nodalaveragingrecoverymodel.h"
-#include "eleminterpmapperinterface.h"
-#include "huertaerrorestimator.h"
-#include "sprnodalrecoverymodel.h"
 
 #define _IFT_QWedgeGrad_Name "qwedgegrad"
 
 namespace oofem {
+class FEI3dWedgeLin;
+
 /**
  * Quadratic 3D element
  * @author L. Svoboda
@@ -54,7 +50,7 @@ namespace oofem {
 class QWedgeGrad : public QWedge, public GradDpElement
 {
 protected:
-    static FEI3dWedgeLin interpolation;
+    static FEI3dWedgeLin interpolation_lin;
 
 public:
     QWedgeGrad(int, Domain *);

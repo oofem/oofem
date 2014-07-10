@@ -33,6 +33,7 @@
  */
 
 #include "qplanestressgrad.h"
+#include "fei2dquadlin.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
@@ -44,7 +45,7 @@
 namespace oofem {
 REGISTER_Element(QPlaneStressGrad);
 
-FEI2dQuadLin QPlaneStressGrad :: interpolation(1, 2);
+FEI2dQuadLin QPlaneStressGrad :: interpolation_lin(1, 2);
 
 QPlaneStressGrad :: QPlaneStressGrad(int n, Domain *aDomain) : QPlaneStress2d(n, aDomain), GradDpElement()
     // Constructor.
@@ -63,7 +64,7 @@ QPlaneStressGrad :: QPlaneStressGrad(int n, Domain *aDomain) : QPlaneStress2d(n,
 void
 QPlaneStressGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    if ( inode <= nSecNodes ) {
+    if ( inode <= 4 ) {
         answer = {D_u, D_v, G_0};
     } else {
         answer = {D_u, D_v};
@@ -90,13 +91,9 @@ QPlaneStressGrad :: computeGaussPoints()
 
 void
 QPlaneStressGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at gp.
 {
     FloatArray n;
-
-    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
+    this->interpolation_lin.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 1);
 }
 
@@ -104,15 +101,7 @@ void
 QPlaneStressGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
-
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(2, 4);
-    answer.zero();
-
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, i) = dnx.at(i, 1);
-        answer.at(2, i) = dnx.at(i, 2);
-    }
+    this->interpolation_lin.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.beTranspositionOf(dnx);
 }
 }

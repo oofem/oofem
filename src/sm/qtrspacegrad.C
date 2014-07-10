@@ -33,6 +33,7 @@
  */
 
 #include "qtrspacegrad.h"
+#include "fei3dtetlin.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
@@ -45,7 +46,6 @@
 #include "structuralms.h"
 #include "mathfem.h"
 #include "structuralcrosssection.h"
-#include "fei3dtetlin.h"
 #include "classfactory.h"
 
 #include <cstdio>
@@ -53,7 +53,7 @@
 namespace oofem {
 REGISTER_Element(QTRSpaceGrad);
 
-FEI3dTetLin QTRSpaceGrad :: interpolation;
+FEI3dTetLin QTRSpaceGrad :: interpolation_lin;
 
 QTRSpaceGrad :: QTRSpaceGrad(int n, Domain *aDomain) :  QTRSpace(n, aDomain), GradDpElement()
     // Constructor.
@@ -84,7 +84,7 @@ QTRSpaceGrad :: initializeFrom(InputRecord *ir)
 void
 QTRSpaceGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    if ( inode <= nSecNodes ) {
+    if ( inode <= 4 ) {
         answer = {D_u, D_v, D_w, G_0};
     } else {
         answer = {D_u, D_v, D_w};
@@ -103,11 +103,9 @@ QTRSpaceGrad :: computeGaussPoints()
 
 void
 QTRSpaceGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at gp.
 {
     FloatArray n;
-    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 1);
 }
 
@@ -115,15 +113,8 @@ void
 QTRSpaceGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
-    answer.resize(3, 4);
-    answer.zero();
-
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, i) = dnx.at(i, 1);
-        answer.at(2, i) = dnx.at(i, 2);
-        answer.at(3, i) = dnx.at(i, 3);
-    }
+    this->interpolation_lin.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.beTranspositionOf(dnx);
 }
 
 }

@@ -37,11 +37,6 @@
 
 #include "qtrspace.h"
 #include "graddpelement.h"
-#include "zznodalrecoverymodel.h"
-#include "nodalaveragingrecoverymodel.h"
-#include "eleminterpmapperinterface.h"
-#include "huertaerrorestimator.h"
-#include "sprnodalrecoverymodel.h"
 
 #define _IFT_QTRSpaceGrad_Name "qtrspacegrad"
 
@@ -54,6 +49,9 @@ class FEI3dTetLin;
  */
 class QTRSpaceGrad : public QTRSpace, public GradDpElement
 {
+protected:
+    static FEI3dTetLin interpolation_lin;
+    
 public:
     QTRSpaceGrad(int, Domain *);
     virtual ~QTRSpaceGrad() { }

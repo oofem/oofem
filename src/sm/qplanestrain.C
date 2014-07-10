@@ -52,7 +52,6 @@ FEI2dQuadQuad QPlaneStrain :: interpolation(1, 2);
 
 QPlaneStrain :: QPlaneStrain(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
-    // Constructor.
 {
     numberOfDofMans  = 8;
     numberOfGaussPoints = 4;
@@ -113,13 +112,9 @@ QPlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 void
 QPlaneStrain :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at gp.
 {
     FloatArray n;
-
     this->interpolation.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
-
     answer.beNMatrixOf(n, 2);
 }
 

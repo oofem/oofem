@@ -33,6 +33,7 @@
  */
 
 #include "qspacegrad.h"
+#include "fei3dhexalin.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
@@ -44,7 +45,7 @@
 namespace oofem {
 REGISTER_Element(QSpaceGrad);
 
-FEI3dHexaLin QSpaceGrad :: interpolation;
+FEI3dHexaLin QSpaceGrad :: interpolation_lin;
 
 QSpaceGrad :: QSpaceGrad(int n, Domain *aDomain) :  QSpace(n, aDomain), GradDpElement()
     // Constructor.
@@ -78,7 +79,7 @@ QSpaceGrad :: initializeFrom(InputRecord *ir)
 void
 QSpaceGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    if ( inode <= nSecNodes ) {
+    if ( inode <= 4 ) {
         answer = {D_u, D_v, D_w, G_0};
     } else {
         answer = {D_u, D_v, D_w};
@@ -99,11 +100,9 @@ QSpaceGrad :: computeGaussPoints()
 
 void
 QSpaceGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at gp.
 {
     FloatArray n;
-    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 1);
 }
 
@@ -111,20 +110,8 @@ void
 QSpaceGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
-    IntArray a(8);
-    for ( int i = 1; i < 9; i++ ) {
-        a.at(i) = dofManArray.at(i);
-    }
-
-    answer.resize(3, 8);
-    answer.zero();
-
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    for ( int i = 1; i <= 8; i++ ) {
-        answer.at(1, i) = dnx.at(i, 1);
-        answer.at(2, i) = dnx.at(i, 2);
-        answer.at(3, i) = dnx.at(i, 3);
-    }
+    this->interpolation_lin.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.beTranspositionOf(dnx);
 }
 
 }
