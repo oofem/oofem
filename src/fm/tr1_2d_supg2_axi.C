@@ -1573,7 +1573,7 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
             triaApprox.global2local( lc, gc, FEIElementGeometryWrapper(this) );
             // modify original ip coords to target ones
             gp->setLocalCoordinates( * gp->giveNaturalCoordinates() );
-            gp->setCoordinates(lc);
+            gp->setNaturalCoordinates(lc);
             //gp->setWeight (gp->giveWeight()*a/area);
         }
     }

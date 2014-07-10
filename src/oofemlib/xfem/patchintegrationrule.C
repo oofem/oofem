@@ -139,7 +139,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
             this->elem->computeLocalCoordinates(local, global);
 
             gp->setGlobalCoordinates(global);
-            gp->setCoordinates(local);
+            gp->setNaturalCoordinates(local);
             gp->setLocalCoordinates(local);
 
 

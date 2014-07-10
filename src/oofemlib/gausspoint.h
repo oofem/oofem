@@ -135,7 +135,7 @@ public:
     double giveNaturalCoordinate(int i) const { return naturalCoordinates->at(i); }
     /// Returns coordinate array of receiver.
     FloatArray *giveNaturalCoordinates() { return naturalCoordinates; }
-    void setCoordinates(FloatArray c) {
+    void setNaturalCoordinates(FloatArray c) {
         if(naturalCoordinates != NULL) {
             * naturalCoordinates = std :: move(c);
         }

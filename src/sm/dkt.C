@@ -793,7 +793,7 @@ DKTPlate :: computeVertexBendingMoments(FloatMatrix &answer, TimeStep *tStep)
     GaussPoint *vgp = iRule.getIntegrationPoint(0);
 
     for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
-        vgp->setCoordinates(coords [ i - 1 ]);
+        vgp->setNaturalCoordinates(coords [ i - 1 ]);
         this->computeStrainVector(eps, vgp, tStep);
         this->giveStructuralCrossSection()->giveGeneralizedStress_Plate(m, vgp, eps, tStep);
         answer.setColumn(m, i);

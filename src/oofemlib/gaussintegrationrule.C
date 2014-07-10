@@ -92,7 +92,7 @@ GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mo
 
         FloatArray naturalCoord;
         this->giveElement()->computeLocalCoordinates(naturalCoord, globalCoord);
-        this->gaussPoints [ i - 1 ]->setCoordinates(naturalCoord);
+        this->gaussPoints [ i - 1 ]->setNaturalCoordinates(naturalCoord);
     }
 
     this->intdomain = _Embedded2dLine;

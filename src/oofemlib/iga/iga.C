@@ -109,7 +109,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
 
                     newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords->at(1) / 2.0 + 0.5 );
                     newgpcoords.at(2) = knotValuesV->at(vi) + dv * ( gpcoords->at(2) / 2.0 + 0.5 );
-                    gp->setCoordinates(newgpcoords);
+                    gp->setNaturalCoordinates(newgpcoords);
                     gp->setWeight(gp->giveWeight() / 4.0 * du * dv);
                 }
 
@@ -161,7 +161,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
                         newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords->at(1) / 2.0 + 0.5 );
                         newgpcoords.at(2) = knotValuesV->at(vi) + dv * ( gpcoords->at(2) / 2.0 + 0.5 );
                         newgpcoords.at(3) = knotValuesW->at(wi) + dw * ( gpcoords->at(3) / 2.0 + 0.5 );
-                        gp->setCoordinates(newgpcoords);
+                        gp->setNaturalCoordinates(newgpcoords);
                         gp->setWeight(gp->giveWeight() / 8.0 * du * dv * dw);
                     }
 
@@ -268,7 +268,7 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
 
                     newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords->at(1) / 2.0 + 0.5 );
                     newgpcoords.at(2) = knotValuesV->at(vi) + dv * ( gpcoords->at(2) / 2.0 + 0.5 );
-                    gp->setCoordinates(newgpcoords);
+                    gp->setNaturalCoordinates(newgpcoords);
                     gp->setWeight(gp->giveWeight() / 4.0 * du * dv);
                 }
 

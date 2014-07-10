@@ -85,7 +85,7 @@ int DiscontinuousSegmentIntegrationRule :: SetUpPointsOnLine(int iNumPointsPerSe
 
             // Local coordinate along the line segment
             double xi = 2.0 * ( global.distance(mXS) / totalLength - 0.5 );
-            gp->setCoordinates({xi});
+            gp->setNaturalCoordinates({xi});
 
             gp->setLocalCoordinates({xi});
             gp->setGlobalCoordinates(global);
