@@ -152,7 +152,7 @@ public:
             return naturalCoordinates;
         }
     }
-    void setLocalCoordinates(FloatArray c)
+    void setSubPatchCoordinates(FloatArray c)
     {
         if ( subPatchCoordinates ) {
             * subPatchCoordinates = std :: move(c);

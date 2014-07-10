@@ -87,7 +87,7 @@ int DiscontinuousSegmentIntegrationRule :: SetUpPointsOnLine(int iNumPointsPerSe
             double xi = 2.0 * ( global.distance(mXS) / totalLength - 0.5 );
             gp->setNaturalCoordinates({xi});
 
-            gp->setLocalCoordinates({xi});
+            gp->setSubPatchCoordinates({xi});
             gp->setGlobalCoordinates(global);
 
             gp->setWeight(1.0 * gp->giveWeight() * mSegments [ i ].giveLength() / totalLength);  // update integration weight

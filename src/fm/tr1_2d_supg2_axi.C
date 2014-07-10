@@ -1572,7 +1572,7 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
             approx->local2global( gc, * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(vcoords [ i ]) );
             triaApprox.global2local( lc, gc, FEIElementGeometryWrapper(this) );
             // modify original ip coords to target ones
-            gp->setLocalCoordinates( * gp->giveNaturalCoordinates() );
+            gp->setSubPatchCoordinates( * gp->giveNaturalCoordinates() );
             gp->setNaturalCoordinates(lc);
             //gp->setWeight (gp->giveWeight()*a/area);
         }
