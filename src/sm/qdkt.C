@@ -432,7 +432,7 @@ QDKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep
 
     if ( force.giveSize() ) {
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), n);
+            this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), n);
             dV  = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
             dens = this->giveCrossSection()->give('d', gp);
             ntf.beTProductOf(n, force);

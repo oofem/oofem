@@ -1804,10 +1804,10 @@ TR1_2D_SUPG2 :: computeVolumeAroundID(GaussPoint *gp, integrationDomain id, cons
 
     if ( id == _Triangle ) {
         FEI2dTrLin __interpolation(1, 2);
-        return weight *fabs( __interpolation.giveTransformationJacobian ( *gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
+        return weight *fabs( __interpolation.giveTransformationJacobian ( *gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
     } else {
         FEI2dQuadLin __interpolation(1, 2);
-        double det = fabs( __interpolation.giveTransformationJacobian( * gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
+        double det = fabs( __interpolation.giveTransformationJacobian( * gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
         return det * weight;
     }
 }

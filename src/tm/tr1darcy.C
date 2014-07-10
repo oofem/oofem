@@ -232,7 +232,7 @@ double Tr1Darcy :: giveThicknessAt(const FloatArray &gcoords)
 double Tr1Darcy :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double thickness = 1;
-    double detJ = fabs( this->interpolation_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double detJ = fabs( this->interpolation_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveSubPatchCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ *thickness *gp->giveWeight();
 }
 

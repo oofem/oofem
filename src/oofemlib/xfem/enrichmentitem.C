@@ -1452,7 +1452,7 @@ bool Inclusion :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection
 
     FloatArray N;
     FEInterpolation *interp = iEl.giveInterpolation();
-    interp->evalN( N, * iGP.giveLocalCoordinates(), FEIElementGeometryWrapper(& iEl) );
+    interp->evalN( N, * iGP.giveNaturalCoordinates(), FEIElementGeometryWrapper(& iEl) );
 
     const IntArray &elNodes = iEl.giveDofManArray();
 

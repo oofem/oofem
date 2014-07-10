@@ -145,7 +145,7 @@ public:
     }
 
     /// Returns local sub-patch coordinates of the receiver
-    FloatArray *giveLocalCoordinates() {
+    FloatArray *giveSubPatchCoordinates() {
         if ( subPatchCoordinates ) {
             return subPatchCoordinates;
         } else {

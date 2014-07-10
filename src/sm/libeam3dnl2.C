@@ -603,7 +603,7 @@ LIBeam3dNL2 :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 

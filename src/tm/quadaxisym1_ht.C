@@ -91,7 +91,7 @@ QuadAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double radius;
     FloatArray gcoords;
-    this->interpolation.edgeLocal2global( gcoords, iEdge, * gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeLocal2global( gcoords, iEdge, * gp->giveSubPatchCoordinates(), FEIElementGeometryWrapper(this) );
     radius = gcoords.at(1);
 
     double detJ = fabs( this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
@@ -103,7 +103,7 @@ double
 QuadAxisym1_ht :: computeRadiusAt(GaussPoint *gp)
 {
     FloatArray gcoords;
-    this->interpolation.local2global( gcoords, * gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.local2global( gcoords, * gp->giveSubPatchCoordinates(), FEIElementGeometryWrapper(this) );
     return gcoords.at(1);
 }
 } // end namespace oofem

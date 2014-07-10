@@ -200,7 +200,7 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
 
     if ( force.giveSize() ) {
         for ( GaussPoint *gp: *iRule ) {
-            this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), n);
+            this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), n);
             dV  = this->computeVolumeAround(gp);
             dens = this->giveCrossSection()->give('d', gp);
             ntf.beTProductOf(n, force);
@@ -419,7 +419,7 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
     mass = 0.;
 
     for ( GaussPoint *gp: iRule ) {
-        this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), n);
+        this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), n);
         density = this->giveCrossSection()->give('d', gp);
 
         if ( ipDensity != NULL ) {
@@ -1217,7 +1217,7 @@ StructuralElement :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSta
         FloatArray u;
         FloatMatrix N;
         this->computeVectorOf(VM_Total, tStep, u);
-        this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), N);
+        this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), N);
         answer.beProductOf(N, u);
         return 1;
     }

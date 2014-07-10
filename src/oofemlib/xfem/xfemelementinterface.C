@@ -108,8 +108,8 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
     FloatMatrix dNdx;
     FloatArray N;
     FEInterpolation *interp = iEl.giveInterpolation();
-    interp->evaldNdx( dNdx, * iGP.giveLocalCoordinates(), FEIElementGeometryWrapper(& iEl) );
-    interp->evalN( N, * iGP.giveLocalCoordinates(), FEIElementGeometryWrapper(& iEl) );
+    interp->evaldNdx( dNdx, * iGP.giveNaturalCoordinates(), FEIElementGeometryWrapper(& iEl) );
+    interp->evalN( N, * iGP.giveNaturalCoordinates(), FEIElementGeometryWrapper(& iEl) );
 
     const IntArray &elNodes = iEl.giveDofManArray();
 

@@ -128,7 +128,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
                     // New N-matrix
                     FloatMatrix NNew;
-                    elNew->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), NNew);
+                    elNew->computeNmatrixAt(* ( gp->giveNaturalCoordinates() ), NNew);
 
 
                     //////////////

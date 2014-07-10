@@ -102,7 +102,7 @@ public:
     virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-    { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
+    { computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer); }
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);

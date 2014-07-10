@@ -105,7 +105,7 @@ public:
     virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-    { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
+    { computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer); }
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LSpace_Name; }
