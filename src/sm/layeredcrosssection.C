@@ -1308,9 +1308,9 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(std :: vector< IntegrationR
             // Map local layer cs to local shell cs
             double zMid_i = this->giveLayerMidZ(layer); // global z-coord
             double xiMid_i = 1.0 - 2.0 * ( totalThickness - this->midSurfaceZcoordFromBottom - zMid_i ) / totalThickness; // local z-coord
-            double deltaxi = gp->coordinates->at(3) * this->giveLayerThickness(layer) / totalThickness; // distance from layer mid
+            double deltaxi = gp->giveCoordinates()->at(3) * this->giveLayerThickness(layer) / totalThickness; // distance from layer mid
             double xinew = xiMid_i + deltaxi * scaleFactor;
-            gp->coordinates->at(3) = xinew;
+            gp->giveCoordinates()->at(3) = xinew;
             gp->number = number;   // fix gp ordering
             number++;
         }

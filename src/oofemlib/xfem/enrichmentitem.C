@@ -537,7 +537,7 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrF
 void EnrichmentItem :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, int iNodeInd, GaussPoint &iGP, bool iGPLivesOnCurrentCrack) const
 {
     double normalSignDist = 0.0;
-    this->interpLevelSet(normalSignDist, *(iGP.giveCoordinates()) );
+    this->interpLevelSet(normalSignDist, iGP.giveGlobalCoordinates() );
 
     auto res = mNodeEnrMarkerMap.find(iNodeInd);
     if ( res != mNodeEnrMarkerMap.end() ) {

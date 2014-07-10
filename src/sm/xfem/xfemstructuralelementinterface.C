@@ -172,10 +172,6 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                 gw *= 0.5 * segLength;
                                 gp->setWeight(gw);
 
-                                FloatArray locCoord;
-                                element->computeLocalCoordinates(locCoord, *(gp->giveCoordinates()) );
-                                gp->setLocalCoordinates(locCoord);
-
                                 // Fetch material status and set normal
                                 StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
                                 if ( ms == NULL ) {
@@ -256,10 +252,6 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                     gw *= 0.5 * segLength;
                                     gp->setWeight(gw);
 
-                                    FloatArray locCoord;
-                                    element->computeLocalCoordinates(locCoord, *(gp->giveCoordinates()) );
-                                    gp->setLocalCoordinates(locCoord);
-
                                     // Fetch material status and set normal
                                     StructuralInterfaceMaterialStatus *ms = dynamic_cast< StructuralInterfaceMaterialStatus * >( mpCZMat->giveStatus(gp) );
                                     if ( ms == NULL ) {
@@ -319,7 +311,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
             for ( size_t czRulInd = 0; czRulInd < mpCZIntegrationRules.size(); czRulInd++ ) {
                 for ( GaussPoint *gp: * mpCZIntegrationRules [ czRulInd ] ) {
-                    czGPCoord.push_back( * ( gp->giveCoordinates() ) );
+                    czGPCoord.push_back( gp->giveGlobalCoordinates() );
                 }
             }
 
@@ -697,7 +689,7 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMas
     mass = 0.;
 
     for ( GaussPoint *gp: *iRule ) {
-        structEl->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), n);
+        structEl->computeNmatrixAt(* ( gp->giveCoordinates() ), n);
         density = structEl->giveMaterial()->give('d', gp);
 
         if ( ipDensity != NULL ) {

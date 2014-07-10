@@ -942,7 +942,7 @@ void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, 
     const int dim = 2;
 
     FloatArray Nc, globalCoord, localCoord;
-    globalCoord = * ( iGP.giveCoordinates() );
+    globalCoord = iGP.giveGlobalCoordinates();
     element->computeLocalCoordinates(localCoord, globalCoord);
     FEInterpolation *interp = element->giveInterpolation();
     interp->evalN( Nc, localCoord, FEIElementGeometryWrapper(element) );

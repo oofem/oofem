@@ -120,11 +120,14 @@ public:
      * with given number, integration weight, coordinates and material mode.
      * @param ir Integration rule to which integration point belongs to.
      * @param n Integration point number.
-     * @param a Coordinates.
+     * @param iNaturalCoord Natueral coordinates.
      * @param w Integration weight.
      * @param mode Material mode.
      */
-    GaussPoint(IntegrationRule * ir, int n, FloatArray * a, double w, MaterialMode mode);
+    GaussPoint(IntegrationRule * ir, int n, FloatArray * iNaturalCoord, double w, MaterialMode mode);
+
+    GaussPoint(IntegrationRule * ir, int n, double w, MaterialMode mode);
+
     /// Destructor
     virtual ~GaussPoint();
 
@@ -132,7 +135,14 @@ public:
     double giveCoordinate(int i) { return naturalCoordinates->at(i); }
     /// Returns coordinate array of receiver.
     FloatArray *giveCoordinates() { return naturalCoordinates; }
-    void setCoordinates(FloatArray c) { * naturalCoordinates = std :: move(c); }
+    void setCoordinates(FloatArray c) {
+        if(naturalCoordinates != NULL) {
+            * naturalCoordinates = std :: move(c);
+        }
+        else {
+            naturalCoordinates = new FloatArray( std :: move(c) );
+        }
+    }
 
     /// Returns local sub-patch coordinates of the receiver
     FloatArray *giveLocalCoordinates() {
@@ -151,13 +161,14 @@ public:
         }
     }
 
-    inline const FloatArray &giveGlobalCoordinates() const {
+    inline const FloatArray &giveGlobalCoordinates() {
         if( globalCoordinates != NULL ) {
             return *globalCoordinates;
         }
         else {
-            OOFEM_ERROR("globalCoordinates == NULL.")
-            return ZeroVector;
+            globalCoordinates = new FloatArray();
+            this->giveElement()->computeGlobalCoordinates(*globalCoordinates, *naturalCoordinates);
+            return *globalCoordinates;
         }
     }
 

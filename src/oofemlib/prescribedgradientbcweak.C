@@ -190,7 +190,7 @@ void PrescribedGradientBCWeak::assembleVector(FloatArray &answer, TimeStep *tSte
             IntegrationRule *ir = createNewIntegrationRule(i);
 
             for ( GaussPoint *gp: *ir ) {
-                const FloatArray &locCoordsOnLine = * gp->giveLocalCoordinates();
+                const FloatArray &locCoordsOnLine = * gp->giveCoordinates();
 
                 // Compute N^trac
                 FloatArray N, Ntrac;
@@ -488,7 +488,7 @@ void PrescribedGradientBCWeak::computeField(FloatArray &sigma, TimeStep *tStep)
         IntegrationRule *ir = createNewIntegrationRule(i);
 
         for ( GaussPoint *gp: *ir ) {
-            const FloatArray &locCoordsOnLine = * gp->giveLocalCoordinates();
+            const FloatArray &locCoordsOnLine = * gp->giveCoordinates();
 
             // Compute N^trac
             FloatArray N, Ntrac;
@@ -1139,7 +1139,7 @@ void PrescribedGradientBCWeak::integrateTangent(FloatMatrix &oTangent, size_t iT
          */
 
         // Fetch GP coordinates
-        const FloatArray &globalCoord = * gp->giveCoordinates();
+        const FloatArray &globalCoord = gp->giveGlobalCoordinates();
 
         assembleTangentGPContribution(oTangent, iTracElInd, *gp, globalCoord, globalNodeIndToPosInLocalLocArray, 1.0);
 
@@ -1164,7 +1164,7 @@ void PrescribedGradientBCWeak::assembleTangentGPContribution(FloatMatrix &oTange
 
     const TractionElement &tEl = *(mpTractionElements[iTracElInd]);
     double detJ = 0.5*tEl.mStartCoord.distance(tEl.mEndCoord);
-    const FloatArray &locCoordsOnLine = * iGP.giveLocalCoordinates();
+    const FloatArray &locCoordsOnLine = * iGP.giveCoordinates();
 
     //////////////////////////////////
     // Compute traction N-matrix
@@ -1252,7 +1252,7 @@ IntegrationRule *PrescribedGradientBCWeak::createNewIntegrationRule(int iTracElI
     ir->SetUpPointsOnLine(numPointsPerSeg, matMode);
 
     for(GaussPoint *gp : *ir) {
-        tracGpCoord.push_back( *(gp->giveCoordinates()) );
+        tracGpCoord.push_back( gp->giveGlobalCoordinates() );
     }
 
     std :: stringstream str3;

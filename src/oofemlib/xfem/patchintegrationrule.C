@@ -138,7 +138,9 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
             FloatArray local;
             this->elem->computeLocalCoordinates(local, global);
 
+            gp->setGlobalCoordinates(global);
             gp->setCoordinates(local);
+            gp->setLocalCoordinates(local);
 
 
 

@@ -122,7 +122,7 @@ void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncDerivAt(std :: vector< Floa
 void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const
 {
 	const FloatArray &xTip = mTipInfo.mGlobalCoord;
-	const FloatArray &gpCoord = *(iGP.giveCoordinates());
+	const FloatArray &gpCoord = iGP.giveGlobalCoordinates();
 
 	double radius = gpCoord.distance(xTip);
 

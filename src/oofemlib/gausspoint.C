@@ -38,13 +38,13 @@
 
 namespace oofem {
 //GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode) : statusDict()
-GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode)
+GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *iNaturalCoord, double w, MaterialMode mode)
 // Constructor. Creates a Gauss point belonging to element e, with number
 // n, with coordinates a, with weight w.
 {
     irule        = ir;
     number       = n;
-    naturalCoordinates  = a;
+    naturalCoordinates  = iNaturalCoord;
     weight       = w;
     materialMode = mode;
 
@@ -53,6 +53,18 @@ GaussPoint :: GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, Ma
     materialStatus = NULL;
 }
 
+GaussPoint :: GaussPoint(IntegrationRule * ir, int n, double w, MaterialMode mode)
+{
+    irule        = ir;
+    number       = n;
+    naturalCoordinates  = NULL;
+    weight       = w;
+    materialMode = mode;
+
+    subPatchCoordinates = NULL;
+    globalCoordinates = NULL;
+    materialStatus = NULL;
+}
 
 GaussPoint :: ~GaussPoint()
 // Destructor.

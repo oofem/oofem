@@ -29,16 +29,16 @@ HeavisideFunction 1
 polygoncrack 1 points 6 -0.5 0.3 -0.2 0.3 1.1 0.3
 #
 #
-#%BEGIN_CHECK% tolerance 1.e-6
+#%BEGIN_CHECK% tolerance 1.e-4
 ## step 2
 #REACTION tStep 2 number 3 dof 1 value 1.87813253e+01
 #REACTION tStep 2 number 4 dof 1 value 1.87813439e+01
 ## step 3
-#REACTION tStep 3 number 3 dof 1 value 1.19494543e+01
-#REACTION tStep 3 number 4 dof 1 value 1.19494543e+01
+#REACTION tStep 3 number 3 dof 1 value 1.19731605e+01
+#REACTION tStep 3 number 4 dof 1 value 1.19731605e+01
 ## step 4
-#REACTION tStep 4 number 3 dof 1 value 5.15332827e+00
-#REACTION tStep 4 number 4 dof 1 value 5.15332945e+00
+#REACTION tStep 4 number 3 dof 1 value 5.16737850e+00
+#REACTION tStep 4 number 4 dof 1 value 5.16737850e+00
 ## step 5
 #REACTION tStep 5 number 3 dof 1 value 0.0e+00
 #REACTION tStep 5 number 4 dof 1 value 0.0e+00
