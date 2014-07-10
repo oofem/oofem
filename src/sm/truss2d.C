@@ -309,7 +309,7 @@ Truss2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 void
 Truss2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) );
+    this->computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
 }
 
 void

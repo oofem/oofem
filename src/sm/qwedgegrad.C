@@ -121,7 +121,7 @@ QWedgeGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // luated at gp.
 {
     FloatArray n;
-    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 1);
 }
 
@@ -134,7 +134,7 @@ QWedgeGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
     answer.resize(3, 9);
     answer.zero();
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= 9; i++ ) {
         answer.at(1, i) = dnx.at(i, 1);
         answer.at(2, i) = dnx.at(i, 2);
@@ -152,7 +152,7 @@ QWedgeGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
     FloatMatrix dnx;
 
     // compute the derivatives of shape functions
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(45, 45);
     answer.zero();

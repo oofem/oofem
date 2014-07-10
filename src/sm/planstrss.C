@@ -87,7 +87,7 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
     FloatArray coord;
 #endif
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 8);
     answer.zero();
@@ -122,7 +122,7 @@ PlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     FloatArray coord;
 #endif
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(4, 8);
 
@@ -172,7 +172,7 @@ PlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 4);
     answer.zero();
@@ -221,7 +221,7 @@ PlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 PlaneStress2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
     return result *gp->giveWeight();
 }
@@ -229,7 +229,7 @@ PlaneStress2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 PlaneStress2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -275,7 +275,7 @@ PlaneStress2d :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
 
 
@@ -384,7 +384,7 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
 
         // gradient of function phi at the current GP
         FloatMatrix dnx;
-        this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         FloatArray gradPhi(2);
         gradPhi.zero();
         for ( int i = 1; i <= 4; i++ ) {
@@ -716,7 +716,7 @@ void PlaneStress2d :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            gpCoords = gp->giveCoordinates();
+            gpCoords = gp->giveNaturalCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;
                 ind.at(2) = 4;
@@ -841,7 +841,7 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
                                                     n3 * this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale) +
                                                     n4 * this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale) );
                         } else {
-                            computeGlobalCoordinates( gpglobalcoords, * ( gp->giveCoordinates() ) );
+                            computeGlobalCoordinates( gpglobalcoords, * ( gp->giveNaturalCoordinates() ) );
                         }
 
                         xc = gpglobalcoords.at(1);

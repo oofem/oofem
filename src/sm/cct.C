@@ -353,7 +353,7 @@ CCTPlate :: computeVolumeAround(GaussPoint *gp)
 			      lc[0].at(3), lc[1].at(3), lc[2].at(3));
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
@@ -567,7 +567,7 @@ CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(5); // {Exx,Eyy,GMyz,GMzx,GMxy}
@@ -587,7 +587,7 @@ CCTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
     FloatArray n;
     double b, c, n12;
 
-    this->interp_lin.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     this->interp_lin.computeLocalEdgeMapping(edgeNodes, iedge);
 
     n12 = 0.5 * n.at(1) * n.at(2);
@@ -645,7 +645,7 @@ CCTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 CCTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -653,7 +653,7 @@ CCTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 CCTPlate :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -715,15 +715,15 @@ CCTPlate :: drawRawGeometry(oofegGraphicContext &gc)
         EASValsSetEdgeFlag(true);
         EASValsSetFillStyle(FILL_SOLID);
         EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-        p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
-        p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
-        p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveCoordinate(3);
-        p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
-        p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveCoordinate(2);
-        p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveCoordinate(3);
-        p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveCoordinate(1);
-        p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveCoordinate(2);
-        p [ 2 ].z = ( FPNum ) this->giveNode(3)->giveCoordinate(3);
+        p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(1);
+        p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(2);
+        p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(3);
+        p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(1);
+        p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(2);
+        p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(3);
+        p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(1);
+        p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(2);
+        p [ 2 ].z = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(3);
 
         go =  CreateTriangle3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
@@ -820,9 +820,9 @@ CCTPlate :: drawScalar(oofegGraphicContext &context)
                 p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                 p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(3, tStep, defScale);
             } else {
-                p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-                p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
-                p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
+                p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(1);
+                p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(2);
+                p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(3);
             }
         }
 

@@ -689,7 +689,7 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMas
     mass = 0.;
 
     for ( GaussPoint *gp: *iRule ) {
-        structEl->computeNmatrixAt(* ( gp->giveCoordinates() ), n);
+        structEl->computeNmatrixAt(* ( gp->giveNaturalCoordinates() ), n);
         density = structEl->giveMaterial()->give('d', gp);
 
         if ( ipDensity != NULL ) {

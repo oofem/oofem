@@ -80,7 +80,7 @@ Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li
 {
     FloatMatrix dN;
 
-    this->interp.evaldNdx( dN, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dN, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     // Reshape
     answer.resize(4, 8);
@@ -152,7 +152,7 @@ Quad1PlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPo
      */
 
     FloatArray n;
-    this->interp.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(2, 4);
     answer.at(1, 1) = n.at(1);
     answer.at(1, 3) = n.at(2);
@@ -199,7 +199,7 @@ Quad1PlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 Quad1PlaneStrain :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -207,7 +207,7 @@ Quad1PlaneStrain :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 Quad1PlaneStrain :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -266,7 +266,7 @@ Quad1PlaneStrain :: computeVolumeAround(GaussPoint *gp)
 {
     double detJ, weight, thickness;
 
-    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     thickness = this->giveCrossSection()->give(CS_Thickness, gp);
     return detJ * weight * thickness;
@@ -582,7 +582,7 @@ void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            gpCoords = gp->giveCoordinates();
+            gpCoords = gp->giveNaturalCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;
                 ind.at(2) = 4;
@@ -705,7 +705,7 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
                                                     n3 * this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale) +
                                                     n4 * this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale) );
                         } else {
-                            computeGlobalCoordinates( gpglobalcoords, * ( gp->giveCoordinates() ) );
+                            computeGlobalCoordinates( gpglobalcoords, * ( gp->giveNaturalCoordinates() ) );
                         }
 
                         xc = gpglobalcoords.at(1);

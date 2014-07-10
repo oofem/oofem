@@ -140,8 +140,8 @@ DKTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
   this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
 
-    double ksi = gp->giveCoordinate(1);
-    double eta = gp->giveCoordinate(2);
+    double ksi = gp->giveNaturalCoordinate(1);
+    double eta = gp->giveNaturalCoordinate(2);
 
     double N1dk = 4.0 * ksi - 1.0;
     double N2dk = 0.0;
@@ -384,7 +384,7 @@ DKTPlate :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
@@ -597,7 +597,7 @@ DKTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(5); // {Exx,Eyy,GMyz,GMzx,GMxy}
@@ -615,7 +615,7 @@ DKTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     FloatArray n;
 
-    this->interp_lin.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.at(1, 1) = n.at(1);
@@ -662,7 +662,7 @@ DKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 DKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -670,7 +670,7 @@ DKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 DKTPlate :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -714,7 +714,7 @@ DKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 void
 DKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-    this->computeNmatrixAt(* sgp->giveCoordinates(), answer);
+    this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), answer);
 }
 
 void
@@ -750,7 +750,7 @@ DKTPlate :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 DKTPlate :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveCoordinates() );
+    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
 }
 
 
@@ -813,7 +813,7 @@ DKTPlate :: computeShearForces(FloatArray &answer, GaussPoint *gp, TimeStep *tSt
     answer.resize(5);
 
     this->computeVertexBendingMoments(m, tStep);
-    this->interp_lin.evaldNdx( dndx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.evaldNdx( dndx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
         answer.at(4) += m.at(1, i) * dndx.at(i, 1) + m.at(3, i) * dndx.at(i, 2); //dMxdx + dMxydy
         answer.at(5) += m.at(2, i) * dndx.at(i, 2) + m.at(3, i) * dndx.at(i, 1); //dMydy + dMxydx
@@ -843,15 +843,15 @@ DKTPlate :: drawRawGeometry(oofegGraphicContext &gc)
         EASValsSetEdgeFlag(true);
         EASValsSetFillStyle(FILL_SOLID);
         EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-        p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
-        p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
-        p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveCoordinate(3);
-        p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
-        p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveCoordinate(2);
-        p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveCoordinate(3);
-        p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveCoordinate(1);
-        p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveCoordinate(2);
-        p [ 2 ].z = ( FPNum ) this->giveNode(3)->giveCoordinate(3);
+        p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(1);
+        p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(2);
+        p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(3);
+        p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(1);
+        p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(2);
+        p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(3);
+        p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(1);
+        p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(2);
+        p [ 2 ].z = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(3);
 
         go =  CreateTriangle3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
@@ -948,9 +948,9 @@ DKTPlate :: drawScalar(oofegGraphicContext &context)
                 p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                 p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(3, tStep, defScale);
             } else {
-                p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-                p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
-                p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
+                p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(1);
+                p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(2);
+                p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(3);
             }
         }
 

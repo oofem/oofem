@@ -96,8 +96,8 @@ QDKTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
   this->giveNodeCoordinates(x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4);
 
     // get gp coordinates
-    double ksi = gp->giveCoordinate(1);
-    double eta = gp->giveCoordinate(2);
+    double ksi = gp->giveNaturalCoordinate(1);
+    double eta = gp->giveNaturalCoordinate(2);
 
     // geometrical characteristics of element sides
     double dx4 = x2-x1;
@@ -382,7 +382,7 @@ QDKTPlate :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
@@ -597,7 +597,7 @@ QDKTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &ma
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(5); // {Exx,Eyy,GMyz,GMzx,GMxy}
@@ -615,7 +615,7 @@ QDKTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp
 {
     FloatArray n;
 
-    this->interp_lin.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.at(1, 1) = n.at(1);
@@ -643,7 +643,7 @@ QDKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 QDKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -651,7 +651,7 @@ QDKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 QDKTPlate :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -694,7 +694,7 @@ QDKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
 void
 QDKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-  this->computeNmatrixAt(* sgp->giveCoordinates(), answer);
+  this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), answer);
 }
 
 void
@@ -730,7 +730,7 @@ QDKTPlate :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 QDKTPlate :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveCoordinates() );
+    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
 }
 
 
@@ -763,17 +763,17 @@ QDKTPlate :: drawRawGeometry(oofegGraphicContext &gc)
         EASValsSetEdgeFlag(true);
         EASValsSetFillStyle(FILL_SOLID);
         EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-        p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
-        p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
-        p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveCoordinate(3);
-        p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
-        p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveCoordinate(2);
-        p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveCoordinate(3);
-        p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveCoordinate(1);
-        p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveCoordinate(2);
-        p [ 2 ].z = ( FPNum ) this->giveNode(3)->giveCoordinate(3);
-	p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveCoordinate(1);
-	p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveCoordinate(2);
+        p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(1);
+        p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(2);
+        p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(3);
+        p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(1);
+        p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(2);
+        p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(3);
+        p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(1);
+        p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(2);
+        p [ 2 ].z = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(3);
+	p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveNaturalCoordinate(1);
+	p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveNaturalCoordinate(2);
 	p [ 3 ].z = 0.;
 
         go =  CreateQuad3D(p);
@@ -862,8 +862,8 @@ QDKTPlate :: drawScalar(oofegGraphicContext &context)
                     p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                     p [ i ].z = 0.;
                 } else {
-                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(1);
+                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(2);
                     p [ i ].z = 0.;
                 }
             }
@@ -885,8 +885,8 @@ QDKTPlate :: drawScalar(oofegGraphicContext &context)
                     p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                     p [ i ].z = s [ i ] * landScale;
                 } else {
-                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(1);
+                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(2);
                     p [ i ].z = s [ i ] * landScale;
                 }
 
@@ -926,8 +926,8 @@ QDKTPlate :: drawScalar(oofegGraphicContext &context)
                 pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                 pp [ i ].z = 0.;
             } else {
-                pp [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-                pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+                pp [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(1);
+                pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(2);
                 pp [ i ].z = 0.;
             }
         }
@@ -947,7 +947,7 @@ QDKTPlate :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            gpCoords = gp->giveCoordinates();
+            gpCoords = gp->giveNaturalCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;
                 ind.at(2) = 4;

@@ -294,7 +294,7 @@ HTSelement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
     for ( int i = 0; i < numberOfEdges; i++ ) {
         iRule = this->giveIntegrationRule(i);
         for ( GaussPoint *gp: *iRule ) {
-            edgeLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
+            edgeLoad->computeValueAt(force, tStep, * ( gp->giveNaturalCoordinates() ), mode);
             dV = this->computeVolumeAroundSide(gp, i + 1);
             this->computePsVectorAt(PsEdge, force, gp);
             PsEdge.times(dV);
@@ -403,7 +403,7 @@ HTSelement :: computeUvMatrixAt(FloatMatrix &answer, GaussPoint *gp, int sideNum
     uv.resize(2);
 
 
-    double t = ( gp->giveCoordinate(1) + 1. ) / 2.;
+    double t = ( gp->giveNaturalCoordinate(1) + 1. ) / 2.;
 
     double Ax =  ( this->giveSideNode(sideNumber, 1)->giveCoordinate(1) ) - cgX;
     double Bx =  this->giveSideNode(sideNumber, 2)->giveCoordinate(1) - cgX;
@@ -475,7 +475,7 @@ HTSelement :: computeSvMatrixAt(FloatMatrix &answer, GaussPoint *gp, int sideNum
     Sv.resize(numberOfStressDofs, 3);
 
 
-    double t = ( gp->giveCoordinate(1) + 1. ) / 2.;
+    double t = ( gp->giveNaturalCoordinate(1) + 1. ) / 2.;
 
     double Ax =  this->giveSideNode(sideNumber, 1)->giveCoordinate(1);
     double Bx =  this->giveSideNode(sideNumber, 2)->giveCoordinate(1);
@@ -971,6 +971,6 @@ double
 HTSelement :: u_gammaLin(GaussPoint *gp)
 {
     //  double ksi = 1; must be calculated
-    return gp->giveCoordinate(1);
+    return gp->giveNaturalCoordinate(1);
 } //end of u_gammaLin
 } // end namespace oofem

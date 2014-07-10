@@ -96,7 +96,7 @@ Axisymm3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     int size, ind = 1;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
 
     if ( ui == ALL_STRAINS ) {
@@ -129,7 +129,7 @@ Axisymm3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
 
     if ( ( li <= 3 ) && ( ui >= 3 ) ) {
         FloatArray n(4);
-        this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
         r = 0.;
         for ( int i = 1; i <= numberOfDofMans; i++ ) {
@@ -173,7 +173,7 @@ Axisymm3d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     FloatArray n;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 6);
     answer.zero();
@@ -219,7 +219,7 @@ Axisymm3d :: computeVolumeAround(GaussPoint *gp)
     double determinant, weight, volume, r, x;
     FloatArray n;
 
-    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     r = 0.;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
@@ -227,7 +227,7 @@ Axisymm3d :: computeVolumeAround(GaussPoint *gp)
         r += x * n.at(i);
     }
 
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
@@ -433,7 +433,7 @@ Axisymm3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 4);
     answer.zero();
@@ -480,7 +480,7 @@ Axisymm3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     FloatArray c(2);
     this->computeEdgeIpGlobalCoords(c, gp, iEdge);
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
 
 
@@ -491,7 +491,7 @@ Axisymm3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 Axisymm3d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 

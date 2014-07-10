@@ -136,8 +136,8 @@ BilinearCZMaterialFagerstrom :: giveRealStressVector(FloatArray &answer, GaussPo
             OOFEM_ERROR("oh no wrong element type");
         }
         FloatArray lCoords(3);
-        lCoords.at(1) = gp->giveCoordinate(1);
-        lCoords.at(2) = gp->giveCoordinate(2);
+        lCoords.at(1) = gp->giveNaturalCoordinate(1);
+        lCoords.at(2) = gp->giveNaturalCoordinate(2);
         lCoords.at(3) = xi;
         shell->evalInitialCovarBaseVectorsAt(lCoords, Gcov);
 
@@ -547,8 +547,8 @@ BilinearCZMaterialFagerstromStatus :: BilinearCZMaterialFagerstromStatus(int n, 
         OOFEM_ERROR("oh no wrong element type");
     }
     FloatArray lCoords(3);
-    lCoords.at(1) = gp->giveCoordinate(1);
-    lCoords.at(2) = gp->giveCoordinate(2);
+    lCoords.at(1) = gp->giveNaturalCoordinate(1);
+    lCoords.at(2) = gp->giveNaturalCoordinate(2);
     shell->evalInitialCovarBaseVectorsAt(lCoords, Gcov);
 
     FloatArray G1, G2;

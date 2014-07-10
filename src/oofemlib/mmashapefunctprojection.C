@@ -113,7 +113,7 @@ MMAShapeFunctProjection :: mapVariable(FloatArray &answer, GaussPoint *gp, Inter
             container.emplace_back(*nvec);
         }
 
-        interface->MMAShapeFunctProjectionInterface_interpolateIntVarAt(answer, ( * gp->giveCoordinates() ),
+        interface->MMAShapeFunctProjectionInterface_interpolateIntVarAt(answer, ( * gp->giveNaturalCoordinates() ),
                                                                         MMAShapeFunctProjectionInterface :: coordType_local,
                                                                         container, type, tStep);
     } else {

@@ -131,7 +131,7 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
     IntegrationRule *iRule = fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary);
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray &lcoords = * gp->giveCoordinates();
+        FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValueAt(force, tStep, lcoords, mode);
@@ -275,7 +275,7 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
             dV  = this->computeEdgeVolumeAround(gp, iEdge);
 
             if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
-                edgeLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
+                edgeLoad->computeValueAt(force, tStep, * ( gp->giveNaturalCoordinates() ), mode);
             } else {
                 this->computeEdgeIpGlobalCoords(globalIPcoords, gp, iEdge);
                 edgeLoad->computeValueAt(force, tStep, globalIPcoords, mode);
@@ -354,7 +354,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
             dV  = this->computeSurfaceVolumeAround(gp, iSurf);
 
             if ( surfLoad->giveFormulationType() == Load :: FT_Entity ) {
-                surfLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
+                surfLoad->computeValueAt(force, tStep, * ( gp->giveNaturalCoordinates() ), mode);
             } else {
                 this->computeSurfIpGlobalCoords(globalIPcoords, gp, iSurf);
                 surfLoad->computeValueAt(force, tStep, globalIPcoords, mode);
@@ -608,7 +608,7 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
     Load *load;
     FloatArray gCoords, temperature;
 
-    if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
+    if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 
@@ -632,7 +632,7 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
     Load *load;
     FloatArray gCoords, eigenstrain;
 
-    if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
+    if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 

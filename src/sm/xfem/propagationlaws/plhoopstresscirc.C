@@ -167,7 +167,7 @@ void PLHoopStressCirc :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &
                             // Compute global gp coordinates
                             FloatArray N;
                             FEInterpolation *interp = gpEl->giveInterpolation();
-                            interp->evalN( N, * ( gp_i->giveCoordinates() ), FEIElementGeometryWrapper(gpEl) );
+                            interp->evalN( N, * ( gp_i->giveNaturalCoordinates() ), FEIElementGeometryWrapper(gpEl) );
 
 
                             // Compute global coordinates of Gauss point

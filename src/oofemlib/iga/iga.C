@@ -105,7 +105,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
 
                 // remap local subelement gp coordinates into knot span coordinates and update integration weight
                 for ( GaussPoint *gp: *integrationRulesArray [ indx ] ) {
-                    gpcoords = gp->giveCoordinates();
+                    gpcoords = gp->giveNaturalCoordinates();
 
                     newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords->at(1) / 2.0 + 0.5 );
                     newgpcoords.at(2) = knotValuesV->at(vi) + dv * ( gpcoords->at(2) / 2.0 + 0.5 );
@@ -156,7 +156,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
 
                     // remap local subelement gp coordinates into knot span coordinates and update integration weight
                     for ( GaussPoint *gp: *integrationRulesArray [ indx ] ) {
-                        gpcoords = gp->giveCoordinates();
+                        gpcoords = gp->giveNaturalCoordinates();
 
                         newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords->at(1) / 2.0 + 0.5 );
                         newgpcoords.at(2) = knotValuesV->at(vi) + dv * ( gpcoords->at(2) / 2.0 + 0.5 );
@@ -264,7 +264,7 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
 
                 // remap local subelement gp coordinates into knot span coordinates and update integration weight
                 for ( GaussPoint *gp: *integrationRulesArray [ indx ] ) {
-                    gpcoords = gp->giveCoordinates();
+                    gpcoords = gp->giveNaturalCoordinates();
 
                     newgpcoords.at(1) = knotValuesU->at(ui) + du * ( gpcoords->at(1) / 2.0 + 0.5 );
                     newgpcoords.at(2) = knotValuesV->at(vi) + dv * ( gpcoords->at(2) / 2.0 + 0.5 );

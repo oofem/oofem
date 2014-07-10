@@ -137,7 +137,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
                     FloatArray Nc;
                     FEInterpolation *interp = elNew->giveInterpolation();
-                    const FloatArray &localCoord = * ( gp->giveCoordinates() );
+                    const FloatArray &localCoord = * ( gp->giveNaturalCoordinates() );
                     interp->evalN( Nc, localCoord, FEIElementGeometryWrapper(elNew) );
 
                     const IntArray &elNodes = elNew->giveDofManArray();

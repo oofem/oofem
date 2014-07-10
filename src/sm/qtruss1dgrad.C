@@ -121,7 +121,7 @@ void
 QTruss1dGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatArray n;
-    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 1);
 }
 
@@ -132,7 +132,7 @@ QTruss1dGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
     answer.resize(1, 2);
     answer.zero();
     FloatMatrix b;
-    this->interpolation.evaldNdx( b, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( b, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.at(1, 1) = b.at(1, 1);
     answer.at(1, 2) = b.at(2, 1);
 }

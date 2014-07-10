@@ -107,7 +107,7 @@ QTRSpaceGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // luated at gp.
 {
     FloatArray n;
-    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 1);
 }
 
@@ -118,7 +118,7 @@ QTRSpaceGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
     answer.resize(3, 4);
     answer.zero();
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, i) = dnx.at(i, 1);
         answer.at(2, i) = dnx.at(i, 2);
@@ -137,7 +137,7 @@ QTRSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
     FloatMatrix dnx;
 
     // compute the derivatives of shape functions
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(30, 30);
     answer.zero();

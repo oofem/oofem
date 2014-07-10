@@ -96,8 +96,8 @@ QTrPlaneStrainGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     double l1, l2, l3;
 
-    l1 = gp->giveCoordinate(1);
-    l2 = gp->giveCoordinate(2);
+    l1 = gp->giveNaturalCoordinate(1);
+    l2 = gp->giveNaturalCoordinate(2);
     l3 = 1.0 - l1 - l2;
 
     answer.resize(1, 3);

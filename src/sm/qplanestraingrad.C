@@ -99,7 +99,7 @@ QPlaneStrainGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatArray n;
 
-    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.beNMatrixOf(n, 1);
 }
@@ -111,7 +111,7 @@ QPlaneStrainGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 4);
     answer.zero();

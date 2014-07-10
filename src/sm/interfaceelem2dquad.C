@@ -74,7 +74,7 @@ InterfaceElem2dQuad :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
     ///@todo Use the interpolator everywhere in this file:
     double ksi, n1, n2, n3;
 
-    ksi = gp->giveCoordinate(1);
+    ksi = gp->giveNaturalCoordinate(1);
     n3  = 1. - ksi * ksi;
     n1  = ( 1. - ksi ) * 0.5 - 0.5 * n3;
     n2  = ( 1. + ksi ) * 0.5 - 0.5 * n3;
@@ -110,7 +110,7 @@ InterfaceElem2dQuad :: computeVolumeAround(GaussPoint *gp)
 // Gauss point is used.
 {
     double weight  = gp->giveWeight();
-    double ksi = gp->giveCoordinate(1);
+    double ksi = gp->giveNaturalCoordinate(1);
     double dn1 = ksi - 0.5;
     double dn2 = ksi + 0.5;
     double dn3 = -2.0 * ksi;
@@ -129,7 +129,7 @@ InterfaceElem2dQuad :: computeVolumeAround(GaussPoint *gp)
 
     double r = 1.0;
     if (this->axisymmode) {
-      double ksi = gp->giveCoordinate(1);
+      double ksi = gp->giveNaturalCoordinate(1);
       double n3  = 1. - ksi * ksi;
       double n1  = ( 1. - ksi ) * 0.5 - 0.5 * n3;
       double n2  = ( 1. + ksi ) * 0.5 - 0.5 * n3;
@@ -234,21 +234,21 @@ void InterfaceElem2dQuad :: drawRawGeometry(oofegGraphicContext &gc)
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
-    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
+    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(1);
+    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(2);
     p [ 0 ].z = 0.0;
-    p [ 1 ].x = ( FPNum ) this->giveNode(3)->giveCoordinate(1);
-    p [ 1 ].y = ( FPNum ) this->giveNode(3)->giveCoordinate(2);
+    p [ 1 ].x = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(1);
+    p [ 1 ].y = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(2);
     p [ 1 ].z = 0.0;
     go = CreateLine3D(p);
     EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
     EGAttachObject(go, ( EObjectP ) this);
     EMAddGraphicsToModel(ESIModel(), go);
-    p [ 0 ].x = ( FPNum ) this->giveNode(3)->giveCoordinate(1);
-    p [ 0 ].y = ( FPNum ) this->giveNode(3)->giveCoordinate(2);
+    p [ 0 ].x = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(1);
+    p [ 0 ].y = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(2);
     p [ 0 ].z = 0.0;
-    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
-    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveCoordinate(2);
+    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(1);
+    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(2);
     p [ 1 ].z = 0.0;
     go = CreateLine3D(p);
     EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
@@ -321,7 +321,7 @@ void InterfaceElem2dQuad :: drawScalar(oofegGraphicContext &context)
 
         indx = context.giveIntVarIndx();
 
-        result += this->computeGlobalCoordinates( gcoord, * ( gp->giveCoordinates() ) );
+        result += this->computeGlobalCoordinates( gcoord, * ( gp->giveNaturalCoordinates() ) );
 
         p [ 0 ].x = ( FPNum ) gcoord.at(1);
         p [ 0 ].y = ( FPNum ) gcoord.at(2);

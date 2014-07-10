@@ -92,7 +92,7 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.zero();
 
     for ( GaussPoint *gp: *iRule ) {
-        const FloatArray &lcoords = * gp->giveCoordinates();
+        const FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         double detJ = this->interpolation_lin.evaldNdx( BT, lcoords, FEIElementGeometryWrapper(this) );
 
@@ -129,7 +129,7 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep
     answer.zero();
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray *lcoords = gp->giveCoordinates();
+        FloatArray *lcoords = gp->giveNaturalCoordinates();
 
         double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
         this->interpolation_lin.evaldNdx( BT, * lcoords, FEIElementGeometryWrapper(this) );
@@ -203,7 +203,7 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
         iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
 
         for ( GaussPoint *gp: iRule ) {
-            FloatArray *lcoords = gp->giveCoordinates();
+            FloatArray *lcoords = gp->giveNaturalCoordinates();
             this->interpolation_lin.edgeEvalN( N, iEdge, * lcoords, FEIElementGeometryWrapper(this) );
             double dV = this->computeEdgeVolumeAround(gp, iEdge);
 

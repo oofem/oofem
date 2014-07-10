@@ -97,7 +97,7 @@ IntegrationRule :: findIntegrationPointClosestTo(const FloatArray &lcoord)
     double mindist = -1.;
     GaussPoint *minGp = NULL;
     for ( GaussPoint *gp: *this ) {
-        double dist = lcoord.distance_square(*gp->giveCoordinates());
+        double dist = lcoord.distance_square(*gp->giveNaturalCoordinates());
         if ( dist <= mindist || mindist < 0. ) {
             mindist = dist;
             minGp = gp;
@@ -187,7 +187,7 @@ IntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *obj)
                 THROW_CIOERR(CIO_IOERR);
             }
 
-            if ( ( iores = gp->giveCoordinates()->storeYourself(stream, mode) ) != CIO_OK ) {
+            if ( ( iores = gp->giveNaturalCoordinates()->storeYourself(stream, mode) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
 

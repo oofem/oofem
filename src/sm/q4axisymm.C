@@ -117,7 +117,7 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
 {
     ///@todo Not sure how to deal with li and lu. This should be changed, in which case "GiveDerivatice***" and "computeJacobianMatrixAt" will be deprecated.
     //FloatMatrix dN;
-    //this->interp.evaldNdx(dN, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    //this->interp.evaldNdx(dN, *gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
 
     int i;
     FloatMatrix jacMtrx, inv;
@@ -125,8 +125,8 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     double ksi, eta, r, x;
     int size, ind = 1;
 
-    ksi = gp->giveCoordinate(1);
-    eta = gp->giveCoordinate(2);
+    ksi = gp->giveNaturalCoordinate(1);
+    eta = gp->giveNaturalCoordinate(2);
 
     nx = GiveDerivativeKsi(ksi, eta);
     ny = GiveDerivativeEta(ksi, eta);
@@ -223,7 +223,7 @@ Q4Axisymm :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     FloatArray n;
     FloatMatrix dnx;
 
-    this->interp.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 16);
     answer.zero();
@@ -264,8 +264,8 @@ Q4Axisymm :: computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *gp)
     answer.resize(2, 2);
     answer.zero();
 
-    ksi = gp->giveCoordinate(1);
-    eta = gp->giveCoordinate(2);
+    ksi = gp->giveNaturalCoordinate(1);
+    eta = gp->giveNaturalCoordinate(2);
 
     nx = this->GiveDerivativeKsi(ksi, eta);
     ny = this->GiveDerivativeEta(ksi, eta);
@@ -339,14 +339,14 @@ Q4Axisymm :: computeVolumeAround(GaussPoint *gp)
     FloatArray n;
     double determinant, r;
 
-    this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     r = 0;
     for ( int i = 1; i <= 8; i++ ) {
         r += this->giveNode(i)->giveCoordinate(1) * n.at(i);
     }
 
-    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return determinant *gp->giveWeight() * r;
 }
 
@@ -434,17 +434,17 @@ void Q4Axisymm :: drawRawGeometry(oofegGraphicContext &gc)
     EASValsSetEdgeFlag(true);
 
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
-    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
+    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(1);
+    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(2);
     p [ 0 ].z = 0.;
-    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
-    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveCoordinate(2);
+    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(1);
+    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(2);
     p [ 1 ].z = 0.;
-    p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveCoordinate(1);
-    p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveCoordinate(2);
+    p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(1);
+    p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(2);
     p [ 2 ].z = 0.;
-    p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveCoordinate(1);
-    p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveCoordinate(2);
+    p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveNaturalCoordinate(1);
+    p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveNaturalCoordinate(2);
     p [ 3 ].z = 0.;
 
     go =  CreateQuad3D(p);

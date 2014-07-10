@@ -132,9 +132,9 @@ public:
     virtual ~GaussPoint();
 
     /// Returns i-th natural element coordinate of receiver
-    double giveCoordinate(int i) { return naturalCoordinates->at(i); }
+    double giveNaturalCoordinate(int i) const { return naturalCoordinates->at(i); }
     /// Returns coordinate array of receiver.
-    FloatArray *giveCoordinates() { return naturalCoordinates; }
+    FloatArray *giveNaturalCoordinates() { return naturalCoordinates; }
     void setCoordinates(FloatArray c) {
         if(naturalCoordinates != NULL) {
             * naturalCoordinates = std :: move(c);

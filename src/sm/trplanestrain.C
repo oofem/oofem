@@ -98,7 +98,7 @@ TrPlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 // luated at gp.
 {
     FloatMatrix dN;
-    this->interp.evaldNdx( dN, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dN, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(4, 6);
 
@@ -125,7 +125,7 @@ TrPlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // @todo not checked if correct
 {
     FloatMatrix dnx;
-    this->interp.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(5, 6);
     answer.zero();
@@ -153,7 +153,7 @@ void
 TrPlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     FloatArray n;
-    this->interp.edgeEvalN( n, 1, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.edgeEvalN( n, 1, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(2, 4);
     answer.at(1, 1) = answer.at(2, 2) = n.at(1);
     answer.at(1, 3) = answer.at(2, 4) = n.at(2);
@@ -193,7 +193,7 @@ TrPlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 TrPlaneStrain :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -201,7 +201,7 @@ TrPlaneStrain :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 TrPlaneStrain :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -259,7 +259,7 @@ double TrPlaneStrain :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
     return detJ *weight *this->giveCrossSection()->give(CS_Thickness, gp);
 }
