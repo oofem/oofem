@@ -1601,9 +1601,9 @@ ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK%
 ##Solution time at step 4
-#NODE tStep 4 number 1 dof 11 unknown d value  3.80460826e+02
+#NODE tStep 4 number 1 dof 11 unknown d value 3.80462591e+02
 #NODE tStep 4 number 2 dof 7 unknown d value  4.06807867e-01
-#NODE tStep 4 number 4 dof 8 unknown d value -9.33888921e-02
+#NODE tStep 4 number 4 dof 8 unknown d value -9.33904299e-02
 ##Solution time at step 20
 ##NODE tStep 4 number 1 dof 11 unknown d value  4.19138564e+02
 ##NODE tStep 4 number 2 dof 7 unknown d value  6.32980127e-01

@@ -37,16 +37,36 @@
 
 #include "prescribedgradientbc.h"
 
+#include "geometry.h"
+#include "gausspoint.h"
+
 #define _IFT_PrescribedGradientBCWeak_Name   "prescribedgradientbcweak"
 #define _IFT_PrescribedGradientBCWeak_TractionInterpOrder   "tractioninterporder"
 #define _IFT_PrescribedGradientBCWeak_NumTractionNodesAtIntersections   "numnodesatintersections"
 #define _IFT_PrescribedGradientBCWeak_NumTractionNodeSpacing   "tractionnodespacing"
-#define _IFT_PrescribedGradientBCWeak_TractionOnGammaPlus   "periodic"
+//#define _IFT_PrescribedGradientBCWeak_TractionOnGammaPlus   "periodic"
+#define _IFT_PrescribedGradientBCWeak_DuplicateCornerNodes   "duplicatecornernodes"
 
 namespace oofem {
 
-class TractionElement;
+class TractionElement {
+public:
+    TractionElement() {}
+    virtual ~TractionElement() {}
 
+    void computeN_Constant(FloatArray &oN, const double &iXi) const {oN = {1.0};}
+    void computeN_Linear(FloatArray &oN, const double &iXi) const {oN = {0.5*(1.0-iXi), 0.5*(1.0+iXi)};}
+
+    std::vector<int> mTractionNodeInd;
+
+    // Interior segments used for Gaussian quadrature
+    std::vector<Line> mInteriorSegments;
+
+    FloatArray mStartCoord;
+    FloatArray mEndCoord;
+};
+
+class IntegrationRule;
 /*
  * Imposes a prescribed gradient weakly on the boundary
  * with an independent traction discretization.
@@ -59,7 +79,7 @@ public:
     PrescribedGradientBCWeak(int n, Domain * d);
     virtual ~PrescribedGradientBCWeak();
 
-    virtual int giveNumberOfInternalDofManagers() {return mpTractionNodes.size();}
+    virtual int giveNumberOfInternalDofManagers();
     virtual DofManager *giveInternalDofManager(int i);
 
     virtual bcType giveType() const { return UnknownBT; }
@@ -86,10 +106,34 @@ public:
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
-                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
+                               		const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
+
+    virtual void giveTractionLocationArrays(int iTracElInd, IntArray &rows, CharType type,
+                                    const UnknownNumberingScheme &s);
+
+    virtual void giveDisplacementLocationArrays(int iTracElInd, IntArray &rows, CharType type,
+                                    const UnknownNumberingScheme &s);
 
     virtual const char *giveClassName() const { return "PrescribedGradientBCWeak"; }
     virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradientBCWeak_Name; }
+
+    /**
+     * Computes the homogenized, macroscopic, field (stress).
+     * @param sigma Output quantity (typically stress).
+     * @param eid Equation ID to which sigma belongs.
+     * @param tStep Active time step.
+     */
+    void computeField(FloatArray &sigma, TimeStep *tStep);
+
+    /// Routines for postprocessing
+    size_t giveNumberOfTractionElements() const {return mpTractionElements.size();}
+    void giveTractionElCoord(size_t iElInd, FloatArray &oStartCoord, FloatArray &oEndCoord) const {oStartCoord = mpTractionElements[iElInd]->mStartCoord; oEndCoord = mpTractionElements[iElInd]->mEndCoord;}
+    void giveTractionElNormal(size_t iElInd, FloatArray &oNormal, FloatArray &oTangent) const;
+
+    void giveTraction(size_t iElInd, FloatArray &oStartTraction, FloatArray &oEndTraction, ValueModeType mode, TimeStep *tStep);
+
+    // TODO: Consider moving this function to Domain.
+    void computeDomainBoundingBox(Domain &iDomain, FloatArray &oLC, FloatArray &oUC);
 
 protected:
 
@@ -119,7 +163,14 @@ protected:
      * false -> the traction lives everywhere on gamma, so
      * that we get Dirichlet as a special case
      */
-    bool mTractionLivesOnGammaPlus;
+    bool mMeshIsPeriodic;
+
+
+    /**
+     * 0 -> Do not duplicate corner traction nodes
+     * 1 -> Duplicate corner traction nodes
+     */
+    bool mDuplicateCornerNodes;
 
     /// Lower corner of domain (assuming a rectangular RVE)
     FloatArray mLC;
@@ -130,6 +181,11 @@ protected:
 
     /// DOF-managers for the independent traction discretization
     std::vector<Node*> mpTractionNodes;
+    std::vector<Node*> mpTractionMasterNodes;
+
+    /// Lock displacements in one node i periodic
+    Node *mpDisplacementLock;
+    double mDispLockScaling;
 
     /// Elements for the independent traction discretization
     std::vector<TractionElement*> mpTractionElements;
@@ -142,36 +198,194 @@ protected:
     std :: unordered_map< int, std :: vector< int > > mMapTractionElDispElGamma;
 
     /**
-     * Map from a traction element to displacement elements it
-     * interacts with on gammaPlus.
+     * Map from a traction element to displacement node and
+     * crack intersection coordinates inside the element.
+     * This map is used when creating the integration rule.
      */
-    std :: unordered_map< int, std :: vector< int > > mMapTractionElDispElGammaPlus;
-
-    /**
-     * Map from a traction element to displacement elements it
-     * interacts with on gammaMinus.
-     */
-    std :: unordered_map< int, std :: vector< int > > mMapTractionElDispElGammaMinus;
-
-    /**
-     * Map from a nodes global number to its local index
-     * in the traction element.
-     */
-    std :: unordered_map< int, int > mNodeTractionElLocalInd;
+    std :: unordered_map<int, std::vector<FloatArray> > mTractionElInteriorCoordinates;
 
 
+    std :: unordered_map<int, std::vector<int> > mTracElDispNodes;
 
-    void createTractionMesh();
+    void createTractionMesh(bool iEnforceCornerPeriodicity);
+    void buildMaps(const std::vector< std::pair<FloatArray, bool> > &iBndNodeCoordsFull);
+    void createTractionElements(const std::vector<FloatArray> &iTractionNodeCoord, const double &iNodeDistTol);
+
+    void integrateTangent(FloatMatrix &oTangent, size_t iTracElInd);
+
+    void assembleTangentGPContribution(FloatMatrix &oTangent, size_t iTracElInd, GaussPoint &iGP, const FloatArray &iBndCoord, std :: unordered_map<int, IntArray > &iGlobalNodeIndToPosInLocalLocArray, const double &iScaleFactor);
+
+    IntegrationRule *createNewIntegrationRule(int iTracElInd);
+
+    void computeNTraction(FloatArray &oN, const double &iXi, const TractionElement &iEl) const;
+
+    void giveTractionUnknows(FloatArray &oTracUnknowns, ValueModeType mode, TimeStep *tStep, int iTracElInd);
+    void giveDisplacementUnknows(FloatArray &oDispUnknowns, ValueModeType mode, TimeStep *tStep, int iTracElInd);
+
+    double domainSize();
+
+    bool pointIsOnGammaPlus(const FloatArray &iPos) const;
+    void giveMirroredPointOnGammaMinus(FloatArray &oPosMinus, const FloatArray &iPosPlus) const;
+    void giveMirroredPointOnGammaPlus(FloatArray &oPosPlus, const FloatArray &iPosMinus) const;
+    bool pointIsMapapble(const FloatArray &iPos) const;
+
+    virtual void giveBoundaryCoordVector(FloatArray &oX, const FloatArray &iPos) const = 0;
+    virtual void checkIfCorner(bool &oIsCorner, bool &oDuplicatable, const FloatArray &iPos, const double &iNodeDistTol) const = 0;
+    virtual bool boundaryPointIsOnActiveBoundary(const FloatArray &iPos) const = 0;
 };
 
-class TractionElement {
+class ArcPosSortFunction {
 public:
-    TractionElement() {}
-    virtual ~TractionElement() {}
-    std::vector<int> mTractionNodeInd;
+    ArcPosSortFunction(const FloatArray &iStartPos):mStartPos(iStartPos) {}
+    ~ArcPosSortFunction() {}
 
-    FloatArray mStartCoord;
-    FloatArray mEndCoord;
+    bool operator()(const FloatArray &iVec1, const FloatArray &iVec2) const
+    {
+                return mStartPos.distance_square(iVec1) < mStartPos.distance_square(iVec2);
+    }
+
+private:
+    const FloatArray mStartPos;
+};
+
+template <class T>
+class ArcPosSortFunction2 {
+public:
+	ArcPosSortFunction2(const FloatArray &iLC, const FloatArray &iUC, const double &iTol):
+	mLC(iLC),
+	mUC(iUC),
+	mTol(iTol)
+	{
+
+	}
+
+	~ArcPosSortFunction2() {}
+
+    bool operator()(const std::pair<FloatArray, T> &iVec1, const std::pair<FloatArray,int> &iVec2) const
+    {
+                return calcArcPos(iVec1.first) < calcArcPos(iVec2.first);
+    }
+
+	double calcArcPos(const FloatArray &iPos) const
+	{
+		double Lx = mUC[0] - mLC[0];
+		double Ly = mUC[1] - mLC[1];
+
+		if( iPos[1] < (mLC[1]+mTol) ){
+			// Edge 1
+			double dist = iPos.distance(mLC);
+			return dist;
+		}
+
+		if( iPos[0] > (mUC[0]-mTol) ){
+			// Edge 2
+			const FloatArray &x = {mUC[0], mLC[1]};
+			double dist = Lx + iPos.distance(x);
+			return dist;
+		}
+
+		if( iPos[1] > (mUC[1]-mTol) ){
+			// Edge 3
+			double dist = Lx + Ly + iPos.distance(mUC);
+			return dist;
+		}
+
+		if( iPos[0] < (mLC[0]+mTol) ){
+			// Edge 4
+			const FloatArray &x = {mLC[0], mUC[1]};
+			double dist = Lx + Ly + Lx + iPos.distance(x);
+			return dist;
+		}
+
+		OOFEM_ERROR("Could not compute distance.")
+		return 0.0;
+	}
+
+private:
+	const FloatArray mLC;
+	const FloatArray mUC;
+	const double mTol;
+};
+
+
+class EdgeTracker {
+public:
+	EdgeTracker()
+	{
+		mNodePair.first 	= -1;
+		mNodePair.second 	= -1;
+		mStoredSecondIndex = -1;
+		mIsFirstPoint = true;
+	}
+
+	~EdgeTracker() {}
+
+	void addPoint(int iPointIndex, bool iIsDuplicated, bool iPeriodic)
+	{
+		if( iIsDuplicated || (iPeriodic && mIsFirstPoint) ) {
+			// Will be added in first position (i.e. master node)
+
+			if( mNodePair.first == -1 && mNodePair.second == -1 ) {
+				mNodePair.first = iPointIndex;
+			}
+			else {
+//				printf("Pair with slave %d and master %d\n", mNodePair.second, mNodePair.first);
+				mStoredSecondIndex = mNodePair.first;
+//				OOFEM_ERROR("The node pair has already been initialized.")
+			}
+
+			mIsFirstPoint = false;
+		}
+		else {
+			// Will be added in second position (i.e. slave node)
+
+			// Add to second position if we have a pair where
+			// the first position has been set. Otherwise,
+			// store it for later use.
+
+			if( mNodePair.first != -1 ) {
+				mNodePair.second = iPointIndex;
+
+				// We prefer to have the highest index as slave
+				if( mNodePair.first > mNodePair.second ) {
+					std::swap( mNodePair.first, mNodePair.second );
+				}
+
+				mMapSlaveToMaster[mNodePair.second] = mNodePair.first;
+
+//				printf("Creating pair with slave %d and master %d\n", mNodePair.second, mNodePair.first);
+
+				mNodePair.first 	= -1;
+				mNodePair.second 	= -1;
+			}
+			else {
+				mStoredSecondIndex = iPointIndex;
+			}
+
+		}
+	}
+
+	bool giveMasterIndex(int &oMasterIndex, int iSlaveIndex) const
+	{
+		auto it = mMapSlaveToMaster.find(iSlaveIndex);
+		if( it == mMapSlaveToMaster.end() ) {
+			return false;
+		}
+
+		oMasterIndex = it->second;
+		return true;
+	}
+
+	void addStoredSecondIndex()
+	{
+		addPoint(mStoredSecondIndex, false, false);
+	}
+
+	std::pair<int,int> mNodePair;
+	std::unordered_map<int, int> mMapSlaveToMaster;
+
+	int mStoredSecondIndex;
+	bool mIsFirstPoint;
 };
 
 

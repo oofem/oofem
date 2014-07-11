@@ -72,6 +72,7 @@ set (core_dofs
 
 set (core_nm
     sparselinsystemnm.C
+    sparsenonlinsystemnm.C
     nrsolver.C
     linesearch.C
     calmls.C
@@ -228,6 +229,8 @@ set (core_bc
     prescribedgradientbc.C
     prescribedgradientbcneumann.C
     prescribedgradientbcweak.C
+    prescribedgradientbcweakperiodic.C
+    prescribedgradientbcweakdirichlet.C
     mixedgradientpressurebc.C
     mixedgradientpressuredirichlet.C
     mixedgradientpressureneumann.C

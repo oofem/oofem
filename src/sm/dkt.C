@@ -136,8 +136,8 @@ DKTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 // evaluated at gp.
 {
     // get node coordinates
-    double x1, x2, x3, y1, y2, y3;
-    this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3);
+  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
 
     double ksi = gp->giveCoordinate(1);
@@ -319,7 +319,7 @@ DKTPlate :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMo
 void
 DKTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
                                 double &y1, double &y2, double &y3,
-                                double *z)
+                                double &z1, double &z2, double &z3)
 {
     FloatArray *nc1, *nc2, *nc3;
     nc1 = this->giveNode(1)->giveCoordinates();
@@ -334,11 +334,10 @@ DKTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
     y2 = nc2->at(2);
     y3 = nc3->at(2);
 
-    if ( z ) {
-        z [ 0 ] = nc1->at(3);
-        z [ 1 ] = nc2->at(3);
-        z [ 2 ] = nc3->at(3);
-    }
+    z1 = nc1->at(3);
+    z2 = nc2->at(3);
+    z3 = nc3->at(3);
+
 }
 
 
@@ -438,8 +437,8 @@ DKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 //does check that the point is in the element thickness
 {
     // get node coordinates
-    double x1, x2, x3, y1, y2, y3, z [ 3 ];
-    this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z);
+  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
     // Fetch local coordinates.
     bool ok = this->interp_lin.global2local( answer, coords, FEIElementGeometryWrapper(this) ) > 0;
@@ -457,7 +456,7 @@ DKTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 
     //get midplane location at this point
     double midplZ;
-    midplZ = z [ 0 ] * answer.at(1) + z [ 1 ] * answer.at(2) + z [ 2 ] * answer.at(3);
+    midplZ = z1 * answer.at(1) + z2 * answer.at(2) + z3 * answer.at(3);
 
     //check that the z is within the element
     StructuralCrossSection *cs = this->giveStructuralCrossSection();

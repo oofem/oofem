@@ -78,7 +78,7 @@ CCTPlate3d :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
 void
 CCTPlate3d :: giveNodeCoordinates(double &x1, double &x2, double &x3,
                                   double &y1, double &y2, double &y3,
-                                  double *z)
+                                  double &z1, double &z2, double &z3)
 {
     FloatArray nc1(3), nc2(3), nc3(3);
 
@@ -94,11 +94,10 @@ CCTPlate3d :: giveNodeCoordinates(double &x1, double &x2, double &x3,
     y2 = nc2.at(2);
     y3 = nc3.at(2);
 
-    if ( z ) {
-        z [ 0 ] = nc1.at(3);
-        z [ 1 ] = nc2.at(3);
-        z [ 2 ] = nc3.at(3);
-    }
+    z1 = nc1.at(3);
+    z2 = nc2.at(3);
+    z3 = nc3.at(3);
+
 }
 
 
@@ -302,7 +301,7 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         answer.at(6) = globTensor.at(2, 3); //syzForce
         answer.at(7) = globTensor.at(1, 3); //qxzForce
         answer.at(8) = globTensor.at(2, 3); //syzForce
-        answer.at(9) = 0.0;
+        answer.at(9) = globTensor.at(3, 3); //szForce
 
         return 1;
     } else if ( ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
@@ -316,18 +315,17 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
         answer.at(1)  = globTensor.at(1, 1); //mxForce
         answer.at(2)  = globTensor.at(1, 2); //mxyForce
-        answer.at(3)  = 0.0;
+        answer.at(3)  = globTensor.at(1, 3); //mxzForce
         answer.at(4)  = globTensor.at(1, 2); //mxyForce
         answer.at(5)  = globTensor.at(2, 2); //myForce
-        answer.at(6)  = 0.0;
-        answer.at(7)  = 0.0;
-        answer.at(8)  = 0.0;
+        answer.at(6)  = globTensor.at(2, 3); //myzForce
+        answer.at(7)  = globTensor.at(1, 3); //mxzForce
+        answer.at(8)  = globTensor.at(2, 3); //myzForce
         answer.at(9)  = globTensor.at(3, 3); //mzForce
 
         return 1;
     } else {
-        answer.clear();
-        return 0;
+        return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
     }
 }
 

@@ -49,7 +49,7 @@ polygoncrack 1 points 6 -1.0 1.0 0.333333333333333 1.0 0.56666666666667 1.0
 EnrFrontLinearBranchFuncRadius radius 0.5
 EnrFrontLinearBranchFuncRadius radius 0.5
 PropagationLawCrackPrescribedDir 1 angle 0.0 incrementLength 0.55
-#%BEGIN_CHECK% tolerance 1.e-8
+#%BEGIN_CHECK% tolerance 1.e-7
 ## Node displacements
 ## Node 13
 #NODE tStep 3 number 13 dof 1 unknown d value 4.00962832e-05
@@ -57,11 +57,11 @@ PropagationLawCrackPrescribedDir 1 angle 0.0 incrementLength 0.55
 #NODE tStep 3 number 13 dof 23 unknown d value 7.86994185e-06
 #NODE tStep 3 number 13 dof 24 unknown d value -2.80317997e-04
 #NODE tStep 3 number 13 dof 25 unknown d value 1.97165709e-04
-#NODE tStep 3 number 13 dof 26 unknown d value 2.73011561e-03
+#NODE tStep 3 number 13 dof 26 unknown d value 2.73658310e-03
 #NODE tStep 3 number 13 dof 27 unknown d value -4.81489634e-04
-#NODE tStep 3 number 13 dof 28 unknown d value -5.32648058e-05
+#NODE tStep 3 number 13 dof 28 unknown d value -5.98442592e-05
 #NODE tStep 3 number 13 dof 29 unknown d value -2.84282149e-04
-#NODE tStep 3 number 13 dof 30 unknown d value 3.96774147e-03
+#NODE tStep 3 number 13 dof 30 unknown d value 3.96991135e-03
 ## Node 15
 #NODE tStep 3 number 15 dof 1 unknown d value 1.21478835e-05
 #NODE tStep 3 number 15 dof 2 unknown d value 6.65787459e-02
