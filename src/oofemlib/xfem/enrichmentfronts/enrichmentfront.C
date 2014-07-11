@@ -72,4 +72,19 @@ void EnrichmentFront :: MarkTipElementNodesAsFront(std :: unordered_map< int, No
         }
 }
 
+void EnrichmentFront :: computeCrackTangent(FloatArray &oTangent, FloatArray &oNormal, bool &oFlipTangent, const EfInput &iEfInput) const
+{
+    oTangent = iEfInput.mLocalTangDir;
+
+    if( oTangent.dotProduct(mTipInfo.mTangDir) < 0.0 ) {
+        oTangent.times(-1.0);
+        oFlipTangent = true;
+    }
+    else {
+        oFlipTangent = false;
+    }
+
+    oNormal = {-oTangent.at(2), oTangent.at(1)};
+}
+
 } // end namespace oofem

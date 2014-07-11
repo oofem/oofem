@@ -60,6 +60,7 @@
 
 namespace oofem {
 const double EnrichmentItem :: mLevelSetTol = 1.0e-12;
+const double EnrichmentItem :: mLevelSetRelTol = 1.0e-3;
 
 REGISTER_EnrichmentItem(Inclusion)
 
@@ -248,6 +249,9 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
     mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
 
+
+    writeVtkDebug();
+
     return 1;
 }
 
@@ -432,6 +436,24 @@ EnrichmentItem :: giveEIDofIdArray(IntArray &answer) const
 
 void EnrichmentItem :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const
 {
+    double tangDist = 0.0, minDistArcPos = 0.0;
+    mpEnrichmentDomain->computeTangentialSignDist(tangDist, iPos, minDistArcPos);
+
+    FloatArray edGlobalCoord, localTangDir;
+
+    EnrichmentDomain_BG *edBG = dynamic_cast<EnrichmentDomain_BG*> (mpEnrichmentDomain);
+    if(edBG != NULL) {
+        edBG->bg->giveGlobalCoordinates(edGlobalCoord, minDistArcPos);
+        edBG->bg->giveTangent(localTangDir, minDistArcPos);
+    }
+    else {
+        printf("edBG == NULL.\n");
+    }
+
+
+    const EfInput efInput(iPos, iLevelSet, iNodeInd, edGlobalCoord, minDistArcPos, localTangDir);
+
+
     if ( iNodeInd == -1 ) {
         // Bulk enrichment
         oEnrFunc.resize(1, 0.0);
@@ -449,14 +471,14 @@ void EnrichmentItem :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, cons
                 mpEnrichmentFunc->evaluateEnrFuncAt(oEnrFunc [ 0 ], iPos, iLevelSet, mpEnrichmentDomain);
                 break;
             case NodeEnr_START_TIP:
-                mpEnrichmentFrontStart->evaluateEnrFuncAt(oEnrFunc, iPos, iLevelSet, iNodeInd);
+                mpEnrichmentFrontStart->evaluateEnrFuncAt(oEnrFunc, efInput);
                 break;
             case NodeEnr_END_TIP:
-                mpEnrichmentFrontEnd->evaluateEnrFuncAt(oEnrFunc, iPos, iLevelSet, iNodeInd);
+                mpEnrichmentFrontEnd->evaluateEnrFuncAt(oEnrFunc, efInput);
                 break;
             case NodeEnr_START_AND_END_TIP:
-                mpEnrichmentFrontStart->evaluateEnrFuncAt(oEnrFunc, iPos, iLevelSet, iNodeInd);
-                mpEnrichmentFrontEnd->evaluateEnrFuncAt(oEnrFunc, iPos, iLevelSet, iNodeInd);
+                mpEnrichmentFrontStart->evaluateEnrFuncAt(oEnrFunc, efInput);
+                mpEnrichmentFrontEnd->evaluateEnrFuncAt(oEnrFunc, efInput);
                 break;
             }
         } else   {
@@ -473,6 +495,22 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrF
     auto res = mNodeEnrMarkerMap.find(iNodeInd);
     if ( res != mNodeEnrMarkerMap.end() ) {
 
+        double tangDist = 0.0, minDistArcPos = 0.0;
+        mpEnrichmentDomain->computeTangentialSignDist(tangDist, iPos, minDistArcPos);
+
+        FloatArray edGlobalCoord, localTangDir;
+
+        EnrichmentDomain_BG *edBG = dynamic_cast<EnrichmentDomain_BG*> (mpEnrichmentDomain);
+        if(edBG != NULL) {
+            edBG->bg->giveGlobalCoordinates(edGlobalCoord, minDistArcPos);
+            edBG->bg->giveTangent(localTangDir, minDistArcPos);
+        }
+        else {
+            printf("edBG == NULL.\n");
+        }
+
+        const EfInput efInput(iPos, iLevelSet, iNodeInd, edGlobalCoord, minDistArcPos, localTangDir);
+
         switch(res->second) {
         case NodeEnr_NONE:
             break;
@@ -481,14 +519,14 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrF
             mpEnrichmentFunc->evaluateEnrFuncDerivAt(oEnrFuncDeriv [ 0 ], iPos, iLevelSet, iGradLevelSet, mpEnrichmentDomain);
             break;
         case NodeEnr_START_TIP:
-            mpEnrichmentFrontStart->evaluateEnrFuncDerivAt(oEnrFuncDeriv, iPos, iLevelSet, iGradLevelSet, iNodeInd);
+            mpEnrichmentFrontStart->evaluateEnrFuncDerivAt(oEnrFuncDeriv, efInput, iGradLevelSet);
             break;
         case NodeEnr_END_TIP:
-            mpEnrichmentFrontEnd->evaluateEnrFuncDerivAt(oEnrFuncDeriv, iPos, iLevelSet, iGradLevelSet, iNodeInd);
+            mpEnrichmentFrontEnd->evaluateEnrFuncDerivAt(oEnrFuncDeriv, efInput, iGradLevelSet);
             break;
         case NodeEnr_START_AND_END_TIP:
-            mpEnrichmentFrontStart->evaluateEnrFuncDerivAt(oEnrFuncDeriv, iPos, iLevelSet, iGradLevelSet, iNodeInd);
-            mpEnrichmentFrontEnd->evaluateEnrFuncDerivAt(oEnrFuncDeriv, iPos, iLevelSet, iGradLevelSet, iNodeInd);
+            mpEnrichmentFrontStart->evaluateEnrFuncDerivAt(oEnrFuncDeriv, efInput, iGradLevelSet);
+            mpEnrichmentFrontEnd->evaluateEnrFuncDerivAt(oEnrFuncDeriv, efInput, iGradLevelSet);
             break;
         }
     } else   {
@@ -647,7 +685,9 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 {
     updateLevelSets(ixFemMan);
 
-    Domain *d = ixFemMan.giveDomain();
+    Domain *domain = giveDomain();
+    SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
+
     mNodeEnrMarkerMap.clear();
     TipInfo tipInfoStart, tipInfoEnd;
     mpEnrichmentDomain->giveTipInfos(tipInfoStart, tipInfoEnd);
@@ -657,15 +697,13 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
     double radius = 0.0;
     giveBoundingSphere(center, radius);
 
-    Domain *domain = giveDomain();
-    SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
 
     std :: set< int >elList;
     localizer->giveAllElementsWithNodesWithinBox(elList, center, radius);
 
     // Loop over elements and use the level sets to mark nodes belonging to completely cut elements.
     for ( int elNum: elList ) {
-        Element *el = d->giveElement(elNum);
+        Element *el = domain->giveElement(elNum);
         int nElNodes = el->giveNumberOfNodes();
 
         double minSignPhi  = 1, maxSignPhi         = -1;
@@ -892,7 +930,12 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
             double phiE = 1.0;
             bool foundPhiE = evalLevelSetNormalInNode(phiE, neGlob);
 
-            if ( (foundPhiS && foundPhiE) && phiS * phiE < mLevelSetTol2 ) {
+            const FloatArray &xS = *(element->giveNode(nsLoc)->giveCoordinates() );
+            const FloatArray &xE = *(element->giveNode(neLoc)->giveCoordinates() );
+            const double edgeLength2 = xS.distance_square(xE);
+            const double gammaRelTol = 1.0e-2;
+
+            if ( (foundPhiS && foundPhiE) && phiS * phiE < mLevelSetRelTol*mLevelSetRelTol*edgeLength2 ) {
                 // Intersection detected
 
                 double xi = calcXiZeroLevel(phiS, phiE);
@@ -910,7 +953,7 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
 
 
                 // If we are inside in tangential direction
-                if ( gamma > 0.0 ) {
+                if ( gamma > -gammaRelTol*sqrt(edgeLength2) ) {
                     if ( fabs(phiS - phiE) < mLevelSetTol ) {
                         // If the crack is parallel to the edge.
 
@@ -1222,6 +1265,15 @@ bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, 
     if ( !foundTip ) {
         return false;
     } else   {
+
+        // Check if the tip point is inside the element
+        Element *el = domain->giveElement(iElIndex);
+        const FloatArray &globCoord = tipInfos [ minIndex ].mGlobalCoord;
+        FloatArray locCoord;
+        if(!el->computeLocalCoordinates(locCoord, globCoord)) {
+            return false;
+        }
+
         oCoord = tipInfos [ minIndex ].mGlobalCoord;
         oArcPos = tipInfos [ minIndex ].mArcPos;
         return true;
@@ -1277,13 +1329,13 @@ double EnrichmentItem :: calcXiZeroLevel(const double &iQ1, const double &iQ2)
     return xi;
 }
 
-void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT)
+void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArray &iOrigin, const FloatArray &iPos, const FloatArray &iN, const FloatArray &iT, const EfInput &iEfInput, bool iFlipTangent)
 {
     FloatArray q = {
         iPos.at(1) - iOrigin.at(1), iPos.at(2) - iOrigin.at(2)
     };
 
-    const double tol = 1.0e-12;
+    const double tol = 1.0e-20;
 
     // Compute polar coordinates
     oR = iOrigin.distance(iPos);
@@ -1292,10 +1344,44 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
         q.times(1.0 / oR);
     }
 
-    if ( q.dotProduct(iN) > 0.0 ) {
-        oTheta =  acos( q.dotProduct(iT) );
+    const double pi = 3.14159265359;
+
+//    if( q.dotProduct(iT) > 0.0 ) {
+//        oTheta = asin( q.dotProduct(iN) );
+//    } else {
+//        if ( q.dotProduct(iN) > 0.0 ) {
+//            oTheta = pi - asin( q.dotProduct(iN) );
+//        } else {
+//            oTheta = -pi - asin( q.dotProduct(iN) );
+//        }
+//    }
+
+
+    const double tol_q = 1.0e-3;
+    double phi = iEfInput.mLevelSet;
+
+    if( iFlipTangent ) {
+        phi *= -1.0;
+    }
+
+    double phi_r = 0.0;
+    if ( oR > tol ) {
+        phi_r = fabs(phi/oR);
+    }
+
+    if(phi_r >= 1.0) {
+//        printf("phi/oR: %e\n", phi/oR );
+        phi_r = 0.99999999999999;
+    }
+
+    if( iEfInput.mArcPos < tol_q || iEfInput.mArcPos > (1.0-tol_q) ) {
+        oTheta = asin( q.dotProduct(iN) );
     } else {
-        oTheta = -acos( q.dotProduct(iT) );
+        if ( phi > 0.0 ) {
+            oTheta = pi - asin( fabs(phi_r) );
+        } else {
+            oTheta = -pi + asin( fabs(phi_r) );
+        }
     }
 }
 

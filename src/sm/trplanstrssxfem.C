@@ -117,7 +117,7 @@ void TrPlaneStress2dXFEM :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answe
 
 void TrPlaneStress2dXFEM :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 {
-    XfemElementInterface_createEnrNmatrixAt(answer, iLocCoord, * this);
+    XfemElementInterface_createEnrNmatrixAt(answer, iLocCoord, * this, false);
 }
 
 
@@ -277,7 +277,7 @@ TrPlaneStress2dXFEM :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(Val
     FloatArray u;
     FloatMatrix n;
 
-    XfemElementInterface_createEnrNmatrixAt(n, lcoords, * this);
+    XfemElementInterface_createEnrNmatrixAt(n, lcoords, * this, false);
 
     this->computeVectorOf(mode, tStep, u);
     answer.beProductOf(n, u);

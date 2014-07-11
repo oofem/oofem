@@ -264,6 +264,6 @@ ConstantFunction 1 f(t) 1.0
 #%BEGIN_CHECK%
 #ELEMENT tStep 20 number 1 gp 1 keyword 43 component 1 value 1.0
 #ELEMENT tStep 20 number 2 gp 1 keyword 43 component 1 value 1.0
-#ELEMENT tStep 20 number 3 gp 1 keyword 43 component 1 value 1.951728e-01
+#ELEMENT tStep 20 number 3 gp 1 keyword 43 component 1 value 1.95192016e-01
 #ELEMENT tStep 20 number 4 gp 1 keyword 43 component 1 value 0.0
 #%END_CHECK%

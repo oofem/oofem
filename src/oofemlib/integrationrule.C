@@ -73,6 +73,8 @@ IntegrationRule :: clear()
     for ( GaussPoint *gp: *this ) {
         delete gp;
     }
+
+    gaussPoints.clear();
 }
 
 

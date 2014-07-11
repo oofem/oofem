@@ -97,6 +97,11 @@ public:
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const = 0;
     virtual void computeLocalCoordinates(FloatArray &oLocCoord, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented."); }
     virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const { OOFEM_ERROR("?"); }
+    virtual void giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iArcPos) const {OOFEM_ERROR("Not implemented.")};
+
+    /// Computes tangential direction at given local coordinate (arcPos)
+    virtual void giveTangent(FloatArray &oTangent, const double &iArcPosition) const {printf("BasicGeometry::giveTangent() not implemented.\n");}
+
 
     /// Checks whether an element is interacted, Element reference will be later replaced by Geometry.
     virtual bool intersects(Element *element) { return false; }
@@ -229,6 +234,8 @@ public:
     // tangential direction. Therefore, we may return any positive number.
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { oDist = mTangSignDist; };
 
+    virtual void giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iArcPos) const;
+
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "Circle"; }
     virtual bool intersects(Element *element);
@@ -260,8 +267,9 @@ public:
     double computeLength() const;
 
     virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const;
+    virtual void giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iArcPos) const;
     void giveNormal(FloatArray &oNormal, const double &iArcPosition) const;
-    void giveTangent(FloatArray &oTangent, const double &iArcPosition) const;
+    virtual void giveTangent(FloatArray &oTangent, const double &iArcPosition) const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

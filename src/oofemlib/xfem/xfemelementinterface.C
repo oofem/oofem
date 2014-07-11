@@ -108,8 +108,8 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
     FloatMatrix dNdx;
     FloatArray N;
     FEInterpolation *interp = iEl.giveInterpolation();
-    interp->evaldNdx( dNdx, * iGP.giveCoordinates(), FEIElementGeometryWrapper(& iEl) );
-    interp->evalN( N, * iGP.giveCoordinates(), FEIElementGeometryWrapper(& iEl) );
+    interp->evaldNdx( dNdx, * iGP.giveLocalCoordinates(), FEIElementGeometryWrapper(& iEl) );
+    interp->evalN( N, * iGP.giveLocalCoordinates(), FEIElementGeometryWrapper(& iEl) );
 
     const IntArray &elNodes = iEl.giveDofManArray();
 
@@ -248,7 +248,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
     }
 }
 
-void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl)
+void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl, bool iSetDiscontContribToZero)
 {
     std :: vector< int >elNodes;
 
@@ -258,10 +258,10 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
         elNodes.push_back(i + 1);
     }
 
-    XfemElementInterface_createEnrNmatrixAt(oAnswer, iLocCoord, iEl, elNodes);
+    XfemElementInterface_createEnrNmatrixAt(oAnswer, iLocCoord, iEl, elNodes, iSetDiscontContribToZero);
 }
 
-void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl, const std :: vector< int > &iLocNodeInd)
+void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix &oAnswer, const FloatArray &iLocCoord, Element &iEl, const std :: vector< int > &iLocNodeInd, bool iSetDiscontContribToZero)
 {
     const int dim = 2;
     const int nDofMan = iEl.giveNumberOfDofManagers();
@@ -328,7 +328,12 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
 
 
                 for ( int k = 0; k < numEnr; k++ ) {
-                    NdNode [ nodeCounter ] = ( efGP [ k ] - efNode [ k ] ) * Nc.at(j);
+                    if(iSetDiscontContribToZero) {
+                        NdNode [ nodeCounter ] = 0.0;
+                    }
+                    else {
+                        NdNode [ nodeCounter ] = ( efGP [ k ] - efNode [ k ] ) * Nc.at(j);
+                    }
                     counter++;
                     nodeCounter++;
                 }
@@ -458,7 +463,9 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
             str3 << "TriEl" << elIndex << ".vtk";
             std :: string name3 = str3.str();
 
-            XFEMDebugTools :: WriteTrianglesToVTK(name3, allTri);
+            if(allTri.size() > 0) {
+                XFEMDebugTools :: WriteTrianglesToVTK(name3, allTri);
+            }
         }
 
 
@@ -588,7 +595,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
             oCrackEndXi     = std :: max(minDistArcPos [ 0 ], tipArcPos);
         }             // If a tip was found
         else {
-            printf( "Warning: no tip found in element %d with only one edge intersection.\n", element->giveGlobalNumber() );
+//            printf( "Warning: no tip found in element %d with only one edge intersection.\n", element->giveGlobalNumber() );
 
             oPointPartitions.resize(1);
 
@@ -826,11 +833,17 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< 
             const FloatArray &seg_xS = oSegments [ segInd ].giveVertex(1);
             const FloatArray &seg_xE = oSegments [ segInd ].giveVertex(2);
 
+
             // Local coordinates of vertices
             FloatArray xiS;
-            element->computeLocalCoordinates(xiS, seg_xS);
+            bool evaluationSucceeded = true;
+            if(!element->computeLocalCoordinates(xiS, seg_xS)) {
+                evaluationSucceeded = false;
+            }
             FloatArray xiE;
-            element->computeLocalCoordinates(xiE, seg_xE);
+            if(!element->computeLocalCoordinates(xiE, seg_xE)) {
+                evaluationSucceeded = false;
+            }
 
             const IntArray &elNodes = element->giveDofManArray();
             FloatArray Ns, Ne;
@@ -840,12 +853,17 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< 
             double phiS         = 0.0, phiE     = 0.0;
             double gammaS       = 0.0, gammaE   = 0.0;
 
+
             for ( int i = 1; i <= Ns.giveSize(); i++ ) {
                 double phiNode = 0.0;
-                ei->evalLevelSetNormalInNode(phiNode, elNodes [ i - 1 ]);
+                if(!ei->evalLevelSetNormalInNode(phiNode, elNodes [ i - 1 ])) {
+                    evaluationSucceeded = false;
+                }
 
                 double gammaNode = 0.0;
-                ei->evalLevelSetTangInNode(gammaNode, elNodes [ i - 1 ]);
+                if(!ei->evalLevelSetTangInNode(gammaNode, elNodes [ i - 1 ])) {
+                    evaluationSucceeded = false;
+                }
 
                 phiS += Ns.at(i) * phiNode;
                 gammaS += Ns.at(i) * gammaNode;
@@ -854,7 +872,8 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< 
                 gammaE += Ne.at(i) * gammaNode;
             }
 
-            if ( phiS * phiE < levelSetTol2 ) {
+
+            if ( phiS * phiE < levelSetTol2 && evaluationSucceeded ) {
                 double xi = EnrichmentItem :: calcXiZeroLevel(phiS, phiE);
                 double gamma = 0.5 * ( 1.0 - xi ) * gammaS + 0.5 * ( 1.0 + xi ) * gammaE;
 
