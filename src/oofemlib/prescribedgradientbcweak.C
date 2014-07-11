@@ -62,9 +62,9 @@ mNumTractionNodesAtIntersections(1),
 mTractionNodeSpacing(1),
 mMeshIsPeriodic(false),
 mDuplicateCornerNodes(false),
+mTangDistPadding(0.0),
 mpDisplacementLock(NULL),
-mDispLockScaling(1.0),
-mTangDistPadding(0.0)
+mDispLockScaling(1.0)
 {
 	// Compute bounding box of the domain
     computeDomainBoundingBox(*d, mLC, mUC);
