@@ -57,6 +57,7 @@
 #include "node.h"
 #include "dynamicinputrecord.h"
 #include "matstatmapperint.h"
+#include "cltypes.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -1177,6 +1178,47 @@ Element :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType typ
         return 1;
     } else {
         return this->giveCrossSection()->giveIPValue(answer, gp, type, tStep);
+    }
+}
+
+int
+Element :: giveGlobalIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    InternalStateValueType valtype = giveInternalStateValueType(type);
+    if ( elemLocalCS.isNotEmpty() && valtype != ISVT_SCALAR ) {
+        FloatArray ans;
+        FloatMatrix full;
+        int ret = this->giveIPValue(ans, gp, type, tStep);
+        if ( ret == 0 ) return 0;
+        if ( valtype == ISVT_VECTOR ) {
+            ///@todo Check transpose here
+            answer.beProductOf(elemLocalCS, ans);
+            return 1;
+        }
+
+        // Tensors are more complicated to transform, easiest to write them in matrix form first
+        if ( valtype == ISVT_TENSOR_S3E ) {
+            ans.at(4) *= 0.5;
+            ans.at(5) *= 0.5;
+            ans.at(6) *= 0.5;
+        }  else if ( valtype != ISVT_TENSOR_G && valtype != ISVT_TENSOR_S3 ) {
+            OOFEM_ERROR("Unsupported internal state value type for computing global IP value");
+        }
+        ///@todo Check transpose here
+        full.beMatrixForm(ans);
+        full.rotatedWith(elemLocalCS, 'n');
+        answer.beVectorForm(full);
+        if ( valtype == ISVT_TENSOR_S3 ) {
+            answer.resizeWithValues(6);
+        } else if ( valtype == ISVT_TENSOR_S3E ) {
+            answer.at(4) += answer.at(7);
+            answer.at(5) += answer.at(8);
+            answer.at(6) += answer.at(9);
+            answer.resizeWithValues(6);
+        }
+        return 1;
+    } else {
+        return this->giveIPValue(answer, gp, type, tStep);
     }
 }
 
