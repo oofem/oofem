@@ -62,13 +62,7 @@ Dof *SimpleSlaveDof :: giveMasterDof() const
     // returns reference to master dof
     // checks dof compatibility and slave to slave references
 
-    if ( this->masterDofIndx == -1 ) {
-        this->masterDofIndx = dofManager->giveDomain()->giveDofManager(masterDofMngr)->findDofWithDofId(this->dofID);
-        if ( !this->masterDofIndx ) {
-            _error("giveMasterDof: no dof with dofID in master found");
-        }
-    }
-    return dofManager->giveDomain()->giveDofManager(masterDofMngr)->giveDof(masterDofIndx);
+    return dofManager->giveDomain()->giveDofManager(masterDofMngr)->giveDofWithID(this->dofID);
 }
 
 BoundaryCondition *SimpleSlaveDof :: giveBc()

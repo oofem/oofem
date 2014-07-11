@@ -46,6 +46,9 @@
 
 #define _IFT_DKTPlate_Name "dktplate"
 
+// enable or disable element vertex moment cache; enabling will speed up postprocessing
+#define DKT_EnableVertexMomentsCache
+
 namespace oofem {
 /**
  * This class implements an triangular Discrete Kirchhoff Theory (DKT) element.
@@ -63,12 +66,16 @@ namespace oofem {
 class DKTPlate : public NLStructuralElement,
     public LayeredCrossSectionInterface, public ZZNodalRecoveryModelInterface,
     public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-    public ZZErrorEstimatorInterface, public ZZRemeshingCriteriaInterface
+    public ZZErrorEstimatorInterface
 {
 protected:
     /// Element geometry approximation
     static FEI2dTrLin interp_lin;
     double area;
+#ifdef DKT_EnableVertexMomentsCache
+    FloatMatrix vertexMoments;
+    StateCounterType stateCounter;
+#endif
 
 public:
     DKTPlate(int n, Domain *d);
@@ -79,7 +86,7 @@ public:
 
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
     virtual int giveApproxOrder() { return 1; }
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
+    virtual int testElementExtension(ElementExtension ext) { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
 protected:
     virtual void computeGaussPoints();
@@ -93,19 +100,30 @@ protected:
 
     virtual void giveNodeCoordinates(double &x1, double &x2, double &x3,
                                      double &y1, double &y2, double &y3,
-                                     double *z = NULL);
+                                     double &z1, double &z2, double &z3);
 
 
+    /**
+     * @name Edge load support
+     */
+    //@{
     virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
-    //virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, GaussPoint *gp) { answer.resize(0, 0); }
     virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    //virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.resize(0); }
-    //virtual IntegrationRule *GetSurfaceIntegrationRule(int i) { return NULL; }
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    //virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    //virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.resize(0); }
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
+    //@}
+    /**
+     * @name Surface load support
+     */
+    //@{
+    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
+    virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
+    virtual IntegrationRule *GetSurfaceIntegrationRule(int iSurf);
+    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
+    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf);
+    virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp);
+    //@}
 
 public:
     // definition & identification
@@ -114,7 +132,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int computeNumberOfDofs() { return 9; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     virtual void computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp);
 
@@ -130,27 +148,21 @@ public:
     virtual bool computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP() { return this->numberOfGaussPoints; }
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
-    // ZZErrorEstimatorInterface
-    virtual Element *ZZErrorEstimatorI_giveElement() { return this; }
-
-    // ZZRemeshingCriteriaInterface
-    virtual double ZZRemeshingCriteriaI_giveCharacteristicSize();
-    virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 1; };
 
     // layered cross section support functions
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
                                             GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
+
+    void computeVertexBendingMoments(FloatMatrix &answer, TimeStep *tStep);
+    // postproccess the shear forces on the element
+    void computeShearForces(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);

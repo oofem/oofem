@@ -81,7 +81,7 @@ public:
      * @param n Integration point number.
      * @param mode Material mode.
      */
-    Microplane(IntegrationRule *ir, int n, MaterialMode mode);
+    Microplane(IntegrationRule * ir, int n, MaterialMode mode);
     /// Destructor
     virtual ~Microplane();
 

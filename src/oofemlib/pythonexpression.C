@@ -32,11 +32,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <Python.h>
+
 #include "pythonexpression.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
 
-#include <Python.h>
 #include <sstream>
 
 // Defines the name for the return variable;
@@ -47,7 +48,7 @@ REGISTER_Function(PythonExpression);
 
 PythonExpression :: PythonExpression(int n, Domain *d) : Function(n, d) { }
 
-PythonExpression::~PythonExpression()
+PythonExpression :: ~PythonExpression()
 {
     ///@todo Is this right?
     Py_DECREF(this->main_dict);
@@ -56,7 +57,6 @@ PythonExpression::~PythonExpression()
 IRResultType
 PythonExpression :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     IR_GIVE_FIELD(ir, this->fExpression, _IFT_PythonExpression_f);
@@ -69,7 +69,7 @@ PythonExpression :: initializeFrom(InputRecord *ir)
 
     ///@todo Check this stuff; Is this OK to do? We need a way to fetch the global dictionary..
     if ( !main_dict ) {
-        PyObject* main_module = PyImport_AddModule("__main__");
+        PyObject *main_module = PyImport_AddModule("__main__");
         this->main_dict = PyModule_GetDict(main_module);
     }
 
@@ -91,28 +91,28 @@ PyObject *
 PythonExpression :: getDict(std :: map< std :: string, FunctionArgument > &valDict)
 {
     PyObject *local_dict = PyDict_New();
-    for (std :: map< std :: string, FunctionArgument > :: iterator val = valDict.begin(); val != valDict.end(); ++val) {
-        const FunctionArgument &arg = val->second;
+    for ( const auto &named_arg: valDict ) {
+        const FunctionArgument &arg = named_arg.second;
         PyObject *tmp;
-        if ( arg.type == FunctionArgument::FAT_double ) {
+        if ( arg.type == FunctionArgument :: FAT_double ) {
             tmp = PyFloat_FromDouble(arg.val0);
-        } else if ( arg.type == FunctionArgument::FAT_FloatArray ) {
-            tmp = PyList_New(arg.val1.giveSize());
-            for (int i = 0; i < arg.val1.giveSize(); ++i) {
-                PyList_SET_ITEM(tmp, i, PyFloat_FromDouble(arg.val1.at(i)));
+        } else if ( arg.type == FunctionArgument :: FAT_FloatArray ) {
+            tmp = PyList_New( arg.val1.giveSize() );
+            for ( int i = 0; i < arg.val1.giveSize(); ++i ) {
+                PyList_SET_ITEM( tmp, i, PyFloat_FromDouble( arg.val1.at(i) ) );
             }
-        } else if ( arg.type == FunctionArgument::FAT_int ) {
+        } else if ( arg.type == FunctionArgument :: FAT_int ) {
             tmp = PyLong_FromLong(arg.val2);
-        } else if ( arg.type == FunctionArgument::FAT_IntArray ) {
-            tmp = PyList_New(arg.val3.giveSize());
-            for (int i = 0; i < arg.val3.giveSize(); ++i) {
-                PyList_SET_ITEM(tmp, i, PyLong_FromLong(arg.val3.at(i)));
+        } else if ( arg.type == FunctionArgument :: FAT_IntArray ) {
+            tmp = PyList_New( arg.val3.giveSize() );
+            for ( int i = 0; i < arg.val3.giveSize(); ++i ) {
+                PyList_SET_ITEM( tmp, i, PyLong_FromLong( arg.val3.at(i) ) );
             }
         } else {
             tmp = NULL;
-            OOFEM_ERROR("PythonExpression :: getDict - Unsupported FunctionArgumentType");
+            OOFEM_ERROR("Unsupported FunctionArgumentType");
         }
-        PyDict_SetItemString(local_dict, val->first.c_str(), tmp);
+        PyDict_SetItemString(local_dict, named_arg.first.c_str(), tmp);
     }
     return local_dict;
 }
@@ -122,16 +122,16 @@ void
 PythonExpression :: getArray(FloatArray &answer, PyObject *func, std :: map< std :: string, FunctionArgument > &valDict)
 {
     PyObject *local_dict = getDict(valDict);
-    PyObject *dummy = PyEval_EvalCode((PyCodeObject*)func, main_dict, local_dict);
+    PyObject *dummy = PyEval_EvalCode( ( PyCodeObject * ) func, main_dict, local_dict );
     PyObject *ret = PyDict_GetItemString(local_dict, RETURN_VARIABLE);
     if ( PyList_Check(ret) ) {
         int size = PyList_GET_SIZE(ret);
         answer.resize(size);
         for ( int i = 0; i < size; ++i ) {
-            answer(i) = PyFloat_AS_DOUBLE(PyList_GET_ITEM(ret, i));
+            answer(i) = PyFloat_AS_DOUBLE( PyList_GET_ITEM(ret, i) );
         }
     } else {
-        answer.setValues(1, PyFloat_AS_DOUBLE(ret));
+        answer = {PyFloat_AS_DOUBLE(ret) };
     }
     Py_DECREF(local_dict);
     Py_DECREF(dummy);
@@ -164,20 +164,20 @@ double
 PythonExpression :: getScalar(PyObject *func, double time)
 {
     PyObject *local_dict = PyDict_New();
-    PyDict_SetItemString(local_dict, "t", PyFloat_FromDouble(time));
-    PyObject *dummy = PyEval_EvalCode((PyCodeObject*)func, main_dict, local_dict);
+    PyDict_SetItemString( local_dict, "t", PyFloat_FromDouble(time) );
+    PyObject *dummy = PyEval_EvalCode( ( PyCodeObject * ) func, main_dict, local_dict );
     double val = 0.;
     PyObject *ret = PyDict_GetItemString(local_dict, RETURN_VARIABLE);
     if ( PyFloat_Check(ret) ) {
         val = PyFloat_AS_DOUBLE(ret);
     } else if ( PyList_Check(ret) ) {
-        if (PyList_GET_SIZE(ret) != 1) {
-            OOFEM_ERROR("PythonExpression :: getScalar - Result from python is not a real float!");
+        if ( PyList_GET_SIZE(ret) != 1 ) {
+            OOFEM_ERROR("Result from python is not a real float!");
         } else {
-            val = PyFloat_AS_DOUBLE(PyList_GET_ITEM(ret, 0));
+            val = PyFloat_AS_DOUBLE( PyList_GET_ITEM(ret, 0) );
         }
     } else {
-        OOFEM_ERROR("PythonExpression :: getScalar - Result from python is not a real float!");
+        OOFEM_ERROR("Result from python is not a real float!");
     }
 
     Py_DECREF(local_dict);
@@ -202,5 +202,4 @@ double PythonExpression :: evaluateAccelerationAtTime(double time)
 {
     return this->getScalar(this->d2fdt2, time);
 }
-
 } // end namespace oofem

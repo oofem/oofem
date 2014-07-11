@@ -101,28 +101,29 @@ public:
      */
     CompCol();
     /// Copy constructor
-    CompCol(const CompCol &S);
+    CompCol(const CompCol & S);
     /// Assignment operator
-    CompCol &operator=(const CompCol &C);
+    CompCol &operator = ( const CompCol & C );
     /// Destructor
     virtual ~CompCol() { }
 
     // Overloaded methods:
     SparseMtrx *GiveCopy() const;
-    void times(const FloatArray &x, FloatArray &answer) const;
-    void timesT(const FloatArray &x, FloatArray &answer) const;
+    virtual void times(const FloatArray &x, FloatArray &answer) const;
+    virtual void timesT(const FloatArray &x, FloatArray &answer) const;
     virtual void times(double x);
-    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme & s);
-    int assemble(const IntArray &loc, const FloatMatrix &mat);
-    int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
-    bool canBeFactorized() const { return false; }
+    virtual int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &s);
+    virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
+    virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
+    virtual bool canBeFactorized() const { return false; }
     virtual void zero();
     virtual double &at(int i, int j);
     virtual double at(int i, int j) const;
     virtual void toFloatMatrix(FloatMatrix &answer) const;
     virtual void printYourself() const;
-    SparseMtrxType giveType() const { return SMT_CompCol; }
-    bool isAsymmetric() const { return true; }
+    virtual const char* giveClassName() const { return "CompCol"; }
+    virtual SparseMtrxType giveType() const { return SMT_CompCol; }
+    virtual bool isAsymmetric() const { return true; }
 
 
     const double &val(int i) const { return val_(i); }
@@ -147,9 +148,9 @@ protected:
     /*  General access function (slow) */
     /***********************************/
     /// implements 0-based access
-    double operator()(int i, int j) const;
+    double operator() (int i, int j) const;
     /// implements 0-based access
-    double &operator()(int i, int j);
+    double &operator() (int i, int j);
 };
 } // end namespace oofem
 #endif // compcol_h

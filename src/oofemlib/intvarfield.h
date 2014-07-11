@@ -69,7 +69,7 @@ public:
      * @param mma_type Algorithm used to map materials.
      * @param d Domain which field belongs to.
      */
-    InternalVariableField(InternalStateType ist, FieldType b, MaterialMappingAlgorithmType mma_type, Domain *d);
+    InternalVariableField(InternalStateType ist, FieldType b, MaterialMappingAlgorithmType mma_type, Domain * d);
     virtual ~InternalVariableField();
 
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *tStep);

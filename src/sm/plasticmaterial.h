@@ -68,7 +68,7 @@ protected:
     double gamma, temp_gamma;
 
 public:
-    PlasticMaterialStatus(int n, Domain *d, GaussPoint *g);
+    PlasticMaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~PlasticMaterialStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -84,10 +84,10 @@ public:
     const FloatArray &giveStrainSpaceHardeningVars() const { return strainSpaceHardeningVarsVector; }
     const FloatArray &givetempStrainSpaceHardeningVarsVector() const { return tempStrainSpaceHardeningVarsVector; }
 
-    void letPlasticStrainVectorBe(const FloatArray &v) { plasticStrainVector = v; }
-    void letTempPlasticStrainVectorBe(const FloatArray &v) { tempPlasticStrainVector = v; }
-    void letTempStrainSpaceHardeningVarsVectorBe(const FloatArray &v) { tempStrainSpaceHardeningVarsVector = v; }
-    void letStrainSpaceHardeningVarsVectorBe(const FloatArray &v) { strainSpaceHardeningVarsVector = v; }
+    void letPlasticStrainVectorBe(FloatArray v) { plasticStrainVector = std :: move(v); }
+    void letTempPlasticStrainVectorBe(FloatArray v) { tempPlasticStrainVector = std :: move(v); }
+    void letTempStrainSpaceHardeningVarsVectorBe(FloatArray v) { tempStrainSpaceHardeningVarsVector = std :: move(v); }
+    void letStrainSpaceHardeningVarsVectorBe(FloatArray v) { strainSpaceHardeningVarsVector = std :: move(v); }
 
     int giveStateFlag() const { return state_flag; }
     int giveTempStateFlag() const { return temp_state_flag; }
@@ -124,7 +124,7 @@ protected:
     LinearElasticMaterial *linearElasticMaterial;
 
 public:
-    PlasticMaterial(int n, Domain *d);
+    PlasticMaterial(int n, Domain * d);
     virtual ~PlasticMaterial();
 
     // identification and auxiliary functions
@@ -172,10 +172,10 @@ protected:
                                       FloatArray *plasticStrainVectorR,
                                       FloatArray *strainSpaceHardeningVariables,
                                       FloatArray *gradientVectorR);
-    virtual void giveConsistentStiffnessMatrix(FloatMatrix & answer,
+    virtual void giveConsistentStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode,
-                                               GaussPoint * gp,
-                                               TimeStep * tStep);
+                                               GaussPoint *gp,
+                                               TimeStep *tStep);
 
     void  computeConsistentModuli(FloatMatrix &answer,
                                   GaussPoint *gp, FloatMatrix &elasticModuliInverse,
@@ -248,10 +248,10 @@ protected:
                                          GaussPoint *gp,
                                          TimeStep *tStep);
 
-    virtual void give1dFiberStiffMtrx(FloatMatrix &answer,
-                                      MatResponseMode mode,
-                                      GaussPoint *gp,
-                                      TimeStep *tStep);
+    virtual void giveFiberStiffMtrx(FloatMatrix &answer,
+                                    MatResponseMode mode,
+                                    GaussPoint *gp,
+                                    TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // plasticmaterial_h

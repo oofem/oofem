@@ -32,15 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/*
- *  File: q9planstrss.h
- *
- *	Description: 9-node element.
- *
- *  Created on: May 22, 2013
- *  Author: Erik Svenning
- */
-
 #ifndef Q9PLANSTRSS_H_
 #define Q9PLANSTRSS_H_
 
@@ -52,20 +43,27 @@
 #define _IFT_Q9PlaneStress2d_Name "q9planestress2d"
 
 namespace oofem {
+
+/**
+ * 9-node plane stress element.
+ *
+ * @date May 22, 2013
+ * @author Erik Svenning
+ */
 class Q9PlaneStress2d : public NLStructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {
 protected:
     static FEI2dQuadBiQuad interpolation;
 
 public:
-    Q9PlaneStress2d(int n, Domain *d);
+    Q9PlaneStress2d(int n, Domain * d);
     virtual ~Q9PlaneStress2d() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int computeNumberOfDofs() { return 18; }
 
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Q9PlaneStress2d_Name; }
@@ -81,17 +79,8 @@ public:
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep);
-
-#ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &context);
-#endif
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

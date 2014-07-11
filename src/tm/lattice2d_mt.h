@@ -93,7 +93,7 @@ public:
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 
     virtual int computeNumberOfDofs() { return 2; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void updateInternalState(TimeStep *tStep);

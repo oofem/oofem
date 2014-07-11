@@ -58,23 +58,6 @@ class ProblemCommunicator;
 class ProcessCommunicator;
 
 /**
- * The corresponding element interface to DirectErrorIndicatorRC class.
- * Declares the necessary services, which have to be provided by particular elements.
- */
-class DirectErrorIndicatorRCInterface : public Interface
-{
-public:
-    /// Constructor
-    DirectErrorIndicatorRCInterface() : Interface() { }
-    /**
-     * Determines the characteristic size of element. This quantity is defined as follows:
-     * For 1D it is the element length, for 2D it is the square root of element area.
-     */
-    virtual double DirectErrorIndicatorRCI_giveCharacteristicSize() = 0;
-};
-
-
-/**
  * The class is an implementation of "direct" remeshing criteria, which
  * maps the error indication, which is usually the value of observed internal variable
  * to the corresponding required element size. The error estimate and global error for
@@ -107,7 +90,7 @@ protected:
 
 public:
     /// Constructor
-    DirectErrorIndicatorRC(int n, ErrorEstimator *e);
+    DirectErrorIndicatorRC(int n, ErrorEstimator * e);
     virtual ~DirectErrorIndicatorRC();
 
     virtual double giveRequiredDofManDensity(int num, TimeStep *tStep, int relative = 0);

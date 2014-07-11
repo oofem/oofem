@@ -1,6 +1,7 @@
 tmpatch44-3.out
 Patch test of axisymmetric linear triangle elements, steady-state solution, prescribed constant heat source
-StationaryProblem nsteps 1 nmodules 0
+StationaryProblem nsteps 1 nmodules 1
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 1
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
@@ -24,10 +25,10 @@ ConstantFunction 1 f(t) 1.0
 
 #exact solution for this case is -4.1666666*x^2+133.33333333*log(x)+14.1666666, T(2.2)=99.127648, T(4.)=132.339249
 #%BEGIN_CHECK%
-#NODE tStep 1 number 2 dof 1 unknown f value 9.21853360e+01
-#NODE tStep 1 number 5 dof 1 unknown f value 9.23002942e+01
-#ELEMENT tStep 1 number 1 gp 1 keyword "flow" component 1 value -2.0546e+02
-#ELEMENT tStep 1 number 2 gp 1 keyword "flow" component 1 value -2.0575e+02
-#ELEMENT tStep 1 number 3 gp 1 keyword "flow" component 1 value -4.8988e+01
-#ELEMENT tStep 1 number 4 gp 1 keyword "flow" component 1 value -4.4363e+01
+#NODE tStep 1 number 2 dof 10 unknown d value 9.21853360e+01
+#NODE tStep 1 number 5 dof 10 unknown d value 9.23002942e+01
+#ELEMENT tStep 1 number 1 gp 1 keyword 56 component 1 value -2.05463340e+02
+#ELEMENT tStep 1 number 2 gp 1 keyword 56 component 1 value -2.05750736e+02
+#ELEMENT tStep 1 number 3 gp 1 keyword 56 component 1 value -4.89877068e+01
+#ELEMENT tStep 1 number 4 gp 1 keyword 56 component 1 value -4.43630650e+01
 #%END_CHECK%

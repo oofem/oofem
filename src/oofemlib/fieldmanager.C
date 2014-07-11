@@ -35,14 +35,13 @@
 #include "fieldmanager.h"
 
 namespace oofem {
-#ifdef FIELDMANAGER_USE_SHARED_PTR
 FieldManager :: ~FieldManager()
-{}
+{ }
 
 void
-FieldManager :: registerField(std :: tr1 :: shared_ptr< Field >eField, FieldType key)
+FieldManager :: registerField(std :: shared_ptr< Field >eField, FieldType key)
 {
-    this->externalFields [ key ] = eField;
+    this->externalFields.insert({key, eField});
 }
 
 bool
@@ -51,23 +50,22 @@ FieldManager :: isFieldRegistered(FieldType key)
     return ( this->externalFields.find(key) != this->externalFields.end() );
 }
 
-std :: tr1 :: shared_ptr< Field >
+std :: shared_ptr< Field >
 FieldManager :: giveField(FieldType key)
 {
-    std :: map< FieldType, std :: tr1 :: shared_ptr< Field > > :: iterator i;
-    if ( ( i = this->externalFields.find(key) ) == this->externalFields.end() ) {
-        std :: tr1 :: shared_ptr< Field >p; // std::tr1::shared_ptr<Field> p(nullptr);
+    auto i = this->externalFields.find(key);
+    if ( i == this->externalFields.end() ) {
+        std :: shared_ptr< Field >p; // std::shared_ptr<Field> p(nullptr);
         return p;
     }
 
-    return ( i->second );
+    return i->second;
 }
 
 void
 FieldManager :: unregisterField(FieldType key)
 {
-    std :: map< FieldType, std :: tr1 :: shared_ptr< Field > > :: iterator i;
-    i = this->externalFields.find(key);
+    auto i = this->externalFields.find(key);
     if ( i == this->externalFields.end() ) {
         return;
     }
@@ -75,60 +73,4 @@ FieldManager :: unregisterField(FieldType key)
     this->externalFields.erase(i);
 }
 
-
-#else //FIELDMANAGER_USE_SHARED_PTR
-
-FieldManager :: ~FieldManager()
-{
-    std :: map< FieldType, fieldRecord * > :: iterator i;
-    for ( i = this->externalFields.begin(); i != this->externalFields.end(); ++i ) {
-        delete ( * i ).second;
-    }
-}
-
-
-void
-FieldManager :: registerField(Field *eField, FieldType key, bool managedFlag)
-{
-    std :: map< FieldType, fieldRecord * > :: iterator i;
-    if ( ( i = this->externalFields.find(key) ) != this->externalFields.end() ) {
-        // delete old entry, since map contains only pointers, not fields themselves
-        delete( * i ).second;
-    }
-
-    this->externalFields [ key ] = new fieldRecord(eField, managedFlag);
-}
-
-bool
-FieldManager :: isFieldRegistered(FieldType key)
-{
-    return ( this->externalFields.find(key) != this->externalFields.end() );
-}
-
-Field *
-FieldManager :: giveField(FieldType key)
-{
-    std :: map< FieldType, fieldRecord * > :: iterator i;
-    if ( ( i = this->externalFields.find(key) ) == this->externalFields.end() ) {
-        return NULL;
-    }
-
-    return ( * i ).second->giveField();
-}
-
-void
-FieldManager :: unregisterField(FieldType key)
-{
-    std :: map< FieldType, fieldRecord * > :: iterator i;
-    i = this->externalFields.find(key);
-    if ( i == this->externalFields.end() ) {
-        return;
-    }
-
-    delete ( * i ).second;
-    this->externalFields.erase(i);
-}
-
-
-#endif //FIELDMANAGER_USE_SHARED_PTR
 } // end namespace oofem

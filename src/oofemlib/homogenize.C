@@ -373,7 +373,7 @@ void Homogenize :: herveZaoui(FloatMatrix &PhaseMatrix)
     double temp1;
 
     if ( NumPhases < 3 ) {
-        OOFEM_ERROR1("Number of considered phases must be at least 3 (including hom. medium)\n");
+        OOFEM_ERROR("Number of considered phases must be at least 3 (including hom. medium)");
     }
 
     F(NumPhases - 1) = lambda_0 / 3.;
@@ -382,7 +382,7 @@ void Homogenize :: herveZaoui(FloatMatrix &PhaseMatrix)
     temp1 = 0.;
     for ( i = 0; i < NumPhases - 1; i++ ) {
         temp1 += PhaseMatrix1(i, 0);
-        r(i) = 1. * pow(temp1, 1. / 3.);
+        r(i) = 1. * cbrt(temp1);
         //printf( "r(%d)=%f\n", i, r(i) );
     }
 
@@ -563,31 +563,31 @@ void Homogenize :: herveZaoui(FloatMatrix &PhaseMatrix)
     nu_n = ( 3. * k(NumPhases - 2) - 2. * mu(NumPhases - 2) ) / ( 6. * k(NumPhases - 2) + 2. * mu(NumPhases - 2) );
 
     a = 4. * pow(r(NumPhases - 2), 10.) * ( 1. - 2. * nu_n ) * ( 7. - 10. * nu_n ) * Z(0, 1) +
-        20. * pow(r(NumPhases - 2), 7.) * ( 7. - 12. * nu_n + 8. * nu_n * nu_n ) * Z(3, 1) +
-        12. * pow(r(NumPhases - 2), 5.) * ( 1. - 2. * nu_n ) * ( Z(0, 3) - 7. * Z(1, 2) ) +
-        20. * pow(r(NumPhases - 2), 3.) * ( 1. - 2. * nu_n ) * ( 1. - 2. * nu_n ) * Z(0, 2) +
-        16. * ( 4. - 5. * nu_n ) * ( 1. - 2. * nu_n ) * Z(3, 2);
+    20. * pow(r(NumPhases - 2), 7.) * ( 7. - 12. * nu_n + 8. * nu_n * nu_n ) * Z(3, 1) +
+    12. * pow(r(NumPhases - 2), 5.) * ( 1. - 2. * nu_n ) * ( Z(0, 3) - 7. * Z(1, 2) ) +
+    20. * pow(r(NumPhases - 2), 3.) * ( 1. - 2. * nu_n ) * ( 1. - 2. * nu_n ) * Z(0, 2) +
+    16. * ( 4. - 5. * nu_n ) * ( 1. - 2. * nu_n ) * Z(3, 2);
 
     b = 3. * pow(r(NumPhases - 2), 10.) * ( 1. - 2. * nu_n ) * ( 15. * nu_n - 7. ) * Z(0, 1) +
-        60. * pow(r(NumPhases - 2), 7.) * ( nu_n - 3. ) * nu_n * Z(3, 1) -
-        24. * pow(r(NumPhases - 2), 5.) * ( 1. - 2. * nu_n ) * ( Z(0, 3) - 7. * Z(1, 2) ) -
-        40. * pow(r(NumPhases - 2), 3.) * ( 1. - 2. * nu_n ) * ( 1. - 2. * nu_n ) * Z(0, 2) -
-        8. * ( 1. - 5. * nu_n ) * ( 1. - 2. * nu_n ) * Z(3, 2);
+    60. * pow(r(NumPhases - 2), 7.) * ( nu_n - 3. ) * nu_n * Z(3, 1) -
+    24. * pow(r(NumPhases - 2), 5.) * ( 1. - 2. * nu_n ) * ( Z(0, 3) - 7. * Z(1, 2) ) -
+    40. * pow(r(NumPhases - 2), 3.) * ( 1. - 2. * nu_n ) * ( 1. - 2. * nu_n ) * Z(0, 2) -
+    8. * ( 1. - 5. * nu_n ) * ( 1. - 2. * nu_n ) * Z(3, 2);
 
     c = -pow(r(NumPhases - 2), 10.) * ( 1. - 2. * nu_n ) * ( 7. + 5 * nu_n ) * Z(0, 1) +
-        10. * pow(r(NumPhases - 2), 7.) * ( 7. - nu_n * nu_n ) * Z(3, 1) +
-        12. * pow(r(NumPhases - 2), 5.) * ( 1. - 2. * nu_n ) * ( Z(0, 3) - 7. * Z(1, 2) ) +
-        20. * pow(r(NumPhases - 2), 3.) * ( 1. - 2. * nu_n ) * ( 1. - 2. * nu_n ) * Z(0, 2) -
-        8. * ( 7. - 5. * nu_n ) * ( 1. - 2. * nu_n ) * Z(3, 2);
+    10. * pow(r(NumPhases - 2), 7.) * ( 7. - nu_n * nu_n ) * Z(3, 1) +
+    12. * pow(r(NumPhases - 2), 5.) * ( 1. - 2. * nu_n ) * ( Z(0, 3) - 7. * Z(1, 2) ) +
+    20. * pow(r(NumPhases - 2), 3.) * ( 1. - 2. * nu_n ) * ( 1. - 2. * nu_n ) * Z(0, 2) -
+    8. * ( 7. - 5. * nu_n ) * ( 1. - 2. * nu_n ) * Z(3, 2);
 
     //solve quadratic equation, report higher number
     sqr = b * b - 4. * a * c;
     if ( sqr < 0 ) {
-        OOFEM_ERROR1("Shear modulus does not yield a real number\n");
+        OOFEM_ERROR("Shear modulus does not yield a real number");
     }
 
     if ( ( -b - pow(sqr, 0.5) ) >= 0 ) {
-        OOFEM_WARNING1("Two solutions for the shear modulus were found, continuing with the higher value\n");
+        OOFEM_WARNING("Two solutions for the shear modulus were found, continuing with the higher value");
     }
 
     //usually this higher value is reported
@@ -622,7 +622,7 @@ void Homogenize :: hansen(FloatMatrix &PhaseMatrix) {
     double f_i, E_i, f_m, E_m;
 
     if ( PhaseMatrix.giveNumberOfRows() != 2 ) {
-        OOFEM_ERROR1("Only two phases are allowed\n");
+        OOFEM_ERROR("Only two phases are allowed");
     }
 
     checkVolFraction(PhaseMatrix);
@@ -642,7 +642,7 @@ void Homogenize :: counto(FloatMatrix &PhaseMatrix)
 {
     double E_i, f_m, E_m, nu_m;
     if ( PhaseMatrix.giveNumberOfRows() != 2 ) {
-        OOFEM_ERROR1("Only two phases are allowed\n");
+        OOFEM_ERROR("Only two phases are allowed");
     }
 
     checkVolFraction(PhaseMatrix);
@@ -665,7 +665,7 @@ void Homogenize :: kusterToksoz(FloatMatrix &PhaseMatrix)
     double k_KT, mu_KT, nom, denom;
     double f_i, E_i, nu_i, k_i, mu_i, f_m, E_m, nu_m, mu_m, k_m;
     if ( PhaseMatrix.giveNumberOfRows() != 2 ) {
-        OOFEM_ERROR1("Only two phases are allowed\n");
+        OOFEM_ERROR("Only two phases are allowed");
     }
 
     checkVolFraction(PhaseMatrix);
@@ -746,7 +746,7 @@ void Homogenize :: checkVolFraction(FloatMatrix &PhaseMatrix)
     }
 
     if ( volTot < 0.99 || volTot > 1.01 ) {
-        OOFEM_ERROR3("Volumetric fraction of phases 0-%d is %f, which not the unity\n", NumPhases, volTot);
+        OOFEM_ERROR("Volumetric fraction of phases 0-%d is %f, which not the unity\n", NumPhases, volTot);
     }
 }
 

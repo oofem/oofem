@@ -65,7 +65,7 @@ class MicroMaterialStatus : public StructuralMaterialStatus
 {
 public:
     /// Constructor
-    MicroMaterialStatus(int, Domain *d, GaussPoint *gp);
+    MicroMaterialStatus(int, Domain * d, GaussPoint * gp);
 
     /// Destructor
     virtual ~MicroMaterialStatus();
@@ -92,7 +92,7 @@ class MicroMaterial : public StructuralMaterial, public UnknownNumberingScheme
 {
 public:
     /// Constructor
-    MicroMaterial(int n, Domain *d);
+    MicroMaterial(int n, Domain * d);
     /// Destructor
     virtual ~MicroMaterial();
 
@@ -127,7 +127,7 @@ public:
     virtual int giveRequiredNumberOfDomainEquation() const;
     //friend class EngngModel;-not here but define in EngngModel class
     /// Array containing coordinates of 8 master nodes of microproblem.
-    const FloatArray *microMasterCoords [ 8 ];
+    std::vector< FloatArray >microMasterCoords;
     /// Array containing equation numbers for boundary nodes [DofManagerNumber][DOF].
     int **microBoundaryDofs;
     /// Array of equation numbers associated to boundary nodes.

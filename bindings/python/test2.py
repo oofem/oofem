@@ -11,7 +11,7 @@ problem = liboofem.linearStatic(nSteps=3, outFile="test2.out")
 
 # domain (if no engngModel specified to domain, it is asigned to the last one created)
 domain = liboofem.domain(1, 1, problem, liboofem.domainType._2dBeamMode, tstep_all=True, dofman_all=True, element_all=True)
-problem.setDomain(1, domain)
+problem.setDomain(1, domain, True)
 vtkxmlModule = liboofem.vtkxml(1,problem,tstep_all=True,vars=[1,4],primvars=[1])
 
 
@@ -27,9 +27,9 @@ ltfs = (ltf1, ltf2, ltf3)
 # loadTimeFunction parameter can be specified as int value or as LoadTimeFunction itself (valid for all objects with giveNumber() method)
 bc1   = liboofem.boundaryCondition(    1, domain, loadTimeFunction=1,    prescribedValue=0.0)
 bc2   = liboofem.boundaryCondition(    2, domain, loadTimeFunction=2,    prescribedValue=-.006e-3)
-eLoad = liboofem.constantEdgeLoad(     3, domain, loadTimeFunction=ltf1, components=(0.,10.,0.), loadType=3, ndofs=3)
+eLoad = liboofem.constantEdgeLoad(     3, domain, loadTimeFunction=1, components=(0.,10.,0.), loadType=3, ndofs=3)
 nLoad = liboofem.nodalLoad(            4, domain, loadTimeFunction=1,    components=(-18.,24.,0.))
-tLoad = liboofem.structTemperatureLoad(5, domain, loadTimeFunction=ltf3, components=(30.,-20.))
+tLoad = liboofem.structTemperatureLoad(5, domain, loadTimeFunction=3, components=(30.,-20.))
 bcs = (bc1, bc2, eLoad, nLoad, tLoad)
 
 # nodes
@@ -67,10 +67,12 @@ domain.resizeBoundaryConditions(len(bcs))
 for bc in bcs:
     domain.setBoundaryCondition(bc.number, bc)
 for ltf in ltfs:
-    domain.setLoadTimeFunction(ltf.number, ltf)
+    domain.setFunction(ltf.number, ltf)
 
 
 problem.checkProblemConsistency();
+problem.init();
+problem.postInitialize();
 problem.setRenumberFlag();
 problem.solveYourself();
 problem.terminateAnalysis();

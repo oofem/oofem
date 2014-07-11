@@ -52,16 +52,13 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
-#endif
-
 namespace oofem {
 class DataStream;
 class Domain;
 class Interface;
 class TimeStep;
 class DynamicInputRecord;
+class oofegGraphicContext;
 
 /**
  * The top abstract class of all classes constituting the finite element mesh.
@@ -89,7 +86,7 @@ public:
      * node number in particular domain.
      * @param d Domain to which component belongs to.
      */
-    FEMComponent(int n, Domain *d) : number(n), domain(d) { }
+    FEMComponent(int n, Domain * d) : number(n), domain(d) { }
     /// Virtual destructor.
     virtual ~FEMComponent() { }
 
@@ -181,24 +178,9 @@ public:
      */
     virtual Interface *giveInterface(InterfaceType t) { return NULL; }
 
-    /**
-     * @name error and warning reporting methods
-     * These methods will print error (or warning) message using oofem default loggers.
-     * Do not use these methods directly, to avoid specify file and line parameters.
-     * More preferably, use these methods via corresponding OOFEM_CLASS_ERROR and OOFEM_CLASS_WARNING macros,
-     * that will include file and line parameters automatically.
-     *
-     * Uses variable number of arguments, so a format string followed by optional arguments is expected
-     * (according to printf conventions).
-     * @param file  source file name, where error encountered (where error* function called)
-     * @param line  source file line number, where error encountered
-     */
-    //@{
-    /// Prints error message and exits.
-    void error(const char *file, int line, const char *format, ...) const;
-    /// Prints warning message.
-    void warning(const char *file, int line, const char *format, ...) const;
-    //@}
+    /// Returns string for prepending output (used by error reporting macros).
+    std :: string errorInfo(const char *func) const;
+
 #ifdef __OOFEG
     virtual void drawYourself(oofegGraphicContext &) { }
 #endif

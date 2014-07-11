@@ -54,7 +54,7 @@ REGISTER_Element(Truss3d);
 FEI3dLineLin Truss3d :: interp;
 
 Truss3d :: Truss3d(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain)
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 2;
 }
@@ -63,12 +63,10 @@ Truss3d :: Truss3d(int n, Domain *aDomain) :
 Interface *
 Truss3d :: giveInterface(InterfaceType interface)
 {
-    if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >( this );
-    } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+    if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     }
 
     //OOFEM_LOG_INFO("Interface on Truss3d element not supported");
@@ -79,15 +77,8 @@ Truss3d :: giveInterface(InterfaceType interface)
 void
 Truss3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
-    _warning("Truss3d element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
-}
-
-
-void
-Truss3d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.resize(0);
+    answer.clear();
+    OOFEM_WARNING("IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
 
@@ -115,9 +106,8 @@ void
 Truss3d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
@@ -161,11 +151,7 @@ Truss3d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 {
     FloatArray n;
     this->interp.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
-
-    answer.resize(3, 6);
-    answer.zero();
-    answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = n.at(1);
-    answer.at(1, 4) = answer.at(2, 5) = answer.at(3, 6) = n.at(2);
+    answer.beNMatrixOf(n, 3);
 }
 
 
@@ -176,7 +162,7 @@ Truss3d :: computeVolumeAround(GaussPoint *gp)
 {
     double detJ = this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
     double weight  = gp->giveWeight();
-    return detJ * weight * this->giveCrossSection()->give(CS_Area, gp);
+    return detJ *weight *this->giveCrossSection()->give(CS_Area, gp);
 }
 
 
@@ -187,37 +173,22 @@ Truss3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 // stored rowwise (mainly used by some materials with ortho and anisotrophy)
 //
 {
-    FloatArray lx, ly(3), lz(3), help(3);
-    double length = this->computeLength();
-    Node *nodeA, *nodeB;
+    FloatArray lx, ly(3), lz;
 
-    // if (referenceNode == 0)
-    // _error ("instanciateFrom: wrong reference node specified");
+    lx.beDifferenceOf( * this->giveNode(2)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
+    lx.normalize();
+
+    ly(0) = lx(1);
+    ly(1) = -lx(2);
+    ly(2) = lx(0);
+
+    // Construct orthogonal vector
+    double npn = ly.dotProduct(lx);
+    ly.add(-npn, lx);
+    ly.normalize();
+    lz.beVectorProductOf(ly, lx);
 
     answer.resize(3, 3);
-    answer.zero();
-    nodeA = this->giveNode(1);
-    nodeB = this->giveNode(2);
-    // refNode= this->giveDomain()->giveNode (this->referenceNode);
-
-    lx.beDifferenceOf( * nodeB->giveCoordinates(), * nodeA->giveCoordinates() );
-    lx.times(1.0 / length);
-
-    int minIndx = 1;
-    for ( int i = 2; i <= 3; i++ ) {
-        if ( lx.at(i) < fabs( lx.at(minIndx) ) ) {
-            minIndx = i;
-        }
-    }
-
-    help.zero();
-    help.at(minIndx) = 1.0;
-
-    lz.beVectorProductOf(lx, help);
-    lz.normalize();
-    ly.beVectorProductOf(lz, lx);
-    ly.normalize();
-
     for ( int i = 1; i <= 3; i++ ) {
         answer.at(1, i) = lx.at(i);
         answer.at(2, i) = ly.at(i);
@@ -236,9 +207,9 @@ Truss3d :: initializeFrom(InputRecord *ir)
 
 
 void
-Truss3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Truss3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(3, D_u, D_v, D_w);
+    answer = {D_u, D_v, D_w};
 }
 
 
@@ -258,7 +229,7 @@ Truss3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      */
 
     if ( iEdge != 1 ) {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 
     answer.resize(6);
@@ -275,7 +246,7 @@ double
 Truss3d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
-        _error("computeEdgeVolumeAround: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 
     double weight = gp->giveWeight();

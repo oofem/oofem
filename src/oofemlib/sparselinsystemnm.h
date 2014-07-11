@@ -58,11 +58,12 @@ class OOFEM_EXPORT SparseLinearSystemNM : public NumericalMethod
 {
 public:
     /// Constructor.
-    SparseLinearSystemNM(Domain *d, EngngModel *m);
+    SparseLinearSystemNM(Domain * d, EngngModel * m);
     /// Destructor.
     virtual ~SparseLinearSystemNM();
 
-    virtual const char *giveClassName() const { return "SparseLinearSystemNM"; }
+    virtual const char *giveClassName() const = 0;
+    std :: string errorInfo(const char *func) { return std :: string(this->giveClassName()) + func; }
 
     /**
      * @return LinSystSolverType value, corresponding to receiver.

@@ -41,7 +41,6 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "unknowntype.h"
-#include "equationid.h"
 #include "valuemodetype.h"
 #include "dofiditem.h"
 #include "doftype.h"
@@ -115,7 +114,7 @@ public:
      * @param id Physical meaning type.
      * @see cltypes.h, DofIDItem type
      */
-    Dof(int i, DofManager *aNode, DofIDItem id = Undef);
+    Dof(int i, DofManager * aNode, DofIDItem id = Undef);
     /// Destructor.
     virtual ~Dof() { }
 
@@ -291,13 +290,6 @@ public:
      */
     void setDofID(DofIDItem id) { this->dofID = id; }
     /**
-     * Returns char representation of DofID value of receiver, which determines physical meaning
-     * of unknown connected to receiver. Useful only for printing. More conveniently,
-     * one should use giveDofID function.
-     * @see giveDofID
-     */
-    char *giveDofIDName(char *s);
-    /**
      * Tests if receiver is primary DOF. Dof is primary if it possess or directly represent
      * certain DOF. If it is linked somehow (rigid arm, doubled node) to other DOF(s) then it is not
      * primary DOF.
@@ -331,7 +323,7 @@ public:
      * to return an updated number of specified entity type based on old number.
      * @param f Function that converts old to new equation number.
      */
-    virtual void updateLocalNumbering(EntityRenumberingFunctor &f) {}
+    virtual void updateLocalNumbering(EntityRenumberingFunctor &f) { }
 
     /**
      * Prints Dof output (it prints value of unknown related to dof at given timeStep).
@@ -391,28 +383,28 @@ public:
      */
     virtual void giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode, double &dofValue) { }
 
-    /// Prints simple error message and exits.
-    void error(const char *file, int line, const char *format, ...) const;
+    /// Returns string for prepending output (used by error reporting macros).
+    std :: string errorInfo(const char *func) const;
     /// Stores receiver state to output stream.
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /// Restores the receiver state previously written in stream.
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /// Overwrites the boundary condition id (0-inactive BC), intended for specific purposes such as coupling of bc's in multiscale simulations
-    virtual void setBcId(int bcId) {}
+    virtual void setBcId(int bcId) { }
     /// Overwrites the initial condition id (0-inactive IC)
-    virtual void setIcId(int icId) {}
+    virtual void setIcId(int icId) { }
 
     /**
      * Sets a specific equation number to receiver.
      * @param equationNumber New equation number.
      */
-    virtual void setEquationNumber(int equationNumber) {};
+    virtual void setEquationNumber(int equationNumber) { };
 
     /**
      * Sets the dictionary of unknowns for receiver.
      * @param unknowns New dictionary of unknowns.
      */
-    virtual void setUnknowns(Dictionary *unknowns) {};
+    virtual void setUnknowns(Dictionary *unknowns) { };
     /**
      * Receives the dictionary of unknowns in receiver.
      * @return Dictionary of unknowns for DOF.

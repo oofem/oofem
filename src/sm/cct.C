@@ -59,8 +59,8 @@ FEI2dTrLin CCTPlate :: interp_lin(1, 2);
 
 CCTPlate :: CCTPlate(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain),
-    LayeredCrossSectionInterface(), ZZNodalRecoveryModelInterface(),
-    NodalAveragingRecoveryModelInterface(), SPRNodalRecoveryModelInterface()
+    LayeredCrossSectionInterface(), ZZNodalRecoveryModelInterface(this),
+    NodalAveragingRecoveryModelInterface(), SPRNodalRecoveryModelInterface(), ZZErrorEstimatorInterface(this)
 {
     numberOfDofMans = 3;
     numberOfGaussPoints = 1;
@@ -83,9 +83,8 @@ void
 CCTPlate :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -100,12 +99,11 @@ CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
 // (should be global coordinate system, but there may be defined
 //  different coordinate system in each node)
 {
-    GaussPoint *gp = NULL;
     FloatArray force;
     FloatMatrix T;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        _error("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("unknown load type");
     }
 
     GaussIntegrationRule irule(1, this, 1, 5);
@@ -115,7 +113,7 @@ CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
     forLoad->computeComponentArrayAt(force, tStep, mode);
 
     if ( force.giveSize() ) {
-        gp = irule.getIntegrationPoint(0);
+        GaussPoint *gp = irule.getIntegrationPoint(0);
         // constant density and thickness assumed
         double dens = this->giveStructuralCrossSection()->give('d', gp);
         double dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
@@ -133,7 +131,7 @@ CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
             answer.rotatedWith(T, 'n');
         }
     } else {
-        answer.resize(0);          // nil resultant
+        answer.clear();          // nil resultant
     }
 }
 
@@ -144,8 +142,8 @@ CCTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 // evaluated at gp.
 {
     // get node coordinates
-    double x1, x2, x3, y1, y2, y3;
-    this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3);
+  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
     //
     double area, b1, b2, b3, c1, c2, c3, l1, l2, l3;
@@ -212,8 +210,8 @@ CCTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // evaluated at gp.
 {
     // get node coordinates
-    double x1, x2, x3, y1, y2, y3;
-    this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3);
+  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
     //
     double l1, l2, l3, b1, b2, b3, c1, c2, c3;
@@ -257,7 +255,7 @@ CCTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 void
 CCTPlate :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Plate(answer, gp, strain, tStep);
+    this->giveStructuralCrossSection()->giveGeneralizedStress_Plate(answer, gp, strain, tStep);
 }
 
 
@@ -271,7 +269,7 @@ CCTPlate :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMo
 void
 CCTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
                                 double &y1, double &y2, double &y3,
-                                double *z)
+                                double &z1, double &z2, double &z3)
 {
     FloatArray *nc1, *nc2, *nc3;
     nc1 = this->giveNode(1)->giveCoordinates();
@@ -286,13 +284,25 @@ CCTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3,
     y2 = nc2->at(2);
     y3 = nc3->at(2);
 
-    if ( z ) {
-        z [ 0 ] = nc1->at(3);
-        z [ 1 ] = nc2->at(3);
-        z [ 2 ] = nc3->at(3);
-    }
+    z1 = nc1->at(3);
+    z2 = nc2->at(3);
+    z3 = nc3->at(3);
+    
 }
 
+double
+CCTPlate :: computeArea ()
+// returns the area occupied by the receiver
+{
+  // get node coordinates
+  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
+  
+  if (area > 0) return area;  // check if previously computed
+
+  return (area = 0.5*(x2*y3+x1*y2+y1*x3-x2*y1-x3*y2-x1*y3)) ;
+ 
+}
 
 IRResultType
 CCTPlate :: initializeFrom(InputRecord *ir)
@@ -303,9 +313,9 @@ CCTPlate :: initializeFrom(InputRecord *ir)
 
 
 void
-CCTPlate :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+CCTPlate :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(3, D_w, R_u, R_v);
+    answer = {D_w, R_u, R_v};
 }
 
 
@@ -337,8 +347,13 @@ CCTPlate :: computeVolumeAround(GaussPoint *gp)
 {
     double detJ, weight;
 
+    std :: vector< FloatArray > lc = {FloatArray(3), FloatArray(3), FloatArray(3)};
+    this->giveNodeCoordinates(lc[0].at(1), lc[1].at(1), lc[2].at(1), 
+			      lc[0].at(2), lc[1].at(2), lc[2].at(2), 
+			      lc[0].at(3), lc[1].at(3), lc[2].at(3));
+
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
@@ -367,17 +382,15 @@ Interface *
 CCTPlate :: giveInterface(InterfaceType interface)
 {
     if ( interface == LayeredCrossSectionInterfaceType ) {
-        return static_cast< LayeredCrossSectionInterface * >( this );
+        return static_cast< LayeredCrossSectionInterface * >(this);
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
-        return static_cast< ZZErrorEstimatorInterface * >( this );
-    } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >( this );
+        return static_cast< ZZErrorEstimatorInterface * >(this);
     }
 
 
@@ -394,18 +407,18 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 //does check that the point is in the element thickness
 {
     // get node coordinates
-    double x1, x2, x3, y1, y2, y3, z [ 3 ];
-    this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z);
+  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+  this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
     // Fetch local coordinates.
     bool ok = this->interp_lin.global2local( answer, coords, FEIElementGeometryWrapper(this) ) > 0;
 
     //get midplane location at this point
     double midplZ;
-    midplZ = z [ 0 ] * answer.at(1) + z [ 1 ] * answer.at(2) + z [ 2 ] * answer.at(3);
+    midplZ = z1 * answer.at(1) + z2 * answer.at(2) + z3 * answer.at(3);
 
     //check that the z is within the element
-    GaussPoint _gp(NULL, 1, new FloatArray(answer), 1.0, _2dPlate);
+    GaussPoint _gp(NULL, 1, new FloatArray ( answer ), 1.0, _2dPlate);
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
     double elthick = cs->give(CS_Thickness, & _gp);
 
@@ -432,22 +445,59 @@ CCTPlate :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coords
 int
 CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    if ( type == IST_ShellForceMomentumTensor ) {
-        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+    FloatArray help;
+    answer.resize(9);
+    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellMomentumTensor ) ) {
+        help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        if ( type == IST_ShellForceTensor ) {
+            answer.at(1) = 0.0; // nx
+            answer.at(2) = 0.0; // vxy
+            answer.at(3) = help.at(4); // vxz
+            answer.at(4) = 0.0; // vyx
+            answer.at(5) = 0.0; // ny
+            answer.at(6) = help.at(5); // vyz
+            answer.at(7) = help.at(4); // vzx
+            answer.at(8) = help.at(5); // vzy
+            answer.at(9) = 0.0; // nz
+        } else {
+            answer.at(1) = help.at(1); // mx
+            answer.at(2) = help.at(3); // mxy
+            answer.at(3) = 0.0;      // mxz
+            answer.at(4) = help.at(3); // mxy
+            answer.at(5) = help.at(2); // my
+            answer.at(6) = 0.0;      // myz
+            answer.at(7) = 0.0;      // mzx
+            answer.at(8) = 0.0;      // mzy
+            answer.at(9) = 0.0;      // mz
+        }
         return 1;
-    } else if ( type == IST_ShellStrainCurvatureTensor ) {
-        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+    } else if ( ( type == IST_ShellStrainTensor )  || ( type == IST_ShellCurvatureTensor ) ) {
+        help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        if ( type == IST_ShellForceTensor ) {
+            answer.at(1) = 0.0; // nx
+            answer.at(2) = 0.0; // vxy
+            answer.at(3) = help.at(4); // vxz
+            answer.at(4) = 0.0; // vyx
+            answer.at(5) = 0.0; // ny
+            answer.at(6) = help.at(5); // vyz
+            answer.at(7) = help.at(4); // vzx
+            answer.at(8) = help.at(5); // nzy
+            answer.at(9) = 0.0; // nz
+        } else {
+            answer.at(1) = help.at(1); // mx
+            answer.at(2) = help.at(3); // mxy
+            answer.at(3) = 0.0;      // mxz
+            answer.at(4) = help.at(3); // mxy
+            answer.at(5) = help.at(2); // my
+            answer.at(6) = 0.0;      // myz
+            answer.at(7) = 0.0;      // mzx
+            answer.at(8) = 0.0;      // mzy
+            answer.at(9) = 0.0;      // mz
+        }
         return 1;
     } else {
         return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
     }
-}
-
-
-double
-CCTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize()
-{
-    return sqrt(this->computeArea() * 2.0);
 }
 
 
@@ -460,23 +510,13 @@ CCTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
                                                        InternalStateType type, TimeStep *tStep)
 {
     GaussPoint *gp;
-    if ( type == IST_ShellForceMomentumTensor ) {
+    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellMomentumTensor ) ||
+        ( type == IST_ShellStrainTensor )  || ( type == IST_ShellCurvatureTensor ) ) {
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
-    } else if ( type == IST_ShellStrainCurvatureTensor ) {
-        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        this->giveIPValue(answer, gp, type, tStep);
     } else {
-        answer.resize(0);
+        answer.clear();
     }
-}
-
-
-void
-CCTPlate :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                      InternalStateType type, TimeStep *tStep)
-{
-    answer.resize(0);
 }
 
 
@@ -498,11 +538,11 @@ CCTPlate :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, in
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-         ( pap == this->giveNode(2)->giveNumber() ) ||
-         ( pap == this->giveNode(3)->giveNumber() ) ) {
+        ( pap == this->giveNode(2)->giveNumber() ) ||
+        ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 
@@ -598,7 +638,7 @@ CCTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(5) = 2;
         answer.at(6) = 3;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 
@@ -606,7 +646,7 @@ double
 CCTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ * gp->giveWeight();
+    return detJ *gp->giveWeight();
 }
 
 

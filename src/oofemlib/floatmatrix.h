@@ -46,9 +46,8 @@
 #include "contextmode.h"
 
 #include <iosfwd>
-#if __cplusplus > 199711L
- #include <initializer_list>
-#endif
+#include <initializer_list>
+#include <algorithm>
 
 #ifdef BOOST_PYTHON
 namespace boost {
@@ -64,9 +63,7 @@ namespace oofem {
 class FloatArray;
 class IntArray;
 class DataStream;
-#ifdef __PARALLEL_MODE
 class CommunicationBuffer;
-#endif
 
 /**
  * Implementation of matrix containing floating point numbers. FloatMatrix can grow and shrink
@@ -97,10 +94,8 @@ protected:
     int nRows;
     /// Number of columns.
     int nColumns;
-    /// Allocated size for values.
-    int allocatedSize;
     /// Values of matrix stored column wise.
-    double *values;
+    std :: vector< double >values;
 
 public:
     /**
@@ -108,9 +103,9 @@ public:
      * @param n Number of rows.
      * @param m Requested number of columns.
      */
-    FloatMatrix(int n, int m);
+    FloatMatrix(int n, int m) : nRows(n), nColumns(m), values(n * m) {}
     /// Creates zero sized matrix.
-    FloatMatrix();
+    FloatMatrix() : nRows(0), nColumns(0), values() {}
     /**
      * Constructor. Creates float matrix from float vector. Vector may be stored row wise
      * or column wise, depending on second parameter.
@@ -119,19 +114,30 @@ public:
      * will be created and initialized, if true then a matrix of size (1,vector->giveSize())
      * will be created.
      */
-    FloatMatrix(const FloatArray *vector, bool transpose = false);
+    FloatMatrix(const FloatArray &vector, bool transpose = false);
     /// Copy constructor.
-    FloatMatrix(const FloatMatrix &);
-#if __cplusplus > 199711L
+    FloatMatrix(const FloatMatrix &mat) : nRows(mat.nRows), nColumns(mat.nColumns), values(mat.values) {}
+    /// Copy constructor.
+    FloatMatrix(FloatMatrix && mat) : nRows(mat.nRows), nColumns(mat.nColumns), values( std :: move(mat.values) ) {}
     /// Initializer list constructor.
     FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat);
     /// Assignment operator.
     FloatMatrix &operator=(std :: initializer_list< std :: initializer_list< double > >mat);
-#endif
-    /// Destructor.
-    ~FloatMatrix();
     /// Assignment operator, adjusts size of the receiver if necessary.
-    FloatMatrix &operator=(const FloatMatrix &);
+    FloatMatrix &operator=(const FloatMatrix &mat) {
+        nRows = mat.nRows;
+        nColumns = mat.nColumns;
+        values = mat.values;
+        return * this;
+    }
+    FloatMatrix &operator=(FloatMatrix && mat) {
+        nRows = std :: move(mat.nRows);
+        nColumns = std :: move(mat.nColumns);
+        values = std :: move(mat.values);
+        return * this;
+    }
+    /// Destructor.
+    ~FloatMatrix() {};
 
     /**
      * Checks size of receiver towards requested bounds.
@@ -181,7 +187,7 @@ public:
 #ifdef DEBUG
     double &operator()(int i, int j);
 #else
-    inline double &operator()(int i, int j)  { return values [ j * nRows + i ]; };
+    inline double &operator()(int i, int j) { return values [ j * nRows + i ]; }
 #endif
     /**
      * Coefficient access function. Implements 0-based indexing.
@@ -247,16 +253,19 @@ public:
      */
     //bool computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix &v, int neigs = 0) const;
     /**
-     * Returns determinant of the receiver. Receiver should be square matrix.
+     * Returns the determinant of the receiver. The receiver should be a square matrix.
      * Current implementation works for (3,3) and smaller matrices.
      * @return Determinant of receiver.
+     */
+    double giveTrace() const;
+    /**
+     * Returns the trace (sum of diagonal components) of the receiver. The receiver should be a square matrix.
+     * @return Trace of receiver.
      */
     double giveDeterminant() const;
 
     /// Zeroes all coefficient of receiver.
     void zero();
-    /// Sets size of receiver to be an empty matrix. It will have zero rows and zero columns size.
-    void beEmptyMtrx() { this->resize(0, 0); }
     /// Sets receiver to unity matrix.
     void beUnitMatrix();
     /// Sets receiver to the inverse of scaling matrix P multiplied by the deviatoric projector ID.
@@ -489,6 +498,11 @@ public:
      * @param c Number of columns.
      */
     void hardResize(int r, int c);
+    /// Sets size of receiver to be an empty matrix. It will have zero rows and zero columns size.
+    void clear() {
+        this->nRows = 0;
+        this->nColumns = 0;
+    }
     /**
      * Computes eigenvalues and eigenvectors of receiver (must be symmetric)
      * The receiver is preserved.
@@ -508,7 +522,7 @@ public:
      * Exposes the internal values of the matrix. Should typically not be used outside of matrix classes.
      * @return Pointer to the values of the matrix.
      */
-    double *givePointer() const { return values; }
+    double *givePointer() const { return const_cast< double * >( values.data() ); }
 
     /**
      * Reciever will be a 3x3 matrix formed from a vector with either 9 or 6 components.
@@ -518,6 +532,13 @@ public:
      */
     void beMatrixFormOfStress(const FloatArray &aArray);
     void beMatrixForm(const FloatArray &aArray);
+
+    /**
+     * Swaps the indices in the 6x6 matrix such that it converts between OOFEM's
+     * and Abaqus' way of writing matrices. Currently used to convert the 6x6 Jacobian
+     * from Abaqus UMAT to OOFEM.
+     */
+    void changeComponentOrder();
 
     // Overloaded methods:
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);

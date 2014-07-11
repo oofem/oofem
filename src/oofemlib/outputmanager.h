@@ -105,7 +105,7 @@ protected:
 public:
 
     /// Creates empty Output Manager. By default all components are selected.
-    OutputManager(Domain *d);
+    OutputManager(Domain * d);
     /// Initializes receiver according to object description stored in input record.
     IRResultType initializeFrom(InputRecord *ir);
 

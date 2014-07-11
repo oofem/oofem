@@ -72,7 +72,7 @@ protected:
      * myPoly[1] occupied by second fluid (air).
      */
     Polygon myPoly [ 2 ];
-    const FloatArray **vcoords [ 2 ];
+    std::vector< FloatArray > vcoords [ 2 ];
 
     integrationDomain id [ 2 ];
     /**
@@ -80,9 +80,15 @@ protected:
      * mat[1] second fluid.
      */
     int mat [ 2 ];
+    /**
+     * default integration rule over element volume.
+     * the standard integrationRulesArray contains two rules on element subvolumes.
+     */
+    IntegrationRule *defaultIRule;
+
 
 public:
-    TR1_2D_SUPG2(int n, Domain *d);
+    TR1_2D_SUPG2(int n, Domain * d);
     virtual ~TR1_2D_SUPG2();
 
     virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep);
@@ -116,8 +122,7 @@ public:
     virtual const char *giveClassName() const { return "TR1_2D_SUPG2"; }
     virtual const char *giveInputRecordName() const { return _IFT_TR1_2D_SUPG2_Name; }
 
-    virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual int computeNumberOfDofs();
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
@@ -128,8 +133,6 @@ public:
 
     virtual Interface *giveInterface(InterfaceType);
 
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
@@ -147,12 +150,8 @@ public:
     virtual Element *giveElement() { return this; }
     virtual double computeMyVolume(LEPlic *matInterface, bool updFlag);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
@@ -160,6 +159,10 @@ public:
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    virtual int giveDefaultIntegrationRule() const { return 0; }
+    virtual IntegrationRule *giveDefaultIntegrationRulePtr() { return defaultIRule; }
+
+
 
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
@@ -180,7 +183,7 @@ protected:
     void computeNVector(FloatArray &answer, GaussPoint *gp);
     virtual void updateVolumePolygons(Polygon &referenceFluidPoly, Polygon &secondFluidPoly, int &rfPoints, int &sfPoints,
                                       const FloatArray &normal, const double p, bool updFlag);
-    double computeVolumeAroundID(GaussPoint *gp, integrationDomain id, const FloatArray **idpoly);
+    double computeVolumeAroundID(GaussPoint *gp, integrationDomain id, const std::vector< FloatArray > &idpoly);
     void updateIntegrationRules();
     Material *_giveMaterial(int indx) { return domain->giveMaterial(mat [ indx ]); }
 };

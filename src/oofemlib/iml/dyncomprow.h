@@ -72,29 +72,31 @@ public:
      */
     DynCompRow();
     /// Copy constructor
-    DynCompRow(const DynCompRow &S);
+    DynCompRow(const DynCompRow & S);
     /// Assignment operator
-    DynCompRow &operator=(const DynCompRow &C);
+    DynCompRow &operator = ( const DynCompRow & C );
     /// Destructor
     virtual ~DynCompRow();
 
     // Overloaded methods:
     SparseMtrx *GiveCopy() const;
-    void times(const FloatArray &x, FloatArray &answer) const;
-    void timesT(const FloatArray &x, FloatArray &answer) const;
+    virtual void times(const FloatArray &x, FloatArray &answer) const;
+    virtual void timesT(const FloatArray &x, FloatArray &answer) const;
     virtual void times(double x);
-    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme &);
-    int assemble(const IntArray &loc, const FloatMatrix &mat);
-    int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
-    bool canBeFactorized() const { return false; }
-    void zero();
-    SparseMtrxType  giveType() const { return SMT_DynCompRow; }
-    bool isAsymmetric() const { return true; }
-    void printStatistics() const;
-    double &at(int i, int j);
-    double at(int i, int j) const;
+    virtual int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &);
+    virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
+    virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
+    virtual bool canBeFactorized() const { return false; }
+    virtual void zero();
+    virtual const char* giveClassName() const { return "DynCompRow"; }
+    virtual SparseMtrxType  giveType() const { return SMT_DynCompRow; }
+    virtual bool isAsymmetric() const { return true; }
+    virtual void printStatistics() const;
+    virtual double &at(int i, int j);
+    virtual double at(int i, int j) const;
 
-    /** Performs LU factorization on yourself; modifies receiver
+    /**
+     * Performs LU factorization on yourself; modifies receiver
      * This routine computes the L and U factors of the ILU(p).
      */
     void ILUPYourself(int part_fill = 5, double drop_tol = 1.e-8);
@@ -115,9 +117,9 @@ protected:
     /*  General access function (slow) */
     /***********************************/
     /// implements 0-based access
-    double operator()(int i, int j) const;
+    double operator() (int i, int j) const;
     /// implements 0-based access
-    double &operator()(int i, int j);
+    double &operator() (int i, int j);
 
     /// returns the column index of given column at given row, else returns zero.
     int giveColIndx(int row, int col) const;

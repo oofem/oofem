@@ -137,6 +137,31 @@ LinearElasticMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint 
 
 
 void
+LinearElasticMaterial :: giveRealStressVector_Warping(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
+{
+    // reducedStrain contains the derivatives of the warping function with respect to x and y
+    // answer should contain stress components tau_zy and tau_zx, computed as
+    //        tau_zy = G * theta * ( x + dPsi/dy )
+    //        tau_zx = G * theta * (-y + dPsi/dx )
+    // where x and y are the global coordinates of the Gauss point (the origin must be at the centroid of the cross section)
+    //       G is the shear modulus of elasticity and theta is the relative twist (dPhi_z/dz), set here to a unit value 
+    FloatArray gcoords;
+    Element* elem = gp->giveElement();
+    elem->computeGlobalCoordinates( gcoords, * ( gp->giveCoordinates() ) );
+    answer.resize(2);
+    answer.at(1) = reducedStrain.at(2) + gcoords.at(1);
+    answer.at(2) = reducedStrain.at(1) - gcoords.at(2);
+    double G = this->giveShearModulus();
+    answer.times(G);
+
+    // update gp
+    StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
+    status->letTempStrainVectorBe(reducedStrain);
+    status->letTempStressVectorBe(answer);
+}
+
+
+void
 LinearElasticMaterial :: giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep)
 {
     FloatArray strainVector;

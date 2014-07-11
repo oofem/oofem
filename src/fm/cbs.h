@@ -71,7 +71,7 @@ protected:
     int numEqs;
 
 public:
-    VelocityEquationNumbering(bool prescribed) : UnknownNumberingScheme(), prescribed(prescribed), numEqs(0) {}
+    VelocityEquationNumbering(bool prescribed) : UnknownNumberingScheme(), prescribed(prescribed), numEqs(0) { }
 
     virtual bool isDefault() const { return !prescribed; }
     virtual int giveDofEquationNumber(Dof *dof) const {
@@ -97,7 +97,7 @@ protected:
     int numEqs;
 
 public:
-    PressureEquationNumbering(bool prescribed) : UnknownNumberingScheme(), prescribed(prescribed), numEqs(0) {}
+    PressureEquationNumbering(bool prescribed) : UnknownNumberingScheme(), prescribed(prescribed), numEqs(0) { }
 
     virtual bool isDefault() const { return !prescribed; }
     virtual int giveDofEquationNumber(Dof *dof) const {
@@ -168,9 +168,9 @@ protected:
     MaterialInterface *materialInterface;
     //</RESTRICTED_SECTION>
 public:
-    CBS(int i, EngngModel *_master = NULL) : FluidModel(i, _master),
-        PressureField(this, 1, FT_Pressure, EID_ConservationEquation, 1),
-        VelocityField(this, 1, FT_Velocity, EID_MomentumBalance, 1),
+    CBS(int i, EngngModel * _master = NULL) : FluidModel(i, _master),
+        PressureField(this, 1, FT_Pressure, 1),
+        VelocityField(this, 1, FT_Velocity, 1),
         vnum(false), vnumPrescribed(true), pnum(false), pnumPrescribed(true) {
         initFlag = 1;
         lhs = NULL;
@@ -185,9 +185,11 @@ public:
     }
     virtual ~CBS() {
         //<RESTRICTED_SECTION>
-        if ( materialInterface ) { delete materialInterface; }
+        delete materialInterface;
 
         //</RESTRICTED_SECTION>
+        delete this->nMethod;
+        delete this->lhs;
     }
 
     virtual void solveYourselfAt(TimeStep *tStep);

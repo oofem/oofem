@@ -40,6 +40,8 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "dynamicinputrecord.h"
+
 namespace oofem {
 REGISTER_Material(IntMatBilinearCZElastic);
 
@@ -47,7 +49,7 @@ IntMatBilinearCZElastic :: IntMatBilinearCZElastic(int n, Domain *d) : Structura
     //
     // constructor
     //
-{}
+{ }
 
 
 IntMatBilinearCZElastic :: ~IntMatBilinearCZElastic()
@@ -192,7 +194,7 @@ IntMatBilinearCZElastic :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatRe
             //printf("Failed...\n");
         }
     }  else {
-        _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
+        OOFEM_ERROR("unknown MatResponseMode");
     }
 }
 
@@ -214,7 +216,6 @@ const double tolerance = 1.0e-12; // small number
 IRResultType
 IntMatBilinearCZElastic :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, kn0, _IFT_IntMatBilinearCZElastic_kn);
@@ -235,9 +236,22 @@ IntMatBilinearCZElastic :: initializeFrom(InputRecord *ir)
     this->gnmax = 2.0 * GIc / sigfn;                         // @todo defaults to zero - will this cause problems?
     this->kn1 = -this->sigfn / ( this->gnmax - this->gn0 );  // slope during softening part in normal dir
 
+    StructuralInterfaceMaterial :: initializeFrom(ir);
+
     this->checkConsistency();                                // check validity of the material paramters
     this->printYourself();
     return IRRT_OK;
+}
+
+void IntMatBilinearCZElastic :: giveInputRecord(DynamicInputRecord &input)
+{
+    StructuralInterfaceMaterial :: giveInputRecord(input);
+
+    input.setField(kn0, _IFT_IntMatBilinearCZElastic_kn);
+    input.setField(knc, _IFT_IntMatBilinearCZElastic_knc);
+    input.setField(ks0, _IFT_IntMatBilinearCZElastic_ks);
+    input.setField(GIc, _IFT_IntMatBilinearCZElastic_g1c);
+    input.setField(sigfn, _IFT_IntMatBilinearCZElastic_sigfn);
 }
 
 int
@@ -245,13 +259,13 @@ IntMatBilinearCZElastic :: checkConsistency()
 {
     double kn0min = 0.5 * this->sigfn * this->sigfn / this->GIc;
     if ( this->kn0 < 0.0 ) {
-        OOFEM_ERROR2("IntMatBilinearCZElastic :: initializeFrom - stiffness kn0 is negative (%.2e)", this->kn0);
+        OOFEM_ERROR("stiffness kn0 is negative (%.2e)", this->kn0);
     } else if ( this->ks0 < 0.0 ) {
-        OOFEM_ERROR2("IntMatBilinearCZElastic :: initializeFrom - stiffness ks0 is negative (%.2e)", this->ks0);
+        OOFEM_ERROR("stiffness ks0 is negative (%.2e)", this->ks0);
     } else if ( this->GIc < 0.0 ) {
-        OOFEM_ERROR2("IntMatBilinearCZElastic :: initializeFrom - GIc is negative (%.2e)", this->GIc);
+        OOFEM_ERROR("GIc is negative (%.2e)", this->GIc);
     } else if ( this->kn0 < kn0min  ) { // => gn0 > gnmax
-        //   OOFEM_ERROR3("IntMatBilinearCZElastic :: initializeFrom - kn0 (%.2e) is below minimum stiffness (%.2e), => gn0 > gnmax, which is unphysical" ,
+        //   OOFEM_ERROR("kn0 (%.2e) is below minimum stiffness (%.2e), => gn0 > gnmax, which is unphysical" ,
         //       this->kn0, kn0min);
     }
     return 1;
@@ -279,7 +293,7 @@ IntMatBilinearCZElastic :: printYourself()
 }
 
 IntMatBilinearCZElasticStatus :: IntMatBilinearCZElasticStatus(int n, Domain *d, GaussPoint *g) : StructuralInterfaceMaterialStatus(n, d, g)
-{}
+{ }
 
 
 IntMatBilinearCZElasticStatus :: ~IntMatBilinearCZElasticStatus()

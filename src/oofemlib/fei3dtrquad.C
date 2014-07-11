@@ -48,7 +48,7 @@ FEI3dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICel
 double
 FEI3dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI3dTrQuad :: evaldNdx - Not supported");
+    OOFEM_ERROR("Not supported");
     return 0.;
 }
 
@@ -104,7 +104,7 @@ FEI3dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const
 {
     FloatArray n;
     this->evalN(n, lcoords, cellgeo);
-    answer.resize(0);
+    answer.clear();
     for ( int i = 1; i <= 6; ++i ) {
         answer.add( n.at(i), * cellgeo.giveVertexCoordinates(i) );
     }
@@ -114,7 +114,7 @@ FEI3dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const
 int
 FEI3dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI3dTrQuad :: global2local - Not supported");
+    OOFEM_ERROR("Not supported");
     return -1;
 }
 
@@ -131,7 +131,7 @@ FEI3dTrQuad :: giveTransformationJacobian(const FloatArray &lcoords, const FEICe
 void
 FEI3dTrQuad :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI3dTrQuad :: giveJacobianMatrixAt - Not supported");
+    OOFEM_ERROR("Not supported");
 }
 
 
@@ -151,7 +151,7 @@ void
 FEI3dTrQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge,
                             const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI3dTrQuad :: edgeEvaldNdx - Not supported");
+    OOFEM_ERROR("Not supported");
 }
 
 void
@@ -173,7 +173,7 @@ FEI3dTrQuad :: edgeLocal2global(FloatArray &answer, int iedge,
     this->computeLocalEdgeMapping(edgeNodes, iedge);
     this->edgeEvalN(N, iedge, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 0; i < N.giveSize(); ++i ) {
         answer.add( N(i), * cellgeo.giveVertexCoordinates( edgeNodes(i) ) );
     }
@@ -186,7 +186,7 @@ FEI3dTrQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoor
     IntArray edgeNodes;
     this->computeLocalEdgeMapping(edgeNodes, iedge);
     ///@todo Implement this
-    OOFEM_ERROR("FEI3dTrQuad :: edgeGiveTransformationJacobian - Not supported");
+    OOFEM_ERROR("Not supported");
     return -1;
 }
 
@@ -210,7 +210,7 @@ FEI3dTrQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         bNode = 1;
         cNode = 6;
     } else {
-        OOFEM_ERROR2("FEI3dTrQuad :: computeEdgeMapping: wrong egde number (%d)", iedge);
+        OOFEM_ERROR("wrong egde number (%d)", iedge);
     }
 
     edgeNodes.at(1) = aNode;
@@ -222,7 +222,7 @@ double
 FEI3dTrQuad :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
 {
     ///@todo Implement this
-    OOFEM_ERROR("FEI3dTrQuad :: edgeComputeLength - Not supported");
+    OOFEM_ERROR("Not supported");
     return -1;
 }
 
@@ -269,7 +269,7 @@ FEI3dTrQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
     FloatArray N;
     this->surfaceEvalN(N, isurf, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 0; i < N.giveSize(); ++i ) {
         answer.add( N(i), * cellgeo.giveVertexCoordinates(i) );
     }
@@ -279,7 +279,7 @@ void
 FEI3dTrQuad :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     ///@todo Implement this
-    OOFEM_ERROR("FEI3dTrQuad :: surfaceEvaldNdx - Not supported");
+    OOFEM_ERROR("Not supported");
 }
 
 void
@@ -289,8 +289,8 @@ FEI3dTrQuad :: surfaceEvalBaseVectorsAt(FloatArray &G1, FloatArray &G2, const Fl
     FloatMatrix dNdxi;
     this->surfaceEvaldNdxi(dNdxi, lcoords);
 
-    G1.resize(0);
-    G2.resize(0);
+    G1.clear();
+    G2.clear();
     for ( int i = 0; i < 6; ++i ) {
         G1.add( dNdxi(i, 1), * cellgeo.giveVertexCoordinates(i) );
         G2.add( dNdxi(i, 2), * cellgeo.giveVertexCoordinates(i) );
@@ -332,14 +332,14 @@ FEI3dTrQuad :: surfaceGiveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const Fl
 double
 FEI3dTrQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI3dTrQuad :: surfaceGiveTransformationJacobian - Not supported yet");
+    OOFEM_ERROR("Not supported yet");
     return 0;
 }
 
 void
 FEI3dTrQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 {
-    surfNodes.setValues(6, 1, 2, 3, 4, 5, 6);
+    surfNodes = {1, 2, 3, 4, 5, 6};
 }
 
 IntegrationRule *
@@ -355,7 +355,7 @@ IntegrationRule *
 FEI3dTrQuad :: giveBoundaryIntegrationRule(int order, int boundary)
 {
     ///@todo Not sure about what defines boundaries on these elements. 2 surfaces + 3 edges? Ask Jim about this.
-    OOFEM_ERROR("FEI3dTrQuad :: giveBoundaryIntegrationRule - Not supported");
+    OOFEM_ERROR("Not supported");
     return NULL;
 }
 } // end namespace oofem

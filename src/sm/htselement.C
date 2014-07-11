@@ -61,13 +61,13 @@ HTSelement :: HTSelement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 
 
 void
-HTSelement :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+HTSelement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 {
     if ( inode <= numberOfEdges ) {
-        answer.setValues(0);
+        answer.clear();
     } else {
-        answer.setValues(4, D_u_edge_const, D_u_edge_lin, D_v_edge_const, D_v_edge_lin);
+        answer = {D_u_edge_const, D_u_edge_lin, D_v_edge_const, D_v_edge_lin};
     }
 }
 
@@ -75,7 +75,6 @@ HTSelement :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) co
 IRResultType
 HTSelement :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macr
     //IRResultType result;                 // Required by IR_GIVE_FIELD macro
     this->StructuralElement :: initializeFrom(ir);
     numberOfGaussPoints = 8;
@@ -84,9 +83,9 @@ HTSelement :: initializeFrom(InputRecord *ir)
 
 #if 0
     if ( !( ( numberOfGaussPoints == 1 ) ||
-            ( numberOfGaussPoints == 4 ) ||
-            ( numberOfGaussPoints == 9 ) ||
-            ( numberOfGaussPoints == 16 ) ) ) {
+           ( numberOfGaussPoints == 4 ) ||
+           ( numberOfGaussPoints == 9 ) ||
+           ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 #endif
@@ -97,13 +96,12 @@ HTSelement :: initializeFrom(InputRecord *ir)
 void
 HTSelement :: computeGaussPoints()
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = numberOfEdges;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(numberOfEdges);
 
-        for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+        for ( int i = 0; i < numberOfEdges; i++ ) {
             integrationRulesArray [ i ] = new GaussIntegrationRule(i + 1, this, 1, 100);
-            integrationRulesArray [ i ]->setUpIntegrationPoints(_Line, numberOfGaussPoints, _1dMat);
+            integrationRulesArray [ i ]->SetUpPointsOnLine(numberOfGaussPoints, _1dMat);
         }
     }
 }
@@ -179,7 +177,6 @@ HTSelement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                      TimeStep *tStep)
 // Computes numerically the stiffness matrix of the receiver.
 {
-    GaussPoint *gp;
     IntegrationRule *iRule;
     double dV;
     answer.resize(numberOfDofs, numberOfDofs);
@@ -193,8 +190,7 @@ HTSelement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     for ( int i = 0; i < numberOfEdges; i++ ) {
         iRule = this->giveIntegrationRule(i);
         this->computeOutwardNormalMatrix(N, i + 1);
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
+        for ( GaussPoint *gp: *iRule ) {
             dV = this->computeVolumeAroundSide(gp, i + 1);
             this->computeFMatrixAt(Fedge, N, gp, i + 1);
             Fedge.times(dV);
@@ -253,15 +249,14 @@ HTSelement :: computePrescribedDisplacementLoadVectorAt(FloatArray &answer, Time
 
     //  FloatArray PuEdge,Pu(numberOfDofs);
     //FloatMatrix N;
-    //GaussPoint* gp;
     //IntegrationRule* iRule;
 
     FloatArray u;
     FloatMatrix K;
 
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf(mode, tStep, u);
     if ( u.containsOnlyZeroes() ) {
-        answer.resize(0);
+        answer.clear();
     } else {
         this->computeStiffnessMatrix(K, TangentStiffness, tStep);
         answer.beProductOf(K, u);
@@ -274,8 +269,7 @@ HTSelement :: computePrescribedDisplacementLoadVectorAt(FloatArray &answer, Time
     for ( int i = 0; i < numberOfEdges; i++ ) {
         this->computeOutwardNormalMatrix(N, i + 1);
         iRule =  this->giveIntegrationRule(i);
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
+        for ( GaussPoint *gp: *iRule ) {
             dV = this->computeVolumeAroundSide(gp, i + 1);
             this->computePuVectorAt(PuEdge, N, u, gp, i + 1);
             PuEdge.times(dV);
@@ -291,8 +285,7 @@ HTSelement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
                                       int iEdge, TimeStep *tStep, ValueModeType mode)
 {
     double dV;
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
-    GaussPoint *gp;
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     IntegrationRule *iRule;
     FloatArray force, PsEdge, Ps(numberOfDofs);
 
@@ -300,8 +293,7 @@ HTSelement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
     answer.resize(numberOfDofs);
     for ( int i = 0; i < numberOfEdges; i++ ) {
         iRule = this->giveIntegrationRule(i);
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
+        for ( GaussPoint *gp: *iRule ) {
             edgeLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
             dV = this->computeVolumeAroundSide(gp, i + 1);
             this->computePsVectorAt(PsEdge, force, gp);
@@ -323,7 +315,7 @@ HTSelement :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueM
     Load *load;
     FloatArray helpLoadVector;
 
-    answer.resize(0);
+    answer.clear();
 
     // loop over boundary load array
     nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
@@ -338,7 +330,7 @@ HTSelement :: computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueM
                 answer.add(helpLoadVector);
             }
         } else {
-            OOFEM_ERROR3("HTSelement :: computeLocalForceLoadVector - boundary load %d is of unsupported type (%d)", id, ltype);
+            OOFEM_ERROR("boundary load %d is of unsupported type (%d)", id, ltype);
         }
     }
     this->computePrescribedDisplacementLoadVectorAt(helpLoadVector, tStep, mode);

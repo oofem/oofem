@@ -71,16 +71,10 @@ class OOFEM_EXPORT RigidArmNode : public Node
 protected:
     ///
     IntArray masterMask;
-    /// Count of Master Dofs
-    IntArray *countOfMasterDofs;
     /// Number of master DofManager (Node)
     int masterDofMngr;
     /// Pointer to master Node
     Node *masterNode;
-    ///
-    IntArray **masterDofID;
-    /// Array of vectors of master contribution coefficients
-    FloatArray **masterContribution;
 
 private:
     void allocAuxArrays();
@@ -92,17 +86,19 @@ public:
      * @param n Node number in domain aDomain.
      * @param aDomain Domain to which node belongs.
      */
-    RigidArmNode(int n, Domain *aDomain);
+    RigidArmNode(int n, Domain * aDomain);
     /// Destructor.
     virtual ~RigidArmNode(void) { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void postInitialize();
+    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
     virtual int checkConsistency();
     /**
      * Compute vector of master contribution coefficients - SUMA of contributions == 1.0
      */
-    void computeMasterContribution();
+    void computeMasterContribution(std::map< DofIDItem, IntArray > &masterDofID, 
+                                   std::map< DofIDItem, FloatArray > &masterContribution);
 
     virtual const char *giveClassName() const { return "RigidArmNode"; }
     virtual const char *giveInputRecordName() const { return _IFT_RigidArmNode_Name; }

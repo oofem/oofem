@@ -39,6 +39,10 @@
 #include "classfactory.h"
 #include "contextioerr.h"
 
+#ifdef __PARALLEL_MODE
+ #include "loadbalancer.h"
+#endif
+
 namespace oofem {
 REGISTER_EngngModel(AdaptiveLinearStatic);
 
@@ -56,19 +60,19 @@ AdaptiveLinearStatic :: updateYourself(TimeStep *tStep)
         return;
     } else {
         // do remeshing
-        MesherInterface *mesher = classFactory.createMesherInterface( meshPackage, this->giveDomain(1) );
+        std :: unique_ptr< MesherInterface >mesher( classFactory.createMesherInterface( meshPackage, this->giveDomain(1) ) );
         Domain *newDomain;
 
         MesherInterface :: returnCode result =
             mesher->createMesh(tStep, 1, this->giveDomain(1)->giveSerialNumber() + 1, & newDomain);
 
-        if ( result == MesherInterface :: MI_OK ) {} else if ( result == MesherInterface :: MI_NEEDS_EXTERNAL_ACTION ) {
+        if ( result == MesherInterface :: MI_OK ) { } else if ( result == MesherInterface :: MI_NEEDS_EXTERNAL_ACTION ) {
             // terminate step
             //this->terminate( tStep );
             //this->terminateAnalysis();
             //exit(1);
         } else {
-            _error("solveYourselfAt: MesherInterface::createMesh failed");
+            OOFEM_ERROR("createMesh failed");
         }
     }
 }
@@ -87,7 +91,7 @@ AdaptiveLinearStatic :: terminate(TimeStep *tStep)
 
 
 int
-AdaptiveLinearStatic :: initializeAdaptive(int tStepumber)
+AdaptiveLinearStatic :: initializeAdaptive(int tStepNumber)
 {
     /*
      * Due to linear character of the problem,
@@ -99,12 +103,12 @@ AdaptiveLinearStatic :: initializeAdaptive(int tStepumber)
     /*
      * this -> initStepIncrements();
      *
-     * int sernum = tStepumber + 1;
+     * int sernum = tStepNumber + 1;
      * printf ("\nrestoring domain %d.%d\n", 1, sernum);
      * Domain* dNew = new Domain (1, sernum, this);
      * FILE* domainInputFile;
      * this->giveDomainFile (&domainInputFile, 1, sernum, contextMode_read);
-     * if (!dNew -> instanciateYourself(domainInputFile)) _error ("initializeAdaptive: domain Instanciation failed");
+     * if (!dNew -> instanciateYourself(domainInputFile)) OOFEM_ERROR("domain Instanciation failed");
      * fclose (domainInputFile);
      *
      * printf ("\ndeleting old domain\n");
@@ -115,7 +119,7 @@ AdaptiveLinearStatic :: initializeAdaptive(int tStepumber)
      * this->forceEquationNumbering();
      *
      * // set time step
-     * this->giveCurrentStep()->setTime(tStepumber+1);
+     * this->giveCurrentStep()->setTime(tStepNumber+1);
      *
      * // init equation numbering
      * // this->forceEquationNumbering();
@@ -140,7 +144,6 @@ IRResultType
 AdaptiveLinearStatic :: initializeFrom(InputRecord *ir)
 // input from inputString
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     LinearStatic :: initializeFrom(ir);

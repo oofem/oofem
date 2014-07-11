@@ -63,7 +63,7 @@ public:
 
     virtual MaterialMode giveMaterialMode() { return _2dHeat; } ///@todo This isn't actually correct.
 
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual void giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueModeType mode, TimeStep *tStep);
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
     virtual void computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep);
@@ -82,7 +82,6 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Tr1Darcy_Name; }
     virtual const char *giveClassName() const { return "Tr1Darcy"; }
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
     virtual Interface *giveInterface(InterfaceType interface);
 };
 }

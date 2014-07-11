@@ -40,11 +40,6 @@
 #include "nonlocmatstiffinterface.h"
 #include "cltypes.h"
 
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
- #include "connectivitytable.h"
-#endif
-
 ///@name Input fields for TrabBoneNL
 //@{
 #define _IFT_TrabBoneNL_Name "trabbonenl"
@@ -63,7 +58,7 @@ protected:
     double localCumPlastStrainForAverage;
 
 public:
-    TrabBoneNLStatus(int n, Domain *d, GaussPoint *g);
+    TrabBoneNLStatus(int n, Domain * d, GaussPoint * g);
     virtual ~TrabBoneNLStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -91,7 +86,7 @@ protected:
     double mParam;
 
 public:
-    TrabBoneNL(int n, Domain *d);
+    TrabBoneNL(int n, Domain * d);
     virtual ~TrabBoneNL();
 
     virtual const char *giveClassName() const { return "TrabBoneNL"; }
@@ -104,9 +99,9 @@ public:
 
     virtual void computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
+    virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
 
-    void computeLocalCumPlastStrain(double &alpha, const StrainVector &strain, GaussPoint *gp, TimeStep *tStep)
+    void computeLocalCumPlastStrain(double &alpha, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
     {
         TrabBoneMaterial :: computeCumPlastStrain(alpha, gp, tStep);
     }

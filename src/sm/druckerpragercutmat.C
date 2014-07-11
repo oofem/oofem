@@ -82,13 +82,12 @@ DruckerPragerCutMat :: hasMaterialModeCapability(MaterialMode mode)
 IRResultType
 DruckerPragerCutMat :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // required by IR_GIVE_FIELD macro
     IRResultType result;                 // required by IR_GIVE_FIELD macro
 
     StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
-    G = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveShearModulus();
-    K = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveBulkModulus();
+    G = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveShearModulus();
+    K = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveBulkModulus();
 
     IR_GIVE_FIELD(ir, tau0, _IFT_DruckerPragerCutMat_tau0); // initial yield stress under pure shear (DP model)
     IR_GIVE_FIELD(ir, sigT, _IFT_DruckerPragerCutMat_sigT); // uniaxial tensile strength for cut-off, (Rankine plasticity model)
@@ -189,7 +188,7 @@ DruckerPragerCutMat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatri
         gradientMatrix.resize(4, 4);
         break;
     default:
-        OOFEM_ERROR2( "Unknown material mode (%s)", __MaterialModeToString( gp->giveMaterialMode() ) );
+        OOFEM_ERROR("Unknown material mode (%s)", __MaterialModeToString( gp->giveMaterialMode() ) );
     }
 
     gradientMatrix.zero();
@@ -240,7 +239,7 @@ DruckerPragerCutMat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatri
             }
             gradientMatrix.symmetrized();
         } else {
-            OOFEM_ERROR2( "Unknown material mode (%s)", __MaterialModeToString( gp->giveMaterialMode() ) );
+            OOFEM_ERROR("Unknown material mode (%s)", __MaterialModeToString( gp->giveMaterialMode() ) );
         }
     }
 }

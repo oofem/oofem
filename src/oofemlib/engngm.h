@@ -37,14 +37,12 @@
 
 #include "oofemcfg.h"
 #include "inputrecord.h"
-#include "alist.h"
 #include "intarray.h"
 #include "fieldmanager.h"
 #include "timer.h"
 #include "chartype.h"
 #include "unknowntype.h"
 #include "varscaletype.h"
-#include "equationid.h"
 #include "numericalcmpn.h"
 #include "valuemodetype.h"
 #include "problemmode.h"
@@ -58,15 +56,10 @@
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
  #include "problemcommunicatormode.h"
- #include "loadbalancer.h"
 #endif
 
 #ifdef __PARALLEL_MODE
  #include "parallelcontext.h"
-#endif
-
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
 #endif
 
 #include <string>
@@ -84,6 +77,7 @@
 #define _IFT_EngngModel_loadBalancingFlag "lbflag"
 #define _IFT_EngngModel_forceloadBalancingFlag "forcelb1"
 #define _IFT_EngngModel_initialGuess "initialguess"
+#define _IFT_EngngModel_referenceFile "referencefile"
 
 #define _IFT_EngngModel_lstype "lstype"
 #define _IFT_EngngModel_smtype "smtype"
@@ -91,7 +85,7 @@
 //@}
 
 namespace oofem {
-template< class T >class AList;
+template< class T > class AList;
 class Domain;
 class TimeStep;
 class Dof;
@@ -107,6 +101,9 @@ class InitModuleManager;
 class ExportModuleManager;
 class FloatMatrix;
 class FloatArray;
+class LoadBalancer;
+class LoadBalancerMonitor;
+class oofegGraphicContext;
 
 #ifdef __PARALLEL_MODE
 class ProblemCommunicator;
@@ -188,6 +185,11 @@ public:
 #ifdef __PARALLEL_MODE
     enum EngngModel_UpdateMode { EngngModel_Unknown_Mode, EngngModel_SUMM_Mode, EngngModel_SET_Mode };
     enum EngngModelCommType { PC_default, PC_nonlocal };
+    /// Helper struct to pass array and numbering scheme as a single argument.
+    struct ArrayWithNumbering {
+        FloatArray *array;
+        const UnknownNumberingScheme *numbering;
+    };
 #endif
 
     /**
@@ -235,17 +237,14 @@ protected:
     /// Receivers id.
     int number;
 
-    //DefaultEquationNumbering
-    EModelDefaultEquationNumbering defaultNumberingScheme;
-    // DefaultPrescribedEquationNumbering
-    EModelDefaultPrescribedEquationNumbering defaultPrescribedNumberingScheme;
-
     /// Path to output stream.
     std :: string dataOutputFileName;
     /// String with core output file name
     std :: string coreOutputFileName;
     /// Output stream.
     FILE *outputStream;
+    /// String with reference file name
+    std :: string referenceFileName;
     /// Domain context output mode.
     ContextOutputMode contextOutputMode;
     int contextOutputStep;
@@ -261,8 +260,6 @@ protected:
     problemScale pScale;
     /// Solution start time.
     time_t startTime;
-    // initial value of processor time used by program
-    // clock_t startClock;
 
     /// Master e-model; if defined receiver is in maintained (slave) mode.
     EngngModel *master;
@@ -314,27 +311,6 @@ protected:
     ProblemCommunicator *nonlocCommunicator;
     /// Message tags
     enum { InternalForcesExchangeTag, MassExchangeTag, LoadExchangeTag, ReactionExchangeTag, RemoteElementExchangeTag };
-    /**
-     * Packing function for vector values of DofManagers. Packs vector values of shared/remote DofManagers
-     * into send communication buffer of given process communicator.
-     * @param processComm Task communicator.
-     * @param src Source vector.
-     * @param prescribedEquations True if src uses prescribed equations numbering.
-     * @return Nonzero if successful.
-     */
-    int packDofManagers(FloatArray *src, ProcessCommunicator &processComm, bool prescribedEquations);
-    /**
-     * Unpacking function for vector values of DofManagers . Unpacks vector of shared/remote DofManagers
-     * from  receive communication buffer of given process communicator.
-     * @param processComm Task communicator.
-     * @param dest Destination vector.
-     * @param prescribedEquations True if src uses prescribed equations numbering.
-     * @return Nonzero if successful.
-     */
-    int unpackDofManagers(FloatArray *dest, ProcessCommunicator &processComm, bool prescribedEquations);
-#endif // __PARALLEL_MODE
-
-#ifdef __PARALLEL_MODE
     /// List where parallel contexts are stored.
     AList< ParallelContext > *parallelContextList;
 #endif
@@ -343,7 +319,7 @@ public:
     /**
      * Constructor. Creates Engng model with number i.
      */
-    EngngModel(int i, EngngModel *_master = NULL);
+    EngngModel(int i, EngngModel * _master = NULL);
     /// Destructor.
     virtual ~EngngModel();
 
@@ -380,6 +356,12 @@ public:
      * to which extensions, like .out .vtu .osf should be added.
      */
     std :: string giveOutputBaseFileName() { return dataOutputFileName; }
+
+    /**
+     * Returns reference file name.
+     */
+    std :: string giveReferenceFileName()  { return referenceFileName;}
+
     /**
      * Sets the base output file name.
      * @see giveOutputBaseFileName
@@ -490,7 +472,7 @@ public:
      * This process should typically include restoring old solution, instanciating newly
      * generated domain(s) and by mapping procedure.
      */
-    virtual int initializeAdaptive(int tStepumber) { return 0; }
+    virtual int initializeAdaptive(int tStepNumber) { return 0; }
 
     /**
      * Returns number of equations for given domain in active (current time step) time step.
@@ -515,6 +497,12 @@ public:
     ///Returns the master engnmodel
     EngngModel *giveMasterEngngModel() { return this->master; }
 
+    /// Returns the current load level.
+    virtual double giveLoadLevel() { return 1.0; }
+
+    /// Only relevant for eigen value analysis. Otherwise returns zero.
+    virtual double giveEigenValue(int eigNum) { return 0.0; }
+
 #ifdef __PARALLEL_MODE
     /// Returns the communication object of reciever.
     MPI_Comm giveParallelComm() { return this->comm; }
@@ -524,14 +512,7 @@ public:
      * @param ExchangeTag Exchange tag used by communicator.
      * @return Nonzero if successful.
      */
-    int updateSharedDofManagers(FloatArray &answer, int ExchangeTag);
-    /**
-     * Exchanges necessary remote prescribed DofManagers data.
-     * @param answer Array with collected values.
-     * @param ExchangeTag Exchange tag used by communicator.
-     * @return Nonzero if successful.
-     */
-    int updateSharedPrescribedDofManagers(FloatArray &answer, int ExchangeTag);
+    int updateSharedDofManagers(FloatArray &answer, const UnknownNumberingScheme &s, int ExchangeTag);
     /**
      * Exchanges necessary remote element data with remote partitions. The receiver's nonlocalExt flag must be set.
      * Uses receiver nonlocCommunicator to perform the task using packRemoteElementData and unpackRemoteElementData
@@ -568,39 +549,29 @@ public:
      * Packing function for vector values of DofManagers. Packs vector values of shared/remote DofManagers
      * into send communication buffer of given process communicator.
      * @param processComm Task communicator.
-     * @param src Source vector.
+     * @param src Source vector + equation numbering.
      * @return Nonzero if successful.
      */
-    int packDofManagers(FloatArray *src, ProcessCommunicator &processComm);
-    /**
-     * Packing function for vector values of DofManagers. Packs vector values of shared/remote prescribed DofManagers
-     * into send communication buffer of given process communicator.
-     * @param processComm Task communicator.
-     * @param src Source vector.
-     * @return Nonzero if successful.
-     */
-    int packPrescribedDofManagers(FloatArray *src, ProcessCommunicator &processComm);
+    int packDofManagers(ArrayWithNumbering *src, ProcessCommunicator &processComm);
     /**
      * Unpacking function for vector values of DofManagers . Unpacks vector of shared/remote DofManagers
      * from  receive communication buffer of given process communicator.
      * @param processComm Task communicator.
-     * @param dest Destination vector.
+     * @param dest Destination vector + equation numbering.
      * @return Nonzero if successful.
      */
-    int unpackDofManagers(FloatArray *dest, ProcessCommunicator &processComm);
-    /**
-     * Unpacking function for vector values of DofManagers . Unpacks vector of shared/remote prescribed DofManagers
-     * from  receive communication buffer of given process communicator.
-     * @param processComm Task communicator.
-     * @param dest Destination vector.
-     * @return Nonzero if successful.
-     */
-    int unpackPrescribedDofManagers(FloatArray *dest, ProcessCommunicator &processComm);
+    int unpackDofManagers(ArrayWithNumbering *dest, ProcessCommunicator &processComm);
 
     void initializeCommMaps(bool forceInit = false);
 
     ProblemCommunicator *giveProblemCommunicator(EngngModelCommType t) {
-        if ( t == PC_default ) { return communicator; } else if ( t == PC_nonlocal ) { return nonlocCommunicator; } else { return NULL; }
+        if ( t == PC_default ) {
+            return communicator;
+        } else if ( t == PC_nonlocal ) {
+            return nonlocCommunicator;
+        } else {
+            return NULL;
+        }
     }
 #endif
     /**
@@ -690,30 +661,65 @@ public:
      * like error estimators, solvers, etc, having domains as attributes.
      */
     virtual void updateDomainLinks();
-    void resolveCorrespondingtStepumber(int &, int &, void *obj);
+    void resolveCorrespondingStepNumber(int &, int &, void *obj);
     /// Returns current meta step.
     MetaStep *giveCurrentMetaStep();
     /// Returns current time step.
-    TimeStep *giveCurrentStep() { if ( master ) { return master->giveCurrentStep(); } else { return currentStep; } }
+    TimeStep *giveCurrentStep() {
+        if ( master ) {
+            return master->giveCurrentStep();
+        } else {
+            return currentStep;
+        }
+    }
     /// Returns previous time step.
-    TimeStep *givePreviousStep() { if ( master ) { return master->givePreviousStep(); } else { return previousStep; } }
+    TimeStep *givePreviousStep() {
+        if ( master ) {
+            return master->givePreviousStep();
+        } else {
+            return previousStep;
+        }
+    }
     /// Returns next time step (next to current step) of receiver.
     virtual TimeStep *giveNextStep() { return NULL; }
     /// Returns the solution step when Initial Conditions (IC) apply.
-    virtual TimeStep *giveSolutionStepWhenIcApply() { if ( master ) { return master->giveCurrentStep(); } else { return stepWhenIcApply; } }
+    virtual TimeStep *giveSolutionStepWhenIcApply() {
+        if ( master ) {
+            return master->giveCurrentStep();
+        } else {
+            return stepWhenIcApply;
+        }
+    }
     /// Returns number of first time step used by receiver.
-    virtual int giveNumberOfFirstStep() { if ( master ) { return master->giveNumberOfFirstStep(); } else { return 1; } }
+    virtual int giveNumberOfFirstStep() {
+        if ( master ) {
+            return master->giveNumberOfFirstStep();
+        } else {
+            return 1;
+        }
+    }
     /// Return number of meta steps.
     int giveNumberOfMetaSteps() { return nMetaSteps; }
     /// Returns the i-th meta step.
     MetaStep *giveMetaStep(int i);
     /// Returns total number of steps.
-    int giveNumberOfSteps() { if ( master ) { return master->giveNumberOfSteps(); } else { return numberOfSteps; } }
+    int giveNumberOfSteps() {
+        if ( master ) {
+            return master->giveNumberOfSteps();
+        } else {
+            return numberOfSteps;
+        }
+    }
     /// Returns end of time interest (time corresponding to end of time integration).
     virtual double giveEndOfTimeOfInterest() { return 0.; }
     /// Returns the time step number, when initial conditions should apply.
     virtual int giveNumberOfTimeStepWhenIcApply() {
-        if ( master ) { return master->giveNumberOfTimeStepWhenIcApply(); } else { return 0; } }
+        if ( master ) {
+            return master->giveNumberOfTimeStepWhenIcApply();
+        } else {
+            return 0;
+        }
+    }
     /// Returns reference to receiver's numerical method.
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep) { return NULL; }
     /// Returns receiver's export module manager.
@@ -741,15 +747,15 @@ public:
      * Assigns context file-descriptor for given step number to stream.
      * Returns nonzero on success.
      * @param contextFile Assigned file descriptor.
-     * @param tStepumber Solution step number to store/restore.
+     * @param tStepNumber Solution step number to store/restore.
      * @param stepVersion Version of step.
      * @param cmode Determines the i/o mode of context file.
      * @param errLevel Determines the amount of warning messages if errors are encountered, level 0 no warnings reported.
      */
-    int giveContextFile(FILE **contextFile, int tStepumber, int stepVersion,
+    int giveContextFile(FILE **contextFile, int tStepNumber, int stepVersion,
                         ContextFileMode cmode, int errLevel = 1);
     /** Returns true if context file for given step and version is available */
-    bool testContextFile(int tStepumber, int stepVersion);
+    bool testContextFile(int tStepNumber, int stepVersion);
     /**
      * Creates new DataReader for given domain.
      * Returns nonzero on success.
@@ -830,18 +836,12 @@ public:
     virtual void updateDofUnknownsDictionary(DofManager *, TimeStep *) { }
     /**
      * This method is responsible for computing unique dictionary id (ie hash value) from
-     * given equationId, valueModeType and time step. This function is used by particular dofs
+     * given valueModeType and time step. This function is used by particular dofs
      * to access unknown identified by given parameters from its dictionary using computed index.
      * Usually the hash algorithm should produce index that depend on time step relatively to
      * actual one to avoid storage of complete history.
      */
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) { return 0; }
-    /**
-     * Returns UnknownNUmberingScheme related to given EquationID
-     */
-    virtual UnknownNumberingScheme &giveUnknownNumberingScheme(EquationID type) {
-        return this->defaultNumberingScheme;
-    }
 
     /**
      * Returns characteristic matrix of element. The Element::giveCharacteristicMatrix function
@@ -886,24 +886,22 @@ public:
      * Assembles characteristic matrix of required type into given sparse matrix.
      * @param answer Assembled matrix.
      * @param tStep Time step, when answer is assembled.
-     * @param eid Determines type of equation and corresponding element code numbers.
      * @param s Determines the equation numbering scheme.
      * @param type Characteristic components of type type are requested from elements and assembled.
      * @param domain Source domain.
      */
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles characteristic matrix of required type into given sparse matrix.
      * @param answer assembled matrix
      * @param tStep Time step, when answer is assembled.
-     * @param eid Determines type of equation and corresponding element code numbers.
      * @param r_s Determines the equation numbering scheme for the rows.
      * @param c_s Determines the equation numbering scheme for the columns.
      * @param type Characteristic components of type type are requested from elements and assembled.
      * @param domain Source domain.
      */
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
     /**
      * Assembles characteristic vector of required type from dofManagers, element, and active boundary conditions, into given vector.
@@ -911,7 +909,6 @@ public:
      * The return value is used to normalize the residual when checking for convergence in nonlinear problems.
      * For parallel problems, the returned norm is also summed over all processes.
      * @param answer Assembled vector.
-     * @param eid Determines type of equation and corresponding element code numbers.
      * @param mode Mode of unknown (total, incremental, rate of change).
      * @param tStep Time step, when answer is assembled.
      * @param type Characteristic components of type type are requested.
@@ -920,7 +917,7 @@ public:
      * @param eNorms If non-NULL, squared norms of each internal force will be added to this, split up into dof IDs.
      * @return Sum of element/node norm (squared) of assembled vector.
      */
-    void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid, CharType type, ValueModeType mode,
+    void assembleVector(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                         const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from dofManagers into given vector.
@@ -939,7 +936,6 @@ public:
      * Assembles characteristic vector of required type from elements into given vector.
      * @param answer Assembled vector.
      * @param tStep Time step, when answer is assembled.
-     * @param eid Determines type of equation and corresponding element code numbers.
      * @param mode Mode of unknown (total, incremental, rate of change).
      * @param type Characteristic components of type type are requested
      * from elements and assembled using prescribed eqn numbers.
@@ -948,15 +944,13 @@ public:
      * @param eNorms Norms for each dofid (optional).
      * @return Sum of element norm (squared) of assembled vector.
      */
-    void assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                    CharType type, ValueModeType mode,
+    void assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                                     const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**
      * Assembles characteristic vector of required type from boundary conditions.
      * @param answer Assembled vector.
      * @param tStep Time step, when answer is assembled.
-     * @param eid Determines type of equation and corresponding element code numbers.
      * @param mode Mode of unknown (total, incremental, rate of change).
      * @param type Characteristic components of type type are requested
      * from elements and assembled using prescribed eqn numbers.
@@ -964,8 +958,7 @@ public:
      * @param domain Domain to assemble from.
      * @param eNorms Norms for each dofid (optional).
      */
-    void assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                              CharType type, ValueModeType mode,
+    void assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                               const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**
@@ -973,13 +966,11 @@ public:
      * useful for obtaining a good initial guess in nonlinear analysis with Dirichlet boundary conditions.
      * @param answer Assembled vector.
      * @param tStep Time step, when answer is assembled.
-     * @param eid Determines type of equation and corresponding element code numbers.
      * @param type Determines the type of matrix to use, typically the tangent matrix or possibly the elastic tangent.
      * @param domain Domain to assemble from.
      * @return Sum of element norm (squared) of assembled vector.
      */
-    void assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                    CharType type, Domain *domain);
+    void assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, CharType type, Domain *domain);
 
 protected:
 #ifdef __PARALLEL_MODE
@@ -1015,7 +1006,11 @@ public:
      * invoke initialization by individual init modules.
      */
     virtual void init();
-
+    /**
+     * Performs post-initialization for all the problem  contents (which is called after initializeFrom).
+     * Currently, it calls Domain::postInitialize for all problem domains.
+     */
+    virtual void postInitialize();
     /**
      * Prints output of receiver to output domain stream, for given time step.
      * Corresponding function for element gauss points is invoked
@@ -1120,23 +1115,8 @@ public:
     virtual void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep) { }
 #endif
 
-    /**@name Error and warning reporting methods.
-     * These methods will print error (or warning) message using oofem default loggers.
-     * Do not use these methods directly, to avoid specify file and line parameters.
-     * More preferably, use these methods via corresponding OOFEM_CLASS_ERROR and OOFEM_CLASS_WARNING macros,
-     * that will include file and line parameters automatically.
-     *
-     * Uses variable number of arguments, so a format string followed by optional arguments is expected
-     * (according to printf conventions).
-     * @param file Source file name, where error encountered (where error* function called).
-     * @param line Source file line number, where error encountered.
-     */
-    //@{
-    /// prints error message and exits
-    void error(const char *file, int line, const char *format, ...) const;
-    /// prints warning message
-    void warning(const char *file, int line, const char *format, ...) const;
-    //@}
+    /// Returns string for prepending output (used by error reporting macros).
+    std :: string errorInfo(const char *func) const;
 };
 } // end namespace oofem
 #endif // engngm_h

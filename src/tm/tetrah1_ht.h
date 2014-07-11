@@ -54,7 +54,7 @@ protected:
     static FEI3dTetLin interpolation;
 
 public:
-    Tetrah1_ht(int n, Domain *d);
+    Tetrah1_ht(int n, Domain * d);
     virtual ~Tetrah1_ht();
 
     virtual FEInterpolation *giveInterpolation() const;
@@ -73,10 +73,6 @@ public:
     virtual int testElementExtension(ElementExtension ext)
     { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
 #ifdef __OOFEG
@@ -98,7 +94,7 @@ protected:
 class Tetrah1_hmt : public Tetrah1_ht
 {
 public:
-    Tetrah1_hmt(int n, Domain *d);
+    Tetrah1_hmt(int n, Domain * d);
 
     virtual const char *giveInputRecordName() const { return _IFT_Tetrah1_hmt_Name; }
     virtual const char *giveClassName() const { return "Tetrah1_hmt"; }

@@ -74,9 +74,13 @@ public:
     /// Constructor, creates empty send and receive com buffs in MPI_COMM_WORLD.
     ProcessCommunicatorBuff(CommBuffType t);
     ~ProcessCommunicatorBuff() {
-        if ( send_buff ) { delete send_buff; }
+        if ( send_buff ) {
+            delete send_buff;
+        }
 
-        if ( recv_buff ) { delete recv_buff; }
+        if ( recv_buff ) {
+            delete recv_buff;
+        }
     }
 
     /**@name Methods for datatype packing/unpacking to/from buffer */
@@ -310,7 +314,7 @@ public:
      * @param irank Rank of associated partition.
      * @param m Mode of communicator.
      */
-    ProcessCommunicator(ProcessCommunicatorBuff *b, int irank, CommunicatorMode m = CommMode_Static);
+    ProcessCommunicator(ProcessCommunicatorBuff * b, int irank, CommunicatorMode m = CommMode_Static);
     /// Destructor
     ~ProcessCommunicator() { }
 
@@ -321,9 +325,11 @@ public:
 
     ///  Returns communication buffer.
     ProcessCommunicatorBuff *giveProcessCommunicatorBuff() {
-        if ( pcBuffer ) { return pcBuffer; }
+        if ( pcBuffer ) {
+            return pcBuffer;
+        }
 
-        OOFEM_ERROR("ProcessCommunicator::giveRecvBuff : ProcessCommunicatorBuff undefined");
+        OOFEM_ERROR("ProcessCommunicatorBuff undefined");
         return NULL;
     }
 
@@ -348,7 +354,7 @@ public:
      * @param packUnpackType Determines the type of packed quantity, used by emodel estimateMaxPackSize
      * service to estimate the size of pack/unpack buffer accordingly.
      */
-    template< class T >void setToSendArry(T *emodel, const IntArray &src, int packUnpackType);
+    template< class T > void setToSendArry(T *emodel, const IntArray &src, int packUnpackType);
     /**
      * Sets receiver toRecv array to src. The method assumes that toRecv array is sorted according
      * to global number associated to corresponding components given in src array. THis is necessary to
@@ -359,7 +365,7 @@ public:
      * @param packUnpackType Determines the type of packed quantity, used by emodel estimateMaxPackSize
      * service to estimate the size of pack/unpack buffer accordingly.
      */
-    template< class T >void setToRecvArry(T *emodel, const IntArray &src, int packUnpackType);
+    template< class T > void setToRecvArry(T *emodel, const IntArray &src, int packUnpackType);
     /**
      * Pack nodal data to send buff.
      * @param emodel Engineering model to pack.
@@ -367,12 +373,15 @@ public:
      * to loop over required nodes.
      * @see NlDEIDynamic_Unpack_func
      */
-    template< class T >int packData( T *emodel, int ( T :: *packFunc )( ProcessCommunicator & ) )
+    template< class T > int packData( T *emodel, int ( T :: *packFunc )( ProcessCommunicator & ) )
     {
         if ( !toSend.isEmpty() || ( this->mode == CommMode_Dynamic ) ) {
             giveProcessCommunicatorBuff()->initForPacking();
             return ( emodel->*packFunc )(* this);
-        } else { return 1; } }
+        } else {
+            return 1;
+        }
+    }
     /**
      * Pack nodal data to send buff.
      * @param emodel Engineering model to pack.
@@ -381,12 +390,15 @@ public:
      * to loop over required nodes.
      * @see NlDEIDynamic_Unpack_func
      */
-    template< class T, class P >int packData( T *emodel, P *src, int ( T :: *packFunc )( P *, ProcessCommunicator & ) )
+    template< class T, class P > int packData( T *emodel, P *src, int ( T :: *packFunc )( P *, ProcessCommunicator & ) )
     {
         if ( !toSend.isEmpty() || ( this->mode == CommMode_Dynamic ) ) {
             giveProcessCommunicatorBuff()->initForPacking();
             return ( emodel->*packFunc )(src, * this);
-        } else { return 1; } }
+        } else {
+            return 1;
+        }
+    }
     /**
      * Unpack nodal data from recv buff.
      * @param emodel Engineering model to unpack from.
@@ -394,12 +406,15 @@ public:
      * to loop over required nodes.
      * @see NlDEIDynamic_Unpack_func
      */
-    template< class T >int unpackData( T *emodel,  int ( T :: *unpackFunc )( ProcessCommunicator & ) )
+    template< class T > int unpackData( T *emodel,  int ( T :: *unpackFunc )( ProcessCommunicator & ) )
     {
         if ( !toReceive.isEmpty() || ( this->mode == CommMode_Dynamic ) ) {
             giveProcessCommunicatorBuff()->initForUnpacking();
             return ( emodel->*unpackFunc )(* this);
-        } else { return 1; } }
+        } else {
+            return 1;
+        }
+    }
     /**
      * Unpack nodal data from recv buff.
      * @param emodel Engineering model to unpack from.
@@ -408,12 +423,15 @@ public:
      * to loop over required nodes.
      * @see NlDEIDynamic_Unpack_func
      */
-    template< class T, class P >int unpackData( T *emodel,  P *dest, int ( T :: *unpackFunc )( P *, ProcessCommunicator & ) )
+    template< class T, class P > int unpackData( T *emodel,  P *dest, int ( T :: *unpackFunc )( P *, ProcessCommunicator & ) )
     {
         if ( !toReceive.isEmpty() || ( this->mode == CommMode_Dynamic ) ) {
             giveProcessCommunicatorBuff()->initForUnpacking();
             return ( emodel->*unpackFunc )(dest, * this);
-        } else { return 1; } }
+        } else {
+            return 1;
+        }
+    }
     /**
      * Initializes data exchange with associated problem.
      * if send or receive pool is empty, the send or receive communication is not performed.
@@ -460,7 +478,7 @@ private:
      * service to estimate the size of pack/unpack buffer accordingly.
      * @return Nonzero if success.
      */
-    template< class T >int resizeSendBuff(T *emodel, int packUnpackType);
+    template< class T > int resizeSendBuff(T *emodel, int packUnpackType);
     /**
      * Resizes receive buffer to needs according to toRecv  array.
      * Current implementation uses EngngModel::estimateMaxPackSize function,
@@ -470,10 +488,10 @@ private:
      * service to estimate the size of pack/unpack buffer accordingly.
      * @return Nonzero if success.
      */
-    template< class T >int resizeRecvBuff(T *emodel, int packUnpackType);
+    template< class T > int resizeRecvBuff(T *emodel, int packUnpackType);
 };
 
-template< class T >void
+template< class T > void
 ProcessCommunicator :: setToSendArry(T *emodel, const IntArray &src, int packUnpackType)
 {
     toSend = src;
@@ -483,7 +501,7 @@ ProcessCommunicator :: setToSendArry(T *emodel, const IntArray &src, int packUnp
 }
 
 
-template< class T >void
+template< class T > void
 ProcessCommunicator :: setToRecvArry(T *emodel, const IntArray &src, int packUnpackType)
 {
     toReceive = src;
@@ -493,7 +511,7 @@ ProcessCommunicator :: setToRecvArry(T *emodel, const IntArray &src, int packUnp
 }
 
 
-template< class T >int
+template< class T > int
 ProcessCommunicator :: resizeSendBuff(T *emodel, int packUnpackType)
 {
     int size;
@@ -505,7 +523,7 @@ ProcessCommunicator :: resizeSendBuff(T *emodel, int packUnpackType)
 }
 
 
-template< class T >int
+template< class T > int
 ProcessCommunicator :: resizeRecvBuff(T *emodel, int packUnpackType)
 {
     int size;

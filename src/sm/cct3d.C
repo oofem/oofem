@@ -40,6 +40,8 @@
 #include "gaussintegrationrule.h"
 #include "classfactory.h"
 
+#include <cstdlib>
+
 namespace oofem {
 REGISTER_Element(CCTPlate3d);
 
@@ -58,7 +60,7 @@ CCTPlate3d :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
     FloatArray offset;
     // test the parametr
     if ( global.giveSize() != 3 ) {
-        _error("giveLocalCoordinate : cannot transform coordinates - size mismatch");
+        OOFEM_ERROR("cannot transform coordinates - size mismatch");
         exit(1);
     }
 
@@ -76,7 +78,7 @@ CCTPlate3d :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
 void
 CCTPlate3d :: giveNodeCoordinates(double &x1, double &x2, double &x3,
                                   double &y1, double &y2, double &y3,
-                                  double *z)
+                                  double &z1, double &z2, double &z3)
 {
     FloatArray nc1(3), nc2(3), nc3(3);
 
@@ -92,18 +94,17 @@ CCTPlate3d :: giveNodeCoordinates(double &x1, double &x2, double &x3,
     y2 = nc2.at(2);
     y3 = nc3.at(2);
 
-    if ( z ) {
-        z [ 0 ] = nc1.at(3);
-        z [ 1 ] = nc2.at(3);
-        z [ 2 ] = nc3.at(3);
-    }
+    z1 = nc1.at(3);
+    z2 = nc2.at(3);
+    z3 = nc3.at(3);
+
 }
 
 
 void
-CCTPlate3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+CCTPlate3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
+    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
 
 
@@ -115,21 +116,18 @@ CCTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
 {
     // rotate the input point Coordinate System into the element CS
     FloatArray inputCoords_ElCS;
-    FloatArray lc [ 3 ], llc;
-    const FloatArray *lcptr [ 3 ] = {
-        lc, lc + 1, lc + 2
-    };
-    this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >( coords ) );
+    std::vector< FloatArray > lc(3);
+    FloatArray llc;
+    this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >(coords) );
     for ( int _i = 0; _i < 3; _i++ ) {
         this->giveLocalCoordinates( lc [ _i ], * this->giveNode(_i + 1)->giveCoordinates() );
     }
-    FEIVertexListGeometryWrapper wr(3, lcptr);
     FEI2dTrLin _interp(1, 2);
-    bool inplane = _interp.global2local(llc, inputCoords_ElCS, wr) > 0;
+    bool inplane = _interp.global2local(llc, inputCoords_ElCS, FEIVertexListGeometryWrapper(lc)) > 0;
     answer.resize(2);
     answer.at(1) = inputCoords_ElCS.at(1);
     answer.at(2) = inputCoords_ElCS.at(2);
-    GaussPoint _gp(NULL, 1, new FloatArray(answer), 2.0, _2dPlate);
+    GaussPoint _gp(NULL, 1, new FloatArray ( answer ), 2.0, _2dPlate);
     // now check if the third local coordinate is within the thickness of element
     bool outofplane = ( fabs( inputCoords_ElCS.at(3) ) <= this->giveCrossSection()->give(CS_Thickness, & _gp) / 2. );
 
@@ -266,12 +264,12 @@ CCTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
         answer.at(1, 2) = charVect.at(3) / 2.;
         answer.at(2, 1) = charVect.at(3) / 2.;
     } else {
-        _error("GiveCharacteristicTensor: unsupported tensor mode");
+        OOFEM_ERROR("unsupported tensor mode");
         exit(1);
     }
 
     if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentumTensor  ) ||
-         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
+        ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
         answer.rotatedWith(* GtoLRotationMatrix);
     }
@@ -284,10 +282,10 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
     FloatMatrix globTensor;
     CharTensor cht;
 
-    answer.resize(12);
+    answer.resize(9);
 
-    if ( ( type == IST_ShellForceMomentumTensor ) || ( type == IST_ShellStrainCurvatureTensor ) ) {
-        if ( type == IST_ShellForceMomentumTensor ) {
+    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellStrainTensor ) ) {
+        if ( type == IST_ShellForceTensor ) {
             cht = GlobalForceTensor;
         } else {
             cht = GlobalStrainTensor;
@@ -296,13 +294,18 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
         answer.at(1) = globTensor.at(1, 1); //sxForce
-        answer.at(2) = globTensor.at(2, 2); //syForce
-        answer.at(3) = globTensor.at(3, 3); //szForce
-        answer.at(4) = globTensor.at(2, 3); //syzForce
-        answer.at(5) = globTensor.at(1, 3); //qxzForce
-        answer.at(6) = globTensor.at(1, 2); //qxyForce
+        answer.at(2) = globTensor.at(1, 2); //qxyForce
+        answer.at(3) = globTensor.at(1, 3); //qxzForce
+        answer.at(4) = globTensor.at(1, 2); //qxyForce
+        answer.at(5) = globTensor.at(2, 2); //syForce
+        answer.at(6) = globTensor.at(2, 3); //syzForce
+        answer.at(7) = globTensor.at(1, 3); //qxzForce
+        answer.at(8) = globTensor.at(2, 3); //syzForce
+        answer.at(9) = globTensor.at(3, 3); //szForce
 
-        if ( type == IST_ShellForceMomentumTensor ) {
+        return 1;
+    } else if ( ( type == IST_ShellMomentumTensor ) || ( type == IST_ShellCurvatureTensor ) ) {
+        if ( type == IST_ShellMomentumTensor ) {
             cht = GlobalMomentumTensor;
         } else {
             cht = GlobalCurvatureTensor;
@@ -310,20 +313,43 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
         this->giveCharacteristicTensor(globTensor, cht, gp, tStep);
 
-        answer.at(7)  = globTensor.at(1, 1); //mxForce
-        answer.at(8)  = globTensor.at(2, 2); //myForce
+        answer.at(1)  = globTensor.at(1, 1); //mxForce
+        answer.at(2)  = globTensor.at(1, 2); //mxyForce
+        answer.at(3)  = globTensor.at(1, 3); //mxzForce
+        answer.at(4)  = globTensor.at(1, 2); //mxyForce
+        answer.at(5)  = globTensor.at(2, 2); //myForce
+        answer.at(6)  = globTensor.at(2, 3); //myzForce
+        answer.at(7)  = globTensor.at(1, 3); //mxzForce
+        answer.at(8)  = globTensor.at(2, 3); //myzForce
         answer.at(9)  = globTensor.at(3, 3); //mzForce
-        answer.at(10) = globTensor.at(2, 3); //myzForce
-        answer.at(11) = globTensor.at(1, 3); //mxzForce
-        answer.at(12) = globTensor.at(1, 2); //mxyForce
 
         return 1;
     } else {
-        answer.resize(0);
-        return 0;
+        return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
+int
+CCTPlate3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
+// Returns the rotation matrix of the receiver of the size [6,6]
+// f(local) = T * f(global)
+{
+    // test if previously computed
+    if ( GtoLRotationMatrix == NULL ) {
+        this->computeGtoLRotationMatrix();
+    }
+
+    answer.resize(6, 6);
+    answer.zero();
+
+    for ( int i = 1; i <= 3; i++ ) {
+        answer.at(1, i) = answer.at(4, i + 3) = GtoLRotationMatrix->at(1, i);
+        answer.at(2, i) = answer.at(5, i + 3) = GtoLRotationMatrix->at(2, i);
+        answer.at(3, i) = answer.at(6, i + 3) = GtoLRotationMatrix->at(3, i);
+    }
+
+    return 1;
+}
 
 void
 CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
@@ -334,12 +360,11 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
 //  different coordinate system in each node)
 {
     double dens, dV, load;
-    GaussPoint *gp = NULL;
     FloatArray force;
     FloatMatrix T;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        _error("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("unknown load type");
     }
 
     GaussIntegrationRule irule(1, this, 1, 5);
@@ -349,7 +374,7 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
     forLoad->computeComponentArrayAt(force, tStep, mode);
 
     if ( force.giveSize() ) {
-        gp = irule.getIntegrationPoint(0);
+        GaussPoint *gp = irule.getIntegrationPoint(0);
 
         dens = this->giveStructuralCrossSection()->give('d', gp); // constant density assumed
         dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp); // constant thickness assumed
@@ -377,42 +402,125 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
             answer.rotatedWith(T, 'n');
         }
     } else {
-        answer.resize(0);          // nil resultant
+        answer.clear();          // nil resultant
     }
 }
 
+void
+CCTPlate3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
+{
+    int i, j;
+    FloatMatrix ne;
+    this->computeNmatrixAt(* sgp->giveCoordinates(), ne);
+
+    answer.resize(6, 18);
+    answer.zero();
+    int ri[] = {
+        2, 3, 4
+    };
+    int ci[] = {
+        2, 3, 4, 8, 9, 10, 14, 15, 16
+    };
+
+    for ( i = 0; i < 3; i++ ) {
+        for ( j = 0; j < 9; j++ ) {
+            answer(ri [ i ], ci [ j ]) = ne(i, j);
+        }
+    }
+}
+
+void
+CCTPlate3d :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
+{
+    answer.resize(18);
+    answer.zero();
+    if ( iSurf == 1 ) {
+        answer.at(3) = 1; // node 1
+        answer.at(4) = 2;
+        answer.at(5) = 3;
+
+        answer.at(9)  = 4; // node 2
+        answer.at(10) = 5;
+        answer.at(11) = 6;
+
+        answer.at(15) = 7; // node 3
+        answer.at(16) = 8;
+        answer.at(17) = 9;
+    } else {
+        OOFEM_ERROR("wrong surface number");
+    }
+}
+
+IntegrationRule *
+CCTPlate3d :: GetSurfaceIntegrationRule(int approxOrder)
+{
+    IntegrationRule *iRule = new GaussIntegrationRule(1, this, 1, 1);
+    int npoints = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, approxOrder);
+    iRule->SetUpPointsOnTriangle(npoints, _Unknown);
+    return iRule;
+}
+
+double
+CCTPlate3d :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
+{
+    return this->computeVolumeAround(gp);
+}
+
+
+void
+CCTPlate3d :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
+{
+    this->computeGlobalCoordinates( answer, * gp->giveCoordinates() );
+}
+
+
+int
+CCTPlate3d :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, GaussPoint *gp)
+{
+    return 0;
+}
 
 void
 CCTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
-    int i, j;
-    GaussPoint *gp;
     FloatArray v;
 
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
-        for ( j = 0; j < integrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = integrationRulesArray [ i ]->getIntegrationPoint(j);
-
-            // gp   -> printOutputAt(file,tStep) ;
+    for ( int i = 0; i < (int)integrationRulesArray.size(); i++ ) {
+        for ( GaussPoint *gp: *integrationRulesArray [ i ] ) {
 
             fprintf( file, "  GP %2d.%-2d :", i + 1, gp->giveNumber() );
 
-            this->giveIPValue(v, gp, IST_ShellStrainCurvatureTensor, tStep);
-            fprintf(file, "  strains ");
+            this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
+            fprintf(file, "  strains    ");
+            // eps_x, eps_y, eps_z, eps_yz, eps_xz, eps_xy (global)
             fprintf( file,
-                     " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                     v.at(1), v.at(2), v.at(3),  2. * v.at(4), 2. * v.at(5), 2. * v.at(6),
-                     v.at(7), v.at(8), v.at(9),  2. * v.at(10), 2. * v.at(11), 2. * v.at(12) );
+                    " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
-            this->giveIPValue(v, gp, IST_ShellForceMomentumTensor, tStep);
-            fprintf(file, "\n              stresses");
+            this->giveIPValue(v, gp, IST_ShellCurvatureTensor, tStep);
+            fprintf(file, "\n              curvatures ");
+            // k_x, k_y, k_z, k_yz, k_xz, k_xy (global)
             fprintf( file,
-                     " % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e % .4e ",
-                     v.at(1), v.at(2), v.at(3),  v.at(4), v.at(5), v.at(6),
-                     v.at(7), v.at(8), v.at(9),  v.at(10), v.at(11), v.at(12) );
+                    " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+
+            // Forces - Moments
+            this->giveIPValue(v, gp, IST_ShellForceTensor, tStep);
+            fprintf(file, "\n              stresses   ");
+            // n_x, n_y, n_z, v_yz, v_xz, v_xy (global)
+            fprintf( file,
+                    " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
+
+            this->giveIPValue(v, gp, IST_ShellMomentumTensor, tStep);
+            fprintf(file, "\n              moments    ");
+            // m_x, m_y, m_z, m_yz, m_xz, m_xy (global)
+            fprintf( file,
+                    " % .4e % .4e % .4e % .4e % .4e % .4e ",
+                    v.at(1), v.at(5), v.at(9),  v.at(6), v.at(3), v.at(2) );
 
             fprintf(file, "\n");
         }

@@ -88,11 +88,11 @@ FEI2dTrLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const 
     l3 = 1.0 - l1 - l2;
 
     answer.at(1) = ( l1 * cellgeo.giveVertexCoordinates(1)->at(xind) +
-                     l2 * cellgeo.giveVertexCoordinates(2)->at(xind) +
-                     l3 * cellgeo.giveVertexCoordinates(3)->at(xind) );
+                    l2 * cellgeo.giveVertexCoordinates(2)->at(xind) +
+                    l3 * cellgeo.giveVertexCoordinates(3)->at(xind) );
     answer.at(2) = ( l1 * cellgeo.giveVertexCoordinates(1)->at(yind) +
-                     l2 * cellgeo.giveVertexCoordinates(2)->at(yind) +
-                     l3 * cellgeo.giveVertexCoordinates(3)->at(yind) );
+                    l2 * cellgeo.giveVertexCoordinates(2)->at(yind) +
+                    l3 * cellgeo.giveVertexCoordinates(3)->at(yind) );
 }
 
 #define POINT_TOL 1.e-3
@@ -115,11 +115,10 @@ FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const F
 
     answer.at(1) = ( ( x2 * y3 - x3 * y2 ) + ( y2 - y3 ) * coords.at(xind) + ( x3 - x2 ) * coords.at(yind) ) / detJ;
     answer.at(2) = ( ( x3 * y1 - x1 * y3 ) + ( y3 - y1 ) * coords.at(xind) + ( x1 - x3 ) * coords.at(yind) ) / detJ;
-    answer.at(3) = 1. - answer.at(1) - answer.at(2);
 
     // check if point is inside
     bool inside = true;
-    for ( int i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 2; i++ ) {
         if ( answer.at(i) < ( 0. - POINT_TOL ) ) {
             answer.at(i) = 0.;
             inside = false;
@@ -128,6 +127,15 @@ FEI2dTrLin :: global2local(FloatArray &answer, const FloatArray &coords, const F
             inside = false;
         }
     }
+
+    if( ( answer.at(1) + answer.at(2)) > 1.0 ) {
+        const double temp = 0.5*( answer.at(1) + answer.at(2) - 1.);
+        answer.at(1) -= temp;
+        answer.at(2) -= temp;
+        inside = false;
+    }
+
+    answer.at(3) = 1. - answer.at(1) - answer.at(2);
 
     return inside;
 }
@@ -195,9 +203,9 @@ FEI2dTrLin :: edgeLocal2global(FloatArray &answer, int iedge,
 
     answer.resize(2);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) +
-                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) );
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) );
     answer.at(2) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(yind) +
-                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) );
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) );
 }
 
 
@@ -217,7 +225,7 @@ FEI2dTrLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         aNode = 3;
         bNode = 1;
     } else {
-        OOFEM_ERROR2("FEI2dTrLin :: computeEdgeMapping: wrong egde number (%d)", iedge);
+        OOFEM_ERROR("wrong egde number (%d)", iedge);
     }
 
     edgeNodes.at(1) = aNode;

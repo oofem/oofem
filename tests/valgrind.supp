@@ -1,0 +1,92 @@
+{
+   petsc_uninit
+   Memcheck:Param
+   writev(vector[...])
+   ...
+   fun:PetscInitialize
+   ...
+}
+
+{
+   petcs_addr4
+   Memcheck:Addr4
+   fun:opal_*
+   ...
+   fun:PetscInitialize
+   ...
+}
+
+
+{
+   petsc_init_leak
+   Memcheck:Leak
+   match-leak-kinds: all
+   fun:*alloc
+   ...
+   fun:PetscInitialize
+   ...
+}
+
+{
+   petsc_pmpi_leak
+   Memcheck:Leak
+   match-leak-kinds: all
+   fun:*alloc
+   ...
+   fun:PMPI_Init_thread
+   ...
+}
+
+
+{
+   petsc_finalize_leak
+   Memcheck:Leak
+   match-leak-kinds: all
+   fun:*alloc
+   ...
+   fun:PetscFinalize
+   ...
+}
+
+
+{
+   mpi_leak
+   Memcheck:Leak
+   match-leak-kinds: all
+   fun:*alloc
+   ...
+   fun:ompi_mpi_init
+   ...
+}
+
+{
+   mpi_leak2
+   Memcheck:Leak
+   match-leak-kinds: all
+   fun:*alloc
+   ...
+   fun:mca_*
+   ...
+}
+
+{
+   notsure_leak
+   Memcheck:Leak
+   match-leak-kinds: all
+   fun:*alloc
+   ...
+   fun:opal_*
+   ...
+}
+
+
+{
+   not_sure
+   Memcheck:Leak
+   match-leak-kinds: all
+   fun:*alloc
+   ...
+   fun:hwloc_*
+   ...
+}
+

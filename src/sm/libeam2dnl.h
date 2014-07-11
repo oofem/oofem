@@ -52,7 +52,7 @@ protected:
     double pitch, length;
 
 public:
-    LIBeam2dNL(int n, Domain *d);
+    LIBeam2dNL(int n, Domain * d);
     virtual ~LIBeam2dNL() { }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
@@ -70,8 +70,10 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
 
     virtual int computeNumberOfDofs() { return 6; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
+
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LIBeam2dNL_Name; }
@@ -103,7 +105,7 @@ protected:
     virtual void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int);
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeGaussPoints();
-    double giveLength();
+    virtual double computeLength();
     double givePitch();
 };
 } // end namespace oofem

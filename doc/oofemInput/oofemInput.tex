@@ -16,9 +16,12 @@
 \usepackage{microtype}
 \usepackage{html}
 \usepackage{graphicx}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{listings}   
 %\usepackage{tikz}
 %\usepackage{hyperref}
 \usepackage[top=0.1\paperheight, bottom=0.1\paperheight, left=0.1\paperwidth, right=0.1\paperwidth]{geometry}
+\usepackage{tabularx}
 \usepackage{ifthen}
 
 \input{include.tex}
@@ -39,26 +42,28 @@
 \newcommand{\dev}{\mathrm{dev}}
 \newcommand{\vol}{\mathrm{vol}}
 
-\newcommand{\param}[1]{\texttt{#1}} % Use when referring to fields in text.
+\newcommand{\param}[1]{\texttt{#1}} % Use when referring to attributes in text.
 \newcommand{\optional}[1]{[#1]} % Denotes optional parameter
-\newcommand{\field}[2]{\param{#1}~\#{\tiny(#2)}} % Fields #1 = identifier, #2 = type
+\newcommand{\field}[2]{\param{#1}~\#{\tiny(#2)}} % Attribute #1 = identifier, #2 = type
 \newcommand{\optField}[2]{\optional{\field{#1}{#2}}}
 \newcommand{\fieldnotype}[1]{\param{#1}}
 \newcommand{\optFieldnotype}[1]{[\param{#1}]}
 \newcommand{\componentNum}{(\param{num}\#){\tiny(in)}} % For the component number.
 \newcommand{\entKeyword}[1]{*\textbf{#1}} % For general keywords, e.g. ``engnmodel''
 \newcommand{\entKeywordInst}[1]{\textbf{#1}} % For specific keywords, e.g. ``nlinearstatic''
+\newcommand{\entKeywordWithVal}[2]{*\textbf{#1}~\#{\tiny(#2)}} % For general keywords, e.g. ``engnmodel''
+\newcommand{\entKeywordInstWithVal}[2]{\textbf{#1}~\#{\tiny(#2)}} % For specific keywords, e.g. ``nlinearstatic''
 
 % macros for items related to parallel
 \newcommand{\Pmode}[1]{{\sffamily #1}}
 \newcommand{\Pparam}[1]{\param{#1}}
-\renewcommand{\parallel}[1]{$\langle${#1}$\rangle$}
-\newcommand{\PentKeyword    }[1]{\parallel{\entKeyword{#1}}}
-\newcommand{\PentKeywordInst}[1]{\parallel{\entKeywordInst{#1}}}
-\newcommand{\Pfield         }[2]{\parallel{\field{#1}{#2}}}
-\newcommand{\Pfieldnotype   }[1]{\parallel{\fieldnotype{#1}}}
-\newcommand{\PoptField      }[2]{\parallel{\optField{#1}{#2}}}
-\newcommand{\PoptFieldnotype}[1]{\parallel{\optFieldnotype{#1}}}
+\newcommand{\oofemParallel}[1]{$\langle${#1}$\rangle$}
+\newcommand{\PentKeyword}[1]{\oofemParallel{\entKeyword{#1}}}
+\newcommand{\PentKeywordInst}[1]{\oofemParallel{\entKeywordInst{#1}}}
+\newcommand{\Pfield}[2]{\oofemParallel{\field{#1}{#2}}}
+\newcommand{\Pfieldnotype}[1]{\oofemParallel{\fieldnotype{#1}}}
+\newcommand{\PoptField}[2]{\oofemParallel{\optField{#1}{#2}}}
+\newcommand{\PoptFieldnotype}[1]{\oofemParallel{\optFieldnotype{#1}}}
 
 \begin{htmlonly}
 \newenvironment{record}[1][]{\begin{tabular}{|ll}}{\end{tabular}\\}
@@ -71,6 +76,32 @@
 \newcommand{\recentry}[2]{\ifthenelse{\value{rcc}>0}{&$\backslash$ \\}{\setcounter{rcc}{1}}{#1}&{#2}}
 %end{latexonly}
 
+\lstdefinelanguage{oofeminput}
+{
+morekeywords={Node, node, Truss2d}, 
+morecomment=[l]{\#},
+emph={coords, bc, ic, nodes, mat, crossSect}, 
+}
+
+\lstdefinestyle{oofem}{
+  belowcaptionskip=1\baselineskip,
+  frame=single,
+  rulecolor=\color{gray},
+  xleftmargin=\parindent,
+  basicstyle=\footnotesize,
+  keywordstyle=\color{red}\bfseries,
+  commentstyle=\itshape, %%\color{green!40!black},
+  emphstyle=\color{red},
+  captionpos=b,
+}
+
+%%\bodytext{
+%%bgcolor="#e5f5ff" text="#000000" link="#0000FF" vlink="#FF0000"
+%%alink="#FF0000"
+%%}
+
+%%\definecolor{oofembgr}{RGB}{229,245,255}
+%%\pagecolor{oofembgr}
 
 \begin{document}
 %begin{latexonly}
@@ -101,67 +132,60 @@ Th\'akurova 7, 166 29 Prague, Czech Republic
 \tableofcontents
 \newpage
 \section{Introduction}
-This report describes in details the format and structure of OOFEM
-text input file. Input file can be created by any available text editor or can be generated
-by some conversion program or by some FEM pre-processor.
+This manual describes in details the format and structure of OOFEM
+text input file. Input file can be prepared in any text editor or can be generated
+by a conversion program or FEM pre-processor.
 
-\Pmode{Some parts of this document are related parallel version of the code (POOFEM).
+\Pmode{Some parts of this document are relevant only to the parallel version of the code (POOFEM).
 These parts are distinguished by typing the text in sans serif font family.}
-\Pmode{In a parallel mode a set of input files must be provided, each one for
-particular process and related partition. The input file corresponding to some
-partition is called partition input file. Its name is composed from two parts. The fist part (referred as base
-name) is user-defined. The second part (called partition name), divided from first part by
-full-stop, is particular partition rank number. The partitions are numbered
-from zero. It is assumed, that all partitions input files have the
-same base name. The partition name is appended automatically to input
-file name, user provides only base name on input. On the other hand,
-the partition name is not appended to output file name, as specified
-in output file record (see section \ref{_OutputFileRecord}).
+\Pmode{The parallel model is based on domain decomposition. In this mode a set of input files must be provided, each one corresponding to 
+particular process and related domain partition. The corresponding domain partition input file is referred as partition input file. 
+The name of partition input file is composed from two parts, the fist part (referred as base
+name) is user-defined, the second part (called partition name), divided from first part by
+full-stop, is corresponding partition rank number. The partitions are numbered
+from zero. All partitions input files must have the
+same base name.
 
 The parallel version requires the unique global numbering  for
 dof managers (nodes) and elements. The global
 numbering is necessary to link partitions together. However, the dof
 managers and optionally elements at interpartion boundaries,
 should be explicitly  marked, in order to distinguish different type
-of relations between their remote counterparts (see further).}
+of relations between their remote counterparts (see further).
+}
 
 \section{Running the code}
 \label{_running_the_code}
-The program may be executed by typing\\
+The program can be executed by typing\\
 \texttt{oofem [option [parameter]] ...}\\
-on the command line prompt with the following command line options:
-\begin{itemize}
-\item
-\textbf{-f string}\\ oofem input file name, if not present, program interactively
-reads this parameter.
-\item
-\textbf{-r int}\\
-Restarts the analysis from given solution step. The corresponding
-context file (*.osf) must exist.
-\item
-\textbf{-rn}\\
-Turns on the equation renumbering. Default is off.
-\item
-\textbf{-ar int}\\
+on the command line prompt with the following command line options:\\[1em]
+\begin{tabularx}{\textwidth}{l|X}
+\hline
+\textbf{\mbox{-v}} & Prints oofem version.\\
+\textbf{\mbox{-f~string}} & path to oofem input file name, if not present, program interactively
+reads this parameter.\Pmode{When invoking the solver in parallel mode, only base name of input file should be specified, 
+the partition name is appended automatically. On the other hand, the partition name is not appended to output file name, as specified
+in output file record (see section \ref{_OutputFileRecord}).}\\
+\textbf{\mbox{-r~int}} & Restarts the analysis from given solution step. The corresponding
+context file (*.osf) must exist.\\
+\textbf{\mbox{-rn}} & Turns on the equation renumbering. Default is off.\\
+\textbf{\mbox{-ar~int}} & 
 Restarts the adaptive computation from given solution step.
 Requires the corresponding context file (*.osf) and domain input file
 (*.din) to exists. The domain input file describes the new mesh, its
 syntax is identical to syntax of input file, but it does not contains
-the output file record, job description record and analysis record.
-\item
-\textbf{-qo string}\\
-Redirect the standard output stream (stdout) to given file.
-\item
-\textbf{-qe string}\\
-Redirect standard error stream (stderr) to given file.
-\item
-\textbf{-context}\\
-Forces the creation of context file for each solution step.
-\end{itemize}
+the output file record, job description record and analysis record.\\
+\textbf{\mbox{-l~int}} & Sets treshold for log messages (Errors=0, Warnings=1,
+Relevant=2, Info=3, Debug=4).\\
+\textbf{\mbox{-qo~string}} & Redirect the standard output stream (stdout) to given file.\\
+\textbf{\mbox{-qe~string}} & Redirect standard error stream (stderr) to given file.\\
+\textbf{\mbox{-c}} & Forces the creation of context file for each solution step.\\
+\hline
+\end{tabularx}\\[1em]
 
 \Pmode{
 The parallel version uses the MPI (Message Passing Interface) standard for message-passing communication. Thus, to execute POOFEM program,
-users must know the procedure for beginning MPI jobs on their selected computer system(s).
+users must know the procedure for executing/scheduling MPI jobs on the particular system(s).
 For instance, when using the MPICH implementation of MPI and many others, the following command initiates a program that uses eight processors: \\[2mm]
 \texttt{mpirun -np 8 poofem program\_options}
 }
@@ -171,10 +195,8 @@ For instance, when using the MPICH implementation of MPI and many others, the fo
 
 \section{Syntax and general rules}
 
-Input file is created by records. In the current implementation, the
-particular record is represented by one line in input file.
-The order of records in file is
-compulsory, and is following
+Input file is composed of records. In the current implementation, each record is represented by one line in input file.
+The order of records in file is compulsory, and it has following structure:
 \begin{enumerate}
 \item output file record, see section \ref{_OutputFileRecord},
 \item job description record, see section \ref{_JobDescriptionRecord},
@@ -193,61 +215,76 @@ compulsory, and is following
 \item time functions record(s), see section \ref{_TimeFunctionsRecords}.
 \item optional xfem manager and associated record(s), see section \ref{_XFEMManagerRecords}
 \end{enumerate}
-When line begins with '\#' character, then it is skipped by parser and
-provide a way, how to include comments inside input file.
+When input line begins with '\#' character, then it is ignored  by the parser and
+can serve as a comment inside input file.
 
-Records contain many fields, each field is characterized by
-keyword and its associated  field value. Some keywords have no field  values.
-Except the first field, the order of remaining fields in record is
-optional. There are several
-exceptions, which will be described in particular sections.
-The type of field value is specific to  keyword.
-General format of field, characterized by keyword ``Keyword'' with
-corresponding value (marked as \#) of type ``type'' is
-\field{Keyword}{type}.
-If keyword is variable, depending on entity type which is
-described by particular record, then the keyword is preceded by star. We call such keyword
-as entity keyword (For example keyword, which  describes  element
-type). The possible
-substitutions for entity keyword are typed using
-\entKeywordInst{Typewriter} font family.
-Often, many fields are specific to particular entity keyword. Then we describe
-general format of record without these specific fields and we describe
-them in entity keyword specific part of record description.
-Sometimes, there are fields without keywords. These are usually
-compulsory, with fixed position in record. Their occurrence is
-described using so called named values. The format of named value is
-``\field{name}{type}'', where a value of required type should be
-substituted.
+The individual records consist of record keyword followed by one or more attributes. Each attribute is identified by
+its keyword, which can be followed by attribute value(s). Some attributes have no values.
+The order of attributes in the record is optional.
 
-In a special case of analysis record, the input record can be followed
-by optional meta-step input records (see section
-\ref{_AnalysisRecord}). Then certain fields originally in analysis
-record should appear in meta-step record instead. This is marked by
-adding ``M'' superscript to keyword. Then the field format is \field{Keyword$^M$}{type}.
+Sometimes, the record keyword itself can be variable, taking on a restricted range of possible values.
+As an example, OOFEM has element record, desribing particulat element, and record keyword determines the  particular element type.
+In this case, the record keyword is preceded by star. We call such record keyword as entity keyword. The possible
+substitutions for entity keyword are typed using \entKeywordInst{Typewriter} font family.
+Often, some attributes are specific to particular entity keyword. Then the general format of record is described and entity specific attributes are described separately. The possible attributes are then union of general and entity specific attributes.
 
-As already mentioned, each field value is typed. The possible types are:
+\begin{lstlisting}[style=oofem, language=oofeminput, caption={Example of input records}]
+# nodal records
+Node 1 coords 3 0. 0. 0. bc 2 1 1
+Node 2 coords 3 0. 0. 2. bc 2 1 0 
+# element record
+Truss2d 1 nodes 2 1 2 mat 1 crossSect 1
+\end{lstlisting}
+
+Each attribute value has a specific type, which describe its size and layout. To describe the type of an attribute, the following notation is used: 
+\field{Keyword}{type}, where type determines the attribute type and \# is the placeholder for the attribute value.
+The possible types of attribute values are following:
 \begin{itemize}
-\item in - integer number.
-\item rn - real number.
-\item ch - character (usually for unknowns description ('d' for
-displacement unknown, 't' for temperature unknown, ...).
-\item ia - integer array, format of integer array is
+\item \textbf{in} - integer number.
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={val1}]
+val1 25
+\end{lstlisting}
+
+\item \textbf{rn} - real number.
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={val2}]
+val2 -0.234e-3
+\end{lstlisting}
+\item \textbf{ch} - character (usually for description of unknown type ('d' for
+displacement, 't' for temperature, etc.).
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={val3}]
+val3 t
+\end{lstlisting}
+
+\item \textbf{ia} - integer array. The format of integer array is
 ``size~val(1)~...~val(size)'', where size, val(1),...,val(size) are
-integer numbers. Values are separated by one or more spaces.
-\item ra - real array, format of real array is
+integer numbers. Values are separated by one or more spaces. As an example, consider the integer array attribute called \param{bc}$=\{1,2,3\}$:
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={bc}]
+bc 3 1 2 3
+\end{lstlisting}
+\item \textbf{ra} - real array. The format of real array is
 ``size~val(1)~...~val(size)'', where size is integer number and val(1),
-..., val(size) are real numbers. Values are separated by one or more spaces;
-\item rm - real matrix, format of real matrix is\\
+..., val(size) are real numbers. Values are separated by one or more spaces. As an example, consider the real array attribute called \param{coords}$=\{1.0,2.0,3.0\}$:
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={coords}]
+coords 3 1.0 2.0 3.0
+\end{lstlisting}
+\item \textbf{rm} - real matrix, format of real matrix is\\
 ``rows~columns~\{val(1,1)~val(1,2)~...;~val(2,1)~...\}'', where ``rows'' and ``columns'' are integer numbers and val(1,1),
 ..., are real numbers. Columns are seperated by space or comma and lines by semicolon.
-\item dc - dictionary. Dictionary consist of pairs, each pair has key
+As an example, consider the real matrix attribute called $\param{mat1}=\left[\begin{array}{ccc}1.0&-1.0&0.0\\2.0&2.5&5.0\end{array}\right]$:
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={mat1}]
+mat1 2 3 1.0 -1.0 0.0 2.0 2.5 5.0
+\end{lstlisting}
+
+\item \textbf{dc} - dictionary. Dictionary consist of pairs, each pair has key
 (character type) and its associated value (integer type).
 Format of dictionary is
 ``size~key(1)~val(1)~...~key(size)~val(size)'', where size is integer
 number, key(1),...,key(size) are single character values, and val(1),
 ..., val(size) are real numbers. Values are separated by one or more spaces;
-\item rl - range list. Range list syntax is \{ number1 .. numberN (start1
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={dict1}]
+dict1 2 a 1.0 v 0.0 
+\end{lstlisting}
+\item \textbf{rl} - range list. Range list syntax is \{ number1 .. numberN (start1
 end1) (start2 end2)\}. The enclosing brackets are compulsory. The range
 list represent list of integer values. Single values can be specified
 using single values (number1, .., NumberN). The range of values
@@ -255,11 +292,17 @@ using single values (number1, .., NumberN). The range of values
 specified using range value in the form (startI endI). The range is
 described using its start and end values enclosed in parenthesis.
 Any number of ranges and single values can be used to specify range list.
-\item et - entity type. For  example, it describes the finite element
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={range1}]
+range1 { 1 7 8 (10 20) (25 30) }
+\end{lstlisting}
+\item \textbf{et} - entity type. For  example, it describes the finite element
 type. Possible type values are mentioned in specific sections.
-\item s - character string. The string have to be enclosed
+\item \textbf{s} - character string. The string have to be enclosed
 in quotes ("") following after corresponding keyword.
-\item expr - function expression. The expression have to be enclosed
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={string1}]
+string1 ``string example''
+\end{lstlisting}
+\item \textbf{expr} - function expression. The expression have to be enclosed
 in quotes (""). The expression is evaluated by internal parser and
 represent mathematical expressions as a function of certain variables.
 The variable names and meaning are described in specific sections.
@@ -268,39 +311,69 @@ evaluation order is taken into account. The evaluation order can be
 changed using parenthesis. Several built-in functions are supported
 (sqrt, sin, cos, tan, atan, asin and acos) - these must be typed using
 lowercase letters and their arguments must be enclosed in parenthesis.
+\begin{lstlisting}[style=oofem, language=oofeminput, moreemph={expr1}]
+expr1 ``2.0*sin(t)/3.0''
+\end{lstlisting}
+
 \end{itemize}
 
 The general format of record is \\
 
 \noindent
 \begin{record}
-  \recentry{}{\field{keyword1}{type} \optField{keyword2}{type}}
+  \recentry{\field{record\_keyword}{type}}{\optField{attribute1\_keyword}{type}}
   \recentry{}{...}
-  \recentry{}{\optField{keywordXX}{type}}
+  \recentry{}{\optField{attributeXX\_keyword}{type}}
 \end{record}
 
-The keywords and their values are separated by one or more spaces. Please note, that a single record cooresponds to one input line in input file. \Pmode{If any keyword or field value is enclosed within angle brackets $\langle$~$\rangle$ then it is related to parallel version of oofem is not available in sequential version.
-When some field is enclosed in brackets [~], then it's use is optional
+The keywords and their values are separated by one or more spaces. Please note, that a single record cooresponds to one input line in input file. 
+
+%In a special case of analysis record, the input record can be followed
+%by optional meta-step input records (see section
+%\ref{_AnalysisRecord}). Then certain attributes originally in analysis
+%record should appear in meta-step record instead. This is marked by
+%adding ``M'' superscript to keyword. Then the attribute format is \field{Keyword$^M$}{type}.
+
+When some attribute is enclosed in brackets [~], then it's use is optional
 and often overwrites the default behavior or adds additional (but
 optional) information or property (for example adds a loading to
-node). }
+node).
+
+\Pmode{If any attribute (and thus its keyword and value) is enclosed within angle brackets $\langle$~$\rangle$ then it is related to parallel version of oofem is not available in sequential version.}
+
+{\flushleft \bf Example of input record.}\\
+As an example, consider the following record description:\\
+\begin{record}
+  \recentry{\entKeywordInstWithVal{Particle}{in}}{\field{color}{in} \field{mass}{rn}}
+  \recentry{}{\field{coords}{ra} \field{name}{s}}
+\end{record}
+The following listing shows the corresponding, properly formatted, input record:
+\begin{lstlisting}[style=oofem, language=oofeminput, caption={Corresponding input record}, moreemph={color, mass, name}, morekeywords={Particle}]
+Particle 2 color 5 mass 0.18 coords 3 0.0 1.0 2.0 name "P1_36"
+\end{lstlisting}
+
+
 
 \section{Output file record}
 \label{_OutputFileRecord}
-This record has no keywords and contains character string, which
-describes the path to output file. If file with the same name exists,
+This record has no keywords and contains a character string, which
+describes the path to output file. If the file with the same name exists,
 it will be overwritten.
 
 \section{Job description record}
 \label{_JobDescriptionRecord}
-This record has no keywords and contains character string, which
+This record has no keywords and contains a character string, which
 describes the job. This description will appear in the output
 file.
 
 \section{Analysis record}
 \label{_AnalysisRecord}
 This record describes the type of analysis, which should be
-performed. The general format of this record can be specified in
+performed. The analysis record can be splitted into optional meta-step input records (see below). 
+Then certain attributes originally in analysis record can be specified independently for each meta-step. This is marked by
+adding ``M'' superscript to keyword. Then the attribute format is \field{Keyword$^M$}{type}.
+
+The general format of this record can be specified in
 \begin{itemize}
 \item ``standard-syntax''\\
   \begin{record}[0.9\textwidth]
@@ -633,7 +706,7 @@ If \param{refloadmode} is 1 (rlm\_inceremental) then the reference load vector i
 obtained as incremental load vector at given time.
 \item[-] \param{solverParams} - parameters of solver. The solver type
 is determined using \param{controlmode}.
-\item The  \param{sparselinsolverparams} parameter describes the sparse
+\item[-] The  \param{sparselinsolverparams} parameter describes the sparse
 linear solver attributes and is explained in section
 \ref{sparselinsolver}.
 \item[-] By default, reached load at the end of
@@ -715,7 +788,7 @@ the parameters \param{rtolv},\param{rtolf}, and \param{rtold} are real values. I
 The indirect solver corresponds to \param{controlmode}=0 and the CALM
 solver is used. The value of reference load vector is determined by
 \param{refloadmode} parameter mentioned above at the first step of
-each metastep. {\em However, the user must ensure, that the same value of
+each metastep. {\em However, the user must ensure that the same value of
 reference load vector could be obtained for all solution steps of
 particular metastep (this is necessary for restart and adaptivity to work)}.
 The corresponding meta step solver parameters (\param{solverParams}) are:\\
@@ -730,11 +803,13 @@ The corresponding meta step solver parameters (\param{solverParams}) are:\\
   \recentry{}{\optField{maxrestarts}{in}}
   \recentry{}{\optField{minIter}{in}}
   \recentry{}{\optField{manrmsteps}{in}}
-  \recentry{}{\optField{hpcmode}{in} \optField{hpc}{ia} \optField{hpcw}{ia}}
+  \recentry{}{\optField{hpcmode}{in} \optField{hpc}{ia} \optField{hpcw}{ra}}
   \recentry{}{\optField{linesearch}{in} \optField{lsearchamp}{rn}}
   \recentry{}{\optField{lsearchmaxeta}{rn} \optField{lsearchtol}{rn}}
   \recentry{}{\optional{\field{nccdg}{in} \field{ccdg1}{ia} ... \field{ccdgN}{ia}}}
   \recentry{}{\field{rtolv}{rn} \optField{rtolf}{rn} \optField{rtold}{rn}}
+  \recentry{}{\optField{pert}{ia} \optField{pertw}{ra}}
+  \recentry{}{\optField{rpa}{rn} \optField{rseed}{in}}
 \end{record}
 where
 \begin{itemize}
@@ -765,15 +840,15 @@ only selected dofs (see \param{hpc} param), 2 - linearized constrain
 in displacements only, taking into account only selected dofs with
 given weight (see \param{hpc} and \param{hpcw} parameters).
 \item \param{hpc} - Special parameter for Hyper-plane control, when only
-selected DOFS are taken account in ALM step length
+selected DOFs are taken account in ALM step length
 condition. Important mainly for material nonlinear problems with
 strong localization. This array selects the degrees of freedom,
-which displacements are controlled. Let the number of these DOFs is N.
+which displacements are controlled. Let the number of these DOFs be N.
 The format of \param{ddm} array is 2*N dofman1 idof1
 dofman2 idof2 ... dofmanN idofN, where the dofmani is the number of i-th dof manager  and idofi is the
 corresponding DOF number.
-\item \param{hpcw} - Array of dof weights in linear constraint. The
-dof ordering is determined by \param{hpc} param, size of array should
+\item \param{hpcw} Array of DOF weights in linear constraint. The
+dof ordering is determined by \param{hpc} parameter, the size of the array should
 be N.
 \item \param{linesearch} nonzero value turns on line search
   algorithm. The \param{lsearchtol} defines tolerance, amplification
@@ -787,6 +862,16 @@ iterative change vector and for residual unbalanced force vector). Optionally, t
 independent relative convergence crteria for unbalanced forces and displacement
 iterative change. If the default convergence criteria is used,
 the parameters \param{rtolv},\param{rtolf}, and \param{rtold} are real values. If the convergence criteria DOF groups are used (see bellow the description of \param{nccdg} parameter) then they should be specified as real valued arrays of \param{nccdg} size, and individual values define relative convergence criteria for each individual dof group.
+\item \param{pert} Array specifying DOFs that should be perturbed after the first iteration of each step. 
+Let the number of these DOFs be M.
+The format of \param{ddm} array is 2*M dofman1 idof1
+dofman2 idof2 ... dofmanN idofN, where the dofmani is the number of i-th dof manager  and idofi is the
+corresponding DOF number.
+\item \param{pertw} Array of DOF perturbations. The
+dof ordering is determined by \param{pert} parameter, the size of the array should
+be M.
+\item \param{rpa} Amplitude of random perturbation that is applied to each DOF.
+\item \param{rseed} Seed for the random generator that generates random perturbations.
 \end{itemize}
 
 \subsubsection{Standard syntax}
@@ -1477,7 +1562,7 @@ various interfaces on fixed grids. Typical examples include free surface,
 evolving interface between two materials, etc.
 Available representations include:
 
-\begin{tabular}{|l|l|l|l|}
+\begin{tabular}{|l|l|l|}
 \hline
 MI & miflag & Compatibility  \\
 \hline
@@ -1495,7 +1580,7 @@ LevelSet & 1 & 2D triangular \\
 \item
 parameter \param{refvol} allows to set initial volume of reference fluid, then the reference volume is computed in each step and printed, so the accuracy and mass conservation can be monitored.
 \end{itemize}
-\item[]
+\item
 LevelSet- level set based representation\\
 \begin{record}[0.9\textwidth]
   \recentry{}{\mbox{[\field{levelset}{ra} OR \field{refmatpolyx}{ra} \field{refmatpolyy}{ra}]}}
@@ -1620,9 +1705,7 @@ Currently, the supported export modules are following
   \recentry{}{\optField{cellvars}{ia}}
   \recentry{}{\optField{ipvars}{ia}}
   \recentry{}{\optField{stype}{in}}
-  \recentry{}{\optField{regionstoskip}{ia}}
-  \recentry{}{\optField{nvr}{in}}
-  \recentry{}{\optField{vrmap}{ia}}
+  \recentry{}{\optField{regionsets}{ia}}
   \recentry{}{\optField{timeScale}{rn}}
 \end{record}
 
@@ -1655,14 +1738,11 @@ InternalStateType enumeration, which is defined in include file
 
 \item The parameter \param{stype} allows to select smoothing procedure for
 internal variables, which is used to compute nodal values from values
-in integration points.
+in integration points. The supported values are $0$ for simple nodal averageing (generally supported only by triangular and tetrahedral elements), $1$ for Zienkiewicz Zhu recovery (default), and $2$ for Superconvergent Patch Recovery (SPR, based on least square fitting).
 
-\item The parameter \param{nvr} allows to set number of virual regions. The internal (state) variables defined in integration points need to be transfered into nodal values. This process is called nodal recovery. VTKXML module allows to perform recovery not only over the whole domain, but also over so called virtual regions. This allows to exactly match discontinuity along region boundary instead of smoothing it. The concept of virtual regions allows to map several true regions onto single virtual region and then perform recovery over virtual regions instead of true ones. Number of true region is given by element cross-section. If \param{nvr} is set to zero (default), the recovery is performed over whole domain (single virtual region), when positive, it should be equal to number of virtual regions and vrmap should be provided. If negative, then recovery over real regions is used.
+\item The export is done on region basis, on each region, the nodal recovery is performed independently and results are exported in a separate piece. This allows to take into account for discntinuities, or to export variables defined only by particular material model. The region volumes are defined using sets containing individual elements. By default the one region is created, containing all element in the problem domain. The optional parameter \param{regionsets} allows to use user-defined.  The individual values refer to numbers (ids) of domain sets. Note, that regions are determined solely using elements.
 
-\item The array \param{vrmap} defines the mapping from real (true) regions to virtual regions. The size of this array
-should equal to number of true regions and values should be in a range $\langle 1, nvr \rangle$. When \param{nvr} is zero or negative, this parameter is ignored. The i-th value defines mapping of true region number to virtual region number. Zero or negative values cause a region to be ignored. For example, to consider only elements associated with a cross-section 1 and disregarding other cross sections, use the line with \param{nvr} and \param{vrmap} as
-
-{\footnotesize vtkxml tstep\_all cellvars 1 46 vars 1 1 primvars 1 1 stype 2 nvr 1 vrmap 2 1 0}
+{\footnotesize vtkxml tstep\_all cellvars 1 46 vars 1 1 primvars 1 1 stype 2 regionsets 2 1 2}
 
 \item \param{timeScale} scales time in output. In transport problem, basic units are seconds. Setting timeScale = 2.777777e-4 (=1/3600.) converts all time data in vtkXML from seconds to hours.
 
@@ -1882,7 +1962,7 @@ and/or natural bc are applied. Analogously, initial conditions are represented u
 
 By default, the number of DOFs per node or side  and their physical meanings are determined by domain record (\entKeyword{domainType} keyword).
 If it is necessary to have
-different number of DOFs, then the \param{ndofs} field
+different number of DOFs, then the \param{ndofs} attribute
 determines number of DOFs in DofManager, and their physical meaning is
 determined by \param{DofIDMask} array. Size of this array
 should be equal to \param{ndofs} value. Each item of \param{DofIDMask}
@@ -1953,7 +2033,7 @@ Supported DofManagerType keywords are
 \end{record}
 Represent an abstraction for finite element node.
 The node coordinates in space (given by global coordinate system) are described
-using \param{coords} field. This array contains x, y and possibly z
+using \param{coords} attribute. This array contains x, y and possibly z
 (depends on problem under consideration) coordinate of node.
 By default, the coordinate system in node is global coordinate system.
 User defined local coordinate system in node is described using \param{lcs} array. This
@@ -2435,7 +2515,7 @@ suitable boundary loads.
 \noindent
 \begin{record}[0.9\textwidth]
   \recentry{\entKeywordInst{LinearConstraintBC}}{\field{weights}{ra}} 
-  \recentry{}{\optField{weightsLtf}{in}}
+  \recentry{}{\optField{weightsLtf}{ia}}
   \recentry{}{\field{dofmans}{in}} \recentry{}{\field{dofs}{in}} 
   \recentry{}{\field{rhs}{rn}} \recentry{}{\optField{rhsLtf}{in}}
   \recentry{}{\field{lhstype}{ia}} \recentry{}{\field{rhsType}{ia}}
@@ -2497,6 +2577,7 @@ where $\langle \tens{\strain} \rangle$ can be imposed as eigenstrain over the do
   \recentry{}{\optField{dofexcludemask}{ia}}
   \recentry{}{\optField{csType}{in}}
   \recentry{}{\optField{properties}{dc}}
+  \recentry{}{\optField{propertytf}{dc}}
 \end{record}
 \item Constant surface fluxes (load)
 
@@ -2507,6 +2588,7 @@ where $\langle \tens{\strain} \rangle$ can be imposed as eigenstrain over the do
   \recentry{}{\optField{dofexcludemask}{ia}}
   \recentry{}{\optField{csType}{in}}
   \recentry{}{\optField{properties}{dc}}
+  \recentry{}{\optField{propertytf}{dc}}
 \end{record}
 Represent constant edge/surface loads or boundary conditions. The \param{ndofs} parameter must be set
 equal to element's number of unknowns. Parameter \param{loadType}
@@ -2533,6 +2615,7 @@ environmental values (temperature of the environment) corresponding to
 element unknowns, and \param{properties} dictionary should contain
 value of transfer (convection) coefficient (assumed to be a constant) under the key 'a'.
 
+The properties can vary in time. Each property can have associated time function which determines its time variation. The time functions are set up using optional \param{propertytf} dictionary, containing for selected properties the corresponding time function number. The time function must be registered under the same key as in \param{properties} dictionary. The property value is then computed by product of property value (determined by \param{properties}) and corresponding time finction evaluated at given time. If no time function provided for particula property, a unit constant function is assumed.
 
 The load can be defined in global coordinate system (\param{csType} =
 0, default) or in entity - specific local coordinate system
@@ -2706,9 +2789,9 @@ This is followed by a line specifying the geometric description (e.g. a polygon
 line or a circle) according to\\
 \noindent
 \begin{record}
-  \recentry{\entKeyword{EntType}}{\componentNum \ extra fields}
+  \recentry{\entKeyword{EntType}}{\componentNum \ extra attributes}
 \end{record}
-where the number and type of extra fields to specify will vary depending on the
+where the number and type of extra attributes to specify will vary depending on the
 geometry chosen, e.g. center and radius for a circle or a number of points for a
 polygon line.
 
@@ -2716,14 +2799,14 @@ If an enrichment front was specified previously, the type and properties of the
 enrichment front are specified on the next line according to\\
 \noindent
 \begin{record}
-  \recentry{\entKeyword{EntType}}{\componentNum \ extra fields}
+  \recentry{\entKeyword{EntType}}{\componentNum \ extra attributes}
 \end{record}
 
 If a propagation law was specified previously, it's type and properties are also
 specified on a separate line according to\\
 \noindent
 \begin{record}
-  \recentry{\entKeyword{EntType}}{\componentNum \ extra fields}
+  \recentry{\entKeyword{EntType}}{\componentNum \ extra attributes}
 \end{record}
 
 

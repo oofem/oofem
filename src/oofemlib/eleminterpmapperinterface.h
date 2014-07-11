@@ -53,19 +53,6 @@ public:
     EIPrimaryUnknownMapperInterface() : Interface() { }
 
     /**
-     * Computes the element vector of primary unknowns at given point. Similar to computeVectorOf,
-     * but the interpolation from element DOFs to given point using element shape function is done.
-     * The method should work also for point outside the volume of element (adaptivity mapping).
-     * @param mode    Identifies mode of unknown (eg. total value or velocity of unknown).
-     * @param tStep   Time step, when vector of unknowns is requested.
-     * @param gcoords Global coordinates of point of interest.
-     * @param answer  Vector of unknowns.
-     * @return Nonzero if given point is in receiver volume otherwise zero
-     */
-    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                 TimeStep *tStep, const FloatArray &gcoords,
-                                                                 FloatArray &answer) = 0;
-    /**
      * Computes the element vector of primary unknowns at given point in the local coordinate system.
      * @see EIPrimaryUnknownMI_computePrimaryUnknownVectorAt
      * @param mode    Identifies mode of unknown (eg. total value or velocity of unknown).
@@ -76,13 +63,7 @@ public:
      */
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                        TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
-    { OOFEM_ERROR("Not implemented\n"); }
-
-    /**
-     * Returns the dof meaning of element vector of primary unknowns.
-     * @param answer Values of DofIDItem type that identify physical meaning of DOFs.
-     */
-    virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer) = 0;
+    { OOFEM_ERROR("Not implemented"); }
 };
 } // end namespace oofem
 #endif // eleminterpmapperinterface_h

@@ -40,12 +40,13 @@
 
 #include "oofemcfg.h"
 #include "floatarray.h"
+
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
 
-
 namespace oofem {
+
 #define GT_EPS 1.e-12
 // zero for parallel lines test
 #define GT_TEPS 1.e-16
@@ -68,8 +69,8 @@ public:
         coords(0) = c [ 0 ];
         coords(1) = c [ 1 ];
     }
-    Vertex(const Vertex &src) : coords(src.coords) { }
-    Vertex &operator=(const Vertex &src) {
+    Vertex(const Vertex & src) : coords(src.coords) { }
+    Vertex &operator = ( const Vertex & src ) {
         coords = src.coords;
         return * this;
     }
@@ -108,9 +109,11 @@ public:
         Vertex curr;
         std :: list< Vertex > :: const_iterator iter;
 public:
-        PolygonEdgeIterator(const Polygon *p) : iter() {
+        PolygonEdgeIterator(const Polygon * p) : iter() {
             iter = p->vertices.begin();
-            if ( iter == p->vertices.end() ) { last = true; } else {
+            if ( iter == p->vertices.end() ) {
+                last = true;
+            } else {
                 curr = ( * iter );
                 ptr = p;
                 last = false;
@@ -118,7 +121,9 @@ public:
         }
         int giveNext(Vertex &p1, Vertex &p2) {
             Vertex next;
-            if ( last ) { return 0; } else {
+            if ( last ) {
+                return 0;
+            } else {
                 //next=*(++iter);
                 ++iter;
                 if ( iter == ptr->vertices.end() ) {
@@ -141,7 +146,7 @@ public:
         const Polygon *ptr;
         std :: list< Vertex > :: const_iterator iter;
 public:
-        PolygonVertexIterator(const Polygon *p) : iter() {
+        PolygonVertexIterator(const Polygon * p) : iter() {
             iter = p->vertices.begin();
             ptr = p;
         }
@@ -150,13 +155,21 @@ public:
             ptr = p;
         }
         int giveNext(Vertex &p1) {
-            if ( iter == ptr->vertices.end() ) { return 0; } else { p1 = ( * iter ); }
+            if ( iter == ptr->vertices.end() ) {
+                return 0;
+            } else {
+                p1 = ( * iter );
+            }
 
             ++iter;
             return 1;
         }
         int giveNext(const Vertex **p1) {
-            if ( iter == ptr->vertices.end() ) { return 0; } else { * p1 = iter.operator->(); }
+            if ( iter == ptr->vertices.end() ) {
+                return 0;
+            } else {
+                * p1 = iter.operator->( );
+            }
 
             ++iter;
             return 1;

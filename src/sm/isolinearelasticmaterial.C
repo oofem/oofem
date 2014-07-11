@@ -60,7 +60,6 @@ IsotropicLinearElasticMaterial :: IsotropicLinearElasticMaterial(int n, Domain *
 IRResultType
 IsotropicLinearElasticMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     double value;
 
@@ -104,17 +103,17 @@ IsotropicLinearElasticMaterial :: give(int aProperty, GaussPoint *gp)
     }
 
     if ( ( aProperty == 'G' ) || ( aProperty == Gyz ) || ( aProperty == Gxz ) ||
-         ( aProperty == Gxy ) ) {
+        ( aProperty == Gxy ) ) {
         return G;
     }
 
     if ( ( aProperty == 'E' ) || ( aProperty == Ex ) || ( aProperty == Ey ) ||
-         ( aProperty == Ez ) ) {
+        ( aProperty == Ez ) ) {
         return E;
     }
 
     if ( ( aProperty == 'n' ) || ( aProperty == NYzx ) || ( aProperty == NYzy ) ||
-         ( aProperty == NYyx ) ) {
+        ( aProperty == NYyx ) ) {
         return nu;
     }
 

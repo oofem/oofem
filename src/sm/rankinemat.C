@@ -80,13 +80,12 @@ RankineMat :: hasMaterialModeCapability(MaterialMode mode)
 IRResultType
 RankineMat :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // required by IR_GIVE_FIELD macro
     IRResultType result;                 // required by IR_GIVE_FIELD macro
 
     StructuralMaterial :: initializeFrom(ir);
     linearElasticMaterial->initializeFrom(ir); // takes care of elastic constants
-    E = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->giveYoungsModulus();
-    nu = static_cast< IsotropicLinearElasticMaterial * >( linearElasticMaterial )->givePoissonsRatio();
+    E = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->giveYoungsModulus();
+    nu = static_cast< IsotropicLinearElasticMaterial * >(linearElasticMaterial)->givePoissonsRatio();
 
     IR_GIVE_FIELD(ir, sig0, _IFT_RankineMat_sig0); // uniaxial yield stress
 
@@ -106,7 +105,7 @@ RankineMat :: initializeFrom(InputRecord *ir)
         ep = ep - sig0 / E; // user input is strain at peak stress sig0 and is converted to plastic strain at peak stress sig0
         md = 1. / log(50. * E * ep / sig0); // exponent used on the 1st plasticity branch
     } else {
-        OOFEM_ERROR2(" Plasticity hardening type number  %d is unknown", plasthardtype);
+        OOFEM_ERROR("Plasticity hardening type number  %d is unknown", plasthardtype);
     }
 
     yieldtol = 1.e-10;
@@ -128,14 +127,14 @@ RankineMat :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, param4, _IFT_RankineMat_param4);
         IR_GIVE_FIELD(ir, param5, _IFT_RankineMat_param5);
     } else {
-        OOFEM_ERROR2("Damage law number  %d is unknown", damlaw);
+        OOFEM_ERROR("Damage law number  %d is unknown", damlaw);
     }
 
     double gf = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, gf, _IFT_RankineMat_gf); // dissipated energy per unit VOLUME
 
     if ( ( a != 0. ) && ( gf != 0 ) ) {
-        OOFEM_ERROR("RankineMat: parameters a and gf cannot be prescribed simultaneously");
+        OOFEM_ERROR("parameters a and gf cannot be prescribed simultaneously");
     }
 
     if ( gf > 0. ) {
@@ -144,7 +143,7 @@ RankineMat :: initializeFrom(InputRecord *ir)
         double B = sig0 * ( 1. + H0 / E );
         double C = 0.5 * sig0 * sig0 / E - gf;
         if ( C >= 0. ) {
-            OOFEM_ERROR("RankineMat: parameter gf is too low");
+            OOFEM_ERROR("parameter gf is too low");
         }
 
         double kappaf = ( -B + sqrt(B * B - 4. * A * C) ) / ( 2. * A );
@@ -182,8 +181,7 @@ RankineMat :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const 
 
     // damage
     double omega = computeDamage(gp, tStep);
-    status->giveTempEffectiveStress(answer);
-    answer.times(1. - omega);
+    answer.beScaled(1. - omega, status->giveTempEffectiveStress());
 
     // store variables in status
     status->setTempDamage(omega);
@@ -213,8 +211,7 @@ RankineMat :: giveRealStressVector_PlaneStress(FloatArray &answer,
 
     // damage
     double omega = computeDamage(gp, tStep);
-    status->giveTempEffectiveStress(answer);
-    answer.times(1. - omega);
+    answer.beScaled(1. - omega, status->giveTempEffectiveStress());
 
     // store variables in status
     status->setTempDamage(omega);
@@ -249,7 +246,7 @@ RankineMat :: evalYieldStress(const double kappa)
     } else if ( plasthardtype == 2 ) { // exponential hardening before the peak stress sig0 and linear after the peak stress sig0
         if ( kappa <= ep ) {
             //1st branch in the rankine variation 2 trying to match the 1st branch of the smooth extended damage law reported by Grassl and Jirasek (2010)
-            yieldStress = 50. *E *kappa *exp(-pow(kappa / ep, md) / md);
+            yieldStress = 50. *E *kappa *exp(-pow ( kappa / ep, md ) / md);
         } else {  //linear hardening branch
             yieldStress = sig0 + H0 * kappa;
         }
@@ -283,12 +280,10 @@ void
 RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain)
 {
     double kappa, tempKappa, H;
-    FloatArray reducedStress;
-    FloatArray strain, tempPlasticStrain;
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     MaterialMode mode = gp->giveMaterialMode();
     // get the initial plastic strain and initial kappa from the status
-    status->givePlasticStrain(tempPlasticStrain);
+    FloatArray tempPlasticStrain = status->givePlasticStrain();
     kappa = tempKappa = status->giveCumulativePlasticStrain();
 
     // elastic predictor
@@ -311,7 +306,7 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
                 i = i + 1;
                 if ( i > 1000 ) {
                     printf("kappa, ftrial: %g %g\n", kappa, ftrial);
-                    OOFEM_ERROR("RankineMat::giveRealStressVector: no convergence of regular stress return algorithm");
+                    OOFEM_ERROR("no convergence of regular stress return algorithm");
                 }
 
                 double ddKappa = f / ( E + evalPlasticModulus(tempKappa) );
@@ -339,7 +334,7 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
                     finalStress.computePrincipalValDir(sigPrinc, nPrinc);
                     sigPrinc.pY();
                     printf("kappa, ftrial: %g %g\n", kappa, ftrial);
-                    OOFEM_ERROR("RankineMat::giveRealStressVector : no convergence of regular stress return algorithm");
+                    OOFEM_ERROR("no convergence of regular stress return algorithm");
                 }
 
                 H = evalPlasticModulus(tempKappa);
@@ -371,7 +366,7 @@ RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStr
                         finalStress.computePrincipalValDir(sigPrinc, nPrinc);
                         sigPrinc.pY();
                         printf("kappa, ftrial: %g %g\n", kappa, ftrial);
-                        OOFEM_ERROR("RankineMat::giveRealStressVector : no convergence of vertex stress return algorithm");
+                        OOFEM_ERROR("no convergence of vertex stress return algorithm");
                     }
 
                     dkap1 += f / C;
@@ -444,7 +439,7 @@ RankineMat :: computeDamageParam(double tempKappa)
         } else if ( damlaw == 1 && tempKappa > ep ) {
             tempDam = 1.0 - exp( -param1 * pow( ( tempKappa - ep ) / ep, param2 ) );
         } else if ( damlaw == 2 && tempKappa > ep ) {
-            tempDam = 1.0 - param5 *exp( -param1 * pow( ( tempKappa - ep ) / ep, param2 ) ) - ( 1. - param5 ) * exp( -param3 * pow( ( tempKappa - ep ) / ep, param4 ) );
+            tempDam = 1.0 - param5 *exp( -param1 *pow ( ( tempKappa - ep ) / ep, param2 ) ) - ( 1. - param5 ) * exp( -param3 * pow( ( tempKappa - ep ) / ep, param4 ) );
         }
     }
 
@@ -459,9 +454,9 @@ RankineMat :: computeDamageParamPrime(double tempKappa)
         if ( damlaw == 0 ) {
             tempDam = a * exp(-a * tempKappa);
         } else if ( damlaw == 1 && tempKappa >= ep ) {
-            tempDam = param1 * param2 * pow( ( tempKappa - ep ) / ep, param2 - 1 ) / ep *exp( -param1 * pow( ( tempKappa - ep ) / ep, param2 ) );
+            tempDam = param1 * param2 * pow( ( tempKappa - ep ) / ep, param2 - 1 ) / ep *exp( -param1 *pow ( ( tempKappa - ep ) / ep, param2 ) );
         } else if ( damlaw == 2 && tempKappa >= ep ) {
-            tempDam = param5 * param1 * param2 * pow( ( tempKappa - ep ) / ep, param2 - 1 ) / ep *exp( -param1 * pow( ( tempKappa - ep ) / ep, param2 ) ) + ( 1. - param5 ) * param3 * param4 * pow( ( tempKappa - ep ) / ep, param4 - 1 ) / ep *exp( -param3 * pow( ( tempKappa - ep ) / ep, param4 ) );
+            tempDam = param5 * param1 * param2 * pow( ( tempKappa - ep ) / ep, param2 - 1 ) / ep *exp( -param1 *pow ( ( tempKappa - ep ) / ep, param2 ) ) + ( 1. - param5 ) * param3 * param4 * pow( ( tempKappa - ep ) / ep, param4 - 1 ) / ep *exp( -param3 *pow ( ( tempKappa - ep ) / ep, param4 ) );
         }
     }
 
@@ -506,19 +501,15 @@ void
 RankineMat :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
-    double om;
+    answer.resize(1, 1);
+    answer.at(1, 1) = this->E;
     if ( mode == ElasticStiffness ) {
-        om = 0.0;
     } else if ( mode == SecantStiffness ) {
-        om = status->giveTempDamage();
-        answer.resize(1, 1);
-        answer.at(1, 1) = this->E;
+        double om = status->giveTempDamage();
         answer.times(1.0 - om);
     } else {
-        _error("RankineMatNl :: give1dStressStiffMtrx ... unknown type of stiffness (secant stiffness not implemented for 1d)\n");
+        OOFEM_ERROR("unknown type of stiffness (secant stiffness not implemented for 1d)");
     }
-
-    return;
 }
 
 // this method is also used by the gradient version,
@@ -593,8 +584,7 @@ RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer,
 
     FloatArray sigPrinc(2);
     FloatMatrix nPrinc(2, 2);
-    StressVector effStress(_PlaneStress);
-    status->giveTempEffectiveStress(effStress);
+    StressVector effStress(status->giveTempEffectiveStress(), _PlaneStress);
     effStress.computePrincipalValDir(sigPrinc, nPrinc);
     // sometimes the method is called with gprime=0., then we can save some work
     if ( gprime != 0. ) {
@@ -646,8 +636,7 @@ RankineMat :: computeEta(FloatArray &answer, RankineMatStatus *status)
 
     FloatArray sigPrinc(2);
     FloatMatrix nPrinc(2, 2);
-    StressVector effStress(_PlaneStress);
-    status->giveTempEffectiveStress(effStress);
+    StressVector effStress(status->giveTempEffectiveStress(), _PlaneStress);
     effStress.computePrincipalValDir(sigPrinc, nPrinc);
 
     FloatMatrix T(3, 3);

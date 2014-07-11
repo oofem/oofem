@@ -45,7 +45,7 @@ class Space3dStructuralElementEvaluator : public StructuralElementEvaluator
 {
 public:
     Space3dStructuralElementEvaluator() : StructuralElementEvaluator() { }
-    virtual ~Space3dStructuralElementEvaluator() {}
+    virtual ~Space3dStructuralElementEvaluator() { }
 
 protected:
     /**
@@ -61,8 +61,8 @@ protected:
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
-        answer.setValues(3, D_u, D_v, D_w);
+    void giveDofManDofIDMask(int inode, IntArray &answer) const {
+        answer = {D_u, D_v, D_w};
     }
 };
 } // end namespace oofem

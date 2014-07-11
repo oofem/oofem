@@ -49,7 +49,7 @@ REGISTER_Element(QSpace);
 
 FEI3dHexaQuad QSpace :: interpolation;
 
-QSpace :: QSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+QSpace :: QSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 20;
 }
@@ -82,9 +82,9 @@ QSpace :: giveMaterialOrientationAt(FloatArray &x, FloatArray &y, FloatArray &z,
 
 
 void
-QSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+QSpace :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(3, D_u, D_v, D_w);
+    answer = {D_u, D_v, D_w};
 }
 
 
@@ -244,9 +244,8 @@ void
 QSpace :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(1);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -379,7 +378,7 @@ QSpace :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPo
     // local y axis - completes the righ hand side cs.
 
     /*
-     * _error ("computeLoadLSToLRotationMatrix: surface local coordinate system not supported");
+     * OOFEM_ERROR("surface local coordinate system not supported");
      * return 1;
      */
     FloatArray gc(3);
@@ -443,11 +442,11 @@ Interface *
 QSpace :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     }
 
     OOFEM_LOG_INFO("Interface on Qspace element not supported");
@@ -478,7 +477,7 @@ QSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int 
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        _error2("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: unknown node number %d", pap);
+        OOFEM_ERROR("unknown node number %d", pap);
     }
 }
 
@@ -499,13 +498,8 @@ QSpace :: SPRNodalRecoveryMI_givePatchType()
 void
 QSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
-    answer.resize(0);
-    _warning("Qspace element: IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
+    answer.clear();
+    OOFEM_WARNING("IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
-void
-QSpace :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.resize(0);
-}
 } // end namespace oofem

@@ -56,9 +56,6 @@ REGISTER_EngngModel(StaggeredProblem);
 StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i, _master)
 {
     ndomains = 1; // domain is needed to store the time step function
-    nModels  = 2;
-    emodelList = new AList< EngngModel >(nModels);
-    inputStreamNames = new std :: string [ nModels ];
 
     dtFunction = 0;
     stepMultiplier = 1.;
@@ -67,8 +64,6 @@ StaggeredProblem :: StaggeredProblem(int i, EngngModel *_master) : EngngModel(i,
 
 StaggeredProblem :: ~StaggeredProblem()
 {
-    delete emodelList;
-    delete [] inputStreamNames;
 }
 
 ///////////
@@ -100,24 +95,25 @@ StaggeredProblem :: instanciateDefaultMetaStep(InputRecord *ir)
 int
 StaggeredProblem :: instanciateSlaveProblems()
 {
-    EngngModel *timeDefProb = NULL, *slaveProb;
-
     //first instantiate master problem if defined
+    EngngModel *timeDefProb;
+    emodelList.resize(inputStreamNames.size());
     if ( timeDefinedByProb ) {
         OOFEMTXTDataReader dr( inputStreamNames [ timeDefinedByProb - 1 ].c_str() );
-        timeDefProb = oofem :: InstanciateProblem(& dr, this->pMode, this->contextOutputMode, NULL);
-        emodelList->put(timeDefinedByProb, timeDefProb);
+        std :: unique_ptr< EngngModel >prob( InstanciateProblem(& dr, this->pMode, this->contextOutputMode, NULL) );
+        timeDefProb = prob.get();
+        emodelList[timeDefinedByProb-1] = std::move(prob);
     }
 
-    for ( int i = 1; i <= nModels; i++ ) {
-        if ( emodelList->includes(i) ) {
+    for ( int i = 1; i <= (int)inputStreamNames.size(); i++ ) {
+        if ( i == timeDefinedByProb ) {
             continue;
         }
 
         OOFEMTXTDataReader dr( inputStreamNames [ i - 1 ].c_str() );
         //the slave problem dictating time needs to have attribute master=NULL, other problems point to the dictating slave
-        slaveProb = oofem :: InstanciateProblem(& dr, this->pMode, this->contextOutputMode, timeDefinedByProb ? timeDefProb : this);
-        emodelList->put(i, slaveProb);
+        std :: unique_ptr< EngngModel >prob( InstanciateProblem(& dr, this->pMode, this->contextOutputMode, timeDefinedByProb ? timeDefProb : this) );
+        emodelList[i-1] = std::move(prob);
     }
 
     return 1;
@@ -127,7 +123,6 @@ StaggeredProblem :: instanciateSlaveProblems()
 IRResultType
 StaggeredProblem :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
 
@@ -150,9 +145,10 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, dtFunction, _IFT_StaggeredProblem_dtf);
     IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, _IFT_StaggeredProblem_stepmultiplier);
     if ( stepMultiplier < 0 ) {
-        _error("stepMultiplier must be > 0")
+        OOFEM_ERROR("stepMultiplier must be > 0")
     }
 
+    inputStreamNames.resize(2);
     IR_GIVE_FIELD(ir, inputStreamNames [ 0 ], _IFT_StaggeredProblem_prob1);
     IR_GIVE_FIELD(ir, inputStreamNames [ 1 ], _IFT_StaggeredProblem_prob2);
 
@@ -168,7 +164,6 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 void
 StaggeredProblem :: updateAttributes(MetaStep *mStep)
 {
-    const char *__proc = "updateAttributes"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                  // Required by IR_GIVE_FIELD macro
 
     InputRecord *ir = mStep->giveAttributesRecord();
@@ -176,8 +171,8 @@ StaggeredProblem :: updateAttributes(MetaStep *mStep)
     EngngModel :: updateAttributes(mStep);
 
     // update attributes of slaves
-    for ( int i = 1; i <= nModels; i++ ) {
-        this->giveSlaveProblem(i)->updateAttributes(mStep);
+    for ( auto &emodel: emodelList ) {
+        emodel->updateAttributes(mStep);
     }
 
     if ( !timeDefinedByProb ) {
@@ -186,7 +181,7 @@ StaggeredProblem :: updateAttributes(MetaStep *mStep)
             IR_GIVE_OPTIONAL_FIELD(ir, dtFunction, _IFT_StaggeredProblem_dtf);
             IR_GIVE_OPTIONAL_FIELD(ir, stepMultiplier, _IFT_StaggeredProblem_stepmultiplier);
             if ( stepMultiplier < 0 ) {
-                _error("stepMultiplier must be > 0")
+                OOFEM_ERROR("stepMultiplier must be > 0")
             }
         } else if ( ir->hasField(_IFT_StaggeredProblem_prescribedtimes) ) {
             IR_GIVE_FIELD(ir, discreteTimes, _IFT_StaggeredProblem_prescribedtimes);
@@ -208,7 +203,7 @@ double
 StaggeredProblem :: giveDeltaT(int n)
 {
     if ( giveDtFunction() ) {
-        return deltaT * giveDtFunction()->evaluateAtTime(n);
+        return deltaT *giveDtFunction()->evaluateAtTime(n);
     }
 
     //in the first step the time increment is taken as the initial, user-specified value
@@ -236,7 +231,7 @@ StaggeredProblem :: giveDiscreteTime(int iStep)
         return ( 0.0 );
     }
 
-    _error("giveDiscreteTime: invalid iStep");
+    OOFEM_ERROR("invalid iStep");
     return 0.0;
 }
 
@@ -246,7 +241,7 @@ StaggeredProblem :: giveSolutionStepWhenIcApply()
     if ( stepWhenIcApply == NULL ) {
         int inin = giveNumberOfTimeStepWhenIcApply();
         int nFirst = giveNumberOfFirstStep();
-        stepWhenIcApply = new TimeStep(inin, this, 0, -giveDeltaT(nFirst), giveDeltaT(nFirst), 0);
+        stepWhenIcApply = new TimeStep(inin, this, 0, -giveDeltaT ( nFirst ), giveDeltaT ( nFirst ), 0);
     }
 
     return stepWhenIcApply;
@@ -272,11 +267,11 @@ StaggeredProblem :: giveNextStep()
         TimeStep *newStep;
         // first step -> generate initial step
         newStep = giveSolutionStepWhenIcApply();
-        currentStep = new TimeStep(* newStep);
+        currentStep = new TimeStep(*newStep);
     }
 
     previousStep = currentStep;
-    currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT(istep), counter);
+    currentStep = new TimeStep(istep, this, 1, totalTime, this->giveDeltaT ( istep ), counter);
 
     // time and dt variables are set eq to 0 for statics - has no meaning
     return currentStep;
@@ -298,7 +293,7 @@ StaggeredProblem :: solveYourself()
         EngngModel *sp = this->giveSlaveProblem(timeDefinedByProb);
 
         if ( sp->giveCurrentStep() ) {
-            smstep = sp->giveCurrentStep()->giveMetatStepumber();
+            smstep = sp->giveCurrentStep()->giveMetaStepNumber();
             sjstep = sp->giveMetaStep(smstep)->giveStepRelativeNumber( sp->giveCurrentStep()->giveNumber() ) + 1;
         } else {
             nMetaSteps = sp->giveNumberOfMetaSteps();
@@ -349,8 +344,7 @@ StaggeredProblem :: solveYourselfAt(TimeStep *tStep)
 #ifdef VERBOSE
     OOFEM_LOG_RELEVANT( "Solving [step number %5d, time %e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
-    for ( int i = 1; i <= nModels; i++ ) {
-        EngngModel *emodel = this->giveSlaveProblem(i);
+    for ( auto &emodel: emodelList ) {
         emodel->solveYourselfAt(tStep);
     }
 
@@ -361,8 +355,7 @@ int
 StaggeredProblem :: forceEquationNumbering()
 {
     int neqs = 0;
-    for ( int i = 1; i <= nModels; i++ ) {
-        EngngModel *emodel = this->giveSlaveProblem(i);
+    for ( auto &emodel: emodelList ) {
         // renumber equations if necessary
         if ( emodel->requiresEquationRenumbering( emodel->giveCurrentStep() ) ) {
             neqs += emodel->forceEquationNumbering();
@@ -375,8 +368,8 @@ StaggeredProblem :: forceEquationNumbering()
 void
 StaggeredProblem :: updateYourself(TimeStep *tStep)
 {
-    for ( int i = 1; i <= nModels; i++ ) {
-        this->giveSlaveProblem(i)->updateYourself(tStep);
+    for ( auto &emodel: emodelList ) {
+        emodel->updateYourself(tStep);
     }
 
     EngngModel :: updateYourself(tStep);
@@ -385,8 +378,8 @@ StaggeredProblem :: updateYourself(TimeStep *tStep)
 void
 StaggeredProblem :: terminate(TimeStep *tStep)
 {
-    for ( int i = 1; i <= nModels; i++ ) {
-        this->giveSlaveProblem(i)->terminate(tStep);
+    for ( auto &emodel: emodelList ) {
+        emodel->terminate(tStep);
     }
 
     fflush( this->giveOutputStream() );
@@ -400,8 +393,8 @@ StaggeredProblem :: doStepOutput(TimeStep *tStep)
     // print output
     this->printOutputAt(File, tStep);
     // export using export manager
-    for ( int i = 1; i <= nModels; i++ ) {
-        this->giveSlaveProblem(i)->giveExportModuleManager()->doOutput(tStep);
+    for ( auto &emodel: emodelList ) {
+        emodel->giveExportModuleManager()->doOutput(tStep);
     }
 }
 
@@ -410,9 +403,9 @@ void
 StaggeredProblem :: printOutputAt(FILE *File, TimeStep *tStep)
 {
     FILE *slaveFile;
-    for ( int i = 1; i <= nModels; i++ ) {
-        slaveFile = this->giveSlaveProblem(i)->giveOutputStream();
-        this->giveSlaveProblem(i)->printOutputAt(slaveFile, tStep);
+    for ( auto &emodel: emodelList ) {
+        slaveFile = emodel->giveOutputStream();
+        emodel->printOutputAt(slaveFile, tStep);
     }
 }
 
@@ -421,8 +414,8 @@ contextIOResultType
 StaggeredProblem :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     EngngModel :: saveContext(stream, mode, obj);
-    for ( int i = 1; i <= nModels; i++ ) {
-        this->giveSlaveProblem(i)->saveContext(stream, mode, obj);
+    for ( auto &emodel: emodelList ) {
+        emodel->saveContext(stream, mode, obj);
     }
 
     return CIO_OK;
@@ -433,8 +426,8 @@ contextIOResultType
 StaggeredProblem :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     EngngModel :: restoreContext(stream, mode, obj);
-    for ( int i = 1; i <= nModels; i++ ) {
-        this->giveSlaveProblem(i)->restoreContext(stream, mode, obj);
+    for ( auto &emodel: this->emodelList ) {
+        emodel->restoreContext(stream, mode, obj);
     }
 
     return CIO_OK;
@@ -444,10 +437,10 @@ StaggeredProblem :: restoreContext(DataStream *stream, ContextMode mode, void *o
 EngngModel *
 StaggeredProblem :: giveSlaveProblem(int i)
 {
-    if ( ( i > 0 ) && ( i <= this->nModels ) ) {
-        return this->emodelList->at(i);
+    if ( ( i > 0 ) && ( i <= this->giveNumberOfSlaveProblems() ) ) {
+        return this->emodelList[i-1].get();
     } else {
-        _error("giveSlaveProblem: Undefined problem");
+        OOFEM_ERROR("Undefined problem");
     }
 
     return NULL;
@@ -460,8 +453,8 @@ StaggeredProblem :: checkProblemConsistency()
     // check internal consistency
     // if success returns nonzero
     int result = 1;
-    for ( int i = 1; i <= nModels; i++ ) {
-        result &= this->giveSlaveProblem(i)->checkProblemConsistency();
+    for ( auto &emodel: emodelList ) {
+        result &= emodel->checkProblemConsistency();
     }
 
 #  ifdef VERBOSE
@@ -480,16 +473,16 @@ StaggeredProblem :: checkProblemConsistency()
 void
 StaggeredProblem :: updateDomainLinks()
 {
-    for ( int i = 1; i <= nModels; i++ ) {
-        this->giveSlaveProblem(i)->updateDomainLinks();
+    for ( auto &emodel: emodelList ) {
+        emodel->updateDomainLinks();
     }
 }
 
 void
 StaggeredProblem :: setRenumberFlag()
 {
-    for ( int i = 1; i <= nModels; i++ ) {
-        this->giveSlaveProblem(i)->setRenumberFlag();
+    for ( auto &emodel: emodelList ) {
+        emodel->setRenumberFlag();
     }
 }
 
@@ -497,7 +490,7 @@ StaggeredProblem :: setRenumberFlag()
 void StaggeredProblem :: drawYourself(oofegGraphicContext &context)
 {
     int ap = context.getActiveProblemIndx();
-    if ( ( ap > 0 ) && ( ap <= nModels ) ) {
+    if ( ( ap > 0 ) && ( ap <= giveNumberOfSlaveProblems() ) ) {
         this->giveSlaveProblem(ap)->drawYourself(context);
     }
 }
@@ -505,7 +498,7 @@ void StaggeredProblem :: drawYourself(oofegGraphicContext &context)
 void StaggeredProblem :: drawElements(oofegGraphicContext &context)
 {
     int ap = context.getActiveProblemIndx();
-    if ( ( ap > 0 ) && ( ap <= nModels ) ) {
+    if ( ( ap > 0 ) && ( ap <= giveNumberOfSlaveProblems() ) ) {
         this->giveSlaveProblem(ap)->drawElements(context);
     }
 }
@@ -513,7 +506,7 @@ void StaggeredProblem :: drawElements(oofegGraphicContext &context)
 void StaggeredProblem :: drawNodes(oofegGraphicContext &context)
 {
     int ap = context.getActiveProblemIndx();
-    if ( ( ap > 0 ) && ( ap <= nModels ) ) {
+    if ( ( ap > 0 ) && ( ap <= giveNumberOfSlaveProblems() ) ) {
         this->giveSlaveProblem(ap)->drawNodes(context);
     }
 }

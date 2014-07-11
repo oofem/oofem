@@ -56,7 +56,6 @@ CBSElement :: ~CBSElement()
 IRResultType
 CBSElement :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_OPTIONAL_FIELD(ir, boundarySides, _IFT_CBSElement_bsides);
@@ -91,7 +90,7 @@ CBSElement :: giveCharacteristicMatrix(FloatMatrix &answer,
     } else if ( mtrx == MassMatrix ) {
         this->computeConsistentMassMtrx(answer, tStep);
     } else {
-        _error("giveCharacteristicMatrix: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -125,7 +124,7 @@ CBSElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, ValueM
     //else if (mtrx == PrescribedDensityRhsVector)
     //  this->computePrescribedTermsII (answer, mode, tStep);
     else {
-        _error("giveCharacteristicVector: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
     }
 }
 
@@ -136,7 +135,7 @@ CBSElement :: giveCharacteristicValue(CharType mtrx, TimeStep *tStep)
     if ( mtrx == CriticalTimeStep ) {
         return this->computeCriticalTimeStep(tStep);
     } else {
-        _error("giveCharacteristicValue: Unknown Type of characteristic mtrx.");
+        OOFEM_ERROR("Unknown Type of characteristic mtrx.");
     }
 
     return 0.0;
@@ -149,7 +148,7 @@ CBSElement :: computePrescribedTermsI(FloatArray &answer, ValueModeType mode, Ti
     FloatMatrix mass;
     FloatArray usp;
     this->computeConsistentMassMtrx(mass, tStep);
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, usp);
+    this->computeVectorOfVelocities(mode, tStep, usp);
     answer.beProductOf(mass, usp);
     answer.negated();
 }
@@ -161,7 +160,7 @@ CBSElement :: computePrescribedTermsII(FloatArray &answer, ValueModeType mode, T
     FloatMatrix lhs;
     FloatArray usp;
     this->computePressureLhs(lhs, tStep);
-    this->computeVectorOf(EID_ConservationEquation, mode, tStep, usp);
+    this->computeVectorOfPressures(mode, tStep, usp);
     answer.beProductOf(lhs, usp);
     answer.negated();
 }
@@ -183,14 +182,12 @@ CBSElement :: checkConsistency()
 void
 CBSElement :: updateInternalState(TimeStep *tStep)
 {
-    IntegrationRule *iRule;
     FloatArray stress;
 
     // force updating strains & stresses
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            computeDeviatoricStress(stress, iRule->getIntegrationPoint(j), tStep);
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( GaussPoint *gp: *iRule ) {
+            computeDeviatoricStress(stress, gp, tStep);
         }
     }
 }
@@ -206,25 +203,21 @@ CBSElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType type
 
     if ( type == IST_Velocity ) {
         answer.resize( this->giveSpatialDimension() );
-        int dofindx;
-        if ( ( dofindx = n->findDofWithDofId(V_u) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
-        }
-
-        if ( ( dofindx = n->findDofWithDofId(V_v) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
-        }
-
-        if ( ( dofindx = n->findDofWithDofId(V_w) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
+        std::vector< Dof* >::const_iterator dofindx;
+        if ( ( dofindx = n->findDofWithDofId(V_u) ) != n->end() ) {
+            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Total, tStep);
+        } else if ( ( dofindx = n->findDofWithDofId(V_v) ) != n->end() ) {
+            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Total, tStep);
+        } else if ( ( dofindx = n->findDofWithDofId(V_w) ) != n->end() ) {
+            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Total, tStep);
         }
 
         return 1;
     } else if ( type == IST_Pressure ) {
-        int dofindx;
-        if ( ( dofindx = n->findDofWithDofId(P_f) ) ) {
+        auto dofindx = n->findDofWithDofId(P_f);
+        if ( dofindx != n->end() ) {
             answer.resize(1);
-            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
+            answer.at(1) = (*dofindx)->giveUnknown(VM_Total, tStep);
             return 1;
         } else {
             return 0;

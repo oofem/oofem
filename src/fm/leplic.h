@@ -98,7 +98,11 @@ public:
 
     void setTempLineConstant(double tp) { temp_p = tp; }
     void setTempInterfaceNormal(const FloatArray &tg) { temp_normal = tg; }
-    void setTempVolumeFraction(double v) { if ( !permanentVofFlag ) { temp_vof = v; } }
+    void setTempVolumeFraction(double v) {
+        if ( !permanentVofFlag ) {
+            temp_vof = v;
+        }
+    }
     void setPermanentVolumeFraction(double v) {
         temp_vof = vof = v;
         permanentVofFlag = true;
@@ -106,7 +110,10 @@ public:
     void addTempVolumeFraction(double v) {
         if ( !permanentVofFlag ) {
             temp_vof += v;
-            if ( temp_vof > 1.0 ) { temp_vof = 1.0; } }
+            if ( temp_vof > 1.0 ) {
+                temp_vof = 1.0;
+            }
+        }
     }
     double giveVolumeFraction() { return vof; }
     double giveTempVolumeFraction() { return temp_vof; }
@@ -159,7 +166,9 @@ public:
      * node number in particular domain.
      * @param d Domain to which component belongs to.
      */
-    LEPlic(int n, Domain *d) : MaterialInterface(n, d) { orig_reference_fluid_volume = 0.0; }
+    LEPlic(int n, Domain * d) : MaterialInterface(n, d) {
+        orig_reference_fluid_volume = 0.0;
+    }
 
     virtual void updatePosition(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep) { }
@@ -203,7 +212,7 @@ protected:
         double target_vof;
         bool upd;
 public:
-        computeLEPLICVolumeFractionWrapper(LEPlicElementInterface *i, LEPlic *mi, const FloatArray &n, const double target_vof_val, bool upd_val) :
+        computeLEPLICVolumeFractionWrapper(LEPlicElementInterface * i, LEPlic * mi, const FloatArray & n, const double target_vof_val, bool upd_val) :
             iface(i), minterf(mi), normal(n), target_vof(target_vof_val), upd(upd_val) { }
         void setNormal(const FloatArray &n) { normal = n; }
         double eval(double x) { return fabs(iface->computeLEPLICVolumeFraction(normal, x, minterf, upd) - target_vof); }

@@ -63,7 +63,7 @@ Interface *
 LIBeam2dNL :: giveInterface(InterfaceType interface)
 {
     if ( interface == LayeredCrossSectionInterfaceType ) {
-        return static_cast< LayeredCrossSectionInterface * >( this );
+        return static_cast< LayeredCrossSectionInterface * >(this);
     }
 
     return NULL;
@@ -76,7 +76,7 @@ LIBeam2dNL :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int 
 {
     double l, ksi, n1, n2, n1x, n2x, n3x;
 
-    l    = this->giveLength();
+    l    = this->computeLength();
     ksi  = gp->giveCoordinate(1);
 
     n1    = 0.5 * ( 1.0 - ksi );
@@ -111,7 +111,7 @@ LIBeam2dNL :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
     // Returns A matrix (see Bittnar & Sejnoha Num. Met. Mech. part II, chap 9)
     double l, l8, ll88, ksi, n1x, n2x, n3x;
 
-    l    = this->giveLength();
+    l    = this->computeLength();
     ksi  = gp->giveCoordinate(1);
 
     //n1    = 0.5*(1.0 - ksi);
@@ -256,18 +256,14 @@ void
 LIBeam2dNL :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     double dV;
-    GaussPoint *gp;
-    IntegrationRule *iRule;
     FloatArray stress;
     FloatMatrix A;
 
     answer.resize(6, 6);
     answer.zero();
 
-    iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     // assemble initial stress matrix
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
         dV = this->computeVolumeAround(gp);
         stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         if ( stress.giveSize() ) {
@@ -287,9 +283,8 @@ LIBeam2dNL :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 void LIBeam2dNL :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
@@ -303,7 +298,7 @@ LIBeam2dNL :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double halfMass   = density * this->giveCrossSection()->give(CS_Area, gp) * this->giveLength() / 2.;
+    double halfMass   = density * this->giveCrossSection()->give(CS_Area, gp) * this->computeLength() / 2.;
     answer.resize(6, 6);
     answer.zero();
     answer.at(1, 1) = halfMass;
@@ -319,7 +314,7 @@ LIBeam2dNL :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // luated at gp.
 {
     double ksi, n1, n2, n3;
-    double l = this->giveLength();
+    double l = this->computeLength();
 
     ksi = iLocCoord.at(1);
     n1  = ( 1. - ksi ) * 0.5;
@@ -374,7 +369,24 @@ double LIBeam2dNL :: computeVolumeAround(GaussPoint *gp)
 // Gauss point is used.
 {
     double weight  = gp->giveWeight();
-    return weight * 0.5 * this->giveLength();
+    return weight * 0.5 * this->computeLength();
+}
+
+
+int
+LIBeam2dNL :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    ///@todo This should be a common inheritance for all 3d beams (and a similar one for 2D beams) 
+    /// to support all the sensible moment/force tensors. 
+    if ( type == IST_BeamForceMomentumTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        return 1;
+    } else if ( type == IST_BeamStrainCurvatureTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        return 1;
+    } else {
+        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+    }
 }
 
 
@@ -400,9 +412,9 @@ LIBeam2dNL :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &m
 
 
 void
-LIBeam2dNL :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+LIBeam2dNL :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(3, D_u, D_w, R_v);
+    answer = {D_u, D_w, R_v};
 }
 
 
@@ -423,7 +435,7 @@ LIBeam2dNL :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
 }
 
 
-double LIBeam2dNL :: giveLength()
+double LIBeam2dNL :: computeLength()
 // Returns the length of the receiver.
 {
     double dx, dy;
@@ -498,7 +510,7 @@ LIBeam2dNL :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      */
 
     if ( iEdge != 1 ) {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 
 
@@ -515,11 +527,11 @@ double
 LIBeam2dNL ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
-        _error("computeEdgeVolumeAround: wrong egde number");
+        OOFEM_ERROR("wrong egde number");
     }
 
     double weight  = gp->giveWeight();
-    return 0.5 * this->giveLength() * weight;
+    return 0.5 * this->computeLength() * weight;
 }
 
 int
@@ -559,7 +571,7 @@ LIBeam2dNL :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
     //
     // i.e. f(element local) = T * f(edge local)
     //
-    answer.beEmptyMtrx();
+    answer.clear();
     return 0;
 }
 

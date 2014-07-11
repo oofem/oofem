@@ -59,7 +59,7 @@ protected:
     double areaOfRVE;
 
 public:
-    StokesFlowVelocityHomogenization(int i, EngngModel *_master = NULL);
+    StokesFlowVelocityHomogenization(int i, EngngModel * _master = NULL);
     virtual ~StokesFlowVelocityHomogenization();
 
     virtual void solveYourselfAt(TimeStep *tStep);
@@ -75,7 +75,6 @@ public:
     virtual const char *giveClassName() const { return "StokesFlowVelocityHomogenization"; }
     virtual const char *giveInputRecordName() const { return _IFT_StokesFlowVelocityHomogenization_Name; }
 
-    void updateC();
 
     void computeTangent(FloatMatrix &answer, TimeStep *tStep);
 

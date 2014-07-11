@@ -59,10 +59,10 @@ REGISTER_Element(PlaneStress2d);
 FEI2dQuadLin PlaneStress2d :: interpolation(1, 2);
 
 PlaneStress2d :: PlaneStress2d(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(),
-    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(),
-    DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface(),
-    HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this),
+    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
+    EIPrimaryUnknownMapperInterface(),
+    HuertaErrorEstimatorInterface()
     // Constructor.
 {
     numberOfDofMans  = 4;
@@ -147,9 +147,8 @@ void
 PlaneStress2d :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -215,7 +214,7 @@ PlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(3) = 1;
         answer.at(4) = 2;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 
@@ -223,8 +222,8 @@ double
 PlaneStress2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) );
-    return result * gp->giveWeight();
+                                                                       FEIElementGeometryWrapper(this) );
+    return result *gp->giveWeight();
 }
 
 void
@@ -277,7 +276,7 @@ PlaneStress2d :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant, weight, thickness, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) ) );
+                                                                       FEIElementGeometryWrapper(this) ) );
 
 
     weight      = gp->giveWeight();
@@ -298,7 +297,7 @@ PlaneStress2d :: initializeFrom(InputRecord *ir)
 
     if ( numberOfGaussPoints != 1 && numberOfGaussPoints != 4 && numberOfGaussPoints != 9 && numberOfGaussPoints != 16 ) {
         numberOfGaussPoints = 4;
-        OOFEM_WARNING1("Number of Gauss points enforced to 4");
+        OOFEM_WARNING("Number of Gauss points enforced to 4");
     }
 
     return IRRT_OK;
@@ -316,7 +315,7 @@ PlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &norm
     if ( normalToCrackPlane.at(3) < 0.999999 ) { //ensure that characteristic length is in the plane of element
         return this->giveLenghtInDir(normalToCrackPlane);
     } else { //otherwise compute out-of-plane characteristic length from element area
-        return DirectErrorIndicatorRCI_giveCharacteristicSize();
+        return this->computeMeanSize();
     }
 }
 
@@ -330,7 +329,7 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
 {
     if ( method == ECSM_SquareRootOfArea ) {
         // square root of element area
-        return DirectErrorIndicatorRCI_giveCharacteristicSize();
+        return this->computeMeanSize();
     }
 
     if ( method == ECSM_Projection ) {
@@ -340,10 +339,7 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
 
     // evaluate average strain and its maximum principal direction
     FloatArray sumstrain, averageNormal;
-    IntegrationRule *iRule = giveDefaultIntegrationRulePtr();
-    int nGP = iRule->giveNumberOfIntegrationPoints();
-    for ( int i = 0; i < nGP; i++ ) {
-        GaussPoint *gpi = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gpi: *this->giveDefaultIntegrationRulePtr() ) {
         StructuralMaterialStatus *matstatus = dynamic_cast< StructuralMaterialStatus * >( gpi->giveMaterialStatus() );
         if ( matstatus ) {
             sumstrain.add( matstatus->giveTempStrainVector() );
@@ -407,20 +403,20 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
         }
 
         if ( dPhidN == 0. ) {
-            _error("Zero value of dPhidN in PlaneStress2d :: giveCharacteristicSize\n");
+            OOFEM_ERROR("Zero value of dPhidN");
         }
 
         return 1. / fabs(dPhidN);
     }
 
-    _error("PlaneStress2d :: giveCharacteristicSize: invalid method");
+    OOFEM_ERROR("invalid method");
     return 0.;
 }
 
 void
-PlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+PlaneStress2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(2, D_u, D_v);
+    answer = {D_u, D_v};
 }
 
 
@@ -428,19 +424,15 @@ Interface *
 PlaneStress2d :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
-    } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
-        return static_cast< HuertaErrorEstimatorInterface * >( this );
-    } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return static_cast< HuertaRemeshingCriteriaInterface * >( this );
+        return static_cast< HuertaErrorEstimatorInterface * >(this);
     }
 
     return NULL;
@@ -455,7 +447,6 @@ PlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode)
 {
-    Element *element = this->HuertaErrorEstimatorI_giveElement();
     int inode, nodes = 4, iside, sides = 4, nd1, nd2;
     FloatArray *corner [ 4 ], midSide [ 4 ], midNode, cor [ 4 ];
     double x = 0.0, y = 0.0;
@@ -463,9 +454,9 @@ PlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
     static int sideNode [ 4 ] [ 2 ] = { { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 1 } };
 
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
-         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
+        ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
-            corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
+            corner [ inode ] = this->giveNode(inode + 1)->giveCoordinates();
             if ( corner [ inode ]->giveSize() != 3 ) {
                 cor [ inode ].resize(3);
                 cor [ inode ].at(1) = corner [ inode ]->at(1);
@@ -497,7 +488,7 @@ PlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
         midNode.at(3) = 0.0;
     }
 
-    this->setupRefinedElementProblem2D(element, refinedElement, level, nodeId, localNodeIdArray, globalNodeIdArray,
+    this->setupRefinedElementProblem2D(this, refinedElement, level, nodeId, localNodeIdArray, globalNodeIdArray,
                                        sMode, tStep, nodes, corner, midSide, midNode,
                                        localNodeId, localElemId, localBcId,
                                        controlNode, controlDof, aMode, "PlaneStress2d");
@@ -692,8 +683,6 @@ void PlaneStress2d :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        int ip;
-        GaussPoint *gp;
         IntArray ind(4);
         FloatArray *gpCoords;
         WCRec pp [ 9 ];
@@ -726,8 +715,7 @@ void PlaneStress2d :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
-        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
             gpCoords = gp->giveCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;
@@ -784,7 +772,6 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
     int i;
     WCRec l [ 2 ];
     GraphicObj *tr;
-    GaussPoint *gp;
     TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     FloatArray crackStatuses, cf;
@@ -795,13 +782,12 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
 
     if ( gc.giveIntVarType() == IST_CrackState ) {
         // ask if any active crack exist
-        int igp, crackStatus;
+        int crackStatus;
         double ax, ay, bx, by, norm, xc, yc, length;
         FloatArray crackDir;
         FloatArray gpglobalcoords;
 
-        for ( igp = 1; igp <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); igp++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(igp - 1);
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
 
             if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
@@ -847,13 +833,13 @@ PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
                             gpglobalcoords.resize(2);
 
                             gpglobalcoords.at(1) = ( n1 * this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale) +
-                                                     n2 * this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) +
-                                                     n3 * this->giveNode(3)->giveUpdatedCoordinate(1, tStep, defScale) +
-                                                     n4 * this->giveNode(4)->giveUpdatedCoordinate(1, tStep, defScale) );
+                                                    n2 * this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) +
+                                                    n3 * this->giveNode(3)->giveUpdatedCoordinate(1, tStep, defScale) +
+                                                    n4 * this->giveNode(4)->giveUpdatedCoordinate(1, tStep, defScale) );
                             gpglobalcoords.at(2) = ( n1 * this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale) +
-                                                     n2 * this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) +
-                                                     n3 * this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale) +
-                                                     n4 * this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale) );
+                                                    n2 * this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) +
+                                                    n3 * this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale) +
+                                                    n4 * this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale) );
                         } else {
                             computeGlobalCoordinates( gpglobalcoords, * ( gp->giveCoordinates() ) );
                         }
@@ -911,7 +897,7 @@ PlaneStress2d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answe
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 
@@ -929,15 +915,6 @@ PlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-int
-PlaneStress2d :: SpatialLocalizerI_containsPoint(const FloatArray &coords) {
-    int result;
-    FloatArray lcoords;
-    result = this->computeLocalCoordinates(lcoords, coords);
-
-    return result;
-}
-
 double
 PlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
@@ -949,7 +926,7 @@ PlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatA
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -965,55 +942,20 @@ PlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatA
 }
 
 
-double
-PlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
-{
-    IntegrationRule *iRule;
-    GaussPoint *gp;
-    double volume = 0.0;
-
-    iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
-        volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
-    }
-
-    return sqrt(volume);
-}
-
-
-int
-PlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                  TimeStep *tStep, const FloatArray &coords,
+void
+PlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                  TimeStep *tStep, const FloatArray &lcoords,
                                                                   FloatArray &answer)
 {
-    FloatArray lcoords, u;
+    FloatArray u, ni;
     FloatMatrix n;
-    FloatArray ni(4);
-    int result;
-
-    result = this->computeLocalCoordinates(lcoords, coords);
 
     this->interpolation.evalN( ni, lcoords, FEIElementGeometryWrapper(this) );
 
-    n.resize(2, 8);
-    n.zero();
+    n.beNMatrixOf(ni, 2);
 
-    n.at(1, 1) = n.at(2, 2) = ni.at(1);
-    n.at(1, 3) = n.at(2, 4) = ni.at(2);
-    n.at(1, 5) = n.at(2, 6) = ni.at(3);
-    n.at(1, 7) = n.at(2, 8) = ni.at(4);
-
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf({D_u, D_v}, mode, tStep, u);
     answer.beProductOf(n, u);
-
-    return result;
 }
 
-
-void
-PlaneStress2d :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    giveDofManDofIDMask(1, EID_MomentumBalance, answer);
-}
 } // end namespace oofem

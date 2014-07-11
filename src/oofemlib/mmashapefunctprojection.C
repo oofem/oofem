@@ -41,11 +41,12 @@
 #include "timestep.h"
 #include "nodalaveragingrecoverymodel.h"
 
+#include <cstdlib>
+
 namespace oofem {
 MMAShapeFunctProjection :: MMAShapeFunctProjection() : MaterialMappingAlgorithm()
 {
     stateCounter = 0;
-    //smootherList(0);
     domain = NULL;
 }
 
@@ -53,7 +54,7 @@ MMAShapeFunctProjection :: ~MMAShapeFunctProjection()
 { }
 
 void
-MMAShapeFunctProjection :: __init(Domain *dold, IntArray &varTypes, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP)
+MMAShapeFunctProjection :: __init(Domain *dold, IntArray &varTypes, FloatArray &coords, Set &elemSet, TimeStep *tStep, bool iCohesiveZoneGP)
 //(Domain* dold, IntArray& varTypes, GaussPoint* gp, TimeStep* tStep)
 {
     int nvar = varTypes.giveSize();
@@ -64,17 +65,17 @@ MMAShapeFunctProjection :: __init(Domain *dold, IntArray &varTypes, FloatArray &
 
 
     // Project Gauss point components to nodes on old mesh
-    if ( this->smootherList.giveSize() != nvar ) {
+    if ( (int)this->smootherList.size() != nvar ) {
         this->smootherList.clear();
-        this->smootherList.growTo(nvar);
+        this->smootherList.reserve(nvar);
         for ( int ivar = 1; ivar <= nvar; ivar++ ) {
-            this->smootherList.put( ivar, new NodalAveragingRecoveryModel(dold) );
+            this->smootherList.emplace_back( new NodalAveragingRecoveryModel(dold) );
         }
     }
 
     this->intVarTypes = varTypes;
     for ( int ivar = 1; ivar <= nvar; ivar++ ) {
-        this->smootherList.at(ivar)->recoverValues( ( InternalStateType ) varTypes.at(ivar), tStep );
+        this->smootherList[ivar-1]->recoverValues(elemSet, ( InternalStateType ) varTypes.at(ivar), tStep);
     }
 
     // remember time stemp
@@ -95,7 +96,7 @@ MMAShapeFunctProjection :: mapVariable(FloatArray &answer, GaussPoint *gp, Inter
 {
     Element *elem = gp->giveElement();
     int nnodes = elem->giveNumberOfDofManagers();
-    MMAShapeFunctProjectionInterface :: nodalValContainerType container(nnodes);
+    MMAShapeFunctProjectionInterface :: nodalValContainerType container;
     MMAShapeFunctProjectionInterface *interface;
     const FloatArray *nvec;
 
@@ -106,18 +107,17 @@ MMAShapeFunctProjection :: mapVariable(FloatArray &answer, GaussPoint *gp, Inter
 
     int indx = this->intVarTypes.findFirstIndexOf( ( int ) type );
     if ( indx ) {
+        container.reserve(nnodes);
         for ( int inode = 1; inode <= nnodes; inode++ ) {
-            container.put(inode, new FloatArray);
-            this->smootherList.at(indx)->giveNodalVector( nvec, elem->giveDofManager(inode)->giveNumber(),
-                                                          elem->giveRegionNumber() );
-            * ( container.at(inode) ) = * nvec;
+            this->smootherList[indx-1]->giveNodalVector( nvec, elem->giveDofManager(inode)->giveNumber() );
+            container.emplace_back(*nvec);
         }
 
         interface->MMAShapeFunctProjectionInterface_interpolateIntVarAt(answer, ( * gp->giveCoordinates() ),
                                                                         MMAShapeFunctProjectionInterface :: coordType_local,
                                                                         container, type, tStep);
     } else {
-        OOFEM_ERROR("MMAShapeFunctProjection::mapVariable: var not initialized");
+        OOFEM_ERROR("var not initialized");
     }
 
     return 1;
@@ -130,11 +130,11 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
 {
     Element *elem = domain->giveSpatialLocalizer()->giveElementContainingPoint(coords);
     if ( !elem ) {
-        OOFEM_ERROR("MMAShapeFunctProjection::__mapVariable: no suitable source found");
+        OOFEM_ERROR("no suitable source found");
     }
 
     int nnodes = elem->giveNumberOfDofManagers();
-    MMAShapeFunctProjectionInterface :: nodalValContainerType container(nnodes);
+    MMAShapeFunctProjectionInterface :: nodalValContainerType container;
     MMAShapeFunctProjectionInterface *interface;
     const FloatArray *nvec;
 
@@ -145,18 +145,17 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
 
     int indx = this->intVarTypes.findFirstIndexOf( ( int ) type );
     if ( indx ) {
+        container.reserve(nnodes);
         for ( int inode = 1; inode <= nnodes; inode++ ) {
-            container.put(inode, new FloatArray);
-            this->smootherList.at(indx)->giveNodalVector( nvec, elem->giveDofManager(inode)->giveNumber(),
-                                                          elem->giveRegionNumber() );
-            * ( container.at(inode) ) = * nvec;
+            this->smootherList.at(indx)->giveNodalVector( nvec, elem->giveDofManager(inode)->giveNumber() );
+            container.emplace_back(*nvec);
         }
 
         interface->MMAShapeFunctProjectionInterface_interpolateIntVarAt(answer, coords,
                                                                         MMAShapeFunctProjectionInterface :: coordType_global,
                                                                         container, type, tStep);
     } else {
-        OOFEM_ERROR("MMAShapeFunctProjection::__mapVariable: var not initialized");
+        OOFEM_ERROR("var not initialized");
     }
 
     return 1;
@@ -165,7 +164,7 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
 int
 MMAShapeFunctProjection :: mapStatus(MaterialStatus &oStatus) const
 {
-    OOFEM_ERROR("ERROR: MMAShapeFunctProjection :: mapStatus() is not implemented yet.")
+    OOFEM_ERROR("not implemented yet.")
 
     return 0;
 }

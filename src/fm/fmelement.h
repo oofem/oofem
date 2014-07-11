@@ -54,7 +54,7 @@ namespace oofem {
 class FMElement : public Element
 {
 public:
-    FMElement(int n, Domain *aDomain);
+    FMElement(int n, Domain * aDomain);
     virtual ~FMElement();
 
     /**
@@ -63,10 +63,8 @@ public:
      */
     virtual void updateStabilizationCoeffs(TimeStep *tStep) { }
 
-    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const
-    { this->giveDofManDofIDMask(inode, EID_MomentumBalance_ConservationEquation, answer); }
-    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const
-    { this->giveInternalDofManDofIDMask(inode, EID_MomentumBalance_ConservationEquation, answer); }
+    virtual void computeVectorOfVelocities(ValueModeType mode, TimeStep *tStep, FloatArray &velocities);
+    virtual void computeVectorOfPressures(ValueModeType mode, TimeStep *tStep, FloatArray &pressures);
 };
 } // end namespace oofem
 #endif // fmelement_h

@@ -85,7 +85,7 @@ Pair *Dictionary :: add(int k, double v)
 
 #  ifdef DEBUG
     if ( this->includes(k) ) {
-        OOFEM_ERROR2("Dictionary::add: key (%d) already exists", k);
+        OOFEM_ERROR("key (%d) already exists", k);
     }
 
 #  endif
@@ -184,7 +184,7 @@ contextIOResultType Dictionary :: saveContext(DataStream *stream, ContextMode mo
     Pair *next;
 
     if ( stream == NULL ) {
-        OOFEM_ERROR("Dictionary::saveContex : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     next = first;
@@ -254,7 +254,7 @@ contextIOResultType Dictionary :: restoreContext(DataStream *stream, ContextMode
 }
 
 
-std :: ostream &operator<<(std :: ostream &out, const Dictionary &r)
+std :: ostream &operator << ( std :: ostream & out, const Dictionary & r )
 {
     int count = 0;
     Pair *next = r.first;

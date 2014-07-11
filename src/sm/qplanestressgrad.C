@@ -56,16 +56,17 @@ QPlaneStressGrad :: QPlaneStressGrad(int n, Domain *aDomain) : QPlaneStress2d(n,
     totalSize = nPrimVars * nPrimNodes + nSecVars * nSecNodes;
     locSize   = nPrimVars * nPrimNodes;
     nlSize    = nSecVars * nSecNodes;
+    numberOfGaussPoints = 4;
 }
 
 
 void
-QPlaneStressGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+QPlaneStressGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( inode <= nSecNodes ) {
-        answer.setValues(3, D_u, D_v, G_0);
+        answer = {D_u, D_v, G_0};
     } else {
-        answer.setValues(2, D_u, D_v);
+        answer = {D_u, D_v};
     }
 }
 
@@ -73,29 +74,15 @@ QPlaneStressGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answ
 IRResultType
 QPlaneStressGrad :: initializeFrom(InputRecord *ir)
 {
-    numberOfGaussPoints = 4;
-    IRResultType result = this->StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( !( ( numberOfGaussPoints == 1 ) ||
-            ( numberOfGaussPoints == 4 ) ||
-            ( numberOfGaussPoints == 9 ) ||
-            ( numberOfGaussPoints == 16 ) ) ) {
-        numberOfGaussPoints = 4;
-    }
-
-    return IRRT_OK;
+    return this->StructuralElement :: initializeFrom(ir);
 }
 
 
 void
 QPlaneStressGrad :: computeGaussPoints()
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -106,15 +93,11 @@ QPlaneStressGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp.
 {
-    FloatArray n(4);
+    FloatArray n;
 
-    answer.resize(1, 4);
-    answer.zero();
     this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, i) = n.at(i);
-    }
+    answer.beNMatrixOf(n, 1);
 }
 
 void

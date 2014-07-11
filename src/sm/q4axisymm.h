@@ -37,6 +37,7 @@
 
 #include "structuralelement.h"
 #include "fei2dquadquad.h"
+#include "zznodalrecoverymodel.h"
 
 ///@name Input fields for Q4Axisymm
 //@{
@@ -51,25 +52,25 @@ namespace oofem {
  * Each node has 2 degrees of freedom.
  * @todo Use FEI classes.
  */
-class Q4Axisymm : public StructuralElement
+class Q4Axisymm : public StructuralElement, public ZZNodalRecoveryModelInterface
 {
 protected:
     static FEI2dQuadQuad interp;
     int numberOfGaussPoints, numberOfFiAndShGaussPoints;
 
 public:
-    Q4Axisymm(int n, Domain *d);
+    Q4Axisymm(int n, Domain * d);
     virtual ~Q4Axisymm();
 
     virtual FEInterpolation *giveInterpolation() const { return & interp; }
 
     virtual int computeNumberOfDofs() { return 16; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     // definition & identification
-    virtual Interface *giveInterface(InterfaceType) { return NULL; }
+    virtual Interface *giveInterface(InterfaceType);
     virtual const char *giveInputRecordName() const { return _IFT_Q4Axisymm_Name; }
     virtual const char *giveClassName() const { return "Q4axisymm"; }
     virtual IRResultType initializeFrom(InputRecord *ir);

@@ -40,7 +40,6 @@
 #include "mathfem.h"
 #include "engngm.h"
 #include "timestep.h"
-#include "structuralcrosssection.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
@@ -62,7 +61,6 @@ Concrete2 :: ~Concrete2()
 IRResultType
 Concrete2 :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     this->Material :: initializeFrom(ir);
@@ -166,33 +164,10 @@ Concrete2 :: give(int aProperty, GaussPoint *gp)
 
 
 void
-Concrete2 :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                  const FloatArray &strain,
-                                  TimeStep *tStep)
-//
-// returns stress vector (in full or reduced form - form parameter)
-// of receiver according to previous level
-// of stress and current
-// strain increment, the only way, how to correctly update gp records
-//
-{
-    MaterialMode mode = gp->giveMaterialMode();
-
-    switch ( mode ) {
-    case _PlateLayer:
-        giveRealStresses3dShellLayer(answer, gp, strain, tStep);
-        break;
-    default:
-        _error("giveRealStresses : unsupported stressMode\n");
-    }
-}
-
-
-void
-Concrete2 :: giveRealStresses3dShellLayer(FloatArray &answer,
-                                          GaussPoint *gp,
-                                          const FloatArray &totalStrain,
-                                          TimeStep *tStep)
+Concrete2 :: giveRealStressVector_PlateLayer(FloatArray &answer,
+                                             GaussPoint *gp,
+                                             const FloatArray &totalStrain,
+                                             TimeStep *tStep)
 //
 // returns total stress vector of receiver according to
 // previous level of stress and current
@@ -246,13 +221,12 @@ Concrete2 :: giveRealStresses3dShellLayer(FloatArray &answer,
     FloatArray plasticStrainVector, plasticStrainIncrementVector;
 
     Concrete2MaterialStatus *status = static_cast< Concrete2MaterialStatus * >( this->giveStatus(gp) );
-    FloatArray currentStress, currentStrain, currentEffStrain(6), pVal, * ep, * pStress,
-    * strainIncr, plasticStrain, help, reducedStrain, helpR;
+    FloatArray currentStress, currentStrain, currentEffStrain(6), pVal, ep, pStress, strainIncr, plasticStrain, help, reducedStrain, helpR;
     FloatMatrix pDir;
 
     pDir.resize(3, 3); // principal directions
-    pStress = new FloatArray(3); // principal stresses
-    strainIncr = new FloatArray(1);
+    pStress.resize(3); // principal stresses
+    strainIncr.resize(1);
 
     this->initGpForNewStep(gp);
 
@@ -276,10 +250,10 @@ Concrete2 :: giveRealStresses3dShellLayer(FloatArray &answer,
         status->giveCurrentTensionStrength() = this->give(c2_SCCT, gp);
     }
 
-    status->givePlasticStrainVector(plasticStrainVector);
+    plasticStrainVector = status->givePlasticStrainVector();
     StructuralMaterial :: giveFullSymVectorForm( plasticStrain, plasticStrainVector, gp->giveMaterialMode() );
 
-    ep = new FloatArray(3);
+    ep.resize(3);
 
     //for (i =1; i <= 6; i++) currentStrain.at(i) += strainIncrement.at(i);
 
@@ -325,7 +299,7 @@ Concrete2 :: giveRealStresses3dShellLayer(FloatArray &answer,
     //
     ifsh = 0;
     psi2 = currentEffStrain.at(4) * currentEffStrain.at(4) +
-           currentEffStrain.at(5) * currentEffStrain.at(5);
+    currentEffStrain.at(5) * currentEffStrain.at(5);
     comp = sqrt(currentEffStrain.at(1) * currentEffStrain.at(1) +
                 currentEffStrain.at(2) * currentEffStrain.at(2) +
                 currentEffStrain.at(3) * currentEffStrain.at(3) +
@@ -337,11 +311,6 @@ Concrete2 :: giveRealStresses3dShellLayer(FloatArray &answer,
             currentStress.at(i) = 0.;
         }
 
-        delete ep;
-        delete pStress;
-        delete strainIncr;
-
-
         // note in status are reduced space variables
         status->letTempStrainVectorBe(totalStrain);
 
@@ -351,7 +320,7 @@ Concrete2 :: giveRealStresses3dShellLayer(FloatArray &answer,
 
         StructuralMaterial :: giveReducedSymVectorForm( help, plasticStrain, gp->giveMaterialMode() );
 
-        status->givePlasticStrainIncrementVector(plasticStrainIncrementVector);
+        plasticStrainIncrementVector = status->givePlasticStrainIncrementVector();
         plasticStrainIncrementVector.subtract(plasticStrainVector);
         plasticStrainIncrementVector.add(help);
         status->letPlasticStrainIncrementVectorBe(plasticStrainIncrementVector);
@@ -402,7 +371,7 @@ Concrete2 :: giveRealStresses3dShellLayer(FloatArray &answer,
             pVal.at(j) = swap;
         }
 
-        this->dtp2(gp, & pVal, pStress, ep, SCC, SCT, & ifplas);
+        this->dtp2(gp, pVal, pStress, ep, SCC, SCT, & ifplas);
     } else {
         ifsh = 1;
         //
@@ -427,7 +396,7 @@ label18:
         //
         // plasticity condition
         //
-        this->dtp3(gp, & pVal, pStress, ep, SCC, SCT, & ifplas);
+        this->dtp3(gp, pVal, pStress, ep, SCC, SCT, & ifplas);
         //
         //  transverse equilibrium
         //  transv strain  ez (flags -> at(SEZ))  its incr.  dez  ,
@@ -436,9 +405,9 @@ label18:
         //  unbalanced transverse stress us
         //  concrete component
         //
-        us = ( pDir.at(3, 1) * pStress->at(1) * pDir.at(3, 1) +
-               pDir.at(3, 2) * pStress->at(2) * pDir.at(3, 2) +
-               pDir.at(3, 3) * pStress->at(3) * pDir.at(3, 3) );
+        us = ( pDir.at(3, 1) * pStress.at(1) * pDir.at(3, 1) +
+              pDir.at(3, 2) * pStress.at(2) * pDir.at(3, 2) +
+              pDir.at(3, 3) * pStress.at(3) * pDir.at(3, 3) );
         //
         // Stirrups component
         //
@@ -513,7 +482,7 @@ label18:
         //
         ez  +=  dez;
         if ( this->give(stirr_E, gp) > 0. ) {
-            strainIncr->at(1) = dez;
+            strainIncr.at(1) = dez;
             this->updateStirrups(gp, strainIncr);
             // updates flags->at(SEZ)
             // stirr(dez,sv(l3),fst);
@@ -557,23 +526,23 @@ label18:
             //
             if ( this->give(c2_IS_PLASTIC_FLOW, gp) && this->give(c2_IFAD, gp) ) {
                 plasticStrain.at(1) += ( pDir.at(1, 1) * ep1 * pDir.at(1, 1) +
-                                         pDir.at(1, 2) * ep2 * pDir.at(1, 2) +
-                                         pDir.at(1, 3) * ep3 * pDir.at(1, 3) );
+                                        pDir.at(1, 2) * ep2 * pDir.at(1, 2) +
+                                        pDir.at(1, 3) * ep3 * pDir.at(1, 3) );
                 plasticStrain.at(2) += ( pDir.at(2, 1) * ep1 * pDir.at(2, 1) +
-                                         pDir.at(2, 2) * ep2 * pDir.at(2, 2) +
-                                         pDir.at(2, 3) * ep3 * pDir.at(2, 3) );
+                                        pDir.at(2, 2) * ep2 * pDir.at(2, 2) +
+                                        pDir.at(2, 3) * ep3 * pDir.at(2, 3) );
                 plasticStrain.at(3) += ( pDir.at(3, 1) * ep1 * pDir.at(3, 1) +
-                                         pDir.at(3, 2) * ep2 * pDir.at(3, 2) +
-                                         pDir.at(3, 3) * ep3 * pDir.at(3, 3) );
+                                        pDir.at(3, 2) * ep2 * pDir.at(3, 2) +
+                                        pDir.at(3, 3) * ep3 * pDir.at(3, 3) );
                 plasticStrain.at(4) += 2. * ( pDir.at(2, 1) * ep1 * pDir.at(3, 1) +
-                                              pDir.at(2, 2) * ep2 * pDir.at(3, 2) +
-                                              pDir.at(2, 3) * ep3 * pDir.at(3, 3) );
+                                             pDir.at(2, 2) * ep2 * pDir.at(3, 2) +
+                                             pDir.at(2, 3) * ep3 * pDir.at(3, 3) );
                 plasticStrain.at(5) += 2. * ( pDir.at(1, 1) * ep1 * pDir.at(3, 1) +
-                                              pDir.at(1, 2) * ep2 * pDir.at(3, 2) +
-                                              pDir.at(1, 3) * ep3 * pDir.at(3, 3) );
+                                             pDir.at(1, 2) * ep2 * pDir.at(3, 2) +
+                                             pDir.at(1, 3) * ep3 * pDir.at(3, 3) );
                 plasticStrain.at(6) += 2. * ( pDir.at(1, 1) * ep1 * pDir.at(2, 1) +
-                                              pDir.at(1, 2) * ep2 * pDir.at(2, 2) +
-                                              pDir.at(1, 3) * ep3 * pDir.at(2, 3) );
+                                             pDir.at(1, 2) * ep2 * pDir.at(2, 2) +
+                                             pDir.at(1, 3) * ep3 * pDir.at(2, 3) );
             }
 
             pVal.zero();
@@ -593,33 +562,33 @@ label18:
                     //  no transverse shear, 1-2 to x-y
                     //
                     plasticStrain.at(1) += ( pDir.at(1, 1) * ep1 * pDir.at(1, 1) +
-                                             pDir.at(1, 2) * ep2 * pDir.at(1, 2) );
+                                            pDir.at(1, 2) * ep2 * pDir.at(1, 2) );
                     plasticStrain.at(2) += ( pDir.at(2, 1) * ep1 * pDir.at(2, 1) +
-                                             pDir.at(2, 2) * ep2 * pDir.at(2, 2) );
+                                            pDir.at(2, 2) * ep2 * pDir.at(2, 2) );
                     plasticStrain.at(6) += 2. * ( pDir.at(1, 1) * ep1 * pDir.at(2, 1) +
-                                                  pDir.at(1, 2) * ep2 * pDir.at(2, 2) );
+                                                 pDir.at(1, 2) * ep2 * pDir.at(2, 2) );
                 } else {
                     //
                     //  transverse shear present , transform back to x,y,z
                     //
                     plasticStrain.at(1) += ( pDir.at(1, 1) * ep1 * pDir.at(1, 1) +
-                                             pDir.at(1, 2) * ep2 * pDir.at(1, 2) +
-                                             pDir.at(1, 3) * ep3 * pDir.at(1, 3) );
+                                            pDir.at(1, 2) * ep2 * pDir.at(1, 2) +
+                                            pDir.at(1, 3) * ep3 * pDir.at(1, 3) );
                     plasticStrain.at(2) += ( pDir.at(2, 1) * ep1 * pDir.at(2, 1) +
-                                             pDir.at(2, 2) * ep2 * pDir.at(2, 2) +
-                                             pDir.at(2, 3) * ep3 * pDir.at(2, 3) );
+                                            pDir.at(2, 2) * ep2 * pDir.at(2, 2) +
+                                            pDir.at(2, 3) * ep3 * pDir.at(2, 3) );
                     plasticStrain.at(3) += ( pDir.at(3, 1) * ep1 * pDir.at(3, 1) +
-                                             pDir.at(3, 2) * ep2 * pDir.at(3, 2) +
-                                             pDir.at(3, 3) * ep3 * pDir.at(3, 3) );
+                                            pDir.at(3, 2) * ep2 * pDir.at(3, 2) +
+                                            pDir.at(3, 3) * ep3 * pDir.at(3, 3) );
                     plasticStrain.at(4) += 2. * ( pDir.at(2, 1) * ep1 * pDir.at(3, 1) +
-                                                  pDir.at(2, 2) * ep2 * pDir.at(3, 2) +
-                                                  pDir.at(2, 3) * ep3 * pDir.at(3, 3) );
+                                                 pDir.at(2, 2) * ep2 * pDir.at(3, 2) +
+                                                 pDir.at(2, 3) * ep3 * pDir.at(3, 3) );
                     plasticStrain.at(5) += 2. * ( pDir.at(1, 1) * ep1 * pDir.at(3, 1) +
-                                                  pDir.at(1, 2) * ep2 * pDir.at(3, 2) +
-                                                  pDir.at(1, 3) * ep3 * pDir.at(3, 3) );
+                                                 pDir.at(1, 2) * ep2 * pDir.at(3, 2) +
+                                                 pDir.at(1, 3) * ep3 * pDir.at(3, 3) );
                     plasticStrain.at(6) += 2. * ( pDir.at(1, 1) * ep1 * pDir.at(2, 1) +
-                                                  pDir.at(1, 2) * ep2 * pDir.at(2, 2) +
-                                                  pDir.at(1, 3) * ep3 * pDir.at(2, 3) );
+                                                 pDir.at(1, 2) * ep2 * pDir.at(2, 2) +
+                                                 pDir.at(1, 3) * ep3 * pDir.at(2, 3) );
                 }
             }
         }
@@ -632,41 +601,37 @@ label18:
     if ( ifsh == 0 ) {
         G = 0.5 * this->give(c2_E, gp) / ( 1.0 + this->give(c2_n, gp) );
 
-        currentStress.at(1) = ( pDir.at(1, 1) * pStress->at(1) * pDir.at(1, 1) +
-                                pDir.at(1, 2) * pStress->at(2) * pDir.at(1, 2) );
-        currentStress.at(2) = ( pDir.at(2, 1) * pStress->at(1) * pDir.at(2, 1) +
-                                pDir.at(2, 2) * pStress->at(2) * pDir.at(2, 2) );
+        currentStress.at(1) = ( pDir.at(1, 1) * pStress.at(1) * pDir.at(1, 1) +
+                               pDir.at(1, 2) * pStress.at(2) * pDir.at(1, 2) );
+        currentStress.at(2) = ( pDir.at(2, 1) * pStress.at(1) * pDir.at(2, 1) +
+                               pDir.at(2, 2) * pStress.at(2) * pDir.at(2, 2) );
         currentStress.at(3) = 0.;
         currentStress.at(4) = currentStrain.at(4) * G;
         currentStress.at(5) = currentStrain.at(5) * G;
-        currentStress.at(6) = ( pDir.at(1, 1) * pStress->at(1) * pDir.at(2, 1) +
-                                pDir.at(1, 2) * pStress->at(2) * pDir.at(2, 2) );
+        currentStress.at(6) = ( pDir.at(1, 1) * pStress.at(1) * pDir.at(2, 1) +
+                               pDir.at(1, 2) * pStress.at(2) * pDir.at(2, 2) );
     } else {
-        currentStress.at(1) = ( pDir.at(1, 1) * pStress->at(1) * pDir.at(1, 1) +
-                                pDir.at(1, 2) * pStress->at(2) * pDir.at(1, 2) +
-                                pDir.at(1, 3) * pStress->at(3) * pDir.at(1, 3) );
-        currentStress.at(2) = ( pDir.at(2, 1) * pStress->at(1) * pDir.at(2, 1) +
-                                pDir.at(2, 2) * pStress->at(2) * pDir.at(2, 2) +
-                                pDir.at(2, 3) * pStress->at(3) * pDir.at(2, 3) );
+        currentStress.at(1) = ( pDir.at(1, 1) * pStress.at(1) * pDir.at(1, 1) +
+                               pDir.at(1, 2) * pStress.at(2) * pDir.at(1, 2) +
+                               pDir.at(1, 3) * pStress.at(3) * pDir.at(1, 3) );
+        currentStress.at(2) = ( pDir.at(2, 1) * pStress.at(1) * pDir.at(2, 1) +
+                               pDir.at(2, 2) * pStress.at(2) * pDir.at(2, 2) +
+                               pDir.at(2, 3) * pStress.at(3) * pDir.at(2, 3) );
         currentStress.at(3) =  us;
-        currentStress.at(4) = ( pDir.at(2, 1) * pStress->at(1) * pDir.at(3, 1) +
-                                pDir.at(2, 2) * pStress->at(2) * pDir.at(3, 2) +
-                                pDir.at(2, 3) * pStress->at(3) * pDir.at(3, 3) );
-        currentStress.at(5) = ( pDir.at(1, 1) * pStress->at(1) * pDir.at(3, 1) +
-                                pDir.at(1, 2) * pStress->at(2) * pDir.at(3, 2) +
-                                pDir.at(1, 3) * pStress->at(3) * pDir.at(3, 3) );
-        currentStress.at(6) = ( pDir.at(1, 1) * pStress->at(1) * pDir.at(2, 1) +
-                                pDir.at(1, 2) * pStress->at(2) * pDir.at(2, 2) +
-                                pDir.at(1, 3) * pStress->at(3) * pDir.at(2, 3) );
+        currentStress.at(4) = ( pDir.at(2, 1) * pStress.at(1) * pDir.at(3, 1) +
+                               pDir.at(2, 2) * pStress.at(2) * pDir.at(3, 2) +
+                               pDir.at(2, 3) * pStress.at(3) * pDir.at(3, 3) );
+        currentStress.at(5) = ( pDir.at(1, 1) * pStress.at(1) * pDir.at(3, 1) +
+                               pDir.at(1, 2) * pStress.at(2) * pDir.at(3, 2) +
+                               pDir.at(1, 3) * pStress.at(3) * pDir.at(3, 3) );
+        currentStress.at(6) = ( pDir.at(1, 1) * pStress.at(1) * pDir.at(2, 1) +
+                               pDir.at(1, 2) * pStress.at(2) * pDir.at(2, 2) +
+                               pDir.at(1, 3) * pStress.at(3) * pDir.at(2, 3) );
     }
 
     if ( this->give(c2_IFAD, gp) ) {
         status->giveTempCurrentStrainInZDir() = ez;
     }
-
-    delete ep;
-    delete pStress;
-    delete strainIncr;
 
     //totalStrainVector = status->giveStrainVector();
     //totalStrainVector.add (totalStrainIncrement);
@@ -676,7 +641,7 @@ label18:
     status->letTempStressVectorBe(helpR);
 
     StructuralMaterial :: giveFullSymVectorForm( help, plasticStrain, gp->giveMaterialMode() );
-    status->givePlasticStrainIncrementVector(plasticStrainIncrementVector);
+    plasticStrainIncrementVector = status->givePlasticStrainIncrementVector();
     plasticStrainIncrementVector.subtract(plasticStrainVector);
     plasticStrainIncrementVector.add(help);
     status->letPlasticStrainIncrementVectorBe(plasticStrainIncrementVector);
@@ -689,7 +654,7 @@ label18:
 
 
 void
-Concrete2 :: dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
+Concrete2 :: dtp3(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,
                   double SCC, double SCT, int *ifplas)
 //
 // DEFORMATION THEORY OF PLASTICITY, PRNCIPAL STRESSES
@@ -719,16 +684,16 @@ Concrete2 :: dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
     int i, ii = 0, j, k, jj = 0, kk = 0;
     double yy, ey, e0, yy1, yy2, s0, sci = 0.0, scj = 0.0, sck = 0.0;
 
-    if ( e->giveSize() != 3 ) {
-        _error("dtp3 : principal strains size mismatch");
+    if ( e.giveSize() != 3 ) {
+        OOFEM_ERROR("principal strains size mismatch");
     }
 
-    if ( s->giveSize() != 3 ) {
-        _error("dtp3 : principal stress size mismatch");
+    if ( s.giveSize() != 3 ) {
+        OOFEM_ERROR("principal stress size mismatch");
     }
 
-    if ( ep->giveSize() != 3 ) {
-        _error("dtp3 : plastic strains size mismatch");
+    if ( ep.giveSize() != 3 ) {
+        OOFEM_ERROR("plastic strains size mismatch");
     }
 
     * ifplas = 0;
@@ -741,32 +706,32 @@ Concrete2 :: dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
 
     if ( this->give(c2_E, gp) < 1.e-6 ) {
         for ( i = 1; i <= 3; i++ ) {
-            s->at(i) = 0.;
-            ep->at(i) = 0.;
+            s.at(i) = 0.;
+            ep.at(i) = 0.;
         }
 
         return;
     }
 
     if ( this->give(c2_n, gp) >= 0.01 ) {
-        s->at(1) =  e0 * ( yy1 * e->at(1) + yy * ( e->at(2) + e->at(3) ) );
-        s->at(2) =  e0 * ( yy1 * e->at(2) + yy * ( e->at(1) + e->at(3) ) );
-        s->at(3) =  e0 * ( yy1 * e->at(3) + yy * ( e->at(2) + e->at(1) ) );
+        s.at(1) =  e0 * ( yy1 * e.at(1) + yy * ( e.at(2) + e.at(3) ) );
+        s.at(2) =  e0 * ( yy1 * e.at(2) + yy * ( e.at(1) + e.at(3) ) );
+        s.at(3) =  e0 * ( yy1 * e.at(3) + yy * ( e.at(2) + e.at(1) ) );
         //
         // find intersection with side  i , sig(i)=sci
         //
         s0 = 0.;
         for ( i = 1; i <= 3; i++ ) {
-            if ( ( s->at(i) - SCT - s0 ) > 0. ) {
+            if ( ( s.at(i) - SCT - s0 ) > 0. ) {
                 ii = i;
                 sci = SCT;
-                s0 = s->at(i) - SCT;
+                s0 = s.at(i) - SCT;
                 * ifplas = 1;
             } else {
-                if ( ( SCC - s->at(i) - s0 ) > 0. ) {
+                if ( ( SCC - s.at(i) - s0 ) > 0. ) {
                     ii = i;
                     sci = SCC;
-                    s0 = SCC - s->at(i);
+                    s0 = SCC - s.at(i);
                 }
             }
         }
@@ -775,9 +740,9 @@ Concrete2 :: dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
             //
             //  linear elastic
             //
-            ep->at(1) = 0.;
-            ep->at(2) = 0.;
-            ep->at(3) = 0.;
+            ep.at(1) = 0.;
+            ep.at(2) = 0.;
+            ep.at(3) = 0.;
             return;
         }
 
@@ -788,47 +753,47 @@ Concrete2 :: dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
         j = iperm(ii, 3);
         k = iperm(j, 3);
         i = ii;
-        s->at(i) = sci;
-        s->at(j) = ( yy * sci + ey / yy2 * ( e->at(j) + yy * e->at(k) ) ) / yy1;
-        s->at(k) = ( yy * sci + ey / yy2 * ( e->at(k) + yy * e->at(j) ) ) / yy1;
+        s.at(i) = sci;
+        s.at(j) = ( yy * sci + ey / yy2 * ( e.at(j) + yy * e.at(k) ) ) / yy1;
+        s.at(k) = ( yy * sci + ey / yy2 * ( e.at(k) + yy * e.at(j) ) ) / yy1;
         s0 = 0.;
         //
         // find intersection with edges j and k
         //
-        if ( ( s->at(j) - SCT - s0 ) > 0. ) {
+        if ( ( s.at(j) - SCT - s0 ) > 0. ) {
             jj = j;
             kk = k;
             scj = SCT;
-            s0  = s->at(j) - SCT;
+            s0  = s.at(j) - SCT;
         }
 
-        if ( ( SCC - s->at(j) - s0 ) > 0. ) {
+        if ( ( SCC - s.at(j) - s0 ) > 0. ) {
             jj = j;
             kk = k;
             scj = SCC;
-            s0  = SCC - s->at(j);
+            s0  = SCC - s.at(j);
         }
 
-        if ( ( s->at(k) - SCT - s0 ) > 0. ) {
+        if ( ( s.at(k) - SCT - s0 ) > 0. ) {
             jj = k;
             kk = j;
             scj = SCT;
-            s0 = s->at(k) - SCT;
+            s0 = s.at(k) - SCT;
         }
 
-        if ( ( SCC - s->at(k) - s0 ) > 0. ) {
+        if ( ( SCC - s.at(k) - s0 ) > 0. ) {
             jj = k;
             kk = j;
             scj = SCC;
-            s0 = SCC - s->at(k);
+            s0 = SCC - s.at(k);
         } else {
             //
             // staying on the side  i
             //
             if ( s0 <= 0. ) {
-                ep->at(i) = e->at(i) - sci / yy1 / e0 + yy / yy1 * ( e->at(j) + e->at(k) );
-                ep->at(j) = 0.;
-                ep->at(k) = 0.;
+                ep.at(i) = e.at(i) - sci / yy1 / e0 + yy / yy1 * ( e.at(j) + e.at(k) );
+                ep.at(j) = 0.;
+                ep.at(k) = 0.;
                 return;
             }
         }
@@ -838,23 +803,23 @@ Concrete2 :: dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
         //
         j = jj;
         k = kk;
-        s->at(j) = scj;
-        s->at(k) = yy * ( sci + scj ) + ey *e->at(k);
+        s.at(j) = scj;
+        s.at(k) = yy * ( sci + scj ) + ey *e.at(k);
         //
         // corner ?
         //
-        if ( ( s->at(k) - SCT ) > 0. ) {
+        if ( ( s.at(k) - SCT ) > 0. ) {
             sck = SCT;
         } else {
-            if ( ( SCC - s->at(k) ) > 0. ) {
+            if ( ( SCC - s.at(k) ) > 0. ) {
                 sck = SCC;
             } else {
                 //
                 // staying on the edge  j - i
                 //
-                ep->at(i) = e->at(i) + yy *e->at(k) + yy2 / ey * ( yy * scj - yy1 * sci );
-                ep->at(j) = e->at(j) + yy *e->at(k) + yy2 / ey * ( yy * sci - yy1 * scj );
-                ep->at(k) = 0.;
+                ep.at(i) = e.at(i) + yy *e.at(k) + yy2 / ey * ( yy * scj - yy1 * sci );
+                ep.at(j) = e.at(j) + yy *e.at(k) + yy2 / ey * ( yy * sci - yy1 * scj );
+                ep.at(k) = 0.;
                 return;
             }
         }
@@ -862,10 +827,10 @@ Concrete2 :: dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
         //
         // corner sck on the edge  j  of the side  i
         //
-        s->at(k) = sck;
-        ep->at(i) = e->at(i) - ( sci - yy * ( scj + sck ) ) / ey;
-        ep->at(j) = e->at(j) - ( scj - yy * ( sck + sci ) ) / ey;
-        ep->at(k) = e->at(k) - ( sck - yy * ( sci + scj ) ) / ey;
+        s.at(k) = sck;
+        ep.at(i) = e.at(i) - ( sci - yy * ( scj + sck ) ) / ey;
+        ep.at(j) = e.at(j) - ( scj - yy * ( sck + sci ) ) / ey;
+        ep.at(k) = e.at(k) - ( sck - yy * ( sci + scj ) ) / ey;
         return;
     } else {
         //
@@ -873,18 +838,18 @@ Concrete2 :: dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
         //
         for ( i = 1; i <= 3; i++ ) {
             sci = 0.;
-            ep->at(i) = 0.;
-            s->at(i)  = e->at(i) * ey;
-            if ( s->at(i) > SCT ) {
+            ep.at(i) = 0.;
+            s.at(i)  = e.at(i) * ey;
+            if ( s.at(i) > SCT ) {
                 sci = SCT;
                 * ifplas = 1;
-                s->at(i) = sci;
-                ep->at(i) -= sci / ey;
+                s.at(i) = sci;
+                ep.at(i) -= sci / ey;
             } else {
-                if ( s->at(i) < SCC ) {
+                if ( s.at(i) < SCC ) {
                     sci = SCC;
-                    s->at(i) = sci;
-                    ep->at(i) -= sci / ey;
+                    s.at(i) = sci;
+                    ep.at(i) -= sci / ey;
                 }
             }
         }
@@ -892,7 +857,7 @@ Concrete2 :: dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
 }
 
 void
-Concrete2 :: dtp2(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
+Concrete2 :: dtp2(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,
                   double SCC, double SCT, int *ifplas)
 //
 // DEFORMATION THEORY OF PLASTICITY, PRNCIPAL STRESSES
@@ -923,16 +888,16 @@ Concrete2 :: dtp2(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
     double yy, ey, e0, so, scj = 0.0, sck = 0.0, sci = 0.0;
     // Dictionary *flags = gp->matInfo->flagDictionary;
 
-    if ( e->giveSize() != 3 ) {
-        _error("dtp3 : principal strains size mismatch");
+    if ( e.giveSize() != 3 ) {
+        OOFEM_ERROR("principal strains size mismatch");
     }
 
-    if ( s->giveSize() != 3 ) {
-        _error("dtp3 : principal stress size mismatch");
+    if ( s.giveSize() != 3 ) {
+        OOFEM_ERROR("principal stress size mismatch");
     }
 
-    if ( ep->giveSize() != 3 ) {
-        _error("dtp3 : plastic strains size mismatch");
+    if ( ep.giveSize() != 3 ) {
+        OOFEM_ERROR("plastic strains size mismatch");
     }
 
     * ifplas = 0;
@@ -942,32 +907,32 @@ Concrete2 :: dtp2(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
 
     * ifplas = 0;
     if ( ey == 0. ) {
-        s->at(1) = s->at(2) = 0.;
-        ep->at(1) = ep->at(2) = 0.;
+        s.at(1) = s.at(2) = 0.;
+        ep.at(1) = ep.at(2) = 0.;
         return;
     }
 
     if ( yy >  0.01 ) {
         e0 = ey / ( 1. - yy * yy );
 
-        s->at(1) = e0 * ( e->at(1) + yy * e->at(2) );
-        s->at(2) = e0 * ( e->at(2) + yy * e->at(1) );
+        s.at(1) = e0 * ( e.at(1) + yy * e.at(2) );
+        s.at(2) = e0 * ( e.at(2) + yy * e.at(1) );
         so = 0.;
         //
         //     find intersection with the edges of the square plast. co
         //     dition - edge j
         //
         for ( j = 1; j <= 2; j++ ) {
-            if ( ( s->at(j) - SCT - so ) > 0. ) {
+            if ( ( s.at(j) - SCT - so ) > 0. ) {
                 jj = j;
                 scj = SCT;
-                so = s->at(j) - SCT;
+                so = s.at(j) - SCT;
                 * ifplas = 1;
             } else {
-                if ( ( SCC - s->at(j) - so ) > 0. ) {
+                if ( ( SCC - s.at(j) - so ) > 0. ) {
                     jj = j;
                     scj = SCC;
-                    so  = SCC - s->at(j);
+                    so  = SCC - s.at(j);
                 }
             }
         }
@@ -976,8 +941,8 @@ Concrete2 :: dtp2(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
             //
             // LINEAR ELASTIC - NO INTERSECTION
             //
-            ep->at(1) = 0.;
-            ep->at(2) = 0.;
+            ep.at(1) = 0.;
+            ep.at(2) = 0.;
             return;
         }
 
@@ -986,22 +951,22 @@ Concrete2 :: dtp2(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
         //
         k = iperm(jj, 2);
         j = jj;
-        s->at(j) = scj;
-        s->at(k) = ey * e->at(k) + scj * yy;
+        s.at(j) = scj;
+        s.at(k) = ey * e.at(k) + scj * yy;
         //
         //     any corner?
         //
-        if ( ( s->at(k) - SCT ) > 0. ) {
+        if ( ( s.at(k) - SCT ) > 0. ) {
             sck = SCT;
         } else {
-            if ( ( SCC - s->at(k) ) > 0. ) {
+            if ( ( SCC - s.at(k) ) > 0. ) {
                 sck = SCC;
             } else {
                 //
                 //    staying on the edge  j
                 //
-                ep->at(j) = e->at(j) + yy *e->at(k) - scj / e0;
-                ep->at(k) = 0.;
+                ep.at(j) = e.at(j) + yy *e.at(k) - scj / e0;
+                ep.at(k) = 0.;
                 return;
             }
         }
@@ -1009,9 +974,9 @@ Concrete2 :: dtp2(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
         //
         //     corner  sck  on the edge  j
         //
-        s->at(k) = sck;
-        ep->at(j) = e->at(j) - ( s->at(j) - yy * s->at(k) ) / ey;
-        ep->at(k) = e->at(k) - ( s->at(k) - yy * s->at(j) ) / ey;
+        s.at(k) = sck;
+        ep.at(j) = e.at(j) - ( s.at(j) - yy * s.at(k) ) / ey;
+        ep.at(k) = e.at(k) - ( s.at(k) - yy * s.at(j) ) / ey;
         return;
     } else {
         //
@@ -1019,17 +984,17 @@ Concrete2 :: dtp2(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
         //
         for ( i = 1; i <= 2; i++ ) {
             sci = 0.;
-            ep->at(i) = 0.;
-            s->at(i) = e->at(i) * ey;
-            if ( s->at(i) > SCT ) {
+            ep.at(i) = 0.;
+            s.at(i) = e.at(i) * ey;
+            if ( s.at(i) > SCT ) {
                 sci = SCT;
                 * ifplas = 1;
             } else {
                 sci = SCC;
             }
 
-            s->at(i) = sci;
-            ep->at(i) = e->at(i) - sci / ey;
+            s.at(i) = sci;
+            ep.at(i) = e.at(i) - sci / ey;
         }
 
         return;
@@ -1040,7 +1005,7 @@ Concrete2 :: dtp2(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
 
 
 void
-Concrete2 :: strsoft(GaussPoint *gp, double epsult, FloatArray *ep, double &ep1, double &ep2, double &ep3,
+Concrete2 :: strsoft(GaussPoint *gp, double epsult, FloatArray &ep, double &ep1, double &ep2, double &ep3,
                      double SCC, double SCT, int &ifupd)
 // material constant of concrete
 // stored in this.propertyDictionary
@@ -1085,8 +1050,8 @@ Concrete2 :: strsoft(GaussPoint *gp, double epsult, FloatArray *ep, double &ep1,
     // tension
     //
     if ( this->give(c2_EOPP, gp) != 0. ) {
-        eop = max(ep->at(1), 0.) + max(ep->at(2), 0.) +
-              max(ep->at(3), 0.);
+        eop = max(ep.at(1), 0.) + max(ep.at(2), 0.) +
+        max(ep.at(3), 0.);
         if ( eop >  status->giveTempMaxVolPlasticStrain() ) {
             //
             // Current plastic volum. strain is greater than max.
@@ -1128,9 +1093,9 @@ label14:
 
     ifupd = 0;
     if ( !( ( this->give(c2_EPP, gp) == 0. ) && ( !this->give(c2_IS_PLASTIC_FLOW, gp) ) ) ) {
-        ep1 = min(ep->at(1), 0.);
-        ep2 = min(ep->at(2), 0.);
-        ep3 = min(ep->at(3), 0.);
+        ep1 = min(ep.at(1), 0.);
+        ep2 = min(ep.at(2), 0.);
+        ep3 = min(ep.at(3), 0.);
         dep = ep1 + ep2 + ep3;
         //
         if ( dep < 0. ) {
@@ -1185,7 +1150,7 @@ label14:
                             SCC = 0.;
                         } else {
                             SCC = this->give(c2_SCCC, gp) * ( 1. - ( eepr - this->give(c2_EPP, gp) ) /
-                                                              ( this->give(c2_EPU, gp) - this->give(c2_EPP, gp) ) );
+                                                             ( this->give(c2_EPU, gp) - this->give(c2_EPP, gp) ) );
                         }
 
                         //
@@ -1206,7 +1171,7 @@ label14:
 
 
 void
-Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray *strainIncrement)
+Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray &strainIncrement)
 // stirr (double dez, double srf)
 //
 //
@@ -1238,11 +1203,8 @@ Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray *strainIncrement)
     Concrete2MaterialStatus *status = static_cast< Concrete2MaterialStatus * >( this->giveStatus(gp) );
 
     double dep, srf, dez, ovs, s, dt;
-    if ( strainIncrement == NULL ) {
-        return;
-    }
 
-    dez = strainIncrement->at(1);
+    dez = strainIncrement.at(1);
     srf = status->giveTempCurrentStressInStirrups();
 
     dep = 0.;
@@ -1269,10 +1231,10 @@ Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray *strainIncrement)
 
 
 void
-Concrete2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                           MatResponseMode rMode,
-                                           GaussPoint *gp,
-                                           TimeStep *tStep)
+Concrete2 :: givePlateLayerStiffMtrx(FloatMatrix &answer,
+                                     MatResponseMode rMode,
+                                     GaussPoint *gp,
+                                     TimeStep *tStep)
 //
 // This material is currently unable compute material stiffness
 // so it uses slave material (linearElasticMaterial ) to perform this work
@@ -1280,8 +1242,8 @@ Concrete2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 // plasticity is not taken into account !.
 //
 {
-    // error ("Give3dMaterialStiffnessMatrix: unable to compute");
-    linearElasticMaterial->give3dMaterialStiffnessMatrix(answer, rMode, gp, tStep);
+    // error ("givePlateLayerStiffMtrx: unable to compute");
+    linearElasticMaterial->givePlateLayerStiffMtrx(answer, rMode, gp, tStep);
 }
 
 

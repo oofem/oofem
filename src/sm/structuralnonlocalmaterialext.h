@@ -65,7 +65,7 @@ public:
      * Constructor.
      * @param d Domain to which new material will belong.
      */
-    StructuralNonlocalMaterialExtensionInterface(Domain *d) : NonlocalMaterialExtensionInterface(d)
+    StructuralNonlocalMaterialExtensionInterface(Domain * d) : NonlocalMaterialExtensionInterface(d)
     { }
     /// Destructor.
     ~StructuralNonlocalMaterialExtensionInterface() { }

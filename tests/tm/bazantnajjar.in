@@ -1,7 +1,8 @@
 bazantnajjar.out
 drying at 50% RH - axisymmetric
 #
-nltransienttransportproblem nsteps 8 alpha 0.5 rtol 1.e-10 lumpedcapa nsmax 1000 prescribedtimes 8 0.01 0.1 0.5 1. 2. 4. 6. 8.
+nltransienttransportproblem nsteps 8 alpha 0.5 rtol 1.e-10 lumpedcapa nsmax 1000 prescribedtimes 8 0.01 0.1 0.5 1. 2. 4. 6. 8. nmodules 1
+errorcheck
 # nmodules 1
 # vtkxml tstep_all domain_all primvars 1 3
 #
@@ -52,12 +53,12 @@ ConstantFunction 1 f(t) 0.5
 ##
 #
 #%BEGIN_CHECK% tolerance 1.e-5
-#NODE tStep 9.900000e-01 number 1 dof 1 unknown f value 8.222709e-01
-#NODE tStep 9.900000e-01 number 3 dof 1 unknown f value 8.168292e-01
-#NODE tStep 9.900000e-01 number 5 dof 1 unknown f value 8.052833e-01
-#NODE tStep 7.990000e+00 number 1 dof 1 unknown f value 6.386320e-01
-#NODE tStep 7.990000e+00 number 3 dof 1 unknown f value 6.342395e-01
-#NODE tStep 7.990000e+00 number 5 dof 1 unknown f value 6.217464e-01
+#NODE tStep 4 number 1 dof 14 unknown d value 8.222709e-01
+#NODE tStep 4 number 3 dof 14 unknown d value 8.168292e-01
+#NODE tStep 4 number 5 dof 14 unknown d value 8.052833e-01
+#NODE tStep 8 number 1 dof 14 unknown d value 6.386320e-01
+#NODE tStep 8 number 3 dof 14 unknown d value 6.342395e-01
+#NODE tStep 8 number 5 dof 14 unknown d value 6.217464e-01
 #%END_CHECK%
 
 

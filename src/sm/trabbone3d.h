@@ -116,7 +116,7 @@ protected:
 
 
 public:
-    TrabBone3DStatus(int n, Domain *d, GaussPoint *g);
+    TrabBone3DStatus(int n, Domain * d, GaussPoint * g);
 
     virtual ~TrabBone3DStatus();
 
@@ -190,7 +190,7 @@ protected:
     double hardFactor;
 
 public:
-    TrabBone3D(int n, Domain *d);
+    TrabBone3D(int n, Domain * d);
 
     bool isCharacteristicMtrxSymmetric(MatResponseMode rMode) { return false; }
     double evaluateCurrentYieldStress(const double kappa);
@@ -232,14 +232,12 @@ public:
     void constructNormAdjustTensor(FloatMatrix &answer);
 
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
-                                               MatResponseMode, GaussPoint * gp,
-                                               TimeStep * tStep);
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                               MatResponseMode, GaussPoint *gp,
+                                               TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *,
-                                      const FloatArray &, TimeStep *);
-
-    virtual int hasMaterialModeCapability(MaterialMode);
+    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *,
+                                         const FloatArray &, TimeStep *);
 
     virtual const char *giveInputRecordName() const { return _IFT_TrabBone3D_Name; }
     virtual const char *giveClassName() const { return "TrabBone3D"; }

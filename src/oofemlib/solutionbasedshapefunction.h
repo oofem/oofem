@@ -66,6 +66,7 @@ class OOFEM_EXPORT SolutionbasedShapeFunction : public ActiveBoundaryCondition
 {
 private:
     Node *myNode;
+    IntArray myDofIDs;
     int set;
     int externalSet;
     int order;
@@ -119,7 +120,7 @@ private:
     void whichBoundary(FloatArray &coord, bool &isPlus, bool &isMinus, bool &isZero);
 
 public:
-    SolutionbasedShapeFunction(int n, Domain *d);
+    SolutionbasedShapeFunction(int n, Domain * d);
     virtual ~SolutionbasedShapeFunction();
 
     IRResultType initializeFrom(InputRecord *ir);

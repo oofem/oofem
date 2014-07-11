@@ -55,7 +55,7 @@ public:
      * @param n Cross section number.
      * @param d Domain for cross section.
      */
-    EmptyCS(int n, Domain *d);
+    EmptyCS(int n, Domain * d);
     /// Destructor.
     virtual ~EmptyCS();
 

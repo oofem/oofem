@@ -89,7 +89,7 @@ protected:
 
 public:
     /// Constructor. Creates new StructuralMaterialStatus with number n, belonging to domain d and IntegrationPoint g.
-    StructuralMaterialStatus(int n, Domain *d, GaussPoint *g);
+    StructuralMaterialStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~StructuralMaterialStatus();
 
@@ -122,25 +122,25 @@ public:
     /// Returns the const pointer to receiver's temporary deformation gradient vector.
     const FloatArray &giveTempFVector() const { return tempFVector; }
     /// Assigns strain vector to given vector v.
-    void letStrainVectorBe(const FloatArray &v) { strainVector = v; }
+    void letStrainVectorBe(FloatArray v) { strainVector = std :: move(v); }
     /// Assigns stressVector to given vector v.
-    void letStressVectorBe(const FloatArray &v) { stressVector = v; }
+    void letStressVectorBe(FloatArray v) { stressVector = std :: move(v); }
     /// Assigns PVector to given vector v.
-    void letPVectorBe(const FloatArray &v) { PVector = v; }
+    void letPVectorBe(FloatArray v) { PVector = std :: move(v); }
     /// Assigns CVector to given vector v.
-    void letCVectorBe(const FloatArray &v) { CVector = v; }
+    void letCVectorBe(FloatArray v) { CVector = std :: move(v); }
     /// Assigns FVector to given vector v.
-    void letFVectorBe(const FloatArray &v) { FVector = v; }
+    void letFVectorBe(FloatArray v) { FVector = std :: move(v); }
     /// Assigns tempStressVector to given vector v.
-    void letTempStressVectorBe(const FloatArray &v) { tempStressVector = v; }
+    void letTempStressVectorBe(FloatArray v) { tempStressVector = std :: move(v); }
     /// Assigns tempStrainVector to given vector v
-    void letTempStrainVectorBe(const FloatArray &v) { tempStrainVector = v; }
+    void letTempStrainVectorBe(FloatArray v) { tempStrainVector = std :: move(v); }
     /// Assigns tempPVector to given vector v
-    void letTempPVectorBe(const FloatArray &v) { tempPVector = v; }
+    void letTempPVectorBe(FloatArray v) { tempPVector = std :: move(v); }
     /// Assigns tempPVector to given vector v
-    void letTempCVectorBe(const FloatArray &v) { tempCVector = v; }
+    void letTempCVectorBe(FloatArray v) { tempCVector = std :: move(v); }
     /// Assigns tempFVector to given vector v
-    void letTempFVectorBe(const FloatArray &v) { tempFVector = v; }
+    void letTempFVectorBe(FloatArray v) { tempFVector = std :: move(v); }
 
     virtual const char *giveClassName() const { return "StructuralMaterialStatus"; }
 

@@ -54,13 +54,13 @@ protected:
     static FEI2dLineLin interp;
 
 public:
-    IntElLine1(int n, Domain *d);
+    IntElLine1(int n, Domain * d);
     virtual ~IntElLine1() { }
 
     virtual FEInterpolation *giveInterpolation() const;
 
     virtual int computeNumberOfDofs() { return 8; }
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
     virtual double computeAreaAround(GaussPoint *gp);
     virtual void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer);

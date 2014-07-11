@@ -67,7 +67,7 @@ Interface *
 MazarsNLMaterial :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
     } else {
         return NULL;
     }
@@ -114,13 +114,10 @@ MazarsNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &str
     this->updateDomainBeforeNonlocAverage(tStep);
 
     // compute nonlocal strain increment first
-    std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
-    std :: list< localIntegrationRecord > :: iterator pos;
-
-    for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        nonlocStatus = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(pos->nearGp) );
+    for ( auto &lir: *this->giveIPIntegrationList(gp) ) {
+        nonlocStatus = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(lir.nearGp) );
         nonlocalContribution = nonlocStatus->giveLocalEquivalentStrainForAverage();
-        nonlocalContribution *= pos->weight;
+        nonlocalContribution *= lir.weight;
 
         nonlocalEquivalentStrain += nonlocalContribution;
     }
@@ -133,7 +130,6 @@ MazarsNLMaterial :: computeEquivalentStrain(double &kappa, const FloatArray &str
 IRResultType
 MazarsNLMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     MazarsMaterial :: initializeFrom(ir);
@@ -269,7 +265,7 @@ Interface *
 MazarsNLMaterialStatus :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialStatusExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialStatusExtensionInterface * >( this );
+        return static_cast< StructuralNonlocalMaterialStatusExtensionInterface * >(this);
     } else {
         return NULL;
     }

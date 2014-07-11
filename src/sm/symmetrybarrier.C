@@ -123,11 +123,9 @@ SymmetryBarrier :: applyConstraint(const FloatArray &c1, const FloatArray &c2, d
 IRResultType
 SymmetryBarrier :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     FloatArray normals;
-    int j;
 
     IR_GIVE_FIELD(ir, origin, _IFT_SymmetryBarrier_origin);
     IR_GIVE_FIELD(ir, normals, _IFT_SymmetryBarrier_normals);
@@ -136,13 +134,13 @@ SymmetryBarrier :: initializeFrom(InputRecord *ir)
     lcs.resize(3, 3);
     int size = normals.giveSize();
     if ( !( ( size == 0 ) || ( size == 6 ) ) ) {
-        _warning2( "initializeFrom: lcs in node %d is not properly defined, will be ignored", this->giveNumber() );
+        OOFEM_WARNING("lcs in node %d is not properly defined, will be ignored", this->giveNumber() );
     }
 
     if ( size == 6 ) {
         double n1 = 0.0, n2 = 0.0;
         // compute transformation matrix
-        for ( j = 1; j <= 3; j++ ) {
+        for ( int j = 1; j <= 3; j++ ) {
             lcs.at(1, j) = normals.at(j);
             n1 += normals.at(j) * normals.at(j);
             lcs.at(2, j) = normals.at(j + 3);
@@ -152,10 +150,10 @@ SymmetryBarrier :: initializeFrom(InputRecord *ir)
         n1 = sqrt(n1);
         n2 = sqrt(n2);
         if ( ( n1 <= 1.e-6 ) || ( n2 <= 1.e-6 ) ) {
-            _error("instanciateFrom : lcs input error");
+            OOFEM_ERROR("lcs input error");
         }
 
-        for ( j = 1; j <= 3; j++ ) { // normalize e1' e2'
+        for ( int j = 1; j <= 3; j++ ) { // normalize e1' e2'
             lcs.at(1, j) /= n1;
             lcs.at(2, j) /= n2;
         }
@@ -168,7 +166,7 @@ SymmetryBarrier :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, mask, _IFT_SymmetryBarrier_activemask);
     if ( mask.giveSize() != 3 ) {
-        _error("instanciateFrom: activemask size should be 3");
+        OOFEM_ERROR("activemask size should be 3");
     }
 
     return IRRT_OK;

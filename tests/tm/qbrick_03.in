@@ -1,6 +1,7 @@
 qbrick_03.out
 Patch test of QBrick1ht element, loaded b one side by heat transfer coefficient
-StationaryProblem nsteps 1 nmodules 0
+StationaryProblem nsteps 1 nmodules 1
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 6 vars 2 37 56 stype 2
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
@@ -58,17 +59,17 @@ boundarycondition 1 loadtimefunction 1 prescribedvalue 0.0
 constantsurfaceload 2 loadTimeFunction 1 ndofs 1 components 1 100.0 properties 1 a 3.0 loadtype 3
 constantfunction 1 f(t) 1.0
 #%BEGIN_CHECK%
-#NODE tStep 1 number 40 dof 1 unknown f value 16.0
-#NODE tStep 1 number 3 dof 1 unknown f value 32.0
-#NODE tStep 1 number 4 dof 1 unknown f value 32.0
-#NODE tStep 1 number 11 dof 1 unknown f value 32.0
-#NODE tStep 1 number 19 dof 1 unknown f value 32.0
-#NODE tStep 1 number 35 dof 1 unknown f value 48.0
-#NODE tStep 1 number 5 dof 1 unknown f value 64.0
-#NODE tStep 1 number 6 dof 1 unknown f value 64.0
-#NODE tStep 1 number 14 dof 1 unknown f value 64.0
-#NODE tStep 1 number 37 dof 1 unknown f value 80.0
-#NODE tStep 1 number 7 dof 1 unknown f value 96.0
-#NODE tStep 1 number 8 dof 1 unknown f value 96.0
-#NODE tStep 1 number 23 dof 1 unknown f value 96.0
+#NODE tStep 1 number 40 dof 10 unknown d value 16.0
+#NODE tStep 1 number 3 dof 10 unknown d value 32.0
+#NODE tStep 1 number 4 dof 10 unknown d value 32.0
+#NODE tStep 1 number 11 dof 10 unknown d value 32.0
+#NODE tStep 1 number 19 dof 10 unknown d value 32.0
+#NODE tStep 1 number 35 dof 10 unknown d value 48.0
+#NODE tStep 1 number 5 dof 10 unknown d value 64.0
+#NODE tStep 1 number 6 dof 10 unknown d value 64.0
+#NODE tStep 1 number 14 dof 10 unknown d value 64.0
+#NODE tStep 1 number 37 dof 10 unknown d value 80.0
+#NODE tStep 1 number 7 dof 10 unknown d value 96.0
+#NODE tStep 1 number 8 dof 10 unknown d value 96.0
+#NODE tStep 1 number 23 dof 10 unknown d value 96.0
 #%END_CHECK%

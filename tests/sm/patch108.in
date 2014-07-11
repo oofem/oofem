@@ -5,7 +5,8 @@
 patch108.out
 PATCH TEST OF TrPlaneStress2d ELEMENTS
 #domain section
-LinearStatic nsteps 1
+LinearStatic nsteps 1 nmodules 1
+errorcheck
 domain 2dPlaneStressRot
 OutputManager tstep_all dofman_all element_all
 #nnode nelem ncrosssect nyield nmat nloa nloatime
@@ -33,7 +34,7 @@ ConstantFunction 1 f(t) 1.0
 #
 #
 #
-#%BEGIN_CHECK% tolerance 1.e-6
+#%BEGIN_CHECK% tolerance 1.e-5
 ##
 ## Note: this is the exact solution
 ##
@@ -56,32 +57,32 @@ ConstantFunction 1 f(t) 1.0
 #NODE tStep 1 number 5 dof 1 unknown d value 0.0
 #NODE tStep 1 number 5 dof 2 unknown d value 0.44
 ## check element no. 1 strain vector
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 1  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 2  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 6  value 0.22
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 6  value 0.22
 ## check element no. 1 stress vector
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 1  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 2  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 6  value 1.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 6  value 1.0
 ##
-#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 1  value 0.0
-#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 2  value 0.0
-#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 6  value 0.22
-#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 1  value 0.0
-#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 2  value 0.0
-#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 6  value 1.0
+#ELEMENT tStep 1 number 2 gp 1 keyword 4 component 1  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword 4 component 2  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword 4 component 6  value 0.22
+#ELEMENT tStep 1 number 2 gp 1 keyword 1 component 1  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword 1 component 2  value 0.0
+#ELEMENT tStep 1 number 2 gp 1 keyword 1 component 6  value 1.0
 ##
-#ELEMENT tStep 1 number 3 gp 1 keyword "strains" component 1  value 0.0
-#ELEMENT tStep 1 number 3 gp 1 keyword "strains" component 2  value 0.0
-#ELEMENT tStep 1 number 3 gp 1 keyword "strains" component 6  value 0.22
-#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 1  value 0.0
-#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 2  value 0.0
-#ELEMENT tStep 1 number 3 gp 1 keyword "stresses" component 6  value 1.0
+#ELEMENT tStep 1 number 3 gp 1 keyword 4 component 1  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword 4 component 2  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword 4 component 6  value 0.22
+#ELEMENT tStep 1 number 3 gp 1 keyword 1 component 1  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword 1 component 2  value 0.0
+#ELEMENT tStep 1 number 3 gp 1 keyword 1 component 6  value 1.0
 ##
-#ELEMENT tStep 1 number 4 gp 1 keyword "strains" component 1  value 0.0
-#ELEMENT tStep 1 number 4 gp 1 keyword "strains" component 2  value 0.0
-#ELEMENT tStep 1 number 4 gp 1 keyword "strains" component 6  value 0.22
-#ELEMENT tStep 1 number 4 gp 1 keyword "stresses" component 1  value 0.0
-#ELEMENT tStep 1 number 4 gp 1 keyword "stresses" component 2  value 0.0
-#ELEMENT tStep 1 number 4 gp 1 keyword "stresses" component 6  value 1.0
+#ELEMENT tStep 1 number 4 gp 1 keyword 4 component 1  value 0.0
+#ELEMENT tStep 1 number 4 gp 1 keyword 4 component 2  value 0.0
+#ELEMENT tStep 1 number 4 gp 1 keyword 4 component 6  value 0.22
+#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 1  value 0.0
+#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 2  value 0.0
+#ELEMENT tStep 1 number 4 gp 1 keyword 1 component 6  value 1.0
 #%END_CHECK%

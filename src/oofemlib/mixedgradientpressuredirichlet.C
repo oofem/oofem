@@ -55,19 +55,24 @@ REGISTER_BoundaryCondition(MixedGradientPressureDirichlet);
 
 MixedGradientPressureDirichlet :: MixedGradientPressureDirichlet(int n, Domain *d) : MixedGradientPressureBC(n, d)
 {
+    ///@todo Creating these statically in the constructor is a bad idea.. it should be part of Domain::createDofs()
     // The unknown volumetric strain
+    vol_id = d->giveNextFreeDofID();
     voldman = new Node(1, d);
-    voldman->appendDof( new MasterDof( 1, voldman, ( DofIDItem ) d->giveNextFreeDofID() ) );
+    voldman->appendDof( new MasterDof( 1, voldman, (DofIDItem)vol_id ) );
 
     int nsd = d->giveNumberOfSpatialDimensions();
     int components = ( nsd + 1 ) * nsd / 2;
     // The prescribed strains.
     devdman = new Node(2, d);
+    dev_id.clear();
     for ( int i = 0; i < components; i++ ) {
+        int dofid = d->giveNextFreeDofID();
+        dev_id.followedBy(dofid);
         // Just putting in X_i id-items since they don't matter.
         // These don't actually need to be active, they are masterdofs with prescribed values, its
         // easier to just have them here rather than trying to make another Dirichlet boundary condition.
-        devdman->appendDof( new ActiveDof( i + 1, devdman, this->giveNumber(), ( DofIDItem ) d->giveNextFreeDofID() ) );
+        devdman->appendDof( new ActiveDof( i + 1, devdman, this->giveNumber(), (DofIDItem)dofid ) );
     }
 }
 
@@ -81,7 +86,7 @@ MixedGradientPressureDirichlet :: ~MixedGradientPressureDirichlet()
 
 Dof *MixedGradientPressureDirichlet :: giveVolDof()
 {
-    return voldman->giveDof(1);
+    return *voldman->begin();
 }
 
 
@@ -116,9 +121,9 @@ Dof *MixedGradientPressureDirichlet :: giveMasterDof(ActiveDof *dof, int mdof)
         return NULL;
     }
     if ( mdof == 1 ) {
-        return voldman->giveDof(1);
+        return *voldman->begin();
     } else {
-        return devdman->giveDof(mdof - 1);
+        return devdman->giveDofWithID(dev_id[mdof - 2]);
     }
 }
 
@@ -138,41 +143,40 @@ void MixedGradientPressureDirichlet :: computeDofTransformation(ActiveDof *dof, 
     if ( id == D_u || id == V_u ) {
         masterContribs.at(1) = dx.at(1) / 3.0;      // d_vol
         if ( nsd == 2 ) {
-            masterContribs.at(2) = dx.at(1);      // d_dev_11
-            masterContribs.at(3) = 0.0;           // d_dev_22
+            masterContribs.at(2) = dx.at(1);        // d_dev_11
+            masterContribs.at(3) = 0.0;             // d_dev_22
             masterContribs.at(4) = dx.at(2) / 2.0;  // gamma_12
         } else if ( nsd == 3 ) {
-            masterContribs.at(2) = dx.at(1);      // d_dev_11
-            masterContribs.at(3) = 0.0;           // d_dev_22
-            masterContribs.at(4) = 0.0;           // d_dev_33
-            masterContribs.at(5) = 0.0;           // gamma_23
+            masterContribs.at(2) = dx.at(1);        // d_dev_11
+            masterContribs.at(3) = 0.0;             // d_dev_22
+            masterContribs.at(4) = 0.0;             // d_dev_33
+            masterContribs.at(5) = 0.0;             // gamma_23
             masterContribs.at(6) = dx.at(3) / 2.0;  // gamma_13
             masterContribs.at(7) = dx.at(2) / 2.0;  // gamma_12
         }
     } else if ( id == D_v || id == V_v ) {
         masterContribs.at(1) = dx.at(2) / 3.0;      // d_vol
-        if ( nsd == 2 ) {
-            masterContribs.at(2) = 0.0;           // d_dev_11
-            masterContribs.at(3) = dx.at(2);      // d_dev_22
-            masterContribs.at(4) = dx.at(1) / 2.0;  // gamma_12
-        } else if ( nsd == 3 ) {
-            masterContribs.at(2) = 0.0;           // d_dev_11
-            masterContribs.at(3) = dx.at(2);      // d_dev_22
-            masterContribs.at(4) = 0.0;           // d_dev_33
+        masterContribs.at(2) = 0.0;                 // d_dev_11
+        masterContribs.at(3) = dx.at(2);            // d_dev_22
+        masterContribs.at(4) = dx.at(1) / 2.0;      // gamma_12
+        if ( nsd == 3 ) {
+            masterContribs.at(2) = 0.0;             // d_dev_11
+            masterContribs.at(3) = dx.at(2);        // d_dev_22
+            masterContribs.at(4) = 0.0;             // d_dev_33
             masterContribs.at(5) = dx.at(3) / 2.0;  // gamma_23
-            masterContribs.at(6) = 0.0;           // gamma_13
+            masterContribs.at(6) = 0.0;             // gamma_13
             masterContribs.at(7) = dx.at(1) / 2.0;  // gamma_12
         }
-    } else if ( id == D_w || id == V_w ) { // 3D only:
+    } else if ( id == D_w || id == V_w ) {      // 3D only:
         masterContribs.at(1) = dx.at(3) / 3.0;  // d_vol
-        masterContribs.at(2) = 0.0;           // d_dev_11
-        masterContribs.at(3) = 0.0;           // d_dev_22
-        masterContribs.at(4) = dx.at(3);      // d_dev_33
+        masterContribs.at(2) = 0.0;             // d_dev_11
+        masterContribs.at(3) = 0.0;             // d_dev_22
+        masterContribs.at(4) = dx.at(3);        // d_dev_33
         masterContribs.at(5) = dx.at(2) / 2.0;  // gamma_23
         masterContribs.at(6) = dx.at(1) / 2.0;  // gamma_13
-        masterContribs.at(7) = 0.0;           // gamma_12
+        masterContribs.at(7) = 0.0;             // gamma_12
     } else {
-        OOFEM_ERROR("MixedGradientPressureDirichlet :: computeDofTransformation - Incompatible id on subjected dof\n");
+        OOFEM_ERROR("Incompatible id on subjected dof");
     }
 }
 
@@ -183,7 +187,7 @@ double MixedGradientPressureDirichlet :: giveUnknown(double vol, const FloatArra
     FloatArray *coords = dof->giveDofManager()->giveCoordinates();
 
     if ( coords == NULL || coords->giveSize() != this->centerCoord.giveSize() ) {
-        OOFEM_ERROR2( "MixedGradientPressureDirichlet :: give - Size of coordinate system different from center coordinate (%d) in b.c.", this->centerCoord.giveSize() );
+        OOFEM_ERROR("Size of coordinate system different from center coordinate (%d) in b.c.", this->centerCoord.giveSize() );
     }
 
     FloatArray dx;
@@ -226,7 +230,7 @@ double MixedGradientPressureDirichlet :: giveUnknown(double vol, const FloatArra
 }
 
 
-void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, double &vol, EquationID eid, TimeStep *tStep)
+void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, double &vol, TimeStep *tStep)
 {
     EngngModel *emodel = this->giveDomain()->giveEngngModel();
     FloatArray tmp;
@@ -235,10 +239,10 @@ void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, doubl
     // sigma = residual (since we use the slave dofs) = f_ext - f_int
     sigmaDev.resize(npeq);
     sigmaDev.zero();
-    emodel->assembleVector(sigmaDev, tStep, eid, InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    emodel->assembleVector(sigmaDev, tStep, InternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
     tmp.resize(npeq);
     tmp.zero();
-    emodel->assembleVector(tmp, tStep, eid, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
+    emodel->assembleVector(tmp, tStep, ExternalForcesVector, VM_Total, EModelDefaultPrescribedEquationNumbering(), this->domain);
     sigmaDev.subtract(tmp);
     // Divide by the RVE-volume
     sigmaDev.times( 1.0 / this->domainSize() );
@@ -250,83 +254,100 @@ void MixedGradientPressureDirichlet :: computeFields(FloatArray &sigmaDev, doubl
 }
 
 
-void MixedGradientPressureDirichlet :: computeTangents(
-    FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, EquationID eid, TimeStep *tStep)
+void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArray &Ep, FloatArray &Cd, double &Cp, TimeStep *tStep)
 {
-    double size = this->domainSize();
+    double rve_size = this->domainSize();
     // Fetch some information from the engineering model
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
     SparseLinearSystemNM *solver = classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ); // = rve->giveLinearSolver();
-    SparseMtrx *Kff, *Kfp, *Kpf, *Kpp;
     SparseMtrxType stype = SMT_PetscMtrx; // = rve->giveSparseMatrixType();
     EModelDefaultEquationNumbering fnum;
     EModelDefaultPrescribedEquationNumbering pnum;
 
     // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
-    Kff = classFactory.createSparseMtrx(stype);
-    Kfp = classFactory.createSparseMtrx(stype);
-    Kpf = classFactory.createSparseMtrx(stype);
-    Kpp = classFactory.createSparseMtrx(stype);
-    if ( !Kff ) {
-        OOFEM_ERROR2("MixedGradientPressureDirichlet :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
-    }
-    Kff->buildInternalStructure(rve, 1, eid, fnum);
-    Kfp->buildInternalStructure(rve, 1, eid, fnum, pnum);
-    Kpf->buildInternalStructure(rve, 1, eid, pnum, fnum);
-    Kpp->buildInternalStructure(rve, 1, eid, pnum);
-    rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, this->domain);
-    rve->assemble(Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain);
-    rve->assemble(Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain);
-    rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, this->domain);
-
-    // Setup up indices and locations
-    int neq = Kff->giveNumberOfRows();
-    int npeq = Kpf->giveNumberOfRows();
+    FloatMatrix ddev_pert;
+    FloatMatrix rhs_d; // RHS for d_dev [d_dev11, d_dev22, d_dev12] in 2D
+    FloatMatrix s_d; // Sensitivity fields for d_dev
+    FloatArray rhs_p; // RHS for pressure
+    FloatArray s_p; // Sensitivity fields for p
 
     // Indices and such of internal dofs
     int dvol_eq = this->giveVolDof()->giveEqn();
     int ndev = this->devGradient.giveSize();
-    // Matrices and arrays for sensitivities
-    FloatMatrix ddev_pert(ndev, npeq); // In fact, npeq should most likely equal ndev
-    FloatMatrix rhs_d(neq, npeq); // RHS for d_dev [d_dev11, d_dev22, d_dev12] in 2D
-    FloatMatrix s_d(neq, npeq); // Sensitivity fields for d_dev
-    FloatArray rhs_p(neq); // RHS for pressure
-    FloatArray s_p(neq); // Sensitivity fields for p
 
-    // Unit pertubations for d_dev
-    ddev_pert.zero();
-    for ( int i = 1; i <= ndev; ++i ) {
-        int eqn = this->devdman->giveDof(i)->__givePrescribedEquationNumber();
-        ddev_pert.at(eqn, i) = -1.0; // Minus sign for moving it to the RHS
+    {
+        // Sets up RHS for all sensitivity problems;
+        SparseMtrx *Kfp = classFactory.createSparseMtrx(stype);
+        Kfp->buildInternalStructure(rve, 1, fnum, pnum);
+        rve->assemble(Kfp, tStep, StiffnessMatrix, fnum, pnum, this->domain);
+
+        // Setup up indices and locations
+        int neq = Kfp->giveNumberOfRows();
+        // Matrices and arrays for sensitivities
+        int npeq = Kfp->giveNumberOfColumns();
+
+        if ( npeq != ndev ) {
+            OOFEM_ERROR("Size mismatch, ndev != npeq");
+        }
+
+        // Unit pertubations for d_dev
+        ddev_pert.resize(ndev, ndev); // In fact, npeq should most likely equal ndev
+        ddev_pert.zero();
+        for ( int i = 1; i <= ndev; ++i ) {
+        int eqn = this->devdman->giveDofWithID(dev_id.at(i))->__givePrescribedEquationNumber();
+            ddev_pert.at(eqn, i) = -1.0; // Minus sign for moving it to the RHS
+        }
+        Kfp->times(ddev_pert, rhs_d);
+        s_d.resize(neq, ndev);
+
+        // Sensitivity analysis for p (already in rhs, just set value directly)
+        rhs_p.resize(neq);
+        rhs_p.zero();
+        rhs_p.at(dvol_eq) = -1.0 * rve_size; // dp = 1.0 (unit size)
+        s_p.resize(neq);
+        delete Kfp;
     }
-    Kfp->times(ddev_pert, rhs_d);
 
-    // Sensitivity analysis for p (already in rhs, just set value directly)
-    rhs_p.zero();
-    rhs_p.at(dvol_eq) = -1.0; // dp = -1.0 (unit size)
-
-    // Solve all sensitivities
-    solver->solve(Kff, & rhs_p, & s_p);
-    solver->solve(Kff, rhs_d, s_d);
+    {
+        // Solve all sensitivities
+        SparseMtrx *Kff = classFactory.createSparseMtrx(stype);
+        Kff->buildInternalStructure(rve, 1, fnum);
+        if ( !Kff ) {
+            OOFEM_ERROR("MixedGradientPressureDirichlet :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
+        }
+        rve->assemble(Kff, tStep, StiffnessMatrix, fnum, this->domain);
+        solver->solve(Kff, & rhs_p, & s_p);
+        solver->solve(Kff, rhs_d, s_d);
+        delete Kff;
+    }
 
     // Sensitivities for d_vol is solved for directly;
-    Cp = s_p.at(dvol_eq);
+    Cp = - s_p.at(dvol_eq); // Note: Defined with negative sign de = - C * dp
     Cd.resize(ndev);
     for ( int i = 1; i <= ndev; ++i ) {
         Cd.at(i) = s_d.at(dvol_eq, i); // Copy over relevant row from solution
     }
 
-    // Sensitivities for d_dev is obtained as reactions forces;
-    Kpf->times(s_p, Ep);
+    {
+        // Sensitivities for d_dev is obtained as reactions forces;
+        SparseMtrx *Kpf = classFactory.createSparseMtrx(stype);
+        SparseMtrx *Kpp = classFactory.createSparseMtrx(stype);
+        Kpf->buildInternalStructure(rve, 1, pnum, fnum);
+        Kpp->buildInternalStructure(rve, 1, pnum);
+        rve->assemble(Kpf, tStep, StiffnessMatrix, pnum, fnum, this->domain);
+        rve->assemble(Kpp, tStep, StiffnessMatrix, pnum, this->domain);
 
-    FloatMatrix tmpMat;
-    Kpp->times(ddev_pert, tmpMat);
-    Kpf->times(s_d, Ed);
-
-    Ed.subtract(tmpMat);
-
-    Ed.times(1.0 / size);
+        FloatMatrix tmpMat;
+        Kpp->times(ddev_pert, tmpMat);
+        Kpf->times(s_d, Ed);
+        Ed.subtract(tmpMat);
+        Ed.times(1.0 / rve_size);
+        Kpf->times(s_p, Ep);
+        Ep.times(1.0 / rve_size);
+        delete Kpp;
+        delete Kpf;
+    }
 
     // Not sure if i actually need to do this part, but the obtained tangents are to dsigma/dp, not dsigma_dev/dp, so they need to be corrected;
     int nsd = this->domain->giveNumberOfSpatialDimensions();
@@ -350,12 +371,6 @@ void MixedGradientPressureDirichlet :: computeTangents(
         }
     }
 #endif
-
-    delete Kff;
-    delete Kfp;
-    delete Kpf;
-    delete Kpp;
-
     delete solver; ///@todo Remove this when solver is taken from engngmodel
 }
 
@@ -363,7 +378,7 @@ void MixedGradientPressureDirichlet :: computeTangents(
 double MixedGradientPressureDirichlet :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
 {
     if ( this->isDevDof(dof) ) {
-        return this->devGradient( dof->giveNumber() );
+        return this->devGradient( dev_id.findFirstIndexOf(dof->giveDofID()) );
     }
     return this->giveUnknown(this->giveVolDof()->giveUnknown(field, mode, tStep), this->devGradient, mode, tStep, dof);
 }
@@ -372,7 +387,7 @@ double MixedGradientPressureDirichlet :: giveUnknown(PrimaryField &field, ValueM
 double MixedGradientPressureDirichlet :: giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
 {
     if ( this->isDevDof(dof) ) {
-        return this->devGradient( dof->giveNumber() );
+        return this->devGradient( dev_id.findFirstIndexOf(dof->giveDofID()) );
     }
     return this->giveUnknown(this->giveVolDof()->giveUnknown(mode, tStep), this->devGradient, mode, tStep, dof);
 }
@@ -384,14 +399,10 @@ void MixedGradientPressureDirichlet :: setPrescribedDeviatoricGradientFromVoigt(
 }
 
 
-void MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void MixedGradientPressureDirichlet :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                                       CharType type, ValueModeType mode, const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
     if ( type != ExternalForcesVector ) {
-        return;
-    }
-
-    if ( eid != EID_MomentumBalance_ConservationEquation && eid != EID_MomentumBalance ) {
         return;
     }
 
@@ -416,9 +427,9 @@ bool MixedGradientPressureDirichlet :: isPrimaryDof(ActiveDof *dof)
 double MixedGradientPressureDirichlet :: giveBcValue(ActiveDof *dof, ValueModeType mode, TimeStep *tStep)
 {
     if ( this->isDevDof(dof) ) {
-        return this->devGradient( dof->giveNumber() );
+        return this->devGradient( dev_id.findFirstIndexOf(dof->giveDofID()) );
     }
-    OOFEM_ERROR("MixedGradientPressureDirichlet :: giveBcValue - Has no prescribed value from bc.");
+    OOFEM_ERROR("Has no prescribed value from bc.");
     return 0.0;
 }
 
@@ -437,7 +448,6 @@ bool MixedGradientPressureDirichlet :: isDevDof(ActiveDof *dof)
 
 IRResultType MixedGradientPressureDirichlet :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     MixedGradientPressureBC :: initializeFrom(ir);

@@ -1,0 +1,32 @@
+\begin{tikzpicture}[scale=3,>=stealth]
+ \tikzstyle{elemnode} = [draw,thin,circle,inner sep=1,fill=white]
+ \newcommand{\eoff}{0.03}
+ \draw[dashed, xshift=2.5, yshift=1] 
+    (0,0) -- (1,0) node[at start,elemnode] {} 
+    to node[at start,elemnode] {} 
+    (0.5,1) -- (0,0) node[at start,elemnode] {} ;
+ 
+ \draw[dashed,xshift=12,yshift=4] 
+    (1,0) to node[at start,elemnode] {} 
+    (0.5,1) -- (1.5,1) node[at start,elemnode] {} 
+    to node[at start,elemnode] {} (1,0);
+
+ \begin{scope}[xshift=7.5,yshift=2.5]
+  \draw[<->] (0.8,1.2) -- (0.5,1.0) node[at start,left] {$\eta$}
+    to (0.99,0) -- (1.1,-0.2) node[at end,right] {$\xi$};
+
+  \draw[thick] (0.5,1)+(0:-\eoff) to
+    node[at start,elemnode] (n1) {}
+    node[at end,elemnode] (n2) {}
+    (1-\eoff,-\eoff)
+    (0.5,1)+(60:\eoff) to
+    node[at start,elemnode] (n3) {}
+    node[at end,elemnode] (n4) {}
+    (1+\eoff,0);
+   \node[yshift=3,left] at (n1) {1};
+   \node[yshift=-4,left] at (n2) {2};
+   \node[xshift=2,yshift=6] at (n3) {3}; % Fine adjustments
+   \node[yshift=-4,right] at (n4) {4};
+   
+ \end{scope}
+\end{tikzpicture}

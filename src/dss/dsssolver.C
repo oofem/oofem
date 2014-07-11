@@ -61,7 +61,7 @@ DSSSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
         _mtrx->factorized();
         _mtrx->solve(b, x);
     } else {
-        OOFEM_ERROR("DSSSolver::solve : incompatible sparse mtrx format");
+        OOFEM_ERROR("incompatible sparse mtrx format");
     }
 
  #ifdef TIME_REPORT

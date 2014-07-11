@@ -61,11 +61,11 @@ public:
      * @param n Particle number in domain aDomain.
      * @param aDomain Domain to which the particle belongs.
      */
-    Particle(int n, Domain *aDomain);
+    Particle(int n, Domain * aDomain);
     /**
      * Destructor.
      */
-    virtual ~Particle(void) {}
+    virtual ~Particle(void) { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveInputRecordName() const { return _IFT_Particle_Name; }

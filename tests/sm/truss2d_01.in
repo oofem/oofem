@@ -2,7 +2,8 @@ truss2d_01.out
 bar with linear variation of area; loaded in tension
 #only momentum influence to the displacements is taken into account
 #beamShearCoeff is artificially enlarged.
-LinearStatic nsteps 1
+LinearStatic nsteps 1 nmodules 1
+errorcheck
 domain 2dtruss
 OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 5 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
@@ -34,8 +35,8 @@ PeakFunction 1 t 1.0 f(t) 1.
 #NODE tStep 1 number 4 dof 1 unknown d value -2.29918230
 #NODE tStep 1 number 2 dof 1 unknown d value -0.60606061
 ## check element no. 1 force vector
-##BEAM_ELEMENT tStep 1 number 1  keyword "stresses" component 1  value -18.181818 tolerance 1.e-4
-##BEAM_ELEMENT tStep 1 number 5  keyword "stresses" component 5  value -66.666666 tolerance 1.e-4
+##ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value -18.181818 tolerance 1.e-4
+##ELEMENT tStep 1 number 5 gp 1 keyword 1 component 5  value -66.666666 tolerance 1.e-4
 #%END_CHECK%
 
 

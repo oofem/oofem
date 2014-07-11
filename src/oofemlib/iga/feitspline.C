@@ -45,10 +45,8 @@ namespace oofem {
 
 TSplineInterpolation :: ~TSplineInterpolation()
 {
-    int i, j;
-
-    for ( i = 0; i <= numberOfControlPoints [ 0 ]; i++ ) {
-        for ( j = 0; j < nsd; j++ ) {
+    for ( int i = 0; i <= numberOfControlPoints [ 0 ]; i++ ) {
+        for ( int j = 0; j < nsd; j++ ) {
             delete [] localIndexKnotVector [ i ] [ j ];
         }
 
@@ -63,7 +61,6 @@ TSplineInterpolation :: ~TSplineInterpolation()
 
 IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
     BSplineInterpolation :: initializeFrom(ir);
@@ -92,10 +89,10 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
     }
 
     for ( int n = 0; n < nsd; n++ ) {
-        localIndexKnotVector_tmp.resize(0);
+        localIndexKnotVector_tmp.clear();
         IR_GIVE_FIELD(ir, localIndexKnotVector_tmp, IFT_localIndexKnotVector [ n ]);
         if ( localIndexKnotVector_tmp.giveSize() != totalNumberOfControlPoints * ( degree [ n ] + 2 ) ) {
-            OOFEM_ERROR2("BSplineInterpolation::initializeFrom - invalid size of knot vector %s", IFT_localIndexKnotVector [ n ]);
+            OOFEM_ERROR("invalid size of knot vector %s", IFT_localIndexKnotVector [ n ]);
         }
 
         pos = 0;
@@ -111,13 +108,13 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
             indexKnotVal = indexKnotVec [ 0 ];
             for ( int j = 1; j < degree [ n ] + 2; j++ ) {
                 if ( indexKnotVal > indexKnotVec [ j ] ) {
-                    OOFEM_ERROR3("TSplineInterpolation::initializeFrom - local index knot vector %s of control point %d is not monotonic",
+                    OOFEM_ERROR("local index knot vector %s of control point %d is not monotonic",
                                  IFT_localIndexKnotVector [ n ], i + 1);
                 }
 
                 /* this is only for the case when TSpline = NURBS
                  * if(indexKnotVal+1 < indexKnotVec[j])
-                 *      OOFEM_ERROR3("TSplineInterpolation::initializeFrom - local index knot vector %s of control point %d is not continuous",
+                 *      OOFEM_ERROR("local index knot vector %s of control point %d is not continuous",
                  *                                                       IFT_localIndexKnotVectorString[n], i+1);
                  */
                 indexKnotVal = indexKnotVec [ j ];
@@ -125,13 +122,13 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
 
             // check for nondegeneracy of local index knot vector
             if ( indexKnotVal == indexKnotVec [ 0 ] ) {
-                OOFEM_ERROR3("TSplineInterpolation::initializeFrom - local index knot vector %s of control point %d is degenerated",
+                OOFEM_ERROR("local index knot vector %s of control point %d is degenerated",
                              IFT_localIndexKnotVector [ n ], i + 1);
             }
 
             // check for range of local index knot vector
             if ( indexKnotVec [ 0 ] <= 0 || indexKnotVal > knotValues [ n ].giveSize() ) {
-                OOFEM_ERROR3("TSplineInterpolation::initializeFrom - local index knot vector %s of control point %d out of range",
+                OOFEM_ERROR("local index knot vector %s of control point %d out of range",
                              IFT_localIndexKnotVector [ n ], i + 1);
             }
         }
@@ -142,7 +139,8 @@ IRResultType TSplineInterpolation :: initializeFrom(InputRecord *ir)
 
 
 
-void TSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {
+void TSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
+{
     FEIIGAElementGeometryWrapper *gw = ( FEIIGAElementGeometryWrapper * ) & cellgeo;
     FloatArray N(nsd);
     IntArray span(nsd);
@@ -151,7 +149,7 @@ void TSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
     int count, i, k;
 
     if ( nsd != 2 ) {
-        OOFEM_ERROR2("evalN not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("implemented for nsd = %d", nsd);
     }
 
     if ( gw->knotSpan ) {
@@ -205,7 +203,7 @@ double TSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
      *                                                                                              // according to A4.4 it seems that only coefficients in lower triangle except the first column are used
      */
     if ( nsd != 2 ) {
-        OOFEM_ERROR2("evaldNdx not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
     if ( gw->knotSpan ) {
@@ -329,7 +327,7 @@ void TSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
     int i, k, count;
 
     if ( nsd != 2 ) {
-        OOFEM_ERROR2("local2global not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
     if ( gw->knotSpan ) {
@@ -391,7 +389,7 @@ double TSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
      *                                                                                              // according to A4.4 it seems that only coefficients in lower triangle except the first column are used
      */
     if ( nsd != 2 ) {
-        OOFEM_ERROR2("giveTransformationJacobianMatrix not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
     if ( gw->knotSpan ) {
@@ -478,7 +476,7 @@ double TSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
     Jacob = jacobian.giveDeterminant();
 
     if ( fabs(Jacob) < 1.0e-10 ) {
-        OOFEM_ERROR("giveTransformationJacobianMatrix - zero Jacobian");
+        OOFEM_ERROR("zero Jacobian");
     }
 
     return Jacob;
@@ -500,7 +498,7 @@ int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, 
     if ( nsd == 2 ) {
         mask.preallocate( ( degree [ 0 ] + 1 ) * ( degree [ 1 ] + 1 ) );
     } else {
-        OOFEM_ERROR2("giveKnotSpanBasisFunctMask not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
     // get starting and ending knots
@@ -515,7 +513,7 @@ int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, 
         nonzero = 1;
         for ( j = 0; j < nsd; j++ ) {
             if ( ( knotEnd(j) <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
-                 ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
+                ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
                 nonzero = 0;
                 break;
             }
@@ -552,7 +550,7 @@ int TSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &k
         // whether local knot vector overlaps the given knot span
         for ( j = 0; j < nsd; j++ ) {
             if ( ( knotEnd(j) <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
-                 ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
+                ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
                 answer--;
                 break;
             }
@@ -579,7 +577,7 @@ int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &startKnotS
     if ( nsd == 2 ) {
         mask.preallocate( ( degree [ 0 ] + 1 ) * ( degree [ 1 ] + 1 ) );
     } else {
-        OOFEM_ERROR2("giveKnotSpanBasisFunctMask not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
     // get starting and ending knots
@@ -594,7 +592,7 @@ int TSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &startKnotS
         nonzero = 1;
         for ( j = 0; j < nsd; j++ ) {
             if ( ( knotEnd(j) <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
-                 ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
+                ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
                 nonzero = 0;
                 break;
             }
@@ -631,7 +629,7 @@ int TSplineInterpolation :: giveNumberOfKnotSpanBasisFunctions(const IntArray &s
         // whether local knot vector overlaps at least partially the knot span interval
         for ( j = 0; j < nsd; j++ ) {
             if ( ( knotEnd(j) <= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ 0 ]) ) ||
-                 ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
+                ( knotStart(j) >= knotValues [ j ].at(localIndexKnotVector [ i ] [ j ] [ degree [ j ] + 1 ]) ) ) {
                 answer--;
                 break;
             }

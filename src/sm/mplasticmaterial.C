@@ -37,7 +37,6 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
-#include "structuralcrosssection.h"
 #include "datastream.h"
 #include "contextioerr.h"
 
@@ -197,7 +196,7 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
     FloatMatrix elasticModuliInverse, hardeningModuliInverse;
     FloatMatrix helpMtrx, helpMtrx2;
     FloatMatrix gmat;
-    std :: vector< FloatArray >yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
+    std :: vector< FloatArray > yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
     FloatArray rhs;
     double yieldValue;
     int nIterations = 0;
@@ -215,8 +214,8 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
 
     MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
 
-    status->givePlasticStrainVector(plasticStrainVectorR);
-    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+    plasticStrainVectorR = status->givePlasticStrainVector();
+    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
 
     dgamma.resize(nsurf);
     dgamma.zero();
@@ -311,7 +310,7 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
                     hardeningModuliInverse.beInverseOf(hardeningModuli);
                     // delete hardeningModuli;
                 } else {
-                    hardeningModuliInverse.resize(0, 0);
+                    hardeningModuliInverse.clear();
                 }
 
                 this->computeAlgorithmicModuli(consistentModuli, gp, elasticModuliInverse,
@@ -407,8 +406,8 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
             nIterations++;
 
             if ( nIterations > PLASTIC_MATERIAL_MAX_ITERATIONS ) {
-                _warning4( "GiveRealStressVector: local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
-                           PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElement()->giveNumber(), gp->giveNumber() );
+                OOFEM_WARNING("local equlibrium not reached in %d iterations\nElement %d, gp %d, continuing",
+                          PLASTIC_MATERIAL_MAX_ITERATIONS, gp->giveElement()->giveNumber(), gp->giveNumber() );
                 answer = fullStressVector;
                 break;
             }
@@ -434,7 +433,7 @@ MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
     FloatArray fSigmaGradientVectorR, gGradientVectorR, helpVector, trialStressIncrement, rhs;
     FloatArray di, dj;
     FloatMatrix elasticModuli, hardeningModuli, dmat, helpMtrx, gmatInv, gradMat;
-    std :: vector< FloatArray >yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
+    std :: vector< FloatArray > yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
     FloatArray dgamma(this->nsurf);
     double yieldValue;
     int nIterations = 0;
@@ -450,8 +449,8 @@ MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
     }
 
     // huhu:
-    status->givePlasticStrainVector(plasticStrainVectorR);
-    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+    plasticStrainVectorR = status->givePlasticStrainVector();
+    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
 
     dgamma.resize(nsurf);
     dgamma.zero();
@@ -656,7 +655,7 @@ MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
                 char buff [ 200 ], buff1 [ 150 ];
                 sprintf(buff, "GiveRealStressVector: local equlibrium not reached in %d iterations", PLASTIC_MATERIAL_MAX_ITERATIONS);
                 sprintf( buff1, "Element %d, gp %d, continuing", gp->giveElement()->giveNumber(), gp->giveNumber() );
-                _warning2(buff, buff1);
+                OOFEM_WARNING(buff, buff1);
                 //nIterations = 0; goto huhu;
                 break;
             }
@@ -729,8 +728,8 @@ MPlasticMaterial :: computeResidualVector(FloatArray &answer, GaussPoint *gp, co
     size =  gradientVectorR [ 0 ].giveSize();
 
     answer.resize(size);
-    status->givePlasticStrainVector(oldPlasticStrainVectorR);
-    status->giveStrainSpaceHardeningVars(oldStrainSpaceHardeningVariables);
+    oldPlasticStrainVectorR = status->givePlasticStrainVector();
+    oldStrainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
 
     for ( i = 1; i <= isize; i++ ) {
         answer.at(i) = oldPlasticStrainVectorR.at(i) - plasticStrainVectorR.at(i);
@@ -856,7 +855,7 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     FloatArray gradientVector, stressVector, fullStressVector;
     FloatArray stressSpaceHardeningVars;
     FloatArray strainSpaceHardeningVariables, helpVector;
-    std :: vector< FloatArray >yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
+    std :: vector< FloatArray > yieldGradVec(this->nsurf), loadGradVec(this->nsurf), * yieldGradVecPtr, * loadGradVecPtr;
     FloatArray helpVec;
 
     IntArray activeConditionMap, mask;
@@ -873,8 +872,8 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     }
 
     // ask for plastic consistency parameter
-    status->giveTempGamma(gamma);
-    status->giveTempActiveConditionMap(activeConditionMap);
+    gamma = status->giveTempGamma();
+    activeConditionMap = status->giveTempActiveConditionMap();
     //
     // check for elastic cases
     //
@@ -903,12 +902,12 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     if ( hardeningModuli.giveNumberOfRows() ) {
         hardeningModuliInverse.beInverseOf(hardeningModuli);
     } else {
-        hardeningModuliInverse.resize(0, 0);
+        hardeningModuliInverse.clear();
     }
 
     stressVector = status->giveStressVector();
     StructuralMaterial :: giveFullSymVectorForm( fullStressVector, stressVector, gp->giveMaterialMode() );
-    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
     this->computeStressSpaceHardeningVars(stressSpaceHardeningVars, gp, strainSpaceHardeningVariables);
 
 
@@ -1002,7 +1001,7 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     FloatArray gradientVector, stressVector, fullStressVector;
     FloatArray stressSpaceHardeningVars;
     FloatArray strainSpaceHardeningVariables, helpVector;
-    std :: vector< FloatArray >yieldGradVec(this->nsurf), loadGradVec(this->nsurf);
+    std :: vector< FloatArray > yieldGradVec(this->nsurf), loadGradVec(this->nsurf);
     FloatArray helpVec;
 
     IntArray activeConditionMap, mask;
@@ -1012,8 +1011,8 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
 
     // ask for plastic consistency parameter
-    status->giveTempGamma(gamma);
-    status->giveTempActiveConditionMap(activeConditionMap);
+    gamma = status->giveTempGamma();
+    activeConditionMap = status->giveTempActiveConditionMap();
     //
     // check for elastic cases
     //
@@ -1041,7 +1040,7 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
 
     stressVector = status->giveStressVector();
     StructuralMaterial :: giveFullSymVectorForm( fullStressVector, stressVector, gp->giveMaterialMode() );
-    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
     this->computeStressSpaceHardeningVars(stressSpaceHardeningVars, gp, strainSpaceHardeningVariables);
 
 
@@ -1191,7 +1190,7 @@ MPlasticMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 {
     MaterialMode originalMode = gp->giveMaterialMode();
     if ( originalMode != _3dMat ) {
-        _error("give3dMaterialStiffnessMatrix : Different stressStrain mode encountered");
+        OOFEM_ERROR("Different stressStrain mode encountered");
     }
 
     // we can force 3d response, and we obtain correct 3d tangent matrix,
@@ -1325,12 +1324,12 @@ MPlasticMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 
 
 void
-MPlasticMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
-                                         MatResponseMode mode,
-                                         GaussPoint *gp,
-                                         TimeStep *tStep)
+MPlasticMaterial :: giveFiberStiffMtrx(FloatMatrix &answer,
+                                       MatResponseMode mode,
+                                       GaussPoint *gp,
+                                       TimeStep *tStep)
 //
-// returns receiver's 1dFiber
+// returns receiver's Fiber
 // (1dFiber ==> sigma_y = sigma_z = tau_yz = 0.)
 //
 // standard method from Material Class overloaded, because no inversion is needed.
@@ -1352,15 +1351,14 @@ MPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStat
 {
     MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_PlasticStrainTensor ) {
-        FloatArray ep;
-        status->givePlasticStrainVector(ep);
+        const FloatArray &ep = status->givePlasticStrainVector();
         ///@todo Fill in correct full form values here! This just adds zeros!
         StructuralMaterial :: giveFullSymVectorForm( answer, ep, gp->giveMaterialMode() );
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        FloatArray st(6), s;
+        FloatArray st;
 
-        status->givePlasticStrainVector(s);
+        const FloatArray &s = status->givePlasticStrainVector();
         ///@todo Fill in correct full form values here! This just adds zeros!
         StructuralMaterial :: giveFullSymVectorForm( st, s, gp->giveMaterialMode() );
 
@@ -1435,7 +1433,7 @@ void MPlasticMaterialStatus :: initTempStatus()
 
     if ( strainSpaceHardeningVarsVector.giveSize() == 0 ) {
         strainSpaceHardeningVarsVector.resize( static_cast< MPlasticMaterial * >( gp->giveMaterial() )->
-                                               giveSizeOfReducedHardeningVarsVector(gp) );
+                                              giveSizeOfReducedHardeningVarsVector(gp) );
         strainSpaceHardeningVarsVector.zero();
     }
 

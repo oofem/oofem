@@ -53,28 +53,22 @@ namespace oofem {
 REGISTER_Element(Quad1MindlinShell3D);
 
 FEI2dQuadLin Quad1MindlinShell3D :: interp(1, 2);
-IntArray Quad1MindlinShell3D :: shellOrdering(20);
-IntArray Quad1MindlinShell3D :: drillOrdering(4);
-bool Quad1MindlinShell3D :: __initialized = Quad1MindlinShell3D :: initOrdering();
+IntArray Quad1MindlinShell3D :: shellOrdering = { 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23};
+IntArray Quad1MindlinShell3D :: drillOrdering = { 6, 12, 18, 24};
 
 Quad1MindlinShell3D :: Quad1MindlinShell3D(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain)
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this),
+    SPRNodalRecoveryModelInterface(),
+    lnodes(4)
 {
     numberOfGaussPoints = 4;
     this->numberOfDofMans = 4;
-    this->lnodes [ 0 ] = new FloatArray();
-    this->lnodes [ 1 ] = new FloatArray();
-    this->lnodes [ 2 ] = new FloatArray();
-    this->lnodes [ 3 ] = new FloatArray();
+    this->reducedIntegrationFlag = false;
 }
 
 
 Quad1MindlinShell3D :: ~Quad1MindlinShell3D()
 {
-    delete this->lnodes [ 0 ];
-    delete this->lnodes [ 1 ];
-    delete this->lnodes [ 2 ];
-    delete this->lnodes [ 3 ];
 }
 
 
@@ -96,9 +90,8 @@ void
 Quad1MindlinShell3D :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -112,11 +105,10 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
 {
     // Only gravity load
     double dV, density;
-    GaussPoint *gp;
     FloatArray forceX, forceY, forceZ, glob_gravity, gravity, n;
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
-        _error("computeBodyLoadVectorAt: unknown load type");
+        OOFEM_ERROR("unknown load type");
     }
 
     // note: force is assumed to be in global coordinate system.
@@ -126,8 +118,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
 
     if ( gravity.giveSize() ) {
         IntegrationRule *ir = integrationRulesArray [ 0 ];
-        for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-            gp = ir->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *ir ) {
 
             this->interp.evalN( n, * gp->giveCoordinates(), FEIVoidCellGeometry() );
             dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
@@ -157,7 +148,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
         answer.at(20) = forceY.at(4);
         answer.at(21) = forceZ.at(4);
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 
@@ -166,8 +157,8 @@ void
 Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                                                   int iSurf, TimeStep *tStep, ValueModeType mode)
 {
-    BoundaryLoad *surfLoad = static_cast< BoundaryLoad * >( load );
-    if ( dynamic_cast< ConstantPressureLoad * >( surfLoad ) ) { // Just checking the type of b.c.
+    BoundaryLoad *surfLoad = static_cast< BoundaryLoad * >(load);
+    if ( dynamic_cast< ConstantPressureLoad * >(surfLoad) ) { // Just checking the type of b.c.
         // EXPERIMENTAL CODE:
         IntegrationRule *iRule;
         FloatArray n, gcoords, pressure;
@@ -178,8 +169,7 @@ Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load
         //int approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder();
 
         iRule = this->integrationRulesArray [ 0 ];
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *iRule ) {
             double dV = this->computeVolumeAround(gp);
             this->interp.evalN( n, * gp->giveCoordinates(), FEIVoidCellGeometry() );
             this->interp.local2global( gcoords, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
@@ -195,7 +185,7 @@ Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load
             answer.negated();
         }
     } else {
-        OOFEM_ERROR("Quad1MindlinShell3D only supports constant pressure boundary load.");
+        OOFEM_ERROR("only supports constant pressure boundary load.");
     }
 }
 
@@ -203,35 +193,50 @@ Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load
 void
 Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
-    FloatArray n;
-    FloatMatrix dn;
+    FloatArray n, ns;
+    FloatMatrix dn, dns;
+    const FloatArray &localCoords = * gp->giveCoordinates();
 
-    this->interp.evaldNdx( dn, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(4, ( const FloatArray ** ) lnodes) );
-    this->interp.evalN( n, * gp->giveCoordinates(),  FEIVoidCellGeometry() );
+    this->interp.evaldNdx( dn, localCoords, FEIVertexListGeometryWrapper(lnodes) );
+    this->interp.evalN( n, localCoords,  FEIVoidCellGeometry() );
 
     answer.resize(8, 4 * 5);
     answer.zero();
+
+    // enforce one-point reduced integration if requested
+    if ( this->reducedIntegrationFlag ) {
+        FloatArray lc(2);
+        lc.zero(); // set to element center coordinates
+
+        this->interp.evaldNdx( dns, lc, FEIVertexListGeometryWrapper(lnodes) );
+        this->interp.evalN( ns, lc,  FEIVoidCellGeometry() );
+    } else {
+        dns = dn;
+        ns = n;
+    }
+
 
     // Note: This is just 5 dofs (sixth column is all zero, torsional stiffness handled separately.)
     for ( int i = 0; i < 4; ++i ) {
         ///@todo Check the rows for both parts here, to be consistent with _3dShell material definition
         // Part related to the membrane (columns represent coefficients for D_u, D_v)
-        answer(0, 0 + i * 5) = dn(i, 0);
-        answer(1, 1 + i * 5) = dn(i, 1);
-        answer(2, 0 + i * 5) = dn(i, 1);
+        answer(0, 0 + i * 5) = dn(i, 0);//eps_x = du/dx
+        answer(1, 1 + i * 5) = dn(i, 1);//eps_y = dv/dy
+        answer(2, 0 + i * 5) = dn(i, 1);//gamma_xy = du/dy+dv/dx
         answer(2, 1 + i * 5) = dn(i, 0);
 
         // Part related to the plate (columns represent the dofs D_w, R_u, R_v)
         ///@todo Check sign here
-        answer(3 + 0, 2 + 1 + i * 5) = dn(i, 0);
-        answer(3 + 1, 2 + 2 + i * 5) = dn(i, 1);
-        answer(3 + 2, 2 + 1 + i * 5) = dn(i, 1);
-        answer(3 + 2, 2 + 2 + i * 5) = dn(i, 0);
+        answer(3 + 0, 2 + 2 + i * 5) = dn(i, 0);// kappa_x = d(fi_y)/dx
+        answer(3 + 1, 2 + 1 + i * 5) =-dn(i, 1);// kappa_y = -d(fi_x)/dy
+        answer(3 + 2, 2 + 2 + i * 5) = dn(i, 1);// kappa_xy=d(fi_y)/dy-d(fi_x)/dx
+        answer(3 + 2, 2 + 1 + i * 5) =-dn(i, 0);
 
-        answer(3 + 3, 2 + 0 + i * 5) = -dn(i, 1);
-        answer(3 + 3, 2 + 2 + i * 5) = n(i);
-        answer(3 + 4, 2 + 0 + i * 5) = -dn(i, 0);
-        answer(3 + 4, 2 + 1 + i * 5) = n(i);
+        // shear strains
+        answer(3 + 3, 2 + 0 + i * 5) = dns(i, 0);// gamma_xz = fi_y+dw/dx
+        answer(3 + 3, 2 + 2 + i * 5) = ns(i);
+        answer(3 + 4, 2 + 0 + i * 5) = dns(i, 1);// gamma_yz = -fi_x+dw/dy
+        answer(3 + 4, 2 + 1 + i * 5) = -ns(i);
     }
 }
 
@@ -239,7 +244,7 @@ Quad1MindlinShell3D :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int
 void
 Quad1MindlinShell3D :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Shell(answer, gp, strain, tStep);
+    this->giveStructuralCrossSection()->giveGeneralizedStress_Shell(answer, gp, strain, tStep);
 }
 
 
@@ -251,34 +256,37 @@ Quad1MindlinShell3D :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespo
 
 
 void
+Quad1MindlinShell3D :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    FloatArray shellUnknowns;
+    FloatMatrix b;
+    /* Here we do compute only the "traditional" part of shell strain vector, the quasi-strain related to rotations is not computed */
+    this->computeVectorOf({D_u, D_v, D_w, R_u, R_v}, VM_Total, tStep, shellUnknowns);
+
+    this->computeBmatrixAt(gp, b);
+    answer.beProductOf(b, shellUnknowns);
+}
+
+
+void
 Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     // We need to overload this for practical reasons (this 3d shell has all 9 dofs, but the shell part only cares for the first 8)
     // This elements adds an additional stiffness for the so called drilling dofs, meaning we need to work with all 9 components.
     FloatMatrix b, d;
     FloatArray n, strain, stress;
-    FloatArray shellUnknowns(20), drillUnknowns(4), unknowns;
+    FloatArray shellUnknowns, drillUnknowns, unknowns;
     bool drillCoeffFlag = false;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, unknowns);
     // Split this for practical reasons into normal shell dofs and drilling dofs
-    for ( int i = 0; i < 4; ++i ) {
-        shellUnknowns(0 + i * 5) = unknowns(0 + i * 6);
-        shellUnknowns(1 + i * 5) = unknowns(1 + i * 6);
-        shellUnknowns(2 + i * 5) = unknowns(2 + i * 6);
-        shellUnknowns(3 + i * 5) = unknowns(3 + i * 6);
-        shellUnknowns(4 + i * 5) = unknowns(4 + i * 6);
-        drillUnknowns(i) = unknowns(5 + i * 6);
-    }
+    this->computeVectorOf({D_u, D_v, D_w, R_u, R_v}, VM_Total, tStep, shellUnknowns);
+    this->computeVectorOf({R_w}, VM_Total, tStep, drillUnknowns);
 
-    FloatArray shellForces(20), drillMoment(4);
-    shellForces.zero();
-    drillMoment.zero();
+    FloatArray shellForces, drillMoment;
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         this->computeBmatrixAt(gp, b);
         double dV = this->computeVolumeAround(gp);
         double drillCoeff = cs->give(CS_DrillingStiffness, gp);
@@ -287,7 +295,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
             stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         } else {
             strain.beProductOf(b, shellUnknowns);
-            cs->giveRealStress_Shell(stress, gp, strain, tStep);
+            cs->giveGeneralizedStress_Shell(stress, gp, strain, tStep);
         }
         shellForces.plusProduct(b, stress, dV);
 
@@ -322,13 +330,10 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
     FloatArray n;
     bool drillCoeffFlag = false;
 
-    FloatMatrix shellStiffness(20, 20), drillStiffness(4, 4);
-    shellStiffness.zero();
-    drillStiffness.zero();
+    FloatMatrix shellStiffness, drillStiffness;
 
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         this->computeBmatrixAt(gp, b);
         double dV = this->computeVolumeAround(gp);
         double drillCoeff = this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp);
@@ -364,19 +369,15 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
 IRResultType
 Quad1MindlinShell3D :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                 // Required by IR_GIVE_FIELD macro
-
-    IR_GIVE_OPTIONAL_FIELD(ir, this->numberOfGaussPoints, _IFT_Element_nip);
-
+    this->reducedIntegrationFlag = ir->hasField(_IFT_Quad1MindlinShell3D_ReducedIntegration);
     return this->NLStructuralElement :: initializeFrom(ir);
 }
 
 
 void
-Quad1MindlinShell3D :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Quad1MindlinShell3D :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
+    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
 
 
@@ -405,7 +406,7 @@ Quad1MindlinShell3D :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIVertexListGeometryWrapper(4, ( const FloatArray ** ) lnodes) ) );
+    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIVertexListGeometryWrapper(lnodes) ) );
     return detJ * weight;
 }
 
@@ -417,8 +418,7 @@ Quad1MindlinShell3D :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tS
     double mass = 0.;
 
     IntegrationRule *ir = integrationRulesArray [ 0 ];
-    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-        GaussPoint *gp = ir->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *ir ) {
         mass += this->computeVolumeAround(gp) * this->giveStructuralCrossSection()->give('d', gp);
     }
 
@@ -435,11 +435,57 @@ Quad1MindlinShell3D :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tS
 int
 Quad1MindlinShell3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    if ( type == IST_ShellForceMomentumTensor ) {
-        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+    //@todo transformation to global c.s. needed
+
+    FloatArray help;
+    answer.resize(9);
+    if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellMomentumTensor ) ) {
+        help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        if ( type == IST_ShellForceTensor ) {
+            answer.at(1) = help.at(1); // nx
+            answer.at(2) = help.at(3); // vxy
+            answer.at(3) = help.at(7); // vxz
+            answer.at(4) = help.at(3); // vxy
+            answer.at(5) = help.at(2); // ny
+            answer.at(6) = help.at(8); // vyz
+            answer.at(7) = help.at(7); // vxy
+            answer.at(8) = help.at(8); // ny
+            answer.at(9) = 0.0;
+        } else {
+            answer.at(1) = help.at(4); // mx
+            answer.at(2) = help.at(6); // mxy
+            answer.at(3) = 0.0;      // mxz
+            answer.at(4) = help.at(6); // mxy
+            answer.at(5) = help.at(5); // my
+            answer.at(6) = 0.0;      // myz
+            answer.at(7) = 0.0;      // mzx
+            answer.at(8) = 0.0;      // mzy
+            answer.at(9) = 0.0;      // mz
+        }
         return 1;
-    } else if ( type == IST_ShellStrainCurvatureTensor ) {
-        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+    } else if ( ( type == IST_ShellStrainTensor )  || ( type == IST_ShellCurvatureTensor ) ) {
+        help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        if ( type == IST_ShellForceTensor ) {
+            answer.at(1) = help.at(1); // nx
+            answer.at(2) = help.at(3); // vxy
+            answer.at(3) = help.at(7); // vxz
+            answer.at(4) = help.at(3); // vxy
+            answer.at(5) = help.at(2); // ny
+            answer.at(6) = help.at(8); // vyz
+            answer.at(7) = help.at(7); // vxy
+            answer.at(8) = help.at(8); // ny
+            answer.at(9) = 0.0;
+        } else {
+            answer.at(1) = help.at(4); // mx
+            answer.at(2) = help.at(6); // mxy
+            answer.at(3) = 0.0;      // mxz
+            answer.at(4) = help.at(6); // mxy
+            answer.at(5) = help.at(5); // my
+            answer.at(6) = 0.0;      // myz
+            answer.at(7) = 0.0;      // mzx
+            answer.at(8) = 0.0;      // mzy
+            answer.at(9) = 0.0;      // mz
+        }
         return 1;
     } else {
         return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
@@ -464,15 +510,15 @@ void
 Quad1MindlinShell3D :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     if ( iEdge == 1 ) { // edge between nodes 1 2
-        answer.setValues(12,  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
+        answer = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
     } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        answer.setValues(12,  7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18);
+        answer = { 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
     } else if ( iEdge == 3 ) { // edge between nodes 3 4
-        answer.setValues(12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24);
+        answer = {13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24};
     } else if ( iEdge == 4 ) { // edge between nodes 4 1
-        answer.setValues(12, 19, 20, 21, 22, 23, 24, 1, 2, 3, 4, 5, 6);
+        answer = {19, 20, 21, 22, 23, 24, 1, 2, 3, 4, 5, 6};
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 
@@ -480,8 +526,8 @@ Quad1MindlinShell3D :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 Quad1MindlinShell3D :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(4, ( const FloatArray ** ) lnodes) );
-    return detJ * gp->giveWeight();
+    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(lnodes) );
+    return detJ *gp->giveWeight();
 }
 
 
@@ -489,7 +535,7 @@ void
 Quad1MindlinShell3D :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
     FloatArray local;
-    this->interp.edgeLocal2global( local, iEdge, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(4, ( const FloatArray ** ) lnodes) );
+    this->interp.edgeLocal2global( local, iEdge, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(lnodes)  );
     local.resize(3);
     local.at(3) = 0.;
     answer.beProductOf(this->lcsMatrix, local);
@@ -546,7 +592,7 @@ Quad1MindlinShell3D :: computeLCS()
     }
 
     for ( int i = 1; i <= 4; i++ ) {
-        this->lnodes [ i - 1 ]->beTProductOf( this->lcsMatrix, * this->giveNode(i)->giveCoordinates() );
+        this->lnodes [ i - 1 ].beTProductOf( this->lcsMatrix, * this->giveNode(i)->giveCoordinates() );
     }
 }
 
@@ -564,5 +610,47 @@ Quad1MindlinShell3D :: computeGtoLRotationMatrix(FloatMatrix &answer)
     }
 
     return true;
+}
+
+Interface *
+Quad1MindlinShell3D :: giveInterface(InterfaceType interface)
+{
+    if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
+    } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
+    }
+
+    return NULL;
+}
+
+
+
+void
+Quad1MindlinShell3D :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
+{
+    pap.resize(4);
+    for ( int i = 1; i < 5; i++ ) {
+        pap.at(i) = this->giveNode(i)->giveNumber();
+    }
+}
+
+void
+Quad1MindlinShell3D :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
+{
+    int found = 0;
+    answer.resize(1);
+
+    for ( int i = 1; i < 5; i++ ) {
+        if ( pap == this->giveNode(i)->giveNumber() ) {
+            found = 1;
+        }
+    }
+
+    if ( found ) {
+        answer.at(1) = pap;
+    } else {
+        OOFEM_ERROR("node unknown");
+    }
 }
 } // end namespace oofem

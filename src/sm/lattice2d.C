@@ -64,7 +64,7 @@ Lattice2d :: Lattice2d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDo
 }
 
 Lattice2d :: ~Lattice2d()
-{}
+{ }
 
 
 int
@@ -201,10 +201,9 @@ void Lattice2d :: computeGaussPoints()
 {
     // the gauss point is used only when methods from crosssection and/or material
     // classes are requested
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
+    integrationRulesArray.resize( 1 );
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-    integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Line, 1, _2dLattice);
+    integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _2dLattice);
 }
 
 
@@ -241,9 +240,9 @@ Lattice2d :: computeVolumeAround(GaussPoint *gp)
 
 
 void
-Lattice2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Lattice2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(3, D_u, D_v, R_w);
+    answer = {D_u, D_v, R_w};
 }
 
 
@@ -327,7 +326,6 @@ Lattice2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 IRResultType
 Lattice2d :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     // first call parent
     LatticeStructuralElement :: initializeFrom(ir);
@@ -389,7 +387,7 @@ Lattice2d :: drawYourself(oofegGraphicContext &gc)
     } else if ( mode == OGC_elemSpecial ) {
         this->drawSpecial(gc);
     } else {
-        _error("drawYourself : unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 }
 

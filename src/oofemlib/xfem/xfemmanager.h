@@ -36,13 +36,18 @@
 #define xfemmanager_h
 
 #include "oofemcfg.h"
-#include "alist.h"
 #include "datareader.h"
 #include "inputrecord.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "enrichmentitem.h"
 #include "enumitem.h"
+#include "internalstatevaluetype.h"
+
+#include <unordered_map>
+#include <list>
+#include <vector>
+#include <memory>
 
 ///@name Input fields for XfemManager
 //@{
@@ -98,7 +103,7 @@ class OOFEM_EXPORT XfemManager
 protected:
     Domain *domain;
     /// Enrichment item list.
-    AList< EnrichmentItem > *enrichmentItemList;
+    std :: vector< std :: unique_ptr< EnrichmentItem > > enrichmentItemList;
 
     int numberOfEnrichmentItems;
 
@@ -111,6 +116,19 @@ protected:
 
     /// If extra debug vtk files should be written.
     bool mDebugVTK;
+
+    /**
+     * Let the XfemManager keep track of enrichment items enriching each
+     * node and each element, to allow more efficient computations.
+     */
+    std :: vector< std :: vector< int > >mNodeEnrichmentItemIndices;
+    std :: unordered_map< int, std :: vector< int > >mElementEnrichmentItemIndices;
+
+    /**
+     * Keep track of enrichment items that may assign a different
+     * material to some Gauss points.
+     */
+    std :: vector< int >mMaterialModifyingEnrItemIndices;
 
 public:
 
@@ -129,16 +147,16 @@ public:
 
     bool isElementEnriched(const Element *elem);
 
-    EnrichmentItem *giveEnrichmentItem(int n);
-    int giveNumberOfEnrichmentItems() const { return enrichmentItemList->giveSize(); }
+    inline EnrichmentItem *giveEnrichmentItem(int n) { return enrichmentItemList[n-1].get(); }
+    int giveNumberOfEnrichmentItems() const { return enrichmentItemList.size(); }
 
     void createEnrichedDofs();
 
     /// Initializes receiver according to object description stored in input record.
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    int instanciateYourself(DataReader *dr);
+    virtual int instanciateYourself(DataReader *dr);
     const char *giveClassName() const { return "XfemManager"; }
     const char *giveInputRecordName() const { return _IFT_XfemManager_Name; }
 
@@ -175,6 +193,13 @@ public:
 
     bool giveVtkDebug() const { return mDebugVTK; }
     void setVtkDebug(bool iDebug) { mDebugVTK = iDebug; }
+
+    void updateNodeEnrichmentItemMap();
+
+    const std :: vector< int > &giveNodeEnrichmentItemIndices(int iNodeIndex) const { return mNodeEnrichmentItemIndices [ iNodeIndex - 1 ]; }
+    void giveElementEnrichmentItemIndices(std :: vector< int > &oElemEnrInd, int iElementIndex) const;
+
+    const std :: vector< int > &giveMaterialModifyingEnrItemIndices() const { return mMaterialModifyingEnrItemIndices; }
 };
 } // end namespace oofem
 #endif // xfemmanager_h

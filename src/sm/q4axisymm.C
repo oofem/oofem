@@ -58,7 +58,7 @@ REGISTER_Element(Q4Axisymm);
 FEI2dQuadQuad Q4Axisymm :: interp(1, 2);
 
 Q4Axisymm :: Q4Axisymm(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain)
+    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 8;
     numberOfGaussPoints          = 4;
@@ -142,7 +142,7 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     }
 
     if ( ( size < 0 ) || ( size > 6 ) ) {
-        _error("ComputeBmatrixAt size mismatch");
+        OOFEM_ERROR("size mismatch");
     }
 
     answer.resize(size, 16);
@@ -288,7 +288,6 @@ Q4Axisymm :: computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 IRResultType
 Q4Axisymm :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     numberOfGaussPoints          = 4;
     result = this->StructuralElement :: initializeFrom(ir);
@@ -300,16 +299,16 @@ Q4Axisymm :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, _IFT_Q4Axisymm_nipfish);
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-            ( numberOfGaussPoints == 4 ) ||
-            ( numberOfGaussPoints == 9 ) ||
-            ( numberOfGaussPoints == 16 ) ) ) {
+           ( numberOfGaussPoints == 4 ) ||
+           ( numberOfGaussPoints == 9 ) ||
+           ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
     if ( !( ( numberOfFiAndShGaussPoints == 1 ) ||
-            ( numberOfFiAndShGaussPoints == 4 ) ||
-            ( numberOfFiAndShGaussPoints == 9 ) ||
-            ( numberOfFiAndShGaussPoints == 16 ) ) ) {
+           ( numberOfFiAndShGaussPoints == 4 ) ||
+           ( numberOfFiAndShGaussPoints == 9 ) ||
+           ( numberOfFiAndShGaussPoints == 16 ) ) ) {
         numberOfFiAndShGaussPoints = 1;
     }
 
@@ -322,9 +321,8 @@ void
 Q4Axisymm :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 2;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(2);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 
@@ -349,7 +347,7 @@ Q4Axisymm :: computeVolumeAround(GaussPoint *gp)
     }
 
     determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
-    return determinant * gp->giveWeight() * r;
+    return determinant *gp->giveWeight() * r;
 }
 
 
@@ -366,7 +364,7 @@ Q4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
     answer.resize(6);
     answer.zero();
     if ( mode == TL ) { // Total Lagrange formulation
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+        this->computeVectorOf(VM_Total, tStep, u);
 
         // linear part of strain tensor (in vector form)
 
@@ -388,22 +386,35 @@ Q4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
             this->computeBmatrixAt(helpGaussPoint, b, 3, 6);
         } else {
             this->computeBmatrixAt(gp, b, 3, 6);
-            //_error ("ComputeStrainVector: numberOfFiAndShGaussPoints size mismatch");
+            //_error("ComputeStrainVector: numberOfFiAndShGaussPoints size mismatch");
         }
 
         Epsilon.beProductOf(b, u);
         answer.at(3) = Epsilon.at(1);
         answer.at(6) = Epsilon.at(4);
     } else if ( mode == AL ) { // actualized Lagrange formulation
-        _error("ComputeStrainVector : unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 }
 
 void
-Q4Axisymm :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Q4Axisymm :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(2, D_u, D_v);
+    answer = {D_u, D_v};
 }
+
+
+
+Interface *
+Q4Axisymm :: giveInterface(InterfaceType interface)
+{
+    if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
+    }
+
+    return NULL;
+}
+
 
 
 #ifdef __OOFEG

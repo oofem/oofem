@@ -48,7 +48,7 @@ FETICommunicator :: FETICommunicator(EngngModel *emodel, CommunicatorBuff *b, in
     Communicator(emodel, b, rank, size)
 {
     if ( rank != 0 ) {
-        _error("FETICommunicator: bad rank number, expected rank 0 for master");
+        OOFEM_ERROR("bad rank number, expected rank 0 for master");
     }
 }
 
@@ -79,7 +79,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
 
     // check if receiver is master
     if ( this->rank != 0 ) {
-        _error("FETICommunicator::setUpCommunicationMaps : rank 0 (master) expected as receiver");
+        OOFEM_ERROR("rank 0 (master) expected as receiver");
     }
 
     // resize receive buffer
@@ -166,7 +166,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
         } else { // update the corresponding record
             boundaryDofManList [ localNumber - 1 ].addPartition(0);
             if ( boundaryDofManList [ localNumber - 1 ].giveNumberOfDofs() != ndofs ) {
-                _error("FETICommunicator :: setUpCommunicationMaps : ndofs size mismatch");
+                OOFEM_ERROR("ndofs size mismatch");
             }
         }
 
@@ -205,7 +205,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
             } else { // update the corresponding record
                 boundaryDofManList [ localNumber - 1 ].addPartition(source);
                 if ( boundaryDofManList [ localNumber - 1 ].giveNumberOfDofs() != ndofs ) {
-                    _error("FETICommunicator :: setUpCommunicationMaps : ndofs size mismatch");
+                    OOFEM_ERROR("ndofs size mismatch");
                 }
             }
 

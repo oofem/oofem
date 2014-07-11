@@ -67,7 +67,7 @@ protected:
     static FEI2dLineHermite interp_beam;
 
 public:
-    Beam2d(int n, Domain *aDomain);
+    Beam2d(int n, Domain * aDomain);
     virtual ~Beam2d();
 
     virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
@@ -86,7 +86,7 @@ public:
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const { return NULL; }
 
     virtual int computeNumberOfDofs() { return 6; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual void  printOutputAt(FILE *file, TimeStep *tStep);
 
@@ -102,9 +102,10 @@ public:
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
                                             GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
 
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+
 protected:
     virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *, int, TimeStep *, ValueModeType mode);
-    virtual void computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &);
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
@@ -115,7 +116,7 @@ protected:
     void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 
     double giveKappaCoeff();
-    double giveLength();
+    virtual double computeLength();
     double givePitch();
     virtual void computeClampedStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode rMode, TimeStep *tStep);

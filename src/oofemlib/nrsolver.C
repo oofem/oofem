@@ -85,6 +85,7 @@ NRSolver :: NRSolver(Domain *d, EngngModel *m) :
     linesearchSolver = NULL;
     lsFlag = 0; // no line-search
     smConstraintVersion = 0;
+    mCalcStiffBeforeRes = true;
 #ifdef __PETSC_MODULE
     prescribedEgsIS_defined = false;
 #endif
@@ -117,14 +118,13 @@ NRSolver :: ~NRSolver()
 IRResultType
 NRSolver :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // Choosing a big "enough" number. (Alternative: Force input of maxinter)
     nsmax = ( int ) 1e8;
     IR_GIVE_OPTIONAL_FIELD(ir, nsmax, _IFT_NRSolver_maxiter);
     if ( nsmax < 0 ) {
-        OOFEM_ERROR("NRSolver :: initializeFrom: nsmax < 0");
+        OOFEM_ERROR("nsmax < 0");
     }
 
     minIterations = 0;
@@ -160,16 +160,16 @@ NRSolver :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), _IFT_NRSolver_rtolf);
     IR_GIVE_OPTIONAL_FIELD(ir, rtold.at(1), _IFT_NRSolver_rtold);
 
-    prescribedDofs.resize(0);
+    prescribedDofs.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, prescribedDofs, _IFT_NRSolver_ddm);
-    prescribedDofsValues.resize(0);
+    prescribedDofsValues.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, prescribedDofsValues, _IFT_NRSolver_ddv);
     prescribedDisplacementTF = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, prescribedDisplacementTF, _IFT_NRSolver_ddfunc);
 
     numberOfPrescribedDofs = prescribedDofs.giveSize() / 2;
     if ( numberOfPrescribedDofs != prescribedDofsValues.giveSize() ) {
-        OOFEM_ERROR("NRSolver :: instanciateFrom direct displacement mask size mismatch");
+        OOFEM_ERROR("direct displacement mask size mismatch");
     }
 
     if ( numberOfPrescribedDofs ) {
@@ -185,6 +185,14 @@ NRSolver :: initializeFrom(InputRecord *ir)
         this->giveLineSearchSolver()->initializeFrom(ir);
     }
 
+    int calcStiffBeforeResFlag = 1;
+    IR_GIVE_OPTIONAL_FIELD(ir, calcStiffBeforeResFlag, _IFT_NRSolver_calcstiffbeforeres);
+    if ( calcStiffBeforeResFlag == 0 ) {
+        mCalcStiffBeforeRes = false;
+    }
+
+    SparseNonLinearSystemNM :: initializeFrom(ir);
+ 
     return IRRT_OK;
 }
 
@@ -245,6 +253,9 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     // Fetch the matrix before evaluating internal forces.
     // This is intentional, since its a simple way to drastically increase convergence for nonlinear problems.
     // (This old tangent is just used)
+    // This improves convergence for many nonlinear problems, but not all. It may actually
+    // cause divergence for some nonlinear problems. Therefore a flag is used to determine if
+    // the stiffness should be evaluated before the residual (default yes). /ES
 
     engngModel->updateComponent(tNow, NonLinearLhs, domain);
     if ( this->prescribedDofsFlag ) {
@@ -269,7 +280,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 
         if ( errorOutOfRangeFlag ) {
             status = NM_NoSuccess;
-            OOFEM_WARNING2("NRSolver:  Divergence reached after %d iterations", nite);
+            OOFEM_WARNING("Divergence reached after %d iterations", nite);
             break;
         } else if ( converged && ( nite >= minIterations ) ) {
             break;
@@ -278,7 +289,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
             break;
         }
 
-        if ( nite > 0 ) {
+        if ( nite > 0 || !mCalcStiffBeforeRes ) {
             if ( ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
                 engngModel->updateComponent(tNow, NonLinearLhs, domain);
                 applyConstraintsToStiffness(k);
@@ -305,7 +316,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
         X->add(ddX);
         dX->add(ddX);
         tNow->incrementStateCounter(); // update solution state counter
-        tNow->incrementSubtStepumber();
+        tNow->incrementSubStepNumber();
         nite++; // iteration increment
 
         engngModel->giveExportModuleManager()->doOutput(tNow, true);
@@ -364,7 +375,7 @@ NRSolver :: giveLinearSolver()
 
     linSolver = classFactory.createSparseLinSolver(solverType, domain, engngModel);
     if ( linSolver == NULL ) {
-        OOFEM_ERROR("NRSolver :: giveLinearSolver: linear solver creation failed");
+        OOFEM_ERROR("linear solver creation failed");
     }
 
     return linSolver;
@@ -390,7 +401,7 @@ NRSolver :: initPrescribedEqs()
     ParallelContext *parallel_context = engngModel->giveParallelContext( this->domain->giveNumber() );
 #endif
     int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
-    int inode, idof;
+    int inode, idofid;
     IntArray localPrescribedEqs(numberOfPrescribedDofs);
 
     for ( int j = 1; j <= ndofman; j++ ) {
@@ -402,9 +413,9 @@ NRSolver :: initPrescribedEqs()
         jglobnum = domain->giveNode(j)->giveGlobalNumber();
         for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
             inode = prescribedDofs.at(2 * i - 1);
-            idof  = prescribedDofs.at(2 * i);
+            idofid = prescribedDofs.at(2 * i);
             if ( inode == jglobnum ) {
-                localPrescribedEqs.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
+                localPrescribedEqs.at(++count) = domain->giveNode(j)->giveDofWithID(idofid)->giveEquationNumber(dn);
                 continue;
             }
         }
@@ -433,10 +444,10 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
     if ( solverType == ST_Petsc ) {
         PetscScalar diagVal = 1.0;
         if ( k->giveType() != SMT_PetscMtrx ) {
-            OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
+            OOFEM_ERROR("PetscSparseMtrx Expected");
         }
 
-        PetscSparseMtrx *lhs = static_cast< PetscSparseMtrx * >( k );
+        PetscSparseMtrx *lhs = static_cast< PetscSparseMtrx * >(k);
 
         if ( !prescribedEgsIS_defined ) {
             IntArray eqs;
@@ -477,10 +488,10 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
  #ifdef __PETSC_MODULE
     if ( solverType == ST_Petsc ) {
         if ( k->giveType() != SMT_PetscMtrx ) {
-            OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
+            OOFEM_ERROR("PetscSparseMtrx Expected");
         }
 
-        PetscSparseMtrx *lhs = static_cast< PetscSparseMtrx * >( k );
+        PetscSparseMtrx *lhs = static_cast< PetscSparseMtrx * >(k);
 
         Vec diag;
         PetscScalar *ptr;
@@ -526,7 +537,7 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
         //factor -= engngModel->giveDomain(1)->giveFunction(prescribedDisplacementTF)->
         // at(tStep->givePreviousStep()->giveTime()) ;
         factor -= engngModel->giveDomain(1)->giveFunction(prescribedDisplacementTF)->
-                  evaluateAtTime( tStep->giveTargetTime() - tStep->giveTimeIncrement() );
+        evaluateAtTime( tStep->giveTargetTime() - tStep->giveTimeIncrement() );
     }
 
     if ( nite == 0 ) {
@@ -559,15 +570,15 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
  #ifdef __PETSC_MODULE
         if ( solverType == ST_Petsc ) {
             if ( k->giveType() != SMT_PetscMtrx ) {
-                OOFEM_ERROR("NRSolver :: applyConstraintsToStiffness: PetscSparseMtrx Expected");
+                OOFEM_ERROR("PetscSparseMtrx Expected");
             }
 
-            const PetscSparseMtrx *lhs = static_cast< const PetscSparseMtrx * >( k );
+            const PetscSparseMtrx *lhs = static_cast< const PetscSparseMtrx * >(k);
 
             Vec diag;
             PetscScalar *ptr;
             lhs->createVecGlobal(& diag);
-            MatGetDiagonal(* (const_cast<PetscSparseMtrx *> (lhs)->giveMtrx()), diag);
+            MatGetDiagonal(* ( const_cast< PetscSparseMtrx * >(lhs)->giveMtrx() ), diag);
             VecGetArray(diag, & ptr);
 
             for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
@@ -668,9 +679,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
 #endif
 
             // loop over individual dofs
-            int ndof = dofman->giveNumberOfDofs();
-            for ( int idof = 1; idof <= ndof; idof++ ) {
-                Dof *dof = dofman->giveDof(idof);
+            for ( Dof *dof: *dofman ) {
                 if ( !dof->isPrimaryDof() ) {
                     continue;
                 }
@@ -701,10 +710,8 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             // loop over element internal Dofs
             for ( int idofman = 1; idofman <= elem->giveNumberOfInternalDofManagers(); idofman++ ) {
                 DofManager *dofman = elem->giveInternalDofManager(idofman);
-                int ndof = dofman->giveNumberOfDofs();
                 // loop over individual dofs
-                for ( int idof = 1; idof <= ndof; idof++ ) {
-                    Dof *dof = dofman->giveDof(idof);
+                for ( Dof *dof: *dofman ) {
                     if ( !dof->isPrimaryDof() ) {
                         continue;
                     }
@@ -735,10 +742,8 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             // loop over element internal Dofs
             for ( int idofman = 1; idofman <= bc->giveNumberOfInternalDofManagers(); idofman++ ) {
                 DofManager *dofman = bc->giveInternalDofManager(idofman);
-                int ndof = dofman->giveNumberOfDofs();
                 // loop over individual dofs
-                for ( int idof = 1; idof <= ndof; idof++ ) {
-                    Dof *dof = dofman->giveDof(idof);
+                for ( Dof *dof: *dofman ) {
                     if ( !dof->isPrimaryDof() ) {
                         continue;
                     }
@@ -826,7 +831,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             }
         }
         OOFEM_LOG_INFO("\n");
-        //if ( zeroNorm ) OOFEM_WARNING("NRSolver :: checkConvergence - Had to resort to absolute error measure (marked by *)");
+        //if ( zeroNorm ) OOFEM_WARNING("Had to resort to absolute error measure (marked by *)");
     } else { // No dof grouping
         double dXX, dXdX;
 

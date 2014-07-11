@@ -55,7 +55,14 @@
 
 #ifdef __PARALLEL_MODE
  #include "parallelcontext.h"
+ #include "loadbalancer.h"
 #endif
+
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
+#endif
+
+#include <cstdlib>
 
 namespace oofem {
 REGISTER_EngngModel(AdaptiveNonLinearStatic);
@@ -73,14 +80,13 @@ AdaptiveNonLinearStatic :: AdaptiveNonLinearStatic(int i, EngngModel *_master) :
 
 
 AdaptiveNonLinearStatic :: ~AdaptiveNonLinearStatic()
-{}
+{ }
 
 
 IRResultType
 AdaptiveNonLinearStatic :: initializeFrom(InputRecord *ir)
 // input from inputString
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     int _val;
 
@@ -105,7 +111,7 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep)
     this->updateYourself(tStep);
 
 #ifdef __OOFEG
-    ESIEventLoop( YES, const_cast< char * >( "AdaptiveNonLinearStatic: Solution finished; Press Ctrl-p to continue" ) );
+    ESIEventLoop( YES, const_cast< char * >("AdaptiveNonLinearStatic: Solution finished; Press Ctrl-p to continue") );
 #endif
 
     this->terminate( this->giveCurrentStep() );
@@ -153,7 +159,7 @@ AdaptiveNonLinearStatic :: solveYourselfAt(TimeStep *tStep)
             this->terminateAnalysis();
             throw OOFEM_Terminate();
         } else {
-            _error("solveYourselfAt: MesherInterface::createMesh failed");
+            OOFEM_ERROR("createMesh failed");
         }
     }
 }
@@ -187,12 +193,12 @@ double AdaptiveNonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
     int eq = dof->__giveEquationNumber();
 #ifdef DEBUG
     if ( eq == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
+        OOFEM_ERROR("invalid equation number");
     }
 #endif
 
     if ( tStep != this->giveCurrentStep() ) {
-        _error("giveUnknownComponent: unknown time step encountered");
+        OOFEM_ERROR("unknown time step encountered");
         return 0.;
     }
 
@@ -213,7 +219,7 @@ double AdaptiveNonLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
             }
 
         default:
-            _error("giveUnknownComponent: Unknown is of undefined ValueModeType for this problem");
+            OOFEM_ERROR("Unknown is of undefined ValueModeType for this problem");
         }
     } else {
         return NonLinearStatic :: giveUnknownComponent(mode, tStep, d, dof);
@@ -233,8 +239,8 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     double mc1, mc2, mc3;
     timer.startTimer();
 
-    if ( dynamic_cast< AdaptiveNonLinearStatic * >( sourceProblem ) ) {
-        _error("AdaptiveNonLinearStatic :: initializeAdaptiveFrom - source problem must also be AdaptiveNonlinearStatic.");
+    if ( dynamic_cast< AdaptiveNonLinearStatic * >(sourceProblem) ) {
+        OOFEM_ERROR("source problem must also be AdaptiveNonlinearStatic.");
     }
 
     this->currentStep = new TimeStep( * ( sourceProblem->giveCurrentStep() ) );
@@ -251,10 +257,10 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     incrementOfDisplacement.zero();
 
     result &= mapper.mapAndUpdate( totalDisplacement, VM_Total,
-                                   sourceProblem->giveDomain(1), this->giveDomain(1), sourceProblem->giveCurrentStep() );
+                                  sourceProblem->giveDomain(1), this->giveDomain(1), sourceProblem->giveCurrentStep() );
 
     result &= mapper.mapAndUpdate( incrementOfDisplacement, VM_Incremental,
-                                   sourceProblem->giveDomain(1), this->giveDomain(1), sourceProblem->giveCurrentStep() );
+                                  sourceProblem->giveDomain(1), this->giveDomain(1), sourceProblem->giveCurrentStep() );
 
     timer.stopTimer();
     mc1 = timer.getUtime();
@@ -264,7 +270,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
     nelem = this->giveDomain(1)->giveNumberOfElements();
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         result &= this->giveDomain(1)->giveElement(ielem)->adaptiveMap( sourceProblem->giveDomain(1),
-                                                                        sourceProblem->giveCurrentStep() );
+                                                                       sourceProblem->giveCurrentStep() );
     }
 
     timer.stopTimer();
@@ -298,7 +304,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
      *
      *
      * if (this->giveCurrentStep()->giveNumber() ==
-     * this->giveMetaStep(this->giveCurrentStep()->giveMetatStepumber())->giveFirsttStepumber()) {
+     * this->giveMetaStep(this->giveCurrentStep()->giveMetaStepNumber())->giveFirstStepNumber()) {
      * this->updateAttributes (this->giveCurrentStep());
      * }
      */
@@ -310,7 +316,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
     // assemble new initial load for new discretization
     this->assembleInitialLoadVector( initialLoadVector, initialLoadVectorOfPrescribed,
-                                     static_cast< AdaptiveNonLinearStatic * >( sourceProblem ), 1, this->giveCurrentStep() );
+                                    static_cast< AdaptiveNonLinearStatic * >(sourceProblem), 1, this->giveCurrentStep() );
     // assemble new total load for new discretization
     // this->assembleCurrentTotalLoadVector (totalLoadVector, totalLoadVectorOfPrescribed, this->giveCurrentStep());
     // set bcloadVector to zero (no increment within same step)
@@ -339,19 +345,19 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
         if ( initFlag ) {
             stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
             if ( stiffnessMatrix == NULL ) {
-                _error("proceedStep: sparse matrix creation failed");
+                OOFEM_ERROR("sparse matrix creation failed");
             }
 
             if ( nonlocalStiffnessFlag ) {
                 if ( !stiffnessMatrix->isAsymmetric() ) {
-                    _error("proceedStep: stiffnessMatrix does not support asymmetric storage");
+                    OOFEM_ERROR("stiffnessMatrix does not support asymmetric storage");
                 }
             }
 
-            stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+            stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, this->giveCurrentStep(), EID_MomentumBalance, SecantStiffnessMatrix,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( stiffnessMatrix, this->giveCurrentStep(), SecantStiffnessMatrix,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
             initFlag = 0;
         }
 
@@ -359,31 +365,31 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
         //this->updateYourself(this->giveCurrentStep());
 #ifdef VERBOSE
         OOFEM_LOG_INFO( "Equilibrating mapped configuration [step number %5d.%d]\n",
-                        this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveVersion() );
+                       this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveVersion() );
 #endif
 
         //double deltaL = nMethod->giveUnknownComponent (StepLength, 0);
         double deltaL = nMethod->giveCurrentStepLength();
         this->assembleIncrementalReferenceLoadVectors( incrementalLoadVector, incrementalLoadVectorOfPrescribed,
-                                                       refLoadInputMode, this->giveDomain(1), EID_MomentumBalance, this->giveCurrentStep() );
+                                                      refLoadInputMode, this->giveDomain(1), this->giveCurrentStep() );
         //
         // call numerical model to solve arised problem
         //
 #ifdef VERBOSE
         OOFEM_LOG_RELEVANT( "Solving [step number %5d.%d]\n",
-                            this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveVersion() );
+                           this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveVersion() );
 #endif
 
         //nMethod -> solveYourselfAt(this->giveCurrentStep()) ;
         nMethod->setStepLength(deltaL / 5.0);
         if ( initialLoadVector.isNotEmpty() ) {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
-                                           & totalDisplacement, & incrementOfDisplacement, & internalForces,
-                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
+                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
+                                          internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, NULL,
-                                           & totalDisplacement, & incrementOfDisplacement, & internalForces,
-                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
+                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
+                                          internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }
 
 
@@ -407,16 +413,16 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
 
 int
-AdaptiveNonLinearStatic :: initializeAdaptive(int tStepumber)
+AdaptiveNonLinearStatic :: initializeAdaptive(int tStepNumber)
 {
     int stepinfo [ 2 ];
 
-    stepinfo [ 0 ] = tStepumber;
+    stepinfo [ 0 ] = tStepNumber;
     stepinfo [ 1 ] = 0;
 
     try {
         this->restoreContext(NULL, CM_State, ( void * ) stepinfo);
-    } catch ( ContextIOERR &c ) {
+    } catch(ContextIOERR & c) {
         c.print();
         exit(1);
     }
@@ -428,7 +434,7 @@ AdaptiveNonLinearStatic :: initializeAdaptive(int tStepumber)
     Domain *dNew = new Domain(2, sernum + 1, this);
     DataReader *domainDr = this->GiveDomainDataReader(1, sernum + 1, contextMode_read);
     if ( !dNew->instanciateYourself(domainDr) ) {
-        _error("initializeAdaptive: domain Instanciation failed");
+        OOFEM_ERROR("domain Instanciation failed");
     }
 
     delete domainDr;
@@ -477,10 +483,10 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     d2_incrementOfDisplacement.zero();
 
     result &= mapper.mapAndUpdate( d2_totalDisplacement, VM_Total,
-                                   this->giveDomain(1), this->giveDomain(2), this->giveCurrentStep() );
+                                  this->giveDomain(1), this->giveDomain(2), this->giveCurrentStep() );
 
     result &= mapper.mapAndUpdate( d2_incrementOfDisplacement, VM_Incremental,
-                                   this->giveDomain(1), this->giveDomain(2), this->giveCurrentStep() );
+                                  this->giveDomain(1), this->giveDomain(2), this->giveCurrentStep() );
 
     timer.stopTimer();
     mc1 = timer.getUtime();
@@ -587,7 +593,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
         //cts->setTime(cts->giveTime()-cts->giveTimeIncrement());
     }
 
-    if ( this->giveCurrentStep()->giveNumber() == this->giveCurrentMetaStep()->giveFirsttStepumber() ) {
+    if ( this->giveCurrentStep()->giveNumber() == this->giveCurrentMetaStep()->giveFirstStepNumber() ) {
         this->updateAttributes( this->giveCurrentMetaStep() );
     }
 
@@ -597,10 +603,10 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 
     // assemble new initial load for new discretization
     this->assembleInitialLoadVector( initialLoadVector, initialLoadVectorOfPrescribed,
-                                     this, 1, this->giveCurrentStep() );
+                                    this, 1, this->giveCurrentStep() );
     this->assembleIncrementalReferenceLoadVectors( incrementalLoadVector, incrementalLoadVectorOfPrescribed,
-                                                   refLoadInputMode, this->giveDomain(1), EID_MomentumBalance,
-                                                   this->giveCurrentStep() );
+                                                  refLoadInputMode, this->giveDomain(1),
+                                                  this->giveCurrentStep() );
 
     // assemble new total load for new discretization
     // this->assembleCurrentTotalLoadVector (totalLoadVector, totalLoadVectorOfPrescribed, this->giveCurrentStep());
@@ -656,7 +662,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
      *************/
 
 #ifdef __OOFEG
-    ESIEventLoop( YES, const_cast< char * >( "AdaptiveRemap: Press Ctrl-p to continue" ) );
+    ESIEventLoop( YES, const_cast< char * >("AdaptiveRemap: Press Ctrl-p to continue") );
 #endif
 
     //
@@ -673,20 +679,20 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
             if ( !stiffnessMatrix ) {
                 stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
                 if ( stiffnessMatrix == NULL ) {
-                    _error("proceedStep: sparse matrix creation failed");
+                    OOFEM_ERROR("sparse matrix creation failed");
                 }
             }
 
             if ( nonlocalStiffnessFlag ) {
                 if ( !stiffnessMatrix->isAsymmetric() ) {
-                    _error("proceedStep: stiffnessMatrix does not support asymmetric storage");
+                    OOFEM_ERROR("stiffnessMatrix does not support asymmetric storage");
                 }
             }
 
-            stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+            stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, this->giveCurrentStep(), EID_MomentumBalance, SecantStiffnessMatrix,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( stiffnessMatrix, this->giveCurrentStep(), SecantStiffnessMatrix,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
             initFlag = 0;
         }
 
@@ -694,7 +700,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
         //this->updateYourself(this->giveCurrentStep());
 #ifdef VERBOSE
         OOFEM_LOG_INFO( "Equilibrating mapped configuration [step number %5d.%d]\n",
-                        this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveVersion() );
+                       this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveVersion() );
 #endif
 
         //double deltaL = nMethod->giveUnknownComponent (StepLength, 0);
@@ -704,19 +710,19 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
         //
 #ifdef VERBOSE
         OOFEM_LOG_RELEVANT( "Solving [step number %5d.%d]\n",
-                            this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveVersion() );
+                           this->giveCurrentStep()->giveNumber(), this->giveCurrentStep()->giveVersion() );
 #endif
 
         //nMethod -> solveYourselfAt(this->giveCurrentStep()) ;
         nMethod->setStepLength(deltaL / 5.0);
         if ( initialLoadVector.isNotEmpty() ) {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
-                                           & totalDisplacement, & incrementOfDisplacement, & internalForces,
-                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
+                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
+                                          internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         } else {
             numMetStatus = nMethod->solve( stiffnessMatrix, & incrementalLoadVector, NULL,
-                                           & totalDisplacement, & incrementOfDisplacement, & internalForces,
-                                           internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
+                                          & totalDisplacement, & incrementOfDisplacement, & internalForces,
+                                          internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, this->giveCurrentStep() );
         }
 
 
@@ -779,7 +785,7 @@ AdaptiveNonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, 
     contextIOResultType iores;
     FILE *file = NULL;
 
-    this->resolveCorrespondingtStepumber(istep, iversion, obj);
+    this->resolveCorrespondingStepNumber(istep, iversion, obj);
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
             THROW_CIOERR(CIO_IOERR); // override
@@ -819,10 +825,9 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
                                                      AdaptiveNonLinearStatic *sourceProblem, int domainIndx,
                                                      TimeStep *tStep)
 {
-    const char *__proc = "assembleInitialLoadVector"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                           // Required by IR_GIVE_FIELD macro
 
-    int mtStepum = tStep->giveMetatStepumber();
+    int mStepNum = tStep->giveMetaStepNumber();
     int hasfixed, mode;
     InputRecord *ir;
     MetaStep *iMStep;
@@ -839,7 +844,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     _incrementalLoadVector.zero();
     _incrementalLoadVectorOfPrescribed.zero();
 
-    for ( int imstep = 1; imstep < mtStepum; imstep++ ) {
+    for ( int imstep = 1; imstep < mStepNum; imstep++ ) {
         iMStep = this->giveMetaStep(imstep);
         ir = iMStep->giveAttributesRecord();
         //hasfixed = ir->hasField("fixload");
@@ -860,11 +865,11 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
 
             // check if displacement control takes place
             if ( ir->hasField(_IFT_AdaptiveNonLinearStatic_ddm) ) {
-                _error("assembleInitialLoadVector: fixload recovery not supported for direct displacement control");
+                OOFEM_ERROR("fixload recovery not supported for direct displacement control");
             }
 
-            int firststep = iMStep->giveFirsttStepumber();
-            int laststep  = iMStep->giveLasttStepumber();
+            int firststep = iMStep->giveFirstStepNumber();
+            int laststep  = iMStep->giveLastStepNumber();
 
             int _val = 0;
             IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_AdaptiveNonLinearStatic_refloadmode);
@@ -876,7 +881,7 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
                     ///@todo Likely memory leak here with new TimeStep; Check.
                     TimeStep *old = new TimeStep(istep, this, imstep, istep - 1.0, deltaT, 0);
                     this->assembleIncrementalReferenceLoadVectors(_incrementalLoadVector, _incrementalLoadVectorOfPrescribed,
-                                                                  rlm, this->giveDomain(domainIndx), EID_MomentumBalance, old);
+                                                                  rlm, this->giveDomain(domainIndx), old);
 
                     _incrementalLoadVector.times( sourceProblem->giveTimeStepLoadLevel(istep) );
                     loadVector.add(_incrementalLoadVector);
@@ -887,24 +892,24 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
                 if ( !ir->hasField(_IFT_NonLinearStatic_donotfixload) ) {
                     TimeStep *old = new TimeStep(firststep, this, imstep, firststep - 1.0, deltaT, 0);
                     this->assembleIncrementalReferenceLoadVectors(_incrementalLoadVector, _incrementalLoadVectorOfPrescribed,
-                                                                  rlm, this->giveDomain(domainIndx), EID_MomentumBalance, old);
+                                                                  rlm, this->giveDomain(domainIndx), old);
 
                     _incrementalLoadVector.times( sourceProblem->giveTimeStepLoadLevel(laststep) );
                     loadVector.add(_incrementalLoadVector);
                     loadVectorOfPrescribed.add(_incrementalLoadVectorOfPrescribed);
                 }
             } else {
-                _error("assembleInitialLoadVector: fixload recovery not supported");
+                OOFEM_ERROR("fixload recovery not supported");
             }
         }
     } // end loop over meta-steps
 
     /* if direct control; add to initial load also previous steps in same metestep */
-    iMStep = this->giveMetaStep(mtStepum);
+    iMStep = this->giveMetaStep(mStepNum);
     ir = iMStep->giveAttributesRecord();
     mode = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, mode, _IFT_AdaptiveNonLinearStatic_controlmode);
-    int firststep = iMStep->giveFirsttStepumber();
+    int firststep = iMStep->giveFirstStepNumber();
     int laststep  = tStep->giveNumber();
     int _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_AdaptiveNonLinearStatic_refloadmode);
@@ -913,9 +918,9 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
     if ( mode == ( int ) nls_directControl ) { // and only load control
         for ( int istep = firststep; istep <= laststep; istep++ ) {
             // bad practise here
-            TimeStep *old = new TimeStep(istep, this, mtStepum, istep - 1.0, deltaT, 0);
+            TimeStep *old = new TimeStep(istep, this, mStepNum, istep - 1.0, deltaT, 0);
             this->assembleIncrementalReferenceLoadVectors(_incrementalLoadVector, _incrementalLoadVectorOfPrescribed,
-                                                          rlm, this->giveDomain(domainIndx), EID_MomentumBalance, old);
+                                                          rlm, this->giveDomain(domainIndx), old);
 
             _incrementalLoadVector.times( sourceProblem->giveTimeStepLoadLevel(istep) );
             loadVector.add(_incrementalLoadVector);
@@ -931,22 +936,21 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
  *                           AdaptiveNonLinearStatic* sourceProblem, int domainIndx,
  *                           TimeStep* tStep)
  * {
- * const char *__proc = "assembleInitialLoadVector"; // Required by IR_GIVE_FIELD macro
  * IRResultType result;                              // Required by IR_GIVE_FIELD macro
  *
- * int mtStepum = tStep->giveMetatStepumber() ;
+ * int mStepNum = tStep->giveMetaStepNumber() ;
  * int mode;
  * InputRecord* ir;
- * MetaStep* mStep = sourceProblem->giveMetaStep(mtStepum);
+ * MetaStep* mStep = sourceProblem->giveMetaStep(mStepNum);
  * FloatArray _incrementalLoadVector, _incrementalLoadVectorOfPrescribed;
  * SparseNonLinearSystemNM::referenceLoadInputModeType rlm;
  * //Domain* sourceDomain = sourceProblem->giveDomain(domainIndx);
  *
- * loadVector.resize(this->giveNumberOfDomainEquations(EID_MomentumBalance));
- * loadVectorOfPrescribed.resize(this->giveNumberOfPrescribedDomainEquations(EID_MomentumBalance));
+ * loadVector.resize(this->giveNumberOfDomainEquations());
+ * loadVectorOfPrescribed.resize(this->giveNumberOfPrescribedDomainEquations());
  * loadVector.zero(); loadVectorOfPrescribed.zero();
- * _incrementalLoadVector.resize(this->giveNumberOfDomainEquations(EID_MomentumBalance));
- * _incrementalLoadVectorOfPrescribed.resize(this->giveNumberOfPrescribedDomainEquations(EID_MomentumBalance));
+ * _incrementalLoadVector.resize(this->giveNumberOfDomainEquations());
+ * _incrementalLoadVectorOfPrescribed.resize(this->giveNumberOfPrescribedDomainEquations());
  * _incrementalLoadVector.zero(); _incrementalLoadVectorOfPrescribed.zero();
  *
  * // ASK CURRENT MSTEP FOR ITS RECORD
@@ -957,11 +961,11 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
  *
  * // check if displacement control takes place
  * if (ir->hasField(_IFT_AdaptiveNonLinearStatic_ddm, "ddm"))
- * _error ("assembleCurrentTotalLoadVector: fixload recovery not supported for direct displacement control");
+ * OOFEM_ERROR("fixload recovery not supported for direct displacement control");
  * int _val = 0;
  * IR_GIVE_OPTIONAL_FIELD (ir, _val, _IFT_AdaptiveNonLinearStatic_refloadmode, "refloadmode");
  *
- * int firststep = mStep->giveFirsttStepumber();
+ * int firststep = mStep->giveFirstStepNumber();
  * int laststep  = tStep->giveNumber()-1;
  *
  * rlm = (SparseNonLinearSystemNM::referenceLoadInputModeType) _val;
@@ -969,9 +973,9 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
  * if (mode == (int)nls_directControl) { // and only load control
  * for (int istep = firststep; istep<=laststep; istep++) {
  * // bad practise here
- * TimeStep* old = new TimeStep (istep, this, mtStepum, istep-1.0, deltaT, 0);
+ * TimeStep* old = new TimeStep (istep, this, mStepNum, istep-1.0, deltaT, 0);
  * this->assembleIncrementalReferenceLoadVectors (_incrementalLoadVector, _incrementalLoadVectorOfPrescribed,
- *                         rlm, this->giveDomain(domainIndx), EID_MomentumBalance, old);
+ *                         rlm, this->giveDomain(domainIndx), old);
  *
  * _incrementalLoadVector.times(sourceProblem->giveTimeStepLoadLevel(istep));
  * loadVector.add(_incrementalLoadVector);
@@ -979,15 +983,15 @@ AdaptiveNonLinearStatic :: assembleInitialLoadVector(FloatArray &loadVector, Flo
  * }
  * } else if (mode == (int)nls_indirectControl) {
  * // bad practise here
- * TimeStep* old = new TimeStep (firststep, this, mtStepum, firststep-1.0, deltaT, 0);
+ * TimeStep* old = new TimeStep (firststep, this, mStepNum, firststep-1.0, deltaT, 0);
  * this->assembleIncrementalReferenceLoadVectors (_incrementalLoadVector, _incrementalLoadVectorOfPrescribed,
- *                        rlm, this->giveDomain(domainIndx), EID_MomentumBalance, old);
+ *                        rlm, this->giveDomain(domainIndx), old);
  *
  * _incrementalLoadVector.times(sourceProblem->giveTimeStepLoadLevel(laststep));
  * loadVector.add(_incrementalLoadVector);
  * loadVectorOfPrescribed.add(_incrementalLoadVectorOfPrescribed);
  * } else {
- * _error ("assembleCurrentTotalLoadVector: totalload recovery not supported");
+ * OOFEM_ERROR("totalload recovery not supported");
  * }
  *
  *
@@ -1001,7 +1005,7 @@ AdaptiveNonLinearStatic :: giveTimeStepLoadLevel(int istep)
     if ( ( istep >= this->giveNumberOfFirstStep() ) && ( istep <= this->giveNumberOfSteps() ) ) {
         return timeStepLoadLevels.at(istep);
     } else {
-        _error("solution step out of range");
+        OOFEM_ERROR("solution step out of range");
     }
 
     return 0.0; // to make compiler happy

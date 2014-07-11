@@ -43,13 +43,17 @@
 #include "mathfem.h"
 #include "classfactory.h"
 
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
+#endif
+
 namespace oofem {
 REGISTER_Element(QPlaneStress2d);
 
 FEI2dQuadQuad QPlaneStress2d :: interpolation(1, 2);
 
 QPlaneStress2d :: QPlaneStress2d(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface()
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface()
     // Constructor.
 {
     numberOfDofMans  = 8;
@@ -60,9 +64,9 @@ Interface *
 QPlaneStress2d :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     }
 
     return NULL;
@@ -114,29 +118,15 @@ QPlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 IRResultType
 QPlaneStress2d :: initializeFrom(InputRecord *ir)
 {
-    numberOfGaussPoints = 4;
-    IRResultType result = this->Element :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( !( ( numberOfGaussPoints == 1 ) ||
-            ( numberOfGaussPoints == 4 ) ||
-            ( numberOfGaussPoints == 9 ) ||
-            ( numberOfGaussPoints == 16 ) ) ) {
-        numberOfGaussPoints = 4;
-    }
-
-    return IRRT_OK;
+    return Element :: initializeFrom(ir);
 }
 
 void
 QPlaneStress2d :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -148,7 +138,7 @@ QPlaneStress2d :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant, weight, thickness, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) ) );
+                                                                       FEIElementGeometryWrapper(this) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
     volume      = determinant * weight * thickness;
@@ -158,9 +148,9 @@ QPlaneStress2d :: computeVolumeAround(GaussPoint *gp)
 
 
 void
-QPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+QPlaneStress2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(2, D_u, D_v);
+    answer = {D_u, D_v};
 }
 
 
@@ -256,8 +246,6 @@ void QPlaneStress2d :: drawScalar(oofegGraphicContext &context)
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 8 ];
     double s [ 9 ], ss [ 4 ], defScale;
-    int ip;
-    GaussPoint *gp;
 
     if ( !context.testElementGraphicActivity(this) ) {
         return;
@@ -284,8 +272,7 @@ void QPlaneStress2d :: drawScalar(oofegGraphicContext &context)
         // computed as average of the values at all Gauss points
 
         s [ 8 ] = 0.;
-        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
             if ( giveIPValue(v [ 0 ], gp, context.giveIntVarType(), tStep) == 0 ) {
                 return;
             }
@@ -440,8 +427,7 @@ void QPlaneStress2d :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.;
 
-        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
             gpCoords = gp->giveCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;
@@ -542,12 +528,6 @@ QPlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer,
     }
 }
 
-void
-QPlaneStress2d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                            InternalStateType type, TimeStep *tStep)
-{
-    answer.resize(0);
-}
 
 void
 QPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
@@ -604,8 +584,8 @@ double
 QPlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) );
-    return result * gp->giveWeight();
+                                                                       FEIElementGeometryWrapper(this) );
+    return result *gp->giveWeight();
 }
 
 void

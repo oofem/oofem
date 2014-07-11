@@ -39,17 +39,18 @@
 #include "materialinterface.h"
 #include "gausspoint.h"
 #include "classfactory.h"
+#include "crosssection.h"
 
 #ifdef __SM_MODULE
- #include "structuralelement.h"
- #include "structuralmaterial.h"
- #include "truss3d.h"
- #include "stressvector.h"
- #include "strainvector.h"
+ #include "../sm/structuralelement.h"
+ #include "../sm/structuralmaterial.h"
+ #include "../sm/truss3d.h"
+ #include "../sm/stressvector.h"
+ #include "../sm/strainvector.h"
 #endif
 
 #ifdef __TM_MODULE
- #include "transportmaterial.h"
+ #include "../tm/transportmaterial.h"
 #endif
 
 
@@ -59,7 +60,9 @@ REGISTER_ExportModule(HOMExportModule)
 //inherit LinearElasticMaterial for accessing stress/strain transformation functions
 HOMExportModule :: HOMExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {
-    this->matnum.resize(0);
+    this->matnum.clear();
+    this->internalSourceEnergy.clear();
+    this->capacityEnergy.clear();
 }
 
 
@@ -69,7 +72,6 @@ HOMExportModule :: ~HOMExportModule()
 IRResultType
 HOMExportModule :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     IRResultType val;
     this->scale = 1.;
@@ -80,6 +82,7 @@ HOMExportModule :: initializeFrom(InputRecord *ir)
     }
 
     val = IR_GIVE_OPTIONAL_FIELD(ir, this->matnum, _IFT_HOMExportModule_matnum);
+    internalSourceEnergy.resize( emodel->giveDomain(1)->giveNumberOfCrossSectionModels() );
     return IRRT_OK;
 }
 
@@ -87,18 +90,17 @@ HOMExportModule :: initializeFrom(InputRecord *ir)
 void
 HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
-    Element *elem;
     if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
         return;
     }
 
-    Domain *d  = emodel->giveDomain(1);
+    Domain *d = emodel->giveDomain(1);
     int nelem = d->giveNumberOfElements();
     double dV, VolTot = 0.;
-    double sumState = 0.;
     FloatArray vecState, vecFlow, sumFlow(3);
-    GaussPoint *gp;
-    IntegrationRule *iRule;
+    FloatArray internalSource, capacity;
+    FloatArray answerArr, answerArr1;
+    FloatMatrix answerMtrx;
     IntArray Mask;
     FloatMatrix baseGCS;
 
@@ -106,12 +108,13 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     domainType domType = d->giveDomainType();
 
     if ( domType == _HeatTransferMode || domType == _HeatMass1Mode ) {
+#ifdef __TM_MODULE
+        double sumState = 0.;
+        TransportElement *transpElem;
         for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-            elem = d->giveElement(ielem);
+            Element *elem = d->giveElement(ielem);
             if ( this->matnum.giveSize() == 0 || this->matnum.contains( elem->giveMaterial()->giveNumber() ) ) {
-                iRule = elem->giveDefaultIntegrationRulePtr();
-                for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-                    gp  = iRule->getIntegrationPoint(i);
+                for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
                     dV  = elem->computeVolumeAround(gp);
                     VolTot += dV;
                     elem->giveIPValue(vecState, gp, IST_Temperature, tStep);
@@ -127,12 +130,37 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         sumState *= ( 1. / VolTot * this->scale );
         fprintf(this->stream, "%e  % e       ", tStep->giveTargetTime(), sumState);
         sumFlow.times(1. / VolTot * this->scale);
-        fprintf( this->stream, "% e  % e  % e\n", sumFlow.at(1), sumFlow.at(2), sumFlow.at(3) );
+        fprintf( this->stream, "% e  % e  % e       ", sumFlow.at(1), sumFlow.at(2), sumFlow.at(3) );
+        //add total heat for each material - accumulated energy due to material capacity (J for heat) and internal source (J for heat)
+        internalSource.resize( d->giveNumberOfCrossSectionModels() );
+        capacity.resize( d->giveNumberOfCrossSectionModels() );
+        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+            transpElem = static_cast< TransportElement * >( d->giveElement(ielem) );
+            transpElem->computeInternalSourceRhsVectorAt(answerArr, tStep, VM_Total);
+            internalSource.at( transpElem->giveCrossSection()->giveNumber() ) += answerArr.sum();
+
+            transpElem->giveCharacteristicMatrix(answerMtrx, CapacityMatrix, tStep);
+            transpElem->computeVectorOf(VM_Incremental, tStep, answerArr);
+            answerArr1.beProductOf(answerMtrx, answerArr);
+            capacity.at( transpElem->giveCrossSection()->giveNumber() ) -= answerArr1.sum();
+        }
+        internalSource.times( tStep->giveTimeIncrement() );
+        internalSourceEnergy.add(internalSource);
+        capacityEnergy.add(capacity);
+        for ( int i = 1; i <= internalSourceEnergy.giveSize(); i++ ) {
+            fprintf( this->stream, "% e ", internalSourceEnergy.at(i) );
+        }
+        fprintf(this->stream, "     ");
+        for ( int i = 1; i <= capacityEnergy.giveSize(); i++ ) {
+            fprintf( this->stream, "% e ", capacityEnergy.at(i) );
+        }
+        fprintf(this->stream, "\n");
+#endif
     } else { //structural analysis
 #ifdef __SM_MODULE
         StructuralElement *structElem;
         //int nnodes = d->giveNumberOfDofManagers();
-        FloatArray VecStrain, VecStress, VecEigStrain, tempStrain(6), tempStress(6), tempEigStrain(6), SumStrain(6), SumStress(6), SumEigStrain(6), tempFloatAr, damage;
+        FloatArray VecStrain, VecStress, VecEigStrain, VecEigStrainReduced, tempStrain(6), tempStress(6), tempEigStrain(6), SumStrain(6), SumStress(6), SumEigStrain(6), tempFloatAr, damage;
         double sumDamage = 0.;
         //stress and strain vectors are always in global c.s.
         SumStrain.zero(); //xx, yy, zz, yz, zx, xy
@@ -140,17 +168,21 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         SumEigStrain.zero();
 
         for ( int ielem = 1; ielem <= nelem; ielem++ ) {
+            Element *elem = d->giveElement(ielem);
             tempStrain.zero();
             tempStress.zero();
             tempEigStrain.zero();
 
-            elem = d->giveElement(ielem);
             if ( this->matnum.giveSize() == 0 || this->matnum.contains( elem->giveMaterial()->giveNumber() ) ) {
-                iRule = elem->giveDefaultIntegrationRulePtr();
-                for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-                    gp  = iRule->getIntegrationPoint(i);
-                    structElem = static_cast< StructuralElement * >( elem );
-                    structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
+                for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
+                    structElem = static_cast< StructuralElement * >(elem);
+                    // structElem->computeResultingIPEigenstrainAt(VecEigStrain, tStep, gp, VM_Incremental);
+                    structElem->computeResultingIPEigenstrainAt(VecEigStrainReduced, tStep, gp, VM_Total);
+                    if ( VecEigStrainReduced.giveSize() == 0 ) {
+                        VecEigStrain.resize(0);
+                    } else {
+                        ( ( StructuralMaterial * ) structElem->giveMaterial() )->giveFullSymVectorForm( VecEigStrain, VecEigStrainReduced,  gp->giveMaterialMode() );
+                    }
                     dV  = elem->computeVolumeAround(gp);
                     elem->giveIPValue(VecStrain, gp, IST_StrainTensor, tStep);
                     elem->giveIPValue(VecStress, gp, IST_StressTensor, tStep);
@@ -158,7 +190,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
                     //truss element has strains and stresses in the first array so transform them to global coordinates
                     ///@todo Should this be the job of giveIPValue to ensure that vectors are given in global c.s.?
-                    if ( dynamic_cast< Truss3d * >( elem ) ) {
+                    if ( dynamic_cast< Truss3d * >(elem) ) {
                         MaterialMode mmode = _3dMat;
                         tempStress.at(1) = VecStress.at(1);
                         tempStrain.at(1) = VecStrain.at(1);
@@ -190,14 +222,9 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                         sumDamage += damage.at(1) * dV;
                     }
 
-                    for ( int j = 1; j <= 6; j++ ) {
-                        SumStrain.at(j) += VecStrain.at(j);
-                        if ( VecEigStrain.giveSize() ) {
-                            SumEigStrain.at(j) += VecEigStrain.at(j);
-                        }
-
-                        SumStress.at(j) += VecStress.at(j);
-                    }
+                    SumStrain.add(VecStrain);
+                    SumEigStrain.add(VecEigStrain);
+                    SumStress.add(VecStress);
 
                     //VecStrain.printYourself();
                     //VecEigStrain.printYourself();
@@ -215,18 +242,18 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         //SumEigStrain.printYourself();
         //SumStress.printYourself();
         fprintf( this->stream, "%f   ", tStep->giveTargetTime() );
-        for ( int j = 0; j < 6; j++ ) { //strain
-            fprintf( this->stream, "%06.5e ", SumStrain(j) );
+        for ( double s: SumStrain ) { //strain
+            fprintf( this->stream, "%06.5e ", s );
         }
 
         fprintf(this->stream, "    ");
-        for ( int j = 0; j < 6; j++ ) { //stress
-            fprintf( this->stream, "%06.5e ", SumStress(j) );
+        for ( double s: SumStress ) { //stress
+            fprintf( this->stream, "%06.5e ", s );
         }
 
         fprintf(this->stream, "    ");
-        for ( int j = 0; j < 6; j++ ) { //eigenstrain
-            fprintf( this->stream, "%06.5e ", SumEigStrain(j) );
+        for ( double s: SumEigStrain ) { //eigenstrain
+            fprintf( this->stream, "%06.5e ", s );
         }
 
         fprintf(this->stream, "Vol %06.5e ", VolTot);
@@ -246,11 +273,11 @@ HOMExportModule :: initialize()
 
     std :: string fileName = emodel->giveOutputBaseFileName() + ".hom";
     if ( ( this->stream = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2( "HOMExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
+        OOFEM_ERROR( "failed to open file %s", fileName.c_str() );
     }
 
     if ( domType == _HeatTransferMode || domType == _HeatMass1Mode ) {
-        fprintf(this->stream, "#Time          AvrState           AvrFlow (xx,yy,zz)\n");
+        fprintf(this->stream, "#Time          AvrState           AvrFlow (xx,yy,zz)                               internalSourceEnergy(over_each_crosssection)   capacityEnergy(over_each_crosssection)\n");
     } else {
         fprintf(this->stream, "#Time   AvrStrain (xx, yy, zz, yz, zx, xy)                                           AvrStress (xx, yy, zz, yz, zx, xy)                                             AvrEigenstrain (xx, yy, zz, yz, zx, xy)\n");
     }

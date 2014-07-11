@@ -40,88 +40,16 @@
 
 
 namespace oofem {
-/**
- * Global variable containing warning level, should be in interval (0,3).
- * Zero level suppress all warning messages, level 3 causes to report all
- * warning messages. Default level is set to maximum level.
- */
-//int oofem_warningLevel = 3;
-
-
 void oofem_exit(int code)
 {
-    oofem_errLogger.printStatistics();
+    oofem_logger.printStatistics();
     fprintf(stderr, "oofem exit code %d\n", code);
     exit(code);
 }
 
-/*
- * #ifndef HAVE_MACRO_VA_ARGS
- *
- ****#include <cstdarg>
- *
- *
- *
- ****#define __PROCESS_LOG \
- * char buff[MAX_ERROR_MSG_LENGTH]; \
- * va_list args; \
- * va_start(args, format); \
- * vsnprintf(buff, MAX_ERROR_MSG_LENGTH, format, args); \
- * va_end(args);
- *
- * void _error(const char *format, ...)
- * {
- * __PROCESS_LOG;
- * oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_ERROR, NULL, 0,buff);
- * exit (1);
- * }
- * void _warning(const char *format, ...)
- * {
- * __PROCESS_LOG;
- * oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_WARNING, NULL ,0,buff);
- * }
- *
- *
- * void OOFEM_FATAL(const char *format, ...)
- * {
- * __PROCESS_LOG;
- * oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_FATAL, NULL ,0,buff);
- * exit (1);
- * }
- *
- * void OOFEM_ERROR(const char *format, ...)
- * {
- * __PROCESS_LOG;
- * oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_ERROR, NULL,0,buff);
- * exit (1);
- *
- * }
- *
- * void OOFEM_WARNING(const char *format, ...)
- * {
- * __PROCESS_LOG;
- * oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_WARNING, NULL,0,buff);
- * }
- *
- * void  __OOFEM_FATAL(const char* _file,int _line,const char *format, ...)
- * {
- * __PROCESS_LOG;
- * oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_FATAL, _file,_line,buff);
- * exit (1);
- * }
- *
- * void __OOFEM_ERROR(const char* _file,int _line,const char *format, ...)
- * {
- * __PROCESS_LOG;
- * oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_ERROR, _file,_line,buff);
- * exit (1);
- * }
- * void __OOFEM_WARNING(const char* _file,int _line,const char *format, ...)
- * {
- * __PROCESS_LOG;
- * oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_WARNING, _file,_line,buff);
- * }
- *
- ****#endif
- */
+std::string errorInfo(const char *func)
+{
+    return std :: string(func);
+}
+
 } // end namespace oofem

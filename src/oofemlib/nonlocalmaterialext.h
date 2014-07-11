@@ -54,6 +54,7 @@
 #define _IFT_NonlocalMaterialExtensionInterface_nonlocalvariation "nlvariation"
 #define _IFT_NonlocalMaterialExtensionInterface_beta "beta"
 #define _IFT_NonlocalMaterialExtensionInterface_zeta "zeta"
+
 //@}
 
 namespace oofem {
@@ -158,7 +159,6 @@ protected:
     IntArray regionMap;
     /// Flag indicating whether to keep nonlocal interaction tables of integration points cached.
     bool permanentNonlocTableFlag;
-
     /// Type characterizing the nonlocal weight function.
     enum WeightFunctionType { WFT_Unknown, WFT_Bell, WFT_Gauss, WFT_Green, WFT_Uniform, WFT_UniformOverElement, WFT_Green_21 };
     /// Parameter specifying the type of nonlocal weight function.
@@ -194,7 +194,7 @@ protected:
      */
     double cl0;
     /// Type characterizing the Nonlocal variation
-    enum NlVariationType { NLVT_Standard, NLVT_DistanceBased, NLVT_StressBased };
+    enum NlVariationType { NLVT_Standard, NLVT_DistanceBasedLinear, NLVT_StressBased, NLVT_DistanceBasedExponential };
     ///Parameter specifying the type of nonlocal variation.
     NlVariationType nlvar;
     /**
@@ -217,7 +217,7 @@ public:
      * Constructor. Creates material with given number, belonging to given domain.
      * @param d Domain to which new material will belong.
      */
-    NonlocalMaterialExtensionInterface(Domain *d);
+    NonlocalMaterialExtensionInterface(Domain * d);
     /// Destructor.
     virtual ~NonlocalMaterialExtensionInterface() { }
 

@@ -55,8 +55,8 @@ REGISTER_Element(QTrPlaneStress2d);
 FEI2dTrQuad QTrPlaneStress2d :: interpolation(1, 2);
 
 QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), SpatialLocalizerInterface(),
-    DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface()
+    NLStructuralElement(n, aDomain), SpatialLocalizerInterface(this),
+    EIPrimaryUnknownMapperInterface()
 {
     numberOfDofMans  = 6;
     numberOfGaussPoints = 4;
@@ -75,13 +75,11 @@ QTrPlaneStress2d :: giveInterface(InterfaceType interface)
      *    return static_cast< ZZNodalRecoveryModelInterface * >( this );
      */
     if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
-    } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     }
 
     return NULL;
@@ -110,11 +108,11 @@ QTrPlaneStress2d :: initializeFrom(InputRecord *ir)
     }
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-            ( numberOfGaussPoints == 3 ) ||
-            ( numberOfGaussPoints == 4 ) ||
-            ( numberOfGaussPoints == 7 ) ||
-            ( numberOfGaussPoints == 13 ) ) ) {
-        _warning("number of Gauss points in QTrPlaneStress2d changed to 4\n");
+           ( numberOfGaussPoints == 3 ) ||
+           ( numberOfGaussPoints == 4 ) ||
+           ( numberOfGaussPoints == 7 ) ||
+           ( numberOfGaussPoints == 13 ) ) ) {
+        OOFEM_WARNING("number of Gauss points in QTrPlaneStress2d changed to 4");
         numberOfGaussPoints = 4;
     }
 
@@ -170,7 +168,7 @@ QTrPlaneStress2d :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant, weight, thickness, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) ) );
+                                                                       FEIElementGeometryWrapper(this) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
     volume      = determinant * weight * thickness;
@@ -181,26 +179,17 @@ QTrPlaneStress2d :: computeVolumeAround(GaussPoint *gp)
 void QTrPlaneStress2d :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
 void
-QTrPlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+QTrPlaneStress2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(2, D_u, D_v);
-}
-
-
-int
-QTrPlaneStress2d :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
+    answer = {D_u, D_v};
 }
 
 
@@ -215,7 +204,7 @@ QTrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -415,8 +404,6 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        int ip;
-        GaussPoint *gp;
         IntArray ind(3);
         WCRec pp [ 6 ];
 
@@ -435,26 +422,25 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
             }
         }
 
-        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
+        for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
             //gpCoords = gp->giveCoordinates();
-            switch ( ip ) {
-            case 2:
+            switch ( gp->giveNumber() ) {
+            case 3:
                 ind.at(1) = 0;
                 ind.at(2) = 3;
                 ind.at(3) = 5;
                 break;
-            case 3:
+            case 4:
                 ind.at(1) = 1;
                 ind.at(2) = 4;
                 ind.at(3) = 3;
                 break;
-            case 1:
+            case 2:
                 ind.at(1) = 2;
                 ind.at(2) = 5;
                 ind.at(3) = 4;
                 break;
-            case 4:
+            case 5:
             default:
                 ind.at(1) = 3;
                 ind.at(2) = 4;
@@ -520,7 +506,7 @@ QTrPlaneStress2d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &an
         answer.at(2) = this->giveNode(6)->giveNumber();
         answer.at(3) = this->giveNode(5)->giveNumber();
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 
@@ -539,53 +525,22 @@ QTrPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-double
-QTrPlaneStress2d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
-{
-    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
-    GaussPoint *gp;
-    double volume = 0.0;
-
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
-        volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
-    }
-
-    return sqrt(volume * 2.0);
-}
-
-
-int
-QTrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                     TimeStep *tStep, const FloatArray &coords,
+void
+QTrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                     TimeStep *tStep, const FloatArray &lcoords,
                                                                      FloatArray &answer)
 {
-    FloatArray lcoords, u, nn;
-    FloatMatrix n(2, 12);
-    int result;
+    FloatArray u, ni;
+    FloatMatrix n;
 
-    result = this->computeLocalCoordinates(lcoords, coords);
+    this->interpolation.evalN( ni, lcoords, FEIElementGeometryWrapper(this) );
 
-    this->interpolation.evalN( nn, lcoords, FEIElementGeometryWrapper(this) );
+    n.beNMatrixOf(ni, 2);
 
-    n.zero();
-    for ( int i = 1; i <= 6; i++ ) {
-        n.at(1, 2 * i - 1) = nn.at(i);
-        n.at(2, 2 * i - 0) = nn.at(i);
-    }
-
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf({D_u, D_v}, mode, tStep, u);
     answer.beProductOf(n, u);
-
-    return result;
 }
 
-
-void
-QTrPlaneStress2d :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    giveDofManDofIDMask(1, EID_MomentumBalance, answer);
-}
 
 void
 QTrPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
@@ -640,8 +595,8 @@ double
 QTrPlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) );
-    return result * gp->giveWeight();
+                                                                       FEIElementGeometryWrapper(this) );
+    return result *gp->giveWeight();
 }
 
 void

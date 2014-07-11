@@ -60,9 +60,7 @@ CompoDamageMat :: ~CompoDamageMat()
 
 IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
 {
-    int i;
     double value;
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     this->Material :: initializeFrom(ir);
@@ -94,20 +92,20 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, this->inputCompression, _IFT_CompoDamageMat_compres_f0_gf);
 
     if ( this->inputTension.giveSize() != 12 ) {
-        _error("instanciateFrom: need 12 components for tension in pairs f0 Gf for all 6 directions");
+        OOFEM_ERROR("need 12 components for tension in pairs f0 Gf for all 6 directions");
     }
 
     if ( this->inputCompression.giveSize() != 12 ) {
-        _error("instanciateFrom: need 12 components for compression in pairs f0 Gf for all 6 directions");
+        OOFEM_ERROR("need 12 components for compression in pairs f0 Gf for all 6 directions");
     }
 
-    for ( i = 1; i <= 12; i += 2 ) {
+    for ( int i = 1; i <= 12; i += 2 ) {
         if ( this->inputTension.at(i) < 0.0 ) {
-            _error("instanciateFrom: negative f0 detected for tension");
+            OOFEM_ERROR("negative f0 detected for tension");
         }
 
         if ( this->inputCompression.at(i) > 0.0 ) {
-            _error("instanciateFrom: positive f0 detected for compression");
+            OOFEM_ERROR("positive f0 detected for compression");
         }
     }
 
@@ -125,7 +123,7 @@ IRResultType CompoDamageMat :: initializeFrom(InputRecord *ir)
 void CompoDamageMat :: giveInputRecord(DynamicInputRecord &input)
 {
     StructuralMaterial :: giveInputRecord(input);
-    OOFEM_ERROR("CompoDamageMat :: giveInputRecord - Not implemented yet\n");
+    OOFEM_ERROR("Not implemented yet");
 }
 
 
@@ -203,7 +201,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, 
     }
     default:
     {
-        OOFEM_ERROR2( "Material mode %s not supported", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("Material mode %s not supported", __MaterialModeToString(mMode) );
         i_max = 0;
     }
     }
@@ -235,7 +233,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, 
                 break;
 
             default:
-                OOFEM_ERROR2( "Material mode %s not supported", __MaterialModeToString(mMode) );
+                OOFEM_ERROR("Material mode %s not supported", __MaterialModeToString(mMode) );
             }
 
             //subdivide last increment, interpolate, delta in range <0;1>
@@ -275,7 +273,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, 
             Gf_tmp = ( * inputFGf ).at(2 * i) - st->initDamageStress.at(i + s) * st->initDamageStress.at(i + s) * charLen / 2. / tmp;
 
             if ( Gf_tmp < 0. ) {
-                OOFEM_WARNING6("Too large initiation trial stress in element %d, component %d, |%f| < |%f|=f_t, negative remaining Gf=%f, treated as a snap-back", gp->giveElement()->giveNumber(), s == 0 ? i : -i, st->initDamageStress.at(i + s), tempStressVectorL.at(i), Gf_tmp);
+                OOFEM_WARNING("Too large initiation trial stress in element %d, component %d, |%f| < |%f|=f_t, negative remaining Gf=%f, treated as a snap-back", gp->giveElement()->giveNumber(), s == 0 ? i : -i, st->initDamageStress.at(i + s), tempStressVectorL.at(i), Gf_tmp);
                 st->hasSnapBack.at(i) = 1;
             }
 
@@ -283,7 +281,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, 
 
             //check the snap-back
             if ( fabs( st->maxStrainAtZeroStress.at(i + s) ) < fabs( st->strainAtMaxStress.at(i + s) ) && st->hasSnapBack.at(i) == 0 ) {
-                OOFEM_WARNING5( "Snap-back occured in element %d, component %d, |elastic strain=%f| > |fracturing strain %f|", gp->giveElement()->giveNumber(), s == 0 ? i : -i, st->strainAtMaxStress.at(i + s), st->maxStrainAtZeroStress.at(i + s) );
+                OOFEM_WARNING( "Snap-back occured in element %d, component %d, |elastic strain=%f| > |fracturing strain %f|", gp->giveElement()->giveNumber(), s == 0 ? i : -i, st->strainAtMaxStress.at(i + s), st->maxStrainAtZeroStress.at(i + s) );
                 st->hasSnapBack.at(i) = 1;
             }
         }
@@ -301,7 +299,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, 
             }
 
             switch ( i ) { //need to subtract contributions from strains
-            //in equations we use nu12 = E11/E22*nu21, nu13 = E11/E33*nu31, nu23 = E22/E33*nu32
+                //in equations we use nu12 = E11/E22*nu21, nu13 = E11/E33*nu31, nu23 = E22/E33*nu32
             case 1: tmp = 1. - sigma / ( this->give(Ex, NULL) * strainVectorL.at(i) + this->give(NYxy, NULL) * tempStressVectorL.at(2) + this->give(NYxz, NULL) * tempStressVectorL.at(3) );
                 break;
             case 2: tmp = 1. - sigma / ( this->give(Ey, NULL) * strainVectorL.at(i) + this->give(NYyx, NULL) * tempStressVectorL.at(1) + this->give(NYyz, NULL) * tempStressVectorL.at(3) );
@@ -440,7 +438,7 @@ int CompoDamageMat :: giveMatStiffRotationMatrix(FloatMatrix &answer, GaussPoint
 
         break;
     default:
-        OOFEM_ERROR2( "Material mode %s not supported", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("Material mode %s not supported", __MaterialModeToString(mMode) );
     }
 
     return 0;
@@ -531,7 +529,7 @@ void CompoDamageMat :: checkSnapBack(GaussPoint *gp, MaterialMode mMode)
                     if ( this->allowSnapBack.contains(i + 6 * j) ) {
                         OOFEM_LOG_INFO("Allowed snapback of 3D element %d GP %d Gf(%d)=%f, would need Gf>%f\n", gp->giveElement()->giveNumber(), gp->giveNumber(), j == 0 ? i : -i, Gf, ft * ft * elem_h / 2 / modulus);
                     } else {
-                        OOFEM_ERROR5("Decrease size of 3D element %d or increase Gf(%d)=%f to Gf>%f, possible snap-back problems", gp->giveElement()->giveNumber(), j == 0 ? i : -i, Gf, ft * ft * elem_h / 2 / modulus);
+                        OOFEM_ERROR("Decrease size of 3D element %d or increase Gf(%d)=%f to Gf>%f, possible snap-back problems", gp->giveElement()->giveNumber(), j == 0 ? i : -i, Gf, ft * ft * elem_h / 2 / modulus);
                     }
                 }
             }
@@ -548,13 +546,13 @@ void CompoDamageMat :: checkSnapBack(GaussPoint *gp, MaterialMode mMode)
                 if ( this->allowSnapBack.contains(1 + 6 * j) ) {
                     OOFEM_LOG_INFO("Allowed snapback of 1D element %d GP %d Gf(%d)=%f, would need Gf>%f\n", gp->giveElement()->giveNumber(), gp->giveNumber(), j == 0 ? 1 : -1, Gf, ft * ft * elem_h / 2 / modulus);
                 } else {
-                    OOFEM_ERROR5("Decrease size of 1D element %d or increase Gf(%d)=%f to Gf>%f, possible snap-back problems", gp->giveElement()->giveNumber(), j == 0 ? 1 : -1, Gf, ft * ft * elem_h / 2 / modulus);
+                    OOFEM_ERROR("Decrease size of 1D element %d or increase Gf(%d)=%f to Gf>%f, possible snap-back problems", gp->giveElement()->giveNumber(), j == 0 ? 1 : -1, Gf, ft * ft * elem_h / 2 / modulus);
                 }
             }
 
             break;
         default:
-            OOFEM_ERROR2( "Material mode %s not supported", __MaterialModeToString(mMode) );
+            OOFEM_ERROR("Material mode %s not supported", __MaterialModeToString(mMode) );
         }
     }
 }

@@ -41,11 +41,6 @@
 #include "nonlocmatstiffinterface.h"
 #include "cltypes.h"
 
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
- #include "connectivitytable.h"
-#endif
-
 ///@name Input fields for TrabBoneNL3D
 //@{
 #define _IFT_TrabBoneNL3D_Name "trabbonenl3d"
@@ -64,7 +59,7 @@ protected:
     double localCumPlastStrainForAverage;
 
 public:
-    TrabBoneNL3DStatus(int n, Domain *d, GaussPoint *g);
+    TrabBoneNL3DStatus(int n, Domain * d, GaussPoint * g);
     virtual ~TrabBoneNL3DStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -86,15 +81,15 @@ public:
  * Trabecular bone nonlocal material model.
  */
 class TrabBoneNL3D : public TrabBone3D,
-    public StructuralNonlocalMaterialExtensionInterface,
-    public NonlocalMaterialStiffnessInterface
+public StructuralNonlocalMaterialExtensionInterface,
+public NonlocalMaterialStiffnessInterface
 {
 protected:
     double R;
     double mParam;
 
 public:
-    TrabBoneNL3D(int n, Domain *d);
+    TrabBoneNL3D(int n, Domain * d);
     virtual ~TrabBoneNL3D();
 
     virtual const char *giveClassName() const { return "TrabBoneNL3D"; }
@@ -114,7 +109,7 @@ public:
      * @param gp Integration point.
      * @param tStep Time step.
      */
-    void computeLocalCumPlastStrain(double &kappa, const StrainVector &strain, GaussPoint *gp, TimeStep *tStep)
+    void computeLocalCumPlastStrain(double &kappa, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
     {
         TrabBone3D :: computeCumPlastStrain(kappa, gp, tStep);
     }
@@ -154,7 +149,7 @@ public:
     void giveRemoteNonlocalStiffnessContribution(GaussPoint *gp, IntArray &rloc, const UnknownNumberingScheme &s,
                                                  FloatArray &rcontrib, TimeStep *tStep);
 
-    virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
+    virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strainVector, TimeStep *tStep);
 
     virtual void updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoint *gp, TimeStep *tStep);
 

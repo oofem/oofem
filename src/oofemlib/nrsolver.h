@@ -64,6 +64,7 @@
 #define _IFT_NRSolver_rtolv "rtolv"
 #define _IFT_NRSolver_rtolf "rtolf"
 #define _IFT_NRSolver_rtold "rtold"
+#define _IFT_NRSolver_calcstiffbeforeres "calcstiffbeforeres"
 //@}
 
 namespace oofem {
@@ -131,6 +132,8 @@ private:
     int lsFlag;
     /// Line search solver
     LineSearchNM *linesearchSolver;
+    /// Flag indicating if the stiffness should be evaluated before the residual in the first iteration.
+    bool mCalcStiffBeforeRes;
 
 #ifdef __PETSC_MODULE
     IS prescribedEgsIS;
@@ -143,7 +146,7 @@ private:
     FloatArray rtold;
 
 public:
-    NRSolver(Domain *d, EngngModel *m);
+    NRSolver(Domain * d, EngngModel * m);
     virtual ~NRSolver();
 
     // Overloaded methods:

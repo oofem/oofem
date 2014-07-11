@@ -58,7 +58,7 @@ protected:
     LinearElasticMaterial *linearElasticMaterial;
 
 public:
-    TrabBoneGrad3DStatus(int n, Domain *d, GaussPoint *g);
+    TrabBoneGrad3DStatus(int n, Domain * d, GaussPoint * g);
     virtual ~TrabBoneGrad3DStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -85,7 +85,7 @@ protected:
     double mParam;
 
 public:
-    TrabBoneGrad3D(int n, Domain *d);
+    TrabBoneGrad3D(int n, Domain * d);
     virtual ~TrabBoneGrad3D();
 
     virtual const char *giveClassName() const { return "TrabBoneGrad3D"; }
@@ -93,7 +93,13 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int hasMaterialModeCapability(MaterialMode mode);
-    virtual Interface *giveInterface(InterfaceType t) { if ( t == GradDpMaterialExtensionInterfaceType ) { return static_cast< GradDpMaterialExtensionInterface * >( this ); } else { return NULL; } }
+    virtual Interface *giveInterface(InterfaceType t) {
+        if ( t == GradDpMaterialExtensionInterfaceType ) {
+            return static_cast< GradDpMaterialExtensionInterface * >(this);
+        } else {
+            return NULL;
+        }
+    }
 
     virtual void givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -102,7 +108,7 @@ public:
     virtual void givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual void giveStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp, TimeStep * tStep);
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp, TimeStep *tStep);
     void give3dKappaMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void give3dGprime(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     void giveInternalLength(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);

@@ -58,41 +58,28 @@ SloanLevelStructure :: destroyLevels()
 int
 SloanLevelStructure :: formYourself(int limitWidth)
 {
-    if ( Structure.isNotEmpty() ) {
+    if ( ! Structure.empty() ) {
         return 1;
     }
 
     int nnodes = Graph->giveDomain()->giveNumberOfDofManagers();
     IntArray nodalStatuses(nnodes);
-    IntArray workLevel;
-    IntArray *Level;
+    IntArray Level = {Root};
 
-    Level = new IntArray;
-    Level->followedBy(Root);
     // mark root
     nodalStatuses.at(Root) = 1;
 
-    IntArray *PrevLevel;
-    std :: list< int > *Neighbor;
-    std :: list< int > :: iterator pos2;
-    SloanGraphNode *Node;
-    int i, PrevLevelWidth, CurrLevelWidth;
-
-    while ( !Level->isEmpty() ) { /* loop over levels */
-        Structure.put(Structure.giveSize() + 1, Level);
-        PrevLevel = Level;
+    while ( !Level.isEmpty() ) { /* loop over levels */
+        Structure.push_back(Level);
         /* start new level */
-        PrevLevelWidth = PrevLevel->giveSize();
         /* loop over nodes on prev. level */
-        workLevel.resize(0);
-        CurrLevelWidth = 0;
-        for ( i = 1; i <= PrevLevelWidth; i++ ) {
-            Node = Graph->giveNode( PrevLevel->at(i) );
-            Neighbor = Node->giveNeighborList();
-            for ( pos2 = Neighbor->begin(); pos2 != Neighbor->end(); ++pos2 ) {
-                if ( nodalStatuses.at(* pos2) == 0 ) {
-                    workLevel.followedBy(* pos2, LEVEL_LIST_GROW_CHUNK);
-                    nodalStatuses.at(* pos2) = 1;
+        Level.resize(0);
+        int CurrLevelWidth = 0;
+        for ( int inode: Structure.back() ) {
+            for ( int n: Graph->giveNode( inode ).giveNeighborList() ) {
+                if ( nodalStatuses.at(n) == 0 ) {
+                    Level.followedBy(n, LEVEL_LIST_GROW_CHUNK);
+                    nodalStatuses.at(n) = 1;
                     if ( ( limitWidth > 0 ) && ( ++CurrLevelWidth > limitWidth ) ) {
                         this->destroyLevels();
                         return 0; // zero mean aborted assembly
@@ -100,11 +87,8 @@ SloanLevelStructure :: formYourself(int limitWidth)
                 }
             }
         }
-
-        Level = new IntArray(workLevel);
     }
 
-    delete Level;
     return 1;
 }
 
@@ -112,34 +96,32 @@ void
 SloanLevelStructure :: computeDepth()
 {
     this->formYourself();
-    Depth = Structure.giveSize();
+    Depth = Structure.size();
 }
 
 void
 SloanLevelStructure :: computeWidth()
 {
     Width = 0;
-    int i, LevelWidth;
-    for ( i = 1; i <= giveDepth(); i++ ) {
-        LevelWidth = giveLevel(i)->giveSize();
+    for ( int i = 1; i <= giveDepth(); i++ ) {
+        int LevelWidth = giveLevel(i).giveSize();
         if ( Width < LevelWidth ) {
             Width = LevelWidth;
         }
     }
 }
 
-IntArray *
+IntArray &
 SloanLevelStructure :: giveLevel(int num)
 {
-    if ( Structure.isEmpty() ) {
+    if ( Structure.empty() ) {
         this->formYourself();
     }
 
     if ( num < 1 || num > giveDepth() ) {
-        OOFEM_WARNING2("LevelStructureClass::give_level - out of bounds (%d)", num);
-        return NULL;
+        OOFEM_ERROR("out of bounds (%d)", num);
     }
 
-    return Structure.at(num);
+    return Structure [ num - 1 ];
 }
 } // end namespace oofem

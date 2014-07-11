@@ -43,9 +43,9 @@ class OOFEM_EXPORT RandomFieldGenerator : public FEMComponent
 {
 public:
     /// Constructor. Creates empty RandomFieldGenerator.
-    RandomFieldGenerator(int n, Domain *d) : FEMComponent(n, d) {}
+    RandomFieldGenerator(int n, Domain * d) : FEMComponent(n, d) { }
     /// Destructor.
-    virtual ~RandomFieldGenerator() {}
+    virtual ~RandomFieldGenerator() { }
     /**
      * Generates random value.
      */
@@ -55,7 +55,7 @@ public:
         if ( gp->giveElement()->computeGlobalCoordinates( globalCoordinates, * ( gp->giveLocalCoordinates() ) ) ) {
             this->generateRandomValue(value, & globalCoordinates);
         } else {
-            OOFEM_ERROR("RandomFieldGenerator::generateRandomValue computeGlobalCoordinates failed");
+            OOFEM_ERROR("computeGlobalCoordinates failed");
         }
     }
 

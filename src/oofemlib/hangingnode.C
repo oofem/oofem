@@ -53,7 +53,6 @@ HangingNode :: HangingNode(int n, Domain *aDomain) : Node(n, aDomain)
 
 IRResultType HangingNode :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     Node :: initializeFrom(ir);
@@ -75,7 +74,7 @@ int HangingNode :: checkConsistency()
     if ( parallel_mode != DofManager_local ) {
         for ( int i = 1; i <= countOfMasterNodes; i++ ) {
             if ( e->giveNode(i)->giveParallelMode() != parallel_mode ) {
-                OOFEM_WARNING("HangingNode :: checkConsistency - Mismatch in parallel mode of HangingNode and master");
+                OOFEM_WARNING("Mismatch in parallel mode of HangingNode and master");
                 return false;
             }
         }
@@ -86,7 +85,7 @@ int HangingNode :: checkConsistency()
     // Check local coordinate systems
     for ( int i = 1; i <= e->giveNumberOfNodes(); ++i ) {
         if ( !this->hasSameLCS( e->giveNode(i) ) ) {
-            OOFEM_WARNING("HangingNode :: checkConsistency - Different lcs for master/slave nodes.");
+            OOFEM_WARNING("Different lcs for master/slave nodes.");
             result = false;
         }
     }
@@ -116,14 +115,14 @@ void HangingNode :: postInitialize()
         // Closest point or containing point? It should be contained, but with numerical errors it might be slightly outside
         // so the closest point is more robust.
         if ( !( e = sp->giveElementClosestToPoint(lcoords, closest, coordinates, this->masterRegion) ) ) {
-            OOFEM_ERROR("HangingNode :: postInitialize - Couldn't find closest element (automatically).");
+            OOFEM_ERROR("Couldn't find closest element (automatically).");
         }
         this->masterElement = e->giveNumber();
     } else if ( !( e = this->giveDomain()->giveElement(this->masterElement) ) ) {
-        OOFEM_ERROR2("HangingNode :: postInitialize - Requested element %d doesn't exist.", this->masterElement);
+        OOFEM_ERROR("Requested element %d doesn't exist.", this->masterElement);
     }
     if ( !( fei = e->giveInterpolation() ) ) {
-        OOFEM_ERROR2("HangingNode :: postInitialize - Requested element %d doesn't have a interpolator.", this->masterElement);
+        OOFEM_ERROR("Requested element %d doesn't have a interpolator.", this->masterElement);
     }
 
     if ( lcoords.giveSize() == 0 ) { // we don't need to do this again if the spatial localizer was used.
@@ -132,13 +131,13 @@ void HangingNode :: postInitialize()
 
     // Initialize slave dofs (inside check of consistency of receiver and master dof)
     const IntArray &masterNodes = e->giveDofManArray();
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        SlaveDof *sdof = dynamic_cast< SlaveDof * >( dofArray [ i - 1 ] );
+    for ( Dof *dof: *this ) {
+        SlaveDof *sdof = dynamic_cast< SlaveDof * >(dof);
         if ( sdof ) {
             DofIDItem id = sdof->giveDofID();
             fei = e->giveInterpolation(id);
             if ( !fei ) {
-                OOFEM_ERROR3("HangingNode :: postInitialize - Requested interpolation for dof id %d doesn't exist in element %d.",
+                OOFEM_ERROR("Requested interpolation for dof id %d doesn't exist in element %d.",
                              id, this->masterElement);
             }
 #if 0 // This won't work (yet), as it requires some more general FEI classes, or something similar.
@@ -147,12 +146,12 @@ void HangingNode :: postInitialize()
                 IntArray masterDofIDs, masterNodesDup, dofids;
                 fei->evalMultiN(multiContribution, dofids, lcoords, FEIElementGeometryWrapper(e), 0.0);
                 masterContribution.flatten(multiContribution);
-                masterDofIDs.resize(0);
+                masterDofIDs.clear();
                 for ( int i = 0; i <= multiContribution.giveNumberOfColumns(); ++i ) {
                     masterDofIDs.followedBy(dofids);
                     masterNodesDup.followedBy(masterNodes);
                 }
-                sdof->initialize(masterContribution.giveSize(), masterNodesDup, & masterDofIDs, masterContribution);
+                sdof->initialize(masterNodesDup, & masterDofIDs, masterContribution);
             } else { }
 #else
             // Note: There can be more masterNodes than masterContributions, since all the
@@ -160,7 +159,7 @@ void HangingNode :: postInitialize()
             // If this assumption is changed in FEIElementGeometryWrapper + friends,
             // masterNode will also need to be modified for each dof accordingly.
             fei->evalN( masterContribution, lcoords, FEIElementGeometryWrapper(e) );
-            sdof->initialize(masterContribution.giveSize(), masterNodes, NULL, masterContribution);
+            sdof->initialize(masterNodes, IntArray(), masterContribution);
 #endif
         }
     }

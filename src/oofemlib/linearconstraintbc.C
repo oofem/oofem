@@ -54,15 +54,14 @@ LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondi
     // this is internal lagrange multiplier used to enforce the receiver constrain
     // this allocates a new equation related to this constraint
     this->md->appendDof( new MasterDof( 0, this->md, ( DofIDItem ) ( d->giveNextFreeDofID() ) ) );
-    this->lhsType.resize(0);
-    this->rhsType.resize(0);
+    this->lhsType.clear();
+    this->rhsType.clear();
 }
 
 
 IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
 {
     ActiveBoundaryCondition :: initializeFrom(ir);
-    const char *__proc = "initializeFrom";
     IRResultType result;
     rhsTf = 0;
 
@@ -71,7 +70,7 @@ IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, dofmans, _IFT_LinearConstraintBC_dofmans);
     IR_GIVE_FIELD(ir, dofs, _IFT_LinearConstraintBC_dofs);
     if ( weights.giveSize() != dofmans.giveSize() ) {
-        OOFEM_ERROR3( "Size mismatch, weights %d and dofmans %d", weights.giveSize(), dofmans.giveSize() );
+        OOFEM_ERROR("Size mismatch, weights %d and dofmans %d", weights.giveSize(), dofmans.giveSize());
     }
     IR_GIVE_OPTIONAL_FIELD(ir, weightsTf, _IFT_LinearConstraintBC_weightsfuncs);
     IR_GIVE_OPTIONAL_FIELD(ir, rhsTf, _IFT_LinearConstraintBC_rhsfuncs);
@@ -86,20 +85,19 @@ IRResultType LinearConstraintBC :: initializeFrom(InputRecord *ir)
 void LinearConstraintBC :: giveLocArray(const UnknownNumberingScheme &r_s,  IntArray &locr, int &lambda_eq)
 {
     int size = this->weights.giveSize();
-    Dof *idof;
 
     locr.resize(size);
     // assemble location array
     for ( int _i = 1; _i <= size; _i++ ) {
-        idof = this->domain->giveDofManager( this->dofmans.at(_i) )->giveDof( this->dofs.at(_i) );
+        Dof *idof = this->domain->giveDofManager( this->dofmans.at(_i) )->giveDofWithID( this->dofs.at(_i) );
         locr.at(_i) = r_s.giveDofEquationNumber(idof);
     }
 
-    lambda_eq = r_s.giveDofEquationNumber( md->giveDof(1) );
+    lambda_eq = r_s.giveDofEquationNumber( *md->begin() );
 }
 
 
-void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep,
                                     CharType type, const UnknownNumberingScheme &r_s,
                                     const UnknownNumberingScheme &c_s)
 {
@@ -135,7 +133,7 @@ void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep, Equatio
     }
 }
 
-void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                           CharType type, ValueModeType mode,
                                           const UnknownNumberingScheme &s, FloatArray *eNorms)
 {
@@ -153,6 +151,7 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
     if ( type == InternalForcesVector ) {
         // compute true residual
         int size = this->weights.giveSize();
+        Dof *mdof = *md->begin();
         Dof *idof;
 
         // assemble location array
@@ -161,12 +160,12 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
             if ( weightsTf.giveSize() ) {
                 factor = domain->giveFunction( weightsTf.at(_i) )->evaluateAtTime( tStep->giveIntrinsicTime() );
             }
-            idof = this->domain->giveDofManager( this->dofmans.at(_i) )->giveDof( this->dofs.at(_i) );
+            idof = this->domain->giveDofManager( this->dofmans.at(_i) )->giveDofWithID( this->dofs.at(_i) );
             if ( s.giveDofEquationNumber(idof) ) {
-                answer.at( s.giveDofEquationNumber(idof) ) += md->giveDof(1)->giveUnknown(mode, tStep) * this->weights.at(_i) * factor;
+                answer.at( s.giveDofEquationNumber(idof) ) += mdof->giveUnknown(mode, tStep) * this->weights.at(_i) * factor;
             }
-            if ( s.giveDofEquationNumber( md->giveDof(1) ) ) {
-                answer.at( s.giveDofEquationNumber( md->giveDof(1) ) ) += idof->giveUnknown(mode, tStep) * this->weights.at(_i) * factor;
+            if ( s.giveDofEquationNumber( mdof ) ) {
+                answer.at( s.giveDofEquationNumber( mdof ) ) += idof->giveUnknown(mode, tStep) * this->weights.at(_i) * factor;
             }
         }
     } else {
@@ -181,7 +180,7 @@ void LinearConstraintBC :: assembleVector(FloatArray &answer, TimeStep *tStep, E
     }
 }
 
-void LinearConstraintBC :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+void LinearConstraintBC :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     rows.resize(3);
     cols.resize(3);

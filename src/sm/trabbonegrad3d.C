@@ -51,7 +51,7 @@ TrabBoneGrad3D :: TrabBoneGrad3D(int n, Domain *d) : TrabBone3D(n, d), GradDpMat
 }
 
 TrabBoneGrad3D :: ~TrabBoneGrad3D()
-{}
+{ }
 
 int
 TrabBoneGrad3D :: hasMaterialModeCapability(MaterialMode mode)
@@ -65,7 +65,7 @@ TrabBoneGrad3D :: giveStiffnessMatrix(FloatMatrix &answer,
 // Returns characteristic material stiffness matrix of the receiver
 //
 {
-    _error("giveStiffnessMatrix : Shouldn't be called");
+    OOFEM_ERROR("Shouldn't be called");
 }
 
 void
@@ -77,7 +77,7 @@ TrabBoneGrad3D :: givePDGradMatrix_uu(FloatMatrix &answer, MatResponseMode mode,
         give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         break;
     default:
-        _error2( "givePDGradMatrix_uu : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR( "givePDGradMatrix_uu : unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -90,7 +90,7 @@ TrabBoneGrad3D :: givePDGradMatrix_ku(FloatMatrix &answer, MatResponseMode mode,
         give3dKappaMatrix(answer, mode, gp, tStep);
         break;
     default:
-        _error2( "givePDGradMatrix_ku : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -103,7 +103,7 @@ TrabBoneGrad3D :: givePDGradMatrix_uk(FloatMatrix &answer, MatResponseMode mode,
         give3dGprime(answer, mode, gp, tStep);
         break;
     default:
-        _error2( "givePDGradMatrix_uk : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -116,7 +116,7 @@ TrabBoneGrad3D :: givePDGradMatrix_kk(FloatMatrix &answer, MatResponseMode mode,
         giveInternalLength(answer, mode, gp, tStep);
         break;
     default:
-        _error2( "givePDGradMatrix_kk : unknown mode (%s)", __MaterialModeToString(mMode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
     }
 }
 
@@ -124,10 +124,7 @@ void
 TrabBoneGrad3D :: givePDGradMatrix_LD(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     MaterialMode mMode = gp->giveMaterialMode();
-    switch ( mMode ) {
-    default:
-        _error2( "givePDGradMatrix_LD : unknown mode (%s)", __MaterialModeToString(mMode) );
-    }
+    OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );
 }
 
 
@@ -328,7 +325,6 @@ TrabBoneGrad3D :: computeCumPlastStrain(double &kappa, GaussPoint *gp, TimeStep 
 IRResultType
 TrabBoneGrad3D :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
     TrabBone3D :: initializeFrom(ir);
@@ -353,7 +349,7 @@ TrabBoneGrad3DStatus :: TrabBoneGrad3DStatus(int n, Domain *d, GaussPoint *g) :
 
 
 TrabBoneGrad3DStatus :: ~TrabBoneGrad3DStatus()
-{}
+{ }
 
 
 void

@@ -86,7 +86,7 @@ FEI3dWedgeQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const
 void
 FEI3dWedgeQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatArray n(15);
+    FloatArray n;
     this->evalN(n, lcoords, cellgeo);
 
     answer.resize(3);
@@ -102,7 +102,7 @@ FEI3dWedgeQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, co
 int
 FEI3dWedgeQuad :: global2local(FloatArray &answer, const FloatArray &coords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI3dHexaQuad :: global2local not implemented");
+    OOFEM_ERROR("not implemented");
     return 1;
 }
 
@@ -205,7 +205,7 @@ void FEI3dWedgeQuad :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray
 
 void FEI3dWedgeQuad :: edgeEvaldNdx(FloatMatrix &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI3dWedgeQuad :: edgeEvaldNdx not implemented");
+    OOFEM_ERROR("not implemented");
 }
 
 
@@ -217,7 +217,7 @@ void FEI3dWedgeQuad :: edgeLocal2global(FloatArray &answer, int iedge, const Flo
     this->computeLocalEdgeMapping(nodes, iedge);
     this->edgeEvalN(n, iedge, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 1; i <= n.giveSize(); ++i ) {
         answer.add( n.at(i), * cellgeo.giveVertexCoordinates( nodes.at(i) ) );
     }
@@ -228,32 +228,32 @@ void
 FEI3dWedgeQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 {
     if ( iedge == 1 ) {
-        edgeNodes.setValues(3, 1, 2, 7);
+        edgeNodes = {1, 2, 7};
     } else if ( iedge == 2 ) {
-        edgeNodes.setValues(3, 2, 3, 8);
+        edgeNodes = {2, 3, 8};
     } else if ( iedge == 3 ) {
-        edgeNodes.setValues(3, 3, 1, 9);
+        edgeNodes = {3, 1, 9};
     } else if ( iedge == 4 ) {
-        edgeNodes.setValues(3, 4, 5, 10);
+        edgeNodes = {4, 5, 10};
     } else if ( iedge == 5 ) {
-        edgeNodes.setValues(3, 5, 6, 11);
+        edgeNodes = {5, 6, 11};
     } else if ( iedge == 6 ) {
-        edgeNodes.setValues(3, 6, 4, 12);
+        edgeNodes = {6, 4, 12};
     } else if ( iedge == 7 ) {
-        edgeNodes.setValues(3, 1, 4, 13);
+        edgeNodes = {1, 4, 13};
     } else if ( iedge == 8 ) {
-        edgeNodes.setValues(3, 2, 5, 14);
+        edgeNodes = {2, 5, 14};
     } else if ( iedge == 9 ) {
-        edgeNodes.setValues(3, 3, 6, 15);
+        edgeNodes = {3, 6, 15};
     } else {
-        OOFEM_ERROR2("FEI3dWedgeQuad :: computeLocalEdgeMapping - Edge %d doesn't exist.\n", iedge);
+        OOFEM_ERROR("Edge %d doesn't exist.\n", iedge);
     }
 }
 
 
 double FEI3dWedgeQuad :: edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI3dWedgeQuad :: edgeGiveTransformationJacobian not implemented");
+    OOFEM_ERROR("not implemented");
     return 0.0;
 }
 
@@ -301,7 +301,7 @@ FEI3dWedgeQuad :: surfaceLocal2global(FloatArray &answer, int isurf,
     this->computeLocalSurfaceMapping(nodes, isurf);
     this->surfaceEvalN(n, isurf, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 1; i <= n.giveSize(); ++i ) {
         answer.add( n.at(i), * cellgeo.giveVertexCoordinates( nodes.at(i) ) );
     }
@@ -312,17 +312,17 @@ void
 FEI3dWedgeQuad :: computeLocalSurfaceMapping(IntArray &nodes, int isurf)
 {
     if ( isurf == 1 ) {
-        nodes.setValues(6, 1, 2, 3, 7, 8, 9);
+        nodes = {1, 2, 3, 7, 8, 9};
     } else if ( isurf == 2 ) {
-        nodes.setValues(6, 4, 5, 6, 10, 11, 12);
+        nodes = {4, 5, 6, 10, 11, 12};
     } else if ( isurf == 3 ) {
-        nodes.setValues(8, 1, 2, 5, 4, 7, 14, 10, 13);
+        nodes = {1, 2, 5, 4, 7, 14, 10, 13};
     } else if ( isurf == 4 ) {
-        nodes.setValues(8, 2, 3, 6, 5, 8, 15, 11, 14);
+        nodes = {2, 3, 6, 5, 8, 15, 11, 14};
     } else if ( isurf == 5 ) {
-        nodes.setValues(8, 3, 1, 4, 6, 9, 13, 12, 15);
+        nodes = {3, 1, 4, 6, 9, 13, 12, 15};
     } else {
-        OOFEM_ERROR2("FEI3dWedgeQuad :: computeLocalSurfaceMapping - Surface %d doesn't exist.\n", isurf);
+        OOFEM_ERROR("Surface %d doesn't exist.\n", isurf);
     }
 }
 

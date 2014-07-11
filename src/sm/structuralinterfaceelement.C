@@ -74,7 +74,7 @@ StructuralInterfaceElement :: computeStiffnessMatrix(FloatMatrix &answer, MatRes
     FloatMatrix N, D, DN;
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
 
-    answer.resize(0, 0);
+    answer.clear();
 
     if ( !this->isActivated(tStep) ) {
         return;
@@ -82,8 +82,7 @@ StructuralInterfaceElement :: computeStiffnessMatrix(FloatMatrix &answer, MatRes
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     FloatMatrix rotationMatGtoL;
-    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-        IntegrationPoint *ip = iRule->getIntegrationPoint(j);
+    for ( IntegrationPoint *ip: *iRule ) {
 
         if ( this->nlGeometry == 0 ) {
             this->giveStiffnessMatrix_Eng(D, rMode, ip, tStep);
@@ -128,7 +127,7 @@ StructuralInterfaceElement :: computeSpatialJump(FloatArray &answer, Integration
     }
 
     this->computeNmatrixAt(ip, N);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
 
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
@@ -157,17 +156,16 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
     FloatMatrix N, rotationMatGtoL;
     FloatArray u, traction, tractionTemp, jump;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
         u.subtract(* initialDisplacements);
     }
 
     // zero answer will resize accordingly when adding first contribution
-    answer.resize(0);
+    answer.clear();
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        IntegrationPoint *ip = iRule->getIntegrationPoint(i);
+    for ( IntegrationPoint *ip: *iRule ) {
         this->computeNmatrixAt(ip, N);
 
         //if ( useUpdatedGpRecord == 1 ) {
@@ -175,9 +173,9 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
         //    // modify sizes if stored traction has 3 components and the spatial dimension is less
         //    int spatialDim = this->giveSpatialDimension();
         //    if ( traction.giveSize() == 3 && spatialDim == 1 ) {
-        //        traction.setValues(1, tractionTemp.at(3) );
+        //        traction = {tractionTemp.at(3) };
         //    } else if ( traction.giveSize() == 3 && spatialDim == 2 ) {
-        //        traction.setValues(2, tractionTemp.at(1), tractionTemp.at(3) );
+        //        traction = {tractionTemp.at(1), tractionTemp.at(3) };
         //    } else {
         //        traction = tractionTemp;
         //    }
@@ -244,7 +242,7 @@ StructuralInterfaceElement :: giveCharacteristicMatrix(FloatMatrix &answer, Char
     } else if ( mtrx == ElasticStiffnessMatrix ) {
         this->computeStiffnessMatrix(answer, ElasticStiffness, tStep);
     } else {
-        _error2( "giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
+        OOFEM_ERROR("Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
 }
 
@@ -278,7 +276,7 @@ StructuralInterfaceElement :: updateYourself(TimeStep *tStep)
             initialDisplacements = new FloatArray();
         }
 
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, * initialDisplacements);
+        this->computeVectorOf(VM_Total, tStep, * initialDisplacements);
     }
 }
 
@@ -292,12 +290,10 @@ StructuralInterfaceElement :: updateInternalState(TimeStep *tStep)
     FloatMatrix rotationMatGtoL;
 
     // force updating strains & stresses
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            IntegrationPoint *ip = iRule->getIntegrationPoint(j);
-            this->computeSpatialJump(jumpL, ip, tStep);
-            this->computeTraction(tractionG, ip, jumpL, tStep);
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( GaussPoint *gp: *iRule ) {
+            this->computeSpatialJump(jumpL, gp, tStep);
+            this->computeTraction(tractionG, gp, jumpL, tStep);
         }
     }
 }
@@ -308,7 +304,7 @@ StructuralInterfaceElement :: checkConsistency()
     // check if the cross section is a 'StructuralInterfaceCrossSection'
     int result = 1;
     if ( !this->giveInterfaceCrossSection()->testCrossSectionExtension(this->giveInterfaceCrossSection()->crossSectionType) ) {
-        OOFEM_ERROR2( "StructuralInterfaceElement :: checkConsistency : cross section %s is not a structural interface cross section", this->giveCrossSection()->giveClassName() );
+        OOFEM_ERROR("cross section %s is not a structural interface cross section", this->giveCrossSection()->giveClassName() );
         result = 0;
     }
     return result;

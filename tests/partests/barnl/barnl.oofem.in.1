@@ -4,7 +4,8 @@ barnl.oofem.out.1
 # note this example cannot be processed by run_problem
 # because imperfection must be made in input file
 #
-nonlinearstatic nsteps 15 rtolv 0.0001 MaxIter 200 reqIterations 80 manrmsteps 10 stiffMode 1 controlmode 0 psi 0.0 renumber 0 hpcmode 1 hpc 2 2 1 stepLength 1.0 lstype 3 smtype 7 nonlocalext
+nonlinearstatic nsteps 15 rtolv 0.0001 MaxIter 200 reqIterations 80 manrmsteps 10 stiffMode 1 controlmode 0 psi 0.0 renumber 0 hpcmode 1 hpc 2 2 1 stepLength 1.0 lstype 3 smtype 7 nonlocalext nmodules 1
+errorcheck filename "barnl.oofem.in"
 domain 1dTruss
 OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 5 ncrosssect 1 nmat 2 nbc 2 nic 0 nltf 2
@@ -26,6 +27,3 @@ BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 NodalLoad 2 loadTimeFunction 1 components 1 1.0
 ConstantFunction 1 f(t) 1.0
 PiecewiseLinFunction 2 nPoints 2 t 2 0.0 1000.0 f(t) 2 1.0 1001.0
-#%BEGIN_CHECK% tolerance 1.e-5
-#NODE tStep 14 number 2 dof 1 unknown d value 1.45293329e+01
-#%END_CHECK%

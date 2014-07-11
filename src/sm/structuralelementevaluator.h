@@ -35,7 +35,7 @@
 #ifndef structuralelementevaluator_h
 #define structuralelementevaluator_h
 
-#include "iga.h"
+#include "iga/iga.h"
 #include "matresponsemode.h"
 
 namespace oofem {
@@ -61,7 +61,7 @@ protected:
     int rotationMatrixDefined;
 
     StructuralElementEvaluator();
-    virtual ~StructuralElementEvaluator() {}
+    virtual ~StructuralElementEvaluator() { }
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
@@ -78,7 +78,7 @@ protected:
      * mass matrix integration (typically only displacements are taken into account).
      * @param answer Integration mask, if zero sized, all unknowns participate. This is default.
      */
-    virtual void giveMassMtrxIntegrationMask(IntArray &answer) { answer.resize(0); }
+    virtual void giveMassMtrxIntegrationMask(IntArray &answer) { answer.clear(); }
     /**
      * Computes lumped mass matrix of receiver. Default implementation returns lumped consistent mass matrix.
      * Then returns lumped mass transformed into nodal coordinate system.
@@ -115,12 +115,11 @@ protected:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual double computeVolumeAround(GaussPoint *gp) { return 0.; }
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, bool useUpdatedGpRecord = false);
-    void computeVectorOf(EquationID type, ValueModeType u,
-                         TimeStep *tStep, FloatArray &answer) {
-        this->giveElement()->computeVectorOf(type, u, tStep, answer);
+    void computeVectorOf(ValueModeType u, TimeStep *tStep, FloatArray &answer) {
+        this->giveElement()->computeVectorOf(u, tStep, answer);
     }
-    void computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *tStep, FloatArray &answer) {
-        this->giveElement()->computeVectorOf(field, u, tStep, answer);
+    void computeVectorOf(PrimaryField &field, const IntArray &dofIdMask, ValueModeType u, TimeStep *tStep, FloatArray &answer) {
+        this->giveElement()->computeVectorOf(field, dofIdMask, u, tStep, answer);
     }
     bool isActivated(TimeStep *tStep) { return true; }
     void updateInternalState(TimeStep *tStep);
@@ -158,7 +157,7 @@ protected:
      * @returns returns nonzero if integration rule code numbers differ from element code numbers
      */
     //virtual int giveIntegrationElementCodeNumbers(IntArray &answer, Element *elem,
-    //                                              IntegrationRule *ie, EquationID ut);
+    //                                              IntegrationRule *ie,);
 
     /**
      * Assembles the local element code numbers of given integration element (sub-patch)
@@ -168,12 +167,10 @@ protected:
      * @return Nonzero if integration rule code numbers differ from element code numbers
      */
     virtual int giveIntegrationElementLocalCodeNumbers(IntArray &answer, Element *elem,
-                                                       IntegrationRule *ie, EquationID ut);
+                                                       IntegrationRule *ie);
 #ifdef __OOFEG
-    friend void drawIGAPatchDeformedGeometry(Element * elem, StructuralElementEvaluator * se, oofegGraphicContext & gc, UnknownType);
+    friend void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se, oofegGraphicContext &gc, UnknownType);
 #endif
-public:
-    void elem(int arg1, EquationID arg2, IntArray arg3);
 };
 } // end namespace oofem
 #endif //structuralelementevaluator_h

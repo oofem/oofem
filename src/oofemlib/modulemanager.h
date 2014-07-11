@@ -35,8 +35,11 @@
 #ifndef modulemanager_h
 #define modulemanager_h
 
-#include "alist.h"
 #include "datareader.h"
+#include "error.h"
+
+#include <memory>
+#include <vector>
 
 ///@name Input fields for module managers
 //@{
@@ -55,21 +58,18 @@ class OOFEM_EXPORT ModuleManager
 {
 protected:
     /// Module list.
-    AList< M > *moduleList;
+    std :: vector< std :: unique_ptr< M > > moduleList;
     /// Number of modules.
     int numberOfModules;
     /// Associated Engineering model.
     EngngModel *emodel;
 
 public:
-    ModuleManager(EngngModel *emodel) {
+    ModuleManager(EngngModel * emodel) {
         this->emodel = emodel;
-
-        moduleList = new AList< M >(0);
         numberOfModules = 0;
     }
     virtual ~ModuleManager() {
-        delete moduleList;
     }
     /**
      * Creates new instance of module.
@@ -91,30 +91,27 @@ public:
      */
     virtual int instanciateYourself(DataReader *dr, InputRecord *ir)
     {
-        const char *__proc = "instanciateYourself"; // Required by IR_GIVE_FIELD macro
         IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
         std :: string name;
-        M *module;
-        InputRecord *mir;
 
         // read modules
-        moduleList->growTo(numberOfModules);
+        moduleList.reserve(numberOfModules);
         for ( int i = 0; i < numberOfModules; i++ ) {
-            mir = dr->giveInputRecord(DataReader :: IR_expModuleRec, i + 1);
+            InputRecord *mir = dr->giveInputRecord(DataReader :: IR_expModuleRec, i + 1);
             result = mir->giveRecordKeywordField(name);
             if ( result != IRRT_OK ) {
-                IR_IOERR(giveClassName(), __proc, "", mir, result);
+                IR_IOERR("", mir, result);
             }
 
             // read type of module
-            module = this->CreateModule(name.c_str(), i, emodel);
-            if ( module == NULL ) {
-                OOFEM_ERROR2( "InitModuleManager::instanciateYourself: unknown module (%s)", name.c_str() );
+            std :: unique_ptr< M > module( this->CreateModule(name.c_str(), i, emodel) );
+            if ( !module ) {
+                OOFEM_ERROR("unknown module (%s)", name.c_str());
             }
 
             module->initializeFrom(mir);
-            moduleList->put(i + 1, module);
+            moduleList.push_back(std :: move(module));
         }
 
 #  ifdef VERBOSE
@@ -138,16 +135,16 @@ public:
     M *giveModule(int num) {
         M *elem = NULL;
 
-        if ( moduleList->includes(num) ) {
-            elem = moduleList->at(num);
+        if ( num >= 1 && num <= (int)moduleList.size() ) {
+            elem = moduleList[num-1].get();
         } else {
-            OOFEM_ERROR2("ModuleManager::giveOuputModule: No module no. %d defined", num);
+            OOFEM_ERROR("No module no. %d defined", num);
         }
 
         return elem;
     }
 
-    int giveNumberOfModules() const { return moduleList->giveSize(); }
+    int giveNumberOfModules() const { return (int)moduleList.size(); }
 };
 } // end namespace oofem
 #endif // modulemanager_h

@@ -1,6 +1,7 @@
 tmpatch01.out
 Patch test of Quad1_ht elements 
-StationaryProblem nsteps 1
+StationaryProblem nsteps 1 nmodules 1
+errorcheck
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 2 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
@@ -10,8 +11,8 @@ node 3 coords 3  2.0   0.0   0.0  bc 1 0
 node 4 coords 3  2.0   4.0   0.0  bc 1 0
 node 5 coords 3  4.0   0.0   0.0  bc 1 2
 node 6 coords 3  4.0   4.0   0.0  bc 1 2
-quad1ht 1 nodes 4 1 3 4 2  crossSect 1 mat 1 NIP 1
-quad1ht 2 nodes 4 3 5 6 4  crossSect 1 mat 1 NIP 1
+quad1ht 1 nodes 4 1 3 4 2  crossSect 1 mat 1
+quad1ht 2 nodes 4 3 5 6 4  crossSect 1 mat 1
 SimpleCS 1 thick 0.15
 IsoHeat 1 d 0. k 1.0 c 1.0
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
@@ -19,9 +20,9 @@ BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 15.0
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK%
-#NODE tStep 1 number 3 dof 1 unknown f value 7.5
-#NODE tStep 1 number 4 dof 1 unknown f value 7.5
-#ELEMENT tStep 1 number 1 gp 1 keyword "state" component 1 value 5.9151e+00
-#ELEMENT tStep 1 number 1 gp 3 keyword "state" component 1 value 1.5849e+00
-#ELEMENT tStep 1 number 1 gp 1 keyword "flow" component 1 value -3.75
+#NODE tStep 1 number 3 dof 10 unknown d value 7.5
+#NODE tStep 1 number 4 dof 10 unknown d value 7.5
+#ELEMENT tStep 1 number 1 gp 1 keyword 37 component 1 value 5.91506351e+00
+#ELEMENT tStep 1 number 1 gp 3 keyword 37 component 1 value 1.58493649e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 56 component 1 value -3.75
 #%END_CHECK%

@@ -82,7 +82,7 @@ public:
         const FloatArray **dmanValuesPtrRef;
         FMM_DofmanRecordDelegate_greater(const FloatArray **dv) : dmanValuesPtrRef(dv)
         { }
-        bool operator()(const int &p, const int &q) const
+        bool operator() (const int & p, const int & q) const
         { return ( fabs( ( * dmanValuesPtrRef )->at(p) ) > fabs( ( * dmanValuesPtrRef )->at(q) ) ); }
     };
 
@@ -90,7 +90,7 @@ public:
     Domain *domain;
 
     /// Priority queue for trial T values.
-    std :: priority_queue< int, std :: vector< int >, FMM_DofmanRecordDelegate_greater >dmanTrialQueue;
+    std :: priority_queue< int, std :: vector< int > , FMM_DofmanRecordDelegate_greater >dmanTrialQueue;
 
 public:
     /**
@@ -98,7 +98,9 @@ public:
      * FastMarchingMethod material interface instance with given number and belonging to given domain.
      * @param d Domain to which component belongs to.
      */
-    FastMarchingMethod(Domain *d) : dmanTrialQueue( FMM_DofmanRecordDelegate_greater(& this->dmanValuesPtr) ) { domain = d; }
+    FastMarchingMethod(Domain * d) : dmanTrialQueue( FMM_DofmanRecordDelegate_greater(& this->dmanValuesPtr) ) {
+        domain = d;
+    }
     ~FastMarchingMethod() { }
 
     /**

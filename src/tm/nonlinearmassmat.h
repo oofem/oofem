@@ -66,7 +66,7 @@ protected:
 
 public:
 
-    NonlinearMassTransferMaterial(int n, Domain *d) : TransportMaterial(n, d) { };
+    NonlinearMassTransferMaterial(int n, Domain * d) : TransportMaterial(n, d) { };
     virtual ~NonlinearMassTransferMaterial() { };
 
     virtual void  giveCharacteristicMatrix(FloatMatrix &answer,

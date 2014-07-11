@@ -88,7 +88,7 @@ private:
 
 public:
     /// Constructor. Creates new instance of LDLTFactorization, with number i, belonging to domain d and Engngmodel m.
-    IMLSolver(Domain *d, EngngModel *m);
+    IMLSolver(Domain * d, EngngModel * m);
     /// Destructor
     virtual ~IMLSolver();
 

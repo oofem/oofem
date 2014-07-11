@@ -52,7 +52,6 @@ namespace oofem {
 bool
 LEPlicElementInterface :: isBoundary()
 {
-    int i, nneighbr, ineighbr;
     double fvk, fvi = this->giveTempVolumeFraction();
     IntArray currCell(1), neighborList;
     LEPlicElementInterface *ineghbrInterface;
@@ -67,11 +66,9 @@ LEPlicElementInterface :: isBoundary()
         currCell.at(1) = this->giveElement()->giveNumber();
         contable->giveElementNeighbourList(neighborList, currCell);
         // loop over neighbors to assemble normal equations
-        nneighbr = neighborList.giveSize();
-        for ( i = 1; i <= nneighbr; i++ ) {
-            ineighbr = neighborList.at(i);
+        for ( int ineighbr: neighborList ) {
             if ( ( ineghbrInterface =
-                       static_cast< LEPlicElementInterface * >( domain->giveElement(ineighbr)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
+                      static_cast< LEPlicElementInterface * >( domain->giveElement(ineighbr)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
                 fvk = ineghbrInterface->giveTempVolumeFraction();
                 if ( fvk < 1.0 ) {
                     return true;
@@ -152,7 +149,7 @@ LEPlic :: updatePosition(TimeStep *tStep)
     // to reconstruct interface (normal, constant) on original grid
     this->doInterfaceReconstruction(tStep, false, true);
 #ifdef __OOFEG
-    ESIEventLoop( NO, const_cast< char * >( "doInterfaceReconstruction Finished; Press Ctrl-p to continue" ) );
+    ESIEventLoop( NO, const_cast< char * >("doInterfaceReconstruction Finished; Press Ctrl-p to continue") );
     //ESIEventLoop (YES, "doInterfaceReconstruction Finished; Press Ctrl-p to continue");
 #endif
 }
@@ -173,7 +170,7 @@ LEPlic :: doLagrangianPhase(TimeStep *tStep)
     EngngModel *emodel = domain->giveEngngModel();
     int err;
 #endif
-    velocityMask.setValues(2, V_u, V_v);
+    velocityMask = {V_u, V_v};
 
     updated_XCoords.resize(ndofman);
     updated_YCoords.resize(ndofman);
@@ -181,7 +178,7 @@ LEPlic :: doLagrangianPhase(TimeStep *tStep)
 
     for ( i = 1; i <= ndofman; i++ ) {
         dman = domain->giveDofManager(i);
-        inode = dynamic_cast< Node * >( dman );
+        inode = dynamic_cast< Node * >(dman);
         // skip dofmanagers with no position information
         if ( !inode ) {
             continue;
@@ -208,7 +205,7 @@ LEPlic :: doLagrangianPhase(TimeStep *tStep)
         FM_FieldPtr vfield;
         vfield = emodel->giveContext()->giveFieldManager()->giveField(FT_Velocity);
         if ( vfield == NULL ) {
-            _error("doLagrangianPhase: Velocity field not available");
+            OOFEM_ERROR("Velocity field not available");
         }
 
         err = vfield->evaluateAt(v_tn1, x2, VM_Total, tStep);
@@ -216,7 +213,7 @@ LEPlic :: doLagrangianPhase(TimeStep *tStep)
             // point outside domain -> be explicit
             v_tn1 = v_t;
         } else if ( err != 0 ) {
-            _error2("doLagrangianPhase: vfield->evaluateAt failed, error code %d", err);
+            OOFEM_ERROR("vfield->evaluateAt failed, error code %d", err);
         }
 
         // compute final updated position
@@ -244,7 +241,7 @@ LEPlic :: doInterfaceReconstruction(TimeStep *tStep, bool coord_upd, bool temp_v
 {
     /* Here volume materials are reconstructed on the new Lagrangian grid */
 
-    int ie, nelem = domain->giveNumberOfElements();
+    int nelem = domain->giveNumberOfElements();
     double p;
     FloatMatrix lhs(2, 2);
 
@@ -253,7 +250,7 @@ LEPlic :: doInterfaceReconstruction(TimeStep *tStep, bool coord_upd, bool temp_v
 
 
     // loop over elements
-    for ( ie = 1; ie <= nelem; ie++ ) {
+    for ( int ie = 1; ie <= nelem; ie++ ) {
         /* STEP 1: first do DLS (Differential least square reconstruction) */
         this->doCellDLS(fvgrad, ie, coord_upd, temp_vof);
         /* STEP 2: Finding the line constant */
@@ -273,7 +270,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *tStep)
      * Final step: deposition of volume materials truncated on Lagrangian (updated)
      * grid to the target grid, which is the original one in our Eulerian case.
      */
-    int in = 0, ie = 0, neighbrNum, nelem = domain->giveNumberOfElements();
+    int neighbrNum, nelem = domain->giveNumberOfElements();
     double in_vof, total_volume = 0.0, in_vol;
     IntArray neighbours, elNum(1);
     FloatArray normal;
@@ -284,14 +281,14 @@ LEPlic :: doInterfaceRemapping(TimeStep *tStep)
 
     LEPlicElementInterface *interface, *neghbrInterface;
     // loop over elements
-    for ( ie = 1; ie <= nelem; ie++ ) {
+    for ( int ie = 1; ie <= nelem; ie++ ) {
         if ( ( interface = static_cast< LEPlicElementInterface * >( domain->giveElement(ie)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
             interface->setTempVolumeFraction(0.0);
         }
     }
 
     // loop over elements
-    for ( ie = 1; ie <= nelem; ie++ ) {
+    for ( int ie = 1; ie <= nelem; ie++ ) {
         //fprintf (stderr, "doInterfaceRemapping: processing elem %d\n", ie);
 
         // examine only neighbours -> this is the limit on time step
@@ -316,7 +313,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *tStep)
                 try {
                     matVolSum = 0.0;
                     // loop over neighbours to truncate material volume on target (original) grid
-                    for ( in = 1; in <= neighbours.giveSize(); in++ ) {
+                    for ( int in = 1; in <= neighbours.giveSize(); in++ ) {
                         neighbrNum = neighbours.at(in);
                         if ( ( neghbrInterface = static_cast< LEPlicElementInterface * >
                                                  ( domain->giveElement(neighbrNum)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
@@ -326,10 +323,10 @@ LEPlic :: doInterfaceRemapping(TimeStep *tStep)
                             matVolSum += in_vol;
                         }
                     }
-                } catch ( GT_Exception &c ) {
+                } catch(GT_Exception & c) {
                     c.print();
 
-                    neighbrNum = neighbours.at(in);
+                    neighbrNum = neighbours.at(1);
                     if ( ( neghbrInterface = static_cast< LEPlicElementInterface * >
                                              ( domain->giveElement(neighbrNum)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
                         in_vof = neghbrInterface->truncateMatVolume(matvolpoly, in_vol);
@@ -342,7 +339,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *tStep)
 #endif
                 double err = fabs(matVol - matVolSum) / matVol;
                 if ( ( err > 1.e-12 ) && ( fabs(matVol - matVolSum) > 1.e-4 ) && ( matVol > 1.e-6 ) ) {
-                    OOFEM_WARNING4("LEPlic::doInterfaceRemapping:  volume inconsistency %5.2f%%\n\ttstep %d, element %d\n", err * 100, tStep->giveNumber(), ie);
+                    OOFEM_WARNING("volume inconsistency %5.2f%%\n\ttstep %d, element %d\n", err * 100, tStep->giveNumber(), ie);
                 }
 
 #if 0
@@ -362,7 +359,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *tStep)
 
                     matVolSum = 0.0;
                     // loop over neighbours to truncate material volume on target (original) grid
-                    for ( in = 1; in <= neighbours.giveSize(); in++ ) {
+                    for ( int in = 1; in <= neighbours.giveSize(); in++ ) {
                         neighbrNum = neighbours.at(in);
                         if ( neghbrInterface = static_cast< LEPlicElementInterface * >
                                                ( domain->giveElement(neighbrNum)->giveInterface(LEPlicElementInterfaceType) ) ) {
@@ -375,7 +372,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *tStep)
 
                     matVolSum = 0.0;
                     // loop over neighbours to truncate material volume on target (original) grid
-                    for ( in = 1; in <= neighbours.giveSize(); in++ ) {
+                    for ( int in = 1; in <= neighbours.giveSize(); in++ ) {
                         neighbrNum = neighbours.at(in);
                         if ( neghbrInterface = static_cast< LEPlicElementInterface * >
                                                ( domain->giveElement(neighbrNum)->giveInterface(LEPlicElementInterfaceType) ) ) {
@@ -388,7 +385,7 @@ LEPlic :: doInterfaceRemapping(TimeStep *tStep)
 
                     matVolSum = 0.0;
                     // loop over neighbours to truncate material volume on target (original) grid
-                    for ( in = 1; in <= neighbours.giveSize(); in++ ) {
+                    for ( int in = 1; in <= neighbours.giveSize(); in++ ) {
                         neighbrNum = neighbours.at(in);
                         if ( neghbrInterface = static_cast< LEPlicElementInterface * >
                                                ( domain->giveElement(neighbrNum)->giveInterface(LEPlicElementInterfaceType) ) ) {
@@ -409,12 +406,12 @@ LEPlic :: doInterfaceRemapping(TimeStep *tStep)
 #endif
             }
         } else {
-            OOFEM_ERROR("LEPlic::doInterfaceRemapping: Element with no LEPlicInterface support encountered");
+            OOFEM_ERROR("Element with no LEPlicInterface support encountered");
         }
     } // end loop over elements
 
     // loop over elements
-    for ( ie = 1; ie <= nelem; ie++ ) {
+    for ( int ie = 1; ie <= nelem; ie++ ) {
         if ( ( interface = static_cast< LEPlicElementInterface * >( domain->giveElement(ie)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
             if ( interface->giveTempVolumeFraction() > 1.0 ) {
                 OOFEM_LOG_INFO( "LEPlic::doInterfaceRemapping - Element %d: vof out of range, vof =%e",  ie, interface->giveTempVolumeFraction() );
@@ -443,7 +440,6 @@ LEPlic :: doInterfaceRemapping(TimeStep *tStep)
 void
 LEPlic :: doCellDLS(FloatArray &fvgrad, int ie, bool coord_upd, bool vof_temp_flag)
 {
-    int i, ineighbr, nneighbr;
     double fvi, fvk, wk, dx, dy;
     bool isBoundaryCell = false;
     LEPlicElementInterface *interface, *ineghbrInterface;
@@ -477,18 +473,16 @@ LEPlic :: doCellDLS(FloatArray &fvgrad, int ie, bool coord_upd, bool vof_temp_fl
             currCell.at(1) = ie;
             contable->giveElementNeighbourList(neighborList, currCell);
             // loop over neighbors to assemble normal equations
-            nneighbr = neighborList.giveSize();
             interface->giveElementCenter(this, xi, coord_upd);
             lhs.zero();
             rhs.zero();
-            for ( i = 1; i <= nneighbr; i++ ) {
-                ineighbr = neighborList.at(i);
+            for ( int ineighbr: neighborList ) {
                 if ( ineighbr == ie ) {
                     continue;         // skip itself
                 }
 
                 if ( ( ineghbrInterface =
-                           static_cast< LEPlicElementInterface * >( domain->giveElement(ineighbr)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
+                          static_cast< LEPlicElementInterface * >( domain->giveElement(ineighbr)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
                     if ( vof_temp_flag ) {
                         fvk = ineghbrInterface->giveTempVolumeFraction();
                     } else {
@@ -557,7 +551,7 @@ LEPlic :: findCellLineConstant(double &p, FloatArray &fvgrad, int ie, bool coord
      */
     Element *elem = domain->giveElement(ie);
     LEPlicElementInterface *interface = static_cast< LEPlicElementInterface * >( elem->giveInterface(LEPlicElementInterfaceType) );
-    int ivert, nelemnodes = elem->giveNumberOfNodes();
+    int nelemnodes = elem->giveNumberOfNodes();
     double ivof, fvi;
     double ivx, ivy, pp, target_vof;
     if ( temp_vof_flag ) {
@@ -587,7 +581,7 @@ LEPlic :: findCellLineConstant(double &p, FloatArray &fvgrad, int ie, bool coord
         // boundary cell
 
 
-        for ( ivert = 1; ivert <= nelemnodes; ivert++ ) {
+        for ( int ivert = 1; ivert <= nelemnodes; ivert++ ) {
             if ( coord_upd ) {
                 ivx = giveUpdatedXCoordinate( elem->giveNode(ivert)->giveNumber() );
                 ivy = giveUpdatedYCoordinate( elem->giveNode(ivert)->giveNumber() );
@@ -642,7 +636,7 @@ LEPlic :: findCellLineConstant(double &p, FloatArray &fvgrad, int ie, bool coord
 #endif
         } else {
             //fprintf (stderr, "target_vof = %le, fvi=%le\n", target_vof, fvi);
-            OOFEM_ERROR3("LEPlic::findCellLineConstant: finding lower and uper bounds of line constant value failed (lowerVOF = %lf, upperVOF=%lf)", lower_vof, upper_vof);
+            OOFEM_ERROR("finding lower and uper bounds of line constant value failed (lowerVOF = %lf, upperVOF=%lf)", lower_vof, upper_vof);
         }
     }
 }
@@ -650,7 +644,6 @@ LEPlic :: findCellLineConstant(double &p, FloatArray &fvgrad, int ie, bool coord
 IRResultType
 LEPlic :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;
 
     orig_reference_fluid_volume = 0.0;

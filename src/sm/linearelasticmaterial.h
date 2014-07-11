@@ -58,7 +58,7 @@ class LinearElasticMaterial : public StructuralMaterial
 {
 public:
     /// Constructor.
-    LinearElasticMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
+    LinearElasticMaterial(int n, Domain * d) : StructuralMaterial(n, d) { }
     /// Destructor.
     virtual ~LinearElasticMaterial() { }
 
@@ -67,10 +67,12 @@ public:
     virtual void giveRealStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     virtual void giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
     virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+    virtual void giveRealStressVector_Warping(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     virtual void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     virtual void giveRealStressVector_Fiber(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
 
+    virtual double giveShearModulus() { return 1.; }
     virtual int hasNonLinearBehaviour() { return 0; }
     virtual const char *giveClassName() const { return "LinearElasticMaterial"; }
 };

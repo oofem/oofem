@@ -59,7 +59,7 @@ private:
 
 public:
     /// Constructor. Initializes the the receiver (constructs the precontioning matrix M) of given matrix.
-    CompCol_ILUPreconditioner(const SparseMtrx &A, InputRecord &attributes);
+    CompCol_ILUPreconditioner(const SparseMtrx & A, InputRecord & attributes);
     /// Constructor. The user should call initializeFrom and init services in this given order to ensure consistency.
     CompCol_ILUPreconditioner() : Preconditioner() { }
     /// Destructor

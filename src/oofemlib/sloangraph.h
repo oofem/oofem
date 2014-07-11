@@ -38,13 +38,12 @@
 #include "oofemcfg.h"
 #include "sloangraphnode.h"
 #include "sloanlevelstruct.h"
+#include "dofmanager.h"
 #include "intarray.h"
-#include "alist.h"
 
 #include <list>
 
 namespace oofem {
-class DofManager;
 class TimeStep;
 
 #define SLOAN_TIME_CHUNK 60
@@ -85,9 +84,9 @@ private:
     Domain *domain;
 
     /// List of graph nodes.
-    AList< SloanGraphNode >nodes;
+    std::vector< SloanGraphNode >nodes;
     /// List of dof managers corresponding to nodes.
-    AList< DofManager >dmans;
+    std::vector< DofManager* >dmans;
     /// Start peripheral node.
     int startNode;
     /// End peripheral node.
@@ -117,7 +116,7 @@ private:
 
 public:
     /// Constructor. Creates the graph associated to given domain.
-    SloanGraph(Domain *d);
+    SloanGraph(Domain * d);
     /// Destructor
     ~SloanGraph();
 
@@ -129,7 +128,7 @@ public:
     void resetAll() { startNode = endNode = nodeDistancesFlag = 0; }
 
     /// Return graph node
-    SloanGraphNode *giveNode(int num);
+    SloanGraphNode &giveNode(int num);
 
     /// Finds the peripheral nodes (rooted in optimal start node) according to receiver quality and current weights.
     void findPeripheralNodes();
@@ -151,14 +150,22 @@ public:
     /// Numbers all the DOFs according to the optimal renumbering found.
     void askNewOptimalNumbering(TimeStep *tStep);
     /// Returns the optimal reverse renumbering table
-    IntArray *giveOptimalRenumberingTable() { return & OptimalRenumberingTable; }
+    IntArray &giveOptimalRenumberingTable() { return OptimalRenumberingTable; }
     void writeRenumberingTable(FILE *file);
     int writeOptimalRenumberingTable(FILE *file);
 
     /// Sets weight distance to given value.
-    void setWeightDistance(int w) { if ( w >= 0 ) { WeightDistance = w; } }
+    void setWeightDistance(int w) {
+        if ( w >= 0 ) {
+            WeightDistance = w;
+        }
+    }
     /// Sets weight degree to given value.
-    void setWeightDegree(int w) { if ( w >= 0 ) { WeightDegree = w; } }
+    void setWeightDegree(int w) {
+        if ( w >= 0 ) {
+            WeightDegree = w;
+        }
+    }
     /// Select spine quality generation.
     void  setSpineQuality(SpineQualityType q) {
         SpineQuality = q;
@@ -209,8 +216,12 @@ class OOFEM_EXPORT SloanNodalDegreeOrderingCrit
 {
     SloanGraph *graph;
 public:
-    SloanNodalDegreeOrderingCrit(SloanGraph *g) { graph = g; }
-    int operator()(const int n1, const int n2) { return graph->giveNode(n1)->giveDegree() - graph->giveNode(n2)->giveDegree(); }
+    SloanNodalDegreeOrderingCrit(SloanGraph * g) {
+        graph = g;
+    }
+    int operator() (const int n1, const int n2) {
+        return graph->giveNode(n1).giveDegree() - graph->giveNode(n2).giveDegree();
+    }
 };
 } // end namespace oofem
 #endif // sloangraph_h

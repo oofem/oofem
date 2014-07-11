@@ -57,7 +57,7 @@ REGISTER_Element(Brick1_mt);
 
 FEI3dHexaLin Brick1_ht :: interpolation;
 
-Brick1_ht :: Brick1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(), ZZNodalRecoveryModelInterface(), SPRNodalRecoveryModelInterface()
+Brick1_ht :: Brick1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface()
 {
     numberOfDofMans  = 8;
     numberOfGaussPoints = 8;
@@ -79,9 +79,8 @@ void
 Brick1_ht :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -98,7 +97,7 @@ Brick1_ht :: initializeFrom(InputRecord *ir)
     }
 
     if ( !( ( numberOfGaussPoints == 8 ) ||
-            ( numberOfGaussPoints == 27 ) ) ) {
+           ( numberOfGaussPoints == 27 ) ) ) {
         numberOfGaussPoints = 8;
     }
 
@@ -112,7 +111,7 @@ Brick1_ht :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant, weight, volume;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) ) );
+                                                                       FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     volume = determinant * weight;
@@ -124,8 +123,8 @@ double
 Brick1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) );
-    return result * gp->giveWeight();
+                                                                       FEIElementGeometryWrapper(this) );
+    return result *gp->giveWeight();
 }
 
 
@@ -154,13 +153,13 @@ Interface *
 Brick1_ht :: giveInterface(InterfaceType interface)
 {
     if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == EIPrimaryFieldInterfaceType ) {
-        return static_cast< EIPrimaryFieldInterface * >( this );
+        return static_cast< EIPrimaryFieldInterface * >(this);
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     }
 
     return NULL;
@@ -190,7 +189,7 @@ Brick1_ht :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        _error2("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: unknown node number %d", pap);
+        OOFEM_ERROR("unknown node number %d", pap);
     }
 }
 
@@ -205,14 +204,6 @@ SPRPatchType
 Brick1_ht :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_3dBiLin;
-}
-
-
-int
-Brick1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
 }
 
 

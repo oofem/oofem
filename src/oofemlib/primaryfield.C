@@ -43,22 +43,14 @@
 
 namespace oofem {
 PrimaryField :: PrimaryField(EngngModel *a, int idomain,
-                             FieldType ft, EquationID ut, int nHist) : Field(ft), solutionVectors(nHist + 1), solStepList(nHist + 1)
+                             FieldType ft, int nHist) : Field(ft), solutionVectors(nHist + 1), solStepList(nHist + 1)
 {
-    FloatArray *sv;
-
-    this->actualtStepumber = -999;
+    this->actualStepNumber = -999;
     this->actualStepIndx = 0;
     this->nHistVectors = nHist;
-    this->ut = ut;
 
     emodel = a;
     domainIndx = idomain;
-
-    for ( int i = 0; i <= nHist; i++ ) {
-        sv = new FloatArray();
-        solutionVectors.put(i + 1, sv);
-    }
 }
 
 PrimaryField :: ~PrimaryField()
@@ -78,7 +70,7 @@ PrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answ
         answer = * ( this->giveSolutionVector(tStep) );
         answer.subtract( * this->giveSolutionVector(indxm1) );
     } else {
-        _error2( "giveUnknownValue: unsupported mode %s", __ValueModeTypeToString(mode) );
+        OOFEM_ERROR("unsupported mode %s", __ValueModeTypeToString(mode));
     }
 }
 
@@ -86,18 +78,20 @@ PrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answ
 double
 PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
-    int eq = dof->giveEquationNumber( emodel->giveUnknownNumberingScheme(this->ut) );
+    int eq = dof->giveEqn();
     if ( eq == 0 ) {
-        _error("giveUnknownValue: invalid equation number");
+        OOFEM_ERROR("invalid equation number");
     }
 
+    ///@todo Mikael: Prescribed values should be stored here too when we extend the usage of fields.
+    /// We should store this in a different way than eqn.-numbers since they may change in-between time steps (requires complicated renumbering).
     if ( mode == VM_Total ) {
         return this->giveSolutionVector(tStep)->at(eq);
     } else if ( mode == VM_Incremental ) {
         int indxm1 = this->resolveIndx(tStep, -1);
         return ( this->giveSolutionVector(tStep)->at(eq) - this->giveSolutionVector(indxm1)->at(eq) );
     } else {
-        _error("giveUnknownValue: unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 
     return 0.0;
@@ -113,10 +107,7 @@ PrimaryField :: __evaluateAt(FloatArray &answer, DofManager *dman,
             dman->giveUnknownVector(answer, * dofId, * this, mode, tStep);
             return 0; // ok
         } else { // all dofs requested
-            int size = dman->giveNumberOfDofs();
-            for ( int i = 1; i <= size; i++ ) {
-                answer.at(i) = dman->giveDof(i)->giveUnknown(* this, mode, tStep);
-            }
+            dman->giveCompleteUnknownVector(answer, mode, tStep);
             return 0; // ok
         }
     } else {
@@ -136,7 +127,7 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray &coords,
     SpatialLocalizer *sl = domain->giveSpatialLocalizer();
     // locate background element
     if ( ( bgelem = sl->giveElementContainingPoint(coords) ) == NULL ) {
-        //_error ("PrimaryField::evaluateAt: point not found in domain\n");
+        //_error("PrimaryField::evaluateAt: point not found in domain\n");
         return 1;
     }
 
@@ -146,11 +137,11 @@ PrimaryField :: __evaluateAt(FloatArray &answer, FloatArray &coords,
             return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, * dofId, mode, tStep);
         } else { // use element default dof id mask
             IntArray elemDofId;
-            bgelem->giveElementDofIDMask(this->giveEquationID(), elemDofId);
+            bgelem->giveElementDofIDMask(elemDofId);
             return interface->EIPrimaryFieldI_evaluateFieldVectorAt(answer, * this, coords, elemDofId, mode, tStep);
         }
     } else {
-        _error("ScalarPrimaryField::operator(): background element does not support EIPrimaryFiledInterface\n");
+        OOFEM_ERROR("background element does not support EIPrimaryFiledInterface");
         return 1; // failed
     }
 }
@@ -182,9 +173,9 @@ PrimaryField :: giveSolutionVector(int i)
 {
     FloatArray *answer = NULL;
     if ( ( i >= 1 ) && ( i <= ( nHistVectors + 1 ) ) ) {
-        answer = solutionVectors.at(i); // alist 1-based access
+        answer = &solutionVectors[i-1];
     } else {
-        _error("giveSolutionVector: index out of range");
+        OOFEM_ERROR("index out of range");
     }
 
     return answer;
@@ -196,11 +187,11 @@ int
 PrimaryField :: resolveIndx(TimeStep *tStep, int shift)
 {
     int tStepo = tStep->giveNumber();
-    int relPos = actualtStepumber - tStepo - shift;
+    int relPos = actualStepNumber - tStepo - shift;
     if ( ( relPos >= 0 ) && ( relPos <= nHistVectors ) ) {
         return ( actualStepIndx + relPos ) % ( nHistVectors + 1 ) + 1;
     } else {
-        _error3("resolveIndx: History not available for relative step no. %d to step no. %d", shift, tStepo);
+        OOFEM_ERROR("History not available for relative step no. %d to step no. %d", shift, tStepo);
     }
 
     return 0;
@@ -210,18 +201,17 @@ PrimaryField :: resolveIndx(TimeStep *tStep, int shift)
 void
 PrimaryField :: advanceSolution(TimeStep *tStep)
 {
-    TimeStep *newts;
-    if ( ( actualtStepumber >= 0 ) && ( actualtStepumber + 1 != tStep->giveNumber() ) ) {
-        _error("advanceSolution: can not advance due to steps skipped");
+    if ( actualStepNumber == tStep->giveNumber() ) {
+        // We're one the correct step already, no need to advance.
+        return;
+    }
+    if ( ( actualStepNumber >= 0 ) && ( actualStepNumber + 1 != tStep->giveNumber() ) ) {
+        OOFEM_ERROR("can not advance due to steps skipped");
     }
 
     actualStepIndx = ( actualStepIndx > 0 ) ? actualStepIndx - 1 : nHistVectors;
-    actualtStepumber = tStep->giveNumber();
-    if ( ( newts = solStepList.at(actualStepIndx + 1) ) ) {
-        * newts = * tStep;
-    } else {
-        solStepList.put( actualStepIndx + 1, new TimeStep(* tStep) );
-    }
+    actualStepNumber = tStep->giveNumber();
+    solStepList[actualStepIndx].reset(new TimeStep(* tStep));
 }
 
 
@@ -230,7 +220,7 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
 {
     contextIOResultType iores(CIO_IOERR);
 
-    if ( !stream->write(& actualtStepumber, 1) ) {
+    if ( !stream->write(& actualStepNumber, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -239,15 +229,14 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
     }
 
     for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( ( iores = solutionVectors.at(i + 1)->storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = solutionVectors[i].storeYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
 
-    TimeStep *iStep;
     int flag;
     for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( ( iStep = solStepList.at(i + 1) ) ) {
+        if ( solStepList[i] ) {
             flag = 1;
         } else {
             flag = 0;
@@ -258,7 +247,7 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
         }
 
         if ( flag ) {
-            if ( ( iores = solStepList.at(i + 1)->saveContext(stream, mode) ) != CIO_OK ) {
+            if ( ( iores = solStepList[i]->saveContext(stream, mode) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         }
@@ -272,7 +261,7 @@ PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
 {
     contextIOResultType iores(CIO_IOERR);
 
-    if ( !stream->read(& actualtStepumber, 1) ) {
+    if ( !stream->read(& actualStepNumber, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -281,28 +270,27 @@ PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
     }
 
     for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( ( iores = solutionVectors.at(i + 1)->restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = solutionVectors[i].restoreYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
 
     int flag;
-    TimeStep *iStep;
     for ( int i = 0; i <= nHistVectors; i++ ) {
         if ( !stream->read(& flag, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         if ( flag ) {
-            iStep = new TimeStep(emodel);
+            std :: unique_ptr< TimeStep > iStep(new TimeStep(emodel));
             if ( ( iores = iStep->restoreContext(stream, mode) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
+            solStepList[i] = std::move(iStep);
         } else {
-            iStep = NULL;
+            solStepList[i].reset(NULL);
         }
 
-        solStepList.put(i + 1, iStep);
     }
 
     return CIO_OK;

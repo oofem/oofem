@@ -75,7 +75,6 @@ NumericalMethod *StationaryTransportProblem :: giveNumericalMethod(MetaStep *mSt
 IRResultType
 StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     EngngModel :: initializeFrom(ir);
@@ -89,38 +88,22 @@ StationaryTransportProblem :: initializeFrom(InputRecord *ir)
 
     // read field export flag
     IntArray exportFields;
-    exportFields.resize(0);
     IR_GIVE_OPTIONAL_FIELD(ir, exportFields, _IFT_StationaryTransportProblem_exportfields);
     if ( exportFields.giveSize() ) {
-        IntArray mask(1);
         FieldManager *fm = this->giveContext()->giveFieldManager();
         for ( int i = 1; i <= exportFields.giveSize(); i++ ) {
             if ( exportFields.at(i) == FT_Temperature ) {
-                mask.at(1) = T_f;
-#ifdef FIELDMANAGER_USE_SHARED_PTR
-                //std::tr1::shared_ptr<Field> _temperatureField = make_shared<MaskedPrimaryField>(FT_Temperature, this->UnknownsField, mask);
-                std :: tr1 :: shared_ptr< Field >_temperatureField( new MaskedPrimaryField(FT_Temperature, this->UnknownsField, mask) );
+                std :: shared_ptr< Field > _temperatureField( new MaskedPrimaryField ( FT_Temperature, this->UnknownsField, {T_f} ) );
                 fm->registerField( _temperatureField, ( FieldType ) exportFields.at(i) );
-#else
-                MaskedPrimaryField *_temperatureField = new MaskedPrimaryField(FT_Temperature, this->UnknownsField, mask);
-                fm->registerField(_temperatureField, ( FieldType ) exportFields.at(i), true);
-#endif
             } else if ( exportFields.at(i) == FT_HumidityConcentration ) {
-                mask.at(1) = C_1;
-#ifdef FIELDMANAGER_USE_SHARED_PTR
-                //std::tr1::shared_ptr<Field> _temperatureField = make_shared<MaskedPrimaryField>(FT_Temperature, this->UnknownsField, mask);
-                std :: tr1 :: shared_ptr< Field >_concentrationField( new MaskedPrimaryField(FT_HumidityConcentration, this->UnknownsField, mask) );
+                std :: shared_ptr< Field > _concentrationField( new MaskedPrimaryField ( FT_HumidityConcentration, this->UnknownsField, {C_1} ) );
                 fm->registerField( _concentrationField, ( FieldType ) exportFields.at(i) );
-#else
-                MaskedPrimaryField *_concentrationField = new MaskedPrimaryField(FT_HumidityConcentration, this->UnknownsField, mask);
-                fm->registerField(_concentrationField, ( FieldType ) exportFields.at(i), true);
-#endif
             }
         }
     }
 
     if ( UnknownsField == NULL ) { // can exist from nonstationary transport problem
-        UnknownsField = new PrimaryField(this, 1, FT_TransportProblemUnknowns, EID_ConservationEquation, 0);
+        UnknownsField = new PrimaryField(this, 1, FT_TransportProblemUnknowns, 0);
     }
 
     return IRRT_OK;
@@ -132,7 +115,7 @@ double StationaryTransportProblem :: giveUnknownComponent(ValueModeType mode, Ti
 {
 #ifdef DEBUG
     if ( dof->__giveEquationNumber() == 0 ) {
-        _error("giveUnknownComponent: invalid equation number");
+        OOFEM_ERROR("invalid equation number");
     }
 #endif
     return UnknownsField->giveUnknownValue(dof, mode, tStep);
@@ -176,16 +159,16 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 
         conductivityMatrix = classFactory.createSparseMtrx(sparseMtrxType);
         if ( conductivityMatrix == NULL ) {
-            _error("solveYourselfAt: sparse matrix creation failed");
+            OOFEM_ERROR("sparse matrix creation failed");
         }
 
-        conductivityMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
+        conductivityMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
         if ( this->keepTangent ) {
             this->conductivityMatrix->zero();
-            this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, ConductivityMatrix,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, LHSBCMatrix,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( conductivityMatrix, tStep, ConductivityMatrix,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( conductivityMatrix, tStep, LHSBCMatrix,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
     }
 
@@ -196,9 +179,9 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 #endif
     FloatArray externalForces(neq);
     externalForces.zero();
-    this->assembleVector( externalForces, tStep, EID_ConservationEquation, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
-    this->updateSharedDofManagers(externalForces, LoadExchangeTag);
+    this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
 #endif
 
     // set-up numerical method
@@ -237,10 +220,10 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
 {
     if ( cmpn == InternalRhs ) {
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep, EID_ConservationEquation, InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
 #ifdef __PARALLEL_MODE
-        this->updateSharedDofManagers(this->internalForces, InternalForcesExchangeTag);
+        this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
         return;
     } else if ( cmpn == NonLinearLhs ) {
@@ -248,14 +231,14 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
             // Optimization for linear problems, we can keep the old matrix (which could save its factorization)
             this->conductivityMatrix->zero();
             ///@todo We should use some problem-neutral names instead of "ConductivityMatrix" (and something nicer for LHSBCMatrix)
-            this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, ConductivityMatrix,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( conductivityMatrix, tStep, EID_ConservationEquation, LHSBCMatrix,
-                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( conductivityMatrix, tStep, ConductivityMatrix,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
+            this->assemble( conductivityMatrix, tStep, LHSBCMatrix,
+                           EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
         return;
     } else {
-        OOFEM_ERROR("StationaryTransportProblem::updateComponent - Unknown component");
+        OOFEM_ERROR("Unknown component");
     }
 }
 
@@ -267,7 +250,7 @@ StationaryTransportProblem :: saveContext(DataStream *stream, ContextMode mode, 
 {
     contextIOResultType iores;
     int closeFlag = 0;
-    FILE *file;
+    FILE *file = NULL;
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, this->giveCurrentStep()->giveNumber(),
@@ -309,9 +292,9 @@ StationaryTransportProblem :: restoreContext(DataStream *stream, ContextMode mod
     contextIOResultType iores;
     int closeFlag = 0;
     int istep, iversion;
-    FILE *file;
+    FILE *file = NULL;
 
-    this->resolveCorrespondingtStepumber(istep, iversion, obj);
+    this->resolveCorrespondingStepNumber(istep, iversion, obj);
 
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
@@ -352,8 +335,8 @@ StationaryTransportProblem :: checkConsistency()
     int nelem = domain->giveNumberOfElements();
     for ( int i = 1; i <= nelem; i++ ) {
         Element *ePtr = domain->giveElement(i);
-        if ( !dynamic_cast< TransportElement * >( ePtr ) ) {
-            _warning2("Element %d has no TransportElement base", i);
+        if ( !dynamic_cast< TransportElement * >(ePtr) ) {
+            OOFEM_WARNING("Element %d has no TransportElement base", i);
             return 0;
         }
     }
@@ -373,7 +356,7 @@ StationaryTransportProblem :: updateDomainLinks()
 void
 StationaryTransportProblem :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 {
-    iDof->printSingleOutputAt(stream, tStep, 'f', VM_Total);
+    iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
 

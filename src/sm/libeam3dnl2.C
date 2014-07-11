@@ -69,7 +69,7 @@ void
 LIBeam3dNL2 :: computeSMtrx(FloatMatrix &answer, FloatArray &vec)
 {
     if ( vec.giveSize() != 3 ) {
-        _error("computeSMtrx: vec param size mismatch");
+        OOFEM_ERROR("vec param size mismatch");
     }
 
     answer.resize(3, 3);
@@ -91,7 +91,7 @@ LIBeam3dNL2 :: computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
     double psiSize;
 
     if ( psi.giveSize() != 3 ) {
-        _error("computeSMtrx: psi param size mismatch");
+        OOFEM_ERROR("psi param size mismatch");
     }
 
     answer.resize(3, 3);
@@ -125,7 +125,7 @@ LIBeam3dNL2 :: updateTempQuaternion(TimeStep *tStep)
         double centreSpinSize;
 
         // ask element's displacement increments
-        this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, u);
+        this->computeVectorOf(VM_Incremental, tStep, u);
 
         // interpolate spin at the centre
         centreSpin.at(1) = 0.5 * ( u.at(4) + u.at(10) );
@@ -323,7 +323,7 @@ LIBeam3dNL2 :: computeXdVector(FloatArray &answer, TimeStep *tStep)
 
     answer.resize(3);
     // ask element's displacements
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
 
     answer.at(1) = ( this->giveNode(2)->giveCoordinate(1) + u.at(7) ) -
                    ( this->giveNode(1)->giveCoordinate(1) + u.at(1) );
@@ -343,7 +343,7 @@ LIBeam3dNL2 :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
 
-    answer.resize(0, 0);
+    answer.clear();
 
     // linear part
 
@@ -426,9 +426,8 @@ void
 LIBeam3dNL2 :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
@@ -445,14 +444,13 @@ LIBeam3dNL2 :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode 
 void
 LIBeam3dNL2 :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_Beam3d(answer, gp, strain, tStep);
+    this->giveStructuralCrossSection()->giveGeneralizedStress_Beam3d(answer, gp, strain, tStep);
 }
 
 
 IRResultType
 LIBeam3dNL2 :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // first call parent
@@ -460,14 +458,14 @@ LIBeam3dNL2 :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3dNL2_refnode);
     if ( referenceNode == 0 ) {
-        _error("instanciateFrom: wrong reference node specified");
+        OOFEM_ERROR("wrong reference node specified");
     }
 
     /*
      * if (this->hasString (initString, "dofstocondense")) {
      *  dofsToCondense = this->ReadIntArray (initString, "dofstocondense");
      *  if (dofsToCondense->giveSize() >= 12)
-     *    _error ("instanciateFrom: wrong input data for condensed dofs");
+     *    OOFEM_ERROR("wrong input data for condensed dofs");
      * } else {
      *  dofsToCondense = NULL;
      * }
@@ -485,7 +483,7 @@ LIBeam3dNL2 :: initializeFrom(InputRecord *ir)
 
 
 double
-LIBeam3dNL2 :: giveLength()
+LIBeam3dNL2 :: computeLength()
 // Returns the original length (l0) of the receiver.
 {
     double dx, dy, dz;
@@ -511,7 +509,7 @@ LIBeam3dNL2 :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     double density = this->giveStructuralCrossSection()->give('d', gp);
-    double halfMass   = density * this->giveCrossSection()->give(CS_Area, gp) * this->giveLength() / 2.;
+    double halfMass   = density * this->giveCrossSection()->give(CS_Area, gp) * this->computeLength() / 2.;
     answer.resize(12, 12);
     answer.zero();
     answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = halfMass;
@@ -560,14 +558,14 @@ LIBeam3dNL2 :: computeVolumeAround(GaussPoint *gp)
 // Gauss point is used.
 {
     double weight  = gp->giveWeight();
-    return weight * 0.5 * this->giveLength();
+    return weight * 0.5 * this->computeLength();
 }
 
 
 void
-LIBeam3dNL2 :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+LIBeam3dNL2 :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
+    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
 
 int
@@ -617,7 +615,7 @@ LIBeam3dNL2 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      * to global element dofs
      */
     if ( iEdge != 1 ) {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 
     answer.resize(12);
@@ -631,11 +629,11 @@ double
 LIBeam3dNL2 :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
-        _error("computeEdgeVolumeAround: wrong egde number");
+        OOFEM_ERROR("wrong egde number");
     }
 
     double weight  = gp->giveWeight();
-    return 0.5 * this->giveLength() * weight;
+    return 0.5 * this->computeLength() * weight;
 }
 
 
@@ -647,7 +645,7 @@ LIBeam3dNL2 :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //
 {
     FloatArray lx(3), ly(3), lz(3), help(3);
-    double length = this->giveLength();
+    double length = this->computeLength();
     Node *nodeA, *nodeB, *refNode;
 
     answer.resize(3, 3);
@@ -742,7 +740,7 @@ LIBeam3dNL2 :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Ga
     //
     // i.e. f(element local) = T * f(edge local)
     //
-    answer.beEmptyMtrx();
+    answer.clear();
     return 0;
 }
 
@@ -799,7 +797,7 @@ LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
      * // update curvature at midpoint
      * // first, compute Tmid
      * // ask increments
-     * this -> computeVectorOf(EID_MomentumBalance,UnknownMode_Incremental,tStep, ui) ;
+     * this -> computeVectorOf(UnknownMode_Incremental,tStep, ui) ;
      * ac.at(1) = 0.5*(ui.at(10) - ui.at(4));
      * ac.at(2) = 0.5*(ui.at(11) - ui.at(5));
      * ac.at(3) = 0.5*(ui.at(12) - ui.at(6));
@@ -834,7 +832,7 @@ LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     FloatArray e, om, omp, acp(3), kapgn1(3);
     double acSize, coeff;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, ui);
+    this->computeVectorOf(VM_Incremental, tStep, ui);
 
     ac.at(1) = 0.5 * ( ui.at(10) - ui.at(4) );
     ac.at(2) = 0.5 * ( ui.at(11) - ui.at(5) );
@@ -1007,7 +1005,7 @@ void LIBeam3dNL2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType ty
         p [ 1 ].y = p [ 0 ].y + coeff *tc.at(2, i);
         p [ 1 ].z = p [ 0 ].z + coeff *tc.at(3, i);
 
-        EASValsSetColor( ColorGetPixelFromString(const_cast< char * >( colors [ i - 1 ] ), & succ) );
+        EASValsSetColor( ColorGetPixelFromString(const_cast< char * >(colors [ i - 1 ]), & succ) );
 
         go = CreateLine3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);

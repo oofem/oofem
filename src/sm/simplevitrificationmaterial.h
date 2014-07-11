@@ -57,7 +57,7 @@ namespace oofem {
 /**
  * Model describing the vitrification process of a glass like material.
  * The model is characterized by a linear anisotropic response followed by switch in tangent stiffness as the material vitrifies.
- * 
+ *
  * @author Tomasz Garstka
  * @author Mikael Öhman
  */
@@ -73,7 +73,7 @@ private:
 
 public:
     /// Constructor.
-    SimpleVitrificationMaterial(int n, Domain *d) : StructuralMaterial(n, d) { }
+    SimpleVitrificationMaterial(int n, Domain * d) : StructuralMaterial(n, d) { }
     /// Destructor.
     virtual ~SimpleVitrificationMaterial();
 
@@ -87,12 +87,13 @@ public:
     virtual void giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                          const FloatArray &reducedStrain, TimeStep *tStep);
 
+    virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     virtual int hasNonLinearBehaviour() { return true; }
     virtual const char *giveClassName() const { return "SimpleVitrificationMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_SimpleVitrificationMaterial_Name; }
 };
-
 } // end namespace oofem
 #endif // simplevitrificationmaterial_h

@@ -96,7 +96,7 @@ protected:
     FloatArray timeStepLoadLevels;
 
 public:
-    AdaptiveNonLinearStatic(int i, EngngModel *_master = NULL);
+    AdaptiveNonLinearStatic(int i, EngngModel * _master = NULL);
     virtual ~AdaptiveNonLinearStatic();
 
     virtual void solveYourselfAt(TimeStep *tStep);
@@ -114,7 +114,7 @@ public:
      * This process should typically include restoring old solution, instanciating newly
      * generated domain(s) and by mapping procedure.
      */
-    virtual int initializeAdaptive(int tStepumber);
+    virtual int initializeAdaptive(int tStepNumber);
     /**
      * Initializes the receiver state according to state of given source problem.
      * This process should typically include mapping of source solution, internal variable mapping procedures and

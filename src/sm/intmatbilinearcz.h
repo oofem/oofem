@@ -48,8 +48,6 @@
 #include "structuralinterfacematerial.h"
 #include "structuralinterfacematerialstatus.h"
 
-#include "dynamicinputrecord.h"
-
 ///@name Input fields for IntMatBilinearCZ
 //@{
 #define _IFT_IntMatBilinearCZ_Name "intmatbilinearcz"
@@ -69,7 +67,7 @@ namespace oofem {
 class IntMatBilinearCZStatus : public StructuralInterfaceMaterialStatus
 {
 public:
-    IntMatBilinearCZStatus(int n, Domain *d, GaussPoint *g);
+    IntMatBilinearCZStatus(int n, Domain * d, GaussPoint * g);
     virtual ~IntMatBilinearCZStatus();
 
     /// damage variable
@@ -95,7 +93,7 @@ public:
 class IntMatBilinearCZ : public StructuralInterfaceMaterial
 {
 public:
-    IntMatBilinearCZ(int n, Domain *d);
+    IntMatBilinearCZ(int n, Domain * d);
     virtual ~IntMatBilinearCZ();
 
 protected:

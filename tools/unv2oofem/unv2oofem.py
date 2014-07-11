@@ -62,6 +62,9 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
             Parser=UNVParser(unvfile)
         elif (fileExtension[-1].lower()=='inp'): # Abaqus output file
             Parser=AbaqusParser(unvfile)
+        else:
+            print "Unknown extension of input file %s" % fileExtension[-1].lower()
+            exit(0)
         
         print 'Parsing mesh file %s' % sys.argv[1],
         FEM=Parser.parse()
@@ -160,7 +163,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                                     #since boundary element may be in more unv groups, we need to find corresponding ctrl group
                                     for bel in belem.oofem_groups:
                                         #print "%d '%s' '%s'" % (len(belem.oofem_groups), bel.name.rstrip(), bel.oofem_groupNameForLoads)
-                                        if (bel.name.rstrip() != bel.oofem_groupNameForLoads):
+                                        if (bel.name.rstrip() == bel.oofem_groupNameForLoads):
                                             #continue
                                             #build a new int list, which reflects load numbers and edges/faces
                                             if (len(bel.oofem_boundaryLoadsNum) > 0):
@@ -229,6 +232,10 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                 elif (words[2].lower()=='elements'):
                     ellist=[]
                     for elemset in FEM.elemsets:
+
+                        if setID == elemset.id:
+                            ellist.extend(elemset.items)
+
                         for oofemset in elemset.oofem_sets:
                             if (setID==oofemset):
                                 ellist.extend(elemset.items)

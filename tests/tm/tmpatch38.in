@@ -1,8 +1,9 @@
 tmpatch38.out
 Patch test of brick1ht elements (test of surfload on all edges)
-StationaryProblem nsteps 1
+StationaryProblem nsteps 1 nmodules 1
 #NonStationaryProblem nsteps 200 deltat 600000.0 alpha 0.5
 #nltransienttransportproblem nsteps 200 deltat 600000.0 rtol 0.001 alpha 0.5 nsmax 300 lumpedcapa
+errorcheck
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
 ndofman 36 nelem 12 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
@@ -66,19 +67,19 @@ BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 constantsurfaceload 2 loadTimeFunction 1 ndofs 1 components 1 15.0 properties 1 a 0.8 loadtype 3
 ConstantFunction 1 f(t) 1.0
 #%BEGIN_CHECK%
-#NODE tStep 1 number 1 dof 1 unknown f value 6.66666667e+00
-#NODE tStep 1 number 2 dof 1 unknown f value 6.66666667e+00
-#NODE tStep 1 number 3 dof 1 unknown f value 6.66666667e+00
-#NODE tStep 1 number 4 dof 1 unknown f value 3.33333333e+00
-#NODE tStep 1 number 5 dof 1 unknown f value 3.33333333e+00
-#NODE tStep 1 number 6 dof 1 unknown f value 3.33333333e+00
-#NODE tStep 1 number 7 dof 1 unknown f value 0.0
-#NODE tStep 1 number 8 dof 1 unknown f value 0.0
-#NODE tStep 1 number 9 dof 1 unknown f value 0.0
-#NODE tStep 1 number 10 dof 1 unknown f value 6.66666667e+00
-#NODE tStep 1 number 11 dof 1 unknown f value 6.66666667e+00
-#NODE tStep 1 number 12 dof 1 unknown f value 6.66666667e+00
-#NODE tStep 1 number 13 dof 1 unknown f value 3.33333333e+00
-#NODE tStep 1 number 14 dof 1 unknown f value 3.33333333e+00
-#NODE tStep 1 number 15 dof 1 unknown f value 3.33333333e+00
+#NODE tStep 1 number 1 dof 10 unknown d value 6.66666667e+00
+#NODE tStep 1 number 2 dof 10 unknown d value 6.66666667e+00
+#NODE tStep 1 number 3 dof 10 unknown d value 6.66666667e+00
+#NODE tStep 1 number 4 dof 10 unknown d value 3.33333333e+00
+#NODE tStep 1 number 5 dof 10 unknown d value 3.33333333e+00
+#NODE tStep 1 number 6 dof 10 unknown d value 3.33333333e+00
+#NODE tStep 1 number 7 dof 10 unknown d value 0.0
+#NODE tStep 1 number 8 dof 10 unknown d value 0.0
+#NODE tStep 1 number 9 dof 10 unknown d value 0.0
+#NODE tStep 1 number 10 dof 10 unknown d value 6.66666667e+00
+#NODE tStep 1 number 11 dof 10 unknown d value 6.66666667e+00
+#NODE tStep 1 number 12 dof 10 unknown d value 6.66666667e+00
+#NODE tStep 1 number 13 dof 10 unknown d value 3.33333333e+00
+#NODE tStep 1 number 14 dof 10 unknown d value 3.33333333e+00
+#NODE tStep 1 number 15 dof 10 unknown d value 3.33333333e+00
 #%END_CHECK%

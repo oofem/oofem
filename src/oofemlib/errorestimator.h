@@ -94,7 +94,7 @@ protected:
 
 public:
     /// Constructor
-    ErrorEstimator(int n, Domain *d);
+    ErrorEstimator(int n, Domain * d);
     /// Destructor
     virtual ~ErrorEstimator();
     /// Sets Domain; should also re-initialize attributes if necessary.

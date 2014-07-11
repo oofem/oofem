@@ -41,7 +41,6 @@
 #include "material.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "oofem_limits.h"
 
 ///@name Input fields for RVEMaterial
 //@{
@@ -71,10 +70,12 @@ public:
     EngngModel *rve;
 
     // Constructor
-    RVEMaterial(int n, Domain *d) { }; // : Material(n, d) { };
+    RVEMaterial(int n, Domain * d) { }; // : Material(n, d) { };
 
     // Destructor
-    ~RVEMaterial() { free(rve); };
+    ~RVEMaterial() {
+        delete rve;
+    };
 
     int SupressRVEoutput;
 

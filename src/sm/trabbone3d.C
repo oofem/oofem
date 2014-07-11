@@ -36,7 +36,6 @@
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
-#include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "internalstatetype.h"
 #include "contextioerr.h"
@@ -49,14 +48,8 @@ namespace oofem {
 REGISTER_Material(TrabBone3D);
 
 TrabBone3D :: TrabBone3D(int n, Domain *d) : StructuralMaterial(n, d)
-{}
+{ }
 
-
-int
-TrabBone3D :: hasMaterialModeCapability(MaterialMode mode)
-{
-    return mode == _3dMat;
-}
 
 void TrabBone3D :: computePlasStrainEnerDensity(GaussPoint *gp, const FloatArray &totalStrain, const FloatArray &totalStress)
 {
@@ -687,7 +680,7 @@ TrabBone3D :: computeDamage(GaussPoint *gp,  TimeStep *tStep)
 
     double tempDam = computeDamageParam(tempKappa);
     if ( tempDam < 0 ) {
-        _error("negative damage");
+        OOFEM_ERROR("negative damage");
     }
 
     return tempDam;
@@ -719,8 +712,8 @@ void TrabBone3D :: computeDensificationStress(FloatArray &answer, GaussPoint *gp
 
 
 void
-TrabBone3D :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
-                                   const FloatArray &totalStrain, TimeStep *tStep)
+TrabBone3D :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
+                                      const FloatArray &totalStrain, TimeStep *tStep)
 {
     double tempDam;
     FloatArray effStress, densStress;
@@ -1041,7 +1034,6 @@ TrabBone3D :: constructFabricTransformationMatrix(FloatMatrix &answer)
 IRResultType
 TrabBone3D :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // Mandatory parameters
@@ -1303,7 +1295,7 @@ TrabBone3DStatus :: TrabBone3DStatus(int n, Domain *d, GaussPoint *g) : Structur
 
 
 TrabBone3DStatus :: ~TrabBone3DStatus()
-{}
+{ }
 
 
 double

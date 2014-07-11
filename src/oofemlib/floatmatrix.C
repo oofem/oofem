@@ -48,15 +48,14 @@
 #include <cstring>
 #include <ostream>
 
-#define ALLOC(size) ( double * ) malloc( size * sizeof( double ) );
-
 #define RESIZE(nr, nc) \
     { \
         this->nRows = nr; this->nColumns = nc; \
-        if ( nr * nc > allocatedSize ) { \
-            allocatedSize = nr * nc; \
-            if ( this->values ) { free(this->values); } \
-            this->values = ALLOC(allocatedSize); \
+        int nsize = this->nRows * this->nColumns; \
+        if ( nsize < ( int ) this->values.size() ) { \
+            this->values.resize(nsize); \
+        } else if ( nsize > ( int ) this->values.size() ) { \
+            this->values.assign(nsize, 0.); \
         } \
     }
 
@@ -111,28 +110,7 @@ extern void dscal_(const int *n, const double *alpha, const double *x, const int
 #endif
 
 namespace oofem {
-FloatMatrix :: FloatMatrix(int n, int m) :
-    nRows(n), nColumns(m),
-    allocatedSize(n * m)
-{
-    values = ALLOC(allocatedSize);
-    memset( this->values, 0, allocatedSize * sizeof( double ) );
-#ifdef DEBUG
-    if ( !values ) {
-        OOFEM_FATAL2("FloatArray :: FloatArray - Failed in allocating %d doubles", n);
-    }
-#endif
-}
-
-
-FloatMatrix :: FloatMatrix() :
-    nRows(0), nColumns(0),
-    allocatedSize(0),
-    values(NULL)
-{}
-
-
-FloatMatrix :: FloatMatrix(const FloatArray *vector, bool transpose)
+FloatMatrix :: FloatMatrix(const FloatArray &vector, bool transpose)
 //
 // constructor : creates (vector->giveSize(),1) FloatMatrix
 // if transpose = 1 creates (1,vector->giveSize()) FloatMatrix
@@ -140,63 +118,45 @@ FloatMatrix :: FloatMatrix(const FloatArray *vector, bool transpose)
 {
     if ( transpose ) {
         nRows = 1; // column vector
-        nColumns = vector->giveSize();
+        nColumns = vector.giveSize();
     } else {
-        nRows = vector->giveSize(); // row vector- default
+        nRows = vector.giveSize(); // row vector- default
         nColumns = 1;
     }
 
-    allocatedSize = nRows * nColumns;
-    values = ALLOC(allocatedSize);
-    memcpy( values, vector->givePointer(), allocatedSize * sizeof( double ) );
+    values = vector.values;
 }
 
 
-FloatMatrix :: FloatMatrix(const FloatMatrix &src) :
-    nRows(src.nRows), nColumns(src.nColumns)
-{
-    allocatedSize = nRows * nColumns;
-    values = ALLOC(allocatedSize);
-    memcpy( values, src.values, allocatedSize * sizeof( double ) );
-}
-
-#if __cplusplus > 199711L
 FloatMatrix :: FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat)
 {
-    this->nColumns = mat.size();
-    this->nRows = mat.begin()->size();
-    this->allocatedSize = this->nRows * this->nColumns;
-    if ( this->allocatedSize ) {
-        this->values = ALLOC(this->allocatedSize);
-        double *p = this->values;
-        for ( auto col : mat ) {
- #if DEBUG
-            if ( this->nRows != col.size() ) {
-                OOFEM_ERROR("FloatMatrix :: FloatMatrix - Initializer list has inconsistent column sizes.");
-            }
- #endif
-            for ( auto x : col ) {
-                * p = x;
-                p++;
-            }
+    RESIZE( mat.size(), mat.begin()->size() )
+    auto p = this->values.begin();
+    for ( auto col : mat ) {
+#if DEBUG
+        if ( this->nRows != ( int ) col.size() ) {
+            OOFEM_ERROR("Initializer list has inconsistent column sizes.");
         }
-    } else {
-        this->values = NULL;
+#endif
+        for ( auto x : col ) {
+            * p = x;
+            p++;
+        }
     }
 }
 
 
-FloatMatrix &FloatMatrix :: operator=(std :: initializer_list< std :: initializer_list< double > >mat)
+FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< std :: initializer_list< double > >mat )
 {
-    RESIZE( mat.begin()->size(), mat.size() );
-    double *p = this->values;
+    RESIZE( ( int ) mat.begin()->size(), ( int ) mat.size() );
+    auto p = this->values.begin();
     for ( auto col : mat ) {
+#if DEBUG
+        if ( this->nRows != ( int ) col.size() ) {
+                OOFEM_ERROR("Initializer list has inconsistent column sizes.");
+        }
+#endif
         for ( auto x : col ) {
- #if DEBUG
-            if ( this->nRows != col.size() ) {
-                OOFEM_ERROR("FloatMatrix :: FloatMatrix - Initializer list has inconsistent column sizes.");
-            }
- #endif
             * p = x;
             p++;
         }
@@ -205,46 +165,25 @@ FloatMatrix &FloatMatrix :: operator=(std :: initializer_list< std :: initialize
     return * this;
 }
 
-#endif
-
-
-FloatMatrix :: ~FloatMatrix()
-{
-    if ( values ) {
-        free(values);
-    }
-}
-
 
 void FloatMatrix :: checkBounds(int i, int j) const
 // Checks that the receiver includes a position (i,j).
 {
     if ( i <= 0 ) {
-        OOFEM_ERROR2("FloatMatrix::checkBounds : matrix error on rows : %d < 0", i);
+        OOFEM_ERROR("matrix error on rows : %d < 0", i);
     }
 
     if ( j <= 0 ) {
-        OOFEM_ERROR2("FloatMatrix::checkBounds : matrix error on columns : %d < 0", j);
+        OOFEM_ERROR("matrix error on columns : %d < 0", j);
     }
 
     if ( i > nRows ) {
-        OOFEM_ERROR3("FloatMatrix::checkBounds : matrix error on rows : %d > %d", i, nRows);
+        OOFEM_ERROR("matrix error on rows : %d > %d", i, nRows);
     }
 
     if ( j > nColumns ) {
-        OOFEM_ERROR3("FloatMatrix::checkBounds : matrix error on columns : %d > %d", j, nColumns);
+        OOFEM_ERROR("matrix error on columns : %d > %d", j, nColumns);
     }
-}
-
-
-FloatMatrix &FloatMatrix :: operator=(const FloatMatrix &src)
-{
-    // assignment: cleanup and copy
-    RESIZE(src.nRows, src.nColumns);
-
-    memcpy( values, src.values, nRows * nColumns * sizeof( double ) );
-
-    return * this;
 }
 
 
@@ -265,13 +204,13 @@ double FloatMatrix :: at(int i, int j) const
     return values [ ( j - 1 ) * nRows + i - 1 ];
 }
 
-double &FloatMatrix :: operator()(int i, int j)
+double &FloatMatrix :: operator() (int i, int j)
 {
     this->checkBounds(i + 1, j + 1);
     return values [ j * nRows + i ];
 }
 
-double FloatMatrix :: operator()(int i, int j) const
+double FloatMatrix :: operator() (int i, int j) const
 {
     this->checkBounds(i + 1, j + 1);
     return values [ j * nRows + i ];
@@ -285,11 +224,11 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &loc)
 
 #ifdef DEBUG
     if ( size != loc.giveSize() ) {
-        OOFEM_ERROR("FloatMatrix :: assemble : dimensions of 'src' and 'loc' mismatch");
+        OOFEM_ERROR("dimensions of 'src' and 'loc' mismatch");
     }
 
     if ( !src.isSquare() ) {
-        OOFEM_ERROR("FloatMatrix :: assemble : 'src' is not sqaure matrix");
+        OOFEM_ERROR("'src' is not sqaure matrix");
     }
 #endif
 
@@ -313,11 +252,11 @@ void FloatMatrix :: assemble(const FloatMatrix &src, const IntArray &rowind, con
 
 #ifdef DEBUG
     if ( nr != rowind.giveSize() ) {
-        OOFEM_ERROR("FloatMatrix :: assemble : row dimensions of 'src' and 'rowind' mismatch");
+        OOFEM_ERROR("row dimensions of 'src' and 'rowind' mismatch");
     }
 
     if ( nc != colind.giveSize() ) {
-        OOFEM_ERROR("FloatMatrix :: assemble : column dimensions of 'src' and 'colind' mismatch");
+        OOFEM_ERROR("column dimensions of 'src' and 'colind' mismatch");
     }
 #endif
 
@@ -370,15 +309,15 @@ void FloatMatrix :: beProductOf(const FloatMatrix &aMatrix, const FloatMatrix &b
 {
 #  ifdef DEBUG
     if ( aMatrix.nColumns != bMatrix.nRows ) {
-        OOFEM_ERROR("FloatMatrix::beProductOf : error in product A*B : dimensions do not match");
+        OOFEM_ERROR("error in product A*B : dimensions do not match");
     }
 #  endif
     RESIZE(aMatrix.nRows, bMatrix.nColumns);
 #  ifdef __LAPACK_MODULE
     double alpha = 1., beta = 0.;
     dgemm_("n", "n", & this->nRows, & this->nColumns, & aMatrix.nColumns,
-           & alpha, aMatrix.values, & aMatrix.nRows, bMatrix.values, & bMatrix.nRows,
-           & beta, this->values, & this->nRows,
+           & alpha, aMatrix.givePointer(), & aMatrix.nRows, bMatrix.givePointer(), & bMatrix.nRows,
+           & beta, this->givePointer(), & this->nRows,
            aMatrix.nColumns, bMatrix.nColumns, this->nColumns);
 #  else
     for ( int i = 1; i <= aMatrix.nRows; i++ ) {
@@ -400,15 +339,15 @@ void FloatMatrix :: beTProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
 {
 #  ifdef DEBUG
     if ( aMatrix.nRows != bMatrix.nRows ) {
-        OOFEM_ERROR("FloatMatrix::beTProductOf : error in product A*B : dimensions do not match");
+        OOFEM_ERROR("error in product A*B : dimensions do not match");
     }
 #  endif
     RESIZE(aMatrix.nColumns, bMatrix.nColumns);
 #  ifdef __LAPACK_MODULE
     double alpha = 1., beta = 0.;
     dgemm_("t", "n", & this->nRows, & this->nColumns, & aMatrix.nRows,
-           & alpha, aMatrix.values, & aMatrix.nRows, bMatrix.values, & bMatrix.nRows,
-           & beta, this->values, & this->nRows,
+           & alpha, aMatrix.givePointer(), & aMatrix.nRows, bMatrix.givePointer(), & bMatrix.nRows,
+           & beta, this->givePointer(), & this->nRows,
            aMatrix.nColumns, bMatrix.nColumns, this->nColumns);
 #  else
     for ( int i = 1; i <= aMatrix.nColumns; i++ ) {
@@ -430,15 +369,15 @@ void FloatMatrix :: beProductTOf(const FloatMatrix &aMatrix, const FloatMatrix &
 {
 #  ifdef DEBUG
     if ( aMatrix.nColumns != bMatrix.nColumns ) {
-        OOFEM_ERROR("FloatMatrix::beProductTOf : error in product A*B : dimensions do not match");
+        OOFEM_ERROR("error in product A*B : dimensions do not match");
     }
 #  endif
     RESIZE(aMatrix.nRows, bMatrix.nRows);
 #  ifdef __LAPACK_MODULE
     double alpha = 1., beta = 0.;
     dgemm_("n", "t", & this->nRows, & this->nColumns, & aMatrix.nColumns,
-           & alpha, aMatrix.values, & aMatrix.nRows, bMatrix.values, & bMatrix.nRows,
-           & beta, this->values, & this->nRows,
+           & alpha, aMatrix.givePointer(), & aMatrix.nRows, bMatrix.givePointer(), & bMatrix.nRows,
+           & beta, this->givePointer(), & this->nRows,
            aMatrix.nColumns, bMatrix.nColumns, this->nColumns);
 #  else
     for ( int i = 1; i <= aMatrix.nRows; i++ ) {
@@ -460,18 +399,18 @@ void FloatMatrix :: addProductOf(const FloatMatrix &aMatrix, const FloatMatrix &
 {
 #  ifdef DEBUG
     if ( aMatrix.nColumns != bMatrix.nRows ) {
-        OOFEM_ERROR("FloatMatrix::addProductOf : error in product A*B : dimensions do not match");
+        OOFEM_ERROR("error in product A*B : dimensions do not match");
     }
     if ( aMatrix.nRows != this->nRows || bMatrix.nColumns != this->nColumns ) {
-        OOFEM_ERROR("FloatMatrix::addTProductOf : error in product receiver : dimensions do not match");
+        OOFEM_ERROR("error in product receiver : dimensions do not match");
     }
 #  endif
 
 #  ifdef __LAPACK_MODULE
     double alpha = 1., beta = 1.;
     dgemm_("n", "n", & this->nRows, & this->nColumns, & aMatrix.nColumns,
-           & alpha, aMatrix.values, & aMatrix.nRows, bMatrix.values, & bMatrix.nRows,
-           & beta, this->values, & this->nRows,
+           & alpha, aMatrix.givePointer(), & aMatrix.nRows, bMatrix.givePointer(), & bMatrix.nRows,
+           & beta, this->givePointer(), & this->nRows,
            aMatrix.nColumns, bMatrix.nColumns, this->nColumns);
 #  else
     for ( int i = 1; i <= aMatrix.nRows; i++ ) {
@@ -492,18 +431,18 @@ void FloatMatrix :: addTProductOf(const FloatMatrix &aMatrix, const FloatMatrix 
 {
 #  ifdef DEBUG
     if ( aMatrix.nRows != bMatrix.nRows ) {
-        OOFEM_ERROR("FloatMatrix::addTProductOf : error in product A*B : dimensions do not match");
+        OOFEM_ERROR("error in product A*B : dimensions do not match");
     }
     if ( aMatrix.nColumns != this->nColumns || bMatrix.nColumns != this->nRows ) {
-        OOFEM_ERROR("FloatMatrix::addTProductOf : error in product receiver : dimensions do not match");
+        OOFEM_ERROR("error in product receiver : dimensions do not match");
     }
 #  endif
 
 #  ifdef __LAPACK_MODULE
     double alpha = 1., beta = 1.;
     dgemm_("t", "n",  & this->nRows, & this->nColumns, & aMatrix.nRows,
-           & alpha, aMatrix.values, & aMatrix.nRows, bMatrix.values, & bMatrix.nRows,
-           & beta, this->values, & this->nRows,
+           & alpha, aMatrix.givePointer(), & aMatrix.nRows, bMatrix.givePointer(), & bMatrix.nRows,
+           & beta, this->givePointer(), & this->nRows,
            aMatrix.nColumns, bMatrix.nColumns, this->nColumns);
 #  else
     for ( int i = 1; i <= aMatrix.nColumns; i++ ) {
@@ -557,10 +496,9 @@ void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
         this->at(2, 2) = normal(1);
     } else if ( normal.giveSize() == 3 ) {
         // Create a permutated vector of n, *always* length 1 and significantly different from n.
-        FloatArray t(3), b; // tangent and binormal
-        t(0) = normal(1);
-        t(1) = -normal(2);
-        t(2) = normal(0);
+        FloatArray b, t = {
+            normal(1), -normal(2), normal(0)
+        };                                                    // binormal and tangent
 
         // Construct orthogonal vector
         double npn = t.dotProduct(normal);
@@ -582,7 +520,7 @@ void FloatMatrix :: beLocalCoordSys(const FloatArray &normal)
         this->at(3, 2) = normal(1);
         this->at(3, 3) = normal(2);
     } else {
-        OOFEM_ERROR("FloatMatrix :: beLocalCoordinateTransformation - Normal needs 1 to 3 components.");
+        OOFEM_ERROR("Normal needs 1 to 3 components.");
     }
 }
 
@@ -597,13 +535,13 @@ void FloatMatrix :: setSubMatrix(const FloatMatrix &src, int sr, int sc)
     int nc = sc + srcCols;
 
     if ( ( this->giveNumberOfRows() < nr ) || ( this->giveNumberOfColumns() < nc ) ) {
-        OOFEM_ERROR("FloatMatrix :: setSubMatrix  - Sub matrix doesn't fit inside allocated space.");
+        OOFEM_ERROR("Sub matrix doesn't fit inside allocated space.");
     }
 #endif
 
     // add sub-matrix
-    for ( int i = 0; i < srcRows; i++ ) {
-        for ( int j = 0; j < srcCols; j++ ) {
+    for ( int j = 0; j < srcCols; j++ ) {
+        for ( int i = 0; i < srcRows; i++ ) {
             ( * this )( sr + i, sc + j ) = src(i, j);
         }
     }
@@ -622,7 +560,7 @@ void FloatMatrix :: setTSubMatrix(const FloatMatrix &src, int sr, int sc)
     int nc = sc + srcRows;
 
     if ( ( this->giveNumberOfRows() < nr ) || ( this->giveNumberOfColumns() < nc ) ) {
-        OOFEM_ERROR("FloatMatrix :: setTSubMatrix  - Sub matrix doesn't fit inside allocated space");
+        OOFEM_ERROR("Sub matrix doesn't fit inside allocated space");
     }
 #endif
 
@@ -682,13 +620,12 @@ void FloatMatrix :: setColumn(const FloatArray &src, int c)
     int nr = src.giveSize();
 #ifdef DEBUG
     if ( this->giveNumberOfRows() != nr || c < 1 || c > this->giveNumberOfColumns() ) {
-        OOFEM_ERROR("FloatMatrix :: setColumn - Size mismatch");
+        OOFEM_ERROR("Size mismatch");
     }
 #endif
 
-    double *P = this->values + ( c - 1 ) * nr;
-    double *srcP = src.givePointer();
-    memcpy( P, srcP, nr * sizeof( double ) );
+    auto P = this->values.begin() + ( c - 1 ) * nr;
+    std :: copy(src.begin(), src.end(), P);
 }
 
 
@@ -697,14 +634,13 @@ void FloatMatrix :: copyColumn(FloatArray &dest, int c) const
     int nr = this->giveNumberOfRows();
 #ifdef DEBUG
     if ( c < 1 || c > this->giveNumberOfColumns() ) {
-        OOFEM_ERROR2("FloatMatrix :: copyColumn - Column outside range (%d)", c);
+        OOFEM_ERROR("Column outside range (%d)", c);
     }
 #endif
 
     dest.resize(nr);
-    double *P = this->values + ( c - 1 ) * nr;
-    double *destP = dest.givePointer();
-    memcpy( destP, P, nr * sizeof( double ) );
+    auto P = this->values.begin() + ( c - 1 ) * nr;
+    std :: copy( P, P + nr, dest.begin() );
 }
 
 
@@ -738,8 +674,9 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
 // not compute the transposition of matrix a.
 {
     if ( !this->isNotEmpty() ) {
-        RESIZE(a.nColumns, b.nColumns);
-        memset( this->values, 0, allocatedSize * sizeof( double ) );
+        this->nRows = a.nColumns;
+        this->nColumns = b.nColumns;
+        this->values.assign(a.nColumns * b.nColumns, 0.);
     }
 
 #ifdef __LAPACK_MODULE
@@ -751,9 +688,9 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
         int s1 = this->nRows / 2;
         int s2 = this->nRows - s1;
         // First column block, we only take the first s rows by only taking the first s columns in the matrix a.
-        dgemm_("t", "n", & s1, & s1, & a.nRows, & dV, a.values, & a.nRows, b.values, & b.nRows, & beta, this->values, & this->nRows, a.nColumns, b.nColumns, this->nColumns);
+        dgemm_("t", "n", & s1, & s1, & a.nRows, & dV, a.givePointer(), & a.nRows, b.givePointer(), & b.nRows, & beta, this->givePointer(), & this->nRows, a.nColumns, b.nColumns, this->nColumns);
         // Second column block starting a memory position c * nRows
-        dgemm_("t", "n", & this->nRows, & s2, & a.nRows, & dV, a.values, & a.nRows, & b.values [ s1 * b.nRows ], & b.nRows, & beta, & this->values [ s1 * this->nRows ], & this->nRows, a.nColumns, b.nColumns, this->nColumns);
+        dgemm_("t", "n", & this->nRows, & s2, & a.nRows, & dV, a.givePointer(), & a.nRows, & b.givePointer() [ s1 * b.nRows ], & b.nRows, & beta, & this->givePointer() [ s1 * this->nRows ], & this->nRows, a.nColumns, b.nColumns, this->nColumns);
     } else {
         // Get suitable blocksize. Around 10 rows should be suitable (slightly adjusted to minimize number of blocks):
         // Smaller blocks than ~10 didn't show any performance gains in my benchmarks. / Mikael
@@ -762,7 +699,7 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
         int end = block;
         while ( start < this->nRows ) {
             int s = end - start;
-            dgemm_("t", "n", & end, & s, & a.nRows, & dV, a.values, & a.nRows, & b.values [ start * b.nRows ], & b.nRows, & beta, & this->values [ start * this->nRows ],
+            dgemm_("t", "n", & end, & s, & a.nRows, & dV, a.givePointer(), & a.nRows, & b.givePointer() [ start * b.nRows ], & b.nRows, & beta, & this->givePointer() [ start * this->nRows ],
                    & this->nRows, a.nColumns, b.nColumns, this->nColumns);
             start = end;
             end += block;
@@ -789,14 +726,15 @@ void FloatMatrix :: plusProductSymmUpper(const FloatMatrix &a, const FloatMatrix
 void FloatMatrix :: plusDyadSymmUpper(const FloatArray &a, double dV)
 {
     if ( !this->isNotEmpty() ) {
-        RESIZE( a.giveSize(), a.giveSize() );
-        memset( this->values, 0, allocatedSize * sizeof( double ) );
+        this->nRows = a.giveSize();
+        this->nColumns = a.giveSize();
+        this->values.assign(this->nRows * this->nColumns, 0.);
     }
 #ifdef __LAPACK_MODULE
     int inc = 1;
     int sizeA = a.giveSize();
     dsyr_("u", & sizeA, & dV, a.givePointer(), & inc,
-          this->values, & this->nRows,
+          this->givePointer(), & this->nRows,
           sizeA, this->nColumns);
 #else
     for ( int i = 1; i <= nRows; i++ ) {
@@ -815,14 +753,15 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
 // Advantage : does not compute the transposition of matrix a.
 {
     if ( !this->isNotEmpty() ) {
-        RESIZE(a.nColumns, b.nColumns);
-        memset( this->values, 0, allocatedSize * sizeof( double ) );
+        this->nRows = a.nColumns;
+        this->nColumns = b.nColumns;
+        this->values.assign(this->nRows * this->nColumns, 0.);
     }
 #ifdef __LAPACK_MODULE
     double beta = 1.;
     dgemm_("t", "n", & this->nRows, & this->nColumns, & a.nRows,
-           & dV, a.values, & a.nRows, b.values, & b.nRows,
-           & beta, this->values, & this->nRows,
+           & dV, a.givePointer(), & a.nRows, b.givePointer(), & b.nRows,
+           & beta, this->givePointer(), & this->nRows,
            a.nColumns, b.nColumns, this->nColumns);
 #else
     for ( int i = 1; i <= nRows; i++ ) {
@@ -842,15 +781,16 @@ void FloatMatrix :: plusProductUnsym(const FloatMatrix &a, const FloatMatrix &b,
 void FloatMatrix :: plusDyadUnsym(const FloatArray &a, const FloatArray &b, double dV)
 {
     if ( !this->isNotEmpty() ) {
-        RESIZE( a.giveSize(), b.giveSize() );
-        memset( this->values, 0, allocatedSize * sizeof( double ) );
+        this->nRows = a.giveSize();
+        this->nColumns = b.giveSize();
+        this->values.assign(this->nRows * this->nColumns, 0.);
     }
 #ifdef __LAPACK_MODULE
     int inc = 1;
     int sizeA = a.giveSize();
     int sizeB = b.giveSize();
     dger_(& sizeA, & sizeB, & dV, a.givePointer(), & inc,
-          b.givePointer(), & inc, this->values, & this->nRows,
+          b.givePointer(), & inc, this->givePointer(), & this->nRows,
           sizeA, sizeB, this->nColumns);
 #else
     for ( int i = 1; i <= nRows; i++ ) {
@@ -869,7 +809,7 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
 
 #  ifdef DEBUG
     if ( !src.isSquare() ) {
-        OOFEM_ERROR3("FloatMatrix::beInverseOf : cannot inverse a %d by %d matrix", src.nRows, src.nColumns);
+        OOFEM_ERROR("cannot inverse a %d by %d matrix", src.nRows, src.nColumns);
     }
 #  endif
 
@@ -918,19 +858,19 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         * this = src;
 
         // LU-factorization
-        dgetrf_(& n, & n, this->values, & n, ipiv.givePointer(), & info);
+        dgetrf_(& n, & n, this->givePointer(), & n, ipiv.givePointer(), & info);
         if ( info != 0 ) {
-            OOFEM_ERROR2("FloatMatrix::beInverseOf : dgetrf error %d", info);
+            OOFEM_ERROR("dgetrf error %d", info);
         }
 
         // Inverse
         lwork = n * n;
         FloatArray work(lwork);
-        dgetri_(& this->nRows, this->values, & this->nRows, ipiv.givePointer(), work.givePointer(), & lwork, & info);
+        dgetri_(& this->nRows, this->givePointer(), & this->nRows, ipiv.givePointer(), work.givePointer(), & lwork, & info);
         if ( info > 0 ) {
-            OOFEM_ERROR2("FloatMatrix::beInverseOf : Singular at %d", info);
+            OOFEM_ERROR("Singular at %d", info);
         } else if ( info < 0 ) {
-            OOFEM_ERROR2("FloatMatrix::beInverseOf : Error on input %d", info);
+            OOFEM_ERROR("Error on input %d", info);
         }
 #else
         // size >3 ... gaussian elimination - slow but safe
@@ -947,7 +887,7 @@ void FloatMatrix :: beInverseOf(const FloatMatrix &src)
         for ( int i = 1; i < nRows; i++ ) {
             piv = tmp.at(i, i);
             if ( fabs(piv) < 1.e-20 ) {
-                OOFEM_ERROR3("FloatMatrix::beInverseOf : cannot inverse a %d by %d matrix", nRows, nColumns);
+                OOFEM_ERROR("cannot inverse a %d by %d matrix", nRows, nColumns);
             }
 
             for ( int j = i + 1; j <= nRows; j++ ) {
@@ -999,12 +939,12 @@ void FloatMatrix :: beSubMatrixOf(const FloatMatrix &src,
 {
 #ifdef DEBUG
     if ( ( topRow < 1 ) || ( bottomRow < 1 ) || ( topCol < 1 ) || ( bottomCol < 1 ) ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : subindexes size mismatch");
+        OOFEM_ERROR("subindexes size mismatch");
     }
 
     if ( ( src.nRows < bottomRow ) || ( src.nColumns < bottomCol ) || ( ( bottomRow - topRow ) > src.nRows ) ||
          ( ( bottomCol - topCol ) > src.nColumns ) ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : subindexes size mismatch");
+        OOFEM_ERROR("subindexes size mismatch");
     }
 #endif
 
@@ -1035,7 +975,7 @@ FloatMatrix :: beSubMatrixOf(const FloatMatrix &src, const IntArray &indxRow, co
 #  ifdef DEBUG
     if ( indxRow.maximum() > src.giveNumberOfRows()  ||  indxCol.maximum() > src.giveNumberOfColumns()  ||
          indxRow.minimum() < 1  ||  indxCol.minimum() < 1 ) {
-        OOFEM_ERROR("FloatMatrix::beSubMatrixOf : index exceeds source dimensions");
+        OOFEM_ERROR("index exceeds source dimensions");
     }
 # endif
 
@@ -1058,13 +998,13 @@ void FloatMatrix :: add(const FloatMatrix &aMatrix)
         return;
     }
 
-    if ( nRows * nColumns == 0 ) {
-        this->operator=(aMatrix);
+    if ( !this->isNotEmpty() ) {
+        this->operator = ( aMatrix );
         return;
     }
 #     ifdef DEBUG
     if ( ( aMatrix.nRows != nRows || aMatrix.nColumns != nColumns ) && aMatrix.isNotEmpty() ) {
-        OOFEM_ERROR5("FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
+        OOFEM_ERROR("dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
     }
 #     endif
 
@@ -1072,16 +1012,10 @@ void FloatMatrix :: add(const FloatMatrix &aMatrix)
     int aSize = aMatrix.nRows * aMatrix.nColumns;
     int inc = 1;
     double s = 1.;
-    daxpy_(& aSize, & s, aMatrix.values, & inc, this->values, & inc, aSize, aSize);
+    daxpy_(& aSize, & s, aMatrix.givePointer(), & inc, this->givePointer(), & inc, aSize, aSize);
 #else
-    int n = aMatrix.nRows;
-    int m = aMatrix.nColumns;
-
-    double *P1 = values;
-    double *P2 = aMatrix.values;
-    register int i  = n * m;
-    while ( i-- ) {
-        * P1++ += * P2++;
+    for ( size_t i = 0; i < this->values.size(); i++ ) {
+        this->values [ i ] += aMatrix.values [ i ];
     }
 #endif
 }
@@ -1096,29 +1030,23 @@ void FloatMatrix :: add(double s, const FloatMatrix &aMatrix)
     }
 
     if ( !this->isNotEmpty() ) {
-        this->operator=(aMatrix);
+        this->operator = ( aMatrix );
         this->times(s);
         return;
     }
 #     ifdef DEBUG
     if ( ( aMatrix.nRows != nRows || aMatrix.nColumns != nColumns ) && aMatrix.isNotEmpty() ) {
-        OOFEM_ERROR5("FloatMatrix::add : dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
+        OOFEM_ERROR("dimensions mismatch : (r1,c1)+(r2,c2) : (%d,%d)+(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
     }
 #     endif
 
 #ifdef __LAPACK_MODULE
     int aSize = aMatrix.nRows * aMatrix.nColumns;
     int inc = 1;
-    daxpy_(& aSize, & s, aMatrix.values, & inc, this->values, & inc, aSize, aSize);
+    daxpy_(& aSize, & s, aMatrix.givePointer(), & inc, this->givePointer(), & inc, aSize, aSize);
 #else
-    int n = aMatrix.nRows;
-    int m = aMatrix.nColumns;
-
-    double *P1 = values;
-    double *P2 = aMatrix.values;
-    register int i  = n * m;
-    while ( i-- ) {
-        * P1++ += s * ( * P2++ );
+    for ( size_t i = 0; i < this->values.size(); i++ ) {
+        this->values [ i ] += s * aMatrix.values [ i ];
     }
 #endif
 }
@@ -1128,12 +1056,13 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
 // adjusts its size to that of aMatrix. Returns the modified receiver.
 {
     if ( !this->isNotEmpty() ) {
-        this->operator=(aMatrix);
+        this->operator = ( aMatrix );
+        this->negated();
         return;
     }
 #     ifdef DEBUG
     if ( ( aMatrix.nRows != nRows || aMatrix.nColumns != nColumns ) && aMatrix.isNotEmpty() ) {
-        OOFEM_ERROR5("FloatMatrix::subtract : dimensions mismatch : (r1,c1)-(r2,c2) : (%d,%d)-(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
+        OOFEM_ERROR("dimensions mismatch : (r1,c1)-(r2,c2) : (%d,%d)-(%d,%d)", nRows, nColumns, aMatrix.nRows, aMatrix.nColumns);
     }
 #     endif
 
@@ -1141,16 +1070,10 @@ void FloatMatrix :: subtract(const FloatMatrix &aMatrix)
     int aSize = aMatrix.nRows * aMatrix.nColumns;
     int inc = 1;
     double s = -1.;
-    daxpy_(& aSize, & s, aMatrix.values, & inc, this->values, & inc, aSize, aSize);
+    daxpy_(& aSize, & s, aMatrix.givePointer(), & inc, this->givePointer(), & inc, aSize, aSize);
 #else
-    int n = aMatrix.nRows;
-    int m = aMatrix.nColumns;
-
-    double *P1 = values;
-    double *P2 = aMatrix.values;
-    register int i  = n * m;
-    while ( i-- ) {
-        * P1++ -= * P2++;
+    for ( size_t i = 0; i < this->values.size(); i++ ) {
+        this->values [ i ] -= aMatrix.values [ i ];
     }
 #endif
 }
@@ -1161,11 +1084,11 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
 {
 #  ifdef DEBUG
     if ( !this->isSquare() ) {
-        OOFEM_ERROR3("FloatMatrix::solveForRhs : cannot solve a %d by %d matrix", nRows, nColumns);
+        OOFEM_ERROR("cannot solve a %d by %d matrix", nRows, nColumns);
     }
 
     if ( nRows != b.giveSize() ) {
-        OOFEM_ERROR("FloatMatrix::solveForRhs : dimension mismatch");
+        OOFEM_ERROR("dimension mismatch");
     }
 #  endif
 
@@ -1173,13 +1096,13 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
     int info, nrhs = 1;
     IntArray ipiv(this->nRows);
     answer = b;
-    //dgesv_( &this->nRows, &nrhs, this->values, &this->nRows, ipiv.givePointer(), answer.givePointer(), &this->nRows, &info );
-    dgetrf_(& this->nRows, & this->nRows, this->values, & this->nRows, ipiv.givePointer(), & info);
+    //dgesv_( &this->nRows, &nrhs, this->givePointer(), &this->nRows, ipiv.givePointer(), answer.givePointer(), &this->nRows, &info );
+    dgetrf_(& this->nRows, & this->nRows, this->givePointer(), & this->nRows, ipiv.givePointer(), & info);
     if ( info == 0 ) {
-        dgetrs_(transpose ? "Transpose" : "No transpose", & this->nRows, & nrhs, this->values, & this->nRows, ipiv.givePointer(), answer.givePointer(), & this->nRows, & info);
+        dgetrs_(transpose ? "Transpose" : "No transpose", & this->nRows, & nrhs, this->givePointer(), & this->nRows, ipiv.givePointer(), answer.givePointer(), & this->nRows, & info);
     }
     if ( info != 0 ) {
-        OOFEM_ERROR2("FloatMatrix::solveForRhs : error %d", info);
+        OOFEM_ERROR("error %d", info);
     }
 #else
     int pivRow;
@@ -1208,7 +1131,7 @@ void FloatMatrix :: solveForRhs(const FloatArray &b, FloatArray &answer, bool tr
         }
 
         if ( piv < 1.e-20 ) {
-            OOFEM_ERROR2("FloatMatrix::solveForRhs : cannot solve, seems to be singular at row %d", pivRow);
+            OOFEM_ERROR("cannot solve, seems to be singular at row %d", pivRow);
         }
 
         // exchange rows
@@ -1255,11 +1178,11 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
 {
 #  ifdef DEBUG
     if ( !this->isSquare() ) {
-        OOFEM_ERROR3("FloatMatrix::solveForRhs : cannot solve a %d by %d matrix", nRows, nColumns);
+        OOFEM_ERROR("cannot solve a %d by %d matrix", nRows, nColumns);
     }
 
     if ( nRows != b.giveNumberOfRows() ) {
-        OOFEM_ERROR("FloatMatrix::solveForRhs : dimension mismatch");
+        OOFEM_ERROR("dimension mismatch");
     }
 #  endif
 
@@ -1267,12 +1190,12 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
     int info;
     IntArray ipiv(this->nRows);
     answer = b;
-    dgetrf_(& this->nRows, & this->nRows, this->values, & this->nRows, ipiv.givePointer(), & info);
+    dgetrf_(& this->nRows, & this->nRows, this->givePointer(), & this->nRows, ipiv.givePointer(), & info);
     if ( info == 0 ) {
-        dgetrs_(transpose ? "t" : "n", & this->nRows, & answer.nColumns, this->values, & this->nRows, ipiv.givePointer(), answer.givePointer(), & this->nRows, & info);
+        dgetrs_(transpose ? "t" : "n", & this->nRows, & answer.nColumns, this->givePointer(), & this->nRows, ipiv.givePointer(), answer.givePointer(), & this->nRows, & info);
     }
     if ( info != 0 ) {
-        OOFEM_ERROR2("FloatMatrix::solveForRhs : error %d", info);
+        OOFEM_ERROR("error %d", info);
     }
 #else
     int pivRow, nPs;
@@ -1301,7 +1224,7 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
         }
 
         if ( fabs(piv) < 1.e-20 ) {
-            OOFEM_ERROR3("FloatMatrix::solveForRhs : pivot too small, cannot solve %d by %d matrix", nRows, nColumns);
+            OOFEM_ERROR("pivot too small, cannot solve %d by %d matrix", nRows, nColumns);
         }
 
         // exchange rows
@@ -1320,7 +1243,7 @@ void FloatMatrix :: solveForRhs(const FloatMatrix &b, FloatMatrix &answer, bool 
         }
 
         if ( fabs(piv) < 1.e-20 ) {
-            OOFEM_ERROR("FloatMatrix::solveForRhs : cannot solve, zero pivot encountered");
+            OOFEM_ERROR("cannot solve, zero pivot encountered");
         }
 
         for ( int j = i + 1; j <= nRows; j++ ) {
@@ -1357,18 +1280,20 @@ void FloatMatrix :: initFromVector(const FloatArray &vector, bool transposed)
 //
 {
     if ( transposed ) {
-        this->resize( 1, vector.giveSize() );
+        this->nRows = 1;
+        this->nColumns = vector.giveSize();
     } else {
-        this->resize(vector.giveSize(), 1); // row vector- default
+        this->nRows = vector.giveSize();
+        this->nColumns = 1;
     }
 
-    memcpy( this->values, vector.givePointer(), this->nRows * this->nColumns * sizeof( double ) );
+    this->values = vector.values;
 }
 
 
 void FloatMatrix :: zero()
 {
-    memset( this->values, 0, nRows * nColumns * sizeof( double ) );
+    std :: fill(this->values.begin(), this->values.end(), 0.);
 }
 
 
@@ -1376,7 +1301,7 @@ void FloatMatrix :: beUnitMatrix()
 {
 #ifdef DEBUG
     if ( !this->isSquare() ) {
-        OOFEM_ERROR3("FloatMatrix::beUnitMatrix : cannot make unit matrix of %d by %d matrix", nRows, nColumns);
+        OOFEM_ERROR("cannot make unit matrix of %d by %d matrix", nRows, nColumns);
     }
 #endif
 
@@ -1405,17 +1330,7 @@ void FloatMatrix :: resize(int rows, int columns)
 {
     this->nRows = rows;
     this->nColumns = columns;
-
-    if ( rows * columns > allocatedSize ) {
-        // memory realocation necessary
-        if ( values ) {
-            free(values);
-        }
-
-        allocatedSize = rows * columns;
-        values = ALLOC(allocatedSize);
-    }
-    memset( values, 0, allocatedSize * sizeof( double ) );
+    this->values.assign(rows * columns, 0.);
 }
 
 
@@ -1429,21 +1344,11 @@ void FloatMatrix :: resizeWithData(int rows, int columns)
         return;
     }
 
-    FloatMatrix old(* this);
-
-    if ( rows * columns > allocatedSize ) {
-        // memory realocation necessary
-        if ( values ) {
-            free(values);
-        }
-
-        allocatedSize = rows * columns; // REMEMBER NEW ALLOCATED SIZE
-        values = ALLOC(allocatedSize);
-    }
-    memset( values, 0, allocatedSize * sizeof( double ) );
+    FloatMatrix old( std :: move(* this) );
 
     this->nRows = rows;
     this->nColumns = columns;
+    this->values.resize(rows * columns);
 
     int ii = min( rows, old.giveNumberOfRows() );
     int jj = min( columns, old.giveNumberOfColumns() );
@@ -1461,17 +1366,10 @@ void FloatMatrix :: hardResize(int rows, int columns)
 // resizes receiver, all data will be lost
 //
 {
-    // memory realocation necessary
-    if ( values ) {
-        free(values);
-    }
-
-    allocatedSize = rows * columns; // REMEMBER NEW ALLOCATED SIZE
-    values = ALLOC(allocatedSize);
-    memset( values, 0, allocatedSize * sizeof( double ) );
-
     this->nRows = rows;
     this->nColumns = columns;
+    values.assign(rows * columns, 0.);
+    this->values.shrink_to_fit();
 }
 
 
@@ -1480,21 +1378,46 @@ double FloatMatrix :: giveDeterminant() const
 {
 #  ifdef DEBUG
     if ( !this->isSquare() ) {
-        OOFEM_ERROR3("FloatMatrix::giveDeterminant : cannot compute determinant of a %d by %d matrix", nRows, nColumns);
+        OOFEM_ERROR("cannot compute the determinant of a non-square %d by %d matrix", nRows, nColumns);
     }
-
 #  endif
 
     if ( nRows == 1 ) {
         return values [ 0 ];
     } else if ( nRows == 2 ) {
-        return  ( values [ 0 ] * values [ 3 ] - values [ 1 ] * values [ 2 ] );
+        return ( values [ 0 ] * values [ 3 ] - values [ 1 ] * values [ 2 ] );
     } else if ( nRows == 3 ) {
         return ( values [ 0 ] * values [ 4 ] * values [ 8 ] + values [ 3 ] * values [ 7 ] * values [ 2 ] +
                  values [ 6 ] * values [ 1 ] * values [ 5 ] - values [ 6 ] * values [ 4 ] * values [ 2 ] -
                  values [ 7 ] * values [ 5 ] * values [ 0 ] - values [ 8 ] * values [ 3 ] * values [ 1 ] );
     } else {
-        OOFEM_ERROR3("FloatMatrix::giveDeterminant : sorry, cannot inverse %d by %d matrices", nRows, nColumns);
+        OOFEM_ERROR("sorry, cannot compute the determinant of a matrix larger than 3x3");
+    }
+
+    return 0.;
+}
+
+double FloatMatrix :: giveTrace() const
+// Returns the trace (sum of diagonal terms) of the receiver.
+{
+#  ifdef DEBUG
+    if ( !this->isSquare() ) {
+        OOFEM_ERROR("cannot compute the trace of a non-square %d by %d matrix", nRows, nColumns);
+    }
+#  endif
+
+    if ( nRows == 1 ) {
+        return values [ 0 ];
+    } else if ( nRows == 2 ) {
+        return ( values [ 0 ] + values [ 3 ] );
+    } else if ( nRows == 3 ) {
+        return ( values [ 0 ] + values [ 4 ] + values [ 8 ] );
+    } else {
+        double answer = 0.;
+        for ( int k = 0; k < nRows; k++ ) {
+            answer += values [ k * ( nRows + 1 ) ];
+        }
+        return answer;
     }
 
     return 0.;
@@ -1552,7 +1475,7 @@ void FloatMatrix :: rotatedWith(const FloatMatrix &r, char mode)
         rta.beProductOf(r, * this);      //  r . a
         this->beProductTOf(rta, r);      //  r . a . r^T
     } else {
-        OOFEM_ERROR("FloatMatrix :: rotatedWith: unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 }
 
@@ -1563,7 +1486,7 @@ void FloatMatrix :: symmetrized()
 {
 #  ifdef DEBUG
     if ( nRows != nColumns ) {
-        OOFEM_ERROR("FloatMatrix::symmetrized : cannot symmetrize a non-square matrix");
+        OOFEM_ERROR("cannot symmetrize a non-square matrix");
     }
 
 #   endif
@@ -1580,36 +1503,24 @@ void FloatMatrix :: times(double factor)
 // Multiplies every coefficient of the receiver by factor. Answers the
 // modified receiver.
 {
-    // dscal_ seemed to be slower for typical usage of this function.
-    int i = nRows * nColumns;
-    double *p = values;
-    while ( i-- ) {
-        * p++ *= factor;
+    for ( double &x : this->values ) {
+        x *= factor;
     }
+    // dscal_ seemed to be slower for typical usage of this function.
 }
 
 
 void FloatMatrix :: negated()
 {
-    double *p = values;
-    int i = nRows * nColumns;
-    while ( i-- ) {
-        * p = -( * p );
-        p++;
+    for ( double &x : this->values ) {
+        x = -x;
     }
 }
 
 
 double FloatMatrix :: computeFrobeniusNorm() const
 {
-    double answer = 0.0;
-    for ( int i = 1; i <= nRows; i++ ) {
-        for ( int j = 1; j <= nColumns; j++ ) {
-            answer += this->at(i, j) * this->at(i, j);
-        }
-    }
-
-    return sqrt(answer);
+    return sqrt( std :: inner_product(this->values.begin(), this->values.end(), this->values.begin(), 0.) );
 }
 
 double FloatMatrix :: computeNorm(char p) const
@@ -1617,7 +1528,7 @@ double FloatMatrix :: computeNorm(char p) const
 #  ifdef __LAPACK_MODULE
     FloatArray work( this->giveNumberOfRows() );
     int lda = max(this->nRows, 1);
-    double norm = dlange_(& p, & this->nRows, & this->nColumns, this->values, & lda, work.givePointer(), 1);
+    double norm = dlange_(& p, & this->nRows, & this->nColumns, this->givePointer(), & lda, work.givePointer(), 1);
     return norm;
 
 #  else
@@ -1643,7 +1554,7 @@ double FloatMatrix :: computeNorm(char p) const
      *  Ata.eigenValues(eigs, 1);
      *  return sqrt(eigs(0));
      * } */else {
-        OOFEM_ERROR2("FloatMatrix::computeNorm(p) : p == %d not implemented.\n", p);
+        OOFEM_ERROR("p == %d not implemented.\n", p);
         return 0.0;
     }
 #  endif
@@ -1658,7 +1569,7 @@ void FloatMatrix :: beMatrixForm(const FloatArray &aArray)
     // order: 11, 22, 33, 23, 13, 12, 32, 31, 21
 #  ifdef DEBUG
     if ( aArray.giveSize() != 6 && aArray.giveSize() != 9 ) {
-        OOFEM_ERROR("FloatArray :: beMatrixForm : matrix dimension is not 3x3");
+        OOFEM_ERROR("matrix dimension is not 3x3");
     }
 #  endif
     this->resize(3, 3);
@@ -1685,33 +1596,77 @@ void FloatMatrix :: beMatrixForm(const FloatArray &aArray)
     }
 }
 
+void FloatMatrix :: changeComponentOrder()
+{
+    // Changes index order between abaqus <-> OOFEM
+    //#  ifdef DEBUG
+    //	if ( nRows != 6 || nColumns != 6 ) {
+    //		OOFEM_ERROR("matrix dimension is not 6x6");
+    //	}
+    //#  endif
+
+    if ( nRows == 6 && nColumns == 6 ) {
+        // This could probably be done more beautifully + efficiently.
+
+        std :: swap( this->at(4, 1), this->at(6, 1) );
+
+        std :: swap( this->at(4, 2), this->at(6, 2) );
+
+        std :: swap( this->at(4, 3), this->at(6, 3) );
+
+        std :: swap( this->at(1, 4), this->at(1, 6) );
+        std :: swap( this->at(2, 4), this->at(2, 6) );
+        std :: swap( this->at(3, 4), this->at(3, 6) );
+        std :: swap( this->at(4, 4), this->at(6, 6) );
+        std :: swap( this->at(5, 4), this->at(5, 6) );
+        std :: swap( this->at(6, 4), this->at(4, 6) );
+
+        std :: swap( this->at(4, 5), this->at(6, 5) );
+    } else if ( nRows == 9 && nColumns == 9 ) {
+        // OOFEM:           11, 22, 33, 23, 13, 12, 32, 31, 21
+        // UMAT:			11, 22, 33, 12, 13, 23, 32, 21, 31
+        const int abq2oo [ 9 ] = {
+            1,  2,  3,  6,  5,  4,  7,  9,  8
+        };
+
+        FloatMatrix tmp(9, 9);
+        for ( int i = 1; i <= 9; i++ ) {
+            for ( int j = 1; j <= 9; j++ ) {
+                tmp.at(i, j) = this->at(abq2oo [ i - 1 ], abq2oo [ j - 1 ]);
+            }
+        }
+
+        * this = tmp;
+    }
+}
+
 
 
 double FloatMatrix :: computeReciprocalCondition(char p) const
 {
 #  ifdef DEBUG
     if ( !this->isSquare() ) {
-        OOFEM_ERROR3("FloatMatrix::computeReciprocalCondition : receiver must be square (is %d by %d)", this->nRows, this->nColumns);
+        OOFEM_ERROR("receiver must be square (is %d by %d)", this->nRows, this->nColumns);
     }
 #  endif
     double anorm = this->computeNorm(p);
 
 #  ifdef __LAPACK_MODULE
     int n = this->nRows;
-    FloatArray work(4 * n);
+    FloatArray work(4 *n);
     IntArray iwork(n);
     int info;
     double rcond;
 
     if ( n > 3 ) { // Only use this routine for larger matrices. (not sure if it's suitable for n = 3) // Mikael
         FloatMatrix a_cpy = * this;
-        dgetrf_(& n, & n, a_cpy.values, & n, iwork.givePointer(), & info);
+        dgetrf_(& n, & n, a_cpy.givePointer(), & n, iwork.givePointer(), & info);
         if ( info < 0 ) {
-            OOFEM_ERROR2("FloatMatrix::computeReciprocalCondition : dgetfr error %d\n", info);
+            OOFEM_ERROR("dgetfr error %d\n", info);
         }
-        dgecon_(& p, & ( this->nRows ), a_cpy.values, & this->nRows, & anorm, & rcond, work.givePointer(), iwork.givePointer(), & info, 1);
+        dgecon_(& p, & ( this->nRows ), a_cpy.givePointer(), & this->nRows, & anorm, & rcond, work.givePointer(), iwork.givePointer(), & info, 1);
         if ( info < 0 ) {
-            OOFEM_ERROR2("FloatMatrix::computeReciprocalCondition : dgecon error %d\n", info);
+            OOFEM_ERROR("dgecon error %d\n", info);
         }
         return rcond;
     }
@@ -1729,7 +1684,7 @@ void FloatMatrix :: beMatrixFormOfStress(const FloatArray &aArray)
     // Revrites the  matrix on vector form (symmetrized matrix used), order: 11, 22, 33, 23, 13, 12
 #  ifdef DEBUG
     if ( aArray.giveSize() != 6 && aArray.giveSize() != 9 ) {
-        OOFEM_ERROR("FloatArray :: beMatrixForm : matrix dimension is not 3x3");
+        OOFEM_ERROR("matrix dimension is not 3x3");
     }
 #  endif
     this->resize(3, 3);
@@ -1775,18 +1730,18 @@ bool FloatMatrix :: computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix 
     v.resize(n, neigs);
 
     IntArray ifail(n), iwork(5 * n);
-    FloatArray work( ( n + 3 ) * n ); // maximum block size should be less than n (?)
+    FloatArray work( ( n + 3 ) *n ); // maximum block size should be less than n (?)
     lwork = ( n + 3 ) * n;
     if ( neigs > 0 ) {
         int one = 1;
         dsyevx_("N", "I", "U",
-                & n, a.values, & n,
+                & n, a.givePointer(), & n,
                 NULL, NULL, & one, & neigs,
                 & abstol, & found, lambda.givePointer(), v.givePointer(), & ldz,
                 work.givePointer(), & lwork, iwork.givePointer(), ifail.givePointer(), & info, 1, 1, 1);
     } else {
         dsyevx_("N", "A", "U",
-                & n, a.values, & n,
+                & n, a.givePointer(), & n,
                 NULL, NULL, NULL, NULL,
                 & abstol, & found, lambda.givePointer(), v.givePointer(), & ldz,
                 work.givePointer(), & lwork, iwork.givePointer(), ifail.givePointer(), & info, 1, 1, 1);
@@ -1795,7 +1750,7 @@ bool FloatMatrix :: computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix 
     return info == 0;
 
  #else
-    OOFEM_ERROR("FloatMatrix::computeEigenValuesSymmetric : Requires LAPACK\n");
+    OOFEM_ERROR("Requires LAPACK");
     return false;
 
  #endif
@@ -1818,7 +1773,7 @@ contextIOResultType FloatMatrix :: storeYourself(DataStream *stream, ContextMode
     }
 
     // write raw data
-    if ( !stream->write(values, nRows * nColumns) ) {
+    if ( !stream->write(this->givePointer(), nRows * nColumns) ) {
         return ( CIO_IOERR );
     }
 
@@ -1842,20 +1797,10 @@ contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMo
         return ( CIO_IOERR );
     }
 
-    if ( values != NULL ) {
-        free(values);
-    }
-
-    if ( nRows * nColumns ) {
-        allocatedSize = nRows * nColumns;
-        values = ALLOC(allocatedSize);
-    } else {
-        values = NULL;
-        allocatedSize = 0;
-    }
+    this->values.resize(nRows * nColumns);
 
     // read raw data
-    if ( !stream->read(values, nRows * nColumns) ) {
+    if ( !stream->read(this->givePointer(), nRows * nColumns) ) {
         return ( CIO_IOERR );
     }
 
@@ -1891,14 +1836,14 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
     /* Function Body */
 #ifdef DEBUG
     if ( !isSquare() ) {
-        OOFEM_ERROR("FloatMatrix::jaco_: Not square matrix");
+        OOFEM_ERROR("Not square matrix");
     }
     // check for symmetry
     for ( i = 1; i <= neq; i++ ) {
         for ( j = i + 1; j <= neq; j++ ) {
             //if ( this->at(i, j) != this->at(j, i) ) {
             if ( fabs( this->at(i, j) - this->at(j, i) ) > 1.0e-6 ) {
-                OOFEM_ERROR("FloatMatrix::jaco_: Not Symmetric matrix");
+                OOFEM_ERROR("Not Symmetric matrix");
             }
         }
     }
@@ -2021,7 +1966,7 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
 
         /* ---- CHECK FOR CONVERGENCE -------------------- */
         if ( ++ite > 50 ) {
-            OOFEM_ERROR("FloatMatrix::jaco_: too many iterations");
+            OOFEM_ERROR("too many iterations");
         }
     } while ( fabs(ssum) / sum > tol );
 
@@ -2046,7 +1991,7 @@ FloatMatrix :: packToCommBuffer(CommunicationBuffer &buff) const
     result &= buff.packInt(nRows);
     result &= buff.packInt(nColumns);
     // pack data
-    result &= buff.packArray(this->values, nRows * nColumns);
+    result &= buff.packArray(this->givePointer(), nRows * nColumns);
 
     return result;
 }
@@ -2060,7 +2005,7 @@ FloatMatrix :: unpackFromCommBuffer(CommunicationBuffer &buff)
     result &= buff.unpackInt(newNColumns);
     // resize yourself
     this->resize(newNRows, newNColumns);
-    result &= buff.unpackArray(this->values, newNRows * newNColumns);
+    result &= buff.unpackArray(this->givePointer(), newNRows * newNColumns);
 
     return result;
 }
@@ -2087,7 +2032,7 @@ FloatMatrix :: __getitem__(boost :: python :: api :: object t)
 }
 #endif
 
-std :: ostream &operator<<(std :: ostream &out, const FloatMatrix &x)
+std :: ostream &operator << ( std :: ostream & out, const FloatMatrix & x )
 {
     out << x.nRows << " " << x.nColumns << " {";
     for ( int i = 0; i < x.nRows; ++i ) {

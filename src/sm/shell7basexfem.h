@@ -36,7 +36,8 @@
 #define Shell7BaseXFEM_h
 
 #include "shell7base.h"
-#include "xfemelementinterface.h"
+#include "xfem/xfemelementinterface.h"
+#include "xfem/enrichmentitems/delamination.h"
 
 
 ///@name Input fields for el
@@ -106,21 +107,21 @@ protected:
     void computeFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep);
 
 public:
-    Shell7BaseXFEM(int n, Domain *d);
-    virtual ~Shell7BaseXFEM() {};
+    Shell7BaseXFEM(int n, Domain * d);
+    virtual ~Shell7BaseXFEM();
     virtual int checkConsistency();
 
     void giveMaxCZDamages(FloatArray &answer, TimeStep *tStep);
     virtual const char *giveClassName()  const { return "Shell7BaseXFEM"; }
+    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
     virtual Interface *giveInterface(InterfaceType it);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual int giveNumberOfDofs();
 
     bool hasCohesiveZone(int interfaceNum);
-    IntegrationRule **czIntegrationRulesArray;
-    IntegrationRule giveCZIntegrationRulesArray() { return * * czIntegrationRulesArray; };
+    std :: vector< IntegrationRule * > czIntegrationRulesArray;
 };
 } // end namespace oofem
 #endif

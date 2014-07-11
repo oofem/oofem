@@ -1,6 +1,7 @@
 tmpatch03.out
 Patch test of Quad1_ht elements 
-StationaryProblem nsteps 1
+StationaryProblem nsteps 1 nmodules 1
+errorcheck
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
 ndofman 10 nelem 4 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
@@ -25,10 +26,10 @@ BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 15.0
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK%
-#NODE tStep 1 number 3 dof 1 unknown f value 1.
-#NODE tStep 1 number 4 dof 1 unknown f value 1.
-#NODE tStep 1 number 5 dof 1 unknown f value 6.
-#NODE tStep 1 number 6 dof 1 unknown f value 9.
-#NODE tStep 1 number 7 dof 1 unknown f value 10.
-#NODE tStep 1 number 8 dof 1 unknown f value 10.
+#NODE tStep 1 number 3 dof 10 unknown d value 1.
+#NODE tStep 1 number 4 dof 10 unknown d value 1.
+#NODE tStep 1 number 5 dof 10 unknown d value 6.
+#NODE tStep 1 number 6 dof 10 unknown d value 9.
+#NODE tStep 1 number 7 dof 10 unknown d value 10.
+#NODE tStep 1 number 8 dof 10 unknown d value 10.
 #%END_CHECK%

@@ -55,7 +55,7 @@ protected:
     static FEI2dTrLin interp;
 
 public:
-    Tr1_ht(int n, Domain *d);
+    Tr1_ht(int n, Domain * d);
     virtual ~Tr1_ht();
 
     virtual double computeVolumeAround(GaussPoint *gp);
@@ -71,10 +71,6 @@ public:
 
     virtual Interface *giveInterface(InterfaceType t);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     virtual FEInterpolation *giveInterpolation() const { return & this->interp; }
@@ -97,7 +93,7 @@ protected:
 class Tr1_hmt : public Tr1_ht
 {
 public:
-    Tr1_hmt(int n, Domain *d);
+    Tr1_hmt(int n, Domain * d);
 
     virtual const char *giveInputRecordName() const { return _IFT_Tr1_hmt_Name; }
     virtual const char *giveClassName() const { return "Tr1_hmt"; }

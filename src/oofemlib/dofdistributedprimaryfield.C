@@ -40,8 +40,8 @@
 
 namespace oofem {
 DofDistributedPrimaryField :: DofDistributedPrimaryField(EngngModel *a, int idomain,
-                                                         FieldType ft, EquationID ut, int nHist) :
-    PrimaryField(a, idomain, ft, ut, nHist)
+                                                         FieldType ft, int nHist) :
+    PrimaryField(a, idomain, ft, nHist)
 { }
 
 DofDistributedPrimaryField :: ~DofDistributedPrimaryField()
@@ -71,9 +71,7 @@ DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, Fl
 
     for ( int j = 1; j <= nnodes; j++ ) {
         DofManager *inode = domain->giveDofManager(j);
-        int ndofs = inode->giveNumberOfDofs();
-        for ( int i = 1; i <= ndofs; i++ ) {
-            Dof *iDof = inode->giveDof(i);
+        for ( Dof *iDof: *inode ) {
             int eqNum = iDof->__giveEquationNumber();
             double val;
             if ( eqNum ) {
@@ -94,9 +92,7 @@ DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *tStep, FloatA
 
     for ( int j = 1; j <= nnodes; j++ ) {
         DofManager *inode = domain->giveDofManager(j);
-        int ndofs = inode->giveNumberOfDofs();
-        for ( int i = 1; i <= ndofs; i++ ) {
-            Dof *iDof = inode->giveDof(i);
+        for ( Dof *iDof: *inode ) {
             int eqNum = iDof->__giveEquationNumber();
             double val;
             if ( mode == VM_Total ) {

@@ -56,8 +56,8 @@ REGISTER_Element(QTrPlaneStrain);
 FEI2dTrQuad QTrPlaneStrain :: interpolation(1, 2);
 
 QTrPlaneStrain :: QTrPlaneStrain(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), SpatialLocalizerInterface(),
-    DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface()
+    NLStructuralElement(n, aDomain), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this),
+    EIPrimaryUnknownMapperInterface()
     // Constructor.
 {
     numberOfDofMans = 6;
@@ -70,15 +70,13 @@ QTrPlaneStrain :: giveInterface(InterfaceType interface)
 {
     //if (interface == NodalAveragingRecoveryModelInterfaceType) return (NodalAveragingRecoveryModelInterface*) this;
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
-    } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
-        return static_cast< EIPrimaryUnknownMapperInterface * >( this );
+        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     }
 
     return NULL;
@@ -146,7 +144,7 @@ QTrPlaneStrain :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant, weight, thickness;
     determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) ) );
+                                                                       FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     thickness = this->giveCrossSection()->give(CS_Thickness, gp);
     return determinant * weight * thickness;
@@ -155,26 +153,17 @@ QTrPlaneStrain :: computeVolumeAround(GaussPoint *gp)
 void QTrPlaneStrain :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
 
 void
-QTrPlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+QTrPlaneStrain :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(2, D_u, D_v);
-}
-
-
-int
-QTrPlaneStrain :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
+    answer = {D_u, D_v};
 }
 
 
@@ -189,7 +178,7 @@ QTrPlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Float
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -418,7 +407,7 @@ QTrPlaneStrain :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answ
         answer.at(2) = this->giveNode(6)->giveNumber();
         answer.at(3) = this->giveNode(5)->giveNumber();
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 
@@ -435,52 +424,21 @@ QTrPlaneStrain :: SPRNodalRecoveryMI_givePatchType()
     return SPRPatchType_2dquadratic;
 }
 
-
-double
-QTrPlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
-{
-    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
-    GaussPoint *gp;
-    double volume = 0.0;
-
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
-        volume += this->computeVolumeAround(gp) / this->giveCrossSection()->give(CS_Thickness, gp);
-    }
-
-    return sqrt(volume * 2.0);
-}
-
-int
-QTrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                   TimeStep *tStep, const FloatArray &coords,
+void
+QTrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                   TimeStep *tStep, const FloatArray &lcoords,
                                                                    FloatArray &answer)
 {
-    FloatArray lcoords, u, nn;
-    FloatMatrix n(2, 12);
-    int result;
+    FloatArray u, ni;
+    FloatMatrix n;
 
-    result = this->computeLocalCoordinates(lcoords, coords);
+    this->interpolation.evalN( ni, lcoords, FEIElementGeometryWrapper(this) );
 
-    this->interpolation.evalN( nn, lcoords, FEIElementGeometryWrapper(this) );
+    n.beNMatrixOf(ni, 2);
 
-    for ( int i = 1; i <= 6; i++ ) {
-        n.at(1, 2 * i - 1) = nn.at(i);
-        n.at(2, 2 * i - 0) = nn.at(i);
-    }
-
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf({D_u, D_v}, mode, tStep, u);
     answer.beProductOf(n, u);
-
-    return result;
 }
-
-void
-QTrPlaneStrain :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    giveDofManDofIDMask(1, EID_MomentumBalance, answer);
-}
-
 
 double
 QTrPlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)

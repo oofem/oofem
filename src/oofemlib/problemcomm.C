@@ -65,7 +65,7 @@ ProblemCommunicator :: setUpCommunicationMapsForNodeCut(EngngModel *pm, bool exc
     int i, j, partition;
 
     if ( this->mode != ProblemCommMode__NODE_CUT ) {
-        _error("setUpCommunicationMapsForNodeCut: invalid mode");
+        OOFEM_ERROR("invalid mode");
     }
 
     //
@@ -91,7 +91,7 @@ ProblemCommunicator :: setUpCommunicationMapsForNodeCut(EngngModel *pm, bool exc
     IntArray pos(size);
     IntArray **maps = new IntArray * [ size ];
     for ( i = 0; i < size; i++ ) {
-        maps [ i ] = new IntArray( domainNodeSendCount.at(i + 1) );
+        maps [ i ] = new IntArray( domainNodeSendCount.at ( i + 1 ) );
     }
 
 
@@ -176,7 +176,7 @@ ProblemCommunicator :: setUpCommunicationMapsForElementCut(EngngModel *pm,
         IntArray pos(size);
         IntArray **maps = new IntArray * [ size ];
         for ( i = 0; i < size; i++ ) {
-            maps [ i ] = new IntArray( domainNodeRecvCount.at(i + 1) );
+            maps [ i ] = new IntArray( domainNodeRecvCount.at ( i + 1 ) );
         }
 
         // allocate also domain receive list to be broadcasted
@@ -238,7 +238,7 @@ ProblemCommunicator :: setUpCommunicationMapsForElementCut(EngngModel *pm,
 #ifdef __USE_MPI
         result = MPI_Allreduce(& localExpectedSize, & globalRecvSize, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
         if ( result != MPI_SUCCESS ) {
-            _error("setUpCommunicationMaps: MPI_Allreduce failed");
+            OOFEM_ERROR("MPI_Allreduce failed");
         }
 
 #else
@@ -269,7 +269,7 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
                 commBuff.packIntArray(domainRecvList);
                 result = commBuff.bcast(i);
                 if ( result != MPI_SUCCESS ) {
-                    _error("setUpCommunicationMaps: commBuff broadcast failed");
+                    OOFEM_ERROR("commBuff broadcast failed");
                 }
 
 #ifdef __VERBOSE_PARALLEL
@@ -283,7 +283,7 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
                 // receive broadcasted lists
                 result = commBuff.bcast(i);
                 if ( result != MPI_SUCCESS ) {
-                    _error("setUpCommunicationMaps: commBuff broadcast failed");
+                    OOFEM_ERROR("commBuff broadcast failed");
                 }
 
 #ifdef __VERBOSE_PARALLEL
@@ -294,7 +294,7 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
 
                 // unpack remote receive list
                 if ( !commBuff.unpackIntArray(remoteDomainRecvList) ) {
-                    _error("ProblemCommunicator::setUpCommunicationMaps: unpack remote receive list failed");
+                    OOFEM_ERROR("unpack remote receive list failed");
                 }
 
                 // find if remote nodes are in local partition
@@ -333,7 +333,7 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
 #endif
         } // end loop over domains
     } else {
-        _error("setUpCommunicationMapsForElementCut: unknown mode");
+        OOFEM_ERROR("unknown mode");
     }
 }
 
@@ -390,7 +390,7 @@ ProblemCommunicator :: setUpCommunicationMapsForRemoteElementMode(EngngModel *pm
         IntArray pos(size);
         IntArray **maps = new IntArray * [ size ];
         for ( i = 0; i < size; i++ ) {
-            maps [ i ] = new IntArray( domainNodeRecvCount.at(i + 1) );
+            maps [ i ] = new IntArray( domainNodeRecvCount.at ( i + 1 ) );
         }
 
         // allocate also domain receive list to be broadcasted
@@ -463,7 +463,7 @@ ProblemCommunicator :: setUpCommunicationMapsForRemoteElementMode(EngngModel *pm
 #ifdef __USE_MPI
         result = MPI_Allreduce(& localExpectedSize, & globalRecvSize, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
         if ( result != MPI_SUCCESS ) {
-            _error("setUpCommunicationMaps: MPI_Allreduce failed");
+            OOFEM_ERROR("MPI_Allreduce failed");
         }
 
 #else
@@ -494,7 +494,7 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
                 commBuff.packIntArray(domainRecvList);
                 result = commBuff.bcast(i);
                 if ( result != MPI_SUCCESS ) {
-                    _error("setUpCommunicationMaps: commBuff broadcast failed");
+                    OOFEM_ERROR("commBuff broadcast failed");
                 }
 
 #ifdef __VERBOSE_PARALLEL
@@ -508,7 +508,7 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
                 // receive broadcasted lists
                 result = commBuff.bcast(i);
                 if ( result != MPI_SUCCESS ) {
-                    _error("setUpCommunicationMaps: commBuff broadcast failed");
+                    OOFEM_ERROR("commBuff broadcast failed");
                 }
 
 #ifdef __VERBOSE_PARALLEL
@@ -519,7 +519,7 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
 
                 // unpack remote receive list
                 if ( !commBuff.unpackIntArray(remoteDomainRecvList) ) {
-                    _error("ProblemCommunicator::setUpCommunicationMaps: unpack remote receive list failed");
+                    OOFEM_ERROR("unpack remote receive list failed");
                 }
 
                 // find if remote elements are in local partition
@@ -572,7 +572,7 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
 #endif
         } // end loop over domains
     } else {
-        _error("setUpCommunicationMapsForRemoteElementMode: unknown mode");
+        OOFEM_ERROR("unknown mode");
     }
 }
 
@@ -595,7 +595,7 @@ ProblemCommunicator :: setUpCommunicationMaps(EngngModel *pm, bool excludeSelfCo
     } else if ( this->mode == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
         setUpCommunicationMapsForRemoteElementMode(pm, excludeSelfCommFlag);
     } else {
-        _error("setUpCommunicationMaps: unknown mode");
+        OOFEM_ERROR("unknown mode");
     }
 
     initialized = true;
@@ -790,7 +790,7 @@ ProblemCommunicator :: setUpCommunicationMaps(EngngModel *pm, bool excludeSelfCo
  *
  ****#ifdef __USE_MPI
  * result = MPI_Allreduce (&localExpectedSize, &globalRecvSize, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
- * if (result != MPI_SUCCESS) _error ("setUpCommunicationMaps: MPI_Allreduce failed");
+ * if (result != MPI_SUCCESS) OOFEM_ERROR("MPI_Allreduce failed");
  ****#else
  * WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
  ****#endif
@@ -818,7 +818,7 @@ ProblemCommunicator :: setUpCommunicationMaps(EngngModel *pm, bool excludeSelfCo
  *
  *  commBuff.packIntArray (domainRecvList);
  *  result = commBuff.bcast (i);
- *  if (result!= MPI_SUCCESS) _error ("setUpCommunicationMaps: commBuff broadcast failed");
+ *  if (result!= MPI_SUCCESS) OOFEM_ERROR("commBuff broadcast failed");
  *
  ****#ifdef __VERBOSE_PARALLEL
  * VERBOSEPARALLEL_PRINT("ProblemCommunicator::setUpCommunicationMaps", "Broadcasting own send list finished", rank);
@@ -832,7 +832,7 @@ ProblemCommunicator :: setUpCommunicationMaps(EngngModel *pm, bool excludeSelfCo
  ****#endif
  *  // receive broadcasted lists
  *  result = commBuff.bcast (i);
- *  if (result != MPI_SUCCESS) _error ("setUpCommunicationMaps: commBuff broadcast failed");
+ *  if (result != MPI_SUCCESS) OOFEM_ERROR("commBuff broadcast failed");
  *
  ****#ifdef __VERBOSE_PARALLEL
  *  fprintf(stderr, "\n[process rank %3d]: %-30s: Receiving broadcasted send map from partition %3d finished",
@@ -842,7 +842,7 @@ ProblemCommunicator :: setUpCommunicationMaps(EngngModel *pm, bool excludeSelfCo
  *
  *  // unpack remote receive list
  *  if (!commBuff.unpackIntArray(remoteDomainRecvList))
- *   _error ("ProblemCommunicator::setUpCommunicationMaps: unpack remote receive list failed");
+ *   OOFEM_ERROR("unpack remote receive list failed");
  *
  *  if (this->mode == PC__ELEMENT_CUT) {
  *   // find if remote nodes are in local partition
@@ -901,7 +901,7 @@ ProblemCommunicator :: setUpCommunicationMaps(EngngModel *pm, bool excludeSelfCo
  ****#endif
  *
  * } // end loop over domains
- * } else _error ("setUpCommunicationMaps: unknown mode");
+ * } else OOFEM_ERROR("unknown mode");
  * }
  */
 
@@ -915,7 +915,7 @@ ProblemCommunicator :: setProcessCommunicatorToSendArry(ProcessCommunicator *pro
                 this->mode == ProblemCommMode__ELEMENT_CUT ) {
         sortCommMap(map, & ProblemCommunicator :: ElemCmp);
     } else {
-        _error("setDomainCommunicatorToSendArry: unknown mode");
+        OOFEM_ERROR("unknown mode");
     }
 
     processComm->setToSendArry(engngModel, map, this->mode);
@@ -931,7 +931,7 @@ ProblemCommunicator :: setProcessCommunicatorToRecvArry(ProcessCommunicator *pro
                 this->mode == ProblemCommMode__ELEMENT_CUT ) {
         sortCommMap(map, & ProblemCommunicator :: ElemCmp);
     } else {
-        _error("setDomainCommunicatorToRecvArry: unknown mode");
+        OOFEM_ERROR("unknown mode");
     }
 
     processComm->setToRecvArry(engngModel, map, this->mode);
@@ -1001,13 +1001,13 @@ int
 ProblemCommunicator :: DofManCmp(int i, int j)
 {
     return ( engngModel->giveDomain(1)->giveDofManager(i)->giveGlobalNumber() -
-             engngModel->giveDomain(1)->giveDofManager(j)->giveGlobalNumber() );
+            engngModel->giveDomain(1)->giveDofManager(j)->giveGlobalNumber() );
 }
 int
 ProblemCommunicator :: ElemCmp(int i, int j)
 {
     return ( engngModel->giveDomain(1)->giveElement(i)->giveGlobalNumber() -
-             engngModel->giveDomain(1)->giveElement(j)->giveGlobalNumber() );
+            engngModel->giveDomain(1)->giveElement(j)->giveGlobalNumber() );
 }
 } // end namespace oofem
 #endif

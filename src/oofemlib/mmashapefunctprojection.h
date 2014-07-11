@@ -35,10 +35,12 @@
 #ifndef mmashapefunctprojection_h
 #define mmashapefunctprojection_h
 
-#include "alist.h"
 #include "materialmappingalgorithm.h"
 #include "nodalrecoverymodel.h"
 #include "interface.h"
+
+#include <vector>
+#include <memory>
 
 namespace oofem {
 class Domain;
@@ -56,7 +58,7 @@ public:
     /**
      * Typedefs to introduce the container type for nodal numbers
      */
-    typedef AList< FloatArray >nodalValContainerType;
+    typedef std::vector< FloatArray > nodalValContainerType;
 
     enum coordType { coordType_local, coordType_global };
 
@@ -109,7 +111,7 @@ class OOFEM_EXPORT MMAShapeFunctProjection : public MaterialMappingAlgorithm
 {
 protected:
     /// Smother.
-    AList< NodalRecoveryModel >smootherList;
+    std :: vector< std :: unique_ptr< NodalRecoveryModel > > smootherList;
     /// Solution state counter.
     StateCounterType stateCounter;
     /// Internal variables in list.
@@ -123,7 +125,7 @@ public:
     /// Destructor
     virtual ~MMAShapeFunctProjection();
 
-    virtual void __init(Domain *dold, IntArray &type, FloatArray &coords, int region, TimeStep *tStep, bool iCohesiveZoneGP = false);
+    virtual void __init(Domain *dold, IntArray &type, FloatArray &coords, Set &sourceElemSet, TimeStep *tStep, bool iCohesiveZoneGP = false);
 
     virtual void finish(TimeStep *tStep);
 

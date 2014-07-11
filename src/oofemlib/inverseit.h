@@ -89,7 +89,7 @@ private:
     int solved;
 
 public:
-    InverseIteration(Domain *d, EngngModel *m);
+    InverseIteration(Domain * d, EngngModel * m);
     virtual ~InverseIteration();
 
     virtual NM_Status solve(SparseMtrx *A, SparseMtrx *B, FloatArray *x, FloatMatrix *v, double rtol, int nroot);

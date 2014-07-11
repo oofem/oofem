@@ -57,15 +57,13 @@ protected:
     ElementMode emode;
 
 public:
-    TransportElement(int n, Domain *d, ElementMode em = HeatTransferEM);
+    TransportElement(int n, Domain * d, ElementMode em = HeatTransferEM);
     virtual ~TransportElement();
 
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType type, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
-    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_ConservationEquation, answer); }
-    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { this->giveInternalDofManDofIDMask(inode, EID_ConservationEquation, answer); }
-    virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
     virtual void computeInternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void computeExternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
@@ -109,8 +107,6 @@ public:
     virtual void updateInternalState(TimeStep *tStep);
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual int checkConsistency();
-
-    virtual void giveElementDofIDMask(EquationID, IntArray & answer) const;
 
     virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,
                                                       FloatArray &coords, IntArray &dofId, ValueModeType mode,

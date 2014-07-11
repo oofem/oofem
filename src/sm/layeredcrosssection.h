@@ -100,7 +100,7 @@ protected:
     double area;
 
 public:
-    LayeredCrossSection(int n, Domain *d) : StructuralCrossSection(n, d), layerMaterials(), layerThicks(), layerWidths()
+    LayeredCrossSection(int n, Domain * d) : StructuralCrossSection(n, d), layerMaterials(), layerThicks(), layerWidths()
     {
         numberOfLayers = 0;
         totalThick = 0.;
@@ -120,6 +120,7 @@ public:
     virtual void giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
     virtual void giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
+    virtual void giveRealStress_Warping(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
 
     virtual void giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveStiffnessMatrix_PlaneStress(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
@@ -127,11 +128,12 @@ public:
     virtual void giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
 
-    virtual void giveRealStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
-    virtual void giveRealStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
-    virtual void giveRealStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
-    virtual void giveRealStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
-    virtual void giveRealStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveGeneralizedStress_MembraneRot(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
+    virtual void giveGeneralizedStress_PlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &generalizedStrain, TimeStep *tStep);
 
     virtual void giveCharMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
@@ -142,11 +144,10 @@ public:
     virtual void give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
     virtual void giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
+    virtual void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual FloatArray *imposeStressConstrainsOnGradient(GaussPoint *gp, FloatArray *);
     virtual FloatArray *imposeStrainConstrainsOnGradient(GaussPoint *gp, FloatArray *);
-
-    virtual void computeStressIndependentStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, ValueModeType mode);
 
     virtual double give(CrossSectionProperty a, GaussPoint *gp);
     virtual double give(CrossSectionProperty a, const FloatArray *coords, Element *elem, bool local);
@@ -200,46 +201,46 @@ public:
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
 
 
-    void mapLayerGpCoordsToShellCoords(IntegrationRule ** &layerIntegrationRulesArray);
+    void mapLayerGpCoordsToShellCoords(std :: vector< IntegrationRule * > &layerIntegrationRulesArray);
 
-    void setupLayeredIntegrationRule(IntegrationRule ** &layerIntegrationRulesArray, Element *el, int numInPlanePoints);
+    void setupLayeredIntegrationRule(std :: vector< IntegrationRule * > &layerIntegrationRulesArray, Element *el, int numInPlanePoints);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
     virtual double give(int aProperty, GaussPoint *gp)
     {
-        OOFEM_ERROR1("LayeredCrossSection :: give - not implemented yet");
+        OOFEM_ERROR("not implemented yet");
         return 0.0;
     };
 
 #ifdef __PARALLEL_MODE
     int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     {
-        _error("packUnknowns: not implemented");
+        OOFEM_ERROR("not implemented");
         return 0;
     }
 
     int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     {
-        _error("unpackAndUpdateUnknowns: not implemented");
+        OOFEM_ERROR("not implemented");
         return 0;
     }
 
     int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
     {
-        _error("estimatePackSize: not implemented");
+        OOFEM_ERROR("not implemented");
         return 0;
     }
 #endif
 
 
     virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
-    { OOFEM_ERROR("giveFirstPKStresses not implemented for layered cross section"); };
+    { OOFEM_ERROR("not implemented"); };
     virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)
-    { OOFEM_ERROR("giveCauchyStresses not implemented for layered cross section"); };
+    { OOFEM_ERROR("not implemented"); };
     virtual void giveStiffnessMatrix_dPdF(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("giveStiffnessMatrix_dPdF not implemented for layered cross section"); };
+    { OOFEM_ERROR("not implemented"); };
     virtual void giveStiffnessMatrix_dCde(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { OOFEM_ERROR("giveStiffnessMatrix_dCde not implemented for layered cross section"); };
+    { OOFEM_ERROR("not implemented"); };
 
 
 protected:
@@ -269,8 +270,8 @@ public:
 class LayeredIntegrationRule : public IntegrationRule
 {
 public:
-    LayeredIntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic = false);
-    LayeredIntegrationRule(int n, Element *e);
+    LayeredIntegrationRule(int n, Element * e, int startIndx, int endIndx, bool dynamic = false);
+    LayeredIntegrationRule(int n, Element * e);
     virtual ~LayeredIntegrationRule();
 
     virtual const char *giveClassName() const { return "LayeredIntegrationRule"; }

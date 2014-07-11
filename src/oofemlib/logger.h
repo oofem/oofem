@@ -42,8 +42,18 @@
 #endif
 
 #include <cstdio>
+#include <string>
+
+// MSVC doesn't properly implement C99. (might need to wrap __func__ behind a macro to support all platforms correctly(?))
+#ifdef _MSC_VER
+# define __func__ __FUNCTION__
+#endif
 
 namespace oofem {
+/**
+ * Logger class used by OOFEM to print information during analysis.
+ * Prints warnings and errors into a separate stream from normal output.
+ */
 class OOFEM_EXPORT Logger
 {
 public:
@@ -58,25 +68,27 @@ public:
     };
 protected:
     /// Stream used for logging.
-    FILE *mylogStream;
+    FILE *logStream, *errStream;
     /// flag indicating whether to close mylogStream.
-    bool closeFlag;
+    bool closeFlag, errCloseFlag;
     /// Current log level, messages with higher level are not reported.
     logLevelType logLevel;
     /// Counter of all warning and error messages.
     int numberOfWrn, numberOfErr;
 public:
-    Logger(logLevelType level, FILE *stream);
+    Logger(logLevelType level);
     ~Logger();
     /// Redirects log output to given file name (with path).
-    void appendlogTo(char *fname);
+    void appendLogTo(const std :: string &fname);
+    /// Redirects error output to given file name (with path).
+    void appendErrorTo(const std :: string &fname);
 
     /// Writes the normal log message.
     void writeLogMsg(logLevelType level, const char *format, ...);
     /// Writes extended log message with file and line info.
-    void writeELogMsg(logLevelType level, const char *_file, int _line, const char *format, ...);
+    void writeELogMsg(logLevelType level, const char *_func, const char *_file, int _line, const char *format, ...);
     /// Flushes the log stream.
-    void flush() { fflush(mylogStream); }
+    void flush() { fflush(logStream); fflush(errStream); }
 
     /// Sets log level to given one. Only log messages with level less or equal given threshold will be printed.
     void setLogLevel(logLevelType level) { logLevel = level; }
@@ -90,97 +102,19 @@ protected:
 };
 
 extern OOFEM_EXPORT Logger oofem_logger;
-extern OOFEM_EXPORT Logger oofem_errLogger;
 
-/**@
- * General log-family macros (those for error and warning reporting).
- * These macros add to given message also file and line information.
- * They can be implemented in a very elegant way using macro with variable
- * number of arguments (__VA_ARGS__). But since the many compilers do not support
- * macros with variable number of arguments we have two choices:
- * to implement this as a function with variable number of arguments, but then we can not
- * add file and line info via __FILE__ and __LINE__ macros. Or if file and line
- * info is preferred, then instead of single macro with variable number of arguments we can have
- * series of "classical" macros with increasing number of parameters.
- * The latter approach is used here.
+/**
+ * Log reporting macros
  */
 //@{
-#define LOG_FATAL1(logger, _1) logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, __FILE__, __LINE__, _1)
-#define LOG_FATAL2(logger, _1, _2) logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, __FILE__, __LINE__, _1, _2)
-#define LOG_FATAL3(logger, _1, _2, _3) logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, __FILE__, __LINE__, _1, _2, _3)
-#define LOG_ERROR1(logger, _1) logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1)
-#define LOG_ERROR2(logger, _1, _2) logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1, _2)
-#define LOG_ERROR3(logger, _1, _2, _3) logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1, _2, _3)
-#define LOG_WARNING1(logger, _1) logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1)
-#define LOG_WARNING2(logger, _1, _2) logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1, _2)
-#define LOG_WARNING3(logger, _1, _2, _3) logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1, _2, _3)
+#define OOFEM_LOG_FATAL(...) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, __func__, __FILE__, __LINE__, __VA_ARGS__)
+#define OOFEM_LOG_ERROR(...) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __func__, __FILE__, __LINE__, __VA_ARGS__)
+#define OOFEM_LOG_WARNING(...) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING,  __func__, __FILE__, __LINE__, __VA_ARGS__)
 
-#define LOG_FATAL(logger, _1) LOG_FATAL1(logger, _1)
-#define LOG_ERROR(logger, _1) LOG_ERROR1(logger, _1)
-#define LOG_WARNING(logger, _1) LOG_WARNING1(logger, _1)
+#define OOFEM_LOG_FORCED(...) oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_FORCED, __VA_ARGS__)
+#define OOFEM_LOG_RELEVANT(...) oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_RELEVANT, __VA_ARGS__)
+#define OOFEM_LOG_INFO(...) oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_INFO, __VA_ARGS__)
+#define OOFEM_LOG_DEBUG(...) oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_DEBUG, __VA_ARGS__)
 //@}
-
-
-/**@
- * log-family macros that use default OOFEM loggers
- */
-//@{
-#define OOFEM_LOG_FATAL1(_1) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, __FILE__, __LINE__, _1)
-#define OOFEM_LOG_FATAL2(_1, _2) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, __FILE__, __LINE__, _1, _2)
-#define OOFEM_LOG_FATAL3(_1, _2, _3) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_FATAL, __FILE__, __LINE__, _1, _2, _3)
-#define OOFEM_LOG_ERROR1(_1) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1)
-#define OOFEM_LOG_ERROR2(_1, _2) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1, _2)
-#define OOFEM_LOG_ERROR3(_1, _2, _3) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_ERROR, __FILE__, __LINE__, _1, _2, _3)
-#define OOFEM_LOG_WARNING1(_1) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1)
-#define OOFEM_LOG_WARNING2(_1, _2) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1, _2)
-#define OOFEM_LOG_WARNING3(_1, _2, _3) oofem_logger.writeELogMsg(Logger :: LOG_LEVEL_WARNING, __FILE__, __LINE__, _1, _2, _3)
-
-#define OOFEM_LOG_FATAL(_1) OOFEM_LOG_FATAL1(_1)
-#define OOFEM_LOG_ERROR(_1) OOFEM_LOG_ERROR1(_1)
-#define OOFEM_LOG_WARNING(_1) OOFEM_LOG_WARNING1(_1)
-//@}
-
-#ifdef HAVE_MACRO_VA_ARGS
-/// used internally
-/**@
- * Log reporting macros (those that do add file and line info)
- */
-//@{
- #define __LOG_E_MESSAGE(logger, level, _file, _line, ...) logger.writeELogMsg(level, _file, _line, __VA_ARGS__)
- #define LOG_FORCED_MSG(logger, ...) logger.writeLogMsg(Logger :: LOG_LEVEL_FORCED, __VA_ARGS__)
-/*
- * // General log-family macros
- * // Alternative definition using VARARGS
- *
- ****#define LOG_FATAL(logger, ...) logger.writeELogMsg(Logger::LOG_LEVEL_FATAL, __FILE__, __LINE__, __VA_ARGS__)
- ****#define LOG_ERROR(logger, ...) logger.writeELogMsg(Logger::LOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__)
- ****#define LOG_WARNING(logger, ...) logger.writeELogMsg(Logger::LOG_LEVEL_WARNING, __FILE__, __LINE__, __VA_ARGS__)
- */
- #define LOG_RELEVANT(logger, ...) logger.writeLogMsg(Logger :: LOG_LEVEL_RELEVANT, __VA_ARGS__)
- #define LOG_INFO(logger, ...) logger.writeLogMsg(Logger :: LOG_LEVEL_INFO, __VA_ARGS__)
- #define LOG_DEBUG(logger, ...) logger.writeLogMsg(Logger :: LOG_LEVEL_DEBUG, __VA_ARGS__)
-
-/* log-family macros that use default OOFEM loggers */
-/*
- * #define OOFEM_LOG_FATAL(...) oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_FATAL, __FILE__, __LINE__, __VA_ARGS__)
- * #define OOFEM_LOG_ERROR(...) oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__)
- * #define OOFEM_LOG_WARNING(...) oofem_errLogger.writeELogMsg(Logger::LOG_LEVEL_WARNING, __FILE__, __LINE__, __VA_ARGS__)
- */
- #define OOFEM_LOG_RELEVANT(...) oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_RELEVANT, __VA_ARGS__)
- #define OOFEM_LOG_INFO(...) oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_INFO, __VA_ARGS__)
- #define OOFEM_LOG_DEBUG(...) oofem_logger.writeLogMsg(Logger :: LOG_LEVEL_DEBUG, __VA_ARGS__)
-//@}
-#else
-
-void LOG_FORCED_MSG(Logger &logger, const char *format, ...);
-void LOG_RELEVANT(Logger &logger, const char *format, ...);
-void LOG_INFO(Logger &logger, const char *format, ...);
-void LOG_DEBUG(Logger &logger, const char *format, ...);
-
-void OOFEM_LOG_RELEVANT(const char *format, ...);
-void OOFEM_LOG_INFO(const char *format, ...);
-void OOFEM_LOG_DEBUG(const char *format, ...);
-
-#endif
 } // end namespace oofem
 #endif // logger_h

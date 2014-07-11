@@ -60,8 +60,8 @@ protected:
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
-    void giveDofManDofIDMask(int inode, EquationID u, IntArray &answer) const {
-        answer.setValues(2, D_u, D_v);
+    void giveDofManDofIDMask(int inode, IntArray &answer) const {
+        answer = {D_u, D_v};
     }
 }; // end of PlaneStressStructuralElementEvaluator definition
 } // end namespace oofem

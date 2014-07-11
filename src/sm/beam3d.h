@@ -64,7 +64,7 @@ protected:
     IntArray *dofsToCondense;
 
 public:
-    Beam3d(int n, Domain *d);
+    Beam3d(int n, Domain * d);
     virtual ~Beam3d();
 
     virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
@@ -84,8 +84,10 @@ public:
     //int hasLayeredSupport () {return 1;}
 
     virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
+
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
@@ -104,6 +106,7 @@ public:
     ///@todo Introduce interpolator and remove these two:
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);
@@ -113,7 +116,6 @@ public:
 protected:
     virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *, int, TimeStep *, ValueModeType mode);
     virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
-    virtual void computePrescribedStrainLocalLoadVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &);
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
@@ -122,7 +124,7 @@ protected:
     double giveKappayCoeff();
     double giveKappazCoeff();
     void computeKappaCoeffs();
-    double giveLength();
+    virtual double computeLength();
     virtual void computeClampedStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode rMode, TimeStep *tStep);
     virtual void computeLocalStiffnessMatrix(FloatMatrix &answer,

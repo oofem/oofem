@@ -35,7 +35,7 @@
 #ifndef rershell_h
 #define rershell_h
 
-#include "cct.h"
+#include "cct3d.h"
 #include "layeredcrosssection.h"
 
 #define _IFT_RerShell_Name "rershell"
@@ -60,20 +60,20 @@ enum CharTensor {
  * This class implements an triangular three-node  shell (CCT+linear plan stress)
  * curved finite element. Each node has 5 degrees of freedom.
  */
-class RerShell : public CCTPlate
+class RerShell : public CCTPlate3d
 {
 protected:
     double Rx, Ry, Rxy;
-    FloatMatrix *GtoLRotationMatrix;
 
 public:
-    RerShell(int n, Domain *d);
-    virtual ~RerShell() { delete GtoLRotationMatrix; }
+    RerShell(int n, Domain * d);
+    virtual ~RerShell() {
+    }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     { computeLumpedMassMatrix(answer, tStep); }
-    virtual FloatMatrix *computeGtoLRotationMatrix();
+
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
 
     void giveLocalCoordinates(FloatArray &answer, const FloatArray &global);
@@ -83,6 +83,11 @@ public:
     void giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, GaussPoint *gp, TimeStep *tStep);
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
+    virtual const FloatMatrix *computeGtoLRotationMatrix() {return CCTPlate3d::computeGtoLRotationMatrix();}
+    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
+    
+
+
     // layered cross section support functions
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
                                             GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
@@ -90,16 +95,12 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
 
     virtual int computeNumberOfDofs() { return 18; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep);
 
 
     // io routines
@@ -122,7 +123,8 @@ protected:
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
-    virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
     virtual void computeGaussPoints();
     virtual double giveArea();
 };

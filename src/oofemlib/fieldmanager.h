@@ -35,27 +35,19 @@
 #ifndef fieldmanager_h
 #define fieldmanager_h
 
-//#define FIELDMANAGER_USE_SHARED_PTR
 #include "oofemcfg.h"
 #include "field.h"
 
 #include <map>
-#ifdef FIELDMANAGER_USE_SHARED_PTR
- #include <tr1/memory>
-#endif
+#include <memory>
 
 namespace oofem {
-#ifdef FIELDMANAGER_USE_SHARED_PTR
-typedef std :: tr1 :: shared_ptr< Field >FM_FieldPtr;
-#else
-typedef Field *FM_FieldPtr;
-#endif
+typedef std :: shared_ptr< Field > FM_FieldPtr;
 
 class OOFEM_EXPORT FieldManager
 {
 protected:
 
-#ifdef FIELDMANAGER_USE_SHARED_PTR
     /**
      * Field container. Stores smart pointers to objects (not object themselves)
      * to avoid copying elements and to preserve the use of polymorphic types.
@@ -63,57 +55,17 @@ protected:
      * ovned (and maintained) by emodel, some may be cretead on demand and thus
      * managed only by field manager.
      */
-    std :: map< FieldType, std :: tr1 :: shared_ptr< Field > >externalFields;
-#else
-    /**
-     * Internal datastructure to keep reference (pointer) to registered field and
-     * flag, indicating, whether the field pointer is managed by field manager or not.
-     * In case by managed field, the field manager is assumed to own the field and is
-     * responsible for its deallocation.
-     */
-    class fieldRecord
-    {
-protected:
-        Field *field;
-        bool isManaged;
-public:
-        /// Creates new field record, containing reference to given field.
-        fieldRecord(Field *f, bool managed) : field(f), isManaged(managed) { }
-        fieldRecord() : field(NULL), isManaged(false) { }
-        /// Destructor. Deletes managed field.
-        ~fieldRecord() { if ( isManaged ) { delete field; } }
-
-        /// Return reference to field.
-        Field *giveField() { return field; }
-    };
-
-
-    /**
-     * Field container. Stores only pointers to objects (not object themselves)
-     * to avoid copying elements and to preserve the use of polymorphic types.
-     */
-    std :: map< FieldType, fieldRecord * >externalFields;
-#endif
+    std :: map< FieldType, std :: shared_ptr< Field > >externalFields;
 
 public:
     FieldManager() : externalFields() { }
     ~FieldManager();
 
-#ifdef FIELDMANAGER_USE_SHARED_PTR
     /**
      * Registers the given field (the receiver is not assumed to own given field).
      * The field is registered under given key. Using this key, it can be later accessed.
      */
     void registerField(FM_FieldPtr eField, FieldType key);
-#else
-    /**
-     * Registers the given field (the receiver is not assumed to own given field).
-     * The field is registered under given key. Using this key, it can be later accessed.
-     * If managedFlag set to true, the receiver is assumed to own the field, so it is
-     * responsible for its deallocation).
-     */
-    void registerField(FM_FieldPtr eField, FieldType key, bool managedFlag = false);
-#endif
 
     /**
      * Returns the previously registered field under given key; NULL otherwise

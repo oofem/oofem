@@ -1,7 +1,8 @@
 patch160.out
 test of Truss2d elements with j2plasticMaterial
 #LinearStatic nsteps 1
-NonLinearStatic nsteps 6 stepLength 6.  minStepLength 0.1 rtolv 0.001 Psi 0.0 MaxIter 30
+NonLinearStatic nsteps 6 stepLength 6.  minStepLength 0.1 rtolv 0.001 Psi 0.0 MaxIter 30 nmodules 1
+errorcheck
 domain 2dTruss
 OutputManager tstep_all dofman_all element_all
 ndofman 2 nelem 1 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
@@ -19,29 +20,29 @@ ConstantFunction 1 f(t) 1.0
 #%BEGIN_CHECK% tolerance 1.e-4
 ## exact solution
 ##
-## step 0
-#NODE tStep 0. number 2 dof 2 unknown d value 6.0
-#ELEMENT tStep 0.  number 1 gp 1 keyword ":\s+strains" component 1  value 2.0
-#ELEMENT tStep 0.  number 1 gp 1 keyword "stresses" component 1  value 1.8214e+00
 ## step 1
-#NODE tStep 1. number 2 dof 2 unknown d value 12.0
-#ELEMENT tStep 1.  number 1 gp 1 keyword ":\s+strains" component 1  value 4.0
-#ELEMENT tStep 1.  number 1 gp 1 keyword "stresses" component 1  value 2.4881e+00
+#NODE tStep 1 number 2 dof 3 unknown d value 6.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1  value 2.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value 1.8214e+00
 ## step 2
-#NODE tStep 2. number 2 dof 2 unknown d value 18.0
-#ELEMENT tStep 2.  number 1 gp 1 keyword ":\s+strains" component 1  value 6.0
-#ELEMENT tStep 2.  number 1 gp 1 keyword "stresses" component 1  value 3.1547e+00
+#NODE tStep 2 number 2 dof 3 unknown d value 12.0
+#ELEMENT tStep 2 number 1 gp 1 keyword 4 component 1  value 4.0
+#ELEMENT tStep 2 number 1 gp 1 keyword 1 component 1  value 2.4881e+00
 ## step 3
-#NODE tStep 3. number 2 dof 2 unknown d value 24.0
-#ELEMENT tStep 3.  number 1 gp 1 keyword ":\s+strains" component 1  value 8.0
-#ELEMENT tStep 3.  number 1 gp 1 keyword "stresses" component 1  value 3.8214e+00
+#NODE tStep 3 number 2 dof 3 unknown d value 18.0
+#ELEMENT tStep 3 number 1 gp 1 keyword 4 component 1  value 6.0
+#ELEMENT tStep 3 number 1 gp 1 keyword 1 component 1  value 3.1547e+00
 ## step 4
-#NODE tStep 4. number 2 dof 2 unknown d value 30.0
-#ELEMENT tStep 4.  number 1 gp 1 keyword ":\s+strains" component 1  value 10.0
-#ELEMENT tStep 4.  number 1 gp 1 keyword "stresses" component 1  value 4.4881e+00
+#NODE tStep 4 number 2 dof 3 unknown d value 24.0
+#ELEMENT tStep 4 number 1 gp 1 keyword 4 component 1  value 8.0
+#ELEMENT tStep 4 number 1 gp 1 keyword 1 component 1  value 3.8214e+00
 ## step 5
-#NODE tStep 5. number 2 dof 2 unknown d value 36.0
-#ELEMENT tStep 5.  number 1 gp 1 keyword ":\s+strains" component 1  value 12.0
-#ELEMENT tStep 5.  number 1 gp 1 keyword "stresses" component 1  value 5.1547e+00
+#NODE tStep 5 number 2 dof 3 unknown d value 30.0
+#ELEMENT tStep 5 number 1 gp 1 keyword 4 component 1  value 10.0
+#ELEMENT tStep 5 number 1 gp 1 keyword 1 component 1  value 4.4881e+00
+## step 6
+#NODE tStep 6 number 2 dof 3 unknown d value 36.0
+#ELEMENT tStep 6 number 1 gp 1 keyword 4 component 1  value 12.0
+#ELEMENT tStep 6 number 1 gp 1 keyword 1 component 1  value 5.1547e+00
 #%END_CHECK%
 

@@ -57,7 +57,7 @@ REGISTER_Element(L4Axisymm);
 FEI2dQuadLin L4Axisymm :: interpolation(1, 2);
 
 L4Axisymm :: L4Axisymm(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain)
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SpatialLocalizerInterface(this)
 {
     numberOfDofMans  = 4;
     numberOfGaussPoints = 4;
@@ -73,11 +73,11 @@ Interface *
 L4Axisymm :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     }
 
     return NULL;
@@ -106,7 +106,7 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     }
 
     if ( ( size < 0 ) || ( size > 6 ) ) {
-        _error("ComputeBmatrixAt size mismatch");
+        OOFEM_ERROR("ComputeBmatrixAt size mismatch");
     }
 
     answer.resize(size, 8);
@@ -129,7 +129,7 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     }
 
     if ( ( li <= 3 ) && ( ui >= 3 ) ) {
-        FloatArray n(4);
+        FloatArray n;
         this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
         r = 0.;
@@ -205,9 +205,8 @@ void
 L4Axisymm :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 2;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(2);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 
@@ -221,7 +220,7 @@ L4Axisymm :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume, r, x;
-    FloatArray n(4);
+    FloatArray n;
 
     this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
@@ -232,7 +231,7 @@ L4Axisymm :: computeVolumeAround(GaussPoint *gp)
     }
 
     determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) ) );
+                                                                       FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     volume = determinant * weight * r;
@@ -251,9 +250,9 @@ L4Axisymm :: initializeFrom(InputRecord *ir)
 
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-            ( numberOfGaussPoints == 4 ) ||
-            ( numberOfGaussPoints == 9 ) ||
-            ( numberOfGaussPoints == 16 ) ) ) {
+           ( numberOfGaussPoints == 4 ) ||
+           ( numberOfGaussPoints == 9 ) ||
+           ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
@@ -277,7 +276,7 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
     answer.resize(6);
     answer.zero();
     if ( mode == TL ) { // Total Lagrange formulation
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+        this->computeVectorOf({D_u, D_v}, VM_Total, tStep, u);
         // linear part of strain tensor (in vector form)
 
         this->computeBmatrixAt(gp, b, 1, 2);
@@ -296,7 +295,7 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
 
             this->computeBmatrixAt(helpGaussPoint, b, 3, 6);
         } else {
-            _error("computeStrainVector: numberOfFiAndShGaussPoints size mismatch");
+            OOFEM_ERROR("numberOfFiAndShGaussPoints size mismatch");
         }
 
         Epsilon.beProductOf(b, u);
@@ -304,10 +303,10 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
         answer.at(6) = Epsilon.at(4);
 
         if ( nlGeometry ) {
-            OOFEM_ERROR("L4Axisymm :: computeStrainVector - only supports nlGeometry = 0");
+            OOFEM_ERROR("only supports nlGeometry = 0");
         }
     } else if ( mode == AL ) { // actualized Lagrange formulation
-        _error("computeStrainVector : unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 }
 
@@ -346,9 +345,9 @@ L4Axisymm :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalTo
 }
 
 void
-L4Axisymm :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+L4Axisymm :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(2, D_u, D_v);
+    answer = {D_u, D_v};
 }
 
 void
@@ -375,7 +374,7 @@ L4Axisymm :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
     if ( found ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 
@@ -390,17 +389,6 @@ SPRPatchType
 L4Axisymm :: SPRNodalRecoveryMI_givePatchType()
 {
     return SPRPatchType_2dxy;
-}
-
-
-int
-L4Axisymm :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    int result;
-    FloatArray lcoords;
-    result = this->computeLocalCoordinates(lcoords, coords);
-
-    return result;
 }
 
 
@@ -463,7 +451,7 @@ L4Axisymm :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(3) = 1;
         answer.at(4) = 2;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 
@@ -474,7 +462,7 @@ L4Axisymm ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     FloatArray c(2);
     this->computeEdgeIpGlobalCoords(c, gp, iEdge);
     double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) );
+                                                                       FEIElementGeometryWrapper(this) );
 
 
     return c.at(1) * result * gp->giveWeight();
@@ -680,8 +668,6 @@ void L4Axisymm :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        int ip;
-        GaussPoint *gp;
         IntArray ind(4);
         FloatArray *gpCoords;
         WCRec pp [ 9 ];
@@ -714,8 +700,7 @@ void L4Axisymm :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
-        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
             gpCoords = gp->giveCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;

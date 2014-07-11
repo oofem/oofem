@@ -51,7 +51,7 @@ protected:
     bool hasAdvanced;
 
 public:
-    DarcyFlow(int i, EngngModel *_master);
+    DarcyFlow(int i, EngngModel * _master);
     virtual ~DarcyFlow();
 
     virtual void solveYourselfAt(TimeStep *tStep);
