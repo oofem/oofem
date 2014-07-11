@@ -46,6 +46,7 @@
 #define _IFT_PrescribedGradientBCWeak_NumTractionNodeSpacing   "tractionnodespacing"
 //#define _IFT_PrescribedGradientBCWeak_TractionOnGammaPlus   "periodic"
 #define _IFT_PrescribedGradientBCWeak_DuplicateCornerNodes   "duplicatecornernodes"
+#define _IFT_PrescribedGradientBCWeak_TangDistPadding   "tangdistpadding"
 
 namespace oofem {
 
@@ -171,6 +172,11 @@ protected:
      * 1 -> Duplicate corner traction nodes
      */
     bool mDuplicateCornerNodes;
+
+    /**
+     * Parameter for creation of traction mesh
+     */
+    double mTangDistPadding;
 
     /// Lower corner of domain (assuming a rectangular RVE)
     FloatArray mLC;

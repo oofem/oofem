@@ -118,7 +118,7 @@ void XfemStructureManager :: splitCracks()
                     crack_i->computeIntersectionPoints(*crack_j, intersectionPoints, arcPositions_i);
                     crack_j->computeArcPoints(intersectionPoints, arcPositions_j);
 
-                    const double arcLengthTol = 1.0e-9;
+                    const double arcLengthTol = 1.0e-6;
 
                     for(int k = 0; k < int(arcPositions_i.size()); k++) {
 

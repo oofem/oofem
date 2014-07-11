@@ -63,7 +63,8 @@ mTractionNodeSpacing(1),
 mMeshIsPeriodic(false),
 mDuplicateCornerNodes(false),
 mpDisplacementLock(NULL),
-mDispLockScaling(1.0)
+mDispLockScaling(1.0),
+mTangDistPadding(0.0)
 {
 	// Compute bounding box of the domain
     computeDomainBoundingBox(*d, mLC, mUC);
@@ -142,6 +143,10 @@ IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
     else {
         mDuplicateCornerNodes = false;
     }
+
+    mTangDistPadding = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, mTangDistPadding, _IFT_PrescribedGradientBCWeak_TangDistPadding);
+    printf("mTangDistPadding: %e\n", mTangDistPadding);
 
     return IRRT_OK;
 }
@@ -574,13 +579,19 @@ void PrescribedGradientBCWeak::giveTractionElNormal(size_t iElInd, FloatArray &o
 void PrescribedGradientBCWeak::giveTraction(size_t iElInd, FloatArray &oStartTraction, FloatArray &oEndTraction, ValueModeType mode, TimeStep *tStep)
 {
     mpTractionNodes[ mpTractionElements[iElInd]->mTractionNodeInd[0] ]->giveCompleteUnknownVector(oStartTraction, mode, tStep);
-    mpTractionNodes[ mpTractionElements[iElInd]->mTractionNodeInd[1] ]->giveCompleteUnknownVector(oEndTraction, mode, tStep);
+
+    if( mpTractionElements[iElInd]->mTractionNodeInd.size() < 2 ) {
+        mpTractionNodes[ mpTractionElements[iElInd]->mTractionNodeInd[0] ]->giveCompleteUnknownVector(oEndTraction, mode, tStep);
+    }
+    else {
+        mpTractionNodes[ mpTractionElements[iElInd]->mTractionNodeInd[1] ]->giveCompleteUnknownVector(oEndTraction, mode, tStep);
+    }
 }
 
 void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity)
 {
     const double nodeDistTol = 1.0e-15;
-    const double meshTol = 1.0e-4; // Minimum distance between traction nodes
+    const double meshTol = 1.0e-8; // Minimum distance between traction nodes
 
     /**
      * first: 	coordinates
@@ -621,8 +632,19 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
                 bndNodeCoords.push_back( nodeCoord );
             }
             else {
-            	std::pair<FloatArray, bool> nodeCoord = {x, false};
-                bndNodeCoords.push_back( nodeCoord );
+
+                bool closePointExists = false;
+                const double meshTol2 = meshTol*meshTol;
+                for(auto bndPos : bndNodeCoords) {
+                    if( bndPos.first.distance_square(x) < meshTol2 ) {
+                        closePointExists = true;
+                    }
+                }
+
+                if(!closePointExists) {
+                    std::pair<FloatArray, bool> nodeCoord = {x, false};
+                    bndNodeCoords.push_back( nodeCoord );
+                }
             }
 
 
@@ -679,7 +701,7 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
         if(xfemElInt != NULL && domain->hasXfemManager() ) {
             std::vector<Line> segments;
             std::vector<FloatArray> intersecPoints;
-            xfemElInt->partitionEdgeSegment( boundary, segments, intersecPoints );
+            xfemElInt->partitionEdgeSegment( boundary, mTangDistPadding, segments, intersecPoints );
 
             for(size_t i = 0; i < intersecPoints.size(); i++) {
 
@@ -876,7 +898,7 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
         localizer->giveAllElementsWithNodesWithinBox(elList_plus, xC_plus, 0.51*elLength_plus );
 
         if( elList_plus.empty() ) {
-            Element *el = localizer->giveElementContainingPoint(xC_plus);
+            Element *el = localizer->giveElementContainingPoint(xC_plus); // TODO: Replace?! giveElementClosestToPoint
             int elPlaceInArray = domain->giveElementPlaceInArray(el->giveGlobalNumber());
             elList_plus.insert( elPlaceInArray );
         }

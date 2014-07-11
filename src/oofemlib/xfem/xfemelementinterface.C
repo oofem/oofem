@@ -793,9 +793,10 @@ void XfemElementInterface :: putPointsInCorrectPartition(std :: vector< std :: v
     }
 }
 
-void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< Line > &oSegments, std::vector<FloatArray> &oIntersectionPoints)
+void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, const double &iTangDistPadding, std :: vector< Line > &oSegments, std::vector<FloatArray> &oIntersectionPoints)
 {
     const double levelSetTol2 = 1.0e-12;
+//    const double gammaPadding = 0.001;
 
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
 
@@ -878,7 +879,7 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< 
                 double gamma = 0.5 * ( 1.0 - xi ) * gammaS + 0.5 * ( 1.0 + xi ) * gammaE;
 
                 // If we are inside in tangential direction
-                if ( gamma > 0.0 ) {
+                if ( gamma > -iTangDistPadding ) {
                     // If so, subdivide it ...
 
                     // Compute global coordinates of the intersection point

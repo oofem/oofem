@@ -115,6 +115,15 @@ double Line :: computeTangentialDistanceToEnd(FloatArray *point)
     return tmp.dotProduct(projection) / projection.computeNorm();
 }
 
+void Line :: computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinArcDist) const
+{
+    PolygonLine pl;
+    pl.insertVertexBack( mVertices[0] );
+    pl.insertVertexBack( mVertices[1] );
+
+    pl.computeTangentialSignDist(oDist, iPoint, oMinArcDist);
+}
+
 int Line :: computeNumberOfIntersectionPoints(Element *element)
 {
     int count = 0;
@@ -124,7 +133,10 @@ int Line :: computeNumberOfIntersectionPoints(Element *element)
 
     for ( int i = 1; i <= nrNodes; i++ ) {
         signedDist.at(i) = computeDistanceTo( element->giveDofManager(i)->giveCoordinates() );
-        tanSignDist.at(i) = computeTangentialDistanceToEnd( element->giveDofManager(i)->giveCoordinates() );
+//        tanSignDist.at(i) = computeTangentialDistanceToEnd( element->giveDofManager(i)->giveCoordinates() );
+        double arcPos = 0.0;
+        computeTangentialSignDist(tanSignDist.at(i), *(element->giveDofManager(i)->giveCoordinates()), arcPos);
+        tanSignDist.at(i) *= -1.0;
     }
 
     // here I need to get max value and min value in the FloatArray
@@ -155,7 +167,7 @@ int Line :: computeNumberOfIntersectionPoints(Element *element)
     if ( ( maxDist * minDist ) < tol ) {
         if ( maxTanDist <= 0.0 ) {
             count = 2;
-        } else if ( ( maxTanDist * minTanDist ) <= 0 ) {
+        } else if ( ( maxTanDist * minTanDist ) <= 0.0 ) {
             count = 1;
         } else {
             count = 0;
