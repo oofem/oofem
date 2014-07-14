@@ -39,6 +39,7 @@
 namespace oofem {
 class StructuralInterfaceMaterial;
 class IntegrationRule;
+class VTKPiece;
 /**
  * Provides Xfem interface for a structural element.
  * @author Erik Svenning
@@ -86,6 +87,9 @@ public:
 
     // Store element subdivision for postprocessing
     std :: vector< Triangle > mSubTri;
+
+    /// VTK Interface
+    void giveSubtriangulationCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
 
 };
 } /* namespace oofem */

@@ -57,7 +57,7 @@ MMAContainingElementProjection :: __init(Domain *dold, IntArray &type, FloatArra
 
         this->source = NULL;
         for ( GaussPoint *jGp: *iRule ) {
-            if ( srcElem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
+            if ( srcElem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
                 distance = coords.distance(jGpCoords);
                 if ( distance < minDist ) {
                     minDist = distance;

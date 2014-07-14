@@ -178,7 +178,7 @@ MMALeastSquareProjection :: __init(Domain *dold, IntArray &type, FloatArray &coo
         element = patchDomain->giveElement( patchList.at(ielem) );
         iRule = element->giveDefaultIntegrationRulePtr();
         for ( GaussPoint *srcgp: *iRule ) {
-            if ( element->computeGlobalCoordinates( srcgpcoords, * ( srcgp->giveCoordinates() ) ) ) {
+            if ( element->computeGlobalCoordinates( srcgpcoords, * ( srcgp->giveNaturalCoordinates() ) ) ) {
                 element->giveIPValue(dam, srcgp, IST_PrincipalDamageTensor, tStep);
                 if ( this->stateFilter ) {
                     // consider only points with same state
@@ -291,7 +291,7 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
                 rhs.resize(neq, nval);
                 rhs.zero();
             }
-            if ( element->computeGlobalCoordinates( coords, * ( srcgp->giveCoordinates() ) ) ) {
+            if ( element->computeGlobalCoordinates( coords, * ( srcgp->giveNaturalCoordinates() ) ) ) {
                 coords.subtract(targetCoords);
                 // compute ip contribution
                 this->computePolynomialTerms(P, coords, patchType);
@@ -329,7 +329,7 @@ MMALeastSquareProjection :: __mapVariable(FloatArray &answer, FloatArray &target
 #endif
         // determine the value from patch
         targetCoords.zero();
-        //gp->giveElement()->computeGlobalCoordinates (coords, *(gp->giveCoordinates()));
+        //gp->giveElement()->computeGlobalCoordinates (coords, *(gp->giveNaturalCoordinates()));
         this->computePolynomialTerms(P, targetCoords, patchType);
 
         answer.resize(nval);

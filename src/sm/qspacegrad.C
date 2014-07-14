@@ -102,7 +102,7 @@ void
 QSpaceGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatArray n;
-    this->interpolation_lin.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 1);
 }
 
@@ -110,7 +110,7 @@ void
 QSpaceGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
-    this->interpolation_lin.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beTranspositionOf(dnx);
 }
 

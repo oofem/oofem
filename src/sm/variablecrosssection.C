@@ -150,7 +150,7 @@ VariableCrossSection :: giveExpression(const ScalarFunction **expr, CrossSection
 double
 VariableCrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gpx)
 {
-    return this->give(aProperty, gpx->giveCoordinates(), gpx->giveElement(), true);
+    return this->give(aProperty, gpx->giveNaturalCoordinates(), gpx->giveElement(), true);
 }
 
 

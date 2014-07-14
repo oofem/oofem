@@ -91,7 +91,7 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     /// VTK Interface
-    void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
+    virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
 
 };
 } // end namespace oofem

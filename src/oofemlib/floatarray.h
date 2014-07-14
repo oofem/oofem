@@ -501,6 +501,7 @@ public:
 #endif
 };
 
+const FloatArray ZeroVector = {0.0,0.0,0.0};
 
 ///@name IML compatibility
 //@{

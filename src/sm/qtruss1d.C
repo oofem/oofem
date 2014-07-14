@@ -88,7 +88,7 @@ QTruss1d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double detJ = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double detJ = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     double weight  = gp->giveWeight();
     return detJ *weight *this->giveCrossSection()->give(CS_Area, gp);
 }
@@ -107,7 +107,7 @@ void QTruss1d :: computeGaussPoints()
 void
 QTruss1d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
-    this->interpolation.evaldNdx( answer, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( answer, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 void

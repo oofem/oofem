@@ -129,7 +129,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
 
 
-            mTriInterp.local2global( global, * gp->giveCoordinates(),
+            mTriInterp.local2global( global, * gp->giveNaturalCoordinates(),
                                     FEIVertexListGeometryWrapper(coords) );
 
             newGPCoord.push_back(global);
@@ -138,7 +138,9 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
             FloatArray local;
             this->elem->computeLocalCoordinates(local, global);
 
-            gp->setCoordinates(local);
+            gp->setGlobalCoordinates(global);
+            gp->setNaturalCoordinates(local);
+            gp->setSubPatchCoordinates(local);
 
 
 

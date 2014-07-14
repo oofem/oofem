@@ -91,7 +91,7 @@ double
 Q27Space :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
-    double determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     double weight      = gp->giveWeight();
 
     return ( determinant * weight );
@@ -126,7 +126,7 @@ Q27Space :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 81);
     answer.zero();
@@ -153,7 +153,7 @@ Q27Space :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 81);
     answer.zero();
@@ -189,7 +189,7 @@ void
 Q27Space :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     FloatArray n;
-    interpolation.surfaceEvalN( n, iSurf, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.surfaceEvalN( n, iSurf, * sgp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 3);
 }
 
@@ -213,7 +213,7 @@ double
 Q27Space :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
-    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     volume = determinant * weight;
@@ -224,7 +224,7 @@ Q27Space :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 Q27Space :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf)
 {
-    interpolation.surfaceLocal2global( answer, iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.surfaceLocal2global( answer, iSurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 int

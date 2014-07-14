@@ -53,7 +53,7 @@ Q9PlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li,
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 18);
     answer.zero();
@@ -101,7 +101,7 @@ Q9PlaneStress2d :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
@@ -200,7 +200,7 @@ Q9PlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoi
      */
 
     FloatArray n(3);
-    this->interpolation.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 6);
     answer.zero();
@@ -236,7 +236,7 @@ Q9PlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 Q9PlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
     return result *gp->giveWeight();
 }
@@ -244,7 +244,7 @@ Q9PlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 Q9PlaneStress2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -262,7 +262,7 @@ Q9PlaneStress2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge
     answer.resize(2, 2);
     answer.zero();
 
-    this->interpolation.edgeEvalNormal( normal, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalNormal( normal, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.at(1, 1) = normal.at(2);
     answer.at(1, 2) = normal.at(1);

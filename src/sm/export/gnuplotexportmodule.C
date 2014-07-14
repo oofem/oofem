@@ -283,7 +283,7 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack)
 		if(matStat != NULL) {
 
 			// Compute arc length position of the Gauss point
-			const FloatArray &coord = *(gp->giveCoordinates());
+			const FloatArray &coord = *(gp->giveNaturalCoordinates());
 			double tangDist = 0.0, arcPos = 0.0;
 			ed->computeTangentialSignDist(tangDist, coord, arcPos);
 			arcLengthPositions.push_back(arcPos);

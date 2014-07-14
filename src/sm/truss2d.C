@@ -309,7 +309,7 @@ Truss2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 void
 Truss2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) );
+    this->computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
 }
 
 void
@@ -329,7 +329,7 @@ Truss2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 

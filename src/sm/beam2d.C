@@ -95,7 +95,7 @@ Beam2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
     double l, ksi, kappa, c1;
 
     l     = this->computeLength();
-    ksi   = 0.5 + 0.5 * gp->giveCoordinate(1);
+    ksi   = 0.5 + 0.5 * gp->giveNaturalCoordinate(1);
     kappa = this->giveKappaCoeff();
     c1 = 1. + 2. * kappa;
 
@@ -269,7 +269,7 @@ Beam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &maste
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(2); // {Exx,GMzx}
@@ -751,12 +751,12 @@ void Beam2d :: drawRawGeometry(oofegGraphicContext &gc)
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
+    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(1);
     p [ 0 ].y = 0.;
-    p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveCoordinate(3);
-    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
+    p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(3);
+    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(1);
     p [ 1 ].y = 0.;
-    p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveCoordinate(3);
+    p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(3);
     go = CreateLine3D(p);
     EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
     EGAttachObject(go, ( EObjectP ) this);

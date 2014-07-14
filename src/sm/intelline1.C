@@ -65,7 +65,7 @@ IntElLine1 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
 
     FloatArray N;
     FEInterpolation *interp = this->giveInterpolation();
-    interp->evalN( N, * ip->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evalN( N, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 8);
     answer.zero();
@@ -94,7 +94,7 @@ IntElLine1 :: computeCovarBaseVectorAt(IntegrationPoint *ip, FloatArray &G)
 {
     FloatMatrix dNdxi;
     FEInterpolation *interp = this->giveInterpolation();
-    interp->evaldNdxi( dNdxi, * ip->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interp->evaldNdxi( dNdxi, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     G.resize(2);
     G.zero();
     int numNodes = this->giveNumberOfNodes();

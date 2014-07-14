@@ -177,7 +177,7 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
         std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(order, Boundary));
 
         for ( GaussPoint *gp: *iRule ) {
-            FloatArray *lcoords = gp->giveCoordinates();
+            FloatArray *lcoords = gp->giveNaturalCoordinates();
             FloatArray gcoords, normal, N;
             FloatArray Phi;
 

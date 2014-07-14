@@ -1510,8 +1510,8 @@ TR1_2D_SUPG :: computeNMtrx(FloatArray &answer, GaussPoint *gp)
     double l1, l2;
     answer.resize(3);
 
-    answer.at(1) = l1 = gp->giveCoordinate(1);
-    answer.at(2) = l2 = gp->giveCoordinate(2);
+    answer.at(1) = l1 = gp->giveNaturalCoordinate(1);
+    answer.at(2) = l2 = gp->giveNaturalCoordinate(2);
     answer.at(3) = 1.0 - l1 - l2;
 }
 
@@ -2269,14 +2269,14 @@ TR1_2D_SUPG :: drawRawGeometry(oofegGraphicContext &gc)
     EASValsSetEdgeColor( gc.getElementEdgeColor() );
     EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
-    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
+    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(1);
+    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(2);
     p [ 0 ].z = 0.;
-    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
-    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveCoordinate(2);
+    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(1);
+    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(2);
     p [ 1 ].z = 0.;
-    p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveCoordinate(1);
-    p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveCoordinate(2);
+    p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(1);
+    p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(2);
     p [ 2 ].z = 0.;
 
     go =  CreateTriangle3D(p);
@@ -2336,8 +2336,8 @@ void TR1_2D_SUPG :: drawScalar(oofegGraphicContext &context)
 
     if ( context.getScalarAlgo() == SA_ISO_SURF ) {
         for ( i = 0; i < 3; i++ ) {
-            p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-            p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+            p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(1);
+            p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(2);
             p [ i ].z = 0.;
         }
 
@@ -2350,8 +2350,8 @@ void TR1_2D_SUPG :: drawScalar(oofegGraphicContext &context)
         double landScale = context.getLandScale();
 
         for ( i = 0; i < 3; i++ ) {
-            p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-            p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+            p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(1);
+            p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(2);
             p [ i ].z = s [ i ] * landScale;
         }
 

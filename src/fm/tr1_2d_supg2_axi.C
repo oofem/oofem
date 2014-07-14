@@ -1569,11 +1569,11 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
 
         // remap ip coords into area coords of receiver
         for ( GaussPoint *gp: *integrationRulesArray [ i ] ) {
-            approx->local2global( gc, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(vcoords [ i ]) );
+            approx->local2global( gc, * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(vcoords [ i ]) );
             triaApprox.global2local( lc, gc, FEIElementGeometryWrapper(this) );
             // modify original ip coords to target ones
-            gp->setLocalCoordinates( * gp->giveCoordinates() );
-            gp->setCoordinates(lc);
+            gp->setSubPatchCoordinates( * gp->giveNaturalCoordinates() );
+            gp->setNaturalCoordinates(lc);
             //gp->setWeight (gp->giveWeight()*a/area);
         }
     }
@@ -1616,8 +1616,8 @@ TR1_2D_SUPG2_AXI :: computeRadiusAt(GaussPoint *gp)
     r2 = this->giveNode(2)->giveCoordinate(1);
     r3 = this->giveNode(3)->giveCoordinate(1);
 
-    n1 = gp->giveCoordinate(1);
-    n2 = gp->giveCoordinate(2);
+    n1 = gp->giveNaturalCoordinate(1);
+    n2 = gp->giveNaturalCoordinate(2);
     n3 = 1. - n1 - n2;
 
     return n1 * r1 + n2 * r2 + n3 * r3;
@@ -1633,10 +1633,10 @@ TR1_2D_SUPG2_AXI :: computeVolumeAroundID(GaussPoint *gp, integrationDomain id, 
 
     if ( id == _Triangle ) {
         FEI2dTrLin __interpolation(1, 2);
-        return _r *weight *fabs( __interpolation.giveTransformationJacobian ( *gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
+        return _r *weight *fabs( __interpolation.giveTransformationJacobian ( *gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
     } else {
         FEI2dQuadLin __interpolation(1, 2);
-        double det = fabs( __interpolation.giveTransformationJacobian( * gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
+        double det = fabs( __interpolation.giveTransformationJacobian( * gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
         return _r * det * weight;
     }
 }
@@ -1695,7 +1695,7 @@ void TR1_2D_SUPG2_AXI :: computeBMtrx(FloatMatrix &_b, GaussPoint *gp)
 void
 TR1_2D_SUPG2_AXI :: computeNVector(FloatArray &n, GaussPoint *gp)
 {
-    this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 void
@@ -1799,14 +1799,14 @@ TR1_2D_SUPG2_AXI :: drawRawGeometry(oofegGraphicContext &gc)
     EASValsSetEdgeColor( gc.getElementEdgeColor() );
     EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
-    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
+    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(1);
+    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(2);
     p [ 0 ].z = 0.;
-    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
-    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveCoordinate(2);
+    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(1);
+    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(2);
     p [ 1 ].z = 0.;
-    p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveCoordinate(1);
-    p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveCoordinate(2);
+    p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(1);
+    p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(2);
     p [ 2 ].z = 0.;
 
     go =  CreateTriangle3D(p);
@@ -1883,8 +1883,8 @@ void TR1_2D_SUPG2_AXI :: drawScalar(oofegGraphicContext &context)
 
     if ( context.getScalarAlgo() == SA_ISO_SURF ) {
         for ( i = 0; i < 3; i++ ) {
-            p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-            p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+            p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(1);
+            p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(2);
             p [ i ].z = 0.;
         }
 
@@ -1897,8 +1897,8 @@ void TR1_2D_SUPG2_AXI :: drawScalar(oofegGraphicContext &context)
         double landScale = context.getLandScale();
 
         for ( i = 0; i < 3; i++ ) {
-            p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
-            p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
+            p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(1);
+            p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(2);
             p [ i ].z = s [ i ] * landScale;
         }
 

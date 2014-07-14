@@ -278,7 +278,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
     if ( norm == ZZErrorEstimator :: L2Norm ) {
         for ( GaussPoint *gp: *iRule ) {
             double dV = element->computeVolumeAround(gp);
-            interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(element) );
+            interpol->evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
 
             diff.beTProductOf(nodalRecoveredStreses, n);
 
@@ -296,7 +296,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
 
         for ( GaussPoint *gp: *iRule ) {
             double dV = element->computeVolumeAround(gp);
-            interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(element) );
+            interpol->evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
             selem->computeConstitutiveMatrixAt(D, TangentStiffness, gp, tStep);
             DInv.beInverseOf(D);
 

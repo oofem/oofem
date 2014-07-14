@@ -128,7 +128,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
                     // New N-matrix
                     FloatMatrix NNew;
-                    elNew->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), NNew);
+                    elNew->computeNmatrixAt(* ( gp->giveNaturalCoordinates() ), NNew);
 
 
                     //////////////
@@ -137,7 +137,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
                     FloatArray Nc;
                     FEInterpolation *interp = elNew->giveInterpolation();
-                    const FloatArray &localCoord = * ( gp->giveCoordinates() );
+                    const FloatArray &localCoord = * ( gp->giveNaturalCoordinates() );
                     interp->evalN( Nc, localCoord, FEIElementGeometryWrapper(elNew) );
 
                     const IntArray &elNodes = elNew->giveDofManArray();
@@ -219,6 +219,15 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
             K->assemble(elDofsGlob, me);
             res.assemble(elRes, elDofsGlob);
+        }
+
+        const double stiffTol = 1.0e-9;
+
+        int numRowsTot = K->giveNumberOfRows();
+        for(int rowInd = 1; rowInd <= numRowsTot; rowInd++) {
+            if( fabs(K->at(rowInd, rowInd)) < stiffTol ) {
+                K->at(rowInd, rowInd) = 1.0e-6;
+            }
         }
 
         //		printf("iter: %d res norm: %e\n", iter, res.computeNorm() );

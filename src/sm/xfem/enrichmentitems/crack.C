@@ -61,7 +61,7 @@ void Crack :: AppendCohesiveZoneGaussPoint(GaussPoint *ipGP)
     matStat->printYourself();
     if ( matStat != NULL ) {
         // Compute arc length position of the Gauss point
-        const FloatArray &coord = * ( ipGP->giveCoordinates() );
+        const FloatArray &coord =  ipGP->giveGlobalCoordinates();
         double tangDist = 0.0, arcPos = 0.0;
         mpEnrichmentDomain->computeTangentialSignDist(tangDist, coord, arcPos);
 

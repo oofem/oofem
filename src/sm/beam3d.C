@@ -79,7 +79,7 @@ Beam3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
     double l, ksi, kappay, kappaz, c1y, c1z;
 
     l     = this->computeLength();
-    ksi   = 0.5 + 0.5 * gp->giveCoordinate(1);
+    ksi   = 0.5 + 0.5 * gp->giveNaturalCoordinate(1);
     kappay = this->giveKappayCoeff();
     kappaz = this->giveKappazCoeff();
     c1y = 1. + 2. * kappay;
@@ -867,8 +867,8 @@ Beam3d :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &an
 {
     double layerYCoord, layerZCoord;
 
-    layerZCoord = slaveGp->giveCoordinate(2);
-    layerYCoord = slaveGp->giveCoordinate(1);
+    layerZCoord = slaveGp->giveNaturalCoordinate(2);
+    layerYCoord = slaveGp->giveNaturalCoordinate(1);
 
     answer.resize(3);  // {Exx,GMzx,GMxy}
 
@@ -911,12 +911,12 @@ void Beam3d :: drawRawGeometry(oofegGraphicContext &gc)
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
-    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
-    p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveCoordinate(3);
-    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
-    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveCoordinate(2);
-    p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveCoordinate(3);
+    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(1);
+    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(2);
+    p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(3);
+    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(1);
+    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(2);
+    p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(3);
     go = CreateLine3D(p);
     EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
     EGAttachObject(go, ( EObjectP ) this);

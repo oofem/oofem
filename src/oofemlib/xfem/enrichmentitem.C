@@ -366,8 +366,15 @@ void EnrichmentItem :: updateGeometry()
 
 void EnrichmentItem :: propagateFronts()
 {
-    // Propagate interfaces
-    mpPropagationLaw->propagateInterfaces(* giveDomain(), * mpEnrichmentDomain);
+    TipPropagation tipPropStart;
+    if( mpPropagationLaw->propagateInterface(*giveDomain(), *mpEnrichmentFrontStart, tipPropStart) ) {
+        mpEnrichmentDomain->propagateTip(tipPropStart);
+    }
+
+    TipPropagation tipPropEnd;
+    if( mpPropagationLaw->propagateInterface(*giveDomain(), *mpEnrichmentFrontEnd, tipPropEnd) ) {
+        mpEnrichmentDomain->propagateTip(tipPropEnd);
+    }
 
     // For debugging only
     if ( mpEnrichmentDomain->getVtkDebug() ) {
@@ -537,7 +544,7 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrF
 void EnrichmentItem :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, int iNodeInd, GaussPoint &iGP, bool iGPLivesOnCurrentCrack) const
 {
     double normalSignDist = 0.0;
-    this->interpLevelSet(normalSignDist, *(iGP.giveCoordinates()) );
+    this->interpLevelSet(normalSignDist, iGP.giveGlobalCoordinates() );
 
     auto res = mNodeEnrMarkerMap.find(iNodeInd);
     if ( res != mNodeEnrMarkerMap.end() ) {
@@ -1452,7 +1459,7 @@ bool Inclusion :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection
 
     FloatArray N;
     FEInterpolation *interp = iEl.giveInterpolation();
-    interp->evalN( N, * iGP.giveLocalCoordinates(), FEIElementGeometryWrapper(& iEl) );
+    interp->evalN( N, * iGP.giveNaturalCoordinates(), FEIElementGeometryWrapper(& iEl) );
 
     const IntArray &elNodes = iEl.giveDofManArray();
 

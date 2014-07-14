@@ -95,8 +95,8 @@ Quad1PlateSubSoil :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int l
     FloatArray n, ns;
     FloatMatrix dn, dns;
 
-    this->interp_lin.evaldNdx( dn, * gp->giveCoordinates(),  FEIElementGeometryWrapper(this) );
-    this->interp_lin.evalN( n, * gp->giveCoordinates(),  FEIElementGeometryWrapper(this) );
+    this->interp_lin.evaldNdx( dn, * gp->giveNaturalCoordinates(),  FEIElementGeometryWrapper(this) );
+    this->interp_lin.evalN( n, * gp->giveNaturalCoordinates(),  FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 4);
     answer.zero();
@@ -164,7 +164,7 @@ Quad1PlateSubSoil :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ * weight;
 }
 
@@ -227,7 +227,7 @@ Quad1PlateSubSoil :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &a
 void
 Quad1PlateSubSoil :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-  this->computeNmatrixAt(* sgp->giveCoordinates(), answer);
+  this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), answer);
 }
 
 void
@@ -263,7 +263,7 @@ Quad1PlateSubSoil :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 Quad1PlateSubSoil :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveCoordinates() );
+    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
 }
 
 

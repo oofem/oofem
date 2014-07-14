@@ -84,21 +84,34 @@ void PLCrackPrescribedDir :: giveInputRecord(DynamicInputRecord &input)
     input.setField(mIncrementLength, _IFT_PLCrackPrescribedDir_IncLength);
 }
 
-void PLCrackPrescribedDir :: propagateInterfaces(Domain &iDomain, EnrichmentDomain &ioEnrDom)
+bool PLCrackPrescribedDir :: propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp)
 {
-    int tipIndex = 1;
+    if(!iEnrFront.propagationIsAllowed()) {
+        return false;
+    }
+
+    const TipInfo &tipInfo = iEnrFront.giveTipInfo();
+
+    SpatialLocalizer *localizer = iDomain.giveSpatialLocalizer();
+    // It is meaningless to propagate a tip that is not inside any element
+    if(tipInfo.mGlobalCoord.giveSize() == 0) {
+        return false;
+    }
+
+    Element *el = localizer->giveElementContainingPoint(tipInfo.mGlobalCoord);
+    if ( el == NULL ) {
+        return false;
+    }
+
+
     double angleRad = mAngle * M_PI / 180.0;
     FloatArray dir = {cos(angleRad), sin(angleRad)};
 
+    oTipProp.mTipIndex = tipInfo.mTipIndex;
+    oTipProp.mPropagationDir = dir;
+    oTipProp.mPropagationLength = mIncrementLength;
 
-    std :: vector< TipPropagation >tipPropagations;
-    TipPropagation tipProp;
-    tipProp.mTipIndex = tipIndex;
-    tipProp.mPropagationDir = dir;
-    tipProp.mPropagationLength = mIncrementLength;
-    tipPropagations.push_back(tipProp);
-
-    ioEnrDom.propagateTips(tipPropagations);
+    return true;
 }
 
 } // end namespace oofem

@@ -23,6 +23,9 @@ public:
 
     virtual void postInitialize();
 
+    virtual const char *giveClassName() const { return "PrescribedGradientBCWeakPeriodic"; }
+    virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradientBCWeakPeriodic_Name; }
+
 protected:
     virtual void giveBoundaryCoordVector(FloatArray &oX, const FloatArray &iPos) const;
     virtual void checkIfCorner(bool &oIsCorner, bool &oDuplicatable, const FloatArray &iPos, const double &iNodeDistTol) const;

@@ -599,7 +599,7 @@ RerShell :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(5); // {Exx,Eyy,GMyz,GMzx,GMxy}

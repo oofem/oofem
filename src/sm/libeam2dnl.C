@@ -77,7 +77,7 @@ LIBeam2dNL :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int 
     double l, ksi, n1, n2, n1x, n2x, n3x;
 
     l    = this->computeLength();
-    ksi  = gp->giveCoordinate(1);
+    ksi  = gp->giveNaturalCoordinate(1);
 
     n1    = 0.5 * ( 1.0 - ksi );
     n2    = 0.5 * ( 1.0 + ksi );
@@ -112,7 +112,7 @@ LIBeam2dNL :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
     double l, l8, ll88, ksi, n1x, n2x, n3x;
 
     l    = this->computeLength();
-    ksi  = gp->giveCoordinate(1);
+    ksi  = gp->giveNaturalCoordinate(1);
 
     //n1    = 0.5*(1.0 - ksi);
     //n2    = 0.5*(1.0 + ksi);
@@ -401,7 +401,7 @@ LIBeam2dNL :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &m
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(2); // {Exx,GMzx}
@@ -497,7 +497,7 @@ LIBeam2dNL :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *g
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 
@@ -599,12 +599,12 @@ void LIBeam2dNL :: drawRawGeometry(oofegGraphicContext &gc)
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
+    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(1);
     p [ 0 ].y = 0.;
-    p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveCoordinate(3);
-    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
+    p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(3);
+    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(1);
     p [ 1 ].y = 0.;
-    p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveCoordinate(3);
+    p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(3);
     go = CreateLine3D(p);
     EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
     EGAttachObject(go, ( EObjectP ) this);

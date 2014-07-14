@@ -134,7 +134,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
 
     FloatArray gpCoords, jGpCoords;
     SpatialLocalizer :: elementContainerType elemSet;
-    if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
+    if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates of target failed");
     }
 
@@ -162,7 +162,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
         if ( regionMap.at( ielem->giveRegionNumber() ) == 0 ) {
             iRule = ielem->giveDefaultIntegrationRulePtr();
             for ( GaussPoint *jGp: *iRule ) {
-                if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
+                if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
                     weight = this->computeWeightFunction(gpCoords, jGpCoords);
 
                     //manipulate weights for a special averaging of strain (OFF by default)
@@ -254,7 +254,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
     } else {
         FloatArray gpCoords, jGpCoords;
         int _size = contributingElems->giveSize();
-        if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
+        if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
             OOFEM_ERROR("computeGlobalCoordinates of target failed");
         }
 
@@ -272,7 +272,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
             if ( regionMap.at( ielem->giveRegionNumber() ) == 0 ) {
                 iRule = ielem->giveDefaultIntegrationRulePtr();
                 for ( GaussPoint *jGp: *iRule ) {
-                    if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
+                    if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
                         weight = this->computeWeightFunction(gpCoords, jGpCoords);
 
                         //manipulate weights for a special averaging of strain (OFF by default)

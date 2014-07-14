@@ -104,7 +104,7 @@ QTrPlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, 
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(4, 12);
     answer.zero();
@@ -125,7 +125,7 @@ QTrPlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // @todo not checked if correct
 {
     FloatMatrix dnx;
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(5, 12);
 
@@ -143,7 +143,7 @@ QTrPlaneStrain :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, thickness;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     thickness = this->giveCrossSection()->give(CS_Thickness, gp);
