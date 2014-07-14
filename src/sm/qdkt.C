@@ -763,17 +763,17 @@ QDKTPlate :: drawRawGeometry(oofegGraphicContext &gc)
         EASValsSetEdgeFlag(true);
         EASValsSetFillStyle(FILL_SOLID);
         EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-        p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(1);
-        p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(2);
-        p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(3);
-        p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(1);
-        p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(2);
-        p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(3);
-        p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(1);
-        p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(2);
-        p [ 2 ].z = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(3);
-	p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveNaturalCoordinate(1);
-	p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveNaturalCoordinate(2);
+        p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
+        p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
+        p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveCoordinate(3);
+        p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
+        p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveCoordinate(2);
+        p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveCoordinate(3);
+        p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveCoordinate(1);
+        p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveCoordinate(2);
+        p [ 2 ].z = ( FPNum ) this->giveNode(3)->giveCoordinate(3);
+	p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveCoordinate(1);
+	p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveCoordinate(2);
 	p [ 3 ].z = 0.;
 
         go =  CreateQuad3D(p);
@@ -862,8 +862,8 @@ QDKTPlate :: drawScalar(oofegGraphicContext &context)
                     p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                     p [ i ].z = 0.;
                 } else {
-                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(1);
-                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(2);
+                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
+                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
                     p [ i ].z = 0.;
                 }
             }
@@ -885,8 +885,8 @@ QDKTPlate :: drawScalar(oofegGraphicContext &context)
                     p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                     p [ i ].z = s [ i ] * landScale;
                 } else {
-                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(1);
-                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(2);
+                    p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
+                    p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
                     p [ i ].z = s [ i ] * landScale;
                 }
 
@@ -926,8 +926,8 @@ QDKTPlate :: drawScalar(oofegGraphicContext &context)
                 pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                 pp [ i ].z = 0.;
             } else {
-                pp [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(1);
-                pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveNaturalCoordinate(2);
+                pp [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
+                pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
                 pp [ i ].z = 0.;
             }
         }

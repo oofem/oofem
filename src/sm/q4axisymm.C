@@ -434,17 +434,17 @@ void Q4Axisymm :: drawRawGeometry(oofegGraphicContext &gc)
     EASValsSetEdgeFlag(true);
 
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(1);
-    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(2);
+    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
+    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
     p [ 0 ].z = 0.;
-    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(1);
-    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(2);
+    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
+    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveCoordinate(2);
     p [ 1 ].z = 0.;
-    p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(1);
-    p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveNaturalCoordinate(2);
+    p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveCoordinate(1);
+    p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveCoordinate(2);
     p [ 2 ].z = 0.;
-    p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveNaturalCoordinate(1);
-    p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveNaturalCoordinate(2);
+    p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveCoordinate(1);
+    p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveCoordinate(2);
     p [ 3 ].z = 0.;
 
     go =  CreateQuad3D(p);

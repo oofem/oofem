@@ -686,8 +686,8 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
                         // obtain gp global coordinates
                         if ( gc.getInternalVarsDefGeoFlag() ) {
                             double ksi, eta, n1, n2, n3, n4;
-                            ksi = gp->giveCoordinate(1);
-                            eta = gp->giveCoordinate(2);
+                            ksi = gp->giveNaturalCoordinate(1);
+                            eta = gp->giveNaturalCoordinate(2);
 
                             n1 = ( 1. + ksi ) * ( 1. + eta ) * 0.25;
                             n2 = ( 1. - ksi ) * ( 1. + eta ) * 0.25;

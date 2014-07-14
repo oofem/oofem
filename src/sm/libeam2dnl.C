@@ -599,12 +599,12 @@ void LIBeam2dNL :: drawRawGeometry(oofegGraphicContext &gc)
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
     EASValsSetColor( gc.getElementColor() );
     EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
-    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(1);
+    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
     p [ 0 ].y = 0.;
-    p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveNaturalCoordinate(3);
-    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(1);
+    p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveCoordinate(3);
+    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
     p [ 1 ].y = 0.;
-    p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveNaturalCoordinate(3);
+    p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveCoordinate(3);
     go = CreateLine3D(p);
     EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
     EGAttachObject(go, ( EObjectP ) this);
