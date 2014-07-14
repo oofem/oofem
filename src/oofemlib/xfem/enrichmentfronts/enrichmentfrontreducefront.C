@@ -46,6 +46,8 @@ REGISTER_EnrichmentFront(EnrFrontReduceFront)
 
 void EnrFrontReduceFront :: MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo)
 {
+    mTipInfo = iTipInfo;
+
     // Remove nodes touched by the crack tip
     Domain &d = * ( ixFemMan.giveDomain() );
 

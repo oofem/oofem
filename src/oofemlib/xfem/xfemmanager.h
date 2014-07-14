@@ -157,8 +157,8 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual int instanciateYourself(DataReader *dr);
-    const char *giveClassName() const { return "XfemManager"; }
-    const char *giveInputRecordName() const { return _IFT_XfemManager_Name; }
+    virtual const char *giveClassName() const { return "XfemManager"; }
+    virtual const char *giveInputRecordName() const { return _IFT_XfemManager_Name; }
 
     Domain *giveDomain() { return this->domain; }
     void setDomain(Domain *ipDomain);

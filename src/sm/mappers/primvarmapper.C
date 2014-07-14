@@ -221,6 +221,15 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
             res.assemble(elRes, elDofsGlob);
         }
 
+        const double stiffTol = 1.0e-9;
+
+        int numRowsTot = K->giveNumberOfRows();
+        for(int rowInd = 1; rowInd <= numRowsTot; rowInd++) {
+            if( fabs(K->at(rowInd, rowInd)) < stiffTol ) {
+                K->at(rowInd, rowInd) = 1.0e-6;
+            }
+        }
+
         //		printf("iter: %d res norm: %e\n", iter, res.computeNorm() );
 
 

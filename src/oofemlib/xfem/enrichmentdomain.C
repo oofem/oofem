@@ -237,20 +237,19 @@ bool EDCrack :: giveTipInfos(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const
     return false;
 }
 
-bool EDCrack :: propagateTips(const std :: vector< TipPropagation > &iTipProp) {
-    for ( size_t i = 0; i < iTipProp.size(); i++ ) {
-        if ( iTipProp [ i ].mTipIndex == 0 ) {
+bool EDCrack :: propagateTip(const TipPropagation &iTipProp) {
+        if ( iTipProp.mTipIndex == 0 ) {
             // Propagate start point
             FloatArray pos( bg->giveVertex(1) );
-            pos.add(iTipProp [ i ].mPropagationLength, iTipProp [ i ].mPropagationDir);
+            pos.add(iTipProp.mPropagationLength, iTipProp.mPropagationDir);
             bg->insertVertexFront(pos);
-        } else if ( iTipProp [ i ].mTipIndex == 1 ) {
+        } else if ( iTipProp.mTipIndex == 1 ) {
             // Propagate end point
             FloatArray pos( bg->giveVertex( bg->giveNrVertices() ) );
-            pos.add(iTipProp [ i ].mPropagationLength, iTipProp [ i ].mPropagationDir);
+            pos.add(iTipProp.mPropagationLength, iTipProp.mPropagationDir);
             bg->insertVertexBack(pos);
         }
-    }
+
     return true;
 }
 

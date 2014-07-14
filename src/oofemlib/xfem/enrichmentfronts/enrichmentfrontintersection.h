@@ -79,6 +79,7 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual double giveSupportRadius() const { return 0.0; }
+    virtual bool propagationIsAllowed() const {return false;}
 
     void setTangent(const FloatArray &iTangent) {mTangent = iTangent;}
 

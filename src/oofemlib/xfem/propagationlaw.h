@@ -62,6 +62,8 @@ namespace oofem {
 class Domain;
 class EnrichmentDomain;
 class DynamicInputRecord;
+class EnrichmentFront;
+struct TipPropagation;
 
 /**
  * Updates the geometry of evolving XFEM interfaces.
@@ -80,7 +82,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) = 0;
     virtual void giveInputRecord(DynamicInputRecord &input) = 0;
 
-    virtual void propagateInterfaces(Domain &iDomain, EnrichmentDomain &iEnrDom) = 0;
+    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) = 0;
 };
 
 /**
@@ -99,7 +101,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual void propagateInterfaces(Domain &iDomain, EnrichmentDomain &ioEnrDom) { };
+    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) {return false;};
 };
 
 /**
@@ -118,7 +120,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual void propagateInterfaces(Domain &iDomain, EnrichmentDomain &ioEnrDom);
+    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp);
 
 protected:
     double mAngle, mIncrementLength;

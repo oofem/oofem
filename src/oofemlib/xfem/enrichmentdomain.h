@@ -96,7 +96,7 @@ public:
     virtual bool giveTipInfos(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const { return false; }
 
     /// Propagate tips
-    virtual bool propagateTips(const std :: vector< TipPropagation > &iTipProp) { return false; }
+    virtual bool propagateTip(const TipPropagation &iTipProp) { return false; }
 
     void setVtkDebug(bool iDebugVTK) { mDebugVTK = iDebugVTK; }
     bool getVtkDebug() const { return mDebugVTK; }
@@ -174,7 +174,7 @@ public:
 
     virtual bool giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const;
     virtual bool giveTipInfos(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const;
-    virtual bool propagateTips(const std :: vector< TipPropagation > &iTipProp);
+    virtual bool propagateTip(const TipPropagation &iTipProp);
 
     /**
      * Keep only a part of the underlying geometry,

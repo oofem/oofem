@@ -366,8 +366,15 @@ void EnrichmentItem :: updateGeometry()
 
 void EnrichmentItem :: propagateFronts()
 {
-    // Propagate interfaces
-    mpPropagationLaw->propagateInterfaces(* giveDomain(), * mpEnrichmentDomain);
+    TipPropagation tipPropStart;
+    if( mpPropagationLaw->propagateInterface(*giveDomain(), *mpEnrichmentFrontStart, tipPropStart) ) {
+        mpEnrichmentDomain->propagateTip(tipPropStart);
+    }
+
+    TipPropagation tipPropEnd;
+    if( mpPropagationLaw->propagateInterface(*giveDomain(), *mpEnrichmentFrontEnd, tipPropEnd) ) {
+        mpEnrichmentDomain->propagateTip(tipPropEnd);
+    }
 
     // For debugging only
     if ( mpEnrichmentDomain->getVtkDebug() ) {

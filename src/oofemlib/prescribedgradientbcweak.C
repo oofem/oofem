@@ -45,6 +45,7 @@
 #include "xfem/integrationrules/discsegintegrationrule.h"
 #include "spatiallocalizer.h"
 #include "geometry.h"
+#include "dynamicinputrecord.h"
 
 #include "xfem/XFEMDebugTools.h"
 
@@ -153,7 +154,20 @@ IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
 
 void PrescribedGradientBCWeak :: giveInputRecord(DynamicInputRecord &input)
 {
-    // TODO: Implement.
+    PrescribedGradientBC :: giveInputRecord(input);
+
+    input.setField(mTractionInterpOrder, _IFT_PrescribedGradientBCWeak_TractionInterpOrder);
+    input.setField(mNumTractionNodesAtIntersections, _IFT_PrescribedGradientBCWeak_NumTractionNodesAtIntersections);
+    input.setField(mTractionNodeSpacing, _IFT_PrescribedGradientBCWeak_NumTractionNodeSpacing);
+
+    if(mDuplicateCornerNodes) {
+        input.setField(1, _IFT_PrescribedGradientBCWeak_DuplicateCornerNodes);
+    }
+    else {
+        input.setField(0, _IFT_PrescribedGradientBCWeak_DuplicateCornerNodes);
+    }
+
+    input.setField(mTangDistPadding, _IFT_PrescribedGradientBCWeak_TangDistPadding);
 }
 
 void PrescribedGradientBCWeak::postInitialize()
