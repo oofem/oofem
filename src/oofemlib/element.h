@@ -726,6 +726,7 @@ public:
      * @return Nonzero if o.k, zero otherwise.
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveGlobalIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     // characteristic length in gp (for some material models)
     /**

@@ -36,17 +36,13 @@
 #define qspacegrad_h
 
 #include "qspace.h"
-#include "fei3dhexalin.h"
 #include "graddpelement.h"
-#include "zznodalrecoverymodel.h"
-#include "nodalaveragingrecoverymodel.h"
-#include "eleminterpmapperinterface.h"
-#include "huertaerrorestimator.h"
-#include "sprnodalrecoverymodel.h"
 
 #define _IFT_QSpaceGrad_Name "qspacegrad"
 
 namespace oofem {
+class FEI3dHexaLin;
+
 /**
  * Quadratic 3d  20 - node element with quadratic approximation of displacements and linear approximation of gradient
  *
@@ -55,7 +51,7 @@ namespace oofem {
 class QSpaceGrad : public QSpace, public GradDpElement
 {
 protected:
-    static FEI3dHexaLin interpolation;
+    static FEI3dHexaLin interpolation_lin;
 
 public:
     QSpaceGrad(int n, Domain * d);
@@ -74,7 +70,6 @@ protected:
     virtual void computeGaussPoints();
     virtual void computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
     virtual StructuralElement *giveStructuralElement() { return this; }
     virtual NLStructuralElement *giveNLStructuralElement() { return this; }
 };

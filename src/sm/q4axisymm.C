@@ -218,24 +218,18 @@ Q4Axisymm :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the [9x16] displacement gradient matrix {BH} of the receiver,
 // evaluated at gp.
 // BH matrix  -  9 rows : du/dx, dv/dy, dw/dz = u/r, 0, 0, du/dy,  0, 0, dv/dx
-// @todo not checked if correct
 {
-    FloatArray n;
+    FloatArray n, gcoords;
     FloatMatrix dnx;
 
+    this->interp.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     this->interp.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(9, 16);
-    answer.zero();
-
-    double r = 0., x;
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        x  = this->giveNode(i)->giveCoordinate(1);
-        r += x * n.at(i);
-    }
-
+    this->interp.local2global( gcoords, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    double r = gcoords.at(1);
 
     // mode is _3dMat !!!!!! answer.at(4,*), answer.at(5,*), answer.at(7,*), and answer.at(8,*) is zero
+    answer.resize(9, 16);
+    answer.zero();
     for ( int i = 1; i <= 16; i++ ) {
         answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
         answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy

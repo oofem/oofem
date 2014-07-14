@@ -49,7 +49,7 @@
 namespace oofem {
 REGISTER_Element(QTruss1dGrad);
 
-FEI1dLin QTruss1dGrad :: interpolation(1);
+FEI1dLin QTruss1dGrad :: interpolation_lin(1);
 
 QTruss1dGrad :: QTruss1dGrad(int n, Domain *aDomain) : QTruss1d(n, aDomain), GradDpElement()
     // Constructor.
@@ -121,7 +121,7 @@ void
 QTruss1dGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatArray n;
-    this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 1);
 }
 
@@ -129,11 +129,8 @@ QTruss1dGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 void
 QTruss1dGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
-    answer.resize(1, 2);
-    answer.zero();
-    FloatMatrix b;
-    this->interpolation.evaldNdx( b, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    answer.at(1, 1) = b.at(1, 1);
-    answer.at(1, 2) = b.at(2, 1);
+    FloatMatrix dnx;
+    this->interpolation_lin.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.beTranspositionOf(dnx);
 }
 }

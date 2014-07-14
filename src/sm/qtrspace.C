@@ -93,11 +93,7 @@ QTRSpace :: giveDofManDofIDMask(int inode, IntArray &answer) const
 // DofId mask array contains the DofID constants (defined in cltypes.h)
 // describing physical meaning of particular DOFs.
 {
-    answer.resize(3);
-
-    answer.at(1) = D_u;
-    answer.at(2) = D_v;
-    answer.at(3) = D_w;
+    answer = {D_u, D_v, D_w};
 }
 
 
