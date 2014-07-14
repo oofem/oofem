@@ -1409,8 +1409,37 @@ VTKXMLExportModule :: getNodalVariableFromPrimaryField(FloatArray &answer, DofMa
     InternalStateType iState = IST_DisplacementVector; // Shouldn't be necessary
 
     dofIDMask.clear();
-    if ( ( type == DisplacementVector ) || ( type == EigenVector ) || ( type == VelocityVector ) ) {
-        dofIDMask = {( int ) Undef, ( int ) Undef, ( int ) Undef};
+
+    if ( type == DisplacementVector ) {
+        dofIDMask = { ( int ) Undef, ( int ) Undef, ( int ) Undef };
+        for ( Dof *dof: *dman ) {
+            DofIDItem id = dof->giveDofID();
+            if ( id == D_u ) {
+                dofIDMask.at(1) = id;
+            } else if ( id == D_v ) {
+                dofIDMask.at(2) = id;
+            } else if ( id == D_w ) {
+                dofIDMask.at(3) = id;
+            }
+        }
+
+        answer.resize(3);
+    } else if ( type == VelocityVector ) {
+        dofIDMask = { ( int ) Undef, ( int ) Undef, ( int ) Undef };
+        for ( Dof *dof: *dman ) {
+            DofIDItem id = dof->giveDofID();
+            if ( id == V_u ) {
+                dofIDMask.at(1) = id;
+            } else if ( id == V_v ) {
+                dofIDMask.at(2) = id;
+            } else if ( id == V_w ) {
+                dofIDMask.at(3) = id;
+            }
+        }
+
+        answer.resize(3);
+    } else if ( type == EigenVector ) {
+        dofIDMask = { ( int ) Undef, ( int ) Undef, ( int ) Undef };
         for ( Dof *dof: *dman ) {
             DofIDItem id = dof->giveDofID();
             if ( ( id == V_u ) || ( id == D_u ) ) {
