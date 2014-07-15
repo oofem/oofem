@@ -140,6 +140,7 @@ set (sm_material
     winklerpasternak.C
     structmatsettable.C
     bondceb.C
+    mooneyrivlin.C
     )
 
 set (sm_error
