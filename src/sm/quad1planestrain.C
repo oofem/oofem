@@ -56,7 +56,7 @@ REGISTER_Element(Quad1PlaneStrain);
 FEI2dQuadLin Quad1PlaneStrain :: interp(1, 2);
 
 Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), SPRNodalRecoveryModelInterface(),
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), SPRNodalRecoveryModelInterface(),
     SpatialLocalizerInterface(),
     DirectErrorIndicatorRCInterface(), EIPrimaryUnknownMapperInterface(),
     HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
@@ -110,6 +110,24 @@ Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li
 #endif
 }
 
+void
+Quad1PlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+// Returns the [5x8] displacement gradient matrix {BH} of the receiver,
+// evaluated at gp.
+{
+    FloatMatrix dnx;
+    this->interp.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+    answer.resize(5, 8);
+    answer.zero();
+    // 3rd row is zero -> dw/dz = 0
+    for ( int i = 1; i <= 4; i++ ) {
+        answer.at(1, 2 * i - 1) = dnx.at(i, 1);     // du/dx -1
+        answer.at(2, 2 * i - 0) = dnx.at(i, 2);     // dv/dy -2
+        answer.at(4, 2 * i - 1) = dnx.at(i, 2);     // du/dy -6
+        answer.at(5, 2 * i - 0) = dnx.at(i, 1);     // dv/dx -9
+    }
+}
 
 void
 Quad1PlaneStrain :: computeGaussPoints()
@@ -208,7 +226,7 @@ double
 Quad1PlaneStrain :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ *gp->giveWeight();
+    return detJ * gp->giveWeight();
 }
 
 
@@ -285,14 +303,14 @@ IRResultType
 Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = this->StructuralElement :: initializeFrom(ir);
+    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
 
     if ( !( ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
+            ( numberOfGaussPoints == 9 ) ||
+            ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
@@ -314,7 +332,9 @@ Quad1PlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &n
 void
 Quad1PlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 {
-    answer = {D_u, D_v};
+    answer = {
+        D_u, D_v
+    };
 }
 
 
@@ -357,7 +377,7 @@ Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElem
     static int sideNode [ 4 ] [ 2 ] = { { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 1 } };
 
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
-        ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
+         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
             corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
             if ( corner [ inode ]->giveSize() != 3 ) {
@@ -715,13 +735,13 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
                             gpglobalcoords.resize(2);
 
                             gpglobalcoords.at(1) = ( n1 * this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale) +
-                                                    n2 * this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) +
-                                                    n3 * this->giveNode(3)->giveUpdatedCoordinate(1, tStep, defScale) +
-                                                    n4 * this->giveNode(4)->giveUpdatedCoordinate(1, tStep, defScale) );
+                                                     n2 * this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) +
+                                                     n3 * this->giveNode(3)->giveUpdatedCoordinate(1, tStep, defScale) +
+                                                     n4 * this->giveNode(4)->giveUpdatedCoordinate(1, tStep, defScale) );
                             gpglobalcoords.at(2) = ( n1 * this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale) +
-                                                    n2 * this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) +
-                                                    n3 * this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale) +
-                                                    n4 * this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale) );
+                                                     n2 * this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) +
+                                                     n3 * this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale) +
+                                                     n4 * this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale) );
                         } else {
                             computeGlobalCoordinates( gpglobalcoords, * ( gp->giveCoordinates() ) );
                         }
