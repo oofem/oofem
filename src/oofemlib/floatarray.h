@@ -117,6 +117,8 @@ public:
     /// Add one element
     void push_back(const double &iVal) {values.push_back(iVal);}
 
+    /// Returns true if no element is NAN or infinite
+    bool isFinite() const;
 
     /**
      * Coefficient access function. Returns value of coefficient at given

@@ -186,6 +186,16 @@ void FloatMatrix :: checkBounds(int i, int j) const
     }
 }
 
+bool FloatMatrix ::isFinite() const
+{
+    for(double val : values) {
+        if(!std::isfinite(val)) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 #ifdef DEBUG
 double &FloatMatrix :: at(int i, int j)

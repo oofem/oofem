@@ -50,6 +50,7 @@
 #include <ostream>
 #include <memory>
 #include <numeric>
+#include <cmath>
 
 #define FAST_RESIZE(newsize) \
     if ( (newsize) < this->giveSize() ) { \
@@ -68,6 +69,17 @@ extern "C" {
 #endif
 
 namespace oofem {
+
+bool FloatArray ::isFinite() const
+{
+    for(double val : values) {
+        if(!std::isfinite(val)) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 #ifdef DEBUG
 double &
