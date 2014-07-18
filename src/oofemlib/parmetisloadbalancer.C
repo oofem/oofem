@@ -90,7 +90,6 @@ ParmetisLoadBalancer :: calculateLoadTransfer()
     Element *ielem;
     MPI_Comm communicator = MPI_COMM_WORLD;
     LoadBalancerMonitor *lbm = domain->giveEngngModel()->giveLoadBalancerMonitor();
-    FloatArray _procweights;
 
     nproc = domain->giveEngngModel()->giveNumberOfProcesses();
     // init parmetis element numbering
@@ -166,7 +165,7 @@ ParmetisLoadBalancer :: calculateLoadTransfer()
     // set ratio of inter-proc communication compared to data redistribution time
     itr = 1000.0;
     // set partition weights by quering load balance monitor
-    lbm->giveProcessorWeights(_procweights);
+    const FloatArray &_procweights = lbm->giveProcessorWeights();
     if ( tpwgts == NULL ) {
         if ( ( tpwgts = new real_t [ nproc ] ) == NULL ) {
             OOFEM_ERROR("failed to allocate tpwgts");
