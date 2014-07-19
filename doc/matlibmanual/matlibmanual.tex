@@ -267,6 +267,68 @@ Supported modes& 3dMat\\
 %\end{center}
 \end{table}
 
+
+\subsubsection{Hyperelastic material - Compressible Mooney-Rivlin}
+The Mooney-Rivlin strain energy function is expressed by
+\begin{equation}\label{freeEnergyMR}
+	\rho_0 \psi = C_1(\bar{I}_1-3) + C_2(\bar{I}_2-3) + \frac{1}{2}K ({\rm ln} J)^2
+\end{equation}
+where $C_1$ and $C_2$ are material constants, $K$ is the bulk modulus, $J$ is the Jacobian (determinant of the deformation gradient, corresponding to the ratio of the current and initial volume),  $\bar{I}_1 = J^{-\frac{2}{3}} I_1$, $\bar{I}_2 = J^{-\frac{2}{3}} I_2$, 
+where $I_1$ and $I_2$ are the first and the second principal invariants of the right Cauchy-Green deformation tensor $\mbf{C}$.
+Compressible neo-Hookean material model is obtained by setting $C_2 = 0$.
+Then stress-strain law can be derived from (\ref{freeEnergyMR}) as
+\begin{equation}
+	\mbf{P} = \rho_0 \frac{\partial \psi}{\partial \mbf{F}} = C_1 \frac{\partial\bar{I}_1}{\partial\mbf{F}} + C_2\frac{\partial\bar{I}_2}{\partial\mbf{F}} + K {\rm ln}J \mbf{F}^{-T}
+\end{equation}
+where
+$\mbf{P}$ is the first Piola-Kirchhoff stress,
+\begin{equation}
+ \frac{\partial \bar{I}_1}{\partial\mbf{F}} = \frac{2}{J^{\frac{2}{3}}}\mbf{F} - \frac{2}{3}\bar{I}_1\mbf{F}^{-T}
+\end{equation}
+and
+\begin{equation}
+\frac{\partial \bar{I}_2}{\partial\mbf{F}} = 2\bar{I}_1\mbf{F}-\frac{4}{3}\bar{I}_2\mbf{F}^{-T}-\frac{2}{J^\frac{4}{3}}\mbf{F}\cdot \mbf{C}
+\end{equation}
+The first elasticity tensor is derived as
+\begin{equation}
+A_{ijkl} = \frac{\partial P_{ij}}{\partial F_{kl}} = C_1 A^1_{ijkl} + C_2  A^2_{ijkl} + K(F_{ji}^{-1}F_{lk}^{-1} - {\rm ln}J F_{jk}^{-1}F_{li}^{-1})
+\end{equation}
+where 
+\begin{equation}
+A^1_{ijkl} = \frac{2}{3} J^{-\frac{2}{3}}\left[3\delta_{ik}\delta_{jl} + I_{1}F_{jk}^{-1}F_{li}^{-1} - 2F_{lk}^{-1}F_{ij}+\frac{2}{3}I_1 F_{ji}^{-1}F_{lk}^{-1}-2F_{ji}^{-1}F_{kl} \right]
+\end{equation}
+and
+
+\begin{eqnarray}
+A^2_{ijkl} = 2 J^{-\frac{4}{3}}\left[ I_1 \delta_{ik} \delta_{jl} + 2 F_{ij}F_{kl}-\frac{4}{3}I_1 F_{ij} F_{lk}^{-1} -\frac{8}{9}I_2 F_{ji}^{-1}F_{lk}^{-1}-\frac{4}{3}I_1 F_{ji}^{-1}F_{kl} \nonumber\right.\\ 
+\left.  + \frac{4}{3} F_{kn}C_{nl}F_{ji}^{-1}  +\frac{2}{3}I_2 F_{li}^{-1}F_{jk}^{-1} + \frac{4}{3}F_{kl}^{-1}F_{im}C_{mj} - \delta_{ik}C_{lj} - F_{il}F_{kj} + F_{km}F_{im}\delta_{jl}\right]
+\end{eqnarray}
+
+
+The model description and parameters are summarized in Tab.~\ref{MooneyRivlin_table}.
+\begin{table}[!htb]
+	%\begin{center}
+	\begin{mmt}
+		\hline
+		Description & Mooney-Rivlin\\
+		\hline
+		Record Format & \descitem{MooneyRivlin}  \elemparam{}{in}
+		\elemparam{d}{rn} \elemparam{K}{rn} \elemparam{C1}{rn} \elemparam{C2}{rn}\\
+		Parameters &- \param{} material number\\
+		&- \param{d} material density\\
+		&- \param{K} bulk modulus\\
+		&- \param{C1} material constant\\
+		&- \param{C2} material constant\\
+		Supported modes& 3dMat, PlaneStrain\\
+		\hline
+	\end{mmt}
+	\caption{Compressible Mooney-Rivlin - summary.}
+	\label{MooneyRivlin_table}
+	%\end{center}
+\end{table}
+
+
+
 \subsection{Winkler-Pasternak model}
 Implementation of 2D winkler-pasternak model for plate (and potentially beam) subsoil model.
 \begin{table}[!htb]
