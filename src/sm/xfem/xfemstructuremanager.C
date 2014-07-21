@@ -115,7 +115,7 @@ void XfemStructureManager :: splitCracks()
 
                     std::vector<FloatArray> intersectionPoints;
                     std::vector<double> arcPositions_i, arcPositions_j;
-                    crack_i->computeIntersectionPoints(*crack_j, intersectionPoints, arcPositions_i);
+                    crack_i->computeCrackIntersectionPoints(*crack_j, intersectionPoints, arcPositions_i);
                     crack_j->computeArcPoints(intersectionPoints, arcPositions_j);
 
                     const double arcLengthTol = 1.0e-6;
