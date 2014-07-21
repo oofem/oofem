@@ -960,9 +960,9 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
 {
     switch ( nPoints ) {
     case 1:
-        coords_xi1 = {0.333333333333};
-        coords_xi2 = {0.333333333333};
-        weights = {0.5};
+        coords_xi1 = FloatArray({0.333333333333});
+        coords_xi2 = FloatArray({0.333333333333});
+        weights = FloatArray({0.5});
         break;
 
     case 3:
@@ -1376,8 +1376,8 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
 {
     switch ( nPoints ) {
     case 1:
-        coords_xi = {0.0};
-        weights = {2.0};
+        coords_xi = FloatArray({0.0});
+        weights = FloatArray({2.0});
         break;
 
     case 2:

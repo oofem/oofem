@@ -430,8 +430,8 @@ Truss1d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType m
     FloatArray n, u;
 
     this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
-    this->computeVectorOf({D_u}, mode, tStep, u);
-    answer = {n.dotProduct(u)};
+    this->computeVectorOf(IntArray({D_u}), mode, tStep, u);
+    answer = FloatArray({n.dotProduct(u)});
 }
 
 

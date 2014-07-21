@@ -54,7 +54,7 @@ public:
     TractionElement() {}
     virtual ~TractionElement() {}
 
-    void computeN_Constant(FloatArray &oN, const double &iXi) const {oN = {1.0};}
+    void computeN_Constant(FloatArray &oN, const double &iXi) const {oN = FloatArray({1.0});}
     void computeN_Linear(FloatArray &oN, const double &iXi) const {oN = {0.5*(1.0-iXi), 0.5*(1.0+iXi)};}
 
     std::vector<int> mTractionNodeInd;
