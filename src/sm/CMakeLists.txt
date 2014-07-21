@@ -180,6 +180,7 @@ set (sm_xfem
 	xfem/enrichmentitems/delamination.C
 	xfem/propagationlaws/plhoopstresscirc.C
 	xfem/xfemstructuremanager.C
+	xfemsolverinterface.C
 	)
 
 set (sm_unsorted

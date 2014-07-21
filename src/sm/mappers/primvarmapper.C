@@ -50,8 +50,16 @@
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
 #include "classfactory.h"
+#include "timestep.h"
+#include "activebc.h"
+#include "prescribedgradientbcweak.h"
 
 #include <fstream>
+
+#ifdef __PETSC_MODULE
+#include "petscsparsemtrx.h"
+#include <petscksp.h>
+#endif
 
 namespace oofem {
 PrimaryVariableMapper :: PrimaryVariableMapper() { }
@@ -85,8 +93,14 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
     du.zero();
 
     FloatArray res(numDofsNew);
+
+#ifdef __PETSC_MODULE
+    PetscSparseMtrx *K = dynamic_cast<PetscSparseMtrx*>( classFactory.createSparseMtrx(SMT_PetscMtrx) );
+    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver(ST_Petsc, & iOldDom, engngMod);
+#else
     SparseMtrx *K = classFactory.createSparseMtrx(SMT_Skyline);
     SparseLinearSystemNM *solver = classFactory.createSparseLinSolver(ST_Direct, & iOldDom, engngMod);
+#endif
 
 
     K->buildInternalStructure( engngMod, 1, num );
@@ -97,6 +111,8 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
         K->zero();
         res.zero();
 
+
+        // Contribution from elements
         for ( int elIndex = 1; elIndex <= numElNew; elIndex++ ) {
             StructuralElement *elNew = dynamic_cast< StructuralElement * >( iNewDom.giveElement(elIndex) );
             if ( elNew == NULL ) {
@@ -194,13 +210,68 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
 
                     // Fetch nodal displacements for the old element
-                    FloatArray nodeDisp;
-                    elOld->computeVectorOf(iMode, & iTStep, nodeDisp);
+                    FloatArray nodeDispOld;
+                    dofsPassed = 1;
+                    IntArray elDofsGlobOld;
+                    elOld->giveLocationArray( elDofsGlobOld, num );
+
+//                    elOld->computeVectorOf(iMode, &(iTStep), nodeDisp);
+                    int numElNodesOld = elOld->giveNumberOfDofManagers();
+                    for(int nodeIndOld = 1; nodeIndOld <= numElNodesOld; nodeIndOld++) {
+                        DofManager *dManOld = elOld->giveDofManager(nodeIndOld);
+
+                        for ( Dof *dof: *dManOld ) {
+                            if ( elDofsGlobOld.at(dofsPassed) != 0 ) {
+                                FloatArray dofUnknowns;
+                                dof->giveUnknowns(dofUnknowns, iMode, &iTStep);
+
+#ifdef DEBUG
+                                if(!dofUnknowns.isFinite()) {
+                                    OOFEM_ERROR("!dofUnknowns.isFinite()")
+                                }
+
+                                if(dofUnknowns.giveSize() < 1) {
+                                    OOFEM_ERROR("dofUnknowns.giveSize() < 1")
+                                }
+#endif
+                                nodeDispOld.push_back(dofUnknowns.at(1));
+                            } else {
+                                if ( dof->hasBc(& iTStep) ) {
+//                                    printf("hasBC.\n");
+#ifdef DEBUG
+                                    if(!std::isfinite(dof->giveBcValue(iMode, & iTStep))) {
+                                        OOFEM_ERROR("!std::isfinite(dof->giveBcValue(iMode, & iTStep))")
+                                    }
+#endif
+                                    nodeDispOld.push_back( dof->giveBcValue(iMode, & iTStep) );
+                                }
+                                else {
+//                                    printf("Unhandled case in LSPrimaryVariableMapper :: mapPrimaryVariables().\n");
+                                    nodeDispOld.push_back( 0.0 );
+                                }
+                            }
+
+                            dofsPassed++;
+                        }
+
+                    }
+
 
                     FloatArray oldDisp;
-                    oldDisp.beProductOf(NOld, nodeDisp);
+                    oldDisp.beProductOf(NOld, nodeDispOld);
 
                     FloatArray temp, du;
+
+#ifdef DEBUG
+                    if(!oldDisp.isFinite()) {
+                        OOFEM_ERROR("!oldDisp.isFinite()")
+                    }
+
+                    if(!newDisp.isFinite()) {
+                        OOFEM_ERROR("!newDisp.isFinite()")
+                    }
+#endif
+
                     du.beDifferenceOf(oldDisp, newDisp);
                     temp.beTProductOf(NNew, du);
                     double dV = elNew->computeVolumeAround(gp);
@@ -217,24 +288,57 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
             double density = 1.0;
             elNew->computeConsistentMassMatrix(me, & iTStep, mass, & density);
 
+#ifdef DEBUG
+            if(!me.isFinite()) {
+                OOFEM_ERROR("!me.isFinite()")
+            }
+#endif
+
             K->assemble(elDofsGlob, me);
             res.assemble(elRes, elDofsGlob);
         }
 
-        const double stiffTol = 1.0e-9;
 
-        int numRowsTot = K->giveNumberOfRows();
-        for(int rowInd = 1; rowInd <= numRowsTot; rowInd++) {
-            if( fabs(K->at(rowInd, rowInd)) < stiffTol ) {
-                K->at(rowInd, rowInd) = 1.0e-6;
+        // Contribution from active boundary conditions
+        int numBC = iNewDom.giveNumberOfBoundaryConditions();
+        for(int bcInd = 1; bcInd <= numBC; bcInd++) {
+
+            PrescribedGradientBCWeak *activeBC = dynamic_cast<PrescribedGradientBCWeak*> ( iNewDom.giveBc(bcInd) );
+
+            if(activeBC != NULL) {
+                IntArray tractionRows;
+                activeBC->giveTractionLocationArray(tractionRows, num);
+
+                FloatMatrix massMtrxBc( tractionRows.giveSize(), tractionRows.giveSize() );
+                massMtrxBc.beUnitMatrix(); // TODO: Compute correct mass matrix and add residual contribution.
+                K->assemble(tractionRows, massMtrxBc);
             }
         }
 
-        //		printf("iter: %d res norm: %e\n", iter, res.computeNorm() );
+#ifdef DEBUG
+        if(!res.isFinite()) {
+            OOFEM_ERROR("!res.isFinite()")
+        }
+#endif
 
+//        printf("iter: %d res norm: %e\n", iter, res.computeNorm() );
+
+
+#ifdef __PETSC_MODULE
+        MatAssemblyBegin( *K->giveMtrx(), MAT_FINAL_ASSEMBLY);
+        MatAssemblyEnd( *K->giveMtrx(), MAT_FINAL_ASSEMBLY);
+#endif
+//        K->writeToFile("Kmapping.txt");
 
         // Solve
         solver->solve(K, & res, & du);
+
+#ifdef DEBUG
+        if(!du.isFinite()) {
+            OOFEM_ERROR("!du.isFinite()")
+        }
+#endif
+
         oU.add(du);
     }
 

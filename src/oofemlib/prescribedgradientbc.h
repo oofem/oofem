@@ -64,6 +64,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
+    virtual void scale(double s) {mGradient.times(s);}
+
     void giveGradientVoigt(FloatArray &oGradient) const;
 protected:
     /// Prescribed gradient @f$ d_{ij} @f$

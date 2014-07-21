@@ -47,6 +47,7 @@
 #include "xfem/patchintegrationrule.h"
 #include "xfem/enrichmentitems/crack.h"
 #include "xfem/XFEMDebugTools.h"
+#include "xfem/xfemtolerances.h"
 
 #include "xfem/enrichmentfronts/enrichmentfrontintersection.h"
 #include "xfem/enrichmentdomain.h"
@@ -909,7 +910,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(V
             meanEdgeLength += (1.0/3.0)*tri.giveVertex(2).distance( tri.giveVertex(3) );
             meanEdgeLength += (1.0/3.0)*tri.giveVertex(3).distance( tri.giveVertex(1) );
 
-            const double relPertLength = 1.0e-5;
+            const double relPertLength = XfemTolerances::giveRelLengthTolTight();
 
             for(int i = 1; i <= 3; i++) {
 
@@ -983,7 +984,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(V
                         double tangSignDist = 0.0, arcPos = 0.0;
                         ei->giveEnrichmentDomain()->computeTangentialSignDist(tangSignDist, x, arcPos);
 
-                        if(tangSignDist > (1.0e-3)*meanEdgeLength && fabs(levelSetNormal) < (1.0e-2)*meanEdgeLength && evaluationSucceeded) {
+                        if( (tangSignDist > (1.0e-3)*meanEdgeLength && fabs(levelSetNormal) < (1.0e-2)*meanEdgeLength) && evaluationSucceeded) {
                             joinNodes = false;
                         }
 

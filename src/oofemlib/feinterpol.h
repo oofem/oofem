@@ -42,6 +42,8 @@
 #include "integrationdomain.h"
 #include "elementgeometrytype.h"
 #include "materialmode.h"
+#include "node.h"
+#include "element.h"
 
 namespace oofem {
 class Element;
@@ -100,7 +102,10 @@ public:
     }
     virtual ~FEIElementGeometryWrapper() { }
     int giveNumberOfVertices() const;
-    const FloatArray *giveVertexCoordinates(int i) const;
+    inline const FloatArray *giveVertexCoordinates(int i) const
+    {
+        return &(elem->giveNode(i)->giveNodeCoordinates());
+    }
 };
 
 

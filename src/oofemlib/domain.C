@@ -384,6 +384,19 @@ int Domain :: giveElementPlaceInArray(int iGlobalElNum) const
 	}
 }
 
+const IntArray &Domain :: giveElementsWithMaterialNum(int iMaterialNum) const
+{
+    auto res = mMapMaterialNum2El.find(iMaterialNum);
+
+    if(res != mMapMaterialNum2El.end()) {
+        return res->second;
+    }
+    else {
+        OOFEM_ERROR("Material not found.")
+        return res->second;
+    }
+}
+
 Load *
 Domain :: giveLoad(int n)
 // Returns the n-th load. Generates the error if not defined.
@@ -461,30 +474,6 @@ Domain :: giveMaterial(int n)
 
     return materialList->at(n);
 }
-
-
-Node *
-Domain :: giveNode(int n)
-// Returns the n-th node if it exists.
-{
-#ifdef DEBUG
-    if ( !dofManagerList->includes(n) ) {
-        OOFEM_ERROR("undefined dofManager (%d)", n);
-    }
-
-    Node *node = dynamic_cast< Node * >( dofManagerList->at(n) );
-    if ( node == NULL ) {
-        OOFEM_ERROR("incompatible type of dofManager %d, can not convert", n);
-    }
-
-    return node;
-
-#else
-    return static_cast< Node * >( dofManagerList->at(n) );
-
-#endif
-}
-
 
 ElementSide *
 Domain :: giveSide(int n)
@@ -1123,6 +1112,9 @@ Domain :: instanciateYourself(DataReader *dr)
     for ( int i = 1; i <= nset; i++ ) {
         this->giveSet(i)->updateLocalNumbering(labelToLocNumFunctor);
     }
+
+
+    BuildMaterialToElementMap();
 
     return 1;
 }
@@ -2168,6 +2160,19 @@ void Domain::BuildElementPlaceInArrayMap()
     for ( int i = 1; i <= nelem; i++ ) {
         Element *elem = this->giveElement(i);
         mElementPlaceInArray[ elem->giveGlobalNumber() ] = i;
+    }
+}
+
+void Domain::BuildMaterialToElementMap()
+{
+    mMapMaterialNum2El.clear();
+
+    int nelem = giveNumberOfElements();
+
+    for ( int i = 1; i <= nelem; i++ ) {
+        Element *elem = this->giveElement(i);
+        int matNum = elem->giveMaterialNumber();
+        mMapMaterialNum2El[ matNum ].followedBy(i);
     }
 }
 

@@ -44,7 +44,6 @@
 #define _IFT_PrescribedGradientBCWeak_TractionInterpOrder   "tractioninterporder"
 #define _IFT_PrescribedGradientBCWeak_NumTractionNodesAtIntersections   "numnodesatintersections"
 #define _IFT_PrescribedGradientBCWeak_NumTractionNodeSpacing   "tractionnodespacing"
-//#define _IFT_PrescribedGradientBCWeak_TractionOnGammaPlus   "periodic"
 #define _IFT_PrescribedGradientBCWeak_DuplicateCornerNodes   "duplicatecornernodes"
 #define _IFT_PrescribedGradientBCWeak_TangDistPadding   "tangdistpadding"
 
@@ -97,8 +96,6 @@ public:
 
     virtual void postInitialize();
 
-    virtual void scale(double s);
-
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
@@ -108,6 +105,9 @@ public:
 
     virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                                		const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
+
+    virtual void giveTractionLocationArray(IntArray &rows,
+                                    const UnknownNumberingScheme &s);
 
     virtual void giveTractionLocationArrays(int iTracElInd, IntArray &rows, CharType type,
                                     const UnknownNumberingScheme &s);

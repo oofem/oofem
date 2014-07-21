@@ -1,6 +1,6 @@
 xfemMultipleCracks1.out
 XFEM simulation: A single element with three cracks and cohesive zones, loaded in shear. Written by Erik Svenning, Chalmers University of Technology.
-XFEMStatic nsteps 5 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 25 minIter 2 stiffmode 0 nmodules 1 lstype 0 smtype 1 manrmsteps 1 forceremap 1
+StaticStructural nsteps 5 deltat 1.0 rtolv 1.0e-6 MaxIter 25 minIter 2 nmodules 1 lstype 0 smtype 1 manrmsteps 1
 errorcheck
 #vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
 domain 2dPlaneStress

@@ -239,7 +239,7 @@ IntMatBilinearCZElastic :: initializeFrom(InputRecord *ir)
     StructuralInterfaceMaterial :: initializeFrom(ir);
 
     this->checkConsistency();                                // check validity of the material paramters
-    this->printYourself();
+//    this->printYourself();
     return IRRT_OK;
 }
 

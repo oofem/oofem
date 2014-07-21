@@ -498,20 +498,6 @@ Element :: giveDofManager(int i) const
     return domain->giveDofManager( dofManArray.at(i) );
 }
 
-
-Node *
-Element :: giveNode(int i) const
-// Returns the i-th node of the receiver.
-{
-#ifdef DEBUG
-    if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
-        OOFEM_ERROR("Node is not defined");
-    }
-#endif
-    return domain->giveNode( dofManArray.at(i) );
-}
-
-
 ElementSide *
 Element :: giveSide(int i) const
 // Returns the i-th side of the receiver.
@@ -1337,15 +1323,8 @@ Element :: mapStateVariables(Domain &iOldDom, const TimeStep &iTStep)
     // create source set (this is quite inefficient here as done for each element.
     // the alternative MaterialModelMapperInterface approach allows to cache sets on material model
     Set sourceElemSet = Set(0, & iOldDom);
-    IntArray el;
-    // compile source list to contain all elements on old odmain with the same material id
-    for ( int i = 1; i <= iOldDom.giveNumberOfElements(); i++ ) {
-        if ( iOldDom.giveElement(i)->giveMaterial()->giveNumber() == this->giveMaterial()->giveNumber() ) {
-            // add oldd domain element to source list
-            el.followedBy(i, 10);
-        }
-    }
-    sourceElemSet.setElementList(el);
+    int materialNum = this->giveMaterial()->giveNumber();
+    sourceElemSet.setElementList( iOldDom.giveElementsWithMaterialNum(materialNum) );
 
     for ( auto &iRule: integrationRulesArray ) {
         for ( GaussPoint *gp: *iRule ) {

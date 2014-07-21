@@ -51,7 +51,7 @@
 #include "entityrenumberingscheme.h"
 #include "unknowntype.h"
 #include "unknownnumberingscheme.h"
-
+#include "domain.h"
 
 #ifdef __OOFEG
  #include "node.h"
@@ -514,7 +514,16 @@ public:
      * @param i Local index of node in element.
      * @return Requested node.
      */
-    virtual Node *giveNode(int i) const;
+    inline Node *giveNode(int i) const
+    {
+#ifdef DEBUG
+        if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
+            OOFEM_ERROR("Node is not defined");
+        }
+#endif
+        return domain->giveNode( dofManArray.at(i) );
+    }
+
     /**
      * Returns reference to the i-th side  of element.
      * Default implementation returns i-th dofmanager of element converted to
@@ -534,6 +543,8 @@ public:
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const { return giveInterpolation(); }
     /// @return Reference to the associated material of element.
     Material *giveMaterial();
+    /// @return Material number.
+    int giveMaterialNumber() const {return material;}
     /// @return Reference to the associated crossSection of element.
     CrossSection *giveCrossSection();
     /**

@@ -58,6 +58,9 @@ public:
 	virtual ~PrescribedGradientBCNeumann();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+
+    virtual const char *giveClassName() const { return "PrescribedGradientBCNeumann"; }
+    virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradientBCNeumann_Name; }
 };
 
 } /* namespace oofem */

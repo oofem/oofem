@@ -80,7 +80,7 @@ public:
      * @param i Index of object.
      * @return Object at given index.
      */
-    T *at(int i) const;
+    inline T *at(int i) const;
     /**
      * Expands the receiver from its current size to newSize, in order to accommodate new entries.
      * @param newSize Size that receiver must fit.

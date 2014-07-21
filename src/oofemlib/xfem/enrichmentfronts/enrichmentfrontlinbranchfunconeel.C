@@ -85,6 +85,15 @@ void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncAt(std :: vector< double > 
     EnrichmentItem :: calcPolarCoord(r, theta, xTip, pos, n, t, iEfInput, flipTangent);
 
     mpBranchFunc->evaluateEnrFuncAt(oEnrFunc, r, theta);
+
+#ifdef DEBUG
+    for(double val:oEnrFunc) {
+        if(!std::isfinite(val)) {
+            printf("r: %e theta: %e\n", r, theta);
+            OOFEM_ERROR("!std::isfinite(val)")
+        }
+    }
+#endif
 }
 
 void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const EfInput &iEfInput, const FloatArray &iGradLevelSet) const

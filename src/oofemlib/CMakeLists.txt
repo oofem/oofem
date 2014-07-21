@@ -206,6 +206,7 @@ set (core_xfem
     xfem/enrichmentfronts/enrichmentfrontlinbranchfunconeel.C
     xfem/enrichmentfronts/enrichmentfrontintersection.C
     xfem/integrationrules/discsegintegrationrule.C
+    xfem/xfemtolerances.C
     )
 
 set (core_parallel

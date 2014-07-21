@@ -323,7 +323,6 @@ bool PLHoopStressCirc ::propagateInterface(Domain &iDomain, EnrichmentFront &iEn
 
         if ( !foundZeroLevel ) {
             return false;
-//            printf("No zero level was found.\n");
         }
 
         if ( iDomain.giveXfemManager()->giveVtkDebug() ) {

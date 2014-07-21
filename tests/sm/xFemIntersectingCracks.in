@@ -1,6 +1,6 @@
 xFemIntersectingCracks.out
 Test of enrichment front for intersecting cracks. Written by Erik Svenning, Chalmers University of Technology, February 2014
-XFEMStatic nsteps 1 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 40 minIter 2 stiffmode 0 nmodules 1 manrmsteps 1 forceremap 0
+StaticStructural nsteps 1 deltat 1.0 rtolv 1.0e-6 MaxIter 40 minIter 2 nmodules 1 manrmsteps 1
 errorcheck filename "xFemIntersectingCracks.in"
 #vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
 #gnuplot tstep_all reactionforces boundaryconditions

@@ -49,6 +49,7 @@
 #include "dynamicinputrecord.h"
 #include "dynamicdatareader.h"
 #include "XFEMDebugTools.h"
+#include "xfemtolerances.h"
 #include "spatiallocalizer.h"
 #include "gausspoint.h"
 #include <algorithm>
@@ -454,7 +455,8 @@ void EnrichmentItem :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, cons
         edBG->bg->giveTangent(localTangDir, minDistArcPos);
     }
     else {
-        printf("edBG == NULL.\n");
+//        printf("EnrichmentItem :: evaluateEnrFuncAt:\n");
+//        printf("edBG == NULL.\n");
     }
 
 
@@ -513,6 +515,7 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrF
             edBG->bg->giveTangent(localTangDir, minDistArcPos);
         }
         else {
+            printf("EnrichmentItem :: evaluateEnrFuncDerivAt:\n");
             printf("edBG == NULL.\n");
         }
 
@@ -1376,13 +1379,17 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
         phi_r = fabs(phi/oR);
     }
 
-    if(phi_r >= 1.0) {
-//        printf("phi/oR: %e\n", phi/oR );
-        phi_r = 0.99999999999999;
+    if(phi_r > 1.0-XfemTolerances::giveApproxZero()) {
+        phi_r = 1.0-XfemTolerances::giveApproxZero();
     }
 
     if( iEfInput.mArcPos < tol_q || iEfInput.mArcPos > (1.0-tol_q) ) {
-        oTheta = asin( q.dotProduct(iN) );
+        double q_dot_n = q.dotProduct(iN);
+        if(q_dot_n > 1.0-XfemTolerances::giveApproxZero()) {
+            q_dot_n = 1.0-XfemTolerances::giveApproxZero();
+        }
+        
+        oTheta = asin( q_dot_n );
     } else {
         if ( phi > 0.0 ) {
             oTheta = pi - asin( fabs(phi_r) );
