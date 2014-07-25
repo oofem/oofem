@@ -1391,10 +1391,12 @@ bool PolygonLine :: isOutside(BasicGeometry *bg)
 
 void PolygonLine :: printYourself()
 {
-    printf("PolygonLine: start: ");
-    mVertices [ 0 ].printYourself();
-    printf(" end: ");
-    mVertices [ 1 ].printYourself();
+    printf("PolygonLine:\n");
+
+    for(const FloatArray &x : mVertices) {
+        x.printYourself();
+    }
+
     printf("\n");
 }
 

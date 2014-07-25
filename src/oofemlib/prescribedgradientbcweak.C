@@ -55,7 +55,6 @@
 #include <sstream>
 
 namespace oofem {
-//REGISTER_BoundaryCondition(PrescribedGradientBCWeak);
 
 PrescribedGradientBCWeak::PrescribedGradientBCWeak(int n, Domain * d):
 PrescribedGradientBC(n, d),
@@ -631,6 +630,23 @@ void PrescribedGradientBCWeak::giveTractionElNormal(size_t iElInd, FloatArray &o
 
 }
 
+void PrescribedGradientBCWeak::giveTractionElArcPos(size_t iElInd, double &oXiStart, double &oXiEnd) const
+{
+    const FloatArray &xS = mpTractionElements[iElInd]->mStartCoord;
+    const FloatArray &xE = mpTractionElements[iElInd]->mEndCoord;
+
+    FloatArray xC;
+    xC.beScaled(0.5, xS);
+    xC.add(0.5, xE);
+    int sideIndex = giveSideIndex(xC);
+
+    const double nodeDistTol = 1.0e-15;
+    ArcPosSortFunction3<bool> sortFunc(mLC, mUC, nodeDistTol, sideIndex);
+
+    oXiStart = sortFunc.calcArcPos(xS);
+    oXiEnd = sortFunc.calcArcPos(xE);
+}
+
 void PrescribedGradientBCWeak::giveTraction(size_t iElInd, FloatArray &oStartTraction, FloatArray &oEndTraction, ValueModeType mode, TimeStep *tStep)
 {
     mpTractionNodes[ mpTractionElements[iElInd]->mTractionNodeInd[0] ]->giveCompleteUnknownVector(oStartTraction, mode, tStep);
@@ -643,26 +659,31 @@ void PrescribedGradientBCWeak::giveTraction(size_t iElInd, FloatArray &oStartTra
     }
 }
 
-void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity)
+void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity, int iNumSides)
 {
     const double nodeDistTol = 1.0e-15;
     const double meshTol = 1.0e-8; // Minimum distance between traction nodes
 
     /**
-     * first: 	coordinates
-     * second: 	bool telling if the point must be included in the
-     * 			traction mesh (e.g. a corner node),
-     * 			or if it can be omitted.
+     * first:   coordinates
+     * second:  bool telling if the point must be included in the
+     *          traction mesh (e.g. a corner node),
+     *          or if it can be omitted.
      */
-    std::vector< std::pair<FloatArray, bool> > bndNodeCoords;
+    // Side 1: x = L, side 1: y = L
+    std::vector< std::vector< std::pair<FloatArray, bool> > > bndNodeCoords;
+    std::vector< std::pair<FloatArray, bool> > emptyVec;
+
+    for(int i = 0; i < iNumSides; i++) {
+        bndNodeCoords.push_back(emptyVec);
+    }
 
     Set *setPointer = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = setPointer->giveBoundaryList();
     IntArray bNodes;
 
-    bool duplicateAtCorner = mDuplicateCornerNodes;
-
-    // Loop over all boundary segments
+    // Loop over all boundary segments twice:
+    // first add mesh points...
     for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
 
         Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
@@ -670,85 +691,90 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
 
         e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
 
-        // Add the start node of the segment
-        DofManager *startNode = e->giveDofManager( bNodes[0] );
-        const FloatArray &x = *(startNode->giveCoordinates());
+        // Add the start and end nodes of the segment
+        DofManager *startNode   = e->giveDofManager( bNodes[0] );
+        const FloatArray &xS    = *(startNode->giveCoordinates());
+
+        DofManager *endNode     = e->giveDofManager( bNodes[1] );
+        const FloatArray &xE    = *(endNode->giveCoordinates());
+
+        FloatArray xC;
+        xC.beScaled(0.5, xS);
+        xC.add(0.5, xE);
+
+        const double meshTol2 = meshTol*meshTol;
+
+        if( boundaryPointIsOnActiveBoundary(xC) ) {
 
 
-        if( boundaryPointIsOnActiveBoundary(x) ) {
+            int sideInd = giveSideIndex(xC);
 
-            bool isCorner = false;
-            bool duplicatable = false;
-
-            checkIfCorner(isCorner, duplicatable, x, nodeDistTol);
-
-            if(isCorner) {
-            	std::pair<FloatArray, bool> nodeCoord = {x, true};
-                bndNodeCoords.push_back( nodeCoord );
-            }
-            else {
-
-                bool closePointExists = false;
-                const double meshTol2 = meshTol*meshTol;
-                for(auto bndPos : bndNodeCoords) {
-                    if( bndPos.first.distance_square(x) < meshTol2 ) {
-                        closePointExists = true;
-                    }
-                }
-
-                if(!closePointExists) {
-                    std::pair<FloatArray, bool> nodeCoord = {x, false};
-                    bndNodeCoords.push_back( nodeCoord );
-                }
+            if(!closePointExists( bndNodeCoords[sideInd], xS, meshTol2)) {
+                std::pair<FloatArray, bool> nodeCoord = {xS, false};
+                bndNodeCoords[sideInd].push_back( nodeCoord );
             }
 
-
-            if(isCorner) {
-
-
-            	if(duplicatable) {
-					if(duplicateAtCorner) {
-
-						// Here, we have the additional constraint of
-						// periodicity along each edge:
-						// We require: t(edge_start) = t(edge_end)
-
-		            	std::pair<FloatArray, bool> nodeCoord = {x, true};
-		                bndNodeCoords.push_back( nodeCoord );
-					}
-            	}
+            if(!closePointExists( bndNodeCoords[sideInd], xE, meshTol2)) {
+                std::pair<FloatArray, bool> nodeCoord = {xE, false};
+                bndNodeCoords[sideInd].push_back( nodeCoord );
             }
 
         } // if pointIsOnGammaPlus
         else {
-            FloatArray xPlus;
-            if(pointIsMapapble(x)) {
-                giveMirroredPointOnGammaPlus(xPlus, x);
 
-                bool isCorner = false;
-                bool duplicatable = false;
+            if( pointIsMapapble(xS) ) {
 
-                checkIfCorner(isCorner, duplicatable, xPlus, nodeDistTol);
+                if( pointIsMapapble(xS) ) {
+                    FloatArray xSPlus;
+                    giveMirroredPointOnGammaPlus(xSPlus, xS);
 
-                if(!isCorner) {
+                    int sideIndS = giveSideIndex(xSPlus);
 
-                    bool closePointExists = false;
-                    const double meshTol2 = meshTol*meshTol;
-                    for(auto bndPos : bndNodeCoords) {
-                        if( bndPos.first.distance_square(xPlus) < meshTol2 ) {
-                            closePointExists = true;
-                        }
+                    if(!closePointExists( bndNodeCoords[sideIndS], xSPlus, meshTol2)) {
+                        std::pair<FloatArray, bool> nodeCoord = {xSPlus, false};
+                        bndNodeCoords[sideIndS].push_back( nodeCoord );
                     }
+                }
 
-                    if(!closePointExists) {
-                        std::pair<FloatArray, bool> nodeCoord = {xPlus, false};
-                        bndNodeCoords.push_back( nodeCoord );
+
+
+                if( pointIsMapapble(xE) ) {
+                    FloatArray xEPlus;
+                    giveMirroredPointOnGammaPlus(xEPlus, xE);
+
+                    int sideIndE = giveSideIndex(xEPlus);
+
+                    if(!closePointExists( bndNodeCoords[sideIndE], xEPlus, meshTol2)) {
+                        std::pair<FloatArray, bool> nodeCoord = {xEPlus, false};
+                        bndNodeCoords[sideIndE].push_back( nodeCoord );
                     }
-
-
                 }
             }
+
         }
+    }
+
+    // ...and then add points where cracks intersect the boundary
+    // (by doing this in two steps with two loops, we avoid getting
+    // in trouble if cracks intersect the boundary close to domain corners.
+    for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
+
+        Element *e = this->giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+        int boundary = boundaries.at(pos * 2);
+
+        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+
+        // Add the start and end nodes of the segment
+        DofManager *startNode   = e->giveDofManager( bNodes[0] );
+        const FloatArray &xS    = *(startNode->giveCoordinates());
+
+        DofManager *endNode     = e->giveDofManager( bNodes[1] );
+        const FloatArray &xE    = *(endNode->giveCoordinates());
+
+        FloatArray xC;
+        xC.beScaled(0.5, xS);
+        xC.add(0.5, xE);
+
 
         // Add traction nodes where cracks intersect the boundary if desired
         XfemElementInterface *xfemElInt = dynamic_cast<XfemElementInterface*> (e);
@@ -760,12 +786,14 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
 
             for(size_t i = 0; i < intersecPoints.size(); i++) {
 
+
                 if( boundaryPointIsOnActiveBoundary(intersecPoints[i]) ) {
 
-                    // TODO: Implement proper search
+                    int sideInd = giveSideIndex(intersecPoints[i]);
+
                     int numClosePoints = 0;
                     const double meshTol2 = meshTol*meshTol;
-                    for(auto bndPos : bndNodeCoords) {
+                    for(auto bndPos : bndNodeCoords[sideInd]) {
                         if( bndPos.first.distance_square(intersecPoints[i]) < meshTol2 ) {
                             numClosePoints++;
                         }
@@ -774,31 +802,34 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
                     if(numClosePoints < mNumTractionNodesAtIntersections) {
                         for(int j = 0; j < mNumTractionNodesAtIntersections-numClosePoints; j++) {
                             std::pair<FloatArray, bool> nodeCoord = {intersecPoints[i], true};
-                            bndNodeCoords.push_back( nodeCoord );
+                            bndNodeCoords[sideInd].push_back( nodeCoord );
                         }
                     }
+
                 }
                 else {
-                	if(mMeshIsPeriodic) {
-                		FloatArray xPlus;
-                		giveMirroredPointOnGammaPlus(xPlus, intersecPoints[i]);
+                    if(mMeshIsPeriodic) {
+                        FloatArray xPlus;
+                        giveMirroredPointOnGammaPlus(xPlus, intersecPoints[i]);
 
-                		// TODO: Implement proper search
+                        int sideInd = giveSideIndex(xPlus);
+
                         int numClosePoints = 0;
-                		const double meshTol2 = meshTol*meshTol;
-                		for(auto bndPos : bndNodeCoords) {
-                		    if( bndPos.first.distance_square(xPlus) < meshTol2 ) {
+                        const double meshTol2 = meshTol*meshTol;
+                        for(auto bndPos : bndNodeCoords[sideInd]) {
+                            if( bndPos.first.distance_square(xPlus) < meshTol2 ) {
                                 numClosePoints++;
-                		    }
-                		}
-
-                		if(numClosePoints < mNumTractionNodesAtIntersections-numClosePoints) {
-                            for(int j = 0; j < mNumTractionNodesAtIntersections; j++) {
-                                std::pair<FloatArray, bool> nodeCoord = {xPlus, true};
-                                bndNodeCoords.push_back( nodeCoord );
                             }
-                		}
-                	}
+                        }
+
+                        if(numClosePoints < mNumTractionNodesAtIntersections) {
+                            for(int j = 0; j < mNumTractionNodesAtIntersections-numClosePoints; j++) {
+                                std::pair<FloatArray, bool> nodeCoord = {xPlus, true};
+                                bndNodeCoords[sideInd].push_back( nodeCoord );
+                            }
+                        }
+
+                    }
                 }
             }
         }
@@ -806,26 +837,21 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
     }
 
     // Sort boundary nodes
-    std::sort(bndNodeCoords.begin(), bndNodeCoords.end(), ArcPosSortFunction2<bool>(mLC, mUC, nodeDistTol) );
+    for(size_t arrayInd = 0; arrayInd < bndNodeCoords.size(); arrayInd++) {
+        std::sort(bndNodeCoords[arrayInd].begin(), bndNodeCoords[arrayInd].end(), ArcPosSortFunction3<bool>(mLC, mUC, nodeDistTol, int(arrayInd)) );
 
-    EdgeTracker edgeTracker;
-    for(size_t i = 0; i < bndNodeCoords.size()-1; i++) {
-    	bool isCorner, dummyBool;
-    	checkIfCorner(isCorner, dummyBool, bndNodeCoords[i].first, nodeDistTol);
+        // Make sure that the first and last point on each side are retained.
+        bndNodeCoords[arrayInd][0].second = true;
+        bndNodeCoords[arrayInd].back().second = true;
 
-    	if(isCorner) {
-    		if( (bndNodeCoords[i].first).distance(bndNodeCoords[i+1].first) < nodeDistTol ) {
-    			edgeTracker.addPoint(i, true, mMeshIsPeriodic);
-    			edgeTracker.addPoint(i, false, mMeshIsPeriodic);
-    		}
-    		else {
-    			edgeTracker.addPoint(i, false, mMeshIsPeriodic);
-    		}
 
-    	}
+#if 0
+        printf("\n\ncoordArray: ");
+        for(auto pos : coordArray) {
+            pos.first.printYourself();
+        }
+#endif
     }
-	edgeTracker.addPoint(bndNodeCoords.size()-1, true, mMeshIsPeriodic);
-	edgeTracker.addStoredSecondIndex();
 
 
     // Create traction dofs
@@ -838,53 +864,152 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
     std::vector<FloatArray> tractionNodeCoord;
     int numNodes = domain->giveNumberOfDofManagers();
     int numPointsPassed = 0;
-    std::unordered_map<int,int> originalNodeToReducedNode;
-    for(size_t i = 0; i < bndNodeCoords.size(); i++) {
+
+    int totNodesCreated = 0;
+    for(auto coordArray: bndNodeCoords) {
+
+        int startNodeInd = mpTractionNodes.size();
+
+        //////////////////////////////////////////////////////
+        // Create first node
+        totNodesCreated++;
         numPointsPassed++;
-        if( bndNodeCoords[i].second || numPointsPassed >= mTractionNodeSpacing ) {
+        Node *firstNode = new Node(numNodes+1, domain);
+        firstNode->setGlobalNumber(numNodes+1);
+        for(int j = 0; j < nsd; j++) {
+            firstNode->appendDof( new MasterDof( j + 1, firstNode, ( DofIDItem ) ( dofIds[j] ) ) );
+        }
 
-        	originalNodeToReducedNode[i] = mpTractionNodes.size();
 
-            //printf("Keeping node %lu located at: ", i); bndNodeCoords[i].printYourself();
-            numPointsPassed = 0;
+        firstNode->setCoordinates(coordArray[0].first);
+        mpTractionNodes.push_back(firstNode);
+        mpTractionMasterNodes.push_back(firstNode);
 
-        	bool createSlaveNode = false;
-        	int masterInd = -1;
+        tractionNodeCoord.push_back(coordArray[0].first);
 
-        	if( edgeTracker.giveMasterIndex(masterInd, i) ){
-        		masterInd = originalNodeToReducedNode[masterInd];
-				createSlaveNode = true;
-        	}
+        numNodes++;
+        //////////////////////////////////////////////////////
 
-        	if(!iEnforceCornerPeriodicity) {
-        		createSlaveNode = false;
-        	}
 
-            if(createSlaveNode) {
+        std::vector<FloatArray> coordsToKeep;
+        for(size_t i = 0; i < coordArray.size(); i++) {
+            numPointsPassed++;
 
-                Node *masterNode = mpTractionNodes[masterInd];
-
-                mpTractionNodes.push_back(masterNode);
-                tractionNodeCoord.push_back(bndNodeCoords[i].first);
-            }
-            else {
-                Node *node = new Node(numNodes+1, domain);
-                node->setGlobalNumber(numNodes+1);
-                for(int j = 0; j < nsd; j++) {
-                    node->appendDof( new MasterDof( j + 1, node, ( DofIDItem ) ( dofIds[j] ) ) );
-                }
-
-                node->setCoordinates(bndNodeCoords[i].first);
-                mpTractionNodes.push_back(node);
-                mpTractionMasterNodes.push_back(node);
-
-                tractionNodeCoord.push_back(bndNodeCoords[i].first);
-
-                numNodes++;
+            if( coordArray[i].second || numPointsPassed >= mTractionNodeSpacing ) {
+                numPointsPassed = 0;
+                coordsToKeep.push_back(coordArray[i].first);
             }
         }
-    }
 
+
+        for(size_t i = 1; i < coordsToKeep.size(); i++) {
+
+
+            // Create the second node if desired
+            numPointsPassed++;
+
+                if( !( (i == (coordsToKeep.size()-1)) && mTractionInterpOrder == 0 ) ) {
+
+                    totNodesCreated++;
+
+                    numPointsPassed = 0;
+
+                    bool createSlaveNode = false;
+
+                    int masterInd = 0;
+                    if( ((i == coordsToKeep.size()-1) && mTractionInterpOrder == 1) || ((i == coordsToKeep.size()-2) && mTractionInterpOrder == 0) ) {
+//                    printf("Creating slave node for i: %lu\n", i);
+                        createSlaveNode = true;
+                        masterInd = startNodeInd;
+                    }
+
+
+
+                    if(!iEnforceCornerPeriodicity) {
+                        createSlaveNode = false;
+                    }
+
+                    if(mTractionInterpOrder == 0) {
+                        createSlaveNode = false;
+                    }
+
+                    if(createSlaveNode) {
+
+                        Node *masterNode = mpTractionNodes[masterInd];
+//                      printf("Creating a slave of %d with coord: ",masterInd ); coordsToKeep[i].printYourself();
+
+                        mpTractionNodes.push_back(masterNode);
+                        tractionNodeCoord.push_back(coordsToKeep[i]);
+                    }
+                    else {
+                        Node *node = new Node(numNodes+1, domain);
+                        node->setGlobalNumber(numNodes+1);
+                        for(int j = 0; j < nsd; j++) {
+                            node->appendDof( new MasterDof( j + 1, node, ( DofIDItem ) ( dofIds[j] ) ) );
+                        }
+
+//                      printf("Creating master node with coord: "); coordsToKeep[i].first.printYourself();
+
+                        node->setCoordinates(coordsToKeep[i]);
+                        mpTractionNodes.push_back(node);
+                        mpTractionMasterNodes.push_back(node);
+
+                        tractionNodeCoord.push_back(coordsToKeep[i]);
+
+                        numNodes++;
+                    }
+                }
+
+
+
+
+                // Create traction elements
+                if(mTractionInterpOrder == 0) {
+                    // Piecewise constant traction
+                    // (Not stable in terms of the LBB condition,
+                    //  but interesting for comparison.)
+
+
+                    if( i == coordsToKeep.size()-1) {
+                        TractionElement *tractionEl = new TractionElement();
+
+                        tractionEl->mTractionNodeInd.push_back( mpTractionNodes.size()-1 );
+                        tractionEl->mStartCoord = tractionNodeCoord[mpTractionNodes.size()-1];
+
+                        tractionEl->mEndCoord = coordsToKeep[i];
+                        mpTractionElements.push_back(tractionEl);
+                    }
+                    else {
+                        TractionElement *tractionEl = new TractionElement();
+
+                        tractionEl->mTractionNodeInd.push_back( mpTractionNodes.size()-2 );
+                        tractionEl->mStartCoord = tractionNodeCoord[mpTractionNodes.size()-2];
+
+                        tractionEl->mEndCoord = tractionNodeCoord[mpTractionNodes.size()-1];
+                        mpTractionElements.push_back(tractionEl);
+                    }
+                }
+                else if(mTractionInterpOrder == 1) {
+                    // Piecewise linear traction
+                    TractionElement *tractionEl = new TractionElement();
+                    tractionEl->mStartCoord = tractionNodeCoord[mpTractionNodes.size()-2];
+                    tractionEl->mTractionNodeInd.push_back( mpTractionNodes.size()-2 );
+
+                    tractionEl->mEndCoord = tractionNodeCoord[mpTractionNodes.size()-1];
+                    tractionEl->mTractionNodeInd.push_back( mpTractionNodes.size()-1 );
+
+                    if( tractionEl->mStartCoord.distance( tractionEl->mEndCoord ) > nodeDistTol ) {
+                        mpTractionElements.push_back(tractionEl);
+                    }
+                    else {
+                        delete tractionEl;
+                    }
+
+                }
+
+
+        }
+    }
 #if 0
     printf("bndNodeCoords: \n");
     for(auto x :  bndNodeCoords) {
@@ -892,11 +1017,14 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
     }
 #endif
 
-    // Create traction elements
-    createTractionElements(tractionNodeCoord, nodeDistTol);
 
     // Construct maps necessary for assembly
-    buildMaps(bndNodeCoords);
+    std::vector< std::pair<FloatArray, bool> > allBndNodeCoords;
+    for(auto &coordArray : bndNodeCoords) {
+        allBndNodeCoords.insert(allBndNodeCoords.end(), coordArray.begin(), coordArray.end());
+    }
+
+    buildMaps(allBndNodeCoords);
 
     // Write traction nodes to debug vtk
     std :: vector<FloatArray> nodeCoord;
@@ -980,7 +1108,7 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
 				// Perturb in direction of xE
 				FloatArray t;
 				t.beDifferenceOf(xE_plus, xS_plus);
-				xS_plus.add(1.0e-9, t);
+				xS_plus.add(1.0e-6, t);
 //				printf("xS_plus: %.12e %.12e\n", xS_plus[0], xS_plus[1]);
 			}
 
@@ -988,7 +1116,7 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
 				// Perturb in direction of xS
 				FloatArray t;
 				t.beDifferenceOf(xS_plus, xE_plus);
-				xE_plus.add(1.0e-9, t);
+				xE_plus.add(1.0e-6, t);
 //				printf("xE_plus: %.12e %.12e\n", xE_plus[0], xE_plus[1]);
 			}
 
@@ -1101,79 +1229,6 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
     }
 
 }
-
-void PrescribedGradientBCWeak::createTractionElements(const std::vector<FloatArray> &iTractionNodeCoord, const double &iNodeDistTol)
-{
-    if(mTractionInterpOrder == 0) {
-    	// Piecewise constant traction
-    	// (Not stable in terms of the LBB condition,
-    	//  but interesting for comparison.)
-        for(size_t i = 0; i < mpTractionNodes.size(); i++) {
-
-            TractionElement *tractionEl = new TractionElement();
-
-            tractionEl->mTractionNodeInd.push_back( i );
-            tractionEl->mStartCoord = iTractionNodeCoord[i];
-
-            if( i < mpTractionNodes.size()-1) {
-                tractionEl->mEndCoord = iTractionNodeCoord[i+1];
-                mpTractionElements.push_back(tractionEl);
-            }
-            else {
-                tractionEl->mEndCoord = iTractionNodeCoord[0];
-                if(!mMeshIsPeriodic) {
-                    mpTractionElements.push_back(tractionEl);
-                }
-                else {
-                    delete tractionEl;
-                }
-            }
-
-        }
-    }
-    else if(mTractionInterpOrder == 1) {
-    	// Piecewise linear traction
-        for(size_t i = 0; i < (mpTractionNodes.size()-1); i++) {
-
-        	TractionElement *tractionEl = new TractionElement();
-        	tractionEl->mStartCoord = iTractionNodeCoord[i];
-        	tractionEl->mTractionNodeInd.push_back( i );
-
-        	tractionEl->mEndCoord = iTractionNodeCoord[i+1];
-        	tractionEl->mTractionNodeInd.push_back( i+1 );
-
-        	if( tractionEl->mStartCoord.distance( tractionEl->mEndCoord ) > iNodeDistTol ) {
-        		mpTractionElements.push_back(tractionEl);
-        	}
-        	else {
-        		delete tractionEl;
-        	}
-        }
-
-        if(!mMeshIsPeriodic) {
-        	// If weak Dirichlet BCs are employed, the traction
-        	// mesh is created along the whole boundary
-        	// (instead of only on the mirror side).
-        	// Then, the last element needs to be treated separately as below.
-        	TractionElement *tractionEl = new TractionElement();
-        	tractionEl->mStartCoord = iTractionNodeCoord[0];
-        	tractionEl->mTractionNodeInd.push_back( 0 );
-
-        	tractionEl->mEndCoord = iTractionNodeCoord[mpTractionNodes.size()-1];
-        	tractionEl->mTractionNodeInd.push_back( mpTractionNodes.size()-1 );
-
-        	if( tractionEl->mStartCoord.distance( tractionEl->mEndCoord ) > iNodeDistTol ) {
-        		mpTractionElements.push_back(tractionEl);
-        	}
-        	else {
-        		delete tractionEl;
-        	}
-        }
-
-    }
-
-}
-
 
 void PrescribedGradientBCWeak::integrateTangent(FloatMatrix &oTangent, size_t iTracElInd)
 {
@@ -1411,7 +1466,7 @@ bool PrescribedGradientBCWeak :: pointIsOnGammaPlus(const FloatArray &iPos) cons
 void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosMinus, const FloatArray &iPosPlus) const
 {
     oPosMinus = iPosPlus;
-    const double distTol = 1.0e-13;
+    const double distTol = 1.0e-12;
 
     if(iPosPlus.distance(mUC) < distTol) {
         printf("iPosPlus: %.12e %.12e\n", iPosPlus[0], iPosPlus[1]);
@@ -1442,7 +1497,7 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosM
 void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPlus, const FloatArray &iPosMinus) const
 {
     oPosPlus = iPosMinus;
-    const double distTol = 1.0e-13;
+    const double distTol = 1.0e-16;
 
     if(iPosMinus.distance(mLC) < distTol) {
         printf("iPosMinus: %.12e %.12e\n", iPosMinus[0], iPosMinus[1]);
@@ -1515,5 +1570,43 @@ void PrescribedGradientBCWeak :: computeDomainBoundingBox(Domain &iDomain, Float
 
     }
 }
+
+int PrescribedGradientBCWeak :: giveSideIndex(const FloatArray &iPos) const
+{
+    const double distTol = 1.0e-12;
+
+    if( iPos[0] > mUC[0]-distTol ) {
+        return 0;
+    }
+
+    if( iPos[1] > mUC[1]-distTol ) {
+        return 1;
+    }
+
+    if( iPos[0] < mLC[0]+distTol ) {
+        return 2;
+    }
+
+    if( iPos[1] < mLC[1]+distTol ) {
+        return 3;
+    }
+
+
+
+    OOFEM_ERROR("Could not identify side index.")
+
+    return -1;
+}
+
+bool PrescribedGradientBCWeak :: closePointExists(const std::vector< std::pair<FloatArray, bool> > &iCoordArray, const FloatArray &iPos, const double &iMeshTol2) const
+{
+    for(auto bndPos : iCoordArray) {
+        if( bndPos.first.distance_square(iPos) < iMeshTol2 ) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 } /* namespace oofem */

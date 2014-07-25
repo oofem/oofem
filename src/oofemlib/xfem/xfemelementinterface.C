@@ -839,11 +839,14 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, const double &i
             FloatArray xiS;
             bool evaluationSucceeded = true;
             if(!element->computeLocalCoordinates(xiS, seg_xS)) {
-                evaluationSucceeded = false;
+                //TODO: Check for numerical round-off error
+//                printf("xiS: "); xiS.printYourself();
+//                evaluationSucceeded = false;
             }
             FloatArray xiE;
             if(!element->computeLocalCoordinates(xiE, seg_xE)) {
-                evaluationSucceeded = false;
+//                printf("xiE: "); xiE.printYourself();
+//                evaluationSucceeded = false;
             }
 
             const IntArray &elNodes = element->giveDofManArray();

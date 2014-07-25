@@ -152,7 +152,7 @@ public:
     virtual void updateGeometry();
     virtual void propagateFronts();
 
-    virtual bool hasPropagatingFronts() const { return mPropLawIndex != 0; }
+    virtual bool hasPropagatingFronts() const;
 
 
     int giveStartOfDofIdPool() const { return this->startOfDofIdPool; };

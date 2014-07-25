@@ -158,7 +158,7 @@ void XfemStructureManager :: splitCracks()
 
                                 EDCrack *ed = dynamic_cast<EDCrack*>( newEI_1->giveEnrichmentDomain() );
                                 if(ed != NULL) {
-                                    //printf("arcPositions[k-1]: %e arcPositions[k]: %e\n", arcPositions[k-1], arcPositions[k] );
+                                    //printf("arcPositions_i[k-1]: %e arcPositions_i[k]: %e\n", arcPositions_i[k-1], arcPositions_i[k] );
                                     ed->cropPolygon(arcPositions_i[k-1], arcPositions_i[k]);
 
 

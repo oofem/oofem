@@ -51,6 +51,7 @@
 #include "dynamicinputrecord.h"
 #include "internalstatevaluetype.h"
 #include "XFEMDebugTools.h"
+#include "xfemtolerances.h"
 
 namespace oofem {
 REGISTER_XfemManager(XfemManager)
@@ -143,6 +144,9 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
     if ( vtkDebug == 1 ) {
         mDebugVTK = true;
     }
+
+	// TODO: Read as input.
+    XfemTolerances::setCharacteristicElementLength(0.001);
 
     return IRRT_OK;
 }

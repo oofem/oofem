@@ -55,6 +55,7 @@
 #include <algorithm>
 #include <limits>
 #include <sstream>
+#include <string>
 
 #include "enrichmentfronts/enrichmentfront.h"
 #include "enrichmentfronts/enrichmentfrontdonothing.h"
@@ -392,6 +393,19 @@ void EnrichmentItem :: propagateFronts()
     }
 
     updateGeometry();
+}
+
+bool EnrichmentItem :: hasPropagatingFronts() const
+{
+    if(mpPropagationLaw == NULL) {
+        return false;
+    }
+
+    if( strcasecmp(mpPropagationLaw->giveClassName(), "PLDoNothing") == 0) {
+        return false;
+    }
+
+    return true;
 }
 
 void

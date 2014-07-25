@@ -15,12 +15,11 @@ REGISTER_BoundaryCondition(PrescribedGradientBCWeakPeriodic);
 PrescribedGradientBCWeakPeriodic::PrescribedGradientBCWeakPeriodic(int n, Domain * d):
 PrescribedGradientBCWeak(n,d)
 {
-	// TODO Auto-generated constructor stub
 
 }
 
 PrescribedGradientBCWeakPeriodic::~PrescribedGradientBCWeakPeriodic() {
-	// TODO Auto-generated destructor stub
+
 }
 
 IRResultType PrescribedGradientBCWeakPeriodic :: initializeFrom(InputRecord *ir)
@@ -34,7 +33,8 @@ IRResultType PrescribedGradientBCWeakPeriodic :: initializeFrom(InputRecord *ir)
 void PrescribedGradientBCWeakPeriodic :: postInitialize()
 {
 	bool enforceCornerPeriodicity = true;
-    createTractionMesh(enforceCornerPeriodicity);
+	int numSides = 2;
+    createTractionMesh(enforceCornerPeriodicity, numSides);
 }
 
 void PrescribedGradientBCWeakPeriodic :: giveBoundaryCoordVector(FloatArray &oX, const FloatArray &iPos) const
