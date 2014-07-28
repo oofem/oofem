@@ -32,8 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef __PARALLEL_MODE
-
 #include <list>
 #include <algorithm>
 
@@ -526,4 +524,3 @@ CommunicationPacketPool :: printInfo()
                    allocatedPackets,  __CommunicationPacket_DEFAULT_SIZE, leasedPackets, freePackets);
 }
 } // end namespace oofem
-#endif

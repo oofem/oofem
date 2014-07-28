@@ -32,8 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef __PARALLEL_MODE
-
 #include "communicator.h"
 #include "intarray.h"
 
@@ -162,4 +160,3 @@ Communicator :: errorInfo(const char *func) const
     return std::string("Communicator::") + func + ", Rank: " + std::to_string(rank);
 }
 } // end namespace oofem
-#endif

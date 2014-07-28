@@ -31,7 +31,6 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef __PARALLEL_MODE
 
 #include "loadbalancer.h"
 #include "domain.h"
@@ -52,6 +51,9 @@
 
 namespace oofem {
 #define LoadBalancer_debug_print 0
+
+REGISTER_LoadBalancerMonitor(WallClockLoadBalancerMonitor);
+
 
 LoadBalancer :: LoadBalancer(Domain *d)  : wtpList()
 {
@@ -761,4 +763,3 @@ LoadBalancer :: WorkTransferPlugin :: WorkTransferPlugin(LoadBalancer *_lb) {
 }
 LoadBalancer :: WorkTransferPlugin :: ~WorkTransferPlugin() { }
 } // end namespace oofem
-#endif

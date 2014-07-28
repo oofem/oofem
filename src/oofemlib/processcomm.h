@@ -35,19 +35,17 @@
 #ifndef processcomm_h
 #define processcomm_h
 
-#ifdef __PARALLEL_MODE
+#include "oofemcfg.h"
+#include "combuff.h"
+#include "commbufftype.h"
+#include "communicatormode.h"
+#include "floatmatrix.h"
+#include "floatarray.h"
+#include "intarray.h"
+#include "error.h"
 
- #include "oofemcfg.h"
- #include "combuff.h"
- #include "commbufftype.h"
- #include "communicatormode.h"
- #include "floatmatrix.h"
- #include "floatarray.h"
- #include "intarray.h"
- #include "error.h"
-
- #include <mpi.h>
- #include <string>
+#include <mpi.h>
+#include <string>
 
 namespace oofem {
 /**
@@ -536,5 +534,4 @@ ProcessCommunicator :: resizeRecvBuff(T *emodel, int packUnpackType)
     return 1;
 }
 } // end namespace oofem
-#endif
 #endif // processcomm_h

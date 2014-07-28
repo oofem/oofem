@@ -40,7 +40,7 @@
 
 ///@name Input fields for IntMatBilinearCZElastic
 //@{
-#define _IFT_IntMatBilinearCZElastic_Name "IntMatBilinearCZElastic"
+#define _IFT_IntMatBilinearCZElastic_Name "intmatbilinearczelastic"
 #define _IFT_IntMatBilinearCZElastic_kn "kn"
 #define _IFT_IntMatBilinearCZElastic_ks "ks"
 #define _IFT_IntMatBilinearCZElastic_knc "knc"

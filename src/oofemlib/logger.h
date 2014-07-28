@@ -37,10 +37,6 @@
 
 #include "oofemcfg.h"
 
-#ifdef __PARALLEL_MODE
- #include <mpi.h>
-#endif
-
 #include <cstdio>
 #include <string>
 

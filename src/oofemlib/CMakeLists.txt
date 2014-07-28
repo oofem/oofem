@@ -219,9 +219,12 @@ set (core_parallel
     parallelcontext.C
     dyncombuff.C
     loadbalancer.C
-    parmetisloadbalancer.C
     nonlocalmatwtp.C
     )
+
+if (USE_PARMETIS)
+    list (APPEND core_parallel parmetisloadbalancer.C)
+endif ()
 
 set (core_bc
     generalboundarycondition.C
