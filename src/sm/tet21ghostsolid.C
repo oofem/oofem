@@ -11,6 +11,10 @@
 #include "dofmanager.h"
 
 namespace oofem {
+
+#define USEUNCOUPLED 0
+#define TESTNUMTAN 0
+
 REGISTER_Element(tet21ghostsolid);
 
 FEI3dTetQuad tet21ghostsolid :: interpolation;
@@ -139,7 +143,6 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
 
     answer.resize(64, 64);
     answer.zero();
-#define USEUNCOUPLED 0
 
 #if USEUNCOUPLED == 1
     // Totaly uncoupled
@@ -148,15 +151,18 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
     answer.assemble(GT, conservation_ordering, momentum_ordering);
     answer.assemble(Kx, ghostdisplacement_ordering, ghostdisplacement_ordering);
 #else
-    answer.assemble(Kf, ghostdisplacement_ordering, ghostdisplacement_ordering);
+    //answer.assemble(Kf, ghostdisplacement_ordering, ghostdisplacement_ordering);
     answer.assemble(Kf, ghostdisplacement_ordering, momentum_ordering);
     answer.assemble(G, ghostdisplacement_ordering, conservation_ordering);
-    answer.assemble(GT, conservation_ordering, ghostdisplacement_ordering);
+    //answer.assemble(GT, conservation_ordering, ghostdisplacement_ordering);
     answer.assemble(GT, conservation_ordering, momentum_ordering);
     answer.assemble(Kx, momentum_ordering, ghostdisplacement_ordering);
 #endif
 
-    //answer.printYourself();
+    if (this->giveNumber() == 364) {
+        //answer.printYourself();
+    }
+
 
 }
 
@@ -216,17 +222,17 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
         this->interpolation_lin.evalN( N, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
 
         dNv.resize(30);
-        for (int k = 0; k<dNx.giveNumberOfColumns(); k++) {
-            dNv.at(k*3+1) = dNx.at(1,k+1);
-            dNv.at(k*3+2) = dNx.at(2,k+1);
-            dNv.at(k*3+3) = dNx.at(3,k+1);
+        for (int k = 0; k<dNx.giveNumberOfRows(); k++) {
+            dNv.at(k*3+1) = dNx.at(k+1,1);
+            dNv.at(k*3+2) = dNx.at(k+1,2);
+            dNv.at(k*3+3) = dNx.at(k+1,3);
         }
 
         G.plusDyadUnsym(N, dNv, dA);
         FloatMatrix GT;
         GT.beTranspositionOf(G);
 
-        vload.plusProduct(GT, u_prev, -0.0 );
+        vload.plusProduct(GT, u_prev, 1.0 );
         //vload.printYourself();
 
     }
@@ -252,86 +258,169 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
     FluidDynamicMaterial *fluidMaterial = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
 
     FloatMatrix Kf, G, Kx, B, Ed, dNx;
-    FloatArray Strain, Stress, Nlin, dNv, a, aVelocity, aPressure, aGhostDisplacement, fluidStress, epsf;
-    FloatArray momentum, conservation, auxstress;
+    FloatArray Strain, Stress, Nlin, dNv, a, aVelocity, aPressure, aGhostDisplacement, fluidStress, epsf, dpdivv;
+    FloatArray momentum, conservation, auxstress, divv, conservation2;
     double pressure, epsvol;
 
     this->computeVectorOf( VM_Total, tStep, a);
-    if (!tStep->isTheFirstStep()) {
-        // a.printYourself();
-    }
 
-    aVelocity.beSubArrayOf(a, momentum_ordering);
-    aPressure.beSubArrayOf(a, conservation_ordering);
-    aGhostDisplacement.beSubArrayOf(a, ghostdisplacement_ordering);
+#if TESTNUMTAN == 1
+    FloatMatrix K;
+    FloatArray f_int;
+    double eps = 1e-6;
+    K.resize(a.giveSize(), a.giveSize());
+    K.zero();
 
-    for (int j = 0; j<iRule->giveNumberOfIntegrationPoints(); j++) {
-        GaussPoint *gp = iRule->getIntegrationPoint(j);
-
-        double detJ = fabs( ( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) ) );
-        double weight = gp->giveWeight();
-
-        this->interpolation.evaldNdx( dNx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-        this->interpolation_lin.evalN( Nlin, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-        dNv.resize(30);
-        for (int k = 0; k<dNx.giveNumberOfColumns(); k++) {
-            dNv.at(k*3+1) = dNx.at(1,k+1);
-            dNv.at(k*3+2) = dNx.at(2,k+1);
-            dNv.at(k*3+3) = dNx.at(3,k+1);
+    for (int i = 0; i<=a.giveSize(); i++) {
+        this->computeVectorOf( VM_Total, tStep, a);
+        if (i>0) { // Compute f_int(a) if a==0, otherwide compute f_int(a+delta)
+            if ( (i==4) && (this->giveNumber() == 364) ) {
+                a.printYourself();
+            }
+            a.at(i) = a.at(i) + eps;
         }
+#endif
 
-        if (nlGeometry == 0) {
+        momentum.resize(30);
+        momentum.zero();
+        conservation.resize(4);
+        conservation.zero();
+        conservation2.resize(4);
+        conservation2.zero();
+        auxstress.resize(30);
+        auxstress.zero();
 
-            this->computeBmatrixAt(gp, B);
-            epsf.beProductOf(B, aVelocity);
-            pressure = Nlin.dotProduct(aPressure);
+        aVelocity.beSubArrayOf(a, momentum_ordering);
+        aPressure.beSubArrayOf(a, conservation_ordering);
+        aGhostDisplacement.beSubArrayOf(a, ghostdisplacement_ordering);
 
-            // Fluid part
-            gp->setMaterialMode(_3dFlow);
-            fluidMaterial->computeDeviatoricStressVector(fluidStress, epsvol, gp, epsf, pressure, tStep);
-            gp->setMaterialMode(_3dMat);
-
-            momentum.plusProduct(B, fluidStress, detJ*weight);
-            momentum.add(-pressure * detJ * weight, dNv);
-            conservation.add(epsvol * detJ * weight, Nlin);
-
-            // Ghost solid part
-            Strain.beProductOf(B, aGhostDisplacement);
-            Stress.beProductOf(Dghost, Strain);
-            auxstress.plusProduct(B, Stress, detJ * weight);
-
-        } else {
-            OOFEM_ERROR("No support for large deformations yet!");
+#if TESTNUMTAN == 1
+        if ( (i==4) && (this->giveNumber() == 364) ) {
+            a.printYourself();
+            aVelocity.printYourself();
+            aPressure.printYourself();
+            aGhostDisplacement.printYourself();
         }
+#endif
 
-    }
-    answer.resize(64);
-    answer.zero();
+        for (int j = 0; j<iRule->giveNumberOfIntegrationPoints(); j++) {
+            GaussPoint *gp = iRule->getIntegrationPoint(j);
+
+            double detJ = fabs( ( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) ) );
+            double weight = gp->giveWeight();
+
+            this->interpolation.evaldNdx( dNx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+            this->interpolation_lin.evalN( Nlin, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+            //this->interpolation_lin.evaldNdx( dNlin, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+
+            dNv.resize(30);
+            for (int k = 0; k<dNx.giveNumberOfRows(); k++) {
+                dNv.at(k*3+1) = dNx.at(k+1,1);
+                dNv.at(k*3+2) = dNx.at(k+1,2);
+                dNv.at(k*3+3) = dNx.at(k+1,3);
+            }
+
+            if (nlGeometry == 0) {
+
+                this->computeBmatrixAt(gp, B);
+                epsf.beProductOf(B, aVelocity);
+                pressure = Nlin.dotProduct(aPressure);
+
+                // Momentum equation
+                gp->setMaterialMode(_3dFlow);
+                fluidMaterial->computeDeviatoricStressVector(fluidStress, epsvol, gp, epsf, pressure, tStep);
+                gp->setMaterialMode(_3dMat);
+
+                momentum.plusProduct(B, fluidStress, detJ*weight);
+                momentum.add(-pressure * detJ * weight, dNv);
+
+
+                // Conservation equation
+                divv.beTProductOf(dNv, aVelocity);
+                divv.times(-detJ * weight);
+
+                conservation.add(divv.at(1), Nlin);
+                //conservation2.add(-epsvol * detJ * weight, Nlin);
+
+                // Ghost solid part
+                Strain.beProductOf(B, aGhostDisplacement);
+                Stress.beProductOf(Dghost, Strain);
+                auxstress.plusProduct(B, Stress, detJ * weight);
+
+            } else {
+                OOFEM_ERROR("No support for large deformations yet!");
+            }
+
+        }
+        answer.resize(64);
+        answer.zero();
 
 #if USEUNCOUPLED == 1
-    // Totaly uncoupled
-    answer.assemble(momentum, momentum_ordering);
-    answer.assemble(conservation, conservation_ordering);
-    answer.assemble(auxstress, ghostdisplacement_ordering);
+        // Totaly uncoupled
+        answer.assemble(momentum, momentum_ordering);
+        answer.assemble(conservation, conservation_ordering);
+        answer.assemble(auxstress, ghostdisplacement_ordering);
 #else
-    answer.assemble(momentum, ghostdisplacement_ordering);
-    answer.assemble(conservation, conservation_ordering);
-    answer.assemble(auxstress, momentum_ordering);
+
+#if TESTNUMTAN == 1
+        if (this->giveNumber() == 364) {
+            momentum.printYourself();
+            conservation.printYourself();
+            auxstress.printYourself();
+        }
+#endif
+        answer.assemble(momentum, ghostdisplacement_ordering);
+        answer.assemble(conservation, conservation_ordering);
+        answer.assemble(auxstress, momentum_ordering);
+#endif
+
+#if TESTNUMTAN == 1
+        if (this->giveNumber() == 364) {
+            //answer.printYourself();
+        }
+
+
+
+        if (i==0) {
+            f_int.operator =( answer );
+        } else {
+            // Compute derivative
+            FloatArray dfda;
+
+            f_int.printYourself();
+            answer.printYourself();
+
+            dfda.operator = (f_int - answer);
+            dfda.times(1.0/eps);
+
+            dfda.printYourself();
+
+            K.setColumn(dfda, i);
+
+        }
+    }
+
+    if (this->giveNumber() == 364) {
+        K.printYourself();
+    }
+
 #endif
 
     // Test linear
-
-    /*    if (this->giveNumber() == 364) {
+    /*
+    if (this->giveNumber() == 364) {
+        conservation_ordering.printYourself();
+        momentum_ordering.printYourself();
+        ghostdisplacement_ordering.printYourself();
         FloatMatrix K;
         FloatArray ans;
         this->computeStiffnessMatrix(K, TangentStiffness, tStep);
         ans.beProductOf(K, a);
         ans.printYourself();
         answer.printYourself();
-    } */
-
-
+        answer.beScaled(1.0, ans);
+    }
+*/
 }
 
 void
@@ -383,6 +472,9 @@ tet21ghostsolid :: giveDisplacementsIncrementData(FloatArray &u_prev, FloatArray
     u_prev.resize(30);
     u.resize(30);
     inc.resize(30);
+    u_prev.zero();
+    u.zero();
+    inc.zero();
 
     if (!tStep->isTheFirstStep()) {
         //G.printYourself();
@@ -405,6 +497,14 @@ tet21ghostsolid :: giveDisplacementsIncrementData(FloatArray &u_prev, FloatArray
             inc.at(3*i+3) = inc_n.at(3);
         }
     }
+
+    if (this->giveNumber()==364) {
+
+        //u.printYourself();
+        //u_prev.printYourself();
+
+    }
+
 }
 
 }
