@@ -188,10 +188,10 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
             FloatArray gcoords;
             FloatArray tmpB(2 *nodes);
             for ( GaussPoint *gp: *iRule ) {
-                fei2d->edgeEvaldNds( dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
-                fei->boundaryEvalN( N, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
-                double J = fei->boundaryGiveTransformationJacobian( side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
-                fei->boundaryLocal2Global( gcoords, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
+                fei2d->edgeEvaldNds( dNds, side, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e) );
+                fei->boundaryEvalN( N, side, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e) );
+                double J = fei->boundaryGiveTransformationJacobian( side, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e) );
+                fei->boundaryLocal2Global( gcoords, side, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e) );
                 double r = gcoords(0); // First coordinate is the radial coord.
 
                 es.beProductOf(xy, dNds);
@@ -214,8 +214,8 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
         } else {
             for ( GaussPoint *gp: *iRule ) {
                 double t = e->giveCrossSection()->give(CS_Thickness, gp); ///@todo The thickness is not often relevant or used in FM.
-                fei2d->edgeEvaldNds( dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
-                double J = fei->boundaryGiveTransformationJacobian( side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
+                fei2d->edgeEvaldNds( dNds, side, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e) );
+                double J = fei->boundaryGiveTransformationJacobian( side, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e) );
 
                 es.beProductOf(xy, dNds);
 
@@ -243,8 +243,8 @@ void SurfaceTensionBoundaryCondition :: computeTangentFromElement(FloatMatrix &a
         FloatMatrix dNdx;
         FloatArray n;
         for ( GaussPoint *gp: *iRule ) {
-            fei3d->surfaceEvaldNdx( dNdx, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
-            /*double J = */ fei->boundaryEvalNormal( n, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
+            fei3d->surfaceEvaldNdx( dNdx, side, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e) );
+            /*double J = */ fei->boundaryEvalNormal( n, side, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e) );
             //double dV = gamma * J * gp->giveWeight();
 
             for ( int i = 0; i < nodes; i++ ) {
@@ -300,10 +300,10 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
             FloatArray N;
             FloatArray gcoords;
             for ( GaussPoint *gp: *iRule ) {
-                fei2d->edgeEvaldNds( dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
-                fei->boundaryEvalN( N, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
-                double J = fei->boundaryGiveTransformationJacobian( side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
-                fei->boundaryLocal2Global( gcoords, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
+                fei2d->edgeEvaldNds( dNds, side, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e) );
+                fei->boundaryEvalN( N, side, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e) );
+                double J = fei->boundaryGiveTransformationJacobian( side, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e) );
+                fei->boundaryLocal2Global( gcoords, side, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e) );
                 double r = gcoords(0); // First coordinate is the radial coord.
 
                 es.beProductOf(xy, dNds);
@@ -319,8 +319,8 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
         } else {
             for ( GaussPoint *gp: *iRule ) {
                 double t = e->giveCrossSection()->give(CS_Thickness, gp);
-                fei2d->edgeEvaldNds( dNds, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
-                double J = fei->boundaryGiveTransformationJacobian( side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
+                fei2d->edgeEvaldNds( dNds, side, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e) );
+                double J = fei->boundaryGiveTransformationJacobian( side, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e) );
                 es.beProductOf(xy, dNds);
 
                 tmp.resize( 2 * nodes);
@@ -340,8 +340,8 @@ void SurfaceTensionBoundaryCondition :: computeLoadVectorFromElement(FloatArray 
         FloatArray n, surfProj;
         FloatMatrix dNdx, B;
         for ( GaussPoint *gp: *iRule ) {
-            fei3d->surfaceEvaldNdx( dNdx, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
-            double J = fei->boundaryEvalNormal( n, side, * gp->giveCoordinates(), FEIElementGeometryWrapper(e) );
+            fei3d->surfaceEvaldNdx( dNdx, side, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e) );
+            double J = fei->boundaryEvalNormal( n, side, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e) );
 
             // [I - n(x)n]  in voigt form:
             surfProj = {1. - n(0)*n(0), 1. - n(1)*n(1), 1. - n(2)*n(2),

@@ -95,7 +95,7 @@ Beam2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
     double l, ksi, kappa, c1;
 
     l     = this->computeLength();
-    ksi   = 0.5 + 0.5 * gp->giveCoordinate(1);
+    ksi   = 0.5 + 0.5 * gp->giveNaturalCoordinate(1);
     kappa = this->giveKappaCoeff();
     c1 = 1. + 2. * kappa;
 
@@ -269,7 +269,7 @@ Beam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &maste
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(2); // {Exx,GMzx}

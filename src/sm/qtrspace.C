@@ -93,11 +93,7 @@ QTRSpace :: giveDofManDofIDMask(int inode, IntArray &answer) const
 // DofId mask array contains the DofID constants (defined in cltypes.h)
 // describing physical meaning of particular DOFs.
 {
-    answer.resize(3);
-
-    answer.at(1) = D_u;
-    answer.at(2) = D_v;
-    answer.at(3) = D_w;
+    answer = {D_u, D_v, D_w};
 }
 
 
@@ -105,7 +101,7 @@ double
 QTRSpace :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
-    double determinant = fabs( ( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) ) );
+    double determinant = fabs( ( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) ) );
     double weight = gp->giveWeight();
     return ( determinant * weight );
 }
@@ -136,7 +132,7 @@ QTRSpace :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 30);
     answer.zero();
@@ -163,7 +159,7 @@ QTRSpace :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 30);
     answer.zero();
@@ -234,7 +230,7 @@ QTRSpace :: SPRNodalRecoveryMI_giveNumberOfIP()
 void
 QTRSpace :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
 {
-    if ( this->computeGlobalCoordinates( coords, * gp->giveCoordinates() ) == 0 ) {
+    if ( this->computeGlobalCoordinates( coords, * gp->giveNaturalCoordinates() ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 }

@@ -33,6 +33,7 @@
  */
 
 #include "qtrspacegrad.h"
+#include "fei3dtetlin.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
@@ -45,7 +46,6 @@
 #include "structuralms.h"
 #include "mathfem.h"
 #include "structuralcrosssection.h"
-#include "fei3dtetlin.h"
 #include "classfactory.h"
 
 #include <cstdio>
@@ -53,7 +53,7 @@
 namespace oofem {
 REGISTER_Element(QTRSpaceGrad);
 
-FEI3dTetLin QTRSpaceGrad :: interpolation;
+FEI3dTetLin QTRSpaceGrad :: interpolation_lin;
 
 QTRSpaceGrad :: QTRSpaceGrad(int n, Domain *aDomain) :  QTRSpace(n, aDomain), GradDpElement()
     // Constructor.
@@ -84,7 +84,7 @@ QTRSpaceGrad :: initializeFrom(InputRecord *ir)
 void
 QTRSpaceGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    if ( inode <= nSecNodes ) {
+    if ( inode <= 4 ) {
         answer = {D_u, D_v, D_w, G_0};
     } else {
         answer = {D_u, D_v, D_w};
@@ -103,11 +103,9 @@ QTRSpaceGrad :: computeGaussPoints()
 
 void
 QTRSpaceGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at gp.
 {
     FloatArray n;
-    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 1);
 }
 
@@ -115,67 +113,8 @@ void
 QTRSpaceGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
-    answer.resize(3, 4);
-    answer.zero();
-
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, i) = dnx.at(i, 1);
-        answer.at(2, i) = dnx.at(i, 2);
-        answer.at(3, i) = dnx.at(i, 3);
-    }
+    this->interpolation_lin.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.beTranspositionOf(dnx);
 }
 
-
-
-void
-QTRSpaceGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
-// Returns the [45x45] nonlinear part of strain-displacement matrix {B} of the receiver,
-// evaluated at gp
-
-{
-    FloatMatrix dnx;
-
-    // compute the derivatives of shape functions
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(30, 30);
-    answer.zero();
-
-    // put the products of derivatives of shape functions into the "nonlinear B matrix",
-    // depending on parameter i, which is the number of the strain component
-    if ( i <= 3 ) {
-        for ( int k = 0; k < 10; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 30; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(i, k + 1) * dnx.at(i, ( j - 1 ) / 3 + 1);
-                }
-            }
-        }
-    } else if ( i == 4 ) {
-        for ( int k = 0; k < 10; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 30; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(2, k + 1) * dnx.at(3, ( j - 1 ) / 3 + 1) + dnx.at(3, k + 1) * dnx.at(2, ( j - 1 ) / 3 + 1);
-                }
-            }
-        }
-    } else if ( i == 5 ) {
-        for ( int k = 0; k < 10; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 30; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(1, k + 1) * dnx.at(3, ( j - 1 ) / 3 + 1) + dnx.at(3, k + 1) * dnx.at(1, ( j - 1 ) / 3 + 1);
-                }
-            }
-        }
-    } else if ( i == 6 ) {
-        for ( int k = 0; k < 10; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 30; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(1, k + 1) * dnx.at(2, ( j - 1 ) / 3 + 1) + dnx.at(2, k + 1) * dnx.at(1, ( j - 1 ) / 3 + 1);
-                }
-            }
-        }
-    }
-}
 }

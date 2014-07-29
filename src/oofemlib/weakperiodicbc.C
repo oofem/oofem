@@ -196,7 +196,7 @@ double WeakPeriodicBoundaryCondition :: computeProjectionCoefficient(int vIndex,
 
         for ( GaussPoint *gp: *iRule ) {
 
-            FloatArray *lcoords = gp->giveCoordinates();
+            FloatArray *lcoords = gp->giveNaturalCoordinates();
             FloatArray gcoords;
 
             geoInterpolation->boundaryLocal2Global( gcoords, side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) );
@@ -395,7 +395,7 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
     std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, boundary));
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray *lcoords = gp->giveCoordinates();
+        FloatArray *lcoords = gp->giveNaturalCoordinates();
 
         FloatArray N;
 

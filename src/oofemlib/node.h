@@ -112,6 +112,13 @@ public:
     virtual bool hasCoordinates() { return true; }
     virtual double giveCoordinate(int i);
     virtual FloatArray *giveCoordinates() { return & coordinates; }
+
+    /**
+     * As giveCoordinates, but non-virtual and therefore faster
+     * (because it can be inlined). /ES
+     */
+    inline const FloatArray &giveNodeCoordinates() const {return coordinates;}
+
     /**
      * Sets node coordinates to given array.
      * @param coords New coordinates for node.

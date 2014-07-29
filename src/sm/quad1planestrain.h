@@ -35,7 +35,7 @@
 #ifndef quad1planestrain_h
 #define quad1planestrain_h
 
-#include "structuralelement.h"
+#include "nlstructuralelement.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
@@ -55,16 +55,16 @@ namespace oofem {
  * This class implements an isoparametric four-node quadrilateral plane-
  * stress structural finite element. Each node has 2 degrees of freedom.
  */
-class Quad1PlaneStrain : public StructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-public SpatialLocalizerInterface,
-public EIPrimaryUnknownMapperInterface,
-public HuertaErrorEstimatorInterface
+class Quad1PlaneStrain : public NLStructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
+    public SpatialLocalizerInterface,
+    public EIPrimaryUnknownMapperInterface,
+    public HuertaErrorEstimatorInterface
 {
 protected:
     static FEI2dQuadLin interp;
 
 public:
-    Quad1PlaneStrain(int n, Domain * d);
+    Quad1PlaneStrain(int n, Domain *d);
     virtual ~Quad1PlaneStrain();
 
     virtual int computeNumberOfDofs() { return 8; }
@@ -102,7 +102,7 @@ public:
     virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-    { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
+    { computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer); }
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);
@@ -125,6 +125,7 @@ protected:
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
 
     virtual void computeGaussPoints();

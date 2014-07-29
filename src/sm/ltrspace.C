@@ -109,7 +109,7 @@ LTRSpace :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 // luated at gp.
 {
     FloatMatrix dn(4, 3);
-    interpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 12);
     answer.zero();
@@ -140,7 +140,7 @@ LTRSpace :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 12);
     answer.zero();
@@ -174,7 +174,7 @@ double LTRSpace :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     volume = determinant * weight;
@@ -702,7 +702,7 @@ LTRSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.zero();
@@ -775,7 +775,7 @@ LTRSpace :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 LTRSpace :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
     return result *gp->giveWeight();
 }
@@ -784,7 +784,7 @@ LTRSpace :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 LTRSpace :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -806,7 +806,7 @@ void
 LTRSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     FloatArray n(3);
-    interpolation.surfaceEvalN( n, iSurf, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.surfaceEvalN( n, iSurf, * sgp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 9);
     answer.zero();
@@ -896,7 +896,7 @@ double
 LTRSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
-    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
     weight      = gp->giveWeight();
     volume      = determinant * weight;
@@ -904,14 +904,14 @@ LTRSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
     return volume;
 
     // the following works only for 1 GP !!!
-    // return interpolation.surfaceGiveTransformationJacobian (iSurf, domain, nodeArray, *gp->giveCoordinates(), 0.0);
+    // return interpolation.surfaceGiveTransformationJacobian (iSurf, domain, nodeArray, *gp->giveNaturalCoordinates(), 0.0);
 }
 
 
 void
 LTRSpace :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    interpolation.surfaceLocal2global( answer, isurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.surfaceLocal2global( answer, isurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 

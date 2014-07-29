@@ -141,6 +141,7 @@ set (sm_material
     winklerpasternak.C
     structmatsettable.C
     bondceb.C
+    mooneyrivlin.C
     )
 
 set (sm_error
@@ -180,6 +181,7 @@ set (sm_xfem
 	xfem/enrichmentitems/delamination.C
 	xfem/propagationlaws/plhoopstresscirc.C
 	xfem/xfemstructuremanager.C
+	xfemsolverinterface.C
 	)
 
 set (sm_unsorted

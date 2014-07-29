@@ -79,7 +79,7 @@ Beam3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
     double l, ksi, kappay, kappaz, c1y, c1z;
 
     l     = this->computeLength();
-    ksi   = 0.5 + 0.5 * gp->giveCoordinate(1);
+    ksi   = 0.5 + 0.5 * gp->giveNaturalCoordinate(1);
     kappay = this->giveKappayCoeff();
     kappaz = this->giveKappazCoeff();
     c1y = 1. + 2. * kappay;
@@ -867,8 +867,8 @@ Beam3d :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &an
 {
     double layerYCoord, layerZCoord;
 
-    layerZCoord = slaveGp->giveCoordinate(2);
-    layerYCoord = slaveGp->giveCoordinate(1);
+    layerZCoord = slaveGp->giveNaturalCoordinate(2);
+    layerYCoord = slaveGp->giveNaturalCoordinate(1);
 
     answer.resize(3);  // {Exx,GMzx,GMxy}
 

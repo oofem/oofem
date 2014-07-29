@@ -52,7 +52,6 @@ FEI2dQuadQuad QPlaneStrain :: interpolation(1, 2);
 
 QPlaneStrain :: QPlaneStrain(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
-    // Constructor.
 {
     numberOfDofMans  = 8;
     numberOfGaussPoints = 4;
@@ -76,7 +75,7 @@ QPlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, in
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(4, 16);
     answer.zero();
@@ -97,7 +96,7 @@ QPlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // @todo not checked if correct
 {
     FloatMatrix dnx;
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(5, 16);
     answer.zero();
@@ -113,13 +112,9 @@ QPlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 void
 QPlaneStrain :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at gp.
 {
     FloatArray n;
-
     this->interpolation.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
-
     answer.beNMatrixOf(n, 2);
 }
 
@@ -145,7 +140,7 @@ QPlaneStrain :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
@@ -357,7 +352,7 @@ void QPlaneStrain :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].z = 0.;
 
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            gpCoords = gp->giveCoordinates();
+            gpCoords = gp->giveNaturalCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;
                 ind.at(2) = 4;

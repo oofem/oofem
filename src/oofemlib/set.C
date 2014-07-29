@@ -67,12 +67,14 @@ IRResultType Set :: initializeFrom(InputRecord *ir)
         for ( int i = 1; i <= numEl; i++ ) {
             this->elements.at(i) = i;
         }
+        mElementListIsSorted = false;
     } else {
         IntArray inputElements;
         std :: list< Range >inputElementRanges;
         IR_GIVE_OPTIONAL_FIELD(ir, inputElements, _IFT_Set_elements);
         IR_GIVE_OPTIONAL_FIELD(ir, inputElementRanges, _IFT_Set_elementRanges);
         this->computeIntArray(this->elements, inputElements, inputElementRanges);
+        mElementListIsSorted = false;
     }
 
 
@@ -182,7 +184,7 @@ const IntArray &Set :: giveNodeList()
 
 const IntArray &Set :: giveSpecifiedNodeList() { return this->nodes; }
 
-void Set :: setElementList(IntArray newElements) { this->elements = std :: move(newElements); }
+void Set :: setElementList(IntArray newElements) { this->elements = std :: move(newElements); mElementListIsSorted = false; }
 
 void Set :: setBoundaryList(IntArray newBoundaries) { this->elementBoundaries = std :: move(newBoundaries); }
 
@@ -193,11 +195,17 @@ void Set :: setNodeList(IntArray newNodes) { this->nodes = std :: move(newNodes)
 void Set :: addAllElements()
 {
     this->elements.enumerate(this->giveDomain()->giveNumberOfElements());
+    mElementListIsSorted = false;
 }
 
 bool Set :: hasElement(int number) const
 {
-    return this->elements.contains(number);
+    if(!mElementListIsSorted) {
+        mElementsSorted = elements;
+        mElementsSorted.sort();
+        mElementListIsSorted = true;
+    }
+    return std :: binary_search(mElementsSorted.begin(), mElementsSorted.end(), number);
 }
 
 void Set :: clear()
@@ -234,6 +242,8 @@ void Set :: updateLocalElementNumbering(EntityRenumberingFunctor &f)
     for ( int i = 1; i <= elementEdges.giveSize(); i += 2 ) {
         elementEdges.at(i) = f(elementEdges.at(i), ERS_Element);
     }
+
+    mElementListIsSorted = false;
 }
 
 

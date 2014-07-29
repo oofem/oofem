@@ -1510,8 +1510,8 @@ TR1_2D_SUPG :: computeNMtrx(FloatArray &answer, GaussPoint *gp)
     double l1, l2;
     answer.resize(3);
 
-    answer.at(1) = l1 = gp->giveCoordinate(1);
-    answer.at(2) = l2 = gp->giveCoordinate(2);
+    answer.at(1) = l1 = gp->giveNaturalCoordinate(1);
+    answer.at(2) = l2 = gp->giveNaturalCoordinate(2);
     answer.at(3) = 1.0 - l1 - l2;
 }
 

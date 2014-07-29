@@ -50,7 +50,7 @@ void PrescribedGradientBC :: giveGradientVoigt(FloatArray &oGradient) const
     int numRows = mGradient.giveNumberOfRows();
     switch(numRows) {
     case 1:
-        oGradient = {mGradient.at(1,1)};
+        oGradient = FloatArray({mGradient.at(1,1)});
         break;
     case 2:
         // Do not assume symmetry

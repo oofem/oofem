@@ -766,7 +766,7 @@ MPSMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep, int option)
         FloatArray et2, ei2; // total and incremental values of water mass
 
         if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
-            gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+            gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
             if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
                 OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
             }
@@ -823,7 +823,7 @@ MPSMaterial :: giveTemperature(GaussPoint *gp, TimeStep *tStep, int option)
         FloatArray et1, ei1; // total and incremental values of temperature
 
         if ( ( tf = fm->giveField(FT_Temperature) ) ) {
-            gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+            gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
             if ( ( err = tf->evaluateAt(et1, gcoords, VM_Total, tStep) ) ) {
                 OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
             }

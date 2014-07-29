@@ -46,6 +46,8 @@
 #define _IFT_GnuplotExportModule_BoundaryConditions "boundaryconditions"
 // Mesh
 #define _IFT_GnuplotExportModule_mesh "mesh"
+// XFEM stuff
+#define _IFT_GnuplotExportModule_xfem "xfem"
 //@}
 
 namespace oofem {
@@ -103,6 +105,7 @@ protected:
 	bool mExportReactionForces;
 	bool mExportBoundaryConditions;
     bool mExportMesh;
+    bool mExportXFEM;
 
     /**
      * Stores the sum of reaction forces for each BC.

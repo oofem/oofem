@@ -40,7 +40,7 @@
 
 ///@name Input fields for LIBeam3dNL
 //@{
-#define _IFT_LIBeam3dNL_Name "libeam3dNL"
+#define _IFT_LIBeam3dNL_Name "libeam3dnl"
 #define _IFT_LIBeam3dNL_refnode "refnode"
 //@}
 
@@ -112,7 +112,7 @@ protected:
     virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-    { computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) ); }
+    { computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) ); }
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
     virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);

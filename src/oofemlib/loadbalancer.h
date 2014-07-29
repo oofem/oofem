@@ -31,46 +31,43 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
+
 #ifndef loadbalancer_h
 #define loadbalancer_h
 
-#ifdef __PARALLEL_MODE
- #include "oofemcfg.h"
- #include "inputrecord.h"
- #include "interface.h"
- #include "alist.h"
- #include "floatarray.h"
- #include "intarray.h"
+#include "oofemcfg.h"
+#include "inputrecord.h"
+#include "interface.h"
+#include "floatarray.h"
+#include "intarray.h"
 
- #define __LB_DEBUG
- #ifdef __LB_DEBUG
-  #include <list>
-  #include "range.h"
- #endif
+#define __LB_DEBUG
+#ifdef __LB_DEBUG
+ #include <list>
+ #include "range.h"
+#endif
 
- #include <vector>
- #include <memory>
+#include <vector>
+#include <memory>
 
 ///@name Input fields for LoadBalancer
 //@{
- #define _IFT_LoadBalancer_wtp "wtp"
- #define _IFT_LoadBalancerMonitor_nodeWeightMode "nodeweightmode"
- #define _IFT_LoadBalancerMonitor_initialnodeweights "nw"
-
- #define _IFT_ParmetisLoadBalancer_Name "parmetis"
+#define _IFT_LoadBalancer_wtp "wtp"
+#define _IFT_LoadBalancerMonitor_nodeWeightMode "nodeweightmode"
+#define _IFT_LoadBalancerMonitor_initialnodeweights "nw"
 //@}
 
 ///@name Input fields for WallClockLoadBalancerMonitor
 //@{
- #define _IFT_WallClockLoadBalancerMonitor_Name "wallclock"
- #define _IFT_WallClockLoadBalancerMonitor_relwct "relwct"
- #define _IFT_WallClockLoadBalancerMonitor_abswct "abswct"
- #define _IFT_WallClockLoadBalancerMonitor_minwct "minwct"
- #define _IFT_WallClockLoadBalancerMonitor_lbstep "lbstep"
- #define _IFT_WallClockLoadBalancerMonitor_perturbedsteps "lbperturbedsteps"
- #define _IFT_WallClockLoadBalancerMonitor_perturbfactor "lbperturbfactor"
- #define _IFT_WallClockLoadBalancerMonitor_recoveredsteps "lbrecoveredsteps"
- #define _IFT_WallClockLoadBalancerMonitor_processingweights "lbprocessingweights"
+#define _IFT_WallClockLoadBalancerMonitor_Name "wallclock"
+#define _IFT_WallClockLoadBalancerMonitor_relwct "relwct"
+#define _IFT_WallClockLoadBalancerMonitor_abswct "abswct"
+#define _IFT_WallClockLoadBalancerMonitor_minwct "minwct"
+#define _IFT_WallClockLoadBalancerMonitor_lbstep "lbstep"
+#define _IFT_WallClockLoadBalancerMonitor_perturbedsteps "lbperturbedsteps"
+#define _IFT_WallClockLoadBalancerMonitor_perturbfactor "lbperturbfactor"
+#define _IFT_WallClockLoadBalancerMonitor_recoveredsteps "lbrecoveredsteps"
+#define _IFT_WallClockLoadBalancerMonitor_processingweights "lbprocessingweights"
 //@}
 
 namespace oofem {
@@ -286,5 +283,5 @@ public:
 };
 */
 } // end namespace oofem
-#endif
+
 #endif // loadbalancer_h

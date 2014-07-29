@@ -33,6 +33,7 @@
  */
 
 #include "qwedgegrad.h"
+#include "fei3dwedgelin.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
@@ -52,7 +53,7 @@
 namespace oofem {
 REGISTER_Element(QWedgeGrad);
 
-FEI3dWedgeLin QWedgeGrad :: interpolation;
+FEI3dWedgeLin QWedgeGrad :: interpolation_lin;
 
 QWedgeGrad :: QWedgeGrad(int n, Domain *aDomain) :  QWedge(n, aDomain), GradDpElement()
     // Constructor.
@@ -90,17 +91,10 @@ QWedgeGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 // DofId mask array contains the DofID constants (defined in cltypes.h)
 // describing physical meaning of particular DOFs.
 {
-    if ( inode <= nSecNodes ) {
-        answer.resize(4);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
-        answer.at(3) = D_w;
-        answer.at(4) = G_0;
+    if ( inode <= 6 ) {
+        answer = {D_u, D_v, D_w, G_0};
     } else {
-        answer.resize(3);
-        answer.at(1) = D_u;
-        answer.at(2) = D_v;
-        answer.at(3) = D_w;
+        answer = {D_u, D_v, D_w};
     }
 }
 
@@ -114,14 +108,11 @@ QWedgeGrad :: computeGaussPoints()
 }
 
 
-
 void
 QWedgeGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at gp.
 {
     FloatArray n;
-    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 1);
 }
 
@@ -129,68 +120,8 @@ void
 QWedgeGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
-    IntArray a(9);
-
-    answer.resize(3, 9);
-    answer.zero();
-
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    for ( int i = 1; i <= 9; i++ ) {
-        answer.at(1, i) = dnx.at(i, 1);
-        answer.at(2, i) = dnx.at(i, 2);
-        answer.at(3, i) = dnx.at(i, 3);
-    }
+    this->interpolation_lin.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.beTranspositionOf(dnx);
 }
 
-
-void
-QWedgeGrad :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
-// Returns the [45x45] nonlinear part of strain-displacement matrix {B} of the receiver,
-// evaluated at gp
-
-{
-    FloatMatrix dnx;
-
-    // compute the derivatives of shape functions
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(45, 45);
-    answer.zero();
-
-    // put the products of derivatives of shape functions into the "nonlinear B matrix",
-    // depending on parameter i, which is the number of the strain component
-    if ( i <= 3 ) {
-        for ( int k = 0; k < 15; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 45; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, i) * dnx.at( ( j - 1 ) / 3 + 1, i );
-                }
-            }
-        }
-    } else if ( i == 4 ) {
-        for ( int k = 0; k < 15; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 45; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 2 );
-                }
-            }
-        }
-    } else if ( i == 5 ) {
-        for ( int k = 0; k < 15; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 45; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 3 ) + dnx.at(k + 1, 3) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
-                }
-            }
-        }
-    } else if ( i == 6 ) {
-        for ( int k = 0; k < 15; k++ ) {
-            for ( int l = 0; l < 3; l++ ) {
-                for ( int j = 1; j <= 45; j += 3 ) {
-                    answer.at(k * 3 + l + 1, l + j) = dnx.at(k + 1, 1) * dnx.at( ( j - 1 ) / 3 + 1, 2 ) + dnx.at(k + 1, 2) * dnx.at( ( j - 1 ) / 3 + 1, 1 );
-                }
-            }
-        }
-    }
-}
 }

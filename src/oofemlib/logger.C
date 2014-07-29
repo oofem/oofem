@@ -36,6 +36,10 @@
 #include "error.h"
 
 #include <cstdarg>
+#ifdef __PARALLEL_MODE
+ #include <mpi.h>
+#endif
+
 
 #if defined ( __GNUC__ ) && defined ( HAVE_EXECINFO_H )
  #include <cxxabi.h>

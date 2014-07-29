@@ -32,11 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef __PARALLEL_MODE
-
 #include "processcomm.h"
 #include "intarray.h"
-
 #include "combuff.h"
 #include "dyncombuff.h"
 
@@ -154,4 +151,3 @@ ProcessCommunicator :: waitCompletion()
     return 1;
 }
 } // end namespace oofem
-#endif

@@ -62,6 +62,8 @@ class OOFEM_EXPORT Set : public FEMComponent
 {
 protected:
     IntArray elements; ///< Element numbers.
+    mutable bool mElementListIsSorted;
+    mutable IntArray mElementsSorted;
     IntArray elementBoundaries; /// Element numbers + boundary numbers (interleaved).
     IntArray elementEdges; /// Element numbers + edge numbers (interleaved).
     IntArray nodes; ///< Node numbers.
@@ -73,7 +75,7 @@ public:
      * @param n Set number.
      * @param d Domain to which component belongs to.
      */
-    Set(int n, Domain * d) : FEMComponent(n, d) { }
+    Set(int n, Domain * d) : FEMComponent(n, d), mElementListIsSorted(false) { }
     virtual ~Set() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

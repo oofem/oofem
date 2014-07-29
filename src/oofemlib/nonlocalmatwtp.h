@@ -35,14 +35,12 @@
 #ifndef nonlocalmatwtp_h
 #define nonlocalmatwtp_h
 
-#ifdef __PARALLEL_MODE
+#include "loadbalancer.h"
 
- #include "loadbalancer.h"
-
- #include <map>
- #include <list>
- #include <vector>
- #include <set>
+#include <map>
+#include <list>
+#include <vector>
+#include <set>
 
 namespace oofem {
 /**
@@ -120,5 +118,5 @@ protected:
     void fastElementIPNonlocTableUpdater(GaussPoint *gp, IntArray &map);
 };
 } // end namespace oofem
-#endif
+
 #endif // nonlocalmatwtp_h

@@ -87,9 +87,9 @@ private:
 
     //FractureManager *fMan;
     FailureCriteria *failCrit;      // pointer to the corresponding failure criteria
-    FailureCriteriaType type;       // local, nonlocal
+//    FailureCriteriaType type;       // local, nonlocal
     //FailureCriteriaName name;     // max strain, von Mises, effectivePlasticStrain, tsaiHill, J-integral, G, K etc.
-    bool failedFlag;                // is the criteria fulfilled?
+//    bool failedFlag;                // is the criteria fulfilled?
     int number;
 
 

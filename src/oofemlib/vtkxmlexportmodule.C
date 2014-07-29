@@ -1972,7 +1972,7 @@ VTKXMLExportModule :: exportIntVarsInGpAs(IntArray valIDs, TimeStep *tStep)
             int ielem = elements.at(i);
 
             for ( GaussPoint *gp: *d->giveElement(ielem)->giveDefaultIntegrationRulePtr() ) {
-                lc = gp->giveCoordinates();
+                lc = gp->giveNaturalCoordinates();
                 d->giveElement(ielem)->computeGlobalCoordinates(gc, * lc);
                 for ( double c: gc ) {
                     fprintf( stream, "%e ", c );

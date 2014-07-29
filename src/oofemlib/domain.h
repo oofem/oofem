@@ -201,6 +201,12 @@ private:
      */
     std::unordered_map< int, int > mElementPlaceInArray;
 
+    /**
+     * Map from material number to elements that have the
+     * given material number. Added by ES 140718.
+     */
+    std::unordered_map< int, IntArray> mMapMaterialNum2El;
+
     /// Topology description
     TopologyDescription *topology;
 
@@ -273,6 +279,11 @@ public:
      */
     int giveElementPlaceInArray(int iGlobalElNum) const;
     /**
+     * Returns array with indices of elements that have a
+     * given material number.
+     */
+    const IntArray &giveElementsWithMaterialNum(int iMaterialNum) const;
+    /**
      * Returns engineering model to which receiver is associated.
      */
     EngngModel *giveEngngModel();
@@ -338,7 +349,21 @@ public:
      * Note: nodes and element sides share common numbering (they are numbered as DofManagers).
      * @param n Pointer to n-th node is returned.
      */
-    Node *giveNode(int n);
+    inline Node *giveNode(int n)
+    {
+    #ifdef DEBUG
+        if ( !dofManagerList->includes(n) ) {
+            OOFEM_ERROR("undefined dofManager (%d)", n);
+        }
+
+        Node *node = reinterpret_cast< Node * >( dofManagerList->at(n) );
+
+        return node;
+
+    #else
+        return reinterpret_cast< Node * >( dofManagerList->at(n) );
+    #endif
+    }
     /**
      * Service for accessing particular domain element side.
      * Generates error if no such element side is defined.
@@ -669,6 +694,11 @@ private:
      */
     void BuildElementPlaceInArrayMap();
 
+    /**
+     * Construct map from a material number to
+     * elements with the given material number.
+     */
+    void BuildMaterialToElementMap();
 };
 } // end namespace oofem
 #endif // domain_h

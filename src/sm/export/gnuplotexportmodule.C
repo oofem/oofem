@@ -68,7 +68,8 @@ GnuplotExportModule::GnuplotExportModule(int n, EngngModel *e):
 ExportModule(n, e),
 mExportReactionForces(false),
 mExportBoundaryConditions(false),
-mExportMesh(false)
+mExportMesh(false),
+mExportXFEM(false)
 {
 
 }
@@ -82,6 +83,7 @@ IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
     mExportReactionForces = ir->hasField(_IFT_GnuplotExportModule_ReactionForces);
     mExportBoundaryConditions = ir->hasField(_IFT_GnuplotExportModule_BoundaryConditions);
     mExportMesh = ir->hasField(_IFT_GnuplotExportModule_mesh);
+    mExportXFEM = ir->hasField(_IFT_GnuplotExportModule_xfem);
     return ExportModule::initializeFrom(ir);
 }
 
@@ -123,23 +125,25 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 		}
 	}
 
-	if(domain->hasXfemManager()) {
-		XfemManager *xMan = domain->giveXfemManager();
+	if(mExportXFEM) {
+        if(domain->hasXfemManager()) {
+            XfemManager *xMan = domain->giveXfemManager();
 
-		int numEI = xMan->giveNumberOfEnrichmentItems();
+            int numEI = xMan->giveNumberOfEnrichmentItems();
 
-        std::vector< std::vector<FloatArray> > points;
+            std::vector< std::vector<FloatArray> > points;
 
-		for(int i = 1; i <= numEI; i++) {
-			EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-			ei->callGnuplotExportModule(*this);
+            for(int i = 1; i <= numEI; i++) {
+                EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
+                ei->callGnuplotExportModule(*this);
 
-			std::vector<FloatArray> eiPoints;
-			ei->giveSubPolygon(eiPoints, 0.0, 1.0);
-			points.push_back(eiPoints);
-		}
+                std::vector<FloatArray> eiPoints;
+                ei->giveSubPolygon(eiPoints, 0.0, 1.0);
+                points.push_back(eiPoints);
+            }
 
-		outputXFEMGeometry(points);
+            outputXFEMGeometry(points);
+        }
 	}
 
 	if(mExportMesh) {
@@ -283,7 +287,7 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack)
 		if(matStat != NULL) {
 
 			// Compute arc length position of the Gauss point
-			const FloatArray &coord = *(gp->giveCoordinates());
+			const FloatArray &coord = *(gp->giveNaturalCoordinates());
 			double tangDist = 0.0, arcPos = 0.0;
 			ed->computeTangentialSignDist(tangDist, coord, arcPos);
 			arcLengthPositions.push_back(arcPos);
@@ -507,12 +511,12 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
         iBC.giveTractionElNormal(i, n, t);
 
 
-        double tSn = tS.dotProduct(n);
-        double tSt = tS.dotProduct(t);
+        double tSn = tS.dotProduct(n,2);
+        double tSt = tS.dotProduct(t,2);
         tractions.push_back( {tSn ,tSt} );
 
-        double tEn = tE.dotProduct(n);
-        double tEt = tE.dotProduct(t);
+        double tEn = tE.dotProduct(n,2);
+        double tEt = tE.dotProduct(t,2);
         tractions.push_back( {tEn, tEt} );
         nodeTractionNTArray.push_back(tractions);
     }

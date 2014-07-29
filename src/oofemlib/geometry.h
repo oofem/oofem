@@ -170,10 +170,11 @@ public:
     /// Computes tangential distance to a point
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("not implemented"); };
-
 
     double computeTangentialDistanceToEnd(FloatArray *point);
+
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const;
+
     void computeProjection(FloatArray &answer);
     virtual int computeNumberOfIntersectionPoints(Element *element);
     virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints);

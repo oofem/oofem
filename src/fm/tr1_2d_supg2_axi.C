@@ -1569,11 +1569,11 @@ TR1_2D_SUPG2_AXI :: updateIntegrationRules()
 
         // remap ip coords into area coords of receiver
         for ( GaussPoint *gp: *integrationRulesArray [ i ] ) {
-            approx->local2global( gc, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(vcoords [ i ]) );
+            approx->local2global( gc, * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(vcoords [ i ]) );
             triaApprox.global2local( lc, gc, FEIElementGeometryWrapper(this) );
             // modify original ip coords to target ones
-            gp->setLocalCoordinates( * gp->giveCoordinates() );
-            gp->setCoordinates(lc);
+            gp->setSubPatchCoordinates( * gp->giveNaturalCoordinates() );
+            gp->setNaturalCoordinates(lc);
             //gp->setWeight (gp->giveWeight()*a/area);
         }
     }
@@ -1616,8 +1616,8 @@ TR1_2D_SUPG2_AXI :: computeRadiusAt(GaussPoint *gp)
     r2 = this->giveNode(2)->giveCoordinate(1);
     r3 = this->giveNode(3)->giveCoordinate(1);
 
-    n1 = gp->giveCoordinate(1);
-    n2 = gp->giveCoordinate(2);
+    n1 = gp->giveNaturalCoordinate(1);
+    n2 = gp->giveNaturalCoordinate(2);
     n3 = 1. - n1 - n2;
 
     return n1 * r1 + n2 * r2 + n3 * r3;
@@ -1633,10 +1633,10 @@ TR1_2D_SUPG2_AXI :: computeVolumeAroundID(GaussPoint *gp, integrationDomain id, 
 
     if ( id == _Triangle ) {
         FEI2dTrLin __interpolation(1, 2);
-        return _r *weight *fabs( __interpolation.giveTransformationJacobian ( *gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
+        return _r *weight *fabs( __interpolation.giveTransformationJacobian ( *gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
     } else {
         FEI2dQuadLin __interpolation(1, 2);
-        double det = fabs( __interpolation.giveTransformationJacobian( * gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
+        double det = fabs( __interpolation.giveTransformationJacobian( * gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
         return _r * det * weight;
     }
 }
@@ -1695,7 +1695,7 @@ void TR1_2D_SUPG2_AXI :: computeBMtrx(FloatMatrix &_b, GaussPoint *gp)
 void
 TR1_2D_SUPG2_AXI :: computeNVector(FloatArray &n, GaussPoint *gp)
 {
-    this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 void

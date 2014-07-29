@@ -241,7 +241,7 @@ LayeredCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoi
         // resolve current layer z-coordinate
         layerThick = this->layerThicks.at(layer);
         layerWidth = this->layerWidths.at(layer);
-        layerZeta = layerGp->giveCoordinate(3);
+        layerZeta = layerGp->giveNaturalCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
         // Compute the layer stress
@@ -302,7 +302,7 @@ LayeredCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoin
         // resolve current layer z-coordinate
         layerThick = this->layerThicks.at(layer);
         layerWidth = this->layerWidths.at(layer);
-        layerZeta = layerGp->giveCoordinate(3);
+        layerZeta = layerGp->giveNaturalCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
         // Compute the layer stress
@@ -398,7 +398,7 @@ LayeredCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoin
         // resolve current layer z-coordinate
         layerThick = this->layerThicks.at(layer);
         layerWidth = this->layerWidths.at(layer);
-        layerZeta = layerGp->giveCoordinate(3);
+        layerZeta = layerGp->giveNaturalCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
         // Compute the layer stress
@@ -589,7 +589,7 @@ LayeredCrossSection :: give2dPlateStiffMtrx(FloatMatrix &answer,
         //
         layerThick = this->layerThicks.at(layer);
         layerWidth  = this->layerWidths.at(layer);
-        layerZeta   = layerGp->giveCoordinate(3);
+        layerZeta   = layerGp->giveNaturalCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
         layerZCoord2 = layerZCoord * layerZCoord;
         //
@@ -688,7 +688,7 @@ LayeredCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer,
         //
         layerThick = this->layerThicks.at(layer);
         layerWidth  = this->layerWidths.at(layer);
-        layerZeta   = layerGp->giveCoordinate(3);
+        layerZeta   = layerGp->giveNaturalCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
         layerZCoord2 = layerZCoord * layerZCoord;
         //
@@ -772,7 +772,7 @@ LayeredCrossSection :: give2dBeamStiffMtrx(FloatMatrix &answer,
         //
         layerThick = this->layerThicks.at(i);
         layerWidth  = this->layerWidths.at(i);
-        layerZeta   = layerGp->giveCoordinate(3);
+        layerZeta   = layerGp->giveNaturalCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
         layerZCoord2 = layerZCoord * layerZCoord;
         //
@@ -1026,7 +1026,7 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
         // create new slave record in masterGp
         // (requires that this is friend of gp)
         double currentZTopCoord, currentZCoord,  bottom, top;
-        FloatArray *zCoord, *masterCoords = masterGp->giveCoordinates();
+        FloatArray *zCoord, *masterCoords = masterGp->giveNaturalCoordinates();
         // resolve slave material mode
         MaterialMode slaveMode, masterMode = masterGp->giveMaterialMode();
         slaveMode = this->giveCorrespondingSlaveMaterialMode(masterMode);
@@ -1308,9 +1308,9 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(std :: vector< IntegrationR
             // Map local layer cs to local shell cs
             double zMid_i = this->giveLayerMidZ(layer); // global z-coord
             double xiMid_i = 1.0 - 2.0 * ( totalThickness - this->midSurfaceZcoordFromBottom - zMid_i ) / totalThickness; // local z-coord
-            double deltaxi = gp->coordinates->at(3) * this->giveLayerThickness(layer) / totalThickness; // distance from layer mid
+            double deltaxi = gp->giveNaturalCoordinates()->at(3) * this->giveLayerThickness(layer) / totalThickness; // distance from layer mid
             double xinew = xiMid_i + deltaxi * scaleFactor;
-            gp->coordinates->at(3) = xinew;
+            gp->giveNaturalCoordinates()->at(3) = xinew;
             gp->number = number;   // fix gp ordering
             number++;
         }

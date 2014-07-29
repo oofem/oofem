@@ -60,7 +60,7 @@ IntElLine2 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
 {
     // Returns the modified N-matrix which multiplied with u give the spatial jump.
     FloatArray N;
-    interp.evalN( N, * ip->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interp.evalN( N, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 12);
     answer.zero();

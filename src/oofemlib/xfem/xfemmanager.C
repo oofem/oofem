@@ -150,7 +150,7 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
 
 void XfemManager :: giveInputRecord(DynamicInputRecord &input)
 {
-    input.setRecordKeywordField(_IFT_XfemManager_Name, 1);
+    input.setRecordKeywordField(giveInputRecordName(), 1);
     input.setField(numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
     input.setField(mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
     input.setField(doVTKExport, _IFT_XfemManager_VTKExport);

@@ -155,6 +155,9 @@ public:
     /// Tests for empty matrix.
     inline bool isNotEmpty() const { return nRows > 0 && nColumns > 0; }
 
+    /// Returns true if no element is NAN or infinite
+    bool isFinite() const;
+
     /**
      * Coefficient access function. Returns value of coefficient at given
      * position of the receiver. Implements 1-based indexing.

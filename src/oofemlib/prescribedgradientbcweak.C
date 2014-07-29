@@ -45,6 +45,8 @@
 #include "xfem/integrationrules/discsegintegrationrule.h"
 #include "spatiallocalizer.h"
 #include "geometry.h"
+#include "dynamicinputrecord.h"
+#include "function.h"
 
 #include "xfem/XFEMDebugTools.h"
 
@@ -62,6 +64,7 @@ mNumTractionNodesAtIntersections(1),
 mTractionNodeSpacing(1),
 mMeshIsPeriodic(false),
 mDuplicateCornerNodes(false),
+mTangDistPadding(0.0),
 mpDisplacementLock(NULL),
 mDispLockScaling(1.0)
 {
@@ -143,21 +146,32 @@ IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
         mDuplicateCornerNodes = false;
     }
 
+    mTangDistPadding = 0.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, mTangDistPadding, _IFT_PrescribedGradientBCWeak_TangDistPadding);
+    printf("mTangDistPadding: %e\n", mTangDistPadding);
+
     return IRRT_OK;
 }
 
 void PrescribedGradientBCWeak :: giveInputRecord(DynamicInputRecord &input)
 {
-    // TODO: Implement.
+    PrescribedGradientBC :: giveInputRecord(input);
+
+    input.setField(mTractionInterpOrder, _IFT_PrescribedGradientBCWeak_TractionInterpOrder);
+    input.setField(mNumTractionNodesAtIntersections, _IFT_PrescribedGradientBCWeak_NumTractionNodesAtIntersections);
+    input.setField(mTractionNodeSpacing, _IFT_PrescribedGradientBCWeak_NumTractionNodeSpacing);
+
+    if(mDuplicateCornerNodes) {
+        input.setField(1, _IFT_PrescribedGradientBCWeak_DuplicateCornerNodes);
+    }
+    else {
+        input.setField(0, _IFT_PrescribedGradientBCWeak_DuplicateCornerNodes);
+    }
+
+    input.setField(mTangDistPadding, _IFT_PrescribedGradientBCWeak_TangDistPadding);
 }
 
 void PrescribedGradientBCWeak::postInitialize()
-{
-
-}
-
-
-void PrescribedGradientBCWeak::scale(double s)
 {
 
 }
@@ -190,7 +204,7 @@ void PrescribedGradientBCWeak::assembleVector(FloatArray &answer, TimeStep *tSte
             IntegrationRule *ir = createNewIntegrationRule(i);
 
             for ( GaussPoint *gp: *ir ) {
-                const FloatArray &locCoordsOnLine = * gp->giveLocalCoordinates();
+                const FloatArray &locCoordsOnLine = * gp->giveNaturalCoordinates();
 
                 // Compute N^trac
                 FloatArray N, Ntrac;
@@ -230,6 +244,9 @@ void PrescribedGradientBCWeak::assembleVector(FloatArray &answer, TimeStep *tSte
 
             fExt.negated();
 
+            double loadLevel = this->giveTimeFunction()->evaluate(tStep, mode);
+            fExt.times(loadLevel);
+
             // Assemble
             answer.assemble(fExt, rows);
 
@@ -259,6 +276,12 @@ void PrescribedGradientBCWeak::assembleVector(FloatArray &answer, TimeStep *tSte
             FloatArray dispUnknowns;
             giveDisplacementUnknows(dispUnknowns, mode, tStep, i);
 
+#ifdef DEBUG
+            if(!dispUnknowns.isFinite()) {
+                OOFEM_ERROR("!dispUnknowns.isFinite()")
+            }
+#endif
+
             fe_trac.beProductOf(Ke, dispUnknowns);
             fe_trac.negated();
 
@@ -270,7 +293,15 @@ void PrescribedGradientBCWeak::assembleVector(FloatArray &answer, TimeStep *tSte
             IntArray dispRrows;
             giveDisplacementLocationArrays( i, dispRrows, type, s);
 
+#ifdef DEBUG
+            if(!fe_trac.isFinite()) {
+                OOFEM_ERROR("!fe_trac.isFinite()")
+            }
 
+            if(!fe_disp.isFinite()) {
+                OOFEM_ERROR("!fe_trac.isFinite()")
+            }
+#endif
             // Assemble
             answer.assemble(fe_trac, tracRrows);
             answer.assemble(fe_disp, dispRrows);
@@ -443,6 +474,35 @@ void PrescribedGradientBCWeak::giveLocationArrays(std :: vector< IntArray > &row
 
 }
 
+void PrescribedGradientBCWeak::giveTractionLocationArray(IntArray &rows,
+                                const UnknownNumberingScheme &s)
+{
+    rows.clear();
+
+    // Loop over traction elements
+    for(size_t tracElInd = 0; tracElInd < mpTractionElements.size(); tracElInd++) {
+
+        IntArray tracElRows, trac_loc_r;
+
+        const TractionElement &tEl = *(mpTractionElements[tracElInd]);
+        for(int tracNodeInd : tEl.mTractionNodeInd) {
+            Node *tNode = mpTractionNodes[tracNodeInd];
+            tNode->giveCompleteLocationArray(trac_loc_r, s);
+            tracElRows.followedBy(trac_loc_r);
+        }
+
+        rows.followedBy(tracElRows);
+    }
+
+
+    if(mpDisplacementLock != NULL) {
+        IntArray dispLock_r;
+        mpDisplacementLock->giveCompleteLocationArray(dispLock_r, s);
+
+        rows.followedBy(dispLock_r);
+    }
+
+}
 
 void PrescribedGradientBCWeak::giveTractionLocationArrays(int iTracElInd, IntArray &rows, CharType type,
                                 const UnknownNumberingScheme &s)
@@ -488,7 +548,7 @@ void PrescribedGradientBCWeak::computeField(FloatArray &sigma, TimeStep *tStep)
         IntegrationRule *ir = createNewIntegrationRule(i);
 
         for ( GaussPoint *gp: *ir ) {
-            const FloatArray &locCoordsOnLine = * gp->giveLocalCoordinates();
+            const FloatArray &locCoordsOnLine = * gp->giveNaturalCoordinates();
 
             // Compute N^trac
             FloatArray N, Ntrac;
@@ -574,13 +634,19 @@ void PrescribedGradientBCWeak::giveTractionElNormal(size_t iElInd, FloatArray &o
 void PrescribedGradientBCWeak::giveTraction(size_t iElInd, FloatArray &oStartTraction, FloatArray &oEndTraction, ValueModeType mode, TimeStep *tStep)
 {
     mpTractionNodes[ mpTractionElements[iElInd]->mTractionNodeInd[0] ]->giveCompleteUnknownVector(oStartTraction, mode, tStep);
-    mpTractionNodes[ mpTractionElements[iElInd]->mTractionNodeInd[1] ]->giveCompleteUnknownVector(oEndTraction, mode, tStep);
+
+    if( mpTractionElements[iElInd]->mTractionNodeInd.size() < 2 ) {
+        mpTractionNodes[ mpTractionElements[iElInd]->mTractionNodeInd[0] ]->giveCompleteUnknownVector(oEndTraction, mode, tStep);
+    }
+    else {
+        mpTractionNodes[ mpTractionElements[iElInd]->mTractionNodeInd[1] ]->giveCompleteUnknownVector(oEndTraction, mode, tStep);
+    }
 }
 
 void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity)
 {
     const double nodeDistTol = 1.0e-15;
-    const double meshTol = 1.0e-4; // Minimum distance between traction nodes
+    const double meshTol = 1.0e-8; // Minimum distance between traction nodes
 
     /**
      * first: 	coordinates
@@ -621,8 +687,19 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
                 bndNodeCoords.push_back( nodeCoord );
             }
             else {
-            	std::pair<FloatArray, bool> nodeCoord = {x, false};
-                bndNodeCoords.push_back( nodeCoord );
+
+                bool closePointExists = false;
+                const double meshTol2 = meshTol*meshTol;
+                for(auto bndPos : bndNodeCoords) {
+                    if( bndPos.first.distance_square(x) < meshTol2 ) {
+                        closePointExists = true;
+                    }
+                }
+
+                if(!closePointExists) {
+                    std::pair<FloatArray, bool> nodeCoord = {x, false};
+                    bndNodeCoords.push_back( nodeCoord );
+                }
             }
 
 
@@ -679,23 +756,23 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
         if(xfemElInt != NULL && domain->hasXfemManager() ) {
             std::vector<Line> segments;
             std::vector<FloatArray> intersecPoints;
-            xfemElInt->partitionEdgeSegment( boundary, segments, intersecPoints );
+            xfemElInt->partitionEdgeSegment( boundary, mTangDistPadding, segments, intersecPoints );
 
             for(size_t i = 0; i < intersecPoints.size(); i++) {
 
                 if( boundaryPointIsOnActiveBoundary(intersecPoints[i]) ) {
 
                     // TODO: Implement proper search
-                    bool closePointExists = false;
+                    int numClosePoints = 0;
                     const double meshTol2 = meshTol*meshTol;
                     for(auto bndPos : bndNodeCoords) {
                         if( bndPos.first.distance_square(intersecPoints[i]) < meshTol2 ) {
-                            closePointExists = true;
+                            numClosePoints++;
                         }
                     }
 
-                    if(!closePointExists) {
-                        for(int j = 0; j < mNumTractionNodesAtIntersections; j++) {
+                    if(numClosePoints < mNumTractionNodesAtIntersections) {
+                        for(int j = 0; j < mNumTractionNodesAtIntersections-numClosePoints; j++) {
                             std::pair<FloatArray, bool> nodeCoord = {intersecPoints[i], true};
                             bndNodeCoords.push_back( nodeCoord );
                         }
@@ -707,15 +784,15 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
                 		giveMirroredPointOnGammaPlus(xPlus, intersecPoints[i]);
 
                 		// TODO: Implement proper search
-                		bool closePointExists = false;
+                        int numClosePoints = 0;
                 		const double meshTol2 = meshTol*meshTol;
                 		for(auto bndPos : bndNodeCoords) {
                 		    if( bndPos.first.distance_square(xPlus) < meshTol2 ) {
-                		        closePointExists = true;
+                                numClosePoints++;
                 		    }
                 		}
 
-                		if(!closePointExists) {
+                		if(numClosePoints < mNumTractionNodesAtIntersections-numClosePoints) {
                             for(int j = 0; j < mNumTractionNodesAtIntersections; j++) {
                                 std::pair<FloatArray, bool> nodeCoord = {xPlus, true};
                                 bndNodeCoords.push_back( nodeCoord );
@@ -876,7 +953,7 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
         localizer->giveAllElementsWithNodesWithinBox(elList_plus, xC_plus, 0.51*elLength_plus );
 
         if( elList_plus.empty() ) {
-            Element *el = localizer->giveElementContainingPoint(xC_plus);
+            Element *el = localizer->giveElementContainingPoint(xC_plus); // TODO: Replace?! giveElementClosestToPoint
             int elPlaceInArray = domain->giveElementPlaceInArray(el->giveGlobalNumber());
             elList_plus.insert( elPlaceInArray );
         }
@@ -1139,7 +1216,7 @@ void PrescribedGradientBCWeak::integrateTangent(FloatMatrix &oTangent, size_t iT
          */
 
         // Fetch GP coordinates
-        const FloatArray &globalCoord = * gp->giveCoordinates();
+        const FloatArray &globalCoord = gp->giveGlobalCoordinates();
 
         assembleTangentGPContribution(oTangent, iTracElInd, *gp, globalCoord, globalNodeIndToPosInLocalLocArray, 1.0);
 
@@ -1164,7 +1241,7 @@ void PrescribedGradientBCWeak::assembleTangentGPContribution(FloatMatrix &oTange
 
     const TractionElement &tEl = *(mpTractionElements[iTracElInd]);
     double detJ = 0.5*tEl.mStartCoord.distance(tEl.mEndCoord);
-    const FloatArray &locCoordsOnLine = * iGP.giveLocalCoordinates();
+    const FloatArray &locCoordsOnLine = * iGP.giveNaturalCoordinates();
 
     //////////////////////////////////
     // Compute traction N-matrix
@@ -1252,7 +1329,7 @@ IntegrationRule *PrescribedGradientBCWeak::createNewIntegrationRule(int iTracElI
     ir->SetUpPointsOnLine(numPointsPerSeg, matMode);
 
     for(GaussPoint *gp : *ir) {
-        tracGpCoord.push_back( *(gp->giveCoordinates()) );
+        tracGpCoord.push_back( gp->giveGlobalCoordinates() );
     }
 
     std :: stringstream str3;

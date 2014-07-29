@@ -69,7 +69,7 @@ LIBeam3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
     double l, ksi, n1, n2, n1x, n2x;
 
     l     = this->computeLength();
-    ksi   = gp->giveCoordinate(1);
+    ksi   = gp->giveNaturalCoordinate(1);
 
     answer.resize(6, 12);
     answer.zero();
@@ -321,7 +321,7 @@ LIBeam3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 
@@ -446,8 +446,8 @@ LIBeam3d :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &
 {
     double layerYCoord, layerZCoord;
 
-    layerZCoord = slaveGp->giveCoordinate(2);
-    layerYCoord = slaveGp->giveCoordinate(1);
+    layerZCoord = slaveGp->giveNaturalCoordinate(2);
+    layerYCoord = slaveGp->giveNaturalCoordinate(1);
 
     answer.resize(3); // {Exx,GMzx,GMxy}
 

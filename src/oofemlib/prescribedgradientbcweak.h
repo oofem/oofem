@@ -44,8 +44,8 @@
 #define _IFT_PrescribedGradientBCWeak_TractionInterpOrder   "tractioninterporder"
 #define _IFT_PrescribedGradientBCWeak_NumTractionNodesAtIntersections   "numnodesatintersections"
 #define _IFT_PrescribedGradientBCWeak_NumTractionNodeSpacing   "tractionnodespacing"
-//#define _IFT_PrescribedGradientBCWeak_TractionOnGammaPlus   "periodic"
 #define _IFT_PrescribedGradientBCWeak_DuplicateCornerNodes   "duplicatecornernodes"
+#define _IFT_PrescribedGradientBCWeak_TangDistPadding   "tangdistpadding"
 
 namespace oofem {
 
@@ -54,7 +54,7 @@ public:
     TractionElement() {}
     virtual ~TractionElement() {}
 
-    void computeN_Constant(FloatArray &oN, const double &iXi) const {oN = {1.0};}
+    void computeN_Constant(FloatArray &oN, const double &iXi) const {oN = FloatArray({1.0});}
     void computeN_Linear(FloatArray &oN, const double &iXi) const {oN = {0.5*(1.0-iXi), 0.5*(1.0+iXi)};}
 
     std::vector<int> mTractionNodeInd;
@@ -96,8 +96,6 @@ public:
 
     virtual void postInitialize();
 
-    virtual void scale(double s);
-
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
@@ -107,6 +105,9 @@ public:
 
     virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                                		const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
+
+    virtual void giveTractionLocationArray(IntArray &rows,
+                                    const UnknownNumberingScheme &s);
 
     virtual void giveTractionLocationArrays(int iTracElInd, IntArray &rows, CharType type,
                                     const UnknownNumberingScheme &s);
@@ -171,6 +172,11 @@ protected:
      * 1 -> Duplicate corner traction nodes
      */
     bool mDuplicateCornerNodes;
+
+    /**
+     * Parameter for creation of traction mesh
+     */
+    double mTangDistPadding;
 
     /// Lower corner of domain (assuming a rectangular RVE)
     FloatArray mLC;

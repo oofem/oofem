@@ -79,10 +79,20 @@ GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mo
 
     for ( int i = 1; i <= nPoints; i++ ) {
         double x = ( coords_xi.at(i) + 1.0 ) * 0.5;
-        FloatArray *coord = new FloatArray(2);
-        coord->at(1) = ( 1. - x ) * coord0.at(1) + x * coord1.at(1);
-        coord->at(2) = ( 1. - x ) * coord0.at(2) + x * coord1.at(2);
-        this->gaussPoints [ i - 1 ] = new GaussPoint(this, i, coord, weights.at ( i ), mode);
+        FloatArray subpatchCoord = {x};
+
+        this->gaussPoints [ i - 1 ] = new GaussPoint(this, i, weights.at ( i ), mode);
+
+        this->gaussPoints [ i - 1 ]->setSubPatchCoordinates(subpatchCoord);
+
+        const FloatArray globalCoord = { 
+        ( 1. - x ) * coord0.at(1) + x * coord1.at(1),
+	    ( 1. - x ) * coord0.at(2) + x * coord1.at(2) };
+        this->gaussPoints [ i - 1 ]->setGlobalCoordinates(globalCoord);
+
+        FloatArray naturalCoord;
+        this->giveElement()->computeLocalCoordinates(naturalCoord, globalCoord);
+        this->gaussPoints [ i - 1 ]->setNaturalCoordinates(naturalCoord);
     }
 
     this->intdomain = _Embedded2dLine;
@@ -950,9 +960,9 @@ GaussIntegrationRule :: giveTriCoordsAndWeights(int nPoints, FloatArray &coords_
 {
     switch ( nPoints ) {
     case 1:
-        coords_xi1 = {0.333333333333};
-        coords_xi2 = {0.333333333333};
-        weights = {0.5};
+        coords_xi1 = FloatArray({0.333333333333});
+        coords_xi2 = FloatArray({0.333333333333});
+        weights = FloatArray({0.5});
         break;
 
     case 3:
@@ -1366,8 +1376,8 @@ GaussIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coords
 {
     switch ( nPoints ) {
     case 1:
-        coords_xi = {0.0};
-        weights = {2.0};
+        coords_xi = FloatArray({0.0});
+        weights = FloatArray({2.0});
         break;
 
     case 2:

@@ -386,7 +386,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
         for ( GaussPoint *gp: *iRuleL ) {
-            lCoords = * gp->giveCoordinates();
+            lCoords = * gp->giveNaturalCoordinates();
             double levelSet = lCoords.at(3) - dei->giveDelamXiCoord();
             dei->evaluateEnrFuncAt(ef, lCoords, levelSet);
 
@@ -395,7 +395,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
                 this->computeGeneralizedStrainVectorNew(genEps,  solVec,  B);
                 this->computeGeneralizedStrainVectorNew(genEpsD, solVecD, B);
 
-                double zeta = giveGlobalZcoord(gp->giveCoordinate(3), lCoords);
+                double zeta = giveGlobalZcoord(gp->giveNaturalCoordinate(3), lCoords);
                 this->computeSectionalForcesAt(sectionalForces, gp, mat, tStep, genEps, genEpsD, zeta);
 
                 // Computation of nodal forces: f = B^t*[N M T Ms Ts]^t
@@ -465,8 +465,8 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
     this->layeredCS->giveInterfaceXiCoords(interfaceXiCoords);
 
     for ( GaussPoint *gp: *iRuleL ) {
-        lCoords.at(1) = gp->giveCoordinate(1);
-        lCoords.at(2) = gp->giveCoordinate(2);
+        lCoords.at(1) = gp->giveNaturalCoordinate(1);
+        lCoords.at(2) = gp->giveNaturalCoordinate(2);
         lCoords.at(3) = dei->giveDelamXiCoord();
 
         this->computeBmatrixAt(lCoords, B);
@@ -573,8 +573,8 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
     FloatArray interfaceXiCoords;
     this->layeredCS->giveInterfaceXiCoords(interfaceXiCoords);
     for ( GaussPoint *gp: *iRuleL ) {
-        lCoords.at(1) = gp->giveCoordinate(1);
-        lCoords.at(2) = gp->giveCoordinate(2);
+        lCoords.at(1) = gp->giveNaturalCoordinate(1);
+        lCoords.at(2) = gp->giveNaturalCoordinate(2);
         lCoords.at(3) = dei->giveDelamXiCoord();
 
         double zeta = this->giveGlobalZcoord(xi, lCoords);
@@ -628,7 +628,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 
         for ( GaussPoint *gp: *iRule ) {
             this->discComputeBulkTangentMatrix(KCC, KCD, KDD, gp, mat, layer, tStep);
-            lCoords = * gp->giveCoordinates();
+            lCoords = * gp->giveNaturalCoordinates();
 
             // Continuous part K_{c,c}
             answer.assemble(KCC, orderingC, orderingC);
@@ -759,14 +759,14 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KCC, FloatMatrix &KC
     FloatArray solVecC, lCoords;
     this->giveUpdatedSolutionVector(solVecC, tStep);
     // continuous part
-    lCoords = * ip->giveCoordinates();
+    lCoords = * ip->giveNaturalCoordinates();
     this->computeBmatrixAt(lCoords, B, 0, 0);
     this->computeGeneralizedStrainVectorNew(genEpsC, solVecC, B);
 
     StructuralMaterial *material = static_cast< StructuralMaterial * >( domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) ) );
     Shell7Base :: computeLinearizedStiffness(ip, material, tStep, A, genEpsC);
 
-    double zeta = giveGlobalZcoord(ip->giveCoordinate(3), lCoords);
+    double zeta = giveGlobalZcoord(ip->giveNaturalCoordinate(3), lCoords);
     this->computeLambdaGMatrices(lambdaC, genEpsC, zeta);
     this->computeLambdaGMatricesDis(lambdaD, zeta);
     double dV = this->computeVolumeAroundLayer(ip, layer);
@@ -863,11 +863,11 @@ Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix 
     FloatArray g1, g2, genEps;
     FloatMatrix lambdaGC [ 3 ], lambdaNC, lambdaGD [ 3 ], lambdaND;
     double xi   = pLoad->giveLoadOffset();
-    double zeta = this->giveGlobalZcoord( xi, * ip->giveCoordinates() );
+    double zeta = this->giveGlobalZcoord( xi, * ip->giveNaturalCoordinates() );
     this->giveUpdatedSolutionVector(solVec, tStep);
     // compute w1,w2, KC
-    lcoords.at(1) = ip->giveCoordinate(1);
-    lcoords.at(2) = ip->giveCoordinate(2);
+    lcoords.at(1) = ip->giveNaturalCoordinate(1);
+    lcoords.at(2) = ip->giveNaturalCoordinate(2);
     lcoords.at(3) = xi;     // local coord where load is applied
 
     this->computeNmatrixAt(lcoords, N);
@@ -882,7 +882,7 @@ Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix 
 
     //(xc+xd)*(g1xg2)=xc*g1xg2 + xd*g1xg2 -> xc*(W2*Dg1 - W1*Dg2) + xd*(W2*Dg1 - W1*Dg2)
     // Traction tangent, L =  lambdaN * ( W2*lambdaG_1 - W1*lambdaG_2  )
-    load->computeValueAt(pressure, tStep, * ( ip->giveCoordinates() ), VM_Total);        // pressure component
+    load->computeValueAt(pressure, tStep, * ( ip->giveNaturalCoordinates() ), VM_Total);        // pressure component
     this->evalCovarBaseVectorsAt(lcoords, gcov, genEps);
     g1.beColumnOf(gcov, 1);
     g2.beColumnOf(gcov, 2);
@@ -971,7 +971,7 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
             FloatArray xbar, m;
             double gam = 0.;
             //this->computeSolutionFields(xbar, m, gam, solVec, N11, N22, N33);
-            FloatArray localCoords = * gp->giveCoordinates();
+            FloatArray localCoords = * gp->giveNaturalCoordinates();
             this->giveUnknownsAt(localCoords, solVec, xbar, m, gam, tStep);
             //this->computeNmatrixAt(gp, N);
             //unknowns.beProductOf(N,a); // [xbar, m, gam]^T
@@ -988,7 +988,7 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
              */
 
 
-            double zeta = giveGlobalZcoord( gp->giveCoordinate(3) );
+            double zeta = giveGlobalZcoord( gp->giveNaturalCoordinate(3) );
             double fac1 = 4;
             double fac2 = 2.0 * zeta * ( 2.0 + gam * zeta );
             double fac3 = 2.0 * zeta * zeta;

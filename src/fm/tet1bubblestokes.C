@@ -103,7 +103,7 @@ void Tet1BubbleStokes :: giveInternalDofManDofIDMask(int i, IntArray &answer) co
 
 double Tet1BubbleStokes :: computeVolumeAround(GaussPoint *gp)
 {
-    double detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ *gp->giveWeight();
 }
 
@@ -146,7 +146,7 @@ void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSte
     FloatArray momentum, conservation;
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray *lcoords = gp->giveCoordinates();
+        FloatArray *lcoords = gp->giveNaturalCoordinates();
 
         double detJ = fabs( this->interp.evaldNdx( dN, * lcoords, FEIElementGeometryWrapper(this) ) );
         this->interp.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
@@ -231,7 +231,7 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharT
     temparray.zero();
     if ( gVector.giveSize() ) {
         for ( GaussPoint *gp: *iRule ) {
-            const FloatArray &lcoords = * gp->giveCoordinates();
+            const FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
             rho = mat->give('d', gp);
             detJ = fabs( this->interp.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) ) );
@@ -276,7 +276,7 @@ void Tet1BubbleStokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryL
         iRule.SetUpPointsOnTriangle(numberOfIPs, _Unknown);
 
         for ( GaussPoint *gp: iRule ) {
-            FloatArray &lcoords = * gp->giveCoordinates();
+            FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
             this->interp.surfaceEvalN( N, iSurf, lcoords, FEIElementGeometryWrapper(this) );
             double detJ = fabs( this->interp.surfaceGiveTransformationJacobian( iSurf, lcoords, FEIElementGeometryWrapper(this) ) );
@@ -321,7 +321,7 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
 
     for ( GaussPoint *gp: *iRule ) {
         // Compute Gauss point and determinant at current element
-        const FloatArray &lcoords = * gp->giveCoordinates();
+        const FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         double detJ = fabs( this->interp.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
         double dV = detJ * gp->giveWeight();

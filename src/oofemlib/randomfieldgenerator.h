@@ -52,7 +52,7 @@ public:
     virtual void generateRandomValue(double &value, FloatArray *position) {; }
     virtual void generateRandomValueAt(double &value, GaussPoint *gp) {
         FloatArray globalCoordinates;
-        if ( gp->giveElement()->computeGlobalCoordinates( globalCoordinates, * ( gp->giveLocalCoordinates() ) ) ) {
+        if ( gp->giveElement()->computeGlobalCoordinates( globalCoordinates, * ( gp->giveSubPatchCoordinates() ) ) ) {
             this->generateRandomValue(value, & globalCoordinates);
         } else {
             OOFEM_ERROR("computeGlobalCoordinates failed");
