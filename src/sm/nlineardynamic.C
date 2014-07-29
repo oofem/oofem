@@ -989,7 +989,7 @@ NonLinearDynamic :: giveLoadBalancer()
     }
 
     if ( loadBalancingFlag ) {
-        lb = classFactory.createLoadBalancer( _IFT_ParmetisLoadBalancer_Name, this->giveDomain(1) );
+        lb = classFactory.createLoadBalancer( "parmetis", this->giveDomain(1) );
         return lb;
     } else {
         return NULL;
@@ -1005,7 +1005,7 @@ NonLinearDynamic :: giveLoadBalancerMonitor()
     }
 
     if ( loadBalancingFlag ) {
-        lbm = classFactory.createLoadBalancerMonitor(_IFT_WallClockLoadBalancerMonitor_Name, this);
+        lbm = classFactory.createLoadBalancerMonitor( "wallclock", this);
         return lbm;
     } else {
         return NULL;

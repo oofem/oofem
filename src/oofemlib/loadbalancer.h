@@ -38,7 +38,6 @@
 #include "oofemcfg.h"
 #include "inputrecord.h"
 #include "interface.h"
-#include "alist.h"
 #include "floatarray.h"
 #include "intarray.h"
 
@@ -284,5 +283,5 @@ public:
 };
 */
 } // end namespace oofem
-#endif
+
 #endif // loadbalancer_h
