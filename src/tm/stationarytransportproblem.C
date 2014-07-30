@@ -373,16 +373,4 @@ StationaryTransportProblem :: updateInternalState(TimeStep *tStep)
     }
 }
 
-
-#ifdef __PARALLEL_MODE
-void
-StationaryTransportProblem :: initParallelContexts()
-{
-    parallelContextList->growTo(ndomains);
-    for ( int i = 1; i <= this->ndomains; i++ ) {
-        ParallelContext *parallelContext =  new ParallelContext(this);
-        parallelContextList->put(i, parallelContext);
-    }
-}
-#endif
 } // end namespace oofem

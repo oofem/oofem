@@ -762,18 +762,6 @@ NonLinearStatic :: updateDomainLinks()
 }
 
 
-#ifdef __PARALLEL_MODE
-void
-NonLinearStatic :: initParallelContexts()
-{
-    parallelContextList->growTo(ndomains);
-    for ( int i = 1; i <= this->ndomains; i++ ) {
-        parallelContextList->put( i, new ParallelContext(this) );
-    }
-}
-#endif
-
-
 void
 NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
                             const UnknownNumberingScheme &s, Domain *domain)

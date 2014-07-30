@@ -260,18 +260,6 @@ double StokesFlow :: giveReynoldsNumber()
 }
 
 
-#ifdef __PARALLEL_MODE
-void StokesFlow :: initParallelContexts()
-{
-    ParallelContext *parallelContext;
-    parallelContextList->growTo(ndomains);
-    for ( int i = 1; i <= this->ndomains; i++ ) {
-        parallelContext =  new ParallelContext(this);
-        parallelContextList->put(i, parallelContext);
-    }
-}
-#endif
-
 int StokesFlow :: checkConsistency()
 {
     Domain *domain = this->giveDomain(1);

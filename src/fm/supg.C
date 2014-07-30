@@ -718,18 +718,14 @@ SUPG :: checkConsistency()
     // check internal consistency
     // if success returns nonzero
     int nelem;
-    Element *ePtr;
-    SUPGElement *sePtr;
-    GeneralBoundaryCondition *bcPtr;
-    InitialCondition *icPtr;
     Domain *domain = this->giveDomain(1);
 
     nelem = domain->giveNumberOfElements();
     // check for proper element type
 
     for ( int i = 1; i <= nelem; i++ ) {
-        ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< SUPGElement * >(ePtr);
+        Element *ePtr = domain->giveElement(i);
+        SUPGElement *sePtr = dynamic_cast< SUPGElement * >(ePtr);
         if ( sePtr == NULL ) {
             OOFEM_WARNING("Element %d has no SUPG base", i);
             return 0;
@@ -743,7 +739,7 @@ SUPG :: checkConsistency()
     if ( equationScalingFlag ) {
         int nbc = domain->giveNumberOfBoundaryConditions();
         for ( int i = 1; i <= nbc; i++ ) {
-            bcPtr = domain->giveBc(i);
+            GeneralBoundaryCondition *bcPtr = domain->giveBc(i);
             if ( bcPtr->giveBCValType() == VelocityBVT ) {
                 bcPtr->scale(1. / uscale);
             } else if ( bcPtr->giveBCValType() == PressureBVT ) {
@@ -757,7 +753,7 @@ SUPG :: checkConsistency()
 
         int nic = domain->giveNumberOfInitialConditions();
         for ( int i = 1; i <= nic; i++ ) {
-            icPtr = domain->giveIc(i);
+            InitialCondition *icPtr = domain->giveIc(i);
             if ( icPtr->giveICValType() == VelocityBVT ) {
                 icPtr->scale(VM_Total, 1. / uscale);
             } else if ( icPtr->giveICValType() == PressureBVT ) {
@@ -1270,20 +1266,6 @@ SUPG :: updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerati
         } // end loop over elem internal dofmans
     } // end loop over elems
 }
-
-
-#ifdef __PARALLEL_MODE
-void
-SUPG :: initParallelContexts()
-{
-    ParallelContext *parallelContext;
-    parallelContextList->growTo(ndomains);
-    for ( int i = 1; i <= this->ndomains; i++ ) {
-        parallelContext =  new ParallelContext(this);
-        parallelContextList->put(i, parallelContext);
-    }
-}
-#endif
 
 
 #define __VOF_TRESHOLD 1.e-5

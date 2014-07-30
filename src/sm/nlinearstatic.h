@@ -175,10 +175,6 @@ public:
 
 #endif
 
-#ifdef __PARALLEL_MODE
-    virtual void initParallelContexts();
-#endif
-
 protected:
     virtual void assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
                           const UnknownNumberingScheme &, Domain *domain);
