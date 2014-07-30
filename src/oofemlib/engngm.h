@@ -52,6 +52,7 @@
 #include "contextfilemode.h"
 #include "contextioresulttype.h"
 #include "unknownnumberingscheme.h"
+#include "alist.h"
 
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
@@ -105,11 +106,9 @@ class LoadBalancer;
 class LoadBalancerMonitor;
 class oofegGraphicContext;
 
-#ifdef __PARALLEL_MODE
 class ProblemCommunicator;
 class ProcessCommunicatorBuff;
 class CommunicatorBuff;
-#endif
 
 
 /**
