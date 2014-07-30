@@ -63,7 +63,7 @@ IntElSurfTr1 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
     // Returns the modified N-matrix which multiplied with u give the spatial jump.
 
     FloatArray N;
-    this->interpolation.evalN( N, * ip->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( N, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 18);
     answer.zero();
@@ -83,9 +83,10 @@ void
 IntElSurfTr1 :: computeGaussPoints()
 {
     // Sets up the array of Gauss Points of the receiver.
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        int numberOfIntegrationRules = 1;
+        //integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray.resize(1);
         //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3); 
         integrationRulesArray [ 0 ]->setUpIntegrationPoints(_Triangle, 4, _3dInterface); ///@todo add parameter for ngp
@@ -97,7 +98,7 @@ void
 IntElSurfTr1 :: computeCovarBaseVectorsAt(IntegrationPoint *ip, FloatArray &G1, FloatArray &G2)
 {
     FloatMatrix dNdxi;
-    this->interpolation.evaldNdxi( dNdxi, * ip->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdxi( dNdxi, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     G1.resize(3);
     G2.resize(3);
     G1.zero();
@@ -132,9 +133,9 @@ IntElSurfTr1 :: initializeFrom(InputRecord *ir)
 
 
 void
-IntElSurfTr1 :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+IntElSurfTr1 :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(3, D_u, D_v, D_w);
+    answer = { D_u, D_v, D_w };
 }
 
 void
@@ -170,7 +171,7 @@ IntElSurfTr1 :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &l
 bool
 IntElSurfTr1 :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
 {
-    _error("Not implemented");
+    OOFEM_ERROR("Not implemented");
     return false;
 }
 

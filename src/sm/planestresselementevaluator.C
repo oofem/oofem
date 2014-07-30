@@ -44,14 +44,14 @@
 #include "crosssection.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
-#include "iga.h"
+#include "iga/iga.h"
 
 namespace oofem {
 void PlaneStressStructuralElementEvaluator :: computeNMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray N;
     FEInterpolation *interp = gp->giveElement()->giveInterpolation();
-    interp->evalN( N, * gp->giveCoordinates(), FEIIGAElementGeometryWrapper( gp->giveElement(), gp->giveIntegrationRule()->giveKnotSpan() ) );
+    interp->evalN( N, * gp->giveNaturalCoordinates(), FEIIGAElementGeometryWrapper( gp->giveElement(), gp->giveIntegrationRule()->giveKnotSpan() ) );
     answer.beNMatrixOf(N, 2);
 }
 
@@ -61,8 +61,8 @@ void PlaneStressStructuralElementEvaluator :: computeBMatrixAt(FloatMatrix &answ
 
     FEInterpolation *interp = gp->giveElement()->giveInterpolation();
     // this uses FEInterpolation::nodes2coords - quite inefficient in this case (large num of dofmans)
-    interp->evaldNdx( d, * gp->giveCoordinates(),
-                      FEIIGAElementGeometryWrapper( gp->giveElement(), gp->giveIntegrationRule()->giveKnotSpan() ) );
+    interp->evaldNdx( d, * gp->giveNaturalCoordinates(),
+                     FEIIGAElementGeometryWrapper( gp->giveElement(), gp->giveIntegrationRule()->giveKnotSpan() ) );
 
     answer.resize(3, d.giveNumberOfRows() * 2);
     answer.zero();
@@ -81,9 +81,9 @@ double PlaneStressStructuralElementEvaluator :: computeVolumeAround(GaussPoint *
 {
     double determinant, weight, thickness, volume;
     determinant = fabs( this->giveElement()->giveInterpolation()
-                        ->giveTransformationJacobian( * gp->giveCoordinates(),
-                                                      FEIIGAElementGeometryWrapper( this->giveElement(),
-                                                                                    gp->giveIntegrationRule()->giveKnotSpan() ) ) );
+                       ->giveTransformationJacobian( * gp->giveNaturalCoordinates(),
+                                                    FEIIGAElementGeometryWrapper( this->giveElement(),
+                                                                                 gp->giveIntegrationRule()->giveKnotSpan() ) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveElement()->giveCrossSection()->give(CS_Thickness, gp);
     volume      = determinant * weight * thickness;

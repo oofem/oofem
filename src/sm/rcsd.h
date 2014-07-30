@@ -70,7 +70,7 @@ protected:
     rcsdMode mode, tempMode;
 
 public:
-    RCSDMaterialStatus(int n, Domain *d, GaussPoint *g);
+    RCSDMaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~RCSDMaterialStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -122,7 +122,7 @@ protected:
     double SDTransitionCoeff;
 
 public:
-    RCSDMaterial(int n, Domain *d);
+    RCSDMaterial(int n, Domain * d);
     virtual ~RCSDMaterial();
 
     // identification and auxiliary functions

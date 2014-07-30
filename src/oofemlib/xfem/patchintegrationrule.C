@@ -53,10 +53,10 @@ namespace oofem {
 PatchIntegrationRule :: PatchIntegrationRule(int n, Element *e, const std :: vector< Triangle > &iTriangles) :
     GaussIntegrationRule(n, e),
     mTriangles(iTriangles)
-{}
+{ }
 
 PatchIntegrationRule :: ~PatchIntegrationRule()
-{}
+{ }
 
 FEI2dTrLin PatchIntegrationRule :: mTriInterp(1, 2);
 FEI3dTrQuad PatchIntegrationRule :: mTriInterpQuad;
@@ -99,7 +99,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     int nPointsTot = nPoints * triToKeep.size();
     FloatArray coords_xi1, coords_xi2, weights;
     this->giveTriCoordsAndWeights(nPoints, coords_xi1, coords_xi2, weights);
-    this->gaussPointArray = new GaussPoint * [ nPointsTot ];
+    this->gaussPoints.resize( nPointsTot );
     ////////////////////////////////////////////
 
 
@@ -108,12 +108,12 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     double parentArea = this->elem->computeArea();
 
     // Loop over triangles
-    for ( int i = 0; i < int( triToKeep.size() ); i++ ) {
+    for ( int tri: triToKeep ) {
         // TODO: Probably unnecessary to allocate here
-        const FloatArray **coords = new const FloatArray * [ mTriangles [ triToKeep [ i ] ].giveNrVertices() ];
+        std::vector< FloatArray > coords( mTriangles [ tri ].giveNrVertices() );
         // this we should put into the function before
-        for ( int k = 0; k < mTriangles [ triToKeep [ i ] ].giveNrVertices(); k++ ) {
-            coords [ k ] = new FloatArray( ( mTriangles [ triToKeep [ i ] ].giveVertex(k + 1) ) );
+        for ( int k = 1; k <= mTriangles [ tri ].giveNrVertices(); k++ ) {
+            coords[ k - 1 ] = mTriangles [ tri ].giveVertex( k );
         }
 
         // Can not be used because it writes to the start of the array instead of appending.
@@ -121,7 +121,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
         for ( int j = 0; j < nPoints; j++ ) {
             FloatArray global;
-            GaussPoint * &gp = this->gaussPointArray [ pointsPassed ];
+            GaussPoint * &gp = this->gaussPoints [ pointsPassed ];
 
             FloatArray *coord = new FloatArray(2);
             coord->at(1) = coords_xi1.at(j + 1);
@@ -130,8 +130,8 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
 
 
-            mTriInterp.local2global( global, * gp->giveCoordinates(),
-                                     FEIVertexListGeometryWrapper(mTriangles [ triToKeep [ i ] ].giveNrVertices(), coords) );
+            mTriInterp.local2global( global, * gp->giveNaturalCoordinates(),
+                                    FEIVertexListGeometryWrapper(coords) );
 
             newGPCoord.push_back(global);
 
@@ -139,25 +139,20 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
             FloatArray local;
             this->elem->computeLocalCoordinates(local, global);
 
-            gp->setCoordinates(local);
+            gp->setGlobalCoordinates(global);
+            gp->setNaturalCoordinates(local);
+            gp->setSubPatchCoordinates(local);
 
 
 
 
             double refElArea = this->elem->giveParentElSize();
 
-            gp->setWeight(2.0 * refElArea * gp->giveWeight() * mTriangles [ triToKeep [ i ] ].getArea() / parentArea); // update integration weight
+            gp->setWeight(2.0 * refElArea * gp->giveWeight() * mTriangles [ tri ].getArea() / parentArea); // update integration weight
 
 
             pointsPassed++;
         }
-
-
-        for ( int k = 0; k < mTriangles [ triToKeep [ i ] ].giveNrVertices(); k++ ) {
-            delete coords [ k ];
-        }
-
-        delete [] coords;
     }
 
     XfemManager *xMan = elem->giveDomain()->giveXfemManager();
@@ -188,10 +183,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
         }
     }
 
-    numberOfIntegrationPoints = pointsPassed;
-
-
-    return numberOfIntegrationPoints;
+    return this->giveNumberOfIntegrationPoints();
 }
 
 
@@ -225,8 +217,8 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
     this->giveTriCoordsAndWeights(nPointsTri, coords_xi1, coords_xi2, weightsTri);
     this->giveLineCoordsAndWeights(nPointsDepth, coords_xi3, weightsDepth);
 
-    this->gaussPointArray = new GaussPoint * [ nPointsTot ];
-
+    //this->gaussPointArray = new GaussPoint * [ nPointsTot ];
+    this->gaussPoints.resize(nPointsTot);
 
     std :: vector< FloatArray >newGPCoord;
 
@@ -237,11 +229,13 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
     for ( int i = 0; i < int( triToKeep.size() ); i++ ) {
 
         Triangle triangle = mTriangles [ triToKeep [ i ] ];
-        const FloatArray **gCoords = new const FloatArray * [ triangle.giveNrVertices() ];
+        //const FloatArray **gCoords = new const FloatArray * [ triangle.giveNrVertices() ];
+        std::vector< FloatArray > gCoords( triangle.giveNrVertices() );
 
         // global coords of the the triangle verticies
         for ( int j = 0; j < triangle.giveNrVertices(); j++ ) {
-            gCoords [ j ] = new FloatArray( ( triangle.giveVertex(j + 1) ) );
+            //gCoords [ j ] = new FloatArray( ( triangle.giveVertex(j + 1) ) );
+            gCoords[j] = (triangle.giveVertex(j + 1));
         }
         
 
@@ -254,7 +248,8 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
 
                 // Compute global gp coordinate in the element from local gp coord in patch triangle
                 FloatArray global;
-                mTriInterp.local2global( global, *lCoords, FEIVertexListGeometryWrapper( triangle.giveNrVertices(), gCoords) );
+                //mTriInterp.local2global( global, *lCoords, FEIVertexListGeometryWrapper( triangle.giveNrVertices(), gCoords) );
+                mTriInterp.local2global(global, *lCoords, FEIVertexListGeometryWrapper(gCoords));
                 
 
                 // Compute local gp coordinate in the element from global gp coord in the element
@@ -276,21 +271,22 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
                 GaussPoint *gp = new GaussPoint(this, count + 1, coord, newWeight, mode);
 
                 //GaussPoint *gp = new GaussPoint(this, count + 1, &local, newWeight, mode);
-                this->gaussPointArray [ count ] = gp;
+                //this->gaussPointArray [ count ] = gp;
+                this->gaussPoints[count] = gp;
                 count++;
 
                 // Store new global gp coord for vtk output
-                this->elem->computeGlobalCoordinates(global, *gp->giveCoordinates() );
+                this->elem->computeGlobalCoordinates(global, *gp->giveNaturalCoordinates() );
                 newGPCoord.push_back(global);
             }
         }
 
 
-        for ( int k = 0; k < mTriangles [ triToKeep [ i ] ].giveNrVertices(); k++ ) {
-            delete gCoords [ k ];
-        }
+        //for ( int k = 0; k < mTriangles [ triToKeep [ i ] ].giveNrVertices(); k++ ) {
+        //    delete gCoords [ k ];
+        //}
 
-        delete [] gCoords;
+        //delete [] gCoords;
     }
 
     XfemManager *xMan = elem->giveDomain()->giveXfemManager();
@@ -321,9 +317,8 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
         }
     }
 
-    numberOfIntegrationPoints = count;
-
-    return numberOfIntegrationPoints;
+    
+    return this->giveNumberOfIntegrationPoints();
 }
 
 
@@ -355,7 +350,7 @@ PatchIntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *
      *
      *      patch->saveContext(stream, mode, obj);
      *  } else {
-     *      OOFEM_ERROR("saveContex : can't store NULL patch");
+     *      OOFEM_ERROR("can't store NULL patch");
      *  }
      */
     return CIO_OK;
@@ -374,7 +369,7 @@ PatchIntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, voi
     contextIOResultType iores;
 
     if ( stream == NULL ) {
-        OOFEM_ERROR("restoreContex : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     if ( ( iores = IntegrationRule :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

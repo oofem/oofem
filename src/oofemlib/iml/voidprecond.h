@@ -49,7 +49,7 @@ private:
 
 public:
     /// Constructor. Creates the empty preconditioner.
-    VoidPreconditioner(const SparseMtrx &a, InputRecord &attributes);
+    VoidPreconditioner(const SparseMtrx & a, InputRecord & attributes);
     /// Constructor. The user should call initializeFrom and init services in this given order to ensure consistency.
     VoidPreconditioner();
     /// Destructor

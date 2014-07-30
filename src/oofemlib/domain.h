@@ -40,17 +40,13 @@
 #include "domaintype.h"
 #include "statecountertype.h"
 #include "intarray.h"
-#include "equationid.h"
 
+#include <unordered_map>
 #include <map>
 #include <string>
 #ifdef __PARALLEL_MODE
  #include <list>
  #include "entityrenumberingscheme.h"
-#endif
-
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
 #endif
 
 ///@name Input fields for domains
@@ -98,6 +94,7 @@ class TopologyDescription;
 class DataReader;
 class Set;
 class FractureManager;
+class oofegGraphicContext;
 
 #ifdef __PARALLEL_MODE
 class ProcessCommunicator;
@@ -198,6 +195,18 @@ private:
     /// Fracture Manager
     FractureManager *fracManager;
 
+    /**
+     * Map from an element's global number to its place
+     * in the element array. Added by ES 140326.
+     */
+    std::unordered_map< int, int > mElementPlaceInArray;
+
+    /**
+     * Map from material number to elements that have the
+     * given material number. Added by ES 140718.
+     */
+    std::unordered_map< int, IntArray> mMapMaterialNum2El;
+
     /// Topology description
     TopologyDescription *topology;
 
@@ -235,7 +244,7 @@ public:
      * @param e Engineering model domain will belong to.
      * @see giveSerialNumber
      */
-    Domain(int n, int serNum, EngngModel *e);
+    Domain(int n, int serNum, EngngModel * e);
 
     /// Create a copy of the domain using the dynamic data reader.
     Domain *Clone();
@@ -263,6 +272,17 @@ public:
      * @param n Pointer to the element with id n
      */
     Element *giveGlobalElement(int n);
+    /**
+     * Returns the array index of the element with global
+     * number iGlobalElNum, so that it can be fetched by
+     * calling giveElement. Returns -1 if not found.
+     */
+    int giveElementPlaceInArray(int iGlobalElNum) const;
+    /**
+     * Returns array with indices of elements that have a
+     * given material number.
+     */
+    const IntArray &giveElementsWithMaterialNum(int iMaterialNum) const;
     /**
      * Returns engineering model to which receiver is associated.
      */
@@ -329,7 +349,21 @@ public:
      * Note: nodes and element sides share common numbering (they are numbered as DofManagers).
      * @param n Pointer to n-th node is returned.
      */
-    Node *giveNode(int n);
+    inline Node *giveNode(int n)
+    {
+    #ifdef DEBUG
+        if ( !dofManagerList->includes(n) ) {
+            OOFEM_ERROR("undefined dofManager (%d)", n);
+        }
+
+        Node *node = reinterpret_cast< Node * >( dofManagerList->at(n) );
+
+        return node;
+
+    #else
+        return reinterpret_cast< Node * >( dofManagerList->at(n) );
+    #endif
+    }
     /**
      * Service for accessing particular domain element side.
      * Generates error if no such element side is defined.
@@ -344,6 +378,12 @@ public:
      * @param n Pointer to n-th dof manager is returned.
      */
     DofManager *giveDofManager(int n);
+    /**
+     * Service for accessing particular domain dof manager.
+     * Generates error if no such element is defined.
+     * @param n Pointer to the element with id n
+     */
+    DofManager *giveGlobalDofManager(int n);
     /**
      * Reads receiver description from input stream and creates corresponding components accordingly.
      * It scans input file, each line is assumed to be single record describing type and parameters for
@@ -644,8 +684,21 @@ public:
 private:
     void resolveDomainDofsDefaults(const char *);
 
-    void error(const char *file, int line, const char *format, ...);
-    void warning(const char *file, int line, const char *format, ...);
+    /// Returns string for prepending output (used by error reporting macros).
+    std :: string errorInfo(const char *func) const;
+
+private:
+    /**
+     * Construct map from an element's global number to
+     * its place the element array.
+     */
+    void BuildElementPlaceInArrayMap();
+
+    /**
+     * Construct map from a material number to
+     * elements with the given material number.
+     */
+    void BuildMaterialToElementMap();
 };
 } // end namespace oofem
 #endif // domain_h

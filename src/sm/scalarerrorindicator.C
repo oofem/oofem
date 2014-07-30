@@ -36,6 +36,7 @@
 #include "directerrorindicatorrc.h"
 #include "element.h"
 #include "integrationrule.h"
+#include "gausspoint.h"
 #include "mathfem.h"
 #include "errorestimatortype.h"
 #include "classfactory.h"
@@ -61,8 +62,7 @@ double
 ScalarErrorIndicator :: giveElementError(EE_ErrorType type, Element *elem, TimeStep *tStep)
 {
     FloatArray val;
-    IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
-    int result = 1, nip = iRule->giveNumberOfIntegrationPoints();
+    int result = 1;
     double sval, maxVal = 0.0;
 
     if ( type != indicatorET ) {
@@ -73,11 +73,11 @@ ScalarErrorIndicator :: giveElementError(EE_ErrorType type, Element *elem, TimeS
         return 0.0;
     }
 
-    for ( int i = 0; i < nip; i++ ) {
-        result = elem->giveIPValue(val, iRule->getIntegrationPoint(i), varType, tStep);
+    for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
+        result = elem->giveIPValue(val, gp, varType, tStep);
         if ( result ) {
             sval = val.computeNorm();
-            if ( i == 0 ) {
+            if ( gp->giveNumber() == 1 ) {
                 maxVal = sval;
             } else {
                 maxVal = max(maxVal, sval);
@@ -92,14 +92,13 @@ ScalarErrorIndicator :: giveElementError(EE_ErrorType type, Element *elem, TimeS
 IRResultType
 ScalarErrorIndicator :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     ErrorEstimator :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, indicatorType, _IFT_ScalarErrorIndicator_vartype);
     if ( indicatorType != 1 ) {
-        _error("instanciateFrom: usupported varType");
+        OOFEM_ERROR("usupported varType");
     }
 
     return this->giveRemeshingCrit()->initializeFrom(ir);

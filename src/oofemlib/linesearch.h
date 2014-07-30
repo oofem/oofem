@@ -71,7 +71,7 @@ public:
 
 public:
     /// Constructor
-    LineSearchNM(Domain *d, EngngModel *m);
+    LineSearchNM(Domain * d, EngngModel * m);
 
     /**
      * Solves the line search optimization problem in the form of @f$ g(r)=0; r_{new}=r_{old}+\eta\delta r; 0 < \eta < 1 @f$,

@@ -68,7 +68,7 @@ void
 LIBeam3dNL :: computeSMtrx(FloatMatrix &answer, FloatArray &vec)
 {
     if ( vec.giveSize() != 3 ) {
-        _error("computeSMtrx: vec param size mismatch");
+        OOFEM_ERROR("vec param size mismatch");
     }
 
     answer.resize(3, 3);
@@ -90,7 +90,7 @@ LIBeam3dNL :: computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
     double psiSize;
 
     if ( psi.giveSize() != 3 ) {
-        _error("computeSMtrx: psi param size mismatch");
+        OOFEM_ERROR("psi param size mismatch");
     }
 
     answer.resize(3, 3);
@@ -125,7 +125,7 @@ LIBeam3dNL :: updateTempTriad(TimeStep *tStep)
     FloatMatrix dR(3, 3);
 
     // ask element's displacement increments
-    this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, u);
+    this->computeVectorOf(VM_Incremental, tStep, u);
 
     // interpolate spin at the centre
     centreSpin.at(1) = 0.5 * ( u.at(4) + u.at(10) );
@@ -237,7 +237,7 @@ LIBeam3dNL :: computeXdVector(FloatArray &answer, TimeStep *tStep)
 
     answer.resize(3);
     // ask element's displacements
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
 
     answer.at(1) = ( this->giveNode(2)->giveCoordinate(1) + u.at(7) ) -
                    ( this->giveNode(1)->giveCoordinate(1) + u.at(1) );
@@ -257,7 +257,7 @@ LIBeam3dNL :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
 
-    answer.resize(0, 0);
+    answer.clear();
 
     // linear part
 
@@ -339,9 +339,8 @@ void
 LIBeam3dNL :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
@@ -351,7 +350,6 @@ LIBeam3dNL :: computeGaussPoints()
 IRResultType
 LIBeam3dNL :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // first call parent
@@ -359,14 +357,14 @@ LIBeam3dNL :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3dNL_refnode);
     if ( referenceNode == 0 ) {
-        _error("instanciateFrom: wrong reference node specified");
+        OOFEM_ERROR("wrong reference node specified");
     }
 
     /*
      * if (this->hasString (initString, "dofstocondense")) {
      *  dofsToCondense = this->ReadIntArray (initString, "dofstocondense");
      *  if (dofsToCondense->giveSize() >= 12)
-     *    _error ("instanciateFrom: wrong input data for condensed dofs");
+     *    OOFEM_ERROR("wrong input data for condensed dofs");
      * } else {
      *  dofsToCondense = NULL;
      * }
@@ -471,10 +469,27 @@ LIBeam3dNL :: computeVolumeAround(GaussPoint *gp)
 }
 
 
-void
-LIBeam3dNL :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+int
+LIBeam3dNL :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
+    ///@todo This should be a common inheritance for all 3d beams (and a similar one for 2D beams) 
+    /// to support all the sensible moment/force tensors. 
+    if ( type == IST_BeamForceMomentumTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        return 1;
+    } else if ( type == IST_BeamStrainCurvatureTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        return 1;
+    } else {
+        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+    }
+}
+
+
+void
+LIBeam3dNL :: giveDofManDofIDMask(int inode, IntArray &answer) const
+{
+    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
 
 
@@ -527,7 +542,7 @@ LIBeam3dNL :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *g
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 
@@ -539,7 +554,7 @@ LIBeam3dNL :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      * to global element dofs
      */
     if ( iEdge != 1 ) {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 
     answer.resize(12);
@@ -553,7 +568,7 @@ double
 LIBeam3dNL :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
-        _error("computeEdgeVolumeAround: wrong egde number");
+        OOFEM_ERROR("wrong egde number");
     }
 
     double weight  = gp->giveWeight();
@@ -664,7 +679,7 @@ LIBeam3dNL :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gau
     //
     // i.e. f(element local) = T * f(edge local)
     //
-    answer.beEmptyMtrx();
+    answer.clear();
     return 0;
 }
 
@@ -721,7 +736,7 @@ LIBeam3dNL :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     // update curvature at midpoint
     // first, compute Tmid
     // ask increments
-    this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, ui);
+    this->computeVectorOf(VM_Incremental, tStep, ui);
 
     ac.at(1) = 0.5 * ( ui.at(10) - ui.at(4) );
     ac.at(2) = 0.5 * ( ui.at(11) - ui.at(5) );

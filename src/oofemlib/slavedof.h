@@ -65,13 +65,13 @@ public:
      * @param aNode Node receiver will belong to.
      * @param id DofID of slave dof.
      */
-    SlaveDof(int n, DofManager *aNode, DofIDItem id = Undef);
+    SlaveDof(int n, DofManager * aNode, DofIDItem id = Undef);
     /// Destructor.
     virtual ~SlaveDof(void) { }
 
     virtual dofType giveDofType() { return DT_slave; }
 
-    void initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray *mstrDofID, const FloatArray &mstrContribution);
+    void initialize(const IntArray &masterNodes, const IntArray &mstrDofID, const FloatArray &mstrContribution);
     virtual int giveNumberOfPrimaryMasterDofs();
     virtual void giveMasterDofManArray(IntArray &answer);
     virtual void giveUnknowns(FloatArray &masterUnknowns, ValueModeType mode, TimeStep *tStep);

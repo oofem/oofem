@@ -44,8 +44,6 @@
 #include <sstream>
 
 namespace oofem {
-
-
 ScalarFunction :: ScalarFunction(double val)
 {
     this->dvType = DV_ValueType;
@@ -53,7 +51,7 @@ ScalarFunction :: ScalarFunction(double val)
 }
 
 
-ScalarFunction :: ScalarFunction(std::string &val)
+ScalarFunction :: ScalarFunction(std :: string &val)
 {
     // initialize type to DV_ValueType to prevent clear() method to clear unitialized memory. will be set correctly by set method.
     this->dvType = DV_ValueType;
@@ -69,7 +67,7 @@ ScalarFunction :: ScalarFunction(int val)
 }
 
 
-ScalarFunction :: ~ScalarFunction() {}
+ScalarFunction :: ~ScalarFunction() { }
 
 
 void
@@ -81,7 +79,7 @@ ScalarFunction :: setValue(double val)
 
 
 void
-ScalarFunction :: setSimpleExpression(std::string &val)
+ScalarFunction :: setSimpleExpression(std :: string &val)
 {
     this->dvType = DV_SimpleExpressionType;
     this->eValue = val;
@@ -97,28 +95,28 @@ ScalarFunction :: setReference(int val)
 
 
 double
-ScalarFunction :: eval(std::map< std::string, FunctionArgument > valDict, Domain *d) const
+ScalarFunction :: eval(std :: map< std :: string, FunctionArgument >valDict, Domain *d) const
 {
-    if (this->dvType == DV_ValueType) {
+    if ( this->dvType == DV_ValueType ) {
         return this->dValue;
-    } else if (this->dvType == DV_SimpleExpressionType) {
+    } else if ( this->dvType == DV_SimpleExpressionType ) {
         std :: ostringstream buff;
         Parser p;
         int err;
         // process valDict and call internal parser
-        for (std :: map< std :: string, FunctionArgument > :: iterator val = valDict.begin(); val != valDict.end(); ++val) {
-            const FunctionArgument &arg = val->second;
-            if ( arg.type == FunctionArgument::FAT_double ) {
-                buff << val->first << "=" << arg.val0 << ";";
-            } else if ( arg.type == FunctionArgument::FAT_FloatArray ) {
-                for (int i = 1; i <= arg.val1.giveSize(); ++i) {
-                    buff << val->first << i << "=" << arg.val1.at(i) << ";";
+        for ( const auto &named_arg: valDict ) {
+            const FunctionArgument &arg = named_arg.second;
+            if ( arg.type == FunctionArgument :: FAT_double ) {
+                buff << named_arg.first << "=" << arg.val0 << ";";
+            } else if ( arg.type == FunctionArgument :: FAT_FloatArray ) {
+                for ( int i = 1; i <= arg.val1.giveSize(); ++i ) {
+                    buff << named_arg.first << i << "=" << arg.val1.at(i) << ";";
                 }
-            } else if ( arg.type == FunctionArgument::FAT_int ) {
-                buff << val->first << "=" << arg.val2 << ";";
-            } else if ( arg.type == FunctionArgument::FAT_IntArray ) {
-                for (int i = 1; i <= arg.val3.giveSize(); ++i) {
-                    buff << val->first << i << "=" << arg.val3.at(i) << ";";
+            } else if ( arg.type == FunctionArgument :: FAT_int ) {
+                buff << named_arg.first << "=" << arg.val2 << ";";
+            } else if ( arg.type == FunctionArgument :: FAT_IntArray ) {
+                for ( int i = 1; i <= arg.val3.giveSize(); ++i ) {
+                    buff << named_arg.first << i << "=" << arg.val3.at(i) << ";";
                 }
             }
         }
@@ -126,15 +124,15 @@ ScalarFunction :: eval(std::map< std::string, FunctionArgument > valDict, Domain
         //printf("string is %s\n", buff.str().c_str());
         // evaluate the expression
         double value = p.eval(buff.str().c_str(), err);
-        if (err) {
-            OOFEM_ERROR2("ScalarFunction::eval parser syntax error (expr=\"%s\")", buff.str().c_str());
+        if ( err ) {
+            OOFEM_ERROR( "parser syntax error (expr=\"%s\")", buff.str().c_str() );
         }
         return value;
-    } else if (this->dvType == DV_FunctionReferenceType) {
+    } else if ( this->dvType == DV_FunctionReferenceType ) {
         FloatArray val;
         d->giveFunction(this->fReference)->evaluate(val, valDict);
         if ( val.giveSize() != 1 ) {
-            OOFEM_ERROR3("ScalarFunction::eval - Function @%d did not return a scalar (size = %d)", this->fReference, val.giveSize());
+            OOFEM_ERROR( "Function @%d did not return a scalar (size = %d)", this->fReference, val.giveSize() );
         }
         return val.at(1);
     }
@@ -145,21 +143,21 @@ ScalarFunction :: eval(std::map< std::string, FunctionArgument > valDict, Domain
 double
 ScalarFunction :: eval(double time, Domain *d) const
 {
-    if (this->dvType == DV_ValueType) {
+    if ( this->dvType == DV_ValueType ) {
         return this->dValue;
     } else {
-        std::map< std::string, FunctionArgument > valDict;
-        valDict.insert(std::make_pair("t", time));
+        std :: map< std :: string, FunctionArgument >valDict;
+        valDict.insert( std :: make_pair("t", time) );
         return this->eval(valDict, d);
     }
 }
 
 
-std :: ostream &operator<<(std :: ostream &out, const ScalarFunction &s)
+std :: ostream &operator << ( std :: ostream & out, const ScalarFunction & s )
 {
-    if ( s.dvType == ScalarFunction::DV_ValueType ) {
+    if ( s.dvType == ScalarFunction :: DV_ValueType ) {
         out << s.dValue;
-    } else if ( s.dvType == ScalarFunction::DV_SimpleExpressionType ) {
+    } else if ( s.dvType == ScalarFunction :: DV_SimpleExpressionType ) {
         out << '$' << s.eValue << '$';
     } else {
         out << '@' << s.fReference;

@@ -77,7 +77,7 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 {
     FloatMatrix Ds0;
     double equivStrain;
-    FloatArray princStress, crackStrain, reducedAnswer;
+    FloatArray princStress, reducedAnswer;
     FloatArray reducedStrainVector, strainVector, principalStrain;
     FloatArray reducedSpaceStressVector;
     FloatMatrix tempCrackDirs;
@@ -94,7 +94,7 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
     StructuralMaterial :: giveFullSymVectorForm( strainVector, reducedStrainVector, gp->giveMaterialMode() );
 
-    status->giveTempCrackDirs(tempCrackDirs);
+    tempCrackDirs = status->giveTempCrackDirs();
     this->computePrincipalValDir(principalStrain, tempCrackDirs,
                                  strainVector,
                                  principal_strain);
@@ -105,14 +105,13 @@ RCSDEMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
 
         this->giveRealPrincipalStressVector3d(princStress, gp, principalStrain, tempCrackDirs, tStep);
         princStress.resize(6);
-        status->giveTempCrackDirs(tempCrackDirs);
+        tempCrackDirs = status->giveTempCrackDirs();
         this->transformStressVectorTo(answer, tempCrackDirs, princStress, 1);
 
         StructuralMaterial :: giveReducedSymVectorForm( reducedSpaceStressVector, answer, gp->giveMaterialMode() );
         status->letTempStressVectorBe(reducedSpaceStressVector);
 
-        status->giveCrackStrainVector(crackStrain);
-        this->updateCrackStatus(gp, crackStrain);
+        this->updateCrackStatus(gp, status->giveCrackStrainVector());
 
         StructuralMaterial :: giveReducedSymVectorForm( reducedAnswer, answer, gp->giveMaterialMode() );
         answer = reducedAnswer;
@@ -223,7 +222,7 @@ RCSDEMaterial :: giveEffectiveMaterialStiffnessMatrix(FloatMatrix &answer,
             this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, rMode, gp, tStep);
             return;
         } else {
-            _error("giveEffectiveMaterialStiffnessMatrix: usupported mode");
+            OOFEM_ERROR("usupported mode");
         }
     }
 }
@@ -264,7 +263,6 @@ RCSDEMaterial :: computeCurrEquivStrain(GaussPoint *gp, const FloatArray &reduce
 IRResultType
 RCSDEMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, SDTransitionCoeff, _IFT_RCSDEMaterial_sdtransitioncoeff);
@@ -318,7 +316,7 @@ RCSDEMaterial :: computeStrength(GaussPoint *gp, double charLength)
     Gf = this->give(pscm_Gf, gp);
     Ft = this->give(pscm_Ft, gp);
 
-    if ( this->checkSizeLimit(gp, charLength) ) {} else {
+    if ( this->checkSizeLimit(gp, charLength) ) { } else {
         // we reduce Ft and there is no softening but sudden drop
         Ft = sqrt(2. * Ee * Gf / charLength);
         //
@@ -364,7 +362,7 @@ RCSDEMaterial :: giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i)
  * char errMsg [80];
  * sprintf (errMsg,"Element %d returned zero char length",
  *    gp->giveElement()->giveNumber());
- * _error (errMsg);
+ * OOFEM_ERROR(errMsg);
  * }
  *
  * status -> setCharLength(i, Le);
@@ -447,7 +445,7 @@ RCSDEMaterial :: giveNormalCrackingStress(GaussPoint *gp, double crackStrain, in
             // crack closing
             // or unloading or reloading regime
             answer = Ft * crackStrain / status->giveTempMaxCrackStrain(i) *
-                     exp(-status->giveTempMaxCrackStrain(i) / ef);
+            exp(-status->giveTempMaxCrackStrain(i) / ef);
         }
     } else {
         answer = 0.;
@@ -506,7 +504,7 @@ RCSDEMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
                 }
 
                 fprintf( file, "crack %d {status %s, normal to crackplane { %f %f %f }} ",
-                         i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
+                        i, s, crackDirs.at(1, i), crackDirs.at(2, i), crackDirs.at(3, i) );
             }
         }
     } else {

@@ -54,7 +54,7 @@ namespace oofem {
 class HydratingTransportMaterialStatus : public TransportMaterialStatus, public HydrationModelStatusInterface
 {
 public:
-    HydratingTransportMaterialStatus(int n, Domain *d, GaussPoint *g) : TransportMaterialStatus(n, d, g), HydrationModelStatusInterface() { }
+    HydratingTransportMaterialStatus(int n, Domain * d, GaussPoint * g) : TransportMaterialStatus(n, d, g), HydrationModelStatusInterface() { }
     virtual ~HydratingTransportMaterialStatus() { }
 
     virtual Interface *giveInterface(InterfaceType t);
@@ -78,7 +78,7 @@ protected:
     int hydration, hydrationHeat, hydrationLHS;
 
 public:
-    HydratingIsoHeatMaterial(int n, Domain *d) : IsotropicHeatTransferMaterial(n, d), HydrationModelInterface() { }
+    HydratingIsoHeatMaterial(int n, Domain * d) : IsotropicHeatTransferMaterial(n, d), HydrationModelInterface() { }
     virtual ~HydratingIsoHeatMaterial() { }
 
     void setMixture(MixtureType mix);

@@ -43,7 +43,7 @@ namespace oofem {
 REGISTER_Material(TrabBoneEmbed);
 
 TrabBoneEmbed :: TrabBoneEmbed(int n, Domain *d) : StructuralMaterial(n, d)
-{}
+{ }
 
 
 void TrabBoneEmbed :: computeCumPlastStrain(double &tempAlpha, GaussPoint *gp, TimeStep *tStep)
@@ -163,7 +163,6 @@ TrabBoneEmbed :: constructIsoComplTensor(FloatMatrix &answer, const double eps0,
 IRResultType
 TrabBoneEmbed :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // Read material properties here
@@ -231,7 +230,7 @@ TrabBoneEmbedStatus :: TrabBoneEmbedStatus(int n, Domain *d, GaussPoint *g) : St
 
 
 TrabBoneEmbedStatus :: ~TrabBoneEmbedStatus()
-{}
+{ }
 
 
 double

@@ -65,18 +65,19 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    TwoFluidMaterial(int n, Domain *d) : FluidDynamicMaterial(n, d) { }
+    TwoFluidMaterial(int n, Domain * d) : FluidDynamicMaterial(n, d) { }
     /// Destructor.
     virtual ~TwoFluidMaterial() { }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
     virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
 
     virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep);
     virtual double give(int aProperty, GaussPoint *gp);
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-    virtual int hasMaterialModeCapability(MaterialMode mode);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual const char *giveClassName() const { return "TwoFluidMaterial"; }
     virtual const char *giveInputRecordName() const { return _IFT_TwoFluidMaterial_Name; }
     virtual int checkConsistency();
@@ -91,12 +92,12 @@ protected:
 class TwoFluidMaterialStatus : public FluidDynamicMaterialStatus
 {
 protected:
-    GaussPoint *slaveGp0;
-    GaussPoint *slaveGp1;
+    std :: unique_ptr< GaussPoint >slaveGp0;
+    std :: unique_ptr< GaussPoint >slaveGp1;
 
 public:
     /// Constructor - creates new BinghamFluidMaterial2Status with number n, belonging to domain d and IntegrationPoint g.
-    TwoFluidMaterialStatus(int n, Domain *d, GaussPoint *g, const IntArray &slaveMaterial);
+    TwoFluidMaterialStatus(int n, Domain * d, GaussPoint * g, const IntArray & slaveMaterial);
     /// Destructor
     virtual ~TwoFluidMaterialStatus() { }
 
@@ -109,8 +110,8 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual const char *giveClassName() const { return "TwoFluidMaterialStatus"; }
 
-    GaussPoint *giveSlaveGaussPoint0() { return this->slaveGp0; }
-    GaussPoint *giveSlaveGaussPoint1() { return this->slaveGp1; }
+    GaussPoint *giveSlaveGaussPoint0() { return this->slaveGp0.get(); }
+    GaussPoint *giveSlaveGaussPoint1() { return this->slaveGp1.get(); }
 };
 } // end namespace oofem
 #endif // twofluidmaterial_h

@@ -38,7 +38,7 @@
 #ifndef phasefieldelement_h
 #define phasefieldelement_h
 
-#include "coupledfieldselement.h"
+//#include "coupledfieldselement.h"
 #include "fei2dquadquad.h"
 #include "qplanstrss.h"
 

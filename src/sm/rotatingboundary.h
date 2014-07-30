@@ -69,7 +69,7 @@ public:
      * @param i Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    RotatingBoundary(int i, Domain *d) : BoundaryCondition(i, d) { }
+    RotatingBoundary(int i, Domain * d) : BoundaryCondition(i, d) { }
     /// Destructor.
     virtual ~RotatingBoundary() { }
 

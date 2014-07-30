@@ -43,6 +43,7 @@
 #include "floatarray.h"
 #include "engngm.h"
 #include "boundaryload.h"
+#include "structuralms.h"
 #include "mathfem.h"
 #include "classfactory.h"
 
@@ -78,7 +79,7 @@ Beam3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
     double l, ksi, kappay, kappaz, c1y, c1z;
 
     l     = this->computeLength();
-    ksi   = 0.5 + 0.5 * gp->giveCoordinate(1);
+    ksi   = 0.5 + 0.5 * gp->giveNaturalCoordinate(1);
     kappay = this->giveKappayCoeff();
     kappaz = this->giveKappazCoeff();
     c1y = 1. + 2. * kappay;
@@ -114,11 +115,10 @@ Beam3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 void Beam3d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
+    if ( integrationRulesArray.size() == 0 ) {
         // the gauss point is used only when methods from crosssection and/or material
         // classes are requested
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
@@ -208,12 +208,11 @@ Beam3d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
     double l = this->computeLength();
     FloatMatrix B, DB, d;
     IntegrationRule *ir = this->giveDefaultIntegrationRulePtr();
-    answer.resize(0,0);
-    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-        GaussPoint *gp = ir->getIntegrationPoint(i);
+    answer.clear();
+    for ( GaussPoint *gp: *ir ) {
         this->computeBmatrixAt(gp, B);
-        this->computeConstitutiveMatrixAt(d, rMode, gp, tStep); 
-        double dV = gp->giveWeight() * 0.5*l;
+        this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
+        double dV = gp->giveWeight() * 0.5 * l;
         DB.beProductOf(d, B);
         answer.plusProductSymmUpper(B, DB, dV);
     }
@@ -270,10 +269,25 @@ Beam3d :: computeVolumeAround(GaussPoint *gp)
 }
 
 
-void
-Beam3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+int
+Beam3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
+    if ( type == IST_BeamForceMomentumTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        return 1;
+    } else if ( type == IST_BeamStrainCurvatureTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        return 1;
+    } else {
+        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+    }
+}
+
+
+void
+Beam3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
+{
+    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
 
 
@@ -385,7 +399,6 @@ Beam3d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 IRResultType
 Beam3d :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // first call parent
@@ -393,14 +406,14 @@ Beam3d :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, referenceNode, _IFT_Beam3d_refnode);
     if ( referenceNode == 0 ) {
-        _error("instanciateFrom: wrong reference node specified");
+        OOFEM_ERROR("wrong reference node specified");
     }
 
     if ( ir->hasField(_IFT_Beam3d_dofstocondense) ) {
         IntArray val;
         IR_GIVE_FIELD(ir, val, _IFT_Beam3d_dofstocondense);
         if ( val.giveSize() >= 12 ) {
-            _error("instanciateFrom: wrong input data for condensed dofs");
+            OOFEM_ERROR("wrong input data for condensed dofs");
         }
 
         dofsToCondense = new IntArray(val);
@@ -420,7 +433,7 @@ Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
     FloatArray u;
 
     this->computeStiffnessMatrix(stiffness, SecantStiffness, tStep);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
     answer.beProductOf(stiffness, u);
 #else
     StructuralElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
@@ -429,7 +442,7 @@ Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
         ///@todo Pretty sure this won't work for nonlinear problems. I think dofsToCondense should just be replaced by an extra slave node.
         FloatMatrix stiff;
         this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
-        this->condense(&stiff, NULL, &answer, this->dofsToCondense);
+        this->condense(& stiff, NULL, & answer, this->dofsToCondense);
     }
 #endif
 }
@@ -479,10 +492,10 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     // evaluates the receivers edge load vector
     // for clamped beam
     //
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
         if ( edgeLoad->giveNumberOfDofs() != 6 ) {
-            _error("computeEdgeLoadVectorAt: load number of dofs mismatch");
+            OOFEM_ERROR("load number of dofs mismatch");
         }
 
         answer.resize(12);
@@ -617,7 +630,7 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             break;
 
         default:
-            _error("computeEdgeLoadVectorAt: unsupported load type");
+            OOFEM_ERROR("unsupported load type");
         }
     }
 }
@@ -635,7 +648,7 @@ Beam3d :: printOutputAt(FILE *File, TimeStep *tStep)
     fprintf(File, "beam element %d :\n", number);
 
     // ask for global element displacement vector
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, rl);
+    this->computeVectorOf(VM_Total, tStep, rl);
     // ask for global element end forces vector
     this->giveEndForcesVector(Fl, tStep);
 
@@ -854,8 +867,8 @@ Beam3d :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &an
 {
     double layerYCoord, layerZCoord;
 
-    layerZCoord = slaveGp->giveCoordinate(2);
-    layerYCoord = slaveGp->giveCoordinate(1);
+    layerZCoord = slaveGp->giveNaturalCoordinate(2);
+    layerYCoord = slaveGp->giveNaturalCoordinate(1);
 
     answer.resize(3);  // {Exx,GMzx,GMxy}
 
@@ -869,10 +882,18 @@ Interface *
 Beam3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == FiberedCrossSectionInterfaceType ) {
-        return static_cast< FiberedCrossSectionInterface * >( this );
+        return static_cast< FiberedCrossSectionInterface * >(this);
     }
 
     return NULL;
+}
+
+
+void
+Beam3d :: updateLocalNumbering(EntityRenumberingFunctor &f)
+{
+  StructuralElement::updateLocalNumbering(f);
+  this->referenceNode = f(this->referenceNode, ERS_DofManager);
 }
 
 

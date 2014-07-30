@@ -63,17 +63,17 @@ protected:
     FloatArray nonlocalStrainVector, tempNonlocalStrainVector, localStrainVectorForAverage;
 
 public:
-    RCSDNLMaterialStatus(int n, Domain *d, GaussPoint *g);
+    RCSDNLMaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~RCSDNLMaterialStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
     const FloatArray &giveNonlocalStrainVector() { return nonlocalStrainVector; }
     const FloatArray &giveTempNonlocalStrainVector() { return tempNonlocalStrainVector; }
-    void   setTempNonlocalStrainVector(const FloatArray &ls) { tempNonlocalStrainVector = ls; }
+    void setTempNonlocalStrainVector(FloatArray ls) { tempNonlocalStrainVector = std :: move(ls); }
 
     const FloatArray &giveLocalStrainVectorForAverage() { return localStrainVectorForAverage; }
-    void setLocalStrainVectorForAverage(const FloatArray &ls) { localStrainVectorForAverage = ls; }
+    void setLocalStrainVectorForAverage(FloatArray ls) { localStrainVectorForAverage = std :: move(ls); }
 
     // definition
     virtual const char *giveInputRecordName() const { return _IFT_RCSDNLMaterial_Name; }
@@ -115,7 +115,7 @@ protected:
     double ef;
 
 public:
-    RCSDNLMaterial(int n, Domain *d);
+    RCSDNLMaterial(int n, Domain * d);
     virtual ~RCSDNLMaterial();
 
     // identification and auxiliary functions

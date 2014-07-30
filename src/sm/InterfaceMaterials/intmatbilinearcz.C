@@ -40,6 +40,7 @@
 #include "contextioerr.h"
 #include "classfactory.h"
 #include "intmatbilinearcz.h"
+#include "dynamicinputrecord.h"
 
 namespace oofem {
 REGISTER_Material(IntMatBilinearCZ);
@@ -66,16 +67,18 @@ IntMatBilinearCZStatus :: IntMatBilinearCZStatus(int n, Domain *d, GaussPoint *g
 
 
 IntMatBilinearCZStatus :: ~IntMatBilinearCZStatus()
-{}
+{ }
 
 void IntMatBilinearCZStatus :: initTempStatus()
-{}
+{ }
 
 void IntMatBilinearCZStatus :: updateYourself(TimeStep *tStep)
 {
     mTractionOld = mTractionNew;
     mJumpOld     = mJumpNew;
     mDamageOld   = mDamageNew;
+
+    jump = mJumpNew;
 }
 
 
@@ -83,8 +86,8 @@ void IntMatBilinearCZStatus :: copyStateVariables(const MaterialStatus &iStatus)
 {
     StructuralInterfaceMaterialStatus :: copyStateVariables(iStatus);
 
-    MaterialStatus &tmpStat = const_cast< MaterialStatus & >( iStatus );
-    const IntMatBilinearCZStatus &structStatus = dynamic_cast< IntMatBilinearCZStatus & >( tmpStat );
+    MaterialStatus &tmpStat = const_cast< MaterialStatus & >(iStatus);
+    const IntMatBilinearCZStatus &structStatus = dynamic_cast< IntMatBilinearCZStatus & >(tmpStat);
 
     mDamageNew   = structStatus.mDamageNew;
     mDamageOld   = structStatus.mDamageOld;
@@ -96,7 +99,7 @@ void IntMatBilinearCZStatus :: copyStateVariables(const MaterialStatus &iStatus)
 
 void IntMatBilinearCZStatus :: addStateVariables(const MaterialStatus &iStatus)
 {
-    OOFEM_ERROR("Error: IntMatBilinearCZStatus :: addStateVariables is not implemented.\n");
+    OOFEM_ERROR("not implemented.");
 }
 
 
@@ -106,10 +109,10 @@ IntMatBilinearCZ :: IntMatBilinearCZ(int n, Domain *d) : StructuralInterfaceMate
     mSigmaF(0.0),
     mMu(0.0),
     mGamma(0.0)
-{}
+{ }
 
 IntMatBilinearCZ :: ~IntMatBilinearCZ()
-{}
+{ }
 
 int IntMatBilinearCZ :: checkConsistency()
 {
@@ -151,7 +154,7 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
 
         status->mTractionNew = answer;
         return;
-    } else   {
+    } else {
         // Iterate to find plastic strain increment.
         int maxIter = 50;
         double absTol = 1.0e-9; // Absolute error tolerance
@@ -209,12 +212,12 @@ void IntMatBilinearCZ :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *
         }
     }
 
-    OOFEM_ERROR("ERROR: No convergence in IntMatBilinearCZ::giveFirstPKTraction_3d().\n");
+    OOFEM_ERROR("No convergence in.");
 }
 
 void IntMatBilinearCZ :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("IntMatBilinearCZ::give3dStiffnessMatrix_dTdj is not implemented. Use numerical Jacobian instead.");
+    OOFEM_ERROR("not implemented. Use numerical Jacobian instead.");
     //this->give3dStiffnessMatrix_dTdj_Num(answer, rMode, gp, tStep);
 }
 
@@ -240,7 +243,7 @@ void IntMatBilinearCZ :: computeTraction(FloatArray &oT, const FloatArray &iTTri
     // Normal part
     if ( iTTrial.at(3) <= 0.0 ) {    // TODO: Check if-statement
         oT.at(3) = iTTrial.at(3);
-    } else   {
+    } else {
         oT.at(3) = iTTrial.at(3) / ( 1.0 + 2.0 * mPenaltyStiffness * iPlastMultInc / mSigmaF );
     }
 }
@@ -259,7 +262,6 @@ int IntMatBilinearCZ :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
 
 IRResultType IntMatBilinearCZ :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, mPenaltyStiffness, _IFT_IntMatBilinearCZ_PenaltyStiffness);

@@ -38,6 +38,8 @@
 #include "domain.h"
 #include "field.h"
 
+#include <vector>
+
 namespace oofem {
 /**
  * Class representing field defined by nodal values associated to given domain.
@@ -51,14 +53,14 @@ protected:
     /// Associated domain (need its elements to interpolate)
     Domain *domain;
     /// Array of dofman values
-    AList< FloatArray >dmanvallist;
+    std::vector< FloatArray >dmanvallist;
 
 public:
     /**
      * Constructor. Creates an empty field of given type associated to given domain.
      */
-    DofManValueField(FieldType b, Domain *d);
-    virtual ~DofManValueField() {}
+    DofManValueField(FieldType b, Domain * d);
+    virtual ~DofManValueField() { }
     /**
      * Evaluates the field at given point.
      * @param coords Coordinates of the point of interest
@@ -110,7 +112,7 @@ public:
     /**
      * Sets the value associated to given dofManager
      */
-    void setDofManValue(int dofMan, const FloatArray &value);
+    void setDofManValue(int dofMan, FloatArray value);
 
     /// @return Class name of the receiver.
     virtual const char *giveClassName() const { return "DofManValueField"; }

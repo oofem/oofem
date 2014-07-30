@@ -80,7 +80,7 @@ IntMatIsoDamageTable :: initializeFrom(InputRecord *ir)
 
     is.open(tablename.c_str(), std :: ifstream :: in);
     if ( !is.is_open() ) {
-        OOFEM_ERROR2( "IntMatIsoDamageTable :: initializeFrom: Can't open table file %s.", tablename.c_str() );
+        OOFEM_ERROR(" Can't open table file %s.", tablename.c_str());
     }
 
     // Read first line
@@ -99,12 +99,12 @@ IntMatIsoDamageTable :: initializeFrom(InputRecord *ir)
 
     for ( int i = 0; i < nbrOfLinesToRead; i++ ) {
         if ( !( is >> tableJumps(i + 1) >> tableDamages(i + 1) ) ) {
-            OOFEM_ERROR2("IntMatIsoDamageTable :: initializeFrom: Error reading table file at line %d, expected a "
+            OOFEM_ERROR("Error reading table file at line %d, expected a "
                          "strain damage pair.", i + 2);
         }
 
         if ( ( tableDamages(i + 1) < tableDamages(i) ) || ( tableJumps(i + 1) < tableJumps(i) ) ) {
-            OOFEM_ERROR2("IntMatIsoDamageTable :: initializeFrom: Error reading table file at line %d, strain "
+            OOFEM_ERROR("Error reading table file at line %d, strain "
                          "and damage must be given in an increasing order and be positive.", i + 2);
         }
     }

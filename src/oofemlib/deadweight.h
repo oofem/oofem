@@ -53,7 +53,7 @@ class OOFEM_EXPORT DeadWeight : public BodyLoad
 {
 public:
     /// Constructor
-    DeadWeight(int i, Domain *d) : BodyLoad(i, d) { }
+    DeadWeight(int i, Domain * d) : BodyLoad(i, d) { }
     /**
      * Computes components values of deadweight field at given point (coordinates given in Global c.s.).
      * taking into account corresponding load time function value while respecting load response mode.
@@ -67,7 +67,7 @@ public:
     virtual bcValType giveBCValType() const { return ForceLoadBVT; }
     virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }
 
-    void setDeadWeighComponents(const FloatArray &newComponents);
+    void setDeadWeighComponents(FloatArray newComponents);
 
     virtual const char *giveClassName() const { return "DeadWeight"; }
     virtual const char *giveInputRecordName() const { return _IFT_DeadWeight_Name; }

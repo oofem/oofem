@@ -71,7 +71,7 @@ protected:
 
 public:
     /// Constructor. Creates empty Output Manager.
-    HOMExportModule(int n, EngngModel *e);
+    HOMExportModule(int n, EngngModel * e);
     /// Destructor.
     virtual ~HOMExportModule();
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -86,6 +86,11 @@ protected:
     FILE *stream;
     /// Material numbers over which averaging is performed.
     IntArray matnum;
+    /// Stores total internal energy released on a specific crosssection.
+    FloatArray internalSourceEnergy;
+    /// Stores total energy from material capacity released on a specific crosssection.
+    FloatArray capacityEnergy;
+    
 };
 } // end namespace oofem
 

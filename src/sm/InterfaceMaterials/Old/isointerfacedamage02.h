@@ -72,7 +72,7 @@ protected:
 
 public:
     /// Constructor
-    IsoInterfaceDamageMaterialStatus_2(int n, Domain *d, GaussPoint *g);
+    IsoInterfaceDamageMaterialStatus_2(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~IsoInterfaceDamageMaterialStatus_2();
 
@@ -148,7 +148,7 @@ protected:
 
 public:
     /// Constructor
-    IsoInterfaceDamageMaterial_2(int n, Domain *d);
+    IsoInterfaceDamageMaterial_2(int n, Domain * d);
     /// Destructor
     virtual ~IsoInterfaceDamageMaterial_2();
 

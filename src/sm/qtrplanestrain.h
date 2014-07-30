@@ -52,18 +52,18 @@ namespace oofem {
  * stress elasticity finite element. Each node has 2 degrees of freedom.
  */
 class QTrPlaneStrain : public NLStructuralElement, public SpatialLocalizerInterface,
-    public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface,
-    public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface
+public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface,
+public EIPrimaryUnknownMapperInterface
 {
 protected:
     static FEI2dTrQuad interpolation;
 
 public:
-    QTrPlaneStrain(int n, Domain *d);
+    QTrPlaneStrain(int n, Domain * d);
     virtual ~QTrPlaneStrain() { }
 
     virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
     virtual double computeVolumeAround(GaussPoint *gp);
@@ -85,24 +85,16 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
-    virtual double DirectErrorIndicatorRCI_giveCharacteristicSize();
-
-    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-                                                                 TimeStep *tStep, const FloatArray &coords,
-                                                                 FloatArray &answer);
-
-    virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
+    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                       TimeStep *tStep, const FloatArray &lcoords,
+                                                                       FloatArray &answer);
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

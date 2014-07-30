@@ -150,7 +150,7 @@ FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
 {
     FloatArray res, delta, guess;
     FloatMatrix jac;
-    double convergence_limit, error;
+    double convergence_limit, error = 0.0;
 
     // find a suitable convergence limit
     convergence_limit = 1e-6 * this->giveCharacteristicLength(cellgeo);
@@ -179,7 +179,7 @@ FEI2dQuadQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, con
         answer.add(delta);
     }
     if ( error > convergence_limit ) { // Imperfect, could give false negatives.
-        //OOFEM_ERROR ("global2local: no convergence after 10 iterations");
+        //OOFEM_ERROR("no convergence after 10 iterations");
         answer.zero();
         return false;
     }
@@ -247,11 +247,11 @@ FEI2dQuadQuad :: edgeLocal2global(FloatArray &answer, int iedge,
 
     answer.resize(2);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) +
-                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) +
-                     n.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(xind) );
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) +
+                    n.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(xind) );
     answer.at(2) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(yind) +
-                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) +
-                     n.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(yind) );
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) +
+                    n.at(3) * cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(yind) );
 }
 
 
@@ -278,7 +278,7 @@ FEI2dQuadQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         bNode = 1;
         cNode = 8;
     } else {
-        OOFEM_ERROR2("FEI2dQuadQuad :: computeEdgeMapping: wrong edge number (%d)", iedge);
+        OOFEM_ERROR("wrong edge number (%d)", iedge);
     }
 
     edgeNodes.at(1) = aNode;
@@ -298,12 +298,12 @@ double FEI2dQuadQuad :: edgeEvalNormal(FloatArray &normal, int iedge, const Floa
     normal.resize(2);
 
     normal.at(1) = dN1dxi * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(yind) +
-                   dN2dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) +
-                   dN3dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(yind);
+    dN2dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) +
+    dN3dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(yind);
 
     normal.at(2) = -dN1dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) +
-                   -dN2dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) +
-                   -dN3dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(xind);
+    - dN2dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) +
+    - dN3dxi *cellgeo.giveVertexCoordinates( edgeNodes.at(3) )->at(xind);
 
     return normal.normalize();
 }

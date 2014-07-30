@@ -58,7 +58,7 @@ REGISTER_Element(Q4Axisymm);
 FEI2dQuadQuad Q4Axisymm :: interp(1, 2);
 
 Q4Axisymm :: Q4Axisymm(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain)
+    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 8;
     numberOfGaussPoints          = 4;
@@ -117,7 +117,7 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
 {
     ///@todo Not sure how to deal with li and lu. This should be changed, in which case "GiveDerivatice***" and "computeJacobianMatrixAt" will be deprecated.
     //FloatMatrix dN;
-    //this->interp.evaldNdx(dN, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    //this->interp.evaldNdx(dN, *gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
 
     int i;
     FloatMatrix jacMtrx, inv;
@@ -125,8 +125,8 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     double ksi, eta, r, x;
     int size, ind = 1;
 
-    ksi = gp->giveCoordinate(1);
-    eta = gp->giveCoordinate(2);
+    ksi = gp->giveNaturalCoordinate(1);
+    eta = gp->giveNaturalCoordinate(2);
 
     nx = GiveDerivativeKsi(ksi, eta);
     ny = GiveDerivativeEta(ksi, eta);
@@ -142,7 +142,7 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     }
 
     if ( ( size < 0 ) || ( size > 6 ) ) {
-        _error("ComputeBmatrixAt size mismatch");
+        OOFEM_ERROR("size mismatch");
     }
 
     answer.resize(size, 16);
@@ -218,24 +218,18 @@ Q4Axisymm :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the [9x16] displacement gradient matrix {BH} of the receiver,
 // evaluated at gp.
 // BH matrix  -  9 rows : du/dx, dv/dy, dw/dz = u/r, 0, 0, du/dy,  0, 0, dv/dx
-// @todo not checked if correct
 {
-    FloatArray n;
+    FloatArray n, gcoords;
     FloatMatrix dnx;
 
-    this->interp.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(9, 16);
-    answer.zero();
-
-    double r = 0., x;
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        x  = this->giveNode(i)->giveCoordinate(1);
-        r += x * n.at(i);
-    }
-
+    this->interp.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.local2global( gcoords, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    double r = gcoords.at(1);
 
     // mode is _3dMat !!!!!! answer.at(4,*), answer.at(5,*), answer.at(7,*), and answer.at(8,*) is zero
+    answer.resize(9, 16);
+    answer.zero();
     for ( int i = 1; i <= 16; i++ ) {
         answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
         answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
@@ -264,8 +258,8 @@ Q4Axisymm :: computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *gp)
     answer.resize(2, 2);
     answer.zero();
 
-    ksi = gp->giveCoordinate(1);
-    eta = gp->giveCoordinate(2);
+    ksi = gp->giveNaturalCoordinate(1);
+    eta = gp->giveNaturalCoordinate(2);
 
     nx = this->GiveDerivativeKsi(ksi, eta);
     ny = this->GiveDerivativeEta(ksi, eta);
@@ -288,7 +282,6 @@ Q4Axisymm :: computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 IRResultType
 Q4Axisymm :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     numberOfGaussPoints          = 4;
     result = this->StructuralElement :: initializeFrom(ir);
@@ -300,16 +293,16 @@ Q4Axisymm :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, _IFT_Q4Axisymm_nipfish);
 
     if ( !( ( numberOfGaussPoints == 1 ) ||
-            ( numberOfGaussPoints == 4 ) ||
-            ( numberOfGaussPoints == 9 ) ||
-            ( numberOfGaussPoints == 16 ) ) ) {
+           ( numberOfGaussPoints == 4 ) ||
+           ( numberOfGaussPoints == 9 ) ||
+           ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
     if ( !( ( numberOfFiAndShGaussPoints == 1 ) ||
-            ( numberOfFiAndShGaussPoints == 4 ) ||
-            ( numberOfFiAndShGaussPoints == 9 ) ||
-            ( numberOfFiAndShGaussPoints == 16 ) ) ) {
+           ( numberOfFiAndShGaussPoints == 4 ) ||
+           ( numberOfFiAndShGaussPoints == 9 ) ||
+           ( numberOfFiAndShGaussPoints == 16 ) ) ) {
         numberOfFiAndShGaussPoints = 1;
     }
 
@@ -322,9 +315,8 @@ void
 Q4Axisymm :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 2;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(2);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 
@@ -341,15 +333,15 @@ Q4Axisymm :: computeVolumeAround(GaussPoint *gp)
     FloatArray n;
     double determinant, r;
 
-    this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     r = 0;
     for ( int i = 1; i <= 8; i++ ) {
         r += this->giveNode(i)->giveCoordinate(1) * n.at(i);
     }
 
-    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
-    return determinant * gp->giveWeight() * r;
+    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    return determinant *gp->giveWeight() * r;
 }
 
 
@@ -366,7 +358,7 @@ Q4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
     answer.resize(6);
     answer.zero();
     if ( mode == TL ) { // Total Lagrange formulation
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+        this->computeVectorOf(VM_Total, tStep, u);
 
         // linear part of strain tensor (in vector form)
 
@@ -388,22 +380,35 @@ Q4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
             this->computeBmatrixAt(helpGaussPoint, b, 3, 6);
         } else {
             this->computeBmatrixAt(gp, b, 3, 6);
-            //_error ("ComputeStrainVector: numberOfFiAndShGaussPoints size mismatch");
+            //_error("ComputeStrainVector: numberOfFiAndShGaussPoints size mismatch");
         }
 
         Epsilon.beProductOf(b, u);
         answer.at(3) = Epsilon.at(1);
         answer.at(6) = Epsilon.at(4);
     } else if ( mode == AL ) { // actualized Lagrange formulation
-        _error("ComputeStrainVector : unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 }
 
 void
-Q4Axisymm :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Q4Axisymm :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(2, D_u, D_v);
+    answer = {D_u, D_v};
 }
+
+
+
+Interface *
+Q4Axisymm :: giveInterface(InterfaceType interface)
+{
+    if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
+    }
+
+    return NULL;
+}
+
 
 
 #ifdef __OOFEG

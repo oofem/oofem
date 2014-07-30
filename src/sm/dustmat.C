@@ -169,7 +169,6 @@ IRResultType
 DustMaterial :: initializeFrom(InputRecord *ir)
 {
     // Required by IR_GIVE_FIELD macro
-    const char *__proc = "initializeFrom";
     IRResultType result;
     // call the corresponding service of structural material
     StructuralMaterial :: initializeFrom(ir);
@@ -428,7 +427,7 @@ DustMaterial :: performF1return(double i1, double rho, GaussPoint *gp)
     }
 
     OOFEM_LOG_DEBUG("  i1 %e rho %e  bulkM %e  shearM %e\n", i1, rho, bulkModulus, shearModulus);
-    OOFEM_ERROR("performF1return: Newton's method did not converge\n");
+    OOFEM_ERROR("Newton's method did not converge");
 }
 
 void
@@ -468,7 +467,7 @@ DustMaterial :: performF2return(double i1, double rho, GaussPoint *gp)
         tempQ = .5 * ( qLeft + qRight );
     }
 
-    OOFEM_ERROR("performF2return: bisection method did not converge\n");
+    OOFEM_ERROR("bisection method did not converge");
 }
 
 void
@@ -494,7 +493,7 @@ DustMaterial :: computeQFromPlastVolEps(double &answer, double q, double deltaVo
     }
 
     OOFEM_LOG_DEBUG("  dVolEpsPl: %e\n", deltaVolumetricPlasticStrain);
-    OOFEM_ERROR("computeQFromPlastVolEps: Newton's method did not converge\n");
+    OOFEM_ERROR("Newton's method did not converge");
 }
 
 void
@@ -514,7 +513,7 @@ DustMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         answer.times(coeff);
     } else {
-        _error("Unsupported MatResponseMode\n");
+        OOFEM_ERROR("Unsupported MatResponseMode");
     }
 }
 
@@ -645,14 +644,14 @@ DustMaterial :: solveQ0(double &answer)
         answer -= fx / dfx;
         if (  fabs(fx / dfx / answer) < newtonTol ) {
             if ( answer >= 0 ) {
-                OOFEM_ERROR("internal parameter q has to be negative\n");
+                OOFEM_ERROR("internal parameter q has to be negative");
             }
 
             return;
         }
     }
 
-    OOFEM_ERROR("solveQ0: Newton's method did not converge\n");
+    OOFEM_ERROR("Newton's method did not converge");
 }
 
 void
@@ -687,7 +686,7 @@ DustMaterial :: computePlastStrainDirM1(StrainVector &answer, const StressVector
         answer.at(2) += temp;
         answer.at(3) += temp;
     } else {
-        OOFEM_ERROR("Incorrect mode of stressstrainvector in DustMaterial :: computePlastStrainDirM1\n");
+        OOFEM_ERROR("Incorrect mode of stressstrainvector");
     }
 }
 
@@ -705,7 +704,7 @@ DustMaterial :: computePlastStrainDirM2(StrainVector &answer, const StressVector
         answer.at(2) -= temp;
         answer.at(3) -= temp;
     } else {
-        OOFEM_ERROR("Incorrect mode of stressstrainvector in DustMaterial :: computePlastStrainDirM2\n");
+        OOFEM_ERROR("Incorrect mode of stressstrainvector");
     }
 }
 
@@ -724,7 +723,7 @@ DustMaterial :: computePlastStrainDirM3(StrainVector &answer, const StressVector
         answer.at(2) += temp;
         answer.at(3) += temp;
     } else {
-        OOFEM_ERROR("Incorrect mode of stressstrainvector in DustMaterial :: computePlastStrainDirM3\n");
+        OOFEM_ERROR("Incorrect mode of stressstrainvector");
     }
 }
 
@@ -749,7 +748,7 @@ DustMaterial :: functionHDQ(double tempQ)
     double dxtq = functionXDQ(tempQ);
     switch ( hardeningType ) {
     case 1:
-        return wHard * dHard * exp(dHard * xtq) * dHard * dxtq;
+        return wHard *dHard *exp(dHard *xtq) * dHard * dxtq;
 
     default:     // 0
         return dHard * wHard * ( dxtq * ( 1 - dHard * xtq ) - xtq * ( -dHard * dxtq ) ) / ( 1 - dHard * xtq ) / ( 1 - dHard * xtq );
@@ -772,7 +771,7 @@ double
 DustMaterial :: computeDeltaGamma2(double tempQ, double q, double i1, double bulkModulus)
 {
     double vfH = functionH(q, tempQ);
-    return rEll * rEll * functionFe(tempQ) * vfH / ( 3 * ( i1 - 3 * bulkModulus * vfH - tempQ ) );
+    return rEll *rEll *functionFe(tempQ) * vfH / ( 3 * ( i1 - 3 * bulkModulus * vfH - tempQ ) );
 }
 
 double

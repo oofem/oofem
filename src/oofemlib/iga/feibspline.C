@@ -57,7 +57,6 @@ BSplineInterpolation :: ~BSplineInterpolation()
 IRResultType
 BSplineInterpolation :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
 
     IntArray degree_tmp;
@@ -85,7 +84,7 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, degree_tmp, _IFT_BSplineInterpolation_degree);
     if ( degree_tmp.giveSize() != nsd ) {
-        OOFEM_ERROR("BSplineInterpolation::initializeFrom - degree size mismatch");
+        OOFEM_ERROR("degree size mismatch");
     }
 
     for ( int i = 0; i < nsd; i++ ) {
@@ -96,14 +95,14 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, knotValues [ n ], IFT_knotVector [ n ]);
         size = knotValues [ n ].giveSize();
         if ( size < 2 ) {
-            OOFEM_ERROR2("BSplineInterpolation::initializeFrom - invalid size of knot vector %s", IFT_knotVector [ n ]);
+            OOFEM_ERROR("invalid size of knot vector %s", IFT_knotVector [ n ]);
         }
 
         // check for monotonicity of knot vector without multiplicity
         knotVal = knotValues [ n ].at(1);
         for ( int i = 1; i < size; i++ ) {
             if ( knotValues [ n ].at(i + 1) <= knotVal ) {
-                OOFEM_ERROR2("BSplineInterpolation::initializeFrom - knot vector %s is not monotonic", IFT_knotVector [ n ]);
+                OOFEM_ERROR("knot vector %s is not monotonic", IFT_knotVector [ n ]);
             }
 
             knotVal = knotValues [ n ].at(i + 1);
@@ -125,14 +124,14 @@ BSplineInterpolation :: initializeFrom(InputRecord *ir)
             }
         } else {
             if ( knotMultiplicity [ n ].giveSize() != size ) {
-                OOFEM_ERROR2("BSplineInterpolation::initializeFrom - knot multiplicity %s size mismatch", IFT_knotMultiplicity [ n ]);
+                OOFEM_ERROR("knot multiplicity %s size mismatch", IFT_knotMultiplicity [ n ]);
             }
 
             // check for multiplicity range (skip the first and last one)
             for ( int i = 1; i < size - 1; i++ ) {
                 if ( knotMultiplicity [ n ].at(i + 1) < 1 || knotMultiplicity [ n ].at(i + 1) > degree [ n ] ) {
-                    OOFEM_ERROR3( "BSplineInterpolation::initializeFrom - knot multiplicity %s out of range - value %d",
-                                  IFT_knotMultiplicity [ n ], knotMultiplicity [ n ].at(i + 1) );
+                    OOFEM_ERROR("knot multiplicity %s out of range - value %d",
+                                 IFT_knotMultiplicity [ n ], knotMultiplicity [ n ].at(i + 1) );
                 }
             }
 
@@ -207,7 +206,7 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
             }
         }
     } else if ( nsd == 3 ) {
-        for ( m = 0; m <= degree [ 2 ]; k++ ) {
+        for ( m = 0; m <= degree [ 2 ]; m++ ) {
             for ( l = 0; l <= degree [ 1 ]; l++ ) {
                 for ( k = 0; k <= degree [ 0 ]; k++ ) {
                     answer.at(c++) = N [ 0 ](k) * N [ 1 ](l) * N [ 2 ](m);
@@ -215,7 +214,7 @@ void BSplineInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords
             }
         }
     } else {
-        OOFEM_ERROR2("evalN not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("evalN not implemented for nsd = %d", nsd);
     }
 }
 
@@ -383,20 +382,20 @@ double BSplineInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &l
                     tmp1(1) = ders [ 0 ](0, k) * ders [ 1 ](1, l) * ders [ 2 ](0, m);       // dN/dv=Nu*dNv/dv*Nt
                     tmp1(2) = ders [ 0 ](0, k) * ders [ 1 ](0, l) * ders [ 2 ](1, m);       // dN/dt=Nu*Nv*dNt/dt
                     answer(cnt, 0) = ( ( jacobian(1, 1) * jacobian(2, 2) - jacobian(1, 2) * jacobian(2, 1) ) * tmp1(0) +
-                                       ( jacobian(0, 2) * jacobian(2, 1) - jacobian(0, 1) * jacobian(2, 2) ) * tmp1(1) +
-                                       ( jacobian(0, 1) * jacobian(1, 2) - jacobian(0, 2) * jacobian(1, 1) ) * tmp1(2) ) / Jacob; // dN/dx
+                                      ( jacobian(0, 2) * jacobian(2, 1) - jacobian(0, 1) * jacobian(2, 2) ) * tmp1(1) +
+                                      ( jacobian(0, 1) * jacobian(1, 2) - jacobian(0, 2) * jacobian(1, 1) ) * tmp1(2) ) / Jacob;  // dN/dx
                     answer(cnt, 1) = ( ( jacobian(1, 2) * jacobian(2, 0) - jacobian(1, 0) * jacobian(2, 2) ) * tmp1(0) +
-                                       ( jacobian(0, 0) * jacobian(2, 2) - jacobian(0, 2) * jacobian(2, 0) ) * tmp1(1) +
-                                       ( jacobian(0, 2) * jacobian(1, 0) - jacobian(0, 0) * jacobian(1, 2) ) * tmp1(2) ) / Jacob;                                                     // dN/dy
+                                      ( jacobian(0, 0) * jacobian(2, 2) - jacobian(0, 2) * jacobian(2, 0) ) * tmp1(1) +
+                                      ( jacobian(0, 2) * jacobian(1, 0) - jacobian(0, 0) * jacobian(1, 2) ) * tmp1(2) ) / Jacob;                                                      // dN/dy
                     answer(cnt, 2) = ( ( jacobian(1, 0) * jacobian(2, 1) - jacobian(1, 1) * jacobian(2, 0) ) * tmp1(0) +
-                                       ( jacobian(0, 1) * jacobian(2, 0) - jacobian(0, 0) * jacobian(2, 1) ) * tmp1(1) +
-                                       ( jacobian(0, 0) * jacobian(1, 1) - jacobian(0, 1) * jacobian(1, 0) ) * tmp1(2) ) / Jacob;                                                     // dN/dz
+                                      ( jacobian(0, 1) * jacobian(2, 0) - jacobian(0, 0) * jacobian(2, 1) ) * tmp1(1) +
+                                      ( jacobian(0, 0) * jacobian(1, 1) - jacobian(0, 1) * jacobian(1, 0) ) * tmp1(2) ) / Jacob;                                                      // dN/dz
                     cnt++;
                 }
             }
         }
     } else {
-        OOFEM_ERROR2("evaldNdx not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("evaldNdx not implemented for nsd = %d", nsd);
     }
 
     return Jacob;
@@ -488,9 +487,8 @@ void BSplineInterpolation :: local2global(FloatArray &answer, const FloatArray &
             answer(2) += N [ 2 ](m) * temp(2);
         }
     } else {
-        OOFEM_ERROR2("local2global not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("local2global not implemented for nsd = %d", nsd);
     }
-
 }
 
 
@@ -611,7 +609,7 @@ double BSplineInterpolation :: giveTransformationJacobian(const FloatArray &lcoo
             jacobian(2, 2) += ders [ 2 ](1, m) * temp3(2); // dz/dt=sum(dNt/dt*sum(Nv*sum(Nu*z)))
         }
     } else {
-        OOFEM_ERROR2("giveTransformationJacobian not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("giveTransformationJacobian not implemented for nsd = %d", nsd);
     }
 
     Jacob = jacobian.giveDeterminant();
@@ -656,7 +654,7 @@ int BSplineInterpolation :: giveKnotSpanBasisFuncMask(const IntArray &knotSpan, 
             }
         }
     } else {
-        OOFEM_ERROR2("BSplineInterpolation :: giveKnotSpanBasisFunctMask not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
     return 1;
 }

@@ -44,7 +44,7 @@
 #include "fei3dwedgequad.h"
 #include "fei3dtrquad.h"
 #include "fracturemanager.h"
-#include "cltypes.h"
+
 #include <vector>
 
 namespace oofem {
@@ -60,12 +60,12 @@ class BoundaryLoad;
  * @date 2012-11-01
  */
 class Shell7Base : public NLStructuralElement, public NodalAveragingRecoveryModelInterface, public LayeredCrossSectionInterface, 
-    public VTKXMLExportModuleElementInterface, public ZZNodalRecoveryModelInterface, public FailureModuleElementInterface
+public VTKXMLExportModuleElementInterface, public ZZNodalRecoveryModelInterface, public FailureModuleElementInterface
 {
 public:
-    Shell7Base(int n, Domain *d); // constructor
-    virtual ~Shell7Base() {}
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    Shell7Base(int n, Domain * d); // constructor
+    virtual ~Shell7Base();
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeNumberOfDofs() { return this->giveNumberOfDofs(); }
     virtual int checkConsistency();
@@ -81,7 +81,6 @@ public:
     virtual int giveNumberOfDofs();
     virtual int giveNumberOfEdgeDofs() = 0;
     virtual int giveNumberOfEdgeDofManagers() = 0;
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
     void evalInitialCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &Gcov);
     void computeInitialGeneralizedStrainVector(FloatArray &lcoords, FloatArray &genStrain);
 
@@ -91,7 +90,7 @@ public:
 
 protected:
     virtual Interface *giveInterface(InterfaceType it);
-    IntegrationRule **specialIntegrationRulesArray;
+    std :: vector< IntegrationRule * > specialIntegrationRulesArray;
     LayeredCrossSection *layeredCS;
 
     static FEI3dTrQuad  interpolationForCZExport;
@@ -190,8 +189,8 @@ protected:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     //virtual void computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, MatResponseMode rMode, TimeStep *tStep);
     virtual void new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep);
-    void computeLinearizedStiffness(GaussPoint * gp,  StructuralMaterial * mat, TimeStep * tStep,
-                                    FloatMatrix A [ 3 ] [ 3 ], FloatArray & solVec);
+    void computeLinearizedStiffness(GaussPoint *gp,  StructuralMaterial *mat, TimeStep *tStep,
+                                    FloatMatrix A [ 3 ] [ 3 ], FloatArray &solVec);
     void computePressureTangentMatrix(FloatMatrix &answer, Load *load, const int iSurf, TimeStep *tStep);
     void computeLambdaGMatrices(FloatMatrix lambda [ 3 ], FloatArray &genEps, double zeta);
     void computeLambdaNMatrix(FloatMatrix &lambda, FloatArray &genEps, double zeta);
@@ -238,12 +237,11 @@ protected:
 
     // Nodal averaging interface:
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
 
     // ZZ recovery
     virtual void ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(FloatArray &answer, GaussPoint *gp, InternalStateType type);
-    void NodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int layer, InternalStateType type, TimeStep *tStep);
-    void NodalRecoveryMI_computeNNMatrix(FloatArray &answer, int layer, InternalStateType type);
+    void ZZNodalRecoveryMI_computeNValProductInLayer(FloatMatrix &answer, int layer, InternalStateType type, TimeStep *tStep);
+    void ZZNodalRecoveryMI_computeNNMatrixInLayer(FloatArray &answer, int layer, InternalStateType type);
     void NodalRecoveryMI_recoverValues(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
 
     // VTK interface
@@ -266,7 +264,7 @@ protected:
 
 
     // N and B matrices
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS){};
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS) { };
 
     virtual void computeBmatrixAt(FloatArray &lCoords, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
     virtual void computeNmatrixAt(const FloatArray &iLocCoords, FloatMatrix &answer);

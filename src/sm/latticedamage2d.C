@@ -44,18 +44,20 @@
 #include "staggeredproblem.h"
 #include "classfactory.h"
 #ifdef __TM_MODULE
- #include "latticetransportelement.h"
+ #include "../tm/latticetransportelement.h"
 #endif
+
+#include <cstdlib>
 
 namespace oofem {
 REGISTER_Material(LatticeDamage2d);
 
 LatticeDamage2d :: LatticeDamage2d(int n, Domain *d) : StructuralMaterial(n, d), RandomMaterialExtensionInterface()
-{}
+{ }
 
 
 LatticeDamage2d :: ~LatticeDamage2d()
-{}
+{ }
 
 int
 LatticeDamage2d :: hasMaterialModeCapability(MaterialMode mode)
@@ -67,7 +69,6 @@ LatticeDamage2d :: hasMaterialModeCapability(MaterialMode mode)
 IRResultType
 LatticeDamage2d :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
     StructuralMaterial :: initializeFrom(ir);
@@ -106,7 +107,7 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
         e0OneMean = 0.3 * e0Mean;
         IR_GIVE_OPTIONAL_FIELD(ir, e0OneMean, _IFT_LatticeDamage2d_e0OneMean);
     } else {
-        _error("Unknown softening type");
+        OOFEM_ERROR("Unknown softening type");
     }
 
     localRandomType = 0; //Default: No local random field
@@ -164,7 +165,7 @@ LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const Flo
             //linear stress-crack opening relation
             //check if input parameter make sense
             if ( this->wf / status->giveLe() <= e0 ) {
-                _error("e0>wf/Le \n Possible solutions: Increase fracture energy or reduce element size\n");
+                OOFEM_ERROR("e0>wf/Le \n Possible solutions: Increase fracture energy or reduce element size");
             }
 
             omega = ( 1. - e0 / tempKappa ) / ( 1. - e0 / ( this->wf / status->giveLe() ) );
@@ -178,9 +179,9 @@ LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const Flo
 
         //Check if input parameter make sense
         if ( e0 > wfOne / status->giveLe() ) {
-            _error("parameter wf1 is too small");
+            OOFEM_ERROR("parameter wf1 is too small");
         } else if ( wfOne / status->giveLe() >  this->wf / status->giveLe() ) {
-            _error("parameter wf is too small");
+            OOFEM_ERROR("parameter wf is too small");
         }
 
         //
@@ -222,16 +223,16 @@ LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const Flo
                 Lhs = eNormal * tempKappa - Ft *exp(-help) * status->giveLe() * tempKappa / this->wf;
                 omega += R / Lhs;
                 if ( nite > 40 ) {
-                    _error("computeDamageParam: algorithm not converging");
+                    OOFEM_ERROR("algorithm not converging");
                 }
             } while ( fabs(R) >= 1.e-4 );
 
             if ( ( omega > 1.0 ) || ( omega < 0.0 ) ) {
-                _error("computeDamageParam: internal error\n");
+                OOFEM_ERROR("internal error");
             }
         }
     } else {
-        _error("Unknown softening type");
+        OOFEM_ERROR("Unknown softening type");
     }
 }
 
@@ -257,12 +258,12 @@ LatticeDamage2d :: computeStressIndependentStrainVector(FloatArray &answer,
     }
 
     if ( et.giveSize() == 0 ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
     if ( et.giveSize() < 1 ) {
-        _error("computeStressIndependentStrainVector - Bad format of TemperatureLoad");
+        OOFEM_ERROR("Bad format of TemperatureLoad");
         exit(1);
     }
 
@@ -555,7 +556,7 @@ void LatticeDamage2d :: giveRandomParameters(FloatArray &param)
     if ( localRandomType == 1 ) { //Gaussian
         param.at(2) = coefficientOfVariation;
     } else {
-        _error("Error: Unknown local random type:\n randomtype 1 = Gaussian\n");
+        OOFEM_ERROR("Unknown local random type:\n randomtype 1 = Gaussian");
     }
 }
 
@@ -583,12 +584,12 @@ LatticeDamage2d :: giveStiffnessMatrix(FloatMatrix &answer,
         } else if ( rMode == TangentStiffness ) {
             this->giveSecantStiffnessMatrix(answer, gp, tStep);
         } else {
-            _error("Unsupported stiffness mode\n");
+            OOFEM_ERROR("Unsupported stiffness mode");
         }
 
         break;
     default:
-        _error("unknown material mode");
+        OOFEM_ERROR("unknown material mode");
     }
 }
 
@@ -620,7 +621,7 @@ LatticeDamage2d :: giveTangentStiffnessMatrix(FloatMatrix &answer,
                                               GaussPoint *gp,
                                               TimeStep *tStep)
 {
-    _error("tangent stiffness not implemented\n");
+    OOFEM_ERROR("tangent stiffness not implemented");
 }
 
 
@@ -768,7 +769,7 @@ Interface *
 LatticeDamage2dStatus :: giveInterface(InterfaceType type)
 {
     if ( type == RandomMaterialStatusExtensionInterfaceType ) {
-        return static_cast< RandomMaterialStatusExtensionInterface * >( this );
+        return static_cast< RandomMaterialStatusExtensionInterface * >(this);
     } else {
         return NULL;
     }
@@ -859,7 +860,7 @@ LatticeDamage2dStatus :: setVariableInStatus(double variable) {
 int
 LatticeDamage2dStatus :: giveCrackFlag()
 {
-    if ( crack_flag != 0 ) {}
+    if ( crack_flag != 0 ) { }
 
     return crack_flag;
 }

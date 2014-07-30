@@ -53,7 +53,7 @@ class OOFEM_EXPORT T3DInterface : public MesherInterface
 {
 public:
     /// Constructor
-    T3DInterface(Domain *d) : MesherInterface(d) { }
+    T3DInterface(Domain * d) : MesherInterface(d) { }
     /// Destructor
     virtual ~T3DInterface() { }
 

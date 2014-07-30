@@ -42,14 +42,24 @@
 #define sparsenonlinsystemnm_h
 
 #include "nummet.h"
-#include "equationid.h"
 #include "nmstatus.h"
+#include "floatarray.h"
+#include "intarray.h"
+
+///@name Input fields for SparseNonLinearSystemNM
+//@{
+#define _IFT_NonLinearStatic_randPertAmplitude "rpa"
+#define _IFT_NonLinearStatic_randSeed "rseed"
+#define _IFT_NonLinearStatic_pert "pert"
+#define _IFT_NonLinearStatic_pertw "pertw"
+//@}
 
 namespace oofem {
 class EngngModel;
 class SparseMtrx;
 class FloatArray;
 class TimeStep;
+class SparseLinearSystemNM;
 
 /**
  * This base class is an abstraction for all numerical methods solving sparse
@@ -63,6 +73,18 @@ class TimeStep;
  */
 class OOFEM_EXPORT SparseNonLinearSystemNM : public NumericalMethod
 {
+protected:
+    /// Load level
+    double deltaL;
+
+    /// Amplitude of a random perturbation applied on the solution before the iteration process
+    double randPertAmplitude;
+    int randSeed;
+    bool pert_init_needed;
+    IntArray igp_PertDmanDofSrcArray;
+    FloatArray igp_PertWeightArray;
+    IntArray igp_Map;
+    FloatArray igp_Weight;
 public:
     /**
      * The following parameter allows to specify how the reference load vector
@@ -72,15 +94,10 @@ public:
     enum referenceLoadInputModeType {
         rlm_total=0, ///< The reference incremental load vector is defined as totalLoadVector assembled at given time.
         rlm_incremental=1, ///< The reference load vector is obtained as incremental load vector at given time.
-    };
+    };    
 
-protected:
-    /// Load level
-    double deltaL;
-
-public:
     /// Constructor
-    SparseNonLinearSystemNM(Domain *d, EngngModel *m) : NumericalMethod(d, m) { }
+    SparseNonLinearSystemNM(Domain * d, EngngModel * m) : NumericalMethod(d, m), igp_PertDmanDofSrcArray(), igp_PertWeightArray(), igp_Map(), igp_Weight() { pert_init_needed = false; }
     /// Destructor
     virtual ~SparseNonLinearSystemNM() { }
 
@@ -131,7 +148,13 @@ public:
      */
     virtual SparseLinearSystemNM *giveLinearSolver() { return NULL; }
 
+    IRResultType initializeFrom(InputRecord *ir);
+    virtual void convertPertMap();
+    virtual void applyPerturbation(FloatArray* displacement);
+
     virtual const char *giveClassName() const { return "SparseNonLinearSystemNM"; }
+    /// Error printing helper.
+    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
 };
 } // end namespace oofem
 #endif // sparsenonlinsystemnm_h

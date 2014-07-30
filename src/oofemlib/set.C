@@ -50,7 +50,6 @@
 namespace oofem {
 IRResultType Set :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     FEMComponent :: initializeFrom(ir);
@@ -68,20 +67,22 @@ IRResultType Set :: initializeFrom(InputRecord *ir)
         for ( int i = 1; i <= numEl; i++ ) {
             this->elements.at(i) = i;
         }
+        mElementListIsSorted = false;
     } else {
         IntArray inputElements;
         std :: list< Range >inputElementRanges;
         IR_GIVE_OPTIONAL_FIELD(ir, inputElements, _IFT_Set_elements);
         IR_GIVE_OPTIONAL_FIELD(ir, inputElementRanges, _IFT_Set_elementRanges);
         this->computeIntArray(this->elements, inputElements, inputElementRanges);
+        mElementListIsSorted = false;
     }
 
 
 
-    this->elementBoundaries.resize(0);
+    this->elementBoundaries.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, this->elementBoundaries, _IFT_Set_elementBoundaries);
 
-    this->elementEdges.resize(0);
+    this->elementEdges.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, this->elementEdges, _IFT_Set_elementEdges);
 
     return IRRT_OK;
@@ -111,9 +112,9 @@ void Set :: computeIntArray(IntArray &answer, const IntArray &specified, std :: 
 {
     // Find the max value;
     int maxIndex = specified.giveSize() == 0 ? 0 : specified.maximum();
-    for ( std :: list< Range > :: iterator it = ranges.begin(); it != ranges.end(); ++it ) {
-        if ( it->giveEnd() > maxIndex ) {
-            maxIndex = it->giveEnd();
+    for ( auto &range: ranges ) {
+        if ( range.giveEnd() > maxIndex ) {
+            maxIndex = range.giveEnd();
         }
     }
     IntArray afflictedNodes(maxIndex);
@@ -123,8 +124,8 @@ void Set :: computeIntArray(IntArray &answer, const IntArray &specified, std :: 
         afflictedNodes.at( specified.at(i) ) = 1;
     }
 
-    for ( std :: list< Range > :: iterator it = ranges.begin(); it != ranges.end(); ++it ) {
-        for ( int i = it->giveStart(); i <= it->giveEnd(); ++i ) {
+    for ( auto &range: ranges ) {
+        for ( int i = range.giveStart(); i <= range.giveEnd(); ++i ) {
             afflictedNodes.at(i) = 1;
         }
     }
@@ -183,21 +184,37 @@ const IntArray &Set :: giveNodeList()
 
 const IntArray &Set :: giveSpecifiedNodeList() { return this->nodes; }
 
-void Set :: setElementList(const IntArray &newElements) { this->elements = newElements; }
+void Set :: setElementList(IntArray newElements) { this->elements = std :: move(newElements); mElementListIsSorted = false; }
 
-void Set :: setBoundaryList(const IntArray &newBoundaries) { this->elementBoundaries = newBoundaries; }
+void Set :: setBoundaryList(IntArray newBoundaries) { this->elementBoundaries = std :: move(newBoundaries); }
 
-void Set :: setEdgeList(const IntArray &newEdges) { this->elementEdges = newEdges; }
+void Set :: setEdgeList(IntArray newEdges) { this->elementEdges = std :: move(newEdges); }
 
-void Set :: setNodeList(const IntArray &newNodes) { this->nodes = newNodes; }
+void Set :: setNodeList(IntArray newNodes) { this->nodes = std :: move(newNodes); }
+
+void Set :: addAllElements()
+{
+    this->elements.enumerate(this->giveDomain()->giveNumberOfElements());
+    mElementListIsSorted = false;
+}
+
+bool Set :: hasElement(int number) const
+{
+    if(!mElementListIsSorted) {
+        mElementsSorted = elements;
+        mElementsSorted.sort();
+        mElementListIsSorted = true;
+    }
+    return std :: binary_search(mElementsSorted.begin(), mElementsSorted.end(), number);
+}
 
 void Set :: clear()
 {
-    this->elementEdges.resize(0);
-    this->elementBoundaries.resize(0);
-    this->elements.resize(0);
-    this->nodes.resize(0);
-    this->totalNodes.resize(0);
+    this->elementEdges.clear();
+    this->elementBoundaries.clear();
+    this->elements.clear();
+    this->nodes.clear();
+    this->totalNodes.clear();
 }
 
 void Set :: updateLocalNumbering(EntityRenumberingFunctor &f)
@@ -225,6 +242,8 @@ void Set :: updateLocalElementNumbering(EntityRenumberingFunctor &f)
     for ( int i = 1; i <= elementEdges.giveSize(); i += 2 ) {
         elementEdges.at(i) = f(elementEdges.at(i), ERS_Element);
     }
+
+    mElementListIsSorted = false;
 }
 
 
@@ -277,7 +296,7 @@ contextIOResultType Set :: restoreContext(DataStream *stream, ContextMode mode, 
         }
     }
 
-    this->totalNodes.resize(0);
+    this->totalNodes.clear();
 
     return CIO_OK;
 }

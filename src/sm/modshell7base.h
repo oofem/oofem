@@ -65,7 +65,7 @@ class ModShell7Base : public NLStructuralElement, public NodalAveragingRecoveryM
 public:
     ModShell7Base(int n, Domain *d); // constructor
     virtual ~ModShell7Base() {}
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
     virtual int computeNumberOfDofs() { return this->giveNumberOfDofs(); }
     virtual int checkConsistency();
@@ -83,7 +83,6 @@ public:
     virtual int giveNumberOfEdgeDofManagers() = 0;
     virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
     void evalInitialCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &Gcov);
-    void computeInitialGeneralizedStrainVector(FloatArray &lcoords, FloatArray &genStrain);
 
     static void giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dphidxi1, FloatArray &dphidxi2, FloatArray &dmdxi1,
                                          FloatArray &dmdxi2, FloatArray &m, double &dgamdxi1, double &dgamdxi2, double &gam);
@@ -144,7 +143,6 @@ protected:
 
     // Base vectors and directors
     virtual void setupInitialNodeDirectors();
-    void evalInitialDirectorAt(GaussPoint *gp, FloatArray &answer);
     void evalInitialDirectorAt(FloatArray &lCoords, FloatArray &answer);
 
 
@@ -164,7 +162,6 @@ protected:
 
     void edgeEvalCovarBaseVectorsAt(FloatArray &lCoords, const int iedge, FloatMatrix &gcov, TimeStep *tStep);
 
-    virtual double giveGlobalZcoord(double xi, FloatArray &lc);
     virtual double giveGlobalZcoord(FloatArray &lCoords);
     virtual double giveGlobalZcoordInLayer(double xi, int layer);
 
@@ -221,10 +218,10 @@ protected:
 
 
     // Transformation
-    void giveCoordTransMatrix(FloatMatrix &answer, FloatArray &g1, FloatArray &g2, FloatArray &g3,
-                              FloatArray &G1, FloatArray &G2, FloatArray &G3);
+    //void giveCoordTransMatrix(FloatMatrix &answer, FloatArray &g1, FloatArray &g2, FloatArray &g3,
+    //                          FloatArray &G1, FloatArray &G2, FloatArray &G3);
 
-    void giveCoordTransMatrix(FloatMatrix &answer, FloatArray &g1, FloatArray &g2, FloatArray &g3);
+    //void giveCoordTransMatrix(FloatMatrix &answer, FloatArray &g1, FloatArray &g2, FloatArray &g3);
 
     void giveBondTransMatrix(FloatMatrix &answer, FloatMatrix &Q);
     void transInitialCartesianToInitialContravar(GaussPoint *gp, const FloatArray &VoightMatrix, FloatArray &answer);
@@ -239,12 +236,12 @@ protected:
    //                                     const FloatMatrix &B22, const FloatMatrix &B32, const FloatMatrix &B43, const FloatMatrix  &B53);
     void computeGeneralizedStrainVectorNew(FloatArray &answer, const FloatArray &solVec, const FloatMatrix &Bconst);
     virtual void edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge, TimeStep *tStep);
-    void edgeGiveInitialSolutionVector(FloatArray &answer, const int iedge);
+    //void edgeGiveInitialSolutionVector(FloatArray &answer, const int iedge);
 
     void setupInitialSolutionVector();
     void setupInitialEdgeSolutionVector();
 
-    void giveInitialSolutionVector(FloatArray &answer);
+    //void giveInitialSolutionVector(FloatArray &answer);
     void giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep);
     void giveUnknownsAt(FloatArray &lcoords, FloatArray &solVec, FloatArray &x, FloatArray &m, double gam, TimeStep *tStep);
 

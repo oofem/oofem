@@ -112,10 +112,12 @@ public:
      * @param id Physical meaning type.
      * @see cltypes.h, DofIDItem type
      */
-    MasterDof(int i, DofManager *aNode, int nbc, int nic, DofIDItem id);
-    MasterDof(int i, DofManager *aNode, DofIDItem id = Undef);
+    MasterDof(int i, DofManager * aNode, int nbc, int nic, DofIDItem id);
+    MasterDof(int i, DofManager * aNode, DofIDItem id = Undef);
     /// Destructor.
-    virtual ~MasterDof()   { delete unknowns; }
+    virtual ~MasterDof()   {
+        delete unknowns;
+    }
 
     virtual dofType giveDofType() { return DT_master; }
     virtual const char *giveClassName() const { return "MasterDof"; }
@@ -127,7 +129,7 @@ public:
     virtual int askNewEquationNumber(TimeStep *tStep);
 
     virtual double giveUnknown(ValueModeType mode, TimeStep *tStep);
-    virtual double giveUnknown(PrimaryField & field, ValueModeType, TimeStep * tStep);
+    virtual double giveUnknown(PrimaryField &field, ValueModeType, TimeStep *tStep);
 
     virtual bool hasBc(TimeStep *tStep);
     virtual bool hasIc();

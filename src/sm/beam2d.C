@@ -43,6 +43,7 @@
 #include "floatarray.h"
 #include "engngm.h"
 #include "boundaryload.h"
+#include "structuralms.h"
 #include "mathfem.h"
 #include "classfactory.h"
 
@@ -80,7 +81,7 @@ Interface *
 Beam2d :: giveInterface(InterfaceType interface)
 {
     if ( interface == LayeredCrossSectionInterfaceType ) {
-        return static_cast< LayeredCrossSectionInterface * >( this );
+        return static_cast< LayeredCrossSectionInterface * >(this);
     }
 
     return NULL;
@@ -94,7 +95,7 @@ Beam2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
     double l, ksi, kappa, c1;
 
     l     = this->computeLength();
-    ksi   = 0.5 + 0.5 * gp->giveCoordinate(1);
+    ksi   = 0.5 + 0.5 * gp->giveNaturalCoordinate(1);
     kappa = this->giveKappaCoeff();
     c1 = 1. + 2. * kappa;
 
@@ -118,11 +119,10 @@ void
 Beam2d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
+    if ( integrationRulesArray.size() == 0 ) {
         // the gauss point is used only when methods from crosssection and/or material
         // classes are requested
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
@@ -199,12 +199,11 @@ Beam2d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
     double l = this->computeLength();
     IntegrationRule *ir = this->giveDefaultIntegrationRulePtr();
     FloatMatrix B, d, DB;
-    answer.resize(0,0);
-    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-        GaussPoint *gp = ir->getIntegrationPoint(i);
+    answer.clear();
+    for ( GaussPoint *gp: *ir ) {
         this->computeBmatrixAt(gp, B);
-        this->computeConstitutiveMatrixAt(d, rMode, gp, tStep); 
-        double dV = gp->giveWeight() * 0.5*l;
+        this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
+        double dV = gp->giveWeight() * 0.5 * l;
         DB.beProductOf(d, B);
         answer.plusProductSymmUpper(B, DB, dV);
     }
@@ -270,7 +269,7 @@ Beam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &maste
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(2); // {Exx,GMzx}
@@ -281,9 +280,9 @@ Beam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &maste
 
 
 void
-Beam2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Beam2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(3, D_u, D_w, R_v);
+    answer = {D_u, D_w, R_v};
 }
 
 
@@ -373,7 +372,6 @@ Beam2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 IRResultType
 Beam2d :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
     // first call parent
     StructuralElement :: initializeFrom(ir);
@@ -382,7 +380,7 @@ Beam2d :: initializeFrom(InputRecord *ir)
         IntArray val;
         IR_GIVE_FIELD(ir, val, _IFT_Beam2d_dofstocondense);
         if ( val.giveSize() >= 6 ) {
-            _error("instanciateFrom: wrong input data for condensed dofs");
+            OOFEM_ERROR("wrong input data for condensed dofs");
         }
 
         dofsToCondense = new IntArray(val);
@@ -403,7 +401,7 @@ Beam2d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
     if ( this->dofsToCondense ) {
         FloatMatrix stiff;
         this->computeClampedStiffnessMatrix(stiff, TangentStiffness, tStep);
-        this->condense(&stiff, NULL, &answer, this->dofsToCondense);
+        this->condense(& stiff, NULL, & answer, this->dofsToCondense);
     }
 }
 
@@ -437,10 +435,10 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     // evaluates the receivers edge load vector
     // for clamped beam
     //
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
         if ( edgeLoad->giveNumberOfDofs() != 3 ) {
-            _error("computeEdgeLoadVectorAt: load number of dofs mismatch");
+            OOFEM_ERROR("load number of dofs mismatch");
         }
 
         answer.resize(6);
@@ -542,7 +540,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
             break;
 
         default:
-            _error("computeEdgeLoadVectorAt: unsupported load type");
+            OOFEM_ERROR("unsupported load type");
         }
     }
 }
@@ -554,6 +552,21 @@ Beam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tSte
     FloatArray lc(1);
     StructuralElement :: computeBodyLoadVectorAt(answer, load, tStep, mode);
     answer.times( this->giveCrossSection()->give(CS_Area, & lc, NULL, this) );
+}
+
+
+int
+Beam2d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    if ( type == IST_BeamForceMomentumTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        return 1;
+    } else if ( type == IST_BeamStrainCurvatureTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        return 1;
+    } else {
+        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+    }
 }
 
 
@@ -569,7 +582,7 @@ Beam2d :: printOutputAt(FILE *File, TimeStep *tStep)
     fprintf(File, "beam element %d :\n", number);
 
     // ask for global element displacement vector
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, rl);
+    this->computeVectorOf(VM_Total, tStep, rl);
 
     // ask for global element end forces vector
     this->giveEndForcesVector(Fl, tStep);

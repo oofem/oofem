@@ -55,8 +55,8 @@ REGISTER_Element(MacroLSpace);
 //derived from linear brick element
 MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
 {
-    this->microMasterNodes.resize(0);
-    this->microBoundaryNodes.resize(0);
+    this->microMasterNodes.clear();
+    this->microBoundaryNodes.clear();
     this->firstCall = true;
     microMaterial = NULL;
     microDomain = NULL;
@@ -65,12 +65,11 @@ MacroLSpace :: MacroLSpace(int n, Domain *aDomain) : LSpace(n, aDomain)
     this->lastStiffMatrixTimeStep = NULL;
 }
 
-MacroLSpace :: ~MacroLSpace() {}
+MacroLSpace :: ~MacroLSpace() { }
 
 
 IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
     //IRResultType val;
 
@@ -79,7 +78,7 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, this->microMasterNodes, _IFT_MacroLspace_microMasterNodes);
 
     if ( this->microMasterNodes.giveSize() != 8 ) {
-        OOFEM_ERROR("Need 8 master nodes from the microproblem defined on macroLspace element\n");
+        OOFEM_ERROR("Need 8 master nodes from the microproblem defined on macroLspace element");
     }
 
     IR_GIVE_FIELD(ir, this->microBoundaryNodes, _IFT_MacroLspace_microBoundaryNodes);
@@ -93,9 +92,9 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
         if ( fopen(this->stiffMatrxFileName, "r") != NULL ) { //if the file exist
             stiffMatrxFile = fopen(this->stiffMatrxFileName, "r");
             this->stiffMatrxFileNoneReadingWriting = 1;
-        } else   { //or create a new one
+        } else {   //or create a new one
             if ( ( stiffMatrxFile = fopen(this->stiffMatrxFileName, "w") ) == NULL ) {
-                OOFEM_ERROR2("Can not create a new file %s\n", this->stiffMatrxFileName);
+                OOFEM_ERROR("Can not create a new file %s\n", this->stiffMatrxFileName);
             }
             this->stiffMatrxFileNoneReadingWriting = 2;
         }
@@ -121,7 +120,7 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
     if ( this->firstCall ) {
         this->microMaterial = static_cast< MicroMaterial * >( this->giveMaterial() );
         if ( this->microMaterial->microMatIsUsed == true ) {
-            OOFEM_ERROR("Micromaterial is already used on another element. Only one micromaterial can be assigned to one macro element\n");
+            OOFEM_ERROR("Micromaterial is already used on another element. Only one micromaterial can be assigned to one macro element");
         }
 
         this->microDomain = this->microMaterial->problemMicro->giveDomain(1); //from engngm.h
@@ -135,7 +134,7 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
 
     //call microproblem
     //activeMStep = microMat->problemMicro->giveMetaStep(1);//->setNumberOfSteps(1);
-    //activeMStep->giveMetatStepumber();
+    //activeMStep->giveMetaStepNumber();
     //microEngngModel->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
     //microproblem must have the same actual time and zero time increment
 
@@ -178,11 +177,10 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
 
     //dofManArray has the node order as specified in input file
     for ( int i = 1; i <= this->giveNumberOfNodes(); i++ ) { //8 nodes
-        DofMan = microDomain->giveDofManager(i);
         //global displacements
-        displ_x.at(i) = this->giveNode(i)->giveDof(1)->giveUnknown(VM_Total, tStep);
-        displ_y.at(i) = this->giveNode(i)->giveDof(2)->giveUnknown(VM_Total, tStep);
-        displ_z.at(i) = this->giveNode(i)->giveDof(3)->giveUnknown(VM_Total, tStep);
+        displ_x.at(i) = this->giveNode(i)->giveDofWithID(D_u)->giveUnknown(VM_Total, tStep);
+        displ_y.at(i) = this->giveNode(i)->giveDofWithID(D_v)->giveUnknown(VM_Total, tStep);
+        displ_z.at(i) = this->giveNode(i)->giveDofWithID(D_w)->giveUnknown(VM_Total, tStep);
     }
 
     //overrides the first load-time function to be a constant
@@ -193,7 +191,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     ir_func.setRecordKeywordField("constantfunction", 1);
     ir_func.setField(1.0, _IFT_ConstantFunction_f);
     if ( ( timeFunct = classFactory.createFunction("constantfunction", 1, microDomain) ) == NULL ) {
-        OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create constant time function");
+        OOFEM_ERROR("Couldn't create constant time function");
     }
     timeFunct->initializeFrom(& ir_func);
     microDomain->setFunction(1, timeFunct);
@@ -212,23 +210,24 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
             this->evalInterpolation( n, microMaterial->microMasterCoords, * DofMan->giveCoordinates() );
             //n.printYourself();
 
-            for ( int j = 1; j <= 3; j++ ) {
+            for ( Dof *dof: *DofMan ) {
                 this->microBoundaryDofManager.at(counter) = DofMan->giveGlobalNumber();
-                DofMan->giveDof(j)->setBcId(counter);
-                displ = n.dotProduct( j == 1 ? displ_x : ( j == 2 ? displ_y : displ_z ) );
+                dof->setBcId(counter);
+                DofIDItem id = dof->giveDofID();
+                displ = n.dotProduct( id == D_u ? displ_x : ( id == D_v ? displ_y : displ_z ) );
                 ir_bc.setRecordKeywordField("boundarycondition", counter);
                 ir_bc.setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
                 ir_bc.setField(displ, _IFT_BoundaryCondition_PrescribedValue);
                 if ( ( GeneralBoundaryCond = classFactory.createBoundaryCondition("boundarycondition", counter, microDomain) ) == NULL ) {
-                    OOFEM_ERROR("MacroLSpace :: changeMicroBoundaryConditions - Couldn't create boundary condition.");
+                    OOFEM_ERROR("Couldn't create boundary condition.");
                 }
                 GeneralBoundaryCond->initializeFrom(& ir_bc);
                 microDomain->setBoundaryCondition(counter, GeneralBoundaryCond);
                 counter++;
             }
         } else {
-            for ( int j = 1; j <= 3; j++ ) {
-                DofMan->giveDof(j)->setBcId(0);
+            for ( Dof *dof: *DofMan ) {
+                dof->setBcId(0);
             }
         }
     }
@@ -261,8 +260,7 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
         this->microEngngModel->solveYourselfAt( this->microEngngModel->giveCurrentStep() );
         this->microEngngModel->updateYourself( this->microEngngModel->giveCurrentStep() );
         //this->microEngngModel->terminate( this->microEngngModel->giveCurrentStep() );
-        StructuralEngngModel *microStructuralEngngModel = dynamic_cast< StructuralEngngModel * >( this->microEngngModel );
-
+        StructuralEngngModel *microStructuralEngngModel = dynamic_cast< StructuralEngngModel * >(this->microEngngModel);
 
         //reaction vector contains contributions from unknownNumberingScheme
         microStructuralEngngModel->computeReaction(reactions, this->microEngngModel->giveCurrentStep(), 1);
@@ -292,14 +290,14 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
     //OOFEM_ERROR("STOP");
 }
 
-void MacroLSpace :: evalInterpolation(FloatArray &answer, const FloatArray **coords, const FloatArray &gcoords)
+void MacroLSpace :: evalInterpolation(FloatArray &answer, const std::vector< FloatArray > &coords, const FloatArray &gcoords)
 {
     FloatArray localCoords;
 
     //this->interpolation.global2local(localCoords, coords, gcoords, 0.0);//returns even outside the element boundaries
     //this->interpolation.evalN(answer, localCoords, 0.0);
-    this->interpolation.global2local( localCoords, gcoords, FEIVertexListGeometryWrapper(8, coords) ); //returns even outside the element boundaries
-    this->interpolation.evalN( answer, localCoords, FEIVertexListGeometryWrapper(8, coords) );
+    this->interpolation.global2local( localCoords, gcoords, FEIVertexListGeometryWrapper(coords) ); //returns even outside the element boundaries
+    this->interpolation.evalN( answer, localCoords, FEIVertexListGeometryWrapper(coords) );
 }
 
 
@@ -308,8 +306,8 @@ void MacroLSpace :: updateYourself(TimeStep *tStep)
 {
     FloatArray answer;
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        integrationRulesArray [ i ]->updateYourself(tStep);
+    for ( auto &iRule: integrationRulesArray ) {
+        iRule->updateYourself(tStep);
     }
 
     OOFEM_LOG_INFO("*** Updating macroelement\n");

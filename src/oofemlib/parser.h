@@ -57,8 +57,13 @@ public:
     Parser() {
         curr_tok = PRINT;
         no_of_errors = 0;
-        for ( int i = 0; i < Parser_TBLSZ; i++ ) { table [ i ] = 0; } }
-    ~Parser() { reset(); }
+        for ( int i = 0; i < Parser_TBLSZ; i++ ) {
+            table [ i ] = 0;
+        }
+    }
+    ~Parser() {
+        reset();
+    }
 
     double eval(const char *string, int &err);
     void   reset();

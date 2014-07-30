@@ -52,13 +52,13 @@ protected:
     static FEI1dQuad interpolation;
 
 public:
-    QTruss1d(int n, Domain *d);
+    QTruss1d(int n, Domain * d);
     virtual ~QTruss1d() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int computeNumberOfDofs() { return 3; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
     { return this->computeLength(); }

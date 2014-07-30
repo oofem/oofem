@@ -174,7 +174,7 @@ IntMatIsoDamage :: give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMod
             }
         }
     }  else {
-        _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
+        OOFEM_ERROR("Unknown MatResponseMode");
     }
 }
 
@@ -229,7 +229,7 @@ IntMatIsoDamage :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMod
             }
         }
     }  else {
-        _error("give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode");
+        OOFEM_ERROR("Unknown MatResponseMode");
     }
 }
 
@@ -315,7 +315,7 @@ IntMatIsoDamage :: computeEquivalentJump(double &kappa, const FloatArray &jump)
     } else if( jump.giveSize() == 1 ) {
         kappa = macbra( jump.at(1) );
     } else {
-        OOFEM_ERROR1("IntMatIsoDamage :: computeEquivalentJump - jump vector is not of dimension 1,2 or 3");
+        OOFEM_ERROR("Jump vector is not of dimension 1,2 or 3");
     }
 }
 

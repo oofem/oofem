@@ -2,7 +2,8 @@ tmpatch35.out
 Patch test of Quad1_ht elements 
 #StationaryProblem nsteps 1 
 #NonStationaryProblem nsteps 200 deltat 600000.0 alpha 0.5
-nltransienttransportproblem nsteps 200 deltat 600000.0 rtol 0.001 alpha 0.5 nsmax 300 lumpedcapa
+nltransienttransportproblem nsteps 200 deltat 600000.0 rtol 0.001 alpha 0.5 nsmax 300 lumpedcapa nmodules 1
+errorcheck
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
 ndofman 12 nelem 2 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
@@ -26,12 +27,12 @@ BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 constantsurfaceload 2 loadTimeFunction 1 ndofs 1 components 1 15.0 properties 1 a 0.8 loadtype 3
 ConstantFunction 1 f(t) 1.0
 #%BEGIN_CHECK%
-#NODE tStep 4.80000000e+06 number 5 dof 1 unknown f value 4.06791172e-01
-#NODE tStep 4.80000000e+06 number 6 dof 1 unknown f value 4.06791172e-01
-#NODE tStep 4.80000000e+06 number 10 dof 1 unknown f value 5.37308605e+00
-#NODE tStep 4.80000000e+06 number 12 dof 1 unknown f value 5.37308605e+00
-#NODE tStep 1.19400000e+08 number 5 dof 1 unknown f value 1.2765957447
-#NODE tStep 1.19400000e+08 number 6 dof 1 unknown f value 1.2765957447
-#NODE tStep 1.19400000e+08 number 10 dof 1 unknown f value 10.212765957
-#NODE tStep 1.19400000e+08 number 12 dof 1 unknown f value 10.212765957
+#NODE tStep 9 number 5 dof 10 unknown d value 4.06791172e-01
+#NODE tStep 9 number 6 dof 10 unknown d value 4.06791172e-01
+#NODE tStep 9 number 10 dof 10 unknown d value 5.37308605e+00
+#NODE tStep 9 number 12 dof 10 unknown d value 5.37308605e+00
+#NODE tStep 200 number 5 dof 10 unknown d value 1.2765957447
+#NODE tStep 200 number 6 dof 10 unknown d value 1.2765957447
+#NODE tStep 200 number 10 dof 10 unknown d value 10.212765957
+#NODE tStep 200 number 12 dof 10 unknown d value 10.212765957
 #%END_CHECK%

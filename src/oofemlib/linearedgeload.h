@@ -74,7 +74,7 @@ protected:
     FormulationType formulation;
 
 public:
-    LinearEdgeLoad(int i, Domain *d) : BoundaryLoad(i, d) { }
+    LinearEdgeLoad(int i, Domain * d) : BoundaryLoad(i, d) { }
 
     virtual int giveApproxOrder() { return 1; }
     virtual IRResultType initializeFrom(InputRecord *ir);

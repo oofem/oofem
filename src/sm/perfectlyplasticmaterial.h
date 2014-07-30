@@ -69,7 +69,7 @@ protected:
     int temp_yield_flag;
 
 public:
-    PerfectlyPlasticMaterialStatus(int n, Domain *d, GaussPoint *g);
+    PerfectlyPlasticMaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~PerfectlyPlasticMaterialStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -84,10 +84,10 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    void givePlasticStrainVector(FloatArray &answer) const { answer =  plasticStrainVector; }
-    void givePlasticStrainIncrementVector(FloatArray &answer) const { answer = plasticStrainIncrementVector; }
-    void letPlasticStrainVectorBe(FloatArray &v) { plasticStrainVector = v; }
-    void letPlasticStrainIncrementVectorBe(FloatArray &v) { plasticStrainIncrementVector = v; }
+    const FloatArray &givePlasticStrainVector() const { return plasticStrainVector; }
+    const FloatArray &givePlasticStrainIncrementVector() const { return plasticStrainIncrementVector; }
+    void letPlasticStrainVectorBe(FloatArray v) { plasticStrainVector = std :: move(v); }
+    void letPlasticStrainIncrementVectorBe(FloatArray v) { plasticStrainIncrementVector = std :: move(v); }
 
     // definition
     virtual const char *giveClassName() const { return "PerfectlyPlasticMaterialStatus"; }
@@ -122,14 +122,16 @@ protected:
 
 public:
 
-    PerfectlyPlasticMaterial(int n, Domain *d) : StructuralMaterial(n, d)
+    PerfectlyPlasticMaterial(int n, Domain * d) : StructuralMaterial(n, d)
     {
         yieldCriteria = 0;
         loadingCriteria = 0;
         linearElasticMaterial = NULL;
     }
 
-    virtual ~PerfectlyPlasticMaterial() { delete linearElasticMaterial; }
+    virtual ~PerfectlyPlasticMaterial() {
+        delete linearElasticMaterial;
+    }
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp,
                                       const FloatArray &reducedStrain, TimeStep *tStep);

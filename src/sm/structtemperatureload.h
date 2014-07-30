@@ -53,7 +53,7 @@ class TimeStep;
 class StructuralTemperatureLoad : public Load
 {
 public:
-    StructuralTemperatureLoad(int n, Domain *d) : Load(n, d) { }
+    StructuralTemperatureLoad(int n, Domain * d) : Load(n, d) { }
 
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
 

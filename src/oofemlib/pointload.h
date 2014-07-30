@@ -78,7 +78,7 @@ public:
      * @param n Load number.
      * @param d Domain to which new object will belongs.
      */
-    PointLoad(int n, Domain *d) : BodyLoad(n, d) {
+    PointLoad(int n, Domain * d) : BodyLoad(n, d) {
         nDofs = 0;
         coordSystemType = CST_Global;
     }
@@ -87,7 +87,7 @@ public:
     /**
      * Gives coordinates of the receiver
      */
-    void giveCoordinates(FloatArray &answer) { answer = coords; }
+    const FloatArray & giveCoordinates() const { return coords; }
     /**
      * Return receiver's number of "DOFs". Should correspond to number of DOFs on loaded entity.
      */

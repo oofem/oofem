@@ -64,7 +64,7 @@
 #define _IFT_NRSolver_rtolv "rtolv"
 #define _IFT_NRSolver_rtolf "rtolf"
 #define _IFT_NRSolver_rtold "rtold"
-#define _IFT_NRSolver_constrainedNR "constrainednr"
+#define _IFT_NRSolver_calcstiffbeforeres "calcstiffbeforeres"
 #define _IFT_NRSolver_constrainedNRalpha "constrainednralpha"
 #define _IFT_NRSolver_constrainedNRminiter "constrainednrminiter"
 //@}
@@ -134,8 +134,8 @@ private:
     bool lsFlag;
     /// Line search solver
     LineSearchNM *linesearchSolver;
-    /// Constrained Newton - updates the solution by a constant factor times the increment.
-    /// Is only activated if the sum of squared residuals are larger at the current iteration than in the previous one.
+    /// Flag indicating if the stiffness should be evaluated before the residual in the first iteration.
+    bool mCalcStiffBeforeRes;
     /// Flag indicating whether to use constrained Newton
     bool constrainedNRFlag;
     /// Scale factor for dX, dX_new = alpha * dX
@@ -154,7 +154,7 @@ private:
     FloatArray rtold;
 
 public:
-    NRSolver(Domain *d, EngngModel *m);
+    NRSolver(Domain * d, EngngModel * m);
     virtual ~NRSolver();
 
     // Overloaded methods:

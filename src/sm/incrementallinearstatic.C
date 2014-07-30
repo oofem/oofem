@@ -78,7 +78,7 @@ NumericalMethod *IncrementalLinearStatic :: giveNumericalMethod(MetaStep *mStep)
 
     nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
     if ( nMethod == NULL ) {
-        _error("giveNumericalMethod: linear solver creation failed");
+        OOFEM_ERROR("linear solver creation failed");
     }
 
     return nMethod;
@@ -87,7 +87,6 @@ NumericalMethod *IncrementalLinearStatic :: giveNumericalMethod(MetaStep *mStep)
 
 IRResultType IncrementalLinearStatic :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     IR_GIVE_OPTIONAL_FIELD(ir, discreteTimes, _IFT_IncrementalLinearStatic_prescribedtimes);
@@ -127,7 +126,7 @@ double IncrementalLinearStatic :: giveDiscreteTime(int iStep)
         }
     }
 
-    _error("giveDiscreteTime: invalid iStep");
+    OOFEM_ERROR("invalid iStep");
     return 0.0;
 }
 
@@ -135,7 +134,7 @@ double IncrementalLinearStatic :: giveDiscreteTime(int iStep)
 TimeStep *IncrementalLinearStatic :: giveNextStep()
 {
     int istep = this->giveNumberOfFirstStep();
-    int mtStepum = 1;
+    int mStepNum = 1;
     double dt = this->giveDiscreteTime(istep);
     StateCounterType counter = 1;
 
@@ -153,7 +152,7 @@ TimeStep *IncrementalLinearStatic :: giveNextStep()
     if ( previousStep == NULL ) {
         previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -dt, dt, 0);
     }
-    currentStep = new TimeStep(istep, this, mtStepum, this->giveDiscreteTime(istep), dt, counter);
+    currentStep = new TimeStep(istep, this, mStepNum, this->giveDiscreteTime ( istep ), dt, counter);
     return currentStep;
 }
 
@@ -172,9 +171,9 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
         Domain *d = this->giveDomain(1);
         for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
             DofManager *dofman = d->giveDofManager(i);
-            for ( int j = 1; j <= dofman->giveNumberOfDofs(); j++ ) {
-                dofman->giveDof(j)->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, 0.);
-                dofman->giveDof(j)->updateUnknownsDictionary(tStep, VM_Total, 0.);
+            for ( Dof *dof: *dofman ) {
+                dof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, 0.);
+                dof->updateUnknownsDictionary(tStep, VM_Total, 0.);
             }
         }
 
@@ -183,13 +182,13 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
             GeneralBoundaryCondition *bc = d->giveBc(ibc);
             ActiveBoundaryCondition *abc;
 
-            if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >( bc ) ) ) {
+            if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc) ) ) {
                 int ndman = abc->giveNumberOfInternalDofManagers();
                 for ( int i = 1; i <= ndman; i++ ) {
                     DofManager *dofman = abc->giveInternalDofManager(i);
-                    for ( int j = 1; j <= dofman->giveNumberOfDofs(); j++ ) {
-                        dofman->giveDof(j)->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, 0.);
-                        dofman->giveDof(j)->updateUnknownsDictionary(tStep, VM_Total, 0.);
+                    for ( Dof *dof: *dofman ) {
+                        dof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, 0.);
+                        dof->updateUnknownsDictionary(tStep, VM_Total, 0.);
                     }
                 }
             }
@@ -200,8 +199,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     Domain *d = this->giveDomain(1);
     for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
         DofManager *dofman = d->giveDofManager(i);
-        for ( int j = 1; j <= dofman->giveNumberOfDofs(); j++ ) {
-            Dof *dof = dofman->giveDof(j);
+        for ( Dof *dof: *dofman ) {
             double tot = dof->giveUnknown( VM_Total, tStep->givePreviousStep() );
             if ( dof->hasBc(tStep) ) {
                 tot += dof->giveBcValue(VM_Incremental, tStep);
@@ -212,11 +210,11 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     }
 
 
-#ifdef VERBOSE
-    OOFEM_LOG_RELEVANT( "Solving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
-#endif
-
     int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
+
+#ifdef VERBOSE
+    OOFEM_LOG_RELEVANT("Solving [step number %8d, time %15e, equations %d]\n", tStep->giveNumber(), tStep->giveTargetTime(), neq);
+#endif
 
     if ( neq == 0 ) { // Allows for fully prescribed/empty problems.
         return;
@@ -231,16 +229,16 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     // Assembling the element part of load vector
     internalLoadVector.resize(neq);
     internalLoadVector.zero();
-    this->assembleVector( internalLoadVector, tStep, EID_MomentumBalance, InternalForcesVector,
-                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( internalLoadVector, tStep, InternalForcesVector,
+                         VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.resize(neq);
     loadVector.zero();
-    this->assembleVector( loadVector, tStep, EID_MomentumBalance, ExternalForcesVector,
-                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assembleVector( loadVector, tStep, ExternalForcesVector,
+                         VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalLoadVector);
-    
+
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
 #endif
@@ -255,13 +253,13 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
 
     stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
     if ( stiffnessMatrix == NULL ) {
-        _error("solveYourselfAt: sparse matrix creation failed");
+        OOFEM_ERROR("sparse matrix creation failed");
     }
 
-    stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+    stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
     stiffnessMatrix->zero();
-    this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
-                    EModelDefaultEquationNumbering(), this->giveDomain(1) );
+    this->assemble( stiffnessMatrix, tStep, StiffnessMatrix,
+                   EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Solving ...\n");
@@ -269,7 +267,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
     NM_Status s = nMethod->solve(stiffnessMatrix, & loadVector, & incrementOfDisplacementVector);
     if ( !( s & NM_Success ) ) {
-        OOFEM_ERROR("IncrementalLinearStatic :: solverYourselfAt - No success in solving system.");
+        OOFEM_ERROR("No success in solving system.");
     }
 }
 
@@ -281,7 +279,7 @@ double IncrementalLinearStatic :: giveUnknownComponent(ValueModeType mode, TimeS
         if ( dof->giveUnknowns()->includes(hash) ) {
             return dof->giveUnknowns()->at(hash);
         } else {
-            OOFEM_ERROR2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+            OOFEM_ERROR("Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
         }
     } else {
         OOFEM_ERROR("Only the mode requiresUnknownsDictionaryUpdate() is supported");
@@ -306,22 +304,19 @@ void IncrementalLinearStatic :: updateDofUnknownsDictionary(DofManager *inode, T
     // particular DOFs may changed, and it is necessary to keep them
     // in DOF level.
 
-    int ndofs = inode->giveNumberOfDofs();
-    Dof *iDof;
     double val;
-    for ( int i = 1; i <= ndofs; i++ ) {
-        iDof = inode->giveDof(i);
+    for ( Dof *dof: *inode ) {
         // skip slave DOFs (only master (primary) DOFs have to be updated).
-        if ( !iDof->isPrimaryDof() ) {
+        if ( !dof->isPrimaryDof() ) {
             continue;
         }
-        val = iDof->giveUnknown(VM_Total, tStep);
-        if ( !iDof->hasBc(tStep) ) {
-            val += this->incrementOfDisplacementVector.at( iDof->__giveEquationNumber() );
+        val = dof->giveUnknown(VM_Total, tStep);
+        if ( !dof->hasBc(tStep) ) {
+            val += this->incrementOfDisplacementVector.at( dof->__giveEquationNumber() );
         }
 
-        iDof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, val);
-        iDof->updateUnknownsDictionary(tStep, VM_Total, val);
+        dof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, val);
+        dof->updateUnknownsDictionary(tStep, VM_Total, val);
     }
 }
 
@@ -375,7 +370,7 @@ contextIOResultType IncrementalLinearStatic :: restoreContext(DataStream *stream
     int closeFlag = 0, istep, iversion;
     contextIOResultType iores;
     FILE *file = NULL;
-    this->resolveCorrespondingtStepumber(istep, iversion, obj);
+    this->resolveCorrespondingStepNumber(istep, iversion, obj);
     if ( stream == NULL ) {
         if ( !this->giveContextFile(& file, istep, iversion, contextMode_read) ) {
             THROW_CIOERR(CIO_IOERR);

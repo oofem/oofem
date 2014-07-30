@@ -103,18 +103,18 @@ protected:
     double SEZ;  ///< Current strain in transverse (z) direction.
 
 public:
-    Concrete2MaterialStatus(int n, Domain *d, GaussPoint *g);
+    Concrete2MaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~Concrete2MaterialStatus();
     virtual void printOutputAt(FILE *file, TimeStep *tStep)
     { StructuralMaterialStatus :: printOutputAt(file, tStep); }
 
-    void givePlasticStrainVector(FloatArray &answer) const { answer = plasticStrainVector; }
-    void givePlasticStrainIncrementVector(FloatArray &answer) const
-    { answer = plasticStrainIncrementVector; }
-    void letPlasticStrainVectorBe(FloatArray &v)
-    { plasticStrainVector = v; }
-    void letPlasticStrainIncrementVectorBe(FloatArray &v)
-    { plasticStrainIncrementVector = v; }
+    const FloatArray & givePlasticStrainVector() const { return plasticStrainVector; }
+    const FloatArray & givePlasticStrainIncrementVector() const
+    { return plasticStrainIncrementVector; }
+    void letPlasticStrainVectorBe(FloatArray v)
+    { plasticStrainVector = std :: move(v); }
+    void letPlasticStrainIncrementVectorBe(FloatArray v)
+    { plasticStrainIncrementVector = std :: move(v); }
 
     double &giveTempCurrentPressureStrength() { return tempSCCM; }
     double &giveTempMaxEffPlasticStrain()     { return tempEPM; }
@@ -177,11 +177,11 @@ private:
     LinearElasticMaterial *linearElasticMaterial;
 
 public:
-    Concrete2(int n, Domain *d);
+    Concrete2(int n, Domain * d);
     virtual ~Concrete2();
 
     virtual void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp,
-                                      const FloatArray &, TimeStep *tStep);
+                                                 const FloatArray &, TimeStep *tStep);
 
     virtual void givePlateLayerStiffMtrx(FloatMatrix &answer,
                                          MatResponseMode mode,
@@ -191,18 +191,18 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
-    void dtp3(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
+    void dtp3(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,
               double SCC, double SCT, int *ifplas);
-    void dtp2(GaussPoint *gp, FloatArray *e, FloatArray *s, FloatArray *ep,
+    void dtp2(GaussPoint *gp, FloatArray &e, FloatArray &s, FloatArray &ep,
               double SCC, double SCT, int *ifplas);
     void stirr(double dez, double srf);
-    void strsoft(GaussPoint *gp, double epsult, FloatArray *ep, double &ep1,
+    void strsoft(GaussPoint *gp, double epsult, FloatArray &ep, double &ep1,
                  double &ep2, double &ep3, double SCC, double SCT, int &ifupd);
 
     // two functions used to initialize and updating temporary variables in
     // gp's status. These variables are used to control process, when
     // we try to find equilibrium state.
-    void updateStirrups(GaussPoint *gp, FloatArray *strainIncrement);
+    void updateStirrups(GaussPoint *gp, FloatArray &strainIncrement);
 
 public:
     virtual double give(int, GaussPoint *gp);

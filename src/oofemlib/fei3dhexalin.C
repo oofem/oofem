@@ -82,7 +82,7 @@ FEI3dHexaLin :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
     FloatArray n;
     this->evalN(n, lcoords, cellgeo);
 
-    answer.resize(0);
+    answer.clear();
     for ( int i = 1; i <= 8; i++ ) {
         answer.add( n.at(i), * cellgeo.giveVertexCoordinates(i) );
     }
@@ -263,11 +263,11 @@ FEI3dHexaLin :: edgeLocal2global(FloatArray &answer, int iedge,
 
     answer.resize(3);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(1) +
-                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(1) );
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(1) );
     answer.at(2) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(2) +
-                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(2) );
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(2) );
     answer.at(3) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(3) +
-                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(3) );
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(3) );
 }
 
 
@@ -322,10 +322,10 @@ FEI3dHexaLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         aNode = 8;
         bNode = 5;
     } else {
-        OOFEM_ERROR2("FEI3dHexaLin :: computeEdgeMapping: wrong egde number (%d)", iedge);
+        OOFEM_ERROR("wrong egde number (%d)", iedge);
     }
 
-    edgeNodes.setValues(2, aNode, bNode);
+    edgeNodes = {aNode, bNode};
 }
 
 double
@@ -361,11 +361,11 @@ FEI3dHexaLin :: surfaceLocal2global(FloatArray &answer, int iedge,
 
     answer.resize(3);
     answer.at(1) = n.at(1) * cellgeo.giveVertexCoordinates( nodes.at(1) )->at(1) + n.at(2) * cellgeo.giveVertexCoordinates( nodes.at(2) )->at(1) +
-                   n.at(3) * cellgeo.giveVertexCoordinates( nodes.at(3) )->at(1) + n.at(4) * cellgeo.giveVertexCoordinates( nodes.at(4) )->at(1);
+    n.at(3) * cellgeo.giveVertexCoordinates( nodes.at(3) )->at(1) + n.at(4) * cellgeo.giveVertexCoordinates( nodes.at(4) )->at(1);
     answer.at(2) = n.at(1) * cellgeo.giveVertexCoordinates( nodes.at(1) )->at(2) + n.at(2) * cellgeo.giveVertexCoordinates( nodes.at(2) )->at(2) +
-                   n.at(3) * cellgeo.giveVertexCoordinates( nodes.at(3) )->at(2) + n.at(4) * cellgeo.giveVertexCoordinates( nodes.at(4) )->at(2);
+    n.at(3) * cellgeo.giveVertexCoordinates( nodes.at(3) )->at(2) + n.at(4) * cellgeo.giveVertexCoordinates( nodes.at(4) )->at(2);
     answer.at(3) = n.at(1) * cellgeo.giveVertexCoordinates( nodes.at(1) )->at(3) + n.at(2) * cellgeo.giveVertexCoordinates( nodes.at(2) )->at(3) +
-                   n.at(3) * cellgeo.giveVertexCoordinates( nodes.at(3) )->at(3) + n.at(4) * cellgeo.giveVertexCoordinates( nodes.at(4) )->at(3);
+    n.at(3) * cellgeo.giveVertexCoordinates( nodes.at(3) )->at(3) + n.at(4) * cellgeo.giveVertexCoordinates( nodes.at(4) )->at(3);
 }
 
 double
@@ -444,10 +444,10 @@ FEI3dHexaLin :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
         cNode = 5;
         dNode = 8;
     } else {
-        OOFEM_ERROR2("FEI3dHexaLin :: computeSurfaceMapping: wrong surface number (%d)", isurf);
+        OOFEM_ERROR("wrong surface number (%d)", isurf);
     }
 
-    surfNodes.setValues(4, aNode, bNode, cNode, dNode);
+    surfNodes = {aNode, bNode, cNode, dNode};
 }
 
 void

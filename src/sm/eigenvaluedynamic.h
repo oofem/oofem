@@ -80,7 +80,7 @@ private:
     GenEigvalSolverType solverType;
 
 public:
-    EigenValueDynamic(int i, EngngModel *_master = NULL) : EngngModel(i, _master)
+    EigenValueDynamic(int i, EngngModel * _master = NULL) : EngngModel(i, _master)
     {
         stiffnessMatrix = NULL;
         massMatrix = NULL;
@@ -89,9 +89,12 @@ public:
         nMethod = NULL;
     }
     virtual ~EigenValueDynamic() {
-        delete  stiffnessMatrix;
+        delete stiffnessMatrix;
         delete massMatrix;
-        if ( nMethod ) { delete nMethod; } }
+        if ( nMethod ) {
+            delete nMethod;
+        }
+    }
 
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void terminate(TimeStep *tStep);
@@ -104,7 +107,9 @@ public:
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
     virtual void setActiveVector(int i) { activeVector = i; }
-    virtual int resolveCorrespondingEigentStepumber(void *obj);
+    virtual int resolveCorrespondingEigenStepNumber(void *obj);
+
+    virtual double giveEigenValue(int eigNum) { return eigVal.at(eigNum); }
 
 #ifdef __SLEPC_MODULE
     virtual void initParallelContexts();

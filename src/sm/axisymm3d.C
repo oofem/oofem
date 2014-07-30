@@ -57,14 +57,13 @@ REGISTER_Element(Axisymm3d);
 FEI2dTrLin Axisymm3d :: interpolation(1, 2);
 
 Axisymm3d :: Axisymm3d(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
-    SPRNodalRecoveryModelInterface()
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
+    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this)
     // Constructor.
 {
     numberOfDofMans = 3;
     area = -1;
     numberOfGaussPoints = 1;
-    numberOfFiAndShGaussPoints = 1;
 }
 
 Axisymm3d :: ~Axisymm3d()
@@ -75,13 +74,13 @@ Interface *
 Axisymm3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     }
 
     return NULL;
@@ -97,7 +96,7 @@ Axisymm3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     int size, ind = 1;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
 
     if ( ui == ALL_STRAINS ) {
@@ -108,7 +107,7 @@ Axisymm3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     }
 
     if ( ( size < 0 ) || ( size > 6 ) ) {
-        _error("ComputeBmatrixAt size mismatch");
+        OOFEM_ERROR("ComputeBmatrixAt size mismatch");
     }
 
     answer.resize(size, 6);
@@ -130,7 +129,7 @@ Axisymm3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
 
     if ( ( li <= 3 ) && ( ui >= 3 ) ) {
         FloatArray n(4);
-        this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
         r = 0.;
         for ( int i = 1; i <= numberOfDofMans; i++ ) {
@@ -174,7 +173,7 @@ Axisymm3d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     FloatArray n;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 6);
     answer.zero();
@@ -217,20 +216,19 @@ Axisymm3d :: giveArea()
 double
 Axisymm3d :: computeVolumeAround(GaussPoint *gp)
 {
-    int i;
     double determinant, weight, volume, r, x;
-    FloatArray n(4);
+    FloatArray n;
 
-    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     r = 0.;
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         x  = this->giveNode(i)->giveCoordinate(1);
         r += x * n.at(i);
     }
 
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
+                                                                       FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     volume = determinant * weight * r;
@@ -242,13 +240,12 @@ Axisymm3d :: computeVolumeAround(GaussPoint *gp)
 void
 Axisymm3d :: computeGaussPoints()
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 2;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(1);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
-        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], numberOfFiAndShGaussPoints, this);
+        //integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
+        //this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], numberOfFiAndShGaussPoints, this);
     }
 }
 
@@ -256,7 +253,6 @@ Axisymm3d :: computeGaussPoints()
 IRResultType
 Axisymm3d :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     numberOfGaussPoints = 1;
@@ -265,19 +261,10 @@ Axisymm3d :: initializeFrom(InputRecord *ir)
         return result;
     }
 
-    numberOfFiAndShGaussPoints = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, _IFT_Axisymm3d_nipfish);
-
     if ( !( ( numberOfGaussPoints == 1 ) ||
-            ( numberOfGaussPoints == 4 ) ||
-            ( numberOfGaussPoints == 7 ) ) ) {
+           ( numberOfGaussPoints == 4 ) ||
+           ( numberOfGaussPoints == 7 ) ) ) {
         numberOfGaussPoints = 1;
-    }
-
-    if ( !( ( numberOfFiAndShGaussPoints == 1 ) ||
-            ( numberOfFiAndShGaussPoints == 4 ) ||
-            ( numberOfFiAndShGaussPoints == 7 ) ) ) {
-        numberOfFiAndShGaussPoints = 1;
     }
 
     return IRRT_OK;
@@ -298,14 +285,14 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
     answer.zero();
 
     if ( mode == TL ) {  // Total Lagrange formulation
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+        this->computeVectorOf({D_u, D_v}, VM_Total, tStep, u);
         // linear part of strain tensor (in vector form)
 
-        this->computeBmatrixAt(gp, b, 1, 2);
-        Epsilon.beProductOf(b, u);
+        this->computeBmatrixAt(gp, b, 1, 6);
+        answer.beProductOf(b, u);
+#if 0
         answer.at(1) = Epsilon.at(1);
         answer.at(2) = Epsilon.at(2);
-        // delete Epsilon; // delete b;
 
         if ( numberOfFiAndShGaussPoints == 1 ) {
             //
@@ -318,18 +305,19 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
 
             this->computeBmatrixAt(helpGaussPoint, b, 3, 6);
         } else {
-            _error("ComputeStrainVector: numberOfRotGaussPoints size mismatch");
+            OOFEM_ERROR("numberOfRotGaussPoints size mismatch");
         }
 
         Epsilon.beProductOf(b, u);
         answer.at(3) = Epsilon.at(1);
         answer.at(6) = Epsilon.at(4);
+#endif
 
         if ( nlGeometry ) {
-            OOFEM_ERROR("Axisymm3d :: computeStrainVector - only supports nlGeometry = 0");
+            OOFEM_ERROR("only supports nlGeometry = 0");
         }
     } else if ( mode == AL ) { // actualized Lagrange formulation
-        _error("computeStrainVector : unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 }
 
@@ -369,9 +357,9 @@ Axisymm3d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalTo
 
 
 void
-Axisymm3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+Axisymm3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(2, D_u, D_v);
+    answer = {D_u, D_v};
 }
 
 
@@ -382,21 +370,13 @@ Axisymm3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int 
     GaussPoint *gp;
 
     if ( numberOfGaussPoints != 1 ) {
-        answer.resize(0); // for more gp's need to be refined
+        answer.clear(); // for more gp's need to be refined
         return;
     }
 
     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);
 }
-
-void
-Axisymm3d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                       InternalStateType type, TimeStep *tStep)
-{
-    answer.resize(0);
-}
-
 
 void
 Axisymm3d :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
@@ -412,11 +392,11 @@ Axisymm3d :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-         ( pap == this->giveNode(2)->giveNumber() ) ||
-         ( pap == this->giveNode(3)->giveNumber() ) ) {
+        ( pap == this->giveNode(2)->giveNumber() ) ||
+        ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 
@@ -453,7 +433,7 @@ Axisymm3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 4);
     answer.zero();
@@ -490,7 +470,7 @@ Axisymm3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(3) = 1;
         answer.at(4) = 2;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 
@@ -500,8 +480,8 @@ Axisymm3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     FloatArray c(2);
     this->computeEdgeIpGlobalCoords(c, gp, iEdge);
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) );
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
+                                                                       FEIElementGeometryWrapper(this) );
 
 
     return c.at(1) * result * gp->giveWeight();
@@ -511,7 +491,7 @@ Axisymm3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 Axisymm3d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -542,7 +522,7 @@ Axisymm3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
         aNode = 3;
         bNode = 1;
     } else {
-        _error("computeLoadLBtoLRotationMatrix: wrong egde number");
+        OOFEM_ERROR("wrong egde number");
     }
 
     nodeA   = this->giveNode(aNode);
@@ -561,14 +541,6 @@ Axisymm3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
 }
 
 
-int
-Axisymm3d :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->interpolation.global2local( lcoords, coords, FEIElementGeometryWrapper(this) );
-}
-
-
 double
 Axisymm3d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
@@ -580,7 +552,7 @@ Axisymm3d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("coordinates size mismatch");
     }
 
     if ( size == gsize ) {

@@ -60,6 +60,8 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
         this->giveRealStress_PlaneStress(answer, gp, strain, tStep);
     } else if ( mode == _1dMat ) {
         this->giveRealStress_1d(answer, gp, strain, tStep);
+    } else if ( mode == _Warping ) {
+        this->giveRealStress_Warping(answer, gp, strain, tStep);
     } else {
         // This should never happen ?
         ///@todo this part only works for simple cross section and will be removed soon when new interface elements are done /JB
@@ -67,7 +69,7 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
         if ( mat->hasMaterialModeCapability( gp->giveMaterialMode() ) ) {
             mat->giveRealStressVector(answer, gp, strain, tStep);
         } else {
-            _error("giveRealStresses : unsupported mode");
+            OOFEM_ERROR("unsupported mode");
         }
     }
 }
@@ -92,7 +94,7 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
 //    } else if ( mode == _1dMat ) {
 //        this->giveFirstPKStress_1d(answer, gp, reducedvF, tStep);
 //    } else {
-//        OOFEM_ERROR2("StructuralCrossSection :: giveStiffnessMatrix_dPdF : unknown mode (%s)", __MaterialModeToString(mode) );
+//        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
 //    }
 //}
 //
@@ -136,7 +138,7 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
 //    } else if ( mode == _1dMat ) {
 //        this->give1dStressStiffMtrx_dPdF(answer, rMode, gp, tStep);
 //    } else {
-//        OOFEM_ERROR2("StructuralCrossSection :: giveStiffnessMatrix_dPdF : unknown mode (%s)", __MaterialModeToString(mode) );
+//        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
 //    }
 //}
 //
@@ -158,7 +160,7 @@ StructuralCrossSection :: giveRealStresses(FloatArray &answer, GaussPoint *gp, c
 //    } else if ( mode == _1dMat ) {
 //        this->give1dStressStiffMtrx_dCde(answer, rMode, gp, tStep);
 //    } else {
-//        OOFEM_ERROR2("StructuralCrossSection :: giveStiffnessMatrix_dCde : unknown mode (%s)", __MaterialModeToString(mode) );
+//        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
 //    }
 //}
 
@@ -182,7 +184,7 @@ StructuralCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( gradientStressVector3d->giveSize() != 6 ) {
-        _error("ImposeStressConstrainsOnGradient: gradientStressVector3d size mismatch");
+        OOFEM_ERROR("gradientStressVector3d size mismatch");
     }
 
     if ( mode == _3dMat ) {
@@ -208,7 +210,7 @@ StructuralCrossSection :: imposeStressConstrainsOnGradient(GaussPoint *gp,
 
         break;
     default:
-        _error2( "ImposeStressConstrainsOnGradient: unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
         break;
     }
 
@@ -230,7 +232,7 @@ StructuralCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
 {
     MaterialMode mode = gp->giveMaterialMode();
     if ( gradientStrainVector3d->giveSize() != 6 ) {
-        _error("ImposeStrainConstrainsOnGradient: gradientStrainVector3d size mismatch");
+        OOFEM_ERROR("gradientStrainVector3d size mismatch");
     }
 
     if ( mode == _3dMat ) {
@@ -256,7 +258,7 @@ StructuralCrossSection :: imposeStrainConstrainsOnGradient(GaussPoint *gp,
 
         break;
     default:
-        _error2( "ImposeStrainConstrainsOnGradient: unknown mode (%s)", __MaterialModeToString(mode) );
+        OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mode) );
         break;
     }
 

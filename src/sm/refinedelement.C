@@ -37,7 +37,6 @@
 #include "node.h"
 #include "dof.h"
 #include "mathfem.h"
-#include "oofem_limits.h"
 
 #include <cstdarg>
 #include <cstdlib> // For abort
@@ -48,8 +47,7 @@ RefinedElement :: RefinedElement(Domain *d, int elem, int level) : fineNodeList(
     // Constructor
 {
     Element *element;
-    int inode, nodes, sides, dim, len;
-    IntArray *connectivity;
+    int nodes, sides, dim, len;
 
     this->elementId = elem;
 
@@ -63,10 +61,9 @@ RefinedElement :: RefinedElement(Domain *d, int elem, int level) : fineNodeList(
         len *= ( level + 2 );
     }
 
-    fineNodeList.growTo(nodes);
-    for ( inode = 1; inode <= nodes; inode++ ) {
-        connectivity = new IntArray(len);
-        fineNodeList.put(inode, connectivity);
+    fineNodeList.resize(nodes);
+    for ( int inode = 0; inode < nodes; inode++ ) {
+        fineNodeList[inode].resize(len);
     }
 
     this->boundaryFlag.resize(sides);
@@ -83,16 +80,7 @@ RefinedElement :: ~RefinedElement()
 IntArray *
 RefinedElement :: giveFineNodeArray(int node)
 {
-    if ( this->fineNodeList.includes(node) ) {
-        return this->fineNodeList.at(node);
-    }
-
-    /*
-     * else {
-     *   _errori ("giveNodeAssocFineNodeList: No such node list defined: ", node);
-     * }
-     */
-    return NULL;
+    return & this->fineNodeList[node-1];
 }
 
 
@@ -148,7 +136,7 @@ RefinedElement :: giveBoundaryFlagArray(int inode, Element *element, IntArray &a
         con = hexa_con_fc [ inode - 1 ];
         break;
     default:
-        _error("giveBoundaryFlagArray: Unsupported geometry type");
+        OOFEM_ERROR("Unsupported geometry type");
     }
 
     for ( i = 0; i < dim; i++ ) {
@@ -159,13 +147,13 @@ RefinedElement :: giveBoundaryFlagArray(int inode, Element *element, IntArray &a
 
 
 bool
-RefinedElement :: giveBcDofArray1D(int inode, Element *element, IntArray *sideBcDofId, int &sideNumBc, TimeStep *tStep)
+RefinedElement :: giveBcDofArray1D(int inode, Element *element, IntArray &sideBcDofId, int &sideNumBc, TimeStep *tStep)
 {
     static int edge_con_nd [ 2 ] = {
         2, 1
     };
 
-    int idof, nodeNumBc;
+    int nodeNumBc;
     Node *node;
     IntArray nodeBcDofId;
 
@@ -173,9 +161,9 @@ RefinedElement :: giveBcDofArray1D(int inode, Element *element, IntArray *sideBc
 
     nodeNumBc = 0;
     nodeBcDofId.resize( node->giveNumberOfDofs() );
-    for ( idof = 1; idof <= node->giveNumberOfDofs(); idof++ ) {
-        if ( node->giveDof(idof)->hasBc(tStep) != 0 ) {
-            nodeBcDofId.at(++nodeNumBc) = idof;
+    for ( Dof *dof: *node ) {
+        if ( dof->hasBc(tStep) != 0 ) {
+            nodeBcDofId.at(++nodeNumBc) = dof->giveDofID();
         }
     }
 
@@ -190,7 +178,7 @@ RefinedElement :: giveBcDofArray1D(int inode, Element *element, IntArray *sideBc
 
 
 bool
-RefinedElement :: giveBcDofArray2D(int inode, Element *element, AList< IntArray > &sideBcDofIdList, IntArray &sideNumBc, TimeStep *tStep)
+RefinedElement :: giveBcDofArray2D(int inode, Element *element, std::vector< IntArray > &sideBcDofIdList, IntArray &sideNumBc, TimeStep *tStep)
 {
     /* note: ordering of connected nodes is given by fine node ordering {m = 0, n = 0};
      * 1-based indexing is used contrary to 0-based indexing in refinedmesh.C */
@@ -198,7 +186,7 @@ RefinedElement :: giveBcDofArray2D(int inode, Element *element, AList< IntArray 
     static int face_con_nd [ 3 ] [ 2 ] = { { 3, 2 }, { 1, 3 }, { 2, 1 } };
     static int quad_con_nd [ 4 ] [ 2 ] = { { 4, 2 }, { 1, 3 }, { 2, 4 }, { 3, 1 } };
 
-    int idof, *con = NULL, iside, nodeNumBc;
+    int *con = NULL, iside, nodeNumBc;
     Node *node;
     IntArray nodeBcDofId;
 
@@ -206,9 +194,9 @@ RefinedElement :: giveBcDofArray2D(int inode, Element *element, AList< IntArray 
 
     nodeNumBc = 0;
     nodeBcDofId.resize( node->giveNumberOfDofs() );
-    for ( idof = 1; idof <= node->giveNumberOfDofs(); idof++ ) {
-        if ( node->giveDof(idof)->hasBc(tStep) != 0 ) {
-            nodeBcDofId.at(++nodeNumBc) = idof;
+    for ( Dof *dof: *node ) {
+        if ( dof->hasBc(tStep) != 0 ) {
+            nodeBcDofId.at(++nodeNumBc) = dof->giveDofID();
         }
     }
 
@@ -226,13 +214,13 @@ RefinedElement :: giveBcDofArray2D(int inode, Element *element, AList< IntArray 
         con = quad_con_nd [ inode - 1 ];
         break;
     default:
-        _error("giveBcDofArray2D: Unsupported geometry type");
+        OOFEM_ERROR("Unsupported geometry type");
     }
 
     for ( iside = 0; iside < 2; iside++ ) {
         sideNumBc.at(iside + 1) = this->giveCompatibleBcDofArray(element->giveNode(con [ iside ]),
                                                                  node, nodeBcDofId, nodeNumBc,
-                                                                 sideBcDofIdList.at(iside + 1),
+                                                                 sideBcDofIdList[iside],
                                                                  VM_Total, tStep);
     }
 
@@ -241,8 +229,8 @@ RefinedElement :: giveBcDofArray2D(int inode, Element *element, AList< IntArray 
 
 
 bool
-RefinedElement :: giveBcDofArray3D(int inode, Element *element, AList< IntArray > &sideBcDofIdList, IntArray &sideNumBc,
-                                   AList< IntArray > &faceBcDofIdList, IntArray &faceNumBc, TimeStep *tStep)
+RefinedElement :: giveBcDofArray3D(int inode, Element *element, std::vector< IntArray > &sideBcDofIdList, IntArray &sideNumBc,
+                                   std::vector< IntArray > &faceBcDofIdList, IntArray &faceNumBc, TimeStep *tStep)
 {
     /* note: ordering of connected nodes is given by fine node ordering {n = k = 0, m = k = 0, m = n = 0};
      * 1-based indexing is used contrary to 0-based indexing in refinedmesh.C */
@@ -263,7 +251,7 @@ RefinedElement :: giveBcDofArray3D(int inode, Element *element, AList< IntArray 
     static int tetra_fc_nd [ 4 ] [ 3 ] = { { 1, 2, 3 }, { 1, 2, 4 }, { 2, 3, 4 }, { 3, 1, 4 } };
     static int hexa_fc_nd [ 6 ] [ 4 ] = { { 1, 2, 3, 4 }, { 1, 2, 6, 5 }, { 2, 3, 7, 6 }, { 3, 4, 8, 7 }, { 4, 1, 5, 8 }, { 8, 7, 6, 5 } };
 
-    int i, j, idof, *con = NULL, iside, iface, jnode, nodeNumBc, fcNumBc;
+    int *con = NULL, iside, iface, jnode, nodeNumBc, fcNumBc;
     Node *node;
     IntArray nodeBcDofId, faceBcDofId;
     bool hasBc = false;
@@ -272,9 +260,9 @@ RefinedElement :: giveBcDofArray3D(int inode, Element *element, AList< IntArray 
 
     nodeNumBc = 0;
     nodeBcDofId.resize( node->giveNumberOfDofs() );
-    for ( idof = 1; idof <= node->giveNumberOfDofs(); idof++ ) {
-        if ( node->giveDof(idof)->hasBc(tStep) != 0 ) {
-            nodeBcDofId.at(++nodeNumBc) = idof;
+    for ( Dof *dof: *node ) {
+        if ( dof->hasBc(tStep) != 0 ) {
+            nodeBcDofId.at(++nodeNumBc) = dof->giveDofID();
         }
     }
 
@@ -292,13 +280,13 @@ RefinedElement :: giveBcDofArray3D(int inode, Element *element, AList< IntArray 
         con = hexa_con_nd [ inode - 1 ];
         break;
     default:
-        _error("giveBcDofArray3D: Unsupported geometry type");
+        OOFEM_ERROR("Unsupported geometry type");
     }
 
     for ( iside = 0; iside < 3; iside++ ) {
         sideNumBc.at(iside + 1) = this->giveCompatibleBcDofArray(element->giveNode(con [ iside ]),
                                                                  node, nodeBcDofId, nodeNumBc,
-                                                                 sideBcDofIdList.at(iside + 1),
+                                                                 sideBcDofIdList[iside],
                                                                  VM_Total, tStep);
         if ( sideNumBc.at(iside + 1) != 0 ) {
             hasBc = true;
@@ -312,24 +300,24 @@ RefinedElement :: giveBcDofArray3D(int inode, Element *element, AList< IntArray 
         case EGT_tetra_1:
             //  case EGT_tetra_2:
 
-            for ( i = 0; i < 3; i++ ) {        // there are always 3 faces at a node
+            for ( int i = 0; i < 3; i++ ) {        // there are always 3 faces at a node
                 iface = tetra_con_fc [ inode - 1 ] [ i ];
                 fcNumBc = nodeNumBc;
-                for ( idof = 1; idof <= fcNumBc; idof++ ) {
+                for ( int idof = 1; idof <= fcNumBc; idof++ ) {
                     faceBcDofId.at(idof) = nodeBcDofId.at(idof);
                 }
 
-                for ( j = 0; j < 3; j++ ) {    // there 3 nodes per face
+                for ( int j = 0; j < 3; j++ ) {    // there 3 nodes per face
                     jnode = tetra_fc_nd [ iface - 1 ] [ j ];
                     if ( jnode == inode ) {
                         continue;
                     }
 
                     fcNumBc = this->giveCompatibleBcDofArray(element->giveNode(jnode), node, faceBcDofId, fcNumBc,
-                                                             faceBcDofIdList.at(i + 1),
+                                                             faceBcDofIdList[i],
                                                              VM_Total, tStep);
-                    for ( idof = 1; idof <= fcNumBc; idof++ ) {
-                        faceBcDofId.at(idof) = faceBcDofIdList.at(i + 1)->at(idof);
+                    for ( int idof = 1; idof <= fcNumBc; idof++ ) {
+                        faceBcDofId.at(idof) = faceBcDofIdList[i].at(idof);
                     }
                 }
 
@@ -340,24 +328,24 @@ RefinedElement :: giveBcDofArray3D(int inode, Element *element, AList< IntArray 
         case EGT_hexa_1:
             //  case EGT_hexa_2:
 
-            for ( i = 0; i < 3; i++ ) {        // there are always 3 faces at a node
+            for ( int i = 0; i < 3; i++ ) {        // there are always 3 faces at a node
                 iface = hexa_con_fc [ inode - 1 ] [ i ];
                 fcNumBc = nodeNumBc;
-                for ( idof = 1; idof <= fcNumBc; idof++ ) {
+                for ( int idof = 1; idof <= fcNumBc; idof++ ) {
                     faceBcDofId.at(idof) = nodeBcDofId.at(idof);
                 }
 
-                for ( j = 0; j < 4; j++ ) {    // there 4 nodes per face
+                for ( int j = 0; j < 4; j++ ) {    // there 4 nodes per face
                     jnode = hexa_fc_nd [ iface - 1 ] [ j ];
                     if ( jnode == inode ) {
                         continue;
                     }
 
                     fcNumBc = this->giveCompatibleBcDofArray(element->giveNode(jnode), node, faceBcDofId, fcNumBc,
-                                                             faceBcDofIdList.at(i + 1),
+                                                             faceBcDofIdList[i],
                                                              VM_Total, tStep);
-                    for ( idof = 1; idof <= fcNumBc; idof++ ) {
-                        faceBcDofId.at(idof) = faceBcDofIdList.at(i + 1)->at(idof);
+                    for ( int idof = 1; idof <= fcNumBc; idof++ ) {
+                        faceBcDofId.at(idof) = faceBcDofIdList[i].at(idof);
                     }
                 }
 
@@ -366,7 +354,7 @@ RefinedElement :: giveBcDofArray3D(int inode, Element *element, AList< IntArray 
 
             break;
         default:
-            _error("giveBcDofArray3D: Unsupported geometry type");
+            OOFEM_ERROR("Unsupported geometry type");
         }
     }
 
@@ -413,7 +401,7 @@ RefinedElement :: giveBoundaryLoadArray1D(int inode, Element *element, IntArray 
 
 
 bool
-RefinedElement :: giveBoundaryLoadArray2D(int inode, Element *element, AList< IntArray > &boundaryLoadList)
+RefinedElement :: giveBoundaryLoadArray2D(int inode, Element *element, std::vector< IntArray > &boundaryLoadList)
 {
     /* note: number of connected edges must correspond to OOFEM element side numbering;
      * ordering of edges at a particular node is given by fine node ordering {m = 0, n = 0};
@@ -427,7 +415,7 @@ RefinedElement :: giveBoundaryLoadArray2D(int inode, Element *element, AList< In
     };                                                           // {m = 0, n = 0}
 
     int iside, iload, loads, bloads, side, *con = NULL;
-    IntArray *loadArray, *boundaryLoadArray;
+    IntArray *loadArray;
 
     if ( ( loads = ( loadArray = element->giveBoundaryLoadArray() )->giveSize() ) == 0 ) {
         return false;
@@ -450,12 +438,12 @@ RefinedElement :: giveBoundaryLoadArray2D(int inode, Element *element, AList< In
         con = quad_con_ed [ inode - 1 ];
         break;
     default:
-        _error("giveBoundaryLoadArray2D: Unsupported geometry type");
+        OOFEM_ERROR("Unsupported geometry type");
     }
 
     for ( iside = 0; iside < 2; iside++ ) {
-        boundaryLoadArray = boundaryLoadList.at(iside + 1);
-        boundaryLoadArray->resize(loads);
+        IntArray &boundaryLoadArray = boundaryLoadList[iside];
+        boundaryLoadArray.resize(loads);
         bloads = 0;
 
         side = con [ iside ];
@@ -465,11 +453,11 @@ RefinedElement :: giveBoundaryLoadArray2D(int inode, Element *element, AList< In
             }
 
             bloads += 2;
-            boundaryLoadArray->at(bloads - 1) = loadArray->at(iload);
-            boundaryLoadArray->at(bloads) = fine_quad_side [ iside ];
+            boundaryLoadArray.at(bloads - 1) = loadArray->at(iload);
+            boundaryLoadArray.at(bloads) = fine_quad_side [ iside ];
         }
 
-        boundaryLoadArray->resize(bloads);
+        boundaryLoadArray.resize(bloads);
     }
 
     return true;
@@ -478,7 +466,7 @@ RefinedElement :: giveBoundaryLoadArray2D(int inode, Element *element, AList< In
 
 
 bool
-RefinedElement :: giveBoundaryLoadArray3D(int inode, Element *element, AList< IntArray > &boundaryLoadList)
+RefinedElement :: giveBoundaryLoadArray3D(int inode, Element *element, std::vector< IntArray > &boundaryLoadList)
 {
     /* note: number of connected faces must correspond to OOFEM element side numbering;
      * ordering of faces at a particular node is given by fine node ordering {m = 0, n = 0, k = 0};
@@ -492,7 +480,7 @@ RefinedElement :: giveBoundaryLoadArray3D(int inode, Element *element, AList< In
     };                                                           // {m = 0, n = 0, k = 0}
 
     int iside, iload, loads, bloads, side, *con = NULL;
-    IntArray *loadArray, *boundaryLoadArray;
+    IntArray *loadArray;
 
     if ( ( loads = ( loadArray = element->giveBoundaryLoadArray() )->giveSize() ) == 0 ) {
         return false;
@@ -515,12 +503,12 @@ RefinedElement :: giveBoundaryLoadArray3D(int inode, Element *element, AList< In
         con = hexa_con_fc [ inode - 1 ];
         break;
     default:
-        _error("giveBoundaryLoadArray3D: Unsupported geometry type");
+        OOFEM_ERROR("Unsupported geometry type");
     }
 
     for ( iside = 0; iside < 3; iside++ ) {
-        boundaryLoadArray = boundaryLoadList.at(iside + 1);
-        boundaryLoadArray->resize(loads);
+        IntArray &boundaryLoadArray = boundaryLoadList[iside];
+        boundaryLoadArray.resize(loads);
         bloads = 0;
 
         side = con [ iside ];
@@ -530,21 +518,20 @@ RefinedElement :: giveBoundaryLoadArray3D(int inode, Element *element, AList< In
             }
 
             bloads += 2;
-            boundaryLoadArray->at(bloads - 1) = loadArray->at(iload);
-            boundaryLoadArray->at(bloads) = fine_hexa_side [ iside ];
+            boundaryLoadArray.at(bloads - 1) = loadArray->at(iload);
+            boundaryLoadArray.at(bloads) = fine_hexa_side [ iside ];
         }
 
-        boundaryLoadArray->resize(bloads);
+        boundaryLoadArray.resize(bloads);
     }
 
     return true;
 }
 
 int
-RefinedElement :: giveCompatibleBcDofArray(Node *master_node, Node *slave_node, IntArray &dofArray, int dofs,
-                                           IntArray *answer, ValueModeType mode, TimeStep *tStep)
+RefinedElement :: giveCompatibleBcDofArray(Node *master_node, Node *slave_node, IntArray &dofIDArray, int dofs,
+                                           IntArray &answer, ValueModeType mode, TimeStep *tStep)
 {
-    Dof *dof, *nodeDof;
     FloatMatrix *Lcs, *nodeLcs, trFromNodeLcsToLcs;
     bool compatibleCS, newLcs, newNodeLcs;
     double epsilon = 1.0e-9;
@@ -593,15 +580,15 @@ RefinedElement :: giveCompatibleBcDofArray(Node *master_node, Node *slave_node, 
         }
     }
 
-    answer->resize(dofs);
+    answer.resize(dofs);
 
     if ( compatibleCS == true ) {
         for ( int i = 1; i <= dofs; i++ ) {
-            nodeDof = slave_node->giveDof( dofArray.at(i) );
+            Dof *nodeDof = slave_node->giveDofWithID( dofIDArray.at(i) );
 
 #ifdef DEBUG
             if ( nodeDof->hasBc(tStep) == false ) {
-                _error("extractCompatibleBcDof: dof has no BC");
+                OOFEM_ERROR("dof has no BC");
             }
 
 #endif
@@ -610,8 +597,7 @@ RefinedElement :: giveCompatibleBcDofArray(Node *master_node, Node *slave_node, 
             bcId = nodeDof->giveBcId();
             bcValue = nodeDof->giveBcValue(mode, tStep);
 
-            for ( int j = 1; j <= master_node->giveNumberOfDofs(); j++ ) {
-                dof = master_node->giveDof(j);
+            for ( Dof *dof: *master_node ) {
                 if ( dof->hasBc(tStep) == false ) {
                     continue;
                 }
@@ -621,12 +607,12 @@ RefinedElement :: giveCompatibleBcDofArray(Node *master_node, Node *slave_node, 
                 }
 
                 if ( dof->giveBcId() == bcId ) {
-                    answer->at(++compDofs) = dofArray.at(i);
+                    answer.at(++compDofs) = dofIDArray.at(i);
                     break;
                 }
 
                 if ( dof->giveBcValue(mode, tStep) == bcValue ) {
-                    answer->at(++compDofs) = dofArray.at(i);
+                    answer.at(++compDofs) = dofIDArray.at(i);
                     break;
                 }
             }
@@ -642,41 +628,14 @@ RefinedElement :: giveCompatibleBcDofArray(Node *master_node, Node *slave_node, 
      * }
      */
 
-    answer->resize(compDofs);
+    answer.resize(compDofs);
 
     return ( compDofs );
 }
 
 
-/*
- *
- * int element -> giveNode(1) -> giveNumberOfDofs()
- * Dof* element -> giveNode(1) -> giveDof(1)
- * int element -> giveNode(1) -> giveDof(1) -> hasBc(tStep)
- * int element -> giveNode(1) -> giveDof(1) -> hasIc(tStep)
- * int element -> giveNode(1) -> giveDof(1) -> giveBcIdValue()
- * double element -> giveNode(1) -> giveDof(1) -> giveBcValue(UnknownMode_Total, tStep)
- * DofIDItem element -> giveNode(1) -> giveDof(1) -> giveDofID()
- *
- * int element -> giveNode(1) -> hasLocalCS()
- * FloatMatrix* element -> giveNode(1) -> giveLocalCoordinateTriplet ()
- * prvni dva radky je normalizovany vstup za lcs
- *
- * BoundaryCondition* = element -> giveNode(1) -> giveDof(1) -> giveBc()
- * InitialCondition* = element -> giveNode(1) -> giveDof(1) -> giveIc()
- *
- * int element -> giveNode(1) -> giveDof(1) -> giveBc() -> isImposed(tStep)
- */
-
-void RefinedElement :: error(const char *file, int line, const char *format, ...) const
+std :: string RefinedElement :: errorInfo(const char *func) const
 {
-    char buffer [ MAX_ERROR_MSG_LENGTH ];
-    va_list args;
-
-    va_start(args, format);
-    vsprintf(buffer, format, args);
-    va_end(args);
-
-    __OOFEM_ERROR3(file, line, "Class: RefinedElement, number: %d\n%s", this->elementId, buffer);
+    return std :: string("RefinedElement::") + func + ", number: " + std::to_string(this->elementId);
 }
 } // end namespace oofem

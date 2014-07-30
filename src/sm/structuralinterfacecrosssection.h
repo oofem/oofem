@@ -65,7 +65,7 @@ public:
      * @param n Cross section number.
      * @param d Domain to which new cross section will belong.
      */
-    StructuralInterfaceCrossSection(int n, Domain *d) : CrossSection(n, d)
+    StructuralInterfaceCrossSection(int n, Domain * d) : CrossSection(n, d)
     {
         materialNum = 0;
         crossSectionType = CS_StructuralInterfaceCapability;

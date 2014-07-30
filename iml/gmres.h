@@ -64,15 +64,6 @@ Update(Vector &x, int k, Matrix &h, Vector &s, Vector v[])
     x += v[j] * y(j);
 }
 
-
-template < class Real >
-Real 
-abs(Real x)
-{
-  return (x > 0 ? x : -x);
-}
-
-
 template < class Operator, class Vector, class Preconditioner,
            class Matrix, class Real >
 int 
@@ -120,7 +111,7 @@ GMRES(const Operator &A, Vector &x, const Vector &b,
       ApplyPlaneRotation(H(i,i), H(i+1,i), cs(i), sn(i));
       ApplyPlaneRotation(s(i), s(i+1), cs(i), sn(i));
       
-      if ((resid = abs(s(i+1)) / normb) < tol) {
+      if ((resid = fabs(s(i+1)) / normb) < tol) {
         Update(x, i, H, s, v);
         tol = resid;
         max_iter = j;

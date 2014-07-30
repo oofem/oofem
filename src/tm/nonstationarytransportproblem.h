@@ -95,7 +95,7 @@ protected:
 
 public:
     /// Constructor.
-    NonStationaryTransportProblem(int i, EngngModel *_master);
+    NonStationaryTransportProblem(int i, EngngModel * _master);
     /// Destructor.
     virtual ~NonStationaryTransportProblem();
 
@@ -154,7 +154,7 @@ public:
 #endif
 
 protected:
-    virtual void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut,
+    virtual void assembleAlgorithmicPartOfRhs(FloatArray &rhs,
                                               const UnknownNumberingScheme &s, TimeStep *tStep);
 
     /**
@@ -167,14 +167,13 @@ protected:
      * Assembles part of RHS due to Dirichlet boundary conditions.
      * @param answer Global vector where the contribution will be added.
      * @param tStep Solution step.
-     * @param eid Equation ID.
      * @param mode Mode of result.
      * @param lhsType Type of element matrix to be multiplied by vector of prescribed.
      * The giveElementCharacteristicMatrix service is used to get/compute element matrix.
      * @param s A map of non-default equation numbering if required.
      * @param d Domain.
      */
-    virtual void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, EquationID eid, ValueModeType mode,
+    virtual void assembleDirichletBcRhsVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode,
                                               CharType lhsType, const UnknownNumberingScheme &s, Domain *d);
 
     /**

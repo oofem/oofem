@@ -38,21 +38,20 @@
 #include "femcmpnn.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
-
-#include "alist.h"
 #include "intarray.h"
 #include "error.h"
 #include "integrationrule.h"
 #include "chartype.h"
 #include "elementgeometrytype.h"
-#include "equationid.h"
 #include "valuemodetype.h"
+#include "internalstatemode.h"
 #include "internalstatetype.h"
 #include "internalstatevaluetype.h"
 #include "elementextension.h"
 #include "entityrenumberingscheme.h"
 #include "unknowntype.h"
 #include "unknownnumberingscheme.h"
+#include "domain.h"
 
 #ifdef __OOFEG
  #include "node.h"
@@ -161,8 +160,6 @@ protected:
      * that apply on receiver.
      */
     IntArray bodyLoadArray, boundaryLoadArray;
-    /// Number of integration rules used by receiver.
-    int numberOfIntegrationRules;
     /**
      * List of integration rules of receiver (each integration rule contains associated
      * integration points also). This list should contain only such integration rules,
@@ -172,7 +169,7 @@ protected:
      * (mass matrix integration) and different integration rule is needed, one should preferably
      * use temporarily created integration rule.
      */
-    IntegrationRule **integrationRulesArray;
+    std::vector< IntegrationRule * > integrationRulesArray;
 
     /// Transformation material matrix, used in orthotropic and anisotropic materials, global->local transformation
     FloatMatrix elemLocalCS;
@@ -207,7 +204,7 @@ public:
      * @param n Element's number
      * @param aDomain Pointer to the domain to which element belongs.
      */
-    Element(int n, Domain *aDomain);
+    Element(int n, Domain * aDomain);
     /// Virtual destructor.
     virtual ~Element();
 
@@ -217,13 +214,13 @@ public:
      * Returns the location array (array of code numbers) of receiver for given numbering scheme.
      * Results are cached at receiver for default scheme in locationArray attribute.
      */
-    void giveLocationArray(IntArray & locationArray, EquationID, const UnknownNumberingScheme & s, IntArray * dofIds = NULL) const;
+    void giveLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) const;
     void giveLocationArray(IntArray &locationArray, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL) const;
     /**
      * Returns the location array for the boundary of the element.
      * Only takes into account nodes in the bNodes vector.
      */
-    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, EquationID eid, const UnknownNumberingScheme &s, IntArray *dofIds = NULL);
+    void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const UnknownNumberingScheme &s, IntArray *dofIds = NULL);
     void giveBoundaryLocationArray(IntArray &locationArray, const IntArray &bNodes, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds = NULL);
     /**
      * @return Number of DOFs in element.
@@ -239,7 +236,7 @@ public:
      * @return DOF number i.
      */
     virtual DofManager *giveInternalDofManager(int i) const {
-        _error2("No such DOF available on Element %d", number);
+        OOFEM_ERROR("No such DOF available on Element %d", number);
         return NULL;
     }
     //@}
@@ -330,21 +327,22 @@ public:
      * should be able return supported unknowns at current and previous time step. Consult
      * reference manual for particular engineering model.
      *
-     * @param type   Identifies unknown type (eg. displacement or temperature vector).
+     * @param dofIDMask Dof IDs for unknowns.
      * @param u      Identifies mode of unknown (eg. total value or velocity of unknown).
      * @param tStep  Time step, when vector of unknowns is requested.
      * @param answer Local vector of unknowns.
      */
-    virtual void computeVectorOf(EquationID type, ValueModeType u, TimeStep *tStep, FloatArray &answer);
+    void computeVectorOf(ValueModeType u, TimeStep *tStep, FloatArray &answer);
+    void computeVectorOf(const IntArray &dofIDMask, ValueModeType u, TimeStep *tStep, FloatArray &answer, bool padding = false);
     /**
      * Boundary version of computeVectorOf.
      * @param bNodes Boundary nodes.
-     * @param eid Equation ID for unknowns.
+     * @param dofIDMask Dof IDs for unknowns.
      * @param u Identifies mode of unknown (eg. total value or velocity of unknown).
      * @param tStep Time step, when vector of unknowns is requested.
      * @param answer Local vector of unknowns.
      */
-    virtual void computeBoundaryVectorOf(const IntArray &bNodes, EquationID eid, ValueModeType u, TimeStep *tStep, FloatArray &answer);
+    void computeBoundaryVectorOf(const IntArray &bNodes, const IntArray &dofIDMask, ValueModeType u, TimeStep *tStep, FloatArray &answer, bool padding = false);
     /**
      * Returns local vector of unknowns. Local vector of unknowns is extracted from
      * given field and from boundary conditions (if dof has active boundary
@@ -352,22 +350,23 @@ public:
      * model, this must support queries for given unknown.
      *
      * @param field  Source field (eg. displacement or temperature vector).
-     * @param u      Value mode of unknown (incremental, total, ...).
-     * @param tStep  Time step, when vector of unknowns is requested.
+     * @param dofIDMask Dof IDs for unknowns.
+     * @param u Value mode of unknown (incremental, total, ...).
+     * @param tStep Time step, when vector of unknowns is requested.
      * @param answer Local vector of unknowns.
      */
-    virtual void computeVectorOf(PrimaryField &field, ValueModeType u, TimeStep *tStep, FloatArray &answer);
+    void computeVectorOf(PrimaryField &field, const IntArray &dofIDMask, ValueModeType u, TimeStep *tStep, FloatArray &answer, bool padding = false);
     /**
      * Returns local vector of prescribed unknowns. Local vector of prescribed unknowns is
      * extracted from nodal (and side - if they hold unknowns) boundary conditions.
      *
-     * @param ut     Identifies mode of unknown (eg. total values or velocity of unknown).
-     * @param type   Value mode of unknown (incremental, total, ...).
-     * @param tStep  Time step, when vector of prescribed unknowns is requested.
+     * @param dofIDMask Dof IDs for unknowns.
+     * @param ut Identifies mode of unknown (eg. total values or velocity of unknown).
+     * @param tStep Time step, when vector of prescribed unknowns is requested.
      * @param answer Local vector of prescribed unknowns. If unknown is not prescribed,
      * zero value is placed on position of free dof.
      */
-    void computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *tStep, FloatArray &answer);
+    void computeVectorOfPrescribed(const IntArray &dofIDMask, ValueModeType type, TimeStep *tStep, FloatArray &answer);
 
     /**
      * Computes or simply returns total number of element's local DOFs.
@@ -383,10 +382,9 @@ public:
     virtual int computeNumberOfGlobalDofs();
     /**
      * Computes the total number of element's primary master DOFs.
-     * @param eid ID of equation that DOFs belong to.
      * @return Total number of DOFs belonging to eid.
      */
-    int computeNumberOfPrimaryMasterDofs(EquationID eid);
+    int computeNumberOfPrimaryMasterDofs();
     /**
      * Returns transformation matrix from global c.s. to local element
      * c.s., i.e. @f$ r_l =T r_g @f$.
@@ -399,10 +397,9 @@ public:
      * Transformation matrices updates rotation matrix between element-local and primary DOFs,
      * taking into account nodal c.s. and master DOF weights.
      * @param answer Contains the rotation matrix on exit.
-     * @param eid Equation ID to compute rotation matrix for.
      * @return True if there is a rotation required, false otherwise.
      */
-    virtual bool giveRotationMatrix(FloatMatrix &answer, EquationID eid);
+    virtual bool giveRotationMatrix(FloatMatrix &answer);
     /**
      * Returns transformation matrix for DOFs from global coordinate system
      * to local coordinate system in nodes.
@@ -413,10 +410,9 @@ public:
      * @param answer Computed rotation matrix.
      * @param nodes Nodes to include in element local ordering.
      * @param includeInternal Determines whether or not to include internal dof managers.
-     * @param eid Equation ID.
      * @return True if transformation is necessary, false otherwise.
      */
-    virtual bool computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &nodes, bool includeInternal, EquationID eid);
+    virtual bool computeDofTransformationMatrix(FloatMatrix &answer, const IntArray &nodes, bool includeInternal);
     /**
      * Returns dofmanager dof mask for node. This mask defines the dofs which are used by element
      * in node. Mask influences the code number ordering for particular node. Code numbers are
@@ -427,15 +423,9 @@ public:
      * this mask. Must be defined by particular element.
      *
      * @param inode  Mask is computed for local dofmanager with inode number.
-     * @param ut     Equation DOFs belong to.
      * @param answer Mask for node.
      */
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const { answer.resize(0); }
-    /**
-     * Calls giveDofManDofIDMask with the default equation id for the type of problem.
-     * @todo Cant have a pure virtual method because of the hacks in HellmichMaterial :: createMaterialGp()
-     */
-    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { }
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const { answer.clear(); }
     /**
      * Returns internal  dofmanager dof mask for node. This mask defines the dofs which are used by element
      * in node. Mask influences the code number ordering for particular node. Code numbers are
@@ -446,15 +436,10 @@ public:
      * this mask. Must be defined by particular element.
      *
      * @param inode Mask is computed for local dofmanager with inode number.
-     * @param ut Unknown type (support for several independent numberings within problem)
      * @param answer mask for node.
      */
-    virtual void giveInternalDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
-    { answer.resize(0); }
-    /**
-     * Calls giveInternalDofManDofIDMask with the default equation id for the type of problem.
-     */
-    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { answer.resize(0); }
+    virtual void giveInternalDofManDofIDMask(int inode, IntArray &answer) const
+    { answer.clear(); }
     /**
      * Returns element dof mask for node. This mask defines the dof ordering of the element interpolation.
      * Must be defined by particular element.
@@ -462,7 +447,7 @@ public:
      * @param ut Equation DOFs belong to.
      * @param answer DOF mask for receiver.
      */
-    virtual void giveElementDofIDMask(EquationID ut, IntArray &answer) const { answer.resize(0); }
+    virtual void giveElementDofIDMask(IntArray &answer) const { this->giveDofManDofIDMask(1, answer); }
     /**
      * Returns volume related to given integration point. Used typically in subroutines,
      * that perform integration over element volume. Should be implemented by particular
@@ -473,7 +458,7 @@ public:
      */
     virtual double computeVolumeAround(GaussPoint *gp) { return 0.; }
     /// Computes the volume, area or length of the element depending on its spatial dimension.
-    double computeVolumeAreaOrLength();
+    virtual double computeVolumeAreaOrLength();
     /**
      * Computes the size of the element defined as its length.
      * @return Length, square root of area or cube root of volume (depending on spatial dimension).
@@ -516,7 +501,7 @@ public:
      */
     int giveDofManagerNumber(int i) const { return dofManArray.at(i); }
     /// @return Receivers list of dof managers.
-    IntArray &giveDofManArray() { return dofManArray; }
+    const IntArray &giveDofManArray() const { return dofManArray; }
     /**
      * @param i Local index of the dof manager in element.
      * @return The i-th dofmanager of element.
@@ -534,7 +519,16 @@ public:
      * @param i Local index of node in element.
      * @return Requested node.
      */
-    virtual Node *giveNode(int i) const;
+    inline Node *giveNode(int i) const
+    {
+#ifdef DEBUG
+        if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
+            OOFEM_ERROR("Node is not defined");
+        }
+#endif
+        return domain->giveNode( dofManArray.at(i) );
+    }
+
     /**
      * Returns reference to the i-th side  of element.
      * Default implementation returns i-th dofmanager of element converted to
@@ -554,18 +548,15 @@ public:
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const { return giveInterpolation(); }
     /// @return Reference to the associated material of element.
     Material *giveMaterial();
+    /// @return Material number.
+    int giveMaterialNumber() const {return material;}
     /// @return Reference to the associated crossSection of element.
     CrossSection *giveCrossSection();
-    /**
-     * Sets the material of receiver.
-     * @param matIndx Index of new material.
-     */
-    void setMaterial(int matIndx) { this->material = matIndx; }
     /**
      * Sets the cross section model of receiver.
      * @param csIndx Index of new cross section.
      */
-    void setCrossSection(int csIndx) { this->crossSection = csIndx; }
+    virtual void setCrossSection(int csIndx) { this->crossSection = csIndx; }
 
     /// @return Number of dofmanagers of receiver.
     int giveNumberOfDofManagers() const { return numberOfDofMans; }
@@ -585,7 +576,7 @@ public:
      * Sets integration rules.
      * @param irlist List of integration rules.
      */
-    void setIntegrationRules(AList< IntegrationRule > *irlist);
+    void setIntegrationRules(const std :: vector< IntegrationRule * > &irlist);
     /**
      * Returns integration domain for receiver, used to initialize
      * integration point over receiver volume.
@@ -604,8 +595,9 @@ public:
      * by collecting the code numbers of nodes corresponding to these
      * shape functions.
      * @return Nonzero if integration rule code numbers differ from element code numbers.
+     * @todo This is currently not used. It is intended for IGA elements? This seems redundant.
      */
-    virtual int giveIntegrationRuleLocalCodeNumbers(IntArray &answer, IntegrationRule *ie, EquationID ut)
+    virtual int giveIntegrationRuleLocalCodeNumbers(IntArray &answer, IntegrationRule *ie)
     { return 0; }
 
     // Returns number of sides (which have unknown dofs) of receiver
@@ -723,7 +715,7 @@ public:
         }
     }
     /// @return Number of integration rules for element.
-    int giveNumberOfIntegrationRules() { return this->numberOfIntegrationRules; }
+    int giveNumberOfIntegrationRules() { return (int)this->integrationRulesArray.size(); }
     /**
      * @param i Index of integration rule.
      * @return Requested integration rule.
@@ -750,6 +742,7 @@ public:
      * @return Nonzero if o.k, zero otherwise.
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    int giveGlobalIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     // characteristic length in gp (for some material models)
     /**
@@ -841,7 +834,7 @@ public:
      * @param iTStep Time step.
      * @return Nonzero if o.k, otherwise zero.
      */
-    virtual int mapStateVariables(const Domain &iOldDom, const TimeStep &iTStep);
+    virtual int mapStateVariables(Domain &iOldDom, const TimeStep &iTStep);
     /**
      * Updates the internal state variables stored in all IPs according to
      * already mapped state.
@@ -867,9 +860,9 @@ public:
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
     /// Integration point evaluator, loops over receiver IP's and calls given function (passed as f parameter) on them. The IP is parameter to function f.
-    template< class T >void ipEvaluator( T * src, void ( T :: *f )( GaussPoint * gp ) );
+    template< class T > void ipEvaluator( T *src, void ( T :: *f )( GaussPoint *gp ) );
     /// Integration point evaluator, loops over receiver IP's and calls given function (passed as f parameter) on them. The IP is parameter to function f as well as additional array.
-    template< class T, class S >void ipEvaluator(T * src, void ( T :: *f )( GaussPoint *, S & ), S & _val);
+    template< class T, class S > void ipEvaluator(T *src, void ( T :: *f )( GaussPoint *, S & ), S &_val);
 
     //@}
 
@@ -916,7 +909,7 @@ public:
     virtual int giveInternalStateAtSide(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                         int side, TimeStep *tStep)
     {
-        answer.resize(0);
+        answer.clear();
         return 0;
     }
 
@@ -1028,7 +1021,7 @@ public:
 
 protected:
     /**
-     * Initializes the array of integration rules and numberOfIntegrationRules member variable.
+     * Initializes the array of integration rules member variable.
      * Element can have multiple integration rules for different tasks.
      * For example structural element family class uses this feature to implement
      * transparent support for reduced and selective integration of some strain components.
@@ -1038,31 +1031,21 @@ protected:
     virtual void computeGaussPoints() { }
 };
 
-template< class T >void
-Element :: ipEvaluator( T *src, void ( T :: *f )( GaussPoint * gp ) )
+template< class T > void
+Element :: ipEvaluator( T *src, void ( T :: *f )( GaussPoint *gp ) )
 {
-    int ir, ip, nip;
-    GaussPoint *gp;
-
-    for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        nip = integrationRulesArray [ ir ]->giveNumberOfIntegrationPoints();
-        for ( ip = 0; ip < nip; ip++ ) {
-            gp = integrationRulesArray [ ir ]->getIntegrationPoint(ip);
+    for ( auto &ir: integrationRulesArray ) {
+        for ( GaussPoint *gp: *ir ) {
             ( src->*f )(gp);
         }
     }
 }
 
-template< class T, class S >void
+template< class T, class S > void
 Element :: ipEvaluator(T *src, void ( T :: *f )( GaussPoint *, S & ), S &_val)
 {
-    int ir, ip, nip;
-    GaussPoint *gp;
-
-    for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        nip = integrationRulesArray [ ir ]->giveNumberOfIntegrationPoints();
-        for ( ip = 0; ip < nip; ip++ ) {
-            gp = integrationRulesArray [ ir ]->getIntegrationPoint(ip);
+    for ( auto &ir: integrationRulesArray ) {
+        for ( GaussPoint *gp: *ir ) {
             ( src->*f )(gp, _val);
         }
     }

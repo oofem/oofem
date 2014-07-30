@@ -40,30 +40,11 @@
 #include "contextioerr.h"
 
 namespace oofem {
-IntegrationRule :: iterator :: iterator(IntegrationRule *ir, int pos) : pos(pos), ir(ir) { }
-
-bool
-IntegrationRule :: iterator :: operator!=(const IntegrationRule :: iterator &other) const { return pos != other.pos; }
-
-GaussPoint &
-IntegrationRule :: iterator :: operator*() const { return * ( ir->getIntegrationPoint(pos) ); }
-
-const IntegrationRule :: iterator &
-IntegrationRule :: iterator :: operator++() { ++pos; return * this; }
-
-IntegrationRule :: iterator
-IntegrationRule :: begin() { return iterator(this, 0); }
-
-IntegrationRule :: iterator
-IntegrationRule :: end() { return iterator(this, this->numberOfIntegrationPoints); }
-
 
 IntegrationRule :: IntegrationRule(int n, Element *e, int startIndx, int endIndx, bool dynamic)
 {
     number = n;
     elem = e;
-    numberOfIntegrationPoints = 0;
-    gaussPointArray = NULL;
     firstLocalStrainIndx = startIndx;
     lastLocalStrainIndx  = endIndx;
     isDynamic = dynamic;
@@ -74,8 +55,6 @@ IntegrationRule :: IntegrationRule(int n, Element *e)
 {
     number = n;
     elem = e;
-    numberOfIntegrationPoints = 0;
-    gaussPointArray = NULL;
     firstLocalStrainIndx = lastLocalStrainIndx = 0;
     isDynamic = false;
     intdomain = _Unknown_integrationDomain;
@@ -91,16 +70,11 @@ IntegrationRule :: ~IntegrationRule()
 void
 IntegrationRule :: clear()
 {
-    if ( gaussPointArray ) {
-        for ( int i = 0; i < numberOfIntegrationPoints; i++ ) {
-            delete gaussPointArray [ i ];
-        }
-
-        delete[] gaussPointArray;
+    for ( GaussPoint *gp: *this ) {
+        delete gp;
     }
 
-    gaussPointArray = NULL;
-    numberOfIntegrationPoints = 0;
+    gaussPoints.clear();
 }
 
 
@@ -108,20 +82,37 @@ GaussPoint *
 IntegrationRule :: getIntegrationPoint(int i)
 {
 #  ifdef DEBUG
-    if ( ( i < 0 ) || ( i >= numberOfIntegrationPoints ) ) {
-        OOFEM_ERROR2("IntegrationRule::getIntegrationPoint - request out of bounds (%d)", i);
+    if ( ( i < 0 ) || ( i >= this->giveNumberOfIntegrationPoints() ) ) {
+        OOFEM_ERROR("request out of bounds (%d)", i);
     }
 
 #  endif
-    return gaussPointArray [ i ];
+    return gaussPoints [ i ];
 }
+
+
+GaussPoint *
+IntegrationRule :: findIntegrationPointClosestTo(const FloatArray &lcoord)
+{
+    double mindist = -1.;
+    GaussPoint *minGp = NULL;
+    for ( GaussPoint *gp: *this ) {
+        double dist = lcoord.distance_square(*gp->giveNaturalCoordinates());
+        if ( dist <= mindist || mindist < 0. ) {
+            mindist = dist;
+            minGp = gp;
+        }
+    }
+    return minGp;
+}
+
 
 void
 IntegrationRule :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
-    for ( int i = 0; i < numberOfIntegrationPoints; i++ ) {
-        gaussPointArray [ i ]->printOutputAt(file, tStep);
+    for ( GaussPoint *gp: *this ) {
+        gp->printOutputAt(file, tStep);
     }
 }
 
@@ -129,8 +120,8 @@ void
 IntegrationRule :: updateYourself(TimeStep *tStep)
 {
     // Updates the receiver at end of step.
-    for ( int i = 0; i < numberOfIntegrationPoints; i++ ) {
-        gaussPointArray [ i ]->updateYourself(tStep);
+    for ( GaussPoint *gp: *this ) {
+        gp->updateYourself(tStep);
     }
 }
 
@@ -143,8 +134,8 @@ IntegrationRule :: initForNewStep()
     //
     // call material->initGpForNewStep() for all GPs.
     //
-    for ( int i = 0; i < numberOfIntegrationPoints; i++ ) {
-        gaussPointArray [ i ]->giveMaterial()->initGpForNewStep(gaussPointArray [ i ]);
+    for ( GaussPoint *gp: *this ) {
+        gp->giveMaterial()->initGpForNewStep(gp);
     }
 }
 
@@ -160,7 +151,7 @@ IntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     contextIOResultType iores;
 
     if ( stream == NULL ) {
-        OOFEM_ERROR("saveContex : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     int isdyn = isDynamic;
@@ -173,6 +164,7 @@ IntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
     if ( mode & CM_Definition ) {
+        int numberOfIntegrationPoints = (int)this->gaussPoints.size();
         if ( !stream->write(& numberOfIntegrationPoints, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
@@ -187,8 +179,7 @@ IntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         }
     }
 
-    for ( int i = 0; i < numberOfIntegrationPoints; i++ ) {
-        GaussPoint *gp = gaussPointArray [ i ];
+    for ( GaussPoint *gp: *this ) {
         if ( mode & CM_Definition ) {
             // write gp weight, coordinates, element number, and material mode
             double dval = gp->giveWeight();
@@ -196,7 +187,7 @@ IntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *obj)
                 THROW_CIOERR(CIO_IOERR);
             }
 
-            if ( ( iores = gp->giveCoordinates()->storeYourself(stream, mode) ) != CIO_OK ) {
+            if ( ( iores = gp->giveNaturalCoordinates()->storeYourself(stream, mode) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
 
@@ -227,11 +218,10 @@ IntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, void *ob
 
     contextIOResultType iores;
     int size;
-    bool __create = false;
     //Element* __parelem = (Element*) obj;
 
     if ( stream == NULL ) {
-        OOFEM_ERROR("restoreContex : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     int isdyn;
@@ -259,15 +249,13 @@ IntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, void *ob
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( numberOfIntegrationPoints != size ) {
-            this->clear();
-            __create = true;
-            gaussPointArray = new GaussPoint * [ size ];
-            numberOfIntegrationPoints = size;
-        }
+        this->clear();
+        
+        this->gaussPoints.resize(size);
     }
 
-    for ( int i = 0; i < numberOfIntegrationPoints; i++ ) {
+    int i = 1;
+    for ( GaussPoint *gp: *this ) {
         if ( mode & CM_Definition ) {
             // read weight
             double w;
@@ -293,19 +281,11 @@ IntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, void *ob
             m = ( MaterialMode ) _m;
             // read dynamic flag
 
-            if ( __create ) {
-                gaussPointArray [ i ] = new GaussPoint(this, i + 1, ( new FloatArray(c) ), w, m);
-            } else {
-                GaussPoint *gp = gaussPointArray [ i ];
-                gp->setWeight(w);
-                gp->setCoordinates(c);
-                //gp->setElement (__parelem);
-                gp->setMaterialMode(m);
-            }
+            gp = new GaussPoint(this, i, ( new FloatArray ( c ) ), w, m);
+            i++;
         }
 
         // read gp data
-        GaussPoint *gp = gaussPointArray [ i ];
         if ( ( iores = gp->giveCrossSection()->restoreIPContext(stream, mode, gp) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -323,31 +303,30 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
 
     switch ( mode ) {
     case _Line:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnLine(nPoints, matMode) );
+        return  this->SetUpPointsOnLine(nPoints, matMode);
 
     case _Triangle:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnTriangle(nPoints, matMode) );
+        return  this->SetUpPointsOnTriangle(nPoints, matMode);
 
     case _Square:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnSquare(nPoints, matMode) );
+        return  this->SetUpPointsOnSquare(nPoints, matMode);
 
     case _Cube:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnCube(nPoints, matMode) );
+        return  this->SetUpPointsOnCube(nPoints, matMode);
 
     case _Tetrahedra:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOnTetrahedra(nPoints, matMode) );
+        return  this->SetUpPointsOnTetrahedra(nPoints, matMode);
 
     case _Wedge:
         // Limited wrapper for now;
         if ( nPoints == 6 ) {
-            numberOfIntegrationPoints = this->SetUpPointsOnWedge(3, 2, matMode);
+            return this->SetUpPointsOnWedge(3, 2, matMode);
         } else {
-            numberOfIntegrationPoints = this->SetUpPointsOnWedge(3, 3, matMode);
+            return this->SetUpPointsOnWedge(3, 3, matMode);
         }
-        return numberOfIntegrationPoints;
 
     default:
-        OOFEM_ERROR2("IntegrationRule::setUpIntegrationPoints - unknown mode (%d)", mode);
+        OOFEM_ERROR("unknown mode (%d)", mode);
     }
 
     return 0;
@@ -355,16 +334,19 @@ IntegrationRule :: setUpIntegrationPoints(integrationDomain mode, int nPoints,
 
 int
 IntegrationRule :: setUpEmbeddedIntegrationPoints(integrationDomain mode, int nPoints, MaterialMode matMode,
-                                                  const FloatArray **coords)
+                                                  const std :: vector< FloatArray > &coords)
 {
     intdomain = mode;
 
     switch ( mode ) {
     case _Embedded2dLine:
-        return  ( numberOfIntegrationPoints = this->SetUpPointsOn2DEmbeddedLine(nPoints, matMode, coords) );
+        if ( coords.size() != 2 ) {
+            OOFEM_ERROR("Exactly 2 coordinates are required for 2D embedded lines!");
+        }
+        return  this->SetUpPointsOn2DEmbeddedLine(nPoints, matMode, coords[0], coords[1]);
 
     default:
-        OOFEM_ERROR("IntegrationRule::setUpEmbeddedIntegrationPoints - unknown mode");
+        OOFEM_ERROR("unknown mode");
     }
 
     return 0;
@@ -373,11 +355,10 @@ IntegrationRule :: setUpEmbeddedIntegrationPoints(integrationDomain mode, int nP
 
 int IntegrationRule :: SetUpPoint(MaterialMode mode)
 {
-    this->numberOfIntegrationPoints = 1;
-    this->gaussPointArray = new GaussPoint * [ this->numberOfIntegrationPoints ];
+    this->gaussPoints.resize(1);
     FloatArray *coord = new FloatArray(0);
-    this->gaussPointArray [ 0 ] = new GaussPoint(this, 1, coord, 1.0, mode);
+    this->gaussPoints [ 0 ] = new GaussPoint(this, 1, coord, 1.0, mode);
     this->intdomain = _Point;
-    return this->numberOfIntegrationPoints;
+    return 1;
 }
 } // end namespace oofem

@@ -39,7 +39,7 @@ namespace oofem {
 template< class T >
 void logData(T myArray) {
     for ( int xyz = 1; xyz <= myArray.giveSize(); xyz++ ) {
-        if ( dynamic_cast< IntArray * >( & myArray ) ) {
+        if ( dynamic_cast< IntArray * >(& myArray) ) {
             printf( "%u ", myArray.at(xyz) );
         } else {
             printf( "%f ", myArray.at(xyz) );
@@ -81,7 +81,6 @@ SolutionbasedShapeFunction :: ~SolutionbasedShapeFunction()
 IRResultType
 SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     ActiveBoundaryCondition :: initializeFrom(ir);
@@ -94,13 +93,21 @@ SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
     externalSet = -1;
     IR_GIVE_OPTIONAL_FIELD(ir, externalSet, _IFT_SolutionbasedShapeFunction_Externalset);
 
+    // use correction factors to ensure incompressibility
+    useCorrectionFactors=false;
+    IR_GIVE_OPTIONAL_FIELD(ir, useCorrectionFactors, _IFT_SolutionbasedShapeFunction_UseCorrectionFactors);
+
+    dumpSnapshot = false;
+    IR_GIVE_OPTIONAL_FIELD(ir, dumpSnapshot, _IFT_SolutionbasedShapeFunction_DumpSnapshots);
+
+
     // Set up master dofs
     myNode = new Node( 1, this->giveDomain() );
 
-    for ( int i = 1; i <= this->giveDofIDs().giveSize(); i++ ) {
-        int DofID = this->domain->giveNextFreeDofID();
-        MasterDof *newDof = new MasterDof(i, myNode, ( DofIDItem ) DofID);
-        myNode->appendDof(newDof);
+    for (int i=1; i<=this->giveDomain()->giveNumberOfSpatialDimensions(); i++) {
+        int DofID=this->domain->giveNextFreeDofID();
+        MasterDof *newDof = new MasterDof( i, myNode, (DofIDItem) DofID );
+        myNode->appendDof( newDof );
     }
 
     init();
@@ -111,8 +118,8 @@ SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
 bool
 SolutionbasedShapeFunction :: isCoeff(ActiveDof *dof)
 {
-    for ( int i = 1; i <= myNode->giveNumberOfDofs(); i++ ) {
-        if ( dof == myNode->giveDof(i) ) {
+    for ( Dof *myDof: *myNode ) {
+        if ( dof == myDof ) {
             return true;
         }
     }
@@ -167,14 +174,10 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
         // Change to global ID for bnodes and identify the intersection of bnodes and the zero boundary
         splitBoundaryNodeIDs(myMode, * thisElement, bnodes, pNodes, mNodes, zNodes, nodeValues);
 
-        GaussIntegrationRule iRule(order, thisElement);
+        std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(order, Boundary));
 
-        int n = iRule.getRequiredNumberOfIntegrationPoints(_Triangle, order);
-        iRule.setUpIntegrationPoints(_Triangle, n, _Unknown);
-
-        for ( int j = 0; j < iRule.giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule.getIntegrationPoint(j);
-            FloatArray *lcoords = gp->giveCoordinates();
+        for ( GaussPoint *gp: *iRule ) {
+            FloatArray *lcoords = gp->giveNaturalCoordinates();
             FloatArray gcoords, normal, N;
             FloatArray Phi;
 
@@ -241,9 +244,9 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
 void
 SolutionbasedShapeFunction :: splitBoundaryNodeIDs(modeStruct &mode, Element &e, IntArray &bnodes, IntArray &pList, IntArray &mList, IntArray &zList, FloatMatrix &nodeValues)
 {
-    pList.resize(0);
-    mList.resize(0);
-    zList.resize(0);
+    pList.clear();
+    mList.clear();
+    zList.clear();
 
     for ( int j = 1; j <= bnodes.giveSize(); j++ ) {
         DofManager *dman = e.giveDofManager( bnodes.at(j) );
@@ -293,7 +296,7 @@ SolutionbasedShapeFunction :: giveUnknown(ValueModeType mode, TimeStep *tStep, A
     computeDofTransformation(dof, shapeFunctionValues);
 
     FloatArray gamma;
-    myNode->giveCompleteUnknownVector(gamma, mode, tStep);  // alpha1, alpha2,...
+    myNode->giveUnknownVector(gamma, myDofIDs, mode, tStep);  // alpha1, alpha2,...
 
     double out = shapeFunctionValues.dotProduct(gamma);
 
@@ -312,8 +315,7 @@ SolutionbasedShapeFunction :: computeDofTransformation(ActiveDof *dof, FloatArra
     masterContribs.resize( this->giveDomain()->giveNumberOfSpatialDimensions() );
     masterContribs2.resize( this->giveDomain()->giveNumberOfSpatialDimensions() );
 
-    IntArray dofIDs;
-    dofIDs.setValues( 1, ( int ) dof->giveDofID() );
+    IntArray dofIDs = {dof->giveDofID()};
 
     bool isPlus, isMinus, isZero, found;
     whichBoundary(* dof->giveDofManager()->giveCoordinates(), isPlus, isMinus, isZero);
@@ -340,22 +342,21 @@ SolutionbasedShapeFunction :: computeDofTransformation(ActiveDof *dof, FloatArra
             OOFEM_ERROR("Node not found");
         }
 
-        giveValueAtPoint(values2, * dof->giveDofManager()->giveCoordinates(), dofIDs, * modes.at(i - 1)->myEngngModel);
-
+        //giveValueAtPoint(values2, *dof->giveDofManager()->giveCoordinates(), dofIDs, *modes.at(i-1)->myEngngModel);
         //printf ("Mode %u, DofManager: %u, DofIDItem %u, value %10.10f\n", i, dof->giveDofManager()->giveNumber(), dof->giveDofID(), values.at(1));
 
         factor = isPlus  ? modes.at(i - 1)->ap : factor;
         factor = isMinus ? modes.at(i - 1)->am : factor;
         factor = isZero  ? 1.0 : factor;
 
-        masterContribs.at(i) = factor * values2.at(1);
+        masterContribs.at(i) = factor * values.at(1);
     }
 }
 
 Dof *
 SolutionbasedShapeFunction :: giveMasterDof(ActiveDof *dof, int mdof)
 {
-    return myNode->giveDof(mdof);
+    return myNode->giveDofWithID(myDofIDs.at(mdof));
 }
 
 void
@@ -385,14 +386,14 @@ SolutionbasedShapeFunction :: loadProblem()
             for ( int k = 1; k <= e->giveNumberOfDofManagers(); k++ ) {
                 DofManager *dman = e->giveDofManager(k);
                 centerCoord.add( * dman->giveCoordinates() );
-                for ( int l = 1; l <= 3; l++ ) {
-                    if ( dman->giveDof(l)->giveBcId() != 0 ) {
+                for ( Dof *dof: *dman ) {
+                    if ( dof->giveBcId() != 0 ) {
                         vlockCount++;
                     }
                 }
             }
             if ( vlockCount == 30 ) {
-                OOFEM_WARNING5("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", e->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
+                OOFEM_WARNING("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", e->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
             }
         }
 
@@ -402,19 +403,16 @@ SolutionbasedShapeFunction :: loadProblem()
         // Set correct export filename
         std :: string originalFilename;
         originalFilename = myEngngModel->giveOutputBaseFileName();
-        if ( i == 0 ) {
-            originalFilename = originalFilename + "_X";
-        }
-        if ( i == 1 ) {
-            originalFilename = originalFilename + "_Y";
-        }
-        if ( i == 2 ) {
-            originalFilename = originalFilename + "_Z";
-        }
-        myEngngModel->letOutputBaseFileNameBe(originalFilename + "_1_Base");
-        myEngngModel->doStepOutput(thisTimestep);
 
-        modeStruct *mode = new( modeStruct );
+        if (i==0) originalFilename = originalFilename + "_X";
+        if (i==1) originalFilename = originalFilename + "_Y";
+        if (i==2) originalFilename = originalFilename + "_Z";
+        if (dumpSnapshot) {
+            myEngngModel->letOutputBaseFileNameBe(originalFilename + "_1_Base");
+            myEngngModel->doStepOutput(thisTimestep);
+        }
+
+        modeStruct *mode = new(modeStruct);
         mode->myEngngModel = myEngngModel;
 
         // Check elements
@@ -424,8 +422,11 @@ SolutionbasedShapeFunction :: loadProblem()
 
         initializeSurfaceData(mode);
         // Update with factor
-        double am = 1.0, ap = 1.0;
-        computeCorrectionFactors(* mode, & dofs, & am, & ap);
+        double am=1.0, ap=1.0;
+
+        if (useCorrectionFactors) {
+            computeCorrectionFactors(*mode, &dofs, &am, &ap );
+        }
 
         OOFEM_LOG_INFO("Correction factors: am=%f, ap=%f\n", am, ap);
 
@@ -434,7 +435,10 @@ SolutionbasedShapeFunction :: loadProblem()
 
         updateModelWithFactors(mode);
 
-        //        myEngngModel->letOutputBaseFileNameBe(originalFilename + "_2_Updated");
+        if (dumpSnapshot) {
+            myEngngModel->letOutputBaseFileNameBe(originalFilename + "_2_Updated");
+            myEngngModel->doStepOutput(thisTimestep);
+        }
 
         modes.push_back(mode);
 
@@ -456,7 +460,7 @@ SolutionbasedShapeFunction :: updateModelWithFactors(modeStruct *m)
         factor = m->SurfaceData.at(j)->isMinus ? m->am : factor;
         factor = m->SurfaceData.at(j)->isZeroBoundary ? 1.0 : factor;
 
-        if ( dynamic_cast< MasterDof * >( d ) && m->SurfaceData.at(j)->isFree ) {
+        if ( dynamic_cast< MasterDof * >(d) && m->SurfaceData.at(j)->isFree ) {
             double u = m->SurfaceData.at(j)->value;
             this->setBoundaryConditionOnDof(dman->giveDofWithID(m->SurfaceData.at(j)->DofID), u * factor);
         }
@@ -526,13 +530,14 @@ SolutionbasedShapeFunction :: computeBaseFunctionValueAt(FloatArray &answer, Flo
             if ( ( fabs( maxCoord.at(i) - coords.at(i) ) < TOL ) || ( fabs( minCoord.at(i) - coords.at(i) ) < TOL ) ) {
                 permuteIndex.push_back(i);
                 n++;
-                thisMask = thisMask + pow(2.0, i - 1);
+                //thisMask = thisMask + pow(2.0, i - 1);   // compiler warning on conversion from double to int
+                thisMask = thisMask + ( 0x01 << ( i - 1 ) );
             }
         }
-
-        for ( int i = 0; i < pow(2.0, n); i++ ) {
+        int _s = 0x01 << n;
+        for ( int i = 0; i < _s; i++ ) {
             int mask = i, counter = 1;
-            FloatArray *newCoord = new ( FloatArray ) ( coords.giveSize() );
+            FloatArray *newCoord = new(FloatArray) ( coords.giveSize() );
             * newCoord = coords;
 
             for ( int j = 1; j <= n; j++ ) {
@@ -582,22 +587,18 @@ SolutionbasedShapeFunction :: giveValueAtPoint(FloatArray &answer, const FloatAr
 
     FloatArray closest, lcoords, values;
 
-    Element *elementAtCoords = myEngngModel.giveDomain(1)->giveSpatialLocalizer()->giveElementContainingPoint(coords);
-
+    Element *elementAtCoords = myEngngModel.giveDomain(1)->giveSpatialLocalizer()->giveElementClosestToPoint(lcoords, closest, coords, 1);
     if ( elementAtCoords == NULL ) {
-        elementAtCoords = myEngngModel.giveDomain(1)->giveSpatialLocalizer()->giveElementClosestToPoint(lcoords, closest, coords, 1);
-        if ( elementAtCoords == NULL ) {
-            OOFEM_WARNING("Cannot find element closest to point\n");
-            coords.pY();
-        }
+        OOFEM_WARNING("Cannot find element closest to point");
+        coords.pY();
     }
 
     EIPrimaryUnknownMapperInterface *em = dynamic_cast< EIPrimaryUnknownMapperInterface * >( elementAtCoords->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
 
     IntArray eldofids;
 
-    em->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(eldofids);
-    em->EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(VM_Total, thisTimestep, coords, values);
+    elementAtCoords->giveElementDofIDMask(eldofids);
+    em->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(VM_Total, thisTimestep, lcoords, values);
 
     for ( int i = 1; i <= dofIDs.giveSize(); i++ ) {
         for ( int j = 1; j <= eldofids.giveSize(); j++ ) {
@@ -637,8 +638,10 @@ SolutionbasedShapeFunction :: setBoundaryConditionOnDof(Dof *d, double value)
 void
 SolutionbasedShapeFunction :: initializeSurfaceData(modeStruct *mode)
 {
-    EngngModel *m = mode->myEngngModel;
-    double TOL2 = 1e-5;
+
+    EngngModel *m=mode->myEngngModel;
+    double TOL2=1e-3;
+
     IntArray pNodes, mNodes, zNodes;
 
     Set *mySet = this->domain->giveSet( this->giveSetNumber() );
@@ -806,23 +809,38 @@ SolutionbasedShapeFunction :: copyDofManagersToSurfaceData(modeStruct *mode, Int
 {
     for ( int i = 1; i <= nodeList.giveSize(); i++ ) {
         FloatArray values;
-        DofManager *dman = mode->myEngngModel->giveDomain(1)->giveDofManager( nodeList.at(i) );
 
-        computeBaseFunctionValueAt(values, * dman->giveCoordinates(), this->dofs, * mode->myEngngModel);
+        IntArray DofIDs;
+        DofManager *dman = mode->myEngngModel->giveDomain(1)->giveDofManager(nodeList.at(i));
 
+        computeBaseFunctionValueAt(values, *dman->giveCoordinates(), this->dofs, *mode->myEngngModel );
+
+/* <<<<<<< HEAD
+=======
         for ( int j = 1; j <= this->dofs.giveSize(); j++ ) {
-            SurfaceDataStruct *surfaceData = new( SurfaceDataStruct );
+            SurfaceDataStruct *surfaceData = new(SurfaceDataStruct);
             Dof *d = dman->giveDofWithID( dofs.at(j) );
+>>>>>>> 147f565295394adef603dae296a820af5f28d9cd
+*/
+        // Check that current node contains current DofID
+        for (int j=1; j<=this->dofs.giveSize(); j++) {
+            for (Dof *d: *dman ){ //int k=1; k<= dman->giveNumberOfDofs(); k++ ) {
 
-            surfaceData->DofID = ( DofIDItem ) this->dofs.at(j);
-            surfaceData->DofMan = dman;
-            surfaceData->isPlus = isPlus;
-            surfaceData->isMinus = isMinus;
-            surfaceData->isZeroBoundary = isZeroBoundary;
-            surfaceData->isFree = d->giveBcId() == 0;
-            surfaceData->value = values.at(j);
+                //Dof *d = dman->dofArray.at(k);// giveDof(k);
 
-            mode->SurfaceData.push_back(surfaceData);
+                if (d->giveDofID() == this->dofs.at(j)) {
+                    SurfaceDataStruct *surfaceData = new(SurfaceDataStruct);
+                    surfaceData->DofID = (DofIDItem) this->dofs.at(j);
+                    surfaceData->DofMan = dman;
+                    surfaceData->isPlus = isPlus;
+                    surfaceData->isMinus = isMinus;
+                    surfaceData->isZeroBoundary = isZeroBoundary;
+                    surfaceData->isFree = d->giveBcId() == 0;
+                    surfaceData->value = values.at(j);
+
+                    mode->SurfaceData.push_back(surfaceData);
+                }
+            }
         }
     }
 }

@@ -47,7 +47,6 @@ REGISTER_Material(B3SolidMaterial);
 IRResultType
 B3SolidMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     //
@@ -121,7 +120,7 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
     } else if ( this->shMode == B3_PointShrinkageMPS ) {   // #3 in enumerator
         // microprestress-sol-theory: read data for shrinkage evaluation
         if ( this->MicroPrestress == 0 ) {
-            _error("to use B3_PointShrinkageMPS - MicroPrestress must be = 1");       //or else no external fiels would be found
+            OOFEM_ERROR("to use B3_PointShrinkageMPS - MicroPrestress must be = 1");       //or else no external fiels would be found
         }
 
         kSh = -1;
@@ -133,12 +132,12 @@ B3SolidMaterial :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, finalHum, _IFT_B3Material_finalhumidity);
         // either kSh or initHum and finalHum must be given in input record
         if ( !( ( this->kSh != -1 ) || ( ( initHum != -1 ) && ( finalHum != -1 ) ) ) ) {
-            _error("either kSh or initHum and finalHum must be given in input record");
+            OOFEM_ERROR("either kSh or initHum and finalHum must be given in input record");
         }
 
         /*
          * if ( ( ( initHum < 0.2 ) || ( initHum > 0.98 ) || ( finalHum < 0.2 ) || ( finalHum > 0.98 ) ) && ( this->kSh == -1 ) ) {
-         *  _error("initital humidity or final humidity out of range (0.2 - 0.98)");
+         *  OOFEM_ERROR("initital humidity or final humidity out of range (0.2 - 0.98)");
          * }
          */
 
@@ -456,7 +455,7 @@ B3SolidMaterial :: computeCreepFunction(double tStep, double ofAge)
     r  = 1.7 * pow(ofAge, 0.12) + 8.0;
     Q  = Qf * pow( ( 1. + pow( ( Qf / Z ), r ) ), -1. / r );
 
-    C0 = q2 * Q + q3 *log( 1. + pow(tStep - ofAge, n) ) + q4 *log(tStep / ofAge);
+    C0 = q2 * Q + q3 *log( 1. + pow ( tStep - ofAge, n ) ) + q4 *log(tStep / ofAge);
 
 
     Cd = 0.0;
@@ -500,7 +499,7 @@ B3SolidMaterial :: giveShrinkageStrainVector(FloatArray &answer,
     }
 
     if ( ( mode != VM_Total ) && ( mode != VM_Incremental ) ) {
-        _error("giveShrinkageStrainVector: unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 
     if ( this->shMode == B3_AverageShrinkage ) {
@@ -630,7 +629,7 @@ B3SolidMaterial :: computeFlowTermViscosity(GaussPoint *gp, TimeStep *tStep)
         tHalfStep = relMatAge + ( tStep->giveTargetTime() - 0.5 * tStep->giveTimeIncrement() ) / timeFactor;
         eta = 1.e6 * tHalfStep / q4;
     } else {
-        _error("computeFlowTermViscosity - mode is not supported");
+        OOFEM_ERROR("mode is not supported");
         eta = 0.;
     }
 
@@ -671,7 +670,7 @@ B3SolidMaterial :: giveEigenStrainVector(FloatArray &answer, GaussPoint *gp, Tim
         answer = reducedAnswer;
     } else {
         /* error - total mode not implemented yet */
-        _error("giveEigenStrainVector - mode is not supported");
+        OOFEM_ERROR("mode is not supported");
     }
 }
 
@@ -709,9 +708,9 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *
 
     if ( ( tf = fm->giveField(FT_Temperature) ) ) {
         // temperature field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Incremental, tStep) ) ) {
-            _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
+            OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
 
         trate = et2.at(1);
@@ -720,13 +719,13 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // temperature field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
-            _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
+            OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
 
         if ( ( err = tf->evaluateAt(ei2, gcoords, VM_Incremental, tStep) ) ) {
-            _error2("computeShrinkageStrainVector: tf->evaluateAt failed, error value %d", err);
+            OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
 
         // convert water mass to relative humidity
@@ -735,7 +734,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *
     }
 
     if ( ( tflag == 0 ) || ( wflag == 0 ) ) {
-        _error("computeTotalShrinkageStrainVector: external fields not found");
+        OOFEM_ERROR("external fields not found");
     }
 
     if ( status->giveStressVector().giveSize() ) {
@@ -801,7 +800,7 @@ B3SolidMaterial :: inverse_sorption_isotherm(double w)
 
     /*
      * if ( ( phi < 0.2 ) || ( phi > 0.98 ) ) {
-     *  _error3("inverse_sorption_isotherm : Relative humidity h = %e (w=%e) is out of range", phi, w);
+     *  OOFEM_ERROR("Relative humidity h = %e (w=%e) is out of range", phi, w);
      * }
      */
 
@@ -849,7 +848,7 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *tStep, int op
      *      deltaT /= 2;
      *      humNew = humOld + 0.5*(this->giveHumidityIncrement(gp, tStep)); //linearly approximated
      * } else {
-     *      _error("computeMicroPrestress: invalid option parameter");
+     *      OOFEM_ERROR("invalid option parameter");
      * }
      *
      * a = c0 * alpha * deltaT;
@@ -885,7 +884,7 @@ B3SolidMaterial :: computeMicroPrestress(GaussPoint *gp, TimeStep *tStep, int op
         deltaT /= 2;
         humNew = humOld + 0.5 * ( this->giveHumidityIncrement(gp, tStep) );       //linearly approximated
     } else {
-        _error("computeMicroPrestress: invalid option parameter");
+        OOFEM_ERROR("invalid option parameter");
         humNew = 0.;
     }
 
@@ -925,9 +924,9 @@ B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep) //computes humi
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // humidity field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
-            _error2("giveHumidity: tf->evaluateAt failed, error value %d", err);
+            OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
 
         // convert water mass to relative humidity
@@ -936,7 +935,7 @@ B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep) //computes humi
     }
 
     if ( wflag == 0 ) {
-        _error("giveHumidity: external fields not found");
+        OOFEM_ERROR("external fields not found");
     }
 
     return humidity;
@@ -956,13 +955,13 @@ B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep) //comp
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // humidity field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
-            _error2("giveHumidityIncrement: tf->evaluateAt failed, error value %d", err);
+            OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
 
         if ( ( err = tf->evaluateAt(ei2, gcoords, VM_Incremental, tStep) ) ) {
-            _error2("giveHumidityIncrement: tf->evaluateAt failed, error value %d", err);
+            OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
 
         // convert water mass to relative humidity
@@ -971,7 +970,7 @@ B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep) //comp
     }
 
     if ( wflag == 0 ) {
-        _error("giveHumidityIncrement: external fields not found");
+        OOFEM_ERROR("external fields not found");
     }
 
     return humIncrement;
@@ -1005,7 +1004,7 @@ B3SolidMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, cons
 
 
 B3SolidMaterialStatus :: B3SolidMaterialStatus(int n, Domain *d, GaussPoint *g, int nunits) :
-    KelvinChainMaterialStatus(n, d, g, nunits) {}
+    KelvinChainMaterialStatus(n, d, g, nunits) { }
 
 void
 B3SolidMaterialStatus :: updateYourself(TimeStep *tStep)
@@ -1027,7 +1026,7 @@ B3SolidMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void 
     contextIOResultType iores;
 
     if ( stream == NULL ) {
-        _error("saveContext : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     if ( ( iores = KelvinChainMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {

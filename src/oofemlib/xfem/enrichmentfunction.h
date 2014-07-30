@@ -36,7 +36,6 @@
 #define enrichmentfunction_h
 
 #include "intarray.h"
-#include "classfactory.h"
 #include "femcmpnn.h"
 
 #define _IFT_DiscontinuousFunction_Name "discontinuousfunction"
@@ -102,7 +101,10 @@ public:
     virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const;
     virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const;
 
-    virtual void giveJump(std :: vector< double > &oJumps) const { oJumps.clear(); oJumps.push_back(2.0); }
+    virtual void giveJump(std :: vector< double > &oJumps) const {
+        oJumps.clear();
+        oJumps.push_back(2.0);
+    }
 
     virtual const char *giveClassName() const { return "DiscontinuousFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_DiscontinuousFunction_Name; }
@@ -123,7 +125,10 @@ public:
     virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const;
     virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const;
 
-    virtual void giveJump(std :: vector< double > &oJumps) const { oJumps.clear(); oJumps.push_back(1.0); }
+    virtual void giveJump(std :: vector< double > &oJumps) const {
+        oJumps.clear();
+        oJumps.push_back(1.0);
+    }
 
     virtual const char *giveClassName() const { return "HeavisideFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_HeavisideFunction_Name; }
@@ -133,13 +138,17 @@ public:
 class OOFEM_EXPORT LinElBranchFunction
 {
 public:
-    LinElBranchFunction() {}
-    virtual ~LinElBranchFunction() {}
+    LinElBranchFunction() { }
+    virtual ~LinElBranchFunction() { }
 
     virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const double &iR, const double &iTheta) const;
     virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const double &iR, const double &iTheta) const;
 
     virtual void giveJump(std :: vector< double > &oJumps) const;
+    virtual void giveJump(std :: vector< double > &oJumps, const double &iRadius) const;
+
+    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
+    virtual const char *giveClassName() const { return "LinElBranchFunction"; }
 };
 
 /** Class representing bimaterial interface. */
@@ -154,7 +163,10 @@ public:
     virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const;
     virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const;
 
-    virtual void giveJump(std :: vector< double > &oJumps) const { oJumps.clear(); oJumps.push_back(0.0); }
+    virtual void giveJump(std :: vector< double > &oJumps) const {
+        oJumps.clear();
+        oJumps.push_back(0.0);
+    }
 
     virtual const char *giveClassName() const { return "RampFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_RampFunction_Name; }

@@ -49,7 +49,7 @@ StokesFlowVelocityHomogenization :: StokesFlowVelocityHomogenization(int i, Engn
 }
 
 StokesFlowVelocityHomogenization :: ~StokesFlowVelocityHomogenization()
-{}
+{ }
 
 double
 StokesFlowVelocityHomogenization :: giveAreaOfDomain()
@@ -108,27 +108,27 @@ void
 StokesFlowVelocityHomogenization :: solveYourselfAt(TimeStep *tStep)
 {
     handlePrescribedValues();
-    currentStep = tStep;
-    StokesFlow :: solveYourselfAt(tStep);
+    this->giveCurrentStep();
+    currentStep->setNumber( tStep->giveNumber() );
+    currentStep->setTime( tStep->giveTargetTime() );
+    currentStep->setTimeIncrement( tStep->giveTimeIncrement() );
+    StokesFlow :: solveYourselfAt(currentStep);
 }
 
 
 void
 StokesFlowVelocityHomogenization :: rveSetBoundaryConditions(int BCType, FloatArray eps)
-{}
+{ }
 
 void
 StokesFlowVelocityHomogenization :: getMeans(FloatArray &gradP, FloatArray &v, TimeStep *tStep)
 {
-    FloatMatrix gradPTemp, v_hatTemp;
+    FloatArray gradPTemp, v_hatTemp;
     double Area = 0, AreaFull = 0; //(xmax-xmin)*(ymax-ymin);
     double xmax = 0, xmin = 0, ymax = 0, ymin = 0;
 
-    gradP.resize(2);
-    gradP.zero();
-
-    v.resize(2);
-    v.zero();
+    gradP.clear();
+    v.clear();
 
     for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfElements(); i++ ) {
         if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( this->giveDomain(1)->giveElement(i) ) ) {
@@ -155,11 +155,8 @@ StokesFlowVelocityHomogenization :: getMeans(FloatArray &gradP, FloatArray &v, T
             T->giveGradP(gradPTemp, tStep);
             T->giveIntegratedVelocity(v_hatTemp, tStep);
 
-            gradP.at(1) = gradP.at(1) + gradPTemp.at(1, 1);
-            gradP.at(2) = gradP.at(2) + gradPTemp.at(2, 1);
-
-            v.at(1) = v.at(1) + v_hatTemp.at(1, 1);
-            v.at(2) = v.at(2) + v_hatTemp.at(2, 1);
+            gradP.add(gradPTemp);
+            v.add(v_hatTemp);
 
             Area = Area + T->computeArea();
         }
@@ -170,11 +167,6 @@ StokesFlowVelocityHomogenization :: getMeans(FloatArray &gradP, FloatArray &v, T
     v.times(1. / AreaFull);
 }
 
-void
-StokesFlowVelocityHomogenization :: updateC()
-{
-    OOFEM_LOG_ERROR("Uses StokesFlowVelocityHomogenization :: updateC()");
-}
 
 void
 StokesFlowVelocityHomogenization :: rveGiveCharacteristicData(int DataType, void *input, void *answer, TimeStep *tStep)
@@ -249,14 +241,12 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
 
     F.resize(ndof, 2);
     F.zero();
-    col.resize(2);
-    col.at(1) = 1;
-    col.at(2) = 2;
+    col = {1,2};
 
     for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
         if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( this->giveDomain(1)->giveElement(i) ) ) {
             T->giveElementFMatrix(Fe);
-            T->giveLocationArray( loc, EID_MomentumBalance_ConservationEquation, EModelDefaultEquationNumbering() );
+            T->giveLocationArray( loc, {V_u, V_v}, EModelDefaultEquationNumbering() );
 
             F.assemble(Fe, loc, col);
         }

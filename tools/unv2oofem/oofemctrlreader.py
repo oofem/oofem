@@ -109,7 +109,7 @@ class CTRLParser:
             if not line: break
             if line.startswith('#'):
                 continue
-            match=re.search('^group((\w| )+)', line, re.IGNORECASE)
+            match=re.search('^group(([\-\w]| )+)', line, re.IGNORECASE)
             if match:
                 groups = match.group(1).split()
                 print "\tFound properties for group(s):", groups

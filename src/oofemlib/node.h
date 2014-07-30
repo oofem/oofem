@@ -105,18 +105,25 @@ public:
      * @param n Node number in domain aDomain.
      * @param aDomain Domain to which node belongs.
      */
-    Node(int n, Domain *aDomain);
+    Node(int n, Domain * aDomain);
     /// Destructor.
     virtual ~Node();
 
     virtual bool hasCoordinates() { return true; }
     virtual double giveCoordinate(int i);
     virtual FloatArray *giveCoordinates() { return & coordinates; }
+
+    /**
+     * As giveCoordinates, but non-virtual and therefore faster
+     * (because it can be inlined). /ES
+     */
+    inline const FloatArray &giveNodeCoordinates() const {return coordinates;}
+
     /**
      * Sets node coordinates to given array.
      * @param coords New coordinates for node.
      */
-    void setCoordinates(const FloatArray &coords) { this->coordinates = coords; }
+    void setCoordinates(FloatArray coords) { this->coordinates = std :: move(coords); }
     /**
      * Returns updated ic-th coordinate of receiver. Return value is computed
      * as coordinate + scale * displacement, where corresponding displacement is obtained

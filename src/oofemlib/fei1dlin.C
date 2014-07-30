@@ -68,12 +68,12 @@ FEI1dLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICe
 void
 FEI1dLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatArray n(2);
+    FloatArray n;
     answer.resize(1);
 
     this->evalN(n, lcoords, cellgeo);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates(1)->at(cindx) +
-                     n.at(2) * cellgeo.giveVertexCoordinates(2)->at(cindx) );
+                    n.at(2) * cellgeo.giveVertexCoordinates(2)->at(cindx) );
 }
 
 int

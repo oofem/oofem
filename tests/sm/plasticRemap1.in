@@ -1,6 +1,7 @@
 plasticRemap1.out
 Test case for mapping of state variables between domains. This is a quite academic test case: at the end of each time step, the domain is cloned and the state variables are mapped to the new domain. Written by Erik Svenning, Chalmers University of Technology.
-XFEMStatic nsteps 5 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 25 minIter 2 stiffmode 0 nmodules 0 manrmsteps 1 forceremap 1
+StaticStructural nsteps 5 deltat 1.0 rtolv 1.0e-6 MaxIter 25 minIter 2 nmodules 1 manrmsteps 1
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
@@ -25,17 +26,17 @@ HeavisideFunction 1
 polygoncrack 1 points 6 -0.1 100.0 0.5 100.0 1.1 100.0
 #
 #
-#%BEGIN_CHECK% tolerance 1.e-12
+#%BEGIN_CHECK% tolerance 1.e-7
 ## step 2
-#REACTION tStep 1. number 3 dof 2 value 3.5165e+00
-#REACTION tStep 1. number 4 dof 2 value 3.5165e+00
+#REACTION tStep 2 number 3 dof 2 value 3.51648352e+00
+#REACTION tStep 2 number 4 dof 2 value 3.51648352e+00
 ## step 3
-#REACTION tStep 2. number 3 dof 2 value 5.6817e+00
-#REACTION tStep 2. number 4 dof 2 value 5.6817e+00
+#REACTION tStep 3 number 3 dof 2 value 5.68173688e+00
+#REACTION tStep 3 number 4 dof 2 value 5.68173688e+00
 ## step 4
-#REACTION tStep 3. number 3 dof 2 value 5.7428e+00
-#REACTION tStep 3. number 4 dof 2 value 5.7428e+00
+#REACTION tStep 4 number 3 dof 2 value 5.74281407e+00
+#REACTION tStep 4 number 4 dof 2 value 5.74281407e+00
 ## step 5
-#REACTION tStep 4. number 3 dof 2 value 5.7650e+00
-#REACTION tStep 4. number 4 dof 2 value 5.7650e+00
+#REACTION tStep 5 number 3 dof 2 value 5.76502539e+00
+#REACTION tStep 5 number 4 dof 2 value 5.76502539e+00
 #%END_CHECK%

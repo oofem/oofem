@@ -40,7 +40,7 @@
 
 ///@name Input fields for LIBeam3dNL
 //@{
-#define _IFT_LIBeam3dNL_Name "libeam3dNL"
+#define _IFT_LIBeam3dNL_Name "libeam3dnl"
 #define _IFT_LIBeam3dNL_refnode "refnode"
 //@}
 
@@ -69,7 +69,7 @@ private:
     int referenceNode;
 
 public:
-    LIBeam3dNL(int n, Domain *d);
+    LIBeam3dNL(int n, Domain * d);
     virtual ~LIBeam3dNL() { }
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
@@ -80,8 +80,9 @@ public:
     //void computeInitialStressMatrix(FloatMatrix& answer, TimeStep* tStep);
 
     virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
@@ -111,7 +112,7 @@ protected:
     virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-    { computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) ); }
+    { computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) ); }
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
     virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
@@ -119,7 +120,7 @@ protected:
     virtual void updateYourself(TimeStep *tStep);
     virtual void initForNewStep();
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx, int upperIndx)
-    { _error("computeBmatrixAt: not implemented"); }
+    { OOFEM_ERROR("not implemented"); }
     //int computeGtoLRotationMatrix(FloatMatrix& answer);
 
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);

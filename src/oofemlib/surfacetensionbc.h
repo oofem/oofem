@@ -49,7 +49,6 @@
 
 namespace oofem {
 class Element;
-class ElementSide;
 
 /**
  * Computes the load (and possibly tangent) for surface tension. This boundary condition applicable to both solid and flow problems.
@@ -66,20 +65,20 @@ public:
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    SurfaceTensionBoundaryCondition(int n, Domain *d) : ActiveBoundaryCondition(n, d) { }
+    SurfaceTensionBoundaryCondition(int n, Domain * d) : ActiveBoundaryCondition(n, d) { }
     /// Destructor.
     virtual ~SurfaceTensionBoundaryCondition() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, FloatArray *eNorms = NULL);
 
-    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
+    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual const char *giveClassName() const { return "SurfaceTensionBoundaryCondition"; }

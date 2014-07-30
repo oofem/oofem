@@ -70,7 +70,7 @@ TrabBoneNL :: TrabBoneNL(int n, Domain *d) : TrabBoneMaterial(n, d), StructuralN
 //
 
 TrabBoneNL :: ~TrabBoneNL()
-{}
+{ }
 
 //
 // END: DESTRUCTOR
@@ -110,9 +110,9 @@ TrabBoneNL :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussPoi
 
 void
 TrabBoneNL :: giveRealStressVector_1d(FloatArray &answer,
-                                   GaussPoint *gp,
-                                   const FloatArray &strainVector,
-                                   TimeStep *tStep)
+                                      GaussPoint *gp,
+                                      const FloatArray &strainVector,
+                                      TimeStep *tStep)
 {
     TrabBoneNLStatus *nlStatus = static_cast< TrabBoneNLStatus * >( this->giveStatus(gp) );
 
@@ -149,12 +149,11 @@ TrabBoneNL :: computeCumPlastStrain(double &alpha, GaussPoint *gp, TimeStep *tSt
     this->updateDomainBeforeNonlocAverage(tStep);
 
     std :: list< localIntegrationRecord > *list = status->giveIntegrationDomainList();
-    std :: list< localIntegrationRecord > :: iterator pos;
 
-    for ( pos = list->begin(); pos != list->end(); ++pos ) {
-        nonlocStatus = static_cast< TrabBoneNLStatus * >( this->giveStatus(pos->nearGp) );
+    for ( auto &lir: *list ) {
+        nonlocStatus = static_cast< TrabBoneNLStatus * >( this->giveStatus(lir.nearGp) );
         nonlocalContribution = nonlocStatus->giveLocalCumPlastStrainForAverage();
-        nonlocalContribution *= pos->weight;
+        nonlocalContribution *= lir.weight;
         nonlocalCumPlastStrain += nonlocalContribution;
     }
 
@@ -177,7 +176,7 @@ Interface *
 TrabBoneNL :: giveInterface(InterfaceType type)
 {
     if ( type == NonlocalMaterialExtensionInterfaceType ) {
-        return static_cast< StructuralNonlocalMaterialExtensionInterface * >( this );
+        return static_cast< StructuralNonlocalMaterialExtensionInterface * >(this);
     } else {
         return NULL;
     }
@@ -195,7 +194,6 @@ TrabBoneNL :: giveInterface(InterfaceType type)
 IRResultType
 TrabBoneNL :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                             // Required by IR_GIVE_FIELD macro
 
     TrabBoneMaterial :: initializeFrom(ir);
@@ -282,7 +280,7 @@ TrabBoneNLStatus :: TrabBoneNLStatus(int n, Domain *d, GaussPoint *g) :
 //
 
 TrabBoneNLStatus :: ~TrabBoneNLStatus()
-{}
+{ }
 
 //
 // END: DESTRUCTOR

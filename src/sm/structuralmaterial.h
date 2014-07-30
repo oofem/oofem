@@ -117,7 +117,7 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    StructuralMaterial(int n, Domain *d) : Material(n, d) { }
+    StructuralMaterial(int n, Domain * d) : Material(n, d) { }
     /// Destructor.
     virtual ~StructuralMaterial() { }
 
@@ -169,12 +169,16 @@ public:
     /// Default implementation relies on giveRealStressVector_StressControl
     virtual void giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     /// Default implementation relies on giveRealStressVector_StressControl
+    virtual void giveRealStressVector_Warping(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    /// Default implementation relies on giveRealStressVector_StressControl
     virtual void giveRealStressVector_2dBeamLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     /// Default implementation relies on giveRealStressVector_StressControl
     virtual void giveRealStressVector_PlateLayer(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
     /// Default implementation relies on giveRealStressVector_StressControl
     virtual void giveRealStressVector_Fiber(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
-
+    /// Default implementation is not provided
+    virtual void giveRealStressVector_2dPlateSubSoil(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedE, TimeStep *tStep);
+    
     /**
      * @name Methods associated with the First PK stress tensor.
      * Computes the first Piola-Kirchhoff stress vector for given total deformation gradient and integration point.
@@ -223,13 +227,13 @@ public:
      */
     //@{
     virtual void giveCauchyStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
-    { _error("giveCauchyStressVector_3d: not implemented "); }
+    { OOFEM_ERROR("not implemented "); }
     virtual void giveCauchyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
-    { _error("giveCauchyStressVector_PlaneStrain: not implemented "); }
+    { OOFEM_ERROR("not implemented "); }
     virtual void giveCauchyStressVector_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
-    { _error("giveCauchyStressVector_PlaneStress: not implemented "); }
+    { OOFEM_ERROR("not implemented "); }
     virtual void giveCauchyStressVector_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
-    { _error("giveCauchyStressVector__1d: not implemented "); }
+    { OOFEM_ERROR("not implemented "); }
     //@}
 
     void give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp);
@@ -251,7 +255,7 @@ public:
      */
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
     {
-        answer.resize(0);
+        answer.clear();
     }
     /**
      * Returns the reference temperature of receiver.
@@ -299,7 +303,7 @@ public:
                                                MatResponseMode mode,
                                                GaussPoint *gp,
                                                TimeStep *tStep)
-    { _error("give3dMaterialStiffnessMatrix: not implemented "); }
+    { OOFEM_ERROR("not implemented "); }
 
 
     virtual void give3dMaterialStiffnessMatrix_dPdF(FloatMatrix &answer,
@@ -524,6 +528,17 @@ public:
     virtual void giveFiberStiffMtrx(FloatMatrix &answer,
                                     MatResponseMode mmode, GaussPoint *gp,
                                     TimeStep *tStep);
+    /**
+     * Method for computing stiffness matrix of plate subsoil model.
+     * Default method is emty; the implementation should be provided by the particular model.
+     * @param answer Stiffness matrix.
+     * @param mmode Material response mode.
+     * @param gp Integration point, which load history is used.
+     * @param tStep Time step (most models are able to respond only when tStep is current time step).
+     */
+    virtual void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer,
+					     MatResponseMode mmode, GaussPoint *gp,
+					     TimeStep *tStep);
     /**
      * Transforms 3d strain vector into another coordinate system.
      * @param answer Transformed strain vector

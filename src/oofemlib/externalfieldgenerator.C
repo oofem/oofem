@@ -43,15 +43,15 @@ namespace oofem {
 REGISTER_RandomFieldGenerator(ExternalFieldGenerator);
 
 ExternalFieldGenerator :: ExternalFieldGenerator(int num, Domain *d) : RandomFieldGenerator(num, d)
-{}
+{ }
 
 ExternalFieldGenerator :: ~ExternalFieldGenerator()
-{}
+{ }
 
 void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *globalCoordinates)
 {
     // Map the corresponding random value from the field
-    int countXDown = 0, countXUp = 0, countYDown = 0, countYUp;
+    int countXDown = 0, countXUp = 0, countYDown = 0, countYUp = 0;
     double randomVariable = 0.;
     //Determine x count
     double helpX = 0., helpY = 0.;
@@ -71,9 +71,9 @@ void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *gl
         while ( exitFlag == 0 ) {
             if ( field( 3 * i * numberReal(1) ) > globalCoordinates->at(1) ) {
                 if ( i == 0 ) { //Check soundness
-                    OOFEM_ERROR("error in externalfieldgenerator.C: i is zero");
+                    OOFEM_ERROR("i is zero");
                 } else if ( i == numberReal(0) ) {
-                    OOFEM_ERROR("error in externalfieldgenerator.C: i is equal to realNumber");
+                    OOFEM_ERROR("i is equal to realNumber");
                 }
 
                 exitFlag = 1;
@@ -91,9 +91,9 @@ void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *gl
         while ( exitFlag == 0 ) {
             if ( field(3 * i + 1) > globalCoordinates->at(2) ) {
                 if ( i == 0 ) {
-                    OOFEM_ERROR("error in externalfieldgenerator.C: i is zero");
+                    OOFEM_ERROR("i is zero");
                 } else if ( i == numberReal(0) ) {
-                    OOFEM_ERROR("error in externalfieldgenerator.C: i is equal to realNumber");
+                    OOFEM_ERROR("i is equal to realNumber");
                 }
 
                 exitFlag = 1;
@@ -110,9 +110,9 @@ void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *gl
         if ( randomVariable == 0. ) {
             randomVariable =
                 ( 1. - helpX ) * ( 1. - helpY ) * field(3 * ( countXDown * numberReal(1) + countYDown ) + 2) +
-                helpX * ( 1. - helpY ) * field(3 * ( countXUp * numberReal(1) + countYDown ) + 2) +
-                helpX *helpY *field(3 * ( countXUp * numberReal(1) + countYUp ) + 2) +
-                ( 1. - helpX ) * helpY * field(3 * ( countXDown * numberReal(1) + countYUp ) + 2);
+            helpX * ( 1. - helpY ) * field(3 * ( countXUp * numberReal(1) + countYDown ) + 2) +
+            helpX *helpY *field(3 * ( countXUp *numberReal ( 1 ) + countYUp ) + 2) +
+            ( 1. - helpX ) * helpY * field(3 * ( countXDown * numberReal(1) + countYUp ) + 2);
         }
     }
 
@@ -130,7 +130,6 @@ IRResultType
 ExternalFieldGenerator :: initializeFrom(InputRecord *ir)
 {
     std :: string name;
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, name, _IFT_ExternalFieldGenerator_name);
@@ -138,7 +137,7 @@ ExternalFieldGenerator :: initializeFrom(InputRecord *ir)
     std :: ifstream inputField( name.c_str() );
 
     if ( !inputField.is_open() ) {
-        OOFEM_ERROR2( "ExternalFieldGenerator :: initializeFrom - Unable to open file %s", name.c_str() );
+        OOFEM_ERROR("Unable to open file %s", name.c_str());
     }
 
     double deltaX, deltaY;

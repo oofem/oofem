@@ -80,7 +80,7 @@ public:
      * @param rank Rank of associated partition.
      * @param size Number of collaborating processes.
      */
-    FETICommunicator(EngngModel *emodel, CommunicatorBuff *b, int rank, int size);
+    FETICommunicator(EngngModel * emodel, CommunicatorBuff * b, int rank, int size);
     /// Destructor
     virtual ~FETICommunicator();
 

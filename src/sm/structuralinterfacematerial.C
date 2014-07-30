@@ -70,7 +70,6 @@ StructuralInterfaceMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, I
 IRResultType
 StructuralInterfaceMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->useNumericalTangent, _IFT_StructuralInterfaceMaterial_useNumericalTangent);
@@ -139,8 +138,7 @@ StructuralInterfaceMaterial :: give2dStiffnessMatrix_Eng(FloatMatrix &answer, Ma
 {
     FloatMatrix answer3D;
     give3dStiffnessMatrix_Eng(answer3D, mode, gp, tStep);
-    IntArray mask;
-    mask.setValues(2,  1, 3);
+    IntArray mask = {1, 3};
     answer.beSubMatrixOf(answer3D, mask, mask);
 
 #if 0
@@ -171,7 +169,7 @@ StructuralInterfaceMaterial :: give3dStiffnessMatrix_Eng(FloatMatrix &answer, Ma
 void
 StructuralInterfaceMaterial :: give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    _error("give3dStiffnessMatrix_dTdj: not implemented ")
+    OOFEM_ERROR("not implemented ")
 }
 
 
@@ -179,13 +177,13 @@ void
 StructuralInterfaceMaterial :: giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
     FloatArray jump3D(3), traction3D;
-    jump3D.setValues( 3, 0.0, 0.0, jump.at(3) );
+    jump3D = { 0.0, 0.0, jump.at(3) };
     this->giveEngTraction_3d(traction3D, gp, jump3D, tStep);
-    answer.setValues( 1,  traction3D.at(3) );
+    answer = FloatArray({ traction3D.at(3) } );
 
 #ifdef DEBUG
     if ( ( abs( traction3D.at(1) ) > 1.0e-3 ) || ( abs( traction3D.at(2) ) > 1.0e-3 )  ) {
-        OOFEM_ERROR1("StructuralInterfaceMaterial :: giveEngTraction_1d - Traction vector obtained from 3D state contains a nonzero shear stress component")
+        OOFEM_ERROR("Traction vector obtained from 3D state contains a nonzero shear stress component")
     }
 #endif
 }
@@ -194,13 +192,13 @@ void
 StructuralInterfaceMaterial :: giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep)
 {
     FloatArray jump3D(3), traction3D;
-    jump3D.setValues( 3, jump.at(1), 0.0, jump.at(2) );
+    jump3D = { jump.at(1), 0.0, jump.at(2) };
     this->giveEngTraction_3d(traction3D, gp, jump3D, tStep);
-    answer.setValues( 2,  traction3D.at(1), traction3D.at(3) );
+    answer = { traction3D.at(1), traction3D.at(3) };
 
 #ifdef DEBUG
     if ( abs( traction3D.at(2) ) > 1.0e-3 ) {
-        OOFEM_ERROR1("StructuralInterfaceMaterial :: giveEngTraction_2d - Traction vector obtained from 3D state contains a nonzero thickness stress component")
+        OOFEM_ERROR("Traction vector obtained from 3D state contains a nonzero thickness stress component")
     }
 #endif
 }
@@ -490,12 +488,12 @@ StructuralInterfaceMaterial::giveReducedJump(FloatArray &answer, FloatArray &jum
     if(size == jump.giveSize() ) {
         answer = jump;
     } else if( (size == 2) && (jump.giveSize() == 3) ) {
-        answer.setValues( 2,  jump.at( 1 ), jump.at( 3 ) );
+        answer = { jump.at(1), jump.at(3) };
     }
     else if(size == 1 && ( jump.giveSize( ) == 3 )) {
-        answer.setValues( 1,  jump.at( 3 ) );
+        answer = FloatArray( { jump.at(3) } );
     }else{
-        OOFEM_ERROR1( "StructuralInterfaceMaterial::giveReducedJump - size must be 1, 2 or 3" );
+        OOFEM_ERROR( "size must be 1, 2 or 3" );
     }
 
 }

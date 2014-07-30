@@ -116,7 +116,8 @@ protected:
     NonLinearStatic_controlType controlMode;
     /// Intrinsic time increment.
     double deltaT;
-    /**
+
+   /**
      * The following parameter allows to specify how the reference load vector
      * is obtained from given totalLoadVector and initialLoadVector.
      * The initialLoadVector desribes the part of loading which does not scale.
@@ -131,7 +132,7 @@ protected:
     InitialGuess initialGuessType;
 
 public:
-    NonLinearStatic(int i, EngngModel *_master = NULL);
+    NonLinearStatic(int i, EngngModel * _master = NULL);
     virtual ~NonLinearStatic();
 
     virtual void solveYourself();
@@ -140,13 +141,15 @@ public:
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    virtual void updateComponent(TimeStep * tStep, NumericalCmpn, Domain * d);
+    virtual void updateComponent(TimeStep *tStep, NumericalCmpn, Domain *d);
     virtual void updateAttributes(MetaStep *mStep);
 
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
+
+    virtual double giveLoadLevel() { return cumulatedLoadLevel + loadLevel; }
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
@@ -177,7 +180,7 @@ public:
 #endif
 
 protected:
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID ut, CharType type,
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
                           const UnknownNumberingScheme &, Domain *domain);
     void proceedStep(int di, TimeStep *tStep);
     virtual void updateLoadVectors(TimeStep *tStep);
@@ -185,7 +188,7 @@ protected:
     void assembleIncrementalReferenceLoadVectors(FloatArray &_incrementalLoadVector,
                                                  FloatArray &_incrementalLoadVectorOfPrescribed,
                                                  SparseNonLinearSystemNM :: referenceLoadInputModeType _refMode,
-                                                 Domain *sourceDomain, EquationID ut, TimeStep *tStep);
+                                                 Domain *sourceDomain, TimeStep *tStep);
 #ifdef __PARALLEL_MODE
     virtual void packMigratingData(TimeStep *tStep);
     virtual void unpackMigratingData(TimeStep *tStep);

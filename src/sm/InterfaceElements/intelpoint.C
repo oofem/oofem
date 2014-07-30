@@ -73,7 +73,7 @@ IntElPoint :: setCoordMode()
         this->mode = ie1d_3d;
         break;
     default:
-        _error("setCoordMode: Unsupported domain type")
+        OOFEM_ERROR("Unsupported domain type")
     }
 }
 
@@ -89,7 +89,7 @@ IntElPoint :: giveMaterialMode()
 
     case ie1d_3d: return _3dInterface;
 
-    default: _error("giveMaterialMode: Unsupported coord mode");
+    default: OOFEM_ERROR("Unsupported coord mode");
     }
     return _1dInterface; // to make the compiler happy
 }
@@ -135,7 +135,7 @@ IntElPoint :: computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
         answer.at(3, 6) = +1.0;
         break;
     default:
-        _error("giveDofManDofIDMask: unsupported mode");
+        OOFEM_ERROR("Unsupported mode");
     }
 
 }
@@ -191,7 +191,7 @@ IntElPoint :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer)
     }
 
     default:
-        _error("giveDofManDofIDMask: unsupported mode");
+        OOFEM_ERROR("Unsupported mode");
     }
 }
 
@@ -200,9 +200,9 @@ void
 IntElPoint :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        int numberOfIntegrationRules = 1;
+        integrationRulesArray.resize(numberOfIntegrationRules);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         integrationRulesArray [ 0 ]->setUpIntegrationPoints( _Line, 1, this->giveMaterialMode() );
     }
@@ -235,7 +235,7 @@ IntElPoint :: computeAreaAround(GaussPoint *gp)
 IRResultType
 IntElPoint :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
+    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     StructuralInterfaceElement :: initializeFrom(ir);
@@ -243,7 +243,7 @@ IntElPoint :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_IntElPoint_refnode);
     IR_GIVE_OPTIONAL_FIELD(ir, normal, _IFT_IntElPoint_normal);
     if ( referenceNode == 0 && normal.at(1) == 0 && normal.at(2) == 0 && normal.at(1) == 0 && normal.at(3) == 0 ) {
-        OOFEM_ERROR1("IntElPoint :: instanciateFrom: wrong reference node or normal specified");
+        OOFEM_ERROR("Wrong reference node or normal specified");
     }
 
     this->computeLocalSlipDir(normal); ///@todo Move into postInitialize ?
@@ -266,7 +266,7 @@ IntElPoint :: computeNumberOfDofs()
         return 6;
 
     default:
-        _error("giveDofManDofIDMask: unsupported mode");
+        OOFEM_ERROR("Unsupported mode");
     }
 
     return 0; // to suppress compiler warning
@@ -274,21 +274,21 @@ IntElPoint :: computeNumberOfDofs()
 
 
 void
-IntElPoint :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+IntElPoint :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
 
     switch ( domain->giveNumberOfSpatialDimensions() ) {
     case 1:
-        answer.setValues(1, D_u);
+        answer = IntArray({ D_u });
         break;
     case 2:
-        answer.setValues(2, D_u, D_v);
+        answer = { D_u, D_v };
         break;
     case 3:
-        answer.setValues(3, D_u, D_v, D_w);
+        answer = { D_u, D_v, D_w };
         break;
     default:
-        OOFEM_ERROR1("IntElPoint :: giveDofManDofIDMask: unsupported mode");
+        OOFEM_ERROR("Unsupported mode");
     }
 
 }
@@ -305,7 +305,7 @@ IntElPoint :: computeLocalSlipDir(FloatArray &normal)
         normal.at(3) = domain->giveNode(this->referenceNode)->giveCoordinate(3) - this->giveNode(1)->giveCoordinate(3);
     } else {
         if ( normal.at(1) == 0 && normal.at(2) == 0 && normal.at(3) == 0 ) {
-            _error("computeLocalSlipDir: normal is not defined (referenceNode=0,normal=(0,0,0))");
+            OOFEM_ERROR("Normal is not defined (referenceNode=0,normal=(0,0,0))");
         }
     }
 

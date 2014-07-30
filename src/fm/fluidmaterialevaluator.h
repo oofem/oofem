@@ -79,12 +79,12 @@ protected:
 
     IntArray vars;
 
-    AList< GaussPoint >gps;
+    std::vector< std :: unique_ptr< GaussPoint > >gps;
 
     std :: ofstream outfile;
 
 public:
-    FluidMaterialEvaluator(int i, EngngModel *_master = NULL);
+    FluidMaterialEvaluator(int i, EngngModel * _master = NULL);
     virtual ~FluidMaterialEvaluator();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -92,7 +92,7 @@ public:
     virtual void solveYourself();
 
     /// Empty implementation, not relevant for this problem class.
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) {};
+    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep) { };
     virtual int checkConsistency();
     virtual void doStepOutput(TimeStep *tStep);
     virtual TimeStep *giveNextStep();

@@ -55,7 +55,7 @@ REGISTER_Element(Quad1_mt);
 
 FEI2dQuadLin Quad1_ht :: interpolation(1, 2);
 
-Quad1_ht :: Quad1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM)
+Quad1_ht :: Quad1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans  = 4;
     numberOfGaussPoints = 4;
@@ -79,9 +79,8 @@ void
 Quad1_ht :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -97,12 +96,6 @@ Quad1_ht :: initializeFrom(InputRecord *ir)
         return result;
     }
 
-    if ( !( ( numberOfGaussPoints == 4 ) ||
-            ( numberOfGaussPoints == 9 ) ||
-            ( numberOfGaussPoints == 16 ) ) ) {
-        numberOfGaussPoints = 4;
-    }
-
     return IRRT_OK;
 }
 
@@ -112,8 +105,8 @@ Quad1_ht :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
+                                                                       FEIElementGeometryWrapper(this) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, gp); // 't'
     volume      = determinant * weight * thickness;
@@ -132,36 +125,29 @@ Quad1_ht :: giveThicknessAt(const FloatArray &gcoords)
 double
 Quad1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
-                                                                        FEIElementGeometryWrapper(this) );
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
+                                                                       FEIElementGeometryWrapper(this) );
     FloatArray gc;
-    this->interpolation.edgeLocal2global( gc, iEdge, * gp->giveCoordinates(),
-                                          FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeLocal2global( gc, iEdge, * gp->giveNaturalCoordinates(),
+                                         FEIElementGeometryWrapper(this) );
     // temporary gauss point on element (not edge) to evaluate thickness
-    GaussPoint _gp( NULL, 1, new FloatArray(gc), 1.0, gp->giveMaterialMode() );
+    GaussPoint _gp( NULL, 1, new FloatArray ( gc ), 1.0, gp->giveMaterialMode() );
     double thick = this->giveCrossSection()->give(CS_Thickness, & _gp); // 't'
-    return result * thick * gp->giveWeight();
+    return result *thick *gp->giveWeight();
 }
 
 Interface *
 Quad1_ht :: giveInterface(InterfaceType interface)
 {
     if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == EIPrimaryFieldInterfaceType ) {
-        return static_cast< EIPrimaryFieldInterface * >( this );
+        return static_cast< EIPrimaryFieldInterface * >(this);
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     }
 
     return NULL;
-}
-
-int
-Quad1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
 }
 
 
@@ -254,7 +240,7 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &context)
             EMAddGraphicsToModel(ESIModel(), tr);
         }
     } else if ( ( ( ( emode == HeatTransferEM ) || ( emode == HeatMass1TransferEM ) ) && ( itype == IST_Temperature ) ) ||
-                ( ( emode == HeatMass1TransferEM ) && ( itype == IST_MassConcentration_1 ) ) ) {
+               ( ( emode == HeatMass1TransferEM ) && ( itype == IST_MassConcentration_1 ) ) ) {
         IntArray dofMask(1);
         if ( itype == IST_Temperature ) {
             dofMask.at(1) = T_f;

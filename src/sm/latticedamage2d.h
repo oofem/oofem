@@ -134,9 +134,9 @@ protected:
 public:
 
     /// Constructor
-    LatticeDamage2dStatus(int n, Domain *d, GaussPoint *g);
+    LatticeDamage2dStatus(int n, Domain * d, GaussPoint * g);
     /// Destructor
-    virtual ~LatticeDamage2dStatus() {}
+    virtual ~LatticeDamage2dStatus() { }
 
 
     /// Returns the last equilibrated scalar measure of the largest strain level
@@ -184,7 +184,7 @@ public:
      * Assign the temp value of plastic strain.
      * @param v New temp value of plastic strain.
      */
-    void letTempReducedStrainBe(const FloatArray &v)  { tempReducedStrain = v; }
+    void letTempReducedStrainBe(FloatArray v)  { tempReducedStrain = std :: move(v); }
 
     /// Prints the receiver state to given stream
     void printOutputAt(FILE *file, TimeStep *tStep);
@@ -288,7 +288,7 @@ protected:
 public:
 
     /// Constructor
-    LatticeDamage2d(int n, Domain *d);
+    LatticeDamage2d(int n, Domain * d);
     /// Destructor
     virtual ~LatticeDamage2d();
 

@@ -62,7 +62,7 @@ protected:
     int couplingFlag, couplingNumber;
 
 public:
-    Lattice2d(int n, Domain *d);
+    Lattice2d(int n, Domain * d);
     virtual ~Lattice2d();
 
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
@@ -88,7 +88,7 @@ public:
     virtual double giveArea() { return this->width * this->thickness; }
 
     virtual int computeNumberOfDofs() { return 6; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual int giveCrackFlag();

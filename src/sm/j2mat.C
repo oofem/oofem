@@ -60,7 +60,6 @@ J2Mat :: ~J2Mat()
 IRResultType
 J2Mat :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     double value;
 
@@ -244,7 +243,7 @@ J2Mat :: computeKGradientVector(FloatArray &answer, functType ftype, int isurf, 
     FloatArray reducedKinematicGrad;
 
     if ( !hasHardening() ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
@@ -345,7 +344,7 @@ J2Mat :: computeReducedSSGradientMatrix(FloatMatrix &gradientMatrix,  int isurf,
         }
 
         f = this->computeJ2InvariantAt(helpVector);
-        f12 = pow(f, 1. / 2.);
+        f12 = sqrt(f);
         f32 = pow(f, 3. / 2.);
 
         ax = helpVector.at(1);
@@ -461,7 +460,7 @@ J2Mat :: computeJ2InvariantAt(const FloatArray &stressVector)
     v3 = ( ( stressVector.at(3) - stressVector.at(1) ) * ( stressVector.at(3) - stressVector.at(1) ) );
 
     answer = ( 1. / 6. ) * ( v1 + v2 + v3 ) + stressVector.at(4) * stressVector.at(4) +
-             stressVector.at(5) * stressVector.at(5) + stressVector.at(6) * stressVector.at(6);
+    stressVector.at(5) * stressVector.at(5) + stressVector.at(6) * stressVector.at(6);
 
     return answer;
 }
@@ -486,7 +485,7 @@ J2Mat :: giveStressBackVector(FloatArray &answer, GaussPoint *gp,
             answer.at( mask.at(i) ) = ( -1.0 ) * this->kinematicModuli * strainSpaceHardeningVars.at(i);
         }
     } else {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 }

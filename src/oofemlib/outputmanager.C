@@ -51,7 +51,6 @@ OutputManager :: OutputManager(Domain *d) : dofman_out(), dofman_except(), eleme
 IRResultType
 OutputManager :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     tstep_all_out_flag  = ir->hasField(_IFT_OutputManager_tstepall);
@@ -159,11 +158,9 @@ OutputManager :: _testDofManOutput(int number)
         selected  = 1;
     } else {
         // test for particular dofman selection
-        std :: list< Range > :: iterator dofmanOutIter;
-
         int _label = domain->giveDofManager(number)->giveLabel();
-        for ( dofmanOutIter = dofman_out.begin(); dofmanOutIter != dofman_out.end(); ++dofmanOutIter ) {
-            if ( ( * dofmanOutIter ).test(_label) ) {
+        for ( Range &range: dofman_out ) {
+            if ( range.test(_label) ) {
                 selected  = 1;
                 break;
             }
@@ -176,13 +173,11 @@ OutputManager :: _testDofManOutput(int number)
     }
 
     // if selected check exclude list
-    std :: list< Range > *list2 = & ( this->dofman_except );
-    std :: list< Range > :: iterator dofmanExceptIter;
     int _label = domain->giveDofManager(number)->giveLabel();
 
-    for ( dofmanExceptIter = list2->begin(); dofmanExceptIter != list2->end(); ++dofmanExceptIter ) {
+    for ( Range &range: this->dofman_except ) {
         // test if excluded
-        if ( ( * dofmanExceptIter ).test(_label) ) {
+        if ( range.test(_label) ) {
             return 0;
         }
     }
@@ -211,11 +206,10 @@ OutputManager :: _testElementOutput(int number)
         selected  = 1;
     } else {
         // test for particular element selection
-        std :: list< Range > :: iterator elemOutIter;
         int _label = domain->giveElement(number)->giveLabel();
 
-        for ( elemOutIter = element_out.begin(); elemOutIter != element_out.end(); ++elemOutIter ) {
-            if ( ( * elemOutIter ).test(_label) ) {
+        for ( Range &range: this->element_out ) {
+            if ( range.test(_label) ) {
                 selected  = 1;
                 break;
             }
@@ -228,12 +222,11 @@ OutputManager :: _testElementOutput(int number)
     }
 
     // if selected check exclude list
-    std :: list< Range > :: iterator elemExceptIter;
     int _label = domain->giveElement(number)->giveLabel();
 
-    for ( elemExceptIter = element_except.begin(); elemExceptIter != element_except.end(); ++elemExceptIter ) {
+    for ( Range &range: element_except ) {
         // test if excluded
-        if ( ( * elemExceptIter ).test(_label) ) {
+        if ( range.test(_label) ) {
             return 0;
         }
     }
@@ -255,10 +248,9 @@ OutputManager :: testTimeStepOutput(TimeStep *tStep)
         }
     }
 
-    std :: list< Range > :: iterator tstepsIter;
-    for ( tstepsIter = tsteps_out.begin(); tstepsIter != tsteps_out.end(); ++tstepsIter ) {
+    for ( Range &range: this->tsteps_out ) {
         // test if INCLUDED
-        if ( ( * tstepsIter ).test( tStep->giveNumber() ) ) {
+        if ( range.test( tStep->giveNumber() ) ) {
             return 1;
         }
     }

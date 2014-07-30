@@ -112,14 +112,13 @@ HydrationModel :: HydrationModel(MixtureType mix, FindRootMethod usefr) : Materi
     if ( ( usefr ) && ( usefr <= frMixed ) ) {
         useFindRoot = usefr;
     } else {
-        _error("constructor: unknown FindRootMethod\n");
+        OOFEM_ERROR("unknown FindRootMethod");
     }
 }
 
 IRResultType
 HydrationModel :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                            // Required by IR_GIVE_FIELD macro
     double value;
 
@@ -129,7 +128,7 @@ HydrationModel :: initializeFrom(InputRecord *ir)
     if ( initialHydrationDegree >= 0. ) {
         OOFEM_LOG_INFO("HydrationModel: Hydration from %.2f.", initialHydrationDegree);
     } else {
-        _error("Hydration degree input incorrect, use 0..1 to set initial material hydration degree.");
+        OOFEM_ERROR("Hydration degree input incorrect, use 0..1 to set initial material hydration degree.");
     }
 
     if ( ir->hasField(_IFT_HydrationModel_c60mix) ) {
@@ -208,7 +207,7 @@ HydrationModel :: setMixture(MixtureType mix)
 
         e0 = 0.05; // ksi_0
     } else {
-        _error("Unknown mixture type!");
+        OOFEM_ERROR("Unknown mixture type!");
     }
 
     ear = 4000; // activation term [K]
@@ -246,7 +245,7 @@ HydrationModel :: dAdksi(double ksi)
     enaksi = exp(-ba * ksi);
 
     return ( aa * ( ca * da * ksinad * ( enaksi - 1 ) / ksi + ba * enaksi * ( ca * ksinad + 1 ) ) /
-             pow(1 + ca * ksinad, 2) );
+            pow(1 + ca * ksinad, 2) );
 }
 
 double
@@ -303,7 +302,7 @@ HydrationModel :: giveStatus(GaussPoint *gp) const
             hmi->setHydrationModelStatus(status);
         }
     } else {
-        _error("giveStatus: Master status undefined.");
+        OOFEM_ERROR("Master status undefined.");
     }
 
     return status;
@@ -332,12 +331,12 @@ HydrationModel :: giveCharacteristicValue(const FloatArray &vec, MatResponseMode
 
     if ( ( rmode == IntSource ) || ( rmode == IntSource_hh ) || ( rmode == IntSource_ww ) || ( rmode == IntSource_wh ) || ( rmode == IntSource_hw ) ) {
         if ( vec.isEmpty() ) {
-            _error("giveCharacteristicValue: undefined state vector.");
+            OOFEM_ERROR("undefined state vector.");
         }
 
         answer = computeIntSource(vec, gp, tStep, rmode);
     } else {
-        _error("giveCharacteristicValue: wrong MatResponseMode.");
+        OOFEM_ERROR("wrong MatResponseMode.");
     }
 
     return answer;
@@ -364,7 +363,7 @@ HydrationModel :: computeHydrationDegreeIncrement(double ksi, double T, double h
             break;
 #ifdef DEBUG
         default: {
-            OOFEM_ERROR2("HydrationModel :: dksi - unknown FindRootMethod %d", useFindRoot);
+            OOFEM_ERROR("unknown FindRootMethod %d", useFindRoot);
         }
 #endif
         }
@@ -409,13 +408,13 @@ HydrationModel :: computeIntSource(const FloatArray &vec, GaussPoint *gp, TimeSt
         case IntSource:
         case IntSource_hh: return -le *dksidT(ksi, T, h, dt);
 
-        case IntSource_ww: return we * dksidh(ksi, T, h, dt);
+        case IntSource_ww: return we *dksidh(ksi, T, h, dt);
 
         case IntSource_hw: return -le *dksidh(ksi, T, h, dt);
 
         case IntSource_wh: return -we *dksidT(ksi, T, h, dt);
 
-        default: _error("computeIntSource: Wrong MatResponseMode.");
+        default: OOFEM_ERROR("Wrong MatResponseMode.");
         }
     }
 
@@ -457,7 +456,7 @@ HydrationModel :: updateInternalState(const FloatArray &vec, GaussPoint *gp, Tim
             h = 1; // assume saturated if undefined
         }
     } else {
-        _error("updateInternalState: undefined state vector.");
+        OOFEM_ERROR("undefined state vector.");
     }
 
     ksi = status->giveHydrationDegree();
@@ -598,7 +597,6 @@ HydrationModelStatusInterface :: printOutputAt(FILE *file, TimeStep *tStep)
 IRResultType
 HydrationModelInterface :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
     double value;
 
@@ -620,7 +618,7 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
         constantHydrationDegree = -value;
         OOFEM_LOG_INFO("HydratingMaterial: Hydration degree set to %.2f.", -value);
     } else {
-        OOFEM_ERROR("HydrationModelInterface :: initializeFrom - Hydration degree input incorrect, use -1..<0 for constant hydration degree, 0..1 to set initial material hydration degree.");
+        OOFEM_ERROR("Hydration degree input incorrect, use -1..<0 for constant hydration degree, 0..1 to set initial material hydration degree.");
     }
 
     // Material cast time - start of hydration
@@ -638,7 +636,7 @@ void
 HydrationModelInterface :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep)
 {
     if ( hydrationModel ) {
-        TimeStep *hydraTime = new TimeStep( ( const TimeStep ) * tStep );
+        TimeStep *hydraTime = new TimeStep( ( const TimeStep ) *tStep );
         int notime = 0;
         if ( tStep->giveTargetTime() - tStep->giveTimeIncrement() < castAt ) {
             if ( tStep->giveTargetTime() >= castAt ) {

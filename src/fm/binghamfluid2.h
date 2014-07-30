@@ -70,7 +70,7 @@ protected:
 
 public:
     /// Constructor - creates new BinghamFluidMaterial2Status with number n, belonging to domain d and IntegrationPoint g.
-    BinghamFluidMaterial2Status(int n, Domain *d, GaussPoint *g);
+    BinghamFluidMaterial2Status(int n, Domain * d, GaussPoint * g);
     /// Destructor
     virtual ~BinghamFluidMaterial2Status() { }
 
@@ -91,7 +91,7 @@ public:
     void letTempDevStressMagnitudeBe(double _val) { temp_devStressMagnitude = _val; }
 
     const FloatArray &giveTempDeviatoricStrainVector() { return temp_deviatoricStrainVector; }
-    void letTempDeviatoricStrainVectorBe(const FloatArray &v) { temp_deviatoricStrainVector = v; }
+    void letTempDeviatoricStrainVectorBe(FloatArray v) { temp_deviatoricStrainVector = std :: move(v); }
 
     virtual const char *giveClassName() const { return "BinghamFluidMaterialStatus"; }
 };
@@ -120,14 +120,14 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    BinghamFluidMaterial2(int n, Domain *d);
+    BinghamFluidMaterial2(int n, Domain * d);
     /// Destructor.
     virtual ~BinghamFluidMaterial2() { }
 
     virtual void computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep);
 
-    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix & answer, MatResponseMode, GaussPoint * gp,
-                                               TimeStep * tStep);
+    virtual void giveDeviatoricStiffnessMatrix(FloatMatrix &answer, MatResponseMode, GaussPoint *gp,
+                                               TimeStep *tStep);
 
     virtual double giveEffectiveViscosity(GaussPoint *gp, TimeStep *tStep);
     virtual double give(int aProperty, GaussPoint *gp);

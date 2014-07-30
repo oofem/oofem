@@ -100,20 +100,20 @@ protected:
     IntArray crackMap;
 
 public:
-    RCM2MaterialStatus(int n, Domain *d, GaussPoint *g);
+    RCM2MaterialStatus(int n, Domain * d, GaussPoint * g);
     virtual ~RCM2MaterialStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    void getPrincipalStrainVector(FloatArray &answer) const { answer =  principalStrain; }
-    void getPrincipalStressVector(FloatArray &answer) const { answer =  principalStress; }
-    void givePrevPrincStrainVector(FloatArray &answer) const { answer = oldPrincipalStrain; }
-    void givePrevPrincStressVector(FloatArray &answer) const { answer = oldPrincipalStress; }
-    void letPrincipalStrainVectorBe(const FloatArray &pv) { principalStrain = pv; }
-    void letPrincipalStressVectorBe(const FloatArray &pv) { principalStress = pv; }
+    const FloatArray &getPrincipalStrainVector() const { return principalStrain; }
+    const FloatArray &getPrincipalStressVector() const { return principalStress; }
+    const FloatArray &givePrevPrincStrainVector() const { return oldPrincipalStrain; }
+    const FloatArray &givePrevPrincStressVector() const { return oldPrincipalStress; }
+    void letPrincipalStrainVectorBe(FloatArray pv) { principalStrain = std :: move(pv); }
+    void letPrincipalStressVectorBe(FloatArray pv) { principalStress = std :: move(pv); }
 
-    void giveCrackMap(IntArray &answer) const { answer = crackMap; }
-    void letCrackMapBe(IntArray &map) { crackMap = map; }
+    const IntArray & giveCrackMap() const { return crackMap; }
+    void letCrackMapBe(IntArray map) { crackMap = std :: move(map); }
     virtual int isCrackActive(int i) const;
     virtual int giveNumberOfActiveCracks() const;
     virtual int giveNumberOfTempActiveCracks() const;
@@ -122,27 +122,33 @@ public:
     //double giveMinCrackStrainsForFullyOpenCrack (int icrack) {return minEffStrainsForFullyOpenCrack.at(icrack);}
     //void   setMinCrackStrainsForFullyOpenCrack (int icrack, double val) {minEffStrainsForFullyOpenCrack.at(icrack) = val;}
 
-    void giveTempCrackDirs(FloatMatrix &answer) { answer =  tempCrackDirs; }
-    void letTempCrackDirsBe(const FloatMatrix &a) { tempCrackDirs = a; }
-    //void giveTempMaxCrackStrain(FloatArray& answer) {answer = tempMaxCrackStrains;}
+    const FloatMatrix &giveTempCrackDirs() { return tempCrackDirs; }
+    void letTempCrackDirsBe(FloatMatrix a) { tempCrackDirs = std :: move(a); }
+    //const FloatArray & giveTempMaxCrackStrain() { return tempMaxCrackStrains;}
     double giveTempMaxCrackStrain(int icrack) { return tempMaxCrackStrains.at(icrack); }
     void setTempMaxCrackStrain(int icrack, double val) { tempMaxCrackStrains.at(icrack) = val; }
-    void giveTempCrackStatus(IntArray &answer) { answer = tempCrackStatuses; }
+    const IntArray &giveTempCrackStatus() { return tempCrackStatuses; }
     int giveTempCrackStatus(int icrack) const { return tempCrackStatuses.at(icrack); }
     void setTempCrackStatus(int icrack, int val) { tempCrackStatuses.at(icrack) = val; }
 
-    void giveCrackStrainVector(FloatArray &answer) { answer = crackStrainVector; }
+    const FloatArray &giveCrackStrainVector() const { return crackStrainVector; }
     double giveCrackStrain(int icrack) const { return crackStrainVector.at(icrack); }
-    void giveOldCrackStrainVector(FloatArray &answer) { answer = oldCrackStrainVector; }
-    void letCrackStrainVectorBe(const FloatArray &a) { crackStrainVector = a; }
-    void letOldCrackStrainVectorBe(const FloatArray &a) { oldCrackStrainVector = a; }
+    const FloatArray &giveOldCrackStrainVector() { return oldCrackStrainVector; }
+    void letCrackStrainVectorBe(FloatArray a) { crackStrainVector = std :: move(a); }
+    void letOldCrackStrainVectorBe(FloatArray a) { oldCrackStrainVector = std :: move(a); }
 
-    double giveCharLength(int icrack) const { if ( icrack ) { return charLengths.at(icrack); } else { return 0.0; } }
+    double giveCharLength(int icrack) const {
+        if ( icrack ) {
+            return charLengths.at(icrack);
+        } else {
+            return 0.0;
+        }
+    }
     void setCharLength(int icrack, double val) { charLengths.at(icrack) = val; }
 
     // query for non-tem variables (usefull for postprocessing)
-    void giveCrackDirs(FloatMatrix &answer) { answer = crackDirs; }
-    void giveCrackStatus(IntArray &answer) { answer = crackStatuses; }
+    const FloatMatrix &giveCrackDirs() { return crackDirs; }
+    const IntArray &giveCrackStatus() { return crackStatuses; }
     int giveAlreadyCrack() const { return this->giveNumberOfActiveCracks(); }
 
     // definition
@@ -176,7 +182,7 @@ protected:
     //double beta;
 
 public:
-    RCM2Material(int n, Domain *d);
+    RCM2Material(int n, Domain * d);
     virtual ~RCM2Material();
 
     // identification and auxiliary functions
@@ -234,9 +240,9 @@ protected:
     virtual double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
                                        double effStrain, int i) { return 1.e20; }
 
-    virtual void giveMaterialStiffnessMatrix(FloatMatrix & answer, MatResponseMode,
-                                             GaussPoint * gp,
-                                             TimeStep * tStep);
+    virtual void giveMaterialStiffnessMatrix(FloatMatrix &answer, MatResponseMode,
+                                             GaussPoint *gp,
+                                             TimeStep *tStep);
 
     void giveCrackedStiffnessMatrix(FloatMatrix &answer,
                                     MatResponseMode rMode,
@@ -253,9 +259,9 @@ protected:
 
     void giveRealPrincipalStressVector3d(FloatArray &answer, GaussPoint *,
                                          FloatArray &, FloatMatrix &, TimeStep *);
-    void giveNormalElasticStiffnessMatrix(FloatMatrix & answer,
+    void giveNormalElasticStiffnessMatrix(FloatMatrix &answer,
                                           bool reduce, MatResponseMode,
-                                          GaussPoint *, TimeStep * tStep,
+                                          GaussPoint *, TimeStep *tStep,
                                           const FloatMatrix &);
     void updateActiveCrackMap(GaussPoint *gp, const IntArray *activatedCracks = NULL);
     // Give3dMaterialStiffnessMatrix should return 3d material stiffness matrix

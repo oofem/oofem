@@ -34,8 +34,8 @@
 
 #include "shell7basexfem.h"
 #include "shell7base.h"
-#include "enrichmentitem.h"
-#include "xfemmanager.h"
+#include "xfem/enrichmentitem.h"
+#include "xfem/xfemmanager.h"
 #include "dofmanager.h"
 #include "constantpressureload.h"
 //#include "InterfaceMaterials\Old\simpleinterfacemat.h"
@@ -43,9 +43,10 @@
 #include "InterfaceMaterials/intmatbilinczfagerstrom.h"
 #include "mathfem.h"
 #include "node.h"
-
 #include "geometry.h"
-
+#include "cltypes.h"
+#include "xfem/enrichmentitems/crack.h"
+#include "xfem/enrichmentitems/shellcrack.h"
 namespace oofem {
 
 /* Scale factor fo the discontinuous dofs. Implies that the corresponding 
@@ -55,6 +56,13 @@ const double DISC_DOF_SCALE_FAC = 1.0e-3;
 
 Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this) 
 {
+}
+
+Shell7BaseXFEM :: ~Shell7BaseXFEM()
+{
+    for ( auto &iRule: czIntegrationRulesArray ) {
+        delete iRule;
+    }
 }
 
 int 
@@ -78,7 +86,7 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStat
     // Compute necessary quantities for evaluation of failure criterias
     ///@todo Ugly code and not tested in a while so probably broken
 
-    if ( DamagedNeighborLayeredStatus *status = dynamic_cast<DamagedNeighborLayeredStatus *>(fcStatus) ) {
+    if ( DamagedNeighborLayeredStatus * status = dynamic_cast< DamagedNeighborLayeredStatus * >(fcStatus) ) {
         /*
         Go through the neighbors of the element and check for each layer if the 
         corresponding cz is damaged (if applicable)
@@ -152,7 +160,6 @@ Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStat
 
 IRResultType Shell7BaseXFEM :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     //IRResultType result;                   // Required by IR_GIVE_FIELD macro
     
     if ( ir->hasField(_IFT_Shell7BaseXFEM_CohesiveZoneMaterial) ) {
@@ -179,7 +186,7 @@ Interface
     if ( it != XfemElementInterfaceType ) {
         return Shell7Base :: giveInterface(it);
     } else if ( it == XfemElementInterfaceType ) {
-        return ( XfemElementInterface * ) this;
+        return static_cast< XfemElementInterface * >(this);
     } else {
         return Shell7Base :: giveInterface(it); ///@todo remove
     }
@@ -187,12 +194,12 @@ Interface
 
 
 void
-Shell7BaseXFEM :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+Shell7BaseXFEM :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     // Returns the total id mask of the dof manager - regular id's + enriched id's
 
     // Continuous part
-    Shell7Base :: giveDofManDofIDMask(inode, ut, answer);
+    Shell7Base :: giveDofManDofIDMask(inode, answer);
     XfemManager *xMan = this->giveDomain()->giveXfemManager(); // xman not initialized on el. level when this is first called
 
     // Discontinuous part
@@ -290,7 +297,7 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
 
     const IntArray &ordering_cont = this->giveOrdering(All);
     IntArray fieldDofId; 
-    Shell7Base::giveDofManDofIDMask(0, EID_MomentumBalance, fieldDofId);
+    Shell7Base :: giveDofManDofIDMask(0, fieldDofId);
 
 
     IntArray ordering_temp, activeDofsArrayTemp;
@@ -306,7 +313,7 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
         
 
         if ( ei == NULL) { // return mask corresponding to the regular id's
-           Shell7Base ::giveDofManDofIDMask(i, EID_MomentumBalance, dofManDofIdMask);
+            Shell7Base :: giveDofManDofIDMask(i, dofManDofIdMask);
         } else {
             if ( ei->isDofManEnriched(*dMan) ) {
                 ei->giveEIDofIdArray(dofManDofIdMask); 
@@ -314,16 +321,17 @@ Shell7BaseXFEM :: computeOrderingArray( IntArray &orderingArray, IntArray &activ
         }
     
         for (int j = 1; j <= dofManDofIdMask.giveSize(); j++ ) {
-            int pos = dMan->findDofWithDofId( (DofIDItem) dofManDofIdMask.at(j) );
+            int pos = dMan->findDofWithDofId( ( DofIDItem ) dofManDofIdMask.at(j) ) - dMan->begin() + 1;
+            //int pos = dMan->findDofWithDofId( (DofIDItem) dofManDofIdMask.at(j) );
             activeDofPos++;
             ordering_temp      .at(activeDofPos) = orderingDofIndex + pos;
             activeDofsArrayTemp.at(activeDofPos) = activeDofIndex   + j;
         }
-        this->giveDofManDofIDMask(i, EID_MomentumBalance, dofManDofIdMaskAll);
+        this->giveDofManDofIDMask(i, dofManDofIdMaskAll);
         orderingDofIndex += dofManDofIdMaskAll.giveSize();
         activeDofIndex   += fieldDofId.giveSize();
 
-        dofManDofIdMask.resize(0);
+        dofManDofIdMask.clear();
     }
     
     // Reduce arrays to actual size 
@@ -395,16 +403,15 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
-        for ( int j = 1; j <= iRuleL->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
-            lCoords = *gp->giveCoordinates();           
+        for ( GaussPoint *gp: *iRuleL ) {
+            lCoords = * gp->giveNaturalCoordinates();
 
             this->computeEnrichedBmatrixAt(lCoords, B, NULL);
             this->computeEnrichedBmatrixAt(lCoords, BEnr, ei);
             this->computeGeneralizedStrainVectorNew(genEps,  solVec,  B);
             this->computeGeneralizedStrainVectorNew(genEpsD, solVecD, BEnr);
 
-            double zeta = giveGlobalZcoord( *gp->giveCoordinates( ) );
+                double zeta = giveGlobalZcoord(gp->giveNaturalCoordinate(3), lCoords);
             this->computeSectionalForcesAt(sectionalForces, gp, mat, tStep, genEps, genEpsD, zeta);
 
             // Computation of nodal forces: f = B^t*[N M T Ms Ts]^t
@@ -436,7 +443,7 @@ Shell7BaseXFEM :: evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei
         this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
         ei->interpLevelSet(levelSet, N, elNodes);
     } else {
-        OOFEM_ERROR1("Shell7BaseXFEm error in evaluation of levelset");
+        OOFEM_ERROR("error in evaluation of levelset");
     }          
     return levelSet;
 }
@@ -455,7 +462,7 @@ Shell7BaseXFEM :: edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem
         this->fei->edgeEvalN( N, 1, lCoords, FEIElementGeometryWrapper(this) );
         ei->interpLevelSet(levelSet, N, elNodes);
     } else {
-        OOFEM_ERROR1("Shell7BaseXFEm error in evaluation of levelset");
+        OOFEM_ERROR("error in evaluation of levelset");
     }          
     return levelSet;
 }
@@ -491,11 +498,10 @@ Shell7BaseXFEM :: giveMaxCZDamages(FloatArray &answer, TimeStep *tStep)
         if ( hasCohesiveZone(i+1) ) {
             IntegrationRule *iRule = czIntegrationRulesArray [ i ];
             double max = 0.0;    
-            for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                IntegrationPoint *ip = iRule->getIntegrationPoint(j);
+            for ( GaussPoint *gp: *iRule ) {
 
                 mat = static_cast < StructuralInterfaceMaterial * > (this->layeredCS->giveInterfaceMaterial(i+1) );
-                mat->giveIPValue(ipValues, ip, IST_DamageScalar, tStep);
+                mat->giveIPValue(ipValues, gp, IST_DamageScalar, tStep);
 
                 double val = ipValues.at(1);
                 if ( val > max ) {
@@ -535,10 +541,9 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         FloatMatrix lambda, lambdaN, Q;
         FloatArray Fp, T, nCov, xd, unknowns, genEpsC, genEpsD;
 
-        for ( int i = 1; i <= iRuleL->giveNumberOfIntegrationPoints(); i++ ) {
-            IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);
-            lCoords.at(1) = ip->giveCoordinate(1);
-            lCoords.at(2) = ip->giveCoordinate(2);
+    for ( GaussPoint *gp: *iRuleL ) {
+        lCoords.at(1) = gp->giveNaturalCoordinate(1);
+        lCoords.at(2) = gp->giveNaturalCoordinate(2);
             lCoords.at(3) = dei->giveDelamXiCoord();
 
             this->computeEnrichedBmatrixAt(lCoords, B, dei);
@@ -563,12 +568,12 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
             F.rotatedWith(Q,'n');
 
             // Compute cohesive traction based on jump
-            intMat->giveFirstPKTraction_3d(T, ip, xd, F, tStep);
+            intMat->giveFirstPKTraction_3d(T, gp, xd, F, tStep);
             lambdaN.beProductOf(lambda,N);
             T.rotatedWith(Q,'t'); // transform back to global coord system
 
             Fp.beTProductOf(lambdaN, T);
-            double dA = this->computeAreaAround(ip,xi);
+            double dA = this->computeAreaAround(gp,xi);
             answerTemp.add(dA*DISC_DOF_SCALE_FAC,Fp);
         }
 
@@ -644,10 +649,9 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
     FloatArray nCov;
     FloatArray interfaceXiCoords;
     this->layeredCS->giveInterfaceXiCoords(interfaceXiCoords);
-    for ( int i = 1; i <= iRuleL->giveNumberOfIntegrationPoints(); i++ ) {
-        IntegrationPoint *ip = iRuleL->getIntegrationPoint(i - 1);
-        lCoords.at(1) = ip->giveCoordinate(1);
-        lCoords.at(2) = ip->giveCoordinate(2);
+    for ( GaussPoint *gp: *iRuleL ) {
+        lCoords.at(1) = gp->giveNaturalCoordinate(1);
+        lCoords.at(2) = gp->giveNaturalCoordinate(2);
         lCoords.at(3) = dei->giveDelamXiCoord();
 
         double zeta = giveGlobalZcoord( lCoords);
@@ -655,14 +659,14 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
         //this->computeNmatrixAt(lCoords, N);
         this->computeEnrichedNmatrixAt(lCoords, N, dei);
                 
-        intMat->give3dStiffnessMatrix_dTdj(K, TangentStiffness, ip, tStep);
+        intMat->give3dStiffnessMatrix_dTdj(K, TangentStiffness, gp, tStep);
         this->evalInitialCovarNormalAt(nCov, lCoords);
         Q.beLocalCoordSys(nCov);
         K.rotatedWith(Q,'t');   // rotate back to global coord system
 
         this->computeTripleProduct(temp, lambda, K, lambda);
         this->computeTripleProduct(tangent, N, temp, N);
-        double dA = this->computeAreaAround(ip,xi);
+        double dA = this->computeAreaAround(gp, xi);
         answerTemp.add(dA,tangent); 
     }
 
@@ -698,16 +702,16 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
         IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
         StructuralMaterial *layerMaterial = static_cast< StructuralMaterial* >( domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) ) );
 
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            IntegrationPoint *ip = iRule->getIntegrationPoint(i);
-            lCoords = *ip->giveCoordinates();
+        for ( GaussPoint *gp: *iRule ) {
+            this->discComputeBulkTangentMatrix(KCC, KCD, KDD, gp, layerMaterial, layer, tStep);
+            lCoords = * gp->giveNaturalCoordinates();
             this->computeEnrichedBmatrixAt(lCoords, Bc, NULL);
             this->computeGeneralizedStrainVectorNew(genEpsC, solVecC , Bc);
             
-            Shell7Base :: computeLinearizedStiffness(ip, layerMaterial, tStep, A, genEpsC);
+            Shell7Base :: computeLinearizedStiffness(gp, layerMaterial, tStep, A, genEpsC);
             
             // Continuous part K_{c,c}
-            this->discComputeBulkTangentMatrix(KCC, ip, NULL, NULL, layer, A, tStep);
+            this->discComputeBulkTangentMatrix(KCC, gp, NULL, NULL, layer, A, tStep);
             answer.assemble(KCC, orderingC, orderingC);
 
             // Discontinuous part
@@ -725,7 +729,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                         this->computeOrderingArray( orderingArrays[m-1], activeDofsArrays[m-1], eiM); 
                     }
 
-                    this->discComputeBulkTangentMatrix(KCD, ip, NULL, eiM, layer, A, tStep);
+                    this->discComputeBulkTangentMatrix(KCD, gp, NULL, eiM, layer, A, tStep);
                     tempRed.beSubMatrixOf(KCD, activeDofsC, activeDofsArrays[m-1]);
                     answer.assemble(tempRed, orderingC, orderingArrays[m-1]);
                     tempRedT.beTranspositionOf(tempRed);
@@ -736,7 +740,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
                         EnrichmentItem *eiK = this->xMan->giveEnrichmentItem(k);
                         
                         if ( eiK->isElementEnriched(this) ) {
-                            this->discComputeBulkTangentMatrix(KDD, ip, eiM, eiK, layer, A, tStep);
+                            this->discComputeBulkTangentMatrix(KDD, gp, eiM, eiK, layer, A, tStep);
                             if ( activeDofsArrays[m-1].giveSize() != 0 && activeDofsArrays[k-1].giveSize() != 0 ) {
                                 tempRed.beSubMatrixOf(KDD, activeDofsArrays[m-1], activeDofsArrays[k-1]);
                                 answer.assemble(tempRed, orderingArrays[m-1], orderingArrays[k-1]);
@@ -773,13 +777,12 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
         Load *load = this->domain->giveLoad(load_number);
         std :: vector< double > efM, efK;
 
-        if ( ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( load ) ) {
+        if ( ConstantPressureLoad * pLoad = dynamic_cast< ConstantPressureLoad * >(load) ) {
 
             IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];
 
-            for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-                IntegrationPoint *ip = iRule->getIntegrationPoint(i);
-                this->computePressureTangentMatrixDis(KCC, KCD, KDD, ip, load, iSurf, tStep);
+            for ( GaussPoint *gp: *iRule ) {
+                this->computePressureTangentMatrixDis(KCC, KCD, KDD, gp, load, iSurf, tStep);
                 KCD.times(DISC_DOF_SCALE_FAC);
                 KDD.times(DISC_DOF_SCALE_FAC*DISC_DOF_SCALE_FAC);
 
@@ -843,12 +846,12 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KdIJ, IntegrationPoi
     FloatMatrix temp, B1, B2;
     FloatMatrix lambda1 [ 3 ], lambda2 [ 3 ];
 
-    FloatArray lCoords;
-    lCoords = *ip->giveCoordinates();
+    FloatArray lCoords = * ip->giveNaturalCoordinates();
     this->computeEnrichedBmatrixAt(lCoords, B1, ei1);
     this->computeEnrichedBmatrixAt(lCoords, B2, ei2);
 
-    double zeta = giveGlobalZcoord( *ip->giveCoordinates( ) );
+    //double zeta = giveGlobalZcoord( *ip->giveCoordinates( ) );
+    double zeta = giveGlobalZcoord( lCoords );
     if ( ei1 ) {
         this->computeLambdaGMatricesDis(lambda1, zeta);
     } else {
@@ -867,6 +870,7 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KdIJ, IntegrationPoi
         this->computeLambdaGMatrices(lambda2, genEpsC, zeta);
     }
 
+    //double zeta = giveGlobalZcoord(ip->giveNaturalCoordinate(3), lCoords);
     double dV = this->computeVolumeAroundLayer(ip, layer);
 
     FloatMatrix LDAD(18,18); 
@@ -895,7 +899,7 @@ void
 Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KCC, FloatMatrix &KCD, FloatMatrix &KDD, IntegrationPoint *ip, Material *mat, int layer, TimeStep *tStep)
 {
 // old remove
-    OOFEM_ERROR1("discComputeBulkTangentMatrix should not be used!!")
+    OOFEM_ERROR("discComputeBulkTangentMatrix should not be used!!")
 }
 
 
@@ -952,15 +956,15 @@ Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix 
     FloatArray g1, g2, genEps;
     FloatMatrix lambdaGC [ 3 ], lambdaNC, lambdaGD [ 3 ], lambdaND;
     double xi   = pLoad->giveLoadOffset();
-
+    double zeta = this->giveGlobalZcoord( xi, * ip->giveNaturalCoordinates() );
     this->giveUpdatedSolutionVector(solVec, tStep);
     // compute w1,w2, KC
-    lcoords.at(1) = ip->giveCoordinate(1);
-    lcoords.at(2) = ip->giveCoordinate(2);
+    lcoords.at(1) = ip->giveNaturalCoordinate(1);
+    lcoords.at(2) = ip->giveNaturalCoordinate(2);
     lcoords.at(3) = xi;     // local coord where load is applied
 
     //double zeta = giveGlobalZcoord( xi, lcoords );
-    double zeta = giveGlobalZcoord( lcoords );
+    //double zeta = giveGlobalZcoord( lcoords );
 
     this->computeNmatrixAt(lcoords, N);
     this->computeBmatrixAt(lcoords, B);
@@ -972,7 +976,7 @@ Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix 
         
     //(xc+xd)*(g1xg2)=xc*g1xg2 + xd*g1xg2 -> xc*(W2*Dg1 - W1*Dg2) + xd*(W2*Dg1 - W1*Dg2)
     // Traction tangent, L =  lambdaN * ( W2*lambdaG_1 - W1*lambdaG_2  ) 
-    load->computeValueAt(pressure, tStep, * ( ip->giveCoordinates() ), VM_Total);        // pressure component   
+    load->computeValueAt(pressure, tStep, * ( ip->giveNaturalCoordinates() ), VM_Total);        // pressure component
     this->evalCovarBaseVectorsAt(lcoords, gcov, genEps);
     g1.beColumnOf(gcov,1);
     g2.beColumnOf(gcov,2);
@@ -1049,8 +1053,7 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( layeredCS->giveLayerMaterial(layer) );
 
-        for ( int j = 1; j <= iRuleL->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
+        for ( GaussPoint *gp: *iRule ) {
 
             FloatMatrix N11, N22, N33, N;
             //this->computeNmatricesAt(gp, N11, N22, N33);
@@ -1058,11 +1061,11 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
             FloatArray xbar, m;
             double gam = 0.;
             //this->computeSolutionFields(xbar, m, gam, solVec, N11, N22, N33);
-            FloatArray localCoords = * gp->giveCoordinates();
+            FloatArray localCoords = * gp->giveNaturalCoordinates();
             this->giveUnknownsAt(localCoords, solVec, xbar, m, gam, tStep);
             //this->computeNmatrixAt(gp, N);
             //unknowns.beProductOf(N,a); // [xbar, m, gam]^T
-            //m.setValues(3, unknowns.at(4), unknowns.at(5), unknowns.at(6) );
+            //m = {unknowns.at(4), unknowns.at(5), unknowns.at(6) };
             //double gam = unknowns.at(7);
 
 
@@ -1075,7 +1078,7 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
              */
 
 
-            double zeta = giveGlobalZcoord(gp->giveCoordinate(3));
+            double zeta = giveGlobalZcoord( gp->giveNaturalCoordinate(3) );
             double fac1 = 4;
             double fac2 = 2.0 * zeta * ( 2.0 + gam * zeta );
             double fac3 = 2.0 * zeta * zeta;
@@ -1158,7 +1161,7 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
 void
 Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode)
 {
-    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
         answer.resize( this->computeNumberOfDofs() );
         answer.zero();
@@ -1194,7 +1197,7 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
         }
         return;
     } else {
-        _error("Shell7BaseXFEM :: computeEdgeLoadVectorAt: load type not supported");
+        OOFEM_ERROR("load type not supported");
         return;
     }
 }
@@ -1215,7 +1218,7 @@ Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, B
     Nf.zero();
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         gp = iRule->getIntegrationPoint(i);
-        lCoords =*gp->giveCoordinates();
+        FloatArray lCoords = *gp->giveNaturalCoordinates();
 
         edgeLoad->computeValueAt(components, tStep, lCoords, mode);
         this->edgeComputeEnrichedNmatrixAt(lCoords, N, ei);
@@ -1224,13 +1227,15 @@ Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, B
             
             // Updated global coord system
             FloatMatrix gcov;
-            FloatArray lCoords = *gp->giveCoordinates();
+            //FloatArray lCoords = *gp->giveCoordinates();
             this->edgeEvalEnrCovarBaseVectorsAt(lCoords, iEdge, gcov, tStep, ei); 
             Q.beTranspositionOf(gcov);
 
             FloatArray distrForces(3), distrMoments(3), t1, t2;
-            distrForces .setValues(3, components.at(1), components.at(2), components.at(3) );
-            distrMoments.setValues(3, components.at(4), components.at(5), components.at(6) );
+            //distrForces .setValues(3, components.at(1), components.at(2), components.at(3) );
+            //distrMoments.setValues(3, components.at(4), components.at(5), components.at(6) );
+            distrForces = { components.at(1), components.at(2), components.at(3) };
+            distrMoments = { components.at(4), components.at(5), components.at(6) };
             t1.beTProductOf(Q, distrForces);
             t2.beTProductOf(Q, distrMoments);
             fT.addSubVector(t1,1);
@@ -1277,9 +1282,9 @@ Shell7BaseXFEM :: edgeEvalEnrCovarBaseVectorsAt(FloatArray &lcoords, const int i
     genEpsEdge.beProductOf(B, solVecEdge); // [dxdxi, dmdxi, m, dgamdxi, gam]^T
 
     FloatArray dxdxi, m, dmdxi;
-    dxdxi.setValues( 3, genEpsEdge.at(1), genEpsEdge.at(2), genEpsEdge.at(3) );
-    dmdxi.setValues( 3, genEpsEdge.at(4), genEpsEdge.at(5), genEpsEdge.at(6) );
-        m.setValues( 3, genEpsEdge.at(7), genEpsEdge.at(8), genEpsEdge.at(9) );
+    dxdxi = { genEpsEdge.at(1), genEpsEdge.at(2), genEpsEdge.at(3) };
+    dmdxi = { genEpsEdge.at(4), genEpsEdge.at(5), genEpsEdge.at(6) };
+    m = { genEpsEdge.at(7), genEpsEdge.at(8), genEpsEdge.at(9) };
     double dgamdxi = genEpsEdge.at(10);
     double gam     = genEpsEdge.at(11);
 
@@ -1306,7 +1311,7 @@ void
 Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
                                          int iSurf, TimeStep *tStep, ValueModeType mode)
 {
-    BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >( load );
+    BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >(load);
 
     if ( surfLoad ) {
         answer.resize( this->giveNumberOfDofs() );
@@ -1325,7 +1330,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 #if 1
         FloatArray solVecD;
         double xi = 0.0; // defaults to geometric midplane
-        if ( ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( load ) ) {
+        if ( ConstantPressureLoad * pLoad = dynamic_cast< ConstantPressureLoad * >(load) ) {
             xi = pLoad->giveLoadOffset();
         }
         std :: vector< double > ef;
@@ -1352,7 +1357,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 #endif
         return;
     } else {
-        _error("Shell7Base :: computeSurfaceLoadVectorAt: load type not supported");
+        OOFEM_ERROR("load type not supported");
         return;
     }
 }
@@ -1870,7 +1875,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
         nodeNum = 1;
         //this->recoverShearStress(tStep);
-        int currentCell = 1;
+        //int currentCell = 1;
         for ( int layer = 1; layer <= numLayers; layer++ ) {   
             numSubCells = (int)this->crackSubdivisions[layer - 1].size();
 
@@ -1923,7 +1928,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
 
     IntArray wedgeToTriMap;
     // For each node in the wedge take the value from the triangle node given by the map below
-    wedgeToTriMap.setValues(15, 1, 2, 3, 1, 2, 3, 4, 5, 6, 4, 5, 6, 1, 2, 3 );
+    wedgeToTriMap = { 1, 2, 3, 1, 2, 3, 4, 5, 6, 4, 5, 6, 1, 2, 3 };
 
     vtkPiece.setNumberOfInternalXFEMVarsToExport(xFemMan->vtkExportFields.giveSize(), nEnrIt, numTotalNodes);
     for ( int field = 1; field <= xFemMan->vtkExportFields.giveSize(); field++ ) {
@@ -2162,7 +2167,7 @@ Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, F
     double d = loc12.at(1);
     double e = loc23.at(1);
     double f = loc31.at(1);
-    nodeLocalXi1Coords.setValues(15, a, b, c, a, b, c, d, e, f, d, e, f, a, b, c);      
+    nodeLocalXi1Coords = { a, b, c, a, b, c, d, e, f, d, e, f, a, b, c };
     
     a = loc1.at(2);
     b = loc2.at(2);
@@ -2170,9 +2175,9 @@ Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, F
     d = loc12.at(2);
     e = loc23.at(2);
     f = loc31.at(2);
-    nodeLocalXi2Coords.setValues(15, a, b, c, a, b, c, d, e, f, d, e, f, a, b, c);
+    nodeLocalXi2Coords = { a, b, c, a, b, c, d, e, f, d, e, f, a, b, c };
 
-    nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
+    nodeLocalXi3Coords = { -z, -z, -z, z, z, z, -z, -z, -z, z, z, z, 0., 0., 0. };
     
     FloatMatrix localNodeCoordsT;
     localNodeCoordsT.resize(15,3);
@@ -2189,7 +2194,7 @@ Shell7BaseXFEM :: giveLocalCZNodeCoordsForExport(FloatArray &nodeLocalXi1Coords,
 {
     // Local coords for a quadratic triangle element - coords for subtriangles
     double scale = 0.999;
-    double z = 1.0*scale;
+    //double z = 1.0*scale;
 
     // Triangle coordinates
     FloatArray g1, g2, g3;
@@ -2221,7 +2226,7 @@ Shell7BaseXFEM :: giveLocalCZNodeCoordsForExport(FloatArray &nodeLocalXi1Coords,
     double d = loc12.at(1);
     double e = loc23.at(1);
     double f = loc31.at(1);
-    nodeLocalXi1Coords.setValues(6, a, b, c, d, e, f);      
+    nodeLocalXi1Coords = { a, b, c, d, e, f };
     
     a = loc1.at(2);
     b = loc2.at(2);
@@ -2229,9 +2234,9 @@ Shell7BaseXFEM :: giveLocalCZNodeCoordsForExport(FloatArray &nodeLocalXi1Coords,
     d = loc12.at(2);
     e = loc23.at(2);
     f = loc31.at(2);
-    nodeLocalXi2Coords.setValues(6, a, b, c, d, e, f);
+    nodeLocalXi2Coords = { a, b, c, d, e, f };
 
-    nodeLocalXi3Coords.setValues(6, 0., 0., 0., 0., 0., 0.);
+    nodeLocalXi3Coords = { 0., 0., 0., 0., 0., 0. };
     
     FloatMatrix localNodeCoordsT;
     localNodeCoordsT.resize(6,3);
@@ -2381,7 +2386,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
         for ( int layer = 1; layer <= numInterfaces; layer++ ) {  
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
                 if ( type == IST_CrossSectionNumber ) {
-                    average.setValues(1,  -double(layer) ); // Set a negative number for interfaces
+                    average = FloatArray({ -double(layer) }); // Set a negative number for interfaces
                 } else {
                     IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
                     VTKXMLExportModule::computeIPAverage(average, iRuleL, this, type, tStep);
@@ -2490,7 +2495,7 @@ Shell7BaseXFEM :: recoverValuesFromCZIP(std::vector<FloatArray> &recoveredValues
         double distOld = 3.0; // should not be larger
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
             ip = iRule->getIntegrationPoint(j);
-            ipCoords = *ip->giveCoordinates();
+            ipCoords = *ip->giveNaturalCoordinates();
             double dist = nodeCoords.distance(ipCoords);
             if ( dist < distOld ) {
                 closestIPArray.at(i) = j;

@@ -62,8 +62,10 @@ private:
     double origin, value;
 
 public:
-    HeavisideTimeFunction(int i, Domain *d) : Function(i, d)
-    { origin = value = 0.; }
+    HeavisideTimeFunction(int i, Domain * d) : Function(i, d)
+    {
+        origin = value = 0.;
+    }
     virtual ~HeavisideTimeFunction() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

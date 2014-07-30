@@ -83,7 +83,7 @@ private:
     SparseLinearSystemNM *nMethodLS;
 
 public:
-    LinearStability(int i, EngngModel *_master = NULL) : StructuralEngngModel(i, _master),
+    LinearStability(int i, EngngModel * _master = NULL) : StructuralEngngModel(i, _master),
         loadVector(), displacementVector(), eigVec(), eigVal()
     {
         stiffnessMatrix = NULL;
@@ -94,10 +94,14 @@ public:
         ndomains = 1;
     }
     virtual ~LinearStability() {
-        delete  stiffnessMatrix;
+        delete stiffnessMatrix;
         delete initialStressMatrix;
-        if ( nMethodLS ) { delete nMethodLS; }
-        if ( nMethod ) { delete nMethod; }
+        if ( nMethodLS ) {
+            delete nMethodLS;
+        }
+        if ( nMethod ) {
+            delete nMethod;
+        }
     }
 
     virtual void solveYourself();
@@ -118,6 +122,8 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual TimeStep *giveNextStep();
+
+    virtual double giveEigenValue(int eigNum) { return eigVal.at(eigNum); }
 
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
     SparseLinearSystemNM *giveNumericalMethodForLinStaticProblem(TimeStep *tStep);

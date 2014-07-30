@@ -92,15 +92,12 @@ public:
      * @param n Element number.
      * @param d Domain to which new material will belong.
      */
-    StructuralInterfaceElement(int n, Domain *d);
+    StructuralInterfaceElement(int n, Domain * d);
     /// Destructor.
     virtual ~StructuralInterfaceElement();
 
-    virtual void giveCharacteristicMatrix(FloatMatrix & answer, CharType, TimeStep * tStep);
+    virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
-
-    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
-    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { this->giveInternalDofManDofIDMask(inode, EID_MomentumBalance, answer); }
 
     /**
      * Computes the stiffness/tangent matrix of receiver. Default implementation computes element stiffness using
@@ -161,13 +158,13 @@ public:
     virtual void giveEngTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
     virtual void giveFirstPKTraction(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, const FloatMatrix &F, TimeStep *tStep)
     {
-        OOFEM_ERROR1("giveFirstPKTraction not implemented for the current element");
+        OOFEM_ERROR("not implemented for the current element");
     }
 
     virtual void giveStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep);
     virtual void giveStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, IntegrationPoint *ip, TimeStep *tStep)
     {
-        OOFEM_ERROR1("giveStiffnessMatrix_dTdj not implemented for the current element");
+        OOFEM_ERROR("not implemented for the current element");
     }
 protected:
 

@@ -99,7 +99,7 @@ private:
     IntArray reactionForcesDofManList; // Holds which dof managers reaction forces should be exported from.
 
 public:
-    MatlabExportModule(int n, EngngModel *e);
+    MatlabExportModule(int n, EngngModel * e);
     virtual ~MatlabExportModule();
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);

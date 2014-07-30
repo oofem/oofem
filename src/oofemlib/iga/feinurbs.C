@@ -51,7 +51,7 @@ void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, 
     IntArray span(nsd);
     double sum = 0.0, val;
     int count, c = 1, i, l, k, m, ind, indx, uind, vind, tind;
-    std :: vector< FloatArray > N;
+    std :: vector< FloatArray >N;
 
     if ( gw->knotSpan ) {
         span = * gw->knotSpan;
@@ -106,7 +106,7 @@ void NURBSInterpolation :: evalN(FloatArray &answer, const FloatArray &lcoords, 
             ind = indx + numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ];
         }
     } else {
-        OOFEM_ERROR2("evalN not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
     while ( count ) {
@@ -297,7 +297,7 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
             ind += numberOfControlPoints [ 0 ];
         }
     } else {
-        OOFEM_ERROR2("evaldNdx not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
 #else
@@ -521,14 +521,14 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
                     tmp1(2) = ders [ 0 ](0, k) * ders [ 1 ](0, l) * ders [ 2 ](1, m) * w * weight - ders [ 0 ](0, k) * ders [ 1 ](0, l) * ders [ 2 ](0, m) * w * wders(3);
 
                     answer(cnt, 0) = ( ( jacobian(1, 1) * jacobian(2, 2) - jacobian(1, 2) * jacobian(2, 1) ) * tmp1(0) +
-                                       ( jacobian(0, 2) * jacobian(2, 1) - jacobian(0, 1) * jacobian(2, 2) ) * tmp1(1) +
-                                       ( jacobian(0, 1) * jacobian(1, 2) - jacobian(0, 2) * jacobian(1, 1) ) * tmp1(2) ) / product;                                                     // dN/dx
+                                      ( jacobian(0, 2) * jacobian(2, 1) - jacobian(0, 1) * jacobian(2, 2) ) * tmp1(1) +
+                                      ( jacobian(0, 1) * jacobian(1, 2) - jacobian(0, 2) * jacobian(1, 1) ) * tmp1(2) ) / product;                                                      // dN/dx
                     answer(cnt, 1) = ( ( jacobian(1, 2) * jacobian(2, 0) - jacobian(1, 0) * jacobian(2, 2) ) * tmp1(0) +
-                                       ( jacobian(0, 0) * jacobian(2, 2) - jacobian(0, 2) * jacobian(2, 0) ) * tmp1(1) +
-                                       ( jacobian(0, 2) * jacobian(1, 0) - jacobian(0, 0) * jacobian(1, 2) ) * tmp1(2) ) / product;                                                     // dN/dy
+                                      ( jacobian(0, 0) * jacobian(2, 2) - jacobian(0, 2) * jacobian(2, 0) ) * tmp1(1) +
+                                      ( jacobian(0, 2) * jacobian(1, 0) - jacobian(0, 0) * jacobian(1, 2) ) * tmp1(2) ) / product;                                                      // dN/dy
                     answer(cnt, 2) = ( ( jacobian(1, 0) * jacobian(2, 1) - jacobian(1, 1) * jacobian(2, 0) ) * tmp1(0) +
-                                       ( jacobian(0, 1) * jacobian(2, 0) - jacobian(0, 0) * jacobian(2, 1) ) * tmp1(1) +
-                                       ( jacobian(0, 0) * jacobian(1, 1) - jacobian(0, 1) * jacobian(1, 0) ) * tmp1(2) ) / product;                                                     // dN/dz
+                                      ( jacobian(0, 1) * jacobian(2, 0) - jacobian(0, 0) * jacobian(2, 1) ) * tmp1(1) +
+                                      ( jacobian(0, 0) * jacobian(1, 1) - jacobian(0, 1) * jacobian(1, 0) ) * tmp1(2) ) / product;                                                      // dN/dz
                     cnt++;
                 }
 
@@ -538,7 +538,7 @@ double NURBSInterpolation :: evaldNdx(FloatMatrix &answer, const FloatArray &lco
             ind = indx + numberOfControlPoints [ 0 ] * numberOfControlPoints [ 1 ];
         }
     } else {
-        OOFEM_ERROR2("evaldNdx not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
 #endif
@@ -639,7 +639,7 @@ void NURBSInterpolation :: local2global(FloatArray &answer, const FloatArray &lc
             weight    += N [ 2 ](m) * temp(3); // w=sum(Nv*Nu*Nt*w)
         }
     } else {
-        OOFEM_ERROR2("local2global not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("lnot implemented for nsd = %d", nsd);
     }
 
     answer.times(1.0 / weight);
@@ -804,7 +804,7 @@ double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoord
         jacobian(1, 1) = ( Aders [ 1 ](0, 1) - wders(0, 1) * tmp1(1) ) / weight; // dy/dv
  #endif
     }     else {
-        OOFEM_ERROR2("giveTransformationJacobian not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
 #else
@@ -974,7 +974,7 @@ double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoord
         jacobian(2, 1) = ( Aders [ 1 ](3) - wders(3) * tmp1(1) ) / weight; // dy/dt
         jacobian(2, 2) = ( Aders [ 2 ](3) - wders(3) * tmp1(2) ) / weight; // dz/dt
     } else {
-        OOFEM_ERROR2("giveTransformationJacobianMatrix not implemented for nsd = %d", nsd);
+        OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
 #endif
@@ -982,7 +982,7 @@ double NURBSInterpolation :: giveTransformationJacobian(const FloatArray &lcoord
     Jacob = jacobian.giveDeterminant();
 
     if ( fabs(Jacob) < 1.0e-10 ) {
-        OOFEM_ERROR("giveTransformationJacobianMatrix - zero Jacobian");
+        OOFEM_ERROR("zero Jacobian");
     }
 
     return Jacob;

@@ -37,7 +37,6 @@
 
 #include "generalboundarycondition.h"
 #include "intarray.h"
-#include "equationid.h"
 #include "chartype.h"
 #include "valuemodetype.h"
 #include "error.h"
@@ -68,7 +67,7 @@ public:
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    ActiveBoundaryCondition(int n, Domain *d) : GeneralBoundaryCondition(n, d) { }
+    ActiveBoundaryCondition(int n, Domain * d) : GeneralBoundaryCondition(n, d) { }
     /// Destructor.
     virtual ~ActiveBoundaryCondition() { }
 
@@ -76,7 +75,6 @@ public:
     {
         GeneralBoundaryCondition :: initializeFrom(ir);
 
-        const char *__proc = "initializeFrom";
         IRResultType result;
         IntArray tempA, tempB, tempC;
         IR_GIVE_OPTIONAL_FIELD(ir, tempB, _IFT_ActiveBoundaryCondition_elementSides);
@@ -94,7 +92,7 @@ public:
      * @param elem Element number.
      * @param side Side number.
      */
-    virtual void addElementSide(int elem, int side) { OOFEM_ERROR2( "%s :: addElement - Not supported", giveClassName() ); }
+    virtual void addElementSide(int elem, int side) { OOFEM_ERROR("Not supported"); }
     //@}
 
     /**
@@ -102,28 +100,26 @@ public:
      * @param[in,out] answer Matrix to assemble to.
      * @param tStep Active time step.
      * @param tStep Active time step.
-     * @param eid Equation ID.
      * @param type Type of matrix to assemble.
      * @param r_s Row numbering scheme.
      * @param c_s Column numbering scheme.
      */
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
-                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) {}
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
+                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) { }
 
     /**
      * Assembles B.C. contributions to specified vector.
      * @param[in,out] answer Vector to assemble to.
      * @param tStep Active time step.
-     * @param eid Equation ID.
      * @param type Type of matrix to assemble.
      * @param mode Mode of value.
      * @param s Numbering scheme.
      * @param eNorms Norms for each dofid (optional).
      * @return Equivalent of the sum of the element norm (squared) of assembled vector.
      */
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
-                                const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) {}
+                                const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) { }
 
     /**
      * Gives a list of location arrays that will be assembled.
@@ -133,13 +129,12 @@ public:
      * The nonzero entries are assembled and allocated for entries at (rows[i], cols[i]) positions.
      * @param rows List of location arrays for r_s.
      * @param cols List of location arrays for c_s.
-     * @param eid Equation ID.
      * @param type Type of matrix to assemble.
      * @param r_s Row numbering scheme.
      * @param c_s Column numbering scheme.
      */
-    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
-                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) {}
+    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
+                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) { }
 
 
     /**
@@ -174,7 +169,7 @@ public:
      */
     virtual int giveNumberOfMasterDofs(ActiveDof *dof)
     {
-        OOFEM_ERROR2( "%s :: giveNumberOfPrimaryMasterDofs - Not supported by bc.", giveClassName() );
+        OOFEM_ERROR("Not supported by bc.");
         return 0;
     }
     /**
@@ -185,12 +180,12 @@ public:
      */
     virtual Dof *giveMasterDof(ActiveDof *dof, int mdof)
     {
-        OOFEM_ERROR2( "%s :: giveMasterDof - Not supported by bc.", giveClassName() );
+        OOFEM_ERROR("Not supported by bc.");
         return NULL;
     }
     virtual void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs)
     {
-        OOFEM_ERROR2( "%s :: computeDofTransformation - Not supported by bc.", giveClassName() );
+        OOFEM_ERROR("Not supported by bc.");
     }
     /**
      * Computes the value of the dof.
@@ -202,7 +197,7 @@ public:
      */
     virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
     {
-        OOFEM_ERROR2( "%s :: giveUnknown - Not supported by bc.", giveClassName() );
+        OOFEM_ERROR("Not supported by bc.");
         return 0.0;
     }
     /**
@@ -214,7 +209,7 @@ public:
      */
     virtual double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof)
     {
-        OOFEM_ERROR2( "%s :: giveUnknown - Not supported by bc.", giveClassName() );
+        OOFEM_ERROR("Not supported by bc.");
         return 0.0;
     }
     //@}

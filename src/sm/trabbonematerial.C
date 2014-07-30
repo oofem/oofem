@@ -44,7 +44,7 @@ namespace oofem {
 REGISTER_Material(TrabBoneMaterial);
 
 TrabBoneMaterial :: TrabBoneMaterial(int n, Domain *d) : StructuralMaterial(n, d)
-{}
+{ }
 
 
 int
@@ -139,7 +139,7 @@ TrabBoneMaterial :: performPlasticityReturn(GaussPoint *gp, const FloatArray &to
             gNewton = sigp / fabs(sigp) * ( E0 * epsnew - ( E0 + Ek ) * ( epsp + depsp ) ) - ( sigY + Eil * ( alpha +
                                                                                                               sigp / fabs(sigp) * depsp ) + Eie * ( 1 - exp( -kie * ( alpha + sigp / fabs(sigp) * depsp ) ) ) );
             dgNewton = -sigp / fabs(sigp) * ( ( E0 + Ek ) + Eil +
-                                              Eie * kie * exp( -kie * ( alpha + sigp / fabs(sigp) * depsp ) ) );
+                                             Eie * kie * exp( -kie * ( alpha + sigp / fabs(sigp) * depsp ) ) );
             depsp += -gNewton / dgNewton;
         }
 
@@ -191,7 +191,7 @@ TrabBoneMaterial :: computeDamageParam(double alpha, GaussPoint *gp)
     }
 
     if ( alpha < 0. ) {
-        _error("Alpha less than zero. Not possible");
+        OOFEM_ERROR("Alpha less than zero. Not possible");
     }
 
     return dam;
@@ -247,7 +247,6 @@ TrabBoneMaterial :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp,
 IRResultType
 TrabBoneMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // Read material properties here
@@ -292,7 +291,7 @@ TrabBoneMaterialStatus :: TrabBoneMaterialStatus(int n, Domain *d, GaussPoint *g
 
 
 TrabBoneMaterialStatus :: ~TrabBoneMaterialStatus()
-{}
+{ }
 
 
 double

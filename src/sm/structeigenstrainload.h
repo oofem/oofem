@@ -52,7 +52,7 @@ class TimeStep;
 class StructuralEigenstrainLoad : public Load
 {
 public:
-    StructuralEigenstrainLoad(int i, Domain *d) : Load(i, d) { }
+    StructuralEigenstrainLoad(int i, Domain * d) : Load(i, d) { }
 
     /**
      * Computes components values of eigenstrain field at given point (coordinates given in Global c.s.).

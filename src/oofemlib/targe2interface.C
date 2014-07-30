@@ -65,12 +65,12 @@ Targe2Interface :: createInput(Domain *d, TimeStep *tStep)
     for ( int i = 1; i <= nelem; i++ ) {
         ielem = d->giveElement(i);
         fprintf( outputStrem, "MC-T %e %e %e %e %e %e   %e %e %e\n",
-                 ielem->giveNode(1)->giveCoordinate(1), ielem->giveNode(1)->giveCoordinate(2),
-                 ielem->giveNode(2)->giveCoordinate(1), ielem->giveNode(2)->giveCoordinate(2),
-                 ielem->giveNode(3)->giveCoordinate(1), ielem->giveNode(3)->giveCoordinate(2),
-                 rc->giveRequiredDofManDensity(ielem->giveNode(1)->giveNumber(), tStep),
-                 rc->giveRequiredDofManDensity(ielem->giveNode(2)->giveNumber(), tStep),
-                 rc->giveRequiredDofManDensity(ielem->giveNode(3)->giveNumber(), tStep) );
+                ielem->giveNode(1)->giveCoordinate(1), ielem->giveNode(1)->giveCoordinate(2),
+                ielem->giveNode(2)->giveCoordinate(1), ielem->giveNode(2)->giveCoordinate(2),
+                ielem->giveNode(3)->giveCoordinate(1), ielem->giveNode(3)->giveCoordinate(2),
+                rc->giveRequiredDofManDensity(ielem->giveNode(1)->giveNumber(), tStep),
+                rc->giveRequiredDofManDensity(ielem->giveNode(2)->giveNumber(), tStep),
+                rc->giveRequiredDofManDensity(ielem->giveNode(3)->giveNumber(), tStep) );
     }
 
     fclose(outputStrem);

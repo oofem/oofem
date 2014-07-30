@@ -38,7 +38,6 @@
 #include "boundarycondition.h"
 #include "initialcondition.h"
 #include "datastream.h"
-#include "oofem_limits.h"
 #include "contextioerr.h"
 #include "unknownnumberingscheme.h"
 
@@ -69,7 +68,7 @@ void Dof :: giveEquationNumbers(IntArray &masterEqNumbers, const UnknownNumberin
 
 void Dof :: giveDofIDs(IntArray &masterDofIDs)
 {
-    masterDofIDs.setValues( 1, this->giveDofID() );
+    masterDofIDs = {this->giveDofID()};
 }
 
 int
@@ -85,7 +84,7 @@ void Dof :: printSingleOutputAt(FILE *File, TimeStep *tStep, char ch, ValueModeT
 // 'd') of the receiver, at tStep.
 {
     double x = scale * this->giveUnknown(mode, tStep);
-    fprintf(File, "  dof %d   %c % .8e\n", number, ch, x);
+    fprintf(File, "  dof %d   %c % .8e\n", dofID, ch, x);
 }
 
 
@@ -95,11 +94,9 @@ void Dof :: printMultipleOutputAt(FILE *File, TimeStep *tStep, char *ch,
 // Prints in the data file the unknown 'u' (for example, the displacement
 // 'd') of the receiver, at tStep.
 {
-    double x;
-
-    fprintf(File, "  dof %d", number);
+    fprintf(File, "  dof %d", dofID);
     for ( int i = 1; i <= nite; i++ ) {
-        x = this->giveUnknown(mode [ i - 1 ], tStep);
+        double x = this->giveUnknown(mode [ i - 1 ], tStep);
         fprintf(File, "   %c % .8e", ch [ i - 1 ], x);
     }
 
@@ -110,65 +107,18 @@ void Dof :: printMultipleOutputAt(FILE *File, TimeStep *tStep, char *ch,
 void Dof :: printYourself()
 // Prints the receiver on screen.
 {
-    printf( "dof %d  of %s %d :\n", number, dofManager->giveClassName(), dofManager->giveNumber() );
+    printf( "dof %d  of %s %d :\n", dofID, dofManager->giveClassName(), dofManager->giveNumber() );
     // printf ("equation %d    bc %d \n",equationNumber,bc) ;
 
     // printOutputAt (node->giveDomain()->giveEngngModel()->giveCurrentStep());
 }
 
 
-void Dof :: error(const char *file, int line, const char *format, ...) const
+std :: string Dof :: errorInfo(const char *func) const
 {
-    char buffer [ MAX_ERROR_MSG_LENGTH ];
-    va_list args;
-
-    va_start(args, format);
-    vsprintf(buffer, format, args);
-    va_end(args);
-
-    __OOFEM_ERROR5(file, line, "Class: %s, number %d, of DofManager %d\n%s",
-                   this->giveClassName(), number, dofManager->giveNumber(), buffer);
+    return std::string(this->giveClassName()) + "::" + func + " id " + std::to_string(dofID) + ", of DofManager " + std::to_string(dofManager->giveNumber());
 }
 
-char *
-Dof :: giveDofIDName(char *s)
-{
-    // returns character string representing receiver's dofID
-    switch ( this->giveDofID() ) {
-    case D_u:
-        return strcpy(s, "D_u");
-
-    case D_v:
-        return strcpy(s, "D_v");
-
-    case D_w:
-        return strcpy(s, "D_w");
-
-    case R_u:
-        return strcpy(s, "R_u");
-
-    case R_v:
-        return strcpy(s, "R_v");
-
-    case R_w:
-        return strcpy(s, "R_w");
-
-    case T_f:
-        return strcpy(s, "T_f");
-
-    case G_0:
-        return strcpy(s, "G_0");
-
-    case G_1:
-        return strcpy(s, "G_1");
-
-    default:
-        sprintf(s, "%3d", this->number);
-        return s;
-    }
-
-    // return s;
-}
 
 double
 Dof :: giveBcValue(ValueModeType mode, TimeStep *tStep)

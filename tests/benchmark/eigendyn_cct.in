@@ -1,6 +1,7 @@
 eigendyn_cct.out
 Free vibration  of CCT  elements  
-EigenValueDynamic nroot 10 rtolv 1.e-5
+EigenValueDynamic nroot 10 rtolv 1.e-5 nmodules 1
+errorcheck filename "eigendyn_cct.in"
 domain 2dMindlinPlate
 OutputManager tstep_all dofman_all element_all
 ndofman 432 nelem 720 ncrosssect  1 nmat 1 nbc 1 nic 0 nltf 1

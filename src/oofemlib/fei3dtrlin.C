@@ -175,16 +175,16 @@ FEI3dTrLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
 {
 
     if ( iedge == 1 ) { // edge between nodes 1 2
-        edgeNodes.setValues(2,  1, 2);
+        edgeNodes = { 1, 2 };
 
     } else if ( iedge == 2 ) { // edge between nodes 2 3
-        edgeNodes.setValues(2,  2, 3);
+        edgeNodes = { 2, 3 };
 
     } else if ( iedge == 3 ) { // edge between nodes 2 3
-        edgeNodes.setValues(2,  3, 1);
+        edgeNodes = { 3, 1 };
 
     } else {
-        OOFEM_ERROR2("FEI3dTrLin :: computeEdgeMapping: wrong edge number (%d)", iedge);
+        OOFEM_ERROR("Wrong edge number (%d)", iedge);
     }
 
 }

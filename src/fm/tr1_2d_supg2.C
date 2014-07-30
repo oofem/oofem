@@ -72,19 +72,16 @@ TR1_2D_SUPG2 :: TR1_2D_SUPG2(int n, Domain *aDomain) :
     TR1_2D_SUPG(n, aDomain)
 {
     numberOfDofMans  = 3;
-    vcoords [ 0 ] = NULL;
-    vcoords [ 1 ] = NULL;
+    defaultIRule = NULL;
 }
 
 TR1_2D_SUPG2 :: ~TR1_2D_SUPG2()
 {
     for ( int i = 0; i < 2; i++ ) {
         myPoly [ i ].clear();
-        if ( vcoords [ i ] ) {
-            delete [] vcoords [ i ];
-        }
-
-        vcoords [ i ] = NULL;
+    }
+    if ( defaultIRule ) {
+        delete defaultIRule;
     }
 }
 
@@ -92,7 +89,7 @@ TR1_2D_SUPG2 :: ~TR1_2D_SUPG2()
 void
 TR1_2D_SUPG2 :: computeNVector(FloatArray &answer, GaussPoint *gp)
 {
-    this->interp.evalN( answer, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evalN( answer, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -103,30 +100,14 @@ TR1_2D_SUPG2 :: computeNumberOfDofs()
 }
 
 void
-TR1_2D_SUPG2 :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+TR1_2D_SUPG2 :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    if ( ut == EID_MomentumBalance ) {
-        answer.setValues(2, V_u, V_v);
-    } else if ( ut == EID_ConservationEquation ) {
-        answer.setValues(1, P_f);
-    } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        answer.setValues(3, V_u, V_v, P_f);
-    } else {
-        _error("giveDofManDofIDMask: Unknown equation id encountered");
-    }
+    answer = {V_u, V_v, P_f};
 }
-
-void
-TR1_2D_SUPG2 :: giveElementDofIDMask(EquationID ut, IntArray &answer) const
-{
-    this->giveDofManDofIDMask(1, ut, answer);
-}
-
 
 IRResultType
 TR1_2D_SUPG2 :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;               // Required by IR_GIVE_FIELD macro
 
     SUPGElement :: initializeFrom(ir);
@@ -179,11 +160,14 @@ void
 TR1_2D_SUPG2 :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 2;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(2);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3, true);
         integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3, true);
+    }
+    if ( !defaultIRule ) {
+        defaultIRule = new GaussIntegrationRule(1, this, 1, 3, true);
+        this->giveCrossSection()->setupIntegrationPoints(* defaultIRule, 1, this);
     }
 }
 
@@ -213,14 +197,10 @@ TR1_2D_SUPG2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep)
     double dV, val, rho;
     double u1, u2;
 
-    GaussPoint *gp;
-    //IntegrationRule* iRule = integrationRulesArray[giveDefaultIntegrationRule()];
-
     // consistent mass
     // loop over each fluid
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
-        for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
+        for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
             rho = this->_giveMaterial(ifluid)->give('d', gp);
             this->computeNVector(n, gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
@@ -237,10 +217,9 @@ TR1_2D_SUPG2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 
     // SUPG stabilization term
     // loop over each fluid
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
-        for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
+        for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
             rho = this->_giveMaterial(ifluid)->give('d', gp);
             this->computeNVector(n, gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
@@ -259,8 +238,7 @@ TR1_2D_SUPG2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep)
     /*
      * // orginal version
      * // consistent mass
-     * for (ip=0 ; ip < iRule->giveNumberOfIntegrationPoints() ; ip++) {
-     * gp = iRule->getIntegrationPoint(ip) ;
+     * for (GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
      * this->computeNVector (n, gp);
      * dV = 2.0*area*gp->giveWeight();
      * for (i=1;i<=3;i++) {
@@ -273,9 +251,8 @@ TR1_2D_SUPG2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep)
      * }
      *
      * // SUPG stabilization term
-     * this -> computeVectorOf(EID_MomentumBalance,VM_Total,tStep->givePreviousStep(), un) ;
-     * for (ip=0 ; ip < iRule->giveNumberOfIntegrationPoints() ; ip++) {
-     * gp = iRule->getIntegrationPoint(ip) ;
+     * this -> computeVectorOfVelocities(VM_Total,tStep->givePreviousStep(), un) ;
+     * for (GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
      * this->computeNVector (n, gp);
      * dV = 2.0*area*gp->giveWeight();
      * u1=n.at(1)*un.at(1)+n.at(2)*un.at(3)+n.at(3)*un.at(5);
@@ -299,7 +276,7 @@ TR1_2D_SUPG2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep)
     for ( i = 1; i <= 6; i++ ) {
         for ( j = 1; j <= 6; j++ ) {
             if ( fabs( ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) ) >= 1.e-10 ) {
-                _error("computeAccelerationTerm_MB: test failure");
+                OOFEM_ERROR("test failure");
             }
         }
     }
@@ -317,11 +294,8 @@ TR1_2D_SUPG2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
     FloatArray n, u, un;
     double rho;
     double dV, dudx, dudy, dvdx, dvdy, u1, u2;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-
-    GaussPoint *gp;
-    //IntegrationRule* iRule = integrationRulesArray[giveDefaultIntegrationRule()];
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
 
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
@@ -331,8 +305,7 @@ TR1_2D_SUPG2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
 
     // standard galerkin term
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
-        for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
+        for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
             rho = this->_giveMaterial(ifluid)->give('d', gp);
             this->computeNVector(n, gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
@@ -348,8 +321,7 @@ TR1_2D_SUPG2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
 
     // supg stabilization term
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
-        for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
+        for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
             rho = this->_giveMaterial(ifluid)->give('d', gp);
             this->computeNVector(n, gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
@@ -365,13 +337,13 @@ TR1_2D_SUPG2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
 
 #if 0
     // test of linearization
-    FloatMatrix _h(6, 6);
-    FloatArray _t(6);
+    FloatMatrix _h;
+    FloatArray _t;
     this->computeAdvectionDerivativeTerm_MB(_h, tStep);
     _t.beProductOf(_h, u);
     for ( i = 1; i <= 6; i++ ) {
         if ( ( fabs( answer.at(i) - _t.at(i) ) >= 1.e-6 ) ) {
-            _error3( "computeAdvectionTerm_MB: test failure (elem %d, error=%e)", this->number, fabs( answer.at(i) - _t.at(i) ) );
+            OOFEM_ERROR("test failure (elem %d, error=%e)", this->number, fabs( answer.at(i) - _t.at(i) ));
         }
     }
 
@@ -387,7 +359,7 @@ TR1_2D_SUPG2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
     integrationRulesArray [ 0 ] = __ir0;
     for ( int i = 1; i <= 6; i++ ) {
         if ( fabs( ( answer.at(i) - test.at(i) ) / test.at(i) ) >= 1.e-10 ) {
-            _error("computeAdvectionTerm_MB: test failure");
+            OOFEM_ERROR("test failure");
         }
     }
 
@@ -403,19 +375,16 @@ TR1_2D_SUPG2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
 
     FloatArray u, un, n;
     double rho;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
 
     double u1, u2, dV;
     int w_dof_addr, u_dof_addr, dij;
 
-    GaussPoint *gp;
-    //IntegrationRule* iRule = integrationRulesArray[giveDefaultIntegrationRule()];
 
     // dN(v)/dv
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
-        for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
+        for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
             rho = this->_giveMaterial(ifluid)->give('d', gp);
             this->computeNVector(n, gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
@@ -439,8 +408,7 @@ TR1_2D_SUPG2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
 
     // stabilization term dN_delta/du
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
-        for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
+        for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
             rho = this->_giveMaterial(ifluid)->give('d', gp);
             this->computeNVector(n, gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
@@ -472,7 +440,7 @@ TR1_2D_SUPG2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
     for ( int i = 1; i <= 6; i++ ) {
         for ( int j = 1; j <= 6; j++ ) {
             if ( fabs( ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) ) >= 1.e-8 ) {
-                _error2( "computeAdvectionDerivativeTerm_MB: test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) );
+                OOFEM_ERROR("test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j));
             }
         }
     }
@@ -489,16 +457,15 @@ TR1_2D_SUPG2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
     FloatArray u, un, eps(3), stress;
     double dV, Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     //double dudx,dudy,dvdx,dvdy;
-    GaussPoint *gp;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     eps.at(1) = ( b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5) );
     eps.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
     eps.at(3) = ( b [ 0 ] * u.at(2) + b [ 1 ] * u.at(4) + b [ 2 ] * u.at(6) + c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5) );
 
     /*
-     * this -> computeVectorOf(EID_MomentumBalance,VM_Total,tStep->givePreviousStep(), un) ;
+     * this -> computeVectorOfVelocities(VM_Total,tStep->givePreviousStep(), un) ;
      * dudx = b[0]*un.at(1)+b[1]*un.at(3)+b[2]*un.at(5);
      * dudy = c[0]*un.at(1)+c[1]*un.at(3)+c[2]*un.at(5);
      * dvdx = b[0]*un.at(2)+b[1]*un.at(4)+b[2]*un.at(6);
@@ -507,8 +474,7 @@ TR1_2D_SUPG2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
 
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
         FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->_giveMaterial(ifluid) );
-        for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
+        for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
             mat->computeDeviatoricStressVector(stress, gp, eps, tStep);
@@ -539,7 +505,7 @@ TR1_2D_SUPG2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
     integrationRulesArray [ 0 ] = __ir0;
     for ( int i = 1; i <= 6; i++ ) {
         if ( fabs( ( answer.at(i) - test.at(i) ) / test.at(i) ) >= 1.e-10 ) {
-            _error("computeDiffusionTerm_MB: test failure");
+            OOFEM_ERROR("test failure");
         }
     }
 
@@ -556,7 +522,6 @@ TR1_2D_SUPG2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
     answer.zero();
     FloatMatrix _db, _d, _b(3, 6), _bs(3, 6);
     //FloatArray un;
-    GaussPoint *gp;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
     _b.at(1, 1) = b [ 0 ];
@@ -580,7 +545,7 @@ TR1_2D_SUPG2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
 
     /*
      * // stabilization terms
-     * this -> computeVectorOf(EID_MomentumBalance,VM_Total,tStep->givePreviousStep(), un) ;
+     * this -> computeVectorOfVelocities(VM_Total,tStep->givePreviousStep(), un) ;
      * dudx = b[0]*un.at(1)+b[1]*un.at(3)+b[2]*un.at(5);
      * dudy = c[0]*un.at(1)+c[1]*un.at(3)+c[2]*un.at(5);
      * dvdx = b[0]*un.at(2)+b[1]*un.at(4)+b[2]*un.at(6);
@@ -595,8 +560,7 @@ TR1_2D_SUPG2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
 
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
         FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->_giveMaterial(ifluid) );
-        for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
+        for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
 
@@ -621,7 +585,7 @@ TR1_2D_SUPG2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
     for ( int i = 1; i <= 6; i++ ) {
         for ( int j = 1; j <= 6; j++ ) {
             if ( fabs( ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) ) >= 1.e-8 ) {
-                _error2( "computeDiffusionDerivativeTerm_MB: test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) );
+                OOFEM_ERROR("test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j));
             }
         }
     }
@@ -640,7 +604,7 @@ TR1_2D_SUPG2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep)
     double usum, vsum;
     double ar3 = area / 3.0, coeff;
 
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, p);
+    this->computeVectorOfPressures(VM_Total, tStep, p);
 
 
     // G matrix
@@ -653,7 +617,7 @@ TR1_2D_SUPG2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep)
     answer.at(6, 1) = answer.at(6, 2) = answer.at(6, 3) = -c [ 2 ] * ar3;
 
     // stabilization term (G_\delta mtrx)
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
 
     usum = un.at(1) + un.at(3) + un.at(5);
     vsum = un.at(2) + un.at(4) + un.at(6);
@@ -695,11 +659,9 @@ TR1_2D_SUPG2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *t
     double n[] = {
         b [ 0 ], c [ 0 ], b [ 1 ], c [ 1 ], b [ 2 ], c [ 2 ]
     };
-    GaussPoint *gp;
 
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
-        for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
+        for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
             rho = this->_giveMaterial(ifluid)->give('d', gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
@@ -722,7 +684,7 @@ TR1_2D_SUPG2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *t
     for ( int i = 1; i <= 6; i++ ) {
         for ( int j = 1; j <= 6; j++ ) {
             if ( fabs( ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) ) >= 1.e-8 ) {
-                _error2( "computeLSICStabilizationTerm_MB: test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) );
+                OOFEM_ERROR("test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j));
             }
         }
     }
@@ -745,8 +707,8 @@ TR1_2D_SUPG2 :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep)
     double dudx, dudy, dvdx, dvdy, usum, vsum;
     FloatArray u, un;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
     dudy = c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5);
@@ -773,8 +735,8 @@ TR1_2D_SUPG2 :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
     //double rho = this->giveMaterial()->giveCharacteristicValue(Density, integrationRulesArray[0]->getIntegrationPoint(0), tStep);
     FloatArray u, un;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
 
     double dudx [ 2 ] [ 2 ], usum [ 2 ];
     double coeff;
@@ -820,11 +782,8 @@ TR1_2D_SUPG2 :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
     answer.resize(3, 3);
     answer.zero();
 
-    GaussPoint *gp;
-
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
-        for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
+        for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
             rho = this->_giveMaterial(ifluid)->give('d', gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
@@ -847,7 +806,7 @@ TR1_2D_SUPG2 :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
     for ( int i = 1; i <= 3; i++ ) {
         for ( int j = 1; j <= 3; j++ ) {
             if ( fabs( ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) ) >= 1.e-8 ) {
-                _error2( "computePressureTerm_MC: test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) );
+                OOFEM_ERROR("test failure (err=%e)", ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j));
             }
         }
     }
@@ -869,11 +828,8 @@ TR1_2D_SUPG2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
     FloatArray un, n, gVector;
     double u1, u2, dV;
 
-    GaussPoint *gp;
-    //IntegrationRule* iRule = integrationRulesArray[giveDefaultIntegrationRule()];
-
     // add body load (gravity) termms
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
 
     nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
@@ -883,9 +839,7 @@ TR1_2D_SUPG2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
             load->computeComponentArrayAt(gVector, tStep, VM_Total);
             if ( gVector.giveSize() ) {
                 for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
-                    for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
-                        gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
-
+                    for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
                         rho = this->_giveMaterial(ifluid)->give('d', gp);
                         dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
                         this->computeNVector(n, gp);
@@ -927,7 +881,7 @@ TR1_2D_SUPG2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
             //nx = ty / length;
             //ny = -tx / length;
 
-            bload = dynamic_cast< BoundaryLoad * >( load );
+            bload = dynamic_cast< BoundaryLoad * >(load);
             if ( bload ) {
                 bload->computeValueAt(t, tStep, coords, VM_Total);
 
@@ -954,7 +908,7 @@ TR1_2D_SUPG2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
     integrationRulesArray [ 0 ] = __ir0;
     for ( int i = 1; i <= 6; i++ ) {
         if ( fabs( ( answer.at(i) - test.at(i) ) / test.at(i) ) >= 1.e-10 ) {
-            _error("computeBCRhsTerm_MB: test failure");
+            OOFEM_ERROR("test failure");
         }
     }
 
@@ -991,9 +945,9 @@ TR1_2D_SUPG2 :: updateStabilizationCoeffs(TimeStep *tStep)
     nu1 = this->_giveMaterial(1)->giveCharacteristicValue(MRM_Viscosity, gp, tStep);
     nu = vof * nu0 + ( 1. - vof ) * nu1;
 
-    //this -> computeVectorOf(EID_MomentumBalance,VM_Total,tStep->givePreviousStep(),un) ;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-    this->computeVectorOf(EID_MomentumBalance, VM_Acceleration, tStep, a);
+    //this -> computeVectorOfVelocities(VM_Total,tStep->givePreviousStep(),un) ;
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Acceleration, tStep, a);
 
     un = u;
     usum = un.at(1) + un.at(3) + un.at(5);
@@ -1044,8 +998,7 @@ TR1_2D_SUPG2 :: updateStabilizationCoeffs(TimeStep *tStep)
     __tmp.resize(6, 6);
     __tmp.zero();
     for ( ifluid = 0; ifluid < 2; ifluid++ ) {
-        for ( ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
+        for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
             rho = this->_giveMaterial(ifluid)->give('d', gp);
             this->computeNVector(n, gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
@@ -1072,8 +1025,7 @@ TR1_2D_SUPG2 :: updateStabilizationCoeffs(TimeStep *tStep)
         b [ 0 ], c [ 0 ], b [ 1 ], c [ 1 ], b [ 2 ], c [ 2 ]
     };
     for ( ifluid = 0; ifluid < 2; ifluid++ ) {
-        for ( ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
+        for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
             rho = this->_giveMaterial(ifluid)->give('d', gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
 
@@ -1091,8 +1043,7 @@ TR1_2D_SUPG2 :: updateStabilizationCoeffs(TimeStep *tStep)
     __tmp.resize(6, 6);
     __tmp.zero();
     for ( ifluid = 0; ifluid < 2; ifluid++ ) {
-        for ( ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
+        for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
             rho = this->_giveMaterial(ifluid)->give('d', gp);
             this->computeNVector(n, gp);
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
@@ -1154,7 +1105,7 @@ TR1_2D_SUPG2 :: updateStabilizationCoeffs(TimeStep *tStep)
     tscale = domain->giveEngngModel()->giveVariableScale(VST_Time);
     dscale = domain->giveEngngModel()->giveVariableScale(VST_Density);
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), u);
     u.times(uscale);
     double nu, nu0, nu1;
 
@@ -1242,29 +1193,22 @@ Interface *
 TR1_2D_SUPG2 :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == EIPrimaryFieldInterfaceType ) {
-        return static_cast< EIPrimaryFieldInterface * >( this );
+        return static_cast< EIPrimaryFieldInterface * >(this);
     } else if ( interface == LEPlicElementInterfaceType ) {
-        return static_cast< LEPlicElementInterface * >( this );
+        return static_cast< LEPlicElementInterface * >(this);
     }
 
     return NULL;
 }
 
-
-int
-TR1_2D_SUPG2 :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
 
 double
 TR1_2D_SUPG2 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
@@ -1277,7 +1221,7 @@ TR1_2D_SUPG2 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatAr
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -1297,7 +1241,7 @@ void
 TR1_2D_SUPG2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     /* one computes here average deviatoric stress, based on rule of mixture (this is used only for postprocessing) */
-    FloatArray eps(3), s0(3), s1(3);
+    FloatArray eps, s0, s1;
     answer.resize(3);
 
     this->computeDeviatoricStrain(eps, gp, tStep);
@@ -1319,7 +1263,7 @@ TR1_2D_SUPG2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, Time
  * double dt1, dt2, dt;
  * double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
  *
- * this -> computeVectorOf(EID_MomentumBalance,VM_Total,tStep, u) ;
+ * this -> computeVectorOfVelocities(VM_Total,tStep, u) ;
  *
  * double vn1 = sqrt(u.at(1)*u.at(1)+u.at(2)*u.at(2));
  * double vn2 = sqrt(u.at(3)*u.at(3)+u.at(4)*u.at(4));
@@ -1353,7 +1297,7 @@ TR1_2D_SUPG2 :: computeLEPLICVolumeFraction(const FloatArray &n, const double p,
     this->formVolumeInterfacePoly(pg, matInterface, n, p, updFlag);
     answer = fabs(pg.computeVolume() / volume);
     if ( answer > 1.000000001 ) {
-        _warning2("VOF fraction out of bounds, vof = %e\n", answer);
+        OOFEM_WARNING("VOF fraction out of bounds, vof = %e\n", answer);
         return 1.0;
     } else {
         return answer;
@@ -1443,10 +1387,10 @@ TR1_2D_SUPG2 :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterfac
             if ( nodeIn [ i - 1 ] ) {
                 if ( updFlag ) {
                     v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(i)->giveNumber() ),
-                                 matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
+                                matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
                 } else {
                     v.setCoords( this->giveNode(i)->giveCoordinate(1),
-                                 this->giveNode(i)->giveCoordinate(2) );
+                                this->giveNode(i)->giveCoordinate(2) );
                 }
 
                 matvolpoly.addVertex(v);
@@ -1476,7 +1420,7 @@ TR1_2D_SUPG2 :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterfac
                     if ( nodeIn [ i - 1 ] ) {
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -1487,7 +1431,7 @@ TR1_2D_SUPG2 :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterfac
                         matvolpoly.addVertex(v);
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -1557,13 +1501,13 @@ TR1_2D_SUPG2 :: updateVolumePolygons(Polygon &referenceFluidPoly, Polygon &secon
             next = i < 3 ? i + 1 : 1;
             if ( nodeIn [ i - 1 ] ) {
                 v.setCoords( this->giveNode(i)->giveCoordinate(1),
-                             this->giveNode(i)->giveCoordinate(2) );
+                            this->giveNode(i)->giveCoordinate(2) );
 
                 referenceFluidPoly.addVertex(v);
                 rfPoints++;
             } else {
                 v.setCoords( this->giveNode(i)->giveCoordinate(1),
-                             this->giveNode(i)->giveCoordinate(2) );
+                            this->giveNode(i)->giveCoordinate(2) );
 
                 secondFluidPoly.addVertex(v);
                 sfPoints++;
@@ -1701,10 +1645,10 @@ TR1_2D_SUPG2 :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Primar
     //FloatMatrix n;
     IntArray elemdofs;
     // determine element dof ids
-    this->giveElementDofIDMask(pf.giveEquationID(), elemdofs);
+    this->giveElementDofIDMask(elemdofs);
     es = elemdofs.giveSize();
     // first evaluate element unknown vector
-    this->computeVectorOf(pf, mode, tStep, elemvector);
+    this->computeVectorOf(pf, elemdofs, mode, tStep, elemvector);
 
     // determine corresponding local coordinates
     if ( this->computeLocalCoordinates(lc, coords) ) {
@@ -1728,7 +1672,7 @@ TR1_2D_SUPG2 :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Primar
 
         return 0; // ok
     } else {
-        _error("EIPrimaryFieldI_evaluateFieldVectorAt: target point not in receiver volume");
+        OOFEM_ERROR("target point not in receiver volume");
         return 1; // fail
     }
 }
@@ -1750,11 +1694,6 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
 
     for ( int i = 0; i < 2; i++ ) {
         myPoly [ i ].clear();
-        if ( vcoords [ i ] ) {
-            delete [] vcoords [ i ];
-        }
-
-        vcoords [ i ] = NULL;
     }
 
     if ( this->temp_vof <= TRSUPG_ZERO_VOF ) {
@@ -1787,7 +1726,6 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
     FEI2dTrLin triaApprox(1, 2);
     FEI2dQuadLin quadApprox(1, 2);
     FEInterpolation *approx = NULL;
-    GaussPoint *gp;
     // set up integration points
     for ( int i = 0; i < 2; i++ ) {
         if ( c [ i ] == 3 ) {
@@ -1799,7 +1737,7 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
         } else if ( c [ i ] == 0 ) {
             continue;
         } else {
-            _error2("updateYourself: cannot set up integration domain for %d vertex polygon", c [ i ]);
+            OOFEM_ERROR("cannot set up integration domain for %d vertex polygon", c [ i ]);
         }
 
 #if 0
@@ -1811,28 +1749,24 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
 
 #endif
 
-        if ( c [ i ] ) {
-            vcoords [ i ] = new const FloatArray * [ c [ i ] ];
-        }
+        vcoords [ i ].clear();
+        vcoords [ i ].reserve(c [ i ]);
 
         // set up vertex coords
         Polygon :: PolygonVertexIterator it(myPoly + i);
-        int j = 0;
         while ( it.giveNext(& p) ) {
-            vcoords [ i ] [ j ] = p->getCoords();
-            j++;
+            vcoords [ i ].push_back( *p->getCoords() );
         }
 
         integrationRulesArray [ i ]->setUpIntegrationPoints(id [ i ], 4, _2dFlow);
 
         // remap ip coords into area coords of receiver
-        for ( int ip = 0; ip < integrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ i ]->getIntegrationPoint(ip);
-            approx->local2global( gc, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(c [ i ], vcoords [ i ]) );
+        for ( GaussPoint *gp: *integrationRulesArray [ i ] ) {
+            approx->local2global( gc, * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(vcoords [ i ]) );
             triaApprox.global2local( lc, gc, FEIElementGeometryWrapper(this) );
             // modify original ip coords to target ones
-            gp->setLocalCoordinates( * gp->giveCoordinates() );
-            gp->setCoordinates(lc);
+            gp->setSubPatchCoordinates( * gp->giveNaturalCoordinates() );
+            gp->setNaturalCoordinates(lc);
             //gp->setWeight (gp->giveWeight()*a/area);
         }
     }
@@ -1840,8 +1774,7 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
     // internal test -> compute receiver area
     double dV, __area = 0.0;
     for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
-        for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
+        for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
             dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
             // compute integral here
             __area += dV;
@@ -1850,12 +1783,11 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
 
     double __err = fabs(__area - area) / area;
     if ( __err > 1.e-6 ) {
-        _error2("updateIntegrationRules: volume inconsistency (%5.2f)", __err * 100);
+        OOFEM_ERROR("volume inconsistency (%5.2f)", __err * 100);
 
         __area = 0.0;
         for ( int ifluid = 0; ifluid < 2; ifluid++ ) {
-            for ( int ip = 0; ip < integrationRulesArray [ ifluid ]->giveNumberOfIntegrationPoints(); ip++ ) {
-                gp = integrationRulesArray [ ifluid ]->getIntegrationPoint(ip);
+            for ( GaussPoint *gp: *integrationRulesArray [ ifluid ] ) {
                 dV = this->computeVolumeAroundID(gp, id [ ifluid ], vcoords [ ifluid ]);
                 // compute integral here
                 __area += dV;
@@ -1866,16 +1798,16 @@ TR1_2D_SUPG2 :: updateIntegrationRules()
 
 
 double
-TR1_2D_SUPG2 :: computeVolumeAroundID(GaussPoint *gp, integrationDomain id, const FloatArray **idpoly)
+TR1_2D_SUPG2 :: computeVolumeAroundID(GaussPoint *gp, integrationDomain id, const std::vector< FloatArray > &idpoly)
 {
     double weight = gp->giveWeight();
 
     if ( id == _Triangle ) {
         FEI2dTrLin __interpolation(1, 2);
-        return weight * fabs( __interpolation.giveTransformationJacobian( * gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(3, idpoly) ) );
+        return weight *fabs( __interpolation.giveTransformationJacobian ( *gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
     } else {
         FEI2dQuadLin __interpolation(1, 2);
-        double det = fabs( __interpolation.giveTransformationJacobian( * gp->giveLocalCoordinates(), FEIVertexListGeometryWrapper(4, idpoly) ) );
+        double det = fabs( __interpolation.giveTransformationJacobian( * gp->giveSubPatchCoordinates(), FEIVertexListGeometryWrapper(idpoly) ) );
         return det * weight;
     }
 }
@@ -1914,13 +1846,6 @@ TR1_2D_SUPG2 :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, i
 }
 
 void
-TR1_2D_SUPG2 :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                          InternalStateType type, TimeStep *tStep)
-{
-    answer.resize(0);
-}
-
-void
 TR1_2D_SUPG2 :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
     pap.resize(3);
@@ -1934,11 +1859,11 @@ TR1_2D_SUPG2 :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-         ( pap == this->giveNode(2)->giveNumber() ) ||
-         ( pap == this->giveNode(3)->giveNumber() ) ) {
+        ( pap == this->giveNode(2)->giveNumber() ) ||
+        ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 

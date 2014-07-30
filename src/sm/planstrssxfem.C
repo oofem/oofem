@@ -34,15 +34,17 @@
 
 #include "planstrssxfem.h"
 #include "structuralmaterial.h"
-#include "xfemelementinterface.h"
-#include "enrichmentfunction.h"
-#include "enrichmentitem.h"
-#include "enrichmentdomain.h"
+#include "xfem/xfemelementinterface.h"
+#include "xfem/enrichmentfunction.h"
+#include "xfem/enrichmentitem.h"
+#include "xfem/enrichmentdomain.h"
 #include "structuralcrosssection.h"
 #include "vtkxmlexportmodule.h"
 #include "dynamicinputrecord.h"
+#include "classfactory.h"
+
 #ifdef __OOFEG
- #include "patchintegrationrule.h"
+ #include "oofeggraphiccontext.h"
 #endif
 
 namespace oofem {
@@ -51,22 +53,22 @@ REGISTER_Element(PlaneStress2dXfem)
 void PlaneStress2dXfem :: updateYourself(TimeStep *tStep)
 {
     PlaneStress2d :: updateYourself(tStep);
-    XfemElementInterface :: updateYourselfCZ(tStep);
+    XfemStructuralElementInterface :: updateYourselfCZ(tStep);
 }
 
 void PlaneStress2dXfem :: postInitialize()
 {
     PlaneStress2d :: postInitialize();
-    XfemElementInterface :: initializeCZMaterial();
+    XfemStructuralElementInterface :: initializeCZMaterial();
 }
 
 Interface *
 PlaneStress2dXfem :: giveInterface(InterfaceType it)
 {
     if ( it == XfemElementInterfaceType ) {
-        return static_cast< XfemElementInterface * >( this );
+        return static_cast< XfemElementInterface * >(this);
     } else if ( it == VTKXMLExportModuleElementInterfaceType ) {
-        return static_cast< VTKXMLExportModuleElementInterface * >( this );
+        return static_cast< VTKXMLExportModuleElementInterface * >(this);
     } else {
         return PlaneStress2d :: giveInterface(it);
     }
@@ -76,20 +78,19 @@ PlaneStress2dXfem :: giveInterface(InterfaceType it)
 void
 PlaneStress2dXfem :: computeGaussPoints()
 {
-	if( this->giveDomain()->hasXfemManager() ) {
-		XfemManager *xMan = this->giveDomain()->giveXfemManager();
+    if ( this->giveDomain()->hasXfemManager() ) {
+        XfemManager *xMan = this->giveDomain()->giveXfemManager();
 
-		if ( xMan->isElementEnriched(this) ) {
-			if ( !this->XfemElementInterface_updateIntegrationRule() ) {
-				PlaneStress2d :: computeGaussPoints();
-			}
-		} else   {
-			PlaneStress2d :: computeGaussPoints();
-		}
-	}
-	else {
-		PlaneStress2d :: computeGaussPoints();
-	}
+        if ( xMan->isElementEnriched(this) ) {
+            if ( !this->XfemElementInterface_updateIntegrationRule() ) {
+                PlaneStress2d :: computeGaussPoints();
+            }
+        } else {
+            PlaneStress2d :: computeGaussPoints();
+        }
+    } else   {
+        PlaneStress2d :: computeGaussPoints();
+    }
 }
 
 void PlaneStress2dXfem :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
@@ -105,7 +106,7 @@ void PlaneStress2dXfem :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 void PlaneStress2dXfem :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 {
-    XfemElementInterface_createEnrNmatrixAt(answer, iLocCoord, * this);
+    XfemElementInterface_createEnrNmatrixAt(answer, iLocCoord, * this, false);
 }
 
 
@@ -122,53 +123,69 @@ int PlaneStress2dXfem :: computeNumberOfDofs()
 
 
 void
-PlaneStress2dXfem :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+PlaneStress2dXfem :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    // Returns the total id mask of the dof manager = regular id's + enriched id's
-    this->giveDofManager(inode)->giveCompleteMasterDofIDArray(answer);
+    // Continuous part
+    PlaneStress2d :: giveDofManDofIDMask(inode, answer);
+
+    // Discontinuous part
+	if( this->giveDomain()->hasXfemManager() ) {
+		DofManager *dMan = giveDofManager(inode);
+		XfemManager *xMan = giveDomain()->giveXfemManager();
+
+        const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices( dMan->giveGlobalNumber() );
+        for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
+            EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices[i]);
+			if ( ei->isDofManEnriched(* dMan) ) {
+				IntArray eiDofIdArray;
+				ei->computeEnrichedDofManDofIdArray(eiDofIdArray, *dMan);
+				answer.followedBy(eiDofIdArray);
+			}
+		}
+	}
 }
 
 
 
 void PlaneStress2dXfem :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    XfemElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
+    XfemStructuralElementInterface :: XfemElementInterface_computeConstitutiveMatrixAt(answer, rMode, gp, tStep);
 }
 
 void
 PlaneStress2dXfem :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    XfemElementInterface :: XfemElementInterface_computeStressVector(answer, strain, gp, tStep);
+    XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(answer, strain, gp, tStep);
 }
 
 void PlaneStress2dXfem :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
     PlaneStress2d :: computeStiffnessMatrix(answer, rMode, tStep);
-    XfemElementInterface :: computeCohesiveTangent(answer, tStep);
+    XfemStructuralElementInterface :: computeCohesiveTangent(answer, tStep);
 }
 
 void
 PlaneStress2dXfem :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     PlaneStress2d :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
-    XfemElementInterface :: computeCohesiveForces(answer, tStep);
+    XfemStructuralElementInterface :: computeCohesiveForces(answer, tStep);
 }
 
 Element_Geometry_Type
 PlaneStress2dXfem :: giveGeometryType() const
 {
-	if( this->giveDomain()->hasXfemManager() ) {
-		XfemManager *xMan = this->giveDomain()->giveXfemManager();
-		if ( xMan->isElementEnriched(this) ) {
-			//return EGT_Composite;
-			return EGT_quad_1;
-		} else {
-			return EGT_quad_1;
-		}
-	}
-	else {
-		return EGT_quad_1;
-	}
+    if ( this->giveDomain()->hasXfemManager() ) {
+        XfemManager *xMan = this->giveDomain()->giveXfemManager();
+        if ( xMan->isElementEnriched(this) ) {
+            return EGT_Composite;
+            //return EGT_quad_1;
+        } else {
+            return EGT_Composite;
+            //return EGT_quad_1;
+        }
+    } else   {
+        return EGT_quad_1;
+    }
 }
 
 
@@ -179,17 +196,17 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
     if ( !context.testElementGraphicActivity(this) ) {
         return;
     }
-
+#if 0
     XfemManager *xf = this->giveDomain()->giveXfemManager();
     if ( !xf->isElementEnriched(this) ) {
         PlaneStress2d :: drawRawGeometry(context);
     } else {
-        if ( numberOfIntegrationRules > 1 ) {
+        if ( integrationRulesArray.size() > 1 ) {
             // TODO: Implement visualization
             /*
              *          PatchIntegrationRule *iRule;
-             *          for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-             *              iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
+             *          for ( auto &iRule: integrationRulesArray ) {
+             *              iRule = dynamic_cast< PatchIntegrationRule * >( ir );
              *              if ( iRule ) {
              *                  iRule->givePatch()->draw(context);
              *              }
@@ -199,6 +216,7 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
             PlaneStress2d :: drawRawGeometry(context);
         }
     }
+#endif
 }
 
 void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
@@ -206,7 +224,7 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
     if ( !context.testElementGraphicActivity(this) ) {
         return;
     }
-
+#if 0
     XfemManager *xf = this->giveDomain()->giveXfemManager();
     if ( !xf->isElementEnriched(this) ) {
         PlaneStress2d :: drawScalar(context);
@@ -219,16 +237,14 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
             indx = context.giveIntVarIndx();
 
             TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
-            PatchIntegrationRule *iRule;
-            for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-                iRule = dynamic_cast< PatchIntegrationRule * >( integrationRulesArray [ i ] );
+            for ( auto &ir: integrationRulesArray ) {
+                PatchIntegrationRule *iRule = dynamic_cast< PatchIntegrationRule * >(ir);
 
  #if 0
                 val = iRule->giveMaterial();
  #else
                 val = 0.0;
-                for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                    GaussPoint *gp = iRule->getIntegrationPoint(0);
+                for ( GaussPoint *gp: *iRule ) {
                     giveIPValue(v, gp, context.giveIntVarType(), tStep);
                     val += v.at(indx);
                 }
@@ -243,6 +259,7 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
             PlaneStress2d :: drawScalar(context);
         }
     }
+#endif
 }
 #endif
 
@@ -257,18 +274,211 @@ PlaneStress2dXfem :: initializeFrom(InputRecord *ir)
         return result;
     }
 
-    result = XfemElementInterface :: initializeCZFrom(ir);
+    result = XfemStructuralElementInterface :: initializeCZFrom(ir);
     return result;
 }
 
 MaterialMode PlaneStress2dXfem :: giveMaterialMode()
 {
-    return XfemElementInterface :: giveMaterialMode();
+    return XfemStructuralElementInterface :: giveMaterialMode();
 }
 
 void PlaneStress2dXfem :: giveInputRecord(DynamicInputRecord &input)
 {
     PlaneStress2d :: giveInputRecord(input);
-    XfemElementInterface :: giveCZInputRecord(input);
+    XfemStructuralElementInterface :: giveCZInputRecord(input);
 }
+
+void
+PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
+{
+    const int numCells = mSubTri.size();
+
+    if(numCells == 0) {
+        // Enriched but uncut element
+        // Visualize as a quad
+        vtkPiece.setNumberOfCells(1);
+
+        int numTotalNodes = 4;
+        vtkPiece.setNumberOfNodes(numTotalNodes);
+
+        // Node coordinates
+        std :: vector< FloatArray >nodeCoords;
+        for(int i = 1; i <= 4; i++) {
+            FloatArray &x = *(giveDofManager(i)->giveCoordinates());
+            nodeCoords.push_back(x);
+
+            vtkPiece.setNodeCoords(i, x);
+        }
+
+        // Connectivity
+        IntArray nodes1 = {1, 2, 3, 4};
+        vtkPiece.setConnectivity(1, nodes1);
+
+        // Offset
+        int offset = 4;
+        vtkPiece.setOffset(1, offset);
+
+        // Cell types
+        vtkPiece.setCellType(1, 9); // Linear quad
+
+
+
+
+        // Export nodal variables from primary fields
+        vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
+
+        for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
+            UnknownType type = ( UnknownType ) primaryVarsToExport.at(fieldNum);
+
+            for ( int nodeInd = 1; nodeInd <= numTotalNodes; nodeInd++ ) {
+
+                if ( type == DisplacementVector ) { // compute displacement
+
+                        FloatArray u = {0.0, 0.0, 0.0};
+
+                        // Fetch global coordinates (in undeformed configuration)
+                        const FloatArray &x = nodeCoords[nodeInd-1];
+
+                        // Compute local coordinates
+                        FloatArray locCoord;
+                        computeLocalCoordinates(locCoord, x);
+
+                        // Compute displacement in point
+                        FloatMatrix NMatrix;
+                        computeNmatrixAt(locCoord, NMatrix);
+                        FloatArray solVec;
+                        computeVectorOf(VM_Total, tStep, solVec);
+                        FloatArray uTemp;
+                        uTemp.beProductOf(NMatrix, solVec);
+
+                        if(uTemp.giveSize() == 3) {
+                            u = uTemp;
+                        }
+                        else {
+                            u = {uTemp[0], uTemp[1], 0.0};
+                        }
+
+                        vtkPiece.setPrimaryVarInNode(fieldNum, nodeInd, u);
+                } else {
+                    printf("fieldNum: %d\n", fieldNum);
+                    // TODO: Implement
+//                    ZZNodalRecoveryMI_recoverValues(values, layer, ( InternalStateType ) 1, tStep); // does not work well - fix
+//                    for ( int j = 1; j <= numCellNodes; j++ ) {
+//                        vtkPiece.setPrimaryVarInNode(fieldNum, nodeNum, values [ j - 1 ]);
+//                        nodeNum += 1;
+//                    }
+                }
+            }
+        }
+
+
+        // Export nodal variables from internal fields
+        vtkPiece.setNumberOfInternalVarsToExport(0, numTotalNodes);
+
+
+        // Export cell variables
+        vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), 1);
+        for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
+            InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
+            FloatArray average;
+            IntegrationRule *iRule = integrationRulesArray [ 0 ];
+            VTKXMLExportModule :: computeIPAverage(average, iRule, this, type, tStep);
+
+            FloatArray averageV9(9);
+            averageV9.at(1) = average.at(1);
+            averageV9.at(5) = average.at(2);
+            averageV9.at(9) = average.at(3);
+            averageV9.at(6) = averageV9.at(8) = average.at(4);
+            averageV9.at(3) = averageV9.at(7) = average.at(5);
+            averageV9.at(2) = averageV9.at(4) = average.at(6);
+
+            vtkPiece.setCellVar( i, 1, averageV9 );
+        }
+
+
+        // Export of XFEM related quantities
+        if ( domain->hasXfemManager() ) {
+            XfemManager *xMan = domain->giveXfemManager();
+
+            int nEnrIt = xMan->giveNumberOfEnrichmentItems();
+            vtkPiece.setNumberOfInternalXFEMVarsToExport(xMan->vtkExportFields.giveSize(), nEnrIt, numTotalNodes);
+
+            const int nDofMan = giveNumberOfDofManagers();
+
+
+            for ( int field = 1; field <= xMan->vtkExportFields.giveSize(); field++ ) {
+                XFEMStateType xfemstype = ( XFEMStateType ) xMan->vtkExportFields [ field - 1 ];
+
+                for ( int enrItIndex = 1; enrItIndex <= nEnrIt; enrItIndex++ ) {
+                    EnrichmentItem *ei = xMan->giveEnrichmentItem(enrItIndex);
+                    for ( int nodeInd = 1; nodeInd <= numTotalNodes; nodeInd++ ) {
+
+                        const FloatArray &x = nodeCoords[nodeInd-1];
+                        FloatArray locCoord;
+                        computeLocalCoordinates(locCoord, x);
+
+                        FloatArray N;
+                        FEInterpolation *interp = giveInterpolation();
+                        interp->evalN( N, locCoord, FEIElementGeometryWrapper(this) );
+
+
+                        if ( xfemstype == XFEMST_LevelSetPhi ) {
+                            double levelSet = 0.0, levelSetInNode = 0.0;
+
+                            for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
+                                DofManager *dMan = giveDofManager(elNodeInd);
+                                ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber() );
+
+                                levelSet += N.at(elNodeInd)*levelSetInNode;
+                            }
+
+
+                            FloatArray valueArray = {levelSet};
+                            vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
+
+                        } else if ( xfemstype == XFEMST_LevelSetGamma ) {
+                            double levelSet = 0.0, levelSetInNode = 0.0;
+
+                            for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
+                                DofManager *dMan = giveDofManager(elNodeInd);
+                                ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber() );
+
+                                levelSet += N.at(elNodeInd)*levelSetInNode;
+                            }
+
+
+                            FloatArray valueArray = {levelSet};
+                            vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
+
+                        } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
+                            double nodeEnrMarker = 0.0, nodeEnrMarkerInNode = 0.0;
+
+                            for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
+                                DofManager *dMan = giveDofManager(elNodeInd);
+                                ei->evalNodeEnrMarkerInNode(nodeEnrMarkerInNode, dMan->giveGlobalNumber() );
+
+                                nodeEnrMarker += N.at(elNodeInd)*nodeEnrMarkerInNode;
+                            }
+
+
+                            FloatArray valueArray = {nodeEnrMarker};
+                            vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
+                        }
+
+                    }
+                }
+            }
+        }
+
+    }
+    else {
+        // Enriched and cut element
+
+        XfemStructuralElementInterface::giveSubtriangulationCompositeExportData(vtkPiece, primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep);
+
+
+    }
+}
+
 } // end namespace oofem

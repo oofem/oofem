@@ -32,12 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/*
- * The original idea for this class comes from
- * Dubois-Pelerin, Y.: "Object-Oriented  Finite Elements: Programming concepts and Implementation",
- * PhD Thesis, EPFL, Lausanne, 1992.
- */
-
 #ifndef floatarray_h
 #define floatarray_h
 
@@ -45,18 +39,15 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
+#include <initializer_list>
+#include <vector>
 #include <iosfwd>
-#if __cplusplus > 199711L
- #include <initializer_list>
-#endif
 
 namespace oofem {
 class IntArray;
 class FloatMatrix;
 class DataStream;
-#ifdef __PARALLEL_MODE
 class CommunicationBuffer;
-#endif
 
 /**
  * Class representing vector of real numbers. This array can grow or shrink to
@@ -80,51 +71,54 @@ class CommunicationBuffer;
  *     This process is controlled in resize member function.
  *
  * Remarks:
- * - For the sake of efficiency, the array values is allocated using the
- *   C calloc function rather than the 'new' operator.
  * - Method givePointer is an encapsulation crime. It is used only for
  *   speeding up method 'dot' of class RowColumn and for speeding method
  *   initialize.
+ * 
+ * @author Mikael Öhman
+ * @author Erik Svenning
+ * @author many others (please add yourselves)
  */
 class OOFEM_EXPORT FloatArray
 {
 protected:
-    /// Size of array.
-    int size;
-    /// allocated space size for array.
-    int allocatedSize;
-    /// Stored values of vector.
-    double *values;
+    /// Stored values.
+    std::vector< double > values;
 
 public:
-    /**
-     * Constructor for empty array.
-     */
-    FloatArray();
-    /**
-     * Constructor. Array is zeroed.
-     * @param size Size of array.
-     */
-    FloatArray(int size);
-    /**
-     * Copy constructor. Creates the array from another array.
-     * @param x Array to copy.
-     */
-    FloatArray(const FloatArray &x);
-#if __cplusplus > 199711L
+    /// @name Iterator for for-each loops:
+    //@{
+    std::vector< double > :: iterator begin() { return this->values.begin(); }
+    std::vector< double > :: iterator end() { return this->values.end(); }
+    std::vector< double > :: const_iterator begin() const { return this->values.begin(); }
+    std::vector< double > :: const_iterator end() const { return this->values.end(); }
+    //@}
+
+    /// Constructor for sized array. Data is zeroed.
+    FloatArray(int n = 0) : values(n) { }
+    /// Disallow double parameter, which can otherwise give unexpected results.
+    FloatArray(double)  = delete;
+    /// Copy constructor. Creates the array from another array.
+    FloatArray(const FloatArray &src) : values(src.values) { }
+    /// Move constructor. Creates the array from another array.
+    FloatArray(FloatArray &&src) : values(std::move(src.values)) { }
     /// Initializer list constructor.
-    FloatArray(std :: initializer_list< double >list);
-    /// Assignment operator.
-    FloatArray &operator=(std :: initializer_list< double >list);
-#endif
+    inline FloatArray(std :: initializer_list< double >list) : values(list) { }
     /// Destructor.
-    virtual ~FloatArray();
+    virtual ~FloatArray() {};
 
     /// Assignment operator
-    FloatArray &operator=(const FloatArray &);
+    FloatArray &operator = (const FloatArray &src) { values = src.values; return *this; }
+    /// Move operator
+    FloatArray &operator = (FloatArray &&src) { values = std::move(src.values); return *this; }
+    /// Assignment operator.
+    inline FloatArray &operator = (std :: initializer_list< double >list) { values = list; return *this; }
 
-    /// Sets values in array. Convenient for writing small specific vectors.
-    void setValues(int n, ...);
+    /// Add one element
+    void push_back(const double &iVal) {values.push_back(iVal);}
+
+    /// Returns true if no element is NAN or infinite
+    bool isFinite() const;
 
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -153,9 +147,15 @@ public:
      * @param i Position of coefficient in array.
      */
 #ifdef DEBUG
-    double &operator()(int i);
+    double &operator() (int i);
+    double &operator[] (int i);
 #else
-    inline double &operator()(int i) { return values [ i ]; };
+    inline double &operator() (int i) {
+        return values [ i ];
+    };
+    inline double &operator[] (int i) {
+        return values [ i ];
+    };
 #endif
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -163,9 +163,11 @@ public:
      * @param i Position of coefficient in array.
      */
 #ifdef DEBUG
-    const double &operator()(int i) const;
+    const double &operator() (int i) const;
+    const double &operator[] (int i) const;
 #else
-    inline const double &operator()(int i) const { return values [ i ]; };
+    inline const double &operator() (int i) const { return values [ i ]; };
+    inline const double &operator[] (int i) const { return values [ i ]; };
 #endif
     /** Checks size of receiver towards requested bounds.
      * Current implementation will call exit(1), if dimension
@@ -180,6 +182,11 @@ public:
      */
     void checkSizeTowards(const IntArray &loc);
     /**
+     * Allocates enough size to fit s, and clears the array.
+     * @param s New reserved size.
+     */
+    void reserve(int s);
+    /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
      * Old values are copied over and new space is zeroed.
@@ -193,6 +200,11 @@ public:
      */
     void resize(int s);
     /**
+     * Clears receiver (zero size).
+     * Same effect as resizing to zero, but has a clearer meaning and intent when used.
+     */
+    void clear() { this->values.clear(); }
+    /**
      * Resizes the size of the receiver to requested bounds. Memory allocation always happens, more preferably use
      * resize() function instead. Array is zeroed.
      * @param s New size.
@@ -203,11 +215,11 @@ public:
      */
     bool containsOnlyZeroes() const;
     /// Returns the size of receiver.
-    int giveSize() const { return size; }
+    int giveSize() const { return (int)this->values.size(); }
     /// Returns true if receiver is not empty.
-    bool isNotEmpty() const { return ( size != 0 ); }
+    bool isNotEmpty() const { return !this->values.empty(); }
     /// Returns true if receiver is empty.
-    bool isEmpty() const { return ( size == 0 ); }
+    bool isEmpty() const { return this->values.empty(); }
     /**
      * Switches the sign of every coefficient of receiver.
      * @return receiver.
@@ -223,6 +235,16 @@ public:
     virtual void pY() const;
     /// Zeroes all coefficients of receiver.
     void zero();
+    /**
+     * Appends array to reciever.
+     * @param a Values to be appended.
+     */
+    void append(const FloatArray &a);
+    /**
+     * Appends value to reciever.
+     * @param a Value to be appended.
+     */
+    void append(double a);
     /**
      * Receiver becomes the result of the product of aMatrix and anArray.
      * Adjusts the size of receiver if necessary.
@@ -364,6 +386,7 @@ public:
      * Written by Erik Svenning, August 2013.
      */
     double distance(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const;
+    double distance_square(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const;
 
     /**
      * Computes the square of distance between position represented by receiver and position given as parameter.
@@ -427,7 +450,7 @@ public:
      * Gives the pointer to the raw data, breaking encapsulation.
      * @return Pointer to values of array
      */
-    double *givePointer() const { return values; }
+    double *givePointer() const { return const_cast< double* >(values.data()); }
     /**
      * Reciever will be a vector with 9 components formed from a 3x3 matrix.
      * Order of matrix components in vector: 11, 22, 33, 23, 13, 12, 32, 31, 21
@@ -463,32 +486,35 @@ public:
     contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
     contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
 
-    friend std :: ostream &operator<<(std :: ostream &out, const FloatArray &x);
+    friend std :: ostream &operator << ( std :: ostream & out, const FloatArray & x );
+
+    friend class FloatMatrix;
 
     ///@name IML compatibility
     //@{
     /// Assignment of scalar to all components of receiver
-    FloatArray &operator=(const double &);
+    FloatArray &operator = ( const double & );
     //@}
 
 #ifdef BOOST_PYTHON
-    void __setitem__(int i, double val) { this->at(i + 1) = val; }
-    double __getitem__(int i) { return this->at(i + 1); }
-    void beCopyOf(const FloatArray &src) { this->operator=(src); }
+    void __setitem__(int i, double val) { this->values[i] = val; }
+    double __getitem__(int i) { return this->values[i]; }
+    void beCopyOf(const FloatArray &src) { this->operator = ( src ); }
 #endif
 };
 
+const FloatArray ZeroVector = {0.0,0.0,0.0};
 
 ///@name IML compatibility
 //@{
 /// Vector multiplication by scalar
-FloatArray &operator*=(FloatArray &x, const double &a);
-FloatArray operator*(const double &a, const FloatArray &x);
-FloatArray operator*(const FloatArray &x, const double &a);
-FloatArray operator+(const FloatArray &x, const FloatArray &y);
-FloatArray operator-(const FloatArray &x, const FloatArray &y);
-FloatArray &operator+=(FloatArray &x, const FloatArray &y);
-FloatArray &operator-=(FloatArray &x, const FloatArray &y);
+FloatArray &operator *= ( FloatArray & x, const double & a );
+FloatArray operator *( const double & a, const FloatArray & x );
+FloatArray operator *( const FloatArray & x, const double & a );
+FloatArray operator + ( const FloatArray & x, const FloatArray & y );
+FloatArray operator - ( const FloatArray & x, const FloatArray & y );
+FloatArray &operator += ( FloatArray & x, const FloatArray & y );
+FloatArray &operator -= ( FloatArray & x, const FloatArray & y );
 
 double norm(const FloatArray &x);
 double dot(const FloatArray &x, const FloatArray &y);

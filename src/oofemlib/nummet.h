@@ -91,7 +91,7 @@ public:
      * @param d Domain which the receiver belongs to.
      * @param m Engineering model which the receiver belongs to.
      */
-    NumericalMethod(Domain *d, EngngModel *m) : domain(d), engngModel(m) { }
+    NumericalMethod(Domain * d, EngngModel * m) : domain(d), engngModel(m) { }
     /// Destructor
     virtual ~NumericalMethod() { }
 

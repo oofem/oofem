@@ -72,7 +72,7 @@ namespace oofem {
 class HydratingConcreteMat : public IsotropicHeatTransferMaterial
 {
 public:
-    HydratingConcreteMat(int n, Domain *d);
+    HydratingConcreteMat(int n, Domain * d);
     virtual ~HydratingConcreteMat();
 
     /// Return true if hydration heat source is present.
@@ -121,7 +121,7 @@ public:
     double DoH1, P1;
 
 protected:
-    double GivePower(TimeStep *tStep, GaussPoint *gp);
+    double GivePower(TimeStep *tStep, GaussPoint *gp, ValueModeType mode);
     double scaleTemperature(GaussPoint *gp);
     /// Return affinity scaled to 25C.
     double affinity25(double alpha);
@@ -139,14 +139,14 @@ protected:
 class HydratingConcreteMatStatus : public TransportMaterialStatus
 {
 public:
-    HydratingConcreteMatStatus(int n, Domain *d, GaussPoint *g);
+    HydratingConcreteMatStatus(int n, Domain * d, GaussPoint * g);
     virtual ~HydratingConcreteMatStatus();
     /// Returns actual degree of hydration at last known equilibrium.
     double giveDoHActual();
     virtual void updateYourself(TimeStep *tStep);
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     double power;
-    double lastIntrinsicTime;
+    double lastEvalTime;
     double lastEquivalentTime, equivalentTime, degreeOfHydration, lastDegreeOfHydration;
 };
 } // end namespace oofem

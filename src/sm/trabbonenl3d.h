@@ -41,11 +41,6 @@
 #include "nonlocmatstiffinterface.h"
 #include "cltypes.h"
 
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
- #include "connectivitytable.h"
-#endif
-
 ///@name Input fields for TrabBoneNL3D
 //@{
 #define _IFT_TrabBoneNL3D_Name "trabbonenl3d"
@@ -64,7 +59,7 @@ protected:
     double localCumPlastStrainForAverage;
 
 public:
-    TrabBoneNL3DStatus(int n, Domain *d, GaussPoint *g);
+    TrabBoneNL3DStatus(int n, Domain * d, GaussPoint * g);
     virtual ~TrabBoneNL3DStatus();
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
@@ -86,15 +81,15 @@ public:
  * Trabecular bone nonlocal material model.
  */
 class TrabBoneNL3D : public TrabBone3D,
-    public StructuralNonlocalMaterialExtensionInterface,
-    public NonlocalMaterialStiffnessInterface
+public StructuralNonlocalMaterialExtensionInterface,
+public NonlocalMaterialStiffnessInterface
 {
 protected:
     double R;
     double mParam;
 
 public:
-    TrabBoneNL3D(int n, Domain *d);
+    TrabBoneNL3D(int n, Domain * d);
     virtual ~TrabBoneNL3D();
 
     virtual const char *giveClassName() const { return "TrabBoneNL3D"; }

@@ -76,7 +76,7 @@ InterfaceElem1d :: setCoordMode()
         this->mode = ie1d_3d;
         break;
     default:
-        _error("setCoordMode: Unsupported domain type")
+        OOFEM_ERROR("Unsupported domain type")
     }
 }
 
@@ -92,7 +92,7 @@ InterfaceElem1d :: giveMaterialMode()
 
     case ie1d_3d: return _3dInterface;
 
-    default: _error("giveMaterialMode: Unsupported coord mode");
+    default: OOFEM_ERROR("Unsupported coord mode");
     }
     return _1dInterface; // to make the compiler happy
 }
@@ -147,7 +147,7 @@ InterfaceElem1d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li,
         bLoc.at(3, 6) = +1.0;
         break;
     default:
-        _error("giveDofManDofIDMask: unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 
     bLoc.times(area);
@@ -204,7 +204,7 @@ InterfaceElem1d :: evaluateLocalCoordinateSystem(FloatMatrix &lcs)
     }
 
     default:
-        _error("giveDofManDofIDMask: unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 }
 
@@ -213,11 +213,10 @@ void
 InterfaceElem1d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        integrationRulesArray [ 0 ]->setUpIntegrationPoints( _Line, 1, this->giveMaterialMode() );
+        integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, this->giveMaterialMode() );
     }
 }
 
@@ -225,10 +224,7 @@ InterfaceElem1d :: computeGaussPoints()
 int
 InterfaceElem1d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    answer.resize(3);
-    answer.at(1) = this->giveNode(1)->giveCoordinate(1);
-    answer.at(2) = this->giveNode(1)->giveCoordinate(2);
-    answer.at(3) = this->giveNode(1)->giveCoordinate(3);
+    answer = *this->giveNode(1)->giveCoordinates();
 
     return 1;
 }
@@ -237,7 +233,7 @@ InterfaceElem1d :: computeGlobalCoordinates(FloatArray &answer, const FloatArray
 bool
 InterfaceElem1d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gcoords)
 {
-    _error("Not implemented");
+    OOFEM_ERROR("Not implemented");
     return false;
 }
 
@@ -253,14 +249,13 @@ InterfaceElem1d :: computeVolumeAround(GaussPoint *gp)
 IRResultType
 InterfaceElem1d :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     this->StructuralElement :: initializeFrom(ir);
     IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_InterfaceElem1d_refnode);
     IR_GIVE_OPTIONAL_FIELD(ir, normal, _IFT_InterfaceElem1d_normal);
     if ( referenceNode == 0 && normal.at(1) == 0 && normal.at(2) == 0 && normal.at(1) == 0 && normal.at(3) == 0 ) {
-        _error("instanciateFrom: wrong reference node or normal specified");
+        OOFEM_ERROR("wrong reference node or normal specified");
     }
 
     this->computeLocalSlipDir(normal); ///@todo Move into postInitialize ?
@@ -283,7 +278,7 @@ InterfaceElem1d :: computeNumberOfDofs()
         return 6;
 
     default:
-        _error("giveDofManDofIDMask: unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 
     return 0; // to suppress compiler warning
@@ -291,26 +286,26 @@ InterfaceElem1d :: computeNumberOfDofs()
 
 
 void
-InterfaceElem1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+InterfaceElem1d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     switch ( domain->giveDomainType() ) {
     case _2dPlaneStressMode:
     case _PlaneStrainMode:
     case _3dAxisymmMode:
-        answer.setValues(2, D_u, D_v);
+        answer = {D_u, D_v};
         break;
     case _3dMode:
-        answer.setValues(3, D_u, D_v, D_w);
+        answer = {D_u, D_v, D_w};
         break;
     case _2dTrussMode:
     case _2dBeamMode:
-        answer.setValues(2, D_u, D_w);
+        answer = {D_u, D_w};
         break;
     case _1dTrussMode:
-        answer.setValues(1, D_u);
+        answer = {D_u};
         break;
     default:
-        _error("giveDofManDofIDMask: unsupported mode");
+        OOFEM_ERROR("unsupported mode");
     }
 }
 
@@ -326,7 +321,7 @@ InterfaceElem1d :: computeLocalSlipDir(FloatArray &normal)
         normal.at(3) = domain->giveNode(this->referenceNode)->giveCoordinate(3) - this->giveNode(1)->giveCoordinate(3);
     } else {
         if ( normal.at(1) == 0 && normal.at(2) == 0 && normal.at(3) == 0 ) {
-            _error("computeLocalSlipDir: normal is not defined (referenceNode=0,normal=(0,0,0))");
+            OOFEM_ERROR("normal is not defined (referenceNode=0,normal=(0,0,0))");
         }
     }
 
@@ -375,11 +370,11 @@ void InterfaceElem1d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownTyp
     EASValsSetColor( gc.getDeformedElementColor() );
     EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
     p [ 0 ].x = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale) +
-                                  this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) );
+                                 this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) );
     p [ 0 ].y = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale) +
-                                  this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) );
+                                 this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) );
     p [ 0 ].z = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(3, tStep, defScale) +
-                                  this->giveNode(2)->giveUpdatedCoordinate(3, tStep, defScale) );
+                                 this->giveNode(2)->giveUpdatedCoordinate(3, tStep, defScale) );
 
     EASValsSetMType(CIRCLE_MARKER);
     go = CreateMarker3D(p);
@@ -390,8 +385,7 @@ void InterfaceElem1d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownTyp
 
 void InterfaceElem1d :: drawScalar(oofegGraphicContext &context)
 {
-    int i, indx, result = 0;
-    GaussPoint *gp;
+    int indx, result = 0;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray gcoord(3), v1;
@@ -406,11 +400,11 @@ void InterfaceElem1d :: drawScalar(oofegGraphicContext &context)
     if ( context.getInternalVarsDefGeoFlag() ) {
         double defScale = context.getDefScale();
         p [ 0 ].x = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale) +
-                                      this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) );
+                                     this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) );
         p [ 0 ].y = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale) +
-                                      this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) );
+                                     this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) );
         p [ 0 ].z = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(3, tStep,  defScale) +
-                                      this->giveNode(2)->giveUpdatedCoordinate(3, tStep, defScale) );
+                                     this->giveNode(2)->giveUpdatedCoordinate(3, tStep, defScale) );
     } else {
         p [ 0 ].x = ( FPNum ) ( this->giveNode(1)->giveCoordinate(1) );
         p [ 0 ].y = ( FPNum ) ( this->giveNode(1)->giveCoordinate(2) );
@@ -420,9 +414,8 @@ void InterfaceElem1d :: drawScalar(oofegGraphicContext &context)
     result += giveIPValue(v1, iRule->getIntegrationPoint(0), context.giveIntVarType(), tStep);
 
 
-    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
+    for ( GaussPoint *gp: *iRule ) {
         result = 0;
-        gp = iRule->getIntegrationPoint(i);
         result += giveIPValue(v1, gp, context.giveIntVarType(), tStep);
         if ( result != 1 ) {
             continue;

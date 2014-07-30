@@ -62,6 +62,9 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
             Parser=UNVParser(unvfile)
         elif (fileExtension[-1].lower()=='inp'): # Abaqus output file
             Parser=AbaqusParser(unvfile)
+        else:
+            print "Unknown extension of input file %s" % fileExtension[-1].lower()
+            exit(0)
         
         print 'Parsing mesh file %s' % sys.argv[1],
         FEM=Parser.parse()
@@ -229,6 +232,10 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                 elif (words[2].lower()=='elements'):
                     ellist=[]
                     for elemset in FEM.elemsets:
+
+                        if setID == elemset.id:
+                            ellist.extend(elemset.items)
+
                         for oofemset in elemset.oofem_sets:
                             if (setID==oofemset):
                                 ellist.extend(elemset.items)

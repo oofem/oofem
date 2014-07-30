@@ -46,7 +46,9 @@ public:
     };
 
     OOFEM_exit_status status;
-    OOFEM_Terminate(OOFEM_exit_status s = ES_OK) { status = s; }
+    OOFEM_Terminate(OOFEM_exit_status s = ES_OK) {
+        status = s;
+    }
 };
 } // end namespace oofem
 #endif // oofem_terminate_h

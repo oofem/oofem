@@ -65,7 +65,7 @@ protected:
     FloatArray * * columns_; // data values per column
     IntArray **rowind_;   // row_ind per column
 #else
-    std :: map< int, double > **columns;
+    std :: vector< std :: map< int, double > > columns;
 #endif
 
     int base_; // index base: offset of first element
@@ -80,24 +80,25 @@ public:
      */
     DynCompCol();
     /// Copy constructor
-    DynCompCol(const DynCompCol &S);
+    DynCompCol(const DynCompCol & S);
     /// Assignment operator
-    DynCompCol &operator=(const DynCompCol &C);
+    DynCompCol &operator = ( const DynCompCol & C );
     /// Destructor
     virtual ~DynCompCol();
 
     // Overloaded methods:
     SparseMtrx *GiveCopy() const;
-    void times(const FloatArray &x, FloatArray &answer) const;
-    void timesT(const FloatArray &x, FloatArray &answer) const;
+    virtual void times(const FloatArray &x, FloatArray &answer) const;
+    virtual void timesT(const FloatArray &x, FloatArray &answer) const;
     virtual void times(double x);
-    int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme &);
-    int assemble(const IntArray &loc, const FloatMatrix &mat);
-    int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
-    bool canBeFactorized() const { return false; }
+    virtual int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &);
+    virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
+    virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
+    virtual bool canBeFactorized() const { return false; }
     virtual void zero();
-    SparseMtrxType  giveType() const { return SMT_DynCompCol; }
-    bool isAsymmetric() const { return true; }
+    virtual const char* giveClassName() const { return "DynCompCol"; }
+    virtual SparseMtrxType  giveType() const { return SMT_DynCompCol; }
+    virtual bool isAsymmetric() const { return true; }
     virtual double &at(int i, int j);
     virtual double at(int i, int j) const;
     virtual void printStatistics() const;
@@ -121,9 +122,9 @@ protected:
     /*  General access function (slow) */
     /***********************************/
     /// Implements 0-based access
-    double operator()(int i, int j) const;
+    double operator() (int i, int j) const;
     /// Implements 0-based access
-    double &operator()(int i, int j);
+    double &operator() (int i, int j);
 
 #ifndef DynCompCol_USE_STL_SETS
     /// Returns the row index of given row at given column, else returns zero.

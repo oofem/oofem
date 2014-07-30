@@ -1,6 +1,7 @@
 xFemCrackValBranch.out
 XFEM simulation: A crack with branch functions. Written by Erik Svenning, Chalmers University of Technology.
-XFEMStatic nsteps 3 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 20 minIter 2 stiffmode 0 nmodules 0
+StaticStructural nsteps 3 deltat 1.0 rtolv 1.0e-6 MaxIter 20 minIter 2 nmodules 1
+errorcheck
 #LinearStatic nsteps 1 lstype 3 smtype 7 nmodules 0
 #LinearStatic nsteps 1 nmodules 1
 #vtkxml tstep_all domain_all vars 1 94 primvars 1 1 cellvars 3 1 92 93
@@ -8,22 +9,22 @@ XFEMStatic nsteps 3 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 20 minIter 2 s
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 16 nelem 9 ncrosssect 1 nmat 1 nbc 24 nic 0 nltf 1 nxfemman 1
-node 1     coords 3  0        0        0       bc 2 1 2
-node 2     coords 3  2        0        0       bc 2 7 8
-node 3     coords 3  2        2        0       bc 2 13 14
-node 4     coords 3  0        2        0       bc 2 19 20
-node 5     coords 3  0.666667  0        0       bc 2 3 4
-node 6     coords 3  1.33333  0        0       bc 2 5 6
-node 7     coords 3  2        0.666667  0       bc 2 9 10
-node 8     coords 3  2        1.33333  0       bc 2 11 12
-node 9     coords 3  1.33333  2        0       bc 2 15 16
-node 10    coords 3  0.666667  2        0       bc 2 17 18
-node 11    coords 3  0        1.33333  0       bc 2 21 22
-node 12    coords 3  0        0.666667  0       bc 2 23 24
-node 13    coords 3  1.33333  0.666667  0       bc 2 0 0
-node 14    coords 3  1.33333  1.33333  0       bc 2 0 0
-node 15    coords 3  0.666667  0.66668  0       bc 2 0 0
-node 16    coords 3  0.666667  1.33335  0       bc 2 0 0
+node 1     coords 2  0        0        bc 2 1 2
+node 2     coords 2  2        0        bc 2 7 8
+node 3     coords 2  2        2        bc 2 13 14
+node 4     coords 2  0        2        bc 2 19 20
+node 5     coords 2  0.666667 0        bc 2 3 4
+node 6     coords 2  1.33333  0        bc 2 5 6
+node 7     coords 2  2        0.666667 bc 2 9 10
+node 8     coords 2  2        1.33333  bc 2 11 12
+node 9     coords 2  1.33333  2        bc 2 15 16
+node 10    coords 2  0.666667 2        bc 2 17 18
+node 11    coords 2  0        1.33333  bc 2 21 22
+node 12    coords 2  0        0.666667 bc 2 23 24
+node 13    coords 2  1.33333  0.666667 bc 2 0 0
+node 14    coords 2  1.33333  1.33333  bc 2 0 0
+node 15    coords 2  0.666667  0.66668 bc 2 0 0
+node 16    coords 2  0.666667  1.33335 bc 2 0 0
 PlaneStress2DXfem 13    nodes 4   2   6   13  7   mat 1 crosssect 1 nip 9 nlgeo 0
 PlaneStress2DXfem 14    nodes 4   7   13  14  8   mat 1 crosssect 1 nip 9 nlgeo 0
 PlaneStress2DXfem 15    nodes 4   8   14  9   3   mat 1 crosssect 1 nip 9 nlgeo 0
@@ -68,30 +69,32 @@ ConstantFunction 1 f(t) 1.0
 XfemManager 1 numberofenrichmentitems 1
 crack 1 enrichmentfront 1 propagationlaw 1
 DiscontinuousFunction 1
-polygoncrack 1 points 6 -0.05 1.0 0.333333333333333 1.0 0.56666666666667 1.0
+#polygoncrack 1 points 6 -0.05 1.0 0.333333333333333 1.0 0.56666666666667 1.0
+polygoncrack 1 points 6 -1.0 1.0 0.333333333333333 1.0 0.56666666666667 1.0
+EnrFrontLinearBranchFuncRadius radius 0.5
 EnrFrontLinearBranchFuncRadius radius 0.5
 PropagationLawCrackPrescribedDir 1 angle 0.0 incrementLength 0.55
 #%BEGIN_CHECK% tolerance 1.e-8
 ## Node displacements
-#NODE tStep 2 number 7 dof 1 unknown d value 4.50638159e-05
-#NODE tStep 2 number 7 dof 2 unknown d value -1.86660437e-05
-#NODE tStep 2 number 7 dof 3 unknown d value -5.77917771e-05
-#NODE tStep 2 number 7 dof 4 unknown d value 1.13878975e-04
-#NODE tStep 2 number 7 dof 5 unknown d value -2.57664969e-05
-#NODE tStep 2 number 7 dof 6 unknown d value 1.30029107e-05
-#NODE tStep 2 number 7 dof 7 unknown d value -1.79096023e-06
-#NODE tStep 2 number 7 dof 8 unknown d value 3.37303917e-05
-#NODE tStep 2 number 7 dof 9 unknown d value -4.94957052e-05
-#NODE tStep 2 number 7 dof 10 unknown d value -6.55577687e-05
+#NODE tStep 3 number 7 dof 1 unknown d value 4.50638159e-05
+#NODE tStep 3 number 7 dof 2 unknown d value -1.86660437e-05
+#NODE tStep 3 number 7 dof 23 unknown d value -5.77917771e-05
+#NODE tStep 3 number 7 dof 24 unknown d value 1.13878975e-04
+#NODE tStep 3 number 7 dof 25 unknown d value -2.57664969e-05
+#NODE tStep 3 number 7 dof 26 unknown d value 1.30029107e-05
+#NODE tStep 3 number 7 dof 27 unknown d value -1.79096023e-06
+#NODE tStep 3 number 7 dof 28 unknown d value 3.37303917e-05
+#NODE tStep 3 number 7 dof 29 unknown d value -4.94957052e-05
+#NODE tStep 3 number 7 dof 30 unknown d value -6.55577687e-05
 ##
-#NODE tStep 2 number 12 dof 1 unknown d value 2.03706640e-05
-#NODE tStep 2 number 12 dof 2 unknown d value -2.05723734e-04
-#NODE tStep 2 number 12 dof 3 unknown d value -2.09655168e-05
-#NODE tStep 2 number 12 dof 4 unknown d value 2.05774314e-04
+#NODE tStep 3 number 12 dof 1 unknown d value 2.03706640e-05
+#NODE tStep 3 number 12 dof 2 unknown d value -2.05723734e-04
+#NODE tStep 3 number 12 dof 23 unknown d value -2.09655168e-05
+#NODE tStep 3 number 12 dof 24 unknown d value 2.05774314e-04
 ##
-#NODE tStep 2 number 15 dof 1 unknown d value 2.57315333e-05
-#NODE tStep 2 number 15 dof 2 unknown d value -1.56809356e-04
-#NODE tStep 2 number 15 dof 3 unknown d value -2.35791345e-05
-#NODE tStep 2 number 15 dof 4 unknown d value 1.57522831e-04
+#NODE tStep 3 number 15 dof 1 unknown d value 2.57315333e-05
+#NODE tStep 3 number 15 dof 2 unknown d value -1.56809356e-04
+#NODE tStep 3 number 15 dof 23 unknown d value -2.35791345e-05
+#NODE tStep 3 number 15 dof 24 unknown d value 1.57522831e-04
 #%END_CHECK%
 

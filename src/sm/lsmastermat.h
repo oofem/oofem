@@ -73,7 +73,7 @@ protected:
 
 
 public:
-    LargeStrainMasterMaterial(int n, Domain *d);
+    LargeStrainMasterMaterial(int n, Domain * d);
     virtual ~LargeStrainMasterMaterial();
 
     virtual int hasMaterialModeCapability(MaterialMode mode);
@@ -89,13 +89,13 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    virtual void give3dMaterialStiffnessMatrix(FloatMatrix & answer,
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode,
-                                               GaussPoint * gp,
-                                               TimeStep * tStep);
+                                               GaussPoint *gp,
+                                               TimeStep *tStep);
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *, const FloatArray &, TimeStep *)
-    { OOFEM_ERROR("LsMasterMat: giveRealStressVector is not implemented, this material is designed for large strains only"); }
+    { OOFEM_ERROR("not implemented, this material is designed for large strains only"); }
     virtual void giveFirstPKStressVector_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &vF, TimeStep *tStep);
 
     /// transformation matrices
@@ -115,20 +115,17 @@ protected:
     int slaveMat;
 
 public:
-    LargeStrainMasterMaterialStatus(int n, Domain *d, GaussPoint *g, int s);
+    LargeStrainMasterMaterialStatus(int n, Domain * d, GaussPoint * g, int s);
     virtual ~LargeStrainMasterMaterialStatus();
 
 
-    void givePmatrix(FloatMatrix &answer)
-    { answer = Pmatrix; }
-    void giveTLmatrix(FloatMatrix &answer)
-    { answer = TLmatrix; }
-    void giveTransformationMatrix(FloatMatrix &answer)
-    { answer = transformationMatrix; }
+    const FloatMatrix &givePmatrix() { return Pmatrix; }
+    const FloatMatrix &giveTLmatrix() { return TLmatrix; }
+    const FloatMatrix &giveTransformationMatrix() { return transformationMatrix; }
 
-    void setPmatrix(FloatMatrix values) { Pmatrix = values; }
-    void setTLmatrix(FloatMatrix values) { TLmatrix = values; }
-    void setTransformationMatrix(FloatMatrix values) { transformationMatrix = values; }
+    void setPmatrix(FloatMatrix values) { Pmatrix = std :: move(values); }
+    void setTLmatrix(FloatMatrix values) { TLmatrix = std :: move(values); }
+    void setTransformationMatrix(FloatMatrix values) { transformationMatrix = std :: move(values); }
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 

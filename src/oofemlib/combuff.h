@@ -35,10 +35,8 @@
 #ifndef combuff_h
 #define combuff_h
 
-#ifdef __PARALLEL_MODE
-
- #include "oofemcfg.h"
- #include "parallel.h"
+#include "oofemcfg.h"
+#include "parallel.h"
 
 namespace oofem {
 class IntArray;
@@ -215,9 +213,13 @@ class OOFEM_EXPORT CommunicationBuffer
 protected:
     MPI_Comm communicator;
 public:
-    CommunicationBuffer(MPI_Comm comm, int size, bool dynamic = 0) { communicator = comm; }
+    CommunicationBuffer(MPI_Comm comm, int size, bool dynamic = 0) {
+        communicator = comm;
+    }
     /// Constructor. Creates empty buffer, using given communicator for packing
-    CommunicationBuffer(MPI_Comm comm, bool dynamic = 0) { communicator = comm; }
+    CommunicationBuffer(MPI_Comm comm, bool dynamic = 0) {
+        communicator = comm;
+    }
     /// Destructor.
     virtual ~CommunicationBuffer() { }
 
@@ -457,5 +459,5 @@ public:
     virtual int bcast(int root) { return MPIBuffer :: bcast(this->communicator, root); }
 };
 } // end namespace oofem
-#endif
+
 #endif // combuff_h

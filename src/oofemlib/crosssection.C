@@ -55,7 +55,6 @@ CrossSection :: initializeFrom(InputRecord *ir)
 // instanciates receiver from input record
 //
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     // Read set number the cross section is applied to
@@ -64,14 +63,14 @@ CrossSection :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-int 
+int
 CrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep)
 {
-   if ( type == IST_CrossSectionNumber ) {
-       answer.resize(1);
-       answer.at(1) = this->giveNumber();
-       return 1;
-    } 
+    if ( type == IST_CrossSectionNumber ) {
+        answer.resize(1);
+        answer.at(1) = this->giveNumber();
+        return 1;
+    }
     return ip->giveMaterial()->giveIPValue(answer, ip, type, tStep);
 }
 
@@ -128,7 +127,7 @@ CrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
     if ( propertyDictionary->includes(aProperty) ) {
         return propertyDictionary->at(aProperty);
     } else {
-        OOFEM_ERROR3("Cross-section Number %d has undefined property ID %d", this->giveNumber(), aProperty);
+        OOFEM_ERROR("Undefined property ID %d", aProperty);
     }
 
     return 0.0;
@@ -141,7 +140,7 @@ CrossSection :: give(CrossSectionProperty aProperty, const FloatArray *coords, E
     if ( propertyDictionary->includes(aProperty) ) {
         return propertyDictionary->at(aProperty);
     } else {
-        OOFEM_ERROR3("Cross-section Number %d has undefined property ID %d", this->giveNumber(), aProperty);
+        OOFEM_ERROR("Undefined property ID %d", aProperty);
     }
 
     return 0.0;

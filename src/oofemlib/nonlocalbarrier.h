@@ -61,7 +61,7 @@ public:
      * @param n Element's number
      * @param aDomain Pointer to the domain to which element belongs.
      */
-    NonlocalBarrier(int n, Domain *aDomain);
+    NonlocalBarrier(int n, Domain * aDomain);
     /// Destructor.
     virtual ~NonlocalBarrier() { };
 
@@ -93,7 +93,7 @@ public:
      * @param maxPossibleDistance Distance from the boundary beyond which the nonlocal radius(as it is interpreted in each weight function) becomes equal to the user-defined
      * @return the minimum value of the minimum distance from nonlocal boundary and maxPossibleDistance
      */
-    virtual double calculateMinimumDistanceFromBoundary(const FloatArray &coords, double maxPossibleDistance) = 0;
+    virtual double calculateMinimumDistanceFromBoundary(const FloatArray &coords) = 0;
 };
 } // end namespace oofem
 #endif // nonlocalbarrier_h

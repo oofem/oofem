@@ -53,14 +53,14 @@ protected:
     static FEI2dQuadQuad interpolation;
 
 public:
-    QPlaneStrain(int N, Domain *d);
+    QPlaneStrain(int N, Domain * d);
     virtual ~QPlaneStrain() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QPlaneStrain_Name; }
@@ -75,8 +75,6 @@ public:
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
-
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);

@@ -214,7 +214,7 @@ void cubic3r(double a, double b, double c, double d, double *r1, double *r2, dou
         q = ( a * a - 3.0 * b ) / 9.0;
         r = ( 2.0 * a * a * a - 9.0 * a * b + 27.0 * c ) / 54.0;
 
-        D = q * q * q - r * r;
+        //D = q * q * q - r * r;
         //  if (D > 0.) {
         // three real roots
         help = r / sqrt(q * q * q);
@@ -226,13 +226,13 @@ void cubic3r(double a, double b, double c, double d, double *r1, double *r2, dou
         p = sqrt(q);
 
         * r1 = -2.0 *p *cos(phi / 3.0) - a / 3.0;
-        * r2 = -2.0 *p *cos( ( phi + 2.0 * M_PI ) / 3.0 ) - a / 3.0;
-        * r3 = -2.0 *p *cos( ( phi - 2.0 * M_PI ) / 3.0 ) - a / 3.0;
+        * r2 = -2.0 *p *cos( ( phi + 2.0 *M_PI ) / 3.0 ) - a / 3.0;
+        * r3 = -2.0 *p *cos( ( phi - 2.0 *M_PI ) / 3.0 ) - a / 3.0;
         * num = 3;
         /*  } else {
          *
          * help = fabs(r) + sqrt(-D);
-         * A = -sgn(r)*pow(D, 1./3.);
+         * A = -sgn(r)*cbrt(D);
          * if (fabs(A) > CUBIC_ZERO)
          * B = q/A;
          * else

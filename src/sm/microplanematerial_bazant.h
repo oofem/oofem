@@ -55,7 +55,7 @@ public:
      * @param n Material number.
      * @param d Domain to which newly created material belongs.
      */
-    MicroplaneMaterial_Bazant(int n, Domain *d);
+    MicroplaneMaterial_Bazant(int n, Domain * d);
     /// Destructor.
     virtual ~MicroplaneMaterial_Bazant() { }
 

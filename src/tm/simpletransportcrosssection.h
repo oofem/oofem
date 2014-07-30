@@ -63,7 +63,7 @@ public:
      * @param n Cross section number.
      * @param d Domain for cross section.
      */
-    SimpleTransportCrossSection(int n, Domain *d);
+    SimpleTransportCrossSection(int n, Domain * d);
     /// Destructor.
     virtual ~SimpleTransportCrossSection();
 

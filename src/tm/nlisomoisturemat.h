@@ -113,7 +113,7 @@ protected:
 
 
 public:
-    NlIsoMoistureMaterial(int n, Domain *d) : IsotropicMoistureTransferMaterial(n, d) { }
+    NlIsoMoistureMaterial(int n, Domain * d) : IsotropicMoistureTransferMaterial(n, d) { }
     virtual ~NlIsoMoistureMaterial() { }
 
     /// evaluates slope of the sorption isotherm

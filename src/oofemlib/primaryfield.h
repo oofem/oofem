@@ -38,11 +38,11 @@
 #include "field.h"
 #include "interface.h"
 #include "floatarray.h"
-#include "equationid.h"
 #include "unknownnumberingscheme.h"
 #include "valuemodetype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
+#include "timestep.h"
 
 #include <vector>
 
@@ -65,6 +65,9 @@ public:
     /**
      * Evaluates the value of field at given point of interest (should be located inside receiver's volume) using
      * element interpolation.
+     * @todo This should use local coordinates instead of having all elements search for it manually.
+     * @todo Shouldn't this just be part of Element? It's very much the core of functionality for elements.
+     * 
      * @param answer Field evaluated at coordinate.
      * @param pf Field to use for evaluation.
      * @param coords Coordinate.
@@ -98,14 +101,13 @@ public:
 class OOFEM_EXPORT PrimaryField : public Field
 {
 protected:
-    int actualtStepumber;
+    int actualStepNumber;
     int actualStepIndx;
     int nHistVectors;
-    AList< FloatArray >solutionVectors;
-    AList< TimeStep >solStepList;
+    std :: vector< FloatArray >solutionVectors;
+    std :: vector< std :: unique_ptr< TimeStep > >solStepList;
     EngngModel *emodel;
     int domainIndx;
-    EquationID ut;
 
 public:
     /**
@@ -116,10 +118,9 @@ public:
      * @param a Engineering model which field belongs to.
      * @param idomain Index of domain for field.
      * @param ft Type of stored field.
-     * @param ut Equation ID for unknowns in field.
      * @param nHist Number of old time steps to store.
      */
-    PrimaryField(EngngModel *a, int idomain, FieldType ft, EquationID ut, int nHist);
+    PrimaryField(EngngModel * a, int idomain, FieldType ft, int nHist);
     virtual ~PrimaryField();
 
     /**
@@ -203,9 +204,6 @@ public:
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode);
-
-    /// @return Equation ID coupled to the field.
-    EquationID giveEquationID() { return this->ut; }
 
     virtual const char *giveClassName() const { return "PrimaryField"; }
 

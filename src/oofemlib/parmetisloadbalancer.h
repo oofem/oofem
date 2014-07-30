@@ -35,13 +35,12 @@
 #ifndef parmetisloadbalancer_h
 #define parmetisloadbalancer_h
 
-#ifdef __PARALLEL_MODE
- #include "loadbalancer.h"
+#include "loadbalancer.h"
 
- #ifdef __PARMETIS_MODULE
-  #include <parmetis.h>
-  #include <vector>
- #endif
+#include <parmetis.h>
+#include <vector>
+
+#define _IFT_ParmetisLoadBalancer_Name "parmetis"
 
 namespace oofem {
 /**
@@ -57,8 +56,6 @@ namespace oofem {
 class OOFEM_EXPORT ParmetisLoadBalancer : public LoadBalancer
 {
 protected:
-
- #ifdef __PARMETIS_MODULE
     /// Element numbering maps.
     IntArray gToLMap, lToGMap;
     idx_t *elmdist;
@@ -71,10 +68,9 @@ protected:
     std :: vector< IntArray >dofManPartitions;
     /// Partition vector of the locally-stored elements.
     IntArray elementPart;
- #endif
 
 public:
-    ParmetisLoadBalancer(Domain *d);
+    ParmetisLoadBalancer(Domain * d);
     virtual ~ParmetisLoadBalancer();
 
     virtual void calculateLoadTransfer();
@@ -87,7 +83,6 @@ public:
 protected:
     void handleMasterSlaveDofManLinks();
 
- #ifdef __PARMETIS_MODULE
     void initGlobalParmetisElementNumbering();
     int  giveLocalElementNumber(int globnum) { return gToLMap.at(globnum - myGlobNumOffset); }
     int  giveGlobalElementNumber(int locnum) { return lToGMap.at(locnum); }
@@ -105,7 +100,6 @@ protected:
     int packSharedDmanPartitions(ProcessCommunicator &pc);
     int unpackSharedDmanPartitions(ProcessCommunicator &pc);
     void addSharedDofmanPartitions(int _locnum, IntArray _partitions);
- #endif
 };
 } // end namespace oofem
 #endif

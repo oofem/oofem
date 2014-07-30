@@ -44,17 +44,9 @@
 namespace oofem {
 REGISTER_Material(NewtonianFluidMaterial);
 
-int
-NewtonianFluidMaterial :: hasMaterialModeCapability(MaterialMode mode)
-{
-    return mode == _2dFlow || mode == _3dFlow;
-}
-
-
 IRResultType
 NewtonianFluidMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     this->FluidDynamicMaterial :: initializeFrom(ir);
@@ -111,37 +103,47 @@ NewtonianFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gaus
     if ( gp->giveMaterialMode() == _2dFlow ) {
         double ekk = eps.at(1) + eps.at(2);
 
-        answer.at(1) = 2.0 * viscosity * ( eps.at(1) - ekk / 3.0 );
-        answer.at(2) = 2.0 * viscosity * ( eps.at(2) - ekk / 3.0 );
-        answer.at(3) = eps.at(3) * viscosity;
+        answer = {
+            2.0 * viscosity * ( eps.at(1) - ekk / 3.0 ),
+            2.0 * viscosity * ( eps.at(2) - ekk / 3.0 ),
+            eps.at(3) * viscosity
+        };
     } else if ( gp->giveMaterialMode() == _2dAxiFlow ) {
 #if 1
         double ekk = eps.at(1) + eps.at(2) + eps.at(3);
 
-        answer.at(1) = 2.0 * viscosity * ( eps.at(1) - ekk / 3.0 );
-        answer.at(2) = 2.0 * viscosity * ( eps.at(2) - ekk / 3.0 );
-        answer.at(3) = 2.0 * viscosity * ( eps.at(3) - ekk / 3.0 );
-        answer.at(4) = eps.at(4) * viscosity;
+        answer = {
+            2.0 * viscosity * ( eps.at(1) - ekk / 3.0 ),
+            2.0 * viscosity * ( eps.at(2) - ekk / 3.0 ),
+            2.0 * viscosity * ( eps.at(3) - ekk / 3.0 ),
+            eps.at(4) * viscosity
+        };
 #else
-        answer.at(1) = 2.0 * viscosity * ( eps.at(1) );
-        answer.at(2) = 2.0 * viscosity * ( eps.at(2) );
-        answer.at(3) = 2.0 * viscosity * ( eps.at(3) );
-        answer.at(4) = eps.at(4) * viscosity;
+        answer = {
+            2.0 * viscosity * ( eps.at(1) ),
+            2.0 * viscosity * ( eps.at(2) ),
+            2.0 * viscosity * ( eps.at(3) ),
+            eps.at(4) * viscosity
+        };
 #endif
     } else if ( gp->giveMaterialMode() == _3dFlow ) {
         double ekk = eps.at(1) + eps.at(2) + eps.at(3);
 
-        answer.at(1) = 2.0 * viscosity * ( eps.at(1) - ekk / 3.0 );
-        answer.at(2) = 2.0 * viscosity * ( eps.at(2) - ekk / 3.0 );
-        answer.at(3) = 2.0 * viscosity * ( eps.at(3) - ekk / 3.0 );
-        answer.at(4) = eps.at(4) * viscosity;
-        answer.at(5) = eps.at(5) * viscosity;
-        answer.at(6) = eps.at(6) * viscosity;
+        answer = {
+            2.0 * viscosity * ( eps.at(1) - ekk / 3.0 ),
+            2.0 * viscosity * ( eps.at(2) - ekk / 3.0 ),
+            2.0 * viscosity * ( eps.at(3) - ekk / 3.0 ),
+            eps.at(4) * viscosity,
+            eps.at(5) * viscosity,
+            eps.at(6) * viscosity
+        };
     }  else {
-        _error("computeDeviatoricStressVector: unsuported material mode");
+        OOFEM_ERROR("unsuported material mode");
     }
 
+
     static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) )->letDeviatoricStressVectorBe(answer);
+    static_cast< FluidDynamicMaterialStatus * >( this->giveStatus(gp) )->letDeviatoricStrainRateVectorBe(eps);
 }
 
 void
@@ -184,7 +186,7 @@ NewtonianFluidMaterial :: giveDeviatoricStiffnessMatrix(FloatMatrix &answer, Mat
 
         answer.at(4, 4) = answer.at(5, 5) = answer.at(6, 6) = viscosity;
     } else {
-        _error("giveDeviatoricStiffnessMatrix: unsupportted material mode");
+        OOFEM_ERROR("unsupportted material mode");
     }
 }
 

@@ -35,7 +35,6 @@
 #ifndef initmodulemanager_h
 #define initmodulemanager_h
 
-#include "alist.h"
 #include "modulemanager.h"
 #include "initmodule.h"
 #include "datareader.h"
@@ -50,7 +49,7 @@ class EngngModel;
 class OOFEM_EXPORT InitModuleManager : public ModuleManager< InitModule >
 {
 public:
-    InitModuleManager(EngngModel *emodel);
+    InitModuleManager(EngngModel * emodel);
     virtual ~InitModuleManager();
 
     InitModule *CreateModule(const char *name, int n, EngngModel *emodel);

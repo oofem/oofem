@@ -53,7 +53,6 @@ REGISTER_Element(QTruss1d);
 FEI1dQuad QTruss1d :: interpolation(1);
 
 QTruss1d :: QTruss1d(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
-    // Constructor.
 {
     numberOfDofMans = 3;
 }
@@ -71,9 +70,9 @@ QTruss1d :: initializeFrom(InputRecord *ir)
 }
 
 void
-QTruss1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+QTruss1d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(1, D_u);
+    answer = {D_u};
 }
 
 int
@@ -89,18 +88,17 @@ QTruss1d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double detJ = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double detJ = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     double weight  = gp->giveWeight();
-    return detJ * weight * this->giveCrossSection()->give(CS_Area, gp);
+    return detJ *weight *this->giveCrossSection()->give(CS_Area, gp);
 }
 
 
 void QTruss1d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.XF
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -108,23 +106,12 @@ void QTruss1d :: computeGaussPoints()
 
 void
 QTruss1d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
-//
-// Returns linear part of geometrical equations of the receiver at gp.
-// Returns the linear part of the B matrix
-//
 {
-    answer.resize(1, 3);
-    answer.zero();
-
-    this->interpolation.evaldNdx( answer, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( answer, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 void
 QTruss1d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-//
-// Returns the [1x3] displacement gradient matrix {BH} of the receiver,
-// evaluated at gp.
-// @todo not checked if correct
 {
     this->computeBmatrixAt(gp, answer);
 }

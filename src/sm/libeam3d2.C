@@ -80,7 +80,7 @@ LIBeam3d2 :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
         l = this->computeLength();
     }
 
-    ksi   = gp->giveCoordinate(1);
+    ksi   = gp->giveNaturalCoordinate(1);
 
     answer.resize(6, 12);
     answer.zero();
@@ -117,9 +117,8 @@ void
 LIBeam3d2 :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
@@ -227,9 +226,9 @@ LIBeam3d2 :: computeVolumeAround(GaussPoint *gp)
 
 
 void
-LIBeam3d2 :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+LIBeam3d2 :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
+    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
 
 
@@ -295,7 +294,6 @@ LIBeam3d2 :: computeLength()
 IRResultType
 LIBeam3d2 :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     // first call parent
@@ -303,13 +301,13 @@ LIBeam3d2 :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3d2_refnode);
     if ( referenceNode == 0 ) {
-        _error("instanciateFrom: wrong reference node specified");
+        OOFEM_ERROR("wrong reference node specified");
     }
 
     //  if (this->hasString (initString, "dofstocondense")) {
     //    dofsToCondense = this->ReadIntArray (initString, "dofstocondense");
     //    if (dofsToCondense->giveSize() >= 12)
-    //      _error ("instanciateFrom: wrong input data for condensed dofs");
+    //      OOFEM_ERROR("wrong input data for condensed dofs");
     //  } else {
     //    dofsToCondense = NULL;
     //  }
@@ -339,7 +337,7 @@ LIBeam3d2 :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 
@@ -351,7 +349,7 @@ LIBeam3d2 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      * to global element dofs
      */
     if ( iEdge != 1 ) {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 
 
@@ -366,7 +364,7 @@ double
 LIBeam3d2 :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
-        _error("computeEdgeVolumeAround: wrong egde number");
+        OOFEM_ERROR("wrong egde number");
     }
 
     double weight  = gp->giveWeight();
@@ -421,7 +419,7 @@ LIBeam3d2 :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
     //
     // i.e. f(element local) = T * f(edge local)
     //
-    answer.beEmptyMtrx();
+    answer.clear();
     return 0;
 }
 
@@ -475,7 +473,7 @@ LIBeam3d2 :: updateTempTriad(TimeStep *tStep)
     FloatMatrix dR(3, 3);
 
     // ask element's displacement increments
-    this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, u);
+    this->computeVectorOf(VM_Incremental, tStep, u);
 
     // interpolate spin at the centre
     centreSpin.at(1) = 0.5 * ( u.at(4) + u.at(10) );
@@ -499,7 +497,7 @@ LIBeam3d2 :: computeRotMtrx(FloatMatrix &answer, FloatArray &psi)
     double psiSize;
 
     if ( psi.giveSize() != 3 ) {
-        _error("computeSMtrx: psi param size mismatch");
+        OOFEM_ERROR("psi param size mismatch");
     }
 
     answer.resize(3, 3);
@@ -526,7 +524,7 @@ void
 LIBeam3d2 :: computeSMtrx(FloatMatrix &answer, FloatArray &vec)
 {
     if ( vec.giveSize() != 3 ) {
-        _error("computeSMtrx: vec param size mismatch");
+        OOFEM_ERROR("vec param size mismatch");
     }
 
     answer.resize(3, 3);
@@ -547,7 +545,7 @@ LIBeam3d2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
     FloatArray ui, PrevEpsilon;
     FloatMatrix b;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, ui);
+    this->computeVectorOf(VM_Incremental, tStep, ui);
 
     this->computeBmatrixAt(gp, b);
     // increment of strains
@@ -570,7 +568,7 @@ LIBeam3d2 :: giveCurrentLength(TimeStep *tStep)
     double dx, dy, dz;
     FloatArray u;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
 
     dx = ( this->giveNode(2)->giveCoordinate(1) + u.at(7) ) -
          ( this->giveNode(1)->giveCoordinate(1) + u.at(1) );
@@ -657,8 +655,8 @@ LIBeam3d2 :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray 
 {
     double layerYCoord, layerZCoord;
 
-    layerZCoord = slaveGp->giveCoordinate(2);
-    layerYCoord = slaveGp->giveCoordinate(1);
+    layerZCoord = slaveGp->giveNaturalCoordinate(2);
+    layerYCoord = slaveGp->giveNaturalCoordinate(1);
 
     answer.resize(3); // {Exx,GMzx,GMxy}
 
@@ -672,7 +670,7 @@ Interface *
 LIBeam3d2 :: giveInterface(InterfaceType interface)
 {
     if ( interface == FiberedCrossSectionInterfaceType ) {
-        return static_cast< FiberedCrossSectionInterface * >( this );
+        return static_cast< FiberedCrossSectionInterface * >(this);
     }
 
     return NULL;
@@ -753,7 +751,7 @@ LIBeam3d2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
         p [ 1 ].y = p [ 0 ].y + coeff *tc.at(2, i);
         p [ 1 ].z = p [ 0 ].z + coeff *tc.at(3, i);
 
-        EASValsSetColor( ColorGetPixelFromString(const_cast< char * >( colors [ i - 1 ] ), & succ) );
+        EASValsSetColor( ColorGetPixelFromString(const_cast< char * >(colors [ i - 1 ]), & succ) );
 
         go = CreateLine3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);

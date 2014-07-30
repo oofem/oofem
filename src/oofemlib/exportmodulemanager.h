@@ -48,7 +48,7 @@ class EngngModel;
 class OOFEM_EXPORT ExportModuleManager : public ModuleManager< ExportModule >
 {
 public:
-    ExportModuleManager(EngngModel *emodel);
+    ExportModuleManager(EngngModel * emodel);
     virtual ~ExportModuleManager();
 
     virtual IRResultType initializeFrom(InputRecord *ir);

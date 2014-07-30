@@ -39,7 +39,6 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "intarray.h"
-#include "equationid.h"
 #include "error.h"
 #include "sparsemtrxtype.h"
 #include "unknownnumberingscheme.h"
@@ -102,13 +101,13 @@ public:
      */
     void checkBounds(int i, int j) const {
         if ( i <= 0 ) {
-            OOFEM_ERROR2("Matrix::checkBounds : matrix error on rows : %d <= 0", i);
+            OOFEM_ERROR("matrix error on rows : %d <= 0", i);
         } else if ( j <= 0 ) {
-            OOFEM_ERROR2("Matrix::checkBounds : matrix error on columns : %d <= 0", j);
+            OOFEM_ERROR("matrix error on columns : %d <= 0", j);
         } else if ( i > nRows ) {
-            OOFEM_ERROR3("Matrix::checkBounds : matrix error on rows : %d => %d", i, nRows);
+            OOFEM_ERROR("matrix error on rows : %d => %d", i, nRows);
         } else if ( j > nColumns ) {
-            OOFEM_ERROR3("Matrix::checkBounds : matrix error on columns : %d => %d", j, nColumns);
+            OOFEM_ERROR("matrix error on columns : %d => %d", j, nColumns);
         }
     }
     /// Returns number of rows of receiver.
@@ -125,37 +124,40 @@ public:
      * care about proper deallocation of allocated space.
      * @return Newly allocated copy of receiver.
      */
-    virtual SparseMtrx *GiveCopy() const { OOFEM_ERROR("SparseMtrx :: GiveCopy - Not implemented"); return NULL; }
+    virtual SparseMtrx *GiveCopy() const {
+        OOFEM_ERROR("Not implemented");
+        return NULL;
+    }
 
     /**
      * Evaluates @f$ y = A \cdot x @f$
      * @param x Array to be multiplied with receiver.
      * @param answer y.
      */
-    virtual void times(const FloatArray &x, FloatArray &answer) const { OOFEM_ERROR("SparseMtrx :: times(FloatArray,FloatArray) - Not implemented"); };
+    virtual void times(const FloatArray &x, FloatArray &answer) const { OOFEM_ERROR("Not implemented"); };
     /**
      * Evaluates @f$ y = A^{\mathrm{T}} \cdot x @f$
      * @param x Array to be multiplied with transpose of the receiver.
      * @param answer y.
      */
-    virtual void timesT(const FloatArray &x, FloatArray &answer) const { OOFEM_ERROR("SparseMtrx :: timesT(FloatArray,FloatArray) - Not implemented"); };
+    virtual void timesT(const FloatArray &x, FloatArray &answer) const { OOFEM_ERROR("Not implemented"); };
     /**
      * Evaluates @f$ C = A^{\mathrm{T}} \cdot B @f$
      * @param B Array to be multiplied with receiver.
      * @param answer C.
      */
-    virtual void times(const FloatMatrix &B, FloatMatrix &answer) const { OOFEM_ERROR("SparseMtrx :: times(FloatMatrix,FloatMatrix) - Not implemented"); };
+    virtual void times(const FloatMatrix &B, FloatMatrix &answer) const { OOFEM_ERROR("Not implemented"); };
     /**
      * Evaluates @f$ C = A^{\mathrm{T}} \cdot B @f$
      * @param B Matrix to be multiplied with receiver.
      * @param answer C.
      */
-    virtual void timesT(const FloatMatrix &B, FloatMatrix &answer) const { OOFEM_ERROR("SparseMtrx :: timesT(FloatMatrix,FloatMatrix) - Not implemented"); };
+    virtual void timesT(const FloatMatrix &B, FloatMatrix &answer) const { OOFEM_ERROR("Not implemented"); };
     /**
      * Multiplies receiver by scalar value.
      * @param x Value to multiply receiver.
      */
-    virtual void times(double x) { OOFEM_ERROR("SparseMtrx :: times(double) - Not implemented"); };
+    virtual void times(double x) { OOFEM_ERROR("Not implemented"); };
 
     /**
      * Builds internal structure of receiver. This method determines the internal profile
@@ -167,10 +169,9 @@ public:
      * @param eModel Pointer to corresponding engineering model.
      * @param di Domain index specify which domain to use.
      * @param s Determines unknown numbering scheme.
-     * @param ut Equation ID.
      * @return Zero iff successful.
      */
-    virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s) = 0;
+    virtual int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s) = 0;
     /**
      * Build internal structure of receiver.
      * @see buildInternalStructure
@@ -178,12 +179,11 @@ public:
      * @param di Domain index specify which domain to use.
      * @param r_s Determines unknown numbering scheme for the rows.
      * @param c_s Determines unknown numbering scheme for the columns.
-     * @param ut Equation ID.
      * @return Zero iff successful.
      */
-    virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &r_s,
+    virtual int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &r_s,
                                        const UnknownNumberingScheme &c_s) {
-        OOFEM_ERROR("SparseMtrx :: buildInternalStructure(EngngModel,di,EquationID,UnknownNumberingScheme,unknownNumberingScheme) - Not implemented");
+        OOFEM_ERROR("Not implemented");
         return 0;
     }
     /**
@@ -231,7 +231,10 @@ public:
     virtual void zero() = 0;
 
     /// Returns the norm of receiver.
-    virtual double computeNorm() const { OOFEM_ERROR("SparseMtrx :: computeNorm - Not implemented"); return 0.0; }
+    virtual double computeNorm() const {
+        OOFEM_ERROR("Not implemented");
+        return 0.0;
+    }
 
     /// Returns coefficient at position (i,j).
     virtual double &at(int i, int j) = 0;
@@ -240,22 +243,25 @@ public:
     /// Checks whether memory is allocated at position (i,j).
     virtual bool isAllocatedAt(int i, int j) const { return false; }
     /// Converts receiving sparse matrix to a dense float matrix.
-    virtual void toFloatMatrix(FloatMatrix &answer) const { OOFEM_ERROR("SparseMtrx :: toFloatMatrix - Not implemented"); }
+    virtual void toFloatMatrix(FloatMatrix &answer) const { OOFEM_ERROR("Not implemented"); }
     /// Prints the receiver statistics (one-line) to stdout.
-    virtual void printStatistics() const { OOFEM_LOG_INFO("SparseMtrx :: printStatistics - Not implemented"); }
+    virtual void printStatistics() const { OOFEM_LOG_INFO("Not implemented"); }
     /// Prints receiver to stdout. Works only for relatively small matrices.
-    virtual void printYourself() const { OOFEM_LOG_INFO("SparseMtrx :: printYourself - Not implemented"); }
+    virtual void printYourself() const { OOFEM_LOG_INFO("Not implemented"); }
     /// Helpful for debugging, writes the matrix to given file.
-    virtual void writeToFile(const char *fname) const { OOFEM_LOG_INFO("SparseMtrx :: writeToFile - Not implemented"); }
+    virtual void writeToFile(const char *fname) const { OOFEM_LOG_INFO("Not implemented"); }
     /// Sparse matrix type identification
     virtual SparseMtrxType giveType() const = 0;
     /// Returns true if asymmetric
     virtual bool isAsymmetric() const = 0;
 
+    virtual const char *giveClassName() const = 0;
+    /// Error printing helper.
+    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
     ///@name IML compatibility
     //@{
     /// IML compatibility, @f$ A \cdot x@f$
-    FloatArray operator*(const FloatArray &x) const
+    FloatArray operator *( const FloatArray & x ) const
     {
         FloatArray answer;
         this->times(x, answer);

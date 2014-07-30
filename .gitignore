@@ -10,6 +10,7 @@ targets/
 *.vtu
 *.pvd
 *.out.*
+t3d.bmf*
 
 # documentation aux-files.
 *.aux
@@ -24,6 +25,7 @@ targets/
 
 
 __pycache__
+*.pyc
 *.swp
 .*.kate-swp
 *.backup

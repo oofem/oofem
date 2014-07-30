@@ -67,7 +67,7 @@ class ConstantPressureLoad : public BoundaryLoad
 {
 public:
     //ConstantPressureLoad(int i, Domain *d) : BoundaryLoad(i, d)
-    ConstantPressureLoad(int i, Domain *d);
+    ConstantPressureLoad(int i, Domain * d);
 
     // Overloaded methods:
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
@@ -86,7 +86,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_ConstantPressureLoad_Name; }
     double giveLoadOffset() { return this->loadOffset; }
 private:
-    virtual void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.resize(0); }
+    virtual void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.clear(); }
     double loadOffset;  // xi-coord offset of load. xi=-1 -> bottom, xi=0 -> midsurface (default), xi=1 -> top surface
 };
 } // end namespace oofem

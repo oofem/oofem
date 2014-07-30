@@ -45,17 +45,17 @@
 #include "structuralmaterial.h"
 #include "structuralms.h"
 #include "mathfem.h"
-#include "iga.h"
+#include "iga/iga.h"
 
 namespace oofem {
 StructuralElementEvaluator :: StructuralElementEvaluator()
 {
-    this->rotationMatrix.beEmptyMtrx();
+    this->rotationMatrix.clear();
 }
 
 /*
  * int StructuralElementEvaluator :: giveIntegrationElementCodeNumbers(IntArray &answer, Element *elem,
- *                                                                  IntegrationRule *ie, EquationID ut) {
+ *                                                                  IntegrationRule *ie) {
  *  int i;
  *  IntArray mask, nodeDofIDMask, nodalArray;
  *
@@ -64,9 +64,9 @@ StructuralElementEvaluator :: StructuralElementEvaluator()
  *      IGAIntegrationElement *ee = static_cast< IGAIntegrationElement * >( ie );
  *      elem->giveInterpolation()->giveKnotSpanBasisFuncMask(* ee->giveKnotSpan(), mask);
  *      // loop over nonzero shape functions and assemble localization array
- *      answer.resize(0);
+ *      answer.clear();
  *      for ( i = 1; i <= mask.giveSize(); i++ ) {
- *          elem->giveDofManDofIDMask(mask.at(i), ut, nodeDofIDMask);
+ *          elem->giveDofManDofIDMask(mask.at(i), nodeDofIDMask);
  *          elem->giveDofManager( mask.at(i) )->giveLocationArray(nodeDofIDMask, nodalArray);
  *          answer.followedBy(nodalArray);
  *      }
@@ -79,24 +79,24 @@ StructuralElementEvaluator :: StructuralElementEvaluator()
  */
 
 int StructuralElementEvaluator :: giveIntegrationElementLocalCodeNumbers(IntArray &answer, Element *elem,
-                                                                         IntegrationRule *ie, EquationID ut)
+                                                                         IntegrationRule *ie)
 {
     int nsd;
     IntArray mask, nodeDofIDMask, nodalArray;
     int dofmandof;
 
     // get number of dofs in node
-    elem->giveDofManDofIDMask(1, ut, nodeDofIDMask);
+    elem->giveDofManDofIDMask(1, nodeDofIDMask);
     dofmandof = nodeDofIDMask.giveSize();
 
     nsd = elem->giveInterpolation()->giveNsd();
 
     // first evaluate nonzero basis function mask
     if ( elem->giveInterpolation()->hasSubPatchFormulation() ) {
-        IGAIntegrationElement *ee = static_cast< IGAIntegrationElement * >( ie );
+        IGAIntegrationElement *ee = static_cast< IGAIntegrationElement * >(ie);
         elem->giveInterpolation()->giveKnotSpanBasisFuncMask(* ee->giveKnotSpan(), mask);
         // loop over nonzero shape functions and assemble localization array
-        answer.resize(0);
+        answer.clear();
         for ( int i = 1; i <= mask.giveSize(); i++ ) {
             nodalArray.resize( nodeDofIDMask.giveSize() );
             for ( int j = 1; j <= nsd; j++ ) {
@@ -120,7 +120,7 @@ void StructuralElementEvaluator :: giveCharacteristicVector(FloatArray &answer, 
     } else if ( type == LastEquilibratedInternalForcesVector ) {
         this->giveInternalForcesVector(answer, tStep, true); /// @todo Only for total value mode type (?)
     } else {
-        answer.resize(0);
+        answer.clear();
     }
 }
 
@@ -139,7 +139,7 @@ void StructuralElementEvaluator :: giveCharacteristicMatrix(FloatMatrix &answer,
     } else if ( mtrx == LumpedMassMatrix ) {
         this->computeLumpedMassMatrix(answer, tStep);
     } else {
-        OOFEM_ERROR2( "giveCharacteristicMatrix: Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
+        OOFEM_ERROR( "Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
 }
 
@@ -165,7 +165,7 @@ void StructuralElementEvaluator :: computeLumpedMassMatrix(FloatMatrix &answer, 
     ldofs = answer.giveNumberOfRows();
 
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        elem->giveDofManDofIDMask(i, EID_MomentumBalance, nodeDofIDMask);
+        elem->giveDofManDofIDMask(i, nodeDofIDMask);
         for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
             indx++;
             // zero all off-diagonal terms
@@ -190,7 +190,7 @@ void StructuralElementEvaluator :: computeLumpedMassMatrix(FloatMatrix &answer, 
     }
 
     if ( indx != ldofs ) {
-        OOFEM_ERROR("computeMassMatrix : internal consistency check failed");
+        OOFEM_ERROR("internal consistency check failed");
     }
 
     dim = dimFlag.at(1) + dimFlag.at(2) + dimFlag.at(3);
@@ -220,15 +220,14 @@ void StructuralElementEvaluator :: computeConsistentMassMatrix(FloatMatrix &answ
     }
 
     if ( ( iRule = this->giveMassMtrxIntegrationRule() ) ) {
-        OOFEM_ERROR("computeConsistentMassMatrix no integration rule available");
+        OOFEM_ERROR("no integration rule available");
     }
 
     this->giveMassMtrxIntegrationMask(mask);
 
     mass = 0.;
 
-    for ( int ip = 0; ip < iRule->giveNumberOfIntegrationPoints(); ip++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(ip);
+    for ( GaussPoint *gp: *iRule ) {
         double density = elem->giveStructuralCrossSection()->give('d', gp);
         double dV      = this->computeVolumeAround(gp);
         mass   += density * dV;
@@ -266,7 +265,7 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
     FloatArray strain, stress, u, temp;
     IntArray irlocnum;
 
-    elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    elem->computeVectorOf(VM_Total, tStep, u);
 
     answer.resize(ndofs);
     answer.zero();
@@ -278,10 +277,9 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
     int numberOfIntegrationRules = elem->giveNumberOfIntegrationRules();
     // loop over individual integration rules
     for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        m->resize(0);
+        m->clear();
         IntegrationRule *iRule = elem->giveIntegrationRule(ir);
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *iRule ) {
             this->computeBMatrixAt(b, gp);
             if ( useUpdatedGpRecord ) {
                 stress = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
@@ -299,7 +297,7 @@ void StructuralElementEvaluator :: giveInternalForcesVector(FloatArray &answer, 
             m->plusProduct(b, stress, dV);
         }
         // localize irule contribution into element matrix
-        if ( this->giveIntegrationElementLocalCodeNumbers(irlocnum, elem, iRule, EID_MomentumBalance) ) {
+        if ( this->giveIntegrationElementLocalCodeNumbers(irlocnum, elem, iRule) ) {
             answer.assemble(* m, irlocnum);
         }
     } // end loop over irules
@@ -330,7 +328,7 @@ void StructuralElementEvaluator :: computeStrainVector(FloatArray &answer, Gauss
 
     // get local code numbers corresponding to ir
     IntArray lc;
-    this->giveIntegrationElementLocalCodeNumbers(lc, elem, gp->giveIntegrationRule(), EID_MomentumBalance);
+    this->giveIntegrationElementLocalCodeNumbers(lc, elem, gp->giveIntegrationRule());
     ur.resize( b.giveNumberOfColumns() );
     for ( int i = 1; i <= lc.giveSize(); i++ ) {
         ur.at(i) = u.at( lc.at(i) );
@@ -345,7 +343,7 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
     FloatArray u;
     Element *elem = this->giveElement();
 
-    elem->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    elem->computeVectorOf(VM_Total, tStep, u);
 
 #if 0
     // subtract initial displacements, if defined
@@ -364,8 +362,7 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
         }
 #endif
         IntegrationRule *iRule = elem->giveIntegrationRule(i);
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(j);
+        for ( GaussPoint *gp: *iRule ) {
             this->computeStrainVector(strain, gp, tStep, u);
             this->computeStressVector(stress, strain, gp, tStep);
         }
@@ -373,20 +370,19 @@ void StructuralElementEvaluator :: updateInternalState(TimeStep *tStep)
 
 #if 0
     // Original unoptimized version
-    int i, j;
     IntegrationRule *iRule;
     FloatArray stress;
     Element *elem = this->giveElement();
     // force updating strains & stresses
-    for ( i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
+    for ( int i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
  #ifdef __PARALLEL_MODE
         if ( this->giveElement()->giveKnotSpanParallelMode(i) == Element_remote ) {
             continue;
         }
  #endif
         iRule = elem->giveIntegrationRule(i);
-        for ( j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            computeStressVector(stress, iRule->getIntegrationPoint(j), tStep);
+        for ( GaussPoint *gp: *iRule ) {
+            computeStressVector(stress, gp, tStep);
         }
     }
 #endif
@@ -420,11 +416,10 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
         }
         //fprintf (stderr, "[%d] Computing element.knotspan %d.%d\n", elem->giveDomain()->giveEngngModel()->giveRank(), elem->giveNumber(), ir);
 #endif
-        m->resize(0, 0);
+        m->clear();
         IntegrationRule *iRule = elem->giveIntegrationRule(ir);
         // loop over individual integration points
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(j);
+        for ( GaussPoint *gp: *iRule ) {
             double dV = this->computeVolumeAround(gp);
             this->computeBMatrixAt(bj, gp);
             this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
@@ -442,7 +437,7 @@ void StructuralElementEvaluator :: computeStiffnessMatrix(FloatMatrix &answer, M
         }
 
         // localize irule contribution into element matrix
-        if ( this->giveIntegrationElementLocalCodeNumbers(irlocnum, elem, iRule, EID_MomentumBalance) ) {
+        if ( this->giveIntegrationElementLocalCodeNumbers(irlocnum, elem, iRule) ) {
             answer.assemble(* m, irlocnum);
         }
     } // end loop over irules

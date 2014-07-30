@@ -64,18 +64,19 @@ Interface *
 TrPlanestressRotAllman :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     }
     return NULL;
 }
 
 void
-TrPlanestressRotAllman :: computeLocalNodalCoordinates(FloatArray lxy [ 6 ])
+TrPlanestressRotAllman :: computeLocalNodalCoordinates(std::vector< FloatArray > &lxy)
 {
+    lxy.resize(6);
     for ( int i = 0; i < 3; i++ ) {
         lxy [ i ] = * this->giveNode(i + 1)->giveCoordinates();
     }
@@ -96,16 +97,14 @@ TrPlanestressRotAllman :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMat
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp.
 {
-    FloatArray L(3), n(6), lxy [ 6 ];
-    const FloatArray *lxyptr[] = {
-        lxy, lxy + 1, lxy + 2, lxy + 3, lxy + 4, lxy + 5
-    };
+    FloatArray L, n;
+    std::vector< FloatArray > lxy;
 
     answer.resize(3, 9);
     answer.zero();
 
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
-    this->qinterpolation.evalN( n, iLocCoord, FEIVertexListGeometryWrapper(6, lxyptr) );
+    this->qinterpolation.evalN( n, iLocCoord, FEIVertexListGeometryWrapper(lxy) );
     this->interp.evalN( L, iLocCoord, FEIElementGeometryWrapper(this) );
 
     answer.at(1, 1) = answer.at(2, 2) = n.at(1) + n.at(4) / 2. + n.at(6) / 2.;
@@ -129,13 +128,10 @@ TrPlanestressRotAllman :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
 // luated at gp.
 {
     FloatMatrix dnx;
-    FloatArray lxy [ 6 ];
-    const FloatArray *lxyptr[] = {
-        lxy, lxy + 1, lxy + 2, lxy + 3, lxy + 4, lxy + 5
-    };
+    std::vector< FloatArray > lxy;
 
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
-    this->qinterpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(6, lxyptr) );
+    this->qinterpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lxy) );
 
     answer.resize(3, 9);
     answer.zero();
@@ -189,14 +185,11 @@ TrPlanestressRotAllman :: computeStiffnessMatrixZeroEnergyStabilization(FloatMat
 {
     FloatMatrix b(1, 9), d(1, 1);
     FloatMatrix dnx;
-    FloatArray lxy [ 6 ], lec;
-    const FloatArray *lxyptr[] = {
-        lxy, lxy + 1, lxy + 2, lxy + 3, lxy + 4, lxy + 5
-    };
+    FloatArray lec = {0.333333333333, 0.333333333333, 0.333333333333}; // element center in local coordinates
+    std::vector< FloatArray > lxy; 
 
-    lec.setValues(3, 0.333333333333, 0.333333333333, 0.333333333333); // element center in local coordinates
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
-    this->qinterpolation.evaldNdx( dnx, lec, FEIVertexListGeometryWrapper(6, lxyptr) );
+    this->qinterpolation.evaldNdx( dnx, lec, FEIVertexListGeometryWrapper(lxy) );
 
     // evaluate (dv/dx-du/dy)/2. at element center
     b.at(1, 1) = -1.0 * ( dnx.at(1, 2) + 0.5 * dnx.at(4, 2) + 0.5 * dnx.at(6, 2) );
@@ -227,9 +220,9 @@ TrPlanestressRotAllman :: computeStiffnessMatrixZeroEnergyStabilization(FloatMat
 
 
 void
-TrPlanestressRotAllman :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+TrPlanestressRotAllman :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(3, D_u, D_v, R_w);
+    answer = {D_u, D_v, R_w};
 }
 
 
@@ -248,9 +241,8 @@ TrPlanestressRotAllman :: giveArea()
 void TrPlanestressRotAllman :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -259,18 +251,15 @@ void TrPlanestressRotAllman :: computeGaussPoints()
 void
 TrPlanestressRotAllman :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
-    FloatArray lxy [ 6 ];
-    const FloatArray *lxyptr[] = {
-        lxy, lxy + 1, lxy + 2, lxy + 3, lxy + 4, lxy + 5
-    };
+    std::vector< FloatArray > lxy;
     FloatArray l, n;
     IntArray en;
     FEI2dTrQuad qi(1, 2);
 
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
-    qi.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(6, lxyptr) );
+    qi.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lxy) );
     qi.computeLocalEdgeMapping(en, iedge); // get edge mapping
-    this->interp.edgeEvalN( l, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.edgeEvalN( l, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(3, 6);
 
     answer.at(1, 1) = answer.at(2, 2) = n.at(1) + n.at(3) / 2.0;
@@ -314,7 +303,7 @@ TrPlanestressRotAllman :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
         answer.at(5) = 2;
         answer.at(6) = 3;
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 
@@ -323,7 +312,7 @@ TrPlanestressRotAllman :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
  * TrPlanestressRotAllman :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
  * {
  *  // edge with linear geometry -> one can use linear interpolation safely
- *  double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+ *  double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
  *  return detJ *gp->giveWeight();
  * }
  *
@@ -332,7 +321,7 @@ TrPlanestressRotAllman :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
  * TrPlanestressRotAllman :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
  * {
  *  // edge with linear geometry -> one can use linear interpolation safely
- *  this->interp.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+ *  this->interp.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
  * }
  *
  *
@@ -363,7 +352,7 @@ TrPlanestressRotAllman :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
  *      aNode = 3;
  *      bNode = 1;
  *  } else {
- *      _error("computeEdgeVolumeAround: wrong egde number");
+ *      OOFEM_ERROR("wrong egde number");
  *  }
  *
  *  nodeA   = this->giveNode(aNode);
@@ -391,7 +380,7 @@ TrPlanestressRotAllman :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
  *
  *  weight = gp->giveWeight();
  *  // safe to use linear interpolation here (geometry is linear)
- *  detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+ *  detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
  *
  *  return detJ *weight *this->giveCrossSection()->give(CS_Thickness), gp;
  * }

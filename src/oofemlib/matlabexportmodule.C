@@ -49,18 +49,18 @@
 #include "timestep.h"
 #include "classfactory.h"
 #include "set.h"
+#include "unknownnumberingscheme.h"
 
 #ifdef __FM_MODULE
-#include "tr21stokes.h"
-#include "tet21stokes.h"
-#include "stokesflow.h"
+ #include "../fm/tr21stokes.h"
+ #include "../fm/tet21stokes.h"
+ #include "../fm/stokesflow.h"
 #endif
 
 #ifdef __SM_MODULE
-#include "structengngmodel.h"
+ #include "../sm/structengngmodel.h"
 #endif
 
-#include "unknownnumberingscheme.h"
 
 namespace oofem {
 
@@ -73,23 +73,24 @@ REGISTER_ExportModule( MatlabExportModule )
     exportArea = false;
     exportSpecials = false;
     exportReactionForces = false;
-    reactionForcesDofManList.resize(0);
+    reactionForcesDofManList.clear();
     exportIntegrationPointFields = false;
+    elList.clear();
     reactionForcesNodeSet = 0;
     IPFieldsElSet = 0;
-    elList.resize(0);
 }
 
 
 MatlabExportModule :: ~MatlabExportModule()
-{}
+{ }
 
 
 IRResultType
 MatlabExportModule :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
+
+    ExportModule :: initializeFrom(ir);
 
 	exportMesh = ir->hasField(_IFT_MatlabExportModule_mesh);
 	exportData = ir->hasField(_IFT_MatlabExportModule_data);
@@ -158,8 +159,9 @@ MatlabExportModule :: computeArea()
 void
 MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
-
-    printf("Doing matlab export...\n");
+    if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
+        return;
+    }
 
 	FILE *FID;
 	FID = giveOutputStream(tStep);
@@ -273,26 +275,20 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
 	Domain *domain  = emodel->giveDomain(1);
 	std :: vector< int >DofIDList;
 	std :: vector< int > :: iterator it;
-	std :: vector< std :: vector< double > * >valuesList;
-	std :: vector< double > *values;
+    std :: vector< std :: vector< double > >valuesList;
 
 	for ( int i = 1; i <= domain->giveNumberOfDofManagers(); i++ ) {
-		for ( int j = 1; j <= domain->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
-			Dof *thisDof;
-			thisDof = domain->giveDofManager(i)->giveDof(j);
+        for ( Dof *thisDof: *domain->giveDofManager(i) ) {
 			it = std :: find( DofIDList.begin(), DofIDList.end(), thisDof->giveDofID() );
 
+            double value = thisDof->giveUnknown(VM_Total, tStep);
 			if ( it == DofIDList.end() ) {
 				DofIDList.push_back( thisDof->giveDofID() );
-				values = new( std :: vector< double > );
-				valuesList.push_back(values);
+                valuesList.push_back({value});
 			} else {
 				std::size_t pos = it - DofIDList.begin();
-				values = valuesList.at(pos);
+                valuesList[pos].push_back(value);
 			}
-
-			double value = thisDof->giveUnknown(VM_Total, tStep);
-			values->push_back(value);
 		}
 	}
 
@@ -304,9 +300,9 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
 	fprintf(FID, "];\n");
 
 	for ( size_t i = 0; i < valuesList.size(); i++ ) {
-		fprintf(FID, "\tdata.a{%lu}=[", static_cast<long unsigned int>(i) + 1);
-		for ( size_t j = 0; j < valuesList.at(i)->size(); j++ ) {
-			fprintf( FID, "%f,", valuesList.at(i)->at(j) );
+        fprintf(FID, "\tdata.a{%lu}=[", static_cast< long unsigned int >(i) + 1);
+        for ( double val: valuesList[i] ) {
+            fprintf( FID, "%f,", val );
 		}
 
 		fprintf(FID, "];\n");
@@ -318,12 +314,11 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
 void
 MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 {
-	FloatMatrix v_hat, GradPTemp, v_hatTemp;
+    FloatArray v_hat, GradPTemp, v_hatTemp;
 
 	Domain *domain  = emodel->giveDomain(1);
 
-	v_hat.resize(ndim, 1);
-	v_hat.zero();
+    v_hat.clear();
 
 	for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
 #ifdef __FM_MODULE
@@ -344,12 +339,12 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 
 	std :: vector <double> V;
 
-	for (int i=0; i<ndim; i++) {
-		intrinsicSize=intrinsicSize*(smax.at(i)-smin.at(i));
+    for ( int i = 0; i < (int)smax.size(); i++ ) {
+        intrinsicSize *= ( smax.at(i) - smin.at(i) );
 	}
 
-	for (int i=1; i<=ndim; i++) {
-		V.push_back(v_hat.at(i,1)/intrinsicSize);
+    for ( double vh: v_hat ) {
+        V.push_back(vh / intrinsicSize);
 	}
 
 	fprintf(FID, "\tspecials.velocitymean=[");
@@ -368,10 +363,10 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 			for ( int j = 1; j <= wpbc->giveNumberOfInternalDofManagers(); j++ ) {
 				fprintf( FID, "\tspecials.weakperiodic{%u}.descType=%u;\n", wpbccount, wpbc->giveBasisType() );
 				fprintf(FID, "\tspecials.weakperiodic{%u}.coefficients=[", wpbccount);
-				for ( int k = 1; k <= wpbc->giveInternalDofManager(j)->giveNumberOfDofs(); k++ ) {
+                for ( Dof *dof: *wpbc->giveInternalDofManager(j) ) {
 					FloatArray unknowns;
 					IntArray DofMask;
-					double X = wpbc->giveInternalDofManager(j)->giveDof(k)->giveUnknown(VM_Total, tStep);
+                    double X = dof->giveUnknown(VM_Total, tStep);
 					fprintf(FID, "%e\t", X);
 				}
 
@@ -382,10 +377,10 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 		SolutionbasedShapeFunction *sbsf = dynamic_cast< SolutionbasedShapeFunction *>( domain->giveBc(i));
 		if (sbsf) {
 			fprintf(FID, "\tspecials.solutionbasedsf{%u}.values=[", sbsfcount);
-			for ( int k = 1; k <= sbsf->giveInternalDofManager(1)->giveNumberOfDofs(); k++ ) {      // Only one internal dof manager
+            for ( Dof *dof: *sbsf->giveInternalDofManager(1) ) {                  // Only one internal dof manager
 				FloatArray unknowns;
 				IntArray DofMask;
-				double X = sbsf->giveInternalDofManager(1)->giveDof(k)->giveUnknown(VM_Total, tStep);
+                double X = dof->giveUnknown(VM_Total, tStep);
 				fprintf(FID, "%e\t", X);
 			}
 			fprintf(FID, "];\n");
@@ -403,16 +398,16 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
     Domain *domain  = emodel->giveDomain( domainIndex );
 
     FloatArray reactions;
-    IntArray dofManMap, dofMap, eqnMap;
-#if __SM_MODULE
-    StructuralEngngModel *strEngMod = dynamic_cast<StructuralEngngModel*>(emodel); 
+    IntArray dofManMap, dofidMap, eqnMap;
+#ifdef __SM_MODULE
+    StructuralEngngModel *strEngMod = dynamic_cast< StructuralEngngModel * >(emodel);
     if ( strEngMod ) {
-        strEngMod->buildReactionTable(dofManMap, dofMap, eqnMap, tStep, domainIndex);
+        strEngMod->buildReactionTable(dofManMap, dofidMap, eqnMap, tStep, domainIndex);
         strEngMod->computeReaction(reactions, tStep, 1);
     } else 
 #endif
     {
-        OOFEM_ERROR("MatlabExportModule :: doOutputReactionForces - Cannot export reaction forces - only implemented for structural problems.");
+        OOFEM_ERROR("Cannot export reaction forces - only implemented for structural problems.");
     }
 
     // Set the nodes and elements to export based on sets
@@ -459,16 +454,14 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
         if ( dofManMap.contains( dManNum ) ) {
 
             DofManager *dofMan = domain->giveDofManager( dManNum );
-            dofIDs.resize( dofMan->giveNumberOfDofs() );
-            dofIDs.zero();
+            dofIDs.clear();
 
-            for ( int j = 1; j <= dofMan->giveNumberOfDofs(); j++ ) {
-                Dof *dof = dofMan->giveDof(j);
+            for ( Dof *dof: *dofMan ) {
                 int num = dof->giveEquationNumber( EModelDefaultPrescribedEquationNumbering() );
                 int pos = eqnMap.findFirstIndexOf( num );
-                dofIDs.at(j) = (int) dof->giveDofID();
+                dofIDs.followedBy(dof->giveDofID());
                 if ( pos > 0 ) {
-                    fprintf( FID, "%e ", reactions.at( pos ) );
+                    fprintf(FID, "%e ", reactions.at(pos));
                 } else {
                     fprintf( FID, "%e ", 0.0 ); // if not prescibed output zero
                 }
@@ -480,8 +473,8 @@ MatlabExportModule :: doOutputReactionForces(TimeStep *tStep,    FILE *FID)
         
         fprintf( FID, "\tReactionForces.DofIDs{%i} = [", i);
         if ( dofManMap.contains( dManNum ) ) {
-            for ( int j = 1; j <= dofIDs.giveSize(); j++ ) {
-                fprintf( FID, "%i ", dofIDs.at( j ) );
+            for ( int id: dofIDs ) {
+                fprintf( FID, "%i ", id );
             }  
         }
         fprintf(FID, "];\n");
@@ -545,24 +538,23 @@ MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *F
             IntegrationRule *iRule = el->giveIntegrationRule(i-1);
 
             fprintf( FID, "\tIntegrationPointFields.Elements{%i}.integrationRule{%i}.ip = cell(%i,1); \n ", 
-                ielem, i, iRule->giveNumberOfIntegrationPoints() );
+                    ielem, i, iRule->giveNumberOfIntegrationPoints() );
 
             // Loop over integration points
-            for ( int j = 1; j <= iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                IntegrationPoint *ip = iRule->getIntegrationPoint(j-1);
+            for ( GaussPoint *ip: *iRule ) {
 
                 double weight = ip->giveWeight();
 
                 fprintf( FID, "\tIntegrationPointFields.Elements{%i}.integrationRule{%i}.ip{%i}.ipWeight = %e; \n ",
-                    ielem, i, j, weight );
+                        ielem, i, ip->giveNumber(), weight);
 
 
                 // export Gauss point coordinates
                 fprintf( FID, "\tIntegrationPointFields.Elements{%i}.integrationRule{%i}.ip{%i}.coords = [",
-                    ielem, i, j );
+                        ielem, i, ip->giveNumber());
                 
                 FloatArray coords;
-                el->computeGlobalCoordinates( coords, * ( ip->giveCoordinates() ) );
+                el->computeGlobalCoordinates( coords, * ( ip->giveNaturalCoordinates() ) );
                 for ( int ic = 1; ic <= coords.giveSize(); ic++ ) {
                     fprintf( FID, "%e ", coords.at(ic) );
                 }
@@ -570,11 +562,11 @@ MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *F
 
                 // export internal variables
                 fprintf( FID, "\tIntegrationPointFields.Elements{%i}.integrationRule{%i}.ip{%i}.valArray = cell(%i,1); \n", 
-                    ielem, i, j, numVars );
+                        ielem, i, ip->giveNumber(), numVars);
 
                 for ( int iv = 1; iv <= numVars; iv++ ) {
                     fprintf( FID, "\tIntegrationPointFields.Elements{%i}.integrationRule{%i}.ip{%i}.valArray{%i} = [", 
-                        ielem, i, j, iv );
+                            ielem, i, ip->giveNumber(), iv);
                     InternalStateType vartype = ( InternalStateType ) this->internalVarsToExport.at(iv);
                     el->giveIPValue(valueArray, ip, vartype, tStep);
                     int nv = valueArray.giveSize();
@@ -593,19 +585,18 @@ MatlabExportModule :: doOutputIntegrationPointFields(TimeStep *tStep,    FILE *F
 
 void
 MatlabExportModule :: initialize()
-{}
+{ }
 
 
 void
 MatlabExportModule :: terminate()
-{}
+{ }
 
 
 FILE *
 MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 {
 	FILE *answer;
-
 	std :: ostringstream baseFileName;
 	std :: string fileName;
 
@@ -618,32 +609,37 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
     //fileName.replace(foundDot, 1, "_"); 
  
     // JIM
- 	//fileName.erase(foundDot);
     fileName.replace(foundDot, 1, "_");
 
     char fext[100];
     sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
     fileName += fext;
 
-
-	functionname = fileName;
-
-	std :: cout << baseFileName.str() << std :: endl;
-	std :: cout << functionname << std :: endl;
-
-	size_t foundSlash;
-
-	foundSlash = functionname.find_last_of("/");
-	functionname.erase(0, foundSlash + 1);
-
+//    char fext [ 100 ];
+    if ( this->testSubStepOutput() ) {
+        // include tStep version in output file name
 #ifdef __PARALLEL_MODE
-	baseFileName << fileName << "_" << emodel->giveRank() << "_V_" << tStep->giveNumber() << "m";
-#else
-	baseFileName << fileName << ".m";
+        if ( this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1 ) {
+            sprintf( fext, "_%03d_m%d_%d_%d", emodel->giveRank(), this->number, tStep->giveNumber(), tStep->giveSubStepNumber() );
+        } else
 #endif
+        sprintf( fext, "_m%d_%d_%d", this->number, tStep->giveNumber(), tStep->giveSubStepNumber() );
+    } else   {
+#ifdef __PARALLEL_MODE
+        if ( this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1 ) {
+            sprintf( fext, "_%03d_m%d_%d", emodel->giveRank(), this->number, tStep->giveNumber() );
+        } else
+#endif
+        sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
+    }
 
-	if ( ( answer = fopen(baseFileName.str().c_str(), "w") ) == NULL ) {
-		OOFEM_ERROR2( "MatlabExportModule::giveOutputStream: failed to open file %s", baseFileName.str().c_str() );
+    fileName += fext;
+
+    functionname = fileName;
+    fileName += ".m";
+
+    if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
+        OOFEM_ERROR("failed to open file %s", fileName.c_str() );
 	}
 
 	return answer;

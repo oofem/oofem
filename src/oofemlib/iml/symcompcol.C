@@ -101,14 +101,14 @@ SymCompCol :: SymCompCol(const SymCompCol &S) : CompCol(S)
 
 SparseMtrx *SymCompCol :: GiveCopy() const
 {
-    SymCompCol *result = new SymCompCol(* this);
+    SymCompCol *result = new SymCompCol(*this);
     return result;
 }
 
 
 #define MAP(i, j) map [ ( j ) * neq - ( j ) * ( ( j ) + 1 ) / 2 + ( i ) ]
 
-int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
+int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
     /*
      * IntArray  loc;
@@ -185,7 +185,7 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
     int i, ii, j, jj, n, indx;
     Element *elem;
     // allocation map
-    std :: vector< std :: set< int > >columns(neq);
+    std :: vector< std :: set< int > > columns(neq);
     /*
      * std::set<int> **columns = new std::set<int>*[neq];
      * for (j=0; j<neq; j++) {
@@ -197,7 +197,7 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
 
     for ( n = 1; n <= nelem; n++ ) {
         elem = domain->giveElement(n);
-        elem->giveLocationArray(loc, ut, s);
+        elem->giveLocationArray(loc, s);
 
         for ( i = 1; i <= loc.giveSize(); i++ ) {
             if ( ( ii = loc.at(i) ) ) {
@@ -218,7 +218,7 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
-            bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
+            bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                 IntArray &krloc = r_locs [ k ];
                 IntArray &kcloc = c_locs [ k ];
@@ -246,11 +246,10 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
     colptr_.resize(neq + 1);
     indx = 0;
 
-    std :: set< int > :: iterator pos;
     for ( j = 0; j < neq; j++ ) { // column loop
         colptr_(j) = indx;
-        for ( pos = columns [ j ].begin(); pos != columns [ j ].end(); ++pos ) { // row loop
-            rowind_(indx++) = * pos;
+        for ( int row: columns [ j ] ) { // row loop
+            rowind_(indx++) = row;
         }
     }
 
@@ -285,7 +284,7 @@ void SymCompCol :: times(const FloatArray &x, FloatArray &answer) const
 
     //      Check for compatible dimensions:
     if ( x.giveSize() != N ) {
-        OOFEM_ERROR("SymCompCol::times: Error in CompCol -- incompatible dimensions");
+        OOFEM_ERROR("incompatible dimensions");
     }
 
     answer.resize(M);
@@ -327,7 +326,7 @@ int SymCompCol :: assemble(const IntArray &loc, const FloatMatrix &mat)
 #  ifdef DEBUG
     dim = mat.giveNumberOfRows();
     if ( dim != loc.giveSize() ) {
-        OOFEM_ERROR("SymCompCol::assemble error : dimension of 'k' and 'loc' mismatch");
+        OOFEM_ERROR("dimension of 'k' and 'loc' mismatch");
     }
 
     //this -> checkSizeTowards(loc) ;
@@ -414,7 +413,7 @@ double &SymCompCol :: at(int i, int j)
         }
     }
 
-    OOFEM_ERROR("SymCompCol::operator(): Array accessing exception -- out of bounds");
+    OOFEM_ERROR("Array accessing exception -- out of bounds");
     return val_(0); // return to suppress compiler warning message
 }
 
@@ -436,12 +435,12 @@ double SymCompCol :: at(int i, int j) const
     if ( i <= dim_ [ 0 ] && j <= dim_ [ 1 ] ) {
         return 0.0;
     } else {
-        OOFEM_ERROR3("SymCompCol::operator(): Array accessing exception -- index out of bounds (%d,%d)", i, j);
+        OOFEM_ERROR("Array accessing exception -- index out of bounds (%d,%d)", i, j);
         return ( 0 ); // return to suppress compiler warning message
     }
 }
 
-double SymCompCol :: operator()(int i, int j)  const
+double SymCompCol :: operator() (int i, int j)  const
 {
     int ii = i, jj = j;
     if ( ii < jj ) {
@@ -458,12 +457,12 @@ double SymCompCol :: operator()(int i, int j)  const
     if ( i < dim_ [ 0 ] && j < dim_ [ 1 ] ) {
         return 0.0;
     } else {
-        OOFEM_ERROR3("SymCompCol::operator(): Array accessing exception, index out of bounds (%d,%d)", i, j);
+        OOFEM_ERROR("Array accessing exception, index out of bounds (%d,%d)", i, j);
         return ( 0 ); // return to suppress compiler warning message
     }
 }
 
-double &SymCompCol :: operator()(int i, int j)
+double &SymCompCol :: operator() (int i, int j)
 {
     int ii = i, jj = j;
     if ( ii < jj ) {
@@ -480,7 +479,7 @@ double &SymCompCol :: operator()(int i, int j)
         }
     }
 
-    OOFEM_ERROR3("SymCompCol::operator(): Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
+    OOFEM_ERROR("Array element (%d,%d) not in sparse structure -- cannot assign", i, j);
     return val_(0); // return to suppress compiler warning message
 }
 } // end namespace oofem

@@ -8,9 +8,9 @@
 #include "XFEMDebugTools.h"
 
 namespace oofem {
-XFEMDebugTools :: XFEMDebugTools() {}
+XFEMDebugTools :: XFEMDebugTools() { }
 
-XFEMDebugTools :: ~XFEMDebugTools() {}
+XFEMDebugTools :: ~XFEMDebugTools() { }
 
 void XFEMDebugTools :: WriteTrianglesToVTK(const std :: string &iName, const std :: vector< Triangle > &iTriangles)
 {
@@ -140,11 +140,14 @@ void XFEMDebugTools :: WriteArrayToMatlab(const std :: string &iName, const std 
 void XFEMDebugTools :: WriteArrayToGnuplot(const std :: string &iName, const std :: vector< double > &iX, const std :: vector< double > &iY)
 {
     if ( iX.size() != iY.size() ) {
-        OOFEM_ERROR("Error in XFEMDebugTools :: WriteArrayToGnuplot(): iX.size() != iY.size().")
+        OOFEM_ERROR("iX.size() != iY.size().")
     }
 
     std :: ofstream file;
     file.open( iName.data() );
+
+    // Set some output options
+    file << std :: scientific;
 
     file << "# x y\n";
 

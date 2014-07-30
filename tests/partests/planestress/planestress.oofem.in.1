@@ -1,6 +1,7 @@
 planestress.oofem.out.1
 1D PETSc test
-linearstatic nsteps 1 lstype 3 smtype 7 nmodules 0
+linearstatic nsteps 1 lstype 3 smtype 7 nmodules 1
+errorcheck filename "planestress.oofem.in"
 #vtkxml tstep_all domain_all primvars 1 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
@@ -18,15 +19,3 @@ IsoLE  1 d 1.0 E 300.e3 n 0.2 talpha 0.0
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 ConstantEdgeLoad 2 loadTimeFunction 1 components 2 1.0 0.0 ndofs 2 loadtype 3
 ConstantFunction 1 f(t) 1.0
-
-#%BEGIN_CHECK% tolerance 5.e-5
-## check element strain vector
-#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 1  value 3.3333e-06
-#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 2  value -6.6667e-07
-#ELEMENT tStep 1 number 2 gp 1 keyword "strains" component 6  value 0.0
-## check element stress vector
-#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 1  value 1.0
-#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 2  value 0.0
-#ELEMENT tStep 1 number 2 gp 1 keyword "stresses" component 6  value 0.0
-##
-#%END_CHECK%

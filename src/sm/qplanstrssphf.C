@@ -42,21 +42,21 @@ QPlaneStressPhF2d::QPlaneStressPhF2d( int n, Domain *aDomain ) : PhaseFieldEleme
 QPlaneStress2d(n, aDomain ) { }
 
 void
-QPlaneStressPhF2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+QPlaneStressPhF2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues( 3, D_u, D_v, T_f ); ///@todo add damage dofID later
+    answer = { D_u, D_v, T_f }; ///@todo add damage dofID later
 }
 
 void
 QPlaneStressPhF2d::giveDofManDofIDMask_u( IntArray &answer )
 {
-    answer.setValues( 2, D_u, D_v );
+    answer = { D_u, D_v };
 }
 
 void
 QPlaneStressPhF2d::giveDofManDofIDMask_d( IntArray &answer )
 {
-    answer.setValues( 1, T_f );
+    answer = IntArray({ T_f });
 }
 
 

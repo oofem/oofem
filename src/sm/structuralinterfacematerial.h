@@ -85,7 +85,7 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    StructuralInterfaceMaterial(int n, Domain *d);
+    StructuralInterfaceMaterial(int n, Domain * d);
     /// Destructor.
     virtual ~StructuralInterfaceMaterial() { }
 
@@ -104,13 +104,13 @@ public:
      */
     virtual void giveFirstPKTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                          const FloatMatrix &reducedF, TimeStep *tStep )
-    { _error("giveFirstPKTraction_1d: not implemented "); }
+    { OOFEM_ERROR("not implemented "); }
     virtual void giveFirstPKTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                          const FloatMatrix &reducedF, TimeStep *tStep )
-    { _error("giveFirstPKTraction_2d: not implemented "); }
+    { OOFEM_ERROR("not implemented "); }
     virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
                                         const FloatMatrix &F, TimeStep *tStep)
-    { _error("giveFirstPKTraction_3d: not implemented "); }
+    { OOFEM_ERROR("not implemented "); }
 
     virtual void giveEngTraction_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
     virtual void giveEngTraction_2d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump, TimeStep *tStep);
@@ -125,9 +125,9 @@ public:
      * @param tStep Time step.
      */
     virtual void give1dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { _error("give1dStiffnessMatrix_dTdj: not implemented "); }
+    { OOFEM_ERROR("not implemented "); }
     virtual void give2dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
-    { _error("give2dStiffnessMatrix_dTdj: not implemented "); }
+    { OOFEM_ERROR("not implemented "); }
     virtual void give3dStiffnessMatrix_dTdj(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
     virtual void give1dStiffnessMatrix_Eng(FloatMatrix &answer,  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);

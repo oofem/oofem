@@ -50,8 +50,8 @@ class OOFEM_EXPORT rveEngngModel
 {
 public:
 
-    rveEngngModel() {}
-    virtual ~rveEngngModel() {}
+    rveEngngModel() { }
+    virtual ~rveEngngModel() { }
 
     /**
      * Abstract method for setting boundary condition on RVE.

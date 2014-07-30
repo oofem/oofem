@@ -42,10 +42,10 @@ namespace oofem {
 REGISTER_RandomFieldGenerator(LocalGaussianRandomGenerator);
 
 LocalGaussianRandomGenerator :: LocalGaussianRandomGenerator(int num, Domain *d) : RandomFieldGenerator(num, d)
-{}
+{ }
 
 LocalGaussianRandomGenerator :: ~LocalGaussianRandomGenerator()
-{}
+{ }
 
 void
 LocalGaussianRandomGenerator :: generateRandomValue(double &value, FloatArray *position)
@@ -56,12 +56,11 @@ LocalGaussianRandomGenerator :: generateRandomValue(double &value, FloatArray *p
 IRResultType
 LocalGaussianRandomGenerator :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, mean, _IFT_LocalGaussianRandomGenerator_mean);
     IR_GIVE_FIELD(ir, variance, _IFT_LocalGaussianRandomGenerator_variance);
-    randomInteger = -time(NULL);
+    randomInteger = ( long ) ( -time(NULL) );
     int seed = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, seed, _IFT_LocalGaussianRandomGenerator_seed);
     if ( seed ) {
@@ -87,7 +86,7 @@ double LocalGaussianRandomGenerator :: ran1(long *idum)
     long k;
     static long iy = 0;
     static long iv [ NTAB ];
-    float temp;
+    double temp;
 
     if ( * idum <= 0 || !iy ) {
         if ( -( * idum ) < 1 ) {
@@ -132,7 +131,7 @@ double LocalGaussianRandomGenerator :: normalCdfInverse(double cdf, double a, do
     double x;
     double x2;
     if ( cdf < 0.0 || 1.0 < cdf ) {
-        OOFEM_ERROR("LocalGaussianRandomGenerator :: normalCdfInverse - NORMAL_CDF_INV - Fatal error!\nCDF < 0 or 1 < CDF.");
+        OOFEM_ERROR("NORMAL_CDF_INV - Fatal error!\nCDF < 0 or 1 < CDF.");
     }
 
     x2 = normal01CdfInverse(cdf);
@@ -209,8 +208,8 @@ double LocalGaussianRandomGenerator :: normal01CdfInverse(double p)
         }
 
         if ( r <= 0.0 ) {
-            value = -1.0;
-            OOFEM_ERROR("LocalGaussianRandomGenerator :: normal01CdfInverse - r < 0.0!");
+            OOFEM_ERROR("r < 0.0!");
+            return -1.0;
         }
 
         r = sqrt( -log(r) );

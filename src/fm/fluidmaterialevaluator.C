@@ -52,11 +52,10 @@ FluidMaterialEvaluator :: FluidMaterialEvaluator(int i, EngngModel *_master) : E
 }
 
 FluidMaterialEvaluator :: ~FluidMaterialEvaluator()
-{}
+{ }
 
 IRResultType FluidMaterialEvaluator :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     this->deltaT = 1.0;
@@ -88,11 +87,10 @@ void FluidMaterialEvaluator :: solveYourself()
 {
     Domain *d = this->giveDomain(1);
 
-    gps.growTo( d->giveNumberOfMaterialModels() );
 
     MaterialMode mode;
     if ( ndim == 1 ) {
-        OOFEM_ERROR("FluidMaterialEvaluator :: solveYourself - 1d flow not supported (should be added)")
+        OOFEM_ERROR("1d flow not supported (should be added)")
         //mode = _1dFlow;
         mode = _Unknown;
     } else if ( ndim == 2 ) {
@@ -104,11 +102,14 @@ void FluidMaterialEvaluator :: solveYourself()
     int components = ( ndim * ( ndim + 1 ) ) / 2;
     FloatArray initialStrain(components);
     initialStrain.zero();
+    gps.clear();
+    gps.reserve(d->giveNumberOfMaterialModels());
     for ( int i = 1; i <= d->giveNumberOfMaterialModels(); i++ ) {
-        gps.put( i, new GaussPoint(NULL, i, NULL, 1, mode) );
+        std :: unique_ptr< GaussPoint > gp(new GaussPoint(nullptr, i, nullptr, 1, mode));
+        gps.emplace_back( std :: move(gp));
         // Initialize the strain vector;
         FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( d->giveMaterial(i) );
-        FluidDynamicMaterialStatus *status = static_cast< FluidDynamicMaterialStatus * >( mat->giveStatus( gps.at(i) ) );
+        FluidDynamicMaterialStatus *status = static_cast< FluidDynamicMaterialStatus * >( mat->giveStatus( &*gps[i-1] ) );
         status->letDeviatoricStrainRateVectorBe(initialStrain);
     }
 
@@ -122,37 +123,38 @@ void FluidMaterialEvaluator :: solveYourself()
     // Note, strain == strain-rate (kept as strain for brevity)
     int maxiter = 100; // User input?
     double tolerance = 1.e-6; // Needs to be normalized somehow, or user input
-    double strainVol, pressure;
+    double strainVol, pressure, strainVolC = 0.;
     FloatArray stressDevC, deltaStrain, strainDev, stressDev, res;
     stressDevC.resize( sControl.giveSize() );
     res.resize( sControl.giveSize() );
 
     FloatMatrix tangent, reducedTangent;
+    FloatArray dsdp, dedd;
+    double dedp;
     for ( int istep = 1; istep <= this->numberOfSteps; ++istep ) {
         this->timer.startTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
         for ( int imat = 1; imat <= d->giveNumberOfMaterialModels(); ++imat ) {
-            GaussPoint *gp = gps.at(imat);
+            GaussPoint *gp = &*gps[imat-1];
             FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( d->giveMaterial(imat) );
             FluidDynamicMaterialStatus *status = static_cast< FluidDynamicMaterialStatus * >( mat->giveStatus(gp) );
 
             strainDev = status->giveDeviatoricStrainRateVector();
+            pressure = 0.; ///@todo We should ask the material model for this initial guess.
             // Update the controlled parts
             for ( int j = 1; j <= eControl.giveSize(); ++j ) {
                 int p = eControl.at(j);
-                strainDev.at(p) = d->giveFunction( cmpntFunctions.at(p) )->evaluateAtTime(tStep->giveIntrinsicTime());
+                strainDev.at(p) = d->giveFunction( cmpntFunctions.at(p) )->evaluateAtTime( tStep->giveIntrinsicTime() );
             }
 
             for ( int j = 1; j <= sControl.giveSize(); ++j ) {
                 int p = sControl.at(j);
-                stressDevC.at(j) = d->giveFunction( cmpntFunctions.at(p) )->evaluateAtTime(tStep->giveIntrinsicTime());
+                stressDevC.at(j) = d->giveFunction( cmpntFunctions.at(p) )->evaluateAtTime( tStep->giveIntrinsicTime() );
             }
 
             if ( pressureControl ) {
-                pressure = d->giveFunction(volFunction)->evaluateAtTime(tStep->giveIntrinsicTime());
+                pressure = d->giveFunction(volFunction)->evaluateAtTime( tStep->giveIntrinsicTime() );
             } else {
-                ///@todo Support volumetric strain control (which is actually quite tricky)
-                OOFEM_ERROR("Volumetric strain rate control not yet implemented");
-                pressure = 0.;
+                strainVolC = d->giveFunction(volFunction)->evaluateAtTime( tStep->giveIntrinsicTime() );
             }
 
             for ( int iter = 1; iter < maxiter; iter++ ) {
@@ -160,28 +162,37 @@ void FluidMaterialEvaluator :: solveYourself()
                 for ( int j = 1; j <= sControl.giveSize(); ++j ) {
                     res.at(j) = stressDevC.at(j) - stressDev.at( sControl.at(j) );
                 }
+                double resVol = 0.;
+                if ( !pressureControl ) {
+                    resVol = strainVolC - strainVol;
+                }
 
-                OOFEM_LOG_RELEVANT( "Time step: %d, Material %d, Iteration: %d,  Residual = %e\n", istep, imat, iter, res.computeNorm() );
-                if ( res.computeNorm() <= tolerance ) { ///@todo More flexible control of convergence needed. Something relative?
+                OOFEM_LOG_RELEVANT( "Time step: %d, Material %d, Iteration: %d,  Residual = %e, Resvol = %e\n", istep, imat, iter, res.computeNorm(), resVol );
+                if ( res.computeNorm() <= tolerance && resVol <= tolerance ) { ///@todo More flexible control of convergence needed. Something relative?
                     break;
                 }
 
-                mat->giveDeviatoricStiffnessMatrix(tangent, TangentStiffness, gp, tStep);
-                // Add mean part to make it invertible
-                double norm = tangent.computeFrobeniusNorm();
-                for ( int i = 1; i <= this->ndim; ++i ) {
-                    for ( int j = 1; j <= this->ndim; ++j ) {
-                        tangent.at(i, j) += norm;
+                mat->giveStiffnessMatrices(tangent, dsdp, dedd, dedp, TangentStiffness, gp, tStep);
+                if ( res.giveSize() > 0 ) {
+                    // Add mean part to make it invertible
+                    double norm = tangent.computeFrobeniusNorm();
+                    for ( int i = 1; i <= this->ndim; ++i ) {
+                        for ( int j = 1; j <= this->ndim; ++j ) {
+                            tangent.at(i, j) += norm;
+                        }
+                    }
+
+                    // Pick out the stress-controlled part;
+                    reducedTangent.beSubMatrixOf(tangent, sControl, sControl);
+
+                    // Update stress-controlled part of the strain
+                    reducedTangent.solveForRhs(res, deltaStrain);
+                    for ( int j = 1; j <= sControl.giveSize(); ++j ) {
+                        strainDev.at( sControl.at(j) ) += deltaStrain.at(j);
                     }
                 }
-
-                // Pick out the stress-controlled part;
-                reducedTangent.beSubMatrixOf(tangent, sControl, sControl);
-
-                // Update stress-controlled part of the strain
-                reducedTangent.solveForRhs(res, deltaStrain);
-                for ( int j = 1; j <= sControl.giveSize(); ++j ) {
-                    strainDev.at( sControl.at(j) ) += deltaStrain.at(j);
+                if ( !pressureControl ) {
+                    pressure -= resVol/dedp;
                 }
             }
 
@@ -220,8 +231,8 @@ void FluidMaterialEvaluator :: doStepOutput(TimeStep *tStep)
     Domain *d = this->giveDomain(1);
     if ( tStep->isTheFirstStep() ) {
         this->outfile << "# Time";
-        for ( int j = 1; j <= this->vars.giveSize(); ++j ) {
-            this->outfile << ", " << __InternalStateTypeToString( ( InternalStateType ) this->vars.at(j) );
+        for ( int var: this->vars ) {
+            this->outfile << ", " << __InternalStateTypeToString( ( InternalStateType ) var );
         }
 
         this->outfile << '\n';
@@ -229,7 +240,7 @@ void FluidMaterialEvaluator :: doStepOutput(TimeStep *tStep)
 
     outfile << tStep->giveIntrinsicTime();
     for ( int i = 1; i <= d->giveNumberOfMaterialModels(); i++ ) {
-        GaussPoint *gp = gps.at(i);
+        GaussPoint *gp = &*gps[i-1];
         FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( d->giveMaterial(i) );
         for ( int j = 1; j <= this->vars.giveSize(); ++j ) {
             mat->giveIPValue(outputValue, gp, ( InternalStateType ) this->vars.at(j), tStep);

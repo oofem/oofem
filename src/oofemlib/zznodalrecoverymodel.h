@@ -66,11 +66,13 @@ protected:
 
 public:
     /// Constructor.
-    ZZNodalRecoveryModel(Domain *d);
+    ZZNodalRecoveryModel(Domain * d);
     /// Destructor.
     virtual ~ZZNodalRecoveryModel();
 
-    virtual int recoverValues(InternalStateType type, TimeStep *tStep);
+    virtual int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep);
+
+    virtual const char *giveClassName() const { return "ZZNodalRecoveryModel"; }
 
 private:
     /**
@@ -83,7 +85,7 @@ private:
 
 #ifdef __PARALLEL_MODE
     void initCommMaps();
-    void exchangeDofManValues(int ireg, FloatArray &lhs, FloatMatrix &rhs, IntArray &rn);
+    void exchangeDofManValues(FloatArray &lhs, FloatMatrix &rhs, IntArray &rn);
     int packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
     int unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
 #endif
@@ -94,9 +96,12 @@ private:
  */
 class OOFEM_EXPORT ZZNodalRecoveryModelInterface : public Interface
 {
+private:
+    Element *element;
+
 public:
     /// Constructor
-    ZZNodalRecoveryModelInterface() { }
+    ZZNodalRecoveryModelInterface(Element *element): element(element) { }
 
     /// @name The element interface required by ZZNodalRecoveryModel
     //@{
@@ -116,10 +121,6 @@ public:
      * @param type Determines the type of internal variable to be recovered.
      */
     virtual void ZZNodalRecoveryMI_computeNNMatrix(FloatArray &answer, InternalStateType type);
-    /**
-     * Returns the corresponding element to interface.
-     */
-    virtual Element *ZZNodalRecoveryMI_giveElement() = 0;
     //@}
 };
 } // end namespace oofem

@@ -1,6 +1,7 @@
 patch105.out
 Rotated Patch test of PlaneStress2d elements -> pure compression in x direction in global c.s.
-LinearStatic nsteps 1
+LinearStatic nsteps 1 nmodules 1
+errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 8 nelem 5 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
@@ -42,21 +43,21 @@ ConstantFunction 1 f(t) 1.0
 #NODE tStep 1 number 7 dof 1 unknown d value -4.6875
 #NODE tStep 1 number 8 dof 1 unknown d value -4.6875
 ## check element no. 1 stress vector
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 1  value -6.7708e+00
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 2  value -3.6458e+00
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 6  value -2.7063e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value -6.7708e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 2  value -3.6458e+00
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 6  value -2.7063e+00
 ##
-#ELEMENT tStep 1 number 2 gp 2 keyword "stresses" component 1  value -6.7708e+00
-#ELEMENT tStep 1 number 2 gp 2 keyword "stresses" component 2  value -3.6458e+00
-#ELEMENT tStep 1 number 2 gp 2 keyword "stresses" component 6  value -2.7063e+00
+#ELEMENT tStep 1 number 2 gp 2 keyword 1 component 1  value -6.7708e+00
+#ELEMENT tStep 1 number 2 gp 2 keyword 1 component 2  value -3.6458e+00
+#ELEMENT tStep 1 number 2 gp 2 keyword 1 component 6  value -2.7063e+00
 ##
-#ELEMENT tStep 1 number 3 gp 3 keyword "stresses" component 1  value -6.7708e+00
-#ELEMENT tStep 1 number 3 gp 3 keyword "stresses" component 2  value -3.6458e+00
-#ELEMENT tStep 1 number 3 gp 3 keyword "stresses" component 6  value -2.7063e+00
+#ELEMENT tStep 1 number 3 gp 3 keyword 1 component 1  value -6.7708e+00
+#ELEMENT tStep 1 number 3 gp 3 keyword 1 component 2  value -3.6458e+00
+#ELEMENT tStep 1 number 3 gp 3 keyword 1 component 6  value -2.7063e+00
 ##
-#ELEMENT tStep 1 number 4 gp 4 keyword "stresses" component 1  value -6.7708e+00
-#ELEMENT tStep 1 number 4 gp 4 keyword "stresses" component 2  value -3.6458e+00
-#ELEMENT tStep 1 number 4 gp 4 keyword "stresses" component 6  value -2.7063e+00
+#ELEMENT tStep 1 number 4 gp 4 keyword 1 component 1  value -6.7708e+00
+#ELEMENT tStep 1 number 4 gp 4 keyword 1 component 2  value -3.6458e+00
+#ELEMENT tStep 1 number 4 gp 4 keyword 1 component 6  value -2.7063e+00
 #%END_CHECK%
 #
 #

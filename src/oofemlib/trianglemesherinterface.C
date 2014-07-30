@@ -44,29 +44,29 @@
 extern "C" {
  #include <triangle.h>
 
-// Function prototypes from triangle.c
-void parsecommandline(int argc, char **argv, struct behavior *b);
-void transfernodes(struct mesh *m, struct behavior *b, REAL *pointlist, REAL *pointattriblist, int *pointmarkerlist, int numberofpoints, int numberofpointattribs);
-void formskeleton(struct mesh *m, struct behavior *b, int *segmentlist, int *segmentmarkerlist, int numberofsegments);
-void highorder(struct mesh *m, struct behavior *b);
-void numbernodes(struct mesh *m, struct behavior *b);
-void writeelements(struct mesh *m, struct behavior *b, int **trianglelist, REAL **triangleattriblist);
-void writepoly(struct mesh *m, struct behavior *b, int **segmentlist, int **segmentmarkerlist);
-void writeedges(struct mesh *m, struct behavior *b, int **edgelist, int **edgemarkerlist);
-void statistics(struct mesh *m, struct behavior *b);
-void writenodes(struct mesh *m, struct behavior *b, REAL **pointlist, REAL **pointattriblist, int **pointmarkerlist);
-void checkmesh(struct mesh *m, struct behavior *b);
-void checkdelaunay(struct mesh *m, struct behavior *b);
-void writeneighbors(struct mesh *m, struct behavior *b, int **neighborlist);
-void writevoronoi(struct mesh *m, struct behavior *b, REAL **vpointlist, REAL **vpointattriblist, int **vpointmarkerlist, int **vedgelist, int **vedgemarkerlist, REAL **vnormlist);
-int reconstruct(struct mesh *m, struct behavior *b, int *trianglelist, REAL *triangleattriblist, REAL *trianglearealist, int elements, int corners, int attribs, int *segmentlist, int *segmentmarkerlist, int numberofsegments);
-subseg *subsegtraverse(struct mesh *m);
-void regionplague(struct mesh *m, struct behavior *b, REAL attribute, REAL area);
-void plague(struct mesh *m, struct behavior *b);
-void poolinit(struct memorypool *pool, int bytecount, int itemcount, int firstitemcount, int alignment);
-void pooldeinit(struct memorypool *pool);
+    // Function prototypes from triangle.c
+    void parsecommandline(int argc, char **argv, struct behavior *b);
+    void transfernodes(struct mesh *m, struct behavior *b, REAL *pointlist, REAL *pointattriblist, int *pointmarkerlist, int numberofpoints, int numberofpointattribs);
+    void formskeleton(struct mesh *m, struct behavior *b, int *segmentlist, int *segmentmarkerlist, int numberofsegments);
+    void highorder(struct mesh *m, struct behavior *b);
+    void numbernodes(struct mesh *m, struct behavior *b);
+    void writeelements(struct mesh *m, struct behavior *b, int **trianglelist, REAL **triangleattriblist);
+    void writepoly(struct mesh *m, struct behavior *b, int **segmentlist, int **segmentmarkerlist);
+    void writeedges(struct mesh *m, struct behavior *b, int **edgelist, int **edgemarkerlist);
+    void statistics(struct mesh *m, struct behavior *b);
+    void writenodes(struct mesh *m, struct behavior *b, REAL **pointlist, REAL **pointattriblist, int **pointmarkerlist);
+    void checkmesh(struct mesh *m, struct behavior *b);
+    void checkdelaunay(struct mesh *m, struct behavior *b);
+    void writeneighbors(struct mesh *m, struct behavior *b, int **neighborlist);
+    void writevoronoi(struct mesh *m, struct behavior *b, REAL **vpointlist, REAL **vpointattriblist, int **vpointmarkerlist, int **vedgelist, int **vedgemarkerlist, REAL **vnormlist);
+    int reconstruct(struct mesh *m, struct behavior *b, int *trianglelist, REAL *triangleattriblist, REAL *trianglearealist, int elements, int corners, int attribs, int *segmentlist, int *segmentmarkerlist, int numberofsegments);
+    subseg *subsegtraverse(struct mesh *m);
+    void regionplague(struct mesh *m, struct behavior *b, REAL attribute, REAL area);
+    void plague(struct mesh *m, struct behavior *b);
+    void poolinit(struct memorypool *pool, int bytecount, int itemcount, int firstitemcount, int alignment);
+    void pooldeinit(struct memorypool *pool);
 
-// Macros from triangle.c
+    // Macros from triangle.c
  #define setelemattribute(otri, attnum, value)                                 \
     ( ( REAL * ) ( otri ).tri ) [ m->elemattribindex + ( attnum ) ] = value
  #define elemattribute(otri, attnum)                                           \
@@ -97,264 +97,264 @@ void pooldeinit(struct memorypool *pool);
 
  #define VIRUSPERBLOCK 1020  /* Number of virus triangles allocated at once. */
 
-// This customized version carves holes defined by the regions.
-// It'll remove any element which doesn't receive any region.
-int custom_carveholes(struct mesh *m, struct behavior *b, const int *outside, const int *inside)
-{
-    struct otri neighbortri;
-    struct otri triangleloop;
-    struct osub subsegloop;
-    triangle **temptri;
-    triangle ptr;                         /* Temporary variable used by sym(). */
-    double area;
-    double attribute;
-    double triangle_attribute;
-    int sane_mesh;
+    // This customized version carves holes defined by the regions.
+    // It'll remove any element which doesn't receive any region.
+    int custom_carveholes(struct mesh *m, struct behavior *b, const int *outside, const int *inside)
+    {
+        struct otri neighbortri;
+        struct otri triangleloop;
+        struct osub subsegloop;
+        triangle **temptri;
+        triangle ptr;                     /* Temporary variable used by sym(). */
+        double area;
+        double attribute;
+        double triangle_attribute;
+        int sane_mesh;
 
-    poolinit(& m->viri, sizeof( triangle * ), VIRUSPERBLOCK, VIRUSPERBLOCK, 0);
+        poolinit(& m->viri, sizeof( triangle * ), VIRUSPERBLOCK, VIRUSPERBLOCK, 0);
 
-    /* Assigns every triangle a regional attribute of -1 */
-    traversalinit(& m->triangles);
-    triangleloop.orient = 0;
-    triangleloop.tri = triangletraverse(m);
-    while ( triangleloop.tri != ( triangle * ) NULL ) {
-        setelemattribute(triangleloop, m->eextras, -1.0);
+        /* Assigns every triangle a regional attribute of -1 */
+        traversalinit(& m->triangles);
+        triangleloop.orient = 0;
         triangleloop.tri = triangletraverse(m);
-    }
+        while ( triangleloop.tri != ( triangle * ) NULL ) {
+            setelemattribute(triangleloop, m->eextras, -1.0);
+            triangleloop.tri = triangletraverse(m);
+        }
 
-    sane_mesh = 1;
+        sane_mesh = 1;
 
-    /* Loop over all segments */
-    traversalinit(& m->subsegs);
-    subsegloop.ss = subsegtraverse(m);
-    subsegloop.ssorient = 0;
-    while ( subsegloop.ss != ( subseg * ) NULL ) {
-        if ( subsegloop.ss != m->dummysub ) {
-            /* First neighbor. */
-            ssymself(subsegloop);
-            stpivot(subsegloop, neighbortri);
-            if ( neighbortri.tri != m->dummytri ) {
-                area = 0.0; /// @todo Possible set this as the minimum as well.
-                attribute = outside [ mark(subsegloop) - 1 ];
-                triangle_attribute = elemattribute(neighbortri, m->eextras);
+        /* Loop over all segments */
+        traversalinit(& m->subsegs);
+        subsegloop.ss = subsegtraverse(m);
+        subsegloop.ssorient = 0;
+        while ( subsegloop.ss != ( subseg * ) NULL ) {
+            if ( subsegloop.ss != m->dummysub ) {
+                /* First neighbor. */
+                ssymself(subsegloop);
+                stpivot(subsegloop, neighbortri);
+                if ( neighbortri.tri != m->dummytri ) {
+                    area = 0.0; /// @todo Possible set this as the minimum as well.
+                    attribute = outside [ mark(subsegloop) - 1 ];
+                    triangle_attribute = elemattribute(neighbortri, m->eextras);
 
-                /* The region no number yet. */
-                if ( triangle_attribute < 0 && attribute >= 0 ) {
-                    infect(neighbortri);
-                    temptri = ( triangle ** ) poolalloc(& m->viri);
-                    * temptri = neighbortri.tri;
-                    /* Apply one region's attribute and/or area constraint. */
-                    regionplague(m, b, attribute, area);
-                    /* The virus pool should be empty now. */
-                } else if ( attribute >= 0 && triangle_attribute >= 0 && attribute != triangle_attribute ) {
-                    /* Check for problems. */
-                    vertex v1, v2, v3;
-                    org(neighbortri, v1);
-                    dest(neighbortri, v2);
-                    apex(neighbortri, v3);
-                    fprintf(stdout, "Error: inconsistent region information (new %d, old %d from %d) (outside) at (%e, %e)\n",
-                            ( int ) attribute, ( int ) triangle_attribute, ( int ) mark(subsegloop), ( v1 [ 0 ] + v2 [ 0 ] + v3 [ 0 ] ) / 3, ( v1 [ 1 ] + v2 [ 1 ] + v3 [ 1 ] ) / 3);
+                    /* The region no number yet. */
+                    if ( triangle_attribute < 0 && attribute >= 0 ) {
+                        infect(neighbortri);
+                        temptri = ( triangle ** ) poolalloc(& m->viri);
+                        * temptri = neighbortri.tri;
+                        /* Apply one region's attribute and/or area constraint. */
+                        regionplague(m, b, attribute, area);
+                        /* The virus pool should be empty now. */
+                    } else if ( attribute >= 0 && triangle_attribute >= 0 && attribute != triangle_attribute ) {
+                        /* Check for problems. */
+                        vertex v1, v2, v3;
+                        org(neighbortri, v1);
+                        dest(neighbortri, v2);
+                        apex(neighbortri, v3);
+                        fprintf(stdout, "Error: inconsistent region information (new %d, old %d from %d) (outside) at (%e, %e)\n",
+                                ( int ) attribute, ( int ) triangle_attribute, ( int ) mark(subsegloop), ( v1 [ 0 ] + v2 [ 0 ] + v3 [ 0 ] ) / 3, ( v1 [ 1 ] + v2 [ 1 ] + v3 [ 1 ] ) / 3);
+                        sane_mesh = 0;
+                    }
+                }
+
+                /* Second neighbor (same procedure). */
+                ssymself(subsegloop);
+                stpivot(subsegloop, neighbortri);
+                if ( neighbortri.tri != m->dummytri ) {
+                    area = 0.0;
+                    attribute = inside [ mark(subsegloop) - 1 ];
+                    triangle_attribute = elemattribute(neighbortri, m->eextras);
+
+                    if ( triangle_attribute < 0 && attribute >= 0 ) {
+                        infect(neighbortri);
+                        temptri = ( triangle ** ) poolalloc(& m->viri);
+                        * temptri = neighbortri.tri;
+                        regionplague(m, b, attribute, area);
+                    } else if ( attribute >= 0 && triangle_attribute >= 0 && attribute != triangle_attribute ) {
+                        vertex v1, v2, v3;
+                        org(neighbortri, v1);
+                        dest(neighbortri, v2);
+                        apex(neighbortri, v3);
+                        fprintf(stdout, "Error: inconsistent region information (new %d, old %d from %d) (inside) at (%e, %e)\n",
+                                ( int ) attribute, ( int ) triangle_attribute, ( int ) mark(subsegloop), ( v1 [ 0 ] + v2 [ 0 ] + v3 [ 0 ] ) / 3, ( v1 [ 1 ] + v2 [ 1 ] + v3 [ 1 ] ) / 3);
+                        sane_mesh = 0;
+                    }
+                }
+
+                subsegloop.ss = subsegtraverse(m);
+            }
+        }
+
+        /* Remove all triangles with marker 0.0 */
+        traversalinit(& m->triangles);
+        triangleloop.tri = triangletraverse(m);
+        int triangle_number = 0;
+        while ( triangleloop.tri != ( triangle * ) NULL ) {
+            if ( triangleloop.tri != m->dummytri ) {
+                triangle_number++;
+                attribute = elemattribute(triangleloop, m->eextras);
+                if ( attribute == -1.0 ) {
+                    fprintf(stderr, "Broken mesh at triangle %d\n", triangle_number);
                     sane_mesh = 0;
+                } else if ( attribute == 0.0 ) {
+                    infect(triangleloop);
+                    temptri = ( triangle ** ) poolalloc(& m->viri);
+                    * temptri = triangleloop.tri;
                 }
             }
-
-            /* Second neighbor (same procedure). */
-            ssymself(subsegloop);
-            stpivot(subsegloop, neighbortri);
-            if ( neighbortri.tri != m->dummytri ) {
-                area = 0.0;
-                attribute = inside [ mark(subsegloop) - 1 ];
-                triangle_attribute = elemattribute(neighbortri, m->eextras);
-
-                if ( triangle_attribute < 0 && attribute >= 0 ) {
-                    infect(neighbortri);
-                    temptri = ( triangle ** ) poolalloc(& m->viri);
-                    * temptri = neighbortri.tri;
-                    regionplague(m, b, attribute, area);
-                } else if ( attribute >= 0 && triangle_attribute >= 0 && attribute != triangle_attribute ) {
-                    vertex v1, v2, v3;
-                    org(neighbortri, v1);
-                    dest(neighbortri, v2);
-                    apex(neighbortri, v3);
-                    fprintf(stdout, "Error: inconsistent region information (new %d, old %d from %d) (inside) at (%e, %e)\n",
-                            ( int ) attribute, ( int ) triangle_attribute, ( int ) mark(subsegloop), ( v1 [ 0 ] + v2 [ 0 ] + v3 [ 0 ] ) / 3, ( v1 [ 1 ] + v2 [ 1 ] + v3 [ 1 ] ) / 3);
-                    sane_mesh = 0;
-                }
-            }
-
-            subsegloop.ss = subsegtraverse(m);
+            triangleloop.tri = triangletraverse(m);
         }
-    }
+        /* Remove the marked elements */
+        plague(m, b);
 
-    /* Remove all triangles with marker 0.0 */
-    traversalinit(& m->triangles);
-    triangleloop.tri = triangletraverse(m);
-    int triangle_number = 0;
-    while ( triangleloop.tri != ( triangle * ) NULL ) {
-        if ( triangleloop.tri != m->dummytri ) {
-            triangle_number++;
-            attribute = elemattribute(triangleloop, m->eextras);
-            if ( attribute == -1.0 ) {
-                fprintf(stderr, "Broken mesh at triangle %d\n", triangle_number);
-                sane_mesh = 0;
-            } else if ( attribute == 0.0 ) {
-                infect(triangleloop);
-                temptri = ( triangle ** ) poolalloc(& m->viri);
-                * temptri = triangleloop.tri;
-            }
+        if ( b->regionattrib && !b->refine ) {
+            /* Note the fact that each triangle has an additional attribute. */
+            m->eextras++;
         }
-        triangleloop.tri = triangletraverse(m);
-    }
-    /* Remove the marked elements */
-    plague(m, b);
 
-    if ( b->regionattrib && !b->refine ) {
-        /* Note the fact that each triangle has an additional attribute. */
-        m->eextras++;
+        /* Free up memory. */
+        pooldeinit(& m->viri);
+
+        return sane_mesh;
     }
 
-    /* Free up memory. */
-    pooldeinit(& m->viri);
-
-    return sane_mesh;
-}
-
-// Customized triangulation call.
-void custom_triangulate(char *triswitches, struct triangulateio *in, struct triangulateio *out, struct triangulateio *vorout, const int *outside, const int *inside)
-{
-    struct mesh m;
-    struct behavior b;
-    //REAL *holearray;
-    //REAL *regionarray;
-    triangleinit(& m);
-    parsecommandline(1, & triswitches, & b);
-    //b.verbose=2;
-    m.steinerleft = b.steiner;
-    transfernodes(& m, & b, in->pointlist, in->pointattributelist,
-                  in->pointmarkerlist, in->numberofpoints,
-                  in->numberofpointattributes);
-    if ( b.refine ) {
-        m.hullsize = reconstruct(& m, & b, in->trianglelist,
-                                 in->triangleattributelist, in->trianglearealist,
-                                 in->numberoftriangles, in->numberofcorners,
-                                 in->numberoftriangleattributes,
-                                 in->segmentlist, in->segmentmarkerlist,
-                                 in->numberofsegments);
-    } else {
-        m.hullsize = delaunay(& m, & b);
-    }
-    m.infvertex1 = ( vertex ) NULL;
-    m.infvertex2 = ( vertex ) NULL;
-    m.infvertex3 = ( vertex ) NULL;
-    if ( b.usesegments ) {
-        m.checksegments = 1;
-        if ( !b.refine ) {
-            formskeleton(& m, & b, in->segmentlist,
-                         in->segmentmarkerlist, in->numberofsegments);
-        }
-    }
- #if 0
-    struct osub subsegloop;
-    traversalinit(& m.subsegs);
-    subsegloop.ss = subsegtraverse(& m);
-    subsegloop.ssorient = 0;
-    while ( subsegloop.ss != ( subseg * ) NULL ) {
-        if ( subsegloop.ss != m.dummysub ) {
-            REAL *p1, *p2;
-            sorg(subsegloop, p1);
-            sdest(subsegloop, p2);
-            printf("  Connected (%f,%f) to (%f,%f)\n", p1 [ 0 ], p1 [ 1 ], p2 [ 0 ], p2 [ 1 ]);
-            subsegloop.ss = subsegtraverse(& m);
-        }
-    }
- #endif
-    if ( b.poly && ( m.triangles.items > 0 ) ) {
-        //holearray = in->holelist;
-        m.holes = in->numberofholes;
-        //regionarray = in->regionlist;
-        m.regions = in->numberofregions;
-        if ( !b.refine ) {
-            /* Only increase quality if the regions are properly defined. */
-            int sane = custom_carveholes(& m, & b, outside, inside);
-            b.quality *= sane;
-            if ( sane == 0 ) {
-                printf("Probably bad PSLG\n");
-                exit(-1);
-            }
-        }
-    } else {
-        m.holes = 0;
-        m.regions = 0;
-    }
-    if ( b.quality && ( m.triangles.items > 0 ) ) {
-        enforcequality(& m, & b);
-    }
-    m.edges = ( 3l * m.triangles.items + m.hullsize ) / 2l;
-    if ( b.order > 1 ) {
-        highorder(& m, & b);
-    }
-    if ( !b.quiet ) {
-        printf("\n");
-    }
-    if ( b.jettison ) {
-        out->numberofpoints = m.vertices.items - m.undeads;
-    } else {
-        out->numberofpoints = m.vertices.items;
-    }
-    out->numberofpointattributes = m.nextras;
-    out->numberoftriangles = m.triangles.items;
-    out->numberofcorners = ( b.order + 1 ) * ( b.order + 2 ) / 2;
-    out->numberoftriangleattributes = m.eextras;
-    out->numberofedges = m.edges;
-    if ( b.usesegments ) {
-        out->numberofsegments = m.subsegs.items;
-    } else {
-        out->numberofsegments = m.hullsize;
-    }
-    if ( vorout != ( struct triangulateio * ) NULL ) {
-        vorout->numberofpoints = m.triangles.items;
-        vorout->numberofpointattributes = m.nextras;
-        vorout->numberofedges = m.edges;
-    }
-    if ( b.nonodewritten || ( b.noiterationnum && m.readnodefile ) ) {
-        if ( !b.quiet ) {
-            printf("NOT writing vertices.\n");
-        }
-        numbernodes(& m, & b);
-    } else {
-        writenodes(& m, & b, & out->pointlist, & out->pointattributelist,
-                   & out->pointmarkerlist);
-    }
-
-    // Simp. always write the triangles.
-    writeelements(& m, & b, & out->trianglelist, & out->triangleattributelist);
-
-    if ( b.poly || b.convex ) {
-        writepoly(& m, & b, & out->segmentlist, & out->segmentmarkerlist);
-        out->numberofholes = m.holes;
-        out->numberofregions = m.regions;
-        if ( b.poly ) {
-            out->holelist = in->holelist;
-            out->regionlist = in->regionlist;
+    // Customized triangulation call.
+    void custom_triangulate(char *triswitches, struct triangulateio *in, struct triangulateio *out, struct triangulateio *vorout, const int *outside, const int *inside)
+    {
+        struct mesh m;
+        struct behavior b;
+        //REAL *holearray;
+        //REAL *regionarray;
+        triangleinit(& m);
+        parsecommandline(1, & triswitches, & b);
+        //b.verbose=2;
+        m.steinerleft = b.steiner;
+        transfernodes(& m, & b, in->pointlist, in->pointattributelist,
+                      in->pointmarkerlist, in->numberofpoints,
+                      in->numberofpointattributes);
+        if ( b.refine ) {
+            m.hullsize = reconstruct(& m, & b, in->trianglelist,
+                                     in->triangleattributelist, in->trianglearealist,
+                                     in->numberoftriangles, in->numberofcorners,
+                                     in->numberoftriangleattributes,
+                                     in->segmentlist, in->segmentmarkerlist,
+                                     in->numberofsegments);
         } else {
-            out->holelist = ( REAL * ) NULL;
-            out->regionlist = ( REAL * ) NULL;
+            m.hullsize = delaunay(& m, & b);
         }
+        m.infvertex1 = ( vertex ) NULL;
+        m.infvertex2 = ( vertex ) NULL;
+        m.infvertex3 = ( vertex ) NULL;
+        if ( b.usesegments ) {
+            m.checksegments = 1;
+            if ( !b.refine ) {
+                formskeleton(& m, & b, in->segmentlist,
+                             in->segmentmarkerlist, in->numberofsegments);
+            }
+        }
+ #if 0
+        struct osub subsegloop;
+        traversalinit(& m.subsegs);
+        subsegloop.ss = subsegtraverse(& m);
+        subsegloop.ssorient = 0;
+        while ( subsegloop.ss != ( subseg * ) NULL ) {
+            if ( subsegloop.ss != m.dummysub ) {
+                REAL *p1, *p2;
+                sorg(subsegloop, p1);
+                sdest(subsegloop, p2);
+                printf("  Connected (%f,%f) to (%f,%f)\n", p1 [ 0 ], p1 [ 1 ], p2 [ 0 ], p2 [ 1 ]);
+                subsegloop.ss = subsegtraverse(& m);
+            }
+        }
+ #endif
+        if ( b.poly && ( m.triangles.items > 0 ) ) {
+            //holearray = in->holelist;
+            m.holes = in->numberofholes;
+            //regionarray = in->regionlist;
+            m.regions = in->numberofregions;
+            if ( !b.refine ) {
+                /* Only increase quality if the regions are properly defined. */
+                int sane = custom_carveholes(& m, & b, outside, inside);
+                b.quality *= sane;
+                if ( sane == 0 ) {
+                    printf("Probably bad PSLG\n");
+                    exit(-1);
+                }
+            }
+        } else {
+            m.holes = 0;
+            m.regions = 0;
+        }
+        if ( b.quality && ( m.triangles.items > 0 ) ) {
+            enforcequality(& m, & b);
+        }
+        m.edges = ( 3l * m.triangles.items + m.hullsize ) / 2l;
+        if ( b.order > 1 ) {
+            highorder(& m, & b);
+        }
+        if ( !b.quiet ) {
+            printf("\n");
+        }
+        if ( b.jettison ) {
+            out->numberofpoints = m.vertices.items - m.undeads;
+        } else {
+            out->numberofpoints = m.vertices.items;
+        }
+        out->numberofpointattributes = m.nextras;
+        out->numberoftriangles = m.triangles.items;
+        out->numberofcorners = ( b.order + 1 ) * ( b.order + 2 ) / 2;
+        out->numberoftriangleattributes = m.eextras;
+        out->numberofedges = m.edges;
+        if ( b.usesegments ) {
+            out->numberofsegments = m.subsegs.items;
+        } else {
+            out->numberofsegments = m.hullsize;
+        }
+        if ( vorout != ( struct triangulateio * ) NULL ) {
+            vorout->numberofpoints = m.triangles.items;
+            vorout->numberofpointattributes = m.nextras;
+            vorout->numberofedges = m.edges;
+        }
+        if ( b.nonodewritten || ( b.noiterationnum && m.readnodefile ) ) {
+            if ( !b.quiet ) {
+                printf("NOT writing vertices.\n");
+            }
+            numbernodes(& m, & b);
+        } else {
+            writenodes(& m, & b, & out->pointlist, & out->pointattributelist,
+                       & out->pointmarkerlist);
+        }
+
+        // Simp. always write the triangles.
+        writeelements(& m, & b, & out->trianglelist, & out->triangleattributelist);
+
+        if ( b.poly || b.convex ) {
+            writepoly(& m, & b, & out->segmentlist, & out->segmentmarkerlist);
+            out->numberofholes = m.holes;
+            out->numberofregions = m.regions;
+            if ( b.poly ) {
+                out->holelist = in->holelist;
+                out->regionlist = in->regionlist;
+            } else {
+                out->holelist = ( REAL * ) NULL;
+                out->regionlist = ( REAL * ) NULL;
+            }
+        }
+        if ( b.edgesout ) {
+            writeedges(& m, & b, & out->edgelist, & out->edgemarkerlist);
+        }
+        // Simp. no voronoi
+        if ( b.neighbors ) {
+            writeneighbors(& m, & b, & out->neighborlist);
+        }
+        // Simp. No statistics.
+        if ( b.docheck ) {
+            checkmesh(& m, & b);
+            checkdelaunay(& m, & b);
+        }
+        triangledeinit(& m, & b);
     }
-    if ( b.edgesout ) {
-        writeedges(& m, & b, & out->edgelist, & out->edgemarkerlist);
-    }
-    // Simp. no voronoi
-    if ( b.neighbors ) {
-        writeneighbors(& m, & b, & out->neighborlist);
-    }
-    // Simp. No statistics.
-    if ( b.docheck ) {
-        checkmesh(& m, & b);
-        checkdelaunay(& m, & b);
-    }
-    triangledeinit(& m, & b);
-}
 }
 
 // Convenience function.
@@ -482,8 +482,8 @@ bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
             int a, b, c;
             std :: set< std :: size_t >tris = node_triangle [ segment.at(1) - 1 ];
             // Now look up any triangle with the other point included.
-            for ( std :: set< std :: size_t > :: iterator it = tris.begin(); it != tris.end(); ++it ) {
-                IntArray &triangle = triangles [ * it ];
+            for ( auto tri: tris ) {
+                IntArray &triangle = triangles [ tri ];
                 if ( ( b = triangle.findFirstIndexOf( segment.at(2) ) ) > 0 ) {
                     a = triangle.findFirstIndexOf( segment.at(1) );
                     if ( a + b == 3 ) {
@@ -530,7 +530,7 @@ bool TriangleMesherInterface :: meshPSLG(const Triangle_PSLG &pslg,
     //free(output.holelist);
     //free(output.regionlist);
 #else
-    OOFEM_ERROR("TriangleMesherInterface :: meshPSLG - OOFEM is not compiled with support for triangle.");
+    OOFEM_ERROR("OOFEM is not compiled with support for triangle.");
 #endif
 
     return true;

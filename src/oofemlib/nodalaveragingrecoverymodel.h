@@ -65,16 +65,18 @@ protected:
 
 public:
     /// Constructor.
-    NodalAveragingRecoveryModel(Domain *d);
+    NodalAveragingRecoveryModel(Domain * d);
     /// Destructor.
     ~NodalAveragingRecoveryModel();
 
-    int recoverValues(InternalStateType type, TimeStep *tStep);
+    int recoverValues(Set elementSet, InternalStateType type, TimeStep *tStep);
+
+    virtual const char *giveClassName() const { return "NodalAveragingRecoveryModel"; }
 
 private:
 #ifdef __PARALLEL_MODE
     void initCommMaps();
-    void exchangeDofManValues(int ireg, FloatArray &lhs, IntArray &, IntArray &, int);
+    void exchangeDofManValues(FloatArray &lhs, IntArray &, IntArray &, int);
     int  packSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
     int  unpackSharedDofManData(parallelStruct *s, ProcessCommunicator &processComm);
 #endif
@@ -100,15 +102,6 @@ public:
      */
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep) = 0;
-    /**
-     * Computes the element value in given side.
-     * @param answer Contains the result.
-     * @param side Element side number.
-     * @param type Determines the type of internal variable to be recovered.
-     * @param tStep Time step.
-     */
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep) = 0;
     //@}
 };
 } // end namespace oofem

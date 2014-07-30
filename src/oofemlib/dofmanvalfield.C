@@ -44,10 +44,7 @@ DofManValueField :: DofManValueField(FieldType ft, Domain *d) : Field(ft), dmanv
 {
     int ndofman = d->giveNumberOfDofManagers();
     this->domain = d;
-    this->dmanvallist.growTo(ndofman);
-    for ( int i = 1; i <= ndofman; i++ ) {
-        this->dmanvallist.put(i, new FloatArray);
-    }
+    this->dmanvallist.resize(ndofman);
 }
 
 int
@@ -68,7 +65,7 @@ DofManValueField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueMode
                 // loop over element nodes
                 for ( int i = 1; i <= n.giveSize(); i++ ) {
                     // multiply nodal value by value of corresponding shape function and add this to answer
-                    answer.add( n.at(i), * this->dmanvallist.at( elem->giveDofManagerNumber(i) ) );
+                    answer.add( n.at(i), this->dmanvallist[elem->giveDofManagerNumber(i)-1] );
                 }
             } else { // mapping from global to local coordinates failed
                 result = 1; // failed
@@ -85,14 +82,14 @@ DofManValueField :: evaluateAt(FloatArray &answer, FloatArray &coords, ValueMode
 int
 DofManValueField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep)
 {
-    answer = * this->dmanvallist.at( dman->giveNumber() );
+    answer = this->dmanvallist[dman->giveNumber()-1];
     return 1;
 }
 
 void
-DofManValueField :: setDofManValue(int dofMan, const FloatArray &value)
+DofManValueField :: setDofManValue(int dofMan, FloatArray value)
 {
-    ( * this->dmanvallist.at(dofMan) ) = value;
+    this->dmanvallist[dofMan-1] = std :: move(value);
 }
 
 contextIOResultType

@@ -80,7 +80,7 @@ public:
      * @param n Load  number.
      * @param d Domain to which new object will belongs.
      */
-    NodalLoad(int n, Domain *d) : Load(n, d) { }
+    NodalLoad(int n, Domain * d) : Load(n, d) { }
 
     virtual const char *giveInputRecordName() const { return _IFT_NodalLoad_Name; }
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)

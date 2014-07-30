@@ -68,11 +68,11 @@ BoundaryCondition *MasterDof :: giveBc()
     if ( bc ) {
         GeneralBoundaryCondition *bcptr = dofManager->giveDomain()->giveBc(bc);
         if ( bcptr->giveType() == DirichletBT ) {
-            return static_cast< BoundaryCondition * >( bcptr );
+            return static_cast< BoundaryCondition * >(bcptr);
         }
     }
 
-    _error2("Incompatible BC (%d) applied as Dirichlet/Primary BC", bc);
+    OOFEM_ERROR("Incompatible BC (%d) applied as Dirichlet/Primary BC", bc);
     return NULL;
 }
 
@@ -85,7 +85,7 @@ int MasterDof :: __giveEquationNumber() const
 
 {
     //if (!equationNumber)
-    //  _error ("giveEquationNumber : Dof has undefined equationNumber");
+    //  OOFEM_ERROR("Dof has undefined equationNumber");
     return ( equationNumber > 0 ) ? equationNumber : 0;
 }
 
@@ -96,7 +96,7 @@ int MasterDof :: __givePrescribedEquationNumber()
 // or equationNumber >0.
 {
     //if (!equationNumber)
-    //  _error ("giveEquationNumber: Dof has undefined equationNumber");
+    //  OOFEM_ERROR("Dof has undefined equationNumber");
     return ( equationNumber < 0 ) ? -1 * equationNumber : 0;
 }
 
@@ -132,7 +132,7 @@ InitialCondition *MasterDof :: giveIc()
     if ( ic ) {
         return  ( dofManager->giveDomain()->giveIc(ic) );
     } else {
-        OOFEM_ERROR("MasterDof :: giveIc() - does not know yet if has InitCond or not");
+        OOFEM_ERROR("does not know yet if has InitCond or not");
         return NULL;
     }
 }
@@ -149,7 +149,7 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
 
 #ifdef DEBUG
     //if (type != this->giveUnknownType ())
-    // _error ("giveUnknown: Noncompatible Request");
+    // OOFEM_ERROR("Noncompatible Request");
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -186,7 +186,7 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
     //         if ( unknowns->includes(hash) ) {
     //             return unknowns->at(hash);
     //         } else {
-    //             _error2( "giveUnknown:  Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode) );
+    //             OOFEM_ERROR(Dof unknowns dictionary does not contain unknown of value mode (%s)", __ValueModeTypeToString(mode));
     //         }
     //  }
 
@@ -196,7 +196,7 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
     }
 
     return ( dofManager->giveDomain()->giveEngngModel()->
-             giveUnknownComponent(mode, tStep, dofManager->giveDomain(), this) );
+            giveUnknownComponent(mode, tStep, dofManager->giveDomain(), this) );
 }
 
 double MasterDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep)
@@ -250,7 +250,7 @@ bool MasterDof :: hasBc(TimeStep *tStep)
 #endif
 
     if ( bc == -1 ) {
-        OOFEM_ERROR("MasterDof :: hasBc() - does not know yet if has InitCond or not");
+        OOFEM_ERROR("does not know yet if has InitCond or not");
     }
 
     if ( bc ) {
@@ -266,7 +266,7 @@ bool MasterDof :: hasIc()
 // else returns False.
 {
     if ( ic == -1 ) {
-        OOFEM_ERROR("MasterDof :: hasIc - does not know yet if has InitCond or not");
+        OOFEM_ERROR("does not know yet if has InitCond or not");
     }
 
     return ic > 0;
@@ -339,7 +339,7 @@ contextIOResultType MasterDof :: saveContext(DataStream *stream, ContextMode mod
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        _error("saveContex : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     if ( ( iores = Dof :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -379,7 +379,7 @@ contextIOResultType MasterDof :: restoreContext(DataStream *stream, ContextMode 
 {
     contextIOResultType iores;
     if ( stream == NULL ) {
-        _error("restoreContex : can't write into NULL stream");
+        OOFEM_ERROR("can't write into NULL stream");
     }
 
     if ( ( iores = Dof :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

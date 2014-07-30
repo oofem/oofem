@@ -33,9 +33,12 @@
  */
 
 #include "datastream.h"
-#include "processcomm.h"
-#include "combuff.h"
 #include "error.h"
+
+#ifdef __PARALLEL_MODE
+ #include "processcomm.h"
+ #include "combuff.h"
+#endif
 
 namespace oofem
 {

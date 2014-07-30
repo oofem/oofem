@@ -88,7 +88,7 @@ protected:
 
 public:
     /// Constructor
-    DruckerPragerPlasticitySMStatus(int n, Domain *d, GaussPoint *gp);
+    DruckerPragerPlasticitySMStatus(int n, Domain * d, GaussPoint * gp);
 
     /// Destructor
     virtual ~DruckerPragerPlasticitySMStatus();
@@ -147,7 +147,7 @@ public:
      * Get the temp value of the plastic strain deviator from the material status.
      * @param answer Temp value of plastic strain deviator.
      */
-    void giveTempPlasticStrainDeviator(StrainVector &answer) const { answer = tempPlasticStrainDeviator; }
+    const StrainVector &giveTempPlasticStrainDeviator() const { return tempPlasticStrainDeviator; }
     /**
      * Get the temp value of the volumetric strain deviator from the material status.
      * @return Temp value of volumetric plastic strain
@@ -240,7 +240,7 @@ protected:
 
 public:
     /// Constructor
-    DruckerPragerPlasticitySM(int n, Domain *d);
+    DruckerPragerPlasticitySM(int n, Domain * d);
     /// Destructor
     virtual ~DruckerPragerPlasticitySM();
 

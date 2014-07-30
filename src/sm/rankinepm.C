@@ -58,7 +58,6 @@ RankinePlasticMaterial :: ~RankinePlasticMaterial()
 IRResultType
 RankinePlasticMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     MPlasticMaterial :: initializeFrom(ir);
@@ -107,7 +106,7 @@ RankinePlasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer,
                                                         const FloatArray &strainSpaceHardeningVariables,
                                                         TimeStep *tStep)
 {
-    answer.resize(0, 0);
+    answer.clear();
 }
 
 void
@@ -115,7 +114,7 @@ RankinePlasticMaterial :: computeStressSpaceHardeningVarsReducedGradient(FloatAr
                                                                          const FloatArray &stressVector,
                                                                          const FloatArray &stressSpaceHardeningVars)
 {
-    answer.resize(0);
+    answer.clear();
 }
 
 
@@ -125,7 +124,7 @@ RankinePlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int 
                                                        const FloatArray &stressVector,
                                                        const FloatArray &stressSpaceHardeningVars)
 {
-    answer.resize(0, 0);
+    answer.clear();
 }
 
 
@@ -133,7 +132,7 @@ void
 RankinePlasticMaterial :: computeStressSpaceHardeningVars(FloatArray &answer, GaussPoint *gp,
                                                           const FloatArray &strainSpaceHardeningVariables)
 {
-    answer.resize(0);
+    answer.clear();
 }
 
 

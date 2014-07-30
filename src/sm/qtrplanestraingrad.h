@@ -35,18 +35,19 @@
 #ifndef qtrplanestraingrad_h
 #define qtrplanestraingrad_h
 
-#include "structuralelement.h"
-#include "gaussintegrationrule.h"
-#include "graddpelement.h"
 #include "qtrplanestrain.h"
+#include "graddpelement.h"
 
 namespace oofem {
+class FEI2dTrLin;
+
 class QTrPlaneStrainGrad : public QTrPlaneStrain, public GradDpElement
 {
 protected:
+    static FEI2dTrLin interpolation_lin;
 
 public:
-    QTrPlaneStrainGrad(int n, Domain *d);
+    QTrPlaneStrainGrad(int n, Domain * d);
     virtual ~QTrPlaneStrainGrad() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -62,7 +63,7 @@ protected:
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) { GradDpElement :: computeForceLoadVector(answer, tStep, mode); }
     virtual int computeNumberOfDofs() { return 15; }
     virtual void computeGaussPoints();
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual StructuralElement *giveStructuralElement() { return this; }
     virtual NLStructuralElement *giveNLStructuralElement() { return this; }
 };

@@ -46,7 +46,6 @@
 #include "integrationpointstatus.h"
 #include "element.h"
 #include "materialmode.h"
-#include "tdictionary.h"
 
 namespace oofem {
 class Material;
@@ -98,9 +97,11 @@ private:
     /// Reference to parent integration rule.
     IntegrationRule *irule;
     /// Natural Element Coordinates of receiver.
-    FloatArray *coordinates;
+    FloatArray *naturalCoordinates;
     /// Optional local sub-patch (sub-patches form element volume) coordinates of the receiver.
-    FloatArray *localCoordinates;
+    FloatArray *subPatchCoordinates;
+    /// Optional global (Cartesian) coordinates
+    FloatArray *globalCoordinates;
     /// Integration weight.
     double weight;
     /// Material mode of receiver.
@@ -108,12 +109,9 @@ private:
 
 protected:
     // layer and fibered material support
-    /// Number of slaves.
-    int numberOfGp;
     /// List of slave integration points.
-    GaussPoint **gaussPointArray;
-    //Disctionary of managed MaterialStatuses
-    //TDictionary<int,IntegrationPointStatus> statusDict;
+    std::vector< GaussPoint * >gaussPoints;
+    /// Status of e.g. material in point
     IntegrationPointStatus *materialStatus;
 
 public:
@@ -122,24 +120,66 @@ public:
      * with given number, integration weight, coordinates and material mode.
      * @param ir Integration rule to which integration point belongs to.
      * @param n Integration point number.
-     * @param a Coordinates.
+     * @param iNaturalCoord Natueral coordinates.
      * @param w Integration weight.
      * @param mode Material mode.
      */
-    GaussPoint(IntegrationRule *ir, int n, FloatArray *a, double w, MaterialMode mode);
+    GaussPoint(IntegrationRule * ir, int n, FloatArray * iNaturalCoord, double w, MaterialMode mode);
+
+    GaussPoint(IntegrationRule * ir, int n, double w, MaterialMode mode);
+
     /// Destructor
     virtual ~GaussPoint();
 
     /// Returns i-th natural element coordinate of receiver
-    double giveCoordinate(int i) { return coordinates->at(i); }
+    double giveNaturalCoordinate(int i) const { return naturalCoordinates->at(i); }
     /// Returns coordinate array of receiver.
-    FloatArray *giveCoordinates() { return coordinates; }
-    void setCoordinates(const FloatArray &c) { * coordinates = c; }
+    FloatArray *giveNaturalCoordinates() { return naturalCoordinates; }
+    void setNaturalCoordinates(FloatArray c) {
+        if(naturalCoordinates != NULL) {
+            * naturalCoordinates = std :: move(c);
+        }
+        else {
+            naturalCoordinates = new FloatArray( std :: move(c) );
+        }
+    }
 
     /// Returns local sub-patch coordinates of the receiver
-    FloatArray *giveLocalCoordinates() { if ( localCoordinates ) { return localCoordinates; } else { return coordinates; } }
-    void setLocalCoordinates(const FloatArray &c)
-    { if ( localCoordinates ) { * localCoordinates = c; } else { localCoordinates = new FloatArray(c); } }
+    FloatArray *giveSubPatchCoordinates() {
+        if ( subPatchCoordinates ) {
+            return subPatchCoordinates;
+        } else {
+            return naturalCoordinates;
+        }
+    }
+    void setSubPatchCoordinates(FloatArray c)
+    {
+        if ( subPatchCoordinates ) {
+            * subPatchCoordinates = std :: move(c);
+        } else {
+            subPatchCoordinates = new FloatArray(std :: move(c));
+        }
+    }
+
+    inline const FloatArray &giveGlobalCoordinates() {
+        if( globalCoordinates != NULL ) {
+            return *globalCoordinates;
+        }
+        else {
+            globalCoordinates = new FloatArray();
+            this->giveElement()->computeGlobalCoordinates(*globalCoordinates, *naturalCoordinates);
+            return *globalCoordinates;
+        }
+    }
+
+    void setGlobalCoordinates(const FloatArray &iCoord) {
+        if( globalCoordinates != NULL ) {
+            *globalCoordinates = iCoord;
+        }
+        else {
+            globalCoordinates = new FloatArray(iCoord);
+        }
+    }
 
     /// Returns  integration weight of receiver.
     virtual double giveWeight() { return weight; }
@@ -187,7 +227,7 @@ public:
     IntegrationPointStatus *setMaterialStatus(IntegrationPointStatus *ptr)
     {
         if ( this->materialStatus != NULL ) {
-            OOFEM_ERROR(" MaterialStatus :: setMaterialStatus status already exist");
+            OOFEM_ERROR("status already exist");
         }
         this->materialStatus = ptr;
         return ptr;

@@ -55,7 +55,7 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
     theta = this->giveTimeFunction()->evaluate(tStep, mode);
 
     if ( axis.giveSize() != 3 ) {
-        OOFEM_ERROR("RotatingBoundary :: give - Size of rotation axis != 3.");
+        OOFEM_ERROR("Size of rotation axis != 3.");
     }
 
     if ( center.giveSize() == 0 ) {
@@ -64,7 +64,7 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
     }
 
     if ( coords == NULL || coords->giveSize() != center.giveSize() ) {
-        OOFEM_ERROR("RotatingBoundary :: give - Size of coordinate system different from center of rotation.");
+        OOFEM_ERROR("Size of coordinate system different from center of rotation.");
     }
 
     double &nx = axis.at(1);
@@ -96,7 +96,7 @@ double RotatingBoundary :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
         R.at(3, 2) = nz * ny * ( 1 - cos(theta) ) + nx *sin(theta);
         R.at(3, 3) = cos(theta) + nz * nz * ( 1 - cos(theta) );
     } else {
-        OOFEM_ERROR("RotatingBoundary :: give - Size of coordinate system has to be 1, 2 or 3.");
+        OOFEM_ERROR("Size of coordinate system has to be 1, 2 or 3.");
     }
 
     newcoords.subtract(center);
@@ -125,7 +125,6 @@ RotatingBoundary :: initializeFrom(InputRecord *ir)
 // Sets up the dictionary where the receiver stores the conditions it
 // imposes.
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     GeneralBoundaryCondition :: initializeFrom(ir);

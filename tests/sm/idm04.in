@@ -1,6 +1,7 @@
 idm04.out
 Test of damage law with linear softening on a 1D truss element, fracturing strain
-NonLinearStatic nsteps 12 rtolv 0.0001 MaxIter 20 stiffMode 1 controlmode 0 psi 0.0 renumber 0 hpcmode 1 hpc 2 2 1 stepLength 0.05 minsteplength 0.05 nmodules 0
+NonLinearStatic nsteps 12 rtolv 0.0001 MaxIter 20 stiffMode 1 controlmode 0 psi 0.0 renumber 0 hpcmode 1 hpc 2 2 1 stepLength 0.05 minsteplength 0.05 nmodules 1
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 1
 domain 1dtruss
 OutputManager tstep_all dofman_all element_all
@@ -18,10 +19,10 @@ ConstantFunction 1 f(t) 1.0
 ### Used for Extractor
 ###
 #%BEGIN_CHECK% tolerance 1.e-4
-#NODE tStep 10 number 2 dof 1 unknown d value 5.50000000e-01
-#LOADLEVEL tStep 7  value 2.857143e+01
-#LOADLEVEL tStep 8  value 2.142857e+01
-#LOADLEVEL tStep 9  value 1.428571e+01
-#LOADLEVEL tStep 10 value 7.142857e+00
-#LOADLEVEL tStep 11 value 0.000000e+00
+#NODE tStep 11 number 2 dof 1 unknown d value 5.50000000e-01
+#LOADLEVEL tStep 8  value 2.857143e+01
+#LOADLEVEL tStep 9  value 2.142857e+01
+#LOADLEVEL tStep 10 value 1.428571e+01
+#LOADLEVEL tStep 11 value 7.142857e+00
+#LOADLEVEL tStep 12 value 0.000000e+00
 #%END_CHECK%

@@ -83,15 +83,15 @@ public:
     virtual MaterialMode giveMaterialMode() { return _PlaneStressRot; }
 
     virtual int computeNumberOfDofs() { return 9; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) { return 0.; }
 
-    FloatArray *GivePitch();
-    FloatArray *GiveDerivativeUX(GaussPoint *gp);
-    FloatArray *GiveDerivativeVX(GaussPoint *gp);
-    FloatArray *GiveDerivativeUY(GaussPoint *gp);
-    FloatArray *GiveDerivativeVY(GaussPoint *gp);
+    FloatArray GivePitch();
+    FloatArray GiveDerivativeUX(GaussPoint *gp);
+    FloatArray GiveDerivativeVX(GaussPoint *gp);
+    FloatArray GiveDerivativeUY(GaussPoint *gp);
+    FloatArray GiveDerivativeVY(GaussPoint *gp);
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }

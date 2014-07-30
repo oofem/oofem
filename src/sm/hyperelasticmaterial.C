@@ -41,7 +41,7 @@ namespace oofem {
 REGISTER_Material(HyperElasticMaterial);
 
 HyperElasticMaterial :: HyperElasticMaterial(int n, Domain *d) : StructuralMaterial(n, d)
-{}
+{ }
 
 
 void
@@ -155,7 +155,6 @@ HyperElasticMaterial :: CreateStatus(GaussPoint *gp) const
 IRResultType
 HyperElasticMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
 
@@ -177,7 +176,7 @@ HyperElasticMaterialStatus :: HyperElasticMaterialStatus(int n, Domain *d, Gauss
 
 
 HyperElasticMaterialStatus :: ~HyperElasticMaterialStatus()
-{}
+{ }
 
 
 void

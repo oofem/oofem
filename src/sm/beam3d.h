@@ -64,7 +64,7 @@ protected:
     IntArray *dofsToCondense;
 
 public:
-    Beam3d(int n, Domain *d);
+    Beam3d(int n, Domain * d);
     virtual ~Beam3d();
 
     virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL);
@@ -84,8 +84,10 @@ public:
     //int hasLayeredSupport () {return 1;}
 
     virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
+
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
@@ -104,6 +106,7 @@ public:
     ///@todo Introduce interpolator and remove these two:
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
+    virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);

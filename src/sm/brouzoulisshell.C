@@ -102,7 +102,7 @@ BrouzoulisShell :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseM
 double
 BrouzoulisShell :: computeVolumeAround(GaussPoint *gp)
 {
-    double determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double determinant = fabs(this->interpolation.giveTransformationJacobian(*gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this)));
     double weight      = gp->giveWeight();
     return ( determinant * weight );
 }
@@ -112,9 +112,10 @@ void
 BrouzoulisShell :: computeGaussPoints()
 // Sets up the array containing the Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    if ( integrationRulesArray.size() == 0 ) {
+        int numberOfIntegrationRules = 1;
+        //integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+        integrationRulesArray.rend(numberOfIntegrationRules);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
         numberOfGaussPoints = 1;
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);

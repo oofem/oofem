@@ -36,8 +36,9 @@
 #define parallelcontext_h
 
 #include "oofemcfg.h"
-#include "parallelordering.h"
-#include "equationid.h"
+#ifdef __PARALLEL_MODE
+ #include "parallelordering.h"
+#endif
 
 namespace oofem {
 class EngngModel;
@@ -55,15 +56,17 @@ class OOFEM_EXPORT ParallelContext
 protected:
     int di;
     EngngModel *emodel;
+#ifdef __PARALLEL_MODE
     Natural2GlobalOrdering n2g;
     Natural2LocalOrdering n2l;
+#endif
 
 public:
     /**
      * Creates a context belonging to a system of equations in a given engineering model.
      * @param e Engineering model to work with.
      */
-    ParallelContext(EngngModel *e);
+    ParallelContext(EngngModel * e);
     ~ParallelContext();
 
     /**
@@ -105,10 +108,10 @@ public:
     void accumulate(const FloatArray &local, FloatArray &global);
     //@}
 
- #ifdef __PARALLEL_MODE
+#ifdef __PARALLEL_MODE
     Natural2GlobalOrdering *giveN2Gmap() { return & n2g; }
     Natural2LocalOrdering *giveN2Lmap() { return & n2l; }
- #endif
+#endif
 };
 } // end namespace oofem
 

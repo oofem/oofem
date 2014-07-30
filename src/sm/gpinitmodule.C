@@ -49,11 +49,11 @@ namespace oofem {
 REGISTER_InitModule(GPInitModule)
 
 GPInitModule :: GPInitModule(int n, EngngModel *e) : InitModule(n, e)
-{}
+{ }
 
 
 GPInitModule :: ~GPInitModule()
-{}
+{ }
 
 
 IRResultType
@@ -67,10 +67,8 @@ GPInitModule :: initializeFrom(InputRecord *ir)
 void
 GPInitModule :: doInit()
 {
-    int ielem, igp, nelem, ie, ig, nv, iv, nc, ic, varsize, vt;
+    int ielem, nelem, ie, ig, nv, iv, nc, ic, varsize, vt;
     InternalStateType vartype;
-    Element *elem;
-    GaussPoint *gp;
     FloatArray value;
 
     double coords [ 3 ];
@@ -80,47 +78,46 @@ GPInitModule :: doInit()
 
     // loop over elements
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        elem = d->giveElement(ielem);
+        Element *elem = d->giveElement(ielem);
         Material *mat = elem->giveMaterial();
         IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
         // loop over Gauss points
-        for ( igp = 0; igp < iRule->giveNumberOfIntegrationPoints(); igp++ ) {
-            gp = iRule->getIntegrationPoint(igp);
+        for ( GaussPoint *gp: *iRule ) {
             MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
             if ( fscanf(initStream, "%d %d", & ie, & ig) != 2 ) {
-                OOFEM_ERROR("GPInitModule :: doInit: initStream reading error");
+                OOFEM_ERROR("initStream reading error");
             }
 
             // check whether the element and GP number agree
             assert(ielem == ie);
-            assert( ( igp + 1 ) == ig );
+            assert( gp->giveNumber() == ig );
             // read coordinates
             if ( fscanf(initStream, "%d", & nc) != 1 ) {
-                OOFEM_ERROR("GPInitModule :: doInit: initStream reading error");
+                OOFEM_ERROR("initStream reading error");
             }
 
             assert(nc >= 0 && nc <= 3);
             for ( ic = 0; ic < nc; ic++ ) {
                 if ( fscanf(initStream, "%lg", & coords [ ic ]) != 1 ) {
-                    OOFEM_ERROR("GPInitModule :: doInit: initStream reading error");
+                    OOFEM_ERROR("initStream reading error");
                 }
             }
 
             if ( fscanf(initStream, "%d", & nv) != 1 ) {
-                OOFEM_ERROR("GPInitModule :: doInit: initStream reading error");
+                OOFEM_ERROR("initStream reading error");
             }
 
             assert(nv >= 0);
             for ( iv = 1; iv <= nv; iv++ ) {
                 if ( fscanf(initStream, "%d %d", & vt, & varsize) != 2 ) {
-                    OOFEM_ERROR("GPInitModule :: doInit: initStream reading error");
+                    OOFEM_ERROR("initStream reading error");
                 }
 
                 vartype = ( InternalStateType ) vt;
                 value.resize(varsize);
                 for ( ic = 1; ic <= varsize; ic++ ) {
                     if ( fscanf( initStream, "%lg", & value.at(ic) ) != 1 ) {
-                        OOFEM_ERROR("GPInitModule :: doInit: initStream reading error");
+                        OOFEM_ERROR("initStream reading error");
                     }
                 }
 

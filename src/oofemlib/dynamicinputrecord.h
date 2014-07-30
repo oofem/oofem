@@ -41,8 +41,14 @@
 #include <set>
 
 namespace oofem {
-
 class FEMComponent;
+class DynamicInputRecord;
+
+/// Helper function for creating a dynamic input record for a node
+DynamicInputRecord *CreateNodeIR(int i, InputFieldType nodeType, const FloatArray &coord);
+
+/// Helper function for creating elements (with optional cross-section number).
+DynamicInputRecord *CreateElementIR(int i, InputFieldType elementType, const IntArray &nodes, int cs = 0);
 
 /**
  * Class representing the a dynamic Input Record.
@@ -72,17 +78,17 @@ protected:
 
 public:
     /// Creates an empty input record.
-    DynamicInputRecord();
-    /// Creates an empty input record.
-    DynamicInputRecord(FEMComponent &femc); ///@todo Make FEMComponent const
+    DynamicInputRecord(std :: string answer = "", int value = 0);
+    /// Extracts input record from given component
+    DynamicInputRecord(FEMComponent & femc); ///@todo Make FEMComponent const
     /// Copy constructor.
     DynamicInputRecord(const DynamicInputRecord &);
     /// Destructor.
     virtual ~DynamicInputRecord();
     /// Assignment operator.
-    DynamicInputRecord &operator=(const DynamicInputRecord &);
+    DynamicInputRecord &operator = ( const DynamicInputRecord & );
 
-    virtual InputRecord *GiveCopy() { return new DynamicInputRecord(* this); }
+    virtual InputRecord *GiveCopy() { return new DynamicInputRecord(*this); }
     virtual void finish(bool wrn = true);
 
     virtual std :: string giveRecordAsString() const;
@@ -99,28 +105,30 @@ public:
     virtual IRResultType giveField(std :: vector< std :: string > &answer, InputFieldType id);
     virtual IRResultType giveField(Dictionary &answer, InputFieldType id);
     virtual IRResultType giveField(std :: list< Range > &answer, InputFieldType id);
-    virtual IRResultType giveField(ScalarFunction& function, InputFieldType id); 
+    virtual IRResultType giveField(ScalarFunction &function, InputFieldType id);
 
     virtual bool hasField(InputFieldType id);
     virtual void printYourself();
     // Setters, unique for the dynamic input record
-    virtual void setRecordKeywordField(const std :: string &keyword, int number);
-    virtual void setRecordKeywordNumber(int number);
-    virtual void setField(int item, InputFieldType id);
-    virtual void setField(double item, InputFieldType id);
-    virtual void setField(bool item, InputFieldType id);
-    virtual void setField(const std :: string &item, InputFieldType id);
-    virtual void setField(const FloatArray &item, InputFieldType id);
-    virtual void setField(const IntArray &item, InputFieldType id);
-    virtual void setField(const FloatMatrix &item, InputFieldType id);
-    virtual void setField(const std :: vector< std :: string > &item, InputFieldType id);
-    virtual void setField(const Dictionary &item, InputFieldType id);
-    virtual void setField(const std :: list< Range > &item, InputFieldType id);
-    virtual void setField(const ScalarFunction& function, InputFieldType id); 
+    void setRecordKeywordField(std :: string keyword, int number);
+    void setRecordKeywordNumber(int number);
+    void setField(int item, InputFieldType id);
+    void setField(double item, InputFieldType id);
+    void setField(bool item, InputFieldType id);
+    void setField(std :: string item, InputFieldType id);
+    void setField(FloatArray item, InputFieldType id);
+    void setField(std :: initializer_list< double > item, InputFieldType id);
+    void setField(IntArray item, InputFieldType id);
+    void setField(std :: initializer_list< int > item, InputFieldType id);
+    void setField(FloatMatrix item, InputFieldType id);
+    void setField(std :: vector< std :: string > item, InputFieldType id);
+    void setField(const Dictionary &item, InputFieldType id);
+    void setField(const std :: list< Range > &item, InputFieldType id);
+    void setField(const ScalarFunction &function, InputFieldType id);
     /// Sets an empty field with given id.
-    virtual void setField(InputFieldType id);
+    void setField(InputFieldType id);
     /// Removes given field from record.
-    virtual void unsetField(InputFieldType id);
+    void unsetField(InputFieldType id);
 
     virtual void report_error(const char *_class, const char *proc, InputFieldType id,
                               IRResultType result, const char *file, int line);

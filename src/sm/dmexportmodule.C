@@ -46,18 +46,17 @@ REGISTER_ExportModule(DofManExportModule)
 
 DofManExportModule :: DofManExportModule(int n, EngngModel *e) : ExportModule(n, e)
 {
-    this->dofManList.resize(0);
+    this->dofManList.clear();
 }
 
 
 DofManExportModule :: ~DofManExportModule()
-{}
+{ }
 
 
 IRResultType
 DofManExportModule :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
     // Read in dofMan's to export - defaults to all
@@ -81,16 +80,15 @@ DofManExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     DofManager *dm;
     double x, y, z, displacement;
-    Dof *dof;
     int domainIndex = 1;
     Domain *d  = emodel->giveDomain(domainIndex);
     FloatArray reactions;
 
 
-    IntArray dofManMap, dofMap, eqnMap;
-    StructuralEngngModel *strEngMod = dynamic_cast< StructuralEngngModel * >( emodel );
+    IntArray dofManMap, dofidMap, eqnMap;
+    StructuralEngngModel *strEngMod = dynamic_cast< StructuralEngngModel * >(emodel);
     if ( strEngMod ) {
-        strEngMod->buildReactionTable(dofManMap, dofMap, eqnMap, tStep, domainIndex);
+        strEngMod->buildReactionTable(dofManMap, dofidMap, eqnMap, tStep, domainIndex);
         strEngMod->computeReaction(reactions, tStep, 1);
     }
 
@@ -112,9 +110,7 @@ DofManExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         y = dm->giveCoordinate(2);
         z = dm->giveCoordinate(3);
         fprintf(stream, "%d %g %g %g ", dm->giveNumber(), x, y, z);
-        int ndofs = dm->giveNumberOfDofs();
-        for ( int idof = 1; idof <= ndofs; idof++ ) {
-            dof = dm->giveDof(idof);
+        for ( Dof *dof: *dm ) {
             displacement = dof->giveUnknown(VM_Total, tStep);
             fprintf(stream, " %g", displacement);
         }
@@ -153,7 +149,7 @@ DofManExportModule :: giveOutputStream(TimeStep *tStep)
 
     std :: string fileName = this->giveOutputBaseFileName(tStep) + ".dm";
     if ( ( answer = fopen(fileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR2( "DofManExportModule::giveOutputStream: failed to open file %s", fileName.c_str() );
+        OOFEM_ERROR("failed to open file %s", fileName.c_str() );
     }
 
     return answer;

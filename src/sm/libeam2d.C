@@ -38,6 +38,7 @@
 #include "crosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
+#include "structuralms.h"
 #include "floatmatrix.h"
 #include "intarray.h"
 #include "floatarray.h"
@@ -62,7 +63,7 @@ Interface *
 LIBeam2d :: giveInterface(InterfaceType interface)
 {
     if ( interface == LayeredCrossSectionInterfaceType ) {
-        return static_cast< LayeredCrossSectionInterface * >( this );
+        return static_cast< LayeredCrossSectionInterface * >(this);
     }
 
     return NULL;
@@ -76,7 +77,7 @@ LIBeam2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
     double l, ksi, n1x, n4x, n3xx, n6xx, n2xxx, n3xxx, n5xxx, n6xxx;
 
     l    = this->computeLength();
-    ksi  = gp->giveCoordinate(1);
+    ksi  = gp->giveNaturalCoordinate(1);
     n1x   = -1.0 / l;
     n4x   =  1.0 / l;
     n3xx  = -1.0 / l;
@@ -104,9 +105,8 @@ void
 LIBeam2d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
@@ -240,7 +240,7 @@ LIBeam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(2); // {Exx,GMzx}
@@ -250,10 +250,25 @@ LIBeam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 }
 
 
-void
-LIBeam2d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+int
+LIBeam2d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    answer.setValues(3, D_u, D_w, R_v);
+    if ( type == IST_BeamForceMomentumTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        return 1;
+    } else if ( type == IST_BeamStrainCurvatureTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        return 1;
+    } else {
+        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+    }
+}
+
+
+void
+LIBeam2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
+{
+    answer = {D_u, D_w, R_v};
 }
 
 
@@ -321,7 +336,7 @@ LIBeam2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 
@@ -334,7 +349,7 @@ LIBeam2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      */
 
     if ( iEdge != 1 ) {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 
     answer.resize(6);
@@ -351,7 +366,7 @@ double
 LIBeam2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
-        _error("computeEdgeVolumeAround: wrong egde number");
+        OOFEM_ERROR("wrong egde number");
     }
 
     double weight  = gp->giveWeight();
@@ -407,7 +422,7 @@ LIBeam2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
     //
     // i.e. f(element local) = T * f(edge local)
     //
-    answer.beEmptyMtrx();
+    answer.clear();
     return 0;
 }
 } // end namespace oofem

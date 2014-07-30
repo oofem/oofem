@@ -56,7 +56,7 @@ public:
     NLStructuralElement *giveElement() { return this; }; 
 
     virtual int computeNumberOfDofs() { return 24; }
-    virtual void giveDofManDofIDMask( int inode, EquationID EqID, IntArray &answer ) const;
+    virtual void giveDofManDofIDMask( int inode, IntArray &answer ) const;
     virtual void giveDofManDofIDMask_u( IntArray &answer );
     virtual void giveDofManDofIDMask_d( IntArray &answer );
 

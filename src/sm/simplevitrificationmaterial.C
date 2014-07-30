@@ -40,12 +40,11 @@
 namespace oofem {
 REGISTER_Material(SimpleVitrificationMaterial);
 
-SimpleVitrificationMaterial :: ~SimpleVitrificationMaterial() {}
+SimpleVitrificationMaterial :: ~SimpleVitrificationMaterial() { }
 
 
 IRResultType SimpleVitrificationMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";
     IRResultType result;
 
     StructuralMaterial :: initializeFrom(ir);
@@ -92,7 +91,7 @@ int SimpleVitrificationMaterial :: checkConsistency()
 
 
 void SimpleVitrificationMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
-                                                         MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
+                                                                  MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     double eksi, nxz, nyz, nxy, nzx, nzy, nyx;
     bool vitr = tStep->giveIntrinsicTime() < this->vitrTime;
@@ -126,12 +125,11 @@ void SimpleVitrificationMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &a
     answer.at(4, 4) = activeG.at(1);
     answer.at(5, 5) = activeG.at(2);
     answer.at(6, 6) = activeG.at(3);
-
 }
 
 
 void SimpleVitrificationMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
-                                                   const FloatArray &reducedStrain, TimeStep *tStep)
+                                                            const FloatArray &reducedStrain, TimeStep *tStep)
 {
     FloatArray strainVector;
     FloatMatrix d;
@@ -141,7 +139,7 @@ void SimpleVitrificationMaterial :: giveRealStressVector_3d(FloatArray &answer, 
 
     this->giveStressDependentPartOfStrainVector(strainVector, gp, reducedStrain, tStep, VM_Total);
 
-    deltaStrain.beDifferenceOf(strainVector, status->giveStrainVector());
+    deltaStrain.beDifferenceOf( strainVector, status->giveStrainVector() );
 
     this->give3dMaterialStiffnessMatrix(d, TangentStiffness, gp, tStep);
 
@@ -172,5 +170,4 @@ MaterialStatus *SimpleVitrificationMaterial :: CreateStatus(GaussPoint *gp) cons
 {
     return new StructuralMaterialStatus(1, domain, gp);
 }
-
 } // end namespace oofem

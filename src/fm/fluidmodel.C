@@ -57,12 +57,10 @@ FluidModel :: forceEquationNumbering(int id)
     // First velocity.
     for ( int i = 1; i <= nnodes; i++ ) {
         DofManager *dman = domain->giveDofManager(i);
-        int ndofs = dman->giveNumberOfDofs();
-        for ( int j = 1; j <= ndofs; j++ ) {
-            Dof *jDof = dman->giveDof(j);
-            DofIDItem type = jDof->giveDofID();
+        for ( Dof *dof: *dman ) {
+            DofIDItem type = dof->giveDofID();
             if ( type == V_u || type == V_v || type == V_w ) {
-                jDof->askNewEquationNumber(currStep);
+                dof->askNewEquationNumber(currStep);
             }
         }
     }
@@ -72,12 +70,10 @@ FluidModel :: forceEquationNumbering(int id)
         int innodes = elem->giveNumberOfInternalDofManagers();
         for ( int k = 1; k <= innodes; k++ ) {
             DofManager *dman = elem->giveInternalDofManager(k);
-            int ndofs = dman->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                Dof *jDof = dman->giveDof(j);
-                DofIDItem type = jDof->giveDofID();
+            for ( Dof *dof: *dman ) {
+                DofIDItem type = dof->giveDofID();
                 if ( type == V_u || type == V_v || type == V_w ) {
-                    jDof->askNewEquationNumber(currStep);
+                    dof->askNewEquationNumber(currStep);
                 }
             }
         }
@@ -88,12 +84,10 @@ FluidModel :: forceEquationNumbering(int id)
         int innodes = bc->giveNumberOfInternalDofManagers();
         for ( int k = 1; k <= innodes; k++ ) {
             DofManager *dman = bc->giveInternalDofManager(k);
-            int ndofs = dman->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                Dof *jDof = dman->giveDof(j);
-                DofIDItem type = jDof->giveDofID();
+            for ( Dof *dof: *dman ) {
+                DofIDItem type = dof->giveDofID();
                 if ( type == V_u || type == V_v || type == V_w ) {
-                    jDof->askNewEquationNumber(currStep);
+                    dof->askNewEquationNumber(currStep);
                 }
             }
         }
@@ -102,12 +96,10 @@ FluidModel :: forceEquationNumbering(int id)
     // Then the rest
     for ( int i = 1; i <= nnodes; i++ ) {
         DofManager *dman = domain->giveDofManager(i);
-        int ndofs = dman->giveNumberOfDofs();
-        for ( int j = 1; j <= ndofs; j++ ) {
-            Dof *jDof = dman->giveDof(j);
-            DofIDItem type = jDof->giveDofID();
+        for ( Dof *dof: *dman ) {
+            DofIDItem type = dof->giveDofID();
             if ( !( type == V_u || type == V_v || type == V_w ) ) {
-                jDof->askNewEquationNumber(currStep);
+                dof->askNewEquationNumber(currStep);
             }
         }
     }
@@ -117,12 +109,10 @@ FluidModel :: forceEquationNumbering(int id)
         int innodes = elem->giveNumberOfInternalDofManagers();
         for ( int k = 1; k <= innodes; k++ ) {
             DofManager *dman = elem->giveInternalDofManager(k);
-            int ndofs = dman->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                Dof *jDof = dman->giveDof(j);
-                DofIDItem type = jDof->giveDofID();
+            for ( Dof *dof: *dman ) {
+                DofIDItem type = dof->giveDofID();
                 if ( !( type == V_u || type == V_v || type == V_w ) ) {
-                    jDof->askNewEquationNumber(currStep);
+                    dof->askNewEquationNumber(currStep);
                 }
             }
         }
@@ -133,12 +123,10 @@ FluidModel :: forceEquationNumbering(int id)
         int innodes = bc->giveNumberOfInternalDofManagers();
         for ( int k = 1; k <= innodes; k++ ) {
             DofManager *dman = bc->giveInternalDofManager(k);
-            int ndofs = dman->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                Dof *jDof = dman->giveDof(j);
-                DofIDItem type = jDof->giveDofID();
+            for ( Dof *dof: *dman ) {
+                DofIDItem type = dof->giveDofID();
                 if ( !( type == V_u || type == V_v || type == V_w ) ) {
-                    jDof->askNewEquationNumber(currStep);
+                    dof->askNewEquationNumber(currStep);
                 }
             }
         }

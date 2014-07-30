@@ -38,14 +38,13 @@
 #include "oofemcfg.h"
 #include "spatiallocalizer.h"
 #include "floatarray.h"
-#include "alist.h"
 #include "intarray.h"
 
 #include <set>
 #include <list>
+#include <vector>
 
 namespace oofem {
-template< class T >class AList;
 class Domain;
 class Element;
 class TimeStep;
@@ -79,18 +78,18 @@ protected:
     int depth;
 
     /// Octant node list.
-    std :: list< int > *nodeList;
+    std :: list< int > nodeList;
     /// Element list, containing all elements having IP in cell.
-    std :: set< int > *elementIPList;
+    std :: set< int > elementIPList;
     /// Element list of all elements close to the cell.
-    AList< std :: list< int > >elementList;
+    std :: vector< std :: list< int > >elementList;
 
 public:
     enum BoundingBoxStatus { BBS_OutsideCell, BBS_InsideCell, BBS_ContainsCell };
     enum ChildStatus { CS_ChildFound, CS_NoChild };
 
     /// Constructor.
-    OctantRec(OctreeSpatialLocalizer *loc, OctantRec *parent, FloatArray &origin, double halfWidth);
+    OctantRec(OctreeSpatialLocalizer * loc, OctantRec * parent, FloatArray & origin, double halfWidth);
     /// Destructor.
     ~OctantRec();
 
@@ -100,7 +99,7 @@ public:
      * Gives the cell origin.
      * @param answer Cell origin.
      */
-    void giveOrigin(FloatArray &answer) { answer = this->origin; }
+    const FloatArray & giveOrigin() { return this->origin; }
     /// @return Half the cell width.
     double giveWidth() { return 2. * this->halfWidth; }
     /// @return Depth in the tree for this octant.
@@ -127,11 +126,11 @@ public:
     /// @return True if octant is terminal (no children).
     bool isTerminalOctant();
     /// @return Reference to node List.
-    std :: list< int > *giveNodeList();
+    std :: list< int > &giveNodeList();
     /// @return Reference to IPelement set.
-    std :: set< int > *giveIPElementList();
+    std :: set< int > &giveIPElementList();
     /// @return Reference to closeElement list.
-    std :: list< int > *giveElementList(int region);
+    std :: list< int > &giveElementList(int region);
 
     /**
      * Divide receiver further, creating corresponding children.
@@ -150,27 +149,28 @@ public:
      * Adds given element to cell list of elements having IP within this cell.
      * @param elementNum Element number to add.
      */
-    void addElementIP(int elementNum) { this->giveIPElementList()->insert(elementNum); }
+    void addElementIP(int elementNum) { this->giveIPElementList().insert(elementNum); }
     /**
      * Adds given element to cell list of elements having IP within this cell.
      * @param region Element region number (0 for global).
      * @param elementNum Element number to add.
      */
-    void addElement(int region, int elementNum) { this->giveElementList(region)->push_back(elementNum); }
+    void addElement(int region, int elementNum) { this->giveElementList(region).push_back(elementNum); }
     /**
      * Adds given Node to node list of nodes contained by receiver.
      * @param nodeNum Node number to add.
      */
-    void addNode(int nodeNum) { this->giveNodeList()->push_back(nodeNum); }
+    void addNode(int nodeNum) { this->giveNodeList().push_back(nodeNum); }
     /**
      * Clears and deletes the nodeList.
      */
     void deleteNodeList() {
-        if ( nodeList ) { delete nodeList; }
-        nodeList = NULL;
+        nodeList.clear();
     }
     /// Recursively prints structure.
     void printYourself();
+    /// Error printing helper.
+    std :: string errorInfo(const char *func) const { return std :: string("OctantRec") + func; }
 };
 
 
@@ -195,13 +195,17 @@ protected:
 
 public:
     /// Constructor
-    OctreeSpatialLocalizer(Domain *d) : SpatialLocalizer(d), octreeMask(3) {
+    OctreeSpatialLocalizer(Domain * d) : SpatialLocalizer(d), octreeMask(3) {
         rootCell = NULL;
         elementIPListsInitialized = false;
-        elementListsInitialized.resize(0);
+        elementListsInitialized.clear();
     }
     /// Destructor - deletes the octree tree
-    virtual ~OctreeSpatialLocalizer() { if ( rootCell ) { delete rootCell; } }
+    virtual ~OctreeSpatialLocalizer() {
+        if ( rootCell ) {
+            delete rootCell;
+        }
+    }
 
     /**
      * Returns the octreeMask value given by the index
@@ -217,9 +221,11 @@ public:
     virtual int init(bool force = false);
 
     virtual Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = NULL);
+    virtual Element *giveElementContainingPoint(const FloatArray &coords, const Set &eset);
     virtual Element *giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList = NULL);
     virtual Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords, int region);
     virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP = false);
+    virtual GaussPoint *giveClosestIP(const FloatArray &coords, Set &elemSet, bool iCohesiveZoneGP = false);
     virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius) { giveAllElementsWithIpWithinBox(elemSet, coords, radius, false); }
     virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius, bool iCohesiveZoneGP);
     virtual void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
@@ -319,15 +325,37 @@ protected:
                                    const FloatArray &coords,
                                    int region, double &dist, GaussPoint **answer, bool iCohesiveZoneGP);
     /**
+     * Returns closest IP to given point contained within given octree cell.
+     * @param currentCell Starting cell to search, all children will be searched too
+     * @param coords Point coordinates.
+     * @param elemSet set of considered elements.
+     * @param dist Threshold distance, only update answer param, if distance is smaller, distance is updated too.
+     * @param answer Pointer to IP, which has the smallest distance "distance" from given point.
+     */
+    void giveClosestIPWithinOctant(OctantRec *currentCell, //elementContainerType& visitedElems,
+                                   const FloatArray &coords,
+                                   Set &elemSet, double &dist, GaussPoint **answer, bool iCohesiveZoneGP);
+    /**
      * Returns the element containing given point.
      * The search is done only for given cell and its children, skipping the given child from search
      * @param cell Top level cell to search.
      * @param coords Point coordinates.
      * @param scannedChild Child pointer to exclude from search.
      * @param regionList Only elements within given regions are considered, if NULL all regions are considered.
+     * @note regions depreceted, use sets insteed
      */
     Element *giveElementContainingPoint(OctantRec *cell, const FloatArray &coords,
                                         OctantRec *scannedChild = NULL, const IntArray *regionList = NULL);
+    /**
+     * Returns the element containing given point.
+     * The search is done only for given cell and its children, skipping the given child from search
+     * @param cell Top level cell to search.
+     * @param coords Point coordinates.
+     * @param scannedChild Child pointer to exclude from search.
+     * @param elset Only elements in gibven set are considered, if NULL all regions are considered.
+     */
+    Element *giveElementContainingPoint(OctantRec *cell, const FloatArray &coords,
+                                        OctantRec *scannedChild = NULL, const Set *elset = NULL);
     /**
      * Returns the element close to given point as element which center is closest to the given point.
      * Only elements with IP in given cell are considered.

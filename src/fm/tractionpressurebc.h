@@ -52,7 +52,7 @@ public:
      * @param i Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    TractionPressureBC(int i, Domain *d) : BoundaryCondition(i, d) { }
+    TractionPressureBC(int i, Domain * d) : BoundaryCondition(i, d) { }
     /// Destructor.
     virtual ~TractionPressureBC() { }
 

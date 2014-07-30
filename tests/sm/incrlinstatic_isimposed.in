@@ -3,7 +3,8 @@ Test of proper handling of changes of static system during computation
 #
 # supported only by some engng. models
 #
-IncrLinearStatic endOfTimeOfInterest 5.0  prescribedTimes 5 1. 2. 3. 4. 5.
+IncrLinearStatic endOfTimeOfInterest 5.0  prescribedTimes 5 1. 2. 3. 4. 5. nmodules 1
+errorcheck
 domain 2dTruss
 OutputManager tstep_all dofman_all element_all
 ndofman 4 nelem 3 ncrosssect  1 nmat 1 nbc 6 nic 0 nltf 5
@@ -35,43 +36,43 @@ HeavisideLTF 5 origin 4.5 value 1.0
 ## check nodal values at the end of time interest
 ##
 ## step 1
-#NODE tStep 1. number 1 dof 1 unknown d value 0.0
-#NODE tStep 1. number 2 dof 1 unknown d value 4.0
-#NODE tStep 1. number 3 dof 1 unknown d value 8.0
-#NODE tStep 1. number 4 dof 1 unknown d value 12.0
-#ELEMENT tStep 1.  number 1 gp 1 keyword "stresses" component 1  value 1.0
-#ELEMENT tStep 1.  number 2 gp 1 keyword "stresses" component 1  value 1.0
-#ELEMENT tStep 1.  number 3 gp 1 keyword "stresses" component 1  value 1.0
+#NODE tStep 1 number 1 dof 1 unknown d value 0.0
+#NODE tStep 1 number 2 dof 1 unknown d value 4.0
+#NODE tStep 1 number 3 dof 1 unknown d value 8.0
+#NODE tStep 1 number 4 dof 1 unknown d value 12.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1  value 1.0
+#ELEMENT tStep 1 number 2 gp 1 keyword 1 component 1  value 1.0
+#ELEMENT tStep 1 number 3 gp 1 keyword 1 component 1  value 1.0
 ## step 2
-#NODE tStep 2. number 1 dof 1 unknown d value 0.0
-#NODE tStep 2. number 2 dof 1 unknown d value 4.0
-#NODE tStep 2. number 3 dof 1 unknown d value 8.0
-#NODE tStep 2. number 4 dof 1 unknown d value 16.0
-#ELEMENT tStep 2.  number 1 gp 1 keyword "stresses" component 1  value 1.0
-#ELEMENT tStep 2.  number 2 gp 1 keyword "stresses" component 1  value 1.0
-#ELEMENT tStep 2.  number 3 gp 1 keyword "stresses" component 1  value 2.0
+#NODE tStep 2 number 1 dof 1 unknown d value 0.0
+#NODE tStep 2 number 2 dof 1 unknown d value 4.0
+#NODE tStep 2 number 3 dof 1 unknown d value 8.0
+#NODE tStep 2 number 4 dof 1 unknown d value 16.0
+#ELEMENT tStep 2 number 1 gp 1 keyword 1 component 1  value 1.0
+#ELEMENT tStep 2 number 2 gp 1 keyword 1 component 1  value 1.0
+#ELEMENT tStep 2 number 3 gp 1 keyword 1 component 1  value 2.0
 ## step 3
-#NODE tStep 3. number 1 dof 1 unknown d value 0.0
-#NODE tStep 3. number 2 dof 1 unknown d value 8.0
-#NODE tStep 3. number 3 dof 1 unknown d value 16.0
-#NODE tStep 3. number 4 dof 1 unknown d value 24.0
-#ELEMENT tStep 3.  number 1 gp 1 keyword "stresses" component 1  value 2.0
-#ELEMENT tStep 3.  number 2 gp 1 keyword "stresses" component 1  value 2.0
-#ELEMENT tStep 3.  number 3 gp 1 keyword "stresses" component 1  value 2.0
+#NODE tStep 3 number 1 dof 1 unknown d value 0.0
+#NODE tStep 3 number 2 dof 1 unknown d value 8.0
+#NODE tStep 3 number 3 dof 1 unknown d value 16.0
+#NODE tStep 3 number 4 dof 1 unknown d value 24.0
+#ELEMENT tStep 3 number 1 gp 1 keyword 1 component 1  value 2.0
+#ELEMENT tStep 3 number 2 gp 1 keyword 1 component 1  value 2.0
+#ELEMENT tStep 3 number 3 gp 1 keyword 1 component 1  value 2.0
 ## step 4
-#NODE tStep 4. number 1 dof 1 unknown d value 0.0
-#NODE tStep 4. number 2 dof 1 unknown d value 9.0
-#NODE tStep 4. number 3 dof 1 unknown d value 17.0
-#NODE tStep 4. number 4 dof 1 unknown d value 25.0
-#ELEMENT tStep 4.  number 1 gp 1 keyword "stresses" component 1  value 2.25
-#ELEMENT tStep 4.  number 2 gp 1 keyword "stresses" component 1  value 2.0
-#ELEMENT tStep 4.  number 3 gp 1 keyword "stresses" component 1  value 2.0
+#NODE tStep 4 number 1 dof 1 unknown d value 0.0
+#NODE tStep 4 number 2 dof 1 unknown d value 9.0
+#NODE tStep 4 number 3 dof 1 unknown d value 17.0
+#NODE tStep 4 number 4 dof 1 unknown d value 25.0
+#ELEMENT tStep 4 number 1 gp 1 keyword 1 component 1  value 2.25
+#ELEMENT tStep 4 number 2 gp 1 keyword 1 component 1  value 2.0
+#ELEMENT tStep 4 number 3 gp 1 keyword 1 component 1  value 2.0
 ## step 5
-#NODE tStep 5. number 1 dof 1 unknown d value 0.0
-#NODE tStep 5. number 2 dof 1 unknown d value 9.0
-#NODE tStep 5. number 3 dof 1 unknown d value 13.0
-#NODE tStep 5. number 4 dof 1 unknown d value 17.0
-#ELEMENT tStep 5.  number 1 gp 1 keyword "stresses" component 1  value 2.25
-#ELEMENT tStep 5.  number 2 gp 1 keyword "stresses" component 1  value 1.0
-#ELEMENT tStep 5.  number 3 gp 1 keyword "stresses" component 1  value 1.0
+#NODE tStep 5 number 1 dof 1 unknown d value 0.0
+#NODE tStep 5 number 2 dof 1 unknown d value 9.0
+#NODE tStep 5 number 3 dof 1 unknown d value 13.0
+#NODE tStep 5 number 4 dof 1 unknown d value 17.0
+#ELEMENT tStep 5 number 1 gp 1 keyword 1 component 1  value 2.25
+#ELEMENT tStep 5 number 2 gp 1 keyword 1 component 1  value 1.0
+#ELEMENT tStep 5 number 3 gp 1 keyword 1 component 1  value 1.0
 #%END_CHECK%

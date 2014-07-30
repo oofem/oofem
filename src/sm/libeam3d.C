@@ -38,11 +38,16 @@
 #include "crosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
+#include "structuralms.h"
 #include "floatmatrix.h"
 #include "intarray.h"
 #include "floatarray.h"
 #include "mathfem.h"
 #include "classfactory.h"
+
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
+#endif
 
 namespace oofem {
 REGISTER_Element(LIBeam3d);
@@ -64,7 +69,7 @@ LIBeam3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
     double l, ksi, n1, n2, n1x, n2x;
 
     l     = this->computeLength();
-    ksi   = gp->giveCoordinate(1);
+    ksi   = gp->giveNaturalCoordinate(1);
 
     answer.resize(6, 12);
     answer.zero();
@@ -102,9 +107,8 @@ void
 LIBeam3d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
@@ -209,10 +213,27 @@ LIBeam3d :: computeVolumeAround(GaussPoint *gp)
 }
 
 
-void
-LIBeam3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+int
+LIBeam3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    answer.setValues(6, D_u, D_v, D_w, R_u, R_v, R_w);
+    ///@todo This should be a common inheritance for all 3d beams (and a similar one for 2D beams) 
+    /// to support all the sensible moment/force tensors. 
+    if ( type == IST_BeamForceMomentumTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        return 1;
+    } else if ( type == IST_BeamStrainCurvatureTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        return 1;
+    } else {
+        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+    }
+}
+
+
+void
+LIBeam3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
+{
+    answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
 
 
@@ -264,18 +285,17 @@ LIBeam3d :: computeLength()
 IRResultType
 LIBeam3d :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, referenceNode, _IFT_LIBeam3d_refnode);
     if ( referenceNode == 0 ) {
-        _error("instanciateFrom: wrong reference node specified");
+        OOFEM_ERROR("wrong reference node specified");
     }
 
     //  if (this->hasString (initString, "dofstocondense")) {
     //    dofsToCondense = this->ReadIntArray (initString, "dofstocondense");
     //    if (dofsToCondense->giveSize() >= 12)
-    //      _error ("instanciateFrom: wrong input data for condensed dofs");
+    //      OOFEM_ERROR("wrong input data for condensed dofs");
     //  } else {
     //    dofsToCondense = NULL;
     //  }
@@ -301,7 +321,7 @@ LIBeam3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 
@@ -313,7 +333,7 @@ LIBeam3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      * to global element dofs
      */
     if ( iEdge != 1 ) {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 
 
@@ -327,7 +347,7 @@ double
 LIBeam3d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
-        _error("computeEdgeVolumeAround: wrong egde number");
+        OOFEM_ERROR("wrong egde number");
     }
 
     double weight  = gp->giveWeight();
@@ -372,7 +392,7 @@ LIBeam3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
     //
     // i.e. f(element local) = T * f(edge local)
     //
-    answer.beEmptyMtrx();
+    answer.clear();
     return 0;
 }
 
@@ -426,8 +446,8 @@ LIBeam3d :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &
 {
     double layerYCoord, layerZCoord;
 
-    layerZCoord = slaveGp->giveCoordinate(2);
-    layerYCoord = slaveGp->giveCoordinate(1);
+    layerZCoord = slaveGp->giveNaturalCoordinate(2);
+    layerYCoord = slaveGp->giveNaturalCoordinate(1);
 
     answer.resize(3); // {Exx,GMzx,GMxy}
 
@@ -440,7 +460,7 @@ Interface *
 LIBeam3d :: giveInterface(InterfaceType interface)
 {
     if ( interface == FiberedCrossSectionInterfaceType ) {
-        return static_cast< FiberedCrossSectionInterface * >( this );
+        return static_cast< FiberedCrossSectionInterface * >(this);
     }
 
     return NULL;

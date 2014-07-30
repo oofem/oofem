@@ -109,7 +109,7 @@ protected:
 
 public:
 
-    OrthotropicLinearElasticMaterial(int n, Domain *d) : LinearElasticMaterial(n, d)
+    OrthotropicLinearElasticMaterial(int n, Domain * d) : LinearElasticMaterial(n, d)
     {
         localCoordinateSystem = NULL;
         helpPlaneNormal = NULL;
@@ -117,9 +117,13 @@ public:
     }
     virtual ~OrthotropicLinearElasticMaterial()
     {
-        if ( localCoordinateSystem ) { delete localCoordinateSystem; }
+        if ( localCoordinateSystem ) {
+            delete localCoordinateSystem;
+        }
 
-        if ( helpPlaneNormal ) { delete helpPlaneNormal; }
+        if ( helpPlaneNormal ) {
+            delete helpPlaneNormal;
+        }
     }
 
     virtual void giveThermalDilatationVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);

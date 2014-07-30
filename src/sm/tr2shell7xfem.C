@@ -38,18 +38,17 @@
 #include "structuralms.h"
 #include "mathfem.h"
 #include "domain.h"
-#include "equationid.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "fei3dtrquad.h"
 #include "boundaryload.h"
 #include "classfactory.h"
-
 #include "tr2shell7.h"
-
-#include "patchintegrationrule.h"
-#include "XFEMDebugTools.h"
-#include "enrichmentdomain.h"
+#include "xfem/patchintegrationrule.h"
+#include "xfem/XFEMDebugTools.h"
+#include "xfem/enrichmentdomain.h"
+#include "xfem/enrichmentitems/crack.h"
+#include "xfem/enrichmentitems/shellcrack.h"
 #include <string>
 #include <sstream>
 
@@ -60,11 +59,13 @@ REGISTER_Element( Tr2Shell7XFEM );
 
 FEI3dTrQuad Tr2Shell7XFEM :: interpolation;
 
-IntArray Tr2Shell7XFEM :: ordering_all(42);
-IntArray Tr2Shell7XFEM :: ordering_gr(42);
-IntArray Tr2Shell7XFEM :: ordering_gr_edge(21);
-bool Tr2Shell7XFEM :: __initialized = Tr2Shell7XFEM :: initOrdering();
-
+IntArray Tr2Shell7XFEM :: ordering_all = {1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30, 31, 36, 37, 38,
+                        4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 32, 33, 34, 39, 40, 41,
+                        7, 14, 21, 28, 35, 42};
+IntArray Tr2Shell7XFEM :: ordering_gr {1, 2, 3, 19, 20, 21, 37, 4, 5, 6, 22, 23, 24, 38, 7, 8, 9, 25, 26, 27, 39,
+                       10, 11, 12, 28, 29, 30, 40, 13, 14, 15, 31, 32, 33, 41, 16, 17, 18,
+                       34, 35, 36, 42};
+IntArray Tr2Shell7XFEM :: ordering_gr_edge = {1, 2, 3, 10, 11, 12, 19, 4, 5, 6, 13, 14, 15, 20, 7, 8, 9, 16, 17, 18, 21};
 
 
 Tr2Shell7XFEM :: Tr2Shell7XFEM(int n, Domain *aDomain) : Shell7BaseXFEM(n, aDomain)
@@ -88,8 +89,8 @@ Tr2Shell7XFEM :: giveOrdering(SolutionField fieldType) const
 void 
 Tr2Shell7XFEM :: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords)
 {
-    nodeLocalXiCoords.setValues( 6, 1., 0., 0., .5, 0., .5); // corner nodes then midnodes, uncertain of node numbering
-    nodeLocalEtaCoords.setValues(6, 0., 1., 0., .5, .5, 0.);
+    nodeLocalXiCoords = {1., 0., 0., .5, 0., .5};  // corner nodes then midnodes, uncertain of node numbering
+    nodeLocalEtaCoords = {0., 1., 0., .5, .5, 0.};
 }
 
 
@@ -102,24 +103,24 @@ Tr2Shell7XFEM :: computeGaussPoints()
 
     this->xMan = this->giveDomain()->giveXfemManager();
 
-    if ( !integrationRulesArray ) {  
+    if ( integrationRulesArray.size() == 0 ) {  
         if( this->xMan->isElementEnriched(this) ) {
             //this->updateIntegrationRule();
             this->updateIntegrationRuleMultiCrack();
         }
     }
     
-    if ( !integrationRulesArray ) {
+    if ( integrationRulesArray.size() == 0 ) {
 
         int nPointsTri  = 6;   // points in the plane
         int nPointsEdge = 2;   // edge integration            
 
         // Cohesive zone
         for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
-            Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
+            //Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
             //if (dei) {
                 int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
-                czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
+                czIntegrationRulesArray.resize( numberOfInterfaces );
                 for ( int i = 0; i < numberOfInterfaces; i++ ) {
                     czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
                     czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
@@ -128,11 +129,11 @@ Tr2Shell7XFEM :: computeGaussPoints()
         }
 
         // Layered cross section for bulk integration
-        this->numberOfIntegrationRules = this->layeredCS->giveNumberOfLayers();
+        //this->numberOfIntegrationRules = this->layeredCS->giveNumberOfLayers();
         this->numberOfGaussPoints = this->layeredCS->giveNumberOfLayers()*nPointsTri*this->layeredCS->giveNumIntegrationPointsInLayer();
         this->layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
         
-        specialIntegrationRulesArray = new IntegrationRule * [ 3 ];
+        specialIntegrationRulesArray.resize(3);
 
         // Midplane (Mass matrix integrated analytically through the thickness)
         specialIntegrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
@@ -209,7 +210,8 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
             int numberOfLayers     = this->layeredCS->giveNumberOfLayers();
             int numPointsThickness = this->layeredCS->giveNumIntegrationPointsInLayer();
 
-            integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
+            //integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
+            integrationRulesArray.resize(numberOfLayers);
             for ( int i = 0; i < numberOfLayers; i++ ) {
                 integrationRulesArray [ i ] = new PatchIntegrationRule(1, this, this->allTri);
                 integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, numPointsThickness, _3dMat);             
@@ -223,9 +225,10 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
 
     // Cohesive zone
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
-        Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
+        //Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
             int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
-            czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
+            //czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
+            czIntegrationRulesArray.resize(numberOfInterfaces);
             for ( int i = 0; i < numberOfInterfaces; i++ ) {
                 czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
                 czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
@@ -253,7 +256,8 @@ bool Tr2Shell7XFEM :: updateIntegrationRuleMultiCrack()
         std :: vector< std :: vector< FloatArray > >pointPartitions;
 
 
-        integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
+        //integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
+        integrationRulesArray.resize(numberOfLayers);
         this->crackSubdivisions.resize(numberOfLayers);
         for ( int i = 0; i < numberOfLayers; i++ ) {
             double zMid_i = this->layeredCS->giveLayerMidZ(i+1); // global z-coord
@@ -296,7 +300,8 @@ bool Tr2Shell7XFEM :: updateIntegrationRuleMultiCrack()
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
         Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
             int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
-            czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
+            //czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
+            czIntegrationRulesArray.resize(numberOfInterfaces);
             for ( int i = 0; i < numberOfInterfaces; i++ ) {
                 czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
                 czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
@@ -317,15 +322,15 @@ Tr2Shell7XFEM :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      */
 
     if ( iEdge == 1 )        { // edge between nodes 1-4-2
-        answer.setValues(21, 1, 2, 3, 8, 9, 10, 22, 23, 24,  4, 5, 6, 11, 12, 13, 25, 26, 27,   7, 14, 28);
+        answer = {1, 2, 3, 8, 9, 10, 22, 23, 24,  4, 5, 6, 11, 12, 13, 25, 26, 27,   7, 14, 28};
 
     } else if ( iEdge == 2 ) { // edge between nodes 2-5-3
-        answer.setValues(21,   8, 9, 10, 15, 16, 17, 29, 30, 31,   11, 12, 13, 18, 19, 20, 32, 33, 34,   14, 21, 35 );
+        answer = {  8, 9, 10, 15, 16, 17, 29, 30, 31,   11, 12, 13, 18, 19, 20, 32, 33, 34,   14, 21, 35};
 
     } else if ( iEdge == 3 ) { // edge between nodes 3-6-1
-        answer.setValues(21,   15, 16, 17, 1, 2, 3, 36, 37, 38,   18, 19, 20, 4, 5, 6, 39, 40, 41,   21, 7, 42);
+        answer = {  15, 16, 17, 1, 2, 3, 36, 37, 38,   18, 19, 20, 4, 5, 6, 39, 40, 41,   21, 7, 42};
     } else {
-        _error("giveEdgeDofMapping: wrong edge number");
+        OOFEM_ERROR("wrong edge number");
     }
 }
 
@@ -348,15 +353,15 @@ Tr2Shell7XFEM :: computeAreaAround(GaussPoint *gp, double xi)
     FloatArray G1, G2, temp;
     FloatMatrix Gcov;
     FloatArray lCoords(3);
-    lCoords.at(1) = gp->giveCoordinate(1);
-    lCoords.at(2) = gp->giveCoordinate(2);
+    lCoords.at(1) = gp->giveNaturalCoordinate(1);
+    lCoords.at(2) = gp->giveNaturalCoordinate(2);
     lCoords.at(3) = xi;
     this->evalInitialCovarBaseVectorsAt(lCoords, Gcov);
     G1.beColumnOf(Gcov,1);
     G2.beColumnOf(Gcov,2);
     temp.beVectorProductOf(G1, G2);
     double detJ = temp.computeNorm();
-    return detJ * gp->giveWeight() ;
+    return detJ *gp->giveWeight();
 }
 
 
@@ -366,10 +371,10 @@ Tr2Shell7XFEM :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
     double detJ;
     FloatMatrix Gcov;
     FloatArray lcoords;
-    lcoords = *gp->giveCoordinates();
+    lcoords = * gp->giveNaturalCoordinates();
     this->evalInitialCovarBaseVectorsAt(lcoords, Gcov);
     detJ = Gcov.giveDeterminant() * 0.5 * this->layeredCS->giveLayerThickness(layer);
-    return detJ * gp->giveWeight();
+    return detJ *gp->giveWeight();
 }
 
 

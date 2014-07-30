@@ -61,7 +61,7 @@ class MicroMaterial;
 class MacroLSpace : public LSpace
 {
 public:
-    MacroLSpace(int n, Domain *d);
+    MacroLSpace(int n, Domain * d);
     virtual ~MacroLSpace();
 
     virtual const char *giveInputRecordName() const { return _IFT_MacroLSpace_Name; }
@@ -82,7 +82,7 @@ public:
      * @param coords Coordinates of nodes defining the interpolation geometry.
      * @param gcoords Global coordinates of point of interest.
      */
-    virtual void evalInterpolation(FloatArray &answer, const FloatArray **coords, const FloatArray &gcoords);
+    virtual void evalInterpolation(FloatArray &answer, const std::vector< FloatArray > &coords, const FloatArray &gcoords);
 
     virtual void updateYourself(TimeStep *tStep);
 

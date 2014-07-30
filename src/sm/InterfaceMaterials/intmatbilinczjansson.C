@@ -184,7 +184,7 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
 				if (1-c*Qn/sigf>0) {
 					xi = (sigf*gamma/Qt)*sqrt(1-c*Qn/sigf);
 				} else {
-					OOFEM_ERROR2("IntMatBilinearCZJansson :: giveFirstPKTraction_3d: Inconsistent cohesive model specification, 1-c*Qn/sigf =  %e", 1-c*Qn/sigf);
+                    OOFEM_ERROR("Inconsistent cohesive model specification, 1-c*Qn/sigf =  %e", 1 - c*Qn / sigf);
 				}
 			}
 
@@ -527,7 +527,7 @@ const double tolerance = 1.0e-12; // small number
 IRResultType
 IntMatBilinearCZJansson :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
+    //const char *__proc = "initializeFrom";  // Required by IR_GIVE_FIELD macro
     IRResultType result;                    // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, kn0, _IFT_IntMatBilinearCZJansson_kn);
@@ -557,15 +557,15 @@ int
 IntMatBilinearCZJansson :: checkConsistency()
 {
     if ( this->kn0 < 0.0 ) {
-        OOFEM_ERROR2("IntMatBilinearCZJansson :: initializeFrom - stiffness kn0 is negative (%.2e)", this->kn0);
+        OOFEM_ERROR("stiffness kn0 is negative (%.2e)", this->kn0);
     } else if ( this->ks0 < 0.0 ) {
-        OOFEM_ERROR2("IntMatBilinearCZJansson :: initializeFrom - stiffness ks0 is negative (%.2e)", this->ks0);
+        OOFEM_ERROR("stiffness ks0 is negative (%.2e)", this->ks0);
     } else if ( this->GIc < 0.0 ) {
-        OOFEM_ERROR2("IntMatBilinearCZJansson :: initializeFrom - GIc is negative (%.2e)", this->GIc);
+        OOFEM_ERROR("GIc is negative (%.2e)", this->GIc);
     } else if ( this->GIIc < 0.0 ) {
-        OOFEM_ERROR2("IntMatBilinearCZJansson :: initializeFrom - GIIc is negative (%.2e)", this->GIIc);
+        OOFEM_ERROR("GIIc is negative (%.2e)", this->GIIc);
     } else if ( this->gamma < 0.0  ) { 
-        OOFEM_ERROR2("IntMatBilinearCZJansson :: initializeFrom - gamma (%.2e) is below zero which is unphysical" ,
+        OOFEM_ERROR("gamma (%.2e) is below zero which is unphysical",
             this->gamma);
     }
     return 1;

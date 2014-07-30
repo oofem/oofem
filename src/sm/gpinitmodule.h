@@ -51,7 +51,7 @@ class GPInitModule : public InitModule
 {
 public:
     /// Creates empty GPInitModule.
-    GPInitModule(int n, EngngModel *e);
+    GPInitModule(int n, EngngModel * e);
 
     /// Destructor
     virtual ~GPInitModule();

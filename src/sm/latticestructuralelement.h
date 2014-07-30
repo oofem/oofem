@@ -54,7 +54,7 @@ namespace oofem {
 class LatticeStructuralElement : public StructuralElement
 {
 public:
-    LatticeStructuralElement(int n, Domain *d);
+    LatticeStructuralElement(int n, Domain * d);
     virtual ~LatticeStructuralElement();
 
     virtual IRResultType initializeFrom(InputRecord *ir);

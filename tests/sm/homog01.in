@@ -1,8 +1,9 @@
 homog01.out
-Elastic homogenization of 2x2 quad elements with periodic boudnary conditions and shear eigenstrain load
-LinearStatic nsteps 1 nmodules 0
+Elastic homogenization of 2x2 quad elements with periodic boundary conditions and shear eigenstrain load
+LinearStatic nsteps 1 nmodules 2
+errorcheck
 #vtkxml tstep_all domain_all cellvars 1 46 primvars 1 1 vars 2 1 4 stype 1
-#hom tstep_all
+hom tstep_all
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 9 nelem 4 ncrosssect 1 nmat 2 nbc 2 nic 0 nltf 1
@@ -33,7 +34,7 @@ ConstantFunction 1 f(t) 1.0
 #NODE tStep 1 number 6 dof 1 unknown d value -5.76246558e-2
 ##
 ## check element strain vector
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 6  value 6.9413e-2
-#ELEMENT tStep 1 number 4 gp 1 keyword "strains" component 6  value 4.2061e-2
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 6  value 6.94129179e-02
+#ELEMENT tStep 1 number 4 gp 1 keyword 4 component 6  value 4.20612770e-02
 ##
 #%END_CHECK%

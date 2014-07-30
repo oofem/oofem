@@ -64,7 +64,6 @@ J2MPlasticMaterial :: ~J2MPlasticMaterial()
 IRResultType
 J2MPlasticMaterial :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                 // Required by IR_GIVE_FIELD macro
     double value;
 
@@ -126,7 +125,7 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVars(FloatArray &answer, GaussP
     IntArray mask;
 
     if ( !hasHardening() ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
@@ -194,7 +193,7 @@ J2MPlasticMaterial :: computeHardeningReducedModuli(FloatMatrix &answer, GaussPo
     int size = this->giveSizeOfReducedHardeningVarsVector(gp);
 
     if ( !hasHardening() ) {
-        answer.resize(0, 0);
+        answer.clear();
         return;
     }
 
@@ -272,7 +271,7 @@ J2MPlasticMaterial :: computeStressSpaceHardeningVarsReducedGradient(FloatArray 
     FloatArray fullKinematicGradient, reducedKinematicGrad;
 
     if ( !hasHardening() ) {
-        answer.resize(0);
+        answer.clear();
         return;
     }
 
@@ -319,7 +318,7 @@ J2MPlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isur
 
     StructuralMaterial :: giveInvertedVoigtVectorMask( mask, gp->giveMaterialMode() );
     size = StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) +
-           this->giveSizeOfReducedHardeningVarsVector(gp);
+    this->giveSizeOfReducedHardeningVarsVector(gp);
 
     answer.resize(size, size);
     answer.zero();
@@ -336,7 +335,7 @@ J2MPlasticMaterial :: computeReducedGradientMatrix(FloatMatrix &answer, int isur
         }
 
         f = this->computeJ2InvariantAt(helpVector);
-        f12 = pow(f, 1. / 2.);
+        f12 = sqrt(f);
         f32 = pow(f, 3. / 2.);
 
         ax = helpVector.at(1);
@@ -433,7 +432,7 @@ J2MPlasticMaterial :: computeJ2InvariantAt(const FloatArray &stressVector)
     v3 = ( ( stressVector.at(3) - stressVector.at(1) ) * ( stressVector.at(3) - stressVector.at(1) ) );
 
     answer = ( 1. / 6. ) * ( v1 + v2 + v3 ) + stressVector.at(4) * stressVector.at(4) +
-             stressVector.at(5) * stressVector.at(5) + stressVector.at(6) * stressVector.at(6);
+    stressVector.at(5) * stressVector.at(5) + stressVector.at(6) * stressVector.at(6);
 
     return answer;
 }
@@ -488,7 +487,7 @@ J2MPlasticMaterial :: giveStressBackVector(FloatArray &answer,
         return;
     }
 
-    answer.resize(0);
+    answer.clear();
 }
 
 

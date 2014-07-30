@@ -69,7 +69,7 @@ REGISTER_Element(TR1_2D_SUPG);
 FEI2dTrLin TR1_2D_SUPG :: interp(1, 2);
 
 TR1_2D_SUPG :: TR1_2D_SUPG(int n, Domain *aDomain) :
-    SUPGElement(n, aDomain), LEPlicElementInterface()
+    SUPGElement(n, aDomain), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this), LEPlicElementInterface()
     // Constructor.
 {
     numberOfDofMans  = 3;
@@ -87,30 +87,15 @@ TR1_2D_SUPG :: computeNumberOfDofs()
 }
 
 void
-TR1_2D_SUPG :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+TR1_2D_SUPG :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    if ( ut == EID_MomentumBalance ) {
-        answer.setValues(2, V_u, V_v);
-    } else if ( ut == EID_ConservationEquation ) {
-        answer.setValues(1, P_f);
-    } else if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        answer.setValues(3, V_u, V_v, P_f);
-    } else {
-        _error("giveDofManDofIDMask: Unknown equation id encountered");
-    }
-}
-
-void
-TR1_2D_SUPG :: giveElementDofIDMask(EquationID ut, IntArray &answer) const
-{
-    this->giveDofManDofIDMask(1, ut, answer);
+    answer = {V_u, V_v, P_f};
 }
 
 
 IRResultType
 TR1_2D_SUPG :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;               // Required by IR_GIVE_FIELD macro
 
     SUPGElement :: initializeFrom(ir);
@@ -147,9 +132,8 @@ void
 TR1_2D_SUPG :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(1);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
@@ -182,7 +166,7 @@ TR1_2D_SUPG :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep)
     answer.at(6, 2) = answer.at(6, 4) = ar12;
 
     /* SUPG stabilization term */
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
 
     usum = un.at(1) + un.at(3) + un.at(5);
     vsum = un.at(2) + un.at(4) + un.at(6);
@@ -223,8 +207,8 @@ TR1_2D_SUPG :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
     FloatArray u, un;
     double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     double dudx, dudy, dvdx, dvdy, usum, vsum, coeff;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
     dudy = c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5);
@@ -266,8 +250,8 @@ TR1_2D_SUPG :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *
 
     FloatArray u, un;
     double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
 
     double dudx [ 2 ] [ 2 ], usum [ 2 ];
     double coeff, ar12 = area / 12.;
@@ -292,7 +276,7 @@ TR1_2D_SUPG :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep *
                     dij = ( i == j );
                     coeff = ( m == k ) ? area / 6. : area / 12.;
                     answer.at(w_dof_addr, u_dof_addr) = rho * ( 0.0 * d1j * dudx [ i - 1 ] [ 0 ] * coeff + dij * b [ m - 1 ] * ar12 * ( usum [ 0 ] + un.at( ( k - 1 ) * 2 + 1 ) ) +
-                                                                0.0 * d2j * dudx [ i - 1 ] [ 1 ] * coeff + dij * c [ m - 1 ] * ar12 * ( usum [ 1 ] + un.at( ( k - 1 ) * 2 + 2 ) ) );
+                                                               0.0 * d2j * dudx [ i - 1 ] [ 1 ] * coeff + dij * c [ m - 1 ] * ar12 * ( usum [ 1 ] + un.at( ( k - 1 ) * 2 + 2 ) ) );
                 }
             }
         }
@@ -340,7 +324,7 @@ TR1_2D_SUPG :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
     FloatArray u, eps(3), stress;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     eps.at(1) = ( b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5) );
     eps.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
@@ -405,7 +389,7 @@ TR1_2D_SUPG :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep)
     double usum, vsum;
     double ar3 = area / 3.0, coeff;
 
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, p);
+    this->computeVectorOfPressures(VM_Total, tStep, p);
 
     // G matrix
     answer.at(1, 1) = answer.at(1, 2) = answer.at(1, 3) = -b [ 0 ] * ar3;
@@ -417,7 +401,7 @@ TR1_2D_SUPG :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep)
     answer.at(6, 1) = answer.at(6, 2) = answer.at(6, 3) = -c [ 2 ] * ar3;
 
     // stabilization term (G_\delta mtrx)
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
     usum = un.at(1) + un.at(3) + un.at(5);
     vsum = un.at(2) + un.at(4) + un.at(6);
     coeff = ar3 * t_supg;
@@ -492,8 +476,8 @@ TR1_2D_SUPG :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep)
     double dudx, dudy, dvdx, dvdy, usum, vsum;
     FloatArray u, un;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
     dudy = c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5);
@@ -520,8 +504,8 @@ TR1_2D_SUPG :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep *
     //double rho = this->giveMaterial()->giveCharacteristicValue(Density, integrationRulesArray[0]->getIntegrationPoint(0), tStep);
     FloatArray u, un;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
 
     double dudx [ 2 ] [ 2 ], usum [ 2 ];
     double coeff;
@@ -602,8 +586,8 @@ TR1_2D_SUPG :: computeSlipWithFrictionBCTerm_MB(FloatMatrix &answer, Load *load,
     answer.zero();
     //beta
     //area
-    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >( load );
-    beta = edgeLoad->giveProperty('a');
+    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
+    beta = edgeLoad->giveProperty('a', tStep);
     node1 = side;
     node2 = ( node1 == 3 ? 1 : node1 + 1 );
 
@@ -698,8 +682,8 @@ TR1_2D_SUPG :: computePenetrationWithResistanceBCTerm_MB(FloatMatrix &answer, Lo
     answer.resize(6, 6);
     answer.zero();
 
-    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >( load );
-    alpha = edgeLoad->giveProperty('a');
+    BoundaryLoad *edgeLoad = static_cast< BoundaryLoad * >(load);
+    alpha = edgeLoad->giveProperty('a', tStep);
     node1 = side;
     node2 = ( node1 == 3 ? 1 : node1 + 1 );
 
@@ -845,12 +829,12 @@ TR1_2D_SUPG :: computeHomogenizedReinforceTerm_MB(FloatMatrix &answer, Load *loa
     double coeffx, coeffy, usum [ 2 ];
     FloatArray un;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
 
 
     usum [ 0 ] = un.at(1) + un.at(3) + un.at(5);
     usum [ 1 ] = un.at(2) + un.at(4) + un.at(6);
-    Reinforcement *reinfload  = dynamic_cast< Reinforcement * >( load );
+    Reinforcement *reinfload  = dynamic_cast< Reinforcement * >(load);
     double kx = reinfload->givePermeability()->at(1);
     double ky = reinfload->givePermeability()->at(2);
     // double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
@@ -872,7 +856,7 @@ TR1_2D_SUPG :: computeHomogenizedReinforceTerm_MC(FloatMatrix &answer, Load *loa
 {
     double coeffx, coeffy;
 
-    Reinforcement *reinfload  = dynamic_cast< Reinforcement * >( load );
+    Reinforcement *reinfload  = dynamic_cast< Reinforcement * >(load);
     double kx = reinfload->givePermeability()->at(1);
     double ky = reinfload->givePermeability()->at(2);
     // double tau_0 = this->giveMaterial()->give( YieldStress, integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
@@ -902,7 +886,7 @@ TR1_2D_SUPG :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
     FloatArray un, gVector;
 
     // add body load (gravity) termms
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), un);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), un);
 
 
     usum [ 0 ] = un.at(1) + un.at(3) + un.at(5);
@@ -1062,9 +1046,9 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
     nu = this->giveMaterial()->giveCharacteristicValue( MRM_Viscosity, gp, tStep->givePreviousStep() );
     rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
 
-    //this -> computeVectorOf(EID_MomentumBalance,VM_Total,tStep->givePreviousStep(),un) ;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
-    this->computeVectorOf(EID_MomentumBalance, VM_Acceleration, tStep->givePreviousStep(), a);
+    //this -> computeVectorOfVelocities(VM_Total,tStep->givePreviousStep(),un) ;
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), u);
+    this->computeVectorOfVelocities(VM_Acceleration, tStep->givePreviousStep(), a);
 
     un = u;
     usum [ 0 ] = un.at(1) + un.at(3) + un.at(5);
@@ -1144,7 +1128,7 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
                     dij = ( i == j );
                     coeff = ( m == k ) ? area / 6. : area / 12.;
                     __tmp.at(w_dof_addr, u_dof_addr) = rho * ( 0.0 * d1j * dudx [ i - 1 ] [ 0 ] * coeff + dij * b [ m - 1 ] * ( area / 12. ) * ( usum [ 0 ] + un.at( ( k - 1 ) * 2 + 1 ) ) +
-                                                               0.0 * d2j * dudx [ i - 1 ] [ 1 ] * coeff + dij * c [ m - 1 ] * ( area / 12. ) * ( usum [ 1 ] + un.at( ( k - 1 ) * 2 + 2 ) ) );
+                                                              0.0 * d2j * dudx [ i - 1 ] [ 1 ] * coeff + dij * c [ m - 1 ] * ( area / 12. ) * ( usum [ 1 ] + un.at( ( k - 1 ) * 2 + 2 ) ) );
                 }
             }
         }
@@ -1283,7 +1267,7 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
     tscale = domain->giveEngngModel()->giveVariableScale(VST_Time);
     dscale = domain->giveEngngModel()->giveVariableScale(VST_Density);
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), u);
     u.times(uscale);
     double nu;
 
@@ -1364,7 +1348,7 @@ TR1_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
  * bool zeroFlag = false;
  * int i,im1;
  * FloatArray u;
- * this -> computeVectorOf(EID_MomentumBalance,VM_Total,tStep, u) ;
+ * this -> computeVectorOfVelocities(VM_Total,tStep, u) ;
  * double nu = this->giveMaterial()->giveCharacteristicValue(MRM_Viscosity, integrationRulesArray[0]->getIntegrationPoint(0), tStep);
  *
  * // UGN-Based Stabilization
@@ -1419,31 +1403,24 @@ Interface *
 TR1_2D_SUPG :: giveInterface(InterfaceType interface)
 {
     if ( interface == ZZNodalRecoveryModelInterfaceType ) {
-        return static_cast< ZZNodalRecoveryModelInterface * >( this );
+        return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
-        return static_cast< NodalAveragingRecoveryModelInterface * >( this );
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == SPRNodalRecoveryModelInterfaceType ) {
-        return static_cast< SPRNodalRecoveryModelInterface * >( this );
+        return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
-        return static_cast< SpatialLocalizerInterface * >( this );
+        return static_cast< SpatialLocalizerInterface * >(this);
     } else if ( interface == EIPrimaryFieldInterfaceType ) {
-        return static_cast< EIPrimaryFieldInterface * >( this );
+        return static_cast< EIPrimaryFieldInterface * >(this);
     } else if ( interface == LEPlicElementInterfaceType ) {
-        return static_cast< LEPlicElementInterface * >( this );
+        return static_cast< LEPlicElementInterface * >(this);
     } else if ( interface == LevelSetPCSElementInterfaceType ) {
-        return static_cast< LevelSetPCSElementInterface * >( this );
+        return static_cast< LevelSetPCSElementInterface * >(this);
     }
 
     return NULL;
 }
 
-
-int
-TR1_2D_SUPG :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
 
 double
 TR1_2D_SUPG :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
@@ -1456,7 +1433,7 @@ TR1_2D_SUPG :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArr
     this->computeGlobalCoordinates(gcoords, lcoords);
 
     if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        _error("SpatialLocalizerI_giveDistanceFromParametricCenter: coordinates size mismatch");
+        OOFEM_ERROR("coordinates size mismatch");
     }
 
     if ( size == gsize ) {
@@ -1480,7 +1457,7 @@ TR1_2D_SUPG :: computeDeviatoricStrain(FloatArray &answer, GaussPoint *gp, TimeS
     answer.resize(3);
 
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     answer.at(1) = ( b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5) );
     answer.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
@@ -1509,7 +1486,7 @@ TR1_2D_SUPG :: initGeometry()
     this->area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
 
     if ( area < 0.0 ) {
-        _error("Area is negative, check element numbering orientation");
+        OOFEM_ERROR("Area is negative, check element numbering orientation");
     }
 
     b [ 0 ] = ( y2 - y3 ) / ( 2. * area );
@@ -1533,8 +1510,8 @@ TR1_2D_SUPG :: computeNMtrx(FloatArray &answer, GaussPoint *gp)
     double l1, l2;
     answer.resize(3);
 
-    answer.at(1) = l1 = gp->giveCoordinate(1);
-    answer.at(2) = l2 = gp->giveCoordinate(2);
+    answer.at(1) = l1 = gp->giveNaturalCoordinate(1);
+    answer.at(2) = l2 = gp->giveNaturalCoordinate(2);
     answer.at(3) = 1.0 - l1 - l2;
 }
 
@@ -1546,7 +1523,7 @@ TR1_2D_SUPG :: computeNMtrx(FloatArray &answer, GaussPoint *gp)
  * double dt1, dt2, dt;
  * double Re = static_cast<FluidModel*>(domain->giveEngngModel())->giveReynoldsNumber();
  *
- * this -> computeVectorOf(EID_MomentumBalance,VM_Total,tStep, u) ;
+ * this -> computeVectorOfVelocities(VM_Total,tStep, u) ;
  *
  * double vn1 = sqrt(u.at(1)*u.at(1)+u.at(2)*u.at(2));
  * double vn2 = sqrt(u.at(3)*u.at(3)+u.at(4)*u.at(4));
@@ -1674,10 +1651,10 @@ TR1_2D_SUPG :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface
             if ( nodeIn [ i - 1 ] ) {
                 if ( updFlag ) {
                     v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(i)->giveNumber() ),
-                                 matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
+                                matInterface->giveUpdatedYCoordinate( this->giveNode(i)->giveNumber() ) );
                 } else {
                     v.setCoords( this->giveNode(i)->giveCoordinate(1),
-                                 this->giveNode(i)->giveCoordinate(2) );
+                                this->giveNode(i)->giveCoordinate(2) );
                 }
 
                 matvolpoly.addVertex(v);
@@ -1707,7 +1684,7 @@ TR1_2D_SUPG :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface
                     if ( nodeIn [ i - 1 ] ) {
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -1718,7 +1695,7 @@ TR1_2D_SUPG :: formVolumeInterfacePoly(Polygon &matvolpoly, LEPlic *matInterface
                         matvolpoly.addVertex(v);
                         if ( updFlag ) {
                             v.setCoords( matInterface->giveUpdatedXCoordinate( this->giveNode(next)->giveNumber() ),
-                                         matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
+                                        matInterface->giveUpdatedYCoordinate( this->giveNode(next)->giveNumber() ) );
                         } else {
                             v.setCoords( this->giveNode(next)->giveCoordinate(1), this->giveNode(next)->giveCoordinate(2) );
                         }
@@ -1813,7 +1790,7 @@ TR1_2D_SUPG :: computeCriticalLEPlicTimeStep(TimeStep *tStep)
     FloatArray u;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     double vn1 = sqrt( u.at(1) * u.at(1) + u.at(2) * u.at(2) );
     double vn2 = sqrt( u.at(3) * u.at(3) + u.at(4) * u.at(4) );
@@ -1867,10 +1844,10 @@ TR1_2D_SUPG :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Primary
     //FloatMatrix n;
     IntArray elemdofs;
     // determine element dof ids
-    this->giveElementDofIDMask(pf.giveEquationID(), elemdofs);
+    this->giveElementDofIDMask(elemdofs);
     es = elemdofs.giveSize();
     // first evaluate element unknown vector
-    this->computeVectorOf(pf, mode, tStep, elemvector);
+    this->computeVectorOf(pf, elemdofs, mode, tStep, elemvector);
     // determine corresponding local coordinates
     if ( this->computeLocalCoordinates(lc, coords) ) {
         // compute interpolation matrix
@@ -1886,14 +1863,14 @@ TR1_2D_SUPG :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Primary
 
                 answer.at(i) = sum;
             } else {
-                // _error("EIPrimaryFieldI_evaluateFieldVectorAt: unknown dof id encountered");
+                // OOFEM_ERROR("unknown dof id encountered");
                 answer.at(i) = 0.0;
             }
         }
 
         return 0; // ok
     } else {
-        _error("EIPrimaryFieldI_evaluateFieldVectorAt: target point not in receiver volume");
+        OOFEM_ERROR("target point not in receiver volume");
         return 1; // fail
     }
 }
@@ -1936,13 +1913,6 @@ TR1_2D_SUPG :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, in
 }
 
 void
-TR1_2D_SUPG :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                         InternalStateType type, TimeStep *tStep)
-{
-    answer.resize(0);
-}
-
-void
 TR1_2D_SUPG :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 {
     pap.resize(3);
@@ -1956,11 +1926,11 @@ TR1_2D_SUPG :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer,
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-         ( pap == this->giveNode(2)->giveNumber() ) ||
-         ( pap == this->giveNode(3)->giveNumber() ) ) {
+        ( pap == this->giveNode(2)->giveNumber() ) ||
+        ( pap == this->giveNode(3)->giveNumber() ) ) {
         answer.at(1) = pap;
     } else {
-        _error("SPRNodalRecoveryMI_giveDofMansDeterminedByPatch: node unknown");
+        OOFEM_ERROR("node unknown");
     }
 }
 
@@ -1982,7 +1952,7 @@ TR1_2D_SUPG :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     SUPGElement :: printOutputAt(file, tStep);
     double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    fprintf(file, "VOF %e, density %e\n\n", this->giveVolumeFraction(), rho);
+    fprintf(file, "\telement_status { VOF %e, density %e }\n\n", this->giveVolumeFraction(), rho);
 }
 
 
@@ -2033,9 +2003,9 @@ double
 TR1_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
 {
     double answer;
-    FloatArray fi(3), un(6);
+    FloatArray fi(3), un;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, un);
+    this->computeVectorOfVelocities(VM_Total, tStep, un);
 
     for ( int i = 1; i <= 3; i++ ) {
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
@@ -2141,7 +2111,7 @@ TR1_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep)
                 return ( __area - ( area - __area ) ) / area;
             }
         } else {
-            OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+            OOFEM_ERROR("internal consistency error");
             return 0.0;
         }
     }
@@ -2227,7 +2197,7 @@ TR1_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
             // compute area
             double __area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
             if ( fabs(__area) / area > 1.00001 ) {
-                OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+                OOFEM_ERROR("internal consistency error");
             }
 
             // prevent some roundoff errors
@@ -2245,7 +2215,7 @@ TR1_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
                 answer.at(2) = 1.0 - answer.at(1);
             }
         } else {
-            OOFEM_ERROR("TR1_2D_SUPG::LS_PCS_computeVOFFractions: internal consistency error");
+            OOFEM_ERROR("internal consistency error");
         }
     }
 }
@@ -2254,22 +2224,13 @@ TR1_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 void
 TR1_2D_SUPG :: giveLocalVelocityDofMap(IntArray &map)
 {
-    map.resize(6);
-    map.at(1) = 1;
-    map.at(2) = 2;
-    map.at(3) = 4;
-    map.at(4) = 5;
-    map.at(5) = 7;
-    map.at(6) = 8;
+    map = {1, 2, 4, 5, 7, 8};
 }
 
 void
 TR1_2D_SUPG :: giveLocalPressureDofMap(IntArray &map)
 {
-    map.resize(3);
-    map.at(1) = 3;
-    map.at(2) = 6;
-    map.at(3) = 9;
+    map = {3, 6, 9};
 }
 
 

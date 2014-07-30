@@ -65,11 +65,11 @@ FEI2dTrConst :: local2global(FloatArray &answer, const FloatArray &lcoords, cons
     l3 = 1.0 - l1 - l2;
 
     answer.at(1) = ( l1 * cellgeo.giveVertexCoordinates(1)->at(xind) +
-                     l2 * cellgeo.giveVertexCoordinates(2)->at(xind) +
-                     l3 * cellgeo.giveVertexCoordinates(3)->at(xind) );
+                    l2 * cellgeo.giveVertexCoordinates(2)->at(xind) +
+                    l3 * cellgeo.giveVertexCoordinates(3)->at(xind) );
     answer.at(2) = ( l1 * cellgeo.giveVertexCoordinates(1)->at(yind) +
-                     l2 * cellgeo.giveVertexCoordinates(2)->at(yind) +
-                     l3 * cellgeo.giveVertexCoordinates(3)->at(yind) );
+                    l2 * cellgeo.giveVertexCoordinates(2)->at(yind) +
+                    l3 * cellgeo.giveVertexCoordinates(3)->at(yind) );
 }
 
 #define POINT_TOL 1.e-3
@@ -138,7 +138,7 @@ FEI2dTrConst :: edgeEvalN(FloatArray &answer, int iedge, const FloatArray &lcoor
 double
 FEI2dTrConst :: edgeEvalNormal(FloatArray &answer, int iedge, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("FEI2dTrConst :: edgeEvalNormal - Not applicable to constant interpolation");
+    OOFEM_ERROR("Not applicable to constant interpolation");
     return 0.;
 }
 
@@ -162,9 +162,9 @@ FEI2dTrConst :: edgeLocal2global(FloatArray &answer, int iedge,
 
     answer.resize(2);
     answer.at(1) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(xind) +
-                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) );
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(xind) );
     answer.at(2) = ( n.at(1) * cellgeo.giveVertexCoordinates( edgeNodes.at(1) )->at(yind) +
-                     n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) );
+                    n.at(2) * cellgeo.giveVertexCoordinates( edgeNodes.at(2) )->at(yind) );
 }
 
 void
@@ -183,7 +183,7 @@ FEI2dTrConst :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         aNode = 3;
         bNode = 1;
     } else {
-        OOFEM_ERROR2("FEI2dTrConst :: computeEdgeMapping: wrong egde number (%d)", iedge);
+        OOFEM_ERROR("wrong egde number (%d)", iedge);
     }
 
     edgeNodes.at(1) = aNode;
