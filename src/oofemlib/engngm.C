@@ -521,7 +521,6 @@ EngngModel :: forceEquationNumbering(int id)
     // sets this->numberOfEquations and this->numberOfPrescribedEquations and returns this value
 
     int nnodes, nelem, nbc;
-    Element *elem;
     Domain *domain = this->giveDomain(id);
     TimeStep *currStep = this->giveCurrentStep();
     IntArray loc;
@@ -529,17 +528,15 @@ EngngModel :: forceEquationNumbering(int id)
     this->domainNeqs.at(id) = 0;
     this->domainPrescribedNeqs.at(id) = 0;
 
-    nnodes = domain->giveNumberOfDofManagers();
-    nelem  = domain->giveNumberOfElements();
-    nbc    = domain->giveNumberOfBoundaryConditions();
-
     if ( !this->profileOpt ) {
+        nnodes = domain->giveNumberOfDofManagers();
         for ( int i = 1; i <= nnodes; i++ ) {
             domain->giveDofManager(i)->askNewEquationNumbers(currStep);
         }
 
+        nelem = domain->giveNumberOfElements();
         for ( int i = 1; i <= nelem; ++i ) {
-            elem = domain->giveElement(i);
+            Element *elem = domain->giveElement(i);
             nnodes = elem->giveNumberOfInternalDofManagers();
             for ( int k = 1; k <= nnodes; k++ ) {
                 elem->giveInternalDofManager(k)->askNewEquationNumbers(currStep);
@@ -547,6 +544,7 @@ EngngModel :: forceEquationNumbering(int id)
         }
 
         // For special boundary conditions;
+        nbc = domain->giveNumberOfBoundaryConditions();
         for ( int i = 1; i <= nbc; ++i ) {
             GeneralBoundaryCondition *bc = domain->giveBc(i);
             nnodes = bc->giveNumberOfInternalDofManagers();
@@ -621,7 +619,6 @@ EngngModel :: solveYourself()
 {
     int nTimeSteps;
     int smstep = 1, sjstep = 1;
-    MetaStep *activeMStep;
     FILE *out = this->giveOutputStream();
 
     this->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
@@ -632,7 +629,7 @@ EngngModel :: solveYourself()
     }
 
     for ( int imstep = smstep; imstep <= nMetaSteps; imstep++, sjstep = 1 ) { //loop over meta steps
-        activeMStep = this->giveMetaStep(imstep);
+        MetaStep *activeMStep = this->giveMetaStep(imstep);
         // update state according to new meta step
         this->initMetaStepAttributes(activeMStep);
 
@@ -1705,7 +1702,14 @@ EngngModel :: giveParallelContext(int i)
 }
 
 void
-EngngModel :: initParallelContexts() { }
+EngngModel :: initParallelContexts()
+{
+    parallelContextList->growTo(ndomains);
+    for ( int i = 1; i <= this->ndomains; i++ ) {
+        ParallelContext *parallelContext = new ParallelContext(this);
+        parallelContextList->put(i, parallelContext);
+    }
+}
 #endif
 
 

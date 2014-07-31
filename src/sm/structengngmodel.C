@@ -268,21 +268,6 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
 }
 
 
-#ifdef __PARALLEL_MODE
-void
-StructuralEngngModel :: initParallelContexts()
-{
-    ParallelContext *parallelContext;
-
-    parallelContextList->growTo(ndomains);
-    for ( int i = 0; i < this->ndomains; i++ ) {
-        parallelContext =  new ParallelContext(this);
-        parallelContextList->put(i + 1, parallelContext);
-    }
-}
-#endif
-
-
 #ifdef __OOFEG
 void
 StructuralEngngModel :: showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep)

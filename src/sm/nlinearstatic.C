@@ -762,18 +762,6 @@ NonLinearStatic :: updateDomainLinks()
 }
 
 
-#ifdef __PARALLEL_MODE
-void
-NonLinearStatic :: initParallelContexts()
-{
-    parallelContextList->growTo(ndomains);
-    for ( int i = 1; i <= this->ndomains; i++ ) {
-        parallelContextList->put( i, new ParallelContext(this) );
-    }
-}
-#endif
-
-
 void
 NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
                             const UnknownNumberingScheme &s, Domain *domain)
@@ -927,7 +915,7 @@ NonLinearStatic :: giveLoadBalancer()
 
     if ( loadBalancingFlag ) {
         ///@todo Make the name possibly optional (but currently, there is just one choice, "parmetis")
-        lb = classFactory.createLoadBalancer( _IFT_ParmetisLoadBalancer_Name, this->giveDomain(1) );
+        lb = classFactory.createLoadBalancer( "parmetis", this->giveDomain(1) );
         return lb;
     } else {
         return NULL;
@@ -943,7 +931,7 @@ NonLinearStatic :: giveLoadBalancerMonitor()
     }
 
     if ( loadBalancingFlag ) {
-        lbm = classFactory.createLoadBalancerMonitor(_IFT_WallClockLoadBalancerMonitor_Name, this);
+        lbm = classFactory.createLoadBalancerMonitor( "wallclock", this);
         return lbm;
     } else {
         return NULL;

@@ -274,15 +274,4 @@ TimeStep *DarcyFlow :: giveNextStep()
     return currentStep;
 }
 
-#ifdef __PARALLEL_MODE
-void DarcyFlow :: initParallelContexts()
-{
-    ParallelContext *parallelContext;
-    parallelContextList->growTo(ndomains);
-    for ( int i = 1; i <= this->ndomains; i++ ) {
-        parallelContext =  new ParallelContext(this);
-        parallelContextList->put(i, parallelContext);
-    }
-}
-#endif
 }

@@ -1021,7 +1021,7 @@ AdaptiveNonLinearStatic :: giveLoadBalancer()
     }
 
     if ( loadBalancingFlag || preMappingLoadBalancingFlag ) {
-        lb = classFactory.createLoadBalancer( _IFT_ParmetisLoadBalancer_Name, this->giveDomain(1) );
+        lb = classFactory.createLoadBalancer( "parmetis", this->giveDomain(1) );
         return lb;
     } else {
         return NULL;
@@ -1035,7 +1035,7 @@ AdaptiveNonLinearStatic :: giveLoadBalancerMonitor()
     }
 
     if ( loadBalancingFlag || preMappingLoadBalancingFlag ) {
-        lbm = classFactory.createLoadBalancerMonitor(_IFT_WallClockLoadBalancerMonitor_Name, this);
+        lbm = classFactory.createLoadBalancerMonitor( "wallclock", this);
         return lbm;
     } else {
         return NULL;

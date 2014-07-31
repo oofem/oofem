@@ -43,7 +43,7 @@
 
 namespace oofem {
 PrimaryField :: PrimaryField(EngngModel *a, int idomain,
-                             FieldType ft, int nHist) : Field(ft), solutionVectors(nHist + 1), solStepList(nHist + 1)
+                             FieldType ft, int nHist) : Field(ft), solutionVectors(nHist + 1), solStepList(nHist + 1, emodel)
 {
     this->actualStepNumber = -999;
     this->actualStepIndx = 0;
@@ -211,7 +211,7 @@ PrimaryField :: advanceSolution(TimeStep *tStep)
 
     actualStepIndx = ( actualStepIndx > 0 ) ? actualStepIndx - 1 : nHistVectors;
     actualStepNumber = tStep->giveNumber();
-    solStepList[actualStepIndx].reset(new TimeStep(* tStep));
+    solStepList[actualStepIndx] = * tStep;
 }
 
 
@@ -234,22 +234,9 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
         }
     }
 
-    int flag;
     for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( solStepList[i] ) {
-            flag = 1;
-        } else {
-            flag = 0;
-        }
-
-        if ( !stream->write(& flag, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-
-        if ( flag ) {
-            if ( ( iores = solStepList[i]->saveContext(stream, mode) ) != CIO_OK ) {
-                THROW_CIOERR(iores);
-            }
+        if ( ( iores = solStepList[i].saveContext(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
         }
     }
 
@@ -275,22 +262,11 @@ PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
         }
     }
 
-    int flag;
     for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( !stream->read(& flag, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
+        solStepList[i] = TimeStep(emodel);
+        if ( ( iores = solStepList[i].restoreContext(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
         }
-
-        if ( flag ) {
-            std :: unique_ptr< TimeStep > iStep(new TimeStep(emodel));
-            if ( ( iores = iStep->restoreContext(stream, mode) ) != CIO_OK ) {
-                THROW_CIOERR(iores);
-            }
-            solStepList[i] = std::move(iStep);
-        } else {
-            solStepList[i].reset(NULL);
-        }
-
     }
 
     return CIO_OK;

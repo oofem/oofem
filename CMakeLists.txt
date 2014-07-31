@@ -258,7 +258,6 @@ if (USE_PARMETIS)
     list (APPEND MODULE_LIST "parmetis")
     set (USE_MPI ON)
     set (USE_METIS ON)
-    add_definitions (-D__PARMETIS_MODULE)
 endif ()
 
 if (USE_METIS)

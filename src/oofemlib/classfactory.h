@@ -145,7 +145,7 @@ template< typename T > FailureCriteriaStatus *failureCriteriaCreator(int n, Fail
 #define REGISTER_SparseNonLinearSystemNM(class) static bool __dummy_ ## class = GiveClassFactory().registerSparseNonLinearSystemNM(_IFT_ ## class ## _Name, nonlinCreator< class > );
 #define REGISTER_InitModule(class) static bool __dummy_ ## class = GiveClassFactory().registerInitModule(_IFT_ ## class ## _Name, initCreator< class > );
 #define REGISTER_TopologyDescription(class) static bool __dummy_ ## class = GiveClassFactory().registerTopologyDescription(_IFT_ ## class ## _Name, topologyCreator< class > );
-#define REGISTER_LoadMonitor(class) static bool __dummy_ ## class = GiveClassFactory().registerLoadMonitor(_IFT_ ## class ## _Name, loadMonitorCreator< class > );
+#define REGISTER_LoadBalancerMonitor(class) static bool __dummy_ ## class = GiveClassFactory().registerLoadBalancerMonitor(_IFT_ ## class ## _Name, loadMonitorCreator< class > );
 #define REGISTER_LoadBalancer(class) static bool __dummy_ ## class = GiveClassFactory().registerLoadBalancer(_IFT_ ## class ## _Name, loadBalancerCreator< class > );
 
 // These should be converted to use strings.
@@ -202,13 +202,11 @@ private:
     std :: map < std :: string, InitModule * ( * )(int, EngngModel *) > initList;
     /// Associative container containing topology description creators.
     std :: map < std :: string, TopologyDescription * ( * )(Domain *) > topologyList;
+    // Internal structures (accessed by hard-coded enum values)
     /// Associative container containing load balancer creators.
-#ifdef __PARALLEL_MODE
     std :: map < std :: string, LoadBalancer * ( * )(Domain *) > loadBalancerList;
     /// Associative container containing load balancer monitor creators.
     std :: map < std :: string, LoadBalancerMonitor * ( * )(EngngModel *) > loadMonitorList;
-#endif
-    // Internal structures (accessed by hard-coded enum values)
     /// Associative container containing sparse matrix creators.
     std :: map < SparseMtrxType, SparseMtrx * ( * )() > sparseMtrxList;
     /// Associative container containing dof creators.
@@ -240,7 +238,7 @@ private:
     std :: map < std :: string, FailureCriteriaStatus * ( * )(int, FailureCriteria *) > failureCriteriaStatusList;
 
 public:
-    /// Constructor, registers all classes
+    /// Creates empty factory
     ClassFactory();
 
     /**
@@ -430,7 +428,7 @@ public:
      * Registers a sparse matrix type.
      * @param type SparseMtrxType id determining the type of new instance.
      */
-    bool registerSparseMtrx( SparseMtrxType type, SparseMtrx * ( * )() );
+    bool registerSparseMtrx( SparseMtrxType type, SparseMtrx * ( *creator )() );
     /**
      * Creates new instance of DOF corresponding to given keyword.
      * @param type ID determining the type of new instance.
@@ -452,7 +450,7 @@ public:
      * Registers a sparse linear system solver.
      * @param type LinSystSolverType id determining the type of new instance.
      */
-    bool registerSparseLinSolver( LinSystSolverType type, SparseLinearSystemNM * ( * )(Domain *, EngngModel *) );
+    bool registerSparseLinSolver( LinSystSolverType type, SparseLinearSystemNM * ( *creator )(Domain *, EngngModel *) );
     /**
      * Creates new instance of ErrorEstimator corresponding
      * to given type.
@@ -466,7 +464,7 @@ public:
      * Registers a new  error estimator.
      * @param type ErrorEstimatorType id determining the type of new instance.
      */
-    bool registerErrorEstimator( ErrorEstimatorType type, ErrorEstimator * ( * )(int, Domain *) );
+    bool registerErrorEstimator( ErrorEstimatorType type, ErrorEstimator * ( *creator )(int, Domain *) );
     /**
      * Creates new instance of nodal recovery model corresponding to given type.
      * @param type ID determining the type of new instance.
@@ -511,10 +509,10 @@ public:
     MaterialMappingAlgorithm *createMaterialMappingAlgorithm(MaterialMappingAlgorithmType type);
     MesherInterface *createMesherInterface(MeshPackageType type, Domain *d);
 
-#ifdef __PARALLEL_MODE
     LoadBalancerMonitor *createLoadBalancerMonitor(const char *name, EngngModel *e);
+    bool registerLoadBalancerMonitor( const char *name, LoadBalancerMonitor * ( *creator )( EngngModel * ) );
     LoadBalancer *createLoadBalancer(const char *name, Domain *d);
-#endif
+    bool registerLoadBalancer( const char *name, LoadBalancer * ( *creator )( Domain * ) );
 };
 
 extern ClassFactory &classFactory;
