@@ -155,6 +155,14 @@ public:
 #ifdef __OOFEG
     virtual void draw(oofegGraphicContext &gc) { }
 #endif
+
+
+    /**
+     * Computes the distance between two lines.
+     * Line 1 has start point iP1 and end point iP2.
+     * Line 2 has start point iQ1 and end point iQ2.
+     */
+    static double computeLineDistance(const FloatArray &iP1, const FloatArray &iP2, const FloatArray &iQ1, const FloatArray &iQ2);
 };
 
 class OOFEM_EXPORT Line : public BasicGeometry

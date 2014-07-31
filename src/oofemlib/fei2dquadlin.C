@@ -370,9 +370,9 @@ FEI2dQuadLin :: giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArr
 void
 FEI2dQuadLin :: giveDerivatives(FloatMatrix &dn, const FloatArray &lc)
 {
-    double ksi, eta;
-    ksi = lc.at(1);
-    eta = lc.at(2);
+    const double &ksi = lc[0];
+    const double &eta = lc[1];
+
     dn.resize(4, 2);
 
     // dn/dxi
