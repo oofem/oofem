@@ -276,13 +276,11 @@ int
 StructuralInterfaceElement :: checkConsistency()
 {
     // check if the cross section is a 'StructuralInterfaceCrossSection'
-    int result = 1;
     if ( !this->giveInterfaceCrossSection()->testCrossSectionExtension(this->giveInterfaceCrossSection()->crossSectionType) ) {
-        OOFEM_ERROR("cross section %s is not a structural interface cross section", this->giveCrossSection()->giveClassName() );
-        result = 0;
+        OOFEM_WARNING("cross section %s is not a structural interface cross section", this->giveCrossSection()->giveClassName() );
+        return 0;
     }
-    !this->giveInterfaceCrossSection()->checkConsistency();
-    return result;
+    return this->giveInterfaceCrossSection()->checkConsistency();
 }
 
 

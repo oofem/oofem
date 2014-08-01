@@ -109,7 +109,8 @@ public:
     StaggeredProblem(int i, EngngModel * _master = NULL);
     /// Destructor.
     virtual ~StaggeredProblem();
-
+    StaggeredProblem(const StaggeredProblem &) = delete;
+    StaggeredProblem & operator=(const StaggeredProblem &) = delete;
     void setContextOutputMode(ContextOutputMode contextMode);
     void setUDContextOutputMode(int cStep);
     void setProblemMode(problemMode pmode);

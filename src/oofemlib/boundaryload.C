@@ -135,7 +135,7 @@ BoundaryLoad :: giveProperty(int aProperty, TimeStep *tStep)
     if ( propertyDictionary.includes(aProperty) ) {
         // check if time fuction registered under the same key
         if ( propertyTimeFunctDictionary.includes(aProperty) ) {
-            return propertyDictionary.at(aProperty) * domain->giveFunction( propertyTimeFunctDictionary.at(aProperty) )->evaluate(tStep, VM_Total);
+            return propertyDictionary.at(aProperty) * domain->giveFunction( (int)propertyTimeFunctDictionary.at(aProperty) )->evaluate(tStep, VM_Total);
         } else {
             return propertyDictionary.at(aProperty);
         }

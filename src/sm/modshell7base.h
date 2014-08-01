@@ -229,7 +229,7 @@ protected:
 
 
     // Solution vectors
-    void giveSolutionVector(FloatArray &answer, const IntArray &dofIdArray, TimeStep *tStep);
+    //void giveSolutionVector(FloatArray &answer, const IntArray &dofIdArray, TimeStep *tStep);
     void computeVectorOfDofIDs(const IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     void temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, ValueModeType u, TimeStep *stepN, FloatArray &answer);
    //void computeGeneralizedStrainVector(FloatArray &answer, const FloatArray &solVec, const FloatMatrix &B11,
@@ -281,7 +281,10 @@ protected:
     virtual void computeNmatrixAt(const FloatArray &iLocCoords, FloatMatrix &answer);
     virtual void edgeComputeNmatrixAt(FloatArray &lCoords, FloatMatrix &answer);
 
-    virtual void computeStrainVectorInLayer( FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep );
+    virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
+    {
+        OOFEM_ERROR("ComputeStrainVectorInLayer - Should not be called! Not meaningful for this element.");
+    };
     virtual void edgeComputeBmatrixAt(FloatArray &lCoords, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
 
     // Misc
@@ -295,6 +298,8 @@ protected:
     void computeInterLaminarStressesAt(int interfaceNum, TimeStep *tStep, std::vector < FloatArray > &interLamStresses);
     virtual void evaluateFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep);
     double computeArea();
+    int giveSymVoigtIndex(int ind1, int ind2);
+    int giveVoigtIndex(int ind1, int ind2);
 };
 } // end namespace oofem
 #endif

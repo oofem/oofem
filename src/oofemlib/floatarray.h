@@ -493,7 +493,7 @@ public:
     ///@name IML compatibility
     //@{
     /// Assignment of scalar to all components of receiver
-    FloatArray &operator = ( const double & );
+    //FloatArray &operator = ( const double & );
     //@}
 
 #ifdef BOOST_PYTHON

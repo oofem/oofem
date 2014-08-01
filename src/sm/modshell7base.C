@@ -51,8 +51,8 @@
 #include <fstream>
 namespace oofem {
 
-    FEI3dTrQuad  ModShell7Base   :: interpolationForCZExport;
-    FEI3dWedgeQuad ModShell7Base :: interpolationForExport;
+FEI3dTrQuad  ModShell7Base   :: interpolationForCZExport;
+FEI3dWedgeQuad ModShell7Base :: interpolationForExport;
 
 
 ModShell7Base :: ModShell7Base(int n, Domain *aDomain) : NLStructuralElement(n, aDomain),  LayeredCrossSectionInterface(), 
@@ -127,7 +127,7 @@ ModShell7Base :: giveNumberOfDofs()
 int
 ModShell7Base :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    // should it return coord in reference or updated config?
+    // should it return coord in reference or updated config? -- Let it be initial so small def code remains the same
     //@todo move VTK method into this
     int layer = 1;
     FloatArray localCoords = lcoords;
@@ -423,6 +423,8 @@ void
 ModShell7Base :: computeLambdaGMatrices(FloatMatrix lambda [ 3 ], FloatArray &genEps, double zeta)
 {
     // computes the lambda^g matrices associated with the variation and linearization of the base vectors g_i.
+    // \delta g_i = lambda_i * \delta n and \Delta g_i = lambda_i * \Delta n 
+    // \delta n = B * \delta a and \Delta n = B * \Delta a
     // @todo optimize method
     FloatArray m(3), dm1(3), dm2(3), temp1;
     double dgam1, dgam2, gam;
@@ -470,6 +472,8 @@ void
 ModShell7Base :: computeLambdaNMatrix(FloatMatrix &lambda, FloatArray &genEps, double zeta)
 {
     // computes the lambda^n matrix associated with the variation and linearization of the position vector x.
+    // \delta x = lambda * \delta \hat{x} with \hat{x} = [\delta \bar{x}, \delta m, \delta \gamma]
+
     FloatArray m(3);
     m = { genEps.at(13), genEps.at(14), genEps.at(15) };
     double gam = genEps.at(18);
@@ -492,7 +496,7 @@ void
 ModShell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep)
 {
     //@todo optimize method - remove I,J-stuff since XFEM does not need this anymore
-    FloatMatrix A [ 3 ] [ 3 ], lambdaI [ 3 ], lambdaJ [ 3 ];
+    FloatMatrix A [ 3 ] [ 3 ], lambda[ 3 ], A_lambda[3], LB;
     FloatMatrix L(18,18), B;
     FloatMatrix K, tempAnswer;
 
@@ -513,36 +517,42 @@ ModShell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &s
             lCoords = *gp->giveNaturalCoordinates();
 
             this->computeBmatrixAt(lCoords, B, 0, 0);
-            this->computeGeneralizedStrainVectorNew(genEpsI, solVecI, B);
-            this->computeGeneralizedStrainVectorNew(genEpsJ, solVecJ, B);
             this->computeGeneralizedStrainVectorNew(genEps , solVec , B);
 
             // Material stiffness
             ModShell7Base :: computeLinearizedStiffness(gp, mat, tStep, A, genEps);
 
             double zeta = giveGlobalZcoord(*gp->giveNaturalCoordinates());
-            this->computeLambdaGMatrices(lambdaI, genEpsI, zeta);
-            this->computeLambdaGMatrices(lambdaJ, genEpsJ, zeta);
-
+            this->computeLambdaGMatrices(lambda, genEps, zeta);
             // L = sum_{i,j} (lambdaI_i)^T * A^ij * lambdaJ_j
             // @todo Naive implementation - should be optimized 
             // note: L will only be symmetric if lambdaI = lambdaJ
             L.zero();
             for ( int j = 0; j < 3; j++ ) {
                 for ( int k = 0; k < 3; k++ ) {
-                    this->computeTripleProduct(temp, lambdaI [ j ], A [ j ][ k ], lambdaJ [ k ]);
+                    this->computeTripleProduct(temp, lambda [ j ], A [ j ][ k ], lambda [ k ]);
                     L.add(temp);
                 }
             }
-            
-            this->computeTripleProduct(K, B, L, B);
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    A_lambda[i].addProductOf(A[i][j], lambda[j]);
+                }
+                L.plusProductSymmUpper(lambda[i], A_lambda[i], 1.0);
+            }
+            L.symmetrized();
+
+            LB.beProductOf(L, B);
             double dV = this->computeVolumeAroundLayer(gp, layer);
-            tempAnswer.add(dV, K);
+            tempAnswer.plusProductSymmUpper(B, LB, dV);
+            //this->computeTripleProduct(K, B, L, B);
+            //double dV = this->computeVolumeAroundLayer(gp, layer);
+            //tempAnswer.add(dV, K);
 
 
         }
     }
-
+    tempAnswer.symmetrized();
     const IntArray &ordering = this->giveOrdering(All);
     answer.assemble(tempAnswer, ordering, ordering);
 
@@ -685,6 +695,40 @@ ModShell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *
     // position 32
     A [ 2 ] [ 1 ].beTranspositionOf( A [ 1 ] [ 2 ] );
     
+
+#if 1
+    // Material stiffness when internal work is formulated in terms of P and F:
+    // \Delta(P*G^I) = L^IJ * \Delta g_J
+    // A[I][J] = L^IJ = L_klmn * [G^I]_l * [G^J]_n
+    mat->give3dMaterialStiffnessMatrix(Dcart, TangentStiffness, gp, tStep);     // L_ijkl - cartesian system (Voigt)
+
+    FloatMatrix G;
+    this->evalInitialContravarBaseVectorsAt(lcoords, G);
+
+    for (int I = 1; I < 3; I++) {
+        for (int J = 0; J < 3; J++) {
+            A[I - 1][J - 1].resize(3, 3);
+            A[I - 1][J - 1].zero();
+
+            for (int k = 1; k <= 3; k++) {
+                for (int l = 1; l <= 3; l++) {
+                    for (int m = 1; m <= 3; m++) {
+                        for (int n = 1; n <= 3; n++) {
+                    
+                            A[I-1][J-1].at(k, m) += D.at( giveVoigtIndex(k, l), giveVoigtIndex(m, n) ) * G.at(l, I) * G.at(n, J);
+
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+#endif
+
+
+
 }
 
 void
@@ -909,8 +953,7 @@ ModShell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, Flo
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
-        for ( int j = 1; j <= iRuleL->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRuleL->getIntegrationPoint(j - 1);
+        for (GaussPoint *gp : *iRuleL) {
             lCoords = *gp->giveNaturalCoordinates();
             this->computeBmatrixAt(lCoords, B);
 
@@ -957,6 +1000,37 @@ ModShell7Base :: computeSectionalForcesAt(FloatArray &sectionalForces, Integrati
     sectionalForces.add(temp);
     temp.beTProductOf(lambda [2], S3g);
     sectionalForces.add(temp);
+
+#if 1
+    // New, in terms of PK1 stress
+    // \Lambda_i * P * G^I
+    this->computeStressVectorInMaterial(cartStressVector, genEpsC, ip, mat, tStep);
+    this->computeStressResultantsAt(ip, cartStressVector, S1g, S2g, S3g, genEpsC);
+
+    FloatMatrix Gcon;
+    FloatArray lCoords = *ip->giveNaturalCoordinates();
+    this->evalInitialContravarBaseVectorsAt(lCoords, Gcon);
+    FloatMatrix P, PG;
+    P.beMatrixFormOfStress(cartStressVector);
+    PG.beProductOf(P,Gcon);
+    S1g.beColumnOf(PG, 1);
+    S2g.beColumnOf(PG, 2);
+    S3g.beColumnOf(PG, 3);
+    this->computeLambdaGMatrices(lambda, genEpsD, zeta); // associated with the variation of the test functions   
+
+    // f = lambda_1^T * P*G^1 + lambda_2^T * P*G^2 + lambda_3^T * P*G^3
+    sectionalForces.resize(18);
+    FloatArray temp;
+    sectionalForces.zero();
+    temp.beTProductOf(lambda[0], S1g);
+    sectionalForces.add(temp);
+    temp.beTProductOf(lambda[1], S2g);
+    sectionalForces.add(temp);
+    temp.beTProductOf(lambda[2], S3g);
+    sectionalForces.add(temp);
+
+#endif
+
 }
 
 #endif
@@ -1908,17 +1982,17 @@ ModShell7Base :: NodalRecoveryMI_recoverValues(std::vector<FloatArray> &recovere
 
 #if 1
 
-void
-ModShell7Base :: giveSolutionVector(FloatArray &answer, const IntArray &dofIdArray, TimeStep *tStep)
-{
-    // Returns the solution vector corresponding to all the dofs
-    FloatArray temp;
-    //computeVectorOfDofIDs(dofIdArray, VM_Total, tStep, temp);
-    this->computeVectorOf(dofIdArray, VM_Total, tStep, temp, true);
-    answer.resize( ModShell7Base :: giveNumberOfDofs() );
-    answer.zero();
-    answer.assemble( temp, this->giveOrdering(AllInv) );
-}
+//void
+//ModShell7Base :: giveSolutionVector(FloatArray &answer, const IntArray &dofIdArray, TimeStep *tStep)
+//{
+//    // Returns the solution vector corresponding to all the dofs
+//    FloatArray temp;
+//    //computeVectorOfDofIDs(dofIdArray, VM_Total, tStep, temp);
+//    this->computeVectorOf(dofIdArray, VM_Total, tStep, temp, true);
+//    answer.resize( ModShell7Base :: giveNumberOfDofs() );
+//    answer.zero();
+//    answer.assemble( temp, this->giveOrdering(AllInv) );
+//}
 
 
 void
@@ -2120,12 +2194,9 @@ ModShell7Base :: giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &
 
 
 void
-ModShell7Base :: computeGeneralizedStrainVectorNew(FloatArray &answer, const FloatArray &solVec, const FloatMatrix &B) {
+ModShell7Base :: computeGeneralizedStrainVectorNew(FloatArray &answer, const FloatArray &solVec, const FloatMatrix &B) 
+{
     // Returns an array genEps = [dxdxi, dmdxi, m, dgamdxi, gam]^T with size 18
-    answer.resize(18);
-    answer.zero();
-
-    
     /*    18   18   6
      * 6 [B_u   0   0
      * 6   0   B_w  0
@@ -2133,35 +2204,7 @@ ModShell7Base :: computeGeneralizedStrainVectorNew(FloatArray &answer, const Flo
      * 2   0    0  B_gam
      * 1   0    0  N_gam]
      */
-#if 0 // more efficient way
-    int ndofs_xm  = 3 * this->giveNumberOfDofManagers();
-    int ndofs_gam  = 1 * this->giveNumberOfDofManagers();
-    for ( int i = 1; i <= ndofs_xm; i++ ) {
-        for ( int j = 1; j <= 6; j++ ) { // 3dofs*2
-            answer.at(j)      += B.at(    j, i           ) * solVec.at(i);                   // dx/dxi
-            answer.at(6 + j)  += B.at(6 + j, i + ndofs_xm) * solVec.at(i + ndofs_xm);        // dm/dxi
-        }
-    }
-
-    for ( int i = 1; i <= ndofs_xm; i++ ) {
-        for ( int j = 1; j <= 3; j++ ) { // 3 dofs
-            answer.at(12 + j) += B.at(12 + j, i + ndofs_xm) * solVec.at(i + ndofs_xm);        // m
-        }
-    }
-
-    for ( int i = 1; i <= ndofs_gam; i++ ) {
-        for ( int j = 1; j <= 2; j++ ) { // 2 dofs
-            answer.at(15 + j) += B.at(15+j, i + ndofs_xm*2) * solVec.at(i + ndofs_xm * 2);    // dgamma/dxi
-        }
-    }
-
-    for ( int i = 1; i <= ndofs_gam; i++ ) { //1 dof
-        answer.at(18) += B.at(18, i + ndofs_xm*2) * solVec.at(i + ndofs_xm * 2);            // gamma
-    }
-#else
     answer.beProductOf(B, solVec);
-
-#endif
 }
 
 
@@ -2176,7 +2219,6 @@ ModShell7Base :: giveUnknownsAt(FloatArray &lCoords, FloatArray &solVec, FloatAr
     x = { temp.at(1), temp.at(2), temp.at(3) };
     m = { temp.at(4), temp.at(5), temp.at(6) };
     gam = temp.at(7);
-
 
 }
 
@@ -2763,15 +2805,6 @@ ModShell7Base :: giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> 
 }
 
 
-//void
-//ModShell7Base :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords) {
-//    // Local coords for a quadratic wedge element (VTK cell type 26)
-//    double z = 0.999;
-//    nodeLocalXi1Coords.setValues(15, 1., 0., 0., 1., 0., 0., .5, 0., .5, .5, 0., .5, 1., 0., 0.);      
-//    nodeLocalXi2Coords.setValues(15, 0., 1., 0., 0., 1., 0., .5, .5, 0., .5, .5, 0., 0., 1., 0.);
-//    nodeLocalXi3Coords.setValues(15, -z, -z, -z,  z,  z,  z, -z, -z, -z,  z,  z,  z, 0., 0., 0.);
-//}
-
 #endif
 
 
@@ -2790,14 +2823,6 @@ ModShell7Base :: convV6ToV9Stress(const FloatArray &V6)
     answer.at(2) = answer.at(4) = V6.at(6);
     return answer;
 };
-
-
-void
-ModShell7Base::computeStrainVectorInLayer( FloatArray &answer, const FloatArray &masterGpStrain, GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep )
-{
-    OOFEM_ERROR("ModShell7Base :: computeStrainVectorInLayer - Should not be called! Not meaningful for this element.");
-}
-
 
 
 void 
@@ -2866,8 +2891,50 @@ ModShell7Base :: evaluateFailureCriteriaQuantities(FailureCriteriaStatus *fc, Ti
 double
 ModShell7Base :: computeArea()
 {
+    ///@todo Why is this here?? JB
     FEI3dTrQuad *test = dynamic_cast< FEI3dTrQuad * >( this->giveInterpolation() );
     return test->giveArea(FEIElementGeometryWrapper(this));
 }
+
+
+int
+ModShell7Base::giveSymVoigtIndex(int ind1, int ind2)
+{
+    // Returns the Voigt index corresponding to two given tensor indices for a symmetric tensor.
+    // [11 12 13      [1 6 5
+    //  21 22 23  = >  6 2 4
+    //  31 32 33]      5 4 3]
+    //
+    std::vector< std::vector<int> > voigtIndices;
+    voigtIndices.resize(3);
+    voigtIndices[0] = { 1, 6, 5 };
+    voigtIndices[1] = { 6, 2, 4 };
+    voigtIndices[2] = { 5, 4, 3 };
+    
+    return voigtIndices[ind1][ind2];
+
+};
+
+
+int
+ModShell7Base::giveVoigtIndex(int ind1, int ind2)
+{
+    // Returns the Voigt index corresponding to two given tensor indices for a general tensor.
+    // [11 12 13      [1 6 5
+    //  21 22 23  = >  9 2 4
+    //  31 32 33]      8 7 3]
+    //
+    std::vector< std::vector<int> > voigtIndices;
+    voigtIndices.resize(3);
+    voigtIndices[0] = { 1, 6, 5 };
+    voigtIndices[1] = { 9, 2, 4 };
+    voigtIndices[2] = { 8, 7, 3 };
+
+    return voigtIndices[ind1][ind2];
+
+};
+
+
+
 
 } // end namespace oofem

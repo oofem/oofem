@@ -411,7 +411,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
             this->computeGeneralizedStrainVectorNew(genEps,  solVec,  B);
             this->computeGeneralizedStrainVectorNew(genEpsD, solVecD, BEnr);
 
-                double zeta = giveGlobalZcoord(gp->giveNaturalCoordinate(3), lCoords);
+            double zeta = giveGlobalZcoord(gp->giveNaturalCoordinate(3), lCoords);
             this->computeSectionalForcesAt(sectionalForces, gp, mat, tStep, genEps, genEpsD, zeta);
 
             // Computation of nodal forces: f = B^t*[N M T Ms Ts]^t
@@ -544,37 +544,37 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
     for ( GaussPoint *gp: *iRuleL ) {
         lCoords.at(1) = gp->giveNaturalCoordinate(1);
         lCoords.at(2) = gp->giveNaturalCoordinate(2);
-            lCoords.at(3) = dei->giveDelamXiCoord();
+        lCoords.at(3) = dei->giveDelamXiCoord();
 
-            this->computeEnrichedBmatrixAt(lCoords, B, dei);
-            this->computeEnrichedNmatrixAt(lCoords, N, dei);
+        this->computeEnrichedBmatrixAt(lCoords, B, dei);
+        this->computeEnrichedNmatrixAt(lCoords, N, dei);
 
-            // Lambda matrix
-            genEpsD.beProductOf(B, solVecD);
-            double xi = dei->giveDelamXiCoord();
-            double zeta = xi * this->layeredCS->computeIntegralThick() * 0.5;
-            this->computeLambdaNMatrix(lambda, genEpsD, zeta);
+        // Lambda matrix
+        genEpsD.beProductOf(B, solVecD);
+        double xi = dei->giveDelamXiCoord();
+        double zeta = xi * this->layeredCS->computeIntegralThick() * 0.5;
+        this->computeLambdaNMatrix(lambda, genEpsD, zeta);
         
-            // Compute jump vector
-            unknowns.beProductOf(N, solVecD);
-            xd.beProductOf(lambda,unknowns); // spatial jump
-		    genEpsC.beProductOf(B, solVecC);
-		    this->computeFAt(lCoords, F, genEpsC);
+        // Compute jump vector
+        unknowns.beProductOf(N, solVecD);
+        xd.beProductOf(lambda,unknowns); // spatial jump
+		genEpsC.beProductOf(B, solVecC);
+		this->computeFAt(lCoords, F, genEpsC);
 
-		    // Transform xd and F to a local coord system
-            this->evalInitialCovarNormalAt(nCov, lCoords);
-            Q.beLocalCoordSys(nCov);
-            xd.rotatedWith(Q,'n');
-            F.rotatedWith(Q,'n');
+		// Transform xd and F to a local coord system
+        this->evalInitialCovarNormalAt(nCov, lCoords);
+        Q.beLocalCoordSys(nCov);
+        xd.rotatedWith(Q,'n');
+        F.rotatedWith(Q,'n');
 
-            // Compute cohesive traction based on jump
-            intMat->giveFirstPKTraction_3d(T, gp, xd, F, tStep);
-            lambdaN.beProductOf(lambda,N);
-            T.rotatedWith(Q,'t'); // transform back to global coord system
+        // Compute cohesive traction based on jump
+        intMat->giveFirstPKTraction_3d(T, gp, xd, F, tStep);
+        lambdaN.beProductOf(lambda,N);
+        T.rotatedWith(Q,'t'); // transform back to global coord system
 
-            Fp.beTProductOf(lambdaN, T);
-            double dA = this->computeAreaAround(gp,xi);
-            answerTemp.add(dA*DISC_DOF_SCALE_FAC,Fp);
+        Fp.beTProductOf(lambdaN, T);
+        double dA = this->computeAreaAround(gp,xi);
+        answerTemp.add(dA*DISC_DOF_SCALE_FAC,Fp);
         }
 
         int ndofs = Shell7Base :: giveNumberOfDofs();
