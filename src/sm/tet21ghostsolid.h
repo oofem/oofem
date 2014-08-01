@@ -48,7 +48,7 @@ class tet21ghostsolid : public NLStructuralElement
 private:
     FloatMatrix Dghost;
 
-    void giveDisplacementsIncrementData(FloatArray &u_prev, FloatArray &u, FloatArray &inc, TimeStep *tStep);
+    void giveUnknownData(FloatArray &u_prev, FloatArray &u, FloatArray &inc, TimeStep *tStep);
 
 public:
     tet21ghostsolid(int n, Domain *d);
@@ -68,6 +68,7 @@ protected:
     static FEI3dTetLin interpolation_lin;
 
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    virtual void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
     virtual void computeGaussPoints();
 
     /// Ordering of momentum balance dofs in element. Used to assemble the element stiffness
