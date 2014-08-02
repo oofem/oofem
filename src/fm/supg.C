@@ -84,13 +84,7 @@ SUPG :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, atolv, _IFT_SUPG_atolv);
 
 
-    int __val = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, __val, _IFT_SUPG_stopmaxiter);
-    if ( __val ) {
-        stopmaxiter = true;
-    } else {
-        stopmaxiter = false;
-    }
+    stopmaxiter = ir->hasField(_IFT_SUPG_stopmaxiter);
 
     maxiter = 200;
     IR_GIVE_OPTIONAL_FIELD(ir, maxiter, _IFT_SUPG_maxiter);
@@ -596,9 +590,7 @@ SUPG :: updateYourself(TimeStep *tStep)
 void
 SUPG :: updateInternalState(TimeStep *tStep)
 {
-    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        Domain *domain = this->giveDomain(idomain);
-
+    for ( auto &domain: domainList ) {
         int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
             for ( int j = 1; j <= nnodes; j++ ) {
@@ -882,10 +874,9 @@ SUPG :: evaluateElementStabilizationCoeffs(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
-    SUPGElement *ePtr;
 
     for ( int i = 1; i <= nelem; i++ ) {
-        ePtr = static_cast< SUPGElement * >( domain->giveElement(i) );
+        SUPGElement *ePtr = static_cast< SUPGElement * >( domain->giveElement(i) );
         ePtr->updateStabilizationCoeffs(tStep);
     }
 }
@@ -895,13 +886,12 @@ SUPG :: updateElementsForNewInterfacePosition(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
-    SUPGElement *ePtr;
 
     OOFEM_LOG_DEBUG("SUPG :: updateElements - updating elements for interface position");
 
 
     for ( int i = 1; i <= nelem; i++ ) {
-        ePtr = static_cast< SUPGElement * >( domain->giveElement(i) );
+        SUPGElement *ePtr = static_cast< SUPGElement * >( domain->giveElement(i) );
         ePtr->updateElementForNewInterfacePosition(tStep);
     }
 }

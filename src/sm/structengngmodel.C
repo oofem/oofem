@@ -191,13 +191,8 @@ StructuralEngngModel :: checkConsistency()
 void
 StructuralEngngModel :: updateInternalState(TimeStep *tStep)
 {
-    int nnodes;
-    Domain *domain;
-
-    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        domain = this->giveDomain(idomain);
-
-        nnodes = domain->giveNumberOfDofManagers();
+    for ( auto &domain: domainList ) {
+        int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
             for ( int j = 1; j <= nnodes; j++ ) {
                 this->updateDofUnknownsDictionary(domain->giveDofManager(j), tStep);

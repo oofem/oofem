@@ -189,11 +189,7 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_NonLinearStatic_refloadmode);
     this->refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 
-    if ( ir->hasField(_IFT_NonLinearStatic_keepll) ) {
-        mstepCumulateLoadLevelFlag = true;
-    } else {
-        mstepCumulateLoadLevelFlag = false;
-    }
+    mstepCumulateLoadLevelFlag = ir->hasField(_IFT_NonLinearStatic_keepll);
 
     // called just to mark field as recognized, used later
     ir->hasField(_IFT_NonLinearStatic_donotfixload);

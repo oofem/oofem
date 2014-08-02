@@ -364,8 +364,7 @@ void
 StationaryTransportProblem :: updateInternalState(TimeStep *tStep)
 {
     ///@todo Remove this, unnecessary with solving as a nonlinear problem (left for now, since nonstationary problems might still need it)
-    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        Domain *domain = this->giveDomain(idomain);
+    for ( auto &domain: domainList ) {
         int nelem = domain->giveNumberOfElements();
         for ( int j = 1; j <= nelem; j++ ) {
             domain->giveElement(j)->updateInternalState(tStep);
