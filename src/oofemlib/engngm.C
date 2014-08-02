@@ -516,8 +516,8 @@ EngngModel :: forceEquationNumbering()
     }
 
 #ifdef __PARALLEL_MODE
-    for ( auto &parallelContext: parallelContextList ) {
-        parallelContext.init(i);
+    for ( std :: size_t i = 1; i <= parallelContextList.size(); i++ ) {
+        this->parallelContextList[i].init(i);
     }
 
 #endif
@@ -1601,7 +1601,6 @@ EngngModel :: initParallelContexts()
     for ( int i = 0; i < this->giveNumberOfDomains(); ++i ) {
         parallelContextList.emplace_back(this);
     }
-}
 }
 #endif
 

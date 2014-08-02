@@ -459,7 +459,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     this->domainList.emplace(domainList.begin() + 1, dNew);
 
 #ifdef __PARALLEL_MODE
-    this->parallelContextList.emplace(parallelContextList + 1, this);
+    this->parallelContextList.emplace(parallelContextList.begin() + 1, this);
 #endif
 
     // init equation numbering
@@ -514,8 +514,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     domainList[0]->setNumber(1);
 
 #ifdef __PARALLEL_MODE
-    parallelContextList[0] = parallelContextList[1];
-    parallelContextList.resize(1);
+    parallelContextList = {parallelContextList[1]};
 #endif
 
     // keep equation numbering of new domain
