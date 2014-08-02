@@ -32,44 +32,63 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "localgaussianrandomgenerator.h"
+#include "localgaussianrandomfunction.h"
 #include "mathfem.h"
 #include "classfactory.h"
 
 #include <ctime>
 
 namespace oofem {
-REGISTER_RandomFieldGenerator(LocalGaussianRandomGenerator);
+REGISTER_Function(LocalGaussianRandomFunction);
 
-LocalGaussianRandomGenerator :: LocalGaussianRandomGenerator(int num, Domain *d) : RandomFieldGenerator(num, d)
+LocalGaussianRandomFunction :: LocalGaussianRandomFunction(int num, Domain *d) : Function(num, d)
 { }
 
-LocalGaussianRandomGenerator :: ~LocalGaussianRandomGenerator()
+LocalGaussianRandomFunction :: ~LocalGaussianRandomFunction()
 { }
 
 void
-LocalGaussianRandomGenerator :: generateRandomValue(double &value, FloatArray *position)
+LocalGaussianRandomFunction :: evaluate(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict)
 {
-    value = normalCdfInverse(ran1(& randomInteger), mean, variance * mean);
+    answer = {evaluateAtTime(0)};
+}
+
+double
+LocalGaussianRandomFunction :: evaluateAtTime(double t)
+{
+    return {normalCdfInverse(ran1(& randomInteger), mean, variance * mean)};
+}
+
+double
+LocalGaussianRandomFunction :: evaluateVelocityAtTime(double t)
+{
+    OOFEM_ERROR("Can't generate velocity of random number");
+    return 0.;
+}
+
+double
+LocalGaussianRandomFunction :: evaluateAccelerationAtTime(double t)
+{
+    OOFEM_ERROR("Can't generate acceleration of random number");
+    return 0.;
 }
 
 IRResultType
-LocalGaussianRandomGenerator :: initializeFrom(InputRecord *ir)
+LocalGaussianRandomFunction :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, mean, _IFT_LocalGaussianRandomGenerator_mean);
-    IR_GIVE_FIELD(ir, variance, _IFT_LocalGaussianRandomGenerator_variance);
+    IR_GIVE_FIELD(ir, mean, _IFT_LocalGaussianRandomFunction_mean);
+    IR_GIVE_FIELD(ir, variance, _IFT_LocalGaussianRandomFunction_variance);
     randomInteger = ( long ) ( -time(NULL) );
     int seed = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, seed, _IFT_LocalGaussianRandomGenerator_seed);
+    IR_GIVE_OPTIONAL_FIELD(ir, seed, _IFT_LocalGaussianRandomFunction_seed);
     if ( seed ) {
         randomInteger = seed;
     }
 
     return IRRT_OK;
 }
-
 
 #define IA 16807
 #define IM 2147483647
@@ -81,7 +100,7 @@ LocalGaussianRandomGenerator :: initializeFrom(InputRecord *ir)
 #define EPS 1.2e-7
 #define RNMX ( 1.0 - EPS )
 
-double LocalGaussianRandomGenerator :: ran1(long *idum)
+double LocalGaussianRandomFunction :: ran1(long *idum)
 {
     long k;
     static long iy = 0;
@@ -126,7 +145,7 @@ double LocalGaussianRandomGenerator :: ran1(long *idum)
     }
 }
 
-double LocalGaussianRandomGenerator :: normalCdfInverse(double cdf, double a, double b)
+double LocalGaussianRandomFunction :: normalCdfInverse(double cdf, double a, double b)
 {
     double x;
     double x2;
@@ -139,7 +158,7 @@ double LocalGaussianRandomGenerator :: normalCdfInverse(double cdf, double a, do
     return x;
 }
 
-double LocalGaussianRandomGenerator :: normal01CdfInverse(double p)
+double LocalGaussianRandomFunction :: normal01CdfInverse(double p)
 {
     double a [ 8 ] = {
         3.3871328727963666080,     1.3314166789178437745e+2,
@@ -230,7 +249,7 @@ double LocalGaussianRandomGenerator :: normal01CdfInverse(double p)
 }
 
 
-double LocalGaussianRandomGenerator :: dpolyValue(int n, double a[], double x)
+double LocalGaussianRandomFunction :: dpolyValue(int n, double a[], double x)
 {
     int i;
     double value;

@@ -32,26 +32,25 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef localrandomgenerator_h
-#define localrandomgenerator_h
+#ifndef localgaussianrandomfunction_h
+#define localgaussianrandomfunction_h
 
-#include "randomfieldgenerator.h"
-#include "gausspoint.h"
+#include "function.h"
 
-///@name Input fields for LocalGaussianRandomGenerator
+///@name Input fields for LocalGaussianRandomFunction
 //@{
-#define _IFT_LocalGaussianRandomGenerator_Name "localgaussrandomgenerator"
-#define _IFT_LocalGaussianRandomGenerator_mean "mean"
-#define _IFT_LocalGaussianRandomGenerator_variance "variance"
-#define _IFT_LocalGaussianRandomGenerator_seed "seed"
+#define _IFT_LocalGaussianRandomFunction_Name "localgaussrandomfunction"
+#define _IFT_LocalGaussianRandomFunction_mean "mean"
+#define _IFT_LocalGaussianRandomFunction_variance "variance"
+#define _IFT_LocalGaussianRandomFunction_seed "seed"
 //@}
 
 namespace oofem {
 /**
- * This class implements a local (no spatial correlation) random generator using Gaussian distribution.
+ * This class implements a local (no spatial correlation) random function using Gaussian distribution.
  * @author Peter Grassl
  */
-class OOFEM_EXPORT LocalGaussianRandomGenerator : public RandomFieldGenerator
+class OOFEM_EXPORT LocalGaussianRandomFunction : public Function
 {
 protected:
     /// Integer which is the input of the pseudo-random number generator.
@@ -60,19 +59,19 @@ protected:
     double mean, variance;
 
 public:
-    /// Constructor. Creates empty RandomFieldGenerator
-    LocalGaussianRandomGenerator(int n, Domain * d);
+    /// Constructor.
+    LocalGaussianRandomFunction(int n, Domain * d);
     /// Destructor
-    virtual ~LocalGaussianRandomGenerator();
+    virtual ~LocalGaussianRandomFunction();
 
-    void generateRandomValue(double &value, FloatArray *position);
-    void generateRandomValueAt(double &value, GaussPoint *gp) {
-        this->generateRandomValue(value, NULL);
-    }
+    virtual void evaluate(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict);
+    virtual double evaluateAtTime(double t);
+    virtual double evaluateVelocityAtTime(double t);
+    virtual double evaluateAccelerationAtTime(double t);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual const char *giveClassName() const { return "LocalGaussianRandomGenerator"; }
-    virtual const char *giveInputRecordName() const { return _IFT_LocalGaussianRandomGenerator_Name; }
+    virtual const char *giveClassName() const { return "LocalGaussianRandomFunction"; }
+    virtual const char *giveInputRecordName() const { return _IFT_LocalGaussianRandomFunction_Name; }
 
 protected:
     /**

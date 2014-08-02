@@ -61,7 +61,6 @@ class CrossSection;
 class Material;
 class Function;
 class NonlocalBarrier;
-class RandomFieldGenerator;
 class ExportModule;
 class SparseNonLinearSystemNM;
 class InitModule;
@@ -103,7 +102,6 @@ template< typename T > Material *matCreator(int n, Domain *d) { return new T(n, 
 template< typename T > EngngModel *engngCreator(int n, EngngModel *m) { return ( new T(n, m) ); }
 template< typename T > Function *funcCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > NonlocalBarrier *nlbCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > RandomFieldGenerator *rfgCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > ExportModule *exportCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
 template< typename T > SparseNonLinearSystemNM *nonlinCreator(Domain *d, EngngModel *m) { return ( new T(d, m) ); }
 template< typename T > InitModule *initCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
@@ -140,7 +138,6 @@ template< typename T > FailureCriteriaStatus *failureCriteriaCreator(int n, Fail
 #define REGISTER_EngngModel(class) static bool __dummy_ ## class = GiveClassFactory().registerEngngModel(_IFT_ ## class ## _Name, engngCreator< class > );
 #define REGISTER_Function(class) static bool __dummy_ ## class = GiveClassFactory().registerFunction(_IFT_ ## class ## _Name, funcCreator< class > );
 #define REGISTER_NonlocalBarrier(class) static bool __dummy_ ## class = GiveClassFactory().registerNonlocalBarrier(_IFT_ ## class ## _Name, nlbCreator< class > );
-#define REGISTER_RandomFieldGenerator(class) static bool __dummy_ ## class = GiveClassFactory().registerRandomFieldGenerator(_IFT_ ## class ## _Name, rfgCreator< class > );
 #define REGISTER_ExportModule(class) static bool __dummy_ ## class = GiveClassFactory().registerExportModule(_IFT_ ## class ## _Name, exportCreator< class > );
 #define REGISTER_SparseNonLinearSystemNM(class) static bool __dummy_ ## class = GiveClassFactory().registerSparseNonLinearSystemNM(_IFT_ ## class ## _Name, nonlinCreator< class > );
 #define REGISTER_InitModule(class) static bool __dummy_ ## class = GiveClassFactory().registerInitModule(_IFT_ ## class ## _Name, initCreator< class > );
@@ -192,8 +189,6 @@ private:
     std :: map < std :: string, Function * ( * )(int, Domain *) > funcList;
     /// Associative container containing nonlocal barriers creators with barrier name as key.
     std :: map < std :: string, NonlocalBarrier * ( * )(int, Domain *) > nlbList;
-    /// Associative container containing random field generator creators with names as key.
-    std :: map < std :: string, RandomFieldGenerator * ( * )(int, Domain *) > rfgList;
     /// Associative container containing export module creators.
     std :: map < std :: string, ExportModule * ( * )(int, EngngModel *) > exportList;
     /// Associative container containing nonlinear solver creators.
@@ -345,19 +340,6 @@ public:
      * @param name Keyword string.
      */
     bool registerNonlocalBarrier( const char *name, NonlocalBarrier * ( *creator )( int, Domain * ) );
-    /**
-     * Creates new instance of random field generator corresponding to given keyword.
-     * @param name Keyword string determining the type of new instance.
-     * @param num  object's number.
-     * @param domain Domain assigned to new object.
-     * @return Newly allocated object of requested type, null if keyword not supported.
-     */
-    RandomFieldGenerator *createRandomFieldGenerator(const char *name, int num, Domain *domain);
-    /**
-     * Registers a new random field generator in the class factory.
-     * @param name Keyword string.
-     */
-    bool registerRandomFieldGenerator( const char *name, RandomFieldGenerator * ( *creator )( int, Domain * ) );
     /**
      * Creates new instance of export module corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
