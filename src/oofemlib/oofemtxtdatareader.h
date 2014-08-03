@@ -52,30 +52,25 @@ namespace oofem {
 class OOFEM_EXPORT OOFEMTXTDataReader : public DataReader
 {
 protected:
-    OOFEMTXTInputRecord ir;
-    std :: ifstream inputStream;
     std :: string dataSourceName;
+    std :: list< OOFEMTXTInputRecord > recordList;
 
-    /// Keep track of read line from stream. Used for error repors.
-    int lineNumber;
+    /// Keeps track of the current position in the list
+    std :: list< OOFEMTXTInputRecord > :: iterator it;
 
 public:
     /// Constructor.
-    OOFEMTXTDataReader(const char *inputfilename);
+    OOFEMTXTDataReader(std :: string inputfilename);
     OOFEMTXTDataReader(const OOFEMTXTDataReader & x);
     virtual ~OOFEMTXTDataReader();
 
-    /// Return a line number, which is helpful for tracking errors.
-    int giveLineNumber() { return lineNumber; }
-
     virtual InputRecord *giveInputRecord(InputRecordType, int recordId);
-    virtual std :: string giveLine();
     virtual void finish();
     virtual const char *giveDataSourceName() const { return dataSourceName.c_str(); }
 
 protected:
-    void giveLineFromInput(std :: string &line);
-    void giveRawLineFromInput(std :: string &line);
+    bool giveLineFromInput(std :: ifstream &stream, int &lineNum, std :: string &line);
+    bool giveRawLineFromInput(std :: ifstream &stream, int &lineNum, std :: string &line);
 };
 } // end namespace oofem
 #endif // oofemtxtdatareader_h

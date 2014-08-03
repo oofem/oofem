@@ -1540,7 +1540,7 @@ EngngModel :: GiveDomainDataReader(int domainNum, int domainSerNum, ContextFileM
 
     DataReader *dr;
 
-    if ( ( dr = new OOFEMTXTDataReader( fname.c_str() ) ) == NULL ) {
+    if ( ( dr = new OOFEMTXTDataReader( fname ) ) == NULL ) {
         OOFEM_ERROR("Creation of DataReader failed");
     }
 
