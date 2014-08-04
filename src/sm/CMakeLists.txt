@@ -169,7 +169,6 @@ set (sm_status
     rheoChM.C maxwellChM.C kelvinChM.C
     rcm2.C
     isodamagemodel.C
-    hydram.C
     mplasticmaterial2.C
     deformationtheorymaterial.C
     microplanematerial.C microplanematerial_bazant.C

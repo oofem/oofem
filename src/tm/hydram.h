@@ -75,8 +75,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "timestep.h"
-#include "structuralms.h"
-#include "structuralmaterial.h"
+#include "material.h"
 #include "interface.h"
 
 ///@name Input fields for HydrationModel
