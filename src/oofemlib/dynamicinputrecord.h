@@ -45,10 +45,10 @@ class FEMComponent;
 class DynamicInputRecord;
 
 /// Helper function for creating a dynamic input record for a node
-DynamicInputRecord *CreateNodeIR(int i, InputFieldType nodeType, const FloatArray &coord);
+DynamicInputRecord *CreateNodeIR(int i, InputFieldType nodeType, FloatArray coord);
 
 /// Helper function for creating elements (with optional cross-section number).
-DynamicInputRecord *CreateElementIR(int i, InputFieldType elementType, const IntArray &nodes, int cs = 0);
+DynamicInputRecord *CreateElementIR(int i, InputFieldType elementType, IntArray nodes, int cs = 0);
 
 /**
  * Class representing the a dynamic Input Record.

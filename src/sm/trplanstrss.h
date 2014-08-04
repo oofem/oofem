@@ -99,9 +99,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
-    //void ZZNodalRecoveryMI_computeNValProduct (FloatArray& answer, InternalStateType type, TimeStep* tStep);
-    //void ZZNodalRecoveryMI_computeNNMatrix (FloatArray& answer, InternalStateType type);
-
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
 
