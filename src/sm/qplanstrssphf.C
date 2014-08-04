@@ -56,7 +56,7 @@ QPlaneStressPhF2d::giveDofManDofIDMask_u( IntArray &answer )
 void
 QPlaneStressPhF2d::giveDofManDofIDMask_d( IntArray &answer )
 {
-    answer = IntArray({ T_f });
+    answer = IntArray{ T_f };
 }
 
 

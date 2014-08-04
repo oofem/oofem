@@ -176,7 +176,7 @@ IntMatCoulombContact::giveEngTraction_2d( FloatArray &answer, GaussPoint *gp, co
     this->initGpForNewStep( gp );
     double normalJump = jump.at( 2 );
     FloatArray shearJump;
-    shearJump = FloatArray({ jump.at(1) });
+    shearJump = FloatArray{ jump.at(1) };
 
     double normalStress = 0.0;
     FloatArray shearStress, tempShearStressShift;

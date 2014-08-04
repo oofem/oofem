@@ -1020,7 +1020,7 @@ ModShell7Base :: computeSectionalForcesAt(FloatArray &sectionalForces, Integrati
 
     // f = lambda_1^T * P*G^1 + lambda_2^T * P*G^2 + lambda_3^T * P*G^3
     sectionalForces.resize(18);
-    FloatArray temp;
+    //FloatArray temp;
     sectionalForces.zero();
     temp.beTProductOf(lambda[0], S1g);
     sectionalForces.add(temp);

@@ -683,9 +683,12 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         bool foundTip = false;
         double tipArcPos = -1.0;
 
-        if ( ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), iTri, elCenter) ) {
-            foundTip = true;
-        }
+        //if ( ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), iTri, elCenter) ) {
+        //    foundTip = true;
+        //}
+		if (ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), elCenter)) {
+			foundTip = true;
+		}
 
         if ( foundTip ) {
             for ( int i = 1; i <= nNodes; i++ ) {

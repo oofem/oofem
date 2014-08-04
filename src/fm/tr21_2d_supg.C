@@ -851,7 +851,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
             //computing middle points to get six-point triangle
             FloatArray borderpoints(4);
-            int sub_case;
+            int sub_case = 0;
             if ( ( si == 1 ) && ( sqi == 4 ) ) {
                 borderpoints.at(1) = xsi;
                 borderpoints.at(2) = ysi;

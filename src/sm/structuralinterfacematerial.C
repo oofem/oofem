@@ -179,7 +179,7 @@ StructuralInterfaceMaterial :: giveEngTraction_1d(FloatArray &answer, GaussPoint
     FloatArray jump3D(3), traction3D;
     jump3D = { 0.0, 0.0, jump.at(3) };
     this->giveEngTraction_3d(traction3D, gp, jump3D, tStep);
-    answer = FloatArray({ traction3D.at(3) } );
+    answer = FloatArray{ traction3D.at(3) };
 
 #ifdef DEBUG
     if ( ( abs( traction3D.at(1) ) > 1.0e-3 ) || ( abs( traction3D.at(2) ) > 1.0e-3 )  ) {
@@ -491,7 +491,7 @@ StructuralInterfaceMaterial::giveReducedJump(FloatArray &answer, FloatArray &jum
         answer = { jump.at(1), jump.at(3) };
     }
     else if(size == 1 && ( jump.giveSize( ) == 3 )) {
-        answer = FloatArray( { jump.at(3) } );
+        answer = FloatArray{ jump.at(3) };
     }else{
         OOFEM_ERROR( "size must be 1, 2 or 3" );
     }

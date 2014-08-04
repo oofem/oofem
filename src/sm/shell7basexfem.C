@@ -2386,7 +2386,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
         for ( int layer = 1; layer <= numInterfaces; layer++ ) {  
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
                 if ( type == IST_CrossSectionNumber ) {
-                    average = FloatArray({ -double(layer) }); // Set a negative number for interfaces
+                    average = FloatArray{ -double(layer) }; // Set a negative number for interfaces
                 } else {
                     IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
                     VTKXMLExportModule::computeIPAverage(average, iRuleL, this, type, tStep);

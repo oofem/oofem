@@ -52,7 +52,7 @@ set (sm_element
     quad1platesubsoil.C tria1platesubsoil.C
     interfaceelem2dlin.C
     trwarp.C
-    qplanstrssphf.C
+    #qplanstrssphf.C
     )
 
 set (sm_interface_elements

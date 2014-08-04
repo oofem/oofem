@@ -1,7 +1,8 @@
 tr2shell7XFEM.out
 Cantilever beam split in two parts by delamination subjected to edge load
-XFEMStatic nsteps 1 lstype 0 smtype 0 rtolf 1.0e-4 rtold -1.0 manrmsteps 1 controllmode 1 nmodules 1 initialguess 1
-errorcheck filename "tr2shell7XFEM.in"
+#XFEMStatic nsteps 1 lstype 0 smtype 0 rtolf 1.0e-4 rtold -1.0 manrmsteps 1 controllmode 1 nmodules 1 initialguess 1
+StaticStructural nsteps 1 lstype 0 smtype 0 rtolf 1.0e-4 rtold -1.0 manrmsteps 1 controllmode 1 nmodules 0 initialguess 1
+#errorcheck filename "tr2shell7XFEM.in"
 #vtkxml tstep_all dofman_all element_all primvars 1 1 
 domain 3dDirShell 
 OutputManager tstep_all dofman_all element_all

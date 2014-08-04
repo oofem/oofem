@@ -279,7 +279,7 @@ IntElPoint :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
     switch ( domain->giveNumberOfSpatialDimensions() ) {
     case 1:
-        answer = IntArray({ D_u });
+        answer = IntArray{ D_u };
         break;
     case 2:
         answer = { D_u, D_v };
