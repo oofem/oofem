@@ -130,11 +130,6 @@ public:
      */
     void buildReactionTable(IntArray &restrDofMans, IntArray &restrDofs, IntArray &eqn, TimeStep *tStep, int di);
 
-
-#ifdef __PARALLEL_MODE
-    virtual void initParallelContexts();
-#endif
-
 #ifdef __OOFEG
     /**
      * Shows the sparse structure of required matrix, type == 1 stiffness.

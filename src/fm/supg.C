@@ -84,13 +84,7 @@ SUPG :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, atolv, _IFT_SUPG_atolv);
 
 
-    int __val = 1;
-    IR_GIVE_OPTIONAL_FIELD(ir, __val, _IFT_SUPG_stopmaxiter);
-    if ( __val ) {
-        stopmaxiter = true;
-    } else {
-        stopmaxiter = false;
-    }
+    stopmaxiter = ir->hasField(_IFT_SUPG_stopmaxiter);
 
     maxiter = 200;
     IR_GIVE_OPTIONAL_FIELD(ir, maxiter, _IFT_SUPG_maxiter);
@@ -596,9 +590,7 @@ SUPG :: updateYourself(TimeStep *tStep)
 void
 SUPG :: updateInternalState(TimeStep *tStep)
 {
-    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        Domain *domain = this->giveDomain(idomain);
-
+    for ( auto &domain: domainList ) {
         int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
             for ( int j = 1; j <= nnodes; j++ ) {
@@ -718,18 +710,14 @@ SUPG :: checkConsistency()
     // check internal consistency
     // if success returns nonzero
     int nelem;
-    Element *ePtr;
-    SUPGElement *sePtr;
-    GeneralBoundaryCondition *bcPtr;
-    InitialCondition *icPtr;
     Domain *domain = this->giveDomain(1);
 
     nelem = domain->giveNumberOfElements();
     // check for proper element type
 
     for ( int i = 1; i <= nelem; i++ ) {
-        ePtr = domain->giveElement(i);
-        sePtr = dynamic_cast< SUPGElement * >(ePtr);
+        Element *ePtr = domain->giveElement(i);
+        SUPGElement *sePtr = dynamic_cast< SUPGElement * >(ePtr);
         if ( sePtr == NULL ) {
             OOFEM_WARNING("Element %d has no SUPG base", i);
             return 0;
@@ -743,7 +731,7 @@ SUPG :: checkConsistency()
     if ( equationScalingFlag ) {
         int nbc = domain->giveNumberOfBoundaryConditions();
         for ( int i = 1; i <= nbc; i++ ) {
-            bcPtr = domain->giveBc(i);
+            GeneralBoundaryCondition *bcPtr = domain->giveBc(i);
             if ( bcPtr->giveBCValType() == VelocityBVT ) {
                 bcPtr->scale(1. / uscale);
             } else if ( bcPtr->giveBCValType() == PressureBVT ) {
@@ -757,7 +745,7 @@ SUPG :: checkConsistency()
 
         int nic = domain->giveNumberOfInitialConditions();
         for ( int i = 1; i <= nic; i++ ) {
-            icPtr = domain->giveIc(i);
+            InitialCondition *icPtr = domain->giveIc(i);
             if ( icPtr->giveICValType() == VelocityBVT ) {
                 icPtr->scale(VM_Total, 1. / uscale);
             } else if ( icPtr->giveICValType() == PressureBVT ) {
@@ -886,10 +874,9 @@ SUPG :: evaluateElementStabilizationCoeffs(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
-    SUPGElement *ePtr;
 
     for ( int i = 1; i <= nelem; i++ ) {
-        ePtr = static_cast< SUPGElement * >( domain->giveElement(i) );
+        SUPGElement *ePtr = static_cast< SUPGElement * >( domain->giveElement(i) );
         ePtr->updateStabilizationCoeffs(tStep);
     }
 }
@@ -899,13 +886,12 @@ SUPG :: updateElementsForNewInterfacePosition(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
-    SUPGElement *ePtr;
 
     OOFEM_LOG_DEBUG("SUPG :: updateElements - updating elements for interface position");
 
 
     for ( int i = 1; i <= nelem; i++ ) {
-        ePtr = static_cast< SUPGElement * >( domain->giveElement(i) );
+        SUPGElement *ePtr = static_cast< SUPGElement * >( domain->giveElement(i) );
         ePtr->updateElementForNewInterfacePosition(tStep);
     }
 }
@@ -1270,20 +1256,6 @@ SUPG :: updateSolutionVectors(FloatArray &solutionVector, FloatArray &accelerati
         } // end loop over elem internal dofmans
     } // end loop over elems
 }
-
-
-#ifdef __PARALLEL_MODE
-void
-SUPG :: initParallelContexts()
-{
-    ParallelContext *parallelContext;
-    parallelContextList->growTo(ndomains);
-    for ( int i = 1; i <= this->ndomains; i++ ) {
-        parallelContext =  new ParallelContext(this);
-        parallelContextList->put(i, parallelContext);
-    }
-}
-#endif
 
 
 #define __VOF_TRESHOLD 1.e-5

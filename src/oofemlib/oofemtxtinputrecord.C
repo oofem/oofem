@@ -52,7 +52,7 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord() : InputRecord(), tokenizer(), recor
 { }
 
 OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : InputRecord(src), tokenizer(),
-    record(src.record)
+    record(src.record), lineNumber(src.lineNumber)
 {
     tokenizer.tokenizeLine( this->record );
     int ntok = tokenizer.giveNumberOfTokens();
@@ -62,8 +62,8 @@ OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const OOFEMTXTInputRecord &src) : Inp
     }
 }
 
-OOFEMTXTInputRecord :: OOFEMTXTInputRecord(const char *source) : InputRecord(), tokenizer(),
-    record(source)
+OOFEMTXTInputRecord :: OOFEMTXTInputRecord(int linenumber, std :: string source) : InputRecord(), tokenizer(),
+    record(std :: move(source)), lineNumber(linenumber)
 {
     tokenizer.tokenizeLine( this->record );
     int ntok = tokenizer.giveNumberOfTokens();

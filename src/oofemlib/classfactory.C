@@ -251,16 +251,6 @@ bool ClassFactory :: registerNonlocalBarrier( const char *name, NonlocalBarrier 
     CF_STORE(nlbList)
 }
 
-RandomFieldGenerator *ClassFactory :: createRandomFieldGenerator(const char *name, int number, Domain *domain)
-{
-    CF_CREATE(rfgList, number, domain)
-}
-
-bool ClassFactory :: registerRandomFieldGenerator( const char *name, RandomFieldGenerator * ( *creator )( int, Domain * ) )
-{
-    CF_STORE(rfgList)
-}
-
 ExportModule *ClassFactory :: createExportModule(const char *name, int number, EngngModel *emodel)
 {
     CF_CREATE(exportList, number, emodel)

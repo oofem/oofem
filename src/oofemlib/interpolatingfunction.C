@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "externalfieldgenerator.h"
+#include "interpolatingfunction.h"
 #include "floatarray.h"
 #include "classfactory.h"
 
@@ -40,16 +40,23 @@
 #include <fstream>
 
 namespace oofem {
-REGISTER_RandomFieldGenerator(ExternalFieldGenerator);
+REGISTER_Function(InterpolatingFuction);
 
-ExternalFieldGenerator :: ExternalFieldGenerator(int num, Domain *d) : RandomFieldGenerator(num, d)
+InterpolatingFuction :: InterpolatingFuction(int num, Domain *d) : Function(num, d)
 { }
 
-ExternalFieldGenerator :: ~ExternalFieldGenerator()
+InterpolatingFuction :: ~InterpolatingFuction()
 { }
 
-void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *globalCoordinates)
+
+void
+InterpolatingFuction :: evaluate(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict)
 {
+    auto it = valDict.find("x");
+    if ( it == valDict.end() ) {
+        OOFEM_ERROR("Coordinate needed for evaluating function");
+    }
+    const FloatArray &globalCoordinates = it->second.val1;
     // Map the corresponding random value from the field
     int countXDown = 0, countXUp = 0, countYDown = 0, countYUp = 0;
     double randomVariable = 0.;
@@ -63,13 +70,13 @@ void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *gl
     double randomYStart = field(1);
     double randomYEnd = field(3 * ( numberReal(0) - 1 ) + 1);
 
-    if ( !( globalCoordinates->at(1) > randomXStart && globalCoordinates->at(1) < randomXEnd &&
-            globalCoordinates->at(2) > randomYStart && globalCoordinates->at(2) < randomYEnd ) ) {
+    if ( !( globalCoordinates.at(1) > randomXStart && globalCoordinates.at(1) < randomXEnd &&
+            globalCoordinates.at(2) > randomYStart && globalCoordinates.at(2) < randomYEnd ) ) {
         randomVariable = 1;
     } else {
         //Determine the corner points of the square over which we are going to interpolate
         while ( exitFlag == 0 ) {
-            if ( field( 3 * i * numberReal(1) ) > globalCoordinates->at(1) ) {
+            if ( field( 3 * i * numberReal(1) ) > globalCoordinates.at(1) ) {
                 if ( i == 0 ) { //Check soundness
                     OOFEM_ERROR("i is zero");
                 } else if ( i == numberReal(0) ) {
@@ -79,7 +86,7 @@ void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *gl
                 exitFlag = 1;
                 countXDown = i - 1;
                 countXUp = i;
-                helpX = ( globalCoordinates->at(1) - field( 3 * countXDown * numberReal(1) ) )
+                helpX = ( globalCoordinates.at(1) - field( 3 * countXDown * numberReal(1) ) )
                         / ( field( 3 * countXUp * numberReal(1) ) - field( 3 * countXDown * numberReal(1) ) );
             }
 
@@ -89,7 +96,7 @@ void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *gl
         //Determine y count
         i = 0, exitFlag = 0;
         while ( exitFlag == 0 ) {
-            if ( field(3 * i + 1) > globalCoordinates->at(2) ) {
+            if ( field(3 * i + 1) > globalCoordinates.at(2) ) {
                 if ( i == 0 ) {
                     OOFEM_ERROR("i is zero");
                 } else if ( i == numberReal(0) ) {
@@ -99,7 +106,7 @@ void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *gl
                 exitFlag = 1;
                 countYDown = i - 1;
                 countYUp = i;
-                helpY = ( globalCoordinates->at(2) - field(3 * countYDown + 1) )
+                helpY = ( globalCoordinates.at(2) - field(3 * countYDown + 1) )
                         / ( field(3 * countYUp + 1) - field(3 * countYDown + 1) );
             }
 
@@ -120,19 +127,25 @@ void ExternalFieldGenerator :: generateRandomValue(double &value, FloatArray *gl
         randomVariable = 1.e-8;
     }
 
-    value = randomVariable;
+    answer = {randomVariable};
+}
 
-    return;
+double
+InterpolatingFuction :: evaluateAtTime(double t)
+{
+    OOFEM_ERROR("InterpolatingFunction needs coordinates to evaluate.");
+    return 0.;
 }
 
 
+
 IRResultType
-ExternalFieldGenerator :: initializeFrom(InputRecord *ir)
+InterpolatingFuction :: initializeFrom(InputRecord *ir)
 {
     std :: string name;
     IRResultType result;              // Required by IR_GIVE_FIELD macro
 
-    IR_GIVE_FIELD(ir, name, _IFT_ExternalFieldGenerator_name);
+    IR_GIVE_FIELD(ir, name, _IFT_InterpolatingFuction_filename);
 
     std :: ifstream inputField( name.c_str() );
 

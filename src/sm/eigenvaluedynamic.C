@@ -383,17 +383,4 @@ EigenValueDynamic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
     iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
-#ifdef __SLEPC_MODULE
-void
-EigenValueDynamic :: initParallelContexts()
-{
-    ParallelContext *parallelContext;
-
-    parallelContextList->growTo(ndomains);
-    for ( int i = 0; i < this->ndomains; i++ ) {
-        parallelContext =  new ParallelContext(this);
-        parallelContextList->put(i + 1, parallelContext);
-    }
-}
-#endif
 } // end namespace oofem

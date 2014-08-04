@@ -191,13 +191,8 @@ StructuralEngngModel :: checkConsistency()
 void
 StructuralEngngModel :: updateInternalState(TimeStep *tStep)
 {
-    int nnodes;
-    Domain *domain;
-
-    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        domain = this->giveDomain(idomain);
-
-        nnodes = domain->giveNumberOfDofManagers();
+    for ( auto &domain: domainList ) {
+        int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
             for ( int j = 1; j <= nnodes; j++ ) {
                 this->updateDofUnknownsDictionary(domain->giveDofManager(j), tStep);
@@ -266,21 +261,6 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
     restrDofs.resizeWithValues(count);
     eqn.resizeWithValues(count);
 }
-
-
-#ifdef __PARALLEL_MODE
-void
-StructuralEngngModel :: initParallelContexts()
-{
-    ParallelContext *parallelContext;
-
-    parallelContextList->growTo(ndomains);
-    for ( int i = 0; i < this->ndomains; i++ ) {
-        parallelContext =  new ParallelContext(this);
-        parallelContextList->put(i + 1, parallelContext);
-    }
-}
-#endif
 
 
 #ifdef __OOFEG

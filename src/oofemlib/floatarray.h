@@ -385,8 +385,8 @@ public:
      * The local coordinate oXi is in the range [0,1]
      * Written by Erik Svenning, August 2013.
      */
-    double distance(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const;
-    double distance_square(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const;
+    double distance(const FloatArray &iP1, const FloatArray &iP2, double &oXi, double &oXiUnbounded) const;
+    double distance_square(const FloatArray &iP1, const FloatArray &iP2, double &oXi, double &oXiUnbounded) const;
 
     /**
      * Computes the square of distance between position represented by receiver and position given as parameter.

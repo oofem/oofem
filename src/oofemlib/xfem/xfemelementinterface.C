@@ -108,8 +108,9 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
     FloatMatrix dNdx;
     FloatArray N;
     FEInterpolation *interp = iEl.giveInterpolation();
-    interp->evaldNdx( dNdx, * iGP.giveNaturalCoordinates(), FEIElementGeometryWrapper(& iEl) );
-    interp->evalN( N, * iGP.giveNaturalCoordinates(), FEIElementGeometryWrapper(& iEl) );
+    const FEIElementGeometryWrapper geomWrapper(&iEl);
+    interp->evaldNdx( dNdx, * iGP.giveNaturalCoordinates(), geomWrapper );
+    interp->evalN( N, * iGP.giveNaturalCoordinates(), geomWrapper );
 
     const IntArray &elNodes = iEl.giveDofManArray();
 
@@ -119,9 +120,10 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
     };
 
     for ( int i = 1; i <= nDofMan; i++ ) {
-        DofManager *dMan = iEl.giveDofManager(i);
-        globalCoord.at(1) += N.at(i) * dMan->giveCoordinate(1);
-        globalCoord.at(2) += N.at(i) * dMan->giveCoordinate(2);
+        const Node *node = iEl.giveNode(i);
+        const FloatArray &nodeCoord = node->giveNodeCoordinates();
+        globalCoord.at(1) += N.at(i) * nodeCoord[0];
+        globalCoord.at(2) += N.at(i) * nodeCoord[1];
     }
 
 
@@ -130,7 +132,6 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
     for ( int i = 1; i <= nDofMan; i++ ) {
         FloatMatrix &BNode = Bc [ i - 1 ];
         BNode.resize(numRows, 2);
-        BNode.zero();
         BNode.at(1, 1)                  = dNdx.at(i, 1);
         BNode.at(2, 2)                  = dNdx.at(i, 2);
         BNode.at(shearInd, 1)   = dNdx.at(i, 2);
@@ -157,6 +158,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 
     for ( int j = 1; j <= nDofMan; j++ ) {
         DofManager *dMan = iEl.giveDofManager(j);
+        const Node *node = iEl.giveNode(j);
 
         // Compute the total number of enrichments for node j
         if( iEl.giveDomain()->hasXfemManager() ) {
@@ -166,10 +168,9 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
         if ( numEnrNode > 0 ) {
             FloatMatrix &BdNode = Bd [ j - 1 ];
             BdNode.resize(numRows, numEnrNode * dim);
-            BdNode.zero();
 
 
-            int globalNodeInd = dMan->giveGlobalNumber();
+            const int globalNodeInd = dMan->giveGlobalNumber();
 
             int nodeEnrCounter = 0;
 
@@ -196,10 +197,10 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
                     ei->evaluateEnrFuncAt(efGP, globalCoord, levelSetGP, globalNodeInd);
 
 
-                    const FloatArray &nodePos = * ( dMan->giveCoordinates() );
+                    const FloatArray &nodePos = node->giveNodeCoordinates();
 
                     double levelSetNode  = 0.0;
-                    ei->evalLevelSetNormalInNode( levelSetNode, dMan->giveGlobalNumber() );
+                    ei->evalLevelSetNormalInNode( levelSetNode, globalNodeInd );
 
                     std :: vector< double >efNode;
                     ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
@@ -235,7 +236,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 
     // Create the total B-matrix by appending each contribution to B after one another.
     oAnswer.resize(numRows, counter);
-    oAnswer.zero();
+
     int column = 1;
     for ( int i = 0; i < nDofMan; i++ ) {
         oAnswer.setSubMatrix(Bc [ i ], 1, column);
@@ -860,11 +861,14 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, const double &i
             FloatArray xiS;
             bool evaluationSucceeded = true;
             if(!element->computeLocalCoordinates(xiS, seg_xS)) {
-                evaluationSucceeded = false;
+                //TODO: Check for numerical round-off error
+//                printf("xiS: "); xiS.printYourself();
+//                evaluationSucceeded = false;
             }
             FloatArray xiE;
             if(!element->computeLocalCoordinates(xiE, seg_xE)) {
-                evaluationSucceeded = false;
+//                printf("xiE: "); xiE.printYourself();
+//                evaluationSucceeded = false;
             }
 
             const IntArray &elNodes = element->giveDofManArray();

@@ -32,34 +32,43 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef randomfieldgenerator_h
-#define randomfieldgenerator_h
+#ifndef interpolatingfunction_h
+#define interpolatingfunction_h
 
-#include "floatarray.h"
-#include "gausspoint.h"
+#include "function.h"
+
+///@name Input fields for InterpolatingFuction
+//@{
+#define _IFT_InterpolatingFuction_Name "interpolatingfunction"
+#define _IFT_InterpolatingFuction_filename "name"
+//@}
 
 namespace oofem {
-class OOFEM_EXPORT RandomFieldGenerator : public FEMComponent
+/**
+ * This class implements a function which reads
+ * an externally generated field interpolates
+ */
+class OOFEM_EXPORT InterpolatingFuction : public Function
 {
-public:
-    /// Constructor. Creates empty RandomFieldGenerator.
-    RandomFieldGenerator(int n, Domain * d) : FEMComponent(n, d) { }
-    /// Destructor.
-    virtual ~RandomFieldGenerator() { }
-    /**
-     * Generates random value.
-     */
-    virtual void generateRandomValue(double &value, FloatArray *position) {; }
-    virtual void generateRandomValueAt(double &value, GaussPoint *gp) {
-        FloatArray globalCoordinates;
-        if ( gp->giveElement()->computeGlobalCoordinates( globalCoordinates, * ( gp->giveSubPatchCoordinates() ) ) ) {
-            this->generateRandomValue(value, & globalCoordinates);
-        } else {
-            OOFEM_ERROR("computeGlobalCoordinates failed");
-        }
-    }
+protected:
+    FloatArray field;
+    IntArray numberReal;
 
-    virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+public:
+    /// Constructor
+    InterpolatingFuction(int n, Domain * d);
+    /// Destructor
+    virtual ~InterpolatingFuction();
+
+    virtual void evaluate(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict);
+    virtual double evaluateAtTime(double t);
+    virtual double evaluateVelocityAtTime(double t) { return 0.; }
+    virtual double evaluateAccelerationAtTime(double t) { return 0.; }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const { return "InterpolatingFuction"; }
+    virtual const char *giveInputRecordName() const { return _IFT_InterpolatingFuction_Name; }
 };
 } // end namespace oofem
-#endif
+
+#endif // interpolatingfunction_h

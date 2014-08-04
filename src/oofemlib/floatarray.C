@@ -129,6 +129,7 @@ double FloatArray :: at(int i) const
     return values [ i - 1 ];
 }
 
+#endif
 void FloatArray :: checkBounds(int i) const
 // Checks that the receiver's size is not smaller than 'i'.
 {
@@ -140,7 +141,6 @@ void FloatArray :: checkBounds(int i) const
         OOFEM_ERROR("array error on index : %d > %d", i, this->giveSize());
     }
 }
-#endif
 
 
 void
@@ -476,12 +476,12 @@ double FloatArray :: distance(const FloatArray &x) const
     return sqrt( this->distance_square(x) );
 }
 
-double FloatArray :: distance(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const
+double FloatArray :: distance(const FloatArray &iP1, const FloatArray &iP2, double &oXi, double &oXiUnbounded) const
 {
-	return sqrt( distance_square(iP1, iP2, oXi) );
+    return sqrt( distance_square(iP1, iP2, oXi, oXiUnbounded) );
 }
 
-double FloatArray :: distance_square(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const
+double FloatArray :: distance_square(const FloatArray &iP1, const FloatArray &iP2, double &oXi, double &oXiUnbounded) const
 {
     const double l2 = iP1.distance_square(iP2);
 
@@ -492,14 +492,17 @@ double FloatArray :: distance_square(const FloatArray &iP1, const FloatArray &iP
         if ( s < 0.0 ) {
             // X is closest to P1
             oXi = 0.0;
+            oXiUnbounded = s/l2;
             return this->distance_square(iP1);
         } else {
             if ( s > l2 ) {
                 // X is closest to P2
                 oXi = 1.0;
+                oXiUnbounded = s/l2;
                 return this->distance_square(iP2);
             } else {
                 oXi = s / l2;
+                oXiUnbounded = s/l2;
                 const FloatArray q = ( 1.0 - oXi ) * iP1 + oXi * iP2;
                 return this->distance_square(q);
             }
@@ -509,6 +512,7 @@ double FloatArray :: distance_square(const FloatArray &iP1, const FloatArray &iP
         // we can compute the distance to any
         // of these points.
         oXi = 0.5;
+        oXiUnbounded = 0.5;
         return this->distance_square(iP1);
     }
 }

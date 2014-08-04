@@ -61,7 +61,6 @@
 #define _IFT_Domain_nfunct "nltf"
 #define _IFT_Domain_nset "nset"
 #define _IFT_Domain_nbarrier "nbarrier"
-#define _IFT_Domain_nrandgen "nrandgen"
 #define _IFT_Domain_topology "topology"
 #define _IFT_Domain_nxfemman "nxfemman" /// [in,optional] Specifies if there is an xfem-manager.
 #define _IFT_Domain_numberOfSpatialDimensions "nsd" ///< [in,optional] Specifies how many spatial dimensions the domain has.
@@ -88,7 +87,6 @@ class SpatialLocalizer;
 class NodalRecoveryModel;
 class NonlocalBarrier;
 class DomainTransactionManager;
-class RandomFieldGenerator;
 class XfemManager;
 class TopologyDescription;
 class DataReader;
@@ -135,8 +133,6 @@ private:
     AList< Set > *setList;
     /// Nonlocal barrier list.
     AList< NonlocalBarrier > *nonlocalBarierList;
-    /// List of Random generators.
-    AList< RandomFieldGenerator > *randomFieldGeneratorList;
 
     /// Default dofs for a node (depends on the domain type).
     IntArray defaultNodeDofIDArry;
@@ -331,12 +327,6 @@ public:
      */
     NonlocalBarrier *giveNonlocalBarrier(int n);
     /**
-     * Service for accessing particular domain random field generator.
-     * Generates error if no such generator is defined.
-     * @param n Pointer to n-th object is returned.
-     */
-    RandomFieldGenerator *giveRandomFieldGenerator(int n);
-    /**
      * Service for accessing particular domain set.
      * Generates error if no such set is defined.
      * @param n Pointer to n-th object is returned.
@@ -428,8 +418,6 @@ public:
     int giveNumberOfRegions() const { return this->giveNumberOfCrossSectionModels(); }
     /// Returns number of nonlocal integration barriers
     int giveNumberOfNonlocalBarriers() const { return nonlocalBarierList->giveSize(); }
-    /// Returns number of random field generators
-    int giveNumberOfRandomFieldGenerators() const { return randomFieldGeneratorList->giveSize(); }
     /// Returns number of sets
     int giveNumberOfSets() const { return setList->giveSize(); }
 
@@ -457,8 +445,6 @@ public:
     void resizeInitialConditions(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize load time functions.
     void resizeFunctions(int _newSize);
-    /// Resizes the internal data structure to accommodate space for _newSize random field generators.
-    void resizeRandomFieldGenerators(int _newSize);
     /// Resizes the internal data structure to accommodate space for _newSize sets.
     void resizeSets(int _newSize);
 
@@ -478,8 +464,6 @@ public:
     void setInitialCondition(int i, InitialCondition *obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setFunction(int i, Function *obj);
-    /// Sets i-th component. The component will be further managed and maintained by domain object.
-    void setRandomFieldGenerator(int i, RandomFieldGenerator *obj);
     /// Sets i-th component. The component will be further managed and maintained by domain object.
     void setSet(int i, Set *obj);
 

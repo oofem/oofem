@@ -70,6 +70,7 @@ private:
 public:
 
     static void setCharacteristicElementLength(double iCharElLength);
+    static double giveCharacteristicElementLength() {return sCharElLength;}
 
     static double giveRelLengthTolLoose();
     static double giveRelLengthTolTight();

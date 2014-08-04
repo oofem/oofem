@@ -425,9 +425,7 @@ CBS :: updateYourself(TimeStep *tStep)
 void
 CBS :: updateInternalState(TimeStep *tStep)
 {
-    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        Domain *domain = this->giveDomain(idomain);
-
+    for ( auto &domain: domainList ) {
         int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
             for ( int j = 1; j <= nnodes; j++ ) {
@@ -738,8 +736,7 @@ void CBS :: printOutputAt(FILE *File, TimeStep *tStep)
     //FILE* File = this->giveDomain()->giveOutputStream();
     int domCount = 0;
     // fprintf (File,"\nOutput for time step number %d \n\n",tStep->giveNumber());
-    for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
-        Domain *domain = this->giveDomain(idomain);
+    for ( auto &domain: this->domainList ) {
         domCount += domain->giveOutputManager()->testTimeStepOutput(tStep);
     }
 
@@ -748,8 +745,7 @@ void CBS :: printOutputAt(FILE *File, TimeStep *tStep)
     }
 
     fprintf( File, "\nOutput for time % .8e \n\n", tStep->giveTime() / this->giveVariableScale(VST_Time) );
-    for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
-        domain = this->giveDomain(idomain);
+    for ( auto &domain: this->domainList ) {
         fprintf( File, "\nOutput for domain %3d\n", domain->giveNumber() );
         domain->giveOutputManager()->doDofManOutput(File, tStep);
         domain->giveOutputManager()->doElementOutput(File, tStep);

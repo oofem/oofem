@@ -52,14 +52,10 @@
 #include "contextfilemode.h"
 #include "contextioresulttype.h"
 #include "unknownnumberingscheme.h"
-#include "alist.h"
 
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
  #include "problemcommunicatormode.h"
-#endif
-
-#ifdef __PARALLEL_MODE
  #include "parallelcontext.h"
 #endif
 
@@ -86,7 +82,6 @@
 //@}
 
 namespace oofem {
-template< class T > class AList;
 class Domain;
 class TimeStep;
 class Dof;
@@ -105,7 +100,6 @@ class FloatArray;
 class LoadBalancer;
 class LoadBalancerMonitor;
 class oofegGraphicContext;
-
 class ProblemCommunicator;
 class ProcessCommunicatorBuff;
 class CommunicatorBuff;
@@ -206,7 +200,7 @@ protected:
     /// Number of receiver domains.
     int ndomains;
     /// List of problem domains.
-    AList< Domain > *domainList;
+    std :: vector< std :: unique_ptr< Domain > > domainList;
     /// Total number of time steps.
     int numberOfSteps;
     /// Total number of equation in current time step.
@@ -226,7 +220,7 @@ protected:
     /// Number of meta steps.
     int nMetaSteps;
     /// List of problem metasteps.
-    AList< MetaStep > *metaStepList;
+    std :: vector< MetaStep > metaStepList;
     /// Solution step when IC (initial conditions) apply.
     TimeStep *stepWhenIcApply;
     /// Current time step.
@@ -311,7 +305,7 @@ protected:
     /// Message tags
     enum { InternalForcesExchangeTag, MassExchangeTag, LoadExchangeTag, ReactionExchangeTag, RemoteElementExchangeTag };
     /// List where parallel contexts are stored.
-    AList< ParallelContext > *parallelContextList;
+    std :: vector< ParallelContext > parallelContextList;
 #endif
 
 public:
@@ -337,7 +331,7 @@ public:
      */
     void setDomain(int i, Domain *ptr, bool iDeallocateOld = true);
     /// Returns number of domains in problem.
-    int giveNumberOfDomains() { return ndomains; }
+    int giveNumberOfDomains() { return (int)domainList.size(); }
 
     /** Service for accessing ErrorEstimator corresponding to particular domain */
     virtual ErrorEstimator *giveDomainErrorEstimator(int n) { return defaultErrEstimator; }
@@ -586,7 +580,7 @@ public:
      * @param dataOutputFileName Name of default output stream
      * @param ndomains number of receiver domains
      */
-    void Instanciate_init(const char *dataOutputFileName, int ndomains);
+    void Instanciate_init(int ndomains);
     /**
      * Initializes receiver according to object description in input reader.
      * InitString can be imagined as data record in component database

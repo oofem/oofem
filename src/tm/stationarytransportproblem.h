@@ -98,10 +98,6 @@ public:
     virtual const char *giveClassName() const { return "StationaryTransportProblem"; }
     virtual fMode giveFormulation() { return TL; }
 
-#ifdef __PARALLEL_MODE
-    virtual void initParallelContexts();
-#endif
-
 protected:
     /**
      * Updates IP values on elements

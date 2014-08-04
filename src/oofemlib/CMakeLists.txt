@@ -6,14 +6,10 @@ set (core_unsorted
     connectivitytable.C error.C mathfem.C logger.C util.C
     initmodulemanager.C initmodule.C initialcondition.C
     homogenize.C
-    localgaussianrandomgenerator.C
     nonlocalbarrier.C
-    trianglemesherinterface.C
     geotoolbox.C geometry.C
-    externalfieldgenerator.C
     datastream.C
     set.C
-    scalarfunction.C
     rvematerial.C
     weakperiodicbc.C
     solutionbasedshapefunction.C
@@ -93,12 +89,15 @@ set (core_fields
 
 set (core_ltf
     function.C
+    scalarfunction.C
     constantfunction.C
     heavisidetimefunction.C
     peakfunction.C
     piecewiselinfunction.C
     periodicpiecewiselinfunction.C
     calculatorfunction.C
+    localgaussianrandomfunction.C
+    interpolatingfunction.C
     )
 
 set (core_cs
@@ -271,6 +270,7 @@ set (core_mesher
     targe2interface.C
     freeminterface.C
     subdivision.C
+    trianglemesherinterface.C
     )
 
 set (core

@@ -189,11 +189,7 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_NonLinearStatic_refloadmode);
     this->refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 
-    if ( ir->hasField(_IFT_NonLinearStatic_keepll) ) {
-        mstepCumulateLoadLevelFlag = true;
-    } else {
-        mstepCumulateLoadLevelFlag = false;
-    }
+    mstepCumulateLoadLevelFlag = ir->hasField(_IFT_NonLinearStatic_keepll);
 
     // called just to mark field as recognized, used later
     ir->hasField(_IFT_NonLinearStatic_donotfixload);
@@ -760,18 +756,6 @@ NonLinearStatic :: updateDomainLinks()
 
 #endif
 }
-
-
-#ifdef __PARALLEL_MODE
-void
-NonLinearStatic :: initParallelContexts()
-{
-    parallelContextList->growTo(ndomains);
-    for ( int i = 1; i <= this->ndomains; i++ ) {
-        parallelContextList->put( i, new ParallelContext(this) );
-    }
-}
-#endif
 
 
 void
