@@ -51,6 +51,7 @@ namespace oofem {
 /// Comment or uncomment the following line to force full or reduced integration
 ///@todo Removed for now.
 //#define Quad1PlaneStrain_reducedShearIntegration
+//#define Quad1PlaneStrain_reducedVolumetricIntegration
 /**
  * This class implements an isoparametric four-node quadrilateral plane-
  * stress structural finite element. Each node has 2 degrees of freedom.
