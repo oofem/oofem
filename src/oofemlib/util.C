@@ -62,8 +62,10 @@ EngngModel *InstanciateProblem(DataReader *dr, problemMode mode, int contextFlag
 
     problem = classFactory.createEngngModel(problemName.c_str(), 1, _master);
     if ( !problem ) {
-        OOFEM_SIMPLE_ERROR( "Failed to construct engineering model if type \"%s\".\n", problemName.c_str() );
+        OOFEM_WARNING( "Failed to construct engineering model if type \"%s\".\n", problemName.c_str() );
+        return NULL;
     }
+
     problem->setProblemMode(mode);
     problem->setParallelMode(parallelFlag);
 

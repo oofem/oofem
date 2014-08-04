@@ -70,15 +70,11 @@ public:
     virtual MaterialMode giveMaterialMode() { return _Warping; }
     virtual double giveThicknessAt(const FloatArray &gcoords);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui);
-    void giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const;
+    void giveDofManDofIDMask(int inode, IntArray &answer) const;
     //virtual void updateInternalState(TimeStep *tStep) { };
 
     virtual Interface *giveInterface(InterfaceType t);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     virtual FEInterpolation *giveInterpolation() const { return & this->interp; }

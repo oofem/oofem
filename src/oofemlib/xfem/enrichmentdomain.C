@@ -33,7 +33,6 @@
  */
 
 #include "mathfem.h"
-#include "alist.h"
 #include "enrichmentdomain.h"
 #include "enrichmentitem.h"
 #include "element.h"
@@ -72,6 +71,40 @@ void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, Xf
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
 }
 
+void EnrichmentDomain_BG :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
+{
+    int nVert = bg->giveNrVertices();
+    oCenter = {
+        0.0, 0.0
+    };
+    oRadius = 0.0;
+
+    if ( nVert > 0 ) {
+        for ( int i = 1; i <= nVert; i++ ) {
+            oCenter.add( bg->giveVertex(i) );
+        }
+
+        oCenter.times( 1.0 / double( nVert ) );
+
+        for ( int i = 1; i <= nVert; i++ ) {
+            oRadius = std :: max( oRadius, oCenter.distance( bg->giveVertex(i) ) );
+        }
+    }
+}
+
+void EDBGCircle :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
+{
+    Circle *circle = dynamic_cast< Circle * >( bg );
+
+    if ( circle == NULL ) {
+        OOFEM_ERROR("In EDBGCircle::giveBoundingSphere(): Failed to cast to Circle.")
+    }
+
+    oCenter = bg->giveVertex(1);
+    oRadius = circle->giveRadius();
+}
+
+
 IRResultType EDCrack :: initializeFrom(InputRecord *ir)
 {
     IRResultType result = bg->initializeFrom(ir);
@@ -99,7 +132,9 @@ bool EDCrack :: giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) co
             oInfo.mTangDir.normalize();
 
             // Tip normal
-            oInfo.mNormalDir = {-oInfo.mTangDir.at(2), oInfo.mTangDir.at(1)};
+            oInfo.mNormalDir = {
+                -oInfo.mTangDir.at(2), oInfo.mTangDir.at(1)
+            };
 
             oInfo.mTipIndex = 0;
 
@@ -118,7 +153,9 @@ bool EDCrack :: giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) co
             oInfo.mTangDir.normalize();
 
             // Tip normal
-            oInfo.mNormalDir = {-oInfo.mTangDir.at(2), oInfo.mTangDir.at(1)};
+            oInfo.mNormalDir = {
+                -oInfo.mTangDir.at(2), oInfo.mTangDir.at(1)
+            };
 
             oInfo.mTipIndex = 1;
 
@@ -146,7 +183,7 @@ DofManList :: addDofManagers(IntArray &dofManNumbers)
     std :: sort( dofManList.begin(), this->dofManList.end() );
 }
 
-bool EDCrack :: giveTipInfos(std :: vector< TipInfo > &oInfo) const
+bool EDCrack :: giveTipInfos(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const
 {
     int nVert = bg->giveNrVertices();
     if ( nVert > 1 ) {
@@ -163,12 +200,14 @@ bool EDCrack :: giveTipInfos(std :: vector< TipInfo > &oInfo) const
         info1.mTangDir.normalize();
 
         // Tip normal
-        info1.mNormalDir = {-info1.mTangDir.at(2), info1.mTangDir.at(1)};
+        info1.mNormalDir = {
+            -info1.mTangDir.at(2), info1.mTangDir.at(1)
+        };
 
         info1.mTipIndex = 0;
         info1.mArcPos = 0.0;
 
-        oInfo.push_back(info1);
+        oStartTipInfo = info1;
 
         // End tip
         TipInfo info2;
@@ -183,12 +222,14 @@ bool EDCrack :: giveTipInfos(std :: vector< TipInfo > &oInfo) const
         info2.mTangDir.normalize();
 
         // Tip normal
-        info2.mNormalDir = {-info2.mTangDir.at(2), info2.mTangDir.at(1)};
+        info2.mNormalDir = {
+            -info2.mTangDir.at(2), info2.mTangDir.at(1)
+        };
 
         info2.mTipIndex = 1;
         info2.mArcPos = 1.0;
 
-        oInfo.push_back(info2);
+        oEndTipInfo = info2;
 
         return true;
     }
@@ -196,23 +237,38 @@ bool EDCrack :: giveTipInfos(std :: vector< TipInfo > &oInfo) const
     return false;
 }
 
-bool EDCrack :: propagateTips(const std :: vector< TipPropagation > &iTipProp) {
-    for ( size_t i = 0; i < iTipProp.size(); i++ ) {
-        if ( iTipProp [ i ].mTipIndex == 0 ) {
+bool EDCrack :: propagateTip(const TipPropagation &iTipProp) {
+        if ( iTipProp.mTipIndex == 0 ) {
             // Propagate start point
             FloatArray pos( bg->giveVertex(1) );
-            pos.add(iTipProp [ i ].mPropagationLength, iTipProp [ i ].mPropagationDir);
+            pos.add(iTipProp.mPropagationLength, iTipProp.mPropagationDir);
             bg->insertVertexFront(pos);
-        } else if ( iTipProp [ i ].mTipIndex == 1 ) {
+        } else if ( iTipProp.mTipIndex == 1 ) {
             // Propagate end point
-            FloatArray pos( bg->giveVertex ( bg->giveNrVertices() ) );
-            pos.add(iTipProp [ i ].mPropagationLength, iTipProp [ i ].mPropagationDir);
+            FloatArray pos( bg->giveVertex( bg->giveNrVertices() ) );
+            pos.add(iTipProp.mPropagationLength, iTipProp.mPropagationDir);
             bg->insertVertexBack(pos);
         }
-    }
+
     return true;
 }
 
+void EDCrack :: cropPolygon(const double &iArcPosStart, const double &iArcPosEnd)
+{
+    PolygonLine *pl = dynamic_cast<PolygonLine*> (bg);
+
+    if(pl == NULL) {
+        OOFEM_ERROR("Failed to cast bg to PolygonLine.")
+    }
+
+    std::vector<FloatArray> points;
+    pl->giveSubPolygon(points, iArcPosStart, iArcPosEnd);
+    pl->setVertices(points);
+
+    const double tol2 = 1.0e-18;
+    pl->removeDuplicatePoints(tol2);
+
+}
 
 void DofManList :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
@@ -253,6 +309,16 @@ void DofManList :: giveInputRecord(DynamicInputRecord &input)
     input.setField(idList, _IFT_DofManList_list);
 }
 
+void DofManList :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
+{
+    // TODO: Compute tighter bounds. /ES
+    oCenter = {
+        0.0, 0.0
+    };
+    oRadius = std :: numeric_limits< double > :: max();
+}
+
+
 void WholeDomain :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
 {
     iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
@@ -261,5 +327,14 @@ void WholeDomain :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManage
 void WholeDomain :: giveInputRecord(DynamicInputRecord &input)
 {
     input.setRecordKeywordField(this->giveInputRecordName(), 1);
+}
+
+void WholeDomain :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
+{
+    // TODO: Compute tighter bounds. /ES
+    oCenter = {
+        0.0, 0.0
+    };
+    oRadius = std :: numeric_limits< double > :: max();
 }
 } // end namespace oofem

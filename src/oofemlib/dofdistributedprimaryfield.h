@@ -57,10 +57,9 @@ public:
      * @param a Engineering model which field belongs to.
      * @param idomain Index of domain for field.
      * @param ft Type of stored field.
-     * @param ut Equation ID for unknowns in field.
      * @param nHist Number of old time steps to store.
      */
-    DofDistributedPrimaryField(EngngModel * a, int idomain, FieldType ft, EquationID ut, int nHist);
+    DofDistributedPrimaryField(EngngModel * a, int idomain, FieldType ft, int nHist);
     virtual ~DofDistributedPrimaryField();
 
     virtual void initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answer, const UnknownNumberingScheme &s);

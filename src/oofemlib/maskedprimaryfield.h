@@ -36,12 +36,13 @@
 #define maskedprimaryfield_h
 
 #include "primaryfield.h"
-
 #include "floatarray.h"
 #include "intarray.h"
 #include "valuemodetype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
+
+#include <memory>
 
 namespace oofem {
 /**
@@ -57,7 +58,7 @@ protected:
     PrimaryField *master;
     IntArray mask;
 public:
-    MaskedPrimaryField(FieldType b, PrimaryField * m, IntArray & dofIdMask) : Field(b), mask(dofIdMask) {
+    MaskedPrimaryField(FieldType b, PrimaryField * m, IntArray dofIdMask) : Field(b), mask(std::move(dofIdMask)) {
         master = m;
     }
 

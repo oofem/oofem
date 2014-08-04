@@ -43,6 +43,7 @@
 #include "floatarray.h"
 #include "engngm.h"
 #include "boundaryload.h"
+#include "structuralms.h"
 #include "mathfem.h"
 #include "classfactory.h"
 
@@ -78,7 +79,7 @@ Beam3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
     double l, ksi, kappay, kappaz, c1y, c1z;
 
     l     = this->computeLength();
-    ksi   = 0.5 + 0.5 * gp->giveCoordinate(1);
+    ksi   = 0.5 + 0.5 * gp->giveNaturalCoordinate(1);
     kappay = this->giveKappayCoeff();
     kappaz = this->giveKappazCoeff();
     c1y = 1. + 2. * kappay;
@@ -114,11 +115,10 @@ Beam3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 void Beam3d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
+    if ( integrationRulesArray.size() == 0 ) {
         // the gauss point is used only when methods from crosssection and/or material
         // classes are requested
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
@@ -209,8 +209,7 @@ Beam3d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
     FloatMatrix B, DB, d;
     IntegrationRule *ir = this->giveDefaultIntegrationRulePtr();
     answer.clear();
-    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-        GaussPoint *gp = ir->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *ir ) {
         this->computeBmatrixAt(gp, B);
         this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
         double dV = gp->giveWeight() * 0.5 * l;
@@ -270,8 +269,23 @@ Beam3d :: computeVolumeAround(GaussPoint *gp)
 }
 
 
+int
+Beam3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    if ( type == IST_BeamForceMomentumTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        return 1;
+    } else if ( type == IST_BeamStrainCurvatureTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        return 1;
+    } else {
+        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+    }
+}
+
+
 void
-Beam3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Beam3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
@@ -419,7 +433,7 @@ Beam3d :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useU
     FloatArray u;
 
     this->computeStiffnessMatrix(stiffness, SecantStiffness, tStep);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
     answer.beProductOf(stiffness, u);
 #else
     StructuralElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord);
@@ -634,7 +648,7 @@ Beam3d :: printOutputAt(FILE *File, TimeStep *tStep)
     fprintf(File, "beam element %d :\n", number);
 
     // ask for global element displacement vector
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, rl);
+    this->computeVectorOf(VM_Total, tStep, rl);
     // ask for global element end forces vector
     this->giveEndForcesVector(Fl, tStep);
 
@@ -853,8 +867,8 @@ Beam3d :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &an
 {
     double layerYCoord, layerZCoord;
 
-    layerZCoord = slaveGp->giveCoordinate(2);
-    layerYCoord = slaveGp->giveCoordinate(1);
+    layerZCoord = slaveGp->giveNaturalCoordinate(2);
+    layerYCoord = slaveGp->giveNaturalCoordinate(1);
 
     answer.resize(3);  // {Exx,GMzx,GMxy}
 

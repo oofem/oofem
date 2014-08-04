@@ -42,7 +42,6 @@
  * @date Feb 14, 2014
  */
 namespace oofem {
-
 class XfemManager;
 class Domain;
 class InputRecord;
@@ -52,7 +51,7 @@ class GnuplotExportModule;
 class OOFEM_EXPORT Crack : public EnrichmentItem
 {
 public:
-    Crack(int n, XfemManager * xm, Domain * aDomain);
+    Crack(int n, XfemManager *xm, Domain *aDomain);
 
     virtual const char *giveClassName() const { return "Crack"; }
     virtual const char *giveInputRecordName() const { return _IFT_Crack_Name; }
@@ -62,8 +61,11 @@ public:
 
     virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod);
 
-    const std::vector<GaussPoint*> &giveCohesiveZoneGaussPoints() const {return mCohesiveZoneGaussPoints;}
-    const std::vector<double> &giveCohesiveZoneArcPositions() const {return mCohesiveZoneArcPositions;}
+    const std :: vector< GaussPoint * > &giveCohesiveZoneGaussPoints() const { return mCohesiveZoneGaussPoints; }
+    const std :: vector< double > &giveCohesiveZoneArcPositions() const { return mCohesiveZoneArcPositions; }
+
+    void computeIntersectionPoints(Crack &iCrack, std::vector<FloatArray> &oIntersectionPoints, std::vector<double> &oArcPositions);
+    void computeArcPoints(const std::vector<FloatArray> &iIntersectionPoints, std::vector<double> &oArcPositions);
 
 protected:
     /**
@@ -79,11 +81,9 @@ protected:
      * accomplished at the level of the EnrichmentItem, because
      * here we know about the geometry of the crack.
      */
-    std::vector<GaussPoint*> 	mCohesiveZoneGaussPoints;
-    std::vector<double>			mCohesiveZoneArcPositions;
+    std :: vector< GaussPoint * >mCohesiveZoneGaussPoints;
+    std :: vector< double >mCohesiveZoneArcPositions;
 };
-
-
 } // end namespace oofem
 
 #endif /* CRACK_H_ */

@@ -74,7 +74,7 @@ public:
 
     // Destructor
     ~RVEMaterial() {
-        free(rve);
+        delete rve;
     };
 
     int SupressRVEoutput;

@@ -206,12 +206,8 @@ Node :: printYourself()
     x = this->giveCoordinate(1);
     y = this->giveCoordinate(2);
     printf("Node %d    coord : x %f  y %f\n", number, x, y);
-    for ( int i = 0; i < numberOfDofs; i++ ) {
-        if ( dofArray [ i ] ) {
-            dofArray [ i ]->printYourself();
-        } else {
-            printf("dof %d is nil \n", i + 1);
-        }
+    for ( Dof *dof: *this ) {
+        dof->printYourself();
     }
 
     loadArray.printYourself();
@@ -228,8 +224,7 @@ Node :: updateYourself(TimeStep *tStep)
     fMode mode = domain->giveEngngModel()->giveFormulation();
 
     if ( mode == AL ) { // updated Lagrange
-        for ( int i = 1; i <= numberOfDofs; i++ ) {
-            Dof *d = this->giveDof(i);
+        for ( Dof *d: *this ) {
             DofIDItem id = d->giveDofID();
             if ( id == D_u || id == D_v || id == D_w ) {
                 int ic = id - D_u + 1;
@@ -260,8 +255,7 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, double scale)
         double coordinate = this->giveCoordinate(ic);
         if ( !this->hasLocalCS() ) {
             // this has no local cs.
-            for ( int i = 1; i <= numberOfDofs; i++ ) {
-                Dof *d = this->giveDof(i);
+            for ( Dof *d: *this ) {
                 DofIDItem id = d->giveDofID();
                 if ( id == ic ) {
                     coordinate += scale * d->giveUnknown(VM_Total, tStep);
@@ -281,8 +275,7 @@ Node :: giveUpdatedCoordinate(int ic, TimeStep *tStep, double scale)
             FloatArray displacements( T->giveNumberOfRows() );
             displacements.zero();
 
-            for ( int i = 1; i <= numberOfDofs; i++ ) {
-                Dof *d = this->giveDof(i);
+            for ( Dof *d: *this ) {
                 DofIDItem id = d->giveDofID();
                 if ( id == D_u || id == D_v || id == D_w ) {
                     int ic2 = id - D_u + 1;
@@ -334,13 +327,12 @@ Node :: checkConsistency()
      * coordinate system as master dofManager of slave dof.
      */
     int result;
-    int ndofs = this->giveNumberOfDofs();
     int nslaves = 0;
 
     result = DofManager :: checkConsistency();
 
-    for ( int i = 1; i <= ndofs; i++ ) {
-        if ( dynamic_cast< SimpleSlaveDof * >( this->giveDof(i) ) ) {
+    for ( Dof *dof: *this ) {
+        if ( dynamic_cast< SimpleSlaveDof * >( dof ) ) {
             nslaves++;
         }
     }
@@ -354,8 +346,8 @@ Node :: checkConsistency()
     int master, alreadyFound = 0;
     Node *masterNode;
 
-    for ( int i = 1; i <= ndofs; i++ ) {
-        SimpleSlaveDof *sdof = dynamic_cast< SimpleSlaveDof * >( this->giveDof(i) );
+    for ( Dof *dof: *this ) {
+        SimpleSlaveDof *sdof = dynamic_cast< SimpleSlaveDof * >( dof );
         if ( sdof ) {
             alreadyFound  = 0;
             master = sdof->giveMasterDofManagerNum();
@@ -433,26 +425,32 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
     // Note: implementation rely on D_u, D_v and D_w (R_u, R_v, R_w) order in cltypes.h
     // file. Do not change their order and do not insert any values between these values.
     //
-    DofIDItem id, id2;
+    DofIDItem id;
 
     if ( localCoordinateSystem == NULL ) {
         answer.clear();
         return false;
     } else {
+        ///@todo This relies on the order of the dofs, not good.. / Mikael
         if ( dofIDArry.isEmpty() ) {
             // response for all local dofs is computed
 
+            int numberOfDofs = this->giveNumberOfDofs();
             answer.resize(numberOfDofs, numberOfDofs);
             answer.zero();
 
-            for ( int i = 1; i <= numberOfDofs; i++ ) {
+            int i = 0;
+            for ( Dof *dof: *this ) {
                 // test for vector quantities
-                switch ( id = giveDof(i)->giveDofID() ) {
+                i++;
+                int j = 0;
+                switch ( id = dof->giveDofID() ) {
                 case D_u:
                 case D_v:
                 case D_w:
-                    for ( int j = 1; j <= numberOfDofs; j++ ) {
-                        id2 = giveDof(j)->giveDofID();
+                    for ( Dof *dof: *this ) {
+                        DofIDItem id2 = dof->giveDofID();
+                        j++;
                         if ( ( id2 == D_u ) || ( id2 == D_v ) || ( id2 == D_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( D_u ) + 1,
                                                                         ( int ) ( id2 ) - ( int ) ( D_u ) + 1 );
@@ -464,8 +462,9 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case V_u:
                 case V_v:
                 case V_w:
-                    for ( int j = 1; j <= numberOfDofs; j++ ) {
-                        id2 = giveDof(j)->giveDofID();
+                    for ( Dof *dof: *this ) {
+                        DofIDItem id2 = dof->giveDofID();
+                        j++;
                         if ( ( id2 == V_u ) || ( id2 == V_v ) || ( id2 == V_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1,
                                                                         ( int ) ( id2 ) - ( int ) ( V_u ) + 1 );
@@ -477,8 +476,9 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case R_u:
                 case R_v:
                 case R_w:
-                    for ( int j = 1; j <= numberOfDofs; j++ ) {
-                        id2 = giveDof(j)->giveDofID();
+                    for ( Dof *dof: *this ) {
+                        DofIDItem id2 = dof->giveDofID();
+                        j++;
                         if ( ( id2 == R_u ) || ( id2 == R_v ) || ( id2 == R_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( R_u ) + 1,
                                                                         ( int ) ( id2 ) - ( int ) ( R_u ) + 1 );
@@ -510,7 +510,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case D_v:
                 case D_w:
                     for ( int j = 1; j <= size; j++ ) {
-                        id2 = ( DofIDItem ) dofIDArry.at(j);
+                        DofIDItem id2 = ( DofIDItem ) dofIDArry.at(j);
                         if ( ( id2 == D_u ) || ( id2 == D_v ) || ( id2 == D_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( D_u ) + 1, ( int ) ( id2 ) - ( int ) ( D_u ) + 1 );
                         }
@@ -522,7 +522,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case V_v:
                 case V_w:
                     for ( int j = 1; j <= size; j++ ) {
-                        id2 = ( DofIDItem ) dofIDArry.at(j);
+                        DofIDItem id2 = ( DofIDItem ) dofIDArry.at(j);
                         if ( ( id2 == V_u ) || ( id2 == V_v ) || ( id2 == V_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( V_u ) + 1, ( int ) ( id2 ) - ( int ) ( V_u ) + 1 );
                         }
@@ -534,7 +534,7 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
                 case R_v:
                 case R_w:
                     for ( int j = 1; j <= size; j++ ) {
-                        id2 = ( DofIDItem ) dofIDArry.at(j);
+                        DofIDItem id2 = ( DofIDItem ) dofIDArry.at(j);
                         if ( ( id2 == R_u ) || ( id2 == R_v ) || ( id2 == R_w ) ) {
                             answer.at(j, i) = localCoordinateSystem->at( ( int ) ( id ) - ( int ) ( R_u ) + 1, ( int ) ( id2 ) - ( int ) ( R_u ) + 1 );
                         }
@@ -683,8 +683,8 @@ Node :: drawYourself(oofegGraphicContext &gc)
 
         bool ordinary = true;
 
-        for ( int idof = 1; idof <= this->giveNumberOfDofs(); idof++ ) {
-            if ( this->giveDof(idof)->isPrimaryDof() ) {
+        for ( Dof *dof: *this ) {
+            if ( dof->isPrimaryDof() ) {
                 ordinary = false;
                 break;
             }
@@ -731,10 +731,10 @@ Node :: drawYourself(oofegGraphicContext &gc)
             hasRotSupport [ i ] = 0;
         }
 
-        for ( i = 1; i <= numberOfDofs; i++ ) {
-            if ( this->giveDof(i)->hasBc(tStep) ) {
+        for ( Dof *dof: *this ) {
+            if ( dof->hasBc(tStep) ) {
                 hasAny = 1;
-                switch ( giveDof(i)->giveDofID() ) {
+                switch ( dof->giveDofID() ) {
                 case D_u: hasDisplSupport [ 0 ] = 1;
                     break;
                 case D_v: hasDisplSupport [ 1 ] = 1;
@@ -806,7 +806,6 @@ Node :: drawYourself(oofegGraphicContext &gc)
             }
         }
     } else if ( mode == OGC_naturalBC ) {
-        int i;
         TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
         if ( !tStep ) {
             TimeStep __temp( domain->giveEngngModel() );
@@ -831,8 +830,10 @@ Node :: drawYourself(oofegGraphicContext &gc)
             }
 
             FloatArray force(3), momentum(3);
-            for ( i = 1; i <= numberOfDofs; i++ ) {
-                switch ( giveDof(i)->giveDofID() ) {
+            int i = 0;
+            for ( Dof *dof: *this ) {
+                i++;
+                switch ( dof->giveDofID() ) {
                 case D_u: force.at(1) = defScale * load.at(i);
                     break;
                 case D_v: force.at(2) = defScale * load.at(i);
@@ -872,7 +873,6 @@ Node :: drawYourself(oofegGraphicContext &gc)
     } else if ( mode == OGC_nodeVectorPlot ) {
         GraphicObj *go;
         TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
-        int i;
 
         if ( gc.giveIntVarType() == IST_Velocity ) {
             WCRec p [ 2 ]; /* point */
@@ -883,13 +883,13 @@ Node :: drawYourself(oofegGraphicContext &gc)
             p [ 0 ].z = p [ 1 ].z = ( FPNum ) this->giveCoordinate(3);
 
             //p[1].x = p[1].y = p[1].z = 0.0;
-            for ( i = 1; i <= numberOfDofs; i++ ) {
-                if ( this->giveDof(i)->giveDofID() == V_u ) {
-                    p [ 1 ].x = defScale * this->giveDof(i)->giveUnknown(VM_Total, tStep);
-                } else if ( this->giveDof(i)->giveDofID() == V_v ) {
-                    p [ 1 ].y = defScale * this->giveDof(i)->giveUnknown(VM_Total, tStep);
-                } else if ( this->giveDof(i)->giveDofID() == V_w ) {
-                    p [ 1 ].z = defScale * this->giveDof(i)->giveUnknown(VM_Total, tStep);
+            for ( Dof *dof: *this ) {
+                if ( dof->giveDofID() == V_u ) {
+                    p [ 1 ].x = defScale * dof->giveUnknown(VM_Total, tStep);
+                } else if ( dof->giveDofID() == V_v ) {
+                    p [ 1 ].y = defScale * dof->giveUnknown(VM_Total, tStep);
+                } else if ( dof->giveDofID() == V_w ) {
+                    p [ 1 ].z = defScale * dof->giveUnknown(VM_Total, tStep);
                 }
             }
 

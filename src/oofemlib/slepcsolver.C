@@ -71,13 +71,13 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
 
     // first check whether Lhs is defined
     if ( ( !a ) || ( !b ) ) {
-        OOFEM_ERROR("matrices are not defined\n");
+        OOFEM_ERROR("matrices are not defined");
     }
 
     if ( a->giveNumberOfRows() != a->giveNumberOfColumns() ||
         b->giveNumberOfRows() != b->giveNumberOfRows() ||
         a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
-        OOFEM_ERROR("matrices size mismatch\n");
+        OOFEM_ERROR("matrices size mismatch");
     }
 
     if ( a->giveType() != SMT_PetscMtrx || b->giveType() != SMT_PetscMtrx ) {
@@ -205,7 +205,7 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
         ierr = VecDestroy(Vr);
         CHKERRQ(ierr);
     } else {
-        OOFEM_ERROR("No converged eigenpairs\n");
+        OOFEM_ERROR("No converged eigenpairs");
     }
 
 #ifdef TIME_REPORT

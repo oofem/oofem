@@ -55,7 +55,7 @@ REGISTER_Element(Quad1_mt);
 
 FEI2dQuadLin Quad1_ht :: interpolation(1, 2);
 
-Quad1_ht :: Quad1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM)
+Quad1_ht :: Quad1_ht(int n, Domain *aDomain) : TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans  = 4;
     numberOfGaussPoints = 4;
@@ -79,9 +79,8 @@ void
 Quad1_ht :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -97,12 +96,6 @@ Quad1_ht :: initializeFrom(InputRecord *ir)
         return result;
     }
 
-    if ( !( ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
-        numberOfGaussPoints = 4;
-    }
-
     return IRRT_OK;
 }
 
@@ -112,7 +105,7 @@ Quad1_ht :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, gp); // 't'
@@ -132,10 +125,10 @@ Quad1_ht :: giveThicknessAt(const FloatArray &gcoords)
 double
 Quad1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
     FloatArray gc;
-    this->interpolation.edgeLocal2global( gc, iEdge, * gp->giveCoordinates(),
+    this->interpolation.edgeLocal2global( gc, iEdge, * gp->giveNaturalCoordinates(),
                                          FEIElementGeometryWrapper(this) );
     // temporary gauss point on element (not edge) to evaluate thickness
     GaussPoint _gp( NULL, 1, new FloatArray ( gc ), 1.0, gp->giveMaterialMode() );
@@ -155,13 +148,6 @@ Quad1_ht :: giveInterface(InterfaceType interface)
     }
 
     return NULL;
-}
-
-int
-Quad1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
 }
 
 

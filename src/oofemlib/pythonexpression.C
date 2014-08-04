@@ -32,11 +32,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <Python.h>
+
 #include "pythonexpression.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
 
-#include <Python.h>
 #include <sstream>
 
 // Defines the name for the return variable;
@@ -90,8 +91,8 @@ PyObject *
 PythonExpression :: getDict(std :: map< std :: string, FunctionArgument > &valDict)
 {
     PyObject *local_dict = PyDict_New();
-    for ( std :: map< std :: string, FunctionArgument > :: iterator val = valDict.begin(); val != valDict.end(); ++val ) {
-        const FunctionArgument &arg = val->second;
+    for ( const auto &named_arg: valDict ) {
+        const FunctionArgument &arg = named_arg.second;
         PyObject *tmp;
         if ( arg.type == FunctionArgument :: FAT_double ) {
             tmp = PyFloat_FromDouble(arg.val0);
@@ -111,7 +112,7 @@ PythonExpression :: getDict(std :: map< std :: string, FunctionArgument > &valDi
             tmp = NULL;
             OOFEM_ERROR("Unsupported FunctionArgumentType");
         }
-        PyDict_SetItemString(local_dict, val->first.c_str(), tmp);
+        PyDict_SetItemString(local_dict, named_arg.first.c_str(), tmp);
     }
     return local_dict;
 }

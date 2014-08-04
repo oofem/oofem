@@ -107,7 +107,7 @@ SpringElement :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
 
 void
-SpringElement :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+SpringElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( this->mode == SE_1D_SPRING ) {
         answer = {D_u};
@@ -128,7 +128,7 @@ double
 SpringElement :: computeSpringInternalForce(TimeStep *tStep)
 {
     FloatArray u;
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
     return ( this->springConstant * ( u.at(2) - u.at(1) ) );
 }
 

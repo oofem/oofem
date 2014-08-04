@@ -38,7 +38,6 @@
 #include "structuralms.h"
 #include "mathfem.h"
 #include "domain.h"
-#include "equationid.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "fei3dtrquad.h"
@@ -52,11 +51,13 @@ REGISTER_Element(Tr2Shell7XFEM);
 
 FEI3dTrQuad Tr2Shell7XFEM :: interpolation;
 
-IntArray Tr2Shell7XFEM :: ordering_all(42);
-IntArray Tr2Shell7XFEM :: ordering_gr(42);
-IntArray Tr2Shell7XFEM :: ordering_gr_edge(21);
-bool Tr2Shell7XFEM :: __initialized = Tr2Shell7XFEM :: initOrdering();
-
+IntArray Tr2Shell7XFEM :: ordering_all = {1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30, 31, 36, 37, 38,
+                        4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 32, 33, 34, 39, 40, 41,
+                        7, 14, 21, 28, 35, 42};
+IntArray Tr2Shell7XFEM :: ordering_gr {1, 2, 3, 19, 20, 21, 37, 4, 5, 6, 22, 23, 24, 38, 7, 8, 9, 25, 26, 27, 39,
+                       10, 11, 12, 28, 29, 30, 40, 13, 14, 15, 31, 32, 33, 41, 16, 17, 18,
+                       34, 35, 36, 42};
+IntArray Tr2Shell7XFEM :: ordering_gr_edge = {1, 2, 3, 10, 11, 12, 19, 4, 5, 6, 13, 14, 15, 20, 7, 8, 9, 16, 17, 18, 21};
 
 
 Tr2Shell7XFEM :: Tr2Shell7XFEM(int n, Domain *aDomain) : Shell7BaseXFEM(n, aDomain)
@@ -91,7 +92,7 @@ FEInterpolation *Tr2Shell7XFEM :: giveInterpolation() const { return & interpola
 void
 Tr2Shell7XFEM :: computeGaussPoints()
 {
-    if ( !integrationRulesArray ) {
+    if ( integrationRulesArray.size() == 0 ) {
         int nPointsTri  = 6;   // points in the plane
         int nPointsEdge = 2;   // edge integration
 
@@ -101,7 +102,7 @@ Tr2Shell7XFEM :: computeGaussPoints()
             Delamination *dei =  dynamic_cast< Delamination * >( xMan->giveEnrichmentItem(i) );
             if ( dei ) {
                 int numberOfInterfaces = this->layeredCS->giveNumberOfLayers() - 1;
-                czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
+                czIntegrationRulesArray.resize( numberOfInterfaces );
                 for ( int i = 0; i < numberOfInterfaces; i++ ) {
                     czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
                     czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
@@ -110,7 +111,7 @@ Tr2Shell7XFEM :: computeGaussPoints()
         }
 
 
-        specialIntegrationRulesArray = new IntegrationRule * [ 3 ];
+        specialIntegrationRulesArray.resize(3);
 
         // Midplane (Mass matrix integrated analytically through the thickness)
         specialIntegrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
@@ -121,7 +122,6 @@ Tr2Shell7XFEM :: computeGaussPoints()
         specialIntegrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
 
         // Layered cross section for bulk integration
-        this->numberOfIntegrationRules = this->layeredCS->giveNumberOfLayers();
         this->numberOfGaussPoints = this->layeredCS->giveNumberOfLayers() * nPointsTri * this->layeredCS->giveNumIntegrationPointsInLayer();
         this->layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
 
@@ -170,8 +170,8 @@ Tr2Shell7XFEM :: computeAreaAround(GaussPoint *gp, double xi)
     FloatArray G1, G2, temp;
     FloatMatrix Gcov;
     FloatArray lCoords(3);
-    lCoords.at(1) = gp->giveCoordinate(1);
-    lCoords.at(2) = gp->giveCoordinate(2);
+    lCoords.at(1) = gp->giveNaturalCoordinate(1);
+    lCoords.at(2) = gp->giveNaturalCoordinate(2);
     lCoords.at(3) = xi;
     this->evalInitialCovarBaseVectorsAt(lCoords, Gcov);
     G1.beColumnOf(Gcov, 1);
@@ -188,7 +188,7 @@ Tr2Shell7XFEM :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
     double detJ;
     FloatMatrix Gcov;
     FloatArray lcoords;
-    lcoords = * gp->giveCoordinates();
+    lcoords = * gp->giveNaturalCoordinates();
     this->evalInitialCovarBaseVectorsAt(lcoords, Gcov);
     detJ = Gcov.giveDeterminant() * 0.5 * this->layeredCS->giveLayerThickness(layer);
     return detJ *gp->giveWeight();

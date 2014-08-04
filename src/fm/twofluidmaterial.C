@@ -60,7 +60,7 @@ TwoFluidMaterial :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, this->slaveMaterial, _IFT_TwoFluidMaterial_mat);
     if ( this->slaveMaterial.giveSize() != 2 ) {
-        OOFEM_ERROR("mat array should have two values\n");
+        OOFEM_ERROR("mat array should have two values");
     }
 
     return IRRT_OK;
@@ -171,13 +171,12 @@ TwoFluidMaterial :: giveTempVOF(GaussPoint *gp)
 
 
 TwoFluidMaterialStatus :: TwoFluidMaterialStatus(int n, Domain *d, GaussPoint *gp, const IntArray &slaveMaterial) :
-    FluidDynamicMaterialStatus(n, d, gp)
+    FluidDynamicMaterialStatus(n, d, gp),
+    slaveGp0( new GaussPoint(NULL, 0, NULL, 0., gp->giveMaterialMode()) ),
+    slaveGp1( new GaussPoint(NULL, 0, NULL, 0., gp->giveMaterialMode()) )
 {
-    MaterialMode mmode = gp->giveMaterialMode();
-    this->slaveGp0 = new GaussPoint(NULL, 0, NULL, 0., mmode);
-    this->slaveGp1 = new GaussPoint(NULL, 0, NULL, 0., mmode);
-    this->slaveGp0->setMaterialStatus( domain->giveMaterial( slaveMaterial(0) )->CreateStatus(this->slaveGp0), this->giveNumber() );
-    this->slaveGp1->setMaterialStatus( domain->giveMaterial( slaveMaterial(1) )->CreateStatus(this->slaveGp0), this->giveNumber() );
+    this->slaveGp0->setMaterialStatus( domain->giveMaterial( slaveMaterial(0) )->CreateStatus(this->slaveGp0.get()), this->giveNumber() );
+    this->slaveGp1->setMaterialStatus( domain->giveMaterial( slaveMaterial(1) )->CreateStatus(this->slaveGp0.get()), this->giveNumber() );
 }
 
 

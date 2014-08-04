@@ -250,8 +250,8 @@ void DynCompCol :: times(const FloatArray &x, FloatArray &answer) const
 
     for ( int j = 0; j < nColumns; j++ ) {
         rhs = x(j);
-        for ( int row: columns [ j ]->begin(); pos != columns [ j ]->end(); ++pos ) {
-            answer(pos->first) += pos->second * rhs;
+        for ( auto &val: columns [ j ] ) {
+            answer(val.first) += val.second * rhs;
         }
     }
 
@@ -266,12 +266,9 @@ void DynCompCol :: times(double x)
     }
 
 #else
-    int j;
-    std :: map< int, double > :: iterator pos;
-
-    for ( j = 0; j < nColumns; j++ ) {
-        for ( pos = columns [ j ]->begin(); pos != columns [ j ]->end(); ++pos ) {
-            pos->second *= x;
+    for ( int j = 0; j < nColumns; j++ ) {
+        for ( auto &val: columns [ j ] ) {
+            val.second *= x;
         }
     }
 
@@ -281,7 +278,7 @@ void DynCompCol :: times(double x)
     this->version++;
 }
 
-int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
+int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
     /*
      * int neq = eModel -> giveNumberOfDomainEquations (di);
@@ -414,7 +411,7 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
 
     for ( n = 1; n <= nelem; n++ ) {
         elem = domain->giveElement(n);
-        elem->giveLocationArray(loc, ut, s);
+        elem->giveLocationArray(loc, s);
 
         for ( i = 1; i <= loc.giveSize(); i++ ) {
             if ( ( ii = loc.at(i) ) ) {
@@ -435,7 +432,7 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
-            bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
+            bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                 IntArray &krloc = r_locs [ k ];
                 IntArray &kcloc = c_locs [ k ];
@@ -461,18 +458,9 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, EquationID 
 #else
     nColumns = nRows = neq;
 
-    int i, j;
-    if ( columns ) {
-        for ( i = 0; i < nColumns; i++ ) {
-            delete this->columns [ i ];
-        }
-
-        delete this->columns;
-    }
-
-    columns = new std :: map< int, double > * [ neq ];
-    for ( j = 0; j < neq; j++ ) {
-        columns [ j ] = new std :: map< int, double >;
+    columns.resize( neq );
+    for ( auto &col: columns ) {
+        col.clear();
     }
 
 #endif
@@ -595,7 +583,7 @@ int DynCompCol :: assemble(const IntArray &rloc, const IntArray &cloc, const Flo
             for ( j = 0; j < rsize; j++ ) {
                 if ( ( jj = rloc(j) ) ) {
                     jj1 = jj - 1;
-                    ( * ( this->columns [ ii1 ] ) ) [ jj1 ] += mat(j, i);
+                    this->columns [ ii1 ] [ jj1 ] += mat(j, i);
                 }
             }
         }
@@ -616,12 +604,9 @@ void DynCompCol :: zero()
     }
 
 #else
-    int j;
-    std :: map< int, double > :: iterator pos;
-
-    for ( j = 0; j < nColumns; j++ ) {
-        for ( pos = columns [ j ]->begin(); pos != columns [ j ]->end(); ++pos ) {
-            pos->second = 0.0;
+    for ( auto &col: columns ) {
+        for ( auto &val: col ) {
+            val.second = 0.;
         }
     }
 
@@ -640,7 +625,7 @@ void DynCompCol :: printStatistics() const
 
 #else
     for ( j = 0; j < nColumns; j++ ) {
-        nz_ += columns [ j ]->size();
+        nz_ += columns [ j ].size();
 #endif
     OOFEM_LOG_DEBUG("DynCompCol info: neq is %d, nelem is %d\n", nColumns, nz_);
 }
@@ -671,7 +656,7 @@ double &DynCompCol :: at(int i, int j)
     return columns_ [ 0 ]->at(1); // return to suppress compiler warning message
 
 #else
-    return ( * ( this->columns [ j - 1 ] ) ) [ i - 1 ];
+    return this->columns [ j - 1 ] [ i - 1 ];
 
 #endif
 }
@@ -704,9 +689,8 @@ double DynCompCol :: at(int i, int j) const
     }
 
 #else
-    std :: map< int, double > :: iterator pos;
-    pos  = this->columns [ j - 1 ]->find(i - 1);
-    if ( pos != this->columns [ j - 1 ]->end() ) {
+    auto pos = this->columns [ j - 1 ].find(i - 1);
+    if ( pos != this->columns [ j - 1 ].end() ) {
         return pos->second;
     } else {
         OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
@@ -743,9 +727,8 @@ double DynCompCol :: operator() (int i, int j)  const
     }
 
 #else
-    std :: map< int, double > :: iterator pos;
-    pos  = this->columns [ j ]->find(i);
-    if ( pos != this->columns [ j ]->end() ) {
+    auto pos = this->columns [ j ].find(i);
+    if ( pos != this->columns [ j ].end() ) {
         return pos->second;
     } else {
         OOFEM_ERROR("Array accessing exception -- (%d,%d) out of bounds", i, j);
@@ -778,7 +761,7 @@ double &DynCompCol :: operator() (int i, int j)
     return columns_ [ 0 ]->at(1); // return to suppress compiler warning message
 
 #else
-    return ( * ( this->columns [ j ] ) ) [ i ];
+    return this->columns [ j ] [ i ];
 
 #endif
 }
@@ -807,14 +790,11 @@ void DynCompCol :: timesT(const FloatArray &x, FloatArray &answer) const
     }
 
 #else
-    int i;
     double r;
-    std :: map< int, double > :: iterator pos;
-
-    for ( i = 0; i < nColumns; i++ ) {
-        r = 0.0;
-        for ( pos = columns [ i ]->begin(); pos != columns [ i ]->end(); ++pos ) {
-            r += pos->second * x(pos->first);
+    for ( int i = 0; i < nColumns; i++ ) {
+        double r = 0.0;
+        for ( auto &val: columns [ i ] ) {
+            r += val.second * x(val.first);
         }
 
         answer(i) = r;
@@ -891,8 +871,8 @@ void DynCompCol :: checkSizeTowards(const IntArray &rloc, const IntArray &cloc)
 
 void DynCompCol :: growTo(int ns)
 {
-#ifndef DynCompCol_USE_STL_SETS
     if ( ns > nColumns ) {
+#ifndef DynCompCol_USE_STL_SETS
         FloatArray **newcolumns_ = new FloatArray * [ ns ];
         IntArray **newrowind_ = new IntArray * [ ns ];
 
@@ -907,26 +887,12 @@ void DynCompCol :: growTo(int ns)
 
         columns_ = newcolumns_;
         rowind_  = newrowind_;
-
-        nColumns = nRows = ns;
-    }
-
 #else
-    if ( ns > nColumns ) {
-        std :: map< int, double > **newcolumns = new std :: map< int, double > * [ ns ];
+        columns.resize(ns);
+#endif
 
-        // copy existing columns ptrs
-        for ( int i = 0; i < nColumns; i++ ) {
-            newcolumns [ i ] = columns [ i ];
-        }
-
-        delete columns;
-
-        columns = newcolumns;
         nColumns = nRows = ns;
     }
-
-#endif
 }
 
 

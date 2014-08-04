@@ -80,7 +80,7 @@ public:
     virtual void times(const FloatArray &x, FloatArray &answer) const;
     virtual void timesT(const FloatArray &x, FloatArray &answer) const;
     virtual void times(double x);
-    virtual int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s);
+    virtual int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s);
     virtual int assemble(const IntArray &loc, const FloatMatrix &mat);
     virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
     virtual bool canBeFactorized() const { return false; }

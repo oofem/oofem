@@ -47,7 +47,6 @@ namespace oofem {
 MMAShapeFunctProjection :: MMAShapeFunctProjection() : MaterialMappingAlgorithm()
 {
     stateCounter = 0;
-    //smootherList(0);
     domain = NULL;
 }
 
@@ -66,17 +65,17 @@ MMAShapeFunctProjection :: __init(Domain *dold, IntArray &varTypes, FloatArray &
 
 
     // Project Gauss point components to nodes on old mesh
-    if ( this->smootherList.giveSize() != nvar ) {
+    if ( (int)this->smootherList.size() != nvar ) {
         this->smootherList.clear();
-        this->smootherList.growTo(nvar);
+        this->smootherList.reserve(nvar);
         for ( int ivar = 1; ivar <= nvar; ivar++ ) {
-            this->smootherList.put( ivar, new NodalAveragingRecoveryModel(dold) );
+            this->smootherList.emplace_back( new NodalAveragingRecoveryModel(dold) );
         }
     }
 
     this->intVarTypes = varTypes;
     for ( int ivar = 1; ivar <= nvar; ivar++ ) {
-        this->smootherList.at(ivar)->recoverValues(elemSet, ( InternalStateType ) varTypes.at(ivar), tStep);
+        this->smootherList[ivar-1]->recoverValues(elemSet, ( InternalStateType ) varTypes.at(ivar), tStep);
     }
 
     // remember time stemp
@@ -110,11 +109,11 @@ MMAShapeFunctProjection :: mapVariable(FloatArray &answer, GaussPoint *gp, Inter
     if ( indx ) {
         container.reserve(nnodes);
         for ( int inode = 1; inode <= nnodes; inode++ ) {
-            this->smootherList.at(indx)->giveNodalVector( nvec, elem->giveDofManager(inode)->giveNumber() );
+            this->smootherList[indx-1]->giveNodalVector( nvec, elem->giveDofManager(inode)->giveNumber() );
             container.emplace_back(*nvec);
         }
 
-        interface->MMAShapeFunctProjectionInterface_interpolateIntVarAt(answer, ( * gp->giveCoordinates() ),
+        interface->MMAShapeFunctProjectionInterface_interpolateIntVarAt(answer, ( * gp->giveNaturalCoordinates() ),
                                                                         MMAShapeFunctProjectionInterface :: coordType_local,
                                                                         container, type, tStep);
     } else {
@@ -131,7 +130,7 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
 {
     Element *elem = domain->giveSpatialLocalizer()->giveElementContainingPoint(coords);
     if ( !elem ) {
-        OOFEM_ERROR("MMAShapeFunctProjection::__mapVariable: no suitable source found");
+        OOFEM_ERROR("no suitable source found");
     }
 
     int nnodes = elem->giveNumberOfDofManagers();

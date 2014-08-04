@@ -85,7 +85,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     virtual void computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp);
 
@@ -121,7 +121,6 @@ protected:
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP() { return this->numberOfGaussPoints; }
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType() { return SPRPatchType_2dxy; }
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 };
 } // end namespace oofem
 #endif // quad1mindlin_H

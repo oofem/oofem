@@ -1,6 +1,7 @@
 bdam7.oofem.out
 collapse of water column 
-supg nsteps 4 lstype 0 smtype 1 deltaT 1.e-2 rtolv 1.e-4 alpha 0.5 miflag 1 refVol 2.678062e-3 
+supg nsteps 4 lstype 0 smtype 1 deltaT 1.e-2 rtolv 1.e-4 alpha 0.5 miflag 1 refVol 2.678062e-3 nmodules 1
+errorcheck filename "bdam7.oofem.in"
 #vtk tstep_step 10 domain_all primvars 2 1 5 vars 1 43
 domain 2dIncompFlow
 OutputManager tsteps_out {4} dofman_all element_all
@@ -1600,12 +1601,12 @@ ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK%
 ##Solution time at step 4
-#NODE tStep 1.73057456e-02  number 1 dof 3 unknown p value  3.80460826e+02
-#NODE tStep 1.73057456e-02  number 2 dof 1 unknown v value  4.06807867e-01
-#NODE tStep 1.73057456e-02  number 4 dof 2 unknown v value -9.33888921e-02
+#NODE tStep 4 number 1 dof 11 unknown d value 3.80462591e+02
+#NODE tStep 4 number 2 dof 7 unknown d value  4.06807867e-01
+#NODE tStep 4 number 4 dof 8 unknown d value -9.33904299e-02
 ##Solution time at step 20
-##NODE tStep 3.24171062e-02  number 1 dof 3 unknown p value  4.19138564e+02
-##NODE tStep 3.24171062e-02  number 2 dof 1 unknown v value  6.32980127e-01
-##NODE tStep 3.24171062e-02  number 4 dof 2 unknown v value -5.06245980e-01
+##NODE tStep 4 number 1 dof 11 unknown d value  4.19138564e+02
+##NODE tStep 4 number 2 dof 7 unknown d value  6.32980127e-01
+##NODE tStep 4 number 4 dof 8 unknown d value -5.06245980e-01
 #%END_CHECK%
 

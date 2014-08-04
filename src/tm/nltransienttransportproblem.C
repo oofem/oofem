@@ -114,7 +114,7 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
-        conductivityMatrix->buildInternalStructure( this, 1, EID_ConservationEquation, EModelDefaultEquationNumbering() );
+        conductivityMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 #ifdef VERBOSE
         OOFEM_LOG_INFO("Assembling conductivity and capacity matrices\n");
 #endif
@@ -170,30 +170,30 @@ void NLTransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
         if ( ( nite == 1 ) || ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
             conductivityMatrix->zero();
             //Assembling left hand side - start with conductivity matrix
-            this->assemble( conductivityMatrix, & TauStep, EID_ConservationEquation, LHSBCMatrix,
+            this->assemble( conductivityMatrix, & TauStep, LHSBCMatrix,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
-            this->assemble( conductivityMatrix, & TauStep, EID_ConservationEquation, IntSourceLHSMatrix,
+            this->assemble( conductivityMatrix, & TauStep, IntSourceLHSMatrix,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             conductivityMatrix->times(alpha);
             //Add capacity matrix
-            this->assemble( conductivityMatrix, & TauStep, EID_ConservationEquation, NSTP_MidpointLhs,
+            this->assemble( conductivityMatrix, & TauStep, NSTP_MidpointLhs,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
         }
 
         rhs.resize(neq);
         rhs.zero();
         //edge or surface load on element
-        this->assembleVectorFromElements( rhs, & TauStep, EID_ConservationEquation, ElementBCTransportVector, VM_Total,
+        this->assembleVectorFromElements( rhs, & TauStep, ElementBCTransportVector, VM_Total,
                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add internal source vector on elements
-        this->assembleVectorFromElements( rhs, & TauStep, EID_ConservationEquation, ElementInternalSourceVector, VM_Total,
+        this->assembleVectorFromElements( rhs, & TauStep, ElementInternalSourceVector, VM_Total,
                                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
         //add nodal load
         this->assembleVectorFromDofManagers( rhs, & TauStep, ExternalForcesVector, VM_Total,
                                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         // subtract the rhs part depending on previous solution
-        assembleAlgorithmicPartOfRhs(rhs, EID_ConservationEquation, EModelDefaultEquationNumbering(), & TauStep);
+        assembleAlgorithmicPartOfRhs(rhs, EModelDefaultEquationNumbering(), & TauStep);
         // set-up numerical model
         this->giveNumericalMethod( this->giveCurrentMetaStep() );
 
@@ -293,12 +293,12 @@ NLTransientTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 }
 
 void
-NLTransientTransportProblem :: createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep) {
+NLTransientTransportProblem :: createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep)
+{
     //Copy the last known temperature to be a previous solution
-    int nnodes, nDofs;
+    int nnodes;
     double val;
     Domain *domain;
-    Dof *iDof;
     DofManager *node;
 
     for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
@@ -307,11 +307,9 @@ NLTransientTransportProblem :: createPreviousSolutionInDofUnknownsDictionary(Tim
         if ( requiresUnknownsDictionaryUpdate() ) {
             for ( int inode = 1; inode <= nnodes; inode++ ) {
                 node = domain->giveDofManager(inode);
-                nDofs = node->giveNumberOfDofs();
-                for ( int i = 1; i <= nDofs; i++ ) {
-                    iDof = node->giveDof(i);
-                    val = iDof->giveUnknown(VM_Total, tStep); //get number on hash=0(current)
-                    iDof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, val);
+                for ( Dof *dof: *node ) {
+                    val = dof->giveUnknown(VM_Total, tStep); //get number on hash=0(current)
+                    dof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, val);
                 }
             }
         }
@@ -348,21 +346,18 @@ void
 NLTransientTransportProblem :: updateDofUnknownsDictionary(DofManager *inode, TimeStep *tStep)
 {
     // update DoF unknowns dictionary. Store the last and previous temperature only, see giveUnknownDictHashIndx
-    int ndofs = inode->giveNumberOfDofs();
-
-    for ( int i = 1; i <= ndofs; i++ ) {
-        Dof *iDof = inode->giveDof(i);
-        int eqNum = iDof->__giveEquationNumber();
+    for ( Dof *dof: *inode ) {
+        int eqNum = dof->__giveEquationNumber();
         double val;
-        if ( iDof->hasBc(tStep) ) { // boundary condition
-            val = iDof->giveBcValue(VM_Total, tStep);
+        if ( dof->hasBc(tStep) ) { // boundary condition
+            val = dof->giveBcValue(VM_Total, tStep);
         } else {
             FloatArray *vect = this->UnknownsField->giveSolutionVector(tStep);
             val = vect->at(eqNum);
         }
 
         //update temperature, which is present in every node
-        iDof->updateUnknownsDictionary(tStep, VM_Total, val);
+        dof->updateUnknownsDictionary(tStep, VM_Total, val);
     }
 }
 
@@ -375,11 +370,9 @@ NLTransientTransportProblem :: copyUnknownsInDictionary(ValueModeType mode, Time
 
     for ( int j = 1; j <= nnodes; j++ ) {
         DofManager *inode = domain->giveDofManager(j);
-        int ndofs = inode->giveNumberOfDofs();
-        for ( int i = 1; i <= ndofs; i++ ) {
-            Dof *iDof = inode->giveDof(i);
-            double val = iDof->giveUnknown(mode, fromTime);
-            iDof->updateUnknownsDictionary(toTime, mode, val);
+        for ( Dof *dof: *inode ) {
+            double val = dof->giveUnknown(mode, fromTime);
+            dof->updateUnknownsDictionary(toTime, mode, val);
         }
     }
 }
@@ -406,7 +399,7 @@ NLTransientTransportProblem :: updateInternalState(TimeStep *tStep)
 }
 
 void
-NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, EquationID ut,
+NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer,
                                                             const UnknownNumberingScheme &ns, TimeStep *tStep)
 {
     //
@@ -438,7 +431,7 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
             continue;
         }
 
-        element->giveLocationArray(loc, ut, ns);
+        element->giveLocationArray(loc, ns);
 
         element->giveCharacteristicMatrix(charMtrxCond, ConductivityMatrix, tStep);
         element->giveCharacteristicMatrix(bcMtrx, LHSBCMatrix, tStep);
@@ -446,14 +439,14 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer, 
 
 
         /*
-         *  element -> computeVectorOf (EID_ConservationEquation, VM_Total, tStep, r);
-         *  element -> computeVectorOf (EID_ConservationEquation, VM_Velocity, tStep, drdt);
+         *  element -> computeVectorOf (VM_Total, tStep, r);
+         *  element -> computeVectorOf (VM_Velocity, tStep, drdt);
          */
 
         if ( ( t >= previousStep->giveTargetTime() ) && ( t <= currentStep->giveTargetTime() ) ) {
             FloatArray rp, rc;
-            element->computeVectorOf(EID_ConservationEquation, VM_Total, currentStep, rc);
-            element->computeVectorOf(EID_ConservationEquation, VM_Total, previousStep, rp);
+            element->computeVectorOf(VM_Total, currentStep, rc);
+            element->computeVectorOf(VM_Total, previousStep, rp);
 
             //approximate derivative with a difference
             drdt.beDifferenceOf(rc, rp);

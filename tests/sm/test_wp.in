@@ -1,7 +1,8 @@
 test_wp.out
 "Winkler pasternak model: test of settlement profile"
 LinearStatic nsteps 1 nmodules 1
-vtkxml tstep_all domain_all primvars 1 1
+errorcheck
+#vtkxml tstep_all domain_all primvars 1 1
 domain 2dMindlinPlate
 OutputManager tstep_all dofman_all element_all
 ndofman 24 nelem 11 ncrosssect  1 nmat 1 nbc 1 nic 0 nltf 1
@@ -50,16 +51,16 @@ ConstantFunction 1 f(t) 1.0
 #
 # Exact solution: w = 0.1*exp(-sqrt(c1/c2)*x
 #%BEGIN_CHECK% tolerance 5.e-4
-#NODE tStep 1 number 1 dof 1 unknown d value 0.1
-#NODE tStep 1 number 2 dof 1 unknown d value 4.85431647e-02
-#NODE tStep 1 number 3 dof 1 unknown d value 2.35644192e-02
-#NODE tStep 1 number 4 dof 1 unknown d value 1.14389933e-02
-#NODE tStep 1 number 5 dof 1 unknown d value 5.55301838e-03
-#NODE tStep 1 number 6 dof 1 unknown d value 2.69596252e-03
-#NODE tStep 1 number 7 dof 1 unknown d value 1.30943168e-03
-#NODE tStep 1 number 8 dof 1 unknown d value 6.37136294e-04
-#NODE tStep 1 number 9 dof 1 unknown d value 3.12369798e-04
-#NODE tStep 1 number 10 dof 1 unknown d value 1.57986829e-04
-#NODE tStep 1 number 11 dof 1 unknown d value 8.97784931e-05
-#NODE tStep 1 number 12 dof 1 unknown d value 7.05402446e-05
+#NODE tStep 1 number 1 dof 3 unknown d value 0.1
+#NODE tStep 1 number 2 dof 3 unknown d value 4.85431647e-02
+#NODE tStep 1 number 3 dof 3 unknown d value 2.35644192e-02
+#NODE tStep 1 number 4 dof 3 unknown d value 1.14389933e-02
+#NODE tStep 1 number 5 dof 3 unknown d value 5.55301838e-03
+#NODE tStep 1 number 6 dof 3 unknown d value 2.69596252e-03
+#NODE tStep 1 number 7 dof 3 unknown d value 1.30943168e-03
+#NODE tStep 1 number 8 dof 3 unknown d value 6.37136294e-04
+#NODE tStep 1 number 9 dof 3 unknown d value 3.12369798e-04
+#NODE tStep 1 number 10 dof 3 unknown d value 1.57986829e-04
+#NODE tStep 1 number 11 dof 3 unknown d value 8.97784931e-05
+#NODE tStep 1 number 12 dof 3 unknown d value 7.05402446e-05
 #%END_CHECK%

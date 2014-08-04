@@ -1,6 +1,7 @@
 patchcct3d.out
 "Complex Patch test of DKT elements, four cases pure bending in x, and y, twist, and shear in one"
-LinearStatic nsteps 1
+LinearStatic nsteps 1 nmodules 1
+errorcheck
 domain 3dshell
 OutputManager tstep_all dofman_all element_all
 ndofman 20 nelem 10 ncrosssect  1 nmat 1 nbc 5 nic 0 nltf 1
@@ -63,41 +64,41 @@ ConstantFunction 1 f(t) 1.0
 #REACTION tStep 1 number 1 dof 4 value 2.5
 #REACTION tStep 1 number 2 dof 3 value 0.0
 #REACTION tStep 1 number 2 dof 4 value 2.5
-#ELEMENT tStep 1 number 1 gp 1 keyword "curvatures" component 1  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword "curvatures" component 3  value 34.722
-#ELEMENT tStep 1 number 1 gp 1 keyword "curvatures" component 2  value 0.0
-#ELEMENT tStep 1 number 1 gp 1 keyword "moments" component 1  value 3.1250e-01
-#ELEMENT tStep 1 number 1 gp 1 keyword "moments" component 3  value 1.2500e+0
-#ELEMENT tStep 1 number 1 gp 1 keyword "moments" component 2  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 11 component 1  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 11 component 9  value 34.722
+#ELEMENT tStep 1 number 1 gp 1 keyword 11 component 5  value 0.0
+#ELEMENT tStep 1 number 1 gp 1 keyword 9 component 1  value 3.1250e-01
+#ELEMENT tStep 1 number 1 gp 1 keyword 9 component 9  value 1.2500e+0
+#ELEMENT tStep 1 number 1 gp 1 keyword 9 component 5  value 0.0
 ## pure bending along y axis
 #REACTION tStep 1 number 11 dof 3 value 0.0
 #REACTION tStep 1 number 11 dof 6 value 2.5
 #REACTION tStep 1 number 14 dof 2 value 0.0
-#ELEMENT tStep 1 number 11 gp 1 keyword "curvatures" component 1  value -34.722
-#ELEMENT tStep 1 number 11 gp 1 keyword "curvatures" component 3  value 0.0
-#ELEMENT tStep 1 number 11 gp 1 keyword "curvatures" component 2  value 0.0
-#ELEMENT tStep 1 number 11 gp 1 keyword "moments" component 1  value -1.2500e+00
-#ELEMENT tStep 1 number 11 gp 1 keyword "moments" component 3  value -3.1250e-01
-#ELEMENT tStep 1 number 11 gp 1 keyword "moments" component 2  value 0.0
+#ELEMENT tStep 1 number 11 gp 1 keyword 11 component 1  value -34.722
+#ELEMENT tStep 1 number 11 gp 1 keyword 11 component 9  value 0.0
+#ELEMENT tStep 1 number 11 gp 1 keyword 11 component 5  value 0.0
+#ELEMENT tStep 1 number 11 gp 1 keyword 9 component 1  value -1.2500e+00
+#ELEMENT tStep 1 number 11 gp 1 keyword 9 component 9  value -3.1250e-01
+#ELEMENT tStep 1 number 11 gp 1 keyword 9 component 5  value 0.0
 ## pure twist
 #REACTION tStep 1 number 21 dof 2  value 0.5
 #REACTION tStep 1 number 22 dof 2 value -0.5
 #REACTION tStep 1 number 24 dof 2 value -0.5
-#ELEMENT tStep 1 number 21 gp 1 keyword "curvatures" component 1  value 0.0
-#ELEMENT tStep 1 number 21 gp 1 keyword "curvatures" component 3  value 0.0
-#ELEMENT tStep 1 number 21 gp 1 keyword "curvatures" component 5  value 9.2593e+00
-#ELEMENT tStep 1 number 21 gp 1 keyword "moments" component 1  value 0.0
-#ELEMENT tStep 1 number 21 gp 1 keyword "moments" component 3  value 0.0
-#ELEMENT tStep 1 number 21 gp 1 keyword "moments" component 5  value 0.25
-# shear x
+#ELEMENT tStep 1 number 21 gp 1 keyword 11 component 1  value 0.0
+#ELEMENT tStep 1 number 21 gp 1 keyword 11 component 9  value 0.0
+#ELEMENT tStep 1 number 21 gp 1 keyword 11 component 3  value 9.2593e+00
+#ELEMENT tStep 1 number 21 gp 1 keyword 9 component 1  value 0.0
+#ELEMENT tStep 1 number 21 gp 1 keyword 9 component 9  value 0.0
+#ELEMENT tStep 1 number 21 gp 1 keyword 9 component 3  value 0.25
+## shear x
 ##REACTION tStep 1 number 31 dof 1 value -0.5
 ##REACTION tStep 1 number 31 dof 3 value  2.0
 ##REACTION tStep 1 number 31 dof 1 value -0.5
 ##REACTION tStep 1 number 31 dof 3 value  2.0
-#shear y
+## shear y
 ##REACTION tStep 1 number 41 dof 1 value -0.5
 ##REACTION tStep 1 number 41 dof 2 value -2.0
 ##REACTION tStep 1 number 41 dof 1 value -0.5
 ##REACTION tStep 1 number 41 dof 2 value -2.0
 #%END_CHECK%
-#
+

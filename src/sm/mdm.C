@@ -162,31 +162,28 @@ MDM :: computeDamageTensor(FloatMatrix &damageTensor, const FloatArray &totalStr
 {
     // local or nonlocal
     if ( nonlocal ) {
-        FloatMatrix nonlocalContribution, nonlocalDamageTensor(nsd, nsd);
+        FloatMatrix nonlocalDamageTensor(nsd, nsd);
         MDMStatus *nonlocStatus, *status = static_cast< MDMStatus * >( this->giveStatus(gp) );
 
         this->buildNonlocalPointTable(gp);
         this->updateDomainBeforeNonlocAverage(tStep);
 
         // compute nonlocal strain increment first
-        std :: list< localIntegrationRecord > *list = this->giveIPIntegrationList(gp); // !
-        std :: list< localIntegrationRecord > :: iterator pos;
-
-        for ( pos = list->begin(); pos != list->end(); ++pos ) {
-            nonlocStatus = static_cast< MDMStatus * >( this->giveStatus(pos->nearGp) );
-            nonlocStatus->giveLocalDamageTensorForAverage(nonlocalContribution);
+        for ( auto &lir: *this->giveIPIntegrationList(gp) ) {
+            nonlocStatus = static_cast< MDMStatus * >( this->giveStatus(lir.nearGp) );
+            const FloatMatrix &nonlocalContribution = nonlocStatus->giveLocalDamageTensorForAverage();
 
             if ( ndc == 3 ) {
-                nonlocalDamageTensor.at(1, 1) += nonlocalContribution.at(1, 1) * pos->weight;
-                nonlocalDamageTensor.at(2, 2) += nonlocalContribution.at(2, 2) * pos->weight;
-                nonlocalDamageTensor.at(1, 2) += nonlocalContribution.at(1, 2) * pos->weight;
+                nonlocalDamageTensor.at(1, 1) += nonlocalContribution.at(1, 1) * lir.weight;
+                nonlocalDamageTensor.at(2, 2) += nonlocalContribution.at(2, 2) * lir.weight;
+                nonlocalDamageTensor.at(1, 2) += nonlocalContribution.at(1, 2) * lir.weight;
             } else {
-                nonlocalDamageTensor.at(1, 1) += nonlocalContribution.at(1, 1) * pos->weight;
-                nonlocalDamageTensor.at(2, 2) += nonlocalContribution.at(2, 2) * pos->weight;
-                nonlocalDamageTensor.at(3, 3) += nonlocalContribution.at(3, 3) * pos->weight;
-                nonlocalDamageTensor.at(1, 2) += nonlocalContribution.at(1, 2) * pos->weight;
-                nonlocalDamageTensor.at(1, 3) += nonlocalContribution.at(1, 3) * pos->weight;
-                nonlocalDamageTensor.at(2, 3) += nonlocalContribution.at(2, 3) * pos->weight;
+                nonlocalDamageTensor.at(1, 1) += nonlocalContribution.at(1, 1) * lir.weight;
+                nonlocalDamageTensor.at(2, 2) += nonlocalContribution.at(2, 2) * lir.weight;
+                nonlocalDamageTensor.at(3, 3) += nonlocalContribution.at(3, 3) * lir.weight;
+                nonlocalDamageTensor.at(1, 2) += nonlocalContribution.at(1, 2) * lir.weight;
+                nonlocalDamageTensor.at(1, 3) += nonlocalContribution.at(1, 3) * lir.weight;
+                nonlocalDamageTensor.at(2, 3) += nonlocalContribution.at(2, 3) * lir.weight;
             }
         }
 
@@ -672,12 +669,13 @@ MDM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, T
 
     if ( type == IST_DamageTensor ) {
         // DamageTensor = I-Phi*Phi \approx I - Phi^{-1}*Phi*^{-1}
+        // d corresponds damage compliance
+        // c corresponds to damage
         FloatMatrix d, c;
         if ( formulation == COMPLIANCE_DAMAGE ) {
-            status->giveDamageTensor(d); // d corresponds damage compliance
-            c.beInverseOf(d);    // c corresponds to damage
+            c.beInverseOf(status->giveDamageTensor());
         } else {
-            status->giveDamageTensor(c);
+            c = status->giveDamageTensor();
         }
 
         d.beProductOf(c, c);
@@ -703,10 +701,9 @@ MDM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, T
     } else if ( type == IST_DamageTensorTemp ) {
         FloatMatrix d, c;
         if ( formulation == COMPLIANCE_DAMAGE ) {
-            status->giveTempDamageTensor(d);
-            c.beInverseOf(d);
+            c.beInverseOf(status->giveTempDamageTensor());
         } else {
-            status->giveTempDamageTensor(c);
+            c = status->giveTempDamageTensor();
         }
 
         d.beProductOf(c, c);
@@ -762,7 +759,7 @@ MDM :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, T
 
         return 1;
     } else if ( type == IST_MicroplaneDamageValues ) {
-        status->giveMicroplaneDamageValues(answer);
+        answer = status->giveMicroplaneDamageValues();
         return 1;
     } else {
         return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);

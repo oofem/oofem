@@ -39,6 +39,10 @@
 #include "classfactory.h"
 #include "contextioerr.h"
 
+#ifdef __PARALLEL_MODE
+ #include "loadbalancer.h"
+#endif
+
 namespace oofem {
 REGISTER_EngngModel(AdaptiveLinearStatic);
 
@@ -56,7 +60,7 @@ AdaptiveLinearStatic :: updateYourself(TimeStep *tStep)
         return;
     } else {
         // do remeshing
-        MesherInterface *mesher = classFactory.createMesherInterface( meshPackage, this->giveDomain(1) );
+        std :: unique_ptr< MesherInterface >mesher( classFactory.createMesherInterface( meshPackage, this->giveDomain(1) ) );
         Domain *newDomain;
 
         MesherInterface :: returnCode result =
@@ -68,7 +72,7 @@ AdaptiveLinearStatic :: updateYourself(TimeStep *tStep)
             //this->terminateAnalysis();
             //exit(1);
         } else {
-            OOFEM_ERROR("MesherInterface::createMesh failed");
+            OOFEM_ERROR("createMesh failed");
         }
     }
 }

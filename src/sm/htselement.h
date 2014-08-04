@@ -69,7 +69,7 @@ protected:
     double  giveSideLength(int sideNumber);
     virtual int computeNumberOfDofs() { return 4 * numberOfEdges; }
     virtual void computeGaussPoints();
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual StructuralElement *giveStructuralElement() { return this; }
     //jak se pocita deformace???
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep) { answer.resize(numberOfStressDofs); }

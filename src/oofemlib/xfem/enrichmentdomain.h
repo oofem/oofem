@@ -81,22 +81,25 @@ public:
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const = 0;
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const = 0;
     virtual void computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const = 0;
-    virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const { OOFEM_SIMPLE_ERROR("EnrichmentDomain::giveSubPolygon() is not implemented.\n"); }
+    virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const { OOFEM_ERROR("not implemented."); }
 
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const { }
 
+    // Return the center and radius of a sphere containing all nodes
+    // enriched by the enrichment item.
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius) = 0;
 
     virtual bool giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const { return false; }
 
     /// Return array with info about all tips
-    virtual bool giveTipInfos(std :: vector< TipInfo > &oInfo) const { return false; }
+    virtual bool giveTipInfos(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const { return false; }
 
     /// Propagate tips
-    virtual bool propagateTips(const std :: vector< TipPropagation > &iTipProp) { return false; }
+    virtual bool propagateTip(const TipPropagation &iTipProp) { return false; }
 
     void setVtkDebug(bool iDebugVTK) { mDebugVTK = iDebugVTK; }
-    bool getVtkDebug() const {return mDebugVTK;}
+    bool getVtkDebug() const { return mDebugVTK; }
 
 protected:
     bool mDebugVTK;
@@ -123,11 +126,13 @@ public:
      */
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { bg->computeNormalSignDist(oDist, iPoint); };
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { bg->computeTangentialSignDist(oDist, iPoint, oMinDistArcPos); };
-    virtual void computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_SIMPLE_ERROR("EnrichmentDomain_BG::computeNormalSignDist -- not implemented"); };
+    virtual void computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
     virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const { bg->giveSubPolygon(oPoints, iXiStart, iXiEnd); }
 
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
+
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
 };
 
 class OOFEM_EXPORT EDBGCircle : public EnrichmentDomain_BG
@@ -144,6 +149,9 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_EDBGCircle_Name; }
     virtual const char *giveClassName() const { return "EDBGCircle"; }
+    std :: string errorInfo(const char *func) const { return std :: string( giveClassName() ) + func; }
+
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
 };
 
 /**
@@ -165,8 +173,14 @@ public:
     virtual const char *giveClassName() const { return "EDCrack"; }
 
     virtual bool giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const;
-    virtual bool giveTipInfos(std :: vector< TipInfo > &oInfo) const;
-    virtual bool propagateTips(const std :: vector< TipPropagation > &iTipProp);
+    virtual bool giveTipInfos(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const;
+    virtual bool propagateTip(const TipPropagation &iTipProp);
+
+    /**
+     * Keep only a part of the underlying geometry,
+     * characterized by iArcPosStart and iArcPosEnd.
+     */
+    void cropPolygon(const double &iArcPosStart, const double &iArcPosEnd);
 };
 
 
@@ -196,6 +210,8 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_DofManList_Name; }
     virtual const char *giveClassName() const { return "DofManList"; }
+
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
 };
 
 /**
@@ -209,9 +225,9 @@ public:
     WholeDomain() { }
     virtual ~WholeDomain() { }
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_SIMPLE_ERROR("WholeDomain::computeNormalSignDist -- not implemented"); };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_SIMPLE_ERROR("WholeDomain::computeTangentialSignDist -- not implemented"); };
-    virtual void computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_SIMPLE_ERROR("WholeDomain::computeNormalSignDist -- not implemented"); };
+    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("not implemented"); };
+    virtual void computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
     // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
 
@@ -220,6 +236,8 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_WholeDomain_Name; }
     virtual const char *giveClassName() const { return "WholeDomain"; }
+
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
 };
 } // end namespace oofem
 #endif

@@ -51,7 +51,7 @@ REGISTER_Element(Tr1_hmt);
 FEI2dTrLin Tr1_ht :: interp(1, 2);
 
 Tr1_ht :: Tr1_ht(int n, Domain *aDomain) :
-    TransportElement(n, aDomain, HeatTransferEM)
+    TransportElement(n, aDomain, HeatTransferEM), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this)
     // Constructor.
 {
     numberOfDofMans  = 3;
@@ -72,9 +72,8 @@ void
 Tr1_ht :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -102,7 +101,7 @@ Tr1_ht :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     volume = determinant * weight * this->giveCrossSection()->give(CS_Thickness, gp);
 
@@ -120,9 +119,9 @@ Tr1_ht :: giveThicknessAt(const FloatArray &gcoords)
 double
 Tr1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     FloatArray gc;
-    double thick = this->giveCrossSection()->give(CS_Thickness, gp->giveCoordinates(), NULL, this); // 't'
+    double thick = this->giveCrossSection()->give(CS_Thickness, gp->giveNaturalCoordinates(), NULL, this); // 't'
     return determinant *thick *gp->giveWeight();
 }
 
@@ -139,13 +138,6 @@ Tr1_ht :: giveInterface(InterfaceType interface)
     }
 
     return NULL;
-}
-
-int
-Tr1_ht :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
 }
 
 

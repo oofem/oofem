@@ -101,9 +101,8 @@ void StructuralElement :: computeLoadVector(FloatArray &answer, Load *load, Char
     // Just a wrapper for the deadweight body load computations:
     PointLoad *p = dynamic_cast< PointLoad * >(load);
     if ( p ) {
-        FloatArray gcoords, lcoords;
-        p->giveCoordinates(gcoords);
-        if ( this->computeLocalCoordinates(lcoords, gcoords) ) {
+        FloatArray lcoords;
+        if ( this->computeLocalCoordinates(lcoords, p->giveCoordinates()) ) {
             this->computePointLoadVectorAt(answer, load, tStep, mode);
         }
     } else {
@@ -121,7 +120,7 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
 
     FEInterpolation *fei = this->giveInterpolation();
     if ( !fei ) {
-        OOFEM_ERROR("No interpolator available\n");
+        OOFEM_ERROR("No interpolator available");
     }
 
     FloatArray n_vec;
@@ -131,9 +130,8 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
 
     IntegrationRule *iRule = fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary);
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
-        FloatArray &lcoords = * gp->giveCoordinates();
+    for ( GaussPoint *gp: *iRule ) {
+        FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValueAt(force, tStep, lcoords, mode);
@@ -183,7 +181,6 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
 //  different coordinate system in each node)
 {
     double dens, dV;
-    GaussPoint *gp;
     FloatArray force, ntf;
     FloatMatrix n, T;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
@@ -202,9 +199,8 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
     answer.clear();
 
     if ( force.giveSize() ) {
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            gp  = iRule->getIntegrationPoint(i);
-            this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), n);
+        for ( GaussPoint *gp: *iRule ) {
+            this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), n);
             dV  = this->computeVolumeAround(gp);
             dens = this->giveCrossSection()->give('d', gp);
             ntf.beTProductOf(n, force);
@@ -218,15 +214,14 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
 void
 StructuralElement :: computePointLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode)
 {
-    FloatArray force, coords, lcoords;
+    FloatArray force, lcoords;
     FloatMatrix T, n;
 
     PointLoad *pointLoad = dynamic_cast< PointLoad * >(load);
-    pointLoad->giveCoordinates(coords);
+    FloatArray coords = pointLoad->giveCoordinates();
     pointLoad->computeValueAt(force, tStep, coords, mode);
-    if ( this->computeLocalCoordinates(lcoords, coords) ) {
-        GaussPoint __gp(NULL, 0, ( new FloatArray ( lcoords ) ), 1.0, _Unknown);
-        this->computeNmatrixAt(* ( __gp.giveLocalCoordinates() ), n);
+    if ( this->computeLocalCoordinates(lcoords, pointLoad->giveCoordinates()) ) {
+        this->computeNmatrixAt(lcoords, n);
         answer.beTProductOf(n, force);
     } else {
         OOFEM_WARNING("point load outside element");
@@ -271,18 +266,16 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
         numberOfGaussPoints = ( int ) ceil( ( approxOrder + 1. ) / 2. );
         GaussIntegrationRule iRule(1, this, 1, 1);
         iRule.SetUpPointsOnLine(numberOfGaussPoints, _Unknown);
-        GaussPoint *gp;
         FloatArray reducedAnswer, force, ntf;
         IntArray mask;
         FloatMatrix n;
 
-        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
-            gp  = iRule.getIntegrationPoint(i);
+        for ( GaussPoint *gp: iRule ) {
             this->computeEgdeNMatrixAt(n, iEdge, gp);
             dV  = this->computeEdgeVolumeAround(gp, iEdge);
 
             if ( edgeLoad->giveFormulationType() == Load :: FT_Entity ) {
-                edgeLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
+                edgeLoad->computeValueAt(force, tStep, * ( gp->giveNaturalCoordinates() ), mode);
             } else {
                 this->computeEdgeIpGlobalCoords(globalIPcoords, gp, iEdge);
                 edgeLoad->computeValueAt(force, tStep, globalIPcoords, mode);
@@ -348,7 +341,6 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
     BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( surfLoad ) {
         IntegrationRule *iRule;
-        GaussPoint *gp;
         FloatArray reducedAnswer, force, ntf;
         IntArray mask;
         FloatMatrix n;
@@ -357,13 +349,12 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder();
 
         iRule = this->GetSurfaceIntegrationRule(approxOrder);
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            gp  = iRule->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *iRule ) {
             this->computeSurfaceNMatrixAt(n, iSurf, gp);
             dV  = this->computeSurfaceVolumeAround(gp, iSurf);
 
             if ( surfLoad->giveFormulationType() == Load :: FT_Entity ) {
-                surfLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
+                surfLoad->computeValueAt(force, tStep, * ( gp->giveNaturalCoordinates() ), mode);
             } else {
                 this->computeSurfIpGlobalCoords(globalIPcoords, gp, iSurf);
                 surfLoad->computeValueAt(force, tStep, globalIPcoords, mode);
@@ -427,9 +418,8 @@ StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *
 
     mass = 0.;
 
-    for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule.getIntegrationPoint(i);
-        this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), n);
+    for ( GaussPoint *gp: iRule ) {
+        this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), n);
         density = this->giveCrossSection()->give('d', gp);
 
         if ( ipDensity != NULL ) {
@@ -551,7 +541,7 @@ void
 StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 // Returns the lumped mass matrix of the receiver.
 {
-    double mass;
+    double mass = 0.;
 
     IntArray nodeDofIDMask, dimFlag(3);
     IntArray nodalArray;
@@ -569,7 +559,7 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     ldofs = answer.giveNumberOfRows();
 
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        this->giveDofManDofIDMask(i, EID_MomentumBalance, nodeDofIDMask);
+        this->giveDofManDofIDMask(i, nodeDofIDMask);
         //this->giveDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray);
         for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
             indx++;
@@ -618,7 +608,7 @@ StructuralElement :: computeResultingIPTemperatureAt(FloatArray &answer, TimeSte
     Load *load;
     FloatArray gCoords, temperature;
 
-    if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
+    if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 
@@ -642,7 +632,7 @@ StructuralElement :: computeResultingIPEigenstrainAt(FloatArray &answer, TimeSte
     Load *load;
     FloatArray gCoords, eigenstrain;
 
-    if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
+    if ( this->computeGlobalCoordinates( gCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 
@@ -668,7 +658,6 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     int iStartIndx, iEndIndx, jStartIndx, jEndIndx;
     double dV;
     FloatMatrix d, bi, bj, dbj, dij;
-    GaussPoint *gp;
     IntegrationRule *iRule;
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
 
@@ -678,11 +667,11 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
         return;
     }
 
-    if ( numberOfIntegrationRules > 1 ) {
-        for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+    if ( integrationRulesArray.size() > 1 ) {
+        for ( int i = 0; i < (int)integrationRulesArray.size(); i++ ) {
             iStartIndx = integrationRulesArray [ i ]->getStartIndexOfLocalStrainWhereApply();
             iEndIndx   = integrationRulesArray [ i ]->getEndIndexOfLocalStrainWhereApply();
-            for ( int j = 0; j < numberOfIntegrationRules; j++ ) {
+            for ( int j = 0; j < (int)integrationRulesArray.size(); j++ ) {
                 jStartIndx = integrationRulesArray [ j ]->getStartIndexOfLocalStrainWhereApply();
                 jEndIndx   = integrationRulesArray [ j ]->getEndIndexOfLocalStrainWhereApply();
                 if ( i == j ) {
@@ -693,8 +682,7 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
                     iRule = integrationRulesArray [ j ];
                 }
 
-                for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-                    gp = iRule->getIntegrationPoint(k);
+                for ( GaussPoint *gp: *iRule ) {
                     this->computeBmatrixAt(gp, bi, iStartIndx, iEndIndx);
                     this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
                     dij.beSubMatrixOf(d, iStartIndx, iEndIndx, jStartIndx, jEndIndx);
@@ -714,11 +702,10 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
                 }
             }
         }
-    } else { // numberOfIntegrationRules == 1
+    } else {
         iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
+        for ( GaussPoint *gp: *iRule ) {
             this->computeBmatrixAt(gp, bj);
             this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
             dV = this->computeVolumeAround(gp);
@@ -753,11 +740,9 @@ void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatri
     }
 
     // loop over individual integration rules
-    for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ ir ];
+    for ( auto &iRule: integrationRulesArray ) {
         // loop over individual integration points
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(j);
+        for ( GaussPoint *gp: *iRule ) {
             double dV = this->computeVolumeAround(gp);
             this->computeBmatrixAt(gp, bj);
             this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
@@ -771,7 +756,7 @@ void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatri
         }
 
         // localize irule contribution into element matrix
-        if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule, EID_MomentumBalance) ) {
+        if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule) ) {
             answer.assemble(* m, irlocnum);
             m->clear();
         }
@@ -799,7 +784,7 @@ StructuralElement :: computeStrainVector(FloatArray &answer, GaussPoint *gp, Tim
     }
 
     this->computeBmatrixAt(gp, b);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
 
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
@@ -838,7 +823,7 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
     FloatArray u, stress, strain;
 
     // This function can be quite costly to do inside the loops when one has many slave dofs.
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
         u.subtract(* initialDisplacements);
@@ -847,8 +832,7 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
     // zero answer will resize accordingly when adding first contribution
     answer.clear();
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
         this->computeBmatrixAt(gp, b);
 
@@ -912,7 +896,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
     IntArray irlocnum;
 
     // This function can be quite costly to do inside the loops when one has many slave dofs.
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
         u.subtract(* initialDisplacements);
@@ -927,11 +911,8 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
     }
 
     // loop over individual integration rules
-    for ( int ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ ir ];
-
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( GaussPoint *gp: *iRule ) {
             StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
             this->computeBmatrixAt(gp, b);
 
@@ -963,7 +944,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
             m->plusProduct(b, stress, dV);
 
             // localize irule contribution into element matrix
-            if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule, EID_MomentumBalance) ) {
+            if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule) ) {
                 answer.assemble(* m, irlocnum);
                 m->clear();
             }
@@ -1038,7 +1019,7 @@ StructuralElement :: updateYourself(TimeStep *tStep)
             initialDisplacements = new FloatArray();
         }
 
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, * initialDisplacements);
+        this->computeVectorOf(VM_Total, tStep, * initialDisplacements);
     }
 }
 
@@ -1050,10 +1031,8 @@ StructuralElement :: updateInternalState(TimeStep *tStep)
     FloatArray stress, strain;
 
     // force updating strains & stresses
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(j);
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( GaussPoint *gp: *iRule ) {
             this->computeStrainVector(strain, gp, tStep);
             this->computeStressVector(stress, strain, gp, tStep);
         }
@@ -1070,7 +1049,6 @@ StructuralElement :: updateBeforeNonlocalAverage(TimeStep *tStep)
      * and then to cast this Material pointer into NonlocalMaterial pointer type,
      * because it is possible to cast only the pointer of derived class to pointer to base class.
      */
-    IntegrationRule *iRule;
     FloatArray epsilon;
 
 #ifdef __PARALLEL_MODE
@@ -1081,23 +1059,21 @@ StructuralElement :: updateBeforeNonlocalAverage(TimeStep *tStep)
 #endif
 
     // force updating local quantities
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            IntegrationPoint *ip = iRule->getIntegrationPoint(j);
-            this->computeStrainVector(epsilon, ip, tStep);
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( GaussPoint *gp: *iRule ) {
+            this->computeStrainVector(epsilon, gp, tStep);
             // provide material local strain increment - as is provided to computeRealStresVector
             // allows to update internal vars to be averaged to new state
 
             // not possible - produces wrong result
             StructuralNonlocalMaterialExtensionInterface *materialExt;
             materialExt =  static_cast< StructuralNonlocalMaterialExtensionInterface * >( this->giveStructuralCrossSection()->
-                                                                                         giveMaterialInterface(NonlocalMaterialExtensionInterfaceType, ip) );
+                                                                                         giveMaterialInterface(NonlocalMaterialExtensionInterfaceType, gp) );
 
             if ( !materialExt ) {
                 return;             //_error("updateBeforeNonlocalAverage: material with no StructuralNonlocalMaterial support");
             }
-            materialExt->updateBeforeNonlocAverage(epsilon, iRule->getIntegrationPoint(j), tStep);
+            materialExt->updateBeforeNonlocAverage(epsilon, gp, tStep);
         }
     }
 }
@@ -1240,8 +1216,8 @@ StructuralElement :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSta
     if ( type == IST_DisplacementVector ) {
         FloatArray u;
         FloatMatrix N;
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
-        this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), N);
+        this->computeVectorOf(VM_Total, tStep, u);
+        this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), N);
         answer.beProductOf(N, u);
         return 1;
     }
@@ -1258,12 +1234,10 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const Un
     // create lit of remote elements, contributing to receiver
     std :: list< localIntegrationRecord > *integrationDomainList;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    std :: list< localIntegrationRecord > :: iterator pos;
 
     locationArray.clear();
     // loop over element IP
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        IntegrationPoint *ip = iRule->getIntegrationPoint(i);
+    for ( IntegrationPoint *ip: *iRule ) {
         interface =  static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
                                                                          giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
 
@@ -1276,8 +1250,8 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const Un
         integrationDomainList = interface->
                                 NonlocalMaterialStiffnessInterface_giveIntegrationDomainList(ip);
         // loop over IP influencing IPs, extract corresponding element numbers and their code numbers
-        for ( pos = integrationDomainList->begin(); pos != integrationDomainList->end(); ++pos ) {
-            pos->nearGp->giveElement()->giveLocationArray(elemLocArry, EID_MomentumBalance, s);
+        for ( auto &lir: *integrationDomainList ) {
+            lir.nearGp->giveElement()->giveLocationArray(elemLocArry, s);
             /*
              * Currently no care given to multiple occurences of code number in locationArray.
              */
@@ -1299,15 +1273,14 @@ StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, const U
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     // loop over element IP
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        IntegrationPoint *ip = iRule->getIntegrationPoint(i);
+    for ( IntegrationPoint *ip: *iRule ) {
         interface = static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
                                                                         giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
         if ( interface == NULL ) {
             return;
         }
 
-        interface->NonlocalMaterialStiffnessInterface_addIPContribution(dest, s, iRule->getIntegrationPoint(i), tStep);
+        interface->NonlocalMaterialStiffnessInterface_addIPContribution(dest, s, ip, tStep);
     }
 }
 
@@ -1316,14 +1289,11 @@ int
 StructuralElement :: adaptiveUpdate(TimeStep *tStep)
 {
     int result = 1;
-    IntegrationRule *iRule;
     FloatArray strain;
 
     MaterialModelMapperInterface *interface;
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            IntegrationPoint *ip = iRule->getIntegrationPoint(i);
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( IntegrationPoint *ip: *iRule ) {
             interface = static_cast< MaterialModelMapperInterface * >( this->giveStructuralCrossSection()->
                                                                       giveMaterialInterface(MaterialModelMapperInterfaceType, ip) );
 
@@ -1360,11 +1330,9 @@ StructuralCrossSection *StructuralElement :: giveStructuralCrossSection()
 void StructuralElement :: createMaterialStatus()
 {
     StructuralCrossSection *cs = giveStructuralCrossSection();
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint &gp = * ( iRule->getIntegrationPoint(j) );
-            cs->createMaterialStatus(gp);
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( GaussPoint *gp: *iRule ) {
+            cs->createMaterialStatus(*gp);
         }
     }
 }
@@ -1397,7 +1365,7 @@ StructuralElement :: showSparseMtrxStructure(CharType mtrx, oofegGraphicContext 
         ( mtrx == SecantStiffnessMatrix ) || ( mtrx == ElasticStiffnessMatrix ) ) {
         int i, j, n;
         IntArray loc;
-        this->giveLocationArray( loc, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        this->giveLocationArray( loc, EModelDefaultEquationNumbering() );
 
         WCRec p [ 4 ];
         GraphicObj *go;
@@ -1478,7 +1446,6 @@ void
 StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphicContext &gc, TimeStep *tStep)
 {
     NonlocalMaterialStiffnessInterface *interface;
-    int i;
     if ( ( ( mtrx == StiffnessMatrix ) || ( mtrx == TangentStiffnessMatrix ) ) ) {
         //interface = static_cast< NonlocalMaterialStiffnessInterface * >
         //            ( this->giveMaterial()->giveInterface(NonlocalMaterialStiffnessInterfaceType) );
@@ -1488,15 +1455,14 @@ StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphic
 
         IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
         // loop over element IP
-        for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            IntegrationPoint *ip = iRule->getIntegrationPoint(i);
+        for ( IntegrationPoint *ip: *iRule ) {
             interface = static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
                                                                             giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
 
             if ( interface == NULL ) {
                 return;
             }
-            interface->NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(iRule->getIntegrationPoint(i), gc, tStep);
+            interface->NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(ip, gc, tStep);
         }
     }
 }

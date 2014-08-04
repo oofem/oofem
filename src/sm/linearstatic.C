@@ -196,7 +196,7 @@ void LinearStatic :: solveYourself()
     if ( this->isParallel() ) {
  #ifdef __VERBOSE_PARALLEL
         // force equation numbering before setting up comm maps
-        int neq = this->giveNumberOfDomainEquations(EID_MomentumBalance);
+        int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
         OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
 
@@ -234,9 +234,9 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
-        stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble( stiffnessMatrix, tStep, EID_MomentumBalance, StiffnessMatrix,
+        this->assemble( stiffnessMatrix, tStep, StiffnessMatrix,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         initFlag = 0;
@@ -257,7 +257,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     loadVector.resize( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     loadVector.zero();
-    this->assembleVector( loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
+    this->assembleVector( loadVector, tStep, ExternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     //
@@ -265,7 +265,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
     //
     FloatArray internalForces( this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() ) );
     internalForces.zero();
-    this->assembleVector( internalForces, tStep, EID_MomentumBalance, InternalForcesVector, VM_Total,
+    this->assembleVector( internalForces, tStep, InternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalForces);
@@ -400,25 +400,21 @@ LinearStatic :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 int
 LinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
 {
-    int mapSize = commMap.giveSize();
-    int ndofs, count = 0, pcount = 0;
+    int count = 0, pcount = 0;
     IntArray locationArray;
     Domain *domain = this->giveDomain(1);
-    DofManager *dman;
-    Dof *jdof;
 
     if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            count += domain->giveDofManager( commMap.at(i) )->giveNumberOfDofs();
+        for ( int map: commMap ) {
+            count += domain->giveDofManager( map )->giveNumberOfDofs();
         }
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
     } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            ndofs = ( dman = domain->giveDofManager( commMap.at(i) ) )->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                jdof = dman->giveDof(j);
-                if ( jdof->isPrimaryDof() && ( jdof->__giveEquationNumber() ) ) {
+        for ( int map: commMap ) {
+            DofManager *dman = domain->giveDofManager( map );
+            for ( Dof *dof: *dman ) {
+                if ( dof->isPrimaryDof() && ( dof->__giveEquationNumber() ) ) {
                     count++;
                 } else {
                     pcount++;
@@ -432,8 +428,8 @@ LinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * pcount );
     } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            count += domain->giveElement( commMap.at(i) )->estimatePackSize(buff);
+        for ( int map: commMap ) {
+            count += domain->giveElement( map )->estimatePackSize(buff);
         }
 
         return count;

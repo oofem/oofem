@@ -254,7 +254,7 @@ SkylineUnsym :: checkSizeTowards(const IntArray &rloc, const IntArray &cloc)
 
 
 int
-SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
+SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
     // Instanciates the profile of the receiver and initializes all coefficients to zero.
     // Warning : case diagonal (lumped) matrix to expected.
@@ -297,11 +297,11 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut
         //elem -> giveLocationArray (loc) ;
 
         if ( !nonlocal ) {
-            elem->giveLocationArray(loc, ut, s);
+            elem->giveLocationArray(loc, s);
         }
         //else ((StructuralElement*)elem) -> giveNonlocalLocationArray(loc) ;
         else {
-            elem->giveLocationArray(loc, ut, s);
+            elem->giveLocationArray(loc, s);
         }
 
         //    Find 'first', the smallest positive number in LocArray
@@ -330,7 +330,7 @@ SkylineUnsym :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
-            bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
+            bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                 IntArray &krloc = r_locs [ k ];
                 IntArray &kcloc = c_locs [ k ];
@@ -562,7 +562,7 @@ SkylineUnsym :: backSubstitutionWith(FloatArray &y) const
         diag = this->giveRowColumn(k)->atDiag();
 #     ifdef DEBUG
         if ( fabs(diag) < SkylineUnsym_TINY_PIVOT ) {
-            OOFEM_ERROR("diagScaling: pivot %d is small", k);
+            OOFEM_ERROR("pivot %d is small", k);
         }
 
 #     endif

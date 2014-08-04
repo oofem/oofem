@@ -57,21 +57,23 @@ class IntArray;
  */
 class OOFEM_EXPORT SpatialLocalizerInterface : public Interface
 {
+private:
+    Element *element;
+
 public:
-    SpatialLocalizerInterface() : Interface() { }
+    SpatialLocalizerInterface(Element *element) : Interface(), element(element) { }
 
     /**
      * @name The element interface required by SpatialLocalizerInterface
      */
     //@{
-    /// @return Reference to corresponding element.
-    virtual Element *SpatialLocalizerI_giveElement() = 0;
     /**
      * Checks if element contains specified coordinate.
+     * Default implementation uses Element::computeLocalCoordinates.
      * @param coords Global coordinate.
      * @return Nonzero if given element contains given point.
      */
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords) = 0;
+    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     /**
      * Creates a bounding box of the nodes and checks if it includes the given coordinate.
      * @param coords Global coordinate.
@@ -91,7 +93,7 @@ public:
      */
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
     {
-        OOFEM_SIMPLE_ERROR( "SpatialLocalizerInterface :: SpatialLocalizerI_giveDistanceFromParametricCenter - Not implemented for %s", this->giveClassName() );
+        OOFEM_ERROR( "Not implemented for %s", this->giveClassName() );
         return 0.0;
     }
 
@@ -164,11 +166,7 @@ public:
      * @return The element belonging to associated domain, close to given point, NULL otherwise.
      */
     virtual Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest,
-                                               const FloatArray &coords, int region = 0)
-    {
-        OOFEM_SIMPLE_ERROR( "SpatialLocalizer :: giveElementClosestToPoint - Not implemented for %s", this->giveClassName() );
-        return NULL;
-    }
+                                               const FloatArray &coords, int region = 0) = 0;
     /**
      * Returns the integration point in associated domain, which is closest
      * to given point. Since IP holds the information about its element,

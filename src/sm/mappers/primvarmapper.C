@@ -67,6 +67,7 @@ LSPrimaryVariableMapper :: ~LSPrimaryVariableMapper()
 void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOldDom, Domain &iNewDom, ValueModeType iMode, TimeStep &iTStep)
 {
     EngngModel *engngMod = iNewDom.giveEngngModel();
+    EModelDefaultEquationNumbering num;
 
 
     const int dim = iNewDom.giveNumberOfSpatialDimensions();
@@ -74,7 +75,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
     int numElNew = iNewDom.giveNumberOfElements();
 
     // Count dofs
-    int numDofsNew = engngMod->giveNumberOfDomainEquations( 1, engngMod->giveUnknownNumberingScheme(EID_MomentumBalance) );
+    int numDofsNew = engngMod->giveNumberOfDomainEquations( 1, num );
 
 
     oU.resize(numDofsNew);
@@ -88,7 +89,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
     SparseLinearSystemNM *solver = classFactory.createSparseLinSolver(ST_Direct, & iOldDom, engngMod);
 
 
-    K->buildInternalStructure( engngMod, 1, EID_MomentumBalance, engngMod->giveUnknownNumberingScheme(EID_MomentumBalance) );
+    K->buildInternalStructure( engngMod, 1, num );
 
     int maxIter = 1;
 
@@ -99,7 +100,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
         for ( int elIndex = 1; elIndex <= numElNew; elIndex++ ) {
             StructuralElement *elNew = dynamic_cast< StructuralElement * >( iNewDom.giveElement(elIndex) );
             if ( elNew == NULL ) {
-                OOFEM_SIMPLE_ERROR("In LSPrimaryVariableMapper::mapPrimaryVariables(): Failed to cast Element new to StructuralElement.\n");
+                OOFEM_ERROR("Failed to cast Element new to StructuralElement.");
             }
 
             ///////////////////////////////////
@@ -116,20 +117,18 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
             elRes.zero();
 
             IntArray elDofsGlob;
-            elNew->giveLocationArray( elDofsGlob, EID_MomentumBalance, engngMod->giveUnknownNumberingScheme(EID_MomentumBalance) );
+            elNew->giveLocationArray( elDofsGlob, num );
 
 
             // Loop over Gauss points
             for ( int intRuleInd = 0; intRuleInd < elNew->giveNumberOfIntegrationRules(); intRuleInd++ ) {
                 IntegrationRule *iRule = elNew->giveIntegrationRule(intRuleInd);
-                int numGP = iRule->giveNumberOfIntegrationPoints();
 
-                for ( int gpInd = 0; gpInd < numGP; gpInd++ ) {
-                    GaussPoint *gp = iRule->getIntegrationPoint(gpInd);
+                for ( GaussPoint *gp: *iRule ) {
 
                     // New N-matrix
                     FloatMatrix NNew;
-                    elNew->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), NNew);
+                    elNew->computeNmatrixAt(* ( gp->giveNaturalCoordinates() ), NNew);
 
 
                     //////////////
@@ -138,7 +137,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
                     FloatArray Nc;
                     FEInterpolation *interp = elNew->giveInterpolation();
-                    const FloatArray &localCoord = * ( gp->giveCoordinates() );
+                    const FloatArray &localCoord = * ( gp->giveNaturalCoordinates() );
                     interp->evalN( Nc, localCoord, FEIElementGeometryWrapper(elNew) );
 
                     const IntArray &elNodes = elNew->giveDofManArray();
@@ -160,7 +159,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                     FloatArray localCoordOld(dim), pointCoordOld(dim);
                     StructuralElement *elOld = dynamic_cast< StructuralElement * >( iOldDom.giveSpatialLocalizer()->giveElementClosestToPoint(localCoordOld, pointCoordOld, globalCoord, 0) );
                     if ( elOld == NULL ) {
-                        OOFEM_SIMPLE_ERROR("In LSPrimaryVariableMapper::mapPrimaryVariables(): Failed to cast Element old to StructuralElement.\n");
+                        OOFEM_ERROR("Failed to cast Element old to StructuralElement.");
                     }
 
 
@@ -176,12 +175,10 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                     for ( int i = 1; i <= elNodes.giveSize(); i++ ) {
                         DofManager *dMan = elNew->giveDofManager(i);
 
-                        for ( int j = 1; j <= dMan->giveNumberOfDofs(); j++ ) {
+                        for ( Dof *dof: *dMan ) {
                             if ( elDofsGlob.at(dofsPassed) != 0 ) {
                                 nodeDispNew.at(dofsPassed) = oU.at( elDofsGlob.at(dofsPassed) );
                             } else {
-                                Dof *dof = dMan->giveDof(j);
-
                                 if ( dof->hasBc(& iTStep) ) {
                                     nodeDispNew.at(dofsPassed) = dof->giveBcValue(iMode, & iTStep);
                                 }
@@ -198,7 +195,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
                     // Fetch nodal displacements for the old element
                     FloatArray nodeDisp;
-                    elOld->computeVectorOf(EID_MomentumBalance, iMode, & iTStep, nodeDisp);
+                    elOld->computeVectorOf(iMode, & iTStep, nodeDisp);
 
                     FloatArray oldDisp;
                     oldDisp.beProductOf(NOld, nodeDisp);
@@ -222,6 +219,15 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
             K->assemble(elDofsGlob, me);
             res.assemble(elRes, elDofsGlob);
+        }
+
+        const double stiffTol = 1.0e-9;
+
+        int numRowsTot = K->giveNumberOfRows();
+        for(int rowInd = 1; rowInd <= numRowsTot; rowInd++) {
+            if( fabs(K->at(rowInd, rowInd)) < stiffTol ) {
+                K->at(rowInd, rowInd) = 1.0e-6;
+            }
         }
 
         //		printf("iter: %d res norm: %e\n", iter, res.computeNorm() );

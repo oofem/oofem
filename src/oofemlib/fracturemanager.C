@@ -44,6 +44,7 @@
 #include "xfem/xfemmanager.h"
 #include "xfem/enrichmentdomain.h"
 #include "classfactory.h"
+#include "element.h"
 
 
 namespace oofem {
@@ -100,7 +101,7 @@ int FractureManager :: instanciateYourself(DataReader *dr)
 
         FailureCriteria *failCriteria = classFactory.createFailureCriteria(name.c_str(), i, this);
         if ( failCriteria == NULL ) {
-            OOFEM_SIMPLE_ERROR( "FractureManager :: instanciateYourself: unknown failure criteria (%s)", name.c_str() );
+            OOFEM_ERROR( "unknown failure criteria (%s)", name.c_str() );
         }
         failCriteria->initializeFrom(mir);
 
@@ -114,11 +115,11 @@ int FractureManager :: instanciateYourself(DataReader *dr)
                 failCriteria->list.at(j - 1) = fcs;
             }
         } else if ( failCriteria->giveType() == IPLocal ) {
-            OOFEM_SIMPLE_ERROR("FractureManager :: instanciateYourself - IPLocal criteria not supported yet");
+            OOFEM_ERROR("IPLocal criteria not supported yet");
         } else if ( failCriteria->giveType() == Nonlocal ) {
-            OOFEM_SIMPLE_ERROR("FractureManager :: instanciateYourself - Nonlocal criteria not supported yet");
+            OOFEM_ERROR("Nonlocal criteria not supported yet");
         } else {
-            OOFEM_SIMPLE_ERROR("FractureManager :: instanciateYourself - Unknown failure criteria");
+            OOFEM_ERROR("Unknown failure criteria");
         }
 
         this->criteriaList.at(i - 1) = failCriteria;
@@ -159,9 +160,9 @@ FractureManager :: evaluateFailureCriterias(TimeStep *tStep)
                 this->setUpdateFlag( failCrit->evaluateFailureCriteria(fcStatus) );
             }
         } else if ( failCrit->giveType() == Nonlocal ) {
-            OOFEM_SIMPLE_ERROR("FractureManager :: evaluateFailureCriterias - Nonlocal criteria not supported yet");
+            OOFEM_ERROR("Nonlocal criteria not supported yet");
         } else {
-            OOFEM_SIMPLE_ERROR("FractureManager :: evaluateFailureCriterias - Unknown failure criteria");
+            OOFEM_ERROR("Unknown failure criteria");
         }
     }
 }

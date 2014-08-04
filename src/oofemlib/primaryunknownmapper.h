@@ -37,7 +37,6 @@
 
 #include "oofemcfg.h"
 #include "interface.h"
-#include "equationid.h"
 #include "valuemodetype.h"
 
 #include <string>

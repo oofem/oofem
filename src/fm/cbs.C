@@ -117,14 +117,9 @@ CBS :: initializeFrom(InputRecord *ir)
         FieldManager *fm = this->giveContext()->giveFieldManager();
         IntArray mask = {V_u, V_v, V_w};
 
-#ifdef FIELDMANAGER_USE_SHARED_PTR
-        //std::tr1::shared_ptr<Field> _velocityField = make_shared<MaskedPrimaryField>(FT_Velocity, &this->VelocityField, mask);
-        std :: tr1 :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, &this->VelocityField, mask ) );
+        //std::shared_ptr<Field> _velocityField = make_shared<MaskedPrimaryField>(FT_Velocity, &this->VelocityField, mask);
+        std :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, &this->VelocityField, mask ) );
         fm->registerField(_velocityField, FT_Velocity);
-#else
-        MaskedPrimaryField *_velocityField = new MaskedPrimaryField(FT_Velocity, &this->VelocityField, mask);
-        fm->registerField(_velocityField, FT_Velocity, true);
-#endif
     }
 
     //</RESTRICTED_SECTION>
@@ -250,7 +245,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
         nodalPrescribedTractionPressureConnectivity.resize(presneq_prescribed);
         nodalPrescribedTractionPressureConnectivity.zero();
-        this->assembleVectorFromElements( nodalPrescribedTractionPressureConnectivity, tStep, EID_MomentumBalance_ConservationEquation,
+        this->assembleVectorFromElements( nodalPrescribedTractionPressureConnectivity, tStep,
                                          NumberOfNodalPrescribedTractionPressureContributions, VM_Total,
                                          pnumPrescribed, this->giveDomain(1) );
 
@@ -260,9 +255,9 @@ CBS :: solveYourselfAt(TimeStep *tStep)
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
-        lhs->buildInternalStructure(this, 1, EID_MomentumBalance_ConservationEquation, pnum);
+        lhs->buildInternalStructure(this, 1, pnum);
 
-        this->assemble( lhs, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, PressureLhs,
+        this->assemble( lhs, stepWhenIcApply, PressureLhs,
                        pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta1 * theta2);
 
@@ -272,13 +267,13 @@ CBS :: solveYourselfAt(TimeStep *tStep)
                 OOFEM_ERROR("sparse matrix creation failed");
             }
 
-            mss->buildInternalStructure(this, 1, EID_MomentumBalance_ConservationEquation, vnum);
-            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, MassMatrix,
+            mss->buildInternalStructure(this, 1, vnum);
+            this->assemble( mss, stepWhenIcApply, MassMatrix,
                            vnum, this->giveDomain(1) );
         } else {
             mm.resize(momneq);
             mm.zero();
-            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance_ConservationEquation, LumpedMassMatrix, VM_Total,
+            this->assembleVectorFromElements( mm, tStep, LumpedMassMatrix, VM_Total,
                                              vnum, this->giveDomain(1) );
         }
 
@@ -294,17 +289,17 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     //<RESTRICTED_SECTION>
     else if ( materialInterface ) {
         lhs->zero();
-        this->assemble( lhs, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, PressureLhs,
+        this->assemble( lhs, stepWhenIcApply, PressureLhs,
                        pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta1 * theta2);
 
         if ( consistentMassFlag ) {
             mss->zero();
-            this->assemble( mss, stepWhenIcApply, EID_MomentumBalance_ConservationEquation, MassMatrix,
+            this->assemble( mss, stepWhenIcApply, MassMatrix,
                            vnum, this->giveDomain(1) );
         } else {
             mm.zero();
-            this->assembleVectorFromElements( mm, tStep, EID_MomentumBalance_ConservationEquation, LumpedMassMatrix, VM_Total,
+            this->assembleVectorFromElements( mm, tStep, LumpedMassMatrix, VM_Total,
                                              vnum, this->giveDomain(1) );
         }
     }
@@ -329,16 +324,16 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     /* STEP 1 - calculates auxiliary velocities*/
     rhs.zero();
     // Depends on old v:
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, IntermediateConvectionTerm, VM_Total,
+    this->assembleVectorFromElements( rhs, tStep, IntermediateConvectionTerm, VM_Total,
                                      vnum, this->giveDomain(1) );
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, IntermediateDiffusionTerm, VM_Total,
+    this->assembleVectorFromElements( rhs, tStep, IntermediateDiffusionTerm, VM_Total,
                                      vnum, this->giveDomain(1) );
-    //this->assembleVectorFromElements(mm, tStep, EID_MomentumBalance_ConservationEquation, LumpedMassMatrix, VM_Total, this->giveDomain(1));
+    //this->assembleVectorFromElements(mm, tStep, LumpedMassMatrix, VM_Total, this->giveDomain(1));
 
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
         // Depends on prescribed v
-        this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, PrescribedVelocityRhsVector, VM_Incremental,
+        this->assembleVectorFromElements( rhs, tStep, PrescribedVelocityRhsVector, VM_Incremental,
                                          vnum, this->giveDomain(1) );
         nMethod->solve(mss, & rhs, & deltaAuxVelocity);
     } else {
@@ -350,7 +345,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     /* STEP 2 - calculates pressure (implicit solver) */
     this->prescribedTractionPressure.resize(presneq_prescribed);
     this->prescribedTractionPressure.zero();
-    this->assembleVectorFromElements( prescribedTractionPressure, tStep, EID_MomentumBalance_ConservationEquation,
+    this->assembleVectorFromElements( prescribedTractionPressure, tStep,
                                      DensityPrescribedTractionPressure, VM_Total,
                                      pnumPrescribed, this->giveDomain(1) );
     for ( int i = 1; i <= presneq_prescribed; i++ ) {
@@ -364,10 +359,10 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     // Depends on old V + deltaAuxV * theta1:
     rhs.resize(presneq);
     rhs.zero();
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, DensityRhsVelocityTerms, VM_Total,
+    this->assembleVectorFromElements( rhs, tStep, DensityRhsVelocityTerms, VM_Total,
                                      pnum, this->giveDomain(1) );
     // Depends on p:
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, DensityRhsPressureTerms, VM_Total,
+    this->assembleVectorFromElements( rhs, tStep, DensityRhsPressureTerms, VM_Total,
                                      pnum, this->giveDomain(1) );
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
     nMethod->solve(lhs, & rhs, pressureVector);
@@ -378,11 +373,11 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     rhs.resize(momneq);
     rhs.zero();
     // Depends on p:
-    this->assembleVectorFromElements( rhs, tStep, EID_MomentumBalance_ConservationEquation, CorrectionRhs, VM_Total,
+    this->assembleVectorFromElements( rhs, tStep, CorrectionRhs, VM_Total,
                                      vnum, this->giveDomain(1) );
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
-        //this->assembleVectorFromElements(rhs, tStep, EID_MomentumBalance_ConservationEquation, PrescribedRhsVector, VM_Incremental, vnum, this->giveDomain(1));
+        //this->assembleVectorFromElements(rhs, tStep, PrescribedRhsVector, VM_Incremental, vnum, this->giveDomain(1));
         nMethod->solve(mss, & rhs, velocityVector);
         velocityVector->add(deltaAuxVelocity);
         velocityVector->add(* prevVelocityVector);
@@ -574,7 +569,7 @@ CBS :: checkConsistency()
             } else if ( bcPtr->giveBCValType() == ForceLoadBVT ) {
                 bcPtr->scale( 1. / this->giveVariableScale(VST_Force) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type\n");
+                OOFEM_ERROR("unknown bc/ic type");
             }
         }
 
@@ -586,7 +581,7 @@ CBS :: checkConsistency()
             } else if ( icPtr->giveICValType() == PressureBVT ) {
                 icPtr->scale( VM_Total, 1. / this->giveVariableScale(VST_Pressure) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type\n");
+                OOFEM_ERROR("unknown bc/ic type");
             }
         }
     }
@@ -610,9 +605,9 @@ CBS :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 
     DofIDItem type = iDof->giveDofID();
     if ( ( type == V_u ) || ( type == V_v ) || ( type == V_w ) ) {
-        iDof->printSingleOutputAt(stream, tStep, 'v', VM_Total, uscale);
+        iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total, uscale);
     } else if ( type == P_f ) {
-        iDof->printSingleOutputAt(stream, tStep, 'p', VM_Total, pscale);
+        iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total, pscale);
     } else {
         OOFEM_ERROR("unsupported dof type");
     }
@@ -644,12 +639,10 @@ CBS :: applyIC(TimeStep *stepWhenIcApply)
     int nman  = domain->giveNumberOfDofManagers();
     for ( int j = 1; j <= nman; j++ ) {
         DofManager *node = domain->giveDofManager(j);
-        int nDofs = node->giveNumberOfDofs();
 
-        for ( int k = 1; k <= nDofs; k++ ) {
+        for ( Dof *iDof: *node ) {
             // ask for initial values obtained from
             // bc (boundary conditions) and ic (initial conditions)
-            Dof *iDof = node->giveDof(k);
             if ( !iDof->isPrimaryDof() ) {
                 continue;
             }

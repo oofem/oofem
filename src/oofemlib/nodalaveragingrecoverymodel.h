@@ -102,15 +102,6 @@ public:
      */
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep) = 0;
-    /**
-     * Computes the element value in given side.
-     * @param answer Contains the result.
-     * @param side Element side number.
-     * @param type Determines the type of internal variable to be recovered.
-     * @param tStep Time step.
-     */
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep) = 0;
     //@}
 };
 } // end namespace oofem

@@ -35,15 +35,14 @@
 #ifndef qtruss1dgrad_h
 #define qtruss1dgrad_h
 
-#include "fei1dlin.h"
-#include "structuralelement.h"
-#include "gaussintegrationrule.h"
-#include "graddpelement.h"
 #include "qtruss1d.h"
+#include "graddpelement.h"
 
 #define _IFT_QTruss1dGrad_Name "qtruss1dgrad"
 
 namespace oofem {
+class FEI1dLin;
+
 /**
  * This class implements a three-node gradient truss bar element for one-dimensional
  * analysis.
@@ -51,8 +50,7 @@ namespace oofem {
 class QTruss1dGrad : public QTruss1d, public GradDpElement
 {
 protected:
-    double length;
-    static FEI1dLin interpolation;
+    static FEI1dLin interpolation_lin;
 
 public:
     QTruss1dGrad(int n, Domain * d);
@@ -72,7 +70,7 @@ protected:
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
     virtual void computeGaussPoints();
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual StructuralElement *giveStructuralElement() { return this; }
     virtual NLStructuralElement *giveNLStructuralElement() { return this; }
 };

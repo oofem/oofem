@@ -145,11 +145,9 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
     EASValsSetFillStyle(FILL_SOLID);
-    numberOfIntegrationRules = this->giveNumberOfIntegrationRules();
     const double *const *knotVector = interp->giveKnotVector();
     const IntArray *span;
-    IntegrationRule *iRule;
-    int ir, j, nsd = this->giveNsd();
+    int j, nsd = this->giveNsd();
     FloatArray c [ 4 ], cg [ 4 ], u;
     IntArray sign [ 4 ];
 
@@ -173,11 +171,10 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
 
     indx = context.giveIntVarIndx();
 
-    StructuralElementEvaluator :: computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    StructuralElementEvaluator :: computeVectorOf(VM_Total, tStep, u);
 
     // loop over individual integration rules (i.e., knot spans)
-    for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        iRule = this->giveIntegrationRule(ir);
+    for ( auto &iRule: integrationRulesArray ) {
         span = iRule->giveKnotSpan();
         if ( nsd == 2 ) {
             // divide span locally to get finer geometry rep.
@@ -262,11 +259,9 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context)
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
     EASValsSetFillStyle(FILL_SOLID);
     EASValsSetEdgeFlag(true);
-    numberOfIntegrationRules = this->giveNumberOfIntegrationRules();
     const double *const *knotVector = interp->giveKnotVector();
     const IntArray *span;
-    IntegrationRule *iRule;
-    int ir, j, nsd = this->giveNsd();
+    int j, nsd = this->giveNsd();
     FloatArray c [ 4 ], cg [ 4 ];
     IntArray sign [ 4 ];
 
@@ -290,13 +285,12 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context)
 
     indx = context.giveIntVarIndx();
 
-    StructuralElementEvaluator :: computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    StructuralElementEvaluator :: computeVectorOf(VM_Total, tStep, u);
 
     //double maxs=-1.0e10, mins=1.0e10;
 
     // loop over individual integration rules (i.e., knot spans)
-    for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        iRule = this->giveIntegrationRule(ir);
+    for ( auto &iRule: integrationRulesArray ) {
         span = iRule->giveKnotSpan();
         if ( nsd == 2 ) {
             // divide span locally to get finer geometry rep.
@@ -469,11 +463,9 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
     EASValsSetFillStyle(FILL_SOLID);
     EASValsSetEdgeFlag(true);
-    numberOfIntegrationRules = this->giveNumberOfIntegrationRules();
     const double *const *knotVector = interp->giveKnotVector();
     const IntArray *span;
-    IntegrationRule *iRule;
-    int ir, j, nsd = this->giveNsd();
+    int j, nsd = this->giveNsd();
     FloatArray c [ 4 ], cg [ 4 ], u;
     IntArray sign [ 4 ];
 
@@ -497,11 +489,10 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
 
     indx = context.giveIntVarIndx();
 
-    StructuralElementEvaluator :: computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    StructuralElementEvaluator :: computeVectorOf(VM_Total, tStep, u);
 
     // loop over individual integration rules (i.e., knot spans)
-    for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        iRule = this->giveIntegrationRule(ir);
+    for ( auto &iRule: integrationRulesArray ) {
         span = iRule->giveKnotSpan();
         if ( nsd == 2 ) {
             // divide span locally to get finer geometry rep.
@@ -587,11 +578,9 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context)
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
     EASValsSetFillStyle(FILL_SOLID);
     EASValsSetEdgeFlag(true);
-    numberOfIntegrationRules = this->giveNumberOfIntegrationRules();
     const double *const *knotVector = interp->giveKnotVector();
     const IntArray *span;
-    IntegrationRule *iRule;
-    int ir, j, nsd = this->giveNsd();
+    int j, nsd = this->giveNsd();
     FloatArray c [ 8 ], cg [ 8 ];
     IntArray sign [ 8 ];
 
@@ -643,13 +632,12 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context)
     }
  #endif
 
-    StructuralElementEvaluator :: computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    StructuralElementEvaluator :: computeVectorOf(VM_Total, tStep, u);
 
     //double maxs=-1.0e10, mins=1.0e10;
 
     // loop over individual integration rules (i.e., knot spans)
-    for ( ir = 0; ir < numberOfIntegrationRules; ir++ ) {
-        iRule = this->giveIntegrationRule(ir);
+    for ( auto &iRule: integrationRulesArray ) {
         span = iRule->giveKnotSpan();
         if ( nsd == 3 ) {
             // divide span locally to get finer geometry rep.

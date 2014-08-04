@@ -68,7 +68,7 @@ public:
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual double computeVolumeAround(GaussPoint *);
     virtual int giveApproxOrder() { return 2; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 9; }
@@ -88,8 +88,6 @@ public:
     virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     virtual void computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
@@ -97,7 +95,6 @@ public:
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QWedge_Name; }

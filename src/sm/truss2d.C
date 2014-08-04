@@ -107,9 +107,8 @@ Truss2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 void Truss2d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
@@ -296,7 +295,7 @@ Truss2d :: initializeFrom(InputRecord *ir)
 
 
 void
-Truss2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Truss2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( cs_mode == 0 ) {
         answer = {D_u, D_w};
@@ -310,7 +309,7 @@ Truss2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 void
 Truss2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) );
+    this->computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
 }
 
 void
@@ -330,7 +329,7 @@ Truss2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 

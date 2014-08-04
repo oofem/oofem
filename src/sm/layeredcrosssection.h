@@ -201,9 +201,9 @@ public:
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
 
 
-    void mapLayerGpCoordsToShellCoords(IntegrationRule ** &layerIntegrationRulesArray);
+    void mapLayerGpCoordsToShellCoords(std :: vector< IntegrationRule * > &layerIntegrationRulesArray);
 
-    void setupLayeredIntegrationRule(IntegrationRule ** &layerIntegrationRulesArray, Element *el, int numInPlanePoints);
+    void setupLayeredIntegrationRule(std :: vector< IntegrationRule * > &layerIntegrationRulesArray, Element *el, int numInPlanePoints);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
     virtual double give(int aProperty, GaussPoint *gp)

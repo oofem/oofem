@@ -54,11 +54,10 @@ REGISTER_Element(TrPlaneStrain);
 FEI2dTrLin TrPlaneStrain :: interp(1, 2);
 
 TrPlaneStrain :: TrPlaneStrain(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
-    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(),
-    DirectErrorIndicatorRCInterface(),
-    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(), ZZRemeshingCriteriaInterface(),
-    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
+    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
+    SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
+    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
+    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface()
     // Constructor.
 {
     numberOfDofMans  = 3;
@@ -78,20 +77,14 @@ TrPlaneStrain :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
         return static_cast< MMAShapeFunctProjectionInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
-    } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return static_cast< HuertaRemeshingCriteriaInterface * >(this);
     }
 
     return NULL;
@@ -105,7 +98,7 @@ TrPlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 // luated at gp.
 {
     FloatMatrix dN;
-    this->interp.evaldNdx( dN, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dN, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(4, 6);
 
@@ -132,7 +125,7 @@ TrPlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // @todo not checked if correct
 {
     FloatMatrix dnx;
-    this->interp.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(5, 6);
     answer.zero();
@@ -148,9 +141,8 @@ TrPlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 void TrPlaneStrain :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -161,7 +153,7 @@ void
 TrPlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     FloatArray n;
-    this->interp.edgeEvalN( n, 1, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.edgeEvalN( n, 1, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(2, 4);
     answer.at(1, 1) = answer.at(2, 2) = n.at(1);
     answer.at(1, 3) = answer.at(2, 4) = n.at(2);
@@ -201,7 +193,7 @@ TrPlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 TrPlaneStrain :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -209,7 +201,7 @@ TrPlaneStrain :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 TrPlaneStrain :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -267,7 +259,7 @@ double TrPlaneStrain :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
     return detJ *weight *this->giveCrossSection()->give(CS_Thickness, gp);
 }
@@ -301,7 +293,7 @@ TrPlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &norm
 
 
 void
-TrPlaneStrain :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+TrPlaneStrain :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v};
 }
@@ -314,14 +306,6 @@ TrPlaneStrain :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, 
     GaussPoint *gp;
     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);
-}
-
-
-void
-TrPlaneStrain :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 
@@ -363,14 +347,6 @@ TrPlaneStrain :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-int
-TrPlaneStrain :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
-
 double
 TrPlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
@@ -398,44 +374,21 @@ TrPlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatA
 }
 
 
-double
-TrPlaneStrain :: DirectErrorIndicatorRCI_giveCharacteristicSize()
-{
-    return sqrt(this->computeArea() * 2.0);
-}
-
-
-int
-TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                  TimeStep *tStep, const FloatArray &coords,
+void
+TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                  TimeStep *tStep, const FloatArray &lcoords,
                                                                   FloatArray &answer)
 {
-    FloatArray lcoords, u, nv;
+    FloatArray u, nv;
     FloatMatrix n;
-    int result;
-
-    result = this->computeLocalCoordinates(lcoords, coords);
 
     this->interp.evalN( nv, lcoords, FEIElementGeometryWrapper(this) );
 
-    n.resize(2, 6);
-    n.zero();
-    n.at(1, 1) = n.at(2, 2) = nv.at(1);
-    n.at(1, 3) = n.at(2, 4) = nv.at(2);
-    n.at(1, 5) = n.at(2, 6) = nv.at(3);
+    n.beNMatrixOf(nv, 2);
 
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf(mode, tStep, u);
 
     answer.beProductOf(n, u);
-
-    return result;
-}
-
-
-void
-TrPlaneStrain :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    giveDofManDofIDMask(1, EID_MomentumBalance, answer);
 }
 
 
@@ -470,7 +423,6 @@ TrPlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode)
 {
-    Element *element = this->HuertaErrorEstimatorI_giveElement();
     int inode, nodes = 3, iside, sides = 3, nd1, nd2;
     FloatArray *corner [ 3 ], midSide [ 3 ], midNode, cor [ 3 ];
     double x = 0.0, y = 0.0;
@@ -480,7 +432,7 @@ TrPlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
-            corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
+            corner [ inode ] = this->giveNode(inode + 1)->giveCoordinates();
             if ( corner [ inode ]->giveSize() != 3 ) {
                 cor [ inode ].resize(3);
                 cor [ inode ].at(1) = corner [ inode ]->at(1);
@@ -512,7 +464,7 @@ TrPlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
         midNode.at(3) = 0.0;
     }
 
-    this->setupRefinedElementProblem2D(element, refinedElement, level, nodeId, localNodeIdArray, globalNodeIdArray,
+    this->setupRefinedElementProblem2D(this, refinedElement, level, nodeId, localNodeIdArray, globalNodeIdArray,
                                        sMode, tStep, nodes, corner, midSide, midNode,
                                        localNodeId, localElemId, localBcId,
                                        controlNode, controlDof, aMode, "Quad1PlaneStrain");

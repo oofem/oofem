@@ -66,7 +66,7 @@ TransportElement :: ~TransportElement()
 
 
 void
-TransportElement :: giveElementDofIDMask(EquationID, IntArray &answer) const
+TransportElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     if ( emode == HeatTransferEM ) {
         answer = {T_f};
@@ -76,25 +76,6 @@ TransportElement :: giveElementDofIDMask(EquationID, IntArray &answer) const
         answer = {C_1};
     } else {
         OOFEM_ERROR("Unknown ElementMode");
-    }
-}
-
-
-void
-TransportElement :: giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const
-{
-    if ( eid == EID_ConservationEquation ) {
-        if ( emode == HeatTransferEM ) {
-            answer = {T_f};
-        } else if ( emode == HeatMass1TransferEM ) {
-            answer = {T_f, C_1};
-        } else if ( emode == Mass1TransferEM ) {
-            answer = {C_1};
-        } else {
-            OOFEM_ERROR("Unknown ElementMode");
-        }
-    } else {
-        answer.clear();
     }
 }
 
@@ -252,7 +233,7 @@ void
 TransportElement :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dnx;
-    this->giveInterpolation()->evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->giveInterpolation()->evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     ///@todo We should change the transposition in evaldNdx;
     answer.beTranspositionOf(dnx);
 }
@@ -334,9 +315,8 @@ TransportElement :: computeCapacitySubMatrix(FloatMatrix &answer, MatResponseMod
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
     answer.clear();
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
-        this->computeNAt( n, * gp->giveCoordinates() );
+    for ( GaussPoint *gp: *iRule ) {
+        this->computeNAt( n, * gp->giveNaturalCoordinates() );
         // ask for capacity coefficient. In basic units [J/K/m3]
         double c = mat->giveCharacteristicValue(rmode, gp, tStep);
         double dV = this->computeVolumeAround(gp);
@@ -351,13 +331,11 @@ TransportElement :: computeConductivitySubMatrix(FloatMatrix &answer, int nsd, i
 {
     double dV;
     FloatMatrix b, d, db;
-    GaussPoint *gp;
     IntegrationRule *iRule = integrationRulesArray [ iri ];
 
     answer.resize( this->giveNumberOfDofManagers(), this->giveNumberOfDofManagers() );
     answer.zero();
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         this->computeConstitutiveMatrixAt(d, rmode, gp, tStep);
         this->computeGradientMatrixAt(b, gp);
         dV = this->computeVolumeAround(gp);
@@ -390,11 +368,10 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
         Load *load = domain->giveLoad(k);
         bcGeomType ltype = load->giveBCGeoType();
         if ( ltype == BodyLoadBGT ) {
-            for ( int igp = 0; igp < iRule->giveNumberOfIntegrationPoints(); igp++ ) {
-                GaussPoint *gp = iRule->getIntegrationPoint(igp);
-                this->computeNAt( n, * gp->giveCoordinates() );
+            for ( GaussPoint *gp: *iRule ) {
+                this->computeNAt( n, * gp->giveNaturalCoordinates() );
                 double dV = this->computeVolumeAround(gp);
-                this->computeGlobalCoordinates( globalIPcoords, * gp->giveCoordinates() );
+                this->computeGlobalCoordinates( globalIPcoords, * gp->giveNaturalCoordinates() );
                 load->computeValueAt(val, tStep, globalIPcoords, mode);
 
                 helpLoadVector.add(val.at(indx) * dV, n);
@@ -406,9 +383,8 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
 
     // add internal source produced by material (if any)
     if ( mat->hasInternalSource() ) {
-        for ( int igp = 0; igp < iRule->giveNumberOfIntegrationPoints(); igp++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(igp);
-            this->computeNAt( n, * gp->giveCoordinates() );
+        for ( GaussPoint *gp: *iRule ) {
+            this->computeNAt( n, * gp->giveNaturalCoordinates() );
             double dV = this->computeVolumeAround(gp);
             mat->computeInternalSourceVector(val, gp, tStep, mode);
 
@@ -487,9 +463,8 @@ TransportElement :: computeIntSourceLHSSubMatrix(FloatMatrix &answer, MatRespons
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
     answer.clear();
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
-        this->computeNAt( n, * gp->giveCoordinates() );
+    for ( GaussPoint *gp: *iRule ) {
+        this->computeNAt( n, * gp->giveNaturalCoordinates() );
         // ask for coefficient from material
         double c = mat->giveCharacteristicValue(rmode, gp, tStep);
         double dV = this->computeVolumeAround(gp);
@@ -511,10 +486,12 @@ TransportElement :: computeConstitutiveMatrixAt(FloatMatrix &answer,
 void
 TransportElement :: computeInternalForcesVectorAt(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
 {
+    IntArray dofids;
     FloatArray tmp;
     FloatArray unknowns;
     FloatMatrix s;
-    this->computeVectorOf(EID_ConservationEquation, mode, tStep, unknowns);
+    this->giveElementDofIDMask(dofids);
+    this->computeVectorOf(dofids, mode, tStep, unknowns);
     ///@todo Integrate and compute as a nonlinear problem instead of doing this tangent.
     this->computeConductivityMatrix(s, Conductivity, tStep);
     answer.beProductOf(s, unknowns);
@@ -545,7 +522,7 @@ TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType t
     FloatArray gcoords, val, n, unknowns;
     IntArray dofid;
 
-    this->giveDefaultDofManDofIDMask(1, dofid);
+    this->giveElementDofIDMask(dofid);
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *fieldInterp = this->giveInterpolation( ( DofIDItem ) dofid.at(1) );
@@ -553,12 +530,11 @@ TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType t
     IntegrationRule *iRule = interp->giveIntegrationRule( load->giveApproxOrder() + fieldInterp->giveInterpolationOrder() );
 
     if ( load->giveType() == ConvectionBC ) {
-        this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, unknowns);
+        this->computeVectorOf(dofid, VM_Total, tStep, unknowns);
     }
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
-        FloatArray &lcoords = * gp->giveCoordinates();
+    for ( GaussPoint *gp: *iRule ) {
+        FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         fieldInterp->evalN( n, lcoords, FEIElementGeometryWrapper(this) );
         double detJ = interp->giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) );
@@ -605,7 +581,7 @@ TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
     FloatArray gcoords, val, n, unknowns;
     IntArray dofid;
 
-    this->giveDefaultDofManDofIDMask(1, dofid);
+    this->giveElementDofIDMask(dofid);
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *fieldInterp = this->giveInterpolation( ( DofIDItem ) dofid.at(1) );
@@ -615,12 +591,11 @@ TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
     if ( load->giveType() == ConvectionBC ) {
         IntArray bNodes;
         fieldInterp->boundaryGiveNodes(bNodes, boundary);
-        this->computeBoundaryVectorOf(bNodes, EID_ConservationEquation, VM_Total, tStep, unknowns);
+        this->computeBoundaryVectorOf(bNodes, dofid, VM_Total, tStep, unknowns);
     }
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
-        FloatArray &lcoords = * gp->giveCoordinates();
+    for ( GaussPoint *gp: *iRule ) {
+        FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         fieldInterp->boundaryEvalN( n, boundary, lcoords, FEIElementGeometryWrapper(this) );
         double detJ = interp->boundaryGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
@@ -665,7 +640,7 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
     FloatArray gcoords, val, n, unknowns;
     IntArray dofid;
 
-    this->giveDefaultDofManDofIDMask(1, dofid);
+    this->giveElementDofIDMask(dofid);
 
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *fieldInterp = this->giveInterpolation( ( DofIDItem ) dofid.at(1) );
@@ -675,12 +650,11 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
     if ( load->giveType() == ConvectionBC ) {
         IntArray bNodes;
         fieldInterp->boundaryGiveNodes(bNodes, boundary);
-        this->computeBoundaryVectorOf(bNodes, EID_ConservationEquation, VM_Total, tStep, unknowns);
+        this->computeBoundaryVectorOf(bNodes, dofid, VM_Total, tStep, unknowns);
     }
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
-        FloatArray &lcoords = * gp->giveCoordinates();
+    for ( GaussPoint *gp: *iRule ) {
+        FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         fieldInterp->boundaryEdgeEvalN( n, boundary, lcoords, FEIElementGeometryWrapper(this) );
         double detJ = interp->boundaryEdgeGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
@@ -818,9 +792,8 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
             coeff = edgeLoad->giveProperty('a', tStep);
         }
 
-        for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule.getIntegrationPoint(i);
-            FloatArray *lcoords = gp->giveCoordinates();
+        for ( GaussPoint *gp: iRule ) {
+            FloatArray *lcoords = gp->giveNaturalCoordinates();
             this->computeEgdeNAt(n, iEdge, * lcoords);
             dV = this->computeEdgeVolumeAround(gp, iEdge);
 
@@ -872,15 +845,14 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
         int approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder(indx);
 
         IntegrationRule *iRule = this->GetSurfaceIntegrationRule(approxOrder);
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(i);
-            this->computeSurfaceNAt( n, iSurf, * gp->giveCoordinates() );
+        for ( GaussPoint *gp: *iRule ) {
+            this->computeSurfaceNAt( n, iSurf, * gp->giveNaturalCoordinates() );
             double dV = this->computeSurfaceVolumeAround(gp, iSurf);
 
             if ( surfLoad->giveFormulationType() == Load :: FT_Entity ) {
-                surfLoad->computeValueAt(val, tStep, * gp->giveCoordinates(), mode);
+                surfLoad->computeValueAt(val, tStep, * gp->giveNaturalCoordinates(), mode);
             } else {
-                this->computeSurfIpGlobalCoords(globalIPcoords, * gp->giveCoordinates(), iSurf);
+                this->computeSurfIpGlobalCoords(globalIPcoords, * gp->giveNaturalCoordinates(), iSurf);
                 surfLoad->computeValueAt(val, tStep, globalIPcoords, mode);
             }
 
@@ -930,9 +902,8 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 IntArray mask;
                 FloatMatrix subAnswer;
 
-                for ( int igp = 0; igp < iRule.giveNumberOfIntegrationPoints(); igp++ ) {
-                    GaussPoint *gp = iRule.getIntegrationPoint(igp);
-                    this->computeEgdeNAt( n, id, * gp->giveCoordinates() );
+                for ( GaussPoint *gp: iRule ) {
+                    this->computeEgdeNAt( n, id, * gp->giveNaturalCoordinates() );
                     double dV = this->computeEdgeVolumeAround(gp, id);
                     subAnswer.plusDyadSymmUpper( n, dV * edgeLoad->giveProperty('a', tStep) );
                 }
@@ -954,9 +925,8 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 int approxOrder = 2 * this->giveApproxOrder(indx);
                 IntegrationRule *iRule = this->GetSurfaceIntegrationRule(approxOrder);
 
-                for ( int igp = 0; igp < iRule->giveNumberOfIntegrationPoints(); igp++ ) {
-                    GaussPoint *gp = iRule->getIntegrationPoint(igp);
-                    this->computeSurfaceNAt( n, id, * gp->giveCoordinates() );
+                for ( GaussPoint *gp: *iRule ) {
+                    this->computeSurfaceNAt( n, id, * gp->giveNaturalCoordinates() );
                     double dV = this->computeSurfaceVolumeAround(gp, id);
                     subAnswer.plusDyadSymmUpper( n, dV * surfLoad->giveProperty('a', tStep) );
                 }
@@ -1012,8 +982,10 @@ TransportElement :: computeFlow(FloatArray &answer, GaussPoint *gp, TimeStep *tS
 {
     FloatArray r, br;
     FloatMatrix b, d;
+    IntArray dofid;
 
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, r);
+    this->giveElementDofIDMask(dofid);
+    this->computeVectorOf(dofid, VM_Total, tStep, r);
     this->computeGradientMatrixAt(b, gp);
 
     if ( emode == HeatTransferEM ||  emode == Mass1TransferEM ) {
@@ -1064,23 +1036,23 @@ TransportElement :: updateInternalState(TimeStep *tStep)
     FloatArray stateVector, r;
     FloatArray gradient, flux;
     FloatMatrix n, B;
+    IntArray dofid;
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, r);
+    this->giveElementDofIDMask(dofid);
+    this->computeVectorOf(dofid, VM_Total, tStep, r);
     // force updating ip values
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(j);
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( GaussPoint *gp: *iRule ) {
 
             ///@todo Why is the state vector the unknown solution at the gauss point? / Mikael
-            this->computeNmatrixAt( n, * gp->giveCoordinates() );
+            this->computeNmatrixAt( n, * gp->giveNaturalCoordinates() );
             stateVector.beProductOf(n, r);
             mat->updateInternalState(stateVector, gp, tStep);
 
             ///@todo We need to sort out multiple materials for coupled (heat+mass) problems
 #if 0
-            this->computeGradientMatrixAt( B, * gp->giveCoordinates() );
+            this->computeGradientMatrixAt( B, * gp->giveNaturalCoordinates() );
             gradient.beProductOf(B, r);
             mat->giveFluxVector(flux, gp, gradient, tStep);
 #endif
@@ -1098,9 +1070,9 @@ TransportElement :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, Pr
     FloatMatrix n;
     IntArray elemdofs;
     // determine element dof ids
-    this->giveElementDofIDMask(pf.giveEquationID(), elemdofs);
+    this->giveElementDofIDMask(elemdofs);
     // first evaluate element unknown vector
-    this->computeVectorOf(pf, mode, tStep, elemvector);
+    this->computeVectorOf(pf, elemdofs, mode, tStep, elemvector);
     // determine corresponding local coordinates
     if ( this->computeLocalCoordinates(lc, coords) ) {
         // compute interpolation matrix
@@ -1136,19 +1108,19 @@ TransportElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateTyp
 {
     Node *n = this->giveNode(node);
     if ( type == IST_Temperature ) {
-        int dofindx;
-        if ( ( dofindx = n->findDofWithDofId(T_f) ) ) {
+        auto dofindx = n->findDofWithDofId(T_f);
+        if ( dofindx != n->end() ) {
             answer.resize(1);
-            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
+            answer.at(1) = (*dofindx)->giveUnknown(VM_Total, tStep);
             return 1;
         } else {
             return 0;
         }
     } else if ( type == IST_MassConcentration_1 ) {
-        int dofindx;
-        if ( ( dofindx = n->findDofWithDofId(C_1) ) ) {
+        auto dofindx = n->findDofWithDofId(C_1);
+        if ( dofindx != n->end() ) {
             answer.resize(1);
-            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
+            answer.at(1) = (*dofindx)->giveUnknown(VM_Total, tStep);
             return 1;
         } else {
             return 0;

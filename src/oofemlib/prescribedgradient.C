@@ -205,7 +205,7 @@ double PrescribedGradient :: domainSize()
 }
 
 
-void PrescribedGradient :: computeField(FloatArray &sigma, EquationID eid, TimeStep *tStep)
+void PrescribedGradient :: computeField(FloatArray &sigma, TimeStep *tStep)
 {
     EngngModel *emodel = this->domain->giveEngngModel();
     int npeq = emodel->giveNumberOfDomainEquations( this->giveDomain()->giveNumber(), EModelDefaultPrescribedEquationNumbering() );
@@ -213,9 +213,9 @@ void PrescribedGradient :: computeField(FloatArray &sigma, EquationID eid, TimeS
 
     R_c.zero();
     R_ext.zero();
-    emodel->assembleVector( R_c, tStep, eid, InternalForcesVector, VM_Total,
+    emodel->assembleVector( R_c, tStep, InternalForcesVector, VM_Total,
                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
-    emodel->assembleVector( R_ext, tStep, eid, ExternalForcesVector, VM_Total,
+    emodel->assembleVector( R_ext, tStep, ExternalForcesVector, VM_Total,
                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
     R_c.subtract(R_ext);
 
@@ -227,7 +227,7 @@ void PrescribedGradient :: computeField(FloatArray &sigma, EquationID eid, TimeS
 }
 
 
-void PrescribedGradient :: computeTangent(FloatMatrix &tangent, EquationID eid, TimeStep *tStep)
+void PrescribedGradient :: computeTangent(FloatMatrix &tangent, TimeStep *tStep)
 // a = [a_c; a_f];
 // K.a = [R_c,0];
 // [K_cc, K_cf; K_fc, K_ff].[a_c;a_f] = [R_c; 0];
@@ -253,14 +253,14 @@ void PrescribedGradient :: computeTangent(FloatMatrix &tangent, EquationID eid, 
     if ( !Kff ) {
         OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
-    Kff->buildInternalStructure(rve, 1, eid, fnum);
-    Kfp->buildInternalStructure(rve, 1, eid, fnum, pnum);
-    Kpf->buildInternalStructure(rve, 1, eid, pnum, fnum);
-    Kpp->buildInternalStructure(rve, 1, eid, pnum);
-    rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, this->domain);
-    rve->assemble(Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain);
-    rve->assemble(Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain);
-    rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, this->domain);
+    Kff->buildInternalStructure(rve, 1, fnum);
+    Kfp->buildInternalStructure(rve, 1, fnum, pnum);
+    Kpf->buildInternalStructure(rve, 1, pnum, fnum);
+    Kpp->buildInternalStructure(rve, 1, pnum);
+    rve->assemble(Kff, tStep, StiffnessMatrix, fnum, this->domain);
+    rve->assemble(Kfp, tStep, StiffnessMatrix, fnum, pnum, this->domain);
+    rve->assemble(Kpf, tStep, StiffnessMatrix, pnum, fnum, this->domain);
+    rve->assemble(Kpp, tStep, StiffnessMatrix, pnum, this->domain);
 
     FloatMatrix C, X, Kpfa, KfpC, a;
 

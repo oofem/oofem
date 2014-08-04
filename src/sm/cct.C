@@ -59,8 +59,8 @@ FEI2dTrLin CCTPlate :: interp_lin(1, 2);
 
 CCTPlate :: CCTPlate(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain),
-    LayeredCrossSectionInterface(), ZZNodalRecoveryModelInterface(),
-    NodalAveragingRecoveryModelInterface(), SPRNodalRecoveryModelInterface()
+    LayeredCrossSectionInterface(), ZZNodalRecoveryModelInterface(this),
+    NodalAveragingRecoveryModelInterface(), SPRNodalRecoveryModelInterface(), ZZErrorEstimatorInterface(this)
 {
     numberOfDofMans = 3;
     numberOfGaussPoints = 1;
@@ -83,9 +83,8 @@ void
 CCTPlate :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -100,7 +99,6 @@ CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
 // (should be global coordinate system, but there may be defined
 //  different coordinate system in each node)
 {
-    GaussPoint *gp = NULL;
     FloatArray force;
     FloatMatrix T;
 
@@ -115,7 +113,7 @@ CCTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
     forLoad->computeComponentArrayAt(force, tStep, mode);
 
     if ( force.giveSize() ) {
-        gp = irule.getIntegrationPoint(0);
+        GaussPoint *gp = irule.getIntegrationPoint(0);
         // constant density and thickness assumed
         double dens = this->giveStructuralCrossSection()->give('d', gp);
         double dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
@@ -315,7 +313,7 @@ CCTPlate :: initializeFrom(InputRecord *ir)
 
 
 void
-CCTPlate :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+CCTPlate :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_w, R_u, R_v};
 }
@@ -349,15 +347,13 @@ CCTPlate :: computeVolumeAround(GaussPoint *gp)
 {
     double detJ, weight;
 
-    FloatArray lc0(3), lc1(3), lc2(3);  
-    const FloatArray* lcp[]={&lc0, &lc1, &lc2};
-    double z [ 3 ];
-    this->giveNodeCoordinates(lc0.at(1), lc1.at(1), lc2.at(1), 
-			      lc0.at(2), lc1.at(2), lc2.at(2), 
-			      lc0.at(3), lc1.at(3), lc2.at(3));
+    std :: vector< FloatArray > lc = {FloatArray(3), FloatArray(3), FloatArray(3)};
+    this->giveNodeCoordinates(lc[0].at(1), lc[1].at(1), lc[2].at(1), 
+			      lc[0].at(2), lc[1].at(2), lc[2].at(2), 
+			      lc[0].at(3), lc[1].at(3), lc[2].at(3));
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveCoordinates(), FEIVertexListGeometryWrapper(3, lcp) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
@@ -395,8 +391,6 @@ CCTPlate :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     }
 
 
@@ -507,13 +501,6 @@ CCTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 }
 
 
-double
-CCTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize()
-{
-    return sqrt(this->computeArea() * 2.0);
-}
-
-
 
 //
 // The element interface required by NodalAveragingRecoveryModel
@@ -530,14 +517,6 @@ CCTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
     } else {
         answer.clear();
     }
-}
-
-
-void
-CCTPlate :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                      InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 
@@ -588,7 +567,7 @@ CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(5); // {Exx,Eyy,GMyz,GMzx,GMxy}
@@ -608,7 +587,7 @@ CCTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
     FloatArray n;
     double b, c, n12;
 
-    this->interp_lin.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     this->interp_lin.computeLocalEdgeMapping(edgeNodes, iedge);
 
     n12 = 0.5 * n.at(1) * n.at(2);
@@ -666,7 +645,7 @@ CCTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 CCTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -674,7 +653,7 @@ CCTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 CCTPlate :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 

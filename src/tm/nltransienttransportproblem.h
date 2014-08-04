@@ -97,7 +97,7 @@ protected:
     virtual void updateInternalState(TimeStep *tStep);
     virtual void applyIC(TimeStep *tStep);
     void createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep);
-    void assembleAlgorithmicPartOfRhs(FloatArray &rhs, EquationID ut, const UnknownNumberingScheme &s, TimeStep *tStep);
+    void assembleAlgorithmicPartOfRhs(FloatArray &rhs, const UnknownNumberingScheme &s, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // nltransienttransportproblem_h

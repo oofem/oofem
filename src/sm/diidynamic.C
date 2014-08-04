@@ -160,7 +160,7 @@ DIIDynamic :: initializeFrom(InputRecord *ir)
             theta = 1.37;
         }
     } else {
-        OOFEM_ERROR("Time-stepping scheme not found!\n");
+        OOFEM_ERROR("Time-stepping scheme not found!");
     }
 
     IR_GIVE_FIELD(ir, deltaT, _IFT_DIIDynamic_deltat);
@@ -259,20 +259,17 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         previousIncrementOfDisplacement.resize(neq);
         previousIncrementOfDisplacement.zero();
 
-        int nDofs, j, k, jj;
+        int j, jj;
         int nman  = domain->giveNumberOfDofManagers();
         DofManager *node;
-        Dof *iDof;
 
         for ( j = 1; j <= nman; j++ ) {
             node = domain->giveDofManager(j);
-            nDofs = node->giveNumberOfDofs();
 
-            for ( k = 1; k <= nDofs; k++ ) {
+            for ( Dof *iDof: *node ) {
                 //
                 // Ask for initial values obtained from boundary conditions and initial conditions.
                 //
-                iDof  =  node->giveDof(k);
                 if ( !iDof->isPrimaryDof() ) {
                     continue;
                 }
@@ -298,9 +295,9 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
-        stiffnessMatrix->buildInternalStructure( this, 1, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, EffectiveStiffnessMatrix,
+        this->assemble(stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
                        EModelDefaultEquationNumbering(), domain);
 
         help.resize(neq);
@@ -326,7 +323,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
         stiffnessMatrix->zero();
-        this->assemble(stiffnessMatrix, tStep, EID_MomentumBalance, EffectiveStiffnessMatrix,
+        this->assemble(stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
                        EModelDefaultEquationNumbering(), domain);
     }
 
@@ -504,7 +501,7 @@ DIIDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Doma
 
 #endif
 
-        element->giveLocationArray(loc, EID_MomentumBalance, en);
+        element->giveLocationArray(loc, en);
         element->giveCharacteristicMatrix(charMtrx, type, tStep);
 
 #ifdef DEBUG
@@ -536,7 +533,7 @@ DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueM
     _loadVector.resize( this->giveNumberOfDomainEquations( domain->giveNumber(), EModelDefaultEquationNumbering() ) );
     _loadVector.zero();
 
-    this->assembleVector(_loadVector, tStep, EID_MomentumBalance, ExternalForcesVector, mode,
+    this->assembleVector(_loadVector, tStep, ExternalForcesVector, mode,
                          EModelDefaultEquationNumbering(), domain);
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(_loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
@@ -609,7 +606,7 @@ DIIDynamic :: determineConstants(TimeStep *tStep)
         a10 = deltaT * deltaT / 6;
         a11 = 0;
     } else {
-        OOFEM_ERROR("Time-stepping scheme not found!\n");
+        OOFEM_ERROR("Time-stepping scheme not found!");
     }
 }
 

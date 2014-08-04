@@ -48,6 +48,9 @@
   #include "range.h"
  #endif
 
+ #include <vector>
+ #include <memory>
+
 ///@name Input fields for LoadBalancer
 //@{
  #define _IFT_LoadBalancer_wtp "wtp"
@@ -107,7 +110,7 @@ public:
     /// Returns flag indicating whether rebalancing is necessary; should update node weights as well.
     virtual LoadBalancerDecisionType decide(TimeStep *) = 0;
     /// Returns processor weights; the larger weight means more powerful node, sum of weights should equal to one.
-    void giveProcessorWeights(FloatArray &answer) { answer = nodeWeights; }
+    const FloatArray & giveProcessorWeights() { return nodeWeights; }
     //@}
 
     /// Returns class name of the receiver.
@@ -270,7 +273,7 @@ public:
 
 protected:
     /// List of work transfer plugins.
-    AList< WorkTransferPlugin >wtpList;
+    std :: vector< std :: unique_ptr< WorkTransferPlugin > >wtpList;
 };
 
 /*

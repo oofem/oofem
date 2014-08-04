@@ -1,8 +1,9 @@
 con2dpm2.out
 #
 Con2DPM Tension in plane strain
-NonLinearStatic nmsteps 1 nsteps 1 
+NonLinearStatic nmsteps 1 nsteps 1 nmodules 1
 nsteps 1 rtolv 1.e-4 reqIterations 4000 stiffMode 2 maxiter 4000 controllmode 0 stepLength 2.e-5 minsteplength 2.e-5 Psi 0. hpcmode 2 hpc 2 2 1 hpcw 1 1. donotfixload
+errorcheck
 #
 domain 3d
 #
@@ -27,11 +28,10 @@ NodalLoad 2 loadTimeFunction 1 Components 3 1.e6 0. 0.
 ConstantFunction 1 f(t) 1. 
 PiecewiselinFunction 2 nPoints 2 t 2 0. 2. f(t) 2 0. 1.  
 #%BEGIN_CHECK%
-#ELEMENT tStep 0 number 1 gp 1 record 0 keyword "strains" component 1 value 2.0000e-05
-#ELEMENT tStep 0 number 1 gp 1 record 0 keyword "strains" component 2 value -3.5312e-06
-#ELEMENT tStep 0 number 1 gp 1 record 0 keyword "strains" component 3 value 0
-#ELEMENT tStep 0 number 1 gp 1 record 1 keyword "stresses" component 1 value 6.1356e+05
-#ELEMENT tStep 0 number 1 gp 1 record 1 keyword "stresses" component 2 value 1.2713e-01
-#ELEMENT tStep 0 number 1 gp 1 record 1 keyword "stresses" component 3 value 9.2074e+04
-#TIME
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 1 value 2.0000e-05 tolerance 1e-10
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 2 value -3.53122718e-06 tolerance 1e-10
+#ELEMENT tStep 1 number 1 gp 1 keyword 4 component 3 value 0  tolerance 1e-10
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 1 value 6.13555261e+05 tolerance 1e0
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 2 value 1.27126299e-01 tolerance 1e0
+#ELEMENT tStep 1 number 1 gp 1 keyword 1 component 3 value 9.20736321e+04 tolerance 1e0
 #%END_CHECK%

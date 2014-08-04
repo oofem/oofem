@@ -61,7 +61,7 @@ public:
 
 
     virtual int computeNumberOfDofs() { return 8; }
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
@@ -78,15 +78,11 @@ public:
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);

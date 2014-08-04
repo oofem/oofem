@@ -63,12 +63,12 @@ SparseNonLinearSystemNM :: initializeFrom(InputRecord *ir)
             OOFEM_ERROR("Pert map size must be an even number, it contains pairs <node, nodeDof>");
         }
         int nsize = igp_PertDmanDofSrcArray.giveSize() / 2;
-	if ( igp_PertWeightArray.giveSize() != nsize ) {
+        if ( igp_PertWeightArray.giveSize() != nsize ) {
             OOFEM_ERROR("Pert map size and weight array size mismatch");
         }
-	pert_init_needed = true;
+	    pert_init_needed = true;
     } else {
-      pert_init_needed = false;
+        pert_init_needed = false;
     }
     return IRRT_OK;
 }
@@ -83,46 +83,47 @@ SparseNonLinearSystemNM :: convertPertMap()
     igp_Weight.resize(size);
 
     for ( j = 1; j <= ndofman; j++ ) {
-      jglobnum = this->domain->giveNode(j)->giveLabel();
+        jglobnum = this->domain->giveNode(j)->giveLabel();
         for ( i = 1; i <= size; i++ ) {
             inode = igp_PertDmanDofSrcArray.at(2 * i - 1);
             idof  = igp_PertDmanDofSrcArray.at(2 * i);
             if ( inode == jglobnum ) {
-	        igp_Map.at(++count) = this -> domain ->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
-		igp_Weight.at(count) = igp_PertWeightArray.at(i);
-		continue;
-	    }
-	}
+                igp_Map.at(++count) = this -> domain ->giveNode(j)->giveDofWithID(idof)->giveEquationNumber(dn);
+                igp_Weight.at(count) = igp_PertWeightArray.at(i);
+                continue;
+            }
+        }
     }
 }
     
 void 
 SparseNonLinearSystemNM :: applyPerturbation(FloatArray* displacement)
 {
-  int i, nsize;   
+    int i, nsize;   
 
-  // First type of perturbation - random perturbation with uniform probability density 
-  // over the interval (-randPertAmplitude,randPertAmplitude) applied on each unknown.
+    // First type of perturbation - random perturbation with uniform probability density 
+    // over the interval (-randPertAmplitude,randPertAmplitude) applied on each unknown.
     if (randPertAmplitude > 0.) {
-      nsize = displacement -> giveSize();
-      srand(randSeed);
-      for (i=1; i<=nsize; i++) {
-	double pert = randPertAmplitude * (2. * rand() / RAND_MAX - 1.);
-	displacement -> at(i) += pert;
-      }
+        nsize = displacement -> giveSize();
+        srand(randSeed);
+        for (i=1; i<=nsize; i++) {
+	        double pert = randPertAmplitude * (2. * rand() / RAND_MAX - 1.);
+        	displacement -> at(i) += pert;
+        }
     }
 
     // Second type of perturbation - only selected unknowns perturbed by the amount specified by the user.
     if (pert_init_needed) {
-      convertPertMap();
-      pert_init_needed = false;
+        convertPertMap();
+        pert_init_needed = false;
     }
       
     nsize = igp_Weight.giveSize();
     for (i=1; i<=nsize; i++) {
-      int iDof = igp_Map.at(i);
-      double w = igp_Weight.at(i);
-      displacement -> at(iDof) += w;
-    }	
+        int iDof = igp_Map.at(i);
+        double w = igp_Weight.at(i);
+        displacement -> at(iDof) += w;
+    }
 }
+
 } // end namespace oofem

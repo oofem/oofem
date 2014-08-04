@@ -121,7 +121,7 @@ public:
         void setNumber(int _n) { this->number = _n; }
         int buildTopLevelNodeConnectivity(ConnectivityTable *ct);
         const IntArray *giveConnectedElements()  { return & connectedElements; }
-        void setConnectedElements(const IntArray &_conn) { connectedElements = _conn; }
+        void setConnectedElements(IntArray _conn) { connectedElements = std :: move(_conn); }
         void insertConnectedElement(int num) { connectedElements.insertSorted(num, 10); }
         void eraseConnectedElement(int num) { connectedElements.eraseSorted(num); }
         void preallocateConnectedElements(int size) { connectedElements.preallocate(size); }
@@ -130,7 +130,7 @@ public:
         dofManagerParallelMode giveParallelMode() const { return parallel_mode; }
         void setParallelMode(dofManagerParallelMode _mode) { parallel_mode = _mode; }
         const IntArray *givePartitions()  { return & partitions; }
-        void setPartitions(const IntArray &_p) { partitions = _p; }
+        void setPartitions(IntArray _p) { partitions = std :: move(_p); }
         int giveGlobalNumber() { return globalNumber; }
         void setGlobalNumber(int gn) { this->globalNumber = gn; }
         virtual bool isIrregular() { return false; }
@@ -329,7 +329,7 @@ public:
             j = jNode;
         }
         const IntArray *givePartitions()  { return & partitions; }
-        void setPartitions(const IntArray &_p) { partitions = _p; }
+        void setPartitions(IntArray _p) { partitions = std :: move(_p); }
         void addPartition(int _p, int allocChunk) { partitions.followedBy(_p, allocChunk); }
         void removePartitions() { partitions.clear(); }
         int giveSharedPartitions(IntArray &partitions);

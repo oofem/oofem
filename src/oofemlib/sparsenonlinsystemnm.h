@@ -42,7 +42,6 @@
 #define sparsenonlinsystemnm_h
 
 #include "nummet.h"
-#include "equationid.h"
 #include "nmstatus.h"
 #include "floatarray.h"
 #include "intarray.h"

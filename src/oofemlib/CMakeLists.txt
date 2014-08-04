@@ -107,7 +107,7 @@ set (core_cs
     )
 
 set (core_td
-    #particletopologydescription.C
+    particletopologydescription.C
     )
 
 set (core_dofman
@@ -129,6 +129,8 @@ set (core_export
     outputmanager.C
     exportmodule.C
     exportmodulemanager.C
+    outputexportmodule.C
+    errorcheckingexportmodule.C
     vtkexportmodule.C
     vtkxmlexportmodule.C
     homexportmodule.C
@@ -202,6 +204,8 @@ set (core_xfem
     xfem/enrichmentfronts/enrichmentfrontreducefront.C
     xfem/enrichmentfronts/enrichmentfrontlinbranchfuncradius.C
     xfem/enrichmentfronts/enrichmentfrontlinbranchfunconeel.C
+    xfem/enrichmentfronts/enrichmentfrontintersection.C
+    xfem/integrationrules/discsegintegrationrule.C
     )
 
 set (core_parallel
@@ -222,6 +226,11 @@ set (core_bc
     generalboundarycondition.C
     boundarycondition.C
     prescribedgradient.C
+    prescribedgradientbc.C
+    prescribedgradientbcneumann.C
+    prescribedgradientbcweak.C
+    prescribedgradientbcweakperiodic.C
+    prescribedgradientbcweakdirichlet.C
     mixedgradientpressurebc.C
     mixedgradientpressuredirichlet.C
     mixedgradientpressureneumann.C

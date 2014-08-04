@@ -194,11 +194,13 @@ B3Material :: predictParametersFrom(double fc, double c, double wc, double ac,
         // Creep at drying
 
         q5 = 7.57e5 * ( 1. / fc ) * pow(EpsSinf, -0.6);
-    }
 
-    char buff [ 1024 ];
-    sprintf(buff, "q1=%lf q2=%lf q3=%lf q4=%lf q5=%lf kt=%lf EpsSinf=%lf", q1, q2, q3, q4, q5, kt, EpsSinf);
-    OOFEM_LOG_DEBUG("B3mat[%d]: estimated params: %s\n", this->number, buff);
+        OOFEM_LOG_DEBUG("B3mat[%d]: estimated params: q1=%lf q2=%lf q3=%lf q4=%lf q5=%lf kt=%lf EpsSinf=%lf\n",
+                this->number, q1, q2, q3, q4, q5, kt, EpsSinf);
+    } else {
+        OOFEM_LOG_DEBUG("B3mat[%d]: estimated params: q1=%lf q2=%lf q3=%lf q4=%lf\n",
+                this->number, q1, q2, q3, q4);
+    }
 }
 
 
@@ -363,7 +365,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
 
     if ( ( tf = fm->giveField(FT_Temperature) ) ) {
         // temperature field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Incremental, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
@@ -374,7 +376,7 @@ B3Material :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *gp, T
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // temperature field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }

@@ -43,6 +43,7 @@ set (sm_element
     structuralinterfaceelement.C
     intelline1.C
     intelline2.C
+    tet21ghostsolid.C
     graddpelement.C graddpmaterialextensioninterface.C
     qtruss1d.C qtruss1dgrad.C
     qplanestrain.C qplanestraingrad.C
@@ -140,6 +141,7 @@ set (sm_material
     winklerpasternak.C
     structmatsettable.C
     bondceb.C
+    mooneyrivlin.C
     )
 
 set (sm_error
@@ -176,6 +178,9 @@ set (sm_status
 set (sm_xfem
 	xfem/xfemstructuralelementinterface.C
 	xfem/enrichmentitems/crack.C
+	xfem/enrichmentitems/delamination.C
+	xfem/propagationlaws/plhoopstresscirc.C
+	xfem/xfemstructuremanager.C
 	)
 
 set (sm_unsorted

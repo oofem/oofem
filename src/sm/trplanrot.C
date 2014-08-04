@@ -66,9 +66,8 @@ void
 TrPlaneStrRot :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 2;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(2);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 
@@ -118,18 +117,17 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
 
     //
     int ind = 1;
-    FloatArray *nx, *ny;
 
     answer.resize(size, 9);
 
     if ( ( li <= 2 ) ) {
-        nx = this->GiveDerivativeUX(gp);
-        ny = this->GiveDerivativeVY(gp);
+        FloatArray nx = this->GiveDerivativeUX(gp);
+        FloatArray ny = this->GiveDerivativeVY(gp);
 
         if ( ( li <= 1 ) && ( ui >= 1 ) ) {
             for ( int i = 1; i <= 3; i++ ) {
                 answer.at(ind, 3 * i - 2) = b.at(i) * 1. / ( 2. * area );
-                answer.at(ind, 3 * i - 0) = nx->at(i) * 1. / ( 2. * area );
+                answer.at(ind, 3 * i - 0) = nx.at(i) * 1. / ( 2. * area );
             }
 
             ind++;
@@ -138,52 +136,44 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
         if ( ( li <= 2 ) && ( ui >= 2 ) ) {
             for ( int i = 1; i <= 3; i++ ) {
                 answer.at(ind, 3 * i - 1) = c.at(i) * 1. / ( 2. * area );
-                answer.at(ind, 3 * i - 0) = ny->at(i) * 1. / ( 2. * area );
+                answer.at(ind, 3 * i - 0) = ny.at(i) * 1. / ( 2. * area );
             }
 
             ind++;
         }
-
-        delete nx;
-        delete ny;
     }
 
     if ( ( li <= 3 ) && ( ui >= 3 ) ) {
         GaussIntegrationRule ir(1, this, 1, 3);
         ir.SetUpPointsOnTriangle(1, _PlaneStress);
 
-        nx = this->GiveDerivativeVX( ir.getIntegrationPoint(0) );
-        ny = this->GiveDerivativeUY( ir.getIntegrationPoint(0) );
+        FloatArray nx = this->GiveDerivativeVX( ir.getIntegrationPoint(0) );
+        FloatArray ny = this->GiveDerivativeUY( ir.getIntegrationPoint(0) );
 
         for ( int i = 1; i <= 3; i++ ) {
             answer.at(ind, 3 * i - 2) = c.at(i) * 1. / ( 2. * area );
             answer.at(ind, 3 * i - 1) = b.at(i) * 1. / ( 2. * area );
-            answer.at(ind, 3 * i - 0) = ( nx->at(i) + ny->at(i) ) * 1. / ( 2. * area );
+            answer.at(ind, 3 * i - 0) = ( nx.at(i) + ny.at(i) ) * 1. / ( 2. * area );
         }
 
         ind++;
-        delete nx;
-        delete ny;
     }
 
     if ( ( li <= 4 ) && ( ui >= 4 ) ) {
         FloatArray shapeFunct(3);
 
-        nx = this->GiveDerivativeVX(gp);
-        ny = this->GiveDerivativeUY(gp);
+        FloatArray nx = this->GiveDerivativeVX(gp);
+        FloatArray ny = this->GiveDerivativeUY(gp);
 
-        shapeFunct.at(1) = gp->giveCoordinate(1);
-        shapeFunct.at(2) = gp->giveCoordinate(2);
+        shapeFunct.at(1) = gp->giveNaturalCoordinate(1);
+        shapeFunct.at(2) = gp->giveNaturalCoordinate(2);
         shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
         for ( int i = 1; i <= 3; i++ ) {
             answer.at(ind, 3 * i - 2) = -1. * c.at(i) * 1.0 / 4.0 / area;
             answer.at(ind, 3 * i - 1) = b.at(i) * 1.0 / 4.0 / area;
-            answer.at(ind, 3 * i - 0) = ( -4. * area * shapeFunct.at(i) + nx->at(i) - ny->at(i) ) * 1.0 / 4.0 / area;
+            answer.at(ind, 3 * i - 0) = ( -4. * area * shapeFunct.at(i) + nx.at(i) - ny.at(i) ) * 1.0 / 4.0 / area;
         }
-
-        delete nx;
-        delete ny;
     }
 }
 
@@ -209,8 +199,7 @@ TrPlaneStrRot :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answ
     }
 
     //
-    FloatArray *angles;
-    angles = this->GivePitch();
+    FloatArray angles = this->GivePitch();
 
     //
     double l1, l2, l3, f11, f12, f13, f21, f22, f23;
@@ -219,13 +208,13 @@ TrPlaneStrRot :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answ
     l2 = iLocCoord.at(2);
     l3 = 1. - l1 - l2;
 
-    f11 = d.at(2) / 2. *l1 *l3 *sin( angles->at(2) ) - d.at(3) / 2. *l2 *l1 *sin( angles->at(3) );
-    f12 = d.at(3) / 2. *l2 *l1 *sin( angles->at(3) ) - d.at(1) / 2. *l3 *l2 *sin( angles->at(1) );
-    f13 = d.at(1) / 2. *l3 *l2 *sin( angles->at(1) ) - d.at(2) / 2. *l1 *l3 *sin( angles->at(2) );
+    f11 = d.at(2) / 2. *l1 *l3 *sin( angles.at(2) ) - d.at(3) / 2. *l2 *l1 *sin( angles.at(3) );
+    f12 = d.at(3) / 2. *l2 *l1 *sin( angles.at(3) ) - d.at(1) / 2. *l3 *l2 *sin( angles.at(1) );
+    f13 = d.at(1) / 2. *l3 *l2 *sin( angles.at(1) ) - d.at(2) / 2. *l1 *l3 *sin( angles.at(2) );
 
-    f21 = d.at(3) / 2. *l2 *l1 *cos( angles->at(3) ) - d.at(2) / 2. *l1 *l3 *cos( angles->at(2) );
-    f22 = d.at(1) / 2. *l3 *l2 *cos( angles->at(1) ) - d.at(3) / 2. *l2 *l1 *cos( angles->at(3) );
-    f23 = d.at(2) / 2. *l1 *l3 *cos( angles->at(2) ) - d.at(1) / 2. *l3 *l2 *cos( angles->at(1) );
+    f21 = d.at(3) / 2. *l2 *l1 *cos( angles.at(3) ) - d.at(2) / 2. *l1 *l3 *cos( angles.at(2) );
+    f22 = d.at(1) / 2. *l3 *l2 *cos( angles.at(1) ) - d.at(3) / 2. *l2 *l1 *cos( angles.at(3) );
+    f23 = d.at(2) / 2. *l1 *l3 *cos( angles.at(2) ) - d.at(1) / 2. *l3 *l2 *cos( angles.at(1) );
 
     //
     answer.resize(3, 9);
@@ -248,8 +237,6 @@ TrPlaneStrRot :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answ
     answer.at(3, 3) = l1;
     answer.at(3, 6) = l2;
     answer.at(3, 9) = l3;
-
-    delete angles;
 }
 
 
@@ -304,7 +291,7 @@ TrPlaneStrRot :: giveNodeCoordinates(FloatArray &x, FloatArray &y)
 }
 
 
-FloatArray *
+FloatArray
 TrPlaneStrRot :: GivePitch()
 // Returns angles between each side and global x-axis
 {
@@ -313,33 +300,32 @@ TrPlaneStrRot :: GivePitch()
     this->giveNodeCoordinates(x, y);
 
     //
-    FloatArray *angles;
-    angles = new FloatArray(3);
+    FloatArray angles(3);
 
     for ( int i = 0; i < 3; i++ ) {
         int j = i + 1 - i / 2 * 3;
         int k = j + 1 - j / 2 * 3;
         if ( x(k) == x(j) ) {
             if ( y(k) > y(j) ) {
-                angles->at(i + 1) = 3.14159265358979 / 2.;
+                angles.at(i + 1) = 3.14159265358979 / 2.;
             } else {
-                angles->at(i + 1) = 3.14159265358979 * 3. / 2.;
+                angles.at(i + 1) = 3.14159265358979 * 3. / 2.;
             }
         }
 
         if ( x(k) > x(j) ) {
             if ( y(k) >= y(j) ) {
-                angles->at(i + 1) = atan( ( y(k) - y(j) ) / ( x(k) - x(j) ) );
+                angles.at(i + 1) = atan( ( y(k) - y(j) ) / ( x(k) - x(j) ) );
             } else {
-                angles->at(i + 1) = 2. * 3.14159265358979 - atan( ( y(j) - y(k) ) / ( x(k) - x(j) ) );
+                angles.at(i + 1) = 2. * 3.14159265358979 - atan( ( y(j) - y(k) ) / ( x(k) - x(j) ) );
             }
         }
 
         if ( x(k) < x(j) ) {
             if ( y(k) >= y(j) ) {
-                angles->at(i + 1) = 3.14159265358979 - atan( ( y(k) - y(j) ) / ( x(j) - x(k) ) );
+                angles.at(i + 1) = 3.14159265358979 - atan( ( y(k) - y(j) ) / ( x(j) - x(k) ) );
             } else {
-                angles->at(i + 1) = 3.14159265358979 + atan( ( y(j) - y(k) ) / ( x(j) - x(k) ) );
+                angles.at(i + 1) = 3.14159265358979 + atan( ( y(j) - y(k) ) / ( x(j) - x(k) ) );
             }
         }
     }
@@ -348,7 +334,7 @@ TrPlaneStrRot :: GivePitch()
 }
 
 
-FloatArray *
+FloatArray
 TrPlaneStrRot :: GiveDerivativeUX(GaussPoint *gp)
 {
     // get node coordinates
@@ -367,32 +353,29 @@ TrPlaneStrRot :: GiveDerivativeUX(GaussPoint *gp)
     }
 
     //
-    FloatArray *angles;
-    angles = this->GivePitch();
+    FloatArray angles = this->GivePitch();
 
     //
     FloatArray shapeFunct(3);
-    shapeFunct.at(1) = gp->giveCoordinate(1);
-    shapeFunct.at(2) = gp->giveCoordinate(2);
+    shapeFunct.at(1) = gp->giveNaturalCoordinate(1);
+    shapeFunct.at(2) = gp->giveNaturalCoordinate(2);
     shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
     //
-    FloatArray *nx;
-    nx = new FloatArray(3);
+    FloatArray nx(3);
 
     for ( int i = 1; i <= 3; i++ ) {
         int j = i + 1 - i / 3 * 3;
         int k = j + 1 - j / 3 * 3;
-        nx->at(i) = ( d.at(j) / 2. * ( b.at(k) * shapeFunct.at(i) + shapeFunct.at(k) * b.at(i) ) * sin( angles->at(j) ) -
-                     d.at(k) / 2. * ( b.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * b.at(j) ) * sin( angles->at(k) ) );
+        nx.at(i) = ( d.at(j) / 2. * ( b.at(k) * shapeFunct.at(i) + shapeFunct.at(k) * b.at(i) ) * sin( angles.at(j) ) -
+                     d.at(k) / 2. * ( b.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * b.at(j) ) * sin( angles.at(k) ) );
     }
 
-    delete angles;
     return nx;
 }
 
 
-FloatArray *
+FloatArray
 TrPlaneStrRot :: GiveDerivativeVX(GaussPoint *gp)
 {
     // get node coordinates
@@ -411,32 +394,29 @@ TrPlaneStrRot :: GiveDerivativeVX(GaussPoint *gp)
     }
 
     //
-    FloatArray *angles;
-    angles = this->GivePitch();
+    FloatArray angles = this->GivePitch();
 
     //
     FloatArray shapeFunct(3);
-    shapeFunct.at(1) = gp->giveCoordinate(1);
-    shapeFunct.at(2) = gp->giveCoordinate(2);
+    shapeFunct.at(1) = gp->giveNaturalCoordinate(1);
+    shapeFunct.at(2) = gp->giveNaturalCoordinate(2);
     shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
     //
-    FloatArray *nx;
-    nx = new FloatArray(3);
+    FloatArray nx(3);
 
     for ( int i = 1; i <= 3; i++ ) {
         int j = i + 1 - i / 3 * 3;
         int k = j + 1 - j / 3 * 3;
-        nx->at(i) = ( d.at(j) / 2. * ( b.at(k) * shapeFunct.at(i) + shapeFunct.at(k) * b.at(i) ) * cos( angles->at(j) ) -
-                     d.at(k) / 2. * ( b.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * b.at(j) ) * cos( angles->at(k) ) ) * ( -1.0 );
+        nx.at(i) = ( d.at(j) / 2. * ( b.at(k) * shapeFunct.at(i) + shapeFunct.at(k) * b.at(i) ) * cos( angles.at(j) ) -
+                     d.at(k) / 2. * ( b.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * b.at(j) ) * cos( angles.at(k) ) ) * ( -1.0 );
     }
 
-    delete angles;
     return nx;
 }
 
 
-FloatArray *
+FloatArray
 TrPlaneStrRot :: GiveDerivativeUY(GaussPoint *gp)
 {
     // get node coordinates
@@ -455,32 +435,29 @@ TrPlaneStrRot :: GiveDerivativeUY(GaussPoint *gp)
     }
 
     //
-    FloatArray *angles;
-    angles = this->GivePitch();
+    FloatArray angles = this->GivePitch();
 
     //
     FloatArray shapeFunct(3);
-    shapeFunct.at(1) = gp->giveCoordinate(1);
-    shapeFunct.at(2) = gp->giveCoordinate(2);
+    shapeFunct.at(1) = gp->giveNaturalCoordinate(1);
+    shapeFunct.at(2) = gp->giveNaturalCoordinate(2);
     shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
     //
-    FloatArray *ny;
-    ny = new FloatArray(3);
+    FloatArray ny(3);
 
     for ( int i = 1; i <= 3; i++ ) {
         int j = i + 1 - i / 3 * 3;
         int k = j + 1 - j / 3 * 3;
-        ny->at(i) = ( d.at(j) / 2. * ( c.at(k) * shapeFunct.at(i) + shapeFunct.at(k) * c.at(i) ) * sin( angles->at(j) ) -
-                     d.at(k) / 2. * ( c.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * c.at(j) ) * sin( angles->at(k) ) );
+        ny.at(i) = ( d.at(j) / 2. * ( c.at(k) * shapeFunct.at(i) + shapeFunct.at(k) * c.at(i) ) * sin( angles.at(j) ) -
+                     d.at(k) / 2. * ( c.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * c.at(j) ) * sin( angles.at(k) ) );
     }
 
-    delete angles;
     return ny;
 }
 
 
-FloatArray *
+FloatArray
 TrPlaneStrRot :: GiveDerivativeVY(GaussPoint *gp)
 {
     // get node coordinates
@@ -499,27 +476,24 @@ TrPlaneStrRot :: GiveDerivativeVY(GaussPoint *gp)
     }
 
     //
-    FloatArray *angles;
-    angles = this->GivePitch();
+    FloatArray angles = this->GivePitch();
 
     //
     FloatArray shapeFunct(3);
-    shapeFunct.at(1) = gp->giveCoordinate(1);
-    shapeFunct.at(2) = gp->giveCoordinate(2);
+    shapeFunct.at(1) = gp->giveNaturalCoordinate(1);
+    shapeFunct.at(2) = gp->giveNaturalCoordinate(2);
     shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
     //
-    FloatArray *ny;
-    ny = new FloatArray(3);
+    FloatArray ny(3);
 
     for ( int i = 1; i <= 3; i++ ) {
         int j = i + 1 - i / 3 * 3;
         int k = j + 1 - j / 3 * 3;
-        ny->at(i) = ( d.at(j) / 2. * ( c.at(k) * shapeFunct.at(i) + shapeFunct.at(k) * c.at(i) ) * cos( angles->at(j) ) -
-                     d.at(k) / 2. * ( c.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * c.at(j) ) * cos( angles->at(k) ) ) * ( -1.0 );
+        ny.at(i) = ( d.at(j) / 2. * ( c.at(k) * shapeFunct.at(i) + shapeFunct.at(k) * c.at(i) ) * cos( angles.at(j) ) -
+                     d.at(k) / 2. * ( c.at(i) * shapeFunct.at(j) + shapeFunct.at(i) * c.at(j) ) * cos( angles.at(k) ) ) * ( -1.0 );
     }
 
-    delete angles;
     return ny;
 }
 
@@ -561,7 +535,7 @@ TrPlaneStrRot :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, i
     FloatArray vStress, vStrain, u;
 
     // This function can be quite costly to do inside the loops when one has many slave dofs.
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
     // subtract initial displacements, if defined
     if ( initialDisplacements ) {
         u.subtract(* initialDisplacements);
@@ -571,8 +545,7 @@ TrPlaneStrRot :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, i
     answer.clear();
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
 
         // Engineering (small strain) stress
         if ( nlGeometry == 0 ) {
@@ -629,7 +602,7 @@ TrPlaneStrRot :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeSte
     FloatMatrix b;
     FloatArray u, Epsilon;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
 
     answer.resize(4);
     answer.zero();
@@ -676,9 +649,9 @@ TrPlaneStrRot :: computeStressVector(FloatArray &answer, const FloatArray &strai
 
 
 void
-TrPlaneStrRot :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+TrPlaneStrRot :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer.setValues(3, D_u, D_v, R_w);
+    answer = {D_u, D_v, R_w};
 }
 
 

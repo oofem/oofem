@@ -57,7 +57,7 @@ REGISTER_Element(L4Axisymm);
 FEI2dQuadLin L4Axisymm :: interpolation(1, 2);
 
 L4Axisymm :: L4Axisymm(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain)
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SpatialLocalizerInterface(this)
 {
     numberOfDofMans  = 4;
     numberOfGaussPoints = 4;
@@ -96,7 +96,7 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     int size, ind = 1;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     if ( ui == ALL_STRAINS ) {
         size = 6;
@@ -129,8 +129,8 @@ L4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     }
 
     if ( ( li <= 3 ) && ( ui >= 3 ) ) {
-        FloatArray n(4);
-        this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+        FloatArray n;
+        this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
         r = 0.;
         for ( int i = 1; i <= numberOfDofMans; i++ ) {
@@ -173,7 +173,7 @@ L4Axisymm :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     FloatArray n;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 8);
     answer.zero();
@@ -205,9 +205,8 @@ void
 L4Axisymm :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 2;
-        integrationRulesArray = new IntegrationRule * [ 2 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(2);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 
@@ -221,9 +220,9 @@ L4Axisymm :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume, r, x;
-    FloatArray n(4);
+    FloatArray n;
 
-    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     r = 0.;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
@@ -231,7 +230,7 @@ L4Axisymm :: computeVolumeAround(GaussPoint *gp)
         r += x * n.at(i);
     }
 
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
@@ -277,7 +276,7 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
     answer.resize(6);
     answer.zero();
     if ( mode == TL ) { // Total Lagrange formulation
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+        this->computeVectorOf({D_u, D_v}, VM_Total, tStep, u);
         // linear part of strain tensor (in vector form)
 
         this->computeBmatrixAt(gp, b, 1, 2);
@@ -346,7 +345,7 @@ L4Axisymm :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalTo
 }
 
 void
-L4Axisymm :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+L4Axisymm :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v};
 }
@@ -393,17 +392,6 @@ L4Axisymm :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-int
-L4Axisymm :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    int result;
-    FloatArray lcoords;
-    result = this->computeLocalCoordinates(lcoords, coords);
-
-    return result;
-}
-
-
 void
 L4Axisymm :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
@@ -421,7 +409,7 @@ L4Axisymm :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 4);
     answer.zero();
@@ -473,7 +461,7 @@ L4Axisymm ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     FloatArray c(2);
     this->computeEdgeIpGlobalCoords(c, gp, iEdge);
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
 
 
@@ -484,7 +472,7 @@ L4Axisymm ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 L4Axisymm :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -680,8 +668,6 @@ void L4Axisymm :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        int ip;
-        GaussPoint *gp;
         IntArray ind(4);
         FloatArray *gpCoords;
         WCRec pp [ 9 ];
@@ -714,9 +700,8 @@ void L4Axisymm :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
-        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
-            gpCoords = gp->giveCoordinates();
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+            gpCoords = gp->giveNaturalCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;
                 ind.at(2) = 4;

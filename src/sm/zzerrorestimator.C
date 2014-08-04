@@ -249,18 +249,17 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
                                                                            TimeStep *tStep)
 {
     int nDofMans;
-    Element *elem = this->ZZErrorEstimatorI_giveElement();
     IntegrationRule *iRule = this->ZZErrorEstimatorI_giveIntegrationRule();
-    FEInterpolation *interpol = elem->giveInterpolation();
+    FEInterpolation *interpol = element->giveInterpolation();
     const FloatArray *recoveredStress;
     FloatArray sig, lsig, diff, ldiff, n;
     FloatMatrix nodalRecoveredStreses;
 
-    nDofMans = elem->giveNumberOfDofManagers();
+    nDofMans = element->giveNumberOfDofManagers();
     // assemble nodal recovered stresses
-    for ( int i = 1; i <= elem->giveNumberOfNodes(); i++ ) {
-        elem->giveDomain()->giveSmoother()->giveNodalVector( recoveredStress,
-                                                            elem->giveDofManager(i)->giveNumber() );
+    for ( int i = 1; i <= element->giveNumberOfNodes(); i++ ) {
+        element->giveDomain()->giveSmoother()->giveNodalVector( recoveredStress,
+                                                            element->giveDofManager(i)->giveNumber() );
         if ( i == 1 ) {
             nodalRecoveredStreses.resize( nDofMans, recoveredStress->giveSize() );
         }
@@ -277,14 +276,13 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
 
     // compute  the e-norm and s-norm
     if ( norm == ZZErrorEstimator :: L2Norm ) {
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(i);
-            double dV = elem->computeVolumeAround(gp);
-            interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(elem) );
+        for ( GaussPoint *gp: *iRule ) {
+            double dV = element->computeVolumeAround(gp);
+            interpol->evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
 
             diff.beTProductOf(nodalRecoveredStreses, n);
 
-            elem->giveIPValue(sig, gp, type, tStep);
+            element->giveIPValue(sig, gp, type, tStep);
             /* the internal stress difference is in global coordinate system */
             diff.subtract(sig);
 
@@ -294,18 +292,17 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
     } else if ( norm == ZZErrorEstimator :: EnergyNorm ) {
         FloatArray help, ldiff_reduced, lsig_reduced;
         FloatMatrix D, DInv;
-        StructuralElement *selem = static_cast< StructuralElement * >(elem);
+        StructuralElement *selem = static_cast< StructuralElement * >(element);
 
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(i);
-            double dV = elem->computeVolumeAround(gp);
-            interpol->evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(elem) );
+        for ( GaussPoint *gp: *iRule ) {
+            double dV = element->computeVolumeAround(gp);
+            interpol->evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
             selem->computeConstitutiveMatrixAt(D, TangentStiffness, gp, tStep);
             DInv.beInverseOf(D);
 
             diff.beTProductOf(nodalRecoveredStreses, n);
 
-            elem->giveIPValue(sig, gp, type, tStep); // returns full value now
+            element->giveIPValue(sig, gp, type, tStep); // returns full value now
             diff.subtract(sig);
             /* the internal stress difference is in global coordinate system */
             /* needs to be transformed into local system to compute associated energy */
@@ -320,7 +317,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
             sNorm += lsig_reduced.dotProduct(help) * dV;
         }
     } else {
-        OOFEM_SIMPLE_ERROR("ZZErrorEstimatorInterface::ZZErrorEstimatorI_computeElementContributions unsupported norm type");
+        OOFEM_ERROR("unsupported norm type");
     }
 
     eNorm = sqrt(eNorm);
@@ -369,7 +366,6 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
     double globValNorm = 0.0, globValErrorNorm = 0.0, elemErrLimit, eerror, iratio, currDensity, elemSize;
     Element *ielem;
     EE_ErrorType errorType = indicatorET;
-    ZZRemeshingCriteriaInterface *interface;
     double pe, coeff = 2.0;
 
     if ( stateCounter == tStep->giveSolutionStateCounter() ) {
@@ -420,12 +416,6 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
             continue;
         }
 
-        interface = static_cast< ZZRemeshingCriteriaInterface * >
-                    ( domain->giveElement(i)->giveInterface(ZZRemeshingCriteriaInterfaceType) );
-        if ( !interface ) {
-            OOFEM_ERROR("element does not support ZZRemeshingCriteriaInterface");
-        }
-
         eerror = this->ee->giveElementError(errorType, ielem, tStep);
         iratio = eerror / elemErrLimit;
         if ( fabs(iratio) < 1.e-3 ) {
@@ -442,8 +432,8 @@ ZZRemeshingCriteria :: estimateMeshDensities(TimeStep *tStep)
 
         //  if (iratio > 5.0)iratio = 5.0;
 
-        currDensity = interface->ZZRemeshingCriteriaI_giveCharacteristicSize();
-        elemPolyOrder = interface->ZZRemeshingCriteriaI_givePolynOrder();
+        currDensity = ielem->computeMeanSize();
+        elemPolyOrder = ielem->giveInterpolation()->giveInterpolationOrder();
         elemSize = currDensity / pow(iratio, 1.0 / elemPolyOrder);
 
         ielemNodes = ielem->giveNumberOfDofManagers();
@@ -489,36 +479,29 @@ ZZRemeshingCriteria :: giveDofManDensity(int num)
     bool init = false;
     ConnectivityTable *ct = domain->giveConnectivityTable();
     const IntArray *con;
-    ZZRemeshingCriteriaInterface *interface;
     double density;
 
     con = ct->giveDofManConnectivityArray(num);
     isize = con->giveSize();
 
-    /*
-     * // Minimum density
-     *
-     * for (i=1; i<=isize; i++) {
-     * interface = (ZZRemeshingCriteriaInterface*)
-     * domain->giveElement(con->at(i))->giveInterface (ZZRemeshingCriteriaInterfaceType);
-     * if (!interface) {
-     * OOFEM_ERROR("element does not support ZZRemeshingCriteriaInterface");
-     * }
-     * if (i==1) density = interface->ZZRemeshingCriteriaI_giveCharacteristicSize ();
-     * else density = min (density, interface->ZZRemeshingCriteriaI_giveCharacteristicSize ());
-     * }
-     */
+#if 0
+     // Minimum density
+     for ( int i = 1; i <= isize; i++ ) {
+        Element *ielem = domain->giveElement( con->at(i) );
+        if (i==1)
+            density = ielem->computeMeanSize();
+        else
+            density = min(density, ielem->computeMeanSize());
+     }
+#endif
 
     // Average density
 
     density = 0.0;
     for ( int i = 1; i <= isize; i++ ) {
-        interface = static_cast< ZZRemeshingCriteriaInterface * >
-                    ( domain->giveElement( con->at(i) )->giveInterface(ZZRemeshingCriteriaInterfaceType) );
-        if ( interface ) {
-            init = true;
-            density += interface->ZZRemeshingCriteriaI_giveCharacteristicSize();
-        }
+        Element *ielem = domain->giveElement( con->at(i) );
+        init = true;
+        density += ielem->computeMeanSize();
     }
     if ( init ) {
         density /= isize;

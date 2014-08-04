@@ -80,16 +80,16 @@ public:
 
     ///@todo REMOVE THESE:
     /// Assigns temporary state vector from a given vector v.
-    void letTempStateVectorBe(const FloatArray &v) { temp_field = v; }
+    void letTempStateVectorBe(FloatArray v) { temp_field = std :: move(v); }
 
     virtual const char *giveClassName() const { return "TransportMaterialStatus"; }
 
     /// Set gradient.
-    void setTempGradient(const FloatArray &grad);
+    void setTempGradient(FloatArray grad);
     /// Set field.
-    void setTempField(const FloatArray &field);
+    void setTempField(FloatArray field);
     /// Set flux.
-    void setTempFlux(const FloatArray &w);
+    void setTempFlux(FloatArray w);
 
     /// Return last gradient.
     const FloatArray &giveGradient() { return gradient; }

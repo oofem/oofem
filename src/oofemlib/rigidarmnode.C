@@ -68,9 +68,8 @@ RigidArmNode :: postInitialize()
     Node :: postInitialize();
 
     // auxiliary arrays
-    IntArray countOfMasterDofs(numberOfDofs);
-    std::vector< IntArray > masterDofID( numberOfDofs );
-    std::vector< FloatArray > masterContribution( numberOfDofs );
+    std::map< DofIDItem, IntArray > masterDofID;
+    std::map< DofIDItem, FloatArray > masterContribution;
 
     this->masterNode = dynamic_cast< Node * >( this->domain->giveDofManager(masterDofMngr) );
     if ( !masterNode ) {
@@ -84,18 +83,14 @@ RigidArmNode :: postInitialize()
         nodeNum = this->masterNode->giveNumber();
     }
 
-    for ( int i = 0; i < numberOfDofs; i++ ) {
-        masterDofID [ i ].resize(masterNdofs);
-        masterContribution [ i ].resize(masterNdofs);
-    }
-
-    this->computeMasterContribution(countOfMasterDofs, masterDofID, masterContribution);
+    this->computeMasterContribution(masterDofID, masterContribution);
 
     // initialize slave dofs (inside check of consistency of receiver and master dof)
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        SlaveDof *sdof = dynamic_cast< SlaveDof * >(dofArray [ i - 1 ]);
+    for ( Dof *dof: *this ) {
+        SlaveDof *sdof = dynamic_cast< SlaveDof * >(dof);
         if ( sdof ) {
-            sdof->initialize(countOfMasterDofs.at(i), masterNodes, masterDofID [ i - 1 ], masterContribution [ i - 1 ]);
+            DofIDItem id = sdof->giveDofID();
+            sdof->initialize(masterNodes, masterDofID [ id ], masterContribution [ id ]);
         }
     }
 
@@ -138,29 +133,32 @@ RigidArmNode :: checkConsistency()
 
 
 void
-RigidArmNode :: computeMasterContribution(IntArray &countOfMasterDofs, std::vector< IntArray > &masterDofID, 
-                                          std::vector< FloatArray > &masterContribution)
+RigidArmNode :: computeMasterContribution(std::map< DofIDItem, IntArray > &masterDofID, 
+                                          std::map< DofIDItem, FloatArray > &masterContribution)
 {
     int k;
     IntArray R_uvw(3), uvw(3);
     FloatArray xyz(3);
+    int numberOfMasterDofs = masterNode->giveNumberOfDofs();
+    //IntArray countOfMasterDofs((int)masterDofID.size());
 
     // decode of masterMask
-    uvw.at(1) = this->findDofWithDofId(R_u);
-    uvw.at(2) = this->findDofWithDofId(R_v);
-    uvw.at(3) = this->findDofWithDofId(R_w);
+    uvw.at(1) = this->dofidmask->findFirstIndexOf(R_u);
+    uvw.at(2) = this->dofidmask->findFirstIndexOf(R_v);
+    uvw.at(3) = this->dofidmask->findFirstIndexOf(R_w);
 
-    for ( int i = 1; i <= 3; i++ ) {
-        xyz.at(i) = this->giveCoordinate(i) - masterNode->giveCoordinate(i);
-    }
+    xyz.beDifferenceOf(*this->giveCoordinates(), *masterNode->giveCoordinates());
 
     if ( hasLocalCS() ) {
         // LCS is stored as global-to-local, so LCS*xyz_glob = xyz_loc
         xyz.rotatedWith(* this->localCoordinateSystem, 'n');
     }
 
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        DofIDItem id = this->giveDof(i)->giveDofID();
+    for ( int i = 1; i <= this->dofidmask->giveSize(); i++ ) {
+        Dof *dof = this->giveDofWithID(dofidmask->at(i));
+        DofIDItem id = dof->giveDofID();
+        masterDofID [ id ].resize(numberOfMasterDofs);
+        masterContribution [ id ].resize(numberOfMasterDofs);
         R_uvw.zero();
 
         switch ( masterMask.at(i) ) {
@@ -198,19 +196,22 @@ RigidArmNode :: computeMasterContribution(IntArray &countOfMasterDofs, std::vect
             OOFEM_ERROR("unknown value in masterMask");
         }
 
-        k = ++countOfMasterDofs.at(i);
-        masterDofID [ i - 1 ].at(k) = ( int ) id;
-        masterContribution [ i - 1 ].at(k) = 1.0;
+        //k = ++countOfMasterDofs.at(i);
+        k = 1;
+        masterDofID [ id ].at(k) = ( int ) id;
+        masterContribution [ id ].at(k) = 1.0;
 
         for ( int j = 1; j <= 3; j++ ) {
             if ( R_uvw.at(j) != 0 ) {
                 int sign = R_uvw.at(j) < 0 ? -1 : 1;
-
-                k = ++countOfMasterDofs.at(i);
-                masterDofID [ i - 1 ].at(k) = sign * R_uvw.at(j);
-                masterContribution [ i - 1 ].at(k) = sign * xyz.at(j);
+                //k = ++countOfMasterDofs.at(i);
+                k++;
+                masterDofID [ id ].at(k) = sign * R_uvw.at(j);
+                masterContribution [ id ].at(k) = sign * xyz.at(j);
             }
         }
+        masterDofID [ id ].resizeWithValues(k);
+        masterContribution [ id ].resizeWithValues(k);
     }
 }
 

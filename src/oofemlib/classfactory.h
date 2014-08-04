@@ -118,6 +118,7 @@ template< typename T > LoadBalancer *loadBalancerCreator(Domain *d) { return new
 template< typename T > LoadBalancerMonitor *loadMonitorCreator(EngngModel *e) { return new T(e); }
 
 // XFEM stuff
+template< typename T > XfemManager *xManCreator(Domain *d) { return new T(d); }
 template< typename T > EnrichmentItem *enrichItemCreator(int n, XfemManager *x, Domain *d) { return new T(n, x, d); }
 template< typename T > EnrichmentFunction *enrichFuncCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > EnrichmentDomain *enrichmentDomainCreator() { return new T(); }
@@ -152,6 +153,7 @@ template< typename T > FailureCriteriaStatus *failureCriteriaCreator(int n, Fail
 #define REGISTER_SparseLinSolver(class, type) static bool __dummy_ ## class = GiveClassFactory().registerSparseLinSolver(type, sparseLinSolCreator< class > );
 #define REGISTER_ErrorEstimator(class, type) static bool __dummy_ ## class = GiveClassFactory().registerErrorEstimator(type, errEstCreator< class > );
 
+#define REGISTER_XfemManager(class) static bool __dummy_ ## class = GiveClassFactory().registerXfemManager(_IFT_ ## class ## _Name, xManCreator< class > );
 #define REGISTER_EnrichmentItem(class) static bool __dummy_ ## class = GiveClassFactory().registerEnrichmentItem(_IFT_ ## class ## _Name, enrichItemCreator< class > );
 #define REGISTER_EnrichmentFunction(class) static bool __dummy_ ## class = GiveClassFactory().registerEnrichmentFunction(_IFT_ ## class ## _Name, enrichFuncCreator< class > );
 #define REGISTER_EnrichmentDomain(class) static bool __dummy_ ## class = GiveClassFactory().registerEnrichmentDomain(_IFT_ ## class ## _Name, enrichmentDomainCreator< class > );
@@ -229,6 +231,8 @@ private:
     std :: map < std :: string, EnrichmentFront * ( * )() > enrichmentFrontList;
     /// Associative container containing propagation law creators
     std :: map < std :: string, PropagationLaw * ( * )() > propagationLawList;
+    /// Associative container containing XfemManager creators
+    std :: map < std :: string, XfemManager * ( * )(Domain *) > xManList;
 
 
     /// Associative container containing failure criteria creators
@@ -489,6 +493,9 @@ public:
 
     BasicGeometry *createGeometry(const char *name);
     bool registerGeometry( const char *name, BasicGeometry * ( *creator )( ) );
+
+    XfemManager *createXfemManager(const char *name, Domain *domain);
+    bool registerXfemManager( const char *name, XfemManager * ( *creator )( Domain * ) );
 
 
     // Failure module (in development!)

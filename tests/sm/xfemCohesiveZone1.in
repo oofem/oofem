@@ -1,6 +1,7 @@
 xfemCohesiveZone1.out
 XFEM simulation: A single element with bilinear cohesive zone, loaded in pure shear. Written by Erik Svenning, Chalmers University of Technology.
-XFEMStatic nsteps 5 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 25 minIter 2 stiffmode 0 nmodules 0 manrmsteps 1 forceremap 1
+XFEMStatic nsteps 5 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 25 minIter 2 stiffmode 0 nmodules 1 manrmsteps 1 forceremap 1
+errorcheck
 #vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
@@ -20,7 +21,7 @@ BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.8e-1
 #
 PiecewiseLinFunction 1 npoints 2 t 2 0.0 5.0 f(t) 2 0.0 1.0
-XfemManager 1 numberofenrichmentitems 1
+XfemManager 1 numberofenrichmentitems 1 debugvtk 0
 crack 1 
 #DiscontinuousFunction 1
 HeavisideFunction 1
@@ -28,17 +29,17 @@ HeavisideFunction 1
 polygoncrack 1 points 6 -0.5 0.3 -0.2 0.3 1.1 0.3
 #
 #
-#%BEGIN_CHECK% tolerance 1.e-12
+#%BEGIN_CHECK% tolerance 1.e-4
 ## step 2
-#REACTION tStep 1. number 3 dof 1 value 1.8781e+01
-#REACTION tStep 1. number 4 dof 1 value 1.8781e+01
+#REACTION tStep 2 number 3 dof 1 value 1.87813253e+01
+#REACTION tStep 2 number 4 dof 1 value 1.87813439e+01
 ## step 3
-#REACTION tStep 2. number 3 dof 1 value 1.1973e+01
-#REACTION tStep 2. number 4 dof 1 value 1.1973e+01
+#REACTION tStep 3 number 3 dof 1 value 1.19731605e+01
+#REACTION tStep 3 number 4 dof 1 value 1.19731605e+01
 ## step 4
-#REACTION tStep 3. number 3 dof 1 value 5.1674e+00
-#REACTION tStep 3. number 4 dof 1 value 5.1674e+00
+#REACTION tStep 4 number 3 dof 1 value 5.16737850e+00
+#REACTION tStep 4 number 4 dof 1 value 5.16737850e+00
 ## step 5
-#REACTION tStep 4. number 3 dof 1 value 0.0e+00
-#REACTION tStep 4. number 4 dof 1 value 0.0e+00
+#REACTION tStep 5 number 3 dof 1 value 0.0e+00
+#REACTION tStep 5 number 4 dof 1 value 0.0e+00
 #%END_CHECK%

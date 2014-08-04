@@ -524,12 +524,11 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
      * std::list<__DofIDSet> __ccDofGroups;
      * int nccdg; // number of Convergence Criteria Dof Groups
      */
-    int _dg, _idofman, _ielem, _idof, _eq, _ndof, _ng = nccdg, ndofman = domain->giveNumberOfDofManagers();
+    int _dg, _idofman, _ielem, _eq, _ng = nccdg, ndofman = domain->giveNumberOfDofManagers();
     int nelem = domain->giveNumberOfElements();
     double forceErr, dispErr, _val;
     DofManager *_idofmanptr;
     Element *_ielemptr;
-    Dof *_idofptr;
     FloatArray rhs; // residual of momentum balance eq (unbalanced nodal forces)
     FloatArray dg_forceErr(nccdg), dg_dispErr(nccdg), dg_totalLoadLevel(nccdg), dg_totalDisp(nccdg);
     bool answer;
@@ -567,10 +566,8 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
 
 #endif
 
-            _ndof = _idofmanptr->giveNumberOfDofs();
             // loop over individual dofs
-            for ( _idof = 1; _idof <= _ndof; _idof++ ) {
-                _idofptr = _idofmanptr->giveDof(_idof);
+            for ( Dof *_idofptr: *_idofmanptr ) {
                 // loop over dof groups
                 for ( _dg = 1; _dg <= _ng; _dg++ ) {
                     // test if dof ID is in active set
@@ -615,10 +612,8 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
 #endif
             // loop over element internal Dofs
             for ( _idofman = 1; _idofman <= _ielemptr->giveNumberOfInternalDofManagers(); _idofman++ ) {
-                _ndof = _ielemptr->giveInternalDofManager(_idofman)->giveNumberOfDofs();
                 // loop over individual dofs
-                for ( _idof = 1; _idof <= _ndof; _idof++ ) {
-                    _idofptr = _ielemptr->giveInternalDofManager(_idofman)->giveDof(_idof);
+                for ( Dof *_idofptr: *_ielemptr->giveInternalDofManager(_idofman) ) {
                     // loop over dof groups
                     for ( _dg = 1; _dg <= _ng; _dg++ ) {
                         // test if dof ID is in active set
@@ -995,31 +990,31 @@ void CylindricalALM :: convertHPCMap()
 {
     IntArray indirectMap;
     FloatArray weights;
-    int size, i;
-    int inode, idof;
+    int size;
+    int inode, idofid;
     EModelDefaultEquationNumbering dn;
 
-    int j, jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
+    int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
     size = calm_HPCDmanDofSrcArray.giveSize() / 2;
     indirectMap.resize(size);
     weights.resize(size);
-    for ( j = 1; j <= ndofman; j++ ) {
+    for ( int j = 1; j <= ndofman; j++ ) {
         jglobnum = domain->giveNode(j)->giveLabel();
-        for ( i = 1; i <= size; i++ ) {
+        for ( int i = 1; i <= size; i++ ) {
             inode = calm_HPCDmanDofSrcArray.at(2 * i - 1);
-            idof  = calm_HPCDmanDofSrcArray.at(2 * i);
+            idofid = calm_HPCDmanDofSrcArray.at(2 * i);
             if ( inode == jglobnum ) {
 #ifdef __PARALLEL_MODE
                 // HUHU hard wired domain no 1
                 if ( parallel_context->isLocal( domain->giveNode(j) ) ) {
-                    indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
+                    indirectMap.at(++count) = domain->giveNode(j)->giveDofWithID(idofid)->giveEquationNumber(dn);
                     if ( calm_Control == calml_hpc ) {
                         weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
                     }
                 }
 
 #else
-                indirectMap.at(++count) = domain->giveNode(j)->giveDof(idof)->giveEquationNumber(dn);
+                indirectMap.at(++count) = domain->giveNode(j)->giveDofWithID(idofid)->giveEquationNumber(dn);
                 if ( calm_Control == calml_hpc ) {
                     weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
                 }
@@ -1043,7 +1038,7 @@ void CylindricalALM :: convertHPCMap()
         calm_HPCWeights.resize(count);
     }
 
-    for ( i = 1; i <= count; i++ ) {
+    for ( int i = 1; i <= count; i++ ) {
         calm_HPCIndirectDofMask.at(i) = indirectMap.at(i);
         calm_HPCWeights.at(i) = weights.at(i);
     }
@@ -1254,7 +1249,7 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
         denom = colv(1);
 #endif
         if ( fabs(denom) < calm_SMALL_NUM ) {
-            OOFEM_ERROR("calm: zero denominator in linearized control");
+            OOFEM_ERROR("zero denominator in linearized control");
         }
 
         deltaLambda = ( deltaL - nom ) / denom;

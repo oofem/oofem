@@ -87,7 +87,7 @@ public:
     void letTempHiddenVarsVectorBe(int i, FloatArray &valueArray);
 
     FloatArray *giveShrinkageStrainVector() { return & shrinkageStrain; }
-    void setShrinkageStrainVector(const FloatArray &src) { shrinkageStrain = src; }
+    void setShrinkageStrainVector(FloatArray src) { shrinkageStrain = std :: move(src); }
 
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);

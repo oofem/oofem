@@ -33,6 +33,7 @@
  */
 
 #include "qtrplanestraingrad.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -45,8 +46,10 @@
 #endif
 
 namespace oofem {
+
+FEI2dTrLin QTrPlaneStrainGrad :: interpolation_lin(1, 2);
+
 QTrPlaneStrainGrad :: QTrPlaneStrainGrad(int n, Domain *aDomain) : QTrPlaneStrain(n, aDomain), GradDpElement()
-    // Constructor.
 {
     nPrimNodes = 6;
     nPrimVars = 2;
@@ -59,9 +62,9 @@ QTrPlaneStrainGrad :: QTrPlaneStrainGrad(int n, Domain *aDomain) : QTrPlaneStrai
 
 
 void
-QTrPlaneStrainGrad :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+QTrPlaneStrainGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    if ( inode <= nSecNodes ) {
+    if ( inode <= 3 ) {
         answer = {D_u, D_v, G_0};
     } else {
         answer = {D_u, D_v};
@@ -82,9 +85,8 @@ QTrPlaneStrainGrad :: initializeFrom(InputRecord *ir)
 void
 QTrPlaneStrainGrad :: computeGaussPoints()
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -92,55 +94,17 @@ QTrPlaneStrainGrad :: computeGaussPoints()
 
 void
 QTrPlaneStrainGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at gp.
 {
-    double l1, l2, l3;
-
-    l1 = gp->giveCoordinate(1);
-    l2 = gp->giveCoordinate(2);
-    l3 = 1.0 - l1 - l2;
-
-    answer.resize(1, 3);
-    answer.zero();
-
-    answer.at(1, 1) = l1;
-    answer.at(1, 2) = l2;
-    answer.at(1, 3) = l3;
+    FloatArray n;
+    this->interpolation_lin.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.beNMatrixOf(n, 1);
 }
 
 void
 QTrPlaneStrainGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the [2x6] strain-displacement matrix {B} of the receiver, eva-
-// luated at gp.
 {
-    Node *node1, *node2, *node3;
-    double x1, x2, x3, y1, y2, y3, area;
-
-    node1 = this->giveNode(1);
-    node2 = this->giveNode(2);
-    node3 = this->giveNode(3);
-
-    x1 = node1->giveCoordinate(1);
-    x2 = node2->giveCoordinate(1);
-    x3 = node3->giveCoordinate(1);
-
-    y1 = node1->giveCoordinate(2);
-    y2 = node2->giveCoordinate(2);
-    y3 = node3->giveCoordinate(2);
-
-    area = 0.5 * ( x2 * y3 + x1 * y2 + y1 * x3 - x2 * y1 - x3 * y2 - x1 * y3 );
-
-    answer.resize(2, 3);
-
-    answer.at(1, 1) = y2 - y3;
-    answer.at(1, 2) = y3 - y1;
-    answer.at(1, 3) = y1 - y2;
-    answer.at(2, 1) = x3 - x2;
-    answer.at(2, 2) = x1 - x3;
-    answer.at(2, 3) = x2 - x1;
-
-
-    answer.times( 1. / ( 2. * area ) );
+    FloatMatrix dnx;
+    this->interpolation_lin.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.beTranspositionOf(dnx);
 }
 }

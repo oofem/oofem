@@ -37,14 +37,12 @@
 
 #include "oofemcfg.h"
 #include "inputrecord.h"
-#include "alist.h"
 #include "intarray.h"
 #include "fieldmanager.h"
 #include "timer.h"
 #include "chartype.h"
 #include "unknowntype.h"
 #include "varscaletype.h"
-#include "equationid.h"
 #include "numericalcmpn.h"
 #include "valuemodetype.h"
 #include "problemmode.h"
@@ -58,7 +56,6 @@
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
  #include "problemcommunicatormode.h"
- #include "loadbalancer.h"
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -80,6 +77,7 @@
 #define _IFT_EngngModel_loadBalancingFlag "lbflag"
 #define _IFT_EngngModel_forceloadBalancingFlag "forcelb1"
 #define _IFT_EngngModel_initialGuess "initialguess"
+#define _IFT_EngngModel_referenceFile "referencefile"
 
 #define _IFT_EngngModel_lstype "lstype"
 #define _IFT_EngngModel_smtype "smtype"
@@ -103,6 +101,8 @@ class InitModuleManager;
 class ExportModuleManager;
 class FloatMatrix;
 class FloatArray;
+class LoadBalancer;
+class LoadBalancerMonitor;
 class oofegGraphicContext;
 
 #ifdef __PARALLEL_MODE
@@ -237,17 +237,14 @@ protected:
     /// Receivers id.
     int number;
 
-    //DefaultEquationNumbering
-    EModelDefaultEquationNumbering defaultNumberingScheme;
-    // DefaultPrescribedEquationNumbering
-    EModelDefaultPrescribedEquationNumbering defaultPrescribedNumberingScheme;
-
     /// Path to output stream.
     std :: string dataOutputFileName;
     /// String with core output file name
     std :: string coreOutputFileName;
     /// Output stream.
     FILE *outputStream;
+    /// String with reference file name
+    std :: string referenceFileName;
     /// Domain context output mode.
     ContextOutputMode contextOutputMode;
     int contextOutputStep;
@@ -359,6 +356,12 @@ public:
      * to which extensions, like .out .vtu .osf should be added.
      */
     std :: string giveOutputBaseFileName() { return dataOutputFileName; }
+
+    /**
+     * Returns reference file name.
+     */
+    std :: string giveReferenceFileName()  { return referenceFileName;}
+
     /**
      * Sets the base output file name.
      * @see giveOutputBaseFileName
@@ -493,6 +496,12 @@ public:
 
     ///Returns the master engnmodel
     EngngModel *giveMasterEngngModel() { return this->master; }
+
+    /// Returns the current load level.
+    virtual double giveLoadLevel() { return 1.0; }
+
+    /// Only relevant for eigen value analysis. Otherwise returns zero.
+    virtual double giveEigenValue(int eigNum) { return 0.0; }
 
 #ifdef __PARALLEL_MODE
     /// Returns the communication object of reciever.
@@ -827,18 +836,12 @@ public:
     virtual void updateDofUnknownsDictionary(DofManager *, TimeStep *) { }
     /**
      * This method is responsible for computing unique dictionary id (ie hash value) from
-     * given equationId, valueModeType and time step. This function is used by particular dofs
+     * given valueModeType and time step. This function is used by particular dofs
      * to access unknown identified by given parameters from its dictionary using computed index.
      * Usually the hash algorithm should produce index that depend on time step relatively to
      * actual one to avoid storage of complete history.
      */
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) { return 0; }
-    /**
-     * Returns UnknownNUmberingScheme related to given EquationID
-     */
-    virtual UnknownNumberingScheme &giveUnknownNumberingScheme(EquationID type) {
-        return this->defaultNumberingScheme;
-    }
 
     /**
      * Returns characteristic matrix of element. The Element::giveCharacteristicMatrix function
@@ -883,24 +886,22 @@ public:
      * Assembles characteristic matrix of required type into given sparse matrix.
      * @param answer Assembled matrix.
      * @param tStep Time step, when answer is assembled.
-     * @param eid Determines type of equation and corresponding element code numbers.
      * @param s Determines the equation numbering scheme.
      * @param type Characteristic components of type type are requested from elements and assembled.
      * @param domain Source domain.
      */
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles characteristic matrix of required type into given sparse matrix.
      * @param answer assembled matrix
      * @param tStep Time step, when answer is assembled.
-     * @param eid Determines type of equation and corresponding element code numbers.
      * @param r_s Determines the equation numbering scheme for the rows.
      * @param c_s Determines the equation numbering scheme for the columns.
      * @param type Characteristic components of type type are requested from elements and assembled.
      * @param domain Source domain.
      */
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
     /**
      * Assembles characteristic vector of required type from dofManagers, element, and active boundary conditions, into given vector.
@@ -908,7 +909,6 @@ public:
      * The return value is used to normalize the residual when checking for convergence in nonlinear problems.
      * For parallel problems, the returned norm is also summed over all processes.
      * @param answer Assembled vector.
-     * @param eid Determines type of equation and corresponding element code numbers.
      * @param mode Mode of unknown (total, incremental, rate of change).
      * @param tStep Time step, when answer is assembled.
      * @param type Characteristic components of type type are requested.
@@ -917,7 +917,7 @@ public:
      * @param eNorms If non-NULL, squared norms of each internal force will be added to this, split up into dof IDs.
      * @return Sum of element/node norm (squared) of assembled vector.
      */
-    void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid, CharType type, ValueModeType mode,
+    void assembleVector(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                         const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     /**
      * Assembles characteristic vector of required type from dofManagers into given vector.
@@ -936,7 +936,6 @@ public:
      * Assembles characteristic vector of required type from elements into given vector.
      * @param answer Assembled vector.
      * @param tStep Time step, when answer is assembled.
-     * @param eid Determines type of equation and corresponding element code numbers.
      * @param mode Mode of unknown (total, incremental, rate of change).
      * @param type Characteristic components of type type are requested
      * from elements and assembled using prescribed eqn numbers.
@@ -945,15 +944,13 @@ public:
      * @param eNorms Norms for each dofid (optional).
      * @return Sum of element norm (squared) of assembled vector.
      */
-    void assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                    CharType type, ValueModeType mode,
+    void assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                                     const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**
      * Assembles characteristic vector of required type from boundary conditions.
      * @param answer Assembled vector.
      * @param tStep Time step, when answer is assembled.
-     * @param eid Determines type of equation and corresponding element code numbers.
      * @param mode Mode of unknown (total, incremental, rate of change).
      * @param type Characteristic components of type type are requested
      * from elements and assembled using prescribed eqn numbers.
@@ -961,8 +958,7 @@ public:
      * @param domain Domain to assemble from.
      * @param eNorms Norms for each dofid (optional).
      */
-    void assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                              CharType type, ValueModeType mode,
+    void assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                               const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
 
     /**
@@ -970,13 +966,11 @@ public:
      * useful for obtaining a good initial guess in nonlinear analysis with Dirichlet boundary conditions.
      * @param answer Assembled vector.
      * @param tStep Time step, when answer is assembled.
-     * @param eid Determines type of equation and corresponding element code numbers.
      * @param type Determines the type of matrix to use, typically the tangent matrix or possibly the elastic tangent.
      * @param domain Domain to assemble from.
      * @return Sum of element norm (squared) of assembled vector.
      */
-    void assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, EquationID eid,
-                                    CharType type, Domain *domain);
+    void assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, CharType type, Domain *domain);
 
 protected:
 #ifdef __PARALLEL_MODE

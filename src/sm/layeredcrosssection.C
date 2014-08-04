@@ -241,7 +241,7 @@ LayeredCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoi
         // resolve current layer z-coordinate
         layerThick = this->layerThicks.at(layer);
         layerWidth = this->layerWidths.at(layer);
-        layerZeta = layerGp->giveCoordinate(3);
+        layerZeta = layerGp->giveNaturalCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
         // Compute the layer stress
@@ -302,7 +302,7 @@ LayeredCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoin
         // resolve current layer z-coordinate
         layerThick = this->layerThicks.at(layer);
         layerWidth = this->layerWidths.at(layer);
-        layerZeta = layerGp->giveCoordinate(3);
+        layerZeta = layerGp->giveNaturalCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
         // Compute the layer stress
@@ -398,7 +398,7 @@ LayeredCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoin
         // resolve current layer z-coordinate
         layerThick = this->layerThicks.at(layer);
         layerWidth = this->layerWidths.at(layer);
-        layerZeta = layerGp->giveCoordinate(3);
+        layerZeta = layerGp->giveNaturalCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
         // Compute the layer stress
@@ -589,7 +589,7 @@ LayeredCrossSection :: give2dPlateStiffMtrx(FloatMatrix &answer,
         //
         layerThick = this->layerThicks.at(layer);
         layerWidth  = this->layerWidths.at(layer);
-        layerZeta   = layerGp->giveCoordinate(3);
+        layerZeta   = layerGp->giveNaturalCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
         layerZCoord2 = layerZCoord * layerZCoord;
         //
@@ -688,7 +688,7 @@ LayeredCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer,
         //
         layerThick = this->layerThicks.at(layer);
         layerWidth  = this->layerWidths.at(layer);
-        layerZeta   = layerGp->giveCoordinate(3);
+        layerZeta   = layerGp->giveNaturalCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
         layerZCoord2 = layerZCoord * layerZCoord;
         //
@@ -772,7 +772,7 @@ LayeredCrossSection :: give2dBeamStiffMtrx(FloatMatrix &answer,
         //
         layerThick = this->layerThicks.at(i);
         layerWidth  = this->layerWidths.at(i);
-        layerZeta   = layerGp->giveCoordinate(3);
+        layerZeta   = layerGp->giveNaturalCoordinate(3);
         layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
         layerZCoord2 = layerZCoord * layerZCoord;
         //
@@ -794,20 +794,20 @@ LayeredCrossSection :: give2dBeamStiffMtrx(FloatMatrix &answer,
 void
 LayeredCrossSection :: give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not implemented\n");
+    OOFEM_ERROR("Not implemented");
 }
 
 
 void
 LayeredCrossSection :: giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not implemented\n");
+    OOFEM_ERROR("Not implemented");
 }
 
 void
 LayeredCrossSection :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not implemented\n");
+    OOFEM_ERROR("Not implemented");
 }
 
 
@@ -1026,7 +1026,7 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
         // create new slave record in masterGp
         // (requires that this is friend of gp)
         double currentZTopCoord, currentZCoord,  bottom, top;
-        FloatArray *zCoord, *masterCoords = masterGp->giveCoordinates();
+        FloatArray *zCoord, *masterCoords = masterGp->giveNaturalCoordinates();
         // resolve slave material mode
         MaterialMode slaveMode, masterMode = masterGp->giveMaterialMode();
         slaveMode = this->giveCorrespondingSlaveMaterialMode(masterMode);
@@ -1034,8 +1034,8 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
         bottom = this->give(CS_BottomZCoord, masterGp);
         top = this->give(CS_TopZCoord, masterGp);
 
-        masterGp->numberOfGp = this->numberOfLayers;                        // Generalize to multiple integration points per layer
-        masterGp->gaussPointArray = new GaussPoint * [ numberOfLayers ];
+        ///@todo Generalize to multiple integration points per layer
+        masterGp->gaussPoints.resize( numberOfLayers );
         currentZTopCoord = -midSurfaceZcoordFromBottom;
         for ( int j = 0; j < numberOfLayers; j++ ) {
             currentZTopCoord += this->layerThicks.at(j + 1);
@@ -1052,13 +1052,13 @@ LayeredCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
 
             zCoord->at(3) = ( 2.0 * currentZCoord - top - bottom ) / ( top - bottom );
             // in gp - is stored isoparametric coordinate (-1,1) of z-coordinate
-            //masterGp->gaussPointArray [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, zCoord, 0., slaveMode);
+            //masterGp->gaussPoints [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, zCoord, 0., slaveMode);
 
             // test - remove!
-            masterGp->gaussPointArray [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, zCoord, 1.0, slaveMode);
+            masterGp->gaussPoints [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, zCoord, 1.0, slaveMode);
         }
 
-        slave = masterGp->gaussPointArray [ i ];
+        slave = masterGp->gaussPoints [ i ];
     }
 
     return slave;
@@ -1265,16 +1265,16 @@ LayeredCrossSection :: giveInterfaceXiCoords(FloatArray &answer)
 }
 
 void
-LayeredCrossSection :: setupLayeredIntegrationRule(IntegrationRule ** &integrationRulesArray, Element *el, int numInPlanePoints)
+LayeredCrossSection :: setupLayeredIntegrationRule(std :: vector< IntegrationRule * > &integrationRulesArray, Element *el, int numInPlanePoints)
 {
     // Loop over each layer and set up an integration rule as if each layer was an independent element
     // @todo - only works for wedge integration at the moment
     int numberOfLayers     = this->giveNumberOfLayers();
     int numPointsThickness = this->giveNumIntegrationPointsInLayer();
 
-    integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
+    integrationRulesArray.resize( numberOfLayers );
     for ( int i = 0; i < numberOfLayers; i++ ) {
-        integrationRulesArray [ i ] = new LayeredIntegrationRule(1, el);
+        integrationRulesArray [ i ] = new LayeredIntegrationRule(i + 1, el);
         integrationRulesArray [ i ]->SetUpPointsOnWedge(numInPlanePoints, numPointsThickness, _3dMat);
     }
     this->mapLayerGpCoordsToShellCoords(integrationRulesArray);
@@ -1282,7 +1282,7 @@ LayeredCrossSection :: setupLayeredIntegrationRule(IntegrationRule ** &integrati
 
 
 void
-LayeredCrossSection :: mapLayerGpCoordsToShellCoords(IntegrationRule ** &layerIntegrationRulesArray)
+LayeredCrossSection :: mapLayerGpCoordsToShellCoords(std :: vector< IntegrationRule * > &layerIntegrationRulesArray)
 /*
  * Maps the local xi-coord (z-coord) in each layer [-1,1] to the corresponding
  * xi-coord in the cross section coordinate system.
@@ -1303,16 +1303,15 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(IntegrationRule ** &layerIn
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRule = layerIntegrationRulesArray [ layer - 1 ];
 
-        for ( int j = 1; j <= iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(j - 1);
+        for ( GaussPoint *gp: *iRule ) {
 
             // Map local layer cs to local shell cs
             double zMid_i = this->giveLayerMidZ(layer); // global z-coord
             double xiMid_i = 1.0 - 2.0 * ( totalThickness - this->midSurfaceZcoordFromBottom - zMid_i ) / totalThickness; // local z-coord
-            double deltaxi = gp->coordinates->at(3) * this->giveLayerThickness(layer) / totalThickness; // distance from layer mid
+            double deltaxi = gp->giveNaturalCoordinates()->at(3) * this->giveLayerThickness(layer) / totalThickness; // distance from layer mid
             double xinew = xiMid_i + deltaxi * scaleFactor;
-            iRule->getIntegrationPoint(j - 1)->coordinates->at(3) = xinew;
-            iRule->getIntegrationPoint(j - 1)->number = number;   // fix gp ordering
+            gp->giveNaturalCoordinates()->at(3) = xinew;
+            gp->number = number;   // fix gp ordering
             number++;
         }
     }
@@ -1336,8 +1335,7 @@ LayeredIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsThicknes
 
     int nPoints = nPointsTri * nPointsThickness;
     //@todo - is not really a Gauss point but rather a hybrid.
-    this->gaussPointArray = new GaussPoint * [ nPoints ];
-    this->numberOfIntegrationPoints = nPoints;
+    this->gaussPoints.resize( nPoints );
 
     // uses Gauss integration in the plane and Lobatto in the thickness
     FloatArray coords_xi1, coords_xi2, coords_xi, weights_tri, weights_thickness;
@@ -1359,7 +1357,7 @@ LayeredIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsThicknes
             coord->at(1) = coords_xi1.at(j);
             coord->at(2) = coords_xi2.at(j);
             coord->at(3) = coords_xi.at(i);
-            this->gaussPointArray [ ind ] =
+            this->gaussPoints [ ind ] =
                 new GaussPoint(this, 1, coord, weights_tri.at ( j ) *weights_thickness.at ( i ), mode);
 
             // store interface points
@@ -1371,7 +1369,7 @@ LayeredIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsThicknes
             ind++;
         }
     }
-    return numberOfIntegrationPoints;
+    return this->giveNumberOfIntegrationPoints();
 }
 
 

@@ -504,12 +504,12 @@ IsotropicDamageMaterial1 :: computeEquivalentStrain(double &kappa, const FloatAr
             this->computePrincipalValues(principalStress, fullStress, principal_stress);
             // TO BE FINISHED
             sum = 0.;
-            OOFEM_ERROR("Elastic energy corresponding to positive part of stress not finished\n");
+            OOFEM_ERROR("Elastic energy corresponding to positive part of stress not finished");
         } else {
             // elastic energy corresponding to positive part of strain
             // TO BE DONE
             sum = 0.;
-            OOFEM_ERROR("Elastic energy corresponding to positive part of strain not finished\n");
+            OOFEM_ERROR("Elastic energy corresponding to positive part of strain not finished");
         }
 
         kappa = sqrt( sum / lmat->give('E', gp) );
@@ -901,7 +901,7 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
                 Lhs = kappa - e0 *exp(-help) * kappa / ef; //- dR / (d omega)
                 omega += R / Lhs;
                 if ( nite > 40 ) {
-                    OOFEM_ERROR("computeDamageParamForCohesiveCrack: algorithm not converging");
+                    OOFEM_ERROR("algorithm not converging");
                 }
             } while ( fabs(R) >= e0 * IDM1_ITERATION_LIMIT );
         } else {
@@ -912,7 +912,7 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
             OOFEM_WARNING("damage parameter is %f, which is greater than 1, snap-back problems", omega);
             omega = maxOmega;
             if ( checkSnapBack ) {
-                OOFEM_ERROR("\n");
+                OOFEM_ERROR("");
             }
         }
 
@@ -920,7 +920,7 @@ IsotropicDamageMaterial1 :: computeDamageParamForCohesiveCrack(double &omega, do
             OOFEM_WARNING("damage parameter is %f, which is smaller than 0, snap-back problems", omega);
             omega = 0.0;
             if ( checkSnapBack ) {
-                OOFEM_ERROR("\n");
+                OOFEM_ERROR("");
             }
         }
     }
@@ -1215,17 +1215,17 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         if ( this->gf != 0. && e0 >= ( wf / le ) ) { // case for a given fracture energy
             OOFEM_WARNING("Fracturing strain %e is lower than the elastic strain e0=%e, possible snap-back. Element number %d, wf %e, le %e", wf / le, e0, gp->giveElement()->giveLabel(), wf, le);
             if ( checkSnapBack ) {
-                OOFEM_ERROR("\n");
+                OOFEM_ERROR("");
             }
         } else if ( wf == 0. && e0 >= ef ) {
             OOFEM_WARNING( "Fracturing strain ef=%e is lower than the elastic strain e0=%f, possible snap-back. Increase fracturing strain to %f. Element number %d", ef, e0, e0, gp->giveElement()->giveLabel() );
             if ( checkSnapBack ) {
-                OOFEM_ERROR("\n");
+                OOFEM_ERROR("");
             }
         } else if ( ef == 0. && e0 * le >= wf ) {
             OOFEM_WARNING( "Crack opening at zero stress wf=%f is lower than the elastic displacement w0=%f, possible snap-back. Increase crack opening wf to %f. Element number %d", wf, e0 * le, e0 * le, gp->giveElement()->giveLabel() );
             if ( checkSnapBack ) {
-                OOFEM_ERROR("\n");
+                OOFEM_ERROR("");
             }
         }
     }

@@ -38,21 +38,21 @@
 
 namespace oofem {
 void
-TransportMaterialStatus :: setTempGradient(const FloatArray &grad)
+TransportMaterialStatus :: setTempGradient(FloatArray grad)
 {
-    this->temp_gradient = grad;
+    this->temp_gradient = std :: move(grad);
 }
 
 void
-TransportMaterialStatus :: setTempField(const FloatArray &field)
+TransportMaterialStatus :: setTempField(FloatArray field)
 {
-    this->temp_field = field;
+    this->temp_field = std :: move(field);
 }
 
 void
-TransportMaterialStatus :: setTempFlux(const FloatArray &w)
+TransportMaterialStatus :: setTempFlux(FloatArray w)
 {
-    this->temp_flux = w;
+    this->temp_flux = std :: move(w);
 }
 
 void
@@ -186,8 +186,7 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSta
     TransportMaterialStatus *ms = static_cast< TransportMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_Temperature || type == IST_MassConcentration_1 || type == IST_Humidity ) {
         FloatArray vec = ms->giveField();
-        answer.resize(1);
-        answer.at(1) = vec.at( ( type == IST_Temperature ) ? 1 : 2 );
+        answer = {vec.at( ( type == IST_Temperature ) ? 1 : 2 ) };
         return 1;
     } else if ( type == IST_TemperatureFlow ) {
         TransportElement *transpElem = static_cast< TransportElement * >( gp->giveElement() );
@@ -202,20 +201,16 @@ TransportMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSta
         answer.resizeWithValues(3);
         return 1;
     } else if ( type == IST_Density ) {
-        answer.resize(1);
-        answer.at(1) = this->give('d', gp);
+        answer = { this->give('d', gp) };
         return 1;
     } else if ( type == IST_HeatCapacity ) {
-        answer.resize(1);
-        answer.at(1) = this->give('c', gp);
+        answer = { this->give('c', gp) };
         return 1;
     } else if ( type == IST_ThermalConductivityIsotropic ) {
-        answer.resize(1);
-        answer.at(1) = this->give('k', gp);
+        answer = { this->give('k', gp) };
         return 1;
     } else if ( type == IST_Maturity ) {
-        answer.resize(1);
-        answer.at(1) = ms->giveMaturity();
+        answer = { ms->giveMaturity() };
         return 1;
     }
     return Material :: giveIPValue(answer, gp, type, tStep);

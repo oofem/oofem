@@ -109,6 +109,8 @@ public:
     virtual void setActiveVector(int i) { activeVector = i; }
     virtual int resolveCorrespondingEigenStepNumber(void *obj);
 
+    virtual double giveEigenValue(int eigNum) { return eigVal.at(eigNum); }
+
 #ifdef __SLEPC_MODULE
     virtual void initParallelContexts();
 #endif

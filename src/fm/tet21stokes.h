@@ -69,52 +69,6 @@ protected:
     /// Ordering of dofs on surfaces. Used to assemble edge loads (only momentum balance)
     static IntArray surf_ordering [ 4 ];
 
-    /// Dummy variable
-    static bool __initialized;
-
-    /// Defines the ordering of the dofs in the local stiffness matrix.
-    static bool initOrdering() {
-        for ( int i = 0, j = 1; i < 10; ++i ) {
-            momentum_ordering(i * 3 + 0) = j++;
-            momentum_ordering(i * 3 + 1) = j++;
-            momentum_ordering(i * 3 + 2) = j++;
-            if ( i <= 3 ) {
-                j++;
-            }
-        }
-
-        conservation_ordering = {4, 8, 12, 16};
-
-        surf_ordering [ 0 ] = { 1,  2,  3,     // node 1
-                                9, 10, 11,     // node 3
-                                5,  6,  7,     // node 2
-                               23, 24, 25,     // node 7
-                               20, 21, 22,     // node 6
-                               17, 18, 19};    // node 5
-
-        surf_ordering [ 1 ] = { 1,  2,  3,     // node 1
-                                5,  6,  7,     // node 2
-                               13, 14, 15,     // node 4
-                               17, 18, 19,     // node 5
-                               29, 30, 31,     // node 9
-                               26, 27, 28};    // node 8
-
-        surf_ordering [ 2 ] = { 5,  6,  7,  // node 2
-                                9, 10, 11,      // node 3
-                               13, 14, 15,     // node 4
-                               20, 21, 22,     // node 6
-                               32, 33, 34,     // node 10
-                               29, 30, 31};    // node 9
-
-        surf_ordering [ 2 ] = { 1,  2,  3,  // node 1
-                               13, 14, 15,     // node 4
-                                9, 10, 11,      // node 3
-                               26, 27, 28,     // node 8
-                               32, 33, 34,     // node 10
-                               23, 24, 25};    // node 7
-        return true;
-    }
-
 public:
     Tet21Stokes(int n, Domain * d);
     virtual ~Tet21Stokes();
@@ -143,32 +97,25 @@ public:
      * Gives the dof ID mask for the element.
      * This element (Taylor-Hood) has V_u, V_v, P_f in node corner and V_u, V_v in edge nodes.
      * @param inode Node to check.
-     * @param ut Equation ID to check.
      * @param answer List of dof IDs.
      */
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
     virtual void updateYourself(TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType it);
 
     // Spatial localizer interface:
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     // Element interpolation interface:
-    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-                                                                 TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
                                                                        TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
-    virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
 
     // Nodal averaging interface:
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep);
 
-    void giveIntegratedVelocity(FloatMatrix &answer, TimeStep *tStep);
+    void giveIntegratedVelocity(FloatArray &answer, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // tet21stokes_h

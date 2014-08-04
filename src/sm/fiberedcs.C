@@ -49,28 +49,28 @@ REGISTER_CrossSection(FiberedCrossSection);
 void
 FiberedCrossSection :: giveRealStress_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("Not supported");
 }
 
 
 void
 FiberedCrossSection :: giveRealStress_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("Not supported");
 }
 
 
 void
 FiberedCrossSection :: giveRealStress_PlaneStress(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("Not supported");
 }
 
 
 void
 FiberedCrossSection :: giveRealStress_1d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("Not supported");
 }
 
 
@@ -84,28 +84,28 @@ FiberedCrossSection :: giveRealStress_Warping(FloatArray &answer, GaussPoint *gp
 void
 FiberedCrossSection :: giveStiffnessMatrix_3d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("Not supported");
 }
 
 
 void
 FiberedCrossSection :: giveStiffnessMatrix_PlaneStress(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("Not supported");
 }
 
 
 void
 FiberedCrossSection :: giveStiffnessMatrix_PlaneStrain(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("Not supported");
 }
 
 
 void
 FiberedCrossSection :: giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("Not supported");
 }
 
 
@@ -114,7 +114,7 @@ FiberedCrossSection :: giveStiffnessMatrix_1d(FloatMatrix &answer, MatResponseMo
 void
 FiberedCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("Not supported");
 }
 
 
@@ -146,8 +146,8 @@ FiberedCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoi
         // resolve current layer z-coordinate
         fiberThick  = this->fiberThicks.at(i);
         fiberWidth  = this->fiberWidths.at(i);
-        fiberYCoord = fiberGp->giveCoordinate(1);
-        fiberZCoord = fiberGp->giveCoordinate(2);
+        fiberYCoord = fiberGp->giveNaturalCoordinate(1);
+        fiberZCoord = fiberGp->giveNaturalCoordinate(2);
 
         interface->FiberedCrossSectionInterface_computeStrainVectorInFiber(fiberStrain, strain, fiberGp, tStep);
 
@@ -176,14 +176,14 @@ FiberedCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoi
 void
 FiberedCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("Not supported");
 }
 
 
 void
 FiberedCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint *gp, const FloatArray &strain, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not supported\n");
+    OOFEM_ERROR("Not supported");
 }
 
 
@@ -215,7 +215,7 @@ FiberedCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
     } else if ( mode == _3dShell ) {
         this->give3dShellStiffMtrx(answer, rMode, gp, tStep);
     } else {
-        OOFEM_ERROR("Not implemented for bulk materials.\n");
+        OOFEM_ERROR("Not implemented for bulk materials.");
         ///@todo What about the fibers?! Rather give just an error message if the fibers aren't supported than to just silently ignore them.
 #if 0
         StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( gp->giveElement()->giveMaterial() );
@@ -232,7 +232,7 @@ FiberedCrossSection :: giveCharMaterialStiffnessMatrix(FloatMatrix &answer,
 void
 FiberedCrossSection :: give2dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not implemented\n");
+    OOFEM_ERROR("Not implemented");
 }
 
 
@@ -299,26 +299,26 @@ FiberedCrossSection :: give3dBeamStiffMtrx(FloatMatrix &answer, MatResponseMode 
 void
 FiberedCrossSection :: give2dPlateStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not implemented\n");
+    OOFEM_ERROR("Not implemented");
 }
 
 
 void
 FiberedCrossSection :: give3dShellStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not implemented\n");
+    OOFEM_ERROR("Not implemented");
 }
 
 void
 FiberedCrossSection :: giveMembraneRotStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-    OOFEM_ERROR("Not implemented\n");
+    OOFEM_ERROR("Not implemented");
 }
 
 void
 FiberedCrossSection :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
-     OOFEM_ERROR("Not supported\n");
+     OOFEM_ERROR("Not supported");
 }
 
 
@@ -481,18 +481,17 @@ FiberedCrossSection :: giveSlaveGaussPoint(GaussPoint *masterGp, int i)
         MaterialMode slaveMode, masterMode = masterGp->giveMaterialMode();
         slaveMode = this->giveCorrespondingSlaveMaterialMode(masterMode);
 
-        masterGp->numberOfGp = this->numberOfFibers;
-        masterGp->gaussPointArray = new GaussPoint * [ numberOfFibers ];
+        masterGp->gaussPoints.resize( this->numberOfFibers );
 
         for ( int j = 0; j < numberOfFibers; j++ ) {
             coords = new FloatArray(2);
             coords->at(1) = fiberYcoords.at(j + 1);
             coords->at(2) = fiberZcoords.at(j + 1);
             // in gp - is stored isoparametric coordinate (-1,1) of z-coordinate
-            masterGp->gaussPointArray [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, coords, 0., slaveMode);
+            masterGp->gaussPoints [ j ] = new GaussPoint(masterGp->giveIntegrationRule(), j + 1, coords, 0., slaveMode);
         }
 
-        slave = masterGp->gaussPointArray [ i ];
+        slave = masterGp->gaussPoints [ i ];
     }
 
     return slave;

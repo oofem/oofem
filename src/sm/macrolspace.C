@@ -78,7 +78,7 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, this->microMasterNodes, _IFT_MacroLspace_microMasterNodes);
 
     if ( this->microMasterNodes.giveSize() != 8 ) {
-        OOFEM_ERROR("Need 8 master nodes from the microproblem defined on macroLspace element\n");
+        OOFEM_ERROR("Need 8 master nodes from the microproblem defined on macroLspace element");
     }
 
     IR_GIVE_FIELD(ir, this->microBoundaryNodes, _IFT_MacroLspace_microBoundaryNodes);
@@ -120,7 +120,7 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
     if ( this->firstCall ) {
         this->microMaterial = static_cast< MicroMaterial * >( this->giveMaterial() );
         if ( this->microMaterial->microMatIsUsed == true ) {
-            OOFEM_ERROR("Micromaterial is already used on another element. Only one micromaterial can be assigned to one macro element\n");
+            OOFEM_ERROR("Micromaterial is already used on another element. Only one micromaterial can be assigned to one macro element");
         }
 
         this->microDomain = this->microMaterial->problemMicro->giveDomain(1); //from engngm.h
@@ -177,11 +177,10 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
 
     //dofManArray has the node order as specified in input file
     for ( int i = 1; i <= this->giveNumberOfNodes(); i++ ) { //8 nodes
-        DofMan = microDomain->giveDofManager(i);
         //global displacements
-        displ_x.at(i) = this->giveNode(i)->giveDof(1)->giveUnknown(VM_Total, tStep);
-        displ_y.at(i) = this->giveNode(i)->giveDof(2)->giveUnknown(VM_Total, tStep);
-        displ_z.at(i) = this->giveNode(i)->giveDof(3)->giveUnknown(VM_Total, tStep);
+        displ_x.at(i) = this->giveNode(i)->giveDofWithID(D_u)->giveUnknown(VM_Total, tStep);
+        displ_y.at(i) = this->giveNode(i)->giveDofWithID(D_v)->giveUnknown(VM_Total, tStep);
+        displ_z.at(i) = this->giveNode(i)->giveDofWithID(D_w)->giveUnknown(VM_Total, tStep);
     }
 
     //overrides the first load-time function to be a constant
@@ -211,10 +210,11 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
             this->evalInterpolation( n, microMaterial->microMasterCoords, * DofMan->giveCoordinates() );
             //n.printYourself();
 
-            for ( int j = 1; j <= 3; j++ ) {
+            for ( Dof *dof: *DofMan ) {
                 this->microBoundaryDofManager.at(counter) = DofMan->giveGlobalNumber();
-                DofMan->giveDof(j)->setBcId(counter);
-                displ = n.dotProduct( j == 1 ? displ_x : ( j == 2 ? displ_y : displ_z ) );
+                dof->setBcId(counter);
+                DofIDItem id = dof->giveDofID();
+                displ = n.dotProduct( id == D_u ? displ_x : ( id == D_v ? displ_y : displ_z ) );
                 ir_bc.setRecordKeywordField("boundarycondition", counter);
                 ir_bc.setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
                 ir_bc.setField(displ, _IFT_BoundaryCondition_PrescribedValue);
@@ -226,8 +226,8 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
                 counter++;
             }
         } else {
-            for ( int j = 1; j <= 3; j++ ) {
-                DofMan->giveDof(j)->setBcId(0);
+            for ( Dof *dof: *DofMan ) {
+                dof->setBcId(0);
             }
         }
     }
@@ -290,14 +290,14 @@ void MacroLSpace :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep
     //OOFEM_ERROR("STOP");
 }
 
-void MacroLSpace :: evalInterpolation(FloatArray &answer, const FloatArray **coords, const FloatArray &gcoords)
+void MacroLSpace :: evalInterpolation(FloatArray &answer, const std::vector< FloatArray > &coords, const FloatArray &gcoords)
 {
     FloatArray localCoords;
 
     //this->interpolation.global2local(localCoords, coords, gcoords, 0.0);//returns even outside the element boundaries
     //this->interpolation.evalN(answer, localCoords, 0.0);
-    this->interpolation.global2local( localCoords, gcoords, FEIVertexListGeometryWrapper(8, coords) ); //returns even outside the element boundaries
-    this->interpolation.evalN( answer, localCoords, FEIVertexListGeometryWrapper(8, coords) );
+    this->interpolation.global2local( localCoords, gcoords, FEIVertexListGeometryWrapper(coords) ); //returns even outside the element boundaries
+    this->interpolation.evalN( answer, localCoords, FEIVertexListGeometryWrapper(coords) );
 }
 
 
@@ -306,8 +306,8 @@ void MacroLSpace :: updateYourself(TimeStep *tStep)
 {
     FloatArray answer;
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        integrationRulesArray [ i ]->updateYourself(tStep);
+    for ( auto &iRule: integrationRulesArray ) {
+        iRule->updateYourself(tStep);
     }
 
     OOFEM_LOG_INFO("*** Updating macroelement\n");

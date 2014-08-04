@@ -772,12 +772,12 @@ AnisotropicDamageMaterial :: computeEquivalentStrain(double &kappa, const FloatA
      *          this->computePrincipalValues(principalStress, fullStress, principal_stress);
      *          // TO BE FINISHED
      *          sum = 0.;
-     *          OOFEM_ERROR("Elastic energy corresponding to positive part of stress not finished\n");
+     *          OOFEM_ERROR("Elastic energy corresponding to positive part of stress not finished");
      *      } else {
      *          // elastic energy corresponding to positive part of strain
      *          // TO BE DONE
      *          sum = 0.;
-     *          OOFEM_ERROR("Elastic energy corresponding to positive part of strain not finished\n");
+     *          OOFEM_ERROR("Elastic energy corresponding to positive part of strain not finished");
      *      }
      *
      *      kappa = sqrt( sum / lmat->give('E', gp) );

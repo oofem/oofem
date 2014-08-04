@@ -131,8 +131,8 @@ void HangingNode :: postInitialize()
 
     // Initialize slave dofs (inside check of consistency of receiver and master dof)
     const IntArray &masterNodes = e->giveDofManArray();
-    for ( int i = 1; i <= numberOfDofs; i++ ) {
-        SlaveDof *sdof = dynamic_cast< SlaveDof * >(dofArray [ i - 1 ]);
+    for ( Dof *dof: *this ) {
+        SlaveDof *sdof = dynamic_cast< SlaveDof * >(dof);
         if ( sdof ) {
             DofIDItem id = sdof->giveDofID();
             fei = e->giveInterpolation(id);
@@ -151,7 +151,7 @@ void HangingNode :: postInitialize()
                     masterDofIDs.followedBy(dofids);
                     masterNodesDup.followedBy(masterNodes);
                 }
-                sdof->initialize(masterContribution.giveSize(), masterNodesDup, & masterDofIDs, masterContribution);
+                sdof->initialize(masterNodesDup, & masterDofIDs, masterContribution);
             } else { }
 #else
             // Note: There can be more masterNodes than masterContributions, since all the
@@ -159,7 +159,7 @@ void HangingNode :: postInitialize()
             // If this assumption is changed in FEIElementGeometryWrapper + friends,
             // masterNode will also need to be modified for each dof accordingly.
             fei->evalN( masterContribution, lcoords, FEIElementGeometryWrapper(e) );
-            sdof->initialize(masterContribution.giveSize(), masterNodes, IntArray(), masterContribution);
+            sdof->initialize(masterNodes, IntArray(), masterContribution);
 #endif
         }
     }

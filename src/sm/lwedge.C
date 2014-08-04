@@ -54,7 +54,7 @@ REGISTER_Element(LWedge);
 
 FEI3dWedgeLin LWedge :: interpolation;
 
-LWedge :: LWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+LWedge :: LWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
     // Constructor.
 {
     numberOfDofMans = 6;
@@ -79,7 +79,7 @@ LWedge :: initializeFrom(InputRecord *ir)
 
 
 void
-LWedge :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+LWedge :: giveDofManDofIDMask(int inode, IntArray &answer) const
 // returns DofId mask array for inode element node.
 // DofId mask array determines the dof ordering requsted from node.
 // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -97,7 +97,7 @@ double
 LWedge :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
-    double determinant = this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double determinant = this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     double weight      = gp->giveWeight();
 
     return ( determinant * weight );
@@ -108,8 +108,7 @@ void
 LWedge :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    integrationRulesArray.resize(1);
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
     this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 }
@@ -120,18 +119,10 @@ LWedge :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Returns the displacement interpolation matrix {N} of the receiver, eva-
 // luated at gp.
 {
-    FloatArray n(6);
-
-    answer.resize(3, 18);
-    answer.zero();
+    FloatArray n;
 
     this->interpolation.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
-
-    for ( int i = 1; i <= 6; i++ ) {
-        answer.at(1, 3 * i - 2) = n.at(i);
-        answer.at(2, 3 * i - 1) = n.at(i);
-        answer.at(3, 3 * i - 0) = n.at(i);
-    }
+    answer.beNMatrixOf(n, 3);
 }
 
 
@@ -149,7 +140,7 @@ LWedge :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 18);
     answer.zero();
@@ -176,7 +167,7 @@ LWedge :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 18);
     answer.zero();
@@ -248,7 +239,7 @@ LWedge :: SPRNodalRecoveryMI_giveNumberOfIP()
 void
 LWedge :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
 {
-    if ( this->computeGlobalCoordinates( coords, * gp->giveCoordinates() ) == 0 ) {
+    if ( this->computeGlobalCoordinates( coords, * gp->giveNaturalCoordinates() ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 }
@@ -268,9 +259,4 @@ LWedge :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
     OOFEM_WARNING("IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
-void
-LWedge :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
 } // end namespace oofem

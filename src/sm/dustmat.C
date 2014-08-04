@@ -427,7 +427,7 @@ DustMaterial :: performF1return(double i1, double rho, GaussPoint *gp)
     }
 
     OOFEM_LOG_DEBUG("  i1 %e rho %e  bulkM %e  shearM %e\n", i1, rho, bulkModulus, shearModulus);
-    OOFEM_ERROR("Newton's method did not converge\n");
+    OOFEM_ERROR("Newton's method did not converge");
 }
 
 void
@@ -467,7 +467,7 @@ DustMaterial :: performF2return(double i1, double rho, GaussPoint *gp)
         tempQ = .5 * ( qLeft + qRight );
     }
 
-    OOFEM_ERROR("bisection method did not converge\n");
+    OOFEM_ERROR("bisection method did not converge");
 }
 
 void
@@ -493,7 +493,7 @@ DustMaterial :: computeQFromPlastVolEps(double &answer, double q, double deltaVo
     }
 
     OOFEM_LOG_DEBUG("  dVolEpsPl: %e\n", deltaVolumetricPlasticStrain);
-    OOFEM_ERROR("Newton's method did not converge\n");
+    OOFEM_ERROR("Newton's method did not converge");
 }
 
 void
@@ -513,7 +513,7 @@ DustMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         LEMaterial->give3dMaterialStiffnessMatrix(answer, mode, gp, tStep);
         answer.times(coeff);
     } else {
-        OOFEM_ERROR("Unsupported MatResponseMode\n");
+        OOFEM_ERROR("Unsupported MatResponseMode");
     }
 }
 
@@ -644,14 +644,14 @@ DustMaterial :: solveQ0(double &answer)
         answer -= fx / dfx;
         if (  fabs(fx / dfx / answer) < newtonTol ) {
             if ( answer >= 0 ) {
-                OOFEM_ERROR("internal parameter q has to be negative\n");
+                OOFEM_ERROR("internal parameter q has to be negative");
             }
 
             return;
         }
     }
 
-    OOFEM_ERROR("Newton's method did not converge\n");
+    OOFEM_ERROR("Newton's method did not converge");
 }
 
 void
@@ -686,7 +686,7 @@ DustMaterial :: computePlastStrainDirM1(StrainVector &answer, const StressVector
         answer.at(2) += temp;
         answer.at(3) += temp;
     } else {
-        OOFEM_ERROR("Incorrect mode of stressstrainvector in DustMaterial :: computePlastStrainDirM1\n");
+        OOFEM_ERROR("Incorrect mode of stressstrainvector");
     }
 }
 
@@ -704,7 +704,7 @@ DustMaterial :: computePlastStrainDirM2(StrainVector &answer, const StressVector
         answer.at(2) -= temp;
         answer.at(3) -= temp;
     } else {
-        OOFEM_ERROR("Incorrect mode of stressstrainvector in DustMaterial :: computePlastStrainDirM2\n");
+        OOFEM_ERROR("Incorrect mode of stressstrainvector");
     }
 }
 
@@ -723,7 +723,7 @@ DustMaterial :: computePlastStrainDirM3(StrainVector &answer, const StressVector
         answer.at(2) += temp;
         answer.at(3) += temp;
     } else {
-        OOFEM_ERROR("Incorrect mode of stressstrainvector in DustMaterial :: computePlastStrainDirM3\n");
+        OOFEM_ERROR("Incorrect mode of stressstrainvector");
     }
 }
 

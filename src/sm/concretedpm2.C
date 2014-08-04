@@ -533,10 +533,10 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
 
     if ( yieldHardPrimePeak < 0 ) {
         yieldHardPrimePeak = 0.;
-        OOFEM_WARNING("kPrimePeak cannot be less than zero\n");
+        OOFEM_WARNING("kPrimePeak cannot be less than zero");
     } else if ( yieldHardPrimePeak > ( 1. - yieldHardInitial ) ) {
         yieldHardPrimePeak = 1. - yieldHardInitial;
-        OOFEM_WARNING("kPrimePeak cannot be greater than 1.-kinit\n");
+        OOFEM_WARNING("kPrimePeak cannot be greater than 1.-kinit");
     }
 
     AHard = 8.e-2;
@@ -554,7 +554,7 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, softeningType, _IFT_ConcreteDPM2_softeningType);
 
     if ( softeningType > 2 ) {
-        OOFEM_ERROR("softening type not implemented\n");
+        OOFEM_ERROR("softening type not implemented");
     }
 
     IR_GIVE_FIELD(ir, this->wf, _IFT_ConcreteDPM2_wf);
@@ -2867,7 +2867,7 @@ ConcreteDPM2 :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
         } else if ( mode == SecantStiffness ) {
             computeSecantStiffness(answer, mode, gp, tStep);
         } else if ( mode == TangentStiffness ) {
-            OOFEM_WARNING("ConcreteDPM2 :: give1dStressStiffMtrx ... unknown type of stiffness (tangent stiffness not implemented for 1d). Elastic stiffness used!\n");
+            OOFEM_WARNING("unknown type of stiffness (tangent stiffness not implemented for 1d). Elastic stiffness used!");
             FloatMatrix stiff;
             this->giveLinearElasticMaterial()->giveStiffnessMatrix(stiff, mode, gp, tStep);
             this->giveFullSymMatrixForm( answer, stiff, gp->giveMaterialMode() );

@@ -431,7 +431,7 @@ DynamicCommunicationBuffer :: popNewRecvPacket()
     active_packet = ( * recvIt );
     ++recvIt;
     if ( active_packet == NULL ) {
-        OOFEM_SIMPLE_ERROR("no more packets received");
+        OOFEM_ERROR("no more packets received");
     }
 
     //active_packet->init(communicator);
@@ -447,7 +447,7 @@ DynamicCommunicationBuffer :: pushNewRecvPacket(CommunicationPacket *p)
 int
 DynamicCommunicationBuffer :: bcast(int root)
 {
-    OOFEM_SIMPLE_ERROR("not implemented");
+    OOFEM_ERROR("not implemented");
     return 0;
 }
 
@@ -461,7 +461,7 @@ CommunicationPacketPool :: popPacket(MPI_Comm comm)
     if ( available_packets.empty() ) {
         // allocate new packet
         if ( ( result = new CommunicationPacket(comm, 0) ) == NULL ) {
-            OOFEM_SIMPLE_ERROR("allocation of new packed failed");
+            OOFEM_ERROR("allocation of new packed failed");
         }
 
         allocatedPackets++;
@@ -490,7 +490,7 @@ CommunicationPacketPool :: pushPacket(CommunicationPacket *p)
         leased_packets.erase(it);
         available_packets.push_back(p);
     } else {
-        OOFEM_SIMPLE_ERROR("request to push strange packet (not allocated by pool)");
+        OOFEM_ERROR("request to push strange packet (not allocated by pool)");
     }
 
 #else
@@ -505,7 +505,7 @@ void
 CommunicationPacketPool :: clear()
 {
     if ( !leased_packets.empty() ) {
-        OOFEM_SIMPLE_WARNING("CommunicationPacketPool::clear: some packets still leased");
+        OOFEM_WARNING("some packets still leased");
     }
 
     for ( auto &packet: available_packets ) {

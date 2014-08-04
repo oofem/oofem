@@ -76,6 +76,7 @@ class CommunicationBuffer;
  *   initialize.
  * 
  * @author Mikael Öhman
+ * @author Erik Svenning
  * @author many others (please add yourselves)
  */
 class OOFEM_EXPORT FloatArray
@@ -95,6 +96,8 @@ public:
 
     /// Constructor for sized array. Data is zeroed.
     FloatArray(int n = 0) : values(n) { }
+    /// Disallow double parameter, which can otherwise give unexpected results.
+    FloatArray(double)  = delete;
     /// Copy constructor. Creates the array from another array.
     FloatArray(const FloatArray &src) : values(src.values) { }
     /// Move constructor. Creates the array from another array.
@@ -111,8 +114,9 @@ public:
     /// Assignment operator.
     inline FloatArray &operator = (std :: initializer_list< double >list) { values = list; return *this; }
 
-    /// Sets values in array. Convenient for writing small specific vectors.
-    void setValues(int n, ...);
+    /// Add one element
+    void push_back(const double &iVal) {values.push_back(iVal);}
+
 
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -176,6 +180,11 @@ public:
      */
     void checkSizeTowards(const IntArray &loc);
     /**
+     * Allocates enough size to fit s, and clears the array.
+     * @param s New reserved size.
+     */
+    void reserve(int s);
+    /**
      * Checks size of receiver towards requested bounds.
      * If dimension mismatch, size is adjusted accordingly.
      * Old values are copied over and new space is zeroed.
@@ -224,6 +233,16 @@ public:
     virtual void pY() const;
     /// Zeroes all coefficients of receiver.
     void zero();
+    /**
+     * Appends array to reciever.
+     * @param a Values to be appended.
+     */
+    void append(const FloatArray &a);
+    /**
+     * Appends value to reciever.
+     * @param a Value to be appended.
+     */
+    void append(double a);
     /**
      * Receiver becomes the result of the product of aMatrix and anArray.
      * Adjusts the size of receiver if necessary.
@@ -365,6 +384,7 @@ public:
      * Written by Erik Svenning, August 2013.
      */
     double distance(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const;
+    double distance_square(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const;
 
     /**
      * Computes the square of distance between position represented by receiver and position given as parameter.
@@ -481,6 +501,7 @@ public:
 #endif
 };
 
+const FloatArray ZeroVector = {0.0,0.0,0.0};
 
 ///@name IML compatibility
 //@{

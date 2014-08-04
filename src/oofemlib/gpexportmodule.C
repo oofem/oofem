@@ -76,8 +76,6 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     int nc, nv, nvars;
     double weight;
-    Element *elem;
-    GaussPoint *gp;
     FloatArray gcoords, intvar;
     InternalStateType vartype;
     IntegrationRule *iRule;
@@ -100,15 +98,14 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     // loop over elements
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        elem = d->giveElement(ielem);
+        Element *elem = d->giveElement(ielem);
         //iRule = elem->giveDefaultIntegrationRulePtr();
         //int numIntRules = elem->giveNumberOfIntegrationRules();
         for ( int i = 0; i < elem->giveNumberOfIntegrationRules(); i++ ) {
             iRule = elem->giveIntegrationRule(i);
 
             // loop over Gauss points
-            for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                gp = iRule->getIntegrationPoint(j);
+            for ( GaussPoint *gp: *iRule ) {
                 // export:
                 // 1) element number
                 // 2) material number ///@todo deprecated returns -1
@@ -116,11 +113,11 @@ GPExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
                 // 4) Gauss point number
                 // 5) contributing volume around Gauss point
                 weight = elem->computeVolumeAround(gp);
-                fprintf(stream, "%d %d %d %d %.6e ", elem->giveNumber(), -1, i + 1, j + 1, weight);
+                fprintf(stream, "%d %d %d %d %.6e ", elem->giveNumber(), -1, i + 1, gp->giveNumber(), weight);
 
                 // export Gauss point coordinates
                 if ( ncoords ) { // no coordinates exported if ncoords==0
-                    elem->computeGlobalCoordinates( gcoords, * ( gp->giveCoordinates() ) );
+                    elem->computeGlobalCoordinates( gcoords, * ( gp->giveNaturalCoordinates() ) );
                     nc = gcoords.giveSize();
                     if ( ncoords >= 0 ) {
                         fprintf(stream, "%d ", ncoords);

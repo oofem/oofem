@@ -105,18 +105,18 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     /// Returns the equilibrated strain vector.
-    void givePlasticStrainVector(FloatArray &answer) const { answer = plasticStrainVector; }
+    const FloatArray & givePlasticStrainVector() const { return plasticStrainVector; }
     /// Returns the actual (temp) strain vector.
-    void giveTempPlasticStrainVector(FloatArray &answer) const { answer = tempPlasticStrainVector; }
+    const FloatArray & giveTempPlasticStrainVector() const { return tempPlasticStrainVector; }
     /// Returns the equilibrated hardening variable vector.
-    void giveStrainSpaceHardeningVars(FloatArray &answer) const { answer = strainSpaceHardeningVarsVector; }
+    const FloatArray & giveStrainSpaceHardeningVars() const { return strainSpaceHardeningVarsVector; }
     /// Returns the actual (temp) hardening variable vector.
-    void giveTempStrainSpaceHardeningVarsVector(FloatArray &answer) const { answer = tempStrainSpaceHardeningVarsVector; }
+    const FloatArray & giveTempStrainSpaceHardeningVarsVector() const { return tempStrainSpaceHardeningVarsVector; }
 
-    void letPlasticStrainVectorBe(const FloatArray &v) { plasticStrainVector = v; }
-    void letTempPlasticStrainVectorBe(const FloatArray &v) { tempPlasticStrainVector = v; }
-    void letTempStrainSpaceHardeningVarsVectorBe(const FloatArray &v) { tempStrainSpaceHardeningVarsVector = v; }
-    void letStrainSpaceHardeningVarsVectorBe(const FloatArray &v) { strainSpaceHardeningVarsVector = v; }
+    void letPlasticStrainVectorBe(FloatArray v) { plasticStrainVector = std :: move(v); }
+    void letTempPlasticStrainVectorBe(FloatArray v) { tempPlasticStrainVector = std :: move(v); }
+    void letTempStrainSpaceHardeningVarsVectorBe(FloatArray v) { tempStrainSpaceHardeningVarsVector = std :: move(v); }
+    void letStrainSpaceHardeningVarsVectorBe(FloatArray v) { strainSpaceHardeningVarsVector = std :: move(v); }
 
     void letTempDamageBe(double v) { tempDamage = v; }
     double giveDamage() { return damage; }
@@ -126,10 +126,10 @@ public:
     int giveTempStateFlag() { return temp_state_flag; }
     void letTempStateFlagBe(int v) { temp_state_flag = v; }
 
-    void giveTempActiveConditionMap(IntArray &answer) { answer = tempActiveConditionMap; }
-    void setTempActiveConditionMap(const IntArray &v) { tempActiveConditionMap = v; }
-    void giveTempGamma(FloatArray &answer) { answer = tempGamma; }
-    void setTempGamma(const FloatArray &v) { tempGamma = v; }
+    const IntArray &giveTempActiveConditionMap() { return tempActiveConditionMap; }
+    void setTempActiveConditionMap(IntArray v) { tempActiveConditionMap = std :: move(v); }
+    const FloatArray &giveTempGamma() { return tempGamma; }
+    void setTempGamma(FloatArray v) { tempGamma = std :: move(v); }
 
     // definition
     virtual const char *giveClassName() const { return "MPlasticMaterial2Status"; }
@@ -361,9 +361,9 @@ protected:
                                          GaussPoint *gp,
                                          TimeStep *tStep);
 
-    virtual void give1dFiberStiffMtrx(FloatMatrix &answer,
-                                      MatResponseMode, GaussPoint *gp,
-                                      TimeStep *tStep);
+    virtual void giveFiberStiffMtrx(FloatMatrix &answer,
+                                    MatResponseMode, GaussPoint *gp,
+                                    TimeStep *tStep);
 
 protected:
     long getPopulationSignature(IntArray &mask);

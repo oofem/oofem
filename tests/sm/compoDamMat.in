@@ -1,6 +1,7 @@
 compoDamMat.out
 test of orthotropic damage material on one LSpace element stretched in the y direction
-NonLinearStatic nsteps 47 controlmode 1 rtolv 0.00001 MaxIter 30 stiffmode 0 deltaT 1.0 nmodules 0
+NonLinearStatic nsteps 47 controlmode 1 rtolv 0.00001 MaxIter 30 stiffmode 0 deltaT 1.0 nmodules 1
+errorcheck
 #vtk tstep_all domain_all primvars 1 1 vars 3 1 4 13
 #hom tstep_all scale 1.
 domain 3d
@@ -26,12 +27,11 @@ PiecewiseLinFunction 2 nPoints 7 t 7 0.0 10.0 20.0 30.0 40.0 50.0 55.0 f(t) 7 0.
 #
 #
 #%BEGIN_CHECK% tolerance 1.e-5
-#TIME
 ## check element no. 1 strain vector
-#ELEMENT tStep 1 number 1 gp 1 keyword "strains" component 2  value 7.000000e-01
+#ELEMENT tStep 2 number 1 gp 1 keyword 4 component 2  value 7.000000e-01
 ## check element no. 1 stress vector
-#ELEMENT tStep 1 number 1 gp 1 keyword "stresses" component 2  value 1.4000e+00
-#ELEMENT tStep 4 number 1 gp 1 keyword "stresses" component 2  value 5.6000e+00
-#ELEMENT tStep 45 number 1 gp 1 keyword "stresses" component 2  value 1.7645e-01
+#ELEMENT tStep 2 number 1 gp 1 keyword 1 component 2  value 1.4000e+00
+#ELEMENT tStep 5 number 1 gp 1 keyword 1 component 2  value 5.6000e+00
+#ELEMENT tStep 46 number 1 gp 1 keyword 1 component 2  value 1.7645e-01
 ##
 #%END_CHECK%

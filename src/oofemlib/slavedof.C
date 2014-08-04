@@ -48,7 +48,7 @@ SlaveDof :: SlaveDof(int n, DofManager *aNode, DofIDItem id) : Dof(n, aNode, id)
 
 
 void
-SlaveDof :: initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const IntArray &mstrDofID, const FloatArray &mstrContribution)
+SlaveDof :: initialize(const IntArray &masterNodes, const IntArray &mstrDofID, const FloatArray &mstrContribution)
 {
     int id;
     bool idSame = false;
@@ -56,16 +56,12 @@ SlaveDof :: initialize(int cntOfMstrDfMngr, const IntArray &masterNodes, const I
 
     if ( mstrDofID.isEmpty() ) {
         idSame = true;
-    } else if ( mstrDofID.giveSize() < cntOfMstrDfMngr ) {
-        OOFEM_ERROR("mstrDofID.giveSize %d != cntOfMstrDfMngr %d", mstrDofID.giveSize(), cntOfMstrDfMngr);
-    }
-
-    if ( mstrContribution.giveSize() < cntOfMstrDfMngr ) {
-        OOFEM_ERROR("mstrContribution.giveSize %d != cntOfMstrDfMngr %d", mstrContribution.giveSize(), cntOfMstrDfMngr);
+    } else if ( mstrDofID.giveSize() != mstrContribution.giveSize() ) {
+        OOFEM_ERROR("mstrDofID.giveSize %d != mstrContribution.giveSize %d", mstrDofID.giveSize(), mstrContribution.giveSize());
     }
 
 
-    countOfMasterDofs  = cntOfMstrDfMngr;
+    countOfMasterDofs  = mstrContribution.giveSize();
     masterContribution = mstrContribution;
 
     masterDofMans.resize(countOfMasterDofs);

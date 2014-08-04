@@ -38,32 +38,33 @@
 #include "xfem/xfemmanager.h"
 #include "domain.h"
 #include "connectivitytable.h"
+#include "spatiallocalizer.h"
+#include "element.h"
 
 namespace oofem {
 REGISTER_EnrichmentFront(EnrFrontReduceFront)
 
-void EnrFrontReduceFront :: MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo)
+void EnrFrontReduceFront :: MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo)
 {
-	// Remove nodes touched by the crack tip
-	Domain &d = * ( ixFemMan.giveDomain() );
+    mTipInfo = iTipInfo;
 
-	for(size_t tipInd = 0; tipInd < iTipInfo.size(); tipInd++) {
-		//    	printf("iTipInfo[tipInd].mElIndex: %d\n", iTipInfo[tipInd].mElIndex );
+    // Remove nodes touched by the crack tip
+    Domain &d = * ( ixFemMan.giveDomain() );
 
-		Element *el = d.giveElement(iTipInfo[tipInd].mElIndex);
+    Element *el = d.giveSpatialLocalizer()->giveElementContainingPoint(iTipInfo.mGlobalCoord);
 
-		const IntArray & elNodes = el->giveDofManArray();
+    if(el != NULL) {
+        const IntArray &elNodes = el->giveDofManArray();
 
-		for(int i = 1; i <= elNodes.giveSize(); i++) {
-			ioNodeEnrMarker[ elNodes.at(i)-1 ] = 0;
-		}
-	}
+        for ( int i = 1; i <= elNodes.giveSize(); i++ ) {
+            ioNodeEnrMarkerMap [ elNodes.at(i) ] = NodeEnr_NONE;
+        }
+    }
 }
 
 void EnrFrontReduceFront :: giveInputRecord(DynamicInputRecord &input)
 {
-	int number = 1;
-	input.setRecordKeywordField(this->giveInputRecordName(), number);
+    int number = 1;
+    input.setRecordKeywordField(this->giveInputRecordName(), number);
 }
-
 } // end namespace oofem

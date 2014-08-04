@@ -34,19 +34,19 @@
 
 #ifndef qplanestressgrad_h
 #define qplanestressgrad_h
-#include "nlstructuralelement.h"
-#include "gaussintegrationrule.h"
-#include "graddpelement.h"
+
 #include "qplanstrss.h"
-#include "fei2dquadlin.h"
+#include "graddpelement.h"
 
 #define _IFT_QPlaneStressGrad_Name "qplanestressgrad"
 
 namespace oofem {
+class FEI2dQuadLin;
+
 class QPlaneStressGrad : public QPlaneStress2d, public GradDpElement
 {
 protected:
-    static FEI2dQuadLin interpolation;
+    static FEI2dQuadLin interpolation_lin;
 
 public:
     QPlaneStressGrad(int n, Domain * d);
@@ -66,7 +66,7 @@ protected:
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0) { GradDpElement :: giveInternalForcesVector(answer, tStep, useUpdatedGpRecord); }
     virtual void computeForceLoadVector(FloatArray &answer, TimeStep *tStep, ValueModeType mode) { GradDpElement :: computeForceLoadVector(answer, tStep, mode); }
     virtual void computeGaussPoints();
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual StructuralElement *giveStructuralElement() { return this; }
     virtual NLStructuralElement *giveNLStructuralElement() { return this; }
 };

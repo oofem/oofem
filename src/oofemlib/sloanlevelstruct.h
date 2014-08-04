@@ -36,7 +36,6 @@
 #define sloanlevelstruct_h
 
 #include "oofemcfg.h"
-#include "alist.h"
 #include "intarray.h"
 
 namespace oofem {
@@ -59,7 +58,7 @@ private:
     /// End node of root structure
     int End;
     /// Data representation of structure: List of arrays, one array for each level.
-    AList< IntArray >Structure;
+    std::vector< IntArray >Structure;
     /// Depth of structure defined as number of levels
     int Depth;
     /// Width of structure defined as max number of nodes in all levels.
@@ -67,7 +66,7 @@ private:
 
 public:
     /// Creates new level structure assignment to graph, with root being the root node.
-    SloanLevelStructure(SloanGraph * graph, int root) : Structure(0)
+    SloanLevelStructure(SloanGraph * graph, int root) : Structure()
     {
         Graph = graph;
         Root = root;
@@ -105,7 +104,7 @@ public:
         return Width;
     }
     /// Returns the i-th level of receiver.
-    IntArray *giveLevel(int num);
+    IntArray &giveLevel(int num);
     /// Sets the end node of receiver.
     void setEnd(int end) { End = end; }
     /// Returns the end node of receiver.

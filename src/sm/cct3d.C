@@ -102,7 +102,7 @@ CCTPlate3d :: giveNodeCoordinates(double &x1, double &x2, double &x3,
 
 
 void
-CCTPlate3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+CCTPlate3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
@@ -116,17 +116,14 @@ CCTPlate3d :: computeLocalCoordinates(FloatArray &answer, const FloatArray &coor
 {
     // rotate the input point Coordinate System into the element CS
     FloatArray inputCoords_ElCS;
-    FloatArray lc [ 3 ], llc;
-    const FloatArray *lcptr [ 3 ] = {
-        lc, lc + 1, lc + 2
-    };
+    std::vector< FloatArray > lc(3);
+    FloatArray llc;
     this->giveLocalCoordinates( inputCoords_ElCS, const_cast< FloatArray & >(coords) );
     for ( int _i = 0; _i < 3; _i++ ) {
         this->giveLocalCoordinates( lc [ _i ], * this->giveNode(_i + 1)->giveCoordinates() );
     }
-    FEIVertexListGeometryWrapper wr(3, lcptr);
     FEI2dTrLin _interp(1, 2);
-    bool inplane = _interp.global2local(llc, inputCoords_ElCS, wr) > 0;
+    bool inplane = _interp.global2local(llc, inputCoords_ElCS, FEIVertexListGeometryWrapper(lc)) > 0;
     answer.resize(2);
     answer.at(1) = inputCoords_ElCS.at(1);
     answer.at(2) = inputCoords_ElCS.at(2);
@@ -328,8 +325,7 @@ CCTPlate3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
         return 1;
     } else {
-        answer.clear();
-        return 0;
+        return NLStructuralElement :: giveIPValue(answer, gp, type, tStep);
     }
 }
 
@@ -364,7 +360,6 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
 //  different coordinate system in each node)
 {
     double dens, dV, load;
-    GaussPoint *gp = NULL;
     FloatArray force;
     FloatMatrix T;
 
@@ -379,7 +374,7 @@ CCTPlate3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeSte
     forLoad->computeComponentArrayAt(force, tStep, mode);
 
     if ( force.giveSize() ) {
-        gp = irule.getIntegrationPoint(0);
+        GaussPoint *gp = irule.getIntegrationPoint(0);
 
         dens = this->giveStructuralCrossSection()->give('d', gp); // constant density assumed
         dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp); // constant thickness assumed
@@ -416,7 +411,7 @@ CCTPlate3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint
 {
     int i, j;
     FloatMatrix ne;
-    this->computeNmatrixAt(* sgp->giveCoordinates(), ne);
+    this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), ne);
 
     answer.resize(6, 18);
     answer.zero();
@@ -475,7 +470,7 @@ CCTPlate3d :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 CCTPlate3d :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveCoordinates() );
+    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
 }
 
 
@@ -489,17 +484,12 @@ void
 CCTPlate3d :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
-    int i, j;
-    GaussPoint *gp;
     FloatArray v;
 
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
-    for ( i = 0; i < numberOfIntegrationRules; i++ ) {
-        for ( j = 0; j < integrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = integrationRulesArray [ i ]->getIntegrationPoint(j);
-
-            // gp   -> printOutputAt(file,tStep) ;
+    for ( int i = 0; i < (int)integrationRulesArray.size(); i++ ) {
+        for ( GaussPoint *gp: *integrationRulesArray [ i ] ) {
 
             fprintf( file, "  GP %2d.%-2d :", i + 1, gp->giveNumber() );
 

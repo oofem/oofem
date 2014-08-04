@@ -63,7 +63,7 @@ public:
 
     virtual int computeNumberOfDofs() { return 18; }
 
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Q9PlaneStress2d_Name; }
@@ -79,11 +79,8 @@ public:
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep);
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

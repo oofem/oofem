@@ -1,0 +1,7 @@
+#%BEGIN_CHECK% tolerance 1.e-8
+#NODE tStep 5 number 1 dof 3 unknown v value 0.0
+#NODE tStep 5 number 2 dof 3 unknown v value 1.25e-3
+#NODE tStep 5 number 3 dof 3 unknown v value 1.475e-1
+#NODE tStep 5 number 3 dof 3 unknown a value 9.5e-2
+#ELEMENT tStep 5 number 2 gp 1 keyword 1 component 1  value 5.e-2
+#%END_CHECK%

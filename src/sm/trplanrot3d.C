@@ -98,7 +98,7 @@ TrPlaneStrRot3d :: giveNodeCoordinates(FloatArray &x, FloatArray &y)
 
 
 void
-TrPlaneStrRot3d :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+TrPlaneStrRot3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
@@ -356,9 +356,8 @@ TrPlaneStrRot3d :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Ti
 void
 TrPlaneStrRot3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-    int i, j;
     FloatMatrix ne;
-    this->computeNmatrixAt(* sgp->giveCoordinates(), ne);
+    this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), ne);
 
     answer.resize(6, 18);
     answer.zero();
@@ -369,8 +368,8 @@ TrPlaneStrRot3d :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, Gauss
         0, 1, 5, 6, 7, 11, 12, 13, 17
     };
 
-    for ( i = 0; i < 3; i++ ) {
-        for ( j = 0; j < 9; j++ ) {
+    for ( int i = 0; i < 3; i++ ) {
+        for ( int j = 0; j < 9; j++ ) {
             answer(ri [ i ], ci [ j ]) = ne(i, j);
         }
     }
@@ -417,7 +416,7 @@ TrPlaneStrRot3d :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 TrPlaneStrRot3d :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveCoordinates() );
+    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
 }
 
 
@@ -436,11 +435,8 @@ TrPlaneStrRot3d :: printOutputAt(FILE *file, TimeStep *tStep)
 
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        for ( int j = 0; j < integrationRulesArray [ i ]->giveNumberOfIntegrationPoints(); j++ ) {
-            GaussPoint *gp = integrationRulesArray [ i ]->getIntegrationPoint(j);
-
-            // gp   -> printOutputAt(file,tStep) ;
+    for ( int i = 0; i < (int)integrationRulesArray.size(); i++ ) {
+        for ( GaussPoint *gp: *integrationRulesArray [ i ] ) {
 
             fprintf( file, "  GP %2d.%-2d :", i + 1, gp->giveNumber() );
 

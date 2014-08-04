@@ -113,13 +113,13 @@ public:
 
 
     void letTempDamageBe(double v) { tempDamage = v; }
-    void letTempEffectiveMandelTractionBe(const FloatArray &v) { tempQEffective = v; }
-    void letTempMaterialJumpBe(const FloatArray &v) { tempMaterialJump = v; }
+    void letTempEffectiveMandelTractionBe(FloatArray v) { tempQEffective = std :: move(v); }
+    void letTempMaterialJumpBe(FloatArray v) { tempMaterialJump = std :: move(v); }
 
-    void letTempInverseDefGradBe(const FloatMatrix &v) { tempFInv = v; }
-    void letTempRotationMatrix(const FloatMatrix &v) { tempRot = v; }
-    void letTempIepBe(const FloatMatrix &v) { Iep = v; }
-    void letTempAlphavBe(const FloatArray &v) { alphav = v; }
+    void letTempInverseDefGradBe(FloatMatrix v) { tempFInv = std :: move(v); }
+    void letTempRotationMatrix(FloatMatrix v) { tempRot = std :: move(v); }
+    void letTempIepBe(FloatMatrix v) { Iep = std :: move(v); }
+    void letTempAlphavBe(FloatArray v) { alphav = std :: move(v); }
 
 
 

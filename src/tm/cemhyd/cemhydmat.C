@@ -353,13 +353,8 @@ CemhydMat :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType t
 int
 CemhydMat :: initMaterial(Element *element)
 {
-    IntegrationRule *iRule;
-    GaussPoint *gp;
-    CemhydMatStatus *ms;
-
-    iRule = element->giveDefaultIntegrationRulePtr();
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *element->giveDefaultIntegrationRulePtr() ) {
+        CemhydMatStatus *ms;
         if ( !MasterCemhydMatStatus && !eachGP ) {
             ms = new CemhydMatStatus(1, domain, gp, NULL, this, 1);
             MasterCemhydMatStatus = ms;
@@ -377,14 +372,9 @@ CemhydMat :: initMaterial(Element *element)
 
 void CemhydMat :: clearWeightTemperatureProductVolume(Element *element)
 {
-    IntegrationRule *iRule;
-    GaussPoint *gp;
     CemhydMatStatus *ms;
-    int i;
-    iRule = element->giveDefaultIntegrationRulePtr();
 
-    for ( i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *element->giveDefaultIntegrationRulePtr() ) {
         ms = static_cast< CemhydMatStatus * >( this->giveStatus(gp) );
         ms->setAverageTemperatureVolume(0.0, 0.0);
     }
@@ -396,8 +386,7 @@ void CemhydMat :: storeWeightTemperatureProductVolume(Element *element, TimeStep
     IntegrationRule *iRule = element->giveDefaultIntegrationRulePtr();
 
     if ( !eachGP ) {
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(i);
+        for ( GaussPoint *gp: *iRule ) {
             //when more GPs are lumped to a master GP
             double dV = element->computeVolumeAround(gp);
             element->giveIPValue(vecTemperature, gp, IST_Temperature, tStep);
@@ -4231,7 +4220,7 @@ void CemhydMatStatus :: init()
         /* Read in values for slag characteristics */
 
         if ( ( slagfile = fopen("slagchar.dat", "r") ) == NULL ) {
-            OOFEM_ERROR("Slag file can not be opened\n");
+            OOFEM_ERROR("Slag file can not be opened");
         }
 
 

@@ -112,11 +112,10 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
     std :: list< localIntegrationRecord > *iList;
 
     Element *ielem;
-    GaussPoint *jGp;
     IntegrationRule *iRule;
 
     if ( !statusExt ) {
-        OOFEM_SIMPLE_ERROR("NonlocalMaterialExtensionInterface::buildNonlocalPointTable : local material status encountered");
+        OOFEM_ERROR("local material status encountered");
     }
 
     // test for bounded support - if no bounded support, the nonlocal point table is
@@ -135,8 +134,8 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
 
     FloatArray gpCoords, jGpCoords;
     SpatialLocalizer :: elementContainerType elemSet;
-    if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
-        OOFEM_SIMPLE_ERROR("NonlocalMaterialExtensionInterface::buildNonlocalPointTable: computeGlobalCoordinates of target failed");
+    if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
+        OOFEM_ERROR("computeGlobalCoordinates of target failed");
     }
 
     //If nonlocal variation is set to the distance-based approach, a new nonlocal radius
@@ -162,9 +161,8 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
         ielem = this->giveDomain()->giveElement(elindx);
         if ( regionMap.at( ielem->giveRegionNumber() ) == 0 ) {
             iRule = ielem->giveDefaultIntegrationRulePtr();
-            for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                jGp = iRule->getIntegrationPoint(j);
-                if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
+            for ( GaussPoint *jGp: *iRule ) {
+                if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
                     weight = this->computeWeightFunction(gpCoords, jGpCoords);
 
                     //manipulate weights for a special averaging of strain (OFF by default)
@@ -187,7 +185,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
                         integrationVolume += elemVolume;
                     }
                 } else {
-                    OOFEM_SIMPLE_ERROR("NonlocalMaterialExtensionInterface::buildNonlocalPointTable: computeGlobalCoordinates of target failed");
+                    OOFEM_ERROR("computeGlobalCoordinates of target failed");
                 }
             }
         }
@@ -203,8 +201,7 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
      * ielem = this->giveDomain()->giveElement(i);
      * if (regionMap.at(ielem->giveRegionNumber()) == 0) {
      * iRule = ielem->giveDefaultIntegrationRulePtr ();
-     * for (j=0 ; j < iRule->giveNumberOfIntegrationPoints() ; j++) {
-     * jGp = iRule->getIntegrationPoint(j) ;
+     * for (GaussPoint *jGp: *iRule ) {
      * if (ielem->computeGlobalCoordinates (jGpCoords, *(jGp->giveCoordinates()))) {
      *   weight = this->computeWeightFunction (gpCoords, jGpCoords);
      *   if (weight > NonlocalMaterialZeroWeight) {
@@ -234,11 +231,10 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
     std :: list< localIntegrationRecord > *iList;
 
     Element *ielem;
-    GaussPoint *jGp;
     IntegrationRule *iRule;
 
     if ( !statusExt ) {
-        OOFEM_SIMPLE_ERROR("NonlocalMaterialExtensionInterface::buildNonlocalPointTable : local material status encountered");
+        OOFEM_ERROR("local material status encountered");
     }
 
     // test for bounded support - if no bounded support, the nonlocal point table is
@@ -258,8 +254,8 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
     } else {
         FloatArray gpCoords, jGpCoords;
         int _size = contributingElems->giveSize();
-        if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
-            OOFEM_SIMPLE_ERROR("NonlocalMaterialExtensionInterface::buildNonlocalPointTable: computeGlobalCoordinates of target failed");
+        if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
+            OOFEM_ERROR("computeGlobalCoordinates of target failed");
         }
 
         //If nonlocal variation is set to the distance-based approach calculates  new nonlocal radius
@@ -275,9 +271,8 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
             ielem = this->giveDomain()->giveElement( contributingElems->at(_e) );
             if ( regionMap.at( ielem->giveRegionNumber() ) == 0 ) {
                 iRule = ielem->giveDefaultIntegrationRulePtr();
-                for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-                    jGp = iRule->getIntegrationPoint(j);
-                    if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveCoordinates() ) ) ) {
+                for ( GaussPoint *jGp: *iRule ) {
+                    if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
                         weight = this->computeWeightFunction(gpCoords, jGpCoords);
 
                         //manipulate weights for a special averaging of strain (OFF by default)
@@ -297,7 +292,7 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
                             integrationVolume += elemVolume;
                         }
                     } else {
-                        OOFEM_SIMPLE_ERROR("NonlocalMaterialExtensionInterface::buildNonlocalPointTable: computeGlobalCoordinates of target failed");
+                        OOFEM_ERROR("computeGlobalCoordinates of target failed");
                     }
                 }
             }
@@ -326,7 +321,7 @@ NonlocalMaterialExtensionInterface :: giveIPIntegrationList(GaussPoint *gp)
                                                                   giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
 
     if ( !statusExt ) {
-        OOFEM_SIMPLE_ERROR("NonlocalMaterialExtensionInterface::givIPIntegrationList : local material status encountered");
+        OOFEM_ERROR("local material status encountered");
     }
 
     if ( statusExt->giveIntegrationDomainList()->empty() ) {
@@ -344,7 +339,7 @@ NonlocalMaterialExtensionInterface :: endIPNonlocalAverage(GaussPoint *gp)
                                                                   giveInterface(NonlocalMaterialStatusExtensionInterfaceType) );
 
     if ( !statusExt ) {
-        OOFEM_SIMPLE_ERROR("NonlocalMaterialExtensionInterface::givIPIntegrationList : local material status encountered");
+        OOFEM_ERROR("local material status encountered");
     }
 
     if ( ( !this->hasBoundedSupport() ) || ( !permanentNonlocTableFlag ) ) {
@@ -382,7 +377,7 @@ NonlocalMaterialExtensionInterface :: computeWeightFunction(double distance)
     {
         /*
          * if (this->domain->giveNumberOfSpatialDimensions() != 1){
-         * OOFEM_ERROR("this type of weight function can be used for a 1D problem only\n");
+         * OOFEM_ERROR("this type of weight function can be used for a 1D problem only");
          * }
          */
         iwf = giveIntegralOfWeightFunction(2); // indeed
@@ -404,7 +399,7 @@ NonlocalMaterialExtensionInterface :: computeWeightFunction(double distance)
         return 1. / iwf;
 
     default:
-        OOFEM_SIMPLE_WARNING("NonlocalMaterialExtensionInterface :: computeWeightFunction - unknown type of weight function %d", weightFun);
+        OOFEM_WARNING("unknown type of weight function %d", weightFun);
         return 0.0;
     }
 }
@@ -503,7 +498,7 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     if ( ir->hasField(_IFT_NonlocalMaterialExtensionInterface_regionmap) ) {
         IR_GIVE_FIELD(ir, regionMap, _IFT_NonlocalMaterialExtensionInterface_regionmap);
         if ( regionMap.giveSize() != this->giveDomain()->giveNumberOfRegions() ) {
-            OOFEM_SIMPLE_ERROR("NonlocalMaterialExtensionInterface::instanciateFrom: regionMap size mismatch");
+            OOFEM_ERROR("regionMap size mismatch");
         }
     } else {
         regionMap.zero();

@@ -94,7 +94,7 @@ public:
     virtual void times(const FloatArray &x, FloatArray &answer) const;
     virtual void timesT(const FloatArray &x, FloatArray &answer) const { this->times(x, answer); }
     virtual void times(double x);
-    virtual int buildInternalStructure(EngngModel *, int, EquationID, const UnknownNumberingScheme &);
+    virtual int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &);
     /**
      * Allocates and builds internal structure according to given
      * array holding addresses of diagonal members values (adr).

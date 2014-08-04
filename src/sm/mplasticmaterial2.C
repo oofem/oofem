@@ -235,8 +235,8 @@ MPlasticMaterial2 :: closestPointReturn(FloatArray &answer,
 
 huhu: //label for goto
 
-    status->givePlasticStrainVector(plasticStrainVectorR);
-    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+    plasticStrainVectorR = status->givePlasticStrainVector();
+    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
 
     dgamma.resize(nsurf);
     dgamma.zero();
@@ -435,10 +435,10 @@ huhu: //label for goto
                                 goto huhu;
                             } else {
                                 printf("ep:");
-                                status->givePlasticStrainVector(plasticStrainVectorR);
+                                plasticStrainVectorR = status->givePlasticStrainVector();
                                 plasticStrainVectorR.printYourself();
                                 printf("kp:");
-                                status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+                                strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
                                 strainSpaceHardeningVariables.printYourself();
                                 elasticStrainVectorR = totalStrain;
                                 elasticStrainVectorR.subtract(plasticStrainVectorR);
@@ -483,8 +483,8 @@ huhu: //label for goto
                          * }
                          * }
                          */
-                        status->givePlasticStrainVector(plasticStrainVectorR);
-                        status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+                        plasticStrainVectorR = status->givePlasticStrainVector();
+                        strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
                         elasticStrainVectorR = totalStrain;
                         elasticStrainVectorR.subtract(plasticStrainVectorR);
                         this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, tStep);
@@ -614,8 +614,8 @@ huhu: //label for goto
                             }
                         }
 
-                        status->givePlasticStrainVector(plasticStrainVectorR);
-                        status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+                        plasticStrainVectorR = status->givePlasticStrainVector();
+                        strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
                         elasticStrainVectorR = totalStrain;
                         elasticStrainVectorR.subtract(plasticStrainVectorR);
                         this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, tStep);
@@ -670,7 +670,7 @@ huhu: //label for goto
 
             if ( hasHardening ) {
                 this->computeStrainHardeningVarsIncrement(dkappa, gp, fullStressVector, gamma, helpVector2, activeConditionMap);
-                status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+                strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
                 strainSpaceHardeningVariables.add(dkappa);
             }
 
@@ -732,10 +732,10 @@ huhu: //label for goto
                             goto huhu;
                         } else {
                             printf("ep:");
-                            status->givePlasticStrainVector(plasticStrainVectorR);
+                            plasticStrainVectorR = status->givePlasticStrainVector();
                             plasticStrainVectorR.printYourself();
                             printf("kp:");
-                            status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+                            strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
                             strainSpaceHardeningVariables.printYourself();
                             elasticStrainVectorR = totalStrain;
                             elasticStrainVectorR.subtract(plasticStrainVectorR);
@@ -775,10 +775,10 @@ huhu: //label for goto
                                     goto huhu;
                                 } else {
                                     printf("ep:");
-                                    status->givePlasticStrainVector(plasticStrainVectorR);
+                                    plasticStrainVectorR = status->givePlasticStrainVector();
                                     plasticStrainVectorR.printYourself();
                                     printf("kp:");
-                                    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+                                    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
                                     strainSpaceHardeningVariables.printYourself();
                                     elasticStrainVectorR = totalStrain;
                                     elasticStrainVectorR.subtract(plasticStrainVectorR);
@@ -809,8 +809,8 @@ huhu: //label for goto
                 if ( restart ) {
                     //fprintf(stderr,"===>LAST RESORT<====");
 
-                    status->givePlasticStrainVector(plasticStrainVectorR);
-                    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+                    plasticStrainVectorR = status->givePlasticStrainVector();
+                    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
                     elasticStrainVectorR = totalStrain;
                     elasticStrainVectorR.subtract(plasticStrainVectorR);
                     this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, tStep);
@@ -872,8 +872,8 @@ MPlasticMaterial2 :: cuttingPlaneReturn(FloatArray &answer,
     }
 
 huhu: //label for goto
-    status->givePlasticStrainVector(plasticStrainVectorR);
-    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+    plasticStrainVectorR = status->givePlasticStrainVector();
+    strainSpaceHardeningVariables =  status->giveStrainSpaceHardeningVars();
 
 
     dgamma.resize(nsurf);
@@ -1021,8 +1021,8 @@ huhu: //label for goto
                             }
                         }
 
-                        status->givePlasticStrainVector(plasticStrainVectorR);
-                        status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+                        plasticStrainVectorR = status->givePlasticStrainVector();
+                        strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
                         elasticStrainVectorR = totalStrain;
                         elasticStrainVectorR.subtract(plasticStrainVectorR);
                         this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, tStep);
@@ -1061,7 +1061,7 @@ huhu: //label for goto
 
             if ( hasHardening ) {
                 this->computeStrainHardeningVarsIncrement(dkappa, gp, fullStressVector, gamma, helpVector, activeConditionMap);
-                status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+                strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
                 strainSpaceHardeningVariables.add(dkappa);
             }
 
@@ -1128,8 +1128,8 @@ huhu: //label for goto
 
 
 
-                    status->givePlasticStrainVector(plasticStrainVectorR);
-                    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+                    plasticStrainVectorR = status->givePlasticStrainVector();
+                    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
                     elasticStrainVectorR = totalStrain;
                     elasticStrainVectorR.subtract(plasticStrainVectorR);
                     this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, tStep);
@@ -1191,8 +1191,8 @@ huhu: //label for goto
                 if ( restart ) {
                     //fprintf(stderr,"===>LAST RESORT<====");
 
-                    status->givePlasticStrainVector(plasticStrainVectorR);
-                    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+                    plasticStrainVectorR = status->givePlasticStrainVector();
+                    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
                     elasticStrainVectorR = totalStrain;
                     elasticStrainVectorR.subtract(plasticStrainVectorR);
                     this->computeTrialStressIncrement(fullStressVector, gp, elasticStrainVectorR, tStep);
@@ -1250,7 +1250,7 @@ MPlasticMaterial2 :: computeResidualVector(FloatArray &answer, GaussPoint *gp, c
     size = plasticStrainVectorR.giveSize();
 
     answer.resize(size);
-    status->givePlasticStrainVector(oldPlasticStrainVectorR);
+    oldPlasticStrainVectorR = status->givePlasticStrainVector();
 
     for ( int i = 1; i <= size; i++ ) {
         answer.at(i) = oldPlasticStrainVectorR.at(i) - plasticStrainVectorR.at(i);
@@ -1379,8 +1379,8 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     }
 
     // ask for plastic consistency parameter
-    status->giveTempGamma(gamma);
-    status->giveTempActiveConditionMap(activeConditionMap);
+    gamma = status->giveTempGamma();
+    activeConditionMap = status->giveTempActiveConditionMap();
     //
     // check for elastic cases
     //
@@ -1407,7 +1407,7 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
 
     stressVector = status->giveTempStressVector();
     StructuralMaterial :: giveFullSymVectorForm( fullStressVector, stressVector, gp->giveMaterialMode() );
-    status->giveTempStrainSpaceHardeningVarsVector(strainSpaceHardeningVariables);
+    strainSpaceHardeningVariables = status->giveTempStrainSpaceHardeningVarsVector();
 
     //
     // compute consistent moduli
@@ -1534,8 +1534,8 @@ MPlasticMaterial2 :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     }
 
     // ask for plastic consistency parameter
-    status->giveTempGamma(gamma);
-    status->giveTempActiveConditionMap(activeConditionMap);
+    gamma = status->giveTempGamma();
+    activeConditionMap = status->giveTempActiveConditionMap();
     //
     // check for elastic cases
     //
@@ -1561,7 +1561,7 @@ MPlasticMaterial2 :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
 
     stressVector = status->giveStressVector();
     StructuralMaterial :: giveFullSymVectorForm( fullStressVector, stressVector, gp->giveMaterialMode() );
-    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
     strSize = elasticModuli.giveNumberOfRows();
 
     //compute gmatInv
@@ -1844,10 +1844,10 @@ MPlasticMaterial2 :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 }
 
 void
-MPlasticMaterial2 :: give1dFiberStiffMtrx(FloatMatrix &answer,
-                                          MatResponseMode mode,
-                                          GaussPoint *gp,
-                                          TimeStep *tStep)
+MPlasticMaterial2 :: giveFiberStiffMtrx(FloatMatrix &answer,
+                                        MatResponseMode mode,
+                                        GaussPoint *gp,
+                                        TimeStep *tStep)
 //
 // returns receiver's 1dFiber
 // (1dFiber ==> sigma_y = sigma_z = tau_yz = 0.)
@@ -1873,15 +1873,14 @@ MPlasticMaterial2 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSta
 {
     MPlasticMaterial2Status *status = static_cast< MPlasticMaterial2Status * >( this->giveStatus(gp) );
     if ( type == IST_PlasticStrainTensor ) {
-        FloatArray ep;
-        status->givePlasticStrainVector(ep);
+        const FloatArray &ep = status->givePlasticStrainVector();
         ///@todo Fill in correct full form values here! This just adds zeros!
         StructuralMaterial :: giveFullSymVectorForm( answer, ep, gp->giveMaterialMode() );
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        FloatArray st(6), s;
+        FloatArray st;
 
-        status->givePlasticStrainVector(s);
+        const FloatArray &s = status->givePlasticStrainVector();
 
         ///@todo Fill in correct full form values here! This just adds zeros!
         StructuralMaterial :: giveFullSymVectorForm( st, s, gp->giveMaterialMode() );

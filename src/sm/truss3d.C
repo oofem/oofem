@@ -54,7 +54,7 @@ REGISTER_Element(Truss3d);
 FEI3dLineLin Truss3d :: interp;
 
 Truss3d :: Truss3d(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain)
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 2;
 }
@@ -63,9 +63,7 @@ Truss3d :: Truss3d(int n, Domain *aDomain) :
 Interface *
 Truss3d :: giveInterface(InterfaceType interface)
 {
-    if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
-    } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
+    if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return static_cast< ZZNodalRecoveryModelInterface * >(this);
     } else if ( interface == NodalAveragingRecoveryModelInterfaceType ) {
         return static_cast< NodalAveragingRecoveryModelInterface * >(this);
@@ -85,13 +83,6 @@ Truss3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int no
 
 
 void
-Truss3d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
-
-void
 Truss3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 // Returns linear part of geometrical equations of the receiver at gp.
@@ -99,7 +90,7 @@ Truss3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 {
     FloatMatrix dN;
-    this->interp.evaldNdx( dN, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dN, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 6);
     answer.at(1, 1) = dN.at(1, 1);
@@ -115,9 +106,8 @@ void
 Truss3d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
@@ -161,11 +151,7 @@ Truss3d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 {
     FloatArray n;
     this->interp.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
-
-    answer.resize(3, 6);
-    answer.zero();
-    answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = n.at(1);
-    answer.at(1, 4) = answer.at(2, 5) = answer.at(3, 6) = n.at(2);
+    answer.beNMatrixOf(n, 3);
 }
 
 
@@ -174,7 +160,7 @@ Truss3d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double detJ = this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     double weight  = gp->giveWeight();
     return detJ *weight *this->giveCrossSection()->give(CS_Area, gp);
 }
@@ -221,7 +207,7 @@ Truss3d :: initializeFrom(InputRecord *ir)
 
 
 void
-Truss3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Truss3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w};
 }
@@ -230,7 +216,7 @@ Truss3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
 void
 Truss3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
-    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 
@@ -264,7 +250,7 @@ Truss3d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     }
 
     double weight = gp->giveWeight();
-    return this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) * weight;
+    return this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) * weight;
 }
 
 

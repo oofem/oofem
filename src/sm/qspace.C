@@ -49,7 +49,7 @@ REGISTER_Element(QSpace);
 
 FEI3dHexaQuad QSpace :: interpolation;
 
-QSpace :: QSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+QSpace :: QSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 20;
 }
@@ -82,7 +82,7 @@ QSpace :: giveMaterialOrientationAt(FloatArray &x, FloatArray &y, FloatArray &z,
 
 
 void
-QSpace :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+QSpace :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w};
 }
@@ -104,7 +104,7 @@ QSpace :: computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoin
         FloatArray x, y, z;
         FloatArray rotStrain, s;
 
-        this->giveMaterialOrientationAt( x, y, z, * gp->giveCoordinates() );
+        this->giveMaterialOrientationAt( x, y, z, * gp->giveNaturalCoordinates() );
         // Transform from global c.s. to material c.s.
 #if 0
         rotStrain = {
@@ -158,7 +158,7 @@ QSpace :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode
         FloatArray x, y, z;
         FloatMatrix Q;
 
-        this->giveMaterialOrientationAt( x, y, z, * gp->giveCoordinates() );
+        this->giveMaterialOrientationAt( x, y, z, * gp->giveNaturalCoordinates() );
 
 #if 0
         Q = {
@@ -225,7 +225,7 @@ double
 QSpace :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
-    double determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     double weight      = gp->giveWeight();
 
     return ( determinant * weight );
@@ -244,9 +244,8 @@ void
 QSpace :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(1);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -261,7 +260,7 @@ QSpace :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 60);
     answer.zero();
@@ -288,7 +287,7 @@ QSpace :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 60);
     answer.zero();
@@ -324,7 +323,7 @@ void
 QSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     FloatArray n;
-    interpolation.surfaceEvalN( n, iSurf, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.surfaceEvalN( n, iSurf, * sgp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 3);
 }
 
@@ -349,7 +348,7 @@ double
 QSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
-    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     volume = determinant * weight;
@@ -360,7 +359,7 @@ QSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 QSpace :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf)
 {
-    interpolation.surfaceLocal2global( answer, iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.surfaceLocal2global( answer, iSurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 int
@@ -503,9 +502,4 @@ QSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
     OOFEM_WARNING("IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
-void
-QSpace :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
 } // end namespace oofem

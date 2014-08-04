@@ -109,7 +109,7 @@ public:
 
     virtual int computeNumberOfDofs() { return 9; }
     virtual int computeNumberOfGlobalDofs() { return 18; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     const FloatMatrix *computeGtoLRotationMatrix();
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);

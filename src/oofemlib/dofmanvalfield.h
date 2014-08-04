@@ -112,7 +112,7 @@ public:
     /**
      * Sets the value associated to given dofManager
      */
-    void setDofManValue(int dofMan, const FloatArray &value);
+    void setDofManValue(int dofMan, FloatArray value);
 
     /// @return Class name of the receiver.
     virtual const char *giveClassName() const { return "DofManValueField"; }

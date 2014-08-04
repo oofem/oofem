@@ -1,6 +1,7 @@
 lb01.out
 Patch test of PlaneStress2d elements -> pure compression in x direction
-NonLinearStatic nsteps 3 controllmode 1 rtolv 1.e-3 refloadmode 0
+NonLinearStatic nsteps 3 controllmode 1 rtolv 1.e-3 refloadmode 0 nmodules 1
+errorcheck filename "lb01.oofem.in"
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 18 nelem 10 ncrosssect  1 nmat 1 nbc 2 nic 0 nltf 1
@@ -42,21 +43,21 @@ ConstantFunction 1 f(t) 1.0
 #
 #%BEGIN_CHECK% tolerance 1.e-4
 ## check reactions 
-#REACTION tStep 2 number 1 dof 1 value 5.6243
-#REACTION tStep 2 number 1 dof 2 value 0.0
-#REACTION tStep 2 number 2 dof 1 value 11.251
-#REACTION tStep 2 number 3 dof 1 value 5.6243 
+#REACTION tStep 3 number 1 dof 1 value 5.6243
+#REACTION tStep 3 number 1 dof 2 value 0.0
+#REACTION tStep 3 number 2 dof 1 value 11.251
+#REACTION tStep 3 number 3 dof 1 value 5.6243 
 ## check nodes
-#NODE tStep 2 number 18 dof 1 unknown d value -27.7756346
-#NODE tStep 2 number 18 dof 2 unknown d value 3.91744535
-#NODE tStep 2 number 10 dof 1 unknown d value -1.49018399e+01
-#NODE tStep 2 number 8  dof 1 unknown d value -9.99470307e+00
-#NODE tStep 2 number 12 dof 1 unknown d value -1.49018399e+01
-#NODE tStep 2 number 6 dof 1 unknown d value -5.00246140e+00
+#NODE tStep 3 number 18 dof 1 unknown d value -27.7756346
+#NODE tStep 3 number 18 dof 2 unknown d value 3.91744535
+#NODE tStep 3 number 10 dof 1 unknown d value -1.49018399e+01
+#NODE tStep 3 number 8  dof 1 unknown d value -9.99470307e+00
+#NODE tStep 3 number 12 dof 1 unknown d value -1.49018399e+01
+#NODE tStep 3 number 6 dof 1 unknown d value -5.00246140e+00
 ## check elements
-#ELEMENT tStep 2 number 1 gp 1 keyword "strains" component 1  value -4.9978e+00
-#ELEMENT tStep 2 number 3 gp 1 keyword "strains" component 1  value -5.0000e+00
-#ELEMENT tStep 2 number 5 gp 1 keyword "strains" component 1  value -5.0723e+00
-#ELEMENT tStep 2 number 7 gp 1 keyword "strains" component 1  value -4.7865e+00
-#ELEMENT tStep 2 number 9 gp 1 keyword "strains" component 1  value -3.5410e+00
+#ELEMENT tStep 3 number 1 gp 1 keyword 4 component 1  value -4.9978e+00
+#ELEMENT tStep 3 number 3 gp 1 keyword 4 component 1  value -5.0000e+00
+#ELEMENT tStep 3 number 5 gp 1 keyword 4 component 1  value -5.0723e+00
+#ELEMENT tStep 3 number 7 gp 1 keyword 4 component 1  value -4.7865e+00
+#ELEMENT tStep 3 number 9 gp 1 keyword 4 component 1  value -3.5410e+00
 #%END_CHECK%

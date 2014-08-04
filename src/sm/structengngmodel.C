@@ -60,7 +60,7 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
 {
     IntArray ielemDofMask;
     FloatArray reactions;
-    IntArray dofManMap, dofMap, eqnMap;
+    IntArray dofManMap, dofidMap, eqnMap;
 
     Domain *domain = this->giveDomain(di);
 
@@ -73,7 +73,7 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
     // map contains corresponding dofmanager and dofs numbers corresponding to prescribed equations
     // sorted according to dofmanger number and as a minor crit. according to dof number
     // this is necessary for extractor, since the sorted output is expected
-    this->buildReactionTable(dofManMap, dofMap, eqnMap, tStep, di);
+    this->buildReactionTable(dofManMap, dofidMap, eqnMap, tStep, di);
 
     //
     // print header
@@ -90,8 +90,8 @@ StructuralEngngModel :: printReactionForces(TimeStep *tStep, int di)
         if ( domain->giveOutputManager()->testDofManOutput(dofManMap.at(i), tStep) ) {
             fprintf( outputStream, "\tNode %8d iDof %2d reaction % .4e    [bc-id: %d]\n",
                     domain->giveDofManager( dofManMap.at(i) )->giveLabel(),
-                    dofMap.at(i), reactions.at( eqnMap.at(i) ),
-                    domain->giveDofManager( dofManMap.at(i) )->giveDof( dofMap.at(i) )->giveBcId() );
+                    dofidMap.at(i), reactions.at( eqnMap.at(i) ),
+                    domain->giveDofManager( dofManMap.at(i) )->giveDofWithID( dofidMap.at(i) )->giveBcId() );
         }
     }
 }
@@ -106,11 +106,11 @@ StructuralEngngModel :: computeReaction(FloatArray &answer, TimeStep *tStep, int
     answer.zero();
 
     // Add internal forces
-    this->assembleVector( answer, tStep, EID_MomentumBalance, LastEquilibratedInternalForcesVector, VM_Total,
+    this->assembleVector( answer, tStep, LastEquilibratedInternalForcesVector, VM_Total,
                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
     // Subtract external loading
     ///@todo All engineering models should be using this (for consistency)
-    //this->assembleVector( answer, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
+    //this->assembleVector( answer, tStep, ExternalForcesVector, VM_Total,
     //                    EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
     ///@todo This method is overloaded in some functions, it needs to be generalized.
     this->computeExternalLoadReactionContribution(contribution, tStep, di);
@@ -127,7 +127,7 @@ StructuralEngngModel :: computeExternalLoadReactionContribution(FloatArray &reac
 {
     reactions.resize( this->giveNumberOfDomainEquations( di, EModelDefaultPrescribedEquationNumbering() ) );
     reactions.zero();
-    this->assembleVector( reactions, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
+    this->assembleVector( reactions, tStep, ExternalForcesVector, VM_Total,
                          EModelDefaultPrescribedEquationNumbering(), this->giveDomain(di) );
 }
 
@@ -142,7 +142,7 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
 
     answer.resize( this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() ) );
     answer.zero();
-    this->assembleVector(answer, tStep, EID_MomentumBalance, InternalForcesVector, VM_Total,
+    this->assembleVector(answer, tStep, InternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), domain, normFlag ? & this->internalForcesEBENorm : NULL);
 
 #ifdef __PARALLEL_MODE
@@ -246,15 +246,13 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
 
     for ( int i = 1; i <= ndofMan; i++ ) {
         DofManager *inode = domain->giveDofManager(i);
-        int indofs = inode->giveNumberOfDofs();
-        for ( int j = 1; j <= indofs; j++ ) {
-            Dof *jdof = inode->giveDof(j);
+        for ( Dof *jdof: *inode ) {
             if ( jdof->isPrimaryDof() && ( jdof->hasBc(tStep) ) ) { // skip slave dofs
                 rindex = jdof->__givePrescribedEquationNumber();
                 if ( rindex ) {
                     count++;
                     restrDofMans.at(count) = i;
-                    restrDofs.at(count) = j;
+                    restrDofs.at(count) = jdof->giveDofID();
                     eqn.at(count) = rindex;
                 } else {
                     // NullDof has no equation number and no prescribed equation number

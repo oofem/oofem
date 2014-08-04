@@ -24,13 +24,13 @@ REGISTER_Element(Q9PlaneStress2d);
 FEI2dQuadBiQuad Q9PlaneStress2d :: interpolation(1, 2);
 
 Q9PlaneStress2d :: Q9PlaneStress2d(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface()
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface()
     // Constructor.
 {
     //	printf("Entering Q9PlaneStress2d :: Q9PlaneStress2d().\n");
 
     numberOfDofMans  = 9;
-    numberOfGaussPoints = 9;
+    numberOfGaussPoints = 4;
 }
 
 Interface *
@@ -53,7 +53,7 @@ Q9PlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li,
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 18);
     answer.zero();
@@ -72,45 +72,25 @@ Q9PlaneStress2d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &an
 // Returns the displacement interpolation matrix {N} of the receiver,
 // evaluated at gp.
 {
-    FloatArray n(9);
-
-    answer.resize(2, 18);
-    answer.zero();
+    FloatArray n;
 
     this->interpolation.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
 
-    for ( int i = 1; i <= 9; i++ ) {
-        answer.at(1, 2 * i - 1) = n.at(i);
-        answer.at(2, 2 * i - 0) = n.at(i);
-    }
+    answer.beNMatrixOf(n, 2);
 }
 
 IRResultType
 Q9PlaneStress2d :: initializeFrom(InputRecord *ir)
 {
-    numberOfGaussPoints = 4;
-    IRResultType result = this->Element :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
-        numberOfGaussPoints = 4;
-    }
-
-    return IRRT_OK;
+    return Element :: initializeFrom(ir);
 }
 
 void
 Q9PlaneStress2d :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -121,7 +101,7 @@ Q9PlaneStress2d :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
@@ -132,7 +112,7 @@ Q9PlaneStress2d :: computeVolumeAround(GaussPoint *gp)
 
 
 void
-Q9PlaneStress2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Q9PlaneStress2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v};
 }
@@ -201,12 +181,6 @@ Q9PlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
     }
 }
 
-void
-Q9PlaneStress2d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                             InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
 
 void
 Q9PlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
@@ -226,7 +200,7 @@ Q9PlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoi
      */
 
     FloatArray n(3);
-    this->interpolation.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 6);
     answer.zero();
@@ -262,7 +236,7 @@ Q9PlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 Q9PlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
     return result *gp->giveWeight();
 }
@@ -270,7 +244,7 @@ Q9PlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 Q9PlaneStress2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -288,7 +262,7 @@ Q9PlaneStress2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge
     answer.resize(2, 2);
     answer.zero();
 
-    this->interpolation.edgeEvalNormal( normal, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalNormal( normal, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.at(1, 1) = normal.at(2);
     answer.at(1, 2) = normal.at(1);

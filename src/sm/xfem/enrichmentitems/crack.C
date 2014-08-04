@@ -36,56 +36,120 @@
 #include "structuralinterfacematerialstatus.h"
 #include "xfem/enrichmentdomain.h"
 #include "export/gnuplotexportmodule.h"
+#include "gausspoint.h"
 
 namespace oofem {
 REGISTER_EnrichmentItem(Crack)
 
 Crack :: Crack(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
 {
-	mpEnrichesDofsWithIdArray = {D_u, D_v, D_w};
+    mpEnrichesDofsWithIdArray = {
+        D_u, D_v, D_w
+    };
 }
 
 IRResultType Crack :: initializeFrom(InputRecord *ir)
 {
-	EnrichmentItem :: initializeFrom(ir);
+    EnrichmentItem :: initializeFrom(ir);
 
-	return IRRT_OK;
+    return IRRT_OK;
 }
 
-void Crack::AppendCohesiveZoneGaussPoint(GaussPoint *ipGP)
+void Crack :: AppendCohesiveZoneGaussPoint(GaussPoint *ipGP)
 {
-	StructuralInterfaceMaterialStatus *matStat = dynamic_cast<StructuralInterfaceMaterialStatus*> ( ipGP->giveMaterialStatus() );
-	matStat->printYourself();
-	if(matStat != NULL) {
-		// Compute arc length position of the Gauss point
-		const FloatArray &coord = *(ipGP->giveCoordinates());
-		double tangDist = 0.0, arcPos = 0.0;
-		mpEnrichmentDomain->computeTangentialSignDist(tangDist, coord, arcPos);
+    StructuralInterfaceMaterialStatus *matStat = dynamic_cast< StructuralInterfaceMaterialStatus * >( ipGP->giveMaterialStatus() );
+    matStat->printYourself();
+    if ( matStat != NULL ) {
+        // Compute arc length position of the Gauss point
+        const FloatArray &coord =  ipGP->giveGlobalCoordinates();
+        double tangDist = 0.0, arcPos = 0.0;
+        mpEnrichmentDomain->computeTangentialSignDist(tangDist, coord, arcPos);
 
-		// Insert at correct position
-		std::vector<GaussPoint*>::iterator iteratorGP 	= mCohesiveZoneGaussPoints.begin();
-		std::vector<double>::iterator iteratorPos 		= mCohesiveZoneArcPositions.begin();
-		for(size_t i = 0; i < mCohesiveZoneArcPositions.size(); i++) {
-			if( arcPos > mCohesiveZoneArcPositions[i] ) {
-				iteratorGP++;
-				iteratorPos++;
-			}
-		}
+        // Insert at correct position
+        std :: vector< GaussPoint * > :: iterator iteratorGP = mCohesiveZoneGaussPoints.begin();
+        std :: vector< double > :: iterator iteratorPos = mCohesiveZoneArcPositions.begin();
+        for ( size_t i = 0; i < mCohesiveZoneArcPositions.size(); i++ ) {
+            if ( arcPos > mCohesiveZoneArcPositions [ i ] ) {
+                iteratorGP++;
+                iteratorPos++;
+            }
+        }
 
-		mCohesiveZoneGaussPoints.insert(iteratorGP, ipGP);
-		mCohesiveZoneArcPositions.insert(iteratorPos, arcPos);
-	}
-	else{
-		OOFEM_ERROR("matStat == NULL.")
-	}
+        mCohesiveZoneGaussPoints.insert(iteratorGP, ipGP);
+        mCohesiveZoneArcPositions.insert(iteratorPos, arcPos);
+    } else   {
+        OOFEM_ERROR("matStat == NULL.")
+    }
 }
 
 void Crack :: callGnuplotExportModule(GnuplotExportModule &iExpMod)
 {
-	iExpMod.outputXFEM(*this);
+    iExpMod.outputXFEM(* this);
+}
+
+void Crack :: computeIntersectionPoints(Crack &iCrack, std::vector<FloatArray> &oIntersectionPoints, std::vector<double> &oArcPositions)
+{
+    const double tol = 1.0e-12;
+
+    // Enrichment domain of the current crack
+    const EnrichmentDomain_BG *ed1 = dynamic_cast<const EnrichmentDomain_BG*>( giveEnrichmentDomain() );
+    PolygonLine *polygonLine1 = NULL;
+    if(ed1 != NULL) {
+        polygonLine1 = dynamic_cast<PolygonLine*>( ed1->bg );
+    }
+
+    // Enrichment domain of the crack given as input
+    const EnrichmentDomain_BG *ed2 = dynamic_cast<const EnrichmentDomain_BG*>( iCrack.giveEnrichmentDomain() );
+    PolygonLine *polygonLine2 = NULL;
+    if(ed2 != NULL) {
+        polygonLine2 = dynamic_cast<PolygonLine*>( ed2->bg );
+    }
+
+    if( polygonLine1 != NULL && polygonLine2 != NULL ) {
+
+        polygonLine2->computeIntersectionPoints(*polygonLine1, oIntersectionPoints);
+
+        for(FloatArray pos:oIntersectionPoints) {
+            double tangDist, arcPos;
+            polygonLine1->computeTangentialSignDist(tangDist, pos, arcPos);
+
+            if(arcPos < -tol || arcPos > (1.0+tol)) {
+                printf("arcPos: %e\n", arcPos);
+                OOFEM_ERROR("arcPos is outside the allowed range [0,1].")
+            }
+
+            oArcPositions.push_back(arcPos);
+        }
+
+    }
+}
+
+void Crack :: computeArcPoints(const std::vector<FloatArray> &iIntersectionPoints, std::vector<double> &oArcPositions)
+{
+    const double tol = 1.0e-12;
+
+    // Enrichment domain of the current crack
+    const EnrichmentDomain_BG *ed1 = dynamic_cast<const EnrichmentDomain_BG*>( giveEnrichmentDomain() );
+    PolygonLine *polygonLine1 = NULL;
+    if(ed1 != NULL) {
+        polygonLine1 = dynamic_cast<PolygonLine*>( ed1->bg );
+    }
+
+    if( polygonLine1 != NULL ) {
+
+        for(FloatArray pos:iIntersectionPoints) {
+            double tangDist, arcPos;
+            polygonLine1->computeTangentialSignDist(tangDist, pos, arcPos);
+
+            if(arcPos < -tol || arcPos > (1.0+tol)) {
+                printf("arcPos: %e\n", arcPos);
+                OOFEM_ERROR("arcPos is outside the allowed range [0,1].")
+            }
+
+            oArcPositions.push_back(arcPos);
+        }
+    }
+
 }
 
 } // end namespace oofem
-
-
-

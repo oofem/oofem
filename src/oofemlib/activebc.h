@@ -37,7 +37,6 @@
 
 #include "generalboundarycondition.h"
 #include "intarray.h"
-#include "equationid.h"
 #include "chartype.h"
 #include "valuemodetype.h"
 #include "error.h"
@@ -101,26 +100,24 @@ public:
      * @param[in,out] answer Matrix to assemble to.
      * @param tStep Active time step.
      * @param tStep Active time step.
-     * @param eid Equation ID.
      * @param type Type of matrix to assemble.
      * @param r_s Row numbering scheme.
      * @param c_s Column numbering scheme.
      */
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) { }
 
     /**
      * Assembles B.C. contributions to specified vector.
      * @param[in,out] answer Vector to assemble to.
      * @param tStep Active time step.
-     * @param eid Equation ID.
      * @param type Type of matrix to assemble.
      * @param mode Mode of value.
      * @param s Numbering scheme.
      * @param eNorms Norms for each dofid (optional).
      * @return Equivalent of the sum of the element norm (squared) of assembled vector.
      */
-    virtual void assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, FloatArray *eNorms = NULL) { }
 
@@ -132,12 +129,11 @@ public:
      * The nonzero entries are assembled and allocated for entries at (rows[i], cols[i]) positions.
      * @param rows List of location arrays for r_s.
      * @param cols List of location arrays for c_s.
-     * @param eid Equation ID.
      * @param type Type of matrix to assemble.
      * @param r_s Row numbering scheme.
      * @param c_s Column numbering scheme.
      */
-    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, EquationID eid, CharType type,
+    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
                                     const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) { }
 
 

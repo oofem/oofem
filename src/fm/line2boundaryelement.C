@@ -44,13 +44,10 @@ REGISTER_Element(Line2BoundaryElement);
 
 FEI2dLineQuad Line2BoundaryElement :: fei(1, 2);
 
-Line2BoundaryElement :: Line2BoundaryElement(int n, Domain *aDomain) : FMElement(n, aDomain)
+Line2BoundaryElement :: Line2BoundaryElement(int n, Domain *aDomain) : FMElement(n, aDomain), SpatialLocalizerInterface(this)
 {
     this->numberOfDofMans = 3;
-    this->numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ 1 ];
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
-    this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 2, this);
+    integrationRulesArray.resize( 0 );
 }
 
 Line2BoundaryElement :: ~Line2BoundaryElement()
@@ -61,13 +58,9 @@ FEInterpolation *Line2BoundaryElement :: giveInterpolation() const
     return & this->fei;
 }
 
-void Line2BoundaryElement :: giveDofManDofIDMask(int i, EquationID eid, IntArray &nodeDofIDMask) const
+void Line2BoundaryElement :: giveDofManDofIDMask(int i, IntArray &nodeDofIDMask) const
 {
-    if ( eid == EID_MomentumBalance || eid == EID_MomentumBalance_ConservationEquation ) {
-        nodeDofIDMask = {V_u, V_v};
-    } else {
-        nodeDofIDMask.clear();
-    }
+    nodeDofIDMask = {V_u, V_v};
 }
 
 Interface *Line2BoundaryElement :: giveInterface(InterfaceType it)
@@ -86,28 +79,7 @@ Interface *Line2BoundaryElement :: giveInterface(InterfaceType it)
 
 double Line2BoundaryElement :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
-    FloatArray c;
-    c = * this->giveNode(3)->giveCoordinates();
-    return c.distance(coords);
-}
-
-int Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                                             TimeStep *tStep, const FloatArray &gcoords, FloatArray &answer)
-{
-    FloatArray lcoords, closest;
-    double distance = this->SpatialLocalizerI_giveClosestPoint(lcoords, closest, gcoords);
-    if ( distance < 0 ) {
-        answer.clear();
-        return false;
-    }
-
-    this->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
-    return true;
-}
-
-void Line2BoundaryElement :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    answer = {V_u, V_v};
+    return this->giveNode(3)->giveCoordinates()->distance(coords);
 }
 
 void Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
@@ -117,7 +89,7 @@ void Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLoc
     this->fei.evalN( answer, lcoords, FEIElementGeometryWrapper(this) );
 
     IntArray dofIDs;
-    this->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(dofIDs);
+    this->giveElementDofIDMask(dofIDs);
 
     answer.resize( dofIDs.giveSize() );
     answer.zero();

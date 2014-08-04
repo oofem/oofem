@@ -181,8 +181,7 @@ RankineMat :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const 
 
     // damage
     double omega = computeDamage(gp, tStep);
-    status->giveTempEffectiveStress(answer);
-    answer.times(1. - omega);
+    answer.beScaled(1. - omega, status->giveTempEffectiveStress());
 
     // store variables in status
     status->setTempDamage(omega);
@@ -212,8 +211,7 @@ RankineMat :: giveRealStressVector_PlaneStress(FloatArray &answer,
 
     // damage
     double omega = computeDamage(gp, tStep);
-    status->giveTempEffectiveStress(answer);
-    answer.times(1. - omega);
+    answer.beScaled(1. - omega, status->giveTempEffectiveStress());
 
     // store variables in status
     status->setTempDamage(omega);
@@ -282,12 +280,10 @@ void
 RankineMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrain)
 {
     double kappa, tempKappa, H;
-    FloatArray reducedStress;
-    FloatArray strain, tempPlasticStrain;
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
     MaterialMode mode = gp->giveMaterialMode();
     // get the initial plastic strain and initial kappa from the status
-    status->givePlasticStrain(tempPlasticStrain);
+    FloatArray tempPlasticStrain = status->givePlasticStrain();
     kappa = tempKappa = status->giveCumulativePlasticStrain();
 
     // elastic predictor
@@ -505,19 +501,15 @@ void
 RankineMat :: give1dStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     RankineMatStatus *status = static_cast< RankineMatStatus * >( this->giveStatus(gp) );
-    double om;
+    answer.resize(1, 1);
+    answer.at(1, 1) = this->E;
     if ( mode == ElasticStiffness ) {
-        om = 0.0;
     } else if ( mode == SecantStiffness ) {
-        om = status->giveTempDamage();
-        answer.resize(1, 1);
-        answer.at(1, 1) = this->E;
+        double om = status->giveTempDamage();
         answer.times(1.0 - om);
     } else {
-        OOFEM_ERROR("unknown type of stiffness (secant stiffness not implemented for 1d)\n");
+        OOFEM_ERROR("unknown type of stiffness (secant stiffness not implemented for 1d)");
     }
-
-    return;
 }
 
 // this method is also used by the gradient version,
@@ -592,8 +584,7 @@ RankineMat :: evaluatePlaneStressStiffMtrx(FloatMatrix &answer,
 
     FloatArray sigPrinc(2);
     FloatMatrix nPrinc(2, 2);
-    StressVector effStress(_PlaneStress);
-    status->giveTempEffectiveStress(effStress);
+    StressVector effStress(status->giveTempEffectiveStress(), _PlaneStress);
     effStress.computePrincipalValDir(sigPrinc, nPrinc);
     // sometimes the method is called with gprime=0., then we can save some work
     if ( gprime != 0. ) {
@@ -645,8 +636,7 @@ RankineMat :: computeEta(FloatArray &answer, RankineMatStatus *status)
 
     FloatArray sigPrinc(2);
     FloatMatrix nPrinc(2, 2);
-    StressVector effStress(_PlaneStress);
-    status->giveTempEffectiveStress(effStress);
+    StressVector effStress(status->giveTempEffectiveStress(), _PlaneStress);
     effStress.computePrincipalValDir(sigPrinc, nPrinc);
 
     FloatMatrix T(3, 3);

@@ -38,7 +38,6 @@
 #include "structuralms.h"
 #include "mathfem.h"
 #include "domain.h"
-#include "equationid.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "fei3dtrquad.h"
@@ -51,11 +50,13 @@ REGISTER_Element(Tr2Shell7);
 
 FEI3dTrQuad Tr2Shell7 :: interpolation;
 
-IntArray Tr2Shell7 :: ordering_all(42);
-IntArray Tr2Shell7 :: ordering_gr(42);
-IntArray Tr2Shell7 :: ordering_gr_edge(21);
-bool Tr2Shell7 :: __initialized = Tr2Shell7 :: initOrdering();
-
+IntArray Tr2Shell7 :: ordering_all = {1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30, 31, 36, 37, 38,
+                        4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 32, 33, 34, 39, 40, 41,
+                        7, 14, 21, 28, 35, 42};
+IntArray Tr2Shell7 :: ordering_gr = {1, 2, 3, 19, 20, 21, 37, 4, 5, 6, 22, 23, 24, 38, 7, 8, 9, 25, 26, 27, 39,
+                       10, 11, 12, 28, 29, 30, 40, 13, 14, 15, 31, 32, 33, 41, 16, 17, 18,
+                       34, 35, 36, 42};
+IntArray Tr2Shell7 :: ordering_gr_edge = {1, 2, 3, 10, 11, 12, 19, 4, 5, 6, 13, 14, 15, 20, 7, 8, 9, 16, 17, 18, 21};
 
 
 Tr2Shell7 :: Tr2Shell7(int n, Domain *aDomain) : Shell7Base(n, aDomain)
@@ -91,10 +92,10 @@ FEInterpolation *Tr2Shell7 :: giveInterpolation() const { return & interpolation
 void
 Tr2Shell7 :: computeGaussPoints()
 {
-    if ( !integrationRulesArray ) {
+    if ( integrationRulesArray.size() == 0 ) {
         int nPointsTri  = 6;   // points in the plane
         int nPointsEdge = 2;   // edge integration
-        specialIntegrationRulesArray = new IntegrationRule * [ 3 ];
+        specialIntegrationRulesArray.resize(3);
 
         // Midplane and thickness
 
@@ -114,7 +115,6 @@ Tr2Shell7 :: computeGaussPoints()
         if ( layeredCS == NULL ) {
             OOFEM_ERROR("Tr2Shell7 only supports layered cross section");
         }
-        this->numberOfIntegrationRules = layeredCS->giveNumberOfLayers();
         this->numberOfGaussPoints = layeredCS->giveNumberOfLayers() * nPointsTri * layeredCS->giveNumIntegrationPointsInLayer();
         layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
 
@@ -167,8 +167,8 @@ Tr2Shell7 :: computeAreaAround(GaussPoint *gp, double xi)
     FloatArray G1, G2, temp;
     FloatMatrix Gcov;
     FloatArray lcoords(3);
-    lcoords.at(1) = gp->giveCoordinate(1);
-    lcoords.at(2) = gp->giveCoordinate(2);
+    lcoords.at(1) = gp->giveNaturalCoordinate(1);
+    lcoords.at(2) = gp->giveNaturalCoordinate(2);
     lcoords.at(3) = xi;
     this->evalInitialCovarBaseVectorsAt(lcoords, Gcov);
     G1.beColumnOf(Gcov, 1);
@@ -186,7 +186,7 @@ Tr2Shell7 :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
     double detJ;
     FloatMatrix Gcov;
     FloatArray lcoords;
-    lcoords = * gp->giveCoordinates();
+    lcoords = * gp->giveNaturalCoordinates();
     this->evalInitialCovarBaseVectorsAt(lcoords, Gcov);
     detJ = Gcov.giveDeterminant() * 0.5 * this->layeredCS->giveLayerThickness(layer);
     return detJ *gp->giveWeight();

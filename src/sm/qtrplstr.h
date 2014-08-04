@@ -52,7 +52,7 @@ namespace oofem {
  */
 class QTrPlaneStress2d : public NLStructuralElement, public SpatialLocalizerInterface,
 public SPRNodalRecoveryModelInterface,
-public DirectErrorIndicatorRCInterface, public EIPrimaryUnknownMapperInterface
+public EIPrimaryUnknownMapperInterface
 {
 protected:
     static FEI2dTrQuad interpolation;
@@ -62,7 +62,7 @@ public:
     virtual ~QTrPlaneStress2d() { }
 
     virtual int  computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
     virtual double computeVolumeAround(GaussPoint *gp);
@@ -85,8 +85,6 @@ public:
     virtual const char *giveClassName() const { return "QTrPlaneStress2d"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
@@ -94,12 +92,9 @@ public:
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
-    virtual double DirectErrorIndicatorRCI_giveCharacteristicSize();
-
-    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-                                                                 TimeStep *tStep, const FloatArray &coords,
-                                                                 FloatArray &answer);
-    virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
+    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                       TimeStep *tStep, const FloatArray &lcoords,
+                                                                       FloatArray &answer);
 
     virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 

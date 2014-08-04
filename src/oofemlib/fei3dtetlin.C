@@ -102,7 +102,7 @@ FEI3dTetLin :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FE
 void
 FEI3dTetLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatArray n(4);
+    FloatArray n;
     this->evalN(n, lcoords, cellgeo);
 
     answer.clear();
@@ -347,31 +347,23 @@ FEI3dTetLin :: surfaceLocal2global(FloatArray &answer, int iedge,
 void
 FEI3dTetLin :: surfaceEvaldNdx(FloatMatrix &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    // Translate the local surface coordinate to the volume coordinates and compute the gradient there.
-    double a, b, c;
-    a = lcoords.at(1);
-    b = lcoords.at(2);
-    c = 1.0 - a - b;
+    // Note, this must be in correct order, not just the correct nodes, therefore we must use snodes;
+    IntArray snodes;
+    this->computeLocalSurfaceMapping(snodes, isurf);
+
     FloatArray lcoords_tet(4);
-    lcoords_tet.at(isurf) = 0.0;
-    if ( isurf == 1 ) {
-        lcoords_tet.at(4) = a;
-        lcoords_tet.at(3) = b;
-        lcoords_tet.at(2) = c;
-    } else if ( isurf == 2 ) {
-        lcoords_tet.at(1) = a;
-        lcoords_tet.at(3) = b;
-        lcoords_tet.at(4) = c;
-    } else if ( isurf == 3 ) {
-        lcoords_tet.at(1) = a;
-        lcoords_tet.at(4) = b;
-        lcoords_tet.at(2) = c;
-    } else if ( isurf == 4 ) {
-        lcoords_tet.at(2) = a;
-        lcoords_tet.at(3) = b;
-        lcoords_tet.at(1) = c;
+    lcoords_tet.at(snodes.at(1)) = lcoords.at(1);
+    lcoords_tet.at(snodes.at(2)) = lcoords.at(2);
+    lcoords_tet.at(snodes.at(3)) = 1. - lcoords.at(1) - lcoords.at(2);
+
+    FloatMatrix fullB;
+    this->evaldNdx(fullB, lcoords_tet, cellgeo);
+    answer.resize(snodes.giveSize(), 3);
+    for ( int i = 1; i <= snodes.giveSize(); ++i ) {
+        for ( int j = 1; j <= 3; ++j ) {
+            answer.at(i, j) = fullB.at(snodes.at(i), j);
+        }
     }
-    this->evaldNdx(answer, lcoords_tet, cellgeo);
 }
 
 double

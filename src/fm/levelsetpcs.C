@@ -256,8 +256,7 @@ void
 LevelSetPCS :: giveMaterialMixtureAt(FloatArray &answer, FloatArray &position)
 {
     double ls;
-    int i;
-    FloatArray N(3);
+    FloatArray N;
     answer.resize(2);
 
     Element *elem = domain->giveSpatialLocalizer()->giveElementContainingPoint(position);
@@ -265,7 +264,8 @@ LevelSetPCS :: giveMaterialMixtureAt(FloatArray &answer, FloatArray &position)
     if ( interface ) {
         if ( elem->computeLocalCoordinates(N, position) ) {
             int inodes = elem->giveNumberOfNodes();
-            for ( ls = 0.0, i = 1; i <= inodes; i++ ) {
+            ls = 0.0;
+            for ( int i = 1; i <= inodes; i++ ) {
                 ls += N.at(i) * levelSetValues.at( elem->giveDofManagerNumber(i) );
             }
 
@@ -293,18 +293,16 @@ LevelSetPCS :: giveElementMaterialMixture(FloatArray &answer, int ie)
         answer = elemVof [ ie - 1 ];
         return;
     } else {
-        Element *ielem;
-        int i, _ie, inodes;
         LevelSetPCSElementInterface *interface;
         FloatArray fi;
 
         elemVof.resize( domain->giveNumberOfElements() );
-        for ( _ie = 1; _ie <= domain->giveNumberOfElements(); _ie++ ) {
-            ielem = domain->giveElement(_ie);
-            inodes = ielem->giveNumberOfNodes();
+        for ( int _ie = 1; _ie <= domain->giveNumberOfElements(); _ie++ ) {
+            Element *ielem = domain->giveElement(_ie);
+            int inodes = ielem->giveNumberOfNodes();
             fi.resize(inodes);
             interface = static_cast< LevelSetPCSElementInterface * >( ielem->giveInterface(LevelSetPCSElementInterfaceType) );
-            for ( i = 1; i <= inodes; i++ ) {
+            for ( int i = 1; i <= inodes; i++ ) {
                 fi.at(i) = levelSetValues.at( ielem->giveDofManagerNumber(i) );
             }
 
@@ -351,7 +349,7 @@ LevelSetPCS :: reinitialization(TimeStep *tStep)
 void
 LevelSetPCS :: redistance(TimeStep *tStep)
 {
-    int nite = 0, inode, i, inodes;
+    int nite = 0;
     int ndofman = domain->giveNumberOfDofManagers();
     int nelem = domain->giveNumberOfElements();
     bool twostage = false;
@@ -359,11 +357,8 @@ LevelSetPCS :: redistance(TimeStep *tStep)
 
     FloatArray fs(ndofman), w(ndofman), d_old, d;
     FloatMatrix dN;
-    FloatArray fi(4), gfi(nsd), n(nsd);
     //ConnectivityTable* contable = domain->giveConnectivityTable();
     //LevelSetPCSElementInterface* interface;
-    Element *ielem;
-
 
     //return;
     if ( this->reinit_dt_flag ) {
@@ -373,14 +368,14 @@ LevelSetPCS :: redistance(TimeStep *tStep)
     }
 
     IntArray _boundary(ndofman);
-    int ie, pos, neg, _node;
+    int pos, neg, _node;
     // check for boundary node
-    for ( ie = 1; ie <= nelem; ie++ ) {
-        ielem = domain->giveElement(ie);
-        inodes = ielem->giveNumberOfNodes();
+    for ( int ie = 1; ie <= nelem; ie++ ) {
+        Element *ielem = domain->giveElement(ie);
+        int inodes = ielem->giveNumberOfNodes();
         pos = 0;
         neg = 0;
-        for ( i = 1; i <= inodes; i++ ) {
+        for ( int i = 1; i <= inodes; i++ ) {
             _node = ielem->giveDofManagerNumber(i);
             if ( levelSetValues.at(_node) >= 0 ) {
                 pos++;
@@ -390,7 +385,7 @@ LevelSetPCS :: redistance(TimeStep *tStep)
         }
 
         if ( pos && neg ) {
-            for ( i = 1; i <= inodes; i++ ) {
+            for ( int i = 1; i <= inodes; i++ ) {
                 _node = ielem->giveDofManagerNumber(i);
                 _boundary.at(_node) = 1;
             }
@@ -407,7 +402,7 @@ LevelSetPCS :: redistance(TimeStep *tStep)
         // update level set values
         // single stage integration
         cm = 0.0;
-        for ( inode = 1; inode <= ndofman; inode++ ) {
+        for ( int inode = 1; inode <= ndofman; inode++ ) {
             if ( _boundary.at(inode) ) {
                 continue;
             }
@@ -424,7 +419,7 @@ LevelSetPCS :: redistance(TimeStep *tStep)
         if ( twostage ) {
             // this->pcs_stage1(d, fs, w, tStep, PCS_levelSetRedistance); //?
             cm = 0.0;
-            for ( inode = 1; inode <= ndofman; inode++ ) {
+            for ( int inode = 1; inode <= ndofman; inode++ ) {
                 if ( _boundary.at(inode) ) {
                     continue;
                 }
@@ -450,12 +445,10 @@ LevelSetPCS :: redistance(TimeStep *tStep)
 void
 LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeStep *tStep, PCSEqType t)
 {
-    int i, j, l, _ig, inodes;
-    int ie, ndofman = domain->giveNumberOfDofManagers(), nelem = domain->giveNumberOfElements();
+    int ndofman = domain->giveNumberOfDofManagers(), nelem = domain->giveNumberOfElements();
     double alpha, dfi, help, sumkn, F, f, volume, gfi_norm;
     FloatMatrix dN;
-    FloatArray gfi(nsd), fi(4), n(nsd), k(4), dfii(4);
-    Element *ielem;
+    FloatArray gfi, fi(4), n(nsd), k(4), dfii(4);
     LevelSetPCSElementInterface *interface;
 
     fs.resize(ndofman);
@@ -464,9 +457,9 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
     w.zero();
 
     // loop over elements
-    for ( ie = 1; ie <= nelem; ie++ ) {
-        ielem = domain->giveElement(ie);
-        inodes = ielem->giveNumberOfNodes();
+    for ( int ie = 1; ie <= nelem; ie++ ) {
+        Element *ielem = domain->giveElement(ie);
+        int inodes = ielem->giveNumberOfNodes();
         interface = static_cast< LevelSetPCSElementInterface * >
                     ( ielem->giveInterface(LevelSetPCSElementInterfaceType) );
 
@@ -478,25 +471,20 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
             volume = interface->LS_PCS_computeVolume();
 
             // assemble element vector with  level set values
-            for ( i = 1; i <= inodes; i++ ) {
+            for ( int i = 1; i <= inodes; i++ ) {
                 fi.at(i) = ls.at( ielem->giveDofManagerNumber(i) );
             }
 
             // compute gradient of level set
-            for ( j = 1; j <= nsd; j++ ) {
-                gfi.at(j) = 0.0;
-                for ( i = 1; i <= inodes; i++ ) {
-                    gfi.at(j) += dN.at(i, j) * fi.at(i);
-                }
-            }
+            gfi.beTProductOf(dN, fi);
 
             // eval size of gfi
             gfi_norm = gfi.computeNorm();
             // compute ki
-            for ( i = 1; i <= inodes; i++ ) {
+            for ( int i = 1; i <= inodes; i++ ) {
                 if ( gfi_norm > 1.e-12 ) {
                     // evaluate i-th normal (corresponding to side opposite to i-th vertex)
-                    for ( j = 1; j <= nsd; j++ ) {
+                    for ( int j = 1; j <= nsd; j++ ) {
                         n.at(j) = nsd * dN.at(i, j) * volume; //?
                     }
 
@@ -508,10 +496,10 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
             }
 
             dfi = fi.dotProduct(k);
-            for ( i = 1; i <= inodes; i++ ) {
+            for ( int i = 1; i <= inodes; i++ ) {
                 help = 0.0;
                 sumkn = 0.0;
-                for ( l = 1; l <= inodes; l++ ) {
+                for ( int l = 1; l <= inodes; l++ ) {
                     help += negbra( k.at(l) ) * ( fi.at(i) - fi.at(l) );
                     sumkn += negbra( k.at(l) );
                 }
@@ -525,12 +513,13 @@ LevelSetPCS :: pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeSte
             }
 
             //compute alpha_i
-            for ( help = 0.0, l = 1; l <= inodes; l++ ) {
+            help = 0.0;
+            for ( int l = 1; l <= inodes; l++ ) {
                 help += max(0.0, dfii.at(l) / dfi);
             }
 
-            for ( i = 1; i <= inodes; i++ ) {
-                _ig = ielem->giveDofManagerNumber(i);
+            for ( int i = 1; i <= inodes; i++ ) {
+                int _ig = ielem->giveDofManagerNumber(i);
                 if ( fabs(help) > 0.0 ) {
                     alpha = max(0.0, dfii.at(i) / dfi) / help;
                     fs.at(_ig) += alpha * ( dfi - f * volume );

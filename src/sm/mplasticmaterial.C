@@ -214,8 +214,8 @@ MPlasticMaterial :: closestPointReturn(FloatArray &answer,
 
     MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
 
-    status->givePlasticStrainVector(plasticStrainVectorR);
-    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+    plasticStrainVectorR = status->givePlasticStrainVector();
+    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
 
     dgamma.resize(nsurf);
     dgamma.zero();
@@ -449,8 +449,8 @@ MPlasticMaterial :: cuttingPlaneReturn(FloatArray &answer,
     }
 
     // huhu:
-    status->givePlasticStrainVector(plasticStrainVectorR);
-    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+    plasticStrainVectorR = status->givePlasticStrainVector();
+    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
 
     dgamma.resize(nsurf);
     dgamma.zero();
@@ -728,8 +728,8 @@ MPlasticMaterial :: computeResidualVector(FloatArray &answer, GaussPoint *gp, co
     size =  gradientVectorR [ 0 ].giveSize();
 
     answer.resize(size);
-    status->givePlasticStrainVector(oldPlasticStrainVectorR);
-    status->giveStrainSpaceHardeningVars(oldStrainSpaceHardeningVariables);
+    oldPlasticStrainVectorR = status->givePlasticStrainVector();
+    oldStrainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
 
     for ( i = 1; i <= isize; i++ ) {
         answer.at(i) = oldPlasticStrainVectorR.at(i) - plasticStrainVectorR.at(i);
@@ -872,8 +872,8 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     }
 
     // ask for plastic consistency parameter
-    status->giveTempGamma(gamma);
-    status->giveTempActiveConditionMap(activeConditionMap);
+    gamma = status->giveTempGamma();
+    activeConditionMap = status->giveTempActiveConditionMap();
     //
     // check for elastic cases
     //
@@ -907,7 +907,7 @@ MPlasticMaterial :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
 
     stressVector = status->giveStressVector();
     StructuralMaterial :: giveFullSymVectorForm( fullStressVector, stressVector, gp->giveMaterialMode() );
-    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
     this->computeStressSpaceHardeningVars(stressSpaceHardeningVars, gp, strainSpaceHardeningVariables);
 
 
@@ -1011,8 +1011,8 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
 
     // ask for plastic consistency parameter
-    status->giveTempGamma(gamma);
-    status->giveTempActiveConditionMap(activeConditionMap);
+    gamma = status->giveTempGamma();
+    activeConditionMap = status->giveTempActiveConditionMap();
     //
     // check for elastic cases
     //
@@ -1040,7 +1040,7 @@ MPlasticMaterial :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
 
     stressVector = status->giveStressVector();
     StructuralMaterial :: giveFullSymVectorForm( fullStressVector, stressVector, gp->giveMaterialMode() );
-    status->giveStrainSpaceHardeningVars(strainSpaceHardeningVariables);
+    strainSpaceHardeningVariables = status->giveStrainSpaceHardeningVars();
     this->computeStressSpaceHardeningVars(stressSpaceHardeningVars, gp, strainSpaceHardeningVariables);
 
 
@@ -1324,12 +1324,12 @@ MPlasticMaterial :: givePlateLayerStiffMtrx(FloatMatrix &answer,
 
 
 void
-MPlasticMaterial :: give1dFiberStiffMtrx(FloatMatrix &answer,
-                                         MatResponseMode mode,
-                                         GaussPoint *gp,
-                                         TimeStep *tStep)
+MPlasticMaterial :: giveFiberStiffMtrx(FloatMatrix &answer,
+                                       MatResponseMode mode,
+                                       GaussPoint *gp,
+                                       TimeStep *tStep)
 //
-// returns receiver's 1dFiber
+// returns receiver's Fiber
 // (1dFiber ==> sigma_y = sigma_z = tau_yz = 0.)
 //
 // standard method from Material Class overloaded, because no inversion is needed.
@@ -1351,15 +1351,14 @@ MPlasticMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStat
 {
     MPlasticMaterialStatus *status = static_cast< MPlasticMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_PlasticStrainTensor ) {
-        FloatArray ep;
-        status->givePlasticStrainVector(ep);
+        const FloatArray &ep = status->givePlasticStrainVector();
         ///@todo Fill in correct full form values here! This just adds zeros!
         StructuralMaterial :: giveFullSymVectorForm( answer, ep, gp->giveMaterialMode() );
         return 1;
     } else if ( type == IST_PrincipalPlasticStrainTensor ) {
-        FloatArray st(6), s;
+        FloatArray st;
 
-        status->givePlasticStrainVector(s);
+        const FloatArray &s = status->givePlasticStrainVector();
         ///@todo Fill in correct full form values here! This just adds zeros!
         StructuralMaterial :: giveFullSymVectorForm( st, s, gp->giveMaterialMode() );
 

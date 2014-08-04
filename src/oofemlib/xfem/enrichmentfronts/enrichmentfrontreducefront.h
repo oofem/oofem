@@ -44,7 +44,6 @@
 #define _IFT_EnrFrontReduceFront_Name "enrfrontreducefront"
 
 namespace oofem {
-
 class XfemManager;
 class DofManager;
 class FloatArray;
@@ -59,10 +58,10 @@ class DynamicInputRecord;
 class OOFEM_EXPORT EnrFrontReduceFront : public EnrichmentFront
 {
 public:
-	EnrFrontReduceFront() {};
+    EnrFrontReduceFront() {};
     virtual ~EnrFrontReduceFront() {};
 
-    virtual void MarkNodesAsFront(std :: vector< int > &ioNodeEnrMarker, XfemManager &ixFemMan, const std :: vector< double > &iLevelSetNormalDir, const std :: vector< double > &iLevelSetTangDir, const std :: vector< TipInfo > &iTipInfo);
+    virtual void MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo);
 
     // No special tip enrichments are applied with this model,
     // it only modifies the set of nodes subject to bulk enrichment.
@@ -70,9 +69,9 @@ public:
     virtual int  giveMaxNumEnrichments() const { return 0; }
 
     // Evaluate the enrichment function and its derivative in front nodes.
-    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd) const {};
-    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const {};
-    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps) const {};
+    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const EfInput &iEfInput) const {};
+    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const EfInput &iEfInput, const FloatArray &iGradLevelSet) const {};
+    virtual void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const {};
 
 
     virtual const char *giveClassName() const { return "EnrFrontReduceFront"; }
@@ -80,9 +79,9 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     virtual void giveInputRecord(DynamicInputRecord &input);
+
+    virtual double giveSupportRadius() const { return 0.0; }
 };
-
-
 } // end namespace oofem
 
 #endif /* ENRICHMENTFRONTREDUCEFRONT_H_ */

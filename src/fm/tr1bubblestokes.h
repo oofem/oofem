@@ -67,17 +67,6 @@ protected:
     static IntArray momentum_ordering, conservation_ordering;
     /// Ordering of dofs on edges. Used to assemble edge loads
     static IntArray edge_ordering [ 3 ];
-    /// Dummy variable
-    static bool __initialized;
-    /// Defines the ordering of the dofs in the local stiffness matrix.
-    static bool initOrdering() {
-        momentum_ordering = {1, 2, 4, 5, 7, 8, 10, 11};
-        conservation_ordering = {3, 6, 9};
-        edge_ordering [ 0 ] = {1, 2, 4, 5};
-        edge_ordering [ 1 ] = {4, 5, 7, 8};
-        edge_ordering [ 2 ] = {7, 8, 1, 2};
-        return true;
-    }
 
     /// The extra dofs from the bubble
     ElementDofManager *bubble;
@@ -110,30 +99,23 @@ public:
 
     virtual int giveNumberOfInternalDofManagers() const { return 1; }
     virtual DofManager *giveInternalDofManager(int i) const { return bubble; }
-    virtual void giveInternalDofManDofIDMask(int i, EquationID eid, IntArray &answer) const;
+    virtual void giveInternalDofManDofIDMask(int i, IntArray &answer) const;
 
     virtual FEInterpolation *giveInterpolation() const;
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
-    virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
     virtual void updateYourself(TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType it);
 
     // Spatial localizer interface:
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     // Element interpolation interface:
-    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-                                                                 TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
                                                                        TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
-    virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
-
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 };
 } // end namespace oofem
 #endif // tr1bubblestokes_h

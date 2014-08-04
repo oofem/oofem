@@ -348,7 +348,7 @@ int Skyline :: setInternalStructure(IntArray &a)
     return true;
 }
 
-int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme &s)
+int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
     // first create array of
     // maximal column height for assembled characteristics matrix
@@ -383,7 +383,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
 
     // loop over elements code numbers
     for ( int i = 1; i <= nelem; i++ ) {
-        domain->giveElement(i)->giveLocationArray(loc, ut, s);
+        domain->giveElement(i)->giveLocationArray(loc, s);
         js = loc.giveSize();
         maxle = INT_MAX;
         for ( int j = 1; j <= js; j++ ) {
@@ -409,7 +409,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, EquationID ut,
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
-            bc->giveLocationArrays(r_locs, c_locs, ut, UnknownCharType, s, s);
+            bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                 IntArray &krloc = r_locs [ k ];
                 IntArray &kcloc = c_locs [ k ];
@@ -852,7 +852,7 @@ void Skyline :: ldl_feti_sky(FloatArray &x, FloatArray &y,
     /*  pro vektor z se nealokuje nove pole                */
     /*  slozky vektoru y se prepisuji na slozky vektoru z  */
     /*******************************************************/
-    k = 0;
+    //k = 0;
     for ( i = 1; i <= neq; i++ ) {
         lj = adr.at(i);
         uj = adr.at(i + 1) - 1;

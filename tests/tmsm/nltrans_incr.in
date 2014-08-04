@@ -1,7 +1,3 @@
 nltrans_incr.out
 Staggered analysis in 2d - Nonstationary temperature field sent to NonLinearStatic problem with required renumbering of equations
 StaggeredProblem nsteps 3 deltat 36000 prob1 "nltrans_incr.in.tm" prob2 "nltrans_incr.in.sm"
-#%BEGIN_CHECK%
-#INCLUDE nltrans_incr.in.tm
-#INCLUDE nltrans_incr.in.sm
-#%END_CHECK%

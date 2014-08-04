@@ -43,10 +43,8 @@ OOFEMTXTDataReader :: OOFEMTXTDataReader(const char *inputfilename) : DataReader
 {
     inputStream.open(inputfilename);
     if ( !inputStream.is_open() ) {
-        OOFEM_SIMPLE_ERROR("OOFEMTXTDataReader::OOFEMTXTDataReader: Can't open input stream (%s)", inputfilename);
+        OOFEM_ERROR("Can't open input stream (%s)", inputfilename);
     }
-    dataSourceName = inputfilename;
-    lineNumber = 0;
 
     this->giveRawLineFromInput(outputFileName);
     this->giveRawLineFromInput(description);
@@ -57,9 +55,8 @@ OOFEMTXTDataReader :: OOFEMTXTDataReader(const OOFEMTXTDataReader &x) : DataRead
 {
     inputStream.open( dataSourceName.c_str() );
     if ( !inputStream.is_open() ) {
-        OOFEM_SIMPLE_ERROR( "OOFEMTXTDataReader::OOFEMTXTDataReader: Can't copy open input stream (%s)", dataSourceName.c_str() );
+        OOFEM_ERROR("Can't copy open input stream (%s)", dataSourceName.c_str());
     }
-    lineNumber = 0;
 
     this->giveRawLineFromInput(outputFileName);
     this->giveRawLineFromInput(description);
@@ -105,13 +102,13 @@ OOFEMTXTDataReader :: giveLineFromInput(std :: string &line)
 
     this->giveRawLineFromInput(line);
 
-    for ( std :: size_t i = 0; i < line.size(); i++ ) {
-        if ( line [ i ] == '"' ) { //do not change to lowercase inside quotation marks
+    for ( auto &c: line ) {
+        if ( c == '"' ) { //do not change to lowercase inside quotation marks
             flag = !flag; // switch flag
         }
 
         if ( !flag ) {
-            line [ i ] = tolower(line [ i ]); // convert line to lowercase
+            c = tolower(c); // convert line to lowercase
         }
     }
 }
@@ -125,7 +122,6 @@ OOFEMTXTDataReader :: giveRawLineFromInput(std :: string &line)
     do {
         this->lineNumber++;
         std :: getline(this->inputStream, line);
-#if __cplusplus > 199711L
         if ( line.back() == '\\' ) {
             line.pop_back();
             std :: string continuedLine;
@@ -136,7 +132,6 @@ OOFEMTXTDataReader :: giveRawLineFromInput(std :: string &line)
                 line += continuedLine;
             } while ( continuedLine.back() == '\\' );
         }
-#endif
     } while ( line [ 0 ] == '#' ); // skip comments
 }
 } // end namespace oofem

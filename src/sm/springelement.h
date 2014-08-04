@@ -92,7 +92,7 @@ public:
     virtual int computeNumberOfDofs() { return 2; }
     virtual int computeNumberOfGlobalDofs();
 
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
     virtual void updateInternalState(TimeStep *tStep) { }
     virtual void updateYourself(TimeStep *tStep) { }

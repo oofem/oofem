@@ -42,9 +42,7 @@
 #include "util.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
-
-// Used for computing
-#include "line2boundaryelement.h"
+#include "mathfem.h"
 
 #include <sstream>
 
@@ -96,9 +94,11 @@ void FE2FluidMaterial :: computeDeviatoricStressVector(FloatArray &stress_dev, d
     // Solve subscale problem
     rve->solveYourselfAt(tStep);
 
-    bc->computeFields(stress_dev, r_vol, EID_MomentumBalance_ConservationEquation, tStep);
+    bc->computeFields(stress_dev, r_vol, tStep);
     ms->letDeviatoricStressVectorBe(stress_dev);
     ms->letDeviatoricStrainRateVectorBe(eps);
+
+    ms->letPressureBe(pressure);
 
     ms->markOldTangents(); // Mark this so that tangents are reevaluated if they are needed.
     // One could also just compute them here, but you don't actually need them if the problem has converged, so this method saves on that iteration.
@@ -129,39 +129,30 @@ void FE2FluidMaterial :: giveStiffnessMatrices(FloatMatrix &dsdd, FloatArray &ds
         dedp = ms->giveVolumetricPressureTangent();
 #if 0
         // Numerical ATS for debugging
-        FloatArray tempStrain(3);
+        FloatMatrix numericalATS(6, 6);
+        FloatArray dsig;
+        FloatArray tempStrain(6);
+
         tempStrain.zero();
-        FloatArray sig, strain, sig11, sig22, sig12;
+        FloatArray sig, strain, sigPert;
         double epspvol;
-        computeDeviatoricStressVector(sig, epspvol, gp, tempStrain, 0.0, tStep);
+        computeDeviatoricStressVector(sig, epspvol, gp, tempStrain, 0., tStep);
         double h = 0.001; // Linear problem, size of this doesn't matter.
-        strain.resize(3);
-        strain = tempStrain;
-        strain.at(1) += h;
-        computeDeviatoricStressVector(sig11, epspvol, gp, strain, 0.0, tStep);
-        strain = tempStrain;
-        strain.at(2) += h;
-        computeDeviatoricStressVector(sig22, epspvol, gp, strain, 0.0, tStep);
-        strain = tempStrain;
-        strain.at(3) += h;
-        computeDeviatoricStressVector(sig12, epspvol, gp, strain, 0.0, tStep);
+        for ( int k = 1; k <= 6; ++k ) {
+            strain = tempStrain;
+            strain.at(k) += h;
+            double tmp = strain.at(1) + strain.at(2) + strain.at(3);
+            strain.at(1) -= tmp/3.0;
+            strain.at(2) -= tmp/3.0;
+            strain.at(3) -= tmp/3.0;
+            strain.printYourself();
+            computeDeviatoricStressVector(sigPert, epspvol, gp, strain, 0., tStep);
+            sigPert.printYourself();
+            dsig.beDifferenceOf(sigPert, sig);
+            numericalATS.setColumn(dsig, k);
+        }
+        numericalATS.times(1. / h);
 
-        FloatArray dsig11;
-        dsig11.beDifferenceOf(sig11, sig);
-        dsig11.times(1 / h);
-        FloatArray dsig22;
-        dsig22.beDifferenceOf(sig22, sig);
-        dsig22.times(1 / h);
-        FloatArray dsig12;
-        dsig12.beDifferenceOf(sig12, sig);
-        dsig12.times(1 / h);
-
-        FloatMatrix numericalATS;
-        numericalATS.resize(3, 3);
-        numericalATS.zero();
-        numericalATS.setColumn(dsig11, 1);
-        numericalATS.setColumn(dsig22, 2);
-        numericalATS.setColumn(dsig12, 3);
         printf("Analytical deviatoric tangent = ");
         dsdd.printYourself();
         printf("Numerical deviatoric tangent = ");
@@ -243,12 +234,12 @@ void FE2FluidMaterial :: giveStiffnessMatrices(FloatMatrix &dsdd, FloatArray &ds
         computeDeviatoricStressVector(sig, epspvol, gp, strain, pressure, tStep);
         computeDeviatoricStressVector(sig, epspvolh, gp, strain, pressure + h, tStep);
 
-        double dvol = ( epspvolh - epspvol ) / h;
+        double dvol = -( epspvolh - epspvol ) / h;
 
-        printf("Analytical volumetric pressure tangent = %e\n", answer);
+        printf("Analytical volumetric pressure tangent = %e\n", dedp);
         printf("Numerical volumetric pressure tangent = %e\n", dvol);
 
-        double norm = fabs(dvol - answer);
+        double norm = fabs(dvol - dedp);
         if ( norm > fabs(dedp) * DEBUG_ERR && norm > 0.0 ) {
             OOFEM_ERROR("Error in volumetric pressure tangent");
         }
@@ -277,6 +268,34 @@ int FE2FluidMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
     FE2FluidMaterialStatus *status = static_cast< FE2FluidMaterialStatus * >( this->giveStatus(gp) );
     if ( type == IST_VOFFraction ) {
         answer = {status->giveVOFFraction()};
+        return true;
+    } else if ( type == IST_Pressure ) {
+        answer = {status->givePressure()};
+        return true;
+    } else if ( type == IST_Undefined ) { ///@todo What should one call this value? Relation between pressure and volumetric strain-rate.
+#if 0
+        // Numerical ATS for debugging
+        FloatArray strain(3);
+        strain.zero();
+        FloatArray sig;
+        double epspvol, epspvolh, pressure = 0.0;
+        double h = 1.0; // Linear problem, size of this doesn't matter.
+
+        computeDeviatoricStressVector(sig, epspvol, gp, strain, pressure, tStep);
+        computeDeviatoricStressVector(sig, epspvolh, gp, strain, pressure + h, tStep);
+
+        double dvol = - ( epspvolh - epspvol ) / h;
+
+        
+        printf("Analytical volumetric pressure tangent = %f\n", status->giveVolumetricPressureTangent());
+        printf("Numerical volumetric pressure tangent = %f\n", dvol);
+
+        double norm = fabs(dvol - status->giveVolumetricPressureTangent());
+        if ( norm > fabs(status->giveVolumetricPressureTangent()) * DEBUG_ERR && norm > 0.0 ) {
+            OOFEM_ERROR("Error in volumetric pressure tangent");
+        }
+#endif
+        answer = {status->giveVolumetricPressureTangent()};
         return true;
     } else {
         return FluidDynamicMaterial :: giveIPValue(answer, gp, type, tStep);
@@ -394,7 +413,7 @@ void FE2FluidMaterialStatus :: markOldTangents() { this->oldTangents = true; }
 void FE2FluidMaterialStatus :: computeTangents(TimeStep *tStep)
 {
     if ( !tStep->isTheCurrentTimeStep() ) {
-        OOFEM_ERROR("Only current timestep supported.\n");
+        OOFEM_ERROR("Only current timestep supported.");
     }
 
     if ( this->oldTangents ) {
@@ -402,7 +421,7 @@ void FE2FluidMaterialStatus :: computeTangents(TimeStep *tStep)
                             this->giveDeviatoricPressureTangent(),
                             this->giveVolumetricDeviatoricTangent(),
                             this->giveVolumetricPressureTangent(),
-                            EID_MomentumBalance_ConservationEquation, tStep);
+                            tStep);
     }
 
     this->oldTangents = false;

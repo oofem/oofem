@@ -289,17 +289,16 @@ public:
      */
     int insertOnce(int p);
     /**
+     * Sorts array.
+     */
+    void sort();
+    /**
      * Erase the element at given position (1-based index)
      * Receiver will shrink accordingly, the values at positions (pos+1,...,size)
      * will be moved to positions (pos,...,size-1)
      * @param pos Position to erase.
      */
     void erase(int pos);
-    /**
-     * Sets the array to be a sequence of values.
-     * @param n Number of integers in the sequence to follow.
-     */
-    void setValues(int n, ...);
     /**
      * Adds given scalar to all values of receiver
      * @param val Value to add.

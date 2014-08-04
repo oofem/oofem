@@ -203,8 +203,7 @@ RankineMatGrad :: givePlaneStressKappaMatrix(FloatMatrix &answer, MatResponseMod
 
     FloatArray sigPrinc(2);
     FloatMatrix nPrinc(2, 2);
-    StressVector effStress(_PlaneStress);
-    status->giveTempEffectiveStress(effStress);
+    StressVector effStress(status->giveTempEffectiveStress(), _PlaneStress);
     effStress.computePrincipalValDir(sigPrinc, nPrinc);
 
     FloatMatrix T(3, 3);
@@ -237,8 +236,7 @@ RankineMatGrad :: givePlaneStressGprime(FloatMatrix &answer, MatResponseMode mod
     double nonlocalCumulatedStrain = status->giveNonlocalCumulatedStrain();
     double tempCumulatedStrain = status->giveTempCumulativePlasticStrain();
     double overNonlocalCumulatedStrain = mParam * nonlocalCumulatedStrain + ( 1. - mParam ) * tempCumulatedStrain;
-    FloatArray tempEffStress;
-    status->giveTempEffectiveStress(tempEffStress);
+    const FloatArray &tempEffStress = status->giveTempEffectiveStress();
     answer.at(1, 1) = tempEffStress.at(1);
     answer.at(2, 1) = tempEffStress.at(2);
     answer.at(3, 1) = tempEffStress.at(3);
@@ -261,11 +259,10 @@ RankineMatGrad :: giveRealStressVectorGrad(FloatArray &answer1, double &answer2,
     this->initTempStatus(gp);
 
     double tempDamage;
-    FloatArray tempEffStress, totalStress, locTotalStrain;
     RankineMat :: performPlasticityReturn(gp, totalStrain);
 
     tempDamage = computeDamage(gp, tStep);
-    status->giveTempEffectiveStress(tempEffStress);
+    const FloatArray &tempEffStress = status->giveTempEffectiveStress();
     answer1.beScaled(1.0 - tempDamage, tempEffStress);
     answer2 = status->giveTempCumulativePlasticStrain();
 

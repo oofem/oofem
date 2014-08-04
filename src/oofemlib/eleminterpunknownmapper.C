@@ -55,7 +55,7 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
     int inode, nd_nnodes = newd->giveNumberOfDofManagers();
     int nsize = newd->giveEngngModel()->giveNumberOfDomainEquations( newd->giveNumber(), EModelDefaultEquationNumbering() );
     FloatArray unknownValues;
-    IntArray dofMask, locationArray;
+    IntArray dofidMask, locationArray;
     IntArray reglist;
 #ifdef OOFEM_MAPPING_CHECK_REGIONS
     ConnectivityTable *conTable = newd->giveConnectivityTable();
@@ -66,10 +66,11 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
     answer.zero();
 
     for ( inode = 1; inode <= nd_nnodes; inode++ ) {
+        DofManager *node = newd->giveNode(inode);
         /* HUHU CHEATING */
 #ifdef __PARALLEL_MODE
-        if ( ( newd->giveNode(inode)->giveParallelMode() == DofManager_null ) ||
-            ( newd->giveNode(inode)->giveParallelMode() == DofManager_remote ) ) {
+        if ( ( node->giveParallelMode() == DofManager_null ) ||
+            ( node->giveParallelMode() == DofManager_remote ) ) {
             continue;
         }
 
@@ -85,26 +86,19 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
         }
 
 #endif
-
-        if ( this->evaluateAt(unknownValues, dofMask, mode, oldd, * newd->giveNode(inode)->giveCoordinates(), reglist, tStep) ) {
-            //
-            //  WARNING !! LIMITED IMPLEMENTATION HERE !!
-            //
-            // possible source of error -> general service allowing to request all DOFs interpolated by element
-            // should be there, but newNode can accommodate only certain dofs.
-            //
-            //
-            newd->giveNode(inode)->giveLocationArray( dofMask, locationArray, EModelDefaultEquationNumbering() );
-            if ( newd->giveNode(inode)->hasAnySlaveDofs() ) {
-                for ( int ii = 1; ii <= dofMask.giveSize(); ii++ ) { ///@todo How should be deal with slave dofs and such? dofMask.size() != locationArray.size() will happen
-                    // exclude slaves; they are determined from masters
-                    if ( newd->giveNode(inode)->giveDof(ii)->isPrimaryDof() ) {
-                        answer.at( locationArray.at(ii) ) += unknownValues.at(ii);
+        ///@todo Shouldn't we pass a primary field or something to this function?
+        if ( this->evaluateAt(unknownValues, dofidMask, mode, oldd, * node->giveCoordinates(), reglist, tStep) ) {
+            ///@todo This doesn't respect local coordinate systems in nodes. Supporting that would require major reworking.
+            for ( int ii = 1; ii <= dofidMask.giveSize(); ii++ ) {
+                // exclude slaves; they are determined from masters
+                auto it = node->findDofWithDofId((DofIDItem)dofidMask.at(ii));
+                if ( it != node->end() ) {
+                    Dof *dof = *it;
+                    if ( dof->isPrimaryDof() ) {
+                        int eq = dof->giveEquationNumber(EModelDefaultEquationNumbering());
+                        answer.at( eq ) += unknownValues.at(ii);
                     }
                 }
-            } else {
-                // assemble the interpolated values to global vector using locationArray of new node
-                answer.assemble(unknownValues, locationArray);
             }
         } else {
             OOFEM_ERROR("evaluateAt service failed for node %d", inode);
@@ -172,9 +166,14 @@ EIPrimaryUnknownMapper :: evaluateAt(FloatArray &answer, IntArray &dofMask, Valu
 
     interface = static_cast< EIPrimaryUnknownMapperInterface * >( oelem->giveInterface(EIPrimaryUnknownMapperInterfaceType) );
     if ( interface ) {
-        interface->EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(dofMask);
+        oelem->giveElementDofIDMask(dofMask);
 #if 1
-        interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(mode, tStep, coords, answer);
+        FloatArray lcoords;
+        if ( oelem->computeLocalCoordinates(lcoords, coords) ) {
+            interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
+        } else {
+            answer.clear();
+        }
 #else
         interface->EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(mode, tStep, lcoords, answer);
 #endif

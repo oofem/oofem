@@ -67,7 +67,9 @@ REGISTER_Element(TR1_2D_CBS);
 FEI2dTrLin TR1_2D_CBS :: interp(1, 2);
 
 TR1_2D_CBS :: TR1_2D_CBS(int n, Domain *aDomain) :
-    CBSElement(n, aDomain)
+    CBSElement(n, aDomain),
+    SpatialLocalizerInterface(this),
+    ZZNodalRecoveryModelInterface(this)
     //<RESTRICTED_SECTION>
     , LEPlicElementInterface()
     //</RESTRICTED_SECTION>
@@ -89,23 +91,9 @@ TR1_2D_CBS :: computeNumberOfDofs()
 }
 
 void
-TR1_2D_CBS :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+TR1_2D_CBS :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    if ( ut == EID_MomentumBalance_ConservationEquation ) {
-        answer = {V_u, V_v, P_f};
-    } else if ( ut == EID_MomentumBalance ) {
-        answer = {V_u, V_v};
-    } else if ( ut == EID_ConservationEquation ) {
-        answer = {P_f};
-    } else {
-        OOFEM_ERROR("Unknown equation id encountered");
-    }
-}
-
-void
-TR1_2D_CBS :: giveElementDofIDMask(EquationID ut, IntArray &answer) const
-{
-    this->giveDofManDofIDMask(1, ut, answer);
+    answer = {V_u, V_v, P_f};
 }
 
 
@@ -152,9 +140,8 @@ void
 TR1_2D_CBS :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(1);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
@@ -220,7 +207,7 @@ TR1_2D_CBS :: computeConvectionTermsI(FloatArray &answer, TimeStep *tStep)
     ar12 = area / 12.;
     ar3 = area / 3.0;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), u);
 
     dudx = b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5);
     dudy = c [ 0 ] * u.at(1) + c [ 1 ] * u.at(3) + c [ 2 ] * u.at(5);
@@ -403,27 +390,27 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
     //double rho = this->giveMaterial()->give('d');
     double theta1 = static_cast< CBS * >( domain->giveEngngModel() )->giveTheta1();
     double rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    FloatArray u(6), ustar(6);
+    FloatArray u, ustar;
 
     answer.resize(9);
     answer.zero();
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
     ///@todo Check the following again:
     // Should we really want to add this term?
     // This will produce velocities that differs from their actual Dirichlet b.c.s;
     // The patch05.in test has a Dirichlet V_v = 1.0 on node 2, but this will produce the value V_v 1.5 for that dof.
     // It also requires knowing theta1, which we could otherwise do without.
     // It is added for now to mirror the old code below.
-    this->computeVectorOfPrescribed(EID_MomentumBalance, VM_Incremental, tStep, ustar);
+    this->computeVectorOfPrescribed({V_u, V_v}, VM_Incremental, tStep, ustar);
     u.add(theta1, ustar);
 
-    //this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, ustar);
+    //this->computeVectorOfVelocities(VM_Incremental, tStep, ustar);
     //u.add((theta1-1, ustar);
     /*
      *  printf("u_new = "); u.printYourself();
-     *  this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
-     *  this->computeVectorOf(EID_AuxMomentumBalance, VM_Incremental, tStep, ustar);
+     *  this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), u);
+     *  this->computeVectorOfAuxVelocities(VM_Incremental, tStep, ustar);
      *  u.add(theta1, ustar);
      *  printf("u_corr = "); u.printYourself();
      */
@@ -450,7 +437,7 @@ TR1_2D_CBS :: computeDensityRhsVelocityTerms(FloatArray &answer, TimeStep *tStep
         if ( ( code & FMElement_PrescribedPressureBC ) ) {
             continue;
         } else if ( ( code & FMElement_PrescribedUnBC ) ) {
-            this->computeVectorOfPrescribed(EID_MomentumBalance, VM_Total, tStep, u);
+            this->computeVectorOfPrescribed({V_u, V_v}, VM_Total, tStep, u);
 
             n1 = boundarySides.at(j);
             n2 = ( n1 == 3 ? 1 : n1 + 1 );
@@ -585,10 +572,10 @@ void
 TR1_2D_CBS :: computeDensityRhsPressureTerms(FloatArray &answer, TimeStep *tStep)
 {
     // computes pressure terms on RHS for density equation
-    FloatArray p(3);
+    FloatArray p;
     double theta1 = static_cast< CBS * >( domain->giveEngngModel() )->giveTheta1();
 
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep->givePreviousStep(), p);
+    this->computeVectorOfPressures(VM_Total, tStep->givePreviousStep(), p);
     answer.resize(9);
     answer.zero();
 
@@ -626,12 +613,12 @@ void
 TR1_2D_CBS :: computeCorrectionRhs(FloatArray &answer, TimeStep *tStep)
 {
     //Evaluates the RHS of velocity correction step
-    FloatArray p(3), u(6);
+    FloatArray p, u;
     double pn1, ar3;
     double usum, vsum, coeff;
 
 
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, p);
+    this->computeVectorOfPressures(VM_Total, tStep, p);
 
     double dpdx = 0.0, dpdy = 0.0;
     for ( int i = 0; i < 3; i++ ) {
@@ -648,8 +635,8 @@ TR1_2D_CBS :: computeCorrectionRhs(FloatArray &answer, TimeStep *tStep)
     answer.at(2) = answer.at(5) = answer.at(8) = -ar3 * dpdy;
 
 
-    this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep->givePreviousStep(), p);
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep->givePreviousStep(), u);
+    this->computeVectorOfPressures(VM_Total, tStep->givePreviousStep(), p);
+    this->computeVectorOfVelocities(VM_Total, tStep->givePreviousStep(), u);
     dpdx = 0.0, dpdy = 0.0;
     for ( int i = 0; i < 3; i++ ) {
         pn1 = p.at(i + 1);
@@ -694,13 +681,6 @@ TR1_2D_CBS :: giveInterface(InterfaceType interface)
 }
 
 
-int
-TR1_2D_CBS :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
 double
 TR1_2D_CBS :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
 {
@@ -732,9 +712,9 @@ void
 TR1_2D_CBS :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
     /* one should call material driver instead */
-    FloatArray u(6), eps(3);
+    FloatArray u, eps(3);
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     eps.at(1) = ( b [ 0 ] * u.at(1) + b [ 1 ] * u.at(3) + b [ 2 ] * u.at(5) );
     eps.at(2) = ( c [ 0 ] * u.at(2) + c [ 1 ] * u.at(4) + c [ 2 ] * u.at(6) );
@@ -780,7 +760,7 @@ TR1_2D_CBS :: computeCriticalTimeStep(TimeStep *tStep)
     double dt1, dt2, dt;
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     double vn1 = sqrt( u.at(1) * u.at(1) + u.at(2) * u.at(2) );
     double vn2 = sqrt( u.at(3) * u.at(3) + u.at(4) * u.at(4) );
@@ -1049,16 +1029,28 @@ TR1_2D_CBS :: EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryF
                                                     FloatArray &coords, IntArray &dofId, ValueModeType mode,
                                                     TimeStep *tStep)
 {
+#if 0
+    ///@todo Change to this (very experimental, untested code) in all EIPrimaryFieldI_evaluateFieldVectorAt functions:
+    int es = dofId.giveSize();
+    this->computeVectorOf(pf, dofId, mode, tStep, elemvector, true);
+    answer.resize( es );
+    answer.zero();
+    for ( int i = 1; i <= es; i++ ) {
+        for ( int j = 1; j <= lc.giveSize(); j++ ) {
+            answer.at(i) += lc.at(j) * elemvector.at( es * ( j -  1 ) + i );
+        }
+    }
+#endif
     int indx, es;
     double sum;
     FloatArray elemvector, f, lc;
     //FloatMatrix n;
     IntArray elemdofs;
     // determine element dof ids
-    this->giveElementDofIDMask(pf.giveEquationID(), elemdofs);
+    this->giveElementDofIDMask(elemdofs);
     es = elemdofs.giveSize();
     // first evaluate element unknown vector
-    this->computeVectorOf(pf, mode, tStep, elemvector);
+    this->computeVectorOf(pf, elemdofs, mode, tStep, elemvector);
     // determine corresponding local coordinates
     if ( this->computeLocalCoordinates(lc, coords) ) {
         // compute interpolation matrix
@@ -1112,16 +1104,8 @@ void
 TR1_2D_CBS :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                          InternalStateType type, TimeStep *tStep)
 {
-    GaussPoint *gp;
-    gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);
-}
-
-void
-TR1_2D_CBS :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                        InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 void

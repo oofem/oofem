@@ -125,7 +125,7 @@ LIBeam3dNL :: updateTempTriad(TimeStep *tStep)
     FloatMatrix dR(3, 3);
 
     // ask element's displacement increments
-    this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, u);
+    this->computeVectorOf(VM_Incremental, tStep, u);
 
     // interpolate spin at the centre
     centreSpin.at(1) = 0.5 * ( u.at(4) + u.at(10) );
@@ -237,7 +237,7 @@ LIBeam3dNL :: computeXdVector(FloatArray &answer, TimeStep *tStep)
 
     answer.resize(3);
     // ask element's displacements
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
 
     answer.at(1) = ( this->giveNode(2)->giveCoordinate(1) + u.at(7) ) -
                    ( this->giveNode(1)->giveCoordinate(1) + u.at(1) );
@@ -339,9 +339,8 @@ void
 LIBeam3dNL :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
@@ -470,8 +469,25 @@ LIBeam3dNL :: computeVolumeAround(GaussPoint *gp)
 }
 
 
+int
+LIBeam3dNL :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    ///@todo This should be a common inheritance for all 3d beams (and a similar one for 2D beams) 
+    /// to support all the sensible moment/force tensors. 
+    if ( type == IST_BeamForceMomentumTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        return 1;
+    } else if ( type == IST_BeamStrainCurvatureTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        return 1;
+    } else {
+        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+    }
+}
+
+
 void
-LIBeam3dNL :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+LIBeam3dNL :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
@@ -526,7 +542,7 @@ LIBeam3dNL :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *g
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 
@@ -720,7 +736,7 @@ LIBeam3dNL :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
     // update curvature at midpoint
     // first, compute Tmid
     // ask increments
-    this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, ui);
+    this->computeVectorOf(VM_Incremental, tStep, ui);
 
     ac.at(1) = 0.5 * ( ui.at(10) - ui.at(4) );
     ac.at(2) = 0.5 * ( ui.at(11) - ui.at(5) );

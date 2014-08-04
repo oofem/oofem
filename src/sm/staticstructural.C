@@ -118,7 +118,7 @@ StaticStructural :: initializeFrom(InputRecord *ir)
 #endif
 
     delete this->field;
-    this->field = new PrimaryField(this, 1, FT_Displacements, EID_MomentumBalance, 1);
+    this->field = new PrimaryField(this, 1, FT_Displacements, 1);
 
     return IRRT_OK;
 }
@@ -155,7 +155,7 @@ void StaticStructural :: solveYourself()
     if ( this->isParallel() ) {
  #ifdef __VERBOSE_PARALLEL
         // force equation numbering before setting up comm maps
-        OOFEM_LOG_INFO( "[process rank %d] neq is %d\n", this->giveRank(), this->giveNumberOfDomainEquations(EID_MomentumBalance) );
+        OOFEM_LOG_INFO( "[process rank %d] neq is %d\n", this->giveRank(), this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering()) );
  #endif
 
         // set up communication patterns
@@ -193,7 +193,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
             OOFEM_ERROR("Couldn't create requested sparse matrix of type %d", sparseMtrxType);
         }
 
-        this->stiffnessMatrix->buildInternalStructure( this, di, EID_MomentumBalance, EModelDefaultEquationNumbering() );
+        this->stiffnessMatrix->buildInternalStructure( this, di, EModelDefaultEquationNumbering() );
     }
     this->internalForces.resize(neq);
 
@@ -203,7 +203,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     // Build initial/external load
     FloatArray externalForces(neq);
     externalForces.zero();
-    this->assembleVector( externalForces, tStep, EID_MomentumBalance, ExternalForcesVector, VM_Total,
+    this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
 #ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
@@ -243,14 +243,15 @@ void StaticStructural :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 {
     if ( cmpn == InternalRhs ) {
         this->internalForces.zero();
-        this->assembleVector(this->internalForces, tStep, EID_MomentumBalance, InternalForcesVector, VM_Total,
+        this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), d, & this->eNorm);
 #ifdef __PARALLEL_MODE
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
+        internalVarUpdateStamp = tStep->giveSolutionStateCounter(); // Hack for linearstatic
     } else if ( cmpn == NonLinearLhs ) {
         this->stiffnessMatrix->zero();
-        this->assemble(this->stiffnessMatrix, tStep, EID_MomentumBalance, TangentStiffnessMatrix, EModelDefaultEquationNumbering(), d);
+        this->assemble(this->stiffnessMatrix, tStep, TangentStiffnessMatrix, EModelDefaultEquationNumbering(), d);
     } else {
         OOFEM_ERROR("Unknown component");
     }
@@ -348,23 +349,20 @@ StaticStructural :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 int
 StaticStructural :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
 {
-    int mapSize = commMap.giveSize();
     int count = 0, pcount = 0;
     Domain *domain = this->giveDomain(1);
 
     if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            count += domain->giveDofManager( commMap.at(i) )->giveNumberOfDofs();
+        for ( int map: commMap ) {
+            count += domain->giveDofManager( map )->giveNumberOfDofs();
         }
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
     } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            DofManager *dman = domain->giveDofManager( commMap.at(i) );
-            int ndofs = dman->giveNumberOfDofs();
-            for ( int j = 1; j <= ndofs; j++ ) {
-                Dof *jdof = dman->giveDof(j);
-                if ( jdof->isPrimaryDof() && jdof->__giveEquationNumber() > 0 ) {
+        for ( int map: commMap ) {
+            DofManager *dman = domain->giveDofManager( map );
+            for ( Dof *dof: *dman ) {
+                if ( dof->isPrimaryDof() && dof->__giveEquationNumber() > 0 ) {
                     count++;
                 } else {
                     pcount++;
@@ -378,8 +376,8 @@ StaticStructural :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * pcount );
     } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
-        for ( int i = 1; i <= mapSize; i++ ) {
-            count += domain->giveElement( commMap.at(i) )->estimatePackSize(buff);
+        for ( int map: commMap ) {
+            count += domain->giveElement( map )->estimatePackSize(buff);
         }
 
         return count;

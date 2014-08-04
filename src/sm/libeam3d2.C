@@ -80,7 +80,7 @@ LIBeam3d2 :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
         l = this->computeLength();
     }
 
-    ksi   = gp->giveCoordinate(1);
+    ksi   = gp->giveNaturalCoordinate(1);
 
     answer.resize(6, 12);
     answer.zero();
@@ -117,9 +117,8 @@ void
 LIBeam3d2 :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
@@ -227,7 +226,7 @@ LIBeam3d2 :: computeVolumeAround(GaussPoint *gp)
 
 
 void
-LIBeam3d2 :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+LIBeam3d2 :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
@@ -338,7 +337,7 @@ LIBeam3d2 :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 
@@ -474,7 +473,7 @@ LIBeam3d2 :: updateTempTriad(TimeStep *tStep)
     FloatMatrix dR(3, 3);
 
     // ask element's displacement increments
-    this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, u);
+    this->computeVectorOf(VM_Incremental, tStep, u);
 
     // interpolate spin at the centre
     centreSpin.at(1) = 0.5 * ( u.at(4) + u.at(10) );
@@ -546,7 +545,7 @@ LIBeam3d2 :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
     FloatArray ui, PrevEpsilon;
     FloatMatrix b;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Incremental, tStep, ui);
+    this->computeVectorOf(VM_Incremental, tStep, ui);
 
     this->computeBmatrixAt(gp, b);
     // increment of strains
@@ -569,7 +568,7 @@ LIBeam3d2 :: giveCurrentLength(TimeStep *tStep)
     double dx, dy, dz;
     FloatArray u;
 
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, u);
+    this->computeVectorOf(VM_Total, tStep, u);
 
     dx = ( this->giveNode(2)->giveCoordinate(1) + u.at(7) ) -
          ( this->giveNode(1)->giveCoordinate(1) + u.at(1) );
@@ -656,8 +655,8 @@ LIBeam3d2 :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray 
 {
     double layerYCoord, layerZCoord;
 
-    layerZCoord = slaveGp->giveCoordinate(2);
-    layerYCoord = slaveGp->giveCoordinate(1);
+    layerZCoord = slaveGp->giveNaturalCoordinate(2);
+    layerYCoord = slaveGp->giveNaturalCoordinate(1);
 
     answer.resize(3); // {Exx,GMzx,GMxy}
 

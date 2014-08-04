@@ -62,7 +62,7 @@ class LSpace  : public NLStructuralElement, public ZZNodalRecoveryModelInterface
 public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface,
 public SpatialLocalizerInterface,
 public EIPrimaryUnknownMapperInterface,
-public HuertaErrorEstimatorInterface, public HuertaRemeshingCriteriaInterface
+public HuertaErrorEstimatorInterface
 {
 protected:
     static FEI3dHexaLin interpolation;
@@ -72,7 +72,7 @@ public:
     virtual ~LSpace() { }
 
     virtual int computeNumberOfDofs() { return 24; }
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
@@ -82,8 +82,6 @@ public:
     virtual int testElementExtension(ElementExtension ext)
     { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
@@ -91,19 +89,12 @@ public:
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
-    virtual void NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                           InternalStateType type, TimeStep *tStep);
 
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
-    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-                                                                 TimeStep *tStep, const FloatArray &coords,
+    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
+                                                                 TimeStep *tStep, const FloatArray &lcoords,
                                                                  FloatArray &answer);
-    virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
-
-    virtual Element *HuertaErrorEstimatorI_giveElement() { return this; }
 
     virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,
                                                                   IntArray &localNodeIdArray, IntArray &globalNodeIdArray,
@@ -114,11 +105,7 @@ public:
     virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
     { computeLocalCoordinates(answer, coords); }
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-    { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
-
-    // HuertaRemeshingCriteriaInterface
-    virtual double HuertaRemeshingCriteriaI_giveCharacteristicSize();
-    virtual int HuertaRemeshingCriteriaI_givePolynOrder() { return 1; };
+    { computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer); }
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LSpace_Name; }

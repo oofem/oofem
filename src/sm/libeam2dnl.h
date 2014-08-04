@@ -70,8 +70,10 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
 
     virtual int computeNumberOfDofs() { return 6; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
+
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LIBeam2dNL_Name; }
@@ -93,14 +95,14 @@ protected:
     virtual void giveEdgeDofMapping(IntArray &answer, int) const;
     virtual double computeEdgeVolumeAround(GaussPoint *, int);
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-    { computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) ); }
+    { computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) ); }
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
     virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     // nonlinear part of geometrical eqs. for i-th component of strain vector.
-    virtual void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int);
+    void computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int);
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeGaussPoints();
     virtual double computeLength();

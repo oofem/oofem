@@ -1804,7 +1804,7 @@ void setSmoother(SmootherType mode)
         } else if ( mode == Smoother_SPR ) {
             gc [ 0 ].getActiveProblem()->giveDomain(id)->setSmoother( new SPRNodalRecoveryModel( gc [ 0 ].getActiveProblem()->giveDomain(id) ) );
         } else {
-            OOFEM_SIMPLE_ERROR("Unrecognized nodal recovery model");
+            OOFEM_ERROR("Unrecognized nodal recovery model");
         }
 
 //         gc [ 0 ].getActiveProblem()->giveDomain(id)->giveSmoother()->setRecoveryMode( -1, IntArray() );

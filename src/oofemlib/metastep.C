@@ -59,10 +59,7 @@ MetaStep :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, numberOfSteps, _IFT_MetaStep_nsteps);
 
-    if ( attributes ) {
-        delete attributes;
-    }
-
+    delete attributes;
     this->attributes = ir->GiveCopy();
     /*
      * this->readQuotedString (initString, "attributes", this->attributes, MetaStepAttrRecLenght);

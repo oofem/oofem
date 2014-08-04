@@ -87,7 +87,7 @@ public:
     virtual int testElementExtension(ElementExtension ext);
 
     virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
@@ -126,7 +126,7 @@ protected:
     virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-    { computeGlobalCoordinates( answer, * ( gp->giveCoordinates() ) ); }
+    { computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) ); }
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
     virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);

@@ -68,7 +68,7 @@ CompCol_ILUPreconditioner :: init(const SparseMtrx &A)
     } else if ( A.giveType() == SMT_DynCompCol ) {
         this->initialize( * ( ( DynCompCol * ) & A ) );
     } else {
-        OOFEM_SIMPLE_ERROR("unsupported sparse matrix type");
+        OOFEM_ERROR("unsupported sparse matrix type");
     }
 
 #ifdef TIME_REPORT
@@ -228,11 +228,10 @@ CompCol_ILUPreconditioner :: initialize(const DynCompCol &A)
     }
 
 #else
-    std :: map< int, double > :: iterator pos;
     // Get size of l and u
     for ( i = 0; i < dim_ [ 1 ]; i++ ) {
-        for ( pos = A.column(i)->begin(); pos != A.column(i)->end(); ++pos ) {
-            if ( pos->first > i ) {
+        for ( auto &val: A.column(i) ) {
+            if ( val.first > i ) {
                 l_nz_++;
             } else {
                 u_nz_++;
@@ -252,15 +251,15 @@ CompCol_ILUPreconditioner :: initialize(const DynCompCol &A)
         l_colptr_(i + 1) = l_colptr_(i);
         u_colptr_(i + 1) = u_colptr_(i);
 
-        for ( pos = A.column(i)->begin(); pos != A.column(i)->end(); ++pos ) {
-            if ( pos->first > i ) {
+        for ( auto &val: A.column(i) ) {
+            if ( val.first > i ) {
                 k = l_colptr_(i + 1)++;
-                l_val_(k) = pos->second;
-                l_rowind_(k) = pos->first;
-            } else if ( pos->first <= i ) {
+                l_val_(k) = val.second;
+                l_rowind_(k) = val.first;
+            } else if ( val.first <= i ) {
                 k = u_colptr_(i + 1)++;
-                u_val_(k) = pos->second;
-                u_rowind_(k) = pos->first;
+                u_val_(k) = val.second;
+                u_rowind_(k) = val.first;
             }
         }
     }

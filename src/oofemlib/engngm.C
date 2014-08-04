@@ -70,6 +70,7 @@
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
  #include "processcomm.h"
+ #include "loadbalancer.h"
 #endif
 
 #include <cstdio>
@@ -107,6 +108,8 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     nonLinFormulation = UNKNOWN;
 
     outputStream          = NULL;
+
+    referenceFileName     = "";
 
     domainList            = new AList< Domain >(0);
     metaStepList          = new AList< MetaStep >(0);
@@ -197,22 +200,13 @@ EngngModel :: ~EngngModel()
 // destructor
 {
     if ( previousStep == currentStep ) {
-        if ( previousStep != NULL ) {
-            delete this->currentStep;
-        }
+        delete this->currentStep;
     } else {
-        if ( currentStep != NULL ) {
-            delete currentStep;
-        }
-
-        if ( previousStep != NULL ) {
-            delete previousStep;
-        }
+        delete currentStep;
+        delete previousStep;
     }
 
-    if ( stepWhenIcApply != NULL ) {
-        delete stepWhenIcApply;
-    }
+    delete stepWhenIcApply;
 
     delete domainList;
     delete metaStepList;
@@ -221,13 +215,9 @@ EngngModel :: ~EngngModel()
     delete parallelContextList;
 #endif
 
-    if ( exportModuleManager ) {
-        delete exportModuleManager;
-    }
+    delete exportModuleManager;
 
-    if ( initModuleManager ) {
-        delete initModuleManager;
-    }
+    delete initModuleManager;
 
     // master deletes the context
     if ( master == NULL ) {
@@ -239,30 +229,17 @@ EngngModel :: ~EngngModel()
         fclose(outputStream);
     }
 
-    if ( defaultErrEstimator ) {
-        delete defaultErrEstimator;
-    }
+    delete defaultErrEstimator;
 
 #ifdef __PARALLEL_MODE
     if ( loadBalancingFlag ) {
-        if ( lb ) {
-            delete lb;
-        }
-
-        if ( lbm ) {
-            delete lbm;
-        }
+        delete lb;
+        delete lbm;
     }
 
-    if ( communicator ) {
-        delete communicator;
-    }
-    if ( nonlocCommunicator ) {
-        delete nonlocCommunicator;
-    }
-    if ( commBuff ) {
-        delete commBuff;
-    }
+    delete communicator;
+    delete nonlocCommunicator;
+    delete commBuff;
 #endif
 }
 
@@ -318,6 +295,11 @@ EngngModel :: Instanciate_init(const char *dataOutputFileName, int ndomains)
 int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const char *dataOutputFileName, const char *desc)
 // simple input - only number of steps variable is read
 {
+    OOFEMTXTDataReader *txtReader = dynamic_cast<OOFEMTXTDataReader*> (dr);
+    if(txtReader != NULL) {
+        referenceFileName = std :: string(txtReader->giveDataSourceName());
+    }
+
     bool inputReaderFinish = true;
 
     this->Instanciate_init(dataOutputFileName, this->ndomains);
@@ -849,7 +831,7 @@ void EngngModel :: printYourself()
     printf("number of eq's : %d\n", numberOfEquations);
 }
 
-void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
                             CharType type, const UnknownNumberingScheme &s, Domain *domain)
 //
 // assembles matrix
@@ -885,8 +867,8 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
         this->giveElementCharacteristicMatrix(mat, ielem, type, tStep, domain);
 
         if ( mat.isNotEmpty() ) {
-            element->giveLocationArray(loc, eid, s);
-            if ( element->giveRotationMatrix(R, eid) ) {
+            element->giveLocationArray(loc, s);
+            if ( element->giveRotationMatrix(R) ) {
                 mat.rotatedWith(R);
             }
 
@@ -903,7 +885,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
-            bc->assemble(answer, tStep, eid, type, s, s);
+            bc->assemble(answer, tStep, type, s, s);
         }
     }
 
@@ -914,7 +896,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
 }
 
 
-void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
+void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
                             CharType type, const UnknownNumberingScheme &rs, const UnknownNumberingScheme &cs,
                             Domain *domain)
 // Same as assemble, but with different numbering for rows and columns
@@ -944,10 +926,10 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
 
         this->giveElementCharacteristicMatrix(mat, ielem, type, tStep, domain);
         if ( mat.isNotEmpty() ) {
-            element->giveLocationArray(r_loc, eid, rs);
-            element->giveLocationArray(c_loc, eid, cs);
+            element->giveLocationArray(r_loc, rs);
+            element->giveLocationArray(c_loc, cs);
             // Rotate it
-            if ( element->giveRotationMatrix(R, eid) ) {
+            if ( element->giveRotationMatrix(R) ) {
                 mat.rotatedWith(R);
             }
 
@@ -964,7 +946,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
     for ( int i = 1; i <= nbc; ++i ) {
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
-            bc->assemble(answer, tStep, eid, type, rs, cs);
+            bc->assemble(answer, tStep, type, rs, cs);
         }
     }
 
@@ -975,7 +957,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep, EquationID eid,
 }
 
 
-void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep,
                                   CharType type, ValueModeType mode,
                                   const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
@@ -993,8 +975,8 @@ void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep, EquationI
     }
 
     this->assembleVectorFromDofManagers(answer, tStep, type, mode, s, domain, eNorms);
-    this->assembleVectorFromElements(answer, tStep, eid, type, mode, s, domain, eNorms);
-    this->assembleVectorFromBC(answer, tStep, eid, type, mode, s, domain, eNorms);
+    this->assembleVectorFromElements(answer, tStep, type, mode, s, domain, eNorms);
+    this->assembleVectorFromBC(answer, tStep, type, mode, s, domain, eNorms);
 
 #ifdef __PARALLEL_MODE
     if ( this->isParallel() ) {
@@ -1064,7 +1046,7 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
 }
 
 
-void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep,
                                         CharType type, ValueModeType mode,
                                         const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
@@ -1077,7 +1059,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
         Load *load;
 
         if ( ( abc = dynamic_cast< ActiveBoundaryCondition * >(bc) ) ) {
-            abc->assembleVector(answer, tStep, eid, type, mode, s, eNorms);
+            abc->assembleVector(answer, tStep, type, mode, s, eNorms);
         } else if ( bc->giveSetNumber() && ( load = dynamic_cast< Load * >(bc) ) && bc->isImposed(tStep) ) {
             // Now we assemble the corresponding load type fo the respective components in the set:
             IntArray dofids, loc, dofIDarry, bNodes;
@@ -1097,11 +1079,11 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                     element->computeLoadVector(charVec, bodyLoad, type, mode, tStep);
 
                     if ( charVec.isNotEmpty() ) {
-                        if ( element->giveRotationMatrix(R, eid) ) {
+                        if ( element->giveRotationMatrix(R) ) {
                             charVec.rotatedWith(R, 't');
                         }
 
-                        element->giveLocationArray(loc, eid, s, & dofids);
+                        element->giveLocationArray(loc, s, & dofids);
                         answer.assemble(charVec, loc);
 
                         if ( eNorms ) {
@@ -1119,11 +1101,11 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
 
                     if ( charVec.isNotEmpty() ) {
                         element->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-                        if ( element->computeDofTransformationMatrix(R, bNodes, false, eid) ) {
+                        if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
                             charVec.rotatedWith(R, 't');
                         }
 
-                        element->giveBoundaryLocationArray(loc, bNodes, eid, s, & dofids);
+                        element->giveBoundaryLocationArray(loc, bNodes, s, & dofids);
                         answer.assemble(charVec, loc);
 
                         if ( eNorms ) {
@@ -1141,11 +1123,11 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
 
                     if ( charVec.isNotEmpty() ) {
                         element->giveInterpolation()->boundaryEdgeGiveNodes(bNodes, boundary);
-                        if ( element->computeDofTransformationMatrix(R, bNodes, false, eid) ) {
+                        if ( element->computeDofTransformationMatrix(R, bNodes, false) ) {
                             charVec.rotatedWith(R, 't');
                         }
 
-                        element->giveBoundaryLocationArray(loc, bNodes, eid, s, & dofids);
+                        element->giveBoundaryLocationArray(loc, bNodes, s, & dofids);
                         answer.assemble(charVec, loc);
 
                         if ( eNorms ) {
@@ -1161,11 +1143,11 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
                     node->computeLoadVector(charVec, nLoad, type, tStep, mode);
 
                     if ( charVec.isNotEmpty() ) {
-                        if ( node->computeM2LTransformation(R, dofIDarry) ) {
+                        if ( node->computeM2LTransformation(R, nLoad->giveDofIDs()) ) {
                             charVec.rotatedWith(R, 't');
                         }
 
-                        node->giveCompleteLocationArray(loc, s);
+                        node->giveLocationArray(nLoad->giveDofIDs(), loc, s);
                         answer.assemble(charVec, loc);
 
                         if ( eNorms ) {
@@ -1181,7 +1163,7 @@ void EngngModel :: assembleVectorFromBC(FloatArray &answer, TimeStep *tStep, Equ
 }
 
 
-void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tStep, EquationID eid,
+void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tStep,
                                               CharType type, ValueModeType mode,
                                               const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 //
@@ -1226,10 +1208,10 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
 
         this->giveElementCharacteristicVector(charVec, i, type, mode, tStep, domain);
         if ( charVec.isNotEmpty() ) {
-            if ( element->giveRotationMatrix(R, eid) ) {
+            if ( element->giveRotationMatrix(R) ) {
                 charVec.rotatedWith(R, 't');
             }
-            element->giveLocationArray(loc, eid, s, & dofids);
+            element->giveLocationArray(loc, s, & dofids);
 
 #ifdef _OPENMP
  #pragma omp critical
@@ -1248,7 +1230,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
 
 
 void
-EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, EquationID eid, CharType type, Domain *domain)
+EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, CharType type, Domain *domain)
 {
     // Simply assembles contributions from each element in domain
     IntArray loc;
@@ -1278,13 +1260,13 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Eq
             continue;
         }
 
-        element->giveLocationArray(loc, eid, dn);
+        element->giveLocationArray(loc, dn);
 
         // Take the tangent from the previous step
         ///@todo This is not perfect. It is probably no good for viscoelastic materials, and possibly other scenarios that are rate dependent
         ///(tangent will be computed for the previous step, with whatever deltaT it had)
         element->giveCharacteristicMatrix(charMatrix, type, tStep);
-        element->computeVectorOf(eid, VM_Incremental, tStep, delta_u);
+        element->computeVectorOf(VM_Incremental, tStep, delta_u);
         charVec.beProductOf(charMatrix, delta_u);
 
         ///@todo Deal with element deactivation and reactivation properly.
@@ -1892,8 +1874,8 @@ EngngModel :: balanceLoad(TimeStep *tStep)
                     fprintf( stderr, "[%d]: %5d[%d] shared ", myrank, i, giveDomain(1)->giveDofManager(i)->giveGlobalNumber() );
                 }
 
-                for ( int j = 1; j <= giveDomain(1)->giveDofManager(i)->giveNumberOfDofs(); j++ ) {
-                    fprintf( stderr, "(%d)", giveDomain(1)->giveDofManager(i)->giveDof(j)->giveEquationNumber(dn) );
+                for ( Dof *dof: *giveDomain(1)->giveDofManager(i) ) {
+                    fprintf( stderr, "(%d)", dof->giveEquationNumber(dn) );
                 }
 
                 fprintf(stderr, "\n");
@@ -2043,9 +2025,7 @@ EngngModel :: packDofManagers(ArrayWithNumbering *srcData, ProcessCommunicator &
     ///@todo Must fix: Internal dofmanagers in xfem and bc
     for ( int i = 1; i <= toSendMap->giveSize(); i++ ) {
         DofManager *dman = domain->giveDofManager( toSendMap->at(i) );
-        int ndofs = dman->giveNumberOfDofs();
-        for ( int j = 1; j <= ndofs; j++ ) {
-            Dof *jdof = dman->giveDof(j);
+        for ( Dof *jdof: *dman ) {
             if ( jdof->isPrimaryDof() ) {
                 int eqNum = jdof->giveEquationNumber(s);
                 if ( eqNum ) {
@@ -2071,13 +2051,11 @@ EngngModel :: unpackDofManagers(ArrayWithNumbering *destData, ProcessCommunicato
     double value;
 
     ///@todo Shouldn't hardcode domain number 1
-    ///@todo Must fix: Internal dofmanagers in xfem and bc
+    ///@todo Must fix: Internal dofmanagers in bc
     for ( int i = 1; i <= toRecvMap->giveSize(); i++ ) {
         DofManager *dman = domain->giveDofManager( toRecvMap->at(i) );
-        int ndofs = dman->giveNumberOfDofs();
         dofManagerParallelMode dofmanmode = dman->giveParallelMode();
-        for ( int j = 1; j <= ndofs; j++ ) {
-            Dof *jdof = dman->giveDof(j);
+        for ( Dof *jdof: *dman ) {
             int eqNum = jdof->giveEquationNumber(s);
             if ( jdof->isPrimaryDof() && eqNum ) {
                 result &= pcbuff->unpackDouble(value);

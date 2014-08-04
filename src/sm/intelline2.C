@@ -60,7 +60,7 @@ IntElLine2 :: computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer)
 {
     // Returns the modified N-matrix which multiplied with u give the spatial jump.
     FloatArray N;
-    interp.evalN( N, * ip->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interp.evalN( N, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 12);
     answer.zero();
@@ -78,9 +78,8 @@ void
 IntElLine2 :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         integrationRulesArray [ 0 ]->SetUpPointsOnLine(4, _2dInterface); //@todo - should be a parameter with num of ip

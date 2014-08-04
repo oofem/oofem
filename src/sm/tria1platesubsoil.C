@@ -53,7 +53,7 @@ REGISTER_Element(Tria1PlateSubSoil);
 FEI2dTrLin Tria1PlateSubSoil :: interp_lin(1, 2);
 
 Tria1PlateSubSoil :: Tria1PlateSubSoil(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(),
+    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this),
     SPRNodalRecoveryModelInterface()
 {
     numberOfGaussPoints = 1;
@@ -72,9 +72,8 @@ void
 Tria1PlateSubSoil :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -93,18 +92,17 @@ Tria1PlateSubSoil :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int l
 // Returns the [3x3] strain-displacement matrix {B} of the receiver,
 // evaluated at gp.
 {
-  FloatArray n, ns;
-  FloatMatrix dn, dns;
+    FloatArray n, ns;
+    FloatMatrix dn, dns;
 
-  this->interp_lin.evaldNdx( dn, * gp->giveCoordinates(),  FEIElementGeometryWrapper(this) );
-  this->interp_lin.evalN( n, * gp->giveCoordinates(),  FEIElementGeometryWrapper(this) );
+    this->interp_lin.evaldNdx( dn, * gp->giveNaturalCoordinates(),  FEIElementGeometryWrapper(this) );
+    this->interp_lin.evalN( n, * gp->giveNaturalCoordinates(),  FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 3);
     answer.zero();
 
     ///@todo Check sign here
     for ( int i = 0; i < 3; ++i ) {
-      
       answer(0, i) = n(i); // eps_z
       answer(1, i) = dn(i, 0); // gamma_xz
       answer(2, i) = dn(i, 1); // gamma_yz
@@ -135,7 +133,7 @@ Tria1PlateSubSoil :: initializeFrom(InputRecord *ir)
 
 
 void
-Tria1PlateSubSoil :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Tria1PlateSubSoil :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_w};
 }
@@ -166,7 +164,7 @@ Tria1PlateSubSoil :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ * weight;
 }
 
@@ -229,7 +227,7 @@ Tria1PlateSubSoil :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &a
 void
 Tria1PlateSubSoil :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-  this->computeNmatrixAt(* sgp->giveCoordinates(), answer);
+  this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), answer);
 }
 
 void
@@ -265,7 +263,7 @@ Tria1PlateSubSoil :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 Tria1PlateSubSoil :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveCoordinates() );
+    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
 }
 
 

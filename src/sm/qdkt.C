@@ -59,8 +59,9 @@ FEI2dQuadLin QDKTPlate :: interp_lin(1, 2);
 
 QDKTPlate :: QDKTPlate(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain),
-    ZZNodalRecoveryModelInterface(),
-    SPRNodalRecoveryModelInterface()
+    ZZNodalRecoveryModelInterface(this),
+    SPRNodalRecoveryModelInterface(),
+    ZZErrorEstimatorInterface(this)
 {
     numberOfDofMans = 4;
     numberOfGaussPoints = 4;
@@ -78,9 +79,8 @@ void
 QDKTPlate :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -96,8 +96,8 @@ QDKTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
   this->giveNodeCoordinates(x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4);
 
     // get gp coordinates
-    double ksi = gp->giveCoordinate(1);
-    double eta = gp->giveCoordinate(2);
+    double ksi = gp->giveNaturalCoordinate(1);
+    double eta = gp->giveNaturalCoordinate(2);
 
     // geometrical characteristics of element sides
     double dx4 = x2-x1;
@@ -287,10 +287,8 @@ QDKTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Note: the interpolation of rotations is quadratic
 // NOTE: linear interpolation returned instead
 {
-    FloatArray N(4);
+    FloatArray N;
 
-    answer.resize(3, 12);
-    answer.zero();
     giveInterpolation()->evalN( N, iLocCoord, FEIElementGeometryWrapper(this) );
 
     answer.beNMatrixOf(N, 3);
@@ -349,7 +347,7 @@ QDKTPlate :: initializeFrom(InputRecord *ir)
 
 
 void
-QDKTPlate :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+QDKTPlate :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_w, R_u, R_v};
 }
@@ -384,7 +382,7 @@ QDKTPlate :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
@@ -400,8 +398,6 @@ QDKTPlate :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     }
 
 
@@ -418,10 +414,8 @@ QDKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep
 //  different coordinate system in each node)
 {
     double dens, dV;
-    GaussPoint *gp;
     FloatArray force, ntf;
     FloatMatrix n, T;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
         OOFEM_ERROR("unknown load type");
@@ -437,9 +431,8 @@ QDKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep
     answer.clear();
 
     if ( force.giveSize() ) {
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            gp  = iRule->getIntegrationPoint(i);
-            this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), n);
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+            this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), n);
             dV  = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
             dens = this->giveCrossSection()->give('d', gp);
             ntf.beTProductOf(n, force);
@@ -554,13 +547,6 @@ QDKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType t
 }
 
 
-double
-QDKTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize()
-{
-    return sqrt(this->computeArea() * 2.0);
-}
-
-
 
 //
 // The element interface required by SPRNodalRecoveryModelInterface
@@ -611,7 +597,7 @@ QDKTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &ma
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(5); // {Exx,Eyy,GMyz,GMzx,GMxy}
@@ -629,7 +615,7 @@ QDKTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp
 {
     FloatArray n;
 
-    this->interp_lin.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.at(1, 1) = n.at(1);
@@ -657,7 +643,7 @@ QDKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 QDKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -665,7 +651,7 @@ QDKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 QDKTPlate :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -708,7 +694,7 @@ QDKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
 void
 QDKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-  this->computeNmatrixAt(* sgp->giveCoordinates(), answer);
+  this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), answer);
 }
 
 void
@@ -744,7 +730,7 @@ QDKTPlate :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 QDKTPlate :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveCoordinates() );
+    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
 }
 
 
@@ -928,8 +914,6 @@ QDKTPlate :: drawScalar(oofegGraphicContext &context)
             return;
         }
 
-        int ip;
-        GaussPoint *gp;
         IntArray ind(4);
         FloatArray *gpCoords;
         WCRec pp [ 9 ];
@@ -962,9 +946,8 @@ QDKTPlate :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].y = 0.25 * ( pp [ 0 ].y + pp [ 1 ].y + pp [ 2 ].y + pp [ 3 ].y );
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
-        for ( ip = 1; ip <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); ip++ ) {
-            gp = integrationRulesArray [ 0 ]->getIntegrationPoint(ip - 1);
-            gpCoords = gp->giveCoordinates();
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
+            gpCoords = gp->giveNaturalCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;
                 ind.at(2) = 4;

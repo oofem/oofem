@@ -38,6 +38,7 @@
 #include "crosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
+#include "structuralms.h"
 #include "floatmatrix.h"
 #include "intarray.h"
 #include "floatarray.h"
@@ -68,7 +69,7 @@ LIBeam3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
     double l, ksi, n1, n2, n1x, n2x;
 
     l     = this->computeLength();
-    ksi   = gp->giveCoordinate(1);
+    ksi   = gp->giveNaturalCoordinate(1);
 
     answer.resize(6, 12);
     answer.zero();
@@ -106,9 +107,8 @@ void
 LIBeam3d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
@@ -213,8 +213,25 @@ LIBeam3d :: computeVolumeAround(GaussPoint *gp)
 }
 
 
+int
+LIBeam3d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    ///@todo This should be a common inheritance for all 3d beams (and a similar one for 2D beams) 
+    /// to support all the sensible moment/force tensors. 
+    if ( type == IST_BeamForceMomentumTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        return 1;
+    } else if ( type == IST_BeamStrainCurvatureTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        return 1;
+    } else {
+        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+    }
+}
+
+
 void
-LIBeam3d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+LIBeam3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
@@ -304,7 +321,7 @@ LIBeam3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 
@@ -429,8 +446,8 @@ LIBeam3d :: FiberedCrossSectionInterface_computeStrainVectorInFiber(FloatArray &
 {
     double layerYCoord, layerZCoord;
 
-    layerZCoord = slaveGp->giveCoordinate(2);
-    layerYCoord = slaveGp->giveCoordinate(1);
+    layerZCoord = slaveGp->giveNaturalCoordinate(2);
+    layerYCoord = slaveGp->giveNaturalCoordinate(1);
 
     answer.resize(3); // {Exx,GMzx,GMxy}
 

@@ -54,7 +54,7 @@ RowColumn :: RowColumn(int n, int st)
         row    = ( double * ) calloc( size, sizeof( double ) );
         column = ( double * ) calloc( size, sizeof( double ) );
         if ( !row || !column ) {
-            OOFEM_SIMPLE_ERROR("RowColumn :: RowColumn - Failed to allocate memory");
+            OOFEM_ERROR("Failed to allocate memory");
         }
     } else {
         row    = NULL;
@@ -96,7 +96,7 @@ void RowColumn :: checkBounds(int i)
 // Checks that the receiver (k) possesses coefficients (i,k) and (k,i).
 {
     if ( i < start || i >= number ) {
-        OOFEM_SIMPLE_ERROR("RowColumn::checkBounds : error in bounds of RowColumn %d (start=%d) : no entry %d", number, start, i);
+        OOFEM_ERROR("error in bounds of RowColumn %d (start=%d) : no entry %d", number, start, i);
     }
 }
 
@@ -109,7 +109,7 @@ void RowColumn :: checkSizeTowards(const IntArray &loc)
 
     n = loc.giveSize();
     if ( !n ) {
-        OOFEM_SIMPLE_ERROR("RowColumn::checkSizeTowards : error in RowCol::checkBounds : 0-size location array");
+        OOFEM_ERROR("0-size location array");
     }
 
     // get first non-zero coefficient in loc
@@ -176,7 +176,7 @@ RowColumn :: growTo(int newStart)
 
 #  ifdef DEBUG
     if ( newStart <= 0 || newStart > start ) {
-        OOFEM_SIMPLE_ERROR("RowColumn::growTo : cannot enlarge RowCol %d (start=%d) to %d", number, start, newStart);
+        OOFEM_ERROR("cannot enlarge RowCol %d (start=%d) to %d", number, start, newStart);
     }
 
 #  endif
@@ -185,7 +185,7 @@ RowColumn :: growTo(int newStart)
     newRow    = ( double * ) calloc( newSize, sizeof( double ) );
     newColumn = ( double * ) calloc( newSize, sizeof( double ) );
     if ( !newRow || !newColumn ) {
-        OOFEM_SIMPLE_ERROR("RowColumn :: growTo - Failed to allocate memory");
+        OOFEM_ERROR("Failed to allocate memory");
     }
     size      = number - start;
 
@@ -262,7 +262,7 @@ RowColumn :: GiveCopy()
         newRow    = ( double * ) malloc( size * sizeof( double ) );
         newColumn = ( double * ) malloc( size * sizeof( double ) );
         if ( !newRow || !newColumn ) {
-            OOFEM_SIMPLE_ERROR("RowColumn :: GiveCopy - Failed to allocate memory");
+            OOFEM_ERROR("Failed to allocate memory");
         }
 
         p1  = row;

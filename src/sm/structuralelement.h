@@ -110,8 +110,6 @@ public:
     virtual void giveCharacteristicMatrix(FloatMatrix &answer, CharType, TimeStep *tStep);
     virtual void giveCharacteristicVector(FloatArray &answer, CharType type, ValueModeType mode, TimeStep *tStep);
 
-    virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const { this->giveDofManDofIDMask(inode, EID_MomentumBalance, answer); }
-    virtual void giveDefaultInternalDofManDofIDMask(int inode, IntArray &answer) const { this->giveInternalDofManDofIDMask(inode, EID_MomentumBalance, answer); }
     /**
      * Computes mass matrix of receiver. Default implementation returns consistent mass matrix and uses
      * numerical integration. Returns result of this->computeConsistentMassMatrix service, transformed into
@@ -161,8 +159,7 @@ public:
      * for numerical integration. Support for reduced or selected integration is implemented. The individual integration
      * rules are assumed to correspond to different terms from which the overall matrix is assembled.
      *
-     * If numberOfIntegrationRules is equal to
-     * 1, the full integration of all coefficients is performed. Otherwise, integration is performed using following rules.
+     * If there is one integration rule, the full integration of all coefficients is performed. Otherwise, integration is performed using following rules.
      * Each integration rule can specify start and end strain index of strain vector components for which is valid.
      * It is necessary to ensure that these start and end indexes, dividing geometrical matrix into blocks,
      * are not overlapping and that each strain component is included.

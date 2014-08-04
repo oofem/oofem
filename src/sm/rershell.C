@@ -167,9 +167,8 @@ void
 RerShell :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 8);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -600,7 +599,7 @@ RerShell :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(5); // {Exx,Eyy,GMyz,GMzx,GMxy}
@@ -617,15 +616,11 @@ void
 RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
-    GaussPoint *gp;
     FloatArray v;
 
     fprintf(file, "element %d ( %d):\n", this->giveLabel(), number);
 
-    for ( int i = 1; i <= integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = integrationRulesArray [ 0 ]->getIntegrationPoint(i - 1);
-        //gp->printOutputAt(file,tStep);
-
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
 
         fprintf( file, "  GP 1.%d :", gp->giveNumber() );
         this->giveIPValue(v, gp, IST_ShellStrainTensor, tStep);
@@ -663,7 +658,7 @@ RerShell :: printOutputAt(FILE *file, TimeStep *tStep)
 
 
 void
-RerShell :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+RerShell :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w, R_u, R_v, R_w};
 }
@@ -674,14 +669,6 @@ RerShell :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
                                                        InternalStateType type, TimeStep *tStep)
 {
     this->giveIPValue(answer, integrationRulesArray [ 0 ]->getIntegrationPoint(0), type, tStep);
-}
-
-
-void
-RerShell :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                      InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 
@@ -733,8 +720,7 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 
         return 1;
     } else {
-        answer.clear();
-        return 0;
+        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
     }
 }
 

@@ -86,7 +86,7 @@ FEI3dWedgeQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const
 void
 FEI3dWedgeQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    FloatArray n(15);
+    FloatArray n;
     this->evalN(n, lcoords, cellgeo);
 
     answer.resize(3);

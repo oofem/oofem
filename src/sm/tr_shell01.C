@@ -49,7 +49,7 @@
 namespace oofem {
 REGISTER_Element(TR_SHELL01);
 
-TR_SHELL01 :: TR_SHELL01(int n, Domain *aDomain) : StructuralElement(n, aDomain)
+TR_SHELL01 :: TR_SHELL01(int n, Domain *aDomain) : StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), ZZErrorEstimatorInterface(this), SpatialLocalizerInterface(this)
 {
     plate    = new CCTPlate3d(-1, aDomain);
     membrane = new TrPlaneStrRot3d(-1, aDomain);
@@ -155,14 +155,14 @@ TR_SHELL01 :: giveCharacteristicMatrix(FloatMatrix &answer, CharType mtrx, TimeS
 }
 
 bool
-TR_SHELL01 :: giveRotationMatrix(FloatMatrix &answer, EquationID eid)
+TR_SHELL01 :: giveRotationMatrix(FloatMatrix &answer)
 {
     IntArray loc(9);
     FloatMatrix aux1, aux2;
     int ncol;
 
-    bool t1 = plate->giveRotationMatrix(aux1, eid);
-    bool t2 =  membrane->giveRotationMatrix(aux2, eid);
+    bool t1 = plate->giveRotationMatrix(aux1);
+    bool t2 =  membrane->giveRotationMatrix(aux2);
 
     if ( t1 != t2 ) {
         OOFEM_ERROR("Transformation demand mismatch");
@@ -217,8 +217,6 @@ TR_SHELL01 :: giveInterface(InterfaceType interface)
         return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
     }
@@ -253,19 +251,6 @@ TR_SHELL01 :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
 
 
 //
-// The element interface required by ZZNodalRecoveryModel
-//
-
-
-double
-TR_SHELL01 :: ZZRemeshingCriteriaI_giveCharacteristicSize()
-{
-    return sqrt(plate->computeArea() * 2.0);
-}
-
-
-
-//
 // The element interface required by NodalAveragingRecoveryModel
 //
 void
@@ -276,15 +261,6 @@ TR_SHELL01 :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int
 }
 
 
-void
-TR_SHELL01 :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                        InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
-
-
 
 
 void
@@ -292,12 +268,11 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
     FloatArray v, aux;
-    GaussPoint *gp, *membraneGP;
+    GaussPoint *membraneGP;
     IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *iRule ) {
         fprintf( file, "  GP %2d.%-2d :", iRule->giveNumber(), gp->giveNumber() );
         membraneGP = membrane->giveDefaultIntegrationRulePtr()->getIntegrationPoint(gp->giveNumber() - 1);
         // Strain - Curvature
@@ -390,7 +365,7 @@ TR_SHELL01 :: ZZErrorEstimatorI_giveIntegrationRule()
         return this->compositeIR;
     } else {
         this->compositeIR = new GaussIntegrationRule(1, this, 1, 12);
-        this->compositeIR->setUpIntegrationPoints(_Triangle, plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(), _3dShell);
+        this->compositeIR->SetUpPointsOnTriangle(plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints(), _3dShell);
         return this->compositeIR;
     }
 }
@@ -451,12 +426,6 @@ TR_SHELL01 :: ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArra
     answer.at(6) = globTensor.at(1, 2); //mxyForce
 }
 
-int
-TR_SHELL01 :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return plate->computeLocalCoordinates(lcoords, coords);
-}
 
 double
 TR_SHELL01 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
@@ -604,13 +573,14 @@ TR_SHELL01 :: drawScalar(oofegGraphicContext &context)
         result += this->giveInternalStateAtNode(v2, context.giveIntVarType(), context.giveIntVarMode(), 2, tStep);
         result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
     } else if ( context.giveIntVarMode() == ISM_local ) {
-        int nip = plate->giveDefaultIntegrationRulePtr()->giveNumberOfIntegrationPoints();
+        double tot_w = 0.;
         FloatArray a, v;
-        for ( int _i = 1; _i <= nip; _i++ ) {
-            this->giveIPValue(a, plate->giveDefaultIntegrationRulePtr()->getIntegrationPoint(_i - 1), IST_ShellMomentumTensor, tStep);
-            v.add(a);
+        for ( GaussPoint *gp: *plate->giveDefaultIntegrationRulePtr() ) {
+            this->giveIPValue(a, gp, IST_ShellMomentumTensor, tStep);
+            v.add(gp->giveWeight(), a);
+            tot_w += gp->giveWeight();
         }
-        v.times(1. / nip);
+        v.times(1. / tot_w);
         v1 = v;
         v2 = v;
         v3 = v;

@@ -190,7 +190,7 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
         // add lsic stabilization term
         //this->giveCharacteristicMatrix(m1, LSICStabilizationTerm_MB, tStep);
         //m1.times( lscale / ( dscale * uscale * uscale ) );
-        this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, v);
+        this->computeVectorOfVelocities(VM_Total, tStep, v);
         //h.beProductOf(m1, v);
         //answer.assemble(h, vloc);
         this->computeLinearAdvectionTerm_MC(m1, tStep);
@@ -200,13 +200,13 @@ SUPGElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx, Value
 
         // add pressure term
         this->computePressureTerm_MB(m1, tStep);
-        this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
+        this->computeVectorOfPressures(VM_Total, tStep, v);
         h.beProductOf(m1, v);
         answer.assemble(h, vloc);
 
         // pressure term
         this->computePressureTerm_MC(m1, tStep);
-        this->computeVectorOf(EID_ConservationEquation, VM_Total, tStep, v);
+        this->computeVectorOfPressures(VM_Total, tStep, v);
         h.beProductOf(m1, v);
         answer.assemble(h, ploc);
     }
@@ -364,14 +364,12 @@ SUPGElement :: checkConsistency()
 void
 SUPGElement :: updateInternalState(TimeStep *tStep)
 {
-    IntegrationRule *iRule;
     FloatArray stress;
 
     // force updating strains & stresses
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        iRule = integrationRulesArray [ i ];
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            computeDeviatoricStress(stress, iRule->getIntegrationPoint(j), tStep);
+    for ( auto &iRule: integrationRulesArray ) {
+        for ( GaussPoint *gp: *iRule ) {
+            computeDeviatoricStress(stress, gp, tStep);
         }
     }
 }
@@ -386,8 +384,8 @@ SUPGElement :: printOutputAt(FILE *file, TimeStep *tStep)
     fprintf(file, "element %d :\n", number);
 #endif
 
-    for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
-        integrationRulesArray [ i ]->printOutputAt(file, tStep);
+    for ( auto &iRule: integrationRulesArray ) {
+        iRule->printOutputAt(file, tStep);
     }
 }
 
@@ -402,21 +400,21 @@ SUPGElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
 
     if ( type == IST_Velocity ) {
         answer.resize( this->giveSpatialDimension() );
-        int dofindx;
-        if ( ( dofindx = n->findDofWithDofId(V_u) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
-        } else if ( ( dofindx = n->findDofWithDofId(V_v) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
-        } else if ( ( dofindx = n->findDofWithDofId(V_w) ) ) {
-            answer.at(indx++) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
+        std::vector< Dof* >::const_iterator dofindx;
+        if ( ( dofindx = n->findDofWithDofId(V_u) ) != n->end() ) {
+            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Total, tStep);
+        } else if ( ( dofindx = n->findDofWithDofId(V_v) ) != n->end() ) {
+            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Total, tStep);
+        } else if ( ( dofindx = n->findDofWithDofId(V_w) ) != n->end() ) {
+            answer.at(indx++) = (*dofindx)->giveUnknown(VM_Total, tStep);
         }
 
         return 1;
     } else if ( type == IST_Pressure ) {
-        int dofindx;
-        if ( ( dofindx = n->findDofWithDofId(P_f) ) ) {
+        auto dofindx = n->findDofWithDofId(P_f);
+        if ( dofindx != n->end() ) {
             answer.resize(1);
-            answer.at(1) = n->giveDof(dofindx)->giveUnknown(VM_Total, tStep);
+            answer.at(1) = (*dofindx)->giveUnknown(VM_Total, tStep);
             return 1;
         } else {
             return 0;
@@ -428,24 +426,4 @@ SUPGElement :: giveInternalStateAtNode(FloatArray &answer, InternalStateType typ
 
 #endif
 
-
-#if 0
-void
-SUPGElement :: computeVectorOfPrescribed(EquationID ut, ValueModeType type, TimeStep *tStep, FloatArray &answer)
-{
-    double scale;
-    Element :: computeVectorOfPrescribed(ut, type, tStep, answer);
-    if ( domain->giveEngngModel()->giveEquationScalingFlag() ) {
-        if ( ut == EID_MomentumBalance ) {
-            scale = domain->giveEngngModel()->giveVariableScale(VST_Velocity);
-        } else if ( ut == EID_ConservationEquation ) {
-            scale = domain->giveEngngModel()->giveVariableScale(VST_Pressure);
-        } else {
-            scale = 1.0;
-        }
-
-        answer.times(1.0 / scale);
-    }
-}
-#endif
 } // end namespace oofem

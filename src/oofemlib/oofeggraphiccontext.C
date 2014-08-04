@@ -162,9 +162,8 @@ oofegGraphicContext :: testElementGraphicActivity(Element *e)
     if ( element_filter.empty() ) {
         return matFilterState;
     } else {
-        std :: list< Range > :: iterator rangeIter;
-        for ( rangeIter = this->element_filter.begin(); rangeIter != this->element_filter.end(); ++rangeIter ) {
-            if ( ( * rangeIter ).test( e->giveNumber() ) ) {
+        for ( Range &range: this->element_filter ) {
+            if ( range.test( e->giveNumber() ) ) {
                 elemFiltState = 1;
                 break;
             }

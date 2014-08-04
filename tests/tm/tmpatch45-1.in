@@ -1,6 +1,7 @@
 tmpatch45-1.out
 Test of tr1ht element with a constant heat source, adiabatic
-NonStationaryProblem nsteps 10 deltat 3600.0 alpha 0.5 nmodules 0
+NonStationaryProblem nsteps 10 deltat 3600.0 alpha 0.5 nmodules 1
+errorcheck
 #hom tstep_all
 domain HeatTransfer
 OutputManager tstep_all dofman_all element_all
@@ -18,8 +19,8 @@ ConstantFunction 1 f(t) 1.0
 #PiecewiseLinFunction 1 nPoints 2 t 2 -3600 36000 f(t) 2 1.0 36.0
 
 #%BEGIN_CHECK%
-#NODE tStep 0.00000000e+00 number 1 dof 1 unknown f value 2.86000000e+01
-#NODE tStep 3.60000000e+03 number 1 dof 1 unknown f value 3.22000000e+01
-#NODE tStep 1.80000000e+04 number 1 dof 1 unknown f value 4.66000000e+01
-#NODE tStep 3.24000000e+04 number 1 dof 1 unknown f value 6.10000000e+01
+#NODE tStep 1 number 1 dof 10 unknown d value 2.86000000e+01
+#NODE tStep 2 number 1 dof 10 unknown d value 3.22000000e+01
+#NODE tStep 6 number 1 dof 10 unknown d value 4.66000000e+01
+#NODE tStep 10 number 1 dof 10 unknown d value 6.10000000e+01
 #%END_CHECK%

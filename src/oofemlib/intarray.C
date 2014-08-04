@@ -101,11 +101,11 @@ void IntArray :: checkBounds(int i) const
 // Checks that the receiver includes an index i.
 {
     if ( i < 0 ) {
-        OOFEM_SIMPLE_ERROR("IntArray::checkBounds : array error on index : %d < 0", i);
+        OOFEM_ERROR("array error on index : %d < 0", i);
     }
 
     if ( i > this->giveSize() ) {
-        OOFEM_SIMPLE_ERROR("IntArray::checkBounds : array error on index : %d > %d", i, this->giveSize());
+        OOFEM_ERROR("array error on index : %d > %d", i, this->giveSize());
     }
 }
 #endif
@@ -184,7 +184,7 @@ int IntArray :: minimum() const
 {
 #ifdef DEBUG
     if ( this->isEmpty() ) {
-        OOFEM_SIMPLE_ERROR("IntArray :: minimum - Empty array.");
+        OOFEM_ERROR("Empty array.");
     }
 #endif
     return *std::min_element(values.begin(), values.end());
@@ -195,7 +195,7 @@ int IntArray :: maximum() const
 {
 #ifdef DEBUG
     if ( this->isEmpty() ) {
-        OOFEM_SIMPLE_ERROR("IntArray :: maximum - Empty array.");
+        OOFEM_ERROR("Empty array.");
     }
 #endif
     return *std::max_element(values.begin(), values.end());
@@ -288,17 +288,6 @@ int IntArray :: findFirstIndexOf(int value) const
 }
 
 
-void IntArray :: setValues(int n, ...)
-{
-    va_list vl;
-    va_start(vl, n);
-    this->values.resize(n);
-    for ( int i = 0; i < n; i++ ) {
-        this->values [ i ] = va_arg(vl, int);
-    }
-    va_end(vl);
-}
-
 int IntArray :: findSorted(int _val)   const
 {
     return std::binary_search (values.begin(), values.end(), _val);
@@ -374,6 +363,12 @@ int IntArray :: insertOnce(int _p)
     }
 
     return this->giveSize();
+}
+
+
+void IntArray :: sort()
+{
+    std::sort(this->begin(), this->end());
 }
 
 

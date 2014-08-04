@@ -133,12 +133,13 @@ public:
  */
 class ZZErrorEstimatorInterface : public Interface
 {
+private:
+    Element *element;
+
 public:
     /// Constructor
-    ZZErrorEstimatorInterface() { }
+    ZZErrorEstimatorInterface(Element *element): element(element) { }
 
-    /// Returns reference to corresponding element
-    virtual Element *ZZErrorEstimatorI_giveElement() = 0;
     /**
      * Computes the element contributions to global norms.
      * @param eNorm Element contribution to error norm.
@@ -154,7 +155,7 @@ public:
      * Default implementation returns element default rule.
      */
     virtual IntegrationRule *ZZErrorEstimatorI_giveIntegrationRule() {
-        return this->ZZErrorEstimatorI_giveElement()->giveDefaultIntegrationRulePtr();
+        return this->element->giveDefaultIntegrationRulePtr();
     }
 
     /**
@@ -214,25 +215,5 @@ public:
     virtual const char *giveClassName() const { return "ZZErrorEstimator"; }
 };
 
-/**
- * The corresponding element interface to ZZRemeshingCriteria class.
- * Declares the necessary services, which have to be provided by particular elements.
- */
-
-class ZZRemeshingCriteriaInterface : public Interface
-{
-public:
-    /// Constructor
-    ZZRemeshingCriteriaInterface() : Interface() { }
-    /**
-     * Determines the characteristic size of element. This quantity is defined as follows:
-     * For 1D it is the element length, for 2D it is the square root of element area.
-     */
-    virtual double ZZRemeshingCriteriaI_giveCharacteristicSize() = 0;
-    /**
-     * Returns the polynomial order of receiver trial functions.
-     */
-    virtual int ZZRemeshingCriteriaI_givePolynOrder() = 0;
-};
 } // end namespace oofem
 #endif // zzerrorestimator_h

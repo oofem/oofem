@@ -39,7 +39,6 @@
 #include "gausspoint.h"
 #include "matstatmapperint.h"
 #include "xfem/xfemelementinterface.h"
-#include "structuralinterfacematerial.h"
 
 namespace oofem {
 MMAClosestIPTransfer :: MMAClosestIPTransfer() : MaterialMappingAlgorithm()
@@ -51,20 +50,13 @@ MMAClosestIPTransfer :: __init(Domain *dold, IntArray &type, FloatArray &coords,
     SpatialLocalizer *sl = dold->giveSpatialLocalizer();
     this->source = sl->giveClosestIP(coords, elemSet, iCohesiveZoneGP);
 
-    if ( iCohesiveZoneGP ) {
-        XfemElementInterface *xFemEl = dynamic_cast< XfemElementInterface * >( source->giveElement() );
-
-        if ( xFemEl == NULL ) {
-            OOFEM_ERROR("xFemEl == NULL.\n");
-        }
-
-        mpMaterialStatus = xFemEl->mpCZMat->giveStatus(source);
-    } else {
-        mpMaterialStatus = source->giveMaterial()->giveStatus(source);
-    }
-
     if ( !source ) {
         OOFEM_ERROR("no suitable source found");
+    }
+
+    mpMaterialStatus = dynamic_cast<MaterialStatus*>(source->giveMaterialStatus());
+    if( mpMaterialStatus == NULL ) {
+        OOFEM_ERROR("Could not find material status.");
     }
 }
 
@@ -89,7 +81,7 @@ MMAClosestIPTransfer :: mapStatus(MaterialStatus &oStatus) const
 
         return 1;
     } else {
-        OOFEM_ERROR("source not set.\n");
+        OOFEM_ERROR("source not set.");
     }
 
     return 0;

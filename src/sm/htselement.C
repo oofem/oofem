@@ -61,7 +61,7 @@ HTSelement :: HTSelement(int n, Domain *aDomain) : StructuralElement(n, aDomain)
 
 
 void
-HTSelement :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+HTSelement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 {
     if ( inode <= numberOfEdges ) {
@@ -96,13 +96,12 @@ HTSelement :: initializeFrom(InputRecord *ir)
 void
 HTSelement :: computeGaussPoints()
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = numberOfEdges;
-        integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(numberOfEdges);
 
-        for ( int i = 0; i < numberOfIntegrationRules; i++ ) {
+        for ( int i = 0; i < numberOfEdges; i++ ) {
             integrationRulesArray [ i ] = new GaussIntegrationRule(i + 1, this, 1, 100);
-            integrationRulesArray [ i ]->setUpIntegrationPoints(_Line, numberOfGaussPoints, _1dMat);
+            integrationRulesArray [ i ]->SetUpPointsOnLine(numberOfGaussPoints, _1dMat);
         }
     }
 }
@@ -178,7 +177,6 @@ HTSelement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                      TimeStep *tStep)
 // Computes numerically the stiffness matrix of the receiver.
 {
-    GaussPoint *gp;
     IntegrationRule *iRule;
     double dV;
     answer.resize(numberOfDofs, numberOfDofs);
@@ -192,8 +190,7 @@ HTSelement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     for ( int i = 0; i < numberOfEdges; i++ ) {
         iRule = this->giveIntegrationRule(i);
         this->computeOutwardNormalMatrix(N, i + 1);
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
+        for ( GaussPoint *gp: *iRule ) {
             dV = this->computeVolumeAroundSide(gp, i + 1);
             this->computeFMatrixAt(Fedge, N, gp, i + 1);
             Fedge.times(dV);
@@ -252,13 +249,12 @@ HTSelement :: computePrescribedDisplacementLoadVectorAt(FloatArray &answer, Time
 
     //  FloatArray PuEdge,Pu(numberOfDofs);
     //FloatMatrix N;
-    //GaussPoint* gp;
     //IntegrationRule* iRule;
 
     FloatArray u;
     FloatMatrix K;
 
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
+    this->computeVectorOf(mode, tStep, u);
     if ( u.containsOnlyZeroes() ) {
         answer.clear();
     } else {
@@ -273,8 +269,7 @@ HTSelement :: computePrescribedDisplacementLoadVectorAt(FloatArray &answer, Time
     for ( int i = 0; i < numberOfEdges; i++ ) {
         this->computeOutwardNormalMatrix(N, i + 1);
         iRule =  this->giveIntegrationRule(i);
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
+        for ( GaussPoint *gp: *iRule ) {
             dV = this->computeVolumeAroundSide(gp, i + 1);
             this->computePuVectorAt(PuEdge, N, u, gp, i + 1);
             PuEdge.times(dV);
@@ -291,7 +286,6 @@ HTSelement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
 {
     double dV;
     BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
-    GaussPoint *gp;
     IntegrationRule *iRule;
     FloatArray force, PsEdge, Ps(numberOfDofs);
 
@@ -299,9 +293,8 @@ HTSelement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
     answer.resize(numberOfDofs);
     for ( int i = 0; i < numberOfEdges; i++ ) {
         iRule = this->giveIntegrationRule(i);
-        for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            gp = iRule->getIntegrationPoint(j);
-            edgeLoad->computeValueAt(force, tStep, * ( gp->giveCoordinates() ), mode);
+        for ( GaussPoint *gp: *iRule ) {
+            edgeLoad->computeValueAt(force, tStep, * ( gp->giveNaturalCoordinates() ), mode);
             dV = this->computeVolumeAroundSide(gp, i + 1);
             this->computePsVectorAt(PsEdge, force, gp);
             PsEdge.times(dV);
@@ -410,7 +403,7 @@ HTSelement :: computeUvMatrixAt(FloatMatrix &answer, GaussPoint *gp, int sideNum
     uv.resize(2);
 
 
-    double t = ( gp->giveCoordinate(1) + 1. ) / 2.;
+    double t = ( gp->giveNaturalCoordinate(1) + 1. ) / 2.;
 
     double Ax =  ( this->giveSideNode(sideNumber, 1)->giveCoordinate(1) ) - cgX;
     double Bx =  this->giveSideNode(sideNumber, 2)->giveCoordinate(1) - cgX;
@@ -482,7 +475,7 @@ HTSelement :: computeSvMatrixAt(FloatMatrix &answer, GaussPoint *gp, int sideNum
     Sv.resize(numberOfStressDofs, 3);
 
 
-    double t = ( gp->giveCoordinate(1) + 1. ) / 2.;
+    double t = ( gp->giveNaturalCoordinate(1) + 1. ) / 2.;
 
     double Ax =  this->giveSideNode(sideNumber, 1)->giveCoordinate(1);
     double Bx =  this->giveSideNode(sideNumber, 2)->giveCoordinate(1);
@@ -978,6 +971,6 @@ double
 HTSelement :: u_gammaLin(GaussPoint *gp)
 {
     //  double ksi = 1; must be calculated
-    return gp->giveCoordinate(1);
+    return gp->giveNaturalCoordinate(1);
 } //end of u_gammaLin
 } // end namespace oofem

@@ -37,11 +37,6 @@
 
 #include "qtrspace.h"
 #include "graddpelement.h"
-#include "zznodalrecoverymodel.h"
-#include "nodalaveragingrecoverymodel.h"
-#include "eleminterpmapperinterface.h"
-#include "huertaerrorestimator.h"
-#include "sprnodalrecoverymodel.h"
 
 #define _IFT_QTRSpaceGrad_Name "qtrspacegrad"
 
@@ -55,15 +50,14 @@ class FEI3dTetLin;
 class QTRSpaceGrad : public QTRSpace, public GradDpElement
 {
 protected:
-    ///@todo FIXME: Is this really supposed to be the linear interpolator used here?!
-    static FEI3dTetLin interpolation;
-
+    static FEI3dTetLin interpolation_lin;
+    
 public:
     QTRSpaceGrad(int, Domain *);
     virtual ~QTRSpaceGrad() { }
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QTRSpaceGrad_Name; }
@@ -75,7 +69,6 @@ protected:
     void computeGaussPoints();
     void computeNkappaMatrixAt(GaussPoint *, FloatMatrix &);
     void computeBkappaMatrixAt(GaussPoint *, FloatMatrix &);
-    virtual void computeNLBMatrixAt(FloatMatrix &, GaussPoint *, int i);
     StructuralElement *giveStructuralElement() { return this; }
     NLStructuralElement *giveNLStructuralElement() { return this; }
 

@@ -35,7 +35,6 @@
 #ifndef fracturemanager_h
 #define fracturemanager_h
 
-#include "alist.h"
 #include "datareader.h"
 #include "inputrecord.h"
 #include "contextioresulttype.h"

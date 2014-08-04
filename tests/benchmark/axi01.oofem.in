@@ -1,6 +1,7 @@
 axi01.oofem.out
 axisymmetric 2D pipe test in radial direction, inlet velocity (constant), outlet: pressure, no friction
-supg nsteps 10 lstype 0 smtype 1 deltaT 100.0 rtolv 1.e-4 alpha 0.5 renumber 1
+supg nsteps 10 lstype 0 smtype 1 deltaT 100.0 rtolv 1.e-4 alpha 0.5 renumber 1 nmodules 1
+errorcheck filename "axi01.oofem.in"
 domain 2dIncompFlow
 OutputManager tstep_all dofman_all element_all
 ndofman 231 nelem 400 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1
@@ -646,24 +647,24 @@ BoundaryCondition 3 loadTimeFunction 1 prescribedvalue 0.0
 ConstantFunction 1 f(t) 1.0
 
 #%BEGIN_CHECK% tolerance 1.e-1
-#NODE tStep 1.e3 number 2 dof 1 unknown v value  0.2
-#NODE tStep 1.e3 number 3 dof 1 unknown v value  0.2
-#NODE tStep 1.e3 number 24 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 25 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 26 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 27 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 28 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 29 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 30 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 31 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 32 dof 1 unknown v value 0.2
-#NODE tStep 1.e3 number 24 dof 2 unknown v value 0.0
-#NODE tStep 1.e3 number 25 dof 2 unknown v value 0.0
-#NODE tStep 1.e3 number 26 dof 2 unknown v value 0.0
-#NODE tStep 1.e3 number 27 dof 2 unknown v value 0.0
-#NODE tStep 1.e3 number 28 dof 2 unknown v value 0.0
-#NODE tStep 1.e3 number 29 dof 2 unknown v value 0.0
-#NODE tStep 1.e3 number 30 dof 2 unknown v value 0.0
-#NODE tStep 1.e3 number 31 dof 2 unknown v value 0.0
-#NODE tStep 1.e3 number 32 dof 2 unknown v value 0.0
+#NODE tStep 10 number 2 dof 7 unknown d value  0.2
+#NODE tStep 10 number 3 dof 7 unknown d value  0.2
+#NODE tStep 10 number 24 dof 7 unknown d value 0.2
+#NODE tStep 10 number 25 dof 7 unknown d value 0.2
+#NODE tStep 10 number 26 dof 7 unknown d value 0.2
+#NODE tStep 10 number 27 dof 7 unknown d value 0.2
+#NODE tStep 10 number 28 dof 7 unknown d value 0.2
+#NODE tStep 10 number 29 dof 7 unknown d value 0.2
+#NODE tStep 10 number 30 dof 7 unknown d value 0.2
+#NODE tStep 10 number 31 dof 7 unknown d value 0.2
+#NODE tStep 10 number 32 dof 7 unknown d value 0.2
+#NODE tStep 10 number 24 dof 8 unknown d value 0.0
+#NODE tStep 10 number 25 dof 8 unknown d value 0.0
+#NODE tStep 10 number 26 dof 8 unknown d value 0.0
+#NODE tStep 10 number 27 dof 8 unknown d value 0.0
+#NODE tStep 10 number 28 dof 8 unknown d value 0.0
+#NODE tStep 10 number 29 dof 8 unknown d value 0.0
+#NODE tStep 10 number 30 dof 8 unknown d value 0.0
+#NODE tStep 10 number 31 dof 8 unknown d value 0.0
+#NODE tStep 10 number 32 dof 8 unknown d value 0.0
 #%END_CHECK%

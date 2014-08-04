@@ -55,7 +55,7 @@ REGISTER_Element(QWedge);
 
 FEI3dWedgeQuad QWedge :: interpolation;
 
-QWedge :: QWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+QWedge :: QWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
     // Constructor.
 {
     numberOfDofMans = 15;
@@ -74,7 +74,7 @@ QWedge :: initializeFrom(InputRecord *ir)
 
 
 void
-QWedge :: giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const
+QWedge :: giveDofManDofIDMask(int inode, IntArray &answer) const
 // returns DofId mask array for inode element node.
 // DofId mask array determines the dof ordering requsted from node.
 // DofId mask array contains the DofID constants (defined in cltypes.h)
@@ -113,7 +113,7 @@ QWedge :: computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoin
         FloatArray x, y, z;
         FloatArray rotStrain, s;
 
-        this->giveMaterialOrientationAt( x, y, z, * gp->giveCoordinates() );
+        this->giveMaterialOrientationAt( x, y, z, * gp->giveNaturalCoordinates() );
         // Transform from global c.s. to material c.s.
 #if 0
         rotStrain = {
@@ -167,7 +167,7 @@ QWedge :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode
         FloatArray x, y, z;
         FloatMatrix Q;
 
-        this->giveMaterialOrientationAt( x, y, z, * gp->giveCoordinates() );
+        this->giveMaterialOrientationAt( x, y, z, * gp->giveNaturalCoordinates() );
 
 #if 0
         Q = {
@@ -234,7 +234,7 @@ double
 QWedge :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
-    double determinant = this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double determinant = this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     double weight      = gp->giveWeight();
 
     return ( determinant * weight );
@@ -245,8 +245,7 @@ void
 QWedge :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    numberOfIntegrationRules = 1;
-    integrationRulesArray = new IntegrationRule * [ numberOfIntegrationRules ];
+    integrationRulesArray.resize(1);
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
     this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 }
@@ -266,7 +265,7 @@ QWedge :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 45);
     answer.zero();
@@ -293,7 +292,7 @@ QWedge :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 45);
     answer.zero();
@@ -365,7 +364,7 @@ QWedge :: SPRNodalRecoveryMI_giveNumberOfIP()
 void
 QWedge :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
 {
-    if ( this->computeGlobalCoordinates( coords, * gp->giveCoordinates() ) == 0 ) {
+    if ( this->computeGlobalCoordinates( coords, * gp->giveNaturalCoordinates() ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 }
@@ -377,7 +376,6 @@ QWedge :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-
 void
 QWedge :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
@@ -385,9 +383,4 @@ QWedge :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
     OOFEM_WARNING("IP values will not be transferred to nodes. Use ZZNodalRecovery instead (parameter stype 1)");
 }
 
-void
-QWedge :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side, InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
 } // end namespace oofem

@@ -50,8 +50,6 @@
 //@}
 
 namespace oofem {
-class BCExportInterface;
-
 /**
  * Prescribes @f$ v_i = d_{ij}(x_j-\bar{x}_j) @f$ or @f$ s = d_{1j}(x_j - \bar{x}_j) @f$
  * where @f$ v_i @f$ are primary unknowns for the subscale.
@@ -107,18 +105,16 @@ public:
     /**
      * Computes the homogenized, macroscopic, field (stress).
      * @param sigma Output quantity (typically stress).
-     * @param eid Equation ID to which sigma belongs.
      * @param tStep Active time step.
      */
-    void computeField(FloatArray &sigma, EquationID eid, TimeStep *tStep);
+    void computeField(FloatArray &sigma, TimeStep *tStep);
 
     /**
      * Computes the macroscopic tangent for homogenization problems through sensitivity analysis.
      * @param tangent Output tangent.
-     * @param eid Equation ID to tangent belongs.
      * @param tStep Active time step.
      */
-    void computeTangent(FloatMatrix &tangent, EquationID eid, TimeStep *tStep);
+    void computeTangent(FloatMatrix &tangent, TimeStep *tStep);
 
     virtual void scale(double s) { gradient.times(s); }
 

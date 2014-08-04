@@ -32,6 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <Python.h>
+
 #include "userdefdirichletbc.h"
 
 #include "boundarycondition.h"
@@ -41,8 +43,6 @@
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
 #include "dofmanager.h"
-
-#include <Python.h>
 
 namespace oofem {
 REGISTER_BoundaryCondition(UserDefDirichletBC);

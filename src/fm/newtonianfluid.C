@@ -103,32 +103,40 @@ NewtonianFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gaus
     if ( gp->giveMaterialMode() == _2dFlow ) {
         double ekk = eps.at(1) + eps.at(2);
 
-        answer.at(1) = 2.0 * viscosity * ( eps.at(1) - ekk / 3.0 );
-        answer.at(2) = 2.0 * viscosity * ( eps.at(2) - ekk / 3.0 );
-        answer.at(3) = eps.at(3) * viscosity;
+        answer = {
+            2.0 * viscosity * ( eps.at(1) - ekk / 3.0 ),
+            2.0 * viscosity * ( eps.at(2) - ekk / 3.0 ),
+            eps.at(3) * viscosity
+        };
     } else if ( gp->giveMaterialMode() == _2dAxiFlow ) {
 #if 1
         double ekk = eps.at(1) + eps.at(2) + eps.at(3);
 
-        answer.at(1) = 2.0 * viscosity * ( eps.at(1) - ekk / 3.0 );
-        answer.at(2) = 2.0 * viscosity * ( eps.at(2) - ekk / 3.0 );
-        answer.at(3) = 2.0 * viscosity * ( eps.at(3) - ekk / 3.0 );
-        answer.at(4) = eps.at(4) * viscosity;
+        answer = {
+            2.0 * viscosity * ( eps.at(1) - ekk / 3.0 ),
+            2.0 * viscosity * ( eps.at(2) - ekk / 3.0 ),
+            2.0 * viscosity * ( eps.at(3) - ekk / 3.0 ),
+            eps.at(4) * viscosity
+        };
 #else
-        answer.at(1) = 2.0 * viscosity * ( eps.at(1) );
-        answer.at(2) = 2.0 * viscosity * ( eps.at(2) );
-        answer.at(3) = 2.0 * viscosity * ( eps.at(3) );
-        answer.at(4) = eps.at(4) * viscosity;
+        answer = {
+            2.0 * viscosity * ( eps.at(1) ),
+            2.0 * viscosity * ( eps.at(2) ),
+            2.0 * viscosity * ( eps.at(3) ),
+            eps.at(4) * viscosity
+        };
 #endif
     } else if ( gp->giveMaterialMode() == _3dFlow ) {
         double ekk = eps.at(1) + eps.at(2) + eps.at(3);
 
-        answer.at(1) = 2.0 * viscosity * ( eps.at(1) - ekk / 3.0 );
-        answer.at(2) = 2.0 * viscosity * ( eps.at(2) - ekk / 3.0 );
-        answer.at(3) = 2.0 * viscosity * ( eps.at(3) - ekk / 3.0 );
-        answer.at(4) = eps.at(4) * viscosity;
-        answer.at(5) = eps.at(5) * viscosity;
-        answer.at(6) = eps.at(6) * viscosity;
+        answer = {
+            2.0 * viscosity * ( eps.at(1) - ekk / 3.0 ),
+            2.0 * viscosity * ( eps.at(2) - ekk / 3.0 ),
+            2.0 * viscosity * ( eps.at(3) - ekk / 3.0 ),
+            eps.at(4) * viscosity,
+            eps.at(5) * viscosity,
+            eps.at(6) * viscosity
+        };
     }  else {
         OOFEM_ERROR("unsuported material mode");
     }

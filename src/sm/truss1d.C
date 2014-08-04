@@ -58,11 +58,10 @@ FEI1dLin Truss1d :: interp(1); // Initiates the static interpolator
 
 Truss1d :: Truss1d(int n, Domain *aDomain) :
     StructuralElement(n, aDomain),
-    ZZNodalRecoveryModelInterface(), NodalAveragingRecoveryModelInterface(),
-    SpatialLocalizerInterface(),
-    DirectErrorIndicatorRCInterface(),
-    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(), ZZRemeshingCriteriaInterface(),
-    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface(), HuertaRemeshingCriteriaInterface()
+    ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
+    SpatialLocalizerInterface(this),
+    EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
+    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface()
 {
     numberOfDofMans = 2;
 }
@@ -71,9 +70,8 @@ Truss1d :: Truss1d(int n, Domain *aDomain) :
 void Truss1d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
@@ -103,7 +101,7 @@ Truss1d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 {
     FloatMatrix dN;
-    this->interp.evaldNdx( dN, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dN, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beTranspositionOf(dN); ///@todo It would be more suitable to follow the column-major version as done in FEI-classes
 }
 
@@ -139,7 +137,7 @@ Truss1d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ *gp->giveWeight() * this->giveCrossSection()->give(CS_Area, gp);
 }
 
@@ -152,7 +150,7 @@ Truss1d :: initializeFrom(InputRecord *ir)
 
 
 void
-Truss1d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Truss1d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u};
 }
@@ -166,7 +164,6 @@ Truss1d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refi
                                                             IntArray &controlNode, IntArray &controlDof,
                                                             HuertaErrorEstimator :: AnalysisMode aMode)
 {
-    Element *element = this->HuertaErrorEstimatorI_giveElement();
     int inode, nodes = 2;
     FloatArray *corner [ 2 ], midNode, cor [ 2 ];
     double x = 0.0;
@@ -174,7 +171,7 @@ Truss1d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refi
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
-            corner [ inode ] = element->giveNode(inode + 1)->giveCoordinates();
+            corner [ inode ] = this->giveNode(inode + 1)->giveCoordinates();
             if ( corner [ inode ]->giveSize() != 3 ) {
                 cor [ inode ].resize(3);
                 cor [ inode ].at(1) = corner [ inode ]->at(1);
@@ -194,7 +191,7 @@ Truss1d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refi
         midNode.at(3) = 0.0;
     }
 
-    this->setupRefinedElementProblem1D(element, refinedElement, level, nodeId, localNodeIdArray, globalNodeIdArray,
+    this->setupRefinedElementProblem1D(this, refinedElement, level, nodeId, localNodeIdArray, globalNodeIdArray,
                                        sMode, tStep, nodes, corner, midNode,
                                        localNodeId, localElemId, localBcId,
                                        controlNode, controlDof, aMode, "Truss1d");
@@ -375,20 +372,14 @@ Truss1d :: giveInterface(InterfaceType interface)
         return static_cast< NodalAveragingRecoveryModelInterface * >(this);
     } else if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-    } else if ( interface == DirectErrorIndicatorRCInterfaceType ) {
-        return static_cast< DirectErrorIndicatorRCInterface * >(this);
     } else if ( interface == EIPrimaryUnknownMapperInterfaceType ) {
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
         return static_cast< MMAShapeFunctProjectionInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
-    } else if ( interface == HuertaRemeshingCriteriaInterfaceType ) {
-        return static_cast< HuertaRemeshingCriteriaInterface * >(this);
     }
 
     return NULL;
@@ -399,25 +390,8 @@ void
 Truss1d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                       InternalStateType type, TimeStep *tStep)
 {
-    GaussPoint *gp;
-    gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     this->giveIPValue(answer, gp, type, tStep);
-}
-
-
-void
-Truss1d :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                     InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
-}
-
-
-int
-Truss1d :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lc;
-    return this->computeLocalCoordinates(lc, coords);
 }
 
 
@@ -448,33 +422,16 @@ Truss1d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &
 }
 
 
-double
-Truss1d :: DirectErrorIndicatorRCI_giveCharacteristicSize()
-{
-    return this->computeLength();
-}
-
-
-int
-Truss1d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType mode,
-                                                            TimeStep *tStep, const FloatArray &coords,
+void
+Truss1d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                            TimeStep *tStep, const FloatArray &lcoords,
                                                             FloatArray &answer)
 {
-    FloatArray n, u, ksi;
-    int result;
+    FloatArray n, u;
 
-    result = this->computeLocalCoordinates(ksi, coords);
-    this->interp.evalN( n, ksi, FEIElementGeometryWrapper(this) );
-    this->computeVectorOf(EID_MomentumBalance, mode, tStep, u);
-    answer = {n.dotProduct(u) };
-    return result;
-}
-
-
-void
-Truss1d :: EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer)
-{
-    giveDofManDofIDMask(1, EID_MomentumBalance, answer);
+    this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
+    this->computeVectorOf({D_u}, mode, tStep, u);
+    answer = {n.dotProduct(u)};
 }
 
 

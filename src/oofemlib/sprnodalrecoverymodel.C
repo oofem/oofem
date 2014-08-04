@@ -410,10 +410,8 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
             for ( i = 1; i <= toDetermine.giveSize(); i++ ) {
                 includes = 0;
                 // test if INCLUDED
-                for ( dofManToDetermineListIter = dofManToDetermineList.begin();
-                      dofManToDetermineListIter != dofManToDetermineList.end();
-                      ++dofManToDetermineListIter ) {
-                    if ( * ( dofManToDetermineListIter ) == toDetermine.at(i) ) {
+                for ( int dman: dofManToDetermineList ) {
+                    if ( dman == toDetermine.at(i) ) {
                         includes = 1;
                     }
                 }
@@ -433,10 +431,8 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
                     if ( papInv.at( elemPap.at(ipap) ) ==  0 ) {
                         includes = 0;
                         // test if INCLUDED
-                        for ( dofManToDetermineListIter = dofManToDetermineList.begin();
-                              dofManToDetermineListIter != dofManToDetermineList.end();
-                              ++dofManToDetermineListIter ) {
-                            if ( ( * dofManToDetermineListIter ) == elemPap.at(ipap) ) {
+                        for ( int dman: dofManToDetermineList ) {
+                            if ( dman == elemPap.at(ipap) ) {
                                 includes = 1;
                             }
                         }
@@ -450,10 +446,8 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
                         for ( j = 1; j <= toDetermine2.giveSize(); j++ ) {
                             includes = 0;
                             // test if INCLUDED
-                            for ( dofManToDetermineListIter = dofManToDetermineList.begin();
-                                  dofManToDetermineListIter != dofManToDetermineList.end();
-                                  ++dofManToDetermineListIter ) {
-                                if ( * dofManToDetermineListIter == toDetermine2.at(j) ) {
+                            for ( int dman: dofManToDetermineList ) {
+                                if ( dman == toDetermine2.at(j) ) {
                                     includes = 1;
                                 }
                             }
@@ -469,20 +463,13 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
     } // end loop over patch elements
 
     // transform set to dofManToDetermine array
-    count = 0;
-    for ( dofManToDetermineListIter = dofManToDetermineList.begin();
-          dofManToDetermineListIter != dofManToDetermineList.end();
-          ++dofManToDetermineListIter ) {
-        count++;
-    }
+    count = (int)dofManToDetermineList.size();
 
     dofManToDetermine.resize(count);
 
     count = 0;
-    for ( dofManToDetermineListIter = dofManToDetermineList.begin();
-          dofManToDetermineListIter != dofManToDetermineList.end();
-          ++dofManToDetermineListIter ) {
-        dofManToDetermine.at(++count) = * dofManToDetermineListIter;
+    for ( int dman: dofManToDetermineList ) {
+        dofManToDetermine.at(++count) = dman;
     }
 }
 
@@ -509,8 +496,7 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
         Element *element = domain->giveElement( patchElems.at(ielem) );
         if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
             IntegrationRule *iRule = element->giveDefaultIntegrationRulePtr();
-            for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-                GaussPoint *gp = iRule->getIntegrationPoint(i);
+            for ( GaussPoint *gp: *iRule ) {
                 int hasVal = element->giveIPValue(ipVal, gp, type, tStep);
                 if ( !hasVal ) {
                     ipVal.resize(regionValSize);
@@ -521,7 +507,7 @@ SPRNodalRecoveryModel :: computePatch(FloatMatrix &a, IntArray &patchElems, int 
                     rhs.zero();
                 }
 
-                element->computeGlobalCoordinates( coords, * gp->giveLocalCoordinates() );
+                element->computeGlobalCoordinates( coords, * gp->giveSubPatchCoordinates() );
                 // compute ip contribution
                 this->computePolynomialTerms(P, coords, regType);
                 for ( int j = 1; j <= neq; j++ ) {

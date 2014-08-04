@@ -96,7 +96,7 @@ T3DInterface :: createInput(Domain *d, TimeStep *tStep)
             hexas++;
             break;
         default:
-            OOFEM_SIMPLE_ERROR( "T3DInterface::createInput unknown element type (%s)",
+            OOFEM_ERROR( "unknown element type (%s)",
                          __Element_Geometry_TypeToString( ielem->giveGeometryType() ) );
         }
     }

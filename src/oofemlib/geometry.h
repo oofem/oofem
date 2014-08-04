@@ -95,8 +95,13 @@ public:
     /// Used by XFEM level set functions.
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const = 0;
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const = 0;
-    virtual void computeLocalCoordinates(FloatArray &oLocCoord, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented.\n"); }
+    virtual void computeLocalCoordinates(FloatArray &oLocCoord, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented."); }
     virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const { OOFEM_ERROR("?"); }
+    virtual void giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iArcPos) const {OOFEM_ERROR("Not implemented.")};
+
+    /// Computes tangential direction at given local coordinate (arcPos)
+    virtual void giveTangent(FloatArray &oTangent, const double &iArcPosition) const {printf("BasicGeometry::giveTangent() not implemented.\n");}
+
 
     /// Checks whether an element is interacted, Element reference will be later replaced by Geometry.
     virtual bool intersects(Element *element) { return false; }
@@ -105,9 +110,12 @@ public:
     /// Gives intersection points between this Geometry and Element.
     virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints) { }
 
-    const FloatArray &giveVertex(int n) const { return mVertices [ n - 1 ]; }
+    inline const FloatArray &giveVertex(int n) const { return mVertices [ n - 1 ]; }
 
     void setVertex(FloatArray *vertex);
+    void setVertices(const std::vector<FloatArray> &iVertices) {mVertices = iVertices;}
+
+    void removeDuplicatePoints(const double &iTolSquare);
 
     void insertVertexFront(const FloatArray &iP) { mVertices.insert(mVertices.begin(), iP); }
     void insertVertexBack(const FloatArray &iP) { mVertices.push_back(iP); }
@@ -154,7 +162,7 @@ class OOFEM_EXPORT Line : public BasicGeometry
 public:
     Line() : BasicGeometry() { }
     virtual ~Line() { }
-    Line(FloatArray &pointA, FloatArray &pointB);
+    Line(const FloatArray &iPointA, const FloatArray &iPointB);
 
     virtual BasicGeometry *Clone() { return new Line(*this); }
 
@@ -162,10 +170,11 @@ public:
     /// Computes tangential distance to a point
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("not implemented"); };
-
 
     double computeTangentialDistanceToEnd(FloatArray *point);
+
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const;
+
     void computeProjection(FloatArray &answer);
     virtual int computeNumberOfIntersectionPoints(Element *element);
     virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints);
@@ -176,6 +185,8 @@ public:
     bool isPointInside(FloatArray *point);
     virtual bool intersects(Element *element);
     virtual bool isOutside(BasicGeometry *bg);
+
+    double giveLength() const {return mVertices[0].distance( mVertices[1] );}
 };
 
 class OOFEM_EXPORT Triangle : public BasicGeometry
@@ -186,8 +197,8 @@ public:
 
     virtual BasicGeometry *Clone() { return new Triangle(*this); }
 
-    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_SIMPLE_ERROR("Triangle::computeNormalSignDist -- not implemented"); };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_SIMPLE_ERROR("Triangle::computeTangentialSignDist -- not implemented"); };
+    virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("not implemented"); };
 
     double getArea();
     void computeBarycentrCoor(FloatArray &answer) const;
@@ -224,6 +235,8 @@ public:
     // tangential direction. Therefore, we may return any positive number.
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { oDist = mTangSignDist; };
 
+    virtual void giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iArcPos) const;
+
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "Circle"; }
     virtual bool intersects(Element *element);
@@ -234,6 +247,8 @@ public:
     virtual bool isInside(Element *element);
     virtual bool isInside(FloatArray &point);
     virtual void printYourself();
+
+    double giveRadius() const {return radius;}
 };
 
 class OOFEM_EXPORT PolygonLine : public BasicGeometry
@@ -253,6 +268,9 @@ public:
     double computeLength() const;
 
     virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const;
+    virtual void giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iArcPos) const;
+    void giveNormal(FloatArray &oNormal, const double &iArcPosition) const;
+    virtual void giveTangent(FloatArray &oTangent, const double &iArcPosition) const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
@@ -265,6 +283,9 @@ public:
     virtual bool intersects(Element *element);
     virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints);
     virtual void computeIntersectionPoints(Line *l, std :: vector< FloatArray > &oIntersectionPoints);
+    void computeIntersectionPoints(const PolygonLine &iPolygonLine, std :: vector< FloatArray > &oIntersectionPoints) const;
+    void computeIntersectionPoints(const FloatArray &iXStart, const FloatArray &iXEnd, std :: vector< FloatArray > &oIntersectionPoints) const;
+
     virtual int computeNumberOfIntersectionPoints(Element *element);
     virtual bool isOutside(BasicGeometry *bg);
     virtual bool isInside(Element *element);

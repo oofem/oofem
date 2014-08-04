@@ -69,7 +69,7 @@ protected:
 
     virtual double giveArea();
     virtual int giveApproxOrder() { return 2; }
-    void computeLocalNodalCoordinates(FloatArray lxy [ 6 ]);
+    void computeLocalNodalCoordinates(std::vector< FloatArray > &lxy);
     /**
      * Computes the stiffness matrix stabilization of zero energy mode (equal rotations)
      *
@@ -89,10 +89,9 @@ public:
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
 
     virtual int computeNumberOfDofs() { return 9; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     Interface *giveInterface(InterfaceType interface);
-    virtual int ZZRemeshingCriteriaI_givePolynOrder() { return 2; };
 
     void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const;

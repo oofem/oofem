@@ -72,7 +72,7 @@ public SPRNodalRecoveryModelInterface
 {
 protected:
     /// Cached nodal coordinates in local c.s.,
-    FloatArray *lnodes [ 4 ];
+    std::vector< FloatArray > lnodes;
     /// Cached coordinates in local c.s.,
     FloatMatrix lcsMatrix;
     /// Flag controlling reduced (one - point) integration for shear
@@ -84,14 +84,6 @@ protected:
     static IntArray shellOrdering;
     /// Ordering for the drilling dofs (the out-of-plane rotations)
     static IntArray drillOrdering;
-    /// Dummy variable
-    static bool __initialized;
-    /// Defines the ordering of the dofs in the local stiffness matrix.
-    static bool initOrdering() {
-        shellOrdering = { 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23};
-        drillOrdering = { 6, 12, 18, 24};
-        return true;
-    }
 
 public:
     Quad1MindlinShell3D(int n, Domain * d);
@@ -114,7 +106,7 @@ public:
 
     virtual int computeNumberOfDofs() { return 24; }
     virtual int computeNumberOfGlobalDofs() { return 24; }
-    virtual void giveDofManDofIDMask(int inode, EquationID, IntArray &) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     virtual void computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp);
 
@@ -136,9 +128,6 @@ public:
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP() { return this->numberOfGaussPoints; }
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType() { return SPRPatchType_2dxy; }
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
-
-
 
 
 protected:
@@ -161,7 +150,6 @@ protected:
     //virtual IntegrationRule *GetSurfaceIntegrationRule(int i) { return NULL; }
     //virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf) { return 0.; }
     //virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf) { answer.clear(); }
-    void splitUnknowns(FloatArray &shellUnknowns, FloatArray &drillUnknowns, FloatArray &unknowns);
 };
 } // end namespace oofem
 #endif // quad1mindlinshell3d_h

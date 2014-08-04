@@ -35,6 +35,9 @@
 //  MAIN
 //  Solves finite element problems.
 //
+#ifdef __PYTHON_MODULE
+ #include <Python.h>
+#endif
 
 #include "engngm.h"
 #include "oofemcfg.h"
@@ -58,10 +61,6 @@
  #include <slepceps.h>
 #endif
 
-#ifdef __PYTHON_MODULE
- #include <Python.h>
-#endif
-
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
 #endif
@@ -82,7 +81,7 @@ using namespace oofem;
 void freeStoreError()
 // This function is called whenever operator "new" is unable to allocate memory.
 {
-    OOFEM_SIMPLE_FATAL("free store exhausted");
+    OOFEM_FATAL("free store exhausted");
 }
 
 // debug

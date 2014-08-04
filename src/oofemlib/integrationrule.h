@@ -102,9 +102,7 @@ protected:
     integrationDomain intdomain;
 
     /// Array containing integration points.
-    GaussPoint **gaussPointArray;
-    /// Number of integration point of receiver.
-    int numberOfIntegrationPoints;
+    std::vector< GaussPoint * > gaussPoints;
     /**
      * firstLocalStrainIndx and lastLocalStrainIndx indexes describe range of components (strains for example)
      * for which receiver integration points apply.
@@ -118,27 +116,8 @@ protected:
     bool isDynamic;
 
 public:
-    /// @name Iterator for for-each loops:
-    //@{
-    class iterator
-    {
-private:
-        int pos;
-        IntegrationRule *ir;
-
-public:
-        iterator(IntegrationRule * ir, int pos);
-
-        bool operator != ( const IntegrationRule :: iterator & other ) const;
-
-        GaussPoint &operator *( ) const;
-
-        const IntegrationRule :: iterator &operator++ ( );
-    };
-
-    IntegrationRule :: iterator begin();
-    IntegrationRule :: iterator end();
-    //@}
+    std::vector< GaussPoint *> :: iterator begin() { return gaussPoints.begin(); }
+    std::vector< GaussPoint *> :: iterator end() { return gaussPoints.end(); }
 
     /**
      * Constructor.
@@ -161,12 +140,16 @@ public:
     /**
      * Returns number of integration points of receiver.
      */
-    int giveNumberOfIntegrationPoints() const { return numberOfIntegrationPoints; }
+    int giveNumberOfIntegrationPoints() const { return (int)gaussPoints.size(); }
     /**
      * Access particular integration point of receiver.
      * @param n Integration point number (should be in range 0,.., giveNumberOfIntegrationPoints()-1).
      */
     GaussPoint *getIntegrationPoint(int n);
+    /**
+     * Scans through the integration points and finds the one closest to the given (local) coordinate.
+     */
+    GaussPoint *findIntegrationPointClosestTo(const FloatArray &lcoord);
     /**
      * Returns starting component index, for which receiver applies.
      * @return First local strain index.
@@ -194,7 +177,7 @@ public:
      * @return Number of points.
      */
     int setUpEmbeddedIntegrationPoints(integrationDomain intdomain, int nPoints, MaterialMode matMode,
-                                       const FloatArray **coords);
+                                       const std :: vector< FloatArray > &coords);
 
     /**
      * Prints receiver's output to given stream.
@@ -318,7 +301,7 @@ public:
      * @param nPoints Number of points along line.
      */
     virtual int SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mode,
-                                            const FloatArray **coords) { return 0; }
+                                            const FloatArray &coord0, const FloatArray &coord1) { return 0; }
 
     /**
      * Sets up receiver's integration points on a wedge integration domain.

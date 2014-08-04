@@ -86,7 +86,7 @@ public:
      */
     virtual int MSMI_map(const GaussPoint &iGP, const Domain &iOldDom, Set &sourceSet, const TimeStep &iTStep, MaterialStatus &oStatus);
 
-    virtual int MSMI_map(const GaussPoint &iGP, const Domain &iOldDom, Set &sourceSet, const TimeStep &iTStep, StructuralInterfaceMaterialStatus &oStatus);
+    virtual int MSMI_map_cz(const GaussPoint &iGP, const Domain &iOldDom, Set &sourceSet, const TimeStep &iTStep, MaterialStatus &oStatus);
     /**
      * Updates the internal state variables from previously mapped values.
      * @param iGP Integration point belonging to the new domain.

@@ -39,7 +39,6 @@
 #include "mathfem.h"
 #include "sparsemtrx.h"
 #include "isolinearelasticmaterial.h"
-#include "dynalist.h"
 #include "error.h"
 #include "nonlocalmaterialext.h"
 #include "datastream.h"
@@ -276,7 +275,7 @@ IDGMaterial :: giveInternalLength(FloatMatrix &answer, MatResponseMode rMode, Ga
     } else if ( averType == 1 ) {
         answer.resize(1, 1);
         FloatArray gpCoords;
-        if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveCoordinates() ) ) == 0 ) {
+        if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
             OOFEM_ERROR("computeGlobalCoordinates of GP failed");
         }
 

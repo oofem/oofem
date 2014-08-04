@@ -87,7 +87,7 @@ public:
     /**
      * Gives coordinates of the receiver
      */
-    void giveCoordinates(FloatArray &answer) { answer = coords; }
+    const FloatArray & giveCoordinates() const { return coords; }
     /**
      * Return receiver's number of "DOFs". Should correspond to number of DOFs on loaded entity.
      */

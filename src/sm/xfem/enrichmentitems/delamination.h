@@ -32,36 +32,46 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef equationid_h
-#define equationid_h
-#include "enumitem.h"
+#ifndef DELAMINATION_H_
+#define DELAMINATION_H_
+
+#include "xfem/enrichmentitem.h"
+
+///@name Input fields for Delamination
+//@{
+#define _IFT_Delamination_Name "delamination"
+#define _IFT_Delamination_xiCoord "delaminationxicoord"
+#define _IFT_Delamination_interfacenum "interfacenum"
+#define _IFT_Delamination_csnum "csnum"
+#define _IFT_Delamination_CohesiveZoneMaterial "czmaterial"
+//#define _IFT_MultipleDelamination_Name "multipledelamination"
+//@}
 
 namespace oofem {
-//EID_AuxMomentumBalance - Auxiliary equation for characteristic-split based methods
-//EID_MomentumBalance_ConservationEquation - Coupled system
-
-#define EquationID_DEF \
-    ENUM_ITEM_WITH_VALUE(EID_Undefined, 0) \
-    ENUM_ITEM_WITH_VALUE(EID_MomentumBalance, 1) \
-    ENUM_ITEM_WITH_VALUE(EID_ConservationEquation, 3) \
-    ENUM_ITEM_WITH_VALUE(EID_MomentumBalance_ConservationEquation, 4) \
-
 /**
- * This type identifies the governing equation.
- */
-enum EquationID {
-    EquationID_DEF
+ * Delamination.
+ * */
+class OOFEM_EXPORT Delamination : public EnrichmentItem
+{
+protected:
+    Material *mat;  // Material for cohesive zone model
+    int interfaceNum;
+    int crossSectionNum;
+    int matNum;
+    double delamXiCoord;    // defines at what local xi-coord the delamination is defined
+public:
+    Delamination(int n, XfemManager *xm, Domain *aDomain);
+
+    virtual const char *giveClassName() const { return "Delamination"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Delamination_Name; }
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void appendInputRecords(DynamicDataReader &oDR);
+
+    double giveDelamXiCoord() { return delamXiCoord; };
+    //virtual Material *giveMaterial() { return mat; }
+    virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
 };
-
-// enum EquationID {
-//     EID_MomentumBalance, ///< Momentum balance equation.
-//     EID_ConservationEquation, ///< Conservation equation.
-//     EID_MomentumBalance_ConservationEquation, ///< Coupled momentum balance and conservation equation.
-// };
-#undef ENUM_ITEM
-#undef ENUM_ITEM_WITH_VALUE
-#undef enumitem_h
-
-const char *__EquationIDToString(EquationID _value);
 } // end namespace oofem
-#endif // equationid_h
+
+
+#endif /* DELAMINATION_H_ */

@@ -69,19 +69,6 @@ protected:
     static IntArray edge_ordering [ 6 ];
     /// Ordering of dofs on surfaces. Used to assemble surface loads
     static IntArray surf_ordering [ 4 ];
-    /// Dummy variable
-    static bool __initialized;
-    /// Convenient vectors for the ordering of the dofs in the local stiffness matrix.
-    static bool initOrdering() {
-        momentum_ordering = {1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 17, 18, 19};
-        conservation_ordering = {4, 8, 12, 16};
-
-        surf_ordering [ 0 ] = {1, 2, 3,  9, 10, 11,  5,  6,  7};
-        surf_ordering [ 1 ] = {1, 2, 3,  5,  6,  7, 13, 14, 15};
-        surf_ordering [ 2 ] = {5, 6, 7,  9, 10, 11, 13, 14, 15};
-        surf_ordering [ 3 ] = {1, 2, 3, 13, 14, 15,  9, 10, 11};
-        return true;
-    }
 
     /// The extra dofs from the bubble
     ElementDofManager *bubble;
@@ -114,30 +101,23 @@ public:
 
     virtual int giveNumberOfInternalDofManagers() const { return 1; }
     virtual DofManager *giveInternalDofManager(int i) const { return bubble; }
-    virtual void giveInternalDofManDofIDMask(int i, EquationID eid, IntArray &answer) const;
+    virtual void giveInternalDofManDofIDMask(int i, IntArray &answer) const;
 
     virtual FEInterpolation *giveInterpolation() const;
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
-    virtual void giveDofManDofIDMask(int inode, EquationID eid, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
     virtual void updateYourself(TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType it);
 
     // Spatial localizer interface:
-    virtual Element *SpatialLocalizerI_giveElement() { return this; }
-    virtual int SpatialLocalizerI_containsPoint(const FloatArray &coords);
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     // Element interpolation interface:
-    virtual int EIPrimaryUnknownMI_computePrimaryUnknownVectorAt(ValueModeType u,
-                                                                 TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
                                                                        TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
-    virtual void EIPrimaryUnknownMI_givePrimaryUnknownVectorDofID(IntArray &answer);
-
-    virtual Element *ZZNodalRecoveryMI_giveElement() { return this; }
 };
 } // end namespace oofem
 #endif // tet1bubblestokes_h

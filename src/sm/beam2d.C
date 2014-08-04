@@ -43,6 +43,7 @@
 #include "floatarray.h"
 #include "engngm.h"
 #include "boundaryload.h"
+#include "structuralms.h"
 #include "mathfem.h"
 #include "classfactory.h"
 
@@ -94,7 +95,7 @@ Beam2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
     double l, ksi, kappa, c1;
 
     l     = this->computeLength();
-    ksi   = 0.5 + 0.5 * gp->giveCoordinate(1);
+    ksi   = 0.5 + 0.5 * gp->giveNaturalCoordinate(1);
     kappa = this->giveKappaCoeff();
     c1 = 1. + 2. * kappa;
 
@@ -118,11 +119,10 @@ void
 Beam2d :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
-    if ( !integrationRulesArray ) {
+    if ( integrationRulesArray.size() == 0 ) {
         // the gauss point is used only when methods from crosssection and/or material
         // classes are requested
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
@@ -200,8 +200,7 @@ Beam2d :: computeClampedStiffnessMatrix(FloatMatrix &answer,
     IntegrationRule *ir = this->giveDefaultIntegrationRulePtr();
     FloatMatrix B, d, DB;
     answer.clear();
-    for ( int i = 0; i < ir->giveNumberOfIntegrationPoints(); ++i ) {
-        GaussPoint *gp = ir->getIntegrationPoint(i);
+    for ( GaussPoint *gp: *ir ) {
         this->computeBmatrixAt(gp, B);
         this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
         double dV = gp->giveWeight() * 0.5 * l;
@@ -270,7 +269,7 @@ Beam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &maste
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(2); // {Exx,GMzx}
@@ -281,7 +280,7 @@ Beam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &maste
 
 
 void
-Beam2d :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Beam2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_w, R_v};
 }
@@ -556,6 +555,21 @@ Beam2d :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tSte
 }
 
 
+int
+Beam2d :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    if ( type == IST_BeamForceMomentumTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        return 1;
+    } else if ( type == IST_BeamStrainCurvatureTensor ) {
+        answer = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        return 1;
+    } else {
+        return StructuralElement :: giveIPValue(answer, gp, type, tStep);
+    }
+}
+
+
 void
 Beam2d :: printOutputAt(FILE *File, TimeStep *tStep)
 {
@@ -568,7 +582,7 @@ Beam2d :: printOutputAt(FILE *File, TimeStep *tStep)
     fprintf(File, "beam element %d :\n", number);
 
     // ask for global element displacement vector
-    this->computeVectorOf(EID_MomentumBalance, VM_Total, tStep, rl);
+    this->computeVectorOf(VM_Total, tStep, rl);
 
     // ask for global element end forces vector
     this->giveEndForcesVector(Fl, tStep);

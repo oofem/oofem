@@ -51,7 +51,7 @@ REGISTER_Element(Tr_Warp);
 FEI2dTrLin Tr_Warp :: interp(1, 2);
 
 Tr_Warp :: Tr_Warp(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain)
+    StructuralElement(n, aDomain), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this)
     // Constructor.
 {
     numberOfDofMans  = 3;
@@ -67,9 +67,8 @@ void
 Tr_Warp :: computeGaussPoints()
 // Sets up the array containing the Gauss point of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize(1);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -93,7 +92,7 @@ Tr_Warp :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
 // luated at gp.
 {
     FloatMatrix dN;
-    this->interp.evaldNdx( dN, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dN, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 3);
 
@@ -112,7 +111,7 @@ Tr_Warp :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     volume = determinant * weight;
 
@@ -192,14 +191,14 @@ Tr_Warp :: giveThicknessAt(const FloatArray &gcoords)
 double
 Tr_Warp :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     FloatArray gc;
     return determinant * gp->giveWeight();
 }
 
 
 void
-Tr_Warp :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+Tr_Warp :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_w};
 }
@@ -217,14 +216,6 @@ Tr_Warp :: giveInterface(InterfaceType interface)
 
     return NULL;
 }
-
-int
-Tr_Warp :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
-{
-    FloatArray lcoords;
-    return this->computeLocalCoordinates(lcoords, coords);
-}
-
 
 double
 Tr_Warp :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)

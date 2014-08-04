@@ -58,8 +58,8 @@ FEI2dTrLin DKTPlate :: interp_lin(1, 2);
 
 DKTPlate :: DKTPlate(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain),
-    LayeredCrossSectionInterface(), ZZNodalRecoveryModelInterface(),
-    NodalAveragingRecoveryModelInterface(), SPRNodalRecoveryModelInterface()
+    LayeredCrossSectionInterface(), ZZNodalRecoveryModelInterface(this),
+    NodalAveragingRecoveryModelInterface(), SPRNodalRecoveryModelInterface(), ZZErrorEstimatorInterface(this)
 {
     numberOfDofMans = 3;
     numberOfGaussPoints = 3;
@@ -78,9 +78,8 @@ void
 DKTPlate :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
-    if ( !integrationRulesArray ) {
-        numberOfIntegrationRules = 1;
-        integrationRulesArray = new IntegrationRule * [ 1 ];
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray.resize( 1 );
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
@@ -95,7 +94,6 @@ DKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
 // (should be global coordinate system, but there may be defined
 //  different coordinate system in each node)
 {
-    GaussPoint *gp = NULL;
     FloatArray force;
     FloatMatrix T;
 
@@ -110,7 +108,7 @@ DKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep 
     forLoad->computeComponentArrayAt(force, tStep, mode);
 
     if ( force.giveSize() ) {
-        gp = irule.getIntegrationPoint(0);
+        GaussPoint *gp = irule.getIntegrationPoint(0);
         double dens = this->giveStructuralCrossSection()->give('d', gp);
         double dV   = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
 
@@ -142,8 +140,8 @@ DKTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
   this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
 
-    double ksi = gp->giveCoordinate(1);
-    double eta = gp->giveCoordinate(2);
+    double ksi = gp->giveNaturalCoordinate(1);
+    double eta = gp->giveNaturalCoordinate(2);
 
     double N1dk = 4.0 * ksi - 1.0;
     double N2dk = 0.0;
@@ -294,7 +292,7 @@ DKTPlate :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // Note: the interpolation of rotations is quadratic
 // NOTE: linear interpolation returned instead
 {
-    FloatArray N(3);
+    FloatArray N;
 
     answer.resize(3, 9);
     answer.zero();
@@ -351,7 +349,7 @@ DKTPlate :: initializeFrom(InputRecord *ir)
 
 
 void
-DKTPlate :: giveDofManDofIDMask(int inode, EquationID, IntArray &answer) const
+DKTPlate :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_w, R_u, R_v};
 }
@@ -386,7 +384,7 @@ DKTPlate :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
@@ -423,8 +421,6 @@ DKTPlate :: giveInterface(InterfaceType interface)
         return static_cast< SPRNodalRecoveryModelInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == ZZRemeshingCriteriaInterfaceType ) {
-        return static_cast< ZZRemeshingCriteriaInterface * >(this);
     }
 
 
@@ -536,14 +532,6 @@ DKTPlate :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 }
 
 
-double
-DKTPlate :: ZZRemeshingCriteriaI_giveCharacteristicSize()
-{
-    return sqrt(this->computeArea() * 2.0);
-}
-
-
-
 //
 // The element interface required by NodalAveragingRecoveryModel
 //
@@ -559,14 +547,6 @@ DKTPlate :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
     } else {
         answer.clear();
     }
-}
-
-
-void
-DKTPlate :: NodalAveragingRecoveryMI_computeSideValue(FloatArray &answer, int side,
-                                                      InternalStateType type, TimeStep *tStep)
-{
-    answer.clear();
 }
 
 
@@ -617,7 +597,7 @@ DKTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(5); // {Exx,Eyy,GMyz,GMzx,GMxy}
@@ -635,7 +615,7 @@ DKTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     FloatArray n;
 
-    this->interp_lin.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.at(1, 1) = n.at(1);
@@ -682,7 +662,7 @@ DKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 DKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -690,7 +670,7 @@ DKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 DKTPlate :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -734,7 +714,7 @@ DKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 void
 DKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-    this->computeNmatrixAt(* sgp->giveCoordinates(), answer);
+    this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), answer);
 }
 
 void
@@ -770,7 +750,7 @@ DKTPlate :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 DKTPlate :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveCoordinates() );
+    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
 }
 
 
@@ -813,7 +793,7 @@ DKTPlate :: computeVertexBendingMoments(FloatMatrix &answer, TimeStep *tStep)
     GaussPoint *vgp = iRule.getIntegrationPoint(0);
 
     for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
-        vgp->setCoordinates(coords [ i - 1 ]);
+        vgp->setNaturalCoordinates(coords [ i - 1 ]);
         this->computeStrainVector(eps, vgp, tStep);
         this->giveStructuralCrossSection()->giveGeneralizedStress_Plate(m, vgp, eps, tStep);
         answer.setColumn(m, i);
@@ -833,7 +813,7 @@ DKTPlate :: computeShearForces(FloatArray &answer, GaussPoint *gp, TimeStep *tSt
     answer.resize(5);
 
     this->computeVertexBendingMoments(m, tStep);
-    this->interp_lin.evaldNdx( dndx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.evaldNdx( dndx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
         answer.at(4) += m.at(1, i) * dndx.at(i, 1) + m.at(3, i) * dndx.at(i, 2); //dMxdx + dMxydy
         answer.at(5) += m.at(2, i) * dndx.at(i, 2) + m.at(3, i) * dndx.at(i, 1); //dMydy + dMxydx

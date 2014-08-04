@@ -208,8 +208,8 @@ double LocalGaussianRandomGenerator :: normal01CdfInverse(double p)
         }
 
         if ( r <= 0.0 ) {
-            value = -1.0;
             OOFEM_ERROR("r < 0.0!");
+            return -1.0;
         }
 
         r = sqrt( -log(r) );

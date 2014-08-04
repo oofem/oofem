@@ -1,10 +1,11 @@
 #
 # partition 1
 #
-bar02.oofem.out.1
+dyn_bar02.oofem.out.1
 Parallel test of explicit oofem computation
 #
-NlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0 ElementCutMode
+NlDEIDynamic nsteps 5 dumpcoef 0.0 deltaT 1.0 ElementCutMode nmodules 1
+errorcheck filename "dyn_bar02.oofem.check"
 domain 2dTruss
 #
 OutputManager tstep_all dofman_all element_all
@@ -18,10 +19,3 @@ IsoLE 1  tAlpha 0.000012  d 10.0  E 1.0  n 0.2
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0
 NodalLoad 2 loadTimeFunction 1 Components 2 0. 1.0
 ConstantFunction 1 f(t) 1.0
-
-
-#%BEGIN_CHECK% tolerance 1.e-8
-#NODE tStep 2.0 number 2 dof 2 unknown v value 1.25e-3
-#NODE tStep 2.0 number 3 dof 2 unknown v value 1.475e-1
-##
-#%END_CHECK%

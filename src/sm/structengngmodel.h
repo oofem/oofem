@@ -123,7 +123,7 @@ public:
      * arrays are sorted with increasing dofman number and with increasing dof number as
      * a second minor criterion.
      * @param restrDofMans Contains numbers of restrained Dofmanagers, with size equal to total number of prescribed equations.
-     * @param restrDofs Contains numbers of restrained Dofs, with size equal to total number of prescribed equations.
+     * @param restrDofs Contains IDs of restrained Dofs, with size equal to total number of prescribed equations.
      * @param eqn Contains the corresponding restrained equation numbers.
      * @param tStep Time step.
      * @param di Domain number.

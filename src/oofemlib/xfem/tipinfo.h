@@ -29,7 +29,6 @@ public:
     double mArcPos;
     FloatArray mTangDir;
     FloatArray mNormalDir;
-    int mElIndex;
     int mTipIndex;
 };
 
