@@ -39,6 +39,7 @@
 #include "inputrecord.h"
 #include "intarray.h"
 #include "fieldmanager.h"
+#include "metastep.h"
 #include "timer.h"
 #include "chartype.h"
 #include "unknowntype.h"
