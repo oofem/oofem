@@ -403,11 +403,7 @@ bool EnrichmentItem :: hasPropagatingFronts() const
         return false;
     }
 
-    if( strcasecmp(mpPropagationLaw->giveClassName(), "PLDoNothing") == 0) {
-        return false;
-    }
-
-    return true;
+    return mpPropagationLaw->hasPropagation();
 }
 
 void
