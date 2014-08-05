@@ -73,7 +73,7 @@ public:
 
     virtual FEInterpolation *giveInterpolation() const { return & interp; }
 
-    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
+    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
 
     virtual int testElementExtension(ElementExtension ext) { return ext == Element_EdgeLoadSupport; }
 

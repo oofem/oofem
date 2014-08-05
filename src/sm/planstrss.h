@@ -70,7 +70,7 @@ public:
     virtual int computeNumberOfDofs() { return 8; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
-    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
+    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
     virtual double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method);
     virtual double giveParentElSize() const { return 4.0; }
 

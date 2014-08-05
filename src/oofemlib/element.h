@@ -733,16 +733,30 @@ public:
      * Default implementation returns length of element projection into specified direction.
      * @return Element length in given direction.
      */
-    virtual double giveLenghtInDir(const FloatArray &normalToCrackPlane);
+    virtual double giveLengthInDir(const FloatArray &normalToCrackPlane) ;
     /**
-     * Returns characteristic length of element in given integration point and in
-     * given direction. Required by material models relying on crack-band approach to achieve
-     * objectivity with respect to mesh size
-     * @param gp Integration point.
-     * @param normalToCrackPlane Normal to crack plane.
-     * @return Characteristic length of element in given integration point and direction.
+     * Returns the size of element in the given direction, in some cases adjusted (e.g. if the direction is perpendicular to a planar element). 
+     * Required by material models relying on the crack-band approach to achieve objectivity with respect to the mesh size. 
+      * @param normalToCrackPlane Normal to the expected crack band.
+     * @return Element size corresponding to the given direction (expected width of the crack band).
      */
-    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) { return 0.; }
+    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane) { OOFEM_ERROR("Function not overloaded, which probably means that the crack band approach should not be used for this element"); return 0.; }
+    /**
+     * Returns the size of element in the given direction if the direction is in the XY plane,
+     * otherwise gives the mean size defined as the square root of the element area.
+     * Required by material models relying on the crack-band approach to achieve objectivity with respect to the mesh size. 
+      * @param normalToCrackPlane Normal to the expected crack band.
+     * @return Element size corresponding to the given direction (expected width of the crack band).
+     */
+    double giveCharacteristicLengthForPlaneElements(const FloatArray &normalToCrackPlane) ;
+    /**
+     * Returns the size of an axisymmetric element in the given direction if the direction is in the XY plane,
+     * otherwise gives the mean distance vrom the symmetry axis multiplied by pi.
+     * Required by material models relying on the crack-band approach to achieve objectivity with respect to the mesh size. 
+      * @param normalToCrackPlane Normal to the expected crack band.
+     * @return Element size corresponding to the given direction (expected width of the crack band).
+     */
+    double giveCharacteristicLengthForAxisymmElements(const FloatArray &normalToCrackPlane) ;
     /**
      * Returns characteristic element size for a given integration point and
      * given direction. Required by material models relying on crack-band approach to achieve
@@ -753,7 +767,7 @@ public:
      * @param method Selection of the specific method to be used.
      * @return Characteristic length of element in given integration point and direction.
      */
-    virtual double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method) { return giveCharacteristicLenght(gp, normalToCrackPlane); }
+    virtual double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method) { return giveCharacteristicLength(normalToCrackPlane); }
     /**
      * Returns the size (length, area or volume depending on element type) of the parent
      * element. E.g. 4.0 for a quadrilateral.

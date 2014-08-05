@@ -445,9 +445,6 @@ MazarsMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, Gauss
     FloatArray principalStrains, crackPlaneNormal(3), fullstrain;
     FloatMatrix principalDir(3, 3);
     MazarsMaterialStatus *status = static_cast< MazarsMaterialStatus * >( this->giveStatus(gp) );
-    //StructuralCrossSection *crossSection = (StructuralCrossSection*) gp -> giveElement()->giveCrossSection();
-
-    // crossSection->giveFullCharacteristicVector(fullstrain, gp, totalStrainVector);
 
     if ( ( kappa > this->e0 ) && ( status->giveDamage() == 0. ) ) {
         //printf (":");
@@ -456,7 +453,7 @@ MazarsMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, Gauss
         if ( gp->giveMaterialMode() == _1dMat ) {
             crackPlaneNormal.zero();
             crackPlaneNormal.at(1) = 1.0;
-            le = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
+            le = gp->giveElement()->giveCharacteristicLength(crackPlaneNormal);
             status->setLe(le);
             status->setLec(le);
             return;
@@ -493,7 +490,7 @@ MazarsMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, Gauss
             crackPlaneNormal.at(i) = principalDir.at(i, indmax);
         }
 
-        le = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
+        le = gp->giveElement()->giveCharacteristicLength(crackPlaneNormal);
         // remember le in cooresponding status for tension
         status->setLe(le);
 
@@ -501,21 +498,12 @@ MazarsMaterial :: initDamaged(double kappa, FloatArray &totalStrainVector, Gauss
             crackPlaneNormal.at(i) = principalDir.at(i, indmin);
         }
 
-        le = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
+        le = gp->giveElement()->giveCharacteristicLength(crackPlaneNormal);
         // remember le in cooresponding status for compression
         status->setLec(le);
 
-        // printf ("les: %e %e\n", status->giveLe(), status->giveLec());
     }
-
-    //status->setLe(hReft); status->setLec(hRefc);
 }
-
-
-
-
-
-
 
 
 MazarsMaterialStatus :: MazarsMaterialStatus(int n, Domain *d, GaussPoint *g) :

@@ -414,8 +414,7 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
                     crackPlaneNormal.at(j) = tempCrackDirs.at(j, i);
                 }
 
-                // Le = gp->giveElement()->giveCharacteristicLenght (gp, &crackPlaneNormal);
-                Le = this->giveCharacteristicElementLenght(gp, crackPlaneNormal);
+                Le = this->giveCharacteristicElementLength(gp, crackPlaneNormal);
                 initStress = this->computeStrength(gp, Le);
                 upd = 1;
             }
@@ -439,14 +438,6 @@ RCM2Material :: checkForNewActiveCracks(IntArray &answer, GaussPoint *gp,
 }
 
 
-double
-RCM2Material :: giveCharacteristicElementLenght(GaussPoint *gp, const FloatArray &crackPlaneNormal)
-{
-    // returns characteristic element length for given crack plane normal
-    return gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
-}
-
-
 void
 RCM2Material :: updateStatusForNewCrack(GaussPoint *gp, int i, double Le)
 //
@@ -464,13 +455,18 @@ RCM2Material :: updateStatusForNewCrack(GaussPoint *gp, int i, double Le)
     //status ->  setMinCrackStrainsForFullyOpenCrack (i, this->giveMinCrackStrainsForFullyOpenCrack(gp,i));
 }
 
+double 
+RCM2Material :: giveCharacteristicElementLength(GaussPoint *gp, const FloatArray &crackPlaneNormal) 
+{ 
+  return gp->giveElement()->giveCharacteristicLength(crackPlaneNormal); 
+}
 
 void
 RCM2Material :: updateCrackStatus(GaussPoint *gp, const FloatArray &crackStrain)
 //
 // updates gp records and MatStatus due to cracking.
 //
-// Updates MatStatus (respective it's temporary variables) to current
+// Updates MatStatus (its temporary variables) to current
 // reached status during integrating incremental constitutive relations
 // Temporary variables are used, because we may integrate constitutive
 // realtions many times for different strainIncrement in order to

@@ -236,7 +236,7 @@ protected:
     virtual double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i) = 0;
     virtual double computeStrength(GaussPoint *gp, double) = 0;
     virtual void updateStatusForNewCrack(GaussPoint *, int, double);
-    virtual double giveCharacteristicElementLenght(GaussPoint *gp, const FloatArray &);
+    virtual double giveCharacteristicElementLength(GaussPoint *gp, const FloatArray &crackPlaneNormal);
     virtual double giveCrackingModulus(MatResponseMode rMode, GaussPoint *gp,
                                        double effStrain, int i) { return 1.e20; }
 

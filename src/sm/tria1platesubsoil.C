@@ -152,9 +152,13 @@ Tria1PlateSubSoil :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint 
 
 
 double
-Tria1PlateSubSoil :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+Tria1PlateSubSoil :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
+//
+// returns receiver's characteristic length for crack band models
+// for a crack formed in the plane with normal normalToCrackPlane.
+//
 {
-    return this->giveLenghtInDir(normalToCrackPlane);
+    return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
 }
 
 

@@ -76,7 +76,7 @@ public:
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
-    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
+    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
 
     virtual Interface *giveInterface(InterfaceType it);
     virtual int testElementExtension(ElementExtension ext)

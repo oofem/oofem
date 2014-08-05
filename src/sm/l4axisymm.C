@@ -310,38 +310,14 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
     }
 }
 
-
-#define NONZERO_COORD_TOL 1.e-2
-
 double
-L4Axisymm :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+L4Axisymm :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 //
-// returns receivers characteristic length in gp (for some material models)
-// for crack formed in plane with normal normalToCrackPlane.
+// returns receiver's characteristic length for crack band models
+// for a crack formed in the plane with normal normalToCrackPlane.
 //
 {
-    // return this -> giveLenghtInDir(normalToCrackPlane) / sqrt (this->numberOfGaussPoints);
-    //
-    // we must handle special case - crack caused by hoop stres Sigma_z
-    // note: z-axis is always principal axis, because there exist only one
-    // nonzero shear strain (Sigma_xy), which will cause only rotation of
-    // principal axises in x-y plane (around z-axis).
-    // so this yields following :
-    // normalCrackPlane(3) component  can be only zero
-    // (then crack normal lies in x-y plane) or equal to 1.0 (crack normal
-    // is perpendicular to to x--y plane) - crack caused by hoop strain.
-    if ( fabs( normalToCrackPlane.at(3) ) > NONZERO_COORD_TOL ) {
-        double r = 0.;
-        int i;
-        for ( i = 1; i <= numberOfDofMans; i++ ) {
-            r += this->giveNode(i)->giveCoordinate(1);
-        }
-
-        r = r / ( ( double ) numberOfDofMans );
-        return r;
-    } else {
-        return this->giveLenghtInDir(normalToCrackPlane);
-    }
+    return this->giveCharacteristicLengthForAxisymmElements(normalToCrackPlane);
 }
 
 void

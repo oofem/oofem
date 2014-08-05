@@ -328,14 +328,13 @@ Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
 
 
 double
-Quad1PlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+Quad1PlaneStrain :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 //
-// returns receivers characteristic length in gp (for some material models)
-// for crack formed in plane with normal normalToCrackPlane.
+// returns receiver's characteristic length for crack band models
+// for a crack formed in the plane with normal normalToCrackPlane.
 //
 {
-    // return this -> giveLenghtInDir(normalToCrackPlane) / sqrt((double) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints());
-    return this->giveLenghtInDir(normalToCrackPlane);
+    return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
 }
 
 void

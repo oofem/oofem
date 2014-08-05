@@ -79,7 +79,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual double computeVolumeAround(GaussPoint *gp);
 
-    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
+    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
 
     virtual Interface *giveInterface(InterfaceType it);
     virtual int testElementExtension(ElementExtension ext)

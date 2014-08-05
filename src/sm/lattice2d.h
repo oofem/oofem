@@ -78,7 +78,7 @@ public:
      * This function returns the length of the element
      * independent of the FloatArray.
      */
-    virtual double giveCharacteristicLenght(GaussPoint *, const FloatArray &)
+    virtual double giveCharacteristicLength(const FloatArray &)
     { return this->giveLength(); }
 
     virtual double giveLength();

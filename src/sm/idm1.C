@@ -1196,11 +1196,8 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         status->setCrackVector(crackVect);
 
         if ( isCrackBandApproachUsed() ) { // le needed only if the crack band approach is used
-            // old approach (default projection method)
-            // le = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
-            // new approach, with choice of method
-            le = gp->giveElement()->giveCharacteristicSize(gp, crackPlaneNormal, ecsMethod);
-            // remember le in corresponding status
+             le = gp->giveElement()->giveCharacteristicSize(gp, crackPlaneNormal, ecsMethod);
+            // store le in corresponding status
             status->setLe(le);
         }
 

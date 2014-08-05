@@ -310,7 +310,7 @@ LatticeDamage2d :: initDamaged(double kappa, FloatArray &strainVector, GaussPoin
             crackPlaneNormal.at(i) = principalDir.at(i, indx);
         }
 
-        le = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
+        le = gp->giveElement()->giveCharacteristicLength(crackPlaneNormal);
         // remember le in corresponding status
         status->setLe(le);
     }

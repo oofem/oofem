@@ -282,13 +282,13 @@ TrPlaneStrain :: initializeFrom(InputRecord *ir)
 
 
 double
-TrPlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+TrPlaneStrain :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 //
-// returns receivers characteristic length in gp (for some material models)
-// for crack formed in plane with normal normalToCrackPlane.
+// returns receiver's characteristic length for crack band models
+// for a crack formed in the plane with normal normalToCrackPlane.
 //
 {
-    return this->giveLenghtInDir(normalToCrackPlane);
+    return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
 }
 
 

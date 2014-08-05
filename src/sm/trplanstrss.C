@@ -344,18 +344,15 @@ TrPlaneStress2d :: initializeFrom(InputRecord *ir)
 
 
 double
-TrPlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+TrPlaneStress2d :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 //
-// returns receivers characteristic length in gp (for some material models)
-// for crack formed in plane with normal normalToCrackPlane.
+// returns receiver's characteristic length for crack band models
+// for a crack formed in the plane with normal normalToCrackPlane.
 //
 {
-    if ( normalToCrackPlane.at(3) < 0.999999 ) { //ensure that characteristic length is in the plane of element
-        return this->giveLenghtInDir(normalToCrackPlane);
-    } else { //otherwise compute out-of-plane characteristic length from element area
-        return sqrt( this->giveArea() );
-    }
+    return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
 }
+
 
 double
 TrPlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method)
@@ -372,7 +369,7 @@ TrPlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCr
 
     if ( ( method == ECSM_Projection ) || ( method == ECSM_ProjectionCentered ) ) {
         // projection method (standard or modified - no difference for constant-strain element)
-        return this->giveCharacteristicLenght(gp, normalToCrackPlane);
+        return this->giveCharacteristicLength(normalToCrackPlane);
     }
 
     if ( ( method == ECSM_Oliver1 ) || ( method == ECSM_Oliver1modified ) || ( method == ECSM_Oliver2 ) ) {

@@ -74,7 +74,7 @@ public:
 
     virtual double computeVolumeAround(GaussPoint *gp);
 
-    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
+    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &);

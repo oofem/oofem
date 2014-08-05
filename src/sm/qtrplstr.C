@@ -88,13 +88,13 @@ QTrPlaneStress2d :: giveInterface(InterfaceType interface)
 
 
 double
-QTrPlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+QTrPlaneStress2d :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
+//
+// returns receiver's characteristic length for crack band models
+// for a crack formed in the plane with normal normalToCrackPlane.
+//
 {
-    if ( normalToCrackPlane.at(3) < 0.999999 ) { //ensure that characteristic length is in the plane of element
-        return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
-    } else { //otherwise compute out-of-plane characteristic length from element area
-        return sqrt( this->computeVolumeAreaOrLength() / ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
-    }
+    return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
 }
 
 

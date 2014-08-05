@@ -77,8 +77,8 @@ public:
     virtual int computeNumberOfDofs() { return 2; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
-    // characteristic length in gp (for some material models)
-    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+    // characteristic length (for crack band approach)
+    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane)
     { return this->computeLength(); }
 
     virtual double computeVolumeAround(GaussPoint *gp);
