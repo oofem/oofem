@@ -505,8 +505,8 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
         std::vector<FloatArray> arcPos;
         double xiS = 0.0, xiE = 0.0;
         iBC.giveTractionElArcPos(i, xiS, xiE);
-        arcPos.push_back( FloatArray({xiS}) );
-        arcPos.push_back( FloatArray({xiE}) );
+        arcPos.push_back( FloatArray{xiS} );
+        arcPos.push_back( FloatArray{xiE} );
 
         arcPosArray.push_back(arcPos);
     }
