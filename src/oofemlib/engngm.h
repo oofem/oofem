@@ -104,6 +104,7 @@ class oofegGraphicContext;
 class ProblemCommunicator;
 class ProcessCommunicatorBuff;
 class CommunicatorBuff;
+class ProcessCommunicator;
 
 
 /**

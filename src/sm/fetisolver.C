@@ -32,14 +32,13 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef __PARALLEL_MODE
-
 #include "mathfem.h"
 #include "fetisolver.h"
 #include "skyline.h"
 #include "verbose.h"
 #include "dofmanager.h"
 #include "engngm.h"
+#include "domain.h"
 #include "feticommunicator.h"
 #include "classfactory.h"
 
@@ -1677,4 +1676,3 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
     return NM_Success;
 }
 } // end namespace oofem
-#endif

@@ -47,6 +47,7 @@
  #include "connectivitytable.h"
  #include "oofegutils.h"
  #include "rcm2.h"
+ #include "engngm.h"
 #endif
 
 

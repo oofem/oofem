@@ -36,6 +36,7 @@
 #define structengngmodel_h
 
 #include "engngm.h"
+#include "statecountertype.h"
 
 namespace oofem {
 class StructuralElement;

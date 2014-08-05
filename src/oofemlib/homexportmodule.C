@@ -40,6 +40,7 @@
 #include "gausspoint.h"
 #include "classfactory.h"
 #include "crosssection.h"
+#include "engngm.h"
 
 #ifdef __SM_MODULE
  #include "../sm/structuralelement.h"

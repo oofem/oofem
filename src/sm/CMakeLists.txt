@@ -221,10 +221,13 @@ set (sm
     ${sm_error}
     ${sm_xfem}
     ${sm_unsorted}
-    ${sm_parallel}
     ${sm_obsolete}
     ${sm_new}
     )
+
+if (USE_PARALLEL)
+    list (APPEND sm ${sm_parallel})
+endif ()
 
 add_library(sm
     ${LIB_TYPE}

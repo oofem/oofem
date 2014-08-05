@@ -41,6 +41,7 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
+ #include "node.h"
  #include "engngm.h"
 #endif
 

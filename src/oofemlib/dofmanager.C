@@ -47,6 +47,9 @@
 #include "contextioerr.h"
 #include "mathfem.h"
 #include "dynamicinputrecord.h"
+#include "domain.h"
+#include "unknownnumberingscheme.h"
+#include "engngm.h"
 
 namespace oofem {
 DofManager :: DofManager(int n, Domain *aDomain) :

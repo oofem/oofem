@@ -35,12 +35,13 @@
 #ifndef dofmanvalfield_h
 #define dofmanvalfield_h
 
-#include "domain.h"
 #include "field.h"
 
 #include <vector>
 
 namespace oofem {
+class Domain;
+
 /**
  * Class representing field defined by nodal values associated to given domain.
  * Field represent the spatial distribution of certain variable.

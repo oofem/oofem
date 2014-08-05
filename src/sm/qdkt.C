@@ -50,6 +50,7 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
+ #include "engngm.h"
 #endif
 
 namespace oofem {

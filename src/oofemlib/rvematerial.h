@@ -41,6 +41,7 @@
 #include "material.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
+#include "engngm.h"
 
 ///@name Input fields for RVEMaterial
 //@{

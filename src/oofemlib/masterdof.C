@@ -42,6 +42,7 @@
 #include "dictionary.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "engngm.h"
 
 namespace oofem {
 MasterDof :: MasterDof(int i, DofManager *aNode, int nbc, int nic, DofIDItem id) : Dof(i, aNode, id)

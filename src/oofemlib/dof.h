@@ -47,10 +47,7 @@
 #include "contextioresulttype.h"
 
 namespace oofem {
-#ifdef __PARALLEL_MODE
 class CommunicationBuffer;
-#endif
-
 class DataStream;
 class Dictionary;
 class PrimaryField;

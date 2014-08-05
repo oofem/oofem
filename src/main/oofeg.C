@@ -47,6 +47,7 @@
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
+#include "domain.h"
 
 #include "util.h"
 #include "node.h"

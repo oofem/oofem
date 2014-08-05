@@ -42,6 +42,7 @@
 #include "connectivitytable.h"
 #include "bilinearczmaterialFagerstrom.h"
 #include "mathfem.h"
+#include "engngm.h"
 
 namespace oofem {
 Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this)

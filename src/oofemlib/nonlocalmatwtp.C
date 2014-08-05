@@ -35,6 +35,8 @@
 #include "nonlocalmatwtp.h"
 #include "nonlocalmaterialext.h"
 #include "element.h"
+#include "dofmanager.h"
+#include "engngm.h"
 #include "gausspoint.h"
 #include "material.h"
 #include "communicator.h"

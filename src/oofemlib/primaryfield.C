@@ -40,6 +40,7 @@
 #include "timestep.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "engngm.h"
 
 namespace oofem {
 PrimaryField :: PrimaryField(EngngModel *a, int idomain,

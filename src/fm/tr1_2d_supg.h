@@ -36,9 +36,6 @@
 #define tr1_2d_supg_h
 
 #include "supgelement.h"
-#include "femcmpnn.h"
-#include "domain.h"
-#include "floatmatrix.h"
 #include "fei2dtrlin.h"
 #include "primaryfield.h"
 #include "spatiallocalizer.h"

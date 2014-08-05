@@ -36,16 +36,12 @@
 #define enrichmentdomain_h
 
 #include "oofemcfg.h"
-#include "domain.h"
-#include "floatarray.h"
-#include "node.h"
-#include "contextioresulttype.h"
-#include "contextmode.h"
 #include "geometry.h"
 #include "tipinfo.h"
 
 namespace oofem {
 class EnrichmentItem;
+class XfemManager;
 
 ///@name Input fields for Enrichment domains
 //@{

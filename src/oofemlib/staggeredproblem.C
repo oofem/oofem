@@ -43,6 +43,7 @@
 #include "util.h"
 #include "verbose.h"
 #include "classfactory.h"
+#include "domain.h"
 
 #include <stdlib.h>
 
@@ -96,7 +97,7 @@ int
 StaggeredProblem :: instanciateSlaveProblems()
 {
     //first instantiate master problem if defined
-    EngngModel *timeDefProb;
+    EngngModel *timeDefProb = NULL;
     emodelList.resize(inputStreamNames.size());
     if ( timeDefinedByProb ) {
         OOFEMTXTDataReader dr( inputStreamNames [ timeDefinedByProb - 1 ] );

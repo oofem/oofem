@@ -36,13 +36,14 @@
 #ifndef topologydescription_h
 #define topologydescription_h
 
-#include "domain.h"
 #include "error.h"
 #include "oofemcfg.h"
 
 namespace oofem {
 class SpatialLocalizer;
 class TimeStep;
+class Domain;
+class DataReader;
 
 /**
  * Determines the state of the evolving topology.

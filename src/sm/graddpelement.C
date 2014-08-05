@@ -51,6 +51,7 @@
 #include "nonlocalbarrier.h"
 #include "nlstructuralelement.h"
 #include "graddpmaterialextensioninterface.h"
+#include "engngm.h"
 
 #include <cstdio>
 

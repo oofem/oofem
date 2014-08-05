@@ -58,6 +58,7 @@
 #include "dynamicinputrecord.h"
 #include "matstatmapperint.h"
 #include "cltypes.h"
+#include "engngm.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

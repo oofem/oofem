@@ -115,6 +115,12 @@ SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
+DofManager *
+SolutionbasedShapeFunction :: giveInternalDofManager(int i)
+{
+    return myNode;
+}
+
 bool
 SolutionbasedShapeFunction :: isCoeff(ActiveDof *dof)
 {
@@ -351,6 +357,12 @@ SolutionbasedShapeFunction :: computeDofTransformation(ActiveDof *dof, FloatArra
 
         masterContribs.at(i) = factor * values.at(1);
     }
+}
+
+int
+SolutionbasedShapeFunction :: giveNumberOfMasterDofs(ActiveDof *dof)
+{
+    return this->giveDomain()->giveNumberOfSpatialDimensions();
 }
 
 Dof *

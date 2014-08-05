@@ -43,6 +43,7 @@
 #include "mathfem.h"
 #include "fei2dquadlin.h"
 #include "classfactory.h"
+#include "engngm.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

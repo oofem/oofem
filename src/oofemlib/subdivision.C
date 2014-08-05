@@ -50,6 +50,7 @@
 #include "timer.h"
 #include "remeshingcrit.h"
 #include "dynamicinputrecord.h"
+#include "engngm.h"
 
 #include <queue>
 #include <set>

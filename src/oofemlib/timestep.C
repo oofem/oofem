@@ -42,6 +42,7 @@
 #include "engngm.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "error.h"
 
 namespace oofem {
 TimeStep :: TimeStep(int n, EngngModel *e, int mn, double tt, double dt, StateCounterType counter, TimeDiscretizationType td) :

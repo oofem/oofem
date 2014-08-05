@@ -37,6 +37,7 @@
 #include "gausspoint.h"
 #include "timestep.h"
 #include "classfactory.h"
+#include "engngm.h"
 
 namespace oofem {
 REGISTER_Material(B3Material);

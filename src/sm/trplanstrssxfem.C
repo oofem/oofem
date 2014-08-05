@@ -20,6 +20,7 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
+ #include "engngm.h"
  #include "rcm2.h"
 #endif
 

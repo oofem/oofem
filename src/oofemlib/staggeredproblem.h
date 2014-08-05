@@ -52,6 +52,8 @@
 //@}
 
 namespace oofem {
+class Function;
+
 /**
  * Implementation of general sequence (staggered) problem. The problem consists in sequence of
  * low level problems (slaves) which are executed sequentially and where the results

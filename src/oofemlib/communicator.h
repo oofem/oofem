@@ -39,14 +39,11 @@
 #include "processcomm.h"
 #include "commbufftype.h"
 #include "communicatormode.h"
-#include "engngm.h"
 #include "error.h"
 
-#ifdef __USE_MPI
- #include <mpi.h>
-#endif
-
 namespace oofem {
+class EngngModel;
+
 /**
  * The Communicator and corresponding buffers (represented by this class)
  * are separated in order to allow share the same buffer by several communicators.

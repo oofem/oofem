@@ -36,12 +36,6 @@
 #define supgelement2_h
 
 #include "supgelement.h"
-#include "femcmpnn.h"
-#include "domain.h"
-#include "floatmatrix.h"
-
-#include "primaryfield.h"
-#include "fluiddynamicmaterial.h"
 
 namespace oofem {
 class TimeStep;

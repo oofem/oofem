@@ -41,6 +41,7 @@
 
 #ifdef __OOFEG
  #include "node.h"
+ #include "engngm.h"
  #include "oofeggraphiccontext.h"
  #include "connectivitytable.h"
 #endif

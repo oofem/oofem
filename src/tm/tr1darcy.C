@@ -40,6 +40,7 @@
 #include "gausspoint.h"
 #include "bcgeomtype.h"
 #include "generalboundarycondition.h"
+#include "transportmaterial.h"
 #include "load.h"
 #include "boundaryload.h"
 #include "mathfem.h"

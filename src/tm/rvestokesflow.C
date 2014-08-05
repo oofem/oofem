@@ -41,6 +41,7 @@
 #include "gausspoint.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "engngm.h"
 
 #include <cstdio>
 #include <cstring>

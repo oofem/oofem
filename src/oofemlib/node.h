@@ -42,7 +42,6 @@
 #define node_h
 
 #include "dofmanager.h"
-#include "domain.h"
 #include "floatarray.h"
 
 ///@name Input fields for Node

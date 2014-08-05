@@ -36,6 +36,7 @@
 
 #include "subspaceit.h"
 #include "engngm.h"
+#include "domain.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "mathfem.h"
