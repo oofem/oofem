@@ -52,6 +52,7 @@
 #include "contextfilemode.h"
 #include "contextioresulttype.h"
 #include "unknownnumberingscheme.h"
+#include "metastep.h"
 
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
@@ -315,7 +316,8 @@ public:
     EngngModel(int i, EngngModel * _master = NULL);
     /// Destructor.
     virtual ~EngngModel();
-
+	EngngModel(const EngngModel &) = delete;
+	EngngModel &operator=(const EngngModel &) = delete;
     /**
      * Service for accessing particular problem domain.
      * Generates error if no such domain is defined.

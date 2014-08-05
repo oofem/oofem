@@ -112,7 +112,7 @@ Function :: evaluate(FloatArray &answer, const std :: map< std :: string, Functi
         OOFEM_ERROR("Missing necessary argument \"t\"");
     }
 #endif
-    answer = {this->evaluateAtTime(it->second.val0)};
+    answer = FloatArray{this->evaluateAtTime(it->second.val0)};
 }
 
 double

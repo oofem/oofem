@@ -127,7 +127,7 @@ InterpolatingFuction :: evaluate(FloatArray &answer, std :: map< std :: string, 
         randomVariable = 1.e-8;
     }
 
-    answer = {randomVariable};
+    answer = FloatArray{randomVariable};
 }
 
 double
