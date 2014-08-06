@@ -11,6 +11,8 @@ targets/
 *.pvd
 *.out.*
 t3d.bmf*
+perf.data*
+*.orig
 
 # documentation aux-files.
 *.aux
