@@ -856,15 +856,15 @@ public:
     //
     // Graphics output
     //
-    virtual void drawYourself(oofegGraphicContext &context);
-    virtual void drawAnnotation(oofegGraphicContext &mode);
-    virtual void drawRawGeometry(oofegGraphicContext &mode) { }
-    virtual void drawDeformedGeometry(oofegGraphicContext &mode, UnknownType) { }
-    virtual void drawScalar(oofegGraphicContext &context) { }
-    virtual void drawSpecial(oofegGraphicContext &context) { }
+    virtual void drawYourself(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawAnnotation(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) { }
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) { }
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) { }
+    virtual void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep) { }
     // added in order to hide IP element details from oofeg
     // to determine the max and min local values, when recovery does not takes place
-    virtual void giveLocalIntVarMaxMin(oofegGraphicContext &context, TimeStep *, double &emin, double &emax) { emin = emax = 0.0; }
+    virtual void giveLocalIntVarMaxMin(oofegGraphicContext &gc, TimeStep *tStep, double &emin, double &emax) { emin = emax = 0.0; }
 
     /**
      * Returns internal state variable (like stress,strain) at node of element in Reduced form,

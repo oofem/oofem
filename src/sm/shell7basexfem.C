@@ -212,13 +212,12 @@ Shell7BaseXFEM :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 
 void
-Shell7BaseXFEM :: evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov, FloatArray &genEpsC)
+Shell7BaseXFEM :: evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov, FloatArray &genEpsC, TimeStep *tStep)
 {
     // Continuous part
-    Shell7Base :: evalCovarBaseVectorsAt(lCoords, gcov, genEpsC);
+    Shell7Base :: evalCovarBaseVectorsAt(lCoords, gcov, genEpsC, tStep);
 
     // Discontinuous part
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray N, dGenEps;
     FloatMatrix gcovd;
     std :: vector< double >ef;
@@ -232,7 +231,7 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov,
 
             if ( ef [ 0 ] > 0.1 ) {
                 computeDiscGeneralizedStrainVector(dGenEps, lCoords, dei, tStep);
-                Shell7Base :: evalCovarBaseVectorsAt(lCoords, gcovd, dGenEps);
+                Shell7Base :: evalCovarBaseVectorsAt(lCoords, gcovd, dGenEps, tStep);
                 gcov.add(ef [ 0 ], gcovd);
             }
         }
@@ -484,7 +483,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         xd.beProductOf(lambda, unknowns); // spatial jump
 
         genEpsC.beProductOf(B, solVecC);
-        this->computeFAt(lCoords, F, genEpsC);
+        this->computeFAt(lCoords, F, genEpsC, tStep);
 
         // Transform xd and F to a local coord system
         this->evalInitialCovarNormalAt(nCov, lCoords);
@@ -884,7 +883,7 @@ Shell7BaseXFEM :: computePressureTangentMatrixDis(FloatMatrix &KCC, FloatMatrix 
     //(xc+xd)*(g1xg2)=xc*g1xg2 + xd*g1xg2 -> xc*(W2*Dg1 - W1*Dg2) + xd*(W2*Dg1 - W1*Dg2)
     // Traction tangent, L =  lambdaN * ( W2*lambdaG_1 - W1*lambdaG_2  )
     load->computeValueAt(pressure, tStep, * ( ip->giveNaturalCoordinates() ), VM_Total);        // pressure component
-    this->evalCovarBaseVectorsAt(lcoords, gcov, genEps);
+    this->evalCovarBaseVectorsAt(lcoords, gcov, genEps, tStep);
     g1.beColumnOf(gcov, 1);
     g2.beColumnOf(gcov, 2);
     W1 = this->giveAxialMatrix(g1);

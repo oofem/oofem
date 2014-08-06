@@ -274,7 +274,7 @@ Truss3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussP
 
 
 #ifdef __OOFEG
-void Truss3d :: drawRawGeometry(oofegGraphicContext &gc)
+void Truss3d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -299,10 +299,9 @@ void Truss3d :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void Truss3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void Truss3d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* point */

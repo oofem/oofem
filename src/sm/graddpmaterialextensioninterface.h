@@ -38,8 +38,6 @@
 #include "interface.h"
 #include "matresponsemode.h"
 
-
-
 ///@name graddpdmaterialextensioninterface
 //@{
 #define _IFT_GradDpMaterialExtensionInterface_averagingtype "averagingType"

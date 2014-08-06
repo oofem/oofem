@@ -84,10 +84,6 @@
  #include "domaintransactionmanager.h"
 #endif
 
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
-#endif
-
 #include <cstdarg>
 #include <cstring>
 #include <vector>
@@ -1221,51 +1217,6 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
         return;
     }
 }
-
-
-#ifdef __OOFEG
-
-void
-Domain :: drawYourself(oofegGraphicContext &context)
-//
-// shows graphics representation of domain, respecting mode
-//
-{
-    OGC_PlotModeType plotMode = context.giveIntVarPlotMode();
-    if ( ( plotMode == OGC_nodeAnnotation ) || ( plotMode == OGC_nodeGeometry ) || ( plotMode == OGC_essentialBC ) ||
-        ( plotMode == OGC_naturalBC ) || ( plotMode == OGC_nodeScalarPlot ) || ( plotMode == OGC_nodeVectorPlot ) ) {
-        this->drawNodes(context);
-    } else {
-        this->drawElements(context);
-    }
-}
-
-
-void
-Domain :: drawElements(oofegGraphicContext &context)
-{
-    //
-    // steps through element array and calls element(i)->show(mode,this);
-    //
-    for ( int i = 1; i <= this->giveNumberOfElements(); i++ ) {
-        this->giveElement(i)->drawYourself(context);
-    }
-}
-
-
-void
-Domain :: drawNodes(oofegGraphicContext &context)
-{
-    //
-    // steps through element array and calls element(i)->show(mode,this);
-    //
-    int nnodes = this->giveNumberOfDofManagers();
-    for ( int i = 1; i <= nnodes; i++ ) {
-        this->giveDofManager(i)->drawYourself(context);
-    }
-}
-
-#endif
 
 
 NodalRecoveryModel *

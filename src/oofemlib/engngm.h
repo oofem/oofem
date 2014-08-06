@@ -1101,13 +1101,13 @@ public:
 #endif
 
 #ifdef __OOFEG
-    virtual void drawYourself(oofegGraphicContext &context);
-    virtual void drawElements(oofegGraphicContext &context);
-    virtual void drawNodes(oofegGraphicContext &context);
+    virtual void drawYourself(oofegGraphicContext &gc);
+    virtual void drawElements(oofegGraphicContext &gc);
+    virtual void drawNodes(oofegGraphicContext &gc);
     /**
      * Shows the sparse structure of required matrix, type == 1 stiffness.
      */
-    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep) { }
+    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep) { }
 #endif
 
     /// Returns string for prepending output (used by error reporting macros).

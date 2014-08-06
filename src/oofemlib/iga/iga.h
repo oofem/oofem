@@ -51,7 +51,7 @@
 namespace oofem {
 #ifdef __OOFEG
 class StructuralElementEvaluator;
-void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se, oofegGraphicContext &gc, UnknownType);
+void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se, oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
 #endif
 
 /**
@@ -112,7 +112,7 @@ public:
 #endif
 
 #ifdef __OOFEG
-    virtual void  drawRawGeometry(oofegGraphicContext &mode);
+    virtual void  drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
 protected:

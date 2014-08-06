@@ -130,17 +130,16 @@ IRResultType NURBSSpace3dElement :: initializeFrom(InputRecord *ir)
 //#define COMPUTE_STRESS
  #define COMPUTE_STRAIN
 
-void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
+void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int indx;
     WCRec p [ 4 ];
     GraphicObj *go;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     double s [ 4 ];
     FEInterpolation *interp = this->giveInterpolation();
     FloatArray val;
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
@@ -170,7 +169,7 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
         OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
-    indx = context.giveIntVarIndx();
+    indx = gc.giveIntVarIndx();
 
     StructuralElementEvaluator :: computeVectorOf(VM_Total, tStep, u);
 
@@ -243,17 +242,16 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
 }
 
 
-void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context)
+void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int indx;
     WCRec p [ 4 ];
     GraphicObj *go;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     double s [ 4 ];
     FEInterpolation *interp = this->giveInterpolation();
     FloatArray val, u;
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
@@ -284,7 +282,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context)
         OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
-    indx = context.giveIntVarIndx();
+    indx = gc.giveIntVarIndx();
 
     StructuralElementEvaluator :: computeVectorOf(VM_Total, tStep, u);
 
@@ -447,17 +445,16 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &context)
 // the reason is to ensure compatible division to quads over which scalar quantity is interpolated
 // bilinearly !!!
 
-void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
+void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int indx;
     WCRec p [ 4 ];
     GraphicObj *go;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     double s [ 4 ];
     FEInterpolation *interp = this->giveInterpolation();
     FloatArray val;
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
@@ -488,7 +485,7 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
         OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
-    indx = context.giveIntVarIndx();
+    indx = gc.giveIntVarIndx();
 
     StructuralElementEvaluator :: computeVectorOf(VM_Total, tStep, u);
 
@@ -561,18 +558,17 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &context)
 
 
 
-void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context)
+void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int indx;
     WCRec p [ 8 ];
     GraphicObj *go;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     double s [ 8 ];
     FEInterpolation *interp = this->giveInterpolation();
     FloatArray val, u;
     //int huhu = 0;
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
@@ -620,15 +616,15 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &context)
         OOFEM_ERROR("not implemented for nsd = %d", nsd);
     }
 
-    indx = context.giveIntVarIndx();
+    indx = gc.giveIntVarIndx();
 
  #ifdef SPHERICAL_CS
-    if ( context.giveIntVarType() == IST_StrainTensor ) {
+    if ( gc.giveIntVarType() == IST_StrainTensor ) {
         huhu = 1;
     }
  #endif
  #ifdef MISSES_STRESS
-    if ( context.giveIntVarType() == IST_ErrorIndicatorLevel ) {
+    if ( gc.giveIntVarType() == IST_ErrorIndicatorLevel ) {
         huhu = 2;
     }
  #endif

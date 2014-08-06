@@ -76,7 +76,7 @@ public:
     virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
 protected:

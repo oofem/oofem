@@ -470,7 +470,7 @@ LIBeam3d :: giveInterface(InterfaceType interface)
 
 #ifdef __OOFEG
 void
-LIBeam3d :: drawRawGeometry(oofegGraphicContext &gc)
+LIBeam3d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
 
@@ -497,7 +497,7 @@ LIBeam3d :: drawRawGeometry(oofegGraphicContext &gc)
 
 
 void
-LIBeam3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+LIBeam3d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
 
@@ -505,7 +505,6 @@ LIBeam3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
         return;
     }
 
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* poin */

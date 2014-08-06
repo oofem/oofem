@@ -95,8 +95,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
 #endif
 
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
@@ -115,7 +115,7 @@ protected:
 
     void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 
-    double giveKappaCoeff();
+    double giveKappaCoeff(TimeStep *tStep);
     virtual double computeLength();
     double givePitch();
     virtual void computeClampedStiffnessMatrix(FloatMatrix &answer,

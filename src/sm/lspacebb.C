@@ -39,7 +39,6 @@
 #include "classfactory.h"
 
 #ifdef __OOFEG
- #include "engngm.h"
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
 #endif

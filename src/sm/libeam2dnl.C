@@ -587,7 +587,7 @@ LIBeam2dNL :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *
 
 
 #ifdef __OOFEG
-void LIBeam2dNL :: drawRawGeometry(oofegGraphicContext &gc)
+void LIBeam2dNL :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
 
@@ -613,14 +613,13 @@ void LIBeam2dNL :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void LIBeam2dNL :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void LIBeam2dNL :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* poin */

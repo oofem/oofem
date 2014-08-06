@@ -33,6 +33,7 @@
  */
 
 #ifndef trabbonematerial_h
+#define trabbonematerial_h
 
 #include "structuralmaterial.h"
 #include "floatarray.h"
@@ -151,5 +152,4 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 };
 } // end namespace oofem
-#define trabbonematerial_h
 #endif

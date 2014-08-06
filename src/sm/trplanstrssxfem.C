@@ -7,6 +7,15 @@
 
 #include "trplanstrssxfem.h"
 
+#include "structuralmaterial.h"
+#include "structuralcrosssection.h"
+#include "vtkxmlexportmodule.h"
+#include "xfem/xfemelementinterface.h"
+#include "xfem/enrichmentfunction.h"
+#include "xfem/enrichmentitem.h"
+#include "xfem/enrichmentdomain.h"
+#include "xfem/delaunay.h"
+#include "xfem/XFEMDebugTools.h"
 #include "node.h"
 #include "crosssection.h"
 #include "gausspoint.h"
@@ -20,24 +29,12 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "engngm.h"
+ #include "xfem/patchintegrationrule.h"
  #include "rcm2.h"
 #endif
 
 
-#include "structuralmaterial.h"
-#include "xfem/xfemelementinterface.h"
-#include "xfem/enrichmentfunction.h"
-#include "xfem/enrichmentitem.h"
-#include "xfem/enrichmentdomain.h"
-#include "structuralcrosssection.h"
-#include "vtkxmlexportmodule.h"
-#ifdef __OOFEG
- #include "xfem/patchintegrationrule.h"
-#endif
-#include "xfem/delaunay.h"
 
-#include "xfem/XFEMDebugTools.h"
 #include <string>
 #include <sstream>
 
@@ -189,15 +186,15 @@ TrPlaneStress2dXFEM :: giveGeometryType() const
 
 #ifdef __OOFEG
 // TODO: FIX OOFEG implementation
-void TrPlaneStress2dXFEM :: drawRawGeometry(oofegGraphicContext &context)
+void TrPlaneStress2dXFEM :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
     XfemManager *xf = this->giveDomain()->giveXfemManager();
     if ( !xf->isElementEnriched(this) ) {
-        TrPlaneStress2d :: drawRawGeometry(context);
+        TrPlaneStress2d :: drawRawGeometry(gc, tStep);
     } else {
         if ( integrationRulesArray.size() > 1 ) {
 #if 0
@@ -205,34 +202,33 @@ void TrPlaneStress2dXFEM :: drawRawGeometry(oofegGraphicContext &context)
                 // TODO: Implement visualization.
                 PatchIntegrationRule *iRule = dynamic_cast< PatchIntegrationRule * >( ir );
                 if ( iRule ) {
-                    iRule->givePatch()->draw(context);
+                    iRule->givePatch()->draw(gc);
                 }
             }
 #endif
         } else {
-            TrPlaneStress2d :: drawRawGeometry(context);
+            TrPlaneStress2d :: drawRawGeometry(gc, tStep);
         }
     }
 }
 
-void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &context)
+void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
     XfemManager *xf = this->giveDomain()->giveXfemManager();
     if ( !xf->isElementEnriched(this) ) {
-        TrPlaneStress2d :: drawScalar(context);
+        TrPlaneStress2d :: drawScalar(gc, tStep);
     } else {
-        if ( context.giveIntVarMode() == ISM_local ) {
+        if ( gc.giveIntVarMode() == ISM_local ) {
             int indx;
             double val;
             FloatArray s(3), v;
 
-            indx = context.giveIntVarIndx();
+            indx = gc.giveIntVarIndx();
 
-            TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
             for ( auto &ir: integrationRulesArray ) {
                 PatchIntegrationRule *iRule = dynamic_cast< PatchIntegrationRule * >(ir);
 
@@ -241,7 +237,7 @@ void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &context)
  #else
                 val = 0.0;
                 for ( GaussPoint *gp: *iRule ) {
-                    giveIPValue(v, gp, context.giveIntVarType(), tStep);
+                    giveIPValue(v, gp, gc.giveIntVarType(), tStep);
                     val += v.at(indx);
                 }
 
@@ -249,10 +245,10 @@ void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &context)
  #endif
                 s.at(1) = s.at(2) = s.at(3) = val;
                 // TODO: Implement visualization.
-                //                iRule->givePatch()->drawWD(context, s);
+                //                iRule->givePatch()->drawWD(gc, s);
             }
         } else {
-            TrPlaneStress2d :: drawScalar(context);
+            TrPlaneStress2d :: drawScalar(gc, tStep);
         }
     }
 }

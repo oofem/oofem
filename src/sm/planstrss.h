@@ -40,7 +40,6 @@
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
-
 #include "directerrorindicatorrc.h"
 #include "eleminterpmapperinterface.h"
 #include "huertaerrorestimator.h"
@@ -104,10 +103,10 @@ public:
                                                                        FloatArray &answer);
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &context);
-    virtual void drawSpecial(oofegGraphicContext &);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
     // definition & identification

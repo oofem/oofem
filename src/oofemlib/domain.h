@@ -93,11 +93,9 @@ class DataReader;
 class Set;
 class FractureManager;
 class oofegGraphicContext;
-
-#ifdef __PARALLEL_MODE
 class ProcessCommunicator;
 class LoadBalancer;
-#endif
+
 /**
  * Class and object Domain. Domain contains mesh description, or if program runs in parallel then it contains
  * description of domain associated to particular processor or thread of execution. Generally, it contain and
@@ -652,11 +650,6 @@ public:
     //@}
 #endif
 
-#ifdef __OOFEG
-    void drawYourself(oofegGraphicContext &context);
-    void drawElements(oofegGraphicContext &context);
-    void drawNodes(oofegGraphicContext &context);
-#endif
     /// Returns class name of the receiver.
     const char *giveClassName() const { return "Domain"; }
 

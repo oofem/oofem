@@ -506,7 +506,7 @@ public:
     bool hasDofID(DofIDItem id);
 
 #ifdef __OOFEG
-    virtual void drawYourself(oofegGraphicContext &context) { }
+    virtual void drawYourself(oofegGraphicContext &gc, TimeStep *tStep) { }
 #endif
 
     /// @return Receivers globally unique number.

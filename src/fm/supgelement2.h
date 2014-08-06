@@ -96,10 +96,6 @@ public:
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *tStep);
-    // Graphics output
-    //void drawYourself(oofegGraphicContext&);
-    //virtual void drawRawGeometry(oofegGraphicContext&) {}
-    //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif
 
 protected:

@@ -49,7 +49,6 @@
 #include "engngm.h"
 
 #ifdef __OOFEG
- #include "engngm.h"
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
  #include "connectivitytable.h"
@@ -680,7 +679,7 @@ LIBeam3d2 :: giveInterface(InterfaceType interface)
 
 #ifdef __OOFEG
 void
-LIBeam3d2 :: drawRawGeometry(oofegGraphicContext &gc)
+LIBeam3d2 :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
 
@@ -707,7 +706,7 @@ LIBeam3d2 :: drawRawGeometry(oofegGraphicContext &gc)
 
 
 void
-LIBeam3d2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+LIBeam3d2 :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
 
@@ -715,7 +714,6 @@ LIBeam3d2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
         return;
     }
 
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* poin */
@@ -762,22 +760,21 @@ LIBeam3d2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 
 
 void
-LIBeam3d2 :: drawScalar(oofegGraphicContext &context)
+LIBeam3d2 :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 2 ];
     GraphicObj *go;
     FloatArray v;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     double defScale;
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
-    if ( context.getInternalVarsDefGeoFlag() ) {
+    if ( gc.getInternalVarsDefGeoFlag() ) {
         // use deformed geometry
-        defScale = context.getDefScale();
+        defScale = gc.getDefScale();
         p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale);
         p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale);
         p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveUpdatedCoordinate(3, tStep, defScale);
@@ -796,15 +793,15 @@ LIBeam3d2 :: drawScalar(oofegGraphicContext &context)
     GaussPoint *gp;
     double s;
     gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    if ( giveIPValue(v, gp, context.giveIntVarType(), tStep) == 0 ) {
+    if ( giveIPValue(v, gp, gc.giveIntVarType(), tStep) == 0 ) {
         return;
     }
 
     s = v.at(1);
-    context.updateFringeTableMinMax(& s, 1);
+    gc.updateFringeTableMinMax(& s, 1);
 
     go = CreateLine3D(p);
-    EASValsSetColor( context.getElementColor() );
+    EASValsSetColor( gc.getElementColor() );
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
     EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
     EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
