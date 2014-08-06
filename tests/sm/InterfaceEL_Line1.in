@@ -1,7 +1,8 @@
 czEl_testcase.out
 Test of interface element - linear line element: Written by Jim Brouzoulis, Chalmers University of Technology.
 nonlinearstatic nsteps 5 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 10 minIter 2 stiffmode 0 nmodules 1 manrmsteps 1
-vtkxml tstep_all dofman_all element_all primvars 1 1 vars 1 1 
+#vtkxml tstep_all dofman_all element_all primvars 1 1 vars 1 1 
+errorcheck
 Domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 8 nelem 3 ncrosssect 2 nmat 2 nbc 2 nic 0 nltf 1
@@ -35,15 +36,15 @@ IntElLine1 3 nodes 4  4 3 5 6 crossSect 2 mat 2
   PiecewiseLinFunction 1 npoints 2 t 2 0.0 5.0 f(t) 2 0.0 1.0
 #
 #
-#%BEGIN_CHECK% tolerance 1.e-12
+#%BEGIN_CHECK% tolerance 1.e-5
 ## step 2
-#REACTION tStep 1. number 1 dof 1 value -1.8799e+001 
-#REACTION tStep 1. number 1 dof 2 value -1.0727e+001
-#REACTION tStep 1. number 8 dof 1 value  1.8799e+001 
-#REACTION tStep 1. number 8 dof 2 value -2.6870e+001
+#REACTION tStep 2 number 1 dof 1 value -1.87990066e+001 
+#REACTION tStep 2 number 1 dof 2 value -1.07274924e+001
+#REACTION tStep 2 number 8 dof 1 value  1.87990065e+001 
+#REACTION tStep 2 number 8 dof 2 value -2.68704521e+001
 ## step 5
-#REACTION tStep 4. number 1 dof 1 value 0.0 
-#REACTION tStep 4. number 1 dof 2 value 0.0
-#REACTION tStep 4. number 8 dof 1 value 0.0
-#REACTION tStep 4. number 8 dof 2 value 0.0
+#REACTION tStep 5 number 1 dof 1 value 0.0 
+#REACTION tStep 5 number 1 dof 2 value 0.0
+#REACTION tStep 5 number 8 dof 1 value 0.0
+#REACTION tStep 5 number 8 dof 2 value 0.0
 #%END_CHECK%

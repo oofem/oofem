@@ -139,8 +139,8 @@ protected:
         void mapXi3FromLocalToShell(FloatArray &answer, FloatArray &local, int layer);
     void recoverValuesFromCZIP(std::vector<FloatArray> &recoveredValues, int interfce, InternalStateType type, TimeStep *tStep);
 
-    FEI3dTrQuad Shell7BaseXFEM    :: interpolationForCZExport;
-    FEI3dWedgeQuad Shell7BaseXFEM :: interpolationForExport;
+    FEI3dTrQuad interpolationForCZExport;
+    FEI3dWedgeQuad interpolationForExport;
 
 
 

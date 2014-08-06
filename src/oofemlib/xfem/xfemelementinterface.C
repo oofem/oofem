@@ -956,7 +956,7 @@ void XfemElementInterface :: updateYourselfCZ(TimeStep *tStep)
     }
 }
 
-void XfemElementInterface :: computeDisplacementJump(GaussPoint &iGP, FloatArray &oJump, const FloatArray &iSolVec, const FloatMatrix &iNMatrix)
+void XfemElementInterface :: computeDisplacementJump(oofem::GaussPoint& iGP, oofem::FloatArray& oJump, const oofem::FloatArray& iSolVec, const oofem::FloatMatrix& iNMatrix)
 {
     const int dim = 2;
     oJump.resize(dim);

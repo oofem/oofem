@@ -703,7 +703,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
         StructuralMaterial *layerMaterial = static_cast< StructuralMaterial* >( domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) ) );
 
         for ( GaussPoint *gp: *iRule ) {
-            this->discComputeBulkTangentMatrix(KCC, KCD, KDD, gp, layerMaterial, layer, tStep);
+            //this->discComputeBulkTangentMatrix(KCC, KCD, KDD, gp, layerMaterial, layer, tStep);
             lCoords = * gp->giveNaturalCoordinates();
             this->computeEnrichedBmatrixAt(lCoords, Bc, NULL);
             this->computeGeneralizedStrainVectorNew(genEpsC, solVecC , Bc);

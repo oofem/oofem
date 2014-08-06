@@ -246,8 +246,8 @@ bool Tr2Shell7XFEM :: updateIntegrationRuleMultiCrack()
     bool partitionSucceeded = false;
     int nPointsTri  = 6;   // points in the plane
 
-    if ( this->xMan->isElementEnriched(this) ) {
-
+    //if ( this->xMan->isElementEnriched(this) ) {
+    if ( 0 ) {
 
         int numberOfLayers     = this->layeredCS->giveNumberOfLayers();
         int numPointsThickness = this->layeredCS->giveNumIntegrationPointsInLayer();

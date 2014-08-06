@@ -260,7 +260,7 @@ FloatArray &tempShearStressShift, const double normalJump, const FloatArray &she
 void
 IntMatCoulombContact :: giveGeneralStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode rMode,
-                                               GaussPoint *gp, TimeStep *tStep)
+                                               GaussPoint *gp, TimeStep *tStep, int numSpaceDim)
 //
 // Returns characteristic material stiffness matrix of the receiver
 //
@@ -270,7 +270,7 @@ IntMatCoulombContact :: giveGeneralStiffnessMatrix(FloatMatrix &answer,
     FloatArray jump;
     jump = status->giveTempJump();
 
-    const int numSpaceDim = jump.giveSize();
+    //const int numSpaceDim = jump.giveSize();
     const double normalJump = jump.at( numSpaceDim );
 
     answer.resize( numSpaceDim, numSpaceDim );

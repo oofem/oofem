@@ -44,6 +44,7 @@ StructuralInterfaceMaterialStatus :: StructuralInterfaceMaterialStatus(int n, Do
     MaterialStatus(n, d, g), jump(), traction(), tempTraction(), tempJump(), firstPKTraction(), tempFirstPKTraction(), F(), tempF()
 {
     int size = this->giveDomain()->giveNumberOfSpatialDimensions();
+    size = 3;
     this->jump.resize(size);
     this->traction.resize(size);
     this->firstPKTraction.resize(size);

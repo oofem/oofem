@@ -116,22 +116,22 @@ public:
 
     virtual void give3dStiffnessMatrix_Eng( FloatMatrix &answer, MatResponseMode rMode,
                                             GaussPoint *gp, TimeStep *tStep )
-    { this->giveGeneralStiffnessMatrix( answer, rMode, gp, tStep ); }
+    { this->giveGeneralStiffnessMatrix( answer, rMode, gp, tStep, 1 ); }
 
     virtual void give2dStiffnessMatrix_Eng( FloatMatrix &answer, MatResponseMode rMode,
                                             GaussPoint *gp, TimeStep *tStep )
-    { this->giveGeneralStiffnessMatrix( answer, rMode, gp, tStep ); }
+    { this->giveGeneralStiffnessMatrix( answer, rMode, gp, tStep, 2 ); }
 
     virtual void give1dStiffnessMatrix_Eng( FloatMatrix &answer, MatResponseMode rMode,
                                             GaussPoint *gp, TimeStep *tStep )
-    { this->giveGeneralStiffnessMatrix( answer, rMode, gp, tStep ); }
+    { this->giveGeneralStiffnessMatrix( answer, rMode, gp, tStep, 3 ); }
     
     // This method returns the stiffness matrix according to the size of 
     // the spatial jump.
     virtual void  giveGeneralStiffnessMatrix(FloatMatrix &answer,
                                       MatResponseMode rMode,
                                       GaussPoint *gp,
-                                      TimeStep *tStep);
+                                      TimeStep *tStep, int numSpaceDim);
 
     void computeEngTraction(double &normalStress, FloatArray &shearStress, 
                              FloatArray &tempShearStressShift,
