@@ -167,9 +167,9 @@ public:
     void giveCoupledModels(IntArray &answer) { answer = coupledModels; }
 
 #ifdef __OOFEG
-    void drawYourself(oofegGraphicContext &gc);
-    void drawElements(oofegGraphicContext &gc);
-    void drawNodes(oofegGraphicContext &gc);
+    virtual void drawYourself(oofegGraphicContext &gc);
+    virtual void drawElements(oofegGraphicContext &gc);
+    virtual void drawNodes(oofegGraphicContext &gc);
     /**
      * Shows the sparse structure of required matrix, type == 1 stiffness.
      */
