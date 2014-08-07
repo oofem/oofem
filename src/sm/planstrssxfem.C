@@ -191,15 +191,15 @@ PlaneStress2dXfem :: giveGeometryType() const
 
 
 #ifdef __OOFEG
-void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
+void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 #if 0
     XfemManager *xf = this->giveDomain()->giveXfemManager();
     if ( !xf->isElementEnriched(this) ) {
-        PlaneStress2d :: drawRawGeometry(context);
+        PlaneStress2d :: drawRawGeometry(gc);
     } else {
         if ( integrationRulesArray.size() > 1 ) {
             // TODO: Implement visualization
@@ -213,15 +213,15 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &context)
              *          }
              */
         } else {
-            PlaneStress2d :: drawRawGeometry(context);
+            PlaneStress2d :: drawRawGeometry(gc);
         }
     }
 #endif
 }
 
-void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
+void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 #if 0
@@ -229,14 +229,13 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
     if ( !xf->isElementEnriched(this) ) {
         PlaneStress2d :: drawScalar(context);
     } else {
-        if ( context.giveIntVarMode() == ISM_local ) {
+        if ( gc.giveIntVarMode() == ISM_local ) {
             int indx;
             double val;
             FloatArray s(3), v;
 
-            indx = context.giveIntVarIndx();
+            indx = gc.giveIntVarIndx();
 
-            TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
             for ( auto &ir: integrationRulesArray ) {
                 PatchIntegrationRule *iRule = dynamic_cast< PatchIntegrationRule * >(ir);
 
@@ -245,7 +244,7 @@ void PlaneStress2dXfem :: drawScalar(oofegGraphicContext &context)
  #else
                 val = 0.0;
                 for ( GaussPoint *gp: *iRule ) {
-                    giveIPValue(v, gp, context.giveIntVarType(), tStep);
+                    giveIPValue(v, gp, gc.giveIntVarType(), tStep);
                     val += v.at(indx);
                 }
 

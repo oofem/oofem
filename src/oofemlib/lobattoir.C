@@ -166,8 +166,8 @@ LobattoIntegrationRule :: giveLineCoordsAndWeights(int nPoints, FloatArray &coor
 {
     switch ( nPoints ) {
     case 1:
-        coords_xi = FloatArray({0.0});
-        weights = FloatArray({2.0});
+        coords_xi = FloatArray{0.0};
+        weights = FloatArray{2.0};
         break;
 
     case 2:

@@ -46,7 +46,6 @@
 #include "classfactory.h"
 
 #ifdef __OOFEG
- #include "engngm.h"
  #include "oofeggraphiccontext.h"
 #endif
 
@@ -199,7 +198,7 @@ Truss1d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refi
 
 
 #ifdef __OOFEG
-void Truss1d :: drawRawGeometry(oofegGraphicContext &gc)
+void Truss1d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -224,10 +223,9 @@ void Truss1d :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void Truss1d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void Truss1d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* point */
@@ -251,25 +249,24 @@ void Truss1d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 }
 
 
-void Truss1d :: drawScalar(oofegGraphicContext &context)
+void Truss1d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, indx, result = 0;
     WCRec p [ 2 ];
     GraphicObj *tr;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v1, v2;
     double s [ 2 ], defScale;
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
-    if ( context.giveIntVarMode() == ISM_recovered ) {
-        result += this->giveInternalStateAtNode(v1, context.giveIntVarType(), context.giveIntVarMode(), 1, tStep);
-        result += this->giveInternalStateAtNode(v2, context.giveIntVarType(), context.giveIntVarMode(), 2, tStep);
-    } else if ( context.giveIntVarMode() == ISM_local ) {
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
+        result += this->giveInternalStateAtNode(v1, gc.giveIntVarType(), gc.giveIntVarMode(), 1, tStep);
+        result += this->giveInternalStateAtNode(v2, gc.giveIntVarType(), gc.giveIntVarMode(), 2, tStep);
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
         GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-        result += giveIPValue(v1, gp, context.giveIntVarType(), tStep);
+        result += giveIPValue(v1, gp, gc.giveIntVarType(), tStep);
         v2 = v1;
         result *= 2;
     }
@@ -278,18 +275,18 @@ void Truss1d :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    indx = context.giveIntVarIndx();
+    indx = gc.giveIntVarIndx();
 
     s [ 0 ] = v1.at(indx);
     s [ 1 ] = v2.at(indx);
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
 
-    if ( ( context.getScalarAlgo() == SA_ISO_SURF ) || ( context.getScalarAlgo() == SA_ISO_LINE ) ) {
+    if ( ( gc.getScalarAlgo() == SA_ISO_SURF ) || ( gc.getScalarAlgo() == SA_ISO_LINE ) ) {
         for ( i = 0; i < 2; i++ ) {
-            if ( context.getInternalVarsDefGeoFlag() ) {
+            if ( gc.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
-                defScale = context.getDefScale();
+                defScale = gc.getDefScale();
                 p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                 p [ i ].y = 0.;
                 p [ i ].z = 0.;
@@ -304,13 +301,13 @@ void Truss1d :: drawScalar(oofegGraphicContext &context)
         tr =  CreateLine3D(p);
         EGWithMaskChangeAttributes(LAYER_MASK, tr);
         EMAddGraphicsToModel(ESIModel(), tr);
-    } else if ( ( context.getScalarAlgo() == SA_ZPROFILE ) || ( context.getScalarAlgo() == SA_COLORZPROFILE ) ) {
-        double landScale = context.getLandScale();
+    } else if ( ( gc.getScalarAlgo() == SA_ZPROFILE ) || ( gc.getScalarAlgo() == SA_COLORZPROFILE ) ) {
+        double landScale = gc.getLandScale();
 
         for ( i = 0; i < 2; i++ ) {
-            if ( context.getInternalVarsDefGeoFlag() ) {
+            if ( gc.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
-                defScale = context.getDefScale();
+                defScale = gc.getDefScale();
                 p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                 p [ i ].y = 0.0;
                 p [ i ].z = s [ i ] * landScale;
@@ -321,9 +318,9 @@ void Truss1d :: drawScalar(oofegGraphicContext &context)
             }
         }
 
-        if ( context.getScalarAlgo() == SA_ZPROFILE ) {
+        if ( gc.getScalarAlgo() == SA_ZPROFILE ) {
             /*
-             * EASValsSetColor(context.getDeformedElementColor());
+             * EASValsSetColor(gc.getDeformedElementColor());
              * EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
              * tr =  CreateLine3D(p);
              * EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
@@ -343,14 +340,14 @@ void Truss1d :: drawScalar(oofegGraphicContext &context)
             pp [ 3 ].z = 0.0;
             tr = CreateQuad3D(pp);
             EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
-            EASValsSetColor( context.getDeformedElementColor() );
+            EASValsSetColor( gc.getDeformedElementColor() );
             //EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
             EASValsSetFillStyle(FILL_HOLLOW);
             EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | LAYER_MASK, tr);
             EMAddGraphicsToModel(ESIModel(), tr);
         } else {
             //tr =  CreateTriangleWD3D(p, s[0], s[1], s[2]);
-            EASValsSetColor( context.getDeformedElementColor() );
+            EASValsSetColor( gc.getDeformedElementColor() );
             tr =  CreateLine3D(p);
             EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
             EMAddGraphicsToModel(ESIModel(), tr);
@@ -430,8 +427,8 @@ Truss1d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType m
     FloatArray n, u;
 
     this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
-    this->computeVectorOf(IntArray({D_u}), mode, tStep, u);
-    answer = FloatArray({n.dotProduct(u)});
+    this->computeVectorOf(IntArray{D_u}, mode, tStep, u);
+    answer = FloatArray{n.dotProduct(u)};
 }
 
 

@@ -38,6 +38,7 @@
 #include "structuralmaterial.h"
 #include "linearelasticmaterial.h"
 #include "dictionary.h"
+#include "intarray.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "structuralms.h"

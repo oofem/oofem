@@ -1712,19 +1712,34 @@ EngngModel :: initParallel()
 #endif
 
 #ifdef __OOFEG
-void EngngModel :: drawYourself(oofegGraphicContext &context)
+void EngngModel :: drawYourself(oofegGraphicContext &gc)
 {
-    this->giveDomain( context.getActiveDomain() )->drawYourself(context);
+    OGC_PlotModeType plotMode = gc.giveIntVarPlotMode();
+
+    if ( ( plotMode == OGC_nodeAnnotation ) || ( plotMode == OGC_nodeGeometry ) || ( plotMode == OGC_essentialBC ) ||
+        ( plotMode == OGC_naturalBC ) || ( plotMode == OGC_nodeScalarPlot ) || ( plotMode == OGC_nodeVectorPlot ) ) {
+        this->drawNodes(gc);
+    } else {
+        this->drawElements(gc);
+    }
 }
 
-void EngngModel :: drawElements(oofegGraphicContext &context)
+void EngngModel :: drawElements(oofegGraphicContext &gc)
 {
-    this->giveDomain( context.getActiveDomain() )->drawElements(context);
+    Domain *d = this->giveDomain( gc.getActiveDomain() );
+    TimeStep *tStep = this->giveCurrentStep();
+    for ( int i = 1; i <= d->giveNumberOfElements(); i++ ) {
+        d->giveElement(i)->drawYourself(gc, tStep);
+    }
 }
 
-void EngngModel :: drawNodes(oofegGraphicContext &context)
+void EngngModel :: drawNodes(oofegGraphicContext &gc)
 {
-    this->giveDomain( context.getActiveDomain() )->drawNodes(context);
+    Domain *d = this->giveDomain( gc.getActiveDomain() );
+    TimeStep *tStep = this->giveCurrentStep();
+    for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
+        d->giveDofManager(i)->drawYourself(gc, tStep);
+    }
 }
 
 #endif

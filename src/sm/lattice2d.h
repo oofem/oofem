@@ -109,13 +109,13 @@ public:
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
 
 #ifdef __OOFEG
-    void drawYourself(oofegGraphicContext &context);
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    virtual void drawSpecial(oofegGraphicContext &gc);
-    void drawRawCrossSections(oofegGraphicContext &gc);
-    void giveCrossSectionCoordinates(FloatArray &coords);
-    void drawDeformedCrossSections(oofegGraphicContext &, UnknownType);
+    virtual void drawYourself(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    virtual void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void giveCrossSectionCoordinates(FloatArray &coords);
+    //virtual void drawDeformedCrossSections(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
 #endif
 
 protected:

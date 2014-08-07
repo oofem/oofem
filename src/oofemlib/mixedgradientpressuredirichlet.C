@@ -49,6 +49,7 @@
 #include "sparsemtrx.h"
 #include "sparselinsystemnm.h"
 #include "dynamicinputrecord.h"
+#include "domain.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(MixedGradientPressureDirichlet);

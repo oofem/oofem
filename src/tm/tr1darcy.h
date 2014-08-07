@@ -37,9 +37,7 @@
 
 #include "transportelement.h"
 #include "fei2dtrlin.h"
-#include "domain.h"
 #include "nodalaveragingrecoverymodel.h"
-#include "transportmaterial.h"
 
 #define _IFT_Tr1Darcy_Name "tr1darcy"
 

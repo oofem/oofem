@@ -48,6 +48,8 @@
 //@}
 
 namespace oofem {
+class Material;
+
 /**
  * Delamination.
  * */

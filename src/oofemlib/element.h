@@ -36,27 +36,20 @@
 #define element_h
 
 #include "femcmpnn.h"
-#include "floatmatrix.h"
-#include "floatarray.h"
-#include "intarray.h"
 #include "error.h"
-#include "integrationrule.h"
 #include "chartype.h"
+#include "domain.h"
+#include "floatmatrix.h"
+#include "integrationdomain.h"
+#include "materialmode.h"
 #include "elementgeometrytype.h"
 #include "valuemodetype.h"
 #include "internalstatemode.h"
 #include "internalstatetype.h"
-#include "internalstatevaluetype.h"
 #include "elementextension.h"
 #include "entityrenumberingscheme.h"
 #include "unknowntype.h"
 #include "unknownnumberingscheme.h"
-#include "domain.h"
-
-#ifdef __OOFEG
- #include "node.h"
- #include "engngm.h"
-#endif
 
 #include <cstdio>
 
@@ -78,6 +71,7 @@ namespace oofem {
 class TimeStep;
 class Node;
 class Material;
+class IntegrationRule;
 class GaussPoint;
 class FloatMatrix;
 class IntArray;
@@ -86,8 +80,6 @@ class ElementSide;
 class FEInterpolation;
 class Load;
 class BoundaryLoad;
-
-#ifdef __PARALLEL_MODE
 class CommunicationBuffer;
 
 /**
@@ -101,8 +93,6 @@ enum elementParallelMode {
     // Element_shared, ///< Element is shared by neighboring partitions - not implemented.
     Element_remote, ///< Element in active domain is only mirror of some remote element.
 };
-
-#endif
 
 
 /**
@@ -866,15 +856,15 @@ public:
     //
     // Graphics output
     //
-    virtual void drawYourself(oofegGraphicContext &context);
-    virtual void drawAnnotation(oofegGraphicContext &mode);
-    virtual void drawRawGeometry(oofegGraphicContext &mode) { }
-    virtual void drawDeformedGeometry(oofegGraphicContext &mode, UnknownType) { }
-    virtual void drawScalar(oofegGraphicContext &context) { }
-    virtual void drawSpecial(oofegGraphicContext &context) { }
+    virtual void drawYourself(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawAnnotation(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) { }
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) { }
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep) { }
+    virtual void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep) { }
     // added in order to hide IP element details from oofeg
     // to determine the max and min local values, when recovery does not takes place
-    virtual void giveLocalIntVarMaxMin(oofegGraphicContext &context, TimeStep *, double &emin, double &emax) { emin = emax = 0.0; }
+    virtual void giveLocalIntVarMaxMin(oofegGraphicContext &gc, TimeStep *tStep, double &emin, double &emax) { emin = emax = 0.0; }
 
     /**
      * Returns internal state variable (like stress,strain) at node of element in Reduced form,
@@ -1045,5 +1035,6 @@ Element :: ipEvaluator(T *src, void ( T :: *f )( GaussPoint *, S & ), S &_val)
         }
     }
 }
+
 } // end namespace oofem
 #endif //element_h

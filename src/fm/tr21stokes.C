@@ -47,6 +47,7 @@
 #include "fei2dtrquad.h"
 #include "fluidcrosssection.h"
 #include "classfactory.h"
+#include "engngm.h"
 
 namespace oofem {
 REGISTER_Element(Tr21Stokes);

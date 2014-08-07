@@ -32,7 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef __OOFEG
 #include "oofeggraphiccontext.h"
 #include "engngm.h"
 #include "element.h"
@@ -196,7 +195,7 @@ oofegGraphicContext :: setMaterialModelFilterState(int i, int state)
 void
 oofegGraphicContext :: setElementFilterState(char *initString)
 {
-    OOFEMTXTInputRecord parser(initString);
+    OOFEMTXTInputRecord parser(0, std :: string(initString));
     element_filter.clear();
     parser.giveField(element_filter, "element_filter");
 }
@@ -261,4 +260,3 @@ oofegGraphicContext :: updateFringeTableMinMax(double *s, int size)
     }
 }
 } // end namespace oofem
-#endif

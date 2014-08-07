@@ -413,7 +413,7 @@ Q4Axisymm :: giveInterface(InterfaceType interface)
 
 #ifdef __OOFEG
 
-void Q4Axisymm :: drawRawGeometry(oofegGraphicContext &gc)
+void Q4Axisymm :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
@@ -448,11 +448,10 @@ void Q4Axisymm :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void Q4Axisymm :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void Q4Axisymm :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     if ( !gc.testElementGraphicActivity(this) ) {

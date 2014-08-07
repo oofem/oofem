@@ -77,9 +77,9 @@ public:
     virtual Interface *giveInterface(InterfaceType it) { return NULL; }
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &context);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
     // definition & identification

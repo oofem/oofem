@@ -197,7 +197,7 @@ QTrPlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Float
 #ifdef __OOFEG
  #define TR_LENGHT_REDUCT 0.3333
 
-void QTrPlaneStrain :: drawRawGeometry(oofegGraphicContext &gc)
+void QTrPlaneStrain :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
@@ -228,11 +228,10 @@ void QTrPlaneStrain :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void QTrPlaneStrain :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void QTrPlaneStrain :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -260,24 +259,23 @@ void QTrPlaneStrain :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType
 }
 
 
-void QTrPlaneStrain :: drawScalar(oofegGraphicContext &context)
+void QTrPlaneStrain :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int t, n [ 3 ], i, indx, result = 0;
     WCRec p [ 3 ];
     GraphicObj *tr;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 6 ];
     double s [ 6 ], ss [ 3 ], defScale;
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
-    if ( context.giveIntVarMode() == ISM_recovered ) {
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
         for ( i = 1; i <= 6; i++ ) {
-            result += this->giveInternalStateAtNode(v [ i - 1 ], context.giveIntVarType(), context.giveIntVarMode(), i, tStep);
+            result += this->giveInternalStateAtNode(v [ i - 1 ], gc.giveIntVarType(), gc.giveIntVarMode(), i, tStep);
         }
-    } else if ( context.giveIntVarMode() == ISM_local ) {
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
         return;
     }
 
@@ -285,7 +283,7 @@ void QTrPlaneStrain :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    indx = context.giveIntVarIndx();
+    indx = gc.giveIntVarIndx();
 
     for ( i = 1; i <= 6; i++ ) {
         s [ i - 1 ] = v [ i - 1 ].at(indx);
@@ -293,7 +291,7 @@ void QTrPlaneStrain :: drawScalar(oofegGraphicContext &context)
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
 
-    if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+    if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
         for ( t = 1; t <= 4; t++ ) {
             if ( t == 1 ) {
                 n [ 0 ] = 1;
@@ -315,9 +313,9 @@ void QTrPlaneStrain :: drawScalar(oofegGraphicContext &context)
 
 
             for ( i = 0; i < 3; i++ ) {
-                if ( context.getInternalVarsDefGeoFlag() ) {
+                if ( gc.getInternalVarsDefGeoFlag() ) {
                     // use deformed geometry
-                    defScale = context.getDefScale();
+                    defScale = gc.getDefScale();
                     p [ i ].x = ( FPNum ) this->giveNode(n [ i ])->giveUpdatedCoordinate(1, tStep, defScale);
                     p [ i ].y = ( FPNum ) this->giveNode(n [ i ])->giveUpdatedCoordinate(2, tStep, defScale);
                     p [ i ].z = 0.;
@@ -332,13 +330,13 @@ void QTrPlaneStrain :: drawScalar(oofegGraphicContext &context)
             ss [ 0 ] = s [ n [ 0 ] - 1 ];
             ss [ 1 ] = s [ n [ 1 ] - 1 ];
             ss [ 2 ] = s [ n [ 2 ] - 1 ];
-            context.updateFringeTableMinMax(ss, 3);
+            gc.updateFringeTableMinMax(ss, 3);
             tr =  CreateTriangleWD3D(p, ss [ 0 ], ss [ 1 ], ss [ 2 ]);
             EGWithMaskChangeAttributes(LAYER_MASK, tr);
             EMAddGraphicsToModel(ESIModel(), tr);
         }
 
-        /* } else if (context.getScalarAlgo() == SA_ISO_LINE) {
+        /* } else if (gc.getScalarAlgo() == SA_ISO_LINE) {
          *
          * EASValsSetColor(context.getActiveCrackColor());
          * EASValsSetLineWidth(OOFEG_ISO_LINE_WIDTH);
@@ -351,9 +349,9 @@ void QTrPlaneStrain :: drawScalar(oofegGraphicContext &context)
          *
          *
          * for (i=0; i< 3; i++) {
-         * if (context.getInternalVarsDefGeoFlag()) {
+         * if (gc.getInternalVarsDefGeoFlag()) {
          * // use deformed geometry
-         * defScale = context.getDefScale();
+         * defScale = gc.getDefScale();
          * p[i].x = (FPNum) this->giveNode(n[i])->giveUpdatedCoordinate(1,tStep,defScale);
          * p[i].y = (FPNum) this->giveNode(n[i])->giveUpdatedCoordinate(2,tStep,defScale);
          * p[i].z = 0.;
@@ -375,7 +373,7 @@ void QTrPlaneStrain :: drawScalar(oofegGraphicContext &context)
 }
 
 void
-QTrPlaneStrain :: drawSpecial(oofegGraphicContext &gc)
+QTrPlaneStrain :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
 { }
 
 #endif

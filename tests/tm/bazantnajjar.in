@@ -44,7 +44,7 @@ quadaxisym1mt   8   nodes 4    8   9  20  19 crossSect 1 mat 1
 quadaxisym1mt   9   nodes 4    9  10  21  20 crossSect 1 mat 1 
 quadaxisym1mt  10   nodes 4   10  11  22  21 crossSect 1 mat 1 
 #
-SimpleCS 1 thick 1.0 width 1.0
+EmptyCS 1
 bazantnajjarmoisturemat 1 d 2400. C1 3.1e-05 alpha0 0.02 hC 0.775 n 5
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 1.
 InitialCondition 1 Conditions 1 u 1.00

@@ -46,6 +46,7 @@
 #include "timestep.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "engngm.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -933,7 +934,7 @@ LIBeam3dNL2 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 #ifdef __OOFEG
-void LIBeam3dNL2 :: drawRawGeometry(oofegGraphicContext &gc)
+void LIBeam3dNL2 :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
 
@@ -959,7 +960,7 @@ void LIBeam3dNL2 :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void LIBeam3dNL2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void LIBeam3dNL2 :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
 
@@ -967,7 +968,6 @@ void LIBeam3dNL2 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType ty
         return;
     }
 
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* poin */

@@ -41,6 +41,7 @@
 #include "fei2dquadlin.h"
 
 #define _IFT_Quad1PlateSubSoil_Name "quad1platesubsoil"
+
 namespace oofem {
 /**
  * This class implements an quadrilateral four-node plate subsoil element in xy plane.

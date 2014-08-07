@@ -105,6 +105,7 @@ protected:
     int actualStepIndx;
     int nHistVectors;
     std :: vector< FloatArray >solutionVectors;
+    std :: vector< FloatArray >prescribedVectors;
     std :: vector< TimeStep >solStepList;
     EngngModel *emodel;
     int domainIndx;
@@ -194,7 +195,7 @@ public:
      * @param mode Mode of the unknown (increment, total value etc.)
      * @param tStep Time step unknowns belong to.
      */
-    virtual void update(ValueModeType mode, TimeStep *tStep, FloatArray &vectorToStore) { };
+    virtual void update(ValueModeType mode, TimeStep *tStep, FloatArray &vectorToStore);
 
     /**
      * Brings up a new solution vector for given time step.
@@ -209,7 +210,8 @@ public:
 
 protected:
     int resolveIndx(TimeStep *tStep, int shift);
-    virtual FloatArray *giveSolutionVector(int);
+    FloatArray *giveSolutionVector(int);
+    FloatArray *givePrescribedVector(int);
 };
 } // end namespace oofem
 #endif // primaryfield_h

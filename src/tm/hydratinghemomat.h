@@ -36,7 +36,7 @@
 #define hydratinghemomat_h
 
 #include "hemotkmat.h"
-#include "../sm/hydram.h"
+#include "hydram.h"
 
 ///@name Input fields for HydratingHeMoMaterial
 //@{

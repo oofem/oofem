@@ -251,6 +251,10 @@ int main(int argc, char *argv[])
     OOFEMTXTDataReader dr( inputFileName.str ( ).c_str() );
     problem = :: InstanciateProblem(& dr, _processor, contextFlag, NULL, parallelFlag);
     dr.finish();
+    if ( !problem ) {
+        OOFEM_LOG_ERROR("Couldn't instanciate problem, exiting");
+        exit(EXIT_FAILURE);
+    }
 
     problem->checkProblemConsistency();
     problem->init();

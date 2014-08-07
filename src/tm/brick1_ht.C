@@ -218,7 +218,7 @@ Brick1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray
 
 
 #ifdef __OOFEG
-void Brick1_ht :: drawRawGeometry(oofegGraphicContext &gc)
+void Brick1_ht :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 8 ];
     GraphicObj *go;
@@ -246,48 +246,47 @@ void Brick1_ht :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void Brick1_ht :: drawScalar(oofegGraphicContext &context)
+void Brick1_ht :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int indx, result = 0;
     WCRec p [ 8 ];
     GraphicObj *tr;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 8 ];
     double s [ 8 ];
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
-    if ( context.giveIntVarMode() == ISM_recovered ) {
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
         for ( int i = 1; i <= 8; i++ ) {
-            result += this->giveInternalStateAtNode(v [ i - 1 ], context.giveIntVarType(), context.giveIntVarMode(), i, tStep);
+            result += this->giveInternalStateAtNode(v [ i - 1 ], gc.giveIntVarType(), gc.giveIntVarMode(), i, tStep);
         }
 
         if ( result != 8 ) {
             return;
         }
-    } else if ( context.giveIntVarMode() == ISM_local ) {
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
         return;
     }
 
-    indx = context.giveIntVarIndx();
+    indx = gc.giveIntVarIndx();
 
     for ( int i = 1; i <= 8; i++ ) {
         s [ i - 1 ] = v [ i - 1 ].at(indx);
     }
 
-    EASValsSetEdgeColor( context.getElementEdgeColor() );
+    EASValsSetEdgeColor( gc.getElementEdgeColor() );
     EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
-    if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+    if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
         for ( int i = 0; i < 8; i++ ) {
             p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
             p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
             p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
         }
 
-        context.updateFringeTableMinMax(s, 8);
+        gc.updateFringeTableMinMax(s, 8);
         tr = CreateHexahedronWD(p, s);
         EGWithMaskChangeAttributes(LAYER_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK, tr);
         EMAddGraphicsToModel(ESIModel(), tr);

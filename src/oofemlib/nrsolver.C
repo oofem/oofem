@@ -45,6 +45,7 @@
 #include "linesearch.h"
 #include "classfactory.h"
 #include "exportmodulemanager.h"
+#include "engngm.h"
 
 #ifdef __PETSC_MODULE
  #include "petscsolver.h"
@@ -152,7 +153,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
     rtolf.resize(1);
     rtolf.at(1) = 1.e-3; // Default value.
     rtold.resize(1);
-    rtold = FloatArray({0.0}); // Default off (0.0 or negative values mean that residual is ignored)
+    rtold = FloatArray{0.0}; // Default off (0.0 or negative values mean that residual is ignored)
     IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), _IFT_NRSolver_rtolv);
     IR_GIVE_OPTIONAL_FIELD(ir, rtold.at(1), _IFT_NRSolver_rtolv);
 

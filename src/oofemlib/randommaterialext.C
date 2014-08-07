@@ -110,10 +110,10 @@ RandomMaterialExtensionInterface :: _generateStatusVariables(GaussPoint *gp) con
         if ( gp->giveElement()->computeGlobalCoordinates( globalCoordinates, * ( gp->giveSubPatchCoordinates() ) ) ) {
             Function *f = gp->giveElement()->giveDomain()->giveFunction( randomVariableGenerators.at(i) );
             value = f->evaluate({{"x", globalCoordinates}});
+            status->_setProperty(randVariables.at(i), value);
         } else {
             OOFEM_ERROR("computeGlobalCoordinates failed");
         }
-        status->_setProperty(randVariables.at(i), value);
     }
 }
 } // end namespace oofem

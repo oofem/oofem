@@ -36,11 +36,11 @@
 #define vtkexportmodule_h
 
 #include "exportmodule.h"
-#include "domain.h"
-#include "engngm.h"
 #include "intarray.h"
 #include "nodalrecoverymodel.h"
 #include "internalstatevaluetype.h"
+#include "unknowntype.h"
+#include "valuemodetype.h"
 
 ///@name Input fields for VTK export module
 //@{
@@ -53,6 +53,8 @@
 //@}
 
 namespace oofem {
+class DofManager;
+
 /**
  * Represents VTK (Visualization Toolkit) export module. It uses VTK file format, Unstructured grid dataset.
  * There is built in support for Region By Region output, taking care about possible nonsmooth character of

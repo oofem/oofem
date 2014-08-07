@@ -41,7 +41,6 @@
 #include "weakperiodicbc.h"
 #include "inputrecord.h"
 #include "element.h"
-#include "elementside.h"
 #include "node.h"
 #include "masterdof.h"
 #include "sparsemtrx.h"

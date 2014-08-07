@@ -35,13 +35,11 @@
 #ifndef feticommunicator_h
 #define feticommunicator_h
 
-#ifdef __PARALLEL_MODE
+#include "communicator.h"
+#include "fetiboundarydofman.h"
+#include "error.h"
 
- #include "communicator.h"
- #include "fetiboundarydofman.h"
- #include "error.h"
-
- #include <vector>
+#include <vector>
 
 using namespace std;
 
@@ -100,5 +98,5 @@ public:
     IntArray *giveMasterCommMapPtr() { return & masterCommMap; }
 };
 } // end namespace oofem
-#endif
+
 #endif // feticommunicator_h

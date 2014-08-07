@@ -40,6 +40,7 @@
 #include "dynamicinputrecord.h"
 #include "structuralms.h"
 #include "structuralelement.h"
+#include "engngm.h"
 
 namespace oofem {
 REGISTER_CrossSection(SimpleCrossSection);

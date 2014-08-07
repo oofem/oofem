@@ -87,8 +87,8 @@ public:
     virtual const char *giveClassName() const { return "LIBeam3d"; }
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
 #endif
 
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }

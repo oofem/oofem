@@ -41,14 +41,16 @@
 #define timestep_h
 
 #include "oofemcfg.h"
-#include "femcmpnn.h"
-#include "engngm.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 #include "statecountertype.h"
 #include "timediscretizationtype.h"
+#include "inputrecord.h"
 
 namespace oofem {
+class EngngModel;
+class DataStream;
+
 /**
  * Class representing solution step. The timeStep instance may represent either
  * time step, load increment, or load case depending on used Engineering model.

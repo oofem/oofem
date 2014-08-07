@@ -36,9 +36,8 @@
 #define load_h
 
 #include "generalboundarycondition.h"
-#include "domain.h"
+#include "intarray.h"
 #include "floatarray.h"
-#include "dictionary.h"
 #include "valuemodetype.h"
 
 ///@name Input fields for Load

@@ -35,8 +35,6 @@
 #ifndef problemcommunicatormode_h
 #define problemcommunicatormode_h
 
-#ifdef __PARALLEL_MODE
-
 namespace oofem {
 /**
  * ProblemCommunicatorMode determines the valid mode.
@@ -52,5 +50,5 @@ enum ProblemCommunicatorMode {
     ProblemCommMode__REMOTE_ELEMENT_MODE,
 };
 } // end namespace oofem
-#endif
+
 #endif // problemcommunicatormode_h

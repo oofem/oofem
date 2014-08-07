@@ -221,11 +221,11 @@ Shell7Base :: evalInitialContravarBaseVectorsAt(FloatArray &lCoords, FloatMatrix
 
 
 void
-Shell7Base :: evalContravarBaseVectorsAt(FloatArray &lcoords, FloatMatrix &gcon, FloatArray &genEps)
+Shell7Base :: evalContravarBaseVectorsAt(FloatArray &lcoords, FloatMatrix &gcon, FloatArray &genEps, TimeStep *tStep)
 {
     // Not in use at the moment!
     FloatMatrix gcov;
-    this->evalCovarBaseVectorsAt(lcoords, gcov, genEps);
+    this->evalCovarBaseVectorsAt(lcoords, gcov, genEps, tStep);
     this->giveDualBase(gcov, gcon);
 }
 
@@ -327,7 +327,7 @@ Shell7Base :: setupInitialNodeDirectors()
 
 
 void
-Shell7Base :: evalCovarBaseVectorsAt(FloatArray &lcoords, FloatMatrix &gcov, FloatArray &genEps)
+Shell7Base :: evalCovarBaseVectorsAt(FloatArray &lcoords, FloatMatrix &gcov, FloatArray &genEps, TimeStep *tStep)
 {
     // Evaluates the covariant base vectors in the current configuration
     FloatArray g1;
@@ -600,7 +600,7 @@ Shell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *mat
     S.beMatrixFormOfStress(contravarStressVector);
 
     FloatMatrix gcov;
-    this->evalCovarBaseVectorsAt(lcoords, gcov, genEps);
+    this->evalCovarBaseVectorsAt(lcoords, gcov, genEps, tStep);
 
     FloatMatrix gg11, gg12, gg13, gg21, gg22, gg23, gg31, gg32, gg33;
     FloatArray g1, g2, g3;
@@ -747,7 +747,7 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
 
         // Traction tangent, L =  lambdaN * ( W2*lambdaG_1 - W1*lambdaG_2  )
         load->computeValueAt(pressure, tStep, * ( gp->giveNaturalCoordinates() ), VM_Total);        // pressure component
-        this->evalCovarBaseVectorsAt(lcoords, gcov, genEps);
+        this->evalCovarBaseVectorsAt(lcoords, gcov, genEps, tStep);
         g1.beColumnOf(gcov, 1);
         g2.beColumnOf(gcov, 2);
         W1 = this->giveAxialMatrix(g1);
@@ -800,14 +800,14 @@ Shell7Base :: giveAxialMatrix(const FloatArray &v)
 #if 1
 
 void
-Shell7Base :: computeFAt(FloatArray &lCoords, FloatMatrix &answer, FloatArray &genEps)
+Shell7Base :: computeFAt(FloatArray &lCoords, FloatMatrix &answer, FloatArray &genEps, TimeStep *tStep)
 {
     // Compute deformation gradient as open product(g_i, G^i) = gcov*Gcon^T
     // Output is a 3x3 matrix
     FloatMatrix gcov, Gcon;
     //FloatArray lcoords;
     //lcoords = *gp->giveNaturalCoordinates();
-    this->evalCovarBaseVectorsAt(lCoords, gcov, genEps);
+    this->evalCovarBaseVectorsAt(lCoords, gcov, genEps, tStep);
     this->evalInitialContravarBaseVectorsAt(lCoords, Gcon);
     answer.beProductTOf(gcov, Gcon);
 }
@@ -833,7 +833,7 @@ Shell7Base :: computeStrainVectorF(FloatArray &answer, GaussPoint *gp, TimeStep 
     FloatMatrix F, E;
     FloatArray lcoords;
     lcoords = * gp->giveNaturalCoordinates();
-    this->computeFAt(lcoords, F, genEps);       // Deformation gradient
+    this->computeFAt(lcoords, F, genEps, tStep);       // Deformation gradient
     this->computeE(E, F);                  // Green-Lagrange strain tensor
     answer.beSymVectorFormOfStrain(E); // Convert to reduced Voight form (6 components)
 }
@@ -860,7 +860,7 @@ Shell7Base :: computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, Time
     FloatArray genEps;
     this->computeGeneralizedStrainVectorNew(genEps, solVec, B);
     FloatMatrix F;
-    this->computeFAt(lCoords, F, genEps);
+    this->computeFAt(lCoords, F, genEps, tStep);
 
     FloatArray vS;
     giveIPValue(vS, gp, IST_StressTensor, tStep); // expects Second PK stress
@@ -875,12 +875,12 @@ Shell7Base :: computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, Time
 
 
 void
-Shell7Base :: computeStressResultantsAt(GaussPoint *gp, FloatArray &Svec, FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatArray &genEps)
+Shell7Base :: computeStressResultantsAt(GaussPoint *gp, FloatArray &Svec, FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatArray &genEps, TimeStep *tStep)
 {
     // Computes the stress resultants in the covariant system Sig =S(i,j)*g_j
     FloatMatrix gcov;
     FloatArray &lCoords = * gp->giveNaturalCoordinates();
-    this->evalCovarBaseVectorsAt(lCoords, gcov, genEps);
+    this->evalCovarBaseVectorsAt(lCoords, gcov, genEps, tStep);
     FloatMatrix S, Sig;
     S.beMatrixFormOfStress(Svec);
     Sig.beProductTOf(gcov, S);       // Stress resultants stored in each column
@@ -979,7 +979,7 @@ Shell7Base :: computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationP
     this->computeStressVectorInMaterial(cartStressVector, genEpsC, ip, mat, tStep);
     //this->computeStressMatrix(cartStressVector, genEpsC, ip, mat, tStep);
     this->transInitialCartesianToInitialContravar(ip, cartStressVector, contravarStressVector);
-    this->computeStressResultantsAt(ip, contravarStressVector, S1g, S2g, S3g, genEpsC);
+    this->computeStressResultantsAt(ip, contravarStressVector, S1g, S2g, S3g, genEpsC, tStep);
     this->computeLambdaGMatrices(lambda, genEpsD, zeta);
 
     // f = lambda_1^T * S1g + lambda_2^T * S2g + lambda_3^T * S3g
@@ -1504,7 +1504,7 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &traction, const
         lcoords.at(2) = gp->giveNaturalCoordinate(2);
         lcoords.at(3) = pLoad->giveLoadOffset();
 
-        this->evalCovarBaseVectorsAt(lcoords, gcov, genEps);
+        this->evalCovarBaseVectorsAt(lcoords, gcov, genEps, tStep);
         g1.beColumnOf(gcov, 1);
         g2.beColumnOf(gcov, 2);
         surfLoad->computeValueAt(load, tStep, lcoords, mode);        // pressure component
@@ -1518,10 +1518,10 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &traction, const
 }
 
 void
-Shell7Base :: evalCovarNormalAt(FloatArray &nCov, FloatArray &lCoords, FloatArray &genEpsC)
+Shell7Base :: evalCovarNormalAt(FloatArray &nCov, FloatArray &lCoords, FloatArray &genEpsC, TimeStep *tStep)
 {
     FloatMatrix gcov;
-    this->evalCovarBaseVectorsAt(lCoords, gcov, genEpsC);
+    this->evalCovarBaseVectorsAt(lCoords, gcov, genEpsC, tStep);
     FloatArray g1, g2;
     g1.beColumnOf(gcov, 1);
     g2.beColumnOf(gcov, 2);

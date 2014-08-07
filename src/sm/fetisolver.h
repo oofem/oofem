@@ -35,15 +35,12 @@
 #ifndef fetisolver_h
 #define fetisolver_h
 
-#ifdef __PARALLEL_MODE
-
- #include "sparselinsystemnm.h"
- #include "sparsemtrx.h"
- #include "floatarray.h"
- #include "floatmatrix.h"
- #include "processcomm.h"
- #include "feticommunicator.h"
- #include "engngm.h"
+#include "sparselinsystemnm.h"
+#include "sparsemtrx.h"
+#include "floatarray.h"
+#include "floatmatrix.h"
+#include "processcomm.h"
+#include "feticommunicator.h"
 
 ///@name Input fields for FETISolver
 //@{
@@ -153,5 +150,5 @@ public:
     enum { FETISolverZeroTag, NumberOfRBMMsg, RBMMessage, QQMessage, SolutionMessage, ResidualMessage, DirectionVectorMessage, PPVectorMessage, GammasMessage, FETISolverIterationContinue, FETISolverIterationBreak };
 };
 } // end namespace oofem
-#endif
+
 #endif // fetisolver_h

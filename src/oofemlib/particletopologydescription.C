@@ -45,6 +45,7 @@
 #include "element.h"
 #include "timer.h"
 #include "classfactory.h"
+#include "engngm.h"
 
 #include "mixedgradientpressureneumann.h"
 #include "node.h"

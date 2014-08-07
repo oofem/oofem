@@ -757,7 +757,6 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
  * {
  * WCRec p[3];
  * GraphicObj *go;
- * TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
  *
  * EASValsSetLineWidth(DEFORMED_GEOMETRY_WIDTH);
  * EASValsSetColor(deformedElementColor);
@@ -781,7 +780,7 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 
 
 //void
-//RerShell :: drawScalar(oofegGraphicContext& context)
+//RerShell :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 //{}
 
 

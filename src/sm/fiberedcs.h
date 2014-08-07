@@ -35,7 +35,6 @@
 #ifndef fiberedcs_h
 #define fiberedcs_h
 
-
 #include "structuralcrosssection.h"
 #include "structuralmaterial.h"
 #include "element.h"

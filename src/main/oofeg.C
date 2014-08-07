@@ -47,6 +47,7 @@
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
+#include "domain.h"
 
 #include "util.h"
 #include "node.h"
@@ -221,7 +222,7 @@ void set_render(EView *v_p, caddr_t data, WCRec *p);
 int show_axes(NODE _data, NODE _view);
 int hide_axes(NODE _data, NODE _view);
 void oofeg_fit_all_graphics(Widget w, XtPointer ptr, XtPointer call_data);
-void updateISA(oofegGraphicContext *context);
+void updateISA(oofegGraphicContext *gc);
 void updateGraphics();
 
 static const char *OOFEG_layer_names[] = {
@@ -2713,11 +2714,11 @@ set_background(NODE _data, NODE _view)
 }
 
 void
-updateISA(oofegGraphicContext *context)
+updateISA(oofegGraphicContext *gc)
 {
     char buff [ 1024 ];
     double time;
-    TimeStep *ct = context [ 0 ].getActiveProblem()->giveCurrentStep();
+    TimeStep *ct = gc [ 0 ].getActiveProblem()->giveCurrentStep();
     if ( ct != NULL ) {
         time = ct->giveTargetTime();
     } else {
@@ -2725,7 +2726,7 @@ updateISA(oofegGraphicContext *context)
     }
 
     if ( GetISASize() > 2 ) {
-        sprintf(buff, "| %s | step: %4d.%d | time: %e |", jobName.c_str(), context [ 0 ].getActiveStep(), context [ 0 ].getActiveStepVersion(),
+        sprintf(buff, "| %s | step: %4d.%d | time: %e |", jobName.c_str(), gc [ 0 ].getActiveStep(), gc [ 0 ].getActiveStepVersion(),
                 time);
         SetISAContent(1, buff);
     }

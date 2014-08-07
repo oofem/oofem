@@ -38,9 +38,6 @@
 #include "inputrecord.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "domain.h"
-#include "node.h"
-#include "element.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "mathfem.h"
@@ -54,7 +51,7 @@
 namespace oofem {
 #ifdef __OOFEG
 class StructuralElementEvaluator;
-void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se, oofegGraphicContext &gc, UnknownType);
+void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se, oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
 #endif
 
 /**
@@ -115,7 +112,7 @@ public:
 #endif
 
 #ifdef __OOFEG
-    virtual void  drawRawGeometry(oofegGraphicContext &mode);
+    virtual void  drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
 protected:

@@ -43,6 +43,7 @@
 #include "util.h"
 #include "verbose.h"
 #include "classfactory.h"
+#include "domain.h"
 
 #include <stdlib.h>
 
@@ -96,7 +97,7 @@ int
 StaggeredProblem :: instanciateSlaveProblems()
 {
     //first instantiate master problem if defined
-    EngngModel *timeDefProb;
+    EngngModel *timeDefProb = NULL;
     emodelList.resize(inputStreamNames.size());
     if ( timeDefinedByProb ) {
         OOFEMTXTDataReader dr( inputStreamNames [ timeDefinedByProb - 1 ] );
@@ -487,27 +488,27 @@ StaggeredProblem :: setRenumberFlag()
 }
 
 #ifdef __OOFEG
-void StaggeredProblem :: drawYourself(oofegGraphicContext &context)
+void StaggeredProblem :: drawYourself(oofegGraphicContext &gc)
 {
-    int ap = context.getActiveProblemIndx();
+    int ap = gc.getActiveProblemIndx();
     if ( ( ap > 0 ) && ( ap <= giveNumberOfSlaveProblems() ) ) {
-        this->giveSlaveProblem(ap)->drawYourself(context);
+        this->giveSlaveProblem(ap)->drawYourself(gc);
     }
 }
 
-void StaggeredProblem :: drawElements(oofegGraphicContext &context)
+void StaggeredProblem :: drawElements(oofegGraphicContext &gc)
 {
-    int ap = context.getActiveProblemIndx();
+    int ap = gc.getActiveProblemIndx();
     if ( ( ap > 0 ) && ( ap <= giveNumberOfSlaveProblems() ) ) {
-        this->giveSlaveProblem(ap)->drawElements(context);
+        this->giveSlaveProblem(ap)->drawElements(gc);
     }
 }
 
-void StaggeredProblem :: drawNodes(oofegGraphicContext &context)
+void StaggeredProblem :: drawNodes(oofegGraphicContext &gc)
 {
-    int ap = context.getActiveProblemIndx();
+    int ap = gc.getActiveProblemIndx();
     if ( ( ap > 0 ) && ( ap <= giveNumberOfSlaveProblems() ) ) {
-        this->giveSlaveProblem(ap)->drawNodes(context);
+        this->giveSlaveProblem(ap)->drawNodes(gc);
     }
 }
 #endif

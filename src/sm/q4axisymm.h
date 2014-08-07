@@ -87,8 +87,8 @@ protected:
     void computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *gp);
 
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &gc);
-    void drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type);
+    void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type);
 #endif
 };
 } // end namespace oofem

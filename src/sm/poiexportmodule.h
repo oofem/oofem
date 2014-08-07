@@ -36,10 +36,9 @@
 #define poiexportmodule_h
 
 #include "exportmodule.h"
-#include "domain.h"
-#include "engngm.h"
 #include "intarray.h"
-#include "materialmappingalgorithm.h"
+#include "internalstatetype.h"
+#include "unknowntype.h"
 
 #include <list>
 
@@ -53,6 +52,8 @@
 //@}
 
 namespace oofem {
+class MaterialMappingAlgorithm;
+
 /**
  * Represents POI (Point Of Interest) export module.
  * It is able to perform output on given points, which are inside domain but can have arbitrary position.

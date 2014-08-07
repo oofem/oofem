@@ -93,10 +93,11 @@ Beam2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // Returns the strain matrix of the receiver.
 {
     double l, ksi, kappa, c1;
+    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
 
     l     = this->computeLength();
     ksi   = 0.5 + 0.5 * gp->giveNaturalCoordinate(1);
-    kappa = this->giveKappaCoeff();
+    kappa = this->giveKappaCoeff(tStep);
     c1 = 1. + 2. * kappa;
 
     answer.resize(3, 6);
@@ -139,10 +140,11 @@ Beam2d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 
 {
     double l, ksi, ksi2, ksi3, kappa, c1;
+    TimeStep *tStep = this->domain->giveEngngModel()->giveCurrentStep();
 
     l     = this->computeLength();
     ksi =   0.5 + 0.5 * iLocCoord.at(1);
-    kappa = this->giveKappaCoeff();
+    kappa = this->giveKappaCoeff(tStep);
     c1 = 1. + 2. * kappa;
     ksi2 = ksi * ksi;
     ksi3 = ksi2 * ksi;
@@ -327,7 +329,7 @@ Beam2d :: givePitch()
 
 
 double
-Beam2d :: giveKappaCoeff()
+Beam2d :: giveKappaCoeff(TimeStep *tStep)
 {
     // returns kappa coeff
     // kappa = (6*E*I)/(k*G*A*l^2)
@@ -336,7 +338,7 @@ Beam2d :: giveKappaCoeff()
         FloatMatrix d;
         double l = this->computeLength();
 
-        this->computeConstitutiveMatrixAt( d, ElasticStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), domain->giveEngngModel()->giveCurrentStep() );
+        this->computeConstitutiveMatrixAt( d, ElasticStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep );
         kappa = 6. * d.at(2, 2) / ( d.at(3, 3) * l * l );
     }
 
@@ -428,7 +430,7 @@ Beam2d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     FloatArray coords, components, help;
     FloatMatrix T;
     double l = this->computeLength();
-    double kappa = this->giveKappaCoeff();
+    double kappa = this->giveKappaCoeff(tStep);
     double fx, fz, fm, dfx, dfz, dfm;
     double cosine, sine;
 
@@ -634,7 +636,7 @@ Beam2d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
      * answer.times(this->giveCrossSection()->give('A'));
      */
     double l = this->computeLength();
-    double kappa = this->giveKappaCoeff();
+    double kappa = this->giveKappaCoeff(tStep);
     double kappa2 = kappa * kappa;
 
     double density = this->giveMaterial()->give('d', gp); // constant density assumed
@@ -697,7 +699,7 @@ Beam2d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     FloatArray endForces;
 
     double l = this->computeLength();
-    double kappa = this->giveKappaCoeff();
+    double kappa = this->giveKappaCoeff(tStep);
     double kappa2 = kappa * kappa;
     double N;
 
@@ -738,7 +740,7 @@ Beam2d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
 
 
 #ifdef __OOFEG
-void Beam2d :: drawRawGeometry(oofegGraphicContext &gc)
+void Beam2d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
 
@@ -764,7 +766,7 @@ void Beam2d :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void Beam2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void Beam2d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
 
@@ -772,7 +774,6 @@ void Beam2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
         return;
     }
 
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* poin */

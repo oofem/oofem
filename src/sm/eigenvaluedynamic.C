@@ -44,6 +44,7 @@
 #include "contextioerr.h"
 #include "classfactory.h"
 #include "dofmanager.h"
+#include "domain.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

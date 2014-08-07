@@ -42,7 +42,6 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "engngm.h"
  #include "structuralelementevaluator.h"
 #endif
 
@@ -295,7 +294,7 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
 // because integration elements (does not matter whether single span or multi span)
 // are generaly finer than T-mesh;
 
-void IGAElement :: drawRawGeometry(oofegGraphicContext &gc)
+void IGAElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 8 ];
     GraphicObj *go;
@@ -1003,7 +1002,7 @@ void IGAElement :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se, oofegGraphicContext &gc, UnknownType)
+void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se, oofegGraphicContext &gc, TimeStep *tStep, UnknownType)
 {
     WCRec p [ 8 ];
     GraphicObj *go;
@@ -1013,7 +1012,6 @@ void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se,
     FloatArray ur, d;
     IntArray lc;
     FEInterpolation *interp = elem->giveInterpolation();
-    TimeStep *tStep = elem->giveDomain()->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     if ( !gc.testElementGraphicActivity(elem) ) {

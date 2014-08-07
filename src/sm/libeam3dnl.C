@@ -45,6 +45,7 @@
 #include "mathfem.h"
 #include "timestep.h"
 #include "classfactory.h"
+#include "engngm.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -771,7 +772,7 @@ LIBeam3dNL :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
 
 
 #ifdef __OOFEG
-void LIBeam3dNL :: drawRawGeometry(oofegGraphicContext &gc)
+void LIBeam3dNL :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
 
@@ -797,7 +798,7 @@ void LIBeam3dNL :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void LIBeam3dNL :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void LIBeam3dNL :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
 
@@ -805,7 +806,6 @@ void LIBeam3dNL :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType typ
         return;
     }
 
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* poin */

@@ -169,7 +169,7 @@ protected:
     virtual int giveIntegrationElementLocalCodeNumbers(IntArray &answer, Element *elem,
                                                        IntegrationRule *ie);
 #ifdef __OOFEG
-    friend void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se, oofegGraphicContext &gc, UnknownType);
+    friend void drawIGAPatchDeformedGeometry(Element *elem, StructuralElementEvaluator *se, oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
 #endif
 };
 } // end namespace oofem

@@ -105,9 +105,9 @@ public:
 
     // io routines
 #ifdef __OOFEG
-    //void drawRawGeometry(oofegGraphicContext &);
-    //void drawDeformedGeometry(oofegGraphicContext &);
-    //virtual void drawScalar(oofegGraphicContext &context);
+    //void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    //void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    //virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
     // definition & identification

@@ -132,11 +132,11 @@ protected:
 
     void giveDualBase(FloatMatrix &base1, FloatMatrix &base2);
 
-    virtual void evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov, FloatArray &solVec);
+    virtual void evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov, FloatArray &solVec, TimeStep *tStep);
 
-    virtual void evalCovarNormalAt(FloatArray &nCov, FloatArray &lCoords, FloatArray &genEpsC);
+    virtual void evalCovarNormalAt(FloatArray &nCov, FloatArray &lCoords, FloatArray &genEpsC, TimeStep *tStep);
     virtual void evalInitialCovarNormalAt(FloatArray &nCov, FloatArray &lCoords);
-    void evalContravarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcon,  FloatArray &solVec);
+    void evalContravarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcon,  FloatArray &solVec, TimeStep *tStep);
 
     void edgeEvalInitialDirectorAt(FloatArray &lCoords, FloatArray &answer, const int iEdge);
 
@@ -150,12 +150,12 @@ protected:
     FloatMatrix giveAxialMatrix(const FloatArray &vec);
 
     // Stress and strain
-    void computeFAt(FloatArray &lCoords, FloatMatrix &answer, FloatArray &genEps);
+    void computeFAt(FloatArray &lCoords, FloatMatrix &answer, FloatArray &genEps, TimeStep *tStep);
     void computeE(FloatMatrix &answer, FloatMatrix &F);
     void computeCovarStressAt(GaussPoint *gp, FloatArray &answer);
     void giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dphidxi1, FloatArray &dphidxi2, FloatArray &dmdxi1,
                                          FloatArray &dmdxi2, FloatArray &m, double &dgamdxi1, double &dgamdxi2, double &gam);
-    void computeStressResultantsAt(GaussPoint *gp, FloatArray &Svec, FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatArray &solVec);
+    void computeStressResultantsAt(GaussPoint *gp, FloatArray &Svec, FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatArray &solVec, TimeStep *tStep);
 
     void computeStressVectorInMaterial(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *tStep)
     { computeStressMatrix(answer, genEps, gp, mat, tStep); };

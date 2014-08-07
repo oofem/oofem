@@ -483,7 +483,7 @@ label18:
         ez  +=  dez;
         if ( this->give(stirr_E, gp) > 0. ) {
             strainIncr.at(1) = dez;
-            this->updateStirrups(gp, strainIncr);
+            this->updateStirrups(gp, strainIncr, tStep);
             // updates flags->at(SEZ)
             // stirr(dez,sv(l3),fst);
         }
@@ -1171,7 +1171,7 @@ label14:
 
 
 void
-Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray &strainIncrement)
+Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray &strainIncrement, TimeStep *tStep)
 // stirr (double dez, double srf)
 //
 //

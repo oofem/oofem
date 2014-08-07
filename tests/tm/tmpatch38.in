@@ -61,7 +61,7 @@ brick1ht 10 nodes 8 14 15 24 23 17 18 27 26 crossSect 1 mat 1
 brick1ht 11 nodes 8 22 23 32 31 25 26 35 34 crossSect 1 mat 1 
 brick1ht 12 nodes 8 23 24 33 32 26 27 36 35 crossSect 1 mat 1 
 #
-SimpleCS 1
+EmptyCS 1
 IsoHeat 1 d 2400. k 3.0 c 1000.0
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
 constantsurfaceload 2 loadTimeFunction 1 ndofs 1 components 1 15.0 properties 1 a 0.8 loadtype 3

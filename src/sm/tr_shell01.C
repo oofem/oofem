@@ -482,11 +482,10 @@ TR_SHELL01 :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
 #ifdef __OOFEG
 
 void
-TR_SHELL01 :: drawRawGeometry(oofegGraphicContext &gc)
+TR_SHELL01 :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
 
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
@@ -517,11 +516,10 @@ TR_SHELL01 :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 void
-TR_SHELL01 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+TR_SHELL01 :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -552,15 +550,14 @@ TR_SHELL01 :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 }
 
 void
-TR_SHELL01 :: drawScalar(oofegGraphicContext &context)
+TR_SHELL01 :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, indx, result = 0;
     WCRec p [ 3 ];
     GraphicObj *tr;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v1, v2, v3;
     double s [ 3 ], defScale;
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
@@ -568,11 +565,11 @@ TR_SHELL01 :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    if ( context.giveIntVarMode() == ISM_recovered ) {
-        result += this->giveInternalStateAtNode(v1, context.giveIntVarType(), context.giveIntVarMode(), 1, tStep);
-        result += this->giveInternalStateAtNode(v2, context.giveIntVarType(), context.giveIntVarMode(), 2, tStep);
-        result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
-    } else if ( context.giveIntVarMode() == ISM_local ) {
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
+        result += this->giveInternalStateAtNode(v1, gc.giveIntVarType(), gc.giveIntVarMode(), 1, tStep);
+        result += this->giveInternalStateAtNode(v2, gc.giveIntVarType(), gc.giveIntVarMode(), 2, tStep);
+        result += this->giveInternalStateAtNode(v3, gc.giveIntVarType(), gc.giveIntVarMode(), 3, tStep);
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
         double tot_w = 0.;
         FloatArray a, v;
         for ( GaussPoint *gp: *plate->giveDefaultIntegrationRulePtr() ) {
@@ -586,17 +583,17 @@ TR_SHELL01 :: drawScalar(oofegGraphicContext &context)
         v3 = v;
     }
 
-    indx = context.giveIntVarIndx();
+    indx = gc.giveIntVarIndx();
 
     s [ 0 ] = v1.at(indx);
     s [ 1 ] = v2.at(indx);
     s [ 2 ] = v3.at(indx);
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
-    if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+    if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
         for ( i = 0; i < 3; i++ ) {
-            if ( context.getInternalVarsDefGeoFlag() ) {
+            if ( gc.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
-                defScale = context.getDefScale();
+                defScale = gc.getDefScale();
                 p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                 p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                 p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(3, tStep, defScale);
@@ -607,7 +604,7 @@ TR_SHELL01 :: drawScalar(oofegGraphicContext &context)
             }
         }
         //     //EASValsSetColor(gc.getYieldPlotColor(ratio));
-        context.updateFringeTableMinMax(s, 3);
+        gc.updateFringeTableMinMax(s, 3);
         tr =  CreateTriangleWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ]);
         EGWithMaskChangeAttributes(LAYER_MASK, tr);
         EMAddGraphicsToModel(ESIModel(), tr);

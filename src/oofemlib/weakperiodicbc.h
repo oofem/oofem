@@ -42,6 +42,8 @@
 #include "inputrecord.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
+#include "floatarray.h"
+#include "intarray.h"
 
 ///@name Input fields for WeakPeriodicBoundaryCondition
 //@{
@@ -57,6 +59,9 @@
 //@}
 
 namespace oofem {
+
+class Node;
+
 enum basisType { monomial=0, trigonometric=1, legendre=2 };
 /**
  * Imposes weak periodicity on the doftype of choice. 2D. It is required that the two edges are parallel and either horizontal or vertical.

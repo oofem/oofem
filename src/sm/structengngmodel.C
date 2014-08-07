@@ -265,7 +265,7 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
 
 #ifdef __OOFEG
 void
-StructuralEngngModel :: showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep)
+StructuralEngngModel :: showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
 
@@ -275,7 +275,7 @@ StructuralEngngModel :: showSparseMtrxStructure(int type, oofegGraphicContext &c
 
     int nelems = domain->giveNumberOfElements();
     for ( int i = 1; i <= nelems; i++ ) {
-        domain->giveElement(i)->showSparseMtrxStructure(StiffnessMatrix, context, tStep);
+        domain->giveElement(i)->showSparseMtrxStructure(StiffnessMatrix, gc, tStep);
     }
 }
 #endif

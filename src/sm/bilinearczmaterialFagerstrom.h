@@ -39,7 +39,6 @@
 #include "structuralms.h"
 #include "structuralinterfacematerial.h"
 
-
 ///@name Input fields for BilinearCZMaterialFagerstrom
 //@{
 #define _IFT_BilinearCZMaterialFagerstrom_Name "bilinearczmaterialFagerstrom"

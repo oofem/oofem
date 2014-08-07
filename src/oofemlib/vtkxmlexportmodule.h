@@ -36,8 +36,6 @@
 #define vtkxmlexportmodule_h
 
 #include "exportmodule.h"
-#include "domain.h"
-#include "engngm.h"
 #include "intarray.h"
 #include "nodalrecoverymodel.h"
 #include "interface.h"
@@ -68,7 +66,9 @@
 //@}
 
 namespace oofem {
-    ///@todo Rename this to something like "ExportPiece" and move it to a separate file (it doesn't actually contain anything VTK-specific).
+class Node;
+
+///@todo Rename this to something like "ExportPiece" and move it to a separate file (it doesn't actually contain anything VTK-specific).
 class VTKPiece
 {
 public:

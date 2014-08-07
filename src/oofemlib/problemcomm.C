@@ -32,12 +32,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef __PARALLEL_MODE
-
 #include "problemcomm.h"
 #include "intarray.h"
 #include "error.h"
+#include "engngm.h"
 #include "element.h"
+#include "dofmanager.h"
 
 #ifdef __USE_MPI
  #include <mpi.h>
@@ -1010,4 +1010,4 @@ ProblemCommunicator :: ElemCmp(int i, int j)
             engngModel->giveDomain(1)->giveElement(j)->giveGlobalNumber() );
 }
 } // end namespace oofem
-#endif
+

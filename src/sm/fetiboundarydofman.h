@@ -37,8 +37,6 @@
 
 #include "intarray.h"
 
-#ifdef __PARALLEL_MODE
-
 namespace oofem {
 /**
  * Represent the abstraction for DOF manager. This DOF manager is on partition boundary and
@@ -124,5 +122,4 @@ public:
 };
 } // end namespace oofem
 
-#endif
 #endif // fetiboundarydofman_h

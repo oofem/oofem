@@ -36,9 +36,6 @@
 #define structuralelement_h
 
 #include "element.h"
-#include "femcmpnn.h"
-#include "domain.h"
-#include "floatmatrix.h"
 #include "matresponsemode.h"
 #include "valuemodetype.h"
 #include "integrationdomain.h"
@@ -53,6 +50,7 @@ class Material;
 class GaussPoint;
 class FloatArray;
 class IntArray;
+class FloatMatrix;
 class SparseMtrx; // required by addNonlocalStiffnessContributions declaration
 class StructuralCrossSection;
 class IDNLMaterial;
