@@ -95,6 +95,19 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
 
     eTorsion = alphaTwo * eNormal;
 
+    localRandomType = 0; //Default: No local random field
+    IR_GIVE_OPTIONAL_FIELD(ir, localRandomType, _IFT_LatticeDamage2d_localrandomtype);
+    if ( localRandomType == 1 ) { //Gaussian random generator
+        coefficientOfVariation = 0.;
+        IR_GIVE_FIELD(ir, coefficientOfVariation, _IFT_LatticeDamage2d_coefficientOfVariation);
+    }
+
+    e0Mean = 0;
+    IR_GIVE_FIELD(ir, e0Mean, _IFT_LatticeDamage2d_e0Mean);
+
+    IR_GIVE_FIELD(ir, coh, _IFT_LatticeDamage2d_coh);
+    IR_GIVE_FIELD(ir, ec, _IFT_LatticeDamage2d_ec);
+
     softeningType = 0;
     IR_GIVE_FIELD(ir, softeningType, _IFT_LatticeDamage2d_softeningType);
 
@@ -110,21 +123,11 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR("Unknown softening type");
     }
 
-    localRandomType = 0; //Default: No local random field
-    IR_GIVE_OPTIONAL_FIELD(ir, localRandomType, _IFT_LatticeDamage2d_localrandomtype);
-    if ( localRandomType == 1 ) { //Gaussian random generator
-        coefficientOfVariation = 0.;
-        IR_GIVE_FIELD(ir, coefficientOfVariation, _IFT_LatticeDamage2d_coefficientOfVariation);
-    }
-
-    e0Mean = 0;
-    IR_GIVE_FIELD(ir, e0Mean, _IFT_LatticeDamage2d_e0Mean);
-
-    IR_GIVE_FIELD(ir, coh, _IFT_LatticeDamage2d_coh);
-    IR_GIVE_FIELD(ir, ec, _IFT_LatticeDamage2d_ec);
-
-    this->biotCoefficient = 1;
+    this->biotCoefficient = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, this->biotCoefficient, _IFT_LatticeDamage2d_bio);
+
+    this->biotType = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->biotType, _IFT_LatticeDamage2d_btype);
 
     return IRRT_OK;
 }
@@ -153,7 +156,7 @@ LatticeDamage2d :: computeEquivalentStrain(double &tempEquivStrain, const FloatA
 void
 LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const FloatArray &strain, GaussPoint *gp)
 {
-    LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
+    double le = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
     const double e0 = this->give(e0_ID, gp) * this->e0Mean;
     omega = 0.0;
 
@@ -161,15 +164,15 @@ LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const Flo
     double R, Lhs, Ft, help;
 
     if ( softeningType == 1 ) { //linear
-        if ( tempKappa >= e0 && tempKappa < this->wf / status->giveLe() ) {
+        if ( tempKappa >= e0 && tempKappa < this->wf / le ) {
             //linear stress-crack opening relation
             //check if input parameter make sense
-            if ( this->wf / status->giveLe() <= e0 ) {
+            if ( this->wf / le <= e0 ) {
                 OOFEM_ERROR("e0>wf/Le \n Possible solutions: Increase fracture energy or reduce element size");
             }
 
-            omega = ( 1. - e0 / tempKappa ) / ( 1. - e0 / ( this->wf / status->giveLe() ) );
-        } else if ( tempKappa >= this->wf / status->giveLe() ) {
+            omega = ( 1. - e0 / tempKappa ) / ( 1. - e0 / ( this->wf / le ) );
+        } else if ( tempKappa >= this->wf / le ) {
             omega = 1.;
         } else {
             omega = 0.;
@@ -178,22 +181,22 @@ LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const Flo
         double helpStrain = 0.3 * e0;
 
         //Check if input parameter make sense
-        if ( e0 > wfOne / status->giveLe() ) {
-            OOFEM_ERROR("parameter wf1 is too small");
-        } else if ( wfOne / status->giveLe() >  this->wf / status->giveLe() ) {
+        if ( e0 > wfOne / le ) {
+           OOFEM_ERROR("parameter wf1 is too small");
+        } else if ( wfOne / le >  this->wf / le ) {
             OOFEM_ERROR("parameter wf is too small");
         }
 
         //
         if ( tempKappa > e0 ) {
-            omega = ( 1 - e0 / tempKappa ) / ( ( helpStrain - e0 ) / this->wfOne * status->giveLe() + 1. );
+            omega = ( 1 - e0 / tempKappa ) / ( ( helpStrain - e0 ) / this->wfOne * le + 1. );
 
-            if ( omega * tempKappa * status->giveLe() > 0 && omega * tempKappa * status->giveLe() < this->wfOne ) {
+            if ( omega * tempKappa * le > 0 && omega * tempKappa * le < this->wfOne ) {
                 return;
             } else {
-                omega = ( 1. - helpStrain / tempKappa - helpStrain * this->wfOne / ( tempKappa * ( this->wf - this->wfOne ) ) ) / ( 1. - helpStrain * status->giveLe() / ( this->wf - this->wfOne ) );
+                omega = ( 1. - helpStrain / tempKappa - helpStrain * this->wfOne / ( tempKappa * ( this->wf - this->wfOne ) ) ) / ( 1. - helpStrain * le / ( this->wf - this->wfOne ) );
 
-                if ( omega * tempKappa * status->giveLe() >= this->wfOne  && omega * tempKappa * status->giveLe() < this->wf  ) {
+                if ( omega * tempKappa * le >= this->wfOne  && omega * tempKappa * le < this->wf  ) {
                     return;
                 }
             }
@@ -218,9 +221,9 @@ LatticeDamage2d :: computeDamageParam(double &omega, double tempKappa, const Flo
             Ft = this->eNormal * e0;
             do {
                 nite++;
-                help = status->giveLe() * omega * tempKappa / this->wf;
+                help = le * omega * tempKappa / this->wf;
                 R = ( 1. - omega ) * eNormal * tempKappa - Ft *exp(-help);
-                Lhs = eNormal * tempKappa - Ft *exp(-help) * status->giveLe() * tempKappa / this->wf;
+                Lhs = eNormal * tempKappa - Ft *exp(-help) * le * tempKappa / this->wf;
                 omega += R / Lhs;
                 if ( nite > 40 ) {
                     OOFEM_ERROR("algorithm not converging");
@@ -282,41 +285,6 @@ LatticeDamage2d :: computeStressIndependentStrainVector(FloatArray &answer,
     return;
 }
 
-
-void
-LatticeDamage2d :: initDamaged(double kappa, FloatArray &strainVector, GaussPoint *gp)
-{
-    int indx = 1;
-    double le;
-    FloatArray principalStrains, crackPlaneNormal(3), fullstrain;
-    FloatMatrix principalDir(3, 3);
-    LatticeDamage2dStatus *status = static_cast< LatticeDamage2dStatus * >( this->giveStatus(gp) );
-
-    //get the random variable from the status
-    const double e0 = this->give(e0_ID, gp) * this->e0Mean;
-
-    StructuralMaterial :: giveFullSymVectorForm( fullstrain, strainVector, gp->giveMaterialMode() );
-
-    if ( ( kappa > e0 ) && ( status->giveDamage() == 0. ) ) {
-        this->computePrincipalValDir(principalStrains, principalDir, fullstrain, principal_strain);
-        // finfd index of max positive principal strain
-        for ( int i = 2; i <= 3; i++ ) {
-            if ( principalStrains.at(i) > principalStrains.at(indx) ) {
-                indx = i;
-            }
-        }
-
-        for ( int i = 1; i <= 3; i++ ) {
-            crackPlaneNormal.at(i) = principalDir.at(i, indx);
-        }
-
-        le = gp->giveElement()->giveCharacteristicLength(crackPlaneNormal);
-        // remember le in corresponding status
-        status->setLe(le);
-    }
-}
-
-
 MaterialStatus *
 LatticeDamage2d :: CreateStatus(GaussPoint *gp) const
 {
@@ -340,7 +308,6 @@ LatticeDamage2d :: giveStatus(GaussPoint *gp) const
 
     return status;
 }
-
 
 
 void
@@ -391,7 +358,6 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
     } else {
         // damage grows
         tempKappa = equivStrain;
-        this->initDamaged(tempKappa, reducedStrain, gp);
 
         // evaluate damage parameter
         this->computeDamageParam(omega, tempKappa, reducedStrain, gp);
@@ -417,26 +383,41 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
         int couplingFlag = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveCouplingFlag();
 
         if ( couplingFlag == 1 && coupledModels.at(2) != 0 && !tStep->isTheFirstStep() ) {
-            int couplingNumber;
-            couplingNumber = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveCouplingNumber();
+            IntArray couplingNumbers;
+
+            static_cast< LatticeStructuralElement * >( gp->giveElement() ) ->giveCouplingNumbers(couplingNumbers);
             LatticeTransportElement *coupledElement;
-            coupledElement  = static_cast< LatticeTransportElement * >( domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem( coupledModels.at(2) )->giveDomain(1)->giveElement(couplingNumber) );
+            coupledElement  = static_cast< LatticeTransportElement * >(domain->giveEngngModel()->giveMasterEngngModel()->giveSlaveProblem( coupledModels.at(2) )->giveDomain(1)->giveElement(couplingNumbers.at(1)) );
             waterPressure = coupledElement->givePressure();
         }
     }
 #endif
-
-    answer.at(1) = answer.at(1) + biotCoefficient * waterPressure;
-
+    
     //Compute dissipation
     double tempDissipation = status->giveDissipation();
     double tempDeltaDissipation = 0.;
-    computeDeltaDissipation(omega, reducedStrain, gp, tStep);
+    tempDeltaDissipation = computeDeltaDissipation(omega, reducedStrain, gp, tStep);
+
     tempDissipation += tempDeltaDissipation;
 
     //Compute crack width
-    double le = status->giveLe();
-    double crackWidth = omega * sqrt( pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) + pow(reducedStrain.at(3), 2.) ) * le;
+    double le = ( static_cast< LatticeStructuralElement * >( gp->giveElement() ) )->giveLength();
+    double crackWidth = omega * sqrt( pow(reducedStrain.at(1), 2.) + pow(reducedStrain.at(2), 2.) ) * le;
+
+    //Calculate the the bio coefficient;
+    double biot = 0.;
+    if(this->biotType == 0){
+      biot = this->biotCoefficient;
+    }
+    else if(this->biotType == 1){
+      biot = computeBiot(omega, tempKappa, le);
+    }
+    else{
+      OOFEM_ERROR("Unknown biot type\n");
+    }
+    
+    answer.at(1) = answer.at(1) + biot * waterPressure;
+
 
     //Set all temp values
     status->setTempDissipation(tempDissipation);
@@ -451,8 +432,38 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
 
     status->setTempNormalStress( answer.at(1) );
     status->setTempCrackWidth(crackWidth);
+    
+    status->setBiotCoefficientInStatus(biot);
+
     return;
 }
+
+double
+LatticeDamage2d :: computeBiot(double omega,
+			       double kappa,
+			       double le)
+{
+  
+  double biot = 0.;
+  
+  if(this->softeningType == 1 || this->softeningType == 3){
+    if(omega == 0){
+      biot = this->biotCoefficient;
+    }
+    else if(omega*kappa*le>0 && omega*kappa*le<this->wf){
+      biot = this->biotCoefficient + (1.-biotCoefficient)*omega*kappa*le/this->wf;
+    }
+    else{
+      biot = 1.;
+    }
+  }
+  else{
+    OOFEM_ERROR("Wrong stype for btype=1. Only linear and exponential softening considered so far\n");
+  } 
+  
+  return biot;
+}
+
 
 double
 LatticeDamage2d :: computeDeltaDissipation(double omega,
@@ -615,17 +626,6 @@ LatticeDamage2d :: giveSecantStiffnessMatrix(FloatMatrix &answer,
     answer.at(3, 3) = ( 1 - omega ) * eTorsion;
 }
 
-
-void
-LatticeDamage2d :: giveTangentStiffnessMatrix(FloatMatrix &answer,
-                                              GaussPoint *gp,
-                                              TimeStep *tStep)
-{
-    OOFEM_ERROR("tangent stiffness not implemented");
-}
-
-
-
 void
 LatticeDamage2d :: giveElasticStiffnessMatrix(FloatMatrix &answer,
                                               GaussPoint *gp,
@@ -693,11 +693,14 @@ LatticeDamage2d :: giveIPValue(FloatArray &answer,
         answer.resize(1);
         answer.at(1) = status->giveDeltaDissipation();
         return 1;
+    } else if ( type == IST_CrackWidth ) {
+        answer.resize(1);
+        answer.at(1) = status->giveCrackWidth();
+        return 1;
     } else {
         return StructuralMaterial :: giveIPValue(answer, gp, type, tStep);
     }
 }
-
 
 LatticeDamage2dStatus :: LatticeDamage2dStatus(int n, Domain *d, GaussPoint *g) :
     LatticeMaterialStatus(n, d, g), RandomMaterialStatusExtensionInterface(), reducedStrain(3), tempReducedStrain(3)
@@ -706,12 +709,14 @@ LatticeDamage2dStatus :: LatticeDamage2dStatus(int n, Domain *d, GaussPoint *g) 
     crack_flag = temp_crack_flag = 0;
     crackWidth = tempCrackWidth = 0;
     normalStress = tempNormalStress = 0;
+    oldNormalStress = 0;
     e0 = 0.;
     damage = tempDamage = 0.;
     equivStrain = tempEquivStrain = 0.;
     kappa = tempKappa = 0.;
     dissipation = tempDissipation = 0.;
     deltaDissipation = tempDeltaDissipation = 0.;
+    biot = 0.;
 }
 
 void
@@ -730,7 +735,8 @@ LatticeDamage2dStatus :: initTempStatus()
     this->tempDeltaDissipation = this->deltaDissipation;
     this->temp_crack_flag = this->crack_flag;
     this->tempCrackWidth = this->crackWidth;
-    this->tempNormalStress = this->normalStress;
+    this->tempNormalStress = this->normalStress;    
+    this->updateFlag = 0;
 }
 
 void
@@ -744,7 +750,7 @@ LatticeDamage2dStatus :: printOutputAt(FILE *file, TimeStep *tStep)
         fprintf( file, "% .4e ", reducedStrain.at(k) );
     }
 
-    fprintf(file, "kappa %f, equivStrain %f, damage %f, dissipation %f, deltaDissipation %f, e0 %f, crack_flag %d, crackWidth % .8e ", this->kappa, this->equivStrain, this->damage, this->dissipation, this->deltaDissipation, this->e0, this->crack_flag, this->crackWidth);
+    fprintf(file, "kappa %f, equivStrain %f, damage %f, dissipation %f, deltaDissipation %f, e0 %f, crack_flag %d, crackWidth % .8e, biotCoeff %f", this->kappa, this->equivStrain, this->damage, this->dissipation, this->deltaDissipation, this->e0, this->crack_flag, this->crackWidth, this->biot);
     fprintf(file, "}\n");
 }
 
@@ -762,7 +768,11 @@ LatticeDamage2dStatus :: updateYourself(TimeStep *tStep)
     this->deltaDissipation = this->tempDeltaDissipation;
     this->crack_flag = this->temp_crack_flag;
     this->crackWidth = this->tempCrackWidth;
+    //Need to preserve oldValues for coupling;
+    this->oldNormalStress = this->normalStress;
     this->normalStress = this->tempNormalStress;
+    //set updateflag
+    this->updateFlag = 1;
 }
 
 Interface *
@@ -780,6 +790,13 @@ LatticeDamage2dStatus :: setTempNormalStress(double val)
 {
     tempNormalStress = val;
 }
+
+void
+LatticeDamage2dStatus :: setOldNormalStress(double val)
+{
+    oldNormalStress = val;
+}
+
 
 contextIOResultType
 LatticeDamage2dStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
@@ -830,7 +847,16 @@ LatticeDamage2dStatus :: saveContext(DataStream *stream, ContextMode mode, void 
         THROW_CIOERR(CIO_IOERR);
     }
 
+    if ( !stream->write(& crackWidth, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+
     if ( !stream->write(& e0, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream->write(& biot, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -855,6 +881,13 @@ LatticeDamage2dStatus :: setTempCrackWidth(double val)
 void
 LatticeDamage2dStatus :: setVariableInStatus(double variable) {
     e0 = variable;
+}
+
+
+void
+LatticeDamage2dStatus :: setBiotCoefficientInStatus(double variable)
+{
+    biot = variable;
 }
 
 int
@@ -911,9 +944,18 @@ LatticeDamage2dStatus :: restoreContext(DataStream *stream, ContextMode mode, vo
         THROW_CIOERR(CIO_IOERR);
     }
 
+    if ( !stream->read(& crackWidth, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
     if ( !stream->read(& e0, 1) ) {
         THROW_CIOERR(CIO_IOERR);
     }
+
+    if ( !stream->read(& biot, 1) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
 
     return CIO_OK;
 }
