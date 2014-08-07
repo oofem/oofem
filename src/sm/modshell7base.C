@@ -2712,20 +2712,19 @@ ModShell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &
     std::vector<FloatArray> nodes;
     giveFictiousNodeCoordsForExport(nodes, layer);
 
-    int VTKWedge2EL [] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
-    FloatArray *coords[numNodes];
+    //int VTKWedge2EL [] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+    //FloatArray *coords[numNodes];
 
 
-    for ( int i = 1; i <= numNodes; i++ ) {
-        int pos = VTKWedge2EL[ i-1 ];
-        coords[ i - 1 ] = &nodes[ pos - 1];
-        
-    }
+    //for ( int i = 1; i <= numNodes; i++ ) {
+    //    int pos = VTKWedge2EL[ i-1 ];
+    //    coords[ i - 1 ] = &nodes[ pos - 1];  
+    //}
     
     FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
     FloatMatrix dNdx;
-    //interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper(numNodes, (const FloatArray **)coords ) ); ///@ todo fix JB 29/07/14
-
+    //interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper( (const FloatArray **)coords ) ); ///@ todo fix JB 29/07/14
+    interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper( nodes ) ); ///@ todo fix JB 29/07/14
     
     /*    
      * 1 [d/dx  0   d/dy

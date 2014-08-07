@@ -192,7 +192,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 int
 PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode)
 {
-    int pointsPassed = 0;
+    //int pointsPassed = 0;
 
     // TODO: set properly
     firstLocalStrainIndx = 1;

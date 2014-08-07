@@ -1,9 +1,11 @@
 tr2shell7XFEM_CZ.out
 Test of internal cohesive zone model in Tr2Shell7XFEM. Pure shear test.
 #
-XFEMStatic nsteps 7 deltaT 0.5 lstype 0 smtype 0 rtold -1.0 rtolf 1.0e-5 manrmsteps 1 controllmode 1 nmodules 1 refloadmode 1 
+XFEMStatic nsteps 7 deltaT 0.5 lstype 0 smtype 0 rtold -1.0 rtolf 1.0e-5 manrmsteps 1 nmodules 0 controllmode 1 initialguess 1
+#StaticStructural nsteps 7 deltaT 0.5 lstype 0 smtype 0 rtold -1.0 rtolf 1.0e-5 manrmsteps 1 nmodules 0 
 #vtkxml tstep_all dofman_all element_all primvars 1 1 
-matlab reactionforces dofmanlist 6 1 2 3 4 5 6 
+#matlab reactionforces dofmanlist 6 1 2 3 4 5 6 
+#errorcheck
 domain 3dDirShell 
 OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 1 ncrosssect 1 nmat 2 nbc 1 nic 0 nltf 1 nset 2 nxfemman 1
@@ -36,12 +38,12 @@ DofManList 1 list 6   1 2 3 4 5 6
 #
 #
 #%BEGIN_CHECK% tolerance 1.e-5
-#REACTION tStep 6 number 1 dof 9 value   3.9683e-015
-#REACTION tStep 6 number 2 dof 9 value   3.0184e-016
-#REACTION tStep 6 number 3 dof 9 value   1.1676e-015
-#REACTION tStep 6 number 4 dof 9 value   8.2971e-001
-#REACTION tStep 6 number 5 dof 9 value   8.2971e-001
-#REACTION tStep 6 number 6 dof 9 value   8.2971e-001
+#REACTION tStep 7 number 1 dof 24 value   3.9683e-015
+#REACTION tStep 7 number 2 dof 24 value   3.0184e-016
+#REACTION tStep 7 number 3 dof 24 value   1.1676e-015
+#REACTION tStep 7 number 4 dof 24 value   8.2971e-001
+#REACTION tStep 7 number 5 dof 24 value   8.2971e-001
+#REACTION tStep 7 number 6 dof 24 value   8.2971e-001
 #%END_CHECK%
 
 

@@ -96,18 +96,17 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
     FloatArray dJ(3);
     dJ.beProductOf(Finv,d);
     status->letTempMaterialJumpBe(dJ);
-	//dJ.printYourself();
 
 
     double oldDamage = status->giveDamage();	
     double dAlpha = 0.0;
     FloatArray Qold(3), Qtemp(3), Qtemp_comp(3);
     Qtemp.zero();
-	Qtemp_comp.zero();
+    Qtemp_comp.zero();
 
-	if (dJ.at(3)<0) {
-		Qtemp_comp.at(3) = this->knc*dJ.at(3);
-	} 
+    if (dJ.at(3)<0) {
+	Qtemp_comp.at(3) = this->knc*dJ.at(3);
+    } 
 
 
     // 	SUBROUTINE stress_damage_XFEM_direct_Mandel(dJ,N,Qold,old_alpha,Fci,Q,Ea,new_alpha,adtim,dalpha_new,dalpha_old,diss,sig_f,fall);
@@ -122,18 +121,17 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
         Kstiff.at(1,1) = this->ks0;
         Kstiff.at(2,2) = this->ks0;
         Kstiff.at(3,3) = this->kn0;
-        
-//		if (dJ.at(3)>=0) {
-//			Kstiff.at(3,3) = this->kn0;
-//		} else {
-//			Kstiff.at(3,3) = this->kn0/(1-oldDamage);
-//		}
-		
 
+//	if (dJ.at(3)>=0) {
+//	Kstiff.at(3,3) = this->kn0;
+//	} else {
+//	Kstiff.at(3,3) = this->kn0/(1-oldDamage);
+//	}
+	      
 
+	//dJ.printYourself();
         dJ.subtract(status->giveOldMaterialJump());	 ///@todo Martin: check with Mikael/Jim
-        //dJ.rotatedWith(Rot,'n');
-
+	dJ.printYourself();
         help.beProductOf(Kstiff,dJ);
         Qtrial.add(help); 
 
@@ -339,6 +337,7 @@ IntMatBilinearCZFagerstrom :: giveFirstPKTraction_3d(FloatArray &answer, GaussPo
     status->letTempJumpBe(d);
     status->letTempFirstPKTractionBe(answer);
     status->letTempFBe(F);
+   // answer.printYourself();
 }
 
 
@@ -578,7 +577,7 @@ IntMatBilinearCZFagerstrom :: initializeFrom(InputRecord *ir)
     StructuralInterfaceMaterial ::initializeFrom(ir);
 
     this->checkConsistency();                                // check validity of the material paramters
-    this->printYourself();
+    //this->printYourself();
     return IRRT_OK;
 }
 
@@ -753,9 +752,9 @@ void
     StructuralInterfaceMaterialStatus :: updateYourself(atTime);
     damage = tempDamage;
     oldMaterialJump = tempMaterialJump;
-	QEffective = tempQEffective;
-	old_dTdJ = temp_dTdJ;
-	oldDamageDev = tempDamageDev;
+    QEffective = tempQEffective;
+    old_dTdJ = temp_dTdJ;
+    oldDamageDev = tempDamageDev;
 }
 
 

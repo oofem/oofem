@@ -181,25 +181,22 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
             dAlpha = 0.0;	// new_alpha=old_alpha
 		    status->letTempEffectiveMandelTractionBe(Qtemp);		
 			Qtemp.times(1-oldDamage);
-		} else {
+	} else {
             // dalpha = datr
             double Qt1,Qt2;
             Qt1 = Qtemp.at(1);
             Qt2 = Qtemp.at(2);
 
-            FloatArray M(3);						// M = (/2*Q_t/(sig_f*gamma**2), 2*Q_n/sig_f, 0.d0/)
+            FloatArray M(3);				// M = (/2*Q_t/(sig_f*gamma**2), 2*Q_n/sig_f, 0.d0/)
             M.at(1) = 2*Qt1/(pow(gamma,2)*sigf);	// Qt = sqrt(Qt1^2 + Qt2^2)
             M.at(2) = 2*Qt2/(pow(gamma,2)*sigf);
             M.at(3) = 2*Qn_M/sigf;
 
-			double loadFun_M, M_norm;
-			M_norm = sqrt(M.computeSquaredNorm());
-			loadFun_M = 0.5*(loadFun + fabs(loadFun));
-            
-			FloatArray dJElastic;
-            dJElastic = dJ;							// dJtn_e(1:2) = dJtn_v(1:2) - S*dalpha*M(1:2)
+	    FloatArray dJElastic;
+            dJElastic = dJ;				// dJtn_e(1:2) = dJtn_v(1:2) - S*dalpha*M(1:2)
             help = M;
-			//dAlpha = (dt/(c_star*S))*pow(loadFun_M/sigf,m)*(1/M_norm);
+	    
+	    //dAlpha = (dt/(c_star*S))*pow(loadFun_M/sigf,m)*(1/M_norm);
             help.times(S*dAlpha);
             dJElastic.subtract(help);
 
@@ -210,8 +207,8 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
             const double errorTol = 0.0001;
             for( int iter = 1; fabs(loadFunDyn)/sigf > errorTol; iter++) {
                 //printf("loadfun = %e \n",loadFun);
-				loadFun_M = 0.5*(loadFun + fabs(loadFun));
-				M_norm = sqrt(M.computeSquaredNorm());
+		//double loadFun_M = 0.5*(loadFun + fabs(loadFun));
+		//double M_norm = sqrt(M.computeSquaredNorm());
 
 				if (iter>40) {
                     OOFEM_ERROR("BilinearCZMaterialFagerstrom :: giveRealStressVector - no convergence in constitutive driver");
@@ -223,15 +220,15 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
                 R.at(2) = dJElastic.at(2) - (dJ.at(2) - gammaGf*S*dAlpha*M.at(2));
                 R.at(3) = dJElastic.at(3) - (dJ.at(3) - S*dAlpha*M.at(3));
                 if (fabs(c_star)>0) {
-					//R.at(4) = loadFun - c_star*pow((dAlpha/dt),m);
-					//R.at(4) = loadFun - c_star*pow((sqrt(dJ.computeSquaredNorm())/dt),m);
-					dJp = dJ;
-					dJp.subtract(dJElastic);
-					R.at(4) = loadFun - c_star*pow((sqrt(dJp.computeSquaredNorm())/dt),m);
-					//R.at(4) = dAlpha - (dt/(c_star*S))*pow(loadFun_M/sigf,m)*(1/M_norm);
-				} else {
-					R.at(4) = loadFun;	// R(3) = F/sig_f
-				}
+		    //R.at(4) = loadFun - c_star*pow((dAlpha/dt),m);
+		    //R.at(4) = loadFun - c_star*pow((sqrt(dJ.computeSquaredNorm())/dt),m);
+		    dJp = dJ;
+		    dJp.subtract(dJElastic);
+		    R.at(4) = loadFun - c_star*pow((sqrt(dJp.computeSquaredNorm())/dt),m);
+		    //R.at(4) = dAlpha - (dt/(c_star*S))*pow(loadFun_M/sigf,m)*(1/M_norm);
+		} else {
+		    R.at(4) = loadFun;	// R(3) = F/sig_f
+		}
 
                 // dMdJtn_e(1,1:2) = (/2/(sig_f*gamma**2),0.d0/)
                 // IF (Q_nM>0) THEN

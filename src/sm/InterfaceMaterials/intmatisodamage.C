@@ -158,7 +158,7 @@ IntMatIsoDamage :: give2dStiffnessMatrix_Eng(FloatMatrix &answer, MatResponseMod
                 double omega, omega_plus;
                 computeDamageParam(omega, un);
                 computeDamageParam(omega_plus, un + 1.0e-8 );
-                double dom = (omega_plus - omega)/ 1.0e-8;
+                //double dom = (omega_plus - omega)/ 1.0e-8;
                 
                 // d( (1-omega)*D*j ) / dj = (1-omega)D - D*j openprod domega/dj
             /*    double fac = ft*(e0 - un)/gf;
@@ -269,7 +269,6 @@ IntMatIsoDamage :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
 IRResultType
 IntMatIsoDamage :: initializeFrom(InputRecord *ir)
 {
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                // Required by IR_GIVE_FIELD macro
 
     IR_GIVE_FIELD(ir, kn, _IFT_IntMatIsoDamage_kn);

@@ -391,7 +391,7 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             //this->exportCompositeElement(this->defaultVTKPiece, el, tStep);
             this->exportCompositeElement(this->defaultVTKPieces, el, tStep);
 
-            for ( int i = 0; i < this->defaultVTKPieces.size(); i++ ) {
+            for ( int i = 0; i < (int)this->defaultVTKPieces.size(); i++ ) {
                 this->writeVTKPiece(this->defaultVTKPieces[i], tStep);
             }
 #else

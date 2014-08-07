@@ -84,8 +84,6 @@ IntElSurfTr1 :: computeGaussPoints()
 {
     // Sets up the array of Gauss Points of the receiver.
     if ( integrationRulesArray.size() == 0 ) {
-        int numberOfIntegrationRules = 1;
-        //integrationRulesArray = new IntegrationRule * [ 1 ];
         integrationRulesArray.resize(1);
         //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3); 

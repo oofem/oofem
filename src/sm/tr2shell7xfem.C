@@ -298,14 +298,14 @@ bool Tr2Shell7XFEM :: updateIntegrationRuleMultiCrack()
         
     // Cohesive zone
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
-        Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
-            int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
-            //czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
-            czIntegrationRulesArray.resize(numberOfInterfaces);
-            for ( int i = 0; i < numberOfInterfaces; i++ ) {
-                czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
-                czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
-            }
+        //Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
+	int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
+	//czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
+	czIntegrationRulesArray.resize(numberOfInterfaces);
+	for ( int i = 0; i < numberOfInterfaces; i++ ) {
+	    czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
+	    czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
+	}
     }
 
     return partitionSucceeded;

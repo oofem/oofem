@@ -48,7 +48,6 @@ ShellCrack :: ShellCrack(int n, XfemManager *xm, Domain *aDomain) : Crack(n, xm,
 IRResultType ShellCrack :: initializeFrom(InputRecord *ir)
 {
     Crack :: initializeFrom(ir);
-    const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
     this->xiBottom = 0.0;
     this->xiTop = 0.0;

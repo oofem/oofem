@@ -381,6 +381,7 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
             if ( this->hasCohesiveZone(i) ) {
                 this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, this->xMan->giveEnrichmentItem(i)); 
                 tempRed.beSubArrayOf(fCZ, activeDofs);
+		//tempRed.printYourself();
                 answer.assemble(tempRed, ordering);
             }
         }
@@ -558,10 +559,10 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         // Compute jump vector
         unknowns.beProductOf(N, solVecD);
         xd.beProductOf(lambda,unknowns); // spatial jump
-		genEpsC.beProductOf(B, solVecC);
-		this->computeFAt(lCoords, F, genEpsC);
+	genEpsC.beProductOf(B, solVecC);
+	this->computeFAt(lCoords, F, genEpsC);
 
-		// Transform xd and F to a local coord system
+	// Transform xd and F to a local coord system
         this->evalInitialCovarNormalAt(nCov, lCoords);
         Q.beLocalCoordSys(nCov);
         xd.rotatedWith(Q,'n');
@@ -569,10 +570,14 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
 
         // Compute cohesive traction based on jump
         intMat->giveFirstPKTraction_3d(T, gp, xd, F, tStep);
-        lambdaN.beProductOf(lambda,N);
-        T.rotatedWith(Q,'t'); // transform back to global coord system
+	lambdaN.beProductOf(lambda,N);
+	//Q.printYourself();	
+	//T.printYourself();
+	T.rotatedWith(Q,'t'); // transform back to global coord system
+//lambdaN.printYourself();
 
-        Fp.beTProductOf(lambdaN, T);
+	Fp.beTProductOf(lambdaN, T);
+	//Fp.printYourself();
         double dA = this->computeAreaAround(gp,xi);
         answerTemp.add(dA*DISC_DOF_SCALE_FAC,Fp);
         }
@@ -1178,10 +1183,11 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
         FloatArray componentsTemp, coordsTemp(1);
         coordsTemp.at(1) = 0.0; // 
         edgeLoad->computeValueAt(componentsTemp, tStep, coordsTemp, VM_Total);
-        double xi = 0.0; // defaults to geometric midplane
-        if ( componentsTemp.giveSize() == 8 ) {
-            xi = componentsTemp.at(8);   // use the 8th component to store the-xi coord where the load acts
-        }
+        ///@todo Add support for load defined over certain area
+	//double xi = 0.0; // defaults to geometric midplane
+        //if ( componentsTemp.giveSize() == 8 ) {
+        //    xi = componentsTemp.at(8);   // use the 8th component to store the-xi coord where the load acts
+        //}
 
         // Disccontinuous part
         FloatArray temp, tempRed;
@@ -1227,13 +1233,10 @@ Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, B
             
             // Updated global coord system
             FloatMatrix gcov;
-            //FloatArray lCoords = *gp->giveCoordinates();
             this->edgeEvalEnrCovarBaseVectorsAt(lCoords, iEdge, gcov, tStep, ei); 
             Q.beTranspositionOf(gcov);
 
             FloatArray distrForces(3), distrMoments(3), t1, t2;
-            //distrForces .setValues(3, components.at(1), components.at(2), components.at(3) );
-            //distrMoments.setValues(3, components.at(4), components.at(5), components.at(6) );
             distrForces = { components.at(1), components.at(2), components.at(3) };
             distrMoments = { components.at(4), components.at(5), components.at(6) };
             t1.beTProductOf(Q, distrForces);
@@ -1767,7 +1770,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
     // Go through each layer and count the number of subcells
     int numCells = 0;
     for ( int i = 0; i < numLayers; i++ ) {
-        numCells += (int)this->crackSubdivisions[i].size();
+        numCells += (int)(this->crackSubdivisions[i].size());
     }
 
     int numCellNodes  = 15; // quadratic wedge
@@ -1956,19 +1959,19 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
                         lCoords.beColumnOf(localNodeCoords, nodeIndx);
                         Node *node = this->giveNode( wedgeToTriMap.at(nodeIndx) );
                         FloatArray valueArray;
-                        const FloatArray *val = NULL;
+                        //const FloatArray *val = NULL;
                         if ( xfemstype == XFEMST_LevelSetPhi ) {
                             valueArray.resize(1);
-                            val = & valueArray;
+                            //val = & valueArray;
                             //ei->evalLevelSetNormalInNode( valueArray.at(1), node->giveNumber() );
                             valueArray.at(1) = this->evaluateLevelSet(lCoords, ei);
                         } else if ( xfemstype == XFEMST_LevelSetGamma ) {
                             valueArray.resize(1);
-                            val = & valueArray;
+                            //val = & valueArray;
                             ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber() );
                         } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
                             valueArray.resize(1);
-                            val = & valueArray;
+                            //val = & valueArray;
                             ei->evalNodeEnrMarkerInNode( valueArray.at(1), node->giveNumber() );
                         } else {
                             //OOFEM_WARNING2("VTKXMLExportModule::getNodalVariableFromXFEMST: invalid data in node %d", inode);
@@ -2361,7 +2364,7 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
         InternalStateType type = ( InternalStateType ) internalVarsToExport.at(fieldNum);
         nodeNum = 1;
         //this->recoverShearStress(tStep);
-        int currentCell = 1;
+        //int currentCell = 1;
         for ( int layer = 1; layer <= numInterfaces; layer++ ) {            
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
                 this->recoverValuesFromCZIP(values, layer, type, tStep);        
