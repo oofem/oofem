@@ -1,11 +1,11 @@
 tr2shell7XFEM_CZ.out
 Test of internal cohesive zone model in Tr2Shell7XFEM. Pure shear test.
 #
-XFEMStatic nsteps 7 deltaT 0.5 lstype 0 smtype 0 rtold -1.0 rtolf 1.0e-5 manrmsteps 1 nmodules 0 controllmode 1 initialguess 1
-#StaticStructural nsteps 7 deltaT 0.5 lstype 0 smtype 0 rtold -1.0 rtolf 1.0e-5 manrmsteps 1 nmodules 0 
+#XFEMStatic nsteps 7 deltaT 0.5 lstype 0 smtype 0 rtold -1.0 rtolf 1.0e-5 manrmsteps 1 nmodules 1 controllmode 1 initialguess 1
+StaticStructural nsteps 7 deltaT 0.5 lstype 0 smtype 0 rtold -1.0 rtolf 1.0e-5 manrmsteps 1 nmodules 1 
 #vtkxml tstep_all dofman_all element_all primvars 1 1 
 #matlab reactionforces dofmanlist 6 1 2 3 4 5 6 
-#errorcheck
+errorcheck
 domain 3dDirShell 
 OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 1 ncrosssect 1 nmat 2 nbc 1 nic 0 nltf 1 nset 2 nxfemman 1
@@ -26,7 +26,7 @@ IntMatBilinearCZFagerstrom 2 kn 2.0e5 ks 2.0e5 knc 2.0e5 g1c 2000.0 g2c 3000.0 m
 #
 BoundaryCondition 1 loadTimeFunction 1 values 13  0.0 0.0 0.0 0.0 0.0 0.0 0.0   0.0 0.01 0.0 0.0 0.0 0.0 dofs 13  1 2 3 15 16 17 18  23 24 25 26 27 28 set 2	
 #
-PiecewiseLinFunction 1 nPoints 2  t 2  0. 100 f(t) 2  0.000 100.e3
+PiecewiseLinFunction 1 nPoints 2  t 2  0. 100 f(t) 2  0.000 100.e0
 #
 Set 1 elements 1 1
 Set 2 nodes 6 1 2 3 4 5 6
