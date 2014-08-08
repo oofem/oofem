@@ -48,7 +48,7 @@ LocalGaussianRandomFunction :: ~LocalGaussianRandomFunction()
 { }
 
 void
-LocalGaussianRandomFunction :: evaluate(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict)
+LocalGaussianRandomFunction :: evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict)
 {
     answer = {evaluateAtTime(0)};
 }
