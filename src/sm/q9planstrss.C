@@ -1,13 +1,39 @@
 /*
- * q9planstrss.C
  *
- *  Created on: May 22, 2013
- *      Author: erik
+ *                 #####    #####   ######  ######  ###   ###
+ *               ##   ##  ##   ##  ##      ##      ## ### ##
+ *              ##   ##  ##   ##  ####    ####    ##  #  ##
+ *             ##   ##  ##   ##  ##      ##      ##     ##
+ *            ##   ##  ##   ##  ##      ##      ##     ##
+ *            #####    #####   ##      ######  ##     ##
+ *
+ *
+ *             OOFEM : Object Oriented Finite Element Code
+ *
+ *               Copyright (C) 1993 - 2013   Borek Patzak
+ *
+ *
+ *
+ *       Czech Technical University, Faculty of Civil Engineering,
+ *   Department of Structural Mechanics, 166 29 Prague, Czech Republic
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public
+ *  License along with this library; if not, write to the Free Software
+ *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
 #include "q9planstrss.h"
-
-#include "qplanstrss.h"
+#include "fei2dquadbiquad.h"
 #include "crosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -25,13 +51,15 @@ FEI2dQuadBiQuad Q9PlaneStress2d :: interpolation(1, 2);
 
 Q9PlaneStress2d :: Q9PlaneStress2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface()
-    // Constructor.
 {
-    //	printf("Entering Q9PlaneStress2d :: Q9PlaneStress2d().\n");
-
     numberOfDofMans  = 9;
     numberOfGaussPoints = 4;
 }
+
+
+FEInterpolation *
+Q9PlaneStress2d :: giveInterpolation() const { return & interpolation; }
+
 
 Interface *
 Q9PlaneStress2d :: giveInterface(InterfaceType interface)
@@ -222,12 +250,11 @@ Q9PlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
      * to global element dofs
      */
 
-    int i;
     IntArray eNodes(3);
     this->interpolation.computeLocalEdgeMapping(eNodes,  iEdge);
 
     answer.resize(6);
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(i * 2 - 1) = eNodes.at(i) * 2 - 1;
         answer.at(i * 2) = eNodes.at(i) * 2;
     }

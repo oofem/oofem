@@ -36,13 +36,13 @@
 #define qplanstrain_h
 
 #include "nlstructuralelement.h"
-#include "fei2dquadquad.h"
 #include "zznodalrecoverymodel.h"
-#include "mathfem.h"
 
 #define _IFT_QPlaneStrain_Name "qplanestrain"
 
 namespace oofem {
+class FEI2dQuadQuad;
+
 /**
  * This class implements an Quadratic isoparametric eight-node quadrilateral plane-
  * stress elasticity finite element. Each node has 2 degrees of freedom.
@@ -58,7 +58,7 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 

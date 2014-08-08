@@ -33,6 +33,7 @@
  */
 
 #include "quad1planestrain.h"
+#include "fei2dquadlin.h"
 #include "node.h"
 #include "crosssection.h"
 #include "gausspoint.h"
@@ -41,7 +42,6 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
-#include "fei2dquadlin.h"
 #include "classfactory.h"
 #include "engngm.h"
 
@@ -69,6 +69,9 @@ Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
 
 Quad1PlaneStrain :: ~Quad1PlaneStrain()
 { }
+
+
+FEInterpolation *Quad1PlaneStrain :: giveInterpolation() const { return & interp; }
 
 
 void
@@ -404,6 +407,13 @@ Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElem
                                        localNodeId, localElemId, localBcId,
                                        controlNode, controlDof, aMode, "Quad1PlaneStrain");
 }
+
+
+void Quad1PlaneStrain :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+}
+
 
 
 #ifdef __OOFEG

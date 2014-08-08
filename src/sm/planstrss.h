@@ -36,18 +36,18 @@
 #define planstrss_h
 
 #include "nlstructuralelement.h"
-#include "fei2dquadlin.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "directerrorindicatorrc.h"
 #include "eleminterpmapperinterface.h"
 #include "huertaerrorestimator.h"
-#include "gausspoint.h"
 
 #define _IFT_PlaneStress2d_Name "planestress2d"
 
 namespace oofem {
+class FEI2dQuadLin;
+
 /// Comment or uncomment the following line to force full or reduced integration
 #define PlaneStress2d_reducedShearIntegration
 /**
@@ -78,7 +78,7 @@ public:
 
     virtual double computeVolumeAround(GaussPoint *gp);
 
-    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
@@ -93,10 +93,7 @@ public:
                                                                   int &localNodeId, int &localElemId, int &localBcId,
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode);
-    virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
-    { computeLocalCoordinates(answer, coords); }
-    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-    { computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer); }
+    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                        TimeStep *tStep, const FloatArray &lcoords,

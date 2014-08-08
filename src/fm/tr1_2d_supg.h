@@ -36,7 +36,6 @@
 #define tr1_2d_supg_h
 
 #include "supgelement.h"
-#include "fei2dtrlin.h"
 #include "primaryfield.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
@@ -55,6 +54,8 @@
 //@}
 
 namespace oofem {
+class FEI2dTrLin;
+
 /**
  * Class representing 2d linear triangular element
  * for solving incompressible fluid with SUPG solver
@@ -81,7 +82,7 @@ public:
     TR1_2D_SUPG(int n, Domain * d);
     virtual ~TR1_2D_SUPG();
 
-    virtual FEInterpolation *giveInterpolation() const { return & interp; }
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep);

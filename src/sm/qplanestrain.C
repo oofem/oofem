@@ -33,6 +33,7 @@
  */
 
 #include "qplanestrain.h"
+#include "fei2dquadquad.h"
 #include "crosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -57,6 +58,9 @@ QPlaneStrain :: QPlaneStrain(int n, Domain *aDomain) :
     numberOfGaussPoints = 4;
 }
 
+FEInterpolation *
+QPlaneStrain :: giveInterpolation() const { return & interpolation; }
+
 Interface *
 QPlaneStrain :: giveInterface(InterfaceType interface)
 {
@@ -66,7 +70,6 @@ QPlaneStrain :: giveInterface(InterfaceType interface)
 
     return NULL;
 }
-
 
 void
 QPlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)

@@ -33,6 +33,7 @@
  */
 
 #include "traxisym1_ht.h"
+#include "fei2dtrlin.h"
 #include "gausspoint.h"
 #include "floatarray.h"
 #include "mathfem.h"

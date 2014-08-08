@@ -33,6 +33,7 @@
  */
 
 #include "tr1_2d_supg.h"
+#include "fei2dtrlin.h"
 #include "fluidmodel.h"
 #include "node.h"
 #include "material.h"
@@ -70,15 +71,12 @@ FEI2dTrLin TR1_2D_SUPG :: interp(1, 2);
 
 TR1_2D_SUPG :: TR1_2D_SUPG(int n, Domain *aDomain) :
     SUPGElement(n, aDomain), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this), LEPlicElementInterface()
-    // Constructor.
 {
     numberOfDofMans  = 3;
 }
 
 TR1_2D_SUPG :: ~TR1_2D_SUPG()
-// Destructor
 { }
-
 
 int
 TR1_2D_SUPG :: computeNumberOfDofs()
@@ -92,6 +90,8 @@ TR1_2D_SUPG :: giveDofManDofIDMask(int inode, IntArray &answer) const
     answer = {V_u, V_v, P_f};
 }
 
+FEInterpolation *
+TR1_2D_SUPG :: giveInterpolation() const { return & interp; }
 
 IRResultType
 TR1_2D_SUPG :: initializeFrom(InputRecord *ir)

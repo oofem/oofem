@@ -41,7 +41,6 @@
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
-#include "fei2dtrlin.h"
 #include "zzerrorestimator.h"
 
 #define _IFT_DKTPlate_Name "dktplate"
@@ -50,6 +49,8 @@
 #define DKT_EnableVertexMomentsCache
 
 namespace oofem {
+class FEI2dTrLin;
+
 /**
  * This class implements an triangular Discrete Kirchhoff Theory (DKT) element.
  * This element is a plate element suitable for thin plates, as the traswerse shear strain energy is neglected.
@@ -81,7 +82,7 @@ public:
     DKTPlate(int n, Domain *d);
     virtual ~DKTPlate() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return & interp_lin; }
+    virtual FEInterpolation *giveInterpolation() const;
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }

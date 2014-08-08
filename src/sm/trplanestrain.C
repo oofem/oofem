@@ -33,6 +33,7 @@
  */
 
 #include "trplanestrain.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "crosssection.h"
 #include "gausspoint.h"
@@ -65,6 +66,9 @@ TrPlaneStrain :: TrPlaneStrain(int n, Domain *aDomain) :
     area = -1;
     numberOfGaussPoints = 1;
 }
+
+
+FEInterpolation *TrPlaneStrain :: giveInterpolation() const { return & interp; }
 
 
 Interface *
@@ -469,6 +473,12 @@ TrPlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
                                        sMode, tStep, nodes, corner, midSide, midNode,
                                        localNodeId, localElemId, localBcId,
                                        controlNode, controlDof, aMode, "Quad1PlaneStrain");
+}
+
+
+void TrPlaneStrain :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 

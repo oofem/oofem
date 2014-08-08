@@ -40,7 +40,6 @@
 
 #include "activebc.h"
 #include "inputrecord.h"
-#include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
@@ -61,6 +60,7 @@
 namespace oofem {
 
 class Node;
+class Element;
 
 enum basisType { monomial=0, trigonometric=1, legendre=2 };
 /**

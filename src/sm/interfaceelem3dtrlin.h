@@ -36,18 +36,19 @@
 #define interfaceelem3dtrlin_h
 
 #include "structuralelement.h"
-#include "fei2dtrlin.h"
 
 #define _IFT_InterfaceElement3dTrLin_Name "interface3dtrlin"
 
 namespace oofem {
+class FEI2dTrLin;
+
 /**
  * This class implements 3d triangular surface interface element with linear interpolation.
  */
 class InterfaceElement3dTrLin : public StructuralElement
 {
 protected:
-    ///@todo Implement FEI3dTrLin, then remove giveIntegrationDomain and giveElementGeometry
+    ///@todo Implement FEI3dTrLin, then remove giveIntegrationDomain and giveElementGeometry and overload giveInterpolation()
     static FEI2dTrLin interpolation;
 
 public:

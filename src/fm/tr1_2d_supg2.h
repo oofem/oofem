@@ -36,13 +36,11 @@
 #define tr1_2d_supg2_h
 
 #include "tr1_2d_supg.h"
-#include "floatmatrix.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "leplic.h"
-#include "gaussintegrationrule.h"
 
 #define _IFT_TR1_2D_SUPG2_Name "tr1supg2"
 

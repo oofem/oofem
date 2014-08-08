@@ -41,13 +41,14 @@
 #include "sprnodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "eleminterpmapperinterface.h"
-#include "fei3dhexalin.h"
 
 #define _IFT_Brick1_ht_Name "brick1ht"
 #define _IFT_Brick1_hmt_Name "brick1hmt"
 #define _IFT_Brick1_mt_Name "brick1mt"
 
 namespace oofem {
+class FEI3dHexaLin;
+
 /**
  * Brick (3d) elements with linear approximation for heat and mass transfer.
  */
@@ -61,7 +62,8 @@ public:
     virtual ~Brick1_ht();
 
     virtual double computeVolumeAround(GaussPoint *gp);
-    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const;
+
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Brick1_ht_Name; }
     virtual const char *giveClassName() const { return "Brick1_ht"; }

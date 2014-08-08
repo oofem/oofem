@@ -33,6 +33,8 @@
  */
 
 #include "beam2d.h"
+#include "fei2dlinelin.h"
+#include "fei2dlinehermite.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
@@ -75,6 +77,9 @@ Beam2d :: ~Beam2d()
 {
     delete dofsToCondense;
 }
+
+
+FEInterpolation *Beam2d :: giveInterpolation() const { return & interp_geom; }
 
 
 Interface *

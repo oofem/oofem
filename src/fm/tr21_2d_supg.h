@@ -37,10 +37,6 @@
 
 #include "supgelement2.h"
 #include "intarray.h"
-#include "floatarray.h"
-#include "floatmatrix.h"
-#include "fei2dtrquad.h"
-#include "fei2dtrlin.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
@@ -50,6 +46,9 @@
 #define _IFT_TR21_2D_SUPG_Name "tr21supg"
 
 namespace oofem {
+class FEI2dTrQuad;
+class FEI2dTrLin;
+
 /**
  * Class representing 2d triangular element  with quadratic velocity
  * and linear pressure approximation for solving incompressible fluid problems

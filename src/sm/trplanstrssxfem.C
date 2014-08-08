@@ -16,6 +16,7 @@
 #include "xfem/enrichmentdomain.h"
 #include "xfem/delaunay.h"
 #include "xfem/XFEMDebugTools.h"
+#include "feinterpol.h"
 #include "node.h"
 #include "crosssection.h"
 #include "gausspoint.h"

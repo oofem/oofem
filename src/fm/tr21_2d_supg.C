@@ -33,6 +33,8 @@
  */
 
 #include "tr21_2d_supg.h"
+#include "fei2dtrquad.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"

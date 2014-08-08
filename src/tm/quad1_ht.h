@@ -38,13 +38,14 @@
 #include "transportelement.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
-#include "fei2dquadlin.h"
 
 #define _IFT_Quad1_ht_Name "quad1ht"
 #define _IFT_Quad1_hmt_Name "quad1hmt"
 #define _IFT_Quad1_mt_Name "quad1mt"
 
 namespace oofem {
+class FEI2dQuadLin;
+
 /**
  * Quadratic (2d) element with linear approximation for heat transfer.
  */
@@ -57,6 +58,7 @@ public:
     Quad1_ht(int n, Domain * d);
     virtual ~Quad1_ht();
 
+    virtual FEInterpolation *giveInterpolation() const;
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual const char *giveInputRecordName() const { return _IFT_Quad1_ht_Name; }
@@ -65,7 +67,6 @@ public:
     //    virtual int computeNumberOfDofs() { return ( emode == HeatTransferEM ) ? 4 : 8; }
     virtual int computeNumberOfDofs() { return 4; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
     virtual MaterialMode giveMaterialMode() { return _2dHeat; }
     virtual double giveThicknessAt(const FloatArray &gcoords);
 

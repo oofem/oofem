@@ -36,13 +36,14 @@
 #define qplanstrss_h
 
 #include "nlstructuralelement.h"
-#include "fei2dquadquad.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 
 #define _IFT_QPlaneStress2d_Name "qplanestress2d"
 
 namespace oofem {
+class FEI2dQuadQuad;
+
 /**
  * This class implements an Quadratic isoparametric eight-node quadrilateral plane-
  * stress elasticity finite element. Each node has 2 degrees of freedom.
@@ -56,13 +57,14 @@ public:
     QPlaneStress2d(int n, Domain * d);
     virtual ~QPlaneStress2d() { }
 
+    virtual FEInterpolation *giveInterpolation() const;
+
     virtual int computeNumberOfDofs() { return 16; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QPlaneStress2d_Name; }
     virtual const char *giveClassName() const { return "QPlaneStress2d"; }
-    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
     virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
     virtual IRResultType initializeFrom(InputRecord *ir);

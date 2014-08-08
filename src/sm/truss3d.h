@@ -36,16 +36,15 @@
 #define truss3d_h
 
 #include "nlstructuralelement.h"
-#include "gaussintegrationrule.h"
-#include "gausspoint.h"
 #include "directerrorindicatorrc.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
-#include "fei3dlinelin.h"
 
 #define _IFT_Truss3d_Name "truss3d"
 
 namespace oofem {
+class FEI3dLineLin;
+
 /**
  * This class implements a two-node truss bar element for three-dimensional
  * analysis.
@@ -61,7 +60,7 @@ public:
     Truss3d(int n, Domain * d);
     virtual ~Truss3d() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return & interp; }
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual double computeLength();
 
@@ -100,8 +99,7 @@ protected:
     virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
     virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-    { computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) ); }
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);

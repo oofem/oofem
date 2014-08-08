@@ -375,6 +375,11 @@ LTRSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *ref
                                        controlNode, controlDof, aMode, "LSpace");
 }
 
+void LTRSpace :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+}
+
 #ifdef __OOFEG
  #define TR_LENGHT_REDUCT 0.3333
 

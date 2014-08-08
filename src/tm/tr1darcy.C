@@ -34,6 +34,7 @@
 
 
 #include "tr1darcy.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "domain.h"
 #include "gaussintegrationrule.h"
@@ -46,7 +47,6 @@
 #include "mathfem.h"
 #include "crosssection.h"
 #include "matresponsemode.h"
-#include "fei2dtrlin.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -66,6 +66,12 @@ IRResultType Tr1Darcy :: initializeFrom(InputRecord *ir)
 {
     this->numberOfGaussPoints = 1;
     return TransportElement :: initializeFrom(ir);
+}
+
+FEInterpolation *
+Tr1Darcy :: giveInterpolation() const
+{
+    return & interpolation_lin;
 }
 
 void Tr1Darcy :: computeGaussPoints()

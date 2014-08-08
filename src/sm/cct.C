@@ -33,6 +33,7 @@
  */
 
 #include "cct.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
@@ -46,7 +47,6 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "classfactory.h"
-#include "engngm.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -67,6 +67,10 @@ CCTPlate :: CCTPlate(int n, Domain *aDomain) :
     numberOfGaussPoints = 1;
     area = 0;
 }
+
+
+FEInterpolation *
+CCTPlate :: giveInterpolation() const { return & interp_lin; }
 
 
 FEInterpolation *

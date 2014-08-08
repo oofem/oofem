@@ -33,6 +33,7 @@
  */
 
 #include "qplanstrss.h"
+#include "fei2dquadquad.h"
 #include "crosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -72,6 +73,7 @@ QPlaneStress2d :: giveInterface(InterfaceType interface)
     return NULL;
 }
 
+FEInterpolation *QPlaneStress2d :: giveInterpolation() const { return & interpolation; }
 
 void
 QPlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)

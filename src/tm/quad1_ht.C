@@ -33,6 +33,7 @@
  */
 
 #include "quad1_ht.h"
+#include "fei2dquadlin.h"
 #include "crosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -71,12 +72,13 @@ Quad1_mt :: Quad1_mt(int n, Domain *aDomain) : Quad1_ht(n, aDomain)
 }
 
 Quad1_ht :: ~Quad1_ht()
-// Destructor
 { }
+
+FEInterpolation *
+Quad1_ht :: giveInterpolation() const { return & interpolation; }
 
 void
 Quad1_ht :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );

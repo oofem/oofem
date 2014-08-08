@@ -33,6 +33,7 @@
  */
 
 #include "tr1_2d_cbs.h"
+#include "fei2dtrlin.h"
 #include "cbs.h"
 #include "node.h"
 #include "material.h"
@@ -79,10 +80,10 @@ TR1_2D_CBS :: TR1_2D_CBS(int n, Domain *aDomain) :
 }
 
 TR1_2D_CBS :: ~TR1_2D_CBS()
-// Destructor
 { }
 
-
+FEInterpolation *
+TR1_2D_CBS :: giveInterpolation() const { return & interp; }
 
 int
 TR1_2D_CBS :: computeNumberOfDofs()

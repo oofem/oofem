@@ -33,6 +33,7 @@
  */
 
 #include "shell7base.h"
+#include "fei3dwedgequad.h"
 #include "node.h"
 #include "load.h"
 #include "structuralms.h"
@@ -40,7 +41,6 @@
 #include "domain.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
-#include "feinterpol3d.h"
 #include "boundaryload.h"
 #include "constantpressureload.h"
 #include "constantsurfaceload.h"

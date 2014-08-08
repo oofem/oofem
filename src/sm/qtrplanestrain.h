@@ -36,17 +36,17 @@
 #define qtrplanestrain_h
 
 #include "nlstructuralelement.h"
-#include "fei2dtrquad.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "directerrorindicatorrc.h"
 #include "eleminterpmapperinterface.h"
-#include "mathfem.h"
 
 #define _IFT_QTrPlaneStrain_Name "qtrplanestrain"
 
 namespace oofem {
+class FEI2dTrQuad;
+
 /**
  * This class implements an triangular three-node  plane-
  * stress elasticity finite element. Each node has 2 degrees of freedom.

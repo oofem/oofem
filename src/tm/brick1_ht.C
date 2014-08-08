@@ -33,6 +33,7 @@
  */
 
 #include "brick1_ht.h"
+#include "fei3dhexalin.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -72,12 +73,15 @@ Brick1_mt :: Brick1_mt(int n, Domain *aDomain) : Brick1_ht(n, aDomain)
 {
     emode = Mass1TransferEM;
 }
+
 Brick1_ht :: ~Brick1_ht()
 { }
 
+FEInterpolation *
+Brick1_ht :: giveInterpolation() const { return & interpolation; }
+
 void
 Brick1_ht :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );

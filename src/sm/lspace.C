@@ -33,6 +33,7 @@
  */
 
 #include "lspace.h"
+#include "fei3dhexalin.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -64,6 +65,8 @@ LSpace :: LSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNo
     numberOfGaussPoints = 8;
 }
 
+
+FEInterpolation *LSpace :: giveInterpolation() const { return & interpolation; }
 
 Interface *
 LSpace :: giveInterface(InterfaceType interface)
@@ -511,6 +514,12 @@ LSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refin
                                        sMode, tStep, nodes, corner, midSide, midFace, midNode,
                                        localNodeId, localElemId, localBcId, hexaSideNode, hexaFaceNode,
                                        controlNode, controlDof, aMode, "LSpace");
+}
+
+
+void LSpace :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 

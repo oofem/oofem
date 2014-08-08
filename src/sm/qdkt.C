@@ -33,6 +33,7 @@
  */
 
 #include "qdkt.h"
+#include "fei2dquadlin.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
@@ -46,7 +47,6 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "classfactory.h"
-#include "fei2dquadquad.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -66,6 +66,10 @@ QDKTPlate :: QDKTPlate(int n, Domain *aDomain) :
     numberOfDofMans = 4;
     numberOfGaussPoints = 4;
 }
+
+
+FEInterpolation *
+QDKTPlate :: giveInterpolation() const { return & interp_lin; }
 
 
 FEInterpolation *

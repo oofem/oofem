@@ -44,6 +44,7 @@
 #include "floatmatrix.h"
 #include "structuralcrosssection.h"
 #include "dynamicinputrecord.h"
+#include "gausspoint.h"
 #include "engngm.h"
 
 namespace oofem {

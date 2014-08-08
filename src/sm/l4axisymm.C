@@ -33,6 +33,7 @@
  */
 
 #include "l4axisymm.h"
+#include "fei2dquadlin.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -67,6 +68,10 @@ L4Axisymm :: L4Axisymm(int n, Domain *aDomain) :
 
 L4Axisymm :: ~L4Axisymm()
 { }
+
+
+FEInterpolation *
+L4Axisymm :: giveInterpolation() const { return & interpolation; }
 
 
 Interface *

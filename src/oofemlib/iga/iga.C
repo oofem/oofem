@@ -37,6 +37,7 @@
 #include "floatmatrix.h"
 #include "mathfem.h"
 #include "iga.h"
+#include "gausspoint.h"
 #include "feitspline.h"
 
 #ifdef __OOFEG

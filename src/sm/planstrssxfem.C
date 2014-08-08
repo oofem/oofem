@@ -41,6 +41,7 @@
 #include "structuralcrosssection.h"
 #include "vtkxmlexportmodule.h"
 #include "dynamicinputrecord.h"
+#include "feinterpol.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG

@@ -65,6 +65,7 @@
 #include "outputmanager.h"
 #include "boundarycondition.h"
 #include "feinterpol.h"
+#include "gausspoint.h"
 
 #include <vector>
 #include <string>
@@ -1435,7 +1436,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                             globCoord.at(3) = zc * ( 1.0 - u ) + zm * u;
 
                             // this effectively rewrites the local coordinates of the fictitious integration point
-                            this->HuertaErrorEstimatorI_computeLocalCoords(* locCoord, globCoord);
+                            element->computeLocalCoordinates(* locCoord, globCoord);
                             // get N matrix at the fictitious integration point
                             this->HuertaErrorEstimatorI_computeNmatrixAt(gp, Nmatrix);
                             // get displacement at the fictitious integration point
@@ -1979,7 +1980,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                 globCoord.at(3) = ( zc * ( 1.0 - u ) + zs1 * u ) * ( 1.0 - v ) + ( zs2 * ( 1.0 - u ) + zm * u ) * v;
 
                                 // this effectively rewrites the local coordinates of the fictitious integration point
-                                this->HuertaErrorEstimatorI_computeLocalCoords(* locCoord, globCoord);
+                                element->computeLocalCoordinates(* locCoord, globCoord);
                                 // get N matrix at the fictitious integration point
                                 this->HuertaErrorEstimatorI_computeNmatrixAt(gp, Nmatrix);
                                 // get displacement at the fictitious integration point
@@ -2698,7 +2699,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                                       + ( ( zs3 * ( 1.0 - u ) + zf2 * u ) * ( 1.0 - v ) + ( zf3 * ( 1.0 - u ) + zm * u ) * v ) * w;
 
                                     // this effectively rewrites the local coordinates of the fictitious integration point
-                                    this->HuertaErrorEstimatorI_computeLocalCoords(* locCoord, globCoord);
+                                    element->computeLocalCoordinates(* locCoord, globCoord);
                                     // get N matrix at the fictitious integration point
                                     this->HuertaErrorEstimatorI_computeNmatrixAt(gp, Nmatrix);
                                     // get displacement at the fictitious integration point

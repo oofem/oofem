@@ -55,6 +55,7 @@
 #include "function.h"
 #include "dofmanager.h"
 #include "node.h"
+#include "gausspoint.h"
 #include "dynamicinputrecord.h"
 #include "matstatmapperint.h"
 #include "cltypes.h"

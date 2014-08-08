@@ -36,12 +36,9 @@
 #define iga_h
 
 #include "inputrecord.h"
-#include "floatarray.h"
-#include "floatmatrix.h"
-#include "gausspoint.h"
-#include "gaussintegrationrule.h"
-#include "mathfem.h"
+#include "intarray.h"
 #include "feinterpol.h"
+#include "gaussintegrationrule.h"
 
 ///@name Input fields for IGAElement
 //@{

@@ -33,6 +33,7 @@
  */
 
 #include "truss3d.h"
+#include "fei3dlinelin.h"
 #include "node.h"
 #include "material.h"
 #include "structuralcrosssection.h"
@@ -59,6 +60,9 @@ Truss3d :: Truss3d(int n, Domain *aDomain) :
 {
     numberOfDofMans = 2;
 }
+
+
+FEInterpolation *Truss3d :: giveInterpolation() const { return & interp; }
 
 
 Interface *
@@ -244,7 +248,7 @@ Truss3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-Truss3d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+Truss3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
         OOFEM_ERROR("wrong edge number");
@@ -252,6 +256,13 @@ Truss3d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 
     double weight = gp->giveWeight();
     return this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) * weight;
+}
+
+
+void
+Truss3d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+{
+    computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
 }
 
 

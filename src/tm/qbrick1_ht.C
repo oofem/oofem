@@ -33,6 +33,7 @@
  */
 
 #include "qbrick1_ht.h"
+#include "fei3dhexaquad.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -64,6 +65,10 @@ QBrick1_hmt :: QBrick1_hmt(int n, Domain *aDomain) : QBrick1_ht(n, aDomain)
 
 QBrick1_ht :: ~QBrick1_ht()
 { }
+
+
+FEInterpolation *
+QBrick1_ht :: giveInterpolation() const { return & interpolation; }
 
 
 void

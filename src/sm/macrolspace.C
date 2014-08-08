@@ -34,6 +34,7 @@
 
 #include "macrolspace.h"
 #include "micromaterial.h"
+#include "fei3dhexalin.h"
 #include "lspace.h"
 #include "constantfunction.h"
 #include "domain.h"

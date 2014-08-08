@@ -36,6 +36,7 @@
 #include "fei2dtrlin.h"
 #include "contextioerr.h"
 #include "gaussintegrationrule.h"
+#include "gausspoint.h"
 #include "classfactory.h"
 #include "node.h"
 

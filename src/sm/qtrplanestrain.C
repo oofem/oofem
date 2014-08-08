@@ -33,6 +33,7 @@
  */
 
 #include "qtrplanestrain.h"
+#include "fei2dtrquad.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"

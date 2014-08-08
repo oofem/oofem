@@ -36,7 +36,6 @@
 #define qtrplstr_h
 
 #include "nlstructuralelement.h"
-#include "fei2dtrquad.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
@@ -46,6 +45,8 @@
 #define _IFT_QTrPlaneStress2d_Name "qtrplstr"
 
 namespace oofem {
+class FEI2dTrQuad;
+
 /**
  * This class implements a quadratic triangular 6-node plane-
  * stress elasticity finite element. Each node has 2 degrees of freedom.
@@ -69,7 +70,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 

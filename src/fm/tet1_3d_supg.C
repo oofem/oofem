@@ -33,6 +33,7 @@
  */
 
 #include "tet1_3d_supg.h"
+#include "fei3dtetlin.h"
 #include "fluidmodel.h"
 #include "node.h"
 #include "material.h"

@@ -36,7 +36,6 @@
 #define tr1_2d_cbs_h
 
 #include "cbselement.h"
-#include "fei2dtrlin.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
@@ -62,6 +61,7 @@ class GaussPoint;
 class FloatMatrix;
 class FloatArray;
 class IntArray;
+class FEI2dTrLin;
 
 /**
  * This class is the implementation of triangular CFD element with linear (and equal order) interpolation of velocity and pressure fields.
@@ -84,7 +84,7 @@ public:
     TR1_2D_CBS(int n, Domain * aDomain);
     virtual ~TR1_2D_CBS();
 
-    virtual FEInterpolation *giveInterpolation() const { return & interp; }
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual void computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *);
     virtual void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *);

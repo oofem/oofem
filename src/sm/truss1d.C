@@ -33,6 +33,7 @@
  */
 
 #include "truss1d.h"
+#include "fei1dlin.h"
 #include "node.h"
 #include "material.h"
 #include "structuralcrosssection.h"
@@ -42,7 +43,6 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
-#include "fei1dlin.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -76,6 +76,8 @@ void Truss1d :: computeGaussPoints()
     }
 }
 
+FEInterpolation *
+Truss1d :: giveInterpolation() const { return & interp; }
 
 void
 Truss1d :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
@@ -194,6 +196,12 @@ Truss1d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refi
                                        sMode, tStep, nodes, corner, midNode,
                                        localNodeId, localElemId, localBcId,
                                        controlNode, controlDof, aMode, "Truss1d");
+}
+
+
+void Truss1d :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 

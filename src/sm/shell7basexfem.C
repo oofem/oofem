@@ -34,6 +34,7 @@
 
 #include "shell7basexfem.h"
 #include "shell7base.h"
+#include "feinterpol3d.h"
 #include "xfem/enrichmentitem.h"
 #include "xfem/xfemmanager.h"
 #include "dofmanager.h"
@@ -42,7 +43,7 @@
 #include "connectivitytable.h"
 #include "bilinearczmaterialFagerstrom.h"
 #include "mathfem.h"
-#include "engngm.h"
+#include "gausspoint.h"
 
 namespace oofem {
 Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain), XfemElementInterface(this)

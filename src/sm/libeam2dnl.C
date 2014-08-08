@@ -535,6 +535,13 @@ LIBeam2dNL ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     return 0.5 * this->computeLength() * weight;
 }
 
+
+void
+LIBeam2dNL :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+{
+    computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
+}
+
 int
 LIBeam2dNL :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 {

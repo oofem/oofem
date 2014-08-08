@@ -36,9 +36,9 @@
 #define PRESCRIBEDGRADIENTBCWEAK_H_
 
 #include "prescribedgradientbc.h"
-
 #include "geometry.h"
-#include "gausspoint.h"
+
+#include <unordered_map>
 
 #define _IFT_PrescribedGradientBCWeak_Name   "prescribedgradientbcweak"
 #define _IFT_PrescribedGradientBCWeak_TractionInterpOrder   "tractioninterporder"
@@ -48,14 +48,18 @@
 #define _IFT_PrescribedGradientBCWeak_TangDistPadding   "tangdistpadding"
 
 namespace oofem {
+class IntegrationRule;
+class Node;
+class GaussPoint;
 
-class TractionElement {
+class TractionElement
+{
 public:
     TractionElement() {}
     virtual ~TractionElement() {}
 
-    void computeN_Constant(FloatArray &oN, const double &iXi) const {oN = FloatArray{1.0};}
-    void computeN_Linear(FloatArray &oN, const double &iXi) const {oN = {0.5*(1.0-iXi), 0.5*(1.0+iXi)};}
+    void computeN_Constant(FloatArray &oN, const double &iXi) const { oN = FloatArray{1.0}; }
+    void computeN_Linear(FloatArray &oN, const double &iXi) const { oN = {0.5*(1.0-iXi), 0.5*(1.0+iXi)}; }
 
     std::vector<int> mTractionNodeInd;
 
@@ -66,15 +70,16 @@ public:
     FloatArray mEndCoord;
 };
 
-class IntegrationRule;
-/*
+
+/**
  * Imposes a prescribed gradient weakly on the boundary
  * with an independent traction discretization.
  *
  * @author Erik Svenning
  * @date April 17, 2014
  */
-class PrescribedGradientBCWeak : public PrescribedGradientBC {
+class PrescribedGradientBCWeak : public PrescribedGradientBC
+{
 public:
     PrescribedGradientBCWeak(int n, Domain * d);
     virtual ~PrescribedGradientBCWeak();

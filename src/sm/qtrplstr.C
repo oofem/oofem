@@ -33,6 +33,7 @@
  */
 
 #include "qtrplstr.h"
+#include "fei2dtrquad.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"
@@ -61,6 +62,9 @@ QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :
     numberOfDofMans  = 6;
     numberOfGaussPoints = 4;
 }
+
+
+FEInterpolation *QTrPlaneStress2d :: giveInterpolation() const { return & interpolation; }
 
 
 Interface *

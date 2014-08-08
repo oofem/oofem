@@ -41,13 +41,14 @@
 #include "nlstructuralelement.h"
 #include "vtkxmlexportmodule.h"
 #include "zznodalrecoverymodel.h"
-#include "fei3dwedgequad.h"
 #include "fracturemanager.h"
 
 #include <vector>
 
 namespace oofem {
 class BoundaryLoad;
+class FEI3dWedgeQuad;
+class FEInterpolation3d;
 
 /**
  * This class represent a 7 parameter shell element.

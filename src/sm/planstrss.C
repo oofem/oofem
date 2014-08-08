@@ -33,6 +33,7 @@
  */
 
 #include "planstrss.h"
+#include "fei2dquadlin.h"
 #include "node.h"
 #include "crosssection.h"
 #include "gausspoint.h"
@@ -73,6 +74,8 @@ PlaneStress2d :: PlaneStress2d(int n, Domain *aDomain) :
 PlaneStress2d :: ~PlaneStress2d()
 // Destructor
 { }
+
+FEInterpolation *PlaneStress2d :: giveInterpolation() const { return & interpolation; }
 
 void
 PlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
@@ -493,6 +496,11 @@ PlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
                                        sMode, tStep, nodes, corner, midSide, midNode,
                                        localNodeId, localElemId, localBcId,
                                        controlNode, controlDof, aMode, "PlaneStress2d");
+}
+
+void PlaneStress2d :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 

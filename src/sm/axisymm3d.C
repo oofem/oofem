@@ -33,6 +33,7 @@
  */
 
 #include "axisymm3d.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -69,6 +70,11 @@ Axisymm3d :: Axisymm3d(int n, Domain *aDomain) :
 Axisymm3d :: ~Axisymm3d()
 // destructor
 { }
+
+
+FEInterpolation *
+Axisymm3d :: giveInterpolation() const { return & interpolation; }
+
 
 Interface *
 Axisymm3d :: giveInterface(InterfaceType interface)

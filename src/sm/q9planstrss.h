@@ -36,13 +36,13 @@
 #define Q9PLANSTRSS_H_
 
 #include "nlstructuralelement.h"
-#include "fei2dquadbiquad.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 
 #define _IFT_Q9PlaneStress2d_Name "q9planestress2d"
 
 namespace oofem {
+class FEI2dQuadBiQuad;
 
 /**
  * 9-node plane stress element.
@@ -68,7 +68,7 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Q9PlaneStress2d_Name; }
     virtual const char *giveClassName() const { return "Q9PlaneStress2d"; }
-    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const;
     virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
     virtual int testElementExtension(ElementExtension ext) { return ( ext == Element_EdgeLoadSupport ); }

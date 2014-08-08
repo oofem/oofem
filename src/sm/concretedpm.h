@@ -36,7 +36,6 @@
 #define ConcreteDPM_h
 
 #include "structuralmaterial.h"
-#include "gausspoint.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "cltypes.h"
@@ -44,6 +43,7 @@
 #include "strainvector.h"
 #include "stressvector.h"
 #include "isolinearelasticmaterial.h"
+#include "gausspoint.h"
 
 ///@name Input fields for ConcreteDPM
 //@{

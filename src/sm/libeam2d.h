@@ -37,11 +37,12 @@
 
 #include "structuralelement.h"
 #include "layeredcrosssection.h"
-#include "fei2dlinelin.h"
 
 #define _IFT_LIBeam2d_Name "libeam2d"
 
 namespace oofem {
+class FEI2dLineLin;
+
 /**
  * A 2-dimensional Linear Isoparametric
  * Mindlin theory beam element, with reduced integration.
@@ -57,6 +58,8 @@ public:
 
     LIBeam2d(int n, Domain * aDomain);
     virtual ~LIBeam2d() { }
+
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep) { computeLumpedMassMatrix(answer, tStep); }
@@ -77,7 +80,6 @@ public:
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual double computeVolumeAround(GaussPoint *gp);
 
-    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LIBeam2d_Name; }
@@ -91,8 +93,7 @@ protected:
     virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *);
     virtual void giveEdgeDofMapping(IntArray &answer, int) const;
     virtual double computeEdgeVolumeAround(GaussPoint *, int);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-    { computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) ); }
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
     virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);

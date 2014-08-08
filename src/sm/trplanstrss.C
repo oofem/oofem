@@ -33,6 +33,7 @@
  */
 
 #include "trplanstrss.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "crosssection.h"
 #include "gausspoint.h"
@@ -65,6 +66,8 @@ TrPlaneStress2d :: TrPlaneStress2d(int n, Domain *aDomain) :
     area = -1;
     numberOfGaussPoints = 1;
 }
+
+FEInterpolation *TrPlaneStress2d :: giveInterpolation() const { return & interp; }
 
 Interface *
 TrPlaneStress2d :: giveInterface(InterfaceType interface)
@@ -511,6 +514,11 @@ TrPlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedEleme
                                        controlNode, controlDof, aMode, "PlaneStress2d");
 }
 
+
+void TrPlaneStress2d :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+}
 
 #ifdef __OOFEG
  #define TR_LENGHT_REDUCT 0.3333

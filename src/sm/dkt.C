@@ -33,6 +33,7 @@
  */
 
 #include "dkt.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
@@ -65,6 +66,10 @@ DKTPlate :: DKTPlate(int n, Domain *aDomain) :
     numberOfGaussPoints = 3;
     area = 0;
 }
+
+
+FEInterpolation *
+DKTPlate :: giveInterpolation() const { return & interp_lin; }
 
 
 FEInterpolation *

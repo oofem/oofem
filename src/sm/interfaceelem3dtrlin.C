@@ -34,6 +34,7 @@
 
 
 #include "interfaceelem3dtrlin.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "crosssection.h"
 #include "gausspoint.h"
