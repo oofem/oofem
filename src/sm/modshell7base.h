@@ -108,8 +108,10 @@ protected:
         EdgeInv,
     };
 
-    virtual const IntArray &giveOrdering(SolutionField fieldType) const = 0;
-
+    virtual const IntArray &giveOrderingDofTypes() const = 0;
+    virtual const IntArray &giveOrderingNodes() const = 0;
+    virtual const IntArray &giveOrderingEdgeNodes() const = 0;
+    
     std :: vector< FloatArray >initialNodeDirectors;
     FloatArray &giveInitialNodeDirector(int i) {
         return this->initialNodeDirectors [ i - 1 ];
@@ -127,7 +129,6 @@ protected:
 
     // Element specific methods
     virtual void computeGaussPoints() = 0;
-    virtual void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords) = 0;
     virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer) = 0;
     virtual double computeAreaAround(GaussPoint *gp, double xi) = 0;
     virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const = 0;
@@ -170,8 +171,6 @@ protected:
 
     // Stress and strain
     void computeFAt(FloatArray &lCoords, FloatMatrix &answer, FloatArray &genEps);
-
-    void computeStressResultantsAt(GaussPoint *gp, FloatArray &Svec, FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatArray &solVec);
     void computeStressMatrix(FloatMatrix &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *stepN);
 
     virtual void computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, TimeStep *stepN);
@@ -216,7 +215,6 @@ protected:
     void computeVectorOfDofIDs(const IntArray &dofIdArray, ValueModeType u, TimeStep *stepN, FloatArray &answer);
     void temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, ValueModeType u, TimeStep *stepN, FloatArray &answer);
 
-    void computeGeneralizedStrainVectorNew(FloatArray &answer, const FloatArray &solVec, const FloatMatrix &Bconst);
     virtual void edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge, TimeStep *tStep);
 
     void setupInitialSolutionVector();
@@ -268,17 +266,11 @@ protected:
     };
     virtual void edgeComputeBmatrixAt(FloatArray &lCoords, FloatMatrix &answer, int li = 1, int ui = ALL_STRAINS);
 
-    // Misc
-    void computeTripleProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c);
-    void giveTensorForm(const FloatMatrix &matrix, FloatArray &tensor);
-    void compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer);
-
     FloatArray convV6ToV9Stress(const FloatArray &V6);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     void computeInterLaminarStressesAt(int interfaceNum, TimeStep *tStep, std::vector < FloatArray > &interLamStresses);
     virtual void evaluateFailureCriteriaQuantities(FailureCriteriaStatus *fc, TimeStep *tStep);
-    double computeArea();
     int giveSymVoigtIndex(int ind1, int ind2);
     int giveVoigtIndex(int ind1, int ind2);
     std::vector< std::vector<int> > voigtIndices;

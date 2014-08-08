@@ -81,7 +81,10 @@ ModShell7Base :: postInitialize()
 {
     
     this->layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection()  );
-    this->fei       = dynamic_cast< FEInterpolation3d   * >( this->giveInterpolation() );
+    if ( this->layeredCS == NULL ) {
+        OOFEM_ERROR("Shell7Base derived elements only supports layered cross section");
+    }
+    this->fei = dynamic_cast< FEInterpolation3d   * >( this->giveInterpolation() );
     this->setupInitialNodeDirectors();
     this->setupInitialSolutionVector();
     this->setupInitialEdgeSolutionVector();
@@ -277,24 +280,16 @@ ModShell7Base :: edgeEvalInitialDirectorAt(FloatArray &lcoords, FloatArray &answ
 void
 ModShell7Base :: setupInitialNodeDirectors()
 {   
-    /* If the directors are not present in the input file, then they should be approximated as
-     * normal to the initial surface. (No support in the input file at the moment.)
-     */
     // Compute directors as normals to the surface
-    //@todo average field for smooth geometry
-    FloatArray M(3), G1(3), G2(3), lcoords(2), nodeLocalXiCoords, nodeLocalEtaCoords;
-
-    // Give the local coordinates for the element nodes - all at once
-    this->giveLocalNodeCoords(nodeLocalXiCoords, nodeLocalEtaCoords);
+    FloatArray M(3), G1(3), G2(3), lcoords(2);
+    FloatMatrix localNodeCoords;
+    this->giveInterpolation()->giveLocalNodeCoords(localNodeCoords);
+    
     int nDofMan = this->giveNumberOfDofManagers();
     this->initialNodeDirectors.resize(nDofMan);
     FloatMatrix dNdxi;
     for ( int node = 1; node <= nDofMan; node++ ) {
-        this->initialNodeDirectors [ node - 1 ].resize(3);
-        this->initialNodeDirectors [ node - 1 ].zero();
-        lcoords.at(1) = nodeLocalXiCoords.at(node);
-        lcoords.at(2) = nodeLocalEtaCoords.at(node);
-        
+        lcoords.beColumnOf(localNodeCoords,node);      
         this->fei->evaldNdxi( dNdxi, lcoords, FEIElementGeometryWrapper(this) );
 
         G1.zero();
@@ -308,7 +303,7 @@ ModShell7Base :: setupInitialNodeDirectors()
 
         M.beVectorProductOf(G1, G2);
         M.normalize();
-        this->initialNodeDirectors [ node - 1 ].add(M);
+        this->initialNodeDirectors [ node - 1 ] = M;
     }
 }
 
@@ -477,7 +472,7 @@ void
 ModShell7Base :: computeLambdaNMatrix(FloatMatrix &lambda, FloatArray &genEps, double zeta)
 {
     // computes the lambda^n matrix associated with the variation and linearization of the position vector x.
-    // \delta x = lambda * \delta \hat{x} with \hat{x} = [\delta \bar{x}, \delta m, \delta \gamma]
+    // \delta x = lambda * \delta \hat{x} with \hat{x} = [\bar{x}, m, \gamma]
 
     FloatArray m(3);
     m = { genEps.at(13), genEps.at(14), genEps.at(15) };
@@ -520,8 +515,7 @@ ModShell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVe
             lCoords = *gp->giveNaturalCoordinates();
 
             this->computeBmatrixAt(lCoords, B);
-            this->computeGeneralizedStrainVectorNew(genEps , solVec , B);
-
+	    genEps.beProductOf(B, solVec);
             // Material stiffness
             ModShell7Base :: computeLinearizedStiffness(gp, mat, tStep, A, genEps);
 
@@ -547,8 +541,7 @@ ModShell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVe
     }
     tempAnswer.symmetrized();
     
- 
-    const IntArray &ordering = this->giveOrdering(All);
+    const IntArray &ordering = this->giveOrderingDofTypes();
     answer.assemble(tempAnswer, ordering, ordering);
 
 }
@@ -606,7 +599,7 @@ ModShell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, c
     IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];   // rule #2 for surface integration
     ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( load );
     
-    FloatMatrix N, B, NLB, L(7, 18), gcov, W1, W2;
+    FloatMatrix N, B, LB, NLB, L(7, 18), gcov, W1, W2;
     FloatArray lcoords(3), solVec, pressure;
     FloatArray g1, g2, genEps;
     FloatMatrix lambdaG [ 3 ], lambdaN;
@@ -645,9 +638,9 @@ ModShell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, c
         L.beTProductOf(lambdaN, W2L);
         L.times( -pressure.at(1) );
 
-
         // Tangent matrix (K = N^T*L*B*dA)
-        this->computeTripleProduct(NLB, N, L, B);
+	LB.beProductOf(L,B);
+	NLB.beTProductOf(N,LB);
         double dA = this->computeAreaAround(ip, xi);
         answer.add(dA, NLB);
     }
@@ -716,7 +709,8 @@ ModShell7Base :: computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, T
     lCoords = *gp->giveNaturalCoordinates();
     this->computeBmatrixAt(lCoords, B);
     FloatArray genEps;
-    this->computeGeneralizedStrainVectorNew(genEps, solVec, B);
+
+    genEps.beProductOf(B, solVec);
     FloatMatrix F;
     this->computeFAt(lCoords, F, genEps);   
 
@@ -731,22 +725,6 @@ ModShell7Base :: computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, T
     answer.beSymVectorForm(sigma);
 }
 
-
-void
-ModShell7Base :: computeStressResultantsAt(GaussPoint *gp, FloatArray &Svec, FloatArray &S1g, FloatArray &S2g, FloatArray &S3g, FloatArray &genEps)
-{
-    // Computes the stress resultants in the covariant system Sig =S(i,j)*g_j
-    FloatMatrix gcov; 
-    FloatArray lCoords = *gp->giveNaturalCoordinates();
-    this->evalCovarBaseVectorsAt(lCoords, gcov, genEps);
-    FloatMatrix S, Sig;
-    S.beMatrixFormOfStress(Svec);
-    Sig.beProductTOf(gcov,S);       // Stress resultants stored in each column
-    S1g.beColumnOf(Sig,1);
-    S2g.beColumnOf(Sig,2);
-    S3g.beColumnOf(Sig,3);
-    
-}
 
 int 
 ModShell7Base :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
@@ -791,7 +769,7 @@ ModShell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, Flo
     int ndofs = ModShell7Base :: giveNumberOfDofs();
 
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();  
-    FloatArray f(ndofs), ftemp, sectionalForces;
+    FloatArray f(ndofs), ftemp, N;
     FloatArray genEps, lCoords;
     FloatMatrix B;
 
@@ -803,13 +781,12 @@ ModShell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, Flo
         for (GaussPoint *gp : *iRuleL) {
             lCoords = *gp->giveNaturalCoordinates();
             this->computeBmatrixAt(lCoords, B);
-            this->computeGeneralizedStrainVectorNew(genEps, solVec, B);
-
+	    genEps.beProductOf(B, solVec);
+	    
             double zeta = giveGlobalZcoord(lCoords);
-            this->computeSectionalForcesAt(sectionalForces, gp, mat, tStep, genEps, zeta); // these are per unit volume
-
+            this->computeSectionalForcesAt(N, gp, mat, tStep, genEps, zeta); // these are per unit volume
             
-            ftemp.beTProductOf(B,sectionalForces);
+            ftemp.beTProductOf(B,N);
             double dV = this->computeVolumeAroundLayer(gp, layer);
             f.add(dV, ftemp);
         }
@@ -817,8 +794,8 @@ ModShell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, Flo
 
     answer.resize( ndofs );
     answer.zero();
-    const IntArray &ordering_all = this->giveOrdering(All);
-    answer.assemble(f, ordering_all);
+    const IntArray &ordering = this->giveOrderingDofTypes();
+    answer.assemble(f, ordering);
 }
 
 
@@ -878,8 +855,7 @@ ModShell7Base :: computeThicknessMappingCoeff(GaussPoint *gp, FloatArray &answer
 
     FloatArray initSolVec, genEps;
     initSolVec = this->giveInitialSolutionVector();
-
-    this->computeGeneralizedStrainVectorNew(genEps, initSolVec, B);
+    genEps.beProductOf(B, initSolVec);
     this->giveGeneralizedStrainComponents(genEps, dX1, dX2, dM1, dM2, M, dg1, dg2, gam);
 
 
@@ -966,8 +942,8 @@ ModShell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     int ndofs = this->computeNumberOfDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
-    const IntArray &ordering_all = this->giveOrdering(All);
-    answer.assemble(temp, ordering_all);
+    const IntArray &ordering = this->giveOrderingDofTypes();    
+    answer.assemble(temp, ordering);
     answer.symmetrized();
 
 
@@ -1048,9 +1024,9 @@ ModShell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
             M.plusProductSymmUpper(N, temp, rho*dV);
         }
         M.symmetrized();
-        const IntArray &ordering_all = this->giveOrdering(All);
+	const IntArray &ordering = this->giveOrderingDofTypes();	
         answer.zero();
-        answer.assemble(M, ordering_all, ordering_all);
+        answer.assemble(M, ordering, ordering);
 #endif
 
     }
@@ -1123,18 +1099,6 @@ ModShell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
         answer.add(fM);
     }
 }
-
-
-void
-ModShell7Base :: computeTripleProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c)
-{
-    // Computes the product a^T*b*c
-    // @todo room for optimization + add scalar product for integration
-    FloatMatrix temp;
-    temp.beTProductOf(a, b);
-    answer.beProductOf(temp, c);
-}
-
 
 
 // External forces
@@ -1210,7 +1174,7 @@ ModShell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, con
 
         Fp.beTProductOf(N, fp);
         Fp.times(dA);
-        answer.assemble(Fp, this->giveOrdering(All));
+        answer.assemble(Fp, this->giveOrderingDofTypes());
         
     }
 }
@@ -1562,7 +1526,8 @@ ModShell7Base :: giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep)
     IntArray dofIdArray;
     ModShell7Base::giveDofManDofIDMask(dummy, dofIdArray);
     Element :: computeVectorOf(dofIdArray, VM_Total, tStep, temp, true);
-    answer.assemble( temp, this->giveOrdering(AllInv) );
+    //answer.assemble( temp, this->giveOrdering(AllInv) );
+    answer.assemble( temp, this->giveOrderingNodes() );
 }
 
 
@@ -1600,13 +1565,14 @@ ModShell7Base :: edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iEd
     IntArray dofIdArray;
     ModShell7Base :: giveDofManDofIDMask(dummy, dofIdArray);
     this->temp_computeBoundaryVectorOf(dofIdArray, iEdge, VM_Total, tStep, temp);
-    answer.assemble( temp, this->giveOrdering(EdgeInv) );
+    //answer.assemble( temp, this->giveOrdering(EdgeInv) );
+    answer.assemble( temp, this->giveOrderingEdgeNodes());
 }
 
 void
 ModShell7Base :: setupInitialEdgeSolutionVector()
 {
-    //int numEdges = this->giveNumberOfBoundarySides();
+    //int numEdges = this->giveNumberOfBoundarySides();///TODO fix
     int numEdges = 3;
     this->initialEdgeSolutionVectors.resize( numEdges );
     for ( int iEdge = 1; iEdge <= numEdges; iEdge++ ) {
@@ -1630,30 +1596,6 @@ ModShell7Base :: setupInitialEdgeSolutionVector()
     }
 }
 
-#if 0
-void
-ModShell7Base :: edgeGiveInitialSolutionVector(FloatArray &answer, const int iedge)
-{
-    OOFEM_WARNING("edgeGiveInitialSolutionVector(FloatArray &answer, const int iedge) -> giveEdgeInitialSolutionVector(int iedge) ");
-    answer.resize( this->giveNumberOfEdgeDofs() );
-    answer.zero();
-    IntArray edgeNodes;
-    this->fei->computeLocalEdgeMapping(edgeNodes, iedge);
-    int ndofs_x = 3 * edgeNodes.giveSize();
-    for ( int i = 1, j = 0; i <= edgeNodes.giveSize(); i++, j += 3 ) {
-        FloatArray *Xi = this->giveNode( edgeNodes.at(i) )->giveCoordinates();
-        FloatArray Mi  = this->giveInitialNodeDirector( edgeNodes.at(i) );
-        answer.at(1 + j) = Xi->at(1);
-        answer.at(2 + j) = Xi->at(2);
-        answer.at(3 + j) = Xi->at(3);
-        answer.at(ndofs_x + 1 + j) = Mi.at(1);
-        answer.at(ndofs_x + 2 + j) = Mi.at(2);
-        answer.at(ndofs_x + 3 + j) = Mi.at(3);
-        // gam(t=0)=0 is assumed
-    }
-}
-#endif
-
 void
 ModShell7Base :: giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &dphidxi1, FloatArray &dphidxi2, FloatArray &dmdxi1,
                                               FloatArray &dmdxi2, FloatArray &m, double &dgamdxi1, double &dgamdxi2, double &gam) {
@@ -1666,21 +1608,6 @@ ModShell7Base :: giveGeneralizedStrainComponents(FloatArray genEps, FloatArray &
     dgamdxi1 = genEps.at(16);
     dgamdxi2 = genEps.at(17);
          gam = genEps.at(18);
-}
-
-
-void
-ModShell7Base :: computeGeneralizedStrainVectorNew(FloatArray &answer, const FloatArray &solVec, const FloatMatrix &B) 
-{
-    // Returns an array genEps = [dxdxi, dmdxi, m, dgamdxi, gam]^T with size 18
-    /*    18   18   6
-     * 6 [B_u   0   0
-     * 6   0   B_w  0
-     * 3   0   N_w  0
-     * 2   0    0  B_gam
-     * 1   0    0  N_gam]
-     */
-    answer.beProductOf(B, solVec);
 }
 
 
@@ -1700,8 +1627,6 @@ ModShell7Base :: giveUnknownsAt(FloatArray &lCoords, FloatArray &solVec, FloatAr
 
 
 #endif
-
-
 
 
 // N and B matrices
@@ -2188,19 +2113,9 @@ ModShell7Base :: computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &
     std::vector<FloatArray> nodes;
     giveFictiousNodeCoordsForExport(nodes, layer);
 
-    //int VTKWedge2EL [] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
-    //FloatArray *coords[numNodes];
-
-
-    //for ( int i = 1; i <= numNodes; i++ ) {
-    //    int pos = VTKWedge2EL[ i-1 ];
-    //    coords[ i - 1 ] = &nodes[ pos - 1];  
-    //}
-    
     FEInterpolation *interpol = static_cast< FEInterpolation * >( &this->interpolationForExport );
     FloatMatrix dNdx;
-    //interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper( (const FloatArray **)coords ) ); ///@ todo fix JB 29/07/14
-    interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper( nodes ) ); ///@ todo fix JB 29/07/14
+    interpol->evaldNdx( dNdx, lcoords, FEIVertexListGeometryWrapper( nodes ) ); 
     
     /*    
      * 1 [d/dx  0   d/dy
@@ -2361,16 +2276,6 @@ ModShell7Base :: evaluateFailureCriteriaQuantities(FailureCriteriaStatus *fc, Ti
 
     //};
 }
-
-
-double
-ModShell7Base :: computeArea()
-{
-    ///@todo Why is this here?? JB
-    FEI3dTrQuad *test = dynamic_cast< FEI3dTrQuad * >( this->giveInterpolation() );
-    return test->giveArea(FEIElementGeometryWrapper(this));
-}
-
 
 int
 ModShell7Base::giveSymVoigtIndex(int ind1, int ind2)
