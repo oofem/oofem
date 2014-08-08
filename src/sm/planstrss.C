@@ -46,7 +46,6 @@
 #include "structuralms.h"
 #include "strainvector.h"
 #include "classfactory.h"
-#include "engngm.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

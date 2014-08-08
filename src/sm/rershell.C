@@ -42,7 +42,6 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "domain.h"
-#include "engngm.h"
 #include "load.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"

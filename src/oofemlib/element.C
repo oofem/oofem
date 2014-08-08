@@ -59,7 +59,6 @@
 #include "dynamicinputrecord.h"
 #include "matstatmapperint.h"
 #include "cltypes.h"
-#include "engngm.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -687,7 +686,7 @@ Element :: giveInputRecord(DynamicInputRecord &input)
 
 
 #ifdef __PARALLEL_MODE
-    if ( this->giveDomain()->giveEngngModel()->isParallel() && partitions.giveSize() > 0 ) {
+    if ( partitions.giveSize() > 0 ) {
         input.setField(this->partitions, _IFT_Element_partitions);
         if ( this->parallel_mode == Element_remote ) {
             input.setField(_IFT_Element_remote);

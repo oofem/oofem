@@ -45,7 +45,6 @@
 #include "intarray.h"
 #include "domain.h"
 #include "verbose.h"
-#include "engngm.h"
 #include "load.h"
 #include "mathfem.h"
 #include "classfactory.h"

@@ -38,7 +38,6 @@
 #include "domain.h"
 #include "node.h"
 #include "element.h"
-#include "engngm.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "matresponsemode.h"
