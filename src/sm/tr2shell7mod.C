@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "tr2shell7.h"
+#include "tr2shell7mod.h"
 #include "node.h"
 #include "load.h"
 #include "structuralms.h"
@@ -46,26 +46,26 @@
 #include "classfactory.h"
 
 namespace oofem {
-REGISTER_Element(Tr2Shell7);
+REGISTER_Element(Tr2Shell7Mod);
 
-FEI3dTrQuad Tr2Shell7 :: interpolation;
+FEI3dTrQuad Tr2Shell7Mod :: interpolation;
 
-IntArray Tr2Shell7 :: ordering_all = {1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30, 31, 36, 37, 38,
+IntArray Tr2Shell7Mod :: ordering_all = {1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30, 31, 36, 37, 38,
                         4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 32, 33, 34, 39, 40, 41,
                         7, 14, 21, 28, 35, 42};
-IntArray Tr2Shell7 :: ordering_gr = {1, 2, 3, 19, 20, 21, 37, 4, 5, 6, 22, 23, 24, 38, 7, 8, 9, 25, 26, 27, 39,
+IntArray Tr2Shell7Mod :: ordering_gr = {1, 2, 3, 19, 20, 21, 37, 4, 5, 6, 22, 23, 24, 38, 7, 8, 9, 25, 26, 27, 39,
                        10, 11, 12, 28, 29, 30, 40, 13, 14, 15, 31, 32, 33, 41, 16, 17, 18,
                        34, 35, 36, 42};
-IntArray Tr2Shell7 :: ordering_gr_edge = {1, 2, 3, 10, 11, 12, 19, 4, 5, 6, 13, 14, 15, 20, 7, 8, 9, 16, 17, 18, 21};
+IntArray Tr2Shell7Mod :: ordering_gr_edge = {1, 2, 3, 10, 11, 12, 19, 4, 5, 6, 13, 14, 15, 20, 7, 8, 9, 16, 17, 18, 21};
 
 
-Tr2Shell7 :: Tr2Shell7(int n, Domain *aDomain) : Shell7Base(n, aDomain)
+Tr2Shell7Mod :: Tr2Shell7Mod(int n, Domain *aDomain) : ModShell7Base(n, aDomain)
 {
     this->numberOfDofMans = 6;
 }
 
 const IntArray &
-Tr2Shell7 :: giveOrdering(SolutionField fieldType) const
+Tr2Shell7Mod :: giveOrdering(SolutionField fieldType) const
 {
     if ( fieldType == All ) {
         return this->ordering_all;
@@ -78,19 +78,19 @@ Tr2Shell7 :: giveOrdering(SolutionField fieldType) const
 
 
 void
-Tr2Shell7 :: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords)
+Tr2Shell7Mod :: giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords)
 {
     nodeLocalXiCoords = {1., 0., 0., .5, 0., .5};      // corner nodes then midnodes, uncertain of node numbering
     nodeLocalEtaCoords = {0., 1., 0., .5, .5, 0.};
 }
 
 
-FEInterpolation *Tr2Shell7 :: giveInterpolation() const { return & interpolation; }
+FEInterpolation *Tr2Shell7Mod :: giveInterpolation() const { return & interpolation; }
 
 
 
 void
-Tr2Shell7 :: computeGaussPoints()
+Tr2Shell7Mod :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         int nPointsTri  = 6;   // points in the plane
@@ -111,9 +111,9 @@ Tr2Shell7 :: computeGaussPoints()
 
         // Layered cross section for bulk integration
         //@todo - must use a cast here since check consistency has not been called yet
-        LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( Tr2Shell7 :: giveCrossSection() );
+        LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( Tr2Shell7Mod :: giveCrossSection() );
         if ( layeredCS == NULL ) {
-            OOFEM_ERROR("Tr2Shell7 only supports layered cross section");
+            OOFEM_ERROR("Tr2Shell7Mod only supports layered cross section");
         }
         this->numberOfGaussPoints = layeredCS->giveNumberOfLayers() * nPointsTri * layeredCS->giveNumIntegrationPointsInLayer();
         layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
@@ -129,7 +129,7 @@ Tr2Shell7 :: computeGaussPoints()
 
 
 void
-Tr2Shell7 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
+Tr2Shell7Mod :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
@@ -152,7 +152,7 @@ Tr2Shell7 :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 void
-Tr2Shell7 :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
+Tr2Shell7Mod :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 {
     answer.resize(42);
     for ( int i = 1; i <= 42; i++ ) {
@@ -162,7 +162,7 @@ Tr2Shell7 :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
 
 
 double
-Tr2Shell7 :: computeAreaAround(GaussPoint *gp, double xi)
+Tr2Shell7Mod :: computeAreaAround(GaussPoint *gp, double xi)
 {
     FloatArray G1, G2, temp;
     FloatMatrix Gcov;
@@ -181,7 +181,7 @@ Tr2Shell7 :: computeAreaAround(GaussPoint *gp, double xi)
 
 
 double
-Tr2Shell7 :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
+Tr2Shell7Mod :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
 {
     double detJ;
     FloatMatrix Gcov;
@@ -194,7 +194,7 @@ Tr2Shell7 :: computeVolumeAroundLayer(GaussPoint *gp, int layer)
 
 
 void
-Tr2Shell7 :: compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer)
+Tr2Shell7Mod :: compareMatrices(const FloatMatrix &matrix1, const FloatMatrix &matrix2, FloatMatrix &answer)
 {
     int ndofs = 42;
     answer.resize(ndofs, ndofs);

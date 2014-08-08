@@ -1,4 +1,4 @@
-7/*
+/*
  *
  *                 #####    #####   ######  ######  ###   ###
  *               ##   ##  ##   ##  ##      ##      ## ### ##
@@ -32,17 +32,17 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef Tr2Shell7_h
-#define Tr2Shell7_h
+#ifndef Tr2Shell7Mod_h
+#define Tr2Shell7Mod_h
 
 #include "eleminterpmapperinterface.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "layeredcrosssection.h"
 #include "nlstructuralelement.h"
-#include "shell7base.h"
+#include "modshell7base.h"
 //#include "vtkxmlexportmodule.h"
 
-#define _IFT_Tr2Shell7_Name "tr2shell7"
+#define _IFT_Tr2Shell7Mod_Name "modtr2shell7"
 
 namespace oofem {
 class FEI3dTrQuad;
@@ -56,7 +56,7 @@ class BoundaryLoad;
  * @date 2012-11-01
  */
 
-class Tr2Shell7 : public Shell7Base
+class Tr2Shell7Mod : public ModShell7Base
 {
 protected:
     static FEI3dTrQuad interpolation;
@@ -83,14 +83,14 @@ protected:
 
 
 public:
-    Tr2Shell7(int n, Domain * d);        // constructor
-    virtual ~Tr2Shell7() { }            // destructor -> declaring as virtual will make each subclass call their respective destr.
+    Tr2Shell7Mod(int n, Domain * d);        // constructor
+    virtual ~Tr2Shell7Mod() { }            // destructor -> declaring as virtual will make each subclass call their respective destr.
     // definition & identification
     virtual int giveNumberOfDofs() { return 42; }
     virtual int giveNumberOfEdgeDofs() { return 21; }
     virtual int giveNumberOfEdgeDofManagers() { return 3;  }
-    virtual const char *giveInputRecordName() const { return _IFT_Tr2Shell7_Name; }
-    virtual const char *giveClassName() const { return "Tr2Shell7"; }
+    virtual const char *giveInputRecordName() const { return _IFT_Tr2Shell7Mod_Name; }
+    virtual const char *giveClassName() const { return "Tr2Shell7Mod"; }
     //virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; }     // write new wedge-like type 'layeredWedge'

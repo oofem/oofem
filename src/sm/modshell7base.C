@@ -83,6 +83,8 @@ ModShell7Base :: postInitialize()
     this->layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveCrossSection()  );
     this->fei       = dynamic_cast< FEInterpolation3d   * >( this->giveInterpolation() );
     this->setupInitialNodeDirectors();
+    this->setupInitialSolutionVector();
+    this->setupInitialEdgeSolutionVector();
     Element :: postInitialize();
 }
 
@@ -524,7 +526,8 @@ ModShell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &s
 
             double zeta = giveGlobalZcoord(*gp->giveNaturalCoordinates());
             this->computeLambdaGMatrices(lambda, genEps, zeta);
-            // L = sum_{i,j} (lambdaI_i)^T * A^ij * lambdaJ_j
+#if 1
+	    // L = sum_{i,j} (lambdaI_i)^T * A^ij * lambdaJ_j
             // @todo Naive implementation - should be optimized 
             // note: L will only be symmetric if lambdaI = lambdaJ
             L.zero();
@@ -534,25 +537,32 @@ ModShell7Base :: new_computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &s
                     L.add(temp);
                 }
             }
+
+            double dV = this->computeVolumeAroundLayer(gp, layer);
+            this->computeTripleProduct(K, B, L, B);
+            //double dV = this->computeVolumeAroundLayer(gp, layer);
+            tempAnswer.add(dV, K);
+	}
+    }
+#else
             for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
+                A_lambda[i].resize(3,18);
+		A_lambda[i].zero();
+		for (int j = 0; j < 3; j++) {
                     A_lambda[i].addProductOf(A[i][j], lambda[j]);
                 }
                 L.plusProductSymmUpper(lambda[i], A_lambda[i], 1.0);
             }
             L.symmetrized();
-
             LB.beProductOf(L, B);
             double dV = this->computeVolumeAroundLayer(gp, layer);
             tempAnswer.plusProductSymmUpper(B, LB, dV);
-            //this->computeTripleProduct(K, B, L, B);
-            //double dV = this->computeVolumeAroundLayer(gp, layer);
-            //tempAnswer.add(dV, K);
-
 
         }
     }
     tempAnswer.symmetrized();
+    
+#endif    
     const IntArray &ordering = this->giveOrdering(All);
     answer.assemble(tempAnswer, ordering, ordering);
 
@@ -562,9 +572,10 @@ void
 ModShell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *mat, TimeStep *tStep,
                                          FloatMatrix A [ 3 ] [ 3 ], FloatArray &genEps) 
 {
+#if 0
     FloatArray cartStressVector, contravarStressVector;
     FloatMatrix D, Dcart, S;
-
+    
     //A = L^iklj * (g_k x g_l) + S^ij*I
     mat->give3dMaterialStiffnessMatrix(Dcart, TangentStiffness, gp, tStep);     // L_ijkl - cartesian system (Voigt)
     this->transInitialCartesianToInitialContravar(gp, Dcart, D);      // L^ijkl - curvilinear system (Voigt)
@@ -696,17 +707,23 @@ ModShell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *
     A [ 2 ] [ 1 ].beTranspositionOf( A [ 1 ] [ 2 ] );
     
 
-#if 1
+#else
+
+    FloatArray Pcart;
+    FloatArray lcoords = *gp->giveNaturalCoordinates();
+    FloatMatrix P, D;
+    this->computeStressVectorInMaterial(Pcart, genEps, gp, mat, tStep);
+    P.beMatrixFormOfStress(Pcart);
+
     // Material stiffness when internal work is formulated in terms of P and F:
     // \Delta(P*G^I) = L^IJ * \Delta g_J
     // A[I][J] = L^IJ = L_klmn * [G^I]_l * [G^J]_n
-    mat->give3dMaterialStiffnessMatrix(Dcart, TangentStiffness, gp, tStep);     // L_ijkl - cartesian system (Voigt)
-
+    //mat->give3dMaterialStiffnessMatrix(Dcart, TangentStiffness, gp, tStep);     // L_ijkl - cartesian system (Voigt)
+    mat->give3dMaterialStiffnessMatrix_dPdF(D, TangentStiffness, gp, tStep);
     FloatMatrix G;
     this->evalInitialContravarBaseVectorsAt(lcoords, G);
-
-    for (int I = 1; I < 3; I++) {
-        for (int J = 0; J < 3; J++) {
+    for (int I = 1; I <= 3; I++) {
+        for (int J = I; J <= 3; J++) {
             A[I - 1][J - 1].resize(3, 3);
             A[I - 1][J - 1].zero();
 
@@ -724,6 +741,15 @@ ModShell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *
         }
     }
 
+    // position 21
+    A [ 1 ] [ 0 ].beTranspositionOf( A [ 0 ] [ 1 ] );
+
+    // position 31
+    A [ 2 ] [ 0 ].beTranspositionOf( A [ 0 ] [ 2 ] );
+    
+    // position 32
+    A [ 2 ] [ 1 ].beTranspositionOf( A [ 1 ] [ 2 ] );
+        
 
 #endif
 
@@ -852,9 +878,15 @@ ModShell7Base :: computeStrainVectorF(FloatArray &answer, GaussPoint *gp, TimeSt
 void
 ModShell7Base :: computeStressMatrix(FloatArray &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *stepN)
 {
-    FloatArray vE;
-    this->computeStrainVectorF(vE, gp, stepN, genEps);     // Green-Lagrange strain vector in Voigt form
-    static_cast< StructuralMaterial * >( mat )->giveRealStressVector(answer, gp, vE, stepN);
+    //FloatArray vE;
+    //this->computeStrainVectorF(vE, gp, stepN, genEps);     // Green-Lagrange strain vector in Voigt form
+    //static_cast< StructuralMaterial * >( mat )->giveRealStressVector(answer, gp, vE, stepN);
+    FloatMatrix F;
+    FloatArray vF;
+    computeFAt(*gp->giveNaturalCoordinates(), F, genEps);
+    vF.beVectorForm(F);
+    static_cast< StructuralMaterial * >( mat )->giveFirstPKStressVector_3d(answer, gp, vF, stepN);
+  
 }
 
 
@@ -984,7 +1016,7 @@ ModShell7Base :: computeSectionalForcesAt(FloatArray &sectionalForces, Integrati
     FloatArray S1g(3), S2g(3), S3g(3);
     FloatArray cartStressVector, contravarStressVector;
     FloatMatrix lambda[3];
-
+#if 0
     this->computeStressVectorInMaterial(cartStressVector, genEpsC, ip, mat, tStep);
     this->transInitialCartesianToInitialContravar(ip, cartStressVector, contravarStressVector);
     this->computeStressResultantsAt(ip, contravarStressVector, S1g, S2g, S3g, genEpsC);
@@ -1001,17 +1033,17 @@ ModShell7Base :: computeSectionalForcesAt(FloatArray &sectionalForces, Integrati
     temp.beTProductOf(lambda [2], S3g);
     sectionalForces.add(temp);
 
-#if 1
+#else
     // New, in terms of PK1 stress
     // \Lambda_i * P * G^I
-    this->computeStressVectorInMaterial(cartStressVector, genEpsC, ip, mat, tStep);
-    this->computeStressResultantsAt(ip, cartStressVector, S1g, S2g, S3g, genEpsC);
+    FloatArray PVector, temp;
+    this->computeStressVectorInMaterial(PVector, genEpsC, ip, mat, tStep);
 
     FloatMatrix Gcon;
     FloatArray lCoords = *ip->giveNaturalCoordinates();
     this->evalInitialContravarBaseVectorsAt(lCoords, Gcon);
     FloatMatrix P, PG;
-    P.beMatrixFormOfStress(cartStressVector);
+    P.beMatrixFormOfStress(PVector);
     PG.beProductOf(P,Gcon);
     S1g.beColumnOf(PG, 1);
     S2g.beColumnOf(PG, 2);
@@ -2131,7 +2163,8 @@ ModShell7Base :: edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iEd
 void
 ModShell7Base :: setupInitialEdgeSolutionVector()
 {
-    int numEdges = this->giveNumberOfBoundarySides();
+    //int numEdges = this->giveNumberOfBoundarySides();
+    int numEdges = 3;
     this->initialEdgeSolutionVectors.resize( numEdges );
     for ( int iEdge = 1; iEdge <= numEdges; iEdge++ ) {
         FloatArray &solVec = this->initialEdgeSolutionVectors[iEdge-1];
@@ -2929,7 +2962,7 @@ ModShell7Base::giveVoigtIndex(int ind1, int ind2)
     voigtIndices[1] = { 9, 2, 4 };
     voigtIndices[2] = { 8, 7, 3 };
 
-    return voigtIndices[ind1][ind2];
+    return voigtIndices[ind1-1][ind2-1];
 
 };
 

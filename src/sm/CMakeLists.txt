@@ -54,7 +54,7 @@ set (sm_element
     trwarp.C
     #qplanstrssphf.C
     modshell7base.C
-    #tr2shell7mod.C
+    tr2shell7mod.C
     )
 
 set (sm_interface_elements
