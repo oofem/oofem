@@ -36,16 +36,12 @@
 #define emptycs_h
 
 #include "crosssection.h"
-#include "material.h"
-#include "gausspoint.h"
-#include "floatarray.h"
-#include "floatmatrix.h"
 
 #define _IFT_EmptyCS_Name "emptycs"
 
 namespace oofem {
 /**
- * Empty cross section model, passes all requests to material driver.
+ * Empty cross section model which doesn't have any material models.
  */
 class OOFEM_EXPORT EmptyCS : public CrossSection
 {
@@ -58,6 +54,12 @@ public:
     EmptyCS(int n, Domain * d);
     /// Destructor.
     virtual ~EmptyCS();
+
+#ifdef __PARALLEL_MODE
+    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip) { return 1; }
+    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip) { return 1; }
+    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip) { return 0; }
+#endif
 
     virtual const char *giveClassName() const { return "EmptyCS"; }
     virtual const char *giveInputRecordName() const { return _IFT_EmptyCS_Name; }
