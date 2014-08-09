@@ -701,6 +701,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
         if ( pos == this->end() ) {
             if ( padding ) {
                 answer.at(++k) = 0.;
+		continue;
             } else {
                 continue;
             }
@@ -730,6 +731,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
         if ( pos == this->end() ) {
             if ( padding ) {
                 answer.at(++k) = 0.;
+		continue;
             } else {
                 continue;
             }
