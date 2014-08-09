@@ -77,6 +77,7 @@ class CommunicationBuffer;
  * 
  * @author Mikael Öhman
  * @author Erik Svenning
+ * @author Jim Brouzoulis
  * @author many others (please add yourselves)
  */
 class OOFEM_EXPORT FloatArray
@@ -229,6 +230,11 @@ public:
      * Print receiver on stdout. Useful for debugging.
      */
     virtual void printYourself() const;
+    /**
+     * Print receiver on stdout with custom name.
+     * @param name Display name of reciever.
+     */    
+    virtual void printYourself(const std::string name) const;
     /**
      * Print receiver on stdout with high accuracy.
      */

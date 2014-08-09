@@ -1453,6 +1453,24 @@ void FloatMatrix :: printYourself() const
 }
 
 
+void FloatMatrix :: printYourself(const std::string name) const
+// Prints the receiver on screen.
+{
+    printf("%s (%d x %d): \n", name.c_str(), nRows, nColumns);
+    if ( nRows <= 250 && nColumns <= 250 ) {
+        for ( int i = 1; i <= nRows; ++i ) {
+            for ( int j = 1; j <= nColumns && j <= 100; ++j ) {
+                printf( "%10.3e  ", this->at(i, j) );
+            }
+
+            printf("\n");
+        }
+    } else {
+        printf("   large matrix : coefficients not printed \n");
+    }
+}
+
+
 void FloatMatrix :: pY() const
 // Prints the receiver on screen with higher accuracy than printYourself.
 {

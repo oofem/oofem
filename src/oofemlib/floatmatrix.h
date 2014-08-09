@@ -87,6 +87,10 @@ class CommunicationBuffer;
  *   previously allocated space.
  *   If further request for growing then is necessary memory reallocation.
  *   This process is controlled in resize member function.
+ * 
+ * @author Mikael Öhman
+ * @author Jim Brouzoulis 
+ * @author many others (please add yourselves) 
  */
 class OOFEM_EXPORT FloatMatrix
 {
@@ -519,6 +523,12 @@ public:
 
     /// Prints matrix to stdout. Useful for debugging.
     void printYourself() const;
+    /**
+     * Print receiver on stdout with custom name.
+     * @param name Display name of reciever.
+     */    
+    void printYourself(const std::string name) const;
+    
     /// Higher accuracy than printYourself.
     void pY() const;
 
