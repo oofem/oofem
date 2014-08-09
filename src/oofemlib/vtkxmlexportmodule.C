@@ -641,7 +641,7 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
 
     // Assemble local->global and global->local region map and get number of
     // single cells to process the composite cells exported individually.
-    this->initRegionNodeNumbering(mapG2L, mapL2G, numNodes, numRegionEl, d, region);
+    this->initRegionNodeNumbering(mapG2L, mapL2G, numNodes, numRegionEl, d, tStep, region);
 #ifndef __PARALLEL_MODE
     if ( numNodes && numRegionEl ) {
 #else
@@ -1295,7 +1295,7 @@ int
 VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
                                               IntArray &regionL2GNodalNumbers,
                                               int &regionDofMans, int &regionSingleCells,
-                                              Domain *domain, int reg)
+                                              Domain *domain, TimeStep *tStep, int reg)
 {
     // regionG2LNodalNumbers is array with mapping from global numbering to local region numbering.
     // The i-th value contains the corresponding local region number (or zero, if global numbar is not in region).
@@ -1324,7 +1324,7 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
             continue;                                    // composite cells exported individually
         }
 
-        if ( !element->isActivated( domain->giveEngngModel()->giveCurrentStep() ) ) {                  //skip inactivated elements
+        if ( !element->isActivated( tStep ) ) {                  //skip inactivated elements
             continue;
         }
 

@@ -38,7 +38,6 @@
 #include "floatmatrix.h"
 #include "gausspoint.h"
 #include "mathfem.h"
-#include "engngm.h"
 #include "timestep.h"
 #include "datastream.h"
 #include "contextioerr.h"
@@ -1215,7 +1214,7 @@ Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray &strainIncrement, TimeSte
                 dep = dez;
             }
         } else {
-            dt  = domain->giveEngngModel()->giveCurrentStep()->giveTimeIncrement();
+            dt = tStep->giveTimeIncrement();
             dep = this->give(stirr_EREF, gp) * exp( ovs / this->give(stirr_LAMBDA, gp) ) * dt;
         }
     }

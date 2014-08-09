@@ -316,7 +316,7 @@ protected:
      */
     int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
                                 int &regionDofMans, int &totalcells,
-                                Domain *domain, int reg);
+                                Domain *domain, TimeStep *tStep, int reg);
     /// Returns number of regions (aka regionSets)
     int giveNumberOfRegions();
     /// Returns element set
