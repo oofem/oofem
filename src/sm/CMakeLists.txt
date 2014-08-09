@@ -55,6 +55,8 @@ set (sm_element
     #qplanstrssphf.C
     modshell7base.C
     tr2shell7mod.C
+    shell7basexfemmod.C
+    tr2shell7xfemmod.C
     )
 
 set (sm_interface_elements

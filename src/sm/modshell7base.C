@@ -517,7 +517,7 @@ ModShell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVe
             this->computeBmatrixAt(lCoords, B);
 	    genEps.beProductOf(B, solVec);
             // Material stiffness
-            ModShell7Base :: computeLinearizedStiffness(gp, mat, tStep, A, genEps);
+            ModShell7Base :: computeLinearizedStiffness(gp, mat, tStep, A);
 
             double zeta = giveGlobalZcoord(lCoords);
             this->computeLambdaGMatrices(lambda, genEps, zeta);
@@ -547,8 +547,7 @@ ModShell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVe
 }
 
 void
-ModShell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *mat, TimeStep *tStep,
-                                         FloatMatrix A [ 3 ] [ 3 ], FloatArray &genEps) 
+ModShell7Base :: computeLinearizedStiffness(GaussPoint *gp, StructuralMaterial *mat, TimeStep *tStep, FloatMatrix A [ 3 ] [ 3 ]) 
 {
     FloatArray Pcart;
     FloatArray lcoords = *gp->giveNaturalCoordinates();
@@ -1526,7 +1525,6 @@ ModShell7Base :: giveUpdatedSolutionVector(FloatArray &answer, TimeStep *tStep)
     IntArray dofIdArray;
     ModShell7Base::giveDofManDofIDMask(dummy, dofIdArray);
     Element :: computeVectorOf(dofIdArray, VM_Total, tStep, temp, true);
-    //answer.assemble( temp, this->giveOrdering(AllInv) );
     answer.assemble( temp, this->giveOrderingNodes() );
 }
 
