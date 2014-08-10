@@ -43,7 +43,6 @@
 #include "fei3dtrquad.h"
 #include "boundaryload.h"
 #include "classfactory.h"
-#include "tr2shell7.h"
 #include "xfem/patchintegrationrule.h"
 #include "xfem/XFEMDebugTools.h"
 #include "xfem/enrichmentdomain.h"
@@ -59,14 +58,14 @@ REGISTER_Element( Tr2Shell7XFEM );
 
 FEI3dTrQuad Tr2Shell7XFEM :: interpolation;
 
-IntArray Tr2Shell7XFEM :: ordering_all = {1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30, 31, 36, 37, 38,
+IntArray Tr2Shell7XFEM :: orderingDofTypes = {1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 29, 30, 31, 36, 37, 38,
                         4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 32, 33, 34, 39, 40, 41,
                         7, 14, 21, 28, 35, 42};
-IntArray Tr2Shell7XFEM :: ordering_gr {1, 2, 3, 19, 20, 21, 37, 4, 5, 6, 22, 23, 24, 38, 7, 8, 9, 25, 26, 27, 39,
+IntArray Tr2Shell7XFEM :: orderingNodes = {1, 2, 3, 19, 20, 21, 37, 4, 5, 6, 22, 23, 24, 38, 7, 8, 9, 25, 26, 27, 39,
                        10, 11, 12, 28, 29, 30, 40, 13, 14, 15, 31, 32, 33, 41, 16, 17, 18,
                        34, 35, 36, 42};
-IntArray Tr2Shell7XFEM :: ordering_gr_edge = {1, 2, 3, 10, 11, 12, 19, 4, 5, 6, 13, 14, 15, 20, 7, 8, 9, 16, 17, 18, 21};
-
+IntArray Tr2Shell7XFEM :: orderingEdgeNodes = {1, 2, 3, 10, 11, 12, 19, 4, 5, 6, 13, 14, 15, 20, 7, 8, 9, 16, 17, 18, 21};
+		   
 
 Tr2Shell7XFEM :: Tr2Shell7XFEM(int n, Domain *aDomain) : Shell7BaseXFEM(n, aDomain)
 {
@@ -74,15 +73,20 @@ Tr2Shell7XFEM :: Tr2Shell7XFEM(int n, Domain *aDomain) : Shell7BaseXFEM(n, aDoma
 }
 
 const IntArray &
-Tr2Shell7XFEM :: giveOrdering(SolutionField fieldType) const
+Tr2Shell7XFEM :: giveOrderingDofTypes() const
 {
-    if ( fieldType == All ) {
-        return this->ordering_all;
-    } else if ( fieldType == AllInv ) {
-        return this->ordering_gr;
-    } else /*if ( fieldType == EdgeInv  )*/ {
-        return this->ordering_gr_edge;
-    }
+    return this->orderingDofTypes;
+}
+
+const IntArray &
+Tr2Shell7XFEM :: giveOrderingNodes() const
+{
+    return this->orderingNodes;
+}
+const IntArray &
+Tr2Shell7XFEM :: giveOrderingEdgeNodes() const
+{
+    return this->orderingEdgeNodes;
 }
 
 

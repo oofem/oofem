@@ -60,11 +60,13 @@ class Tr2Shell7XFEM : public Shell7BaseXFEM
 {
 protected:
     static FEI3dTrQuad interpolation;
-    static IntArray ordering_all;
-    static IntArray ordering_gr;
-    static IntArray ordering_gr_edge;
+    static IntArray orderingDofTypes;
+    static IntArray orderingNodes;
+    static IntArray orderingEdgeNodes;
 
-    virtual const IntArray &giveOrdering(SolutionField fieldType) const;
+    virtual const IntArray &giveOrderingDofTypes() const;
+    virtual const IntArray &giveOrderingNodes() const;
+    virtual const IntArray &giveOrderingEdgeNodes() const;
     void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
 

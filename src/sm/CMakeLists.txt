@@ -36,7 +36,6 @@ set (sm_element
     latticestructuralelement.C
     lattice2d.C
     shell7base.C
-    modshell7base.C
     tr2shell7.C
     shell7basexfem.C
     tr2shell7xfem.C
@@ -53,10 +52,6 @@ set (sm_element
     interfaceelem2dlin.C
     trwarp.C
     #qplanstrssphf.C
-    modshell7base.C
-    tr2shell7mod.C
-    shell7basexfemmod.C
-    tr2shell7xfemmod.C
     )
 
 set (sm_interface_elements

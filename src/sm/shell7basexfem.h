@@ -71,11 +71,13 @@ protected:
     virtual void evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcon, FloatArray &solVec);
     void discGiveInitialSolutionVector(FloatArray &answer, IntArray &eiDofIdArray); // should be replaced with general function
     void computeDiscGeneralizedStrainVector(FloatArray &dGenEps, FloatArray &lCoords, EnrichmentItem *ei, TimeStep *tStep);
-    void giveDisSolutionVector(FloatArray &answer, const IntArray &dofIdArray, TimeStep *tStep);
+    void computeDiscSolutionVector(IntArray &dofIdArray , TimeStep *tStep, FloatArray &solVecD);
 
     // Internal forces
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
     void discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei);
+    void computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationPoint *ip, Material *mat, TimeStep *tStep, FloatArray &genEps, FloatArray &genEpsD, double zeta);
+    
     double evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
     double edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
     double evaluateHeavisideGamma(double xi, EnrichmentItem *ei);
@@ -85,8 +87,6 @@ protected:
     void computeLambdaGMatricesDis(FloatMatrix lambdaD [ 3 ], double zeta);
     void computeLambdaNMatrixDis(FloatMatrix &lambda_xd, double zeta);  
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
-
-    virtual void discComputeBulkTangentMatrix(FloatMatrix &KCC, FloatMatrix &KCD, FloatMatrix &KDD, IntegrationPoint *ip, Material *mat, int layer, TimeStep *tStep);
 
     virtual void discComputeBulkTangentMatrix(FloatMatrix &KdIJ, IntegrationPoint *ip, EnrichmentItem *eiI, EnrichmentItem *eiJ, int layer, FloatMatrix A [ 3 ] [ 3 ], TimeStep *tStep);
 
@@ -142,7 +142,13 @@ protected:
     FEI3dTrQuad interpolationForCZExport;
     FEI3dWedgeQuad interpolationForExport;
 
-
+    std::vector< IntArray >orderingArrays;
+    std::vector< IntArray >activeDofsArrays;
+    
+    
+// temp - to be removed 090814
+   void computeTripleProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c);
+    
 
 public:
     Shell7BaseXFEM(int n, Domain * d);

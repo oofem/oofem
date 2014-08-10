@@ -56,7 +56,7 @@ class BoundaryLoad;
  * @date 2012-11-01
  */
 
-class Tr2Shell7XFEMMod : public ModShell7BaseXFEM
+class Tr2Shell7XFEMMod : public MoShell7BaseXFEM
 {
 protected:
     static FEI3dTrQuad interpolation;
