@@ -40,8 +40,8 @@
 #include "domain.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
-#include "feinterpol3d.h"
-#include "fei3dtrquad.h"
+//#include "feinterpol3d.h"
+//#include "fei3dtrquad.h"
 #include "boundaryload.h"
 #include "constantpressureload.h"
 #include "constantsurfaceload.h"
@@ -310,7 +310,7 @@ Shell7Base :: setupInitialNodeDirectors()
 
 
 void
-Shell7Base :: evalCovarBaseVectorsAt(FloatArray &lcoords, FloatMatrix &gcov, FloatArray &genEps)
+Shell7Base :: evalCovarBaseVectorsAt(FloatArray &lcoords, FloatMatrix &gcov, FloatArray &genEps, TimeStep *tStep)
 {
     // Evaluates the covariant base vectors in the current configuration
     FloatArray g1; FloatArray g2; FloatArray g3;
@@ -622,7 +622,7 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
 
         // Traction tangent, L =  lambdaN * ( W2*lambdaG_1 - W1*lambdaG_2  ) 
         load->computeValueAt(pressure, tStep, *(ip->giveNaturalCoordinates()), VM_Total);        // pressure component   
-        this->evalCovarBaseVectorsAt(lcoords, gcov, genEps);
+        this->evalCovarBaseVectorsAt(lcoords, gcov, genEps, tStep);
         g1.beColumnOf(gcov,1);
         g2.beColumnOf(gcov,2);
         W1 = this->giveAxialMatrix(g1);
@@ -680,7 +680,7 @@ Shell7Base :: computeFAt(FloatArray &lCoords, FloatMatrix &answer, FloatArray &g
 {
     // Computes the deformation gradient in matrix form as open product(g_i, G^i) = gcov*Gcon^T
     FloatMatrix gcov, Gcon;
-    this->evalCovarBaseVectorsAt(lCoords, gcov, genEps);
+    this->evalCovarBaseVectorsAt(lCoords, gcov, genEps, NULL);
     this->evalInitialContravarBaseVectorsAt(lCoords, Gcon);
     answer.beProductTOf(gcov, Gcon);
 }
@@ -1197,7 +1197,7 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &traction, const
         lcoords.at(2) = gp->giveNaturalCoordinate(2);
         lcoords.at(3) = pLoad->giveLoadOffset();
 
-        this->evalCovarBaseVectorsAt(lcoords, gcov, genEps); 
+        this->evalCovarBaseVectorsAt(lcoords, gcov, genEps, tStep); 
         g1.beColumnOf(gcov,1);
         g2.beColumnOf(gcov,2);
         surfLoad->computeValueAt(load, tStep, lcoords, mode);        // pressure component
@@ -1215,7 +1215,7 @@ void
 Shell7Base :: evalCovarNormalAt(FloatArray &nCov, FloatArray &lCoords, FloatArray &genEpsC)
 {
     FloatMatrix gcov;
-    this->evalCovarBaseVectorsAt(lCoords, gcov, genEpsC);
+    this->evalCovarBaseVectorsAt(lCoords, gcov, genEpsC, NULL);
     FloatArray g1, g2;
     g1.beColumnOf(gcov,1);
     g2.beColumnOf(gcov,2);

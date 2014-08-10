@@ -153,7 +153,7 @@ protected:
 
     
     
-    virtual void evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov, FloatArray &solVec);
+    virtual void evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov, FloatArray &genEps, TimeStep *tStep);
 
     virtual void evalCovarNormalAt(FloatArray &nCov, FloatArray &lCoords, FloatArray &genEpsC);
     virtual void evalInitialCovarNormalAt(FloatArray &nCov, FloatArray &lCoords);
