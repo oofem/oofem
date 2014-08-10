@@ -41,6 +41,11 @@
 #define _IFT_HTSelement_Name "htselement"
 
 namespace oofem {
+  /**
+ * Implements a Hybrid-Trefftz element
+ * See http://en.wikipedia.org/wiki/Trefftz_method for description.
+ * @author Jan Novak (among others?) 
+ */
 class HTSelement : public StructuralElement
 {
 protected:

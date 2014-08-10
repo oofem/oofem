@@ -16,7 +16,7 @@ set (sm_element
     libeam2d.C libeam2dnl.C
     libeam3d.C libeam3dnl.C libeam3dnl2.C libeam3d2.C
     beam2d.C beam3d.C
-    interfaceelement1d.C interfaceelem2dquad.C interfaceelem3dtrlin.C
+    #interfaceelement1d.C interfaceelem2dquad.C interfaceelem3dtrlin.C
     quad1planestrain.C rershell.C tr_shell01.C qplanstrss.C q9planstrss.C qtrplstr.C q4axisymm.C
     planstrss.C
     planstrssxfem.C
@@ -49,7 +49,7 @@ set (sm_element
     qspacegrad.C
     dkt.C qdkt.C
     quad1platesubsoil.C tria1platesubsoil.C
-    interfaceelem2dlin.C
+    
     trwarp.C
     #qplanstrssphf.C
     )
@@ -59,6 +59,10 @@ set (sm_interface_elements
     InterfaceElements/intelline1.C
     InterfaceElements/intelline2.C
     InterfaceElements/intelsurftr1.C
+    InterfaceElements/Deprecated/interfaceelement1d.C
+    InterfaceElements/Deprecated/interfaceelem2dlin.C
+    InterfaceElements/Deprecated/interfaceelem2dquad.C
+    InterfaceElements/Deprecated/interfaceelem3dtrlin.C
     )
 
 set (sm_boundary_conditions
@@ -138,9 +142,9 @@ set (sm_material
     latticedamage2d.C
     dustmat.C
     lsmastermat.C
-	lsmastermatgrad.C
-	InterfaceMaterials/intmatdummycz.C
-	simplevitrificationmaterial.C
+    lsmastermatgrad.C
+    InterfaceMaterials/intmatdummycz.C
+    simplevitrificationmaterial.C
     anisodamagemodel.C
     winklerpasternak.C
     structmatsettable.C
@@ -157,9 +161,9 @@ set (sm_interface_materials
     InterfaceMaterials/intmatisodamage.C
     InterfaceMaterials/intmatisodamagetable.C
     InterfaceMaterials/intmatcoulombcontact.C
-    InterfaceMaterials/Old/isointerfacedamage01.C
-    InterfaceMaterials/Old/isointerfacedamage02.C
-    InterfaceMaterials/Old/simpleinterfacemat.C
+    InterfaceMaterials/Deprecated/isointerfacedamage01.C
+    InterfaceMaterials/Deprecated/isointerfacedamage02.C
+    InterfaceMaterials/Deprecated/simpleinterfacemat.C
     )
 
 set (sm_error
@@ -171,8 +175,8 @@ set (sm_error
     )
 
 set (sm_export
-    dmexportmodule.C
-    poiexportmodule.C
+    export/dmexportmodule.C
+    export/poiexportmodule.C
     export/gnuplotexportmodule.C
     )
 
