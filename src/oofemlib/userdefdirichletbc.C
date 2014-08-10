@@ -43,6 +43,7 @@
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
 #include "dofmanager.h"
+#include "dof.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(UserDefDirichletBC);

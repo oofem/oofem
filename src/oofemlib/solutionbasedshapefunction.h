@@ -36,7 +36,8 @@
 #define SOLUTIONBASEDSHAPEFUNCTION_H_
 
 #include "activebc.h"
-#include "node.h"
+#include "dofiditem.h"
+#include "floatarray.h"
 
 #define _IFT_SolutionbasedShapeFunction_Name "solutionbasedshapefunction"
 #define _IFT_SolutionbasedShapeFunction_Set "set"
@@ -46,6 +47,10 @@
 #define _IFT_SolutionbasedShapeFunction_DumpSnapshots "dumpsnapshots"
 
 namespace oofem {
+class EngngModel;
+class Element;
+class Node;
+
 struct SurfaceDataStruct {
     bool isPlus;
     bool isMinus;
@@ -123,11 +128,11 @@ public:
     SolutionbasedShapeFunction(int n, Domain * d);
     virtual ~SolutionbasedShapeFunction();
 
-    IRResultType initializeFrom(InputRecord *ir);
+    virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual bool requiresActiveDofs() { return true; }
     virtual int giveNumberOfInternalDofManagers() { return 1; }
-    virtual DofManager *giveInternalDofManager(int i) { return myNode; }
+    virtual DofManager *giveInternalDofManager(int i);
 
     virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
     virtual double giveUnknown(ValueModeType mode, TimeStep *tStep, ActiveDof *dof);
@@ -138,7 +143,7 @@ public:
 
     virtual void computeDofTransformation(ActiveDof *dof, FloatArray &masterContribs);
 
-    virtual int giveNumberOfMasterDofs(ActiveDof *dof) { return this->giveDomain()->giveNumberOfSpatialDimensions(); }
+    virtual int giveNumberOfMasterDofs(ActiveDof *dof);
     virtual Dof *giveMasterDof(ActiveDof *dof, int mdof);
 
     virtual const char *giveClassName() const { return "SolutionbasedShapeFunction"; }

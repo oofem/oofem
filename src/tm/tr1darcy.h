@@ -36,14 +36,13 @@
 #define tr1darcy_h_
 
 #include "transportelement.h"
-#include "fei2dtrlin.h"
-#include "domain.h"
 #include "nodalaveragingrecoverymodel.h"
-#include "transportmaterial.h"
 
 #define _IFT_Tr1Darcy_Name "tr1darcy"
 
 namespace oofem {
+class FEI2dTrLin;
+
 /**
  * Element class for the DarcyFlow engineering model. Linear description of seepage
  * @author Carl Sandström
@@ -59,7 +58,7 @@ public:
     virtual ~Tr1Darcy();
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual FEInterpolation *giveInterpolation() const { return & interpolation_lin; }
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual MaterialMode giveMaterialMode() { return _2dHeat; } ///@todo This isn't actually correct.
 

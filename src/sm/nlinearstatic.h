@@ -164,7 +164,7 @@ public:
     virtual int giveUnknownDictHashIndx(ValueModeType mode, TimeStep *tStep) { return ( int ) mode; }
 
 #ifdef __OOFEG
-    void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep);
+    void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
 #ifdef __PARALLEL_MODE

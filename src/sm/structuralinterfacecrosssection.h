@@ -51,6 +51,7 @@ class GaussPoint;
 class Element;
 class FloatArray;
 class FloatMatrix;
+typedef GaussPoint IntegrationPoint;
 
 /**
  * Base class for all structural interface cross section models.
@@ -129,12 +130,17 @@ public:
 
     virtual int checkConsistency();
 
+#ifdef __PARALLEL_MODE
+    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp);
+    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp);
+    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *gp);
+#endif
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "StructuralInterfaceCrossSection"; }
-    CrossSectExtension crossSectionType;
-    /// @return Input record name of the receiver.
     virtual const char *giveInputRecordName() const { return _IFT_StructuralInterfaceCrossSection_Name; };
+
+    CrossSectExtension crossSectionType;
 private:
     int materialNum;
 };

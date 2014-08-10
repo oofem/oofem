@@ -40,6 +40,7 @@
 #include "floatmatrix.h"
 #include "interface.h"
 #include "gaussintegrationrule.h"
+#include "domain.h"
 
 ///@name Input fields for LayeredCrossSection
 //@{

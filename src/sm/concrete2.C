@@ -38,7 +38,6 @@
 #include "floatmatrix.h"
 #include "gausspoint.h"
 #include "mathfem.h"
-#include "engngm.h"
 #include "timestep.h"
 #include "datastream.h"
 #include "contextioerr.h"
@@ -483,7 +482,7 @@ label18:
         ez  +=  dez;
         if ( this->give(stirr_E, gp) > 0. ) {
             strainIncr.at(1) = dez;
-            this->updateStirrups(gp, strainIncr);
+            this->updateStirrups(gp, strainIncr, tStep);
             // updates flags->at(SEZ)
             // stirr(dez,sv(l3),fst);
         }
@@ -1171,7 +1170,7 @@ label14:
 
 
 void
-Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray &strainIncrement)
+Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray &strainIncrement, TimeStep *tStep)
 // stirr (double dez, double srf)
 //
 //
@@ -1215,7 +1214,7 @@ Concrete2 :: updateStirrups(GaussPoint *gp, FloatArray &strainIncrement)
                 dep = dez;
             }
         } else {
-            dt  = domain->giveEngngModel()->giveCurrentStep()->giveTimeIncrement();
+            dt = tStep->giveTimeIncrement();
             dep = this->give(stirr_EREF, gp) * exp( ovs / this->give(stirr_LAMBDA, gp) ) * dt;
         }
     }

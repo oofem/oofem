@@ -11,7 +11,6 @@
 #include "activedof.h"
 #include "inputrecord.h"
 #include "element.h"
-#include "elementside.h"
 #include "node.h"
 #include "masterdof.h"
 #include "sparsemtrx.h"
@@ -113,6 +112,12 @@ SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
     init();
 
     return IRRT_OK;
+}
+
+DofManager *
+SolutionbasedShapeFunction :: giveInternalDofManager(int i)
+{
+    return myNode;
 }
 
 bool
@@ -351,6 +356,12 @@ SolutionbasedShapeFunction :: computeDofTransformation(ActiveDof *dof, FloatArra
 
         masterContribs.at(i) = factor * values.at(1);
     }
+}
+
+int
+SolutionbasedShapeFunction :: giveNumberOfMasterDofs(ActiveDof *dof)
+{
+    return this->giveDomain()->giveNumberOfSpatialDimensions();
 }
 
 Dof *

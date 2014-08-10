@@ -36,7 +36,6 @@
 #define usrdeftempfield_h
 
 #include "structtemperatureload.h"
-#include "domain.h"
 #include "parser.h"
 
 ///@name Input fields for UserDefinedTemperatureField

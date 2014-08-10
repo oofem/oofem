@@ -36,7 +36,6 @@
 #define tet1bubblestokes_h
 
 #include "fmelement.h"
-#include "domain.h"
 #include "zznodalrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"

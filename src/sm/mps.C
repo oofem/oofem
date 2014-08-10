@@ -36,6 +36,7 @@
 #include "mathfem.h"
 #include "gausspoint.h"
 #include "timestep.h"
+#include "engngm.h"
 #include "contextioerr.h"
 #include "datastream.h"
 #include "classfactory.h"

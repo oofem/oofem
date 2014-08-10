@@ -36,10 +36,6 @@
 #define fluidcrosssection_h
 
 #include "crosssection.h"
-#include "material.h"
-#include "gausspoint.h"
-#include "floatarray.h"
-#include "floatmatrix.h"
 
 #define _IFT_FluidCrossSection_Name "fluidcs"
 #define _IFT_FluidCrossSection_material "mat"
@@ -76,6 +72,12 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
 
     FluidDynamicMaterial *giveFluidMaterial();
+
+#ifdef __PARALLEL_MODE
+    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp);
+    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp);
+    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *gp);
+#endif
 
     virtual const char *giveClassName() const { return "FluidCrossSection"; }
     virtual const char *giveInputRecordName() const { return _IFT_FluidCrossSection_Name; }

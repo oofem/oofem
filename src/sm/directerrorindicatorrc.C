@@ -36,6 +36,8 @@
 #include "directerrorindicatorrc.h"
 #include "domain.h"
 #include "element.h"
+#include "dofmanager.h"
+#include "engngm.h"
 #include "connectivitytable.h"
 #include "mathfem.h"
 #include "timestep.h"

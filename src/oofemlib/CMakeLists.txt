@@ -275,7 +275,6 @@ set (core_mesher
 
 set (core
     ${core_unsorted}
-    ${core_oofeg}
     ${core_nodalrecovery}
     ${core_dofs}
     ${core_nm}
@@ -300,6 +299,11 @@ set (core
 if (USE_PARALLEL)
     list (APPEND core ${core_parallel})
 endif ()
+
+if (USE_OOFEG)
+    list (APPEND core ${core_oofeg})
+endif ()
+
 
 add_library (core
     ${LIB_TYPE}

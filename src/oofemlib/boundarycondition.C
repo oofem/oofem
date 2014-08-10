@@ -37,6 +37,7 @@
 #include "function.h"
 #include "verbose.h"
 #include "dynamicinputrecord.h"
+#include "dof.h"
 #include "classfactory.h"
 
 namespace oofem {

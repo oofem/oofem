@@ -99,18 +99,11 @@ public:
     virtual void updateInternalState(TimeStep *tStep);
 
 #ifdef __OOFEG
-    //
     // Graphics output
-    //
-
-    virtual void drawYourself(oofegGraphicContext &gc);
-
-    virtual void drawRawGeometry(oofegGraphicContext &);
-
-    virtual void drawRawCrossSections(oofegGraphicContext &gc);
-
+    virtual void drawYourself(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep);
     virtual void giveCrossSectionCoordinates(FloatArray &coords);
-
 #endif
 
 protected:

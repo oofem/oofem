@@ -33,6 +33,7 @@
  */
 
 #include "tr1_2d_supg_axi.h"
+#include "fei2dtrlin.h"
 #include "fluidmodel.h"
 #include "node.h"
 #include "material.h"

@@ -39,7 +39,6 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
-#include "engngm.h"
 #include "crosssection.h"
 #include "classfactory.h"
 

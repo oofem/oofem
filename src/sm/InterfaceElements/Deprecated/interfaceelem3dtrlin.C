@@ -34,6 +34,7 @@
 
 
 #include "interfaceelem3dtrlin.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "crosssection.h"
 #include "gausspoint.h"
@@ -219,7 +220,7 @@ InterfaceElement3dTrLin :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
 
 #ifdef __OOFEG
-void InterfaceElement3dTrLin :: drawRawGeometry(oofegGraphicContext &gc)
+void InterfaceElement3dTrLin :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -250,11 +251,11 @@ void InterfaceElement3dTrLin :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void InterfaceElement3dTrLin :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void InterfaceElement3dTrLin :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 { }
 
 
-void InterfaceElement3dTrLin :: drawScalar(oofegGraphicContext &context)
+void InterfaceElement3dTrLin :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 { }
 
 #endif

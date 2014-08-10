@@ -64,7 +64,7 @@ public:
     /// Destructor
     virtual ~LocalGaussianRandomFunction();
 
-    virtual void evaluate(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict);
+    virtual void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict);
     virtual double evaluateAtTime(double t);
     virtual double evaluateVelocityAtTime(double t);
     virtual double evaluateAccelerationAtTime(double t);

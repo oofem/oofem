@@ -38,13 +38,14 @@
 #include "transportelement.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
-#include "fei2dtrlin.h"
 
 #define _IFT_Tr1_hmt_Name "tr1hmt"
 #define _IFT_Tr1_ht_Name "tr1ht"
 
 
 namespace oofem {
+class FEI2dTrLin;
+
 /**
  * Triangle (2d) element with linear approximation for heat transfer.
  * @todo Use the interpolation classes.
@@ -73,13 +74,12 @@ public:
 
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
-    virtual FEInterpolation *giveInterpolation() const { return & this->interp; }
+    virtual FEInterpolation *giveInterpolation() const;
 
 #ifdef __OOFEG
     // Graphics output
-    //void drawYourself(oofegGraphicContext&);
-    //virtual void drawRawGeometry(oofegGraphicContext&) {}
-    //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
+    //virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) {}
+    //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
 #endif
 
 protected:

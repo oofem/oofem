@@ -36,10 +36,6 @@
 #define macrolspace_h
 
 #include "lspace.h"
-#include "sparsemtrx.h"
-#include "engngm.h"
-#include "structengngmodel.h"
-#include "metastep.h"
 
 ///@name Input fields for MacroLspace
 //@{
@@ -50,6 +46,8 @@
 //@}
 
 namespace oofem {
+class Domain;
+class EngngModel;
 class MicroMaterial;
 
 /**

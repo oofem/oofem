@@ -52,6 +52,8 @@
 //@}
 
 namespace oofem {
+class Function;
+
 /**
  * Implementation of general sequence (staggered) problem. The problem consists in sequence of
  * low level problems (slaves) which are executed sequentially and where the results
@@ -166,13 +168,13 @@ public:
     void giveCoupledModels(IntArray &answer) { answer = coupledModels; }
 
 #ifdef __OOFEG
-    void drawYourself(oofegGraphicContext &context);
-    void drawElements(oofegGraphicContext &context);
-    void drawNodes(oofegGraphicContext &context);
+    virtual void drawYourself(oofegGraphicContext &gc);
+    virtual void drawElements(oofegGraphicContext &gc);
+    virtual void drawNodes(oofegGraphicContext &gc);
     /**
      * Shows the sparse structure of required matrix, type == 1 stiffness.
      */
-    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep) { }
+    virtual void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep) { }
 #endif
 
     virtual int checkProblemConsistency();

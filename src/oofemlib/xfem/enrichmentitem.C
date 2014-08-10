@@ -52,13 +52,15 @@
 #include "xfemtolerances.h"
 #include "spatiallocalizer.h"
 #include "gausspoint.h"
+#include "enrichmentfronts/enrichmentfront.h"
+#include "enrichmentfronts/enrichmentfrontdonothing.h"
+#include "engngm.h"
+
 #include <algorithm>
 #include <limits>
 #include <sstream>
 #include <string>
 
-#include "enrichmentfronts/enrichmentfront.h"
-#include "enrichmentfronts/enrichmentfrontdonothing.h"
 
 namespace oofem {
 const double EnrichmentItem :: mLevelSetTol = 1.0e-12;
@@ -401,11 +403,7 @@ bool EnrichmentItem :: hasPropagatingFronts() const
         return false;
     }
 
-    if( strcasecmp(mpPropagationLaw->giveClassName(), "PLDoNothing") == 0) {
-        return false;
-    }
-
-    return true;
+    return mpPropagationLaw->hasPropagation();
 }
 
 void

@@ -38,11 +38,13 @@
 #include "nlstructuralelement.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
-#include "fei2dquadlin.h"
 
 #define _IFT_Quad1Mindlin_Name "quad1mindlin"
 #define _IFT_Quad1Mindlin_ReducedIntegration "reducedintegration"
+
 namespace oofem {
+class FEI2dQuadLin;
+
 /**
  * This class implements an quadrilateral four-node Mindlin plate.
  * Each node has 3 degrees of freedom (out-of-plane displacement, in-plane rotations).
@@ -72,7 +74,7 @@ public:
     Quad1Mindlin(int n, Domain * d);
     virtual ~Quad1Mindlin() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return & interp_lin; }
+    virtual FEInterpolation *giveInterpolation() const;
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }

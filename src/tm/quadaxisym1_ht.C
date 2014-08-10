@@ -33,6 +33,7 @@
  */
 
 #include "quadaxisym1_ht.h"
+#include "fei2dquadlin.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"

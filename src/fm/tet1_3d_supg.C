@@ -33,11 +33,13 @@
  */
 
 #include "tet1_3d_supg.h"
+#include "fei3dtetlin.h"
 #include "fluidmodel.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
+#include "fluiddynamicmaterial.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
@@ -644,9 +646,8 @@ Tet1_3D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
 
 #ifdef __OOFEG
- #define TR_LENGHT_REDUCT 0.3333
 
-void Tet1_3D_SUPG :: drawRawGeometry(oofegGraphicContext &gc)
+void Tet1_3D_SUPG :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 4 ];
     GraphicObj *go;

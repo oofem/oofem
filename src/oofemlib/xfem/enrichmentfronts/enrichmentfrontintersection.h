@@ -57,7 +57,8 @@ class LinElBranchFunction;
  * @author Erik Svenning
  * @date Apr 23, 2014
  */
-class EnrFrontIntersection : public EnrichmentFront {
+class EnrFrontIntersection : public EnrichmentFront
+{
 public:
     EnrFrontIntersection();
     virtual ~EnrFrontIntersection();
@@ -81,7 +82,7 @@ public:
     virtual double giveSupportRadius() const { return 0.0; }
     virtual bool propagationIsAllowed() const {return false;}
 
-    void setTangent(const FloatArray &iTangent) {mTangent = iTangent;}
+    void setTangent(FloatArray iTangent) { mTangent = std::move(iTangent); }
 
 protected:
     FloatArray mTangent;

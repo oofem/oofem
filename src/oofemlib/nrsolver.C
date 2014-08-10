@@ -45,6 +45,7 @@
 #include "linesearch.h"
 #include "classfactory.h"
 #include "exportmodulemanager.h"
+#include "engngm.h"
 
 #ifdef __PETSC_MODULE
  #include "petscsolver.h"

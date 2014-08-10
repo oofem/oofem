@@ -33,6 +33,7 @@
  */
 
 #include "quad1platesubsoil.h"
+#include "fei2dquadlin.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
@@ -59,6 +60,10 @@ Quad1PlateSubSoil :: Quad1PlateSubSoil(int n, Domain *aDomain) :
     numberOfGaussPoints = 4;
     numberOfDofMans = 4;
 }
+
+
+FEInterpolation *
+Quad1PlateSubSoil :: giveInterpolation() const { return & interp_lin; }
 
 
 FEInterpolation *

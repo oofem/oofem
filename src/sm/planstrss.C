@@ -33,6 +33,7 @@
  */
 
 #include "planstrss.h"
+#include "fei2dquadlin.h"
 #include "node.h"
 #include "crosssection.h"
 #include "gausspoint.h"
@@ -72,6 +73,8 @@ PlaneStress2d :: PlaneStress2d(int n, Domain *aDomain) :
 PlaneStress2d :: ~PlaneStress2d()
 // Destructor
 { }
+
+FEInterpolation *PlaneStress2d :: giveInterpolation() const { return & interpolation; }
 
 void
 PlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
@@ -494,11 +497,16 @@ PlaneStress2d :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement
                                        controlNode, controlDof, aMode, "PlaneStress2d");
 }
 
+void PlaneStress2d :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+}
+
 
 #ifdef __OOFEG
  #define TR_LENGHT_REDUCT 0.3333
 
-void PlaneStress2d :: drawRawGeometry(oofegGraphicContext &gc)
+void PlaneStress2d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
@@ -533,11 +541,10 @@ void PlaneStress2d :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void PlaneStress2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void PlaneStress2d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -570,40 +577,39 @@ void PlaneStress2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType 
 
 
 
-void PlaneStress2d :: drawScalar(oofegGraphicContext &context)
+void PlaneStress2d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, indx, result = 0;
     WCRec p [ 4 ];
     GraphicObj *tr;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 4 ];
     double s [ 4 ], defScale;
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
-    if ( context.giveIntVarMode() == ISM_recovered ) {
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
         for ( i = 1; i <= 4; i++ ) {
-            result += this->giveInternalStateAtNode(v [ i - 1 ], context.giveIntVarType(), context.giveIntVarMode(), i, tStep);
+            result += this->giveInternalStateAtNode(v [ i - 1 ], gc.giveIntVarType(), gc.giveIntVarMode(), i, tStep);
         }
 
         if ( result != 4 ) {
             return;
         }
 
-        indx = context.giveIntVarIndx();
+        indx = gc.giveIntVarIndx();
 
         for ( i = 1; i <= 4; i++ ) {
             s [ i - 1 ] = v [ i - 1 ].at(indx);
         }
 
-        if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+        if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
             for ( i = 0; i < 4; i++ ) {
-                if ( context.getInternalVarsDefGeoFlag() ) {
+                if ( gc.getInternalVarsDefGeoFlag() ) {
                     // use deformed geometry
-                    defScale = context.getDefScale();
+                    defScale = gc.getDefScale();
                     p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                     p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                     p [ i ].z = 0.;
@@ -615,20 +621,20 @@ void PlaneStress2d :: drawScalar(oofegGraphicContext &context)
             }
 
             //EASValsSetColor(gc.getYieldPlotColor(ratio));
-            context.updateFringeTableMinMax(s, 4);
+            gc.updateFringeTableMinMax(s, 4);
             tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
             EGWithMaskChangeAttributes(LAYER_MASK, tr);
             EMAddGraphicsToModel(ESIModel(), tr);
 
-            /*  } else if (context.getScalarAlgo() == SA_ISO_LINE) {
+            /*  } else if (gc.getScalarAlgo() == SA_ISO_LINE) {
              *
              * EASValsSetColor(context.getActiveCrackColor());
              * EASValsSetLineWidth(OOFEG_ISO_LINE_WIDTH);
              *
              * for (i=0; i< 4; i++) {
-             * if (context.getInternalVarsDefGeoFlag()) {
+             * if (gc.getInternalVarsDefGeoFlag()) {
              * // use deformed geometry
-             * defScale = context.getDefScale();
+             * defScale = gc.getDefScale();
              * p[i].x = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(1,tStep,defScale);
              * p[i].y = (FPNum) this->giveNode(i+1)->giveUpdatedCoordinate(2,tStep,defScale);
              * p[i].z = 0.;
@@ -643,13 +649,13 @@ void PlaneStress2d :: drawScalar(oofegGraphicContext &context)
              * // isoline implementation
              * oofeg_drawIsoLinesOnQuad (p, s);
              */
-        } else if ( ( context.getScalarAlgo() == SA_ZPROFILE ) || ( context.getScalarAlgo() == SA_COLORZPROFILE ) ) {
-            double landScale = context.getLandScale();
+        } else if ( ( gc.getScalarAlgo() == SA_ZPROFILE ) || ( gc.getScalarAlgo() == SA_COLORZPROFILE ) ) {
+            double landScale = gc.getLandScale();
 
             for ( i = 0; i < 4; i++ ) {
-                if ( context.getInternalVarsDefGeoFlag() ) {
+                if ( gc.getInternalVarsDefGeoFlag() ) {
                     // use deformed geometry
-                    defScale = context.getDefScale();
+                    defScale = gc.getDefScale();
                     p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                     p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                     p [ i ].z = s [ i ] * landScale;
@@ -665,20 +671,20 @@ void PlaneStress2d :: drawScalar(oofegGraphicContext &context)
                 }
             }
 
-            if ( context.getScalarAlgo() == SA_ZPROFILE ) {
-                EASValsSetColor( context.getDeformedElementColor() );
+            if ( gc.getScalarAlgo() == SA_ZPROFILE ) {
+                EASValsSetColor( gc.getDeformedElementColor() );
                 EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
                 tr =  CreateQuad3D(p);
                 EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
             } else {
-                context.updateFringeTableMinMax(s, 4);
+                gc.updateFringeTableMinMax(s, 4);
                 tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
                 EGWithMaskChangeAttributes(LAYER_MASK, tr);
             }
 
             EMAddGraphicsToModel(ESIModel(), tr);
         }
-    } else if ( context.giveIntVarMode() == ISM_local ) {
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
         if ( integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() != 4 ) {
             return;
         }
@@ -688,9 +694,9 @@ void PlaneStress2d :: drawScalar(oofegGraphicContext &context)
         WCRec pp [ 9 ];
 
         for ( i = 0; i < 4; i++ ) {
-            if ( context.getInternalVarsDefGeoFlag() ) {
+            if ( gc.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
-                defScale = context.getDefScale();
+                defScale = gc.getDefScale();
                 pp [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                 pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                 pp [ i ].z = 0.;
@@ -739,11 +745,11 @@ void PlaneStress2d :: drawScalar(oofegGraphicContext &context)
                 ind.at(4) = 8;
             }
 
-            if ( giveIPValue(v [ 0 ], gp, context.giveIntVarType(), tStep) == 0 ) {
+            if ( giveIPValue(v [ 0 ], gp, gc.giveIntVarType(), tStep) == 0 ) {
                 return;
             }
 
-            indx = context.giveIntVarIndx();
+            indx = gc.giveIntVarIndx();
 
             for ( i = 1; i <= 4; i++ ) {
                 s [ i - 1 ] = v [ 0 ].at(indx);
@@ -755,7 +761,7 @@ void PlaneStress2d :: drawScalar(oofegGraphicContext &context)
                 p [ i ].z = pp [ ind.at(i + 1) ].z;
             }
 
-            context.updateFringeTableMinMax(s, 4);
+            gc.updateFringeTableMinMax(s, 4);
             tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
             EGWithMaskChangeAttributes(LAYER_MASK, tr);
             EMAddGraphicsToModel(ESIModel(), tr);
@@ -767,12 +773,11 @@ void PlaneStress2d :: drawScalar(oofegGraphicContext &context)
 
 
 void
-PlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
+PlaneStress2d :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i;
     WCRec l [ 2 ];
     GraphicObj *tr;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     FloatArray crackStatuses, cf;
 

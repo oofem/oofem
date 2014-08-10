@@ -33,6 +33,7 @@
  */
 
 #include "dofmanvalfield.h"
+#include "domain.h"
 #include "spatiallocalizer.h"
 #include "element.h"
 #include "timestep.h"

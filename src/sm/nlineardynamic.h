@@ -154,7 +154,7 @@ public:
     void timesMtrx(FloatArray &answer, FloatArray &vec, CharType type, Domain *domain, TimeStep *tStep);
 
 #ifdef __OOFEG
-    void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep);
+    void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
 #ifdef __PARALLEL_MODE

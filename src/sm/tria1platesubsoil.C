@@ -33,6 +33,7 @@
  */
 
 #include "tria1platesubsoil.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
@@ -66,6 +67,10 @@ Tria1PlateSubSoil :: giveInterpolation(DofIDItem id) const
 {
     return & interp_lin;
 }
+
+
+FEInterpolation *
+Tria1PlateSubSoil :: giveInterpolation() const { return & interp_lin; }
 
 
 void

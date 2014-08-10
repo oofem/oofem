@@ -44,6 +44,7 @@
 #include "stressvector.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
+#include "engngm.h"
 
 namespace oofem {
 REGISTER_Material(IsotropicDamageMaterial1);

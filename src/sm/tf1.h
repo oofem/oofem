@@ -36,7 +36,6 @@
 #define tf1_h
 
 #include "structtemperatureload.h"
-#include "domain.h"
 
 #define _IFT_TF1_Name "tf1"
 

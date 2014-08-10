@@ -36,11 +36,10 @@
 #define dmexportmodule_h
 
 #include "exportmodule.h"
-#include "domain.h"
-#include "engngm.h"
 
+///@name Input fields for DofManExportModule
+//@{
 #define _IFT_DofManExportModule_Name "dm"
-
 #define _IFT_DofManExportModule_dmlist "dmlist"
 //@}
 

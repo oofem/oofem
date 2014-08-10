@@ -43,6 +43,7 @@
 #include "dynamicinputrecord.h"
 #include "feinterpol.h"
 #include "spatiallocalizer.h"
+#include "engngm.h"
 
 #include "xfem/patchintegrationrule.h"
 #include "xfem/enrichmentitems/crack.h"

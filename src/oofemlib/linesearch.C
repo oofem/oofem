@@ -35,8 +35,10 @@
 #include "linesearch.h"
 #include "timestep.h"
 #include "floatarray.h"
+#include "intarray.h"
 #include "mathfem.h"
 #include "nmstatus.h"
+#include "engngm.h"
 
 namespace oofem {
 LineSearchNM :: LineSearchNM(Domain *d, EngngModel *m) :

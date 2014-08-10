@@ -36,17 +36,17 @@
 #define qtrplanestrain_h
 
 #include "nlstructuralelement.h"
-#include "fei2dtrquad.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "directerrorindicatorrc.h"
 #include "eleminterpmapperinterface.h"
-#include "mathfem.h"
 
 #define _IFT_QTrPlaneStrain_Name "qtrplanestrain"
 
 namespace oofem {
+class FEI2dTrQuad;
+
 /**
  * This class implements an triangular three-node  plane-
  * stress elasticity finite element. Each node has 2 degrees of freedom.
@@ -73,10 +73,10 @@ public:
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 0 : 0 ); }
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &context);
-    virtual void drawSpecial(oofegGraphicContext &);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
     // definition & identification

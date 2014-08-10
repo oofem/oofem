@@ -40,6 +40,7 @@
 #include "materialinterface.h"
 #include "dynamicinputrecord.h"
 #include "classfactory.h"
+#include "matconst.h"
 //#include "leplic.h"
 
 namespace oofem {
@@ -114,6 +115,11 @@ TwoFluidMaterial :: CreateStatus(GaussPoint *gp) const
     return new TwoFluidMaterialStatus(1, this->giveDomain(), gp, this->slaveMaterial);
 }
 
+FluidDynamicMaterial *
+TwoFluidMaterial :: giveMaterial(int i) const
+{
+    return static_cast< FluidDynamicMaterial * >( domain->giveMaterial( slaveMaterial(i) ) );
+}
 
 void
 TwoFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &eps, TimeStep *tStep)

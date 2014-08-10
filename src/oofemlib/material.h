@@ -59,6 +59,9 @@ class GaussPoint;
 class Dictionary;
 class FloatArray;
 class FloatMatrix;
+class Element;
+class ProcessCommunicator;
+class CommunicationBuffer;
 
 /**
  * Abstract base class for all material models. Declares the basic common interface

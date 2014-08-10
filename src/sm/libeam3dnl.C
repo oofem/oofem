@@ -576,6 +576,13 @@ LIBeam3dNL :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 }
 
 
+void
+LIBeam3dNL :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+{
+    computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
+}
+
+
 int
 LIBeam3dNL :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //
@@ -586,7 +593,6 @@ LIBeam3dNL :: giveLocalCoordinateSystem(FloatMatrix &answer)
     FloatArray lx(3), ly(3), lz(3), help(3);
     double length = this->computeLength();
     Node *nodeA, *nodeB, *refNode;
-    int i;
 
     answer.resize(3, 3);
     answer.zero();
@@ -594,7 +600,7 @@ LIBeam3dNL :: giveLocalCoordinateSystem(FloatMatrix &answer)
     nodeB  = this->giveNode(2);
     refNode = this->giveDomain()->giveNode(this->referenceNode);
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         lx.at(i) = ( nodeB->giveCoordinate(i) - nodeA->giveCoordinate(i) ) / length;
         help.at(i) = ( refNode->giveCoordinate(i) - nodeA->giveCoordinate(i) );
     }
@@ -604,7 +610,7 @@ LIBeam3dNL :: giveLocalCoordinateSystem(FloatMatrix &answer)
     ly.beVectorProductOf(lz, lx);
     ly.normalize();
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         answer.at(1, i) = lx.at(i);
         answer.at(2, i) = ly.at(i);
         answer.at(3, i) = lz.at(i);
@@ -771,7 +777,7 @@ LIBeam3dNL :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
 
 
 #ifdef __OOFEG
-void LIBeam3dNL :: drawRawGeometry(oofegGraphicContext &gc)
+void LIBeam3dNL :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
 
@@ -797,7 +803,7 @@ void LIBeam3dNL :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void LIBeam3dNL :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void LIBeam3dNL :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
 
@@ -805,7 +811,6 @@ void LIBeam3dNL :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType typ
         return;
     }
 
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* poin */

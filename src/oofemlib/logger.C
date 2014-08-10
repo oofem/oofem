@@ -73,7 +73,7 @@ static inline void print_stacktrace(FILE *out = stderr, unsigned int max_frames 
 
     // iterate over the returned symbol lines. skip the first, it is the
     // address of this function.
-    for ( int i = 1; i < addrlen; i++ ) {
+    for ( int i = 2; i < addrlen; i++ ) {
         char *begin_name = 0, *begin_offset = 0, *end_offset = 0;
 
         // find parentheses and +address offset surrounding the mangled name:

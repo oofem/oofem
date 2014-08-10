@@ -38,6 +38,7 @@
 #include "timestep.h"
 #include "dynamicinputrecord.h"
 #include "valuemodetype.h"
+#include "domain.h"
 
 namespace oofem {
 void

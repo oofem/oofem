@@ -36,7 +36,6 @@
 #define elementside_h
 
 #include "dofmanager.h"
-#include "domain.h"
 
 #define _IFT_ElementSide_Name "elementside"
 

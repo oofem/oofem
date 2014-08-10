@@ -38,10 +38,12 @@
 #include "structuralelement.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
-#include "fei2dtrlin.h"
 
 #define _IFT_Tria1PlateSubSoil_Name "tria1platesubsoil"
+
 namespace oofem {
+class FEI2dTrLin;
+
 /**
  * This class implements an triangular four-node plate subsoil element with linear interpolation in xy plane.
  * Each node has 1 degree of freedom (out-of-plane displacement).
@@ -63,7 +65,7 @@ public:
     Tria1PlateSubSoil(int n, Domain * d);
     virtual ~Tria1PlateSubSoil() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return & interp_lin; }
+    virtual FEInterpolation *giveInterpolation() const;
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     virtual MaterialMode giveMaterialMode()  { return _2dPlateSubSoil; }

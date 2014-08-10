@@ -36,12 +36,6 @@
 #define supgelement2_h
 
 #include "supgelement.h"
-#include "femcmpnn.h"
-#include "domain.h"
-#include "floatmatrix.h"
-
-#include "primaryfield.h"
-#include "fluiddynamicmaterial.h"
 
 namespace oofem {
 class TimeStep;
@@ -102,10 +96,6 @@ public:
 #ifdef __OOFEG
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *tStep);
-    // Graphics output
-    //void drawYourself(oofegGraphicContext&);
-    //virtual void drawRawGeometry(oofegGraphicContext&) {}
-    //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
 #endif
 
 protected:

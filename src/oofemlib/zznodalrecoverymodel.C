@@ -42,6 +42,8 @@
 #include "mathfem.h"
 #include "feinterpol.h"
 #include "error.h"
+#include "engngm.h"
+
 #include <sstream>
 #include <set>
 

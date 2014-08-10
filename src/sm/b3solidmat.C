@@ -39,6 +39,7 @@
 #include "contextioerr.h"
 #include "datastream.h"
 #include "classfactory.h"
+#include "engngm.h"
 #include "b3mat.h" // For the input record keywords.
 
 namespace oofem {

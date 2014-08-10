@@ -36,8 +36,6 @@
 #define nlstructuralelement_h
 
 #include "structuralelement.h"
-#include "domain.h"
-#include "floatmatrix.h"
 
 ///@name Input fields for NLStructuralElement
 //@{

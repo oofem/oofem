@@ -47,7 +47,6 @@
  #include "oofeggraphiccontext.h"
  #include "connectivitytable.h"
  #include "oofegutils.h"
- #include "engngm.h"
 #endif
 
 namespace oofem {
@@ -421,7 +420,7 @@ CohesiveSurface3d :: printOutputAt(FILE *File, TimeStep *tStep)
 }
 
 #ifdef __OOFEG
-void CohesiveSurface3d :: drawRawGeometry(oofegGraphicContext &gc)
+void CohesiveSurface3d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
@@ -465,7 +464,7 @@ void CohesiveSurface3d :: drawRawGeometry(oofegGraphicContext &gc)
     EMAddGraphicsToModel(ESIModel(), go);
 }
 
-void CohesiveSurface3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void CohesiveSurface3d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go1, *go2;
 
@@ -473,7 +472,6 @@ void CohesiveSurface3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownT
         return;
     }
 
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     WCRec p [ 2 ];
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
@@ -518,34 +516,33 @@ void CohesiveSurface3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownT
 
 
 void
-CohesiveSurface3d :: drawScalar(oofegGraphicContext &context)
+CohesiveSurface3d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
     FloatArray val;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-    if ( !giveIPValue(val, gp, context.giveIntVarType(), tStep) ) {
+    if ( !giveIPValue(val, gp, gc.giveIntVarType(), tStep) ) {
         return;
     }
 
-    int indx = context.giveIntVarIndx();
+    int indx = gc.giveIntVarIndx();
 
     double s [ 8 ];
     for ( int i = 0; i < 8; i++ ) {
         s [ i ] = val.at(indx);
     }
 
-    context.updateFringeTableMinMax(s, 1);
+    gc.updateFringeTableMinMax(s, 1);
 
     WCRec p [ 8 ];
     Particle *nodeA = ( Particle * ) giveNode(1);
     Particle *nodeB = ( Particle * ) giveNode(2);
-    if ( context.getInternalVarsDefGeoFlag() ) {
+    if ( gc.getInternalVarsDefGeoFlag() ) {
         // use deformed geometry
-        double defScale = context.getDefScale();
+        double defScale = gc.getDefScale();
         p [ 0 ].x = nodeA->giveUpdatedCoordinate(1, tStep, defScale);
         p [ 0 ].y = nodeA->giveUpdatedCoordinate(2, tStep, defScale);
         p [ 0 ].z = nodeA->giveUpdatedCoordinate(3, tStep, defScale);

@@ -45,10 +45,10 @@ class FEMComponent;
 class DynamicInputRecord;
 
 /// Helper function for creating a dynamic input record for a node
-DynamicInputRecord *CreateNodeIR(int i, InputFieldType nodeType, const FloatArray &coord);
+DynamicInputRecord *CreateNodeIR(int i, InputFieldType nodeType, FloatArray coord);
 
 /// Helper function for creating elements (with optional cross-section number).
-DynamicInputRecord *CreateElementIR(int i, InputFieldType elementType, const IntArray &nodes, int cs = 0);
+DynamicInputRecord *CreateElementIR(int i, InputFieldType elementType, IntArray nodes, int cs = 0);
 
 /**
  * Class representing the a dynamic Input Record.
@@ -117,9 +117,7 @@ public:
     void setField(bool item, InputFieldType id);
     void setField(std :: string item, InputFieldType id);
     void setField(FloatArray item, InputFieldType id);
-    void setField(std :: initializer_list< double > item, InputFieldType id);
     void setField(IntArray item, InputFieldType id);
-    void setField(std :: initializer_list< int > item, InputFieldType id);
     void setField(FloatMatrix item, InputFieldType id);
     void setField(std :: vector< std :: string > item, InputFieldType id);
     void setField(const Dictionary &item, InputFieldType id);

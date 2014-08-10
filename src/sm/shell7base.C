@@ -40,8 +40,6 @@
 #include "domain.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
-//#include "feinterpol3d.h"
-//#include "fei3dtrquad.h"
 #include "boundaryload.h"
 #include "constantpressureload.h"
 #include "constantsurfaceload.h"
@@ -676,23 +674,23 @@ Shell7Base :: giveAxialMatrix(const FloatArray &v)
 #if 1
 
 void
-Shell7Base :: computeFAt(FloatArray &lCoords, FloatMatrix &answer, FloatArray &genEps)
+Shell7Base :: computeFAt(FloatArray &lCoords, FloatMatrix &answer, FloatArray &genEps, TimeStep *tStep)
 {
     // Computes the deformation gradient in matrix form as open product(g_i, G^i) = gcov*Gcon^T
     FloatMatrix gcov, Gcon;
-    this->evalCovarBaseVectorsAt(lCoords, gcov, genEps, NULL);
+    this->evalCovarBaseVectorsAt(lCoords, gcov, genEps, tStep);
     this->evalInitialContravarBaseVectorsAt(lCoords, Gcon);
     answer.beProductTOf(gcov, Gcon);
 }
 
 void
-Shell7Base :: computeStressMatrix(FloatMatrix &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *stepN)
+Shell7Base :: computeStressMatrix(FloatMatrix &answer, FloatArray &genEps, GaussPoint *gp, Material *mat, TimeStep *tStep)
 {
     FloatMatrix F;
     FloatArray vF, vP;
-    computeFAt(*gp->giveNaturalCoordinates(), F, genEps);
+    computeFAt(*gp->giveNaturalCoordinates(), F, genEps, tStep);
     vF.beVectorForm(F);
-    static_cast< StructuralMaterial * >( mat )->giveFirstPKStressVector_3d(vP, gp, vF, stepN);
+    static_cast< StructuralMaterial * >( mat )->giveFirstPKStressVector_3d(vP, gp, vF, tStep);
     answer.beMatrixForm(vP);
   
 }
@@ -711,7 +709,7 @@ Shell7Base :: computeCauchyStressVector(FloatArray &answer, GaussPoint *gp, Time
 
     genEps.beProductOf(B, solVec);
     FloatMatrix F;
-    this->computeFAt(lCoords, F, genEps);   
+    this->computeFAt(lCoords, F, genEps, tStep);   
 
     FloatArray vS;
     giveIPValue(vS, gp, IST_StressTensor, tStep); // expects Second PK stress
@@ -1212,10 +1210,10 @@ Shell7Base :: computePressureForceAt(GaussPoint *gp, FloatArray &traction, const
 }
 
 void
-Shell7Base :: evalCovarNormalAt(FloatArray &nCov, FloatArray &lCoords, FloatArray &genEpsC)
+Shell7Base :: evalCovarNormalAt(FloatArray &nCov, FloatArray &lCoords, FloatArray &genEpsC, TimeStep *tStep)
 {
     FloatMatrix gcov;
-    this->evalCovarBaseVectorsAt(lCoords, gcov, genEpsC, NULL);
+    this->evalCovarBaseVectorsAt(lCoords, gcov, genEpsC, tStep);
     FloatArray g1, g2;
     g1.beColumnOf(gcov,1);
     g2.beColumnOf(gcov,2);
@@ -1296,7 +1294,7 @@ Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, Boundary
 
 
 void
-Shell7Base :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *stepN, ValueModeType mode)
+Shell7Base :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep *tStep, ValueModeType mode)
 {
     OOFEM_ERROR("Shell7Base :: computeBodyLoadVectorAt - currently not implemented");
 }
@@ -1487,7 +1485,7 @@ Shell7Base :: NodalRecoveryMI_recoverValues(std::vector<FloatArray> &recoveredVa
 #if 1
 
 void
-Shell7Base :: temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, ValueModeType u, TimeStep *stepN, FloatArray &answer)
+Shell7Base :: temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, ValueModeType u, TimeStep *tStep, FloatArray &answer)
 {
     ///@todo: NOT CHECKED!!!
     // Routine to extract vector given an array of dofid items
@@ -1495,7 +1493,7 @@ Shell7Base :: temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, V
     
     IntArray bNodes;
     this->fei->computeLocalEdgeMapping(bNodes, boundary);
-    this->computeBoundaryVectorOf(bNodes, dofIdArray, u, stepN, answer); ///@todo uses new standard method
+    this->computeBoundaryVectorOf(bNodes, dofIdArray, u, tStep, answer); ///@todo uses new standard method
 
     //answer.resize( dofIdArray.giveSize() * bNodes.giveSize() );
     //answer.zero();
@@ -1506,7 +1504,7 @@ Shell7Base :: temp_computeBoundaryVectorOf(IntArray &dofIdArray, int boundary, V
     //        Dof *d = dMan->giveDof(j);
     //        k++;
     //        if ( dMan->hasDofID( (DofIDItem) dofIdArray.at(j) ) ) {
-    //            answer.at(k) = d->giveUnknown(VM_Total, stepN); 
+    //            answer.at(k) = d->giveUnknown(VM_Total, tStep); 
     //        }
     //    }
     //}

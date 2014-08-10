@@ -41,6 +41,8 @@
 #include "floatmatrix.h"
 #include "fluiddynamicmaterial.h"
 #include "dynamicinputrecord.h"
+#include "engngm.h"
+#include "node.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

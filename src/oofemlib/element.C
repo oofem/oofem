@@ -55,6 +55,7 @@
 #include "function.h"
 #include "dofmanager.h"
 #include "node.h"
+#include "gausspoint.h"
 #include "dynamicinputrecord.h"
 #include "matstatmapperint.h"
 #include "cltypes.h"
@@ -700,7 +701,7 @@ Element :: giveInputRecord(DynamicInputRecord &input)
 
 
 #ifdef __PARALLEL_MODE
-    if ( this->giveDomain()->giveEngngModel()->isParallel() && partitions.giveSize() > 0 ) {
+    if ( partitions.giveSize() > 0 ) {
         input.setField(this->partitions, _IFT_Element_partitions);
         if ( this->parallel_mode == Element_remote ) {
             input.setField(_IFT_Element_remote);
@@ -1481,22 +1482,22 @@ Element :: predictRelativeComputationalCost()
 
 #ifdef __OOFEG
 void
-Element :: drawYourself(oofegGraphicContext &gc)
+Element :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
 {
     OGC_PlotModeType mode = gc.giveIntVarPlotMode();
 
     if ( mode == OGC_rawGeometry ) {
-        this->drawRawGeometry(gc);
+        this->drawRawGeometry(gc, tStep);
     } else if ( mode == OGC_elementAnnotation ) {
-        this->drawAnnotation(gc);
+        this->drawAnnotation(gc, tStep);
     } else if ( mode == OGC_deformedGeometry ) {
-        this->drawDeformedGeometry(gc, DisplacementVector);
+        this->drawDeformedGeometry(gc, tStep, DisplacementVector);
     } else if ( mode == OGC_eigenVectorGeometry ) {
-        this->drawDeformedGeometry(gc, EigenVector);
+        this->drawDeformedGeometry(gc, tStep, EigenVector);
     } else if ( mode == OGC_scalarPlot ) {
-        this->drawScalar(gc);
+        this->drawScalar(gc, tStep);
     } else if ( mode == OGC_elemSpecial ) {
-        this->drawSpecial(gc);
+        this->drawSpecial(gc, tStep);
     } else {
         OOFEM_ERROR("unsupported mode");
     }
@@ -1504,7 +1505,7 @@ Element :: drawYourself(oofegGraphicContext &gc)
 
 
 void
-Element :: drawAnnotation(oofegGraphicContext &gc)
+Element :: drawAnnotation(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, count = 0;
     Node *node;

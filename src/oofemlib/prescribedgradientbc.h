@@ -39,6 +39,7 @@
 #include "activebc.h"
 #include "valuemodetype.h"
 #include "floatmatrix.h"
+#include "floatarray.h"
 
 #define _IFT_PrescribedGradientBC_centercoords "ccoord"
 #define _IFT_PrescribedGradientBC_gradient "gradient"
@@ -54,19 +55,8 @@ namespace oofem {
  * @date Mar 5, 2014
  */
 
-class OOFEM_EXPORT PrescribedGradientBC : public ActiveBoundaryCondition {
-public:
-	PrescribedGradientBC(int n, Domain * d);
-	virtual ~PrescribedGradientBC();
-
-    virtual bcType giveType() const { return UnknownBT; }
-
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
-
-    virtual void scale(double s) {mGradient.times(s);}
-
-    void giveGradientVoigt(FloatArray &oGradient) const;
+class OOFEM_EXPORT PrescribedGradientBC : public ActiveBoundaryCondition
+{
 protected:
     /// Prescribed gradient @f$ d_{ij} @f$
     FloatMatrix mGradient;
@@ -76,6 +66,18 @@ protected:
 
     double domainSize();
 
+public:
+    PrescribedGradientBC(int n, Domain * d);
+    virtual ~PrescribedGradientBC();
+
+    virtual bcType giveType() const { return UnknownBT; }
+
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
+
+    virtual void scale(double s) { mGradient.times(s); }
+
+    void giveGradientVoigt(FloatArray &oGradient) const;
 };
 
 } /* namespace oofem */

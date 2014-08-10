@@ -38,6 +38,7 @@
 #include "dofmanager.h"
 #include "dof.h"
 #include "classfactory.h"
+#include "domain.h"
 
 #include "structengngmodel.h" // JB
 

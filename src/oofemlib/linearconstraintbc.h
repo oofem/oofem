@@ -36,6 +36,7 @@
 #define linearconstraintbc_h
 
 #include "activebc.h"
+#include "floatarray.h"
 #include "intarray.h"
 #include "chartype.h"
 #include "valuemodetype.h"

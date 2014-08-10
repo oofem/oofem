@@ -33,11 +33,13 @@
  */
 
 #include "cct3d.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "load.h"
 #include "structuralms.h"
 #include "mathfem.h"
 #include "gaussintegrationrule.h"
+#include "gausspoint.h"
 #include "classfactory.h"
 
 #include <cstdlib>

@@ -36,6 +36,7 @@
 #include "timestep.h"
 #include "element.h"
 #include "dofmanager.h"
+#include "engngm.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"

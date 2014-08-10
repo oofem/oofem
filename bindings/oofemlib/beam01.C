@@ -84,24 +84,24 @@ int main(int argc, char *argv[])
     DynamicInputRecord* beam;
 
     beam = CreateElementIR(1, _IFT_Beam2d_Name, {1, 2});
-    beam->setField({3, 1}, _IFT_Element_boundaryload);
+    beam->setField(IntArray{3, 1}, _IFT_Element_boundaryload);
     beam->setField(IntArray{5}, _IFT_Element_bodyload);
     myData.insertInputRecord(DataReader::IR_elemRec, beam);
 
     beam = CreateElementIR(2, _IFT_Beam2d_Name, {2, 3});
-    beam->setField(IntArray{ 6 }, _IFT_Beam2d_dofstocondense);
-    beam->setField(IntArray{ 5 }, _IFT_Element_bodyload);
+    beam->setField({6}, _IFT_Beam2d_dofstocondense);
+    beam->setField(IntArray{5}, _IFT_Element_bodyload);
     myData.insertInputRecord(DataReader::IR_elemRec, beam);
 
     beam = CreateElementIR(3, _IFT_Beam2d_Name, {3, 4});
-    beam->setField(IntArray{ 3 }, _IFT_Beam2d_dofstocondense);
+    beam->setField(IntArray{3}, _IFT_Beam2d_dofstocondense);
     myData.insertInputRecord(DataReader::IR_elemRec, beam);
 
     beam = CreateElementIR(4, _IFT_Beam2d_Name, {4, 5});
     myData.insertInputRecord(DataReader::IR_elemRec, beam);
 
     beam = CreateElementIR(5, _IFT_Beam2d_Name, {6, 2});
-    beam->setField(IntArray{ 6 }, _IFT_Beam2d_dofstocondense);
+    beam->setField(IntArray{6}, _IFT_Beam2d_dofstocondense);
     myData.insertInputRecord(DataReader::IR_elemRec, beam);
 
     //CrossSection
@@ -126,19 +126,19 @@ int main(int argc, char *argv[])
     myInput = new DynamicInputRecord(_IFT_BoundaryCondition_Name, 1);
     myInput->setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
     myInput->setField(FloatArray{0.}, _IFT_BoundaryCondition_values);
-    myInput->setField(IntArray{ D_w }, _IFT_GeneralBoundaryCondition_dofs);
+    myInput->setField(IntArray{D_w}, _IFT_GeneralBoundaryCondition_dofs);
     myData.insertInputRecord(DataReader::IR_bcRec, myInput);
 
     myInput = new DynamicInputRecord(_IFT_BoundaryCondition_Name, 2);
     myInput->setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
     myInput->setField(FloatArray{0.}, _IFT_BoundaryCondition_values);
-    myInput->setField(IntArray{ R_v }, _IFT_GeneralBoundaryCondition_dofs);
+    myInput->setField(IntArray{R_v}, _IFT_GeneralBoundaryCondition_dofs);
     myData.insertInputRecord(DataReader::IR_bcRec, myInput);
 
     myInput = new DynamicInputRecord(_IFT_BoundaryCondition_Name, 6);
     myInput->setField(2, _IFT_GeneralBoundaryCondition_timeFunct);
-    myInput->setField({0., 0., -0.006e-3}, _IFT_BoundaryCondition_values);
-    myInput->setField({D_u, D_w, R_v}, _IFT_GeneralBoundaryCondition_dofs);
+    myInput->setField(FloatArray{0., 0., -0.006e-3}, _IFT_BoundaryCondition_values);
+    myInput->setField(IntArray{D_u, D_w, R_v}, _IFT_GeneralBoundaryCondition_dofs);
     myInput->setField(4, _IFT_GeneralBoundaryCondition_set);
     myData.insertInputRecord(DataReader::IR_bcRec, myInput);
 
@@ -146,20 +146,20 @@ int main(int argc, char *argv[])
     //Loads
     myInput = new DynamicInputRecord(_IFT_ConstantEdgeLoad_Name, 3);
     myInput->setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
-    myInput->setField({0.0, 10.0, 0.0}, _IFT_Load_components);
+    myInput->setField(FloatArray{0.0, 10.0, 0.0}, _IFT_Load_components);
     myInput->setField(3, _IFT_BoundaryLoad_loadtype);
     myInput->setField(3, _IFT_BoundaryLoad_ndofs);
     myData.insertInputRecord(DataReader::IR_bcRec, myInput);
 
     myInput = new DynamicInputRecord(_IFT_NodalLoad_Name, 4);
     myInput->setField(1, _IFT_GeneralBoundaryCondition_timeFunct);
-    myInput->setField({-18.0, 24.0, 0.0}, _IFT_Load_components);
+    myInput->setField(FloatArray{-18.0, 24.0, 0.0}, _IFT_Load_components);
     myInput->setField(3, _IFT_GeneralBoundaryCondition_set);
     myData.insertInputRecord(DataReader::IR_bcRec, myInput);
 
     myInput = new DynamicInputRecord(_IFT_StructuralTemperatureLoad_Name, 5);
     myInput->setField(3, _IFT_GeneralBoundaryCondition_timeFunct);
-    myInput->setField({30.0, -20.0}, _IFT_Load_components);
+    myInput->setField(FloatArray{30.0, -20.0}, _IFT_Load_components);
     myData.insertInputRecord(DataReader::IR_bcRec, myInput);
 
     //Functions
@@ -180,19 +180,19 @@ int main(int argc, char *argv[])
 
     //Sets
     myInput = new DynamicInputRecord(_IFT_Set_Name, 1);
-    myInput->setField({1, 2, 3, 4, 5}, _IFT_Set_elements);
+    myInput->setField(IntArray{1, 2, 3, 4, 5}, _IFT_Set_elements);
     myData.insertInputRecord(DataReader::IR_setRec, myInput);
 
     myInput = new DynamicInputRecord(_IFT_Set_Name, 2);
-    myInput->setField({1, 5}, _IFT_Set_nodes);
+    myInput->setField(IntArray{1, 5}, _IFT_Set_nodes);
     myData.insertInputRecord(DataReader::IR_setRec, myInput);
 
     myInput = new DynamicInputRecord(_IFT_Set_Name, 3);
-    myInput->setField(IntArray{ 3 }, _IFT_Set_nodes);
+    myInput->setField(IntArray{3}, _IFT_Set_nodes);
     myData.insertInputRecord(DataReader::IR_setRec, myInput);
 
     myInput = new DynamicInputRecord(_IFT_Set_Name, 4);
-    myInput->setField(IntArray{ 6 }, _IFT_Set_nodes);
+    myInput->setField(IntArray{6}, _IFT_Set_nodes);
     myData.insertInputRecord(DataReader::IR_setRec, myInput);
 
     // Writing to file (to verify, and for backups)

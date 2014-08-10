@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
 #include "qwedge.h"
+#include "fei3dwedgequad.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
@@ -56,7 +56,6 @@ REGISTER_Element(QWedge);
 FEI3dWedgeQuad QWedge :: interpolation;
 
 QWedge :: QWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
-    // Constructor.
 {
     numberOfDofMans = 15;
 }
@@ -72,6 +71,11 @@ QWedge :: initializeFrom(InputRecord *ir)
     return this->NLStructuralElement :: initializeFrom(ir);
 }
 
+FEInterpolation *
+QWedge :: giveInterpolation() const
+{
+    return & interpolation;
+}
 
 void
 QWedge :: giveDofManDofIDMask(int inode, IntArray &answer) const
@@ -80,11 +84,7 @@ QWedge :: giveDofManDofIDMask(int inode, IntArray &answer) const
 // DofId mask array contains the DofID constants (defined in cltypes.h)
 // describing physical meaning of particular DOFs.
 {
-    answer.resize(3);
-
-    answer.at(1) = D_u;
-    answer.at(2) = D_v;
-    answer.at(3) = D_w;
+    answer = {D_u, D_v, D_w};
 }
 
 

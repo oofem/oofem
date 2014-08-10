@@ -109,8 +109,8 @@ public:
     virtual void updateLocalNumbering(EntityRenumberingFunctor &f);
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
 #endif
 
 protected:
@@ -121,9 +121,9 @@ protected:
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 
-    double giveKappayCoeff();
-    double giveKappazCoeff();
-    void computeKappaCoeffs();
+    double giveKappayCoeff(TimeStep *tStep);
+    double giveKappazCoeff(TimeStep *tStep);
+    void computeKappaCoeffs(TimeStep *tStep);
     virtual double computeLength();
     virtual void computeClampedStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode rMode, TimeStep *tStep);

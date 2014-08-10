@@ -33,6 +33,7 @@
  */
 
 #include "tr1_ht.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "crosssection.h"
 #include "gausspoint.h"
@@ -64,8 +65,11 @@ Tr1_hmt :: Tr1_hmt(int n, Domain *aDomain) : Tr1_ht(n, aDomain)
 }
 
 Tr1_ht :: ~Tr1_ht()
-// Destructor
 { }
+
+
+FEInterpolation *
+Tr1_ht :: giveInterpolation() const { return & this->interp; }
 
 
 void

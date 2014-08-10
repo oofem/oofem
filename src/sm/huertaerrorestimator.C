@@ -65,6 +65,7 @@
 #include "outputmanager.h"
 #include "boundarycondition.h"
 #include "feinterpol.h"
+#include "gausspoint.h"
 
 #include <vector>
 #include <string>
@@ -1349,7 +1350,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                     }
                 }
 
-                ir->setField({nd1, nd2}, "nodes");
+                ir->setField(IntArray{nd1, nd2}, "nodes");
                 ir->setField(csect2, "crosssect");
 
                 // copy body and boundary loads
@@ -1435,7 +1436,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem1D(Element *element, 
                             globCoord.at(3) = zc * ( 1.0 - u ) + zm * u;
 
                             // this effectively rewrites the local coordinates of the fictitious integration point
-                            this->HuertaErrorEstimatorI_computeLocalCoords(* locCoord, globCoord);
+                            element->computeLocalCoordinates(* locCoord, globCoord);
                             // get N matrix at the fictitious integration point
                             this->HuertaErrorEstimatorI_computeNmatrixAt(gp, Nmatrix);
                             // get displacement at the fictitious integration point
@@ -1656,7 +1657,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                         y = ( yc * ( 1.0 - u ) + ys1 * u ) * ( 1.0 - v ) + ( ys2 * ( 1.0 - u ) + ym * u ) * v;
                         z = ( zc * ( 1.0 - u ) + zs1 * u ) * ( 1.0 - v ) + ( zs2 * ( 1.0 - u ) + zm * u ) * v;
 
-                        ir->setField({x, y, z}, "coords");
+                        ir->setField(FloatArray{x, y, z}, "coords");
 
                         if ( ( lcs = node->giveLocalCoordinateTriplet() ) != NULL ) {
                             FloatArray lcs_vec = {lcs->at(1, 1), lcs->at(1, 2), lcs->at(1, 3),
@@ -1820,7 +1821,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                     nd3 = localNodeIdArray.at( connectivity->at(nd + level + 3) );
                     nd4 = localNodeIdArray.at( connectivity->at(nd + level + 2) );
 
-                    ir->setField({nd1, nd2, nd3, nd4}, "nodes");
+                    ir->setField(IntArray{nd1, nd2, nd3, nd4}, "nodes");
                     ir->setField(csect, "crosssect");
 
                     // copy body and boundary loads
@@ -1979,7 +1980,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                 globCoord.at(3) = ( zc * ( 1.0 - u ) + zs1 * u ) * ( 1.0 - v ) + ( zs2 * ( 1.0 - u ) + zm * u ) * v;
 
                                 // this effectively rewrites the local coordinates of the fictitious integration point
-                                this->HuertaErrorEstimatorI_computeLocalCoords(* locCoord, globCoord);
+                                element->computeLocalCoordinates(* locCoord, globCoord);
                                 // get N matrix at the fictitious integration point
                                 this->HuertaErrorEstimatorI_computeNmatrixAt(gp, Nmatrix);
                                 // get displacement at the fictitious integration point
@@ -2274,7 +2275,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                             z = ( ( zc * ( 1.0 - u ) + zs1 * u ) * ( 1.0 - v ) + ( zs2 * ( 1.0 - u ) + zf1 * u ) * v ) * ( 1.0 - w )
                                 + ( ( zs3 * ( 1.0 - u ) + zf2 * u ) * ( 1.0 - v ) + ( zf3 * ( 1.0 - u ) + zm * u ) * v ) * w;
 
-                            ir->setField({x, y, z}, "coords");
+                            ir->setField(FloatArray{x, y, z}, "coords");
 
                             if ( ( lcs = node->giveLocalCoordinateTriplet() ) != NULL ) {
                                 FloatArray lcs_vec = {lcs->at(1, 1), lcs->at(1, 2), lcs->at(1, 3),
@@ -2496,7 +2497,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                         nd8 = localNodeIdArray.at( connectivity->at(nd + level + 2) );
 
                         ir->setRecordKeywordField(hexatype, localElemId);
-                        ir->setField({nd1, nd2, nd3, nd4, nd5, nd6, nd7, nd8}, "nodes");
+                        ir->setField(IntArray{nd1, nd2, nd3, nd4, nd5, nd6, nd7, nd8}, "nodes");
                         ir->setField(csect, "crosssect");
 
                         // copy body and boundary loads
@@ -2698,7 +2699,7 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                                       + ( ( zs3 * ( 1.0 - u ) + zf2 * u ) * ( 1.0 - v ) + ( zf3 * ( 1.0 - u ) + zm * u ) * v ) * w;
 
                                     // this effectively rewrites the local coordinates of the fictitious integration point
-                                    this->HuertaErrorEstimatorI_computeLocalCoords(* locCoord, globCoord);
+                                    element->computeLocalCoordinates(* locCoord, globCoord);
                                     // get N matrix at the fictitious integration point
                                     this->HuertaErrorEstimatorI_computeNmatrixAt(gp, Nmatrix);
                                     // get displacement at the fictitious integration point

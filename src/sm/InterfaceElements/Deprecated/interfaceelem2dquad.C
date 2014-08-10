@@ -222,7 +222,7 @@ InterfaceElem2dQuad :: giveInterpolation() const
 
 
 #ifdef __OOFEG
-void InterfaceElem2dQuad :: drawRawGeometry(oofegGraphicContext &gc)
+void InterfaceElem2dQuad :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -257,7 +257,7 @@ void InterfaceElem2dQuad :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void InterfaceElem2dQuad :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void InterfaceElem2dQuad :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -266,7 +266,6 @@ void InterfaceElem2dQuad :: drawDeformedGeometry(oofegGraphicContext &gc, Unknow
         return;
     }
 
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
@@ -294,32 +293,31 @@ void InterfaceElem2dQuad :: drawDeformedGeometry(oofegGraphicContext &gc, Unknow
 }
 
 
-void InterfaceElem2dQuad :: drawScalar(oofegGraphicContext &context)
+void InterfaceElem2dQuad :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int indx, result = 0;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray gcoord(3), v1;
     WCRec p [ 1 ];
     GraphicObj *go;
     double val [ 1 ];
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
-    if ( context.giveIntVarMode() == ISM_recovered ) {
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
         return;
     }
 
     for ( GaussPoint *gp: *iRule ) {
         result = 0;
-        result += giveIPValue(v1, gp, context.giveIntVarType(), tStep);
+        result += giveIPValue(v1, gp, gc.giveIntVarType(), tStep);
         if ( result != 1 ) {
             continue;
         }
 
-        indx = context.giveIntVarIndx();
+        indx = gc.giveIntVarIndx();
 
         result += this->computeGlobalCoordinates( gcoord, * ( gp->giveNaturalCoordinates() ) );
 
@@ -328,7 +326,7 @@ void InterfaceElem2dQuad :: drawScalar(oofegGraphicContext &context)
         p [ 0 ].z = 0.;
 
         val [ 0 ] = v1.at(indx);
-        context.updateFringeTableMinMax(val, 1);
+        gc.updateFringeTableMinMax(val, 1);
         //if (val[0] > 0.) {
 
         EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);

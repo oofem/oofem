@@ -34,6 +34,7 @@
 
 #include "shell7basexfem.h"
 #include "shell7base.h"
+#include "feinterpol3d.h"
 #include "xfem/enrichmentitem.h"
 #include "xfem/xfemmanager.h"
 #include "dofmanager.h"
@@ -41,11 +42,12 @@
 #include "connectivitytable.h"
 #include "InterfaceMaterials/intmatbilinczfagerstrom.h"
 #include "mathfem.h"
-#include "node.h"
-#include "geometry.h"
-#include "cltypes.h"
+//#include "node.h"
+//#include "geometry.h"
+//#include "cltypes.h"
 #include "xfem/enrichmentitems/crack.h"
 #include "xfem/enrichmentitems/shellcrack.h"
+#include "gausspoint.h"
 namespace oofem {
 
 /* Scale factor fo the discontinuous dofs. Implies that the corresponding 
@@ -233,7 +235,6 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov,
     Shell7Base :: evalCovarBaseVectorsAt(lCoords, gcov, genEpsC, tStep);
 
     // Discontinuous part g_d
-    tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray dGenEps;
     FloatMatrix gcovd; 
     std :: vector< double > ef;
@@ -614,7 +615,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         unknowns.beProductOf(NEnr, solVecD);
         xd.beProductOf(lambda,unknowns); // spatial jump
 	genEpsC.beProductOf(BEnr, solVecC);
-	this->computeFAt(lCoords, F, genEpsC);
+	this->computeFAt(lCoords, F, genEpsC, tStep);
 
 	// Transform xd and F to a local coord system
         this->evalInitialCovarNormalAt(nCov, lCoords);
@@ -625,13 +626,9 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         // Compute cohesive traction based on jump
         intMat->giveFirstPKTraction_3d(T, gp, xd, F, tStep);
 	lambdaN.beProductOf(lambda,NEnr);
-	//Q.printYourself();	
-	//T.printYourself();
-	T.rotatedWith(Q,'t'); // transform back to global coord system
-//lambdaN.printYourself();
 
+	T.rotatedWith(Q,'t'); // transform back to global coord system
 	Fp.beTProductOf(lambdaN, T);
-	//Fp.printYourself();
         double dA = this->computeAreaAround(gp,xi);
         answerTemp.add(dA*DISC_DOF_SCALE_FAC,Fp);
         }
@@ -1911,7 +1908,6 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
                 
                 for ( int j = 1; j <= numCellNodes; j++ ) {
                     vtkPiece.setInternalVarInNode( fieldNum, nodeNum, values[j-1] );
-                    //values[j-1].printYourself();
                     //ZZNodalRecoveryMI_recoverValues(el.nodeVars[fieldNum], layer, type, tStep);          
                     nodeNum += 1;        
                 }                                

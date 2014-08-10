@@ -33,6 +33,7 @@
  */
 
 #include "qspace.h"
+#include "fei3dhexaquad.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -64,6 +65,9 @@ QSpace :: initializeFrom(InputRecord *ir)
 
     return this->NLStructuralElement :: initializeFrom(ir);
 }
+
+
+FEInterpolation *QSpace :: giveInterpolation() const { return & interpolation; }
 
 
 void

@@ -1,4 +1,6 @@
 #include "tet21ghostsolid.h"
+#include "fei3dtetquad.h"
+#include "fei3dtetlin.h"
 #include "nlstructuralelement.h"
 #include "classfactory.h"
 #include "gausspoint.h"

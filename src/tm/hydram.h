@@ -77,6 +77,7 @@
 #include "timestep.h"
 #include "material.h"
 #include "interface.h"
+#include "valuemodetype.h"
 
 ///@name Input fields for HydrationModel
 //@{

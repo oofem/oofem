@@ -81,12 +81,10 @@ public:
     virtual const char *giveClassName() const { return "BsplinePlaneStressElement"; }
 
 #ifdef __OOFEG
-    //
     // Graphics output
-    //
-    virtual void  drawScalar(oofegGraphicContext &context);
-    virtual void drawDeformedGeometry(oofegGraphicContext &mode, UnknownType ut) {
-        drawIGAPatchDeformedGeometry(this, this, mode, ut);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType ut) {
+        drawIGAPatchDeformedGeometry(this, this, gc, tStep, ut);
     }
 #endif
 
@@ -126,9 +124,9 @@ public:
     //
     // Graphics output
     //
-    virtual void  drawScalar(oofegGraphicContext &context);
-    virtual void drawDeformedGeometry(oofegGraphicContext &mode, UnknownType ut) {
-        drawIGAPatchDeformedGeometry(this, this, mode, ut);
+    virtual void  drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType ut) {
+        drawIGAPatchDeformedGeometry(this, this, gc, tStep, ut);
     }
 
 #endif
@@ -172,7 +170,7 @@ public:
     virtual const char *giveClassName() const { return "TSplinePlaneStressElement"; }
 #ifdef __OOFEG
     // Graphics output
-    virtual void  drawScalar(oofegGraphicContext &context);
+    virtual void  drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
 protected:
@@ -210,9 +208,9 @@ public:
     virtual const char *giveClassName() const { return "NURBSSpace3dElement"; }
 #ifdef __OOFEG
     // Graphics output
-    virtual void drawScalar(oofegGraphicContext &context);
-    virtual void drawDeformedGeometry(oofegGraphicContext &mode, UnknownType ut) {
-        drawIGAPatchDeformedGeometry(this, this, mode, ut);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType ut) {
+        drawIGAPatchDeformedGeometry(this, this, gc, tStep, ut);
     }
 #endif
 

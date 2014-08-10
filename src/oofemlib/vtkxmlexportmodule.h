@@ -36,8 +36,6 @@
 #define vtkxmlexportmodule_h
 
 #include "exportmodule.h"
-#include "domain.h"
-#include "engngm.h"
 #include "intarray.h"
 #include "nodalrecoverymodel.h"
 #include "interface.h"
@@ -68,7 +66,9 @@
 //@}
 
 namespace oofem {
-    ///@todo Rename this to something like "ExportPiece" and move it to a separate file (it doesn't actually contain anything VTK-specific).
+class Node;
+
+///@todo Rename this to something like "ExportPiece" and move it to a separate file (it doesn't actually contain anything VTK-specific).
 class VTKPiece
 {
 public:
@@ -314,7 +314,7 @@ protected:
      */
     int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
                                 int &regionDofMans, int &totalcells,
-                                Domain *domain, int reg);
+                                Domain *domain, TimeStep *tStep, int reg);
     /// Returns number of regions (aka regionSets)
     int giveNumberOfRegions();
     /// Returns element set

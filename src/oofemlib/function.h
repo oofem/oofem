@@ -36,8 +36,8 @@
 #define function_h
 
 #include "femcmpnn.h"
-#include "domain.h"
 #include "valuemodetype.h"
+#include "intarray.h"
 #include "floatarray.h"
 
 #include <map>

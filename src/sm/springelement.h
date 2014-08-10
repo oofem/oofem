@@ -100,9 +100,9 @@ public:
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
 #ifdef __OOFEG
-    //void drawRawGeometry(oofegGraphicContext &);
-    //void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    //void drawScalar(oofegGraphicContext &context);
+    //void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    //void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    //void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
     // definition & identification

@@ -178,4 +178,27 @@ StructuralInterfaceCrossSection :: give3dStiffnessMatrix_dTdj(FloatMatrix &answe
         OOFEM_ERROR("not implemented - use numerical tangent instead (keyword: 'use_num_tangent') ");
     }
 }
+
+
+
+#ifdef __PARALLEL_MODE
+int
+StructuralInterfaceCrossSection :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+{
+    return this->giveInterfaceMaterial()->packUnknowns(buff, tStep, gp);
+}
+
+int
+StructuralInterfaceCrossSection :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+{
+    return this->giveInterfaceMaterial()->unpackAndUpdateUnknowns(buff, tStep, gp);
+}
+
+int
+StructuralInterfaceCrossSection :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *gp)
+{
+    return this->giveInterfaceMaterial()->estimatePackSize(buff, gp);
+}
+#endif
+
 } // end namespace oofem

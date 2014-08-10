@@ -330,7 +330,7 @@ InterfaceElem1d :: computeLocalSlipDir(FloatArray &normal)
 
 
 #ifdef __OOFEG
-void InterfaceElem1d :: drawRawGeometry(oofegGraphicContext &gc)
+void InterfaceElem1d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -354,7 +354,7 @@ void InterfaceElem1d :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void InterfaceElem1d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void InterfaceElem1d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -363,7 +363,6 @@ void InterfaceElem1d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownTyp
         return;
     }
 
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
@@ -383,22 +382,21 @@ void InterfaceElem1d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownTyp
 }
 
 
-void InterfaceElem1d :: drawScalar(oofegGraphicContext &context)
+void InterfaceElem1d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int indx, result = 0;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray gcoord(3), v1;
     WCRec p [ 1 ];
     GraphicObj *go;
     double val [ 1 ];
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
-    if ( context.getInternalVarsDefGeoFlag() ) {
-        double defScale = context.getDefScale();
+    if ( gc.getInternalVarsDefGeoFlag() ) {
+        double defScale = gc.getDefScale();
         p [ 0 ].x = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale) +
                                      this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) );
         p [ 0 ].y = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale) +
@@ -411,20 +409,20 @@ void InterfaceElem1d :: drawScalar(oofegGraphicContext &context)
         p [ 0 ].z = ( FPNum ) ( this->giveNode(1)->giveCoordinate(3) );
     }
 
-    result += giveIPValue(v1, iRule->getIntegrationPoint(0), context.giveIntVarType(), tStep);
+    result += giveIPValue(v1, iRule->getIntegrationPoint(0), gc.giveIntVarType(), tStep);
 
 
     for ( GaussPoint *gp: *iRule ) {
         result = 0;
-        result += giveIPValue(v1, gp, context.giveIntVarType(), tStep);
+        result += giveIPValue(v1, gp, gc.giveIntVarType(), tStep);
         if ( result != 1 ) {
             continue;
         }
 
-        indx = context.giveIntVarIndx();
+        indx = gc.giveIntVarIndx();
 
         val [ 0 ] = v1.at(indx);
-        context.updateFringeTableMinMax(val, 1);
+        gc.updateFringeTableMinMax(val, 1);
 
         EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
         EASValsSetMType(FILLED_CIRCLE_MARKER);

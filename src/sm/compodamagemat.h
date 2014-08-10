@@ -39,6 +39,8 @@
 #include "linearelasticmaterial.h"
 #include "structuralmaterial.h"
 #include "structuralms.h"
+#include "intarray.h"
+#include "floatarray.h"
 #include "cltypes.h"
 
 ///@name Input fields for CompoDamageMat
