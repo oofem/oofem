@@ -48,6 +48,22 @@
 #include "eleminterpmapperinterface.h"
 
 namespace oofem {
+StructuralMaterial :: StructuralMaterial(int n, Domain * d) : Material(n, d) 
+{ 
+  
+      // Voigt index map
+      vIindex.resize(3);
+      vIindex[0] = { 1, 6, 5 };
+      vIindex[1] = { 9, 2, 4 };
+      vIindex[2] = { 8, 7, 3 };  
+      
+      // Symmetric Voigt index map
+      svIndex.resize(3);
+      svIndex[0] = { 1, 6, 5 };
+      svIndex[1] = { 6, 2, 4 };
+      svIndex[2] = { 5, 4, 3 };       
+    
+}  
 int
 StructuralMaterial :: hasMaterialModeCapability(MaterialMode mode)
 //
@@ -339,6 +355,8 @@ StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix
     if ( matMode == _3dMat ) {
         //Save terms associated with H = [du/dx, dv/dy, dw/dz, dv/dz, du/dz, du/dy, dw/dy, dw/dx, dv/dx]
 
+#if 1    
+      
         answer.resize(9, 9);
         answer(0, 0) = F(0) * C(0, 0) * F(0) + F(0) * C(0, 5) * F(5) + F(0) * C(0, 4) * F(4) + F(5) * C(5, 0) * F(0) + F(5) * C(5, 5) * F(5) + F(5) * C(5, 4) * F(4) + F(4) * C(4, 0) * F(0) + F(4) * C(4, 5) * F(5) + F(4) * C(4, 4) * F(4) + S(0);
         answer(0, 1) = F(0) * C(0, 5) * F(8) + F(0) * C(0, 1) * F(1) + F(0) * C(0, 3) * F(3) + F(5) * C(5, 5) * F(8) + F(5) * C(5, 1) * F(1) + F(5) * C(5, 3) * F(3) + F(4) * C(4, 5) * F(8) + F(4) * C(4, 1) * F(1) + F(4) * C(4, 3) * F(3) + 0.0;
@@ -421,6 +439,33 @@ StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix
         answer(8, 6) = F(8) * C(0, 5) * F(7) + F(8) * C(0, 1) * F(6) + F(8) * C(0, 3) * F(2) + F(1) * C(5, 5) * F(7) + F(1) * C(5, 1) * F(6) + F(1) * C(5, 3) * F(2) + F(3) * C(4, 5) * F(7) + F(3) * C(4, 1) * F(6) + F(3) * C(4, 3) * F(2) + 0.0;
         answer(8, 7) = F(8) * C(0, 0) * F(7) + F(8) * C(0, 5) * F(6) + F(8) * C(0, 4) * F(2) + F(1) * C(5, 0) * F(7) + F(1) * C(5, 5) * F(6) + F(1) * C(5, 4) * F(2) + F(3) * C(4, 0) * F(7) + F(3) * C(4, 5) * F(6) + F(3) * C(4, 4) * F(2) + 0.0;
         answer(8, 8) = F(8) * C(0, 0) * F(8) + F(8) * C(0, 5) * F(1) + F(8) * C(0, 4) * F(3) + F(1) * C(5, 0) * F(8) + F(1) * C(5, 5) * F(1) + F(1) * C(5, 4) * F(3) + F(3) * C(4, 0) * F(8) + F(3) * C(4, 5) * F(1) + F(3) * C(4, 4) * F(3) + S(0);
+
+#else
+      ///@todo Experimental - added 110814 by JB
+      // Conversion expressed in index form. Seems a tiny bit slower than that above but easier to debug.  
+      FloatMatrix I(3,3);
+      I.beUnitMatrix();
+      	
+      //I_ik * S_jl + F_im F_kn C_mjnl
+      answer.resize(9,9);
+      for ( int i = 1; i <= 3; i++) {
+	for ( int j = 1; j <= 3; j++) {
+	  for ( int k = 1; k <= 3; k++) {
+	    for ( int l = 1; l <= 3; l++) {
+	      for ( int m = 1; m <= 3; m++) {
+		for ( int n = 1; n <= 3; n++) {
+      
+		  answer.at( giveVI(i,j), giveVI(k,l) ) += I.at(i,k) * S.at(giveSymVI(j,l)) + F.at(giveVI(i,m)) * F.at(giveVI(k,n)) * C.at(giveSymVI(m,j),giveSymVI(n,l) );
+		  
+		}
+	      }
+	    }
+	  }
+	}
+      }
+      
+#endif
+	
     } else if ( matMode == _PlaneStress ) {
         // Save terms associated with H = [du/dx dv/dy du/dy dv/dx]
 

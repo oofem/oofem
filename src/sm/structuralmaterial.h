@@ -42,6 +42,7 @@
 #include "matstatus.h"
 #include "stressstrainprincmode.h"
 #include "valuemodetype.h"
+#include <vector>
 
 ///@name Input fields for StructuralMaterial
 //@{
@@ -118,12 +119,17 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    StructuralMaterial(int n, Domain * d) : Material(n, d) { }
+    //StructuralMaterial(int n, Domain * d) : Material(n, d) { }
+    StructuralMaterial(int n, Domain * d);
     /// Destructor.
     virtual ~StructuralMaterial() { }
 
     // identification and auxiliary functions
-
+    std::vector< std::vector<int> > vIindex;
+    std::vector< std::vector<int> > svIndex;
+    int giveSymVI(int ind1, int ind2) {  return svIndex[ind1-1][ind2-1]; };
+    int giveVI(int ind1, int ind2) {  return this->vIindex[ind1-1][ind2-1]; };    
+      
     virtual int hasMaterialModeCapability(MaterialMode mode);
     virtual const char *giveClassName() const { return "StructuralMaterial"; }
 
@@ -238,7 +244,7 @@ public:
     //@}
 
     void give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp);
-    static void convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &dSdE, FloatArray &S, FloatArray &F, MaterialMode matMode);
+    void convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &dSdE, FloatArray &S, FloatArray &F, MaterialMode matMode);
 
     static void convert_P_2_S(FloatArray &answer, const FloatArray &reducedvP, const FloatArray &reducedvF, MaterialMode matMode);
     static void convert_S_2_P(FloatArray &answer, const FloatArray &reducedvS, const FloatArray &reducedvF, MaterialMode matMode);
