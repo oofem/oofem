@@ -35,12 +35,14 @@
 #ifndef intvarfield_h
 #define intvarfield_h
 
-#include "domain.h"
 #include "field.h"
-#include "materialmappingalgorithm.h"
 #include "materialmappingalgorithmtype.h"
+#include "internalstatetype.h"
 
 namespace oofem {
+class Domain;
+class MaterialMappingAlgorithm;
+
 /**
  * Abstract class representing a field of an internal variable.
  * Field represent the spatial distribution of certain variable and is able to

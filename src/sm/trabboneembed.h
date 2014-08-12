@@ -33,6 +33,7 @@
  */
 
 #ifndef trabboneembed_h
+#define trabboneembed_h
 
 #include "structuralmaterial.h"
 #include "floatarray.h"
@@ -131,5 +132,4 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
 };
 } // end namespace oofem
-#define trabboneembed_h
 #endif

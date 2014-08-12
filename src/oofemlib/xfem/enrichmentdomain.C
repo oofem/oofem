@@ -42,6 +42,7 @@
 #include "enrichmentfunction.h"
 #include "xfemmanager.h"
 #include "dynamicinputrecord.h"
+#include "set.h"
 
 #include <algorithm>
 
@@ -294,6 +295,26 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
     //IR_GIVE_FIELD(ir, this->xi, _IFT_DofManList_DelaminationLevel);
 
     return IRRT_OK;
+}
+
+int
+DofManList::instanciateYourself( Domain *d )
+{
+
+    // Set the nodes based on a given node set
+    if(this->setNumber > 0) {
+
+        Set *set = d->giveSet( this->setNumber );
+        const IntArray &nodes = set->giveNodeList( );
+        //nodes.printYourself();
+        for(int i = 1; i <= nodes.giveSize( ); i++) {
+            this->dofManList.push_back( nodes.at( i ) );
+        }
+    }
+
+    std::sort( dofManList.begin( ), this->dofManList.end( ) );
+
+    return 1;
 }
 
 void DofManList :: giveInputRecord(DynamicInputRecord &input)

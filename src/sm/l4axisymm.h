@@ -36,7 +36,6 @@
 #define l4axisymm_h
 
 #include "nlstructuralelement.h"
-#include "fei2dquadlin.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
@@ -44,6 +43,8 @@
 #define _IFT_L4Axisymm_Name "l4axisymm"
 
 namespace oofem {
+class FEI2dQuadLin;
+
 /**
  * This class implements an isoparametric four-node quadrilateral axisymmetric
  * finite element. Each node has 2 degrees of freedom.
@@ -67,7 +68,7 @@ public:
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &crackToNormalPlane);
 
-    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual Interface *giveInterface(InterfaceType it);
 
@@ -85,9 +86,9 @@ public:
 
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
-    virtual void drawScalar(oofegGraphicContext &context);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
     virtual MaterialMode giveMaterialMode() { return _3dMat; }

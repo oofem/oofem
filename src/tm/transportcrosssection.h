@@ -36,9 +36,6 @@
 #define transportcrosssection_h
 
 #include "crosssection.h"
-#include "gausspoint.h"
-#include "floatarray.h"
-#include "floatmatrix.h"
 
 #define _IFT_SimpleTransportCrossSection_material "mat"
 

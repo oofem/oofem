@@ -111,10 +111,6 @@ public:
 
     virtual double giveEigenValue(int eigNum) { return eigVal.at(eigNum); }
 
-#ifdef __SLEPC_MODULE
-    virtual void initParallelContexts();
-#endif
-
     /**
      * DOF printing routine. Called by DofManagers to print Dof specific part.
      * Dof class provides component printing routines, but emodel is responsible

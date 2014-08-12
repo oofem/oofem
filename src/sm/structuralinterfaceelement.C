@@ -70,15 +70,10 @@ StructuralInterfaceElement :: ~StructuralInterfaceElement()
 void
 StructuralInterfaceElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-    // Computes the stiffness matrix of the receiver
+    // Computes the stiffness matrix of the receiver K_cohesive = int_A ( N^t * dT/dj * N ) dA
     FloatMatrix N, D, DN;
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
-
     answer.clear();
-
-    if ( !this->isActivated(tStep) ) {
-        return;
-    }
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     FloatMatrix rotationMatGtoL;
@@ -115,7 +110,7 @@ StructuralInterfaceElement :: computeStiffnessMatrix(FloatMatrix &answer, MatRes
 void
 StructuralInterfaceElement :: computeSpatialJump(FloatArray &answer, IntegrationPoint *ip, TimeStep *tStep)
 {
-    // Computes the spatial jump vector (allways 3 components) at the Gauss point (ip) of
+    // Computes the spatial jump vector at the Gauss point (ip) of
     // the receiver, at time step (tStep). jump = N*u
     FloatMatrix N;
     FloatArray u;
@@ -167,43 +162,22 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
 
     for ( IntegrationPoint *ip: *iRule ) {
         this->computeNmatrixAt(ip, N);
-
         //if ( useUpdatedGpRecord == 1 ) {
-        //    tractionTemp = static_cast<StructuralInterfaceMaterialStatus *> (ip->giveMaterialStatus())->giveTraction();
-        //    // modify sizes if stored traction has 3 components and the spatial dimension is less
-        //    int spatialDim = this->giveSpatialDimension();
-        //    if ( traction.giveSize() == 3 && spatialDim == 1 ) {
-        //        traction = {tractionTemp.at(3) };
-        //    } else if ( traction.giveSize() == 3 && spatialDim == 2 ) {
-        //        traction = {tractionTemp.at(1), tractionTemp.at(3) };
-        //    } else {
-        //        traction = tractionTemp;
-        //    }
+        //    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( ip->giveMaterialStatus() );
+        //    //temp
+        //    FloatArray traction3d;
+        //    traction3d = status->giveTraction();
+        //    traction.setValues(2, traction3d.at(1), traction3d.at(3) );
         //} else {
-        if ( this->isActivated(tStep) ) {
             jump.beProductOf(N, u);
-        } else {
-            jump.resize(3);
-            jump.zero();
-        }
-        this->computeTraction(traction, ip, jump, tStep);
+            this->computeTraction(traction, ip, jump, tStep);
         //}
-
-        if ( traction.giveSize() == 0 ) {
-            break;
-        }
 
         // compute internal cohesive forces as f = N^T*traction dA
         double dA = this->computeAreaAround(ip);
         answer.plusProduct(N, traction, dA);
     }
 
-    // if inactive update state, but no contribution to global system
-    ///@todo why do we need to do this?
-    if ( !this->isActivated(tStep) ) {
-        answer.zero();
-        return;
-    }
 }
 
 void
@@ -302,12 +276,11 @@ int
 StructuralInterfaceElement :: checkConsistency()
 {
     // check if the cross section is a 'StructuralInterfaceCrossSection'
-    int result = 1;
     if ( !this->giveInterfaceCrossSection()->testCrossSectionExtension(this->giveInterfaceCrossSection()->crossSectionType) ) {
-        OOFEM_ERROR("cross section %s is not a structural interface cross section", this->giveCrossSection()->giveClassName() );
-        result = 0;
+        OOFEM_WARNING("cross section %s is not a structural interface cross section", this->giveCrossSection()->giveClassName() );
+        return 0;
     }
-    return result;
+    return this->giveInterfaceCrossSection()->checkConsistency();
 }
 
 
@@ -361,3 +334,7 @@ StructuralInterfaceElement :: giveStiffnessMatrix_Eng(FloatMatrix &answer, MatRe
     ///@todo dT1dj = d(F*T2)/dj = dF/dj*T2 + F*dT2/dj - should we assume dFdj = 0? Otherwise it will be very complex!
 }
 } // end namespace oofem
+
+
+
+

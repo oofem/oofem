@@ -36,6 +36,7 @@
 #define structengngmodel_h
 
 #include "engngm.h"
+#include "statecountertype.h"
 
 namespace oofem {
 class StructuralElement;
@@ -130,16 +131,11 @@ public:
      */
     void buildReactionTable(IntArray &restrDofMans, IntArray &restrDofs, IntArray &eqn, TimeStep *tStep, int di);
 
-
-#ifdef __PARALLEL_MODE
-    virtual void initParallelContexts();
-#endif
-
 #ifdef __OOFEG
     /**
      * Shows the sparse structure of required matrix, type == 1 stiffness.
      */
-    void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep);
+    void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 };
 } // end namespace oofem

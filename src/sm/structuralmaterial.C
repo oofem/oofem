@@ -1806,7 +1806,7 @@ StructuralMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalSt
     } else {
         return Material :: giveIPValue(answer, gp, type, tStep);
     }
-    return 0;
+
 }
 
 void

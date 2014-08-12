@@ -40,6 +40,7 @@
 #include "floatmatrix.h"
 #include "interface.h"
 #include "gaussintegrationrule.h"
+#include "domain.h"
 
 ///@name Input fields for LayeredCrossSection
 //@{
@@ -166,7 +167,12 @@ public:
     }
 
     Material *giveInterfaceMaterial(int interface) {
-        return this->giveDomain()->giveMaterial( this->interfacerMaterials.at(interface) );
+        int matNum = this->giveInterfaceMaterialNum(interface);
+        if ( matNum ) {
+            return this->giveDomain()->giveMaterial( this->interfacerMaterials.at(interface) );
+        } else {
+            return NULL;
+        }
     }
 
     virtual int checkConsistency();

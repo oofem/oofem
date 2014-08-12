@@ -138,7 +138,7 @@ public:
      * Set the center coordinate for the prescribed values to be set for.
      * @param x Center coordinate.
      */
-    virtual void setCenterCoordinate(const FloatArray &x) { centerCoord = x; }
+    virtual void setCenterCoordinate(FloatArray x) { centerCoord = std::move(x); }
     /// Returns the center coordinate
     virtual FloatArray &giveCenterCoordinate() { return centerCoord; }
 

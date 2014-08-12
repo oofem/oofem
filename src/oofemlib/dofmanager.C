@@ -47,6 +47,9 @@
 #include "contextioerr.h"
 #include "mathfem.h"
 #include "dynamicinputrecord.h"
+#include "domain.h"
+#include "unknownnumberingscheme.h"
+#include "engngm.h"
 
 namespace oofem {
 DofManager :: DofManager(int n, Domain *aDomain) :
@@ -666,7 +669,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
         }
 
         int _val;
-        if ( !stream->read(& _val, 1) ) {
+		if ( !stream->read(& _val, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -701,6 +704,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
         if ( pos == this->end() ) {
             if ( padding ) {
                 answer.at(++k) = 0.;
+		continue;
             } else {
                 continue;
             }
@@ -730,6 +734,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
         if ( pos == this->end() ) {
             if ( padding ) {
                 answer.at(++k) = 0.;
+		continue;
             } else {
                 continue;
             }

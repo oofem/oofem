@@ -43,6 +43,7 @@
 #include "dynamicinputrecord.h"
 #include "feinterpol.h"
 #include "spatiallocalizer.h"
+#include "engngm.h"
 
 #include "xfem/patchintegrationrule.h"
 #include "xfem/enrichmentitems/crack.h"
@@ -535,7 +536,6 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
                 computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ], mCZTouchingEnrItemIndices[segIndex]);
 
                 ////////////////////////////////////////////////////////
-
                 // Compute jump vector
                 FloatArray jump2D;
                 computeDisplacementJump(* gp, jump2D, solVec, NMatrix);
@@ -647,7 +647,6 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
 
                     computeGlobalCohesiveTractionVector(T, jump2D, crackNormal, NMatrix, * gp, tStep);
                 }
-
 
                 FloatMatrix tmp, tmp2;
                 tmp.beProductOf(K2D, NMatrix);

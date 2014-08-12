@@ -105,12 +105,8 @@ void Dof :: printMultipleOutputAt(FILE *File, TimeStep *tStep, char *ch,
 
 
 void Dof :: printYourself()
-// Prints the receiver on screen.
 {
     printf( "dof %d  of %s %d :\n", dofID, dofManager->giveClassName(), dofManager->giveNumber() );
-    // printf ("equation %d    bc %d \n",equationNumber,bc) ;
-
-    // printOutputAt (node->giveDomain()->giveEngngModel()->giveCurrentStep());
 }
 
 

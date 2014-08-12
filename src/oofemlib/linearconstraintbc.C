@@ -43,6 +43,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "node.h"
+#include "domain.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(LinearConstraintBC);

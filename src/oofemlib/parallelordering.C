@@ -34,6 +34,7 @@
 
 #include "parallelordering.h"
 #include "engngm.h"
+#include "domain.h"
 #include "unknownnumberingscheme.h"
 #include "combuff.h"
 #include "mathfem.h"

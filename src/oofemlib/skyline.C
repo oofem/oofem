@@ -180,7 +180,7 @@ Skyline :: isAllocatedAt(int i, int j) const
         answer = 0;
     }
 
-    return answer;
+    return (bool)answer;
 }
 
 

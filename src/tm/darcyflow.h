@@ -82,10 +82,6 @@ public:
     CommunicatorBuff *commBuff; //new CommunicatorBuff(this->giveNumberOfProcesses(), CBT_static);
     ProblemCommunicator *communicator;
 #endif
-
-#ifdef __PARALLEL_MODE
-    virtual void initParallelContexts();
-#endif
 };
 }
 

@@ -52,12 +52,15 @@
 #include "xfemtolerances.h"
 #include "spatiallocalizer.h"
 #include "gausspoint.h"
+#include "enrichmentfronts/enrichmentfront.h"
+#include "enrichmentfronts/enrichmentfrontdonothing.h"
+#include "engngm.h"
+
 #include <algorithm>
 #include <limits>
 #include <sstream>
+#include <string>
 
-#include "enrichmentfronts/enrichmentfront.h"
-#include "enrichmentfronts/enrichmentfrontdonothing.h"
 
 namespace oofem {
 const double EnrichmentItem :: mLevelSetTol = 1.0e-12;
@@ -392,6 +395,15 @@ void EnrichmentItem :: propagateFronts()
     }
 
     updateGeometry();
+}
+
+bool EnrichmentItem :: hasPropagatingFronts() const
+{
+    if(mpPropagationLaw == NULL) {
+        return false;
+    }
+
+    return mpPropagationLaw->hasPropagation();
 }
 
 void
@@ -744,7 +756,8 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
         if ( minPhi * maxPhi < mLevelSetTol ) { // If the level set function changes sign within the element.
             // Count the number of element edges intersected by the interface
-            int numEdges = nElNodes; // TODO: Is this assumption always true?
+            //int numEdges = nElNodes; // TODO: Is this assumption always true?
+            int numEdges = el->giveInterpolation()->giveNumberOfEdges(); //JIM
 
             for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
                 IntArray bNodes;
@@ -752,7 +765,7 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
 
                 int niLoc = bNodes.at(1);
                 int niGlob = el->giveNode(niLoc)->giveGlobalNumber();
-                int njLoc = bNodes.at( bNodes.giveSize() );
+                int njLoc = bNodes.at( 2 );
                 int njGlob = el->giveNode(njLoc)->giveGlobalNumber();
 
                 double levelSetNormalNodeI = 0.0;
@@ -923,7 +936,8 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
         // node values of the level set functions have different signs
 
         //		int numEdges = element->giveNumberOfBoundarySides();
-        int numEdges = element->giveNumberOfNodes(); // TODO: Is this assumption always true?
+        //int numEdges = element->giveNumberOfNodes(); // TODO: Is this assumption always true?
+        int numEdges = element->giveInterpolation()->giveNumberOfEdges();
 
         for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
             IntArray bNodes;
@@ -931,7 +945,7 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
 
             int nsLoc = bNodes.at(1);
             int nsGlob = element->giveNode(nsLoc)->giveGlobalNumber();
-            int neLoc = bNodes.at( bNodes.giveSize() );
+            int neLoc = bNodes.at( 2 );
             int neGlob = element->giveNode(neLoc)->giveGlobalNumber();
 
             double phiS = 1.0;
@@ -1290,35 +1304,6 @@ bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, 
     }
 }
 
-bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const Triangle &iTri, const FloatArray &iElCenter) const
-{
-    TipInfo tipInfoStart, tipInfoEnd;
-    mpEnrichmentDomain->giveTipInfos(tipInfoStart, tipInfoEnd);
-
-    std :: vector< TipInfo >tipInfos = {tipInfoStart, tipInfoEnd};
-
-    double minDist2 = std :: numeric_limits< double > :: max();
-    size_t minIndex = 0;
-    bool foundTip = false;
-
-    for ( size_t i = 0; i < tipInfos.size(); i++ ) {
-        if ( tipInfos [ i ].mGlobalCoord.distance_square(iElCenter) < minDist2 ) {
-            if ( iTri.pointIsInTriangle(tipInfos [ i ].mGlobalCoord) ) {
-                minDist2 = tipInfos [ i ].mGlobalCoord.distance_square(iElCenter);
-                minIndex = i;
-                foundTip = true;
-            }
-        }
-    }
-
-    if ( !foundTip ) {
-        return false;
-    } else   {
-        oCoord = tipInfos [ minIndex ].mGlobalCoord;
-        oArcPos = tipInfos [ minIndex ].mArcPos;
-        return true;
-    }
-}
 
 double EnrichmentItem :: calcXiZeroLevel(const double &iQ1, const double &iQ2)
 {

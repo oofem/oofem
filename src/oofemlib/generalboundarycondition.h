@@ -36,9 +36,7 @@
 #define generalbc_h
 
 #include "femcmpnn.h"
-#include "domain.h"
-#include "floatarray.h"
-#include "dictionary.h"
+#include "intarray.h"
 #include "bcvaltype.h"
 #include "bcgeomtype.h"
 #include "bctype.h"
@@ -53,6 +51,10 @@
 //@}
 
 namespace oofem {
+
+class Function;
+class DofManager;
+
 /**
  * Abstract base class for all boundary conditions of problem.
  * Boundary condition is an attribute of the domain (it belongs to).

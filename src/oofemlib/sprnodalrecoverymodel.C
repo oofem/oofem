@@ -39,6 +39,7 @@
 #include "connectivitytable.h"
 #include "integrationrule.h"
 #include "gausspoint.h"
+#include "engngm.h"
 
 #ifdef __PARALLEL_MODE
  #include "processcomm.h"
@@ -379,9 +380,9 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
         }
 
 #endif
-	if ( elementSet.hasElement(papDofManConnectivity->at(ielem)) ) {
-	  patchElems.at(++patchElements) = papDofManConnectivity->at(ielem);
-	}
+        if ( elementSet.hasElement(papDofManConnectivity->at(ielem)) ) {
+            patchElems.at(++patchElements) = papDofManConnectivity->at(ielem);
+        }
     }
 
     // Invert the pap array for faster access later

@@ -36,9 +36,9 @@
 #define PRESCRIBEDGRADIENTBCWEAK_H_
 
 #include "prescribedgradientbc.h"
-
 #include "geometry.h"
-#include "gausspoint.h"
+
+#include <unordered_map>
 
 #define _IFT_PrescribedGradientBCWeak_Name   "prescribedgradientbcweak"
 #define _IFT_PrescribedGradientBCWeak_TractionInterpOrder   "tractioninterporder"
@@ -48,14 +48,18 @@
 #define _IFT_PrescribedGradientBCWeak_TangDistPadding   "tangdistpadding"
 
 namespace oofem {
+class IntegrationRule;
+class Node;
+class GaussPoint;
 
-class TractionElement {
+class TractionElement
+{
 public:
     TractionElement() {}
     virtual ~TractionElement() {}
 
-    void computeN_Constant(FloatArray &oN, const double &iXi) const {oN = FloatArray({1.0});}
-    void computeN_Linear(FloatArray &oN, const double &iXi) const {oN = {0.5*(1.0-iXi), 0.5*(1.0+iXi)};}
+    void computeN_Constant(FloatArray &oN, const double &iXi) const { oN = FloatArray{1.0}; }
+    void computeN_Linear(FloatArray &oN, const double &iXi) const { oN = {0.5*(1.0-iXi), 0.5*(1.0+iXi)}; }
 
     std::vector<int> mTractionNodeInd;
 
@@ -66,15 +70,16 @@ public:
     FloatArray mEndCoord;
 };
 
-class IntegrationRule;
-/*
+
+/**
  * Imposes a prescribed gradient weakly on the boundary
  * with an independent traction discretization.
  *
  * @author Erik Svenning
  * @date April 17, 2014
  */
-class PrescribedGradientBCWeak : public PrescribedGradientBC {
+class PrescribedGradientBCWeak : public PrescribedGradientBC
+{
 public:
     PrescribedGradientBCWeak(int n, Domain * d);
     virtual ~PrescribedGradientBCWeak();
@@ -130,6 +135,7 @@ public:
     size_t giveNumberOfTractionElements() const {return mpTractionElements.size();}
     void giveTractionElCoord(size_t iElInd, FloatArray &oStartCoord, FloatArray &oEndCoord) const {oStartCoord = mpTractionElements[iElInd]->mStartCoord; oEndCoord = mpTractionElements[iElInd]->mEndCoord;}
     void giveTractionElNormal(size_t iElInd, FloatArray &oNormal, FloatArray &oTangent) const;
+    void giveTractionElArcPos(size_t iElInd, double &oXiStart, double &oXiEnd) const;
 
     void giveTraction(size_t iElInd, FloatArray &oStartTraction, FloatArray &oEndTraction, ValueModeType mode, TimeStep *tStep);
 
@@ -213,9 +219,8 @@ protected:
 
     std :: unordered_map<int, std::vector<int> > mTracElDispNodes;
 
-    void createTractionMesh(bool iEnforceCornerPeriodicity);
+    void createTractionMesh(bool iEnforceCornerPeriodicity, int iNumSides);
     void buildMaps(const std::vector< std::pair<FloatArray, bool> > &iBndNodeCoordsFull);
-    void createTractionElements(const std::vector<FloatArray> &iTractionNodeCoord, const double &iNodeDistTol);
 
     void integrateTangent(FloatMatrix &oTangent, size_t iTracElInd);
 
@@ -238,6 +243,9 @@ protected:
     virtual void giveBoundaryCoordVector(FloatArray &oX, const FloatArray &iPos) const = 0;
     virtual void checkIfCorner(bool &oIsCorner, bool &oDuplicatable, const FloatArray &iPos, const double &iNodeDistTol) const = 0;
     virtual bool boundaryPointIsOnActiveBoundary(const FloatArray &iPos) const = 0;
+
+    int giveSideIndex(const FloatArray &iPos) const;
+    bool closePointExists(const std::vector< std::pair<FloatArray, bool> > &iCoordArray, const FloatArray &iPos, const double &iMeshTol2) const;
 };
 
 class ArcPosSortFunction {
@@ -255,145 +263,63 @@ private:
 };
 
 template <class T>
-class ArcPosSortFunction2 {
+class ArcPosSortFunction3 {
 public:
-	ArcPosSortFunction2(const FloatArray &iLC, const FloatArray &iUC, const double &iTol):
-	mLC(iLC),
-	mUC(iUC),
-	mTol(iTol)
-	{
+    ArcPosSortFunction3(const FloatArray &iLC, const FloatArray &iUC, const double &iTol, int iSideInd):
+    mLC(iLC),
+    mUC(iUC),
+    mTol(iTol),
+    mSideInd(iSideInd)
+    {
 
-	}
+    }
 
-	~ArcPosSortFunction2() {}
+    ~ArcPosSortFunction3() {}
 
     bool operator()(const std::pair<FloatArray, T> &iVec1, const std::pair<FloatArray,int> &iVec2) const
     {
                 return calcArcPos(iVec1.first) < calcArcPos(iVec2.first);
     }
 
-	double calcArcPos(const FloatArray &iPos) const
-	{
-		double Lx = mUC[0] - mLC[0];
-		double Ly = mUC[1] - mLC[1];
+    double calcArcPos(const FloatArray &iPos) const
+    {
+        double Lx = mUC[0] - mLC[0];
+        double Ly = mUC[1] - mLC[1];
 
-		if( iPos[1] < (mLC[1]+mTol) ){
-			// Edge 1
-			double dist = iPos.distance(mLC);
-			return dist;
-		}
+        if(mSideInd == 0){
+            const FloatArray &x = {mUC[0], mLC[1]};
+            double dist = Lx + iPos.distance(x);
+            return dist;
+        }
 
-		if( iPos[0] > (mUC[0]-mTol) ){
-			// Edge 2
-			const FloatArray &x = {mUC[0], mLC[1]};
-			double dist = Lx + iPos.distance(x);
-			return dist;
-		}
+        if(mSideInd == 1){
+            double dist = Lx + Ly + iPos.distance(mUC);
+            return dist;
+        }
 
-		if( iPos[1] > (mUC[1]-mTol) ){
-			// Edge 3
-			double dist = Lx + Ly + iPos.distance(mUC);
-			return dist;
-		}
+        if(mSideInd == 2){
+            const FloatArray &x = {mLC[0], mUC[1]};
+            double dist = Lx + Ly + Lx + iPos.distance(x);
+            return dist;
+        }
 
-		if( iPos[0] < (mLC[0]+mTol) ){
-			// Edge 4
-			const FloatArray &x = {mLC[0], mUC[1]};
-			double dist = Lx + Ly + Lx + iPos.distance(x);
-			return dist;
-		}
+        if(mSideInd == 3){
+            double dist = iPos.distance(mLC);
+            return dist;
+        }
 
-		OOFEM_ERROR("Could not compute distance.")
-		return 0.0;
-	}
+        OOFEM_ERROR("Could not compute distance.")
+        return 0.0;
+    }
 
 private:
-	const FloatArray mLC;
-	const FloatArray mUC;
-	const double mTol;
+    const FloatArray mLC;
+    const FloatArray mUC;
+    const double mTol;
+
+    // 0->x=L, 1->y=L, 2->x=0, 3->y=0
+    const int mSideInd;
 };
-
-
-class EdgeTracker {
-public:
-	EdgeTracker()
-	{
-		mNodePair.first 	= -1;
-		mNodePair.second 	= -1;
-		mStoredSecondIndex = -1;
-		mIsFirstPoint = true;
-	}
-
-	~EdgeTracker() {}
-
-	void addPoint(int iPointIndex, bool iIsDuplicated, bool iPeriodic)
-	{
-		if( iIsDuplicated || (iPeriodic && mIsFirstPoint) ) {
-			// Will be added in first position (i.e. master node)
-
-			if( mNodePair.first == -1 && mNodePair.second == -1 ) {
-				mNodePair.first = iPointIndex;
-			}
-			else {
-//				printf("Pair with slave %d and master %d\n", mNodePair.second, mNodePair.first);
-				mStoredSecondIndex = mNodePair.first;
-//				OOFEM_ERROR("The node pair has already been initialized.")
-			}
-
-			mIsFirstPoint = false;
-		}
-		else {
-			// Will be added in second position (i.e. slave node)
-
-			// Add to second position if we have a pair where
-			// the first position has been set. Otherwise,
-			// store it for later use.
-
-			if( mNodePair.first != -1 ) {
-				mNodePair.second = iPointIndex;
-
-				// We prefer to have the highest index as slave
-				if( mNodePair.first > mNodePair.second ) {
-					std::swap( mNodePair.first, mNodePair.second );
-				}
-
-				mMapSlaveToMaster[mNodePair.second] = mNodePair.first;
-
-//				printf("Creating pair with slave %d and master %d\n", mNodePair.second, mNodePair.first);
-
-				mNodePair.first 	= -1;
-				mNodePair.second 	= -1;
-			}
-			else {
-				mStoredSecondIndex = iPointIndex;
-			}
-
-		}
-	}
-
-	bool giveMasterIndex(int &oMasterIndex, int iSlaveIndex) const
-	{
-		auto it = mMapSlaveToMaster.find(iSlaveIndex);
-		if( it == mMapSlaveToMaster.end() ) {
-			return false;
-		}
-
-		oMasterIndex = it->second;
-		return true;
-	}
-
-	void addStoredSecondIndex()
-	{
-		addPoint(mStoredSecondIndex, false, false);
-	}
-
-	std::pair<int,int> mNodePair;
-	std::unordered_map<int, int> mMapSlaveToMaster;
-
-	int mStoredSecondIndex;
-	bool mIsFirstPoint;
-};
-
 
 } /* namespace oofem */
 

@@ -36,7 +36,6 @@
 #define ConcreteDPM2_h
 
 #include "structuralmaterial.h"
-#include "gausspoint.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "cltypes.h"
@@ -44,6 +43,7 @@
 #include "strainvector.h"
 #include "stressvector.h"
 #include "isolinearelasticmaterial.h"
+#include "gausspoint.h"
 
 #define DYNCON_TOL 1.e-6
 #define keep_track_of_dissipated_energy

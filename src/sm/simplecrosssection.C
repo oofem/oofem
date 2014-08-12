@@ -40,6 +40,7 @@
 #include "dynamicinputrecord.h"
 #include "structuralms.h"
 #include "structuralelement.h"
+#include "engngm.h"
 
 namespace oofem {
 REGISTER_CrossSection(SimpleCrossSection);
@@ -738,4 +739,25 @@ SimpleCrossSection :: giveTemperatureVector(FloatArray &answer, GaussPoint *gp, 
         }
     }
 }
+
+#ifdef __PARALLEL_MODE
+int
+SimpleCrossSection :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+{
+    return this->giveMaterial(gp)->packUnknowns(buff, tStep, gp);
+}
+
+int
+SimpleCrossSection :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+{
+    return this->giveMaterial(gp)->unpackAndUpdateUnknowns(buff, tStep, gp);
+}
+
+int
+SimpleCrossSection :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *gp)
+{
+    return this->giveMaterial(gp)->estimatePackSize(buff, gp);
+}
+#endif
+
 } // end namespace oofem

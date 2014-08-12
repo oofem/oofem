@@ -34,6 +34,7 @@
 
 #include "tractionpressurebc.h"
 #include "cbs.h"
+#include "domain.h"
 #include "classfactory.h"
 
 namespace oofem {

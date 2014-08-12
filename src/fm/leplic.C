@@ -43,6 +43,7 @@
 #include "contextioerr.h"
 #include "element.h"
 #include "dynamicinputrecord.h"
+#include "engngm.h"
 
 namespace oofem {
 #define LEPLIC_ZERO_VOF  1.e-8

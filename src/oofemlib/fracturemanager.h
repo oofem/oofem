@@ -42,6 +42,7 @@
 #include "timestep.h"
 #include "interface.h"
 #include "enumitem.h"
+#include "floatarray.h"
 
 namespace oofem {
 class Domain;

@@ -178,7 +178,7 @@ Function *
 NonStationaryTransportProblem :: giveDtFunction()
 // Returns the load-time function of the receiver.
 {
-    if ( !dtFunction || !ndomains ) {
+    if ( !dtFunction ) {
         return NULL;
     }
 
@@ -368,8 +368,7 @@ NonStationaryTransportProblem :: updateYourself(TimeStep *tStep)
 
     ///@todo Find a cleaner way to do these cemhyd hacks
 #ifdef __CEMHYD_MODULE
-    for ( int idomain = 1; idomain <= ndomains; idomain++ ) {
-        Domain *d = this->giveDomain(idomain);
+    for ( auto &domain: this->domainList ) {
         for ( int i = 1; i <= d->giveNumberOfElements(); ++i ) {
             TransportElement *elem = static_cast< TransportElement * >( d->giveElement(i) );
             //store temperature and associated volume on each GP before performing averaging
@@ -397,9 +396,7 @@ NonStationaryTransportProblem :: updateYourself(TimeStep *tStep)
 void
 NonStationaryTransportProblem :: updateInternalState(TimeStep *tStep)
 {
-    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        Domain *domain = this->giveDomain(idomain);
-
+    for ( auto &domain: domainList ) {
         if ( requiresUnknownsDictionaryUpdate() ) {
             //update temperature vector
             UnknownsField->update( VM_Total, tStep, * ( this->UnknownsField->giveSolutionVector(tStep) ) );

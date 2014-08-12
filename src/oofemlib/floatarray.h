@@ -77,6 +77,7 @@ class CommunicationBuffer;
  * 
  * @author Mikael Öhman
  * @author Erik Svenning
+ * @author Jim Brouzoulis
  * @author many others (please add yourselves)
  */
 class OOFEM_EXPORT FloatArray
@@ -215,7 +216,7 @@ public:
      */
     bool containsOnlyZeroes() const;
     /// Returns the size of receiver.
-    int giveSize() const { return this->values.size(); }
+    int giveSize() const { return (int)this->values.size(); }
     /// Returns true if receiver is not empty.
     bool isNotEmpty() const { return !this->values.empty(); }
     /// Returns true if receiver is empty.
@@ -229,6 +230,11 @@ public:
      * Print receiver on stdout. Useful for debugging.
      */
     virtual void printYourself() const;
+    /**
+     * Print receiver on stdout with custom name.
+     * @param name Display name of reciever.
+     */    
+    virtual void printYourself(const std::string name) const;
     /**
      * Print receiver on stdout with high accuracy.
      */
@@ -385,8 +391,8 @@ public:
      * The local coordinate oXi is in the range [0,1]
      * Written by Erik Svenning, August 2013.
      */
-    double distance(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const;
-    double distance_square(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const;
+    double distance(const FloatArray &iP1, const FloatArray &iP2, double &oXi, double &oXiUnbounded) const;
+    double distance_square(const FloatArray &iP1, const FloatArray &iP2, double &oXi, double &oXiUnbounded) const;
 
     /**
      * Computes the square of distance between position represented by receiver and position given as parameter.

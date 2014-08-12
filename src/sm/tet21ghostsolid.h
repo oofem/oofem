@@ -36,12 +36,13 @@
 #define TET21GHOSTSOLID_H
 
 #include "nlstructuralelement.h"
-#include "fei3dtetquad.h"
-#include "fei3dtetlin.h"
+#include "floatmatrix.h"
 
 #define _IFT_tet21ghostsolid_Name "tet21ghostsolid"
 
 namespace oofem {
+class FEI3dTetQuad;
+class FEI3dTetLin;
 
 class tet21ghostsolid : public NLStructuralElement
 {

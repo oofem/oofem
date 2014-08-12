@@ -36,10 +36,6 @@
 #define tr1_2d_supg_h
 
 #include "supgelement.h"
-#include "femcmpnn.h"
-#include "domain.h"
-#include "floatmatrix.h"
-#include "fei2dtrlin.h"
 #include "primaryfield.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
@@ -58,6 +54,8 @@
 //@}
 
 namespace oofem {
+class FEI2dTrLin;
+
 /**
  * Class representing 2d linear triangular element
  * for solving incompressible fluid with SUPG solver
@@ -84,7 +82,7 @@ public:
     TR1_2D_SUPG(int n, Domain * d);
     virtual ~TR1_2D_SUPG();
 
-    virtual FEInterpolation *giveInterpolation() const { return & interp; }
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual void computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep);
@@ -176,10 +174,9 @@ public:
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *tStep);
     // Graphics output
-    //virtual void drawYourself(oofegGraphicContext&);
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawScalar(oofegGraphicContext &context);
-    //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
 #endif
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);

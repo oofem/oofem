@@ -1,11 +1,15 @@
 #include "tet21ghostsolid.h"
+#include "fei3dtetquad.h"
+#include "fei3dtetlin.h"
 #include "nlstructuralelement.h"
 #include "classfactory.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "structuralcrosssection.h"
-#include "fluiddynamicmaterial.h"
-#include "fluidcrosssection.h"
+#ifdef __FM_MODULE
+ #include "fluiddynamicmaterial.h"
+ #include "fluidcrosssection.h"
+#endif
 #include "load.h"
 #include "element.h"
 #include "dofmanager.h"
@@ -84,7 +88,9 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
 {
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+#ifdef __FM_MODULE
     FluidDynamicMaterial *fluidMaterial = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
+#endif
 
     FloatMatrix Kf, G, Kx, D, B, Ed, EdB, dNx;
     FloatArray Nlin, dNv;
@@ -112,7 +118,11 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
 
             // Fluid part
             gp->setMaterialMode(_3dFlow);
+#ifdef __FM_MODULE
             fluidMaterial->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep);
+#else
+            OOFEM_ERROR("Fluid module missing\n");
+#endif
             gp->setMaterialMode(_3dMat);
 
             EdB.beProductOf(Ed, B);
@@ -151,11 +161,18 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
     FloatMatrix GT;
 
     GT.beTranspositionOf(G);
+    //GTdeltat.beTranspositionOf(G);
+    //GTdeltat.times(deltat);
     Kf.symmetrized();
     Kx.symmetrized();
+    //    Kf.printYourself();
+    //    G.printYourself();
+    //    GT.printYourself();
+    //    Kx.printYourself();
 
     answer.resize(64, 64);
     answer.zero();
+#define USEUNCOUPLED 0
 
 #if USEUNCOUPLED == 1
     // Totaly uncoupled
@@ -222,8 +239,12 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
 
         // Body load
         if ( gVector.giveSize() ) {
-
+#ifdef __FM_MODULE
             double rho = mat->give('d', gp);
+#else
+            OOFEM_ERROR("Missing FM module");
+            double rho = 1.0;
+#endif
             this->interpolation.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
 
             for ( int j = 0; j < N.giveSize(); j++ ) {
@@ -261,6 +282,9 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
     answer.assemble(vload, this->conservation_ordering);
 #endif
 
+
+
+    // answer.printYourself();
 }
 
 void
@@ -268,7 +292,9 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
 {
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+#ifdef __FM_MODULE
     FluidDynamicMaterial *fluidMaterial = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
+#endif
 
     FloatMatrix Kf, G, Kx, B, Ed, dNx;
     FloatArray Strain, Stress, Nlin, dNv, a, a_inc, a_prev, aVelocity, aPressure, aGhostDisplacement, aIncGhostDisplacement, fluidStress, epsf, dpdivv;
@@ -444,7 +470,18 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
         //K.printYourself();
         //answer.printYourself();
     }
+    answer.resize(64);
+    answer.zero();
 
+#if USEUNCOUPLED == 1
+    // Totaly uncoupled
+    answer.assemble(momentum, momentum_ordering);
+    answer.assemble(conservation, conservation_ordering);
+    answer.assemble(auxstress, ghostdisplacement_ordering);
+#else
+    answer.assemble(momentum, ghostdisplacement_ordering);
+    answer.assemble(conservation, conservation_ordering);
+    answer.assemble(auxstress, momentum_ordering);
 #endif
 
 //if (this->giveNumber() == 364) {
@@ -521,6 +558,7 @@ tet21ghostsolid :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li,
         answer.at(6, 3 * i - 2) = dnx.at(i, 2);
         answer.at(6, 3 * i - 1) = dnx.at(i, 1);
     }
+    //answer.printYourself();
 }
 
 void
@@ -561,8 +599,21 @@ tet21ghostsolid :: giveUnknownData(FloatArray &u_prev, FloatArray &u, FloatArray
         u_prev.operator = (inc);
     }
 
+        for (int i = 0; i<this->giveNumberOfDofManagers(); i++) {
 
-
+            this->giveDofManager(i+1)->giveUnknownVector(u_n, id, VM_Total, tStep );
+            this->giveDofManager(i+1)->giveUnknownVector(inc_n, id, VM_Incremental, tStep );
+            u_prev.at(3*i+1) = u_n.at(1)-inc_n.at(1);
+            u_prev.at(3*i+2) = u_n.at(2)-inc_n.at(2);
+            u_prev.at(3*i+3) = u_n.at(3)-inc_n.at(3);
+            u.at(3*i+1) = u_n.at(1);
+            u.at(3*i+2) = u_n.at(2);
+            u.at(3*i+3) = u_n.at(3);
+            inc.at(3*i+1) = inc_n.at(1);
+            inc.at(3*i+2) = inc_n.at(2);
+            inc.at(3*i+3) = inc_n.at(3);
+        }
+    }
 }
 
 }

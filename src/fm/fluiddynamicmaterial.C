@@ -125,7 +125,6 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
             return 0;
         }
 
-        return 1;
     } else if ( type == IST_DeviatoricStrain ) {
         MaterialMode mmode = gp->giveMaterialMode();
         const FloatArray &vec = status->giveDeviatoricStrainRateVector();
@@ -156,7 +155,6 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
             return 0;
         }
 
-        return 1;
     } else if ( type == IST_Viscosity ) {
         answer.resize(1);
         answer.at(1) = this->giveEffectiveViscosity(gp, tStep);

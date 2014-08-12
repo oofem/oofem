@@ -168,10 +168,6 @@ public:
 
     virtual MaterialInterface *giveMaterialInterface(int n) { return materialInterface; }
 
-#ifdef __PARALLEL_MODE
-    virtual void initParallelContexts();
-#endif
-
 
 protected:
     void updateInternalState(TimeStep *tStep);

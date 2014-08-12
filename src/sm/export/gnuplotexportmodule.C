@@ -499,6 +499,25 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
 
 
 
+    // Arc position along the boundary
+    std::vector< std::vector<FloatArray> > arcPosArray;
+    for(size_t i = 0; i < numTracEl; i++) {
+        std::vector<FloatArray> arcPos;
+        double xiS = 0.0, xiE = 0.0;
+        iBC.giveTractionElArcPos(i, xiS, xiE);
+        arcPos.push_back( FloatArray{xiS} );
+        arcPos.push_back( FloatArray{xiE} );
+
+        arcPosArray.push_back(arcPos);
+    }
+
+    std :: stringstream strArcPos;
+    strArcPos << "ArcPosGnuplotTime" << time << ".dat";
+    std :: string nameArcPos = strArcPos.str();
+
+    WritePointsToGnuplot(nameArcPos, arcPosArray);
+
+
     // Traction (normal, tangent)
     std::vector< std::vector<FloatArray> > nodeTractionNTArray;
     for(size_t i = 0; i < numTracEl; i++) {
@@ -589,7 +608,13 @@ void GnuplotExportModule :: WritePointsToGnuplot(const std :: string &iName, con
 
     for(auto posVec: iPoints) {
         for(auto pos: posVec) {
-            file << pos[0] << " " << pos[1] << "\n";
+
+            for(int i = 0; i < pos.giveSize(); i++) {
+                file << pos[i] << " ";
+            }
+            file << "\n";
+
+//            file << pos[0] << " " << pos[1] << "\n";
         }
         file << "\n";
     }

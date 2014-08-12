@@ -37,7 +37,6 @@
 #define lwedge_h
 
 #include "nlstructuralelement.h"
-#include "fei3dwedgelin.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "eleminterpmapperinterface.h"
@@ -47,6 +46,8 @@
 #define _IFT_LWedge_Name "lwedge"
 
 namespace oofem {
+class FEI3dWedgeLin;
+
 /**
  * This class implements a Linear 3d  6 - node elasticity finite element.
  *
@@ -63,7 +64,7 @@ public:
     LWedge(int, Domain *);
     virtual ~LWedge() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;

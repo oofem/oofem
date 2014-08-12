@@ -36,15 +36,11 @@
 #define tr1_2d_cbs_h
 
 #include "cbselement.h"
-#include "femcmpnn.h"
-#include "domain.h"
-#include "floatmatrix.h"
-#include "fei2dtrlin.h"
-#include "primaryfield.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
+#include "primaryfield.h"
 //<RESTRICTED_SECTION>
 #include "leplic.h"
 //</RESTRICTED_SECTION>
@@ -65,6 +61,7 @@ class GaussPoint;
 class FloatMatrix;
 class FloatArray;
 class IntArray;
+class FEI2dTrLin;
 
 /**
  * This class is the implementation of triangular CFD element with linear (and equal order) interpolation of velocity and pressure fields.
@@ -87,7 +84,7 @@ public:
     TR1_2D_CBS(int n, Domain * aDomain);
     virtual ~TR1_2D_CBS();
 
-    virtual FEInterpolation *giveInterpolation() const { return & interp; }
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual void computeConsistentMassMtrx(FloatMatrix &answer, TimeStep *);
     virtual void computeDiagonalMassMtrx(FloatArray &answer, TimeStep *);
@@ -154,10 +151,9 @@ public:
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *tStep);
     // Graphics output
-    //virtual void drawYourself(oofegGraphicContext&);
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawScalar(oofegGraphicContext &context);
-    //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
 #endif
 
 protected:

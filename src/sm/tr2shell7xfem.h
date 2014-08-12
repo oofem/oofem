@@ -60,21 +60,24 @@ class Tr2Shell7XFEM : public Shell7BaseXFEM
 {
 protected:
     static FEI3dTrQuad interpolation;
-    static IntArray ordering_all;
-    static IntArray ordering_gr;
-    static IntArray ordering_gr_edge;
+    static IntArray orderingDofTypes;
+    static IntArray orderingNodes;
+    static IntArray orderingEdgeNodes;
 
-    virtual const IntArray &giveOrdering(SolutionField fieldType) const;
-
-    //specific
+    virtual const IntArray &giveOrderingDofTypes() const;
+    virtual const IntArray &giveOrderingNodes() const;
+    virtual const IntArray &giveOrderingEdgeNodes() const;
     void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
     void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
 
-    //virtual double computeVolumeAround(GaussPoint *gp);
+
     virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer);
     virtual double computeAreaAround(GaussPoint *gp, double xi);
 
     virtual void computeGaussPoints();
+    bool updateIntegrationRule();
+    bool updateIntegrationRuleMultiCrack();
+
     virtual void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords);
 
     virtual FEInterpolation *giveInterpolation() const;
@@ -91,14 +94,9 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Tr2Shell7XFEM_Name; }
     virtual const char *giveClassName() const { return "Tr2Shell7XFEM"; }
 
-    //virtual Element_Geometry_Type giveGeometryType() const { return EGT_triangle_2; }
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_Composite; }
     virtual integrationDomain giveIntegrationDomain() const { return _Triangle; } // write new wedge-like type 'layeredWedge'
-    void giveCompositeExportData(VTKPiece &vtkPiece,
-                                 IntArray &primaryVarsToExport,
-                                 IntArray &internalVarsToExport,
-                                 IntArray cellVarsToExport,
-                                 TimeStep *tStep) { }
+
 };
 } // end namespace oofem
 #endif

@@ -48,7 +48,7 @@ FEI3dTrQuad :: evalN(FloatArray &answer, const FloatArray &lcoords, const FEICel
 double
 FEI3dTrQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("Not supported");
+    OOFEM_ERROR("FEI3dTrQuad :: evaldNdx - Not supported");
     return 0.;
 }
 
@@ -100,6 +100,29 @@ FEI3dTrQuad :: giveDerivativeEta(FloatArray &n, const FloatArray &lc)
 
 
 void
+FEI3dTrQuad :: giveLocalNodeCoords(FloatMatrix &answer)
+{
+
+    answer.resize(3,6);
+    answer.zero();
+    answer.at(1,1) = 1.0;
+    answer.at(1,2) = 0.0;
+    answer.at(1,3) = 0.0;
+    answer.at(1,4) = 0.5;
+    answer.at(1,5) = 0.0;
+    answer.at(1,6) = 0.5;
+
+    answer.at(2,1) = 0.0;
+    answer.at(2,2) = 1.0;
+    answer.at(2,3) = 0.0;
+    answer.at(2,4) = 0.5;
+    answer.at(2,5) = 0.5;
+    answer.at(2,6) = 0.0;
+
+}
+
+
+void
 FEI3dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray n;
@@ -110,12 +133,49 @@ FEI3dTrQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const
     }
 }
 
-
+#define POINT_TOL 1.e-3
 int
 FEI3dTrQuad :: global2local(FloatArray &answer, const FloatArray &gcoords, const FEICellGeometry &cellgeo)
 {
-    OOFEM_ERROR("Not supported");
-    return -1;
+    //OOFEM_ERROR("FEI3dTrQuad :: global2local - Not supported");
+    //return -1;
+
+    ///@todo this is for linear triangle
+    int xind = 1;
+    int yind = 2;
+    
+    
+    double detJ, x1, x2, x3, y1, y2, y3;
+    answer.resize(3);
+
+    x1 = cellgeo.giveVertexCoordinates(1)->at(xind);
+    x2 = cellgeo.giveVertexCoordinates(2)->at(xind);
+    x3 = cellgeo.giveVertexCoordinates(3)->at(xind);
+
+    y1 = cellgeo.giveVertexCoordinates(1)->at(yind);
+    y2 = cellgeo.giveVertexCoordinates(2)->at(yind);
+    y3 = cellgeo.giveVertexCoordinates(3)->at(yind);
+
+    detJ = x1*(y2 - y3) + x2*(-y1 + y3) + x3*(y1 - y2);
+
+    answer.at(1) = ( ( x2 * y3 - x3 * y2 ) + ( y2 - y3 ) * gcoords.at(xind) + ( x3 - x2 ) * gcoords.at(yind) ) / detJ;
+    answer.at(2) = ( ( x3 * y1 - x1 * y3 ) + ( y3 - y1 ) * gcoords.at(xind) + ( x1 - x3 ) * gcoords.at(yind) ) / detJ;
+    answer.at(3) = 1. - answer.at(1) - answer.at(2);
+
+    // check if point is inside
+    bool inside = true;
+    for ( int i = 1; i <= 3; i++ ) {
+        if ( answer.at(i) < ( 0. - POINT_TOL ) ) {
+            answer.at(i) = 0.;
+            inside = false;
+        } else if ( answer.at(i) > ( 1. + POINT_TOL ) ) {
+            answer.at(i) = 1.;
+            inside = false;
+        }
+    }
+    
+    return inside;
+
 }
 
 
@@ -210,7 +270,7 @@ FEI3dTrQuad :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
         bNode = 1;
         cNode = 6;
     } else {
-        OOFEM_ERROR("wrong egde number (%d)", iedge);
+        OOFEM_ERROR("Wrong edge number (%d)", iedge);
     }
 
     edgeNodes.at(1) = aNode;
@@ -339,7 +399,11 @@ FEI3dTrQuad :: surfaceGiveTransformationJacobian(int isurf, const FloatArray &lc
 void
 FEI3dTrQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 {
+    //surfNodes.setValues(6, 1, 2, 3, 4, 5, 6);
     surfNodes = {1, 2, 3, 4, 5, 6};
+    ///@todo - fix wrt xfem
+    //computeLocalEdgeMapping(surfNodes, isurf);
+
 }
 
 IntegrationRule *
@@ -355,7 +419,38 @@ IntegrationRule *
 FEI3dTrQuad :: giveBoundaryIntegrationRule(int order, int boundary)
 {
     ///@todo Not sure about what defines boundaries on these elements. 2 surfaces + 3 edges? Ask Jim about this.
-    OOFEM_ERROR("Not supported");
+    OOFEM_ERROR("FEI3dTrQuad :: giveBoundaryIntegrationRule - Not supported");
     return NULL;
+}
+
+
+double
+FEI3dTrQuad :: giveArea(const FEICellGeometry &cellgeo) const
+{
+    ///@todo this only correct for a planar triangle in the xy-plane
+    const FloatArray *p;
+    double x1, x2, x3, x4, x5, x6, y1, y2, y3, y4, y5, y6;
+
+    p = cellgeo.giveVertexCoordinates(1);
+    x1 = p->at(1);
+    y1 = p->at(2);
+    p = cellgeo.giveVertexCoordinates(2);
+    x2 = p->at(1);
+    y2 = p->at(2);
+    p = cellgeo.giveVertexCoordinates(3);
+    x3 = p->at(1);
+    y3 = p->at(2);
+    p = cellgeo.giveVertexCoordinates(4);
+    x4 = p->at(1);
+    y4 = p->at(2);
+    p = cellgeo.giveVertexCoordinates(5);
+    x5 = p->at(1);
+    y5 = p->at(2);
+    p = cellgeo.giveVertexCoordinates(6);
+    x6 = p->at(1);
+    y6 = p->at(2);
+
+    return (4*(-(x4*y1) + x6*y1 + x4*y2 - x5*y2 + x5*y3 - x6*y3) + x2*(y1 - y3 - 4*y4 + 4*y5) +
+            x1*(-y2 + y3 + 4*y4 - 4*y6) + x3*(-y1 + y2 - 4*y5 + 4*y6))/6;
 }
 } // end namespace oofem

@@ -371,28 +371,28 @@ Lattice2d :: giveGpCoordinates(FloatArray &answer)
 #ifdef __OOFEG
 
 void
-Lattice2d :: drawYourself(oofegGraphicContext &gc)
+Lattice2d :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
 {
     OGC_PlotModeType mode = gc.giveIntVarPlotMode();
 
     if ( mode == OGC_rawGeometry ) {
-        this->drawRawGeometry(gc);
-        this->drawRawCrossSections(gc);
+        this->drawRawGeometry(gc, tStep);
+        this->drawRawCrossSections(gc, tStep);
     } else if ( mode == OGC_deformedGeometry ) {
-        this->drawDeformedGeometry(gc, DisplacementVector);
+        this->drawDeformedGeometry(gc, tStep, DisplacementVector);
     } else if ( mode == OGC_eigenVectorGeometry ) {
-        this->drawDeformedGeometry(gc, EigenVector);
+        this->drawDeformedGeometry(gc, tStep, EigenVector);
     } else if ( mode == OGC_scalarPlot ) {
-        this->drawScalar(gc);
+        this->drawScalar(gc, tStep);
     } else if ( mode == OGC_elemSpecial ) {
-        this->drawSpecial(gc);
+        this->drawSpecial(gc, tStep);
     } else {
         OOFEM_ERROR("unsupported mode");
     }
 }
 
 void
-Lattice2d :: drawRawGeometry(oofegGraphicContext &gc)
+Lattice2d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
 
@@ -419,7 +419,7 @@ Lattice2d :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 void
-Lattice2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+Lattice2d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
 
@@ -427,7 +427,6 @@ Lattice2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
         return;
     }
 
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     WCRec p [ 2 ]; /* poin */
@@ -449,12 +448,11 @@ Lattice2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 }
 
 void
-Lattice2d :: drawSpecial(oofegGraphicContext &gc)
+Lattice2d :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec l [ 2 ];
     GraphicObj *tr;
     GaussPoint *gp;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     FloatArray crackStatuses, cf;
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -521,7 +519,7 @@ Lattice2d :: drawSpecial(oofegGraphicContext &gc)
 }
 
 void
-Lattice2d :: drawRawCrossSections(oofegGraphicContext &gc)
+Lattice2d :: drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
 

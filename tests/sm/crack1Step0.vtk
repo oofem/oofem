@@ -1,0 +1,20 @@
+# vtk DataFile Version 2.0
+Geometry of a PolygonLine
+ASCII
+DATASET UNSTRUCTURED_GRID
+POINTS 5double
+-0.05 1 0.0
+0.333333 1 0.0
+0.566667 1 0.0
+1.11667 1 0.0
+1.66667 1 0.0
+CELLS 4 12
+2 0 1
+2 1 2
+2 2 3
+2 3 4
+CELL_TYPES 4
+3
+3
+3
+3

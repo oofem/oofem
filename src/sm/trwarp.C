@@ -33,6 +33,7 @@
  */
 
 #include "trwarp.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "crosssection.h"
 #include "gausspoint.h"
@@ -61,6 +62,10 @@ Tr_Warp :: Tr_Warp(int n, Domain *aDomain) :
 Tr_Warp :: ~Tr_Warp()
 // Destructor
 { }
+
+
+FEInterpolation *
+Tr_Warp :: giveInterpolation() const { return & this->interp; }
 
 
 void

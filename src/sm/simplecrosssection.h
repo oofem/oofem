@@ -165,6 +165,11 @@ public:
 
     virtual void giveTemperatureVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
+#ifdef __PARALLEL_MODE
+    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp);
+    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp);
+    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *gp);
+#endif
 
 protected:
     int materialNumber;   // material number

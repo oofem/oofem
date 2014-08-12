@@ -35,6 +35,7 @@
 #include "fluidcrosssection.h"
 #include "fluiddynamicmaterial.h"
 #include "dynamicinputrecord.h"
+#include "domain.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -94,4 +95,26 @@ FluidCrossSection :: giveFluidMaterial()
 {
     return static_cast< FluidDynamicMaterial * >( this->domain->giveMaterial(this->matNumber) );
 }
+
+
+#ifdef __PARALLEL_MODE
+int
+FluidCrossSection :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+{
+    return this->domain->giveMaterial(this->matNumber)->packUnknowns(buff, tStep, gp);
+}
+
+int
+FluidCrossSection :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+{
+    return this->domain->giveMaterial(this->matNumber)->unpackAndUpdateUnknowns(buff, tStep, gp);
+}
+
+int
+FluidCrossSection :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *gp)
+{
+    return this->domain->giveMaterial(this->matNumber)->estimatePackSize(buff, gp);
+}
+#endif
+
 } // end namespace oofem

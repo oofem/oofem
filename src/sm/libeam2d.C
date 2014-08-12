@@ -33,6 +33,7 @@
  */
 
 #include "libeam2d.h"
+#include "fei2dlinelin.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
@@ -57,6 +58,9 @@ LIBeam2d :: LIBeam2d(int n, Domain *aDomain) : StructuralElement(n, aDomain), La
     length              = 0.;
     pitch               = 10.;   // a dummy value
 }
+
+
+FEInterpolation *LIBeam2d :: giveInterpolation() const { return & interpolation; }
 
 
 Interface *
@@ -371,6 +375,13 @@ LIBeam2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 
     double weight  = gp->giveWeight();
     return 0.5 * this->computeLength() * weight;
+}
+
+
+void
+LIBeam2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+{
+    computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
 }
 
 

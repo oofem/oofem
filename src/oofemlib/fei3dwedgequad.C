@@ -84,6 +84,30 @@ FEI3dWedgeQuad :: evaldNdx(FloatMatrix &answer, const FloatArray &lcoords, const
 
 
 void
+FEI3dWedgeQuad :: giveLocalNodeCoords(FloatMatrix &answer)
+{
+
+    answer.resize(3,15);
+    answer.at(1,1)  = 1.0; answer.at(2,1)  = 0.0; answer.at(3,1)  = -1.0;
+    answer.at(1,2)  = 0.0; answer.at(2,2)  = 1.0; answer.at(3,2)  = -1.0;
+    answer.at(1,3)  = 0.0; answer.at(2,3)  = 0.0; answer.at(3,3)  = -1.0;
+    answer.at(1,4)  = 1.0; answer.at(2,4)  = 0.0; answer.at(3,4)  =  1.0;
+    answer.at(1,5)  = 0.0; answer.at(2,5)  = 1.0; answer.at(3,5)  =  1.0; 
+    answer.at(1,6)  = 0.0; answer.at(2,6)  = 0.0; answer.at(3,6)  =  1.0;
+    answer.at(1,7)  = 0.5; answer.at(2,7)  = 0.5; answer.at(3,7)  = -1.0;
+    answer.at(1,8)  = 0.0; answer.at(2,8)  = 0.5; answer.at(3,8)  = -1.0;
+    answer.at(1,9)  = 0.5; answer.at(2,9)  = 0.0; answer.at(3,9)  = -1.0;
+    answer.at(1,10) = 0.5; answer.at(2,10) = 0.5; answer.at(3,10) =  1.0;
+    answer.at(1,11) = 0.0; answer.at(2,11) = 0.5; answer.at(3,11) =  1.0;
+    answer.at(1,12) = 0.5; answer.at(2,12) = 0.0; answer.at(3,12) =  1.0;
+    answer.at(1,13) = 1.0; answer.at(2,13) = 0.0; answer.at(3,13) =  0.0;
+    answer.at(1,14) = 0.0; answer.at(2,14) = 1.0; answer.at(3,14) =  0.0;
+    answer.at(1,15) = 0.0; answer.at(2,15) = 0.0; answer.at(3,15) =  0.0;
+
+}
+
+
+void
 FEI3dWedgeQuad :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     FloatArray n;

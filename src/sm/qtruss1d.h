@@ -35,13 +35,13 @@
 #ifndef qtruss1d_h
 #define qtruss1d_h
 
-#include "fei1dquad.h"
 #include "nlstructuralelement.h"
-#include "gaussintegrationrule.h"
 
 #define _IFT_QTruss1d_Name "qtruss1d"
 
 namespace oofem {
+class FEI1dQuad;
+
 /**
  * This class implements a three-node truss bar element for one-dimensional
  * analysis.

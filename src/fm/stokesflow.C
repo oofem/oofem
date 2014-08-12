@@ -260,18 +260,6 @@ double StokesFlow :: giveReynoldsNumber()
 }
 
 
-#ifdef __PARALLEL_MODE
-void StokesFlow :: initParallelContexts()
-{
-    ParallelContext *parallelContext;
-    parallelContextList->growTo(ndomains);
-    for ( int i = 1; i <= this->ndomains; i++ ) {
-        parallelContext =  new ParallelContext(this);
-        parallelContextList->put(i, parallelContext);
-    }
-}
-#endif
-
 int StokesFlow :: checkConsistency()
 {
     Domain *domain = this->giveDomain(1);
@@ -296,8 +284,7 @@ void StokesFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 
 void StokesFlow :: updateInternalState(TimeStep *tStep)
 {
-    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        Domain *domain = this->giveDomain(idomain);
+    for ( auto &domain: domainList ) {
         if ( domain->giveTopology() ) {
             // Must be done before updating nodal positions
             this->ts = domain->giveTopology()->updateYourself(tStep);

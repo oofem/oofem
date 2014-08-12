@@ -39,6 +39,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
+#include "engngm.h"
 #include "structuralcrosssection.h"
 #include "contextioerr.h"
 

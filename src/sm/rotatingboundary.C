@@ -33,8 +33,8 @@
  */
 
 #include "rotatingboundary.h"
-#include "engngm.h"
 #include "dofmanager.h"
+#include "dof.h"
 #include "mathfem.h"
 #include "function.h"
 #include "classfactory.h"

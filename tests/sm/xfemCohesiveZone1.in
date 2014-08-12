@@ -6,10 +6,10 @@ errorcheck
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 4 nelem 1 ncrosssect 1 nmat 2 nbc 2 nic 0 nltf 1 nxfemman 1
-node 1     coords 3  0        0        0       bc 2 1 1
-node 2     coords 3  1        0        0       bc 2 1 1
-node 3     coords 3  1        1        0       bc 2 2 1
-node 4     coords 3  0        1        0       bc 2 2 1
+node 1     coords 2  0        0       bc 2 1 1
+node 2     coords 2  1        0       bc 2 1 1
+node 3     coords 2  1        1       bc 2 2 1
+node 4     coords 2  0        1       bc 2 2 1
 PlaneStress2DXfem 1    nodes 4   1   2   3  4   mat 1 crosssect 1 nip 9 nlgeo 0 czmaterial 2
 SimpleCS 1 thick 1.0 material 1
 #

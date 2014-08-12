@@ -33,6 +33,7 @@
  */
 
 #ifndef latticetransmat_h
+#define latticetransmat_h
 
 #include "transportmaterial.h"
 #include "dictionary.h"
@@ -181,5 +182,4 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 };
 } // end namespace oofem
-#define latticetransmat_h
 #endif

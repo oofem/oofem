@@ -71,6 +71,8 @@ public:
     }
     virtual ~ModuleManager() {
     }
+    ModuleManager(const ModuleManager &) = delete;
+    ModuleManager & operator=(const ModuleManager &) = delete;
     /**
      * Creates new instance of module.
      * @param name Name of module.

@@ -102,5 +102,5 @@ protected:
     void addSharedDofmanPartitions(int _locnum, IntArray _partitions);
 };
 } // end namespace oofem
-#endif
+
 #endif // parmetisloadbalancer_h

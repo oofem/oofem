@@ -45,7 +45,6 @@
 #include "classfactory.h"
 
 #ifdef __OOFEG
- #include "engngm.h"
  #include "oofeggraphiccontext.h"
 #endif
 
@@ -393,7 +392,7 @@ Truss2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussP
 
 
 #ifdef __OOFEG
-void Truss2d :: drawRawGeometry(oofegGraphicContext &gc)
+void Truss2d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int c1, c2;
     resolveCoordIndices(c1, c2);
@@ -438,13 +437,12 @@ void Truss2d :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void Truss2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void Truss2d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     int c1, c2;
     resolveCoordIndices(c1, c2);
 
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* point */

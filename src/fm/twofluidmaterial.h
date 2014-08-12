@@ -36,10 +36,10 @@
 #define twofluidmaterial_h
 
 #include "fluiddynamicmaterial.h"
-#include "floatarray.h"
-#include "floatmatrix.h"
-#include "matconst.h"
+#include "intarray.h"
 #include "matstatus.h"
+
+#include <memory>
 
 ///@name Input fields for TwoFluidMaterial
 //@{
@@ -84,7 +84,7 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
 protected:
-    FluidDynamicMaterial *giveMaterial(int i) const { return static_cast< FluidDynamicMaterial * >( domain->giveMaterial( slaveMaterial(i) ) ); }
+    FluidDynamicMaterial *giveMaterial(int i) const;
     double giveTempVOF(GaussPoint *gp);
 };
 

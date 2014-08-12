@@ -90,7 +90,8 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
     ///@todo Check all the windows support.
     this->umatobj = ( void * ) LoadLibrary( filename.c_str() );
     if ( !this->umatobj ) {
-        OOFEM_ERROR("couldn't load \"%s\",\ndlerror: %s", filename.c_str() );
+        DWORD dlresult = GetLastError(); //works for MinGW 32bit and MSVC
+        OOFEM_ERROR("Couldn't load \"%s\",\nerror code = %d", filename.c_str(), dlresult);
     }
 
     //     * ( void ** )( & this->umat ) = GetProcAddress( ( HMODULE ) this->umatobj, "umat_" );
@@ -98,7 +99,7 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
     if ( !this->umat ) {
         //         char *dlresult = GetLastError();
         DWORD dlresult = GetLastError(); //works for MinGW 32bit
-        OOFEM_ERROR("couldn't load symbol umat,\nerror: %s\n", dlresult);
+        OOFEM_ERROR("Couldn't load symbol umat,\nerror code: %d\n", dlresult);
     }
 
 #else
@@ -634,7 +635,7 @@ void AbaqusUserMaterialStatus :: updateYourself(TimeStep *tStep)
 int AbaqusUserMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
-    if ( type == IST_Undefined ) {
+    if ( type == IST_Undefined || type == IST_AbaqusStateVector ) {
         // The undefined value is used to just dump the entire state vector.
         answer = ms->giveStateVector();
         return 1;

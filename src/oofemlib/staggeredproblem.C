@@ -43,6 +43,7 @@
 #include "util.h"
 #include "verbose.h"
 #include "classfactory.h"
+#include "domain.h"
 
 #include <stdlib.h>
 
@@ -96,10 +97,10 @@ int
 StaggeredProblem :: instanciateSlaveProblems()
 {
     //first instantiate master problem if defined
-    EngngModel *timeDefProb;
+    EngngModel *timeDefProb = NULL;
     emodelList.resize(inputStreamNames.size());
     if ( timeDefinedByProb ) {
-        OOFEMTXTDataReader dr( inputStreamNames [ timeDefinedByProb - 1 ].c_str() );
+        OOFEMTXTDataReader dr( inputStreamNames [ timeDefinedByProb - 1 ] );
         std :: unique_ptr< EngngModel >prob( InstanciateProblem(& dr, this->pMode, this->contextOutputMode, NULL) );
         timeDefProb = prob.get();
         emodelList[timeDefinedByProb-1] = std::move(prob);
@@ -110,7 +111,7 @@ StaggeredProblem :: instanciateSlaveProblems()
             continue;
         }
 
-        OOFEMTXTDataReader dr( inputStreamNames [ i - 1 ].c_str() );
+        OOFEMTXTDataReader dr( inputStreamNames [ i - 1 ] );
         //the slave problem dictating time needs to have attribute master=NULL, other problems point to the dictating slave
         std :: unique_ptr< EngngModel >prob( InstanciateProblem(& dr, this->pMode, this->contextOutputMode, timeDefinedByProb ? timeDefProb : this) );
         emodelList[i-1] = std::move(prob);
@@ -140,6 +141,9 @@ StaggeredProblem :: initializeFrom(InputRecord *ir)
 
     if ( dtFunction < 1 ) {
         ndomains = 0;
+        domainNeqs.clear();
+        domainPrescribedNeqs.clear();
+        domainList.clear();
     }
 
     IR_GIVE_OPTIONAL_FIELD(ir, dtFunction, _IFT_StaggeredProblem_dtf);
@@ -192,7 +196,7 @@ StaggeredProblem :: updateAttributes(MetaStep *mStep)
 Function *StaggeredProblem :: giveDtFunction()
 // Returns the load-time function of the receiver.
 {
-    if ( !dtFunction || !ndomains ) {
+    if ( !dtFunction ) {
         return NULL;
     }
 
@@ -281,59 +285,56 @@ StaggeredProblem :: giveNextStep()
 void
 StaggeredProblem :: solveYourself()
 {
+    EngngModel *sp;
     if ( !timeDefinedByProb ) {
-        EngngModel :: solveYourself();
+        sp = this;
     } else { //time dictated by slave problem
-        int imstep, jstep, nTimeSteps;
-        int smstep = 1, sjstep = 1;
-        MetaStep *activeMStep;
-        FILE *out = this->giveOutputStream();
-        this->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
+        sp = this->giveSlaveProblem(timeDefinedByProb);
+    }
 
-        EngngModel *sp = this->giveSlaveProblem(timeDefinedByProb);
+    int smstep = 1, sjstep = 1;
+    FILE *out = this->giveOutputStream();
+    this->timer.startTimer(EngngModelTimer :: EMTT_AnalysisTimer);
 
-        if ( sp->giveCurrentStep() ) {
-            smstep = sp->giveCurrentStep()->giveMetaStepNumber();
-            sjstep = sp->giveMetaStep(smstep)->giveStepRelativeNumber( sp->giveCurrentStep()->giveNumber() ) + 1;
-        } else {
-            nMetaSteps = sp->giveNumberOfMetaSteps();
-        }
+    if ( sp->giveCurrentStep() ) {
+        smstep = sp->giveCurrentStep()->giveMetaStepNumber();
+        sjstep = sp->giveMetaStep(smstep)->giveStepRelativeNumber( sp->giveCurrentStep()->giveNumber() ) + 1;
+    }
 
-        for ( imstep = smstep; imstep <= nMetaSteps; imstep++, sjstep = 1 ) { //loop over meta steps
-            activeMStep = sp->giveMetaStep(imstep);
-            // update state according to new meta step in all slaves
-            this->initMetaStepAttributes(activeMStep);
+    for ( int imstep = smstep; imstep <= sp->giveNumberOfMetaSteps(); imstep++ ) { //loop over meta steps
+        MetaStep *activeMStep = sp->giveMetaStep(imstep);
+        // update state according to new meta step in all slaves
+        this->initMetaStepAttributes(activeMStep);
 
-            nTimeSteps = activeMStep->giveNumberOfSteps();
-            for ( jstep = sjstep; jstep <= nTimeSteps; jstep++ ) { //loop over time steps
-                this->timer.startTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
-                this->timer.initTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
-                sp->giveNextStep();
+        int nTimeSteps = activeMStep->giveNumberOfSteps();
+        for ( int jstep = sjstep; jstep <= nTimeSteps; jstep++ ) { //loop over time steps
+            this->timer.startTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
+            this->timer.initTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
+            sp->giveNextStep();
 
-                // renumber equations if necessary. Ensure to call forceEquationNumbering() for staggered problems
-                if ( this->requiresEquationRenumbering( sp->giveCurrentStep() ) ) {
-                    this->forceEquationNumbering();
-                }
+            // renumber equations if necessary. Ensure to call forceEquationNumbering() for staggered problems
+            if ( this->requiresEquationRenumbering( sp->giveCurrentStep() ) ) {
+                this->forceEquationNumbering();
+            }
 
-                this->solveYourselfAt( sp->giveCurrentStep() );
-                this->updateYourself( sp->giveCurrentStep() );
-                this->terminate( sp->giveCurrentStep() );
+            this->solveYourselfAt( sp->giveCurrentStep() );
+            this->updateYourself( sp->giveCurrentStep() );
+            this->terminate( sp->giveCurrentStep() );
 
-                this->timer.stopTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
-                double _steptime = this->timer.getUtime(EngngModelTimer :: EMTT_SolutionStepTimer);
-                OOFEM_LOG_INFO("EngngModel info: user time consumed by solution step %d: %.2fs\n",
-                               sp->giveCurrentStep()->giveNumber(), _steptime);
+            this->timer.stopTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
+            double _steptime = this->timer.getUtime(EngngModelTimer :: EMTT_SolutionStepTimer);
+            OOFEM_LOG_INFO("EngngModel info: user time consumed by solution step %d: %.2fs\n",
+                            sp->giveCurrentStep()->giveNumber(), _steptime);
 
-                fprintf(out, "\nUser time consumed by solution step %d: %.3f [s]\n\n",
-                        sp->giveCurrentStep()->giveNumber(), _steptime);
+            fprintf(out, "\nUser time consumed by solution step %d: %.3f [s]\n\n",
+                    sp->giveCurrentStep()->giveNumber(), _steptime);
 
 #ifdef __PARALLEL_MODE
-                if ( loadBalancingFlag ) {
-                    this->balanceLoad( sp->giveCurrentStep() );
-                }
+            if ( loadBalancingFlag ) {
+                this->balanceLoad( sp->giveCurrentStep() );
+            }
 
 #endif
-            }
         }
     }
 }
@@ -487,27 +488,27 @@ StaggeredProblem :: setRenumberFlag()
 }
 
 #ifdef __OOFEG
-void StaggeredProblem :: drawYourself(oofegGraphicContext &context)
+void StaggeredProblem :: drawYourself(oofegGraphicContext &gc)
 {
-    int ap = context.getActiveProblemIndx();
+    int ap = gc.getActiveProblemIndx();
     if ( ( ap > 0 ) && ( ap <= giveNumberOfSlaveProblems() ) ) {
-        this->giveSlaveProblem(ap)->drawYourself(context);
+        this->giveSlaveProblem(ap)->drawYourself(gc);
     }
 }
 
-void StaggeredProblem :: drawElements(oofegGraphicContext &context)
+void StaggeredProblem :: drawElements(oofegGraphicContext &gc)
 {
-    int ap = context.getActiveProblemIndx();
+    int ap = gc.getActiveProblemIndx();
     if ( ( ap > 0 ) && ( ap <= giveNumberOfSlaveProblems() ) ) {
-        this->giveSlaveProblem(ap)->drawElements(context);
+        this->giveSlaveProblem(ap)->drawElements(gc);
     }
 }
 
-void StaggeredProblem :: drawNodes(oofegGraphicContext &context)
+void StaggeredProblem :: drawNodes(oofegGraphicContext &gc)
 {
-    int ap = context.getActiveProblemIndx();
+    int ap = gc.getActiveProblemIndx();
     if ( ( ap > 0 ) && ( ap <= giveNumberOfSlaveProblems() ) ) {
-        this->giveSlaveProblem(ap)->drawNodes(context);
+        this->giveSlaveProblem(ap)->drawNodes(gc);
     }
 }
 #endif
