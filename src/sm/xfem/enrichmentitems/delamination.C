@@ -122,6 +122,11 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
         this->mat = this->giveDomain()->giveMaterial(this->matNum);
     }
 
+    
+    this->xiBottom = -2.0;
+    this->xiTop = -2.0;
+    IR_GIVE_OPTIONAL_FIELD(ir, this->xiBottom, _IFT_Delamination_xiBottom);
+    IR_GIVE_OPTIONAL_FIELD(ir, this->xiTop, _IFT_Delamination_xiTop);
 
     return IRRT_OK;
 }

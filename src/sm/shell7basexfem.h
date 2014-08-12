@@ -50,7 +50,7 @@ namespace oofem {
 class FEI3dTrQuad;
 class BoundaryLoad;
 class EnrichmentItem;
-
+class ShellCrack;
 /**
  * This class represent a 7 parameter shell element.
  * Each node has 7 degrees of freedom (displ. vec., director vec., inhomogeneous thickness strain ).
@@ -80,7 +80,9 @@ protected:
     
     double evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
     double edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
-    double evaluateHeavisideGamma(double xi, EnrichmentItem *ei);
+    double evaluateHeavisideGamma(double xi, ShellCrack *ei);
+    double evaluateHeavisideGamma(double xi, Delamination *ei);
+    double evaluateCutHeaviside(const double xi, const double xiBottom, const double xiTop) const;
     void computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei);
 
     // Tangent matrices

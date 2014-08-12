@@ -42,9 +42,6 @@
 #include "connectivitytable.h"
 #include "InterfaceMaterials/intmatbilinczfagerstrom.h"
 #include "mathfem.h"
-//#include "node.h"
-//#include "geometry.h"
-//#include "cltypes.h"
 #include "xfem/enrichmentitems/crack.h"
 #include "xfem/enrichmentitems/shellcrack.h"
 #include "gausspoint.h"
@@ -526,13 +523,34 @@ Shell7BaseXFEM :: edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem
 
 
 double 
-Shell7BaseXFEM :: evaluateHeavisideGamma(double xi, EnrichmentItem *ei)
+Shell7BaseXFEM :: evaluateHeavisideGamma(double xi, ShellCrack *ei)
 {
-    // Evaluates the Heaviside product H(gamma_1) * H(gamma_2)
+    // Evaluates the "cut" Heaviside for a ShellCrack
+    double xiBottom = ei->xiBottom;
+    double xiTop    = ei->xiTop;
 
-    double xiBottom = dynamic_cast< ShellCrack * >( ei )->xiBottom;
-    double xiTop    = dynamic_cast< ShellCrack * >( ei )->xiTop;
+    return this->evaluateCutHeaviside(xi, xiBottom, xiTop);  
 
+}
+
+double 
+Shell7BaseXFEM :: evaluateHeavisideGamma(double xi, Delamination *ei)
+{
+    // Evaluates the "cut" Heaviside for a Delamination
+    double xiBottom = ei->xiBottom;
+    double xiTop    = ei->xiTop;
+
+    return this->evaluateCutHeaviside(xi, xiBottom, xiTop);  
+
+}
+
+double 
+Shell7BaseXFEM :: evaluateCutHeaviside(const double xi, const double xiBottom, const double xiTop)  const
+{
+    // Evaluates the "cut" Heaviside defined as: 
+    // H(xi - xi1)  - H(xi - xi2) or?
+    // H(xi - xi1) * ( 1 - H(xi - xi2) ) 
+    
     if ( ( xiBottom <= xi ) && ( xi <= xiTop ) ) {
             return 1.0;
     } else {
@@ -540,7 +558,6 @@ Shell7BaseXFEM :: evaluateHeavisideGamma(double xi, EnrichmentItem *ei)
     }          
 
 }
-
 
 void
 Shell7BaseXFEM :: giveMaxCZDamages(FloatArray &answer, TimeStep *tStep)
@@ -587,7 +604,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         answerTemp.resize(Shell7Base :: giveNumberOfDofs() ); 
         answerTemp.zero();
 
-        FloatMatrix NEnr, BEnr, F;  
+        FloatMatrix B, NEnr, BEnr, F;  
         int delamNum = dei->giveNumber();
         IntegrationRule *iRuleL = czIntegrationRulesArray [ delamNum - 1 ]; ///@ todo does this work with giveNumber? Probably not, will have to save num delam.
 
@@ -596,48 +613,56 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
 
         FloatMatrix lambda, lambdaN, Q;
         FloatArray Fp, T, nCov, xd, unknowns, genEpsC, genEpsD;
-
-    for ( GaussPoint *gp: *iRuleL ) {
-        lCoords.at(1) = gp->giveNaturalCoordinate(1);
-        lCoords.at(2) = gp->giveNaturalCoordinate(2);
-        lCoords.at(3) = dei->giveDelamXiCoord();
-
-        this->computeEnrichedBmatrixAt(lCoords, BEnr, dei);
-        this->computeEnrichedNmatrixAt(lCoords, NEnr, dei);
-
-        // Lambda matrix
-        genEpsD.beProductOf(BEnr, solVecD);
-        double xi = dei->giveDelamXiCoord();
-        double zeta = xi * this->layeredCS->computeIntegralThick() * 0.5;
-        this->computeLambdaNMatrix(lambda, genEpsD, zeta);
         
-        // Compute jump vector
-        unknowns.beProductOf(NEnr, solVecD);
-        xd.beProductOf(lambda,unknowns); // spatial jump
-	genEpsC.beProductOf(BEnr, solVecC);
-	this->computeFAt(lCoords, F, genEpsC, tStep);
+        for ( GaussPoint *gp: *iRuleL ) {
+            lCoords.at(1) = gp->giveNaturalCoordinate(1);
+            lCoords.at(2) = gp->giveNaturalCoordinate(2);
+            lCoords.at(3) = dei->giveDelamXiCoord();
+            
+            this->computeEnrichedBmatrixAt(lCoords, B, NULL);
+            this->computeEnrichedBmatrixAt(lCoords, BEnr, dei);
+            this->computeEnrichedNmatrixAt(lCoords, NEnr, dei);
 
-	// Transform xd and F to a local coord system
-        this->evalInitialCovarNormalAt(nCov, lCoords);
-        Q.beLocalCoordSys(nCov);
-        xd.rotatedWith(Q,'n');
-        F.rotatedWith(Q,'n');
+            // Lambda matrix
+            genEpsD.beProductOf(BEnr, solVecD);
+            double xi = dei->giveDelamXiCoord();
+            double zeta = xi * this->layeredCS->computeIntegralThick() * 0.5;
+            this->computeLambdaNMatrix(lambda, genEpsD, zeta);
+            
+            // Compute jump vector
+            unknowns.beProductOf(NEnr, solVecD);
+            xd.beProductOf(lambda,unknowns); // spatial jump
+            
+            genEpsC.beProductOf(B, solVecC);
+            //genEpsC.beProductOf(BEnr, solVecC);
+            this->computeFAt(lCoords, F, genEpsC, tStep);
+            //F.printYourself("F");
 
-        // Compute cohesive traction based on jump
-        intMat->giveFirstPKTraction_3d(T, gp, xd, F, tStep);
-	lambdaN.beProductOf(lambda,NEnr);
+            // Transform xd and F to a local coord system
+            this->evalInitialCovarNormalAt(nCov, lCoords);
+            Q.beLocalCoordSys(nCov);
+            xd.rotatedWith(Q,'n');
+            F.rotatedWith(Q,'n');
 
-	T.rotatedWith(Q,'t'); // transform back to global coord system
-	Fp.beTProductOf(lambdaN, T);
-        double dA = this->computeAreaAround(gp,xi);
-        answerTemp.add(dA*DISC_DOF_SCALE_FAC,Fp);
-        }
+            // Compute cohesive traction based on jump
+            intMat->giveFirstPKTraction_3d(T, gp, xd, F, tStep);
+            
+            //xd.printYourself("spatial jump");
+            //T.printYourself("Traction");
+            lambdaN.beProductOf(lambda,NEnr);
+
+            T.rotatedWith(Q,'t'); // transform back to global coord system
+            Fp.beTProductOf(lambdaN, T);
+            double dA = this->computeAreaAround(gp,xi);
+            answerTemp.add(dA*DISC_DOF_SCALE_FAC,Fp);
+            }
 
         int ndofs = Shell7Base :: giveNumberOfDofs();
         answer.resize(ndofs); answer.zero();
         const IntArray &ordering = this->giveOrderingDofTypes();
         answer.assemble(answerTemp, ordering);
     }
+    //answer.printYourself("cohesive forces");
 }
 
 void
@@ -1390,7 +1415,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 
 // Shifted N and B matrices
 void
-Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &answer, EnrichmentItem *ei)
+Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei)
 {
     // Returns the enriched and shifted {B} matrix of the receiver, evaluated at gp. Such that
     // B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
@@ -1403,8 +1428,8 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &ans
         answer.zero();
         FloatArray N;
         FloatMatrix dNdxi;
-        this->fei->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
-        this->fei->evaldNdxi( dNdxi, lcoords, FEIElementGeometryWrapper(this) );
+        this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
+        this->fei->evaldNdxi( dNdxi, lCoords, FEIElementGeometryWrapper(this) );
 
         /*    18   18   6
          * 6 [B_u   0   0
@@ -1416,8 +1441,8 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &ans
 
         // Evaluate enrichment function at point given by lcoords
         std :: vector< double > efGP;
-        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
+        double levelSetGP = this->evaluateLevelSet(lCoords, ei);
+        ei->evaluateEnrFuncAt(efGP, lCoords, levelSetGP);
         //printf("enr func in gp = %e \n", efGP[0]);
         int ndofman = this->giveNumberOfDofManagers();
 
@@ -1459,21 +1484,18 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &ans
         }
         
 
-        answer.times( this->evaluateHeavisideGamma(lcoords.at(3), ei) ); 
+        answer.times( this->evaluateHeavisideGamma(lCoords.at(3), static_cast< ShellCrack* >(ei)) ); 
         answer.times(DISC_DOF_SCALE_FAC);
 
     } else if ( ei && dynamic_cast< Delamination*>(ei) ){
-        Shell7Base :: computeBmatrixAt(lcoords, answer);
-        std :: vector< double > efGP;
-        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
-        if ( efGP[0] > 0.1 ) {
-            answer.times( efGP[0]*DISC_DOF_SCALE_FAC );
-        } else {
-            answer.times(0.0);
-        }
+        Shell7Base :: computeBmatrixAt(lCoords, answer);
+        //std :: vector< double > efGP;
+        //double levelSetGP = this->evaluateLevelSet(lCoords, ei);
+        //ei->evaluateEnrFuncAt(efGP, lCoords, levelSetGP);
+        double fac = this->evaluateHeavisideGamma(lCoords.at(3), static_cast< Delamination* >(ei) );
+        answer.times( fac * DISC_DOF_SCALE_FAC );
     } else {
-        Shell7Base :: computeBmatrixAt(lcoords, answer);
+        Shell7Base :: computeBmatrixAt(lCoords, answer);
     }
 }
 
@@ -1497,7 +1519,7 @@ Shell7BaseXFEM :: EvaluateEnrFuncInDofMan(int dofManNum, EnrichmentItem *ei)
 
 
 void
-Shell7BaseXFEM :: computeEnrichedNmatrixAt(const FloatArray &lcoords, FloatMatrix &answer, EnrichmentItem *ei)
+Shell7BaseXFEM :: computeEnrichedNmatrixAt(const FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei)
 {
     // Returns the displacement interpolation matrix {N} of the receiver,
     // evaluated at aGaussPoint.
@@ -1507,7 +1529,7 @@ Shell7BaseXFEM :: computeEnrichedNmatrixAt(const FloatArray &lcoords, FloatMatri
     answer.resize(7, ndofs);
     answer.zero();
     FloatArray N;
-    this->fei->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
+    this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
 
     /*   nno*3 nno*3 nno
      * 3 [N_x   0    0
@@ -1517,8 +1539,8 @@ Shell7BaseXFEM :: computeEnrichedNmatrixAt(const FloatArray &lcoords, FloatMatri
 
     if ( ei && dynamic_cast< Crack*>(ei) ) { 
         std :: vector< double > efGP;
-        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
+        double levelSetGP = this->evaluateLevelSet(lCoords, ei);
+        ei->evaluateEnrFuncAt(efGP, lCoords, levelSetGP);
         
         for ( int i = 1, j = 0; i <= this->giveNumberOfDofManagers(); i++, j += 3 ) {
             double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
@@ -1532,28 +1554,25 @@ Shell7BaseXFEM :: computeEnrichedNmatrixAt(const FloatArray &lcoords, FloatMatri
             answer.at(7, ndofs_xm * 2 + i) = N.at(i) * factor;
         }
         
-        answer.times( this->evaluateHeavisideGamma(lcoords.at(3), ei) ); 
+        answer.times( this->evaluateHeavisideGamma(lCoords.at(3), static_cast< ShellCrack* >(ei)) ); 
         answer.times(DISC_DOF_SCALE_FAC);
 
     } else if ( ei && dynamic_cast< Delamination*>(ei) ) {
-        Shell7Base :: computeNmatrixAt(lcoords, answer);
-        std :: vector< double > efGP;
-        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
-        if ( efGP[0] > 0.1 ) {
-            answer.times( efGP[0] * DISC_DOF_SCALE_FAC );
-        } else {
-            answer.times(0.0);
-        }
+        Shell7Base :: computeNmatrixAt(lCoords, answer);
+        //std :: vector< double > efGP;
+        //double levelSetGP = this->evaluateLevelSet(lCoords, ei);
+        //ei->evaluateEnrFuncAt(efGP, lCoords, levelSetGP);
+        double fac = this->evaluateHeavisideGamma(lCoords.at(3), static_cast< Delamination* >(ei) );
+        answer.times( fac * DISC_DOF_SCALE_FAC );
     } else {
-        Shell7Base :: computeNmatrixAt(lcoords, answer);
+        Shell7Base :: computeNmatrixAt(lCoords, answer);
     }
 }
 
 
 
 void
-Shell7BaseXFEM :: edgeComputeEnrichedNmatrixAt(FloatArray &lcoords, FloatMatrix &answer, EnrichmentItem *ei)
+Shell7BaseXFEM :: edgeComputeEnrichedNmatrixAt(FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei)
 {
 // Returns the displacement interpolation matrix {N} of the receiver 
 // evaluated at gaussPoint along one edge.
@@ -1562,7 +1581,7 @@ Shell7BaseXFEM :: edgeComputeEnrichedNmatrixAt(FloatArray &lcoords, FloatMatrix 
     answer.zero();
 
     FloatArray N;
-    this->fei->edgeEvalN( N, 1, lcoords, FEIElementGeometryWrapper(this) );
+    this->fei->edgeEvalN( N, 1, lCoords, FEIElementGeometryWrapper(this) );
 
     /*    9   9    3
      * 3 [N_x   0    0
@@ -1573,8 +1592,8 @@ Shell7BaseXFEM :: edgeComputeEnrichedNmatrixAt(FloatArray &lcoords, FloatMatrix 
 
     if ( ei && dynamic_cast< Crack*>(ei) ) { 
         std :: vector< double > efGP;
-        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
+        double levelSetGP = this->evaluateLevelSet(lCoords, ei);
+        ei->evaluateEnrFuncAt(efGP, lCoords, levelSetGP);
 
         for ( int i = 1, j = 0; i <= this->giveNumberOfEdgeDofManagers(); i++, j += 3 ) {
             double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
@@ -1586,28 +1605,25 @@ Shell7BaseXFEM :: edgeComputeEnrichedNmatrixAt(FloatArray &lcoords, FloatMatrix 
             answer.at(6, ndofs_xm + 3 + j) = N.at(i) * factor;
             answer.at(7, ndofs_xm * 2 + i) = N.at(i) * factor;
         }
-        answer.times( this->evaluateHeavisideGamma(lcoords.at(3), ei) ); 
+        answer.times( this->evaluateHeavisideGamma(0.0, static_cast< ShellCrack* >(ei)) ); 
         answer.times(DISC_DOF_SCALE_FAC);
 
     } else if ( ei && dynamic_cast< Delamination*>(ei) ) {
-        Shell7Base :: edgeComputeNmatrixAt(lcoords, answer);
-        std :: vector< double > efGP;
-        double levelSetGP = this->edgeEvaluateLevelSet(lcoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
-        if ( efGP[0] > 0.1 ) {
-            answer.times( efGP[0] * DISC_DOF_SCALE_FAC );
-        } else {
-            answer.times(0.0);
-        }
+        Shell7Base :: edgeComputeNmatrixAt(lCoords, answer);
+        //std :: vector< double > efGP;
+        //double levelSetGP = this->edgeEvaluateLevelSet(lCoords, ei);
+        //ei->evaluateEnrFuncAt(efGP, lCoords, levelSetGP);
+        double fac = this->evaluateHeavisideGamma(0.0, static_cast< Delamination* >(ei) );
+        answer.times( fac * DISC_DOF_SCALE_FAC );
     } else {
-        Shell7Base :: edgeComputeNmatrixAt(lcoords, answer);
+        Shell7Base :: edgeComputeNmatrixAt(lCoords, answer);
     }
 
 }
 
 
 void
-Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &answer, EnrichmentItem *ei)
+Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei)
 {
 /* Returns the  matrix {B} of the receiver, evaluated at aGaussPoint. Such that
  * B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
@@ -1621,9 +1637,9 @@ Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix 
 
     if ( ei && dynamic_cast< Crack*>(ei) ) { 
 
-        this->fei->edgeEvalN( N, 1, lcoords, FEIElementGeometryWrapper(this) );
+        this->fei->edgeEvalN( N, 1, lCoords, FEIElementGeometryWrapper(this) );
         int iedge = 0;
-        this->fei->edgeEvaldNdxi( dNdxi, iedge, lcoords, FEIElementGeometryWrapper(this) );
+        this->fei->edgeEvaldNdxi( dNdxi, iedge, lCoords, FEIElementGeometryWrapper(this) );
 
         /*
          * 3 [B_u   0    0
@@ -1635,8 +1651,8 @@ Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix 
 
         // Evaluate enrichment function at point given by lcoords
         std :: vector< double > efGP;
-        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
+        double levelSetGP = this->evaluateLevelSet(lCoords, ei);
+        ei->evaluateEnrFuncAt(efGP, lCoords, levelSetGP);
 
 
         int ndofs_xm = this->giveNumberOfEdgeDofs() / 7 * 3;   // numEdgeNodes * 3 dofs
@@ -1670,21 +1686,18 @@ Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix 
             answer.at(11, ndofs_xm * 2 + 1 + j) = N.at(i) * factor;
         }
 
-        answer.times( this->evaluateHeavisideGamma(lcoords.at(3), ei) ); 
+        answer.times( this->evaluateHeavisideGamma(lCoords.at(3), static_cast< ShellCrack* >(ei)) ); 
         answer.times(DISC_DOF_SCALE_FAC);
 
     } else if ( ei && dynamic_cast< Delamination*>(ei) ){
-        Shell7Base :: edgeComputeBmatrixAt(lcoords, answer);
-        std :: vector< double > efGP;
-        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
-        if ( efGP[0] > 0.1 ) {
-            answer.times( efGP[0]*DISC_DOF_SCALE_FAC );
-        } else {
-            answer.times(0.0);
-        }
+        Shell7Base :: edgeComputeBmatrixAt(lCoords, answer);
+        //std :: vector< double > efGP;
+        //double levelSetGP = this->evaluateLevelSet(lCoords, ei);
+        //ei->evaluateEnrFuncAt(efGP, lCoords, levelSetGP);
+        double fac = this->evaluateHeavisideGamma(lCoords.at(3), static_cast< Delamination* >(ei) );
+        answer.times( fac * DISC_DOF_SCALE_FAC );
     } else {
-        Shell7Base :: edgeComputeBmatrixAt(lcoords, answer);
+        Shell7Base :: edgeComputeBmatrixAt(lCoords, answer);
     }
 
 }

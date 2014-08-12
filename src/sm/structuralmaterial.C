@@ -449,19 +449,19 @@ StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix
       //I_ik * S_jl + F_im F_kn C_mjnl
       answer.resize(9,9);
       for ( int i = 1; i <= 3; i++) {
-	for ( int j = 1; j <= 3; j++) {
-	  for ( int k = 1; k <= 3; k++) {
-	    for ( int l = 1; l <= 3; l++) {
-	      for ( int m = 1; m <= 3; m++) {
-		for ( int n = 1; n <= 3; n++) {
-      
-		  answer.at( giveVI(i,j), giveVI(k,l) ) += I.at(i,k) * S.at(giveSymVI(j,l)) + F.at(giveVI(i,m)) * F.at(giveVI(k,n)) * C.at(giveSymVI(m,j),giveSymVI(n,l) );
-		  
-		}
-	      }
-	    }
-	  }
-	}
+        for ( int j = 1; j <= 3; j++) {
+          for ( int k = 1; k <= 3; k++) {
+            for ( int l = 1; l <= 3; l++) {
+              for ( int m = 1; m <= 3; m++) {
+                for ( int n = 1; n <= 3; n++) {
+          
+                  answer.at( giveVI(i,j), giveVI(k,l) ) += I.at(i,k) * S.at(giveSymVI(j,l)) + F.at(giveVI(i,m)) * F.at(giveVI(k,n)) * C.at(giveSymVI(m,j),giveSymVI(n,l) );
+              
+                }
+              }
+            }
+          }
+        }
       }
       
 #endif

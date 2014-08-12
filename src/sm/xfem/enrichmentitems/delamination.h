@@ -44,7 +44,8 @@
 #define _IFT_Delamination_interfacenum "interfacenum"
 #define _IFT_Delamination_csnum "csnum"
 #define _IFT_Delamination_CohesiveZoneMaterial "czmaterial"
-//#define _IFT_MultipleDelamination_Name "multipledelamination"
+#define _IFT_Delamination_xiBottom "xibottom"
+#define _IFT_Delamination_xiTop "xitop"
 //@}
 
 namespace oofem {
@@ -61,6 +62,8 @@ protected:
     int crossSectionNum;
     int matNum;
     double delamXiCoord;    // defines at what local xi-coord the delamination is defined
+    
+
 public:
     Delamination(int n, XfemManager *xm, Domain *aDomain);
 
@@ -72,6 +75,10 @@ public:
     double giveDelamXiCoord() { return delamXiCoord; };
     //virtual Material *giveMaterial() { return mat; }
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
+
+    // New 110814 JB defines between what local xi-coords the delamination is defined
+    double xiBottom;
+    double xiTop;    
 };
 } // end namespace oofem
 
