@@ -127,7 +127,22 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
 
         } else {
 
-            OOFEM_ERROR ("No support for large deformations yet!");
+            this->computeBmatrixAt(gp, B);
+
+            // Fluid part
+            gp->setMaterialMode(_3dFlow);
+            fluidMaterial->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep);
+            gp->setMaterialMode(_3dMat);
+
+            EdB.beProductOf(Ed, B);
+            Kf.plusProductSymmUpper(B, EdB, detJ*weight);
+
+            // Ghost solid part
+            EdB.beProductOf(Dghost, B);
+            Kx.plusProductSymmUpper(B, EdB, detJ*weight);
+
+            // Incompressibility part
+            G.plusDyadUnsym(dNv, Nlin, -detJ*weight);
 
         }
 
@@ -150,10 +165,10 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
     answer.assemble(Kx, ghostdisplacement_ordering, ghostdisplacement_ordering);
 #else
 
-    if (!tStep->isTheFirstStep()) {
+    //if (!tStep->isTheFirstStep()) {
         answer.assemble(Kf, ghostdisplacement_ordering, ghostdisplacement_ordering);
         answer.assemble(GT, conservation_ordering, ghostdisplacement_ordering);
-    }
+    //}
 
     answer.assemble(Kf, ghostdisplacement_ordering, momentum_ordering);
     answer.assemble(G,  ghostdisplacement_ordering, conservation_ordering);
@@ -272,11 +287,6 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
     double pressure, epsvol;
 
     giveUnknownData(a_prev, a, a_inc, tStep);
-    /*    if (this->giveNumber() == 364 ){
-        printf ("%u\n", tStep->giveNumber());
-        a_prev.printYourself();
-        a.printYourself();
-    }*/
 
 #if TESTNUMTAN == 1
     FloatMatrix K;
@@ -285,11 +295,11 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
     K.resize(a.giveSize(), a.giveSize());
     K.zero();
 
-    for (int i = 0; i<=a.giveSize(); i++) {
+    for (int i = 0; i<=0; i++) {
         this->computeVectorOf( VM_Total, tStep, a);
         if (i>0) { // Compute f_int(a) if a==0, otherwide compute f_int(a+delta)
             if ( (i==4) && (this->giveNumber() == 364) ) {
-                a.printYourself();
+                //a.printYourself();
             }
             a.at(i) = a.at(i) + eps;
         }
@@ -304,19 +314,13 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
         auxstress.resize(30);
         auxstress.zero();
 
+        this->computeVectorOf( VM_Total, tStep, a);
+        a_inc.operator =(a-a_prev);
+
         aVelocity.beSubArrayOf(a, momentum_ordering);
         aPressure.beSubArrayOf(a, conservation_ordering);
         aGhostDisplacement.beSubArrayOf(a, ghostdisplacement_ordering);
         aIncGhostDisplacement.beSubArrayOf(a_inc, ghostdisplacement_ordering);
-
-#if TESTNUMTAN == 1
-        if ( (i==4 || i==0 ) && ( this->giveNumber() == 364) ) {
-            /*            a.printYourself();
-            aVelocity.printYourself();
-            aPressure.printYourself();
-            aIncGhostDisplacement.printYourself(); */
-        }
-#endif
 
         for (int j = 0; j<iRule->giveNumberOfIntegrationPoints(); j++) {
             GaussPoint *gp = iRule->getIntegrationPoint(j);
@@ -364,9 +368,57 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
                 auxstress.plusProduct(B, Stress, detJ * weight);
 
             } else {
+                // We use small deformation on solid part since it is just there for keeping the mesh in ok shape.
+                FloatMatrix B, BH;
 
-                OOFEM_ERROR ("No support for large deformations yet!");
+                this->computeBHmatrixAt(gp, BH);
+                this->computeBmatrixAt(gp, B);
 
+                FloatArray aTotal;
+                aTotal.operator = (aVelocity + aIncGhostDisplacement); // Assume deltaT=1 gives that the increment is the velocity
+
+                epsf.beProductOf(B, aTotal);
+                pressure = Nlin.dotProduct(aPressure);
+
+                // Momentum equation -----
+
+                // Compute fluid cauchy stress
+                FloatArray fluidCauchy;
+                FloatMatrix fluidCauchyMatrix;
+
+                gp->setMaterialMode(_3dFlow);
+                fluidMaterial->computeDeviatoricStressVector(fluidCauchy, epsvol, gp, epsf, pressure, tStep);
+                gp->setMaterialMode(_3dMat);
+
+                // Transform to 1st Piola-Kirshhoff
+                FloatArray Fa;
+                FloatMatrix F, Finv, FinvT, fluidStressMatrix;
+
+                this->computeDeformationGradientVector(Fa, gp, tStep);
+                F.beMatrixForm(Fa);
+                Finv.beInverseOf(F);
+                FinvT.beTranspositionOf(Finv);
+
+                fluidCauchyMatrix.beMatrixFormOfStress(fluidCauchy);
+                fluidStressMatrix.beProductOf(FinvT, fluidCauchyMatrix);
+                fluidStressMatrix.times( detJ );
+                fluidStress.beVectorForm(fluidStressMatrix);
+
+                // Add to equation
+
+                momentum.plusProduct(BH, fluidStress, detJ*weight);
+                momentum.add(-pressure * detJ * weight, dNv);
+
+                // Conservation equation
+                divv.beTProductOf(dNv, aTotal);
+                divv.times(-detJ * weight);
+
+                conservation.add(divv.at(1), Nlin);
+
+                // Ghost solid part
+                Strain.beProductOf(B, aGhostDisplacement);
+                Stress.beProductOf(Dghost, Strain);
+                auxstress.plusProduct(B, Stress, detJ * weight);
             }
 
         }
@@ -406,26 +458,39 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
     }
 
     if (this->giveNumber() == 364) {
-        K.printYourself();
-        answer.printYourself();
+        //K.printYourself();
+        //answer.printYourself();
     }
 
 #endif
 
-    // Test linear
-if (this->giveNumber() == 364) {
+//if (this->giveNumber() == 364) {
     // answer.printYourself();
-}
+//}
 
 #if TESTNUMTAN == 1
-    if (this->giveNumber() == 364) {
-        FloatMatrix K;
+    //if (this->giveNumber() == 364) {
+/*        FloatMatrix Ka, Diff;
         FloatArray ans;
-        this->computeStiffnessMatrix(K, TangentStiffness, tStep);
-        K.printYourself();
-        ans.beProductOf(K, a);
-        ans.printYourself();
-    }
+        this->computeStiffnessMatrix(Ka, TangentStiffness, tStep);
+        Diff = Ka;
+        Diff.subtract(K);
+
+        // Diff.printYourself();
+
+        double m=0.0;
+        for (int i=0; i<Diff.giveNumberOfRows(); i++) {
+            for (int j=0; j<Diff.giveNumberOfColumns(); j++) {
+                if (sqrt( Diff(i,j)*Diff(i,j) ) > m) m = sqrt( Diff(i,j)*Diff(i,j) );
+            }
+        }
+*/
+        //printf("%e\n", m);
+
+        /*Ka.printYourself();
+        ans.beProductOf(Ka, a);
+        ans.printYourself();*/
+    //}
 #endif
 
 }
