@@ -40,7 +40,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
-#include "shell7base.h"
+//#include "shell7base.h"
 #include "intmatbilinczjansson.h"
 //#include "vld.h"
 

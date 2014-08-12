@@ -16,7 +16,6 @@ set (sm_element
     libeam2d.C libeam2dnl.C
     libeam3d.C libeam3dnl.C libeam3dnl2.C libeam3d2.C
     beam2d.C beam3d.C
-    #interfaceelement1d.C interfaceelem2dquad.C interfaceelem3dtrlin.C
     quad1planestrain.C rershell.C tr_shell01.C qplanstrss.C q9planstrss.C qtrplstr.C q4axisymm.C
     planstrss.C
     planstrssxfem.C
@@ -35,10 +34,10 @@ set (sm_element
     qplanestressgrad.C
     latticestructuralelement.C
     lattice2d.C
-    shell7base.C
-    tr2shell7.C
-    shell7basexfem.C
-    tr2shell7xfem.C
+    Elements/Shells/shell7base.C
+    Elements/Shells/tr2shell7.C
+    Elements/Shells/shell7basexfem.C
+    Elements/Shells/tr2shell7xfem.C
     trplanestressrotallman.C
     structuralinterfaceelement.C
     tet21ghostsolid.C
@@ -49,20 +48,19 @@ set (sm_element
     qspacegrad.C
     dkt.C qdkt.C
     quad1platesubsoil.C tria1platesubsoil.C
-    
     trwarp.C
     #qplanstrssphf.C
     )
 
 set (sm_interface_elements
-    InterfaceElements/intelpoint.C
-    InterfaceElements/intelline1.C
-    InterfaceElements/intelline2.C
-    InterfaceElements/intelsurftr1.C
-    InterfaceElements/Deprecated/interfaceelement1d.C
-    InterfaceElements/Deprecated/interfaceelem2dlin.C
-    InterfaceElements/Deprecated/interfaceelem2dquad.C
-    InterfaceElements/Deprecated/interfaceelem3dtrlin.C
+    Elements/InterfaceElements/intelpoint.C
+    Elements/InterfaceElements/intelline1.C
+    Elements/InterfaceElements/intelline2.C
+    Elements/InterfaceElements/intelsurftr1.C
+    Elements/InterfaceElements/Deprecated/interfaceelement1d.C
+    Elements/InterfaceElements/Deprecated/interfaceelem2dlin.C
+    Elements/InterfaceElements/Deprecated/interfaceelem2dquad.C
+    Elements/InterfaceElements/Deprecated/interfaceelem3dtrlin.C
     )
 
 set (sm_boundary_conditions
@@ -143,7 +141,6 @@ set (sm_material
     dustmat.C
     lsmastermat.C
     lsmastermatgrad.C
-    InterfaceMaterials/intmatdummycz.C
     simplevitrificationmaterial.C
     anisodamagemodel.C
     winklerpasternak.C
@@ -153,17 +150,18 @@ set (sm_material
 	)
 
 set (sm_interface_materials
-    InterfaceMaterials/intmatbilinczfagerstrom.C
-    InterfaceMaterials/intmatbilinczjansson.C
-    InterfaceMaterials/intmatbilinearcz.C
-    InterfaceMaterials/intmatbilinczelastic.C
-    InterfaceMaterials/intmatbilinczfagerstromrate.C
-    InterfaceMaterials/intmatisodamage.C
-    InterfaceMaterials/intmatisodamagetable.C
-    InterfaceMaterials/intmatcoulombcontact.C
-    InterfaceMaterials/Deprecated/isointerfacedamage01.C
-    InterfaceMaterials/Deprecated/isointerfacedamage02.C
-    InterfaceMaterials/Deprecated/simpleinterfacemat.C
+    Materials/InterfaceMaterials/intmatbilinczfagerstrom.C
+    Materials/InterfaceMaterials/intmatbilinczjansson.C
+    Materials/InterfaceMaterials/intmatbilinearcz.C
+    Materials/InterfaceMaterials/intmatbilinczelastic.C
+    Materials/InterfaceMaterials/intmatbilinczfagerstromrate.C
+    Materials/InterfaceMaterials/intmatisodamage.C
+    Materials/InterfaceMaterials/intmatisodamagetable.C
+    Materials/InterfaceMaterials/intmatcoulombcontact.C
+    Materials/InterfaceMaterials/intmatdummycz.C    
+    Materials/InterfaceMaterials/Deprecated/isointerfacedamage01.C
+    Materials/InterfaceMaterials/Deprecated/isointerfacedamage02.C
+    Materials/InterfaceMaterials/Deprecated/simpleinterfacemat.C
     )
 
 set (sm_error

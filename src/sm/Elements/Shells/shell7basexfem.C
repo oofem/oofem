@@ -40,7 +40,7 @@
 #include "dofmanager.h"
 #include "constantpressureload.h"
 #include "connectivitytable.h"
-#include "InterfaceMaterials/intmatbilinczfagerstrom.h"
+#include "Materials/InterfaceMaterials/intmatbilinczfagerstrom.h"
 #include "mathfem.h"
 #include "xfem/enrichmentitems/crack.h"
 #include "xfem/enrichmentitems/shellcrack.h"
