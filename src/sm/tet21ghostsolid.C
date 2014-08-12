@@ -15,7 +15,7 @@
 namespace oofem {
 
 #define USEUNCOUPLED 0
-#define TESTNUMTAN 0
+#define TESTNUMTAN 1
 
 REGISTER_Element(tet21ghostsolid);
 
@@ -165,11 +165,8 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
     answer.assemble(Kx, ghostdisplacement_ordering, ghostdisplacement_ordering);
 #else
 
-    //if (!tStep->isTheFirstStep()) {
-        answer.assemble(Kf, ghostdisplacement_ordering, ghostdisplacement_ordering);
-        answer.assemble(GT, conservation_ordering, ghostdisplacement_ordering);
-    //}
-
+    answer.assemble(Kf, ghostdisplacement_ordering, ghostdisplacement_ordering);
+    answer.assemble(GT, conservation_ordering, ghostdisplacement_ordering);
     answer.assemble(Kf, ghostdisplacement_ordering, momentum_ordering);
     answer.assemble(G,  ghostdisplacement_ordering, conservation_ordering);
     answer.assemble(Kx, momentum_ordering, ghostdisplacement_ordering);
@@ -207,7 +204,6 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
     FloatMatrix dNx, G;
 
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
-    //gVector.printYourself();
     temparray.zero();
 
     vload.resize(4);
@@ -229,7 +225,6 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
 
             double rho = mat->give('d', gp);
             this->interpolation.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
-            //N.printYourself();
 
             for ( int j = 0; j < N.giveSize(); j++ ) {
                 temparray(3 * j + 0) += N(j) * rho * gVector(0) * dA;
@@ -237,7 +232,6 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
                 temparray(3 * j + 2) += N(j) * rho * gVector(2) * dA;
             }
         }
-        //temparray.printYourself();
 
         // "load" from previous step
         this->interpolation.evaldNdx( dNx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
@@ -267,11 +261,6 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
     answer.assemble(vload, this->conservation_ordering);
 #endif
 
-    if (this->giveNumber() == 364) {
-        //answer.printYourself();
-    }
-
-    // answer.printYourself();
 }
 
 void
@@ -284,9 +273,10 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
     FloatMatrix Kf, G, Kx, B, Ed, dNx;
     FloatArray Strain, Stress, Nlin, dNv, a, a_inc, a_prev, aVelocity, aPressure, aGhostDisplacement, aIncGhostDisplacement, fluidStress, epsf, dpdivv;
     FloatArray momentum, conservation, auxstress, divv;
-    double pressure, epsvol;
+    double pressure, epsvol=0.0;
 
     giveUnknownData(a_prev, a, a_inc, tStep);
+    a_inc.operator =(a-a_prev);
 
 #if TESTNUMTAN == 1
     FloatMatrix K;
@@ -295,12 +285,9 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
     K.resize(a.giveSize(), a.giveSize());
     K.zero();
 
-    for (int i = 0; i<=0; i++) {
-        this->computeVectorOf( VM_Total, tStep, a);
-        if (i>0) { // Compute f_int(a) if a==0, otherwide compute f_int(a+delta)
-            if ( (i==4) && (this->giveNumber() == 364) ) {
-                //a.printYourself();
-            }
+    for (int i = 0; i<=a.giveSize(); i++) {
+        giveUnknownData(a_prev, a, a_inc, tStep);
+        if (i>0) { // Compute f_int(a) if i==0, otherwide compute f_int(a+delta)
             a.at(i) = a.at(i) + eps;
         }
         // Update a_inc
@@ -313,9 +300,6 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
         conservation.zero();
         auxstress.resize(30);
         auxstress.zero();
-
-        this->computeVectorOf( VM_Total, tStep, a);
-        a_inc.operator =(a-a_prev);
 
         aVelocity.beSubArrayOf(a, momentum_ordering);
         aPressure.beSubArrayOf(a, conservation_ordering);
@@ -330,7 +314,6 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
 
             this->interpolation.evaldNdx( dNx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
             this->interpolation_lin.evalN( Nlin, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-            //this->interpolation_lin.evaldNdx( dNlin, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
             dNv.resize(30);
             for (int k = 0; k<dNx.giveNumberOfRows(); k++) {
@@ -409,13 +392,13 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
                 momentum.plusProduct(BH, fluidStress, detJ*weight);
                 momentum.add(-pressure * detJ * weight, dNv);
 
-                // Conservation equation
+                // Conservation equation -----
                 divv.beTProductOf(dNv, aTotal);
                 divv.times(-detJ * weight);
 
                 conservation.add(divv.at(1), Nlin);
 
-                // Ghost solid part
+                // Ghost solid part -----
                 Strain.beProductOf(B, aGhostDisplacement);
                 Stress.beProductOf(Dghost, Strain);
                 auxstress.plusProduct(B, Stress, detJ * weight);
@@ -469,10 +452,14 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
 //}
 
 #if TESTNUMTAN == 1
-    //if (this->giveNumber() == 364) {
-/*        FloatMatrix Ka, Diff;
+    if (this->giveNumber() == 364) {
+        FloatMatrix Ka, Diff;
         FloatArray ans;
         this->computeStiffnessMatrix(Ka, TangentStiffness, tStep);
+        printf("Numerical tangent:\n");
+        K.printYourself();
+        printf("Analytical tangent:\n");
+        Ka.printYourself();
         Diff = Ka;
         Diff.subtract(K);
 
@@ -484,13 +471,13 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
                 if (sqrt( Diff(i,j)*Diff(i,j) ) > m) m = sqrt( Diff(i,j)*Diff(i,j) );
             }
         }
-*/
-        //printf("%e\n", m);
+
+        printf("%e\n", m);
 
         /*Ka.printYourself();
         ans.beProductOf(Ka, a);
         ans.printYourself();*/
-    //}
+    }
 #endif
 
 }
