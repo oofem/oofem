@@ -92,7 +92,7 @@ class EngngModel;
  */
 class OOFEM_EXPORT NRSolver : public SparseNonLinearSystemNM
 {
-private:
+protected:
     enum nrsolver_ModeType { nrsolverModifiedNRM, nrsolverFullNRM, nrsolverAccelNRM };
 
     int nsmax, minIterations;
