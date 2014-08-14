@@ -35,8 +35,8 @@
 #ifndef libeam3d_h
 #define libeam3d_h
 
-#include "Elements/structuralelement.h"
-#include "CrossSections/fiberedcs.h"
+#include "../sm/Elements/structuralelement.h"
+#include "../sm/CrossSections/fiberedcs.h"
 
 ///@name Input fields for LIBeam3d
 //@{

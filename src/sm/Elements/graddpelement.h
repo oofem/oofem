@@ -36,8 +36,8 @@
 #ifndef graddpelement_h
 #define graddpelement_h
 
-#include "Elements/structuralelement.h"
-#include "Elements/nlstructuralelement.h"
+#include "../sm/Elements/structuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
 
 namespace oofem {
 /**

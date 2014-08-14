@@ -32,7 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "qwedgegrad.h"
+#include "../sm/Elements/3D/qwedgegrad.h"
+#include "../sm/Materials/structuralms.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
 #include "fei3dwedgelin.h"
 #include "node.h"
 #include "material.h"
@@ -43,9 +45,7 @@
 #include "intarray.h"
 #include "domain.h"
 #include "cltypes.h"
-#include "Materials/structuralms.h"
 #include "mathfem.h"
-#include "CrossSections/structuralcrosssection.h"
 #include "classfactory.h"
 
 #include <cstdio>

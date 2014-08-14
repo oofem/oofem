@@ -35,11 +35,10 @@
 #ifndef staticstructural_h
 #define staticstructural_h
 
-#include "structengngmodel.h"
+#include "../sm/EngineeringModels/structengngmodel.h"
+#include "../sm/EngineeringModels/xfemsolverinterface.h"
 #include "sparsenonlinsystemnm.h"
 #include "sparsemtrxtype.h"
-#include "xfemsolverinterface.h"
-
 #include "staggeredsolver.h"
 
 #define _IFT_StaticStructural_Name "staticstructural"

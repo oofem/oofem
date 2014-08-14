@@ -37,7 +37,7 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
-#include "CrossSections/structuralcrosssection.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "mathfem.h"

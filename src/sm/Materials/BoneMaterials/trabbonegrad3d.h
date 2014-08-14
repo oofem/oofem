@@ -36,7 +36,7 @@
 #define TrabBoneGrad3D_h
 
 #include "trabbone3d.h"
-#include "Materials/graddpmaterialextensioninterface.h"
+#include "../sm/Materials/graddpmaterialextensioninterface.h"
 #include "cltypes.h"
 
 #define _IFT_TrabBoneGrad3D_Name "trabbonegrad3d"

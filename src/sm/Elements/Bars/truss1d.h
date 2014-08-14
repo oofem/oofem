@@ -35,15 +35,15 @@
 #ifndef truss1d_h
 #define truss1d_h
 
-#include "Elements/structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
+#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
+#include "../sm/ErrorEstimators/zzerrorestimator.h"
+#include "../sm/ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "spatiallocalizer.h"
-#include "ErrorEstimators/directerrorindicatorrc.h"
 #include "eleminterpmapperinterface.h"
-#include "ErrorEstimators/zzerrorestimator.h"
 #include "mmashapefunctprojection.h"
-#include "ErrorEstimators/huertaerrorestimator.h"
 
 #define _IFT_Truss1d_Name "truss1d"
 

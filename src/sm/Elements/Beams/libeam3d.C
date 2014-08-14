@@ -32,13 +32,13 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "libeam3d.h"
+#include "../sm/Elements/Beams/libeam3d.h"
+#include "../sm/Materials/structuralms.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
-#include "Materials/structuralms.h"
 #include "floatmatrix.h"
 #include "intarray.h"
 #include "floatarray.h"

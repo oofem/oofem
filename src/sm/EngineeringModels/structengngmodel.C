@@ -32,16 +32,16 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "structengngmodel.h"
+#include "../sm/EngineeringModels/structengngmodel.h"
+#include "../sm/Elements/structuralelement.h"
+#include "../sm/ElementEvaluators/structuralelementevaluator.h"
+#include "../sm/Elements/Interfaces/structuralinterfaceelement.h"
 #include "dofmanager.h"
 #include "dof.h"
 #include "element.h"
 #include "timestep.h"
 #include "outputmanager.h"
-#include "Elements/structuralelement.h"
-#include "ElementEvaluators/structuralelementevaluator.h"
 #include "activebc.h"
-#include "Elements/Interfaces/structuralinterfaceelement.h"
 
 namespace oofem {
 StructuralEngngModel :: StructuralEngngModel(int i, EngngModel *_master) : EngngModel(i, _master),

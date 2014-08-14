@@ -36,10 +36,10 @@
 
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "Materials/structuralms.h"
+#include "../sm/Materials/structuralms.h"
 #include "gausspoint.h"
 #include "intarray.h"
-#include "Materials/structuralmaterial.h"
+#include "../sm/Materials/structuralmaterial.h"
 #include "Materials/isolinearelasticmaterial.h"
 #include "datastream.h"
 #include "contextioerr.h"

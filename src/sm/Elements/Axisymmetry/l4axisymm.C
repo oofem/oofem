@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "l4axisymm.h"
+#include "../sm/Elements/Axisymmetry/l4axisymm.h"
 #include "fei2dquadlin.h"
 #include "node.h"
 #include "gausspoint.h"

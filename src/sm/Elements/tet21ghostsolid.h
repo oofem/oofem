@@ -35,7 +35,7 @@
 #ifndef TET21GHOSTSOLID_H
 #define TET21GHOSTSOLID_H
 
-#include "Elements/nlstructuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
 #include "floatmatrix.h"
 
 #define _IFT_tet21ghostsolid_Name "tet21ghostsolid"

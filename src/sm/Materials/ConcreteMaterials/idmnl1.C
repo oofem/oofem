@@ -37,7 +37,7 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "mathfem.h"
-#include "Elements/structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 #include "sparsemtrx.h"
 #include "error.h"
 #include "nonlocalmaterialext.h"

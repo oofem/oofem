@@ -35,7 +35,7 @@
 #ifndef linearstatic_h
 #define linearstatic_h
 
-#include "structengngmodel.h"
+#include "../sm/EngineeringModels/structengngmodel.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrxtype.h"
 

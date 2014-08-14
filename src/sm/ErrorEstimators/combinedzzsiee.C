@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "combinedzzsiee.h"
+#include "../sm/ErrorEstimators/combinedzzsiee.h"
 #include "domain.h"
 #include "element.h"
 #include "connectivitytable.h"

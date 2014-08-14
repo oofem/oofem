@@ -35,8 +35,8 @@
 #ifndef libeam3d2_h
 #define libeam3d2_h
 
-#include "Elements/nlstructuralelement.h"
-#include "CrossSections/fiberedcs.h"
+#include "../sm/Elements/nlstructuralelement.h"
+#include "../sm/CrossSections/fiberedcs.h"
 
 ///@name Input fields for LIBeam3d2
 //@{

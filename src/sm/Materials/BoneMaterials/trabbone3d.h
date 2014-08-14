@@ -34,14 +34,14 @@
 #ifndef trabbone3d_h
 #define trabbone3d_h
 
-#include "Materials/structuralmaterial.h"
+#include "../sm/Materials/structuralmaterial.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "cltypes.h"
 #include "matconst.h"
 #include "matstatus.h"
 #include "strainvector.h"
-#include "Materials/structuralms.h"
+#include "../sm/Materials/structuralms.h"
 #include "cltypes.h"
 
 ///@name Input fields for TrabBone3D

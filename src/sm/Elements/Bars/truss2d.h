@@ -35,7 +35,7 @@
 #ifndef truss2d_h
 #define truss2d_h
 
-#include "Elements/nlstructuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
 
 ///@name Input fields for 2D truss element
 //@{

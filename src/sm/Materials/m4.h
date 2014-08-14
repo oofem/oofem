@@ -36,7 +36,7 @@
 #define m4_h
 
 #include "microplanematerial_bazant.h"
-#include "Materials/structuralms.h"
+#include "../sm/Materials/structuralms.h"
 
 ///@name Input fields for M4Material
 //@{

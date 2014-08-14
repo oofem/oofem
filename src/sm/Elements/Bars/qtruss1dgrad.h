@@ -35,8 +35,8 @@
 #ifndef qtruss1dgrad_h
 #define qtruss1dgrad_h
 
-#include "Elements/Bars/qtruss1d.h"
-#include "Elements/graddpelement.h"
+#include "../sm/Elements/Bars/qtruss1d.h"
+#include "../sm/Elements/graddpelement.h"
 
 #define _IFT_QTruss1dGrad_Name "qtruss1dgrad"
 

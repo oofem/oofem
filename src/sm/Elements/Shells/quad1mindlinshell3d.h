@@ -35,7 +35,7 @@
 #ifndef quad1mindlinshell3d_h
 #define quad1mindlinshell3d_h
 
-#include "Elements/nlstructuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 

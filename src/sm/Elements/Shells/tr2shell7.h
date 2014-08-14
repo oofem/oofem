@@ -35,12 +35,11 @@
 #ifndef Tr2Shell7_h
 #define Tr2Shell7_h
 
+#include "../sm/Elements/Shells/shell7base.h"
+#include "../sm/CrossSections/layeredcrosssection.h"
+#include "../sm/Elements/nlstructuralelement.h"
 #include "eleminterpmapperinterface.h"
 #include "nodalaveragingrecoverymodel.h"
-#include "CrossSections/layeredcrosssection.h"
-#include "Elements/nlstructuralelement.h"
-#include "shell7base.h"
-//#include "vtkxmlexportmodule.h"
 
 #define _IFT_Tr2Shell7_Name "tr2shell7"
 

@@ -34,8 +34,8 @@
 
 #include "linearelasticmaterial.h"
 #include "gausspoint.h"
-#include "CrossSections/simplecrosssection.h"
-#include "Materials/structuralms.h"
+#include "../sm/CrossSections/simplecrosssection.h"
+#include "../sm/Materials/structuralms.h"
 
 namespace oofem {
 void

@@ -35,7 +35,7 @@
 #ifndef planestresselementevaluator_h
 #define planestresselementevaluator_h
 
-#include "structuralelementevaluator.h"
+#include "../sm/ElementEvaluators/structuralelementevaluator.h"
 
 namespace oofem {
 /**

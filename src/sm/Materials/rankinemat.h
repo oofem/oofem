@@ -35,8 +35,8 @@
 #ifndef rankinemat_h
 #define rankinemat_h
 
-#include "Materials/structuralmaterial.h"
-#include "Materials/structuralms.h"
+#include "../sm/Materials/structuralmaterial.h"
+#include "../sm/Materials/structuralms.h"
 #include "linearelasticmaterial.h"
 #include "dictionary.h"
 #include "floatarray.h"

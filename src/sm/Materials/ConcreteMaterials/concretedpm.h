@@ -35,11 +35,11 @@
 #ifndef ConcreteDPM_h
 #define ConcreteDPM_h
 
-#include "Materials/structuralmaterial.h"
+#include "../sm/Materials/structuralmaterial.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "cltypes.h"
-#include "Materials/structuralms.h"
+#include "../sm/Materials/structuralms.h"
 #include "strainvector.h"
 #include "stressvector.h"
 #include "Materials/isolinearelasticmaterial.h"

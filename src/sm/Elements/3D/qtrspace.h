@@ -35,11 +35,11 @@
 #ifndef qtrspace_h
 #define qtrspace_h
 
-#include "Elements/nlstructuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
+#include "../sm/ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "eleminterpmapperinterface.h"
-#include "ErrorEstimators/huertaerrorestimator.h"
 #include "sprnodalrecoverymodel.h"
 
 #define _IFT_QTRSpace_Name "qtrspace"

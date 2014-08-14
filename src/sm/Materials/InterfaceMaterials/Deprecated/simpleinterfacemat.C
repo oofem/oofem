@@ -33,7 +33,7 @@
  */
 
 #include "simpleinterfacemat.h"
-#include "Elements/structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 //#include "interfaceelement1d.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"

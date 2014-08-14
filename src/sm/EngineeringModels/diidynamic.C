@@ -32,7 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "diidynamic.h"
+#include "../sm/EngineeringModels/diidynamic.h"
+#include "../sm/Elements/structuralelement.h"
+#include "../sm/ElementEvaluators/structuralelementevaluator.h"
 #include "timestep.h"
 #include "element.h"
 #include "dofmanager.h"
@@ -40,8 +42,6 @@
 #include "contextioerr.h"
 #include "datastream.h"
 #include "verbose.h"
-#include "Elements/structuralelement.h"
-#include "ElementEvaluators/structuralelementevaluator.h"
 #include "classfactory.h"
 
 namespace oofem {

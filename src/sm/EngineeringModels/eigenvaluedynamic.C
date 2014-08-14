@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "eigenvaluedynamic.h"
+#include "../sm/EngineeringModels/eigenvaluedynamic.h"
 #include "timestep.h"
 #include "floatmatrix.h"
 #include "floatarray.h"

@@ -35,12 +35,12 @@
 #ifndef fetisolver_h
 #define fetisolver_h
 
+#include "../sm/FETISolver/feticommunicator.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "processcomm.h"
-#include "feticommunicator.h"
 
 ///@name Input fields for FETISolver
 //@{

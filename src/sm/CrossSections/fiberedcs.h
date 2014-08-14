@@ -35,8 +35,8 @@
 #ifndef fiberedcs_h
 #define fiberedcs_h
 
-#include "structuralcrosssection.h"
-#include "Materials/structuralmaterial.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
+#include "../sm/Materials/structuralmaterial.h"
 #include "element.h"
 #include "dictionary.h"
 #include "floatarray.h"

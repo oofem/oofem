@@ -32,21 +32,21 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "quad1mindlinshell3d.h"
+#include "../sm/Elements/Shells/quad1mindlinshell3d.h"
+#include "../sm/Materials/structuralms.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
+#include "../sm/Loads/constantpressureload.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
-#include "Materials/structuralms.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
 #include "load.h"
-#include "CrossSections/structuralcrosssection.h"
 #include "mathfem.h"
 #include "fei2dquadlin.h"
-#include "Loads/constantpressureload.h"
 #include "classfactory.h"
 
 namespace oofem {

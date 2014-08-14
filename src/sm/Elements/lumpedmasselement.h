@@ -35,7 +35,7 @@
 #ifndef lumpedmasselement_h
 #define lumpedmasselement_h
 
-#include "Elements/structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 
 ///@name Input fields for lumped mass element
 //@{

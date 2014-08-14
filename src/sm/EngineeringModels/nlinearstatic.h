@@ -35,7 +35,7 @@
 #ifndef nlinearstatic_h
 #define nlinearstatic_h
 
-#include "EngineeringModels/linearstatic.h"
+#include "../sm/EngineeringModels/linearstatic.h"
 #include "sparsenonlinsystemnm.h"
 
 ///@name Input fields for NonLinearStatic

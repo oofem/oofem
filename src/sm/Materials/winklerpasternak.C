@@ -33,7 +33,7 @@
  */
 
 #include "winklerpasternak.h"
-#include "Materials/structuralms.h"
+#include "../sm/Materials/structuralms.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
 #include "classfactory.h"

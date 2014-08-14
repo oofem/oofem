@@ -32,8 +32,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "xfemsolverinterface.h"
-
+#include "../sm/EngineeringModels/xfemsolverinterface.h"
+#include "../sm/Elements/structuralelement.h"
+#include "../sm/Materials/InterfaceMaterials/structuralinterfacematerial.h"
+#include "../sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
+#include "../sm/xfem/xfemstructuralelementinterface.h"
+#include "../sm/mappers/primvarmapper.h"
 #include "timestep.h"
 #include "structengngmodel.h"
 #include "staticstructural.h"
@@ -41,12 +45,7 @@
 #include "domain.h"
 #include "xfem/xfemmanager.h"
 #include "element.h"
-#include "Elements/structuralelement.h"
-#include "xfem/xfemstructuralelementinterface.h"
-#include "mappers/primvarmapper.h"
 #include "matstatmapperint.h"
-#include "Materials/InterfaceMaterials/structuralinterfacematerial.h"
-#include "Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
 #include "nummet.h"
 #include "floatarray.h"
 #include "exportmodulemanager.h"

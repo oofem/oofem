@@ -35,8 +35,8 @@
 #ifndef XFEMSTATIC_H_
 #define XFEMSTATIC_H_
 
-#include "EngineeringModels/nlinearstatic.h"
-#include "fracturemanager.h" // JB
+#include "../sm/EngineeringModels/nlinearstatic.h"
+#include "fracturemanager.h" 
 #include <map>
 
 ///@name Input fields for XFEMStatic

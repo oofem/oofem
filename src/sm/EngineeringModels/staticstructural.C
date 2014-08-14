@@ -32,14 +32,14 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "staticstructural.h"
+#include "../sm/EngineeringModels/staticstructural.h"
+#include "../sm/Elements/structuralelement.h"
+#include "../sm/ElementEvaluators/structuralelementevaluator.h"
 #include "nummet.h"
 #include "timestep.h"
 #include "element.h"
 #include "sparsemtrx.h"
 #include "verbose.h"
-#include "Elements/structuralelement.h"
-#include "ElementEvaluators/structuralelementevaluator.h"
 #include "primaryfield.h"
 #include "nrsolver.h"
 #include "classfactory.h"

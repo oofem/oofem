@@ -36,7 +36,7 @@
 #define idmgrad1_h
 
 #include "Materials/ConcreteMaterials/idm1.h"
-#include "Materials/graddpmaterialextensioninterface.h"
+#include "../sm/Materials/graddpmaterialextensioninterface.h"
 
 #define _IFT_IDGMaterial_Name "idmgrad1"
 

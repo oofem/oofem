@@ -35,7 +35,7 @@
 #ifndef cct3d_h
 #define cct3d_h
 
-#include "Elements/Plates/cct.h"
+#include "../sm/Elements/Plates/cct.h"
 
 #define _IFT_CCTPlate3d_Name "cctplate3d"
 

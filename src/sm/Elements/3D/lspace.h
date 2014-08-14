@@ -35,13 +35,13 @@
 #ifndef lspace_h
 #define lspace_h
 
-#include "Elements/nlstructuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
+#include "../sm/ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
-#include "ErrorEstimators/huertaerrorestimator.h"
 
 #define _IFT_LSpace_Name "lspace"
 

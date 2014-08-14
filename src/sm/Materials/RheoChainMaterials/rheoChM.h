@@ -35,14 +35,14 @@
 #ifndef rheochm_h
 #define rheochm_h
 
-#include "Materials/structuralmaterial.h"
+#include "../sm/Materials/structuralmaterial.h"
 #include "Materials/linearelasticmaterial.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 
 #include "matconst.h"
-#include "Elements/structuralelement.h"
-#include "Materials/structuralms.h"
+#include "../sm/Elements/structuralelement.h"
+#include "../sm/Materials/structuralms.h"
 
 ///@name Input fields for RheoChainMaterial
 //@{

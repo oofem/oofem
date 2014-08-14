@@ -35,7 +35,7 @@
 #ifndef latticematstatus_h
 #define latticematstatus_h
 
-#include "Materials/structuralms.h"
+#include "../sm/Materials/structuralms.h"
 
 namespace oofem {
 class GaussPoint;

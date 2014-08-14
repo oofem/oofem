@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "qtruss1d.h"
+#include "../sm/Elements/Bars/qtruss1d.h"
 #include "fei1dquad.h"
 #include "crosssection.h"
 #include "gausspoint.h"

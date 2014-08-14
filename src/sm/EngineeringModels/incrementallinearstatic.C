@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "incrementallinearstatic.h"
+#include "../sm/EngineeringModels/incrementallinearstatic.h"
 #include "timestep.h"
 #include "dof.h"
 #include "domain.h"

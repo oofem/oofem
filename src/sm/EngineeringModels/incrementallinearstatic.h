@@ -35,7 +35,7 @@
 #ifndef incrementallinearstatic_h
 #define incrementallinearstatic_h
 
-#include "structengngmodel.h"
+#include "../sm/EngineeringModels/structengngmodel.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrxtype.h"
 

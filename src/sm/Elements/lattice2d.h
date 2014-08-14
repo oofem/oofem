@@ -35,7 +35,7 @@
 #ifndef lattice2d_h
 #define lattice2d_h
 
-#include "latticestructuralelement.h"
+#include "../sm/Elements/latticestructuralelement.h"
 
 ///@name Input fields for Lattice2d
 //@{

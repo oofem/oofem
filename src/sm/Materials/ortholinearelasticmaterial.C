@@ -34,9 +34,9 @@
 
 #include "Materials/linearelasticmaterial.h"
 #include "Materials/ortholinearelasticmaterial.h"
-#include "Elements/structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 #include "material.h"
-#include "Materials/structuralms.h"
+#include "../sm/Materials/structuralms.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
 #include "mathfem.h"

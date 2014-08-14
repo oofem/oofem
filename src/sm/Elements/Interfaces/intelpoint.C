@@ -32,9 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "intelpoint.h"
-#include "CrossSections/structuralinterfacecrosssection.h"
-
+#include "../sm/Elements/Interfaces/intelpoint.h"
+#include "../sm/CrossSections/structuralinterfacecrosssection.h"
 #include "domain.h"
 #include "node.h"
 #include "gaussintegrationrule.h"

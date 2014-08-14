@@ -35,7 +35,7 @@
 #ifndef space3delementevaluator_h
 #define space3delementevaluator_h
 
-#include "structuralelementevaluator.h"
+#include "../sm/ElementEvaluators/structuralelementevaluator.h"
 
 namespace oofem {
 /**

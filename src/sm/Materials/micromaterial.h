@@ -36,7 +36,7 @@
 #define micromaterial_h
 
 #include "structuralmaterial.h"
-#include "Materials/structuralms.h"
+#include "../sm/Materials/structuralms.h"
 #include "dictionary.h"
 #include "floatarray.h"
 #include "floatmatrix.h"

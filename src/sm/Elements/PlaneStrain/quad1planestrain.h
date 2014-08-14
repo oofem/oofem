@@ -35,13 +35,13 @@
 #ifndef quad1planestrain_h
 #define quad1planestrain_h
 
-#include "Elements/nlstructuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
+#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
+#include "../sm/ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
-#include "ErrorEstimators/directerrorindicatorrc.h"
 #include "eleminterpmapperinterface.h"
-#include "ErrorEstimators/huertaerrorestimator.h"
 
 #define _IFT_Quad1PlaneStrain_Name "quad1planestrain"
 

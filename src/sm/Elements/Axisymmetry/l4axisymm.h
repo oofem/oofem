@@ -35,7 +35,7 @@
 #ifndef l4axisymm_h
 #define l4axisymm_h
 
-#include "Elements/nlstructuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"

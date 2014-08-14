@@ -35,7 +35,7 @@
 #ifndef deformationtheorymaterial_h
 #define deformationtheorymaterial_h
 
-#include "Materials/structuralmaterial.h"
+#include "../sm/Materials/structuralmaterial.h"
 
 namespace oofem {
 /**

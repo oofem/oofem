@@ -35,10 +35,10 @@
 #ifndef huertaerrorestimator_h
 #define huertaerrorestimator_h
 
+#include "../sm/refinedelement.h"
+#include "../sm/refinedmesh.h"
 #include "errorestimator.h"
 #include "interface.h"
-#include "refinedelement.h"
-#include "refinedmesh.h"
 #include "floatarray.h"
 #include "statecountertype.h"
 #include "remeshingcrit.h"

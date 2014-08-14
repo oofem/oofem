@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
 #include "errorestimator.h"
-#include "directerrorindicatorrc.h"
 #include "domain.h"
 #include "element.h"
 #include "dofmanager.h"

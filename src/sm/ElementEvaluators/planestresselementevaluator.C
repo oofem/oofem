@@ -32,7 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "planestresselementevaluator.h"
+#include "../sm/ElementEvaluators/planestresselementevaluator.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "domain.h"
@@ -42,7 +43,6 @@
 #include "gaussintegrationrule.h"
 #include "matresponsemode.h"
 #include "crosssection.h"
-#include "CrossSections/structuralcrosssection.h"
 #include "mathfem.h"
 #include "iga/iga.h"
 

@@ -35,8 +35,8 @@
 #ifndef libeam2dnl_h
 #define libeam2dnl_h
 
-#include "Elements/nlstructuralelement.h"
-#include "CrossSections/layeredcrosssection.h"
+#include "../sm/Elements/nlstructuralelement.h"
+#include "../sm/CrossSections/layeredcrosssection.h"
 
 #define _IFT_LIBeam2dNL_Name "libeam2dNL"
 

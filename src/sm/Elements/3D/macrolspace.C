@@ -32,13 +32,13 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "macrolspace.h"
-#include "Materials/micromaterial.h"
+#include "../sm/Elements/3D/macrolspace.h"
+#include "../sm/Materials/micromaterial.h"
+#include "../sm/EngineeringModels/structengngmodel.h"
+#include "../sm/Elements/3D/lspace.h"
 #include "fei3dhexalin.h"
-#include "Elements/3D/lspace.h"
 #include "constantfunction.h"
 #include "domain.h"
-#include "EngineeringModels/structengngmodel.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 #include "node.h"

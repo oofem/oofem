@@ -43,7 +43,7 @@
 #include "spatiallocalizer.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
-#include "Materials/structuralms.h"
+#include "../sm/Materials/structuralms.h"
 #include "xfem/enrichmentitem.h"
 #include "feinterpol.h"
 #include "xfem/xfemmanager.h"

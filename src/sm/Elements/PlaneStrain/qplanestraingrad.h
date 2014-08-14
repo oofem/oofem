@@ -35,8 +35,8 @@
 #ifndef qplanestraingrad_h
 #define qplanestraingrad_h
 
-#include "Elements/PlaneStrain/qplanestrain.h"
-#include "Elements/graddpelement.h"
+#include "../sm/Elements/PlaneStrain/qplanestrain.h"
+#include "../sm/Elements/graddpelement.h"
 
 #define _IFT_QPlaneStrainGrad_Name "qplanestraingrad"
 

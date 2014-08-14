@@ -32,7 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "rershell.h"
+#include "../sm/Elements/Shells/rershell.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
@@ -43,7 +44,6 @@
 #include "intarray.h"
 #include "domain.h"
 #include "load.h"
-#include "CrossSections/structuralcrosssection.h"
 #include "mathfem.h"
 #include "classfactory.h"
 

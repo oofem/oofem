@@ -35,7 +35,7 @@
 #ifndef intelline1_h
 #define intelline1_h
 
-#include "structuralinterfaceelement.h"
+#include "../sm/Elements/Interfaces/structuralinterfaceelement.h"
 
 #define _IFT_IntElLine1_Name "intelline1"
 

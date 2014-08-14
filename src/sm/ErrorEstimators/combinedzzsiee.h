@@ -35,9 +35,9 @@
 #ifndef combinedzzsiee_h
 #define combinedzzsiee_h
 
-#include "zzerrorestimator.h"
-#include "scalarerrorindicator.h"
-#include "directerrorindicatorrc.h"
+#include "../sm/ErrorEstimators/zzerrorestimator.h"
+#include "../sm/ErrorEstimators/scalarerrorindicator.h"
+#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
 
 namespace oofem {
 /**

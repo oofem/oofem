@@ -35,8 +35,8 @@
 #ifndef qtrspacegrad_h
 #define qtrspacegrad_h
 
-#include "Elements/3D/qtrspace.h"
-#include "Elements/graddpelement.h"
+#include "../sm/Elements/3D/qtrspace.h"
+#include "../sm/Elements/graddpelement.h"
 
 #define _IFT_QTRSpaceGrad_Name "qtrspacegrad"
 

@@ -35,7 +35,7 @@
 #include "trabbonematerial.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
-#include "Materials/structuralmaterial.h"
+#include "../sm/Materials/structuralmaterial.h"
 #include "contextioerr.h"
 #include "mathfem.h"
 #include "classfactory.h"

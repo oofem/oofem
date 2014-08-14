@@ -32,7 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "qspace.h"
+#include "../sm/Elements/3D/qspace.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
 #include "fei3dhexaquad.h"
 #include "node.h"
 #include "gausspoint.h"
@@ -42,7 +43,6 @@
 #include "intarray.h"
 #include "domain.h"
 #include "mathfem.h"
-#include "CrossSections/structuralcrosssection.h"
 #include "classfactory.h"
 
 namespace oofem {

@@ -35,8 +35,8 @@
 #ifndef qtrplanestraingrad_h
 #define qtrplanestraingrad_h
 
-#include "Elements/PlaneStrain/qtrplanestrain.h"
-#include "Elements/graddpelement.h"
+#include "../sm/Elements/PlaneStrain/qtrplanestrain.h"
+#include "../sm/Elements/graddpelement.h"
 
 namespace oofem {
 class FEI2dTrLin;

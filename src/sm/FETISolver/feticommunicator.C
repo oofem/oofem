@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "feticommunicator.h"
+#include "../sm/FETISolver/feticommunicator.h"
 #include "engngm.h"
 #include "intarray.h"
 #include "dofmanager.h"

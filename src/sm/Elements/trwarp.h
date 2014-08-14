@@ -35,7 +35,7 @@
 #ifndef tr_warp_h
 #define tr_warp_h
 
-#include "Elements/structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 

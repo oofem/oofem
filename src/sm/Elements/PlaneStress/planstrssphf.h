@@ -35,8 +35,8 @@
 #ifndef planstrssphf_h
 #define planstrssphf_h
 
-#include "phasefieldelement.h"
-#include "planstrss.h"
+#include "../sm/Elements/phasefieldelement.h"
+#include "../sm/Elements/PlaneStress/planstrss.h"
 
 #define _IFT_PlaneStressPhF2d_Name "PlaneStressPhF2d"
 
@@ -44,6 +44,7 @@ namespace oofem {
 /**
  * This class implements an isoparametric four-node quadrilateral plane-
  * stress phase field finite element. Each node has 3 degrees of freedom.
+ * TODO This element is in development!
  */
 class PlaneStressPhF2d : public PlaneStress2d, public PhaseFieldElement
 {

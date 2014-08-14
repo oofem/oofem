@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "trabbonenl3d.h"
-#include "Elements/structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"

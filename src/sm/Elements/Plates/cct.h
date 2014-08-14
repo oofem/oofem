@@ -35,13 +35,13 @@
 #ifndef cct_h
 #define cct_h
 
+#include "../sm/Elements/nlstructuralelement.h"
+#include "../sm/CrossSections/layeredcrosssection.h"
+#include "../sm/ErrorEstimators/zzerrorestimator.h"
 #include "mathfem.h"
-#include "Elements/nlstructuralelement.h"
-#include "CrossSections/layeredcrosssection.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
-#include "ErrorEstimators/zzerrorestimator.h"
 
 #define _IFT_CCTPlate_Name "cctplate"
 

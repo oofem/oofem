@@ -35,7 +35,7 @@
 #ifndef nlineardynamic_h
 #define nlineardynamic_h
 
-#include "structengngmodel.h"
+#include "../sm/EngineeringModels/structengngmodel.h"
 #include "sparsemtrxtype.h"
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"

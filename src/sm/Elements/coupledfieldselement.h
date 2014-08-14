@@ -36,7 +36,7 @@
 #ifndef coupledfieldselement_h
 #define coupledfieldselement_h
 
-#include "Elements/nlstructuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
 
 namespace oofem {
 /**

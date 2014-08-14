@@ -36,7 +36,7 @@
 #include "structuralinterfacematerial.h"
 #include "contextioerr.h"
 
-#include "Materials/structuralmaterial.h"
+#include "../sm/Materials/structuralmaterial.h"
 #include "structuralinterfacematerialstatus.h"
 #include "gausspoint.h"
 namespace oofem {

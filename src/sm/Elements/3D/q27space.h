@@ -35,11 +35,11 @@
 #ifndef q27space_h
 #define q27space_h
 
-#include "Elements/nlstructuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
+#include "../sm/ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "eleminterpmapperinterface.h"
-#include "ErrorEstimators/huertaerrorestimator.h"
 #include "sprnodalrecoverymodel.h"
 
 #define _IFT_Q27Space_Name "q27space"

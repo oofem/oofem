@@ -35,8 +35,8 @@
 #ifndef rershell_h
 #define rershell_h
 
-#include "Elements/Shells/cct3d.h"
-#include "CrossSections/layeredcrosssection.h"
+#include "../sm/Elements/Shells/cct3d.h"
+#include "../sm/CrossSections/layeredcrosssection.h"
 
 #define _IFT_RerShell_Name "rershell"
 

@@ -35,7 +35,7 @@
 #ifndef staticstructuralstaggered_h
 #define staticstructuralstaggered_h
 
-#include "EngineeringModels/staticstructural.h"
+#include "../sm/EngineeringModels/staticstructural.h"
 #include "staggeredsolver.h"
 
 #define _IFT_StaticStructuralStaggered_Name "staticstructuralstaggered"

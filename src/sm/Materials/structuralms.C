@@ -32,10 +32,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Materials/structuralms.h"
-#include "Materials/structuralmaterial.h"
+#include "../sm/Materials/structuralms.h"
+#include "../sm/Materials/structuralmaterial.h"
 #include "contextioerr.h"
-#include "Elements/nlstructuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
 #include "gausspoint.h"
 
 namespace oofem {

@@ -37,7 +37,7 @@
 // published in Engineering Fracture Mechanics 74 (2007) 1539-1560.
 
 #include "anisodamagemodel.h"
-#include "Materials/structuralmaterial.h"
+#include "../sm/Materials/structuralmaterial.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "mathfem.h"

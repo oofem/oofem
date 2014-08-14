@@ -35,8 +35,8 @@
 #ifndef qtrplstrgrad_h
 #define qtrplstrgrad_h
 
-#include "Elements/PlaneStress/qtrplstr.h"
-#include "Elements/graddpelement.h"
+#include "../sm/Elements/PlaneStress/qtrplstr.h"
+#include "../sm/Elements/graddpelement.h"
 
 #define _IFT_QTrPlaneStressGrad_Name "qtrplstrgrad"
 

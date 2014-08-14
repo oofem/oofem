@@ -34,7 +34,10 @@
  */
 
 #if 1
-#include "coupledfieldselement.h"
+#include "../sm/Elements/coupledfieldselement.h"
+#include "../sm/Materials/structuralms.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
+#include "../sm/Elements/nlstructuralelement.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
@@ -44,11 +47,7 @@
 #include "intarray.h"
 #include "domain.h"
 #include "cltypes.h"
-#include "Materials/structuralms.h"
 #include "mathfem.h"
-#include "structuralcrosssection.h"
-#include "Elements/nlstructuralelement.h"
-#include "nlstructuralelement.h"
 #include "unknownnumberingscheme.h"
 #include <cstdio>
 

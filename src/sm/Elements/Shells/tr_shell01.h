@@ -35,11 +35,11 @@
 #ifndef tr_shell01_h
 #define tr_shell01_h
 
-#include "Elements/structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 #include "zznodalrecoverymodel.h"
-#include "ErrorEstimators/zzerrorestimator.h"
-#include "Elements/Shells/cct3d.h"
-#include "Elements/PlaneStress/trplanrot3d.h"
+#include "../sm/ErrorEstimators/zzerrorestimator.h"
+#include "../sm/Elements/Shells/cct3d.h"
+#include "../sm/Elements/PlaneStress/trplanrot3d.h"
 #include "spatiallocalizer.h"
 
 #define _IFT_TR_SHELL01_Name "tr_shell01"

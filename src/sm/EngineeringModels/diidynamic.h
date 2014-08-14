@@ -35,7 +35,7 @@
 #ifndef diidynamic_h
 #define diidynamic_h
 
-#include "structengngmodel.h"
+#include "../sm/EngineeringModels/structengngmodel.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
 #include "timediscretizationtype.h"

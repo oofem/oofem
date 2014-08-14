@@ -35,8 +35,8 @@
 #ifndef truss3d_h
 #define truss3d_h
 
-#include "Elements/nlstructuralelement.h"
-#include "ErrorEstimators/directerrorindicatorrc.h"
+#include "../sm/Elements/nlstructuralelement.h"
+#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 

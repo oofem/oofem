@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "staticstructuralstaggered.h"
+#include "../sm/EngineeringModels/staticstructuralstaggered.h"
 #include "classfactory.h"
 #include "primaryfield.h"
 

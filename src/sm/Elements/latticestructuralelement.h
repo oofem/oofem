@@ -35,7 +35,7 @@
 #ifndef latticestructuralelement_h
 #define latticestructuralelement_h
 
-#include "Elements/structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 
 namespace oofem {
 /**

@@ -40,7 +40,7 @@
 #include "Materials/linearelasticmaterial.h"
 #include "latticematstatus.h"
 #include "cltypes.h"
-#include "Materials/structuralmaterial.h"
+#include "../sm/Materials/structuralmaterial.h"
 #include "randommaterialext.h"
 #include "strainvector.h"
 #include "stressvector.h"

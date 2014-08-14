@@ -35,7 +35,7 @@
 #ifndef cohsur3d_h
 #define cohsur3d_h
 
-#include "Elements/structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 
 ///@name Input fields for CohSur3d
 //@{

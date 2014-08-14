@@ -32,26 +32,22 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
-#include "xfemstatic.h"
+#include "../sm/EngineeringModels/xfemstatic.h"
+#include "../sm/xfem/xfemstructuralelementinterface.h"
+#include "../sm/Elements/structuralelement.h"
+#include "../sm/Materials/InterfaceMaterials/structuralinterfacematerial.h"
+#include "../sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
+#include "../sm/mappers/primvarmapper.h"
 #include "timestep.h"
 #include "metastep.h"
 #include "dictionary.h"
 #include "classfactory.h"
 #include "dofmanager.h"
-#include "xfem/xfemstructuralelementinterface.h"
 #include "element.h"
-#include "Elements/structuralelement.h"
-
 #include "exportmodulemanager.h"
 #include "vtkxmlexportmodule.h"
-
 #include "gausspoint.h"
-
-#include "mappers/primvarmapper.h"
 #include "matstatmapperint.h"
-#include "Materials/InterfaceMaterials/structuralinterfacematerial.h"
-#include "Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
 
 namespace oofem {
 REGISTER_EngngModel(XFEMStatic);

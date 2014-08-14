@@ -33,7 +33,9 @@
  */
 
 
-#include "qtrspace.h"
+#include "../sm/Elements/3D/qtrspace.h"
+#include "../sm/Materials/structuralms.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
@@ -43,9 +45,7 @@
 #include "intarray.h"
 #include "domain.h"
 #include "cltypes.h"
-#include "Materials/structuralms.h"
 #include "mathfem.h"
-#include "CrossSections/structuralcrosssection.h"
 #include "fei3dtetquad.h"
 #include "classfactory.h"
 

@@ -32,7 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "zzerrorestimator.h"
+#include "../sm/ErrorEstimators/zzerrorestimator.h"
+#include "../sm/Elements/structuralelement.h"
+#include "../sm/Materials/structuralmaterial.h"
 #include "domain.h"
 #include "dofmanager.h"
 #include "element.h"
@@ -43,8 +45,6 @@
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "timestep.h"
-#include "Elements/structuralelement.h"
-#include "Materials/structuralmaterial.h"
 #include "integrationrule.h"
 #include "feinterpol.h"
 #include "connectivitytable.h"

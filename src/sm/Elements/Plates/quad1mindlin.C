@@ -32,18 +32,18 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "quad1mindlin.h"
+#include "../sm/Elements/Plates/quad1mindlin.h"
+#include "../sm/Materials/structuralms.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
-#include "Materials/structuralms.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
 #include "load.h"
-#include "CrossSections/structuralcrosssection.h"
 #include "mathfem.h"
 #include "fei2dquadlin.h"
 #include "classfactory.h"

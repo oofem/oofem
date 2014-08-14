@@ -32,7 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "planstrss.h"
+#include "../sm/Elements/PlaneStress/planstrss.h"
+#include "../sm/Materials/structuralms.h"
 #include "fei2dquadlin.h"
 #include "node.h"
 #include "crosssection.h"
@@ -43,7 +44,6 @@
 #include "intarray.h"
 #include "domain.h"
 #include "mathfem.h"
-#include "Materials/structuralms.h"
 #include "strainvector.h"
 #include "classfactory.h"
 

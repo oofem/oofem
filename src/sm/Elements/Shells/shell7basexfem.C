@@ -32,18 +32,18 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "shell7basexfem.h"
-#include "shell7base.h"
+#include "../sm/Elements/Shells/shell7basexfem.h"
+#include "../sm/Elements/Shells/shell7base.h"
+#include "../sm/Loads/constantpressureload.h"
+#include "../sm/Materials/InterfaceMaterials/intmatbilinczfagerstrom.h"
+#include "../sm/xfem/enrichmentitems/crack.h"
+#include "../sm/xfem/enrichmentitems/shellcrack.h"
 #include "feinterpol3d.h"
 #include "xfem/enrichmentitem.h"
 #include "xfem/xfemmanager.h"
 #include "dofmanager.h"
-#include "Loads/constantpressureload.h"
 #include "connectivitytable.h"
-#include "Materials/InterfaceMaterials/intmatbilinczfagerstrom.h"
 #include "mathfem.h"
-#include "xfem/enrichmentitems/crack.h"
-#include "xfem/enrichmentitems/shellcrack.h"
 #include "gausspoint.h"
 namespace oofem {
 

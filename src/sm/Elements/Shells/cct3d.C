@@ -32,11 +32,11 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "cct3d.h"
+#include "../sm/Elements/Shells/cct3d.h"
+#include "../sm/Materials/structuralms.h"
 #include "fei2dtrlin.h"
 #include "node.h"
 #include "load.h"
-#include "Materials/structuralms.h"
 #include "mathfem.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"

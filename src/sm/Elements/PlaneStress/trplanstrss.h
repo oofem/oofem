@@ -35,16 +35,16 @@
 #ifndef trplanstrss_h
 #define trplanstrss_h
 
-#include "Elements/nlstructuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
+#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
+#include "../sm/ErrorEstimators/zzerrorestimator.h"
+#include "../sm/ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
-#include "ErrorEstimators/directerrorindicatorrc.h"
 #include "eleminterpmapperinterface.h"
-#include "ErrorEstimators/zzerrorestimator.h"
 #include "mmashapefunctprojection.h"
-#include "ErrorEstimators/huertaerrorestimator.h"
 
 #define _IFT_TrPlaneStress2d_Name "trplanestress2d"
 

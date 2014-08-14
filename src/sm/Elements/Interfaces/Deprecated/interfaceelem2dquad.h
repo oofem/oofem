@@ -35,7 +35,7 @@
 #ifndef interfaceelem2dquad_h
 #define interfaceelem2dquad_h
 
-#include "Elements/structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 
 #define _IFT_InterfaceElem2dQuad_Name "interface2dquad"
 #define _IFT_InterfaceElem2dQuad_axisymmode "axisymmode"

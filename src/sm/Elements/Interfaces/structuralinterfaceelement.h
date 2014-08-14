@@ -35,6 +35,7 @@
 #ifndef structuralinterfaceelement_h
 #define structuralinterfaceelement_h
 
+#include "../sm/CrossSections/structuralinterfacecrosssection.h"
 #include "element.h"
 #include "floatmatrix.h"
 #include "function.h"
@@ -42,7 +43,6 @@
 #include "valuemodetype.h"
 #include "integrationdomain.h"
 #include "dofmantransftype.h"
-#include "CrossSections/structuralinterfacecrosssection.h"
 
 namespace oofem {
 class TimeStep;

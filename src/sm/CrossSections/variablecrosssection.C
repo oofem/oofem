@@ -32,13 +32,13 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "variablecrosssection.h"
+#include "../sm/CrossSections/variablecrosssection.h"
+#include "../sm/Materials/structuralmaterial.h"
+#include "../sm/Materials/structuralms.h"
 #include "gausspoint.h"
-#include "Materials/structuralmaterial.h"
 #include "floatarray.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
-#include "Materials/structuralms.h"
 #include "scalarfunction.h"
 #include "function.h"
 

@@ -32,23 +32,23 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "../sm/Elements/lattice2d.h"
+#include "../sm/Materials/latticematstatus.h"
+#include "../sm/Elements/latticestructuralelement.h"
 #include "domain.h"
-#include "lattice2d.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
-#include "Materials/latticematstatus.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "intarray.h"
 #include "floatarray.h"
 #include "mathfem.h"
-#include "latticestructuralelement.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "Materials/structuralmaterial.h"
+ #include "../sm/Materials/structuralmaterial.h"
 #endif
 
 namespace oofem {

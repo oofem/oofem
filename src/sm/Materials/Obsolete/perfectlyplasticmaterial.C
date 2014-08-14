@@ -33,7 +33,7 @@
  */
 
 #include "perfectlyplasticmaterial.h"
-#include "CrossSections/structuralcrosssection.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"

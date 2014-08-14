@@ -35,8 +35,8 @@
 #ifndef hyperelasticmaterial_h
 #define hyperelasticmaterial_h
 
-#include "Materials/structuralmaterial.h"
-#include "Materials/structuralms.h"
+#include "../sm/Materials/structuralmaterial.h"
+#include "../sm/Materials/structuralms.h"
 
 ///@name Input fields for HyperElasticMaterial
 //@{

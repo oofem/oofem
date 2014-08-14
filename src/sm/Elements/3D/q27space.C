@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "q27space.h"
+#include "../sm/Elements/3D/q27space.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"

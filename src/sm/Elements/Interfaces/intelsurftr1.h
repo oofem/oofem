@@ -35,7 +35,7 @@
 #ifndef intelsurftr1_h
 #define intelsurftr1_h
 
-#include "structuralinterfaceelement.h"
+#include "../sm/Elements/Interfaces/structuralinterfaceelement.h"
 #include "fei3dtrlin.h"
 
 #define _IFT_IntElSurfTr1_Name "intelsurftr1"

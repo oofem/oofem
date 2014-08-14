@@ -35,7 +35,7 @@
 #ifndef quad1platesubsoil_H
 #define quad1platesubsoil_H
 
-#include "Elements/structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 

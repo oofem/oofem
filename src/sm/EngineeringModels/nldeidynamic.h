@@ -35,7 +35,7 @@
 #ifndef nldeidynamic_h
 #define nldeidynamic_h
 
-#include "structengngmodel.h"
+#include "../sm/EngineeringModels/structengngmodel.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "sparselinsystemnm.h"

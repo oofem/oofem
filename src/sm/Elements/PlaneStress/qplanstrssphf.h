@@ -35,8 +35,8 @@
 #ifndef qplanstrssphf_h
 #define qplanstrssphf_h
 
-#include "phasefieldelement.h"
-#include "qplanstrss.h"
+#include "../sm/Elements/phasefieldelement.h"
+#include "../sm/Elements/PlaneStress/qplanstrss.h"
 
 #define _IFT_QPlaneStressPhF2d_Name "QPlaneStressPhF2d"
 
@@ -44,6 +44,7 @@ namespace oofem {
 /**
  * This class implements an Quadratic isoparametric eight-node quadrilateral plane-
  * stress phase field finite element. Each node has 3 degrees of freedom.
+ * TODO in development
  */
 class QPlaneStressPhF2d : public QPlaneStress2d, public PhaseFieldElement
 {

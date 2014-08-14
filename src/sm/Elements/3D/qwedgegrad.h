@@ -35,8 +35,8 @@
 #ifndef qwedgegrad_h
 #define qwedgegrad_h
 
-#include "Elements/3D/qwedge.h"
-#include "Elements/graddpelement.h"
+#include "../sm/Elements/3D/qwedge.h"
+#include "../sm/Elements/graddpelement.h"
 
 #define _IFT_QWedgeGrad_Name "qwedgegrad"
 

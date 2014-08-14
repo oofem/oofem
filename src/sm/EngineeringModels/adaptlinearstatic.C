@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "adaptlinearstatic.h"
+#include "../sm/EngineeringModels/adaptlinearstatic.h"
 #include "remeshingcrit.h"
 #include "mesherinterface.h"
 #include "errorestimator.h"

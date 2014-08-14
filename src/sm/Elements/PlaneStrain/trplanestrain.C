@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "trplanestrain.h"
+#include "../sm/Elements/PlaneStrain/trplanestrain.h"
 #include "fei2dtrlin.h"
 #include "node.h"
 #include "crosssection.h"

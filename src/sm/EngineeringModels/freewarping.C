@@ -32,14 +32,14 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "freewarping.h"
+#include "../sm/EngineeringModels/freewarping.h"
+#include "../sm/Elements/structuralelement.h"
+#include "../sm/ElementEvaluators/structuralelementevaluator.h"
 #include "nummet.h"
 #include "timestep.h"
 #include "element.h"
 #include "sparsemtrx.h"
 #include "verbose.h"
-#include "Elements/structuralelement.h"
-#include "ElementEvaluators/structuralelementevaluator.h"
 #include "classfactory.h"
 #include "datastream.h"
 #include "contextioerr.h"

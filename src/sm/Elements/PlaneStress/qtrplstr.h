@@ -35,11 +35,11 @@
 #ifndef qtrplstr_h
 #define qtrplstr_h
 
-#include "Elements/nlstructuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
+#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
-#include "ErrorEstimators/directerrorindicatorrc.h"
 #include "eleminterpmapperinterface.h"
 
 #define _IFT_QTrPlaneStress2d_Name "qtrplstr"

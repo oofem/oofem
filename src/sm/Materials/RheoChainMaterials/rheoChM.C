@@ -40,7 +40,7 @@
 #include "floatmatrix.h"
 #include "gausspoint.h"
 #include "engngm.h"
-#include "CrossSections/structuralcrosssection.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
 #include "contextioerr.h"
 
 namespace oofem {

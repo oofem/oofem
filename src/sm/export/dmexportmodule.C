@@ -40,7 +40,7 @@
 #include "classfactory.h"
 #include "domain.h"
 
-#include "EngineeringModels/structengngmodel.h" // JB
+#include "../sm/EngineeringModels/structengngmodel.h" // JB
 
 namespace oofem {
 REGISTER_ExportModule(DofManExportModule)

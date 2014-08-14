@@ -32,7 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "huertaerrorestimator.h"
+#include "../sm/ErrorEstimators/huertaerrorestimator.h"
+#include "../sm/EngineeringModels/adaptnlinearstatic.h"
+#include "../sm/EngineeringModels/adaptlinearstatic.h"
 #include "domain.h"
 #include "node.h"
 #include "element.h"
@@ -49,8 +51,6 @@
 #include "dof.h"
 #include "util.h"
 #include "eleminterpunknownmapper.h"
-#include "EngineeringModels/adaptnlinearstatic.h"
-#include "EngineeringModels/adaptlinearstatic.h"
 #include "verbose.h"
 #include "datastream.h"
 #include "contextioerr.h"

@@ -35,7 +35,7 @@
 #ifndef qtruss1d_h
 #define qtruss1d_h
 
-#include "Elements/nlstructuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
 
 #define _IFT_QTruss1d_Name "qtruss1d"
 

@@ -35,7 +35,7 @@
 #ifndef quad1mindlin_H
 #define quad1mindlin_H
 
-#include "Elements/nlstructuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 

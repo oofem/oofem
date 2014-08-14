@@ -5,10 +5,10 @@
  *      Author: svennine
  */
 
-#include "trplanstrssxfem.h"
+#include "../sm/Elements/PlaneStress/trplanstrssxfem.h"
 
-#include "Materials/structuralmaterial.h"
-#include "CrossSections/structuralcrosssection.h"
+#include "../sm/Materials/structuralmaterial.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
 #include "vtkxmlexportmodule.h"
 #include "xfem/xfemelementinterface.h"
 #include "xfem/enrichmentfunction.h"

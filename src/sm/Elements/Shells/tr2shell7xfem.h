@@ -35,12 +35,11 @@
 #ifndef Tr2Shell7XFEM_h
 #define Tr2Shell7XFEM_h
 
-
+#include "../sm/Elements/Shells/shell7basexfem.h"
+#include "../sm/CrossSections/layeredcrosssection.h"
+#include "../sm/Elements/nlstructuralelement.h"
 #include "eleminterpmapperinterface.h"
 #include "nodalaveragingrecoverymodel.h"
-#include "CrossSections/layeredcrosssection.h"
-#include "Elements/nlstructuralelement.h"
-#include "shell7basexfem.h"
 
 #define _IFT_Tr2Shell7XFEM_Name "tr2shell7xfem"
 

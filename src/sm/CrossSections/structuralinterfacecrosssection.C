@@ -32,11 +32,11 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "CrossSections/structuralinterfacecrosssection.h"
-#include "Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
+#include "../sm/CrossSections/structuralinterfacecrosssection.h"
+#include "../sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
+#include "../sm/Materials/InterfaceMaterials/structuralinterfacematerial.h"
 #include "gausspoint.h"
 #include "element.h"
-#include "Materials/InterfaceMaterials/structuralinterfacematerial.h"
 #include "floatarray.h"
 
 namespace oofem {

@@ -33,10 +33,10 @@
  */
 
 #include "xfemstructuralelementinterface.h"
-#include "Materials/InterfaceMaterials/structuralinterfacematerial.h"
-#include "Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
-#include "Elements/structuralelement.h"
-#include "CrossSections/structuralcrosssection.h"
+#include "../sm/Materials/InterfaceMaterials/structuralinterfacematerial.h"
+#include "../sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
+#include "../sm/Elements/structuralelement.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "dynamicinputrecord.h"

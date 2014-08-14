@@ -35,11 +35,11 @@
 #ifndef plasticmaterial_h
 #define plasticmaterial_h
 
-#include "Materials/structuralmaterial.h"
+#include "../sm/Materials/structuralmaterial.h"
 #include "Materials/linearelasticmaterial.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "Materials/structuralms.h"
+#include "../sm/Materials/structuralms.h"
 #include "matstatmapperint.h"
 
 namespace oofem {

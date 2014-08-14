@@ -35,11 +35,11 @@
 #ifndef qtrplanestrain_h
 #define qtrplanestrain_h
 
-#include "Elements/nlstructuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
+#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
-#include "ErrorEstimators/directerrorindicatorrc.h"
 #include "eleminterpmapperinterface.h"
 
 #define _IFT_QTrPlaneStrain_Name "qtrplanestrain"

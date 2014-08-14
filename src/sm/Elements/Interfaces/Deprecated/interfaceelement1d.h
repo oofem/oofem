@@ -35,7 +35,7 @@
 #ifndef interfaceelement1d_h
 #define interfaceelement1d_h
 
-#include "Elements/structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 #include "gaussintegrationrule.h"
 
 ///@name Input fields for Material

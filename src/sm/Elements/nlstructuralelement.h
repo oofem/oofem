@@ -35,7 +35,7 @@
 #ifndef nlstructuralelement_h
 #define nlstructuralelement_h
 
-#include "Elements/structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 
 ///@name Input fields for NLStructuralElement
 //@{

@@ -35,7 +35,7 @@
 #ifndef libeam3dnl2_h
 #define libeam3dnl2_h
 
-#include "Elements/nlstructuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
 
 ///@name Input fields for LIBeam3dNL2
 //@{

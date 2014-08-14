@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "../sm/EngineeringModels/adaptnlinearstatic.h"
 #include "mathfem.h"
-#include "adaptnlinearstatic.h"
 #include "verbose.h"
 #include "timer.h"
 #include "metastep.h"

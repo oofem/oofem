@@ -35,7 +35,7 @@
 #ifndef adaptnlinearstatic_h
 #define adaptnlinearstatic_h
 
-#include "nlinearstatic.h"
+#include "../sm/EngineeringModels/nlinearstatic.h"
 #include "sparsemtrx.h"
 #include "errorestimator.h"
 #include "meshpackagetype.h"

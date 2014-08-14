@@ -32,6 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include "../sm/FETISolver/feticommunicator.h"
 #include "mathfem.h"
 #include "fetisolver.h"
 #include "skyline.h"
@@ -39,7 +40,6 @@
 #include "dofmanager.h"
 #include "engngm.h"
 #include "domain.h"
-#include "feticommunicator.h"
 #include "classfactory.h"
 
 namespace oofem {

@@ -35,7 +35,9 @@
 #include <iostream>
 using namespace std;
 
-#include "nlineardynamic.h"
+#include "../sm/EngineeringModels/nlineardynamic.h"
+#include "../sm/Elements/nlstructuralelement.h"
+#include "../sm/ElementEvaluators/structuralelementevaluator.h"
 #include "nummet.h"
 #include "timestep.h"
 #include "metastep.h"
@@ -44,8 +46,6 @@ using namespace std;
 #include "verbose.h"
 #include "sparsenonlinsystemnm.h"
 #include "nrsolver.h"
-#include "Elements/nlstructuralelement.h"
-#include "ElementEvaluators/structuralelementevaluator.h"
 #include "outputmanager.h"
 #include "datastream.h"
 #include "classfactory.h"

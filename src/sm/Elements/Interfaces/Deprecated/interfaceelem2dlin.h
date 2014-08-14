@@ -35,7 +35,7 @@
 #ifndef interfaceelem2dlin_h
 #define interfaceelem2dlin_h
 
-#include "Elements/structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 
 #define _IFT_InterfaceElem2dLin_Name "interface2dlin"
 #define _IFT_InterfaceElem2dLin_axisymmode "axisymmode"

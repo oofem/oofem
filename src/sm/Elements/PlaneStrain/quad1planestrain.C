@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "quad1planestrain.h"
+#include "../sm/Elements/PlaneStrain/quad1planestrain.h"
 #include "fei2dquadlin.h"
 #include "node.h"
 #include "crosssection.h"

@@ -35,7 +35,7 @@
 #ifndef interfaceelem3dtrlin_h
 #define interfaceelem3dtrlin_h
 
-#include "Elements/structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 
 #define _IFT_InterfaceElement3dTrLin_Name "interface3dtrlin"
 

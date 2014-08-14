@@ -32,13 +32,13 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "planstrssxfem.h"
-#include "Materials/structuralmaterial.h"
+#include "../sm/Elements/PlaneStress/planstrssxfem.h"
+#include "../sm/Materials/structuralmaterial.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
 #include "xfem/xfemelementinterface.h"
 #include "xfem/enrichmentfunction.h"
 #include "xfem/enrichmentitem.h"
 #include "xfem/enrichmentdomain.h"
-#include "CrossSections/structuralcrosssection.h"
 #include "vtkxmlexportmodule.h"
 #include "dynamicinputrecord.h"
 #include "feinterpol.h"

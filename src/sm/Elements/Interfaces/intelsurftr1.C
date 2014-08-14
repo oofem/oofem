@@ -32,8 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
-#include "intelsurftr1.h"
+#include "../sm/Elements/Interfaces/intelsurftr1.h"
 #include "node.h"
 #include "crosssection.h"
 #include "gausspoint.h"
@@ -43,7 +42,6 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "classfactory.h"
-
 
 namespace oofem {
 REGISTER_Element(IntElSurfTr1);

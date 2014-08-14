@@ -42,7 +42,7 @@
 #include "domain.h"
 #include "dofmanager.h"
 #include "linsystsolvertype.h"
-#include "Elements/structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 #include "engngm.h"
 #include "gausspoint.h"
 #include "feinterpol.h"

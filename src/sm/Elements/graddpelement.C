@@ -34,7 +34,11 @@
  */
 
 
-#include "graddpelement.h"
+#include "../sm/Elements/graddpelement.h"
+#include "../sm/Materials/structuralms.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
+#include "../sm/Elements/nlstructuralelement.h"
+#include "../sm/Materials/graddpmaterialextensioninterface.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
@@ -44,12 +48,8 @@
 #include "intarray.h"
 #include "domain.h"
 #include "cltypes.h"
-#include "Materials/structuralms.h"
 #include "mathfem.h"
-#include "CrossSections/structuralcrosssection.h"
-#include "Elements/nlstructuralelement.h"
 #include "nonlocalbarrier.h"
-#include "Materials/graddpmaterialextensioninterface.h"
 #include "engngm.h"
 
 #include <cstdio>

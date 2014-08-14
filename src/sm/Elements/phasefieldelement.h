@@ -38,9 +38,8 @@
 #ifndef phasefieldelement_h
 #define phasefieldelement_h
 
-//#include "coupledfieldselement.h"
 #include "fei2dquadquad.h"
-#include "qplanstrss.h"
+#include "../sm/Elements/PlaneStress/qplanstrss.h"
 
 namespace oofem {
 /**

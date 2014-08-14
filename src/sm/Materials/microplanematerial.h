@@ -35,7 +35,7 @@
 #ifndef microplanematerial_h
 #define microplanematerial_h
 
-#include "Materials/structuralmaterial.h"
+#include "../sm/Materials/structuralmaterial.h"
 #include "matconst.h"
 
 ///@name Input fields for MicroplaneMaterial

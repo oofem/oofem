@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "qspacegrad.h"
+#include "../sm/Elements/3D/qspacegrad.h"
 #include "fei3dhexalin.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"

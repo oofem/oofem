@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "scalarerrorindicator.h"
-#include "directerrorindicatorrc.h"
+#include "../sm/ErrorEstimators/scalarerrorindicator.h"
+#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
 #include "element.h"
 #include "integrationrule.h"
 #include "gausspoint.h"

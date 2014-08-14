@@ -35,8 +35,8 @@
 #ifndef simplecrosssection_h
 #define simplecrosssection_h
 
-#include "structuralcrosssection.h"
-#include "Materials/structuralmaterial.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
+#include "../sm/Materials/structuralmaterial.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
 

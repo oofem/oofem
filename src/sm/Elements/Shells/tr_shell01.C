@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "tr_shell01.h"
+#include "../sm/Elements/Shells/tr_shell01.h"
 #include "fei2dtrlin.h"
 #include "contextioerr.h"
 #include "gaussintegrationrule.h"

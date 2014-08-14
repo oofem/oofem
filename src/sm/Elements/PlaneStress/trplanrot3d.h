@@ -35,7 +35,7 @@
 #ifndef trplanrot3d_h
 #define trplanrot3d_h
 
-#include "trplanrot.h"
+#include "../sm/Elements/PlaneStress/trplanrot.h"
 
 #define _IFT_TrPlaneStrRot3d_Name "trplanestrrot3d"
 

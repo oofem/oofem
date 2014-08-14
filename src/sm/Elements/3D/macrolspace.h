@@ -35,7 +35,7 @@
 #ifndef macrolspace_h
 #define macrolspace_h
 
-#include "Elements/3D/lspace.h"
+#include "../sm/Elements/3D/lspace.h"
 
 ///@name Input fields for MacroLspace
 //@{

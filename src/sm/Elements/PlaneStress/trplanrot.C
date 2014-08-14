@@ -32,12 +32,11 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "trplanrot.h"
-
+#include "../sm/Elements/PlaneStress/trplanrot.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
+#include "../sm/Materials/structuralms.h"
 #include "node.h"
 #include "material.h"
-#include "CrossSections/structuralcrosssection.h"
-#include "Materials/structuralms.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"

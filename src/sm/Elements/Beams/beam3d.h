@@ -35,8 +35,8 @@
 #ifndef beam3d_h
 #define beam3d_h
 
-#include "Elements/structuralelement.h"
-#include "CrossSections/fiberedcs.h"
+#include "../sm/Elements/structuralelement.h"
+#include "../sm/CrossSections/fiberedcs.h"
 
 ///@name Input fields for Beam3d
 //@{

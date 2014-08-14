@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "cohsur3d.h"
+#include "../sm/Elements/Interfaces/cohsur3d.h"
 #include "node.h"
 #include "particle.h"
 #include "gaussintegrationrule.h"

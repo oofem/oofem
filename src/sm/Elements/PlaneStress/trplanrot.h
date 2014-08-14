@@ -35,7 +35,7 @@
 #ifndef trplanrot_h
 #define trplanrot_h
 
-#include "trplanstrss.h"
+#include "../sm/Elements/PlaneStress/trplanstrss.h"
 
 ///@name Input fields for TrPlaneStrRot
 //@{
