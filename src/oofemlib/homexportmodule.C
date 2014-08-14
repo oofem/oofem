@@ -43,9 +43,9 @@
 #include "engngm.h"
 
 #ifdef __SM_MODULE
- #include "../sm/structuralelement.h"
- #include "../sm/structuralmaterial.h"
- #include "../sm/truss3d.h"
+ #include "../sm/Elements/structuralelement.h"
+ #include "../sm/Materials/structuralmaterial.h"
+ #include "../sm/Elements/Bars/truss3d.h"
  #include "../sm/stressvector.h"
  #include "../sm/strainvector.h"
 #endif

@@ -58,7 +58,7 @@
 #endif
 
 #ifdef __SM_MODULE
- #include "../sm/structengngmodel.h"
+ #include "../sm/EngineeringModels/structengngmodel.h"
 #endif
 
 

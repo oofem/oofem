@@ -36,7 +36,7 @@
 #include "classfactory.h"
 #include "fracturemanager.h"
 #include "element.h"
-#include "layeredcrosssection.h"
+#include "CrossSections/layeredcrosssection.h"
 #include "dynamicinputrecord.h"
 #include "dynamicdatareader.h"
 #include "xfem/enrichmentfunction.h"

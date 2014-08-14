@@ -44,7 +44,7 @@
 #include "timestep.h"
 #include "classfactory.h"
 #ifdef __SM_MODULE
- #include "structengngmodel.h"
+ #include "EngineeringModels/structengngmodel.h"
 #endif
 
 namespace oofem {

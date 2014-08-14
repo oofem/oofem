@@ -37,8 +37,8 @@
 
 #include "eleminterpmapperinterface.h"
 #include "nodalaveragingrecoverymodel.h"
-#include "layeredcrosssection.h"
-#include "nlstructuralelement.h"
+#include "CrossSections/layeredcrosssection.h"
+#include "Elements/nlstructuralelement.h"
 #include "vtkxmlexportmodule.h"
 #include "zznodalrecoverymodel.h"
 #include "fei3dwedgequad.h"
