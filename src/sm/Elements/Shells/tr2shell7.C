@@ -35,7 +35,7 @@
 #include "tr2shell7.h"
 #include "node.h"
 #include "load.h"
-#include "structuralms.h"
+#include "Materials/structuralms.h"
 #include "mathfem.h"
 #include "domain.h"
 #include "gaussintegrationrule.h"

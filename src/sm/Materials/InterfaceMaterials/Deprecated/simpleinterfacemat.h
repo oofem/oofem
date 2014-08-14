@@ -40,9 +40,9 @@
 #define simpleinterfacemat_h
 
 #include "material.h"
-#include "linearelasticmaterial.h"
-#include "structuralmaterial.h"
-#include "structuralms.h"
+#include "Materials/linearelasticmaterial.h"
+#include "Materials/structuralmaterial.h"
+#include "Materials/structuralms.h"
 
 ///@name Input fields for SimpleInterfaceMaterial
 //@{

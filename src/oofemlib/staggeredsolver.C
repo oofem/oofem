@@ -34,7 +34,7 @@
 
 
 #include "staggeredsolver.h"
-#include "staticstructuralstaggered.h" ///@todo temporary for development
+#include "EngineeringModels/staticstructuralstaggered.h" ///@todo temporary for development
 
 #include "timestep.h"
 #include "classfactory.h"

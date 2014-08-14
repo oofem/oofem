@@ -36,7 +36,7 @@
 #ifndef staggeredsolver_h
 #define staggeredsolver_h
 
-
+//#include "EngineeringModels/staticstructuralstaggered.h"
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
 #include "sparsemtrx.h"

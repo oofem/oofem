@@ -40,7 +40,7 @@
 #include "staggeredproblem.h"
 #include "classfactory.h"
 #ifdef __SM_MODULE
- #include "latticestructuralelement.h"
+ #include "Elements/latticestructuralelement.h"
 #endif
 
 namespace oofem {
