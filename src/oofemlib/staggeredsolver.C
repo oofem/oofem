@@ -34,7 +34,7 @@
 
 
 #include "staggeredsolver.h"
-#include "staticstructural.h" ///@todo temporary for development
+#include "staticstructuralstaggered.h" ///@todo temporary for development
 
 #include "timestep.h"
 #include "classfactory.h"
@@ -72,7 +72,7 @@ StaggeredSolver :: initializeFrom(InputRecord *ir)
     this->UnknownNumberingSchemeList[0].setDofIdArray(idList1);
     this->UnknownNumberingSchemeList[0].setNumber(1);
     this->UnknownNumberingSchemeList[1].setDofIdArray(idList2);
-    this->UnknownNumberingSchemeList[0].setNumber(2);
+    this->UnknownNumberingSchemeList[1].setNumber(2);
     
     
     return IRRT_OK;
@@ -139,7 +139,7 @@ StaggeredSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     
     //-------------------------------------------------    
     
-    StaticStructural *ss = static_cast< StaticStructural* > (engngModel);
+    StaticStructuralStaggered *ss = static_cast< StaticStructuralStaggered* > (engngModel);
     int numDofIdGroups = this->UnknownNumberingSchemeList.size();
     FloatArray X, dX, ddX; // unknowns for the current dof group
     FloatArray RRT(numDofIdGroups);

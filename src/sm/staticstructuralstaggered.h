@@ -32,74 +32,56 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef staticstructural_h
-#define staticstructural_h
+#ifndef staticstructuralstaggered_h
+#define staticstructuralstaggered_h
 
-#include "structengngmodel.h"
-#include "sparsenonlinsystemnm.h"
-#include "sparsemtrxtype.h"
-#include "xfemsolverinterface.h"
-
+#include "staticstructural.h"
 #include "staggeredsolver.h"
 
-#define _IFT_StaticStructural_Name "staticstructural"
-#define _IFT_StaticStructural_deltat "deltat"
+#define _IFT_StaticStructuralStaggered_Name "staticstructuralstaggered"
 
 namespace oofem {
 class SparseMtrx;
 
 /**
- * Solves a static structural problem.
- * @author Mikael Öhman
+ * Solves a static structural problem using a staggered approach. Experimental version.
+ * @author Jim Brouzoulis
  */
-class StaticStructural : public StructuralEngngModel, public XfemSolverInterface
+class StaticStructuralStaggered : public StaticStructural
 {
 protected:
-    FloatArray internalForces;
-    FloatArray *solution;
-    FloatArray eNorm;
-    SparseMtrx *stiffnessMatrix;
 
-    PrimaryField *field;
+    
+    std :: vector< CustomEquationNumbering > UnknownNumberingSchemeList;    
+    std :: vector< SparseMtrx *> stiffnessMatrixList;
+    std :: vector< FloatArray > fIntList;
+    std :: vector< FloatArray > fExtList;
 
-    SparseMtrxType sparseMtrxType;
-
-    SparseNonLinearSystemNM *nMethod;
-
-    double deltaT;
     
 public:
-    StaticStructural(int i, EngngModel * _master = NULL);
-    virtual ~StaticStructural();
+    StaticStructuralStaggered(int i, EngngModel * _master = NULL);
+    virtual ~StaticStructuralStaggered();
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual void solveYourself();
+    //virtual void solveYourself();
     virtual void solveYourselfAt(TimeStep *tStep);
 
     virtual void terminate(TimeStep *tStep);
 
-    virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
+    //virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
     
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
 
-    virtual void updateDomainLinks();
-
     virtual int forceEquationNumbering();
 
-    virtual TimeStep *giveNextStep();
     virtual NumericalMethod *giveNumericalMethod(MetaStep *mStep);
 
-    virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
     virtual fMode giveFormulation() { return TL; }
-
-    virtual void updatePrimaryField(ValueModeType mode, TimeStep *tStep, const FloatArray &vectorToStore);
+   
 
     // identification
-    virtual const char *giveInputRecordName() const { return _IFT_StaticStructural_Name; }
-    virtual const char *giveClassName() const { return "StaticStructural"; }
-
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual const char *giveInputRecordName() const { return _IFT_StaticStructuralStaggered_Name; }
+    virtual const char *giveClassName() const { return "StaticStructuralStaggered"; }
 
     // Experimental Jim
     virtual void updateInternalForcesForStaggeredSolver(FloatArray &answer, TimeStep* tStep, Domain* d, const CustomEquationNumbering& s);
@@ -107,15 +89,11 @@ public:
     virtual void updateTangentStiffnessForStaggeredSolver(SparseMtrx *answer, TimeStep* tStep, Domain* d, const CustomEquationNumbering& s);
     SparseMtrxType giveSparseMtrxType() { return this->sparseMtrxType; };
     
-    //virtual int giveNewEquationNumber(int domain, DofIDItem);
-    //virtual int giveNewPrescribedEquationNumber(int domain, DofIDItem);
-
     
     
-    
-#ifdef __PARALLEL_MODE
-    int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
-#endif
+    virtual int giveNewEquationNumber(int domain, DofIDItem);
+    virtual int giveNewPrescribedEquationNumber(int domain, DofIDItem);
+    virtual int giveNumberOfEquations(int id, CustomEquationNumbering &num);
 };
 } // end namespace oofem
 #endif // staticstructural_h

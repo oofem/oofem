@@ -1,6 +1,6 @@
 brick_nlgeo_1.out
 test of Brick elements with nlgeo 1(strain is the Green-Lagrangian strain) rotated as a rigid body
-StaticStructural nsteps 2 rtolv 1.e-6 maxiter 100 nmodules 0
+StaticStructuralStaggered nsteps 2 rtolv 1.e-6 maxiter 100 nmodules 0
 #errorcheck
 domain 3d
 OutputManager tstep_all dofman_all element_all

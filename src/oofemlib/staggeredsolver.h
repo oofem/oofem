@@ -63,30 +63,40 @@ class CustomEquationNumbering : public UnknownNumberingScheme
 protected:
     bool prescribed;
     int numEqs;
+    int numPresEqs;
 
-    IntArray dofIdArray;
     int number; 
 public:
-    CustomEquationNumbering() : UnknownNumberingScheme(), prescribed(false), numEqs(0) { dofIdArray.resize(0); }
+    CustomEquationNumbering() : UnknownNumberingScheme(), prescribed(false), numEqs(0), numPresEqs(0) { dofIdArray.resize(0); }
 
-    virtual bool isDefault() const { return !prescribed; }
+    IntArray dofIdArray; // should be private
+    virtual bool isDefault() const { return true; }
     void setDofIdArray(IntArray &array) { this->dofIdArray = array; };
     void setNumber(int num) { this->number = num; };
     int getNumber() { return this->number; };
     
     virtual int giveDofEquationNumber(Dof *dof) const {
         DofIDItem id = dof->giveDofID();
-	
-        if ( this->dofIdArray.contains( (int)id ) ) {
-	    return prescribed ? dof->__givePrescribedEquationNumber() : dof->__giveEquationNumber();    
-	} else {
-	    return 0;  
-	}
-	
+	//printf("asking for num %d \n", (int)id);
+         if ( this->dofIdArray.contains( (int)id ) ) {
+ 	    return prescribed ? dof->__givePrescribedEquationNumber() : dof->__giveEquationNumber();    
+ 	} else {
+ 	    return 0;  
+ 	}
     }
+//     if ( this->dofIdArray.contains( (int)id ) ) {
+//             return dof->__giveEquationNumber();    
+//         } else {
+//             return -1*dof->__giveEquationNumber();    
+//         }	
+//         
+//     }
     virtual int giveRequiredNumberOfDomainEquation() const { return numEqs; }
 
-    int askNewEquationNumber() { return ++numEqs; }
+    int giveNewEquationNumber() { return ++numEqs; }
+    int giveNewPrescribedEquationNumber() { return ++numPresEqs; }
+    int giveNumEquations() { return this->numEqs; };
+    int giveNumPresEquations() { return this->numPresEqs; };
 };
 
 /**

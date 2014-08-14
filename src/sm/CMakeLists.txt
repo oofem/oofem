@@ -79,6 +79,7 @@ set (sm_crosssection
 set (sm_emodel
     structengngmodel.C
     staticstructural.C
+    staticstructuralstaggered.C
     linearstatic.C
     nlinearstatic.C
     xfemstatic.C

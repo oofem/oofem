@@ -88,8 +88,8 @@ NumericalMethod *StaticStructural :: giveNumericalMethod(MetaStep *mStep)
     if ( nMethod ) {
         return nMethod;
     }
-    nMethod = new NRSolver(this->giveDomain(1), this);
-    //nMethod = new StaggeredSolver(this->giveDomain(1), this); ///In development /Jim
+    //nMethod = new NRSolver(this->giveDomain(1), this);
+    nMethod = new StaggeredSolver(this->giveDomain(1), this); ///In development /Jim
     return nMethod;
 }
 
@@ -449,5 +449,34 @@ StaticStructural :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
 
     return 0;
 }
+
+
+
+
+// int
+// StaticStructural :: giveNewEquationNumber(int domain, DofIDItem id)
+// {
+//     if ( ( id == V_u ) || ( id == V_v ) || ( id == V_w ) ) {
+//         return this->vnum.askNewEquationNumber();
+//     } else if ( id == P_f ) {
+//         return this->pnum.askNewEquationNumber();
+//     } else {
+//         OOFEM_ERROR("Unknown DofIDItem");
+//     }
+// 
+//     return 0;
+// }
+
+
+
+
+
+
+
+
+
+
+
+
 #endif
 } // end namespace oofem

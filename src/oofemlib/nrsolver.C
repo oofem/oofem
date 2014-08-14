@@ -283,7 +283,8 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
         // Compute the residual
         engngModel->updateComponent(tNow, InternalRhs, domain);
         rhs.beDifferenceOf(RT, * F);
-
+        RT.printYourself("Fext");    
+        F->printYourself("Fint");    
         if ( this->prescribedDofsFlag ) {
             this->applyConstraintsToLoadIncrement(nite, k, rhs, rlm, tNow);
         }

@@ -384,6 +384,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
     // loop over elements code numbers
     for ( int i = 1; i <= nelem; i++ ) {
         domain->giveElement(i)->giveLocationArray(loc, s);
+        loc.printYourself("location array");
         js = loc.giveSize();
         maxle = INT_MAX;
         for ( int j = 1; j <= js; j++ ) {
