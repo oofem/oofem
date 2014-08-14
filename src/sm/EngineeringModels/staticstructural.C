@@ -89,6 +89,7 @@ NumericalMethod *StaticStructural :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
     nMethod = new NRSolver(this->giveDomain(1), this);
+    //nMethod = new StaggeredSolver(this->giveDomain(1), this); ///In development /Jim
     return nMethod;
 }
 
@@ -276,6 +277,35 @@ void StaticStructural :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
     }
 }
 
+
+void StaticStructural :: updateInternalForcesForStaggeredSolver(FloatArray &answer, TimeStep* tStep, Domain* d, const CustomEquationNumbering& s)
+{
+    answer.zero();
+    this->assembleVector(answer, tStep, InternalForcesVector, VM_Total, s, d, & this->eNorm);
+#ifdef __PARALLEL_MODE
+    this->updateSharedDofManagers(answer, s, InternalForcesExchangeTag);
+#endif
+    internalVarUpdateStamp = tStep->giveSolutionStateCounter(); // Hack for linearstatic
+
+}
+
+
+void StaticStructural :: updateExternalForcesForStaggeredSolver(FloatArray &answer, TimeStep* tStep, Domain* d, const CustomEquationNumbering& s)
+{
+    answer.zero();
+    this->assembleVector( answer, tStep, ExternalForcesVector, VM_Total, s, d );
+}
+
+
+void StaticStructural :: updateTangentStiffnessForStaggeredSolver(SparseMtrx *answer, TimeStep* tStep, Domain* d, const CustomEquationNumbering& s)
+{
+    answer->zero();
+    this->assemble(answer, tStep, TangentStiffnessMatrix, s, d);
+
+}
+
+
+ 
 
 contextIOResultType StaticStructural :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {

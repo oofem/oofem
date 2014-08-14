@@ -40,6 +40,8 @@
 #include "sparsemtrxtype.h"
 #include "xfemsolverinterface.h"
 
+#include "staggeredsolver.h"
+
 #define _IFT_StaticStructural_Name "staticstructural"
 #define _IFT_StaticStructural_deltat "deltat"
 
@@ -65,7 +67,7 @@ protected:
     SparseNonLinearSystemNM *nMethod;
 
     double deltaT;
-
+    
 public:
     StaticStructural(int i, EngngModel * _master = NULL);
     virtual ~StaticStructural();
@@ -77,6 +79,7 @@ public:
     virtual void terminate(TimeStep *tStep);
 
     virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
+    
     virtual double giveUnknownComponent(ValueModeType type, TimeStep *tStep, Domain *d, Dof *dof);
 
     virtual void updateDomainLinks();
@@ -98,6 +101,13 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
+    // Experimental Jim
+    virtual void updateInternalForcesForStaggeredSolver(FloatArray &answer, TimeStep* tStep, Domain* d, const CustomEquationNumbering& s);
+    virtual void updateExternalForcesForStaggeredSolver(FloatArray &answer, TimeStep* tStep, Domain* d, const CustomEquationNumbering& s);    
+    virtual void updateTangentStiffnessForStaggeredSolver(SparseMtrx *answer, TimeStep* tStep, Domain* d, const CustomEquationNumbering& s);
+    SparseMtrxType giveSparseMtrxType() { return this->sparseMtrxType; };
+    
+    
 #ifdef __PARALLEL_MODE
     int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
 #endif
