@@ -858,13 +858,11 @@ void EnrichmentItem :: createEnrichedDofs()
         DofManager *dMan = this->giveDomain()->giveDofManager(i);
 
         if ( isDofManEnriched(* dMan) ) {
-            int dofsPassed = dMan->giveNumberOfDofs();
             //printf("dofMan %i is enriched \n", dMan->giveNumber());
             computeEnrichedDofManDofIdArray(dofIdArray, * dMan);
-            for ( int m = 1; m <= dofIdArray.giveSize(); m++ ) {
-                dofsPassed++;
+            for ( auto &dofid: dofIdArray ) {
 
-                if ( !dMan->hasDofID( ( DofIDItem ) ( dofIdArray.at(m) ) ) ) {
+                if ( !dMan->hasDofID( ( DofIDItem ) ( dofid ) ) ) {
                     if ( mInheritBoundaryConditions ) {
                         // Check if the other dofs in the dof manager have
                         // Dirichlet BCs. If so, let the new enriched dof
@@ -880,14 +878,14 @@ void EnrichmentItem :: createEnrichedDofs()
 
                         if ( foundBC ) {
                             // Append dof with BC
-                            dMan->appendDof( new MasterDof( dofsPassed, dMan, bcIndex, icIndex, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
+                            dMan->appendDof( new MasterDof( dMan, bcIndex, icIndex, ( DofIDItem ) dofid ) );
                         } else   {
                             // No BC found, append enriched dof without BC
-                            dMan->appendDof( new MasterDof( dofsPassed, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
+                            dMan->appendDof( new MasterDof( dMan, ( DofIDItem ) dofid ) );
                         }
                     } else   {
                         // Append enriched dof without BC
-                        dMan->appendDof( new MasterDof( dofsPassed, dMan, ( DofIDItem ) ( dofIdArray.at(m) ) ) );
+                        dMan->appendDof( new MasterDof( dMan, ( DofIDItem ) dofid ) );
                     }
                 }
             }

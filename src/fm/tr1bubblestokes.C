@@ -68,8 +68,8 @@ Tr1BubbleStokes :: Tr1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomai
     this->numberOfGaussPoints = 7;
 
     this->bubble = new ElementDofManager(1, aDomain, this);
-    this->bubble->appendDof( new MasterDof(1, this->bubble, V_u) );
-    this->bubble->appendDof( new MasterDof(2, this->bubble, V_v) );
+    this->bubble->appendDof( new MasterDof(this->bubble, V_u) );
+    this->bubble->appendDof( new MasterDof(this->bubble, V_v) );
 }
 
 Tr1BubbleStokes :: ~Tr1BubbleStokes()

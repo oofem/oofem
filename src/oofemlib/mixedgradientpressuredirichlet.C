@@ -60,7 +60,7 @@ MixedGradientPressureDirichlet :: MixedGradientPressureDirichlet(int n, Domain *
     // The unknown volumetric strain
     vol_id = d->giveNextFreeDofID();
     voldman = new Node(1, d);
-    voldman->appendDof( new MasterDof( 1, voldman, (DofIDItem)vol_id ) );
+    voldman->appendDof( new MasterDof( voldman, (DofIDItem)vol_id ) );
 
     int nsd = d->giveNumberOfSpatialDimensions();
     int components = ( nsd + 1 ) * nsd / 2;
@@ -73,7 +73,7 @@ MixedGradientPressureDirichlet :: MixedGradientPressureDirichlet(int n, Domain *
         // Just putting in X_i id-items since they don't matter.
         // These don't actually need to be active, they are masterdofs with prescribed values, its
         // easier to just have them here rather than trying to make another Dirichlet boundary condition.
-        devdman->appendDof( new ActiveDof( i + 1, devdman, this->giveNumber(), (DofIDItem)dofid ) );
+        devdman->appendDof( new ActiveDof( devdman, (DofIDItem)dofid, this->giveNumber() ) );
     }
 }
 

@@ -117,10 +117,10 @@ bool ClassFactory :: registerSparseMtrx( SparseMtrxType name, SparseMtrx * ( *cr
     return true;
 }
 
-Dof *ClassFactory :: createDof(dofType name, int number, DofManager *dman)
+Dof *ClassFactory :: createDof(dofType name, DofIDItem dofid, DofManager *dman)
 {
-    //CF_CREATE(dofList, number, dman)
-    return ( dofList.count(name) == 1 ) ? dofList [ name ](number, dman) : NULL;
+    //CF_CREATE(dofList, dofid, dman)
+    return ( dofList.count(name) == 1 ) ? dofList [ name ](dofid, dman) : NULL;
 }
 
 SparseLinearSystemNM *ClassFactory :: createSparseLinSolver(LinSystSolverType name, Domain *domain, EngngModel *emodel)

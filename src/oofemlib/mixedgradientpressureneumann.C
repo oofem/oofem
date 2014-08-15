@@ -68,7 +68,7 @@ MixedGradientPressureNeumann :: MixedGradientPressureNeumann(int n, Domain *d) :
         int dofid = d->giveNextFreeDofID();
         dev_id.followedBy(dofid);
         // Just putting in X_i id-items since they don't matter.
-        sigmaDev->appendDof( new MasterDof( i + 1, sigmaDev, ( DofIDItem )dofid ) );
+        sigmaDev->appendDof( new MasterDof( sigmaDev, ( DofIDItem )dofid ) );
     }
 }
 

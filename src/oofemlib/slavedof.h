@@ -61,11 +61,10 @@ protected:
 public:
     /**
      * Constructor. Creates slave dof with number n, belonging to aNode dof manager.
-     * @param n Dof number.
      * @param aNode Node receiver will belong to.
      * @param id DofID of slave dof.
      */
-    SlaveDof(int n, DofManager * aNode, DofIDItem id = Undef);
+    SlaveDof(DofManager * aNode, DofIDItem id = Undef);
     /// Destructor.
     virtual ~SlaveDof(void) { }
 
