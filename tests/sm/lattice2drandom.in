@@ -1,8 +1,8 @@
 lattice2drandom.out
 Direct tension. 2D Lattice Model with random input
-NonLinearStatic nmsteps 1 nsteps 1 contextOutputStep 1000 nmodules 0
+NonLinearStatic nmsteps 1 nsteps 1 contextOutputStep 1000 nmodules 1
 nsteps 1 rtolv 1.e-3 maxiter 2000 stiffMode 0 controllmode 0 steplength 1.e-5 minsteplength 1.e-5 hpcmode 2 hpc 2 2 1 hpcw 1 1.
-#vtkxml primvars 1 1 tstep_all domain_all
+errorcheck
 domain 2dLattice
 OutputManager tstep_all dofman_all element_all
 ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1 nrandgen 1
@@ -15,6 +15,8 @@ externalfieldgenerator 1 name lattice2drandom.dat
 BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 NodalLoad 2 loadTimeFunction 1 Components 3 1. 0. 0.
 ConstantFunction 1 f(t) 1.
+
 #%BEGIN_CHECK% tolerance 1.e-2
 #LOADLEVEL tStep 1 value 2.931192e+03
 #%END_CHECK%
+

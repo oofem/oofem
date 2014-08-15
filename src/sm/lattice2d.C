@@ -61,6 +61,7 @@ Lattice2d :: Lattice2d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDo
 
     length = 0.;
     pitch = 10.;  // a dummy value
+    couplingNumbers.zero();
 }
 
 Lattice2d :: ~Lattice2d()
@@ -97,6 +98,23 @@ Lattice2d :: giveCrackWidth()
 
     return crackWidth;
 }
+
+double
+Lattice2d :: giveOldCrackWidth()
+{
+    LatticeMaterialStatus *status;
+
+    GaussPoint *gp;
+    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    gp = iRule->getIntegrationPoint(0);
+    status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
+    double crackWidth = 0;
+    crackWidth = status->giveOldCrackWidth();
+
+    return crackWidth;
+}
+
+
 
 double
 Lattice2d :: giveDissipation()
@@ -201,7 +219,7 @@ void Lattice2d :: computeGaussPoints()
 {
     // the gauss point is used only when methods from crosssection and/or material
     // classes are requested
-    integrationRulesArray.resize( 1 );
+    integrationRulesArray.resize(1);
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
     integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _2dLattice);
 }
@@ -242,7 +260,9 @@ Lattice2d :: computeVolumeAround(GaussPoint *gp)
 void
 Lattice2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer = {D_u, D_v, R_w};
+    answer = {
+        D_u, D_v, R_w
+    };
 }
 
 
@@ -299,6 +319,38 @@ Lattice2d :: giveNormalStress()
 }
 
 
+double
+Lattice2d :: giveOldNormalStress()
+{
+    LatticeMaterialStatus *status;
+
+    GaussPoint *gp;
+    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    gp = iRule->getIntegrationPoint(0);
+    status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
+    double normalStress = 0;
+    normalStress = status->giveOldNormalStress();
+
+    return normalStress;
+}
+
+int
+Lattice2d :: hasBeenUpdated()
+{
+    LatticeMaterialStatus *status;
+
+    GaussPoint *gp;
+    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    gp = iRule->getIntegrationPoint(0);
+    status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
+    int updateFlag = 0;
+    updateFlag = status->hasBeenUpdated();
+
+    return updateFlag;
+}
+
+
+
 int
 Lattice2d :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //
@@ -339,8 +391,10 @@ Lattice2d :: initializeFrom(InputRecord *ir)
     couplingFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, couplingFlag, _IFT_Lattice2d_couplingflag);
 
+    couplingNumbers.resize(1);
+    couplingNumbers.zero();
     if ( couplingFlag == 1 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, couplingNumber, _IFT_Lattice2d_couplingnumber);
+        IR_GIVE_OPTIONAL_FIELD(ir, couplingNumbers.at(1), _IFT_Lattice2d_couplingnumber);
     }
 
     return IRRT_OK;
@@ -396,7 +450,7 @@ Lattice2d :: drawRawGeometry(oofegGraphicContext &gc)
 {
     GraphicObj *go;
 
-    WCRec p [ 2 ]; /* poin */
+    WCRec p [ 2 ]; /* points */
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }

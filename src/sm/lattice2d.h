@@ -59,10 +59,11 @@ protected:
 
     double width, thickness;
     FloatArray gpCoords;
-    int couplingFlag, couplingNumber;
+    int couplingFlag;
+    IntArray couplingNumbers;
 
 public:
-    Lattice2d(int n, Domain * d);
+    Lattice2d(int n, Domain *d);
     virtual ~Lattice2d();
 
     virtual int giveLocalCoordinateSystem(FloatMatrix &answer);
@@ -74,16 +75,12 @@ public:
      */
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
 
-    /**
-     * This function returns the length of the element
-     * independent of the FloatArray.
-     */
-    virtual double giveCharacteristicLength(const FloatArray &)
-    { return this->giveLength(); }
-
     virtual double giveLength();
 
     virtual double giveNormalStress();
+    virtual double giveOldNormalStress();
+
+    virtual int hasBeenUpdated();
 
     virtual double giveArea() { return this->width * this->thickness; }
 
@@ -94,12 +91,14 @@ public:
     virtual int giveCrackFlag();
 
     virtual double giveCrackWidth();
+    virtual double giveOldCrackWidth();
+
     virtual double giveDissipation();
     virtual double giveDeltaDissipation();
 
     virtual int giveCouplingFlag() { return couplingFlag; }
 
-    virtual int giveCouplingNumber() { return couplingNumber; }
+    virtual void giveCouplingNumbers(IntArray &numbers) { numbers = this->couplingNumbers; }
     //
     // definition & identification
     //
