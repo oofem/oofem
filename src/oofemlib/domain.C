@@ -1374,7 +1374,6 @@ Domain :: createDofs()
     // Step 3. Create the dofs. This involves obtaining the correct
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); ++i ) {
         DofManager *dman = this->giveDofManager(i);
-        int c = 0;
         //printf("Dofs in node %d (of %d) = %d\n", i, this->giveNumberOfDofManagers(), node_dofs[i-1].size());
         dman->setNumberOfDofs(0);
         for ( int id: node_dofs [ i - 1 ] ) {
@@ -1408,8 +1407,7 @@ Domain :: createDofs()
 
             // Finally create the new DOF:
             //printf("Creating: node %d, id = %d, dofType = %d, bc = %d, ic = %d\n", i, id, dtype, bcid, icid);
-            Dof *dof = classFactory.createDof(dtype, ++c, dman);
-            dof->setDofID((DofIDItem)id);
+            Dof *dof = classFactory.createDof(dtype, (DofIDItem)id, dman);
             dof->setBcId(bcid); // Note: slave dofs and such will simple ignore this.
             dof->setIcId(icid);
             // Slave dofs obtain their weights post-initialization, simple slave dofs must have their master node specified.
