@@ -192,7 +192,14 @@ Skyline :: toFloatMatrix(FloatMatrix &answer) const
 
     int d1, d2, pk, size;
 
-    size = this->giveNumberOfRows();
+    size = this->giveNumberOfColumns();
+    
+#  ifdef DEBUG
+    if ( size != this->adr.giveSize() - 1 ) {
+        OOFEM_ERROR("Internal error in skyline matrix: num columns != size(adr)-1: %d != %d", size, this->adr.giveSize() - 1);
+    }
+#  endif    
+
     answer.resize(size, size);
     answer.zero();
 
@@ -205,6 +212,7 @@ Skyline :: toFloatMatrix(FloatMatrix &answer) const
             pk--;
         }
     }
+    answer.symmetrized();
 }
 
 
@@ -384,7 +392,6 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
     // loop over elements code numbers
     for ( int i = 1; i <= nelem; i++ ) {
         domain->giveElement(i)->giveLocationArray(loc, s);
-        loc.printYourself("location array");
         js = loc.giveSize();
         maxle = INT_MAX;
         for ( int j = 1; j <= js; j++ ) {
@@ -670,7 +677,77 @@ Skyline :: Skyline(int neq, int nwk1, double *mtrx1, const IntArray &adr1) : Spa
     nwk  = nwk1;
     mtrx = mtrx1;
     adr  = adr1;
+    isFactorized = 0;
 }
+
+
+//Skyline *Skyline :: giveSubMatrix(Skyline *mat, IntArray &rows, IntArray &cols)
+//Skyline *Skyline :: beSubMatrixOf(const Skyline *mat, IntArray &rows, IntArray &cols)
+//SparseMtrx *Skyline :: beSubMatrixOf(const SparseMtrx *mat, IntArray &rows, IntArray &cols)
+SparseMtrx *Skyline :: giveSubMatrix(const IntArray &rows, const IntArray &cols) 
+{
+
+    IntArray positions( cols.giveSize() + 1 );
+
+    FloatArray values( this->giveNumberOfNonZeros() ); //TODO choose a better initial size? 
+    int diagPos = 1;
+    int nnz = 0; // number of nonzeros 
+    
+    for ( int j = 1; j <= cols.giveSize(); j++ ) {
+        for ( int i = rows.giveSize(); i >= 1; i-- ) { // start from the "bottom of the matrix"
+            //if( cols.at(j) < rows.at(i) ){
+            if( j < i ){                
+             continue;   
+            }
+                
+            bool hasValue = this->isAllocatedAt( rows.at(i), cols.at(j) );
+            
+            if ( hasValue  && i == j ) { // allocated diagonal element
+                values.at(++nnz) = this->at( rows.at(i), cols.at(j) );
+                positions.at(diagPos++) = nnz;
+            } else if ( i == j  ) { // empty diagonal element
+                values.at(++nnz) = 0.0;
+                positions.at(diagPos++) = nnz;
+            } else if ( hasValue  ) {
+                values.at(++nnz) = this->at( rows.at(i), cols.at(j) );
+            }
+            
+        }
+    }
+    
+    positions.at(diagPos++) = ++nnz;
+    
+    double *mtrxValues;
+    mtrxValues = ( double * ) malloc( nnz * sizeof( double ) );
+    if ( !mtrxValues ) {
+        OOFEM_ERROR("Can't allocate: %d", nnz);
+    }
+    
+    for ( int i = 0; i < nnz-1; i++ ) {
+        mtrxValues [ i + 1] = values [ i ];
+    }
+    int neq = rows.giveSize();
+     
+    Skyline *answer = new Skyline(neq, nnz, mtrxValues, positions);
+
+    
+    
+    //this->adr.printYourself();
+    //answer->adr.printYourself();
+    //this->printYourself();
+
+    for ( int i = 0; i < nnz; i++ ) {
+       // printf("old %e, new %e \n", this->mtrx[i], answer->mtrx[i]);
+    //answer->mtrx.printYourself();
+    }    
+    
+    
+    
+    return answer;
+    
+}
+
+
 
 void Skyline :: rbmodes(FloatMatrix &r, int &nse, IntArray &se,
                         double limit, int tc)
