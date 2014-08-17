@@ -255,7 +255,7 @@ IntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, void *ob
     }
 
     int i = 1;
-    for ( GaussPoint *gp: *this ) {
+    for ( GaussPoint *&gp: *this ) {
         if ( mode & CM_Definition ) {
             // read weight
             double w;

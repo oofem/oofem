@@ -1957,7 +1957,7 @@ Domain :: renumberElementData(DomainTransactionManager *tm)
 void
 Domain :: renumberDofManagers()
 {
-    int _locnum;
+    int _locnum = 1;
     for ( auto &map: dmanMap ) {
         map.second->setNumber(_locnum++);
     }

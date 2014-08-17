@@ -517,7 +517,7 @@ EngngModel :: forceEquationNumbering()
 
 #ifdef __PARALLEL_MODE
     for ( std :: size_t i = 1; i <= parallelContextList.size(); i++ ) {
-        this->parallelContextList[i].init(i);
+        this->parallelContextList[i-1].init((int)i);
     }
 
 #endif

@@ -660,7 +660,8 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
     }
 
     // allocate new ones
-    dofArray.resize(_numberOfDofs);
+    for ( auto &d: dofArray) { delete d; } ///@todo Smart pointers would be nicer here
+    dofArray.clear();
     for ( int i = 0; i < _numberOfDofs; i++ ) {
         Dof *dof = classFactory.createDof( ( dofType ) dtypes(i), (DofIDItem)dofids(i), this );
         this->appendDof(dof);
