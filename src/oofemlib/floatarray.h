@@ -456,7 +456,8 @@ public:
      * Gives the pointer to the raw data, breaking encapsulation.
      * @return Pointer to values of array
      */
-    double *givePointer() const { return const_cast< double* >(values.data()); }
+    inline const double *givePointer() const { return values.data(); }
+    inline double *givePointer() { return values.data(); }
     /**
      * Reciever will be a vector with 9 components formed from a 3x3 matrix.
      * Order of matrix components in vector: 11, 22, 33, 23, 13, 12, 32, 31, 21

@@ -138,7 +138,6 @@ double RowColumn :: dot(const FloatArray &b, char c, int first, int last)
 // the receiver with array 'b', from indices 'first' to 'last'.
 {
     double answer, *p1;
-    // double *p2 ;
     int i;
 
     answer = 0.;
@@ -150,11 +149,12 @@ double RowColumn :: dot(const FloatArray &b, char c, int first, int last)
             p1 = column + first - start;
         }
 
-        //p2 = b->givePointer() + first-1 ;            // bad practice !
-        int pos = first;
+        // I do the bad practice, because it speed up debug runs significantly / Mikael
+        const double *p2 = b.givePointer() + first-1 ;            // bad practice !
+        //int pos = first;
         while ( i-- ) {
-            //answer += *p1++ * *p2++ ;
-            answer += * p1++ * b.at(pos++);
+            answer += *p1++ * *p2++ ;
+            //answer += * p1++ * b.at(pos++);
         }
     }
 
