@@ -119,8 +119,7 @@ set (sm_emodel
     EngineeringModels/diidynamic.C
     EngineeringModels/nldeidynamic.C
     EngineeringModels/incrementallinearstatic.C
-    EngineeringModels/freewarping.C
-    EngineeringModels/staticstructuralstaggered.C    
+    EngineeringModels/freewarping.C 
     )
 
 set (sm_loads

@@ -48,6 +48,8 @@
 #include "contextioerr.h"
 #include "classfactory.h"
 
+#include "staggeredsolver.h"
+
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
  #include "communicator.h"
@@ -89,6 +91,7 @@ NumericalMethod *StaticStructural :: giveNumericalMethod(MetaStep *mStep)
         return nMethod;
     }
     nMethod = new NRSolver(this->giveDomain(1), this);
+    //nMethod = new StaggeredSolver(this->giveDomain(1), this);
     return nMethod;
 }
 

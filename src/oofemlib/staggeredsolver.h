@@ -36,7 +36,7 @@
 #ifndef staggeredsolver_h
 #define staggeredsolver_h
 
-//#include "EngineeringModels/staticstructuralstaggered.h"
+
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
 #include "sparsemtrx.h"
@@ -84,13 +84,8 @@ public:
  	    return 0;  
  	}
     }
-//     if ( this->dofIdArray.contains( (int)id ) ) {
-//             return dof->__giveEquationNumber();    
-//         } else {
-//             return -1*dof->__giveEquationNumber();    
-//         }	
-//         
-//     }
+    
+
     virtual int giveRequiredNumberOfDomainEquation() const { return numEqs; }
 
     int giveNewEquationNumber() { return ++numEqs; }
@@ -111,6 +106,14 @@ private:
     std :: vector< SparseMtrx *> stiffnessMatrixList;
     std :: vector< FloatArray > fIntList;
     std :: vector< FloatArray > fExtList;
+    
+    std :: vector< IntArray > locArrayList;    
+    std :: vector< FloatArray > ddX;    
+    std :: vector< FloatArray > dX;   
+    std :: vector< FloatArray > X;
+    
+
+    void giveTotalLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s, Domain *d);
     
 public:
     //StaggeredSolver(Domain * d, EngngModel * m)  : NRSolver(d, m){};
