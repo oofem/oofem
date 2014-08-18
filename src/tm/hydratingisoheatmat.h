@@ -36,7 +36,7 @@
 #define hydratingisoheatmat_h
 
 #include "isoheatmat.h"
-#include "../sm/hydram.h"
+#include "hydram.h"
 
 ///@name Input fields for HydratingIsoHeatMaterial
 //@{

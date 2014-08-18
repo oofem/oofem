@@ -58,7 +58,6 @@
 #include "logger.h"
 #include "xfem/xfemmanager.h"
 #include "topologydescription.h"
-#include "randomfieldgenerator.h"
 #include "errorestimator.h"
 #include "range.h"
 #include "fracturemanager.h"
@@ -85,10 +84,6 @@
  #include "domaintransactionmanager.h"
 #endif
 
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
-#endif
-
 #include <cstdarg>
 #include <cstring>
 #include <vector>
@@ -111,7 +106,6 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
     crossSectionList         = new AList< CrossSection >(0);
     nonlocalBarierList       = new AList< NonlocalBarrier >(0);
     setList                  = new AList< Set >(0);
-    randomFieldGeneratorList = new AList< RandomFieldGenerator >(0);
 
     dType                 = _unknownMode;
 
@@ -293,7 +287,6 @@ Domain :: ~Domain()
     delete crossSectionList;
     delete nonlocalBarierList;
     delete setList;
-    delete randomFieldGeneratorList;
     delete xfemManager;
     delete connectivityTable;
     delete spatialLocalizer;
@@ -320,7 +313,6 @@ Domain :: clear()
     crossSectionList->clear();
     nonlocalBarierList->clear();
     setList->clear();
-    randomFieldGeneratorList->clear();
     delete xfemManager;
     xfemManager = NULL;
 
@@ -551,20 +543,6 @@ Domain :: giveNonlocalBarrier(int n)
 }
 
 
-RandomFieldGenerator *
-Domain :: giveRandomFieldGenerator(int n)
-// Returns the n-th RandomFieldGenerator.
-{
-#ifdef DEBUG
-    if ( !randomFieldGeneratorList->includes(n) ) {
-        OOFEM_ERROR("undefined generator (%d)", n);
-    }
-#endif
-
-    return randomFieldGeneratorList->at(n);
-}
-
-
 Set *
 Domain :: giveSet(int n)
 {
@@ -634,7 +612,6 @@ void Domain :: resizeNonlocalBarriers(int _newSize) { nonlocalBarierList->growTo
 void Domain :: resizeBoundaryConditions(int _newSize) { bcList->growTo(_newSize); }
 void Domain :: resizeInitialConditions(int _newSize) { icList->growTo(_newSize); }
 void Domain :: resizeFunctions(int _newSize) { functionList->growTo(_newSize); }
-void Domain :: resizeRandomFieldGenerators(int _newSize) { randomFieldGeneratorList->growTo(_newSize); }
 void Domain :: resizeSets(int _newSize) { setList->growTo(_newSize); }
 
 void Domain :: setDofManager(int i, DofManager *obj) { dofManagerList->put(i, obj); }
@@ -645,7 +622,6 @@ void Domain :: setNonlocalBarrier(int i, NonlocalBarrier *obj) { nonlocalBarierL
 void Domain :: setBoundaryCondition(int i, GeneralBoundaryCondition *obj) { bcList->put(i, obj); }
 void Domain :: setInitialCondition(int i, InitialCondition *obj) { icList->put(i, obj); }
 void Domain :: setFunction(int i, Function *obj) { functionList->put(i, obj); }
-void Domain :: setRandomFieldGenerator(int i, RandomFieldGenerator *obj) { randomFieldGeneratorList->put(i, obj); }
 void Domain :: setSet(int i, Set *obj) { setList->put(i, obj); }
 
 void Domain :: clearBoundaryConditions() { bcList->clear(true); }
@@ -658,10 +634,9 @@ Domain :: instanciateYourself(DataReader *dr)
 
     int num;
     std :: string name, topologytype;
-    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier, nrfg, nset = 0;
+    int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier = 0, nset = 0;
     bool nxfemman = false;
     bool nfracman = false;
-    RandomFieldGenerator *rfg;
     //XfemManager *xMan;
     // mapping from label to local numbers for dofmans and elements
     std :: map< int, int >dofManLabelMap, elemLabelMap;
@@ -707,6 +682,7 @@ Domain :: instanciateYourself(DataReader *dr)
     IR_GIVE_OPTIONAL_FIELD(ir, this->nsd, _IFT_Domain_numberOfSpatialDimensions);
     this->axisymm = ir->hasField(_IFT_Domain_axisymmetric);
     IR_GIVE_OPTIONAL_FIELD(ir, nfracman, _IFT_Domain_nfracman);
+    IR_GIVE_OPTIONAL_FIELD(ir, nbarrier,  _IFT_Domain_nbarrier);
 
     ///@todo Eventually remove this backwards compatibility:
     //_HeatTransferMode _HeatMass1Mode // Are these deprecated?
@@ -721,16 +697,6 @@ Domain :: instanciateYourself(DataReader *dr)
         nsd = 2;
         axisymm = true;
     }
-
-
-    // read optional number of nonlocalBarriers
-    nbarrier = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, nbarrier,  _IFT_Domain_nbarrier);
-    // read optional number of RandomFieldGenerator
-    nrfg = 0;
-    IR_GIVE_OPTIONAL_FIELD(ir, nrfg, _IFT_Domain_nrandgen);
-
-
 
     // read nodes
     dofManagerList->growTo(nnode);
@@ -893,37 +859,6 @@ Domain :: instanciateYourself(DataReader *dr)
         VERBOSE_PRINT0("Instanciated barriers ", nbarrier);
     }
 #  endif
-
-    // read random field generators
-    randomFieldGeneratorList->growTo(nrfg);
-    for ( int i = 1; i <= nrfg; i++ ) {
-        ir = dr->giveInputRecord(DataReader :: IR_nRandomFieldGenRec, i);
-        // read type of load
-        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
-
-        rfg = classFactory.createRandomFieldGenerator(name.c_str(), num, this);
-        rfg->initializeFrom(ir);
-
-        // check number
-        if ( ( num < 1 ) || ( num > nrfg ) ) {
-            OOFEM_ERROR("Invalid generator number (num=%d)", num);
-        }
-
-        if ( !randomFieldGeneratorList->includes(num) ) {
-            randomFieldGeneratorList->put(num, rfg);
-        } else {
-            OOFEM_ERROR("generator entry already exist (num=%d)", num);
-        }
-
-        ir->finish();
-    }
-
-#  ifdef VERBOSE
-    if ( nrfg ) {
-        VERBOSE_PRINT0("Instanciated random generators ", nbarrier);
-    }
-#  endif
-
 
 
     // read boundary conditions
@@ -1145,11 +1080,14 @@ Domain :: postInitialize()
     }
 
 
-    //----
+    if ( this->hasXfemManager() ) {
+        //this->giveXfemManager()->postInitialize();
+    }
 
     for ( int i = 1; i <= this->elementList->giveSize(); i++ ) {
         this->elementList->at(i)->postInitialize();
     }
+
     for ( int i = 1; i <= this->bcList->giveSize(); i++ ) {
         this->bcList->at(i)->postInitialize();
     }
@@ -1284,51 +1222,6 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
 }
 
 
-#ifdef __OOFEG
-
-void
-Domain :: drawYourself(oofegGraphicContext &context)
-//
-// shows graphics representation of domain, respecting mode
-//
-{
-    OGC_PlotModeType plotMode = context.giveIntVarPlotMode();
-    if ( ( plotMode == OGC_nodeAnnotation ) || ( plotMode == OGC_nodeGeometry ) || ( plotMode == OGC_essentialBC ) ||
-        ( plotMode == OGC_naturalBC ) || ( plotMode == OGC_nodeScalarPlot ) || ( plotMode == OGC_nodeVectorPlot ) ) {
-        this->drawNodes(context);
-    } else {
-        this->drawElements(context);
-    }
-}
-
-
-void
-Domain :: drawElements(oofegGraphicContext &context)
-{
-    //
-    // steps through element array and calls element(i)->show(mode,this);
-    //
-    for ( int i = 1; i <= this->giveNumberOfElements(); i++ ) {
-        this->giveElement(i)->drawYourself(context);
-    }
-}
-
-
-void
-Domain :: drawNodes(oofegGraphicContext &context)
-{
-    //
-    // steps through element array and calls element(i)->show(mode,this);
-    //
-    int nnodes = this->giveNumberOfDofManagers();
-    for ( int i = 1; i <= nnodes; i++ ) {
-        this->giveDofManager(i)->drawYourself(context);
-    }
-}
-
-#endif
-
-
 NodalRecoveryModel *
 Domain :: giveSmoother()
 {
@@ -1400,6 +1293,7 @@ Domain :: createDofs()
         Element *element = this->giveElement(i);
         for ( int j = 1; j <= element->giveNumberOfNodes(); ++j ) {
             element->giveDofManDofIDMask(j, dofids);
+            //dofids.printYourself();
             for ( int k = 1; k <= dofids.giveSize(); k++ ) {
                 node_dofs [ element->giveNode(j)->giveNumber() - 1 ].insert( dofids.at(k) );
             }
@@ -1480,7 +1374,6 @@ Domain :: createDofs()
     // Step 3. Create the dofs. This involves obtaining the correct
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); ++i ) {
         DofManager *dman = this->giveDofManager(i);
-        int c = 0;
         //printf("Dofs in node %d (of %d) = %d\n", i, this->giveNumberOfDofManagers(), node_dofs[i-1].size());
         dman->setNumberOfDofs(0);
         for ( int id: node_dofs [ i - 1 ] ) {
@@ -1514,8 +1407,7 @@ Domain :: createDofs()
 
             // Finally create the new DOF:
             //printf("Creating: node %d, id = %d, dofType = %d, bc = %d, ic = %d\n", i, id, dtype, bcid, icid);
-            Dof *dof = classFactory.createDof(dtype, ++c, dman);
-            dof->setDofID((DofIDItem)id);
+            Dof *dof = classFactory.createDof(dtype, (DofIDItem)id, dman);
             dof->setBcId(bcid); // Note: slave dofs and such will simple ignore this.
             dof->setIcId(icid);
             // Slave dofs obtain their weights post-initialization, simple slave dofs must have their master node specified.
@@ -1627,8 +1519,8 @@ Domain :: giveErrorEstimator()
     {                                               \
         for ( int i = 1; i <= size; i++ ) {         \
             type *obj = giveMethod(i);              \
-            if ( ( mode & CM_Definition ) ) {       \
-                if ( !stream->write( obj->giveInputRecordName() ) ) { \
+            if ( ( mode & CM_Definition ) != 0 ) {       \
+                if ( stream->write( std :: string( obj->giveInputRecordName() ) ) == 0 ) { \
                     THROW_CIOERR(CIO_IOERR);        \
                 }                                   \
             }                                       \
@@ -1666,7 +1558,7 @@ Domain :: giveErrorEstimator()
         }                                       \
     }
 
-#define DOMAIN_NCOMP 9
+#define DOMAIN_NCOMP 8
 
 contextIOResultType
 Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
@@ -1691,7 +1583,6 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         ncomp [ 5 ] = this->giveNumberOfInitialConditions();
         ncomp [ 6 ] = this->giveNumberOfFunctions();
         ncomp [ 7 ] = this->giveNumberOfNonlocalBarriers();
-        ncomp [ 8 ] = this->giveNumberOfRandomFieldGenerators();
 
         // store number of components
         if ( !stream->write(ncomp, DOMAIN_NCOMP) ) {
@@ -1704,7 +1595,6 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         SAVE_COMPONENTS(this->giveNumberOfInitialConditions(), InitialCondition, this->giveIc);
         SAVE_COMPONENTS(this->giveNumberOfFunctions(), Function, this->giveFunction);
         SAVE_COMPONENTS(this->giveNumberOfNonlocalBarriers(), NonlocalBarrier, this->giveNonlocalBarrier);
-        SAVE_COMPONENTS(this->giveNumberOfRandomFieldGenerators(), RandomFieldGenerator, this->giveRandomFieldGenerator);
     }
 
     // save dof managers
@@ -1735,7 +1625,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     ErrorEstimator *ee;
     long ncomp [ DOMAIN_NCOMP ];
 
-    int nnodes, nelem, nmat, ncs, nbc, nic, nfunc, nnlb, nrfg;
+    int nnodes, nelem, nmat, ncs, nbc, nic, nfunc, nnlb;
 
 
     domainUpdated = false;
@@ -1759,7 +1649,6 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         nic   = ncomp [ 5 ];
         nfunc = ncomp [ 6 ];
         nnlb  = ncomp [ 7 ];
-        nrfg  = ncomp [ 8 ];
 
         // clear receiver data
         dofManagerList->clear();
@@ -1770,7 +1659,6 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         icList->clear();
         functionList->clear();
         nonlocalBarierList->clear();
-        randomFieldGeneratorList->clear();
         setList->clear();
         ///@todo Saving and restoring xfemmanagers.
         delete xfemManager;
@@ -1782,7 +1670,6 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         RESTORE_COMPONENTS(nic, InitialCondition, this->resizeInitialConditions, classFactory.createInitialCondition, this->giveIc, setInitialCondition);
         RESTORE_COMPONENTS(nfunc, Function, resizeFunctions, classFactory.createFunction, giveFunction, setFunction);
         RESTORE_COMPONENTS(nnlb, NonlocalBarrier, resizeNonlocalBarriers, classFactory.createNonlocalBarrier, giveNonlocalBarrier, setNonlocalBarrier);
-        RESTORE_COMPONENTS(nrfg, RandomFieldGenerator, resizeRandomFieldGenerators, classFactory.createRandomFieldGenerator, giveRandomFieldGenerator, setRandomFieldGenerator);
 
         domainUpdated = true;
     } else {
@@ -2070,7 +1957,7 @@ Domain :: renumberElementData(DomainTransactionManager *tm)
 void
 Domain :: renumberDofManagers()
 {
-    int _locnum;
+    int _locnum = 1;
     for ( auto &map: dmanMap ) {
         map.second->setNumber(_locnum++);
     }

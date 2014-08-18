@@ -83,8 +83,10 @@ void XFEMDebugTools :: WritePointsToVTK(const std :: string &iName, const std ::
         //			{
         const double &x = iPoints [ i - 1 ].at(1);
         const double &y = iPoints [ i - 1 ].at(2);
-        //				const double &z = iPoints[i-1].at(3);
-        const double z = 0.0;
+        double z = 0.0; 
+        if ( iPoints [ i - 1 ].giveSize() == 3 ) {     
+            z = iPoints[i-1].at(3);
+        }
 
         file << x << " " << y << " " << z << "\n";
         //			}

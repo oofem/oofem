@@ -80,13 +80,12 @@ public:
      * Constructor. Creates slave dof vith number i, belonging to aNode dof manager.
      * Slave will be linked to master dof with id type belonging to dofManager with
      * number given in master variable.
-     * @param i dof number
      * @param aNode receiver will belong to aNode dof manager
      * @param master number of dofManager which contain master dof
      * @param id DofID of master dof (and slave too).
      */
-    SimpleSlaveDof(int i, DofManager * aNode, int master, DofIDItem id);
-    SimpleSlaveDof(int i, DofManager * aNode, DofIDItem id = Undef);
+    SimpleSlaveDof(DofManager * aNode, int master, DofIDItem id);
+    SimpleSlaveDof(DofManager * aNode, DofIDItem id = Undef);
     /// Destructor.
     virtual ~SimpleSlaveDof() { }
 

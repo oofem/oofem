@@ -36,6 +36,7 @@
 #define structengngmodel_h
 
 #include "engngm.h"
+#include "statecountertype.h"
 
 namespace oofem {
 class StructuralElement;
@@ -134,7 +135,7 @@ public:
     /**
      * Shows the sparse structure of required matrix, type == 1 stiffness.
      */
-    void showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep);
+    void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 };
 } // end namespace oofem

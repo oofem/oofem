@@ -700,11 +700,11 @@ if (MSVC)
 else ()
     add_custom_target (tests
         #COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "test"
-        COMMAND ${CMAKE_CTEST_COMMAND} "-R" "test"
+        COMMAND ${CMAKE_CTEST_COMMAND} "-j" "8" "-R" "test"
         WORKING_DIRECTORY ${oofem_BINARY_DIR}
         )
     add_custom_target (benchmarks
-        COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "benchmark"
+        COMMAND ${CMAKE_CTEST_COMMAND} "-j" "8" "-R" "benchmark"
         WORKING_DIRECTORY ${oofem_BINARY_DIR}
         )
 endif ()

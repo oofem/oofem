@@ -102,9 +102,9 @@ public:
     void updateLocalNumbering(EntityRenumberingFunctor &f);
     void setCrossSection(int csIndx);
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
-    virtual void drawScalar(oofegGraphicContext &context);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
     // the membrane and plate irules are same (chacked in initializeFrom)
     virtual int giveDefaultIntegrationRule() const { return plate->giveDefaultIntegrationRule(); }

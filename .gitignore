@@ -11,6 +11,8 @@ targets/
 *.pvd
 *.out.*
 t3d.bmf*
+perf.data*
+*.orig
 
 # documentation aux-files.
 *.aux
@@ -35,3 +37,9 @@ elixirtest.c
 configure
 config.log
 config.status
+src/sm/materialname.C
+src/sm/materialname.h
+tests/sm/crack0Step0.vtk
+tests/sm/crack1Step0.vtk
+tests/sm/crack2Step0.vtk
+tests/sm/t3d.bmf

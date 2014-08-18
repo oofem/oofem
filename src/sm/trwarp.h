@@ -38,12 +38,12 @@
 #include "structuralelement.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
-#include "fei2dtrlin.h"
 
 #define _IFT_Tr_Warp_Name "trwarp"
 
-
 namespace oofem {
+class FEI2dTrLin;
+
 /**
  * Triangle (2d) element with linear approximation for free warping analysis.
  * @todo Use the interpolation classes.
@@ -58,7 +58,7 @@ public:
     virtual ~Tr_Warp();
 
     virtual double computeVolumeAround(GaussPoint *gp);
-    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
+    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
     virtual void computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iEdge, TimeStep *tStep, ValueModeType mode);
 
     // definition
@@ -70,20 +70,19 @@ public:
     virtual MaterialMode giveMaterialMode() { return _Warping; }
     virtual double giveThicknessAt(const FloatArray &gcoords);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui);
-    void giveDofManDofIDMask(int inode, IntArray &answer) const;
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     //virtual void updateInternalState(TimeStep *tStep) { };
 
     virtual Interface *giveInterface(InterfaceType t);
 
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
-    virtual FEInterpolation *giveInterpolation() const { return & this->interp; }
+    virtual FEInterpolation *giveInterpolation() const;
 
 #ifdef __OOFEG
     // Graphics output
-    //void drawYourself(oofegGraphicContext&);
-    //virtual void drawRawGeometry(oofegGraphicContext&) {}
-    //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
+    //virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) {}
+    //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
 #endif
 
 protected:

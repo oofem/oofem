@@ -36,7 +36,6 @@
 #define axisymm3d_h
 
 #include "nlstructuralelement.h"
-#include "fei2dtrlin.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
@@ -49,6 +48,8 @@
 //@}
 
 namespace oofem {
+class FEI2dTrLin;
+
 /**
  * This class implements an triangular three-node finite element for axisymmetric continuum.
  * Each node has 2 degrees of freedom.
@@ -80,12 +81,12 @@ public:
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType it);
-    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const;
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
-    virtual void drawScalar(oofegGraphicContext &context);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,

@@ -46,6 +46,7 @@
 #include "geneigvalsolvertype.h"
 #include "materialmappingalgorithmtype.h"
 #include "meshpackagetype.h"
+#include "dofiditem.h"
 
 #include <map>
 #include <string>
@@ -61,7 +62,6 @@ class CrossSection;
 class Material;
 class Function;
 class NonlocalBarrier;
-class RandomFieldGenerator;
 class ExportModule;
 class SparseNonLinearSystemNM;
 class InitModule;
@@ -103,13 +103,12 @@ template< typename T > Material *matCreator(int n, Domain *d) { return new T(n, 
 template< typename T > EngngModel *engngCreator(int n, EngngModel *m) { return ( new T(n, m) ); }
 template< typename T > Function *funcCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > NonlocalBarrier *nlbCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > RandomFieldGenerator *rfgCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > ExportModule *exportCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
 template< typename T > SparseNonLinearSystemNM *nonlinCreator(Domain *d, EngngModel *m) { return ( new T(d, m) ); }
 template< typename T > InitModule *initCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
 template< typename T > TopologyDescription *topologyCreator(Domain *d) { return new T(d); }
 
-template< typename T > Dof *dofCreator(int n, DofManager *dman) { return new T(n, dman); }
+template< typename T > Dof *dofCreator(DofIDItem dofid, DofManager *dman) { return new T(dman, dofid); }
 template< typename T > SparseMtrx *sparseMtrxCreator() { return new T(); }
 template< typename T > SparseLinearSystemNM *sparseLinSolCreator(Domain *d, EngngModel *m) { return new T(d, m); }
 template< typename T > ErrorEstimator *errEstCreator(int n, Domain *d) { return new T(n, d); }
@@ -140,7 +139,6 @@ template< typename T > FailureCriteriaStatus *failureCriteriaCreator(int n, Fail
 #define REGISTER_EngngModel(class) static bool __dummy_ ## class = GiveClassFactory().registerEngngModel(_IFT_ ## class ## _Name, engngCreator< class > );
 #define REGISTER_Function(class) static bool __dummy_ ## class = GiveClassFactory().registerFunction(_IFT_ ## class ## _Name, funcCreator< class > );
 #define REGISTER_NonlocalBarrier(class) static bool __dummy_ ## class = GiveClassFactory().registerNonlocalBarrier(_IFT_ ## class ## _Name, nlbCreator< class > );
-#define REGISTER_RandomFieldGenerator(class) static bool __dummy_ ## class = GiveClassFactory().registerRandomFieldGenerator(_IFT_ ## class ## _Name, rfgCreator< class > );
 #define REGISTER_ExportModule(class) static bool __dummy_ ## class = GiveClassFactory().registerExportModule(_IFT_ ## class ## _Name, exportCreator< class > );
 #define REGISTER_SparseNonLinearSystemNM(class) static bool __dummy_ ## class = GiveClassFactory().registerSparseNonLinearSystemNM(_IFT_ ## class ## _Name, nonlinCreator< class > );
 #define REGISTER_InitModule(class) static bool __dummy_ ## class = GiveClassFactory().registerInitModule(_IFT_ ## class ## _Name, initCreator< class > );
@@ -192,8 +190,6 @@ private:
     std :: map < std :: string, Function * ( * )(int, Domain *) > funcList;
     /// Associative container containing nonlocal barriers creators with barrier name as key.
     std :: map < std :: string, NonlocalBarrier * ( * )(int, Domain *) > nlbList;
-    /// Associative container containing random field generator creators with names as key.
-    std :: map < std :: string, RandomFieldGenerator * ( * )(int, Domain *) > rfgList;
     /// Associative container containing export module creators.
     std :: map < std :: string, ExportModule * ( * )(int, EngngModel *) > exportList;
     /// Associative container containing nonlinear solver creators.
@@ -210,7 +206,7 @@ private:
     /// Associative container containing sparse matrix creators.
     std :: map < SparseMtrxType, SparseMtrx * ( * )() > sparseMtrxList;
     /// Associative container containing dof creators.
-    std :: map < dofType, Dof * ( * )(int, DofManager *) > dofList;
+    std :: map < dofType, Dof * ( * )(DofIDItem, DofManager *) > dofList;
     /// Associative container containing error estimator creators.
     std :: map < ErrorEstimatorType, ErrorEstimator * ( * )(int, Domain *) > errEstList;
     /// Associative container containing sparse linear solver creators
@@ -346,19 +342,6 @@ public:
      */
     bool registerNonlocalBarrier( const char *name, NonlocalBarrier * ( *creator )( int, Domain * ) );
     /**
-     * Creates new instance of random field generator corresponding to given keyword.
-     * @param name Keyword string determining the type of new instance.
-     * @param num  object's number.
-     * @param domain Domain assigned to new object.
-     * @return Newly allocated object of requested type, null if keyword not supported.
-     */
-    RandomFieldGenerator *createRandomFieldGenerator(const char *name, int num, Domain *domain);
-    /**
-     * Registers a new random field generator in the class factory.
-     * @param name Keyword string.
-     */
-    bool registerRandomFieldGenerator( const char *name, RandomFieldGenerator * ( *creator )( int, Domain * ) );
-    /**
      * Creates new instance of export module corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param num  Export module number.
@@ -432,11 +415,11 @@ public:
     /**
      * Creates new instance of DOF corresponding to given keyword.
      * @param type ID determining the type of new instance.
-     * @param num  object's number.
+     * @param dofid The dof ID.
      * @param dman Dof manager assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    Dof *createDof(dofType type, int num, DofManager *dman);
+    Dof *createDof(dofType type, DofIDItem dofid, DofManager *dman);
     /**
      * Creates new instance of SparseLinearSystemNM corresponding
      * to given type.

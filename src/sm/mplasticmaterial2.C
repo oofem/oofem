@@ -218,7 +218,7 @@ MPlasticMaterial2 :: closestPointReturn(FloatArray &answer,
     int strSize;
     int elastic, restart, actSurf, indx;
     bool yieldConsistency, init = true;
-    bool hasHardening = this->hasHardening();
+    bool hasHardening = this->hasHardening() > 0;
 #ifdef DEBUG
     bool debug = false;
 #endif
@@ -861,7 +861,7 @@ MPlasticMaterial2 :: cuttingPlaneReturn(FloatArray &answer,
     int nIterations = 0;
     int strSize, i, j, elastic, restart, actSurf, indx;
     bool yieldConsistency, init = true;
-    bool hasHardening = this->hasHardening();
+    bool hasHardening = this->hasHardening() > 0;
 
     MPlasticMaterial2Status *status = static_cast< MPlasticMaterial2Status * >( this->giveStatus(gp) );
 
@@ -1298,7 +1298,7 @@ MPlasticMaterial2 :: computeAlgorithmicModuli(FloatMatrix &answer,
     FloatMatrix gradientMatrix, ks;
     FloatMatrix help, helpInverse;
     int i, j, size;
-    bool hasHardening = this->hasHardening();
+    bool hasHardening = this->hasHardening() > 0;
 
     size = elasticModuliInverse.giveNumberOfRows();
 
@@ -1368,7 +1368,7 @@ MPlasticMaterial2 :: giveConsistentStiffnessMatrix(FloatMatrix &answer,
     IntArray activeConditionMap, mask;
     FloatArray gamma;
     int strSize, indx, actSurf = 0;
-    bool hasHardening = this->hasHardening();
+    bool hasHardening = this->hasHardening() > 0;
 
     MPlasticMaterial2Status *status = static_cast< MPlasticMaterial2Status * >( this->giveStatus(gp) );
 
@@ -1523,7 +1523,7 @@ MPlasticMaterial2 :: giveElastoPlasticStiffnessMatrix(FloatMatrix &answer,
     IntArray activeConditionMap, mask;
     FloatArray gamma;
     int strSize, indx, actSurf = 0;
-    bool hasHardening = this->hasHardening();
+    bool hasHardening = this->hasHardening() > 0;
 
     MPlasticMaterial2Status *status = static_cast< MPlasticMaterial2Status * >( this->giveStatus(gp) );
 

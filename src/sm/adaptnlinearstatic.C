@@ -456,12 +456,10 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     this->domainPrescribedNeqs.resize(2);
     this->domainNeqs.at(2) = 0;
     this->domainPrescribedNeqs.at(2) = 0;
-    this->domainList->put(2, dNew);
+    this->domainList.emplace(domainList.begin() + 1, dNew);
 
 #ifdef __PARALLEL_MODE
-    ParallelContext *pcNew = new ParallelContext(this);
-
-    this->parallelContextList->put(2, pcNew);
+    this->parallelContextList.emplace(parallelContextList.begin() + 1, this);
 #endif
 
     // init equation numbering
@@ -512,12 +510,11 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     //domainList->put(1, dNew);
     //dNew->setNumber(1);
     //domainList->put(2, NULL);
-    domainList->put( 1, domainList->unlink(2) );
-    domainList->at(1)->setNumber(1);
+    domainList[0] = std :: move(domainList[1]);
+    domainList[0]->setNumber(1);
 
 #ifdef __PARALLEL_MODE
-    parallelContextList->put( 1, parallelContextList->unlink(2) );
-    parallelContextList->growTo(1);
+    parallelContextList = {parallelContextList[1]};
 #endif
 
     // keep equation numbering of new domain

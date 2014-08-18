@@ -387,4 +387,9 @@ void XfemManager :: giveElementEnrichmentItemIndices(std :: vector< int > &oElem
         oElemEnrInd = res->second;
     }
 }
+
+
+   
+    
+
 } // end namespace oofem

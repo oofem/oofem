@@ -33,6 +33,8 @@
  */
 
 #include "tr21_2d_supg.h"
+#include "fei2dtrquad.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
@@ -46,6 +48,7 @@
 #include "contextioerr.h"
 #include "crosssection.h"
 #include "classfactory.h"
+#include "engngm.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -851,7 +854,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
             //computing middle points to get six-point triangle
             FloatArray borderpoints(4);
-            int sub_case;
+            int sub_case = 0;
             if ( ( si == 1 ) && ( sqi == 4 ) ) {
                 borderpoints.at(1) = xsi;
                 borderpoints.at(2) = ysi;
@@ -1474,7 +1477,7 @@ TR21_2D_SUPG :: giveInternalStateAtNode(FloatArray &answer, InternalStateType ty
 
 
 void
-TR21_2D_SUPG :: drawRawGeometry(oofegGraphicContext &gc)
+TR21_2D_SUPG :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
@@ -1504,38 +1507,37 @@ TR21_2D_SUPG :: drawRawGeometry(oofegGraphicContext &gc)
     EMAddGraphicsToModel(ESIModel(), go);
 }
 
-void TR21_2D_SUPG :: drawScalar(oofegGraphicContext &context)
+void TR21_2D_SUPG :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, indx, result = 0;
     WCRec p [ 3 ];
     GraphicObj *tr;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v1, v2, v3;
     double s [ 3 ];
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
 
-    // if ((context.giveIntVarMode() == ISM_local) && (context.giveIntVarType() ==  IST_VOFFraction)) {
-    if ( ( context.giveIntVarType() ==  IST_VOFFraction ) && ( context.giveIntVarMode() == ISM_local ) ) {
+    // if ((gc.giveIntVarMode() == ISM_local) && (gc.giveIntVarType() ==  IST_VOFFraction)) {
+    if ( ( gc.giveIntVarType() ==  IST_VOFFraction ) && ( gc.giveIntVarMode() == ISM_local ) ) {
         Polygon matvolpoly;
         //this->formMaterialVolumePoly(matvolpoly, NULL, temp_normal, temp_p, false);
-        EASValsSetColor( context.getStandardSparseProfileColor() );
-        //GraphicObj *go = matvolpoly.draw(context,true,OOFEG_VARPLOT_PATTERN_LAYER);
-        matvolpoly.draw(context, true, OOFEG_VARPLOT_PATTERN_LAYER);
+        EASValsSetColor( gc.getStandardSparseProfileColor() );
+        //GraphicObj *go = matvolpoly.draw(gc,true,OOFEG_VARPLOT_PATTERN_LAYER);
+        matvolpoly.draw(gc, true, OOFEG_VARPLOT_PATTERN_LAYER);
         return;
     }
 
-    if ( context.giveIntVarMode() == ISM_recovered ) {
-        result += this->giveInternalStateAtNode(v1, context.giveIntVarType(), context.giveIntVarMode(), 1, tStep);
-        result += this->giveInternalStateAtNode(v2, context.giveIntVarType(), context.giveIntVarMode(), 2, tStep);
-        result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
-    } else if ( context.giveIntVarMode() == ISM_local ) {
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
+        result += this->giveInternalStateAtNode(v1, gc.giveIntVarType(), gc.giveIntVarMode(), 1, tStep);
+        result += this->giveInternalStateAtNode(v2, gc.giveIntVarType(), gc.giveIntVarMode(), 2, tStep);
+        result += this->giveInternalStateAtNode(v3, gc.giveIntVarType(), gc.giveIntVarMode(), 3, tStep);
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
         GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-        result += giveIPValue(v1, gp, context.giveIntVarType(), tStep);
+        result += giveIPValue(v1, gp, gc.giveIntVarType(), tStep);
         v2 = v1;
         v3 = v1;
         result *= 3;
@@ -1545,7 +1547,7 @@ void TR21_2D_SUPG :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    indx = context.giveIntVarIndx();
+    indx = gc.giveIntVarIndx();
 
     s [ 0 ] = v1.at(indx);
     s [ 1 ] = v2.at(indx);
@@ -1553,7 +1555,7 @@ void TR21_2D_SUPG :: drawScalar(oofegGraphicContext &context)
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
 
-    if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+    if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
         for ( i = 0; i < 3; i++ ) {
             p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
             p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
@@ -1561,12 +1563,12 @@ void TR21_2D_SUPG :: drawScalar(oofegGraphicContext &context)
         }
 
         //EASValsSetColor(gc.getYieldPlotColor(ratio));
-        context.updateFringeTableMinMax(s, 3);
+        gc.updateFringeTableMinMax(s, 3);
         tr =  CreateTriangleWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ]);
         EGWithMaskChangeAttributes(LAYER_MASK, tr);
         EMAddGraphicsToModel(ESIModel(), tr);
-    } else if ( ( context.getScalarAlgo() == SA_ZPROFILE ) || ( context.getScalarAlgo() == SA_COLORZPROFILE ) ) {
-        double landScale = context.getLandScale();
+    } else if ( ( gc.getScalarAlgo() == SA_ZPROFILE ) || ( gc.getScalarAlgo() == SA_COLORZPROFILE ) ) {
+        double landScale = gc.getLandScale();
 
         for ( i = 0; i < 3; i++ ) {
             p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
@@ -1574,14 +1576,14 @@ void TR21_2D_SUPG :: drawScalar(oofegGraphicContext &context)
             p [ i ].z = s [ i ] * landScale;
         }
 
-        if ( context.getScalarAlgo() == SA_ZPROFILE ) {
-            EASValsSetColor( context.getDeformedElementColor() );
+        if ( gc.getScalarAlgo() == SA_ZPROFILE ) {
+            EASValsSetColor( gc.getDeformedElementColor() );
             EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
             EASValsSetFillStyle(FILL_SOLID);
             tr =  CreateTriangle3D(p);
             EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | FILL_MASK | LAYER_MASK, tr);
         } else {
-            context.updateFringeTableMinMax(s, 3);
+            gc.updateFringeTableMinMax(s, 3);
             EASValsSetFillStyle(FILL_SOLID);
             tr =  CreateTriangleWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ]);
             EGWithMaskChangeAttributes(FILL_MASK | LAYER_MASK, tr);

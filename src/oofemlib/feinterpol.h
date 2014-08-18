@@ -191,6 +191,12 @@ public:
         OOFEM_ERROR("not implemented");
     }
     /**
+     * Returns a matrix containing the local coordinates for each node corresponding to the interpolation
+     */
+    virtual void giveLocalNodeCoords(FloatMatrix &answer) {
+        OOFEM_ERROR("FEInterpolation::giveLocalNodeCoords: not implemented");
+    }
+    /**
      * Evaluates global coordinates from given local ones.
      * @param answer Contains resulting global coordinates.
      * @param lcoords Array containing (local) coordinates.
@@ -361,6 +367,11 @@ public:
      * Returns number of spatial dimensions.
      */
     virtual int giveNsd() = 0;
+    /**
+     * Returns number of edges.
+     */
+    virtual int giveNumberOfEdges() const 
+    { OOFEM_ERROR("FEInterpolation :: giveNumberOfEdges : Not overloaded."); return -1;}
     //@}
 
     /**

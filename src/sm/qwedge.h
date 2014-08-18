@@ -36,7 +36,6 @@
 #define qwedge_h
 
 #include "nlstructuralelement.h"
-#include "fei3dwedgequad.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "eleminterpmapperinterface.h"
@@ -47,6 +46,8 @@
 #define _IFT_QWedge_materialCoordinateSystem "matcs" ///< [optional] Experimental support for material directions
 
 namespace oofem {
+class FEI3dWedgeQuad;
+
 /**
  * This class implements an Quadratic 3d  15 - node structural finite element.
  * Each node has 3 degrees of freedom.
@@ -65,7 +66,7 @@ public:
     QWedge(int, Domain *);
     virtual ~QWedge() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return & interpolation; }
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;

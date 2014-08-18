@@ -41,6 +41,7 @@
 #include "mathfem.h"
 #include "classfactory.h"
 #include "gaussintegrationrule.h"
+#include "gausspoint.h"
 
 namespace oofem {
 REGISTER_Element(TrPlaneStrRot3d);

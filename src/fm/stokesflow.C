@@ -284,8 +284,7 @@ void StokesFlow :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 
 void StokesFlow :: updateInternalState(TimeStep *tStep)
 {
-    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        Domain *domain = this->giveDomain(idomain);
+    for ( auto &domain: domainList ) {
         if ( domain->giveTopology() ) {
             // Must be done before updating nodal positions
             this->ts = domain->giveTopology()->updateYourself(tStep);

@@ -388,6 +388,8 @@ void XfemElementInterface :: XfemElementInterface_partitionElement(std :: vector
     dl.triangulate(iPoints, oTriangles);
 }
 
+
+
 bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 {
     bool partitionSucceeded = false;
@@ -600,10 +602,21 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
 
             oPointPartitions.resize(1);
 
+            printf("Warning: No tip found.\n");
+
             for ( int i = 1; i <= this->element->giveNumberOfDofManagers(); i++ ) {
                 const FloatArray &nodeCoord = * element->giveDofManager(i)->giveCoordinates();
                 oPointPartitions [ 0 ].push_back(nodeCoord);
             }
+
+            // test Jim
+            // Add first intersection point
+            oPointPartitions [ 0 ].push_back( intersecPoints [ 0 ] );
+
+            // want to add the extrapolated intersection point
+            //FloatArray test;
+            //test.setValues(2, 0.0, 0.4);
+            //oPointPartitions [ 0 ].push_back( test );
 
             // Export start and end points of
             // the intersection line.
@@ -612,6 +625,11 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         }
 
         oIntersection = true;
+
+
+        //oPointPartitions.resize(0);
+        //oIntersection = true;
+        //false;
         return;
     }
 
@@ -666,9 +684,12 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         bool foundTip = false;
         double tipArcPos = -1.0;
 
-        if ( ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), iTri, elCenter) ) {
-            foundTip = true;
-        }
+        //if ( ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), iTri, elCenter) ) {
+        //    foundTip = true;
+        //}
+		if (ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), elCenter)) {
+			foundTip = true;
+		}
 
         if ( foundTip ) {
             for ( int i = 1; i <= nNodes; i++ ) {
@@ -935,7 +956,7 @@ void XfemElementInterface :: updateYourselfCZ(TimeStep *tStep)
     }
 }
 
-void XfemElementInterface :: computeDisplacementJump(GaussPoint &iGP, FloatArray &oJump, const FloatArray &iSolVec, const FloatMatrix &iNMatrix)
+void XfemElementInterface :: computeDisplacementJump(oofem::GaussPoint& iGP, oofem::FloatArray& oJump, const oofem::FloatArray& iSolVec, const oofem::FloatMatrix& iNMatrix)
 {
     const int dim = 2;
     oJump.resize(dim);

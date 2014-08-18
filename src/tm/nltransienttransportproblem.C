@@ -244,7 +244,7 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
     TimeStep *previousStep = this->givePreviousStep(), *currentStep = this->giveCurrentStep();
 
     if ( dof->__giveEquationNumber() == 0 ) {
-        OOFEM_ERROR("invalid equation number on DoF %d", dof->giveNumber() );
+        OOFEM_ERROR("invalid equation number on DoF %d", dof->giveDofID() );
     }
 
     if ( ( t >= previousStep->giveTargetTime() ) && ( t <= currentStep->giveTargetTime() ) ) {
@@ -296,19 +296,13 @@ void
 NLTransientTransportProblem :: createPreviousSolutionInDofUnknownsDictionary(TimeStep *tStep)
 {
     //Copy the last known temperature to be a previous solution
-    int nnodes;
-    double val;
-    Domain *domain;
-    DofManager *node;
-
-    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        domain = this->giveDomain(idomain);
-        nnodes = domain->giveNumberOfDofManagers();
+    for ( auto &domain: domainList ) {
+        int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
             for ( int inode = 1; inode <= nnodes; inode++ ) {
-                node = domain->giveDofManager(inode);
+                DofManager *node = domain->giveDofManager(inode);
                 for ( Dof *dof: *node ) {
-                    val = dof->giveUnknown(VM_Total, tStep); //get number on hash=0(current)
+                    double val = dof->giveUnknown(VM_Total, tStep); //get number on hash=0(current)
                     dof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, val);
                 }
             }
@@ -381,8 +375,7 @@ NLTransientTransportProblem :: copyUnknownsInDictionary(ValueModeType mode, Time
 void
 NLTransientTransportProblem :: updateInternalState(TimeStep *tStep)
 {
-    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        Domain *domain = this->giveDomain(idomain);
+    for ( auto &domain: domainList ) {
         int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
             for ( int j = 1; j <= nnodes; j++ ) {

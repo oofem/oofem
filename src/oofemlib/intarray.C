@@ -238,6 +238,23 @@ void IntArray :: printYourself() const
 }
 
 
+void IntArray :: printYourself(const std::string name) const
+// Prints the receiver on screen.
+{
+    printf("%s (%d): ", name.c_str(), this->giveSize());
+    for ( int i = 1; i <= this->giveSize(); ++i ) {
+        if ( i > 42 ) {
+            printf("   (other components not printed)");
+            break;
+        } else {
+            printf( "%d  ", this->at(i) );
+        }
+    }
+
+    printf("\n");
+}
+
+
 contextIOResultType IntArray :: storeYourself(DataStream *stream, ContextMode mode) const
 {
     // write size

@@ -191,13 +191,8 @@ StructuralEngngModel :: checkConsistency()
 void
 StructuralEngngModel :: updateInternalState(TimeStep *tStep)
 {
-    int nnodes;
-    Domain *domain;
-
-    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        domain = this->giveDomain(idomain);
-
-        nnodes = domain->giveNumberOfDofManagers();
+    for ( auto &domain: domainList ) {
+        int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
             for ( int j = 1; j <= nnodes; j++ ) {
                 this->updateDofUnknownsDictionary(domain->giveDofManager(j), tStep);
@@ -270,7 +265,7 @@ StructuralEngngModel :: buildReactionTable(IntArray &restrDofMans, IntArray &res
 
 #ifdef __OOFEG
 void
-StructuralEngngModel :: showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep)
+StructuralEngngModel :: showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
 
@@ -280,7 +275,7 @@ StructuralEngngModel :: showSparseMtrxStructure(int type, oofegGraphicContext &c
 
     int nelems = domain->giveNumberOfElements();
     for ( int i = 1; i <= nelems; i++ ) {
-        domain->giveElement(i)->showSparseMtrxStructure(StiffnessMatrix, context, tStep);
+        domain->giveElement(i)->showSparseMtrxStructure(StiffnessMatrix, gc, tStep);
     }
 }
 #endif

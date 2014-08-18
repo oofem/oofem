@@ -45,7 +45,6 @@
 #include "zzerrorestimator.h"
 #include "mmashapefunctprojection.h"
 #include "huertaerrorestimator.h"
-#include "gausspoint.h"
 
 #define _IFT_LTRSpace_Name "ltrspace"
 
@@ -92,10 +91,10 @@ public:
     virtual MaterialMode giveMaterialMode();
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &context);
-    virtual void drawSpecial(oofegGraphicContext &);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
 #ifdef __PARALLEL_MODE
@@ -127,10 +126,7 @@ public:
                                                                   int &localNodeId, int &localElemId, int &localBcId,
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode);
-    virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
-    { computeLocalCoordinates(answer, coords); }
-    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-    { computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer); }
+    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

@@ -35,14 +35,13 @@
 #ifndef problemcomm_h
 #define problemcomm_h
 
-#ifdef __PARALLEL_MODE
-
- #include "communicator.h"
- #include "problemcommunicatormode.h"
- #include "engngm.h"
- #include "error.h"
+#include "communicator.h"
+#include "problemcommunicatormode.h"
+#include "error.h"
 
 namespace oofem {
+class EngngModel;
+
 /**
  * Class representing communicator for engng model.
  * It is assumed to be an attribute of an engineering model.
@@ -141,5 +140,5 @@ private:
     void setUpCommunicationMapsForRemoteElementMode(EngngModel *emodel, bool excludeSelfCommFlag);
 };
 } // end namespace oofem
-#endif
+
 #endif // problemcomm_h

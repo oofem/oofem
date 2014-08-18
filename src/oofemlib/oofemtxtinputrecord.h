@@ -38,6 +38,7 @@
 #include "inputrecord.h"
 #include "tokenizer.h"
 
+#include <string>
 #include <vector>
 
 namespace oofem {
@@ -65,7 +66,7 @@ public:
     /// Constructor. Creates an empty input record.
     OOFEMTXTInputRecord();
     /// Constructor. Creates the input record corresponding to given string.
-    OOFEMTXTInputRecord(const char *source);
+    OOFEMTXTInputRecord(int linenumber, std :: string source);
     /// Copy constructor.
     OOFEMTXTInputRecord(const OOFEMTXTInputRecord &);
     /// Destructor.

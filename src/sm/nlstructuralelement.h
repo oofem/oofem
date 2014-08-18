@@ -36,8 +36,6 @@
 #define nlstructuralelement_h
 
 #include "structuralelement.h"
-#include "domain.h"
-#include "floatmatrix.h"
 
 ///@name Input fields for NLStructuralElement
 //@{
@@ -230,6 +228,7 @@ protected:
         return;
     }
     friend class GradDpElement;
+    friend class PhaseFieldElement;
 };
 } // end namespace oofem
 #endif // nlstructuralelement_h

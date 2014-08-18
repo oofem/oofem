@@ -53,6 +53,10 @@
 
 #include <vector>
 
+#ifdef __PARALLEL_MODE
+ #include "parallel.h"
+#endif
+
 namespace oofem {
 REGISTER_ErrorEstimator(ZZErrorEstimator, EET_ZZEE);
 

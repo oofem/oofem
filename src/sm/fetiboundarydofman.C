@@ -31,7 +31,6 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef __PARALLEL_MODE
 
 #include "fetiboundarydofman.h"
 #include "error.h"
@@ -150,4 +149,3 @@ FETIBoundaryDofManager :: giveCompleteLocationArray(int rank, IntArray &location
     return 1;
 }
 } // end namespace oofem
-#endif

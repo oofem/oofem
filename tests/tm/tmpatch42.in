@@ -36,7 +36,7 @@ tetrah1ht 11 nodes 4 6 7 12 3 crossSect 1 mat 1
 tetrah1ht 12 nodes 4 12 7 11 3 crossSect 1 mat 1
 #
 #
-SimpleCS 1
+EmptyCS 1
 IsoHeat 1 d 2400. k 3.0 c 1000.0
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
 constantsurfaceload 2 loadTimeFunction 1 ndofs 1 components 1 15.0 properties 1 a 0.8 loadtype 3

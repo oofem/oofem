@@ -43,6 +43,7 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "node.h"
+#include "domain.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(LinearConstraintBC);
@@ -53,7 +54,7 @@ LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondi
     this->md = new Node(0, domain);
     // this is internal lagrange multiplier used to enforce the receiver constrain
     // this allocates a new equation related to this constraint
-    this->md->appendDof( new MasterDof( 0, this->md, ( DofIDItem ) ( d->giveNextFreeDofID() ) ) );
+    this->md->appendDof( new MasterDof( this->md, ( DofIDItem ) ( d->giveNextFreeDofID() ) ) );
     this->lhsType.clear();
     this->rhsType.clear();
 }

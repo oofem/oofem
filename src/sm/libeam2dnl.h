@@ -81,8 +81,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
 #endif
 
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }
@@ -94,8 +94,7 @@ protected:
     virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *);
     virtual void giveEdgeDofMapping(IntArray &answer, int) const;
     virtual double computeEdgeVolumeAround(GaussPoint *, int);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-    { computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) ); }
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
     virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);

@@ -58,12 +58,11 @@ protected:
 public:
     /**
      * Constructor. Creates slave dof with number n, belonging to aNode dof manager.
-     * @param n Dof number.
      * @param aNode Node receiver will belong to.
-     * @param bc Boundary condition dof belongs to.
      * @param id DofID of slave dof.
+     * @param bc Boundary condition dof belongs to.
      */
-    ActiveDof(int n, DofManager * aNode, int bc = 0, DofIDItem id = Undef);
+    ActiveDof(DofManager * aNode, DofIDItem id = Undef, int bc = 0);
     /// Destructor.
     virtual ~ActiveDof() { }
 

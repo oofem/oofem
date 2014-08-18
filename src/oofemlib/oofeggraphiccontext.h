@@ -36,14 +36,12 @@
 #ifndef oofeggraphiccontext_h
 #define oofeggraphiccontext_h
 
-#ifdef __OOFEG
+#include "oofemcfg.h"
+#include "intarray.h"
+#include "internalstatemode.h"
+#include "internalstatetype.h"
 
- #include "oofemcfg.h"
- #include "intarray.h"
- #include "internalstatemode.h"
- #include "internalstatetype.h"
-
- #include <list>
+#include <list>
 
 //
 // for c++ compiler to be successful on some c files
@@ -328,6 +326,4 @@ extern oofem :: oofegGraphicContext gc [ OOFEG_LAST_LAYER ];
 extern EView *myview;
 extern void deleteLayerGraphics(int iLayer);
 
-
-#endif
 #endif // oofeggraphiccontext_h

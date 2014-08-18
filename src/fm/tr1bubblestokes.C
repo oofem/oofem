@@ -34,6 +34,7 @@
 
 #include "tr1bubblestokes.h"
 #include "node.h"
+#include "elementinternaldofman.h"
 #include "domain.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
@@ -67,8 +68,8 @@ Tr1BubbleStokes :: Tr1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDomai
     this->numberOfGaussPoints = 7;
 
     this->bubble = new ElementDofManager(1, aDomain, this);
-    this->bubble->appendDof( new MasterDof(1, this->bubble, V_u) );
-    this->bubble->appendDof( new MasterDof(2, this->bubble, V_v) );
+    this->bubble->appendDof( new MasterDof(this->bubble, V_u) );
+    this->bubble->appendDof( new MasterDof(this->bubble, V_v) );
 }
 
 Tr1BubbleStokes :: ~Tr1BubbleStokes()
@@ -98,6 +99,17 @@ void Tr1BubbleStokes :: giveDofManDofIDMask(int inode, IntArray &answer) const
 void Tr1BubbleStokes :: giveInternalDofManDofIDMask(int i, IntArray &answer) const
 {
     answer = {V_u, V_v};
+}
+
+int Tr1BubbleStokes :: giveNumberOfInternalDofManagers() const
+{
+    return 1;
+    
+}
+
+DofManager *Tr1BubbleStokes :: giveInternalDofManager(int i) const
+{
+    return this->bubble;
 }
 
 double Tr1BubbleStokes :: computeVolumeAround(GaussPoint *gp)

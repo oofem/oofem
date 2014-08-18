@@ -77,6 +77,7 @@ class CommunicationBuffer;
  * 
  * @author Mikael Öhman
  * @author Erik Svenning
+ * @author Jim Brouzoulis
  * @author many others (please add yourselves)
  */
 class OOFEM_EXPORT FloatArray
@@ -215,7 +216,7 @@ public:
      */
     bool containsOnlyZeroes() const;
     /// Returns the size of receiver.
-    int giveSize() const { return this->values.size(); }
+    int giveSize() const { return (int)this->values.size(); }
     /// Returns true if receiver is not empty.
     bool isNotEmpty() const { return !this->values.empty(); }
     /// Returns true if receiver is empty.
@@ -229,6 +230,11 @@ public:
      * Print receiver on stdout. Useful for debugging.
      */
     virtual void printYourself() const;
+    /**
+     * Print receiver on stdout with custom name.
+     * @param name Display name of reciever.
+     */    
+    virtual void printYourself(const std::string name) const;
     /**
      * Print receiver on stdout with high accuracy.
      */
@@ -450,7 +456,8 @@ public:
      * Gives the pointer to the raw data, breaking encapsulation.
      * @return Pointer to values of array
      */
-    double *givePointer() const { return const_cast< double* >(values.data()); }
+    inline const double *givePointer() const { return values.data(); }
+    inline double *givePointer() { return values.data(); }
     /**
      * Reciever will be a vector with 9 components formed from a 3x3 matrix.
      * Order of matrix components in vector: 11, 22, 33, 23, 13, 12, 32, 31, 21

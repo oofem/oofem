@@ -77,11 +77,12 @@ Beam3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 // eeps = {\eps_x, \gamma_xz, \gamma_xy, \der{phi_x}{x}, \kappa_y, \kappa_z}^T
 {
     double l, ksi, kappay, kappaz, c1y, c1z;
+    TimeStep *tStep = this->domain->giveEngngModel()->giveCurrentStep();
 
     l     = this->computeLength();
     ksi   = 0.5 + 0.5 * gp->giveNaturalCoordinate(1);
-    kappay = this->giveKappayCoeff();
-    kappaz = this->giveKappazCoeff();
+    kappay = this->giveKappayCoeff(tStep);
+    kappaz = this->giveKappazCoeff(tStep);
     c1y = 1. + 2. * kappay;
     c1z = 1. + 2. * kappaz;
 
@@ -134,11 +135,12 @@ Beam3d :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 // r = {u1,v1,w1,fi_x1,fi_y1,fi_z1,u2,v2,w2,fi_x2,fi_y2,fi_21}^T
 {
     double l, ksi, ksi2, ksi3, kappay, kappaz, c1y, c1z;
+    TimeStep *tStep = this->domain->giveEngngModel()->giveCurrentStep();
 
     l     = this->computeLength();
     ksi =   0.5 + 0.5 * iLocCoord.at(1);
-    kappay = this->giveKappayCoeff();
-    kappaz = this->giveKappazCoeff();
+    kappay = this->giveKappayCoeff(tStep);
+    kappaz = this->giveKappazCoeff(tStep);
     c1y = 1. + 2. * kappay;
     c1z = 1. + 2. * kappaz;
     ksi2 = ksi * ksi;
@@ -312,7 +314,7 @@ Beam3d :: computeLength()
 
 
 void
-Beam3d :: computeKappaCoeffs()
+Beam3d :: computeKappaCoeffs(TimeStep *tStep)
 {
     // computes kappa coeff
     // kappa_y = (6*E*Iy)/(k*G*A*l^2)
@@ -320,7 +322,7 @@ Beam3d :: computeKappaCoeffs()
     FloatMatrix d;
     double l = this->computeLength();
 
-    this->computeConstitutiveMatrixAt( d, ElasticStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), domain->giveEngngModel()->giveCurrentStep() );
+    this->computeConstitutiveMatrixAt( d, ElasticStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep );
 
     //  kappay = 6. * d.at(5, 5) / ( d.at(3, 3) * l * l );
     //  kappaz = 6. * d.at(6, 6) / ( d.at(2, 2) * l * l );
@@ -338,10 +340,10 @@ Beam3d :: computeKappaCoeffs()
 
 
 double
-Beam3d :: giveKappayCoeff()
+Beam3d :: giveKappayCoeff(TimeStep *tStep)
 {
     if ( kappay < 0.0 ) {
-        this->computeKappaCoeffs();
+        this->computeKappaCoeffs(tStep);
     }
 
     return kappay;
@@ -349,10 +351,10 @@ Beam3d :: giveKappayCoeff()
 
 
 double
-Beam3d :: giveKappazCoeff()
+Beam3d :: giveKappazCoeff(TimeStep *tStep)
 {
     if ( kappaz < 0.0 ) {
-        this->computeKappaCoeffs();
+        this->computeKappaCoeffs(tStep);
     }
 
     return kappaz;
@@ -485,8 +487,8 @@ Beam3d :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iedge, Tim
     FloatMatrix T;
     FloatArray floc(12);
     double l = this->computeLength();
-    double kappay = this->giveKappayCoeff();
-    double kappaz = this->giveKappazCoeff();
+    double kappay = this->giveKappayCoeff(tStep);
+    double kappaz = this->giveKappazCoeff(tStep);
     double fx, fy, fz, fmx, fmy, fmz, dfx, dfy, dfz, dfmx, dfmy, dfmz;
 
     // evaluates the receivers edge load vector
@@ -708,8 +710,8 @@ Beam3d :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, doub
      * answer.times(this->giveCrossSection()->give('A'));
      */
     double l = this->computeLength();
-    double kappay = this->giveKappayCoeff();
-    double kappaz = this->giveKappazCoeff();
+    double kappay = this->giveKappayCoeff(tStep);
+    double kappaz = this->giveKappazCoeff(tStep);
     double kappay2 = kappay * kappay;
     double kappaz2 = kappaz * kappaz;
 
@@ -792,8 +794,8 @@ Beam3d :: computeInitialStressMatrix(FloatMatrix &answer, TimeStep *tStep)
     FloatArray endForces;
 
     double l = this->computeLength();
-    double kappay = this->giveKappayCoeff();
-    double kappaz = this->giveKappazCoeff();
+    double kappay = this->giveKappayCoeff(tStep);
+    double kappaz = this->giveKappazCoeff(tStep);
     double kappay2 = kappay * kappay;
     double kappaz2 = kappaz * kappaz;
     double minVal;
@@ -898,7 +900,7 @@ Beam3d :: updateLocalNumbering(EntityRenumberingFunctor &f)
 
 
 #ifdef __OOFEG
-void Beam3d :: drawRawGeometry(oofegGraphicContext &gc)
+void Beam3d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
 
@@ -924,7 +926,7 @@ void Beam3d :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void Beam3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void Beam3d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
 
@@ -932,7 +934,6 @@ void Beam3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
         return;
     }
 
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* poin */

@@ -90,7 +90,7 @@ ClassFactory &classFactory = GiveClassFactory();
 std :: string conv2lower(std :: string input)
 {
     for ( std :: size_t i = 0; i < input.size(); i++ ) {
-        input [ i ] = std :: tolower(input [ i ]);
+        input [ i ] = (char)std :: tolower(input [ i ]);
     }
     return input;
 }
@@ -117,10 +117,10 @@ bool ClassFactory :: registerSparseMtrx( SparseMtrxType name, SparseMtrx * ( *cr
     return true;
 }
 
-Dof *ClassFactory :: createDof(dofType name, int number, DofManager *dman)
+Dof *ClassFactory :: createDof(dofType name, DofIDItem dofid, DofManager *dman)
 {
-    //CF_CREATE(dofList, number, dman)
-    return ( dofList.count(name) == 1 ) ? dofList [ name ](number, dman) : NULL;
+    //CF_CREATE(dofList, dofid, dman)
+    return ( dofList.count(name) == 1 ) ? dofList [ name ](dofid, dman) : NULL;
 }
 
 SparseLinearSystemNM *ClassFactory :: createSparseLinSolver(LinSystSolverType name, Domain *domain, EngngModel *emodel)
@@ -249,16 +249,6 @@ NonlocalBarrier *ClassFactory :: createNonlocalBarrier(const char *name, int num
 bool ClassFactory :: registerNonlocalBarrier( const char *name, NonlocalBarrier * ( *creator )( int, Domain * ) )
 {
     CF_STORE(nlbList)
-}
-
-RandomFieldGenerator *ClassFactory :: createRandomFieldGenerator(const char *name, int number, Domain *domain)
-{
-    CF_CREATE(rfgList, number, domain)
-}
-
-bool ClassFactory :: registerRandomFieldGenerator( const char *name, RandomFieldGenerator * ( *creator )( int, Domain * ) )
-{
-    CF_STORE(rfgList)
 }
 
 ExportModule *ClassFactory :: createExportModule(const char *name, int number, EngngModel *emodel)

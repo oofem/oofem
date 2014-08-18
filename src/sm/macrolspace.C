@@ -34,20 +34,14 @@
 
 #include "macrolspace.h"
 #include "micromaterial.h"
+#include "fei3dhexalin.h"
 #include "lspace.h"
 #include "constantfunction.h"
 #include "domain.h"
+#include "structengngmodel.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
 #include "node.h"
-
-#ifdef __OOFEG
- #include "engngm.h"
- #include "metastep.h"
- #include "oofeggraphiccontext.h"
- #include "oofegutils.h"
- #include "connectivitytable.h"
-#endif
 
 namespace oofem {
 REGISTER_Element(MacroLSpace);

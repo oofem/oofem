@@ -116,9 +116,8 @@ public:
     int giveInternalStateAtNode(FloatArray &answer, InternalStateType type, InternalStateMode mode,
                                 int node, TimeStep *tStep);
     // Graphics output
-    //virtual void drawYourself(oofegGraphicContext&);
-    //virtual void drawRawGeometry(oofegGraphicContext&) {}
-    //virtual void drawDeformedGeometry(oofegGraphicContext&, UnknownType) {}
+    //virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep) {}
+    //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
 #endif
 
 protected:

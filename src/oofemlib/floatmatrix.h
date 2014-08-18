@@ -45,6 +45,7 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
+#include <vector>
 #include <iosfwd>
 #include <initializer_list>
 #include <algorithm>
@@ -86,6 +87,10 @@ class CommunicationBuffer;
  *   previously allocated space.
  *   If further request for growing then is necessary memory reallocation.
  *   This process is controlled in resize member function.
+ * 
+ * @author Mikael Öhman
+ * @author Jim Brouzoulis 
+ * @author many others (please add yourselves) 
  */
 class OOFEM_EXPORT FloatMatrix
 {
@@ -123,6 +128,8 @@ public:
     FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat);
     /// Assignment operator.
     FloatMatrix &operator=(std :: initializer_list< std :: initializer_list< double > >mat);
+    /// Assignment operator.
+    FloatMatrix &operator=(std :: initializer_list< FloatArray >mat);
     /// Assignment operator, adjusts size of the receiver if necessary.
     FloatMatrix &operator=(const FloatMatrix &mat) {
         nRows = mat.nRows;
@@ -518,6 +525,12 @@ public:
 
     /// Prints matrix to stdout. Useful for debugging.
     void printYourself() const;
+    /**
+     * Print receiver on stdout with custom name.
+     * @param name Display name of reciever.
+     */    
+    void printYourself(const std::string name) const;
+    
     /// Higher accuracy than printYourself.
     void pY() const;
 
@@ -525,7 +538,8 @@ public:
      * Exposes the internal values of the matrix. Should typically not be used outside of matrix classes.
      * @return Pointer to the values of the matrix.
      */
-    double *givePointer() const { return const_cast< double * >( values.data() ); }
+    inline const double *givePointer() const { return values.data(); }
+    inline double *givePointer() { return values.data(); }
 
     /**
      * Reciever will be a 3x3 matrix formed from a vector with either 9 or 6 components.

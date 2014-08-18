@@ -46,11 +46,9 @@
 #include <cstdarg>
 
 namespace oofem {
-Dof :: Dof(int i, DofManager *aNode, DofIDItem id)
-// Constructor. Creates a new d.o.f., with number i, belonging
-// to aNode
+
+Dof :: Dof(DofManager *aNode, DofIDItem id)
 {
-    number         = i;
     dofManager     = aNode;
     dofID          = id;
 }
@@ -105,12 +103,8 @@ void Dof :: printMultipleOutputAt(FILE *File, TimeStep *tStep, char *ch,
 
 
 void Dof :: printYourself()
-// Prints the receiver on screen.
 {
     printf( "dof %d  of %s %d :\n", dofID, dofManager->giveClassName(), dofManager->giveNumber() );
-    // printf ("equation %d    bc %d \n",equationNumber,bc) ;
-
-    // printOutputAt (node->giveDomain()->giveEngngModel()->giveCurrentStep());
 }
 
 
@@ -148,13 +142,6 @@ Dof :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(CIO_IOERR);
     }
 
-
-    if ( mode & CM_Definition ) {
-        if ( !stream->write(& number, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-    }
-
     return CIO_OK;
 }
 
@@ -169,13 +156,6 @@ Dof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
     dofID = ( DofIDItem ) _val;
-
-
-    if ( mode & CM_Definition ) {
-        if ( !stream->read(& number, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-    }
 
     return CIO_OK;
 }

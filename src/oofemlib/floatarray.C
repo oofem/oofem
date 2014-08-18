@@ -740,6 +740,17 @@ void FloatArray :: printYourself() const
 }
 
 
+void FloatArray :: printYourself(const std::string name) const
+// Prints the receiver on screen.
+{
+    printf("%s (%d): \n", name.c_str(), this->giveSize());
+    for ( double x: *this ) {
+        printf( "%10.3e  ", x );
+    }
+
+    printf("\n");
+}
+
 void FloatArray :: pY() const
 // Prints the receiver on screen with higher accuracy than printYourself.
 {

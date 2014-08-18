@@ -125,6 +125,9 @@ public:
     /// Destructor
     virtual ~MMAShapeFunctProjection();
 
+    MMAShapeFunctProjection(const MMAShapeFunctProjection &) = delete;
+    MMAShapeFunctProjection &operator=(const MMAShapeFunctProjection &) = delete;
+
     virtual void __init(Domain *dold, IntArray &type, FloatArray &coords, Set &sourceElemSet, TimeStep *tStep, bool iCohesiveZoneGP = false);
 
     virtual void finish(TimeStep *tStep);

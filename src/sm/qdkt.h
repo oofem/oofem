@@ -35,18 +35,18 @@
 #ifndef qdkt_h
 #define qdkt_h
 
-#include "mathfem.h"
 #include "nlstructuralelement.h"
 #include "layeredcrosssection.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
-#include "fei2dquadlin.h"
 #include "zzerrorestimator.h"
 
 #define _IFT_QDKTPlate_Name "qdktplate"
 
 namespace oofem {
+class FEI2dQuadLin;
+
 /**
  * This class implements an quad Discrete Kirchhoff Theory (DKT) element.
  * This element is a plate element suitable for thin plates, as the traswerse shear strain energy is neglected.
@@ -74,7 +74,7 @@ public:
     QDKTPlate(int n, Domain * d);
     virtual ~QDKTPlate() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return & interp_lin; }
+    virtual FEInterpolation *giveInterpolation() const;
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
@@ -150,9 +150,9 @@ public:
                                             GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
-    virtual void drawScalar(oofegGraphicContext &context);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 };
 } // end namespace oofem

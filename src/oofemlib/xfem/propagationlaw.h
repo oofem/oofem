@@ -82,6 +82,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) = 0;
     virtual void giveInputRecord(DynamicInputRecord &input) = 0;
 
+    virtual bool hasPropagation() const = 0;
     virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) = 0;
 };
 
@@ -101,6 +102,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     virtual void giveInputRecord(DynamicInputRecord &input);
 
+    virtual bool hasPropagation() const { return false; }
     virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) {return false;};
 };
 
@@ -120,6 +122,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
+    virtual bool hasPropagation() const { return mIncrementLength > 0.; }
     virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp);
 
 protected:

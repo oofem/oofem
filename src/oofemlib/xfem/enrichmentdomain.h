@@ -36,21 +36,19 @@
 #define enrichmentdomain_h
 
 #include "oofemcfg.h"
-#include "domain.h"
-#include "floatarray.h"
-#include "node.h"
-#include "contextioresulttype.h"
-#include "contextmode.h"
 #include "geometry.h"
 #include "tipinfo.h"
 
 namespace oofem {
 class EnrichmentItem;
+class XfemManager;
+class Domain;
 
 ///@name Input fields for Enrichment domains
 //@{
+#define _IFT_DofManList_SetNumber "set"
 #define _IFT_DofManList_list "list"
-#define _IFT_DofManList_DelaminationLevel "xi"
+#define _IFT_DofManList_DelaminationLevel "xi" ///@todo deprecated /JB
 #define _IFT_DofManList_Name "dofmanlist"
 #define _IFT_WholeDomain_Name "wholedomain"
 #define _IFT_EDBGCircle_Name "circle"
@@ -70,7 +68,9 @@ public:
     EnrichmentDomain();
     virtual ~EnrichmentDomain() { }
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
+    virtual int instanciateYourself(Domain *d) { return 1; };
     virtual void giveInputRecord(DynamicInputRecord &input) = 0;
+    virtual void postInitialize(Domain *d) {};
 
     virtual const char *giveInputRecordName() const = 0;
     virtual const char *giveClassName() const = 0;
@@ -189,8 +189,9 @@ class OOFEM_EXPORT DofManList : public EnrichmentDomain
 protected:
     std :: vector< int >dofManList;
     double xi;
+    int setNumber;
 public:
-    DofManList() : xi(0.0) { }
+    DofManList() : xi(0.0) { setNumber = 0; }
     virtual ~DofManList() { }
 
     const std :: vector< int > &giveDofManList() const { return dofManList; }
@@ -202,6 +203,7 @@ public:
     virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int instanciateYourself(Domain *d);
     void addDofManagers(IntArray &dofManNumbers);
     virtual void giveInputRecord(DynamicInputRecord &input);
 

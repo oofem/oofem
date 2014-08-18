@@ -40,6 +40,9 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 #include "fluidmodel.h"
+#include "fluiddynamicmaterial.h"
+#include "integrationrule.h"
+#include "node.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"

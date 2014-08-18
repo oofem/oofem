@@ -39,6 +39,7 @@
 
 namespace oofem {
 class FEI2dTrLin;
+class FEI3dTrQuad;
 class Triangle;
 
 /**
@@ -59,6 +60,7 @@ protected:
     // Interpolation used to distribute quadrature points
     // in each triangle of the patch.
     static FEI2dTrLin mTriInterp;
+    static FEI3dTrQuad mTriInterpQuad;
 
 
 public:
@@ -72,6 +74,7 @@ public:
     // TODO: Give this function a better name.
     // Note: the fact that this function is inherited complicates name change.
     virtual int SetUpPointsOnTriangle(int nPoints, MaterialMode mode);
+    virtual int SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode);
 
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);

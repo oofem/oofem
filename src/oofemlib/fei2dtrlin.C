@@ -81,7 +81,9 @@ void
 FEI2dTrLin :: local2global(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo)
 {
     double l1, l2, l3;
-    answer.resize(2);
+    //answer.resize(2);
+    answer.resize(3);
+    answer.zero();
 
     l1 = lcoords.at(1);
     l2 = lcoords.at(2);

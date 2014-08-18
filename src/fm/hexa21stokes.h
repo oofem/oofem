@@ -36,7 +36,6 @@
 #define hexa21stokes_h
 
 #include "fmelement.h"
-#include "domain.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"

@@ -90,7 +90,6 @@
 
 namespace oofem {
 EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs()
-    // constructor
 {
     number = i;
     currentStep = NULL;
@@ -110,9 +109,6 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     outputStream          = NULL;
 
     referenceFileName     = "";
-
-    domainList            = new AList< Domain >(0);
-    metaStepList          = new AList< MetaStep >(0);
 
     contextOutputMode     = COM_NoContext;
     contextOutputStep     = 0;
@@ -142,62 +138,10 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     comm = MPI_COMM_SELF;
  #endif
 #endif
-
-#ifdef __PARALLEL_MODE
-    parallelContextList = new AList< ParallelContext >(0);
-#endif
 }
 
-#if 0
-EngngModel :: EngngModel(int i, char *s, EngngModel *_master) : domainNeqs(), domainPrescribedNeqs()
-    // constructor
-{
-    number = i;
-    currentStep = NULL;
-    previousStep = NULL;
-    stepWhenIcApply = NULL;
-    defaultErrEstimator = NULL;
-    numberOfSteps = 0;
-    numberOfEquations = 0;
-    numberOfPrescribedEquations = 0;
-    renumberFlag = false;
-    equationNumberingCompleted = 0;
-    ndomains = 0;
-    nMetaSteps = 0;
-    nxfemman = 0;
-
-    outputStream          = NULL;
-
-    domainList            = new AList< Domain >(0);
-    metaStepList          = new AList< MetaStep >(0);
-    xfemManagerList       = new AList< XfemManager >(0);
-
-    exportModuleManager   = new ExportModuleManager(this);
-    initModuleManager     = new InitModuleManager(this);
-    master                = _master; // master mode by default
-    // create context if in master mode; otherwise request context from master
-    if ( master ) {
-        context = master->giveContext();
-    } else {
-        context = new EngngModelContext();
-    }
-
-    parallelFlag = 0;
- #ifdef __PARALLEL_MODE
-    loadBalancingFlag = false;
-    force_load_rebalance_in_first_step = false;
-    lb = NULL;
-    lbm = NULL;
- #endif
-
- #ifdef __PARALLEL_MODE
-    parallelContextList = new AList< ParallelContext >(0);
- #endif
-}
-#endif
 
 EngngModel :: ~EngngModel()
-// destructor
 {
     if ( previousStep == currentStep ) {
         delete this->currentStep;
@@ -207,13 +151,6 @@ EngngModel :: ~EngngModel()
     }
 
     delete stepWhenIcApply;
-
-    delete domainList;
-    delete metaStepList;
-
-#ifdef __PARALLEL_MODE
-    delete parallelContextList;
-#endif
 
     delete exportModuleManager;
 
@@ -258,33 +195,18 @@ void EngngModel :: setParallelMode(bool parallelFlag)
 
 
 void
-EngngModel :: Instanciate_init(const char *dataOutputFileName, int ndomains)
+EngngModel :: Instanciate_init(int ndomains)
 {
-    Domain *domain;
-
-    this->coreOutputFileName = std :: string(dataOutputFileName);
-    this->dataOutputFileName = std :: string(dataOutputFileName);
-
-    if ( this->giveProblemMode() == _postProcessor ) {
-        // modify output file name to prevent output to be lost
-        this->dataOutputFileName.append(".oofeg");
-    }
-
-    if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
-        OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
-    }
-
-
     // create domains
+    domainNeqs.clear();
     domainNeqs.resize(ndomains);
+    domainPrescribedNeqs.clear();
     domainPrescribedNeqs.resize(ndomains);
-    domainList->growTo(ndomains);
+    domainList.clear();
+    domainList.reserve(ndomains);
     for ( int i = 1; i <= ndomains; i++ ) {
-        domain =  new Domain(i, 0, this);
-        domainList->put(i, domain);
+        domainList.emplace_back(new Domain(i, 0, this));
     }
-
-    this->ndomains = ndomains;
 
 #ifdef __PARALLEL_MODE
     this->initParallelContexts();
@@ -302,7 +224,19 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
 
     bool inputReaderFinish = true;
 
-    this->Instanciate_init(dataOutputFileName, this->ndomains);
+    this->coreOutputFileName = std :: string(dataOutputFileName);
+    this->dataOutputFileName = std :: string(dataOutputFileName);
+
+    if ( this->giveProblemMode() == _postProcessor ) {
+        // modify output file name to prevent output to be lost
+        this->dataOutputFileName.append(".oofeg");
+    }
+
+    if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
+        OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
+    }
+
+    this->Instanciate_init(this->ndomains); // Must be done after initializeFrom
 
     fprintf(outputStream, "%s", PRG_HEADER);
     this->startTime = time(NULL);
@@ -345,25 +279,6 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
     //gim -> getInput();
     // Milan ??????????????????
 
-#if 0
-    // instantiate xfemmanager
-    XfemManager *xm;
-    xfemManagerList->growTo(nxfemman);
-    for ( int i = 1; i <= this->nxfemman; i++ ) {
-        xm =  new XfemManager(this, i);
-        ir = dr->giveInputRecord(DataReader :: IR_xfemManRec, 1);
-        // XfemManager has to be put into xfemManagerList before xm->initializeFrom, otherwise Enrichmentitem cannot access XfemManager
-        // or we have to make a reference from EnrichmentItem also
-        xfemManagerList->put(i, xm);
-        xm->initializeFrom(ir);
-        xm->instanciateYourself(dr);
-
-        int last = xm->computeFictPosition();
-        this->setNumberOfEquations(1, last);
-        //Jim - removed
-        //xm->updateIntegrationRule();
-    }
-#endif
     // check emodel input record if no default metastep, since all has been read
     if ( inputReaderFinish ) {
         ir->finish();
@@ -429,8 +344,8 @@ EngngModel :: instanciateDomains(DataReader *dr)
 {
     int result = 1;
     // read problem domains
-    for ( int i = 1; i <= this->ndomains; i++ ) {
-        result &= domainList->at(i)->instanciateYourself(dr);
+    for ( auto &domain: domainList ) {
+        result &= domain->instanciateYourself(dr);
     }
     this->postInitialize();
 
@@ -443,25 +358,25 @@ int
 EngngModel :: instanciateMetaSteps(DataReader *dr)
 {
     int result = 1;
-    MetaStep *mstep;
 
     // create meta steps
-    metaStepList->growTo(nMetaSteps);
+    metaStepList.clear();
+    metaStepList.reserve(nMetaSteps);
     for ( int i = 1; i <= this->nMetaSteps; i++ ) {
-        mstep =  new MetaStep(i, this);
-        metaStepList->put(i, mstep);
+        //MetaStep *mstep = new MetaStep(i, this);
+        metaStepList.emplace_back(i, this);
     }
 
     // read problem domains
     for ( int i = 1; i <= this->nMetaSteps; i++ ) {
         InputRecord *ir = dr->giveInputRecord(DataReader :: IR_mstepRec, i);
-        result &= metaStepList->at(i)->initializeFrom(ir);
+        result &= metaStepList[i-1].initializeFrom(ir);
     }
 
     // set meta step bounds
     int istep = this->giveNumberOfFirstStep();
-    for ( int i = 1; i <= this->nMetaSteps; i++ ) {
-        istep = metaStepList->at(i)->setStepBounds(istep);
+    for ( auto &metaStep: metaStepList ) {
+        istep = metaStep.setStepBounds(istep);
     }
 
     this->numberOfSteps = istep - 1;
@@ -473,21 +388,19 @@ EngngModel :: instanciateMetaSteps(DataReader *dr)
 int
 EngngModel :: instanciateDefaultMetaStep(InputRecord *ir)
 {
-    MetaStep *mstep;
-
     if ( numberOfSteps == 0 ) {
         OOFEM_ERROR("nsteps cannot be zero");
     }
 
     // create default meta steps
     this->nMetaSteps = 1;
-    metaStepList->growTo(nMetaSteps);
-    mstep =  new MetaStep(1, this, numberOfSteps, *ir);
-    metaStepList->put(1, mstep);
+    metaStepList.clear();
+    //MetaStep *mstep = new MetaStep(1, this, numberOfSteps, *ir);
+    metaStepList.emplace_back(1, this, numberOfSteps, *ir);
 
     // set meta step bounds
     int istep = this->giveNumberOfFirstStep() - 1;
-    metaStepList->at(1)->setStepBounds(istep + 1);
+    metaStepList[0].setStepBounds(istep + 1);
 
     OOFEM_LOG_RELEVANT("Total number of solution steps     %d\n",  numberOfSteps);
     return 1;
@@ -591,20 +504,20 @@ EngngModel :: forceEquationNumbering()
     this->numberOfPrescribedEquations = 0;
 
     OOFEM_LOG_DEBUG("Renumbering dofs in all domains\n");
-    for ( int i = 1; i <= this->ndomains; i++ ) {
+    for ( int i = 1; i <= this->giveNumberOfDomains(); i++ ) {
         domainNeqs.at(i) = 0;
         this->numberOfEquations += this->forceEquationNumbering(i);
     }
 
     equationNumberingCompleted = 1;
 
-    for ( int i = 1; i <= this->ndomains; i++ ) {
+    for ( int i = 1; i <= this->giveNumberOfDomains(); i++ ) {
         this->numberOfPrescribedEquations += domainPrescribedNeqs.at(i);
     }
 
 #ifdef __PARALLEL_MODE
-    for ( int i = 1; i <= parallelContextList->giveSize(); i++ ) {
-        this->parallelContextList->at(i)->init(i);
+    for ( std :: size_t i = 1; i <= parallelContextList.size(); i++ ) {
+        this->parallelContextList[i-1].init((int)i);
     }
 
 #endif
@@ -617,7 +530,6 @@ EngngModel :: forceEquationNumbering()
 void
 EngngModel :: solveYourself()
 {
-    int nTimeSteps;
     int smstep = 1, sjstep = 1;
     FILE *out = this->giveOutputStream();
 
@@ -633,7 +545,7 @@ EngngModel :: solveYourself()
         // update state according to new meta step
         this->initMetaStepAttributes(activeMStep);
 
-        nTimeSteps = activeMStep->giveNumberOfSteps();
+        int nTimeSteps = activeMStep->giveNumberOfSteps();
         for ( int jstep = sjstep; jstep <= nTimeSteps; jstep++ ) { //loop over time steps
             this->timer.startTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
             this->timer.initTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
@@ -706,11 +618,7 @@ EngngModel :: updateAttributes(MetaStep *mStep)
 void
 EngngModel :: updateYourself(TimeStep *tStep)
 {
-    int ndomains = this->giveNumberOfDomains();
-
-    for ( int idomain = 1; idomain <= ndomains; idomain++ ) {
-        Domain *domain = this->giveDomain(idomain);
-
+    for ( auto &domain: domainList ) {
 #  ifdef VERBOSE
         VERBOSE_PRINT0( "Updating domain ", domain->giveNumber() )
 #  endif
@@ -800,8 +708,7 @@ EngngModel :: printOutputAt(FILE *File, TimeStep *tStep)
     int domCount = 0;
 
     // fprintf (File,"\nOutput for time step number %d \n\n",tStep->giveNumber());
-    for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
-        Domain *domain = this->giveDomain(idomain);
+    for ( auto &domain: domainList ) {
         domCount += domain->giveOutputManager()->testTimeStepOutput(tStep);
     }
 
@@ -812,8 +719,7 @@ EngngModel :: printOutputAt(FILE *File, TimeStep *tStep)
     fprintf(File, "\n==============================================================");
     fprintf( File, "\nOutput for time % .8e ", tStep->giveTargetTime() * this->giveVariableScale(VST_Time) );
     fprintf(File, "\n==============================================================\n");
-    for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
-        Domain *domain = this->giveDomain(idomain);
+    for ( auto &domain: domainList ) {
         fprintf( File, "Output for domain %3d\n", domain->giveNumber() );
 
         domain->giveOutputManager()->doDofManOutput(File, tStep);
@@ -1310,9 +1216,7 @@ EngngModel :: initStepIncrements()
 // of temp variables.
 //
 {
-    for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
-        Domain *domain = this->giveDomain(idomain);
-
+    for ( auto &domain: domainList ) {
         int nelem = domain->giveNumberOfElements();
         for ( int j = 1; j <= nelem; j++ ) {
             Element *elem = domain->giveElement(j);
@@ -1402,8 +1306,8 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
     }
 
 
-    for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
-        this->giveDomain(idomain)->saveContext(stream, mode, obj);
+    for ( auto &domain: domainList ) {
+        domain->saveContext(stream, mode, obj);
     }
 
 
@@ -1451,7 +1355,6 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
 {
     contextIOResultType iores;
     int closeFlag = 0, istep, iversion;
-    Domain *domain;
     FILE *file = NULL;
 
     this->resolveCorrespondingStepNumber(istep, iversion, obj);
@@ -1514,8 +1417,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
         THROW_CIOERR(CIO_IOERR);
     }
 
-    for ( int idomain = 1; idomain <= this->ndomains; idomain++ ) {
-        domain = this->giveDomain(idomain);
+    for ( auto &domain: domainList ) {
         domain->restoreContext(stream, mode, obj);
     }
 
@@ -1638,7 +1540,7 @@ EngngModel :: GiveDomainDataReader(int domainNum, int domainSerNum, ContextFileM
 
     DataReader *dr;
 
-    if ( ( dr = new OOFEMTXTDataReader( fname.c_str() ) ) == NULL ) {
+    if ( ( dr = new OOFEMTXTDataReader( fname ) ) == NULL ) {
         OOFEM_ERROR("Creation of DataReader failed");
     }
 
@@ -1658,8 +1560,8 @@ EngngModel :: errorInfo(const char *func) const
 Domain *
 EngngModel :: giveDomain(int i)
 {
-    if ( ( i > 0 ) && ( i <= this->ndomains ) ) {
-        return this->domainList->at(i);
+    if ( ( i > 0 ) && ( i <= (int)this->domainList.size() ) ) {
+        return this->domainList[i-1].get();
     } else {
         OOFEM_ERROR("Undefined domain");
     }
@@ -1670,16 +1572,13 @@ EngngModel :: giveDomain(int i)
 void
 EngngModel :: setDomain(int i, Domain *ptr, bool iDeallocateOld)
 {
+    if ( i < 1 || i > (int)this->domainList.size() ) {
+        OOFEM_ERROR("Domain index %d out of range [1,%d]", i, (int)this->domainList.size());
+    }
     if ( !iDeallocateOld ) {
-        printf("Unlinking old domain.\n");
-        this->domainList->unlink(i);
+        this->domainList[i-1].release();
     }
-
-    if ( ( i > 0 ) && ( i <= this->ndomains ) ) {
-        this->domainList->put(i, ptr);
-    } else {
-        OOFEM_ERROR("Domain index %d out of range [1,%d]", i, this->ndomains);
-    }
+    this->domainList[i-1].reset(ptr);
 }
 
 
@@ -1688,26 +1587,19 @@ EngngModel :: setDomain(int i, Domain *ptr, bool iDeallocateOld)
 ParallelContext *
 EngngModel :: giveParallelContext(int i)
 {
-    if ( ( i > 0 ) && ( i <= this->ndomains ) ) {
-        if  ( i > parallelContextList->giveSize() ) {
-            OOFEM_ERROR("context not initialized for this problem");
-        }
-
-        return this->parallelContextList->at(i);
-    } else {
-        OOFEM_ERROR("Undefined domain index %d ", i);
+    if  ( i > (int)parallelContextList.size() ) {
+        OOFEM_ERROR("context not initialized for this problem");
     }
 
-    return NULL;
+    return &this->parallelContextList[i-1];
 }
 
 void
 EngngModel :: initParallelContexts()
 {
-    parallelContextList->growTo(ndomains);
-    for ( int i = 1; i <= this->ndomains; i++ ) {
-        ParallelContext *parallelContext = new ParallelContext(this);
-        parallelContextList->put(i, parallelContext);
+    parallelContextList.clear();
+    for ( int i = 0; i < this->giveNumberOfDomains(); ++i ) {
+        parallelContextList.emplace_back(this);
     }
 }
 #endif
@@ -1718,7 +1610,7 @@ MetaStep *
 EngngModel :: giveMetaStep(int i)
 {
     if ( ( i > 0 ) && ( i <= this->nMetaSteps ) ) {
-        return this->metaStepList->at(i);
+        return &this->metaStepList[i-1];
     } else {
         OOFEM_ERROR("undefined metaStep (%d)", i);
     }
@@ -1768,9 +1660,8 @@ EngngModel :: checkProblemConsistency()
 
     result &= this->checkConsistency();
 
-    int ndomains = this->giveNumberOfDomains();
-    for ( int i = 1; i <= ndomains; i++ ) {
-        result &= this->giveDomain(i)->checkConsistency();
+    for ( auto &domain: domainList ) {
+        result &= domain->checkConsistency();
     }
 
 #  ifdef VERBOSE
@@ -1788,12 +1679,11 @@ EngngModel :: checkProblemConsistency()
 
 
 void
-EngngModel::postInitialize()
+EngngModel :: postInitialize()
 {
-  for ( int i = 1; i <= this->ndomains; i++ ) {
-    domainList->at(i)->postInitialize();
-  }
-  
+    for ( auto &domain: domainList ) {
+        domain->postInitialize();
+    }
 }
 
 void
@@ -1822,19 +1712,34 @@ EngngModel :: initParallel()
 #endif
 
 #ifdef __OOFEG
-void EngngModel :: drawYourself(oofegGraphicContext &context)
+void EngngModel :: drawYourself(oofegGraphicContext &gc)
 {
-    this->giveDomain( context.getActiveDomain() )->drawYourself(context);
+    OGC_PlotModeType plotMode = gc.giveIntVarPlotMode();
+
+    if ( ( plotMode == OGC_nodeAnnotation ) || ( plotMode == OGC_nodeGeometry ) || ( plotMode == OGC_essentialBC ) ||
+        ( plotMode == OGC_naturalBC ) || ( plotMode == OGC_nodeScalarPlot ) || ( plotMode == OGC_nodeVectorPlot ) ) {
+        this->drawNodes(gc);
+    } else {
+        this->drawElements(gc);
+    }
 }
 
-void EngngModel :: drawElements(oofegGraphicContext &context)
+void EngngModel :: drawElements(oofegGraphicContext &gc)
 {
-    this->giveDomain( context.getActiveDomain() )->drawElements(context);
+    Domain *d = this->giveDomain( gc.getActiveDomain() );
+    TimeStep *tStep = this->giveCurrentStep();
+    for ( int i = 1; i <= d->giveNumberOfElements(); i++ ) {
+        d->giveElement(i)->drawYourself(gc, tStep);
+    }
 }
 
-void EngngModel :: drawNodes(oofegGraphicContext &context)
+void EngngModel :: drawNodes(oofegGraphicContext &gc)
 {
-    this->giveDomain( context.getActiveDomain() )->drawNodes(context);
+    Domain *d = this->giveDomain( gc.getActiveDomain() );
+    TimeStep *tStep = this->giveCurrentStep();
+    for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
+        d->giveDofManager(i)->drawYourself(gc, tStep);
+    }
 }
 
 #endif

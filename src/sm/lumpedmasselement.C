@@ -41,7 +41,7 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
- #include "engngm.h"
+ #include "node.h"
 #endif
 
 namespace oofem {
@@ -135,7 +135,7 @@ LumpedMassElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
 }
 
 #ifdef __OOFEG
-void LumpedMassElement :: drawRawGeometry(oofegGraphicContext &gc)
+void LumpedMassElement :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
     WCRec p [ 1 ]; /* point */
@@ -157,10 +157,9 @@ void LumpedMassElement :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void LumpedMassElement :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void LumpedMassElement :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     WCRec p [ 1 ]; /* point */
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -181,7 +180,7 @@ void LumpedMassElement :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownT
 }
 
 
-void LumpedMassElement :: drawScalar(oofegGraphicContext &context)
+void LumpedMassElement :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 { }
 
 #endif

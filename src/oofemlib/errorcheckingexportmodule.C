@@ -43,7 +43,9 @@
 #include "element.h"
 #include "timestep.h"
 #include "classfactory.h"
-#include <structengngmodel.h>
+#ifdef __SM_MODULE
+ #include "structengngmodel.h"
+#endif
 
 namespace oofem {
 REGISTER_ExportModule(ErrorCheckingExportModule)
@@ -197,6 +199,7 @@ ReactionErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
         return true;
     }
 
+#ifdef __SM_MODULE
     //EngngModel *emodel = domain->giveEngngModel();
     StructuralEngngModel *emodel = static_cast< StructuralEngngModel* >( domain->giveEngngModel() );
     ///@todo These would be easier to use if they just returned some more useable structure. Perhaps embed inside a PrimaryField, or just some std::pair/tuple.
@@ -234,6 +237,10 @@ ReactionErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
                       reactionForce, value, fabs(reactionForce-value), tolerance );
     }
     return check;
+#else
+    OOFEM_WARNING("Reaction forces only supported for structural problems yet");
+    return false;
+#endif
 }
 
 
@@ -395,7 +402,7 @@ ErrorCheckingExportModule :: writeCheck(Domain *domain, TimeStep *tStep)
             }
             std :: cout << "#NODE tStep " << tStep->giveNumber();
             std :: cout << " number " << dman->giveNumber();
-            std :: cout << " dof " << dof->giveNumber(); 
+            std :: cout << " dof " << dof->giveDofID(); 
             std :: cout << " unknown " << 'd';
             std :: cout << " value " << dof->giveUnknown(VM_Total, tStep);
             std :: cout << std :: endl;

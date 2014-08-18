@@ -47,6 +47,9 @@
 #include "contextioerr.h"
 #include "mathfem.h"
 #include "dynamicinputrecord.h"
+#include "domain.h"
+#include "unknownnumberingscheme.h"
+#include "engngm.h"
 
 namespace oofem {
 DofManager :: DofManager(int n, Domain *aDomain) :
@@ -575,6 +578,14 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
         }
     }
 
+    // store dof types
+    for ( Dof *dof: *this ) {
+        _val = dof->giveDofID();
+        if ( !stream->write(& _val, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+    }
+
     if ( mode & CM_Definition ) {
         if ( ( iores = loadArray.storeYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
@@ -639,11 +650,20 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
             THROW_CIOERR(CIO_IOERR);
         }
     }
+    
+    IntArray dofids(_numberOfDofs);
+    // restore dof ids
+    for ( int i = 1; i <= _numberOfDofs; i++ ) {
+        if ( !stream->read(& dofids.at(i), 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+    }
 
     // allocate new ones
-    dofArray.resize(_numberOfDofs);
+    for ( auto &d: dofArray) { delete d; } ///@todo Smart pointers would be nicer here
+    dofArray.clear();
     for ( int i = 0; i < _numberOfDofs; i++ ) {
-        Dof *dof = classFactory.createDof( ( dofType ) dtypes(i), i + 1, this );
+        Dof *dof = classFactory.createDof( ( dofType ) dtypes(i), (DofIDItem)dofids(i), this );
         this->appendDof(dof);
     }
 
@@ -666,7 +686,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
         }
 
         int _val;
-        if ( !stream->read(& _val, 1) ) {
+		if ( !stream->read(& _val, 1) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -701,6 +721,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
         if ( pos == this->end() ) {
             if ( padding ) {
                 answer.at(++k) = 0.;
+		continue;
             } else {
                 continue;
             }
@@ -730,6 +751,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
         if ( pos == this->end() ) {
             if ( padding ) {
                 answer.at(++k) = 0.;
+		continue;
             } else {
                 continue;
             }

@@ -87,8 +87,8 @@ public:
     virtual const char *giveClassName() const { return "LIBeam3d"; }
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
 #endif
 
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }
@@ -99,8 +99,7 @@ protected:
     virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
     virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-    { computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) ); }
+    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
     virtual int computeLoadGToLRotationMtrx(FloatMatrix &answer);
     virtual void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);

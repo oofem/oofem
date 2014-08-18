@@ -1358,6 +1358,13 @@ LayeredIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsThicknes
             coord->at(2) = coords_xi2.at(j);
             coord->at(3) = coords_xi.at(i);
             this->gaussPoints [ ind ] =
+            //coord->printYourself();
+            //weights_tri.printYourself();
+            //weights_thickness.printYourself();
+
+            //GaussPoint *gp = new GaussPoint(this, ind+1, coord, weights_tri.at(j) * weights_thickness.at(i), mode);
+            //this->gaussPointArray [ ind ] = gp;
+
                 new GaussPoint(this, 1, coord, weights_tri.at ( j ) *weights_thickness.at ( i ), mode);
 
             // store interface points
@@ -1476,7 +1483,7 @@ LayeredCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
             return layerMat->giveIPValue(answer, gp, type, tStep);
         }
     } else {
-        return CrossSection :: giveIPValue(answer, gp, type, tStep);
+        //return CrossSection :: giveIPValue(answer, gp, type, tStep);
 
         ///@todo so far this only works for el where each layer has its own integration rule
         int layer = gp->giveIntegrationRule()->giveNumber();

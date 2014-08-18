@@ -1,11 +1,15 @@
 #include "tet21ghostsolid.h"
+#include "fei3dtetquad.h"
+#include "fei3dtetlin.h"
 #include "nlstructuralelement.h"
 #include "classfactory.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "structuralcrosssection.h"
-#include "fluiddynamicmaterial.h"
-#include "fluidcrosssection.h"
+#ifdef __FM_MODULE
+ #include "fluiddynamicmaterial.h"
+ #include "fluidcrosssection.h"
+#endif
 #include "load.h"
 #include "element.h"
 #include "dofmanager.h"
@@ -78,7 +82,9 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
 {
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+#ifdef __FM_MODULE
     FluidDynamicMaterial *fluidMaterial = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
+#endif
 
     FloatMatrix Kf, G, Kx, D, B, Ed, EdB, dNx;
     FloatArray Nlin, dNv;
@@ -106,7 +112,11 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
 
             // Fluid part
             gp->setMaterialMode(_3dFlow);
+#ifdef __FM_MODULE
             fluidMaterial->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep);
+#else
+            OOFEM_ERROR("Fluid module missing\n");
+#endif
             gp->setMaterialMode(_3dMat);
 
             EdB.beProductOf(Ed, B);
@@ -178,7 +188,9 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
         return;
     }
 
+#ifdef __FM_MODULE
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
+#endif
     IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatArray N, gVector, temparray(30), dNv, u, inc, u_prev, vload;
     FloatMatrix dNx, G;
@@ -200,8 +212,12 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
 
         // Body load
         if ( gVector.giveSize() ) {
-
+#ifdef __FM_MODULE
             double rho = mat->give('d', gp);
+#else
+            OOFEM_ERROR("Missing FM module");
+            double rho = 1.0;
+#endif
             this->interpolation.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
 
             for ( int j = 0; j < N.giveSize(); j++ ) {
@@ -249,7 +265,9 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
 {
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+#ifdef __FM_MODULE
     FluidDynamicMaterial *fluidMaterial = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
+#endif
 
     FloatMatrix Kf, G, Kx, B, Ed, dNx;
     FloatArray Strain, Stress, Nlin, dNv, a, aVelocity, aPressure, aGhostDisplacement, fluidStress, epsf;
@@ -289,7 +307,11 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
 
             // Fluid part
             gp->setMaterialMode(_3dFlow);
+#ifdef __FM_MODULE
             fluidMaterial->computeDeviatoricStressVector(fluidStress, epsvol, gp, epsf, pressure, tStep);
+#else
+            OOFEM_ERROR("Missing FM module");
+#endif
             gp->setMaterialMode(_3dMat);
 
             momentum.plusProduct(B, fluidStress, detJ*weight);

@@ -36,8 +36,6 @@
 #define vtkxmlexportmodule_h
 
 #include "exportmodule.h"
-#include "domain.h"
-#include "engngm.h"
 #include "intarray.h"
 #include "nodalrecoverymodel.h"
 #include "interface.h"
@@ -68,7 +66,9 @@
 //@}
 
 namespace oofem {
-    ///@todo Rename this to something like "ExportPiece" and move it to a separate file (it doesn't actually contain anything VTK-specific).
+class Node;
+
+///@todo Rename this to something like "ExportPiece" and move it to a separate file (it doesn't actually contain anything VTK-specific).
 class VTKPiece
 {
 public:
@@ -211,6 +211,8 @@ public:
 
     VTKPiece defaultVTKPiece;
 
+    std :: vector < VTKPiece > defaultVTKPieces;
+
     /**
      * Computes a cell average of an InternalStateType varible based on the weights
      * in the integrationpoints (=> volume/area/length average)
@@ -232,10 +234,6 @@ protected:
      * Some common element types are supported, others can be supported via interface concept.
      */
     int giveCellType(Element *element);
-    /**
-     * Returns the number of elements vtk cells.
-     */
-    int giveNumberOfElementCells(Element *element);
     /**
      * Returns number of nodes corresponding to cell type
      */
@@ -316,7 +314,7 @@ protected:
      */
     int initRegionNodeNumbering(IntArray &mapG2L, IntArray &mapL2G,
                                 int &regionDofMans, int &totalcells,
-                                Domain *domain, int reg);
+                                Domain *domain, TimeStep *tStep, int reg);
     /// Returns number of regions (aka regionSets)
     int giveNumberOfRegions();
     /// Returns element set
@@ -342,6 +340,7 @@ protected:
 
     bool isElementComposite(Element *elem); /// Returns true if element geometry type is composite (not a single cell).
     void exportCompositeElement(VTKPiece &vtkPiece, Element *el, TimeStep *tStep);
+    void exportCompositeElement(std::vector< VTKPiece > &vtkPieces, Element *el, TimeStep *tStep);
 };
 
 
@@ -359,6 +358,7 @@ public:
     VTKXMLExportModuleElementInterface() : Interface() { }
     virtual const char *giveClassName() const { return "VTKXMLExportModuleElementInterface"; }
     virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { };
+    virtual void giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep) { };
 };
 } // end namespace oofem
 #endif // vtkxmlexportmodule_h

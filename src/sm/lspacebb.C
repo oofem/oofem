@@ -33,13 +33,13 @@
  */
 
 #include "lspacebb.h"
+#include "fei3dhexalin.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
- #include "engngm.h"
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
 #endif
@@ -56,7 +56,6 @@ LSpaceBB :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 // luated at gp.
 // B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
 {
-    int i;
     FloatMatrix dnx, dnx0;
     FloatArray coord(3);
 
@@ -77,20 +76,20 @@ LSpaceBB :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
     // B(0)  is geometrical matrix evalueated at centroid
     //
     // assemble Pv [B(0)-B(gp)]
-    for ( i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= 8; i++ ) {
         answer.at(1, 3 * i - 2) = answer.at(2, 3 * i - 2) = answer.at(3, 3 * i - 2) = ( dnx0.at(i, 1) - dnx.at(i, 1) ) / 3.0;
         answer.at(1, 3 * i - 1) = answer.at(2, 3 * i - 1) = answer.at(3, 3 * i - 1) = ( dnx0.at(i, 2) - dnx.at(i, 2) ) / 3.0;
         answer.at(1, 3 * i - 0) = answer.at(2, 3 * i - 0) = answer.at(3, 3 * i - 0) = ( dnx0.at(i, 3) - dnx.at(i, 3) ) / 3.0;
     }
 
     // add B(gp)
-    for ( i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= 8; i++ ) {
         answer.at(1, 3 * i - 2) += dnx.at(i, 1);
         answer.at(2, 3 * i - 1) += dnx.at(i, 2);
         answer.at(3, 3 * i - 0) += dnx.at(i, 3);
     }
 
-    for ( i = 1; i <= 8; i++ ) {
+    for ( int i = 1; i <= 8; i++ ) {
         answer.at(4, 3 * i - 1) += dnx.at(i, 3);
         answer.at(4, 3 * i - 0) += dnx.at(i, 2);
 

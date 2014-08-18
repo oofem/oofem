@@ -37,8 +37,6 @@
 
 #include "structuralmaterial.h"
 #include "structuralms.h"
-#include "gausspoint.h"
-#include "timestep.h"
 #include "dictionary.h"
 #include "floatarray.h"
 #include "floatmatrix.h"

@@ -36,6 +36,7 @@
 #include "remeshingcrit.h"
 #include "mesherinterface.h"
 #include "errorestimator.h"
+#include "domain.h"
 #include "classfactory.h"
 #include "contextioerr.h"
 

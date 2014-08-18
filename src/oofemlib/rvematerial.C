@@ -36,6 +36,7 @@
 #include "oofemtxtdatareader.h"
 #include "util.h"
 #include "inputrecord.h"
+#include "engngm.h"
 
 #include <cstdio>
 //#include <unistd.h>

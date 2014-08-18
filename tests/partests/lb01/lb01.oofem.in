@@ -45,7 +45,7 @@ ConstantFunction 1 f(t) 1.0
 ## check reactions 
 #REACTION tStep 3 number 1 dof 1 value 5.6243
 #REACTION tStep 3 number 1 dof 2 value 0.0
-#REACTION tStep 3 number 2 dof 1 value 11.251
+#REACTION tStep 3 number 2 dof 1 value 1.12513332e+01
 #REACTION tStep 3 number 3 dof 1 value 5.6243 
 ## check nodes
 #NODE tStep 3 number 18 dof 1 unknown d value -27.7756346

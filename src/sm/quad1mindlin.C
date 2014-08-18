@@ -45,6 +45,7 @@
 #include "load.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
+#include "fei2dquadlin.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -61,13 +62,17 @@ Quad1Mindlin :: Quad1Mindlin(int n, Domain *aDomain) :
     this->reducedIntegrationFlag = false;
 }
 
+FEInterpolation *
+Quad1Mindlin :: giveInterpolation() const
+{
+    return & interp_lin;
+}
 
 FEInterpolation *
 Quad1Mindlin :: giveInterpolation(DofIDItem id) const
 {
     return & interp_lin;
 }
-
 
 void
 Quad1Mindlin :: computeGaussPoints()

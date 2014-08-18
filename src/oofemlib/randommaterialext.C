@@ -36,7 +36,7 @@
 #include "inputrecord.h"
 #include "domain.h"
 #include "material.h"
-#include "randomfieldgenerator.h"
+#include "function.h"
 #include "randommaterialext.h"
 #include "dynamicinputrecord.h"
 
@@ -106,9 +106,14 @@ RandomMaterialExtensionInterface :: _generateStatusVariables(GaussPoint *gp) con
                                                      ( matStat->giveInterface(RandomMaterialStatusExtensionInterfaceType) );
 
     for ( int i = 1; i <= size; i++ ) {
-        gp->giveElement()->giveDomain()->
-        giveRandomFieldGenerator( randomVariableGenerators.at(i) )->generateRandomValueAt(value, gp);
-        status->_setProperty(randVariables.at(i), value);
+        FloatArray globalCoordinates, randomVal;
+        if ( gp->giveElement()->computeGlobalCoordinates( globalCoordinates, * ( gp->giveSubPatchCoordinates() ) ) ) {
+            Function *f = gp->giveElement()->giveDomain()->giveFunction( randomVariableGenerators.at(i) );
+            value = f->evaluate({{"x", globalCoordinates}});
+            status->_setProperty(randVariables.at(i), value);
+        } else {
+            OOFEM_ERROR("computeGlobalCoordinates failed");
+        }
     }
 }
 } // end namespace oofem

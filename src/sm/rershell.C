@@ -42,7 +42,6 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "domain.h"
-#include "engngm.h"
 #include "load.h"
 #include "structuralcrosssection.h"
 #include "mathfem.h"
@@ -757,7 +756,6 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
  * {
  * WCRec p[3];
  * GraphicObj *go;
- * TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
  *
  * EASValsSetLineWidth(DEFORMED_GEOMETRY_WIDTH);
  * EASValsSetColor(deformedElementColor);
@@ -781,7 +779,7 @@ RerShell :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType ty
 
 
 //void
-//RerShell :: drawScalar(oofegGraphicContext& context)
+//RerShell :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 //{}
 
 

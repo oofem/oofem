@@ -36,9 +36,6 @@
 #define simpletransportcrosssection_h
 
 #include "transportcrosssection.h"
-#include "gausspoint.h"
-#include "floatarray.h"
-#include "floatmatrix.h"
 
 #define _IFT_SimpleTransportCrossSection_Name "simpletransportcs"
 #define _IFT_SimpleTransportCrossSection_material "mat"
@@ -77,6 +74,12 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
 
     virtual int checkConsistency();
+
+#ifdef __PARALLEL_MODE
+    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp);
+    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp);
+    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *gp);
+#endif
 
     virtual const char *giveClassName() const { return "SimpleTransportCrossSection"; }
     virtual const char *giveInputRecordName() const { return _IFT_SimpleTransportCrossSection_Name; }

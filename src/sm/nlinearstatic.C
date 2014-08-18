@@ -189,11 +189,7 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_NonLinearStatic_refloadmode);
     this->refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 
-    if ( ir->hasField(_IFT_NonLinearStatic_keepll) ) {
-        mstepCumulateLoadLevelFlag = true;
-    } else {
-        mstepCumulateLoadLevelFlag = false;
-    }
+    mstepCumulateLoadLevelFlag = ir->hasField(_IFT_NonLinearStatic_keepll);
 
     // called just to mark field as recognized, used later
     ir->hasField(_IFT_NonLinearStatic_donotfixload);
@@ -793,7 +789,7 @@ NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
 
 #ifdef __OOFEG
 void
-NonLinearStatic :: showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep)
+NonLinearStatic :: showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
     CharType ctype;
@@ -812,11 +808,11 @@ NonLinearStatic :: showSparseMtrxStructure(int type, oofegGraphicContext &contex
 
     int nelems = domain->giveNumberOfElements();
     for ( int i = 1; i <= nelems; i++ ) {
-        domain->giveElement(i)->showSparseMtrxStructure(ctype, context, tStep);
+        domain->giveElement(i)->showSparseMtrxStructure(ctype, gc, tStep);
     }
 
     for ( int i = 1; i <= nelems; i++ ) {
-        domain->giveElement(i)->showExtendedSparseMtrxStructure(ctype, context, tStep);
+        domain->giveElement(i)->showExtendedSparseMtrxStructure(ctype, gc, tStep);
     }
 }
 #endif

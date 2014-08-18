@@ -33,6 +33,8 @@
  */
 
 #include "trplanestressrotallman.h"
+#include "fei2dtrquad.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "structuralcrosssection.h"
 #include "gausspoint.h"

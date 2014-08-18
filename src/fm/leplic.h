@@ -97,7 +97,7 @@ public:
     //@}
 
     void setTempLineConstant(double tp) { temp_p = tp; }
-    void setTempInterfaceNormal(const FloatArray &tg) { temp_normal = tg; }
+    void setTempInterfaceNormal(FloatArray tg) { temp_normal = std::move(tg); }
     void setTempVolumeFraction(double v) {
         if ( !permanentVofFlag ) {
             temp_vof = v;
@@ -214,7 +214,7 @@ protected:
 public:
         computeLEPLICVolumeFractionWrapper(LEPlicElementInterface * i, LEPlic * mi, const FloatArray & n, const double target_vof_val, bool upd_val) :
             iface(i), minterf(mi), normal(n), target_vof(target_vof_val), upd(upd_val) { }
-        void setNormal(const FloatArray &n) { normal = n; }
+        void setNormal(FloatArray n) { normal = std::move(n); }
         double eval(double x) { return fabs(iface->computeLEPLICVolumeFraction(normal, x, minterf, upd) - target_vof); }
     };
 };

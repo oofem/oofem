@@ -36,7 +36,6 @@
 #define truss1d_h
 
 #include "structuralelement.h"
-#include "gaussintegrationrule.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "spatiallocalizer.h"
@@ -45,12 +44,12 @@
 #include "zzerrorestimator.h"
 #include "mmashapefunctprojection.h"
 #include "huertaerrorestimator.h"
-#include "fei1dlin.h"
-#include "gausspoint.h"
 
 #define _IFT_Truss1d_Name "truss1d"
 
 namespace oofem {
+class FEI1dLin;
+
 /**
  * This class implements a two-node truss bar element for one-dimensional
  * analysis.
@@ -68,7 +67,7 @@ public:
     Truss1d(int n, Domain * d);
     virtual ~Truss1d() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return & interp; }
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual void computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
@@ -88,9 +87,9 @@ public:
     virtual Interface *giveInterface(InterfaceType it);
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &context);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
     // definition & identification
@@ -98,10 +97,6 @@ public:
     virtual const char *giveClassName() const { return "Truss1d"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _1dMat; }
-
-    // ZZNodalRecoveryMInterface
-    //void ZZNodalRecoveryMI_computeNValProduct (FloatArray& answer, InternalStateType type, TimeStep* tStep);
-    //void ZZNodalRecoveryMI_computeNNMatrix (FloatArray& answer, InternalStateType type);
 
     // NodalAveragingRecoveryMInterface
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
@@ -122,10 +117,7 @@ public:
                                                                   int &localNodeId, int &localElemId, int &localBcId,
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode);
-    virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
-    { computeLocalCoordinates(answer, coords); }
-    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-    { computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer); }
+    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
     virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
                                                                       coordType ct, nodalValContainerType &list,

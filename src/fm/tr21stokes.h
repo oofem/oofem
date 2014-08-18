@@ -36,7 +36,6 @@
 #define tr21stokes_h
 
 #include "fmelement.h"
-#include "domain.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "zznodalrecoverymodel.h"
 #include "spatiallocalizer.h"

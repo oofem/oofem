@@ -36,17 +36,17 @@
 #define geometry_h
 
 #include "oofemcfg.h"
-#include "domain.h"
+#include "error.h"
 #include "floatarray.h"
-#include "node.h"
+#include "inputrecord.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
+#include <list>
 #ifdef __BOOST_MODULE
  #include <BoostInterface.h>
 #endif
 
-namespace oofem {
 ///@name Input fields for geometries
 //@{
 #define _IFT_Circle_Name "circle"
@@ -65,6 +65,12 @@ namespace oofem {
 #define _IFT_PolygonLine_points "points"
 
 //@}
+
+namespace oofem {
+
+class Element;
+class DynamicInputRecord;
+class oofegGraphicContext;
 
 /**
  * Abstract representation of Geometry
@@ -128,7 +134,7 @@ public:
     virtual const char *giveClassName() const { return NULL; }
     std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
     /// Returns number of Geometry vertices.
-    int giveNrVertices() const { return mVertices.size(); }
+    int giveNrVertices() const { return (int)mVertices.size(); }
     virtual bool isOutside(BasicGeometry *bg) { return false; }
     virtual bool isInside(Element *el) { return false; }
     virtual bool isInside(FloatArray &point) { return false; }

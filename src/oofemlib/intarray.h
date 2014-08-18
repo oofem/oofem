@@ -55,7 +55,8 @@ class CommunicationBuffer;
  * The lower value index of array is 1, upper depends on array size.
  * 
  * @author Mikael Öhman
- * @author many others
+ * @author Jim Brouzoulis 
+ * @author many others (please add yourselves)
  */
 class OOFEM_EXPORT IntArray
 {
@@ -312,10 +313,16 @@ public:
     void printYourself() const;
 
     /**
+     * Prints receiver on stdout with custom name.  
+     * @param name Display name of reciever.
+     */
+    void printYourself(const std::string name) const;    
+    /**
      * Breaks encapsulation. Avoid using this unless absolutely necessary.
      * @return Internal pointer to stored values.
      */
-    int *givePointer() const { return const_cast< int* >(values.data()); }
+    inline const int *givePointer() const { return values.data(); }
+    inline int *givePointer() { return values.data(); }
 
     /**
      * Stores array to output stream.

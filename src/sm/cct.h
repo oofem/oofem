@@ -41,12 +41,13 @@
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
-#include "fei2dtrlin.h"
 #include "zzerrorestimator.h"
 
 #define _IFT_CCTPlate_Name "cctplate"
 
 namespace oofem {
+class FEI2dTrLin;
+
 /**
  * This class implements an triangular three-node plate CCT finite element.
  * Each node has 3 degrees of freedom.
@@ -69,7 +70,7 @@ public:
     CCTPlate(int n, Domain * d);
     virtual ~CCTPlate() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return & interp_lin; }
+    virtual FEInterpolation *giveInterpolation() const;
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     virtual MaterialMode giveMaterialMode()  { return _2dPlate; }
@@ -140,9 +141,9 @@ public:
                                             GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep);
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType type);
-    virtual void drawScalar(oofegGraphicContext &context);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 };
 } // end namespace oofem

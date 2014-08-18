@@ -16,7 +16,7 @@ set (sm_element
     libeam2d.C libeam2dnl.C
     libeam3d.C libeam3dnl.C libeam3dnl2.C libeam3d2.C
     beam2d.C beam3d.C
-    interfaceelement1d.C interfaceelem2dquad.C interfaceelem3dtrlin.C
+    #interfaceelement1d.C interfaceelem2dquad.C interfaceelem3dtrlin.C
     quad1planestrain.C rershell.C tr_shell01.C qplanstrss.C q9planstrss.C qtrplstr.C q4axisymm.C
     planstrss.C
     planstrssxfem.C
@@ -41,8 +41,6 @@ set (sm_element
     tr2shell7xfem.C
     trplanestressrotallman.C
     structuralinterfaceelement.C
-    intelline1.C
-    intelline2.C
     tet21ghostsolid.C
     graddpelement.C graddpmaterialextensioninterface.C
     qtruss1d.C qtruss1dgrad.C
@@ -51,8 +49,24 @@ set (sm_element
     qspacegrad.C
     dkt.C qdkt.C
     quad1platesubsoil.C tria1platesubsoil.C
-    interfaceelem2dlin.C
+    
     trwarp.C
+    #qplanstrssphf.C
+    )
+
+set (sm_interface_elements
+    InterfaceElements/intelpoint.C
+    InterfaceElements/intelline1.C
+    InterfaceElements/intelline2.C
+    InterfaceElements/intelsurftr1.C
+    InterfaceElements/Deprecated/interfaceelement1d.C
+    InterfaceElements/Deprecated/interfaceelem2dlin.C
+    InterfaceElements/Deprecated/interfaceelem2dquad.C
+    InterfaceElements/Deprecated/interfaceelem3dtrlin.C
+    )
+
+set (sm_boundary_conditions
+    prescribedgenstrainshell7.C
     )
 
 set (sm_crosssection
@@ -110,8 +124,6 @@ set (sm_material
     druckerPragerPlasticitySM.C
     druckerpragercutmat.C
     masonry02.C
-    isointerfacedamage01.C
-    isointerfacedamage02.C
     j2mat.C
     mat_cebfip90.C
     mdm.C
@@ -126,22 +138,32 @@ set (sm_material
     rankinematgrad.C
     rankinematnl.C
     kelvinChSolM.C
-    simpleinterfacemat.C
     latticematstatus.C
     latticedamage2d.C
     dustmat.C
-    lsmastermat.C lsmastermatgrad.C
-    intmatbilinczfagerstrom.C
-	intmatbilinczjansson.C
-    intmatbilinearcz.C
-	intmatbilinczelastic.C
-	InterfaceMaterials/intmatdummycz.C
+    lsmastermat.C
+    lsmastermatgrad.C
+    InterfaceMaterials/intmatdummycz.C
     simplevitrificationmaterial.C
     anisodamagemodel.C
     winklerpasternak.C
     structmatsettable.C
     bondceb.C
     mooneyrivlin.C
+	)
+
+set (sm_interface_materials
+    InterfaceMaterials/intmatbilinczfagerstrom.C
+    InterfaceMaterials/intmatbilinczjansson.C
+    InterfaceMaterials/intmatbilinearcz.C
+    InterfaceMaterials/intmatbilinczelastic.C
+    InterfaceMaterials/intmatbilinczfagerstromrate.C
+    InterfaceMaterials/intmatisodamage.C
+    InterfaceMaterials/intmatisodamagetable.C
+    InterfaceMaterials/intmatcoulombcontact.C
+    InterfaceMaterials/Deprecated/isointerfacedamage01.C
+    InterfaceMaterials/Deprecated/isointerfacedamage02.C
+    InterfaceMaterials/Deprecated/simpleinterfacemat.C
     )
 
 set (sm_error
@@ -153,8 +175,8 @@ set (sm_error
     )
 
 set (sm_export
-    dmexportmodule.C
-    poiexportmodule.C
+    export/dmexportmodule.C
+    export/poiexportmodule.C
     export/gnuplotexportmodule.C
     )
 
@@ -169,7 +191,6 @@ set (sm_status
     rheoChM.C maxwellChM.C kelvinChM.C
     rcm2.C
     isodamagemodel.C
-    hydram.C
     mplasticmaterial2.C
     deformationtheorymaterial.C
     microplanematerial.C microplanematerial_bazant.C
@@ -179,6 +200,7 @@ set (sm_xfem
 	xfem/xfemstructuralelementinterface.C
 	xfem/enrichmentitems/crack.C
 	xfem/enrichmentitems/delamination.C
+	xfem/enrichmentitems/shellcrack.C
 	xfem/propagationlaws/plhoopstresscirc.C
 	xfem/xfemstructuremanager.C
 	xfemsolverinterface.C
@@ -212,20 +234,26 @@ set (sm_obsolete
 
 set (sm
     ${sm_element}
+    ${sm_interface_elements}
     ${sm_crosssection}
     ${sm_loads}
     ${sm_emodel}
     ${sm_material}
+    ${sm_interface_materials}
     ${sm_status}
     ${sm_export}
     ${sm_barrier}
     ${sm_error}
     ${sm_xfem}
     ${sm_unsorted}
-    ${sm_parallel}
     ${sm_obsolete}
     ${sm_new}
+	${sm_boundary_conditions}
     )
+
+if (USE_PARALLEL)
+    list (APPEND sm ${sm_parallel})
+endif ()
 
 add_library(sm
     ${LIB_TYPE}
