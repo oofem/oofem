@@ -128,6 +128,8 @@ public:
     FloatMatrix(std :: initializer_list< std :: initializer_list< double > >mat);
     /// Assignment operator.
     FloatMatrix &operator=(std :: initializer_list< std :: initializer_list< double > >mat);
+    /// Assignment operator.
+    FloatMatrix &operator=(std :: initializer_list< FloatArray >mat);
     /// Assignment operator, adjusts size of the receiver if necessary.
     FloatMatrix &operator=(const FloatMatrix &mat) {
         nRows = mat.nRows;
