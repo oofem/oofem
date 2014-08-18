@@ -137,7 +137,6 @@ public:
     bool isElementEnriched(const Element *element) const;
     inline bool isDofManEnriched(const DofManager &iDMan) const;
     int  giveNumDofManEnrichments(const DofManager &iDMan) const;
-    int giveNumEnrichedDofs(const DofManager &iDMan) const;
 
     // Returns true if the enrichment item can assign
     // a different material to any Gauss point.
@@ -174,8 +173,6 @@ public:
     bool evalLevelSetTangInNode(double &oLevelSet, int iNodeInd) const;
     bool evalNodeEnrMarkerInNode(double &oNodeEnrMarker, int iNodeInd) const;
 
-    bool levelSetChangesSignInEl(const IntArray &iElNodes) const;
-
     void interpLevelSet(double &oLevelSet, const FloatArray &iGlobalCoord) const;
 
     // By templating the function this way, we may choose if we want to pass iNodeInd as
@@ -189,11 +186,6 @@ public:
 
     template< typename T >
     void interpGradLevelSet(FloatArray &oGradLevelSet, const FloatMatrix &idNdX, const T &iNodeInd) const;
-
-    // JB - temporary
-    template< typename T >
-    void interpSurfaceLevelSet(double &oLevelSet, const FloatArray &iN, const T &iNodeInd, double iXi) const;
-    void interpSurfaceLevelSet(double &oLevelSet, double iXi) const;
 
     // Level set routines
     bool giveLevelSetsNeedUpdate() const { return mLevelSetsNeedUpdate; }
@@ -369,17 +361,6 @@ void EnrichmentItem :: interpGradLevelSet(FloatArray &oGradLevelSet, const Float
     }
 }
 
-
-// should be generalised - JB
-template< typename T >
-void EnrichmentItem :: interpSurfaceLevelSet(double &oLevelSet, const FloatArray &iN, const T &iNodeInd, double iXi) const
-{
-    //oLevelSet = 0.0;
-    oLevelSet = iXi;
-    for ( int i = 1; i <= iN.giveSize(); i++ ) {
-        oLevelSet -= iN.at(i) * mLevelSetSurfaceNormalDir [ iNodeInd [ i - 1 ] - 1 ];
-    }
-}
 } // end namespace oofem
 
 
