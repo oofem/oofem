@@ -53,6 +53,8 @@
 #include "mathfem.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
+#include "domain.h"
+#include "engngm.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -640,7 +642,7 @@ Node :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
 #ifdef __OOFEG
 void
-Node :: drawYourself(oofegGraphicContext &gc)
+Node :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
 //
 // draws graphics representation of receiver
 //
@@ -718,7 +720,6 @@ Node :: drawYourself(oofegGraphicContext &gc)
         EMAddGraphicsToModel(ESIModel(), go);
     } else if ( mode == OGC_essentialBC ) {
         int i, hasDisplSupport [ 3 ], hasRotSupport [ 3 ], hasAny = 0;
-        TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
         if ( !tStep ) {
             TimeStep __temp( domain->giveEngngModel() );
             tStep = & __temp;
@@ -806,7 +807,6 @@ Node :: drawYourself(oofegGraphicContext &gc)
             }
         }
     } else if ( mode == OGC_naturalBC ) {
-        TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
         if ( !tStep ) {
             TimeStep __temp( domain->giveEngngModel() );
             tStep = & __temp;
@@ -872,7 +872,6 @@ Node :: drawYourself(oofegGraphicContext &gc)
         }
     } else if ( mode == OGC_nodeVectorPlot ) {
         GraphicObj *go;
-        TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
 
         if ( gc.giveIntVarType() == IST_Velocity ) {
             WCRec p [ 2 ]; /* point */

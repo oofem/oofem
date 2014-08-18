@@ -52,6 +52,7 @@ class Node;
 class IntegrationRule;
 class SparseMtrx;
 class SparseLinearSystemNM;
+class Element;
 
 /**
  * Applies a mean deviatoric shear rate and pressure (Neumann boundary condition) in a weakly periodic way.

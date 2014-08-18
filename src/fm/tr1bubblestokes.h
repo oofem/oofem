@@ -36,16 +36,15 @@
 #define tr1bubblestokes_h
 
 #include "fmelement.h"
-#include "domain.h"
 #include "zznodalrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
-#include "elementinternaldofman.h"
 
 #define _IFT_Tr1BubbleStokes_Name "tr1bubblestokes"
 
 namespace oofem {
 class FEI2dTrLin;
+class ElementDofManager;
 
 /**
  * Triangular element for Stokes flow using Bubble basis function.
@@ -97,8 +96,8 @@ public:
 
     virtual int computeNumberOfDofs();
 
-    virtual int giveNumberOfInternalDofManagers() const { return 1; }
-    virtual DofManager *giveInternalDofManager(int i) const { return bubble; }
+    virtual int giveNumberOfInternalDofManagers() const;
+    virtual DofManager *giveInternalDofManager(int i) const;
     virtual void giveInternalDofManDofIDMask(int i, IntArray &answer) const;
 
     virtual FEInterpolation *giveInterpolation() const;

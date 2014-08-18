@@ -33,6 +33,7 @@
  */
 
 #include "quad1planestrain.h"
+#include "fei2dquadlin.h"
 #include "node.h"
 #include "crosssection.h"
 #include "gausspoint.h"
@@ -41,7 +42,6 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
-#include "fei2dquadlin.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -56,7 +56,7 @@ REGISTER_Element(Quad1PlaneStrain);
 FEI2dQuadLin Quad1PlaneStrain :: interp(1, 2);
 
 Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface(),
+    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface(),
     SpatialLocalizerInterface(this),
     EIPrimaryUnknownMapperInterface(),
     HuertaErrorEstimatorInterface()
@@ -70,6 +70,9 @@ Quad1PlaneStrain :: ~Quad1PlaneStrain()
 { }
 
 
+FEInterpolation *Quad1PlaneStrain :: giveInterpolation() const { return & interp; }
+
+
 void
 Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
@@ -80,7 +83,7 @@ Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li
 {
     FloatMatrix dN;
 
-    this->interp.evaldNdx( dN, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dN, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     // Reshape
     answer.resize(4, 8);
@@ -110,6 +113,24 @@ Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li
 #endif
 }
 
+void
+Quad1PlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+// Returns the [5x8] displacement gradient matrix {BH} of the receiver,
+// evaluated at gp.
+{
+    FloatMatrix dnx;
+    this->interp.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+
+    answer.resize(5, 8);
+    answer.zero();
+    // 3rd row is zero -> dw/dz = 0
+    for ( int i = 1; i <= 4; i++ ) {
+        answer.at(1, 2 * i - 1) = dnx.at(i, 1);     // du/dx -1
+        answer.at(2, 2 * i - 0) = dnx.at(i, 2);     // dv/dy -2
+        answer.at(4, 2 * i - 1) = dnx.at(i, 2);     // du/dy -6
+        answer.at(5, 2 * i - 0) = dnx.at(i, 1);     // dv/dx -9
+    }
+}
 
 void
 Quad1PlaneStrain :: computeGaussPoints()
@@ -152,7 +173,7 @@ Quad1PlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPo
      */
 
     FloatArray n;
-    this->interp.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(2, 4);
     answer.at(1, 1) = n.at(1);
     answer.at(1, 3) = n.at(2);
@@ -199,15 +220,15 @@ Quad1PlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 Quad1PlaneStrain :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ *gp->giveWeight();
+    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    return detJ * gp->giveWeight();
 }
 
 
 void
 Quad1PlaneStrain :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -266,7 +287,7 @@ Quad1PlaneStrain :: computeVolumeAround(GaussPoint *gp)
 {
     double detJ, weight, thickness;
 
-    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     thickness = this->giveCrossSection()->give(CS_Thickness, gp);
     return detJ * weight * thickness;
@@ -277,14 +298,14 @@ IRResultType
 Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = this->StructuralElement :: initializeFrom(ir);
+    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
 
     if ( !( ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
+            ( numberOfGaussPoints == 9 ) ||
+            ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
     }
 
@@ -306,7 +327,9 @@ Quad1PlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &n
 void
 Quad1PlaneStrain :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
-    answer = {D_u, D_v};
+    answer = {
+        D_u, D_v
+    };
 }
 
 
@@ -344,7 +367,7 @@ Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElem
     static int sideNode [ 4 ] [ 2 ] = { { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 1 } };
 
     if ( sMode == HuertaErrorEstimatorInterface :: NodeMode ||
-        ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
+         ( sMode == HuertaErrorEstimatorInterface :: BCMode && aMode == HuertaErrorEstimator :: HEE_linear ) ) {
         for ( inode = 0; inode < nodes; inode++ ) {
             corner [ inode ] = this->giveNode(inode + 1)->giveCoordinates();
             if ( corner [ inode ]->giveSize() != 3 ) {
@@ -385,10 +408,17 @@ Quad1PlaneStrain :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElem
 }
 
 
+void Quad1PlaneStrain :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+}
+
+
+
 #ifdef __OOFEG
  #define TR_LENGHT_REDUCT 0.3333
 
-void Quad1PlaneStrain :: drawRawGeometry(oofegGraphicContext &gc)
+void Quad1PlaneStrain :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
@@ -423,11 +453,10 @@ void Quad1PlaneStrain :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void Quad1PlaneStrain :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void Quad1PlaneStrain :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -460,40 +489,39 @@ void Quad1PlaneStrain :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownTy
 
 
 
-void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &context)
+void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, indx, result = 0;
     WCRec p [ 4 ];
     GraphicObj *tr;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 4 ];
     double s [ 4 ], defScale;
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
-    if ( context.giveIntVarMode() == ISM_recovered ) {
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
         for ( i = 1; i <= 4; i++ ) {
-            result += this->giveInternalStateAtNode(v [ i - 1 ], context.giveIntVarType(), context.giveIntVarMode(), i, tStep);
+            result += this->giveInternalStateAtNode(v [ i - 1 ], gc.giveIntVarType(), gc.giveIntVarMode(), i, tStep);
         }
 
         if ( result != 4 ) {
             return;
         }
 
-        indx = context.giveIntVarIndx();
+        indx = gc.giveIntVarIndx();
 
         for ( i = 1; i <= 4; i++ ) {
             s [ i - 1 ] = v [ i - 1 ].at(indx);
         }
 
-        if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+        if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
             for ( i = 0; i < 4; i++ ) {
-                if ( context.getInternalVarsDefGeoFlag() ) {
+                if ( gc.getInternalVarsDefGeoFlag() ) {
                     // use deformed geometry
-                    defScale = context.getDefScale();
+                    defScale = gc.getDefScale();
                     p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                     p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                     p [ i ].z = 0.;
@@ -505,17 +533,17 @@ void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &context)
             }
 
             //EASValsSetColor(gc.getYieldPlotColor(ratio));
-            context.updateFringeTableMinMax(s, 4);
+            gc.updateFringeTableMinMax(s, 4);
             tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
             EGWithMaskChangeAttributes(LAYER_MASK, tr);
             EMAddGraphicsToModel(ESIModel(), tr);
-        } else if ( ( context.getScalarAlgo() == SA_ZPROFILE ) || ( context.getScalarAlgo() == SA_COLORZPROFILE ) ) {
-            double landScale = context.getLandScale();
+        } else if ( ( gc.getScalarAlgo() == SA_ZPROFILE ) || ( gc.getScalarAlgo() == SA_COLORZPROFILE ) ) {
+            double landScale = gc.getLandScale();
 
             for ( i = 0; i < 4; i++ ) {
-                if ( context.getInternalVarsDefGeoFlag() ) {
+                if ( gc.getInternalVarsDefGeoFlag() ) {
                     // use deformed geometry
-                    defScale = context.getDefScale();
+                    defScale = gc.getDefScale();
                     p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                     p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                     p [ i ].z = s [ i ] * landScale;
@@ -531,20 +559,20 @@ void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &context)
                 }
             }
 
-            if ( context.getScalarAlgo() == SA_ZPROFILE ) {
-                EASValsSetColor( context.getDeformedElementColor() );
+            if ( gc.getScalarAlgo() == SA_ZPROFILE ) {
+                EASValsSetColor( gc.getDeformedElementColor() );
                 EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
                 tr =  CreateQuad3D(p);
                 EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
             } else {
-                context.updateFringeTableMinMax(s, 4);
+                gc.updateFringeTableMinMax(s, 4);
                 tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
                 EGWithMaskChangeAttributes(LAYER_MASK, tr);
             }
 
             EMAddGraphicsToModel(ESIModel(), tr);
         }
-    } else if ( context.giveIntVarMode() == ISM_local ) {
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
         if ( numberOfGaussPoints != 4 ) {
             return;
         }
@@ -554,9 +582,9 @@ void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &context)
         WCRec pp [ 9 ];
 
         for ( i = 0; i < 4; i++ ) {
-            if ( context.getInternalVarsDefGeoFlag() ) {
+            if ( gc.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
-                defScale = context.getDefScale();
+                defScale = gc.getDefScale();
                 pp [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                 pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                 pp [ i ].z = 0.;
@@ -582,7 +610,7 @@ void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            gpCoords = gp->giveCoordinates();
+            gpCoords = gp->giveNaturalCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;
                 ind.at(2) = 4;
@@ -605,11 +633,11 @@ void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &context)
                 ind.at(4) = 8;
             }
 
-            if ( giveIPValue(v [ 0 ], gp, context.giveIntVarType(), tStep) == 0 ) {
+            if ( giveIPValue(v [ 0 ], gp, gc.giveIntVarType(), tStep) == 0 ) {
                 return;
             }
 
-            indx = context.giveIntVarIndx();
+            indx = gc.giveIntVarIndx();
 
             for ( i = 1; i <= 4; i++ ) {
                 s [ i - 1 ] = v [ 0 ].at(indx);
@@ -621,7 +649,7 @@ void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &context)
                 p [ i ].z = pp [ ind.at(i + 1) ].z;
             }
 
-            context.updateFringeTableMinMax(s, 4);
+            gc.updateFringeTableMinMax(s, 4);
             tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
             EGWithMaskChangeAttributes(LAYER_MASK, tr);
             EMAddGraphicsToModel(ESIModel(), tr);
@@ -631,12 +659,11 @@ void Quad1PlaneStrain :: drawScalar(oofegGraphicContext &context)
 
 
 void
-Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
+Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i;
     WCRec l [ 2 ];
     GraphicObj *tr;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     FloatArray crackStatuses, cf;
 
@@ -686,8 +713,8 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
                         // obtain gp global coordinates
                         if ( gc.getInternalVarsDefGeoFlag() ) {
                             double ksi, eta, n1, n2, n3, n4;
-                            ksi = gp->giveCoordinate(1);
-                            eta = gp->giveCoordinate(2);
+                            ksi = gp->giveNaturalCoordinate(1);
+                            eta = gp->giveNaturalCoordinate(2);
 
                             n1 = ( 1. + ksi ) * ( 1. + eta ) * 0.25;
                             n2 = ( 1. - ksi ) * ( 1. + eta ) * 0.25;
@@ -697,15 +724,15 @@ Quad1PlaneStrain :: drawSpecial(oofegGraphicContext &gc)
                             gpglobalcoords.resize(2);
 
                             gpglobalcoords.at(1) = ( n1 * this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale) +
-                                                    n2 * this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) +
-                                                    n3 * this->giveNode(3)->giveUpdatedCoordinate(1, tStep, defScale) +
-                                                    n4 * this->giveNode(4)->giveUpdatedCoordinate(1, tStep, defScale) );
+                                                     n2 * this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) +
+                                                     n3 * this->giveNode(3)->giveUpdatedCoordinate(1, tStep, defScale) +
+                                                     n4 * this->giveNode(4)->giveUpdatedCoordinate(1, tStep, defScale) );
                             gpglobalcoords.at(2) = ( n1 * this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale) +
-                                                    n2 * this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) +
-                                                    n3 * this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale) +
-                                                    n4 * this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale) );
+                                                     n2 * this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) +
+                                                     n3 * this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale) +
+                                                     n4 * this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale) );
                         } else {
-                            computeGlobalCoordinates( gpglobalcoords, * ( gp->giveCoordinates() ) );
+                            computeGlobalCoordinates( gpglobalcoords, * ( gp->giveNaturalCoordinates() ) );
                         }
 
                         xc = gpglobalcoords.at(1);

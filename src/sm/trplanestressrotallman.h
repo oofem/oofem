@@ -36,7 +36,6 @@
 #define trplanestressrotallman_h
 
 #include "trplanstrss.h"
-#include "fei2dtrquad.h"
 
 ///@name Input fields for TrPlaneStrRot
 //@{
@@ -44,6 +43,8 @@
 //@}
 
 namespace oofem {
+class FEI2dTrQuad;
+
 /**
  * Class implements an triangular three-node  plane-
  * stress elasticity finite element with independentvertex rotations.

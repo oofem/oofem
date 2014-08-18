@@ -43,16 +43,10 @@
 #define _IFT_TrPlaneStress2dXFEM_Name "trplanestress2dxfem"
 
 namespace oofem {
-/*
- *		trplanstrssxfem.h
- *
- *
- *      Class: TrPlaneStress2dXFEM
- *      Description: 3-node triangle with XFEM kinematics
- *      @author Erik Svenning
- *
+/**
+ * 3-node triangle with XFEM kinematics
+ * @author Erik Svenning
  */
-
 class TrPlaneStress2dXFEM : public TrPlaneStress2d, public XfemStructuralElementInterface, public VTKXMLExportModuleElementInterface
 {
 protected:
@@ -90,14 +84,14 @@ public:
 
     virtual void computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity = NULL) { XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMassMatrix(answer, tStep, mass, ipDensity); }
 
-    //    virtual Element_Geometry_Type giveGeometryType() const;
+        virtual Element_Geometry_Type giveGeometryType() const;
 
 #ifdef __OOFEG
     // TODO: Implement OOFEG functions
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    //void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &context);
-    //virtual void drawSpecial(oofegGraphicContext &);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    //void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    //virtual void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -109,6 +103,10 @@ public:
                                                                        TimeStep *tStep, const FloatArray &lcoords,
                                                                        FloatArray &answer);
     virtual void giveElementDofIDMask(IntArray &answer) const;
+
+    /// VTK Interface
+    virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
+
 };
 } /* namespace oofem */
 #endif /* TRPLANSTRSSXFEM_H_ */

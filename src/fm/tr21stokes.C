@@ -47,6 +47,7 @@
 #include "fei2dtrquad.h"
 #include "fluidcrosssection.h"
 #include "classfactory.h"
+#include "engngm.h"
 
 namespace oofem {
 REGISTER_Element(Tr21Stokes);
@@ -101,7 +102,7 @@ void Tr21Stokes :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 double Tr21Stokes :: computeVolumeAround(GaussPoint *gp)
 {
-    double detJ = fabs( this->interpolation_quad.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double detJ = fabs( this->interpolation_quad.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ *gp->giveWeight();
 }
 
@@ -144,7 +145,7 @@ void Tr21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tSt
     FloatArray momentum, conservation;
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray &lcoords = * gp->giveCoordinates();
+        FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         double detJ = fabs( this->interpolation_quad.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
         this->interpolation_lin.evalN( Nh, lcoords, FEIElementGeometryWrapper(this) );
@@ -216,7 +217,7 @@ void Tr21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
     temparray.zero();
     if ( gVector.giveSize() ) {
         for ( GaussPoint *gp: *iRule ) {
-            FloatArray &lcoords = * gp->giveCoordinates();
+            FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
             double rho = mat->give('d', gp);
             double detJ = fabs( this->interpolation_quad.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) ) );
@@ -255,7 +256,7 @@ void Tr21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *l
         iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
 
         for ( GaussPoint *gp: iRule ) {
-            FloatArray &lcoords = * gp->giveCoordinates();
+            FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
             this->interpolation_quad.edgeEvalN( N, boundary, lcoords, FEIElementGeometryWrapper(this) );
             double detJ = fabs( this->interpolation_quad.boundaryGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) ) );
@@ -297,7 +298,7 @@ void Tr21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     for ( GaussPoint *gp: *iRule ) {
         // Compute Gauss point and determinant at current element
-        FloatArray &lcoords = * gp->giveCoordinates();
+        FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         this->interpolation_lin.evalN( Nlin, lcoords, FEIElementGeometryWrapper(this) );
         double detJ = fabs( this->interpolation_quad.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
@@ -507,7 +508,7 @@ void Tr21Stokes :: giveIntegratedVelocity(FloatArray &answer, TimeStep *tStep)
 
     for ( GaussPoint *gp: *iRule ) {
 
-        FloatArray &lcoords = * gp->giveCoordinates();
+        FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         this->interpolation_quad.evalN( N, lcoords, FEIElementGeometryWrapper(this) );
         double detJ = this->interpolation_quad.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) );
@@ -529,7 +530,7 @@ void Tr21Stokes :: giveElementFMatrix(FloatMatrix &answer)
     N2.clear();
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray &lcoords = * gp->giveCoordinates();
+        FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         this->interpolation_quad.evalN( N, lcoords, FEIElementGeometryWrapper(this) );
         detJ = this->interpolation_quad.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) );

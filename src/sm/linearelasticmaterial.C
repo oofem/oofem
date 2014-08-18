@@ -147,7 +147,7 @@ LinearElasticMaterial :: giveRealStressVector_Warping(FloatArray &answer, GaussP
     //       G is the shear modulus of elasticity and theta is the relative twist (dPhi_z/dz), set here to a unit value 
     FloatArray gcoords;
     Element* elem = gp->giveElement();
-    elem->computeGlobalCoordinates( gcoords, * ( gp->giveCoordinates() ) );
+    elem->computeGlobalCoordinates( gcoords, * ( gp->giveNaturalCoordinates() ) );
     answer.resize(2);
     answer.at(1) = reducedStrain.at(2) + gcoords.at(1);
     answer.at(2) = reducedStrain.at(1) - gcoords.at(2);

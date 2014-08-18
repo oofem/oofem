@@ -142,13 +142,16 @@ public:
     XfemManager(Domain *domain);
     /// Destructor.
     virtual ~XfemManager();
+    XfemManager(const XfemManager &) = delete;
+
+    XfemManager & operator=(const XfemManager &) = delete;
 
     int giveNumGpPerTri() const { return mNumGpPerTri; } /// Number of Gauss points per sub-triangle in cut elements.
 
     bool isElementEnriched(const Element *elem);
 
     inline EnrichmentItem *giveEnrichmentItem(int n) { return enrichmentItemList[n-1].get(); }
-    int giveNumberOfEnrichmentItems() const { return enrichmentItemList.size(); }
+    int giveNumberOfEnrichmentItems() const { return (int)enrichmentItemList.size(); }
 
     void createEnrichedDofs();
 
@@ -157,8 +160,8 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual int instanciateYourself(DataReader *dr);
-    const char *giveClassName() const { return "XfemManager"; }
-    const char *giveInputRecordName() const { return _IFT_XfemManager_Name; }
+    virtual const char *giveClassName() const { return "XfemManager"; }
+    virtual const char *giveInputRecordName() const { return _IFT_XfemManager_Name; }
 
     Domain *giveDomain() { return this->domain; }
     void setDomain(Domain *ipDomain);

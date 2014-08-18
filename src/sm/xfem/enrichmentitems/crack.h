@@ -36,11 +36,8 @@
 
 #include "xfem/enrichmentitem.h"
 
-/**
- * Crack.
- * @author Erik Svenning
- * @date Feb 14, 2014
- */
+#define _IFT_Crack_Name "crack"
+
 namespace oofem {
 class XfemManager;
 class Domain;
@@ -48,6 +45,11 @@ class InputRecord;
 class GaussPoint;
 class GnuplotExportModule;
 
+/**
+ * Crack.
+ * @author Erik Svenning
+ * @date Feb 14, 2014
+ */
 class OOFEM_EXPORT Crack : public EnrichmentItem
 {
 public:
@@ -64,7 +66,7 @@ public:
     const std :: vector< GaussPoint * > &giveCohesiveZoneGaussPoints() const { return mCohesiveZoneGaussPoints; }
     const std :: vector< double > &giveCohesiveZoneArcPositions() const { return mCohesiveZoneArcPositions; }
 
-    void computeIntersectionPoints(Crack &iCrack, std::vector<FloatArray> &oIntersectionPoints, std::vector<double> &oArcPositions);
+    void computeCrackIntersectionPoints(Crack &iCrack, std::vector<FloatArray> &oIntersectionPoints, std::vector<double> &oArcPositions);
     void computeArcPoints(const std::vector<FloatArray> &iIntersectionPoints, std::vector<double> &oArcPositions);
 
 protected:

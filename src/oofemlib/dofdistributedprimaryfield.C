@@ -35,8 +35,10 @@
 #include "dofdistributedprimaryfield.h"
 #include "dofmanager.h"
 #include "dof.h"
+#include "domain.h"
 #include "timestep.h"
 #include "floatarray.h"
+#include "engngm.h"
 
 namespace oofem {
 DofDistributedPrimaryField :: DofDistributedPrimaryField(EngngModel *a, int idomain,

@@ -45,6 +45,7 @@
 #include "linesearch.h"
 #include "classfactory.h"
 #include "exportmodulemanager.h"
+#include "engngm.h"
 
 #ifdef __PETSC_MODULE
  #include "petscsolver.h"
@@ -84,6 +85,12 @@ NRSolver :: NRSolver(Domain *d, EngngModel *m) :
     linSolver = NULL;
     linesearchSolver = NULL;
     lsFlag = 0; // no line-search
+    
+    constrainedNRFlag = false; 
+    this->forceErrVecOld.resize(0);
+    this->forceErrVec.resize(0);
+    constrainedNRalpha = 0.5; // default
+
     smConstraintVersion = 0;
     mCalcStiffBeforeRes = true;
 #ifdef __PETSC_MODULE
@@ -152,7 +159,7 @@ NRSolver :: initializeFrom(InputRecord *ir)
     rtolf.resize(1);
     rtolf.at(1) = 1.e-3; // Default value.
     rtold.resize(1);
-    rtold = 0.0; // Default off (0.0 or negative values mean that residual is ignored)
+    rtold = FloatArray{0.0}; // Default off (0.0 or negative values mean that residual is ignored)
     IR_GIVE_OPTIONAL_FIELD(ir, rtolf.at(1), _IFT_NRSolver_rtolv);
     IR_GIVE_OPTIONAL_FIELD(ir, rtold.at(1), _IFT_NRSolver_rtolv);
 
@@ -193,6 +200,12 @@ NRSolver :: initializeFrom(InputRecord *ir)
 
     SparseNonLinearSystemNM :: initializeFrom(ir);
  
+    IR_GIVE_OPTIONAL_FIELD(ir, this->constrainedNRminiter, _IFT_NRSolver_constrainedNRminiter);
+
+    #define _IFT_NRSolver_constrainedNRalpha "constrainednralpha"
+#define _IFT_NRSolver_constrainedNRminiter "constrainednrminiter"
+
+
     return IRRT_OK;
 }
 
@@ -312,6 +325,12 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
             LineSearchNM :: LS_status status;
             double eta;
             this->giveLineSearchSolver()->solve(X, & ddX, F, R, R0, prescribedEqs, 1.0, eta, status, tNow);
+        } else if ( this->constrainedNRFlag && ( nite > this->constrainedNRminiter ) ) { 
+            if ( this->forceErrVec.computeSquaredNorm() > this->forceErrVecOld.computeSquaredNorm() ) {
+                printf("Constraining increment to be %e times full increment...\n", this->constrainedNRalpha);
+                ddX.times(this->constrainedNRalpha);
+            }   
+            //this->giveConstrainedNRSolver()->solve(X, & ddX, this->forceErrVec, this->forceErrVecOld, status, tNow);
         }
         X->add(ddX);
         dX->add(ddX);
@@ -391,7 +410,6 @@ NRSolver :: giveLineSearchSolver()
 
     return linesearchSolver;
 }
-
 
 void
 NRSolver :: initPrescribedEqs()
@@ -653,6 +671,13 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
     answer = true;
     errorOutOfRange = false;
 
+    // Store the errors associated with the dof groups    
+    if ( this->constrainedNRFlag ) {
+        this->forceErrVecOld = this->forceErrVec; // copy the old values
+        this->forceErrVec.resize( internalForcesEBENorm.giveSize() );
+        forceErrVec.zero();
+    }
+
     if ( internalForcesEBENorm.giveSize() > 1 ) { // Special treatment when just one norm is given; No grouping
         int nccdg = this->domain->giveMaxDofID();
         // Keeps tracks of which dof IDs are actually in use;
@@ -809,6 +834,11 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                     answer = false;
                 }
                 OOFEM_LOG_INFO(zeroFNorm ? " *%.3e" : "  %.3e", forceErr);
+
+                // Store the errors from the current iteration
+                if ( this->constrainedNRFlag ) {
+                    forceErrVec.at(dg) = forceErr;
+                }       
             }
 
             if ( rtold.at(1) > 0.0 ) {
@@ -867,6 +897,11 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                 answer = false;
             }
             OOFEM_LOG_INFO(" %-15e", forceErr);
+
+            if ( this->constrainedNRFlag ) {
+                // store the errors from the current iteration for use in the next
+                forceErrVec.at(1) = forceErr;
+            }       
         }
 
         if ( rtold.at(1) > 0.0 ) {

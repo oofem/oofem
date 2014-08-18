@@ -808,17 +808,6 @@ NonLinearDynamic :: updateDomainLinks()
 }
 
 
-#ifdef __PARALLEL_MODE
-void
-NonLinearDynamic :: initParallelContexts()
-{
-    parallelContextList->growTo(ndomains);
-    for ( int i = 1; i <= this->ndomains; i++ ) {
-        parallelContextList->put( i, new ParallelContext(this) );
-    }
-}
-#endif
-
 void
 NonLinearDynamic :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
                              const UnknownNumberingScheme &s, Domain *domain)
@@ -849,7 +838,7 @@ NonLinearDynamic :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
 
 #ifdef __OOFEG
 void
-NonLinearDynamic :: showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep)
+NonLinearDynamic :: showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
     CharType ctype;
@@ -862,11 +851,11 @@ NonLinearDynamic :: showSparseMtrxStructure(int type, oofegGraphicContext &conte
 
     int nelems = domain->giveNumberOfElements();
     for ( int i = 1; i <= nelems; i++ ) {
-        domain->giveElement(i)->showSparseMtrxStructure(ctype, context, tStep);
+        domain->giveElement(i)->showSparseMtrxStructure(ctype, gc, tStep);
     }
 
     for ( int i = 1; i <= nelems; i++ ) {
-        domain->giveElement(i)->showExtendedSparseMtrxStructure(ctype, context, tStep);
+        domain->giveElement(i)->showExtendedSparseMtrxStructure(ctype, gc, tStep);
     }
 }
 #endif
@@ -989,7 +978,7 @@ NonLinearDynamic :: giveLoadBalancer()
     }
 
     if ( loadBalancingFlag ) {
-        lb = classFactory.createLoadBalancer( _IFT_ParmetisLoadBalancer_Name, this->giveDomain(1) );
+        lb = classFactory.createLoadBalancer( "parmetis", this->giveDomain(1) );
         return lb;
     } else {
         return NULL;
@@ -1005,7 +994,7 @@ NonLinearDynamic :: giveLoadBalancerMonitor()
     }
 
     if ( loadBalancingFlag ) {
-        lbm = classFactory.createLoadBalancerMonitor(_IFT_WallClockLoadBalancerMonitor_Name, this);
+        lbm = classFactory.createLoadBalancerMonitor( "wallclock", this);
         return lbm;
     } else {
         return NULL;

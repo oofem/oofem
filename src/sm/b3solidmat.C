@@ -39,6 +39,7 @@
 #include "contextioerr.h"
 #include "datastream.h"
 #include "classfactory.h"
+#include "engngm.h"
 #include "b3mat.h" // For the input record keywords.
 
 namespace oofem {
@@ -708,7 +709,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *
 
     if ( ( tf = fm->giveField(FT_Temperature) ) ) {
         // temperature field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Incremental, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
@@ -719,7 +720,7 @@ B3SolidMaterial :: computeShrinkageStrainVector(FloatArray &answer, GaussPoint *
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // temperature field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
@@ -924,7 +925,7 @@ B3SolidMaterial :: giveHumidity(GaussPoint *gp, TimeStep *tStep) //computes humi
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // humidity field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }
@@ -955,7 +956,7 @@ B3SolidMaterial :: giveHumidityIncrement(GaussPoint *gp, TimeStep *tStep) //comp
 
     if ( ( tf = fm->giveField(FT_HumidityConcentration) ) ) {
         // humidity field registered
-        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+        gp->giveElement()->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
         if ( ( err = tf->evaluateAt(et2, gcoords, VM_Total, tStep) ) ) {
             OOFEM_ERROR("tf->evaluateAt failed, error value %d", err);
         }

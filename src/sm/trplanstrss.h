@@ -36,7 +36,6 @@
 #define trplanstrss_h
 
 #include "nlstructuralelement.h"
-#include "fei2dtrlin.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
@@ -46,11 +45,12 @@
 #include "zzerrorestimator.h"
 #include "mmashapefunctprojection.h"
 #include "huertaerrorestimator.h"
-#include "gausspoint.h"
 
 #define _IFT_TrPlaneStress2d_Name "trplanestress2d"
 
 namespace oofem {
+class FEI2dTrLin;
+
 /**
  * This class implements an triangular three-node plane-stress
  * elasticity finite element. Each node has 2 degrees of freedom.
@@ -73,7 +73,7 @@ public:
     TrPlaneStress2d(int n, Domain * d);
     virtual ~TrPlaneStress2d() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return & interp; }
+    virtual FEInterpolation *giveInterpolation() const;
     virtual int computeNumberOfDofs() { return 6; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
@@ -87,10 +87,10 @@ public:
     virtual Interface *giveInterface(InterfaceType);
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &context);
-    virtual void drawSpecial(oofegGraphicContext &);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
     // definition & identification
@@ -98,9 +98,6 @@ public:
     virtual const char *giveClassName() const { return "TrPlaneStress2d"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
-
-    //void ZZNodalRecoveryMI_computeNValProduct (FloatArray& answer, InternalStateType type, TimeStep* tStep);
-    //void ZZNodalRecoveryMI_computeNNMatrix (FloatArray& answer, InternalStateType type);
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
@@ -123,10 +120,7 @@ public:
                                                                   int &localNodeId, int &localElemId, int &localBcId,
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode);
-    virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
-    { computeLocalCoordinates(answer, coords); }
-    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-    { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
+    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
     virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
                                                                       coordType ct, nodalValContainerType &list,

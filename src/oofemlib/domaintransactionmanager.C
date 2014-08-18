@@ -32,7 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef __PARALLEL_MODE
 #include "domaintransactionmanager.h"
 #include "error.h"
 #include "dofmanager.h"
@@ -129,4 +128,3 @@ DomainTransactionManager :: commitTransactions()
     return domain->commitTransactions(this);
 }
 } // end namespace oofem
-#endif

@@ -45,6 +45,7 @@ REGISTER_EnrichmentFront(EnrFrontExtend)
 
 void EnrFrontExtend :: MarkNodesAsFront(std :: unordered_map< int, NodeEnrichmentType > &ioNodeEnrMarkerMap, XfemManager &ixFemMan, const std :: unordered_map< int, double > &iLevelSetNormalDirMap, const std :: unordered_map< int, double > &iLevelSetTangDirMap, const TipInfo &iTipInfo)
 {
+    mTipInfo = iTipInfo;
     // Extend the set of enriched nodes as follows:
     // If any node of the neighboring elements is enriched, the current node is also enriched.
 

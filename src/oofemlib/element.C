@@ -55,8 +55,10 @@
 #include "function.h"
 #include "dofmanager.h"
 #include "node.h"
+#include "gausspoint.h"
 #include "dynamicinputrecord.h"
 #include "matstatmapperint.h"
+#include "cltypes.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -110,7 +112,7 @@ Element :: computeVectorOf(ValueModeType u, TimeStep *tStep, FloatArray &answer)
 
 
 void
-Element :: computeVectorOf(const IntArray &dofIDMask, ValueModeType u, TimeStep *tStep, FloatArray &answer, double padding)
+Element :: computeVectorOf(const IntArray &dofIDMask, ValueModeType u, TimeStep *tStep, FloatArray &answer, bool padding)
 {
     FloatMatrix G2L;
     FloatArray vec;
@@ -135,7 +137,7 @@ Element :: computeVectorOf(const IntArray &dofIDMask, ValueModeType u, TimeStep 
 
 
 void
-Element :: computeBoundaryVectorOf(const IntArray &bNodes, const IntArray &dofIDMask, ValueModeType u, TimeStep *tStep, FloatArray &answer, double padding)
+Element :: computeBoundaryVectorOf(const IntArray &bNodes, const IntArray &dofIDMask, ValueModeType u, TimeStep *tStep, FloatArray &answer, bool padding)
 {
     FloatMatrix G2L;
     FloatArray vec;
@@ -154,7 +156,7 @@ Element :: computeBoundaryVectorOf(const IntArray &bNodes, const IntArray &dofID
 
 
 void
-Element :: computeVectorOf(PrimaryField &field, const IntArray &dofIDMask, ValueModeType u, TimeStep *tStep, FloatArray &answer, double padding)
+Element :: computeVectorOf(PrimaryField &field, const IntArray &dofIDMask, ValueModeType u, TimeStep *tStep, FloatArray &answer, bool padding)
 {
     FloatMatrix G2L;
     FloatArray vec;
@@ -497,19 +499,20 @@ Element :: giveDofManager(int i) const
     return domain->giveDofManager( dofManArray.at(i) );
 }
 
-
-Node *
-Element :: giveNode(int i) const
-// Returns the i-th node of the receiver.
+void
+Element :: addDofManager(DofManager *dMan)
+// Adds a new dMan to the dofManArray
 {
 #ifdef DEBUG
-    if ( ( i <= 0 ) || ( i > dofManArray.giveSize() ) ) {
-        OOFEM_ERROR("Node is not defined");
+    if ( dMan == NULL ) {
+        OOFEM_ERROR("Element :: addDofManager - dMan is a null pointer");
     }
 #endif
-    return domain->giveNode( dofManArray.at(i) );
+    int size =  dofManArray.giveSize();
+    this->dofManArray.resizeWithValues( size + 1 );
+    this->dofManArray.at(size + 1) = dMan->giveGlobalNumber();
+    
 }
-
 
 ElementSide *
 Element :: giveSide(int i) const
@@ -698,7 +701,7 @@ Element :: giveInputRecord(DynamicInputRecord &input)
 
 
 #ifdef __PARALLEL_MODE
-    if ( this->giveDomain()->giveEngngModel()->isParallel() && partitions.giveSize() > 0 ) {
+    if ( partitions.giveSize() > 0 ) {
         input.setField(this->partitions, _IFT_Element_partitions);
         if ( this->parallel_mode == Element_remote ) {
             input.setField(_IFT_Element_remote);
@@ -1181,6 +1184,47 @@ Element :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType typ
 }
 
 int
+Element :: giveGlobalIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+    InternalStateValueType valtype = giveInternalStateValueType(type);
+    if ( elemLocalCS.isNotEmpty() && valtype != ISVT_SCALAR ) {
+        FloatArray ans;
+        FloatMatrix full;
+        int ret = this->giveIPValue(ans, gp, type, tStep);
+        if ( ret == 0 ) return 0;
+        if ( valtype == ISVT_VECTOR ) {
+            ///@todo Check transpose here
+            answer.beProductOf(elemLocalCS, ans);
+            return 1;
+        }
+
+        // Tensors are more complicated to transform, easiest to write them in matrix form first
+        if ( valtype == ISVT_TENSOR_S3E ) {
+            ans.at(4) *= 0.5;
+            ans.at(5) *= 0.5;
+            ans.at(6) *= 0.5;
+        }  else if ( valtype != ISVT_TENSOR_G && valtype != ISVT_TENSOR_S3 ) {
+            OOFEM_ERROR("Unsupported internal state value type for computing global IP value");
+        }
+        ///@todo Check transpose here
+        full.beMatrixForm(ans);
+        full.rotatedWith(elemLocalCS, 'n');
+        answer.beVectorForm(full);
+        if ( valtype == ISVT_TENSOR_S3 ) {
+            answer.resizeWithValues(6);
+        } else if ( valtype == ISVT_TENSOR_S3E ) {
+            answer.at(4) += answer.at(7);
+            answer.at(5) += answer.at(8);
+            answer.at(6) += answer.at(9);
+            answer.resizeWithValues(6);
+        }
+        return 1;
+    } else {
+        return this->giveIPValue(answer, gp, type, tStep);
+    }
+}
+
+int
 Element :: giveSpatialDimension()
 {
     ///@todo Just ask the interpolator instead?
@@ -1295,15 +1339,8 @@ Element :: mapStateVariables(Domain &iOldDom, const TimeStep &iTStep)
     // create source set (this is quite inefficient here as done for each element.
     // the alternative MaterialModelMapperInterface approach allows to cache sets on material model
     Set sourceElemSet = Set(0, & iOldDom);
-    IntArray el;
-    // compile source list to contain all elements on old odmain with the same material id
-    for ( int i = 1; i <= iOldDom.giveNumberOfElements(); i++ ) {
-        if ( iOldDom.giveElement(i)->giveMaterial()->giveNumber() == this->giveMaterial()->giveNumber() ) {
-            // add oldd domain element to source list
-            el.followedBy(i, 10);
-        }
-    }
-    sourceElemSet.setElementList(el);
+    int materialNum = this->giveMaterial()->giveNumber();
+    sourceElemSet.setElementList( iOldDom.giveElementsWithMaterialNum(materialNum) );
 
     for ( auto &iRule: integrationRulesArray ) {
         for ( GaussPoint *gp: *iRule ) {
@@ -1445,22 +1482,22 @@ Element :: predictRelativeComputationalCost()
 
 #ifdef __OOFEG
 void
-Element :: drawYourself(oofegGraphicContext &gc)
+Element :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
 {
     OGC_PlotModeType mode = gc.giveIntVarPlotMode();
 
     if ( mode == OGC_rawGeometry ) {
-        this->drawRawGeometry(gc);
+        this->drawRawGeometry(gc, tStep);
     } else if ( mode == OGC_elementAnnotation ) {
-        this->drawAnnotation(gc);
+        this->drawAnnotation(gc, tStep);
     } else if ( mode == OGC_deformedGeometry ) {
-        this->drawDeformedGeometry(gc, DisplacementVector);
+        this->drawDeformedGeometry(gc, tStep, DisplacementVector);
     } else if ( mode == OGC_eigenVectorGeometry ) {
-        this->drawDeformedGeometry(gc, EigenVector);
+        this->drawDeformedGeometry(gc, tStep, EigenVector);
     } else if ( mode == OGC_scalarPlot ) {
-        this->drawScalar(gc);
+        this->drawScalar(gc, tStep);
     } else if ( mode == OGC_elemSpecial ) {
-        this->drawSpecial(gc);
+        this->drawSpecial(gc, tStep);
     } else {
         OOFEM_ERROR("unsupported mode");
     }
@@ -1468,7 +1505,7 @@ Element :: drawYourself(oofegGraphicContext &gc)
 
 
 void
-Element :: drawAnnotation(oofegGraphicContext &gc)
+Element :: drawAnnotation(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, count = 0;
     Node *node;

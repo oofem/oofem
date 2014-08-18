@@ -38,10 +38,12 @@
 #include "structuralelement.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
-#include "fei2dquadlin.h"
 
 #define _IFT_Quad1PlateSubSoil_Name "quad1platesubsoil"
+
 namespace oofem {
+class FEI2dQuadLin;
+
 /**
  * This class implements an quadrilateral four-node plate subsoil element in xy plane.
  * Each node has 1 degree of freedom (out-of-plane displacement).
@@ -63,7 +65,7 @@ public:
     Quad1PlateSubSoil(int n, Domain * d);
     virtual ~Quad1PlateSubSoil() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return & interp_lin; }
+    virtual FEInterpolation *giveInterpolation() const;
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
 
     virtual MaterialMode giveMaterialMode()  { return _2dPlateSubSoil; }

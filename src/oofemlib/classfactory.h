@@ -61,7 +61,6 @@ class CrossSection;
 class Material;
 class Function;
 class NonlocalBarrier;
-class RandomFieldGenerator;
 class ExportModule;
 class SparseNonLinearSystemNM;
 class InitModule;
@@ -103,7 +102,6 @@ template< typename T > Material *matCreator(int n, Domain *d) { return new T(n, 
 template< typename T > EngngModel *engngCreator(int n, EngngModel *m) { return ( new T(n, m) ); }
 template< typename T > Function *funcCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > NonlocalBarrier *nlbCreator(int n, Domain *d) { return new T(n, d); }
-template< typename T > RandomFieldGenerator *rfgCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > ExportModule *exportCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
 template< typename T > SparseNonLinearSystemNM *nonlinCreator(Domain *d, EngngModel *m) { return ( new T(d, m) ); }
 template< typename T > InitModule *initCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
@@ -140,12 +138,11 @@ template< typename T > FailureCriteriaStatus *failureCriteriaCreator(int n, Fail
 #define REGISTER_EngngModel(class) static bool __dummy_ ## class = GiveClassFactory().registerEngngModel(_IFT_ ## class ## _Name, engngCreator< class > );
 #define REGISTER_Function(class) static bool __dummy_ ## class = GiveClassFactory().registerFunction(_IFT_ ## class ## _Name, funcCreator< class > );
 #define REGISTER_NonlocalBarrier(class) static bool __dummy_ ## class = GiveClassFactory().registerNonlocalBarrier(_IFT_ ## class ## _Name, nlbCreator< class > );
-#define REGISTER_RandomFieldGenerator(class) static bool __dummy_ ## class = GiveClassFactory().registerRandomFieldGenerator(_IFT_ ## class ## _Name, rfgCreator< class > );
 #define REGISTER_ExportModule(class) static bool __dummy_ ## class = GiveClassFactory().registerExportModule(_IFT_ ## class ## _Name, exportCreator< class > );
 #define REGISTER_SparseNonLinearSystemNM(class) static bool __dummy_ ## class = GiveClassFactory().registerSparseNonLinearSystemNM(_IFT_ ## class ## _Name, nonlinCreator< class > );
 #define REGISTER_InitModule(class) static bool __dummy_ ## class = GiveClassFactory().registerInitModule(_IFT_ ## class ## _Name, initCreator< class > );
 #define REGISTER_TopologyDescription(class) static bool __dummy_ ## class = GiveClassFactory().registerTopologyDescription(_IFT_ ## class ## _Name, topologyCreator< class > );
-#define REGISTER_LoadMonitor(class) static bool __dummy_ ## class = GiveClassFactory().registerLoadMonitor(_IFT_ ## class ## _Name, loadMonitorCreator< class > );
+#define REGISTER_LoadBalancerMonitor(class) static bool __dummy_ ## class = GiveClassFactory().registerLoadBalancerMonitor(_IFT_ ## class ## _Name, loadMonitorCreator< class > );
 #define REGISTER_LoadBalancer(class) static bool __dummy_ ## class = GiveClassFactory().registerLoadBalancer(_IFT_ ## class ## _Name, loadBalancerCreator< class > );
 
 // These should be converted to use strings.
@@ -192,8 +189,6 @@ private:
     std :: map < std :: string, Function * ( * )(int, Domain *) > funcList;
     /// Associative container containing nonlocal barriers creators with barrier name as key.
     std :: map < std :: string, NonlocalBarrier * ( * )(int, Domain *) > nlbList;
-    /// Associative container containing random field generator creators with names as key.
-    std :: map < std :: string, RandomFieldGenerator * ( * )(int, Domain *) > rfgList;
     /// Associative container containing export module creators.
     std :: map < std :: string, ExportModule * ( * )(int, EngngModel *) > exportList;
     /// Associative container containing nonlinear solver creators.
@@ -202,13 +197,11 @@ private:
     std :: map < std :: string, InitModule * ( * )(int, EngngModel *) > initList;
     /// Associative container containing topology description creators.
     std :: map < std :: string, TopologyDescription * ( * )(Domain *) > topologyList;
+    // Internal structures (accessed by hard-coded enum values)
     /// Associative container containing load balancer creators.
-#ifdef __PARALLEL_MODE
     std :: map < std :: string, LoadBalancer * ( * )(Domain *) > loadBalancerList;
     /// Associative container containing load balancer monitor creators.
     std :: map < std :: string, LoadBalancerMonitor * ( * )(EngngModel *) > loadMonitorList;
-#endif
-    // Internal structures (accessed by hard-coded enum values)
     /// Associative container containing sparse matrix creators.
     std :: map < SparseMtrxType, SparseMtrx * ( * )() > sparseMtrxList;
     /// Associative container containing dof creators.
@@ -240,7 +233,7 @@ private:
     std :: map < std :: string, FailureCriteriaStatus * ( * )(int, FailureCriteria *) > failureCriteriaStatusList;
 
 public:
-    /// Constructor, registers all classes
+    /// Creates empty factory
     ClassFactory();
 
     /**
@@ -348,19 +341,6 @@ public:
      */
     bool registerNonlocalBarrier( const char *name, NonlocalBarrier * ( *creator )( int, Domain * ) );
     /**
-     * Creates new instance of random field generator corresponding to given keyword.
-     * @param name Keyword string determining the type of new instance.
-     * @param num  object's number.
-     * @param domain Domain assigned to new object.
-     * @return Newly allocated object of requested type, null if keyword not supported.
-     */
-    RandomFieldGenerator *createRandomFieldGenerator(const char *name, int num, Domain *domain);
-    /**
-     * Registers a new random field generator in the class factory.
-     * @param name Keyword string.
-     */
-    bool registerRandomFieldGenerator( const char *name, RandomFieldGenerator * ( *creator )( int, Domain * ) );
-    /**
      * Creates new instance of export module corresponding to given keyword.
      * @param name Keyword string determining the type of new instance.
      * @param num  Export module number.
@@ -430,7 +410,7 @@ public:
      * Registers a sparse matrix type.
      * @param type SparseMtrxType id determining the type of new instance.
      */
-    bool registerSparseMtrx( SparseMtrxType type, SparseMtrx * ( * )() );
+    bool registerSparseMtrx( SparseMtrxType type, SparseMtrx * ( *creator )() );
     /**
      * Creates new instance of DOF corresponding to given keyword.
      * @param type ID determining the type of new instance.
@@ -452,7 +432,7 @@ public:
      * Registers a sparse linear system solver.
      * @param type LinSystSolverType id determining the type of new instance.
      */
-    bool registerSparseLinSolver( LinSystSolverType type, SparseLinearSystemNM * ( * )(Domain *, EngngModel *) );
+    bool registerSparseLinSolver( LinSystSolverType type, SparseLinearSystemNM * ( *creator )(Domain *, EngngModel *) );
     /**
      * Creates new instance of ErrorEstimator corresponding
      * to given type.
@@ -466,7 +446,7 @@ public:
      * Registers a new  error estimator.
      * @param type ErrorEstimatorType id determining the type of new instance.
      */
-    bool registerErrorEstimator( ErrorEstimatorType type, ErrorEstimator * ( * )(int, Domain *) );
+    bool registerErrorEstimator( ErrorEstimatorType type, ErrorEstimator * ( *creator )(int, Domain *) );
     /**
      * Creates new instance of nodal recovery model corresponding to given type.
      * @param type ID determining the type of new instance.
@@ -511,10 +491,10 @@ public:
     MaterialMappingAlgorithm *createMaterialMappingAlgorithm(MaterialMappingAlgorithmType type);
     MesherInterface *createMesherInterface(MeshPackageType type, Domain *d);
 
-#ifdef __PARALLEL_MODE
     LoadBalancerMonitor *createLoadBalancerMonitor(const char *name, EngngModel *e);
+    bool registerLoadBalancerMonitor( const char *name, LoadBalancerMonitor * ( *creator )( EngngModel * ) );
     LoadBalancer *createLoadBalancer(const char *name, Domain *d);
-#endif
+    bool registerLoadBalancer( const char *name, LoadBalancer * ( *creator )( Domain * ) );
 };
 
 extern ClassFactory &classFactory;

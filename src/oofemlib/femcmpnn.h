@@ -135,7 +135,6 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
     /**
      * Stores receiver state to output stream.
-     * Writes the FEMComponent class-id in order to allow test whether correct data are then restored.
      * @param stream Output stream.
      * @param mode Determines amount of info required in stream (state, definition, ...).
      * @param obj Special parameter, used only to send particular integration point to material class version of this method.
@@ -145,7 +144,6 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     /**
      * Restores the receiver state previously written in stream.
-     * Reads the FEMComponent class-id in order to allow test consistency.
      * @see saveContext
      * @param stream Input stream.
      * @param mode Determines amount of info available in stream (state, definition, ...).
@@ -180,10 +178,6 @@ public:
 
     /// Returns string for prepending output (used by error reporting macros).
     std :: string errorInfo(const char *func) const;
-
-#ifdef __OOFEG
-    virtual void drawYourself(oofegGraphicContext &) { }
-#endif
 };
 } // end namespace oofem
 #endif // femcmpnn_h

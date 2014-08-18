@@ -189,11 +189,7 @@ NonLinearStatic :: updateAttributes(MetaStep *mStep)
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_NonLinearStatic_refloadmode);
     this->refLoadInputMode = ( SparseNonLinearSystemNM :: referenceLoadInputModeType ) _val;
 
-    if ( ir->hasField(_IFT_NonLinearStatic_keepll) ) {
-        mstepCumulateLoadLevelFlag = true;
-    } else {
-        mstepCumulateLoadLevelFlag = false;
-    }
+    mstepCumulateLoadLevelFlag = ir->hasField(_IFT_NonLinearStatic_keepll);
 
     // called just to mark field as recognized, used later
     ir->hasField(_IFT_NonLinearStatic_donotfixload);
@@ -762,18 +758,6 @@ NonLinearStatic :: updateDomainLinks()
 }
 
 
-#ifdef __PARALLEL_MODE
-void
-NonLinearStatic :: initParallelContexts()
-{
-    parallelContextList->growTo(ndomains);
-    for ( int i = 1; i <= this->ndomains; i++ ) {
-        parallelContextList->put( i, new ParallelContext(this) );
-    }
-}
-#endif
-
-
 void
 NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
                             const UnknownNumberingScheme &s, Domain *domain)
@@ -805,7 +789,7 @@ NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
 
 #ifdef __OOFEG
 void
-NonLinearStatic :: showSparseMtrxStructure(int type, oofegGraphicContext &context, TimeStep *tStep)
+NonLinearStatic :: showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
     CharType ctype;
@@ -824,11 +808,11 @@ NonLinearStatic :: showSparseMtrxStructure(int type, oofegGraphicContext &contex
 
     int nelems = domain->giveNumberOfElements();
     for ( int i = 1; i <= nelems; i++ ) {
-        domain->giveElement(i)->showSparseMtrxStructure(ctype, context, tStep);
+        domain->giveElement(i)->showSparseMtrxStructure(ctype, gc, tStep);
     }
 
     for ( int i = 1; i <= nelems; i++ ) {
-        domain->giveElement(i)->showExtendedSparseMtrxStructure(ctype, context, tStep);
+        domain->giveElement(i)->showExtendedSparseMtrxStructure(ctype, gc, tStep);
     }
 }
 #endif
@@ -927,7 +911,7 @@ NonLinearStatic :: giveLoadBalancer()
 
     if ( loadBalancingFlag ) {
         ///@todo Make the name possibly optional (but currently, there is just one choice, "parmetis")
-        lb = classFactory.createLoadBalancer( _IFT_ParmetisLoadBalancer_Name, this->giveDomain(1) );
+        lb = classFactory.createLoadBalancer( "parmetis", this->giveDomain(1) );
         return lb;
     } else {
         return NULL;
@@ -943,7 +927,7 @@ NonLinearStatic :: giveLoadBalancerMonitor()
     }
 
     if ( loadBalancingFlag ) {
-        lbm = classFactory.createLoadBalancerMonitor(_IFT_WallClockLoadBalancerMonitor_Name, this);
+        lbm = classFactory.createLoadBalancerMonitor( "wallclock", this);
         return lbm;
     } else {
         return NULL;

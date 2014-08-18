@@ -36,10 +36,9 @@
 #define outputmanager_h
 
 #include "oofemcfg.h"
-#include "domain.h"
-#include "engngm.h"
 #include "intarray.h"
 #include "range.h"
+#include "inputrecord.h"
 
 #include <list>
 
@@ -58,6 +57,9 @@
 //@}
 
 namespace oofem {
+class Domain;
+class TimeStep;
+
 /**
  * Represents output manager. It controls and manages the time step output.
  * Allows to filter output to certain time steps, dof managers and elements.

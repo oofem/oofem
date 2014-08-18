@@ -36,19 +36,20 @@
 #define TET21GHOSTSOLID_H
 
 #include "nlstructuralelement.h"
-#include "fei3dtetquad.h"
-#include "fei3dtetlin.h"
+#include "floatmatrix.h"
 
 #define _IFT_tet21ghostsolid_Name "tet21ghostsolid"
 
 namespace oofem {
+class FEI3dTetQuad;
+class FEI3dTetLin;
 
 class tet21ghostsolid : public NLStructuralElement
 {
 private:
     FloatMatrix Dghost;
 
-    void giveDisplacementsIncrementData(FloatArray &u_prev, FloatArray &u, FloatArray &inc, TimeStep *tStep);
+    void giveUnknownData(FloatArray &u_prev, FloatArray &u, FloatArray &inc, TimeStep *tStep);
 
 public:
     tet21ghostsolid(int n, Domain *d);
@@ -59,15 +60,18 @@ public:
     virtual int computeNumberOfDofs() { return 70; }
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
     virtual void computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
+    virtual void computeNumericStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep);
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
+    virtual void giveInternalForcesVectorGivenSolution(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord, FloatArray &SolutionVector);
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
-    virtual void computeForceLoadVectorX(FloatArray &answer, TimeStep *tStep, ValueModeType mode);
+    virtual void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &u);
 
 protected:
     static FEI3dTetQuad interpolation;
     static FEI3dTetLin interpolation_lin;
 
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
+    virtual void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
     virtual void computeGaussPoints();
 
     /// Ordering of momentum balance dofs in element. Used to assemble the element stiffness

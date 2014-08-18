@@ -35,10 +35,8 @@
 #ifndef combuff_h
 #define combuff_h
 
-#ifdef __PARALLEL_MODE
-
- #include "oofemcfg.h"
- #include "parallel.h"
+#include "oofemcfg.h"
+#include "parallel.h"
 
 namespace oofem {
 class IntArray;
@@ -461,5 +459,5 @@ public:
     virtual int bcast(int root) { return MPIBuffer :: bcast(this->communicator, root); }
 };
 } // end namespace oofem
-#endif
+
 #endif // combuff_h

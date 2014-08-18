@@ -42,6 +42,8 @@
 #include "integrationdomain.h"
 #include "elementgeometrytype.h"
 #include "materialmode.h"
+#include "node.h"
+#include "element.h"
 
 namespace oofem {
 class Element;
@@ -100,7 +102,10 @@ public:
     }
     virtual ~FEIElementGeometryWrapper() { }
     int giveNumberOfVertices() const;
-    const FloatArray *giveVertexCoordinates(int i) const;
+    inline const FloatArray *giveVertexCoordinates(int i) const
+    {
+        return &(elem->giveNode(i)->giveNodeCoordinates());
+    }
 };
 
 
@@ -184,6 +189,12 @@ public:
      */
     virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo) {
         OOFEM_ERROR("not implemented");
+    }
+    /**
+     * Returns a matrix containing the local coordinates for each node corresponding to the interpolation
+     */
+    virtual void giveLocalNodeCoords(FloatMatrix &answer) {
+        OOFEM_ERROR("FEInterpolation::giveLocalNodeCoords: not implemented");
     }
     /**
      * Evaluates global coordinates from given local ones.
@@ -356,6 +367,11 @@ public:
      * Returns number of spatial dimensions.
      */
     virtual int giveNsd() = 0;
+    /**
+     * Returns number of edges.
+     */
+    virtual int giveNumberOfEdges() const 
+    { OOFEM_ERROR("FEInterpolation :: giveNumberOfEdges : Not overloaded."); return -1;}
     //@}
 
     /**

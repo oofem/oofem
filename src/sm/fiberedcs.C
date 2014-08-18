@@ -146,8 +146,8 @@ FiberedCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoi
         // resolve current layer z-coordinate
         fiberThick  = this->fiberThicks.at(i);
         fiberWidth  = this->fiberWidths.at(i);
-        fiberYCoord = fiberGp->giveCoordinate(1);
-        fiberZCoord = fiberGp->giveCoordinate(2);
+        fiberYCoord = fiberGp->giveNaturalCoordinate(1);
+        fiberZCoord = fiberGp->giveNaturalCoordinate(2);
 
         interface->FiberedCrossSectionInterface_computeStrainVectorInFiber(fiberStrain, strain, fiberGp, tStep);
 

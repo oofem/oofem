@@ -42,6 +42,7 @@
 #include "dictionary.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "engngm.h"
 
 namespace oofem {
 MasterDof :: MasterDof(int i, DofManager *aNode, int nbc, int nic, DofIDItem id) : Dof(i, aNode, id)
@@ -322,12 +323,9 @@ void MasterDof :: giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mod
 }
 
 void MasterDof :: printYourself()
-// Prints the receiver on screen.
 {
     printf( "dof %d  of %s %d :\n", number, dofManager->giveClassName(), dofManager->giveNumber() );
     printf("equation %d    bc %d \n", equationNumber, bc);
-
-    // printOutputAt (node->giveDomain()->giveEngngModel()->giveCurrentStep());
 }
 
 

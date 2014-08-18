@@ -33,6 +33,7 @@
  */
 
 #include "traxisym1_ht.h"
+#include "fei2dtrlin.h"
 #include "gausspoint.h"
 #include "floatarray.h"
 #include "mathfem.h"
@@ -58,7 +59,7 @@ double
 TrAxisym1_ht :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant, weight;
-    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     return determinant *weight *this->computeRadiusAt(gp); ///@todo What about 2*pi ?
 }
@@ -75,8 +76,8 @@ TrAxisym1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
     FloatArray gcoords;
     double determinant, radius;
 
-    determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
-    this->interp.edgeLocal2global( gcoords, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    this->interp.edgeLocal2global( gcoords, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     radius = gcoords.at(1);
     return determinant *radius *gp->giveWeight();
 }
@@ -85,7 +86,7 @@ double
 TrAxisym1_ht :: computeRadiusAt(GaussPoint *gp)
 {
     FloatArray gcoords;
-    this->computeGlobalCoordinates( gcoords, * gp->giveCoordinates() );
+    this->computeGlobalCoordinates( gcoords, * gp->giveNaturalCoordinates() );
     return gcoords.at(1);
 }
 } // end namespace oofem

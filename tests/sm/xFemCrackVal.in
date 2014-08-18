@@ -1,6 +1,6 @@
 xFemCrackVal.out
 Test case for xfem: a crack through 3-node triangle elements. Added by Erik Svenning.
-XFEMStatic nsteps 3 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 20 minIter 2 stiffmode 0 nmodules 1
+StaticStructural nsteps 3 deltat 1.0 rtolv 1.0e-6 MaxIter 20 minIter 2 nmodules 1
 errorcheck
 #vtkxml tstep_all domain_all vars 1 94 primvars 1 1 cellvars 1 1
 domain 2dPlaneStress

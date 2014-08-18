@@ -45,7 +45,6 @@
 #include "intarray.h"
 #include "domain.h"
 #include "verbose.h"
-#include "engngm.h"
 #include "load.h"
 #include "mathfem.h"
 #include "classfactory.h"
@@ -165,8 +164,8 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
         FloatArray nx = this->GiveDerivativeVX(gp);
         FloatArray ny = this->GiveDerivativeUY(gp);
 
-        shapeFunct.at(1) = gp->giveCoordinate(1);
-        shapeFunct.at(2) = gp->giveCoordinate(2);
+        shapeFunct.at(1) = gp->giveNaturalCoordinate(1);
+        shapeFunct.at(2) = gp->giveNaturalCoordinate(2);
         shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
         for ( int i = 1; i <= 3; i++ ) {
@@ -357,8 +356,8 @@ TrPlaneStrRot :: GiveDerivativeUX(GaussPoint *gp)
 
     //
     FloatArray shapeFunct(3);
-    shapeFunct.at(1) = gp->giveCoordinate(1);
-    shapeFunct.at(2) = gp->giveCoordinate(2);
+    shapeFunct.at(1) = gp->giveNaturalCoordinate(1);
+    shapeFunct.at(2) = gp->giveNaturalCoordinate(2);
     shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
     //
@@ -398,8 +397,8 @@ TrPlaneStrRot :: GiveDerivativeVX(GaussPoint *gp)
 
     //
     FloatArray shapeFunct(3);
-    shapeFunct.at(1) = gp->giveCoordinate(1);
-    shapeFunct.at(2) = gp->giveCoordinate(2);
+    shapeFunct.at(1) = gp->giveNaturalCoordinate(1);
+    shapeFunct.at(2) = gp->giveNaturalCoordinate(2);
     shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
     //
@@ -439,8 +438,8 @@ TrPlaneStrRot :: GiveDerivativeUY(GaussPoint *gp)
 
     //
     FloatArray shapeFunct(3);
-    shapeFunct.at(1) = gp->giveCoordinate(1);
-    shapeFunct.at(2) = gp->giveCoordinate(2);
+    shapeFunct.at(1) = gp->giveNaturalCoordinate(1);
+    shapeFunct.at(2) = gp->giveNaturalCoordinate(2);
     shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
     //
@@ -480,8 +479,8 @@ TrPlaneStrRot :: GiveDerivativeVY(GaussPoint *gp)
 
     //
     FloatArray shapeFunct(3);
-    shapeFunct.at(1) = gp->giveCoordinate(1);
-    shapeFunct.at(2) = gp->giveCoordinate(2);
+    shapeFunct.at(1) = gp->giveNaturalCoordinate(1);
+    shapeFunct.at(2) = gp->giveNaturalCoordinate(2);
     shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
     //

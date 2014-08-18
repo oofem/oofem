@@ -202,7 +202,7 @@ protected:
     // two functions used to initialize and updating temporary variables in
     // gp's status. These variables are used to control process, when
     // we try to find equilibrium state.
-    void updateStirrups(GaussPoint *gp, FloatArray &strainIncrement);
+    void updateStirrups(GaussPoint *gp, FloatArray &strainIncrement, TimeStep *tStep);
 
 public:
     virtual double give(int, GaussPoint *gp);

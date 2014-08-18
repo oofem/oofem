@@ -233,7 +233,7 @@ void
 TransportElement :: computeGradientMatrixAt(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dnx;
-    this->giveInterpolation()->evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->giveInterpolation()->evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     ///@todo We should change the transposition in evaldNdx;
     answer.beTranspositionOf(dnx);
 }
@@ -316,7 +316,7 @@ TransportElement :: computeCapacitySubMatrix(FloatMatrix &answer, MatResponseMod
 
     answer.clear();
     for ( GaussPoint *gp: *iRule ) {
-        this->computeNAt( n, * gp->giveCoordinates() );
+        this->computeNAt( n, * gp->giveNaturalCoordinates() );
         // ask for capacity coefficient. In basic units [J/K/m3]
         double c = mat->giveCharacteristicValue(rmode, gp, tStep);
         double dV = this->computeVolumeAround(gp);
@@ -369,9 +369,9 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
         bcGeomType ltype = load->giveBCGeoType();
         if ( ltype == BodyLoadBGT ) {
             for ( GaussPoint *gp: *iRule ) {
-                this->computeNAt( n, * gp->giveCoordinates() );
+                this->computeNAt( n, * gp->giveNaturalCoordinates() );
                 double dV = this->computeVolumeAround(gp);
-                this->computeGlobalCoordinates( globalIPcoords, * gp->giveCoordinates() );
+                this->computeGlobalCoordinates( globalIPcoords, * gp->giveNaturalCoordinates() );
                 load->computeValueAt(val, tStep, globalIPcoords, mode);
 
                 helpLoadVector.add(val.at(indx) * dV, n);
@@ -384,7 +384,7 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
     // add internal source produced by material (if any)
     if ( mat->hasInternalSource() ) {
         for ( GaussPoint *gp: *iRule ) {
-            this->computeNAt( n, * gp->giveCoordinates() );
+            this->computeNAt( n, * gp->giveNaturalCoordinates() );
             double dV = this->computeVolumeAround(gp);
             mat->computeInternalSourceVector(val, gp, tStep, mode);
 
@@ -464,7 +464,7 @@ TransportElement :: computeIntSourceLHSSubMatrix(FloatMatrix &answer, MatRespons
 
     answer.clear();
     for ( GaussPoint *gp: *iRule ) {
-        this->computeNAt( n, * gp->giveCoordinates() );
+        this->computeNAt( n, * gp->giveNaturalCoordinates() );
         // ask for coefficient from material
         double c = mat->giveCharacteristicValue(rmode, gp, tStep);
         double dV = this->computeVolumeAround(gp);
@@ -534,7 +534,7 @@ TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType t
     }
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray &lcoords = * gp->giveCoordinates();
+        FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         fieldInterp->evalN( n, lcoords, FEIElementGeometryWrapper(this) );
         double detJ = interp->giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) );
@@ -595,7 +595,7 @@ TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
     }
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray &lcoords = * gp->giveCoordinates();
+        FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         fieldInterp->boundaryEvalN( n, boundary, lcoords, FEIElementGeometryWrapper(this) );
         double detJ = interp->boundaryGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
@@ -654,7 +654,7 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
     }
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray &lcoords = * gp->giveCoordinates();
+        FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         fieldInterp->boundaryEdgeEvalN( n, boundary, lcoords, FEIElementGeometryWrapper(this) );
         double detJ = interp->boundaryEdgeGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
@@ -793,7 +793,7 @@ TransportElement :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int
         }
 
         for ( GaussPoint *gp: iRule ) {
-            FloatArray *lcoords = gp->giveCoordinates();
+            FloatArray *lcoords = gp->giveNaturalCoordinates();
             this->computeEgdeNAt(n, iEdge, * lcoords);
             dV = this->computeEdgeVolumeAround(gp, iEdge);
 
@@ -846,13 +846,13 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
 
         IntegrationRule *iRule = this->GetSurfaceIntegrationRule(approxOrder);
         for ( GaussPoint *gp: *iRule ) {
-            this->computeSurfaceNAt( n, iSurf, * gp->giveCoordinates() );
+            this->computeSurfaceNAt( n, iSurf, * gp->giveNaturalCoordinates() );
             double dV = this->computeSurfaceVolumeAround(gp, iSurf);
 
             if ( surfLoad->giveFormulationType() == Load :: FT_Entity ) {
-                surfLoad->computeValueAt(val, tStep, * gp->giveCoordinates(), mode);
+                surfLoad->computeValueAt(val, tStep, * gp->giveNaturalCoordinates(), mode);
             } else {
-                this->computeSurfIpGlobalCoords(globalIPcoords, * gp->giveCoordinates(), iSurf);
+                this->computeSurfIpGlobalCoords(globalIPcoords, * gp->giveNaturalCoordinates(), iSurf);
                 surfLoad->computeValueAt(val, tStep, globalIPcoords, mode);
             }
 
@@ -903,7 +903,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 FloatMatrix subAnswer;
 
                 for ( GaussPoint *gp: iRule ) {
-                    this->computeEgdeNAt( n, id, * gp->giveCoordinates() );
+                    this->computeEgdeNAt( n, id, * gp->giveNaturalCoordinates() );
                     double dV = this->computeEdgeVolumeAround(gp, id);
                     subAnswer.plusDyadSymmUpper( n, dV * edgeLoad->giveProperty('a', tStep) );
                 }
@@ -926,7 +926,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                 IntegrationRule *iRule = this->GetSurfaceIntegrationRule(approxOrder);
 
                 for ( GaussPoint *gp: *iRule ) {
-                    this->computeSurfaceNAt( n, id, * gp->giveCoordinates() );
+                    this->computeSurfaceNAt( n, id, * gp->giveNaturalCoordinates() );
                     double dV = this->computeSurfaceVolumeAround(gp, id);
                     subAnswer.plusDyadSymmUpper( n, dV * surfLoad->giveProperty('a', tStep) );
                 }
@@ -1046,13 +1046,13 @@ TransportElement :: updateInternalState(TimeStep *tStep)
         for ( GaussPoint *gp: *iRule ) {
 
             ///@todo Why is the state vector the unknown solution at the gauss point? / Mikael
-            this->computeNmatrixAt( n, * gp->giveCoordinates() );
+            this->computeNmatrixAt( n, * gp->giveNaturalCoordinates() );
             stateVector.beProductOf(n, r);
             mat->updateInternalState(stateVector, gp, tStep);
 
             ///@todo We need to sort out multiple materials for coupled (heat+mass) problems
 #if 0
-            this->computeGradientMatrixAt( B, * gp->giveCoordinates() );
+            this->computeGradientMatrixAt( B, * gp->giveNaturalCoordinates() );
             gradient.beProductOf(B, r);
             mat->giveFluxVector(flux, gp, gradient, tStep);
 #endif

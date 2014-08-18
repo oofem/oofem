@@ -37,11 +37,12 @@
 
 #include "supgelement2.h"
 #include "levelsetpcs.h"
-#include "fei3dtetlin.h"
 
 #define _IFT_Tet1_3D_SUPG_Name "tet1supg"
 
 namespace oofem {
+class FEI3dTetLin;
+
 /**
  * Class representing 3d linear tetrahedral element
  * for solving incompressible fluid with SUPG solver
@@ -76,7 +77,7 @@ public:
     virtual void LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi);
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
 protected:

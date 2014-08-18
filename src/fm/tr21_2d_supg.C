@@ -33,6 +33,8 @@
  */
 
 #include "tr21_2d_supg.h"
+#include "fei2dtrquad.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
@@ -46,6 +48,7 @@
 #include "contextioerr.h"
 #include "crosssection.h"
 #include "classfactory.h"
+#include "engngm.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -142,7 +145,7 @@ TR21_2D_SUPG :: computeNuMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray n;
 
-    this->velocityInterpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->velocityInterpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(2, 12);
     answer.zero();
 
@@ -157,7 +160,7 @@ TR21_2D_SUPG :: computeUDotGradUMatrix(FloatMatrix &answer, GaussPoint *gp, Time
 {
     FloatMatrix n, dn;
     FloatArray u, un;
-    this->velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->velocityInterpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     this->computeNuMatrix(n, gp);
     this->computeVectorOfVelocities(VM_Total, tStep, un);
 
@@ -175,7 +178,7 @@ void
 TR21_2D_SUPG :: computeBMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dn(6, 2);
-    this->velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->velocityInterpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 12);
     answer.zero();
@@ -192,7 +195,7 @@ void
 TR21_2D_SUPG :: computeDivUMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dn;
-    velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    velocityInterpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 12);
     answer.zero();
@@ -207,7 +210,7 @@ void
 TR21_2D_SUPG :: computeNpMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatArray n;
-    this->pressureInterpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->pressureInterpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 3);
     answer.zero();
@@ -225,7 +228,7 @@ TR21_2D_SUPG :: computeGradUMatrix(FloatMatrix &answer, GaussPoint *gp, TimeStep
     FloatMatrix dn, um(2, 6);
     this->computeVectorOfVelocities(VM_Total, tStep, u);
 
-    velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    velocityInterpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= 6; i++ ) {
         um.at(1, i) = u.at(2 * i - 1);
         um.at(2, i) = u.at(2 * i);
@@ -238,7 +241,7 @@ void
 TR21_2D_SUPG :: computeGradPMatrix(FloatMatrix &answer, GaussPoint *gp)
 {
     FloatMatrix dn(3, 2);
-    pressureInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    pressureInterpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.beTranspositionOf(dn);
 }
@@ -255,7 +258,7 @@ TR21_2D_SUPG :: computeDivTauMatrix(FloatMatrix &answer, GaussPoint *gp, TimeSte
     answer.zero();
 
 
-    this->velocityInterpolation.evald2Ndx2( d2n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->velocityInterpolation.evald2Ndx2( d2n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveDeviatoricStiffnessMatrix(D, TangentStiffness, integrationRulesArray [ 0 ]->getIntegrationPoint(0), tStep);
 
@@ -425,7 +428,7 @@ TR21_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
     IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     for ( GaussPoint *gp: *iRule ) {
         double dV = this->computeVolumeAround(gp);
-        velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+        velocityInterpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         this->computeNuMatrix(n, gp);
         u.beProductOf(n, un);
         gfi.beTProductOf(dn, fi);
@@ -447,7 +450,7 @@ TR21_2D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
 
     for ( GaussPoint *gp: *iRule ) {
 
-        velocityInterpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+        velocityInterpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
         answer.add(dn); ///@todo This code makes no sense to me. Without the weight and jacobian this is dependant on the number of gauss points.
     }
@@ -465,7 +468,7 @@ TR21_2D_SUPG :: LS_PCS_computeVolume(double &answer, const FloatArray **coordina
 
         double determinant, weight, volume;
 
-        determinant = fabs( this->velocityInterpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+        determinant = fabs( this->velocityInterpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
         weight = gp->giveWeight();
         volume = determinant * weight;
@@ -502,7 +505,7 @@ TR21_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep)
 
     for ( GaussPoint *gp: *iRule ) {
         double dV = this->computeVolumeAround(gp);
-        velocityInterpolation.evalN( n,  * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+        velocityInterpolation.evalN( n,  * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         vol += dV;
         _fi = n.dotProduct(fi);
         S +=  _fi / ( _fi * _fi + eps * eps ) * dV;
@@ -851,7 +854,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
             //computing middle points to get six-point triangle
             FloatArray borderpoints(4);
-            int sub_case;
+            int sub_case = 0;
             if ( ( si == 1 ) && ( sqi == 4 ) ) {
                 borderpoints.at(1) = xsi;
                 borderpoints.at(2) = ysi;
@@ -1105,7 +1108,7 @@ TR21_2D_SUPG :: computeIntersection(int iedge, FloatArray &intcoords, FloatArray
 
     this->velocityInterpolation.edgeLocal2global( intcoords, 3, helplcoords, FEIElementGeometryWrapper(this) );
 
-    //this->velocityInterpolation.evaldNdx(dn, this->giveDomain(), dofManArray, *gp->giveCoordinates(),tStep->giveTime());
+    //this->velocityInterpolation.evaldNdx(dn, this->giveDomain(), dofManArray, *gp->giveNaturalCoordinates(),tStep->giveTime());
 }
 
 
@@ -1141,7 +1144,7 @@ TR21_2D_SUPG :: computeIntersection(int iedge, FloatArray &intcoords, FloatArray
 
     this->velocityInterpolation.edgeLocal2global( intcoords, iedge, this->giveDomain(), dofManArray, helplcoords, tStep->giveTime() );
 
-    //this->velocityInterpolation.evaldNdx(dn, this->giveDomain(), dofManArray, *gp->giveCoordinates(),tStep->giveTime());
+    //this->velocityInterpolation.evaldNdx(dn, this->giveDomain(), dofManArray, *gp->giveNaturalCoordinates(),tStep->giveTime());
 }
 #endif
 
@@ -1406,7 +1409,7 @@ TR21_2D_SUPG :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant, weight, volume;
 
-    determinant = fabs( this->velocityInterpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->velocityInterpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
 
     weight = gp->giveWeight();
@@ -1423,7 +1426,7 @@ TR21_2D_SUPG :: computeVolumeAround(GaussPoint *gp)
 //  double determinant, weight, volume;
 
 //  determinant = fabs( interpol.giveTransformationJacobian(domain, pressureDofManArray,
-//     * gp->giveCoordinates(), 0.0) );
+//     * gp->giveNaturalCoordinates(), 0.0) );
 
 
 //  weight      = gp->giveWeight();
@@ -1474,7 +1477,7 @@ TR21_2D_SUPG :: giveInternalStateAtNode(FloatArray &answer, InternalStateType ty
 
 
 void
-TR21_2D_SUPG :: drawRawGeometry(oofegGraphicContext &gc)
+TR21_2D_SUPG :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
@@ -1504,38 +1507,37 @@ TR21_2D_SUPG :: drawRawGeometry(oofegGraphicContext &gc)
     EMAddGraphicsToModel(ESIModel(), go);
 }
 
-void TR21_2D_SUPG :: drawScalar(oofegGraphicContext &context)
+void TR21_2D_SUPG :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, indx, result = 0;
     WCRec p [ 3 ];
     GraphicObj *tr;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v1, v2, v3;
     double s [ 3 ];
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
 
-    // if ((context.giveIntVarMode() == ISM_local) && (context.giveIntVarType() ==  IST_VOFFraction)) {
-    if ( ( context.giveIntVarType() ==  IST_VOFFraction ) && ( context.giveIntVarMode() == ISM_local ) ) {
+    // if ((gc.giveIntVarMode() == ISM_local) && (gc.giveIntVarType() ==  IST_VOFFraction)) {
+    if ( ( gc.giveIntVarType() ==  IST_VOFFraction ) && ( gc.giveIntVarMode() == ISM_local ) ) {
         Polygon matvolpoly;
         //this->formMaterialVolumePoly(matvolpoly, NULL, temp_normal, temp_p, false);
-        EASValsSetColor( context.getStandardSparseProfileColor() );
-        //GraphicObj *go = matvolpoly.draw(context,true,OOFEG_VARPLOT_PATTERN_LAYER);
-        matvolpoly.draw(context, true, OOFEG_VARPLOT_PATTERN_LAYER);
+        EASValsSetColor( gc.getStandardSparseProfileColor() );
+        //GraphicObj *go = matvolpoly.draw(gc,true,OOFEG_VARPLOT_PATTERN_LAYER);
+        matvolpoly.draw(gc, true, OOFEG_VARPLOT_PATTERN_LAYER);
         return;
     }
 
-    if ( context.giveIntVarMode() == ISM_recovered ) {
-        result += this->giveInternalStateAtNode(v1, context.giveIntVarType(), context.giveIntVarMode(), 1, tStep);
-        result += this->giveInternalStateAtNode(v2, context.giveIntVarType(), context.giveIntVarMode(), 2, tStep);
-        result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
-    } else if ( context.giveIntVarMode() == ISM_local ) {
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
+        result += this->giveInternalStateAtNode(v1, gc.giveIntVarType(), gc.giveIntVarMode(), 1, tStep);
+        result += this->giveInternalStateAtNode(v2, gc.giveIntVarType(), gc.giveIntVarMode(), 2, tStep);
+        result += this->giveInternalStateAtNode(v3, gc.giveIntVarType(), gc.giveIntVarMode(), 3, tStep);
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
         GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-        result += giveIPValue(v1, gp, context.giveIntVarType(), tStep);
+        result += giveIPValue(v1, gp, gc.giveIntVarType(), tStep);
         v2 = v1;
         v3 = v1;
         result *= 3;
@@ -1545,7 +1547,7 @@ void TR21_2D_SUPG :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    indx = context.giveIntVarIndx();
+    indx = gc.giveIntVarIndx();
 
     s [ 0 ] = v1.at(indx);
     s [ 1 ] = v2.at(indx);
@@ -1553,7 +1555,7 @@ void TR21_2D_SUPG :: drawScalar(oofegGraphicContext &context)
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
 
-    if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+    if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
         for ( i = 0; i < 3; i++ ) {
             p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
             p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
@@ -1561,12 +1563,12 @@ void TR21_2D_SUPG :: drawScalar(oofegGraphicContext &context)
         }
 
         //EASValsSetColor(gc.getYieldPlotColor(ratio));
-        context.updateFringeTableMinMax(s, 3);
+        gc.updateFringeTableMinMax(s, 3);
         tr =  CreateTriangleWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ]);
         EGWithMaskChangeAttributes(LAYER_MASK, tr);
         EMAddGraphicsToModel(ESIModel(), tr);
-    } else if ( ( context.getScalarAlgo() == SA_ZPROFILE ) || ( context.getScalarAlgo() == SA_COLORZPROFILE ) ) {
-        double landScale = context.getLandScale();
+    } else if ( ( gc.getScalarAlgo() == SA_ZPROFILE ) || ( gc.getScalarAlgo() == SA_COLORZPROFILE ) ) {
+        double landScale = gc.getLandScale();
 
         for ( i = 0; i < 3; i++ ) {
             p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
@@ -1574,14 +1576,14 @@ void TR21_2D_SUPG :: drawScalar(oofegGraphicContext &context)
             p [ i ].z = s [ i ] * landScale;
         }
 
-        if ( context.getScalarAlgo() == SA_ZPROFILE ) {
-            EASValsSetColor( context.getDeformedElementColor() );
+        if ( gc.getScalarAlgo() == SA_ZPROFILE ) {
+            EASValsSetColor( gc.getDeformedElementColor() );
             EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
             EASValsSetFillStyle(FILL_SOLID);
             tr =  CreateTriangle3D(p);
             EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | FILL_MASK | LAYER_MASK, tr);
         } else {
-            context.updateFringeTableMinMax(s, 3);
+            gc.updateFringeTableMinMax(s, 3);
             EASValsSetFillStyle(FILL_SOLID);
             tr =  CreateTriangleWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ]);
             EGWithMaskChangeAttributes(FILL_MASK | LAYER_MASK, tr);

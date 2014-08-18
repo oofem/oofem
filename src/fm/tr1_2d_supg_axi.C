@@ -33,6 +33,7 @@
  */
 
 #include "tr1_2d_supg_axi.h"
+#include "fei2dtrlin.h"
 #include "fluidmodel.h"
 #include "node.h"
 #include "material.h"
@@ -983,7 +984,7 @@ void TR1_2D_SUPG_AXI :: computeBMtrx(FloatMatrix &_b, GaussPoint *gp)
 void
 TR1_2D_SUPG_AXI :: computeNVector(FloatArray &n, GaussPoint *gp)
 {
-    this->interp.evalN( n, * gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evalN( n, * gp->giveSubPatchCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 double
@@ -991,7 +992,7 @@ TR1_2D_SUPG_AXI :: computeVolumeAround(GaussPoint *gp)
 {
     double _r, weight, detJ;
 
-    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveSubPatchCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     _r = computeRadiusAt(gp);
 
@@ -1095,7 +1096,7 @@ TR1_2D_SUPG_AXI :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi
     double x1, x2, x3, y1, y2, y3;
 
     answer.resize(2);
-    for ( int ifi: fi ) {
+    for ( double ifi: fi ) {
         if ( ifi >= 0. ) {
             pos++;
         } else if ( ifi < 0.0 ) {

@@ -32,12 +32,11 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef __PARALLEL_MODE
-
 #include "feticommunicator.h"
 #include "engngm.h"
 #include "intarray.h"
 #include "dofmanager.h"
+#include "domain.h"
 
 #ifdef __USE_MPI
  #include <mpi.h>
@@ -247,4 +246,3 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
 #endif
 }
 } // end namespace oofem
-#endif

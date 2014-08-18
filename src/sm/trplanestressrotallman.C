@@ -33,6 +33,8 @@
  */
 
 #include "trplanestressrotallman.h"
+#include "fei2dtrquad.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "structuralcrosssection.h"
 #include "gausspoint.h"
@@ -131,7 +133,7 @@ TrPlanestressRotAllman :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, 
     std::vector< FloatArray > lxy;
 
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
-    this->qinterpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(lxy) );
+    this->qinterpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lxy) );
 
     answer.resize(3, 9);
     answer.zero();
@@ -257,9 +259,9 @@ TrPlanestressRotAllman :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, G
     FEI2dTrQuad qi(1, 2);
 
     this->computeLocalNodalCoordinates(lxy); // get ready for tranformation into 3d
-    qi.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIVertexListGeometryWrapper(lxy) );
+    qi.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lxy) );
     qi.computeLocalEdgeMapping(en, iedge); // get edge mapping
-    this->interp.edgeEvalN( l, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.edgeEvalN( l, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.resize(3, 6);
 
     answer.at(1, 1) = answer.at(2, 2) = n.at(1) + n.at(3) / 2.0;
@@ -312,7 +314,7 @@ TrPlanestressRotAllman :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
  * TrPlanestressRotAllman :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
  * {
  *  // edge with linear geometry -> one can use linear interpolation safely
- *  double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+ *  double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
  *  return detJ *gp->giveWeight();
  * }
  *
@@ -321,7 +323,7 @@ TrPlanestressRotAllman :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
  * TrPlanestressRotAllman :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
  * {
  *  // edge with linear geometry -> one can use linear interpolation safely
- *  this->interp.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+ *  this->interp.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
  * }
  *
  *
@@ -380,7 +382,7 @@ TrPlanestressRotAllman :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
  *
  *  weight = gp->giveWeight();
  *  // safe to use linear interpolation here (geometry is linear)
- *  detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+ *  detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
  *
  *  return detJ *weight *this->giveCrossSection()->give(CS_Thickness), gp;
  * }

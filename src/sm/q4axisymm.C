@@ -33,6 +33,7 @@
  */
 
 #include "q4axisymm.h"
+#include "fei2dquadquad.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -48,8 +49,6 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "connectivitytable.h"
-//#include "rcm2.h"
-//#include "oofegutils.h"
 #endif
 
 namespace oofem {
@@ -61,8 +60,8 @@ Q4Axisymm :: Q4Axisymm(int n, Domain *aDomain) :
     StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 8;
-    numberOfGaussPoints          = 4;
-    numberOfFiAndShGaussPoints   = 1;
+    numberOfGaussPoints = 4;
+    numberOfFiAndShGaussPoints = 1;
 }
 
 
@@ -70,69 +69,19 @@ Q4Axisymm :: ~Q4Axisymm()
 { }
 
 
-FloatArray *
-Q4Axisymm :: GiveDerivativeKsi(double ksi, double eta)
+FEInterpolation *
+Q4Axisymm :: giveInterpolation() const
 {
-    FloatArray *n;
-
-    n = new FloatArray(8);
-
-    n->at(1) =  0.25 * ( 1. + eta ) * ( 2.0 * ksi + eta );
-    n->at(2) = -0.25 * ( 1. + eta ) * ( -2.0 * ksi + eta );
-    n->at(3) = -0.25 * ( 1. - eta ) * ( -2.0 * ksi - eta );
-    n->at(4) =  0.25 * ( 1. - eta ) * ( 2.0 * ksi - eta );
-    n->at(5) = -ksi * ( 1. + eta );
-    n->at(6) = -0.5 * ( 1. - eta * eta );
-    n->at(7) = -ksi * ( 1. - eta );
-    n->at(8) =  0.5 * ( 1. - eta * eta );
-
-    return n;
+    return & interp;
 }
-
-
-FloatArray *
-Q4Axisymm :: GiveDerivativeEta(double ksi, double eta)
-{
-    FloatArray *n;
-
-    n = new FloatArray(8);
-
-    n->at(1) =  0.25 * ( 1. + ksi ) * ( 2.0 * eta + ksi );
-    n->at(2) =  0.25 * ( 1. - ksi ) * ( 2.0 * eta - ksi );
-    n->at(3) = -0.25 * ( 1. - ksi ) * ( -2.0 * eta - ksi );
-    n->at(4) = -0.25 * ( 1. + ksi ) * ( -2.0 * eta + ksi );
-    n->at(5) =  0.5 * ( 1. - ksi * ksi );
-    n->at(6) = -eta * ( 1. - ksi );
-    n->at(7) = -0.5 * ( 1. - ksi * ksi );
-    n->at(8) = -eta * ( 1. + ksi );
-
-    return n;
-}
-
 
 void
 Q4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
-// Returns the [6x16] strain-displacement matrix {B} of the receiver,
-// evaluated at gp.
 {
-    ///@todo Not sure how to deal with li and lu. This should be changed, in which case "GiveDerivatice***" and "computeJacobianMatrixAt" will be deprecated.
-    //FloatMatrix dN;
-    //this->interp.evaldNdx(dN, *gp->giveCoordinates(), FEIElementGeometryWrapper(this));
+    FloatMatrix dN;
+    this->interp.evaldNdx(dN, *gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
 
-    int i;
-    FloatMatrix jacMtrx, inv;
-    FloatArray *nx, *ny;
-    double ksi, eta, r, x;
     int size, ind = 1;
-
-    ksi = gp->giveCoordinate(1);
-    eta = gp->giveCoordinate(2);
-
-    nx = GiveDerivativeKsi(ksi, eta);
-    ny = GiveDerivativeEta(ksi, eta);
-
-    this->computeJacobianMatrixAt(jacMtrx, gp);
-    inv.beInverseOf(jacMtrx);
 
     if ( ui == ALL_STRAINS ) {
         size = 6;
@@ -149,44 +98,35 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     answer.zero();
 
     if ( ( li <= 1 ) && ( ui >= 1 ) ) {
-        for ( i = 1; i <= 8; i++ ) {
-            answer.at(ind, 2 * i - 1) = nx->at(i) * inv.at(1, 1) + ny->at(i) * inv.at(1, 2);
+        for ( int i = 1; i <= 8; i++ ) {
+            answer.at(ind, 2 * i - 1) = dN.at(i,1);
         }
 
         ind++;
     }
 
     if ( ( li <= 2 ) && ( ui >= 2 ) ) {
-        for ( i = 1; i <= 8; i++ ) {
-            answer.at(ind, 2 * i - 0) = nx->at(i) * inv.at(2, 1) + ny->at(i) * inv.at(2, 2);
+        for ( int i = 1; i <= 8; i++ ) {
+            answer.at(ind, 2 * i - 0) = dN.at(i,2);
         }
 
         ind++;
     }
 
     if ( ( li <= 3 ) && ( ui >= 3 ) ) {
-        FloatArray n(8);
+        FloatArray n;
 
-        n.at(1) = ( 1. + ksi ) * ( 1. + eta ) * 0.25 * ( ksi + eta - 1. );
-        n.at(2) = ( 1. - ksi ) * ( 1. + eta ) * 0.25 * ( -ksi + eta - 1. );
-        n.at(3) = ( 1. - ksi ) * ( 1. - eta ) * 0.25 * ( -ksi - eta - 1. );
-        n.at(4) = ( 1. + ksi ) * ( 1. - eta ) * 0.25 * ( ksi - eta - 1. );
-        n.at(5) = 0.5 * ( 1. - ksi * ksi ) * ( 1. + eta );
-        n.at(6) = 0.5 * ( 1. - ksi ) * ( 1. - eta * eta );
-        n.at(7) = 0.5 * ( 1. - ksi * ksi ) * ( 1. - eta );
-        n.at(8) = 0.5 * ( 1. + ksi ) * ( 1. - eta * eta );
+        this->interp.evalN(n, *gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this));
 
-        r = 0.;
-        for ( i = 1; i <= 8; i++ ) {
-            x  = this->giveNode(i)->giveCoordinate(1);
-            r += x * n.at(i);
+        double r = 0.;
+        for ( int i = 1; i <= n.giveSize(); i++ ) {
+            r += this->giveNode(i)->giveCoordinate(1) * n.at(i);
         }
 
-        for ( i = 1; i <= 8; i++ ) {
-            answer.at( ind, ( 2 * i - 1 ) ) = ( n.at(i) ) / r;
+        for ( int i = 1; i <= 8; i++ ) {
+            answer.at( ind, 2 * i - 1 ) = n.at(i) / r;
         }
 
-        // delete n;
         ind++;
     }
 
@@ -200,16 +140,13 @@ Q4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
 
 
     if ( ( li <= 6 ) && ( ui >= 6 ) ) {
-        for ( i = 1; i <= 8; i++ ) {
-            answer.at(ind, 2 * i - 1) = nx->at(i) * inv.at(2, 1) + ny->at(i) * inv.at(2, 2);
-            answer.at(ind, 2 * i - 0) = nx->at(i) * inv.at(1, 1) + ny->at(i) * inv.at(1, 2);
+        for ( int i = 1; i <= 8; i++ ) {
+            answer.at(ind, 2 * i - 1) = dN.at(i,2);
+            answer.at(ind, 2 * i - 0) = dN.at(i,1);
         }
 
         ind++;
     }
-
-    delete nx;
-    delete ny;
 }
 
 
@@ -218,24 +155,18 @@ Q4Axisymm :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the [9x16] displacement gradient matrix {BH} of the receiver,
 // evaluated at gp.
 // BH matrix  -  9 rows : du/dx, dv/dy, dw/dz = u/r, 0, 0, du/dy,  0, 0, dv/dx
-// @todo not checked if correct
 {
-    FloatArray n;
+    FloatArray n, gcoords;
     FloatMatrix dnx;
 
-    this->interp.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(9, 16);
-    answer.zero();
-
-    double r = 0., x;
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        x  = this->giveNode(i)->giveCoordinate(1);
-        r += x * n.at(i);
-    }
-
+    this->interp.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.local2global( gcoords, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    double r = gcoords.at(1);
 
     // mode is _3dMat !!!!!! answer.at(4,*), answer.at(5,*), answer.at(7,*), and answer.at(8,*) is zero
+    answer.resize(9, 16);
+    answer.zero();
     for ( int i = 1; i <= 16; i++ ) {
         answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
         answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
@@ -254,66 +185,20 @@ Q4Axisymm :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 }
 
 
-void
-Q4Axisymm :: computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *gp)
-// Returns the jacobian matrix  J (x,y)/(ksi,eta)  of the receiver.
-{
-    double ksi, eta, x, y;
-    FloatArray *nx, *ny;
-
-    answer.resize(2, 2);
-    answer.zero();
-
-    ksi = gp->giveCoordinate(1);
-    eta = gp->giveCoordinate(2);
-
-    nx = this->GiveDerivativeKsi(ksi, eta);
-    ny = this->GiveDerivativeEta(ksi, eta);
-
-    for ( int i = 1; i <= 8; i++ ) {
-        x = this->giveNode(i)->giveCoordinate(1);
-        y = this->giveNode(i)->giveCoordinate(2);
-
-        answer.at(1, 1) += nx->at(i) * x;
-        answer.at(1, 2) += nx->at(i) * y;
-        answer.at(2, 1) += ny->at(i) * x;
-        answer.at(2, 2) += ny->at(i) * y;
-    }
-
-    delete nx;
-    delete ny;
-}
-
-
 IRResultType
 Q4Axisymm :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                // Required by IR_GIVE_FIELD macro
-    numberOfGaussPoints          = 4;
+    numberOfGaussPoints = 4;
     result = this->StructuralElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
     }
 
-    numberOfFiAndShGaussPoints   = 1;
+    numberOfFiAndShGaussPoints = 1;
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, _IFT_Q4Axisymm_nipfish);
 
-    if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
-        numberOfGaussPoints = 4;
-    }
-
-    if ( !( ( numberOfFiAndShGaussPoints == 1 ) ||
-           ( numberOfFiAndShGaussPoints == 4 ) ||
-           ( numberOfFiAndShGaussPoints == 9 ) ||
-           ( numberOfFiAndShGaussPoints == 16 ) ) ) {
-        numberOfFiAndShGaussPoints = 1;
-    }
-
-
-    return IRRT_OK;
+    return result;
 }
 
 
@@ -339,14 +224,14 @@ Q4Axisymm :: computeVolumeAround(GaussPoint *gp)
     FloatArray n;
     double determinant, r;
 
-    this->interp.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     r = 0;
     for ( int i = 1; i <= 8; i++ ) {
         r += this->giveNode(i)->giveCoordinate(1) * n.at(i);
     }
 
-    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return determinant *gp->giveWeight() * r;
 }
 
@@ -404,7 +289,6 @@ Q4Axisymm :: giveDofManDofIDMask(int inode, IntArray &answer) const
 }
 
 
-
 Interface *
 Q4Axisymm :: giveInterface(InterfaceType interface)
 {
@@ -416,10 +300,9 @@ Q4Axisymm :: giveInterface(InterfaceType interface)
 }
 
 
-
 #ifdef __OOFEG
 
-void Q4Axisymm :: drawRawGeometry(oofegGraphicContext &gc)
+void Q4Axisymm :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
@@ -454,11 +337,10 @@ void Q4Axisymm :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void Q4Axisymm :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void Q4Axisymm :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     if ( !gc.testElementGraphicActivity(this) ) {

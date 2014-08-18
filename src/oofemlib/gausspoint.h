@@ -97,9 +97,11 @@ private:
     /// Reference to parent integration rule.
     IntegrationRule *irule;
     /// Natural Element Coordinates of receiver.
-    FloatArray *coordinates;
+    FloatArray *naturalCoordinates;
     /// Optional local sub-patch (sub-patches form element volume) coordinates of the receiver.
-    FloatArray *localCoordinates;
+    FloatArray *subPatchCoordinates;
+    /// Optional global (Cartesian) coordinates
+    FloatArray *globalCoordinates;
     /// Integration weight.
     double weight;
     /// Material mode of receiver.
@@ -118,34 +120,64 @@ public:
      * with given number, integration weight, coordinates and material mode.
      * @param ir Integration rule to which integration point belongs to.
      * @param n Integration point number.
-     * @param a Coordinates.
+     * @param iNaturalCoord Natueral coordinates.
      * @param w Integration weight.
      * @param mode Material mode.
      */
-    GaussPoint(IntegrationRule * ir, int n, FloatArray * a, double w, MaterialMode mode);
+    GaussPoint(IntegrationRule * ir, int n, FloatArray * iNaturalCoord, double w, MaterialMode mode);
+
+    GaussPoint(IntegrationRule * ir, int n, double w, MaterialMode mode);
+
     /// Destructor
     virtual ~GaussPoint();
 
     /// Returns i-th natural element coordinate of receiver
-    double giveCoordinate(int i) { return coordinates->at(i); }
+    double giveNaturalCoordinate(int i) const { return naturalCoordinates->at(i); }
     /// Returns coordinate array of receiver.
-    FloatArray *giveCoordinates() { return coordinates; }
-    void setCoordinates(FloatArray c) { * coordinates = std :: move(c); }
-
-    /// Returns local sub-patch coordinates of the receiver
-    FloatArray *giveLocalCoordinates() {
-        if ( localCoordinates ) {
-            return localCoordinates;
-        } else {
-            return coordinates;
+    FloatArray *giveNaturalCoordinates() { return naturalCoordinates; }
+    void setNaturalCoordinates(FloatArray c) {
+        if(naturalCoordinates != NULL) {
+            * naturalCoordinates = std :: move(c);
+        }
+        else {
+            naturalCoordinates = new FloatArray( std :: move(c) );
         }
     }
-    void setLocalCoordinates(FloatArray c)
-    {
-        if ( localCoordinates ) {
-            * localCoordinates = std :: move(c);
+
+    /// Returns local sub-patch coordinates of the receiver
+    FloatArray *giveSubPatchCoordinates() {
+        if ( subPatchCoordinates ) {
+            return subPatchCoordinates;
         } else {
-            localCoordinates = new FloatArray(std :: move(c));
+            return naturalCoordinates;
+        }
+    }
+    void setSubPatchCoordinates(FloatArray c)
+    {
+        if ( subPatchCoordinates ) {
+            * subPatchCoordinates = std :: move(c);
+        } else {
+            subPatchCoordinates = new FloatArray(std :: move(c));
+        }
+    }
+
+    inline const FloatArray &giveGlobalCoordinates() {
+        if( globalCoordinates != NULL ) {
+            return *globalCoordinates;
+        }
+        else {
+            globalCoordinates = new FloatArray();
+            this->giveElement()->computeGlobalCoordinates(*globalCoordinates, *naturalCoordinates);
+            return *globalCoordinates;
+        }
+    }
+
+    void setGlobalCoordinates(const FloatArray &iCoord) {
+        if( globalCoordinates != NULL ) {
+            *globalCoordinates = iCoord;
+        }
+        else {
+            globalCoordinates = new FloatArray(iCoord);
         }
     }
 

@@ -80,10 +80,10 @@ public:
     virtual Element_Geometry_Type giveGeometryType() const;
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    //void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &context);
-    //virtual void drawSpecial(oofegGraphicContext &);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    //void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    //virtual void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
     virtual IRResultType initializeFrom(InputRecord *ir);
@@ -91,7 +91,7 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     /// VTK Interface
-    void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
+    virtual void giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
 
 };
 } // end namespace oofem

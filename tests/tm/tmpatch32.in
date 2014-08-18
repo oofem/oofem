@@ -21,7 +21,7 @@ node 11 coords 3  2.0  8.0   2.0  bc 1 0
 node 12 coords 3  2.0  8.0   0.0  bc 1 0
 brick1ht 1 nodes 8 1 2 3 4 5 6 7 8  crossSect 1 mat 1 
 brick1ht 2 nodes 8 5 6 7 8 9 10 11 12 crossSect 1 mat 1  boundaryloads 2 2 2
-SimpleCS 1
+EmptyCS 1
 IsoHeat 1 d 2400. k 1.0 c 1000.0
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
 constantsurfaceload 2 loadTimeFunction 1 ndofs 1 components 1 1.0 loadtype 2

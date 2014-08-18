@@ -46,17 +46,17 @@
 #include <sstream>
 
 namespace oofem {
-DynamicInputRecord *CreateNodeIR(int i, InputFieldType nodeType, const FloatArray &coord)
+DynamicInputRecord *CreateNodeIR(int i, InputFieldType nodeType, FloatArray coord)
 {
     DynamicInputRecord *result = new DynamicInputRecord(nodeType, i);
-    result->setField(coord, _IFT_Node_coords);
+    result->setField(std :: move(coord), _IFT_Node_coords);
     return result;
 }
 
-DynamicInputRecord *CreateElementIR(int i, InputFieldType elementType, const IntArray &nodes, int cs)
+DynamicInputRecord *CreateElementIR(int i, InputFieldType elementType, IntArray nodes, int cs)
 {
     DynamicInputRecord *result = new DynamicInputRecord(elementType, i);
-    result->setField(nodes, _IFT_Element_nodes);
+    result->setField(std :: move(nodes), _IFT_Element_nodes);
     if ( cs != 0 ) {
         result->setField(cs, _IFT_Element_crosssect);
     }
@@ -321,21 +321,9 @@ void DynamicInputRecord :: setField(FloatArray item, InputFieldType id)
     this->floatArrayRecord.insert({id, std :: move(item)});
 }
 
-void DynamicInputRecord :: setField(std :: initializer_list< double > item, InputFieldType id)
-{
-    //this->floatArrayRecord.emplace(id, item);
-    this->floatArrayRecord.insert(std :: make_pair(id, FloatArray(item)));
-}
-
 void DynamicInputRecord :: setField(IntArray item, InputFieldType id)
 {
     this->intArrayRecord.insert({id, std :: move(item)});
-}
-
-void DynamicInputRecord :: setField(std :: initializer_list< int > item, InputFieldType id)
-{
-    //this->intArrayRecord.emplace(id, item);
-    this->intArrayRecord.insert({id, IntArray(item)});
 }
 
 void DynamicInputRecord :: setField(FloatMatrix item, InputFieldType id)

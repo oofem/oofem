@@ -33,6 +33,7 @@
  */
 
 #include "qtrplstrgrad.h"
+#include "fei2dtrlin.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
@@ -48,7 +49,7 @@
 namespace oofem {
 REGISTER_Element(QTrPlaneStressGrad);
 
-FEI2dQuadLin QTrPlaneStressGrad :: interpolation(1, 2);
+FEI2dTrLin QTrPlaneStressGrad :: interpolation_lin(1, 2);
 
 QTrPlaneStressGrad :: QTrPlaneStressGrad(int n, Domain *aDomain) : QTrPlaneStress2d(n, aDomain), GradDpElement()
     // Constructor.
@@ -68,7 +69,7 @@ void
 QTrPlaneStressGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 {
-    if ( inode <= nSecNodes ) {
+    if ( inode <= 3 ) {
         answer = {D_u, D_v, G_0};
     } else {
         answer = {D_u, D_v};
@@ -99,9 +100,7 @@ QTrPlaneStressGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // luated at gp.
 {
     FloatArray n;
-
-    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
+    this->interpolation_lin.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 1);
 }
 
@@ -109,15 +108,7 @@ void
 QTrPlaneStressGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
-
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(2, 3);
-    answer.zero();
-
-    for ( int i = 1; i <= 3; i++ ) {
-        answer.at(1, i) = dnx.at(i, 1);
-        answer.at(2, i) = dnx.at(i, 2);
-    }
+    this->interpolation_lin.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.beTranspositionOf(dnx);
 }
 }

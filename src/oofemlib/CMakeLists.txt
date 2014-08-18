@@ -6,14 +6,10 @@ set (core_unsorted
     connectivitytable.C error.C mathfem.C logger.C util.C
     initmodulemanager.C initmodule.C initialcondition.C
     homogenize.C
-    localgaussianrandomgenerator.C
     nonlocalbarrier.C
-    trianglemesherinterface.C
     geotoolbox.C geometry.C
-    externalfieldgenerator.C
     datastream.C
     set.C
-    scalarfunction.C
     rvematerial.C
     weakperiodicbc.C
     solutionbasedshapefunction.C
@@ -93,12 +89,15 @@ set (core_fields
 
 set (core_ltf
     function.C
+    scalarfunction.C
     constantfunction.C
     heavisidetimefunction.C
     peakfunction.C
     piecewiselinfunction.C
     periodicpiecewiselinfunction.C
     calculatorfunction.C
+    localgaussianrandomfunction.C
+    interpolatingfunction.C
     )
 
 set (core_cs
@@ -178,6 +177,7 @@ set (core_fei
     fei2dquadquad.C
     fei2dquadbiquad.C
     fei3dlinelin.C
+    fei3dtrlin.C
     fei3dtrquad.C
     fei3dtetlin.C
     fei3dtetquad.C
@@ -206,6 +206,7 @@ set (core_xfem
     xfem/enrichmentfronts/enrichmentfrontlinbranchfunconeel.C
     xfem/enrichmentfronts/enrichmentfrontintersection.C
     xfem/integrationrules/discsegintegrationrule.C
+    xfem/xfemtolerances.C
     )
 
 set (core_parallel
@@ -218,9 +219,12 @@ set (core_parallel
     parallelcontext.C
     dyncombuff.C
     loadbalancer.C
-    parmetisloadbalancer.C
     nonlocalmatwtp.C
     )
+
+if (USE_PARMETIS)
+    list (APPEND core_parallel parmetisloadbalancer.C)
+endif ()
 
 set (core_bc
     generalboundarycondition.C
@@ -266,11 +270,11 @@ set (core_mesher
     targe2interface.C
     freeminterface.C
     subdivision.C
+    trianglemesherinterface.C
     )
 
 set (core
     ${core_unsorted}
-    ${core_oofeg}
     ${core_nodalrecovery}
     ${core_dofs}
     ${core_nm}
@@ -295,6 +299,11 @@ set (core
 if (USE_PARALLEL)
     list (APPEND core ${core_parallel})
 endif ()
+
+if (USE_OOFEG)
+    list (APPEND core ${core_oofeg})
+endif ()
+
 
 add_library (core
     ${LIB_TYPE}

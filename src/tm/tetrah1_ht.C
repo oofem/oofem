@@ -46,7 +46,6 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "connectivitytable.h"
 #endif
 
 namespace oofem {
@@ -112,7 +111,7 @@ Tetrah1_ht :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
@@ -124,7 +123,7 @@ Tetrah1_ht :: computeVolumeAround(GaussPoint *gp)
 double
 Tetrah1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
     return result *gp->giveWeight();
 }
@@ -144,7 +143,7 @@ double
 Tetrah1_ht :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double detJ, weight;
-    detJ = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     return detJ * weight;
@@ -197,7 +196,7 @@ Tetrah1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArra
  #define TR_LENGHT_REDUCT 0.3333
 
 void
-Tetrah1_ht :: drawRawGeometry(oofegGraphicContext &gc)
+Tetrah1_ht :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
@@ -233,48 +232,47 @@ Tetrah1_ht :: drawRawGeometry(oofegGraphicContext &gc)
 
 
 void
-Tetrah1_ht :: drawScalar(oofegGraphicContext &context)
+Tetrah1_ht :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, indx, result = 0;
     WCRec p [ 4 ];
     GraphicObj *tr;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 4 ];
     double s [ 4 ];
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
-    if ( context.giveIntVarMode() == ISM_recovered ) {
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
         for ( i = 1; i <= 4; i++ ) {
-            result += this->giveInternalStateAtNode(v [ i - 1 ], context.giveIntVarType(), context.giveIntVarMode(), i, tStep);
+            result += this->giveInternalStateAtNode(v [ i - 1 ], gc.giveIntVarType(), gc.giveIntVarMode(), i, tStep);
         }
 
         if ( result != 4 ) {
             return;
         }
-    } else if ( context.giveIntVarMode() == ISM_local ) {
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
         return;
     }
 
-    indx = context.giveIntVarIndx();
+    indx = gc.giveIntVarIndx();
 
     for ( i = 1; i <= 4; i++ ) {
         s [ i - 1 ] = v [ i - 1 ].at(indx);
     }
 
-    EASValsSetEdgeColor( context.getElementEdgeColor() );
+    EASValsSetEdgeColor( gc.getElementEdgeColor() );
     EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
-    if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+    if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
         for ( i = 0; i < 4; i++ ) {
             p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
             p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
             p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(3);
         }
 
-        context.updateFringeTableMinMax(s, 4);
+        gc.updateFringeTableMinMax(s, 4);
         tr = CreateTetraWD(p, s);
         EGWithMaskChangeAttributes(LAYER_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK, tr);
         EMAddGraphicsToModel(ESIModel(), tr);

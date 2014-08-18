@@ -149,9 +149,7 @@ XFEMStatic :: terminate(TimeStep *tStep)
     this->saveStepContext(tStep);
 
     // Propagate fronts
-    int numDom = this->giveNumberOfDomains();
-    for ( int i = 1; i <= numDom; i++ ) {
-        Domain *domain = this->giveDomain(i);
+    for ( auto &domain: domainList ) {
         XfemManager *xMan = domain->giveXfemManager();
         xMan->propagateFronts();
     }
@@ -270,9 +268,9 @@ XFEMStatic :: terminate(TimeStep *tStep)
     }
 
     // Fracture/failure mechanics evaluation
-    for ( int i = 1; i <= numDom; i++ ) {
-        if ( this->giveDomain(i)->hasFractureManager() ) { // Will most likely fail if numDom > 1
-            FractureManager *fracMan  = this->giveDomain(i)->giveFractureManager();
+    for ( auto &domain: domainList ) {
+        if ( domain->hasFractureManager() ) { // Will most likely fail if numDom > 1
+            FractureManager *fracMan = domain->giveFractureManager();
             fracMan->evaluateYourself(tStep);
             fracMan->updateXFEM(tStep); // Update XFEM structure based on the fracture manager
 
@@ -399,8 +397,7 @@ XFEMStatic :: updateYourself(TimeStep *tStep)
 
         buildDofMap();
 
-        for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-            Domain *domain = this->giveDomain(idomain);
+        for ( auto &domain: domainList ) {
             int nnodes = domain->giveNumberOfDofManagers();
             for ( int inode = 1; inode <= nnodes; inode++ ) {
                 this->updateDofUnknownsDictionary(domain->giveDofManager(inode), tStep);
@@ -449,8 +446,7 @@ void
 XFEMStatic :: initializeDofUnknownsDictionary(TimeStep *tStep)
 {
     // Initializes all dof values to zero
-    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        Domain *domain = this->giveDomain(idomain);
+    for ( auto &domain: domainList ) {
         int nnodes = domain->giveNumberOfDofManagers();
         for ( int inode = 1; inode <= nnodes; inode++ ) {
             DofManager *node = domain->giveDofManager(inode);
@@ -468,8 +464,7 @@ XFEMStatic :: setTotalDisplacementFromUnknownsInDictionary(ValueModeType mode, T
 
     // Sets the values in the displacement vector based on stored values in the unknowns dictionaries.
     // Used in the beginning of each time step.
-    for ( int idomain = 1; idomain <= this->giveNumberOfDomains(); idomain++ ) {
-        Domain *domain = this->giveDomain(idomain);
+    for ( auto &domain: domainList ) {
         for ( int j = 1; j <= domain->giveNumberOfDofManagers(); j++ ) {
             DofManager *inode = domain->giveDofManager(j);
             int eqNum;

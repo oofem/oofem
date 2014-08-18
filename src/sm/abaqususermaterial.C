@@ -90,7 +90,8 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
     ///@todo Check all the windows support.
     this->umatobj = ( void * ) LoadLibrary( filename.c_str() );
     if ( !this->umatobj ) {
-        OOFEM_ERROR("couldn't load \"%s\",\ndlerror: %s", filename.c_str() );
+        DWORD dlresult = GetLastError(); //works for MinGW 32bit and MSVC
+        OOFEM_ERROR("Couldn't load \"%s\",\nerror code = %d", filename.c_str(), dlresult);
     }
 
     //     * ( void ** )( & this->umat ) = GetProcAddress( ( HMODULE ) this->umatobj, "umat_" );
@@ -98,7 +99,7 @@ IRResultType AbaqusUserMaterial :: initializeFrom(InputRecord *ir)
     if ( !this->umat ) {
         //         char *dlresult = GetLastError();
         DWORD dlresult = GetLastError(); //works for MinGW 32bit
-        OOFEM_ERROR("couldn't load symbol umat,\nerror: %s\n", dlresult);
+        OOFEM_ERROR("Couldn't load symbol umat,\nerror code: %d\n", dlresult);
     }
 
 #else
@@ -296,7 +297,7 @@ void AbaqusUserMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoin
      * nonlinearity is accounted for during the step (see “Procedures: overview,” Section 6.1.1); otherwise,
      * the array contains the original coordinates of the point */
     FloatArray coords;
-    gp->giveElement()->computeGlobalCoordinates( coords, * gp->giveCoordinates() );
+    gp->giveElement()->computeGlobalCoordinates( coords, * gp->giveNaturalCoordinates() );
 
     /* Rotation increment matrix. This matrix represents the increment of rigid body rotation of the basis
      * system in which the components of stress (STRESS) and strain (STRAN) are stored. It is provided so
@@ -461,7 +462,7 @@ void AbaqusUserMaterial :: giveFirstPKStressVector_3d(FloatArray &answer, GaussP
      * nonlinearity is accounted for during the step (see “Procedures: overview,” Section 6.1.1); otherwise,
      * the array contains the original coordinates of the point */
     FloatArray coords;
-    gp->giveElement()->computeGlobalCoordinates( coords, * gp->giveCoordinates() ); ///@todo Large deformations?
+    gp->giveElement()->computeGlobalCoordinates( coords, * gp->giveNaturalCoordinates() ); ///@todo Large deformations?
 
     /* Rotation increment matrix. This matrix represents the increment of rigid body rotation of the basis
      * system in which the components of stress (STRESS) and strain (STRAN) are stored. It is provided so
@@ -634,7 +635,7 @@ void AbaqusUserMaterialStatus :: updateYourself(TimeStep *tStep)
 int AbaqusUserMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
     AbaqusUserMaterialStatus *ms = static_cast< AbaqusUserMaterialStatus * >( this->giveStatus(gp) );
-    if ( type == IST_Undefined ) {
+    if ( type == IST_Undefined || type == IST_AbaqusStateVector ) {
         // The undefined value is used to just dump the entire state vector.
         answer = ms->giveStateVector();
         return 1;

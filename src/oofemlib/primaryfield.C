@@ -40,10 +40,11 @@
 #include "timestep.h"
 #include "datastream.h"
 #include "contextioerr.h"
+#include "engngm.h"
 
 namespace oofem {
 PrimaryField :: PrimaryField(EngngModel *a, int idomain,
-                             FieldType ft, int nHist) : Field(ft), solutionVectors(nHist + 1), solStepList(nHist + 1)
+                             FieldType ft, int nHist) : Field(ft), solutionVectors(nHist + 1), solStepList(nHist + 1, emodel)
 {
     this->actualStepNumber = -999;
     this->actualStepIndx = 0;
@@ -59,10 +60,6 @@ PrimaryField :: ~PrimaryField()
 void
 PrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answer, const UnknownNumberingScheme &s)
 {
-    int neq =  emodel->giveNumberOfDomainEquations(domainIndx, s);
-    answer.resize(neq);
-    answer.zero();
-
     if ( mode == VM_Total ) {
         answer = * ( this->giveSolutionVector(tStep) );
     } else if ( mode == VM_Incremental ) {
@@ -74,22 +71,39 @@ PrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answ
     }
 }
 
+void
+PrimaryField :: update(ValueModeType mode, TimeStep *tStep, FloatArray &vectorToStore)
+{
+    if ( mode == VM_Total ) {
+        * this->giveSolutionVector(tStep) = vectorToStore;
+    } else {
+        OOFEM_ERROR("unsupported mode %s", __ValueModeTypeToString(mode));
+    }
+}
 
 double
 PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
 {
     int eq = dof->giveEqn();
     if ( eq == 0 ) {
-        OOFEM_ERROR("invalid equation number");
+        OOFEM_ERROR("invalid equation number (slave dof maybe?)");
     }
 
     ///@todo Mikael: Prescribed values should be stored here too when we extend the usage of fields.
     /// We should store this in a different way than eqn.-numbers since they may change in-between time steps (requires complicated renumbering).
     if ( mode == VM_Total ) {
-        return this->giveSolutionVector(tStep)->at(eq);
+        int indxm0 = this->resolveIndx(tStep, 0);
+        if ( eq > 0 )
+            return this->giveSolutionVector(indxm0)->at(eq);
+        else
+            return this->givePrescribedVector(indxm0)->at(eq);
     } else if ( mode == VM_Incremental ) {
+        int indxm0 = this->resolveIndx(tStep, 0);
         int indxm1 = this->resolveIndx(tStep, -1);
-        return ( this->giveSolutionVector(tStep)->at(eq) - this->giveSolutionVector(indxm1)->at(eq) );
+        if ( eq > 0 )
+            return ( this->giveSolutionVector(indxm0)->at(eq) - this->giveSolutionVector(indxm1)->at(eq) );
+        else
+            return ( this->givePrescribedVector(indxm0)->at(eq) - this->givePrescribedVector(indxm1)->at(eq) );
     } else {
         OOFEM_ERROR("unsupported mode");
     }
@@ -171,16 +185,20 @@ PrimaryField :: giveSolutionVector(TimeStep *tStep)
 FloatArray *
 PrimaryField :: giveSolutionVector(int i)
 {
-    FloatArray *answer = NULL;
-    if ( ( i >= 1 ) && ( i <= ( nHistVectors + 1 ) ) ) {
-        answer = &solutionVectors[i-1];
-    } else {
+    if ( ( i < 1 ) || ( i > ( nHistVectors + 1 ) ) ) {
         OOFEM_ERROR("index out of range");
     }
-
-    return answer;
+    return &solutionVectors[i-1];
 }
 
+FloatArray *
+PrimaryField :: givePrescribedVector(int i)
+{
+    if ( ( i < 1 ) || ( i > ( nHistVectors + 1 ) ) ) {
+        OOFEM_ERROR("index out of range");
+    }
+    return &prescribedVectors[i-1];
+}
 
 
 int
@@ -211,7 +229,7 @@ PrimaryField :: advanceSolution(TimeStep *tStep)
 
     actualStepIndx = ( actualStepIndx > 0 ) ? actualStepIndx - 1 : nHistVectors;
     actualStepNumber = tStep->giveNumber();
-    solStepList[actualStepIndx].reset(new TimeStep(* tStep));
+    solStepList[actualStepIndx] = * tStep;
 }
 
 
@@ -234,22 +252,9 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
         }
     }
 
-    int flag;
     for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( solStepList[i] ) {
-            flag = 1;
-        } else {
-            flag = 0;
-        }
-
-        if ( !stream->write(& flag, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-
-        if ( flag ) {
-            if ( ( iores = solStepList[i]->saveContext(stream, mode) ) != CIO_OK ) {
-                THROW_CIOERR(iores);
-            }
+        if ( ( iores = solStepList[i].saveContext(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
         }
     }
 
@@ -275,22 +280,11 @@ PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
         }
     }
 
-    int flag;
     for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( !stream->read(& flag, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
+        solStepList[i] = TimeStep(emodel);
+        if ( ( iores = solStepList[i].restoreContext(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
         }
-
-        if ( flag ) {
-            std :: unique_ptr< TimeStep > iStep(new TimeStep(emodel));
-            if ( ( iores = iStep->restoreContext(stream, mode) ) != CIO_OK ) {
-                THROW_CIOERR(iores);
-            }
-            solStepList[i] = std::move(iStep);
-        } else {
-            solStepList[i].reset(NULL);
-        }
-
     }
 
     return CIO_OK;

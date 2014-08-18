@@ -33,6 +33,7 @@
  */
 
 #include "axisymm3d.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -70,6 +71,11 @@ Axisymm3d :: ~Axisymm3d()
 // destructor
 { }
 
+
+FEInterpolation *
+Axisymm3d :: giveInterpolation() const { return & interpolation; }
+
+
 Interface *
 Axisymm3d :: giveInterface(InterfaceType interface)
 {
@@ -96,7 +102,7 @@ Axisymm3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
     int size, ind = 1;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
 
     if ( ui == ALL_STRAINS ) {
@@ -129,7 +135,7 @@ Axisymm3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
 
     if ( ( li <= 3 ) && ( ui >= 3 ) ) {
         FloatArray n(4);
-        this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
         r = 0.;
         for ( int i = 1; i <= numberOfDofMans; i++ ) {
@@ -173,7 +179,7 @@ Axisymm3d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     FloatArray n;
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 6);
     answer.zero();
@@ -219,7 +225,7 @@ Axisymm3d :: computeVolumeAround(GaussPoint *gp)
     double determinant, weight, volume, r, x;
     FloatArray n;
 
-    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     r = 0.;
     for ( int i = 1; i <= numberOfDofMans; i++ ) {
@@ -227,7 +233,7 @@ Axisymm3d :: computeVolumeAround(GaussPoint *gp)
         r += x * n.at(i);
     }
 
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
@@ -433,7 +439,7 @@ Axisymm3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 4);
     answer.zero();
@@ -480,7 +486,7 @@ Axisymm3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     FloatArray c(2);
     this->computeEdgeIpGlobalCoords(c, gp, iEdge);
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
 
 
@@ -491,7 +497,7 @@ Axisymm3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 Axisymm3d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -571,7 +577,7 @@ Axisymm3d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray
 #ifdef __OOFEG
  #define TR_LENGHT_REDUCT 0.3333
 
-void Axisymm3d :: drawRawGeometry(oofegGraphicContext &gc)
+void Axisymm3d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
@@ -603,11 +609,10 @@ void Axisymm3d :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void Axisymm3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void Axisymm3d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -635,26 +640,25 @@ void Axisymm3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type
 }
 
 void
-Axisymm3d :: drawScalar(oofegGraphicContext &context)
+Axisymm3d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, indx, result = 0;
     WCRec p [ 3 ];
     GraphicObj *tr;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v1, v2, v3;
     double s [ 3 ], defScale;
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
-    if ( context.giveIntVarMode() == ISM_recovered ) {
-        result += this->giveInternalStateAtNode(v1, context.giveIntVarType(), context.giveIntVarMode(), 1, tStep);
-        result += this->giveInternalStateAtNode(v2, context.giveIntVarType(), context.giveIntVarMode(), 2, tStep);
-        result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
-    } else if ( context.giveIntVarMode() == ISM_local ) {
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
+        result += this->giveInternalStateAtNode(v1, gc.giveIntVarType(), gc.giveIntVarMode(), 1, tStep);
+        result += this->giveInternalStateAtNode(v2, gc.giveIntVarType(), gc.giveIntVarMode(), 2, tStep);
+        result += this->giveInternalStateAtNode(v3, gc.giveIntVarType(), gc.giveIntVarMode(), 3, tStep);
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
         GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-        result += giveIPValue(v1, gp, context.giveIntVarType(), tStep);
+        result += giveIPValue(v1, gp, gc.giveIntVarType(), tStep);
         v2 = v1;
         v3 = v1;
         result *= 3;
@@ -664,7 +668,7 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    indx = context.giveIntVarIndx();
+    indx = gc.giveIntVarIndx();
 
     s [ 0 ] = v1.at(indx);
     s [ 1 ] = v2.at(indx);
@@ -672,11 +676,11 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
 
-    if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+    if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
         for ( i = 0; i < 3; i++ ) {
-            if ( context.getInternalVarsDefGeoFlag() ) {
+            if ( gc.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
-                defScale = context.getDefScale();
+                defScale = gc.getDefScale();
                 p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                 p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                 p [ i ].z = 0.;
@@ -688,17 +692,17 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
         }
 
         //EASValsSetColor(gc.getYieldPlotColor(ratio));
-        context.updateFringeTableMinMax(s, 3);
+        gc.updateFringeTableMinMax(s, 3);
         tr =  CreateTriangleWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ]);
         EGWithMaskChangeAttributes(LAYER_MASK, tr);
         EMAddGraphicsToModel(ESIModel(), tr);
-    } else if ( ( context.getScalarAlgo() == SA_ZPROFILE ) || ( context.getScalarAlgo() == SA_COLORZPROFILE ) ) {
-        double landScale = context.getLandScale();
+    } else if ( ( gc.getScalarAlgo() == SA_ZPROFILE ) || ( gc.getScalarAlgo() == SA_COLORZPROFILE ) ) {
+        double landScale = gc.getLandScale();
 
         for ( i = 0; i < 3; i++ ) {
-            if ( context.getInternalVarsDefGeoFlag() ) {
+            if ( gc.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
-                defScale = context.getDefScale();
+                defScale = gc.getDefScale();
                 p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                 p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                 p [ i ].z = s [ i ] * landScale;
@@ -709,14 +713,14 @@ Axisymm3d :: drawScalar(oofegGraphicContext &context)
             }
         }
 
-        if ( context.getScalarAlgo() == SA_ZPROFILE ) {
-            EASValsSetColor( context.getDeformedElementColor() );
+        if ( gc.getScalarAlgo() == SA_ZPROFILE ) {
+            EASValsSetColor( gc.getDeformedElementColor() );
             EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
             EASValsSetFillStyle(FILL_SOLID);
             tr =  CreateTriangle3D(p);
             EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | FILL_MASK | LAYER_MASK, tr);
         } else {
-            context.updateFringeTableMinMax(s, 3);
+            gc.updateFringeTableMinMax(s, 3);
             EASValsSetFillStyle(FILL_SOLID);
             tr =  CreateTriangleWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ]);
             EGWithMaskChangeAttributes(FILL_MASK | LAYER_MASK, tr);

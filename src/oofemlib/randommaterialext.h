@@ -38,6 +38,7 @@
 #include "matstatus.h"
 #include "dictionary.h"
 #include "interface.h"
+#include "intarray.h"
 
 ///@name Input fields for RandomMaterialExt
 //@{

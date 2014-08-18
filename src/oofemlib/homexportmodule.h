@@ -36,10 +36,7 @@
 #define homexportmodule_h
 
 #include "exportmodule.h"
-#include "domain.h"
-#include "engngm.h"
-#include "intarray.h"
-
+#include "floatarray.h"
 
 ///@name Input fields for Homogenization export module
 //@{

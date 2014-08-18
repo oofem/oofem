@@ -33,6 +33,7 @@
  */
 
 #include "lspace.h"
+#include "fei3dhexalin.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -45,7 +46,6 @@
 #include "classfactory.h"
 
 #ifdef __OOFEG
- #include "engngm.h"
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
  #include "rcm2.h"
@@ -65,6 +65,8 @@ LSpace :: LSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNo
     numberOfGaussPoints = 8;
 }
 
+
+FEInterpolation *LSpace :: giveInterpolation() const { return & interpolation; }
 
 Interface *
 LSpace :: giveInterface(InterfaceType interface)
@@ -95,7 +97,7 @@ LSpace :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 24);
     answer.zero();
@@ -119,7 +121,7 @@ LSpace :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 24);
     answer.zero();
@@ -189,7 +191,7 @@ double LSpace :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
 
 
@@ -311,7 +313,7 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
             r.zero();
         }
 
-        coord = gp->giveCoordinates();
+        coord = gp->giveNaturalCoordinates();
         u = coord->at(1);
         v = coord->at(2);
         w = coord->at(3);
@@ -515,10 +517,16 @@ LSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refin
 }
 
 
+void LSpace :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+}
+
+
 #ifdef __OOFEG
  #define TR_LENGHT_REDUCT 0.3333
 
-void LSpace :: drawRawGeometry(oofegGraphicContext &gc)
+void LSpace :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 8 ];
     GraphicObj *go;
@@ -658,12 +666,11 @@ void LSpace :: drawTriad(FloatArray &coords, int isurf)
 }
 
 
-void LSpace :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void LSpace :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     int i;
     WCRec p [ 8 ];
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -688,45 +695,44 @@ void LSpace :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 }
 
 
-void LSpace :: drawScalar(oofegGraphicContext &context)
+void LSpace :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, indx, result = 0;
     WCRec p [ 8 ];
     GraphicObj *tr;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 8 ];
     double s [ 8 ], defScale = 0.0;
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
-    if ( context.giveIntVarMode() == ISM_recovered ) {
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
         for ( i = 1; i <= 8; i++ ) {
-            result += this->giveInternalStateAtNode(v [ i - 1 ], context.giveIntVarType(), context.giveIntVarMode(), i, tStep);
+            result += this->giveInternalStateAtNode(v [ i - 1 ], gc.giveIntVarType(), gc.giveIntVarMode(), i, tStep);
         }
 
         if ( result != 8 ) {
             return;
         }
-    } else if ( context.giveIntVarMode() == ISM_local ) {
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
         return;
     }
 
-    indx = context.giveIntVarIndx();
+    indx = gc.giveIntVarIndx();
 
     for ( i = 1; i <= 8; i++ ) {
         s [ i - 1 ] = v [ i - 1 ].at(indx);
     }
 
-    EASValsSetEdgeColor( context.getElementEdgeColor() );
+    EASValsSetEdgeColor( gc.getElementEdgeColor() );
     EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
-    if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+    if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
         for ( i = 0; i < 8; i++ ) {
-            if ( context.getInternalVarsDefGeoFlag() ) {
+            if ( gc.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
-                defScale = context.getDefScale();
+                defScale = gc.getDefScale();
                 p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                 p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                 p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(3, tStep, defScale);
@@ -737,7 +743,7 @@ void LSpace :: drawScalar(oofegGraphicContext &context)
             }
         }
 
-        context.updateFringeTableMinMax(s, 8);
+        gc.updateFringeTableMinMax(s, 8);
         tr = CreateHexahedronWD(p, s);
         EGWithMaskChangeAttributes(LAYER_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK, tr);
         EMAddGraphicsToModel(ESIModel(), tr);
@@ -745,13 +751,12 @@ void LSpace :: drawScalar(oofegGraphicContext &context)
 }
 
 void
-LSpace :: drawSpecial(oofegGraphicContext &gc)
+LSpace :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, j, k;
     WCRec q [ 4 ];
     GraphicObj *tr;
     IntegrationRule *iRule;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     FloatArray crackStatuses, cf;
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -776,7 +781,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc)
 
             //
             // obtain gp global coordinates
-            this->computeGlobalCoordinates( gpc, * gp->giveCoordinates() );
+            this->computeGlobalCoordinates( gpc, * gp->giveNaturalCoordinates() );
             length = 0.3333 * cbrt(this->computeVolumeAround(gp));
             if ( this->giveIPValue(crackDir, gp, IST_CrackDirs, tStep) ) {
                 this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
@@ -852,7 +857,7 @@ LSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.zero();
@@ -967,7 +972,7 @@ LSpace :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 LSpace :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
     return result *gp->giveWeight();
 }
@@ -976,7 +981,7 @@ LSpace :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 LSpace :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -999,7 +1004,7 @@ void
 LSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     FloatArray n(4);
-    interpolation.surfaceEvalN( n, iSurf, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.surfaceEvalN( n, iSurf, * sgp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 12);
     answer.zero();
@@ -1141,7 +1146,7 @@ double
 LSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
-    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     volume = determinant * weight;
@@ -1153,7 +1158,7 @@ LSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 LSpace :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    interpolation.surfaceLocal2global( answer, isurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.surfaceLocal2global( answer, isurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 

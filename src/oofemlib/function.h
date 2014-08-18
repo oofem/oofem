@@ -36,8 +36,8 @@
 #define function_h
 
 #include "femcmpnn.h"
-#include "domain.h"
 #include "valuemodetype.h"
+#include "intarray.h"
 #include "floatarray.h"
 
 #include <map>
@@ -119,11 +119,17 @@ public:
     double evaluate(TimeStep *tStep, ValueModeType mode);
 
     /**
-     * Returns the Returns the value of the function at given time.
-     * @param valDict Dictionary with values.
+     * Returns the value of the function for given input.
+     * @param valDict Map with inputs.
      * @param answer Function value.
      */
-    virtual void evaluate(FloatArray &answer, std :: map< std :: string, FunctionArgument > &valDict);
+    virtual void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict);
+    /**
+     * Returns the (scalar) value of the function for given input.
+     * @param valDict Map with inputs.
+     * @return Function value.
+     */
+    virtual double evaluate(const std :: map< std :: string, FunctionArgument > &valDict);
 
     /**
      * Returns the value of the function at given time.

@@ -35,20 +35,15 @@
 #ifndef communicator_h
 #define communicator_h
 
-#ifdef __PARALLEL_MODE
-
- #include "oofemcfg.h"
- #include "processcomm.h"
- #include "commbufftype.h"
- #include "communicatormode.h"
- #include "engngm.h"
- #include "error.h"
-
- #ifdef __USE_MPI
-  #include <mpi.h>
- #endif
+#include "oofemcfg.h"
+#include "processcomm.h"
+#include "commbufftype.h"
+#include "communicatormode.h"
+#include "error.h"
 
 namespace oofem {
+class EngngModel;
+
 /**
  * The Communicator and corresponding buffers (represented by this class)
  * are separated in order to allow share the same buffer by several communicators.
@@ -434,5 +429,4 @@ Communicator :: unpackAllData( T *ptr, P *dest, int ( T :: *unpackFunc )( P *, P
     return result;
 }
 } // end namespace oofem
-#endif
 #endif // communicator_h

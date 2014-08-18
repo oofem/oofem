@@ -127,6 +127,9 @@ InternalStateValueType giveInternalStateValueType(InternalStateType type)
     case IST_CrackDirs:
     case IST_CrackStatuses:
     case IST_CrackVector:
+    case IST_InterfaceFirstPKTraction:
+    case IST_InterfaceTraction:
+    case IST_InterfaceJump:
         return ISVT_VECTOR;
 
     case IST_MaxEquivalentStrainLevel:

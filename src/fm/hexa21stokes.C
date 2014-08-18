@@ -139,7 +139,7 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
 
     B.zero();
     for ( GaussPoint *gp: *iRule ) {
-        const FloatArray &lcoords = * gp->giveCoordinates();
+        const FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         double detJ = fabs( this->interpolation_quad.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
         this->interpolation_lin.evalN( Nh, lcoords, FEIElementGeometryWrapper(this) );
@@ -209,7 +209,7 @@ void Hexa21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType 
     temparray.zero();
     if ( gVector.giveSize() ) {
         for ( GaussPoint *gp: *iRule ) {
-            FloatArray *lcoords = gp->giveCoordinates();
+            FloatArray *lcoords = gp->giveNaturalCoordinates();
 
             double rho = mat->give('d', gp);
             double detJ = fabs( this->interpolation_quad.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) ) );
@@ -248,7 +248,7 @@ void Hexa21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad 
         iRule.SetUpPointsOnTriangle(numberOfSurfaceIPs, _Unknown);
 
         for ( GaussPoint *gp: iRule ) {
-            FloatArray &lcoords = * gp->giveCoordinates();
+            FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
             this->interpolation_quad.surfaceEvalN( N, iSurf, lcoords, FEIElementGeometryWrapper(this) );
             double dA = gp->giveWeight() * this->interpolation_quad.surfaceGiveTransformationJacobian( iSurf, lcoords, FEIElementGeometryWrapper(this) );
@@ -289,7 +289,7 @@ void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep
 
     for ( GaussPoint *gp: *iRule ) {
         // Compute Gauss point and determinant at current element
-        const FloatArray &lcoords = * gp->giveCoordinates();
+        const FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         double detJ = fabs( this->interpolation_quad.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
         double dV = detJ * gp->giveWeight();

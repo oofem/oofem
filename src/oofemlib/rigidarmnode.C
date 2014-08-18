@@ -37,6 +37,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "classfactory.h"
+#include "domain.h"
 
 namespace oofem {
 REGISTER_DofManager(RigidArmNode);

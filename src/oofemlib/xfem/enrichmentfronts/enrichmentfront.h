@@ -127,6 +127,8 @@ public:
 
     virtual double giveSupportRadius() const = 0;
 
+    virtual bool propagationIsAllowed() const {return true;}
+
     const TipInfo &giveTipInfo() const {return mTipInfo;}
 
     void computeCrackTangent(FloatArray &oTangent, FloatArray &oNormal, bool &oFlipTangent, const EfInput &iEfInput) const;

@@ -33,12 +33,12 @@
  */
 
 #include "qplanestraingrad.h"
+#include "fei2dquadlin.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
-#include "engngm.h"
 #include "crosssection.h"
 #include "classfactory.h"
 
@@ -49,7 +49,7 @@
 namespace oofem {
 REGISTER_Element(QPlaneStrainGrad);
 
-FEI2dQuadLin QPlaneStrainGrad :: interpolation(1, 2);
+FEI2dQuadLin QPlaneStrainGrad :: interpolation_lin(1, 2);
 
 QPlaneStrainGrad :: QPlaneStrainGrad(int n, Domain *aDomain) : QPlaneStrain(n, aDomain), GradDpElement()
     // Constructor.
@@ -68,7 +68,7 @@ void
 QPlaneStrainGrad :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 {
-    if ( inode <= nSecNodes ) {
+    if ( inode <= 4 ) {
         answer = {D_u, D_v, G_0};
     } else {
         answer = {D_u, D_v};
@@ -94,31 +94,17 @@ QPlaneStrainGrad :: computeGaussPoints()
 
 void
 QPlaneStrainGrad :: computeNkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver, eva-
-// luated at gp.
 {
     FloatArray n;
-
-    this->interpolation.evalN( n, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
+    this->interpolation_lin.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 1);
 }
 
 void
 QPlaneStrainGrad :: computeBkappaMatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the [1x8] strain-displacement matrix {B} of the receiver, eva-
-// luated at gp.
 {
     FloatMatrix dnx;
-
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(2, 4);
-    answer.zero();
-
-    for ( int i = 1; i <= 4; i++ ) {
-        answer.at(1, i) = dnx.at(i, 1);
-        answer.at(2, i) = dnx.at(i, 2);
-    }
+    this->interpolation_lin.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.beTranspositionOf(dnx);
 }
 }

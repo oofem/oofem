@@ -46,7 +46,6 @@
 #include "classfactory.h"
 
 #ifdef __OOFEG
- #include "engngm.h"
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
  #include "rcm2.h"
@@ -109,7 +108,7 @@ LTRSpace :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
 // luated at gp.
 {
     FloatMatrix dn(4, 3);
-    interpolation.evaldNdx( dn, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 12);
     answer.zero();
@@ -140,7 +139,7 @@ LTRSpace :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 12);
     answer.zero();
@@ -174,7 +173,7 @@ double LTRSpace :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     volume = determinant * weight;
@@ -376,10 +375,15 @@ LTRSpace :: HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *ref
                                        controlNode, controlDof, aMode, "LSpace");
 }
 
+void LTRSpace :: HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
+}
+
 #ifdef __OOFEG
  #define TR_LENGHT_REDUCT 0.3333
 
-void LTRSpace :: drawRawGeometry(oofegGraphicContext &gc)
+void LTRSpace :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
@@ -414,11 +418,10 @@ void LTRSpace :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void LTRSpace :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void LTRSpace :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -450,43 +453,42 @@ void LTRSpace :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 }
 
 
-void LTRSpace :: drawScalar(oofegGraphicContext &context)
+void LTRSpace :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, indx, result = 0;
     WCRec p [ 4 ];
     GraphicObj *tr;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 4 ];
     double s [ 4 ], defScale = 0.0;
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
-    if ( context.giveIntVarMode() == ISM_recovered ) {
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
         for ( i = 1; i <= 4; i++ ) {
-            result += this->giveInternalStateAtNode(v [ i - 1 ], context.giveIntVarType(), context.giveIntVarMode(), i, tStep);
+            result += this->giveInternalStateAtNode(v [ i - 1 ], gc.giveIntVarType(), gc.giveIntVarMode(), i, tStep);
         }
 
         if ( result != 4 ) {
             return;
         }
-    } else if ( context.giveIntVarMode() == ISM_local ) {
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
         return;
     }
 
-    indx = context.giveIntVarIndx();
+    indx = gc.giveIntVarIndx();
 
     for ( i = 1; i <= 4; i++ ) {
         s [ i - 1 ] = v [ i - 1 ].at(indx);
     }
 
-    EASValsSetEdgeColor( context.getElementEdgeColor() );
+    EASValsSetEdgeColor( gc.getElementEdgeColor() );
     EASValsSetEdgeFlag(true);
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
-    if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+    if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
         for ( i = 0; i < 4; i++ ) {
-            if ( context.getInternalVarsDefGeoFlag() ) {
+            if ( gc.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
                 p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                 p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
@@ -498,7 +500,7 @@ void LTRSpace :: drawScalar(oofegGraphicContext &context)
             }
         }
 
-        context.updateFringeTableMinMax(s, 4);
+        gc.updateFringeTableMinMax(s, 4);
         tr = CreateTetraWD(p, s);
         EGWithMaskChangeAttributes(LAYER_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK, tr);
         EMAddGraphicsToModel(ESIModel(), tr);
@@ -506,14 +508,13 @@ void LTRSpace :: drawScalar(oofegGraphicContext &context)
 }
 
 void
-LTRSpace :: drawSpecial(oofegGraphicContext &gc)
+LTRSpace :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, j, k;
     WCRec q [ 4 ];
     GraphicObj *tr;
     IntegrationRule *iRule = integrationRulesArray [ 0 ];
     GaussPoint *gp;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     FloatArray crackStatuses, cf;
 
@@ -702,7 +703,7 @@ LTRSpace :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
      */
 
     FloatArray n(2);
-    this->interpolation.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.zero();
@@ -775,7 +776,7 @@ LTRSpace :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 LTRSpace :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
     return result *gp->giveWeight();
 }
@@ -784,7 +785,7 @@ LTRSpace :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 LTRSpace :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -806,7 +807,7 @@ void
 LTRSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     FloatArray n(3);
-    interpolation.surfaceEvalN( n, iSurf, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.surfaceEvalN( n, iSurf, * sgp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 9);
     answer.zero();
@@ -896,7 +897,7 @@ double
 LTRSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
-    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
     weight      = gp->giveWeight();
     volume      = determinant * weight;
@@ -904,14 +905,14 @@ LTRSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
     return volume;
 
     // the following works only for 1 GP !!!
-    // return interpolation.surfaceGiveTransformationJacobian (iSurf, domain, nodeArray, *gp->giveCoordinates(), 0.0);
+    // return interpolation.surfaceGiveTransformationJacobian (iSurf, domain, nodeArray, *gp->giveNaturalCoordinates(), 0.0);
 }
 
 
 void
 LTRSpace :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    interpolation.surfaceLocal2global( answer, isurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.surfaceLocal2global( answer, isurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 

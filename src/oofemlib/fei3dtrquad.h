@@ -41,7 +41,7 @@ namespace oofem {
 /**
  * Second order triangular interpolation in 3D space (6 nodes).
  * @todo This class is entirely unchecked.
- * @author Jim Brozoulis
+ * @author Jim Brouzoulis
  * @author Mikael Öhman
  */
 class OOFEM_EXPORT FEI3dTrQuad : public FEInterpolation3d
@@ -62,7 +62,7 @@ public:
     // new methods
     void giveDerivativeXi(FloatArray &n, const FloatArray &lcoords);
     void giveDerivativeEta(FloatArray &n, const FloatArray &lcoords);
-    //void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
+    virtual void giveLocalNodeCoords(FloatMatrix &answer);
     virtual void evaldNdxi(FloatMatrix &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     void surfaceEvaldNdxi(FloatMatrix &answer, const FloatArray &lcoords);
 
@@ -76,6 +76,8 @@ public:
     virtual double edgeGiveTransformationJacobian(int iedge, const FloatArray &lcoords,
                                                   const FEICellGeometry &cellgeo);
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
+
+    virtual int giveNumberOfEdges() const { return 3; };
 
     // Surface
     virtual void surfaceEvalN(FloatArray &answer, int isurf, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
@@ -92,6 +94,7 @@ public:
 
     virtual IntegrationRule *giveIntegrationRule(int order);
     virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
+    double giveArea(const FEICellGeometry &cellgeo) const;
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);

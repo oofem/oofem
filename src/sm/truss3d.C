@@ -33,6 +33,7 @@
  */
 
 #include "truss3d.h"
+#include "fei3dlinelin.h"
 #include "node.h"
 #include "material.h"
 #include "structuralcrosssection.h"
@@ -58,6 +59,9 @@ Truss3d :: Truss3d(int n, Domain *aDomain) :
 {
     numberOfDofMans = 2;
 }
+
+
+FEInterpolation *Truss3d :: giveInterpolation() const { return & interp; }
 
 
 Interface *
@@ -90,7 +94,7 @@ Truss3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
 {
     FloatMatrix dN;
-    this->interp.evaldNdx( dN, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp.evaldNdx( dN, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(1, 6);
     answer.at(1, 1) = dN.at(1, 1);
@@ -160,7 +164,7 @@ Truss3d :: computeVolumeAround(GaussPoint *gp)
 // Returns the length of the receiver. This method is valid only if 1
 // Gauss point is used.
 {
-    double detJ = this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     double weight  = gp->giveWeight();
     return detJ *weight *this->giveCrossSection()->give(CS_Area, gp);
 }
@@ -216,7 +220,7 @@ Truss3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 void
 Truss3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
-    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 
@@ -243,14 +247,21 @@ Truss3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 double
-Truss3d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+Truss3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     if ( iEdge != 1 ) { // edge between nodes 1 2
         OOFEM_ERROR("wrong edge number");
     }
 
     double weight = gp->giveWeight();
-    return this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) * weight;
+    return this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) * weight;
+}
+
+
+void
+Truss3d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+{
+    computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
 }
 
 
@@ -273,7 +284,7 @@ Truss3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussP
 
 
 #ifdef __OOFEG
-void Truss3d :: drawRawGeometry(oofegGraphicContext &gc)
+void Truss3d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -298,10 +309,9 @@ void Truss3d :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void Truss3d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void Truss3d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* point */

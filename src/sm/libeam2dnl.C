@@ -77,7 +77,7 @@ LIBeam2dNL :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int 
     double l, ksi, n1, n2, n1x, n2x, n3x;
 
     l    = this->computeLength();
-    ksi  = gp->giveCoordinate(1);
+    ksi  = gp->giveNaturalCoordinate(1);
 
     n1    = 0.5 * ( 1.0 - ksi );
     n2    = 0.5 * ( 1.0 + ksi );
@@ -112,7 +112,7 @@ LIBeam2dNL :: computeNLBMatrixAt(FloatMatrix &answer, GaussPoint *gp, int i)
     double l, l8, ll88, ksi, n1x, n2x, n3x;
 
     l    = this->computeLength();
-    ksi  = gp->giveCoordinate(1);
+    ksi  = gp->giveNaturalCoordinate(1);
 
     //n1    = 0.5*(1.0 - ksi);
     //n2    = 0.5*(1.0 + ksi);
@@ -401,7 +401,7 @@ LIBeam2dNL :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &m
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(2); // {Exx,GMzx}
@@ -497,7 +497,7 @@ LIBeam2dNL :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *g
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 
@@ -532,6 +532,13 @@ LIBeam2dNL ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 
     double weight  = gp->giveWeight();
     return 0.5 * this->computeLength() * weight;
+}
+
+
+void
+LIBeam2dNL :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+{
+    computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
 }
 
 int
@@ -586,7 +593,7 @@ LIBeam2dNL :: computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *
 
 
 #ifdef __OOFEG
-void LIBeam2dNL :: drawRawGeometry(oofegGraphicContext &gc)
+void LIBeam2dNL :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
 
@@ -612,14 +619,13 @@ void LIBeam2dNL :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void LIBeam2dNL :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void LIBeam2dNL :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
     //  if (!go) { // create new one
     WCRec p [ 2 ]; /* poin */

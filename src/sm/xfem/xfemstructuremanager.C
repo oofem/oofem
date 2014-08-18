@@ -115,10 +115,10 @@ void XfemStructureManager :: splitCracks()
 
                     std::vector<FloatArray> intersectionPoints;
                     std::vector<double> arcPositions_i, arcPositions_j;
-                    crack_i->computeIntersectionPoints(*crack_j, intersectionPoints, arcPositions_i);
+                    crack_i->computeCrackIntersectionPoints(*crack_j, intersectionPoints, arcPositions_i);
                     crack_j->computeArcPoints(intersectionPoints, arcPositions_j);
 
-                    const double arcLengthTol = 1.0e-9;
+                    const double arcLengthTol = 1.0e-6;
 
                     for(int k = 0; k < int(arcPositions_i.size()); k++) {
 
@@ -158,7 +158,7 @@ void XfemStructureManager :: splitCracks()
 
                                 EDCrack *ed = dynamic_cast<EDCrack*>( newEI_1->giveEnrichmentDomain() );
                                 if(ed != NULL) {
-                                    //printf("arcPositions[k-1]: %e arcPositions[k]: %e\n", arcPositions[k-1], arcPositions[k] );
+                                    //printf("arcPositions_i[k-1]: %e arcPositions_i[k]: %e\n", arcPositions_i[k-1], arcPositions_i[k] );
                                     ed->cropPolygon(arcPositions_i[k-1], arcPositions_i[k]);
 
 

@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
 #ifndef rankinematnl_h
+#define rankinematnl_h
 
 #include "rankinemat.h"
 #include "structuralnonlocalmaterialext.h"
@@ -126,7 +126,7 @@ public:
 
 #ifdef __OOFEG
     // Plots the sparse structure of stiffness contribution.
-    //  virtual void NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(GaussPoint* gp, oofegGraphicContext& gc, TimeStep* tStep);
+    //virtual void NonlocalMaterialStiffnessInterface_showSparseMtrxStructure(GaussPoint *gp, oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
     virtual void NonlocalMaterialStiffnessInterface_addIPContribution(SparseMtrx &dest, const UnknownNumberingScheme &s,
@@ -185,5 +185,4 @@ protected:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RankineMatNlStatus(1, RankineMat :: domain, gp); }
 };
 } // end namespace oofem
-#define rankinematnl_h
 #endif

@@ -108,10 +108,6 @@ public:
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-#ifdef __PARALLEL_MODE
-    virtual void initParallelContexts();
-#endif
-
     virtual int checkConsistency();
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
     virtual void doStepOutput(TimeStep *tStep);

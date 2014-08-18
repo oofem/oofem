@@ -33,6 +33,7 @@
  */
 
 #include "qspace.h"
+#include "fei3dhexaquad.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -64,6 +65,9 @@ QSpace :: initializeFrom(InputRecord *ir)
 
     return this->NLStructuralElement :: initializeFrom(ir);
 }
+
+
+FEInterpolation *QSpace :: giveInterpolation() const { return & interpolation; }
 
 
 void
@@ -104,7 +108,7 @@ QSpace :: computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoin
         FloatArray x, y, z;
         FloatArray rotStrain, s;
 
-        this->giveMaterialOrientationAt( x, y, z, * gp->giveCoordinates() );
+        this->giveMaterialOrientationAt( x, y, z, * gp->giveNaturalCoordinates() );
         // Transform from global c.s. to material c.s.
 #if 0
         rotStrain = {
@@ -158,7 +162,7 @@ QSpace :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode
         FloatArray x, y, z;
         FloatMatrix Q;
 
-        this->giveMaterialOrientationAt( x, y, z, * gp->giveCoordinates() );
+        this->giveMaterialOrientationAt( x, y, z, * gp->giveNaturalCoordinates() );
 
 #if 0
         Q = {
@@ -225,7 +229,7 @@ double
 QSpace :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
-    double determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     double weight      = gp->giveWeight();
 
     return ( determinant * weight );
@@ -260,7 +264,7 @@ QSpace :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 60);
     answer.zero();
@@ -287,7 +291,7 @@ QSpace :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 60);
     answer.zero();
@@ -323,7 +327,7 @@ void
 QSpace :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
     FloatArray n;
-    interpolation.surfaceEvalN( n, iSurf, * sgp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.surfaceEvalN( n, iSurf, * sgp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     answer.beNMatrixOf(n, 3);
 }
 
@@ -348,7 +352,7 @@ double
 QSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 {
     double determinant, weight, volume;
-    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( interpolation.surfaceGiveTransformationJacobian( iSurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
 
     weight = gp->giveWeight();
     volume = determinant * weight;
@@ -359,7 +363,7 @@ QSpace :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 QSpace :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf)
 {
-    interpolation.surfaceLocal2global( answer, iSurf, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    interpolation.surfaceLocal2global( answer, iSurf, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 int

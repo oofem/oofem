@@ -36,35 +36,34 @@
 #define enrichmentitem_h
 
 #include "femcmpnn.h"
-#include "domain.h"
-#include "floatmatrix.h"
-#include "dofiditem.h"
 #include "tipinfo.h"
+#include "floatmatrix.h"
+#include "intarray.h"
+#include "dofmanager.h"
+#include "xfem/enrichmentfronts/enrichmentfront.h"
 
 #include <memory>
-
-#include "dofmanager.h"
 #include <algorithm>
 #include <unordered_map>
 
-#include "xfem/enrichmentfronts/enrichmentfront.h"
 
-///@name Input fields for XFEM
+///@name Input fields for EnrichmentItem
 //@{
-#define _IFT_Inclusion_Name "inclusion"
-#define _IFT_Inclusion_CrossSection "crosssection"
-
 #define _IFT_EnrichmentItem_domains "enrichmentdomains"
 #define _IFT_EnrichmentItem_domain "enrichmentdomain"
 #define _IFT_EnrichmentItem_function "enrichmentfunction"
 #define _IFT_EnrichmentItem_front "enrichmentfront"
 #define _IFT_EnrichmentItem_propagationlaw "propagationlaw"
-
 #define _IFT_EnrichmentItem_inheritbc "inheritbc"
-
 //@}
 
-#define _IFT_Crack_Name "crack"
+#define _IFT_Inclusion_Name "inclusion"
+#define _IFT_Inclusion_CrossSection "crosssection"
+#define _IFT_ShellCrack_Name "shellcrack"
+#define _IFT_ShellCrack_xiBottom "xibottom"
+#define _IFT_ShellCrack_xiTop "xitop"
+
+
 
 
 
@@ -84,6 +83,8 @@ class DynamicDataReader;
 class Triangle;
 class GnuplotExportModule;
 class GaussPoint;
+class CrossSection;
+class Element;
 
 
 enum NodeEnrichmentType : int {
@@ -152,7 +153,7 @@ public:
     virtual void updateGeometry();
     virtual void propagateFronts();
 
-    virtual bool hasPropagatingFronts() const { return mPropLawIndex != 0; }
+    virtual bool hasPropagatingFronts() const;
 
 
     int giveStartOfDofIdPool() const { return this->startOfDofIdPool; };
@@ -321,6 +322,9 @@ public:
 };
 
 
+
+
+
 /////////////////////////////////////////////////
 // Function implementations
 
@@ -380,7 +384,17 @@ void EnrichmentItem :: interpSurfaceLevelSet(double &oLevelSet, const FloatArray
         oLevelSet -= iN.at(i) * mLevelSetSurfaceNormalDir [ iNodeInd [ i - 1 ] - 1 ];
     }
 }
+
+
+
+
+
 } // end namespace oofem
+
+
+
+
+
 
 
 

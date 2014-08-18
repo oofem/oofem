@@ -45,12 +45,12 @@
 #include "zzerrorestimator.h"
 #include "mmashapefunctprojection.h"
 #include "huertaerrorestimator.h"
-#include "fei2dtrlin.h"
-#include "gausspoint.h"
 
 #define _IFT_TrPlaneStrain_Name "trplanestrain"
 
 namespace oofem {
+class FEI2dTrLin;
+
 /**
  * This class implements an triangular three-node  plane-
  * strain elasticity finite element. Each node has 2 degrees of freedom.
@@ -71,7 +71,7 @@ public:
     TrPlaneStrain(int n, Domain * d);
     virtual ~TrPlaneStrain() { }
 
-    virtual FEInterpolation *giveInterpolation() const { return & interp; }
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual int computeNumberOfDofs() { return 6; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
@@ -104,19 +104,16 @@ public:
                                                                   int &localNodeId, int &localElemId, int &localBcId,
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode);
-    virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
-    { computeLocalCoordinates(answer, coords); }
-    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-    { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
+    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
     virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
                                                                       coordType ct, nodalValContainerType &list,
                                                                       InternalStateType type, TimeStep *tStep);
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &context);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
     // definition & identification

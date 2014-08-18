@@ -33,8 +33,9 @@ IRResultType PrescribedGradientBCWeakDirichlet :: initializeFrom(InputRecord *ir
 
 void PrescribedGradientBCWeakDirichlet :: postInitialize()
 {
-	bool enforceCornerPeriodicity = false;
-    createTractionMesh(enforceCornerPeriodicity);
+    bool enforceCornerPeriodicity = false;
+    int numSides = 4;
+    createTractionMesh(enforceCornerPeriodicity, numSides);
 }
 
 void PrescribedGradientBCWeakDirichlet::giveBoundaryCoordVector(FloatArray &oX, const FloatArray &iPos) const

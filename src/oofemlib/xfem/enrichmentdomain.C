@@ -42,6 +42,7 @@
 #include "enrichmentfunction.h"
 #include "xfemmanager.h"
 #include "dynamicinputrecord.h"
+#include "set.h"
 
 #include <algorithm>
 
@@ -237,20 +238,19 @@ bool EDCrack :: giveTipInfos(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const
     return false;
 }
 
-bool EDCrack :: propagateTips(const std :: vector< TipPropagation > &iTipProp) {
-    for ( size_t i = 0; i < iTipProp.size(); i++ ) {
-        if ( iTipProp [ i ].mTipIndex == 0 ) {
+bool EDCrack :: propagateTip(const TipPropagation &iTipProp) {
+        if ( iTipProp.mTipIndex == 0 ) {
             // Propagate start point
             FloatArray pos( bg->giveVertex(1) );
-            pos.add(iTipProp [ i ].mPropagationLength, iTipProp [ i ].mPropagationDir);
+            pos.add(iTipProp.mPropagationLength, iTipProp.mPropagationDir);
             bg->insertVertexFront(pos);
-        } else if ( iTipProp [ i ].mTipIndex == 1 ) {
+        } else if ( iTipProp.mTipIndex == 1 ) {
             // Propagate end point
             FloatArray pos( bg->giveVertex( bg->giveNrVertices() ) );
-            pos.add(iTipProp [ i ].mPropagationLength, iTipProp [ i ].mPropagationDir);
+            pos.add(iTipProp.mPropagationLength, iTipProp.mPropagationDir);
             bg->insertVertexBack(pos);
         }
-    }
+
     return true;
 }
 
@@ -295,6 +295,26 @@ IRResultType DofManList :: initializeFrom(InputRecord *ir)
     //IR_GIVE_FIELD(ir, this->xi, _IFT_DofManList_DelaminationLevel);
 
     return IRRT_OK;
+}
+
+int
+DofManList::instanciateYourself( Domain *d )
+{
+
+    // Set the nodes based on a given node set
+    if(this->setNumber > 0) {
+
+        Set *set = d->giveSet( this->setNumber );
+        const IntArray &nodes = set->giveNodeList( );
+        //nodes.printYourself();
+        for(int i = 1; i <= nodes.giveSize( ); i++) {
+            this->dofManList.push_back( nodes.at( i ) );
+        }
+    }
+
+    std::sort( dofManList.begin( ), this->dofManList.end( ) );
+
+    return 1;
 }
 
 void DofManList :: giveInputRecord(DynamicInputRecord &input)

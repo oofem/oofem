@@ -31,11 +31,12 @@
  *  License along with this library; if not, write to the Free Software
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#ifdef __PARALLEL_MODE
 
 #include "nonlocalmatwtp.h"
 #include "nonlocalmaterialext.h"
 #include "element.h"
+#include "dofmanager.h"
+#include "engngm.h"
 #include "gausspoint.h"
 #include "material.h"
 #include "communicator.h"
@@ -522,4 +523,3 @@ NonlocalMaterialWTP :: fastElementIPNonlocTableUpdater(GaussPoint *gp, IntArray 
     }
 }
 } // end namespace oofem
-#endif

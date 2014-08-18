@@ -43,6 +43,7 @@ class SparseMtrx;
 class GaussPoint;
 class TimeStep;
 class oofegGraphicContext;
+class UnknownNumberingScheme;
 
 /**
  * Class Nonlocal Material Stiffness Interface. This is only abstract class.

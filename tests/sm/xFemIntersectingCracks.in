@@ -1,28 +1,28 @@
 xFemIntersectingCracks.out
 Test of enrichment front for intersecting cracks. Written by Erik Svenning, Chalmers University of Technology, February 2014
-XFEMStatic nsteps 1 deltat 1.0 controlmode 1 rtolv 1.0e-6 MaxIter 40 minIter 2 stiffmode 0 nmodules 1 manrmsteps 1 forceremap 0
+StaticStructural nsteps 1 deltat 1.0 rtolv 1.0e-6 MaxIter 40 minIter 2 nmodules 1 manrmsteps 1
 errorcheck filename "xFemIntersectingCracks.in"
 #vtkxml tstep_all domain_all primvars 1 1 cellvars 1 1
 #gnuplot tstep_all reactionforces boundaryconditions
 domain 2dPlaneStress
 OutputManager tstep_all dofman_all element_all
 ndofman 16 nelem 9 ncrosssect 1 nmat 1 nbc 3 nic 0 nltf 1 nset 0 nxfemman 1
-node 1     coords 3  0        0        0       bc 2 1 1
-node 2     coords 3  1        0        0       bc 2 1 1
-node 3     coords 3  1        1        0       bc 2 2 3 
-node 4     coords 3  0        1        0       bc 2 1 1
-node 5     coords 3  0.333333  0        0       bc 2 1 1
-node 6     coords 3  0.666667  0        0       bc 2 1 1
-node 7     coords 3  1        0.333333  0       bc 2 1 1
-node 8     coords 3  1        0.666667  0       bc 2 2 3
-node 9     coords 3  0.666667  1        0       bc 2 2 3
-node 10    coords 3  0.333333  1        0       bc 2 1 1
-node 11    coords 3  0        0.666667  0       bc 2 1 1
-node 12    coords 3  0        0.333333  0       bc 2 1 1
-node 13    coords 3  0.666667  0.333333  0       
-node 14    coords 3  0.666667  0.666667  0       
-node 15    coords 3  0.333333  0.333333  0       
-node 16    coords 3  0.333333  0.666667  0       
+node 1     coords 2  0        0        bc 2 1 1
+node 2     coords 2  1        0        bc 2 1 1
+node 3     coords 2  1        1        bc 2 2 3 
+node 4     coords 2  0        1        bc 2 1 1
+node 5     coords 2  0.333333  0       bc 2 1 1
+node 6     coords 2  0.666667  0       bc 2 1 1
+node 7     coords 2  1        0.333333 bc 2 1 1
+node 8     coords 2  1        0.666667 bc 2 2 3
+node 9     coords 2  0.666667  1       bc 2 2 3
+node 10    coords 2  0.333333  1       bc 2 1 1
+node 11    coords 2  0        0.666667 bc 2 1 1
+node 12    coords 2  0        0.333333 bc 2 1 1
+node 13    coords 2  0.666667  0.333333       
+node 14    coords 2  0.666667  0.666667        
+node 15    coords 2  0.333333  0.333333        
+node 16    coords 2  0.333333  0.666667        
 PlaneStress2DXFEM 13    nodes 4   2   6   13  7   mat 1 crosssect 1 nip 4 nlgeo 0 useplanestrain 1
 PlaneStress2DXFEM 14    nodes 4   7   13  14  8   mat 1 crosssect 1 nip 4 nlgeo 0 useplanestrain 1
 PlaneStress2DXFEM 15    nodes 4   8   14  9   3   mat 1 crosssect 1 nip 4 nlgeo 0 useplanestrain 1

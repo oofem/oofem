@@ -50,6 +50,7 @@
 #include <ostream>
 #include <memory>
 #include <numeric>
+#include <cmath>
 
 #define FAST_RESIZE(newsize) \
     if ( (newsize) < this->giveSize() ) { \
@@ -68,6 +69,17 @@ extern "C" {
 #endif
 
 namespace oofem {
+
+bool FloatArray ::isFinite() const
+{
+    for(double val : values) {
+        if(!std::isfinite(val)) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 #ifdef DEBUG
 double &
@@ -117,6 +129,7 @@ double FloatArray :: at(int i) const
     return values [ i - 1 ];
 }
 
+#endif
 void FloatArray :: checkBounds(int i) const
 // Checks that the receiver's size is not smaller than 'i'.
 {
@@ -128,7 +141,6 @@ void FloatArray :: checkBounds(int i) const
         OOFEM_ERROR("array error on index : %d > %d", i, this->giveSize());
     }
 }
-#endif
 
 
 void
@@ -464,53 +476,44 @@ double FloatArray :: distance(const FloatArray &x) const
     return sqrt( this->distance_square(x) );
 }
 
-double FloatArray :: distance(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const
+double FloatArray :: distance(const FloatArray &iP1, const FloatArray &iP2, double &oXi, double &oXiUnbounded) const
 {
-	return sqrt( distance_square(iP1, iP2, oXi) );
+    return sqrt( distance_square(iP1, iP2, oXi, oXiUnbounded) );
 }
 
-double FloatArray :: distance_square(const FloatArray &iP1, const FloatArray &iP2, double &oXi) const
+double FloatArray :: distance_square(const FloatArray &iP1, const FloatArray &iP2, double &oXi, double &oXiUnbounded) const
 {
-    double dist2 = 0.0;
-
-    // Vector from start P1 to point X
-    FloatArray u;
-    u.beDifferenceOf(* this, iP1);
-
-    // Line tangent vector
-    FloatArray t;
-    t.beDifferenceOf(iP2, iP1);
-    double l2 = t.computeSquaredNorm();
+    const double l2 = iP1.distance_square(iP2);
 
     if ( l2 > 0.0 ) {
-        double l = t.normalize();
-        double s = dot(u, t);
+
+        const double s = (dot(*this, iP2) - dot(*this, iP1) ) - ( dot(iP1, iP2) - dot(iP1, iP1) );
 
         if ( s < 0.0 ) {
             // X is closest to P1
-            dist2 = this->distance_square(iP1);
             oXi = 0.0;
-            return dist2;
+            oXiUnbounded = s/l2;
+            return this->distance_square(iP1);
         } else {
-            if ( s > l ) {
+            if ( s > l2 ) {
                 // X is closest to P2
-                dist2 = this->distance_square(iP2);
                 oXi = 1.0;
-                return dist2;
+                oXiUnbounded = s/l2;
+                return this->distance_square(iP2);
             } else {
-                oXi = s / l;
-                FloatArray q = ( 1.0 - oXi ) * iP1 + oXi * iP2;
-                dist2 = this->distance_square(q);
-                return dist2;
+                oXi = s / l2;
+                oXiUnbounded = s/l2;
+                const FloatArray q = ( 1.0 - oXi ) * iP1 + oXi * iP2;
+                return this->distance_square(q);
             }
         }
     } else {
         // If the points P1 and P2 coincide,
         // we can compute the distance to any
         // of these points.
-        dist2 = this->distance_square(iP1);
         oXi = 0.5;
-        return dist2;
+        oXiUnbounded = 0.5;
+        return this->distance_square(iP1);
     }
 }
 
@@ -736,6 +739,17 @@ void FloatArray :: printYourself() const
     printf("\n");
 }
 
+
+void FloatArray :: printYourself(const std::string name) const
+// Prints the receiver on screen.
+{
+    printf("%s (%d): \n", name.c_str(), this->giveSize());
+    for ( double x: *this ) {
+        printf( "%10.3e  ", x );
+    }
+
+    printf("\n");
+}
 
 void FloatArray :: pY() const
 // Prints the receiver on screen with higher accuracy than printYourself.

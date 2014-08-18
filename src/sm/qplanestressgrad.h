@@ -34,19 +34,19 @@
 
 #ifndef qplanestressgrad_h
 #define qplanestressgrad_h
-#include "nlstructuralelement.h"
-#include "gaussintegrationrule.h"
-#include "graddpelement.h"
+
 #include "qplanstrss.h"
-#include "fei2dquadlin.h"
+#include "graddpelement.h"
 
 #define _IFT_QPlaneStressGrad_Name "qplanestressgrad"
 
 namespace oofem {
+class FEI2dQuadLin;
+
 class QPlaneStressGrad : public QPlaneStress2d, public GradDpElement
 {
 protected:
-    static FEI2dQuadLin interpolation;
+    static FEI2dQuadLin interpolation_lin;
 
 public:
     QPlaneStressGrad(int n, Domain * d);

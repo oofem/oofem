@@ -33,6 +33,7 @@
  */
 
 #include "tr1_ht.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "crosssection.h"
 #include "gausspoint.h"
@@ -64,8 +65,11 @@ Tr1_hmt :: Tr1_hmt(int n, Domain *aDomain) : Tr1_ht(n, aDomain)
 }
 
 Tr1_ht :: ~Tr1_ht()
-// Destructor
 { }
+
+
+FEInterpolation *
+Tr1_ht :: giveInterpolation() const { return & this->interp; }
 
 
 void
@@ -101,7 +105,7 @@ Tr1_ht :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, volume;
-    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    determinant = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     weight = gp->giveWeight();
     volume = determinant * weight * this->giveCrossSection()->give(CS_Thickness, gp);
 
@@ -119,9 +123,9 @@ Tr1_ht :: giveThicknessAt(const FloatArray &gcoords)
 double
 Tr1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     FloatArray gc;
-    double thick = this->giveCrossSection()->give(CS_Thickness, gp->giveCoordinates(), NULL, this); // 't'
+    double thick = this->giveCrossSection()->give(CS_Thickness, gp->giveNaturalCoordinates(), NULL, this); // 't'
     return determinant *thick *gp->giveWeight();
 }
 

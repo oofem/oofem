@@ -35,11 +35,12 @@
 #ifndef smoothednodalintvarfield_h
 #define smoothednodalintvarfield_h
 
-#include "domain.h"
 #include "field.h"
 #include "zznodalrecoverymodel.h"
 
 namespace oofem {
+class Domain;
+
 /**
  * Class representing a field of an internal variable smoothed from integration points
  * into nodes. It is relying on NodalRecoveryModel to smooth the data.

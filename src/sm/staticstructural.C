@@ -183,8 +183,20 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
 
     // Fetch vector to fill in from primary field.
     this->solution = field->giveSolutionVector(tStep);
-    this->solution->resize(neq);
-    this->solution->zero();
+
+
+    if(!tStep->isTheFirstStep()) {
+        // Old solution as starting guess
+        FloatArray *oldSol = field->giveSolutionVector(tStep->givePreviousStep());
+        *solution = *oldSol;
+    }
+
+    if(solution->giveSize() != neq) {
+        printf("Resizing.\n");
+        this->solution->resize(neq);
+        this->solution->zero();
+    }
+
 
     // Create "stiffness matrix"
     if ( !this->stiffnessMatrix ) {
@@ -232,6 +244,13 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     }
 }
 
+void StaticStructural :: terminate(TimeStep *tStep)
+{
+    StructuralEngngModel::terminate(tStep);
+
+    XfemSolverInterface::propagateXfemInterfaces(tStep, *this);
+    XfemSolverInterface::mapVariables(tStep, *this);
+}
 
 double StaticStructural :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)
 {
@@ -248,6 +267,7 @@ void StaticStructural :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
 #ifdef __PARALLEL_MODE
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
+        internalVarUpdateStamp = tStep->giveSolutionStateCounter(); // Hack for linearstatic
     } else if ( cmpn == NonLinearLhs ) {
         this->stiffnessMatrix->zero();
         this->assemble(this->stiffnessMatrix, tStep, TangentStiffnessMatrix, EModelDefaultEquationNumbering(), d);
@@ -335,6 +355,16 @@ StaticStructural :: updateDomainLinks()
     this->giveNumericalMethod( this->giveCurrentMetaStep() )->setDomain( this->giveDomain(1) );
 }
 
+int
+StaticStructural :: forceEquationNumbering()
+{
+    int numEqn = StructuralEngngModel::forceEquationNumbering();
+
+    delete stiffnessMatrix;
+    stiffnessMatrix = NULL;
+
+    return numEqn;
+}
 
 
 void
@@ -343,6 +373,11 @@ StaticStructural :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
     iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
+void StaticStructural :: updatePrimaryField(ValueModeType mode, TimeStep *tStep, const FloatArray &vectorToStore)
+{
+//    printf("Storing solution vector: "); vectorToStore.printYourself();
+    *field->giveSolutionVector(tStep) = vectorToStore;
+}
 
 #ifdef __PARALLEL_MODE
 int

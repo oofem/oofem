@@ -36,7 +36,6 @@
 #define field_h
 
 #include "oofemcfg.h"
-#include "domain.h"
 #include "valuemodetype.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
@@ -65,6 +64,8 @@ enum FieldType {
 
 class TimeStep;
 class FloatArray;
+class DofManager;
+class DataStream;
 
 /**
  * Abstract class representing field. Field represent the spatial distribution of certain variable.

@@ -34,6 +34,7 @@
  */
 
 #ifndef latticedamage2d_h
+#define latticedamage2d_h
 
 #include "material.h"
 #include "linearelasticmaterial.h"
@@ -408,5 +409,4 @@ protected:
                             TimeStep *tStep);
 };
 } // end namespace oofem
-#define latticedamage2d_h
 #endif

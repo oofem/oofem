@@ -33,6 +33,7 @@
  */
 
 #include "quad1_ht.h"
+#include "fei2dquadlin.h"
 #include "crosssection.h"
 #include "gausspoint.h"
 #include "gaussintegrationrule.h"
@@ -45,7 +46,6 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "connectivitytable.h"
 #endif
 
 namespace oofem {
@@ -72,12 +72,13 @@ Quad1_mt :: Quad1_mt(int n, Domain *aDomain) : Quad1_ht(n, aDomain)
 }
 
 Quad1_ht :: ~Quad1_ht()
-// Destructor
 { }
+
+FEInterpolation *
+Quad1_ht :: giveInterpolation() const { return & interpolation; }
 
 void
 Quad1_ht :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
@@ -105,7 +106,7 @@ Quad1_ht :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, gp); // 't'
@@ -125,10 +126,10 @@ Quad1_ht :: giveThicknessAt(const FloatArray &gcoords)
 double
 Quad1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
     FloatArray gc;
-    this->interpolation.edgeLocal2global( gc, iEdge, * gp->giveCoordinates(),
+    this->interpolation.edgeLocal2global( gc, iEdge, * gp->giveNaturalCoordinates(),
                                          FEIElementGeometryWrapper(this) );
     // temporary gauss point on element (not edge) to evaluate thickness
     GaussPoint _gp( NULL, 1, new FloatArray ( gc ), 1.0, gp->giveMaterialMode() );
@@ -162,7 +163,7 @@ Quad1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray 
 
 
 #ifdef __OOFEG
-void Quad1_ht :: drawRawGeometry(oofegGraphicContext &gc)
+void Quad1_ht :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
@@ -196,17 +197,16 @@ void Quad1_ht :: drawRawGeometry(oofegGraphicContext &gc)
     EMAddGraphicsToModel(ESIModel(), go);
 }
 
-void Quad1_ht :: drawScalar(oofegGraphicContext &context)
+void Quad1_ht :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, indx, result = 0;
     WCRec p [ 4 ];
     GraphicObj *tr;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     double s [ 4 ];
     FloatArray v [ 4 ];
-    InternalStateType itype = context.giveIntVarType();
+    InternalStateType itype = gc.giveIntVarType();
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
@@ -214,27 +214,27 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &context)
 
     if ( itype == IST_HydrationDegree ) {
         for ( i = 1; i <= 4; i++ ) {
-            result += this->giveInternalStateAtNode(v [ i - 1 ], context.giveIntVarType(), context.giveIntVarMode(), i, tStep);
+            result += this->giveInternalStateAtNode(v [ i - 1 ], gc.giveIntVarType(), gc.giveIntVarMode(), i, tStep);
         }
 
         if ( result != 4 ) {
             return;
         }
 
-        indx = context.giveIntVarIndx();
+        indx = gc.giveIntVarIndx();
 
         for ( i = 1; i <= 4; i++ ) {
             s [ i - 1 ] = v [ i - 1 ].at(indx);
         }
 
-        if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+        if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
             for ( i = 0; i < 4; i++ ) {
                 p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(1);
                 p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveCoordinate(2);
                 p [ i ].z = 0.;
             }
 
-            context.updateFringeTableMinMax(s, 4);
+            gc.updateFringeTableMinMax(s, 4);
             tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
             EGWithMaskChangeAttributes(LAYER_MASK, tr);
             EMAddGraphicsToModel(ESIModel(), tr);
@@ -258,7 +258,7 @@ void Quad1_ht :: drawScalar(oofegGraphicContext &context)
             p [ i ].z = 0.;
         }
 
-        context.updateFringeTableMinMax(s, 4);
+        gc.updateFringeTableMinMax(s, 4);
         tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
         EGWithMaskChangeAttributes(LAYER_MASK, tr);
         EMAddGraphicsToModel(ESIModel(), tr);

@@ -33,6 +33,7 @@
  */
 
 #include "cct.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
@@ -66,6 +67,10 @@ CCTPlate :: CCTPlate(int n, Domain *aDomain) :
     numberOfGaussPoints = 1;
     area = 0;
 }
+
+
+FEInterpolation *
+CCTPlate :: giveInterpolation() const { return & interp_lin; }
 
 
 FEInterpolation *
@@ -353,7 +358,7 @@ CCTPlate :: computeVolumeAround(GaussPoint *gp)
 			      lc[0].at(3), lc[1].at(3), lc[2].at(3));
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
@@ -567,7 +572,7 @@ CCTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(5); // {Exx,Eyy,GMyz,GMzx,GMxy}
@@ -587,7 +592,7 @@ CCTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
     FloatArray n;
     double b, c, n12;
 
-    this->interp_lin.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     this->interp_lin.computeLocalEdgeMapping(edgeNodes, iedge);
 
     n12 = 0.5 * n.at(1) * n.at(2);
@@ -645,7 +650,7 @@ CCTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 CCTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -653,7 +658,7 @@ CCTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 CCTPlate :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -698,11 +703,10 @@ CCTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 //
 #ifdef __OOFEG
 void
-CCTPlate :: drawRawGeometry(oofegGraphicContext &gc)
+CCTPlate :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
 
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
@@ -734,11 +738,10 @@ CCTPlate :: drawRawGeometry(oofegGraphicContext &gc)
 
 
 void
-CCTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+CCTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -770,16 +773,15 @@ CCTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 
 
 void
-CCTPlate :: drawScalar(oofegGraphicContext &context)
+CCTPlate :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, indx, result = 0;
     WCRec p [ 3 ];
     GraphicObj *tr;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v1, v2, v3;
     double s [ 3 ], defScale;
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
@@ -787,13 +789,13 @@ CCTPlate :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    if ( context.giveIntVarMode() == ISM_recovered ) {
-        result += this->giveInternalStateAtNode(v1, context.giveIntVarType(), context.giveIntVarMode(), 1, tStep);
-        result += this->giveInternalStateAtNode(v2, context.giveIntVarType(), context.giveIntVarMode(), 2, tStep);
-        result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
-    } else if ( context.giveIntVarMode() == ISM_local ) {
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
+        result += this->giveInternalStateAtNode(v1, gc.giveIntVarType(), gc.giveIntVarMode(), 1, tStep);
+        result += this->giveInternalStateAtNode(v2, gc.giveIntVarType(), gc.giveIntVarMode(), 2, tStep);
+        result += this->giveInternalStateAtNode(v3, gc.giveIntVarType(), gc.giveIntVarMode(), 3, tStep);
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
         GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-        result += giveIPValue(v1, gp, context.giveIntVarType(), tStep);
+        result += giveIPValue(v1, gp, gc.giveIntVarType(), tStep);
         v2 = v1;
         v3 = v1;
         result *= 3;
@@ -803,7 +805,7 @@ CCTPlate :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    indx = context.giveIntVarIndx();
+    indx = gc.giveIntVarIndx();
 
     s [ 0 ] = v1.at(indx);
     s [ 1 ] = v2.at(indx);
@@ -811,11 +813,11 @@ CCTPlate :: drawScalar(oofegGraphicContext &context)
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
 
-    if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+    if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
         for ( i = 0; i < 3; i++ ) {
-            if ( context.getInternalVarsDefGeoFlag() ) {
+            if ( gc.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
-                defScale = context.getDefScale();
+                defScale = gc.getDefScale();
                 p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                 p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                 p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(3, tStep, defScale);
@@ -827,7 +829,7 @@ CCTPlate :: drawScalar(oofegGraphicContext &context)
         }
 
         //EASValsSetColor(gc.getYieldPlotColor(ratio));
-        context.updateFringeTableMinMax(s, 3);
+        gc.updateFringeTableMinMax(s, 3);
         tr =  CreateTriangleWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ]);
         EGWithMaskChangeAttributes(LAYER_MASK, tr);
         EMAddGraphicsToModel(ESIModel(), tr);

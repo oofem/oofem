@@ -33,6 +33,7 @@
  */
 
 #include "qtrplstr.h"
+#include "fei2dtrquad.h"
 #include "node.h"
 #include "gausspoint.h"
 #include "floatmatrix.h"
@@ -61,6 +62,9 @@ QTrPlaneStress2d :: QTrPlaneStress2d(int n, Domain *aDomain) :
     numberOfDofMans  = 6;
     numberOfGaussPoints = 4;
 }
+
+
+FEInterpolation *QTrPlaneStress2d :: giveInterpolation() const { return & interpolation; }
 
 
 Interface *
@@ -127,7 +131,7 @@ QTrPlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 12);
     answer.zero();
@@ -148,7 +152,7 @@ QTrPlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // @todo not checked if correct
 {
     FloatMatrix dnx;
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(4, 12);
     answer.zero();
@@ -167,7 +171,7 @@ QTrPlaneStress2d :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
     double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(),
+    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) ) );
     weight      = gp->giveWeight();
     thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
@@ -223,7 +227,7 @@ QTrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const Flo
 #ifdef __OOFEG
  #define TR_LENGHT_REDUCT 0.3333
 
-void QTrPlaneStress2d :: drawRawGeometry(oofegGraphicContext &gc)
+void QTrPlaneStress2d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
@@ -254,11 +258,10 @@ void QTrPlaneStress2d :: drawRawGeometry(oofegGraphicContext &gc)
 }
 
 
-void QTrPlaneStress2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+void QTrPlaneStress2d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -286,30 +289,29 @@ void QTrPlaneStress2d :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownTy
 }
 
 
-void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
+void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int t, n [ 3 ], i, indx, result = 0;
     WCRec p [ 3 ];
     GraphicObj *tr;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 6 ];
     double s [ 6 ], ss [ 3 ], defScale;
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
-    if ( context.giveIntVarMode() == ISM_recovered ) {
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
         // ========= plot recovered values =========
         for ( i = 1; i <= 6; i++ ) {
-            result += this->giveInternalStateAtNode(v [ i - 1 ], context.giveIntVarType(), context.giveIntVarMode(), i, tStep);
+            result += this->giveInternalStateAtNode(v [ i - 1 ], gc.giveIntVarType(), gc.giveIntVarMode(), i, tStep);
         }
 
         if ( result != 6 ) {
             return;
         }
 
-        indx = context.giveIntVarIndx();
+        indx = gc.giveIntVarIndx();
 
         for ( i = 1; i <= 6; i++ ) {
             s [ i - 1 ] = v [ i - 1 ].at(indx);
@@ -317,7 +319,7 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
 
         EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
 
-        if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+        if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
             for ( t = 1; t <= 4; t++ ) {
                 if ( t == 1 ) {
                     n [ 0 ] = 1;
@@ -339,9 +341,9 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
 
 
                 for ( i = 0; i < 3; i++ ) {
-                    if ( context.getInternalVarsDefGeoFlag() ) {
+                    if ( gc.getInternalVarsDefGeoFlag() ) {
                         // use deformed geometry
-                        defScale = context.getDefScale();
+                        defScale = gc.getDefScale();
                         p [ i ].x = ( FPNum ) this->giveNode(n [ i ])->giveUpdatedCoordinate(1, tStep, defScale);
                         p [ i ].y = ( FPNum ) this->giveNode(n [ i ])->giveUpdatedCoordinate(2, tStep, defScale);
                         p [ i ].z = 0.;
@@ -357,13 +359,13 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
                 ss [ 0 ] = s [ n [ 0 ] - 1 ];
                 ss [ 1 ] = s [ n [ 1 ] - 1 ];
                 ss [ 2 ] = s [ n [ 2 ] - 1 ];
-                context.updateFringeTableMinMax(ss, 3);
+                gc.updateFringeTableMinMax(ss, 3);
                 tr =  CreateTriangleWD3D(p, ss [ 0 ], ss [ 1 ], ss [ 2 ]);
                 EGWithMaskChangeAttributes(LAYER_MASK, tr);
                 EMAddGraphicsToModel(ESIModel(), tr);
             }
 
-            /* } else if (context.getScalarAlgo() == SA_ISO_LINE) {
+            /* } else if (gc.getScalarAlgo() == SA_ISO_LINE) {
              *
              * EASValsSetColor(context.getActiveCrackColor());
              * EASValsSetLineWidth(OOFEG_ISO_LINE_WIDTH);
@@ -376,9 +378,9 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
              *
              *
              * for (i=0; i< 3; i++) {
-             * if (context.getInternalVarsDefGeoFlag()) {
+             * if (gc.getInternalVarsDefGeoFlag()) {
              * // use deformed geometry
-             * defScale = context.getDefScale();
+             * defScale = gc.getDefScale();
              * p[i].x = (FPNum) this->giveNode(n[i])->giveUpdatedCoordinate(1,tStep,defScale);
              * p[i].y = (FPNum) this->giveNode(n[i])->giveUpdatedCoordinate(2,tStep,defScale);
              * p[i].z = 0.;
@@ -397,7 +399,7 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
              * oofeg_drawIsoLinesOnTriangle (p, sv);
              * } */
         }
-    } else if ( context.giveIntVarMode() == ISM_local ) {
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
         // ========= plot local values =========
         // (so far implemented for 4 Gauss points only)
         if ( numberOfGaussPoints != 4 ) {
@@ -408,9 +410,9 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
         WCRec pp [ 6 ];
 
         for ( i = 0; i < 6; i++ ) {
-            if ( context.getInternalVarsDefGeoFlag() ) {
+            if ( gc.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
-                defScale = context.getDefScale();
+                defScale = gc.getDefScale();
                 pp [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                 pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                 pp [ i ].z = 0.;
@@ -423,7 +425,7 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
         }
 
         for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
-            //gpCoords = gp->giveCoordinates();
+            //gpCoords = gp->giveNaturalCoordinates();
             switch ( gp->giveNumber() ) {
             case 3:
                 ind.at(1) = 0;
@@ -447,11 +449,11 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
                 ind.at(3) = 5;
             }
 
-            if ( giveIPValue(v [ 0 ], gp, context.giveIntVarType(), tStep) == 0 ) {
+            if ( giveIPValue(v [ 0 ], gp, gc.giveIntVarType(), tStep) == 0 ) {
                 return;
             }
 
-            indx = context.giveIntVarIndx();
+            indx = gc.giveIntVarIndx();
 
             for ( i = 1; i <= 3; i++ ) {
                 s [ i - 1 ] = v [ 0 ].at(indx);
@@ -463,7 +465,7 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
                 p [ i ].z = pp [ ind.at(i + 1) ].z;
             }
 
-            context.updateFringeTableMinMax(s, 3);
+            gc.updateFringeTableMinMax(s, 3);
             EASValsSetFillStyle(FILL_SOLID);
             tr =  CreateTriangleWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ]);
             EGWithMaskChangeAttributes(FILL_MASK | LAYER_MASK, tr);
@@ -473,7 +475,7 @@ void QTrPlaneStress2d :: drawScalar(oofegGraphicContext &context)
 }
 
 void
-QTrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc)
+QTrPlaneStress2d :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
 { }
 
 #endif
@@ -560,7 +562,7 @@ QTrPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPo
      */
 
     FloatArray n(3);
-    this->interpolation.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(2, 6);
     answer.zero();
@@ -594,7 +596,7 @@ QTrPlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 QTrPlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(),
+    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
                                                                        FEIElementGeometryWrapper(this) );
     return result *gp->giveWeight();
 }
@@ -602,7 +604,7 @@ QTrPlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 QTrPlaneStress2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -620,7 +622,7 @@ QTrPlaneStress2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdg
     answer.resize(2, 2);
     answer.zero();
 
-    this->interpolation.edgeEvalNormal( normal, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.edgeEvalNormal( normal, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.at(1, 1) = normal.at(2);
     answer.at(1, 2) = normal.at(1);

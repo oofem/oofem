@@ -33,6 +33,7 @@
  */
 
 #include "dkt.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
@@ -65,6 +66,10 @@ DKTPlate :: DKTPlate(int n, Domain *aDomain) :
     numberOfGaussPoints = 3;
     area = 0;
 }
+
+
+FEInterpolation *
+DKTPlate :: giveInterpolation() const { return & interp_lin; }
 
 
 FEInterpolation *
@@ -140,8 +145,8 @@ DKTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
   this->giveNodeCoordinates(x1, x2, x3, y1, y2, y3, z1, z2, z3);
 
 
-    double ksi = gp->giveCoordinate(1);
-    double eta = gp->giveCoordinate(2);
+    double ksi = gp->giveNaturalCoordinate(1);
+    double eta = gp->giveNaturalCoordinate(2);
 
     double N1dk = 4.0 * ksi - 1.0;
     double N2dk = 0.0;
@@ -384,7 +389,7 @@ DKTPlate :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
@@ -597,7 +602,7 @@ DKTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(5); // {Exx,Eyy,GMyz,GMzx,GMxy}
@@ -615,7 +620,7 @@ DKTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     FloatArray n;
 
-    this->interp_lin.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.at(1, 1) = n.at(1);
@@ -662,7 +667,7 @@ DKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 DKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -670,7 +675,7 @@ DKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 DKTPlate :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -714,7 +719,7 @@ DKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gauss
 void
 DKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-    this->computeNmatrixAt(* sgp->giveCoordinates(), answer);
+    this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), answer);
 }
 
 void
@@ -750,7 +755,7 @@ DKTPlate :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 DKTPlate :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveCoordinates() );
+    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
 }
 
 
@@ -793,7 +798,7 @@ DKTPlate :: computeVertexBendingMoments(FloatMatrix &answer, TimeStep *tStep)
     GaussPoint *vgp = iRule.getIntegrationPoint(0);
 
     for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
-        vgp->setCoordinates(coords [ i - 1 ]);
+        vgp->setNaturalCoordinates(coords [ i - 1 ]);
         this->computeStrainVector(eps, vgp, tStep);
         this->giveStructuralCrossSection()->giveGeneralizedStress_Plate(m, vgp, eps, tStep);
         answer.setColumn(m, i);
@@ -813,7 +818,7 @@ DKTPlate :: computeShearForces(FloatArray &answer, GaussPoint *gp, TimeStep *tSt
     answer.resize(5);
 
     this->computeVertexBendingMoments(m, tStep);
-    this->interp_lin.evaldNdx( dndx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.evaldNdx( dndx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
         answer.at(4) += m.at(1, i) * dndx.at(i, 1) + m.at(3, i) * dndx.at(i, 2); //dMxdx + dMxydy
         answer.at(5) += m.at(2, i) * dndx.at(i, 2) + m.at(3, i) * dndx.at(i, 1); //dMydy + dMxydx
@@ -826,11 +831,10 @@ DKTPlate :: computeShearForces(FloatArray &answer, GaussPoint *gp, TimeStep *tSt
 //
 #ifdef __OOFEG
 void
-DKTPlate :: drawRawGeometry(oofegGraphicContext &gc)
+DKTPlate :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
 
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
@@ -862,11 +866,10 @@ DKTPlate :: drawRawGeometry(oofegGraphicContext &gc)
 
 
 void
-DKTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+DKTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     WCRec p [ 3 ];
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -898,16 +901,15 @@ DKTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 
 
 void
-DKTPlate :: drawScalar(oofegGraphicContext &context)
+DKTPlate :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, indx, result = 0;
     WCRec p [ 3 ];
     GraphicObj *tr;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v1, v2, v3;
     double s [ 3 ], defScale;
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
@@ -915,13 +917,13 @@ DKTPlate :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    if ( context.giveIntVarMode() == ISM_recovered ) {
-        result += this->giveInternalStateAtNode(v1, context.giveIntVarType(), context.giveIntVarMode(), 1, tStep);
-        result += this->giveInternalStateAtNode(v2, context.giveIntVarType(), context.giveIntVarMode(), 2, tStep);
-        result += this->giveInternalStateAtNode(v3, context.giveIntVarType(), context.giveIntVarMode(), 3, tStep);
-    } else if ( context.giveIntVarMode() == ISM_local ) {
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
+        result += this->giveInternalStateAtNode(v1, gc.giveIntVarType(), gc.giveIntVarMode(), 1, tStep);
+        result += this->giveInternalStateAtNode(v2, gc.giveIntVarType(), gc.giveIntVarMode(), 2, tStep);
+        result += this->giveInternalStateAtNode(v3, gc.giveIntVarType(), gc.giveIntVarMode(), 3, tStep);
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
         GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
-        result += giveIPValue(v1, gp, context.giveIntVarType(), tStep);
+        result += giveIPValue(v1, gp, gc.giveIntVarType(), tStep);
         v2 = v1;
         v3 = v1;
         result *= 3;
@@ -931,7 +933,7 @@ DKTPlate :: drawScalar(oofegGraphicContext &context)
         return;
     }
 
-    indx = context.giveIntVarIndx();
+    indx = gc.giveIntVarIndx();
 
     s [ 0 ] = v1.at(indx);
     s [ 1 ] = v2.at(indx);
@@ -939,11 +941,11 @@ DKTPlate :: drawScalar(oofegGraphicContext &context)
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
 
-    if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+    if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
         for ( i = 0; i < 3; i++ ) {
-            if ( context.getInternalVarsDefGeoFlag() ) {
+            if ( gc.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
-                defScale = context.getDefScale();
+                defScale = gc.getDefScale();
                 p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                 p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                 p [ i ].z = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(3, tStep, defScale);
@@ -955,7 +957,7 @@ DKTPlate :: drawScalar(oofegGraphicContext &context)
         }
 
         //EASValsSetColor(gc.getYieldPlotColor(ratio));
-        context.updateFringeTableMinMax(s, 3);
+        gc.updateFringeTableMinMax(s, 3);
         tr =  CreateTriangleWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ]);
         EGWithMaskChangeAttributes(LAYER_MASK, tr);
         EMAddGraphicsToModel(ESIModel(), tr);

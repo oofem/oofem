@@ -47,7 +47,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ostream>
-
+#include <numeric>
 #define RESIZE(nr, nc) \
     { \
         this->nRows = nr; this->nColumns = nc; \
@@ -186,6 +186,16 @@ void FloatMatrix :: checkBounds(int i, int j) const
     }
 }
 
+bool FloatMatrix ::isFinite() const
+{
+    for(double val : values) {
+        if(!std::isfinite(val)) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 #ifdef DEBUG
 double &FloatMatrix :: at(int i, int j)
@@ -1429,6 +1439,24 @@ void FloatMatrix :: printYourself() const
 {
     printf("FloatMatrix with dimensions : %d %d\n",
            nRows, nColumns);
+    if ( nRows <= 250 && nColumns <= 250 ) {
+        for ( int i = 1; i <= nRows; ++i ) {
+            for ( int j = 1; j <= nColumns && j <= 100; ++j ) {
+                printf( "%10.3e  ", this->at(i, j) );
+            }
+
+            printf("\n");
+        }
+    } else {
+        printf("   large matrix : coefficients not printed \n");
+    }
+}
+
+
+void FloatMatrix :: printYourself(const std::string name) const
+// Prints the receiver on screen.
+{
+    printf("%s (%d x %d): \n", name.c_str(), nRows, nColumns);
     if ( nRows <= 250 && nColumns <= 250 ) {
         for ( int i = 1; i <= nRows; ++i ) {
             for ( int j = 1; j <= nColumns && j <= 100; ++j ) {

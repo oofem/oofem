@@ -77,7 +77,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);
 
-    virtual void propagateInterfaces(Domain &iDomain, EnrichmentDomain &ioEnrDom);
+    virtual bool hasPropagation() const { return mIncrementLength > 0.; } ///@todo Could this be done smarter? / Mikael
+    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp);
 
 protected:
     double mRadius, mAngleInc, mIncrementLength, mHoopStressThreshold;

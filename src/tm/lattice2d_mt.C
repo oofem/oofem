@@ -185,7 +185,7 @@ Lattice2d_mt :: updateInternalState(TimeStep *tStep)
     // force updating ip values
     for ( auto &iRule: integrationRulesArray ) {
         for ( GaussPoint *gp: *iRule ) {
-            this->computeNmatrixAt( n, * gp->giveCoordinates() );
+            this->computeNmatrixAt( n, * gp->giveNaturalCoordinates() );
             this->computeVectorOf({P_f}, VM_Total, tStep, r);
             f.beProductOf(n, r);
             mat->updateInternalState(f, gp, tStep);
@@ -390,13 +390,13 @@ Lattice2d_mt :: computeLocalCoordinates(FloatArray &answer, const FloatArray &co
 
 
 void
-Lattice2d_mt :: drawYourself(oofegGraphicContext &gc)
+Lattice2d_mt :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
 {
     OGC_PlotModeType mode = gc.giveIntVarPlotMode();
 
     if ( mode == OGC_rawGeometry ) {
-        this->drawRawGeometry(gc);
-        this->drawRawCrossSections(gc);
+        this->drawRawGeometry(gc, tStep);
+        this->drawRawCrossSections(gc, tStep);
     } else {
         OOFEM_ERROR("unsupported mode");
     }
@@ -405,7 +405,7 @@ Lattice2d_mt :: drawYourself(oofegGraphicContext &gc)
 
 
 
-void Lattice2d_mt :: drawRawGeometry(oofegGraphicContext &gc)
+void Lattice2d_mt :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -430,7 +430,7 @@ void Lattice2d_mt :: drawRawGeometry(oofegGraphicContext &gc)
     EMAddGraphicsToModel(ESIModel(), go);
 }
 
-void Lattice2d_mt :: drawRawCrossSections(oofegGraphicContext &gc)
+void Lattice2d_mt :: drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
 

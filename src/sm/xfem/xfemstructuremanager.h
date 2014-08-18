@@ -62,6 +62,8 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual int instanciateYourself(DataReader *dr);
+    virtual const char *giveClassName() const { return "XfemStructureManager"; }
+    virtual const char *giveInputRecordName() const { return _IFT_XfemStructureManager_Name; }
 
     void splitCracks();
 

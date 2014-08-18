@@ -32,8 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifdef __PARALLEL_MODE
-
 #include "parmetisloadbalancer.h"
 #include "domain.h"
 #include "engngm.h"
@@ -44,6 +42,7 @@
 #include "parallel.h"
 #include "processcomm.h"
 #include "communicator.h"
+#include "classfactory.h"
 
 #include <set>
 #include <stdlib.h>
@@ -51,20 +50,16 @@
 namespace oofem {
 //#define ParmetisLoadBalancer_DEBUG_PRINT
 
+REGISTER_LoadBalancer(ParmetisLoadBalancer);
 
 ParmetisLoadBalancer :: ParmetisLoadBalancer(Domain *d) : LoadBalancer(d)
 {
-#ifdef __PARMETIS_MODULE
     elmdist = NULL;
     tpwgts  = NULL;
-#else
-    OOFEM_ERROR("ParMETIS support not compiled");
-#endif
 }
 
 ParmetisLoadBalancer :: ~ParmetisLoadBalancer()
 {
-#ifdef __PARMETIS_MODULE
     if ( elmdist ) {
         delete[] elmdist;
     }
@@ -72,12 +67,9 @@ ParmetisLoadBalancer :: ~ParmetisLoadBalancer()
     if ( tpwgts ) {
         delete[] tpwgts;
     }
-
-#endif
 }
 
 
-#ifdef __PARMETIS_MODULE
 void
 ParmetisLoadBalancer :: calculateLoadTransfer()
 {
@@ -90,7 +82,6 @@ ParmetisLoadBalancer :: calculateLoadTransfer()
     Element *ielem;
     MPI_Comm communicator = MPI_COMM_WORLD;
     LoadBalancerMonitor *lbm = domain->giveEngngModel()->giveLoadBalancerMonitor();
-    FloatArray _procweights;
 
     nproc = domain->giveEngngModel()->giveNumberOfProcesses();
     // init parmetis element numbering
@@ -166,7 +157,7 @@ ParmetisLoadBalancer :: calculateLoadTransfer()
     // set ratio of inter-proc communication compared to data redistribution time
     itr = 1000.0;
     // set partition weights by quering load balance monitor
-    lbm->giveProcessorWeights(_procweights);
+    const FloatArray &_procweights = lbm->giveProcessorWeights();
     if ( tpwgts == NULL ) {
         if ( ( tpwgts = new real_t [ nproc ] ) == NULL ) {
             OOFEM_ERROR("failed to allocate tpwgts");
@@ -566,9 +557,8 @@ ParmetisLoadBalancer :: unpackSharedDmanPartitions(ProcessCommunicator &pc)
 
 void ParmetisLoadBalancer :: addSharedDofmanPartitions(int _locnum, IntArray _partitions)
 {
-    int i, s = _partitions.giveSize();
-    for ( i = 1; i <= s; i++ ) {
-        dofManPartitions [ _locnum - 1 ].insertOnce( _partitions.at(i) );
+    for ( int part: _partitions ) {
+        dofManPartitions [ _locnum - 1 ].insertOnce( part );
     }
 }
 
@@ -613,22 +603,4 @@ void ParmetisLoadBalancer :: handleMasterSlaveDofManLinks()
     }
 }
 
-
-#else //PARMETIS_MODULE
-void ParmetisLoadBalancer :: calculateLoadTransfer() { }
-
-LoadBalancer :: DofManMode
-ParmetisLoadBalancer :: giveDofManState(int idofman)
-{ return DM_NULL; }
-
-
-IntArray *
-ParmetisLoadBalancer :: giveDofManPartitions(int idofman)
-{ return NULL; }
-
-int
-ParmetisLoadBalancer :: giveElementPartition(int ielem)
-{ return 0; }
-#endif
 } // end namespace oofem
-#endif

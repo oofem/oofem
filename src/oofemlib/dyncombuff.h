@@ -35,11 +35,9 @@
 #ifndef dyncombuff_h
 #define dyncombuff_h
 
-#ifdef __PARALLEL_MODE
-
- #include "parallel.h"
- #include "combuff.h"
- #include <list>
+#include "parallel.h"
+#include "combuff.h"
+#include <list>
 
 namespace oofem {
 class IntArray;
@@ -316,5 +314,5 @@ protected:
     }
 };
 } // end namespace oofem
-#endif
+
 #endif // dyncombuff_h

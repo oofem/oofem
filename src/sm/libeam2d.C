@@ -33,6 +33,7 @@
  */
 
 #include "libeam2d.h"
+#include "fei2dlinelin.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
@@ -59,6 +60,9 @@ LIBeam2d :: LIBeam2d(int n, Domain *aDomain) : StructuralElement(n, aDomain), La
 }
 
 
+FEInterpolation *LIBeam2d :: giveInterpolation() const { return & interpolation; }
+
+
 Interface *
 LIBeam2d :: giveInterface(InterfaceType interface)
 {
@@ -77,7 +81,7 @@ LIBeam2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui
     double l, ksi, n1x, n4x, n3xx, n6xx, n2xxx, n3xxx, n5xxx, n6xxx;
 
     l    = this->computeLength();
-    ksi  = gp->giveCoordinate(1);
+    ksi  = gp->giveNaturalCoordinate(1);
     n1x   = -1.0 / l;
     n4x   =  1.0 / l;
     n3xx  = -1.0 / l;
@@ -240,7 +244,7 @@ LIBeam2d :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &mas
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(2); // {Exx,GMzx}
@@ -336,7 +340,7 @@ LIBeam2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
      * without regarding particular side
      */
 
-    this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer);
+    this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), answer);
 }
 
 
@@ -371,6 +375,13 @@ LIBeam2d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 
     double weight  = gp->giveWeight();
     return 0.5 * this->computeLength() * weight;
+}
+
+
+void
+LIBeam2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+{
+    computeGlobalCoordinates( answer, * ( gp->giveNaturalCoordinates() ) );
 }
 
 

@@ -37,8 +37,6 @@
 
 #include "structuralelement.h"
 #include "layeredcrosssection.h"
-#include "fei2dlinelin.h"
-#include "fei2dlinehermite.h"
 
 ///@name Input fields for Beam2d
 //@{
@@ -47,6 +45,9 @@
 //@}
 
 namespace oofem {
+class FEI2dLineLin;
+class FEI2dLineHermite;
+
 /**
  * This class implements a 2-dimensional beam element
  * with cubic lateral displacement, quadratic rotations,
@@ -82,7 +83,7 @@ public:
 
     virtual Interface *giveInterface(InterfaceType);
 
-    virtual FEInterpolation *giveInterpolation() const { return & interp_geom; }
+    virtual FEInterpolation *giveInterpolation() const;
     virtual FEInterpolation *giveInterpolation(DofIDItem id) const { return NULL; }
 
     virtual int computeNumberOfDofs() { return 6; }
@@ -95,8 +96,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
 #endif
 
     virtual void computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
@@ -115,7 +116,7 @@ protected:
 
     void computeBodyLoadVectorAt(FloatArray &answer, Load *load, TimeStep *tStep, ValueModeType mode);
 
-    double giveKappaCoeff();
+    double giveKappaCoeff(TimeStep *tStep);
     virtual double computeLength();
     double givePitch();
     virtual void computeClampedStiffnessMatrix(FloatMatrix &answer,

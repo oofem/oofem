@@ -36,17 +36,17 @@
 #define geometry_h
 
 #include "oofemcfg.h"
-#include "domain.h"
+#include "error.h"
 #include "floatarray.h"
-#include "node.h"
+#include "inputrecord.h"
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
+#include <list>
 #ifdef __BOOST_MODULE
  #include <BoostInterface.h>
 #endif
 
-namespace oofem {
 ///@name Input fields for geometries
 //@{
 #define _IFT_Circle_Name "circle"
@@ -65,6 +65,12 @@ namespace oofem {
 #define _IFT_PolygonLine_points "points"
 
 //@}
+
+namespace oofem {
+
+class Element;
+class DynamicInputRecord;
+class oofegGraphicContext;
 
 /**
  * Abstract representation of Geometry
@@ -128,7 +134,7 @@ public:
     virtual const char *giveClassName() const { return NULL; }
     std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
     /// Returns number of Geometry vertices.
-    int giveNrVertices() const { return mVertices.size(); }
+    int giveNrVertices() const { return (int)mVertices.size(); }
     virtual bool isOutside(BasicGeometry *bg) { return false; }
     virtual bool isInside(Element *el) { return false; }
     virtual bool isInside(FloatArray &point) { return false; }
@@ -155,6 +161,14 @@ public:
 #ifdef __OOFEG
     virtual void draw(oofegGraphicContext &gc) { }
 #endif
+
+
+    /**
+     * Computes the distance between two lines.
+     * Line 1 has start point iP1 and end point iP2.
+     * Line 2 has start point iQ1 and end point iQ2.
+     */
+    static double computeLineDistance(const FloatArray &iP1, const FloatArray &iP2, const FloatArray &iQ1, const FloatArray &iQ2);
 };
 
 class OOFEM_EXPORT Line : public BasicGeometry
@@ -170,10 +184,11 @@ public:
     /// Computes tangential distance to a point
 
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
-    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("not implemented"); };
-
 
     double computeTangentialDistanceToEnd(FloatArray *point);
+
+    virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const;
+
     void computeProjection(FloatArray &answer);
     virtual int computeNumberOfIntersectionPoints(Element *element);
     virtual void computeIntersectionPoints(Element *element, std :: vector< FloatArray > &oIntersectionPoints);

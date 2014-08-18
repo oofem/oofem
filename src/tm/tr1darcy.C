@@ -34,18 +34,19 @@
 
 
 #include "tr1darcy.h"
+#include "fei2dtrlin.h"
 #include "node.h"
 #include "domain.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "bcgeomtype.h"
 #include "generalboundarycondition.h"
+#include "transportmaterial.h"
 #include "load.h"
 #include "boundaryload.h"
 #include "mathfem.h"
 #include "crosssection.h"
 #include "matresponsemode.h"
-#include "fei2dtrlin.h"
 #include "classfactory.h"
 
 namespace oofem {
@@ -65,6 +66,12 @@ IRResultType Tr1Darcy :: initializeFrom(InputRecord *ir)
 {
     this->numberOfGaussPoints = 1;
     return TransportElement :: initializeFrom(ir);
+}
+
+FEInterpolation *
+Tr1Darcy :: giveInterpolation() const
+{
+    return & interpolation_lin;
 }
 
 void Tr1Darcy :: computeGaussPoints()
@@ -92,7 +99,7 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.zero();
 
     for ( GaussPoint *gp: *iRule ) {
-        const FloatArray &lcoords = * gp->giveCoordinates();
+        const FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         double detJ = this->interpolation_lin.evaldNdx( BT, lcoords, FEIElementGeometryWrapper(this) );
 
@@ -129,7 +136,7 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep
     answer.zero();
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray *lcoords = gp->giveCoordinates();
+        FloatArray *lcoords = gp->giveNaturalCoordinates();
 
         double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
         this->interpolation_lin.evaldNdx( BT, * lcoords, FEIElementGeometryWrapper(this) );
@@ -203,7 +210,7 @@ void Tr1Darcy :: computeEdgeBCSubVectorAt(FloatArray &answer, Load *load, int iE
         iRule.SetUpPointsOnLine(numberOfEdgeIPs, _Unknown);
 
         for ( GaussPoint *gp: iRule ) {
-            FloatArray *lcoords = gp->giveCoordinates();
+            FloatArray *lcoords = gp->giveNaturalCoordinates();
             this->interpolation_lin.edgeEvalN( N, iEdge, * lcoords, FEIElementGeometryWrapper(this) );
             double dV = this->computeEdgeVolumeAround(gp, iEdge);
 
@@ -232,7 +239,7 @@ double Tr1Darcy :: giveThicknessAt(const FloatArray &gcoords)
 double Tr1Darcy :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double thickness = 1;
-    double detJ = fabs( this->interpolation_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveLocalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double detJ = fabs( this->interpolation_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveSubPatchCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ *thickness *gp->giveWeight();
 }
 

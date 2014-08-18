@@ -33,6 +33,7 @@
  */
 
 #include "qdkt.h"
+#include "fei2dquadlin.h"
 #include "node.h"
 #include "material.h"
 #include "crosssection.h"
@@ -46,7 +47,6 @@
 #include "structuralcrosssection.h"
 #include "mathfem.h"
 #include "classfactory.h"
-#include "fei2dquadquad.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -66,6 +66,10 @@ QDKTPlate :: QDKTPlate(int n, Domain *aDomain) :
     numberOfDofMans = 4;
     numberOfGaussPoints = 4;
 }
+
+
+FEInterpolation *
+QDKTPlate :: giveInterpolation() const { return & interp_lin; }
 
 
 FEInterpolation *
@@ -96,8 +100,8 @@ QDKTPlate :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int u
   this->giveNodeCoordinates(x1, x2, x3, x4, y1, y2, y3, y4, z1, z2, z3, z4);
 
     // get gp coordinates
-    double ksi = gp->giveCoordinate(1);
-    double eta = gp->giveCoordinate(2);
+    double ksi = gp->giveNaturalCoordinate(1);
+    double eta = gp->giveNaturalCoordinate(2);
 
     // geometrical characteristics of element sides
     double dx4 = x2-x1;
@@ -382,7 +386,7 @@ QDKTPlate :: computeVolumeAround(GaussPoint *gp)
     double detJ, weight;
 
     weight = gp->giveWeight();
-    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) ) );
+    detJ = fabs( this->interp_lin.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     return detJ * weight; ///@todo What about thickness?
 }
 
@@ -432,7 +436,7 @@ QDKTPlate :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeStep
 
     if ( force.giveSize() ) {
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            this->computeNmatrixAt(* ( gp->giveLocalCoordinates() ), n);
+            this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), n);
             dV  = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
             dens = this->giveCrossSection()->give('d', gp);
             ntf.beTProductOf(n, force);
@@ -597,7 +601,7 @@ QDKTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &ma
 
     top    = this->giveCrossSection()->give(CS_TopZCoord, masterGp);
     bottom = this->giveCrossSection()->give(CS_BottomZCoord, masterGp);
-    layerZeta = slaveGp->giveCoordinate(3);
+    layerZeta = slaveGp->giveNaturalCoordinate(3);
     layerZCoord = 0.5 * ( ( 1. - layerZeta ) * bottom + ( 1. + layerZeta ) * top );
 
     answer.resize(5); // {Exx,Eyy,GMyz,GMzx,GMxy}
@@ -615,7 +619,7 @@ QDKTPlate :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp
 {
     FloatArray n;
 
-    this->interp_lin.edgeEvalN( n, iedge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 6);
     answer.at(1, 1) = n.at(1);
@@ -643,7 +647,7 @@ QDKTPlate :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 double
 QDKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
-    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double detJ = this->interp_lin.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     return detJ *gp->giveWeight();
 }
 
@@ -651,7 +655,7 @@ QDKTPlate :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 void
 QDKTPlate :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
-    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interp_lin.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
 
@@ -694,7 +698,7 @@ QDKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
 void
 QDKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-  this->computeNmatrixAt(* sgp->giveCoordinates(), answer);
+  this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), answer);
 }
 
 void
@@ -730,7 +734,7 @@ QDKTPlate :: computeSurfaceVolumeAround(GaussPoint *gp, int iSurf)
 void
 QDKTPlate :: computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int isurf)
 {
-    this->computeGlobalCoordinates( answer, * gp->giveCoordinates() );
+    this->computeGlobalCoordinates( answer, * gp->giveNaturalCoordinates() );
 }
 
 
@@ -746,11 +750,10 @@ QDKTPlate :: computeLoadLSToLRotationMatrix(FloatMatrix &answer, int isurf, Gaus
 //
 #ifdef __OOFEG
 void
-QDKTPlate :: drawRawGeometry(oofegGraphicContext &gc)
+QDKTPlate :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
 
     if ( !gc.testElementGraphicActivity(this) ) {
         return;
@@ -772,9 +775,9 @@ QDKTPlate :: drawRawGeometry(oofegGraphicContext &gc)
         p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveCoordinate(1);
         p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveCoordinate(2);
         p [ 2 ].z = ( FPNum ) this->giveNode(3)->giveCoordinate(3);
-	p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveCoordinate(1);
-	p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveCoordinate(2);
-	p [ 3 ].z = 0.;
+        p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveCoordinate(1);
+        p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveCoordinate(2);
+        p [ 3 ].z = 0.;
 
         go =  CreateQuad3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
@@ -785,11 +788,10 @@ QDKTPlate :: drawRawGeometry(oofegGraphicContext &gc)
 
 
 void
-QDKTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
+QDKTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     WCRec p [ 4 ];
     GraphicObj *go;
-    TimeStep *tStep = domain->giveEngngModel()->giveCurrentStep();
     double defScale = gc.getDefScale();
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -812,9 +814,9 @@ QDKTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
         p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveUpdatedCoordinate(1, tStep, defScale);
         p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveUpdatedCoordinate(2, tStep, defScale);
         p [ 2 ].z = ( FPNum ) this->giveNode(3)->giveUpdatedCoordinate(3, tStep, defScale);
-	p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveUpdatedCoordinate(1, tStep, defScale);
-	p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale);
-	p [ 3 ].z = ( FPNum ) this->giveNode(4)->giveUpdatedCoordinate(3, tStep, defScale);
+        p [ 3 ].x = ( FPNum ) this->giveNode(4)->giveUpdatedCoordinate(1, tStep, defScale);
+        p [ 3 ].y = ( FPNum ) this->giveNode(4)->giveUpdatedCoordinate(2, tStep, defScale);
+        p [ 3 ].z = ( FPNum ) this->giveNode(4)->giveUpdatedCoordinate(3, tStep, defScale);
 
         go =  CreateQuad3D(p);
         EGWithMaskChangeAttributes(WIDTH_MASK | FILL_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
@@ -824,40 +826,39 @@ QDKTPlate :: drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type)
 
 
 void
-QDKTPlate :: drawScalar(oofegGraphicContext &context)
+QDKTPlate :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int i, indx, result = 0;
     WCRec p [ 4 ];
     GraphicObj *tr;
-    TimeStep *tStep = this->giveDomain()->giveEngngModel()->giveCurrentStep();
     FloatArray v [ 4 ];
     double s [ 4 ], defScale;
 
-    if ( !context.testElementGraphicActivity(this) ) {
+    if ( !gc.testElementGraphicActivity(this) ) {
         return;
     }
 
     EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
-    if ( context.giveIntVarMode() == ISM_recovered ) {
+    if ( gc.giveIntVarMode() == ISM_recovered ) {
         for ( i = 1; i <= 4; i++ ) {
-            result += this->giveInternalStateAtNode(v [ i - 1 ], context.giveIntVarType(), context.giveIntVarMode(), i, tStep);
+            result += this->giveInternalStateAtNode(v [ i - 1 ], gc.giveIntVarType(), gc.giveIntVarMode(), i, tStep);
         }
 
         if ( result != 4 ) {
             return;
         }
 
-        indx = context.giveIntVarIndx();
+        indx = gc.giveIntVarIndx();
 
         for ( i = 1; i <= 4; i++ ) {
             s [ i - 1 ] = v [ i - 1 ].at(indx);
         }
 
-        if ( context.getScalarAlgo() == SA_ISO_SURF ) {
+        if ( gc.getScalarAlgo() == SA_ISO_SURF ) {
             for ( i = 0; i < 4; i++ ) {
-                if ( context.getInternalVarsDefGeoFlag() ) {
+                if ( gc.getInternalVarsDefGeoFlag() ) {
                     // use deformed geometry
-                    defScale = context.getDefScale();
+                    defScale = gc.getDefScale();
                     p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                     p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                     p [ i ].z = 0.;
@@ -869,18 +870,18 @@ QDKTPlate :: drawScalar(oofegGraphicContext &context)
             }
 
             //EASValsSetColor(gc.getYieldPlotColor(ratio));
-            context.updateFringeTableMinMax(s, 4);
+            gc.updateFringeTableMinMax(s, 4);
             tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
             EGWithMaskChangeAttributes(LAYER_MASK, tr);
             EMAddGraphicsToModel(ESIModel(), tr);
 
-        } else if ( ( context.getScalarAlgo() == SA_ZPROFILE ) || ( context.getScalarAlgo() == SA_COLORZPROFILE ) ) {
-            double landScale = context.getLandScale();
+        } else if ( ( gc.getScalarAlgo() == SA_ZPROFILE ) || ( gc.getScalarAlgo() == SA_COLORZPROFILE ) ) {
+            double landScale = gc.getLandScale();
 
             for ( i = 0; i < 4; i++ ) {
-                if ( context.getInternalVarsDefGeoFlag() ) {
+                if ( gc.getInternalVarsDefGeoFlag() ) {
                     // use deformed geometry
-                    defScale = context.getDefScale();
+                    defScale = gc.getDefScale();
                     p [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                     p [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                     p [ i ].z = s [ i ] * landScale;
@@ -896,20 +897,20 @@ QDKTPlate :: drawScalar(oofegGraphicContext &context)
                 }
             }
 
-            if ( context.getScalarAlgo() == SA_ZPROFILE ) {
-                EASValsSetColor( context.getDeformedElementColor() );
+            if ( gc.getScalarAlgo() == SA_ZPROFILE ) {
+                EASValsSetColor( gc.getDeformedElementColor() );
                 EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
                 tr =  CreateQuad3D(p);
                 EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
             } else {
-                context.updateFringeTableMinMax(s, 4);
+                gc.updateFringeTableMinMax(s, 4);
                 tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
                 EGWithMaskChangeAttributes(LAYER_MASK, tr);
             }
 
             EMAddGraphicsToModel(ESIModel(), tr);
         }
-    } else if ( context.giveIntVarMode() == ISM_local ) {
+    } else if ( gc.giveIntVarMode() == ISM_local ) {
         if ( integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints() != 4 ) {
             return;
         }
@@ -919,9 +920,9 @@ QDKTPlate :: drawScalar(oofegGraphicContext &context)
         WCRec pp [ 9 ];
 
         for ( i = 0; i < 4; i++ ) {
-            if ( context.getInternalVarsDefGeoFlag() ) {
+            if ( gc.getInternalVarsDefGeoFlag() ) {
                 // use deformed geometry
-                defScale = context.getDefScale();
+                defScale = gc.getDefScale();
                 pp [ i ].x = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(1, tStep, defScale);
                 pp [ i ].y = ( FPNum ) this->giveNode(i + 1)->giveUpdatedCoordinate(2, tStep, defScale);
                 pp [ i ].z = 0.;
@@ -947,7 +948,7 @@ QDKTPlate :: drawScalar(oofegGraphicContext &context)
         pp [ 8 ].z = 0.25 * ( pp [ 0 ].z + pp [ 1 ].z + pp [ 2 ].z + pp [ 3 ].z );
 
         for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-            gpCoords = gp->giveCoordinates();
+            gpCoords = gp->giveNaturalCoordinates();
             if ( ( gpCoords->at(1) > 0. ) && ( gpCoords->at(2) > 0. ) ) {
                 ind.at(1) = 0;
                 ind.at(2) = 4;
@@ -970,11 +971,11 @@ QDKTPlate :: drawScalar(oofegGraphicContext &context)
                 ind.at(4) = 8;
             }
 
-            if ( giveIPValue(v [ 0 ], gp, context.giveIntVarType(), tStep) == 0 ) {
+            if ( giveIPValue(v [ 0 ], gp, gc.giveIntVarType(), tStep) == 0 ) {
                 return;
             }
 
-            indx = context.giveIntVarIndx();
+            indx = gc.giveIntVarIndx();
 
             for ( i = 1; i <= 4; i++ ) {
                 s [ i - 1 ] = v [ 0 ].at(indx);
@@ -986,7 +987,7 @@ QDKTPlate :: drawScalar(oofegGraphicContext &context)
                 p [ i ].z = pp [ ind.at(i + 1) ].z;
             }
 
-            context.updateFringeTableMinMax(s, 4);
+            gc.updateFringeTableMinMax(s, 4);
             tr =  CreateQuadWD3D(p, s [ 0 ], s [ 1 ], s [ 2 ], s [ 3 ]);
             EGWithMaskChangeAttributes(LAYER_MASK, tr);
             EMAddGraphicsToModel(ESIModel(), tr);

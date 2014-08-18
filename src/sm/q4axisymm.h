@@ -36,7 +36,6 @@
 #define q4axisymm_h
 
 #include "structuralelement.h"
-#include "fei2dquadquad.h"
 #include "zznodalrecoverymodel.h"
 
 ///@name Input fields for Q4Axisymm
@@ -46,11 +45,12 @@
 //@}
 
 namespace oofem {
+class FEI2dQuadQuad;
+
 /**
  * This class implements an Quadratic isoparametric eight-node quadrilateral -
  * elasticity finite element for axisymmetric 3d continuum.
  * Each node has 2 degrees of freedom.
- * @todo Use FEI classes.
  */
 class Q4Axisymm : public StructuralElement, public ZZNodalRecoveryModelInterface
 {
@@ -62,7 +62,7 @@ public:
     Q4Axisymm(int n, Domain * d);
     virtual ~Q4Axisymm();
 
-    virtual FEInterpolation *giveInterpolation() const { return & interp; }
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual int computeNumberOfDofs() { return 16; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
@@ -82,13 +82,9 @@ protected:
 
     virtual void computeGaussPoints();
 
-    FloatArray *GiveDerivativeKsi(double, double);
-    FloatArray *GiveDerivativeEta(double, double);
-    void computeJacobianMatrixAt(FloatMatrix &answer, GaussPoint *gp);
-
 #ifdef __OOFEG
-    void drawRawGeometry(oofegGraphicContext &gc);
-    void drawDeformedGeometry(oofegGraphicContext &gc, UnknownType type);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type);
 #endif
 };
 } // end namespace oofem

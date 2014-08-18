@@ -35,19 +35,19 @@
 #ifndef quad1planestrain_h
 #define quad1planestrain_h
 
-#include "structuralelement.h"
+#include "nlstructuralelement.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "directerrorindicatorrc.h"
 #include "eleminterpmapperinterface.h"
 #include "huertaerrorestimator.h"
-#include "fei2dquadlin.h"
-#include "gausspoint.h"
 
 #define _IFT_Quad1PlaneStrain_Name "quad1planestrain"
 
 namespace oofem {
+class FEI2dQuadLin;
+
 /// Comment or uncomment the following line to force full or reduced integration
 ///@todo Removed for now.
 //#define Quad1PlaneStrain_reducedShearIntegration
@@ -55,22 +55,22 @@ namespace oofem {
  * This class implements an isoparametric four-node quadrilateral plane-
  * stress structural finite element. Each node has 2 degrees of freedom.
  */
-class Quad1PlaneStrain : public StructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
-public SpatialLocalizerInterface,
-public EIPrimaryUnknownMapperInterface,
-public HuertaErrorEstimatorInterface
+class Quad1PlaneStrain : public NLStructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
+    public SpatialLocalizerInterface,
+    public EIPrimaryUnknownMapperInterface,
+    public HuertaErrorEstimatorInterface
 {
 protected:
     static FEI2dQuadLin interp;
 
 public:
-    Quad1PlaneStrain(int n, Domain * d);
+    Quad1PlaneStrain(int n, Domain *d);
     virtual ~Quad1PlaneStrain();
 
     virtual int computeNumberOfDofs() { return 8; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
-    virtual FEInterpolation *giveInterpolation() const { return & interp; }
+    virtual FEInterpolation *giveInterpolation() const;
 
     virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
 
@@ -99,16 +99,13 @@ public:
                                                                   int &localNodeId, int &localElemId, int &localBcId,
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode);
-    virtual void HuertaErrorEstimatorI_computeLocalCoords(FloatArray &answer, const FloatArray &coords)
-    { computeLocalCoordinates(answer, coords); }
-    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-    { computeNmatrixAt(* ( gp->giveLocalCoordinates() ), answer); }
+    virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
 #ifdef __OOFEG
-    virtual void drawRawGeometry(oofegGraphicContext &);
-    virtual void drawDeformedGeometry(oofegGraphicContext &, UnknownType);
-    virtual void drawScalar(oofegGraphicContext &context);
-    virtual void drawSpecial(oofegGraphicContext &);
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
     // definition & identification
@@ -125,6 +122,7 @@ protected:
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
 
     virtual void computeGaussPoints();

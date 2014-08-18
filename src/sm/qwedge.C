@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
 #include "qwedge.h"
+#include "fei3dwedgequad.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
@@ -56,7 +56,6 @@ REGISTER_Element(QWedge);
 FEI3dWedgeQuad QWedge :: interpolation;
 
 QWedge :: QWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
-    // Constructor.
 {
     numberOfDofMans = 15;
 }
@@ -72,6 +71,11 @@ QWedge :: initializeFrom(InputRecord *ir)
     return this->NLStructuralElement :: initializeFrom(ir);
 }
 
+FEInterpolation *
+QWedge :: giveInterpolation() const
+{
+    return & interpolation;
+}
 
 void
 QWedge :: giveDofManDofIDMask(int inode, IntArray &answer) const
@@ -80,11 +84,7 @@ QWedge :: giveDofManDofIDMask(int inode, IntArray &answer) const
 // DofId mask array contains the DofID constants (defined in cltypes.h)
 // describing physical meaning of particular DOFs.
 {
-    answer.resize(3);
-
-    answer.at(1) = D_u;
-    answer.at(2) = D_v;
-    answer.at(3) = D_w;
+    answer = {D_u, D_v, D_w};
 }
 
 
@@ -113,7 +113,7 @@ QWedge :: computeStressVector(FloatArray &answer, const FloatArray &e, GaussPoin
         FloatArray x, y, z;
         FloatArray rotStrain, s;
 
-        this->giveMaterialOrientationAt( x, y, z, * gp->giveCoordinates() );
+        this->giveMaterialOrientationAt( x, y, z, * gp->giveNaturalCoordinates() );
         // Transform from global c.s. to material c.s.
 #if 0
         rotStrain = {
@@ -167,7 +167,7 @@ QWedge :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode
         FloatArray x, y, z;
         FloatMatrix Q;
 
-        this->giveMaterialOrientationAt( x, y, z, * gp->giveCoordinates() );
+        this->giveMaterialOrientationAt( x, y, z, * gp->giveNaturalCoordinates() );
 
 #if 0
         Q = {
@@ -234,7 +234,7 @@ double
 QWedge :: computeVolumeAround(GaussPoint *gp)
 // Returns the portion of the receiver which is attached to gp.
 {
-    double determinant = this->interpolation.giveTransformationJacobian( * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    double determinant = this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
     double weight      = gp->giveWeight();
 
     return ( determinant * weight );
@@ -265,7 +265,7 @@ QWedge :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(6, 45);
     answer.zero();
@@ -292,7 +292,7 @@ QWedge :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     FloatMatrix dnx;
 
-    this->interpolation.evaldNdx( dnx, * gp->giveCoordinates(), FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(9, 45);
     answer.zero();
@@ -364,7 +364,7 @@ QWedge :: SPRNodalRecoveryMI_giveNumberOfIP()
 void
 QWedge :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
 {
-    if ( this->computeGlobalCoordinates( coords, * gp->giveCoordinates() ) == 0 ) {
+    if ( this->computeGlobalCoordinates( coords, * gp->giveNaturalCoordinates() ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates failed");
     }
 }

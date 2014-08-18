@@ -154,6 +154,8 @@ protected:
 public:
     ErrorCheckingExportModule(int n, EngngModel * e);
     virtual ~ErrorCheckingExportModule() {}
+    ErrorCheckingExportModule(const ErrorCheckingExportModule &) = delete;
+    ErrorCheckingExportModule &operator=(const ErrorCheckingExportModule &) = delete;
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);
 

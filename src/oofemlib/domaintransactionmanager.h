@@ -35,11 +35,9 @@
 #ifndef domaintransactionmanager_h
 #define domaintransactionmanager_h
 
-#ifdef __PARALLEL_MODE
+#include "oofemcfg.h"
 
- #include "oofemcfg.h"
-
- #include <map>
+#include <map>
 
 namespace oofem {
 class FEMComponent;
@@ -112,5 +110,5 @@ public:
     friend class Domain;
 };
 } // end namespace oofem
-#endif
+
 #endif // domaintransactionmanager_h

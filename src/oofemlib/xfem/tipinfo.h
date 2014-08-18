@@ -30,6 +30,7 @@ public:
     FloatArray mTangDir;
     FloatArray mNormalDir;
     int mTipIndex;
+    int mEdgeIndex; /// Local number of which edge the crack enters the element (2d)
 };
 
 struct TipPropagation {

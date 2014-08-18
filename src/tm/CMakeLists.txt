@@ -1,9 +1,3 @@
-if (NOT USE_SM)
-    set (tm_hydram
-        ../sm/hydram.C
-        )
-endif ()
-
 if (USE_CEMHYD)
     set (tm_cemhyd
         cemhyd/cemhydmat.C
@@ -45,15 +39,16 @@ set (tm_status
     )
 
 set (tm_material
+    hydram.C
     hydratingisoheatmat.C
     hydratinghemomat.C
+    hydratingconcretemat.C
     hemotkmat.C
     isoheatmat.C
     isomoisturemat.C
     isolinmoisturemat.C
     bazantnajjarmat.C
     nlisomoisturemat.C
-    hydratingconcretemat.C
     nonlinearmassmat.C
     anisomassmat.C
     rvestokesflow.C

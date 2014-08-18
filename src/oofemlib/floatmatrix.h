@@ -45,6 +45,7 @@
 #include "contextioresulttype.h"
 #include "contextmode.h"
 
+#include <vector>
 #include <iosfwd>
 #include <initializer_list>
 #include <algorithm>
@@ -86,6 +87,10 @@ class CommunicationBuffer;
  *   previously allocated space.
  *   If further request for growing then is necessary memory reallocation.
  *   This process is controlled in resize member function.
+ * 
+ * @author Mikael Öhman
+ * @author Jim Brouzoulis 
+ * @author many others (please add yourselves) 
  */
 class OOFEM_EXPORT FloatMatrix
 {
@@ -154,6 +159,9 @@ public:
     inline bool isSquare() const { return nRows == nColumns; }
     /// Tests for empty matrix.
     inline bool isNotEmpty() const { return nRows > 0 && nColumns > 0; }
+
+    /// Returns true if no element is NAN or infinite
+    bool isFinite() const;
 
     /**
      * Coefficient access function. Returns value of coefficient at given
@@ -515,6 +523,12 @@ public:
 
     /// Prints matrix to stdout. Useful for debugging.
     void printYourself() const;
+    /**
+     * Print receiver on stdout with custom name.
+     * @param name Display name of reciever.
+     */    
+    void printYourself(const std::string name) const;
+    
     /// Higher accuracy than printYourself.
     void pY() const;
 

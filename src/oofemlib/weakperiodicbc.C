@@ -41,7 +41,6 @@
 #include "weakperiodicbc.h"
 #include "inputrecord.h"
 #include "element.h"
-#include "elementside.h"
 #include "node.h"
 #include "masterdof.h"
 #include "sparsemtrx.h"
@@ -196,7 +195,7 @@ double WeakPeriodicBoundaryCondition :: computeProjectionCoefficient(int vIndex,
 
         for ( GaussPoint *gp: *iRule ) {
 
-            FloatArray *lcoords = gp->giveCoordinates();
+            FloatArray *lcoords = gp->giveNaturalCoordinates();
             FloatArray gcoords;
 
             geoInterpolation->boundaryLocal2Global( gcoords, side [ thisSide ].at(ielement), * lcoords, FEIElementGeometryWrapper(thisElement) );
@@ -395,7 +394,7 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
     std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, boundary));
 
     for ( GaussPoint *gp: *iRule ) {
-        FloatArray *lcoords = gp->giveCoordinates();
+        FloatArray *lcoords = gp->giveNaturalCoordinates();
 
         FloatArray N;
 
