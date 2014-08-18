@@ -7,19 +7,17 @@
 #include "gaussintegrationrule.h"
 #include "structuralcrosssection.h"
 #ifdef __FM_MODULE
- #include "fluiddynamicmaterial.h"
- #include "fluidcrosssection.h"
+#include "fluiddynamicmaterial.h"
+#include "fluidcrosssection.h"
 #endif
 #include "load.h"
 #include "element.h"
 #include "dofmanager.h"
 
-// Fredag?
-
 namespace oofem {
 
 #define USEUNCOUPLED 0
-#define TESTNUMTAN 1
+#define USENUMTAN 1
 
 REGISTER_Element(tet21ghostsolid);
 
@@ -84,8 +82,41 @@ tet21ghostsolid :: computeGaussPoints()
 }
 
 void
+tet21ghostsolid :: computeNumericStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
+{
+
+    FloatArray a, aPert, intF, intFPert, DintF;
+    double eps=1e-8;
+
+    answer.resize(64, 64);
+    answer.zero();
+
+    this->computeVectorOf(VM_Total, tStep, a);
+
+    giveInternalForcesVectorGivenSolution(intF, tStep, 0, a);
+
+    for (int i=1; i<=answer.giveNumberOfColumns(); i++) {
+        aPert = a;
+        aPert.at(i) = aPert.at(i) + eps;
+
+        giveInternalForcesVectorGivenSolution(intFPert, tStep, 0, aPert);
+
+        DintF.operator =(intF-intFPert);
+        DintF.times(-1/eps);
+        answer.setColumn(DintF, i);
+    }
+
+
+}
+
+void
 tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
+
+#ifdef USENUMTAN
+    computeNumericStiffnessMatrix(answer, rMode, tStep);
+    return;
+#endif
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 #ifdef __FM_MODULE
@@ -140,9 +171,11 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
             this->computeBmatrixAt(gp, B);
 
             // Fluid part
-            gp->setMaterialMode(_3dFlow);
+#ifdef __FM_MODULE
             fluidMaterial->giveDeviatoricStiffnessMatrix(Ed, TangentStiffness, gp, tStep);
-            gp->setMaterialMode(_3dMat);
+#else
+            OOFEM_ERROR("Fluid module missing\n");
+#endif
 
             EdB.beProductOf(Ed, B);
             Kf.plusProductSymmUpper(B, EdB, detJ*weight);
@@ -161,26 +194,11 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
     FloatMatrix GT;
 
     GT.beTranspositionOf(G);
-    //GTdeltat.beTranspositionOf(G);
-    //GTdeltat.times(deltat);
     Kf.symmetrized();
     Kx.symmetrized();
-    //    Kf.printYourself();
-    //    G.printYourself();
-    //    GT.printYourself();
-    //    Kx.printYourself();
 
     answer.resize(64, 64);
     answer.zero();
-#define USEUNCOUPLED 0
-
-#if USEUNCOUPLED == 1
-    // Totaly uncoupled
-    answer.assemble(Kf, momentum_ordering, momentum_ordering);
-    answer.assemble(G, momentum_ordering, conservation_ordering);
-    answer.assemble(GT, conservation_ordering, momentum_ordering);
-    answer.assemble(Kx, ghostdisplacement_ordering, ghostdisplacement_ordering);
-#else
 
     answer.assemble(Kf, ghostdisplacement_ordering, ghostdisplacement_ordering);
     answer.assemble(GT, conservation_ordering, ghostdisplacement_ordering);
@@ -188,18 +206,6 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
     answer.assemble(G,  ghostdisplacement_ordering, conservation_ordering);
     answer.assemble(Kx, momentum_ordering, ghostdisplacement_ordering);
     answer.assemble(GT, conservation_ordering, momentum_ordering);
-
-#endif
-
-    if (this->giveNumber() == 364 ) {
-        //answer.printYourself();
-    }
-
-}
-
-void
-tet21ghostsolid :: computeForceLoadVectorX(FloatArray &answer, TimeStep *tStep, ValueModeType mode)
-{
 
 }
 
@@ -274,21 +280,23 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
 
     }
 
-#if USEUNCOUPLED == 1
-    // Totaly uncoupled
-    answer.assemble(temparray, this->momentum_ordering);
-#else
     answer.assemble(temparray, this->ghostdisplacement_ordering);
     answer.assemble(vload, this->conservation_ordering);
-#endif
 
-
-
-    // answer.printYourself();
 }
 
 void
 tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
+{
+
+    FloatArray a;
+    this->computeVectorOf(VM_Total, tStep, a);
+    giveInternalForcesVectorGivenSolution(answer, tStep, useUpdatedGpRecord, a);
+
+}
+
+void
+tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord, FloatArray &a)
 {
 
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
@@ -297,28 +305,17 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
 #endif
 
     FloatMatrix Kf, G, Kx, B, Ed, dNx;
-    FloatArray Strain, Stress, Nlin, dNv, a, a_inc, a_prev, aVelocity, aPressure, aGhostDisplacement, aIncGhostDisplacement, fluidStress, epsf, dpdivv;
+    FloatArray Strain, Stress, Nlin, dNv, a_inc, a_prev, aVelocity, aPressure, aGhostDisplacement, aIncGhostDisplacement, fluidStress, epsf, dpdivv;
     FloatArray momentum, conservation, auxstress, divv;
     double pressure, epsvol=0.0;
 
-    giveUnknownData(a_prev, a, a_inc, tStep);
+    if (!tStep->isTheFirstStep()) {
+        this->computeVectorOf( VM_Total, tStep->givePreviousStep(), a_prev);
+    } else {
+        a_prev.resize( a.giveSize() );
+        a_prev.zero();
+    }
     a_inc.operator =(a-a_prev);
-
-#if TESTNUMTAN == 1
-    FloatMatrix K;
-    FloatArray f_int;
-    double eps = 1e-3;
-    K.resize(a.giveSize(), a.giveSize());
-    K.zero();
-
-    for (int i = 0; i<=a.giveSize(); i++) {
-        giveUnknownData(a_prev, a, a_inc, tStep);
-        if (i>0) { // Compute f_int(a) if i==0, otherwide compute f_int(a+delta)
-            a.at(i) = a.at(i) + eps;
-        }
-        // Update a_inc
-        a_inc.operator =(a-a_prev);
-#endif
 
         momentum.resize(30);
         momentum.zero();
@@ -377,7 +374,6 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
                 auxstress.plusProduct(B, Stress, detJ * weight);
 
             } else {
-                // We use small deformation on solid part since it is just there for keeping the mesh in ok shape.
                 FloatMatrix B, BH;
 
                 this->computeBHmatrixAt(gp, BH);
@@ -397,21 +393,23 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
 
                 gp->setMaterialMode(_3dFlow);
                 fluidMaterial->computeDeviatoricStressVector(fluidCauchy, epsvol, gp, epsf, pressure, tStep);
+                //fluidCauchy.printYourself();
                 gp->setMaterialMode(_3dMat);
 
                 // Transform to 1st Piola-Kirshhoff
                 FloatArray Fa;
                 FloatMatrix F, Finv, FinvT, fluidStressMatrix;
 
-                this->computeDeformationGradientVector(Fa, gp, tStep);
+                computeDeformationGradientVector(Fa, gp, tStep, aGhostDisplacement);
                 F.beMatrixForm(Fa);
                 Finv.beInverseOf(F);
                 FinvT.beTranspositionOf(Finv);
 
                 fluidCauchyMatrix.beMatrixFormOfStress(fluidCauchy);
                 fluidStressMatrix.beProductOf(FinvT, fluidCauchyMatrix);
-                fluidStressMatrix.times( detJ );
+                fluidStressMatrix.times( F.giveDeterminant() );
                 fluidStress.beVectorForm(fluidStressMatrix);
+                //fluidStress.printYourself();
 
                 // Add to equation
 
@@ -434,88 +432,9 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
         answer.resize(64);
         answer.zero();
 
-#if USEUNCOUPLED == 1
-        // Totaly uncoupled
-        answer.assemble(momentum, momentum_ordering);
-        answer.assemble(conservation, conservation_ordering);
-        answer.assemble(auxstress, ghostdisplacement_ordering);
-#else
         answer.assemble(momentum, ghostdisplacement_ordering);
         answer.assemble(conservation, conservation_ordering);
         answer.assemble(auxstress, momentum_ordering);
-#endif
-
-#if TESTNUMTAN == 1
-
-        if (i==0) {
-            f_int.operator =( answer );
-        } else {
-            // Compute derivative
-            FloatArray dfda;
-
-            //f_int.printYourself();
-            //answer.printYourself();
-
-            dfda.operator = (f_int - answer);
-            dfda.times(-1.0/eps);
-
-            //dfda.printYourself();
-
-            K.setColumn(dfda, i);
-
-        }
-    }
-
-    if (this->giveNumber() == 364) {
-        //K.printYourself();
-        //answer.printYourself();
-    }
-    answer.resize(64);
-    answer.zero();
-
-#if USEUNCOUPLED == 1
-    // Totaly uncoupled
-    answer.assemble(momentum, momentum_ordering);
-    answer.assemble(conservation, conservation_ordering);
-    answer.assemble(auxstress, ghostdisplacement_ordering);
-#else
-    answer.assemble(momentum, ghostdisplacement_ordering);
-    answer.assemble(conservation, conservation_ordering);
-    answer.assemble(auxstress, momentum_ordering);
-#endif
-
-//if (this->giveNumber() == 364) {
-    // answer.printYourself();
-//}
-
-#if TESTNUMTAN == 1
-    if (this->giveNumber() == 364) {
-        FloatMatrix Ka, Diff;
-        FloatArray ans;
-        this->computeStiffnessMatrix(Ka, TangentStiffness, tStep);
-        printf("Numerical tangent:\n");
-        K.printYourself();
-        printf("Analytical tangent:\n");
-        Ka.printYourself();
-        Diff = Ka;
-        Diff.subtract(K);
-
-        // Diff.printYourself();
-
-        double m=0.0;
-        for (int i=0; i<Diff.giveNumberOfRows(); i++) {
-            for (int j=0; j<Diff.giveNumberOfColumns(); j++) {
-                if (sqrt( Diff(i,j)*Diff(i,j) ) > m) m = sqrt( Diff(i,j)*Diff(i,j) );
-            }
-        }
-
-        printf("%e\n", m);
-
-        /*Ka.printYourself();
-        ans.beProductOf(Ka, a);
-        ans.printYourself();*/
-    }
-#endif
 
 }
 
@@ -587,7 +506,6 @@ tet21ghostsolid :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 void
 tet21ghostsolid :: giveUnknownData(FloatArray &u_prev, FloatArray &u, FloatArray &inc, TimeStep *tStep)
 {
-
     this->computeVectorOf( VM_Total, tStep, u);
 
     if (!tStep->isTheFirstStep()) {
@@ -599,20 +517,38 @@ tet21ghostsolid :: giveUnknownData(FloatArray &u_prev, FloatArray &u, FloatArray
         u_prev.operator = (inc);
     }
 
-        for (int i = 0; i<this->giveNumberOfDofManagers(); i++) {
+}
 
-            this->giveDofManager(i+1)->giveUnknownVector(u_n, id, VM_Total, tStep );
-            this->giveDofManager(i+1)->giveUnknownVector(inc_n, id, VM_Incremental, tStep );
-            u_prev.at(3*i+1) = u_n.at(1)-inc_n.at(1);
-            u_prev.at(3*i+2) = u_n.at(2)-inc_n.at(2);
-            u_prev.at(3*i+3) = u_n.at(3)-inc_n.at(3);
-            u.at(3*i+1) = u_n.at(1);
-            u.at(3*i+2) = u_n.at(2);
-            u.at(3*i+3) = u_n.at(3);
-            inc.at(3*i+1) = inc_n.at(1);
-            inc.at(3*i+2) = inc_n.at(2);
-            inc.at(3*i+3) = inc_n.at(3);
-        }
+void
+tet21ghostsolid :: computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &u)
+{
+    // Computes the deformation gradient in the Voigt format at the Gauss point gp of
+    // the receiver at time step tStep.
+    // Order of components: 11, 22, 33, 23, 13, 12, 32, 31, 21 in the 3D.
+
+    // Obtain the current displacement vector of the element and subtract initial displacements (if present)
+    if ( initialDisplacements ) {
+        u.subtract(* initialDisplacements);
+    }
+
+    // Displacement gradient H = du/dX
+    FloatMatrix B;
+    this->computeBHmatrixAt(gp, B);
+    answer.beProductOf(B, u);
+
+    // Deformation gradient F = H + I
+    MaterialMode matMode = gp->giveMaterialMode();
+    if ( matMode == _3dMat || matMode == _PlaneStrain ) {
+        answer.at(1) += 1.0;
+        answer.at(2) += 1.0;
+        answer.at(3) += 1.0;
+    } else if ( matMode == _PlaneStress ) {
+        answer.at(1) += 1.0;
+        answer.at(2) += 1.0;
+    } else if ( matMode == _1dMat ) {
+        answer.at(1) += 1.0;
+    } else {
+        OOFEM_ERROR("MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
     }
 }
 
