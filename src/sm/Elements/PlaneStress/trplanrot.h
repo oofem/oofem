@@ -85,7 +85,7 @@ public:
     virtual int computeNumberOfDofs() { return 9; }
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
-    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane) { return 0.; }
+    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
 
     FloatArray GivePitch();
     FloatArray GiveDerivativeUX(GaussPoint *gp);

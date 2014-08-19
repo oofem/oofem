@@ -46,6 +46,7 @@
 #include "geneigvalsolvertype.h"
 #include "materialmappingalgorithmtype.h"
 #include "meshpackagetype.h"
+#include "dofiditem.h"
 
 #include <map>
 #include <string>
@@ -107,7 +108,7 @@ template< typename T > SparseNonLinearSystemNM *nonlinCreator(Domain *d, EngngMo
 template< typename T > InitModule *initCreator(int n, EngngModel *e) { return ( new T(n, e) ); }
 template< typename T > TopologyDescription *topologyCreator(Domain *d) { return new T(d); }
 
-template< typename T > Dof *dofCreator(int n, DofManager *dman) { return new T(n, dman); }
+template< typename T > Dof *dofCreator(DofIDItem dofid, DofManager *dman) { return new T(dman, dofid); }
 template< typename T > SparseMtrx *sparseMtrxCreator() { return new T(); }
 template< typename T > SparseLinearSystemNM *sparseLinSolCreator(Domain *d, EngngModel *m) { return new T(d, m); }
 template< typename T > ErrorEstimator *errEstCreator(int n, Domain *d) { return new T(n, d); }
@@ -205,7 +206,7 @@ private:
     /// Associative container containing sparse matrix creators.
     std :: map < SparseMtrxType, SparseMtrx * ( * )() > sparseMtrxList;
     /// Associative container containing dof creators.
-    std :: map < dofType, Dof * ( * )(int, DofManager *) > dofList;
+    std :: map < dofType, Dof * ( * )(DofIDItem, DofManager *) > dofList;
     /// Associative container containing error estimator creators.
     std :: map < ErrorEstimatorType, ErrorEstimator * ( * )(int, Domain *) > errEstList;
     /// Associative container containing sparse linear solver creators
@@ -414,11 +415,11 @@ public:
     /**
      * Creates new instance of DOF corresponding to given keyword.
      * @param type ID determining the type of new instance.
-     * @param num  object's number.
+     * @param dofid The dof ID.
      * @param dman Dof manager assigned to new object.
      * @return Newly allocated object of requested type, null if keyword not supported.
      */
-    Dof *createDof(dofType type, int num, DofManager *dman);
+    Dof *createDof(dofType type, DofIDItem dofid, DofManager *dman);
     /**
      * Creates new instance of SparseLinearSystemNM corresponding
      * to given type.

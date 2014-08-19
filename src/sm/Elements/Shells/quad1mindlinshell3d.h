@@ -110,7 +110,7 @@ public:
 
     virtual void computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp);
 
-    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
+    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
     virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);

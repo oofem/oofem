@@ -402,7 +402,7 @@ ErrorCheckingExportModule :: writeCheck(Domain *domain, TimeStep *tStep)
             }
             std :: cout << "#NODE tStep " << tStep->giveNumber();
             std :: cout << " number " << dman->giveNumber();
-            std :: cout << " dof " << dof->giveNumber(); 
+            std :: cout << " dof " << dof->giveDofID(); 
             std :: cout << " unknown " << 'd';
             std :: cout << " value " << dof->giveUnknown(VM_Total, tStep);
             std :: cout << std :: endl;

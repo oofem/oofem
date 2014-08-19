@@ -105,7 +105,7 @@ SolutionbasedShapeFunction :: initializeFrom(InputRecord *ir)
 
     for (int i=1; i<=this->giveDomain()->giveNumberOfSpatialDimensions(); i++) {
         int DofID=this->domain->giveNextFreeDofID();
-        MasterDof *newDof = new MasterDof( i, myNode, (DofIDItem) DofID );
+        MasterDof *newDof = new MasterDof( myNode, (DofIDItem) DofID );
         myNode->appendDof( newDof );
     }
 

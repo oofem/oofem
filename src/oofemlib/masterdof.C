@@ -45,7 +45,7 @@
 #include "engngm.h"
 
 namespace oofem {
-MasterDof :: MasterDof(int i, DofManager *aNode, int nbc, int nic, DofIDItem id) : Dof(i, aNode, id)
+MasterDof :: MasterDof(DofManager *aNode, int nbc, int nic, DofIDItem id) : Dof(aNode, id)
     // Constructor. Creates a new d.o.f., with number i, belonging
     // to aNode with bc=nbc, ic=nic
 {
@@ -57,7 +57,7 @@ MasterDof :: MasterDof(int i, DofManager *aNode, int nbc, int nic, DofIDItem id)
      * pastUnknowns   = NULL ; */
 }
 
-MasterDof :: MasterDof(int i, DofManager *aNode, DofIDItem id) : Dof(i, aNode, id)
+MasterDof :: MasterDof(DofManager *aNode, DofIDItem id) : Dof(aNode, id)
 {
     ic = bc = equationNumber = 0;                        // means "uninitialized"
     unknowns = new Dictionary();
@@ -324,7 +324,7 @@ void MasterDof :: giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mod
 
 void MasterDof :: printYourself()
 {
-    printf( "dof %d  of %s %d :\n", number, dofManager->giveClassName(), dofManager->giveNumber() );
+    printf( "dof %d  of %s %d :\n", dofID, dofManager->giveClassName(), dofManager->giveNumber() );
     printf("equation %d    bc %d \n", equationNumber, bc);
 }
 

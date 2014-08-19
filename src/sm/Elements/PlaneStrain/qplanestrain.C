@@ -161,9 +161,13 @@ QPlaneStrain :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 
 double
-QPlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+QPlaneStrain :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
+//
+// returns receiver's characteristic length for crack band models
+// for a crack formed in the plane with normal normalToCrackPlane.
+//
 {
-    return this->giveLenghtInDir(normalToCrackPlane) / sqrt( ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
+    return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
 }
 
 

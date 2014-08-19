@@ -723,6 +723,17 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMas
     }
 
     answer.symmetrized();
+
+    const double tol = 1.0e-9;
+    const double regularizationCoeff = 1.0e-6;
+    int numRows = answer.giveNumberOfRows();
+    for(int i = 0; i < numRows; i++) {
+        if( fabs(answer(i,i)) < tol ) {
+            answer(i,i) += regularizationCoeff;
+//          printf("Found zero on diagonal.\n");
+        }
+    }
+
 }
 
 IRResultType
@@ -851,13 +862,13 @@ bool XfemStructuralElementInterface :: tipIsTouchingEI(const TipInfo &iTipInfo, 
     return false;
 }
 
-void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
+void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
 {
     const int numCells = mSubTri.size();
-    vtkPiece.setNumberOfCells(numCells);
+    vtkPieces[0].setNumberOfCells(numCells);
 
     int numTotalNodes = numCells*3;
-    vtkPiece.setNumberOfNodes(numTotalNodes);
+    vtkPieces[0].setNumberOfNodes(numTotalNodes);
 
     // Node coordinates
     std :: vector< FloatArray >nodeCoords;
@@ -866,7 +877,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(V
         for(int i = 1; i <= 3; i++) {
             FloatArray x = tri.giveVertex(i);
             nodeCoords.push_back(x);
-            vtkPiece.setNodeCoords(nodesPassed, x);
+            vtkPieces[0].setNodeCoords(nodesPassed, x);
             nodesPassed++;
         }
     }
@@ -877,18 +888,18 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(V
     for(size_t i = 1; i <= mSubTri.size(); i++ ) {
         IntArray nodes = {nodesPassed, nodesPassed+1, nodesPassed+2};
         nodesPassed += 3;
-        vtkPiece.setConnectivity(i, nodes);
+        vtkPieces[0].setConnectivity(i, nodes);
 
-        vtkPiece.setOffset(i, offset);
+        vtkPieces[0].setOffset(i, offset);
         offset += 3;
 
-        vtkPiece.setCellType(i, 5); // Linear triangle
+        vtkPieces[0].setCellType(i, 5); // Linear triangle
     }
 
 
 
     // Export nodal variables from primary fields
-    vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
+    vtkPieces[0].setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
 
     for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(fieldNum);
@@ -1011,7 +1022,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(V
 
 
                     FloatArray valuearray = u;
-                    vtkPiece.setPrimaryVarInNode(fieldNum, nodesPassed, valuearray);
+                    vtkPieces[0].setPrimaryVarInNode(fieldNum, nodesPassed, valuearray);
                 } else {
                     // TODO: Implement
                     printf("fieldNum: %d\n", fieldNum);
@@ -1027,10 +1038,10 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(V
 
 
     // Export nodal variables from internal fields
-    vtkPiece.setNumberOfInternalVarsToExport(0, numTotalNodes);
+    vtkPieces[0].setNumberOfInternalVarsToExport(0, numTotalNodes);
 
 
-    vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
+    vtkPieces[0].setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
     for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
         FloatArray average;
@@ -1046,7 +1057,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(V
         averageV9.at(2) = averageV9.at(4) = average.at(6);
 
         for(size_t triInd = 1; triInd <= mSubTri.size(); triInd++) {
-            vtkPiece.setCellVar( i, triInd, averageV9 );
+            vtkPieces[0].setCellVar( i, triInd, averageV9 );
         }
     }
 
@@ -1057,7 +1068,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(V
         XfemManager *xMan = element->giveDomain()->giveXfemManager();
 
         int nEnrIt = xMan->giveNumberOfEnrichmentItems();
-        vtkPiece.setNumberOfInternalXFEMVarsToExport(xMan->vtkExportFields.giveSize(), nEnrIt, numTotalNodes);
+        vtkPieces[0].setNumberOfInternalXFEMVarsToExport(xMan->vtkExportFields.giveSize(), nEnrIt, numTotalNodes);
 
         const int nDofMan = element->giveNumberOfDofManagers();
 
@@ -1090,7 +1101,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(V
 
 
                         FloatArray valueArray = {levelSet};
-                        vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
+                        vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
 
                     } else if ( xfemstype == XFEMST_LevelSetGamma ) {
                         double levelSet = 0.0, levelSetInNode = 0.0;
@@ -1104,7 +1115,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(V
 
 
                         FloatArray valueArray = {levelSet};
-                        vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
+                        vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
 
                     } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
 
@@ -1120,7 +1131,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(V
 
 
                         FloatArray valueArray = {nodeEnrMarker};
-                        vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
+                        vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
 
                     }
 

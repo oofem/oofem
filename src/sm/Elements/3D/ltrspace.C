@@ -238,9 +238,9 @@ LTRSpace :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 
 double
-LTRSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+LTRSpace :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 {
-    return this->giveLenghtInDir(normalToCrackPlane);
+    return this->giveLengthInDir(normalToCrackPlane);
 }
 
 

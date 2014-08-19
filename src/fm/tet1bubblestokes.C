@@ -67,9 +67,9 @@ Tet1BubbleStokes :: Tet1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDom
     this->numberOfGaussPoints = 24;
 
     this->bubble = new ElementDofManager(1, aDomain, this);
-    this->bubble->appendDof( new MasterDof(1, this->bubble, V_u) );
-    this->bubble->appendDof( new MasterDof(2, this->bubble, V_v) );
-    this->bubble->appendDof( new MasterDof(3, this->bubble, V_w) );
+    this->bubble->appendDof( new MasterDof(this->bubble, V_u) );
+    this->bubble->appendDof( new MasterDof(this->bubble, V_v) );
+    this->bubble->appendDof( new MasterDof(this->bubble, V_w) );
 }
 
 Tet1BubbleStokes :: ~Tet1BubbleStokes()

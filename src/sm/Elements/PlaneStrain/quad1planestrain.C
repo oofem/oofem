@@ -89,6 +89,21 @@ Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li
     answer.resize(4, 8);
     answer.zero();
 
+#ifdef Quad1PlaneStrain_reducedVolumetricIntegration
+    FloatMatrix dN_red;
+    FloatArray lcoords_red(2);
+    lcoords_red.zero();
+    this->interp.evaldNdx( dN_red, lcoords_red, FEIElementGeometryWrapper(this) );
+
+    for ( int i = 1; i <= 4; i++ ) {
+      answer.at(1, 2 * i - 1) = ( dN.at(i, 1) + dN_red.at(i, 1) ) / 2.;
+      answer.at(1, 2 * i - 0) = (-dN.at(i, 2) + dN_red.at(i, 2) ) / 2.;
+      answer.at(2, 2 * i - 1) = (-dN.at(i, 1) + dN_red.at(i, 1) ) / 2.;
+      answer.at(2, 2 * i - 0) = ( dN.at(i, 2) + dN_red.at(i, 2) ) / 2.;
+      answer.at(4, 2 * i - 1) = dN.at(i, 2);
+      answer.at(4, 2 * i - 0) = dN.at(i, 1);
+    }
+#else
 #ifdef Quad1PlaneStrain_reducedShearIntegration
     FloatMatrix dN_red;
     FloatArray lcoords_red(2);
@@ -110,6 +125,7 @@ Quad1PlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li
         answer.at(4, 2 * i - 0) = dN.at(i, 1);
     }
 
+#endif
 #endif
 }
 
@@ -304,6 +320,7 @@ Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
     }
 
     if ( !( ( numberOfGaussPoints == 4 ) ||
+            ( numberOfGaussPoints == 1 ) ||
             ( numberOfGaussPoints == 9 ) ||
             ( numberOfGaussPoints == 16 ) ) ) {
         numberOfGaussPoints = 4;
@@ -314,14 +331,13 @@ Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
 
 
 double
-Quad1PlaneStrain :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+Quad1PlaneStrain :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 //
-// returns receivers characteristic length in gp (for some material models)
-// for crack formed in plane with normal normalToCrackPlane.
+// returns receiver's characteristic length for crack band models
+// for a crack formed in the plane with normal normalToCrackPlane.
 //
 {
-    // return this -> giveLenghtInDir(normalToCrackPlane) / sqrt((double) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints());
-    return this->giveLenghtInDir(normalToCrackPlane);
+    return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
 }
 
 void

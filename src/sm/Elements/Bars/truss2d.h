@@ -78,7 +78,8 @@ public:
     virtual int computeNumberOfDofs() { return 4; }
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
-    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &)
+    // characteristic length (for crack band approach)
+    virtual double giveCharacteristicLength(const FloatArray &)
     { return this->computeLength(); }
 
     virtual double computeVolumeAround(GaussPoint *gp);

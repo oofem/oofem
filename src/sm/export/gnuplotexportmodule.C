@@ -546,6 +546,59 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
 
     WritePointsToGnuplot(nameTractionsNT, nodeTractionNTArray);
 
+
+
+    // Boundary points and displacements
+    IntArray boundaries, bNodes;
+    iBC.giveBoundaries(boundaries);
+
+    std::vector< std::vector<FloatArray> > bndNodes;
+
+    for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
+
+        Element *e = iBC.giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+        int boundary = boundaries.at(pos * 2);
+
+        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+
+        std::vector<FloatArray> bndSegNodes;
+
+        // Add the start and end nodes of the segment
+        DofManager *startNode   = e->giveDofManager( bNodes[0] );
+        FloatArray xS    = *(startNode->giveCoordinates());
+
+        Dof *dSu = startNode->giveDofWithID(D_u);
+        double dU = dSu->giveUnknown(VM_Total, tStep);
+        xS.push_back(dU);
+
+        Dof *dSv = startNode->giveDofWithID(D_v);
+        double dV = dSv->giveUnknown(VM_Total, tStep);
+        xS.push_back(dV);
+
+        bndSegNodes.push_back(xS);
+
+        DofManager *endNode     = e->giveDofManager( bNodes[1] );
+        FloatArray xE    = *(endNode->giveCoordinates());
+
+        Dof *dEu = endNode->giveDofWithID(D_u);
+        dU = dEu->giveUnknown(VM_Total, tStep);
+        xE.push_back(dU);
+
+        Dof *dEv = endNode->giveDofWithID(D_v);
+        dV = dEv->giveUnknown(VM_Total, tStep);
+        xE.push_back(dV);
+
+        bndSegNodes.push_back(xE);
+
+        bndNodes.push_back(bndSegNodes);
+    }
+
+    std :: stringstream strBndNodes;
+    strBndNodes << "BndNodesGnuplotTime" << time << ".dat";
+    std :: string nameBndNodes = strBndNodes.str();
+
+    WritePointsToGnuplot(nameBndNodes, bndNodes);
+
 }
 
 void GnuplotExportModule::outputMesh(Domain &iDomain)

@@ -227,22 +227,9 @@ LSpace :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 
 double
-LSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+LSpace :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 {
-    if ( normalToCrackPlane.giveSize() != 0 ) {
-        double factor = cbrt( ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
-        return this->giveLenghtInDir(normalToCrackPlane) / factor;
-    } else {
-        IntegrationRule *iRule;
-        double volume = 0.0;
-
-        iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        for ( GaussPoint *gp: *iRule ) {
-            volume += this->computeVolumeAround(gp);
-        }
-
-        return cbrt(volume);
-    }
+    return this->giveLengthInDir(normalToCrackPlane);
 }
 
 

@@ -32,13 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/*
- * xfemsolverinterface.h
- *
- *  Created on: Jul 18, 2014
- *      Author: svennine
- */
-
 #ifndef XFEMSOLVERINTERFACE_H_
 #define XFEMSOLVERINTERFACE_H_
 
