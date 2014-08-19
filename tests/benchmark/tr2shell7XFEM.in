@@ -33,7 +33,7 @@ ConstantEdgeLoad 2 ndofs 8 loadType 2 loadTimeFunction 1 Components 8 0. 0. 1.0 
 ConstantFunction 1 f(t) 1.
 XfemManager 1 numberofenrichmentitems 1 
 #delamination 1 enrichmentdomains 1 1  enrichmentfunction 1  enrichmentdomain 1 enrichmentfront 1 delaminationxicoord 0.0  
-delamination 1 interfacenum 1 csnum 1 xibottom 0.0 xitop 1.0
+delamination 1 interfacenum 1 1 csnum 1
 DiscontinuousFunction 1 
 DofManList 1 list 12  2 3 5 6 7 8 9 10 12 13 14 15
 #EnrFrontDoNothing 1

@@ -63,7 +63,6 @@ class Shell7BaseXFEM : public Shell7Base, public XfemElementInterface
 {
 protected:
     XfemManager *xMan;
-
     virtual void updateYourself(TimeStep *tStep);
     virtual void postInitialize();
     void computeOrderingArray(IntArray &orderingArray, IntArray &activeDofsArray,  EnrichmentItem *ei);
@@ -72,6 +71,7 @@ protected:
     void discGiveInitialSolutionVector(FloatArray &answer, IntArray &eiDofIdArray); // should be replaced with general function
     void computeDiscGeneralizedStrainVector(FloatArray &dGenEps, FloatArray &lCoords, EnrichmentItem *ei, TimeStep *tStep);
     void computeDiscSolutionVector(IntArray &dofIdArray , TimeStep *tStep, FloatArray &solVecD);
+    void computeInterfaceJumpAt(int interf, FloatArray &lCoords, TimeStep *tStep, FloatArray &answer);
 
     // Internal forces
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
@@ -84,7 +84,7 @@ protected:
     double evaluateHeavisideGamma(double xi, Delamination *ei);
     double evaluateCutHeaviside(const double xi, const double xiBottom, const double xiTop) const;
     void computeCohesiveForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei);
-
+    
     // Tangent matrices
     void computeLambdaGMatricesDis(FloatMatrix lambdaD [ 3 ], double zeta);
     void computeLambdaNMatrixDis(FloatMatrix &lambda_xd, double zeta);  
@@ -144,9 +144,9 @@ protected:
     FEI3dTrQuad interpolationForCZExport;
     FEI3dWedgeQuad interpolationForExport;
 
-    std::vector< IntArray >orderingArrays;
-    std::vector< IntArray >activeDofsArrays;
-    
+    std::vector< IntArray > orderingArrays;
+    std::vector< IntArray > activeDofsArrays;
+    std::vector< FloatArray > solVecDarrays;
     
 // temp - to be removed 090814
    void computeTripleProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c);
@@ -168,6 +168,8 @@ public:
 
     bool hasCohesiveZone(int interfaceNum);
     std :: vector< IntegrationRule * > czIntegrationRulesArray;
+    private:
+    void jump(FloatMatrix lambda, FloatArray deltaUnknowns);
 };
 } // end namespace oofem
 #endif

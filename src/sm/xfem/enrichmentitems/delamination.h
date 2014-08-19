@@ -58,12 +58,14 @@ class OOFEM_EXPORT Delamination : public EnrichmentItem
 {
 protected:
     Material *mat;  // Material for cohesive zone model
-    int interfaceNum;
-    int crossSectionNum;
-    int matNum;
+    FloatArray interfaceNum; // starting and ending interfaceNum for the delamination
+    int crossSectionNum;     // use this to keep track of the interface coordinates
+    int matNum; // still used??
     double delamXiCoord;    // defines at what local xi-coord the delamination is defined
     
-
+    // New 110814 JB defines between what local xi-coords the delamination is defined
+    double xiBottom;
+    double xiTop;
 public:
     Delamination(int n, XfemManager *xm, Domain *aDomain);
 
@@ -72,13 +74,12 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void appendInputRecords(DynamicDataReader &oDR);
 
-    double giveDelamXiCoord() { return delamXiCoord; };
-    //virtual Material *giveMaterial() { return mat; }
+    double giveDelamXiCoord() { return xiBottom; };     // coord where the delamination is defined 
+    double giveBoundingDelamXiCoord() { return xiTop; };// coord where the delamination enrichment should stop, default is the shell surface
+    int giveDelamInterfaceNum() { return interfaceNum.at(1); };
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
 
-    // New 110814 JB defines between what local xi-coords the delamination is defined
-    double xiBottom;
-    double xiTop;    
+    
 };
 } // end namespace oofem
 

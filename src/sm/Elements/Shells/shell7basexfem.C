@@ -87,7 +87,20 @@ Shell7BaseXFEM :: postInitialize()
 	    this->computeOrderingArray( this->orderingArrays[i-1], activeDofsArrays[i-1], ei); 
 	}
     }
+
+    // initialize the solution vectors to zero
+    this->solVecDarrays.resize(numEI);
+    int numDofs = Shell7Base :: giveNumberOfDofs();
+    for ( int i = 1; i <= numEI; i++ ) {
+	this->solVecDarrays[i-1].resize(numDofs);
+	this->solVecDarrays[i-1].zero();
+    }
+  
+  
+  
 }
+
+
 
 void
 Shell7BaseXFEM :: computeFailureCriteriaQuantities(FailureCriteriaStatus *fcStatus, TimeStep *tStep) 
@@ -266,11 +279,25 @@ Shell7BaseXFEM :: computeDiscSolutionVector(IntArray &dofIdArray , TimeStep *tSt
     FloatArray temp;
     IntArray newIdArray;
     newIdArray = dofIdArray;
-    newIdArray.followedBy(0); // Extend it by one such that the length is 7 -> answer = size 42
+    newIdArray.followedBy(0); // Extend it by one such that the length is 7 -> answer = size 42 for 6 noded triangle
     this->computeVectorOf(newIdArray, VM_Total, tStep, temp, true);
     answer.resize(temp.giveSize());
     answer.zero();
     answer.assemble( temp, this->giveOrderingNodes() );
+    
+}
+
+void 
+Shell7BaseXFEM :: computeInterfaceJumpAt(int interf, FloatArray &lCoords, TimeStep *tStep, FloatArray &answer)
+{
+
+    FloatArray temp;
+    lCoords.at(3) += 1.0e-9; // bottom position for plus side + num. perturbation 
+    this->vtkEvalUpdatedGlobalCoordinateAt(lCoords, interf + 1, answer, tStep); // position vector at + side
+    lCoords.at(3) -= 2.0e-9; // top position for minus side - num. perturbation
+    this->vtkEvalUpdatedGlobalCoordinateAt(lCoords, interf, temp, tStep);	// position vector at - side
+    answer.subtract(temp); // jump = x(+) - x(-)
+    
 }
 
 int
@@ -384,6 +411,7 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
 
 	  ei->giveEIDofIdArray(eiDofIdArray); 
 	  this->computeDiscSolutionVector(eiDofIdArray, tStep, solVecD);
+
 	  this->discComputeSectionalForces(temp, tStep, solVec, solVecD, ei);
 
 	  tempRed.beSubArrayOf(temp, this->activeDofsArrays[i-1]);
@@ -394,6 +422,11 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
 	      this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, this->xMan->giveEnrichmentItem(i)); 
 	      tempRed.beSubArrayOf(fCZ, this->activeDofsArrays[i-1]);
 	      answer.assemble(tempRed, this->orderingArrays[i-1]);
+	      // Add equal forces on the minus side except for the first delamination -> one discontinuity term only
+	      if ( i != 1 ) {  
+		tempRed.negated(); // acts in the opposite direction
+		answer.assemble(tempRed, this->orderingArrays[i-2]); 
+	      }
 	  }
       }
     }
@@ -476,13 +509,6 @@ Shell7BaseXFEM :: computeSectionalForcesAt(FloatArray &sectionalForces, Integrat
 
 
 
-
-
-
-
-
-
-
 double 
 Shell7BaseXFEM :: evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei)
 {
@@ -537,8 +563,8 @@ double
 Shell7BaseXFEM :: evaluateHeavisideGamma(double xi, Delamination *ei)
 {
     // Evaluates the "cut" Heaviside for a Delamination
-    double xiBottom = ei->xiBottom;
-    double xiTop    = ei->xiTop;
+    double xiBottom = ei->giveDelamXiCoord();
+    double xiTop    = ei->giveBoundingDelamXiCoord();
 
     return this->evaluateCutHeaviside(xi, xiBottom, xiTop);  
 
@@ -606,18 +632,19 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
 
         FloatMatrix B, NEnr, BEnr, F;  
         int delamNum = dei->giveNumber();
-        IntegrationRule *iRuleL = czIntegrationRulesArray [ delamNum - 1 ]; ///@ todo does this work with giveNumber? Probably not, will have to save num delam.
+        IntegrationRule *iRuleL = czIntegrationRulesArray [ delamNum - 1 ]; ///TODO switch to giveIntefaceNum?
 
         StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > 
             (this->layeredCS->giveInterfaceMaterial(delamNum) );
 
         FloatMatrix lambda, lambdaN, Q;
-        FloatArray Fp, T, nCov, xd, unknowns, genEpsC, genEpsD;
+        FloatArray Fp, T, nCov, jump, unknowns, genEpsC, genEpsD;
         
         for ( GaussPoint *gp: *iRuleL ) {
+	    double xi = dei->giveDelamXiCoord();
             lCoords.at(1) = gp->giveNaturalCoordinate(1);
             lCoords.at(2) = gp->giveNaturalCoordinate(2);
-            lCoords.at(3) = dei->giveDelamXiCoord();
+	    lCoords.at(3) = xi;
             
             this->computeEnrichedBmatrixAt(lCoords, B, NULL);
             this->computeEnrichedBmatrixAt(lCoords, BEnr, dei);
@@ -625,34 +652,32 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
 
             // Lambda matrix
             genEpsD.beProductOf(BEnr, solVecD);
-            double xi = dei->giveDelamXiCoord();
             double zeta = xi * this->layeredCS->computeIntegralThick() * 0.5;
-            this->computeLambdaNMatrix(lambda, genEpsD, zeta);
+            this->computeLambdaNMatrix(lambda, genEpsD, zeta); // shouldn't I use the discontinious version?
             
             // Compute jump vector
-            unknowns.beProductOf(NEnr, solVecD);
-            xd.beProductOf(lambda,unknowns); // spatial jump
-            
+            this->computeInterfaceJumpAt(dei->giveDelamInterfaceNum(), lCoords, tStep, jump); // -> numerical tol. issue -> normal jump = 1e-10
+	    
+	    
             genEpsC.beProductOf(B, solVecC);
-            //genEpsC.beProductOf(BEnr, solVecC);
+            //genEpsC.beProductOf(BEnr, solVecC); //TODO BUG old, incorrect version. Need to verify that the results are ok now
             this->computeFAt(lCoords, F, genEpsC, tStep);
-            //F.printYourself("F");
 
             // Transform xd and F to a local coord system
-            this->evalInitialCovarNormalAt(nCov, lCoords);
+            this->evalInitialCovarNormalAt(nCov, lCoords); 
             Q.beLocalCoordSys(nCov);
-            xd.rotatedWith(Q,'n');
+            jump.rotatedWith(Q,'n');
             F.rotatedWith(Q,'n');
 
             // Compute cohesive traction based on jump
-            intMat->giveFirstPKTraction_3d(T, gp, xd, F, tStep);
+            intMat->giveFirstPKTraction_3d(T, gp, jump, F, tStep);
             
-            //xd.printYourself("spatial jump");
+            //zzjump.printYourself("spatial jump");
             //T.printYourself("Traction");
-            lambdaN.beProductOf(lambda,NEnr);
-
             T.rotatedWith(Q,'t'); // transform back to global coord system
-            Fp.beTProductOf(lambdaN, T);
+	    
+            lambdaN.beProductOf(lambda,NEnr);
+	    Fp.beTProductOf(lambdaN, T);
             double dA = this->computeAreaAround(gp,xi);
             answerTemp.add(dA*DISC_DOF_SCALE_FAC,Fp);
             }
@@ -665,6 +690,11 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
     //answer.printYourself("cohesive forces");
 }
 
+
+
+
+
+
 void
 Shell7BaseXFEM :: updateYourself(TimeStep *tStep)
 // Updates the receiver at end of step.
@@ -676,7 +706,11 @@ Shell7BaseXFEM :: updateYourself(TimeStep *tStep)
             czIntegrationRulesArray [ i ]->updateYourself(tStep);
         }
     }
+
+    
 }
+
+
 
 void
 Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
@@ -689,7 +723,7 @@ Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
     answer.zero();
 
     // Disccontinuous part (continuous part does not contribute)
-    IntArray eiDofIdArray, orderingJ, activeDofsJ;
+    IntArray eiDofIdArray;
     FloatMatrix tempRed;
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) {
 
@@ -698,10 +732,17 @@ Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
             dei->giveEIDofIdArray(eiDofIdArray); 
 	    this->computeDiscSolutionVector(eiDofIdArray, tStep, solVecD);
             this->computeCohesiveTangentAt(temp, tStep, solVecD, dei);
-            // Assemble part correpsonding to active dofs
-            this->computeOrderingArray(orderingJ, activeDofsJ, dei); //
-            tempRed.beSubMatrixOf(temp, activeDofsJ, activeDofsJ);
-            answer.assemble(tempRed, orderingJ, orderingJ);
+
+	    // Assemble part correpsonding to active dofs
+	    tempRed.beSubMatrixOf(temp, this->activeDofsArrays[dei->giveNumber()-1], this->activeDofsArrays[dei->giveNumber()-1]);
+	    answer.assemble(tempRed, this->orderingArrays[dei->giveNumber()-1], this->orderingArrays[dei->giveNumber()-1]);	    
+	    // Add equal (but negative) tangent corresponding to the forces on the minus side
+	    // except for the first delamination -> one discontinuity term only
+	      if ( i != 1 ) {  
+		tempRed.negated(); // acts in the opposite direction
+		answer.assemble(tempRed, this->orderingArrays[dei->giveNumber()], this->orderingArrays[dei->giveNumber()]);	    
+	      }	    
+	    
         }
     }
 }
