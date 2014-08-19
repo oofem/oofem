@@ -65,7 +65,7 @@ public:
     /// @return Value of receiver.
     double giveValue() { return value; }
 
-    //virtual FloatArray evaluate(std :: map< std :: string, double > &valDict) { return {this->giveValue()}; }
+    virtual void evaluate(FloatArray &answer, const std :: map< std :: string, FunctionArgument > &valDict) { answer = {this->giveValue()}; }
     virtual double evaluateAtTime(double t) { return this->giveValue(); }
     virtual double evaluateVelocityAtTime(double t) { return 0.; }
     virtual double evaluateAccelerationAtTime(double t) { return 0.; }
