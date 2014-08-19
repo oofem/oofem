@@ -11,12 +11,16 @@ ROBOT = /home/bp/oofem-doc/www/robot2.pl
 all: html 
 
 html:
-	if [ -x "$(ROBOT)" ] ; then $(ROBOT) < footer.shtml > footer.html; fi
+#	if [ -x "$(ROBOT)" ] ; then $(ROBOT) < footer.shtml > footer.html; fi
 	$(DOCXX) doxygen.cfg
 
 ps: html
 	cd $(BUILD_DIR_LATEX); latex refman.tex; latex refman.tex; dvips -o refman.ps refman
 	cp $(BUILD_DIR_LATEX)/refman.ps ..
+
+pdf: html
+	cd $(BUILD_DIR_LATEX); pdflatex refman.tex
+	cp $(BUILD_DIR_LATEX)/refman.pdf ..
 
 www-install: html
 ifdef INSTALLDIR
