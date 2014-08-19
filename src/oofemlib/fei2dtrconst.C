@@ -209,7 +209,7 @@ FEI2dTrConst :: giveIntegrationRule(int order)
 {
     IntegrationRule *iRule = new GaussIntegrationRule(1, NULL);
     int points = iRule->getRequiredNumberOfIntegrationPoints(_Triangle, order + 0);
-    iRule->SetUpPointsOnTriangle(points, mode);
+    iRule->SetUpPointsOnTriangle(points, _Unknown);
     return iRule;
 }
 } // end namespace oofem

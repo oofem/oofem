@@ -112,10 +112,10 @@ public:
      * @param id Physical meaning type.
      * @see cltypes.h, DofIDItem type
      */
-    MasterDof(int i, DofManager * aNode, int nbc, int nic, DofIDItem id);
-    MasterDof(int i, DofManager * aNode, DofIDItem id = Undef);
+    MasterDof(DofManager * aNode, int nbc, int nic, DofIDItem id);
+    MasterDof(DofManager * aNode, DofIDItem id = Undef);
     /// Destructor.
-    virtual ~MasterDof()   {
+    virtual ~MasterDof() {
         delete unknowns;
     }
 

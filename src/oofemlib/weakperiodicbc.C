@@ -130,7 +130,7 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
     for ( int i = 0; i < ndof; i++ ) {
         int dofid = this->domain->giveNextFreeDofID();
         gamma_ids.followedBy(dofid);
-        gammaDman->appendDof( new MasterDof( i, gammaDman, ( DofIDItem )dofid ) );
+        gammaDman->appendDof( new MasterDof( gammaDman, ( DofIDItem )dofid ) );
     }
 
     //	computeOrthogonalBasis();

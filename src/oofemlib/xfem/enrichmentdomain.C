@@ -113,62 +113,6 @@ IRResultType EDCrack :: initializeFrom(InputRecord *ir)
     return result;
 }
 
-bool EDCrack :: giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const
-{
-    int nVert = bg->giveNrVertices();
-    if ( nVert > 1 ) {
-        double distS = bg->giveVertex(1).distance(iCoords);
-        double distE = bg->giveVertex(nVert).distance(iCoords);
-
-
-        if ( distS < distE ) {
-            const FloatArray &p1 = ( bg->giveVertex(1) );
-            const FloatArray &p2 = ( bg->giveVertex(2) );
-
-            // Tip position
-            oInfo.mGlobalCoord = p1;
-
-            // Tip tangent
-            oInfo.mTangDir.beDifferenceOf(p1, p2);
-            oInfo.mTangDir.normalize();
-
-            // Tip normal
-            oInfo.mNormalDir = {
-                -oInfo.mTangDir.at(2), oInfo.mTangDir.at(1)
-            };
-
-            oInfo.mTipIndex = 0;
-
-            oInfo.mArcPos = 0.0;
-
-            return true;
-        } else {
-            const FloatArray &p1 = ( bg->giveVertex(nVert - 1) );
-            const FloatArray &p2 = ( bg->giveVertex(nVert) );
-
-            // Tip position
-            oInfo.mGlobalCoord = p2;
-
-            // Tip tangent
-            oInfo.mTangDir.beDifferenceOf(p2, p1);
-            oInfo.mTangDir.normalize();
-
-            // Tip normal
-            oInfo.mNormalDir = {
-                -oInfo.mTangDir.at(2), oInfo.mTangDir.at(1)
-            };
-
-            oInfo.mTipIndex = 1;
-
-            oInfo.mArcPos = 1.0;
-
-            return true;
-        }
-    }
-
-    return false;
-}
-
 void
 DofManList :: addDofManagers(IntArray &dofManNumbers)
 {

@@ -70,8 +70,8 @@ public:
     virtual ~EnrichmentFunction() { };
 
     // New interface
-    virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const = 0;
-    virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const = 0;
+    virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet) const = 0;
+    virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet) const = 0;
 
     /**
      * Returns the discontinuous jump in the enrichment function when the lvel set function
@@ -98,8 +98,8 @@ public:
         this->numberOfDofs = 1;
     }
 
-    virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const;
-    virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const;
+    virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet) const;
+    virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet) const;
 
     virtual void giveJump(std :: vector< double > &oJumps) const {
         oJumps.clear();
@@ -122,8 +122,8 @@ public:
         this->numberOfDofs = 1;
     }
 
-    virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const;
-    virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const;
+    virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet) const;
+    virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet) const;
 
     virtual void giveJump(std :: vector< double > &oJumps) const {
         oJumps.clear();
@@ -160,8 +160,8 @@ public:
         this->numberOfDofs = 1;
     }
 
-    virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, const EnrichmentDomain *ipEnrDom) const;
-    virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, const EnrichmentDomain *ipEnrDom) const;
+    virtual void evaluateEnrFuncAt(double &oEnrFunc, const FloatArray &iPos, const double &iLevelSet) const;
+    virtual void evaluateEnrFuncDerivAt(FloatArray &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet) const;
 
     virtual void giveJump(std :: vector< double > &oJumps) const {
         oJumps.clear();

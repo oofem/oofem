@@ -578,6 +578,14 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
         }
     }
 
+    // store dof types
+    for ( Dof *dof: *this ) {
+        _val = dof->giveDofID();
+        if ( !stream->write(& _val, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+    }
+
     if ( mode & CM_Definition ) {
         if ( ( iores = loadArray.storeYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
@@ -642,11 +650,20 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
             THROW_CIOERR(CIO_IOERR);
         }
     }
+    
+    IntArray dofids(_numberOfDofs);
+    // restore dof ids
+    for ( int i = 1; i <= _numberOfDofs; i++ ) {
+        if ( !stream->read(& dofids.at(i), 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+    }
 
     // allocate new ones
-    dofArray.resize(_numberOfDofs);
+    for ( auto &d: dofArray) { delete d; } ///@todo Smart pointers would be nicer here
+    dofArray.clear();
     for ( int i = 0; i < _numberOfDofs; i++ ) {
-        Dof *dof = classFactory.createDof( ( dofType ) dtypes(i), i + 1, this );
+        Dof *dof = classFactory.createDof( ( dofType ) dtypes(i), (DofIDItem)dofids(i), this );
         this->appendDof(dof);
     }
 

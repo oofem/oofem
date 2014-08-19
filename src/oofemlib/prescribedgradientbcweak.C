@@ -857,7 +857,7 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
     // Create traction dofs
     int nsd = domain->giveNumberOfSpatialDimensions();
     std::vector<int> dofIds;
-    for(int j = 0; j < nsd; j++) {
+    for ( int j = 0; j < nsd; j++ ) {
         dofIds.push_back( this->domain->giveNextFreeDofID() );
     }
 
@@ -876,8 +876,8 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
         numPointsPassed++;
         Node *firstNode = new Node(numNodes+1, domain);
         firstNode->setGlobalNumber(numNodes+1);
-        for(int j = 0; j < nsd; j++) {
-            firstNode->appendDof( new MasterDof( j + 1, firstNode, ( DofIDItem ) ( dofIds[j] ) ) );
+        for ( auto &dofId: dofIds ) {
+            firstNode->appendDof( new MasterDof( firstNode, ( DofIDItem ) dofId ) );
         }
 
 
@@ -944,8 +944,8 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
                     else {
                         Node *node = new Node(numNodes+1, domain);
                         node->setGlobalNumber(numNodes+1);
-                        for(int j = 0; j < nsd; j++) {
-                            node->appendDof( new MasterDof( j + 1, node, ( DofIDItem ) ( dofIds[j] ) ) );
+                        for ( auto &dofid: dofIds ) {
+                            node->appendDof( new MasterDof( node, ( DofIDItem ) dofid ) );
                         }
 
 //                      printf("Creating master node with coord: "); coordsToKeep[i].first.printYourself();
@@ -1045,12 +1045,12 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
 
         int nsd = domain->giveNumberOfSpatialDimensions();
         std::vector<int> dofIds;
-        for(int j = 0; j < nsd; j++) {
+        for ( int j = 0; j < nsd; j++ ) {
             dofIds.push_back( this->domain->giveNextFreeDofID() );
         }
 
-        for(int j = 0; j < nsd; j++) {
-            mpDisplacementLock->appendDof( new MasterDof( j + 1, mpDisplacementLock, ( DofIDItem ) ( dofIds[j] ) ) );
+        for ( auto &dofid: dofIds ) {
+            mpDisplacementLock->appendDof( new MasterDof( mpDisplacementLock, ( DofIDItem ) dofid ) );
         }
     }
 

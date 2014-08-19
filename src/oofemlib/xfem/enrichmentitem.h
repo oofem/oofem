@@ -36,34 +36,35 @@
 #define enrichmentitem_h
 
 #include "femcmpnn.h"
-#include "tipinfo.h"
+#include "domain.h"
 #include "floatmatrix.h"
-#include "intarray.h"
-#include "dofmanager.h"
-#include "xfem/enrichmentfronts/enrichmentfront.h"
+#include "dofiditem.h"
+#include "tipinfo.h"
 
 #include <memory>
+
+#include "dofmanager.h"
 #include <algorithm>
 #include <unordered_map>
 
+#include "xfem/enrichmentfronts/enrichmentfront.h"
 
-///@name Input fields for EnrichmentItem
+///@name Input fields for XFEM
 //@{
+#define _IFT_Inclusion_Name "inclusion"
+#define _IFT_Inclusion_CrossSection "crosssection"
+
 #define _IFT_EnrichmentItem_domains "enrichmentdomains"
 #define _IFT_EnrichmentItem_domain "enrichmentdomain"
 #define _IFT_EnrichmentItem_function "enrichmentfunction"
 #define _IFT_EnrichmentItem_front "enrichmentfront"
 #define _IFT_EnrichmentItem_propagationlaw "propagationlaw"
+
 #define _IFT_EnrichmentItem_inheritbc "inheritbc"
+
 //@}
 
-#define _IFT_Inclusion_Name "inclusion"
-#define _IFT_Inclusion_CrossSection "crosssection"
-#define _IFT_ShellCrack_Name "shellcrack"
-#define _IFT_ShellCrack_xiBottom "xibottom"
-#define _IFT_ShellCrack_xiTop "xitop"
-
-
+#define _IFT_Crack_Name "crack"
 
 
 
@@ -83,8 +84,6 @@ class DynamicDataReader;
 class Triangle;
 class GnuplotExportModule;
 class GaussPoint;
-class CrossSection;
-class Element;
 
 
 enum NodeEnrichmentType : int {
@@ -138,7 +137,6 @@ public:
     bool isElementEnriched(const Element *element) const;
     inline bool isDofManEnriched(const DofManager &iDMan) const;
     int  giveNumDofManEnrichments(const DofManager &iDMan) const;
-    int giveNumEnrichedDofs(const DofManager &iDMan) const;
 
     // Returns true if the enrichment item can assign
     // a different material to any Gauss point.
@@ -175,8 +173,6 @@ public:
     bool evalLevelSetTangInNode(double &oLevelSet, int iNodeInd) const;
     bool evalNodeEnrMarkerInNode(double &oNodeEnrMarker, int iNodeInd) const;
 
-    bool levelSetChangesSignInEl(const IntArray &iElNodes) const;
-
     void interpLevelSet(double &oLevelSet, const FloatArray &iGlobalCoord) const;
 
     // By templating the function this way, we may choose if we want to pass iNodeInd as
@@ -190,11 +186,6 @@ public:
 
     template< typename T >
     void interpGradLevelSet(FloatArray &oGradLevelSet, const FloatMatrix &idNdX, const T &iNodeInd) const;
-
-    // JB - temporary
-    template< typename T >
-    void interpSurfaceLevelSet(double &oLevelSet, const FloatArray &iN, const T &iNodeInd, double iXi) const;
-    void interpSurfaceLevelSet(double &oLevelSet, double iXi) const;
 
     // Level set routines
     bool giveLevelSetsNeedUpdate() const { return mLevelSetsNeedUpdate; }
@@ -322,9 +313,6 @@ public:
 };
 
 
-
-
-
 /////////////////////////////////////////////////
 // Function implementations
 
@@ -373,28 +361,7 @@ void EnrichmentItem :: interpGradLevelSet(FloatArray &oGradLevelSet, const Float
     }
 }
 
-
-// should be generalised - JB
-template< typename T >
-void EnrichmentItem :: interpSurfaceLevelSet(double &oLevelSet, const FloatArray &iN, const T &iNodeInd, double iXi) const
-{
-    //oLevelSet = 0.0;
-    oLevelSet = iXi;
-    for ( int i = 1; i <= iN.giveSize(); i++ ) {
-        oLevelSet -= iN.at(i) * mLevelSetSurfaceNormalDir [ iNodeInd [ i - 1 ] - 1 ];
-    }
-}
-
-
-
-
-
 } // end namespace oofem
-
-
-
-
-
 
 
 
