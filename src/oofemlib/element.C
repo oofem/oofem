@@ -1057,10 +1057,10 @@ Element :: computeLength()
 
 
 double
-Element :: giveLenghtInDir(const FloatArray &normalToCrackPlane)
+Element :: giveLengthInDir(const FloatArray &normalToCrackPlane)
 //
-// returns receivers projection length (for some material models)
-// to direction given by normalToCrackPlane;
+// returns receiver's size projected onto the direction given by normalToCrackPlane
+// (exploited by the crack band approach)
 //
 {
     FloatArray *coords;
@@ -1082,7 +1082,44 @@ Element :: giveLenghtInDir(const FloatArray &normalToCrackPlane)
 
     return maxDis - minDis;
 }
-
+    
+double 
+Element :: giveCharacteristicLengthForPlaneElements(const FloatArray &normalToCrackPlane) 
+//
+// returns receiver's size projected onto the direction given by normalToCrackPlane
+// or, if that direction is not in-plane, the square root of element area
+// (this can happen if the crack normal is set to the maximum principal stress direction
+//  and the in-plane principal stresses are negative)
+//
+{
+    if ( normalToCrackPlane.at(3) < 0.5 ) { // check whether the projection direction is in-plane 
+        return this->giveLengthInDir(normalToCrackPlane);
+    } else { // if not, compute the size from element area
+        return this->computeMeanSize();
+    }
+}
+    
+double 
+Element :: giveCharacteristicLengthForAxisymmElements(const FloatArray &normalToCrackPlane) 
+//
+// returns receiver's size projected onto the direction given by normalToCrackPlane
+// or, if that direction is not in-plane, the distance from the axis of symmetry
+// multiplied by pi, assuming that two symmetrically located radial cracks will form
+// (this can happen if the cracking is caused by the hoop stress)
+//
+{
+    if ( normalToCrackPlane.at(3) < 0.5 ) { // check whether the projection direction is in-plane 
+        return this->giveLengthInDir(normalToCrackPlane);
+    } else { // if not, take the average distance from axis of symmetry multiplied by pi
+        double r = 0.;
+        int i;
+        for ( i = 1; i <= numberOfDofMans; i++ ) {
+            r += this->giveNode(i)->giveCoordinate(1);
+        }
+        r = r * 3.1415926 / ( ( double ) numberOfDofMans );
+        return r;
+    }
+}
 
 int
 Element :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)

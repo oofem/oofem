@@ -209,9 +209,9 @@ Quad1Mindlin :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
 
 
 double
-Quad1Mindlin :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+Quad1Mindlin :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 {
-    return this->giveLenghtInDir(normalToCrackPlane);
+    return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
 }
 
 

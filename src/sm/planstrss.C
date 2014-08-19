@@ -308,18 +308,13 @@ PlaneStress2d :: initializeFrom(InputRecord *ir)
 
 
 double
-PlaneStress2d :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+PlaneStress2d :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 //
-// returns receivers characteristic length in gp (for some material models)
-// for crack formed in plane with normal normalToCrackPlane.
+// returns receiver's characteristic length for crack band models
+// for a crack formed in the plane with normal normalToCrackPlane.
 //
 {
-    // return this -> giveLenghtInDir(normalToCrackPlane) / sqrt ((double) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints());
-    if ( normalToCrackPlane.at(3) < 0.999999 ) { //ensure that characteristic length is in the plane of element
-        return this->giveLenghtInDir(normalToCrackPlane);
-    } else { //otherwise compute out-of-plane characteristic length from element area
-        return this->computeMeanSize();
-    }
+    return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
 }
 
 double
@@ -337,7 +332,7 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
 
     if ( method == ECSM_Projection ) {
         // standard projection method
-        return this->giveCharacteristicLenght(gp, normalToCrackPlane);
+        return this->giveCharacteristicLength(normalToCrackPlane);
     }
 
     // evaluate average strain and its maximum principal direction
@@ -355,7 +350,7 @@ PlaneStress2d :: giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrac
     if ( method == ECSM_ProjectionCentered ) {
         // projection method based on principal direction of average strain
         normalToCrackPlane = averageNormal;
-        return this->giveLenghtInDir(normalToCrackPlane);
+        return this->giveLengthInDir(normalToCrackPlane);
     }
 
     if ( method == ECSM_Oliver1 || method == ECSM_Oliver1modified ) {

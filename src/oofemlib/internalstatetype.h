@@ -137,21 +137,23 @@ namespace oofem {
     ENUM_ITEM_WITH_VALUE(IST_TangentNorm, 87) \
     ENUM_ITEM_WITH_VALUE(IST_Tangent, 88) \
     ENUM_ITEM_WITH_VALUE(IST_DirectorField, 89) \
-    ENUM_ITEM_WITH_VALUE(IST_DeformationGradientTensor, 90) \
-    ENUM_ITEM_WITH_VALUE(IST_FirstPKStressTensor, 91) \
-    ENUM_ITEM_WITH_VALUE(IST_XFEMEnrichment, 92) \
-    ENUM_ITEM_WITH_VALUE(IST_XFEMNumIntersecPoints, 93) \
-    ENUM_ITEM_WITH_VALUE(IST_XFEMLevelSetPhi, 94) \
-    ENUM_ITEM_WITH_VALUE(IST_Maturity, 95) \
-    ENUM_ITEM_WITH_VALUE(IST_CauchyStressTensor, 96) \
-    ENUM_ITEM_WITH_VALUE(IST_InterfaceJump, 97) \
-    ENUM_ITEM_WITH_VALUE(IST_InterfaceTraction, 98) \
-    ENUM_ITEM_WITH_VALUE(IST_InterfaceFirstPKTraction, 99) \
-    ENUM_ITEM_WITH_VALUE(IST_StressTensor_Reduced, 100) \
-    ENUM_ITEM_WITH_VALUE(IST_StrainTensor_Reduced, 101) \
-    ENUM_ITEM_WITH_VALUE(IST_CrossSectionNumber, 102) \
-    ENUM_ITEM_WITH_VALUE(IST_ShellStrainTensor, 103) \
-    ENUM_ITEM_WITH_VALUE(IST_AbaqusStateVector, 104)
+    ENUM_ITEM_WITH_VALUE(IST_CrackWidth, 90) \
+    ENUM_ITEM_WITH_VALUE(IST_DeformationGradientTensor, 91) \
+    ENUM_ITEM_WITH_VALUE(IST_FirstPKStressTensor, 92) \
+    ENUM_ITEM_WITH_VALUE(IST_XFEMEnrichment, 93) \
+    ENUM_ITEM_WITH_VALUE(IST_XFEMNumIntersecPoints, 94) \
+    ENUM_ITEM_WITH_VALUE(IST_XFEMLevelSetPhi, 95) \
+    ENUM_ITEM_WITH_VALUE(IST_Maturity, 96) \
+    ENUM_ITEM_WITH_VALUE(IST_CauchyStressTensor, 97) \
+    ENUM_ITEM_WITH_VALUE(IST_InterfaceJump, 98) \
+    ENUM_ITEM_WITH_VALUE(IST_InterfaceTraction, 99) \
+    ENUM_ITEM_WITH_VALUE(IST_InterfaceFirstPKTraction, 100) \
+    ENUM_ITEM_WITH_VALUE(IST_StressTensor_Reduced, 101) \
+    ENUM_ITEM_WITH_VALUE(IST_StrainTensor_Reduced, 102) \
+    ENUM_ITEM_WITH_VALUE(IST_CrossSectionNumber, 103 ) \
+    ENUM_ITEM_WITH_VALUE(IST_ShellStrainTensor, 104) \
+    ENUM_ITEM_WITH_VALUE(IST_AbaqusStateVector, 105)
+
 
 /**
  * Type  representing the physical meaning of element or constitutive model internal variable.
