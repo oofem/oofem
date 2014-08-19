@@ -391,10 +391,7 @@ Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep); // a
     
-    // first 'solVec' corresponds to the point where the tangent i evaluated and solVecLeft, solVecRight
-    // corresponds to the solution used for evaluation of the lambda matrices
-    ///@todo rewrite this method since the XFEM part does not use this anymore
-    this->computeBulkTangentMatrix(answer, solVec, solVec, solVec, rMode, tStep);
+    this->computeBulkTangentMatrix(answer, solVec, tStep);
 
 
     // Add contribution due to pressure load ///@todo should later be compted by the load
@@ -488,7 +485,7 @@ Shell7Base :: computeLambdaNMatrix(FloatMatrix &lambda, FloatArray &genEps, doub
 
 
 void
-Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, FloatArray &solVecI, FloatArray &solVecJ, MatResponseMode rMode, TimeStep *tStep)
+Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, TimeStep *tStep)
 {
     FloatMatrix A [ 3 ] [ 3 ], lambda[ 3 ], A_lambda(3,18), LB;
     FloatMatrix L(18,18), B;
@@ -970,7 +967,6 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
     FloatMatrix mass, temp;
     FloatArray solVec, lCoords;
     this->giveUpdatedSolutionVector(solVec, tStep);
-    int ndofs = this->giveNumberOfDofs();
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of data
 
     FloatMatrix M11(18, 18), M12(18, 18), M13(18, 6), M22(18, 18), M23(18, 6), M33(6, 6), M(42,42);
