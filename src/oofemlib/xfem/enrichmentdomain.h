@@ -90,8 +90,6 @@ public:
     // enriched by the enrichment item.
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius) = 0;
 
-    virtual bool giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const { return false; }
-
     /// Return array with info about all tips
     virtual bool giveTipInfos(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const { return false; }
 
@@ -172,7 +170,6 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_EDCrack_Name; }
     virtual const char *giveClassName() const { return "EDCrack"; }
 
-    virtual bool giveClosestTipInfo(const FloatArray &iCoords, TipInfo &oInfo) const;
     virtual bool giveTipInfos(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const;
     virtual bool propagateTip(const TipPropagation &iTipProp);
 

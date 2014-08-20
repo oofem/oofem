@@ -1354,8 +1354,8 @@ ConcreteDPM2 :: initDamaged(double kappaD,
             crackPlaneNormal.at(i) = principalDir.at(i, indx);
         }
 
-        // this gives the projected element size
-        le = gp->giveElement()->giveLenghtInDir(crackPlaneNormal);
+        // evaluate the projected element size
+        le = gp->giveElement()->giveCharacteristicLength(crackPlaneNormal);
         if ( le == 0. ) {
             le = gp->giveElement()->computeMeanSize();
         }

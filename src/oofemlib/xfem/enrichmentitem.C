@@ -334,25 +334,6 @@ int EnrichmentItem :: giveNumDofManEnrichments(const DofManager &iDMan) const
     return 0;
 }
 
-int EnrichmentItem :: giveNumEnrichedDofs(const DofManager &iDMan) const
-{
-    int numEnrDofs = 0;
-
-    int startId = giveStartOfDofIdPool();
-    int endId = this->giveEndOfDofIdPool();
-
-    for( Dof *dof: iDMan ) {
-        int dofId = dof->giveDofID();
-
-        // If the dof belongs to this enrichment item
-        if ( dofId >= startId && dofId <= endId ) {
-            numEnrDofs++;
-        }
-    }
-
-    return numEnrDofs;
-}
-
 bool EnrichmentItem :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const
 {
     return false;
@@ -410,7 +391,7 @@ void
 EnrichmentItem :: computeEnrichedDofManDofIdArray(IntArray &oDofIdArray, DofManager &iDMan)
 {
     // Gives an array containing the dofId's that
-    // are candidated for enrichment. At the moment,
+    // are candidates for enrichment. At the moment,
     // regular dofs are considered as candidates. In
     // the future, we may also consider enriching
     // enriched dofs from other enrichment items.
@@ -478,7 +459,7 @@ void EnrichmentItem :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, cons
     if ( iNodeInd == -1 ) {
         // Bulk enrichment
         oEnrFunc.resize(1, 0.0);
-        mpEnrichmentFunc->evaluateEnrFuncAt(oEnrFunc [ 0 ], iPos, iLevelSet, mpEnrichmentDomain);
+        mpEnrichmentFunc->evaluateEnrFuncAt(oEnrFunc [ 0 ], iPos, iLevelSet);
     } else {
         auto res = mNodeEnrMarkerMap.find(iNodeInd);
         if ( res != mNodeEnrMarkerMap.end() ) {
@@ -489,7 +470,7 @@ void EnrichmentItem :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, cons
             case NodeEnr_BULK:
                 // Bulk enrichment
                 oEnrFunc.resize(1, 0.0);
-                mpEnrichmentFunc->evaluateEnrFuncAt(oEnrFunc [ 0 ], iPos, iLevelSet, mpEnrichmentDomain);
+                mpEnrichmentFunc->evaluateEnrFuncAt(oEnrFunc [ 0 ], iPos, iLevelSet);
                 break;
             case NodeEnr_START_TIP:
                 mpEnrichmentFrontStart->evaluateEnrFuncAt(oEnrFunc, efInput);
@@ -538,7 +519,7 @@ void EnrichmentItem :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrF
             break;
         case NodeEnr_BULK:
             oEnrFuncDeriv.resize(1);
-            mpEnrichmentFunc->evaluateEnrFuncDerivAt(oEnrFuncDeriv [ 0 ], iPos, iLevelSet, iGradLevelSet, mpEnrichmentDomain);
+            mpEnrichmentFunc->evaluateEnrFuncDerivAt(oEnrFuncDeriv [ 0 ], iPos, iLevelSet, iGradLevelSet);
             break;
         case NodeEnr_START_TIP:
             mpEnrichmentFrontStart->evaluateEnrFuncDerivAt(oEnrFuncDeriv, efInput, iGradLevelSet);
@@ -621,30 +602,6 @@ bool EnrichmentItem :: evalNodeEnrMarkerInNode(double &oNodeEnrMarker, int iNode
         oNodeEnrMarker = 0.0;
         return false;
     }
-}
-
-bool EnrichmentItem :: levelSetChangesSignInEl(const IntArray &iElNodes) const
-{
-    double maxLevelSet = 0.0, minLevelSet = 0.0;
-    double levelSetNode = 0.0;
-
-    if ( evalLevelSetNormalInNode( levelSetNode, iElNodes.at(1) ) ) {
-        maxLevelSet = levelSetNode;
-        minLevelSet = levelSetNode;
-    }
-
-    for ( int j = 2; j < iElNodes.giveSize(); j++ ) {
-        if ( evalLevelSetNormalInNode( levelSetNode, iElNodes.at(j) ) ) {
-            maxLevelSet = std :: max(maxLevelSet, levelSetNode);
-            minLevelSet = std :: min(minLevelSet, levelSetNode);
-        }
-    }
-
-    if ( maxLevelSet * minLevelSet < 0.0 ) {
-        return true;
-    }
-
-    return false;
 }
 
 void EnrichmentItem :: interpLevelSet(double &oLevelSet, const FloatArray &iGlobalCoord) const

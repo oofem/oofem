@@ -89,7 +89,7 @@ public:
     std :: vector< Triangle > mSubTri;
 
     /// VTK Interface
-    void giveSubtriangulationCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
+    void giveSubtriangulationCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
 
 };
 } /* namespace oofem */

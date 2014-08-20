@@ -282,6 +282,16 @@ Q4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
     }
 }
 
+double
+Q4Axisymm :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
+//
+// returns receiver's characteristic length for crack band models
+// for a crack formed in the plane with normal normalToCrackPlane.
+//
+{
+    return this->giveCharacteristicLengthForAxisymmElements(normalToCrackPlane);
+}
+
 void
 Q4Axisymm :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {

@@ -1,0 +1,103 @@
+/*
+
+                   *****    *****   ******  ******  ***   ***
+                 **   **  **   **  **      **      ** *** **
+                **   **  **   **  ****    ****    **  *  **
+               **   **  **   **  **      **      **     **
+              **   **  **   **  **      **      **     **
+              *****    *****   **      ******  **     **
+
+               OOFEM : Object Oriented Finite Element Code
+
+                 Copyright (C) 1993 - 2014   Borek Patzak
+
+         Czech Technical University, Faculty of Civil Engineering,
+          Department of Mechanics, 166 29 Prague, Czech Republic
+                www.oofem.org    e-mail: info@oofem.org
+     
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                                                                              
+*/
+
+CONTENTS:
+
+[1]   What is here
+[2]   Pre-requisites
+[3]   Generating documentation
+[4]   Bug reporting
+
+
+
+
+[1] What is here
+==============================================================================
+The directory tree below holds documentation of the OOFEM package.  
+
+OOFEM_DOC_DIR
+|
+|-- oofemInput       - oofem input manual, describes in detail the structure, format, 
+|                      and examples of input file
+|
+|-- matlibmanual     - material library documantation. Description of available material 
+|                      models and their parameters 
+|
+|-- elementlibmanual - element library documentation. Description of supprted element types
+|
+|-- programmer       - oofem programmer's manual 
+|
+|-- refman           - oofem regerence manual
+|
+|-- extractorInput   - documentation of extractor tool
+
+
+[2] Pre-requisites
+==============================================================================
+To generate documentation from provided sources, some additional tools are
+required to be installed.
+
+The latex, htlatex, and latex2html instalation is required to generate both postscript, pdf, or html documenetations.
+(texlive-binaries, texlive-base, texlive-latex-base, and texlive-latex-recomended, texlive-bibtex-extra (for biblatex.sty), 
+ tex4ht, latex2html packages in ubuntu).
+
+The compiled Reference Manual itself is not included in release 
+due to its size. It can be accessed online from oofem home page.
+
+
+[3] Generating documentation from sources
+==============================================================================
+
+To generate oofemInput, material library, and element library manuals, enter into 
+respective subfolder.
+1) To generate pdf documentation, use "make pdf"
+2) To generate ps documentation, use "make ps"
+3) To generate html documentation, use "make html"
+
+To generate reference manual (in refman subdir), the doxygen (doxygen package) 
+and graphviz (graphviz package) tools are required. Note that only html version 
+of reference manual is supported now.
+1) To generate reference manaual in html, use "make html"
+ 
+[4] Bugs
+==============================================================================
+
+Please mail all bug reports and suggestions to [info@oofem.org] or use oofem forum 
+(www.oofem.org/forum). 
+
+
+                                Enjoy
+                                        OOFEM Team
+
+
+

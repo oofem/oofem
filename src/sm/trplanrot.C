@@ -700,4 +700,16 @@ TrPlaneStrRot :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, Time
         answer.clear();          // nil resultant
     }
 }
+
+
+double
+TrPlaneStrRot :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
+//
+// returns receiver's characteristic length for crack band models
+// for a crack formed in the plane with normal normalToCrackPlane.
+//
+{
+    return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
+}
+
 } // end namespace oofem

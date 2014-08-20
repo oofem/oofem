@@ -166,6 +166,26 @@ FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< std :: initial
 }
 
 
+FloatMatrix &FloatMatrix :: operator = ( std :: initializer_list< FloatArray >mat )
+{
+    RESIZE( ( int ) mat.begin()->giveSize(), ( int ) mat.size() );
+    auto p = this->values.begin();
+    for ( auto col : mat ) {
+#if DEBUG
+        if ( this->nRows != ( int ) col.giveSize() ) {
+                OOFEM_ERROR("Initializer list has inconsistent column sizes.");
+        }
+#endif
+        for ( auto x : col ) {
+            * p = x;
+            p++;
+        }
+    }
+
+    return * this;
+}
+
+
 void FloatMatrix :: checkBounds(int i, int j) const
 // Checks that the receiver includes a position (i,j).
 {

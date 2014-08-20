@@ -647,6 +647,12 @@ void PrescribedGradientBCWeak::giveTractionElArcPos(size_t iElInd, double &oXiSt
     oXiEnd = sortFunc.calcArcPos(xE);
 }
 
+void PrescribedGradientBCWeak::giveBoundaries(IntArray &oBoundaries)
+{
+    Set *setPointer = this->giveDomain()->giveSet(this->set);
+    oBoundaries = setPointer->giveBoundaryList();
+}
+
 void PrescribedGradientBCWeak::giveTraction(size_t iElInd, FloatArray &oStartTraction, FloatArray &oEndTraction, ValueModeType mode, TimeStep *tStep)
 {
     mpTractionNodes[ mpTractionElements[iElInd]->mTractionNodeInd[0] ]->giveCompleteUnknownVector(oStartTraction, mode, tStep);

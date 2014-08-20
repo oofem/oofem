@@ -321,7 +321,8 @@ public:
      * Breaks encapsulation. Avoid using this unless absolutely necessary.
      * @return Internal pointer to stored values.
      */
-    int *givePointer() const { return const_cast< int* >(values.data()); }
+    inline const int *givePointer() const { return values.data(); }
+    inline int *givePointer() { return values.data(); }
 
     /**
      * Stores array to output stream.

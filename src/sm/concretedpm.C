@@ -712,11 +712,8 @@ ConcreteDPM :: initDamaged(double kappaD,
             crackPlaneNormal.at(i) = principalDir.at(i, indx);
         }
 
-        // Warning: This would give the element size divided by the number of Gauss points
-        // le = gp->giveElement()->giveCharacteristicLenght (gp, crackPlaneNormal);
-
-        // this gives the projected element size
-        le = gp->giveElement()->giveLenghtInDir(crackPlaneNormal);
+        // evaluate the projected element size
+        le = gp->giveElement()->giveCharacteristicLength(crackPlaneNormal);
         if ( le == 0. ) {
             le = gp->giveElement()->computeMeanSize();
         }
