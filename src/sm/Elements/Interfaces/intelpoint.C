@@ -55,6 +55,7 @@ IntElPoint :: IntElPoint(int n, Domain *aDomain) :
     referenceNode = 0;
     normal.resize(3);
     normal.zero();
+    area = 1.0;
 }
 
 
@@ -200,8 +201,7 @@ IntElPoint :: computeGaussPoints()
 // Sets up the array of Gauss Points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
-        int numberOfIntegrationRules = 1;
-        integrationRulesArray.resize(numberOfIntegrationRules);
+        integrationRulesArray.resize(1);
         integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
         integrationRulesArray [ 0 ]->setUpIntegrationPoints( _Line, 1, this->giveMaterialMode() );
     }
@@ -223,29 +223,31 @@ IntElPoint :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
 
 double
 IntElPoint :: computeAreaAround(GaussPoint *gp)
-// Returns the length of the receiver. This method is valid only if 1
-// Gauss point is used.
 {
-        //double area = this->giveCrossSection()->give(CS_Area);
-    return 1.0;  ///@todo read input from cs
+    // The modeled area/extension around the connected nodes. 
+    // Compare with the cs area of a bar. ///@todo replace with cs-property? /JB
+    return this->area;  
 }
 
 
 IRResultType
 IntElPoint :: initializeFrom(InputRecord *ir)
 {
-    //const char *__proc = "initializeFrom"; // Required by IR_GIVE_FIELD macro
-    IRResultType result;                // Required by IR_GIVE_FIELD macro
+    IRResultType result;  // Required by IR_GIVE_FIELD macro
 
     StructuralInterfaceElement :: initializeFrom(ir);
-
-    IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_IntElPoint_refnode);
-    IR_GIVE_OPTIONAL_FIELD(ir, normal, _IFT_IntElPoint_normal);
-    if ( referenceNode == 0 && normal.at(1) == 0 && normal.at(2) == 0 && normal.at(1) == 0 && normal.at(3) == 0 ) {
-        OOFEM_ERROR("Wrong reference node or normal specified");
+    if ( ir->hasField(_IFT_IntElPoint_refnode)  &&  ir->hasField(_IFT_IntElPoint_normal) ) {
+	OOFEM_ERROR("Ambiguous input: 'refnode' and 'normal' cannot both be specified");
+    } else if ( ir->hasField(_IFT_IntElPoint_refnode) ) {
+	IR_GIVE_OPTIONAL_FIELD(ir, referenceNode, _IFT_IntElPoint_refnode);
+    } else if ( ir->hasField(_IFT_IntElPoint_normal) ) {
+	IR_GIVE_OPTIONAL_FIELD(ir, normal, _IFT_IntElPoint_normal);  
     }
-
-    this->computeLocalSlipDir(normal); ///@todo Move into postInitialize ?
+    
+    this->area = 1.0; // Default area ///@todo Make non-optional? /JB
+    IR_GIVE_OPTIONAL_FIELD(ir, normal, _IFT_IntElPoint_area);
+    
+    this->computeLocalSlipDir(normal); 
     return IRRT_OK;
 }
 

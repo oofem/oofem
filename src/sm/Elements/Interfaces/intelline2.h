@@ -43,10 +43,10 @@ namespace oofem {
 class FEI2dLineQuad;
 
 /**
- * This class implements a two dimensional interface element.
- * Even if geometry approx is quadratic, the element is assumed straight
- * If not straight, the rotation matrix depends on actual integration point
- * and stiffness and strain computations should be modified.
+ * This class implements a two dimensional interface element and is simply an extension 
+ * of IntElLine1 to a quadratic approximation.
+ * @author Jim Brouzoulis
+ * @author Borek Patzak
  */
 class IntElLine2 : public IntElLine1
 {
@@ -58,7 +58,8 @@ public:
     virtual ~IntElLine2() { }
     virtual FEInterpolation *giveInterpolation() const;
     virtual int computeNumberOfDofs() { return 12; }
-
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_IntElLine2_Name; }
     virtual const char *giveClassName() const { return "IntElLine2"; }

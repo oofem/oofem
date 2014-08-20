@@ -38,6 +38,7 @@
 #include "../sm/Elements/Interfaces/structuralinterfaceelement.h"
 
 #define _IFT_IntElLine1_Name "intelline1"
+#define _IFT_IntElLine1_axisymmode "axisymmode"
 
 namespace oofem {
 class FEI2dLineLin;
@@ -47,12 +48,17 @@ class FEI2dLineLin;
  * Even if geometry approx is quadratic, the element is assumed straight
  * If not straight, the rotation matrix depends on actual integration point
  * and stiffness and strain computations should be modified.
+ * 
+ * @author Jim Brouzoulis
+ * @author Borek Patzak
  */
 class IntElLine1 : public StructuralInterfaceElement
 {
 protected:
     static FEI2dLineLin interp;
-
+    /// Flag controlling axisymmetric mode (integration over unit circumferential angle)
+    bool axisymmode;
+    
 public:
     IntElLine1(int n, Domain * d);
     virtual ~IntElLine1() { }

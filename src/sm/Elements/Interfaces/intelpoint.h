@@ -43,12 +43,16 @@
 #define _IFT_IntElPoint_Name "intelpoint"
 #define _IFT_IntElPoint_refnode "refnode"
 #define _IFT_IntElPoint_normal "normal"
+#define _IFT_IntElPoint_area "area"
 //@}
 
 namespace oofem {
 /**
- * This class implements an interface element that connects two nodes
- * In order to compute normal and tangential direction of the slip plane, a reference node or specific direction is needed.
+ * This class implements an interface element that connects two nodes.
+ * In order to compute the normal and tangential direction of the slip plane, 
+ * a reference node or specific direction must be specified in the input.
+ * @author Jim Brouzoulis
+ * @author Borek Patzak
  */
 class IntElPoint : public StructuralInterfaceElement
 {
@@ -56,7 +60,7 @@ protected:
     enum cmode { ie1d_1d, ie1d_2d, ie1d_3d } mode;
     int referenceNode;
     FloatArray normal;
-
+    double area;
 public:
     IntElPoint(int n, Domain *d);
     virtual ~IntElPoint() { }

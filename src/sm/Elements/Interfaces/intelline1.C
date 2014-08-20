@@ -55,6 +55,7 @@ IntElLine1 :: IntElLine1(int n, Domain *aDomain) :
     StructuralInterfaceElement(n, aDomain)
 {
     numberOfDofMans = 4;
+    axisymmode = false;
 }
 
 
@@ -114,16 +115,32 @@ IntElLine1 :: computeAreaAround(IntegrationPoint *ip)
 
     double weight  = ip->giveWeight();
     double ds = sqrt( G.dotProduct(G) ) * weight;
-
-    double thickness  = this->giveCrossSection()->give(CS_Thickness, ip);
-    return ds * thickness;
+    if (this->axisymmode) {
+	int numNodes = this->giveNumberOfNodes();
+	FloatArray N;
+	this->interp.evalN( N, * ip->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+	// interpolate radius
+	double r = 0.0;
+	for ( int i = 1; i <= N.giveSize(); i++ ) {
+	    double X_i = 0.5 * ( this->giveNode(i)->giveCoordinate(1) + this->giveNode(i + numNodes / 2)->giveCoordinate(1) ); // X-coord of the fictious mid surface
+	    r += N.at(i) * X_i;
+	}
+	return ds * r;
+	
+    } else { // regular 2d
+	double thickness  = this->giveCrossSection()->give(CS_Thickness, ip);
+	return ds * thickness;
+    }
 }
 
 
 IRResultType
 IntElLine1 :: initializeFrom(InputRecord *ir)
 {
+    this->axisymmode = false;
+    this->axisymmode = ir->hasField(_IFT_IntElLine1_axisymmode);
     return StructuralInterfaceElement :: initializeFrom(ir);
+    
 }
 
 

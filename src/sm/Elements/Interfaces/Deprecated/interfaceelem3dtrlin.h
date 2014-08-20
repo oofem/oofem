@@ -44,6 +44,8 @@ class FEI2dTrLin;
 
 /**
  * This class implements 3d triangular surface interface element with linear interpolation.
+ * @author Jim Brouzoulis
+ * @author Borek Patzak
  */
 class InterfaceElement3dTrLin : public StructuralElement
 {
