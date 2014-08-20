@@ -53,7 +53,7 @@ class IntArray;
 
 /**
  * Abstract base class for "structural" finite elements with geometrical nonlinearities.
- * The base StructuralElement supports nonlinearities at constitutive level.
+ * The base class StructuralElement supports nonlinearities at constitutive level.
  * The new implementation of relevant services is extended to incorporate general geometric
  * nonlinearity. The services for computing nonlinear parts of geometrical equations for
  * particular strain components are provided. The updated services for stiffness,
