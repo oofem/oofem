@@ -789,9 +789,7 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
         return 6;
 
     case _Warping:
-        answer.resize(2);
-        answer.at(1) = 4;
-        answer.at(2) = 5;
+        answer = {4, 5};
         return 6;
 
     case _PlateLayer:
@@ -850,7 +848,7 @@ StructuralMaterial :: giveVoigtSymVectorMask(IntArray &answer, MaterialMode mmod
 
     case _2dPlateSubSoil:
         answer = {3, 5, 4};
-	return 6;
+        return 6;
 
     case _Unknown:
         answer.clear();

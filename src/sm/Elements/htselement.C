@@ -80,14 +80,6 @@ HTSelement :: initializeFrom(InputRecord *ir)
     //IR_GIVE_FIELD(ir, numberOfEdges, _IFT_HTSelement_numberOfEdges, "numberOfEdges");
     //numberOfEdges = 3;
 
-#if 0
-    if ( !( ( numberOfGaussPoints == 1 ) ||
-           ( numberOfGaussPoints == 4 ) ||
-           ( numberOfGaussPoints == 9 ) ||
-           ( numberOfGaussPoints == 16 ) ) ) {
-        numberOfGaussPoints = 4;
-    }
-#endif
     this->computeCenterOfGravity();
     return IRRT_OK;
 }

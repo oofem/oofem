@@ -189,7 +189,7 @@ void CompoDamageMat :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, 
     { //applies only for 1D, strain vectors are already in local c.s.
         if ( st->elemCharLength.at(1) == 0. ) {
             FloatArray normal(0);
-            st->elemCharLength.at(1) = gp->giveElement()->giveCharacteristicLenght(gp, normal); //truss length
+            st->elemCharLength.at(1) = gp->giveElement()->giveCharacteristicLength(normal); //truss length
             this->checkSnapBack(gp, mMode);
         }
 
@@ -461,8 +461,7 @@ void CompoDamageMat :: giveCharLength(CompoDamageMatStatus *status, GaussPoint *
             crackPlaneNormal.at(j) = elementCs.at(j, i);
         }
 
-        //already corrected for the number of integration points on element
-        status->elemCharLength.at(i) = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
+       status->elemCharLength.at(i) = gp->giveElement()->giveCharacteristicLength(crackPlaneNormal);
     }
 }
 

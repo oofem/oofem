@@ -244,7 +244,7 @@ double NLTransientTransportProblem :: giveUnknownComponent(ValueModeType mode, T
     TimeStep *previousStep = this->givePreviousStep(), *currentStep = this->giveCurrentStep();
 
     if ( dof->__giveEquationNumber() == 0 ) {
-        OOFEM_ERROR("invalid equation number on DoF %d", dof->giveNumber() );
+        OOFEM_ERROR("invalid equation number on DoF %d", dof->giveDofID() );
     }
 
     if ( ( t >= previousStep->giveTargetTime() ) && ( t <= currentStep->giveTargetTime() ) ) {

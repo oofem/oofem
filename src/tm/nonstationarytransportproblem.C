@@ -155,7 +155,7 @@ double NonStationaryTransportProblem :: giveUnknownComponent(ValueModeType mode,
     }
 
     if ( dof->__giveEquationNumber() == 0 ) {
-        OOFEM_ERROR("invalid equation number on DoF %d", dof->giveNumber());
+        OOFEM_ERROR("invalid equation number on DoF %d", dof->giveDofID());
     }
 
     return UnknownsField->giveUnknownValue(dof, mode, tStep);

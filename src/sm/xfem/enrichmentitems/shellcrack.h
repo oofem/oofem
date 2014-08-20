@@ -36,6 +36,11 @@
 
 //#include "xfem/enrichmentitem.h"
 #include "xfem/enrichmentitems/crack.h"
+
+#define _IFT_ShellCrack_Name "shellcrack"
+#define _IFT_ShellCrack_xiBottom "xibottom"
+#define _IFT_ShellCrack_xiTop "xitop"
+
 /**
  * Crack.
  * @author Jim Brouzoulis

@@ -1026,8 +1026,7 @@ MDM :: giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedSt
         dir.at(2) = dirs.at(2, indx);
         dir.at(3) = dirs.at(3, indx);
 
-        //h  = gp->giveElement()->giveCharacteristicLenght(gp, dir);
-        h  = gp->giveElement()->giveLenghtInDir(dir);
+        h  = gp->giveElement()->giveCharacteristicLength(dir);
         double E  = this->giveLinearElasticMaterial()->give(Ex, gp);
         Ep = this->mdm_Ep;
         if ( nsd == 2 ) {
@@ -1076,7 +1075,7 @@ MDM :: giveRawMDMParameters(double &Efp, double &Ep, const FloatArray &reducedSt
  * dir.at(2) = dirs.at(2,indx);
  * dir.at(3) = dirs.at(3,indx);
  *
- * h  = gp->giveElement()->giveCharacteristicLenght (gp, dir);
+ * h  = gp->giveElement()->giveCharacteristicLength (dir);
  * }
  *
  * double E  = this -> giveLinearElasticMaterial()->give(Ex);

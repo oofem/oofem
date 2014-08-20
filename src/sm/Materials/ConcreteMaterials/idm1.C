@@ -87,6 +87,8 @@ IsotropicDamageMaterial1 :: IsotropicDamageMaterial1(int n, Domain *d) : Isotrop
     gft = 0.;
     ek  = 0.;
     griff_n = 8.;
+    c1 = 3.;  // default value of Hordijk parameter
+    c2 = 6.93; // default value of Hordijk parameter
     ecsMethod = ECSM_Unknown;
     sourceElemSet = NULL;
 }
@@ -268,7 +270,26 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
         }
 
         break;
-    case 3: // reserved for Hordijk's law
+    case 3: 
+        this->softType = ST_Hordijk_Cohesive_Crack;
+	c1 = 3.;
+        IR_GIVE_OPTIONAL_FIELD(ir, c1, _IFT_IsotropicDamageMaterial1_c1);
+	c2 = 6.93;
+        IR_GIVE_OPTIONAL_FIELD(ir, c2, _IFT_IsotropicDamageMaterial1_c2);
+        if ( ir->hasField(_IFT_IsotropicDamageMaterial1_wf) ) {
+	  IR_GIVE_FIELD(ir, wf, _IFT_IsotropicDamageMaterial1_wf);
+	} else if ( ir->hasField(_IFT_IsotropicDamageMaterial1_gf) ) {
+	  IR_GIVE_FIELD(ir, gf, _IFT_IsotropicDamageMaterial1_gf);
+	  double E;
+	  IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
+	  double aux = c1*c1*c1/(c2*c2*c2*c2);
+	  aux *= (6.-(c2*c2*c2+3.*c2*c2+6.*c2+6.)*exp(-c2));
+	  aux += (1.-exp(-c2))/c2;
+	  aux -= 0.5*(1.+c1*c1*c1)*exp(-c2);
+	  wf = gf/(aux*E*e0);
+	} else {
+	  OOFEM_ERROR("wf or gf must be specified for Hordijk softening law");
+	}
         break;
     case 4:
         this->softType = ST_Mazars;
@@ -296,6 +317,11 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
         this->ef = -e1 / ( 1. - md * pow(e1 / e0, md) );
         IR_GIVE_FIELD(ir, e2, _IFT_IsotropicDamageMaterial1_e2);
         IR_GIVE_FIELD(ir, nd, _IFT_IsotropicDamageMaterial1_nd);
+        break;
+    case 8:     // power-exponential softening
+        this->softType = ST_PowerExponential;
+	IR_GIVE_FIELD(ir, ef, _IFT_IsotropicDamageMaterial1_ef);
+        IR_GIVE_FIELD(ir, md, _IFT_IsotropicDamageMaterial1_md);
         break;
     default:
         OOFEM_ERROR("Softening type number %d is unknown", damageLaw);
@@ -905,7 +931,7 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
 {
     const double e0 = this->give(e0_ID, gp);
     double ef = 0.;
-    if ( softType == ST_Linear || softType == ST_Exponential || softType == ST_SmoothExtended ) {
+    if ( softType == ST_Linear || softType == ST_Exponential || softType == ST_SmoothExtended || softType == ST_PowerExponential ) {
         ef = this->give(ef_ID, gp);         // ef is the fracturing strain
     }
 
@@ -922,6 +948,13 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
     case ST_Exponential:
         if ( kappa > e0 ) {
             return 1.0 - ( e0 / kappa ) * exp( -( kappa - e0 ) / ( ef - e0 ) );
+        } else {
+            return 0.0;
+        }
+
+    case ST_PowerExponential:
+        if ( kappa > e0 ) {
+	  return 1.0 - ( e0 / kappa ) * exp( -pow(( kappa - e0 ) / ( ef - e0 ),md) );
         } else {
             return 0.0;
         }
@@ -1164,11 +1197,8 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         status->setCrackVector(crackVect);
 
         if ( isCrackBandApproachUsed() ) { // le needed only if the crack band approach is used
-            // old approach (default projection method)
-            // le = gp->giveElement()->giveCharacteristicLenght(gp, crackPlaneNormal);
-            // new approach, with choice of method
-            le = gp->giveElement()->giveCharacteristicSize(gp, crackPlaneNormal, ecsMethod);
-            // remember le in corresponding status
+             le = gp->giveElement()->giveCharacteristicSize(gp, crackPlaneNormal, ecsMethod);
+            // store le in corresponding status
             status->setLe(le);
         }
 

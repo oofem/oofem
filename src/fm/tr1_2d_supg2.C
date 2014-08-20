@@ -341,7 +341,7 @@ TR1_2D_SUPG2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
     FloatArray _t;
     this->computeAdvectionDerivativeTerm_MB(_h, tStep);
     _t.beProductOf(_h, u);
-    for ( i = 1; i <= 6; i++ ) {
+    for ( int i = 1; i <= 6; i++ ) {
         if ( ( fabs( answer.at(i) - _t.at(i) ) >= 1.e-6 ) ) {
             OOFEM_ERROR("test failure (elem %d, error=%e)", this->number, fabs( answer.at(i) - _t.at(i) ));
         }

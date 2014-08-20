@@ -136,6 +136,7 @@ public:
     void giveTractionElCoord(size_t iElInd, FloatArray &oStartCoord, FloatArray &oEndCoord) const {oStartCoord = mpTractionElements[iElInd]->mStartCoord; oEndCoord = mpTractionElements[iElInd]->mEndCoord;}
     void giveTractionElNormal(size_t iElInd, FloatArray &oNormal, FloatArray &oTangent) const;
     void giveTractionElArcPos(size_t iElInd, double &oXiStart, double &oXiEnd) const;
+    void giveBoundaries(IntArray &oBoundaries);
 
     void giveTraction(size_t iElInd, FloatArray &oStartTraction, FloatArray &oEndTraction, ValueModeType mode, TimeStep *tStep);
 

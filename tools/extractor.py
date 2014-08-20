@@ -25,6 +25,7 @@ global error_on_missing_record
 # - add reading of userrec from file
 # - add support for extractor/checker mode (or split into separate scripts)
 # - add support for additional records -
+# - decide whether tStep or solution number should be checked. This should be consistent with errorcheckingexportmodule.C
 
 
 #record tuple format
@@ -68,12 +69,15 @@ end_re   = re.compile(r"""
         \#%END_CHECK%
         """, re.X)
 
-timeStep_re = re.compile(r"""
-        ^           # begining of line
-        Output\ for\ time\s*  # characteristic string
-        ([-+ ]\d+\.\d+(e[+-]\d+)*) # time step
-        """,re.X)
 
+#tStep represents time. This is inconsistent consistent with errorcheckingexportmodule.C
+timeStep_re = re.compile(r"""
+       ^           # begining of line
+       Output\ for\ time\s*  # characteristic string
+       ([-+ ]\d+\.\d+(e[+-]\d+)*) # time step
+       """,re.X)
+
+        
 dofMan_re = re.compile(r"""
         ^           # beginning of line
         (?:Node|RigidArmNode|HangingNode)\s*         # char string
@@ -182,6 +186,13 @@ def getKeywordValue (infilename, record, kwd, optional = None):
         else:
             return optional
 
+#translate numbers in internalstatetype.h to strings in out file (e.g. 1=stresses, 4=strains)
+def elemKwdToString(kwd):
+    if kwd == '1' : return 'stresses'
+    if kwd == '4' : return 'strains'
+    print ( "Error. Can not translate element's keyword %s to string, exiting" % kwd )
+    exit(0)
+            
 # parses the extractor/checker input record
 def parse_input_rec (context, recline):
     if re.search('^#(DOFMAN|NODE)', recline):
@@ -208,6 +219,7 @@ def parse_input_rec (context, recline):
             kwd   = getKeywordValue(context.infilename, recline, 'keyword')
             cmpn  = int(getKeywordValue(context.infilename, recline, 'component'))
             value = float(getKeywordValue(context.infilename, recline, 'value', 0.0))
+            kwd = elemKwdToString(kwd)
             return ('er', tstep, number, irule, gp, kwd, cmpn, value)
 
         except ValueError:
@@ -223,6 +235,7 @@ def parse_input_rec (context, recline):
             kwd   = getKeywordValue(context.infilename, recline, 'keyword')
             cmpn  = int(getKeywordValue(context.infilename, recline, 'component'))
             value = float(getKeywordValue(context.infilename, recline, 'value', 0.0))
+            kwd = elemKwdToString(kwd)
             return ('ber', tstep, number, kwd, cmpn, value)
         except ValueError:
             print ( "Input error on\n",recline )
@@ -285,12 +298,13 @@ def check_element_rec (context, kwd, line):
 
         if ((rec[0]=='er') and timeflag and (context.recnumber == rec[2]) and
             (context.recirule==rec[3]) and (context.recgpnum == rec[4])):
-#               print ( "Found er: looking for ",rec[5],"in ", line )
+            #print ( "Found er: looking for ",rec[5],"in ", line )
+            
             match=re.search(rec[5]+'\s*((([-]*\d+(\.\d+)?(e[+-]\d+)?)\s*)+)', line)
             if match:
                 # print ( "match: ",match.group(1) )
                 context.recVal[irec]=re.split('\s+',match.group(1))[rec[6]-1]
-                # print ( "found: ",recVal[irec] )
+                #print ( "found: ",context.recVal[irec] )
 
 
 #extract element record
@@ -546,7 +560,7 @@ def check_results (context, tolerance):
             err = float(rec[-1])
         if (abs(err) > float(tolerance)):
             if (success): print ( header ) # print header before reporting error for the first time
-            print ( "\tError when checking rule %d: err = %g, value is %g and correct value is %g" % (irec, err, float(context.recVal[irec]), float(rec[-1])) )
+            print ( "\tError when checking rule %d: err = %g, value is %g and correct value should be %g" % (irec, err, float(context.recVal[irec]), float(rec[-1])) )
             # print ( rec, recVal )
             success = 0
 

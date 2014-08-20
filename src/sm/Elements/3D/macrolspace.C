@@ -65,7 +65,6 @@ MacroLSpace :: ~MacroLSpace() { }
 IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;              // Required by IR_GIVE_FIELD macro
-    //IRResultType val;
 
     this->LSpace :: initializeFrom(ir);
 
@@ -80,9 +79,8 @@ IRResultType MacroLSpace :: initializeFrom(InputRecord *ir)
     microBoundaryDofManager.resize( 3 * microBoundaryNodes.giveSize() );
 
 #if 0
-    val = IR_GIVE_OPTIONAL_FIELD2(ir, this->stiffMatrxFileName, _IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename");
-
-    if ( ir->hasField(_IFT_MacroLspace_stiffMatrxFileName, "stiffmatrxfilename") ) {
+    if ( ir->hasField(_IFT_MacroLspace_stiffMatrxFileName) ) {
+        IR_GIVE_OPTIONAL_FIELD(ir, this->stiffMatrxFileName, _IFT_MacroLspace_stiffMatrxFileName);
         if ( fopen(this->stiffMatrxFileName, "r") != NULL ) { //if the file exist
             stiffMatrxFile = fopen(this->stiffMatrxFileName, "r");
             this->stiffMatrxFileNoneReadingWriting = 1;
