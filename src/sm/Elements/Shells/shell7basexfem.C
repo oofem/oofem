@@ -88,16 +88,6 @@ Shell7BaseXFEM :: postInitialize()
         }
     }
 
-    // initialize the solution vectors to zero
-    this->solVecDarrays.resize(numEI);
-    int numDofs = Shell7Base :: giveNumberOfDofs();
-    for ( int i = 1; i <= numEI; i++ ) {
-	this->solVecDarrays[i-1].resize(numDofs);
-	this->solVecDarrays[i-1].zero();
-    }
-  
-  
-  
 }
 
 
@@ -418,11 +408,11 @@ Shell7BaseXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, 
                 this->computeCohesiveForces( fCZ, tStep, solVec, solVecD, this->xMan->giveEnrichmentItem(i));
                 tempRed.beSubArrayOf(fCZ, this->activeDofsArrays[i-1]);
                 answer.assemble(tempRed, this->orderingArrays[i-1]);
-	      // Add equal forces on the minus side except for the first delamination -> one discontinuity term only
-	      if ( i != 1 ) {  
-		tempRed.negated(); // acts in the opposite direction
-		answer.assemble(tempRed, this->orderingArrays[i-2]); 
-	      }
+                // Add equal forces on the minus side except for the first delamination -> one discontinuity term only
+                if ( i != 1 ) {  
+                    tempRed.negated(); // acts in the opposite direction
+                    answer.assemble(tempRed, this->orderingArrays[i-2]); 
+                }
             }
         }
     }
@@ -436,7 +426,7 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
 {
     int ndofs = Shell7Base :: giveNumberOfDofs();
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();
-    FloatArray f(ndofs), genEps, genEpsD, ftemp, lCoords, Nd;
+    FloatArray f(ndofs), genEps, ftemp, lCoords, Nd;
     FloatMatrix B, BEnr;
     f.zero();
 
@@ -450,16 +440,14 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
             this->computeEnrichedBmatrixAt(lCoords, B, NULL);
             this->computeEnrichedBmatrixAt(lCoords, BEnr, ei);
             genEps.beProductOf(B, solVec);
-            genEpsD.beProductOf(BEnr, solVecD);
             double zeta = giveGlobalZcoord(lCoords);
-            this->computeSectionalForcesAt(Nd, gp, mat, tStep, genEps, genEpsD, zeta);
+            this->computeSectionalForcesAt(Nd, gp, mat, tStep, genEps, zeta);
 
             // Computation of nodal forces: f = B^t*[N M T Ms Ts]^t
             ftemp.beTProductOf( BEnr, Nd );
             double dV = this->computeVolumeAroundLayer(gp, layer);
             f.add( dV, ftemp );
-
-
+            
         }
     }
 
@@ -470,10 +458,10 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
 
 
 void
-Shell7BaseXFEM :: computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationPoint *ip, Material *mat, TimeStep *tStep, FloatArray &genEps, FloatArray &genEpsD, double zeta)
+Shell7BaseXFEM :: computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationPoint *ip, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta)
 {
     // New, in terms of PK1 stress
-    // \Lambda_i * P * G^I
+    // f = \Lambda_i * P * G^I
     FloatArray PG1(3), PG2(3), PG3(3);
     FloatMatrix lambda[3], Gcon, P, PG;
     FloatArray PVector;
@@ -485,8 +473,8 @@ Shell7BaseXFEM :: computeSectionalForcesAt(FloatArray &sectionalForces, Integrat
     PG1.beColumnOf(PG, 1);
     PG2.beColumnOf(PG, 2);
     PG3.beColumnOf(PG, 3);
-    //this->computeLambdaGMatrices(lambda, genEpsD, zeta); // associated with the variation of the test functions   
-    this->computeLambdaGMatricesDis(lambda, zeta);
+    this->computeLambdaGMatricesDis(lambda, zeta); // associated with the variation of the test functions   
+    
     // f = lambda_1^T * P*G^1 + lambda_2^T * P*G^2 + lambda_3^T * P*G^3
     sectionalForces.clear();
     sectionalForces.plusProduct(lambda[0], PG1, 1.0);

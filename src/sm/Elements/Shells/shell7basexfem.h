@@ -76,7 +76,7 @@ protected:
     // Internal forces
     void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord);
     void discComputeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatArray &solVec, FloatArray &solVecD, EnrichmentItem *ei);
-    void computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationPoint *ip, Material *mat, TimeStep *tStep, FloatArray &genEps, FloatArray &genEpsD, double zeta);
+    void computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationPoint *ip, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta);
     
     double evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
     double edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
@@ -149,10 +149,8 @@ protected:
 
     std::vector< IntArray > orderingArrays;
     std::vector< IntArray > activeDofsArrays;
-    std::vector< FloatArray > solVecDarrays;
     
-// temp - to be removed 090814
-   void computeTripleProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c);
+    void computeTripleProduct(FloatMatrix &answer, const FloatMatrix &a, const FloatMatrix &b, const FloatMatrix &c);
     
 
 public:

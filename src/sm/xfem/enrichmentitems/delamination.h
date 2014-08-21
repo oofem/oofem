@@ -44,8 +44,6 @@
 #define _IFT_Delamination_interfacenum "interfacenum"
 #define _IFT_Delamination_csnum "csnum"
 #define _IFT_Delamination_CohesiveZoneMaterial "czmaterial"
-#define _IFT_Delamination_xiBottom "xibottom"
-#define _IFT_Delamination_xiTop "xitop"
 //@}
 
 namespace oofem {
@@ -58,7 +56,7 @@ class OOFEM_EXPORT Delamination : public EnrichmentItem
 {
 protected:
     Material *mat;  // Material for cohesive zone model
-    FloatArray interfaceNum; // starting and ending interfaceNum for the delamination
+    IntArray interfaceNum; // starting and ending interfaceNum for the delamination
     int crossSectionNum;     // use this to keep track of the interface coordinates
     int matNum; // still used??
     double delamXiCoord;    // defines at what local xi-coord the delamination is defined
