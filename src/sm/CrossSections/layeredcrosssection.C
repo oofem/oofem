@@ -1288,13 +1288,13 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(std :: vector< IntegrationR
  * xi-coord in the cross section coordinate system.
  * Also renames the gp numbering from layerwise to global (1,2,1,2 -> 1,2,3,4)
  *  xi
- *  ^    --------  1               --------  1
+ * --------  1               --------  1
  |           |                         |
  |           |                         |
- |       -------- -1       =>      --------  x
- |  ^    --------  1               --------  x
+ | -------- -1       =>      --------  x
+ | --------  1               --------  x
  |           |                         |
- |    -------- -1               -------- -1
+ | -------- -1               -------- -1
  */
 {
     double scaleFactor = 0.999; // Will be numerically unstable with xfem if the endpoints lie at +-1

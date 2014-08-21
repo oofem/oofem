@@ -133,7 +133,8 @@ protected:
     std :: vector< Triangle > allTri;
 
     std :: vector < std :: vector< Triangle > > crackSubdivisions;
-
+    IntArray numSubDivisionsArray;
+    
     void giveFictiousNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, int subCell);
     void giveFictiousCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, int subCell);
     void giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep, int subCell);

@@ -632,10 +632,10 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         FloatArray Fp, T, nCov, jump, unknowns, genEpsC, genEpsD;
         
         for ( GaussPoint *gp: *iRuleL ) {
-	    double xi = dei->giveDelamXiCoord();
+            double xi = dei->giveDelamXiCoord();
             lCoords.at(1) = gp->giveNaturalCoordinate(1);
             lCoords.at(2) = gp->giveNaturalCoordinate(2);
-	    lCoords.at(3) = xi;
+            lCoords.at(3) = xi;
             
             this->computeEnrichedBmatrixAt(lCoords, B, NULL);
             this->computeEnrichedBmatrixAt(lCoords, BEnr, dei);
@@ -668,10 +668,10 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
             T.rotatedWith(Q,'t'); // transform back to global coord system
 	    
             lambdaN.beProductOf(lambda,NEnr);
-	    Fp.beTProductOf(lambdaN, T);
+            Fp.beTProductOf(lambdaN, T);
             double dA = this->computeAreaAround(gp,xi);
             answerTemp.add(dA*DISC_DOF_SCALE_FAC,Fp);
-            }
+        }
 
         int ndofs = Shell7Base :: giveNumberOfDofs();
         answer.resize(ndofs); answer.zero();
@@ -724,16 +724,16 @@ Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
             this->computeDiscSolutionVector(eiDofIdArray, tStep, solVecD);
             this->computeCohesiveTangentAt(temp, tStep, solVecD, dei);
 
-	    // Assemble part correpsonding to active dofs
-	    tempRed.beSubMatrixOf(temp, this->activeDofsArrays[dei->giveNumber()-1], this->activeDofsArrays[dei->giveNumber()-1]);
-	    answer.assemble(tempRed, this->orderingArrays[dei->giveNumber()-1], this->orderingArrays[dei->giveNumber()-1]);	    
-	    // Add equal (but negative) tangent corresponding to the forces on the minus side
-	    // except for the first delamination -> one discontinuity term only
-	      if ( i != 1 ) {  
-		tempRed.negated(); // acts in the opposite direction
-		answer.assemble(tempRed, this->orderingArrays[dei->giveNumber()], this->orderingArrays[dei->giveNumber()]);	    
-	      }	    
-	    
+            // Assemble part correpsonding to active dofs
+            tempRed.beSubMatrixOf(temp, this->activeDofsArrays[dei->giveNumber()-1], this->activeDofsArrays[dei->giveNumber()-1]);
+            answer.assemble(tempRed, this->orderingArrays[dei->giveNumber()-1], this->orderingArrays[dei->giveNumber()-1]);	    
+            // Add equal (but negative) tangent corresponding to the forces on the minus side
+            // except for the first delamination -> one discontinuity term only
+            if ( i != 1 ) {  
+                tempRed.negated(); // acts in the opposite direction
+                answer.assemble(tempRed, this->orderingArrays[dei->giveNumber()], this->orderingArrays[dei->giveNumber()]);	    
+            }   
+            
         }
     }
 }
@@ -2051,16 +2051,14 @@ void
 Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep )
 {
     int numSubCells = 1;
-    //if ( this->crackSubdivisions[0].size() ) {
-    //    numSubCells = (int)this->crackSubdivisions[0].size();
-    //}
+
     
     int numLayers = this->layeredCS->giveNumberOfLayers();
     //int numCells = numLayers * numSubCells;
     // Go through each layer and count the number of subcells
     int numCells = 0;
-    for ( int i = 0; i < numLayers; i++ ) {
-        numCells += (int)(this->crackSubdivisions[i].size());
+    for ( int i = 1; i <= numLayers; i++ ) {
+        numCells += this->numSubDivisionsArray.at(i);
     }
 
     int numCellNodes  = 15; // quadratic wedge
@@ -2080,7 +2078,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
     int nodeNum = 1;
     for ( int layer = 1; layer <= numLayers; layer++ ) {
 
-        numSubCells = (int)this->crackSubdivisions[layer - 1].size();
+        numSubCells = (int)this->numSubDivisionsArray[layer - 1];
         for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
 
             // Node coordinates
@@ -2128,7 +2126,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
         int currentCell = 1;
         for ( int layer = 1; layer <= numLayers; layer++ ) {
 
-            numSubCells = (int)this->crackSubdivisions[layer - 1].size();
+            numSubCells = (int)this->numSubDivisionsArray[layer - 1];
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
 
                 if ( type == DisplacementVector ) { // compute displacement as u = x - X
@@ -2170,7 +2168,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
         //this->recoverShearStress(tStep);
         //int currentCell = 1;
         for ( int layer = 1; layer <= numLayers; layer++ ) {
-            numSubCells = (int)this->crackSubdivisions[layer - 1].size();
+            numSubCells = (int)this->numSubDivisionsArray[layer - 1];
 
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
                 recoverValuesFromIP(values, layer, type, tStep);
@@ -2193,7 +2191,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
         InternalStateValueType valueType =  giveInternalStateValueType(type);
         int currentCell = 1;
         for ( int layer = 1; layer <= numLayers; layer++ ) {
-            numSubCells = (int)this->crackSubdivisions[layer - 1].size();
+            numSubCells = (int)this->numSubDivisionsArray[layer - 1];
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
                 IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
                 VTKXMLExportModule::computeIPAverage(average, iRuleL, this, type, tStep);
@@ -2232,7 +2230,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
             for ( int layer = 1; layer <= numLayers; layer++ ) {
                 FloatMatrix localNodeCoords;
 
-                numSubCells = (int)this->crackSubdivisions[layer - 1].size();
+                numSubCells = (int)this->numSubDivisionsArray[layer - 1];
                 for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
                     FloatArray nodeLocalXi1Coords, nodeLocalXi2Coords, nodeLocalXi3Coords, nodeLocalXi3CoordsMapped;
                     if ( numSubCells == 1) {
