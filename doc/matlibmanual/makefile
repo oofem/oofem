@@ -3,18 +3,15 @@ BACKUP_FILES = *.tex makefile
 RCP = scp
 
 html: ps
-	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
 	latex2html -style "/oofeml2h.css" -local_icons -dir html -mkdir matlibmanual -init_file "latex2html-init"
 
 ps:
-	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
 	rm -f *.toc *.lot *.aux
 	latex \\nonstopmode\\input matlibmanual
 	latex \\nonstopmode\\input matlibmanual
 	dvips -o 	matlibmanual.ps matlibmanual
 
 pdf:
-	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
 	rm -f *.toc *.lot *.aux
 	pdflatex matlibmanual
 	pdflatex matlibmanual

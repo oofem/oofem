@@ -74,7 +74,7 @@ public:
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
 
     // characteristic length in gp (for some material models)
-    virtual double giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane);
+    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
     virtual double giveArea();
     virtual double computeVolumeAround(GaussPoint *gp);
 

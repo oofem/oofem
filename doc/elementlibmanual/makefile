@@ -3,7 +3,6 @@ BACKUP_FILES = *.tex *.fig *.eps makefile
 RCP = scp
 
 html: pdf
-	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
 	for i in elementlibmanual-figure*.pdf; do convert -density 300 $$i `echo $$i | sed -e 's/\.pdf/\.png/g'`; done
 #mkdir html
 	mkdir -p html
@@ -18,7 +17,6 @@ ps: pdf
 
 
 pdf:
-	if [ x"$(ROBOT)" != "x" ]; then $(ROBOT) < include.src.tex > include.tex; fi
 	rm -f *.toc *.lot *.aux
 	pdflatex -shell-escape elementlibmanual
 	pdflatex -shell-escape elementlibmanual

@@ -157,7 +157,7 @@ public:
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new RCSDNLMaterialStatus(1, RCSDEMaterial :: domain, gp); }
 
 protected:
-    virtual double giveCharacteristicElementLenght(GaussPoint *, const FloatArray &) { return 1.0; }
+    virtual double giveCharacteristicElementLength(GaussPoint *gp, const FloatArray &) { return 1.0; }
     virtual double giveMinCrackStrainsForFullyOpenCrack(GaussPoint *gp, int i);
     virtual double computeStrength(GaussPoint *, double)  { return this->Ft; }
 };

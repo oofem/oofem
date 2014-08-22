@@ -489,14 +489,14 @@ ZZRemeshingCriteria :: giveDofManDensity(int num)
     isize = con->giveSize();
 
 #if 0
-     // Minimum density
-     for ( int i = 1; i <= isize; i++ ) {
+    // Minimum density
+    for ( int i = 1; i <= isize; i++ ) {
         Element *ielem = domain->giveElement( con->at(i) );
         if (i==1)
             density = ielem->computeMeanSize();
         else
             density = min(density, ielem->computeMeanSize());
-     }
+    }
 #endif
 
     // Average density

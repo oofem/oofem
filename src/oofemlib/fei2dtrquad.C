@@ -239,7 +239,6 @@ FEI2dTrQuad :: edgeEvaldNds(FloatArray &answer, int iedge,
     // In fact, dxdxi is also needed sometimes (surface tension)
 #if 0
     IntArray edgeNodes;
-    FloatArray J(2);
     FloatArray dNdxi(3);
     FloatArray dxdxi(2);
     double xi = lcoords.at(1);

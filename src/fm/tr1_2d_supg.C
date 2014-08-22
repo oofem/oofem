@@ -2024,11 +2024,10 @@ double
 TR1_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep)
 {
 #if 0
-    int i;
     double fi, answer, eps = 0.0;
     FloatArray s(3);
 
-    for ( i = 1; i <= 3; i++ ) {
+    for ( int i = 1; i <= 3; i++ ) {
         fi = ls->giveLevelSetDofManValue( dofManArray.at(i) );
         s.at(i) = fi / sqrt(fi * fi + eps * eps);
     }
