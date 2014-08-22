@@ -652,23 +652,6 @@ Quad10_2D_SUPG :: giveInterface(InterfaceType interface)
 
 
 void
-Quad10_2D_SUPG :: printOutputAt(FILE *file, TimeStep *tStep)
-// Performs end-of-step operations.
-{
-#ifdef __PARALLEL_MODE
-    fprintf( file, "element %d [%8d] :\n", this->giveNumber(), this->giveGlobalNumber() );
-#else
-    fprintf(file, "element %d :\n", number);
-#endif
-    pressureNode.printOutputAt(file, tStep);
-
-    for ( auto &iRule: integrationRulesArray ) {
-        iRule->printOutputAt(file, tStep);
-    }
-}
-
-
-void
 Quad10_2D_SUPG :: giveLocalVelocityDofMap(IntArray &map)
 {
     map.enumerate(8);

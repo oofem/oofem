@@ -147,13 +147,6 @@ TransportElement :: checkConsistency()
 }
 
 void
-TransportElement :: printOutputAt(FILE *file, TimeStep *tStep)
-// Performs end-of-step operations.
-{
-    Element :: printOutputAt(file, tStep);
-}
-
-void
 TransportElement :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     answer.resize( this->computeNumberOfDofs(), this->computeNumberOfDofs() );

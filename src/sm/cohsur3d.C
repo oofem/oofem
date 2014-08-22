@@ -407,17 +407,6 @@ CohesiveSurface3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArr
     return 1;
 }
 
-void
-CohesiveSurface3d :: printOutputAt(FILE *File, TimeStep *tStep)
-{
-    fprintf(File, "element %d :\n", number);
-
-    for ( auto &iRule: integrationRulesArray ) {
-        iRule->printOutputAt(File, tStep);
-    }
-
-    fprintf(File, "\n");
-}
 
 #ifdef __OOFEG
 void CohesiveSurface3d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)

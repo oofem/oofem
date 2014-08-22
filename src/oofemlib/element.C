@@ -730,6 +730,11 @@ Element :: printOutputAt(FILE *file, TimeStep *tStep)
 {
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
 
+    for ( int i = 1; i <= this->giveNumberOfInternalDofManagers(); ++i ) {
+        DofManager *dman = this->giveInternalDofManager(i);
+        dman->printOutputAt(file, tStep);
+    }
+
     for ( auto &iRule: integrationRulesArray ) {
         iRule->printOutputAt(file, tStep);
     }

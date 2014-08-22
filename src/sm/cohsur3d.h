@@ -84,7 +84,6 @@ public:
 
     // input and output
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
