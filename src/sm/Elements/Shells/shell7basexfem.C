@@ -783,6 +783,7 @@ void
 Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
 
+ 
     int ndofs = this->giveNumberOfDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
@@ -817,17 +818,17 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
             double dV = this->computeVolumeAroundLayer(gp, layer);
             
             
-            Shell7Base :: computeLinearizedStiffness(gp, layerMaterial, tStep, A);
-            this->discComputeStiffness(LCC, LDD, LDC, gp, layer, A, tStep);
+            Shell7Base :: computeLinearizedStiffness(gp, layerMaterial, tStep, A); // called L in new formulation
+            this->discComputeStiffness(LCC, LDD, LDC, gp, layer, A, tStep);        // called D in new formulation
             
             LB.beProductOf(LCC, B);
             KCC.clear();
             KCC.plusProductSymmUpper(B, LB, dV);
             KCC.symmetrized();
             KOrdered.zero();
-            KOrdered.assemble(KCC, ordering, ordering);
+            KOrdered.assemble(KCC, ordering, ordering);                            // from dof group to node ordering 
             tempRed.beSubMatrixOf(KOrdered, activeDofsC, activeDofsC);
-            answer.assemble(tempRed, orderingC, orderingC);
+            answer.assemble(tempRed, orderingC, orderingC);                        // position in element stiffness matrix
             
             // Discontinuous part
             int numEI = this->xMan->giveNumberOfEnrichmentItems();
@@ -954,7 +955,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
         }
     }
 #endif
-    
+
 }
 
 
@@ -978,7 +979,7 @@ Shell7BaseXFEM :: discComputeStiffness(FloatMatrix &LCC, FloatMatrix &LDD, Float
     this->computeLambdaGMatrices(lambdaC, genEpsC, zeta);    
     this->computeLambdaGMatricesDis(lambdaD, zeta);
 
-    FloatMatrix A_lambdaC(3,18), A_lambdaD(3,18), LB;
+    FloatMatrix A_lambdaC(3,18), A_lambdaD(3,18);
     LCC.clear(); LDD.clear(); LDC.clear();
     
     
@@ -999,6 +1000,7 @@ Shell7BaseXFEM :: discComputeStiffness(FloatMatrix &LCC, FloatMatrix &LDD, Float
 }
 
 
+//remove
 void 
 Shell7BaseXFEM :: OLDcomputeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
@@ -1151,7 +1153,7 @@ for ( int k = 1; k <= numEI; k++ ) {
 
 }
 
-
+//remove
 void
 Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KdIJ, IntegrationPoint *ip, EnrichmentItem *ei1, EnrichmentItem *ei2, int layer, FloatMatrix A [ 3 ] [ 3 ],  TimeStep *tStep)
 {
@@ -1672,7 +1674,7 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lCoords, FloatMatrix &ans
     // Returns the enriched and shifted {B} matrix of the receiver, evaluated at gp. Such that
     // B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
  
-    if ( ei && dynamic_cast< Crack*>(ei) ) {
+    if ( ei && dynamic_cast< ShellCrack*>(ei) ) {
 
         int ndofs = Shell7Base :: giveNumberOfDofs();
         int ndofs_xm  = 3 * this->giveNumberOfDofManagers();
@@ -1694,8 +1696,10 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lCoords, FloatMatrix &ans
         // Evaluate enrichment function at point given by lcoords
         std :: vector< double > efGP;
         double levelSetGP = this->evaluateLevelSet(lCoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lCoords, levelSetGP);
-        //printf("enr func in gp = %e \n", efGP[0]);
+	///TODO : evaluateEnrFuncAt must have an input with only 3 values
+	FloatArray lCoords2 = lCoords;
+	lCoords2.resizeWithValues(2);
+        ei->evaluateEnrFuncAt(efGP, lCoords2, levelSetGP);
         int ndofman = this->giveNumberOfDofManagers();
 
         // First column
@@ -1759,8 +1763,11 @@ Shell7BaseXFEM :: EvaluateEnrFuncInDofMan(int dofManNum, EnrichmentItem *ei)
         double levelSetNode  = 0.0;
         ei->evalLevelSetNormalInNode( levelSetNode, globalNodeInd );
         std :: vector< double >efNode;
-        const FloatArray &nodePos = * ( dMan->giveCoordinates() );
-        ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
+        //const FloatArray &nodePos = * ( dMan->giveCoordinates() );
+        // evaluateEnrFuncAt requires coords to be size 2
+	FloatArray nodePos = * ( dMan->giveCoordinates() );
+	nodePos.resizeWithValues(2);
+	ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
         if( efNode.size() ) {
             return efNode [ 0 ];
         } else {
@@ -1792,7 +1799,10 @@ Shell7BaseXFEM :: computeEnrichedNmatrixAt(const FloatArray &lCoords, FloatMatri
     if ( ei && dynamic_cast< Crack*>(ei) ) {
         std :: vector< double > efGP;
         double levelSetGP = this->evaluateLevelSet(lCoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lCoords, levelSetGP);
+	///TODO : evaluateEnrFuncAt must have an input with only 3 values
+	FloatArray lCoords2 = lCoords;
+	lCoords2.resizeWithValues(2);
+        ei->evaluateEnrFuncAt(efGP, lCoords2, levelSetGP);
         
         for ( int i = 1, j = 0; i <= this->giveNumberOfDofManagers(); i++, j += 3 ) {
             double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
@@ -2414,9 +2424,12 @@ Shell7BaseXFEM :: giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, F
     g2 = this->crackSubdivisions[layer-1][subCell-1].giveVertex(2);
     g3 = this->crackSubdivisions[layer-1][subCell-1].giveVertex(3);
 
-    FloatArray gs1, gs2, gs3;
+    FloatArray gs1(2), gs2(2), gs3(2);
+    gs1.zero(); gs2.zero(); gs3.zero();
     // Move the triangle nodes slightly towards the center to avoid numerical problems - controlled by 'scale' 
     double alpha1 = scale; double alpha2 = (1.0-alpha1)*0.5; double alpha3 = alpha2;
+    //g1.printYourself(); g2.printYourself(); g3.printYourself();
+    g1.resizeWithValues(2); g2.resizeWithValues(2); g3.resizeWithValues(2);
     gs1 = alpha1*g1 + alpha2*g2 + alpha3*g3;
     gs2 = alpha2*g1 + alpha1*g2 + alpha3*g3;
     gs3 = alpha2*g1 + alpha3*g2 + alpha1*g3;

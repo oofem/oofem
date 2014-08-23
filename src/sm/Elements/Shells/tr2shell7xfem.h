@@ -74,13 +74,12 @@ protected:
     virtual double computeAreaAround(GaussPoint *gp, double xi);
 
     virtual void computeGaussPoints();
-    bool updateIntegrationRule();
     bool updateIntegrationRuleMultiCrack();
 
     virtual void giveLocalNodeCoords(FloatArray &nodeLocalXiCoords, FloatArray &nodeLocalEtaCoords);
 
     virtual FEInterpolation *giveInterpolation() const;
-
+    virtual double computeArea();
     // VTK
     void vtkGiveUpdatedFictiousNodeCoords(FloatArray nodeCoords [ 15 ], int layer, TimeStep *tStep);
 

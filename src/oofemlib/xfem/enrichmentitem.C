@@ -641,7 +641,10 @@ void EnrichmentItem :: updateLevelSets(XfemManager &ixFemMan)
         Node *node = ixFemMan.giveDomain()->giveNode(nodeNum);
 
         // Extract node coord
-        const FloatArray &pos( * node->giveCoordinates() );
+        //const FloatArray &pos( * node->giveCoordinates() );
+	///TODO JB->ES: my coords have size 3, I resize here since x3 = 0
+	FloatArray pos = * node->giveCoordinates();
+	pos.resizeWithValues(2);
 
         // Calc normal sign dist
         double phi = 0.0;
@@ -739,6 +742,8 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
                         FloatArray pos;
                         pos.add(0.5 * ( 1.0 - xi ), posI);
                         pos.add(0.5 * ( 1.0 + xi ), posJ);
+			//TODO JB->ES Again, I must resize the coordinates
+			pos.resizeWithValues(2);
                         mpEnrichmentDomain->computeTangentialSignDist(tangDist, pos, arcPos);
                         double gamma = tangDist;
 
@@ -896,8 +901,9 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
 
         for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
             IntArray bNodes;
-            element->giveInterpolation()->boundaryGiveNodes(bNodes, edgeIndex);
-
+            //TODO JB: boundary will give the surface nodes for my shell el and will be completely wrong: see FEI3dTrQuad :: computeLocalSurfaceMapping for temporary hack 
+	    element->giveInterpolation()->boundaryGiveNodes(bNodes, edgeIndex);
+	    //bNodes.printYourself("b nodes");
             int nsLoc = bNodes.at(1);
             int nsGlob = element->giveNode(nsLoc)->giveGlobalNumber();
             int neLoc = bNodes.at( 2 );
@@ -927,6 +933,8 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
                 FloatArray pos;
                 pos.add(0.5 * ( 1.0 - xi ), posI);
                 pos.add(0.5 * ( 1.0 + xi ), posJ);
+		//TODO JB->ES Again, I must resize the coordinates
+		pos.resizeWithValues(2);
                 mpEnrichmentDomain->computeTangentialSignDist(tangDist, pos, arcPos);
                 double gamma = tangDist;
 
@@ -990,8 +998,9 @@ void EnrichmentItem :: computeIntersectionPoints(std :: vector< FloatArray > &oI
                         FloatArray ps( * ( element->giveDofManager(nsLoc)->giveCoordinates() ) );
                         FloatArray pe( * ( element->giveDofManager(neLoc)->giveCoordinates() ) );
 
-                        int nDim = ps.giveSize();
-                        FloatArray p;
+                        //int nDim = ps.giveSize(); 
+                        int nDim = 2; //TODO JB->ES Again, I must resize the coordinates
+			FloatArray p;
                         p.resize(nDim);
 
                         for ( int i = 1; i <= nDim; i++ ) {

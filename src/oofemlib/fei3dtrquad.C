@@ -400,9 +400,9 @@ void
 FEI3dTrQuad :: computeLocalSurfaceMapping(IntArray &surfNodes, int isurf)
 {
     //surfNodes.setValues(6, 1, 2, 3, 4, 5, 6);
-    surfNodes = {1, 2, 3, 4, 5, 6};
+    //surfNodes = {1, 2, 3, 4, 5, 6};
     ///@todo - fix wrt xfem
-    //computeLocalEdgeMapping(surfNodes, isurf);
+    computeLocalEdgeMapping(surfNodes, isurf);
 
 }
 
