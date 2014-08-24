@@ -51,6 +51,8 @@
 ///@name Input fields for StaggeredSolver
 //@{
 #define _IFT_StaggeredSolver_Name "staggeredsolver"
+#define _IFT_StaggeredSolver_DofIdList "dofidlist"
+#define _IFT_StaggeredSolver_DofIdListPositions "idpos"
 //@}
 
 namespace oofem {
@@ -66,6 +68,9 @@ protected:
     int numPresEqs;
 
     int number; 
+    
+    
+    
 public:
     CustomEquationNumbering() : UnknownNumberingScheme(), prescribed(false), numEqs(0), numPresEqs(0) { dofIdArray.resize(0); }
 
@@ -114,7 +119,9 @@ private:
     
 
     void giveTotalLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s, Domain *d);
-    
+  bool checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, FloatArray &rhs, FloatArray &ddX, FloatArray &X,
+                          double RRT, const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange, TimeStep *tNow, IntArray &dofIdArray);
+
 public:
     //StaggeredSolver(Domain * d, EngngModel * m)  : NRSolver(d, m){};
     StaggeredSolver(Domain * d, EngngModel * m);

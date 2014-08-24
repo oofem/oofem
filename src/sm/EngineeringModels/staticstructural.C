@@ -67,6 +67,7 @@ StaticStructural :: StaticStructural(int i, EngngModel *_master) : StructuralEng
     nMethod(NULL)
 {
     ndomains = 1;
+    solverType = 0;
 
 #ifdef __PARALLEL_MODE
     commMode = ProblemCommMode__NODE_CUT;
@@ -90,8 +91,15 @@ NumericalMethod *StaticStructural :: giveNumericalMethod(MetaStep *mStep)
     if ( nMethod ) {
         return nMethod;
     }
-    nMethod = new NRSolver(this->giveDomain(1), this);
-    //nMethod = new StaggeredSolver(this->giveDomain(1), this);
+    
+    if ( solverType == 0 ) {
+        nMethod = new NRSolver(this->giveDomain(1), this);
+    } else if ( solverType == 1 ) {
+        nMethod = new StaggeredSolver(this->giveDomain(1), this);
+    } else {
+        OOFEM_ERROR("Unsupported solver (%d). Solvers currently supported are: 0 - NR (default) and 1 - staggered NR", solverType);
+    }
+    
     return nMethod;
 }
 
@@ -108,6 +116,10 @@ StaticStructural :: initializeFrom(InputRecord *ir)
     this->deltaT = 1.0;
     IR_GIVE_OPTIONAL_FIELD(ir, deltaT, _IFT_StaticStructural_deltat);
 
+    this->solverType = 0; // Default NR
+    IR_GIVE_OPTIONAL_FIELD(ir, solverType, _IFT_StaticStructural_solvertype);
+    
+    
 #ifdef __PARALLEL_MODE
     if ( isParallel() ) {
         delete communicator;

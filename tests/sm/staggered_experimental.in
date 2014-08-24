@@ -1,6 +1,7 @@
 exp.out
 development input file
-StaticStructural nsteps 1 lstype 0 smtype 0 rtolf 1.0e-4 rtold -1.0 manrmsteps 1 nmodules 0
+#StaticStructural nsteps 1 lstype 0 smtype 0 rtolf 1.0e-4 rtold -1.0 manrmsteps 1 nmodules 0 
+StaticStructural nsteps 1 lstype 0 smtype 0 rtolf 1.0e-4 rtold -1.0 manrmsteps 1 nmodules 0 solvertype 1 dofidlist 7  1 2 3 15 16 17 18  idpos 4 1 6 7 7
 #vtkxml tstep_all dofman_all element_all primvars 1 1 
 domain 3dDirShell 
 OutputManager tstep_all dofman_all element_all

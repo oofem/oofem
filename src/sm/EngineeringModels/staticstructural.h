@@ -43,7 +43,7 @@
 
 #define _IFT_StaticStructural_Name "staticstructural"
 #define _IFT_StaticStructural_deltat "deltat"
-
+#define _IFT_StaticStructural_solvertype "solvertype"
 namespace oofem {
 class SparseMtrx;
 
@@ -64,7 +64,8 @@ protected:
     SparseMtrxType sparseMtrxType;
 
     SparseNonLinearSystemNM *nMethod;
-
+    int solverType;
+    
     double deltaT;
     
 public:
