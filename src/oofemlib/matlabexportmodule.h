@@ -46,6 +46,7 @@
 #define _IFT_MatlabExportModule_data "data"
 #define _IFT_MatlabExportModule_area "area"
 #define _IFT_MatlabExportModule_specials "specials"
+#define _IFT_MatlabExportModule_homogenizeInternalVars "homogenizeivars"
 // Reaction forces
 #define _IFT_MatlabExportModule_ReactionForces "reactionforces"
 #define _IFT_MatlabExportModule_DofManList "dofmanlist"
@@ -88,6 +89,7 @@ protected:
     bool exportSpecials;
     bool exportReactionForces;
     bool exportIntegrationPointFields;
+    bool exportHomogenizeIST;
 
     int reactionForcesNodeSet;
     int IPFieldsElSet;
@@ -111,6 +113,7 @@ public:
     void doOutputSpecials(TimeStep *tStep, FILE *FID);
     void doOutputReactionForces(TimeStep *tStep, FILE *FID);
     void doOutputIntegrationPointFields(TimeStep *tStep, FILE *FID);
+    void doOutputHomogenizeDofIDs(TimeStep *tStep, FILE *FID);
 
     virtual const char *giveClassName() const { return "MatlabExportModule"; };
     virtual const char *giveInputRecordName() const { return _IFT_MatlabExportModule_Name; }
