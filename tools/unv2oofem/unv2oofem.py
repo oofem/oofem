@@ -178,7 +178,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                                                 #print bel.name, elem.id, elem.oofem_bLoads
                                                 
                                         if (bel.oofem_sets):
-                                            print "Set \"%s\" found for element %d " % (bel.name.rstrip('\n'), elem.id)
+                                            print "Set \"%s\" found for boundary of element %d " % (bel.name.rstrip('\n'), elem.id)
                                             setNum = bel.oofem_sets;
                                             # setID, element id, element side
                                             for thisSet in setNum:
