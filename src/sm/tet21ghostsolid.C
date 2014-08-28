@@ -33,7 +33,7 @@ tet21ghostsolid::tet21ghostsolid(int n, Domain *aDomain) : NLStructuralElement(n
 
     numberOfGaussPoints = 4;
     numberOfDofMans = 10;
-
+    computeItransform = true;
 
     double nu=.25, E=1;
     Dghost.resize(6,6);
@@ -62,6 +62,8 @@ tet21ghostsolid::tet21ghostsolid(int n, Domain *aDomain) : NLStructuralElement(n
         if ( i <= 3 ) { j++; }
     }
 
+
+
 }
 
 FEInterpolation *
@@ -86,7 +88,7 @@ tet21ghostsolid :: computeNumericStiffnessMatrix(FloatMatrix &answer, MatRespons
 {
 
     FloatArray a, aPert, intF, intFPert, DintF;
-    double eps=1e-8;
+    double eps=1e-6;
 
     answer.resize(64, 64);
     answer.zero();
@@ -280,8 +282,18 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
 
     }
 
-    answer.assemble(temparray, this->ghostdisplacement_ordering);
-    answer.assemble(vload, this->conservation_ordering);
+    if ( this->computeItransform ) {
+        giveRowTransformationMatrix(Itransform, tStep);
+    }
+
+    FloatArray temp;
+
+    temp.resize(64);
+    temp.zero();
+    temp.assemble(temparray, this->ghostdisplacement_ordering);
+    temp.assemble(vload, this->conservation_ordering);
+
+    answer.beProductOf(Itransform, temp);
 
 }
 
@@ -317,124 +329,133 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
     }
     a_inc.operator =(a-a_prev);
 
-        momentum.resize(30);
-        momentum.zero();
-        conservation.resize(4);
-        conservation.zero();
-        auxstress.resize(30);
-        auxstress.zero();
+    momentum.resize(30);
+    momentum.zero();
+    conservation.resize(4);
+    conservation.zero();
+    auxstress.resize(30);
+    auxstress.zero();
 
-        aVelocity.beSubArrayOf(a, momentum_ordering);
-        aPressure.beSubArrayOf(a, conservation_ordering);
-        aGhostDisplacement.beSubArrayOf(a, ghostdisplacement_ordering);
-        aIncGhostDisplacement.beSubArrayOf(a_inc, ghostdisplacement_ordering);
+    aVelocity.beSubArrayOf(a, momentum_ordering);
+    aPressure.beSubArrayOf(a, conservation_ordering);
+    aGhostDisplacement.beSubArrayOf(a, ghostdisplacement_ordering);
+    aIncGhostDisplacement.beSubArrayOf(a_inc, ghostdisplacement_ordering);
 
-        for (int j = 0; j<iRule->giveNumberOfIntegrationPoints(); j++) {
-            GaussPoint *gp = iRule->getIntegrationPoint(j);
+    for (int j = 0; j<iRule->giveNumberOfIntegrationPoints(); j++) {
+        GaussPoint *gp = iRule->getIntegrationPoint(j);
 
-            double detJ = fabs( ( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) ) );
-            double weight = gp->giveWeight();
+        double detJ = fabs( ( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) ) );
+        double weight = gp->giveWeight();
 
-            this->interpolation.evaldNdx( dNx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-            this->interpolation_lin.evalN( Nlin, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interpolation.evaldNdx( dNx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interpolation_lin.evalN( Nlin, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
-            dNv.resize(30);
-            for (int k = 0; k<dNx.giveNumberOfRows(); k++) {
-                dNv.at(k*3+1) = dNx.at(k+1,1);
-                dNv.at(k*3+2) = dNx.at(k+1,2);
-                dNv.at(k*3+3) = dNx.at(k+1,3);
-            }
-
-            if (nlGeometry == 0) {
-
-                this->computeBmatrixAt(gp, B);
-                FloatArray aTotal;
-                aTotal.operator = (aVelocity + aIncGhostDisplacement); // Assume deltaT=1 gives that the increment is the velocity
-
-                epsf.beProductOf(B, aTotal);
-                pressure = Nlin.dotProduct(aPressure);
-
-                // Momentum equation
-                gp->setMaterialMode(_3dFlow);
-                fluidMaterial->computeDeviatoricStressVector(fluidStress, epsvol, gp, epsf, pressure, tStep);
-                gp->setMaterialMode(_3dMat);
-
-                momentum.plusProduct(B, fluidStress, detJ*weight);
-                momentum.add(-pressure * detJ * weight, dNv);
-
-                // Conservation equation
-                divv.beTProductOf(dNv, aTotal);
-                divv.times(-detJ * weight);
-
-                conservation.add(divv.at(1), Nlin);
-
-                // Ghost solid part
-                Strain.beProductOf(B, aGhostDisplacement);
-                Stress.beProductOf(Dghost, Strain);
-                auxstress.plusProduct(B, Stress, detJ * weight);
-
-            } else {
-                FloatMatrix B, BH;
-
-                this->computeBHmatrixAt(gp, BH);
-                this->computeBmatrixAt(gp, B);
-
-                FloatArray aTotal;
-                aTotal.operator = (aVelocity + aIncGhostDisplacement); // Assume deltaT=1 gives that the increment is the velocity
-
-                epsf.beProductOf(B, aTotal);
-                pressure = Nlin.dotProduct(aPressure);
-
-                // Momentum equation -----
-
-                // Compute fluid cauchy stress
-                FloatArray fluidCauchy;
-                FloatMatrix fluidCauchyMatrix;
-
-                gp->setMaterialMode(_3dFlow);
-                fluidMaterial->computeDeviatoricStressVector(fluidCauchy, epsvol, gp, epsf, pressure, tStep);
-                //fluidCauchy.printYourself();
-                gp->setMaterialMode(_3dMat);
-
-                // Transform to 1st Piola-Kirshhoff
-                FloatArray Fa;
-                FloatMatrix F, Finv, FinvT, fluidStressMatrix;
-
-                computeDeformationGradientVector(Fa, gp, tStep, aGhostDisplacement);
-                F.beMatrixForm(Fa);
-                Finv.beInverseOf(F);
-                FinvT.beTranspositionOf(Finv);
-
-                fluidCauchyMatrix.beMatrixFormOfStress(fluidCauchy);
-                fluidStressMatrix.beProductOf(FinvT, fluidCauchyMatrix);
-                fluidStressMatrix.times( F.giveDeterminant() );
-                fluidStress.beVectorForm(fluidStressMatrix);
-                //fluidStress.printYourself();
-
-                // Add to equation
-
-                momentum.plusProduct(BH, fluidStress, detJ*weight);
-                momentum.add(-pressure * detJ * weight, dNv);
-
-                // Conservation equation -----
-                divv.beTProductOf(dNv, aTotal);
-                divv.times(-detJ * weight);
-
-                conservation.add(divv.at(1), Nlin);
-
-                // Ghost solid part -----
-                Strain.beProductOf(B, aGhostDisplacement);
-                Stress.beProductOf(Dghost, Strain);
-                auxstress.plusProduct(B, Stress, detJ * weight);
-            }
-
+        dNv.resize(30);
+        for (int k = 0; k<dNx.giveNumberOfRows(); k++) {
+            dNv.at(k*3+1) = dNx.at(k+1,1);
+            dNv.at(k*3+2) = dNx.at(k+1,2);
+            dNv.at(k*3+3) = dNx.at(k+1,3);
         }
-        answer.resize(64);
-        answer.zero();
 
-        answer.assemble(momentum, ghostdisplacement_ordering);
-        answer.assemble(conservation, conservation_ordering);
-        answer.assemble(auxstress, momentum_ordering);
+        if (nlGeometry == 0) {
+
+            this->computeBmatrixAt(gp, B);
+            FloatArray aTotal;
+            aTotal.operator = (aVelocity + aIncGhostDisplacement); // Assume deltaT=1 gives that the increment is the velocity
+
+            epsf.beProductOf(B, aTotal);
+            pressure = Nlin.dotProduct(aPressure);
+
+            // Momentum equation
+            gp->setMaterialMode(_3dFlow);
+            fluidMaterial->computeDeviatoricStressVector(fluidStress, epsvol, gp, epsf, pressure, tStep);
+            gp->setMaterialMode(_3dMat);
+
+            momentum.plusProduct(B, fluidStress, detJ*weight);
+            momentum.add(-pressure * detJ * weight, dNv);
+
+            // Conservation equation
+            divv.beTProductOf(dNv, aTotal);
+            divv.times(-detJ * weight);
+
+            conservation.add(divv.at(1), Nlin);
+
+            // Ghost solid part
+            Strain.beProductOf(B, aGhostDisplacement);
+            Stress.beProductOf(Dghost, Strain);
+            auxstress.plusProduct(B, Stress, detJ * weight);
+
+        } else {
+            FloatMatrix B, BH;
+
+            this->computeBHmatrixAt(gp, BH);
+            this->computeBmatrixAt(gp, B);
+
+            FloatArray aTotal;
+            aTotal.operator = (aVelocity + aIncGhostDisplacement); // Assume deltaT=1 gives that the increment is the velocity
+
+            epsf.beProductOf(B, aTotal);
+            pressure = Nlin.dotProduct(aPressure);
+
+            // Momentum equation -----
+
+            // Compute fluid cauchy stress
+            FloatArray fluidCauchy;
+            FloatMatrix fluidCauchyMatrix;
+
+            gp->setMaterialMode(_3dFlow);
+            fluidMaterial->computeDeviatoricStressVector(fluidCauchy, epsvol, gp, epsf, pressure, tStep);
+            //fluidCauchy.printYourself();
+            gp->setMaterialMode(_3dMat);
+
+            // Transform to 1st Piola-Kirshhoff
+            FloatArray Fa;
+            FloatMatrix F, Finv, FinvT, fluidStressMatrix;
+
+            computeDeformationGradientVector(Fa, gp, tStep, aGhostDisplacement);
+            F.beMatrixForm(Fa);
+            Finv.beInverseOf(F);
+            FinvT.beTranspositionOf(Finv);
+
+            fluidCauchyMatrix.beMatrixFormOfStress(fluidCauchy);
+            fluidStressMatrix.beProductOf(FinvT, fluidCauchyMatrix);
+            fluidStressMatrix.times( F.giveDeterminant() );
+            fluidStress.beVectorForm(fluidStressMatrix);
+            //fluidStress.printYourself();
+
+            // Add to equation
+
+            momentum.plusProduct(BH, fluidStress, detJ*weight);
+            momentum.add(-pressure * detJ * weight, dNv);
+
+            // Conservation equation -----
+            divv.beTProductOf(dNv, aTotal);
+            divv.times(-detJ * weight);
+
+            conservation.add(divv.at(1), Nlin);
+
+            // Ghost solid part -----
+            Strain.beProductOf(B, aGhostDisplacement);
+            Stress.beProductOf(Dghost, Strain);
+            auxstress.plusProduct(B, Stress, detJ * weight);
+        }
+
+    }
+
+    FloatArray temp;
+
+    temp.resize(64);
+    temp.zero();
+
+    temp.assemble(momentum, ghostdisplacement_ordering);
+    temp.assemble(conservation, conservation_ordering);
+    temp.assemble(auxstress, momentum_ordering);
+
+    if ( this->computeItransform ) {
+        giveRowTransformationMatrix(Itransform, tStep);
+    }
+
+    answer.beProductOf(Itransform, temp);
 
 }
 
@@ -550,6 +571,133 @@ tet21ghostsolid :: computeDeformationGradientVector(FloatArray &answer, GaussPoi
     } else {
         OOFEM_ERROR("MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
     }
+}
+
+double
+tet21ghostsolid :: computeVolumeAround(GaussPoint *gp)
+// Returns the portion of the receiver which is attached to gp.
+{
+    double determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
+    double weight      = gp->giveWeight();
+
+    return ( determinant * weight );
+}
+
+
+int
+tet21ghostsolid :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
+{
+
+    if ( type == IST_Velocity ) {
+        FloatArray N, a;
+        FloatMatrix Nmat;
+
+        this->computeVectorOf({V_u, V_v, V_w}, VM_Total, tStep, a );
+        this->interpolation.evalN( N, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+
+        Nmat.resize(3, N.giveSize()*3);
+        for (int i=1; i<= N.giveSize(); i ++ ) {
+            Nmat.at(1,3*i-2) = N.at(i);
+            Nmat.at(2,3*i-1) = N.at(i);
+            Nmat.at(3,3*i-0) = N.at(i);
+        }
+
+        answer.beProductOf(Nmat, a);
+        return 1;
+    } else if (type == IST_Pressure) {
+        FloatArray N, a;
+
+        this->computeVectorOf({P_f}, VM_Total, tStep, a);
+        this->interpolation_lin.evalN( N, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+
+        answer.resize(1);
+        answer.at(1) = N.dotProduct(a);
+        return 1;
+
+    } else {
+        MaterialMode matmode=gp->giveMaterialMode();
+        gp->setMaterialMode(_3dFlow);
+        int r = StructuralElement :: giveIPValue(answer, gp, type, tStep);
+        gp->setMaterialMode(matmode);
+        return r;
+    }
+
+
+}
+
+bool
+tet21ghostsolid :: giveRowTransformationMatrix(FloatMatrix &Itransform, TimeStep *tStep)
+{
+
+    // Create a transformation matrix that switch all rows/equations located in OmegaF but not on GammaInt, i.e where we do not have a no slip condition
+
+    Itransform.resize(64, 64);
+    Itransform.zero();
+
+    int m=1;
+
+    int row1, row2;
+    IntArray row1List, row2List;
+
+    for (int i=1; i<=this->giveNumberOfDofManagers(); i++) {
+
+        IntArray DofIDs;
+        int firstIndex = m;
+        this->giveDofManDofIDMask(i, DofIDs);
+        // DofIDs.printYourself();
+
+        for (int j=1; j<=DofIDs.giveSize(); j++) {
+
+            row1=m;
+            row2=m;
+
+            if (DofIDs.at(j) == V_u || DofIDs.at(j) == V_v || DofIDs.at(j) == V_w) {
+
+                bool doSwitch=!this->giveDofManager(i)->giveDofWithID(DofIDs.at(j))->hasBc(tStep);
+
+                if (doSwitch) {     // Boundary condition not set, make switch
+                    row1=m;
+
+                    for (int n=1; n<=DofIDs.giveSize(); n++) {
+
+                        if ( (DofIDs.at(j) == V_u && DofIDs.at(n) == D_u) ||
+                             (DofIDs.at(j) == V_v && DofIDs.at(n) == D_v) ||
+                             (DofIDs.at(j) == V_w && DofIDs.at(n) == D_w) ) {
+                            row2 = firstIndex + n - 1;
+                        }
+
+                    }
+                    row1List.resizeWithValues(row1List.giveSize() + 1);
+                    row1List.at(row1List.giveSize()) = row1;
+                    row2List.resizeWithValues(row2List.giveSize() + 1);
+                    row2List.at(row2List.giveSize()) = row2;
+
+                }
+
+            }
+            m++;
+        }
+
+    }
+
+    // Create identity matrix
+    for (int i=1; i<=64; i++) {
+        Itransform.at(i, i) = 1;
+    }
+
+    // Create tranformation matrix by switching rows
+    for (int i=1; i<=row1List.giveSize(); i++) {
+        Itransform.at(row1List.at(i), row1List.at(i)) = 0;
+        Itransform.at(row2List.at(i), row2List.at(i)) = 0;
+
+        Itransform.at(row1List.at(i), row2List.at(i)) = 1;
+        Itransform.at(row2List.at(i), row1List.at(i)) = 1;
+    }
+
+    computeItransform = false;
+
+    return 0;
+
 }
 
 }
