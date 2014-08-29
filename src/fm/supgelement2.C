@@ -295,9 +295,8 @@ SUPGElement2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep)
     answer.clear();
 
     int rule = 2;
-    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* consistent part + supg stabilization term */
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix( b, gp, tStep->givePreviousStep() );
         double dV = this->computeVolumeAround(gp);
@@ -320,9 +319,8 @@ SUPGElement2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
     this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     int rule = 2;
-    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* consistent part + supg stabilization term */
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix( bn, gp, tStep->givePreviousStep() );
         this->computeUDotGradUMatrix(b, gp, tStep);
@@ -345,9 +343,8 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
     answer.clear();
 
     int rule = 2;
-    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* consistent part + supg stabilization term */
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix( bn, gp, tStep->givePreviousStep() );
         this->computeUDotGradUMatrix(b, gp, tStep);
@@ -379,8 +376,7 @@ SUPGElement2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
     this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     int rule = 1;
-    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         double dV = this->computeVolumeAround(gp);
         this->computeBMatrix(b, gp);
         this->computeDivTauMatrix(dDB, gp, tStep);
@@ -406,8 +402,7 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
     answer.clear();
 
     int rule = 1;
-    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         double dV = this->computeVolumeAround(gp);
         this->computeBMatrix(_b, gp);
         static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveDeviatoricStiffnessMatrix(_d, mode, gp, tStep);
@@ -432,8 +427,7 @@ SUPGElement2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep)
     answer.clear();
 
     int rule = 1;
-    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         double dV = this->computeVolumeAround(gp);
         this->computeDivUMatrix(gu, gp);
         this->computeNpMatrix(np, gp);
@@ -446,8 +440,7 @@ SUPGElement2 :: computePressureTerm_MB(FloatMatrix &answer, TimeStep *tStep)
         answer.plusProductUnsym(gu, np, ( -1.0 ) * dV);
     }
 
-    iRule = this->integrationRulesArray [ 1 ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ 1 ] ) { ///@todo Is this right? It's the same integration rule as above, why not merge them?
         double dV = this->computeVolumeAround(gp);
         this->computeUDotGradUMatrix( b, gp, tStep->givePreviousStep() );
         this->computeGradPMatrix(np, gp);
@@ -464,8 +457,7 @@ SUPGElement2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *t
     answer.clear();
 
     int rule = 0;
-    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         double dV = this->computeVolumeAround(gp);
         double rho = this->giveMaterial()->give('d', gp);
         this->computeDivUMatrix(b, gp);
@@ -484,8 +476,7 @@ SUPGElement2 :: computeLinearAdvectionTerm_MC(FloatMatrix &answer, TimeStep *tSt
     answer.clear();
 
     int rule = 0;
-    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         double dV = this->computeVolumeAround(gp);
         this->computeDivUMatrix(gu, gp);
         this->computeNpMatrix(np, gp);
@@ -505,11 +496,10 @@ SUPGElement2 :: computeAdvectionTerm_MC(FloatArray &answer, TimeStep *tStep)
     answer.clear();
 
     int rule = 1;
-    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     this->computeVectorOfVelocities(VM_Total, tStep, u);
 
     /* pspg stabilization term */
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         this->computeGradPMatrix(g, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         v.beProductOf(b, u);
@@ -527,9 +517,8 @@ SUPGElement2 :: computeAdvectionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
     answer.clear();
 
     int rule = 1;
-    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     /* pspg stabilization term */
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         this->computeGradPMatrix(g, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV = this->computeVolumeAround(gp);
@@ -545,9 +534,7 @@ SUPGElement2 :: computeDiffusionDerivativeTerm_MC(FloatMatrix &answer, TimeStep 
     answer.clear();
 
     int rule = 1;
-    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
-
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         double dV = this->computeVolumeAround(gp);
         double rho = this->giveMaterial()->give('d', gp);
 
@@ -571,13 +558,12 @@ SUPGElement2 :: computeDiffusionTerm_MC(FloatArray &answer, TimeStep *tStep)
      * FloatMatrix dDB, _d, g;
      * double sum, dV, coeff, rho, isd, nsd = this->giveNumberOfSpatialDimensions();
      * GaussPoint *gp;
-     * IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
      * int i,k;
      * FloatArray u, dDB_u;
      *
      * this->computeVectorOfVelocities(VM_Total, tStep, u);
      *
-     * for ( GaussPoint *gp: *iRule ) {
+     * for ( GaussPoint *gp: *this->integrationRulesArray [ 1 ] ) {
      *  dV  = this->computeVolumeAround(gp);
      *  rho = this->giveMaterial()->give('d', gp);
      *
@@ -611,11 +597,8 @@ SUPGElement2 :: computeAccelerationTerm_MC(FloatMatrix &answer, TimeStep *tStep)
     answer.clear();
     // pspg stabilization term: M_\epsilon term
 
-
     int rule = 0;
-    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
-
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         this->computeGradPMatrix(g, gp);
         this->computeNuMatrix(n, gp);
         double dV = this->computeVolumeAround(gp);
@@ -631,9 +614,7 @@ SUPGElement2 :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
     answer.clear();
 
     int rule = 0;
-    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
-
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
         this->computeGradPMatrix(g, gp);
         double dV  = this->computeVolumeAround(gp);
         double rho = this->giveMaterial()->give('d', gp);
@@ -652,7 +633,6 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
     answer.clear();
 
     int rule = 0;
-    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
     FloatArray un, gVector, s, helpLoadVector;
     FloatMatrix b, nu;
 
@@ -664,7 +644,7 @@ SUPGElement2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
             load->computeComponentArrayAt(gVector, tStep, VM_Total);
             if ( gVector.giveSize() ) {
-                for ( GaussPoint *gp: *iRule ) {
+                for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
                     this->computeUDotGradUMatrix( b, gp, tStep->givePreviousStep() );
                     this->computeNuMatrix(nu, gp);
                     double dV  = this->computeVolumeAround(gp);
@@ -713,7 +693,6 @@ SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
     FloatMatrix g;
 
     int rule = 1;
-    IntegrationRule *iRule = this->integrationRulesArray [ rule ];
 
     answer.clear();
 
@@ -724,7 +703,7 @@ SUPGElement2 :: computeBCRhsTerm_MC(FloatArray &answer, TimeStep *tStep)
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
             load->computeComponentArrayAt(gVector, tStep, VM_Total);
             if ( gVector.giveSize() ) {
-                for ( GaussPoint *gp: *iRule ) {
+                for ( GaussPoint *gp: *this->integrationRulesArray [ rule ] ) {
                     this->computeGradPMatrix(g, gp);
                     double dV = this->computeVolumeAround(gp);
                     answer.plusProduct(g, gVector, t_pspg * dV);

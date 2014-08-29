@@ -411,8 +411,7 @@ Tet1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
     }
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ 0 ] ) {
         dV  = this->computeVolumeAround(gp);
         interpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         this->computeNuMatrix(n, gp);
@@ -430,8 +429,7 @@ Tet1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
 void
 Tet1_3D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
 {
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    GaussPoint *gp = iRule->getIntegrationPoint(0);
+    GaussPoint *gp = this->integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     interpolation.evaldNdx( answer, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
@@ -441,8 +439,7 @@ Tet1_3D_SUPG :: LS_PCS_computeVolume()
 {
     double answer = 0.0;
  
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ 0 ] ) {
         answer += this->computeVolumeAround(gp);
     }
 
