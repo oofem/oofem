@@ -38,7 +38,7 @@
 namespace oofem {
 REGISTER_BoundaryCondition(StructuralEigenstrainLoad);
 
-void StructuralEigenstrainLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
+void StructuralEigenstrainLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
 {
     this->computeComponentArrayAt(answer, tStep, mode);
 }

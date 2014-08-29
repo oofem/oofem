@@ -65,7 +65,7 @@ public:
     ConstantSurfaceLoad(int i, Domain * d) : BoundaryLoad(i, d) { }
 
     // Overloaded methods:
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
     virtual int giveApproxOrder() { return 0; }
 
     /**
@@ -81,7 +81,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_ConstantSurfaceLoad_Name; }
 
 private:
-    virtual void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.clear(); }
+    virtual void computeNArray(FloatArray &answer, const FloatArray &coords) const { answer.clear(); }
 };
 } // end namespace oofem
 #endif // constantsurfaceload_h
