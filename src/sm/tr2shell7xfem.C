@@ -214,7 +214,6 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
             int numberOfLayers     = this->layeredCS->giveNumberOfLayers();
             int numPointsThickness = this->layeredCS->giveNumIntegrationPointsInLayer();
 
-            //integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
             integrationRulesArray.resize(numberOfLayers);
             for ( int i = 0; i < numberOfLayers; i++ ) {
                 integrationRulesArray [ i ] = new PatchIntegrationRule(1, this, this->allTri);
@@ -230,13 +229,12 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
     // Cohesive zone
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
         //Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
-            int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
-            //czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
-            czIntegrationRulesArray.resize(numberOfInterfaces);
-            for ( int i = 0; i < numberOfInterfaces; i++ ) {
-                czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
-                czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
-            }
+        int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
+        czIntegrationRulesArray.resize(numberOfInterfaces);
+        for ( int i = 0; i < numberOfInterfaces; i++ ) {
+            czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
+            czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
+        }
     }
 
     return partitionSucceeded;
@@ -260,7 +258,6 @@ bool Tr2Shell7XFEM :: updateIntegrationRuleMultiCrack()
         std :: vector< std :: vector< FloatArray > >pointPartitions;
 
 
-        //integrationRulesArray = new IntegrationRule * [ numberOfLayers ];
         integrationRulesArray.resize(numberOfLayers);
         this->crackSubdivisions.resize(numberOfLayers);
         for ( int i = 0; i < numberOfLayers; i++ ) {
@@ -303,13 +300,12 @@ bool Tr2Shell7XFEM :: updateIntegrationRuleMultiCrack()
     // Cohesive zone
     for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
         //Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
-	int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
-	//czIntegrationRulesArray = new IntegrationRule * [ numberOfInterfaces ];
-	czIntegrationRulesArray.resize(numberOfInterfaces);
-	for ( int i = 0; i < numberOfInterfaces; i++ ) {
-	    czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
-	    czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
-	}
+        int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
+        czIntegrationRulesArray.resize(numberOfInterfaces);
+        for ( int i = 0; i < numberOfInterfaces; i++ ) {
+            czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
+            czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
+        }
     }
 
     return partitionSucceeded;

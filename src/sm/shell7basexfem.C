@@ -226,7 +226,7 @@ Shell7BaseXFEM :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 
 void
-Shell7BaseXFEM :: evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov, FloatArray &genEpsC, TimeStep *tStep)
+Shell7BaseXFEM :: evalCovarBaseVectorsAt(const FloatArray &lCoords, FloatMatrix &gcov, FloatArray &genEpsC, TimeStep *tStep)
 {
     // Continuous part g_c
     Shell7Base :: evalCovarBaseVectorsAt(lCoords, gcov, genEpsC, tStep);
@@ -248,7 +248,7 @@ Shell7BaseXFEM :: evalCovarBaseVectorsAt(FloatArray &lCoords, FloatMatrix &gcov,
 
 
 void
-Shell7BaseXFEM :: computeDiscGeneralizedStrainVector(FloatArray &answer, FloatArray &lCoords, EnrichmentItem *ei, TimeStep *tStep)
+Shell7BaseXFEM :: computeDiscGeneralizedStrainVector(FloatArray &answer, const FloatArray &lCoords, EnrichmentItem *ei, TimeStep *tStep)
 {
     FloatArray solVecD;
     IntArray eiDofIdArray;
@@ -411,10 +411,9 @@ Shell7BaseXFEM :: discComputeSectionalForces(FloatArray &answer, TimeStep *tStep
     f.zero();
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
-        for ( GaussPoint *gp: *iRuleL ) {
+        for ( GaussPoint *gp: *integrationRulesArray [ layer - 1 ] ) {
             lCoords = * gp->giveNaturalCoordinates();
 
             this->computeEnrichedBmatrixAt(lCoords, B, NULL);
@@ -543,9 +542,8 @@ Shell7BaseXFEM :: giveMaxCZDamages(FloatArray &answer, TimeStep *tStep)
     FloatArray ipValues;
     for ( int i = 0; i < numZones; i++ ) {
         if ( hasCohesiveZone(i+1) ) {
-            IntegrationRule *iRule = czIntegrationRulesArray [ i ];
             double max = 0.0;
-            for ( GaussPoint *gp: *iRule ) {
+            for ( GaussPoint *gp: *czIntegrationRulesArray [ i ] ) {
 
                 mat = static_cast < StructuralInterfaceMaterial * > (this->layeredCS->giveInterfaceMaterial(i+1) );
                 mat->giveIPValue(ipValues, gp, IST_DamageScalar, tStep);
@@ -580,7 +578,6 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
 
         FloatMatrix NEnr, BEnr, F;
         int delamNum = dei->giveNumber();
-        IntegrationRule *iRuleL = czIntegrationRulesArray [ delamNum - 1 ]; ///@todo does this work with giveNumber? Probably not, will have to save num delam.
 
         StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > 
             (this->layeredCS->giveInterfaceMaterial(delamNum) );
@@ -588,7 +585,7 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
         FloatMatrix lambda, lambdaN, Q;
         FloatArray Fp, T, nCov, xd, unknowns, genEpsC, genEpsD;
 
-    for ( GaussPoint *gp: *iRuleL ) {
+    for ( GaussPoint *gp: *czIntegrationRulesArray [ delamNum - 1 ] ) { ///@todo does this work with giveNumber? Probably not, will have to save num delam.
         lCoords.at(1) = gp->giveNaturalCoordinate(1);
         lCoords.at(2) = gp->giveNaturalCoordinate(2);
         lCoords.at(3) = dei->giveDelamXiCoord();
@@ -738,14 +735,12 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     this->computeOrderingArray(orderingC, activeDofsC, NULL);
 
     FloatMatrix A [ 3 ] [ 3 ];
-    FloatArray lCoords;
     
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
         StructuralMaterial *layerMaterial = static_cast< StructuralMaterial* >( domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) ) );
 
-        for ( GaussPoint *gp: *iRule ) {
-            lCoords = * gp->giveNaturalCoordinates();
+        for ( GaussPoint *gp: *integrationRulesArray [ layer - 1 ] ) {
+            const FloatArray &lCoords = * gp->giveNaturalCoordinates();
             this->computeEnrichedBmatrixAt(lCoords, Bc, NULL);
             
             Shell7Base :: computeLinearizedStiffness(gp, layerMaterial, tStep, A);
@@ -811,9 +806,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
 
         if ( ConstantPressureLoad * pLoad = dynamic_cast< ConstantPressureLoad * >(load) ) {
 
-            IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];
-
-            for ( GaussPoint *gp: *iRule ) {
+            for ( GaussPoint *gp: *specialIntegrationRulesArray [ 1 ] ) {
                 this->computePressureTangentMatrixDis(KCC, KCD, KDD, gp, load, iSurf, tStep);
                 KCD.times(DISC_DOF_SCALE_FAC);
                 KDD.times(DISC_DOF_SCALE_FAC*DISC_DOF_SCALE_FAC);
@@ -1063,10 +1056,9 @@ Shell7BaseXFEM :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
     M33.zero();
 
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( layeredCS->giveLayerMaterial(layer) );
 
-        for ( GaussPoint *gp: *iRule ) {
+        for ( GaussPoint *gp: *integrationRulesArray [ layer - 1 ] ) {
 
             FloatMatrix N11, N22, N33, N;
             //this->computeNmatricesAt(gp, N11, N22, N33);
@@ -1210,19 +1202,12 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
 void
 Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, BoundaryLoad *edgeLoad, TimeStep *tStep, ValueModeType mode, EnrichmentItem *ei)
 {
-    // 
-    IntegrationRule *iRule = specialIntegrationRulesArray [ 2 ];   // rule #3 for edge integration of distributed loads given in [*/m]
-    GaussPoint *gp;
-
     FloatMatrix N, Q;
-    FloatArray fT(7), components, lCoords;
+    FloatArray fT(7), Nf, components;
     Load :: CoordSystType coordSystType = edgeLoad->giveCoordSystMode();
 
-    FloatArray Nftemp(21), Nf(21);
-    Nf.zero();
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
-        FloatArray lCoords = *gp->giveNaturalCoordinates();
+    for ( auto &gp: *specialIntegrationRulesArray [ 2 ] ) {// rule #3 for edge integration of distributed loads given in [*/m]
+        const FloatArray &lCoords = *gp->giveNaturalCoordinates();
 
         edgeLoad->computeValueAt(components, tStep, lCoords, mode);
         this->edgeComputeEnrichedNmatrixAt(lCoords, N, ei);
@@ -1253,9 +1238,8 @@ Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, B
         }
 
         double dL = this->edgeComputeLengthAround(gp, iEdge);
-        
-        Nftemp.beTProductOf(N, fT*dL);
-        Nf.add(Nftemp);
+
+        Nf.plusProduct(N, fT, dL);
     }
 
     IntArray mask;
@@ -1267,7 +1251,7 @@ Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, B
 }
 
 void
-Shell7BaseXFEM :: edgeEvalEnrCovarBaseVectorsAt(FloatArray &lcoords, const int iedge, FloatMatrix &gcov, TimeStep *tStep, EnrichmentItem *ei)
+Shell7BaseXFEM :: edgeEvalEnrCovarBaseVectorsAt(const FloatArray &lcoords, const int iedge, FloatMatrix &gcov, TimeStep *tStep, EnrichmentItem *ei)
 {
     // Evaluates the covariant base vectors in the current configuration for an edge
     double zeta = lcoords.at(3);
@@ -1362,7 +1346,7 @@ Shell7BaseXFEM :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 
 // Shifted N and B matrices
 void
-Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &answer, EnrichmentItem *ei)
+Shell7BaseXFEM :: computeEnrichedBmatrixAt(const FloatArray &lcoords, FloatMatrix &answer, EnrichmentItem *ei)
 {
     // Returns the enriched and shifted {B} matrix of the receiver, evaluated at gp. Such that
     // B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
@@ -1525,7 +1509,7 @@ Shell7BaseXFEM :: computeEnrichedNmatrixAt(const FloatArray &lcoords, FloatMatri
 
 
 void
-Shell7BaseXFEM :: edgeComputeEnrichedNmatrixAt(FloatArray &lcoords, FloatMatrix &answer, EnrichmentItem *ei)
+Shell7BaseXFEM :: edgeComputeEnrichedNmatrixAt(const FloatArray &lcoords, FloatMatrix &answer, EnrichmentItem *ei)
 {
 // Returns the displacement interpolation matrix {N} of the receiver 
 // evaluated at gaussPoint along one edge.
@@ -1579,7 +1563,7 @@ Shell7BaseXFEM :: edgeComputeEnrichedNmatrixAt(FloatArray &lcoords, FloatMatrix 
 
 
 void
-Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &answer, EnrichmentItem *ei)
+Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(const FloatArray &lcoords, FloatMatrix &answer, EnrichmentItem *ei)
 {
 /* Returns the  matrix {B} of the receiver, evaluated at aGaussPoint. Such that
  * B*a = [dxbar_dxi, dwdxi, w, dgamdxi, gam]^T, where a is the vector of unknowns
@@ -1670,7 +1654,7 @@ Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix 
 
 
 void
-Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep)
+Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(const FloatArray &localCoords, int layer, FloatArray &globalCoords, TimeStep *tStep)
 {
     double zeta = this->giveGlobalZcoord( localCoords );
 
@@ -1707,7 +1691,7 @@ Shell7BaseXFEM :: vtkEvalUpdatedGlobalCoordinateAt(FloatArray &localCoords, int 
 
 
 void
-Shell7BaseXFEM :: giveDisUnknownsAt(FloatArray &lcoords, EnrichmentItem *ei, FloatArray &solVec, FloatArray &x, FloatArray &m, double gam, TimeStep *tStep)
+Shell7BaseXFEM :: giveDisUnknownsAt(const FloatArray &lcoords, EnrichmentItem *ei, FloatArray &solVec, FloatArray &x, FloatArray &m, double gam, TimeStep *tStep)
 {
     // returns the unknowns evaluated at a point (xi1, xi2, xi3)
     FloatArray vec;
