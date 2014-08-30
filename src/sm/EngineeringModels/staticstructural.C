@@ -96,6 +96,11 @@ NumericalMethod *StaticStructural :: giveNumericalMethod(MetaStep *mStep)
         nMethod = new NRSolver(this->giveDomain(1), this);
     } else if ( solverType == 1 ) {
         nMethod = new StaggeredSolver(this->giveDomain(1), this);
+        // Check if sparse matrix is SMT_Skyline
+        if ( this->sparseMtrxType != SMT_Skyline ) {
+            OOFEM_ERROR("Only Skyline sparse matrix type is currently supported (0) for the staggered solver");
+        }
+        
     } else {
         OOFEM_ERROR("Unsupported solver (%d). Solvers currently supported are: 0 - NR (default) and 1 - staggered NR", solverType);
     }
