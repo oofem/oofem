@@ -167,7 +167,6 @@ void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     //     double scale = 1.;
     //     FloatArray VecStrain, VecStress, SumStrain(6), SumStress(6);
     //     GaussPoint *gpL;
-    //     IntegrationRule *iRule;
     //     Domain *microDomain = problemMicro->giveDomain(1); //from engngm.h
     //     EngngModel *microEngngModel = microDomain->giveEngngModel();
     //     StructuralMaterialStatus *status = static_cast< StructuralMaterialStatus * >( this->giveStatus(gp) );
@@ -188,8 +187,7 @@ void MicroMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp, c
     //
     //     for ( int ielem = 1; ielem <= nelem; ielem++ ) { //return stress as average through all elements of the same MicroMaterial
     //         Element *elem = microDomain->giveElement(ielem);
-    //         iRule = elem->giveDefaultIntegrationRulePtr();
-    //         for ( GaussPoint *gpL: *iRule ) {
+    //         for ( GaussPoint *gpL: *elem->giveDefaultIntegrationRulePtr() ) {
     //             dV  = elem->computeVolumeAround(gpL);
     //             VolTot += dV;
     //             //OOFEM_LOG_INFO("Element %d GP %d Vol %f\n", elem->giveNumber(), gp->giveNumber(), dV);

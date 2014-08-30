@@ -61,7 +61,7 @@ void
 PhaseFieldElement :: computeLocationArrayOfDofIDs( const IntArray &dofIdArray, IntArray &answer )
 {
     // Routine to extract compute the location array an element given an dofid array.
-    answer.resize( 0 );
+    answer.clear();
     NLStructuralElement *el = this->giveElement();
     int k = 0;
     for(int i = 1; i <= el->giveNumberOfDofManagers(); i++) {
@@ -80,6 +80,7 @@ PhaseFieldElement :: computeLocationArrayOfDofIDs( const IntArray &dofIdArray, I
 void
 PhaseFieldElement :: computeVectorOfDofIDs( const IntArray &dofIdArray, ValueModeType valueMode, TimeStep *stepN, FloatArray &answer )
 {
+    ///@todo Remove these functions Jim, they work identically to the one in Element.
     // Routine to extract the solution vector for an element given an dofid array.
     // Size will be size of the dofId array times number of dofmanagers. If a certain dofId does not exist a zero is used as value. 
 
@@ -143,20 +144,18 @@ void
 PhaseFieldElement :: giveInternalForcesVector_u(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     // computes int_V ( B_u^t * BSgima_u ) * dV
-    FloatArray NStress, BStress, vGenStress, NS, BS;
+    FloatArray NStress, BStress, vGenStress, NS;
     FloatMatrix N, B;
     NLStructuralElement *el = this->giveElement( );
-    IntegrationRule *iRule = el->giveIntegrationRule(0);
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
-        double dV  = el->computeVolumeAround(gp);
+    answer.clear();
+    for ( auto &gp: el->giveIntegrationRule(0) ) {
+        double dV = el->computeVolumeAround(gp);
             
         // compute generalized stress measure
         el->computeBmatrixAt(gp, B);
         this->computeBStress_u(BStress, gp, tStep, useUpdatedGpRecord);
-        BS.beTProductOf(B, BStress);
-        answer.add(dV, BS);      
+        answer.plusProduct(B, BStress, dV);
     }
     
 }
@@ -165,16 +164,13 @@ void
 PhaseFieldElement :: giveInternalForcesVector_d(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     // Computes int_V ( N^t *Nstress_d  +  B^t * g_c*l*grad(d)  ) dV
-    FloatArray NStress, BStress, NS, BS, a_d, grad_d;
+    FloatArray NStress, BStress, NS, a_d, grad_d;
     FloatMatrix N, B;
     NLStructuralElement *el = this->giveElement( );
-    IntegrationRule *iRule = el->giveIntegrationRule(0);
     this->computeDamageUnknowns( a_d, VM_Total, tStep );
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
-    
-        double dV  = el->computeVolumeAround(gp);
+    for ( auto &gp: el->giveIntegrationRule(0) ) {
+        double dV = el->computeVolumeAround(gp);
             
         // compute generalized stress measures
         this->computeNd_matrixAt( *gp->giveCoordinates(), N);
@@ -187,8 +183,7 @@ PhaseFieldElement :: giveInternalForcesVector_d(FloatArray &answer, TimeStep *tS
         double l = this->giveInternalLength();
         double g_c = this->giveCriticalEnergy( );
         BStress = grad_d * l * g_c;
-        BS.beTProductOf(B, BStress);
-        answer.add(dV, BS);
+        answer.plusProduct(B, BStress, dV);
       
     }
     
@@ -295,6 +290,7 @@ PhaseFieldElement :: computeBd_matrixAt(GaussPoint *aGaussPoint, FloatMatrix &an
 int
 PhaseFieldElement :: computeNumberOfDofs()
 {
+    ///@todo This is NOT correct procedure. This function may absolutely not ask the dof managers _anything_.
     NLStructuralElement *el = this->giveElement( );
     int nDofs = 0;
     for( int i = 1; i <= el->giveNumberOfDofManagers(); i++)
@@ -340,13 +336,10 @@ PhaseFieldElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseM
     NLStructuralElement *el = this->giveElement( );
     StructuralCrossSection *cs = dynamic_cast<StructuralCrossSection* > (el->giveCrossSection() );
 
-    IntegrationRule *iRule = el->giveIntegrationRule(0);
     bool matStiffSymmFlag = cs->isCharacteristicMtrxSymmetric(rMode);
-    answer.resize(0,0);
+    answer.clear();
 
-    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(j);
-        
+    for ( auto gp: el->giveIntegrationRule(0) ) {
         double dV = el->computeVolumeAround(gp);
         // compute int_V ( B^t * D_B * B )dV
         el->computeBmatrixAt(gp, B );
@@ -362,7 +355,6 @@ PhaseFieldElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseM
         
     }
 
-
     if ( matStiffSymmFlag ) {
         answer.symmetrized();
     }
@@ -377,11 +369,9 @@ PhaseFieldElement :: computeStiffnessMatrix_ud(FloatMatrix &answer, MatResponseM
     NLStructuralElement *el = this->giveElement( );
     StructuralCrossSection *cs = dynamic_cast<StructuralCrossSection* > (el->giveCrossSection() );
 
-    IntegrationRule *iRule = el->giveIntegrationRule(0);
-    answer.resize(0,0);
+    answer.clear();
 
-    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(j);
+    for ( auto &gp: el->giveIntegrationRule(0) ) {
         StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
 
         double dV = el->computeVolumeAround(gp);
@@ -415,12 +405,9 @@ PhaseFieldElement :: computeStiffnessMatrix_dd(FloatMatrix &answer, MatResponseM
     FloatMatrix B_d, N_d;
     //StructuralCrossSection *cs = dynamic_cast<StructuralCrossSection* > (this->giveCrossSection() );
     NLStructuralElement *el = this->giveElement( );
-    IntegrationRule *iRule = el->giveIntegrationRule(0);
-    answer.resize(0,0);
+    answer.clear();
 
-    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(j);
-        
+    for ( auto &gp: el->giveIntegrationRule(0) ) {
         double dV = el->computeVolumeAround(gp);
         
         this->computeNd_matrixAt(*gp->giveCoordinates(), N_d);

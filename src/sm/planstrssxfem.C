@@ -214,15 +214,12 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tSt
     } else {
         if ( integrationRulesArray.size() > 1 ) {
             // TODO: Implement visualization
-            /*
-             *          PatchIntegrationRule *iRule;
-             *          for ( auto &iRule: integrationRulesArray ) {
-             *              iRule = dynamic_cast< PatchIntegrationRule * >( ir );
-             *              if ( iRule ) {
-             *                  iRule->givePatch()->draw(context);
-             *              }
-             *          }
-             */
+            for ( auto &iRule: integrationRulesArray ) {
+                PatchIntegrationRule *piRule = dynamic_cast< PatchIntegrationRule * >( ir );
+                if ( piRule ) {
+                    piRule->givePatch()->draw(context);
+                }
+            }
         } else {
             PlaneStress2d :: drawRawGeometry(gc);
         }

@@ -3057,18 +3057,15 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     if ( this->normType == HuertaErrorEstimator :: L2Norm ) {
         FloatMatrix Nmatrix;
         FloatArray elementVectorGp, patchVectorGp, coarseVectorGp;
-        IntegrationRule *iRule;
-        double dV;
 
         eNorm = uNorm = 0.0;
         for ( ielem = 1; ielem <= localElemId; ielem++ ) {
             element = refinedDomain->giveElement(ielem);
             interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
-            iRule = element->giveDefaultIntegrationRulePtr();
 
             elementNorm = patchNorm = mixedNorm = 0.0;
-            for ( GaussPoint *gp: *iRule ) {
-                dV = element->computeVolumeAround(gp);
+            for ( GaussPoint *gp: *element->giveDefaultIntegrationRulePtr() ) {
+                double dV = element->computeVolumeAround(gp);
 
                 interface->HuertaErrorEstimatorI_computeNmatrixAt(gp, Nmatrix);
 
@@ -3829,8 +3826,6 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
     if ( this->normType == HuertaErrorEstimator :: L2Norm ) {
         FloatMatrix Nmatrix;
         FloatArray errorVectorGp, coarseVectorGp, fineVectorGp;
-        IntegrationRule *iRule;
-        double dV;
         /*
          * exactENorm = dotProduct(errorSolution.givePointer(), errorSolution.givePointer(), size);
          * coarseUNorm = dotProduct(coarseSolution.givePointer(), coarseSolution.givePointer(), size);
@@ -3840,10 +3835,9 @@ HuertaErrorEstimator :: solveRefinedWholeProblem(IntArray &localNodeIdArray, Int
         for ( ielem = 1; ielem <= localElemId; ielem++ ) {
             element = refinedDomain->giveElement(ielem);
             interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
-            iRule = element->giveDefaultIntegrationRulePtr();
 
-            for ( GaussPoint *gp: *iRule ) {
-                dV = element->computeVolumeAround(gp);
+            for ( GaussPoint *gp: *element->giveDefaultIntegrationRulePtr() ) {
+                double dV = element->computeVolumeAround(gp);
 
                 interface->HuertaErrorEstimatorI_computeNmatrixAt(gp, Nmatrix);
 

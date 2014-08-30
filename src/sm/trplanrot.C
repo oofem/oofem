@@ -543,8 +543,7 @@ TrPlaneStrRot :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, i
     // zero answer will resize accordingly when adding first contribution
     answer.clear();
 
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
 
         // Engineering (small strain) stress
         if ( nlGeometry == 0 ) {

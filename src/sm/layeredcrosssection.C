@@ -1301,9 +1301,7 @@ LayeredCrossSection :: mapLayerGpCoordsToShellCoords(std :: vector< IntegrationR
     double totalThickness = this->computeIntegralThick();
     int number = 1;
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRule = layerIntegrationRulesArray [ layer - 1 ];
-
-        for ( GaussPoint *gp: *iRule ) {
+        for ( GaussPoint *gp: *layerIntegrationRulesArray [ layer - 1 ] ) {
 
             // Map local layer cs to local shell cs
             double zMid_i = this->giveLayerMidZ(layer); // global z-coord

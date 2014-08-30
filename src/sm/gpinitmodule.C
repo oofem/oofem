@@ -80,9 +80,8 @@ GPInitModule :: doInit()
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         Element *elem = d->giveElement(ielem);
         Material *mat = elem->giveMaterial();
-        IntegrationRule *iRule = elem->giveDefaultIntegrationRulePtr();
         // loop over Gauss points
-        for ( GaussPoint *gp: *iRule ) {
+        for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
             MaterialStatus *status = static_cast< MaterialStatus * >( gp->giveMaterialStatus() );
             if ( fscanf(initStream, "%d %d", & ie, & ig) != 2 ) {
                 OOFEM_ERROR("initStream reading error");

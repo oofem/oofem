@@ -80,8 +80,6 @@ tet21ghostsolid :: computeGaussPoints()
 void
 tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 #ifdef __FM_MODULE
     FluidDynamicMaterial *fluidMaterial = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
 #endif
@@ -89,9 +87,7 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
     FloatMatrix Kf, G, Kx, D, B, Ed, EdB, dNx;
     FloatArray Nlin, dNv;
 
-    for (int j = 0; j<iRule->giveNumberOfIntegrationPoints(); j++) {
-        GaussPoint *gp = iRule->getIntegrationPoint(j);
-
+    for ( auto &gp: *this->giveDefaultIntegrationRulePtr() ) {
         double detJ = fabs( ( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) ) );
         double weight = gp->giveWeight();
 
@@ -191,7 +187,6 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
 #ifdef __FM_MODULE
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
 #endif
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatArray N, gVector, temparray(30), dNv, u, inc, u_prev, vload;
     FloatMatrix dNx, G;
 
@@ -203,8 +198,7 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
 
     this->giveDisplacementsIncrementData(u_prev, u, inc, tStep);
 
-    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(k);
+    for ( auto &gp: *this->integrationRulesArray [ 0 ] ) {
         FloatArray *lcoords = gp->giveNaturalCoordinates();
 
         double detJ = fabs( this->interpolation.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) ) );
@@ -263,8 +257,6 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
 void
 tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 #ifdef __FM_MODULE
     FluidDynamicMaterial *fluidMaterial = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
 #endif
@@ -283,9 +275,7 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
     aPressure.beSubArrayOf(a, conservation_ordering);
     aGhostDisplacement.beSubArrayOf(a, ghostdisplacement_ordering);
 
-    for (int j = 0; j<iRule->giveNumberOfIntegrationPoints(); j++) {
-        GaussPoint *gp = iRule->getIntegrationPoint(j);
-
+    for ( auto *gp: *this->giveDefaultIntegrationRulePtr() ) {
         double detJ = fabs( ( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) ) );
         double weight = gp->giveWeight();
 

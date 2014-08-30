@@ -55,7 +55,6 @@ namespace oofem {
 REGISTER_Element(Lattice2d);
 
 Lattice2d :: Lattice2d(int n, Domain *aDomain) : LatticeStructuralElement(n, aDomain)
-    // Constructor.
 {
     numberOfDofMans = 2;
 
@@ -71,12 +70,8 @@ Lattice2d :: ~Lattice2d()
 int
 Lattice2d :: giveCrackFlag()
 {
-    LatticeMaterialStatus *status;
-
-    GaussPoint *gp;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    gp = iRule->getIntegrationPoint(0);
-    status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
+    GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
+    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
     int crackFlag = 0;
     crackFlag = status->giveCrackFlag();
 
@@ -87,12 +82,8 @@ Lattice2d :: giveCrackFlag()
 double
 Lattice2d :: giveCrackWidth()
 {
-    LatticeMaterialStatus *status;
-
-    GaussPoint *gp;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    gp = iRule->getIntegrationPoint(0);
-    status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
+    GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
+    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
     double crackWidth = 0;
     crackWidth = status->giveCrackWidth();
 
@@ -119,12 +110,8 @@ Lattice2d :: giveOldCrackWidth()
 double
 Lattice2d :: giveDissipation()
 {
-    LatticeMaterialStatus *status;
-
-    GaussPoint *gp;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    gp = iRule->getIntegrationPoint(0);
-    status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
+    GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
+    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
     double dissipation = 0;
     dissipation = status->giveDissipation();
 
@@ -135,12 +122,8 @@ Lattice2d :: giveDissipation()
 double
 Lattice2d :: giveDeltaDissipation()
 {
-    LatticeMaterialStatus *status;
-
-    GaussPoint *gp;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    gp = iRule->getIntegrationPoint(0);
-    status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
+    GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
+    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
     double deltaDissipation = 0;
     deltaDissipation = status->giveDeltaDissipation();
 
@@ -306,12 +289,8 @@ double Lattice2d :: givePitch()
 double
 Lattice2d :: giveNormalStress()
 {
-    LatticeMaterialStatus *status;
-
-    GaussPoint *gp;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    gp = iRule->getIntegrationPoint(0);
-    status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
+    GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
+    LatticeMaterialStatus *status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
     double normalStress = 0;
     normalStress = status->giveNormalStress();
 

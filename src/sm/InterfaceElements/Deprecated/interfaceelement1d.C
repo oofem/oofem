@@ -385,7 +385,6 @@ void InterfaceElem1d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *
 void InterfaceElem1d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int indx, result = 0;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     FloatArray gcoord(3), v1;
     WCRec p [ 1 ];
     GraphicObj *go;
@@ -409,10 +408,11 @@ void InterfaceElem1d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         p [ 0 ].z = ( FPNum ) ( this->giveNode(1)->giveCoordinate(3) );
     }
 
-    result += giveIPValue(v1, iRule->getIntegrationPoint(0), gc.giveIntVarType(), tStep);
+    ///@todo This code was here, but it can't possible do anything useful:
+    //result += giveIPValue(v1, iRule->getIntegrationPoint(0), gc.giveIntVarType(), tStep);
 
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
         result = 0;
         result += giveIPValue(v1, gp, gc.giveIntVarType(), tStep);
         if ( result != 1 ) {

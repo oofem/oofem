@@ -117,8 +117,7 @@ Quad1MindlinShell3D :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad
     gravity.beProductOf(this->lcsMatrix, glob_gravity); ///@todo Check potential transpose here.
 
     if ( gravity.giveSize() ) {
-        IntegrationRule *ir = integrationRulesArray [ 0 ];
-        for ( GaussPoint *gp: *ir ) {
+        for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
 
             this->interp.evalN( n, * gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
             dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
@@ -160,16 +159,13 @@ Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load
     BoundaryLoad *surfLoad = static_cast< BoundaryLoad * >(load);
     if ( dynamic_cast< ConstantPressureLoad * >(surfLoad) ) { // Just checking the type of b.c.
         // EXPERIMENTAL CODE:
-        IntegrationRule *iRule;
         FloatArray n, gcoords, pressure;
 
         answer.resize(24);
         answer.zero();
 
         //int approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder();
-
-        iRule = this->integrationRulesArray [ 0 ];
-        for ( GaussPoint *gp: *iRule ) {
+        for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
             double dV = this->computeVolumeAround(gp);
             this->interp.evalN( n, * gp->giveNaturalCoordinates(), FEIVoidCellGeometry() );
             this->interp.local2global( gcoords, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
@@ -285,8 +281,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     FloatArray shellForces, drillMoment;
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
 
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         this->computeBmatrixAt(gp, b);
         double dV = this->computeVolumeAround(gp);
         double drillCoeff = cs->give(CS_DrillingStiffness, gp);
@@ -332,8 +327,7 @@ Quad1MindlinShell3D :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMo
 
     FloatMatrix shellStiffness, drillStiffness;
 
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         this->computeBmatrixAt(gp, b);
         double dV = this->computeVolumeAround(gp);
         double drillCoeff = this->giveStructuralCrossSection()->give(CS_DrillingStiffness, gp);
@@ -417,8 +411,7 @@ Quad1MindlinShell3D :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tS
 {
     double mass = 0.;
 
-    IntegrationRule *ir = integrationRulesArray [ 0 ];
-    for ( GaussPoint *gp: *ir ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         mass += this->computeVolumeAround(gp) * this->giveStructuralCrossSection()->give('d', gp);
     }
 
@@ -435,12 +428,9 @@ Quad1MindlinShell3D :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tS
 int
 Quad1MindlinShell3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep)
 {
-    //@todo transformation to global c.s. needed
-
-    FloatArray help;
     answer.resize(9);
     if ( ( type == IST_ShellForceTensor ) || ( type == IST_ShellMomentumTensor ) ) {
-        help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
+        const FloatArray &help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStressVector();
         if ( type == IST_ShellForceTensor ) {
             answer.at(1) = help.at(1); // nx
             answer.at(2) = help.at(3); // vxy
@@ -464,7 +454,7 @@ Quad1MindlinShell3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
         }
         return 1;
     } else if ( ( type == IST_ShellStrainTensor )  || ( type == IST_ShellCurvatureTensor ) ) {
-        help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
+        const FloatArray &help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
         if ( type == IST_ShellForceTensor ) {
             answer.at(1) = help.at(1); // nx
             answer.at(2) = help.at(3); // vxy
