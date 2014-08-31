@@ -46,7 +46,6 @@
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
-
  #include <Emarkwd3d.h>
 #endif
 

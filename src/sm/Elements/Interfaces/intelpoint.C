@@ -43,7 +43,11 @@
 #include "mathfem.h"
 #include "classfactory.h"
 
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
 
+ #include <Emarkwd3d.h>
+#endif
 
 namespace oofem {
 REGISTER_Element(IntElPoint);
@@ -312,5 +316,112 @@ IntElPoint :: computeLocalSlipDir(FloatArray &normal)
 
     normal.normalize();
 }
+
+
+
+#ifdef __OOFEG
+void InterfaceElem1d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+{
+    GraphicObj *go;
+    //  if (!go) { // create new one
+    WCRec p [ 1 ]; /* poin */
+    if ( !gc.testElementGraphicActivity(this) ) {
+        return;
+    }
+
+    EASValsSetColor( gc.getElementColor() );
+    EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
+    EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
+    EASValsSetColor( gc.getDeformedElementColor() );
+    p [ 0 ].x = ( FPNum ) ( this->giveNode(1)->giveCoordinate(1) );
+    p [ 0 ].y = ( FPNum ) ( this->giveNode(1)->giveCoordinate(2) );
+    p [ 0 ].z = ( FPNum ) ( this->giveNode(1)->giveCoordinate(3) );
+
+    EASValsSetMType(CIRCLE_MARKER);
+    go = CreateMarker3D(p);
+    EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
+    EMAddGraphicsToModel(ESIModel(), go);
+}
+
+
+void InterfaceElem1d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+{
+    GraphicObj *go;
+    //  if (!go) { // create new one
+    WCRec p [ 1 ]; /* poin */
+    if ( !gc.testElementGraphicActivity(this) ) {
+        return;
+    }
+
+    double defScale = gc.getDefScale();
+
+    EASValsSetLineWidth(OOFEG_DEFORMED_GEOMETRY_WIDTH);
+    EASValsSetColor( gc.getDeformedElementColor() );
+    EASValsSetLayer(OOFEG_DEFORMED_GEOMETRY_LAYER);
+    p [ 0 ].x = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale) +
+                                 this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) );
+    p [ 0 ].y = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale) +
+                                 this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) );
+    p [ 0 ].z = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(3, tStep, defScale) +
+                                 this->giveNode(2)->giveUpdatedCoordinate(3, tStep, defScale) );
+
+    EASValsSetMType(CIRCLE_MARKER);
+    go = CreateMarker3D(p);
+    EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
+    EMAddGraphicsToModel(ESIModel(), go);
+}
+
+
+void InterfaceElem1d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
+{
+    int indx, result = 0;
+    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    FloatArray gcoord(3), v1;
+    WCRec p [ 1 ];
+    GraphicObj *go;
+    double val [ 1 ];
+
+    if ( !gc.testElementGraphicActivity(this) ) {
+        return;
+    }
+
+    if ( gc.getInternalVarsDefGeoFlag() ) {
+        double defScale = gc.getDefScale();
+        p [ 0 ].x = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(1, tStep, defScale) +
+                                     this->giveNode(2)->giveUpdatedCoordinate(1, tStep, defScale) );
+        p [ 0 ].y = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(2, tStep, defScale) +
+                                     this->giveNode(2)->giveUpdatedCoordinate(2, tStep, defScale) );
+        p [ 0 ].z = ( FPNum ) 0.5 * ( this->giveNode(1)->giveUpdatedCoordinate(3, tStep,  defScale) +
+                                     this->giveNode(2)->giveUpdatedCoordinate(3, tStep, defScale) );
+    } else {
+        p [ 0 ].x = ( FPNum ) ( this->giveNode(1)->giveCoordinate(1) );
+        p [ 0 ].y = ( FPNum ) ( this->giveNode(1)->giveCoordinate(2) );
+        p [ 0 ].z = ( FPNum ) ( this->giveNode(1)->giveCoordinate(3) );
+    }
+
+    result += giveIPValue(v1, iRule->getIntegrationPoint(0), gc.giveIntVarType(), tStep);
+
+
+    for ( GaussPoint *gp: *iRule ) {
+        result = 0;
+        result += giveIPValue(v1, gp, gc.giveIntVarType(), tStep);
+        if ( result != 1 ) {
+            continue;
+        }
+
+        indx = gc.giveIntVarIndx();
+
+        val [ 0 ] = v1.at(indx);
+        gc.updateFringeTableMinMax(val, 1);
+
+        EASValsSetLayer(OOFEG_VARPLOT_PATTERN_LAYER);
+        EASValsSetMType(FILLED_CIRCLE_MARKER);
+        go = CreateMarkerWD3D(p, val [ 0 ]);
+        EGWithMaskChangeAttributes(LAYER_MASK | FILL_MASK | MTYPE_MASK, go);
+        EMAddGraphicsToModel(ESIModel(), go);
+        //}
+    }
+}
+#endif
 
 } // end namespace oofem

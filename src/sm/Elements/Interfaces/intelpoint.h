@@ -107,6 +107,12 @@ public:
         
     }
 
+#ifdef __OOFEG
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+#endif    
+    
 protected:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
