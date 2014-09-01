@@ -95,9 +95,8 @@ Lattice2d :: giveOldCrackWidth()
 {
     LatticeMaterialStatus *status;
 
-    GaussPoint *gp;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    gp = iRule->getIntegrationPoint(0);
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
+    GaussPoint *gp = iRule->getIntegrationPoint(0);
     status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
     double crackWidth = 0;
     crackWidth = status->giveOldCrackWidth();
@@ -203,7 +202,7 @@ void Lattice2d :: computeGaussPoints()
     // the gauss point is used only when methods from crosssection and/or material
     // classes are requested
     integrationRulesArray.resize(1);
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+    integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
     integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _2dLattice);
 }
 
@@ -303,9 +302,8 @@ Lattice2d :: giveOldNormalStress()
 {
     LatticeMaterialStatus *status;
 
-    GaussPoint *gp;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    gp = iRule->getIntegrationPoint(0);
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
+    GaussPoint *gp = iRule->getIntegrationPoint(0);
     status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
     double normalStress = 0;
     normalStress = status->giveOldNormalStress();
@@ -318,9 +316,8 @@ Lattice2d :: hasBeenUpdated()
 {
     LatticeMaterialStatus *status;
 
-    GaussPoint *gp;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    gp = iRule->getIntegrationPoint(0);
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
+    GaussPoint *gp = iRule->getIntegrationPoint(0);
     status = static_cast< LatticeMaterialStatus * >( gp->giveMaterialStatus() );
     int updateFlag = 0;
     updateFlag = status->hasBeenUpdated();

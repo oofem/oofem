@@ -126,7 +126,7 @@ Tr2Shell7XFEM :: computeGaussPoints()
                 int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
                 czIntegrationRulesArray.resize( numberOfInterfaces );
                 for ( int i = 0; i < numberOfInterfaces; i++ ) {
-                    czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
+                    czIntegrationRulesArray [ i ].reset( new GaussIntegrationRule(1, this) );
                     czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
                 }
             //}
@@ -140,15 +140,15 @@ Tr2Shell7XFEM :: computeGaussPoints()
         specialIntegrationRulesArray.resize(3);
 
         // Midplane (Mass matrix integrated analytically through the thickness)
-        specialIntegrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
+        specialIntegrationRulesArray [ 1 ].reset( new GaussIntegrationRule(1, this) );
         specialIntegrationRulesArray [ 1 ]->SetUpPointsOnTriangle(nPointsTri, _3dMat); 
 
         // Edge
-        specialIntegrationRulesArray [ 2 ] = new GaussIntegrationRule(1, this);
+        specialIntegrationRulesArray [ 2 ].reset( new GaussIntegrationRule(1, this) );
         specialIntegrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
         
         // Thickness integration for stress recovery
-        specialIntegrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
+        specialIntegrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this) );
         specialIntegrationRulesArray [ 0 ]->SetUpPointsOnLine(this->layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
 
     }
@@ -216,7 +216,7 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
 
             integrationRulesArray.resize(numberOfLayers);
             for ( int i = 0; i < numberOfLayers; i++ ) {
-                integrationRulesArray [ i ] = new PatchIntegrationRule(1, this, this->allTri);
+                integrationRulesArray [ i ].reset( new PatchIntegrationRule(1, this, this->allTri) );
                 integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, numPointsThickness, _3dMat);             
             }
             this->layeredCS->mapLayerGpCoordsToShellCoords(integrationRulesArray);
@@ -232,7 +232,7 @@ bool Tr2Shell7XFEM :: updateIntegrationRule()
         int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
         czIntegrationRulesArray.resize(numberOfInterfaces);
         for ( int i = 0; i < numberOfInterfaces; i++ ) {
-            czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
+            czIntegrationRulesArray [ i ].reset( new GaussIntegrationRule(1, this) );
             czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
         }
     }
@@ -287,7 +287,7 @@ bool Tr2Shell7XFEM :: updateIntegrationRuleMultiCrack()
                             partitionSucceeded = true;
                         }
 
-                        integrationRulesArray [ i ] = new PatchIntegrationRule(1, this, this->crackSubdivisions [ i ]);
+                        integrationRulesArray [ i ].reset( new PatchIntegrationRule(1, this, this->crackSubdivisions [ i ]) );
                         integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, numPointsThickness, _3dMat);             
                     }
                 }
@@ -303,7 +303,7 @@ bool Tr2Shell7XFEM :: updateIntegrationRuleMultiCrack()
         int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
         czIntegrationRulesArray.resize(numberOfInterfaces);
         for ( int i = 0; i < numberOfInterfaces; i++ ) {
-            czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
+            czIntegrationRulesArray [ i ].reset( new GaussIntegrationRule(1, this) );
             czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
         }
     }

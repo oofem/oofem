@@ -67,10 +67,10 @@ TrPlaneStrRot :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(2);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 4, 4);
+        integrationRulesArray [ 1 ].reset( new GaussIntegrationRule(2, this, 4, 4) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], numberOfRotGaussPoints, this);
     }
 }

@@ -61,9 +61,6 @@ Shell7BaseXFEM :: Shell7BaseXFEM(int n, Domain *aDomain) : Shell7Base(n, aDomain
 
 Shell7BaseXFEM :: ~Shell7BaseXFEM()
 {
-    for ( auto &iRule: czIntegrationRulesArray ) {
-        delete iRule;
-    }
 }
 
 int 
@@ -681,7 +678,7 @@ Shell7BaseXFEM :: computeCohesiveTangentAt(FloatMatrix &answer, TimeStep *tStep,
     int nDofs = Shell7Base :: giveNumberOfDofs();
 
     int delamNum = dei->giveNumber();
-    IntegrationRule *iRuleL = czIntegrationRulesArray [ dei->giveNumber() - 1 ];
+    std :: unique_ptr< IntegrationRule > &iRuleL = czIntegrationRulesArray [ dei->giveNumber() - 1 ];
     StructuralInterfaceMaterial *intMat = static_cast < StructuralInterfaceMaterial * > 
         (this->layeredCS->giveInterfaceMaterial(delamNum) );
 
@@ -1874,8 +1871,8 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
         for ( int layer = 1; layer <= numLayers; layer++ ) {
             numSubCells = (int)this->crackSubdivisions[layer - 1].size();
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
-                IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
-                VTKXMLExportModule :: computeIPAverage(average, iRuleL, this, type, tStep);
+                std :: unique_ptr< IntegrationRule > &iRuleL = integrationRulesArray [ layer - 1 ];
+                VTKXMLExportModule :: computeIPAverage(average, iRuleL.get(), this, type, tStep);
                 if ( valueType == ISVT_TENSOR_S3 ) {
                     vtkPiece.setCellVar(i, currentCell, convV6ToV9Stress(average) );
                 } else {
@@ -2345,8 +2342,8 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
                 if ( type == IST_CrossSectionNumber ) {
                     average = FloatArray{ -double(layer) }; // Set a negative number for interfaces
                 } else {
-                    IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
-                    VTKXMLExportModule::computeIPAverage(average, iRuleL, this, type, tStep);
+                    std :: unique_ptr< IntegrationRule > &iRuleL = integrationRulesArray [ layer - 1 ];
+                    VTKXMLExportModule::computeIPAverage(average, iRuleL.get(), this, type, tStep);
                 }
                 if ( valueType == ISVT_TENSOR_S3 ) {
                     vtkPiece.setCellVar(i, currentCell, convV6ToV9Stress(average) );
@@ -2440,7 +2437,7 @@ Shell7BaseXFEM :: recoverValuesFromCZIP(std::vector<FloatArray> &recoveredValues
     int numNodes = localNodeCoords.giveNumberOfColumns();
     recoveredValues.resize(numNodes);
     
-    IntegrationRule *iRule = this->czIntegrationRulesArray [ interfce - 1 ];
+    std :: unique_ptr< IntegrationRule > &iRule = this->czIntegrationRulesArray [ interfce - 1 ];
 
     // Find closest ip to the nodes
     IntArray closestIPArray(numNodes);

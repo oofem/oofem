@@ -96,12 +96,12 @@ Tr2Shell7 :: computeGaussPoints()
         // Midplane and thickness
 
         // Midplane (Mass matrix integrated analytically through the thickness)
-        specialIntegrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
+        specialIntegrationRulesArray [ 1 ].reset( new GaussIntegrationRule(1, this) );
         specialIntegrationRulesArray [ 1 ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
 
 
         // Edge
-        specialIntegrationRulesArray [ 2 ] = new GaussIntegrationRule(1, this);
+        specialIntegrationRulesArray [ 2 ].reset( new GaussIntegrationRule(1, this) );
         specialIntegrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
 
 
@@ -116,7 +116,7 @@ Tr2Shell7 :: computeGaussPoints()
 
 
         // Thickness integration for stress recovery
-        specialIntegrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
+        specialIntegrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this) );
         specialIntegrationRulesArray [ 0 ]->SetUpPointsOnLine(layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
     }
 }

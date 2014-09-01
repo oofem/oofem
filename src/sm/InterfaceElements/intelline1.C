@@ -83,8 +83,8 @@ IntElLine1 :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        //integrationRulesArray[0] = new LobattoIntegrationRule (1,domain, 1, 2);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        //integrationRulesArray[0].reset( new LobattoIntegrationRule (1,domain, 1, 2) );
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
         integrationRulesArray [ 0 ]->SetUpPointsOnLine(4, _2dInterface); ///@todo - should be a parameter with num of ip
     }
 }

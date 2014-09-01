@@ -1342,10 +1342,8 @@ Shell7Base :: NodalRecoveryMI_computeNNMatrix(FloatArray &answer, int layer, Int
     //
     FloatMatrix fullAnswer;
     FloatArray n;
-    IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
 
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(i);
+    for ( auto &gp: *integrationRulesArray [ layer - 1 ] ) {
         double dV = this->computeVolumeAroundLayer(gp, layer);
         this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
         fullAnswer.plusDyadSymmUpper(n, dV);
@@ -1896,8 +1894,8 @@ Shell7Base :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExp
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);;
       
         for ( int layer = 1; layer <= numCells; layer++ ) {     
-            IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
-            VTKXMLExportModule::computeIPAverage(average, iRuleL, this, type, tStep);
+            std :: unique_ptr< IntegrationRule > &iRuleL = integrationRulesArray [ layer - 1 ];
+            VTKXMLExportModule::computeIPAverage(average, iRuleL.get(), this, type, tStep);
             
             if ( average.giveSize() == 6 ) {
                 vtkPiece.setCellVar(i, layer, convV6ToV9Stress(average) );
@@ -1936,7 +1934,7 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
     for ( int i = 1; i <= numNodes; i++ ) {
         nodeCoords.beColumnOf(localNodeCoords, i);
         double distOld = 3.0; // should not be larger
-        IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
+        std :: unique_ptr< IntegrationRule > &iRule = integrationRulesArray [ layer - 1 ];
         for ( int j = 1; j <= iRule->giveNumberOfIntegrationPoints(); ++j ) {
             IntegrationPoint *ip = iRule->getIntegrationPoint(j);
             const FloatArray &ipCoords = *ip->giveNaturalCoordinates();
@@ -1974,14 +1972,14 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
     // Recover shear stresses at ip by numerical integration of the momentum balance through the thickness
     std::vector<FloatArray> recoveredValues;
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of types
-    IntegrationRule *iRuleThickness = specialIntegrationRulesArray[ 0 ];
+    std :: unique_ptr< IntegrationRule > &iRuleThickness = specialIntegrationRulesArray[ 0 ];
     FloatArray dS, Sold;
     FloatMatrix B, Smat(2,6); // 2 stress components * num of in plane ip ///@todo generalize
     Smat.zero();
     FloatArray Tcon(6), Trec(6);  Tcon.zero(); Trec.zero();
     
      for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
-        IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
+        std :: unique_ptr< IntegrationRule > &iRuleL = integrationRulesArray [ layer - 1 ];
         this->recoverValuesFromIP(recoveredValues, layer, IST_StressTensor, tStep);
         //this->ZZNodalRecoveryMI_recoverValues(recoveredValues, layer, IST_StressTensor, tStep);
         double thickness = this->layeredCS->giveLayerThickness(layer);

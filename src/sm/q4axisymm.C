@@ -208,10 +208,10 @@ Q4Axisymm :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(2);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
+        integrationRulesArray [ 1 ].reset( new GaussIntegrationRule(2, this, 3, 6) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], numberOfFiAndShGaussPoints, this);
     }
 }

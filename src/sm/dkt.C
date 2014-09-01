@@ -85,7 +85,7 @@ DKTPlate :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 5);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 5) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }

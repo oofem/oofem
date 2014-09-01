@@ -399,8 +399,8 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiece
         for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
             InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
             FloatArray average;
-            IntegrationRule *iRule = integrationRulesArray [ 0 ];
-            VTKXMLExportModule :: computeIPAverage(average, iRule, this, type, tStep);
+            std :: unique_ptr< IntegrationRule > &iRule = integrationRulesArray [ 0 ];
+            VTKXMLExportModule :: computeIPAverage(average, iRule.get(), this, type, tStep);
 
             FloatArray averageV9(9);
             averageV9.at(1) = average.at(1);

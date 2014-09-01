@@ -91,7 +91,7 @@ void
 QTruss1dGrad :: computeGaussPoints()
 {
     integrationRulesArray.resize( 1 );
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 1);
+    integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 1) );
     this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
 }
 

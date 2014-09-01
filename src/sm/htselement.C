@@ -91,7 +91,7 @@ HTSelement :: computeGaussPoints()
         integrationRulesArray.resize(numberOfEdges);
 
         for ( int i = 0; i < numberOfEdges; i++ ) {
-            integrationRulesArray [ i ] = new GaussIntegrationRule(i + 1, this, 1, 100);
+            integrationRulesArray [ i ].reset( new GaussIntegrationRule(i + 1, this, 1, 100) );
             integrationRulesArray [ i ]->SetUpPointsOnLine(numberOfGaussPoints, _1dMat);
         }
     }
