@@ -96,7 +96,7 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
 
     this->maxdef = 25; ///@todo Deal with this parameter (set to some reasonable value by default now)
 
-    return EngngModel :: initializeFrom(ir);
+    return FluidModel :: initializeFrom(ir);
 }
 
 
@@ -210,7 +210,7 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
     if ( cmpn == InternalRhs ) {
         this->internalForces.zero();
         this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
-                             EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
+                             EModelDefaultEquationNumbering(), d, & this->eNorm);
 #ifdef __PARALLEL_MODE
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
 #endif
@@ -228,7 +228,7 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
 void StokesFlow :: updateYourself(TimeStep *tStep)
 {
     this->updateInternalState(tStep);
-    EngngModel :: updateYourself(tStep);
+    FluidModel :: updateYourself(tStep);
 }
 
 int StokesFlow :: forceEquationNumbering(int id)
@@ -304,7 +304,7 @@ void StokesFlow :: doStepOutput(TimeStep *tStep)
         tp->doOutput(tStep);
     }
 
-    EngngModel :: doStepOutput(tStep);
+    FluidModel :: doStepOutput(tStep);
 }
 
 NumericalMethod *StokesFlow :: giveNumericalMethod(MetaStep *mStep)

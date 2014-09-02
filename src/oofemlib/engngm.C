@@ -1777,13 +1777,14 @@ EngngModel :: balanceLoad(TimeStep *tStep)
             int myrank = this->giveRank();
             fprintf(stderr, "\n[%d] Nodal Table\n", myrank);
             for ( int i = 1; i <= nnodes; i++ ) {
-                if ( giveDomain(1)->giveDofManager(i)->giveParallelMode() == DofManager_local ) {
-                    fprintf( stderr, "[%d]: %5d[%d] local ", myrank, i, giveDomain(1)->giveDofManager(i)->giveGlobalNumber() );
-                } else if ( giveDomain(1)->giveDofManager(i)->giveParallelMode() == DofManager_shared ) {
-                    fprintf( stderr, "[%d]: %5d[%d] shared ", myrank, i, giveDomain(1)->giveDofManager(i)->giveGlobalNumber() );
+                DofManager *dman = this->giveDomain(1)->giveDofManager(i);
+                if ( dman->giveParallelMode() == DofManager_local ) {
+                    fprintf( stderr, "[%d]: %5d[%d] local ", myrank, i, dman->giveGlobalNumber() );
+                } else if ( dman->giveParallelMode() == DofManager_shared ) {
+                    fprintf( stderr, "[%d]: %5d[%d] shared ", myrank, i, dman->giveGlobalNumber() );
                 }
 
-                for ( Dof *dof: *giveDomain(1)->giveDofManager(i) ) {
+                for ( Dof *dof: *dman ) {
                     fprintf( stderr, "(%d)", dof->giveEquationNumber(dn) );
                 }
 
