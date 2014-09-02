@@ -61,7 +61,8 @@ public:
 
     // Bulk
     virtual void evalN(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-
+    virtual int giveNumberOfNodes() const { return 9; }
+    
     virtual IntegrationRule *giveIntegrationRule(int order);
 
 protected:

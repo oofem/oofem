@@ -35,7 +35,7 @@
 #ifndef qtrplstr_h
 #define qtrplstr_h
 
-#include "../sm/Elements/nlstructuralelement.h"
+#include "../sm/Elements/planestresselement.h"
 #include "../sm/ErrorEstimators/directerrorindicatorrc.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
@@ -51,7 +51,7 @@ class FEI2dTrQuad;
  * This class implements a quadratic triangular 6-node plane-
  * stress elasticity finite element. Each node has 2 degrees of freedom.
  */
-class QTrPlaneStress2d : public NLStructuralElement, public SpatialLocalizerInterface,
+class QTrPlaneStress2d : public PlaneStressElement, public SpatialLocalizerInterface,
 public SPRNodalRecoveryModelInterface,
 public EIPrimaryUnknownMapperInterface
 {
@@ -62,17 +62,8 @@ public:
     QTrPlaneStress2d(int n, Domain * d);
     virtual ~QTrPlaneStress2d() { }
 
-    virtual int  computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
-
-    virtual double computeVolumeAround(GaussPoint *gp);
-
     virtual Interface *giveInterface(InterfaceType it);
-
     virtual FEInterpolation *giveInterpolation() const;
-
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
@@ -97,25 +88,10 @@ public:
                                                                        TimeStep *tStep, const FloatArray &lcoords,
                                                                        FloatArray &answer);
 
-    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
-
 protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeGaussPoints();
-    virtual int giveApproxOrder() { return 2; }
+    //virtual int giveApproxOrder() { return 2; } // probably safe to remove /JB
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 
-    void computeDerivativeKsi(FloatArray &, double, double);
-    void computeDerivativeEta(FloatArray &, double, double);
-    void computeJacobianMatrixAt(FloatMatrix &, GaussPoint *);
-
-    // edge load support
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
-    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
 };
 } // end namespace oofem
 #endif // qtrplstr_h

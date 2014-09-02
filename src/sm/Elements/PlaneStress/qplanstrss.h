@@ -35,7 +35,7 @@
 #ifndef qplanstrss_h
 #define qplanstrss_h
 
-#include "../sm/Elements/nlstructuralelement.h"
+#include "Elements/planestresselement.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 
@@ -48,7 +48,7 @@ class FEI2dQuadQuad;
  * This class implements an Quadratic isoparametric eight-node quadrilateral plane-
  * stress elasticity finite element. Each node has 2 degrees of freedom.
  */
-class QPlaneStress2d : public NLStructuralElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
+class QPlaneStress2d : public PlaneStressElement, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {
 protected:
     static FEI2dQuadQuad interpolation;
@@ -59,23 +59,11 @@ public:
 
     virtual FEInterpolation *giveInterpolation() const;
 
-    virtual int computeNumberOfDofs() { return 16; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QPlaneStress2d_Name; }
     virtual const char *giveClassName() const { return "QPlaneStress2d"; }
-    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
-
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
-    virtual int testElementExtension(ElementExtension ext) { return ( ext == Element_EdgeLoadSupport ); }
-
+    
     virtual Interface *giveInterface(InterfaceType it);
-
-    virtual double computeVolumeAround(GaussPoint *gp);
-
-    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
@@ -86,17 +74,6 @@ public:
     virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
-protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeGaussPoints();
-
-    // edge load support
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
-    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
 };
 } // end namespace oofem
 #endif // qplanstrss_h

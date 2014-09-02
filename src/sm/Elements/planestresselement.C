@@ -191,6 +191,16 @@ PlaneStressElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 }
 
 
+
+void
+PlaneStressElement :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+{
+    static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
+        edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+}
+
+
+
 double
 PlaneStressElement :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
@@ -229,6 +239,22 @@ PlaneStressElement :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iE
 
     return 1;
 }
+
+
+
+
+double
+PlaneStressElement :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
+//
+// returns receiver's characteristic length for crack band models
+// for a crack formed in the plane with normal normalToCrackPlane.
+//
+{
+    return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
+}
+
+
+
 
 
 } // end namespace oofem

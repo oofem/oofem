@@ -35,10 +35,10 @@
 #ifndef trplanstrss_h
 #define trplanstrss_h
 
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
-#include "../sm/ErrorEstimators/zzerrorestimator.h"
-#include "../sm/ErrorEstimators/huertaerrorestimator.h"
+#include "Elements/planestresselement.h"
+#include "ErrorEstimators/directerrorindicatorrc.h"
+#include "ErrorEstimators/zzerrorestimator.h"
+#include "ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
@@ -58,7 +58,7 @@ class FEI2dTrLin;
  * Tasks:
  * - calculating its B,D,N matrices and dV.
  */
-class TrPlaneStress2d : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
+class TrPlaneStress2d : public PlaneStressElement, public ZZNodalRecoveryModelInterface,
 public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
 public EIPrimaryUnknownMapperInterface,
@@ -74,16 +74,8 @@ public:
     virtual ~TrPlaneStress2d() { }
 
     virtual FEInterpolation *giveInterpolation() const;
-    virtual int computeNumberOfDofs() { return 6; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-
-    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
     virtual double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method);
     virtual double giveParentElSize() const { return 0.5; }
-
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
-    virtual double computeVolumeAround(GaussPoint *gp);
-
     virtual Interface *giveInterface(InterfaceType);
 
 #ifdef __OOFEG
@@ -96,8 +88,6 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_TrPlaneStress2d_Name; }
     virtual const char *giveClassName() const { return "TrPlaneStress2d"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);
@@ -127,16 +117,6 @@ public:
                                                                       InternalStateType type, TimeStep *tStep);
 
 protected:
-    // edge load support
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
-    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-
-    virtual void computeGaussPoints();
 
     virtual double giveArea();
     virtual FloatArray *GivebCoeff();

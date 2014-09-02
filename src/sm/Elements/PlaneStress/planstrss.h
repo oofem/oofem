@@ -35,9 +35,9 @@
 #ifndef planstrss_h
 #define planstrss_h
 
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
-#include "../sm/ErrorEstimators/huertaerrorestimator.h"
+#include "Elements/planestresselement.h"
+#include "ErrorEstimators/directerrorindicatorrc.h"
+#include "ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
@@ -54,7 +54,7 @@ class FEI2dQuadLin;
  * This class implements an isoparametric four-node quadrilateral plane-
  * stress elasticity finite element. Each node has 2 degrees of freedom.
  */
-class PlaneStress2d : public NLStructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
+class PlaneStress2d : public PlaneStressElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
 public EIPrimaryUnknownMapperInterface,
 public HuertaErrorEstimatorInterface
@@ -66,18 +66,10 @@ public:
     PlaneStress2d(int n, Domain * d);
     virtual ~PlaneStress2d();
 
-    virtual int computeNumberOfDofs() { return 8; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-
-    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
     virtual double giveCharacteristicSize(GaussPoint *gp, FloatArray &normalToCrackPlane, ElementCharSizeMethod method);
     virtual double giveParentElSize() const { return 4.0; }
 
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     virtual Interface *giveInterface(InterfaceType it);
-
-    virtual double computeVolumeAround(GaussPoint *gp);
-
     virtual FEInterpolation *giveInterpolation() const;
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
@@ -113,16 +105,9 @@ public:
     virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
 protected:
-    // edge load support
-    void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
-    void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
 
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeGaussPoints();
 
     int giveApproxOrder() { return 1; }
     int giveNumberOfIPForMassMtrxIntegration() { return 4; }

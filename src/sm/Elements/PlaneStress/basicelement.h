@@ -84,7 +84,7 @@ public:
     virtual const char *giveClassName() const { return "BasicElement"; }
     //virtual IRResultType initializeFrom(InputRecord *ir);
     //virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
+    //virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
 protected:
    
