@@ -108,9 +108,9 @@ Tr2Shell7XFEM :: computeGaussPoints()
     this->xMan = this->giveDomain()->giveXfemManager();
 
     if ( integrationRulesArray.size() == 0 ) {  
-        if( this->xMan->isElementEnriched(this) ) {
+        //if( this->xMan->isElementEnriched(this) ) {
             this->updateIntegrationRuleMultiCrack();
-        }
+        //}
     }
 
     int nPointsTri  = 6;   // points in the plane
@@ -157,26 +157,29 @@ Tr2Shell7XFEM :: computeGaussPoints()
 
 bool Tr2Shell7XFEM :: updateIntegrationRuleMultiCrack()
 {
-    bool partitionSucceeded = false;
     int nPointsTri  = 6;   // points in the plane
 
-    if ( this->xMan->isElementEnriched(this) ) {
-        int numberOfLayers     = this->layeredCS->giveNumberOfLayers();
-        int numPointsThickness = this->layeredCS->giveNumIntegrationPointsInLayer();
-        double totalThickness  = this->layeredCS->computeIntegralThick();
-        int numEI = this->xMan->giveNumberOfEnrichmentItems();
-        std :: vector< std :: vector< FloatArray > >pointPartitions;
+    
+    int numberOfLayers     = this->layeredCS->giveNumberOfLayers();
+    int numPointsThickness = this->layeredCS->giveNumIntegrationPointsInLayer();
+    double totalThickness  = this->layeredCS->computeIntegralThick();
+    int numEI = this->xMan->giveNumberOfEnrichmentItems();
+    std :: vector< std :: vector< FloatArray > >pointPartitions;
 
-        integrationRulesArray.resize(numberOfLayers);
-        this->crackSubdivisions.resize(numberOfLayers);
-        this->numSubDivisionsArray.resize(numberOfLayers);
+    integrationRulesArray.resize(numberOfLayers);
+    this->crackSubdivisions.resize(numberOfLayers);     // Store the subdivisions for each layer (empty otherwise)
+    this->numSubDivisionsArray.resize(numberOfLayers);  // number of subdivision for each - set this to one for layers not subdivided
 
-	for ( int i = 0; i < numberOfLayers; i++ ) {
-            double zMid_i = this->layeredCS->giveLayerMidZ(i+1); // global z-coord
-            double xiMid_i = 1.0 - 2.0 * ( totalThickness - this->layeredCS->giveMidSurfaceZcoordFromBottom() - zMid_i ) / totalThickness; // local xi-coord
-
+    bool createdRule;
+    for ( int i = 0; i < numberOfLayers; i++ ) {
+        createdRule = false;
+        
+        double zMid_i = this->layeredCS->giveLayerMidZ(i+1); // global z-coord
+        double xiMid_i = 1.0 - 2.0 * ( totalThickness - this->layeredCS->giveMidSurfaceZcoordFromBottom() - zMid_i ) / totalThickness; // local xi-coord
+        
+        if ( this->xMan->isElementEnriched(this) ) {
+        
             for ( int eiIndex = 1; eiIndex <= numEI; eiIndex++ ) {
-                
                 EnrichmentItem *ei = this->xMan->giveEnrichmentItem(eiIndex);
                 if ( dynamic_cast< ShellCrack*> (ei) ) {
 
@@ -195,38 +198,41 @@ bool Tr2Shell7XFEM :: updateIntegrationRuleMultiCrack()
                                 this->XfemElementInterface_partitionElement(this->crackSubdivisions [ i ], pointPartitions [ j ]);
                             }
 
-                            partitionSucceeded = true;
+                     
+                            integrationRulesArray [ i ] = new PatchIntegrationRule(i + 1, this, this->crackSubdivisions [ i ]);
+                            integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, numPointsThickness, _3dMat);         
+                            this->numSubDivisionsArray [ i ] = this->crackSubdivisions [ i ].size();
+                            createdRule = true;         
+                            continue;
                         }
-
-                        integrationRulesArray [ i ] = new PatchIntegrationRule(i + 1, this, this->crackSubdivisions [ i ]);
-                        integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, numPointsThickness, _3dMat);         
-                        this->numSubDivisionsArray [ i ] = this->crackSubdivisions [ i ].size();
-                    }
-                } else {
-                    
-                    integrationRulesArray [ i ] = new LayeredIntegrationRule(i + 1, this);
-                    integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, numPointsThickness, _3dMat);
-                    this->numSubDivisionsArray [ i ] = 1; 
-                    
-                }                 
+                    }            
+                }
             }
-    
         }
-        this->layeredCS->mapLayerGpCoordsToShellCoords(integrationRulesArray);
+            
+        if( !createdRule ) {
+            integrationRulesArray [ i ] = new LayeredIntegrationRule(i + 1, this);
+            integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, numPointsThickness, _3dMat);
+            this->numSubDivisionsArray [ i ] = 1;                 
+        }
         
-        // Cohesive zone
-        for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
-            //Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
-            int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
-            czIntegrationRulesArray.resize(numberOfInterfaces);
-            for ( int i = 0; i < numberOfInterfaces; i++ ) {
-                czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
-                czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
-            }
+    }
+    
+    this->layeredCS->mapLayerGpCoordsToShellCoords(integrationRulesArray);
+    
+    // Cohesive zone
+    for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
+        //Delamination *dei =  dynamic_cast< Delamination * >( this->xMan->giveEnrichmentItem(i) ); 
+        int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
+        czIntegrationRulesArray.resize(numberOfInterfaces);
+        for ( int i = 0; i < numberOfInterfaces; i++ ) {
+            czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
+            czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
         }
     }
 
-    return partitionSucceeded;
+
+    return true;
 }
 
 

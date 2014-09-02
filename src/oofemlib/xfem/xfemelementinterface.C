@@ -535,8 +535,8 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         if ( ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), elCenter) ) {
             foundTip = true;
         }
-	int nEdges = this->element->giveInterpolation()->giveNumberOfEdges();
-	nNodes = nEdges; // JB: test
+        int nEdges = this->element->giveInterpolation()->giveNumberOfEdges();
+        nNodes = nEdges; // JB: test
         if ( foundTip ) {
             for ( int i = 1; i <= nNodes; i++ ) {
                 // Store edge points
@@ -550,7 +550,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
 
                     int nsLoc = bNodes.at(1);
                     //int neLoc = bNodes.at( bNodes.giveSize() );
-		    int neLoc = bNodes.at(2); // JB
+                    int neLoc = bNodes.at(2); // JB
 
                     const FloatArray &coordS = * ( element->giveDofManager(nsLoc)->giveCoordinates() );
                     const FloatArray &coordE = * ( element->giveDofManager(neLoc)->giveCoordinates() );
