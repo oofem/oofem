@@ -50,7 +50,7 @@ REGISTER_Element(BasicElement);
 // 1 -> first spatial index, 2 -> second spatial index
 FEI2dTrLin BasicElement :: interp(1, 2);    
 
-BasicElement :: BasicElement(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+BasicElement :: BasicElement(int n, Domain *aDomain) : PlaneStressElement(n, aDomain)
 {
     this->numberOfDofMans  = 3;
     this->numberOfGaussPoints = 1;
@@ -58,13 +58,7 @@ BasicElement :: BasicElement(int n, Domain *aDomain) : NLStructuralElement(n, aD
 
 
 
-IRResultType
-BasicElement :: initializeFrom(InputRecord *ir)
-{
-    // Initialise the element from the input record (text line from input file)  
-    IRResultType result = this->NLStructuralElement :: initializeFrom(ir); // Call initializeFrom for the base class
-    return result; 
-}
+
 
 
 FEInterpolation *BasicElement :: giveInterpolation() const 
@@ -75,6 +69,58 @@ FEInterpolation *BasicElement :: giveInterpolation() const
     return & interp; 
 }
 
+#if 0
+
+IRResultType
+BasicElement :: initializeFrom(InputRecord *ir)
+{
+    // Initialise the element from the input record (text line from input file)  
+    IRResultType result = this->NLStructuralElement :: initializeFrom(ir); // Call initializeFrom for the base class
+    return result; 
+}
+
+
+void BasicElement :: computeGaussPoints()
+{
+    // Sets up the integration rule array which contains all the Gauss points (integration points)
+    // used for integration over the element volume.
+    
+    if ( integrationRulesArray.size() == 0 ) {
+        int iRuleNumber = 1;
+        integrationRulesArray = { new GaussIntegrationRule(iRuleNumber, this, 1, 3) };
+        // The cross section is responsible for setting up the integration rule - not the element.
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ iRuleNumber - 1 ], this->numberOfGaussPoints, this);
+    }
+}
+
+
+
+
+/// Optional: Needed in order to have support for nonlinear kinematics / large deformations
+void
+BasicElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
+{
+    /* Compute the [3x6] displacement gradient matrix {BH} for the element,
+     * evaluated at the given gp.
+     * {BH}*{a} should provide the displacement gradient {H} in Voigt form 
+     * {H} = {du/dx, dv/dy, du/dy, dv/dx }^T with {a} being the solution vector 
+     * of the element.
+     */    
+
+    // Evaluate the derivatives of the shape functions at the position of the gp.
+    FloatMatrix dNdx;
+    this->interp.evaldNdx( dNdx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+
+    // Construct the BH-matrix
+    answer.resize(4, 6);
+    answer.zero();
+    for ( int i = 1; i <= 3; i++ ) {
+        answer.at(1, 2 * i - 1) = dNdx.at(i, 1);     // du/dx -1
+        answer.at(2, 2 * i - 0) = dNdx.at(i, 2);     // dv/dy -2
+        answer.at(3, 2 * i - 1) = dNdx.at(i, 2);     // du/dy -6
+        answer.at(4, 2 * i - 0) = dNdx.at(i, 1);     // dv/dx -9
+    }
+}
 
 double 
 BasicElement :: computeVolumeAround(GaussPoint *gp)
@@ -97,6 +143,7 @@ BasicElement :: giveDofManDofIDMask(int inode, IntArray &answer) const
    
     answer = {D_u, D_v}; // Displacement in u- and v-direction. See 'dofiditem.h' for a list of basic dof types.
 }
+
 
 void
 BasicElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
@@ -135,48 +182,12 @@ BasicElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, in
     answer.at(3, 6) = dNdx.at(3, 1);
 }
 
-
-void BasicElement :: computeGaussPoints()
-{
-    // Sets up the integration rule array which contains all the Gauss points (integration points)
-    // used for integration over the element volume.
-    
-    if ( integrationRulesArray.size() == 0 ) {
-        int iRuleNumber = 1;
-        integrationRulesArray = { new GaussIntegrationRule(iRuleNumber, this, 1, 3) };
-        // The cross section is responsible for setting up the integration rule - not the element.
-        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ iRuleNumber - 1 ], this->numberOfGaussPoints, this);
-    }
-}
+#endif
 
 
-/// Optional: Needed in order to have support for nonlinear kinematics / large deformations
-void
-BasicElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-{
-    /* Compute the [3x6] displacement gradient matrix {BH} for the element,
-     * evaluated at the given gp.
-     * {BH}*{a} should provide the displacement gradient {H} in Voigt form 
-     * {H} = {du/dx, dv/dy, du/dy, dv/dx }^T with {a} being the solution vector 
-     * of the element.
-     */    
-
-    // Evaluate the derivatives of the shape functions at the position of the gp.
-    FloatMatrix dNdx;
-    this->interp.evaldNdx( dNdx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    // Construct the BH-matrix
-    answer.resize(4, 6);
-    answer.zero();
-    for ( int i = 1; i <= 3; i++ ) {
-        answer.at(1, 2 * i - 1) = dNdx.at(i, 1);     // du/dx -1
-        answer.at(2, 2 * i - 0) = dNdx.at(i, 2);     // dv/dy -2
-        answer.at(3, 2 * i - 1) = dNdx.at(i, 2);     // du/dy -6
-        answer.at(4, 2 * i - 0) = dNdx.at(i, 1);     // dv/dx -9
-    }
-}
 
 
+#if 0
 /// Optional: Needed in order to support edge loads
 void
 BasicElement :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
@@ -194,6 +205,9 @@ BasicElement :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint 
     answer.at(1, 1) = answer.at(2, 2) = N.at(1);
     answer.at(1, 3) = answer.at(2, 4) = N.at(2);
 }
+
+
+
 
 /// Optional: Needed in order to support edge loads
 void
@@ -216,6 +230,9 @@ BasicElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
     
     
 }
+
+
+
 
 /// Optional: Needed in order to support edge loads
 double
@@ -265,7 +282,7 @@ BasicElement :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, G
 }
 
 
-
+#endif
 
 
 

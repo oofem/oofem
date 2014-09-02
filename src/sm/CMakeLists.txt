@@ -78,6 +78,7 @@ set (sm_element
     Elements/tria1platesubsoil.C
     Elements/trwarp.C
     Elements/PlaneStress/basicelement.C
+    Elements/planestresselement.C
     #qplanstrssphf.C
     )
 
