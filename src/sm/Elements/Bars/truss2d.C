@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Bars/truss2d.h"
-#include "../sm/CrossSections/structuralcrosssection.h"
+#include "Elements/Bars/truss2d.h"
+#include "CrossSections/structuralcrosssection.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
@@ -43,6 +43,7 @@
 #include "intarray.h"
 #include "mathfem.h"
 #include "classfactory.h"
+#include "fei1dlin.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -50,6 +51,8 @@
 
 namespace oofem {
 REGISTER_Element(Truss2d);
+
+FEI1dLin Truss2d :: interp(1);  
 
 Truss2d :: Truss2d(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain)
@@ -388,6 +391,13 @@ Truss2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussP
     answer.at(2, 2) = cosine;
 
     return 1;
+}
+
+
+FEInterpolation *Truss2d :: giveInterpolation() const 
+{
+    // return interpolator
+    return & interp; 
 }
 
 

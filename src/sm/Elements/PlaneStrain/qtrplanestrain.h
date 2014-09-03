@@ -89,7 +89,6 @@ public:
                                                                        FloatArray &answer);
 
 protected:
-    virtual int giveApproxOrder() { return 2; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 } // end namespace oofem

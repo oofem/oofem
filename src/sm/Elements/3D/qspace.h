@@ -108,7 +108,6 @@ protected:
     //void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
     void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
 
-    virtual int giveApproxOrder() { return 2; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 27; }
 
     /**

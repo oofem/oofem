@@ -77,7 +77,6 @@ public:
     virtual const char *giveClassName() const { return "BasicElement"; }
 
 protected:
-    virtual int giveApproxOrder() { return 1; } // to be removed /JB
     
     // - Support for computing the mass matrix needed for dynamic simulations
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }    

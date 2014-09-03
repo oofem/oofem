@@ -88,8 +88,6 @@ protected:
     virtual void computeGaussPoints();
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
-
-    virtual int giveApproxOrder() { return 2; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 27; }
 
     /**

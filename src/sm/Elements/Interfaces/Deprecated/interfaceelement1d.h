@@ -96,8 +96,6 @@ protected:
     virtual void computeGaussPoints();
     void evaluateLocalCoordinateSystem(FloatMatrix &);
 
-    virtual int giveApproxOrder() { return 1; }
-
     void computeLocalSlipDir(FloatArray &normal);
     cmode giveCoordMode() const { return this->mode; }
     void setCoordMode();

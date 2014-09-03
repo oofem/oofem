@@ -166,8 +166,6 @@ Quad1MindlinShell3D :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load
         answer.resize(24);
         answer.zero();
 
-        //int approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder();
-
         iRule = this->integrationRulesArray [ 0 ];
         for ( GaussPoint *gp: *iRule ) {
             double dV = this->computeVolumeAround(gp);

@@ -251,7 +251,6 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
     // - GiveEdgeDofMapping - returns integer array specifying local edge dof mapping to
     //   element dofs.
     //
-    int approxOrder, numberOfGaussPoints;
     double dV;
     FloatMatrix T;
     FloatArray globalIPcoords;
@@ -262,8 +261,8 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
 
     BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
-        approxOrder = edgeLoad->giveApproxOrder() + this->giveApproxOrder();
-        numberOfGaussPoints = ( int ) ceil( ( approxOrder + 1. ) / 2. );
+        int approxOrder = edgeLoad->giveApproxOrder() + this->giveInterpolation()->giveInterpolationOrder();
+        int numberOfGaussPoints = ( int ) ceil( ( approxOrder + 1. ) / 2. );
         GaussIntegrationRule iRule(1, this, 1, 1);
         iRule.SetUpPointsOnLine(numberOfGaussPoints, _Unknown);
         FloatArray reducedAnswer, force, ntf;
@@ -330,7 +329,6 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
     //   element dofs.
     //
 
-    int approxOrder;
     double dV;
     FloatMatrix T;
 
@@ -346,8 +344,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         FloatMatrix n;
         FloatArray globalIPcoords;
 
-        approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder();
-
+        int approxOrder = surfLoad->giveApproxOrder() + this->giveInterpolation()->giveInterpolationOrder();
         iRule = this->GetSurfaceIntegrationRule(approxOrder);
         for ( GaussPoint *gp: *iRule ) {
             this->computeSurfaceNMatrixAt(n, iSurf, gp);

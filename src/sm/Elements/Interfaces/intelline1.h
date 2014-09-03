@@ -101,7 +101,6 @@ protected:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
-    virtual int giveApproxOrder() { return 1; }
     Element_Geometry_Type giveGeometryType() const { return EGT_quad_1_interface; };
 };
 } // end namespace oofem

@@ -128,7 +128,7 @@ protected:
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeGaussPoints();
-    virtual int giveApproxOrder() { return 1; }
+
 };
 } // end namespace oofem
 #endif // truss1d_h

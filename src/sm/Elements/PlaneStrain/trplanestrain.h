@@ -113,7 +113,6 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
 
 protected:
-    virtual int giveApproxOrder() { return 1; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 1; }
 };
 } // end namespace oofem

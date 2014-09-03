@@ -89,7 +89,6 @@ public:
                                                                        FloatArray &answer);
 
 protected:
-    //virtual int giveApproxOrder() { return 2; } // probably safe to remove /JB
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 
 };

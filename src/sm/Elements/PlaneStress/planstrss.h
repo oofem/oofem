@@ -109,7 +109,6 @@ protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
-    int giveApproxOrder() { return 1; }
     int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 } // end namespace oofem
