@@ -35,8 +35,8 @@
 #ifndef Shell7Base_h
 #define Shell7Base_h
 
-#include "../sm/CrossSections/layeredcrosssection.h"
-#include "../sm/Elements/nlstructuralelement.h"
+#include "CrossSections/layeredcrosssection.h"
+#include "Elements/nlstructuralelement.h"
 #include "eleminterpmapperinterface.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "vtkxmlexportmodule.h"
@@ -73,7 +73,6 @@ public:
 
     // Definition & identification
     virtual const char *giveClassName() const { return "Shell7Base"; }
-//    virtual classType giveClassID() const { return Shell7BaseClass; }
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
 
 
@@ -90,23 +89,12 @@ public:
 
 protected:
     virtual Interface *giveInterface(InterfaceType it);
-    //IntegrationRule **specialIntegrationRulesArray;
-    std :: vector< IntegrationRule * > specialIntegrationRulesArray;
     LayeredCrossSection *layeredCS;
 
     static FEI3dTrQuad  interpolationForCZExport;
     static FEI3dWedgeQuad interpolationForExport;
 
     FEInterpolation3d *fei;
-
-    enum SolutionField {
-        Midplane,       ///< phi_bar 7 x_bar (3 dofs)
-        Director,       ///< m (3 dofs)
-        InhomStrain,    ///< gamma (1 dofs) - inhomogenious thickness strain
-        All,
-        AllInv,
-        EdgeInv,
-    };
 
     virtual const IntArray &giveOrderingDofTypes() const = 0;
     virtual const IntArray &giveOrderingNodes() const = 0;

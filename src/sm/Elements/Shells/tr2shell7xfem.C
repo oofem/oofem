@@ -114,41 +114,19 @@ Tr2Shell7XFEM :: computeGaussPoints()
     }
 
     int nPointsTri  = 6;   // points in the plane
-    int nPointsEdge = 2;   // edge integration        
-        
     if ( integrationRulesArray.size() == 0 ) {
         // Cohesive zone
         for ( int i = 1; i <= this->xMan->giveNumberOfEnrichmentItems(); i++ ) { 
-                int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
-                czIntegrationRulesArray.resize( numberOfInterfaces );
-                for ( int i = 0; i < numberOfInterfaces; i++ ) {
-                    czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
-                    czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
-                }
-            //}
+            int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
+            czIntegrationRulesArray.resize( numberOfInterfaces );
+            for ( int i = 0; i < numberOfInterfaces; i++ ) {
+                czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
+                czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
+            }
+        
         }
     }
 
-    
-    if ( specialIntegrationRulesArray.size() == 0 ) {
-        this->numberOfGaussPoints = this->layeredCS->giveNumberOfLayers()*nPointsTri*this->layeredCS->giveNumIntegrationPointsInLayer();
-        this->layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
-        
-        specialIntegrationRulesArray.resize(3);
-
-        // Midplane (Mass matrix integrated analytically through the thickness)
-        specialIntegrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
-        specialIntegrationRulesArray [ 1 ]->SetUpPointsOnTriangle(nPointsTri, _3dMat); 
-
-        // Edge
-        specialIntegrationRulesArray [ 2 ] = new GaussIntegrationRule(1, this);
-        specialIntegrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
-        
-        // Thickness integration for stress recovery
-        specialIntegrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
-        specialIntegrationRulesArray [ 0 ]->SetUpPointsOnLine(this->layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
-
-    }
 
 }
 

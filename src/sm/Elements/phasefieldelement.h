@@ -63,7 +63,6 @@ public:
     virtual const char *giveClassName() const { return "PhaseFieldElement"; }
 
     int computeNumberOfDofs();
-    void computeVectorOfDofIDs( const IntArray &dofIdArray, ValueModeType valueMode, TimeStep *stepN, FloatArray &answer );
     void computeLocationArrayOfDofIDs( const IntArray &dofIdArray, IntArray &answer );
 
     double computeFreeEnergy( GaussPoint *gp, TimeStep *tStep );
@@ -79,17 +78,6 @@ public:
 protected:
 
     virtual void computeStiffnessMatrix(FloatMatrix &, MatResponseMode, TimeStep *);
-
-    /*void computeStiffnessMatrixGen(FloatMatrix &, MatResponseMode, TimeStep *, 
-        void (*Nfunc)(GaussPoint*, FloatMatrix), void (*Bfunc)(GaussPoint*, FloatMatrix),
-        void (*NStiffness)(GaussPoint*, FloatMatrix), void (*BStiffness)(GaussPoint*, FloatMatrix),
-        double (*volumeAround)(GaussPoint*)
-        );
-     void Duu_B(FloatMatrix &, MatResponseMode, GaussPoint *, TimeStep *);
-     void Duu_d(FloatMatrix &, MatResponseMode, GaussPoint *, TimeStep *);
-     
-     void computeBStress_d(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, int useUpdatedGpRecord);
-     */
 
     void computeStiffnessMatrix_uu(FloatMatrix &, MatResponseMode, TimeStep *);
     void computeStiffnessMatrix_ud(FloatMatrix &, MatResponseMode, TimeStep *);

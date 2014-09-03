@@ -1517,8 +1517,11 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
 void
 Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, BoundaryLoad *edgeLoad, TimeStep *tStep, ValueModeType mode, EnrichmentItem *ei)
 {
-    // 
-    IntegrationRule *iRule = specialIntegrationRulesArray [ 2 ];   // rule #3 for edge integration of distributed loads given in [*/m]
+    int approxOrder = edgeLoad->giveApproxOrder() + this->giveInterpolation()->giveInterpolationOrder();
+    int numberOfGaussPoints = ( int ) ceil( ( approxOrder + 1. ) / 2. );
+    GaussIntegrationRule iRule(1, this, 1, 1);
+    iRule.SetUpPointsOnLine(numberOfGaussPoints, _Unknown); 
+    
     GaussPoint *gp;
 
     FloatMatrix N, Q;
@@ -1527,8 +1530,8 @@ Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, B
 
     FloatArray Nftemp(21), Nf(21);
     Nf.zero();
-    for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp = iRule->getIntegrationPoint(i);
+    for ( int i = 0; i < iRule.giveNumberOfIntegrationPoints(); i++ ) {
+        gp = iRule.getIntegrationPoint(i);
         FloatArray lCoords = *gp->giveNaturalCoordinates();
 
         edgeLoad->computeValueAt(components, tStep, lCoords, mode);

@@ -79,34 +79,11 @@ PhaseFieldElement :: computeLocationArrayOfDofIDs( const IntArray &dofIdArray, I
 }
 
 void
-PhaseFieldElement :: computeVectorOfDofIDs( const IntArray &dofIdArray, ValueModeType valueMode, TimeStep *stepN, FloatArray &answer )
-{
-    // Routine to extract the solution vector for an element given an dofid array.
-    // Size will be size of the dofId array times number of dofmanagers. If a certain dofId does not exist a zero is used as value. 
-
-    NLStructuralElement *el = this->giveElement( );
-    answer.resize( el->giveNumberOfDofManagers( ) * dofIdArray.giveSize( ) ); // equal number of nodes for all fields
-    answer.zero( );
-    int k = 1;
-    for(int i = 1; i <= el->giveNumberOfDofManagers(); i++) {
-        DofManager *dMan = el->giveDofManager( i );
-        for(int j = 1; j <= dofIdArray.giveSize( ); j++) {
-
-            if(dMan->hasDofID( (DofIDItem) dofIdArray.at( j ) )) {
-                Dof *d = dMan->giveDofWithID( dofIdArray.at( j ) );
-                answer.at( k ) = d->giveUnknown( valueMode, stepN );
-            }
-            k++;
-        }
-    }
-}
-
-void
 PhaseFieldElement :: computeDisplacementUnknowns(FloatArray &answer, ValueModeType valueMode, TimeStep *stepN)
 {
     IntArray dofIdArray;
     this->giveDofManDofIDMask_u(dofIdArray);
-    this->computeVectorOfDofIDs(dofIdArray, valueMode, stepN, answer);
+    Element :: computeVectorOf(dofIdArray, valueMode, stepN, answer);
 }
 
 void
@@ -114,7 +91,7 @@ PhaseFieldElement :: computeDamageUnknowns(FloatArray &answer, ValueModeType val
 {
     IntArray dofIdArray;
     this->giveDofManDofIDMask_d(dofIdArray);
-    this->computeVectorOfDofIDs(dofIdArray, valueMode, stepN, answer);
+    Element :: computeVectorOf(dofIdArray, valueMode, stepN, answer);
 }
 
 void
