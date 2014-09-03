@@ -35,7 +35,8 @@
 #ifndef q4axisymm_h
 #define q4axisymm_h
 
-#include "../sm/Elements/structuralelement.h"
+#include "Elements/structuralelement.h"
+#include "Elements/planestresselement.h"
 #include "zznodalrecoverymodel.h"
 
 ///@name Input fields for Q4Axisymm
@@ -52,7 +53,7 @@ class FEI2dQuadQuad;
  * elasticity finite element for axisymmetric 3d continuum.
  * Each node has 2 degrees of freedom.
  */
-class Q4Axisymm : public StructuralElement, public ZZNodalRecoveryModelInterface
+class Q4Axisymm : public AxisymElement, public ZZNodalRecoveryModelInterface
 {
 protected:
     static FEI2dQuadQuad interp;
@@ -63,11 +64,6 @@ public:
     virtual ~Q4Axisymm();
 
     virtual FEInterpolation *giveInterpolation() const;
-
-    virtual int computeNumberOfDofs() { return 16; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
-    virtual double computeVolumeAround(GaussPoint *gp);
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     // definition & identification
@@ -75,12 +71,8 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Q4Axisymm_Name; }
     virtual const char *giveClassName() const { return "Q4axisymm"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual MaterialMode giveMaterialMode() { return _3dMat; }
-
+    
 protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-
     virtual void computeGaussPoints();
 
 #ifdef __OOFEG

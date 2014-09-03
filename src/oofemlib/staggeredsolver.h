@@ -69,7 +69,7 @@ protected:
 
     int number; 
     
-    
+     
     
 public:
     CustomEquationNumbering() : UnknownNumberingScheme(), prescribed(false), numEqs(0), numPresEqs(0) { dofIdArray.resize(0); }
@@ -105,8 +105,11 @@ public:
 class OOFEM_EXPORT StaggeredSolver : public NRSolver
 {
 private:
-    
-    // Experimental for use with staggered solver // Jim
+  
+    IntArray totalIdList;
+    IntArray idPos; 
+  
+    // Lists for each dof group
     std :: vector< CustomEquationNumbering > UnknownNumberingSchemeList;    
     std :: vector< SparseMtrx *> stiffnessMatrixList;
     std :: vector< FloatArray > fIntList;
@@ -119,11 +122,12 @@ private:
     
 
     void giveTotalLocationArray(IntArray &locationArray, const UnknownNumberingScheme &s, Domain *d);
-  bool checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, FloatArray &rhs, FloatArray &ddX, FloatArray &X,
+    bool checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, FloatArray &rhs, FloatArray &ddX, FloatArray &X,
                           double RRT, const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange, TimeStep *tNow, IntArray &dofIdArray);
 
+    void instanciateYourself();
 public:
-    //StaggeredSolver(Domain * d, EngngModel * m)  : NRSolver(d, m){};
+    
     StaggeredSolver(Domain * d, EngngModel * m);
     virtual ~StaggeredSolver(){};
 
@@ -134,6 +138,7 @@ public:
                             int &nite, TimeStep *);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
+    
     virtual const char *giveClassName() const { return "StaggeredSolver"; }
     virtual const char *giveInputRecordName() const { return _IFT_StaggeredSolver_Name; }
 

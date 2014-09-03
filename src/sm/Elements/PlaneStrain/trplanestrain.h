@@ -35,10 +35,10 @@
 #ifndef trplanstrain_h
 #define trplanstrain_h
 
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
-#include "../sm/ErrorEstimators/zzerrorestimator.h"
-#include "../sm/ErrorEstimators/huertaerrorestimator.h"
+#include "Elements/planestresselement.h"
+#include "ErrorEstimators/directerrorindicatorrc.h"
+#include "ErrorEstimators/zzerrorestimator.h"
+#include "ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
@@ -55,7 +55,7 @@ class FEI2dTrLin;
  * This class implements an triangular three-node  plane-
  * strain elasticity finite element. Each node has 2 degrees of freedom.
  */
-class TrPlaneStrain : public StructuralElement, public ZZNodalRecoveryModelInterface,
+class TrPlaneStrain : public PlaneStrainElement, public ZZNodalRecoveryModelInterface,
 public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
 public EIPrimaryUnknownMapperInterface,
@@ -72,15 +72,6 @@ public:
     virtual ~TrPlaneStrain() { }
 
     virtual FEInterpolation *giveInterpolation() const;
-
-    virtual int computeNumberOfDofs() { return 6; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-
-    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
-
-    virtual int testElementExtension(ElementExtension ext) { return ( ext == Element_EdgeLoadSupport ); }
-    virtual double computeVolumeAround(GaussPoint *gp);
-
     virtual Interface *giveInterface(InterfaceType it);
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
@@ -120,21 +111,8 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_TrPlaneStrain_Name; }
     virtual const char *giveClassName() const { return "TrPlaneStrain"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
 protected:
-    // edge load support
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
-    virtual void giveEdgeDofMapping(IntArray &answer, int) const;
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *gp);
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &);
-
-
-    virtual void computeGaussPoints();
-
     virtual int giveApproxOrder() { return 1; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 1; }
 };

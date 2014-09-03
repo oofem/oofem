@@ -64,6 +64,12 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_IntElLine2_Name; }
     virtual const char *giveClassName() const { return "IntElLine2"; }
 
+    #ifdef __OOFEG
+    virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
+    virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+    virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
+    #endif    
+    
 protected:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();

@@ -403,6 +403,12 @@ public:
      * @param boundary Boundary number.
      */
     virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary) = 0;
+    /**
+     * Returns the number of geometric nodes of the receiver.
+     */
+    virtual int giveNumberOfNodes() const 
+    { OOFEM_ERROR("giveNumberOfNodes: Not overloaded."); return -1;}
+    //@}
     
     std :: string errorInfo(const char *func) const { return func; } ///@todo Class name?
 };

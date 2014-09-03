@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Axisymmetry/axisymm3d.h"
+#include "Elements/Axisymmetry/axisymm3d.h"
 #include "fei2dtrlin.h"
 #include "node.h"
 #include "gausspoint.h"
@@ -58,7 +58,7 @@ REGISTER_Element(Axisymm3d);
 FEI2dTrLin Axisymm3d :: interpolation(1, 2);
 
 Axisymm3d :: Axisymm3d(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
+    AxisymElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this)
     // Constructor.
 {
@@ -93,119 +93,6 @@ Axisymm3d :: giveInterface(InterfaceType interface)
 }
 
 
-void
-Axisymm3d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
-// Returns the [6x6] strain-displacement matrix {B} of the receiver, eva-
-// luated at gp.
-{
-    double x, r;
-    int size, ind = 1;
-    FloatMatrix dnx;
-
-    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-
-    if ( ui == ALL_STRAINS ) {
-        size = 6;
-        ui = 6;
-    } else {
-        size = ui - li + 1;
-    }
-
-    if ( ( size < 0 ) || ( size > 6 ) ) {
-        OOFEM_ERROR("ComputeBmatrixAt size mismatch");
-    }
-
-    answer.resize(size, 6);
-    answer.zero();
-
-    if ( ( li <= 1 ) && ( ui >= 1 ) ) {
-        answer.at(ind, 1) = dnx.at(1, 1);
-        answer.at(ind, 3) = dnx.at(2, 1);
-        answer.at(ind, 5) = dnx.at(3, 1);
-        ind++;
-    }
-
-    if ( ( li <= 2 ) && ( ui >= 2 ) ) {
-        answer.at(ind, 2) = dnx.at(1, 2);
-        answer.at(ind, 4) = dnx.at(2, 2);
-        answer.at(ind, 6) = dnx.at(3, 2);
-        ind++;
-    }
-
-    if ( ( li <= 3 ) && ( ui >= 3 ) ) {
-        FloatArray n(4);
-        this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-        r = 0.;
-        for ( int i = 1; i <= numberOfDofMans; i++ ) {
-            x  = this->giveNode(i)->giveCoordinate(1);
-            r += x * n.at(i);
-        }
-
-        answer.at(ind, 1) = n.at(1) / r;
-        answer.at(ind, 3) = n.at(2) / r;
-        answer.at(ind, 5) = n.at(3) / r;
-        ind++;
-    }
-
-    if ( ( li <= 4 ) && ( ui >= 4 ) ) {
-        ind++;
-    }
-
-    if ( ( li <= 5 ) && ( ui >= 5 ) ) {
-        ind++;
-    }
-
-    if ( ( li <= 6 ) && ( ui >= 6 ) ) {
-        answer.at(ind, 1) = dnx.at(1, 2);
-        answer.at(ind, 2) = dnx.at(1, 1);
-        answer.at(ind, 3) = dnx.at(2, 2);
-        answer.at(ind, 4) = dnx.at(2, 1);
-        answer.at(ind, 5) = dnx.at(3, 2);
-        answer.at(ind, 6) = dnx.at(3, 1);
-        ind++;
-    }
-}
-
-
-void
-Axisymm3d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the [9x6] displacement gradient matrix {BH} of the receiver,
-// evaluated at gp.
-// BH matrix  -  9 rows : du/dx, dv/dy, dw/dz = u/r, 0, 0, du/dy,  0, 0, dv/dx
-// @todo not checked if correct
-{
-    FloatArray n;
-    FloatMatrix dnx;
-
-    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(9, 6);
-    answer.zero();
-
-    double r = 0., x;
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        x  = this->giveNode(i)->giveCoordinate(1);
-        r += x * n.at(i);
-    }
-
-
-    // mode is _3dMat !!!!!! answer.at(4,*), answer.at(5,*), answer.at(7,*), and answer.at(8,*) is zero
-    for ( int i = 1; i <= 6; i++ ) {
-        answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
-        answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
-        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy
-        answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
-    }
-
-    answer.at(3, 1) = n.at(1) / r;
-    answer.at(3, 3) = n.at(2) / r;
-    answer.at(3, 5) = n.at(3) / r;
-}
-
-
-
 double
 Axisymm3d :: giveArea()
 // returns the area occupied by the receiver
@@ -217,31 +104,6 @@ Axisymm3d :: giveArea()
     area = fabs( this->interpolation.giveArea( FEIElementGeometryWrapper(this) ) );
     return area;
 }
-
-
-double
-Axisymm3d :: computeVolumeAround(GaussPoint *gp)
-{
-    double determinant, weight, volume, r, x;
-    FloatArray n;
-
-    this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    r = 0.;
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        x  = this->giveNode(i)->giveCoordinate(1);
-        r += x * n.at(i);
-    }
-
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
-
-    weight = gp->giveWeight();
-    volume = determinant * weight * r;
-
-    return volume;
-}
-
 
 void
 Axisymm3d :: computeGaussPoints()
@@ -327,21 +189,6 @@ Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
     }
 }
 
-double
-Axisymm3d :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
-//
-// returns receiver's characteristic length for crack band models
-// for a crack formed in the plane with normal normalToCrackPlane.
-//
-{
-    return this->giveCharacteristicLengthForAxisymmElements(normalToCrackPlane);
-}
-
-void
-Axisymm3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
-{
-    answer = {D_u, D_v};
-}
 
 void
 Axisymm3d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
@@ -395,130 +242,6 @@ Axisymm3d :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-void
-Axisymm3d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    /*
-     *
-     * computes interpolation matrix for element edge.
-     * we assemble locally this matrix for only nonzero
-     * shape functions.
-     * (for example only two nonzero shape functions for 2 dofs are
-     * necessary for linear plane stress tringle edge).
-     * These nonzero shape functions are then mapped to
-     * global element functions.
-     *
-     * Using mapping technique will allow to assemble shape functions
-     * without regarding particular side
-     */
-
-    FloatArray n(2);
-    this->interpolation.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(2, 4);
-    answer.zero();
-
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 3) = n.at(2);
-    answer.at(2, 2) = n.at(1);
-    answer.at(2, 4) = n.at(2);
-}
-
-
-void
-Axisymm3d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
-{
-    /*
-     * provides dof mapping of local edge dofs (only nonzero are taken into account)
-     * to global element dofs
-     */
-
-    answer.resize(4);
-    if ( iEdge == 1 ) { // edge between nodes 1,2
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-        answer.at(3) = 3;
-        answer.at(4) = 4;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        answer.at(1) = 3;
-        answer.at(2) = 4;
-        answer.at(3) = 5;
-        answer.at(4) = 6;
-    } else if ( iEdge == 3 ) { // edge between nodes 3 1
-        answer.at(1) = 5;
-        answer.at(2) = 6;
-        answer.at(3) = 1;
-        answer.at(4) = 2;
-    } else {
-        OOFEM_ERROR("wrong edge number");
-    }
-}
-
-
-double
-Axisymm3d :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
-{
-    FloatArray c(2);
-    this->computeEdgeIpGlobalCoords(c, gp, iEdge);
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) );
-
-
-    return c.at(1) * result * gp->giveWeight();
-}
-
-
-void
-Axisymm3d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-}
-
-
-int
-Axisymm3d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
-{
-    // returns transformation matrix from
-    // edge local coordinate system
-    // to element local c.s
-    // (same as global c.s in this case)
-    //
-    // i.e. f(element local) = T * f(edge local)
-    //
-    double dx, dy, length;
-    Node *nodeA, *nodeB;
-    int aNode = 0, bNode = 0;
-
-    answer.resize(2, 2);
-    answer.zero();
-
-    if ( iEdge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
-    } else if ( iEdge == 3 ) { // edge between nodes 2 3
-        aNode = 3;
-        bNode = 1;
-    } else {
-        OOFEM_ERROR("wrong egde number");
-    }
-
-    nodeA   = this->giveNode(aNode);
-    nodeB   = this->giveNode(bNode);
-
-    dx      = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
-    dy      = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
-    length = sqrt(dx * dx + dy * dy);
-
-    answer.at(1, 1) = dx / length;
-    answer.at(1, 2) = -dy / length;
-    answer.at(2, 1) = dy / length;
-    answer.at(2, 2) = dx / length;
-
-    return 1;
-}
 
 
 double

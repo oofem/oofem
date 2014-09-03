@@ -53,7 +53,7 @@ REGISTER_Element(QPlaneStress2d);
 FEI2dQuadQuad QPlaneStress2d :: interpolation(1, 2);
 
 QPlaneStress2d :: QPlaneStress2d(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface()
+    PlaneStressElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface()
     // Constructor.
 {
     numberOfDofMans  = 8;
@@ -74,96 +74,6 @@ QPlaneStress2d :: giveInterface(InterfaceType interface)
 
 FEInterpolation *QPlaneStress2d :: giveInterpolation() const { return & interpolation; }
 
-void
-QPlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
-// Returns the [3x16] strain-displacement matrix {B} of the receiver,
-// evaluated at gp.
-{
-    FloatMatrix dnx;
-
-    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(3, 16);
-    answer.zero();
-
-    for ( int i = 1; i <= 8; i++ ) {
-        answer.at(1, 2 * i - 1) = dnx.at(i, 1);
-        answer.at(2, 2 * i - 0) = dnx.at(i, 2);
-
-        answer.at(3, 2 * i - 1) = dnx.at(i, 2);
-        answer.at(3, 2 * i - 0) = dnx.at(i, 1);
-    }
-}
-
-void
-QPlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-//
-// Returns the [4x16] displacement gradient matrix {BH} of the receiver,
-// evaluated at gp.
-// @todo not checked if correct
-{
-    FloatMatrix dnx;
-
-    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(4, 16);
-
-    for ( int i = 1; i <= 8; i++ ) {
-        answer.at(1, 2 * i - 1) = dnx.at(i, 1);     // du/dx -1
-        answer.at(2, 2 * i - 0) = dnx.at(i, 2);     // dv/dy -2
-        answer.at(3, 2 * i - 1) = dnx.at(i, 2);     // du/dy -6
-        answer.at(4, 2 * i - 0) = dnx.at(i, 1);     // dv/dx -9
-    }
-}
-
-IRResultType
-QPlaneStress2d :: initializeFrom(InputRecord *ir)
-{
-    return Element :: initializeFrom(ir);
-}
-
-void
-QPlaneStress2d :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
-{
-    if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
-    }
-}
-
-double
-QPlaneStress2d :: computeVolumeAround(GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
-{
-    double determinant, weight, thickness, volume;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
-    weight      = gp->giveWeight();
-    thickness   = this->giveCrossSection()->give(CS_Thickness, gp);
-    volume      = determinant * weight * thickness;
-
-    return volume;
-}
-
-
-void
-QPlaneStress2d :: giveDofManDofIDMask(int inode, IntArray &answer) const
-{
-    answer = {D_u, D_v};
-}
-
-
-double
-QPlaneStress2d :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
-//
-// returns receiver's characteristic length for crack band models
-// for a crack formed in the plane with normal normalToCrackPlane.
-//
-{
-    return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
-}
 
 
 #ifdef __OOFEG
@@ -527,93 +437,4 @@ QPlaneStress2d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer,
 }
 
 
-void
-QPlaneStress2d :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    /*
-     *
-     * computes interpolation matrix for element edge.
-     * we assemble locally this matrix for only nonzero
-     * shape functions.
-     * (for example only two nonzero shape functions for 2 dofs are
-     * necessary for linear plane stress tringle edge).
-     * These nonzero shape functions are then mapped to
-     * global element functions.
-     *
-     * Using mapping technique will allow to assemble shape functions
-     * without regarding particular side
-     */
-
-    FloatArray n(3);
-    this->interpolation.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(2, 6);
-    answer.zero();
-
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 3) = n.at(2);
-    answer.at(1, 5) = n.at(3);
-    answer.at(2, 2) = n.at(1);
-    answer.at(2, 4) = n.at(2);
-    answer.at(2, 6) = n.at(3);
-}
-
-
-void
-QPlaneStress2d :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
-{
-    /*
-     * provides dof mapping of local edge dofs (only nonzero are taken into account)
-     * to global element dofs
-     */
-
-    int i;
-    IntArray eNodes(3);
-    this->interpolation.computeLocalEdgeMapping(eNodes,  iEdge);
-
-    answer.resize(6);
-    for ( i = 1; i <= 3; i++ ) {
-        answer.at(i * 2 - 1) = eNodes.at(i) * 2 - 1;
-        answer.at(i * 2) = eNodes.at(i) * 2;
-    }
-}
-
-double
-QPlaneStress2d ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
-{
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) );
-    return result *gp->giveWeight();
-}
-
-void
-QPlaneStress2d :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-}
-
-
-int
-QPlaneStress2d :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
-{
-    // returns transformation matrix from
-    // edge local coordinate system
-    // to element local c.s
-    // (same as global c.s in this case)
-    //
-    // i.e. f(element local) = T * f(edge local)
-    //
-    FloatArray normal(2);
-    answer.resize(2, 2);
-    answer.zero();
-
-    this->interpolation.edgeEvalNormal( normal, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.at(1, 1) = normal.at(2);
-    answer.at(1, 2) = normal.at(1);
-    answer.at(2, 1) = -normal.at(1);
-    answer.at(2, 2) = normal.at(2);
-
-    return 1;
-}
 } // end namespace oofem

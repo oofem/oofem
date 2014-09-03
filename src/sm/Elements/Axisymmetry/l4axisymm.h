@@ -35,7 +35,7 @@
 #ifndef l4axisymm_h
 #define l4axisymm_h
 
-#include "../sm/Elements/nlstructuralelement.h"
+#include "Elements/planestresselement.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
@@ -49,7 +49,7 @@ class FEI2dQuadLin;
  * This class implements an isoparametric four-node quadrilateral axisymmetric
  * finite element. Each node has 2 degrees of freedom.
  */
-class L4Axisymm : public NLStructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
+class L4Axisymm : public AxisymElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface
 {
 protected:
@@ -59,14 +59,7 @@ protected:
 public:
     L4Axisymm(int n, Domain * d);
     virtual ~L4Axisymm();
-
-
-    virtual int computeNumberOfDofs() { return 8; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual double computeVolumeAround(GaussPoint *gp);
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
-
-    virtual double giveCharacteristicLength(const FloatArray &crackToNormalPlane);
 
     virtual FEInterpolation *giveInterpolation() const;
 
@@ -76,7 +69,6 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_L4Axisymm_Name; }
     virtual const char *giveClassName() const { return "L4Axisymm"; }
 
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
@@ -91,19 +83,9 @@ public:
     virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
-    virtual MaterialMode giveMaterialMode() { return _3dMat; }
-
 protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
 
-    // edge load support
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
-    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
 };
 } // end namespace oofem
 #endif // l4axisymm_h

@@ -43,6 +43,12 @@
 #include "mathfem.h"
 #include "classfactory.h"
 
+#ifdef __OOFEG
+ #include "oofeggraphiccontext.h"
+
+ #include <Emarkwd3d.h>
+#endif
+
 namespace oofem {
 REGISTER_Element(IntElSurfTr1);
 
@@ -171,6 +177,45 @@ IntElSurfTr1 :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gc
     return false;
 }
 
+///@todo this code not tested, onlu copied from interfaceelem3dtrlin.C //JB
+#ifdef __OOFEG
+void InterfaceElement3dTrLin :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+{
+    GraphicObj *go;
+    //  if (!go) { // create new one
+    WCRec p [ 3 ]; /* triangle */
+    if ( !gc.testElementGraphicActivity(this) ) {
+        return;
+    }
+
+    EASValsSetLineWidth(OOFEG_RAW_GEOMETRY_WIDTH);
+    EASValsSetColor( gc.getElementColor() );
+    EASValsSetEdgeColor( gc.getElementEdgeColor() );
+    EASValsSetEdgeFlag(true);
+    EASValsSetLayer(OOFEG_RAW_GEOMETRY_LAYER);
+    p [ 0 ].x = ( FPNum ) this->giveNode(1)->giveCoordinate(1);
+    p [ 0 ].y = ( FPNum ) this->giveNode(1)->giveCoordinate(2);
+    p [ 0 ].z = ( FPNum ) this->giveNode(1)->giveCoordinate(3);
+    p [ 1 ].x = ( FPNum ) this->giveNode(2)->giveCoordinate(1);
+    p [ 1 ].y = ( FPNum ) this->giveNode(2)->giveCoordinate(2);
+    p [ 1 ].z = ( FPNum ) this->giveNode(2)->giveCoordinate(3);
+    p [ 2 ].x = ( FPNum ) this->giveNode(3)->giveCoordinate(1);
+    p [ 2 ].y = ( FPNum ) this->giveNode(3)->giveCoordinate(2);
+    p [ 2 ].z = ( FPNum ) this->giveNode(3)->giveCoordinate(3);
+
+    go =  CreateTriangle3D(p);
+    EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | EDGE_COLOR_MASK | EDGE_FLAG_MASK | LAYER_MASK, go);
+    EGAttachObject(go, ( EObjectP ) this);
+    EMAddGraphicsToModel(ESIModel(), go);
+}
 
 
+void InterfaceElement3dTrLin :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+{ }
+
+
+void InterfaceElement3dTrLin :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
+{ }
+
+#endif
 } // end namespace oofem

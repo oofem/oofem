@@ -58,7 +58,7 @@ REGISTER_Element(L4Axisymm);
 FEI2dQuadLin L4Axisymm :: interpolation(1, 2);
 
 L4Axisymm :: L4Axisymm(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SpatialLocalizerInterface(this)
+    AxisymElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SpatialLocalizerInterface(this)
 {
     numberOfDofMans  = 4;
     numberOfGaussPoints = 4;
@@ -89,122 +89,6 @@ L4Axisymm :: giveInterface(InterfaceType interface)
 }
 
 
-void
-L4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
-//
-// Returns the [6x8] strain-displacement matrix {B} of the receiver,
-// evaluated at gp.
-// (epsilon_x,epsilon_y,...,Gamma_xy) = B . r
-// r = ( u1,v1,u2,v2,u3,v3,u4,v4)
-{
-    double r, x;
-    int size, ind = 1;
-    FloatMatrix dnx;
-
-    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    if ( ui == ALL_STRAINS ) {
-        size = 6;
-        ui = 6;
-    } else {
-        size = ui - li + 1;
-    }
-
-    if ( ( size < 0 ) || ( size > 6 ) ) {
-        OOFEM_ERROR("ComputeBmatrixAt size mismatch");
-    }
-
-    answer.resize(size, 8);
-    answer.zero();
-
-    if ( ( li <= 1 ) && ( ui >= 1 ) ) {
-        for ( int i = 1; i <= 4; i++ ) {
-            answer.at(ind, 2 * i - 1) = dnx.at(i, 1);
-        }
-
-        ind++;
-    }
-
-    if ( ( li <= 2 ) && ( ui >= 2 ) ) {
-        for ( int i = 1; i <= 4; i++ ) {
-            answer.at(ind, 2 * i - 0) = dnx.at(i, 2);
-        }
-
-        ind++;
-    }
-
-    if ( ( li <= 3 ) && ( ui >= 3 ) ) {
-        FloatArray n;
-        this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-        r = 0.;
-        for ( int i = 1; i <= numberOfDofMans; i++ ) {
-            x  = this->giveNode(i)->giveCoordinate(1);
-            r += x * n.at(i);
-        }
-
-        answer.at(ind, 1) = n.at(1) / r;
-        answer.at(ind, 3) = n.at(2) / r;
-        answer.at(ind, 5) = n.at(3) / r;
-        answer.at(ind, 7) = n.at(4) / r;
-
-        ind++;
-    }
-
-    if ( ( li <= 4 ) && ( ui >= 4 ) ) {
-        ind++;
-    }
-
-    if ( ( li <= 5 ) && ( ui >= 5 ) ) {
-        ind++;
-    }
-
-    if ( ( li <= 6 ) && ( ui >= 6 ) ) {
-        for ( int i = 1; i <= 4; i++ ) {
-            answer.at(ind, 2 * i - 1) = dnx.at(i, 2);
-            answer.at(ind, 2 * i - 0) = dnx.at(i, 1);
-        }
-    }
-}
-
-
-void
-L4Axisymm :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the [9x8] displacement gradient matrix {BH} of the receiver,
-// evaluated at gp.
-// BH matrix  -  9 rows : du/dx, dv/dy, dw/dz = u/r, 0, 0, du/dy,  0, 0, dv/dx
-// @todo not checked if correct
-{
-    FloatArray n;
-    FloatMatrix dnx;
-
-    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(9, 8);
-    answer.zero();
-
-    double r = 0., x;
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        x  = this->giveNode(i)->giveCoordinate(1);
-        r += x * n.at(i);
-    }
-
-
-    // mode is _3dMat !!!!!! answer.at(4,*), answer.at(5,*), answer.at(7,*), and answer.at(8,*) is zero
-    for ( int i = 1; i <= 8; i++ ) {
-        answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
-        answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
-        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy
-        answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
-    }
-
-    answer.at(3, 1) = n.at(1) / r;
-    answer.at(3, 3) = n.at(2) / r;
-    answer.at(3, 5) = n.at(3) / r;
-    answer.at(3, 7) = n.at(4) / r;
-}
-
-
 
 void
 L4Axisymm :: computeGaussPoints()
@@ -220,29 +104,6 @@ L4Axisymm :: computeGaussPoints()
     }
 }
 
-double
-L4Axisymm :: computeVolumeAround(GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
-{
-    double determinant, weight, volume, r, x;
-    FloatArray n;
-
-    this->interpolation.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    r = 0.;
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
-        x  = this->giveNode(i)->giveCoordinate(1);
-        r += x * n.at(i);
-    }
-
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
-
-    weight = gp->giveWeight();
-    volume = determinant * weight * r;
-
-    return volume;
-}
 
 IRResultType
 L4Axisymm :: initializeFrom(InputRecord *ir)
@@ -315,21 +176,7 @@ L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *t
     }
 }
 
-double
-L4Axisymm :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
-//
-// returns receiver's characteristic length for crack band models
-// for a crack formed in the plane with normal normalToCrackPlane.
-//
-{
-    return this->giveCharacteristicLengthForAxisymmElements(normalToCrackPlane);
-}
 
-void
-L4Axisymm :: giveDofManDofIDMask(int inode, IntArray &answer) const
-{
-    answer = {D_u, D_v};
-}
 
 void
 L4Axisymm :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
@@ -372,125 +219,6 @@ L4Axisymm :: SPRNodalRecoveryMI_givePatchType()
     return SPRPatchType_2dxy;
 }
 
-
-void
-L4Axisymm :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    /*
-     * computes interpolation matrix for element edge.
-     * we assemble locally this matrix for only nonzero
-     * shape functions.
-     * (for example only two nonzero shape functions for 2 dofs are
-     * necessary for linear plane stress tringle edge).
-     * These nonzero shape functions are then mapped to
-     * global element functions.
-     *
-     * Using mapping technique will allow to assemble shape functions
-     * without regarding particular side
-     */
-
-    FloatArray n(2);
-    this->interpolation.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(2, 4);
-    answer.zero();
-
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 3) = n.at(2);
-    answer.at(2, 2) = n.at(1);
-    answer.at(2, 4) = n.at(2);
-}
-
-
-void
-L4Axisymm :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
-{
-    /*
-     * provides dof mapping of local edge dofs (only nonzero are taken into account)
-     * to global element dofs
-     */
-
-    answer.resize(4);
-    if ( iEdge == 1 ) { // edge between nodes 1,2
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-        answer.at(3) = 3;
-        answer.at(4) = 4;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        answer.at(1) = 3;
-        answer.at(2) = 4;
-        answer.at(3) = 5;
-        answer.at(4) = 6;
-    } else if ( iEdge == 3 ) { // edge between nodes 3 4
-        answer.at(1) = 5;
-        answer.at(2) = 6;
-        answer.at(3) = 7;
-        answer.at(4) = 8;
-    } else if ( iEdge == 4 ) { // edge between nodes 4 1
-        answer.at(1) = 7;
-        answer.at(2) = 8;
-        answer.at(3) = 1;
-        answer.at(4) = 2;
-    } else {
-        OOFEM_ERROR("wrong edge number");
-    }
-}
-
-
-double
-L4Axisymm ::   computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
-{
-    FloatArray c(2);
-    this->computeEdgeIpGlobalCoords(c, gp, iEdge);
-    double result = this->interpolation.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) );
-
-
-    return c.at(1) * result * gp->giveWeight();
-}
-
-
-void
-L4Axisymm :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    this->interpolation.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-}
-
-
-int
-L4Axisymm :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
-{
-    // returns transformation matrix from
-    // edge local coordinate system
-    // to element local c.s
-    // (same as global c.s in this case)
-    //
-    // i.e. f(element local) = T * f(edge local)
-    //
-    double dx, dy, length;
-    Node *nodeA, *nodeB;
-    IntArray edgeNodes(2);
-
-    answer.resize(2, 2);
-    answer.zero();
-
-    this->interpolation.computeEdgeMapping(edgeNodes, dofManArray, iEdge);
-
-    // edge nodes are global numbers, not local element numbers
-    nodeA  = domain->giveNode( edgeNodes.at(1) );
-    nodeB  = domain->giveNode( edgeNodes.at(2) );
-
-    dx     = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
-    dy     = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
-    length = sqrt(dx * dx + dy * dy);
-
-    answer.at(1, 1) = dx / length;
-    answer.at(1, 2) = -dy / length;
-    answer.at(2, 1) = answer.at(1, 2);
-    answer.at(2, 2) = dx / length;
-
-    return 1;
-}
 
 
 #ifdef __OOFEG

@@ -35,9 +35,9 @@
 #ifndef quad1planestrain_h
 #define quad1planestrain_h
 
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
-#include "../sm/ErrorEstimators/huertaerrorestimator.h"
+#include "Elements/planestresselement.h"
+#include "ErrorEstimators/directerrorindicatorrc.h"
+#include "ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
@@ -56,7 +56,7 @@ class FEI2dQuadLin;
  * This class implements an isoparametric four-node quadrilateral plane-
  * stress structural finite element. Each node has 2 degrees of freedom.
  */
-class Quad1PlaneStrain : public NLStructuralElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
+class Quad1PlaneStrain : public PlaneStrainElement, public ZZNodalRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
     public SpatialLocalizerInterface,
     public EIPrimaryUnknownMapperInterface,
     public HuertaErrorEstimatorInterface
@@ -68,18 +68,8 @@ public:
     Quad1PlaneStrain(int n, Domain *d);
     virtual ~Quad1PlaneStrain();
 
-    virtual int computeNumberOfDofs() { return 8; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-
     virtual FEInterpolation *giveInterpolation() const;
-
-    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
-
-    virtual int testElementExtension(ElementExtension ext) { return ext == Element_EdgeLoadSupport; }
-
     virtual Interface *giveInterface(InterfaceType it);
-
-    virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
@@ -113,20 +103,10 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Quad1PlaneStrain_Name; }
     virtual const char *giveClassName() const { return "Quad1PlaneStrain"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
 protected:
-    // edge load support
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
-    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
-
-    virtual void computeGaussPoints();
 
     virtual int giveApproxOrder() { return 1; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
