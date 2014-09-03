@@ -35,7 +35,7 @@
 #ifndef axisymm3d_h
 #define axisymm3d_h
 
-#include "../sm/Elements/nlstructuralelement.h"
+#include "Elements/planestresselement.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
@@ -57,7 +57,7 @@ class FEI2dTrLin;
  * Tasks:
  * - calculating its B,D,N matrices and dV.
  */
-class Axisymm3d : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
+class Axisymm3d : public AxisymElement, public ZZNodalRecoveryModelInterface,
 public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface
 {
@@ -70,14 +70,7 @@ public:
     Axisymm3d(int n, Domain * d);
     virtual ~Axisymm3d();
 
-    virtual int computeNumberOfDofs() { return 6; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-
-    // characteristic length in gp (for some material models)
-    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
     virtual double giveArea();
-    virtual double computeVolumeAround(GaussPoint *gp);
-
     virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual Interface *giveInterface(InterfaceType it);
@@ -102,22 +95,10 @@ public:
 
     virtual const char *giveClassName() const { return "Axisymm3d"; }
     virtual const char *giveInputRecordName() const { return _IFT_Axisymm3d_Name; }
-    virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-    virtual MaterialMode giveMaterialMode() { return _3dMat; }
-
 protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
     virtual void computeGaussPoints();
-
-    // edge load support
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
-    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &, int iEdge, GaussPoint *gp);
 };
 } // end namespace oofem
 #endif // axisymm3d_h

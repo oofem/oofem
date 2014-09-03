@@ -34,13 +34,9 @@
 
 #include "../sm/Elements/PlaneStrain/qtrplanestrain.h"
 #include "fei2dtrquad.h"
-#include "node.h"
-#include "gausspoint.h"
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
-#include "crosssection.h"
-#include "gaussintegrationrule.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG
@@ -57,7 +53,7 @@ REGISTER_Element(QTrPlaneStrain);
 FEI2dTrQuad QTrPlaneStrain :: interpolation(1, 2);
 
 QTrPlaneStrain :: QTrPlaneStrain(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this),
+    PlaneStrainElement(n, aDomain), SpatialLocalizerInterface(this), ZZNodalRecoveryModelInterface(this),
     EIPrimaryUnknownMapperInterface()
     // Constructor.
 {
@@ -81,90 +77,6 @@ QTrPlaneStrain :: giveInterface(InterfaceType interface)
     }
 
     return NULL;
-}
-
-
-IRResultType
-QTrPlaneStrain :: initializeFrom(InputRecord *ir)
-{
-    numberOfGaussPoints = 4;
-    IRResultType result = this->StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    return IRRT_OK;
-}
-
-
-
-void
-QTrPlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
-// Returns the [3x12] strain-displacement matrix {B} of the receiver, eva-
-// luated at gp.
-{
-    FloatMatrix dnx;
-
-    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(4, 12);
-    answer.zero();
-
-    for ( int i = 1; i <= 6; i++ ) {
-        answer.at(1, 2 * i - 1) = dnx.at(i, 1);
-        answer.at(2, 2 * i - 0) = dnx.at(i, 2);
-
-        answer.at(4, 2 * i - 1) = dnx.at(i, 2);
-        answer.at(4, 2 * i - 0) = dnx.at(i, 1);
-    }
-}
-
-void
-QTrPlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the [5x12] displacement gradient matrix {BH} of the receiver,
-// evaluated at gp.
-// @todo not checked if correct
-{
-    FloatMatrix dnx;
-    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(5, 12);
-
-    // 3rd row is zero -> dw/dz = 0
-    for ( int i = 1; i <= 6; i++ ) {
-        answer.at(1, 2 * i - 1) = dnx.at(i, 1);     // du/dx -1
-        answer.at(2, 2 * i - 0) = dnx.at(i, 2);     // dv/dy -2
-        answer.at(4, 2 * i - 1) = dnx.at(i, 2);     // du/dy -6
-        answer.at(5, 2 * i - 0) = dnx.at(i, 1);     // dv/dx -9
-    }
-}
-
-double
-QTrPlaneStrain :: computeVolumeAround(GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
-{
-    double determinant, weight, thickness;
-    determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(),
-                                                                       FEIElementGeometryWrapper(this) ) );
-    weight = gp->giveWeight();
-    thickness = this->giveCrossSection()->give(CS_Thickness, gp);
-    return determinant * weight * thickness;
-}
-
-void QTrPlaneStrain :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
-{
-    if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
-    }
-}
-
-void
-QTrPlaneStrain :: giveDofManDofIDMask(int inode, IntArray &answer) const
-{
-    answer = {D_u, D_v};
 }
 
 
@@ -439,14 +351,5 @@ QTrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueMod
     answer.beProductOf(n, u);
 }
 
-double
-QTrPlaneStrain :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
-//
-// returns receiver's characteristic length for crack band models
-// for a crack formed in the plane with normal normalToCrackPlane.
-//
-{
-    return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
-}
 
 } // end namespace oofem

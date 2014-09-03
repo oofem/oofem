@@ -67,44 +67,20 @@ protected:
     static FEI2dTrLin interp;           
 
 public:
-
-    
     /// Constructor
     BasicElement(int n, Domain * d);    
     /// Destructor.
     virtual ~BasicElement() { }         
 
-    virtual FEInterpolation *giveInterpolation() const;
-    //virtual int computeNumberOfDofs() { return 6; }
-    //virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-    //virtual double computeVolumeAround(GaussPoint *gp);
-
-    
+    virtual FEInterpolation *giveInterpolation() const;    
     virtual const char *giveInputRecordName() const { return _IFT_BasicElement_Name; }
     virtual const char *giveClassName() const { return "BasicElement"; }
-    //virtual IRResultType initializeFrom(InputRecord *ir);
-    //virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
-    //virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
 
 protected:
-   
-    //virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    //virtual void computeGaussPoints();
-    virtual int giveApproxOrder() { return 1; }
-
-    // Semi-optional methods - if not implemented, some basic features will not work for the element.
-    
-    // - Support for large deformation anlysis.  
-    //virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual int giveApproxOrder() { return 1; } // to be removed /JB
     
     // - Support for computing the mass matrix needed for dynamic simulations
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }    
-    
-    // - Methods needed to support edge loads
-    //virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);  
-    //virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    //virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    //virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
 
 
 };

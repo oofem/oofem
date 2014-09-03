@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/PlaneStrain/quad1planestrain.h"
+#include "Elements/PlaneStrain/quad1planestrain.h"
 #include "fei2dquadlin.h"
 #include "node.h"
 #include "crosssection.h"
@@ -56,7 +56,7 @@ REGISTER_Element(Quad1PlaneStrain);
 FEI2dQuadLin Quad1PlaneStrain :: interp(1, 2);
 
 Quad1PlaneStrain :: Quad1PlaneStrain(int n, Domain *aDomain) :
-    NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface(),
+    PlaneStrainElement(n, aDomain), ZZNodalRecoveryModelInterface(this), SPRNodalRecoveryModelInterface(),
     SpatialLocalizerInterface(this),
     EIPrimaryUnknownMapperInterface(),
     HuertaErrorEstimatorInterface()
@@ -148,167 +148,6 @@ Quad1PlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     }
 }
 
-void
-Quad1PlaneStrain :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
-{
-    if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
-    }
-}
-
-
-void
-Quad1PlaneStrain :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
-// Returns the displacement interpolation matrix {N} of the receiver,
-// evaluated at gp.
-{
-    FloatArray n;
-    this->interp.evalN( n, iLocCoord, FEIElementGeometryWrapper(this) );
-    answer.beNMatrixOf(n, 2);
-}
-
-
-void
-Quad1PlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    /*
-     *
-     * computes interpolation matrix for element edge.
-     * we assemble locally this matrix for only nonzero
-     * shape functions.
-     * (for example only two nonzero shape functions for 2 dofs are
-     * necessary for linear plane stress tringle edge).
-     * These nonzero shape functions are then mapped to
-     * global element functions.
-     *
-     * Using mapping technique will allow to assemble shape functions
-     * without regarding particular side
-     */
-
-    FloatArray n;
-    this->interp.edgeEvalN( n, iedge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    answer.resize(2, 4);
-    answer.at(1, 1) = n.at(1);
-    answer.at(1, 3) = n.at(2);
-    answer.at(2, 2) = n.at(1);
-    answer.at(2, 4) = n.at(2);
-}
-
-
-void
-Quad1PlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
-{
-    /*
-     * provides dof mapping of local edge dofs (only nonzero are taken into account)
-     * to global element dofs
-     */
-
-    answer.resize(4);
-    if ( iEdge == 1 ) { // edge between nodes 1,2
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-        answer.at(3) = 3;
-        answer.at(4) = 4;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        answer.at(1) = 3;
-        answer.at(2) = 4;
-        answer.at(3) = 5;
-        answer.at(4) = 6;
-    } else if ( iEdge == 3 ) { // edge between nodes 3 4
-        answer.at(1) = 5;
-        answer.at(2) = 6;
-        answer.at(3) = 7;
-        answer.at(4) = 8;
-    } else if ( iEdge == 4 ) { // edge between nodes 4 1
-        answer.at(1) = 7;
-        answer.at(2) = 8;
-        answer.at(3) = 1;
-        answer.at(4) = 2;
-    } else {
-        OOFEM_ERROR("wrong edge number");
-    }
-}
-
-
-double
-Quad1PlaneStrain :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
-{
-    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ * gp->giveWeight();
-}
-
-
-void
-Quad1PlaneStrain :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    this->interp.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-}
-
-
-int
-Quad1PlaneStrain :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
-{
-    // returns transformation matrix from
-    // edge local coordinate system
-    // to element local c.s
-    // (same as global c.s in this case)
-    //
-    // i.e. f(element local) = T * f(edge local)
-    //
-    double dx, dy, length;
-    Node *nodeA, *nodeB;
-    int aNode = 0, bNode = 0;
-
-    answer.resize(2, 2);
-    answer.zero();
-
-    if ( iEdge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
-    } else if ( iEdge == 3 ) { // edge between nodes 3 4
-        aNode = 3;
-        bNode = 4;
-    } else if ( iEdge == 4 ) { // edge between nodes 4 1
-        aNode = 4;
-        bNode = 1;
-    } else {
-        OOFEM_ERROR("wrong egde number");
-    }
-
-    nodeA = this->giveNode(aNode);
-    nodeB = this->giveNode(bNode);
-
-    dx = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
-    dy = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
-    length = sqrt(dx * dx + dy * dy);
-
-    answer.at(1, 1) = dx / length;
-    answer.at(1, 2) = -dy / length;
-    answer.at(2, 1) = answer.at(1, 2);
-    answer.at(2, 2) = dx / length;
-
-    return 1;
-}
-
-
-double
-Quad1PlaneStrain :: computeVolumeAround(GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
-{
-    double detJ, weight, thickness;
-
-    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
-    weight = gp->giveWeight();
-    thickness = this->giveCrossSection()->give(CS_Thickness, gp);
-    return detJ * weight * thickness;
-}
-
 
 IRResultType
 Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
@@ -329,24 +168,6 @@ Quad1PlaneStrain :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-
-double
-Quad1PlaneStrain :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
-//
-// returns receiver's characteristic length for crack band models
-// for a crack formed in the plane with normal normalToCrackPlane.
-//
-{
-    return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
-}
-
-void
-Quad1PlaneStrain :: giveDofManDofIDMask(int inode, IntArray &answer) const
-{
-    answer = {
-        D_u, D_v
-    };
-}
 
 
 Interface *

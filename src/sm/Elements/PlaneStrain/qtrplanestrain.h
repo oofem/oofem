@@ -35,8 +35,8 @@
 #ifndef qtrplanestrain_h
 #define qtrplanestrain_h
 
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
+#include "Elements/planestresselement.h"
+#include "ErrorEstimators/directerrorindicatorrc.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
@@ -51,7 +51,7 @@ class FEI2dTrQuad;
  * This class implements an triangular three-node  plane-
  * stress elasticity finite element. Each node has 2 degrees of freedom.
  */
-class QTrPlaneStrain : public NLStructuralElement, public SpatialLocalizerInterface,
+class QTrPlaneStrain : public PlaneStrainElement, public SpatialLocalizerInterface,
 public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface,
 public EIPrimaryUnknownMapperInterface
 {
@@ -61,12 +61,6 @@ protected:
 public:
     QTrPlaneStrain(int n, Domain * d);
     virtual ~QTrPlaneStrain() { }
-
-    virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
-    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
-
-    virtual double computeVolumeAround(GaussPoint *gp);
 
     virtual Interface *giveInterface(InterfaceType it);
 
@@ -82,9 +76,7 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QTrPlaneStrain_Name; }
     virtual const char *giveClassName() const { return "QTrPlaneStrain"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
-
+    
     virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
 
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
@@ -97,9 +89,6 @@ public:
                                                                        FloatArray &answer);
 
 protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &);
-    virtual void computeGaussPoints();
     virtual int giveApproxOrder() { return 2; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };

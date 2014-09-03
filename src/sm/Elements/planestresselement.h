@@ -37,23 +37,20 @@
 
 #include "../sm/Elements/nlstructuralelement.h"
 
-///@name Input fields for PlaneStressElement
+
 
 namespace oofem {
-class TimeStep;
-class Node;
-class Material;
 class GaussPoint;
 class FloatMatrix;
 class FloatArray;
 class IntArray;
 
 /**
- * Base class for plane stress elements with geometrical nonlinearities.
+ * Base class for plane stress elements.
  *
  * @author Jim Brouzoulis
  */
-class PlaneStressElement : public NLStructuralElement
+class PlaneElement : public NLStructuralElement
 {
 
 public:
@@ -62,23 +59,21 @@ public:
      * @param n Element number.
      * @param d Domain to which new material will belong.
      */
-    PlaneStressElement(int n, Domain * d);
+    PlaneElement(int n, Domain * d);
     /// Destructor.
-    virtual ~PlaneStressElement() { }
+    virtual ~PlaneElement() { }
 
     virtual int computeNumberOfDofs();
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual double computeVolumeAround(GaussPoint *gp);
-    
-    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
     
     virtual IRResultType initializeFrom(InputRecord *ir);
     
     virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
     
 protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) ;
-    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) = 0 ;
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer) = 0;
     virtual void computeGaussPoints();
     
     
@@ -91,9 +86,65 @@ protected:
     virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_EdgeLoadSupport ) ? 1 : 0 ); }
     
-    
-    
 };
+
+
+
+// Plane stress element
+class PlaneStressElement : public PlaneElement
+{
+
+public:
+    PlaneStressElement(int n, Domain * d);
+    virtual ~PlaneStressElement() { }
+    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
+    
+protected:
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) ;
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+
+};
+
+
+
+// Plane strain element
+class PlaneStrainElement : public PlaneElement
+{
+
+public:
+    PlaneStrainElement(int n, Domain * d);
+    virtual ~PlaneStrainElement() { }
+    virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
+    
+protected:
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) ;
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+
+};
+
+
+
+
+// Axisymmetric element
+class AxisymElement : public PlaneElement
+{
+
+public:
+    AxisymElement(int n, Domain * d);
+    virtual ~AxisymElement() { }
+    virtual MaterialMode giveMaterialMode() { return _3dMat; }
+
+    virtual double giveCharacteristicLength(const FloatArray &crackToNormalPlane);
+    //virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);    
+    virtual double computeVolumeAround(GaussPoint *gp);
+
+protected:
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) ;
+    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
+};
+
+
 
 } // end namespace oofem
 #endif // planestresselement_h

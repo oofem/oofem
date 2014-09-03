@@ -32,7 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/PlaneStrain/trplanestrain.h"
+#include "Elements/PlaneStrain/trplanestrain.h"
 #include "fei2dtrlin.h"
 #include "node.h"
 #include "crosssection.h"
@@ -55,7 +55,7 @@ REGISTER_Element(TrPlaneStrain);
 FEI2dTrLin TrPlaneStrain :: interp(1, 2);
 
 TrPlaneStrain :: TrPlaneStrain(int n, Domain *aDomain) :
-    StructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
+    PlaneStrainElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
     EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
     MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface()
@@ -95,179 +95,6 @@ TrPlaneStrain :: giveInterface(InterfaceType interface)
 }
 
 
-void
-TrPlaneStrain :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
-                                  int li, int ui)
-// Returns the [4x6] strain-displacement matrix {B} of the receiver, eva-
-// luated at gp.
-{
-    FloatMatrix dN;
-    this->interp.evaldNdx( dN, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(4, 6);
-
-    answer.at(1, 1) = dN.at(1, 1);
-    answer.at(1, 3) = dN.at(2, 1);
-    answer.at(1, 5) = dN.at(3, 1);
-
-    answer.at(2, 2) = dN.at(1, 2);
-    answer.at(2, 4) = dN.at(2, 2);
-    answer.at(2, 6) = dN.at(3, 2);
-
-    answer.at(4, 1) = dN.at(1, 2);
-    answer.at(4, 2) = dN.at(1, 1);
-    answer.at(4, 3) = dN.at(2, 2);
-    answer.at(4, 4) = dN.at(2, 1);
-    answer.at(4, 5) = dN.at(3, 2);
-    answer.at(4, 6) = dN.at(3, 1);
-}
-
-void
-TrPlaneStrain :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-// Returns the [5x6] displacement gradient matrix {BH} of the receiver,
-// evaluated at gp.
-// @todo not checked if correct
-{
-    FloatMatrix dnx;
-    this->interp.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(5, 6);
-    answer.zero();
-    // 3rd row is zero -> dw/dz = 0
-    for ( int i = 1; i <= 3; i++ ) {
-        answer.at(1, 2 * i - 1) = dnx.at(i, 1);     // du/dx -1
-        answer.at(2, 2 * i - 0) = dnx.at(i, 2);     // dv/dy -2
-        answer.at(4, 2 * i - 1) = dnx.at(i, 2);     // du/dy -6
-        answer.at(5, 2 * i - 0) = dnx.at(i, 1);     // dv/dx -9
-    }
-}
-
-void TrPlaneStrain :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
-{
-    if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
-        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
-    }
-}
-
-
-void
-TrPlaneStrain :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
-{
-    FloatArray n;
-    this->interp.edgeEvalN( n, 1, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    answer.resize(2, 4);
-    answer.at(1, 1) = answer.at(2, 2) = n.at(1);
-    answer.at(1, 3) = answer.at(2, 4) = n.at(2);
-}
-
-
-void
-TrPlaneStrain :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
-{
-    /*
-     * provides dof mapping of local edge dofs (only nonzero are taken into account)
-     * to global element dofs
-     */
-
-    answer.resize(4);
-    if ( iEdge == 1 ) { // edge between nodes 1,2
-        answer.at(1) = 1;
-        answer.at(2) = 2;
-        answer.at(3) = 3;
-        answer.at(4) = 4;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        answer.at(1) = 3;
-        answer.at(2) = 4;
-        answer.at(3) = 5;
-        answer.at(4) = 6;
-    } else if ( iEdge == 3 ) { // edge between nodes 3 1
-        answer.at(1) = 5;
-        answer.at(2) = 6;
-        answer.at(3) = 1;
-        answer.at(4) = 2;
-    } else {
-        OOFEM_ERROR("wrong edge number");
-    }
-}
-
-
-double
-TrPlaneStrain :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
-{
-    double detJ = this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    return detJ *gp->giveWeight();
-}
-
-
-void
-TrPlaneStrain :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
-{
-    this->interp.edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-}
-
-
-int
-TrPlaneStrain :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
-{
-    // returns transformation matrix from
-    // edge local coordinate system
-    // to element local c.s
-    // (same as global c.s in this case)
-    //
-    // i.e. f(element local) = T * f(edge local)
-    //
-
-    ///@todo Move this to interpolation class (similar code is repeated in several elements)
-    double dx, dy, length;
-    Node *nodeA, *nodeB;
-    int aNode = 0, bNode = 0;
-
-    answer.resize(2, 2);
-    answer.zero();
-
-    if ( iEdge == 1 ) { // edge between nodes 1 2
-        aNode = 1;
-        bNode = 2;
-    } else if ( iEdge == 2 ) { // edge between nodes 2 3
-        aNode = 2;
-        bNode = 3;
-    } else if ( iEdge == 3 ) { // edge between nodes 2 3
-        aNode = 3;
-        bNode = 1;
-    } else {
-        OOFEM_ERROR("wrong egde number");
-    }
-
-    nodeA = this->giveNode(aNode);
-    nodeB = this->giveNode(bNode);
-
-    dx = nodeB->giveCoordinate(1) - nodeA->giveCoordinate(1);
-    dy = nodeB->giveCoordinate(2) - nodeA->giveCoordinate(2);
-    length = sqrt(dx * dx + dy * dy);
-
-    answer.at(1, 1) = dx / length;
-    answer.at(1, 2) = -dy / length;
-    answer.at(2, 1) = dy / length;
-    answer.at(2, 2) = dx / length;
-
-    return 1;
-}
-
-
-double TrPlaneStrain :: computeVolumeAround(GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
-{
-    double detJ, weight;
-
-    weight = gp->giveWeight();
-    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
-
-    return detJ *weight *this->giveCrossSection()->give(CS_Thickness, gp);
-}
-
 IRResultType
 TrPlaneStrain :: initializeFrom(InputRecord *ir)
 {
@@ -284,23 +111,6 @@ TrPlaneStrain :: initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-
-double
-TrPlaneStrain :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
-//
-// returns receiver's characteristic length for crack band models
-// for a crack formed in the plane with normal normalToCrackPlane.
-//
-{
-    return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
-}
-
-
-void
-TrPlaneStrain :: giveDofManDofIDMask(int inode, IntArray &answer) const
-{
-    answer = {D_u, D_v};
-}
 
 
 void

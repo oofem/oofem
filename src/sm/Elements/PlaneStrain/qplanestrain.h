@@ -35,7 +35,7 @@
 #ifndef qplanstrain_h
 #define qplanstrain_h
 
-#include "../sm/Elements/nlstructuralelement.h"
+#include "Elements/planestresselement.h"
 #include "zznodalrecoverymodel.h"
 
 #define _IFT_QPlaneStrain_Name "qplanestrain"
@@ -47,7 +47,7 @@ class FEI2dQuadQuad;
  * This class implements an Quadratic isoparametric eight-node quadrilateral plane-
  * stress elasticity finite element. Each node has 2 degrees of freedom.
  */
-class QPlaneStrain : public NLStructuralElement, public ZZNodalRecoveryModelInterface
+class QPlaneStrain : public PlaneStrainElement, public ZZNodalRecoveryModelInterface
 {
 protected:
     static FEI2dQuadQuad interpolation;
@@ -56,25 +56,15 @@ public:
     QPlaneStrain(int N, Domain * d);
     virtual ~QPlaneStrain() { }
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
-
     virtual FEInterpolation *giveInterpolation() const;
-
-    virtual void giveDofManDofIDMask(int inode, IntArray &) const;
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QPlaneStrain_Name; }
     virtual const char *giveClassName() const { return "QPlaneStrain"; }
-    virtual int computeNumberOfDofs() { return 16; }
-    virtual MaterialMode giveMaterialMode() { return _PlaneStrain; }
 
-    virtual int testElementExtension(ElementExtension ext) { return 0; }
+    virtual int testElementExtension(ElementExtension ext) { return 0; } ///@todo //check this probably ok now when derived from PE-element
 
     virtual Interface *giveInterface(InterfaceType it);
-
-    virtual double computeVolumeAround(GaussPoint *gp);
-
-    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
 
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
@@ -82,11 +72,6 @@ public:
     virtual void drawScalar(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
-protected:
-    void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
-    void computeGaussPoints();
 };
 } // end namespace oofem
 #endif // qplanstrain_h
