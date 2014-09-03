@@ -332,7 +332,10 @@ IDNLMaterial :: computeStressBasedWeight(double &angle, double &ratio, GaussPoin
     rotation.at(2, 1) = sin(angle);
     rotation.at(2, 2) = cos(angle);
     //Rotate distance vector
-    FloatArray distanceRotated(distance);
+    FloatArray distanceRotated(2);
+    distanceRotated.at(1)=distance.at(1);        
+    distanceRotated.at(2)=distance.at(2); 
+
     distanceRotated.rotatedWith(rotation, 't'); // Operation distanceRotated= rotation^T *distance
     // Compute axis of ellipse and scale/stretch weak axis so that ellipse is converted to circle
     double gamma = this->beta + ( 1. - beta ) * pow(ratio, 2);
