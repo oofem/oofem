@@ -35,7 +35,7 @@
 #ifndef trplanstrain_h
 #define trplanstrain_h
 
-#include "Elements/planestresselement.h"
+#include "Elements/structural2delement.h"
 #include "ErrorEstimators/directerrorindicatorrc.h"
 #include "ErrorEstimators/zzerrorestimator.h"
 #include "ErrorEstimators/huertaerrorestimator.h"

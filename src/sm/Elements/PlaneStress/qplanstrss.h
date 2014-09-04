@@ -35,7 +35,7 @@
 #ifndef qplanstrss_h
 #define qplanstrss_h
 
-#include "Elements/planestresselement.h"
+#include "Elements/structural2delement.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 

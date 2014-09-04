@@ -36,8 +36,8 @@
 #ifndef lwedge_h
 #define lwedge_h
 
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/ErrorEstimators/huertaerrorestimator.h"
+#include "Elements/structural3delement.h"
+#include "ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "eleminterpmapperinterface.h"
@@ -55,7 +55,7 @@ class FEI3dWedgeLin;
  * One single additional attribute is needed for Gauss integration purpose :
  * 'jacobianMatrix'. This 3x3 matrix contains polynomials.
  */
-class LWedge : public NLStructuralElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
+class LWedge : public Structural3DElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {
 protected:
     static FEI3dWedgeLin interpolation;
@@ -67,9 +67,7 @@ public:
     virtual FEInterpolation *giveInterpolation() const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual double computeVolumeAround(GaussPoint *);
-
+    
     virtual Interface *giveInterface(InterfaceType);
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 9; }
@@ -82,19 +80,10 @@ public:
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
 
-    //
     // definition & identification
-    //
     virtual const char *giveInputRecordName() const { return _IFT_LWedge_Name; }
     virtual const char *giveClassName() const { return "LWedge"; }
-    virtual int computeNumberOfDofs() { return 18; }
-    virtual MaterialMode giveMaterialMode();
-
-protected:
-    virtual void computeGaussPoints();
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &);
-    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
+    
 };
 } // end namespace oofem
 #endif

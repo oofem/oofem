@@ -32,9 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/3D/lwedge.h"
-#include "../sm/Materials/structuralms.h"
-#include "../sm/CrossSections/structuralcrosssection.h"
+#include "Elements/3D/lwedge.h"
+#include "Materials/structuralms.h"
+#include "CrossSections/structuralcrosssection.h"
 #include "fei3dwedgelin.h"
 #include "node.h"
 #include "material.h"
@@ -55,7 +55,7 @@ REGISTER_Element(LWedge);
 
 FEI3dWedgeLin LWedge :: interpolation;
 
-LWedge :: LWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
+LWedge :: LWedge(int n, Domain *aDomain) : Structural3DElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
     // Constructor.
 {
     numberOfDofMans = 6;
@@ -81,6 +81,8 @@ LWedge :: initializeFrom(InputRecord *ir)
 
 FEInterpolation * LWedge :: giveInterpolation() const { return & interpolation; }
 
+
+#if 0
 void
 LWedge :: giveDofManDofIDMask(int inode, IntArray &answer) const
 // returns DofId mask array for inode element node.
@@ -184,6 +186,7 @@ LWedge :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     }
 }
 
+#endif
 
 Interface *
 LWedge :: giveInterface(InterfaceType interface)

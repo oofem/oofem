@@ -36,7 +36,7 @@
 #define q4axisymm_h
 
 #include "Elements/structuralelement.h"
-#include "Elements/planestresselement.h"
+#include "Elements/structural2delement.h"
 #include "zznodalrecoverymodel.h"
 
 ///@name Input fields for Q4Axisymm
@@ -64,7 +64,6 @@ public:
     virtual ~Q4Axisymm();
 
     virtual FEInterpolation *giveInterpolation() const;
-    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     // definition & identification
     virtual Interface *giveInterface(InterfaceType);
@@ -73,8 +72,9 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     
 protected:
-    virtual void computeGaussPoints();
-
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) ;
+    
+    
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
     virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type);

@@ -35,8 +35,7 @@
 #ifndef basicelement_h
 #define basicelement_h
 
-#include "Elements/nlstructuralelement.h"
-#include "Elements/planestresselement.h"
+#include "Elements/structural2delement.h"
 #define _IFT_BasicElement_Name "basicelement"
 
 namespace oofem {

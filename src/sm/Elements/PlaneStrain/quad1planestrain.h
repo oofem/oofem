@@ -35,7 +35,7 @@
 #ifndef quad1planestrain_h
 #define quad1planestrain_h
 
-#include "Elements/planestresselement.h"
+#include "Elements/structural2delement.h"
 #include "ErrorEstimators/directerrorindicatorrc.h"
 #include "ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"

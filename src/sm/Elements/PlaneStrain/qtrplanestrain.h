@@ -35,7 +35,7 @@
 #ifndef qtrplanestrain_h
 #define qtrplanestrain_h
 
-#include "Elements/planestresselement.h"
+#include "Elements/structural2delement.h"
 #include "ErrorEstimators/directerrorindicatorrc.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"

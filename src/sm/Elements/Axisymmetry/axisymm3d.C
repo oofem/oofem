@@ -105,18 +105,6 @@ Axisymm3d :: giveArea()
     return area;
 }
 
-void
-Axisymm3d :: computeGaussPoints()
-{
-    if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
-        //integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
-        //this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], numberOfFiAndShGaussPoints, this);
-    }
-}
-
 
 IRResultType
 Axisymm3d :: initializeFrom(InputRecord *ir)
@@ -139,55 +127,7 @@ Axisymm3d :: initializeFrom(InputRecord *ir)
 }
 
 
-void
-Axisymm3d :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
-// Computes the vector containing the strains at the Gauss point gp of
-// the receiver, at time step tStep. The nature of these strains depends
-// on the element's type.
-{
-    FloatMatrix b, A;
-    FloatArray u, Epsilon, help;
-    fMode mode = domain->giveEngngModel()->giveFormulation();
 
-    answer.resize(6);
-    answer.zero();
-
-    if ( mode == TL ) {  // Total Lagrange formulation
-        this->computeVectorOf({D_u, D_v}, VM_Total, tStep, u);
-        // linear part of strain tensor (in vector form)
-
-        this->computeBmatrixAt(gp, b, 1, 6);
-        answer.beProductOf(b, u);
-#if 0
-        answer.at(1) = Epsilon.at(1);
-        answer.at(2) = Epsilon.at(2);
-
-        if ( numberOfFiAndShGaussPoints == 1 ) {
-            //
-            // if reduced integration in one gp only
-            // force the evaluation of eps_fi in this gauss point
-            // instead of evaluating in given gp
-            //
-            GaussPoint *helpGaussPoint;
-            helpGaussPoint = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
-
-            this->computeBmatrixAt(helpGaussPoint, b, 3, 6);
-        } else {
-            OOFEM_ERROR("numberOfRotGaussPoints size mismatch");
-        }
-
-        Epsilon.beProductOf(b, u);
-        answer.at(3) = Epsilon.at(1);
-        answer.at(6) = Epsilon.at(4);
-#endif
-
-        if ( nlGeometry ) {
-            OOFEM_ERROR("only supports nlGeometry = 0");
-        }
-    } else if ( mode == AL ) { // actualized Lagrange formulation
-        OOFEM_ERROR("unsupported mode");
-    }
-}
 
 
 void
