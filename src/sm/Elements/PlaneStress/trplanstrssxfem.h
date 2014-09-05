@@ -56,7 +56,7 @@ protected:
 
 public:
 
-    TrPlaneStress2dXFEM(int n, Domain * d) : TrPlaneStress2d(n, d), XfemStructuralElementInterface(this), VTKXMLExportModuleElementInterface() { }
+    TrPlaneStress2dXFEM(int n, Domain * d) : TrPlaneStress2d(n, d), XfemStructuralElementInterface(this), VTKXMLExportModuleElementInterface() { numberOfDofMans = 3; }
 
     virtual ~TrPlaneStress2dXFEM();
 

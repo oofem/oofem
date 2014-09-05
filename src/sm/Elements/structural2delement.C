@@ -44,9 +44,25 @@ Structural2DElement :: Structural2DElement(int n, Domain *aDomain) :
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
     //nlGeometry = 0; // Geometrical nonlinearities disabled as default
+
+}
+
+void
+Structural2DElement::postInitialize()
+{
+    // Element must be created before giveNumberOfNodes can be called
+    StructuralElement :: postInitialize();
+    this->numberOfDofMans = this->giveNumberOfNodes();
 }
 
 
+int 
+Structural2DElement :: giveNumberOfNodes() const
+{
+    return this->giveInterpolation()->giveNumberOfNodes();
+}
+
+ 
 
 int 
 Structural2DElement :: computeNumberOfDofs() 
@@ -101,6 +117,8 @@ Structural2DElement :: computeGaussPoints()
         integrationRulesArray = { new GaussIntegrationRule(1, this, 1, 3) };
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
+    
+    StructuralElement :: giveNumberOfIPForMassMtrxIntegration();
 }
 
 
@@ -363,7 +381,7 @@ AxisymElement :: computeVolumeAround(GaussPoint *gp)
         evalN( N, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );  
         
     double r = 0.0;
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         double x  = this->giveNode(i)->giveCoordinate(1);
         r += x * N.at(i);
     }
@@ -433,7 +451,7 @@ AxisymElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     answer.zero();
 
     double r = 0., x;
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         x  = this->giveNode(i)->giveCoordinate(1);
         r += x * n.at(i);
     }
@@ -448,7 +466,7 @@ AxisymElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     }
 
     
-    for ( int i = 0; i < numberOfDofMans; i++ ) {
+    for ( int i = 0; i < this->giveNumberOfDofManagers(); i++ ) {
         answer.at(3, 2*i + 1) = n.at(i+1) / r;
     }            
 

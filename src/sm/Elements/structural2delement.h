@@ -62,7 +62,10 @@ public:
     Structural2DElement(int n, Domain * d);
     /// Destructor.
     virtual ~Structural2DElement() { }
-
+    virtual void postInitialize();
+    virtual int giveNumberOfNodes() const;
+    
+    
     virtual int computeNumberOfDofs();
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual double computeVolumeAround(GaussPoint *gp);
