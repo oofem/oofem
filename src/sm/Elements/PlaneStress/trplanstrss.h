@@ -35,7 +35,7 @@
 #ifndef trplanstrss_h
 #define trplanstrss_h
 
-#include "Elements/planestresselement.h"
+#include "Elements/structural2delement.h"
 #include "ErrorEstimators/directerrorindicatorrc.h"
 #include "ErrorEstimators/zzerrorestimator.h"
 #include "ErrorEstimators/huertaerrorestimator.h"
@@ -121,7 +121,6 @@ protected:
     virtual double giveArea();
     virtual FloatArray *GivebCoeff();
     virtual FloatArray *GivecCoeff();
-    virtual int giveApproxOrder() { return 1; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 } // end namespace oofem

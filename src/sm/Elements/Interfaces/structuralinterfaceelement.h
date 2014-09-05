@@ -177,14 +177,6 @@ protected:
     // transformation matrix from local to global
     virtual void computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answer) = 0;
 
-
-    /**
-     * Returns maximum approximation order used by receiver.
-     * Must be implemented by derived classes
-     * @return Order of approximation.
-     */
-    virtual int giveApproxOrder() { return 0; }
-
     /**
      * Return desired number of integration points for consistent mass matrix
      * computation, if required.

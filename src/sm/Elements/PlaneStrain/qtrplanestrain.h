@@ -35,7 +35,7 @@
 #ifndef qtrplanestrain_h
 #define qtrplanestrain_h
 
-#include "Elements/planestresselement.h"
+#include "Elements/structural2delement.h"
 #include "ErrorEstimators/directerrorindicatorrc.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
@@ -89,7 +89,6 @@ public:
                                                                        FloatArray &answer);
 
 protected:
-    virtual int giveApproxOrder() { return 2; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 } // end namespace oofem

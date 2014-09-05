@@ -35,7 +35,7 @@
 #ifndef truss2d_h
 #define truss2d_h
 
-#include "../sm/Elements/nlstructuralelement.h"
+#include "Elements/nlstructuralelement.h"
 
 ///@name Input fields for 2D truss element
 //@{
@@ -44,6 +44,7 @@
 //@}
 
 namespace oofem {
+class FEI1dLin;
 /**
  * This class implements a two-node truss bar element for two-dimensional
  * analysis.
@@ -63,7 +64,8 @@ protected:
     double pitch;
     int cs_mode;
     ///@todo Use interpolator class for lines in 2D
-
+    static FEI1dLin interp;  // only defined it so far...
+    
 public:
     Truss2d(int n, Domain * d);
     virtual ~Truss2d() { }
@@ -99,7 +101,8 @@ public:
     virtual Element_Geometry_Type giveGeometryType() const { return EGT_line_1; }
     virtual integrationDomain giveIntegrationDomain() const { return _Line; }
     virtual MaterialMode giveMaterialMode() { return _1dMat; }
-
+    virtual FEInterpolation *giveInterpolation() const;
+    
 protected:
     // edge load support
     void resolveCoordIndices(int &c1, int &c2);
@@ -115,7 +118,6 @@ protected:
 
     virtual double computeLength();
     double givePitch();
-    virtual int giveApproxOrder() { return 1; }
 };
 } // end namespace oofem
 #endif // truss2d_h

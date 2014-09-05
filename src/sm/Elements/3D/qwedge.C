@@ -32,9 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/3D/qwedge.h"
-#include "../sm/Materials/structuralms.h"
-#include "../sm/CrossSections/structuralcrosssection.h"
+#include "Elements/3D/qwedge.h"
+#include "Materials/structuralms.h"
+#include "CrossSections/structuralcrosssection.h"
 #include "fei3dwedgequad.h"
 #include "node.h"
 #include "material.h"
@@ -55,7 +55,7 @@ REGISTER_Element(QWedge);
 
 FEI3dWedgeQuad QWedge :: interpolation;
 
-QWedge :: QWedge(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
+QWedge :: QWedge(int n, Domain *aDomain) : Structural3DElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 15;
 }
@@ -75,16 +75,6 @@ FEInterpolation *
 QWedge :: giveInterpolation() const
 {
     return & interpolation;
-}
-
-void
-QWedge :: giveDofManDofIDMask(int inode, IntArray &answer) const
-// returns DofId mask array for inode element node.
-// DofId mask array determines the dof ordering requsted from node.
-// DofId mask array contains the DofID constants (defined in cltypes.h)
-// describing physical meaning of particular DOFs.
-{
-    answer = {D_u, D_v, D_w};
 }
 
 
@@ -226,87 +216,6 @@ QWedge :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rMode
         answer.rotatedWith(Q, 't');
         //printf("rotated = "); answer.printYourself();
         //OOFEM_ERROR("DEBUG QUIT");
-    }
-}
-
-
-double
-QWedge :: computeVolumeAround(GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
-{
-    double determinant = this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    double weight      = gp->giveWeight();
-
-    return ( determinant * weight );
-}
-
-
-void
-QWedge :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
-{
-    integrationRulesArray.resize(1);
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-    this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
-}
-
-
-MaterialMode
-QWedge :: giveMaterialMode()
-{
-    return _3dMat;
-}
-
-void
-QWedge :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
-// Returns the [6x45] strain-displacement matrix {B} of the receiver, eva-
-// luated at gp.
-// B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
-{
-    FloatMatrix dnx;
-
-    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(6, 45);
-    answer.zero();
-
-    for ( int i = 1; i <= 15; i++ ) {
-        answer.at(1, 3 * i - 2) = dnx.at(i, 1);
-        answer.at(2, 3 * i - 1) = dnx.at(i, 2);
-        answer.at(3, 3 * i - 0) = dnx.at(i, 3);
-
-        answer.at(4, 3 * i - 1) = dnx.at(i, 3);
-        answer.at(4, 3 * i - 0) = dnx.at(i, 2);
-
-        answer.at(5, 3 * i - 2) = dnx.at(i, 3);
-        answer.at(5, 3 * i - 0) = dnx.at(i, 1);
-
-        answer.at(6, 3 * i - 2) = dnx.at(i, 2);
-        answer.at(6, 3 * i - 1) = dnx.at(i, 1);
-    }
-}
-
-
-void
-QWedge :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-{
-    FloatMatrix dnx;
-
-    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(9, 45);
-    answer.zero();
-
-    for ( int i = 1; i <= dnx.giveNumberOfRows(); i++ ) {
-        answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
-        answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
-        answer.at(3, 3 * i - 0) = dnx.at(i, 3);     // dw/dz
-        answer.at(4, 3 * i - 1) = dnx.at(i, 3);     // dv/dz
-        answer.at(7, 3 * i - 0) = dnx.at(i, 2);     // dw/dy
-        answer.at(5, 3 * i - 2) = dnx.at(i, 3);     // du/dz
-        answer.at(8, 3 * i - 0) = dnx.at(i, 1);     // dw/dx
-        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy
-        answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
     }
 }
 

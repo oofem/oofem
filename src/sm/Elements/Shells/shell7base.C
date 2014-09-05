@@ -587,8 +587,12 @@ void
 Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, const int iSurf, TimeStep *tStep)
 {
     // Computes tangent matrix associated with the linearization of pressure loading. Assumes constant pressure.
-    IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];   // rule #2 for surface integration
     ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( load );
+    
+    //IntegrationRule *iRule = giveInterpolation()->giveBoundaryIntegrationRule(load->giveApproxOrder(), iSurf);
+    int nPointsTri = 6; //todo generalize
+    IntegrationRule *iRule = new GaussIntegrationRule(1, this);
+    iRule->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
     
     FloatMatrix N, B, LB, NLB, L(7, 18), gcov, W1, W2;
     FloatArray lcoords(3), solVec, pressure;
@@ -636,6 +640,7 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
         answer.add(dA, NLB);
     }
     
+    delete iRule;
 }
 
 
@@ -871,9 +876,11 @@ void
 Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     // Analytically integrated over the thickness. Constant density assumed.
-    // => integration rule #2 = midplane only
-    IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];
-
+    int nPointsTri = 6; //todo generalize
+    IntegrationRule *iRule = new GaussIntegrationRule(1, this);
+    iRule->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
+    
+    
     //------------------------------
     FloatMatrix N, Ntm, NtmN, temp;
     FloatArray solVec, lCoords;
@@ -930,7 +937,7 @@ Shell7Base :: computeMassMatrix(FloatMatrix &answer, TimeStep *tStep)
     answer.assemble(temp, ordering);
     answer.symmetrized();
 
-
+    delete iRule;
 }
 
 
@@ -1019,7 +1026,10 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
     ///@todo: very old version should be checked
     // Analytically integrated over the thickness. Constant density assumed.
 
-    IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];   // rule 2 for mid-plane integration only
+    int nPointsTri = 6; //todo generalize
+    IntegrationRule *iRule = new GaussIntegrationRule(1, this);
+    iRule->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
+        
     GaussPoint *gp;
     FloatMatrix N;
     FloatArray lCoords, a, da, m, dm, aVec, daVec, fm(7);
@@ -1076,6 +1086,8 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
         dA = this->computeAreaAround(gp, xi);
         answer.plusProduct(N, fm, dA);
     }
+    
+    delete iRule;
 }
 
 
@@ -1124,7 +1136,10 @@ Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const 
 {
     // Computes pressure loading. Acts normal to the current (deformed) surface.
     ConstantPressureLoad* pLoad = dynamic_cast< ConstantPressureLoad * >( surfLoad );
-    IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];   // rule #2 for surface integration
+    int nPointsTri = 6; //todo generalize
+    IntegrationRule *iRule = new GaussIntegrationRule(1, this);
+    iRule->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
+    
     
     FloatMatrix N, B, lambda;
     FloatArray Fp, fp, genEps, genEpsC, lCoords(3), traction, solVecC;
@@ -1215,8 +1230,11 @@ Shell7Base :: evalInitialCovarNormalAt(FloatArray &nCov, FloatArray &lCoords)
 void
 Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, BoundaryLoad *edgeLoad, TimeStep *tStep, ValueModeType mode)
 {
-    // 
-    IntegrationRule *iRule = specialIntegrationRulesArray [ 2 ];   // rule #3 for edge integration of distributed loads given in [*/m]
+
+    int approxOrder = edgeLoad->giveApproxOrder() + this->giveInterpolation()->giveInterpolationOrder();
+    int numberOfGaussPoints = ( int ) ceil( ( approxOrder + 1. ) / 2. );
+    GaussIntegrationRule iRule(1, this, 1, 1);
+    iRule.SetUpPointsOnLine(numberOfGaussPoints, _Unknown);    
     
     FloatMatrix N, Q;
     FloatArray fT(7), components, lCoords;
@@ -1226,7 +1244,7 @@ Shell7Base :: computeTractionForce(FloatArray &answer, const int iEdge, Boundary
     FloatArray Nftemp(21), Nf(21);
     Nf.zero();
 
-    for ( GaussPoint *gp : *iRule ) {    
+    for ( GaussPoint *gp : iRule ) {    
         lCoords = *gp->giveNaturalCoordinates();
         edgeLoad->computeValueAt(components, tStep, lCoords, mode);
         this->edgeComputeNmatrixAt(lCoords, N);
@@ -2007,7 +2025,10 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
     // Recover shear stresses at ip by numerical integration of the momentum balance through the thickness
     std::vector<FloatArray> recoveredValues;
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of types
-    IntegrationRule *iRuleThickness = specialIntegrationRulesArray[ 0 ];
+    
+    GaussIntegrationRule iRuleThickness(1, this, 1, 1);
+    iRuleThickness.SetUpPointsOnLine(this->layeredCS->giveNumIntegrationPointsInLayer(), _Unknown);    
+    
     FloatArray dS, Sold;
     FloatMatrix B, Smat(2,6); // 2 stress components * num of in plane ip ///@todo generalize
     Smat.zero();
@@ -2029,8 +2050,8 @@ Shell7Base :: recoverShearStress(TimeStep *tStep)
         }
         int numInPlaneIP = 6;
 
-        for ( int i = 0; i < iRuleThickness->giveNumberOfIntegrationPoints(); i++ ) { 
-            double  dz = thickness * iRuleThickness->getIntegrationPoint(i)->giveWeight();
+        for ( int i = 0; i < iRuleThickness.giveNumberOfIntegrationPoints(); i++ ) { 
+            double  dz = thickness * iRuleThickness.getIntegrationPoint(i)->giveWeight();
             
             for ( int j = 0; j < numInPlaneIP; j++ ) { 
 

@@ -33,9 +33,9 @@
  */
 
 
-#include "../sm/Elements/3D/qtrspace.h"
-#include "../sm/Materials/structuralms.h"
-#include "../sm/CrossSections/structuralcrosssection.h"
+#include "Elements/3D/qtrspace.h"
+#include "Materials/structuralms.h"
+#include "CrossSections/structuralcrosssection.h"
 #include "node.h"
 #include "material.h"
 #include "gausspoint.h"
@@ -56,7 +56,7 @@ REGISTER_Element(QTRSpace);
 
 FEI3dTetQuad QTRSpace :: interpolation;
 
-QTRSpace :: QTRSpace(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
+QTRSpace :: QTRSpace(int n, Domain *aDomain) : Structural3DElement(n, aDomain), ZZNodalRecoveryModelInterface(this)
 {
     numberOfDofMans = 10;
 }
@@ -85,97 +85,6 @@ QTRSpace :: giveInterpolation() const
     return & interpolation;
 }
 
-
-void
-QTRSpace :: giveDofManDofIDMask(int inode, IntArray &answer) const
-// returns DofId mask array for inode element node.
-// DofId mask array determines the dof ordering requsted from node.
-// DofId mask array contains the DofID constants (defined in cltypes.h)
-// describing physical meaning of particular DOFs.
-{
-    answer = {D_u, D_v, D_w};
-}
-
-
-double
-QTRSpace :: computeVolumeAround(GaussPoint *gp)
-// Returns the portion of the receiver which is attached to gp.
-{
-    double determinant = fabs( ( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) ) );
-    double weight = gp->giveWeight();
-    return ( determinant * weight );
-}
-
-
-void
-QTRSpace :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
-{
-    integrationRulesArray.resize(1);
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
-    this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
-}
-
-
-MaterialMode
-QTRSpace :: giveMaterialMode()
-{
-    return _3dMat;
-}
-
-
-void
-QTRSpace :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
-// Returns the [6x30] strain-displacement matrix {B} of the receiver, eva-
-// luated at gp.
-// B matrix  -  6 rows : epsilon-X, epsilon-Y, epsilon-Z, gamma-YZ, gamma-ZX, gamma-XY  :
-{
-    FloatMatrix dnx;
-
-    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(6, 30);
-    answer.zero();
-
-    for ( int i = 1; i <= 10; i++ ) {
-        answer.at(1, 3 * i - 2) = dnx.at(i, 1);
-        answer.at(2, 3 * i - 1) = dnx.at(i, 2);
-        answer.at(3, 3 * i - 0) = dnx.at(i, 3);
-
-        answer.at(4, 3 * i - 1) = dnx.at(i, 3);
-        answer.at(4, 3 * i - 0) = dnx.at(i, 2);
-
-        answer.at(5, 3 * i - 2) = dnx.at(i, 3);
-        answer.at(5, 3 * i - 0) = dnx.at(i, 1);
-
-        answer.at(6, 3 * i - 2) = dnx.at(i, 2);
-        answer.at(6, 3 * i - 1) = dnx.at(i, 1);
-    }
-}
-
-
-void
-QTRSpace :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
-{
-    FloatMatrix dnx;
-
-    this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-    answer.resize(9, 30);
-    answer.zero();
-
-    for ( int i = 1; i <= dnx.giveNumberOfRows(); i++ ) {
-        answer.at(1, 3 * i - 2) = dnx.at(i, 1);     // du/dx
-        answer.at(2, 3 * i - 1) = dnx.at(i, 2);     // dv/dy
-        answer.at(3, 3 * i - 0) = dnx.at(i, 3);     // dw/dz
-        answer.at(4, 3 * i - 1) = dnx.at(i, 3);     // dv/dz
-        answer.at(7, 3 * i - 0) = dnx.at(i, 2);     // dw/dy
-        answer.at(5, 3 * i - 2) = dnx.at(i, 3);     // du/dz
-        answer.at(8, 3 * i - 0) = dnx.at(i, 1);     // dw/dx
-        answer.at(6, 3 * i - 2) = dnx.at(i, 2);     // du/dy
-        answer.at(9, 3 * i - 1) = dnx.at(i, 1);     // dv/dx
-    }
-}
 
 Interface *
 QTRSpace :: giveInterface(InterfaceType interface)

@@ -35,7 +35,7 @@
 #ifndef qplanstrain_h
 #define qplanstrain_h
 
-#include "Elements/planestresselement.h"
+#include "Elements/structural2delement.h"
 #include "zznodalrecoverymodel.h"
 
 #define _IFT_QPlaneStrain_Name "qplanestrain"

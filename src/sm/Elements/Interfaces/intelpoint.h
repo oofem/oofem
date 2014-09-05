@@ -115,10 +115,7 @@ public:
     
 protected:
     virtual void computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-
     virtual void computeGaussPoints();
-
-    virtual int giveApproxOrder() { return 0; }
 
     void computeLocalSlipDir(FloatArray &normal);
     cmode giveCoordMode() const { return this->mode; }

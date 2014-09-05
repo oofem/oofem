@@ -457,10 +457,14 @@ protected:
     virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const { answer.clear(); }
     /**
      * Returns integration rule for integration over element surface.
-     * @param i order of integrated polynomial
+     * @param order order of integrated polynomial
+     * @param isurf which surface to return integration rule for
      * @return Best integration rule to integrate polynomial of order i over element surface.
      */
-    virtual IntegrationRule *GetSurfaceIntegrationRule(int i) { return NULL; }
+    virtual IntegrationRule *giveSurfaceIntegrationRule(int order, int isurf) { return NULL; }
+    
+    ///@todo Old, only kept until all el have changed to the above
+    virtual IntegrationRule *GetSurfaceIntegrationRule(int order) { return NULL; }
     /**
      * Computes volume related to integration point on local edge.
      * @param gp edge integration point
@@ -570,17 +574,11 @@ public:
 
 protected:
     /**
-     * Returns maximum approximation order used by receiver.
-     * Must be implemented by derived classes
-     * @return Order of approximation.
-     */
-    virtual int giveApproxOrder() { return 0; }
-    /**
      * Return desired number of integration points for consistent mass matrix
      * computation, if required.
      * @return Number of integration points for mass matrix.
      */
-    virtual int giveNumberOfIPForMassMtrxIntegration() { return 0; }
+    virtual int giveNumberOfIPForMassMtrxIntegration();
 
     /**
      * General service for condensation of stiffness and optionally load vector and mass or initial stress matrices

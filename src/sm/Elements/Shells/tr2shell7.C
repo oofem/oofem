@@ -90,21 +90,7 @@ Tr2Shell7 :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         int nPointsTri  = 6;   // points in the plane
-        int nPointsEdge = 2;   // edge integration
-        specialIntegrationRulesArray.resize(3);
-
-        // Midplane and thickness
-
-        // Midplane (Mass matrix integrated analytically through the thickness)
-        specialIntegrationRulesArray [ 1 ] = new GaussIntegrationRule(1, this);
-        specialIntegrationRulesArray [ 1 ]->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
-
-
-        // Edge
-        specialIntegrationRulesArray [ 2 ] = new GaussIntegrationRule(1, this);
-        specialIntegrationRulesArray [ 2 ]->SetUpPointsOnLine(nPointsEdge, _3dMat);
-
-
+        
         // Layered cross section for bulk integration
         //@todo - must use a cast here since check consistency has not been called yet
         LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( Tr2Shell7 :: giveCrossSection() );
@@ -114,10 +100,6 @@ Tr2Shell7 :: computeGaussPoints()
         this->numberOfGaussPoints = layeredCS->giveNumberOfLayers() * nPointsTri * layeredCS->giveNumIntegrationPointsInLayer();
         layeredCS->setupLayeredIntegrationRule(integrationRulesArray, this, nPointsTri);
 
-
-        // Thickness integration for stress recovery
-        specialIntegrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
-        specialIntegrationRulesArray [ 0 ]->SetUpPointsOnLine(layeredCS->giveNumIntegrationPointsInLayer(), _3dMat);
     }
 }
 

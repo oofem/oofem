@@ -32,15 +32,14 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/planestresselement.h"
-//#include "feinterpol.h"
+#include "Elements/structural2delement.h"
 #include "feinterpol2d.h"
 #include "gausspoint.h"
 #include "crosssection.h"
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-PlaneElement :: PlaneElement(int n, Domain *aDomain) :
+Structural2DElement :: Structural2DElement(int n, Domain *aDomain) :
     NLStructuralElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
@@ -50,7 +49,7 @@ PlaneElement :: PlaneElement(int n, Domain *aDomain) :
 
 
 int 
-PlaneElement :: computeNumberOfDofs() 
+Structural2DElement :: computeNumberOfDofs() 
 { 
     ///@todo move one hiearchy up and generalize
     IntArray dofIdMask; 
@@ -61,23 +60,24 @@ PlaneElement :: computeNumberOfDofs()
 
 
 IRResultType
-PlaneElement :: initializeFrom(InputRecord *ir)
+Structural2DElement :: initializeFrom(InputRecord *ir)
 {
     // Initialise the element from the input record   
     return this->NLStructuralElement :: initializeFrom(ir); 
+    
 }
 
 
 
 void 
-PlaneElement :: giveDofManDofIDMask(int inode, IntArray &answer) const 
+Structural2DElement :: giveDofManDofIDMask(int inode, IntArray &answer) const 
 {    
     answer = {D_u, D_v};
 }
 
 
 double 
-PlaneElement :: computeVolumeAround(GaussPoint *gp)
+Structural2DElement :: computeVolumeAround(GaussPoint *gp)
 {
     // Computes the volume element dV associated with the given gp.
 
@@ -93,7 +93,7 @@ PlaneElement :: computeVolumeAround(GaussPoint *gp)
 
 
 void 
-PlaneElement :: computeGaussPoints()
+Structural2DElement :: computeGaussPoints()
 {
     // Sets up the integration rule array which contains all the Gauss points
     // Default: create one integration rule
@@ -110,7 +110,7 @@ PlaneElement :: computeGaussPoints()
 // Edge support
 
 void
-PlaneElement :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
+Structural2DElement :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp)
 {
     /* Returns the [2x4] shape function matrix {N} of the receiver, 
      * evaluated at the given gp.
@@ -126,7 +126,7 @@ PlaneElement :: computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint 
 
 
 void
-PlaneElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
+Structural2DElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 {
     /*
      * provides dof mapping of local edge dofs (only nonzero are taken into account)
@@ -145,7 +145,7 @@ PlaneElement :: giveEdgeDofMapping(IntArray &answer, int iEdge) const
 
 
 void
-PlaneElement :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
+Structural2DElement :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge)
 {
     static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
         edgeLocal2global( answer, iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
@@ -154,7 +154,7 @@ PlaneElement :: computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, in
 
 
 double
-PlaneElement :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
+Structural2DElement :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     /* Returns the line element ds associated with the given gp on the specific edge.
      * Note: The name is misleading since there is no volume to speak of in this case. 
@@ -168,7 +168,7 @@ PlaneElement :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 
 
 int
-PlaneElement :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
+Structural2DElement :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp)
 {
     // returns transformation matrix from
     // edge local coordinate system
@@ -196,7 +196,7 @@ PlaneElement :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, G
 
 
 double
-PlaneElement :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
+Structural2DElement :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 //
 // returns receiver's characteristic length for crack band models
 // for a crack formed in the plane with normal normalToCrackPlane.
@@ -215,7 +215,7 @@ PlaneElement :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 
 
 PlaneStressElement :: PlaneStressElement(int n, Domain *aDomain) :
-    PlaneElement(n, aDomain)
+    Structural2DElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
     //nlGeometry = 0; // Geometrical nonlinearities disabled as default
@@ -275,7 +275,7 @@ PlaneStressElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 
 PlaneStrainElement :: PlaneStrainElement(int n, Domain *aDomain) :
-    PlaneElement(n, aDomain)
+    Structural2DElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
     //nlGeometry = 0; // Geometrical nonlinearities disabled as default
@@ -332,9 +332,8 @@ PlaneStrainElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 
 // Axisymmetry
 
-
 AxisymElement :: AxisymElement(int n, Domain *aDomain) :
-    PlaneElement(n, aDomain)
+    Structural2DElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
     //nlGeometry = 0; // Geometrical nonlinearities disabled as default
@@ -379,89 +378,39 @@ AxisymElement :: computeVolumeAround(GaussPoint *gp)
 
 
 
-
-
-
 void
 AxisymElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 //
-// Returns the [6x8] strain-displacement matrix {B} of the receiver,
+// Returns the [ 6 x (nno*2) ] strain-displacement matrix {B} of the receiver,
 // evaluated at gp.
 // (epsilon_x,epsilon_y,...,Gamma_xy) = B . r
 // r = ( u1,v1,u2,v2,u3,v3,u4,v4)
 {
-    double r, x;
-    int size, ind = 1;
-    FloatMatrix dnx;
 
-    static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
-        evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-    int nRows = dnx.giveNumberOfRows();
+    FEInterpolation *interp = this->giveInterpolation();
+     
+    FloatArray N;
+    interp->evalN( N, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    double r = 0.0;
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
+        double x = this->giveNode(i)->giveCoordinate(1);
+        r += x * N.at(i);
+    } 
     
-    if ( ui == ALL_STRAINS ) {
-        size = 6;
-        ui = 6;
-    } else {
-        size = ui - li + 1;
-    }
-
-    if ( ( size < 0 ) || ( size > 6 ) ) {
-        OOFEM_ERROR("ComputeBmatrixAt size mismatch");
-    }
-
-    answer.resize(size, nRows*2);
+    FloatMatrix dNdx;
+    interp->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+    answer.resize(6, dNdx.giveNumberOfRows() * 2);
     answer.zero();
 
-    if ( ( li <= 1 ) && ( ui >= 1 ) ) {
-        for ( int i = 1; i <= nRows; i++ ) {
-            answer.at(ind, 2 * i - 1) = dnx.at(i, 1);
-        }
-
-        ind++;
+    for ( int i = 1; i <= dNdx.giveNumberOfRows(); i++ ) {
+        answer.at(1, i * 2 - 1) = dNdx.at(i, 1);
+        answer.at(2, i * 2 - 0) = dNdx.at(i, 2);
+        answer.at(3, i * 2 - 1) = N.at(i) / r;
+        answer.at(6, 2 * i - 1) = dNdx.at(i, 2);
+        answer.at(6, 2 * i - 0) = dNdx.at(i, 1);
     }
-
-    if ( ( li <= 2 ) && ( ui >= 2 ) ) {
-        for ( int i = 1; i <= nRows; i++ ) {
-            answer.at(ind, 2 * i - 0) = dnx.at(i, 2);
-        }
-
-        ind++;
-    }
-
-    if ( ( li <= 3 ) && ( ui >= 3 ) ) {
-        FloatArray n;
-        static_cast< FEInterpolation2d* > ( this->giveInterpolation() )->
-            evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-
-        r = 0.;
-        for ( int i = 1; i <= numberOfDofMans; i++ ) {
-            x  = this->giveNode(i)->giveCoordinate(1);
-            r += x * n.at(i);
-        }
-
-        for ( int i = 0; i < numberOfDofMans; i++ ) {
-            answer.at(ind, 2*i + 1) = n.at(i+1) / r;
-        }        
-        
-        ind++;
-    }
-
-    if ( ( li <= 4 ) && ( ui >= 4 ) ) {
-        ind++;
-    }
-
-    if ( ( li <= 5 ) && ( ui >= 5 ) ) {
-        ind++;
-    }
-
-    if ( ( li <= 6 ) && ( ui >= 6 ) ) {
-        for ( int i = 1; i <= nRows; i++ ) {
-            answer.at(ind, 2 * i - 1) = dnx.at(i, 2);
-            answer.at(ind, 2 * i - 0) = dnx.at(i, 1);
-        }
-    }
+  
 }
-
 
 
 
@@ -472,7 +421,7 @@ AxisymElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // Returns the [ 9 x (nno*2) ] displacement gradient matrix {BH} of the receiver,
 // evaluated at gp.
 // BH matrix  -  9 rows : du/dx, dv/dy, dw/dz = u/r, 0, 0, du/dy,  0, 0, dv/dx
-// @todo not checked if correct
+///@todo not checked if correct, is dw/dz = u/r for large deformations? /JB
 {
     FloatArray n;
     FloatMatrix dnx;
@@ -519,60 +468,17 @@ AxisymElement :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 }
 
 
-#if 0
-
-void
-L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
-// Computes the vector containing the strains at the Gauss point gp of
-// the receiver, at time step tStep. The nature of these strains depends
-// on the element's type.
+void 
+AxisymElement :: computeGaussPoints()
 {
-    FloatMatrix b, A;
-    FloatArray u, Epsilon, help;
-    fMode mode = domain->giveEngngModel()->giveFormulation();
-
-    answer.resize(6);
-    answer.zero();
-    if ( mode == TL ) { // Total Lagrange formulation
-        this->computeVectorOf({D_u, D_v}, VM_Total, tStep, u);
-        // linear part of strain tensor (in vector form)
-
-        this->computeBmatrixAt(gp, b, 1, 2);
-        Epsilon.beProductOf(b, u);
-        answer.at(1) = Epsilon.at(1);
-        answer.at(2) = Epsilon.at(2);
-
-        if ( numberOfFiAndShGaussPoints == 1 ) {
-            //
-            // if reduced integration in one gp only
-            // force the evaluation of eps_fi in this gauss point
-            // instead of evaluating in given gp
-            //
-            GaussPoint *helpGaussPoint;
-            helpGaussPoint = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
-
-            this->computeBmatrixAt(helpGaussPoint, b, 3, 6);
-        } else {
-            OOFEM_ERROR("numberOfFiAndShGaussPoints size mismatch");
-        }
-
-        Epsilon.beProductOf(b, u);
-        answer.at(3) = Epsilon.at(1);
-        answer.at(6) = Epsilon.at(4);
-
-        if ( nlGeometry ) {
-            OOFEM_ERROR("only supports nlGeometry = 0");
-        }
-    } else if ( mode == AL ) { // actualized Lagrange formulation
-        OOFEM_ERROR("unsupported mode");
+    // Sets up the integration rule array which contains all the Gauss points
+    if ( integrationRulesArray.size() == 0 ) {
+        integrationRulesArray = { new GaussIntegrationRule(1, this, 1, 6) };
+        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
+    
+    //printf(" num ip: = %d \n", StructuralElement :: giveNumberOfIPForMassMtrxIntegration() );
 }
-
-
-#endif
-
-
-
 
 
 

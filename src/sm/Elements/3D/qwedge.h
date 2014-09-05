@@ -35,8 +35,8 @@
 #ifndef qwedge_h
 #define qwedge_h
 
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/ErrorEstimators/huertaerrorestimator.h"
+#include "Elements/structural3delement.h"
+#include "ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "eleminterpmapperinterface.h"
@@ -54,7 +54,7 @@ class FEI3dWedgeQuad;
  *
  * @author Mikael Öhman (among others)
  */
-class QWedge : public NLStructuralElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
+class QWedge : public Structural3DElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 
 {
 protected:
@@ -69,9 +69,6 @@ public:
     virtual FEInterpolation *giveInterpolation() const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual double computeVolumeAround(GaussPoint *);
-    virtual int giveApproxOrder() { return 2; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 9; }
 
     virtual Interface *giveInterface(InterfaceType);
@@ -100,15 +97,7 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_QWedge_Name; }
     virtual const char *giveClassName() const { return "QWedge"; }
-    virtual int computeNumberOfDofs() { return 45; }
-    virtual MaterialMode giveMaterialMode();
 
-protected:
-    virtual void computeGaussPoints();
-
-    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    //virtual void computeBFmatrixAt(GaussPoint *, FloatMatrix &);
-    virtual void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
 };
 } // end namespace oofem
 #endif

@@ -32,10 +32,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef planestresselement_h
-#define planestresselement_h
+#ifndef structural2delement_h
+#define structural2delement_h
 
-#include "../sm/Elements/nlstructuralelement.h"
+#include "Elements/nlstructuralelement.h"
 
 
 
@@ -46,11 +46,11 @@ class FloatArray;
 class IntArray;
 
 /**
- * Base class for plane stress elements.
+ * Base class for planar 2D elements.
  *
  * @author Jim Brouzoulis
  */
-class PlaneElement : public NLStructuralElement
+class Structural2DElement : public NLStructuralElement
 {
 
 public:
@@ -59,9 +59,9 @@ public:
      * @param n Element number.
      * @param d Domain to which new material will belong.
      */
-    PlaneElement(int n, Domain * d);
+    Structural2DElement(int n, Domain * d);
     /// Destructor.
-    virtual ~PlaneElement() { }
+    virtual ~Structural2DElement() { }
 
     virtual int computeNumberOfDofs();
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
@@ -91,7 +91,7 @@ protected:
 
 
 // Plane stress element
-class PlaneStressElement : public PlaneElement
+class PlaneStressElement : public Structural2DElement
 {
 
 public:
@@ -108,7 +108,7 @@ protected:
 
 
 // Plane strain element
-class PlaneStrainElement : public PlaneElement
+class PlaneStrainElement : public Structural2DElement
 {
 
 public:
@@ -126,7 +126,7 @@ protected:
 
 
 // Axisymmetric element
-class AxisymElement : public PlaneElement
+class AxisymElement : public Structural2DElement
 {
 
 public:
@@ -135,16 +135,16 @@ public:
     virtual MaterialMode giveMaterialMode() { return _3dMat; }
 
     virtual double giveCharacteristicLength(const FloatArray &crackToNormalPlane);
-    //virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);    
     virtual double computeVolumeAround(GaussPoint *gp);
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) ;
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
+    virtual void computeGaussPoints();
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
 };
 
 
 
 } // end namespace oofem
-#endif // planestresselement_h
+#endif // structural3delement_h

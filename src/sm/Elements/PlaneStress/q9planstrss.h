@@ -35,7 +35,7 @@
 #ifndef Q9PLANSTRSS_H_
 #define Q9PLANSTRSS_H_
 
-#include "Elements/planestresselement.h"
+#include "Elements/structural2delement.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 

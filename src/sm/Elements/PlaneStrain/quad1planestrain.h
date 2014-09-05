@@ -35,7 +35,7 @@
 #ifndef quad1planestrain_h
 #define quad1planestrain_h
 
-#include "Elements/planestresselement.h"
+#include "Elements/structural2delement.h"
 #include "ErrorEstimators/directerrorindicatorrc.h"
 #include "ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
@@ -108,7 +108,6 @@ protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
-    virtual int giveApproxOrder() { return 1; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 };
 } // end namespace oofem

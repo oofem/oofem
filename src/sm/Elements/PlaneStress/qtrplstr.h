@@ -35,8 +35,8 @@
 #ifndef qtrplstr_h
 #define qtrplstr_h
 
-#include "../sm/Elements/planestresselement.h"
-#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
+#include "Elements/structural2delement.h"
+#include "ErrorEstimators/directerrorindicatorrc.h"
 #include "spatiallocalizer.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
@@ -89,7 +89,6 @@ public:
                                                                        FloatArray &answer);
 
 protected:
-    //virtual int giveApproxOrder() { return 2; } // probably safe to remove /JB
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
 
 };

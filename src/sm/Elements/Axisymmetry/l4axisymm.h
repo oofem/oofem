@@ -35,7 +35,7 @@
 #ifndef l4axisymm_h
 #define l4axisymm_h
 
-#include "Elements/planestresselement.h"
+#include "Elements/structural2delement.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
@@ -59,7 +59,6 @@ protected:
 public:
     L4Axisymm(int n, Domain * d);
     virtual ~L4Axisymm();
-    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual FEInterpolation *giveInterpolation() const;
 
@@ -84,8 +83,7 @@ public:
 #endif
 
 protected:
-    virtual void computeGaussPoints();
-
+    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS) ;
 };
 } // end namespace oofem
 #endif // l4axisymm_h

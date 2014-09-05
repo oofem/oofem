@@ -35,7 +35,7 @@
 #ifndef axisymm3d_h
 #define axisymm3d_h
 
-#include "Elements/planestresselement.h"
+#include "Elements/structural2delement.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
@@ -71,8 +71,6 @@ public:
     virtual ~Axisymm3d();
 
     virtual double giveArea();
-    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
-
     virtual Interface *giveInterface(InterfaceType it);
     virtual FEInterpolation *giveInterpolation() const;
 
@@ -97,8 +95,6 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_Axisymm3d_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);
 
-protected:
-    virtual void computeGaussPoints();
 };
 } // end namespace oofem
 #endif // axisymm3d_h

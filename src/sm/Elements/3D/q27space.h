@@ -35,8 +35,8 @@
 #ifndef q27space_h
 #define q27space_h
 
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/ErrorEstimators/huertaerrorestimator.h"
+#include "Elements/structural3delement.h"
+#include "ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "eleminterpmapperinterface.h"
@@ -51,7 +51,7 @@ class FEI3dHexaTriQuad;
  * A 27 node tri-quadratic element for structural analysis.
  * @author Mikael Öhman
  */
-class Q27Space : public NLStructuralElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
+class Q27Space : public Structural3DElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
 {
 protected:
     static FEI3dHexaTriQuad interpolation;
@@ -63,11 +63,6 @@ public:
     virtual FEInterpolation *giveInterpolation() const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual double computeVolumeAround(GaussPoint *);
-
-    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
-
     virtual Interface *giveInterface(InterfaceType);
     virtual int testElementExtension(ElementExtension ext) { return ( ( ext == Element_SurfaceLoadSupport ) ? 1 : 0 ); }
 
@@ -81,15 +76,7 @@ public:
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_Q27Space_Name; }
     virtual const char *giveClassName() const { return "Q27Space"; }
-    virtual int computeNumberOfDofs() { return 81; }
-    virtual MaterialMode giveMaterialMode();
-
 protected:
-    virtual void computeGaussPoints();
-    virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
-
-    virtual int giveApproxOrder() { return 2; }
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 27; }
 
     /**
@@ -97,10 +84,6 @@ protected:
      */
     //@{
     virtual IntegrationRule *GetSurfaceIntegrationRule(int);
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
-    virtual void giveSurfaceDofMapping(IntArray &answer, int) const;
-    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int);
-    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int);
     virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *gp);
     //@}
 };

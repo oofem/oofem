@@ -87,7 +87,6 @@ public:
 protected:
     virtual void computeNmatrixAt(GaussPoint *ip, FloatMatrix &answer);
     virtual void computeGaussPoints();
-    virtual int giveApproxOrder() { return 1; }
 
 };
 } // end namespace oofem

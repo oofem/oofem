@@ -35,15 +35,15 @@
 #ifndef ltrspace_h
 #define ltrspace_h
 
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/ErrorEstimators/directerrorindicatorrc.h"
-#include "../sm/ErrorEstimators/huertaerrorestimator.h"
+#include "Elements/structural3delement.h"
+#include "ErrorEstimators/directerrorindicatorrc.h"
+#include "ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "spatiallocalizer.h"
 #include "eleminterpmapperinterface.h"
-#include "../sm/ErrorEstimators/zzerrorestimator.h"
+#include "ErrorEstimators/zzerrorestimator.h"
 #include "mmashapefunctprojection.h"
 
 #define _IFT_LTRSpace_Name "ltrspace"
@@ -55,7 +55,7 @@ class FEI3dTetLin;
  * This class implements a linear tetrahedral four-node finite element for stress analysis.
  * Each node has 3 degrees of freedom.
  */
-class LTRSpace : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
+class LTRSpace : public Structural3DElement, public ZZNodalRecoveryModelInterface,
 public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
 public EIPrimaryUnknownMapperInterface,
@@ -73,23 +73,12 @@ public:
 
     virtual void computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep);
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }
-
-    virtual int computeNumberOfDofs() { return 12; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual double computeVolumeAround(GaussPoint *gp);
-
-    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
-
     virtual Interface *giveInterface(InterfaceType it);
-    virtual int testElementExtension(ElementExtension ext)
-    { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
     // definition & identification
     virtual const char *giveInputRecordName() const { return _IFT_LTRSpace_Name; }
     virtual const char *giveClassName() const { return "LTRSpace"; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual MaterialMode giveMaterialMode();
-
+    
 #ifdef __OOFEG
     virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
     virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
@@ -129,31 +118,12 @@ public:
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
 protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeGaussPoints();
-
-    /**
-     * @name Edge load support
-     */
-    //@{
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *);
-    virtual void giveEdgeDofMapping(IntArray &answer, int) const;
-    virtual double computeEdgeVolumeAround(GaussPoint *, int);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &, int, GaussPoint *);
-    //@}
 
     /**
      * @name Surface load support
      */
     //@{
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *);
-    virtual void giveSurfaceDofMapping(IntArray &answer, int) const;
     virtual IntegrationRule *GetSurfaceIntegrationRule(int);
-    virtual double computeSurfaceVolumeAround(GaussPoint *, int);
-    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *, int);
-    virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int, GaussPoint *);
     //@}
 };
 } // end namespace oofem

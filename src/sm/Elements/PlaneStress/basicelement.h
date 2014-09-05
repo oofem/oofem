@@ -35,8 +35,7 @@
 #ifndef basicelement_h
 #define basicelement_h
 
-#include "Elements/nlstructuralelement.h"
-#include "Elements/planestresselement.h"
+#include "Elements/structural2delement.h"
 #define _IFT_BasicElement_Name "basicelement"
 
 namespace oofem {
@@ -77,7 +76,6 @@ public:
     virtual const char *giveClassName() const { return "BasicElement"; }
 
 protected:
-    virtual int giveApproxOrder() { return 1; } // to be removed /JB
     
     // - Support for computing the mass matrix needed for dynamic simulations
     virtual int giveNumberOfIPForMassMtrxIntegration() { return 4; }    

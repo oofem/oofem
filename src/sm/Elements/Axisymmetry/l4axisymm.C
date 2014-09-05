@@ -89,22 +89,6 @@ L4Axisymm :: giveInterface(InterfaceType interface)
 }
 
 
-
-void
-L4Axisymm :: computeGaussPoints()
-// Sets up the array containing the four Gauss points of the receiver.
-{
-    if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray.resize(2);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
-
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 3, 6);
-        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], numberOfFiAndShGaussPoints, this);
-    }
-}
-
-
 IRResultType
 L4Axisymm :: initializeFrom(InputRecord *ir)
 {
@@ -130,53 +114,42 @@ L4Axisymm :: initializeFrom(InputRecord *ir)
 
 
 void
-L4Axisymm :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
-// Computes the vector containing the strains at the Gauss point gp of
-// the receiver, at time step tStep. The nature of these strains depends
-// on the element's type.
+L4Axisymm :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, int ui)
 {
-    FloatMatrix b, A;
-    FloatArray u, Epsilon, help;
-    fMode mode = domain->giveEngngModel()->giveFormulation();
+    // Returns the [ 6 x (nno*2) ] strain-displacement matrix {B} of the receiver,
+    // evaluated at gp. Uses reduced integration.
+    // (epsilon_x,epsilon_y,...,Gamma_xy) = B . r
+    // r = ( u1,v1,u2,v2,u3,v3,u4,v4)
 
-    answer.resize(6);
-    answer.zero();
-    if ( mode == TL ) { // Total Lagrange formulation
-        this->computeVectorOf({D_u, D_v}, VM_Total, tStep, u);
-        // linear part of strain tensor (in vector form)
+    if ( numberOfFiAndShGaussPoints == 1 ) { // Reduced integration
+        FEInterpolation *interp = this->giveInterpolation();
+        
+        FloatArray N, NRed, redCoord = {0.0, 0.0}; // eval in centroid
+        interp->evalN( N, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        interp->evalN( NRed, redCoord, FEIElementGeometryWrapper(this) );
+        
+        // Evaluate radius at center
+        double r = 0.0;
+        for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
+            double x = this->giveNode(i)->giveCoordinate(1);
+            r += x * NRed.at(i);
+        } 
+        
+        FloatMatrix dNdx, dNdxRed;
+        interp->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        interp->evaldNdx( dNdxRed, redCoord, FEIElementGeometryWrapper(this) );
+        answer.resize(6, dNdx.giveNumberOfRows() * 2);
+        answer.zero();
 
-        this->computeBmatrixAt(gp, b, 1, 2);
-        Epsilon.beProductOf(b, u);
-        answer.at(1) = Epsilon.at(1);
-        answer.at(2) = Epsilon.at(2);
-
-        if ( numberOfFiAndShGaussPoints == 1 ) {
-            //
-            // if reduced integration in one gp only
-            // force the evaluation of eps_fi in this gauss point
-            // instead of evaluating in given gp
-            //
-            GaussPoint *helpGaussPoint;
-            helpGaussPoint = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
-
-            this->computeBmatrixAt(helpGaussPoint, b, 3, 6);
-        } else {
-            OOFEM_ERROR("numberOfFiAndShGaussPoints size mismatch");
+        for ( int i = 1; i <= dNdx.giveNumberOfRows(); i++ ) {
+            answer.at(1, i * 2 - 1) = dNdx.at(i, 1);
+            answer.at(2, i * 2 - 0) = dNdx.at(i, 2);
+            answer.at(3, i * 2 - 1) = NRed.at(i) / r;
+            answer.at(6, 2 * i - 1) = dNdxRed.at(i, 2);
+            answer.at(6, 2 * i - 0) = dNdxRed.at(i, 1);
         }
-
-        Epsilon.beProductOf(b, u);
-        answer.at(3) = Epsilon.at(1);
-        answer.at(6) = Epsilon.at(4);
-
-        if ( nlGeometry ) {
-            OOFEM_ERROR("only supports nlGeometry = 0");
-        }
-    } else if ( mode == AL ) { // actualized Lagrange formulation
-        OOFEM_ERROR("unsupported mode");
     }
 }
-
-
 
 void
 L4Axisymm :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)

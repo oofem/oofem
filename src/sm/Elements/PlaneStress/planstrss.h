@@ -35,7 +35,7 @@
 #ifndef planstrss_h
 #define planstrss_h
 
-#include "Elements/planestresselement.h"
+#include "Elements/structural2delement.h"
 #include "ErrorEstimators/directerrorindicatorrc.h"
 #include "ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
@@ -102,15 +102,13 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_PlaneStress2d_Name; }
     virtual const char *giveClassName() const { return "PlaneStress2d"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
 protected:
 
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
-    int giveApproxOrder() { return 1; }
-    int giveNumberOfIPForMassMtrxIntegration() { return 4; }
+    int giveNumberOfIPForMassMtrxIntegration() { return 4; } //ok
 };
 } // end namespace oofem
 #endif // planstrss_h

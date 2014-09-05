@@ -87,7 +87,6 @@ protected:
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer) { }
     virtual void computeGaussPoints();
 
-    virtual int giveApproxOrder() { return 1; }
     virtual bool computeGtoLRotationMatrix(FloatMatrix &answer);
 };
 } // end namespace oofem

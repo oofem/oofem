@@ -35,8 +35,8 @@
 #ifndef lspace_h
 #define lspace_h
 
-#include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/ErrorEstimators/huertaerrorestimator.h"
+#include "Elements/structural3delement.h"
+#include "ErrorEstimators/huertaerrorestimator.h"
 #include "zznodalrecoverymodel.h"
 #include "sprnodalrecoverymodel.h"
 #include "nodalaveragingrecoverymodel.h"
@@ -58,7 +58,7 @@ class FEI3dHexaLin;
  * - Calculating its Gauss points.
  * - Calculating its B,D,N matrices and dV.
  */
-class LSpace  : public NLStructuralElement, public ZZNodalRecoveryModelInterface,
+class LSpace  : public Structural3DElement, public ZZNodalRecoveryModelInterface,
 public SPRNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface,
 public SpatialLocalizerInterface,
 public EIPrimaryUnknownMapperInterface,
@@ -70,13 +70,7 @@ protected:
 public:
     LSpace(int n, Domain * d);
     virtual ~LSpace() { }
-
-    virtual int computeNumberOfDofs() { return 24; }
-    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
-    virtual double computeVolumeAround(GaussPoint *gp);
     virtual FEInterpolation *giveInterpolation() const;
-
-    virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
 
     virtual Interface *giveInterface(InterfaceType it);
     virtual int testElementExtension(ElementExtension ext)
@@ -117,36 +111,14 @@ public:
     void drawTriad(FloatArray &, int isurf);
 #endif
 
-    virtual MaterialMode giveMaterialMode();
-
 protected:
-    virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
-    virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-    virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
-    virtual void computeGaussPoints();
-    virtual int giveApproxOrder() { return 1; }
-    virtual int giveNumberOfIPForMassMtrxIntegration() { return 8; }
-
-    /**
-     * @name Edge load support
-     */
-    //@{
-    virtual void computeEgdeNMatrixAt(FloatMatrix &answer, int iedge, GaussPoint *gp);
-    virtual void giveEdgeDofMapping(IntArray &answer, int iEdge) const;
-    virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);
-    virtual void computeEdgeIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iEdge);
-    virtual int computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, GaussPoint *gp);
-    //@}
+    virtual int giveNumberOfIPForMassMtrxIntegration() { return 8; };
 
     /**
      * @name Surface load support
      */
     //@{
-    virtual void computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *gp);
-    virtual void giveSurfaceDofMapping(IntArray &answer, int iSurf) const;
     virtual IntegrationRule *GetSurfaceIntegrationRule(int iSurf);
-    virtual double computeSurfaceVolumeAround(GaussPoint *gp, int iSurf);
-    virtual void computeSurfIpGlobalCoords(FloatArray &answer, GaussPoint *gp, int iSurf);
     virtual int computeLoadLSToLRotationMatrix(FloatMatrix &answer, int iSurf, GaussPoint *gp);
     //@}
 };

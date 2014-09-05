@@ -54,7 +54,7 @@
 #include "nonlocmatstiffinterface.h"
 #include "mathfem.h"
 #include "materialmapperinterface.h"
-
+#include <math.h>
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "connectivitytable.h"
@@ -251,7 +251,6 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
     // - GiveEdgeDofMapping - returns integer array specifying local edge dof mapping to
     //   element dofs.
     //
-    int approxOrder, numberOfGaussPoints;
     double dV;
     FloatMatrix T;
     FloatArray globalIPcoords;
@@ -262,8 +261,8 @@ StructuralElement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
 
     BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( edgeLoad ) {
-        approxOrder = edgeLoad->giveApproxOrder() + this->giveApproxOrder();
-        numberOfGaussPoints = ( int ) ceil( ( approxOrder + 1. ) / 2. );
+        int approxOrder = edgeLoad->giveApproxOrder() + this->giveInterpolation()->giveInterpolationOrder();
+        int numberOfGaussPoints = ( int ) ceil( ( approxOrder + 1. ) / 2. );
         GaussIntegrationRule iRule(1, this, 1, 1);
         iRule.SetUpPointsOnLine(numberOfGaussPoints, _Unknown);
         FloatArray reducedAnswer, force, ntf;
@@ -330,7 +329,6 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
     //   element dofs.
     //
 
-    int approxOrder;
     double dV;
     FloatMatrix T;
 
@@ -346,8 +344,7 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
         FloatMatrix n;
         FloatArray globalIPcoords;
 
-        approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder();
-
+        int approxOrder = surfLoad->giveApproxOrder() + this->giveInterpolation()->giveInterpolationOrder();
         iRule = this->GetSurfaceIntegrationRule(approxOrder);
         for ( GaussPoint *gp: *iRule ) {
             this->computeSurfaceNMatrixAt(n, iSurf, gp);
@@ -390,6 +387,58 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
     }
 }
 
+
+
+int 
+StructuralElement :: giveNumberOfIPForMassMtrxIntegration()
+{
+  
+    //test different elements:
+  IntegrationRule *iRule = this->giveIntegrationRule(0);
+  
+//     printf("%e \n", ceil(( 4 + 1 ) / 2));
+//     printf("%d \n", (int)ceil((double)(4+1) / (double)2) );
+//     
+//     printf(" num ip Triangle1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Triangle, 2*1));
+//     
+//     printf(" num ip Triangle2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Triangle, 2*2));
+//     
+//     printf(" num ip Square1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Square, 2*1));
+//     
+//     printf(" num ip Square2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Square, 2*2)); 
+//     
+//     printf(" num ip Square3: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Square, 2*3));
+//     
+//     printf(" num ip_Cube1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Cube, 2*1)); 
+//     
+//     printf(" num ip_Cube2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Cube, 2*2)); 
+//     
+//     printf(" num ip_Cube3: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Cube, 2*3)); 
+// 
+//     printf(" num ip_Tetrahedra1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, 2*1)); 
+//     
+//     printf(" num ip_Tetrahedra1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, 2*2)); 
+//     
+//     printf(" num ip_Tetrahedra1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, 2*3)); 
+//         
+//     printf(" num ip_Wedge1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Wedge, 2*1)); 
+//     
+//     printf(" num ip_Wedge2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Wedge, 2*2)); 
+//     //_Line,
+//     
+  
+  
+  
+  
+  
+  
+  
+    // returns necessary number of ip to integrate the mass matrix 
+    // \int_V N^T*N dV => (order of the approximation)*nsd (constant density assumed)
+    int order = this->giveInterpolation()->giveInterpolationOrder();
+    int nsd = this->giveInterpolation()->giveNsd();
+    return iRule->getRequiredNumberOfIntegrationPoints(this->giveInterpolation()->giveIntegrationDomain(), nsd*order);
+}
 
 void
 StructuralElement :: computeConsistentMassMatrix(FloatMatrix &answer, TimeStep *tStep, double &mass, const double *ipDensity)
