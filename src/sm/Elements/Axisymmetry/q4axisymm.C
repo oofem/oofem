@@ -88,6 +88,7 @@ Q4Axisymm :: initializeFrom(InputRecord *ir)
     }
 
     numberOfFiAndShGaussPoints = 1;
+    ///@todo only works for 1 //JB
     IR_GIVE_OPTIONAL_FIELD(ir, numberOfFiAndShGaussPoints, _IFT_Q4Axisymm_nipfish);
 
     return result;

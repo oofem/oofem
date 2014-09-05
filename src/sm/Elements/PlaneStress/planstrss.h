@@ -102,14 +102,13 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_PlaneStress2d_Name; }
     virtual const char *giveClassName() const { return "PlaneStress2d"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual MaterialMode giveMaterialMode() { return _PlaneStress; }
 
 protected:
 
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);
     virtual void computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer);
 
-    int giveNumberOfIPForMassMtrxIntegration() { return 4; }
+    int giveNumberOfIPForMassMtrxIntegration() { return 4; } //ok
 };
 } // end namespace oofem
 #endif // planstrss_h

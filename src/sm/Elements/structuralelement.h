@@ -578,7 +578,7 @@ protected:
      * computation, if required.
      * @return Number of integration points for mass matrix.
      */
-    virtual int giveNumberOfIPForMassMtrxIntegration() { return 0; }
+    virtual int giveNumberOfIPForMassMtrxIntegration();
 
     /**
      * General service for condensation of stiffness and optionally load vector and mass or initial stress matrices

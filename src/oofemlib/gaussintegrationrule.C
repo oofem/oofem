@@ -302,7 +302,7 @@ GaussIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain d
 
     switch ( dType ) {
     case _Line:
-        requiredNIP = ( approxOrder + 1 ) / 2;
+        requiredNIP = ceil(( approxOrder + 1 ) / 2);
 
         if ( requiredNIP <= 8 ) {
             return requiredNIP;
@@ -370,7 +370,7 @@ GaussIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain d
         return -1;
 
     case _Square:
-        requiredNIP = max( ( approxOrder + 1 ) / 2, 2 );
+        requiredNIP = max( (int)ceil( (double)( approxOrder + 1 ) / (double)2), 2 );
         requiredNIP *= requiredNIP;
         if ( requiredNIP > 64 * 64 ) {
             return -1;
@@ -379,7 +379,7 @@ GaussIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain d
         return requiredNIP;
 
     case _Cube:
-        requiredNIP = max( ( approxOrder + 1 ) / 2, 2 );
+        requiredNIP = max( (int)ceil( (double)( approxOrder + 1 ) / (double)2), 2 );
         requiredNIP *= requiredNIP * requiredNIP;
         if ( requiredNIP > 64 * 64 * 64 ) { // = 262 144 gp's maybe overkill :)
             return -1;

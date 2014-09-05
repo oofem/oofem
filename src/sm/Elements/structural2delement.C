@@ -64,6 +64,7 @@ Structural2DElement :: initializeFrom(InputRecord *ir)
 {
     // Initialise the element from the input record   
     return this->NLStructuralElement :: initializeFrom(ir); 
+    
 }
 
 
@@ -475,6 +476,8 @@ AxisymElement :: computeGaussPoints()
         integrationRulesArray = { new GaussIntegrationRule(1, this, 1, 6) };
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
+    
+    //printf(" num ip: = %d \n", StructuralElement :: giveNumberOfIPForMassMtrxIntegration() );
 }
 
 
