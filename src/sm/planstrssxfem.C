@@ -163,6 +163,16 @@ void PlaneStress2dXfem :: computeStiffnessMatrix(FloatMatrix &answer, MatRespons
 {
     PlaneStress2d :: computeStiffnessMatrix(answer, rMode, tStep);
     XfemStructuralElementInterface :: computeCohesiveTangent(answer, tStep);
+
+    const double tol = 1.0e-6;
+    const double regularizationCoeff = 1.0e-6;
+    int numRows = answer.giveNumberOfRows();
+    for(int i = 0; i < numRows; i++) {
+    	if( fabs(answer(i,i)) < tol ) {
+    		answer(i,i) += regularizationCoeff;
+//    		printf("Found zero on diagonal.\n");
+    	}
+    }
 }
 
 void
@@ -204,15 +214,12 @@ void PlaneStress2dXfem :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tSt
     } else {
         if ( integrationRulesArray.size() > 1 ) {
             // TODO: Implement visualization
-            /*
-             *          PatchIntegrationRule *iRule;
-             *          for ( auto &iRule: integrationRulesArray ) {
-             *              iRule = dynamic_cast< PatchIntegrationRule * >( ir );
-             *              if ( iRule ) {
-             *                  iRule->givePatch()->draw(context);
-             *              }
-             *          }
-             */
+            for ( auto &iRule: integrationRulesArray ) {
+                PatchIntegrationRule *piRule = dynamic_cast< PatchIntegrationRule * >( ir );
+                if ( piRule ) {
+                    piRule->givePatch()->draw(context);
+                }
+            }
         } else {
             PlaneStress2d :: drawRawGeometry(gc);
         }
@@ -290,17 +297,19 @@ void PlaneStress2dXfem :: giveInputRecord(DynamicInputRecord &input)
 }
 
 void
-PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
+PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
 {
+    vtkPieces.resize(1);
+
     const int numCells = mSubTri.size();
 
     if(numCells == 0) {
         // Enriched but uncut element
         // Visualize as a quad
-        vtkPiece.setNumberOfCells(1);
+        vtkPieces[0].setNumberOfCells(1);
 
         int numTotalNodes = 4;
-        vtkPiece.setNumberOfNodes(numTotalNodes);
+        vtkPieces[0].setNumberOfNodes(numTotalNodes);
 
         // Node coordinates
         std :: vector< FloatArray >nodeCoords;
@@ -308,25 +317,25 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
             FloatArray &x = *(giveDofManager(i)->giveCoordinates());
             nodeCoords.push_back(x);
 
-            vtkPiece.setNodeCoords(i, x);
+            vtkPieces[0].setNodeCoords(i, x);
         }
 
         // Connectivity
         IntArray nodes1 = {1, 2, 3, 4};
-        vtkPiece.setConnectivity(1, nodes1);
+        vtkPieces[0].setConnectivity(1, nodes1);
 
         // Offset
         int offset = 4;
-        vtkPiece.setOffset(1, offset);
+        vtkPieces[0].setOffset(1, offset);
 
         // Cell types
-        vtkPiece.setCellType(1, 9); // Linear quad
+        vtkPieces[0].setCellType(1, 9); // Linear quad
 
 
 
 
         // Export nodal variables from primary fields
-        vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
+        vtkPieces[0].setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
 
         for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
             UnknownType type = ( UnknownType ) primaryVarsToExport.at(fieldNum);
@@ -359,7 +368,7 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
                             u = {uTemp[0], uTemp[1], 0.0};
                         }
 
-                        vtkPiece.setPrimaryVarInNode(fieldNum, nodeInd, u);
+                        vtkPieces[0].setPrimaryVarInNode(fieldNum, nodeInd, u);
                 } else {
                     printf("fieldNum: %d\n", fieldNum);
                     // TODO: Implement
@@ -374,11 +383,11 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
 
 
         // Export nodal variables from internal fields
-        vtkPiece.setNumberOfInternalVarsToExport(0, numTotalNodes);
+        vtkPieces[0].setNumberOfInternalVarsToExport(0, numTotalNodes);
 
 
         // Export cell variables
-        vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), 1);
+        vtkPieces[0].setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), 1);
         for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
             InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
             FloatArray average;
@@ -393,7 +402,7 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
             averageV9.at(3) = averageV9.at(7) = average.at(5);
             averageV9.at(2) = averageV9.at(4) = average.at(6);
 
-            vtkPiece.setCellVar( i, 1, averageV9 );
+            vtkPieces[0].setCellVar( i, 1, averageV9 );
         }
 
 
@@ -402,7 +411,7 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
             XfemManager *xMan = domain->giveXfemManager();
 
             int nEnrIt = xMan->giveNumberOfEnrichmentItems();
-            vtkPiece.setNumberOfInternalXFEMVarsToExport(xMan->vtkExportFields.giveSize(), nEnrIt, numTotalNodes);
+            vtkPieces[0].setNumberOfInternalXFEMVarsToExport(xMan->vtkExportFields.giveSize(), nEnrIt, numTotalNodes);
 
             const int nDofMan = giveNumberOfDofManagers();
 
@@ -435,7 +444,7 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
 
 
                             FloatArray valueArray = {levelSet};
-                            vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
+                            vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
 
                         } else if ( xfemstype == XFEMST_LevelSetGamma ) {
                             double levelSet = 0.0, levelSetInNode = 0.0;
@@ -449,7 +458,7 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
 
 
                             FloatArray valueArray = {levelSet};
-                            vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
+                            vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
 
                         } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
                             double nodeEnrMarker = 0.0, nodeEnrMarkerInNode = 0.0;
@@ -463,7 +472,7 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
 
 
                             FloatArray valueArray = {nodeEnrMarker};
-                            vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
+                            vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
                         }
 
                     }
@@ -475,7 +484,7 @@ PlaneStress2dXfem :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &prima
     else {
         // Enriched and cut element
 
-        XfemStructuralElementInterface::giveSubtriangulationCompositeExportData(vtkPiece, primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep);
+        XfemStructuralElementInterface::giveSubtriangulationCompositeExportData(vtkPieces, primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep);
 
 
     }

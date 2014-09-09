@@ -59,7 +59,7 @@ ConstantPressureLoad :: initializeFrom(InputRecord *ir)
 }
 
 void
-ConstantPressureLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
+ConstantPressureLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
 {
     // we overload general implementation on the boundary load level due
     // to implementation efficiency

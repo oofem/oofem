@@ -679,10 +679,9 @@ TR1_2D_SUPG2_AXI :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
 #ifdef TR1_2D_SUPG2_DEBUG
     /* test */
     FloatMatrix test;
-    IntegrationRule *__ir0 = integrationRulesArray [ 0 ];
-    integrationRulesArray [ 0 ] = integrationRulesArray [ 1 ];
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     TR1_2D_SUPG :: computePressureTerm_MC(test, tStep);
-    integrationRulesArray [ 0 ] = __ir0;
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     for ( int i = 1; i <= 3; i++ ) {
         for ( int j = 1; j <= 3; j++ ) {
             if ( fabs( ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) ) >= 1.e-8 ) {

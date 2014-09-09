@@ -253,7 +253,6 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
                                                                            TimeStep *tStep)
 {
     int nDofMans;
-    IntegrationRule *iRule = this->ZZErrorEstimatorI_giveIntegrationRule();
     FEInterpolation *interpol = element->giveInterpolation();
     const FloatArray *recoveredStress;
     FloatArray sig, lsig, diff, ldiff, n;
@@ -280,7 +279,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
 
     // compute  the e-norm and s-norm
     if ( norm == ZZErrorEstimator :: L2Norm ) {
-        for ( GaussPoint *gp: *iRule ) {
+        for ( GaussPoint *gp: *this->ZZErrorEstimatorI_giveIntegrationRule() ) {
             double dV = element->computeVolumeAround(gp);
             interpol->evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
 
@@ -298,7 +297,7 @@ ZZErrorEstimatorInterface :: ZZErrorEstimatorI_computeElementContributions(doubl
         FloatMatrix D, DInv;
         StructuralElement *selem = static_cast< StructuralElement * >(element);
 
-        for ( GaussPoint *gp: *iRule ) {
+        for ( GaussPoint *gp: *this->ZZErrorEstimatorI_giveIntegrationRule() ) {
             double dV = element->computeVolumeAround(gp);
             interpol->evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(element) );
             selem->computeConstitutiveMatrixAt(D, TangentStiffness, gp, tStep);
@@ -489,14 +488,14 @@ ZZRemeshingCriteria :: giveDofManDensity(int num)
     isize = con->giveSize();
 
 #if 0
-     // Minimum density
-     for ( int i = 1; i <= isize; i++ ) {
+    // Minimum density
+    for ( int i = 1; i <= isize; i++ ) {
         Element *ielem = domain->giveElement( con->at(i) );
         if (i==1)
             density = ielem->computeMeanSize();
         else
             density = min(density, ielem->computeMeanSize());
-     }
+    }
 #endif
 
     // Average density

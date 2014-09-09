@@ -101,6 +101,8 @@
 #define _IFT_IsotropicDamageMaterial1_nd "nd"
 #define _IFT_IsotropicDamageMaterial1_checkSnapBack "checksnapback"
 #define _IFT_IsotropicDamageMaterial1_n "griff_n"
+#define _IFT_IsotropicDamageMaterial1_c1 "c1"
+#define _IFT_IsotropicDamageMaterial1_c2 "c2"
 //@}
 
 namespace oofem {
@@ -168,6 +170,9 @@ protected:
     /// Determines the softening for the bilinear law -> corresponds to the stress at the knee point.
     double sk;
 
+    /// Parameters used in Hordijk's softening law
+    double c1, c2;
+
     /// Type characterizing the algorithm used to compute equivalent strain measure.
     enum EquivStrainType { EST_Unknown, EST_Mazars, EST_Rankine_Smooth, EST_Rankine_Standard, EST_ElasticEnergy, EST_ElasticEnergyPositiveStress, EST_ElasticEnergyPositiveStrain, EST_Mises, EST_Griffith };
     /// Parameter specifying the definition of equivalent strain.
@@ -185,7 +190,7 @@ protected:
     /** Type characterizing the formula for the damage law. For example, linear softening can be specified
      *   with fracturing strain or crack opening.
      */
-    enum SofteningType { ST_Unknown, ST_Exponential, ST_Linear, ST_Mazars, ST_Smooth, ST_SmoothExtended, ST_Exponential_Cohesive_Crack, ST_Linear_Cohesive_Crack, ST_BiLinear_Cohesive_Crack, ST_Disable_Damage };
+    enum SofteningType { ST_Unknown, ST_Exponential, ST_Linear, ST_Mazars, ST_Smooth, ST_SmoothExtended, ST_Exponential_Cohesive_Crack, ST_Linear_Cohesive_Crack, ST_BiLinear_Cohesive_Crack, ST_Disable_Damage, ST_PowerExponential, ST_Hordijk_Cohesive_Crack };
 
     /// Parameter specifying the type of softening (damage law).
     SofteningType softType;

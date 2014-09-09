@@ -151,9 +151,9 @@ ElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
         }
     }
 #ifdef __PARALLEL_MODE
-    if ( element->giveParallelMode() == Element_remote ) {
-        return true;
-    }
+        if ( element->giveParallelMode() != Element_local ) {
+            return true;
+        }
 #endif
 
     // note! GPs are numbered from 0 internally, but written with 1-index, inconsistent!

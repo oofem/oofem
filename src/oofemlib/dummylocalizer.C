@@ -205,8 +205,7 @@ DummySpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, boo
     for ( int i = 1; i <= nelem; i++ ) {
         Element *ielem = this->giveDomain()->giveElement(i);
         if ( ( region < 0 ) || ( region == ielem->giveRegionNumber() ) ) {
-            IntegrationRule *iRule = ielem->giveDefaultIntegrationRulePtr();
-            for ( GaussPoint *jGp: *iRule ) {
+            for ( GaussPoint *jGp: *ielem->giveDefaultIntegrationRulePtr() ) {
                 if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
                     double distance = coords.distance(jGpCoords);
                     if ( answer == NULL || distance < minDist ) {
@@ -231,8 +230,7 @@ DummySpatialLocalizer :: giveAllElementsWithIpWithinBox(elementContainerType &el
     nelem = this->giveDomain()->giveNumberOfElements();
     for ( int i = 1; i <= nelem; i++ ) {
         Element *ielem = this->giveDomain()->giveElement(i);
-        IntegrationRule *iRule = ielem->giveDefaultIntegrationRulePtr();
-        for ( GaussPoint *jGp: *iRule ) {
+        for ( GaussPoint *jGp: *ielem->giveDefaultIntegrationRulePtr() ) {
             if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
                 double currDist = coords.distance(jGpCoords);
                 if ( currDist <= radius ) {

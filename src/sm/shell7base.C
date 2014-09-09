@@ -383,10 +383,6 @@ void
 Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
 
-    int ndofs = this->giveNumberOfDofs();
-    answer.resize(ndofs, ndofs);
-    answer.zero();
-    
     FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep); // a
     
@@ -509,7 +505,7 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, 
             lCoords = *gp->giveNaturalCoordinates();
 
             this->computeBmatrixAt(lCoords, B);
-	    genEps.beProductOf(B, solVec);
+            genEps.beProductOf(B, solVec);
             // Material stiffness
             Shell7Base :: computeLinearizedStiffness(gp, mat, tStep, A);
 
@@ -762,11 +758,10 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
     int ndofs = Shell7Base :: giveNumberOfDofs();
 
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();  
-    FloatArray f(ndofs), N;
+    FloatArray f, N;
     FloatArray genEps;
     FloatMatrix B;
 
-    f.zero();
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
@@ -969,7 +964,6 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
     FloatMatrix mass, temp;
     FloatArray solVec, lCoords;
     this->giveUpdatedSolutionVector(solVec, tStep);
-    int ndofs = this->giveNumberOfDofs();
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of data
 
     FloatMatrix M11(18, 18), M12(18, 18), M13(18, 6), M22(18, 18), M23(18, 6), M33(6, 6), M(42,42);
@@ -1992,10 +1986,6 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
         //} else if ( ipValues.giveSize() == 0 && type == IST_AbaqusStateVector) {
         //    recoveredValues[i-1].resize(23);
         //    recoveredValues[i-1].zero();
-        } else if ( ipValues.giveSize() == 0 ) {
-            recoveredValues[i-1].resize(giveInternalStateTypeSize(valueType));
-            recoveredValues[i-1].zero();
-
         } else {
             recoveredValues[i-1] = ipValues;
         }

@@ -143,7 +143,6 @@ void Tr1BubbleStokes :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     FloatArray a_pressure, a_velocity, devStress, epsp, N, dNv(8);
     double r_vol, pressure;
@@ -155,7 +154,7 @@ void Tr1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep
 
     FloatArray momentum, conservation;
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         double detJ = fabs( this->interp.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
@@ -229,13 +228,12 @@ void Tr1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharTy
     }
 
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatArray N, gVector, temparray(8);
 
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( GaussPoint *gp: *iRule ) {
+        for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
             FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
             double rho = mat->give('d', gp);
@@ -311,13 +309,12 @@ void Tr1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tS
 {
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatMatrix B(3, 8), EdB, K, G, Dp, DvT, C, Ed, dN;
     FloatArray dNv(8), N, Ep, Cd, tmpA, tmpB;
     double Cp;
     B.zero();
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         // Compute Gauss point and determinant at current element
         FloatArray &lcoords = * gp->giveNaturalCoordinates();
 

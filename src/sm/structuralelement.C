@@ -183,7 +183,6 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
     double dens, dV;
     FloatArray force, ntf;
     FloatMatrix n, T;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
     if ( ( forLoad->giveBCGeoType() != BodyLoadBGT ) || ( forLoad->giveBCValType() != ForceLoadBVT ) ) {
         OOFEM_ERROR("unknown load type");
@@ -199,7 +198,7 @@ StructuralElement :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, 
     answer.clear();
 
     if ( force.giveSize() ) {
-        for ( GaussPoint *gp: *iRule ) {
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
             this->computeNmatrixAt(* ( gp->giveSubPatchCoordinates() ), n);
             dV  = this->computeVolumeAround(gp);
             dens = this->giveCrossSection()->give('d', gp);
@@ -817,8 +816,6 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
 // has been called for the same time step.
 //
 {
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-
     FloatMatrix b;
     FloatArray u, stress, strain;
 
@@ -832,7 +829,7 @@ StructuralElement :: giveInternalForcesVector(FloatArray &answer,
     // zero answer will resize accordingly when adding first contribution
     answer.clear();
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
         StructuralMaterialStatus *matStat = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() );
         this->computeBmatrixAt(gp, b);
 
@@ -1233,11 +1230,10 @@ StructuralElement :: giveNonlocalLocationArray(IntArray &locationArray, const Un
     IntArray elemLocArry;
     // create lit of remote elements, contributing to receiver
     std :: list< localIntegrationRecord > *integrationDomainList;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 
     locationArray.clear();
     // loop over element IP
-    for ( IntegrationPoint *ip: *iRule ) {
+    for ( IntegrationPoint *ip: *this->giveDefaultIntegrationRulePtr() ) {
         interface =  static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
                                                                          giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
 
@@ -1271,9 +1267,8 @@ StructuralElement :: addNonlocalStiffnessContributions(SparseMtrx &dest, const U
         return;
     }
 
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     // loop over element IP
-    for ( IntegrationPoint *ip: *iRule ) {
+    for ( IntegrationPoint *ip: *this->giveDefaultIntegrationRulePtr() ) {
         interface = static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
                                                                         giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
         if ( interface == NULL ) {
@@ -1453,9 +1448,8 @@ StructuralElement :: showExtendedSparseMtrxStructure(CharType mtrx, oofegGraphic
         //    return;
         //}
 
-        IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
         // loop over element IP
-        for ( IntegrationPoint *ip: *iRule ) {
+        for ( IntegrationPoint *ip: *this->giveDefaultIntegrationRulePtr() ) {
             interface = static_cast< NonlocalMaterialStiffnessInterface * >( this->giveStructuralCrossSection()->
                                                                             giveMaterialInterface(NonlocalMaterialStiffnessInterfaceType, ip) );
 

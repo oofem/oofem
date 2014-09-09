@@ -198,8 +198,7 @@ LIBeam3dNL :: computeXMtrx(FloatMatrix &answer, TimeStep *tStep)
 void
 LIBeam3dNL :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    GaussPoint *gp = iRule->getIntegrationPoint(0);
+    GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
     FloatArray nm(6), stress, strain;
     FloatMatrix x;
     double s1, s2;
@@ -254,8 +253,7 @@ LIBeam3dNL :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     double s1, s2;
     FloatMatrix d, x, xt(12, 6), dxt, sn, sm, sxd, y;
     FloatArray n(3), m(3), xd(3), stress, strain;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    GaussPoint *gp = iRule->getIntegrationPoint(0);
+    GaussPoint *gp = this->giveDefaultIntegrationRulePtr()->getIntegrationPoint(0);
 
     answer.clear();
 
@@ -731,13 +729,11 @@ LIBeam3dNL :: initForNewStep()
 void
 LIBeam3dNL :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
 {
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     GaussPoint *gp = iRule->getIntegrationPoint(0);
 
     FloatArray ui(3), xd(3), curv(3), ac(3), PrevEpsilon;
     FloatMatrix sc(3, 3), tmid(3, 3);
-
-    answer.resize(3);
 
     // update curvature at midpoint
     // first, compute Tmid

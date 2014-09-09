@@ -102,8 +102,8 @@ Quad1Mindlin :: computeBodyLoadVectorAt(FloatArray &answer, Load *forLoad, TimeS
 
     force.clear();
     if ( gravity.giveSize() ) {
-        IntegrationRule *ir = integrationRulesArray [ 0 ]; ///@todo Other/higher integration for lumped mass matrices perhaps?
-        for ( GaussPoint *gp: *ir ) {
+        ///@todo Other/higher integration for lumped mass matrices perhaps?
+        for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
 
             this->interp_lin.evalN( n, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
             dV = this->computeVolumeAround(gp) * this->giveCrossSection()->give(CS_Thickness, gp);
@@ -209,9 +209,9 @@ Quad1Mindlin :: computeMidPlaneNormal(FloatArray &answer, const GaussPoint *gp)
 
 
 double
-Quad1Mindlin :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+Quad1Mindlin :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 {
-    return this->giveLenghtInDir(normalToCrackPlane);
+    return this->giveCharacteristicLengthForPlaneElements(normalToCrackPlane);
 }
 
 
@@ -232,8 +232,8 @@ Quad1Mindlin :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     double dV, mass = 0.;
 
-    IntegrationRule *ir = integrationRulesArray [ 0 ]; ///@todo Other/higher integration for lumped mass matrices perhaps?
-    for ( GaussPoint *gp: *ir ) {
+    ///@todo Other/higher integration for lumped mass matrices perhaps?
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
 
         dV = this->computeVolumeAround(gp);
         mass += dV * this->giveStructuralCrossSection()->give('d', gp);

@@ -280,10 +280,9 @@ Quad10_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
     FloatMatrix N, N_d, M_d, LSIC, G_c, M_c, N_c;
     FloatArray u;
 
-    IntegrationRule *iRule = integrationRulesArray [ 1 ];
     mu_min = 1;
     rho = this->giveMaterial()->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
         mu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity(gp, tStep);
         if ( mu_min > mu ) {
             mu_min = mu;
@@ -363,9 +362,8 @@ Quad10_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *tStep)
 
     answer.clear();
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ 1 ] ) {
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
@@ -382,9 +380,8 @@ Quad10_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *tStep
 
     answer.clear();
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ 1 ] ) {
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
@@ -402,9 +399,8 @@ Quad10_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *tStep)
 
     answer.clear();
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* mtrx for computing t_supg, norm of this mtrx is computed */
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ 1 ] ) {
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
@@ -421,8 +417,7 @@ Quad10_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *tStep)
 
     answer.clear();
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ 1 ] ) {
         double dV  = this->computeVolumeAround(gp);
         double rho = this->giveMaterial()->give('d', gp);
         this->computeDivUMatrix(b, gp);
@@ -442,9 +437,7 @@ Quad10_2D_SUPG :: computeAdvectionEpsilonTerm(FloatMatrix &answer, TimeStep *tSt
 
     answer.clear();
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ 1 ] ) {
         this->computeGradPMatrix(g, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV = this->computeVolumeAround(gp);
@@ -461,9 +454,7 @@ Quad10_2D_SUPG :: computeMassEpsilonTerm(FloatMatrix &answer, TimeStep *tStep)
 
     answer.clear();
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ 1 ] ) {
         this->computeGradPMatrix(g, gp);
         this->computeNuMatrix(n, gp);
         double dV = this->computeVolumeAround(gp);

@@ -227,22 +227,9 @@ LSpace :: giveDofManDofIDMask(int inode, IntArray &answer) const
 
 
 double
-LSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+LSpace :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 {
-    if ( normalToCrackPlane.giveSize() != 0 ) {
-        double factor = cbrt( ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
-        return this->giveLenghtInDir(normalToCrackPlane) / factor;
-    } else {
-        IntegrationRule *iRule;
-        double volume = 0.0;
-
-        iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        for ( GaussPoint *gp: *iRule ) {
-            volume += this->computeVolumeAround(gp);
-        }
-
-        return cbrt(volume);
-    }
+    return this->giveLengthInDir(normalToCrackPlane);
 }
 
 
@@ -295,7 +282,6 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
                                                      InternalStateType type, TimeStep *tStep)
 {
     double x1 = 0.0, x2 = 0.0, x3 = 0.0, y = 0.0;
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FloatMatrix A(4, 4);
     FloatMatrix b, r;
     FloatArray val, *coord;
@@ -303,7 +289,7 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
 
     int size = 0;
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         giveIPValue(val, gp, type, tStep);
         if ( size == 0 ) {
             size = val.giveSize();
@@ -756,7 +742,6 @@ LSpace :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
     int i, j, k;
     WCRec q [ 4 ];
     GraphicObj *tr;
-    IntegrationRule *iRule;
     FloatArray crackStatuses, cf;
 
     if ( !gc.testElementGraphicActivity(this) ) {
@@ -769,8 +754,7 @@ LSpace :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
         double length;
         FloatArray crackDir;
 
-        iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-        for ( GaussPoint *gp: *iRule ) {
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
             if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }
