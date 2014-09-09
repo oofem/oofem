@@ -45,13 +45,8 @@ FEI2dTrLin BasicElement :: interp(1, 2);
 
 BasicElement :: BasicElement(int n, Domain *aDomain) : PlaneStressElement(n, aDomain)
 {
-    this->numberOfDofMans  = 3;
     this->numberOfGaussPoints = 1;
 }
-
-
-
-
 
 
 FEInterpolation *BasicElement :: giveInterpolation() const 
@@ -61,7 +56,6 @@ FEInterpolation *BasicElement :: giveInterpolation() const
      */
     return & interp; 
 }
-
 
 
 } // end namespace oofem

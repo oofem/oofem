@@ -93,7 +93,7 @@ Element :: computeVectorOf(ValueModeType u, TimeStep *tStep, FloatArray &answer)
 
     answer.reserve( this->computeNumberOfGlobalDofs() );
 
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         this->giveDofManDofIDMask(i, dofIDMask);
         this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, u, tStep, true);
         answer.append(vec);
@@ -119,7 +119,7 @@ Element :: computeVectorOf(const IntArray &dofIDMask, ValueModeType u, TimeStep 
 
     answer.reserve( dofIDMask.giveSize() * ( this->giveNumberOfDofManagers() + this->giveNumberOfInternalDofManagers() ) );
 
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, u, tStep, padding);
         answer.append(vec);
     }
@@ -162,7 +162,7 @@ Element :: computeVectorOf(PrimaryField &field, const IntArray &dofIDMask, Value
     FloatArray vec;
     answer.reserve( this->computeNumberOfGlobalDofs() );
 
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         this->giveDofManager(i)->giveUnknownVector(vec, dofIDMask, field, u, tStep);
         answer.append(vec);
     }
@@ -186,7 +186,7 @@ Element :: computeVectorOfPrescribed(const IntArray &dofIDMask, ValueModeType mo
 
     answer.reserve( dofIDMask.giveSize() * this->computeNumberOfGlobalDofs() );
 
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         this->giveDofManager(i)->givePrescribedUnknownVector(vec, dofIDMask, mode, tStep);
         answer.append(vec);
     }
@@ -215,7 +215,7 @@ Element :: computeNumberOfPrimaryMasterDofs()
     int answer = 0;
     IntArray nodeDofIDMask, dofMask;
 
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         this->giveDofManDofIDMask(i, nodeDofIDMask);
         answer += this->giveDofManager(i)->giveNumberOfPrimaryMasterDofs(nodeDofIDMask);
     }
@@ -368,7 +368,7 @@ Element :: giveLocationArray(IntArray &locationArray, const UnknownNumberingSche
     if ( dofIdArray ) {
         dofIdArray->clear();
     }
-    for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         this->giveDofManDofIDMask(i, ids);
         this->giveDofManager(i)->giveLocationArray(ids, nodalArray, s);
         locationArray.followedBy(nodalArray);
@@ -397,7 +397,7 @@ Element :: giveLocationArray(IntArray &locationArray, const IntArray &dofIDMask,
     if ( dofIdArray ) {
         dofIdArray->clear();
     }
-    for ( int i = 1; i <= this->numberOfDofMans; i++ ) {
+    for ( int i = 1; i <=this->giveNumberOfDofManagers(); i++ ) {
         this->giveDofManager(i)->giveLocationArray(dofIDMask, nodalArray, s);
         locationArray.followedBy(nodalArray);
         if ( dofIdArray ) {
@@ -1113,10 +1113,10 @@ Element :: giveCharacteristicLengthForAxisymmElements(const FloatArray &normalTo
     } else { // if not, take the average distance from axis of symmetry multiplied by pi
         double r = 0.;
         int i;
-        for ( i = 1; i <= numberOfDofMans; i++ ) {
+        for ( i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
             r += this->giveNode(i)->giveCoordinate(1);
         }
-        r = r * 3.1415926 / ( ( double ) numberOfDofMans );
+        r = r * 3.1415926 / ( ( double ) this->giveNumberOfDofManagers() );
         return r;
     }
 }
@@ -1427,7 +1427,7 @@ Element :: adaptiveFinish(TimeStep *tStep)
 void
 Element :: updateLocalNumbering(EntityRenumberingFunctor &f)
 {
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         dofManArray.at(i) = f(dofManArray.at(i), ERS_DofManager);
     }
 }
@@ -1552,7 +1552,7 @@ Element :: drawAnnotation(oofegGraphicContext &gc, TimeStep *tStep)
 
     p [ 0 ].x = p [ 0 ].y = p [ 0 ].z = 0.0;
     // compute element center
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    for ( i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         if ( ( node = this->giveNode(i) ) ) {
             p [ 0 ].x += node->giveCoordinate(1);
             p [ 0 ].y += node->giveCoordinate(2);

@@ -642,9 +642,9 @@ void EnrichmentItem :: updateLevelSets(XfemManager &ixFemMan)
 
         // Extract node coord
         //const FloatArray &pos( * node->giveCoordinates() );
-	///TODO JB->ES: my coords have size 3, I resize here since x3 = 0
-	FloatArray pos = * node->giveCoordinates();
-	pos.resizeWithValues(2);
+        ///TODO JB->ES: my coords have size 3, I resize here since x3 = 0
+        FloatArray pos = * node->giveCoordinates();
+        pos.resizeWithValues(2);
 
         // Calc normal sign dist
         double phi = 0.0;
@@ -742,8 +742,8 @@ void EnrichmentItem :: updateNodeEnrMarker(XfemManager &ixFemMan, const Enrichme
                         FloatArray pos;
                         pos.add(0.5 * ( 1.0 - xi ), posI);
                         pos.add(0.5 * ( 1.0 + xi ), posJ);
-			//TODO JB->ES Again, I must resize the coordinates
-			pos.resizeWithValues(2);
+                        //TODO JB->ES Again, I must resize the coordinates
+                        pos.resizeWithValues(2);
                         mpEnrichmentDomain->computeTangentialSignDist(tangDist, pos, arcPos);
                         double gamma = tangDist;
 

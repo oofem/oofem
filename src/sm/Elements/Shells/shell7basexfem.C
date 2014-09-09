@@ -783,6 +783,8 @@ void
 Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
 
+    //this->OLDcomputeStiffnessMatrix(answer, rMode, tStep);
+    //return;
  
     int ndofs = this->giveNumberOfDofs();
     answer.resize(ndofs, ndofs);
@@ -804,8 +806,7 @@ Shell7BaseXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rM
     FloatArray lCoords;
     KOrdered.resize(ndofs,ndofs);
     
-    //Shell7Base :: computeBulkTangentMatrix(KCC, solVec, tStep );
-    //answer.assemble(KCC, orderingC, orderingC);
+
     const IntArray &ordering = this->giveOrderingDofTypes();
     
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
@@ -1699,9 +1700,9 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lCoords, FloatMatrix &ans
         // Evaluate enrichment function at point given by lcoords
         std :: vector< double > efGP;
         double levelSetGP = this->evaluateLevelSet(lCoords, ei);
-	///TODO : evaluateEnrFuncAt must have an input with only 3 values
-	FloatArray lCoords2 = lCoords;
-	lCoords2.resizeWithValues(2);
+        ///TODO : evaluateEnrFuncAt must have an input with only 3 values
+        FloatArray lCoords2 = lCoords;
+        lCoords2.resizeWithValues(2);
         ei->evaluateEnrFuncAt(efGP, lCoords2, levelSetGP);
         int ndofman = this->giveNumberOfDofManagers();
 
@@ -1761,22 +1762,30 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lCoords, FloatMatrix &ans
 double
 Shell7BaseXFEM :: EvaluateEnrFuncInDofMan(int dofManNum, EnrichmentItem *ei)
 {
-        DofManager *dMan = this->giveDofManager(dofManNum);
+    
+    DofManager *dMan = this->giveDofManager(dofManNum);
+    if ( ei->isDofManEnriched(*dMan) ) {
+        
         int globalNodeInd = dMan->giveGlobalNumber(); // global number in order to pick levelset value in that node
         double levelSetNode  = 0.0;
         ei->evalLevelSetNormalInNode( levelSetNode, globalNodeInd );
         std :: vector< double >efNode;
         //const FloatArray &nodePos = * ( dMan->giveCoordinates() );
         // evaluateEnrFuncAt requires coords to be size 2
-	FloatArray nodePos = * ( dMan->giveCoordinates() );
-	nodePos.resizeWithValues(2);
-	ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
-        if( efNode.size() ) {
-            return efNode [ 0 ];
-        } else {
-            return 0.0;
-        }
-        
+        FloatArray nodePos = * ( dMan->giveCoordinates() );
+        nodePos.resizeWithValues(2);
+        ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
+       
+        return efNode [ 0 ];
+        //if( efNode.size() ) {
+        //    return efNode [ 0 ];
+        //} else {
+        //    return 0.0;
+        //}
+    } else {
+        return 0.0;
+    }
+    
 }
 
 

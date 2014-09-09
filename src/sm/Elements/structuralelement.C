@@ -32,13 +32,13 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/structuralelement.h"
-#include "../sm/CrossSections/structuralcrosssection.h"
-#include "../sm/Materials/structuralmaterial.h"
-#include "../sm/Materials/structuralms.h"
-#include "../sm/Loads/structtemperatureload.h"
-#include "../sm/Materials/structuralnonlocalmaterialext.h"
-#include "../sm/Loads/structeigenstrainload.h"
+#include "Elements/structuralelement.h"
+#include "CrossSections/structuralcrosssection.h"
+#include "Materials/structuralmaterial.h"
+#include "Materials/structuralms.h"
+#include "Loads/structtemperatureload.h"
+#include "Materials/structuralnonlocalmaterialext.h"
+#include "Loads/structeigenstrainload.h"
 #include "feinterpol.h"
 #include "domain.h"
 #include "material.h"
@@ -396,36 +396,34 @@ StructuralElement :: giveNumberOfIPForMassMtrxIntegration()
     //test different elements:
   IntegrationRule *iRule = this->giveIntegrationRule(0);
   
-//     printf("%e \n", ceil(( 4 + 1 ) / 2));
-//     printf("%d \n", (int)ceil((double)(4+1) / (double)2) );
-//     
-//     printf(" num ip Triangle1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Triangle, 2*1));
-//     
-//     printf(" num ip Triangle2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Triangle, 2*2));
-//     
-//     printf(" num ip Square1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Square, 2*1));
-//     
-//     printf(" num ip Square2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Square, 2*2)); 
-//     
-//     printf(" num ip Square3: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Square, 2*3));
-//     
-//     printf(" num ip_Cube1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Cube, 2*1)); 
-//     
-//     printf(" num ip_Cube2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Cube, 2*2)); 
-//     
-//     printf(" num ip_Cube3: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Cube, 2*3)); 
-// 
-//     printf(" num ip_Tetrahedra1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, 2*1)); 
-//     
-//     printf(" num ip_Tetrahedra1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, 2*2)); 
-//     
-//     printf(" num ip_Tetrahedra1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, 2*3)); 
-//         
-//     printf(" num ip_Wedge1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Wedge, 2*1)); 
-//     
-//     printf(" num ip_Wedge2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Wedge, 2*2)); 
-//     //_Line,
-//     
+    
+    printf(" num ip Triangle1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Triangle, 2*1));
+    
+    printf(" num ip Triangle2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Triangle, 2*2));
+    
+    printf(" num ip Square1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Square, 2*1));
+    
+    printf(" num ip Square2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Square, 2*2)); 
+    
+    printf(" num ip Square3: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Square, 2*3));
+    
+    printf(" num ip_Cube1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Cube, 2*1)); 
+    
+    printf(" num ip_Cube2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Cube, 2*2)); 
+    
+    printf(" num ip_Cube3: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Cube, 2*3)); 
+
+    printf(" num ip_Tetrahedra1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, 2*1)); 
+    
+    printf(" num ip_Tetrahedra2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, 2*2)); 
+    
+    printf(" num ip_Tetrahedra3: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Tetrahedra, 2*3)); 
+        
+    printf(" num ip_Wedge1: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Wedge, 2*1)); 
+    
+    printf(" num ip_Wedge2: = %d \n", iRule->getRequiredNumberOfIntegrationPoints(_Wedge, 2*2)); 
+    //_Line,
+    
   
   
   
@@ -434,10 +432,10 @@ StructuralElement :: giveNumberOfIPForMassMtrxIntegration()
   
   
     // returns necessary number of ip to integrate the mass matrix 
-    // \int_V N^T*N dV => (order of the approximation)*nsd (constant density assumed)
+    // \int_V N^T*N dV => (order of the approximation)*2 (constant density assumed)
+    ///TODO this is without the jacobian and density
     int order = this->giveInterpolation()->giveInterpolationOrder();
-    int nsd = this->giveInterpolation()->giveNsd();
-    return iRule->getRequiredNumberOfIntegrationPoints(this->giveInterpolation()->giveIntegrationDomain(), nsd*order);
+    return iRule->getRequiredNumberOfIntegrationPoints(this->giveInterpolation()->giveIntegrationDomain(), 2*order);
 }
 
 void
@@ -607,7 +605,7 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
     this->computeConsistentMassMatrix(answer, tStep, mass);
     ldofs = answer.giveNumberOfRows();
 
-    for ( int i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         this->giveDofManDofIDMask(i, nodeDofIDMask);
         //this->giveDofManager(i)->giveLocationArray(nodeDofIDMask, nodalArray);
         for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
