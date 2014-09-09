@@ -2197,14 +2197,14 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
     FloatArray average;
     vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
     for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
-        InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);;
-        InternalStateValueType valueType =  giveInternalStateValueType(type);
+        InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
+        InternalStateValueType valueType = giveInternalStateValueType(type);
         int currentCell = 1;
         for ( int layer = 1; layer <= numLayers; layer++ ) {
             numSubCells = (int)this->numSubDivisionsArray[layer - 1];
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
                 IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
-                VTKXMLExportModule::computeIPAverage(average, iRuleL, this, type, tStep);
+                VTKXMLExportModule :: computeIPAverage(average, iRuleL, this, type, tStep);
                 if ( valueType == ISVT_TENSOR_S3 ) {
                     vtkPiece.setCellVar(i, currentCell, convV6ToV9Stress(average) );
                 } else {
@@ -2669,8 +2669,8 @@ Shell7BaseXFEM :: giveCZExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToEx
     FloatArray average;
     vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
     for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
-        InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);;
-        InternalStateValueType valueType =  giveInternalStateValueType(type);
+        InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
+        InternalStateValueType valueType = giveInternalStateValueType(type);
         int currentCell = 1;
         for ( int layer = 1; layer <= numInterfaces; layer++ ) {
             for ( int subCell = 1; subCell <= numSubCells; subCell++ ) {
@@ -2773,7 +2773,6 @@ Shell7BaseXFEM :: recoverValuesFromCZIP(std::vector<FloatArray> &recoveredValues
     recoveredValues.resize(numNodes);
     
     IntegrationRule *iRule = this->czIntegrationRulesArray [ interfce - 1 ];
-    IntegrationPoint *ip;
 
     // Find closest ip to the nodes
     IntArray closestIPArray(numNodes);
@@ -2783,7 +2782,7 @@ Shell7BaseXFEM :: recoverValuesFromCZIP(std::vector<FloatArray> &recoveredValues
         nodeCoords.beColumnOf(localNodeCoords, i);
         double distOld = 3.0; // should not be larger
         for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-            ip = iRule->getIntegrationPoint(j);
+            IntegrationPoint *ip = iRule->getIntegrationPoint(j);
             ipCoords = *ip->giveNaturalCoordinates();
             double dist = nodeCoords.distance(ipCoords);
             if ( dist < distOld ) {
@@ -2793,13 +2792,12 @@ Shell7BaseXFEM :: recoverValuesFromCZIP(std::vector<FloatArray> &recoveredValues
         }
     }
 
-   InternalStateValueType valueType =  giveInternalStateValueType(type);
+   InternalStateValueType valueType = giveInternalStateValueType(type);
 
     // recover ip values
     for ( int i = 1; i <= numNodes; i++ ) {
-        
         if ( this->layeredCS->giveInterfaceMaterial(interfce) ) {
-            ip = iRule->getIntegrationPoint( closestIPArray.at(i) );
+            IntegrationPoint *ip = iRule->getIntegrationPoint( closestIPArray.at(i) );
             this->layeredCS->giveInterfaceMaterial(interfce)->giveIPValue(ipValues, ip, type, tStep);
         } else {
             ipValues.resize(0);

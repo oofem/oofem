@@ -83,7 +83,7 @@ public:
         coordSystemType = CST_Global;
     }
 
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
     /**
      * Gives coordinates of the receiver
      */

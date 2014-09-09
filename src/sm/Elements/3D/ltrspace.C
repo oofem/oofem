@@ -393,8 +393,6 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
     int i, j, k;
     WCRec q [ 4 ];
     GraphicObj *tr;
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    GaussPoint *gp;
     double defScale = gc.getDefScale();
     FloatArray crackStatuses, cf;
 
@@ -413,7 +411,8 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
 
         //   for (GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         {
-            gp = iRule->getIntegrationPoint(0);
+            IntegrationRule *iRule = integrationRulesArray [ 0 ];
+            GaussPoint *gp = iRule->getIntegrationPoint(0);
             if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }

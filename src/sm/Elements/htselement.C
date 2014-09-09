@@ -168,7 +168,6 @@ HTSelement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
                                      TimeStep *tStep)
 // Computes numerically the stiffness matrix of the receiver.
 {
-    IntegrationRule *iRule;
     double dV;
     answer.resize(numberOfDofs, numberOfDofs);
     answer.zero();
@@ -179,9 +178,8 @@ HTSelement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode,
     A.resize(numberOfStressDofs, numberOfDofs);
     A.zero();
     for ( int i = 0; i < numberOfEdges; i++ ) {
-        iRule = this->giveIntegrationRule(i);
         this->computeOutwardNormalMatrix(N, i + 1);
-        for ( GaussPoint *gp: *iRule ) {
+        for ( GaussPoint *gp: *this->giveIntegrationRule(i) ) {
             dV = this->computeVolumeAroundSide(gp, i + 1);
             this->computeFMatrixAt(Fedge, N, gp, i + 1);
             Fedge.times(dV);
@@ -277,14 +275,12 @@ HTSelement :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load,
 {
     double dV;
     BoundaryLoad *edgeLoad = dynamic_cast< BoundaryLoad * >(load);
-    IntegrationRule *iRule;
     FloatArray force, PsEdge, Ps(numberOfDofs);
 
     Ps.zero();
     answer.resize(numberOfDofs);
     for ( int i = 0; i < numberOfEdges; i++ ) {
-        iRule = this->giveIntegrationRule(i);
-        for ( GaussPoint *gp: *iRule ) {
+        for ( GaussPoint *gp: *this->giveIntegrationRule(i) ) {
             edgeLoad->computeValueAt(force, tStep, * ( gp->giveNaturalCoordinates() ), mode);
             dV = this->computeVolumeAroundSide(gp, i + 1);
             this->computePsVectorAt(PsEdge, force, gp);

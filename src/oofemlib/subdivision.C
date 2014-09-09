@@ -5180,7 +5180,8 @@ Subdivision :: packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicat
             remoteElements.insert(i);
  #ifdef __OOFEG
   #ifdef DRAW_REMOTE_ELEMENTS
-            d->giveElement(i)->drawRawGeometry(gc);
+            TimeStep *tStep = emodel->giveCurrentStep();
+            d->giveElement(i)->drawRawGeometry(gc, tStep);
   #endif
  #endif
         }

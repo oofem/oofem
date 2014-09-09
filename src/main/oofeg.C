@@ -64,6 +64,10 @@
 #include <iostream>
 #include <cstring>
 
+#ifdef __PETSC_MODULE
+ #include <petsc.h>
+#endif
+
 //
 // for c++ compiler to be successful on some c files
 //

@@ -246,7 +246,6 @@ GradDpElement :: giveNonlocalInternalForcesVector(FloatArray &answer, TimeStep *
 {
     double dV, localCumulatedStrain = 0.;
     NLStructuralElement *elem = this->giveNLStructuralElement();
-    IntegrationRule *iRule =  elem->giveIntegrationRule(0);
     FloatMatrix stiffKappa, Nk;
     FloatArray fKappa(nlSize), aux(nlSize), dKappa, stress;
 
@@ -258,7 +257,7 @@ GradDpElement :: giveNonlocalInternalForcesVector(FloatArray &answer, TimeStep *
     this->setNonlocalLocationArray(locK, nPrimNodes, nPrimVars, nSecNodes, nSecVars);
 
     answer.resize(size);
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *elem->giveIntegrationRule(0) ) {
         this->computeNkappaMatrixAt(gp, Nk);
         for ( int j = 1; j <= nlSize; j++ ) {
             fKappa.at(j) = Nk.at(1, j);
@@ -282,11 +281,10 @@ void
 GradDpElement :: giveLocalInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {
     NLStructuralElement *elem = this->giveNLStructuralElement();
-    IntegrationRule *iRule = elem->giveIntegrationRule(0);
     int nlGeo = elem->giveGeometryMode();
     FloatArray BS, vStress;
     FloatMatrix B;
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *elem->giveIntegrationRule(0) ) {
 
         if ( nlGeo == 0 || elem->domain->giveEngngModel()->giveFormulation() == AL ) {
             elem->computeBmatrixAt(gp, B);
@@ -404,10 +402,9 @@ GradDpElement :: computeStiffnessMatrix_uu(FloatMatrix &answer, MatResponseMode 
 
 
     int nlGeo = elem->giveGeometryMode();
-    IntegrationRule *iRule = elem->giveIntegrationRule(0);
     bool matStiffSymmFlag = elem->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
     answer.clear();
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *elem->giveIntegrationRule(0) ) {
 
         GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(
             cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );
@@ -457,10 +454,9 @@ GradDpElement :: computeStiffnessMatrix_ku(FloatMatrix &answer, MatResponseMode 
 
     answer.clear();
 
-    IntegrationRule *iRule = elem->giveIntegrationRule(0);
     int nlGeo = elem->giveGeometryMode();
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *elem->giveIntegrationRule(0) ) {
 
         GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(
             cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );
@@ -560,11 +556,9 @@ GradDpElement :: computeStiffnessMatrix_kk(FloatMatrix &answer, MatResponseMode 
     FloatMatrix Bk, Nk, LBk;
     StructuralCrossSection *cs = elem->giveStructuralCrossSection();
 
-    IntegrationRule *iRule = elem->giveIntegrationRule(0);
-
     answer.clear();
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *elem->giveIntegrationRule(0) ) {
 
         GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(
             cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );
@@ -596,12 +590,11 @@ GradDpElement :: computeStiffnessMatrix_uk(FloatMatrix &answer, MatResponseMode 
     double dV;
     StructuralCrossSection *cs = elem->giveStructuralCrossSection();
     int nlGeo = elem->giveGeometryMode();
-    IntegrationRule *iRule = elem->giveIntegrationRule(0);
     FloatMatrix B, Nk, SNk, gPSigma;
 
     answer.clear();
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *elem->giveIntegrationRule(0) ) {
 
         GradDpMaterialExtensionInterface *dpmat = dynamic_cast< GradDpMaterialExtensionInterface * >(
             cs->giveMaterialInterface(GradDpMaterialExtensionInterfaceType, gp) );

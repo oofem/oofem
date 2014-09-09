@@ -51,7 +51,6 @@ namespace oofem {
 /**
  * This class implements a 2-dimensional lattice element
  */
-
 class Lattice2d : public LatticeStructuralElement
 {
 protected:

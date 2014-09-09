@@ -50,7 +50,6 @@ namespace oofem {
  * is part of the input.
  * In this base class common interfaces of derived elements are defined.
  */
-
 class LatticeStructuralElement : public StructuralElement
 {
 public:

@@ -75,9 +75,8 @@ StructuralInterfaceElement :: computeStiffnessMatrix(FloatMatrix &answer, MatRes
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
     answer.clear();
 
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     FloatMatrix rotationMatGtoL;
-    for ( IntegrationPoint *ip: *iRule ) {
+    for ( IntegrationPoint *ip: *this->giveDefaultIntegrationRulePtr() ) {
 
         if ( this->nlGeometry == 0 ) {
             this->giveStiffnessMatrix_Eng(D, rMode, ip, tStep);
@@ -146,8 +145,6 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
     // this must be done after you want internal forces after element->updateYourself()
     // has been called for the same time step.
 
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-
     FloatMatrix N, rotationMatGtoL;
     FloatArray u, traction, tractionTemp, jump;
 
@@ -160,7 +157,7 @@ StructuralInterfaceElement :: giveInternalForcesVector(FloatArray &answer,
     // zero answer will resize accordingly when adding first contribution
     answer.clear();
 
-    for ( IntegrationPoint *ip: *iRule ) {
+    for ( IntegrationPoint *ip: *this->giveDefaultIntegrationRulePtr() ) {
         this->computeNmatrixAt(ip, N);
         //if ( useUpdatedGpRecord == 1 ) {
         //    StructuralInterfaceMaterialStatus *status = static_cast< StructuralInterfaceMaterialStatus * >( ip->giveMaterialStatus() );
