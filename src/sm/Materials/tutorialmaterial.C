@@ -107,7 +107,6 @@ TutorialMaterial :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
     if ( phiTrial < 0.0 ) { // elastic
         answer = trialStress;
     } else { // plastic loading
-        printf("plastic \n\n\n");
         double mu = phiTrial / ( 3.0 * G + H ); // plastic multiplier
         FloatArray devStress = devTrialStress * ( 1.0 - 3.0*G*mu/effectiveTrialStress); // radial return
         answer = devStress + sphTrialStress;
