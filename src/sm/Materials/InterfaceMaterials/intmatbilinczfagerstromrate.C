@@ -70,7 +70,8 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
     
     IntMatBilinearCZFagerstromStatus *status = static_cast< IntMatBilinearCZFagerstromStatus * >( this->giveStatus(gp) );
 
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
+    this->initTempStatus(gp);
 
     FloatMatrix Finv(3,3);
 

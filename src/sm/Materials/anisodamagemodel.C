@@ -110,7 +110,8 @@ AnisotropicDamageMaterial :: giveRealStressVector_PlaneStress(FloatArray &answer
 {
 #define AD_TOLERANCE 1.e-10 // convergence tolerance for the internal iteration used under plane stress
 #define AD_MAXITER 20       // maximum number of internal iterations used under plane stress
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
+    this->initTempStatus(gp);
     // subtract the stress-independent part of strains (e.g. due to temperature)
     FloatArray eps;
     this->giveStressDependentPartOfStrainVector(eps, gp, totalStrain, atTime, VM_Total);
@@ -512,7 +513,8 @@ AnisotropicDamageMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint
 // computed from the state at the beginning of the step and strain at the end of the step
 //
 {
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
+    this->initTempStatus(gp);
     MaterialMode mode = gp->giveMaterialMode();
     // subtract the stress-independent part of strains (e.g. due to temperature)
     FloatArray reducedTotalStrainVector;

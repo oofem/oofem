@@ -66,7 +66,7 @@ RankineMatNl :: giveRealStressVector_PlaneStress(FloatArray &answer, GaussPoint 
 {
     RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(gp) );
     //mj this->initGpForNewStep(gp);
-
+    
     double tempDam;
     FloatArray tempEffStress;
     //mj performPlasticityReturn(gp, totalStrain, mode);

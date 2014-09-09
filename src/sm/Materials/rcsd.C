@@ -84,7 +84,7 @@ RCSDMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     RCSDMaterialStatus *status = static_cast< RCSDMaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
 
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp

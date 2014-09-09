@@ -72,7 +72,8 @@ IntMatIsoDamage :: giveEngTraction_3d(FloatArray &answer, GaussPoint *gp,
     
     double f, equivJump, tempKappa = 0.0, omega = 0.0;
 
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
+    this->initTempStatus(gp);
 
     // compute equivalent strain
     this->computeEquivalentJump(equivJump, jump);

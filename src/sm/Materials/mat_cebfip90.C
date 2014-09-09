@@ -95,8 +95,9 @@ CebFipSlip90Material :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     FloatArray reducedTotalStrainVector;
     double f, slip, tempKappa;
 
-    this->initGpForNewStep(gp);
-
+    //this->initGpForNewStep(gp);
+    this->initTempStatus(gp);
+    
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
     // therefore it is necessary to subtract always the total eigen strain value

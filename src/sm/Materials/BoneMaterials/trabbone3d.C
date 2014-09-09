@@ -718,7 +718,8 @@ TrabBone3D :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
     double tempDam;
     FloatArray effStress, densStress;
     TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
+    this->initTempStatus(gp);
     // compute effective stress using the plasticity model
     performPlasticityReturn(gp, totalStrain, tStep);
     effStress =  status->giveTempEffectiveStress();

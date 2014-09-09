@@ -93,7 +93,7 @@ RheoChainMaterial :: giveRealStressVector(FloatArray &answer,
 
     // initialize the temporary material status and the Gauss point
     this->initTempStatus(gp);
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
 
     // subtract the part of strain which does not depend on the stress increment from the final strain
     // note: it is somewhat confusing to say "stress-dependent" part of strain

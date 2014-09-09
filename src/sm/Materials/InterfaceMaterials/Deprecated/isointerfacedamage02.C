@@ -100,8 +100,9 @@ IsoInterfaceDamageMaterial_2 :: giveRealStressVector(FloatArray &answer, GaussPo
     FloatMatrix de;
     double f, equivStrain, tempKappa = 0.0, omega = 0.0;
 
-    this->initGpForNewStep(gp);
-
+    //this->initGpForNewStep(gp);
+    this->initTempStatus(gp);
+    
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
     // therefore it is necessary to subtract always the total eigen strain value

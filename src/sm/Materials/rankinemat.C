@@ -174,7 +174,7 @@ RankineMat :: giveRealStressVector_1d(FloatArray &answer, GaussPoint *gp, const 
 
     // initialization
     this->initTempStatus(gp);
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
 
     // elastoplasticity
     this->performPlasticityReturn(gp, totalStrain);
@@ -204,7 +204,7 @@ RankineMat :: giveRealStressVector_PlaneStress(FloatArray &answer,
 
     // initialization
     this->initTempStatus(gp);
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
 
     // elastoplasticity
     this->performPlasticityReturn(gp, totalStrain);

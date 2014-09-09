@@ -227,8 +227,9 @@ Concrete2 :: giveRealStressVector_PlateLayer(FloatArray &answer,
     pStress.resize(3); // principal stresses
     strainIncr.resize(1);
 
-    this->initGpForNewStep(gp);
-
+    //this->initGpForNewStep(gp);
+    this->initTempStatus(gp);
+    
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp
     // therefore it is necessary to subtract always the total eigen strain value

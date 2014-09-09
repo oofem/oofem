@@ -125,8 +125,8 @@ TrabBoneEmbed :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
     elasticity.beInverseOf(compliance);
 
     TrabBoneEmbedStatus *status = static_cast< TrabBoneEmbedStatus * >( this->giveStatus(gp) );
-
-    this->initGpForNewStep(gp);
+    this->initTempStatus(gp);
+    //this->initGpForNewStep(gp);
 
     performPlasticityReturn(gp, totalStrain);
 

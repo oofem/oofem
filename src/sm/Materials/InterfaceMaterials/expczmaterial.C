@@ -81,8 +81,8 @@ ExpCZMaterial :: giveRealStressVector(FloatArray &answer, MatResponseForm form, 
 {
     ExpCZMaterialStatus *status = static_cast< ExpCZMaterialStatus * >( this->giveStatus(gp) );
 
-    this->initGpForNewStep(gp);
-
+    //this->initGpForNewStep(gp);
+    this->initTempStatus(gp);
 
     answer.resize( jumpVector.giveSize() );
     answer.zero();

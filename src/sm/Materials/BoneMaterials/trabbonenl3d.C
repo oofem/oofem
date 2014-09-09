@@ -74,7 +74,7 @@ TrabBoneNL3D :: updateBeforeNonlocAverage(const FloatArray &strainVector, GaussP
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
     this->giveStressDependentPartOfStrainVector(SDstrainVector, gp, strainVector, tStep, VM_Total);
 
     nlStatus->letTempStrainVectorBe(strainVector);
@@ -298,8 +298,9 @@ TrabBoneNL3D :: giveRealStressVector_3d(FloatArray &answer, GaussPoint *gp,
                                         const FloatArray &totalStrain, TimeStep *tStep)
 {
     TrabBoneNL3DStatus *nlStatus = static_cast< TrabBoneNL3DStatus * >( this->giveStatus(gp) );
-    this->initGpForNewStep(gp);
-
+    //this->initGpForNewStep(gp);
+    this->initTempStatus(gp);
+    
     double tempDam;
     FloatArray effStress, totalStress, densStress;
 
