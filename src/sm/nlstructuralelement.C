@@ -56,6 +56,29 @@ NLStructuralElement :: NLStructuralElement(int n, Domain *aDomain) :
 }
 
 
+double
+NLStructuralElement :: computeCurrentVolume(TimeStep *tStep)
+{
+    double vol=0.0;
+    for ( auto &gp: *this->giveDefaultIntegrationRulePtr() ) {
+        FloatArray F;
+        FloatMatrix Fm;
+
+
+        computeDeformationGradientVector(F, gp, tStep);
+        Fm.beMatrixForm(F);
+        double J=Fm.giveDeterminant();
+
+        FEInterpolation *interpolation = this->giveInterpolation();
+        double detJ = fabs( ( interpolation->giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) ) );
+
+        vol=vol + gp->giveWeight()*detJ*J;
+    }
+
+    return vol;
+}
+
+
 void
 NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
