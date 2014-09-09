@@ -215,6 +215,11 @@ void
 tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep)
 {
 
+    // Compute displacements used to compute J
+    /*FloatArray a, aGhostDisplacement;
+    this->computeVectorOf(VM_Total, tStep, a);
+    aGhostDisplacement.beSubArrayOf(a, ghostdisplacement_ordering); */
+
     answer.resize(64);
     answer.zero();
 
@@ -245,6 +250,7 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
         double detJ = fabs( this->interpolation.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) ) );
         double dA = detJ * gp->giveWeight();
 
+
         // Body load
         if ( gVector.giveSize() ) {
 #ifdef __FM_MODULE
@@ -253,6 +259,21 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
             OOFEM_ERROR("Missing FM module");
             double rho = 1.0;
 #endif
+
+            if (this->nlGeometry) {
+                FloatArray Fa, temp;
+                FloatMatrix F, Finv, FinvT;
+                computeDeformationGradientVector(Fa, gp, tStep, u);
+                F.beMatrixForm(Fa);
+                Finv.beInverseOf(F);
+                FinvT.beTranspositionOf(Finv);
+
+                dA = dA * F.giveDeterminant();
+
+                temp.beProductOf(Finv, gVector);
+                gVector = temp;
+            }
+
             this->interpolation.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
 
             for ( int j = 0; j < N.giveSize(); j++ ) {
@@ -319,7 +340,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
     FloatMatrix Kf, G, Kx, B, Ed, dNx;
     FloatArray Strain, Stress, Nlin, dNv, a_inc, a_prev, aVelocity, aPressure, aGhostDisplacement, aIncGhostDisplacement, fluidStress, epsf, dpdivv;
     FloatArray momentum, conservation, auxstress, divv;
-    double pressure, epsvol=0.0;
+    double pressure, epsvol=0.0, velocityCoeff=1.0;
 
     if (!tStep->isTheFirstStep()) {
         this->computeVectorOf( VM_Total, tStep->givePreviousStep(), a_prev);
@@ -361,7 +382,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
 
             this->computeBmatrixAt(gp, B);
             FloatArray aTotal;
-            aTotal.operator = (aVelocity + aIncGhostDisplacement); // Assume deltaT=1 gives that the increment is the velocity
+            aTotal.operator = (aVelocity + aIncGhostDisplacement*velocityCoeff); // Assume deltaT=1 gives that the increment is the velocity
 
             epsf.beProductOf(B, aTotal);
             pressure = Nlin.dotProduct(aPressure);
@@ -392,7 +413,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
             this->computeBmatrixAt(gp, B);
 
             FloatArray aTotal;
-            aTotal.operator = (aVelocity + aIncGhostDisplacement); // Assume deltaT=1 gives that the increment is the velocity
+            aTotal.operator = (aVelocity + aIncGhostDisplacement*velocityCoeff); // Assume deltaT=1 gives that the increment is the velocity
 
             epsf.beProductOf(B, aTotal);
             pressure = Nlin.dotProduct(aPressure);
@@ -414,6 +435,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
 
             computeDeformationGradientVector(Fa, gp, tStep, aGhostDisplacement);
             F.beMatrixForm(Fa);
+            double J=F.giveDeterminant();
             Finv.beInverseOf(F);
             FinvT.beTranspositionOf(Finv);
 
@@ -426,11 +448,11 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
             // Add to equation
 
             momentum.plusProduct(BH, fluidStress, detJ*weight);
-            momentum.add(-pressure * detJ * weight, dNv);
+            momentum.add(-pressure * detJ * weight *J, dNv);
 
             // Conservation equation -----
             divv.beTProductOf(dNv, aTotal);
-            divv.times(-detJ * weight);
+            divv.times(-detJ * weight*J);
 
             conservation.add(divv.at(1), Nlin);
 
@@ -579,7 +601,7 @@ tet21ghostsolid :: computeVolumeAround(GaussPoint *gp)
 {
     double determinant = fabs( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     double weight      = gp->giveWeight();
-
+    return ( this->computeVolume() );
     return ( determinant * weight );
 }
 
