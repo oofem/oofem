@@ -81,7 +81,7 @@ void LinearEdgeLoad :: giveInputRecord(DynamicInputRecord &input)
 
 
 void
-LinearEdgeLoad :: computeNArray(FloatArray &answer, FloatArray &coords) const
+LinearEdgeLoad :: computeNArray(FloatArray &answer, const FloatArray &coords) const
 {
     // compute local isoparametric coordinates of given point
     double ksi;

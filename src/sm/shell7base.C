@@ -89,10 +89,11 @@ Shell7Base :: postInitialize()
     Element :: postInitialize();
     
         
-    this->voigtIndices.resize(3);
-    this->voigtIndices[0] = { 1, 6, 5 };
-    this->voigtIndices[1] = { 9, 2, 4 };
-    this->voigtIndices[2] = { 8, 7, 3 };
+    this->voigtIndices = {
+        { 1, 6, 5 },
+        { 9, 2, 4 },
+        { 8, 7, 3 }
+    };
     
     this->nlGeometry = 1;
 }
@@ -177,15 +178,13 @@ Shell7Base :: evalInitialCovarBaseVectorsAt(FloatArray &lcoords, FloatMatrix &Gc
     // In plane base vectors
     this->fei->evaldNdxi( dNdxi, lcoords, FEIElementGeometryWrapper(this) );
 
-    FloatArray G1(3), G2(3), nodeCoords; 
-    G1.zero();
-    G2.zero();
+    FloatArray G1, G2, nodeCoords; 
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         FloatArray &xbar = * this->giveNode(i)->giveCoordinates();
         M = this->giveInitialNodeDirector(i);
         nodeCoords = (xbar + zeta*M);
-        G1 += dNdxi.at(i, 1) * nodeCoords;
-        G2 += dNdxi.at(i, 2) * nodeCoords;   
+        G1.add(dNdxi.at(i, 1), nodeCoords);
+        G2.add(dNdxi.at(i, 2), nodeCoords);
     }
 
     // Out of plane base vector = director
@@ -208,13 +207,12 @@ Shell7Base :: edgeEvalInitialCovarBaseVectorsAt(FloatArray &lcoords, const int i
     this->fei->edgeEvaldNdxi( dNdxi, iedge, lcoords, FEIElementGeometryWrapper(this) );
 
     // Base vector along edge
-    G1.resize(3);
-    G1.zero();
+    G1.clear();
     for ( int i = 1; i <= edgeNodes.giveSize(); i++ ) {
         FloatArray &xbar = * this->giveNode(edgeNodes.at(i))->giveCoordinates();
         M = this->giveInitialNodeDirector(edgeNodes.at(i));
         nodeCoords = (xbar + zeta*M);
-        G1 += dNdxi.at(i) * nodeCoords; 
+        G1.add(dNdxi.at(i), nodeCoords);
     }
 
     // Director will be the second base vector
@@ -248,8 +246,7 @@ Shell7Base :: evalInitialDirectorAt(FloatArray &lcoords, FloatArray &answer)
     // Interpolates between the node directors
     FloatArray N;
     this->fei->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
-    answer.resize(3);
-    answer.zero();
+    answer.clear();
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         answer.add( N.at(i), this->giveInitialNodeDirector(i) );
     }
@@ -266,8 +263,7 @@ Shell7Base :: edgeEvalInitialDirectorAt(FloatArray &lcoords, FloatArray &answer,
     this->fei->computeLocalEdgeMapping(edgeNodes, iEdge);
     this->fei->edgeEvalN( N, iEdge, lcoords, FEIElementGeometryWrapper(this) );
 
-    answer.resize(3);
-    answer.zero();
+    answer.clear();
     for ( int i = 1; i <= edgeNodes.giveSize(); i++ ) {
         answer.add( N.at(i), this->giveInitialNodeDirector( edgeNodes.at(i) ) );
     }
@@ -387,10 +383,6 @@ void
 Shell7Base :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
 
-    int ndofs = this->giveNumberOfDofs();
-    answer.resize(ndofs, ndofs);
-    answer.zero();
-    
     FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep); // a
     
@@ -513,7 +505,7 @@ Shell7Base :: computeBulkTangentMatrix(FloatMatrix &answer, FloatArray &solVec, 
             lCoords = *gp->giveNaturalCoordinates();
 
             this->computeBmatrixAt(lCoords, B);
-	    genEps.beProductOf(B, solVec);
+            genEps.beProductOf(B, solVec);
             // Material stiffness
             Shell7Base :: computeLinearizedStiffness(gp, mat, tStep, A);
 
@@ -766,33 +758,30 @@ Shell7Base :: computeSectionalForces(FloatArray &answer, TimeStep *tStep, FloatA
     int ndofs = Shell7Base :: giveNumberOfDofs();
 
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();  
-    FloatArray f(ndofs), ftemp, N;
-    FloatArray genEps, lCoords;
+    FloatArray f, N;
+    FloatArray genEps;
     FloatMatrix B;
 
-    f.zero();
     for ( int layer = 1; layer <= numberOfLayers; layer++ ) {
         IntegrationRule *iRuleL = integrationRulesArray [ layer - 1 ];
         Material *mat = domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) );
 
         for (GaussPoint *gp : *iRuleL) {
-            lCoords = *gp->giveNaturalCoordinates();
+            FloatArray &lCoords = *gp->giveNaturalCoordinates();
             this->computeBmatrixAt(lCoords, B);
-	    genEps.beProductOf(B, solVec);
-	    
+            genEps.beProductOf(B, solVec);
+
             double zeta = giveGlobalZcoord(lCoords);
             this->computeSectionalForcesAt(N, gp, mat, tStep, genEps, zeta); // these are per unit volume
             
-            ftemp.beTProductOf(B,N);
             double dV = this->computeVolumeAroundLayer(gp, layer);
-            f.add(dV, ftemp);
+            f.plusProduct(B, N, dV);
         }
     }
 
     answer.resize( ndofs );
     answer.zero();
-    const IntArray &ordering = this->giveOrderingDofTypes();
-    answer.assemble(f, ordering);
+    answer.assemble(f, this->giveOrderingDofTypes());
 }
 
 
@@ -815,15 +804,10 @@ Shell7Base :: computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationP
     this->computeLambdaGMatrices(lambda, genEps, zeta); // associated with the variation of the test functions   
 
     // f = lambda_1^T * P*G^1 + lambda_2^T * P*G^2 + lambda_3^T * P*G^3
-    sectionalForces.resize(18);
-    sectionalForces.zero();
-    temp.beTProductOf(lambda[0], PG1);
-    sectionalForces.add(temp);
-    temp.beTProductOf(lambda[1], PG2);
-    sectionalForces.add(temp);
-    temp.beTProductOf(lambda[2], PG3);
-    sectionalForces.add(temp);
-
+    sectionalForces.clear();
+    sectionalForces.plusProduct(lambda[0], PG1, 1.0);
+    sectionalForces.plusProduct(lambda[1], PG2, 1.0);
+    sectionalForces.plusProduct(lambda[2], PG3, 1.0);
 }
 
 #endif
@@ -980,10 +964,6 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
     FloatMatrix mass, temp;
     FloatArray solVec, lCoords;
     this->giveUpdatedSolutionVector(solVec, tStep);
-    int ndofs = this->giveNumberOfDofs();
-    temp.resize(ndofs, ndofs);
-    temp.zero();
-
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of data
 
     FloatMatrix M11(18, 18), M12(18, 18), M13(18, 6), M22(18, 18), M23(18, 6), M33(6, 6), M(42,42);
@@ -1021,7 +1001,7 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
             M.plusProductSymmUpper(N, temp, rho*dV);
         }
         M.symmetrized();
-	const IntArray &ordering = this->giveOrderingDofTypes();	
+        const IntArray &ordering = this->giveOrderingDofTypes();	
         answer.zero();
         answer.assemble(M, ordering, ordering);
 #endif
@@ -1039,7 +1019,7 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
     IntegrationRule *iRule = specialIntegrationRulesArray [ 1 ];   // rule 2 for mid-plane integration only
     GaussPoint *gp;
     FloatMatrix N;
-    FloatArray lCoords, a, da, m, dm, aVec, daVec, fm(7), fM;
+    FloatArray lCoords, a, da, m, dm, aVec, daVec, fm(7);
     double gam, dgam, dA;
 
     answer.resize(42);
@@ -1091,9 +1071,7 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
         fm.at(7) = fac3 * m.dotProduct(dm) * gam;
         double xi = 0.0;
         dA = this->computeAreaAround(gp, xi);
-        fM.beTProductOf(N, fm);
-        fM.times(dA);
-        answer.add(fM);
+        answer.plusProduct(N, fm, dA);
     }
 }
 
@@ -1147,8 +1125,6 @@ Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const 
     
     FloatMatrix N, B, lambda;
     FloatArray Fp, fp, genEps, genEpsC, lCoords(3), traction, solVecC;
-    answer.resize( Shell7Base :: giveNumberOfDofs() );
-    answer.zero();
 
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
         IntegrationPoint *ip = iRule->getIntegrationPoint(i);
@@ -1169,11 +1145,11 @@ Shell7Base :: computePressureForce(FloatArray &answer, FloatArray solVec, const 
         double xi = pLoad->giveLoadOffset();
         double dA = this->computeAreaAround(ip, xi);
 
-        Fp.beTProductOf(N, fp);
-        Fp.times(dA);
-        answer.assemble(Fp, this->giveOrderingDofTypes());
-        
+        Fp.plusProduct(N, fp, dA);
     }
+    answer.resize( Shell7Base :: giveNumberOfDofs() );
+    answer.zero();
+    answer.assemble(Fp, this->giveOrderingDofTypes());
 }
 
 
@@ -1363,8 +1339,6 @@ Shell7Base :: NodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int layer,
 
     //int size = ZZNodalRecoveryMI_giveDofManRecordSize(type);
     int size = 6; ///@todo this is hard coded for stress recovery
-    int numDofMans = 15;
-    answer.resize(numDofMans, size);
 
     answer.zero();
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
@@ -1377,11 +1351,7 @@ Shell7Base :: NodalRecoveryMI_computeNValProduct(FloatMatrix &answer, int layer,
         }
 
         this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
-        for ( int j = 1; j <= numDofMans; j++ ) {
-            for ( int k = 1; k <= size; k++ ) {
-                answer.at(j, k) += n.at(j) * stressVector.at(k) * dV;
-            }
-        }
+        answer.plusDyadUnsym(n, stressVector, dV);
 
     }
 }
@@ -1397,24 +1367,20 @@ Shell7Base :: NodalRecoveryMI_computeNNMatrix(FloatArray &answer, int layer, Int
     FloatMatrix fullAnswer;
     FloatArray n;
     IntegrationRule *iRule = integrationRulesArray [ layer - 1 ];
-    GaussPoint *gp;
 
-    int size = 15;
-    fullAnswer.resize(size, size);
-    fullAnswer.zero();
     for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-        gp  = iRule->getIntegrationPoint(i);
+        GaussPoint *gp = iRule->getIntegrationPoint(i);
         double dV = this->computeVolumeAroundLayer(gp, layer);
         this->ZZNodalRecoveryMI_ComputeEstimatedInterpolationMtrx(n, gp, type);
         fullAnswer.plusDyadSymmUpper(n, dV);
     }
-
-
     fullAnswer.symmetrized();
-    answer.resize(size);
-    for ( int i = 1; i <= size; i++ ) {
+
+    ///@todo Make a "lumpMatrix" function in FloatArray ? (summing over columns would also be faster)
+    answer.resize(fullAnswer.giveNumberOfRows());
+    for ( int i = 1; i <= fullAnswer.giveNumberOfRows(); i++ ) {
         double sum = 0.0;
-        for ( int j = 1; j <= size; j++ ) {
+        for ( int j = 1; j <= fullAnswer.giveNumberOfColumns(); j++ ) {
             sum += fullAnswer.at(i, j);
         }
         answer.at(i) = sum;
@@ -1808,12 +1774,11 @@ Shell7Base :: vtkEvalInitialGlobalCoordinateAt(const FloatArray &localCoords, in
     FloatArray N;
     this->fei->evalN( N, localCoords, FEIElementGeometryWrapper(this) );
 
-    globalCoords.resize(3);
-    globalCoords.zero();
+    globalCoords.clear();
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         FloatArray &xbar = *this->giveNode(i)->giveCoordinates();
-        FloatArray M = this->giveInitialNodeDirector(i);
-        globalCoords += N.at(i) * ( xbar + zeta * M );
+        const FloatArray &M = this->giveInitialNodeDirector(i);
+        globalCoords.add(N.at(i), ( xbar + zeta * M ));
     }
 
 }
@@ -1825,12 +1790,11 @@ Shell7Base :: vtkEvalInitialGlobalCZCoordinateAt(FloatArray &localCoords, int in
     FloatArray N;
     this->fei->evalN( N, localCoords, FEIElementGeometryWrapper(this) );
 
-    globalCoords.resize(3);
-    globalCoords.zero();
+    globalCoords.clear();
     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
         FloatArray &xbar = *this->giveNode(i)->giveCoordinates();
-        FloatArray M = this->giveInitialNodeDirector(i);
-        globalCoords += N.at(i) * ( xbar + zeta * M );
+        const FloatArray &M = this->giveInitialNodeDirector(i);
+        globalCoords.add(N.at(i), ( xbar + zeta * M ));
     }
 
 }
@@ -2022,10 +1986,6 @@ Shell7Base :: recoverValuesFromIP(std::vector<FloatArray> &recoveredValues, int 
         //} else if ( ipValues.giveSize() == 0 && type == IST_AbaqusStateVector) {
         //    recoveredValues[i-1].resize(23);
         //    recoveredValues[i-1].zero();
-        } else if ( ipValues.giveSize() == 0 ) {
-            recoveredValues[i-1].resize(giveInternalStateTypeSize(valueType));
-            recoveredValues[i-1].zero();
-
         } else {
             recoveredValues[i-1] = ipValues;
         }
@@ -2281,11 +2241,12 @@ Shell7Base::giveSymVoigtIndex(int ind1, int ind2)
     //  21 22 23  = >  6 2 4
     //  31 32 33]      5 4 3]
     //
-    std::vector< std::vector<int> > voigtIndices;
-    voigtIndices.resize(3);
-    voigtIndices[0] = { 1, 6, 5 };
-    voigtIndices[1] = { 6, 2, 4 };
-    voigtIndices[2] = { 5, 4, 3 };
+    std :: vector< std::vector<int> > voigtIndices =
+        {
+            { 1, 6, 5 },
+            { 6, 2, 4 },
+            { 5, 4, 3 }
+        };
     
     return voigtIndices[ind1][ind2];
 

@@ -305,18 +305,19 @@ TrPlaneStress2dXFEM :: giveElementDofIDMask(IntArray &answer) const
 }
 
 void
-TrPlaneStress2dXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
+TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
 {
+    vtkPieces.resize(1);
 
     const int numCells = mSubTri.size();
 
     if(numCells == 0) {
         // Enriched but uncut element
         // Visualize as a quad
-        vtkPiece.setNumberOfCells(1);
+        vtkPieces[0].setNumberOfCells(1);
 
         int numTotalNodes = 3;
-        vtkPiece.setNumberOfNodes(numTotalNodes);
+        vtkPieces[0].setNumberOfNodes(numTotalNodes);
 
         // Node coordinates
         std :: vector< FloatArray >nodeCoords;
@@ -324,25 +325,25 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &pri
             FloatArray &x = *(giveDofManager(i)->giveCoordinates());
             nodeCoords.push_back(x);
 
-            vtkPiece.setNodeCoords(i, x);
+            vtkPieces[0].setNodeCoords(i, x);
         }
 
         // Connectivity
         IntArray nodes1 = {1, 2, 3};
-        vtkPiece.setConnectivity(1, nodes1);
+        vtkPieces[0].setConnectivity(1, nodes1);
 
         // Offset
         int offset = 3;
-        vtkPiece.setOffset(1, offset);
+        vtkPieces[0].setOffset(1, offset);
 
         // Cell types
-        vtkPiece.setCellType(1, 5); // Linear triangle
+        vtkPieces[0].setCellType(1, 5); // Linear triangle
 
 
 
 
         // Export nodal variables from primary fields
-        vtkPiece.setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
+        vtkPieces[0].setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
 
         for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
             UnknownType type = ( UnknownType ) primaryVarsToExport.at(fieldNum);
@@ -375,7 +376,7 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &pri
                             u = {uTemp[0], uTemp[1], 0.0};
                         }
 
-                        vtkPiece.setPrimaryVarInNode(fieldNum, nodeInd, u);
+                        vtkPieces[0].setPrimaryVarInNode(fieldNum, nodeInd, u);
                 } else {
                     printf("fieldNum: %d\n", fieldNum);
                     // TODO: Implement
@@ -390,11 +391,11 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &pri
 
 
         // Export nodal variables from internal fields
-        vtkPiece.setNumberOfInternalVarsToExport(0, numTotalNodes);
+        vtkPieces[0].setNumberOfInternalVarsToExport(0, numTotalNodes);
 
 
         // Export cell variables
-        vtkPiece.setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), 1);
+        vtkPieces[0].setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), 1);
         for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
             InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
             FloatArray average;
@@ -409,7 +410,7 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &pri
             averageV9.at(3) = averageV9.at(7) = average.at(5);
             averageV9.at(2) = averageV9.at(4) = average.at(6);
 
-            vtkPiece.setCellVar( i, 1, averageV9 );
+            vtkPieces[0].setCellVar( i, 1, averageV9 );
         }
 
 
@@ -418,7 +419,7 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &pri
             XfemManager *xMan = domain->giveXfemManager();
 
             int nEnrIt = xMan->giveNumberOfEnrichmentItems();
-            vtkPiece.setNumberOfInternalXFEMVarsToExport(xMan->vtkExportFields.giveSize(), nEnrIt, numTotalNodes);
+            vtkPieces[0].setNumberOfInternalXFEMVarsToExport(xMan->vtkExportFields.giveSize(), nEnrIt, numTotalNodes);
 
             const int nDofMan = giveNumberOfDofManagers();
 
@@ -451,7 +452,7 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &pri
 
 
                             FloatArray valueArray = {levelSet};
-                            vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
+                            vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
 
                         } else if ( xfemstype == XFEMST_LevelSetGamma ) {
                             double levelSet = 0.0, levelSetInNode = 0.0;
@@ -465,7 +466,7 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &pri
 
 
                             FloatArray valueArray = {levelSet};
-                            vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
+                            vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
 
                         } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
                             double nodeEnrMarker = 0.0, nodeEnrMarkerInNode = 0.0;
@@ -479,7 +480,7 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &pri
 
 
                             FloatArray valueArray = {nodeEnrMarker};
-                            vtkPiece.setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
+                            vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
                         }
 
                     }
@@ -491,7 +492,7 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(VTKPiece &vtkPiece, IntArray &pri
     else {
         // Enriched and cut element
 
-        XfemStructuralElementInterface::giveSubtriangulationCompositeExportData(vtkPiece, primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep);
+        XfemStructuralElementInterface::giveSubtriangulationCompositeExportData(vtkPieces, primaryVarsToExport, internalVarsToExport, cellVarsToExport, tStep);
 
 
     }

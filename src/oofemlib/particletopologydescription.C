@@ -1165,8 +1165,8 @@ void ParticleTopologyDescription :: generateMesh(std :: vector< FloatArray > &no
 
     // Append the corner nodes manually. Didn't see any pretty way to do this.
 #if 0 // Replace by this...
-    ParticlePoint *origin;
     for ( ParticleGrid< ParticlePoint > :: iterator it = this->grid->begin(); !it.end(); ++it ) {
+        ParticlePoint *origin;
         if ( ( origin = it.getPoint() ) != NULL ) {
             double dist2, min_dist2 = 1e100;
             int min_i = 0;

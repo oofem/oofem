@@ -50,7 +50,6 @@ namespace oofem {
  * is part of the input.
  * In this base class common interfaces of derived elements are defined.
  */
-
 class LatticeStructuralElement : public StructuralElement
 {
 public:
@@ -89,6 +88,12 @@ public:
     virtual double giveCrackWidth() { return 0; }
 
     /**
+     * @return Crack width
+     */
+    virtual double giveOldCrackWidth() { return 0; }
+
+
+    /**
      * Returns the energy dissipation computed at the GaussPoint of the element.
      * This function is used for the lattice specific vtk export.
      * @return dissipation
@@ -114,19 +119,33 @@ public:
      * Returns the coupling flag.
      * @return couplingFlag
      */
+
     virtual int giveCouplingFlag() { return 0; }
 
     /**
-     * Returns the coupling number.
-     * @return couplingNumber
+     * Returns the coupling numbers
+     * @return couplingNumbers.
      */
-    virtual int giveCouplingNumber() { return 0; }
+    virtual void giveCouplingNumbers(IntArray &numbers){return;}
 
     /**
      * Returns the normal stress.
      * @return normalStress
      */
     virtual double giveNormalStress() { return 0; }
+
+    /**
+     * Returns the old normal stress.
+     * @return oldNormalStress
+     */
+    virtual double giveOldNormalStress() { return 0; }
+
+
+    /**
+     * Returns flag indicating if status has been updated
+     */
+    virtual int hasBeenUpdated() { return 0; }
+
 
     /**
      * Gives the GP coordinates

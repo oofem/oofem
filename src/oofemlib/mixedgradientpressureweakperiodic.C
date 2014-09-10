@@ -63,7 +63,7 @@ MixedGradientPressureWeakPeriodic :: MixedGradientPressureWeakPeriodic(int n, Do
     this->voldman = new Node(0, d); // Node number lacks meaning here.
     int dofid = this->domain->giveNextFreeDofID();
     v_id.followedBy(dofid);
-    this->voldman->appendDof( new MasterDof( 1, voldman, ( DofIDItem ) dofid ) );
+    this->voldman->appendDof( new MasterDof( voldman, ( DofIDItem ) dofid ) );
     this->tractionsdman = new Node(0, this->domain); // Node number lacks meaning here.
 }
 
@@ -111,7 +111,7 @@ IRResultType MixedGradientPressureWeakPeriodic :: initializeFrom(InputRecord *ir
         t_id.followedBy(dofid);
         // Simply use t_i = S_i . n, where S_1 = [1,0,0;0,0,0;0,0,0], S_2 = [0,1,0;0,0,0;0,0,0], etc.
         // then the linear terms, [x,0,0], [0,x,0] ... and so on
-        this->tractionsdman->appendDof( new MasterDof( i, tractionsdman, ( DofIDItem ) dofid ) );
+        this->tractionsdman->appendDof( new MasterDof( tractionsdman, ( DofIDItem ) dofid ) );
     }
 
     return IRRT_OK;

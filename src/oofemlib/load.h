@@ -123,7 +123,7 @@ public:
      * evaluate components values.
      * @param mode Determines response mode.
      */
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode) = 0;
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode) = 0;
     /**
      * Returns the value of dofExcludeMask corresponding to given index.
      * See the description of dofExcludeMask attribute for more details.

@@ -155,7 +155,7 @@ double NonStationaryTransportProblem :: giveUnknownComponent(ValueModeType mode,
     }
 
     if ( dof->__giveEquationNumber() == 0 ) {
-        OOFEM_ERROR("invalid equation number on DoF %d", dof->giveNumber());
+        OOFEM_ERROR("invalid equation number on DoF %d", dof->giveDofID());
     }
 
     return UnknownsField->giveUnknownValue(dof, mode, tStep);
@@ -369,8 +369,8 @@ NonStationaryTransportProblem :: updateYourself(TimeStep *tStep)
     ///@todo Find a cleaner way to do these cemhyd hacks
 #ifdef __CEMHYD_MODULE
     for ( auto &domain: this->domainList ) {
-        for ( int i = 1; i <= d->giveNumberOfElements(); ++i ) {
-            TransportElement *elem = static_cast< TransportElement * >( d->giveElement(i) );
+        for ( int i = 1; i <= domain->giveNumberOfElements(); ++i ) {
+            TransportElement *elem = static_cast< TransportElement * >( domain->giveElement(i) );
             //store temperature and associated volume on each GP before performing averaging
             CemhydMat *cem = dynamic_cast< CemhydMat * >( elem->giveMaterial() );
             if ( cem ) {
@@ -379,8 +379,8 @@ NonStationaryTransportProblem :: updateYourself(TimeStep *tStep)
             }
         }
         //perform averaging on each material instance
-        for ( int i = 1; i <= d->giveNumberOfMaterialModels(); i++ ) {
-            CemhydMat *cem = dynamic_cast< CemhydMat * >( d->giveMaterial(i) );
+        for ( int i = 1; i <= domain->giveNumberOfMaterialModels(); i++ ) {
+            CemhydMat *cem = dynamic_cast< CemhydMat * >( domain->giveMaterial(i) );
             if ( cem ) {
                 cem->averageTemperature();
             }

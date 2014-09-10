@@ -67,9 +67,9 @@ Tet1BubbleStokes :: Tet1BubbleStokes(int n, Domain *aDomain) : FMElement(n, aDom
     this->numberOfGaussPoints = 24;
 
     this->bubble = new ElementDofManager(1, aDomain, this);
-    this->bubble->appendDof( new MasterDof(1, this->bubble, V_u) );
-    this->bubble->appendDof( new MasterDof(2, this->bubble, V_v) );
-    this->bubble->appendDof( new MasterDof(3, this->bubble, V_w) );
+    this->bubble->appendDof( new MasterDof(this->bubble, V_u) );
+    this->bubble->appendDof( new MasterDof(this->bubble, V_v) );
+    this->bubble->appendDof( new MasterDof(this->bubble, V_w) );
 }
 
 Tet1BubbleStokes :: ~Tet1BubbleStokes()
@@ -133,7 +133,6 @@ void Tet1BubbleStokes :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     FloatArray a_pressure, a_velocity, devStress, epsp, N, dNv(15);
     double r_vol, pressure;
@@ -145,7 +144,7 @@ void Tet1BubbleStokes :: computeInternalForcesVector(FloatArray &answer, TimeSte
 
     FloatArray momentum, conservation;
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         FloatArray *lcoords = gp->giveNaturalCoordinates();
 
         double detJ = fabs( this->interp.evaldNdx( dN, * lcoords, FEIElementGeometryWrapper(this) ) );
@@ -222,7 +221,6 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharT
     }
 
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatArray N, gVector, temparray(15);
     double dV, detJ, rho;
 
@@ -230,7 +228,7 @@ void Tet1BubbleStokes :: computeLoadVector(FloatArray &answer, Load *load, CharT
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( GaussPoint *gp: *iRule ) {
+        for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
             const FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
             rho = mat->give('d', gp);
@@ -312,14 +310,13 @@ void Tet1BubbleStokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *t
 {
     // Note: Working with the components; [K, G+Dp; G^T+Dv^T, C] . [v,p]
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatMatrix B(6, 15), EdB, K, G, Dp, DvT, C, Ed, dN;
     FloatArray dNv(15), N, Ep, Cd, tmpA, tmpB;
     double Cp;
 
     B.zero();
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         // Compute Gauss point and determinant at current element
         const FloatArray &lcoords = * gp->giveNaturalCoordinates();
 

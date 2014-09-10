@@ -130,7 +130,7 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
     for ( int i = 0; i < ndof; i++ ) {
         int dofid = this->domain->giveNextFreeDofID();
         gamma_ids.followedBy(dofid);
-        gammaDman->appendDof( new MasterDof( i, gammaDman, ( DofIDItem )dofid ) );
+        gammaDman->appendDof( new MasterDof( gammaDman, ( DofIDItem )dofid ) );
     }
 
     //	computeOrthogonalBasis();
@@ -428,7 +428,7 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
 
 void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if ( type != StiffnessMatrix ) {
+    if ( type != TangentStiffnessMatrix && type != StiffnessMatrix ) {
         return;
     }
 
@@ -491,6 +491,7 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
             answer->assemble(r_loc, c_sideLoc, BT);
         }
     }
+
 }
 
 double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue2D(int baseID, FloatArray coordinate)

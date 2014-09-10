@@ -48,6 +48,8 @@ class tet21ghostsolid : public NLStructuralElement
 {
 private:
     FloatMatrix Dghost;
+    bool computeItransform;
+    FloatMatrix Itransform;
 
     void giveUnknownData(FloatArray &u_prev, FloatArray &u, FloatArray &inc, TimeStep *tStep);
 
@@ -65,6 +67,10 @@ public:
     virtual void giveInternalForcesVectorGivenSolution(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord, FloatArray &SolutionVector);
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &u);
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
+    virtual double computeVolumeAround(GaussPoint *gp);
+    virtual bool giveRowTransformationMatrix(FloatMatrix &Itransform, TimeStep *tStep);
+
 
 protected:
     static FEI3dTetQuad interpolation;
@@ -74,11 +80,11 @@ protected:
     virtual void computeBHmatrixAt(GaussPoint *, FloatMatrix &);
     virtual void computeGaussPoints();
 
-    /// Ordering of momentum balance dofs in element. Used to assemble the element stiffness
+    /// Ordering of momentum balance equations in element. Used to assemble the element stiffness
     static IntArray momentum_ordering;
-    /// Ordering of conservation dofs in element. Used to assemble the element stiffness
+    /// Ordering of conservation equations in element. Used to assemble the element stiffness
     static IntArray conservation_ordering;
-    /// Ordering of ghost displacements dofs
+    /// Ordering of ghost displacements equations
     static IntArray ghostdisplacement_ordering;
 
 };

@@ -41,7 +41,7 @@ namespace oofem {
 REGISTER_BoundaryCondition(TF1);
 
 void
-TF1 :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
+TF1 :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
 // Returns the value of the receiver at time and given position respecting the mode.
 {
     FloatArray cd(3);

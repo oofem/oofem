@@ -40,7 +40,7 @@
 #include "contextioerr.h"
 
 namespace oofem {
-SlaveDof :: SlaveDof(int n, DofManager *aNode, DofIDItem id) : Dof(n, aNode, id), masterContribution()
+SlaveDof :: SlaveDof(DofManager *aNode, DofIDItem id) : Dof(aNode, id), masterContribution()
 {
     countOfPrimaryMasterDofs = -1;
     countOfMasterDofs = -1;
@@ -86,7 +86,7 @@ SlaveDof :: giveNumberOfPrimaryMasterDofs()
         return countOfPrimaryMasterDofs;
     } else
     if ( countOfPrimaryMasterDofs == 0 ) {
-        OOFEM_ERROR("slaveDof number %ld is own master", this->giveNumber());
+        OOFEM_ERROR("slaveDof is own master");
     }
 
     countOfPrimaryMasterDofs = 0;

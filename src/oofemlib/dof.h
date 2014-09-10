@@ -94,8 +94,6 @@ class EntityRenumberingFunctor;
 class OOFEM_EXPORT Dof
 {
 protected:
-    /// Dof number.
-    int number;
     /// Link to related DofManager.
     DofManager *dofManager;
     /// Physical meaning of DOF.
@@ -106,12 +104,11 @@ public:
     /**
      * Constructor. Creates DOF with number i, belonging to DofManager aNode and with
      * physical meaning described by id.
-     * @param i DOF number.
      * @param aNode DofManager which possess DOF.
      * @param id Physical meaning type.
      * @see cltypes.h, DofIDItem type
      */
-    Dof(int i, DofManager * aNode, DofIDItem id = Undef);
+    Dof(DofManager * aNode, DofIDItem id = Undef);
     /// Destructor.
     virtual ~Dof() { }
 
@@ -119,9 +116,6 @@ public:
     virtual dofType giveDofType() = 0;
     /// Returns class name of the receiver.
     virtual const char *giveClassName() const { return "Dof"; }
-
-    /// @return Receiver number.
-    int giveNumber() const { return number; }
 
     /// @return Index of possessing DofManager.
     int giveDofManNumber() const;

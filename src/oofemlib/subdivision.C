@@ -3575,20 +3575,18 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
             node->setNumberOfDofs(0);
             node->setLoadArray( * parentNodePtr->giveLoadArray() );
             // create individual DOFs
-            int count = 1;
             for ( Dof *idofPtr: *parentNodePtr ) {
                 if ( idofPtr->isPrimaryDof() ) {
-                    dof = new MasterDof( count, node, idofPtr->giveBcId(), idofPtr->giveIcId(), idofPtr->giveDofID() );
+                    dof = new MasterDof( node, idofPtr->giveBcId(), idofPtr->giveIcId(), idofPtr->giveDofID() );
                 } else {
                     SimpleSlaveDof *simpleSlaveDofPtr = dynamic_cast< SimpleSlaveDof * >(idofPtr);
                     if ( simpleSlaveDofPtr ) {
-                        dof = new SimpleSlaveDof( count, node, simpleSlaveDofPtr->giveMasterDofManagerNum(), idofPtr->giveDofID() );
+                        dof = new SimpleSlaveDof( node, simpleSlaveDofPtr->giveMasterDofManagerNum(), idofPtr->giveDofID() );
                     } else {
                         OOFEM_ERROR("unsupported DOF type");
                         dof = NULL;
                     }
                 }
-                count ++;
                 node->appendDof(dof);
             }
 
@@ -3612,21 +3610,21 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                 if ( !dof ) {
                     if ( fabs(coords->at(1) - 200.0) < 0.000001 ) {
                         if ( coords->at(2) > -0.000001 && coords->at(2) < 97.500001 ) {
-                            dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
+                            dof = new MasterDof( node, 1, 0, dofIDArrayPtr.at ( idof ) );
                         }
                     }
                 }
 
                 if ( !dof ) {
                     if ( fabs( coords->at(2) ) < 0.000001 ) {
-                        dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
+                        dof = new MasterDof( node, 1, 0, dofIDArrayPtr.at ( idof ) );
                     }
                 }
 
                 if ( !dof ) {
                     if ( fabs( coords->at(1) ) < 0.000001 ) {
                         if ( coords->at(2) > 102.4999999 && coords->at(2) < 199.9999999 ) {
-                            dof = new SimpleSlaveDof( idof, node, 5, ( DofID ) dofIDArrayPtr.at ( idof ) );                                // HUHU
+                            dof = new SimpleSlaveDof( node, 5, ( DofID ) dofIDArrayPtr.at ( idof ) );                                // HUHU
                         }
                     }
                 }
@@ -3634,13 +3632,13 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                 if ( !dof ) {
                     if ( fabs(coords->at(2) - 200.0) < 0.000001 ) {
                         if ( coords->at(1) > 0.000001 && coords->at(1) < 200.000001 ) {
-                            dof = new SimpleSlaveDof( idof, node, 6, ( DofID ) dofIDArrayPtr.at ( idof ) );                                  // HUHU
+                            dof = new SimpleSlaveDof( node, 6, ( DofID ) dofIDArrayPtr.at ( idof ) );                                  // HUHU
                         }
                     }
                 }
 
                 if ( !dof ) {
-                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at ( idof ) );
+                    dof = new MasterDof( node, 0, 0, dofIDArrayPtr.at ( idof ) );
                 }
 
 #else
@@ -3651,7 +3649,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                     if ( fabs( coords->at(1) ) < 0.000001 ) {
                         if ( coords->at(2) > 0.000001 ) {
                             if ( idof == 1 ) {
-                                dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
+                                dof = new MasterDof( node, 1, 0, dofIDArrayPtr.at ( idof ) );
                             }
                         }
                     }
@@ -3661,14 +3659,14 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                     if ( fabs( coords->at(2) ) < 0.000001 ) {
                         if ( coords->at(1) > 0.000001 ) {
                             if ( idof == 2 ) {
-                                dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
+                                dof = new MasterDof( node, 1, 0, dofIDArrayPtr.at ( idof ) );
                             }
                         }
                     }
                 }
 
                 if ( !dof ) {
-                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at ( idof ) );
+                    dof = new MasterDof( node, 0, 0, dofIDArrayPtr.at ( idof ) );
                 }
 
  #else
@@ -3680,7 +3678,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                         if ( coords->at(2) > 0.000001 ) {
                             if ( coords->at(3) > 499.999999 ) {
                                 if ( idof == 1 || idof == 3 ) {
-                                    dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
+                                    dof = new MasterDof( node, 1, 0, dofIDArrayPtr.at ( idof ) );
                                 }
                             }
                         }
@@ -3692,7 +3690,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                         if ( coords->at(2) > 0.000001 ) {
                             if ( coords->at(3) > 499.999999 ) {
                                 if ( idof == 3 ) {
-                                    dof = new MasterDof( idof, node, 1, 0, dofIDArrayPtr.at ( idof ) );
+                                    dof = new MasterDof( node, 1, 0, dofIDArrayPtr.at ( idof ) );
                                 }
                             }
                         }
@@ -3700,7 +3698,7 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                 }
 
                 if ( !dof ) {
-                    dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at ( idof ) );
+                    dof = new MasterDof( node, 0, 0, dofIDArrayPtr.at ( idof ) );
                 }
 
   #else
@@ -3715,18 +3713,18 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
                         if ( coords->at(2) > 70.000001 ) {
                             if ( fabs(dist - 7.0 * 7.0) < 0.01 ) {                            // be very tolerant (geometry is not precise)
                                 if ( idof == 1 || idof == 3 ) {
-                                    dof = new MasterDof( idof, node, 1, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
+                                    dof = new MasterDof( node, 1, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
                                 }
                             }
                         } else if ( coords->at(2) > 67.9999999 ) {
                             rad = 18.0 - 11.0 / 5.5 * ( coords->at(2) - 64.5 );
                             if ( fabs(dist - rad * rad) < 0.01 ) {                            // be very tolerant (geometry is not precise)
                                 if ( idof == 1 || idof == 3 ) {
-                                    dof = new MasterDof( idof, node, 1, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
+                                    dof = new MasterDof( node, 1, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
                                 }
 
                                 if ( idof == 2 ) {
-                                    dof = new MasterDof( idof, node, 2, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
+                                    dof = new MasterDof( node, 2, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
                                 }
                             }
                         }
@@ -3735,24 +3733,24 @@ Subdivision :: createMesh(TimeStep *tStep, int domainNumber, int domainSerNum, D
 
                 if ( !dof ) {
                     if ( coords->at(1) > 299.999999 || coords->at(3) > 299.999999 ) {
-                        dof = new MasterDof( idof, node, 1, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
+                        dof = new MasterDof( node, 1, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
                     }
                 }
 
                 if ( !dof ) {
                     if ( coords->at(1) < 0.00000001 ) {
                         if ( idof == 1 ) {
-                            dof = new MasterDof( idof, node, 1, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
+                            dof = new MasterDof( node, 1, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
                         }
                     }
                 }
 
                 if ( !dof ) {
-                    dof = new MasterDof( idof, node, 0, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
+                    dof = new MasterDof( node, 0, 0, ( DofIDItem ) dofIDArrayPtr.at ( idof ) );
                 }
 
    #else
-                dof = new MasterDof( idof, node, 0, 0, dofIDArrayPtr.at ( idof ) );
+                dof = new MasterDof( node, 0, 0, dofIDArrayPtr.at ( idof ) );
    #endif
   #endif
  #endif
@@ -5182,7 +5180,8 @@ Subdivision :: packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicat
             remoteElements.insert(i);
  #ifdef __OOFEG
   #ifdef DRAW_REMOTE_ELEMENTS
-            d->giveElement(i)->drawRawGeometry(gc);
+            TimeStep *tStep = emodel->giveCurrentStep();
+            d->giveElement(i)->drawRawGeometry(gc, tStep);
   #endif
  #endif
         }

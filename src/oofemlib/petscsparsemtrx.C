@@ -840,13 +840,12 @@ PetscSparseMtrx :: scatterG2L(Vec src, FloatArray &dest) const
 int
 PetscSparseMtrx :: scatterL2G(const FloatArray &src, Vec dest) const
 {
-    PetscScalar *ptr;
+    const PetscScalar *ptr = src.givePointer();
 
 #ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
         ParallelContext *context = this->emodel->giveParallelContext(di);
         int size = src.giveSize();
-        ptr = src.givePointer();
 
         Natural2LocalOrdering *n2l = context->giveN2Lmap();
         Natural2GlobalOrdering *n2g = context->giveN2Gmap();
@@ -863,7 +862,6 @@ PetscSparseMtrx :: scatterL2G(const FloatArray &src, Vec dest) const
 #endif
 
     int size = src.giveSize();
-    ptr = src.givePointer();
     for ( int i = 0; i < size; i++ ) {
         //VecSetValues(dest, 1, & i, ptr + i, mode);
         VecSetValue(dest, i, ptr [ i ], INSERT_VALUES);

@@ -237,10 +237,9 @@ QSpace :: computeVolumeAround(GaussPoint *gp)
 
 
 double
-QSpace :: giveCharacteristicLenght(GaussPoint *gp, const FloatArray &normalToCrackPlane)
+QSpace :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 {
-    double factor = cbrt( ( double ) gp->giveIntegrationRule()->giveNumberOfIntegrationPoints() );
-    return this->giveLenghtInDir(normalToCrackPlane) / factor;
+    return this->giveLengthInDir(normalToCrackPlane);
 }
 
 

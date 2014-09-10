@@ -205,6 +205,11 @@ public:
      */
     void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
+    /**
+      * Computes the current volume of element
+      */
+    double computeCurrentVolume(TimeStep *tStep);
+
     // data management
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void giveInputRecord(DynamicInputRecord &input);

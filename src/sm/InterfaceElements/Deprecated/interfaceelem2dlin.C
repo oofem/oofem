@@ -222,7 +222,6 @@ void InterfaceElem2dLin :: drawDeformedGeometry(oofegGraphicContext &gc, TimeSte
 void InterfaceElem2dLin :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int indx, result = 0;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     FloatArray gcoord(3), v1;
     WCRec p [ 1 ];
     GraphicObj *go;
@@ -236,7 +235,7 @@ void InterfaceElem2dLin :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
         return;
     }
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
         result = 0;
         result += giveIPValue(v1, gp, gc.giveIntVarType(), tStep);
         if ( result != 1 ) {

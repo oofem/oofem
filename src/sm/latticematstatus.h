@@ -64,6 +64,13 @@ public:
     /// Gives the last equilibrated normal stress
     virtual double giveNormalStress() { return 0; }
 
+    /// Gives the last equilibrated normal stress
+    virtual double giveOldNormalStress(){return 0;}
+
+    /// Gives the last equilibrated normal stress
+    virtual int hasBeenUpdated(){return 0;}
+
+
     virtual const char *giveClassName() const { return "LatticeMaterialStatus"; }
 
     ///Sets the temp_crack_flag
@@ -79,6 +86,13 @@ public:
      * @return crack width
      */
     virtual double giveCrackWidth() { return 0; }
+
+
+    /**
+     * @return old crack width
+     */
+    virtual double giveOldCrackWidth() { return 0; }
+
 
     /**
      * Returns the energy dissipation computed at the GaussPoint of the element.
