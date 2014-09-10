@@ -70,7 +70,7 @@ public:
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual bool giveRowTransformationMatrix(FloatMatrix &Itransform, TimeStep *tStep);
-
+    virtual const char *giveClassName() const { return "tet21ghostsolid"; }
 
 protected:
     static FEI3dTetQuad interpolation;
