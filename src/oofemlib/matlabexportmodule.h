@@ -80,6 +80,9 @@ protected:
     std :: vector< double >smax;
     std :: vector< double >smin;
 
+    std :: vector< double > partVolume;
+    std :: vector< std :: string > partName;
+
     double Area, Volume;
     int ndim;
 
@@ -95,7 +98,7 @@ protected:
     int IPFieldsElSet;
 
 private:
-    void computeArea();
+    void computeArea(TimeStep *tStep);
 
     // Export reaction forces
     IntArray reactionForcesDofManList; // Holds which dof managers reaction forces should be exported from.
@@ -115,7 +118,7 @@ public:
     void doOutputIntegrationPointFields(TimeStep *tStep, FILE *FID);
     void doOutputHomogenizeDofIDs(TimeStep *tStep, FILE *FID);
 
-    virtual const char *giveClassName() const { return "MatlabExportModule"; };
+    virtual const char *giveClassName() const { return "MatlabExportModule"; }
     virtual const char *giveInputRecordName() const { return _IFT_MatlabExportModule_Name; }
 };
 } // end namespace oofem

@@ -59,6 +59,7 @@
 
 #ifdef __SM_MODULE
 #include "../sm/structengngmodel.h"
+#include "../sm/nlstructuralelement.h"
 #endif
 
 
@@ -122,7 +123,7 @@ MatlabExportModule :: initializeFrom(InputRecord *ir)
 
 
 void
-MatlabExportModule :: computeArea()
+MatlabExportModule :: computeArea(TimeStep *tStep)
 {
     Domain *domain = emodel->giveDomain(1);
 
@@ -141,7 +142,6 @@ MatlabExportModule :: computeArea()
         }
     }
 
-
     Area=0;
     Volume=0;
 
@@ -151,7 +151,41 @@ MatlabExportModule :: computeArea()
         }
     } else {
         for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
-            Volume = Volume + domain->giveElement(i)->computeVolume();
+            //
+            double v;
+#ifdef __SM_MODULE
+            if ( NLStructuralElement *e = dynamic_cast< NLStructuralElement *>(domain->giveElement(i)) ) {
+                v = e->computeCurrentVolume(tStep);
+            } else {
+#endif
+                v = domain->giveElement(i)->computeVolume();
+#ifdef __SM_MODULE
+            }
+#endif
+
+            std :: string eName ( domain->giveElement(i)->giveClassName() );
+            int j = -1;
+
+            printf("%s\n", eName.c_str());
+
+            for (size_t k=0; k<partName.size(); k++) {
+                //printf("partName.at(%u) = %s\n", k, partName.at(k).c_str() );
+                if (eName.compare(partName.at(k)) == 0) {
+                    j = k;
+                    break;
+                }
+            }
+
+            if (j==-1) {
+                partName.push_back( domain->giveElement(i)->giveClassName() );
+                partVolume.push_back( v );
+            } else {
+                partVolume.at(j) = partVolume.at(j) + v;
+            }
+
+
+            Volume = Volume + v;
+
         }
     }
 
@@ -200,7 +234,7 @@ MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     }
 
     if ( exportArea ) {
-        computeArea();
+        computeArea(tStep);
         fprintf(FID, "\tarea.xmax=%f;\n", smax.at(0));
         fprintf(FID, "\tarea.xmin=%f;\n", smin.at(0));
         fprintf(FID, "\tarea.ymax=%f;\n", smax.at(1));
@@ -221,7 +255,7 @@ MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     if ( exportSpecials ) {
         if ( !exportArea ) {
-            computeArea();
+            computeArea(tStep);
         }
 
         doOutputSpecials(tStep, FID);
@@ -648,7 +682,7 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
     while (foundDot != std :: string :: npos) {
         fileName.replace(foundDot, 1, "_");
         foundDot = fileName.rfind(".");
-        printf("%s\n", fileName.c_str());
+//        printf("%s\n", fileName.c_str());
     }
 
     fileName += fext;
