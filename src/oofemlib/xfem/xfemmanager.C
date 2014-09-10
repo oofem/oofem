@@ -38,7 +38,6 @@
 #include "connectivitytable.h"
 #include "floatarray.h"
 #include "domain.h"
-#include "enrichmentdomain.h"
 #include "element.h"
 #include "dofmanager.h"
 #include "cltypes.h"

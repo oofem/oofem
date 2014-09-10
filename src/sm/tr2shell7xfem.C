@@ -45,7 +45,6 @@
 #include "classfactory.h"
 #include "xfem/patchintegrationrule.h"
 #include "xfem/XFEMDebugTools.h"
-#include "xfem/enrichmentdomain.h"
 #include "xfem/enrichmentitems/crack.h"
 #include "xfem/enrichmentitems/shellcrack.h"
 #include <string>

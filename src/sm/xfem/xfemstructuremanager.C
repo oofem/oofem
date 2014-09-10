@@ -38,9 +38,9 @@
 #include "dynamicdatareader.h"
 #include "datareader.h"
 
-#include "xfem/enrichmentdomain.h"
 #include "xfem/enrichmentitems/crack.h"
 #include "xfem/enrichmentfronts/enrichmentfrontintersection.h"
+#include "geometry.h"
 
 namespace oofem {
 REGISTER_XfemManager(XfemStructureManager)

@@ -37,7 +37,6 @@
 #include "xfem/xfemelementinterface.h"
 #include "xfem/enrichmentfunction.h"
 #include "xfem/enrichmentitem.h"
-#include "xfem/enrichmentdomain.h"
 #include "structuralcrosssection.h"
 #include "vtkxmlexportmodule.h"
 #include "dynamicinputrecord.h"

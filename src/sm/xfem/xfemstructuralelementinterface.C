@@ -51,7 +51,6 @@
 #include "xfem/xfemtolerances.h"
 
 #include "xfem/enrichmentfronts/enrichmentfrontintersection.h"
-#include "xfem/enrichmentdomain.h"
 
 #include "vtkxmlexportmodule.h"
 

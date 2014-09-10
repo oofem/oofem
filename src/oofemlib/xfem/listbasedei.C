@@ -39,8 +39,6 @@
 
 #include <string>
 
-#include "enrichmentdomain.h"
-
 namespace oofem {
 
 //REGISTER_EnrichmentItem(ListBasedEI)

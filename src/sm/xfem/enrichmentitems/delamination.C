@@ -40,7 +40,6 @@
 #include "dynamicinputrecord.h"
 #include "dynamicdatareader.h"
 #include "xfem/enrichmentfunction.h"
-#include "xfem/enrichmentdomain.h"
 #include "xfem/propagationlaw.h"
 #include "xfem/xfemmanager.h"
 #include "xfem/enrichmentfronts/enrichmentfrontdonothing.h"
@@ -285,7 +284,7 @@ Delamination :: appendInputRecords(DynamicDataReader &oDR)
         idList.at(i + 1) = dofManList [ i ];
     }
 
-    geoRec->setField(idList, _IFT_DofManList_list);
+    geoRec->setField(idList, _IFT_ListBasedEI_list);
 
     oDR.insertInputRecord(DataReader :: IR_geoRec, geoRec);
 

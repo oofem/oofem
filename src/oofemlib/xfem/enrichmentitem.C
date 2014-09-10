@@ -37,7 +37,6 @@
 #include "enrichmentitem.h"
 #include "element.h"
 #include "enrichmentfunction.h"
-#include "enrichmentdomain.h"
 #include "cltypes.h"
 #include "connectivitytable.h"
 #include "classfactory.h"

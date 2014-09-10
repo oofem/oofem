@@ -44,7 +44,6 @@
 #include "xfemmanager.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "enrichmentdomain.h"
 #include "dynamicinputrecord.h"
 
 

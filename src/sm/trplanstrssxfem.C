@@ -13,7 +13,6 @@
 #include "xfem/xfemelementinterface.h"
 #include "xfem/enrichmentfunction.h"
 #include "xfem/enrichmentitem.h"
-#include "xfem/enrichmentdomain.h"
 #include "xfem/delaunay.h"
 #include "xfem/XFEMDebugTools.h"
 #include "feinterpol.h"

@@ -44,6 +44,7 @@
 #include "gausspoint.h"
 #include "dynamicinputrecord.h"
 #include "dynamicdatareader.h"
+#include "geometry.h"
 
 #include "xfem/enrichmentfunction.h"
 #include "xfem/propagationlaw.h"
@@ -52,8 +53,6 @@
 #include <string>
 #include <algorithm>
 #include <set>
-
-#include "enrichmentdomain.h"
 
 namespace oofem {
 

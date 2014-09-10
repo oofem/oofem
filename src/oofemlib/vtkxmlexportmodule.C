@@ -47,7 +47,6 @@
 
 #include "xfem/xfemmanager.h"
 #include "xfem/enrichmentitem.h"
-#include "xfem/enrichmentdomain.h"
 
 #include <string>
 #include <sstream>

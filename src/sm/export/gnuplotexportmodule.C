@@ -49,7 +49,6 @@
 #include "xfem/enrichmentitem.h"
 #include "xfem/xfemmanager.h"
 #include "structuralinterfacematerialstatus.h"
-#include "xfem/enrichmentdomain.h"
 #include "xfem/XFEMDebugTools.h"
 #include "prescribedgradient.h"
 #include "prescribedgradientbcneumann.h"

@@ -68,7 +68,6 @@
 #include "exportmodulemanager.h"
 #include "xfem/enrichmentitem.h"
 #include "xfem/enrichmentfunction.h"
-#include "xfem/enrichmentdomain.h"
 #include "xfem/propagationlaw.h"
 
 #include "boundarycondition.h"

@@ -199,7 +199,6 @@ set (core_xfem
     xfem/listbasedei.C
     xfem/inclusion.C
     xfem/patchintegrationrule.C
-    xfem/enrichmentdomain.C
     xfem/propagationlaw.C
     xfem/XFEMDebugTools.C
     xfem/enrichmentfronts/enrichmentfront.C
