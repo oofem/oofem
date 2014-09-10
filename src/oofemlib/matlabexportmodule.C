@@ -150,6 +150,11 @@ MatlabExportModule :: computeArea(TimeStep *tStep)
             Area = Area + domain->giveElement(i)->computeArea();
         }
     } else {
+
+        for (size_t i = 0; i<partVolume.size(); i++ ) {
+            partVolume.at(i)=0.0;
+        }
+
         for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
             //
             double v;
@@ -166,7 +171,7 @@ MatlabExportModule :: computeArea(TimeStep *tStep)
             std :: string eName ( domain->giveElement(i)->giveClassName() );
             int j = -1;
 
-            printf("%s\n", eName.c_str());
+            //printf("%s\n", eName.c_str());
 
             for (size_t k=0; k<partName.size(); k++) {
                 //printf("partName.at(%u) = %s\n", k, partName.at(k).c_str() );
@@ -179,10 +184,12 @@ MatlabExportModule :: computeArea(TimeStep *tStep)
             if (j==-1) {
                 partName.push_back( domain->giveElement(i)->giveClassName() );
                 partVolume.push_back( v );
+                j=partVolume.size()-1;
             } else {
                 partVolume.at(j) = partVolume.at(j) + v;
             }
 
+            //printf("%s, partVolume.at(%u)=%f\n", eName.c_str(), j, partVolume.at(j));
 
             Volume = Volume + v;
 
@@ -247,6 +254,9 @@ MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             fprintf(FID, "\tarea.zmin=%f;\n", smin.at(2));
             fprintf(FID, "\tarea.area=[];\n");
             fprintf(FID, "\tarea.volume=%f;\n", Volume);
+            for (size_t i=0; i<this->partName.size(); i++) {
+                fprintf(FID, "\tarea.volume_%s=%f;\n", partName.at(i).c_str(), partVolume.at(i));
+            }
         }
     } else {
         fprintf(FID, "\tarea.area=[];\n");
