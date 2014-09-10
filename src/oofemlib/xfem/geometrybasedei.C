@@ -95,28 +95,15 @@ int GeometryBasedEI :: instanciateYourself(DataReader *dr)
     }
 
 
-    // Instantiate enrichment domain
+    // Instantiate geometry
     mir = dr->giveInputRecord(DataReader :: IR_geoRec, 1);
     result = mir->giveRecordKeywordField(name);
-    if ( result != IRRT_OK ) {
-        mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
-    }
-
-    mpEnrichmentDomain = classFactory.createEnrichmentDomain( name.c_str() );
-    if ( mpEnrichmentDomain == NULL ) {
-        OOFEM_ERROR( "unknown enrichment domain (%s)", name.c_str() );
-    }
-
-    mpBasicGeometry = classFactory.createGeometry("PolygonLine");
+    mpBasicGeometry = classFactory.createGeometry(name.c_str());
     if ( mpBasicGeometry == NULL ) {
         OOFEM_ERROR( "unknown geometry domain (%s)", name.c_str() );
     }
 
-    if ( giveDomain()->giveXfemManager()->giveVtkDebug() ) {
-        mpEnrichmentDomain->setVtkDebug(true);
-    }
-
-    mpEnrichmentDomain->initializeFrom(mir);
+    mpBasicGeometry->initializeFrom(mir);
 
     // Instantiate EnrichmentFront
     if ( mEnrFrontIndex == 0 ) {
@@ -200,11 +187,10 @@ void GeometryBasedEI :: appendInputRecords(DynamicDataReader &oDR)
     mpEnrichmentFunc->giveInputRecord(* efRec);
     oDR.insertInputRecord(DataReader :: IR_enrichFuncRec, efRec);
 
-
-    // Enrichment domain
-    DynamicInputRecord *edRec = new DynamicInputRecord();
-    mpEnrichmentDomain->giveInputRecord(* edRec);
-    oDR.insertInputRecord(DataReader :: IR_geoRec, edRec);
+    // Geometry
+    DynamicInputRecord *geoRec = new DynamicInputRecord();
+    mpBasicGeometry->giveInputRecord(* geoRec);
+    oDR.insertInputRecord(DataReader :: IR_geoRec, geoRec);
 
 
     // Enrichment front
@@ -230,9 +216,7 @@ void GeometryBasedEI::updateGeometry()
 {
     // Update enrichments ...
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
-//    mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
 
-    EnrichmentDomain_BG *edBG = dynamic_cast<EnrichmentDomain_BG*>(mpEnrichmentDomain);
     this->updateNodeEnrMarker(*xMan);
     // ... and create new dofs if necessary.
     createEnrichedDofs();
@@ -248,7 +232,7 @@ void GeometryBasedEI::updateNodeEnrMarker(XfemManager &ixFemMan)
 
     mNodeEnrMarkerMap.clear();
     TipInfo tipInfoStart, tipInfoEnd;
-    mpEnrichmentDomain->giveTipInfos(tipInfoStart, tipInfoEnd);
+    mpBasicGeometry->giveTips(tipInfoStart, tipInfoEnd);
 
 
     FloatArray center;
@@ -320,7 +304,9 @@ void GeometryBasedEI::updateNodeEnrMarker(XfemManager &ixFemMan)
                         FloatArray pos;
                         pos.add(0.5 * ( 1.0 - xi ), posI);
                         pos.add(0.5 * ( 1.0 + xi ), posJ);
-                        mpEnrichmentDomain->computeTangentialSignDist(tangDist, pos, arcPos);
+
+                        mpBasicGeometry->computeTangentialSignDist(tangDist, pos, arcPos);
+
                         double gamma = tangDist;
 
                         if ( gamma > 0.0 ) {
@@ -374,16 +360,72 @@ void GeometryBasedEI :: updateLevelSets(XfemManager &ixFemMan)
 
         // Calc normal sign dist
         double phi = 0.0;
-        mpEnrichmentDomain->computeNormalSignDist(phi, pos);
+        mpBasicGeometry->computeNormalSignDist(phi, pos);
         mLevelSetNormalDirMap [ nodeNum ] = phi;
 
         // Calc tangential sign dist
         double gamma = 0.0, arcPos = -1.0;
-        mpEnrichmentDomain->computeTangentialSignDist(gamma, pos, arcPos);
+        mpBasicGeometry->computeTangentialSignDist(gamma, pos, arcPos);
         mLevelSetTangDirMap [ nodeNum ] = gamma;
     }
 
     mLevelSetsNeedUpdate = false;
+}
+
+void GeometryBasedEI :: evaluateEnrFuncInNode(std :: vector< double > &oEnrFunc, const Node &iNode) const
+{
+    double levelSetGP = 0.0;
+    const FloatArray &globalCoord = iNode.giveNodeCoordinates();
+    int nodeInd = iNode.giveNumber();
+    this->evalLevelSetNormalInNode(levelSetGP, nodeInd, globalCoord);
+
+    const int dim = this->giveDomain()->giveNumberOfSpatialDimensions();
+    FloatArray gradLevelSetGP(dim);
+
+    double tangDist = 0.0, minDistArcPos = 0.0;
+    mpBasicGeometry->computeTangentialSignDist(tangDist, globalCoord, minDistArcPos);
+
+    FloatArray edGlobalCoord, localTangDir;
+
+    mpBasicGeometry->giveGlobalCoordinates(edGlobalCoord, minDistArcPos);
+    mpBasicGeometry->giveTangent(localTangDir, minDistArcPos);
+
+
+    const EfInput efInput(globalCoord, levelSetGP, nodeInd, edGlobalCoord, minDistArcPos, localTangDir);
+
+
+    if ( nodeInd == -1 ) {
+        // Bulk enrichment
+        oEnrFunc.resize(1, 0.0);
+        mpEnrichmentFunc->evaluateEnrFuncAt(oEnrFunc [ 0 ], globalCoord, levelSetGP);
+    } else {
+        auto res = mNodeEnrMarkerMap.find(nodeInd);
+        if ( res != mNodeEnrMarkerMap.end() ) {
+
+            switch(res->second) {
+            case NodeEnr_NONE:
+                break;
+            case NodeEnr_BULK:
+                // Bulk enrichment
+                oEnrFunc.resize(1, 0.0);
+                mpEnrichmentFunc->evaluateEnrFuncAt(oEnrFunc [ 0 ], globalCoord, levelSetGP);
+                break;
+            case NodeEnr_START_TIP:
+                mpEnrichmentFrontStart->evaluateEnrFuncAt(oEnrFunc, efInput);
+                break;
+            case NodeEnr_END_TIP:
+                mpEnrichmentFrontEnd->evaluateEnrFuncAt(oEnrFunc, efInput);
+                break;
+            case NodeEnr_START_AND_END_TIP:
+                mpEnrichmentFrontStart->evaluateEnrFuncAt(oEnrFunc, efInput);
+                mpEnrichmentFrontEnd->evaluateEnrFuncAt(oEnrFunc, efInput);
+                break;
+            }
+        } else   {
+            printf("In EnrichmentItem :: evaluateEnrFuncAt: mNodeEnrMarkerMap not found for iNodeInd %d\n", nodeInd);
+        }
+    }
+
 }
 
 void GeometryBasedEI :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl) const
@@ -401,22 +443,14 @@ void GeometryBasedEI :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, con
 
     const int dim = this->giveDomain()->giveNumberOfSpatialDimensions();
     FloatArray gradLevelSetGP(dim);
-//    evalGradLevelSetNormal(gradLevelSetGP, iPos, idNdX, iElNodes);
 
     double tangDist = 0.0, minDistArcPos = 0.0;
-    mpEnrichmentDomain->computeTangentialSignDist(tangDist, iGlobalCoord, minDistArcPos);
+    mpBasicGeometry->computeTangentialSignDist(tangDist, iGlobalCoord, minDistArcPos);
 
     FloatArray edGlobalCoord, localTangDir;
 
-    EnrichmentDomain_BG *edBG = dynamic_cast<EnrichmentDomain_BG*> (mpEnrichmentDomain);
-    if(edBG != NULL) {
-        edBG->bg->giveGlobalCoordinates(edGlobalCoord, minDistArcPos);
-        edBG->bg->giveTangent(localTangDir, minDistArcPos);
-    }
-    else {
-//        printf("EnrichmentItem :: evaluateEnrFuncAt:\n");
-//        printf("edBG == NULL.\n");
-    }
+    mpBasicGeometry->giveGlobalCoordinates(edGlobalCoord, minDistArcPos);
+    mpBasicGeometry->giveTangent(localTangDir, minDistArcPos);
 
 
     const EfInput efInput(iGlobalCoord, levelSetGP, iNodeInd, edGlobalCoord, minDistArcPos, localTangDir);
@@ -481,19 +515,13 @@ void GeometryBasedEI :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnr
         evalGradLevelSetNormal(gradLevelSetGP, iGlobalCoord, idNdX, iElNodes);
 
         double tangDist = 0.0, minDistArcPos = 0.0;
-        mpEnrichmentDomain->computeTangentialSignDist(tangDist, iGlobalCoord, minDistArcPos);
+        mpBasicGeometry->computeTangentialSignDist(tangDist, iGlobalCoord, minDistArcPos);
 
         FloatArray edGlobalCoord, localTangDir;
 
-        EnrichmentDomain_BG *edBG = dynamic_cast<EnrichmentDomain_BG*> (mpEnrichmentDomain);
-        if(edBG != NULL) {
-            edBG->bg->giveGlobalCoordinates(edGlobalCoord, minDistArcPos);
-            edBG->bg->giveTangent(localTangDir, minDistArcPos);
-        }
-        else {
-            printf("EnrichmentItem :: evaluateEnrFuncDerivAt:\n");
-            printf("edBG == NULL.\n");
-        }
+
+        mpBasicGeometry->giveGlobalCoordinates(edGlobalCoord, minDistArcPos);
+        mpBasicGeometry->giveTangent(localTangDir, minDistArcPos);
 
         const EfInput efInput(iGlobalCoord, levelSetGP, iNodeInd, edGlobalCoord, minDistArcPos, localTangDir);
 
@@ -632,7 +660,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
                 FloatArray pos;
                 pos.add(0.5 * ( 1.0 - xi ), posI);
                 pos.add(0.5 * ( 1.0 + xi ), posJ);
-                mpEnrichmentDomain->computeTangentialSignDist(tangDist, pos, arcPos);
+                mpBasicGeometry->computeTangentialSignDist(tangDist, pos, arcPos);
                 double gamma = tangDist;
 
 
@@ -664,7 +692,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
                             oIntersectionPoints.push_back(ps);
 
                             double arcPos = 0.0, tangDist = 0.0;
-                            mpEnrichmentDomain->computeTangentialSignDist(tangDist, ps, arcPos);
+                            mpBasicGeometry->computeTangentialSignDist(tangDist, ps, arcPos);
                             oMinDistArcPos.push_back(arcPos);
 
                             oIntersectedEdgeInd.push_back(edgeIndex);
@@ -686,7 +714,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
                             oIntersectionPoints.push_back(pe);
 
                             double arcPos = 0.0, tangDist = 0.0;
-                            mpEnrichmentDomain->computeTangentialSignDist(tangDist, pe, arcPos);
+                            mpBasicGeometry->computeTangentialSignDist(tangDist, pe, arcPos);
                             oMinDistArcPos.push_back(arcPos);
 
                             oIntersectedEdgeInd.push_back(edgeIndex);
@@ -725,7 +753,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
                             oIntersectionPoints.push_back(p);
 
                             double arcPos = 0.0, tangDist = 0.0;
-                            mpEnrichmentDomain->computeTangentialSignDist(tangDist, p, arcPos);
+                            mpBasicGeometry->computeTangentialSignDist(tangDist, p, arcPos);
                             oMinDistArcPos.push_back(arcPos);
 
                             oIntersectedEdgeInd.push_back(edgeIndex);
@@ -854,7 +882,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
                         oIntersectionPoints.push_back(ps);
 
                         double arcPos = 0.0, tangDist = 0.0;
-                        mpEnrichmentDomain->computeTangentialSignDist(tangDist, ps, arcPos);
+                        mpBasicGeometry->computeTangentialSignDist(tangDist, ps, arcPos);
                         oMinDistArcPos.push_back(arcPos);
 
                         oIntersectedEdgeInd.push_back(edgeIndex);
@@ -876,7 +904,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
                         oIntersectionPoints.push_back(pe);
 
                         double arcPos = 0.0, tangDist = 0.0;
-                        mpEnrichmentDomain->computeTangentialSignDist(tangDist, pe, arcPos);
+                        mpBasicGeometry->computeTangentialSignDist(tangDist, pe, arcPos);
                         oMinDistArcPos.push_back(arcPos);
 
                         oIntersectedEdgeInd.push_back(edgeIndex);
@@ -915,7 +943,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
                         oIntersectionPoints.push_back(p);
 
                         double arcPos = 0.0, tangDist = 0.0;
-                        mpEnrichmentDomain->computeTangentialSignDist(tangDist, p, arcPos);
+                        mpBasicGeometry->computeTangentialSignDist(tangDist, p, arcPos);
                         oMinDistArcPos.push_back(arcPos);
 
                         oIntersectedEdgeInd.push_back(edgeIndex);
@@ -928,6 +956,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
 
 void GeometryBasedEI :: writeVtkDebug() const
 {
+#if 0
     // For debugging only
     if ( mpEnrichmentDomain->getVtkDebug() ) {
         int tStepInd = 0; //this->domain->giveEngngModel()->giveCurrentStep()->giveNumber();
@@ -942,11 +971,119 @@ void GeometryBasedEI :: writeVtkDebug() const
         }
 
     }
+#endif
 }
 
 void GeometryBasedEI :: giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const
 {
-    mpEnrichmentDomain->giveSubPolygon(oPoints, iXiStart, iXiEnd);
+    mpBasicGeometry->giveSubPolygon(oPoints, iXiStart, iXiEnd);
+}
+
+void GeometryBasedEI :: propagateFronts()
+{
+    TipPropagation tipPropStart;
+    if( mpPropagationLaw->propagateInterface(*giveDomain(), *mpEnrichmentFrontStart, tipPropStart) ) {
+//        mpEnrichmentDomain->propagateTip(tipPropStart);
+        // TODO: Generalize
+        // Propagate start point
+        FloatArray pos( mpBasicGeometry->giveVertex(1) );
+        pos.add(tipPropStart.mPropagationLength, tipPropStart.mPropagationDir);
+        mpBasicGeometry->insertVertexFront(pos);
+
+    }
+
+    TipPropagation tipPropEnd;
+    if( mpPropagationLaw->propagateInterface(*giveDomain(), *mpEnrichmentFrontEnd, tipPropEnd) ) {
+//        mpEnrichmentDomain->propagateTip(tipPropEnd);
+        // TODO: Generalize
+        // Propagate end point
+        FloatArray pos( mpBasicGeometry->giveVertex( mpBasicGeometry->giveNrVertices() ) );
+        pos.add(tipPropEnd.mPropagationLength, tipPropEnd.mPropagationDir);
+        mpBasicGeometry->insertVertexBack(pos);
+    }
+
+#if 0
+    // For debugging only
+    if ( mpEnrichmentDomain->getVtkDebug() ) {
+        int tStepInd = this->domain->giveEngngModel()->giveCurrentStep()->giveNumber();
+
+        EnrichmentDomain_BG *enrDomBG = dynamic_cast< EnrichmentDomain_BG * >( mpEnrichmentDomain );
+
+        if ( enrDomBG != NULL ) {
+            PolygonLine *pl = dynamic_cast< PolygonLine * >( enrDomBG->bg );
+            if ( pl != NULL ) {
+                pl->printVTK(tStepInd, number);
+            }
+        }
+    }
+#endif
+    updateGeometry();
+}
+
+bool GeometryBasedEI :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos,  Element &iEl, const FloatArray &iElCenter) const
+{
+    TipInfo tipInfoStart, tipInfoEnd;
+    mpBasicGeometry->giveTips(tipInfoStart, tipInfoEnd);
+
+
+    std :: vector< TipInfo >tipInfos = {tipInfoStart, tipInfoEnd};
+
+    double minDist2 = std :: numeric_limits< double > :: max();
+    size_t minIndex = 0;
+    bool foundTip = false;
+
+    for ( size_t i = 0; i < tipInfos.size(); i++ ) {
+        if ( tipInfos [ i ].mGlobalCoord.distance_square(iElCenter) < minDist2 ) {
+            minDist2 = tipInfos [ i ].mGlobalCoord.distance_square(iElCenter);
+            minIndex = i;
+            foundTip = true;
+            printf("foundTip = true.\n");
+        }
+    }
+
+    if ( !foundTip ) {
+        printf("!foundTip, Returning false.\n");
+        return false;
+    } else   {
+
+        // Check if the tip point is inside the element
+//        Element *el = domain->giveElement(iElIndex);
+        const FloatArray &globCoord = tipInfos [ minIndex ].mGlobalCoord;
+        FloatArray locCoord;
+        if(!iEl.computeLocalCoordinates(locCoord, globCoord)) {
+            printf("globCoord: "); globCoord.printYourself();
+            printf("iElCenter: "); iElCenter.printYourself();
+            printf("!el->computeLocalCoordinates(locCoord, globCoord). Returning false.\n");
+            return false;
+        }
+
+        oCoord = tipInfos [ minIndex ].mGlobalCoord;
+        oArcPos = tipInfos [ minIndex ].mArcPos;
+        return true;
+    }
+}
+
+void GeometryBasedEI :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
+{
+    // Compute bounding sphere from enrichment domain ...
+    mpBasicGeometry->giveBoundingSphere(oCenter, oRadius);
+
+    // ... increase the radius to cover the support of
+    //     the enrichment front ...
+    oRadius += max(mpEnrichmentFrontStart->giveSupportRadius(), mpEnrichmentFrontEnd->giveSupportRadius());
+
+
+    if(domain->giveNumberOfSpatialDimensions() == 2) {
+        // Compute mean area if applicable
+        double meanArea = domain->giveArea()/domain->giveNumberOfElements();
+        double meanLength = sqrt(meanArea);
+        //printf("meanLength: %e\n", meanLength );
+
+        oRadius = max(oRadius, meanLength);
+    }
+
+    // ... and make sure that all nodes of partly cut elements are included.
+    oRadius *= 2.0;     // TODO: Compute a better estimate based on maximum element size. /ES
 }
 
 } /* namespace oofem */

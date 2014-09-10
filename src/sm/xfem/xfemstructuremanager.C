@@ -150,39 +150,58 @@ void XfemStructureManager :: splitCracks()
 
                                 int n1 = this->giveNumberOfEnrichmentItems()+1;
         //                        EnrichmentItem *newEI_1 = new Crack(n1, this, this->giveDomain() );
-                                std :: unique_ptr< EnrichmentItem > newEI_1( new Crack(n1, this, this->giveDomain() ) );
+                                Crack *newCrack = new Crack(n1, this, this->giveDomain() );
+                                std :: unique_ptr< EnrichmentItem > newEI_1( newCrack );
 
                                 InputRecord *ir = dataReader.giveInputRecord(DataReader :: IR_enrichItemRec, i);
                                 newEI_1->initializeFrom( ir );
                                 newEI_1->instanciateYourself(&dataReader);
 
-                                EDCrack *ed = dynamic_cast<EDCrack*>( newEI_1->giveEnrichmentDomain() );
-                                if(ed != NULL) {
+                                PolygonLine *new_pl = dynamic_cast<PolygonLine*>( newCrack->giveGeometry() );
+//                                EDCrack *ed = dynamic_cast<EDCrack*>( newEI_1->giveEnrichmentDomain() );
+
+                                if(new_pl == NULL) {
+                                    OOFEM_ERROR("Failed to cast PolygonLine *new_pl.")
+                                }
+
+                                if(new_pl != NULL) {
                                     //printf("arcPositions_i[k-1]: %e arcPositions_i[k]: %e\n", arcPositions_i[k-1], arcPositions_i[k] );
-                                    ed->cropPolygon(arcPositions_i[k-1], arcPositions_i[k]);
+                                    new_pl->cropPolygon(arcPositions_i[k-1], arcPositions_i[k]);
 
 
-                                    // Take enrichment front tangent direction
-                                    // as the normal direction of crack_j
-                                    EnrichmentDomain_BG *ed_crack_j = dynamic_cast<EnrichmentDomain_BG*>( crack_j->giveEnrichmentDomain() );
-                                    if(ed_crack_j == NULL) {
-                                        OOFEM_ERROR("Failed to cast EnrichmentDomain_BG *ed_crack_j.")
-                                    }
+                                    PolygonLine *polygonLine_j = dynamic_cast<PolygonLine*>( crack_j->giveGeometry() );
 
-                                    PolygonLine *polygonLine_j = dynamic_cast<PolygonLine*>( ed_crack_j->bg );
                                     if(polygonLine_j == NULL) {
                                         OOFEM_ERROR("Failed to cast PolygonLine *polygonLine_j.")
                                     }
 
-                                    EnrichmentDomain_BG *ed_crack_i = dynamic_cast<EnrichmentDomain_BG*>( crack_i->giveEnrichmentDomain() );
-                                    if(ed_crack_i == NULL) {
-                                        OOFEM_ERROR("Failed to cast EnrichmentDomain_BG *ed_crack_i.")
-                                    }
+                                    PolygonLine *polygonLine_i = dynamic_cast<PolygonLine*>( crack_i->giveGeometry() );
 
-                                    PolygonLine *polygonLine_i = dynamic_cast<PolygonLine*>( ed_crack_i->bg );
                                     if(polygonLine_i == NULL) {
                                         OOFEM_ERROR("Failed to cast PolygonLine *polygonLine_i.")
                                     }
+
+                                    // Take enrichment front tangent direction
+                                    // as the normal direction of crack_j
+//                                    EnrichmentDomain_BG *ed_crack_j = dynamic_cast<EnrichmentDomain_BG*>( crack_j->giveEnrichmentDomain() );
+//                                    if(ed_crack_j == NULL) {
+//                                        OOFEM_ERROR("Failed to cast EnrichmentDomain_BG *ed_crack_j.")
+//                                    }
+//
+//                                    PolygonLine *polygonLine_j = dynamic_cast<PolygonLine*>( ed_crack_j->bg );
+//                                    if(polygonLine_j == NULL) {
+//                                        OOFEM_ERROR("Failed to cast PolygonLine *polygonLine_j.")
+//                                    }
+//
+//                                    EnrichmentDomain_BG *ed_crack_i = dynamic_cast<EnrichmentDomain_BG*>( crack_i->giveEnrichmentDomain() );
+//                                    if(ed_crack_i == NULL) {
+//                                        OOFEM_ERROR("Failed to cast EnrichmentDomain_BG *ed_crack_i.")
+//                                    }
+//
+//                                    PolygonLine *polygonLine_i = dynamic_cast<PolygonLine*>( ed_crack_i->bg );
+//                                    if(polygonLine_i == NULL) {
+//                                        OOFEM_ERROR("Failed to cast PolygonLine *polygonLine_i.")
+//                                    }
 
 
                                     // Change enrichment fronts

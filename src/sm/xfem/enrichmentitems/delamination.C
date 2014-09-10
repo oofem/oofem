@@ -90,16 +90,14 @@ int Delamination :: instanciateYourself(DataReader *dr)
         mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
     }
 
-    mpEnrichmentDomain = classFactory.createEnrichmentDomain( name.c_str() );
-    if ( mpEnrichmentDomain == NULL ) {
-        OOFEM_ERROR( "unknown enrichment domain (%s)", name.c_str() );
+    IntArray idList;
+    IR_GIVE_FIELD(mir, idList, _IFT_ListBasedEI_list);
+    for ( int i = 1; i <= idList.giveSize(); i++ ) {
+        this->dofManList.push_back( idList.at(i) );
     }
 
-    if ( giveDomain()->giveXfemManager()->giveVtkDebug() ) {
-        mpEnrichmentDomain->setVtkDebug(true);
-    }
-
-    mpEnrichmentDomain->initializeFrom(mir);
+    std :: sort( dofManList.begin(), this->dofManList.end() );
+    //IR_GIVE_FIELD(ir, this->xi, _IFT_DofManList_DelaminationLevel);
 
     // Instantiate EnrichmentFront
     if ( mEnrFrontIndex == 0 ) {
@@ -191,7 +189,17 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
             }
         }
 
-        dynamic_cast< DofManList * >( this->mpEnrichmentDomain )->addDofManagers(dofManNumbers);     // fix JB
+        for ( int i = 1; i <= dofManNumbers.giveSize(); i++ ) {
+            //std::list< int > :: iterator p;
+            std :: vector< int > :: iterator p;
+            p = std :: find( this->dofManList.begin(), this->dofManList.end(), dofManNumbers.at(i) );
+            if ( p == this->dofManList.end() ) {          // if new node
+                this->dofManList.push_back( dofManNumbers.at(i) );
+            }
+        }
+
+        std :: sort( dofManList.begin(), this->dofManList.end() );
+
     }
 }
 
@@ -267,9 +275,19 @@ Delamination :: appendInputRecords(DynamicDataReader &oDR)
 
 
     // Enrichment domain
-    DynamicInputRecord *edRec = new DynamicInputRecord();
-    mpEnrichmentDomain->giveInputRecord(* edRec);
-    oDR.insertInputRecord(DataReader :: IR_geoRec, edRec);
+
+    DynamicInputRecord *geoRec = new DynamicInputRecord();
+    geoRec->setRecordKeywordField(this->giveInputRecordName(), 1);
+
+    IntArray idList;
+    idList.resize( dofManList.size() );
+    for ( size_t i = 0; i < dofManList.size(); i++ ) {
+        idList.at(i + 1) = dofManList [ i ];
+    }
+
+    geoRec->setField(idList, _IFT_DofManList_list);
+
+    oDR.insertInputRecord(DataReader :: IR_geoRec, geoRec);
 
     // Enrichment front
     if ( mEnrFrontIndex != 0 ) {

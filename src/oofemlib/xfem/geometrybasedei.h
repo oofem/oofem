@@ -67,6 +67,8 @@ public:
 
     void updateLevelSets(XfemManager &ixFemMan);
 
+    virtual void evaluateEnrFuncInNode(std :: vector< double > &oEnrFunc, const Node &iNode) const;
+
     virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl) const;
     virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl, const FloatArray &iN, const IntArray &iElNodes) const;
 
@@ -86,6 +88,12 @@ public:
 
     void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const;
 
+    virtual void propagateFronts();
+    virtual bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, Element &iEl, const FloatArray &iElCenter) const;
+
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
+
+    BasicGeometry *giveGeometry() {return mpBasicGeometry;}
 
 protected:
     BasicGeometry *mpBasicGeometry;

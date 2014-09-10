@@ -160,6 +160,16 @@ void TrPlaneStress2dXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatRespo
 {
     TrPlaneStress2d :: computeStiffnessMatrix(answer, rMode, tStep);
     XfemStructuralElementInterface :: computeCohesiveTangent(answer, tStep);
+
+    const double tol = 1.0e-6;
+    const double regularizationCoeff = 1.0e-6;
+    int numRows = answer.giveNumberOfRows();
+    for(int i = 0; i < numRows; i++) {
+        if( fabs(answer(i,i)) < tol ) {
+            answer(i,i) += regularizationCoeff;
+//          printf("Found zero on diagonal.\n");
+        }
+    }
 }
 
 void

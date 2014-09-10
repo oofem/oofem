@@ -282,7 +282,7 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack)
 
 	std::vector<double> arcLengthPositions, normalJumps, tangJumps;
 
-	const EnrichmentDomain *ed = iCrack.giveEnrichmentDomain();
+	const BasicGeometry *bg = iCrack.giveGeometry();
 
 	for( GaussPoint *gp: czGaussPoints ) {
 
@@ -292,7 +292,7 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack)
 			// Compute arc length position of the Gauss point
 			const FloatArray &coord = *(gp->giveNaturalCoordinates());
 			double tangDist = 0.0, arcPos = 0.0;
-			ed->computeTangentialSignDist(tangDist, coord, arcPos);
+			bg->computeTangentialSignDist(tangDist, coord, arcPos);
 			arcLengthPositions.push_back(arcPos);
 
 			// Compute displacement jump in normal and tangential direction

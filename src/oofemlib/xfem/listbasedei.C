@@ -68,18 +68,19 @@ void ListBasedEI::updateGeometry()
 
 }
 
+void ListBasedEI :: propagateFronts()
+{
+
+}
+
 void ListBasedEI::updateNodeEnrMarker(XfemManager &ixFemMan)
 {
-    //    updateLevelSets(ixFemMan);
-    DofManList *dManList = dynamic_cast<DofManList*>(mpEnrichmentDomain);
-
     mNodeEnrMarkerMap.clear();
 
     //printf("\n The following nodes are enriched ");
     // Loop over nodes in the DofManList and mark nodes as enriched.
-    const std :: vector< int > &dofList = dManList->giveDofManList();
-    for ( int i = 0; i < int ( dofList.size() ); i++ ) {
-        mNodeEnrMarkerMap [ dofList [ i ] ] = NodeEnr_BULK;
+    for ( int i = 0; i < int ( dofManList.size() ); i++ ) {
+        mNodeEnrMarkerMap [ dofManList [ i ] ] = NodeEnr_BULK;
         //  printf(" %i", dofList [ i ]);
     }
 
@@ -87,5 +88,11 @@ void ListBasedEI::updateNodeEnrMarker(XfemManager &ixFemMan)
     //mLevelSetSurfaceNormalDir.resize(nNodes, 0.0); // New /JB
 }
 
+bool ListBasedEI::giveElementTipCoord(FloatArray &oCoord, double &oArcPos,  Element &iEl, const FloatArray &iElCenter) const
+{
+    // No tips can be defined for list based enrichment items.
+    // Hence, we return false.
+    return false;
+}
 
 } /* namespace oofem */

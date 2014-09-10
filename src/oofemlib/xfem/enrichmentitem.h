@@ -147,7 +147,7 @@ public:
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep) { };
     virtual void updateGeometry() = 0;
-    virtual void propagateFronts();
+    virtual void propagateFronts() = 0;
 
     virtual bool hasPropagatingFronts() const;
 
@@ -162,6 +162,7 @@ public:
 
     void giveEIDofIdArray(IntArray &answer) const; // list of id's for the enrichment dofs
 
+    virtual void evaluateEnrFuncInNode(std :: vector< double > &oEnrFunc, const Node &iNode) const = 0;
 
     virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl) const = 0;
     virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl, const FloatArray &iN, const IntArray &iElNodes) const = 0;
@@ -205,8 +206,8 @@ public:
 
     // Return the coordinates of the tip in element iElIndex,
     // if the element contains a tip.
-    bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const FloatArray &iElCenter) const;
-    bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const Triangle &iTri, const FloatArray &iElCenter) const;
+    virtual bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, Element &iEl, const FloatArray &iElCenter) const = 0;
+//    bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const Triangle &iTri, const FloatArray &iElCenter) const = 0;
 
     // Help functions
     static double calcXiZeroLevel(const double &iQ1, const double &iQ2);
@@ -218,11 +219,11 @@ public:
 
     virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod);
 
-    EnrichmentDomain *giveEnrichmentDomain() const { return mpEnrichmentDomain; }
+//    EnrichmentDomain *giveEnrichmentDomain() const { return mpEnrichmentDomain; }
 
     const std :: unordered_map< int, NodeEnrichmentType > &giveEnrNodeMap() const { return mNodeEnrMarkerMap; }
 
-    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius) = 0;
 
     EnrichmentFront *giveEnrichmentFrontStart() {return mpEnrichmentFrontStart;}
     void setEnrichmentFrontStart(EnrichmentFront *ipEnrichmentFrontStart);
@@ -235,7 +236,7 @@ public:
 
 protected:
 
-    EnrichmentDomain *mpEnrichmentDomain;
+//    EnrichmentDomain *mpEnrichmentDomain;
 
     EnrichmentFunction *mpEnrichmentFunc;
 

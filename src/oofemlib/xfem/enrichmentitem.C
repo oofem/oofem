@@ -68,7 +68,6 @@ const double EnrichmentItem :: mLevelSetRelTol = 1.0e-3;
 
 
 EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FEMComponent(n, aDomain),
-    mpEnrichmentDomain(NULL),
     mpEnrichmentFunc(NULL),
     mpEnrichmentFrontStart(NULL),
     mpEnrichmentFrontEnd(NULL),
@@ -85,7 +84,6 @@ EnrichmentItem :: EnrichmentItem(int n, XfemManager *xMan, Domain *aDomain) : FE
 
 EnrichmentItem :: ~EnrichmentItem()
 {
-    delete mpEnrichmentDomain;
     delete mpEnrichmentFunc;
     delete mpEnrichmentFrontStart;
     delete mpEnrichmentFrontEnd;
@@ -171,35 +169,6 @@ int EnrichmentItem :: giveNumDofManEnrichments(const DofManager &iDMan) const
 bool EnrichmentItem :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const
 {
     return false;
-}
-
-void EnrichmentItem :: propagateFronts()
-{
-    TipPropagation tipPropStart;
-    if( mpPropagationLaw->propagateInterface(*giveDomain(), *mpEnrichmentFrontStart, tipPropStart) ) {
-        mpEnrichmentDomain->propagateTip(tipPropStart);
-    }
-
-    TipPropagation tipPropEnd;
-    if( mpPropagationLaw->propagateInterface(*giveDomain(), *mpEnrichmentFrontEnd, tipPropEnd) ) {
-        mpEnrichmentDomain->propagateTip(tipPropEnd);
-    }
-
-    // For debugging only
-    if ( mpEnrichmentDomain->getVtkDebug() ) {
-        int tStepInd = this->domain->giveEngngModel()->giveCurrentStep()->giveNumber();
-
-        EnrichmentDomain_BG *enrDomBG = dynamic_cast< EnrichmentDomain_BG * >( mpEnrichmentDomain );
-
-        if ( enrDomBG != NULL ) {
-            PolygonLine *pl = dynamic_cast< PolygonLine * >( enrDomBG->bg );
-            if ( pl != NULL ) {
-                pl->printVTK(tStepInd, number);
-            }
-        }
-    }
-
-    updateGeometry();
 }
 
 bool EnrichmentItem :: hasPropagatingFronts() const
@@ -377,43 +346,6 @@ void EnrichmentItem :: createEnrichedDofs()
     }
 }
 
-bool EnrichmentItem :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const FloatArray &iElCenter) const
-{
-    TipInfo tipInfoStart, tipInfoEnd;
-    mpEnrichmentDomain->giveTipInfos(tipInfoStart, tipInfoEnd);
-
-    std :: vector< TipInfo >tipInfos = {tipInfoStart, tipInfoEnd};
-
-    double minDist2 = std :: numeric_limits< double > :: max();
-    size_t minIndex = 0;
-    bool foundTip = false;
-
-    for ( size_t i = 0; i < tipInfos.size(); i++ ) {
-        if ( tipInfos [ i ].mGlobalCoord.distance_square(iElCenter) < minDist2 ) {
-            minDist2 = tipInfos [ i ].mGlobalCoord.distance_square(iElCenter);
-            minIndex = i;
-            foundTip = true;
-        }
-    }
-
-    if ( !foundTip ) {
-        return false;
-    } else   {
-
-        // Check if the tip point is inside the element
-        Element *el = domain->giveElement(iElIndex);
-        const FloatArray &globCoord = tipInfos [ minIndex ].mGlobalCoord;
-        FloatArray locCoord;
-        if(!el->computeLocalCoordinates(locCoord, globCoord)) {
-            return false;
-        }
-
-        oCoord = tipInfos [ minIndex ].mGlobalCoord;
-        oArcPos = tipInfos [ minIndex ].mArcPos;
-        return true;
-    }
-}
-
 
 double EnrichmentItem :: calcXiZeroLevel(const double &iQ1, const double &iQ2)
 {
@@ -497,29 +429,6 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
 void EnrichmentItem :: callGnuplotExportModule(GnuplotExportModule &iExpMod)
 {
     //iExpMod.outputXFEM(*this);
-}
-
-void EnrichmentItem :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
-{
-    // Compute bounding sphere from enrichment domain ...
-    mpEnrichmentDomain->giveBoundingSphere(oCenter, oRadius);
-
-    // ... increase the radius to cover the support of
-    //	   the enrichment front ...
-    oRadius += max(mpEnrichmentFrontStart->giveSupportRadius(), mpEnrichmentFrontEnd->giveSupportRadius());
-
-
-    if(domain->giveNumberOfSpatialDimensions() == 2) {
-        // Compute mean area if applicable
-        double meanArea = domain->giveArea()/domain->giveNumberOfElements();
-        double meanLength = sqrt(meanArea);
-        //printf("meanLength: %e\n", meanLength );
-
-        oRadius = max(oRadius, meanLength);
-    }
-
-    // ... and make sure that all nodes of partly cut elements are included.
-    oRadius *= 2.0;     // TODO: Compute a better estimate based on maximum element size. /ES
 }
 
 void EnrichmentItem :: setEnrichmentFrontStart(EnrichmentFront *ipEnrichmentFrontStart)

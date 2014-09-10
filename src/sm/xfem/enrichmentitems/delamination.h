@@ -76,6 +76,8 @@ public:
     //virtual Material *giveMaterial() { return mat; }
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep);
 
+    virtual void evaluateEnrFuncInNode(std :: vector< double > &oEnrFunc, const Node &iNode) const {OOFEM_ERROR("Not implemented.")}
+
     virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl) const;
     virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl, const FloatArray &iN, const IntArray &iElNodes) const;
 

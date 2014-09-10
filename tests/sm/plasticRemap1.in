@@ -23,7 +23,7 @@ XfemManager 1 numberofenrichmentitems 1
 crack 1 
 #DiscontinuousFunction 1
 HeavisideFunction 1
-polygoncrack 1 points 6 -0.1 100.0 0.5 100.0 1.1 100.0
+PolygonLine 1 points 6 -0.1 100.0 0.5 100.0 1.1 100.0
 #
 #
 #%BEGIN_CHECK% tolerance 1.e-7

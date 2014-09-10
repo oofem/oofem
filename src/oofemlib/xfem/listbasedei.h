@@ -36,6 +36,7 @@
 #define LISTBASEDEI_H_
 
 #define _IFT_ListBasedEI_Name "listbasedei"
+#define _IFT_ListBasedEI_list "list"
 
 #include "enrichmentitem.h"
 
@@ -58,7 +59,17 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_ListBasedEI_Name; }
 
     virtual void updateGeometry();
+    virtual void propagateFronts();
     virtual void updateNodeEnrMarker(XfemManager &ixFemMan);
+
+    virtual bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos,  Element &iEl, const FloatArray &iElCenter) const;
+
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius) {OOFEM_ERROR("Not implemented.")}
+
+protected:
+    std :: vector< int >dofManList;
+    double xi;
+    int setNumber;
 
 };
 

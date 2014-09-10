@@ -954,8 +954,14 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
 
                         }
 
-                        double tangSignDist = 0.0, arcPos = 0.0;
-                        ei->giveEnrichmentDomain()->computeTangentialSignDist(tangSignDist, x, arcPos);
+                        double tangSignDist = levelSetTang, arcPos = 0.0;
+
+                        GeometryBasedEI *geoEI = dynamic_cast<GeometryBasedEI*>(ei);
+                        if(geoEI != NULL) {
+                            // TODO: Consider removing this special treatment. /ES
+                            geoEI->giveGeometry()->computeTangentialSignDist(tangSignDist, x, arcPos);
+                        }
+
 
                         if( (tangSignDist > (1.0e-3)*meanEdgeLength && fabs(levelSetNormal) < (1.0e-2)*meanEdgeLength) && evaluationSucceeded) {
                             joinNodes = false;

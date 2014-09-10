@@ -63,7 +63,7 @@ void Crack :: AppendCohesiveZoneGaussPoint(GaussPoint *ipGP)
         // Compute arc length position of the Gauss point
         const FloatArray &coord =  ipGP->giveGlobalCoordinates();
         double tangDist = 0.0, arcPos = 0.0;
-        mpEnrichmentDomain->computeTangentialSignDist(tangDist, coord, arcPos);
+        mpBasicGeometry->computeTangentialSignDist(tangDist, coord, arcPos);
 
         // Insert at correct position
         std :: vector< GaussPoint * > :: iterator iteratorGP = mCohesiveZoneGaussPoints.begin();
@@ -92,18 +92,10 @@ void Crack :: computeCrackIntersectionPoints(Crack &iCrack, std::vector<FloatArr
     const double tol = 1.0e-12;
 
     // Enrichment domain of the current crack
-    const EnrichmentDomain_BG *ed1 = dynamic_cast<const EnrichmentDomain_BG*>( giveEnrichmentDomain() );
-    PolygonLine *polygonLine1 = NULL;
-    if(ed1 != NULL) {
-        polygonLine1 = dynamic_cast<PolygonLine*>( ed1->bg );
-    }
+    PolygonLine *polygonLine1 = dynamic_cast<PolygonLine*>(mpBasicGeometry);
 
     // Enrichment domain of the crack given as input
-    const EnrichmentDomain_BG *ed2 = dynamic_cast<const EnrichmentDomain_BG*>( iCrack.giveEnrichmentDomain() );
-    PolygonLine *polygonLine2 = NULL;
-    if(ed2 != NULL) {
-        polygonLine2 = dynamic_cast<PolygonLine*>( ed2->bg );
-    }
+    PolygonLine *polygonLine2 = dynamic_cast<PolygonLine*>(iCrack.giveGeometry());
 
     if( polygonLine1 != NULL && polygonLine2 != NULL ) {
 
@@ -129,11 +121,7 @@ void Crack :: computeArcPoints(const std::vector<FloatArray> &iIntersectionPoint
     const double tol = 1.0e-12;
 
     // Enrichment domain of the current crack
-    const EnrichmentDomain_BG *ed1 = dynamic_cast<const EnrichmentDomain_BG*>( giveEnrichmentDomain() );
-    PolygonLine *polygonLine1 = NULL;
-    if(ed1 != NULL) {
-        polygonLine1 = dynamic_cast<PolygonLine*>( ed1->bg );
-    }
+    PolygonLine *polygonLine1 = dynamic_cast<PolygonLine*>(mpBasicGeometry);
 
     if( polygonLine1 != NULL ) {
 

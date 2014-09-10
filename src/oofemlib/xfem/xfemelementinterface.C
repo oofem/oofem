@@ -198,8 +198,8 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
                     std :: vector< double >efNode;
                     FloatArray nodeNaturalCoord;
                     iEl.computeLocalCoordinates(nodeNaturalCoord, nodePos);
-                    ei->evaluateEnrFuncAt(efNode, nodePos, nodeNaturalCoord, globalNodeInd, iEl);
-
+//                    ei->evaluateEnrFuncAt(efNode, nodePos, nodeNaturalCoord, globalNodeInd, iEl);
+                    ei->evaluateEnrFuncInNode(efNode, *node);
 
                     for ( int k = 0; k < numEnr; k++ ) {
                         // matrix to be added anytime a node is enriched
@@ -529,7 +529,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         bool foundTip = false;
         double tipArcPos = -1.0;
 
-        if ( ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), elCenter) ) {
+        if ( ei->giveElementTipCoord(tipCoord, tipArcPos, *element, elCenter) ) {
             foundTip = true;
         }
 
@@ -688,7 +688,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         //if ( ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), iTri, elCenter) ) {
         //    foundTip = true;
         //}
-		if (ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), elCenter)) {
+		if (ei->giveElementTipCoord(tipCoord, tipArcPos, *element, elCenter)) {
 			foundTip = true;
 		}
 
