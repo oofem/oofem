@@ -35,6 +35,7 @@
 #define CRACK_H_
 
 #include "xfem/enrichmentitem.h"
+#include "xfem/hybridei.h"
 
 #define _IFT_Crack_Name "crack"
 
@@ -50,7 +51,7 @@ class GnuplotExportModule;
  * @author Erik Svenning
  * @date Feb 14, 2014
  */
-class OOFEM_EXPORT Crack : public EnrichmentItem
+class OOFEM_EXPORT Crack : public HybridEI
 {
 public:
     Crack(int n, XfemManager *xm, Domain *aDomain);

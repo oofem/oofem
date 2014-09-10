@@ -42,6 +42,8 @@
 #include "xfem/enrichmentfunction.h"
 #include "xfem/enrichmentdomain.h"
 #include "xfem/propagationlaw.h"
+#include "xfem/xfemmanager.h"
+#include "xfem/enrichmentfronts/enrichmentfrontdonothing.h"
 
 namespace oofem {
 REGISTER_EnrichmentItem(Delamination)
@@ -49,6 +51,117 @@ REGISTER_EnrichmentItem(Delamination)
 //------------------
 // DELAMINATION
 //------------------
+
+Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : ListBasedEI(n, xm, aDomain)
+{
+    mpEnrichesDofsWithIdArray = {
+            D_u, D_v, D_w, W_u, W_v, W_w
+    };
+    this->interfaceNum = -1;
+    this->crossSectionNum = -1;
+    this->matNum = 0;
+}
+
+int Delamination :: instanciateYourself(DataReader *dr)
+{
+    IRResultType result; // Required by IR_GIVE_FIELD macro
+    std :: string name;
+
+    // Instantiate enrichment function
+    InputRecord *mir = dr->giveInputRecord(DataReader :: IR_enrichFuncRec, 1);
+    result = mir->giveRecordKeywordField(name);
+
+    if ( result != IRRT_OK ) {
+        mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
+    }
+
+    mpEnrichmentFunc = classFactory.createEnrichmentFunction( name.c_str(), 1, this->giveDomain() );
+    if ( mpEnrichmentFunc != NULL ) {
+        mpEnrichmentFunc->initializeFrom(mir);
+    } else {
+        OOFEM_ERROR( "failed to create enrichment function (%s)", name.c_str() );
+    }
+
+
+    // Instantiate enrichment domain
+    mir = dr->giveInputRecord(DataReader :: IR_geoRec, 1);
+    result = mir->giveRecordKeywordField(name);
+    if ( result != IRRT_OK ) {
+        mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
+    }
+
+    mpEnrichmentDomain = classFactory.createEnrichmentDomain( name.c_str() );
+    if ( mpEnrichmentDomain == NULL ) {
+        OOFEM_ERROR( "unknown enrichment domain (%s)", name.c_str() );
+    }
+
+    if ( giveDomain()->giveXfemManager()->giveVtkDebug() ) {
+        mpEnrichmentDomain->setVtkDebug(true);
+    }
+
+    mpEnrichmentDomain->initializeFrom(mir);
+
+    // Instantiate EnrichmentFront
+    if ( mEnrFrontIndex == 0 ) {
+        mpEnrichmentFrontStart = new EnrFrontDoNothing();
+        mpEnrichmentFrontEnd = new EnrFrontDoNothing();
+    } else {
+        std :: string enrFrontNameStart, enrFrontNameEnd;
+
+        InputRecord *enrFrontStartIr = dr->giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
+        result = enrFrontStartIr->giveRecordKeywordField(enrFrontNameStart);
+
+        mpEnrichmentFrontStart = classFactory.createEnrichmentFront( enrFrontNameStart.c_str() );
+        if ( mpEnrichmentFrontStart != NULL ) {
+            mpEnrichmentFrontStart->initializeFrom(enrFrontStartIr);
+        } else {
+            OOFEM_ERROR( "Failed to create enrichment front (%s)", enrFrontNameStart.c_str() );
+        }
+
+        InputRecord *enrFrontEndIr = dr->giveInputRecord(DataReader :: IR_enrichFrontRec, mEnrFrontIndex);
+        result = enrFrontEndIr->giveRecordKeywordField(enrFrontNameEnd);
+
+        mpEnrichmentFrontEnd = classFactory.createEnrichmentFront( enrFrontNameEnd.c_str() );
+        if ( mpEnrichmentFrontEnd != NULL ) {
+            mpEnrichmentFrontEnd->initializeFrom(enrFrontEndIr);
+        } else {
+            OOFEM_ERROR( "Failed to create enrichment front (%s)", enrFrontNameEnd.c_str() );
+        }
+    }
+
+
+    // Instantiate PropagationLaw
+    if ( mPropLawIndex == 0 ) {
+        mpPropagationLaw = new PLDoNothing();
+    } else {
+        std :: string propLawName;
+
+        InputRecord *propLawir = dr->giveInputRecord(DataReader :: IR_propagationLawRec, mPropLawIndex);
+        result = propLawir->giveRecordKeywordField(propLawName);
+
+        mpPropagationLaw = classFactory.createPropagationLaw( propLawName.c_str() );
+        if ( mpPropagationLaw != NULL ) {
+            mpPropagationLaw->initializeFrom(propLawir);
+        } else {
+            OOFEM_ERROR( "Failed to create propagation law (%s)", propLawName.c_str() );
+        }
+    }
+
+    // Set start of the enrichment dof pool for the given EI
+    int xDofPoolAllocSize = this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() * 1 + 5; // TODO: overload for Crack
+    this->startOfDofIdPool = this->giveDomain()->giveNextFreeDofID(xDofPoolAllocSize);
+    this->endOfDofIdPool = this->startOfDofIdPool + xDofPoolAllocSize - 1;
+
+
+    XfemManager *xMan = this->giveDomain()->giveXfemManager();
+//    mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
+    this->updateNodeEnrMarker(*xMan);
+
+
+    writeVtkDebug();
+
+    return 1;
+}
 
 void
 Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
@@ -82,17 +195,18 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
     }
 }
 
-
-
-
-Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
+void Delamination :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl) const
 {
-    mpEnrichesDofsWithIdArray = {
-        D_u, D_v, D_w, W_u, W_v, W_w
-    };
-    this->interfaceNum = -1;
-    this->crossSectionNum = -1;
-    this->matNum = 0;
+    double levelSet = iLocalCoord.at(3) - giveDelamXiCoord();
+
+    oEnrFunc.resize(1, 0.0);
+    mpEnrichmentFunc->evaluateEnrFuncAt(oEnrFunc [ 0 ], iGlobalCoord, levelSet);
+}
+
+
+void Delamination :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl, const FloatArray &iN, const IntArray &iElNodes) const
+{
+    evaluateEnrFuncAt(oEnrFunc, iGlobalCoord, iLocalCoord, iNodeInd, iEl);
 }
 
 
@@ -175,4 +289,17 @@ Delamination :: appendInputRecords(DynamicDataReader &oDR)
         oDR.insertInputRecord(DataReader :: IR_propagationLawRec, plRec);
     }
 }
+
+void Delamination::evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const
+{
+    // TODO: For consistency, this should be evaluated based on giveDelamXiCoord() /ES
+//    interpLevelSet(oLevelSet, iN, iNodeInd);
+}
+
+void Delamination::evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet) const
+{
+    oEnrFunc.resize(1, 0.0);
+    mpEnrichmentFunc->evaluateEnrFuncAt(oEnrFunc [ 0 ], iPos, iLevelSet);
+}
+
 } // end namespace oofem

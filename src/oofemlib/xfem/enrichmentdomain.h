@@ -83,9 +83,6 @@ public:
     virtual void computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const = 0;
     virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const { OOFEM_ERROR("not implemented."); }
 
-    // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
-    virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const { }
-
     // Return the center and radius of a sphere containing all nodes
     // enriched by the enrichment item.
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius) = 0;
@@ -126,9 +123,6 @@ public:
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { bg->computeTangentialSignDist(oDist, iPoint, oMinDistArcPos); };
     virtual void computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
     virtual void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const { bg->giveSubPolygon(oPoints, iXiStart, iXiEnd); }
-
-    // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
-    virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
 
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
 };
@@ -199,8 +193,6 @@ public:
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { oDist = 0.0; };
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { oDist = 0.0; };
     virtual void computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const; // new /JB
-    // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
-    virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual int instanciateYourself(Domain *d);
@@ -227,8 +219,6 @@ public:
     virtual void computeNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
     virtual void computeTangentialSignDist(double &oDist, const FloatArray &iPoint, double &oMinDistArcPos) const { OOFEM_ERROR("not implemented"); };
     virtual void computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const { OOFEM_ERROR("not implemented"); };
-    // Use double dispatch to call the correct version of CallNodeEnrMarkerUpdate.
-    virtual void CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const;
 
     virtual IRResultType initializeFrom(InputRecord *ir) { return IRRT_OK; }
     virtual void giveInputRecord(DynamicInputRecord &input);

@@ -485,10 +485,12 @@ Shell7BaseXFEM :: evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei
     if ( dynamic_cast< Delamination * >( ei ) ) {
         levelSet = lCoords.at(3) - dynamic_cast< Delamination * >( ei )->giveDelamXiCoord();
     } else if ( dynamic_cast< Crack * >( ei ) ) {
+
+        Crack *crack = dynamic_cast< Crack * >( ei );
         FloatArray N;
         const IntArray &elNodes = this->giveDofManArray();
         this->fei->evalN( N, lCoords, FEIElementGeometryWrapper(this) );
-        ei->interpLevelSet(levelSet, N, elNodes);
+        crack->interpLevelSet(levelSet, N, elNodes);
     } else {
         OOFEM_ERROR("error in evaluation of levelset");
     }          
@@ -504,10 +506,12 @@ Shell7BaseXFEM :: edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem
         double xiLoad = 0.0; ///@todo need info about load position
         levelSet = xiLoad - dynamic_cast< Delamination * >( ei )->giveDelamXiCoord();
     } else if ( dynamic_cast< Crack * >( ei ) ) {
+        Crack *crack = dynamic_cast< Crack * >( ei );
+
         FloatArray N;
         const IntArray &elNodes = this->giveDofManArray();
         this->fei->edgeEvalN( N, 1, lCoords, FEIElementGeometryWrapper(this) );
-        ei->interpLevelSet(levelSet, N, elNodes);
+        crack->interpLevelSet(levelSet, N, elNodes);
     } else {
         OOFEM_ERROR("error in evaluation of levelset");
     }          
@@ -1387,14 +1391,24 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &ans
          */
 
         // Evaluate enrichment function at point given by lcoords
-        std :: vector< double > efGP;
-        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
+//        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
+//        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
+
+
         //printf("enr func in gp = %e \n", efGP[0]);
         int ndofman = this->giveNumberOfDofManagers();
 
+        FloatArray gcoords;
+        computeGlobalCoordinates(gcoords, lcoords);
+
         // First column
         for ( int i = 1, j = 0; i <= ndofman; i++, j += 3 ) {
+
+            std :: vector< double > efGP;
+            DofManager *dMan = this->giveDofManager(i);
+            int nodeInd = dMan->giveGlobalNumber();
+            ei->evaluateEnrFuncAt(efGP, gcoords, lcoords, nodeInd, *this, N, giveDofManArray());
+
             double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
             //printf("enr func in dofman %d = %e \n", i, EvaluateEnrFuncInDofMan(i, ei));
 
@@ -1408,6 +1422,13 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &ans
 
         // Second column
         for ( int i = 1, j = 0; i <= ndofman; i++, j += 3 ) {
+
+            std :: vector< double > efGP;
+            DofManager *dMan = this->giveDofManager(i);
+            int nodeInd = dMan->giveGlobalNumber();
+            ei->evaluateEnrFuncAt(efGP, gcoords, lcoords, nodeInd, *this, N, giveDofManArray());
+
+
             double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
 
             answer.at(7, ndofs_xm + 1 + j) = dNdxi.at(i, 1) * factor;
@@ -1423,6 +1444,12 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &ans
 
         // Third column
         for ( int i = 1, j = 0; i <= ndofman; i++, j += 1 ) {
+
+            std :: vector< double > efGP;
+            DofManager *dMan = this->giveDofManager(i);
+            int nodeInd = dMan->giveGlobalNumber();
+            ei->evaluateEnrFuncAt(efGP, gcoords, lcoords, nodeInd, *this, N, giveDofManArray());
+
             double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
 
             answer.at(16, ndofs_xm * 2 + 1 + j) = dNdxi.at(i, 1) * factor;
@@ -1438,7 +1465,8 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &ans
         Shell7Base :: computeBmatrixAt(lcoords, answer);
         std :: vector< double > efGP;
         double levelSetGP = this->evaluateLevelSet(lcoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
+        Delamination *delamination = dynamic_cast<Delamination*>(ei);
+        delamination->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
         if ( efGP[0] > 0.1 ) {
             answer.times( efGP[0]*DISC_DOF_SCALE_FAC );
         } else {
@@ -1455,10 +1483,13 @@ Shell7BaseXFEM :: EvaluateEnrFuncInDofMan(int dofManNum, EnrichmentItem *ei)
         DofManager *dMan = this->giveDofManager(dofManNum);
         int globalNodeInd = dMan->giveGlobalNumber(); // global number in order to pick levelset value in that node
         double levelSetNode  = 0.0;
-        ei->evalLevelSetNormalInNode( levelSetNode, globalNodeInd );
+        ei->evalLevelSetNormalInNode( levelSetNode, globalNodeInd, *(dMan->giveCoordinates()) );
         std :: vector< double >efNode;
         const FloatArray &nodePos = * ( dMan->giveCoordinates() );
-        ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
+//        ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
+        FloatArray localCoord;
+        this->computeLocalCoordinates(localCoord, nodePos);
+        ei->evaluateEnrFuncAt(efNode, nodePos, localCoord, globalNodeInd, *this);
         if( efNode.size() ) {
             return efNode [ 0 ];
         } else {
@@ -1488,11 +1519,18 @@ Shell7BaseXFEM :: computeEnrichedNmatrixAt(const FloatArray &lcoords, FloatMatri
      */
 
     if ( ei && dynamic_cast< Crack*>(ei) ) {
-        std :: vector< double > efGP;
-        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
+//        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
+//        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
         
+        FloatArray gcoords;
+        this->computeGlobalCoordinates(gcoords, lcoords);
+
         for ( int i = 1, j = 0; i <= this->giveNumberOfDofManagers(); i++, j += 3 ) {
+
+            std :: vector< double > efGP;
+            int nodeInd = giveDofManager(i)->giveGlobalNumber();
+            ei->evaluateEnrFuncAt(efGP, gcoords, lcoords, nodeInd, *this, N, giveDofManArray());
+
             double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
 
             answer.at(1, 1 + j) = N.at(i) * factor;
@@ -1511,7 +1549,8 @@ Shell7BaseXFEM :: computeEnrichedNmatrixAt(const FloatArray &lcoords, FloatMatri
         Shell7Base :: computeNmatrixAt(lcoords, answer);
         std :: vector< double > efGP;
         double levelSetGP = this->evaluateLevelSet(lcoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
+        Delamination *delamination = dynamic_cast<Delamination*>(ei);
+        delamination->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
         if ( efGP[0] > 0.1 ) {
             answer.times( efGP[0] * DISC_DOF_SCALE_FAC );
         } else {
@@ -1544,11 +1583,20 @@ Shell7BaseXFEM :: edgeComputeEnrichedNmatrixAt(FloatArray &lcoords, FloatMatrix 
     int ndofs_xm = this->giveNumberOfEdgeDofs() / 7 * 3;   // numEdgeNodes * 3 dofs
 
     if ( ei && dynamic_cast< Crack*>(ei) ) {
-        std :: vector< double > efGP;
-        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
+//        std :: vector< double > efGP;
+//        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
+//        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
+
+        FloatArray gcoords;
+        this->computeGlobalCoordinates(gcoords, lcoords);
 
         for ( int i = 1, j = 0; i <= this->giveNumberOfEdgeDofManagers(); i++, j += 3 ) {
+
+            std :: vector< double > efGP;
+            int nodeInd = giveDofManager(i)->giveGlobalNumber();
+            ei->evaluateEnrFuncAt(efGP, gcoords, lcoords, nodeInd, *this, N, giveDofManArray());
+
+
             double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
             answer.at(1, 1 + j)   = N.at(i) * factor;
             answer.at(2, 2 + j)   = N.at(i) * factor;
@@ -1565,7 +1613,8 @@ Shell7BaseXFEM :: edgeComputeEnrichedNmatrixAt(FloatArray &lcoords, FloatMatrix 
         Shell7Base :: edgeComputeNmatrixAt(lcoords, answer);
         std :: vector< double > efGP;
         double levelSetGP = this->edgeEvaluateLevelSet(lcoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
+        Delamination *delamination = dynamic_cast< Delamination*>(ei);
+        delamination->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
         if ( efGP[0] > 0.1 ) {
             answer.times( efGP[0] * DISC_DOF_SCALE_FAC );
         } else {
@@ -1606,15 +1655,22 @@ Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix 
          */
 
         // Evaluate enrichment function at point given by lcoords
-        std :: vector< double > efGP;
-        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
+//        std :: vector< double > efGP;
+//        double levelSetGP = this->evaluateLevelSet(lcoords, ei);
+//        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
 
+        FloatArray gcoords;
+        this->computeGlobalCoordinates(gcoords, lcoords);
 
         int ndofs_xm = this->giveNumberOfEdgeDofs() / 7 * 3;   // numEdgeNodes * 3 dofs
         int ndofman = this->giveNumberOfEdgeDofManagers();
         // First row
         for ( int i = 1, j = 0; i <= ndofman; i++, j += 3  ) {
+
+            std :: vector< double > efGP;
+            int nodeInd = giveDofManager(i)->giveGlobalNumber();
+            ei->evaluateEnrFuncAt(efGP, gcoords, lcoords, nodeInd, *this, N, giveDofManArray());
+
             double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
             
             answer.at(1, 1 + j) = dNdxi.at(i) * factor;
@@ -1624,6 +1680,11 @@ Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix 
 
         // Second row
         for ( int i = 1, j = 0; i <= ndofman; i++, j += 3  ) {
+
+            std :: vector< double > efGP;
+            int nodeInd = giveDofManager(i)->giveGlobalNumber();
+            ei->evaluateEnrFuncAt(efGP, gcoords, lcoords, nodeInd, *this, N, giveDofManArray());
+
             double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
 
             answer.at(4, ndofs_xm + 1 + j) = dNdxi.at(i) * factor;
@@ -1636,6 +1697,11 @@ Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix 
 
         // Third row
         for ( int i = 1, j = 0; i <= ndofman; i++, j += 1  ) {
+
+            std :: vector< double > efGP;
+            int nodeInd = giveDofManager(i)->giveGlobalNumber();
+            ei->evaluateEnrFuncAt(efGP, gcoords, lcoords, nodeInd, *this, N, giveDofManArray());
+
             double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
 
             answer.at(10, ndofs_xm * 2 + 1 + j) = dNdxi.at(i) * factor;
@@ -1649,7 +1715,9 @@ Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix 
         Shell7Base :: edgeComputeBmatrixAt(lcoords, answer);
         std :: vector< double > efGP;
         double levelSetGP = this->evaluateLevelSet(lcoords, ei);
-        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
+
+        Delamination *delamination = dynamic_cast< Delamination*>(ei);
+        delamination->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
         if ( efGP[0] > 0.1 ) {
             answer.times( efGP[0]*DISC_DOF_SCALE_FAC );
         } else {
@@ -1952,7 +2020,7 @@ Shell7BaseXFEM :: giveShellExportData(VTKPiece &vtkPiece, IntArray &primaryVarsT
                         } else if ( xfemstype == XFEMST_LevelSetGamma ) {
                             valueArray.resize(1);
                             //val = & valueArray;
-                            ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber() );
+                            ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber(), node->giveNodeCoordinates() );
                         } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
                             valueArray.resize(1);
                             //val = & valueArray;

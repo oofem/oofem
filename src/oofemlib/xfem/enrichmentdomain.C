@@ -67,11 +67,6 @@ void EnrichmentDomain_BG :: giveInputRecord(DynamicInputRecord &input)
     bg->giveInputRecord(input);
 }
 
-void EnrichmentDomain_BG :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
-{
-    iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
-}
-
 void EnrichmentDomain_BG :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
 {
     int nVert = bg->giveNrVertices();
@@ -215,11 +210,6 @@ void EDCrack :: cropPolygon(const double &iArcPosStart, const double &iArcPosEnd
 
 }
 
-void DofManList :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
-{
-    iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
-}
-
 void DofManList :: computeSurfaceNormalSignDist(double &oDist, const FloatArray &iPoint) const
 {
     oDist = iPoint.at(3) - this->xi;     // will only work for plane el
@@ -283,11 +273,6 @@ void DofManList :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
     oRadius = std :: numeric_limits< double > :: max();
 }
 
-
-void WholeDomain :: CallNodeEnrMarkerUpdate(EnrichmentItem &iEnrItem, XfemManager &ixFemMan) const
-{
-    iEnrItem.updateNodeEnrMarker(ixFemMan, * this);
-}
 
 void WholeDomain :: giveInputRecord(DynamicInputRecord &input)
 {

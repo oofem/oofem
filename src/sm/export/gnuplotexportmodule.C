@@ -137,9 +137,12 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
                 EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
                 ei->callGnuplotExportModule(*this);
 
-                std::vector<FloatArray> eiPoints;
-                ei->giveSubPolygon(eiPoints, 0.0, 1.0);
-                points.push_back(eiPoints);
+                GeometryBasedEI *geoEI = dynamic_cast<GeometryBasedEI*>(ei);
+                if(geoEI != NULL) {
+                    std::vector<FloatArray> eiPoints;
+                    geoEI->giveSubPolygon(eiPoints, 0.0, 1.0);
+                    points.push_back(eiPoints);
+                }
             }
 
             outputXFEMGeometry(points);

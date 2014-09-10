@@ -41,7 +41,7 @@
 namespace oofem {
 REGISTER_EnrichmentItem(Crack)
 
-Crack :: Crack(int n, XfemManager *xm, Domain *aDomain) : EnrichmentItem(n, xm, aDomain)
+Crack :: Crack(int n, XfemManager *xm, Domain *aDomain) : HybridEI(n, xm, aDomain)
 {
     mpEnrichesDofsWithIdArray = {
         D_u, D_v, D_w

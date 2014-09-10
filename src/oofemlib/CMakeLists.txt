@@ -194,6 +194,10 @@ set (core_xfem
     xfem/enrichmentfunction.C
     xfem/xfemmanager.C
     xfem/enrichmentitem.C
+    xfem/geometrybasedei.C
+    xfem/hybridei.C
+    xfem/listbasedei.C
+    xfem/inclusion.C
     xfem/patchintegrationrule.C
     xfem/enrichmentdomain.C
     xfem/propagationlaw.C
