@@ -120,7 +120,6 @@ tet21ghostsolid :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode r
     return;
 #endif
 
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 #ifdef __FM_MODULE
     FluidDynamicMaterial *fluidMaterial = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
 #endif
