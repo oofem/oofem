@@ -65,7 +65,8 @@ CohesiveInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint
     CohesiveInterfaceMaterialStatus *status = static_cast< CohesiveInterfaceMaterialStatus * >( this->giveStatus(gp) );
 
     // initialize
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
+    this->initTempStatus(gp);
     answer.resize(3);
 
     // normal part of elastic stress-strain law

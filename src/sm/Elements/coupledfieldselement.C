@@ -114,17 +114,12 @@ CoupledFieldsElement :: giveInternalForcesVectorGen(FloatArray &answer, TimeStep
 {
     // General implementation of internal forces that computes
     // f = sum_gp( N^T*GenStress_N + B^T*GenStress_B ) * dV
-    
-    IntegrationRule *iRule = this->giveIntegrationRule(0);
+
     FloatArray NStress, BStress, vGenStress, NS, BS;
     FloatMatrix N, B;
 
     for ( int j = 0; j < this->giveNumberOfIntegrationRules(); j++ ) {
-        IntegrationRule *iRule = this->giveIntegrationRule(j);
-
-        for ( int i = 0; i < iRule->giveNumberOfIntegrationPoints(); i++ ) {
-            GaussPoint *gp = iRule->getIntegrationPoint(i);
-    
+        for ( auto &gp: this->giveIntegrationRule(j) ) {
             double dV  = this->computeVolumeAround(gp);
             
             // compute generalized stress measures
@@ -160,13 +155,10 @@ CoupledFieldsElement :: computeStiffnessMatrixGen(FloatMatrix &answer, MatRespon
 {
     FloatMatrix B, DB, N, DN, D_B, D_N;
 
-    IntegrationRule *iRule = this->giveIntegrationRule(0);
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
     answer.resize(0,0);
 
-    for ( int j = 0; j < iRule->giveNumberOfIntegrationPoints(); j++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(j);
-        
+    for ( auto &gp: this->giveIntegrationRule(0) ) {
         double dV = this->computeVolumeAround(gp);
 
 

@@ -121,7 +121,7 @@ MPlasticMaterial2 :: giveRealStressVector(FloatArray &answer,
     MPlasticMaterial2Status *status = static_cast< MPlasticMaterial2Status * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
 
     // subtract stress independent part
     // note: eigenStrains (temperature) is not contained in mechanical strain stored in gp

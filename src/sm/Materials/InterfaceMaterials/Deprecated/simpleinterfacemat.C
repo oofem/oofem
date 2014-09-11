@@ -94,7 +94,8 @@ SimpleInterfaceMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *
 //
 {
     SimpleInterfaceMaterialStatus *status = static_cast< SimpleInterfaceMaterialStatus * >( this->giveStatus(gp) );
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
+    this->initTempStatus(gp);
     FloatArray shearStrain(2), shearStress; //, strainVector;
     StructuralElement *el = static_cast< StructuralElement * >( gp->giveElement() );
     //el->computeStrainVector(strainVector, gp, tStep);

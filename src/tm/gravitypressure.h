@@ -71,7 +71,7 @@ public:
     GravityPressure(int i, Domain * d) : BodyLoad(i, d) { }
 
     virtual bcGeomType giveBCGeoType() const { return GravityPressureBGT; }
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

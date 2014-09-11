@@ -621,7 +621,8 @@ ConcreteDPM2 :: giveRealStressVector_1d(FloatArray &answer,
 
     // Initialize temp variables for this gauss point
     //    status->initTempStatus();
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
+    this->initTempStatus(gp);
     status->letTempStrainVectorBe(strainVector);
 
     FloatArray testStrain;

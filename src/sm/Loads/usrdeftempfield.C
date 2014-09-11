@@ -42,7 +42,7 @@ namespace oofem {
 REGISTER_BoundaryCondition(UserDefinedTemperatureField);
 
 void
-UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
+UserDefinedTemperatureField :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
 // Returns the value of the receiver at time and given position respecting the mode.
 {
     int err;

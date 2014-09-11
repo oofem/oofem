@@ -55,7 +55,8 @@ IntMatCoulombContact :: giveEngTraction_3d( FloatArray &answer, GaussPoint *gp, 
     // Returns the (engineering) traction vector in 3d based on the spatial jump.
 
     IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * >( this->giveStatus( gp ) );
-    this->initGpForNewStep( gp );
+    //this->initGpForNewStep( gp );
+    this->initTempStatus(gp);
 
     double normalJump = jump.at( 3 );
     FloatArray shearJump;
@@ -77,90 +78,6 @@ IntMatCoulombContact :: giveEngTraction_3d( FloatArray &answer, GaussPoint *gp, 
     status->setTempShearStressShift( tempShearStressShift );
     status->letTempJumpBe( jump );
     status->letTempTractionBe( answer );
-
-#if 0
-    IntMatCoulombContactStatus *status = static_cast< IntMatCoulombContactStatus * >( this->giveStatus(gp) );
-    this->initGpForNewStep(gp);
-    FloatArray shearJump(2), shearStress; 
-
-    FloatArray tempShearStressShift = status->giveTempShearStressShift();
-    double normalJump = jump.at( jump.giveSize() );
-    
-    double normalStress, maxShearStress, dp;
-    double shift = -this->kn * this->stiffCoeff * normalClearance;
-
-    answer.zero();
-    if ( normalJump + normalClearance <= 0. ) {
-        normalStress = this->kn * ( normalJump + normalClearance ) + shift; //in compression and after the clearance gap closed
-        maxShearStress = fabs(normalStress) * this->frictCoeff;
-    } else {
-        normalStress = this->kn * this->stiffCoeff * ( normalJump + normalClearance ) + shift;
-        maxShearStress = 0.;
-    }
-
-    //switch ( mMode ) {
-    switch( jump.giveSize() ) {
-    //case _1dInterface:
-    case 1:
-        answer.resize(1);
-        break;
-    //case _2dInterface:
-    case 2:
-        answer.resize(2);
-        shearJump.at(1) = jump.at(2);
-        shearStress.beScaled(this->kn, shearJump);
-        shearStress.subtract(tempShearStressShift);
-        dp = shearStress.dotProduct(shearStress, 1);
-        if ( dp > maxShearStress * maxShearStress ) {
-            shearStress.times( maxShearStress / sqrt(dp) );
-        }
-
-        tempShearStressShift.beScaled(this->kn, shearJump);
-        tempShearStressShift.subtract(shearStress);
-        //answer.at(2) = shearStress.at(1);
-        answer.at( 1 ) = shearStress.at( 1 );
-        break;
-    //case _3dInterface:
-    case 3:
-        answer.resize(3);
-        //shearJump.at(1) = jump.at(2);
-        //shearJump.at(2) = jump.at(3);
-        shearJump.at( 1 ) = jump.at( 1 );
-        shearJump.at( 2 ) = jump.at( 2 );
-        shearStress.beScaled(this->kn, shearJump);
-        shearStress.subtract(tempShearStressShift);
-        dp = shearStress.dotProduct(shearStress, 2);
-        if ( dp > maxShearStress * maxShearStress ) {
-            shearStress.times( maxShearStress / sqrt(dp) );
-        }
-
-        tempShearStressShift.beScaled(this->kn, shearJump);
-        tempShearStressShift.subtract(shearStress);
-        //answer.at(2) = shearStress.at(1);
-        //answer.at(3) = shearStress.at(2);
-        answer.at( 1 ) = shearStress.at( 1 );
-        answer.at( 2 ) = shearStress.at( 2 );
-        break;
-    default:
-        _error("giveMaterialMode: Unsupported interface mode");
-    }
-
-    double lim = 1.e+50;
-    //answer.at(1) = min(normalStress, lim);  //threshold on maximum
-    //answer.at(1) = max(answer.at(1), -lim);  //threshold on minimum
-    answer.at( jump.giveSize() ) = min( normalStress, lim );  //threshold on maximum
-    answer.at( jump.giveSize() ) = max( answer.at( 1 ), -lim );  //threshold on minimum
-
-    //answer.at(1) = normalStress > lim ? lim : normalStress < -lim ? -lim : normalStress;
-
-    // update gp
-    status->setTempShearStressShift(tempShearStressShift);
-    //status->letTempStrainVectorBe(strainVector);
-    //status->letTempStressVectorBe(answer);
-
-    status->letTempJumpBe( jump );
-    status->letTempTractionBe( answer );
-#endif
 
 }
 
@@ -285,73 +202,6 @@ IntMatCoulombContact :: giveGeneralStiffnessMatrix(FloatMatrix &answer,
         answer.times( this->kn );
     }
 
-#if 0
-    switch ( jump.giveSize() ) {
-    //case _1dInterface:
-    case 1:
-        answer.resize(1, 1);
-        if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
-            //if ( normalJump + normalClearance <= 0 ) {
-            if( jump.at(1) + normalClearance <= 0) {
-                answer.at(1, 1) = this->kn; //in compression and after the clearance gap closed
-            } else {
-                answer.at(1, 1) = this->kn * this->stiffCoeff;
-            }
-        } else {
-            if ( rMode == ElasticStiffness ) {
-                answer.at(1, 1) = this->kn;
-            } else {
-                _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
-            }
-        }
-
-        return;
-
-    //case _2dInterface:
-    case 2:
-        answer.resize(2, 2);
-        if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
-            //if ( normalJump + normalClearance <= 0. ) {
-            if( jump.at(2) + normalClearance <= 0.) {
-                answer.at(1, 1) = answer.at(2, 2) = this->kn; //in compression and after the clearance gap closed
-            } else {
-                answer.at(1, 1) = answer.at(2, 2) = this->kn * this->stiffCoeff;
-            }
-        } else {
-            if ( rMode == ElasticStiffness ) {
-                answer.at(1, 1) = answer.at(2, 2) = this->kn;
-            } else {
-                _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
-            }
-        }
-
-        return;
-
-    //case _3dInterface:
-    case 3:
-        answer.resize(3, 3);
-        if ( rMode == SecantStiffness || rMode == TangentStiffness ) {
-            //if ( normalJump + normalClearance <= 0. ) {
-            if( jump.at(3) + normalClearance <= 0.) {
-                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn; //in compression and after the clearance gap closed
-            } else {
-                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn * this->stiffCoeff;
-            }
-        } else {
-            if ( rMode == ElasticStiffness ) {
-                answer.at(1, 1) = answer.at(2, 2) = answer.at(3, 3) = this->kn;
-            } else {
-                _error2( "give2dInterfaceMaterialStiffnessMatrix: unknown MatResponseMode (%s)", __MatResponseModeToString(rMode) );
-            }
-        }
-
-        return;
-
-    default:
-        //StructuralMaterial :: giveStiffnessMatrix(answer, rMode, gp, tStep);
-        OOFEM_ERROR1( "IntMatCoulombContact :: giveStiffnessMatrix - size of jump is not 1, 2 or 3");
-    }
-#endif
 }
 
 

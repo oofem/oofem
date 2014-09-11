@@ -6,6 +6,7 @@ include (CheckIncludeFileCXX)
 include (CheckCXXSourceCompiles)
 include (GenerateExportHeader)
 include (UsePkgConfig)
+include (ProcessorCount)
 
 project (oofem CXX C)
 set (oofem_VERSION_MAJOR 2)
@@ -688,25 +689,19 @@ endforeach (case)
 
 # Custom targets for test and benchmarks (which can conveniently be accessed from IDEs)
 
+ProcessorCount(N)
+if (N EQUAL 0)
+  set (N 1)
+endif ()
+
 if (MSVC)
-    add_custom_target (tests
-        COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "test" "-C" "Debug"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        )
-    add_custom_target (benchmarks
-        COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "benchmark" "-C" "Debug"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        )
+    add_custom_target (tests      COMMAND ${CMAKE_CTEST_COMMAND} "-j${N}" "-R" "^test" "-C" "Debug")
+    add_custom_target (partests   COMMAND ${CMAKE_CTEST_COMMAND} "-R" "^partest" "-C" "Debug")
+    add_custom_target (benchmarks COMMAND ${CMAKE_CTEST_COMMAND} "-j${N}" "-R" "^benchmark" "-C" "Debug")
 else ()
-    add_custom_target (tests
-        #COMMAND ${CMAKE_CTEST_COMMAND} "-j" "2" "-R" "test"
-        COMMAND ${CMAKE_CTEST_COMMAND} "-j" "8" "-R" "test"
-        WORKING_DIRECTORY ${oofem_BINARY_DIR}
-        )
-    add_custom_target (benchmarks
-        COMMAND ${CMAKE_CTEST_COMMAND} "-j" "8" "-R" "benchmark"
-        WORKING_DIRECTORY ${oofem_BINARY_DIR}
-        )
+    add_custom_target (tests      COMMAND ${CMAKE_CTEST_COMMAND} "-j${N}" "-R" "^test")
+    add_custom_target (partests   COMMAND ${CMAKE_CTEST_COMMAND} "-R" "^partest")
+    add_custom_target (benchmarks COMMAND ${CMAKE_CTEST_COMMAND} "-j${N}" "-R" "^benchmark")
 endif ()
 
 

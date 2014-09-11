@@ -87,8 +87,8 @@ IntMatBilinearCZElastic :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
 {
     IntMatBilinearCZElasticStatus *status = static_cast< IntMatBilinearCZElasticStatus * >( this->giveStatus(gp) );
 
-    this->initGpForNewStep(gp);
-
+    //this->initGpForNewStep(gp);
+    this->initTempStatus(gp);
 
     answer.resize( jumpVector.giveSize() );
     answer.zero();

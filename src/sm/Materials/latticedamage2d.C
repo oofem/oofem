@@ -330,7 +330,8 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
 
     double f, equivStrain, tempKappa, omega = 0.;
 
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
+    this->initTempStatus(gp);
     reducedStrain = totalStrain;
 
     FloatArray testStrainOld( status->giveStrainVector() );

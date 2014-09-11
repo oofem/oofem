@@ -55,7 +55,7 @@ class StructuralTemperatureLoad : public Load
 public:
     StructuralTemperatureLoad(int n, Domain * d) : Load(n, d) { }
 
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
 
     virtual bcValType giveBCValType() const { return TemperatureBVT; }
     virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }

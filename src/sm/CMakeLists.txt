@@ -194,6 +194,7 @@ set (sm_material
     Materials/structmatsettable.C
     Materials/InterfaceMaterials/bondceb.C
     Materials/RheoChainMaterials/mooneyrivlin.C
+    Materials/tutorialmaterial.C
 	)
 
 set (sm_interface_materials

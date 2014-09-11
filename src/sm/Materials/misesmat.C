@@ -114,7 +114,7 @@ MisesMat :: giveRealStressVector(FloatArray &answer,
 {
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
     this->performPlasticityReturn(gp, totalStrain);
     double omega = computeDamage(gp, tStep);
     FloatArray totalStress = status->giveTempEffectiveStress();
@@ -135,7 +135,7 @@ MisesMat :: giveFirstPKStressVector_3d(FloatArray &answer,
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
 
     double kappa, dKappa, yieldValue, mi;
     FloatMatrix F, oldF, invOldF;
@@ -271,7 +271,7 @@ MisesMat :: performPlasticityReturn(GaussPoint *gp, const FloatArray &totalStrai
     MisesMatStatus *status = static_cast< MisesMatStatus * >( this->giveStatus(gp) );
     StressVector fullStress(mode);
     this->initTempStatus(gp);
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
     // get the initial plastic strain and initial kappa from the status
     plStrain = status->givePlasticStrain();
     kappa = status->giveCumulativePlasticStrain();

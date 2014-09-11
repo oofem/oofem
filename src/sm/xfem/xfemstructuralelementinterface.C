@@ -677,7 +677,6 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMas
     int ndofs = structEl->computeNumberOfDofs();
     double density, dV;
     FloatMatrix n;
-    IntegrationRule *iRule = element->giveIntegrationRule(0);
     IntArray mask;
 
     answer.resize(ndofs, ndofs);
@@ -690,7 +689,7 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMas
 
     mass = 0.;
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *element->giveIntegrationRule(0) ) {
         structEl->computeNmatrixAt(* ( gp->giveNaturalCoordinates() ), n);
         density = structEl->giveMaterial()->give('d', gp);
 

@@ -101,8 +101,9 @@ BondCEBMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     int i;
     BondCEBMaterialStatus *status = static_cast< BondCEBMaterialStatus * >( this->giveStatus(gp) );
 
-    this->initGpForNewStep(gp);
-
+    //this->initGpForNewStep(gp);
+    this->initTempStatus(gp);
+    
     // normal traction evaluated elastically
     answer.resize(ntc);
     answer.at(1) = kn * totalStrain.at(1);

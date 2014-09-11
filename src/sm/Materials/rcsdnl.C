@@ -80,7 +80,7 @@ RCSDNLMaterial :: updateBeforeNonlocAverage(const FloatArray &strainVector, Gaus
     RCSDNLMaterialStatus *status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(gp) );
 
     this->initTempStatus(gp);
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
 
     status->setLocalStrainVectorForAverage(strainVector);
 }
@@ -108,7 +108,7 @@ RCSDNLMaterial :: giveRealStressVector(FloatArray &answer, GaussPoint *gp,
     FloatArray reducedLocalStrainVector, localStrain;
 
     this->initTempStatus(gp);
-    this->initGpForNewStep(gp);
+    //this->initGpForNewStep(gp);
     this->buildNonlocalPointTable(gp);
     this->updateDomainBeforeNonlocAverage(tStep);
 
