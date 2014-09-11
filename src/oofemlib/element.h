@@ -549,7 +549,7 @@ public:
     virtual void setCrossSection(int csIndx) { this->crossSection = csIndx; }
 
     /// @return Number of dofmanagers of receiver.
-    int giveNumberOfDofManagers() const { return numberOfDofMans; }
+    virtual int giveNumberOfDofManagers() const { return numberOfDofMans; }
     /**
      * Returns number of nodes of receiver.
      * Default implementation returns number of dofmanagers of element

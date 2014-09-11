@@ -39,6 +39,7 @@
 namespace oofem {
 void FEInterpolation2d :: boundaryEdgeGiveNodes(IntArray &answer, int boundary)
 {
+    ///@todo What is this?! ...Doesn't seem to be used anyway / JB
     answer.resize(1);
     answer.at(1) = boundary;
 }

@@ -72,6 +72,7 @@ set (core_nm
     nrsolver.C
     linesearch.C
     calmls.C
+    staggeredsolver.C
     )
 
 if (USE_PETSC)

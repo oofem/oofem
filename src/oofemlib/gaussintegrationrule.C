@@ -295,6 +295,7 @@ int
 GaussIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain dType,
                                                              int approxOrder)
 {
+    // Returns the required number of gp's to exactly integrate a polynomial of order 'approxOrder'
     int requiredNIP;
     if ( approxOrder < 0 ) {
         return 0;
@@ -302,7 +303,7 @@ GaussIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain d
 
     switch ( dType ) {
     case _Line:
-        requiredNIP = ( approxOrder + 1 ) / 2;
+        requiredNIP = ceil(( approxOrder + 1 ) / 2);
 
         if ( requiredNIP <= 8 ) {
             return requiredNIP;
@@ -370,7 +371,7 @@ GaussIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain d
         return -1;
 
     case _Square:
-        requiredNIP = max( ( approxOrder + 1 ) / 2, 2 );
+        requiredNIP = max( (int)ceil( (double)( approxOrder + 1 ) / (double)2), 2 );
         requiredNIP *= requiredNIP;
         if ( requiredNIP > 64 * 64 ) {
             return -1;
@@ -379,7 +380,7 @@ GaussIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain d
         return requiredNIP;
 
     case _Cube:
-        requiredNIP = max( ( approxOrder + 1 ) / 2, 2 );
+        requiredNIP = max( (int)ceil( (double)( approxOrder + 1 ) / (double)2), 2 );
         requiredNIP *= requiredNIP * requiredNIP;
         if ( requiredNIP > 64 * 64 * 64 ) { // = 262 144 gp's maybe overkill :)
             return -1;
@@ -417,7 +418,24 @@ GaussIntegrationRule :: getRequiredNumberOfIntegrationPoints(integrationDomain d
         }
 
         break;
+    
+    ///@todo Assuming same approximation order for triangle as line. Not totally sure about these /JB
+    case _Wedge:
+        if ( approxOrder <= 1 ) { // (lin tri) x (lin line) = 1 x 1 = 1
+            return 1;        
+        }
 
+        if ( approxOrder <= 2 ) { // (quad tri) x (quad line) = 3 x 2 = 6
+            return 6;
+        }
+
+        if ( approxOrder <= 3 ) { // (cubic tri) x (cubic line) = 4 x 2 = 8
+            return 8;
+        }                
+        
+        if ( approxOrder <= 4 ) { // (quartic tri) x (quartic line) = 6 x 3 = 18
+            return 18;
+        }        
     default:
         OOFEM_ERROR("unknown integrationDomain");
     }

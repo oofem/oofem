@@ -58,8 +58,8 @@
 #endif
 
 #ifdef __SM_MODULE
-#include "../sm/structengngmodel.h"
-#include "../sm/nlstructuralelement.h"
+#include "../sm/Elements/nlstructuralelement.h"
+#include "../sm/EngineeringModels/structengngmodel.h"
 #endif
 
 
@@ -405,7 +405,7 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
     }
 
     for ( double vh: v_hat ) {
-        V.push_back(vh / intrinsicSize);
+        V.push_back(vh);
     }
 
     fprintf(FID, "\tspecials.velocitymean=[");

@@ -58,6 +58,7 @@ public:
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double giveArea(const FEICellGeometry &cellgeo) const;
     virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
+    virtual int giveNumberOfNodes() const { return 6; }    
     /**
      * Returns a characteristic length of the geometry, typically a diagonal or edge length.
      * @param cellgeo Underlying cell geometry.

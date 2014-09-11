@@ -176,6 +176,11 @@ public:
     //@}
 
     virtual IntegrationRule *giveBoundaryEdgeIntegrationRule(int order, int boundary);
+    virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary)
+    { 
+      OOFEM_ERROR("Not overloaded"); 
+      return NULL;
+    };
 };
 } // end namespace oofem
 #endif // feinterpol3d_h
