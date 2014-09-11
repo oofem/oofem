@@ -156,7 +156,7 @@ public:
 
     int giveStartOfDofIdPool() const { return this->startOfDofIdPool; };
     int giveEndOfDofIdPool() const { return this->endOfDofIdPool; };
-
+    virtual int giveDofPoolSize() const;
     /**
      * Compute Id's of enriched dofs for a given DofManager.
      */
