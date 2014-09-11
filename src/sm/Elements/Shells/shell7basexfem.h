@@ -79,7 +79,7 @@ protected:
     void computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationPoint *ip, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta);
     
     double evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
-    double edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
+    double edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei, const int edge);
     double evaluateHeavisideGamma(double xi, ShellCrack *ei);
     double evaluateHeavisideGamma(double xi, Delamination *ei);
     double evaluateCutHeaviside(const double xi, const double xiBottom, const double xiTop) const;
@@ -97,8 +97,8 @@ protected:
     double EvaluateEnrFuncInDofMan(int dofManNum, EnrichmentItem *ei);
     void computeEnrichedBmatrixAt(FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei);
     void computeEnrichedNmatrixAt(const FloatArray &iLocCoords, FloatMatrix &answer, EnrichmentItem *ei);
-    void edgeComputeEnrichedNmatrixAt(FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei);
-    void edgeComputeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &answer, EnrichmentItem *ei);
+    void edgeComputeEnrichedNmatrixAt(FloatArray &lCoords, FloatMatrix &answer, EnrichmentItem *ei, const int edge);
+    void edgeComputeEnrichedBmatrixAt(FloatArray &lcoords, FloatMatrix &answer, EnrichmentItem *ei, const int edge);
     virtual void edgeGiveUpdatedSolutionVector(FloatArray &answer, const int iedge, TimeStep *tStep);
 
     void edgeEvalEnrCovarBaseVectorsAt(FloatArray &lCoords, const int iedge, FloatMatrix &gcov, TimeStep *tStep, EnrichmentItem *ei);
