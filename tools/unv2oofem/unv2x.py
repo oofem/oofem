@@ -195,7 +195,7 @@ class UNVParser:
                 lst=[]
                 for i in range(nlines):
                     dat=Line2Int(file.readline())
-                    print "dat = ", dat
+                    #print "dat = ", dat
                     lst.append(dat[0:3])
                     if len(dat)>4:
                         lst.append(dat[4:7])
@@ -216,7 +216,7 @@ class UNVParser:
                     FEM.nodesets.append(nset)
                 if elset.nitems>0:
                     FEM.elemsets.append(elset)
-                print "%u \n" % elset.id
+                #print "%u \n" % elset.id
                 FEM.nnodesets=len(FEM.nodesets)
                 FEM.nelemsets=len(FEM.elemsets)
         return FEM
