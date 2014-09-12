@@ -32,12 +32,12 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "../sm/Elements/Shells/shell7basexfem.h"
-#include "../sm/Elements/Shells/shell7base.h"
-#include "../sm/Loads/constantpressureload.h"
-#include "../sm/Materials/InterfaceMaterials/intmatbilinczfagerstrom.h"
-#include "../sm/xfem/enrichmentitems/crack.h"
-#include "../sm/xfem/enrichmentitems/shellcrack.h"
+#include "Elements/Shells/shell7basexfem.h"
+#include "Elements/Shells/shell7base.h"
+#include "Loads/constantpressureload.h"
+#include "Materials/InterfaceMaterials/intmatbilinczfagerstrom.h"
+#include "xfem/enrichmentitems/crack.h"
+#include "xfem/enrichmentitems/shellcrack.h"
 #include "feinterpol3d.h"
 #include "xfem/enrichmentitem.h"
 #include "xfem/xfemmanager.h"
@@ -45,6 +45,8 @@
 #include "connectivitytable.h"
 #include "mathfem.h"
 #include "gausspoint.h"
+#include "spatiallocalizer.h"
+
 namespace oofem {
 
 /* Scale factor fo the discontinuous dofs. Implies that the corresponding 
@@ -1528,6 +1530,7 @@ Shell7BaseXFEM :: computeEdgeLoadVectorAt(FloatArray &answer, Load *load, int iE
 void
 Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, BoundaryLoad *edgeLoad, TimeStep *tStep, ValueModeType mode, EnrichmentItem *ei)
 {
+#if 0
     int approxOrder = edgeLoad->giveApproxOrder() + this->giveInterpolation()->giveInterpolationOrder();
     int numberOfGaussPoints = ( int ) ceil( ( approxOrder + 1. ) / 2. );
     GaussIntegrationRule iRule(1, this, 1, 1);
@@ -1584,7 +1587,70 @@ Shell7BaseXFEM :: computeEnrTractionForce(FloatArray &answer, const int iEdge, B
     answer.resize( Shell7Base :: giveNumberOfDofs()  );
     answer.zero();
     answer.assemble(Nf, mask);
+    
+    answer.printYourself("f_ext old");
+#else
 
+    if(1) {
+    int approxOrder = edgeLoad->giveApproxOrder() + this->giveInterpolation()->giveInterpolationOrder();
+    int numberOfGaussPoints = ( int ) ceil( ( approxOrder + 1. ) / 2. );
+    GaussIntegrationRule iRule(1, this, 1, 1);
+    iRule.SetUpPointsOnLine(numberOfGaussPoints, _Unknown); 
+
+    FloatMatrix N, Q;
+    FloatArray fT(7), components, lCoords, gCoords, Nf;
+    Load :: CoordSystType coordSystType = edgeLoad->giveCoordSystMode();
+
+    answer.resize( Shell7Base :: giveNumberOfDofs()  );
+    answer.zero();
+    Nf.resize( Shell7Base :: giveNumberOfDofs()  );
+    Nf.zero();
+    for ( GaussPoint *gp : iRule ) {
+        FloatArray lCoordsEdge = *gp->giveNaturalCoordinates();
+        
+        this->fei->edgeLocal2global( gCoords, iEdge, lCoordsEdge, FEIElementGeometryWrapper(this) );
+        this->fei->global2local( lCoords, gCoords, FEIElementGeometryWrapper(this) );
+
+
+        edgeLoad->computeValueAt(components, tStep, lCoordsEdge, mode);
+        if( components.giveSize() == 8 ) {
+            lCoords.at(3) = components.at(8);
+        }
+        this->computeEnrichedNmatrixAt(lCoords, N, ei);
+        
+        if ( coordSystType ==  Load :: CST_UpdatedGlobal ) {
+            
+            // Updated global coord system
+            FloatMatrix gcov;
+            this->edgeEvalEnrCovarBaseVectorsAt(lCoordsEdge, iEdge, gcov, tStep, ei);
+            Q.beTranspositionOf(gcov);
+
+            FloatArray distrForces, distrMoments, t1, t2;
+            distrForces = { components.at(1), components.at(2), components.at(3) };
+            distrMoments = { components.at(4), components.at(5), components.at(6) };
+            t1.beTProductOf(Q, distrForces);
+            t2.beTProductOf(Q, distrMoments);
+            fT.addSubVector(t1,1);
+            fT.addSubVector(t2,4);
+            fT.at(7) = components.at(7); // don't do anything with the 'gamma'-load
+
+        } else if( coordSystType == Load :: CST_Global ) {
+            // Undeformed global coord system
+            for ( int i = 1; i <= 7; i++) {
+                fT.at(i) = components.at(i);
+            }
+        } else {
+            OOFEM_ERROR("ModShell7Base :: computeTractionForce - does not support local coordinate system");
+        }
+
+        double dL = this->edgeComputeLengthAround(gp, iEdge);
+
+        //answer.plusProduct(N, fT, dL);
+        Nf.plusProduct(N, fT, dL);
+    }
+    answer.assemble(Nf, this->giveOrderingDofTypes() );
+    }
+#endif
 }
 
 void
@@ -1888,6 +1954,7 @@ Shell7BaseXFEM :: edgeComputeEnrichedNmatrixAt(FloatArray &lCoords, FloatMatrix 
     int ndofs_xm = this->giveNumberOfEdgeDofs() / 7 * 3;   // numEdgeNodes * 3 dofs
 
     if ( ei && dynamic_cast< Crack*>(ei) ) {
+        
         std :: vector< double > efGP;
         //double levelSetGP = this->evaluateLevelSet(lCoords, ei);
         double levelSetGP = this->edgeEvaluateLevelSet(lCoords, ei, edge);

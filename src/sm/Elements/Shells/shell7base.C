@@ -148,6 +148,24 @@ Shell7Base :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lco
     return 1;
 }
 
+int
+Shell7Base :: computeGlobalCoordinatesOnEdge(FloatArray &answer, const FloatArray &lcoords, const int iEdge)
+{
+    // should it return coord in reference or updated config? -- Let it be initial so small def code remains the same
+//     double zeta = giveGlobalZcoordInLayer(lcoords.at(3), layer);
+//     FloatArray N;
+//     this->fei->evalN( N, lcoords, FEIElementGeometryWrapper(this) );
+// 
+//     globalCoords.clear();
+//     for ( int i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
+//         FloatArray &xbar = *this->giveNode(i)->giveCoordinates();
+//         const FloatArray &M = this->giveInitialNodeDirector(i);
+//         globalCoords.add(N.at(i), ( xbar + zeta * M ));
+//     }
+    return 1;
+}
+
+
 
 double
 Shell7Base::giveGlobalZcoord( FloatArray &lCoords )
