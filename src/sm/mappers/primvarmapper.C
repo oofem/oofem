@@ -42,7 +42,7 @@
 #include "domain.h"
 #include "dofmanager.h"
 #include "linsystsolvertype.h"
-#include "structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 #include "engngm.h"
 #include "gausspoint.h"
 #include "feinterpol.h"
@@ -138,9 +138,8 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
             // Loop over Gauss points
             for ( int intRuleInd = 0; intRuleInd < elNew->giveNumberOfIntegrationRules(); intRuleInd++ ) {
-                IntegrationRule *iRule = elNew->giveIntegrationRule(intRuleInd);
 
-                for ( GaussPoint *gp: *iRule ) {
+                for ( GaussPoint *gp: *elNew->giveIntegrationRule(intRuleInd) ) {
 
                     // New N-matrix
                     FloatMatrix NNew;

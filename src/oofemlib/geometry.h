@@ -251,6 +251,8 @@ public:
 
     virtual void giveGlobalCoordinates(FloatArray &oGlobalCoord, const double &iArcPos) const;
 
+    virtual void giveTangent(FloatArray &oTangent, const double &iArcPosition) const { }
+
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "Circle"; }
     virtual bool intersects(Element *element);

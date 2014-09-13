@@ -36,7 +36,7 @@
 #define microplane_h
 
 #include "gausspoint.h"
-#include "microplanematerial.h"
+#include "Materials/microplanematerial.h"
 #include "floatarray.h"
 #include "element.h"
 #include "matstatus.h"

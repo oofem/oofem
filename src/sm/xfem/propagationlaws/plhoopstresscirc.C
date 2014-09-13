@@ -43,7 +43,7 @@
 #include "spatiallocalizer.h"
 #include "floatmatrix.h"
 #include "gausspoint.h"
-#include "structuralms.h"
+#include "../sm/Materials/structuralms.h"
 #include "xfem/enrichmentitem.h"
 #include "feinterpol.h"
 #include "xfem/xfemmanager.h"
@@ -160,9 +160,8 @@ bool PLHoopStressCirc ::propagateInterface(Domain &iDomain, EnrichmentFront &iEn
                 double sumWiVi = 0.0;
                 for ( int elIndex: elIndices ) {
                     Element *gpEl = iDomain.giveElement(elIndex);
-                    IntegrationRule *iRule = gpEl->giveDefaultIntegrationRulePtr();
 
-                    for ( GaussPoint *gp_i: *iRule ) {
+                    for ( GaussPoint *gp_i: *gpEl->giveDefaultIntegrationRulePtr() ) {
 
                         ////////////////////////////////////////
                         // Compute global gp coordinates

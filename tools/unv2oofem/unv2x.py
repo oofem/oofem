@@ -188,14 +188,14 @@ class UNVParser:
                     print "Group %s is empty, did you remesh the object and lost the members?" % groupname
                     exit(0)
                 else:
-                    id=dataline[0]
+                    id=0 # dataline[0]
                     nitems=dataline[7]
                 nlines=(nitems+1)/2
                 # read group items
                 lst=[]
                 for i in range(nlines):
                     dat=Line2Int(file.readline())
-                    print "dat = ", dat
+                    #print "dat = ", dat
                     lst.append(dat[0:3])
                     if len(dat)>4:
                         lst.append(dat[4:7])
@@ -216,6 +216,7 @@ class UNVParser:
                     FEM.nodesets.append(nset)
                 if elset.nitems>0:
                     FEM.elemsets.append(elset)
+                #print "%u \n" % elset.id
                 FEM.nnodesets=len(FEM.nodesets)
                 FEM.nelemsets=len(FEM.elemsets)
         return FEM

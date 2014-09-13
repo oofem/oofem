@@ -33,11 +33,10 @@
  */
 
 #include "xfemstructuralelementinterface.h"
-
-#include "structuralinterfacematerial.h"
-#include "structuralinterfacematerialstatus.h"
-#include "structuralelement.h"
-#include "structuralcrosssection.h"
+#include "../sm/Materials/InterfaceMaterials/structuralinterfacematerial.h"
+#include "../sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
+#include "../sm/Elements/structuralelement.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "dynamicinputrecord.h"
@@ -678,7 +677,6 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMas
     int ndofs = structEl->computeNumberOfDofs();
     double density, dV;
     FloatMatrix n;
-    IntegrationRule *iRule = element->giveIntegrationRule(0);
     IntArray mask;
 
     answer.resize(ndofs, ndofs);
@@ -691,7 +689,7 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMas
 
     mass = 0.;
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *element->giveIntegrationRule(0) ) {
         structEl->computeNmatrixAt(* ( gp->giveNaturalCoordinates() ), n);
         density = structEl->giveMaterial()->give('d', gp);
 

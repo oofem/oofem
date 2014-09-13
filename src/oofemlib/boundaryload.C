@@ -50,7 +50,7 @@ BoundaryLoad :: computeComponentArrayAt(FloatArray &answer, TimeStep *tStep, Val
 
 
 void
-BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
+BoundaryLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
 {
     // Evaluates the value at specific integration point
     int i, j, nSize;

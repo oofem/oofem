@@ -40,7 +40,7 @@
 namespace oofem {
 REGISTER_BoundaryCondition(DeadWeight);
 
-void DeadWeight :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
+void DeadWeight :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
 {
     computeComponentArrayAt(answer, tStep, mode);
 }

@@ -44,7 +44,7 @@
 #include "timestep.h"
 #include "classfactory.h"
 #ifdef __SM_MODULE
- #include "structengngmodel.h"
+ #include "../sm/EngineeringModels/structengngmodel.h"
 #endif
 
 namespace oofem {
@@ -149,12 +149,12 @@ ElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
             OOFEM_WARNING("Element %d not found.", number);
             return false;
         }
+    }
 #ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() != Element_local ) {
             return true;
         }
 #endif
-    }
 
     // note! GPs are numbered from 0 internally, but written with 1-index, inconsistent!
     GaussPoint *gp = element->giveIntegrationRule(irule)->getIntegrationPoint(gpnum-1);

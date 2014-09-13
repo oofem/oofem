@@ -140,7 +140,7 @@ public:
      */
     BoundaryLoad(int i, Domain * d) : Load(i, d), nDofs(0), coordSystemType(CST_Global) { }
 
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
     /**
      * @return Approximation order of load geometry.
      */
@@ -176,7 +176,7 @@ protected:
      * @param answer Approximation vector.
      * @param coords Global integration point coordinates.
      */
-    virtual void computeNArray(FloatArray &answer, FloatArray &coords) const  = 0;
+    virtual void computeNArray(FloatArray &answer, const FloatArray &coords) const  = 0;
     /**
      * Returns array of load "vertex" values evaluated at given time.
      * @param answer Load "vertex" values.

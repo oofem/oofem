@@ -95,6 +95,11 @@ public:
     virtual void timesT(const FloatArray &x, FloatArray &answer) const { this->times(x, answer); }
     virtual void times(double x);
     virtual int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &);
+
+    //virtual Skyline *giveSubMatrix(Skyline *mat, IntArray &rows, IntArray &cols);
+    //virtual Skyline *beSubMatrixOf(const Skyline *mat, IntArray &rows, IntArray &cols);
+    //virtual SparseMtrx *beSubMatrixOf(const SparseMtrx *mat, IntArray &rows, IntArray &cols);
+    virtual SparseMtrx *giveSubMatrix(const IntArray &rows, const IntArray &cols); 
     /**
      * Allocates and builds internal structure according to given
      * array holding addresses of diagonal members values (adr).
@@ -137,7 +142,7 @@ public:
     virtual double at(int i, int j) const;
     /// Returns 0 if the memory is not allocated at position (i,j).
     virtual bool isAllocatedAt(int i, int j) const;
-
+    int giveNumberOfNonZeros() const { return this->nwk; };
     virtual void toFloatMatrix(FloatMatrix &answer) const;
     /// Prints receiver to stdout.
     virtual void printYourself() const;
