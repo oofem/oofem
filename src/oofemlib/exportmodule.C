@@ -84,20 +84,18 @@ ExportModule :: giveOutputBaseFileName(TimeStep *tStep)
 
     if ( this->testSubStepOutput() ) {
         // include tStep version in output file name
-#ifdef __PARALLEL_MODE
         if ( this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1 ) {
             sprintf( fext, "_%03d.m%d.%d.%d", emodel->giveRank(), this->number, tStep->giveNumber(), tStep->giveSubStepNumber() );
-        } else
-#endif
-        sprintf( fext, ".m%d.%d.%d", this->number, tStep->giveNumber(), tStep->giveSubStepNumber() );
+        } else {
+            sprintf( fext, ".m%d.%d.%d", this->number, tStep->giveNumber(), tStep->giveSubStepNumber() );
+        }
         return this->emodel->giveOutputBaseFileName() + fext;
     } else {
-#ifdef __PARALLEL_MODE
         if ( this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1 ) {
             sprintf( fext, "_%03d.m%d.%d", emodel->giveRank(), this->number, tStep->giveNumber() );
-        } else
-#endif
-        sprintf( fext, ".m%d.%d", this->number, tStep->giveNumber() );
+        } else {
+            sprintf( fext, ".m%d.%d", this->number, tStep->giveNumber() );
+        }
         return this->emodel->giveOutputBaseFileName() + fext;
     }
 }

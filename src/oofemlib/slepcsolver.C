@@ -123,12 +123,12 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
          * Create eigensolver context
          */
 #ifdef __PARALLEL_MODE
-        ierr = EPSCreate(PETSC_COMM_WORLD, & eps);
-        CHKERRQ(ierr);
+        MPI_Comm comm = engngModel->giveParallelComm();
 #else
-        ierr = EPSCreate(PETSC_COMM_SELF, & eps);
-        CHKERRQ(ierr);
+        MPI_Comm comm = PETSC_COMM_SELF;
 #endif
+        ierr = EPSCreate(comm, & eps);
+        CHKERRQ(ierr);
         epsInit = true;
     }
 
@@ -184,9 +184,7 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
         ierr = MatGetVecs(* B->giveMtrx(), PETSC_NULL, & Vr);
         CHKERRQ(ierr);
 
-#ifdef __PARALLEL_MODE
         FloatArray Vr_loc;
-#endif
 
         for ( int i = 0; i < nconv && i < nroot; i++ ) {
             ierr = EPSGetEigenpair(eps, nconv - i - 1, & kr, PETSC_NULL, Vr, PETSC_NULL);

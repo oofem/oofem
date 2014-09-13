@@ -650,7 +650,6 @@ Element :: initializeFrom(InputRecord *ir)
         //elemLocalCS.printYourself();
     }
 
-#ifdef __PARALLEL_MODE
     partitions.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, partitions, _IFT_Element_partitions);
     if ( ir->hasField(_IFT_Element_remote) ) {
@@ -658,8 +657,6 @@ Element :: initializeFrom(InputRecord *ir)
     } else {
         parallel_mode = Element_local;
     }
-
-#endif
 
     IR_GIVE_OPTIONAL_FIELD(ir, activityTimeFunction, _IFT_Element_activityTimeFunction);
 
@@ -700,14 +697,12 @@ Element :: giveInputRecord(DynamicInputRecord &input)
     }
 
 
-#ifdef __PARALLEL_MODE
     if ( partitions.giveSize() > 0 ) {
         input.setField(this->partitions, _IFT_Element_partitions);
         if ( this->parallel_mode == Element_remote ) {
             input.setField(_IFT_Element_remote);
         }
     }
-#endif
 
     if ( activityTimeFunction > 0 ) {
         input.setField(activityTimeFunction, _IFT_Element_activityTimeFunction);
@@ -806,7 +801,6 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
             THROW_CIOERR(CIO_IOERR);
         }
 
-#ifdef __PARALLEL_MODE
         if ( mode & CM_DefinitionGlobal ) {
             // send global numbers instead of local ones
             int s = dofManArray.giveSize();
@@ -824,12 +818,6 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
             }
         }
 
-#else
-        if ( ( iores = dofManArray.storeYourself(stream, mode) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
-
-#endif
         if ( ( iores = bodyLoadArray.storeYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
@@ -850,7 +838,6 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
             }
         }
 
-#ifdef __PARALLEL_MODE
         int _mode;
         if ( !stream->write(& globalNumber, 1) ) {
             THROW_CIOERR(CIO_IOERR);
@@ -864,8 +851,6 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
         if ( ( iores = partitions.storeYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-
-#endif
     }
 
     for ( auto &iRule: integrationRulesArray ) {
@@ -948,7 +933,6 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
             }
         }
 
-#ifdef __PARALLEL_MODE
         int _mode;
         if ( !stream->read(& globalNumber, 1) ) {
             THROW_CIOERR(CIO_IOERR);
@@ -962,8 +946,6 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
         if ( ( iores = partitions.restoreYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-
-#endif
     }
 
 
@@ -1506,6 +1488,7 @@ Element :: estimatePackSize(CommunicationBuffer &buff)
 
     return result;
 }
+#endif
 
 
 double
@@ -1519,7 +1502,6 @@ Element :: predictRelativeComputationalCost()
 
     return ( this->giveRelativeSelfComputationalCost() * wgt );
 }
-#endif
 
 
 #ifdef __OOFEG
@@ -1549,7 +1531,7 @@ Element :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
 void
 Element :: drawAnnotation(oofegGraphicContext &gc, TimeStep *tStep)
 {
-    int i, count = 0;
+    int count = 0;
     Node *node;
     WCRec p [ 1 ]; /* point */
     GraphicObj *go;
@@ -1557,7 +1539,7 @@ Element :: drawAnnotation(oofegGraphicContext &gc, TimeStep *tStep)
 
     p [ 0 ].x = p [ 0 ].y = p [ 0 ].z = 0.0;
     // compute element center
-    for ( i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         if ( ( node = this->giveNode(i) ) ) {
             p [ 0 ].x += node->giveCoordinate(1);
             p [ 0 ].y += node->giveCoordinate(2);
@@ -1572,11 +1554,8 @@ Element :: drawAnnotation(oofegGraphicContext &gc, TimeStep *tStep)
 
     EASValsSetLayer(OOFEG_ELEMENT_ANNOTATION_LAYER);
     EASValsSetColor( gc.getElementColor() );
- #ifdef __PARALLEL_MODE
     sprintf( num, "%d(%d)", this->giveNumber(), this->giveGlobalNumber() );
- #else
-    sprintf( num, "%d", this->giveNumber() );
- #endif
+
     go = CreateAnnText3D(p, num);
     EGWithMaskChangeAttributes(COLOR_MASK | LAYER_MASK, go);
     EMAddGraphicsToModel(ESIModel(), go);

@@ -656,29 +656,23 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 {
     FILE *answer;
 
-    // JIM
-    //fileName.replace(foundDot, 1, "_");
-
     char fext[100];
     sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
     //fileName += fext;
 
-    //    char fext [ 100 ];
     if ( this->testSubStepOutput() ) {
         // include tStep version in output file name
-#ifdef __PARALLEL_MODE
         if ( this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1 ) {
             sprintf( fext, "_%03d_m%d_%d_%d", emodel->giveRank(), this->number, tStep->giveNumber(), tStep->giveSubStepNumber() );
-        } else
-#endif
+        } else {
             sprintf( fext, "_m%d_%d_%d", this->number, tStep->giveNumber(), tStep->giveSubStepNumber() );
+        }
     } else   {
-#ifdef __PARALLEL_MODE
         if ( this->emodel->isParallel() && this->emodel->giveNumberOfProcesses() > 1 ) {
             sprintf( fext, "_%03d_m%d_%d", emodel->giveRank(), this->number, tStep->giveNumber() );
-        } else
-#endif
+        } else {
             sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
+        }
     }
 
     std :: string fileName;

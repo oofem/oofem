@@ -1492,11 +1492,10 @@ Domain :: giveSize()
 int
 Domain :: giveNextFreeDofID(int increment)
 {
-#ifdef __PARALLEL_MODE
     if ( this->engineeringModel->isParallel() ) {
         OOFEM_ERROR("Additional dof id's not implemented/tested for parallel problems");
     }
-#endif
+
     int freeID = this->freeDofID;
     this->freeDofID += increment;
     return freeID;

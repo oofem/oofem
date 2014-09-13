@@ -205,11 +205,8 @@ protected:
     FloatArray rtolf;
     /// Relative iterative displacement change tolerance for each group.
     FloatArray rtold;
-
-#ifdef __PARALLEL_MODE
     /// Parallel context for computing norms, dot products and such.
     ParallelContext *parallel_context;
-#endif
 
 public:
     CylindricalALM(Domain * d, EngngModel * m);

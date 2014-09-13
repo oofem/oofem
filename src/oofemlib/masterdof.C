@@ -110,13 +110,11 @@ int MasterDof :: askNewEquationNumber(TimeStep *tStep)
 {
     EngngModel *model = dofManager->giveDomain()->giveEngngModel();
 
-#ifdef __PARALLEL_MODE
     if ( dofManager->giveParallelMode() == DofManager_null ) {
         equationNumber = 0;
         return 0;
     }
 
-#endif
     if ( this->hasBc(tStep) ) {
         equationNumber = -1 * model->giveNewPrescribedEquationNumber(dofManager->giveDomain()->giveNumber(), this->dofID);
     } else {
@@ -153,12 +151,9 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
     // OOFEM_ERROR("Noncompatible Request");
 #endif
 
-#ifdef __PARALLEL_MODE
     if ( dofManager->giveParallelMode() == DofManager_null ) {
         return 0.0;
     }
-
-#endif
 
     // first try if IC apply
     if ( tStep->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
@@ -206,15 +201,9 @@ double MasterDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeSte
 {
     double value;
 
-#ifdef DEBUG
-#endif
-
-#ifdef __PARALLEL_MODE
     if ( dofManager->giveParallelMode() == DofManager_null ) {
         return 0.0;
     }
-
-#endif
 
     // first try if IC apply
     if ( tStep->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
@@ -243,12 +232,9 @@ bool MasterDof :: hasBc(TimeStep *tStep)
 // Returns True if the receiver is subjected to a boundary condition, else
 // returns False. If necessary, reads the answer in the data file.
 {
-#ifdef __PARALLEL_MODE
     if ( dofManager->giveParallelMode() == DofManager_null ) {
         return true;
     }
-
-#endif
 
     if ( bc == -1 ) {
         OOFEM_ERROR("does not know yet if has InitCond or not");

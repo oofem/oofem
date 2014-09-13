@@ -14,6 +14,7 @@ set (core_unsorted
     weakperiodicbc.C
     solutionbasedshapefunction.C
     fracturemanager.C
+    parallelcontext.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
@@ -217,7 +218,6 @@ set (core_parallel
     combuff.C
     domaintransactionmanager.C
     parallelordering.C
-    parallelcontext.C
     dyncombuff.C
     loadbalancer.C
     nonlocalmatwtp.C

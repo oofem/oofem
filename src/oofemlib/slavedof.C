@@ -228,18 +228,13 @@ contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode
             THROW_CIOERR(iores);
         }
 
-        int _idof, _idofmanNum;
-        for ( _idof = 1; _idof <= countOfMasterDofs; _idof++ ) {
-#ifdef __PARALLEL_MODE
+        for ( int _idof = 1; _idof <= countOfMasterDofs; _idof++ ) {
+            int _idofmanNum;
             if ( mode & CM_DefinitionGlobal ) {
                 _idofmanNum = dofManager->giveDomain()->giveDofManager( masterDofMans.at(_idof) )->giveGlobalNumber();
             } else {
                 _idofmanNum = masterDofMans.at(_idof);
             }
-
-#else
-            _idofmanNum = masterDofMans.at(_idof);
-#endif
 
             if ( !stream->write(& _idofmanNum, 1) ) {
                 THROW_CIOERR(CIO_IOERR);

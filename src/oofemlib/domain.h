@@ -40,14 +40,14 @@
 #include "domaintype.h"
 #include "statecountertype.h"
 #include "intarray.h"
+#ifdef __PARALLEL_MODE
+ #include "entityrenumberingscheme.h"
+#endif
 
 #include <unordered_map>
 #include <map>
 #include <string>
-#ifdef __PARALLEL_MODE
- #include <list>
- #include "entityrenumberingscheme.h"
-#endif
+#include <list>
 
 ///@name Input fields for domains
 //@{

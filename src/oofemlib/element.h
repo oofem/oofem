@@ -179,14 +179,14 @@ protected:
      */
     int numberOfGaussPoints;
 
-#ifdef __PARALLEL_MODE
+    /// Determines the parallel mode of the element
     elementParallelMode parallel_mode;
+
     /**
      * List of partition sharing the shared element or
      * remote partition containing remote element counterpart.
      */
     IntArray partitions;
-#endif
 
 public:
     /**
@@ -938,9 +938,8 @@ public:
      */
     void setGlobalNumber(int num) { globalNumber = num; }
 
-#ifdef __PARALLEL_MODE
     /**
-     * Return elementParallelMode of receiver. Defined for __Parallel_Mode only.
+     * Return elementParallelMode of receiver.
      */
     elementParallelMode giveParallelMode() const { return parallel_mode; }
     /// Sets parallel mode of element
@@ -950,7 +949,7 @@ public:
      * The knot span identifies the sub-region of the finite element.
      */
     virtual elementParallelMode giveKnotSpanParallelMode(int) const { return parallel_mode; }
-
+#ifdef __PARALLEL_MODE
     /**
      * Pack all necessary data of element (according to its parallel_mode) integration points
      * into given communication buffer. The corresponding cross section service is invoked, which in
@@ -975,8 +974,10 @@ public:
      * Estimates the necessary pack size to hold all packed data of receiver.
      * The corresponding cross section service is invoked, which in
      * turn should invoke material model service for particular integration point. The
-     * nature of packed data is material model dependent.  */
+     * nature of packed data is material model dependent.
+     */
     int estimatePackSize(CommunicationBuffer &buff);
+#endif
     /**
      * Returns partition list of receiver.
      * @return partition array.
@@ -1007,7 +1008,6 @@ public:
      * Returns the relative redistribution cost of the receiver
      */
     virtual double predictRelativeRedistributionCost() { return 1.0; }
-#endif
 
 public:
     /// Returns array containing load numbers of loads acting on element

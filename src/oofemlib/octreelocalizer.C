@@ -623,11 +623,9 @@ OctreeSpatialLocalizer :: giveElementContainingPoint(OctantRec *cell, const Floa
             Element *ielemptr = this->giveDomain()->giveElement(iel);
 
             /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
             if ( ielemptr->giveParallelMode() == Element_remote ) {
                 continue;
             }
-#endif
 
             SpatialLocalizerInterface *interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
             if ( interface ) {
@@ -683,11 +681,9 @@ OctreeSpatialLocalizer :: giveElementContainingPoint(OctantRec *cell, const Floa
             Element *ielemptr = this->giveDomain()->giveElement(iel);
 
             /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
             if ( ielemptr->giveParallelMode() == Element_remote ) {
                 continue;
             }
-#endif
 
             SpatialLocalizerInterface *interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
             if ( interface ) {
@@ -759,11 +755,9 @@ OctreeSpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, cons
             Element *ielemptr = this->giveDomain()->giveElement(iel);
 
             /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
             if ( ielemptr->giveParallelMode() == Element_remote ) {
                 continue;
             }
-#endif
 
             interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
             if ( interface ) {
@@ -876,11 +870,10 @@ OctreeSpatialLocalizer :: giveElementClosestToPointWithinOctant(OctantRec *currC
         for ( int iel: elementList ) {
             Element *ielemptr = this->giveDomain()->giveElement(iel);
 
-#ifdef __PARALLEL_MODE
             if ( ielemptr->giveParallelMode() == Element_remote ) {
                 continue;
             }
-#endif
+
             SpatialLocalizerInterface *interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
             if ( region > 0 && ielemptr->giveRegionNumber() != region ) {
                 continue;
@@ -914,12 +907,9 @@ OctreeSpatialLocalizer :: giveElementCloseToPointWithinOctant(OctantRec *cell, c
                 Element *ielemptr = this->giveDomain()->giveElement(iel);
 
                 /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
                 if ( ielemptr->giveParallelMode() == Element_remote ) {
                     continue;
                 }
-
-#endif
 
                 SpatialLocalizerInterface *interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
                 if ( interface ) {
@@ -984,12 +974,9 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
             Element *ielem = domain->giveElement(iel);
 
             /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
             if ( ielem->giveParallelMode() == Element_remote ) {
                 continue;
             }
-
-#endif
 
             //igp   = ipContainer[i].giveGp();
             if ( ( region > 0 ) && ( region != ielem->giveRegionNumber() ) ) {
@@ -1152,12 +1139,9 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                 Element *ielem = domain->giveElement(iel);
 
                 /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
                 if ( ielem->giveParallelMode() == Element_remote ) {
                     continue;
                 }
-
-#endif
 
                 if ( ( region > 0 ) && ( region != ielem->giveRegionNumber() ) ) {
                     continue;
@@ -1256,12 +1240,9 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, Set &elementSe
             Element *ielem = domain->giveElement(iel);
 
             /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
             if ( ielem->giveParallelMode() == Element_remote ) {
                 continue;
             }
-
-#endif
 
             //igp   = ipContainer[i].giveGp();
             if ( !elementSet.hasElement( ielem->giveNumber() ) ) {
@@ -1423,12 +1404,9 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                 Element *ielem = domain->giveElement(iel);
 
                 /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
                 if ( ielem->giveParallelMode() == Element_remote ) {
                     continue;
                 }
-
-#endif
 
                 if ( !elementSet.hasElement( ielem->giveNumber() ) ) {
                     continue;
@@ -1550,10 +1528,7 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
                 // ask for element
                 Element *ielem = domain->giveElement(iel);
 
-                /* #ifdef __PARALLEL_MODE
-                 *       if(ielem -> giveParallelMode() == Element_remote)continue;
-                 ****#endif
-                 */
+                //if(ielem -> giveParallelMode() == Element_remote)continue;
                 if ( !iCohesiveZoneGP ) {
                     // is one of his ip's  within given bbox -> inset it into elemSet
                     for ( GaussPoint *gp: *ielem->giveDefaultIntegrationRulePtr() ) {

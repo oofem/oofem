@@ -105,12 +105,10 @@ ZZNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, Ti
         ZZNodalRecoveryModelInterface *interface;
         Element *element = domain->giveElement(ielem);
 
-#ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() != Element_local ) {
             continue;
         }
 
-#endif
         // If an element doesn't implement the interface, it is ignored.
         if ( ( interface = static_cast< ZZNodalRecoveryModelInterface * >( element->giveInterface(ZZNodalRecoveryModelInterfaceType) ) ) == NULL ) {
             //abort();

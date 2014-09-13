@@ -118,25 +118,17 @@ SPRNodalRecoveryModel :: recoverValues(Set elementSet, InternalStateType type, T
     // average  recovered values of active region
     bool abortFlag = false;
     for ( int i = 1; i <= nnodes; i++ ) {
-#ifndef __PARALLEL_MODE
-        if ( regionNodalNumbers.at(i) ) {
-#else
         if ( regionNodalNumbers.at(i) &&
             ( ( domain->giveDofManager(i)->giveParallelMode() == DofManager_local ) ||
              ( domain->giveDofManager(i)->giveParallelMode() == DofManager_shared ) ) ) {
-#endif
             int eq = ( regionNodalNumbers.at(i) - 1 ) * regionValSize;
             if ( dofManPatchCount.at( regionNodalNumbers.at(i) ) ) {
                 for ( int j = 1; j <= regionValSize; j++ ) {
                     dofManValues.at(eq + j) /= dofManPatchCount.at( regionNodalNumbers.at(i) );
                 }
             } else {
-#ifndef __PARALLEL_MODE
                 OOFEM_WARNING("values of %s in dofmanager %d undetermined", __InternalStateTypeToString(type), i);
-#else
-                OOFEM_WARNING("values of %s in dofmanager %d undetermined",
-                               domain->giveEngngModel()->giveRank(), __InternalStateTypeToString(type), i);
-#endif
+
                 for ( int j = 1; j <= regionValSize; j++ ) {
                     dofManValues.at(eq + j) = 0.0;
                 }
@@ -179,12 +171,11 @@ SPRNodalRecoveryModel :: determinePatchAssemblyPoints(IntArray &pap, SPRPatchTyp
     for ( int i = 1; i <= elements.giveSize(); i++ ) {
         ielem = elements.at(i);
         element = domain->giveElement(ielem);
-#ifdef __PARALLEL_MODE
+
         if ( element->giveParallelMode() != Element_local ) {
             continue;
         }
 
-#endif
         if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
             interface->SPRNodalRecoveryMI_giveSPRAssemblyPoints(elemPap);
             npap = elemPap.giveSize();
@@ -212,12 +203,11 @@ SPRNodalRecoveryModel :: determinePatchAssemblyPoints(IntArray &pap, SPRPatchTyp
             papDofManConnectivity = domain->giveConnectivityTable()->giveDofManConnectivityArray(idofMan);
             for ( ielem = 1; ielem <= papDofManConnectivity->giveSize(); ielem++ ) {
                 element = domain->giveElement( papDofManConnectivity->at(ielem) );
-#ifdef __PARALLEL_MODE
+
                 if ( element->giveParallelMode() != Element_local ) {
                     continue;
                 }
 
-#endif
                 if ( elementSet.hasElement( element->giveNumber() ) ) {
                     if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
                         nip += interface->SPRNodalRecoveryMI_giveNumberOfIP();
@@ -252,12 +242,11 @@ SPRNodalRecoveryModel :: determinePatchAssemblyPoints(IntArray &pap, SPRPatchTyp
             for ( ielem = 1; ielem <= papDofManConnectivity->giveSize(); ielem++ ) {
                 // try to determine if they can be determined from surronuding elements paps
                 element = domain->giveElement( papDofManConnectivity->at(ielem) );
-#ifdef __PARALLEL_MODE
+
                 if ( element->giveParallelMode() != Element_local ) {
                     continue;
                 }
 
-#endif
                 if ( !elementSet.hasElement( element->giveNumber() ) ) {
                     continue;
                 }
@@ -359,12 +348,10 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
     nelem = papDofManConnectivity->giveSize();
     count = 0;
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
-#ifdef __PARALLEL_MODE
         if ( domain->giveElement( papDofManConnectivity->at(ielem) )->giveParallelMode() != Element_local ) {
             continue;
         }
 
-#endif
         if ( elementSet.hasElement(papDofManConnectivity->at(ielem)) ) {
             count++;
         }
@@ -374,12 +361,11 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
     patchElements = 0;
     for ( int i = 1; i <= nelem; i++ ) {
         ielem = regionelements.at(i);
-#ifdef __PARALLEL_MODE
+
         if ( domain->giveElement( papDofManConnectivity->at(ielem) )->giveParallelMode() != Element_local ) {
             continue;
         }
 
-#endif
         if ( elementSet.hasElement(papDofManConnectivity->at(ielem)) ) {
             patchElems.at(++patchElements) = papDofManConnectivity->at(ielem);
         }
@@ -399,12 +385,10 @@ SPRNodalRecoveryModel :: initPatch(IntArray &patchElems, IntArray &dofManToDeter
     for ( ielem = 1; ielem <= patchElements; ielem++ ) {
         element = domain->giveElement( patchElems.at(ielem) );
 
-#ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() != Element_local ) {
             continue;
         }
 
-#endif
         if ( ( interface = static_cast< SPRNodalRecoveryModelInterface * >( element->giveInterface(SPRNodalRecoveryModelInterfaceType) ) ) ) {
             // add element reported dofMans for pap dofMan
             interface->SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(toDetermine, papNumber);

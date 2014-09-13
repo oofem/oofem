@@ -157,7 +157,7 @@ contextIOResultType SimpleSlaveDof :: saveContext(DataStream *stream, ContextMod
     }
 
     if ( mode & CM_Definition ) {
-#ifdef __PARALLEL_MODE
+
         if ( mode & CM_DefinitionGlobal ) {
             int _masterGlobNum = dofManager->giveDomain()->giveDofManager(masterDofMngr)->giveGlobalNumber();
             if ( !stream->write(& _masterGlobNum, 1) ) {
@@ -168,13 +168,6 @@ contextIOResultType SimpleSlaveDof :: saveContext(DataStream *stream, ContextMod
                 THROW_CIOERR(CIO_IOERR);
             }
         }
-
-#else
-        if ( !stream->write(& masterDofMngr, 1) ) {
-            THROW_CIOERR(CIO_IOERR);
-        }
-
-#endif
     }
 
     return CIO_OK;

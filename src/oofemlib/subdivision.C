@@ -121,8 +121,8 @@ int Subdivision :: RS_Node :: buildTopLevelNodeConnectivity(ConnectivityTable *c
         if ( this->mesh->giveElement(el)->giveParallelMode() != Element_local ) {
             continue;
         }
-
 #endif
+
         // use nonzero chunk, the estimated size may be not large enough
         this->mesh->giveElement(el)->buildTopLevelNodeConnectivity(this);
     }
@@ -695,12 +695,8 @@ Subdivision :: RS_Triangle :: bisect(std :: queue< int > &subdivqueue, std :: li
  #endif
 #endif
 
-#ifdef __PARALLEL_MODE
- #ifdef __VERBOSE_PARALLEL
+#ifdef __VERBOSE_PARALLEL
         OOFEM_LOG_INFO("[%d] RS_Triangle::bisecting %d nodes %d %d %d, leIndex %d, new irregular %d\n", mesh->giveSubdivision()->giveRank(), this->number, nodes.at(1), nodes.at(2), nodes.at(3), leIndex, iNum);
- #endif
-#else
-        //OOFEM_LOG_INFO ("RS_Triangle::bisecting %d, new irregular %d\n",this->number, iNum);
 #endif
 
 #ifdef QUICK_HACK

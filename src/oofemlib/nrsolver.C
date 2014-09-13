@@ -46,6 +46,7 @@
 #include "classfactory.h"
 #include "exportmodulemanager.h"
 #include "engngm.h"
+#include "parallelcontext.h"
 
 #ifdef __PETSC_MODULE
  #include "petscsolver.h"
@@ -227,9 +228,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     int neq = X->giveSize();
     NM_Status status;
     bool converged, errorOutOfRangeFlag;
-#ifdef __PARALLEL_MODE
     ParallelContext *parallel_context = engngModel->giveParallelContext( this->domain->giveNumber() );
-#endif
 
     if ( engngModel->giveProblemScale() == macroScale ) {
         OOFEM_LOG_INFO("NRSolver: Iteration");
@@ -253,12 +252,8 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
         RT.add(* R0);
     }
 
-#ifdef __PARALLEL_MODE
     RRT = parallel_context->localNorm(RT);
     RRT *= RRT;
-#else
-    RRT = RT.computeSquaredNorm();
-#endif
 
     ddX.resize(neq);
     ddX.zero();
@@ -415,23 +410,18 @@ void
 NRSolver :: initPrescribedEqs()
 {
     EModelDefaultEquationNumbering dn;
-#ifdef __PARALLEL_MODE
     ParallelContext *parallel_context = engngModel->giveParallelContext( this->domain->giveNumber() );
-#endif
-    int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
-    int inode, idofid;
+    int count = 0, ndofman = domain->giveNumberOfDofManagers();
     IntArray localPrescribedEqs(numberOfPrescribedDofs);
 
     for ( int j = 1; j <= ndofman; j++ ) {
-#ifdef __PARALLEL_MODE
         if ( !parallel_context->isLocal( domain->giveNode(j) ) ) {
             continue;
         }
-#endif
-        jglobnum = domain->giveNode(j)->giveGlobalNumber();
+        int jglobnum = domain->giveNode(j)->giveGlobalNumber();
         for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
-            inode = prescribedDofs.at(2 * i - 1);
-            idofid = prescribedDofs.at(2 * i);
+            int inode = prescribedDofs.at(2 * i - 1);
+            int idofid = prescribedDofs.at(2 * i);
             if ( inode == jglobnum ) {
                 localPrescribedEqs.at(++count) = domain->giveNode(j)->giveDofWithID(idofid)->giveEquationNumber(dn);
                 continue;
@@ -469,7 +459,6 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
 
         if ( !prescribedEgsIS_defined ) {
             IntArray eqs;
-  #ifdef __PARALLEL_MODE
             Natural2GlobalOrdering *n2lpm = engngModel->giveParallelContext(1)->giveN2Gmap();
             int s = prescribedEqs.giveSize();
             eqs.resize(s);
@@ -479,15 +468,6 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
 
             ISCreateGeneral(PETSC_COMM_WORLD, s, eqs.givePointer(), & prescribedEgsIS);
             //ISView(prescribedEgsIS,PETSC_VIEWER_STDOUT_WORLD);
-  #else
-            eqs.resize(numberOfPrescribedDofs);
-            for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
-                eqs.at(i) = prescribedEqs.at(i) - 1;
-            }
-
-            ISCreateGeneral(PETSC_COMM_SELF, numberOfPrescribedDofs, eqs.givePointer(), & prescribedEgsIS);
-            //ISView(prescribedEgsIS,PETSC_VIEWER_STDOUT_SELF);
-  #endif
             prescribedEgsIS_defined = true;
         }
 
@@ -562,7 +542,6 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
 #if 0
  #ifdef __PETSC_MODULE
         if ( solverType == ST_Petsc ) {
-  #ifdef __PARALLEL_MODE
             //Natural2LocalOrdering* n2lpm = engngModel->giveParallelContext(1)->giveN2Lmap();
             //IntArray* map = n2lpm->giveN2Lmap();
             for ( i = 1; i <= prescribedEqs.giveSize(); i++ ) {
@@ -571,16 +550,6 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
             }
 
             return;
-
-  #else // PETSC_SERIAL
-            for ( i = 1; i <= numberOfPrescribedDofs; i++ ) {
-                eq = prescribedEqs.at(i);
-                R.at(eq) = prescribedDofsValues.at(i) * factor;
-            }
-
-            return;
-
-  #endif
         }
 
  #endif
@@ -653,8 +622,8 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
     FloatArray dg_forceErr, dg_dispErr, dg_totalLoadLevel, dg_totalDisp;
     bool answer;
     EModelDefaultEquationNumbering dn;
-#ifdef __PARALLEL_MODE
     ParallelContext *parallel_context = engngModel->giveParallelContext( this->domain->giveNumber() );
+#ifdef __PARALLEL_MODE
     Natural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
 #endif
 
@@ -696,12 +665,9 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         int ndofman = domain->giveNumberOfDofManagers();
         for ( int idofman = 1; idofman <= ndofman; idofman++ ) {
             DofManager *dofman = domain->giveDofManager(idofman);
-#ifdef __PARALLEL_MODE
             if ( !parallel_context->isLocal(dofman) ) {
                 continue;
             }
-
-#endif
 
             // loop over individual dofs
             for ( Dof *dof: *dofman ) {
@@ -726,12 +692,10 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         int nelem = domain->giveNumberOfElements();
         for ( int ielem = 1; ielem <= nelem; ielem++ ) {
             Element *elem = domain->giveElement(ielem);
-#ifdef __PARALLEL_MODE
             if ( elem->giveParallelMode() != Element_local ) {
                 continue;
             }
 
-#endif
             // loop over element internal Dofs
             for ( int idofman = 1; idofman <= elem->giveNumberOfInternalDofManagers(); idofman++ ) {
                 DofManager *dofman = elem->giveInternalDofManager(idofman);
@@ -792,7 +756,6 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             } // end loop over element internal dofmans
         } // end loop over elements
 
-#ifdef __PARALLEL_MODE
         // exchange individual partition contributions (simultaneously for all groups)
         FloatArray collectiveErr(nccdg);
         parallel_context->accumulate(dg_forceErr,       collectiveErr);
@@ -803,7 +766,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         dg_totalLoadLevel = collectiveErr;
         parallel_context->accumulate(dg_totalDisp,      collectiveErr);
         dg_totalDisp      = collectiveErr;
-#endif
+
         OOFEM_LOG_INFO("NRSolver: %-5d", nite);
         //bool zeroNorm = false;
         // loop over dof groups and check convergence individually
@@ -871,18 +834,14 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
             OOFEM_LOG_INFO("  NRSolver:     %-15d", nite);
         }
 
-#ifdef __PARALLEL_MODE
+
         forceErr = parallel_context->localNorm(rhs);
         forceErr *= forceErr;
         dXX = parallel_context->localNorm(X);
         dXX *= dXX;                                       // Note: Solutions are always total global values (natural distribution makes little sense for the solution)
         dXdX = parallel_context->localNorm(ddX);
         dXdX *= dXdX;
-#else
-        forceErr = rhs.computeSquaredNorm();
-        dXX = X.computeSquaredNorm();
-        dXdX = ddX.computeSquaredNorm();
-#endif
+
         if ( rtolf.at(1) > 0.0 ) {
             // we compute a relative error norm
             if ( ( RRT + internalForcesEBENorm.at(1) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {

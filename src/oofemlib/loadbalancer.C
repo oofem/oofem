@@ -742,7 +742,6 @@ WallClockLoadBalancerMonitor :: initializeFrom(InputRecord *ir)
 }
 
 /*
- * #else //__PARALLEL_MODE
  * void
  * LoadBalancer::migrateLoad () {}
  *

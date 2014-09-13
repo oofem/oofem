@@ -66,6 +66,7 @@
 #include "feinterpol3d.h"
 #include "classfactory.h"
 #include "xfem/xfemmanager.h"
+#include "parallelcontext.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
@@ -126,6 +127,8 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     }
 
     parallelFlag = 0;
+    numProcs = 1;
+    rank = 0;
 #ifdef __PARALLEL_MODE
     loadBalancingFlag = false;
     force_load_rebalance_in_first_step = false;
@@ -185,11 +188,7 @@ void EngngModel :: setParallelMode(bool parallelFlag)
 {
     this->parallelFlag = parallelFlag;
     if ( this->parallelFlag ) {
-#ifndef __PARALLEL_MODE
-        OOFEM_ERROR("Can't do it, only compiled for sequential runs");
-#else
         initParallel();
-#endif
     }
 }
 
@@ -321,10 +320,10 @@ EngngModel :: initializeFrom(InputRecord *ir)
         this->defaultErrEstimator->initializeFrom(ir);
     }
 
-#ifdef __PARALLEL_MODE
     IR_GIVE_OPTIONAL_FIELD(ir, parallelFlag, _IFT_EngngModel_parallelflag);
     // fprintf (stderr, "Parallel mode is %d\n", parallelFlag);
 
+#ifdef __PARALLEL_MODE
     /* Load balancing support */
     _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_loadBalancingFlag);
@@ -515,12 +514,9 @@ EngngModel :: forceEquationNumbering()
         this->numberOfPrescribedEquations += domainPrescribedNeqs.at(i);
     }
 
-#ifdef __PARALLEL_MODE
     for ( std :: size_t i = 1; i <= parallelContextList.size(); i++ ) {
         this->parallelContextList[i-1].init((int)i);
     }
-
-#endif
 
 
     return this->numberOfEquations;
@@ -641,7 +637,6 @@ EngngModel :: updateYourself(TimeStep *tStep)
         int nelem = domain->giveNumberOfElements();
         for ( int j = 1; j <= nelem; j++ ) {
             Element *elem = domain->giveElement(j);
-#ifdef __PARALLEL_MODE
             // skip remote elements (these are used as mirrors of remote elements on other domains
             // when nonlocal constitutive models are used. They introduction is necessary to
             // allow local averaging on domains without fine grain communication between domains).
@@ -649,7 +644,6 @@ EngngModel :: updateYourself(TimeStep *tStep)
                 continue;
             }
 
-#endif
             elem->updateYourself(tStep);
         }
 
@@ -754,7 +748,6 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
 #endif
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         Element *element = domain->giveElement(ielem);
-#ifdef __PARALLEL_MODE
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
@@ -762,7 +755,6 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
             continue;
         }
 
-#endif
         if ( !element->isActivated(tStep) ) {
             continue;
         }
@@ -817,12 +809,11 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
 #endif
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         Element *element = domain->giveElement(ielem);
-#ifdef __PARALLEL_MODE
+
         if ( element->giveParallelMode() == Element_remote ) {
             continue;
         }
 
-#endif
         if ( !element->isActivated(tStep) ) {
             continue;
         }
@@ -869,7 +860,7 @@ void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep,
 #ifdef __PARALLEL_MODE
         if ( this->isParallel() ) {
             int val;
-            MPI_Allreduce(& maxdofids, & val, 1, MPI_INT, MPI_SUM, this->comm);
+            MPI_Allreduce(& maxdofids, & val, 1, MPI_INT, MPI_MAX, this->comm);
             maxdofids = val;
         }
 #endif
@@ -881,15 +872,12 @@ void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep,
     this->assembleVectorFromElements(answer, tStep, type, mode, s, domain, eNorms);
     this->assembleVectorFromBC(answer, tStep, type, mode, s, domain, eNorms);
 
-#ifdef __PARALLEL_MODE
     if ( this->isParallel() ) {
         if ( eNorms ) {
             FloatArray localENorms = * eNorms;
-            //this->giveParallelContext(domain->giveNumber())->accumulate(localENorms, *eNorms);
-            MPI_Allreduce(localENorms.givePointer(), eNorms->givePointer(), eNorms->giveSize(), MPI_DOUBLE, MPI_SUM, this->comm);
+            this->giveParallelContext(domain->giveNumber())->accumulate(localENorms, *eNorms);
         }
     }
-#endif
 }
 
 
@@ -920,12 +908,11 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
     for ( int i = 1; i <= nnode; i++ ) {
         DofManager *node = domain->giveDofManager(i);
         node->computeLoadVectorAt(charVec, tStep, mode);
-#ifdef __PARALLEL_MODE
+
         if ( node->giveParallelMode() == DofManager_shared ) {
             charVec.times( 1. / ( node->givePartitionsConnectivitySize() ) );
         }
 
-#endif
         if ( charVec.isNotEmpty() ) {
             if ( node->computeM2LTransformation(R, dofIDarry) ) {
                 charVec.rotatedWith(R, 't');
@@ -1096,7 +1083,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
 #endif
     for ( int i = 1; i <= nelem; i++ ) {
         Element *element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
+
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
@@ -1104,7 +1091,6 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
             continue;
         }
 
-#endif
         if ( !element->isActivated(tStep) ) {
             continue;
         }
@@ -1150,7 +1136,7 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Ch
 
     for ( int i = 1; i <= nelems; i++ ) {
         Element *element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
+
         // Skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. Their introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
@@ -1158,7 +1144,6 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Ch
             continue;
         }
 
-#endif
         if ( !element->isActivated(tStep) ) {
             continue;
         }
@@ -1220,7 +1205,7 @@ EngngModel :: initStepIncrements()
         int nelem = domain->giveNumberOfElements();
         for ( int j = 1; j <= nelem; j++ ) {
             Element *elem = domain->giveElement(j);
-#ifdef __PARALLEL_MODE
+
             // skip remote elements (these are used as mirrors of remote elements on other domains
             // when nonlocal constitutive models are used. They introduction is necessary to
             // allow local averaging on domains without fine grain communication between domains).
@@ -1228,7 +1213,6 @@ EngngModel :: initStepIncrements()
                 continue;
             }
 
-#endif
             elem->initForNewStep();
         }
     }
@@ -1550,11 +1534,11 @@ EngngModel :: GiveDomainDataReader(int domainNum, int domainSerNum, ContextFileM
 std :: string
 EngngModel :: errorInfo(const char *func) const
 {
-#ifdef __PARALLEL_MODE
-    return std::string(this->giveClassName()) + "::" + func + ", Rank: " + std::to_string(rank);
-#else
-    return std::string(this->giveClassName()) + "::" + func;
-#endif
+    if ( this->isParallel() ) {
+        return std::string(this->giveClassName()) + "::" + func + ", Rank: " + std::to_string(rank);
+    } else {
+        return std::string(this->giveClassName()) + "::" + func;
+    }
 }
 
 Domain *
@@ -1582,8 +1566,6 @@ EngngModel :: setDomain(int i, Domain *ptr, bool iDeallocateOld)
 }
 
 
-
-#ifdef __PARALLEL_MODE
 ParallelContext *
 EngngModel :: giveParallelContext(int i)
 {
@@ -1602,8 +1584,6 @@ EngngModel :: initParallelContexts()
         parallelContextList.emplace_back(this);
     }
 }
-#endif
-
 
 
 MetaStep *
@@ -1693,7 +1673,6 @@ EngngModel :: init()
 }
 
 
-#ifdef __PARALLEL_MODE
 void
 EngngModel :: initParallel()
 {
@@ -1703,13 +1682,14 @@ EngngModel :: initParallel()
     this->comm = MPI_COMM_WORLD;
     MPI_Comm_rank(this->comm, & this->rank);
     MPI_Comm_size(this->comm, & numProcs);
+ #else
+    OOFEM_ERROR("Can't do it, only compiled for sequential runs");
  #endif
  #ifdef __VERBOSE_PARALLEL
     OOFEM_LOG_RELEVANT("[%d/%d] Running on %s\n", rank, numProcs, processor_name);
  #endif
 }
 
-#endif
 
 #ifdef __OOFEG
 void EngngModel :: drawYourself(oofegGraphicContext &gc)
@@ -1743,6 +1723,21 @@ void EngngModel :: drawNodes(oofegGraphicContext &gc)
 }
 
 #endif
+
+
+void
+EngngModel :: initializeCommMaps(bool forceInit)
+{
+#ifdef __PARALLEL_MODE
+    // Set up communication patterns.
+    communicator->setUpCommunicationMaps(this, true, forceInit);
+    if ( nonlocalExt ) {
+        nonlocCommunicator->setUpCommunicationMaps(this, true, forceInit);
+    }
+#else
+    OOFEM_ERROR("Can't set up comm maps, parallel support not compiled");
+#endif
+}
 
 
 #ifdef __PARALLEL_MODE
@@ -1834,17 +1829,6 @@ EngngModel :: updateSharedDofManagers(FloatArray &answer, const UnknownNumbering
     }
 
     return result;
-}
-
-
-void
-EngngModel :: initializeCommMaps(bool forceInit)
-{
-    // Set up communication patterns.
-    communicator->setUpCommunicationMaps(this, true, forceInit);
-    if ( nonlocalExt ) {
-        nonlocCommunicator->setUpCommunicationMaps(this, true, forceInit);
-    }
 }
 
 
