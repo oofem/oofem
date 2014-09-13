@@ -270,7 +270,6 @@ TimeStep *NonLinearDynamic :: giveNextStep()
 void NonLinearDynamic :: solveYourself()
 {
     if ( commInitFlag ) {
-#ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
         // Force equation numbering before setting up comm maps.
         int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
@@ -280,7 +279,6 @@ void NonLinearDynamic :: solveYourself()
             // Set up communication patterns.
             this->initializeCommMaps();
         }
-#endif
         commInitFlag = 0;
     }
 
@@ -292,7 +290,6 @@ void
 NonLinearDynamic :: solveYourselfAt(TimeStep *tStep)
 {
     if ( commInitFlag ) {
-#ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
         // Force equation numbering before setting up comm maps.
         int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
@@ -302,7 +299,6 @@ NonLinearDynamic :: solveYourselfAt(TimeStep *tStep)
             // Set up communication patterns.
             this->initializeCommMaps();
         }
-#endif
         commInitFlag = 0;
     }
 
@@ -875,15 +871,12 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
     answer.zero();
     for ( int i = 1; i <= nelem; i++ ) {
         Element *element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
         // Skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) {
             continue;
         }
-
-#endif
 
         element->giveLocationArray(loc, en);
         element->giveCharacteristicMatrix(charMtrx, type, tStep);
@@ -959,17 +952,6 @@ NonLinearDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
 }
 
 
-void
-NonLinearDynamic :: initializeCommMaps(bool forceInit)
-{
-    // set up communication patterns
-    communicator->setUpCommunicationMaps(this, true, forceInit);
-    if ( nonlocalExt ) {
-        nonlocCommunicator->setUpCommunicationMaps(this, true, forceInit);
-    }
-}
-
-
 LoadBalancer *
 NonLinearDynamic :: giveLoadBalancer()
 {
@@ -1000,7 +982,7 @@ NonLinearDynamic :: giveLoadBalancerMonitor()
         return NULL;
     }
 }
-
+#endif
 
 void
 NonLinearDynamic :: packMigratingData(TimeStep *tStep)
@@ -1048,7 +1030,7 @@ NonLinearDynamic :: unpackMigratingData(TimeStep *tStep)
                         fprintf(stderr, "[%d] Local : %d(%d) -> %d\n", myrank, idofman, idof, _eq);
                     }
 
- #endif
+ #endif 
                 }
             }
         }
@@ -1063,5 +1045,5 @@ NonLinearDynamic :: unpackMigratingData(TimeStep *tStep)
 
     initFlag = true;
 }
-#endif
+
 } // end namespace oofem

@@ -194,19 +194,15 @@ TimeStep *NlDEIDynamic :: giveNextStep()
 
 void NlDEIDynamic :: solveYourself()
 {
-#ifdef __PARALLEL_MODE
+    if ( this->isParallel() ) {
  #ifdef __VERBOSE_PARALLEL
-    // Force equation numbering before setting up comm maps.
-    int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
-    OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
+        // Force equation numbering before setting up comm maps.
+        int neq = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
+        OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
  #endif
 
-    // Set up communication patterns,
-    communicator->setUpCommunicationMaps(this, true);
-    if ( nonlocalExt ) {
-        nonlocCommunicator->setUpCommunicationMaps(this, true);
+        this->initializeCommMaps();
     }
-#endif
 
     StructuralEngngModel :: solveYourself();
 }
@@ -539,9 +535,6 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     IntArray loc;
     Element *element;
     EModelDefaultEquationNumbering en;
-#ifdef __PARALLEL_MODE
-    int result;
-#endif
 
 #ifndef LOCAL_ZERO_MASS_REPLACEMENT
     FloatArray diagonalStiffMtrx;
@@ -553,14 +546,12 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
 
-#ifdef __PARALLEL_MODE
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) {
             continue;
         }
-#endif
 
         element->giveLocationArray(loc, en);
         element->giveCharacteristicMatrix(charMtrx, LumpedMassMatrix, tStep);
@@ -667,7 +658,7 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     VERBOSEPARALLEL_PRINT( "NlDEIDynamic :: computeMassMtrx", "Reduce of maxOm started", this->giveRank() );
   #endif
 
-    result = MPI_Allreduce(& maxOm, & globalMaxOm, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+    int result = MPI_Allreduce(& maxOm, & globalMaxOm, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
 
   #ifdef __VERBOSE_PARALLEL
     VERBOSEPARALLEL_PRINT( "NlDEIDynamic :: computeMassMtrx", "Reduce of maxOm finished", this->giveRank() );

@@ -359,10 +359,8 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-#ifdef __PARALLEL_MODE
     virtual double predictRelativeComputationalCost(GaussPoint *gp);
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
-#endif
 };
 } // end namespace oofem
 #endif // druckerpragerplasticitysm_h

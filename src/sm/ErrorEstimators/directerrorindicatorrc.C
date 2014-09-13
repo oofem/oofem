@@ -57,8 +57,6 @@ DirectErrorIndicatorRC :: DirectErrorIndicatorRC(int n, ErrorEstimator *e) : Rem
 
 DirectErrorIndicatorRC :: ~DirectErrorIndicatorRC()
 {
-#ifdef __PARALLEL_MODE
-#endif
 }
 
 void

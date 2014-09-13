@@ -185,10 +185,9 @@ protected:
                                                  FloatArray &_incrementalLoadVectorOfPrescribed,
                                                  SparseNonLinearSystemNM :: referenceLoadInputModeType _refMode,
                                                  Domain *sourceDomain, TimeStep *tStep);
-#ifdef __PARALLEL_MODE
+
     virtual void packMigratingData(TimeStep *tStep);
     virtual void unpackMigratingData(TimeStep *tStep);
-#endif
 };
 } // end namespace oofem
 #endif // nlinearstatic_h

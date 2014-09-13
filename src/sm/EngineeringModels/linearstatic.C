@@ -192,22 +192,15 @@ TimeStep *LinearStatic :: giveNextStep()
 
 void LinearStatic :: solveYourself()
 {
-#ifdef __PARALLEL_MODE
     if ( this->isParallel() ) {
- #ifdef __VERBOSE_PARALLEL
+#ifdef __VERBOSE_PARALLEL
         // force equation numbering before setting up comm maps
         int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
         OOFEM_LOG_INFO("[process rank %d] neq is %d\n", this->giveRank(), neq);
- #endif
-
-        // set up communication patterns
-        // needed only for correct shared rection computation
-        communicator->setUpCommunicationMaps(this, true);
-        if ( nonlocalExt ) {
-            nonlocCommunicator->setUpCommunicationMaps(this, true);
-        }
-    }
 #endif
+
+        this->initializeCommMaps();
+    }
 
     StructuralEngngModel :: solveYourself();
 }

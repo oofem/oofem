@@ -351,12 +351,10 @@ bool FE2FluidMaterialStatus :: createRVE(int n, GaussPoint *gp, const std :: str
 
     std :: ostringstream name;
     name << this->rve->giveOutputBaseFileName() << "-gp" << n;
-#ifdef __PARALLEL_MODE
     if ( this->domain->giveEngngModel()->isParallel() && this->domain->giveEngngModel()->giveNumberOfProcesses() > 1 ) {
         name << "." << this->domain->giveEngngModel()->giveRank();
     }
 
-#endif
     this->rve->letOutputBaseFileNameBe( name.str() );
 
     this->bc = dynamic_cast< MixedGradientPressureBC * >( this->rve->giveDomain(1)->giveBc(1) );

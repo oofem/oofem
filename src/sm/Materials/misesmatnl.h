@@ -165,9 +165,9 @@ public:
     virtual int hasBoundedSupport() { return 1; }
 
 #ifdef __PARALLEL_MODE
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-    int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
+    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
 #endif
 
 protected:

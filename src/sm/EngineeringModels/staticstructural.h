@@ -102,7 +102,7 @@ public:
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     
 #ifdef __PARALLEL_MODE
-    int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
+    virtual int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
 #endif
 };
 } // end namespace oofem

@@ -50,12 +50,10 @@
 #include "connectivitytable.h"
 #include "errorestimatortype.h"
 #include "classfactory.h"
+#include "engngm.h"
+#include "parallelcontext.h"
 
 #include <vector>
-
-#ifdef __PARALLEL_MODE
- #include "parallel.h"
-#endif
 
 namespace oofem {
 REGISTER_ErrorEstimator(ZZErrorEstimator, EET_ZZEE);
@@ -134,18 +132,12 @@ ZZErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
         this->globalSNorm += sNorm * sNorm;
     }
 
-#ifdef __PARALLEL_MODE
-    // compute global ENorm and SNorm by summing up comtributions on all partitions
-    double lnorms [ 2 ] = {
-        this->globalENorm, this->globalSNorm
-    };
-    double gnorms [ 2 ] = {
-        0.0, 0.0
-    };
-    MPI_Allreduce(lnorms, gnorms, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    FloatArray gnorms;
+    ParallelContext *parallel_context = this->domain->giveEngngModel()->giveParallelContext(this->domain->giveNumber());
+    parallel_context->accumulate({this->globalENorm, this->globalSNorm}, gnorms);
     this->globalENorm = gnorms [ 0 ];
     this->globalSNorm = gnorms [ 1 ];
-#endif
+    
 
     // recover the stored smoother
     this->domain->setSmoother(oldSmoother); //delete old one (the rm)

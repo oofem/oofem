@@ -219,19 +219,19 @@ public:
     };
 
 #ifdef __PARALLEL_MODE
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     {
         OOFEM_ERROR("not implemented");
         return 0;
     }
 
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
     {
         OOFEM_ERROR("not implemented");
         return 0;
     }
 
-    int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
+    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
     {
         OOFEM_ERROR("not implemented");
         return 0;

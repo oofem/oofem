@@ -1342,6 +1342,7 @@ MDM :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
         return 0;
     }
 }
+#endif
 
 double
 MDM :: predictRelativeComputationalCost(GaussPoint *gp)
@@ -1369,15 +1370,13 @@ MDM :: predictRelativeComputationalCost(GaussPoint *gp)
     return cost;
 }
 
-#endif
 
 
 
 
 MDMStatus :: MDMStatus(int n, int nsd, int nmplanes, Domain *d, GaussPoint *g) : StructuralMaterialStatus(n, d, g), StructuralNonlocalMaterialStatusExtensionInterface(), Psi(nmplanes), PsiTemp(nmplanes), DamageTensor(nsd, nsd), DamageTensorTemp(nsd, nsd), tempDamageTensorEigenValues(nsd), damageTensorEigenValues(nsd), tempDamageTensorEigenVectors(nsd, nsd), damageTensorEigenVectors(nsd, nsd)
 {
-    int i;
-    for ( i = 1; i <= nsd; i++ ) {
+    for ( int i = 1; i <= nsd; i++ ) {
         damageTensorEigenValues.at(i) = tempDamageTensorEigenValues.at(i) = 1.0;
         tempDamageTensorEigenVectors.at(i, i) = damageTensorEigenVectors.at(i, i) = 1.0;
     }

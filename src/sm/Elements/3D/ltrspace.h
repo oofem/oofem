@@ -86,9 +86,7 @@ public:
     virtual void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
-#ifdef __PARALLEL_MODE
     virtual double giveRelativeSelfComputationalCost() { return 2.15; }
-#endif
 
     virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node,
                                                             InternalStateType type, TimeStep *tStep);

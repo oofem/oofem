@@ -136,9 +136,9 @@ public:
     virtual void giveSupportRadius(double &radius) { radius = this->R; }
 
 #ifdef __PARALLEL_MODE
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-    int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
+    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
 #endif
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new MazarsNLMaterialStatus(1, MazarsMaterial :: domain, gp); }

@@ -214,12 +214,12 @@ public:
     //@}
 
 #ifdef __PARALLEL_MODE
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
-    int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
+    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip);
+    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip);
+#endif
     virtual double predictRelativeComputationalCost(GaussPoint *gp);
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
-#endif
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const { return new IDNLMaterialStatus(1, IsotropicDamageMaterial1 :: domain, gp); }
 

@@ -50,6 +50,7 @@
 #include "sparsemtrx.h"
 #include "errorestimator.h"
 #include "mathfem.h"
+#include "dofmanager.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
@@ -320,7 +321,6 @@ TimeStep *NonLinearStatic :: giveNextStep()
 
 void NonLinearStatic :: solveYourself()
 {
-#ifdef __PARALLEL_MODE
     if ( this->isParallel() ) {
  #ifdef __VERBOSE_PARALLEL
         // force equation numbering before setting up comm maps
@@ -333,7 +333,6 @@ void NonLinearStatic :: solveYourself()
         // init remote dofman list
         // this->initRemoteDofManList ();
     }
-#endif
     StructuralEngngModel :: solveYourself();
 }
 
@@ -933,7 +932,7 @@ NonLinearStatic :: giveLoadBalancerMonitor()
         return NULL;
     }
 }
-
+#endif
 
 void
 NonLinearStatic :: packMigratingData(TimeStep *tStep)
@@ -1033,5 +1032,5 @@ NonLinearStatic :: unpackMigratingData(TimeStep *tStep)
 
     initFlag = true;
 }
-#endif
+
 } // end namespace oofem

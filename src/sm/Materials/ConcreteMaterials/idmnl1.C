@@ -1069,6 +1069,7 @@ IDNLMaterial :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
 
     return buff.givePackSize(MPI_DOUBLE, 1);
 }
+#endif
 
 double
 IDNLMaterial :: predictRelativeComputationalCost(GaussPoint *gp)
@@ -1093,5 +1094,4 @@ IDNLMaterial :: predictRelativeComputationalCost(GaussPoint *gp)
     return cost;
 }
 
-#endif
 } // end namespace oofem

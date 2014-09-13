@@ -81,28 +81,6 @@ NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
 // Only one has reason for DIIDynamic
 // - SolutionOfLinearEquations
 {
-#ifdef __PARALLEL_MODE
-
-    if ( nMethod ) {
-        return nMethod;
-    }
-
-    if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
-        if ( nMethod ) {
-            return nMethod;
-        }
-
-        nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-    }
-
-    if ( nMethod == NULL ) {
-        OOFEM_ERROR("linear solver creation failed (unknown type or no parallel support)");
-    }
-
-    return nMethod;
-
-#endif
-
     if ( nMethod ) {
         return nMethod;
     }
@@ -493,13 +471,10 @@ DIIDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Doma
 
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
         // Skip remote elements.
         if ( element->giveParallelMode() == Element_remote ) {
             continue;
         }
-
-#endif
 
         element->giveLocationArray(loc, en);
         element->giveCharacteristicMatrix(charMtrx, type, tStep);

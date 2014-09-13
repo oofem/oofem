@@ -494,12 +494,10 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     nelem = this->giveDomain(2)->giveNumberOfElements();
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
+
         if ( this->giveDomain(2)->giveElement(ielem)->giveParallelMode() == Element_remote ) {
             continue;
         }
-
-#endif
 
         result &= this->giveDomain(2)->giveElement(ielem)->adaptiveMap( this->giveDomain(1), this->giveCurrentStep() );
     }
@@ -548,12 +546,9 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     // computes the stresses and calls updateYourself to mapped state
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
         if ( this->giveDomain(1)->giveElement(ielem)->giveParallelMode() == Element_remote ) {
             continue;
         }
-
-#endif
 
         result &= this->giveDomain(1)->giveElement(ielem)->adaptiveUpdate( this->giveCurrentStep() );
     }
@@ -561,12 +556,9 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     // finish mapping process
     for ( ielem = 1; ielem <= nelem; ielem++ ) {
         /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
         if ( this->giveDomain(1)->giveElement(ielem)->giveParallelMode() == Element_remote ) {
             continue;
         }
-
-#endif
 
         result &= this->giveDomain(1)->giveElement(ielem)->adaptiveFinish( this->giveCurrentStep() );
     }
@@ -743,7 +735,8 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 
 
 contextIOResultType
-AdaptiveNonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj) {
+AdaptiveNonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+{
     int closeFlag = 0;
     contextIOResultType iores;
     FILE *file = NULL;
@@ -776,7 +769,8 @@ AdaptiveNonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, voi
 }
 
 contextIOResultType
-AdaptiveNonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *obj) {
+AdaptiveNonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
     int closeFlag = 0;
     int istep, iversion;
     contextIOResultType iores;
@@ -811,7 +805,8 @@ AdaptiveNonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, 
 
 
 void
-AdaptiveNonLinearStatic :: updateDomainLinks() {
+AdaptiveNonLinearStatic :: updateDomainLinks()
+{
     NonLinearStatic :: updateDomainLinks();
     this->defaultErrEstimator->setDomain( this->giveDomain(1) );
 }

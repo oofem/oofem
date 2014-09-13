@@ -16,11 +16,6 @@
 #include "nrsolver.h"
 #include "primaryfield.h"
 
-#ifdef __PARALLEL_MODE
- #include "problemcomm.h"
- #include "processcomm.h"
-#endif
-
 #include <iostream>
 #include <fstream>
 #include <cstdio>
@@ -60,20 +55,7 @@ IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
 
     // Create solution space for pressure field
     PressureField = new PrimaryField(this, 1, FT_Pressure, 1);
-#if 0
- #ifdef __PARALLEL_MODE
 
-
-    printf("Parallel mode!\n");
-    if ( isParallel() ) {
-        commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
-        communicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
-                                               this->giveNumberOfProcesses(),
-                                               this->commMode);
-    }
-
- #endif
-#endif
     return IRRT_OK;
 }
 

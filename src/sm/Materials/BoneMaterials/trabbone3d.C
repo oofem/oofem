@@ -1250,7 +1250,7 @@ TrabBone3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType 
     }
 }
 
-#ifdef __PARALLEL_MODE
+
 double TrabBone3D :: predictRelativeComputationalCost(GaussPoint *gp)
 {
     TrabBone3DStatus *status = static_cast< TrabBone3DStatus * >( this->giveStatus(gp) );
@@ -1261,14 +1261,12 @@ double TrabBone3D :: predictRelativeComputationalCost(GaussPoint *gp)
         return 1.0;
     }
 }
+
+
 double TrabBone3D :: predictRelativeRedistributionCost(GaussPoint *gp)
 {
     return 1.0;
 }
-#endif
-
-
-
 
 
 

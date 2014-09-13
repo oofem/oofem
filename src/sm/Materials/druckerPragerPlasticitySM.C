@@ -828,7 +828,6 @@ DruckerPragerPlasticitySM :: CreateStatus(GaussPoint *gp) const
 }
 
 
-#ifdef __PARALLEL_MODE
 double
 DruckerPragerPlasticitySM :: predictRelativeComputationalCost(GaussPoint *gp)
 {
@@ -845,7 +844,6 @@ DruckerPragerPlasticitySM :: predictRelativeComputationalCost(GaussPoint *gp)
     }
 }
 
-#endif
 } // end namespace oofem
 
 #undef PRINTFDP

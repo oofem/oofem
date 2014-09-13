@@ -1095,12 +1095,9 @@ StructuralElement :: updateBeforeNonlocalAverage(TimeStep *tStep)
      */
     FloatArray epsilon;
 
-#ifdef __PARALLEL_MODE
     if ( this->giveParallelMode() == Element_remote ) {
         return;
     }
-
-#endif
 
     // force updating local quantities
     for ( auto &iRule: integrationRulesArray ) {

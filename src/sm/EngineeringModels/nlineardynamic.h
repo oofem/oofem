@@ -158,15 +158,9 @@ public:
 #endif
 
 #ifdef __PARALLEL_MODE
-    int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
-    /**
-     * Initializes communication maps of the receiver.
-     */
-    void initializeCommMaps(bool forceInit = false);
-
+    virtual int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
     virtual LoadBalancer *giveLoadBalancer();
     virtual LoadBalancerMonitor *giveLoadBalancerMonitor();
-
 #endif
 
 protected:
@@ -175,20 +169,9 @@ protected:
 
     void proceedStep(int di, TimeStep *tStep);
     void determineConstants(TimeStep *tStep);
-#ifdef __PARALLEL_MODE
-    /** Packs receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.
-     *  Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
-     *  are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After
-     *  data migration and local renumbering, the solution vectors will be restored from dof dictionary data back.
-     */
+
     virtual void packMigratingData(TimeStep *tStep);
-    /** Unpacks receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.
-     *  Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
-     *  are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After
-     *  data migration and local renumbering, the solution vectors will be restored from dof dictionary data back.
-     */
     virtual void unpackMigratingData(TimeStep *tStep);
-#endif
 };
 } // end namespace oofem
 #endif // nlineardynamic_h
