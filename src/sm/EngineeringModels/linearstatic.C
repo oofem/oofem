@@ -46,8 +46,6 @@
 #include "classfactory.h"
 
 #ifdef __PARALLEL_MODE
- #include "fetisolver.h"
- #include "sparsemtrx.h"
  #include "problemcomm.h"
  #include "communicator.h"
 #endif
