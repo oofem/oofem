@@ -1067,14 +1067,12 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
     int nelem = domain->giveNumberOfElements();
 
 
-#ifdef __PARALLEL_MODE
     ///@todo Checking the chartype is not since there could be some other chartype in the future. We need to try and deal with chartype in a better way.
     /// For now, this is the best we can do.
     if ( this->isParallel() && type == InternalForcesVector ) {
         // Copies internal (e.g. Gauss-Point) data from remote elements to make sure they have all information necessary for nonlocal averaging.
         this->exchangeRemoteElementData(RemoteElementExchangeTag);
     }
-#endif
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     ///@todo Consider using private answer variables and sum them up at the end, but it just might be slower then a shared variable.
@@ -1740,20 +1738,95 @@ EngngModel :: initializeCommMaps(bool forceInit)
 }
 
 
+int
+EngngModel :: updateSharedDofManagers(FloatArray &answer, const UnknownNumberingScheme &s, int ExchangeTag)
+{
+    if ( isParallel() ) {
+#ifdef __PARALLEL_MODE
+        int result = 1;
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Packing data", this->giveRank() );
+ #endif
+
+        ArrayWithNumbering tmp;
+        tmp.array = & answer;
+        tmp.numbering = & s;
+        result &= communicator->packAllData(this, & tmp, & EngngModel :: packDofManagers);
+
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Exchange started", this->giveRank() );
+ #endif
+
+        result &= communicator->initExchange(ExchangeTag);
+
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Receiving and unpacking", this->giveRank() );
+ #endif
+
+        result &= communicator->unpackAllData(this, & tmp, & EngngModel :: unpackDofManagers);
+        result &= communicator->finishExchange();
+        return result;
+#else
+        OOFEM_ERROR("Support for parallel mode not compiled in.");
+        return 0;
+#endif
+    } else {
+        return 1;
+    }
+
+}
+
+
+int
+EngngModel :: exchangeRemoteElementData(int ExchangeTag)
+{
+
+    if ( isParallel() && nonlocalExt ) {
+#ifdef __PARALLEL_MODE
+        int result = 1;
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Packing remote element data", this->giveRank() );
+ #endif
+
+        result &= nonlocCommunicator->packAllData(this, & EngngModel :: packRemoteElementData);
+
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Remote element data exchange started", this->giveRank() );
+ #endif
+
+        result &= nonlocCommunicator->initExchange(ExchangeTag);
+
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Receiveng and Unpacking remote element data", this->giveRank() );
+ #endif
+
+        if ( !( result &= nonlocCommunicator->unpackAllData(this, & EngngModel :: unpackRemoteElementData) ) ) {
+            OOFEM_ERROR("Receiveng and Unpacking remote element data");
+        }
+
+        result &= nonlocCommunicator->finishExchange();
+        return result;
+#else
+        OOFEM_ERROR("Support for parallel mode not compiled in.");
+        return 0;
+#endif
+    } else {
+        return 1;
+    }
+}
+
 #ifdef __PARALLEL_MODE
 void
 EngngModel :: balanceLoad(TimeStep *tStep)
 {
-    LoadBalancerMonitor :: LoadBalancerDecisionType _d;
     this->giveLoadBalancerMonitor();
     this->giveLoadBalancer();
-    EModelDefaultEquationNumbering dn;
 
     //print statistics for current step
     lb->printStatistics();
 
     if ( tStep->isNotTheLastStep() ) {
-        _d = lbm->decide(tStep);
+        LoadBalancerMonitor :: LoadBalancerDecisionType _d = lbm->decide(tStep);
         if ( ( _d == LoadBalancerMonitor :: LBD_RECOVER ) ||
             ( ( tStep->isTheFirstStep() ) && force_load_rebalance_in_first_step ) ) {
             this->timer.startTimer(EngngModelTimer :: EMTT_LoadBalancingTimer);
@@ -1768,6 +1841,7 @@ EngngModel :: balanceLoad(TimeStep *tStep)
             this->forceEquationNumbering();
  #ifdef __VERBOSE_PARALLEL
             // debug print
+            EModelDefaultEquationNumbering dn;
             int nnodes = giveDomain(1)->giveNumberOfDofManagers();
             int myrank = this->giveRank();
             fprintf(stderr, "\n[%d] Nodal Table\n", myrank);
@@ -1795,73 +1869,6 @@ EngngModel :: balanceLoad(TimeStep *tStep)
                            this->giveRank(), _steptime);
         }
     }
-}
-
-
-int
-EngngModel :: updateSharedDofManagers(FloatArray &answer, const UnknownNumberingScheme &s, int ExchangeTag)
-{
-    int result = 1;
-
-
-    if ( isParallel() ) {
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Packing data", this->giveRank() );
- #endif
-
-        ArrayWithNumbering tmp;
-        tmp.array = & answer;
-        tmp.numbering = & s;
-        result &= communicator->packAllData(this, & tmp, & EngngModel :: packDofManagers);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Exchange started", this->giveRank() );
- #endif
-
-        result &= communicator->initExchange(ExchangeTag);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Receiving and unpacking", this->giveRank() );
- #endif
-
-        result &= communicator->unpackAllData(this, & tmp, & EngngModel :: unpackDofManagers);
-        result &= communicator->finishExchange();
-    }
-
-    return result;
-}
-
-
-int
-EngngModel :: exchangeRemoteElementData(int ExchangeTag)
-{
-    int result = 1;
-
-    if ( isParallel() && nonlocalExt ) {
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Packing remote element data", this->giveRank() );
- #endif
-
-        result &= nonlocCommunicator->packAllData(this, & EngngModel :: packRemoteElementData);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Remote element data exchange started", this->giveRank() );
- #endif
-
-        result &= nonlocCommunicator->initExchange(ExchangeTag);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Receiveng and Unpacking remote element data", this->giveRank() );
- #endif
-
-        if ( !( result &= nonlocCommunicator->unpackAllData(this, & EngngModel :: unpackRemoteElementData) ) ) {
-            OOFEM_ERROR("Receiveng and Unpacking remote element data");
-        }
-
-        result &= nonlocCommunicator->finishExchange();
-    }
-
-    return result;
 }
 
 

@@ -74,8 +74,8 @@ NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEng
     massMatrix               = NULL;
     nMethod                  = NULL;
 
-#ifdef __PARALLEL_MODE
     nonlocalExt = 0;
+#ifdef __PARALLEL_MODE
 
     communicator       = NULL;
     nonlocCommunicator = NULL;
@@ -436,10 +436,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     loadVector.zero();
     this->assembleVector( loadVector, tStep, ExternalForcesVector,
                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(di) );
-
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 
     // Assembling the effective load vector
     for ( int i = 1; i <= neq; i++ ) {
@@ -906,9 +903,7 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
         }
     }
 
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), MassExchangeTag);
-#endif
 }
 
 

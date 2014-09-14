@@ -65,9 +65,9 @@ LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(
     initFlag = 1;
     solverType = ST_Direct;
 
+    nonlocalExt = 0;
 #ifdef __PARALLEL_MODE
     commMode = ProblemCommMode__NODE_CUT;
-    nonlocalExt = 0;
     communicator = nonlocCommunicator = NULL;
     commBuff = NULL;
 #endif
@@ -263,9 +263,7 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
 
     loadVector.subtract(internalForces);
 
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
-#endif
 
     //
     // set-up numerical model

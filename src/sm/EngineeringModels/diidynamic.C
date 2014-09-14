@@ -58,9 +58,9 @@ DIIDynamic :: DIIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _
 
     initialTimeDiscretization = TD_ThreePointBackward;
 
+    nonlocalExt = 0;
 #ifdef __PARALLEL_MODE
     commMode = ProblemCommMode__NODE_CUT;
-    nonlocalExt = 0;
     communicator = nonlocCommunicator = NULL;
     commBuff = NULL;
 #endif
@@ -510,9 +510,7 @@ DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueM
 
     this->assembleVector(_loadVector, tStep, ExternalForcesVector, mode,
                          EModelDefaultEquationNumbering(), domain);
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(_loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 }
 
 void

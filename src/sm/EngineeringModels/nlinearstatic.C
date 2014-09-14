@@ -81,9 +81,9 @@ NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i,
     nMethod = NULL;
     initialGuessType = IG_None;
 
+    nonlocalExt = 0;
 #ifdef __PARALLEL_MODE
     commMode = ProblemCommMode__NODE_CUT;
-    nonlocalExt = 0;
     communicator = nonlocCommunicator = NULL;
     commBuff = NULL;
 #endif
@@ -855,9 +855,7 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
                              VM_Total, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     }
 
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(_incrementalLoadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 }
 
 

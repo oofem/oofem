@@ -59,9 +59,9 @@ NlDEIDynamic :: NlDEIDynamic(int i, EngngModel *_master) : StructuralEngngModel(
     previousIncrementOfDisplacementVector(), displacementVector(),
     velocityVector(), accelerationVector(), internalForces()
 {
+    nonlocalExt = 0;
 #ifdef __PARALLEL_MODE
     commMode = ProblemCommMode__UNKNOWN_MODE;
-    nonlocalExt = 0;
     communicator = nonlocCommunicator = NULL;
     commBuff = NULL;
 #endif
@@ -517,9 +517,7 @@ NlDEIDynamic :: computeLoadVector(FloatArray &answer, ValueModeType mode, TimeSt
     //
     // Exchange contributions.
     //
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 }
 
 
@@ -647,9 +645,9 @@ NlDEIDynamic :: computeMassMtrx(FloatArray &massMatrix, double &maxOm, TimeStep 
     }
 #endif
 
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(massMatrix, EModelDefaultEquationNumbering(), MassExchangeTag);
 
+#ifdef __PARALLEL_MODE
     // Determine maxOm over all processes.
  #ifdef __USE_MPI
     double globalMaxOm;

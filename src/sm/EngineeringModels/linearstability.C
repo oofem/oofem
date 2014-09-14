@@ -223,10 +223,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
 
     this->assembleVector( loadVector, tStep, ExternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
-
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
-#endif
 
     //
     // call numerical model to solve problem

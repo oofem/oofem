@@ -94,9 +94,7 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     this->externalForces.zero();
     this->assembleVectorFromElements( this->externalForces, tStep, ExternalForcesVector, VM_Total,
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 
     this->incrementOfSolution.resize(neq);
     this->internalForces.resize(neq);
@@ -190,9 +188,7 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
         this->internalForces.zero();
         this->assembleVector(this->internalForces, tStep,  InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), d, & this->ebeNorm);
-#ifdef __PARALLEL_MODE
         this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
-#endif
         break;
 
     case NonLinearLhs:

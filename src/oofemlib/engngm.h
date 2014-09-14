@@ -273,6 +273,8 @@ protected:
     int rank;
     /// Total number of collaborating processes.
     int numProcs;
+    /// Flag indicating if nonlocal extension active, which will cause data to be sent between shared elements before computing the internal forces.
+    int nonlocalExt;
 #ifdef __PARALLEL_MODE
     /// Processor name.
     char processor_name [ PROCESSOR_NAME_LENGTH ];
@@ -299,8 +301,6 @@ protected:
     /// Communicator.
     ProblemCommunicator *communicator;
 
-    /// Flag indicating if nonlocal extension active, which will cause data to be sent between shared elements before computing the internal forces.
-    int nonlocalExt;
     /// NonLocal Communicator. Necessary when nonlocal constitutive models are used.
     ProblemCommunicator *nonlocCommunicator;
 #endif
@@ -498,11 +498,9 @@ public:
     /// Only relevant for eigen value analysis. Otherwise returns zero.
     virtual double giveEigenValue(int eigNum) { return 0.0; }
 
-#ifdef __PARALLEL_MODE
-    /// Returns the communication object of reciever.
-    MPI_Comm giveParallelComm() { return this->comm; }
     /**
      * Exchanges necessary remote DofManagers data.
+     * @todo The name and description of this function is misleading, the function really just accumulates the total values for shared "equations".
      * @param answer Array with collected values.
      * @param ExchangeTag Exchange tag used by communicator.
      * @return Nonzero if successful.
@@ -516,6 +514,10 @@ public:
      * @return Nonzero if successful.
      */
     int exchangeRemoteElementData(int ExchangeTag);
+
+#ifdef __PARALLEL_MODE
+    /// Returns the communication object of reciever.
+    MPI_Comm giveParallelComm() { return this->comm; }
     /**
      * Packs data of local element to be received by their remote counterpart on remote partitions.
      * Remote elements are introduced when nonlocal constitutive models are used, in order to

@@ -116,10 +116,7 @@ StructuralEngngModel :: computeReaction(FloatArray &answer, TimeStep *tStep, int
     ///@todo This method is overloaded in some functions, it needs to be generalized.
     this->computeExternalLoadReactionContribution(contribution, tStep, di);
     answer.subtract(contribution);
-
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(answer, EModelDefaultPrescribedEquationNumbering(), ReactionExchangeTag);
-#endif
 }
 
 
@@ -146,10 +143,8 @@ StructuralEngngModel :: giveInternalForces(FloatArray &answer, bool normFlag, in
     this->assembleVector(answer, tStep, InternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), domain, normFlag ? & this->internalForcesEBENorm : NULL);
 
-#ifdef __PARALLEL_MODE
     // Redistributes answer so that every process have the full values on all shared equations
     this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
-#endif
 
     // Remember last internal vars update time stamp.
     internalVarUpdateStamp = tStep->giveSolutionStateCounter();

@@ -282,9 +282,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     loadVector.zero();
     this->assembleVector(loadVector, tStep, ExternalForcesVector,
                          VM_Total, EModelDefaultEquationNumbering(), domain);
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 
 
     //
