@@ -36,7 +36,7 @@
 #include "classfactory.h"
 #include "fracturemanager.h"
 #include "element.h"
-#include "layeredcrosssection.h"
+#include "../sm/CrossSections/layeredcrosssection.h"
 #include "dynamicinputrecord.h"
 #include "dynamicdatareader.h"
 #include "xfem/enrichmentfunction.h"
@@ -90,9 +90,11 @@ Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : Enrichme
     mpEnrichesDofsWithIdArray = {
         D_u, D_v, D_w, W_u, W_v, W_w
     };
-    this->interfaceNum = -1;
+    this->interfaceNum = {};
     this->crossSectionNum = -1;
     this->matNum = 0;
+    this->xiBottom = -1.0;
+    this->xiTop = -1.0;
 }
 
 
@@ -107,21 +109,43 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
 
     LayeredCrossSection *layeredCS = dynamic_cast< LayeredCrossSection * >( this->giveDomain()->giveCrossSection(this->crossSectionNum) );
     if ( layeredCS == NULL ) {
-        OOFEM_ERROR("requires a layered cross section reference as input");
+        OOFEM_ERROR("Delamination EI requires a valid layered cross section number input: see record '%s'.", _IFT_Delamination_csnum);
+    } else if ( this->interfaceNum.giveSize() < 1 || this->interfaceNum.giveSize() > 2 ) {
+        OOFEM_ERROR("Size of record 'interfacenum' must be 1 or 2");
     }
-
+    
+    // check that interface numbers are valid
+    interfaceNum.printYourself("interface num");
+    for ( int i = 1; i <= this->interfaceNum.giveSize(); i++ ) {
+        if ( this->interfaceNum.at(i) < 1 || this->interfaceNum.at(i) >= layeredCS->giveNumberOfLayers() ) {
+            OOFEM_ERROR("Cross section does not contain the interface number (%d) specified in the record '%s' since number of layers is %d.", this->interfaceNum.at(i), _IFT_Delamination_interfacenum, layeredCS->giveNumberOfLayers());
+        }
+    }
+    
+    // compute xi-coord of the delamination
     this->delamXiCoord = -1.0;
     double totalThickness = layeredCS->give(CS_Thickness, NULL, NULL, false); // no position available
-    for ( int i = 1; i <= this->interfaceNum; i++ ) {
+    for ( int i = 1; i <= this->interfaceNum.at(1); i++ ) {
         this->delamXiCoord += layeredCS->giveLayerThickness(i) / totalThickness * 2.0;
+        this->xiBottom += layeredCS->giveLayerThickness(i) / totalThickness * 2.0;
     }
-
+    
+    if ( this->interfaceNum.giveSize() == 2 ) {
+        if (this->interfaceNum.at(1) >= this->interfaceNum.at(2)) {
+            OOFEM_ERROR("second intercfacenum must be greater than the first one");
+        }
+        for ( int i = 1; i <= this->interfaceNum.at(2); i++ ) {
+            this->xiTop += layeredCS->giveLayerThickness(i) / totalThickness * 2.0;
+        }
+    } else {
+        this->xiTop = 1.0; // default is the top surface
+    }
+    
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->matNum, _IFT_Delamination_CohesiveZoneMaterial);
     if ( this->matNum > 0 ) {
         this->mat = this->giveDomain()->giveMaterial(this->matNum);
     }
-
 
     return IRRT_OK;
 }

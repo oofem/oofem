@@ -1,0 +1,78 @@
+tutorialmaterial.out
+description...
+StaticStructural  nmsteps 1 nsteps 1 nmodules 1 
+nsteps 5 rtolv 1.e-6
+errorcheck
+#vtkxml 1 tstep_all domain_all cellvars 1 1 vars 2 1 81 primvars 1 1
+domain 3d
+OutputManager tstep_all dofman_all element_all
+ndofman 8 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
+node 1 coords 3  0.0   0.0   0.0  bc 3 1 1 1
+node 2 coords 3  1.0   0.0   0.0  bc 3 1 1 1
+node 3 coords 3  1.0   1.0   0.0  bc 3 1 1 1
+node 4 coords 3  0.0   1.0   0.0  bc 3 1 1 1
+node 5 coords 3  0.0   0.0   1.0  bc 3 1 1 2
+node 6 coords 3  1.0   0.0   1.0  bc 3 1 1 2
+node 7 coords 3  1.0   1.0   1.0  bc 3 1 1 2
+node 8 coords 3  0.0   1.0   1.0  bc 3 1 1 2
+lspace  1 nodes 8 1 2 3 4 5 6 7 8  mat 1 crossSect 1
+SimpleCS 1
+#IsoLE 1 d 0. E 15.0 n 0.25 talpha 1.0  
+tutorialmaterial 1 d 0. E 200.0e9 n 0.3 sigy 500.0e6 H 10.0e9 talpha -1.0
+BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 
+BoundaryCondition  2 loadTimeFunction 1 prescribedvalue 0.03
+PiecewiseLinFunction 1 npoints 2 t 2 0. 4. f(t) 2 0.1 1.
+#
+#%BEGIN_CHECK% tolerance 1.e4
+## error has the unit Pa => tolerance = 10 kPa
+#ELEMENT tStep 5 number 1 gp 1 keyword 1 component 1 value 4.77636e+09
+#ELEMENT tStep 5 number 1 gp 1 keyword 1 component 2 value 4.77636e+09
+#ELEMENT tStep 5 number 1 gp 1 keyword 1 component 3 value 5.44728e+09
+#ELEMENT tStep 5 number 1 gp 1 keyword 1 component 4 value -2.45693e-09
+#ELEMENT tStep 5 number 1 gp 1 keyword 1 component 5 value 0
+#ELEMENT tStep 5 number 1 gp 1 keyword 1 component 6 value 0
+#ELEMENT tStep 5 number 1 gp 2 keyword 1 component 1 value 4.77636e+09
+#ELEMENT tStep 5 number 1 gp 2 keyword 1 component 2 value 4.77636e+09
+#ELEMENT tStep 5 number 1 gp 2 keyword 1 component 3 value 5.44728e+09
+#ELEMENT tStep 5 number 1 gp 2 keyword 1 component 4 value 8.23711e-09
+#ELEMENT tStep 5 number 1 gp 2 keyword 1 component 5 value 0
+#ELEMENT tStep 5 number 1 gp 2 keyword 1 component 6 value 0
+#ELEMENT tStep 5 number 1 gp 3 keyword 1 component 1 value 4.77636e+09
+#ELEMENT tStep 5 number 1 gp 3 keyword 1 component 2 value 4.77636e+09
+#ELEMENT tStep 5 number 1 gp 3 keyword 1 component 3 value 5.44728e+09
+#ELEMENT tStep 5 number 1 gp 3 keyword 1 component 4 value -9.46558e-09
+#ELEMENT tStep 5 number 1 gp 3 keyword 1 component 5 value 0
+#ELEMENT tStep 5 number 1 gp 3 keyword 1 component 6 value 0
+#ELEMENT tStep 5 number 1 gp 4 keyword 1 component 1 value 4.77636e+09
+#ELEMENT tStep 5 number 1 gp 4 keyword 1 component 2 value 4.77636e+09
+#ELEMENT tStep 5 number 1 gp 4 keyword 1 component 3 value 5.44728e+09
+#ELEMENT tStep 5 number 1 gp 4 keyword 1 component 4 value 1.704e-08
+#ELEMENT tStep 5 number 1 gp 4 keyword 1 component 5 value 0
+#ELEMENT tStep 5 number 1 gp 4 keyword 1 component 6 value 0
+#ELEMENT tStep 5 number 1 gp 5 keyword 1 component 1 value 4.77636e+09
+#ELEMENT tStep 5 number 1 gp 5 keyword 1 component 2 value 4.77636e+09
+#ELEMENT tStep 5 number 1 gp 5 keyword 1 component 3 value 5.44728e+09
+#ELEMENT tStep 5 number 1 gp 5 keyword 1 component 4 value -2.45693e-09
+#ELEMENT tStep 5 number 1 gp 5 keyword 1 component 5 value 0
+#ELEMENT tStep 5 number 1 gp 5 keyword 1 component 6 value 0
+#ELEMENT tStep 5 number 1 gp 6 keyword 1 component 1 value 4.77636e+09
+#ELEMENT tStep 5 number 1 gp 6 keyword 1 component 2 value 4.77636e+09
+#ELEMENT tStep 5 number 1 gp 6 keyword 1 component 3 value 5.44728e+09
+#ELEMENT tStep 5 number 1 gp 6 keyword 1 component 4 value 8.23711e-09
+#ELEMENT tStep 5 number 1 gp 6 keyword 1 component 5 value 0
+#ELEMENT tStep 5 number 1 gp 6 keyword 1 component 6 value 0
+#ELEMENT tStep 5 number 1 gp 7 keyword 1 component 1 value 4.77636e+09
+#ELEMENT tStep 5 number 1 gp 7 keyword 1 component 2 value 4.77636e+09
+#ELEMENT tStep 5 number 1 gp 7 keyword 1 component 3 value 5.44728e+09
+#ELEMENT tStep 5 number 1 gp 7 keyword 1 component 4 value -9.46558e-09
+#ELEMENT tStep 5 number 1 gp 7 keyword 1 component 5 value 0
+#ELEMENT tStep 5 number 1 gp 7 keyword 1 component 6 value 0
+#ELEMENT tStep 5 number 1 gp 8 keyword 1 component 1 value 4.77636e+09
+#ELEMENT tStep 5 number 1 gp 8 keyword 1 component 2 value 4.77636e+09
+#ELEMENT tStep 5 number 1 gp 8 keyword 1 component 3 value 5.44728e+09
+#ELEMENT tStep 5 number 1 gp 8 keyword 1 component 4 value 1.704e-08
+#ELEMENT tStep 5 number 1 gp 8 keyword 1 component 5 value 0
+#ELEMENT tStep 5 number 1 gp 8 keyword 1 component 6 value 0
+#%END_CHECK%
+
+

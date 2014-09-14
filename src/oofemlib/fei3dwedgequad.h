@@ -84,6 +84,8 @@ public:
 
     virtual IntegrationRule *giveIntegrationRule(int order);
     virtual IntegrationRule *giveBoundaryIntegrationRule(int order, int boundary);
+    virtual IntegrationRule *giveSurfaceIntegrationRule(int order, int isurf)
+        { return giveBoundaryIntegrationRule(order, isurf); };    
 
 protected:
     double edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo);

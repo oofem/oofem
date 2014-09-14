@@ -236,6 +236,9 @@ public:
         return 0.0;
     }
 
+    virtual SparseMtrx *giveSubMatrix(const IntArray &rows, const IntArray &cols) 
+        { OOFEM_ERROR("Not implemented"); return NULL; };
+    
     /// Returns coefficient at position (i,j).
     virtual double &at(int i, int j) = 0;
     /// Returns coefficient at position (i,j).

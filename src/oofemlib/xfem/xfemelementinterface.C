@@ -512,7 +512,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         return;
     } else if ( intersecPoints.size() == 1 ) {
         // TODO: For now, assume that the number of element edges is
-        // equal to the number of nodes.
+        // equal to the number of nodes. JB: cannot assume this
         int nNodes = this->element->giveNumberOfNodes();
         std :: vector< FloatArray >edgeCoords, nodeCoords;
 
@@ -526,7 +526,8 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         if ( ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), elCenter) ) {
             foundTip = true;
         }
-
+        int nEdges = this->element->giveInterpolation()->giveNumberOfEdges();
+        nNodes = nEdges; // JB: test
         if ( foundTip ) {
             for ( int i = 1; i <= nNodes; i++ ) {
                 // Store edge points
@@ -539,7 +540,8 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
                     this->element->giveInterpolation()->boundaryGiveNodes(bNodes, i);
 
                     int nsLoc = bNodes.at(1);
-                    int neLoc = bNodes.at( bNodes.giveSize() );
+                    //int neLoc = bNodes.at( bNodes.giveSize() );
+                    int neLoc = bNodes.at(2); // JB
 
                     const FloatArray &coordS = * ( element->giveDofManager(nsLoc)->giveCoordinates() );
                     const FloatArray &coordE = * ( element->giveDofManager(neLoc)->giveCoordinates() );
@@ -550,7 +552,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
                 }
 
                 // Store node coords
-                const FloatArray &coord = * ( element->giveDofManager(i)->giveCoordinates() );
+                const FloatArray &coord = * ( element->giveDofManager(i)->giveCoordinates() ); //JB: ok for 6 noded tri also but can't we use coordS?
                 nodeCoords.push_back(coord);
             }
 
