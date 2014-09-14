@@ -56,9 +56,6 @@ StokesFlow :: StokesFlow(int i, EngngModel *_master) : FluidModel(i, _master)
     this->stiffnessMatrix = NULL;
     this->meshqualityee = NULL;
     this->velocityPressureField = NULL;
-#ifdef __PARALLEL_MODE
-    commMode = ProblemCommMode__NODE_CUT;
-#endif
 }
 
 StokesFlow :: ~StokesFlow()

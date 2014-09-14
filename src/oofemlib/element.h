@@ -92,7 +92,6 @@ class CommunicationBuffer;
  */
 enum elementParallelMode {
     Element_local, ///< Element is local, there are no contributions from other domains to this element.
-    // Element_shared, ///< Element is shared by neighboring partitions - not implemented.
     Element_remote, ///< Element in active domain is only mirror of some remote element.
 };
 

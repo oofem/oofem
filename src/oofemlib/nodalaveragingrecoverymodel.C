@@ -167,18 +167,12 @@ NodalAveragingRecoveryModel :: initCommMaps()
 {
     if ( initCommMap ) {
         EngngModel *emodel = domain->giveEngngModel();
-        ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
-        if ( commMode == ProblemCommMode__NODE_CUT ) {
-            commBuff = new CommunicatorBuff(emodel->giveNumberOfProcesses(), CBT_dynamic);
-            communicator = new ProblemCommunicator(emodel, commBuff, emodel->giveRank(),
-                                                   emodel->giveNumberOfProcesses(),
-                                                   commMode);
-            communicator->setUpCommunicationMaps(domain->giveEngngModel(), true, true);
-            OOFEM_LOG_INFO("NodalAveragingRecoveryModel :: initCommMaps: initialized comm maps\n");
-            initCommMap = false;
-        } else {
-            OOFEM_ERROR("unsupported comm mode");
-        }
+        commBuff = new CommunicatorBuff(emodel->giveNumberOfProcesses(), CBT_dynamic);
+        communicator = new NodeCommunicator(emodel, commBuff, emodel->giveRank(),
+                                            emodel->giveNumberOfProcesses());
+        communicator->setUpCommunicationMaps(domain->giveEngngModel(), true, true);
+        OOFEM_LOG_INFO("NodalAveragingRecoveryModel :: initCommMaps: initialized comm maps\n");
+        initCommMap = false;
     }
 }
 
@@ -186,20 +180,13 @@ void
 NodalAveragingRecoveryModel :: exchangeDofManValues(FloatArray &lhs, IntArray &regionDofMansConnectivity,
                                                     IntArray &regionNodalNumbers, int regionValSize)
 {
-    EngngModel *emodel = domain->giveEngngModel();
-    ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
+    parallelStruct ls( &lhs, &regionDofMansConnectivity, &regionNodalNumbers, regionValSize);
 
-    if ( commMode == ProblemCommMode__NODE_CUT ) {
-        parallelStruct ls( &lhs, &regionDofMansConnectivity, &regionNodalNumbers, regionValSize);
-
-        // exchange data for shared nodes
-        communicator->packAllData(this, & ls, & NodalAveragingRecoveryModel :: packSharedDofManData);
-        communicator->initExchange(789);
-        communicator->unpackAllData(this, & ls, & NodalAveragingRecoveryModel :: unpackSharedDofManData);
-        communicator->finishExchange();
-    } else {
-        OOFEM_ERROR("Unsupported commMode");
-    }
+    // exchange data for shared nodes
+    communicator->packAllData(this, & ls, & NodalAveragingRecoveryModel :: packSharedDofManData);
+    communicator->initExchange(789);
+    communicator->unpackAllData(this, & ls, & NodalAveragingRecoveryModel :: unpackSharedDofManData);
+    communicator->finishExchange();
 }
 
 int

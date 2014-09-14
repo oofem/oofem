@@ -57,7 +57,6 @@
 
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
- #include "problemcommunicatormode.h"
  #include "parallelcontext.h"
 #endif
 
@@ -278,8 +277,6 @@ protected:
     int numProcs;
     /// Processor name.
     char processor_name [ PROCESSOR_NAME_LENGTH ];
-    /// Communicator mode. Determines current strategy used.
-    ProblemCommunicatorMode commMode;
  #ifdef __USE_MPI
     /// Communication object for this engineering model.
     MPI_Comm comm;
@@ -1098,8 +1095,6 @@ public:
     void initParallel();
     /// Returns reference to itself -> required by communicator.h
     EngngModel *giveEngngModel() { return this; }
-    /// Returns Communicator mode. Determines current domain-decomposition strategy used.
-    ProblemCommunicatorMode giveProblemCommMode() { return this->commMode; }
 #endif
 
 #ifdef __OOFEG
