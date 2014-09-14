@@ -89,7 +89,10 @@ NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
         return this->nMethod;
     }
 
-    this->nMethod = new NRSolver(this->giveDomain(1), this);
+    this->nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this); 
+    if ( this->nMethod == NULL ) { 
+        OOFEM_ERROR("linear solver creation failed"); 
+    }
     return this->nMethod;
 }
 
@@ -426,7 +429,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(),  LoadExchangeTag);
 #endif
 
-#if 1
+#if 0
     this->updateSolutionVectors(* solutionVector, accelerationVector, incrementalSolutionVector, tStep);
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
     this->initMetaStepAttributes( this->giveCurrentMetaStep() );
@@ -457,7 +460,6 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
 
     // algoritmic rhs part (assembled by e-model (in giveCharComponent service) from various element contribs)
-    FloatArray internalForces;
     internalForces.zero();
     this->assembleVector( internalForces, tStep, InternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );

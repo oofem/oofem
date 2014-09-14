@@ -72,7 +72,7 @@ class SUPG : public FluidModel
 {
 protected:
     /// Numerical method used to solve the problem
-    SparseNonLinearSystemNM *nMethod;
+    SparseLinearSystemNM *nMethod;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
