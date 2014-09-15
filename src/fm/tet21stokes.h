@@ -67,6 +67,8 @@ protected:
     static IntArray conservation_ordering;
     /// Ordering of dofs on surfaces. Used to assemble edge loads (only momentum balance)
     static IntArray surf_ordering [ 4 ];
+    /// Index of velocities on side (basically 1..21 excluding the pressures at index 4, 8 and 12)
+    static IntArray velocitydofsonside;
 
 public:
     Tet21Stokes(int n, Domain * d);
