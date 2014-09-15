@@ -1017,7 +1017,8 @@ Shell7BaseXFEM :: discComputeStiffness(FloatMatrix &LCC, FloatMatrix &LDD, Float
 void 
 Shell7BaseXFEM :: OLDcomputeStiffnessMatrix(FloatMatrix &answer, MatResponseMode rMode, TimeStep *tStep)
 {
-
+    // This is an old unoptimized version. 
+    // The new one doesn't work with all the coupling terms for shellcracks and delaminations.
     int ndofs = this->giveNumberOfDofs();
     answer.resize(ndofs, ndofs);
     answer.zero();
@@ -1221,8 +1222,8 @@ Shell7BaseXFEM :: discComputeBulkTangentMatrix(FloatMatrix &KdIJ, IntegrationPoi
         }
         L.symmetrized();
         LB.beProductOf(L, B1);
-            KDDtemp.plusProductSymmUpper(B1, LB, dV);
-            KDDtemp.symmetrized();
+        KDDtemp.plusProductSymmUpper(B1, LB, dV);
+        KDDtemp.symmetrized();
     } else {
         for ( int j = 0; j < 3; j++ ) {
             for ( int k = 0; k < 3; k++ ) {
