@@ -78,9 +78,6 @@ Element :: Element(int n, Domain *aDomain) :
 
 Element :: ~Element()
 {
-    for ( auto &iRule: integrationRulesArray ) {
-        delete iRule;
-    }
 }
 
 
@@ -535,13 +532,9 @@ Element :: setDofManagers(const IntArray &_dmans)
 
 
 void
-Element :: setIntegrationRules(const std :: vector< IntegrationRule * > &irlist)
+Element :: setIntegrationRules(std :: vector< std :: unique_ptr< IntegrationRule > > irlist)
 {
-    for ( auto &iRule: integrationRulesArray ) {
-        delete iRule;
-    }
-
-    integrationRulesArray = irlist;
+    integrationRulesArray = std :: move(irlist);
 }
 
 
@@ -914,21 +907,16 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
         }
 
         if ( _nrules != (int)integrationRulesArray.size() ) {
-            // delete old int rule array
-            for ( auto &iRule: integrationRulesArray ) {
-                delete iRule;
-            }
 
             // AND ALLOCATE NEW ONE
             integrationRulesArray.resize( _nrules );
             for ( int i = 0; i < _nrules; i++ ) {
-                integrationRulesArray [ i ] = classFactory.createIRule( ( IntegrationRuleType ) dtypes(i), i + 1, this );
+                integrationRulesArray [ i ].reset( classFactory.createIRule( ( IntegrationRuleType ) dtypes(i), i + 1, this ) );
             }
         } else {
             for ( int i = 0; i < _nrules; i++ ) {
                 if ( integrationRulesArray [ i ]->giveIntegrationRuleType() != dtypes(i) ) {
-                    delete integrationRulesArray [ i ];
-                    integrationRulesArray [ i ] = classFactory.createIRule( ( IntegrationRuleType ) dtypes(i), i + 1, this );
+                    integrationRulesArray [ i ].reset( classFactory.createIRule( ( IntegrationRuleType ) dtypes(i), i + 1, this ) );
                 }
             }
         }
@@ -965,7 +953,7 @@ Element :: computeVolumeAreaOrLength()
 // (depending on the spatial dimension of that element)
 {
     double answer = 0.;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     if ( iRule ) {
         for ( GaussPoint *gp: *iRule ) {
             answer += this->computeVolumeAround(gp);

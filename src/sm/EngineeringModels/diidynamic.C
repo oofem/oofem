@@ -60,7 +60,6 @@ DIIDynamic :: DIIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _
 
     nonlocalExt = 0;
 #ifdef __PARALLEL_MODE
-    commMode = ProblemCommMode__NODE_CUT;
     communicator = nonlocCommunicator = NULL;
     commBuff = NULL;
 #endif

@@ -364,8 +364,7 @@ OctreeSpatialLocalizer :: initElementIPDataStructure()
         // only default IP are taken into account
         Element *ielem = this->giveDomain()->giveElement(i);
         if ( ielem->giveNumberOfIntegrationRules() > 0 ) {
-            IntegrationRule *iRule = ielem->giveDefaultIntegrationRulePtr();
-            for ( GaussPoint *jGp: *iRule ) {
+            for ( GaussPoint *jGp: *ielem->giveDefaultIntegrationRulePtr() ) {
                 if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
                     this->insertIPElementIntoOctree(this->rootCell, i, jGpCoords);
                 } else {
@@ -1006,8 +1005,8 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
                 if ( xFemEl != NULL ) {
                     size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
                     for ( size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++ ) {
-                        IntegrationRule *iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
-                        if ( iRule != NULL ) {
+                        std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
+                        if ( iRule ) {
                             for ( GaussPoint *jGp: *iRule ) {
                                 if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
                                     // compute distance
@@ -1171,8 +1170,8 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                     if ( xFemEl != NULL ) {
                         size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
                         for ( size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++ ) {
-                            IntegrationRule *iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
-                            if ( iRule != NULL ) {
+                            std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
+                            if ( iRule ) {
                                 for ( GaussPoint *gp: *iRule ) {
                                     if ( ielem->computeGlobalCoordinates( jGpCoords, * ( gp->giveNaturalCoordinates() ) ) ) {
                                         currDist = coords.distance(jGpCoords);
@@ -1272,8 +1271,8 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, Set &elementSe
                 if ( xFemEl != NULL ) {
                     size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
                     for ( size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++ ) {
-                        IntegrationRule *iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
-                        if ( iRule != NULL ) {
+                        std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
+                        if ( iRule ) {
                             for ( GaussPoint *jGp: *iRule ) {
                                 if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
                                     // compute distance
@@ -1436,8 +1435,8 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
                     if ( xFemEl != NULL ) {
                         size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
                         for ( size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++ ) {
-                            IntegrationRule *iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
-                            if ( iRule != NULL ) {
+                            std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
+                            if ( iRule ) {
                                 for ( GaussPoint *gp: *iRule ) {
                                     if ( ielem->computeGlobalCoordinates( jGpCoords, * ( gp->giveNaturalCoordinates() ) ) ) {
                                         currDist = coords.distance(jGpCoords);
@@ -1550,8 +1549,8 @@ OctreeSpatialLocalizer :: giveElementsWithIPWithinBox(elementContainerType &elem
                     if ( xFemEl != NULL ) {
                         size_t numCZRules = xFemEl->mpCZIntegrationRules.size();
                         for ( size_t czRuleIndex = 0; czRuleIndex < numCZRules; czRuleIndex++ ) {
-                            IntegrationRule *iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
-                            if ( iRule != NULL ) {
+                            std :: unique_ptr< IntegrationRule > &iRule = xFemEl->mpCZIntegrationRules [ czRuleIndex ];
+                            if ( iRule ) {
                                 for ( GaussPoint *gp: *iRule ) {
                                     if ( ielem->computeGlobalCoordinates( jGpCoords, * ( gp->giveNaturalCoordinates() ) ) ) {
                                         currDist = coords.distance(jGpCoords);

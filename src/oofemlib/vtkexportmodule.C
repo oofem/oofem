@@ -528,30 +528,28 @@ VTKExportModule :: giveTotalRBRNumberOfNodes(Domain *d)
 // vtk from smoothing the nodal values at region boundaries.
 //
 {
-    Element *elem;
     int rbrnodes = 0, nnodes = d->giveNumberOfDofManagers(), nelems = d->giveNumberOfElements();
     std :: vector< char > map(nnodes);
     //char map[nnodes];
-    int j;
-    int elemnodes, ielemnode;
+    int elemnodes;
 
-    for ( j = 0; j < nnodes; j++ ) {
+    for ( int j = 0; j < nnodes; j++ ) {
         map [ j ] = 0;
     }
 
-    for ( j = 1; j <= nelems; j++ ) {
-        elem  = d->giveElement(j);
-        if ( d->giveElement(j)->giveParallelMode() != Element_local ) {
+    for ( int j = 1; j <= nelems; j++ ) {
+        Element *elem  = d->giveElement(j);
+        if ( elem->giveParallelMode() != Element_local ) {
             continue;
         }
 
         elemnodes = elem->giveNumberOfNodes();
-        for ( ielemnode = 1; ielemnode <= elemnodes; ielemnode++ ) {
-            map [ elem->giveNode(ielemnode)->giveNumber() - 1 ] = 1;
+        for ( int ielemnode = 1; ielemnode <= elemnodes; ielemnode++ ) {
+             map [ elem->giveNode(ielemnode)->giveNumber() - 1 ] = 1;
         }
     }
 
-    for ( j = 0; j < nnodes; j++ ) {
+    for ( int j = 0; j < nnodes; j++ ) {
         rbrnodes += map [ j ];
     }
 

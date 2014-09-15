@@ -52,6 +52,8 @@
 #include "unknownnumberingscheme.h"
 
 #include <cstdio>
+#include <vector>
+#include <memory>
 
 ///@name Input fields for general element.
 //@{
@@ -90,7 +92,6 @@ class CommunicationBuffer;
  */
 enum elementParallelMode {
     Element_local, ///< Element is local, there are no contributions from other domains to this element.
-    // Element_shared, ///< Element is shared by neighboring partitions - not implemented.
     Element_remote, ///< Element in active domain is only mirror of some remote element.
 };
 
@@ -159,7 +160,7 @@ protected:
      * (mass matrix integration) and different integration rule is needed, one should preferably
      * use temporarily created integration rule.
      */
-    std::vector< IntegrationRule * > integrationRulesArray;
+    std::vector< std :: unique_ptr< IntegrationRule > > integrationRulesArray;
 
     /// Transformation material matrix, used in orthotropic and anisotropic materials, global->local transformation
     FloatMatrix elemLocalCS;
@@ -566,7 +567,7 @@ public:
      * Sets integration rules.
      * @param irlist List of integration rules.
      */
-    void setIntegrationRules(const std :: vector< IntegrationRule * > &irlist);
+    void setIntegrationRules(std :: vector< std :: unique_ptr< IntegrationRule > > irlist);
     /**
      * Returns integration domain for receiver, used to initialize
      * integration point over receiver volume.
@@ -587,7 +588,7 @@ public:
      * @return Nonzero if integration rule code numbers differ from element code numbers.
      * @todo This is currently not used. It is intended for IGA elements? This seems redundant.
      */
-    virtual int giveIntegrationRuleLocalCodeNumbers(IntArray &answer, IntegrationRule *ie)
+    virtual int giveIntegrationRuleLocalCodeNumbers(IntArray &answer, IntegrationRule &ie)
     { return 0; }
 
     // Returns number of sides (which have unknown dofs) of receiver
@@ -701,7 +702,7 @@ public:
         if ( this->giveNumberOfIntegrationRules() == 0 ) {
             return NULL;
         } else {
-            return this->integrationRulesArray [ giveDefaultIntegrationRule() ];
+            return this->integrationRulesArray [ giveDefaultIntegrationRule() ].get();
         }
     }
     /// @return Number of integration rules for element.
@@ -710,7 +711,7 @@ public:
      * @param i Index of integration rule.
      * @return Requested integration rule.
      */
-    virtual IntegrationRule *giveIntegrationRule(int i) { return integrationRulesArray [ i ]; }
+    virtual IntegrationRule *giveIntegrationRule(int i) { return integrationRulesArray [ i ].get(); }
     /**
      * Tests if the element implements required extension. ElementExtension type defines
      * the list of all available element extensions.

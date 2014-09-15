@@ -55,7 +55,6 @@ IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
 
     // Create solution space for pressure field
     PressureField = new PrimaryField(this, 1, FT_Pressure, 1);
-
     return IRRT_OK;
 }
 
@@ -249,6 +248,7 @@ TimeStep *DarcyFlow :: giveNextStep()
     previousStep = currentStep;
     currentStep = new TimeStep(istep, this, 1, ( double ) istep, 0., counter);
     // time and dt variables are set eq to 0 for statics - has no meaning
+    ///@todo They have important meaning in *quasi* static solutions, this must be fixed.
     return currentStep;
 }
 

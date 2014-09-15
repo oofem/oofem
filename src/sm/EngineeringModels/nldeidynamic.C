@@ -61,7 +61,6 @@ NlDEIDynamic :: NlDEIDynamic(int i, EngngModel *_master) : StructuralEngngModel(
 {
     nonlocalExt = 0;
 #ifdef __PARALLEL_MODE
-    commMode = ProblemCommMode__UNKNOWN_MODE;
     communicator = nonlocCommunicator = NULL;
     commBuff = NULL;
 #endif
@@ -106,24 +105,14 @@ NlDEIDynamic :: initializeFrom(InputRecord *ir)
     }
 
 #ifdef __PARALLEL_MODE
-    if ( ir->hasField(_IFT_NlDEIDynamic_nodecutmode) ) {
-        commMode = ProblemCommMode__NODE_CUT;
-    } else if ( ir->hasField(_IFT_NlDEIDynamic_elementcutmode) ) {
-        commMode = ProblemCommMode__ELEMENT_CUT;
-    } else {
-        OOFEM_ERROR("NlDEIDynamicCommunicatorMode not specified");
-    }
-
     commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
-    communicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
-                                           this->giveNumberOfProcesses(),
-                                           this->commMode);
+    communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
+                                        this->giveNumberOfProcesses());
 
     if ( ir->hasField(_IFT_NlDEIDynamic_nonlocalext) ) {
         nonlocalExt = 1;
-        nonlocCommunicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
-                                                     this->giveNumberOfProcesses(),
-                                                     ProblemCommMode__REMOTE_ELEMENT_MODE);
+        nonlocCommunicator = new ElementCommunicator(this, commBuff, this->giveRank(),
+                                                     this->giveNumberOfProcesses());
     }
 
 #endif
@@ -679,16 +668,9 @@ int
 NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
 {
     int count = 0, pcount = 0;
-    IntArray locationArray;
     Domain *domain = this->giveDomain(1);
 
-    if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
-        for ( int inod: commMap ) {
-            count += domain->giveDofManager( inod )->giveNumberOfDofs();
-        }
-
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
-    } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
+    if ( packUnpackType == 0 ) { ///@todo Fix this old ProblemCommMode__NODE_CUT value
         for ( int inod: commMap ) {
             DofManager *dman = domain->giveDofManager( inod );
             for ( Dof *dof: *dman ) {
@@ -701,7 +683,7 @@ NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
         }
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * max(count, pcount) );
-    } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
+    } else if ( packUnpackType == 1 ) {
         for ( int inod: commMap ) {
             count += domain->giveElement( inod )->estimatePackSize(buff);
         }

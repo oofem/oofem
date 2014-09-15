@@ -704,7 +704,6 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
     int iStartIndx, iEndIndx, jStartIndx, jEndIndx;
     double dV;
     FloatMatrix d, bi, bj, dbj, dij;
-    IntegrationRule *iRule;
     bool matStiffSymmFlag = this->giveCrossSection()->isCharacteristicMtrxSymmetric(rMode);
 
     answer.clear();
@@ -718,14 +717,15 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
             iStartIndx = integrationRulesArray [ i ]->getStartIndexOfLocalStrainWhereApply();
             iEndIndx   = integrationRulesArray [ i ]->getEndIndexOfLocalStrainWhereApply();
             for ( int j = 0; j < (int)integrationRulesArray.size(); j++ ) {
+                IntegrationRule *iRule;
                 jStartIndx = integrationRulesArray [ j ]->getStartIndexOfLocalStrainWhereApply();
                 jEndIndx   = integrationRulesArray [ j ]->getEndIndexOfLocalStrainWhereApply();
                 if ( i == j ) {
-                    iRule = integrationRulesArray [ i ];
+                    iRule = integrationRulesArray [ i ].get();
                 } else if ( integrationRulesArray [ i ]->giveNumberOfIntegrationPoints() < integrationRulesArray [ j ]->giveNumberOfIntegrationPoints() ) {
-                    iRule = integrationRulesArray [ i ];
+                    iRule = integrationRulesArray [ i ].get();
                 } else {
-                    iRule = integrationRulesArray [ j ];
+                    iRule = integrationRulesArray [ j ].get();
                 }
 
                 for ( GaussPoint *gp: *iRule ) {
@@ -749,9 +749,7 @@ StructuralElement :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
             }
         }
     } else {
-        iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-
-        for ( GaussPoint *gp: *iRule ) {
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
             this->computeBmatrixAt(gp, bj);
             this->computeConstitutiveMatrixAt(d, rMode, gp, tStep);
             dV = this->computeVolumeAround(gp);
@@ -802,7 +800,7 @@ void StructuralElement :: computeStiffnessMatrix_withIRulesAsSubcells(FloatMatri
         }
 
         // localize irule contribution into element matrix
-        if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule) ) {
+        if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, *iRule) ) {
             answer.assemble(* m, irlocnum);
             m->clear();
         }
@@ -988,7 +986,7 @@ StructuralElement :: giveInternalForcesVector_withIRulesAsSubcells(FloatArray &a
             m->plusProduct(b, stress, dV);
 
             // localize irule contribution into element matrix
-            if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, iRule) ) {
+            if ( this->giveIntegrationRuleLocalCodeNumbers(irlocnum, *iRule) ) {
                 answer.assemble(* m, irlocnum);
                 m->clear();
             }

@@ -75,12 +75,6 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
 
     if ( mpCZMat != NULL ) {
-        for ( size_t i = 0; i < mpCZIntegrationRules.size(); i++ ) {
-            if ( mpCZIntegrationRules [ i ] != NULL ) {
-                delete mpCZIntegrationRules [ i ];
-            }
-        }
-
         mpCZIntegrationRules.clear();
         mCZEnrItemIndices.clear();
         mCZTouchingEnrItemIndices.clear();
@@ -146,7 +140,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                         for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
                             int czRuleNum = 1;
-                            mpCZIntegrationRules.push_back( new GaussIntegrationRule(czRuleNum, element) );
+                            mpCZIntegrationRules.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
 
                             // Add index of current ei
                             mCZEnrItemIndices.push_back(eiIndex);
@@ -229,7 +223,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                             for ( int segIndex = 0; segIndex < numSeg; segIndex++ ) {
                                 int czRuleNum = 1;
-                                mpCZIntegrationRules.push_back( new GaussIntegrationRule(czRuleNum, element) );
+                                mpCZIntegrationRules.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
                                 size_t newRuleInd = mpCZIntegrationRules.size() - 1;
                                 mCZEnrItemIndices.push_back(eiIndex);
 
@@ -301,9 +295,10 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
         int ruleNum = 1;
 
         if ( partitionSucceeded ) {
-            IntegrationRule *intRule = new PatchIntegrationRule(ruleNum, element, mSubTri);
-            intRule->SetUpPointsOnTriangle(xMan->giveNumGpPerTri(), matMode);
-            element->setIntegrationRules({intRule});
+            std :: vector< std :: unique_ptr< IntegrationRule > > intRule;
+            intRule.emplace_back(new PatchIntegrationRule(ruleNum, element, mSubTri));
+            intRule[0]->SetUpPointsOnTriangle(xMan->giveNumGpPerTri(), matMode);
+            element->setIntegrationRules(std :: move(intRule));
         }
 
 

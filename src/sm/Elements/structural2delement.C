@@ -114,7 +114,8 @@ Structural2DElement :: computeGaussPoints()
     // Sets up the integration rule array which contains all the Gauss points
     // Default: create one integration rule
     if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray = { new GaussIntegrationRule(1, this, 1, 3) };
+        integrationRulesArray.resize(1);
+        integrationRulesArray[ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
     
@@ -491,7 +492,8 @@ AxisymElement :: computeGaussPoints()
 {
     // Sets up the integration rule array which contains all the Gauss points
     if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray = { new GaussIntegrationRule(1, this, 1, 6) };
+        integrationRulesArray.resize(1);
+        integrationRulesArray[ 0 ].reset( new GaussIntegrationRule(1, this, 1, 6) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
     

@@ -133,7 +133,7 @@ public:
     void partitionEdgeSegment(int iBndIndex, const double &iTangDistPadding, std :: vector< Line > &oSegments, std::vector<FloatArray> &oIntersectionPoints);
 
     // TODO: Move to XfemStructuralElementInterface
-    std :: vector< IntegrationRule * >mpCZIntegrationRules;
+    std :: vector< std :: unique_ptr< IntegrationRule > >mpCZIntegrationRules;
 
     MaterialMode giveMaterialMode();
 

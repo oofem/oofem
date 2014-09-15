@@ -63,16 +63,6 @@ XfemElementInterface :: XfemElementInterface(Element *e) :
 
 XfemElementInterface :: ~XfemElementInterface()
 {
-    size_t numCZRules = mpCZIntegrationRules.size();
-
-    for ( size_t i = 0; i < numCZRules; i++ ) {
-        if ( mpCZIntegrationRules [ i ] != NULL ) {
-            delete mpCZIntegrationRules [ i ];
-            mpCZIntegrationRules [ i ] = NULL;
-        }
-    }
-
-    mpCZIntegrationRules.clear();
 }
 
 void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl)
@@ -474,9 +464,10 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
         int ruleNum = 1;
         if ( partitionSucceeded ) {
-            IntegrationRule *intRule = new PatchIntegrationRule(ruleNum, element, allTri);
-            intRule->SetUpPointsOnTriangle(xMan->giveNumGpPerTri(), matMode);
-            element->setIntegrationRules({intRule});
+            std :: vector< std :: unique_ptr< IntegrationRule > > intRule;
+            intRule.emplace_back(new PatchIntegrationRule(ruleNum, element, allTri));
+            intRule[0]->SetUpPointsOnTriangle(xMan->giveNumGpPerTri(), matMode);
+            element->setIntegrationRules(std :: move(intRule));
         }
     }
 

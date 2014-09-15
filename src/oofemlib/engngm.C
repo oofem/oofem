@@ -207,9 +207,7 @@ EngngModel :: Instanciate_init(int ndomains)
         domainList.emplace_back(new Domain(i, 0, this));
     }
 
-#ifdef __PARALLEL_MODE
     this->initParallelContexts();
-#endif
 }
 
 

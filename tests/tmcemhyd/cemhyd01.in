@@ -11,7 +11,7 @@ node 1 coords 3  0.0   0.0   0.0  ic 1 1 bc 1 0
 node 2 coords 3  4.0   0.0   0.0  ic 1 1
 node 3 coords 3  4.0   1.0   0.0  ic 1 1
 node 4 coords 3  0.0   1.0   0.0  ic 1 1 bc 1 0
-quad1ht 1 nodes 4 1 2 3 4 crossSect 1 mat 1 NIP 4
+quad1ht 1 nodes 4 1 2 3 4 crossSect 1 mat 1
 SimpleCS 1 thick 0.15
 #Standard concrete k(conductivity)=1.7 W/m/K   c(capacity)=870 J/kg/K
 CemhydMat 1 d 2400. k 1.7 c 870. file "cemhyd01_XML.src" eachGP 0 densityType 0 conductivityType 0 capacityType 0 castingtime 0.

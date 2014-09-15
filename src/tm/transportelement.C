@@ -304,11 +304,10 @@ void
 TransportElement :: computeCapacitySubMatrix(FloatMatrix &answer, MatResponseMode rmode, int iri, TimeStep *tStep)
 {
     FloatArray n;
-    IntegrationRule *iRule = integrationRulesArray [ iri ];
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
     answer.clear();
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ iri ] ) {
         this->computeNAt( n, * gp->giveNaturalCoordinates() );
         // ask for capacity coefficient. In basic units [J/K/m3]
         double c = mat->giveCharacteristicValue(rmode, gp, tStep);
@@ -324,11 +323,10 @@ TransportElement :: computeConductivitySubMatrix(FloatMatrix &answer, int nsd, i
 {
     double dV;
     FloatMatrix b, d, db;
-    IntegrationRule *iRule = integrationRulesArray [ iri ];
 
     answer.resize( this->giveNumberOfDofManagers(), this->giveNumberOfDofManagers() );
     answer.zero();
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ iri ] ) {
         this->computeConstitutiveMatrixAt(d, rmode, gp, tStep);
         this->computeGradientMatrixAt(b, gp);
         dV = this->computeVolumeAround(gp);
@@ -349,7 +347,6 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
     // // load vector is then transformed to coordinate system in each node.
     // // (should be global coordinate system, but there may be defined
     // //  different coordinate system in each node)
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
     FloatArray val, helpLoadVector, globalIPcoords, n;
@@ -361,7 +358,7 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
         Load *load = domain->giveLoad(k);
         bcGeomType ltype = load->giveBCGeoType();
         if ( ltype == BodyLoadBGT ) {
-            for ( GaussPoint *gp: *iRule ) {
+            for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
                 this->computeNAt( n, * gp->giveNaturalCoordinates() );
                 double dV = this->computeVolumeAround(gp);
                 this->computeGlobalCoordinates( globalIPcoords, * gp->giveNaturalCoordinates() );
@@ -376,7 +373,7 @@ TransportElement :: computeInternalSourceRhsSubVectorAt(FloatArray &answer, Time
 
     // add internal source produced by material (if any)
     if ( mat->hasInternalSource() ) {
-        for ( GaussPoint *gp: *iRule ) {
+        for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
             this->computeNAt( n, * gp->giveNaturalCoordinates() );
             double dV = this->computeVolumeAround(gp);
             mat->computeInternalSourceVector(val, gp, tStep, mode);
@@ -452,11 +449,10 @@ TransportElement :: computeIntSourceLHSSubMatrix(FloatMatrix &answer, MatRespons
 // hw, wh is not used now
 {
     FloatArray n;
-    IntegrationRule *iRule = integrationRulesArray [ iri ];
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
     answer.clear();
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ iri ] ) {
         this->computeNAt( n, * gp->giveNaturalCoordinates() );
         // ask for coefficient from material
         double c = mat->giveCharacteristicValue(rmode, gp, tStep);

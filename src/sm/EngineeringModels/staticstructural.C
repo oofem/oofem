@@ -70,7 +70,6 @@ StaticStructural :: StaticStructural(int i, EngngModel *_master) : StructuralEng
     solverType = 0;
 
 #ifdef __PARALLEL_MODE
-    commMode = ProblemCommMode__NODE_CUT;
     nonlocalExt = 0;
     communicator = nonlocCommunicator = NULL;
     commBuff = NULL;
@@ -126,13 +125,13 @@ StaticStructural :: initializeFrom(InputRecord *ir)
     
     
 #ifdef __PARALLEL_MODE
+    ///@todo Where is the best place to create these?
     if ( isParallel() ) {
         delete communicator;
         delete commBuff;
         commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
-        communicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
-                                               this->giveNumberOfProcesses(),
-                                               this->commMode);
+        communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
+                                            this->giveNumberOfProcesses());
     }
 
 #endif
@@ -404,13 +403,7 @@ StaticStructural :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
     int count = 0, pcount = 0;
     Domain *domain = this->giveDomain(1);
 
-    if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
-        for ( int map: commMap ) {
-            count += domain->giveDofManager( map )->giveNumberOfDofs();
-        }
-
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
-    } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
+    if ( packUnpackType == 0 ) { ///@todo Fix this old ProblemCommMode__NODE_CUT value
         for ( int map: commMap ) {
             DofManager *dman = domain->giveDofManager( map );
             for ( Dof *dof: *dman ) {
@@ -427,7 +420,7 @@ StaticStructural :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
         // --------------------------------------------------------------------------------
 
         return ( buff.givePackSize(MPI_DOUBLE, 1) * pcount );
-    } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
+    } else if ( packUnpackType == 1 ) {
         for ( int map: commMap ) {
             count += domain->giveElement( map )->estimatePackSize(buff);
         }

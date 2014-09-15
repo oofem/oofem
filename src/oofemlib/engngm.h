@@ -58,7 +58,6 @@
 
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
- #include "problemcommunicatormode.h"
 #endif
 
 #include <string>
@@ -278,8 +277,6 @@ protected:
 #ifdef __PARALLEL_MODE
     /// Processor name.
     char processor_name [ PROCESSOR_NAME_LENGTH ];
-    /// Communicator mode. Determines current strategy used.
-    ProblemCommunicatorMode commMode;
  #ifdef __USE_MPI
     /// Communication object for this engineering model.
     MPI_Comm comm;
@@ -1089,9 +1086,6 @@ public:
     virtual LoadBalancer *giveLoadBalancer() { return NULL; }
     /** Returns reference to receiver's load balancer monitor. */
     virtual LoadBalancerMonitor *giveLoadBalancerMonitor() { return NULL; }
-
-    /// Returns Communicator mode. Determines current domain-decomposition strategy used.
-    ProblemCommunicatorMode giveProblemCommMode() { return this->commMode; }
 #endif
     /// Request domain rank and problem size
     void initParallel();
