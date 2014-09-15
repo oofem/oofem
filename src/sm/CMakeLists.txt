@@ -263,6 +263,8 @@ set (sm_unsorted
     gpinitmodule.C
     stressstrainbasevector.C stressvector.C strainvector.C
     mappers/primvarmapper.C
+    Contact/contactdefinition.C
+    Contact/contactelement.C
     )
 
 set (sm_parallel

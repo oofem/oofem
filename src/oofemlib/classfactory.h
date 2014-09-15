@@ -94,6 +94,8 @@ class FractureManager;
 class FailureCriteriaStatus;
 class FailureCriteria;
 
+class ContactManager;
+
 // Templates to wrap constructors into functions
 template< typename T > Element *elemCreator(int n, Domain *d) { return new T(n, d); }
 template< typename T > DofManager *dofmanCreator(int n, Domain *d) { return new T(n, d); }
@@ -129,6 +131,8 @@ template< typename T > PropagationLaw *propagationLawCreator() { return new T();
 template< typename T > FailureCriteria *failureCriteriaCreator(int n, FractureManager *x) { return new T(n, x); }
 template< typename T > FailureCriteriaStatus *failureCriteriaCreator(int n, FailureCriteria *x) { return new T(n, x); }
 
+template< typename T > ContactManager *contactManCreator(Domain *d) { return new T(d); }
+
 ///@name Macros for registering new components. Unique dummy variables must be created as a result (design flaw in C++).
 //@{
 #define REGISTER_Element(class) static bool __dummy_ ## class = GiveClassFactory().registerElement(_IFT_ ## class ## _Name, elemCreator< class > );
@@ -161,6 +165,8 @@ template< typename T > FailureCriteriaStatus *failureCriteriaCreator(int n, Fail
 
 #define REGISTER_FailureCriteria(class) static bool __dummy_ ## class = GiveClassFactory().registerFailureCriteria(_IFT_ ## class ## _Name, failureCriteriaCreator< class > );
 #define REGISTER_FailureCriteriaStatus(class) static bool __dummy_ ## class = GiveClassFactory().registerFailureCriteriaStatus(_IFT_ ## class ## _Name, failureCriteriaCreator< class > );
+
+#define REGISTER_ContactManager(class) static bool __dummy_ ## class = GiveClassFactory().registerContactManager(_IFT_ ## class ## _Name, contactManCreator< class > );
 //@}
 
 /**
@@ -233,6 +239,9 @@ private:
     std :: map < std :: string, FailureCriteria * ( * )(int, FractureManager *) > failureCriteriaList;
     std :: map < std :: string, FailureCriteriaStatus * ( * )(int, FailureCriteria *) > failureCriteriaStatusList;
 
+    /// Associative container containing ContactManager creators
+    std :: map < std :: string, ContactManager * ( * )(Domain *) > contactManList;
+    
 public:
     /// Creates empty factory
     ClassFactory();
@@ -478,6 +487,9 @@ public:
     XfemManager *createXfemManager(const char *name, Domain *domain);
     bool registerXfemManager( const char *name, XfemManager * ( *creator )( Domain * ) );
 
+    ContactManager *createContactManager(const char *name, Domain *domain);
+    bool registerContactManager( const char *name, ContactManager * ( *creator )( Domain * ) );
+    
 
     // Failure module (in development!)
     FailureCriteria *createFailureCriteria(const char *name, int num, FractureManager *fracManager);
