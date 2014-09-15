@@ -969,6 +969,10 @@ public:
      */
     void assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, CharType type, Domain *domain);
 
+
+    void assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+                                    const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
+        
 protected:
 #ifdef __PARALLEL_MODE
     /**

@@ -65,12 +65,9 @@ TrPlaneStrRot :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
     if ( integrationRulesArray.size() == 0 ) {
-        integrationRulesArray.resize(2);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray.resize(1);
+        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 4);
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
-
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 4, 4);
-        this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], numberOfRotGaussPoints, this);
     }
 }
 
@@ -82,6 +79,61 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
 // type of this part is [3,9]  r=(u1,w1,fi1,u2,w2,fi2,u3,w3,fi3)
 // evaluated at gp.
 {
+#if 1 
+    // New version (13-09-2014 /JB)
+    // Computes the B-matrix, directly taking into account the reduced 
+    // integration of the fourth strain component.
+    
+    // get node coordinates
+    FloatArray x(3), y(3);
+    this->giveNodeCoordinates(x, y);
+
+    FloatArray b(3), c(3);
+
+    for ( int i = 1; i <= 3; i++ ) {
+        int j = i + 1 - i / 3 * 3;
+        int k = j + 1 - j / 3 * 3;
+        b.at(i) = y.at(j) - y.at(k);
+        c.at(i) = x.at(k) - x.at(j);
+    }
+    
+    // Derivatives of the shape functions (for this special interpolation)
+    FloatArray nx = this->GiveDerivativeUX(*gp->giveNaturalCoordinates());
+    FloatArray ny = this->GiveDerivativeVY(*gp->giveNaturalCoordinates());
+
+    FloatArray center = {0.0, 0.0};
+    FloatArray nxRed = this->GiveDerivativeVX( center );
+    FloatArray nyRed = this->GiveDerivativeUY( center );
+    
+    // These are the regular shape functions of a linear triangle evaluated at the center
+    FloatArray shapeFunct = { center.at(1), center.at(2), 1.0 - center.at(1) - center.at(2) }; // = {0, 0, 1}
+    
+    double area = this->giveArea();
+    double detJ = 1.0 / ( 2.0 * area );
+    answer.resize(4, 9);
+    for ( int i = 1; i <= 3; i++ ) {
+        answer.at(1, 3 * i - 2) = b.at(i) * detJ;
+        answer.at(1, 3 * i - 0) = nx.at(i) * detJ;
+
+        answer.at(2, 3 * i - 1) = c.at(i) * detJ;
+        answer.at(2, 3 * i - 0) = ny.at(i) * detJ;
+
+        ///@note The third strain component is evaluated at the element center just as for reduced
+        ///integration (component 4 below), should it be like this? /JB
+        answer.at(3, 3 * i - 2) = c.at(i) * detJ;
+        answer.at(3, 3 * i - 1) = b.at(i) * detJ;
+        answer.at(3, 3 * i - 0) = ( nxRed.at(i) + nyRed.at(i) ) * detJ;
+        
+        // Reduced integration of the fourth strain component
+        answer.at(4, 3 * i - 2) = -1. * c.at(i) * 1.0 / 4.0 / area;
+        answer.at(4, 3 * i - 1) = b.at(i) * 1.0 / 4.0 / area;
+        answer.at(4, 3 * i - 0) = ( -4. * area * shapeFunct.at(i) + nxRed.at(i) - nyRed.at(i) ) * 1.0 / 4.0 / area;
+            
+    }
+
+#else
+    // OLD version - commented out 13-09-2014 // JB
+
     // get node coordinates
     FloatArray x(3), y(3);
     this->giveNodeCoordinates(x, y);
@@ -119,13 +171,13 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
     answer.resize(size, 9);
 
     if ( ( li <= 2 ) ) {
-        FloatArray nx = this->GiveDerivativeUX(gp);
-        FloatArray ny = this->GiveDerivativeVY(gp);
+        FloatArray nx = this->GiveDerivativeUX(*gp->giveNaturalCoordinates());
+        FloatArray ny = this->GiveDerivativeVY(*gp->giveNaturalCoordinates());
 
         if ( ( li <= 1 ) && ( ui >= 1 ) ) {
             for ( int i = 1; i <= 3; i++ ) {
-                answer.at(ind, 3 * i - 2) = b.at(i) * 1. / ( 2. * area );
-                answer.at(ind, 3 * i - 0) = nx.at(i) * 1. / ( 2. * area );
+                answer.at(1, 3 * i - 2) = b.at(i) * 1. / ( 2. * area );
+                answer.at(1, 3 * i - 0) = nx.at(i) * 1. / ( 2. * area );
             }
 
             ind++;
@@ -133,8 +185,8 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
 
         if ( ( li <= 2 ) && ( ui >= 2 ) ) {
             for ( int i = 1; i <= 3; i++ ) {
-                answer.at(ind, 3 * i - 1) = c.at(i) * 1. / ( 2. * area );
-                answer.at(ind, 3 * i - 0) = ny.at(i) * 1. / ( 2. * area );
+                answer.at(2, 3 * i - 1) = c.at(i) * 1. / ( 2. * area );
+                answer.at(2, 3 * i - 0) = ny.at(i) * 1. / ( 2. * area );
             }
 
             ind++;
@@ -145,26 +197,29 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
         GaussIntegrationRule ir(1, this, 1, 3);
         ir.SetUpPointsOnTriangle(1, _PlaneStress);
 
-        FloatArray nx = this->GiveDerivativeVX( ir.getIntegrationPoint(0) );
-        FloatArray ny = this->GiveDerivativeUY( ir.getIntegrationPoint(0) );
+        FloatArray nx = this->GiveDerivativeVX( *ir.getIntegrationPoint(0)->giveNaturalCoordinates() );
+        FloatArray ny = this->GiveDerivativeUY( *ir.getIntegrationPoint(0)->giveNaturalCoordinates() );
 
         for ( int i = 1; i <= 3; i++ ) {
-            answer.at(ind, 3 * i - 2) = c.at(i) * 1. / ( 2. * area );
-            answer.at(ind, 3 * i - 1) = b.at(i) * 1. / ( 2. * area );
-            answer.at(ind, 3 * i - 0) = ( nx.at(i) + ny.at(i) ) * 1. / ( 2. * area );
+            answer.at(3, 3 * i - 2) = c.at(i) * 1. / ( 2. * area );
+            answer.at(3, 3 * i - 1) = b.at(i) * 1. / ( 2. * area );
+            answer.at(3, 3 * i - 0) = ( nx.at(i) + ny.at(i) ) * 1. / ( 2. * area );
         }
 
         ind++;
     }
 
     if ( ( li <= 4 ) && ( ui >= 4 ) ) {
+      if ( numberOfRotGaussPoints == 1 ) {
+      //reduced integration, evaluate at coordinate (0,0)
+        FloatArray center = {0.0, 0.0};
         FloatArray shapeFunct(3);
 
-        FloatArray nx = this->GiveDerivativeVX(gp);
-        FloatArray ny = this->GiveDerivativeUY(gp);
+        FloatArray nx = this->GiveDerivativeVX( center );
+        FloatArray ny = this->GiveDerivativeUY( center );
 
-        shapeFunct.at(1) = gp->giveNaturalCoordinate(1);
-        shapeFunct.at(2) = gp->giveNaturalCoordinate(2);
+        shapeFunct.at(1) = center.at(1);
+        shapeFunct.at(2) = center.at(2);
         shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
         for ( int i = 1; i <= 3; i++ ) {
@@ -172,7 +227,13 @@ TrPlaneStrRot :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
             answer.at(ind, 3 * i - 1) = b.at(i) * 1.0 / 4.0 / area;
             answer.at(ind, 3 * i - 0) = ( -4. * area * shapeFunct.at(i) + nx.at(i) - ny.at(i) ) * 1.0 / 4.0 / area;
         }
+      }
     }
+
+
+#endif
+
+
 }
 
 
@@ -242,6 +303,7 @@ double
 TrPlaneStrRot :: giveArea()
 // returns the area occupied by the receiver
 {
+   ///@todo replace with call to linear triangle interpolator 
     if ( area > 0 ) { // check if previously computed
         return area;
     }
@@ -333,7 +395,7 @@ TrPlaneStrRot :: GivePitch()
 
 
 FloatArray
-TrPlaneStrRot :: GiveDerivativeUX(GaussPoint *gp)
+TrPlaneStrRot :: GiveDerivativeUX(FloatArray &lCoords)
 {
     // get node coordinates
     FloatArray x(3), y(3);
@@ -355,8 +417,8 @@ TrPlaneStrRot :: GiveDerivativeUX(GaussPoint *gp)
 
     //
     FloatArray shapeFunct(3);
-    shapeFunct.at(1) = gp->giveNaturalCoordinate(1);
-    shapeFunct.at(2) = gp->giveNaturalCoordinate(2);
+    shapeFunct.at(1) = lCoords.at(1);
+    shapeFunct.at(2) = lCoords.at(2);
     shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
     //
@@ -374,7 +436,7 @@ TrPlaneStrRot :: GiveDerivativeUX(GaussPoint *gp)
 
 
 FloatArray
-TrPlaneStrRot :: GiveDerivativeVX(GaussPoint *gp)
+TrPlaneStrRot :: GiveDerivativeVX(FloatArray &lCoords)
 {
     // get node coordinates
     FloatArray x(3), y(3);
@@ -396,8 +458,8 @@ TrPlaneStrRot :: GiveDerivativeVX(GaussPoint *gp)
 
     //
     FloatArray shapeFunct(3);
-    shapeFunct.at(1) = gp->giveNaturalCoordinate(1);
-    shapeFunct.at(2) = gp->giveNaturalCoordinate(2);
+    shapeFunct.at(1) = lCoords.at(1);
+    shapeFunct.at(2) = lCoords.at(2);
     shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
     //
@@ -415,7 +477,7 @@ TrPlaneStrRot :: GiveDerivativeVX(GaussPoint *gp)
 
 
 FloatArray
-TrPlaneStrRot :: GiveDerivativeUY(GaussPoint *gp)
+TrPlaneStrRot :: GiveDerivativeUY(FloatArray &lCoords)
 {
     // get node coordinates
     FloatArray x(3), y(3);
@@ -437,8 +499,8 @@ TrPlaneStrRot :: GiveDerivativeUY(GaussPoint *gp)
 
     //
     FloatArray shapeFunct(3);
-    shapeFunct.at(1) = gp->giveNaturalCoordinate(1);
-    shapeFunct.at(2) = gp->giveNaturalCoordinate(2);
+    shapeFunct.at(1) = lCoords.at(1);
+    shapeFunct.at(2) = lCoords.at(2);
     shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
     //
@@ -456,7 +518,7 @@ TrPlaneStrRot :: GiveDerivativeUY(GaussPoint *gp)
 
 
 FloatArray
-TrPlaneStrRot :: GiveDerivativeVY(GaussPoint *gp)
+TrPlaneStrRot :: GiveDerivativeVY(FloatArray &lCoords)
 {
     // get node coordinates
     FloatArray x(3), y(3);
@@ -478,8 +540,8 @@ TrPlaneStrRot :: GiveDerivativeVY(GaussPoint *gp)
 
     //
     FloatArray shapeFunct(3);
-    shapeFunct.at(1) = gp->giveNaturalCoordinate(1);
-    shapeFunct.at(2) = gp->giveNaturalCoordinate(2);
+    shapeFunct.at(1) = lCoords.at(1);
+    shapeFunct.at(2) = lCoords.at(2);
     shapeFunct.at(3) = 1.0 - shapeFunct.at(1) - shapeFunct.at(2);
 
     //
@@ -516,116 +578,13 @@ TrPlaneStrRot :: initializeFrom(InputRecord *ir)
         numberOfGaussPoints = 4;
     }
 
-    if ( !( ( numberOfRotGaussPoints == 1 ) ||
-           ( numberOfRotGaussPoints == 4 ) ||
-           ( numberOfRotGaussPoints == 7 ) ) ) {
-        numberOfRotGaussPoints = 1;
+    // According to the implementation of the B-matrix only one gp is supported, 
+    // so it shouldn't be an optional parameter //JB
+    if ( numberOfRotGaussPoints != 1 ) {
+        OOFEM_ERROR("numberOfRotGaussPoints size mismatch - must be equal to one");
     }
-
+    
     return IRRT_OK;
-}
-
-#if 0
-void
-TrPlaneStrRot :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
-{
-    FloatMatrix B, d;
-    FloatArray vStress, vStrain, u;
-
-    // This function can be quite costly to do inside the loops when one has many slave dofs.
-    this->computeVectorOf(VM_Total, tStep, u);
-    // subtract initial displacements, if defined
-    if ( initialDisplacements ) {
-        u.subtract(* initialDisplacements);
-    }
-
-    // zero answer will resize accordingly when adding first contribution
-    answer.clear();
-
-    for ( GaussPoint *gp: *this->giveDefaultIntegrationRulePtr() ) {
-
-        // Engineering (small strain) stress
-        if ( nlGeometry == 0 ) {
-            this->computeBmatrixAt(gp, B);
-
-            if ( !this->isActivated(tStep) ) {
-                vStrain.resize( StructuralMaterial :: giveSizeOfVoigtSymVector( gp->giveMaterialMode() ) );
-                vStrain.zero();
-            }
-            vStrain.beProductOf(B, u);
- #if 1
-            this->computeStressVector(vStress, vStrain, gp, tStep);
- #else
-            if ( useUpdatedGpRecord == 1 && false ) {
-                ///@todo This is problematic, it only saves the plane stress components. Should we just keep the curvature field completely separate,
-                /// or introduce the membrane+rotation mode directly into the cross-section.
-                vStress = static_cast< StructuralMaterialStatus * >( gp->giveStatus() )->giveStressVector();
-                /*
-                 *              // Curvature field:
-                 *              vStress.resizeWithValues(4);
-                 *              //cs->givePlaneStressStiffMtrx(d, TangentStiffness, gp, tStep);
-                 *              this->giveStructuralCrossSection()->giveCharMaterialStiffnessMatrix(d, ElasticStiffness, gp, tStep);
-                 *              vStress.resizeWithValues(4, 0);
-                 *              vStress.at(4) = vStrain.at(4) * d.at(3,3);
-                 */
-            } else {
-                this->computeStressVector(vStress, vStrain, gp, tStep);
-            }
- #endif
-        } else if ( nlGeometry == 1 ) {  // First Piola-Kirchhoff stress
-            OOFEM_ERROR("Only small strain mode is supported");
-        }
-
-        // Compute nodal internal forces at nodes as f = B^T*Stress dV
-        double dV  = this->computeVolumeAround(gp);
-        answer.plusProduct(B, vStress, dV);
-    }
-
-    // If inactive: update fields but do not give any contribution to the internal forces
-    if ( !this->isActivated(tStep) ) {
-        answer.zero();
-        return;
-    }
-}
-#endif
-
-
-void
-TrPlaneStrRot :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
-// Computes the vector containing the strains at the Gauss point gp of
-// the receiver, at time step tStep. The nature of these strains depends
-// on the element's type.
-{
-    FloatMatrix b;
-    FloatArray u, Epsilon;
-
-    this->computeVectorOf(VM_Total, tStep, u);
-
-    answer.resize(4);
-    answer.zero();
-
-    this->computeBmatrixAt(gp, b, 1, 3);
-    Epsilon.beProductOf(b, u);
-    answer.at(1) = Epsilon.at(1);
-    answer.at(2) = Epsilon.at(2);
-    answer.at(3) = Epsilon.at(3);
-
-    if ( numberOfRotGaussPoints == 1 ) {
-        //
-        // if reduced integration in one gp only
-        // force the evaluation of eps_fi in this gauss point
-        // instead of evaluating in given gp
-        //
-        GaussPoint *helpGaussPoint;
-        helpGaussPoint = integrationRulesArray [ 1 ]->getIntegrationPoint(0);
-
-        this->computeBmatrixAt(helpGaussPoint, b, 4, 4);
-    } else {
-        OOFEM_ERROR("numberOfRotGaussPoints size mismatch");
-    }
-
-    Epsilon.beProductOf(b, u);
-    answer.at(4) = Epsilon.at(1);
 }
 
 

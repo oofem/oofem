@@ -245,7 +245,7 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
     }
 
     // Set start of the enrichment dof pool for the given EI
-    int xDofPoolAllocSize = this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() * 1 + 5; // TODO: overload for Crack
+    int xDofPoolAllocSize = this->giveDofPoolSize();
     this->startOfDofIdPool = this->giveDomain()->giveNextFreeDofID(xDofPoolAllocSize);
     this->endOfDofIdPool = this->startOfDofIdPool + xDofPoolAllocSize - 1;
 
@@ -258,6 +258,14 @@ int EnrichmentItem :: instanciateYourself(DataReader *dr)
 
     return 1;
 }
+
+
+int 
+EnrichmentItem::giveDofPoolSize() const
+{
+    return this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs();
+}
+
 
 void EnrichmentItem :: writeVtkDebug() const
 {

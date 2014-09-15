@@ -152,4 +152,10 @@ void Crack :: computeArcPoints(const std::vector<FloatArray> &iIntersectionPoint
 
 }
 
+
+int Crack::giveDofPoolSize() const
+{
+      return this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() + 5;
+}
+
 } // end namespace oofem
