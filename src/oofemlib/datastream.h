@@ -50,6 +50,7 @@ class ProcessCommunicatorBuff;
  * This will facilitate many algorithms relying on saving/moving state of components
  * (such as load balancing), without writing new (and very similar) routines.
  * This  will lead to a  better consistency of code.
+ * @todo Are the "long" and "unsigned long" functions really necessary?
  */
 class OOFEM_EXPORT DataStream
 {
@@ -65,14 +66,19 @@ public:
     //@{
     /// Reads count integer values into array pointed by data.
     virtual int read(int *data, unsigned int count) = 0;
+    int read(int &data) { return this->read(&data, 1); }
     /// Reads count unsigned long values into array pointed by data.
     virtual int read(unsigned long *data, unsigned int count) = 0;
+    int read(unsigned long &data) { return this->read(&data, 1); }
     /// Reads count long values into array pointed by data.
     virtual int read(long *data, unsigned int count) = 0;
+    int read(long &data) { return this->read(&data, 1); }
     /// Reads count double values into array pointed by data.
     virtual int read(double *data, unsigned int count) = 0;
+    int read(double &data) { return this->read(&data, 1); }
     /// Reads count char values into array pointed by data.
     virtual int read(char *data, unsigned int count) = 0;
+    int read(char &data) { return this->read(&data, 1); }
     /// Reads a bool value from data.
     virtual int read(bool &data) = 0;
     /// Reads a string (stored as an int for the length followed by char*).
@@ -87,18 +93,35 @@ public:
     //@{
     /// Writes count integer values from array pointed by data.
     virtual int write(const int *data, unsigned int count) = 0;
+    int write(int data) { return this->write(&data, 1); }
     /// Writes count unsigned long values from array pointed by data.
     virtual int write(const unsigned long *data, unsigned int count) = 0;
+    int write(unsigned long data) { return this->write(&data, 1); }
     /// Writes count long values from array pointed by data.
     virtual int write(const long *data, unsigned int count) = 0;
+    int write(long data) { return this->write(&data, 1); }
     /// Writes count double values from array pointed by data.
     virtual int write(const double *data, unsigned int count) = 0;
+    int write(double data) { return this->write(&data, 1); }
     /// Writes count char values from array pointed by data.
     virtual int write(const char *data, unsigned int count) = 0;
+    int write(char data) { return this->write(&data, 1); }
     /// Writes a bool value.
     virtual int write(bool data) = 0;
     /// Reads a string (stored as an int for the length followed by char*).
     int write(const std :: string &data);
+    //@}
+
+    /**
+     * @name Sizing functions.
+     * These methods compute the stored size (in bytes) of an array containing "count" elements.
+     */
+    //@{
+    virtual int givePackSizeOfInt(int count) = 0;
+    virtual int givePackSizeOfDouble(int count) = 0;
+    virtual int givePackSizeOfChar(int count) = 0;
+    virtual int givePackSizeOfBool(int count) = 0;
+    virtual int givePackSizeOfLong(int count) = 0;
     //@}
 };
 
@@ -135,6 +158,12 @@ public:
     virtual int write(const double *data, unsigned int count);
     virtual int write(const char *data, unsigned int count);
     virtual int write(bool data);
+
+    virtual int givePackSizeOfInt(int count);
+    virtual int givePackSizeOfDouble(int count);
+    virtual int givePackSizeOfChar(int count);
+    virtual int givePackSizeOfBool(int count);
+    virtual int givePackSizeOfLong(int count);
 };
 
 #ifdef __PARALLEL_MODE
@@ -171,6 +200,12 @@ public:
     virtual int write(const double *data, unsigned int count);
     virtual int write(const char *data, unsigned int count);
     virtual int write(bool data);
+
+    virtual int givePackSizeOfInt(int count);
+    virtual int givePackSizeOfDouble(int count);
+    virtual int givePackSizeOfChar(int count);
+    virtual int givePackSizeOfBool(int count);
+    virtual int givePackSizeOfLong(int count);
 };
 
 
@@ -206,6 +241,12 @@ public:
     virtual int write(const double *data, unsigned int count);
     virtual int write(const char *data, unsigned int count);
     virtual int write(bool data);
+
+    virtual int givePackSizeOfInt(int count);
+    virtual int givePackSizeOfDouble(int count);
+    virtual int givePackSizeOfChar(int count);
+    virtual int givePackSizeOfBool(int count);
+    virtual int givePackSizeOfLong(int count);
 };
 
 #endif
