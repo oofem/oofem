@@ -733,7 +733,7 @@ contextIOResultType NlDEIDynamic :: saveContext(DataStream *stream, ContextMode 
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->write(& deltaT, 1) ) {
+    if ( !stream->write(deltaT) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -786,7 +786,7 @@ contextIOResultType NlDEIDynamic :: restoreContext(DataStream *stream, ContextMo
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(& deltaT, 1) ) {
+    if ( !stream->read(deltaT) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

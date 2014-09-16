@@ -217,10 +217,10 @@ LinearConstraintBC :: saveContext(DataStream *stream, ContextMode mode, void *ob
         if ( ( iores = dofs.storeYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( !stream->write(& rhs, 1) ) {
+        if ( !stream->write(rhs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
-        if ( !stream->write(& rhsTf, 1) ) {
+        if ( !stream->write(rhsTf) ) {
             THROW_CIOERR(CIO_IOERR);
         }
         if ( ( iores = lhsType.storeYourself(stream, mode) ) != CIO_OK ) {
@@ -256,10 +256,10 @@ LinearConstraintBC :: restoreContext(DataStream *stream, ContextMode mode, void 
         if ( ( iores = dofs.restoreYourself(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( !stream->read(& rhs, 1) ) {
+        if ( !stream->read(rhs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
-        if ( !stream->read(& rhsTf, 1) ) {
+        if ( !stream->read(rhsTf) ) {
             THROW_CIOERR(CIO_IOERR);
         }
         if ( ( iores = lhsType.restoreYourself(stream, mode) ) != CIO_OK ) {

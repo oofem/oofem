@@ -823,11 +823,11 @@ PlasticMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void 
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->write(& state_flag, 1) ) {
+    if ( !stream->write(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& gamma, 1) ) {
+    if ( !stream->write(gamma) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -856,11 +856,11 @@ PlasticMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, vo
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(& state_flag, 1) ) {
+    if ( !stream->read(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& gamma, 1) ) {
+    if ( !stream->read(gamma) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

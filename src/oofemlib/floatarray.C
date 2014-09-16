@@ -837,7 +837,7 @@ contextIOResultType FloatArray :: storeYourself(DataStream *stream, ContextMode 
 {
     // write size
     int size = this->giveSize();
-    if ( !stream->write(& size, 1) ) {
+    if ( !stream->write(size) ) {
         return CIO_IOERR;
     }
 
@@ -860,7 +860,7 @@ contextIOResultType FloatArray :: restoreYourself(DataStream *stream, ContextMod
 {
     // read size
     int size;
-    if ( !stream->read(& size, 1) ) {
+    if ( !stream->read(size) ) {
         return CIO_IOERR;
     }
 

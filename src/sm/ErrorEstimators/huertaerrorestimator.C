@@ -655,7 +655,7 @@ HuertaErrorEstimator :: saveContext(DataStream *stream, ContextMode mode, void *
     }
 
     // write a raw data
-    if ( !stream->write(& stateCounter, 1) ) {
+    if ( !stream->write(stateCounter) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -678,7 +678,7 @@ HuertaErrorEstimator :: restoreContext(DataStream *stream, ContextMode mode, voi
     }
 
     // read raw data
-    if ( !stream->read(& stateCounter, 1) ) {
+    if ( !stream->read(stateCounter) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

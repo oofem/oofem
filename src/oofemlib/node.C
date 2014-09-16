@@ -582,7 +582,7 @@ Node :: saveContext(DataStream *stream, ContextMode mode, void *obj)
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->write(& _haslcs, 1) ) {
+        if ( !stream->write(_haslcs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -619,7 +619,7 @@ Node :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->read(& _haslcs, 1) ) {
+        if ( !stream->read(_haslcs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 

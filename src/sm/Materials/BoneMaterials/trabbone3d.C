@@ -1427,15 +1427,15 @@ TrabBone3DStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
 
-    if ( !stream->write(& dam, 1) ) {
+    if ( !stream->write(dam) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& kappa, 1) ) {
+    if ( !stream->write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& beta, 1) ) {
+    if ( !stream->write(beta) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1482,15 +1482,15 @@ TrabBone3DStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
     }
 
 
-    if ( !stream->read(& dam, 1) ) {
+    if ( !stream->read(dam) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& kappa, 1) ) {
+    if ( !stream->read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& beta, 1) ) {
+    if ( !stream->read(beta) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

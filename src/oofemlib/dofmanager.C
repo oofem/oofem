@@ -556,14 +556,14 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
 
 
     int numberOfDofs = this->giveNumberOfDofs();
-    if ( !stream->write(& numberOfDofs, 1) ) {
+    if ( !stream->write(numberOfDofs) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // store dof types
     for ( Dof *dof: *this ) {
         _val = dof->giveDofType();
-        if ( !stream->write(& _val, 1) ) {
+        if ( !stream->write(_val) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
@@ -571,7 +571,7 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
     // store dof types
     for ( Dof *dof: *this ) {
         _val = dof->giveDofID();
-        if ( !stream->write(& _val, 1) ) {
+        if ( !stream->write(_val) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
@@ -589,12 +589,12 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->write(& globalNumber, 1) ) {
+        if ( !stream->write(globalNumber) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         _val = ( int ) parallel_mode;
-        if ( !stream->write(& _val, 1) ) {
+        if ( !stream->write(_val) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -626,14 +626,14 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
     }
 
     int _numberOfDofs;
-    if ( !stream->read(& _numberOfDofs, 1) ) {
+    if ( !stream->read(_numberOfDofs) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     IntArray dtypes(_numberOfDofs);
     // restore dof types
     for ( int i = 1; i <= _numberOfDofs; i++ ) {
-        if ( !stream->read(& dtypes.at(i), 1) ) {
+        if ( !stream->read(dtypes.at(i)) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
@@ -641,7 +641,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
     IntArray dofids(_numberOfDofs);
     // restore dof ids
     for ( int i = 1; i <= _numberOfDofs; i++ ) {
-        if ( !stream->read(& dofids.at(i), 1) ) {
+        if ( !stream->read(dofids.at(i)) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
@@ -667,12 +667,12 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(& globalNumber, 1) ) {
+        if ( !stream->read(globalNumber) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         int _val;
-        if ( !stream->read(& _val, 1) ) {
+        if ( !stream->read(_val) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 

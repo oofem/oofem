@@ -727,7 +727,7 @@ PerfectlyPlasticMaterialStatus :: saveContext(DataStream *stream, ContextMode mo
     }
 
     // write a raw data
-    if ( !stream->write(& yield_flag, 1) ) {
+    if ( !stream->write(yield_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -753,7 +753,7 @@ PerfectlyPlasticMaterialStatus :: restoreContext(DataStream *stream, ContextMode
     }
 
     // read raw data
-    if ( !stream->read(& yield_flag, 1) ) {
+    if ( !stream->read(yield_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

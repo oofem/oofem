@@ -143,15 +143,15 @@ DruckerPragerPlasticitySMStatus :: saveContext(DataStream *stream, ContextMode m
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->write(& volumetricPlasticStrain, 1) ) {
+    if ( !stream->write(volumetricPlasticStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& kappa, 1) ) {
+    if ( !stream->write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& temp_state_flag, 1) ) {
+    if ( !stream->write(temp_state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -174,15 +174,15 @@ DruckerPragerPlasticitySMStatus :: restoreContext(DataStream *stream, ContextMod
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(& volumetricPlasticStrain, 1) ) {
+    if ( !stream->read(volumetricPlasticStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& kappa, 1) ) {
+    if ( !stream->read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& temp_state_flag, 1) ) {
+    if ( !stream->read(temp_state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

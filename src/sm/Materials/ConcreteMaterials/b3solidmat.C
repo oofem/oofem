@@ -1035,7 +1035,7 @@ B3SolidMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void 
     }
 
     // write microprestress value
-    if ( !stream->write(& microprestress_old, 1) ) {
+    if ( !stream->write(microprestress_old) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1054,7 +1054,7 @@ B3SolidMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, vo
     }
 
     // write microprestress value
-    if ( !stream->read(& microprestress_old, 1) ) {
+    if ( !stream->read(microprestress_old) ) {
         return CIO_IOERR;
     }
 

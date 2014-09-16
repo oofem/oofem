@@ -259,7 +259,7 @@ contextIOResultType IntArray :: storeYourself(DataStream *stream, ContextMode mo
 {
     // write size
     int size = this->giveSize();
-    if ( !stream->write(& size, 1) ) {
+    if ( !stream->write(size) ) {
         return ( CIO_IOERR );
     }
 
@@ -276,7 +276,7 @@ contextIOResultType IntArray :: restoreYourself(DataStream *stream, ContextMode 
 {
     // read size
     int size;
-    if ( !stream->read(& size, 1) ) {
+    if ( !stream->read(size) ) {
         return ( CIO_IOERR );
     }
 

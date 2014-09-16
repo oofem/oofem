@@ -134,7 +134,7 @@ Dof :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
     // store dofid
     int _val = dofID;
-    if ( !stream->write(& _val, 1) ) {
+    if ( !stream->write(_val) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -147,7 +147,7 @@ Dof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     // restore dofid
     int _val;
-    if ( !stream->read(& _val, 1) ) {
+    if ( !stream->read(_val) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

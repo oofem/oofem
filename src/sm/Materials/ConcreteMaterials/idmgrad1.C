@@ -505,7 +505,7 @@ IDGMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj
     }
 
     // write a raw data
-    if ( !stream->write(& le, 1) ) {
+    if ( !stream->write(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -525,7 +525,7 @@ IDGMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *
     }
 
     // read raw data
-    if ( !stream->read(& le, 1) ) {
+    if ( !stream->read(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

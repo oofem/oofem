@@ -337,7 +337,7 @@ PatchIntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *
      *  if ( this->patch ) {
      *      // store patch type
      *      int _type = this->patch->givePatchType();
-     *      if ( !stream->write(& _type, 1) ) {
+     *      if ( !stream->write(_type) ) {
      *          THROW_CIOERR(CIO_IOERR);
      *      }
      *
@@ -376,7 +376,7 @@ PatchIntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, voi
      *  }
      */
     int _ptype;
-    if ( !stream->read(& _ptype, 1) ) {
+    if ( !stream->read(_ptype) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

@@ -124,7 +124,7 @@ StressStrainBaseVector :: storeYourself(DataStream *stream, ContextMode mode)
     }
 
     // write material mode
-    if ( !stream->write(& mode, 1) ) {
+    if ( !stream->write(mode) ) {
         return CIO_IOERR;
     }
 
@@ -140,7 +140,7 @@ StressStrainBaseVector :: restoreYourself(DataStream *stream, ContextMode mode)
     }
 
     // read material mode
-    if ( !stream->read(& mode, 1) ) {
+    if ( !stream->read(mode) ) {
         return CIO_IOERR;
     }
 

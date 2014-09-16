@@ -625,7 +625,7 @@ LevelSetPCS :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
-    if ( !stream->write(& levelSetVersion, 1) ) {
+    if ( !stream->write(levelSetVersion) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -642,7 +642,7 @@ LevelSetPCS :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
-    if ( !stream->read(& levelSetVersion, 1) ) {
+    if ( !stream->read(levelSetVersion) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

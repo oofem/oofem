@@ -331,17 +331,17 @@ contextIOResultType MasterDof :: saveContext(DataStream *stream, ContextMode mod
     }
 
     if ( mode & CM_Definition ) {
-        if ( !stream->write(& bc, 1) ) {
+        if ( !stream->write(bc) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->write(& ic, 1) ) {
+        if ( !stream->write(ic) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
 
     // store equation number of receiver
-    if ( !stream->write(& equationNumber, 1) ) {
+    if ( !stream->write(equationNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -371,18 +371,18 @@ contextIOResultType MasterDof :: restoreContext(DataStream *stream, ContextMode 
     }
 
     if ( mode & CM_Definition ) {
-        if ( !stream->read(& bc, 1) ) {
+        if ( !stream->read(bc) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(& ic, 1) ) {
+        if ( !stream->read(ic) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
 
 
     // read equation number of receiver
-    if ( !stream->read(& equationNumber, 1) ) {
+    if ( !stream->read(equationNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

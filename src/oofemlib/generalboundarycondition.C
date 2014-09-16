@@ -132,7 +132,7 @@ contextIOResultType
 GeneralBoundaryCondition :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     if ( mode & CM_Definition ) {
-        if ( !stream->write(& timeFunction, 1) ) {
+        if ( !stream->write(timeFunction) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
@@ -145,7 +145,7 @@ contextIOResultType
 GeneralBoundaryCondition :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     if ( mode & CM_Definition ) {
-        if ( !stream->read(& timeFunction, 1) ) {
+        if ( !stream->read(timeFunction) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }

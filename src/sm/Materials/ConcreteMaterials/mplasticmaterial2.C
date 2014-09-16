@@ -2205,7 +2205,7 @@ MPlasticMaterial2Status :: saveContext(DataStream *stream, ContextMode mode, voi
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->write(& state_flag, 1) ) {
+    if ( !stream->write(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -2244,7 +2244,7 @@ MPlasticMaterial2Status :: restoreContext(DataStream *stream, ContextMode mode, 
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(& state_flag, 1) ) {
+    if ( !stream->read(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

@@ -579,15 +579,15 @@ RCSDMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *ob
     }
 
     // write a raw data
-    if ( !stream->write(& maxEquivStrain, 1) ) {
+    if ( !stream->write(maxEquivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& damageCoeff, 1) ) {
+    if ( !stream->write(damageCoeff) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& mode, 1) ) {
+    if ( !stream->write(mode) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -613,15 +613,15 @@ RCSDMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void 
     }
 
     // read raw data
-    if ( !stream->read(& maxEquivStrain, 1) ) {
+    if ( !stream->read(maxEquivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& damageCoeff, 1) ) {
+    if ( !stream->read(damageCoeff) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& mode, 1) ) {
+    if ( !stream->read(mode) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

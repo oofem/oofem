@@ -782,15 +782,15 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
     }
 
     if ( ( mode & CM_Definition ) ) {
-        if ( !stream->write(& numberOfDofMans, 1) ) {
+        if ( !stream->write(numberOfDofMans) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->write(& material, 1) ) {
+        if ( !stream->write(material) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->write(& crossSection, 1) ) {
+        if ( !stream->write(crossSection) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -820,24 +820,24 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
         }
 
         int numberOfIntegrationRules = (int)integrationRulesArray.size();
-        if ( !stream->write(& numberOfIntegrationRules, 1) ) {
+        if ( !stream->write(numberOfIntegrationRules) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         for ( auto &iRule: integrationRulesArray ) {
             _val = iRule->giveIntegrationRuleType();
-            if ( !stream->write(& _val, 1) ) {
+            if ( !stream->write(_val) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
         }
 
         int _mode;
-        if ( !stream->write(& globalNumber, 1) ) {
+        if ( !stream->write(globalNumber) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         _mode = parallel_mode;
-        if ( !stream->write(& _mode, 1) ) {
+        if ( !stream->write(_mode) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -870,15 +870,15 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
     }
 
     if ( mode & CM_Definition ) {
-        if ( !stream->read(& numberOfDofMans, 1) ) {
+        if ( !stream->read(numberOfDofMans) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(& material, 1) ) {
+        if ( !stream->read(material) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(& crossSection, 1) ) {
+        if ( !stream->read(crossSection) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -894,14 +894,14 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->read(& _nrules, 1) ) {
+        if ( !stream->read(_nrules) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         // restore integration rules
         IntArray dtypes(_nrules);
         for ( int i = 1; i <= _nrules; i++ ) {
-            if ( !stream->read(& dtypes.at(i), 1) ) {
+            if ( !stream->read(dtypes.at(i)) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
         }
@@ -922,11 +922,11 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
         }
 
         int _mode;
-        if ( !stream->read(& globalNumber, 1) ) {
+        if ( !stream->read(globalNumber) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(& _mode, 1) ) {
+        if ( !stream->read(_mode) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 

@@ -267,68 +267,68 @@ ConcreteDPM2Status :: saveContext(DataStream *stream, ContextMode mode, void *ob
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->write(& kappaP, 1) ) {
+    if ( !stream->write(kappaP) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& equivStrain, 1) ) {
+    if ( !stream->write(equivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& equivStrainTension, 1) ) {
+    if ( !stream->write(equivStrainTension) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& equivStrainCompression, 1) ) {
+    if ( !stream->write(equivStrainCompression) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& kappaDTensionOne, 1) ) {
+    if ( !stream->write(kappaDTensionOne) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& kappaDCompressionOne, 1) ) {
+    if ( !stream->write(kappaDCompressionOne) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& kappaDTensionTwo, 1) ) {
+    if ( !stream->write(kappaDTensionTwo) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& kappaDCompressionTwo, 1) ) {
+    if ( !stream->write(kappaDCompressionTwo) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& kappaDTension, 1) ) {
+    if ( !stream->write(kappaDTension) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& kappaDCompression, 1) ) {
+    if ( !stream->write(kappaDCompression) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& damageTension, 1) ) {
+    if ( !stream->write(damageTension) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& damageCompression, 1) ) {
+    if ( !stream->write(damageCompression) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& state_flag, 1) ) {
+    if ( !stream->write(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& le, 1) ) {
+    if ( !stream->write(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
 #ifdef keep_track_of_dissipated_energy
-    if ( !stream->write(& stressWork, 1) ) {
+    if ( !stream->write(stressWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& dissWork, 1) ) {
+    if ( !stream->write(dissWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -352,68 +352,68 @@ ConcreteDPM2Status :: restoreContext(DataStream *stream, ContextMode mode, void 
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(& kappaP, 1) ) {
+    if ( !stream->read(kappaP) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& equivStrain, 1) ) {
+    if ( !stream->read(equivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& equivStrainTension, 1) ) {
+    if ( !stream->read(equivStrainTension) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& equivStrainCompression, 1) ) {
+    if ( !stream->read(equivStrainCompression) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& kappaDTensionOne, 1) ) {
+    if ( !stream->read(kappaDTensionOne) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& kappaDCompressionOne, 1) ) {
+    if ( !stream->read(kappaDCompressionOne) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& kappaDTensionTwo, 1) ) {
+    if ( !stream->read(kappaDTensionTwo) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& kappaDCompressionTwo, 1) ) {
+    if ( !stream->read(kappaDCompressionTwo) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& kappaDTension, 1) ) {
+    if ( !stream->read(kappaDTension) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& kappaDCompression, 1) ) {
+    if ( !stream->read(kappaDCompression) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& damageTension, 1) ) {
+    if ( !stream->read(damageTension) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& damageCompression, 1) ) {
+    if ( !stream->read(damageCompression) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& state_flag, 1) ) {
+    if ( !stream->read(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& le, 1) ) {
+    if ( !stream->read(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
 #ifdef keep_track_of_dissipated_energy
-    if ( !stream->read(& stressWork, 1) ) {
+    if ( !stream->read(stressWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& dissWork, 1) ) {
+    if ( !stream->read(dissWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

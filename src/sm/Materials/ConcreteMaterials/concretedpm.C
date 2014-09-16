@@ -183,31 +183,31 @@ ConcreteDPMStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->write(& kappaP, 1) ) {
+    if ( !stream->write(kappaP) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& kappaD, 1) ) {
+    if ( !stream->write(kappaD) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& equivStrain, 1) ) {
+    if ( !stream->write(equivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& damage, 1) ) {
+    if ( !stream->write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& state_flag, 1) ) {
+    if ( !stream->write(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& deltaEquivStrain, 1) ) {
+    if ( !stream->write(deltaEquivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& le, 1) ) {
+    if ( !stream->write(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -230,31 +230,31 @@ ConcreteDPMStatus :: restoreContext(DataStream *stream, ContextMode mode, void *
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(& kappaP, 1) ) {
+    if ( !stream->read(kappaP) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& kappaD, 1) ) {
+    if ( !stream->read(kappaD) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& equivStrain, 1) ) {
+    if ( !stream->read(equivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& damage, 1) ) {
+    if ( !stream->read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& state_flag, 1) ) {
+    if ( !stream->read(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& deltaEquivStrain, 1) ) {
+    if ( !stream->read(deltaEquivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& le, 1) ) {
+    if ( !stream->read(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

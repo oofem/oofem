@@ -1292,27 +1292,27 @@ Concrete2MaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
     }
 
     // write a raw data
-    if ( !stream->write(& this->SCCM, 1) ) {
+    if ( !stream->write(SCCM) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& EPM, 1) ) {
+    if ( !stream->write(EPM) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& SCTM, 1) ) {
+    if ( !stream->write(SCTM) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& E0PM, 1) ) {
+    if ( !stream->write(E0PM) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& SRF, 1) ) {
+    if ( !stream->write(SRF) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& SEZ, 1) ) {
+    if ( !stream->write(SEZ) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1338,27 +1338,27 @@ Concrete2MaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
     }
 
     // read raw data
-    if ( !stream->read(& SCCM, 1) ) {
+    if ( !stream->read(SCCM) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& EPM, 1) ) {
+    if ( !stream->read(EPM) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& SCTM, 1) ) {
+    if ( !stream->read(SCTM) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& E0PM, 1) ) {
+    if ( !stream->read(E0PM) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& SRF, 1) ) {
+    if ( !stream->read(SRF) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& SEZ, 1) ) {
+    if ( !stream->read(SEZ) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

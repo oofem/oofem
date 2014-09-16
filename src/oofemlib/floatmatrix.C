@@ -1812,11 +1812,11 @@ contextIOResultType FloatMatrix :: storeYourself(DataStream *stream, ContextMode
 //              =0 file i/o error
 {
     // write size
-    if ( !stream->write(& nRows, 1) ) {
+    if ( !stream->write(nRows) ) {
         return ( CIO_IOERR );
     }
 
-    if ( !stream->write(& nColumns, 1) ) {
+    if ( !stream->write(nColumns) ) {
         return ( CIO_IOERR );
     }
 
@@ -1837,11 +1837,11 @@ contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMo
 //        -1 if id of class id is not correct
 {
     // read size
-    if ( !stream->read(& nRows, 1) ) {
+    if ( !stream->read(nRows) ) {
         return ( CIO_IOERR );
     }
 
-    if ( !stream->read(& nColumns, 1) ) {
+    if ( !stream->read(nColumns) ) {
         return ( CIO_IOERR );
     }
 

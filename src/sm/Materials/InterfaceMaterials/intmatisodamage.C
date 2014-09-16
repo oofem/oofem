@@ -382,11 +382,11 @@ IntMatIsoDamageStatus :: saveContext(DataStream *stream, ContextMode mode, void 
     }
 
     // write a raw data
-    if ( !stream->write(& kappa, 1) ) {
+    if ( !stream->write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& damage, 1) ) {
+    if ( !stream->write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -404,11 +404,11 @@ IntMatIsoDamageStatus :: restoreContext(DataStream *stream, ContextMode mode, vo
     }
 
     // read raw data
-    if ( !stream->read(& kappa, 1) ) {
+    if ( !stream->read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& damage, 1) ) {
+    if ( !stream->read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

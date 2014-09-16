@@ -1263,7 +1263,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
     }
 
     // store numberOfEquations and domainNeqs array
-    if ( !stream->write(& numberOfEquations, 1) ) {
+    if ( !stream->write(numberOfEquations) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1272,7 +1272,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
     }
 
     // store numberOfPrescribedEquations and domainNeqs array
-    if ( !stream->write(& numberOfPrescribedEquations, 1) ) {
+    if ( !stream->write(numberOfPrescribedEquations) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1375,7 +1375,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
                                 currentStep->giveTimeIncrement(), currentStep->giveSolutionStateCounter() - 1);
 
     // restore numberOfEquations and domainNeqs array
-    if ( !stream->read(& numberOfEquations, 1) ) {
+    if ( !stream->read(numberOfEquations) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1384,7 +1384,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     }
 
     // restore numberOfPrescribedEquations and domainNeqs array
-    if ( !stream->read(& numberOfPrescribedEquations, 1) ) {
+    if ( !stream->read(numberOfPrescribedEquations) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

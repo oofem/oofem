@@ -1425,7 +1425,7 @@ IsotropicDamageMaterial1Status :: saveContext(DataStream *stream, ContextMode mo
     }
 
     // write a raw data
-    if ( !stream->write(& le, 1) ) {
+    if ( !stream->write(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1445,7 +1445,7 @@ IsotropicDamageMaterial1Status :: restoreContext(DataStream *stream, ContextMode
     }
 
     // read raw data
-    if ( !stream->read(& le, 1) ) {
+    if ( !stream->read(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

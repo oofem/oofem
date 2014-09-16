@@ -1568,7 +1568,7 @@ Domain :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
     // save domain serial number
     serNum = this->giveSerialNumber();
-    if ( !stream->write(& serNum, 1) ) {
+    if ( !stream->write(serNum) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1630,7 +1630,7 @@ Domain :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
     domainUpdated = false;
     serNum = this->giveSerialNumber();
     // restore domain serial number
-    if ( !stream->read(& this->serialNumber, 1) ) {
+    if ( !stream->read(this->serialNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

@@ -634,15 +634,15 @@ NonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
     int _cm = controlMode;
-    if ( !stream->write(& _cm, 1) ) {
+    if ( !stream->write(_cm) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& loadLevel, 1) ) {
+    if ( !stream->write(loadLevel) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& cumulatedLoadLevel, 1) ) {
+    if ( !stream->write(cumulatedLoadLevel) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -703,16 +703,16 @@ NonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *ob
     }
 
     int _cm;
-    if ( !stream->read(& _cm, 1) ) {
+    if ( !stream->read(_cm) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     controlMode = ( NonLinearStatic_controlType ) _cm;
-    if ( !stream->read(& loadLevel, 1) ) {
+    if ( !stream->read(loadLevel) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& cumulatedLoadLevel, 1) ) {
+    if ( !stream->read(cumulatedLoadLevel) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

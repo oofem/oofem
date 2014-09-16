@@ -990,7 +990,7 @@ contextIOResultType
 CylindricalALM :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     // write current deltaL
-    if ( !stream->write(& deltaL, 1) ) {
+    if ( !stream->write(deltaL) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1002,7 +1002,7 @@ contextIOResultType
 CylindricalALM :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     // read last deltaL
-    if ( !stream->read(& deltaL, 1) ) {
+    if ( !stream->read(deltaL) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

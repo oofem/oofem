@@ -226,8 +226,7 @@ MPIBuffer :: givePackSize(MPI_Comm communicator, MPI_Datatype type, int size)
 void
 MPIBuffer :: dump()
 {
-    int _i;
-    for ( _i = 0; _i < 20; ++_i ) {
+    for ( int _i = 0; _i < 20; ++_i ) {
         fprintf(stderr, "%d ", buff [ _i ]);
     }
 

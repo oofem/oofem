@@ -238,11 +238,11 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
 {
     contextIOResultType iores(CIO_IOERR);
 
-    if ( !stream->write(& actualStepNumber, 1) ) {
+    if ( !stream->write(actualStepNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& actualStepIndx, 1) ) {
+    if ( !stream->write(actualStepIndx) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -266,11 +266,11 @@ PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
 {
     contextIOResultType iores(CIO_IOERR);
 
-    if ( !stream->read(& actualStepNumber, 1) ) {
+    if ( !stream->read(actualStepNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& actualStepIndx, 1) ) {
+    if ( !stream->read(actualStepIndx) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
