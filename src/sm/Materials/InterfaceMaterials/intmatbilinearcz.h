@@ -32,16 +32,6 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/**
- *
- *	IntMatBilinearCZ
- *
- *	Bilinear cohesive zone model.
- *
- *  Created on: Oct 20, 2013
- *  @author: Erik Svenning
- */
-
 #ifndef INTMATBILINEARCZ_H_
 #define INTMATBILINEARCZ_H_
 
@@ -51,7 +41,6 @@
 ///@name Input fields for IntMatBilinearCZ
 //@{
 #define _IFT_IntMatBilinearCZ_Name "intmatbilinearcz"
-
 #define _IFT_IntMatBilinearCZ_PenaltyStiffness "kn"
 #define _IFT_IntMatBilinearCZ_g1c "g1c"
 #define _IFT_IntMatBilinearCZ_g2c "g2c"
@@ -90,6 +79,11 @@ public:
 };
 
 
+/**
+ * Bilinear cohesive zone model.
+ * Created on: Oct 20, 2013
+ * @author Erik Svenning
+ */
 class IntMatBilinearCZ : public StructuralInterfaceMaterial
 {
 public:

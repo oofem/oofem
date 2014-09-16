@@ -109,7 +109,6 @@ public:
  * The behaviour of the model is elastic, described by normal and shear stiffness components.
  * Isotropic damage is initiated when the stress reaches the tensile strength. The damage evolution
  * is governed by the normal jump
- *.
  */
 class IntMatIsoDamage : public StructuralInterfaceMaterial
 {
