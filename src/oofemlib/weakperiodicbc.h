@@ -51,6 +51,7 @@
 #define _IFT_WeakPeriodicBoundaryCondition_descritizationType "descritizationtype"
 #define _IFT_WeakPeriodicBoundaryCondition_dofid "dofid"
 #define _IFT_WeakPeriodicBoundaryCondition_ngp "ngp"
+#define _IFT_WeakPeriodicBoundaryCondition_gradient "gradient"
 #define _IFT_WeakPeriodicBoundaryCondition_elementSidesPositive "elementsidespositive"
 #define _IFT_WeakPeriodicBoundaryCondition_elementSidesNegative "elementsidesnegative"
 #define _IFT_WeakPeriodicBoundaryCondition_elementSidesPositiveSet "elementsidespositiveset"
@@ -75,6 +76,9 @@ private:
     basisType useBasisType;
     int bcID;
     int orderOfPolygon;
+
+    /** Contains prescribed gradient */
+    FloatArray g;
 
     /** Direction of normal. 1 if normal in x, 2 if y and 3 if z. */
     int direction;
@@ -150,6 +154,14 @@ public:
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
                                 CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
+
+    void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
+                                  CharType type, ValueModeType mode,
+                                  const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
+
+    void giveExternalForcesVector(FloatArray &answer, TimeStep *tStep,
+                                  CharType type, ValueModeType mode,
+                                  const UnknownNumberingScheme &s);
 
     virtual int giveNumberOfInternalDofManagers();
 

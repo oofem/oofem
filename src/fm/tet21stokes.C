@@ -66,6 +66,8 @@ IntArray Tet21Stokes :: surf_ordering [ 4 ] = {
     { 1,  2,  3, 13, 14, 15,  9, 10, 11, 26, 27, 28, 32, 33, 34, 23, 24, 25}
 };
 
+IntArray Tet21Stokes :: velocitydofsonside = {1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15, 16, 17, 18, 19, 20, 21};
+
 Tet21Stokes :: Tet21Stokes(int n, Domain *aDomain) : FMElement(n, aDomain), SpatialLocalizerInterface(this)
 {
     this->numberOfDofMans = 10;
@@ -235,13 +237,15 @@ void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
         return;
     }
 
-    answer.resize(34);
+    answer.resize(21);
     answer.zero();
 
     if ( load->giveType() == TransmissionBC ) { // Neumann boundary conditions (traction)
         BoundaryLoad *boundaryLoad = static_cast< BoundaryLoad * >(load);
 
-        int numberOfSurfaceIPs = ( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2; ///@todo Check this.
+        // printf("%f, %f, %f\n", boundaryLoad->giveApproxOrder(), boundaryLoad->giveApproxOrder()+1., ( boundaryLoad->giveApproxOrder() + 1.) /2.);
+
+        int numberOfSurfaceIPs = 3;//( int ) ceil( ( boundaryLoad->giveApproxOrder() + 1. ) / 2. ) * 2; ///@todo Check this.
 
         GaussIntegrationRule iRule(1, this, 1, 1);
         FloatArray N, t, f(18);
@@ -271,7 +275,7 @@ void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
             }
         }
 
-        answer.assemble(f, this->surf_ordering [ iSurf - 1 ]);
+        answer.assemble(f, velocitydofsonside);
     } else {
         OOFEM_ERROR("Strange boundary condition type");
     }
