@@ -42,6 +42,7 @@
 #include "feinterpol.h"
 #include "gausspoint.h"
 
+
 namespace oofem {
 REGISTER_BoundaryCondition(NeumannMomentLoad);
 
@@ -60,6 +61,8 @@ NeumannMomentLoad :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, p, _IFT_NeumannMomentLoad_Constant);
     IR_GIVE_FIELD(ir, cset, _IFT_NeumannMomentLoad_CenterSet);
 
+    //g.printYourself();
+
     xbar.resize(0);
 
     return result;
@@ -75,13 +78,16 @@ NeumannMomentLoad :: computeXbar()
     xbar.zero();
 
     celements = this->giveDomain()->giveSet(cset)->giveElementList();
+    //celements.printYourself();
+
+    double V=0.0;
 
     for ( auto elementID : celements ) {
 
         Element *thisElement = this->giveDomain()->giveElement(elementID);
         FEInterpolation *i = thisElement->giveInterpolation();
 
-        IntegrationRule *iRule = i->giveIntegrationRule(2);
+        IntegrationRule *iRule = i->giveIntegrationRule(3);
 
         for ( GaussPoint * gp: * iRule ) {
             FloatArray coord;
@@ -91,13 +97,18 @@ NeumannMomentLoad :: computeXbar()
             i->local2global(coord, *lcoords, FEIElementGeometryWrapper(thisElement));
             coord.times(gp->giveWeight()*fabs(detJ));
 
-            printf("(%f, %f, %f), detJ = %f\n", coord.at(1), coord.at(2), coord.at(3), detJ);
+            V=V+gp->giveWeight()*fabs(detJ);
+
+            //printf("(%f, %f, %f), detJ = %f\n", coord.at(1), coord.at(2), coord.at(3), detJ);
 
             xbar.add(coord);
         }
     }
 
-    xbar.printYourself();
+    xbar.times(1.0/V);
+
+    //xbar.printYourself();
+    //printf("%f\n", V);
 
 }
 
@@ -126,6 +137,51 @@ NeumannMomentLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const F
     factor = this->giveTimeFunction()->evaluate(tStep, mode);
     answer = componentArray;
     answer.times(factor);
+}
+
+void
+NeumannMomentLoad :: computeNormal(FloatArray &answer, Element *e, int side)
+{
+
+    FloatArray xi;
+
+    if ( this->domain->giveNumberOfSpatialDimensions() == 3 ) {
+        xi.resize(2);
+        xi(0) = 0.25;
+        xi(1) = 0.25;
+    } else {
+        xi.resize(1);
+        xi(0) = 0.5;
+    }
+
+    FEInterpolation *interpolation = e->giveInterpolation();
+
+    interpolation->boundaryEvalNormal( answer, side, xi, FEIElementGeometryWrapper(e) );
+}
+
+void
+NeumannMomentLoad :: computeValueAtBoundary(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode, Element *e, int iside)
+{
+    computeXbar();
+
+    FEInterpolation *interpolation = e->giveInterpolation();
+
+    // Compute normal
+    FloatArray n, lcoords;
+    interpolation->global2local(lcoords, coords, FEIElementGeometryWrapper(e));
+    interpolation->boundaryEvalNormal( n, iside, lcoords, FEIElementGeometryWrapper(e) );
+
+    // Compute l=p+g.[x-x^f]
+    FloatArray xdiff, x;
+    //coords.printYourself();
+
+    xdiff = coords-xbar;
+    double l = p+g.dotProduct(xdiff);
+
+    answer = l*n;
+
+    //printf("%f\t%f\t%f\t%f\t%f\t%f\t\n", coords.at(1), coords.at(2), coords.at(3), answer.at(1), answer.at(2), answer.at(3));
+
 }
 
 }

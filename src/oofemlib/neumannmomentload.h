@@ -36,6 +36,7 @@
 #define NEUMANNMOMENTLOAD_H
 
 #include "boundaryload.h"
+#include "element.h"
 
 #define _IFT_NeumannMomentLoad_Name "momentload"
 #define _IFT_NeumannMomentLoad_Gradient "gradient"
@@ -65,6 +66,9 @@ private:
 
     // Compute centre of mass for set cset
     void computeXbar();
+
+    // Compute normal at center of element
+    void computeNormal(FloatArray &answer, Element *e, int side);
 public:
     NeumannMomentLoad(int i, Domain * d) : BoundaryLoad(i, d) { }
 
@@ -72,6 +76,9 @@ public:
     virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
     virtual int giveApproxOrder() { return 0; }
 
+    FormulationType giveFormulationType() { return FT_Global; }
+
+    virtual void computeValueAtBoundary(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode, Element *e, int iside);
     /**
      * Sets a new load vector.
      * @param newValue New load.

@@ -47,7 +47,9 @@
 #include "fei3dtetlin.h"
 #include "fei3dtetquad.h"
 #include "fluidcrosssection.h"
+#include "neumannmomentload.h"
 #include "classfactory.h"
+
 
 namespace oofem {
 REGISTER_Element(Tet21Stokes);
@@ -260,11 +262,16 @@ void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
             double dA = gp->giveWeight() * this->interpolation_quad.surfaceGiveTransformationJacobian( iSurf, * lcoords, FEIElementGeometryWrapper(this) );
 
             if ( boundaryLoad->giveFormulationType() == Load :: FT_Entity ) { // load in xi-eta system
-                boundaryLoad->computeValueAt(t, tStep, * lcoords, VM_Total);
+                boundaryLoad->computeValueAt(t, tStep, *lcoords, VM_Total);
             } else { // Edge load in x-y system
                 FloatArray gcoords;
                 this->interpolation_quad.surfaceLocal2global( gcoords, iSurf, * lcoords, FEIElementGeometryWrapper(this) );
-                boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
+                NeumannMomentLoad *e= dynamic_cast<NeumannMomentLoad*> (boundaryLoad) ;
+                if (e != NULL ) {
+                    e->computeValueAtBoundary(t, tStep, gcoords, VM_Total, this, iSurf);
+                } else {
+                    boundaryLoad->computeValueAt(t, tStep, gcoords, VM_Total);
+                }
             }
 
             // Reshape the vector
@@ -415,8 +422,8 @@ void Tet21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answe
             IntArray eNodes;
             this->interpolation_quad.computeLocalEdgeMapping(eNodes, node - 4);
             answer.at(1) = 0.5 * (
-                this->giveNode( eNodes.at(1) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) +
-                this->giveNode( eNodes.at(2) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) );
+                        this->giveNode( eNodes.at(1) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) +
+                        this->giveNode( eNodes.at(2) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) );
         }
     } else {
         answer.clear();
