@@ -32,36 +32,22 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "Contact/contactelement.h"
-#include "dofmanager.h"
-#include "floatarray.h"
+#include "Contact/celnode2node.h"
 #include "floatmatrix.h"
-#include "valuemodetype.h"
-#include "dofiditem.h"
-#include "timestep.h"
-#include "dof.h"
 #include "masterdof.h"
 #include "unknownnumberingscheme.h"
-#include "domain.h"
 #include "gaussintegrationrule.h"
 
 namespace oofem {
-
-ContactElement :: ContactElement()
-{ 
-    this->dofIdArray.clear();
-    this->integrationRule = NULL;
-};  
   
   
   
-Node2NodeContact :: Node2NodeContact(DofManager *master, DofManager *slave, FloatArray &normal) : ContactElement()
+Node2NodeContact :: Node2NodeContact(DofManager *master, DofManager *slave) : ContactElement()
 {   
     this->masterNode = master;
     this->slaveNode = slave;
-    this->normal = normal;
-    this->area = 1.0;
-    this->eps = 1.0e6; // penalty
+    this->area = 1.0;   // should be optional parameter
+    this->epsN = 1.0e6; // penalty - should be given by 'contactmaterial'
 };   
   
 int
@@ -73,8 +59,13 @@ Node2NodeContact :: instanciateYourself(DataReader *dr)
     xm = *this->masterNode->giveCoordinates();
     
     normal = xs-xm;
-    normal.normalize();
-    this->normal = normal;
+    double norm = normal.computeNorm();
+    if ( norm < 1.0e-8 ) {
+        OOFEM_ERROR("Couldn't compute normal between master node (num %d) and slave node (num %d), nodes are too close to each other.", 
+          masterNode->giveGlobalNumber(), slaveNode->giveGlobalNumber() )
+    } else {
+        this->normal = normal*(1.0/norm);
+    }
     return 1;
 }
 
@@ -95,7 +86,7 @@ Node2NodeContact :: computeGap(FloatArray &answer, TimeStep *tStep)
     FloatArray normal = this->giveNormal();
     answer = {dx.dotProduct(normal), 0.0, 0.0};
     
-    printf("normal gap = %e \n", answer.at(1));
+    //printf("normal gap = %e \n", answer.at(1));
     if ( answer.at(1) < 0.0 ) {
         //printf("normal gap = %e \n", answer.at(1));
         this->inContact = true; // store in gp?
@@ -126,7 +117,7 @@ Node2NodeContact :: computeContactTractionAt(GaussPoint *gp, FloatArray &t, Floa
     // should be replaced with a call to constitutive model
     // gap should be in a local system
     if ( gap.at(1) < 0.0 ) {
-        t = this->eps * gap;
+        t = this->epsN * gap;
     } else {
         t = {0.0, 0.0, 0.0};
     }
@@ -174,7 +165,7 @@ Node2NodeContact :: computeContactTangent(FloatMatrix &answer, CharType type, Ti
     this->computeCmatrixAt(gp, C, tStep);
     answer.beDyadicProductOf(C,C);
     // this is the interface stiffness and should be obtained from that model
-    answer.times( this->eps * this->area );
+    answer.times( this->epsN * this->area );
     answer.negated();
 
     if( gap.at(1) > 0.0 ) {
@@ -246,7 +237,7 @@ Node2NodeContact :: setupIntegrationPoints()
 // node 2 node Lagrange
 
 
-Node2NodeContactL :: Node2NodeContactL(DofManager *master, DofManager *slave, FloatArray &normal) : Node2NodeContact(master, slave, normal)
+Node2NodeContactL :: Node2NodeContactL(DofManager *master, DofManager *slave) : Node2NodeContact(master, slave)
 {   
     this->masterNode = master;
     this->slaveNode = slave;
@@ -340,7 +331,7 @@ Node2NodeContactL :: computeContactTractionAt(GaussPoint *gp, FloatArray &t, Flo
         Dof *dof = masterNode->giveDofWithID( this->giveDofIdArray().at(1) );
         double lambda = dof->giveUnknown(VM_Total, tStep);
         t = {lambda, 0.0, 0.0};
-        printf("lambda %e \n\n", lambda);
+        //printf("lambda %e \n\n", lambda);
     } else {
         t = {0.0, 0.0, 0.0};
     }

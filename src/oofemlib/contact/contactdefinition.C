@@ -33,21 +33,23 @@
  */
 
 #include "contact/contactmanager.h"
-#include "Contact/contactdefinition.h"
-#include "Contact/contactelement.h"
+#include "contact/contactdefinition.h"
+#include "contact/contactelement.h"
 #include "intarray.h"
 #include "domain.h"
 #include "floatmatrix.h"
 #include "sparsemtrx.h"
 #include "masterdof.h"
-
+#include "classfactory.h"
 
 namespace oofem {
+REGISTER_ContactDefinition(ContactDefinition)
 
 
 ContactDefinition :: ContactDefinition(ContactManager *cMan)
 {
     this->cMan = cMan;
+    this->numberOfConstraintEq = 0;
 }
     /// Destructor.
 ContactDefinition :: ~ContactDefinition()
@@ -57,76 +59,13 @@ ContactDefinition :: ~ContactDefinition()
 
 
 
-IRResultType
-ContactDefinition :: initializeFrom(InputRecord *ir)
-{
-
-
-    IRResultType result; // Required by IR_GIVE_FIELD macro
-    
-    std::string typeName;
-    
-    
-    result = ir->giveRecordKeywordField(typeName);
-    
-    
-    std::string Node2NodeP ("node2nodep");
-    std::string Node2NodeL ("node2nodel");
-    
-    // define one contact 
-
-
-  
-  // Example of node to node contact with two elements
-  
-    /*  4 - 3  <->  8 - 7
-     *  |   |       |   |
-     *  1 - 2  <->  5 - 6
-     */
-
-    Domain *domain = this->cMan->giveDomain();
-    
-    this->numDofsPerContactElement = 1; // add one dof per el/node
-
-    IntArray masterNodes;
-    IntArray slaveNodes;
-    
-    IR_GIVE_FIELD(ir, masterNodes, _IFT_ContactManager_MasterNodes);
-    IR_GIVE_FIELD(ir, slaveNodes, _IFT_ContactManager_SlaveNodes);
-        
-    FloatArray normal = {1.0, 0.0, 0.0};
-
-    this->masterElementList.resize( masterNodes.giveSize() );
-    for( int i = 1; i<= masterNodes.giveSize(); i++ ) {
-        ContactElement *master;
-        
-        if ( typeName.compare(Node2NodeP) == 0 ) {
-            master = new Node2NodeContact( domain->giveDofManager(masterNodes.at(i)),
-                                           domain->giveDofManager(slaveNodes.at(i)), normal );
-          
-        } else if ( typeName.compare(Node2NodeL) == 0 ) {
-            master = new Node2NodeContactL( domain->giveDofManager(masterNodes.at(i)),
-                                            domain->giveDofManager(slaveNodes.at(i)), normal );
-        }
-      this->masterElementList[i-1] = std :: move(master);
-    }
-    
-    
-    for( ContactElement *cEl : this->masterElementList ) {
-        cEl->setupIntegrationPoints();
-    }
-    
-      
-    return IRRT_OK;
-}
-
-
 int
 ContactDefinition :: instanciateYourself(DataReader *dr)
 {
   
     for ( ContactElement *cEl : this->masterElementList ) { 
         cEl->instanciateYourself(dr);
+        cEl->setupIntegrationPoints();
     }
     
   return 1;
@@ -138,34 +77,38 @@ void
 ContactDefinition :: createContactDofs()
 {
     // Creates new dofs due associated with the contact (Lagrange multipliers) and appends them to the dof managers
+// Creates new dofs due associated with the contact (Lagrange multipliers) and appends them to the dof managers
 
-    //TODO This is a bit ugly, find a better solution than asking the conteact el
-    IntArray dofIdArray(this->numDofsPerContactElement), dofMans;
-    for ( int i = 1; i <= this->numDofsPerContactElement; i++ ) {
-        dofIdArray.at(i) = this->cMan->giveDomain()->giveNextFreeDofID();
-    }
-    
-    
-    
-    for ( ContactElement *cEl : this->masterElementList ) { 
+    //TODO This is a bit ugly, find a better solution than asking the contact el
+    if ( int numDofs = this->giveNumberOfConstraintEqToAdd() ) {
         
-        cEl->giveDofManagersToAppendTo(dofMans);
-        if ( dofMans.giveSize() ) { // if the contact element adds extra dofs, store them. Maybe just store in cDef?
-            cEl->setDofIdArray(dofIdArray);
+        // get an array with dof ids' to append to 
+        IntArray dofIdArray(numDofs), dofMans;
+        for ( int i = 1; i <= numDofs; i++ ) {
+            dofIdArray.at(i) = this->cMan->giveDomain()->giveNextFreeDofID();
         }
         
-        for ( int i = 1; i <= dofMans.giveSize(); i++ ) {
-            DofManager *dMan = this->cMan->giveDomain()->giveDofManager(dofMans.at(i));
-            for ( auto &dofid: dofIdArray ) {
-                if ( !dMan->hasDofID( ( DofIDItem ) ( dofid ) ) ) {
-                
-                    dMan->appendDof( new MasterDof( dMan, ( DofIDItem ) dofid ) );
-                }
+        
+        
+        for ( ContactElement *cEl : this->masterElementList ) { 
+            
+            cEl->giveDofManagersToAppendTo(dofMans);
+            if ( dofMans.giveSize() ) { // if the contact element adds extra dofs, store them. Maybe just store in cDef?
+                cEl->setDofIdArray(dofIdArray);
             }
-          
-        }
-    }  
-  
+            
+            for ( int i = 1; i <= dofMans.giveSize(); i++ ) {
+                DofManager *dMan = this->cMan->giveDomain()->giveDofManager(dofMans.at(i));
+                for ( auto &dofid: dofIdArray ) {
+                    if ( !dMan->hasDofID( ( DofIDItem ) ( dofid ) ) ) {
+                    
+                        dMan->appendDof( new MasterDof( dMan, ( DofIDItem ) dofid ) );
+                    }
+                }
+              
+            }
+        }  
+    }
 }
 
 

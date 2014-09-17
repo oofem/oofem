@@ -33,7 +33,7 @@
  */
 
 #include "contact/contactmanager.h"
-#include "Contact/contactdefinition.h"
+#include "contact/contactdefinition.h"
 #include "classfactory.h"
 #include "numericalcmpn.h"
 
@@ -66,16 +66,16 @@ ContactManager :: initializeFrom(InputRecord *ir)
     this->numberOfContactDefinitions = 0;
     IR_GIVE_FIELD(ir, this->numberOfContactDefinitions, _IFT_ContactManager_NumberOfContactDefinitions);
   
-    // define one contact
     
     this->contactDefinitionList.resize(this->numberOfContactDefinitions);
     
     std::string type;
     for ( int i = 1; i <= numberOfContactDefinitions; i++ ) {
-     
-        ContactDefinition *cDef = new ContactDefinition(this);
-        //cDef->initializeFrom(ir);
-        this->contactDefinitionList[i-1] = std :: move(cDef);
+        
+        //std::string name;
+        //result = ir->giveRecordKeywordField(name);
+        //this->contactDefinitionList[i-1] = new ContactDefinition(this);
+        //this->contactDefinitionList[i-1] = classFactory.createContactDefinition( name.c_str(), this );
         
     }
     
@@ -87,17 +87,25 @@ ContactManager :: initializeFrom(InputRecord *ir)
 int 
 ContactManager :: instanciateYourself(DataReader *dr)
 {
+      IRResultType result; // Required by IR_GIVE_FIELD macro
+      std :: string name;
+
+      // Create and instantiate contact definitions
+      for ( int i = 1; i <= this->giveNumberOfContactDefinitions(); i++ ) {
+          InputRecord *ir = dr->giveInputRecord(DataReader :: IR_contactDefRec, i);
+          result = ir->giveRecordKeywordField(name);  
+          ContactDefinition *cDef = classFactory.createContactDefinition( name.c_str(), this );
+          if ( cDef != NULL ) {
+            cDef->initializeFrom(ir);
+            cDef->instanciateYourself(dr);
+            this->contactDefinitionList[i-1] = std :: move(cDef);
+          } else {
+              OOFEM_ERROR("Failed to create contact definition (%s)", name.c_str() );
+          }
+        
+      }
     
-    for ( ContactDefinition *cDef : this->contactDefinitionList ) { 
-      ///TODO add number
-        int num = 1;
-        InputRecord *ir = dr->giveInputRecord(DataReader :: IR_contactManRec, num);
-        //result = ir->giveRecordKeywordField(name);
-        cDef->initializeFrom(ir);
-        cDef->instanciateYourself(dr);
-    }
-    
-    return 1;
+    return result;
 }
 
 

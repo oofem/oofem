@@ -44,8 +44,8 @@
 #include "classfactory.h"
 #include "activebc.h"
 #include "contact/contactmanager.h"
-#include "Contact/contactdefinition.h"
-#include "Contact/contactelement.h"
+#include "contact/contactdefinition.h"
+#include "contact/contactelement.h"
 
 
 #include <climits>
@@ -447,9 +447,8 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
             
         for ( int i =1; i <= cMan->giveNumberOfContactDefinitions(); i++ ) {
             ContactDefinition *cDef = cMan->giveContactDefinition(i);
-            //for ( ContactElement *cEl : cDef ) {
             for ( int k = 1; k <= cDef->giveNumbertOfContactElements(); k++ ) {
-                ContactElement *cEl = cDef->giveContactElemnt(k);
+                ContactElement *cEl = cDef->giveContactElement(k);
                 cEl->giveLocationArray(loc, s);
             
                 js = loc.giveSize();

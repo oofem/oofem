@@ -397,6 +397,19 @@ bool ClassFactory :: registerContactManager( const char *name, ContactManager * 
     CF_STORE(contactManList)
 }
 
+
+ContactDefinition *ClassFactory :: createContactDefinition(const char *name, ContactManager *cMan)
+{
+    CF_CREATE(contactDefList, cMan)
+}
+
+bool ClassFactory :: registerContactDefinition( const char *name, ContactDefinition * ( *creator )( ContactManager * ) )
+{
+    CF_STORE(contactDefList)
+}
+
+
+
 SparseGeneralEigenValueSystemNM *ClassFactory :: createGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *domain, EngngModel *emodel)
 {
     //CF_CREATE(mesherInterfaceList, domain)

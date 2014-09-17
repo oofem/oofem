@@ -15,6 +15,8 @@ set (core_unsorted
     solutionbasedshapefunction.C
     fracturemanager.C
     contact/contactmanager.C
+    contact/contactdefinition.C
+    contact/contactelement.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C

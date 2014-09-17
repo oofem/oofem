@@ -38,21 +38,11 @@
 #include "oofemcfg.h"
 #include "datareader.h"
 #include "inputrecord.h"
+#include "contact/contactmanager.h"
 
-
-#include <unordered_map>
-#include <list>
-#include <vector>
-#include <memory>
-
-///@name Input fields for _IFT_ContactManager
+///@name Input fields for _IFT_ContactDefinition
 //@{
-#define _IFT_ContactManager_Name "contactmanager"
-#define _IFT_ContactManager_NumberOfContactDefinitions "numcontactdef"
-
-// move to special ContactDefinition later
-#define _IFT_ContactManager_MasterNodes "masternodes"
-#define _IFT_ContactManager_SlaveNodes "slavenodes"
+#define _IFT_ContactDefinition_Name "contactdefinition"
 //@}
 
 namespace oofem {
@@ -60,6 +50,7 @@ class Domain;
 class ContactManager;
 class ContactObject;
 class ContactElement;
+class TimeStep;
 
 class ContactMaterial; // write this
 
@@ -72,13 +63,11 @@ class ContactMaterial; // write this
  */
 class OOFEM_EXPORT ContactDefinition
 {
-protected:
-  
 private:
     ContactManager *cMan;
 
     std :: vector< ContactElement *> masterElementList;
-    int numDofsPerContactElement; // used when creating new dofs
+    int numberOfConstraintEq; // used when creating new dofs
     
     ContactMaterial *contactMaterial;
     
@@ -89,24 +78,25 @@ public:
     /// Destructor.
     virtual ~ContactDefinition();
 
-    void createContactDofs();
+    virtual void createContactDofs();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);;
+    virtual IRResultType initializeFrom(InputRecord *ir){ return IRRT_OK; };
 
     virtual int instanciateYourself(DataReader *dr);
     virtual const char *giveClassName() const { return "ContactDefinition"; }
     //virtual const char *giveInputRecordName() const { return _IFT_ContactDefinition_Name; }
-
-    
+    ContactManager *giveContactManager() { return this->cMan; };
+    virtual int giveNumberOfConstraintEqToAdd() { return this->numberOfConstraintEq; }; 
+    virtual void setNumberOfConstraintEqToAdd(const int number) { this->numberOfConstraintEq = number; };
     virtual void computeContactForces(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms);
     
     virtual void computeContactTangent(SparseMtrx *answer, TimeStep *tStep,
                       CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s); 
     
-    ContactElement *giveContactElemnt(const int num) { return this->masterElementList[num-1]; };
+    ContactElement *giveContactElement(const int num) { return this->masterElementList[num-1]; };
     int giveNumbertOfContactElements() { return this->masterElementList.size(); };
-    
+    void addContactElement(ContactElement *cEl) { this->masterElementList.push_back(cEl); };
     // objects can be of different kinds
     // nodes, segments, surfaces, analytical functions
     

@@ -246,14 +246,14 @@ set (sm_status
     )
 
 set (sm_xfem
-	xfem/xfemstructuralelementinterface.C
-	xfem/enrichmentitems/crack.C
-	xfem/enrichmentitems/delamination.C
-	xfem/enrichmentitems/shellcrack.C
-	xfem/propagationlaws/plhoopstresscirc.C
-	xfem/xfemstructuremanager.C
-	EngineeringModels/xfemsolverinterface.C
-	)
+    xfem/xfemstructuralelementinterface.C
+    xfem/enrichmentitems/crack.C
+    xfem/enrichmentitems/delamination.C
+    xfem/enrichmentitems/shellcrack.C
+    xfem/propagationlaws/plhoopstresscirc.C
+    xfem/xfemstructuremanager.C
+    EngineeringModels/xfemsolverinterface.C
+    )
 
 set (sm_unsorted
     particle.C
@@ -263,8 +263,8 @@ set (sm_unsorted
     gpinitmodule.C
     stressstrainbasevector.C stressvector.C strainvector.C
     mappers/primvarmapper.C
-    Contact/contactdefinition.C
-    Contact/contactelement.C
+    Contact/cdefnode2node.C
+    Contact/celnode2node.C
     )
 
 set (sm_parallel

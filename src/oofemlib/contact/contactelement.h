@@ -116,7 +116,7 @@ public:
 };
 
 
-
+/*
 class OOFEM_EXPORT Node2NodeContact : public ContactElement
 {
 protected:
@@ -128,13 +128,13 @@ private:
     
     // should be set by input:
     double area; // The area associated with the node (default = 1)- in order to represent some physical dimension.  
-    double eps;  // penalty stiffness 
+    double epsN;  // penalty stiffness 
     
     FloatArray normal;
 public:
 
     /// Constructor.
-    Node2NodeContact(DofManager *master, DofManager *slave, FloatArray &normal);
+    Node2NodeContact(DofManager *master, DofManager *slave);
     /// Destructor.
     virtual ~Node2NodeContact(){};
     virtual int instanciateYourself(DataReader *dr);
@@ -175,7 +175,7 @@ private:
 public:
 
     /// Constructor.
-    Node2NodeContactL(DofManager *master, DofManager *slave, FloatArray &normal);
+    Node2NodeContactL(DofManager *master, DofManager *slave);
     /// Destructor.
     virtual ~Node2NodeContactL(){};
     //virtual int instanciateYourself(DataReader *dr);
@@ -193,7 +193,7 @@ public:
     virtual void computeContactTangent(FloatMatrix &answer, CharType type, TimeStep *tStep);
     
     virtual void giveLocationArray(IntArray &answer, const UnknownNumberingScheme &s);
-};
+};*/
 
 
 
