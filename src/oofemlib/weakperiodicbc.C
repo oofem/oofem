@@ -695,7 +695,7 @@ WeakPeriodicBoundaryCondition :: giveExternalForcesVector(FloatArray &answer, Ti
                         coord.at(2) = gcoords.at( surfaceIndexes.at(2) );
                         fVal = computeBaseFunctionValue2D(j + 1, coord);
                     }
-                    temp.at(j+1)=temp.at(j+1)+normalSign*this->g.dotProduct(gcoords)*fVal*gp->giveWeight()*detJ;
+                    temp.at(j+1)=temp.at(j+1)-normalSign*this->g.dotProduct(gcoords)*fVal*gp->giveWeight()*detJ;
                 }
             }
         }
