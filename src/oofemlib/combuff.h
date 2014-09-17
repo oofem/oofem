@@ -258,27 +258,6 @@ public:
      *  @return Nonzero if successful.
      */
     int packDouble(double value) { return packArray(& value, 1); }
-    /**
-     * Packs given IntArray  value into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     * @param arry Array to pack.
-     * @return Nonzero if successful.
-     */
-    int packIntArray(const IntArray &arry);
-    /**
-     * Packs given FloatArray  value into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     * @param arry Array to pack.
-     * @return Nonzero if successful.
-     */
-    int packFloatArray(const FloatArray &arry);
-    /**
-     * Packs given FloatMatrix  value into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     * @param mtrx Matrix to pack.
-     * @return Nonzero if successful.
-     */
-    int packFloatMatrix(const FloatMatrix &mtrx);
 
     /** @name Packing routines.
      * Packs array of values of given type into buffer.
@@ -307,24 +286,6 @@ public:
      * @return Nonzero if successful.
      */
     int unpackDouble(double &value) { return unpackArray(& value, 1); }
-    /**
-     * Unpacks given IntArray value from buffer.
-     * @param arry Array to unpack into.
-     * @return Nonzero if successful.
-     */
-    virtual int unpackIntArray(IntArray &arry);
-    /**
-     * Unpacks given FloatArray value from buffer.
-     * @param arry Array to unpack into.
-     * @return Nonzero if successful.
-     */
-    int unpackFloatArray(FloatArray &arry);
-    /**
-     * Unpacks given FloatMatrix value from buffer.
-     * @param mtrx Matrix to unpack into.
-     * @return Nonzero if successful.
-     */
-    int unpackFloatMatrix(FloatMatrix &mtrx);
     /**
      * Unpacks array of values of given type from buffer.
      * @param dest Address of first value in memory, where to store values.

@@ -233,34 +233,5 @@ MPIBuffer :: dump()
     fprintf(stderr, "\n");
 }
 
-
-
-/*** CommunicationBuffer CLASS ****/
-
-
-int
-CommunicationBuffer :: packIntArray(const IntArray &arry)
-{ return arry.packToCommBuffer(* this); }
-
-int
-CommunicationBuffer :: packFloatArray(const FloatArray &arry)
-{ return arry.packToCommBuffer(* this); }
-
-int
-CommunicationBuffer :: packFloatMatrix(const FloatMatrix &mtrx)
-{ return mtrx.packToCommBuffer(* this); }
-
-int
-CommunicationBuffer :: unpackIntArray(IntArray &arry)
-{ return arry.unpackFromCommBuffer(* this); }
-
-int
-CommunicationBuffer :: unpackFloatArray(FloatArray &arry)
-{ return arry.unpackFromCommBuffer(* this); }
-
-int
-CommunicationBuffer :: unpackFloatMatrix(FloatMatrix &mtrx)
-{ return mtrx.unpackFromCommBuffer(* this); }
-
 #endif
 } // end namespace oofem
