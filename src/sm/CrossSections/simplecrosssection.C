@@ -575,8 +575,6 @@ Material
 
 double
 SimpleCrossSection :: give(int aProperty, GaussPoint *gp)
-// Returns the value of the property aProperty (e.g. the Young's modulus
-// 'E') of the receiver.
 {
     if ( this->giveMaterialNumber() ) {
         return this->giveMaterial(gp)->give(aProperty, gp);
@@ -584,6 +582,19 @@ SimpleCrossSection :: give(int aProperty, GaussPoint *gp)
         return gp->giveMaterial()->give(aProperty, gp);
     }
 }
+
+
+int
+SimpleCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep)
+{
+    if ( type == IST_CrossSectionNumber ) {
+        answer.resize(1);
+        answer.at(1) = this->giveNumber();
+        return 1;
+    }
+    return this->giveMaterial(ip)->giveIPValue(answer, ip, type, tStep);
+}
+
 
 
 int

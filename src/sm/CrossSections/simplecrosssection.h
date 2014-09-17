@@ -148,6 +148,7 @@ public:
     virtual double give(int aProperty, GaussPoint *gp);
     virtual double give(CrossSectionProperty a, GaussPoint *gp) { return CrossSection :: give(a, gp); }
     virtual double give(CrossSectionProperty a, const FloatArray *coords, Element *elem, bool local) { return CrossSection :: give(a, coords, elem, local); }
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
     virtual Material *giveMaterial(IntegrationPoint *ip);
 
     int giveMaterialNumber() const { return this->materialNumber; };

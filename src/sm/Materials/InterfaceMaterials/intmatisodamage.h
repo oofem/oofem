@@ -42,8 +42,8 @@
 ///@name Input fields for IntMatIsoDamage
 //@{
 #define _IFT_IntMatIsoDamage_Name "intmatisodamage"
-#define _IFT_IntMatIsoDamage_kn "kn"
-#define _IFT_IntMatIsoDamage_ks "ks"
+#define _IFT_IntMatIsoDamage_kn "kn" /// Normal stiffness
+#define _IFT_IntMatIsoDamage_ks "ks" /// Tangent stiffness
 #define _IFT_IntMatIsoDamage_ft "ft"
 #define _IFT_IntMatIsoDamage_gf "gf"
 #define _IFT_IntMatIsoDamage_maxOmega "maxomega"
