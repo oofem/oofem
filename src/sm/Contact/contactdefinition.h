@@ -47,8 +47,12 @@
 
 ///@name Input fields for _IFT_ContactManager
 //@{
-//#define _IFT_ContactManager_Name "contactmanager"
+#define _IFT_ContactManager_Name "contactmanager"
+#define _IFT_ContactManager_NumberOfContactDefinitions "numcontactdef"
 
+// move to special ContactDefinition later
+#define _IFT_ContactManager_MasterNodes "masternodes"
+#define _IFT_ContactManager_SlaveNodes "slavenodes"
 //@}
 
 namespace oofem {
@@ -57,6 +61,7 @@ class ContactManager;
 class ContactObject;
 class ContactElement;
 
+class ContactMaterial; // write this
 
 
 /**
@@ -68,9 +73,14 @@ class ContactElement;
 class OOFEM_EXPORT ContactDefinition
 {
 protected:
+  
+private:
     ContactManager *cMan;
 
     std :: vector< ContactElement *> masterElementList;
+    int numDofsPerContactElement; // used when creating new dofs
+    
+    ContactMaterial *contactMaterial;
     
 public:
 
@@ -78,6 +88,8 @@ public:
     ContactDefinition(ContactManager *cMan);
     /// Destructor.
     virtual ~ContactDefinition();
+
+    void createContactDofs();
 
     virtual IRResultType initializeFrom(InputRecord *ir);;
 

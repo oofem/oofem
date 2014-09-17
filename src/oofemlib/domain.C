@@ -1463,6 +1463,11 @@ Domain :: createDofs()
     if ( this->hasXfemManager() ) {
         xfemManager->createEnrichedDofs();
     }
+    
+    if ( this->hasContactManager() ) {
+        contactManager->createContactDofs();
+    }
+    
 }
 
 

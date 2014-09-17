@@ -44,7 +44,8 @@
 #include "oofemcfg.h"
 #include "datareader.h"
 #include "inputrecord.h"
-
+#include "intarray.h"
+#include "floatarray.h"
 
 #include <unordered_map>
 #include <list>
@@ -67,6 +68,7 @@ class DofManager;
 class GaussPoint;
 class UnknownNumberingScheme;
 class FloatMatrix;
+class IntegrationRule;
 
 // contact elements
 
@@ -75,21 +77,30 @@ class OOFEM_EXPORT ContactElement
 private:
     ContactDefinition *cDef;
     
-    std :: vector< ContactElement *> slaveObjectList;
+    std :: vector< ContactElement *> slaveObjectList; // remove?
+    
+    IntArray dofIdArray;
+    
+
+    
 protected:
     bool inContact;
 public:
-
+    IntegrationRule *integrationRule;
     /// Constructor.
-    ContactElement(){};
+    ContactElement();
     /// Destructor.
     virtual ~ContactElement(){};
 
+    virtual void setupIntegrationPoints(){};
+    
+    
     ContactElement *giveSlave(const int num) { return slaveObjectList[num-1]; }; 
     int giveNumberOfSlaves() { return slaveObjectList.size(); };
     virtual int instanciateYourself(DataReader *dr){ return 1; };
     //virtual const char *giveClassName() const { return "ContactDefinition"; }
     bool isInContact() { return inContact; };
+    virtual void giveDofManagersToAppendTo(IntArray &answer) { answer = {}; }; 
     
     
     virtual void computeContactForces(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
@@ -99,6 +110,9 @@ public:
     
     
     virtual void giveLocationArray(IntArray &answer, const UnknownNumberingScheme &s) = 0;
+    // set the dof id array if the contact element has its own dofs (Lagrange multipliers)
+    virtual void setDofIdArray(IntArray &array){ this->dofIdArray = array; };
+    virtual IntArray &giveDofIdArray(){ return this->dofIdArray; };
 };
 
 
@@ -115,18 +129,21 @@ private:
     // should be set by input:
     double area; // The area associated with the node (default = 1)- in order to represent some physical dimension.  
     double eps;  // penalty stiffness 
+    
+    FloatArray normal;
 public:
 
     /// Constructor.
-    Node2NodeContact(DofManager *master, DofManager *slave);
+    Node2NodeContact(DofManager *master, DofManager *slave, FloatArray &normal);
     /// Destructor.
     virtual ~Node2NodeContact(){};
-
+    virtual int instanciateYourself(DataReader *dr);
+    virtual void setupIntegrationPoints();
     
     virtual void computeGap(FloatArray &answer, TimeStep *tStep);
     virtual void computeContactTractionAt(GaussPoint *gp, FloatArray &t, FloatArray &gap, TimeStep *tStep);
     virtual void computeCmatrixAt(GaussPoint *gp, FloatArray &answer, TimeStep *TimeStep);
-    
+    FloatArray &giveNormal() { return this->normal; };
     
     
     // Necessary methods - pure virtual in base class
@@ -154,20 +171,20 @@ private:
     // should be set by input:
     double area; // The area associated with the node (default = 1)- in order to represent some physical dimension.  
   
-    //DofManager *gammaDman
+    
 public:
 
     /// Constructor.
-    Node2NodeContactL(DofManager *master, DofManager *slave);
+    Node2NodeContactL(DofManager *master, DofManager *slave, FloatArray &normal);
     /// Destructor.
     virtual ~Node2NodeContactL(){};
-    virtual int instanciateYourself(DataReader *dr);
+    //virtual int instanciateYourself(DataReader *dr);
+    virtual void giveDofManagersToAppendTo(IntArray &answer); 
+    virtual void computeContactTractionAt(GaussPoint *gp, FloatArray &t, FloatArray &gap, TimeStep *tStep);
     
     //virtual void computeGap(FloatArray &answer, TimeStep *tStep);
     //virtual void computeContactTractionAt(GaussPoint *gp, FloatArray &t, FloatArray &gap, TimeStep *tStep);
     //virtual void computeCmatrixAt(GaussPoint *gp, FloatArray &answer, TimeStep *TimeStep);
-    
-    
     
     // Necessary methods - pure virtual in base class
     virtual void computeContactForces(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,

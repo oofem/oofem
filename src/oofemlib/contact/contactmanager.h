@@ -91,8 +91,9 @@ public:
     ContactManager & operator=(const ContactManager &) = delete;
     
 
-    //void createEnrichedDofs();
-
+    
+    void createContactDofs();
+    
     /// Initializes receiver according to object description stored in input record.
     virtual IRResultType initializeFrom(InputRecord *ir);
 

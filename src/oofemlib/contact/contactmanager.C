@@ -60,16 +60,21 @@ ContactManager :: ~ContactManager()
 IRResultType
 ContactManager :: initializeFrom(InputRecord *ir)
 {
+
+    IRResultType result; // Required by IR_GIVE_FIELD macro
+    
+    this->numberOfContactDefinitions = 0;
+    IR_GIVE_FIELD(ir, this->numberOfContactDefinitions, _IFT_ContactManager_NumberOfContactDefinitions);
   
     // define one contact
-    this->numberOfContactDefinitions = 1;
+    
     this->contactDefinitionList.resize(this->numberOfContactDefinitions);
     
-
+    std::string type;
     for ( int i = 1; i <= numberOfContactDefinitions; i++ ) {
      
         ContactDefinition *cDef = new ContactDefinition(this);
-        cDef->initializeFrom(ir);
+        //cDef->initializeFrom(ir);
         this->contactDefinitionList[i-1] = std :: move(cDef);
         
     }
@@ -84,6 +89,11 @@ ContactManager :: instanciateYourself(DataReader *dr)
 {
     
     for ( ContactDefinition *cDef : this->contactDefinitionList ) { 
+      ///TODO add number
+        int num = 1;
+        InputRecord *ir = dr->giveInputRecord(DataReader :: IR_contactManRec, num);
+        //result = ir->giveRecordKeywordField(name);
+        cDef->initializeFrom(ir);
         cDef->instanciateYourself(dr);
     }
     
@@ -120,6 +130,15 @@ ContactManager ::assembleTangentFromContacts(SparseMtrx *answer, TimeStep *tStep
 }
 
 
+
+void
+ContactManager :: createContactDofs()
+{
+    // Creates new dofs contacts and appends them to the dof managers
+    for ( ContactDefinition *cDef : contactDefinitionList ) {
+      cDef->createContactDofs();
+    }  
+}
 
 
 

@@ -43,18 +43,41 @@
 #include "masterdof.h"
 #include "unknownnumberingscheme.h"
 #include "domain.h"
-
+#include "gaussintegrationrule.h"
 
 namespace oofem {
 
-Node2NodeContact :: Node2NodeContact(DofManager *master, DofManager *slave) : ContactElement()
+ContactElement :: ContactElement()
+{ 
+    this->dofIdArray.clear();
+    this->integrationRule = NULL;
+};  
+  
+  
+  
+Node2NodeContact :: Node2NodeContact(DofManager *master, DofManager *slave, FloatArray &normal) : ContactElement()
 {   
     this->masterNode = master;
     this->slaveNode = slave;
+    this->normal = normal;
     this->area = 1.0;
-    this->eps = 1.0e11; // penalty
+    this->eps = 1.0e6; // penalty
 };   
   
+int
+Node2NodeContact :: instanciateYourself(DataReader *dr)
+{
+    // compute normal as direction vector from master node to slave node
+    FloatArray xs, xm, normal;
+    xs = *this->slaveNode->giveCoordinates();
+    xm = *this->masterNode->giveCoordinates();
+    
+    normal = xs-xm;
+    normal.normalize();
+    this->normal = normal;
+    return 1;
+}
+
 
 void
 Node2NodeContact :: computeGap(FloatArray &answer, TimeStep *tStep)
@@ -65,23 +88,19 @@ Node2NodeContact :: computeGap(FloatArray &answer, TimeStep *tStep)
     xm = *this->masterNode->giveCoordinates();
     this->slaveNode->giveUnknownVector(uS, {D_u, D_v, D_w}, VM_Total, tStep, true);
     this->masterNode->giveUnknownVector(uM, {D_u, D_v, D_w}, VM_Total, tStep, true);
-    uS.printYourself("uS");
-    uM.printYourself("uM");
     xs.add(uS);
     xm.add(uM);
     FloatArray dx = xs-xm;
     
-    // debug - set normal to x-axis - constant
-    // need info from surrounding elements in order to compute an average normal at the point
-    FloatArray normal = {1.0, 0.0, 0.0};
+    FloatArray normal = this->giveNormal();
     answer = {dx.dotProduct(normal), 0.0, 0.0};
     
     printf("normal gap = %e \n", answer.at(1));
     if ( answer.at(1) < 0.0 ) {
         //printf("normal gap = %e \n", answer.at(1));
-        this->inContact = true;
+        this->inContact = true; // store in gp?
     } else {
-        //this->inContact = false;
+        this->inContact = false;
     }
     
 }
@@ -91,14 +110,12 @@ void
 Node2NodeContact :: computeCmatrixAt(GaussPoint *gp, FloatArray &answer, TimeStep *TimeStep)
 {
   
-    //giveNormal -not updated for node2node
-    //TODO: debug
-    FloatArray normal = {1.0, 0.0, 0.0};
+    // The normal is not updated for node2node which is for small deformations only
     // C = {n -n}
+    FloatArray normal = this->giveNormal();
     answer = {  normal.at(1),  normal.at(2),  normal.at(3),
                -normal.at(1), -normal.at(2), -normal.at(3) };
     
-  
 }
 
 
@@ -106,7 +123,7 @@ Node2NodeContact :: computeCmatrixAt(GaussPoint *gp, FloatArray &answer, TimeSte
 void
 Node2NodeContact :: computeContactTractionAt(GaussPoint *gp, FloatArray &t, FloatArray &gap, TimeStep *tStep)
 {
-    // call to constitutive model
+    // should be replaced with a call to constitutive model
     // gap should be in a local system
     if ( gap.at(1) < 0.0 ) {
         t = this->eps * gap;
@@ -124,24 +141,22 @@ void
 Node2NodeContact :: computeContactForces(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
 {
-    //Loop through all the master objects and let them do their thing
-    FloatArray gap, C, Fc;
+    answer.clear();
+    FloatArray gap, C;
       
-    // we have a node 2 node contact so we know that both parties should be nodes - use this?
     this->computeGap(gap, tStep);
-    
-    GaussPoint *gp = NULL; // Need to create integration points later
-    // better name?
-    FloatArray t;
-    this->computeContactTractionAt(gp, t ,gap, tStep);
-    // rotate to to global system
-    this->computeCmatrixAt(gp, C, tStep);
-    
-    // compute load vector
-    // for penalty: fc = C^T * traction * A, Area - optional par
-    answer = t.at(1) * this->area * C;
-      
-    
+    if ( gap.at(1) < 0.0 ) {
+        GaussPoint *gp = this->integrationRule->getIntegrationPoint(0);
+        FloatArray t;
+        this->computeContactTractionAt(gp, t ,gap, tStep);
+        
+        this->computeCmatrixAt(gp, C, tStep);
+        
+        // compute load vector
+        // fc = C^T * traction * A, Area - should be optional par
+        answer = t.at(1) * this->area * C;
+          
+    }
   
 }
 
@@ -151,12 +166,20 @@ Node2NodeContact :: computeContactTangent(FloatMatrix &answer, CharType type, Ti
 {
    // Need to set up an integration rule 
     GaussPoint *gp = NULL;
-    
+    FloatArray gap;
+      
+    this->computeGap(gap, tStep);
+
     FloatArray C;
     this->computeCmatrixAt(gp, C, tStep);
     answer.beDyadicProductOf(C,C);
     // this is the interface stiffness and should be obtained from that model
     answer.times( this->eps * this->area );
+    answer.negated();
+
+    if( gap.at(1) > 0.0 ) {
+        answer.zero();
+    }
 }
   
   
@@ -195,39 +218,40 @@ Node2NodeContact :: giveLocationArray(IntArray &answer, const UnknownNumberingSc
 }    
 
 
-// node 2 node lagrange
+void
+Node2NodeContact :: setupIntegrationPoints()
+{
+    // Sets up the integration rule array which contains all the necessary integration points
+    if ( this->integrationRule == NULL ) {
+        //TODO sets a null pointer for the element in the iRule 
+        this->integrationRule = new GaussIntegrationRule(1, NULL) ;
+        this->integrationRule->SetUpPoint(_Unknown);
+    }
+    
+  
+}
 
 
-Node2NodeContactL :: Node2NodeContactL(DofManager *master, DofManager *slave) : Node2NodeContact(master, slave)
+
+
+
+
+
+
+
+
+
+
+
+// node 2 node Lagrange
+
+
+Node2NodeContactL :: Node2NodeContactL(DofManager *master, DofManager *slave, FloatArray &normal) : Node2NodeContact(master, slave, normal)
 {   
     this->masterNode = master;
     this->slaveNode = slave;
     this->area = 1.0;
 };   
-
-
-int
-Node2NodeContactL :: instanciateYourself(DataReader *dr)
-{
-
-    // Create dofs for coefficients
-   
-    //gammaDman = new Node(0, this->domain);
-    //gamma_ids.clear();
-    //for ( int i = 0; i < ndof; i++ ) {
-        //int dofid = this->domain->giveNextFreeDofID();
-        //gamma_ids.followedBy(dofid);
-        //gammaDman->appendDof( new MasterDof( gammaDman, ( DofIDItem )dofid ) );
-    //}
-  
-    // Add new dof to master dof manager -> new lagrange multiplier
-    // TODO fix in a nicer way
-    int dofid = this->masterNode->giveDomain()->giveNextFreeDofID();
-    this->masterNode->appendDof( new MasterDof( this->masterNode, ( DofIDItem )dofid ) );
-    this->lagrangeId = dofid;
-    
-    return 1;
-}
 
 
 
@@ -237,9 +261,9 @@ Node2NodeContactL :: giveLocationArray(IntArray &answer, const UnknownNumberingS
   
     Node2NodeContact :: giveLocationArray(answer, s);
     
-    //add lagrange dof
-    if ( this->masterNode->hasDofID( (DofIDItem)this->lagrangeId ) ) { 
-        Dof *dof= this->masterNode->giveDofWithID( (DofIDItem)this->lagrangeId );
+    // Add one lagrange dof
+    if ( this->masterNode->hasDofID( (DofIDItem)this->giveDofIdArray().at(1) ) ) { 
+        Dof *dof= this->masterNode->giveDofWithID( (DofIDItem)this->giveDofIdArray().at(1) );
         answer.followedBy( s.giveDofEquationNumber(dof) );
     }
     
@@ -254,34 +278,23 @@ Node2NodeContactL :: computeContactForces(FloatArray &answer, TimeStep *tStep, C
   
     //Loop through all the master objects and let them do their thing
     FloatArray gap, C, Fc;
-      
-    // we have a node 2 node contact so we know that both parties should be nodes - use this?
     this->computeGap(gap, tStep);
     
-    GaussPoint *gp = NULL; // Need to create integration points later
-    // better name?
+    GaussPoint *gp = this->integrationRule->getIntegrationPoint(0);
     FloatArray t;
-    //this->computeContactTractionAt(gp, t ,gap, tStep);
-    bool flag =false;
-    flag = masterNode->hasDofID( (DofIDItem)this->lagrangeId );
-    
-    IntArray temp2;
-    masterNode->giveCompleteMasterDofIDArray(temp2);
-    temp2.printYourself();
-    Dof *dof = masterNode->giveDofWithID( this->lagrangeId );
-    
-    double lambda = dof->giveUnknown(mode, tStep);
-    // rotate to to global system
+    this->computeContactTractionAt(gp, t ,gap, tStep);
     this->computeCmatrixAt(gp, C, tStep);
     
     // compute load vector
-    // for penalty: fc = {C^T * lambda * A, gap_n}
-    FloatArray temp = lambda *this->area * C;
+    // for Lagrange: fc = traction * C^T * A (traction = lambda)
+    FloatArray temp = t.at(1) *this->area * C;
+    
     answer.resize( C.giveSize() + 1);
-    answer.addSubVector(temp,1);
-    answer.at( C.giveSize() + 1 ) = gap.at(1);
-        
-  
+    answer.zero();
+    if( gap.at(1) < 0.0 ) {
+        answer.addSubVector(temp,1);
+        answer.at( C.giveSize() + 1 ) = -gap.at(1);
+    }
 }
     
 
@@ -289,23 +302,57 @@ Node2NodeContactL :: computeContactForces(FloatArray &answer, TimeStep *tStep, C
 void
 Node2NodeContactL :: computeContactTangent(FloatMatrix &answer, CharType type, TimeStep *tStep)
 {
-   // Need to set up an integration rule 
-    GaussPoint *gp = NULL;
-    
-    FloatArray C;
-    this->computeCmatrixAt(gp, C, tStep);
-    int sz = C.giveSize();
-    answer.resize(sz+1,sz+1);
+    answer.resize(7,7);
     answer.zero();
     
-    C.times(this->area);
+    FloatArray gap;
+    this->computeGap(gap, tStep);
     
-    answer.addSubVectorCol(C, 1, sz + 1);
-    answer.addSubVectorCol(C, sz + 1, 1);
+    if( gap.at(1) < 0.0 ) {
+      
+        GaussPoint *gp = this->integrationRule->getIntegrationPoint(0);
+        
+        FloatArray C;
+        this->computeCmatrixAt(gp, C, tStep);
+        int sz = C.giveSize();
+        C.times(this->area);
+        
+        answer.addSubVectorCol(C, 1, sz + 1);
+        answer.addSubVectorRow(C, sz + 1, 1);
+    }
+    
+    //TODO need to add a small number for the solver
+    for ( int i = 1; i <= 7; i++ ) {
+        answer.at(i,i) += 1.0e-8;
+    }
+
 }
   
+
+  
+void
+Node2NodeContactL :: computeContactTractionAt(GaussPoint *gp, FloatArray &t, FloatArray &gap, TimeStep *tStep)
+{
+    // should be replaced with a call to constitutive model
+    // gap should be in a local system
+    if ( gap.at(1) < 0.0 ) {
+        
+        Dof *dof = masterNode->giveDofWithID( this->giveDofIdArray().at(1) );
+        double lambda = dof->giveUnknown(VM_Total, tStep);
+        t = {lambda, 0.0, 0.0};
+        printf("lambda %e \n\n", lambda);
+    } else {
+        t = {0.0, 0.0, 0.0};
+    }
+  
+} 
+  
     
-    
+void
+Node2NodeContactL :: giveDofManagersToAppendTo(IntArray &answer)
+{
+    answer = {this->masterNode->giveNumber()};
+}
     
     
     
