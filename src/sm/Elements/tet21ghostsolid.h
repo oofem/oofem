@@ -57,6 +57,8 @@ public:
     tet21ghostsolid(int n, Domain *d);
 
     virtual FEInterpolation *giveInterpolation() const;
+    virtual FEInterpolation *giveInterpolation(DofIDItem id) const;
+
     virtual void giveDofManDofIDMask(int inode, IntArray &answer) const;
     virtual const char *giveInputRecordName() const { return _IFT_tet21ghostsolid_Name; }
     virtual int computeNumberOfDofs() { return 70; }

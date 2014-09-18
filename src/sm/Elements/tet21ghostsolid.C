@@ -107,6 +107,16 @@ tet21ghostsolid :: giveInterpolation() const
     return & interpolation;
 }
 
+FEInterpolation *
+tet21ghostsolid :: giveInterpolation(DofIDItem id) const
+{
+    if ( id == P_f ) {
+        return & interpolation_lin;
+    } else {
+        return & interpolation;
+    }
+}
+
 void
 tet21ghostsolid :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
