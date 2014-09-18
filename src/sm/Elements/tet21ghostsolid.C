@@ -63,7 +63,7 @@ IntArray tet21ghostsolid :: momentum_ordering(30);
 IntArray tet21ghostsolid :: conservation_ordering(4);
 IntArray tet21ghostsolid :: ghostdisplacement_ordering(30);
 
-tet21ghostsolid::tet21ghostsolid(int n, Domain *aDomain) : NLStructuralElement(n, aDomain)
+tet21ghostsolid::tet21ghostsolid(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), SpatialLocalizerInterface(this)
 {
 
     numberOfGaussPoints = 4;
@@ -769,6 +769,72 @@ tet21ghostsolid :: giveRowTransformationMatrix(FloatMatrix &Itransform, TimeStep
 
     return 0;
 
+}
+
+// Some extension Interfaces to follow:
+
+Interface *tet21ghostsolid :: giveInterface(InterfaceType it)
+{
+    switch ( it ) {
+    case NodalAveragingRecoveryModelInterfaceType:
+        return static_cast< NodalAveragingRecoveryModelInterface * >(this);
+
+    case SpatialLocalizerInterfaceType:
+        return static_cast< SpatialLocalizerInterface * >(this);
+
+    case EIPrimaryUnknownMapperInterfaceType:
+        return static_cast< EIPrimaryUnknownMapperInterface * >(this);
+
+    default:
+        return StructuralElement :: giveInterface(it);
+        //return FMElement :: giveInterface(it);
+    }
+}
+
+void tet21ghostsolid :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
+                                                                          TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+{
+    FloatArray n, n_lin;
+    this->interpolation.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
+    this->interpolation_lin.evalN( n_lin, lcoords, FEIElementGeometryWrapper(this) );
+    answer.resize(4);
+    answer.zero();
+    for ( int i = 1; i <= n.giveSize(); i++ ) {
+        answer(0) += n.at(i) * this->giveNode(i)->giveDofWithID(V_u)->giveUnknown(mode, tStep);
+        answer(1) += n.at(i) * this->giveNode(i)->giveDofWithID(V_v)->giveUnknown(mode, tStep);
+        answer(2) += n.at(i) * this->giveNode(i)->giveDofWithID(V_w)->giveUnknown(mode, tStep);
+    }
+
+    for ( int i = 1; i <= n_lin.giveSize(); i++ ) {
+        answer(3) += n_lin.at(i) * this->giveNode(i)->giveDofWithID(P_f)->giveUnknown(mode, tStep);
+    }
+}
+
+double tet21ghostsolid :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
+{
+    FloatArray center;
+    FloatArray lcoords = {0.3333333, 0.3333333, 0.3333333};
+    this->computeGlobalCoordinates(center, lcoords);
+    return center.distance(coords);
+}
+
+void
+tet21ghostsolid :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
+{
+    if ( type == IST_Pressure ) {
+        answer.resize(1);
+        if ( node <= 4 ) {
+            answer.at(1) = this->giveNode(node)->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep);
+        } else {
+            IntArray eNodes;
+            this->interpolation.computeLocalEdgeMapping(eNodes, node - 4);
+            answer.at(1) = 0.5 * (
+                        this->giveNode( eNodes.at(1) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) +
+                        this->giveNode( eNodes.at(2) )->giveDofWithID(P_f)->giveUnknown(VM_Total, tStep) );
+        }
+    } else {
+        answer.clear();
+    }
 }
 
 }

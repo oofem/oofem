@@ -37,6 +37,9 @@
 
 #include "../sm/Elements/nlstructuralelement.h"
 #include "floatmatrix.h"
+#include "nodalaveragingrecoverymodel.h"
+#include "spatiallocalizer.h"
+#include "eleminterpmapperinterface.h"
 
 #define _IFT_tet21ghostsolid_Name "tet21ghostsolid"
 
@@ -44,7 +47,10 @@ namespace oofem {
 class FEI3dTetQuad;
 class FEI3dTetLin;
 
-class tet21ghostsolid : public NLStructuralElement
+class tet21ghostsolid : public NLStructuralElement,
+        public NodalAveragingRecoveryModelInterface,
+        public SpatialLocalizerInterface,
+        public EIPrimaryUnknownMapperInterface
 {
 private:
     FloatMatrix Dghost;
@@ -73,6 +79,19 @@ public:
     virtual double computeVolumeAround(GaussPoint *gp);
     virtual bool giveRowTransformationMatrix(FloatMatrix &Itransform, TimeStep *tStep);
     virtual const char *giveClassName() const { return "tet21ghostsolid"; }
+
+
+    virtual Interface *giveInterface(InterfaceType it);
+
+    // Spatial localizer interface:
+    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
+
+    // Element interpolation interface:
+    virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
+                                                                       TimeStep *tStep, const FloatArray &coords, FloatArray &answer);
+
+    // Nodal averaging interface:
+    virtual void NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep);
 
 protected:
     static FEI3dTetQuad interpolation;
