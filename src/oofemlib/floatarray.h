@@ -389,7 +389,7 @@ public:
      * Computes distance between the position represented by the reciever and a line segment represented by it's start
      * point iP1 and it's end point iP2.
      * The local coordinate oXi is in the range [0,1]
-     * Written by Erik Svenning, August 2013.
+     * @author Erik Svenning, August 2013.
      */
     double distance(const FloatArray &iP1, const FloatArray &iP2, double &oXi, double &oXiUnbounded) const;
     double distance_square(const FloatArray &iP1, const FloatArray &iP2, double &oXi, double &oXiUnbounded) const;
@@ -490,8 +490,8 @@ public:
     int givePackSize(CommunicationBuffer &buff) const;
 #endif
 
-    contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
-    contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
+    contextIOResultType storeYourself(DataStream *stream);
+    contextIOResultType restoreYourself(DataStream *stream);
 
     friend std :: ostream &operator << ( std :: ostream & out, const FloatArray & x );
 

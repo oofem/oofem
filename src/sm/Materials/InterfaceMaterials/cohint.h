@@ -51,9 +51,6 @@ namespace oofem {
 
 /**
  * This class implements associated Material Status to CohesiveInterfaceMaterial.
- * It is attribute of matStatusDictionary at every GaussPoint, for which this material
- * is active.
- *
  * @author Milan Jirasek
  */
 class CohesiveInterfaceMaterialStatus : public StructuralMaterialStatus

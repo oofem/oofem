@@ -157,7 +157,7 @@ IntElSurfTr1 :: computeTransformationMatrixAt(GaussPoint *gp, FloatMatrix &answe
 int
 IntElSurfTr1 :: computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords)
 {
-    FloatArray N(3), meanNode;
+    FloatArray N, meanNode;
     this->interpolation.evalN( N, lcoords, FEIElementGeometryWrapper(this) );
     answer.resize(3);
     answer.zero();

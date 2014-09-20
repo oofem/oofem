@@ -187,7 +187,7 @@ IntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *obj)
                 THROW_CIOERR(CIO_IOERR);
             }
 
-            if ( ( iores = gp->giveNaturalCoordinates()->storeYourself(stream, mode) ) != CIO_OK ) {
+            if ( ( iores = gp->giveNaturalCoordinates()->restoreYourself(stream) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
 
@@ -265,7 +265,7 @@ IntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, void *ob
 
             // read coords
             FloatArray c;
-            if ( ( iores = c.restoreYourself(stream, mode) ) != CIO_OK ) {
+            if ( ( iores = c.restoreYourself(stream) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
 

@@ -113,7 +113,7 @@ public:
 /**
  * Class representing Heaviside EnrichmentFunction.
  *
- * \author Erik Svenning
+ * @author Erik Svenning
  */
 class OOFEM_EXPORT HeavisideFunction : public EnrichmentFunction
 {

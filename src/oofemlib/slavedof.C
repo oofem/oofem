@@ -224,7 +224,7 @@ contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( ( iores = masterContribution.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = masterContribution.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
@@ -241,7 +241,7 @@ contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode
             }
         }
 
-        if ( ( iores = dofIDs.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = dofIDs.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     } // if ( mode & CM_Definition )
@@ -265,7 +265,7 @@ contextIOResultType SlaveDof :: restoreContext(DataStream *stream, ContextMode m
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( ( iores = masterContribution.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = masterContribution.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
@@ -278,7 +278,7 @@ contextIOResultType SlaveDof :: restoreContext(DataStream *stream, ContextMode m
             }
         }
 
-        if ( ( iores = dofIDs.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = dofIDs.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     } // if ( mode & CM_Definition )

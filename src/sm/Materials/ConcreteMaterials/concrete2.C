@@ -1316,7 +1316,7 @@ Concrete2MaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = plasticStrainVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasticStrainVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1362,7 +1362,7 @@ Concrete2MaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = plasticStrainVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasticStrainVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

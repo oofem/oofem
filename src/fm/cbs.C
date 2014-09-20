@@ -473,7 +473,7 @@ CBS :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = prescribedTractionPressure.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = prescribedTractionPressure.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -522,7 +522,7 @@ CBS :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = prescribedTractionPressure.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = prescribedTractionPressure.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

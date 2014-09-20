@@ -256,16 +256,16 @@ contextIOResultType Set :: saveContext(DataStream *stream, ContextMode mode, voi
     }
 
     if ( ( mode & CM_Definition ) ) {
-        if ( ( iores = elements.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = elements.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = elementBoundaries.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = elementBoundaries.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = elementEdges.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = elementEdges.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = nodes.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = nodes.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -282,16 +282,16 @@ contextIOResultType Set :: restoreContext(DataStream *stream, ContextMode mode, 
     }
 
     if ( mode & CM_Definition ) {
-        if ( ( iores = elements.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = elements.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = elementBoundaries.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = elementBoundaries.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = elementEdges.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = elementEdges.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = nodes.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = nodes.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

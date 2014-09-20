@@ -177,11 +177,11 @@ FluidDynamicMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, 
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = deviatoricStressVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = deviatoricStressVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = deviatoricStrainRateVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = deviatoricStrainRateVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -197,11 +197,11 @@ FluidDynamicMaterialStatus :: restoreContext(DataStream *stream, ContextMode mod
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = deviatoricStressVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = deviatoricStressVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = deviatoricStrainRateVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = deviatoricStrainRateVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

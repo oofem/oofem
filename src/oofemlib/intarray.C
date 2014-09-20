@@ -255,7 +255,7 @@ void IntArray :: printYourself(const std::string name) const
 }
 
 
-contextIOResultType IntArray :: storeYourself(DataStream *stream, ContextMode mode) const
+contextIOResultType IntArray :: storeYourself(DataStream *stream) const
 {
     // write size
     int size = this->giveSize();
@@ -272,7 +272,7 @@ contextIOResultType IntArray :: storeYourself(DataStream *stream, ContextMode mo
     return CIO_OK;
 }
 
-contextIOResultType IntArray :: restoreYourself(DataStream *stream, ContextMode mode)
+contextIOResultType IntArray :: restoreYourself(DataStream *stream)
 {
     // read size
     int size;

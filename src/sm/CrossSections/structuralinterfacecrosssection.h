@@ -130,6 +130,8 @@ public:
 
     virtual int checkConsistency();
 
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
+
 #ifdef __PARALLEL_MODE
     virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp);
     virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp);

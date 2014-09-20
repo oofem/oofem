@@ -1805,7 +1805,7 @@ bool FloatMatrix :: computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix 
 }
 #endif
 
-contextIOResultType FloatMatrix :: storeYourself(DataStream *stream, ContextMode mode)
+contextIOResultType FloatMatrix :: storeYourself(DataStream *stream)
 // writes receiver's binary image into stream
 // use id to distinguish some instances
 // return value >0 success
@@ -1830,7 +1830,7 @@ contextIOResultType FloatMatrix :: storeYourself(DataStream *stream, ContextMode
 }
 
 
-contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMode mode)
+contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream)
 // reads receiver from stream
 // warning - overwrites existing data!
 // returns 0 if file i/o error

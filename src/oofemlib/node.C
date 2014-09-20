@@ -578,7 +578,7 @@ Node :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
     if ( mode & CM_Definition ) {
         int _haslcs = hasLocalCS();
-        if ( ( iores = coordinates.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = coordinates.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
@@ -587,7 +587,7 @@ Node :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         }
 
         if ( _haslcs ) {
-            if ( ( iores = localCoordinateSystem->storeYourself(stream, mode) ) != CIO_OK ) {
+            if ( ( iores = localCoordinateSystem->restoreYourself(stream) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         }
@@ -615,7 +615,7 @@ Node :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
     if ( mode & CM_Definition ) {
         int _haslcs;
-        if ( ( iores = coordinates.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = coordinates.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
@@ -628,7 +628,7 @@ Node :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
                 localCoordinateSystem = new FloatMatrix();
             }
 
-            if ( ( iores = localCoordinateSystem->restoreYourself(stream, mode) ) != CIO_OK ) {
+            if ( ( iores = localCoordinateSystem->restoreYourself(stream) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         } else {

@@ -577,7 +577,7 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
     }
 
     if ( mode & CM_Definition ) {
-        if ( ( iores = loadArray.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = loadArray.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
@@ -598,7 +598,7 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( ( iores = partitions.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = partitions.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -655,7 +655,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
     }
 
     if ( mode & CM_Definition ) {
-        if ( ( iores = loadArray.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = loadArray.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
@@ -677,7 +677,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
         }
 
         parallel_mode = ( dofManagerParallelMode ) _val;
-        if ( ( iores = partitions.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = partitions.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

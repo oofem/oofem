@@ -280,6 +280,7 @@ IntMatIsoDamage :: initializeFrom(InputRecord *ir)
     this->e0 = ft / kn;
 
     //Set limit on the maximum isotropic damage parameter if needed
+    maxOmega = 0.999999;
     IR_GIVE_OPTIONAL_FIELD(ir, maxOmega, _IFT_IntMatIsoDamage_maxOmega);
     maxOmega = min(maxOmega, 0.999999);
     maxOmega = max(maxOmega, 0.0);

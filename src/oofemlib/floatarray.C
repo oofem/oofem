@@ -829,7 +829,7 @@ void FloatArray :: copySubVector(const FloatArray &src, int si)
 }
 
 
-contextIOResultType FloatArray :: storeYourself(DataStream *stream, ContextMode mode)
+contextIOResultType FloatArray :: storeYourself(DataStream *stream)
 // writes receiver's binary image into stream
 // use id to distinguish some instances
 // return value >0 success
@@ -852,7 +852,7 @@ contextIOResultType FloatArray :: storeYourself(DataStream *stream, ContextMode 
     return CIO_OK;
 }
 
-contextIOResultType FloatArray :: restoreYourself(DataStream *stream, ContextMode mode)
+contextIOResultType FloatArray :: restoreYourself(DataStream *stream)
 // reads receiver from stream
 // warning - overwrites existing data!
 // returns 0 if file i/o error

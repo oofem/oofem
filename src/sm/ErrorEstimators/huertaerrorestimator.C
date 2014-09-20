@@ -650,7 +650,7 @@ HuertaErrorEstimator :: saveContext(DataStream *stream, ContextMode mode, void *
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = this->eNorms.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = this->eNorms.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -673,7 +673,7 @@ HuertaErrorEstimator :: restoreContext(DataStream *stream, ContextMode mode, voi
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = eNorms.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = eNorms.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

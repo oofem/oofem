@@ -717,19 +717,19 @@ contextIOResultType NlDEIDynamic :: saveContext(DataStream *stream, ContextMode 
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = previousIncrementOfDisplacementVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = previousIncrementOfDisplacementVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = velocityVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -770,19 +770,19 @@ contextIOResultType NlDEIDynamic :: restoreContext(DataStream *stream, ContextMo
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = previousIncrementOfDisplacementVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = previousIncrementOfDisplacementVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = velocityVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
