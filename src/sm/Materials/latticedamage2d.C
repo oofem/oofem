@@ -815,7 +815,7 @@ LatticeDamage2dStatus :: saveContext(DataStream *stream, ContextMode mode, void 
 
 
     // write a raw data
-    if ( ( iores = reducedStrain.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = reducedStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -912,7 +912,7 @@ LatticeDamage2dStatus :: restoreContext(DataStream *stream, ContextMode mode, vo
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = reducedStrain.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = reducedStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

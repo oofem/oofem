@@ -1267,7 +1267,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainNeqs.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = domainNeqs.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1276,7 +1276,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainPrescribedNeqs.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = domainPrescribedNeqs.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1379,7 +1379,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainNeqs.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = domainNeqs.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1388,7 +1388,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainPrescribedNeqs.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = domainPrescribedNeqs.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

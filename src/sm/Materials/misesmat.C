@@ -896,7 +896,7 @@ MisesMatStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     // write raw data
 
     // write plastic strain (vector)
-    if ( ( iores = plasticStrain.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasticStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -929,7 +929,7 @@ MisesMatStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj
     }
 
     // read plastic strain (vector)
-    if ( ( iores = plasticStrain.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasticStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

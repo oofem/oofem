@@ -514,7 +514,7 @@ RCSDNLMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *
     }
 
     // write a raw data
-    if ( ( iores = nonlocalStrainVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = nonlocalStrainVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -537,7 +537,7 @@ RCSDNLMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, voi
 
     // read raw data
 
-    if ( ( iores = nonlocalStrainVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = nonlocalStrainVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

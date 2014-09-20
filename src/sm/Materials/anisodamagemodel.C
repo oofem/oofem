@@ -2276,7 +2276,7 @@ AnisotropicDamageMaterialStatus :: saveContext(DataStream *stream, ContextMode m
 
 
     // write damage (vector)
-    if ( ( iores = damage.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = damage.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -2342,7 +2342,7 @@ AnisotropicDamageMaterialStatus :: restoreContext(DataStream *stream, ContextMod
 
 
     // read damage (vector)
-    if ( ( iores = damage.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = damage.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

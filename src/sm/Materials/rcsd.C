@@ -591,7 +591,7 @@ RCSDMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *ob
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = Ds0.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = Ds0.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -625,7 +625,7 @@ RCSDMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void 
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = Ds0.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = Ds0.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

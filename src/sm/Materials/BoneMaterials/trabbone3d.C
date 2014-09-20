@@ -1422,7 +1422,7 @@ TrabBone3DStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = plasDef.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasDef.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1439,26 +1439,26 @@ TrabBone3DStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = effectiveStress.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = effectiveStress.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = plasFlowDirec.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasFlowDirec.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     /*
-     * if ( ( iores = smtrx.storeYourself(stream, mode) ) != CIO_OK ) {
+     * if ( ( iores = smtrx.restoreYourself(stream) ) != CIO_OK ) {
      * THROW_CIOERR(iores);
      * }
-     * if ( ( iores = tangentMatrix.storeYourself(stream, mode) ) != CIO_OK ) {
+     * if ( ( iores = tangentMatrix.restoreYourself(stream) ) != CIO_OK ) {
      * THROW_CIOERR(iores);
      * }
-     * if ( ( iores = SSaTensor.storeYourself(stream, mode) ) != CIO_OK ) {
+     * if ( ( iores = SSaTensor.restoreYourself(stream) ) != CIO_OK ) {
      * THROW_CIOERR(iores);
      * }
      *
-     * if ( ( iores = tempStrain.storeYourself(stream, mode) ) != CIO_OK ) {
+     * if ( ( iores = tempStrain.restoreYourself(stream) ) != CIO_OK ) {
      * THROW_CIOERR(iores);
      * }
      */
@@ -1477,7 +1477,7 @@ TrabBone3DStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
     }
 
     // read raw data
-    if ( ( iores = plasDef.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasDef.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1495,25 +1495,25 @@ TrabBone3DStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
     }
 
 
-    if ( ( iores = effectiveStress.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = effectiveStress.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = plasFlowDirec.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasFlowDirec.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     /*
-     * if ( ( iores = smtrx.restoreYourself(stream, mode) ) != CIO_OK ) {
+     * if ( ( iores = smtrx.restoreYourself(stream) ) != CIO_OK ) {
      * THROW_CIOERR(iores);
      * }
-     * if ( ( iores = tangentMatrix.restoreYourself(stream, mode) ) != CIO_OK ) {
+     * if ( ( iores = tangentMatrix.restoreYourself(stream) ) != CIO_OK ) {
      * THROW_CIOERR(iores);
      * }
-     * if ( ( iores = SSaTensor.restoreYourself(stream, mode) ) != CIO_OK ) {
+     * if ( ( iores = SSaTensor.restoreYourself(stream) ) != CIO_OK ) {
      * THROW_CIOERR(iores);
      * }
-     * if ( ( iores = tempStrain.restoreYourself(stream, mode) ) != CIO_OK ) {
+     * if ( ( iores = tempStrain.restoreYourself(stream) ) != CIO_OK ) {
      * THROW_CIOERR(iores);
      * }
      */

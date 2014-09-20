@@ -490,8 +490,8 @@ public:
     int givePackSize(CommunicationBuffer &buff) const;
 #endif
 
-    contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
-    contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
+    contextIOResultType storeYourself(DataStream *stream);
+    contextIOResultType restoreYourself(DataStream *stream);
 
     friend std :: ostream &operator << ( std :: ostream & out, const FloatArray & x );
 

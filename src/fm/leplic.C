@@ -96,7 +96,7 @@ LEPlicElementInterface :: saveContext(DataStream *stream, ContextMode mode, void
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = normal.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = normal.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -119,7 +119,7 @@ LEPlicElementInterface :: restoreContext(DataStream *stream, ContextMode mode, v
     }
 
     temp_p = p;
-    if ( ( iores = normal.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = normal.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

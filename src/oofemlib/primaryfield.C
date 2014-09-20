@@ -247,7 +247,7 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
     }
 
     for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( ( iores = solutionVectors[i].storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = solutionVectors[i].restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -275,7 +275,7 @@ PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
     }
 
     for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( ( iores = solutionVectors[i].restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = solutionVectors[i].restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
