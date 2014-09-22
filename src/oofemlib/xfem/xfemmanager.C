@@ -207,7 +207,7 @@ contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode m
     contextIOResultType iores;
 
     if ( mode & CM_Definition ) {
-        if ( !stream->write(& this->numberOfEnrichmentItems, 1) ) {
+        if ( !stream->write(this->numberOfEnrichmentItems) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
@@ -234,7 +234,7 @@ contextIOResultType XfemManager :: restoreContext(DataStream *stream, ContextMod
     contextIOResultType iores;
 
     if ( mode & CM_Definition ) {
-        if ( !stream->read(& this->numberOfEnrichmentItems, 1) ) {
+        if ( !stream->read(this->numberOfEnrichmentItems) ) {
             THROW_CIOERR(CIO_IOERR);
         }
         this->enrichmentItemList.resize(this->numberOfEnrichmentItems);

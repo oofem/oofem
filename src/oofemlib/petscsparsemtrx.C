@@ -88,7 +88,6 @@ PetscSparseMtrx :: GiveCopy() const
 void
 PetscSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
 {
-#ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
         if ( x.giveSize() != answer.giveSize() ) {
             OOFEM_ERROR("Size mismatch");
@@ -112,32 +111,28 @@ PetscSparseMtrx :: times(const FloatArray &x, FloatArray &answer) const
         VecDestroy(& globX);
         VecDestroy(& globY);
     } else {
-#endif
+        if ( this->giveNumberOfColumns() != x.giveSize() ) {
+            OOFEM_ERROR("Dimension mismatch");
+        }
 
-    if ( this->giveNumberOfColumns() != x.giveSize() ) {
-        OOFEM_ERROR("Dimension mismatch");
+        Vec globX, globY;
+        VecCreateSeqWithArray(PETSC_COMM_SELF, 1, x.giveSize(), x.givePointer(), & globX);
+        VecCreate(PETSC_COMM_SELF, & globY);
+        VecSetType(globY, VECSEQ);
+        VecSetSizes(globY, PETSC_DECIDE, this->nRows);
+
+        MatMult(this->mtrx, globX, globY);
+        double *ptr;
+        VecGetArray(globY, & ptr);
+        answer.resize(this->nRows);
+        for ( int i = 0; i < this->nRows; i++ ) {
+            answer(i) = ptr [ i ];
+        }
+
+        VecRestoreArray(globY, & ptr);
+        VecDestroy(& globX);
+        VecDestroy(& globY);
     }
-
-    Vec globX, globY;
-    VecCreateSeqWithArray(PETSC_COMM_SELF, 1, x.giveSize(), x.givePointer(), & globX);
-    VecCreate(PETSC_COMM_SELF, & globY);
-    VecSetType(globY, VECSEQ);
-    VecSetSizes(globY, PETSC_DECIDE, this->nRows);
-
-    MatMult(this->mtrx, globX, globY);
-    double *ptr;
-    VecGetArray(globY, & ptr);
-    answer.resize(this->nRows);
-    for ( int i = 0; i < this->nRows; i++ ) {
-        answer(i) = ptr [ i ];
-    }
-
-    VecRestoreArray(globY, & ptr);
-    VecDestroy(& globX);
-    VecDestroy(& globY);
-#ifdef __PARALLEL_MODE
-}
-#endif
 }
 
 void
@@ -147,11 +142,10 @@ PetscSparseMtrx :: timesT(const FloatArray &x, FloatArray &answer) const
         OOFEM_ERROR("Dimension mismatch");
     }
 
-#ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
         OOFEM_ERROR("Not implemented");
     }
-#endif
+
     Vec globX, globY;
     VecCreateSeqWithArray(PETSC_COMM_SELF, 1, x.giveSize(), x.givePointer(), & globX);
     VecCreate(PETSC_COMM_SELF, & globY);
@@ -179,11 +173,10 @@ PetscSparseMtrx :: times(const FloatMatrix &B, FloatMatrix &answer) const
         OOFEM_ERROR("Dimension mismatch");
     }
 
-#ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
         OOFEM_ERROR("Not implemented");
     }
-#endif
+
     // I'm opting to work with a set of vectors, as i think it might be faster and more robust. / Mikael
 
     int nr = this->giveNumberOfRows();
@@ -238,11 +231,10 @@ PetscSparseMtrx :: timesT(const FloatMatrix &B, FloatMatrix &answer) const
         OOFEM_ERROR("Dimension mismatch");
     }
 
-#ifdef __PARALLEL_MODE
     if ( emodel->isParallel() ) {
         OOFEM_ERROR("Not implemented");
     }
-#endif
+
     int nr = this->giveNumberOfColumns();
     int nc = B.giveNumberOfColumns();
     answer.resize(nr, nc);
@@ -295,11 +287,9 @@ PetscSparseMtrx :: buildInternalStructure(EngngModel *eModel, int di, const Unkn
     this->emodel = eModel;
     this->di = di;
 
-#ifdef __PARALLEL_MODE
-    if ( eModel->isParallel() ) {
+    if ( emodel->isParallel() ) {
         OOFEM_ERROR("Not implemented");
     }
-#endif
 
     nRows = eModel->giveNumberOfDomainEquations(di, r_s);
     nColumns = eModel->giveNumberOfDomainEquations(di, c_s);

@@ -147,11 +147,10 @@ CrossSection :: give(CrossSectionProperty aProperty, const FloatArray *coords, E
 }
 
 
-#ifdef __PARALLEL_MODE
 double
 CrossSection :: predictRelativeComputationalCost(GaussPoint *gp)
 {
     return this->giveRelativeSelfComputationalCost() * gp->giveMaterial()->predictRelativeComputationalCost(gp);
 }
-#endif
+
 } // end namespace oofem

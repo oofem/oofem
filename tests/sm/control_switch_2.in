@@ -25,7 +25,7 @@ Node 1 coords 3  0.0   0.0   0.0  bc 2 1 1
 Node 2 coords 3  4.0   0.0   0.0  bc 2 0 1 load 1 2
 Node 3 coords 3  4.0   3.0   0.0  bc 2 0 0 load 3 2 3 4
 Node 4 coords 3  0.0   3.0   0.0  bc 2 1 0 load 2 3 4
-PlaneStress2d 1 nodes 4 1 2 3 4  mat 1 NIP 4 crossSect 1
+PlaneStress2d 1 nodes 4 1 2 3 4  mat 1 crossSect 1
 SimpleCS 1 thick 0.15
 IsoLE 1  tAlpha 0.000012  d 1.0  E 15.0  n 0.25 
 BoundaryCondition  1 loadTimeFunction 1 prescribedvalue 0.0 

@@ -77,11 +77,6 @@ public:
 
     virtual const char *giveInputRecordName() const { return _IFT_DarcyFlow_Name; }
     virtual const char *giveClassName() const { return "DarcyFlow"; }
-
-#ifdef __PARALLEL_MODE
-    CommunicatorBuff *commBuff; //new CommunicatorBuff(this->giveNumberOfProcesses(), CBT_static);
-    ProblemCommunicator *communicator;
-#endif
 };
 }
 

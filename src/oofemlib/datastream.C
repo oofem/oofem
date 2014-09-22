@@ -122,6 +122,32 @@ int FileDataStream :: write(bool data)
     return ( fwrite(& data, sizeof( bool ), 1, stream) == 1 );
 }
 
+int FileDataStream :: givePackSizeOfInt(int count)
+{
+    return sizeof(int)*count;
+}
+
+int FileDataStream :: givePackSizeOfDouble(int count)
+{
+    return sizeof(double)*count;
+}
+
+int FileDataStream :: givePackSizeOfChar(int count)
+{
+    return sizeof(char)*count;
+}
+
+int FileDataStream :: givePackSizeOfBool(int count)
+{
+    return sizeof(bool)*count;
+}
+
+int FileDataStream :: givePackSizeOfLong(int count)
+{
+    return sizeof(int)*count;
+}
+
+
 #ifdef __PARALLEL_MODE
 
 int ComBuffDataStream :: read(int *data, unsigned int count)
@@ -188,6 +214,33 @@ int ComBuffDataStream :: write(bool data)
     return buff->packArray(& val, 1);
 }
 
+int ComBuffDataStream :: givePackSizeOfInt(int count)
+{
+    return buff->givePackSize(MPI_INT, count);
+}
+
+int ComBuffDataStream :: givePackSizeOfDouble(int count)
+{
+    return buff->givePackSize(MPI_DOUBLE, count);
+}
+
+int ComBuffDataStream :: givePackSizeOfChar(int count)
+{
+    return buff->givePackSize(MPI_CHAR, count);
+}
+
+int ComBuffDataStream :: givePackSizeOfBool(int count)
+{
+    return buff->givePackSize(MPI_CHAR, count);
+}
+
+int ComBuffDataStream :: givePackSizeOfLong(int count)
+{
+    return buff->givePackSize(MPI_LONG, count);
+}
+
+
+
 int ProcessCommDataStream :: read(int *data, unsigned int count)
 {
     return pc->unpackArray(data, count);
@@ -250,6 +303,31 @@ int ProcessCommDataStream :: write(bool data)
 {
     char val = data;
     return pc->packArray(& val, 1);
+}
+
+int ProcessCommDataStream :: givePackSizeOfInt(int count)
+{
+    return pc->givePackSize(MPI_INT, count);
+}
+
+int ProcessCommDataStream :: givePackSizeOfDouble(int count)
+{
+    return pc->givePackSize(MPI_DOUBLE, count);
+}
+
+int ProcessCommDataStream :: givePackSizeOfChar(int count)
+{
+    return pc->givePackSize(MPI_CHAR, count);
+}
+
+int ProcessCommDataStream :: givePackSizeOfBool(int count)
+{
+    return pc->givePackSize(MPI_BOOL, count);
+}
+
+int ProcessCommDataStream :: givePackSizeOfLong(int count)
+{
+    return pc->givePackSize(MPI_CHAR, count);
 }
 
 #endif //__PARALLEL_MODE

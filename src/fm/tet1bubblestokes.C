@@ -81,7 +81,7 @@ void Tet1BubbleStokes :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
 }

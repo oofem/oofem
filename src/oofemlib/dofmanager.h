@@ -71,9 +71,12 @@ class EntityRenumberingFunctor;
 class FloatMatrix;
 class PrimaryField;
 class UnknownNumberingScheme;
-
-#ifdef __PARALLEL_MODE
 class CommunicationBuffer;
+class Load;
+class TimeStep;
+class FloatArray;
+class IntArray;
+
 /// In parallel mode, this type indicates the mode of DofManager.
 enum dofManagerParallelMode {
     DofManager_local, /**< DofManager is local, there are no contribution from other domains to this DofManager.*/
@@ -89,13 +92,6 @@ enum dofManagerParallelMode {
                       *   for computing real integration point coordinates of remote elements and there is no reason to maintain
                       *   their unknowns (they have no equation number assigned).*/
 };
-
-#endif
-
-class Load;
-class TimeStep;
-class FloatArray;
-class IntArray;
 
 /**
  * Base class for dof managers. Dof manager is an abstraction for object possessing degrees of
@@ -135,14 +131,14 @@ protected:
      * local domain number.
      */
     int globalNumber;
-#ifdef __PARALLEL_MODE
+
     dofManagerParallelMode parallel_mode;
+
     /**
      * List of partition sharing the shared dof manager or
      * remote partition containing remote dofmanager counterpart.
      */
     IntArray partitions;
-#endif
 
     /// List of additional dof ids to include.
     IntArray *dofidmask;
@@ -517,13 +513,14 @@ public:
      * @param number New global number for receiver.
      */
     void setGlobalNumber(int number) { globalNumber = number; }
-#ifdef __PARALLEL_MODE
+
     /**
-     * Return dofManagerParallelMode of receiver. Defined for __Parallel_Mode only.
+     * Return dofManagerParallelMode of receiver.
      */
     dofManagerParallelMode giveParallelMode() const { return parallel_mode; }
     /** Sets parallel mode of receiver */
     void setParallelMode(dofManagerParallelMode _mode) { parallel_mode = _mode; }
+#ifdef __PARALLEL_MODE
     /**
      * Packs specific  DOF Manager's dofs unknowns into communication buffer.
      * @param buff Communication buffer to pack data.
@@ -535,6 +532,7 @@ public:
      * @todo Remove this? Is this function ever used? It looks like leftovers that could be removed. / Mikael
      */
     int packDOFsUnknowns(CommunicationBuffer &buff, ValueModeType mode, TimeStep *tStep);
+#endif
     /**
      * Returns partition list of receiver.
      * @return Partition array.
@@ -565,7 +563,6 @@ public:
             return false;
         }
     }
-#endif
 };
 } // end namespace oofem
 #endif // dofmanager_h

@@ -123,9 +123,8 @@ public:
     /// @return Associated DofManager.
     DofManager *giveDofManager() const { return dofManager; }
 
-#ifdef __PARALLEL_MODE
     int giveDofManGlobalNumber() const;
-#endif
+
     /**
      * Returns value of boundary condition of dof if it is prescribed.
      * Use hasBc service to determine, if boundary condition is active.

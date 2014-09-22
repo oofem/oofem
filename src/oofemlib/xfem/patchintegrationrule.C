@@ -216,8 +216,6 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
     FloatArray coords_xi1, coords_xi2, coords_xi3, weightsTri, weightsDepth;
     this->giveTriCoordsAndWeights(nPointsTri, coords_xi1, coords_xi2, weightsTri);
     this->giveLineCoordsAndWeights(nPointsDepth, coords_xi3, weightsDepth);
-
-    //this->gaussPointArray = new GaussPoint * [ nPointsTot ];
     this->gaussPoints.resize(nPointsTot);
 
     std :: vector< FloatArray >newGPCoord;
@@ -229,54 +227,49 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
     for ( int i = 0; i < int( triToKeep.size() ); i++ ) {
 
         Triangle triangle = mTriangles [ triToKeep [ i ] ];
-        //const FloatArray **gCoords = new const FloatArray * [ triangle.giveNrVertices() ];
-        std::vector< FloatArray > gCoords( triangle.giveNrVertices() );
-
+        
         // global coords of the the triangle verticies
+        std::vector< FloatArray > gCoords( triangle.giveNrVertices() );
         for ( int j = 0; j < triangle.giveNrVertices(); j++ ) {
-            //gCoords [ j ] = new FloatArray( ( triangle.giveVertex(j + 1) ) );
             gCoords[j] = (triangle.giveVertex(j + 1));
         }
         
 
         for ( int k = 1; k <= nPointsTri; k++ ) {
             for ( int m = 1; m <= nPointsDepth; m++ ) {
+                // local coords in the parent triangle
                 FloatArray *lCoords = new FloatArray(3);
                 lCoords->at(1) = coords_xi1.at(k);
                 lCoords->at(2) = coords_xi2.at(k);
                 lCoords->at(3) = coords_xi3.at(m);
 
-                // Compute global gp coordinate in the element from local gp coord in patch triangle
-                FloatArray global;
-                //mTriInterp.local2global( global, *lCoords, FEIVertexListGeometryWrapper( triangle.giveNrVertices(), gCoords) );
-                mTriInterp.local2global(global, *lCoords, FEIVertexListGeometryWrapper(gCoords));
+                double refElArea = 0.5;
+                double oldWeight = weightsTri.at(k) * weightsDepth.at(m);
+                double newWeight = 2.0 * refElArea * oldWeight * triangle.getArea() / parentArea; 
                 
-
+                GaussPoint *gp = new GaussPoint(this, count + 1, lCoords, newWeight, mode);
+                this->gaussPoints[count] = gp;
+                count++;
+                
+                
+                // Compute global gp coordinate in the element from local gp coord in the sub triangle
+                FloatArray global;
+                mTriInterp.local2global( global, * gp->giveNaturalCoordinates(),
+                                    FEIVertexListGeometryWrapper(gCoords) );
+                 
+                
                 // Compute local gp coordinate in the element from global gp coord in the element
                 FloatArray local;
                 this->elem->computeLocalCoordinates(local, global);
                 local.at(3) = coords_xi3.at(m); // manually set third coordinate
-    
-                double refElArea = 0.5;
-                //double refElArea = this->elem->giveParentElSize();
-                double oldWeight = weightsTri.at(k) * weightsDepth.at(m);
-                double newWeight = 2.0 * refElArea * oldWeight * triangle.getArea() / parentArea; 
-
-
-                FloatArray *coord = new FloatArray(3);
-                coord->at(1) = local.at(1);
-                coord->at(2) = local.at(2);
-                coord->at(3) = local.at(3);
-
-                GaussPoint *gp = new GaussPoint(this, count + 1, coord, newWeight, mode);
-
-                //GaussPoint *gp = new GaussPoint(this, count + 1, &local, newWeight, mode);
-                //this->gaussPointArray [ count ] = gp;
-                this->gaussPoints[count] = gp;
-                count++;
+                // compute global coords again, since interpolator dosn't give the z-coord 
+                this->elem->computeGlobalCoordinates(global, local);
+                
+                gp->setGlobalCoordinates(global);
+                gp->setNaturalCoordinates(local);
+                gp->setSubPatchCoordinates(local);
 
                 // Store new global gp coord for vtk output
-                this->elem->computeGlobalCoordinates(global, *gp->giveNaturalCoordinates() );
                 newGPCoord.push_back(global);
             }
         }
@@ -344,7 +337,7 @@ PatchIntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *
      *  if ( this->patch ) {
      *      // store patch type
      *      int _type = this->patch->givePatchType();
-     *      if ( !stream->write(& _type, 1) ) {
+     *      if ( !stream->write(_type) ) {
      *          THROW_CIOERR(CIO_IOERR);
      *      }
      *
@@ -383,7 +376,7 @@ PatchIntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, voi
      *  }
      */
     int _ptype;
-    if ( !stream->read(& _ptype, 1) ) {
+    if ( !stream->read(_ptype) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

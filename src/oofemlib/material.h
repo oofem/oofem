@@ -292,6 +292,7 @@ public:
      */
     virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
     { return 0; }
+#endif
     /**
      * Returns the weight representing relative computational cost of receiver
      * The reference material model is linear isotropic material - its weight is set to 1.0
@@ -302,7 +303,6 @@ public:
      * Returns the relative redistribution cost of the receiver
      */
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
-#endif
 
 
     /**

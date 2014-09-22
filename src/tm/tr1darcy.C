@@ -78,7 +78,7 @@ void Tr1Darcy :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
@@ -93,14 +93,11 @@ void Tr1Darcy :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
 
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
+    answer.clear();
 
-    answer.resize(3, 3);
-    answer.zero();
-
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         const FloatArray &lcoords = * gp->giveNaturalCoordinates();
-
+        ///@todo Should we make it return the transpose instead?
         double detJ = this->interpolation_lin.evaldNdx( BT, lcoords, FEIElementGeometryWrapper(this) );
 
         mat->giveCharacteristicMatrix(K, TangentStiffness, gp, tStep);
@@ -128,14 +125,13 @@ void Tr1Darcy :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep
     FloatMatrix B, BT;
 
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
 
     this->computeVectorOf(VM_Total, tStep, a);
 
     answer.resize(3);
     answer.zero();
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         FloatArray *lcoords = gp->giveNaturalCoordinates();
 
         double detJ = this->interpolation_lin.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) );
@@ -266,8 +262,7 @@ Tr1Darcy :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int n
 {
     TransportMaterial *mat = static_cast< TransportMaterial * >( this->giveMaterial() );
     ///@todo Write support function for getting the closest gp given local c.s. and use that here
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    GaussPoint *gp = iRule->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     mat->giveIPValue(answer, gp, type, tStep);
 }
 

@@ -59,7 +59,8 @@ public:
     virtual int  global2local(FloatArray &answer, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual double giveTransformationJacobian(const FloatArray &lcoords, const FEICellGeometry &cellgeo);
     virtual void giveJacobianMatrixAt(FloatMatrix &jacobianMatrix, const FloatArray &lcoords, const FEICellGeometry &cellgeo);
-
+    virtual int giveNumberOfNodes() const { return 4; }
+    
     // Edge
     virtual void computeLocalEdgeMapping(IntArray &edgeNodes, int iedge);
     virtual int giveNumberOfEdges() const { return 4; };

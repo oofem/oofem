@@ -180,9 +180,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     FloatArray externalForces(neq);
     externalForces.zero();
     this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 
     // set-up numerical method
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
@@ -222,9 +220,7 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
         this->internalForces.zero();
         this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
-#ifdef __PARALLEL_MODE
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
-#endif
         return;
     } else if ( cmpn == NonLinearLhs ) {
         if ( !this->keepTangent ) {

@@ -87,13 +87,11 @@ OutputManager :: doDofManOutput(FILE *file, TimeStep *tStep)
 
     if ( dofman_all_out_flag   && dofman_except.empty() ) {
         for ( int i = 1; i <= ndofman; i++ ) {
-#ifdef __PARALLEL_MODE
             // test for null dof in parallel mode
             if ( domain->giveDofManager(i)->giveParallelMode() == DofManager_null ) {
                 continue;
             }
 
-#endif
             domain->giveDofManager(i)->printOutputAt(file, tStep);
         }
     } else {
@@ -119,13 +117,10 @@ OutputManager :: doElementOutput(FILE *file, TimeStep *tStep)
 
     if ( element_all_out_flag   && element_except.empty() ) {
         for ( int i = 1; i <= nelem; i++ ) {
-#ifdef __PARALLEL_MODE
             // test for remote element in parallel mode
             if ( domain->giveElement(i)->giveParallelMode() == Element_remote ) {
                 continue;
             }
-
-#endif
 
             domain->giveElement(i)->printOutputAt(file, tStep);
         }
@@ -145,13 +140,10 @@ OutputManager :: _testDofManOutput(int number)
 {
     int selected = 0;
 
-#ifdef __PARALLEL_MODE
     // test for null dof in parallel mode
     if ( domain->giveDofManager(number)->giveParallelMode() == DofManager_null ) {
         return 0;
     }
-
-#endif
 
     // test all_select flag on
     if ( dofman_all_out_flag ) {
@@ -192,14 +184,10 @@ OutputManager :: _testElementOutput(int number)
 {
     int selected = 0;
 
-#ifdef __PARALLEL_MODE
     // test for remote element in parallel mode
     if ( domain->giveElement(number)->giveParallelMode() == Element_remote ) {
         return 0;
     }
-
-#endif
-
 
     // test all_select flag on
     if ( element_all_out_flag ) {

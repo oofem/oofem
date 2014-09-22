@@ -1295,9 +1295,7 @@ void ParticleTopologyDescription :: replaceFEMesh()
         element->setGlobalNumber(i);
         element->setCrossSection(r);
         element->setDofManagers(elements [ i - 1 ]);
-#ifdef __PARALLEL_MODE
         element->setParallelMode(Element_local);
-#endif
         new_d->setElement(element->giveNumber(), element);
     }
 
@@ -1314,9 +1312,7 @@ void ParticleTopologyDescription :: replaceFEMesh()
         element->setGlobalNumber( i + elements.size() );
         element->setCrossSection(r);
         element->setDofManagers(segments [ i - 1 ]);
-#ifdef __PARALLEL_MODE
         element->setParallelMode(Element_local);
-#endif
         new_d->setElement(element->giveNumber(), element);
     }
 

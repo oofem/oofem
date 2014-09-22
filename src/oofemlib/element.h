@@ -52,6 +52,8 @@
 #include "unknownnumberingscheme.h"
 
 #include <cstdio>
+#include <vector>
+#include <memory>
 
 ///@name Input fields for general element.
 //@{
@@ -90,7 +92,6 @@ class CommunicationBuffer;
  */
 enum elementParallelMode {
     Element_local, ///< Element is local, there are no contributions from other domains to this element.
-    // Element_shared, ///< Element is shared by neighboring partitions - not implemented.
     Element_remote, ///< Element in active domain is only mirror of some remote element.
 };
 
@@ -159,7 +160,7 @@ protected:
      * (mass matrix integration) and different integration rule is needed, one should preferably
      * use temporarily created integration rule.
      */
-    std::vector< IntegrationRule * > integrationRulesArray;
+    std::vector< std :: unique_ptr< IntegrationRule > > integrationRulesArray;
 
     /// Transformation material matrix, used in orthotropic and anisotropic materials, global->local transformation
     FloatMatrix elemLocalCS;
@@ -179,14 +180,14 @@ protected:
      */
     int numberOfGaussPoints;
 
-#ifdef __PARALLEL_MODE
+    /// Determines the parallel mode of the element
     elementParallelMode parallel_mode;
+
     /**
      * List of partition sharing the shared element or
      * remote partition containing remote element counterpart.
      */
     IntArray partitions;
-#endif
 
 public:
     /**
@@ -549,7 +550,7 @@ public:
     virtual void setCrossSection(int csIndx) { this->crossSection = csIndx; }
 
     /// @return Number of dofmanagers of receiver.
-    int giveNumberOfDofManagers() const { return numberOfDofMans; }
+    virtual int giveNumberOfDofManagers() const { return numberOfDofMans; }
     /**
      * Returns number of nodes of receiver.
      * Default implementation returns number of dofmanagers of element
@@ -566,7 +567,7 @@ public:
      * Sets integration rules.
      * @param irlist List of integration rules.
      */
-    void setIntegrationRules(const std :: vector< IntegrationRule * > &irlist);
+    void setIntegrationRules(std :: vector< std :: unique_ptr< IntegrationRule > > irlist);
     /**
      * Returns integration domain for receiver, used to initialize
      * integration point over receiver volume.
@@ -587,7 +588,7 @@ public:
      * @return Nonzero if integration rule code numbers differ from element code numbers.
      * @todo This is currently not used. It is intended for IGA elements? This seems redundant.
      */
-    virtual int giveIntegrationRuleLocalCodeNumbers(IntArray &answer, IntegrationRule *ie)
+    virtual int giveIntegrationRuleLocalCodeNumbers(IntArray &answer, IntegrationRule &ie)
     { return 0; }
 
     // Returns number of sides (which have unknown dofs) of receiver
@@ -701,7 +702,7 @@ public:
         if ( this->giveNumberOfIntegrationRules() == 0 ) {
             return NULL;
         } else {
-            return this->integrationRulesArray [ giveDefaultIntegrationRule() ];
+            return this->integrationRulesArray [ giveDefaultIntegrationRule() ].get();
         }
     }
     /// @return Number of integration rules for element.
@@ -710,7 +711,7 @@ public:
      * @param i Index of integration rule.
      * @return Requested integration rule.
      */
-    virtual IntegrationRule *giveIntegrationRule(int i) { return integrationRulesArray [ i ]; }
+    virtual IntegrationRule *giveIntegrationRule(int i) { return integrationRulesArray [ i ].get(); }
     /**
      * Tests if the element implements required extension. ElementExtension type defines
      * the list of all available element extensions.
@@ -938,9 +939,8 @@ public:
      */
     void setGlobalNumber(int num) { globalNumber = num; }
 
-#ifdef __PARALLEL_MODE
     /**
-     * Return elementParallelMode of receiver. Defined for __Parallel_Mode only.
+     * Return elementParallelMode of receiver.
      */
     elementParallelMode giveParallelMode() const { return parallel_mode; }
     /// Sets parallel mode of element
@@ -950,7 +950,7 @@ public:
      * The knot span identifies the sub-region of the finite element.
      */
     virtual elementParallelMode giveKnotSpanParallelMode(int) const { return parallel_mode; }
-
+#ifdef __PARALLEL_MODE
     /**
      * Pack all necessary data of element (according to its parallel_mode) integration points
      * into given communication buffer. The corresponding cross section service is invoked, which in
@@ -975,8 +975,10 @@ public:
      * Estimates the necessary pack size to hold all packed data of receiver.
      * The corresponding cross section service is invoked, which in
      * turn should invoke material model service for particular integration point. The
-     * nature of packed data is material model dependent.  */
+     * nature of packed data is material model dependent.
+     */
     int estimatePackSize(CommunicationBuffer &buff);
+#endif
     /**
      * Returns partition list of receiver.
      * @return partition array.
@@ -1007,7 +1009,6 @@ public:
      * Returns the relative redistribution cost of the receiver
      */
     virtual double predictRelativeRedistributionCost() { return 1.0; }
-#endif
 
 public:
     /// Returns array containing load numbers of loads acting on element

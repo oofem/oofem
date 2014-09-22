@@ -1805,18 +1805,18 @@ bool FloatMatrix :: computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix 
 }
 #endif
 
-contextIOResultType FloatMatrix :: storeYourself(DataStream *stream, ContextMode mode)
+contextIOResultType FloatMatrix :: storeYourself(DataStream *stream)
 // writes receiver's binary image into stream
 // use id to distinguish some instances
 // return value >0 success
 //              =0 file i/o error
 {
     // write size
-    if ( !stream->write(& nRows, 1) ) {
+    if ( !stream->write(nRows) ) {
         return ( CIO_IOERR );
     }
 
-    if ( !stream->write(& nColumns, 1) ) {
+    if ( !stream->write(nColumns) ) {
         return ( CIO_IOERR );
     }
 
@@ -1830,18 +1830,18 @@ contextIOResultType FloatMatrix :: storeYourself(DataStream *stream, ContextMode
 }
 
 
-contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMode mode)
+contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream)
 // reads receiver from stream
 // warning - overwrites existing data!
 // returns 0 if file i/o error
 //        -1 if id of class id is not correct
 {
     // read size
-    if ( !stream->read(& nRows, 1) ) {
+    if ( !stream->read(nRows) ) {
         return ( CIO_IOERR );
     }
 
-    if ( !stream->read(& nColumns, 1) ) {
+    if ( !stream->read(nColumns) ) {
         return ( CIO_IOERR );
     }
 

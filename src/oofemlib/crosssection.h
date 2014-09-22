@@ -224,6 +224,7 @@ public:
      * @return Estimate of pack size.
      */
     virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip) = 0;
+#endif
     /**
      * Returns the weight representing relative computational cost of receiver
      * The reference cross section is integral model in plane stress.
@@ -247,7 +248,6 @@ public:
      * @return Relative redistribution cost of the receiver.
      */
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
-#endif
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

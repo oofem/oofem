@@ -123,7 +123,6 @@ public:
     //virtual void drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType) {}
 #endif
 
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual double computeCriticalTimeStep(TimeStep *tStep);
 
     // three terms for computing their norms due to computing t_supg

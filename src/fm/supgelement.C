@@ -376,21 +376,6 @@ SUPGElement :: updateInternalState(TimeStep *tStep)
     }
 }
 
-void
-SUPGElement :: printOutputAt(FILE *file, TimeStep *tStep)
-// Performs end-of-step operations.
-{
-#ifdef __PARALLEL_MODE
-    fprintf( file, "element %d [%8d] :\n", this->giveNumber(), this->giveGlobalNumber() );
-#else
-    fprintf(file, "element %d :\n", number);
-#endif
-
-    for ( auto &iRule: integrationRulesArray ) {
-        iRule->printOutputAt(file, tStep);
-    }
-}
-
 
 #ifdef __OOFEG
 int

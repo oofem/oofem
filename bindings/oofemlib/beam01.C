@@ -6,8 +6,8 @@
 
 
 // Optional (only need the input fields defines)
-#include "linearstatic.h"
-#include "simplecrosssection.h"
+#include "../sm/EngineeringModels/linearstatic.h"
+#include "../sm/CrossSections/simplecrosssection.h"
 #include "isolinearelasticmaterial.h"
 #include "truss2d.h"
 #include "generalboundarycondition.h"

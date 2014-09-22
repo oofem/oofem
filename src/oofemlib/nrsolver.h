@@ -92,7 +92,7 @@ class EngngModel;
  */
 class OOFEM_EXPORT NRSolver : public SparseNonLinearSystemNM
 {
-private:
+protected:
     enum nrsolver_ModeType { nrsolverModifiedNRM, nrsolverFullNRM, nrsolverAccelNRM };
 
     int nsmax, minIterations;
@@ -201,6 +201,9 @@ protected:
      */
     bool checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs, FloatArray &ddX, FloatArray &X,
                           double RRT, const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange, TimeStep *tNow);
+
+    bool checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, FloatArray &rhs, FloatArray &ddX, FloatArray &X,
+                          double RRT, const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange, TimeStep *tNow, IntArray &dofIdArray);
 
     ///NEW JB
     FloatArray forceErrVec;
