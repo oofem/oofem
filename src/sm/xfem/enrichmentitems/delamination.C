@@ -56,9 +56,11 @@ Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : ListBase
     mpEnrichesDofsWithIdArray = {
             D_u, D_v, D_w, W_u, W_v, W_w
     };
-    this->interfaceNum = -1;
+    this->interfaceNum = {};
     this->crossSectionNum = -1;
     this->matNum = 0;
+    this->xiBottom = -1.0;
+    this->xiTop = -1.0;
 }
 
 int Delamination :: instanciateYourself(DataReader *dr)

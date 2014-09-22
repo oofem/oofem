@@ -147,9 +147,9 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR("mpModule == NULL")
     }
 
-    Py_INCREF(mpName);
-    Py_INCREF(mpModule);
-    Py_INCREF(mpFunc);
+//    Py_INCREF(mpName);
+//    Py_INCREF(mpModule);
+//    Py_INCREF(mpFunc);
 
     return IRRT_OK;
 }

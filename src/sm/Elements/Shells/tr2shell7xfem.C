@@ -47,7 +47,6 @@
 #include "classfactory.h"
 #include "xfem/patchintegrationrule.h"
 #include "xfem/XFEMDebugTools.h"
-#include "xfem/enrichmentdomain.h"
 #include <string>
 #include <sstream>
 
