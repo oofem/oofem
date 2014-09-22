@@ -12,6 +12,7 @@ set (core_unsorted
     set.C
     rvematerial.C
     weakperiodicbc.C
+    prescribedmean.C
     solutionbasedshapefunction.C
     fracturemanager.C
     neumannmomentload.C
