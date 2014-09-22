@@ -43,6 +43,9 @@
 #include "load.h"
 #include "element.h"
 #include "dofmanager.h"
+#include "load.h"
+#include "boundaryload.h"
+#include "neumannmomentload.h"
 
 #ifdef __FM_MODULE
 #include "fluiddynamicmaterial.h"
@@ -62,6 +65,8 @@ FEI3dTetLin tet21ghostsolid :: interpolation_lin;
 IntArray tet21ghostsolid :: momentum_ordering(30);
 IntArray tet21ghostsolid :: conservation_ordering(4);
 IntArray tet21ghostsolid :: ghostdisplacement_ordering(30);
+IntArray tet21ghostsolid :: velocitydofsonside = {1, 2, 3, 8, 9, 10, 15, 16, 17, 22, 23, 24, 28, 29, 30, 34, 35, 36};
+IntArray tet21ghostsolid :: displacementdofsonside = {4, 5, 6, 11, 12, 13, 18, 19, 20, 25, 26, 27, 31, 32, 33, 37, 38, 39};
 
 tet21ghostsolid::tet21ghostsolid(int n, Domain *aDomain) : NLStructuralElement(n, aDomain), SpatialLocalizerInterface(this)
 {
@@ -96,8 +101,6 @@ tet21ghostsolid::tet21ghostsolid(int n, Domain *aDomain) : NLStructuralElement(n
         ghostdisplacement_ordering(i * 3 + 2) = j++;
         if ( i <= 3 ) { j++; }
     }
-
-
 
 }
 
@@ -347,7 +350,7 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
     }
 
     if ( this->computeItransform ) {
-        giveRowTransformationMatrix(Itransform, tStep);
+        giveRowTransformationMatrix(tStep);
     }
 
     FloatArray temp;
@@ -523,7 +526,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
     temp.assemble(auxstress, momentum_ordering);
 
     if ( this->computeItransform ) {
-        giveRowTransformationMatrix(Itransform, tStep);
+        giveRowTransformationMatrix(tStep);
     }
 
     answer.beProductOf(Itransform, temp);
@@ -697,7 +700,7 @@ tet21ghostsolid :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalState
 }
 
 bool
-tet21ghostsolid :: giveRowTransformationMatrix(FloatMatrix &Itransform, TimeStep *tStep)
+tet21ghostsolid :: giveRowTransformationMatrix(TimeStep *tStep)
 {
 
     // Create a transformation matrix that switch all rows/equations located in OmegaF but not on GammaInt, i.e where we do not have a no slip condition
@@ -792,7 +795,7 @@ Interface *tet21ghostsolid :: giveInterface(InterfaceType it)
 }
 
 void tet21ghostsolid :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
-                                                                          TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
+                                                                              TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {
     FloatArray n, n_lin;
     this->interpolation.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
@@ -835,6 +838,81 @@ tet21ghostsolid :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer
     } else {
         answer.clear();
     }
+}
+
+void
+tet21ghostsolid :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep)
+{
+    answer.clear();
+    if ( type != ExternalForcesVector ) {
+        return;
+    }
+
+    FEInterpolation *fei = this->giveInterpolation();
+    if ( !fei ) {
+        OOFEM_ERROR("No interpolator available");
+    }
+
+    FloatArray n_vec, f(18);
+    FloatMatrix n, T;
+    FloatArray force, globalIPcoords;
+    int nsd = fei->giveNsd();
+
+    f.zero();
+    IntegrationRule *iRule = fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary);
+
+    for ( GaussPoint *gp: *iRule ) {
+        FloatArray &lcoords = * gp->giveNaturalCoordinates();
+
+        if ( load->giveFormulationType() == Load :: FT_Entity ) {
+            load->computeValueAt(force, tStep, lcoords, mode);
+        } else {
+            FloatArray gcoords;
+            this->interpolation.surfaceLocal2global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
+            NeumannMomentLoad *e= dynamic_cast<NeumannMomentLoad*> (load) ;
+            if (e != NULL ) {
+                e->computeValueAtBoundary(force, tStep, gcoords, VM_Total, this, boundary);
+            } else {
+                load->computeValueAt(force, tStep, gcoords, VM_Total);
+            }
+        }
+
+        ///@todo Make sure this part is correct.
+        // We always want the global values in the end, so we might as well compute them here directly:
+        // transform force
+        if ( load->giveCoordSystMode() == Load :: CST_Global ) {
+            // then just keep it in global c.s
+        } else {
+            ///@todo Support this...
+            // transform from local boundary to element local c.s
+            /*if ( this->computeLoadLSToLRotationMatrix(T, boundary, gp) ) {
+             *  force.rotatedWith(T, 'n');
+             * }*/
+            // then to global c.s
+            if ( this->computeLoadGToLRotationMtrx(T) ) {
+                force.rotatedWith(T, 't');
+            }
+        }
+
+        // Construct n-matrix
+        fei->boundaryEvalN( n_vec, boundary, lcoords, FEIElementGeometryWrapper(this) );
+        n.beNMatrixOf(n_vec, nsd);
+
+        ///@todo Some way to ask for the thickness at a global coordinate maybe?
+        double thickness = 1.0; // Should be the circumference for axisymm-elements.
+        double dV = thickness * gp->giveWeight() * fei->boundaryGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
+        f.plusProduct(n, force, dV);
+    }
+
+    FloatArray temp;
+    FloatMatrix Itrans;
+
+    answer.resize(39);
+    answer.zero();
+    answer.assemble(f, this->velocitydofsonside);
+
+    delete iRule;
+
 }
 
 }
