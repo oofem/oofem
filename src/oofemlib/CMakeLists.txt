@@ -196,6 +196,7 @@ set (core_xfem
     xfem/enrichmentitem.C
     xfem/geometrybasedei.C
     xfem/hybridei.C
+    xfem/directei.C
     xfem/listbasedei.C
     xfem/inclusion.C
     xfem/patchintegrationrule.C

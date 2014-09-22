@@ -196,18 +196,17 @@ protected:
      */
     virtual void evalGradLevelSetNormal(FloatArray &oGradLevelSet, const FloatArray &iGlobalCoord, const FloatMatrix &idNdX, const IntArray &iNodeInd) const = 0;
 
-public:
 
     // Level set routines
-    bool giveLevelSetsNeedUpdate() const { return mLevelSetsNeedUpdate; }
     virtual void updateNodeEnrMarker(XfemManager &ixFemMan) = 0;
+
+public:
 
     virtual void createEnrichedDofs();
 
     // Return the coordinates of the tip in element iElIndex,
     // if the element contains a tip.
     virtual bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, Element &iEl, const FloatArray &iElCenter) const = 0;
-//    bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const Triangle &iTri, const FloatArray &iElCenter) const = 0;
 
     // Help functions
     static double calcXiZeroLevel(const double &iQ1, const double &iQ2);
@@ -219,7 +218,6 @@ public:
 
     virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod);
 
-//    EnrichmentDomain *giveEnrichmentDomain() const { return mpEnrichmentDomain; }
 
     const std :: unordered_map< int, NodeEnrichmentType > &giveEnrNodeMap() const { return mNodeEnrMarkerMap; }
 
@@ -235,8 +233,6 @@ public:
 
 
 protected:
-
-//    EnrichmentDomain *mpEnrichmentDomain;
 
     EnrichmentFunction *mpEnrichmentFunc;
 

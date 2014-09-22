@@ -48,7 +48,6 @@ REGISTER_EnrichmentItem(HybridEI)
 HybridEI::HybridEI(int n, XfemManager *xm, Domain *aDomain):
 GeometryBasedEI(n, xm, aDomain)
 {
-    // TODO Auto-generated constructor stub
 
 }
 

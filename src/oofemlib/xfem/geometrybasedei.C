@@ -378,8 +378,8 @@ void GeometryBasedEI :: evaluateEnrFuncInNode(std :: vector< double > &oEnrFunc,
     int nodeInd = iNode.giveNumber();
     this->evalLevelSetNormalInNode(levelSetGP, nodeInd, globalCoord);
 
-    const int dim = this->giveDomain()->giveNumberOfSpatialDimensions();
-    FloatArray gradLevelSetGP(dim);
+//    const int dim = this->giveDomain()->giveNumberOfSpatialDimensions();
+//    FloatArray gradLevelSetGP(dim);
 
     double tangDist = 0.0, minDistArcPos = 0.0;
     mpBasicGeometry->computeTangentialSignDist(tangDist, globalCoord, minDistArcPos);
@@ -440,8 +440,8 @@ void GeometryBasedEI :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, con
     double levelSetGP = 0.0;
     evalLevelSetNormal(levelSetGP, iGlobalCoord, iN, iElNodes);
 
-    const int dim = this->giveDomain()->giveNumberOfSpatialDimensions();
-    FloatArray gradLevelSetGP(dim);
+//    const int dim = this->giveDomain()->giveNumberOfSpatialDimensions();
+//    FloatArray gradLevelSetGP(dim);
 
     double tangDist = 0.0, minDistArcPos = 0.0;
     mpBasicGeometry->computeTangentialSignDist(tangDist, iGlobalCoord, minDistArcPos);
@@ -593,26 +593,6 @@ void GeometryBasedEI :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJu
         printf("In EnrichmentItem :: evaluateEnrFuncDerivAt: evaluateEnrFuncJumps not found for iNodeInd %d\n", iNodeInd);
     }
 }
-
-#if 0
-void GeometryBasedEI :: interpLevelSet(double &oLevelSet, const FloatArray &iGlobalCoord) const
-{
-    SpatialLocalizer *localizer = this->giveDomain()->giveSpatialLocalizer();
-
-    Element *tipEl = localizer->giveElementContainingPoint(iGlobalCoord);
-    if(tipEl != NULL) {
-
-        FloatArray N;
-        FloatArray locCoord;
-        tipEl->computeLocalCoordinates(locCoord, iGlobalCoord);
-        FEInterpolation *interp = tipEl->giveInterpolation();
-        interp->evalN( N, locCoord, FEIElementGeometryWrapper(tipEl) );
-
-        EnrichmentItem::interpLevelSet(oLevelSet, N, tipEl->giveDofManArray() );
-    }
-
-}
-#endif
 
 void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, std :: vector< double > &oMinDistArcPos) const
 {
