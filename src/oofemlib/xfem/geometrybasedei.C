@@ -151,7 +151,7 @@ int GeometryBasedEI :: instanciateYourself(DataReader *dr)
     }
 
     // Set start of the enrichment dof pool for the given EI
-    int xDofPoolAllocSize = this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() * 1 + 5; // TODO: overload for Crack
+    int xDofPoolAllocSize = this->giveDofPoolSize();
     this->startOfDofIdPool = this->giveDomain()->giveNextFreeDofID(xDofPoolAllocSize);
     this->endOfDofIdPool = this->startOfDofIdPool + xDofPoolAllocSize - 1;
 
@@ -446,7 +446,8 @@ void GeometryBasedEI :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, con
 //    FloatArray gradLevelSetGP(dim);
 
     double tangDist = 0.0, minDistArcPos = 0.0;
-    mpBasicGeometry->computeTangentialSignDist(tangDist, iGlobalCoord, minDistArcPos);
+    const FloatArray globalCoord = {iGlobalCoord[0], iGlobalCoord[1]};
+    mpBasicGeometry->computeTangentialSignDist(tangDist, globalCoord, minDistArcPos);
 
     FloatArray edGlobalCoord, localTangDir;
 

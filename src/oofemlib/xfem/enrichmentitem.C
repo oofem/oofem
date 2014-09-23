@@ -108,6 +108,12 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
 }
 
 
+int 
+EnrichmentItem::giveDofPoolSize() const
+{
+    return this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs();
+}
+
 int
 EnrichmentItem :: giveNumberOfEnrDofs() const
 {

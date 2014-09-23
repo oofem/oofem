@@ -62,13 +62,13 @@ DofManList 1 list 9  1 2 3 4 5 6 7 8 9
 #
 shellcrack 3 enrichmentfront 1 propagationlaw 0 xibottom -1 xitop -.333333
 DiscontinuousFunction 1 
-polygoncrack 1 points 6  -2.0 -2.0   -0.4 -0.8   1.4 2.0
+polygonline 1 points 6  -2.0 -2.0   -0.4 -0.8   1.4 2.0
 EnrFrontDoNothing 1
 EnrFrontDoNothing 1
 #
 shellcrack 4 enrichmentfront 1 propagationlaw 0 xibottom 0.333333 xitop 1
 DiscontinuousFunction 1 
-polygoncrack 1 points 6  -2.0 -2.0   -0.8 -0.4   2.0 1.4
+polygonline 1 points 6  -2.0 -2.0   -0.8 -0.4   2.0 1.4
 EnrFrontDoNothing 1
 EnrFrontDoNothing 1
 #
