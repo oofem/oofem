@@ -206,6 +206,10 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
 
 void Delamination :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl) const
 {
+    if(iLocalCoord.giveSize() != 3) {
+        OOFEM_ERROR("iLocalCoord.giveSize() != 3")
+    }
+
     double levelSet = iLocalCoord.at(3) - giveDelamXiCoord();
 
     oEnrFunc.resize(1, 0.0);

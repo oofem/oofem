@@ -504,6 +504,7 @@ Shell7BaseXFEM :: evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei
     return levelSet;
 }
 
+#if 0
 double 
 Shell7BaseXFEM :: edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei)
 {
@@ -524,6 +525,7 @@ Shell7BaseXFEM :: edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem
     }          
     return levelSet;
 }
+#endif
 
 
 
@@ -1676,7 +1678,9 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(const FloatArray &lCoords, FloatMatri
         int ndofman = this->giveNumberOfDofManagers();
 
         FloatArray gcoords;
-        computeGlobalCoordinates(gcoords, lCoords);
+        fei->local2global(gcoords, lCoords, FEIElementGeometryWrapper(this) );
+        //computeGlobalCoordinates(gcoords, lCoords);
+        gcoords.resizeWithValues(2);
 
         // First column
         for ( int i = 1, j = 0; i <= ndofman; i++, j += 3 ) {
@@ -1875,13 +1879,20 @@ Shell7BaseXFEM :: edgeComputeEnrichedNmatrixAt(const FloatArray &lCoords, FloatM
 //        ei->evaluateEnrFuncAt(efGP, lcoords, levelSetGP);
 
         FloatArray gcoords;
-        this->computeGlobalCoordinates(gcoords, lCoords);
+//        this->computeGlobalCoordinates(gcoords, lCoords);
+        fei->edgeLocal2global(gcoords, 1, lCoords, FEIElementGeometryWrapper(this));
+
+        FloatArray elLocCoord;
+        this->computeLocalCoordinates(elLocCoord, gcoords);
+
+        gcoords.resizeWithValues(2);
+        elLocCoord.resizeWithValues(2);
 
         for ( int i = 1, j = 0; i <= this->giveNumberOfEdgeDofManagers(); i++, j += 3 ) {
 
             std :: vector< double > efGP;
             int nodeInd = giveDofManager(i)->giveGlobalNumber();
-            ei->evaluateEnrFuncAt(efGP, gcoords, lCoords, nodeInd, *this, N, giveDofManArray());
+            ei->evaluateEnrFuncAt(efGP, gcoords, elLocCoord, nodeInd, *this, N, giveDofManArray());
 
 
             double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);

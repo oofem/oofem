@@ -79,7 +79,7 @@ protected:
     void computeSectionalForcesAt(FloatArray &sectionalForces, IntegrationPoint *ip, Material *mat, TimeStep *tStep, FloatArray &genEps, double zeta);
     
     double evaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
-    double edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
+//    double edgeEvaluateLevelSet(const FloatArray &lCoords, EnrichmentItem *ei);
     double evaluateHeavisideGamma(double xi, ShellCrack *ei);
     double evaluateHeavisideGamma(double xi, Delamination *ei);
     double evaluateCutHeaviside(const double xi, const double xiBottom, const double xiTop) const;

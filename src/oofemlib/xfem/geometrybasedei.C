@@ -303,6 +303,7 @@ void GeometryBasedEI::updateNodeEnrMarker(XfemManager &ixFemMan)
                         FloatArray pos;
                         pos.add(0.5 * ( 1.0 - xi ), posI);
                         pos.add(0.5 * ( 1.0 + xi ), posJ);
+                        pos.resizeWithValues(2);
 
                         mpBasicGeometry->computeTangentialSignDist(tangDist, pos, arcPos);
 
@@ -355,7 +356,8 @@ void GeometryBasedEI :: updateLevelSets(XfemManager &ixFemMan)
         Node *node = ixFemMan.giveDomain()->giveNode(nodeNum);
 
         // Extract node coord
-        const FloatArray &pos( * node->giveCoordinates() );
+        FloatArray pos( * node->giveCoordinates() );
+        pos.resizeWithValues(2);
 
         // Calc normal sign dist
         double phi = 0.0;
@@ -639,6 +641,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
                 FloatArray pos;
                 pos.add(0.5 * ( 1.0 - xi ), posI);
                 pos.add(0.5 * ( 1.0 + xi ), posJ);
+                pos.resizeWithValues(2);
                 mpBasicGeometry->computeTangentialSignDist(tangDist, pos, arcPos);
                 double gamma = tangDist;
 
@@ -649,7 +652,9 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
                         // If the crack is parallel to the edge.
 
                         FloatArray ps( * ( element->giveDofManager(nsLoc)->giveCoordinates() ) );
+                        ps.resizeWithValues(2);
                         FloatArray pe( * ( element->giveDofManager(neLoc)->giveCoordinates() ) );
+                        pe.resizeWithValues(2);
 
                         // Check that the intersection points have not already been identified.
                         // This may happen if the crack intersects the element exactly at a node,
@@ -704,9 +709,9 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
 
                         int nDim = ps.giveSize();
                         FloatArray p;
-                        p.resize(nDim);
+                        p.resizeWithValues(2);
 
-                        for ( int i = 1; i <= nDim; i++ ) {
+                        for ( int i = 1; i <= 2; i++ ) {
                             ( p.at(i) ) = 0.5 * ( 1.0 - xi ) * ( ( ps.at(i) ) ) + 0.5 * ( 1.0 + xi ) * ( ( pe.at(i) ) );
                         }
 
