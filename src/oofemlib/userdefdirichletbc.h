@@ -71,7 +71,6 @@ typedef _object PyObject;
  * @author: Erik Svenning
  */
 namespace oofem {
-class PythonInitializer;
 
 class OOFEM_EXPORT UserDefDirichletBC : public BoundaryCondition
 {
@@ -79,7 +78,6 @@ protected:
     /// Prescribed values for each resp. dof
     FloatArray values;
 
-    PyObject *mpName;
     PyObject *mpModule;
     PyObject *mpFunc;
 

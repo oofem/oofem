@@ -61,10 +61,10 @@ IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
 
     StructuralMaterial :: initializeFrom(ir);
 
-    IR_GIVE_FIELD(ir, this->filename, _IFT_StructuralPythonMaterial_filename);
+    IR_GIVE_FIELD(ir, this->moduleName, _IFT_StructuralPythonMaterial_moduleName);
 
     // Import Python file
-    PyObject *mpName = PyString_FromString( this->filename.c_str() );
+    PyObject *mpName = PyString_FromString( this->moduleName.c_str() );
     this->mpModule = PyImport_Import(mpName);
     Py_DECREF(mpName);
 
@@ -84,7 +84,7 @@ IRResultType StructuralPythonMaterial :: initializeFrom(InputRecord *ir)
             OOFEM_ERROR("No functions for either small or large deformations supplied. Are you sure the functions are named correctly?");
         }
     } else   {
-        OOFEM_ERROR("mpModule == NULL for filename %s", this->filename.c_str())
+        OOFEM_ERROR("mpModule == NULL for module name %s", this->moduleName.c_str())
     }
     pert = 1e-12;
 
@@ -95,7 +95,7 @@ void StructuralPythonMaterial :: giveInputRecord(DynamicInputRecord &input)
 {
     StructuralMaterial :: giveInputRecord(input);
 
-    input.setField(this->filename, _IFT_StructuralPythonMaterial_filename);
+    input.setField(this->moduleName, _IFT_StructuralPythonMaterial_moduleName);
 }
 
 MaterialStatus *StructuralPythonMaterial :: CreateStatus(GaussPoint *gp) const
@@ -103,7 +103,7 @@ MaterialStatus *StructuralPythonMaterial :: CreateStatus(GaussPoint *gp) const
     return new StructuralPythonMaterialStatus(this->giveDomain(), gp);
 }
 
-void StructuralPythonMaterial :: callStressFunction(PyObject *func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, PyObject *stateDict, TimeStep *tStep)
+void StructuralPythonMaterial :: callStressFunction(PyObject *func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, PyObject *stateDict, TimeStep *tStep) const
 {
     if ( !PyCallable_Check(func) ) {
         OOFEM_ERROR("Python function is not callable.");
@@ -147,7 +147,7 @@ void StructuralPythonMaterial :: callStressFunction(PyObject *func, const FloatA
     Py_DECREF(pArgs);
 }
 
-void StructuralPythonMaterial :: callTangentFunction(FloatMatrix &answer, PyObject *func, const FloatArray &strain, const FloatArray &stress, PyObject *stateDict, TimeStep *tStep)
+void StructuralPythonMaterial :: callTangentFunction(FloatMatrix &answer, PyObject *func, const FloatArray &strain, const FloatArray &stress, PyObject *stateDict, TimeStep *tStep) const
 {
     if ( !PyCallable_Check(func) ) {
         OOFEM_ERROR("Python function is not callable.");

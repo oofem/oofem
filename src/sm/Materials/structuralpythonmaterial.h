@@ -35,15 +35,18 @@
 #ifndef structuralpythonmaterial_h
 #define structuralpythonmaterial_h
 
-#include <Python.h>
-
 #include "../sm/Materials/structuralmaterial.h"
 #include "../sm/Materials/structuralms.h"
+
+#ifndef PyObject_HEAD
+struct _object;
+typedef _object PyObject;
+#endif
 
 ///@name Input fields for StructuralPythonMaterial
 //@{
 #define _IFT_StructuralPythonMaterial_Name "structuralpythonmaterial"
-#define _IFT_StructuralPythonMaterial_filename "filename"
+#define _IFT_StructuralPythonMaterial_moduleName "module" /// The name of the module with the supplied functions (i.e. the name of the python script, without file extension)
 //@}
 
 namespace oofem {
@@ -51,21 +54,24 @@ namespace oofem {
  * Custom user supplied python scripts for material models.
  * The python module should contain the functions
  * @code{.py}
- * giveStress(oldStrain, oldStress, strain, state, time) ( returns stress )
- * givePK1Stress(oldF, oldP, F, state, time) ( returns P )
+ * giveStress(oldStrain, oldStress, strain, state, time) # returns stress
+ * givePK1Stress(oldF, oldP, F, state, time) # returns P
  * @endcode
  * and optionally
  * @code{.py}
- * giveStressTangent(strain, stress, state, time) ( returns ds/de )
- * givePK1StressTangent(F, P, state, time) ( return dP/dF )
+ * giveStressTangent(strain, stress, state, time) # returns ds/de
+ * givePK1StressTangent(F, P, state, time) # return dP/dF
  * @endcode
+ * else numerical derivatives are used.
+ * 
+ * This code is still experimental, and needs extensive testing.
  * @author Mikael Öhman
  */
 class StructuralPythonMaterial : public StructuralMaterial
 {
 private:
     /// Name of the file that contains the python function
-    std :: string filename;
+    std :: string moduleName;
     /// The module containing the functions
     PyObject *mpModule;
 
@@ -90,8 +96,8 @@ public:
 
     virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
-    void callStressFunction(PyObject *func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, PyObject *stateDict, TimeStep *tStep);
-    void callTangentFunction(FloatMatrix &answer, PyObject *func, const FloatArray &strain, const FloatArray &stress, PyObject *stateDict, TimeStep *tStep);
+    void callStressFunction(PyObject *func, const FloatArray &oldStrain, const FloatArray &oldStress, const FloatArray &strain, FloatArray &stress, PyObject *stateDict, TimeStep *tStep) const;
+    void callTangentFunction(FloatMatrix &answer, PyObject *func, const FloatArray &strain, const FloatArray &stress, PyObject *stateDict, TimeStep *tStep) const;
 
     virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
                                                MatResponseMode mode, GaussPoint *gp, TimeStep *tStep);
