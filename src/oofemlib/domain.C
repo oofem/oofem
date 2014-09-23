@@ -69,6 +69,7 @@
 #include "xfem/enrichmentitem.h"
 #include "xfem/enrichmentfunction.h"
 #include "xfem/propagationlaw.h"
+#include "contact/contactmanager.h"
 
 #include "boundarycondition.h"
 #include "activebc.h"
@@ -115,6 +116,7 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
     smoother              = NULL;
     topology              = NULL;
     fracManager           = NULL;
+    contactManager        = NULL;
 
     nonlocalUpdateStateCounter = 0;
 
@@ -292,6 +294,7 @@ Domain :: ~Domain()
     delete outputManager;
     delete smoother;
     delete topology;
+    delete contactManager;
 
 #ifdef __PARALLEL_MODE
     delete transactionManager;
@@ -314,7 +317,8 @@ Domain :: clear()
     setList->clear();
     delete xfemManager;
     xfemManager = NULL;
-
+    delete contactManager;
+    contactManager = NULL;
     if ( connectivityTable ) {
         connectivityTable->reset();
     }
@@ -572,6 +576,23 @@ Domain :: hasXfemManager()
 }
 
 
+ContactManager *
+Domain :: giveContactManager()
+{
+#ifdef DEBUG
+    if ( !contactManager ) {
+        OOFEM_ERROR("undefined contact manager");
+    }
+#endif
+    return contactManager;
+}
+
+bool
+Domain :: hasContactManager()
+{
+    return contactManager != NULL;
+}
+
 bool
 Domain :: hasFractureManager()
 {
@@ -635,6 +656,7 @@ Domain :: instanciateYourself(DataReader *dr)
     std :: string name, topologytype;
     int nnode, nelem, nmat, nload, nic, nloadtimefunc, ncrossSections, nbarrier = 0, nset = 0;
     bool nxfemman = false;
+    bool ncontactman = false;
     bool nfracman = false;
     //XfemManager *xMan;
     // mapping from label to local numbers for dofmans and elements
@@ -676,6 +698,7 @@ Domain :: instanciateYourself(DataReader *dr)
     IR_GIVE_FIELD(ir, nloadtimefunc, _IFT_Domain_nfunct);
     IR_GIVE_OPTIONAL_FIELD(ir, nset, _IFT_Domain_nset);
     IR_GIVE_OPTIONAL_FIELD(ir, nxfemman, _IFT_Domain_nxfemman);
+    IR_GIVE_OPTIONAL_FIELD(ir, ncontactman, _IFT_Domain_ncontactman);
     IR_GIVE_OPTIONAL_FIELD(ir, topologytype, _IFT_Domain_topology);
     this->nsd = -1; ///@todo Change this to default 0 when the domaintype record has been removed.
     IR_GIVE_OPTIONAL_FIELD(ir, this->nsd, _IFT_Domain_numberOfSpatialDimensions);
@@ -1005,6 +1028,24 @@ Domain :: instanciateYourself(DataReader *dr)
     }
 #  endif
 
+
+    if ( ncontactman ) {
+        // don't read any input yet
+        ir = dr->giveInputRecord(DataReader :: IR_contactManRec, 1);
+
+        IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
+        contactManager = classFactory.createContactManager(name.c_str(), this);
+
+        contactManager->initializeFrom(ir);
+        contactManager->instanciateYourself(dr);
+    }
+#  ifdef VERBOSE
+    if ( ncontactman ) {
+        VERBOSE_PRINT0("Instanciated contact manager ", ncontactman);
+    }
+#  endif
+
+
     this->topology = NULL;
     if ( topologytype.length() > 0 ) {
         this->topology = classFactory.createTopology(topologytype.c_str(), this);
@@ -1029,7 +1070,7 @@ Domain :: instanciateYourself(DataReader *dr)
     }
 #  ifdef VERBOSE
     if ( nfracman ) {
-        VERBOSE_PRINT0("Instanciated fracture manager ", nxfemman);
+        VERBOSE_PRINT0("Instanciated fracture manager ", nfracman);
     }
 #  endif
 
@@ -1421,6 +1462,11 @@ Domain :: createDofs()
     if ( this->hasXfemManager() ) {
         xfemManager->createEnrichedDofs();
     }
+    
+    if ( this->hasContactManager() ) {
+        contactManager->createContactDofs();
+    }
+    
 }
 
 

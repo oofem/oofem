@@ -119,7 +119,7 @@ Structural2DElement :: computeGaussPoints()
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
     
-    StructuralElement :: giveNumberOfIPForMassMtrxIntegration();
+    
 }
 
 
@@ -497,7 +497,7 @@ AxisymElement :: computeGaussPoints()
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
     
-    //printf(" num ip: = %d \n", StructuralElement :: giveNumberOfIPForMassMtrxIntegration() );
+   
 }
 
 

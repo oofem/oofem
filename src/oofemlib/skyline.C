@@ -43,6 +43,10 @@
 #include "sparsemtrxtype.h"
 #include "classfactory.h"
 #include "activebc.h"
+#include "contact/contactmanager.h"
+#include "contact/contactdefinition.h"
+#include "contact/contactelement.h"
+
 
 #include <climits>
 #include <cstdlib>
@@ -437,6 +441,36 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
         }
     }
 
+    
+    if ( domain->hasContactManager() ) {
+        ContactManager *cMan = domain->giveContactManager();
+            
+        for ( int i =1; i <= cMan->giveNumberOfContactDefinitions(); i++ ) {
+            ContactDefinition *cDef = cMan->giveContactDefinition(i);
+            for ( int k = 1; k <= cDef->giveNumbertOfContactElements(); k++ ) {
+                ContactElement *cEl = cDef->giveContactElement(k);
+                cEl->giveLocationArray(loc, s);
+            
+                js = loc.giveSize();
+                maxle = INT_MAX;
+                for ( int j = 1; j <= js; j++ ) {
+                    int ieq = loc.at(j);
+                    if ( ieq != 0 ) {
+                        maxle = min(maxle, ieq);
+                    }
+                }
+
+                for ( int j = 1; j <= js; j++ ) {
+                    int ieq = loc.at(j);
+                    if ( ieq != 0 ) {
+                        mht.at(ieq) = min( maxle, mht.at(ieq) );
+                    }
+                  
+                }
+            }
+        }
+    }
+    
     // NOTE
     // add there call to eModel if any possible additional equation added by
     // eModel
