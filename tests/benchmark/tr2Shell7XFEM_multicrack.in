@@ -13,7 +13,7 @@ node 4 coords 3 0.0  0.5  0.0
 node 5 coords 3 0.5  0.5  0.0
 node 6 coords 3 1.0  0.5  0.0
 node 7 coords 3 0.0  1.0  0.0
-node 8 coords 3 0.5  1.0  0.0
+node 8 coords 3 0.4999999999  1.0  0.0
 node 9 coords 3 1.0  1.0  0.0
 ## Elements 
 Tr2Shell7XFEM 1 nodes 6 1 3 9 2 6 5 boundaryLoads  2 2 2
