@@ -47,10 +47,6 @@
 #include "strainvector.h"
 #include "classfactory.h"
 
-#ifdef __PARALLEL_MODE
- #include "combuff.h"
-#endif
-
 namespace oofem {
 REGISTER_Material(IDGMaterial);
 

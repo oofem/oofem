@@ -4685,7 +4685,7 @@ Subdivision :: unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
     // query process communicator to use
     ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
 
-    pcbuff->unpackInt(_type);
+    pcbuff->read(_type);
     // unpack dofman data
     while ( _type != SUBDIVISION_END_DATA ) {
         if ( _type == SUBDIVISION_SHARED_IRREGULAR_REC_TAG ) {
@@ -4861,7 +4861,7 @@ Subdivision :: unpackSharedIrregulars(Subdivision *s, ProcessCommunicator &pc)
         }
 
         // get type of the next record
-        pcbuff->unpackInt(_type);
+        pcbuff->read(_type);
     }
 
     return 1;
@@ -4942,7 +4942,7 @@ Subdivision :: unpackIrregularSharedGlobnums(Subdivision *s, ProcessCommunicator
     // query process communicator to use
     ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
 
-    pcbuff->unpackInt(_type);
+    pcbuff->read(_type);
     // unpack dofman data
     while ( _type != SUBDIVISION_END_DATA ) {
         if ( _type == SUBDIVISION_SHARED_IRREGULAR_REC_TAG ) {   // KOKO asi zbytecne
@@ -5004,7 +5004,7 @@ Subdivision :: unpackIrregularSharedGlobnums(Subdivision *s, ProcessCommunicator
             OOFEM_ERROR("unknown tag received");
         }
 
-        pcbuff->unpackInt(_type);
+        pcbuff->read(_type);
     }
 
     return 1;
@@ -5219,27 +5219,27 @@ Subdivision :: packRemoteElements(RS_packRemoteElemsStruct *s, ProcessCommunicat
     for ( int nodeNum: nodesToSend ) {
         inodePtr = d->giveDofManager(nodeNum);
 
-        pcbuff->packString( inodePtr->giveInputRecordName() );
+        pcbuff->write( inodePtr->giveInputRecordName() );
         pcbuff->packInt( inodePtr->giveGlobalNumber() );
         inodePtr->saveContext(& pcDataStream, CM_Definition);
     }
 
     // pack end-of-element-record
-    pcbuff->packString("");
+    pcbuff->write("");
 
     // send elements
     for ( int elNum: remoteElements ) {
         elemPtr = d->giveElement(elNum);
         // pack local element (node numbers shuld be global ones!!!)
         // pack type
-        pcbuff->packString( elemPtr->giveInputRecordName() );
+        pcbuff->write( elemPtr->giveInputRecordName() );
         // nodal numbers shuld be packed as global !!
         elemPtr->saveContext(& pcDataStream, CM_Definition | CM_DefinitionGlobal);
         //OOFEM_LOG_INFO ("[%d] Sending Remote elem %d[%d] to rank %d\n", myrank,*si, elemPtr->giveGlobalNumber(), rproc );
     }
 
     // pack end-of-element-record
-    pcbuff->packString("");
+    pcbuff->write("");
 
     return 1;
 }
@@ -5264,13 +5264,13 @@ Subdivision :: unpackRemoteElements(Domain *d, ProcessCommunicator &pc)
 
     // unpack dofman data
     do {
-        pcbuff->unpackString(_type);
+        pcbuff->read(_type);
         if ( _type.size() == 0 ) {
             break;
         }
 
         // receiving new local dofManager
-        pcbuff->unpackInt(_globnum);
+        pcbuff->read(_globnum);
 
         DofManager *dofman;
         bool _newentry = false;
@@ -5295,7 +5295,7 @@ Subdivision :: unpackRemoteElements(Domain *d, ProcessCommunicator &pc)
     int nrecv = 0;
 
     do {
-        pcbuff->unpackString(_type);
+        pcbuff->read(_type);
         if ( _type.size() == 0 ) {
             break;
         }
@@ -5539,7 +5539,7 @@ Subdivision :: unpackSharedEdges(Subdivision *s, ProcessCommunicator &pc)
     // query process communicator to use
     ProcessCommunicatorBuff *pcbuff = pc.giveProcessCommunicatorBuff();
 
-    pcbuff->unpackInt(_type);
+    pcbuff->read(_type);
     // unpack dofman data
     while ( _type != SUBDIVISION_END_DATA ) {
         if ( _type == SUBDIVISION_SHARED_EDGE_REC_TAG ) {   // KOKO zbytecne
@@ -5596,7 +5596,7 @@ Subdivision :: unpackSharedEdges(Subdivision *s, ProcessCommunicator &pc)
             OOFEM_ERROR("unknown tag received");
         }
 
-        pcbuff->unpackInt(_type);
+        pcbuff->read(_type);
     }
 
     return 1;

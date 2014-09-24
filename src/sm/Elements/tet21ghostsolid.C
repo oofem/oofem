@@ -362,8 +362,6 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
 void
 tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord, FloatArray &a)
 {
-
-    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
 #ifdef __FM_MODULE
     FluidDynamicMaterial *fluidMaterial = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
 #endif

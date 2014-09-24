@@ -46,10 +46,7 @@
 #include "strainvector.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
-
-#ifdef __PARALLEL_MODE
- #include "combuff.h"
-#endif
+#include "datastream.h"
 
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
@@ -1033,33 +1030,31 @@ IDNLMaterialStatus :: giveInterface(InterfaceType type)
 }
 
 
-
-#ifdef __PARALLEL_MODE
 int
-IDNLMaterial :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+IDNLMaterial :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(tStep);
 
-    return buff.packDouble( status->giveLocalEquivalentStrainForAverage() );
+    return buff.write( status->giveLocalEquivalentStrainForAverage() );
 }
 
 int
-IDNLMaterial :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+IDNLMaterial :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     int result;
     IDNLMaterialStatus *status = static_cast< IDNLMaterialStatus * >( this->giveStatus(ip) );
     double localEquivalentStrainForAverage;
 
-    result = buff.unpackDouble(localEquivalentStrainForAverage);
+    result = buff.read(localEquivalentStrainForAverage);
     status->setLocalEquivalentStrainForAverage(localEquivalentStrainForAverage);
     return result;
 }
 
 int
-IDNLMaterial :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
+IDNLMaterial :: estimatePackSize(DataStream &buff, GaussPoint *ip)
 {
     //
     // Note: status localStrainVectorForAverage memeber must be properly sized!
@@ -1067,9 +1062,9 @@ IDNLMaterial :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
 
     //IDNLMaterialStatus *status = (IDNLMaterialStatus*) this -> giveStatus (ip);
 
-    return buff.givePackSize(MPI_DOUBLE, 1);
+    return buff.givePackSizeOfDouble(1);
 }
-#endif
+
 
 double
 IDNLMaterial :: predictRelativeComputationalCost(GaussPoint *gp)

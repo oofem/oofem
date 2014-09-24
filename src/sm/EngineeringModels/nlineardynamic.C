@@ -903,9 +903,8 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
 }
 
 
-#ifdef __PARALLEL_MODE
 int
-NonLinearDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
+NonLinearDynamic :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType)
 {
     int count = 0, pcount = 0;
     Domain *domain = this->giveDomain(1);
@@ -922,7 +921,7 @@ NonLinearDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
             }
         }
 
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * max(count, pcount) );
+        return ( buff.givePackSizeOfDouble(1) * max(count, pcount) );
     } else if ( packUnpackType == 1 ) {
         for ( int map: commMap ) {
             count += domain->giveElement( map )->estimatePackSize(buff);
@@ -935,6 +934,7 @@ NonLinearDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
 }
 
 
+#ifdef __PARALLEL_MODE
 LoadBalancer *
 NonLinearDynamic :: giveLoadBalancer()
 {

@@ -663,9 +663,8 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
 #endif
 }
 
-#ifdef __PARALLEL_MODE
 int
-NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
+NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType)
 {
     int count = 0, pcount = 0;
     Domain *domain = this->giveDomain(1);
@@ -682,7 +681,7 @@ NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
             }
         }
 
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * max(count, pcount) );
+        return ( buff.givePackSizeOfDouble(1) * max(count, pcount) );
     } else if ( packUnpackType == 1 ) {
         for ( int inod: commMap ) {
             count += domain->giveElement( inod )->estimatePackSize(buff);
@@ -693,9 +692,6 @@ NlDEIDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff
 
     return 0;
 }
-
-#endif
-
 
 contextIOResultType NlDEIDynamic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {

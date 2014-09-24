@@ -218,7 +218,7 @@ LoadBalancer :: packMigratingData(Domain *d, ProcessCommunicator &pc)
         //if ((this->giveDofManPartitions(idofman)->findFirstIndexOf(iproc))) {
         if ( ( this->giveDofManPartitions(idofman)->findFirstIndexOf(iproc) ) &&
             ( !dofman->givePartitionList()->findFirstIndexOf(iproc) ) ) {
-            pcbuff->packString( dofman->giveInputRecordName() );
+            pcbuff->write( dofman->giveInputRecordName() );
             pcbuff->packInt( this->giveDofManState(idofman) );
             pcbuff->packInt( dofman->giveGlobalNumber() );
 
@@ -233,7 +233,7 @@ LoadBalancer :: packMigratingData(Domain *d, ProcessCommunicator &pc)
     }
 
     // pack end-of-dofman-section record
-    pcbuff->packString("");
+    pcbuff->write("");
 
     int nelem = d->giveNumberOfElements(), nsend = 0;
 
@@ -243,7 +243,7 @@ LoadBalancer :: packMigratingData(Domain *d, ProcessCommunicator &pc)
             ( this->giveElementPartition(ielem) == iproc ) ) {
             // pack local element (node numbers should be global ones!!!)
             // pack type
-            pcbuff->packString( elem->giveInputRecordName() );
+            pcbuff->write( elem->giveInputRecordName() );
             // nodal numbers should be packed as global !!
             elem->saveContext(& pcDataStream, CM_Definition | CM_DefinitionGlobal | CM_State);
             nsend++;
@@ -251,7 +251,7 @@ LoadBalancer :: packMigratingData(Domain *d, ProcessCommunicator &pc)
     } // end loop over elements
 
     // pack end-of-element-record
-    pcbuff->packString("");
+    pcbuff->write("");
 
     OOFEM_LOG_RELEVANT("[%d] LoadBalancer:: sending %d migrating elements to %d\n", myrank, nsend, iproc);
 
@@ -292,15 +292,15 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
 
     // unpack dofman data
     do {
-        pcbuff->unpackString(_type);
+        pcbuff->read(_type);
         if ( _type.size() == 0 ) { // Empty string marks end of data
             break;
         }
-        pcbuff->unpackInt(_mode);
+        pcbuff->read(_mode);
         switch ( _mode ) {
         case LoadBalancer :: DM_Remote:
             // receiving new local dofManager
-            pcbuff->unpackInt(_globnum);
+            pcbuff->read(_globnum);
             /*
              * _newentry = false;
              * if ( ( dofman = dtm->giveDofManager(_globnum) ) == NULL ) {
@@ -330,7 +330,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
         case LoadBalancer :: DM_Shared:
             // receiving new shared dofManager, that was local on sending partition
             // should be received only once (from partition where was local)
-            pcbuff->unpackInt(_globnum);
+            pcbuff->read(_globnum);
             /*
              * _newentry = false;
              * if ( ( dofman = dtm->giveDofManager(_globnum) ) == NULL ) {
@@ -370,7 +370,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
     Element *elem;
     int nrecv = 0;
     do {
-        pcbuff->unpackString(_type);
+        pcbuff->read(_type);
         if ( _type.size() == 0 ) {
             break;
         }

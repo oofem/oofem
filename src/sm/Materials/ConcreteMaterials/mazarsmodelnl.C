@@ -38,11 +38,7 @@
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
 #include "classfactory.h"
-
-#ifdef __PARALLEL_MODE
- #include "combuff.h"
-#endif
-
+#include "datastream.h"
 
 namespace oofem {
 REGISTER_Material(MazarsNLMaterial);
@@ -272,40 +268,38 @@ MazarsNLMaterialStatus :: giveInterface(InterfaceType type)
 }
 
 
-#ifdef __PARALLEL_MODE
 int
-MazarsNLMaterial :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+MazarsNLMaterial :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     MazarsNLMaterialStatus *status = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(tStep);
 
-    return buff.packDouble( status->giveLocalEquivalentStrainForAverage() );
+    return buff.write( status->giveLocalEquivalentStrainForAverage() );
 }
 
 int
-MazarsNLMaterial :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+MazarsNLMaterial :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     int result;
     MazarsNLMaterialStatus *status = static_cast< MazarsNLMaterialStatus * >( this->giveStatus(ip) );
     double localEquivalentStrainForAverage;
 
-    result = buff.unpackDouble(localEquivalentStrainForAverage);
+    result = buff.read(localEquivalentStrainForAverage);
     status->setLocalEquivalentStrainForAverage(localEquivalentStrainForAverage);
     return result;
 }
 
 int
-MazarsNLMaterial :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
+MazarsNLMaterial :: estimatePackSize(DataStream &buff, GaussPoint *ip)
 {
     //
     // Note: status localStrainVectorForAverage memeber must be properly sized!
     //
     //MazarsNLMaterialStatus *status = (MazarsNLMaterialStatus*) this -> giveStatus (ip);
 
-    return buff.givePackSize(MPI_DOUBLE, 1);
+    return buff.givePackSizeOfDouble(1);
 }
 
-#endif
 } // end namespace oofem

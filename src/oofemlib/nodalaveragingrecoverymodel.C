@@ -229,10 +229,10 @@ NodalAveragingRecoveryModel :: unpackSharedDofManData(parallelStruct *s, Process
         int indx = s->regionNodalNumbers->at( toRecvMap->at(i) );
         // toRecvMap contains all shared dofmans with remote partition
         // one has to check, if particular shared node received contribution is available for given region
-        result &= pcbuff->unpackInt(flag);
+        result &= pcbuff->read(flag);
         if ( flag ) {
             // "1" to indicates that for given shared node this is a valid contribution
-            result &= pcbuff->unpackInt(intValue);
+            result &= pcbuff->read(intValue);
             // now check if we have a valid number
             if ( indx ) {
                 s->regionDofMansConnectivity->at(indx) += intValue;
@@ -240,7 +240,7 @@ NodalAveragingRecoveryModel :: unpackSharedDofManData(parallelStruct *s, Process
 
             int eq = ( indx - 1 ) * s->regionValSize;
             for ( int j = 1; j <= s->regionValSize; j++ ) {
-                result &= pcbuff->unpackDouble(value);
+                result &= pcbuff->read(value);
                 if ( indx ) {
                     s->lhs->at(eq + j) += value;
                 }

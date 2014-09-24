@@ -47,7 +47,6 @@ namespace oofem {
 class IntArray;
 class FloatMatrix;
 class DataStream;
-class CommunicationBuffer;
 
 /**
  * Class representing vector of real numbers. This array can grow or shrink to
@@ -484,14 +483,10 @@ public:
      * Reciever will be set to a given column in a matrix
      */
     void beColumnOf(const FloatMatrix &mat, int col);
-#ifdef __PARALLEL_MODE
-    int packToCommBuffer(CommunicationBuffer &buff) const;
-    int unpackFromCommBuffer(CommunicationBuffer &buff);
-    int givePackSize(CommunicationBuffer &buff) const;
-#endif
 
-    contextIOResultType storeYourself(DataStream *stream);
+    contextIOResultType storeYourself(DataStream *stream) const;
     contextIOResultType restoreYourself(DataStream *stream);
+    int givePackSize(DataStream &buff) const;
 
     friend std :: ostream &operator << ( std :: ostream & out, const FloatArray & x );
 

@@ -683,12 +683,12 @@ SPRNodalRecoveryModel :: unpackSharedDofManData(parallelStruct *s, ProcessCommun
         indx = s->regionNodalNumbers->at( toRecvMap->at(i) );
         // toRecvMap contains all shared dofmans with remote partition
         // one has to check, if particular shared node received contribution is available for given region
-        result &= pcbuff->unpackInt(flag);
+        result &= pcbuff->read(flag);
         if ( flag ) {
             // "1" to indicates that for given shared node this is a valid contribution
             eq = ( indx - 1 ) * s->regionValSize;
             for ( j = 1; j <= s->regionValSize; j++ ) {
-                result &= pcbuff->unpackDouble(value);
+                result &= pcbuff->read(value);
                 if ( indx ) {
                     s->dofManValues->at(eq + j) += value;
                 }

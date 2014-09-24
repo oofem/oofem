@@ -386,9 +386,8 @@ FreeWarping :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
 }
 
 
-#ifdef __PARALLEL_MODE
 int
-FreeWarping :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
+FreeWarping :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType)
 {
     int count = 0, pcount = 0;
     Domain *domain = this->giveDomain(1);
@@ -408,7 +407,7 @@ FreeWarping :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff,
         // only pcount is relevant here, since only prescribed components are exchanged !!!!
         // --------------------------------------------------------------------------------
 
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * pcount );
+        return ( buff.givePackSizeOfDouble(1) * pcount );
     } else if ( packUnpackType == 1 ) {
         for ( int map: commMap ) {
             count += domain->giveElement( map )->estimatePackSize(buff);
@@ -419,5 +418,4 @@ FreeWarping :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff,
 
     return 0;
 }
-#endif
 } // end namespace oofem

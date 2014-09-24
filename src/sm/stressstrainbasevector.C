@@ -39,6 +39,7 @@
 #include "datastream.h"
 #include "materialmode.h"
 #include "../sm/Materials/structuralmaterial.h"
+#include "datastream.h"
 
 namespace oofem {
 StressStrainBaseVector :: StressStrainBaseVector(MaterialMode m) : FloatArray()

@@ -1956,7 +1956,7 @@ EngngModel :: unpackDofManagers(ArrayWithNumbering *destData, ProcessCommunicato
         for ( Dof *jdof: *dman ) {
             int eqNum = jdof->giveEquationNumber(s);
             if ( jdof->isPrimaryDof() && eqNum ) {
-                result &= pcbuff->unpackDouble(value);
+                result &= pcbuff->read(value);
                 if ( dofmanmode == DofManager_shared ) {
                     dest->at(eqNum) += value;
                 } else if ( dofmanmode == DofManager_remote ) {

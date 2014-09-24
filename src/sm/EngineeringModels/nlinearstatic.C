@@ -853,9 +853,8 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
 }
 
 
-#ifdef __PARALLEL_MODE
 int
-NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
+NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType)
 {
     int count = 0, pcount = 0;
     Domain *domain = this->giveDomain(1);
@@ -873,7 +872,7 @@ NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &b
         }
 
         //printf ("\nestimated count is %d\n",count);
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * max(count, pcount) );
+        return ( buff.givePackSizeOfDouble(1) * max(count, pcount) );
     } else if ( packUnpackType == 1 ) {
         for ( int map: commMap ) {
             count += domain->giveElement( map )->estimatePackSize(buff);
@@ -886,6 +885,7 @@ NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &b
 }
 
 
+#ifdef __PARALLEL_MODE
 LoadBalancer *
 NonLinearStatic :: giveLoadBalancer()
 {

@@ -40,10 +40,6 @@
 #include "datastream.h"
 #include "mathfem.h"
 
-#ifdef __PARALLEL_MODE
- #include "combuff.h"
-#endif
-
 #include <cstdarg>
 #include <cstdlib>
 #include <cstring>
@@ -829,7 +825,7 @@ void FloatArray :: copySubVector(const FloatArray &src, int si)
 }
 
 
-contextIOResultType FloatArray :: storeYourself(DataStream *stream)
+contextIOResultType FloatArray :: storeYourself(DataStream *stream) const
 // writes receiver's binary image into stream
 // use id to distinguish some instances
 // return value >0 success
@@ -878,36 +874,10 @@ contextIOResultType FloatArray :: restoreYourself(DataStream *stream)
 }
 
 
-#ifdef __PARALLEL_MODE
-int FloatArray :: packToCommBuffer(CommunicationBuffer &buff) const
+int FloatArray :: givePackSize(DataStream &buff) const
 {
-    int result = 1;
-    // pack size
-    result &= buff.packInt(this->giveSize());
-    // pack data
-    result &= buff.packArray(this->givePointer(), this->giveSize());
-
-    return result;
+    return buff.givePackSizeOfInt(1) + buff.givePackSizeOfDouble(this->giveSize());
 }
-
-int FloatArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
-{
-    int newSize, result = 1;
-    // unpack size
-    result &= buff.unpackInt(newSize);
-    // resize yourself
-    this->values.resize(newSize);
-    result &= buff.unpackArray(this->givePointer(), newSize);
-
-    return result;
-}
-
-int FloatArray :: givePackSize(CommunicationBuffer &buff) const
-{
-    return buff.givePackSize(MPI_INT, 1) + buff.givePackSize(MPI_DOUBLE, this->giveSize());
-}
-
-#endif
 
 // IML compat
 

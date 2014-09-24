@@ -44,6 +44,7 @@
 #include "contextioerr.h"
 #include "classfactory.h"
 #include "dynamicinputrecord.h"
+#include "datastream.h"
 
 namespace oofem {
 REGISTER_Material(MDM);
@@ -1304,33 +1305,31 @@ MDM :: giveInterface(InterfaceType type)
     }
 }
 
-
-#ifdef __PARALLEL_MODE
 int
-MDM :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+MDM :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(tStep);
 
-    return status->giveLocalDamageTensorForAveragePtr()->packToCommBuffer(buff);
+    return status->giveLocalDamageTensorForAveragePtr()->storeYourself(&buff);
 }
 
 int
-MDM :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+MDM :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     int result;
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(ip) );
     FloatMatrix _LocalDamageTensorForAverage;
 
-    result = _LocalDamageTensorForAverage.unpackFromCommBuffer(buff);
+    result = _LocalDamageTensorForAverage.restoreYourself(&buff);
     status->setLocalDamageTensorForAverage(_LocalDamageTensorForAverage);
     return result;
 }
 
 int
-MDM :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
+MDM :: estimatePackSize(DataStream &buff, GaussPoint *ip)
 {
     //
     // Note: status localStrainVectorForAverage memeber must be properly sized!
@@ -1342,7 +1341,7 @@ MDM :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
         return 0;
     }
 }
-#endif
+
 
 double
 MDM :: predictRelativeComputationalCost(GaussPoint *gp)

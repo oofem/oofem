@@ -208,7 +208,7 @@ DynamicCommunicationBuffer :: initForUnpacking()
 
 /*
  * int
- * DynamicCommunicationBuffer::packArray (int* src, int n)
+ * DynamicCommunicationBuffer::write (int* src, int n)
  * {
  * int _result=1;
  * int start_indx=0, end_indx, _size;
@@ -217,7 +217,7 @@ DynamicCommunicationBuffer :: initForUnpacking()
  *  _size = this->giveFitSize(MPI_INT, active_packet -> giveAvailableSpace(), n);
  *  end_indx = start_indx + _size;
  *
- *  if (_size) _result &= active_packet -> packArray (communicator, src+start_indx,_size, MPI_INT);
+ *  if (_size) _result &= active_packet -> write (communicator, src+start_indx,_size, MPI_INT);
  *  if (end_indx == n) break;
  *  // active packet full, allocate a new one
  *  active_packet = this->allocateNewPacket (++number_of_packets);
@@ -230,7 +230,7 @@ DynamicCommunicationBuffer :: initForUnpacking()
  *
  *
  * int
- * DynamicCommunicationBuffer::unpackArray (int* dest, int n)
+ * DynamicCommunicationBuffer::read (int* dest, int n)
  * {
  * int _result=1;
  * int start_indx=0, end_indx, _size;
@@ -239,7 +239,7 @@ DynamicCommunicationBuffer :: initForUnpacking()
  *  _size = this->giveFitSize(MPI_INT, active_packet -> giveAvailableSpace(), n);
  *  end_indx = start_indx + _size;
  *
- *  if (_size) _result &= active_packet->unpackArray (communicator,dest+start_indx,_size, MPI_INT);
+ *  if (_size) _result &= active_packet->read (communicator,dest+start_indx,_size, MPI_INT);
  *  if (end_indx == n) break;
  *  // active packet exhausted, pop a new one
  *  this->popNewRecvPacket();

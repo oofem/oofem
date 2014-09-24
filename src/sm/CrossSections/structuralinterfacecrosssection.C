@@ -191,25 +191,22 @@ StructuralInterfaceCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *i
     return this->giveInterfaceMaterial()->giveIPValue(answer, ip, type, tStep);
 }
 
-
-#ifdef __PARALLEL_MODE
 int
-StructuralInterfaceCrossSection :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+StructuralInterfaceCrossSection :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)
 {
     return this->giveInterfaceMaterial()->packUnknowns(buff, tStep, gp);
 }
 
 int
-StructuralInterfaceCrossSection :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+StructuralInterfaceCrossSection :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)
 {
     return this->giveInterfaceMaterial()->unpackAndUpdateUnknowns(buff, tStep, gp);
 }
 
 int
-StructuralInterfaceCrossSection :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *gp)
+StructuralInterfaceCrossSection :: estimatePackSize(DataStream &buff, GaussPoint *gp)
 {
     return this->giveInterfaceMaterial()->estimatePackSize(buff, gp);
 }
-#endif
 
 } // end namespace oofem

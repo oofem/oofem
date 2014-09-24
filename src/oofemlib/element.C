@@ -1432,9 +1432,8 @@ Element :: computeGtoLRotationMatrix(FloatMatrix &answer)
 }
 
 
-#ifdef __PARALLEL_MODE
 int
-Element :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep)
+Element :: packUnknowns(DataStream &buff, TimeStep *tStep)
 {
     int result = 1;
 
@@ -1449,7 +1448,7 @@ Element :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep)
 
 
 int
-Element :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep)
+Element :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep)
 {
     int result = 1;
 
@@ -1464,7 +1463,7 @@ Element :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep)
 
 
 int
-Element :: estimatePackSize(CommunicationBuffer &buff)
+Element :: estimatePackSize(DataStream &buff)
 {
     int result = 0;
 
@@ -1476,7 +1475,6 @@ Element :: estimatePackSize(CommunicationBuffer &buff)
 
     return result;
 }
-#endif
 
 
 double
