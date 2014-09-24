@@ -322,7 +322,7 @@ int ProcessCommDataStream :: givePackSizeOfChar(int count)
 
 int ProcessCommDataStream :: givePackSizeOfBool(int count)
 {
-    return pc->givePackSize(MPI_BOOL, count);
+    return pc->givePackSize(MPI_CHAR, count);
 }
 
 int ProcessCommDataStream :: givePackSizeOfLong(int count)

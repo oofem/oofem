@@ -48,15 +48,13 @@
 namespace oofem {
 REGISTER_BoundaryCondition(UserDefDirichletBC);
 
-UserDefDirichletBC :: UserDefDirichletBC(int i, Domain *d) : BoundaryCondition(i, d)
+UserDefDirichletBC :: UserDefDirichletBC(int i, Domain *d) : BoundaryCondition(i, d), mpModule(NULL)
 { }
 
 
 UserDefDirichletBC :: ~UserDefDirichletBC()
 {
-    Py_DECREF(mpName);
-    Py_DECREF(mpModule);
-    Py_DECREF(mpFunc);
+    if ( mpModule ) Py_DECREF(mpModule);
 }
 
 
@@ -89,15 +87,11 @@ UserDefDirichletBC :: give(Dof *dof, ValueModeType mode, TimeStep *tStep)
     // to it -> no DECREF
     PyTuple_SetItem(pArgs, 0, pArgArray);
 
-
     // Dof number
-    PyObject *pValDofNum = PyLong_FromLong( dof->giveDofID() );
-    PyTuple_SetItem(pArgs, 1, pValDofNum);
-
+    PyTuple_SetItem(pArgs, 1, PyLong_FromLong( dof->giveDofID() ));
 
     // Time
-    PyObject *pTargetTime = PyFloat_FromDouble( tStep->giveTargetTime() );
-    PyTuple_SetItem(pArgs, 2, pTargetTime);
+    PyTuple_SetItem(pArgs, 2, PyFloat_FromDouble( tStep->giveTargetTime() ));
 
     // Value returned from the Python function
     PyObject *pRetVal = NULL;
@@ -136,8 +130,9 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, this->mFileName, _IFT_UserDefDirichletBC_filename);
 
     // Import Python file
-    mpName = PyString_FromString( this->mFileName.c_str() );
+    PyObject *mpName = PyString_FromString( this->mFileName.c_str() );
     mpModule = PyImport_Import(mpName);
+    Py_DECREF(mpName);
 
     if ( mpModule != NULL ) {
         // Load and call Python function
@@ -146,10 +141,6 @@ UserDefDirichletBC :: initializeFrom(InputRecord *ir)
         printf( "this->mFileName.c_str(): %s\n", this->mFileName.c_str() );
         OOFEM_ERROR("mpModule == NULL")
     }
-
-//    Py_INCREF(mpName);
-//    Py_INCREF(mpModule);
-//    Py_INCREF(mpFunc);
 
     return IRRT_OK;
 }

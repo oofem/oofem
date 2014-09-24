@@ -200,6 +200,10 @@ set (sm_material
     Materials/isodamagemodel.C
     )
 
+if (USE_PYTHON)
+    list (APPEND sm_material Materials/structuralpythonmaterial.C)
+endif ()
+
 set (sm_interface_materials
     Materials/InterfaceMaterials/structuralinterfacematerial.C
     Materials/InterfaceMaterials/bondceb.C
