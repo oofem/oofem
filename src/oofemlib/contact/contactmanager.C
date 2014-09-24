@@ -87,7 +87,7 @@ ContactManager :: initializeFrom(InputRecord *ir)
 int 
 ContactManager :: instanciateYourself(DataReader *dr)
 {
-      IRResultType result; // Required by IR_GIVE_FIELD macro
+      IRResultType result = IRRT_OK; // Required by IR_GIVE_FIELD macro
       std :: string name;
 
       // Create and instantiate contact definitions

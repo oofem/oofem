@@ -708,7 +708,6 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
                         FloatArray ps( * ( element->giveDofManager(nsLoc)->giveCoordinates() ) );
                         FloatArray pe( * ( element->giveDofManager(neLoc)->giveCoordinates() ) );
 
-                        int nDim = ps.giveSize();
                         FloatArray p;
                         p.resizeWithValues(2);
 
