@@ -815,7 +815,7 @@ LatticeDamage2dStatus :: saveContext(DataStream *stream, ContextMode mode, void 
 
 
     // write a raw data
-    if ( ( iores = reducedStrain.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = reducedStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

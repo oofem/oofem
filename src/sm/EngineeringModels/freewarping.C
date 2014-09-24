@@ -307,7 +307,7 @@ contextIOResultType FreeWarping :: saveContext(DataStream *stream, ContextMode m
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

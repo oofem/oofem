@@ -256,16 +256,16 @@ contextIOResultType Set :: saveContext(DataStream *stream, ContextMode mode, voi
     }
 
     if ( ( mode & CM_Definition ) ) {
-        if ( ( iores = elements.restoreYourself(stream) ) != CIO_OK ) {
+        if ( ( iores = elements.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = elementBoundaries.restoreYourself(stream) ) != CIO_OK ) {
+        if ( ( iores = elementBoundaries.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = elementEdges.restoreYourself(stream) ) != CIO_OK ) {
+        if ( ( iores = elementEdges.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = nodes.restoreYourself(stream) ) != CIO_OK ) {
+        if ( ( iores = nodes.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

@@ -578,7 +578,7 @@ Node :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
     if ( mode & CM_Definition ) {
         int _haslcs = hasLocalCS();
-        if ( ( iores = coordinates.restoreYourself(stream) ) != CIO_OK ) {
+        if ( ( iores = coordinates.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
@@ -587,7 +587,7 @@ Node :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         }
 
         if ( _haslcs ) {
-            if ( ( iores = localCoordinateSystem->restoreYourself(stream) ) != CIO_OK ) {
+            if ( ( iores = localCoordinateSystem->storeYourself(stream) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         }

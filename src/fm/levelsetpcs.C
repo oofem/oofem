@@ -629,7 +629,7 @@ LevelSetPCS :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = levelSetValues.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = levelSetValues.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

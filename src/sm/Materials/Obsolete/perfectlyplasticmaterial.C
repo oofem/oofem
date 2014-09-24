@@ -731,7 +731,7 @@ PerfectlyPlasticMaterialStatus :: saveContext(DataStream *stream, ContextMode mo
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = plasticStrainVector.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = plasticStrainVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

@@ -71,7 +71,6 @@ class EntityRenumberingFunctor;
 class FloatMatrix;
 class PrimaryField;
 class UnknownNumberingScheme;
-class CommunicationBuffer;
 class Load;
 class TimeStep;
 class FloatArray;
@@ -520,19 +519,6 @@ public:
     dofManagerParallelMode giveParallelMode() const { return parallel_mode; }
     /** Sets parallel mode of receiver */
     void setParallelMode(dofManagerParallelMode _mode) { parallel_mode = _mode; }
-#ifdef __PARALLEL_MODE
-    /**
-     * Packs specific  DOF Manager's dofs unknowns into communication buffer.
-     * @param buff Communication buffer to pack data.
-     * @param mode Mode of unknown (e.g, total value, velocity or acceleration of unknown).
-     * @param tStep Time step when unknown requested. See documentation of particular EngngModel
-     * class for valid tStep values (most implementation can return only values for current
-     * and possibly for previous time step).
-     * @return Nonzero if successful
-     * @todo Remove this? Is this function ever used? It looks like leftovers that could be removed. / Mikael
-     */
-    int packDOFsUnknowns(CommunicationBuffer &buff, ValueModeType mode, TimeStep *tStep);
-#endif
     /**
      * Returns partition list of receiver.
      * @return Partition array.

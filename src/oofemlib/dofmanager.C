@@ -577,7 +577,7 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
     }
 
     if ( mode & CM_Definition ) {
-        if ( ( iores = loadArray.restoreYourself(stream) ) != CIO_OK ) {
+        if ( ( iores = loadArray.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
@@ -598,7 +598,7 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( ( iores = partitions.restoreYourself(stream) ) != CIO_OK ) {
+        if ( ( iores = partitions.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -987,21 +987,6 @@ void DofManager :: mergePartitionList(IntArray &_p)
         partitions.insertOnce( _p.at(i) );
     }
 }
-
-
-#ifdef __PARALLEL_MODE
-int
-DofManager :: packDOFsUnknowns(CommunicationBuffer &buff,
-                               ValueModeType mode, TimeStep *tStep)
-{
-    int result = 1;
-    for ( Dof *dof: *this ) {
-        result &= dof->packUnknowns(buff, mode, tStep);
-    }
-
-    return result;
-}
-#endif
 
 
 int DofManager :: givePartitionsConnectivitySize()

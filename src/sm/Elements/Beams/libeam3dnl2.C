@@ -908,7 +908,7 @@ LIBeam3dNL2 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = q.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = q.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

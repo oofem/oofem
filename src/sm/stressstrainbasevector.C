@@ -119,7 +119,7 @@ contextIOResultType
 StressStrainBaseVector :: storeYourself(DataStream *stream)
 {
     contextIOResultType iores;
-    if ( ( iores = FloatArray :: restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = FloatArray :: storeYourself(stream) ) != CIO_OK ) {
         return CIO_OK;
     }
 

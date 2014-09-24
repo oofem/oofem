@@ -1400,19 +1400,19 @@ MDMStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = Psi.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = Psi.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = DamageTensor.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = DamageTensor.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = damageTensorEigenValues.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = damageTensorEigenValues.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = damageTensorEigenVectors.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = damageTensorEigenVectors.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

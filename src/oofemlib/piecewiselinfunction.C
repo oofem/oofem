@@ -182,8 +182,8 @@ contextIOResultType
 PiecewiseLinFunction :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     if ( mode & CM_Definition ) {
-        dates.restoreYourself(stream);
-        values.restoreYourself(stream);
+        dates.storeYourself(stream);
+        values.storeYourself(stream);
     }
 
     return CIO_OK;

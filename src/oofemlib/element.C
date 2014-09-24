@@ -802,20 +802,20 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
                 globDN.at(i) = this->giveDofManager(i)->giveGlobalNumber();
             }
 
-            if ( ( iores = globDN.restoreYourself(stream) ) != CIO_OK ) {
+            if ( ( iores = globDN.storeYourself(stream) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         } else {
-            if ( ( iores = dofManArray.restoreYourself(stream) ) != CIO_OK ) {
+            if ( ( iores = dofManArray.storeYourself(stream) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         }
 
-        if ( ( iores = bodyLoadArray.restoreYourself(stream) ) != CIO_OK ) {
+        if ( ( iores = bodyLoadArray.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
-        if ( ( iores = boundaryLoadArray.restoreYourself(stream) ) != CIO_OK ) {
+        if ( ( iores = boundaryLoadArray.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
@@ -841,7 +841,7 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( ( iores = partitions.restoreYourself(stream) ) != CIO_OK ) {
+        if ( ( iores = partitions.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
