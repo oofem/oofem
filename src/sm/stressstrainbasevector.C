@@ -39,6 +39,7 @@
 #include "datastream.h"
 #include "materialmode.h"
 #include "../sm/Materials/structuralmaterial.h"
+#include "datastream.h"
 
 namespace oofem {
 StressStrainBaseVector :: StressStrainBaseVector(MaterialMode m) : FloatArray()
@@ -119,7 +120,7 @@ contextIOResultType
 StressStrainBaseVector :: storeYourself(DataStream *stream)
 {
     contextIOResultType iores;
-    if ( ( iores = FloatArray :: restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = FloatArray :: storeYourself(stream) ) != CIO_OK ) {
         return CIO_OK;
     }
 

@@ -1067,7 +1067,6 @@ public:
     virtual double giveVariableScale(VarScaleType varId) { return 1.0; }
 
 
-#ifdef __PARALLEL_MODE
     /**
      * Determines the space necessary for send/receive buffer.
      * It uses related communication map pattern to determine the maximum size needed.
@@ -1077,7 +1076,8 @@ public:
      * to estimate the size of pack/unpack buffer accordingly.
      * @return Upper bound of space needed.
      */
-    virtual int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType) { return 0; }
+    virtual int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType) { return 0; }
+#ifdef __PARALLEL_MODE
     /**
      * Recovers the load balance between processors, if needed. Uses load balancer monitor and load balancer
      * instances to decide if rebalancing is needed (monitor) and to repartition the domain (load balancer).

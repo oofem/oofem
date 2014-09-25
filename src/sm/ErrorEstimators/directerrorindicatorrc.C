@@ -337,7 +337,7 @@ DirectErrorIndicatorRC :: unpackSharedDofManLocalDensities(ProcessCommunicator &
 
     size = toRecvMap->giveSize();
     for ( i = 1; i <= size; i++ ) {
-        result &= pcbuff->unpackDouble(value);
+        result &= pcbuff->read(value);
         this->sharedDofManDensities [ toRecvMap->at(i) ] = max(value, this->sharedDofManDensities [ toRecvMap->at(i) ]);
  #ifdef __VERBOSE_PARALLEL
         OOFEM_LOG_INFO("unpackSharedDofManLocalDensities: node %d[%d], value %f\n", toRecvMap->at(i), domain->giveDofManager( toRecvMap->at(i) )->giveGlobalNumber(), this->sharedDofManDensities [ toRecvMap->at(i) ]);
@@ -398,7 +398,7 @@ DirectErrorIndicatorRC :: unpackSharedDofManLocalIndicatorVals(ProcessCommunicat
 
     size = toRecvMap->giveSize();
     for ( i = 1; i <= size; i++ ) {
-        result &= pcbuff->unpackDouble(value);
+        result &= pcbuff->read(value);
         this->sharedDofManIndicatorVals [ toRecvMap->at(i) ] = max(value, this->sharedDofManIndicatorVals [ toRecvMap->at(i) ]);
  #ifdef __VERBOSE_PARALLEL
         OOFEM_LOG_INFO("unpackSharedDofManLocalIndicatorVals: node %d[%d], value %f\n", toRecvMap->at(i), domain->giveDofManager( toRecvMap->at(i) )->giveGlobalNumber(), this->sharedDofManIndicatorVals [ toRecvMap->at(i) ]);

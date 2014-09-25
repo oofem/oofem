@@ -82,7 +82,6 @@ class ElementSide;
 class FEInterpolation;
 class Load;
 class BoundaryLoad;
-class CommunicationBuffer;
 
 /**
  * In parallel mode, this type indicates the mode of element.
@@ -950,7 +949,6 @@ public:
      * The knot span identifies the sub-region of the finite element.
      */
     virtual elementParallelMode giveKnotSpanParallelMode(int) const { return parallel_mode; }
-#ifdef __PARALLEL_MODE
     /**
      * Pack all necessary data of element (according to its parallel_mode) integration points
      * into given communication buffer. The corresponding cross section service is invoked, which in
@@ -962,7 +960,7 @@ public:
      * @param buff communication buffer
      * @param tStep solution step.
      */
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep);
+    int packUnknowns(DataStream &buff, TimeStep *tStep);
     /**
      * Unpack and updates all necessary data of element (according to its parallel_mode) integration points
      * into given communication buffer.
@@ -970,15 +968,14 @@ public:
      * @param buff communication buffer
      * @param tStep solution step.
      */
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep);
+    int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep);
     /**
      * Estimates the necessary pack size to hold all packed data of receiver.
      * The corresponding cross section service is invoked, which in
      * turn should invoke material model service for particular integration point. The
      * nature of packed data is material model dependent.
      */
-    int estimatePackSize(CommunicationBuffer &buff);
-#endif
+    int estimatePackSize(DataStream &buff);
     /**
      * Returns partition list of receiver.
      * @return partition array.

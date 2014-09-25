@@ -278,7 +278,7 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
             VERBOSEPARALLEL_PRINT("ProblemCommunicator::setUpCommunicationMaps", "Broadcasting own send list", rank);
 #endif
 
-            domainRecvList.packToCommBuffer(commBuff);
+            domainRecvList.storeYourself(&commBuff);
             result = commBuff.bcast(i);
             if ( result != MPI_SUCCESS ) {
                 OOFEM_ERROR("commBuff broadcast failed");
@@ -305,7 +305,7 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
 
 
             // unpack remote receive list
-            if ( !remoteDomainRecvList.packToCommBuffer(commBuff) ) {
+            if ( !remoteDomainRecvList.storeYourself(&commBuff) ) {
                 OOFEM_ERROR("unpack remote receive list failed");
             }
 

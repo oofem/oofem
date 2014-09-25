@@ -625,11 +625,11 @@ NonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
     //if ((iores = this->giveNumericalMethod(giveCurrentStep())->saveContext (stream)) != CIO_OK) THROW_CIOERR(iores);
 
-    if ( ( iores = totalDisplacement.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = totalDisplacement.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = incrementOfDisplacement.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = incrementOfDisplacement.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -647,11 +647,11 @@ NonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
     // store InitialLoadVector
-    if ( ( iores = initialLoadVector.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = initialLoadVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = initialLoadVectorOfPrescribed.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = initialLoadVectorOfPrescribed.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -853,9 +853,8 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
 }
 
 
-#ifdef __PARALLEL_MODE
 int
-NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
+NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType)
 {
     int count = 0, pcount = 0;
     Domain *domain = this->giveDomain(1);
@@ -873,7 +872,7 @@ NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &b
         }
 
         //printf ("\nestimated count is %d\n",count);
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * max(count, pcount) );
+        return ( buff.givePackSizeOfDouble(1) * max(count, pcount) );
     } else if ( packUnpackType == 1 ) {
         for ( int map: commMap ) {
             count += domain->giveElement( map )->estimatePackSize(buff);
@@ -886,6 +885,7 @@ NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &b
 }
 
 
+#ifdef __PARALLEL_MODE
 LoadBalancer *
 NonLinearStatic :: giveLoadBalancer()
 {

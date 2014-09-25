@@ -189,27 +189,27 @@ public:
     /// Initialize for Unpacking (data already received).
     virtual void initForUnpacking();
 
-    virtual int packArray(const int *src, int n)
-    { return __packArray(src, n, MPI_INT); }
-    virtual int packArray(const long *src, int n)
-    { return __packArray(src, n, MPI_LONG); }
-    virtual int packArray(const unsigned long *src, int n)
-    { return __packArray(src, n, MPI_UNSIGNED_LONG); }
-    virtual int packArray(const double *src, int n)
-    { return __packArray(src, n, MPI_DOUBLE); }
-    virtual int packArray(const char *src, int n)
-    { return __packArray(src, n, MPI_CHAR); }
+    virtual int write(const int *src, int n)
+    { return __write(src, n, MPI_INT); }
+    virtual int write(const long *src, int n)
+    { return __write(src, n, MPI_LONG); }
+    virtual int write(const unsigned long *src, int n)
+    { return __write(src, n, MPI_UNSIGNED_LONG); }
+    virtual int write(const double *src, int n)
+    { return __write(src, n, MPI_DOUBLE); }
+    virtual int write(const char *src, int n)
+    { return __write(src, n, MPI_CHAR); }
 
-    virtual int unpackArray(int *dest, int n)
-    { return __unpackArray(dest, n, MPI_INT); }
-    virtual int unpackArray(long *dest, int n)
-    { return __unpackArray(dest, n, MPI_LONG); }
-    virtual int unpackArray(unsigned long *dest, int n)
-    { return __unpackArray(dest, n, MPI_UNSIGNED_LONG); }
-    virtual int unpackArray(double *dest, int n)
-    { return __unpackArray(dest, n, MPI_DOUBLE); }
-    virtual int unpackArray(char *dest, int n)
-    { return __unpackArray(dest, n, MPI_CHAR); }
+    virtual int read(int *dest, int n)
+    { return __read(dest, n, MPI_INT); }
+    virtual int read(long *dest, int n)
+    { return __read(dest, n, MPI_LONG); }
+    virtual int read(unsigned long *dest, int n)
+    { return __read(dest, n, MPI_UNSIGNED_LONG); }
+    virtual int read(double *dest, int n)
+    { return __read(dest, n, MPI_DOUBLE); }
+    virtual int read(char *dest, int n)
+    { return __read(dest, n, MPI_CHAR); }
 
 
     virtual int iSend(int dest, int tag);
@@ -255,7 +255,7 @@ protected:
      * Templated version used since implementation is similar for different types
      * but type info is needed since implementation is relying on pointer arithmetic.
      */
-    template< class T > int __packArray(T *src, int n, MPI_Datatype type) {
+    template< class T > int __write(T *src, int n, MPI_Datatype type) {
         int _result = 1;
         int start_indx = 0, end_indx, _size;
         int remaining_size = n;
@@ -287,7 +287,7 @@ protected:
      * Templated version used since implementation is similar for different types
      * but type info is needed since implementation is relying on pointer arithmetic.
      */
-    template< class T > int __unpackArray(T *dest, int n, MPI_Datatype type) {
+    template< class T > int __read(T *dest, int n, MPI_Datatype type) {
         int _result = 1;
         int start_indx = 0, end_indx, _size;
         int remaining_size = n;

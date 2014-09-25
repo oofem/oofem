@@ -133,15 +133,15 @@ TransportMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = gradient.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = gradient.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = field.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = field.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = flux.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = flux.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

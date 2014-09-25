@@ -755,7 +755,7 @@ AdaptiveNonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, voi
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = timeStepLoadLevels.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = timeStepLoadLevels.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

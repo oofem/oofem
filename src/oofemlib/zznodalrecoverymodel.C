@@ -348,17 +348,17 @@ ZZNodalRecoveryModel :: unpackSharedDofManData(parallelStruct *s, ProcessCommuni
         indx = s->regionNodalNumbers->at( toRecvMap->at(i) );
         // toRecvMap contains all shared dofmans with remote partition
         // one has to check, if particular shared node received contribution is available for given region
-        result &= pcbuff->unpackInt(flag);
+        result &= pcbuff->read(flag);
         if ( flag ) {
             // "1" to indicates that for given shared node this is a valid contribution
-            result &= pcbuff->unpackDouble(value);
+            result &= pcbuff->read(value);
             // now check if we have a valid number
             if ( indx ) {
                 s->lhs->at(indx) += value;
             }
 
             for ( int j = 1; j <= nc; j++ ) {
-                result &= pcbuff->unpackDouble(value);
+                result &= pcbuff->read(value);
                 if ( indx ) {
                     s->rhs->at(indx, j) += value;
                 }

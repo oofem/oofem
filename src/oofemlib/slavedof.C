@@ -224,7 +224,7 @@ contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( ( iores = masterContribution.restoreYourself(stream) ) != CIO_OK ) {
+        if ( ( iores = masterContribution.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
@@ -241,7 +241,7 @@ contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode
             }
         }
 
-        if ( ( iores = dofIDs.restoreYourself(stream) ) != CIO_OK ) {
+        if ( ( iores = dofIDs.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     } // if ( mode & CM_Definition )

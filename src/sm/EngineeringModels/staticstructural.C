@@ -396,9 +396,8 @@ void StaticStructural :: updatePrimaryField(ValueModeType mode, TimeStep *tStep,
     *field->giveSolutionVector(tStep) = vectorToStore;
 }
 
-#ifdef __PARALLEL_MODE
 int
-StaticStructural :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
+StaticStructural :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType)
 {
     int count = 0, pcount = 0;
     Domain *domain = this->giveDomain(1);
@@ -419,7 +418,7 @@ StaticStructural :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
         // only pcount is relevant here, since only prescribed components are exchanged !!!!
         // --------------------------------------------------------------------------------
 
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * pcount );
+        return ( buff.givePackSizeOfDouble(1) * pcount );
     } else if ( packUnpackType == 1 ) {
         for ( int map: commMap ) {
             count += domain->giveElement( map )->estimatePackSize(buff);
@@ -431,7 +430,4 @@ StaticStructural :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
     return 0;
 }
 
-
-
-#endif
 } // end namespace oofem

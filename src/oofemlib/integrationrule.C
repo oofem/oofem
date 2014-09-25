@@ -187,7 +187,7 @@ IntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *obj)
                 THROW_CIOERR(CIO_IOERR);
             }
 
-            if ( ( iores = gp->giveNaturalCoordinates()->restoreYourself(stream) ) != CIO_OK ) {
+            if ( ( iores = gp->giveNaturalCoordinates()->storeYourself(stream) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
 

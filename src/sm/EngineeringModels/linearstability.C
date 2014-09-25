@@ -426,15 +426,15 @@ contextIOResultType LinearStability :: saveContext(DataStream *stream, ContextMo
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = eigVal.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = eigVal.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = eigVec.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = eigVec.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

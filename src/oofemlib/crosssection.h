@@ -191,7 +191,6 @@ public:
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
 
-#ifdef __PARALLEL_MODE
     /**
      * Pack all necessary data of integration point (according to element parallel_mode)
      * into given communication buffer. The corresponding material model service for particular integration point
@@ -204,7 +203,7 @@ public:
      * @param ip Integration point.
      * @return Nonzero if successful.
      */
-    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip) = 0;
+    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) = 0;
     /**
      * Unpack and updates all necessary data of given integration point (according to element parallel_mode)
      * into given communication buffer.
@@ -214,7 +213,7 @@ public:
      * @param ip Integration point.
      * @return Nonzero if successful.
      */
-    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip) = 0;
+    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) = 0;
     /**
      * Estimates the necessary pack size to hold all packed data of receiver.
      * The corresponding material model  service is invoked. The
@@ -223,8 +222,7 @@ public:
      * @param ip Integration point.
      * @return Estimate of pack size.
      */
-    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip) = 0;
-#endif
+    virtual int estimatePackSize(DataStream &buff, GaussPoint *ip) = 0;
     /**
      * Returns the weight representing relative computational cost of receiver
      * The reference cross section is integral model in plane stress.

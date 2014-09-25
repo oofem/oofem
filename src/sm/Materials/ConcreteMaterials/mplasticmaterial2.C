@@ -2197,11 +2197,11 @@ MPlasticMaterial2Status :: saveContext(DataStream *stream, ContextMode mode, voi
     }
 
     // write a raw data
-    if ( ( iores = plasticStrainVector.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = plasticStrainVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = strainSpaceHardeningVarsVector.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = strainSpaceHardeningVarsVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -2209,11 +2209,11 @@ MPlasticMaterial2Status :: saveContext(DataStream *stream, ContextMode mode, voi
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = gamma.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = gamma.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = activeConditionMap.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = activeConditionMap.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

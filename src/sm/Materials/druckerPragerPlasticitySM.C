@@ -139,7 +139,7 @@ DruckerPragerPlasticitySMStatus :: saveContext(DataStream *stream, ContextMode m
     }
 
     // write raw data
-    if ( ( iores = plasticStrainDeviator.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = plasticStrainDeviator.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

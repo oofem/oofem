@@ -157,8 +157,8 @@ public:
     void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
+    virtual int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType);
 #ifdef __PARALLEL_MODE
-    virtual int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
     virtual LoadBalancer *giveLoadBalancer();
     virtual LoadBalancerMonitor *giveLoadBalancerMonitor();
 #endif

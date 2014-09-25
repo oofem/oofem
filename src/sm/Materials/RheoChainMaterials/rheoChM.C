@@ -668,12 +668,12 @@ RheoChainMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
 
     // write raw data
     for ( int i = 0; i < nUnits; i++ ) {
-        if ( ( iores = hiddenVars [ i ].restoreYourself(stream) ) != CIO_OK ) {
+        if ( ( iores = hiddenVars [ i ].storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
 
-    if ( ( iores = shrinkageStrain.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = shrinkageStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

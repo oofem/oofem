@@ -629,7 +629,7 @@ contextIOResultType LIBeam3d2 :: saveContext(DataStream *stream, ContextMode mod
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = tc.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = tc.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

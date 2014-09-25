@@ -263,7 +263,7 @@ ConcreteDPM2Status :: saveContext(DataStream *stream, ContextMode mode, void *ob
 
     // write raw data
 
-    if ( ( iores = plasticStrain.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = plasticStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

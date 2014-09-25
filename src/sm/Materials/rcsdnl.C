@@ -40,6 +40,7 @@
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
 #include "classfactory.h"
+#include "datastream.h"
 
 namespace oofem {
 REGISTER_Material(RCSDNLMaterial);
@@ -514,7 +515,7 @@ RCSDNLMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *
     }
 
     // write a raw data
-    if ( ( iores = nonlocalStrainVector.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = nonlocalStrainVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -556,32 +557,31 @@ RCSDNLMaterialStatus :: giveInterface(InterfaceType type)
 }
 
 
-#ifdef __PARALLEL_MODE
 int
-RCSDNLMaterial :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+RCSDNLMaterial :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     RCSDNLMaterialStatus *status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(tStep);
 
-    return status->giveLocalStrainVectorForAverage().packToCommBuffer(buff);
+    return status->giveLocalStrainVectorForAverage().storeYourself(&buff);
 }
 
 int
-RCSDNLMaterial :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+RCSDNLMaterial :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     int result;
     RCSDNLMaterialStatus *status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(ip) );
     FloatArray localStrainVectorForAverage;
 
-    result = localStrainVectorForAverage.unpackFromCommBuffer(buff);
+    result = localStrainVectorForAverage.restoreYourself(&buff);
     status->setLocalStrainVectorForAverage(localStrainVectorForAverage);
     return result;
 }
 
 int
-RCSDNLMaterial :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
+RCSDNLMaterial :: estimatePackSize(DataStream &buff, GaussPoint *ip)
 {
     //
     // Note: status localStrainVectorForAverage memeber must be properly sized!
@@ -591,5 +591,4 @@ RCSDNLMaterial :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
     return status->giveLocalStrainVectorForAverage().givePackSize(buff);
 }
 
-#endif
 } // end namespace oofem

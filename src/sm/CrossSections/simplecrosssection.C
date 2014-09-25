@@ -751,24 +751,22 @@ SimpleCrossSection :: giveTemperatureVector(FloatArray &answer, GaussPoint *gp, 
     }
 }
 
-#ifdef __PARALLEL_MODE
 int
-SimpleCrossSection :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+SimpleCrossSection :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)
 {
     return this->giveMaterial(gp)->packUnknowns(buff, tStep, gp);
 }
 
 int
-SimpleCrossSection :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+SimpleCrossSection :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)
 {
     return this->giveMaterial(gp)->unpackAndUpdateUnknowns(buff, tStep, gp);
 }
 
 int
-SimpleCrossSection :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *gp)
+SimpleCrossSection :: estimatePackSize(DataStream &buff, GaussPoint *gp)
 {
     return this->giveMaterial(gp)->estimatePackSize(buff, gp);
 }
-#endif
 
 } // end namespace oofem

@@ -181,25 +181,23 @@ public:
 
     virtual int checkConsistency();
 
-#ifdef __PARALLEL_MODE
-    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
     {
         OOFEM_ERROR("not implemented");
         return 0;
     }
 
-    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
     {
         OOFEM_ERROR("not implemented");
         return 0;
     }
 
-    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
+    virtual int estimatePackSize(DataStream &buff, GaussPoint *ip)
     {
         OOFEM_ERROR("not implemented");
         return 0;
     }
-#endif
 
 
     virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)

@@ -112,7 +112,7 @@ public:
      */
     virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
 
-    int estimateMaxPackSize(IntArray &, CommunicationBuffer &, int &);
+    int estimateMaxPackSize(IntArray &, DataStream &, int &);
     /// Sets up the communication maps
     void setUpCommunicationMaps();
 

@@ -42,10 +42,6 @@
 #include <algorithm>
 #include <memory>
 
-#ifdef __PARALLEL_MODE
- #include "combuff.h"
-#endif
-
 namespace oofem {
 
 void IntArray :: zero()
@@ -292,6 +288,12 @@ contextIOResultType IntArray :: restoreYourself(DataStream *stream)
 }
 
 
+int IntArray :: givePackSize(DataStream &buff) const
+{
+    return buff.givePackSizeOfInt(1) + buff.givePackSizeOfInt(this->giveSize());
+}
+
+
 int IntArray :: findFirstIndexOf(int value) const
 {
     // finds index of value in receiver
@@ -388,38 +390,6 @@ void IntArray :: sort()
     std::sort(this->begin(), this->end());
 }
 
-
-#ifdef __PARALLEL_MODE
-int IntArray :: packToCommBuffer(CommunicationBuffer &buff) const
-{
-    int result = 1;
-    // pack size
-    result &= buff.packInt(this->giveSize());
-    // pack data
-    result &= buff.packArray(this->values.data(), this->giveSize());
-
-    return result;
-}
-
-
-int IntArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
-{
-    int newSize, result = 1;
-    // unpack size
-    result &= buff.unpackInt(newSize);
-    // resize yourself
-    this->values.resize(newSize);
-    result &= buff.unpackArray(this->values.data(), newSize);
-
-    return result;
-}
-
-
-int IntArray :: givePackSize(CommunicationBuffer &buff)
-{
-    return buff.givePackSize(MPI_INT, 1) + buff.givePackSize(MPI_INT, this->giveSize());
-}
-#endif
 
 std :: ostream &operator<<(std :: ostream &out, const IntArray &x)
 {

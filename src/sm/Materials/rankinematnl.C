@@ -42,14 +42,7 @@
 #include "nonlocalmaterialext.h"
 #include "contextioerr.h"
 #include "classfactory.h"
-
-#ifdef __PARALLEL_MODE
- #include "combuff.h"
-#endif
-
-#ifdef __OOFEG
- #include "oofeggraphiccontext.h"
-#endif
+#include "datastream.h"
 
 namespace oofem {
 REGISTER_Material(RankineMatNl);
@@ -496,36 +489,35 @@ RankineMatNlStatus :: giveInterface(InterfaceType type)
 }
 
 
-#ifdef __PARALLEL_MODE
 int
-RankineMatNl :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+RankineMatNl :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(ip) );
 
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(tStep);
 
-    return buff.packDouble( nlStatus->giveLocalCumPlasticStrainForAverage() );
+    return buff.write( nlStatus->giveLocalCumPlasticStrainForAverage() );
 }
 
 int
-RankineMatNl :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+RankineMatNl :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
 {
     int result;
     RankineMatNlStatus *nlStatus = static_cast< RankineMatNlStatus * >( this->giveStatus(ip) );
     double localCumPlasticStrainForAverage;
 
-    result = buff.unpackDouble(localCumPlasticStrainForAverage);
+    result = buff.read(localCumPlasticStrainForAverage);
     nlStatus->setLocalCumPlasticStrainForAverage(localCumPlasticStrainForAverage);
     return result;
 }
 
 int
-RankineMatNl :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
+RankineMatNl :: estimatePackSize(DataStream &buff, GaussPoint *ip)
 {
     // Note: nlStatus localStrainVectorForAverage memeber must be properly sized!
     // IDNLMaterialStatus *nlStatus = (IDNLMaterialStatus*) this -> giveStatus (ip);
-    return buff.givePackSize(MPI_DOUBLE, 1);
+    return buff.givePackSizeOfDouble(1);
 }
-#endif
+
 } // end namespace oofem

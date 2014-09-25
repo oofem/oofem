@@ -1281,7 +1281,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainNeqs.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = domainNeqs.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1290,7 +1290,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainPrescribedNeqs.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = domainPrescribedNeqs.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1970,7 +1970,7 @@ EngngModel :: unpackDofManagers(ArrayWithNumbering *destData, ProcessCommunicato
         for ( Dof *jdof: *dman ) {
             int eqNum = jdof->giveEquationNumber(s);
             if ( jdof->isPrimaryDof() && eqNum ) {
-                result &= pcbuff->unpackDouble(value);
+                result &= pcbuff->read(value);
                 if ( dofmanmode == DofManager_shared ) {
                     dest->at(eqNum) += value;
                 } else if ( dofmanmode == DofManager_remote ) {
