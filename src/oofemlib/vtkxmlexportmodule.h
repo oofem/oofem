@@ -291,7 +291,7 @@ protected:
     //  Exports cell variables (typically internal variables).
     //
 
-    void exportCellVars(VTKPiece &piece, int numCells, TimeStep *tStep);
+    void exportCellVars(VTKPiece &piece, const IntArray &elems, TimeStep *tStep);
 
     //
     //  Exports a single cell variable (typically an internal variable).
