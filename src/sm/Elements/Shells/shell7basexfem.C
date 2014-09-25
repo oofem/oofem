@@ -1791,7 +1791,6 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(const FloatArray &lCoords, FloatMatri
         //computeGlobalCoordinates(gcoords, lCoords);
         gcoords.resizeWithValues(2);
 
-        // First column
         for ( int i = 1, j = 0; i <= ndofman; i++, j += 3 ) {
             if ( !ei->isDofManEnriched( *this->giveDofManager(i) ) ){
                 continue;
@@ -1804,30 +1803,16 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(const FloatArray &lCoords, FloatMatri
 
 
             double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
-            //printf("enr func in dofman %d = %e \n", i, EvaluateEnrFuncInDofMan(i, ei));
 
+            // First column
             answer.at(1, 1 + j) = dNdxi.at(i, 1) * factor;
             answer.at(2, 2 + j) = dNdxi.at(i, 1) * factor;
             answer.at(3, 3 + j) = dNdxi.at(i, 1) * factor;
             answer.at(4, 1 + j) = dNdxi.at(i, 2) * factor;
             answer.at(5, 2 + j) = dNdxi.at(i, 2) * factor;
             answer.at(6, 3 + j) = dNdxi.at(i, 2) * factor;
-        }
 
-        // Second column
-        for ( int i = 1, j = 0; i <= ndofman; i++, j += 3 ) {
-            if ( !ei->isDofManEnriched( *this->giveDofManager(i) ) ){
-                continue;
-            }            
-
-            std :: vector< double > efGP;
-            DofManager *dMan = this->giveDofManager(i);
-            int nodeInd = dMan->giveGlobalNumber();
-            ei->evaluateEnrFuncAt(efGP, gcoords, lCoords, nodeInd, *this, N, giveDofManArray());
-
-
-            double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
-
+            // Second column
             answer.at(7, ndofs_xm + 1 + j) = dNdxi.at(i, 1) * factor;
             answer.at(8, ndofs_xm + 2 + j) = dNdxi.at(i, 1) * factor;
             answer.at(9, ndofs_xm + 3 + j) = dNdxi.at(i, 1) * factor;
@@ -1837,25 +1822,11 @@ Shell7BaseXFEM :: computeEnrichedBmatrixAt(const FloatArray &lCoords, FloatMatri
             answer.at(13, ndofs_xm + 1 + j) = N.at(i) * factor;
             answer.at(14, ndofs_xm + 2 + j) = N.at(i) * factor;
             answer.at(15, ndofs_xm + 3 + j) = N.at(i) * factor;
-        }
 
-        // Third column
-        for ( int i = 1, j = 0; i <= ndofman; i++, j += 1 ) {
-            if ( !ei->isDofManEnriched( *this->giveDofManager(i) ) ){
-                continue;
-            }            
-
-            std :: vector< double > efGP;
-            DofManager *dMan = this->giveDofManager(i);
-            int nodeInd = dMan->giveGlobalNumber();
-            ei->evaluateEnrFuncAt(efGP, gcoords, lCoords, nodeInd, *this, N, giveDofManArray());
-
-
-            double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
-
-            answer.at(16, ndofs_xm * 2 + 1 + j) = dNdxi.at(i, 1) * factor;
-            answer.at(17, ndofs_xm * 2 + 1 + j) = dNdxi.at(i, 2) * factor;
-            answer.at(18, ndofs_xm * 2 + 1 + j) = N.at(i) * factor;
+            // Third column
+            answer.at(16, ndofs_xm * 2 + 1 + i-1) = dNdxi.at(i, 1) * factor;
+            answer.at(17, ndofs_xm * 2 + 1 + i-1) = dNdxi.at(i, 2) * factor;
+            answer.at(18, ndofs_xm * 2 + 1 + i-1) = N.at(i) * factor;
         }
         
 
@@ -1943,15 +1914,15 @@ Shell7BaseXFEM :: computeEnrichedNmatrixAt(const FloatArray &lCoords, FloatMatri
             ei->evaluateEnrFuncAt(efGP, gcoords, lCoords, nodeInd, *this, N, giveDofManArray());
 
 
-            double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
+            double factor = N.at(i) * ( efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei) );
 
-            answer.at(1, 1 + j) = N.at(i) * factor;
-            answer.at(2, 2 + j) = N.at(i) * factor;
-            answer.at(3, 3 + j) = N.at(i) * factor;
-            answer.at(4, ndofs_xm + 1 + j) = N.at(i) * factor;
-            answer.at(5, ndofs_xm + 2 + j) = N.at(i) * factor;
-            answer.at(6, ndofs_xm + 3 + j) = N.at(i) * factor;
-            answer.at(7, ndofs_xm * 2 + i) = N.at(i) * factor;
+            answer.at(1, 1 + j) = factor;
+            answer.at(2, 2 + j) = factor;
+            answer.at(3, 3 + j) = factor;
+            answer.at(4, ndofs_xm + 1 + j) = factor;
+            answer.at(5, ndofs_xm + 2 + j) = factor;
+            answer.at(6, ndofs_xm + 3 + j) = factor;
+            answer.at(7, ndofs_xm * 2 + i) = factor;
         }
         
         answer.times( this->evaluateHeavisideGamma(lCoords.at(3), static_cast< ShellCrack* >(ei)) ); 
@@ -2090,16 +2061,16 @@ Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(const FloatArray &lCoords, FloatM
             answer.at(1, 1 + j) = dNdxi.at(i) * factor;
             answer.at(2, 2 + j) = dNdxi.at(i) * factor;
             answer.at(3, 3 + j) = dNdxi.at(i) * factor;
-        }
+//        }
 
         // Second row
-        for ( int i = 1, j = 0; i <= ndofman; i++, j += 3  ) {
+//        for ( int i = 1, j = 0; i <= ndofman; i++, j += 3  ) {
 
-            std :: vector< double > efGP;
-            int nodeInd = giveDofManager(i)->giveGlobalNumber();
-            ei->evaluateEnrFuncAt(efGP, gcoords, lCoords, nodeInd, *this, N, giveDofManArray());
-
-            double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
+//            std :: vector< double > efGP;
+//            int nodeInd = giveDofManager(i)->giveGlobalNumber();
+//            ei->evaluateEnrFuncAt(efGP, gcoords, lCoords, nodeInd, *this, N, giveDofManArray());
+//
+//            double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
 
             answer.at(4, ndofs_xm + 1 + j) = dNdxi.at(i) * factor;
             answer.at(5, ndofs_xm + 2 + j) = dNdxi.at(i) * factor;
@@ -2107,19 +2078,19 @@ Shell7BaseXFEM :: edgeComputeEnrichedBmatrixAt(const FloatArray &lCoords, FloatM
             answer.at(7, ndofs_xm + 1 + j) = N.at(i) * factor;
             answer.at(8, ndofs_xm + 2 + j) = N.at(i) * factor;
             answer.at(9, ndofs_xm + 3 + j) = N.at(i) * factor;
-        }
+//        }
 
         // Third row
-        for ( int i = 1, j = 0; i <= ndofman; i++, j += 1  ) {
+//        for ( int i = 1, j = 0; i <= ndofman; i++, j += 1  ) {
 
-            std :: vector< double > efGP;
-            int nodeInd = giveDofManager(i)->giveGlobalNumber();
-            ei->evaluateEnrFuncAt(efGP, gcoords, lCoords, nodeInd, *this, N, giveDofManArray());
+//            std :: vector< double > efGP;
+//            int nodeInd = giveDofManager(i)->giveGlobalNumber();
+//            ei->evaluateEnrFuncAt(efGP, gcoords, lCoords, nodeInd, *this, N, giveDofManArray());
+//
+//            double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
 
-            double factor = efGP [ 0 ] - EvaluateEnrFuncInDofMan(i, ei);
-
-            answer.at(10, ndofs_xm * 2 + 1 + j) = dNdxi.at(i) * factor;
-            answer.at(11, ndofs_xm * 2 + 1 + j) = N.at(i) * factor;
+            answer.at(10, ndofs_xm * 2 + 1 + i-1) = dNdxi.at(i) * factor;
+            answer.at(11, ndofs_xm * 2 + 1 + i-1) = N.at(i) * factor;
         }
 
         answer.times( this->evaluateHeavisideGamma(lCoords.at(3), static_cast< ShellCrack* >(ei)) ); 
