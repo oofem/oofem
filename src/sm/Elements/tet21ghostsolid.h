@@ -56,6 +56,8 @@ private:
     FloatMatrix Dghost;
     bool computeItransform;
     FloatMatrix Itransform;
+    static IntArray velocitydofsonside;
+    static IntArray displacementdofsonside;
 
     void giveUnknownData(FloatArray &u_prev, FloatArray &u, FloatArray &inc, TimeStep *tStep);
 
@@ -74,10 +76,11 @@ public:
     virtual void giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord = 0);
     virtual void giveInternalForcesVectorGivenSolution(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord, FloatArray &SolutionVector);
     virtual void computeLoadVector(FloatArray &answer, Load *load, CharType type, ValueModeType mode, TimeStep *tStep);
+    virtual void computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *load, int boundary, CharType type, ValueModeType mode, TimeStep *tStep);
     virtual void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &u);
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual double computeVolumeAround(GaussPoint *gp);
-    virtual bool giveRowTransformationMatrix(FloatMatrix &Itransform, TimeStep *tStep);
+    virtual bool giveRowTransformationMatrix(TimeStep *tStep);
     virtual const char *giveClassName() const { return "tet21ghostsolid"; }
 
 
