@@ -202,7 +202,7 @@ Logger :: appendLogTo(FILE *stream)
     }
 
     if ( stream == NULL ) {
-        OOFEM_SIMPLE_WARNING( "Logger::appendLogTo : null stream given");
+        OOFEM_ERROR( "Logger::appendLogTo : null stream given" );
     } else {
         this->logStream = stream;
     }
@@ -218,7 +218,7 @@ Logger :: appendErrorTo(FILE *stream)
     }
 
     if ( stream == NULL ) {
-        OOFEM_SIMPLE_WARNING( "Logger::appendLogTo : null stream given");
+        OOFEM_ERROR( "Logger::appendLogTo : null stream given" );
     } else {
         this->errStream = stream;
     }
