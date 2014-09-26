@@ -305,7 +305,7 @@ WARNING: NOT SUPPORTED MESSAGE PARSING LIBRARY
 
 
             // unpack remote receive list
-            if ( !remoteDomainRecvList.storeYourself(&commBuff) ) {
+            if ( remoteDomainRecvList.restoreYourself(&commBuff) != CIO_OK ) {
                 OOFEM_ERROR("unpack remote receive list failed");
             }
 

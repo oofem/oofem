@@ -254,8 +254,7 @@ void IntArray :: printYourself(const std::string name) const
 contextIOResultType IntArray :: storeYourself(DataStream *stream) const
 {
     // write size
-    int size = this->giveSize();
-    if ( !stream->write(size) ) {
+    if ( !stream->write(this->giveSize()) ) {
         return ( CIO_IOERR );
     }
 
