@@ -45,9 +45,15 @@ int DataStream :: read(std :: string &data)
 {
     int n;
     char *str;
-    this->read(& n, 1);
+    if ( !this->read(& n, 1) ) {
+        data = "";
+        return 0;
+    }
     str = new char [ n + 1 ];
-    this->read(str, n);
+    if ( !this->read(str, n) ) {
+        data = "";
+        return 0;
+    }
     str [ n ] = '\0';
     data = str;
     delete [] str;

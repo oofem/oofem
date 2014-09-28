@@ -238,22 +238,10 @@ public:
     virtual void initForPacking() = 0;
     /// Initialize for Unpacking (data already received)
     virtual void initForUnpacking() = 0;
-/*
-    virtual int read(int *data, int count) = 0;
-    virtual int read(unsigned long *data, int count) = 0;
-    virtual int read(long *data, int count) = 0;
-    virtual int read(double *data, int count) = 0;
-    virtual int read(char *data, int count) = 0;
-    */
+
     using DataStream::read;
     virtual int read(bool &data);
-/*
-    virtual int write(const int *data, int count) = 0;
-    virtual int write(const unsigned long *data, int count) = 0;
-    virtual int write(const long *data, int count) = 0;
-    virtual int write(const double *data, int count) = 0;
-    virtual int write(const char *data, int count) = 0;
-    */
+
     using DataStream::write;
     virtual int write(bool data);
    
@@ -352,9 +340,6 @@ public:
     { return MPIBuffer :: unpackArray(this->communicator, dest, n, MPI_DOUBLE); }
     virtual int read(char *dest, int n)
     { return MPIBuffer :: unpackArray(this->communicator, dest, n, MPI_CHAR); }
-
-    virtual int givePackSize(MPI_Datatype type, int size) { return MPIBuffer :: givePackSize(this->communicator, type, size); }
-
 
     virtual int iSend(int dest, int tag) { return MPIBuffer :: iSend(this->communicator, dest, tag); }
 
