@@ -963,6 +963,10 @@ public:
      */
     void assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, CharType type, Domain *domain);
 
+
+    void assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+                                    const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
+        
 protected:
     /**
      * Packs receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.

@@ -38,7 +38,6 @@
 #include "xfem/xfemelementinterface.h"
 #include "xfem/enrichmentfunction.h"
 #include "xfem/enrichmentitem.h"
-#include "xfem/enrichmentdomain.h"
 #include "vtkxmlexportmodule.h"
 #include "dynamicinputrecord.h"
 #include "feinterpol.h"
@@ -437,7 +436,7 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces,
 
                             for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
                                 DofManager *dMan = giveDofManager(elNodeInd);
-                                ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber() );
+                                ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber(), *(dMan->giveCoordinates()) );
 
                                 levelSet += N.at(elNodeInd)*levelSetInNode;
                             }
@@ -451,7 +450,7 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces,
 
                             for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
                                 DofManager *dMan = giveDofManager(elNodeInd);
-                                ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber() );
+                                ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber(), *(dMan->giveCoordinates()) );
 
                                 levelSet += N.at(elNodeInd)*levelSetInNode;
                             }

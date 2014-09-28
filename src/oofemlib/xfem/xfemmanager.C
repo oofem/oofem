@@ -38,7 +38,6 @@
 #include "connectivitytable.h"
 #include "floatarray.h"
 #include "domain.h"
-#include "enrichmentdomain.h"
 #include "element.h"
 #include "dofmanager.h"
 #include "cltypes.h"
@@ -279,21 +278,28 @@ void XfemManager :: propagateFronts()
     for ( auto &ei: enrichmentItemList ) {
         ei->propagateFronts();
 
+#if 0
         if ( giveVtkDebug() ) {
-            std :: vector< FloatArray >points;
-            ei->giveSubPolygon(points, -0.1, 1.1);
 
-            std :: vector< double >x, y;
-            for ( size_t j = 0; j < points.size(); j++ ) {
-                x.push_back( points [ j ].at(1) );
-                y.push_back( points [ j ].at(2) );
+            GeometryBasedEI *geoEI = dynamic_cast<GeometryBasedEI*>(ei);
+            if(geoEI != NULL) {
+
+                std :: vector< FloatArray >points;
+                geoEI->giveSubPolygon(points, -0.1, 1.1);
+
+                std :: vector< double >x, y;
+                for ( size_t j = 0; j < points.size(); j++ ) {
+                    x.push_back( points [ j ].at(1) );
+                    y.push_back( points [ j ].at(2) );
+                }
+
+
+                char fileName [ 200 ];
+                sprintf(fileName, "crack%d.dat", ei->giveNumber());
+                XFEMDebugTools :: WriteArrayToGnuplot(fileName, x, y);
             }
-
-
-            char fileName [ 200 ];
-            sprintf(fileName, "crack%d.dat", ei->giveNumber());
-            XFEMDebugTools :: WriteArrayToGnuplot(fileName, x, y);
         }
+#endif
     }
 
     updateNodeEnrichmentItemMap();

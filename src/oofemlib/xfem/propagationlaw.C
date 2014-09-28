@@ -35,7 +35,6 @@
 
 
 #include "propagationlaw.h"
-#include "enrichmentdomain.h"
 #include "tipinfo.h"
 #include "classfactory.h"
 #include "mathfem.h"

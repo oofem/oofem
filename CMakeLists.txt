@@ -300,7 +300,7 @@ if (USE_PETSC)
     # Have to use pkgconfig information
     find_package (PkgConfig REQUIRED)
     
-    set (ENV{PKG_CONFIG_PATH} ${MY_PETSC_DIR}/${MY_PETSC_ARCH}/lib64/pkgconfig;${MY_PETSC_DIR}/${MY_PETSC_ARCH}/lib/pkgconfig)
+    set (ENV{PKG_CONFIG_PATH} "${MY_PETSC_DIR}/${MY_PETSC_ARCH}/lib64/pkgconfig:${MY_PETSC_DIR}/${MY_PETSC_ARCH}/lib/pkgconfig")
     pkg_check_modules (PC_PETSC REQUIRED PETSc)
     include_directories (${PC_PETSC_INCLUDE_DIRS})
 

@@ -387,6 +387,27 @@ bool ClassFactory :: registerFailureCriteriaStatus( const char *name, FailureCri
 }
 
 
+ContactManager *ClassFactory :: createContactManager(const char *name, Domain *domain)
+{
+    CF_CREATE(contactManList, domain)
+}
+
+bool ClassFactory :: registerContactManager( const char *name, ContactManager * ( *creator )( Domain * ) )
+{
+    CF_STORE(contactManList)
+}
+
+
+ContactDefinition *ClassFactory :: createContactDefinition(const char *name, ContactManager *cMan)
+{
+    CF_CREATE(contactDefList, cMan)
+}
+
+bool ClassFactory :: registerContactDefinition( const char *name, ContactDefinition * ( *creator )( ContactManager * ) )
+{
+    CF_STORE(contactDefList)
+}
+
 
 
 SparseGeneralEigenValueSystemNM *ClassFactory :: createGeneralizedEigenValueSolver(GenEigvalSolverType st, Domain *domain, EngngModel *emodel)

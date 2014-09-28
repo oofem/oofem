@@ -41,6 +41,7 @@
 #include "dynamicinputrecord.h"
 #include "xfem/xfemtolerances.h"
 #include "feinterpol.h"
+#include "xfem/tipinfo.h"
 
 
 #include <fstream>
@@ -50,6 +51,7 @@ namespace oofem {
 REGISTER_Geometry(Line)
 REGISTER_Geometry(Circle)
 REGISTER_Geometry(PointSwarm)
+REGISTER_Geometry(PolygonLine)
 
 BasicGeometry :: BasicGeometry()
 { }
@@ -94,9 +96,10 @@ double BasicGeometry :: computeLineDistance(const FloatArray &iP1, const FloatAr
 
 
     // Regularization coefficients (to make it possible to solve when lines are parallel)
-    const double c1 = (1.0e-12)*LengthP*LengthP;
-    const double c2 = (1.0e-12)*LengthQ*LengthQ;
+    const double c1 = (1.0e-14)*LengthP*LengthP;
+    const double c2 = (1.0e-14)*LengthQ*LengthQ;
 
+    const size_t minIter = 2;
     const size_t maxIter = 5;
     const double absTol = 1.0e-12;
 
@@ -150,7 +153,7 @@ double BasicGeometry :: computeLineDistance(const FloatArray &iP1, const FloatAr
         const double res = R.computeNorm();
 //        printf("iter: %lu res: %e\n", iter, res);
 
-        if(res < absTol) {
+        if(res < absTol && iter >= minIter) {
 //            printf("xi: %e eta: %e\n", xi, eta);
             break;
         }
@@ -812,6 +815,13 @@ void Circle :: printYourself()
     printf("\n");
 }
 
+void Circle :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
+{
+    oCenter = mVertices [ 0 ];
+    oRadius = radius;
+}
+
+
 PolygonLine :: PolygonLine() : BasicGeometry()
 {
     mDebugVtk = false;
@@ -1218,6 +1228,8 @@ IRResultType PolygonLine :: initializeFrom(InputRecord *ir)
 
 void PolygonLine :: giveInputRecord(DynamicInputRecord &input)
 {
+    input.setRecordKeywordField( "PolygonLine", 1 );
+
     FloatArray points;
     int nVert = mVertices.size();
     points.resize(nVert * 2);
@@ -1608,6 +1620,93 @@ void PolygonLine :: printVTK(int iTStepIndex, int iLineIndex)
 }
 
 
+bool PolygonLine :: giveTips(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const
+{
+    printf("Entering PolygonLine :: giveTips()\n");
+    int nVert = giveNrVertices();
+    if ( nVert > 1 ) {
+        // Start tip
+        TipInfo info1;
+        const FloatArray &p1S = ( giveVertex(1) );
+        const FloatArray &p2S = ( giveVertex(2) );
+
+        // Tip position
+        info1.mGlobalCoord = p1S;
+
+        // Tip tangent
+        info1.mTangDir.beDifferenceOf(p1S, p2S);
+        info1.mTangDir.normalize();
+
+        // Tip normal
+        info1.mNormalDir = {
+            -info1.mTangDir.at(2), info1.mTangDir.at(1)
+        };
+
+        info1.mTipIndex = 0;
+        info1.mArcPos = 0.0;
+
+        oStartTipInfo = info1;
+
+        // End tip
+        TipInfo info2;
+        const FloatArray &p1E = ( giveVertex(nVert - 1) );
+        const FloatArray &p2E = ( giveVertex(nVert) );
+
+        // Tip position
+        info2.mGlobalCoord = p2E;
+
+        // Tip tangent
+        info2.mTangDir.beDifferenceOf(p2E, p1E);
+        info2.mTangDir.normalize();
+
+        // Tip normal
+        info2.mNormalDir = {
+            -info2.mTangDir.at(2), info2.mTangDir.at(1)
+        };
+
+        info2.mTipIndex = 1;
+        info2.mArcPos = 1.0;
+
+        oEndTipInfo = info2;
+
+        return true;
+    }
+
+    return false;
+}
+
+void PolygonLine :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
+{
+    int nVert = giveNrVertices();
+    oCenter = {
+        0.0, 0.0
+    };
+    oRadius = 0.0;
+
+    if ( nVert > 0 ) {
+        for ( int i = 1; i <= nVert; i++ ) {
+            oCenter.add( giveVertex(i) );
+        }
+
+        oCenter.times( 1.0 / double( nVert ) );
+
+        for ( int i = 1; i <= nVert; i++ ) {
+            oRadius = std :: max( oRadius, oCenter.distance( giveVertex(i) ) );
+        }
+    }
+
+}
+
+void PolygonLine :: cropPolygon(const double &iArcPosStart, const double &iArcPosEnd)
+{
+    std::vector<FloatArray> points;
+    giveSubPolygon(points, iArcPosStart, iArcPosEnd);
+    setVertices(points);
+
+    const double tol2 = 1.0e-18;
+    removeDuplicatePoints(tol2);
+
+}
 
 IRResultType PointSwarm :: initializeFrom(InputRecord *ir)
 {

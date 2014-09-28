@@ -47,7 +47,6 @@
 
 #include "xfem/xfemmanager.h"
 #include "xfem/enrichmentitem.h"
-#include "xfem/enrichmentdomain.h"
 
 #include <string>
 #include <sstream>
@@ -1018,11 +1017,11 @@ VTKXMLExportModule :: getNodalVariableFromXFEMST(FloatArray &answer, Node *node,
     if ( xfemstype == XFEMST_LevelSetPhi ) {
         valueArray.resize(1);
         val = & valueArray;
-        ei->evalLevelSetNormalInNode( valueArray.at(1), node->giveNumber() );
+        ei->evalLevelSetNormalInNode( valueArray.at(1), node->giveNumber(), *(node->giveCoordinates()) );
     } else if ( xfemstype == XFEMST_LevelSetGamma ) {
         valueArray.resize(1);
         val = & valueArray;
-        ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber() );
+        ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber(), *(node->giveCoordinates()) );
     } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
         valueArray.resize(1);
         val = & valueArray;

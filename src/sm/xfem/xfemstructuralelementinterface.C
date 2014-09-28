@@ -50,7 +50,6 @@
 #include "xfem/xfemtolerances.h"
 
 #include "xfem/enrichmentfronts/enrichmentfrontintersection.h"
-#include "xfem/enrichmentdomain.h"
 
 #include "vtkxmlexportmodule.h"
 
@@ -797,7 +796,7 @@ void XfemStructuralElementInterface :: giveIntersectionsTouchingCrack(std::vecto
             if(efStart != NULL) {
                 const TipInfo &tipInfo = efStart->giveTipInfo();
 
-                if(tipIsTouchingEI(tipInfo, ei)) {
+                if(ei->tipIsTouchingEI(tipInfo)) {
                     //printf("Crack %d is touched by a tip on crack %d.\n", iEnrItemIndex, candidateIndex);
                     oTouchingEnrItemIndices.push_back(candidateIndex);
                 }
@@ -808,7 +807,7 @@ void XfemStructuralElementInterface :: giveIntersectionsTouchingCrack(std::vecto
             if(efEnd != NULL) {
                 const TipInfo &tipInfo = efEnd->giveTipInfo();
 
-                if(tipIsTouchingEI(tipInfo, ei)) {
+                if(ei->tipIsTouchingEI(tipInfo)) {
                     //printf("Crack %d is touched by a tip on crack %d.\n", iEnrItemIndex, candidateIndex);
                     oTouchingEnrItemIndices.push_back(candidateIndex);
                 }
@@ -817,43 +816,6 @@ void XfemStructuralElementInterface :: giveIntersectionsTouchingCrack(std::vecto
 
     }
 
-}
-
-bool XfemStructuralElementInterface :: tipIsTouchingEI(const TipInfo &iTipInfo, EnrichmentItem *iEI)
-{
-    // TODO: Move this function to EnrichmentItem.
-
-    double tol = 1.0e-9;
-    SpatialLocalizer *localizer = element->giveDomain()->giveSpatialLocalizer();
-
-    //                printf("tipInfo.mGlobalCoord: "); tipInfo.mGlobalCoord.printYourself();
-
-    Element *tipEl = localizer->giveElementContainingPoint(iTipInfo.mGlobalCoord);
-    if(tipEl != NULL) {
-
-        // Check if the candidate tip is located on the current crack
-        FloatArray N;
-        FloatArray locCoord;
-        tipEl->computeLocalCoordinates(locCoord, iTipInfo.mGlobalCoord);
-        FEInterpolation *interp = tipEl->giveInterpolation();
-        interp->evalN( N, locCoord, FEIElementGeometryWrapper(tipEl) );
-
-        double normalSignDist;
-        iEI->interpLevelSet(normalSignDist, N, tipEl->giveDofManArray() );
-    //                    printf("normalSignDist: %e\n", normalSignDist );
-
-        double tangSignDist;
-        iEI->interpLevelSetTangential(tangSignDist, N, tipEl->giveDofManArray() );
-    //                    printf("tangSignDist: %e\n", tangSignDist );
-
-        if( fabs(normalSignDist) < tol && tangSignDist > tol ) {
-    //                        printf("normalSignDist: %e\n", normalSignDist );
-    //                        printf("tangSignDist: %e\n", tangSignDist );
-            return true;
-        }
-    }
-
-    return false;
 }
 
 void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
@@ -971,21 +933,28 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                         bool evaluationSucceeded = true;
                         for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
                             DofManager *dMan = element->giveDofManager(elNodeInd);
+                            const FloatArray &nodeCoord = *(dMan->giveCoordinates());
 
-                            if(!ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber() )) {
+                            if(!ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber(), nodeCoord )) {
                                 evaluationSucceeded = false;
                             }
                             levelSetTang += N.at(elNodeInd)*levelSetInNode;
 
-                            if(!ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber() )) {
+                            if(!ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber(), nodeCoord )) {
                                 evaluationSucceeded = false;
                             }
                             levelSetNormal += N.at(elNodeInd)*levelSetInNode;
 
                         }
 
-                        double tangSignDist = 0.0, arcPos = 0.0;
-                        ei->giveEnrichmentDomain()->computeTangentialSignDist(tangSignDist, x, arcPos);
+                        double tangSignDist = levelSetTang, arcPos = 0.0;
+
+                        GeometryBasedEI *geoEI = dynamic_cast<GeometryBasedEI*>(ei);
+                        if(geoEI != NULL) {
+                            // TODO: Consider removing this special treatment. /ES
+                            geoEI->giveGeometry()->computeTangentialSignDist(tangSignDist, x, arcPos);
+                        }
+
 
                         if( (tangSignDist > (1.0e-3)*meanEdgeLength && fabs(levelSetNormal) < (1.0e-2)*meanEdgeLength) && evaluationSucceeded) {
                             joinNodes = false;
@@ -1088,7 +1057,8 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
 
                         for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
                             DofManager *dMan = element->giveDofManager(elNodeInd);
-                            ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber() );
+                            const FloatArray &nodeCoord = *(dMan->giveCoordinates());
+                            ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber(), nodeCoord );
 
                             levelSet += N.at(elNodeInd)*levelSetInNode;
                         }
@@ -1102,7 +1072,8 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
 
                         for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
                             DofManager *dMan = element->giveDofManager(elNodeInd);
-                            ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber() );
+                            const FloatArray &nodeCoord = *(dMan->giveCoordinates());
+                            ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber(), nodeCoord );
 
                             levelSet += N.at(elNodeInd)*levelSetInNode;
                         }

@@ -88,11 +88,11 @@ public:
     virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
 
     FloatArray GivePitch();
-    FloatArray GiveDerivativeUX(GaussPoint *gp);
-    FloatArray GiveDerivativeVX(GaussPoint *gp);
-    FloatArray GiveDerivativeUY(GaussPoint *gp);
-    FloatArray GiveDerivativeVY(GaussPoint *gp);
-    virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    FloatArray GiveDerivativeUX(FloatArray &lCoords);
+    FloatArray GiveDerivativeVX(FloatArray &lCoords);
+    FloatArray GiveDerivativeUY(FloatArray &lCoords);
+    FloatArray GiveDerivativeVY(FloatArray &lCoords);
+    //virtual void computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
 
     virtual int testElementExtension(ElementExtension ext) { return 0; }
 };

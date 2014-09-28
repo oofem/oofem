@@ -177,7 +177,7 @@ IntMatBilinearCZJansson :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint
 			C2 = c*Qn_M/sigf;
 
 			//double xi = (-C2 + sqrt(pow(C2,2)+(1-c*Qn_M/sigf)*4*C1))/(2*C1);
-			double xi;
+			double xi = 0.0;
 
 			if (Qn >=0) {
 				xi = (-C2 + sqrt(pow(C2,2)+4*C1))/(2*C1);

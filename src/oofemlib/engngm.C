@@ -67,6 +67,7 @@
 #include "classfactory.h"
 #include "xfem/xfemmanager.h"
 #include "parallelcontext.h"
+#include "contact/contactmanager.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
@@ -781,7 +782,11 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
             bc->assemble(answer, tStep, type, s, s);
         }
     }
-
+    
+    if ( domain->hasContactManager() ) {
+        domain->giveContactManager()->assembleTangentFromContacts(answer, tStep, type, s, s);
+    }
+    
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
     answer->assembleBegin();
@@ -1159,6 +1164,15 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Ch
     }
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
+}
+
+void
+EngngModel :: assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+                                    const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
+{
+    if( domain->hasContactManager()) {
+        domain->giveContactManager()->assembleVectorFromContacts(answer, tStep, type, mode, s, domain, eNorms);
+    } 
 }
 
 

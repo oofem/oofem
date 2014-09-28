@@ -30,19 +30,19 @@ XfemManager 1 numberofenrichmentitems 3 numberofgppertri 1
 crack 1 
 HeavisideFunction 1
 #DiscontinuousFunction 1
-polygoncrack 1 points 6 -0.5 0.3 -0.2 0.3 1.1 0.3
+PolygonLine 1 points 6 -0.5 0.3 -0.2 0.3 1.1 0.3
 ###################################
 # Crack 2
 crack 2 
 HeavisideFunction 1
 #DiscontinuousFunction 1
-polygoncrack 2 points 6 0.5 1.1 0.5 0.5 0.5 -0.1
+PolygonLine 2 points 6 0.5 1.1 0.5 0.5 0.5 -0.1
 ###################################
 # Crack 3
 crack 3 
 HeavisideFunction 1
 #DiscontinuousFunction 1
-polygoncrack 2 points 8 -0.1 0.8 0.4 0.5 0.7 -0.1 0.8 -0.2
+PolygonLine 2 points 8 -0.1 0.8 0.4 0.5 0.7 -0.1 0.8 -0.2
 ###################################
 #
 #

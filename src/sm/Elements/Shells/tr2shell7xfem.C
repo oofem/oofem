@@ -47,7 +47,6 @@
 #include "classfactory.h"
 #include "xfem/patchintegrationrule.h"
 #include "xfem/XFEMDebugTools.h"
-#include "xfem/enrichmentdomain.h"
 #include <string>
 #include <sstream>
 
@@ -178,7 +177,8 @@ bool Tr2Shell7XFEM :: updateIntegrationRuleMultiCrack()
 
                      
                             integrationRulesArray [ i ].reset( new PatchIntegrationRule(i + 1, this, this->crackSubdivisions [ i ]) );
-                            integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, numPointsThickness, _3dMat);         
+                            int nPointsTriSubTri = 3; 
+                            integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTriSubTri, numPointsThickness, _3dMat);         
                             this->numSubDivisionsArray [ i ] = this->crackSubdivisions [ i ].size();
                             createdRule = true;         
                             continue;

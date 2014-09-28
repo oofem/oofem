@@ -267,6 +267,8 @@ set (sm_unsorted
     gpinitmodule.C
     stressstrainbasevector.C stressvector.C strainvector.C
     mappers/primvarmapper.C
+    Contact/cdefnode2node.C
+    Contact/celnode2node.C
     )
 
 set (sm_parallel

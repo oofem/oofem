@@ -175,7 +175,8 @@ PhaseFieldElement :: computeBStress_u(FloatArray &answer, GaussPoint *gp, TimeSt
     StructuralCrossSection *cs = dynamic_cast< StructuralCrossSection *> ( el->giveCrossSection() );
     FloatArray reducedStrain, a_u;
     FloatMatrix B_u;
-    el->computeBmatrixAt(gp, B_u, 1, 3);
+
+    el->computeBmatrixAt(gp, B_u);
 
     this->computeDisplacementUnknowns(a_u, VM_Total, tStep);
     reducedStrain.beProductOf(B_u, a_u);

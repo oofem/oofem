@@ -15,6 +15,9 @@ set (core_unsorted
     solutionbasedshapefunction.C
     fracturemanager.C
     parallelcontext.C
+	contact/contactmanager.C
+	contact/contactdefinition.C
+	contact/contactelement.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
@@ -196,8 +199,12 @@ set (core_xfem
     xfem/enrichmentfunction.C
     xfem/xfemmanager.C
     xfem/enrichmentitem.C
+    xfem/geometrybasedei.C
+    xfem/hybridei.C
+    xfem/directei.C
+    xfem/listbasedei.C
+    xfem/inclusion.C
     xfem/patchintegrationrule.C
-    xfem/enrichmentdomain.C
     xfem/propagationlaw.C
     xfem/XFEMDebugTools.C
     xfem/enrichmentfronts/enrichmentfront.C

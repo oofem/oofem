@@ -67,6 +67,7 @@ public:
     virtual ~Shell7Base() {}
     virtual void giveDofManDofIDMask(int inode, IntArray &) const;
     virtual int computeGlobalCoordinates(FloatArray &answer, const FloatArray &lcoords);
+    virtual int computeGlobalCoordinatesOnEdge(FloatArray &answer, const FloatArray &lcoords, const int iEdge);
     virtual int computeNumberOfDofs() { return this->giveNumberOfDofs(); }
     virtual int checkConsistency();
     virtual void postInitialize();
