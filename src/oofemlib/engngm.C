@@ -130,6 +130,7 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     parallelFlag = 0;
     numProcs = 1;
     rank = 0;
+    nonlocalExt = 0;
 #ifdef __PARALLEL_MODE
     loadBalancingFlag = false;
     force_load_rebalance_in_first_step = false;

@@ -80,23 +80,12 @@ NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i,
     refLoadInputMode = SparseNonLinearSystemNM :: rlm_total;
     nMethod = NULL;
     initialGuessType = IG_None;
-
-    nonlocalExt = 0;
-#ifdef __PARALLEL_MODE
-    communicator = nonlocCommunicator = NULL;
-    commBuff = NULL;
-#endif
 }
 
 
 NonLinearStatic :: ~NonLinearStatic()
 {
-    //
-    // destructor
-    //
-    if ( nMethod ) {
-        delete nMethod;
-    }
+    delete nMethod;
 }
 
 

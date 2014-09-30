@@ -68,12 +68,6 @@ StaticStructural :: StaticStructural(int i, EngngModel *_master) : StructuralEng
 {
     ndomains = 1;
     solverType = 0;
-
-#ifdef __PARALLEL_MODE
-    nonlocalExt = 0;
-    communicator = nonlocCommunicator = NULL;
-    commBuff = NULL;
-#endif
 }
 
 

@@ -56,6 +56,8 @@ using namespace std;
 
 #ifdef __PARALLEL_MODE
  #include "loadbalancer.h"
+ #include "problemcomm.h"
+ #include "processcomm.h"
 #endif
 
 namespace oofem {
@@ -73,14 +75,6 @@ NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEng
     effectiveStiffnessMatrix = NULL;
     massMatrix               = NULL;
     nMethod                  = NULL;
-
-    nonlocalExt = 0;
-#ifdef __PARALLEL_MODE
-
-    communicator       = NULL;
-    nonlocCommunicator = NULL;
-    commBuff           = NULL;
-#endif
 }
 
 

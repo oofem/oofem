@@ -57,23 +57,12 @@ DIIDynamic :: DIIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _
     nMethod = NULL;
 
     initialTimeDiscretization = TD_ThreePointBackward;
-
-    nonlocalExt = 0;
-#ifdef __PARALLEL_MODE
-    communicator = nonlocCommunicator = NULL;
-    commBuff = NULL;
-#endif
 }
 
 DIIDynamic :: ~DIIDynamic()
 {
-    if ( stiffnessMatrix ) {
-        delete stiffnessMatrix;
-    }
-
-    if ( nMethod ) {
-        delete nMethod;
-    }
+    delete stiffnessMatrix;
+    delete nMethod;
 }
 
 NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)

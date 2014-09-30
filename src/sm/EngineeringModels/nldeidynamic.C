@@ -59,11 +59,6 @@ NlDEIDynamic :: NlDEIDynamic(int i, EngngModel *_master) : StructuralEngngModel(
     previousIncrementOfDisplacementVector(), displacementVector(),
     velocityVector(), accelerationVector(), internalForces()
 {
-    nonlocalExt = 0;
-#ifdef __PARALLEL_MODE
-    communicator = nonlocCommunicator = NULL;
-    commBuff = NULL;
-#endif
     ndomains = 1;
     initFlag = 1;
 }

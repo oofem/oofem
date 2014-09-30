@@ -62,23 +62,13 @@ FreeWarping :: FreeWarping(int i, EngngModel *_master) : StructuralEngngModel(i,
     nMethod = NULL;
     initFlag = 1;
     solverType = ST_Direct;
-
-    nonlocalExt = 0;
-#ifdef __PARALLEL_MODE
-    communicator = nonlocCommunicator = NULL;
-    commBuff = NULL;
-#endif
 }
 
 
 FreeWarping :: ~FreeWarping()
 {
-    if ( stiffnessMatrix ) {
-        delete stiffnessMatrix;
-    }
-    if ( nMethod ) {
-        delete nMethod;
-    }
+    delete stiffnessMatrix;
+    delete nMethod;
 }
 
 
