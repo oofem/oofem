@@ -41,6 +41,7 @@
 
 #include "activebc.h"
 #include "node.h"
+#include "boundaryload.h"
 
 namespace oofem
 {
@@ -76,7 +77,7 @@ private:
     IntArray lambdaIDs;
 
 public:
-    PrescribedMean (int n, Domain * d) : ActiveBoundaryCondition(n, d) {}
+    PrescribedMean (int n, Domain * d) : ActiveBoundaryCondition(n, d) {};
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

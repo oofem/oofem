@@ -180,7 +180,10 @@ NeumannMomentLoad :: computeValueAtBoundary(FloatArray &answer, TimeStep *tStep,
 
     answer = l*n;
 
-    //printf("%f\t%f\t%f\t%f\t%f\t%f\t\n", coords.at(1), coords.at(2), coords.at(3), answer.at(1), answer.at(2), answer.at(3));
+    // Finally, compute value of loadtimefunction
+    double factor;
+    factor = this->giveTimeFunction()->evaluate(tStep, mode);
+    answer=answer*factor;
 
 }
 

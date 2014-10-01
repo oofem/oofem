@@ -39,6 +39,7 @@
 #include "feinterpol.h"
 #include "gausspoint.h"
 #include "sparsemtrx.h"
+#include "function.h"
 
 namespace oofem
 {
@@ -52,6 +53,8 @@ IRResultType
 PrescribedMean :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;
+
+    GeneralBoundaryCondition :: initializeFrom(ir);
 
     IR_GIVE_FIELD(ir, c, _IFT_PrescribedMean_Mean);
     IR_GIVE_FIELD(ir, dofid, _IFT_PrescribedMean_DofID);
@@ -209,6 +212,11 @@ PrescribedMean :: giveExternalForcesVector(FloatArray &answer, TimeStep *tStep,
 
     lambdaDman->giveLocationArray(lambdaIDs, lambdaLoc, s);
     answer.assemble(temp, lambdaLoc);
+
+    // Finally, compute value of loadtimefunction
+    double factor;
+    factor = this->giveTimeFunction()->evaluate(tStep, mode);
+    answer.times(factor);
 }
 
 void
@@ -216,7 +224,7 @@ PrescribedMean :: computeDomainSize()
 {
     if (domainSize > 0.0) return;
 
-    setList = this->giveDomain()->giveSet(set)->giveBoundaryList();
+    setList = ((GeneralBoundaryCondition *)this)->giveDomain()->giveSet(set)->giveBoundaryList();
 
     elements.resize(setList.giveSize() / 2);
     sides.resize(setList.giveSize() / 2);

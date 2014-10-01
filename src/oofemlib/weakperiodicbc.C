@@ -51,6 +51,7 @@
 #include "fei2dtrquad.h"
 #include "classfactory.h"
 #include "set.h"
+#include "function.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(WeakPeriodicBoundaryCondition);
@@ -703,6 +704,10 @@ WeakPeriodicBoundaryCondition :: giveExternalForcesVector(FloatArray &answer, Ti
 
     answer.assemble(temp, gammaLoc);
 
+    // Finally, compute value of loadtimefunction
+    double factor;
+    factor = this->giveTimeFunction()->evaluate(tStep, mode);
+    answer.times(factor);
 }
 
 int WeakPeriodicBoundaryCondition :: giveNumberOfInternalDofManagers()
