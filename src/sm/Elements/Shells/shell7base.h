@@ -78,6 +78,7 @@ public:
 
 
     // Element specific
+    virtual int giveNumberOfInPlaneIP() { return numInPlaneIP; };
     virtual int giveNumberOfDofs();
     virtual int giveNumberOfEdgeDofs() = 0;
     virtual int giveNumberOfEdgeDofManagers() = 0;
@@ -117,6 +118,7 @@ protected:
     }
 
     // Element specific methods
+    int numInPlaneIP;
     virtual void computeGaussPoints() = 0;
     virtual double computeVolumeAroundLayer(GaussPoint *mastergp, int layer) = 0;
     virtual double computeAreaAround(GaussPoint *gp, double xi) = 0;
@@ -153,7 +155,7 @@ protected:
 
     void edgeEvalCovarBaseVectorsAt(FloatArray &lCoords, const int iedge, FloatMatrix &gcov, TimeStep *tStep);
 
-    virtual double giveGlobalZcoord(FloatArray &lCoords);
+    virtual double giveGlobalZcoord(const FloatArray &lCoords);
     virtual double giveGlobalZcoordInLayer(double xi, int layer);
 
     FloatMatrix giveAxialMatrix(const FloatArray &vec);
@@ -232,10 +234,14 @@ protected:
     void giveFictiousCZNodeCoordsForExport(std::vector<FloatArray> &nodes, int interface);
     void giveFictiousUpdatedNodeCoordsForExport(std::vector<FloatArray> &nodes, int layer, TimeStep *tStep);
     //void giveLocalNodeCoordsForExport(FloatArray &nodeLocalXi1Coords, FloatArray &nodeLocalXi2Coords, FloatArray &nodeLocalXi3Coords);
-
-    void recoverValuesFromIP(std::vector<FloatArray> &nodes, int layer, InternalStateType type, TimeStep *tStep);
+    
+    // Recovery of through thickness stresses by momentum balance
+    enum stressRecoveryType {copyIPvalue, LSfit, L2fit}; 
+    void recoverValuesFromIP(std::vector<FloatArray> &nodes, int layer, InternalStateType type, TimeStep *tStep, stressRecoveryType SRtype = copyIPvalue);
+    void CopyIPvaluesToNodes(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
+    void nodalLeastSquareFitFromIP(std::vector<FloatArray> &recoveredValues, int layer, InternalStateType type, TimeStep *tStep);
     void recoverShearStress(TimeStep *tStep);
-    void computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer, int layer);
+    void computeBmatrixForStressRecAt(FloatArray &lcoords, FloatMatrix &answer, int layer, bool intSzz = false);
 
 
     // N and B matrices
@@ -260,6 +266,7 @@ protected:
     int giveVoigtIndex(int ind1, int ind2);
     std::vector< std::vector<int> > voigtIndices;
     
+    //std :: vector< IntegrationRule * > srIntegrationRulesArray;
 };
 } // end namespace oofem
 #endif

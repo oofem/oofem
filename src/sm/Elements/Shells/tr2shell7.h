@@ -50,6 +50,14 @@ class BoundaryLoad;
 /**
  * This class represent a 7 parameter shell element.
  * Each node has 7 degrees of freedom (displ. vec., director vec., inhomogeneous thickness strain ).
+ * Nodal numbering:
+ *           (3)
+ *          / |
+ *        /   |
+ *      (6)  (5)
+ *     /      |
+ *   /        |
+ * (1)--(4)--(2)
  * Add ref. to paper!
  * @author Jim Brouzoulis
  * @date 2012-11-01

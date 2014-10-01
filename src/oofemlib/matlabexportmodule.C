@@ -66,7 +66,7 @@ namespace oofem {
 
 REGISTER_ExportModule( MatlabExportModule )
 
-				MatlabExportModule :: MatlabExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
+MatlabExportModule :: MatlabExportModule(int n, EngngModel *e) : ExportModule(n, e), internalVarsToExport(), primaryVarsToExport()
 {
     exportMesh = false;
     exportData = false;
@@ -92,10 +92,10 @@ MatlabExportModule :: initializeFrom(InputRecord *ir)
 
     ExportModule :: initializeFrom(ir);
 
-	exportMesh = ir->hasField(_IFT_MatlabExportModule_mesh);
-	exportData = ir->hasField(_IFT_MatlabExportModule_data);
-	exportArea = ir->hasField(_IFT_MatlabExportModule_area);
-	exportSpecials = ir->hasField(_IFT_MatlabExportModule_specials);
+    exportMesh = ir->hasField(_IFT_MatlabExportModule_mesh);
+    exportData = ir->hasField(_IFT_MatlabExportModule_data);
+    exportArea = ir->hasField(_IFT_MatlabExportModule_area);
+    exportSpecials = ir->hasField(_IFT_MatlabExportModule_specials);
 
     exportReactionForces = ir->hasField(_IFT_MatlabExportModule_ReactionForces);
     reactionForcesDofManList.resize(0);
@@ -596,26 +596,18 @@ MatlabExportModule :: terminate()
 FILE *
 MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 {
-	FILE *answer;
-	std :: ostringstream baseFileName;
-	std :: string fileName;
+    FILE *answer;
+    std :: ostringstream baseFileName;
+    std :: string fileName;
 
-	fileName = this->emodel->giveOutputBaseFileName();
-
-	size_t foundDot;
-	foundDot = fileName.rfind(".");
-
-    // CARL
-    //fileName.replace(foundDot, 1, "_"); 
- 
-    // JIM
+    fileName = this->emodel->giveOutputBaseFileName();
+    size_t foundDot;
+    foundDot = fileName.rfind(".");
+    
     fileName.replace(foundDot, 1, "_");
 
     char fext[100];
-    sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
-    fileName += fext;
 
-//    char fext [ 100 ];
     if ( this->testSubStepOutput() ) {
         // include tStep version in output file name
 #ifdef __PARALLEL_MODE
@@ -632,8 +624,10 @@ MatlabExportModule :: giveOutputStream(TimeStep *tStep)
 #endif
         sprintf( fext, "_m%d_%d", this->number, tStep->giveNumber() );
     }
-
+    
     fileName += fext;
+    // Erase box-character (CR/LF). NB: isspace may need qualification
+    // fileName.erase(std::remove_if(fileName.begin(), fileName.end(), isspace), fileName.end());
 
     functionname = fileName;
     fileName += ".m";

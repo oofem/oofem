@@ -83,4 +83,4 @@ protected:
 
 };
 } // end namespace oofem
-#endif // trplanstrss_h
+#endif // basicelement_h
