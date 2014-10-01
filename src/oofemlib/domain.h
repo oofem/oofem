@@ -95,7 +95,6 @@ class Set;
 class FractureManager;
 class oofegGraphicContext;
 class ProcessCommunicator;
-class LoadBalancer;
 class ContactManager;
 /**
  * Class and object Domain. Domain contains mesh description, or if program runs in parallel then it contains
