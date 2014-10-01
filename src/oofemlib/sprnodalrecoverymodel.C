@@ -655,14 +655,14 @@ SPRNodalRecoveryModel :: packSharedDofManData(parallelStruct *s, ProcessCommunic
         indx = s->regionNodalNumbers->at( toSendMap->at(i) );
         if ( indx && s->dofManPatchCount->at(indx) ) {
             // pack "1" to indicate that for given shared node this is a valid contribution
-            result &= pcbuff->packInt(1);
+            result &= pcbuff->write(1);
             eq = ( indx - 1 ) * s->regionValSize;
             for ( j = 1; j <= s->regionValSize; j++ ) {
-                result &= pcbuff->packDouble( s->dofManValues->at(eq + j) );
+                result &= pcbuff->write( s->dofManValues->at(eq + j) );
             }
         } else {
             // ok shared node is not in active region (determined by s->regionNodalNumbers)
-            result &= pcbuff->packInt(0);
+            result &= pcbuff->write(0);
         }
     }
 

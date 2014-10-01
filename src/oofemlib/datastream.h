@@ -41,8 +41,6 @@
 #include <cstdio>
 
 namespace oofem {
-class ProcessCommunicatorBuff;
-
 /**
  * The purpose of DataStream abstract class is to allow to store/restore context to different streams,
  * including file, communication buffers, etc., using the same routine.
@@ -109,6 +107,8 @@ public:
     virtual int write(bool data) = 0;
     /// Reads a string (stored as an int for the length followed by char*).
     int write(const std :: string &data);
+    /// Writes a string (wrapper needed, otherwise write(bool) is called )
+    int write(const char *data) { return this->write(std :: string(data)); }
     //@}
 
     /**
@@ -165,48 +165,5 @@ public:
     virtual int givePackSizeOfLong(int count);
 };
 
-#ifdef __PARALLEL_MODE
-
-/**
- * Implementation of ComBuffDataStream representing DataStream interface to (MPI) process communicator.
- * This class creates a DataStream shell around process communicator routines.
- * @see DataStream class.
- */
-class OOFEM_EXPORT ProcessCommDataStream : public DataStream
-{
-private:
-    /// Associated process communicator buffer
-    ProcessCommunicatorBuff *pc;
-
-public:
-    /// Constructor
-    ProcessCommDataStream(ProcessCommunicatorBuff * b) {
-        pc = b;
-    }
-    /// Destructor
-    virtual ~ProcessCommDataStream() { }
-
-    virtual int read(int *data, int count);
-    virtual int read(unsigned long *data, int count);
-    virtual int read(long *data, int count);
-    virtual int read(double *data, int count);
-    virtual int read(char *data, int count);
-    virtual int read(bool &data);
-
-    virtual int write(const int *data, int count);
-    virtual int write(const unsigned long *data, int count);
-    virtual int write(const long *data, int count);
-    virtual int write(const double *data, int count);
-    virtual int write(const char *data, int count);
-    virtual int write(bool data);
-
-    virtual int givePackSizeOfInt(int count);
-    virtual int givePackSizeOfDouble(int count);
-    virtual int givePackSizeOfChar(int count);
-    virtual int givePackSizeOfBool(int count);
-    virtual int givePackSizeOfLong(int count);
-};
-
-#endif
 } // end namespace oofem
 #endif // datastream_h

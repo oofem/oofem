@@ -1942,7 +1942,7 @@ EngngModel :: packDofManagers(ArrayWithNumbering *srcData, ProcessCommunicator &
             if ( jdof->isPrimaryDof() ) {
                 int eqNum = jdof->giveEquationNumber(s);
                 if ( eqNum ) {
-                    result &= pcbuff->packDouble( src->at(eqNum) );
+                    result &= pcbuff->write( src->at(eqNum) );
                 }
             }
         }
