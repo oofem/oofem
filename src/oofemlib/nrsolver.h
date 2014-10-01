@@ -143,11 +143,6 @@ protected:
     /// Minimum number of iterations before constraint is activated
     int constrainedNRminiter;
 
-#ifdef __PETSC_MODULE
-    IS prescribedEgsIS;
-    bool prescribedEgsIS_defined;
-#endif
-
     /// Relative unbalanced force tolerance for each group
     FloatArray rtolf;
     /// Relative iterative displacement change tolerance for each group

@@ -457,10 +457,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     this->domainNeqs.at(2) = 0;
     this->domainPrescribedNeqs.at(2) = 0;
     this->domainList.emplace(domainList.begin() + 1, dNew);
-
-#ifdef __PARALLEL_MODE
     this->parallelContextList.emplace(parallelContextList.begin() + 1, this);
-#endif
 
     // init equation numbering
     //this->forceEquationNumbering(2);
@@ -510,10 +507,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     //domainList->put(2, NULL);
     domainList[0] = std :: move(domainList[1]);
     domainList[0]->setNumber(1);
-
-#ifdef __PARALLEL_MODE
     parallelContextList = {parallelContextList[1]};
-#endif
 
     // keep equation numbering of new domain
     this->numberOfEquations = this->domainNeqs.at(1) = this->domainNeqs.at(2);
