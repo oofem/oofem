@@ -480,7 +480,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
             gp->setMaterialMode(_3dMat);
 
             // Transform to 1st Piola-Kirshhoff
-            FloatArray Fa;
+            FloatArray Fa, FinvTa;
             FloatMatrix F, Finv, FinvT, fluidStressMatrix;
 
             computeDeformationGradientVector(Fa, gp, tStep, aGhostDisplacement);
@@ -488,27 +488,37 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
             double J=F.giveDeterminant();
             Finv.beInverseOf(F);
             FinvT.beTranspositionOf(Finv);
+            FinvTa.beVectorForm(FinvT);
 
             fluidCauchyMatrix.beMatrixFormOfStress(fluidCauchy);
             fluidStressMatrix.beProductOf(FinvT, fluidCauchyMatrix);
-            fluidStressMatrix.times( F.giveDeterminant() );
+            fluidStressMatrix.times( J );
             fluidStress.beVectorForm(fluidStressMatrix);
             //fluidStress.printYourself();
 
             // Add to equation
-
             momentum.plusProduct(BH, fluidStress, detJ*weight);
-            momentum.add(-pressure * detJ * weight *J, dNv);
+
+            // Pressure term in momentum equation
+            FloatArray ptemp;
+            ptemp.beTProductOf(BH, FinvTa);
+            momentum.add(-pressure * detJ * weight *J, ptemp);
 
             // Conservation equation -----
-            divv.beTProductOf(dNv, aTotal);
-            divv.times(-detJ * weight*J);
+            divv.beTProductOf(ptemp, aTotal);  // Also include external forces
+            divv.times(-detJ * weight* J);
 
             conservation.add(divv.at(1), Nlin);
 
             // Ghost solid part -----
             Strain.beProductOf(B, aGhostDisplacement);
             Stress.beProductOf(Dghost, Strain);
+
+/*            fluidCauchyMatrix.beMatrixFormOfStress(fluidCauchy);
+            fluidStressMatrix.beProductOf(FinvT, fluidCauchyMatrix);
+            fluidStressMatrix.times( J );
+            fluidStress.beVectorForm(fluidStressMatrix);
+  */
             auxstress.plusProduct(B, Stress, detJ * weight);
         }
 
