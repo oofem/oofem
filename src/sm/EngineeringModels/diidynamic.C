@@ -58,9 +58,8 @@ DIIDynamic :: DIIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _
 
     initialTimeDiscretization = TD_ThreePointBackward;
 
-#ifdef __PARALLEL_MODE
-    commMode = ProblemCommMode__NODE_CUT;
     nonlocalExt = 0;
+#ifdef __PARALLEL_MODE
     communicator = nonlocCommunicator = NULL;
     commBuff = NULL;
 #endif
@@ -81,28 +80,6 @@ NumericalMethod *DIIDynamic :: giveNumericalMethod(MetaStep *mStep)
 // Only one has reason for DIIDynamic
 // - SolutionOfLinearEquations
 {
-#ifdef __PARALLEL_MODE
-
-    if ( nMethod ) {
-        return nMethod;
-    }
-
-    if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
-        if ( nMethod ) {
-            return nMethod;
-        }
-
-        nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
-    }
-
-    if ( nMethod == NULL ) {
-        OOFEM_ERROR("linear solver creation failed (unknown type or no parallel support)");
-    }
-
-    return nMethod;
-
-#endif
-
     if ( nMethod ) {
         return nMethod;
     }
@@ -493,13 +470,10 @@ DIIDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type, Doma
 
     for ( i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
         // Skip remote elements.
         if ( element->giveParallelMode() == Element_remote ) {
             continue;
         }
-
-#endif
 
         element->giveLocationArray(loc, en);
         element->giveCharacteristicMatrix(charMtrx, type, tStep);
@@ -535,9 +509,7 @@ DIIDynamic :: assembleLoadVector(FloatArray &_loadVector, Domain *domain, ValueM
 
     this->assembleVector(_loadVector, tStep, ExternalForcesVector, mode,
                          EModelDefaultEquationNumbering(), domain);
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(_loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 }
 
 void
@@ -631,23 +603,23 @@ contextIOResultType DIIDynamic :: saveContext(DataStream *stream, ContextMode mo
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = velocityVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = loadVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = loadVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = previousIncrementOfDisplacement.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = previousIncrementOfDisplacement.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -681,23 +653,23 @@ contextIOResultType DIIDynamic :: restoreContext(DataStream *stream, ContextMode
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = velocityVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = loadVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = loadVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = previousIncrementOfDisplacement.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = previousIncrementOfDisplacement.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

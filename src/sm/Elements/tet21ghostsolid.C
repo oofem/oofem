@@ -126,7 +126,7 @@ tet21ghostsolid :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 6);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 6) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
@@ -276,7 +276,6 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
 #ifdef __FM_MODULE
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
 #endif
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatArray N, gVector, temparray(30), dNv, inc, a, a_prev, u, u_prev, vload;
     FloatMatrix dNx, G;
 
@@ -290,11 +289,10 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
     u.beSubArrayOf(a, ghostdisplacement_ordering);
     u_prev.beSubArrayOf(a_prev, ghostdisplacement_ordering);
 
-    for ( int k = 0; k < iRule->giveNumberOfIntegrationPoints(); k++ ) {
-        GaussPoint *gp = iRule->getIntegrationPoint(k);
-        FloatArray *lcoords = gp->giveNaturalCoordinates();
+    for ( auto &gp: *this->integrationRulesArray [ 0 ] ) {
+        const FloatArray &lcoords = *gp->giveNaturalCoordinates();
 
-        double detJ = fabs( this->interpolation.giveTransformationJacobian( * lcoords, FEIElementGeometryWrapper(this) ) );
+        double detJ = fabs( this->interpolation.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) ) );
         double dA = detJ * gp->giveWeight();
 
         // Body load
@@ -320,7 +318,7 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
                 gVector = temp;
             }
 
-            this->interpolation.evalN( N, * lcoords, FEIElementGeometryWrapper(this) );
+            this->interpolation.evalN( N, lcoords, FEIElementGeometryWrapper(this) );
 
             for ( int j = 0; j < N.giveSize(); j++ ) {
                 temparray(3 * j + 0) += N(j) * rho * gVector(0) * dA;
@@ -377,8 +375,6 @@ tet21ghostsolid :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
 void
 tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord, FloatArray &a)
 {
-
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
 #ifdef __FM_MODULE
     FluidDynamicMaterial *fluidMaterial = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
 #endif
@@ -396,26 +392,18 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
     }
     a_inc.operator =(a-a_prev);
 
-    momentum.resize(30);
-    momentum.zero();
-    conservation.resize(4);
-    conservation.zero();
-    auxstress.resize(30);
-    auxstress.zero();
-
     aVelocity.beSubArrayOf(a, momentum_ordering);
     aPressure.beSubArrayOf(a, conservation_ordering);
     aGhostDisplacement.beSubArrayOf(a, ghostdisplacement_ordering);
     aIncGhostDisplacement.beSubArrayOf(a_inc, ghostdisplacement_ordering);
 
-    for (int j = 0; j<iRule->giveNumberOfIntegrationPoints(); j++) {
-        GaussPoint *gp = iRule->getIntegrationPoint(j);
-
-        double detJ = fabs( ( this->interpolation.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) ) );
+    for ( auto &gp: *this->giveDefaultIntegrationRulePtr() ) {
+        const FloatArray &lcoords = *gp->giveNaturalCoordinates();
+        double detJ = fabs( ( this->interpolation.giveTransformationJacobian( lcoords, FEIElementGeometryWrapper(this) ) ) );
         double weight = gp->giveWeight();
 
-        this->interpolation.evaldNdx( dNx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
-        this->interpolation_lin.evalN( Nlin, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
+        this->interpolation.evaldNdx( dNx, lcoords, FEIElementGeometryWrapper(this) );
+        this->interpolation_lin.evalN( Nlin, lcoords, FEIElementGeometryWrapper(this) );
 
         dNv.resize(30);
         for (int k = 0; k<dNx.giveNumberOfRows(); k++) {

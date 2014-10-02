@@ -99,24 +99,22 @@ SimpleTransportCrossSection :: isCharacteristicMtrxSymmetric(MatResponseMode rMo
 }
 
 
-#ifdef __PARALLEL_MODE
 int
-SimpleTransportCrossSection :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+SimpleTransportCrossSection :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)
 {
     return this->domain->giveMaterial(this->matNumber)->packUnknowns(buff, tStep, gp);
 }
 
 int
-SimpleTransportCrossSection :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+SimpleTransportCrossSection :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)
 {
     return this->domain->giveMaterial(this->matNumber)->unpackAndUpdateUnknowns(buff, tStep, gp);
 }
 
 int
-SimpleTransportCrossSection :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *gp)
+SimpleTransportCrossSection :: estimatePackSize(DataStream &buff, GaussPoint *gp)
 {
     return this->domain->giveMaterial(this->matNumber)->estimatePackSize(buff, gp);
 }
-#endif
 
 } // end namespace oofem

@@ -1480,23 +1480,23 @@ MPlasticMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void
     }
 
     // write a raw data
-    if ( ( iores = plasticStrainVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasticStrainVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = strainSpaceHardeningVarsVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = strainSpaceHardeningVarsVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->write(& state_flag, 1) ) {
+    if ( !stream->write(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = gamma.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = gamma.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = activeConditionMap.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = activeConditionMap.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1518,23 +1518,23 @@ MPlasticMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, v
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = plasticStrainVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasticStrainVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = strainSpaceHardeningVarsVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = strainSpaceHardeningVarsVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(& state_flag, 1) ) {
+    if ( !stream->read(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = gamma.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = gamma.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = activeConditionMap.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = activeConditionMap.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

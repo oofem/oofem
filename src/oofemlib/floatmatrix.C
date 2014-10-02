@@ -105,10 +105,6 @@ extern void dscal_(const int *n, const double *alpha, const double *x, const int
 #endif
 
 
-#ifdef __PARALLEL_MODE
- #include "combuff.h"
-#endif
-
 namespace oofem {
 FloatMatrix :: FloatMatrix(const FloatArray &vector, bool transpose)
 //
@@ -1805,18 +1801,18 @@ bool FloatMatrix :: computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix 
 }
 #endif
 
-contextIOResultType FloatMatrix :: storeYourself(DataStream *stream, ContextMode mode)
+contextIOResultType FloatMatrix :: storeYourself(DataStream *stream) const
 // writes receiver's binary image into stream
 // use id to distinguish some instances
 // return value >0 success
 //              =0 file i/o error
 {
     // write size
-    if ( !stream->write(& nRows, 1) ) {
+    if ( !stream->write(nRows) ) {
         return ( CIO_IOERR );
     }
 
-    if ( !stream->write(& nColumns, 1) ) {
+    if ( !stream->write(nColumns) ) {
         return ( CIO_IOERR );
     }
 
@@ -1830,18 +1826,18 @@ contextIOResultType FloatMatrix :: storeYourself(DataStream *stream, ContextMode
 }
 
 
-contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMode mode)
+contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream)
 // reads receiver from stream
 // warning - overwrites existing data!
 // returns 0 if file i/o error
 //        -1 if id of class id is not correct
 {
     // read size
-    if ( !stream->read(& nRows, 1) ) {
+    if ( !stream->read(nRows) ) {
         return ( CIO_IOERR );
     }
 
-    if ( !stream->read(& nColumns, 1) ) {
+    if ( !stream->read(nColumns) ) {
         return ( CIO_IOERR );
     }
 
@@ -1854,6 +1850,14 @@ contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMo
 
     // return result back
     return CIO_OK;
+}
+
+
+int
+FloatMatrix :: givePackSize(DataStream &buff) const
+{
+    return buff.givePackSizeOfInt(1) + buff.givePackSizeOfInt(1) +
+           buff.givePackSizeOfDouble(nRows * nColumns);
 }
 
 
@@ -2028,43 +2032,6 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
     return 0;
 } /* jaco_ */
 
-
-
-#ifdef __PARALLEL_MODE
-int
-FloatMatrix :: packToCommBuffer(CommunicationBuffer &buff) const
-{
-    int result = 1;
-    // pack size
-    result &= buff.packInt(nRows);
-    result &= buff.packInt(nColumns);
-    // pack data
-    result &= buff.packArray(this->givePointer(), nRows * nColumns);
-
-    return result;
-}
-
-int
-FloatMatrix :: unpackFromCommBuffer(CommunicationBuffer &buff)
-{
-    int newNRows, newNColumns, result = 1;
-    // unpack size
-    result &= buff.unpackInt(newNRows);
-    result &= buff.unpackInt(newNColumns);
-    // resize yourself
-    this->resize(newNRows, newNColumns);
-    result &= buff.unpackArray(this->givePointer(), newNRows * newNColumns);
-
-    return result;
-}
-
-int
-FloatMatrix :: givePackSize(CommunicationBuffer &buff)
-{
-    return buff.givePackSize(MPI_INT, 1) + buff.givePackSize(MPI_INT, 1) +
-           buff.givePackSize(MPI_DOUBLE, nRows * nColumns);
-}
-#endif
 
 #ifdef BOOST_PYTHON
 void

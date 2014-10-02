@@ -68,13 +68,9 @@ EIPrimaryUnknownMapper :: mapAndUpdate(FloatArray &answer, ValueModeType mode,
     for ( inode = 1; inode <= nd_nnodes; inode++ ) {
         DofManager *node = newd->giveNode(inode);
         /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
-        if ( ( node->giveParallelMode() == DofManager_null ) ||
-            ( node->giveParallelMode() == DofManager_remote ) ) {
+        if ( node->giveParallelMode() != DofManager_local ) {
             continue;
         }
-
-#endif
 
 #ifdef OOFEM_MAPPING_CHECK_REGIONS
         // build up region list for node

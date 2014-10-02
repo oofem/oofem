@@ -454,20 +454,20 @@ IsotropicDamageMaterialStatus :: saveContext(DataStream *stream, ContextMode mod
     }
 
     // write raw data
-    if ( !stream->write(& kappa, 1) ) {
+    if ( !stream->write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& damage, 1) ) {
+    if ( !stream->write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
 #ifdef keep_track_of_dissipated_energy
-    if ( !stream->write(& stressWork, 1) ) {
+    if ( !stream->write(stressWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& dissWork, 1) ) {
+    if ( !stream->write(dissWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -487,20 +487,20 @@ IsotropicDamageMaterialStatus :: restoreContext(DataStream *stream, ContextMode 
     }
 
     // read raw data
-    if ( !stream->read(& kappa, 1) ) {
+    if ( !stream->read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& damage, 1) ) {
+    if ( !stream->read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
 #ifdef keep_track_of_dissipated_energy
-    if ( !stream->read(& stressWork, 1) ) {
+    if ( !stream->read(stressWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& dissWork, 1) ) {
+    if ( !stream->read(dissWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

@@ -526,7 +526,7 @@ MazarsMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *
     }
 
     // write a raw data
-    if ( !stream->write(& lec, 1) ) {
+    if ( !stream->write(lec) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -546,7 +546,7 @@ MazarsMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, voi
     }
 
     // read raw data
-    if ( !stream->read(& lec, 1) ) {
+    if ( !stream->read(lec) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

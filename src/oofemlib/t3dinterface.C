@@ -148,12 +148,11 @@ T3DInterface :: createInput(Domain *d, TimeStep *tStep)
         tri_tetra = true;
     }
 
-#ifdef __PARALLEL_MODE
-    sprintf( fileName, "%s.%d", BMF_FILENAME, d->giveEngngModel()->
-            giveRank() );
-#else
-    sprintf(fileName, "%s", BMF_FILENAME);
-#endif
+    if ( d->giveEngngModel()->isParallel() ) {
+        sprintf( fileName, "%s.%d", BMF_FILENAME, d->giveEngngModel()->giveRank() );
+    } else {
+        sprintf(fileName, "%s", BMF_FILENAME);
+    }
 
     outputStrem = fopen(fileName, "w");
     if ( tri_tetra == true ) {

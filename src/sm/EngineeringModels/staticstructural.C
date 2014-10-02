@@ -70,7 +70,6 @@ StaticStructural :: StaticStructural(int i, EngngModel *_master) : StructuralEng
     solverType = 0;
 
 #ifdef __PARALLEL_MODE
-    commMode = ProblemCommMode__NODE_CUT;
     nonlocalExt = 0;
     communicator = nonlocCommunicator = NULL;
     commBuff = NULL;
@@ -126,13 +125,13 @@ StaticStructural :: initializeFrom(InputRecord *ir)
     
     
 #ifdef __PARALLEL_MODE
+    ///@todo Where is the best place to create these?
     if ( isParallel() ) {
         delete communicator;
         delete commBuff;
         commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
-        communicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
-                                               this->giveNumberOfProcesses(),
-                                               this->commMode);
+        communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
+                                            this->giveNumberOfProcesses());
     }
 
 #endif
@@ -237,9 +236,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     externalForces.zero();
     this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 
     if ( this->giveProblemScale() == macroScale ) {
         OOFEM_LOG_INFO("\nStaticStructural :: solveYourselfAt - Solving step %d, metastep %d, (neq = %d)\n", tStep->giveNumber(), tStep->giveMetaStepNumber(), neq);
@@ -284,9 +281,8 @@ void StaticStructural :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
         this->internalForces.zero();
         this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), d, & this->eNorm);
-#ifdef __PARALLEL_MODE
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
-#endif
+
         internalVarUpdateStamp = tStep->giveSolutionStateCounter(); // Hack for linearstatic
     } else if ( cmpn == NonLinearLhs ) {
         this->stiffnessMatrix->zero();
@@ -400,20 +396,13 @@ void StaticStructural :: updatePrimaryField(ValueModeType mode, TimeStep *tStep,
     *field->giveSolutionVector(tStep) = vectorToStore;
 }
 
-#ifdef __PARALLEL_MODE
 int
-StaticStructural :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
+StaticStructural :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType)
 {
     int count = 0, pcount = 0;
     Domain *domain = this->giveDomain(1);
 
-    if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
-        for ( int map: commMap ) {
-            count += domain->giveDofManager( map )->giveNumberOfDofs();
-        }
-
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
-    } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
+    if ( packUnpackType == 0 ) { ///@todo Fix this old ProblemCommMode__NODE_CUT value
         for ( int map: commMap ) {
             DofManager *dman = domain->giveDofManager( map );
             for ( Dof *dof: *dman ) {
@@ -429,8 +418,8 @@ StaticStructural :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
         // only pcount is relevant here, since only prescribed components are exchanged !!!!
         // --------------------------------------------------------------------------------
 
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * pcount );
-    } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
+        return ( buff.givePackSizeOfDouble(1) * pcount );
+    } else if ( packUnpackType == 1 ) {
         for ( int map: commMap ) {
             count += domain->giveElement( map )->estimatePackSize(buff);
         }
@@ -441,7 +430,4 @@ StaticStructural :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
     return 0;
 }
 
-
-
-#endif
 } // end namespace oofem

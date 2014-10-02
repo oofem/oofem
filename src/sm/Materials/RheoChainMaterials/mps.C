@@ -86,11 +86,11 @@ MPSMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj
     }
 
 
-    if ( !stream->write(& equivalentTime, 1) ) { // write equivalent time
+    if ( !stream->write(equivalentTime) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& flowTermViscosity, 1) ) { // write viscosity of the aging dashpot
+    if ( !stream->write(flowTermViscosity) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -108,11 +108,11 @@ MPSMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(& equivalentTime, 1) ) { // restore equivalentTime
+    if ( !stream->read(equivalentTime) ) {
         return CIO_IOERR;
     }
 
-    if ( !stream->read(& flowTermViscosity, 1) ) {  // restore equivalentTime
+    if ( !stream->read(flowTermViscosity) ) {
         return CIO_IOERR;
     }
 

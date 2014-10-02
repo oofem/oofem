@@ -42,6 +42,9 @@
 #include "gaussintegrationrule.h"
 #include "domain.h"
 
+#include <vector>
+#include <memory>
+
 ///@name Input fields for LayeredCrossSection
 //@{
 #define _IFT_LayeredCrossSection_Name "layeredcs"
@@ -207,9 +210,9 @@ public:
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
 
 
-    void mapLayerGpCoordsToShellCoords(std :: vector< IntegrationRule * > &layerIntegrationRulesArray);
+    void mapLayerGpCoordsToShellCoords(std :: vector< std :: unique_ptr< IntegrationRule > > &layerIntegrationRulesArray);
 
-    void setupLayeredIntegrationRule(std :: vector< IntegrationRule * > &layerIntegrationRulesArray, Element *el, int numInPlanePoints);
+    void setupLayeredIntegrationRule(std :: vector< std :: unique_ptr< IntegrationRule > > &layerIntegrationRulesArray, Element *el, int numInPlanePoints);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
     virtual double give(int aProperty, GaussPoint *gp)
@@ -218,25 +221,23 @@ public:
         return 0.0;
     };
 
-#ifdef __PARALLEL_MODE
-    int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
     {
         OOFEM_ERROR("not implemented");
         return 0;
     }
 
-    int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
+    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
     {
         OOFEM_ERROR("not implemented");
         return 0;
     }
 
-    int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
+    virtual int estimatePackSize(DataStream &buff, GaussPoint *ip)
     {
         OOFEM_ERROR("not implemented");
         return 0;
     }
-#endif
 
 
     virtual void giveFirstPKStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep)

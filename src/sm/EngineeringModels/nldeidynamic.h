@@ -185,10 +185,8 @@ protected:
     void computeMassMtrx(FloatArray &mass, double &maxOm, TimeStep *tStep);
     void computeMassMtrx2(FloatMatrix &mass, double &maxOm, TimeStep *tStep);
 
-#ifdef __PARALLEL_MODE
 public:
-    virtual int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
-#endif
+    virtual int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType);
 };
 } // end namespace oofem
 #endif // nldeidynamic_h

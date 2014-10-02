@@ -101,9 +101,7 @@ public:
     virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
     
-#ifdef __PARALLEL_MODE
-    int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
-#endif
+    virtual int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType);
 };
 } // end namespace oofem
 #endif // staticstructural_h

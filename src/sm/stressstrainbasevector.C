@@ -39,6 +39,7 @@
 #include "datastream.h"
 #include "materialmode.h"
 #include "../sm/Materials/structuralmaterial.h"
+#include "datastream.h"
 
 namespace oofem {
 StressStrainBaseVector :: StressStrainBaseVector(MaterialMode m) : FloatArray()
@@ -116,15 +117,15 @@ StressStrainBaseVector :: convertFromFullForm(const FloatArray &vector, Material
 
 
 contextIOResultType
-StressStrainBaseVector :: storeYourself(DataStream *stream, ContextMode mode)
+StressStrainBaseVector :: storeYourself(DataStream *stream)
 {
     contextIOResultType iores;
-    if ( ( iores = FloatArray :: storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = FloatArray :: storeYourself(stream) ) != CIO_OK ) {
         return CIO_OK;
     }
 
     // write material mode
-    if ( !stream->write(& mode, 1) ) {
+    if ( !stream->write((int)mode) ) {
         return CIO_IOERR;
     }
 
@@ -132,17 +133,19 @@ StressStrainBaseVector :: storeYourself(DataStream *stream, ContextMode mode)
 }
 
 contextIOResultType
-StressStrainBaseVector :: restoreYourself(DataStream *stream, ContextMode mode)
+StressStrainBaseVector :: restoreYourself(DataStream *stream)
 {
     contextIOResultType iores;
-    if ( ( iores = FloatArray :: restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = FloatArray :: restoreYourself(stream) ) != CIO_OK ) {
         return iores;
     }
 
     // read material mode
-    if ( !stream->read(& mode, 1) ) {
+    int val;
+    if ( !stream->read(val) ) {
         return CIO_IOERR;
     }
+    mode = (StressStrainMatMode)val;
 
     return CIO_OK;
 }

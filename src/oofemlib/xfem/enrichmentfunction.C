@@ -36,7 +36,6 @@
 #include "gausspoint.h"
 #include "mathfem.h"
 #include "feinterpol.h"
-#include "enrichmentdomain.h"
 #include "classfactory.h"
 #include "dynamicdatareader.h"
 

@@ -532,7 +532,7 @@ ParmetisLoadBalancer :: unpackSharedDmanPartitions(ProcessCommunicator &pc)
     // init domain global2local map
     domain->initGlobalDofManMap();
 
-    pcbuff->unpackInt(_globnum);
+    pcbuff->read(_globnum);
     // unpack dofman data
     while ( _globnum != PARMETISLB_END_DATA ) {
         pcbuff->unpackIntArray(_partitions);
@@ -548,7 +548,7 @@ ParmetisLoadBalancer :: unpackSharedDmanPartitions(ProcessCommunicator &pc)
          * fprintf (stderr,"%d ", dofManPartitions[_locnum-1].at(_i));
          * fprintf (stderr,"\n");
          */
-        pcbuff->unpackInt(_globnum);
+        pcbuff->read(_globnum);
     }
 
     return 1;

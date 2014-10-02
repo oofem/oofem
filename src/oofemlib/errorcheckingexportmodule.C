@@ -96,11 +96,10 @@ NodeErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
             return false;
         }
     }
-#ifdef __PARALLEL_MODE
+
     if ( dman->giveParallelMode() == DofManager_remote || dman->giveParallelMode() == DofManager_null ) {
         return true;
     }
-#endif
 
     Dof *dof = dman->giveDofWithID(dofid);
 
@@ -150,11 +149,9 @@ ElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
             return false;
         }
     }
-#ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() != Element_local ) {
             return true;
         }
-#endif
 
     // note! GPs are numbered from 0 internally, but written with 1-index, inconsistent!
     GaussPoint *gp = element->giveIntegrationRule(irule)->getIntegrationPoint(gpnum-1);

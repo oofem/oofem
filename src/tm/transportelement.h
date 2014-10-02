@@ -105,7 +105,6 @@ public:
 
     // time step termination
     virtual void updateInternalState(TimeStep *tStep);
-    virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual int checkConsistency();
 
     virtual int EIPrimaryFieldI_evaluateFieldVectorAt(FloatArray &answer, PrimaryField &pf,

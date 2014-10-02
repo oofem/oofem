@@ -626,11 +626,11 @@ BinghamFluidMaterial2Status :: saveContext(DataStream *stream, ContextMode mode,
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->write(& devStrainMagnitude, 1) ) {
+    if ( !stream->write(devStrainMagnitude) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& devStressMagnitude, 1) ) {
+    if ( !stream->write(devStressMagnitude) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -654,11 +654,11 @@ BinghamFluidMaterial2Status :: restoreContext(DataStream *stream, ContextMode mo
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(& devStrainMagnitude, 1) ) {
+    if ( !stream->read(devStrainMagnitude) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& devStressMagnitude, 1) ) {
+    if ( !stream->read(devStressMagnitude) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

@@ -1,12 +1,11 @@
 tr2shell7XFEM_CZ.out
 Test of internal cohesive zone model in Tr2Shell7XFEM. Pure shear test.
 #
-#XFEMStatic nsteps 7 deltaT 0.5 lstype 0 smtype 0 rtold -1.0 rtolf 1.0e-5 manrmsteps 1 nmodules 1 controllmode 1 initialguess 1
-StaticStructural nsteps 7 deltaT 0.5 lstype 0 smtype 0 rtold -1.0 rtolf 1.0e-5 manrmsteps 1 nmodules 0 
-#vtkxml tstep_all dofman_all element_all primvars 1 1 
+#XFEMStatic nsteps 1 lstype 0 smtype 0 rtold -1.0 rtolf 1.0e-5 manrmsteps 1 nmodules 2 controllmode 1 initialguess 0
+StaticStructural nsteps 1 rtold -1.0 rtolf 1.0e-5 nmodules 2
+vtkxml tstep_all dofman_all element_all primvars 1 1 
 #matlab reactionforces dofmanlist 6 1 2 3 4 5 6 
-# Bug found in the code so this test is incorrect and therefore disabled 14-08-2014 //Jim
-#errorcheck
+errorcheck
 domain 3dDirShell 
 OutputManager tstep_all dofman_all element_all
 ndofman 6 nelem 1 ncrosssect 1 nmat 2 nbc 1 nic 0 nltf 1 nset 2 nxfemman 1
@@ -23,11 +22,11 @@ Tr2Shell7XFEM  1 nodes 6 1 2 3 4 5 6
 layeredCS 1 nlayers 2 layermaterials 2 1 1 thicks 2 0.05 0.05 nintegrationpoints 2 set 1 interfacematerials 1 2
 #
 hyperelmat 1 d 1. K 1666666.7 G 76923.
-IntMatBilinearCZFagerstrom 2 kn 2.0e5 ks 2.0e5 knc 2.0e5 g1c 2000.0 g2c 3000.0 mu 0.00 gamma 1. sigf 5.e3
+IntMatBilinearCZFagerstrom 2 kn 1.0e5 ks 1.0e5 knc 2.0e5 g1c 2000.0 g2c 3000.0 mu 0.00 gamma 1. sigf 5.e3
 #
-BoundaryCondition 1 loadTimeFunction 1 values 13  0.0 0.0 0.0 0.0 0.0 0.0 0.0   0.0 0.01 0.0 0.0 0.0 0.0 dofs 13  1 2 3 15 16 17 18  23 24 25 26 27 28 set 2	
+BoundaryCondition 1 loadTimeFunction 1 values 13  0.0 0.0 0.0 0.0 0.0 0.0 0.0   0.0 10.0 0.0 0.0 0.0 0.0 dofs 13  1 2 3 15 16 17 18  23 24 25 26 27 28 set 2    
 #
-PiecewiseLinFunction 1 nPoints 2  t 2  0. 100 f(t) 2  0.000 100.e0
+Constantfunction 1 f(t) 1.0
 #
 Set 1 elements 1 1
 Set 2 nodes 6 1 2 3 4 5 6
@@ -39,12 +38,12 @@ DofManList 1 list 6   1 2 3 4 5 6
 #
 #
 #%BEGIN_CHECK% tolerance 1.e-5
-#REACTION tStep 7 number 1 dof 24 value   3.9683e-015
-#REACTION tStep 7 number 2 dof 24 value   3.0184e-016
-#REACTION tStep 7 number 3 dof 24 value   1.1676e-015
-#REACTION tStep 7 number 4 dof 24 value   8.2971e-001
-#REACTION tStep 7 number 5 dof 24 value   8.2971e-001
-#REACTION tStep 7 number 6 dof 24 value   8.2971e-001
+#REACTION tStep 1 number 1 dof 24 value   0.0
+#REACTION tStep 1 number 2 dof 24 value   0.0
+#REACTION tStep 1 number 3 dof 24 value   0.0
+#REACTION tStep 1 number 4 dof 24 value   1.6666e-001
+#REACTION tStep 1 number 5 dof 24 value   1.6666e-001
+#REACTION tStep 1 number 6 dof 24 value   1.6666e-001
 #%END_CHECK%
 
 

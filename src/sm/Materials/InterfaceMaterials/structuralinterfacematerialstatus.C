@@ -144,11 +144,11 @@ StructuralInterfaceMaterialStatus :: saveContext(DataStream *stream, ContextMode
     //    THROW_CIOERR(iores);
     //}
 
-    //if ( ( iores = strainVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    //if ( ( iores = strainVector.storeYourself(stream) ) != CIO_OK ) {
     //    THROW_CIOERR(iores);
     //}
 
-    //if ( ( iores = stressVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    //if ( ( iores = stressVector.storeYourself(stream) ) != CIO_OK ) {
     //    THROW_CIOERR(iores);
     //}
 
@@ -172,11 +172,11 @@ StructuralInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextM
     //    THROW_CIOERR(iores);
     //}
 
-    //if ( ( iores = strainVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    //if ( ( iores = strainVector.restoreYourself(stream) ) != CIO_OK ) {
     //    THROW_CIOERR(iores);
     //}
 
-    //if ( ( iores = stressVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    //if ( ( iores = stressVector.restoreYourself(stream) ) != CIO_OK ) {
     //    THROW_CIOERR(iores);
     //}
 

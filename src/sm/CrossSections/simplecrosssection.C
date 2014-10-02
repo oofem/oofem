@@ -575,8 +575,6 @@ Material
 
 double
 SimpleCrossSection :: give(int aProperty, GaussPoint *gp)
-// Returns the value of the property aProperty (e.g. the Young's modulus
-// 'E') of the receiver.
 {
     if ( this->giveMaterialNumber() ) {
         return this->giveMaterial(gp)->give(aProperty, gp);
@@ -584,6 +582,19 @@ SimpleCrossSection :: give(int aProperty, GaussPoint *gp)
         return gp->giveMaterial()->give(aProperty, gp);
     }
 }
+
+
+int
+SimpleCrossSection :: giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep)
+{
+    if ( type == IST_CrossSectionNumber ) {
+        answer.resize(1);
+        answer.at(1) = this->giveNumber();
+        return 1;
+    }
+    return this->giveMaterial(ip)->giveIPValue(answer, ip, type, tStep);
+}
+
 
 
 int
@@ -740,24 +751,22 @@ SimpleCrossSection :: giveTemperatureVector(FloatArray &answer, GaussPoint *gp, 
     }
 }
 
-#ifdef __PARALLEL_MODE
 int
-SimpleCrossSection :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+SimpleCrossSection :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)
 {
     return this->giveMaterial(gp)->packUnknowns(buff, tStep, gp);
 }
 
 int
-SimpleCrossSection :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp)
+SimpleCrossSection :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp)
 {
     return this->giveMaterial(gp)->unpackAndUpdateUnknowns(buff, tStep, gp);
 }
 
 int
-SimpleCrossSection :: estimatePackSize(CommunicationBuffer &buff, GaussPoint *gp)
+SimpleCrossSection :: estimatePackSize(DataStream &buff, GaussPoint *gp)
 {
     return this->giveMaterial(gp)->estimatePackSize(buff, gp);
 }
-#endif
 
 } // end namespace oofem

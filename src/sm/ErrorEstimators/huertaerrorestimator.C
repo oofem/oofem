@@ -176,14 +176,9 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
         return 1;
     }
 
-#ifdef __PARALLEL_MODE
     OOFEM_LOG_INFO( "[%d] Estimating error [step number %5d]\n",
                    d->giveEngngModel()->giveRank(),
                    d->giveEngngModel()->giveCurrentStep()->giveNumber() );
-#else
-    OOFEM_LOG_INFO( "Estimating error [step number %5d]\n",
-                   d->giveEngngModel()->giveCurrentStep()->giveNumber() );
-#endif
 
     if ( dynamic_cast< AdaptiveLinearStatic * >( d->giveEngngModel() ) ) {
         this->mode = HEE_linear;
@@ -309,16 +304,10 @@ HuertaErrorEstimator :: estimateError(EE_ErrorMode mode, TimeStep *tStep)
 
     for ( ielem = 1; ielem <= nelems; ielem++ ) {
         if ( exactFlag == false ) {
- #ifdef __PARALLEL_MODE
             OOFEM_LOG_DEBUG("[%d] %5d: %15.8e %s\n", d->giveEngngModel()->giveRank(), ielem,
                             this->eNorms.at(ielem) * this->eNorms.at(ielem),
                             ( this->skipRegion( d->giveElement(ielem)->giveRegionNumber() ) != 0 ) ? "(skipped)" :
                             ( d->giveElement(ielem)->giveParallelMode() == Element_remote ) ? "(remote)" : "");
- #else
-            OOFEM_LOG_DEBUG("%5d: %15.8e %s\n", ielem,
-                            this->eNorms.at(ielem) * this->eNorms.at(ielem),
-                            ( this->skipRegion( d->giveElement(ielem)->giveRegionNumber() ) != 0 ) ? "(skipped)" : "");
- #endif
         }
 
  #ifdef EXACT_ERROR
@@ -661,12 +650,12 @@ HuertaErrorEstimator :: saveContext(DataStream *stream, ContextMode mode, void *
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = this->eNorms.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = this->eNorms.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // write a raw data
-    if ( !stream->write(& stateCounter, 1) ) {
+    if ( !stream->write(stateCounter) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -684,12 +673,12 @@ HuertaErrorEstimator :: restoreContext(DataStream *stream, ContextMode mode, voi
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = eNorms.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = eNorms.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // read raw data
-    if ( !stream->read(& stateCounter, 1) ) {
+    if ( !stream->read(stateCounter) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1559,7 +1548,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                             }
 
                             /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
                             if ( bc == 0 ) {
                                 if ( element->giveNode(nodeId)->giveParallelMode() == DofManager_shared ) {
                                     if ( m == 0 && boundary.at(1) == 0 ) {
@@ -1571,8 +1559,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                     }
                                 }
                             }
-
-#endif
                         }
 
 #ifdef EXACT_ERROR
@@ -1681,7 +1667,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                             }
 
                             /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
                             if ( bc == 0 ) {
                                 if ( element->giveNode(nodeId)->giveParallelMode() == DofManager_shared ) {
                                     if ( m == 0 && boundary.at(1) == 0 ) {
@@ -1693,8 +1678,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                     }
                                 }
                             }
-
-#endif
                         }
 
 #ifdef EXACT_ERROR
@@ -1951,7 +1934,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                 }
 
                                 /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
                                 if ( bc == 0 ) {
                                     if ( element->giveNode(nodeId)->giveParallelMode() == DofManager_shared ) {
                                         if ( m == 0 && boundary.at(1) == 0 ) {
@@ -1963,8 +1945,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                         }
                                     }
                                 }
-
-#endif
                             }
 
 #ifdef EXACT_ERROR
@@ -2031,7 +2011,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                 }
 
                                 /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
                                 if ( bc == 0 ) {
                                     if ( element->giveNode(nodeId)->giveParallelMode() == DofManager_shared ) {
                                         if ( m == 0 && boundary.at(1) == 0 ) {
@@ -2043,8 +2022,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem2D(Element *element, 
                                         }
                                     }
                                 }
-
-#endif
                             }
 
 #ifdef EXACT_ERROR
@@ -2146,7 +2123,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                 }
 
                                 /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
                                 if ( bc == 0 ) {
                                     if ( element->giveNode(nodeId)->giveParallelMode() == DofManager_shared ) {
                                         if ( m == 0 && boundary.at(1) == 0 ) {
@@ -2162,8 +2138,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                         }
                                     }
                                 }
-
-#endif
                             }
 
 #ifdef EXACT_ERROR
@@ -2303,7 +2277,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                 }
 
                                 /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
                                 if ( bc == 0 ) {
                                     if ( element->giveNode(nodeId)->giveParallelMode() == DofManager_shared ) {
                                         if ( m == 0 && boundary.at(1) == 0 ) {
@@ -2319,8 +2292,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                         }
                                     }
                                 }
-
-#endif
                             }
 
 #ifdef EXACT_ERROR
@@ -2663,7 +2634,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                     }
 
                                     /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
                                     if ( bc == 0 ) {
                                         if ( element->giveNode(nodeId)->giveParallelMode() == DofManager_shared ) {
                                             if ( m == 0 && boundary.at(1) == 0 ) {
@@ -2679,8 +2649,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                             }
                                         }
                                     }
-
-#endif
                                 }
 
 #ifdef EXACT_ERROR
@@ -2756,7 +2724,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                     }
 
                                     /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
                                     if ( bc == 0 ) {
                                         if ( element->giveNode(nodeId)->giveParallelMode() == DofManager_shared ) {
                                             if ( m == 0 && boundary.at(1) == 0 ) {
@@ -2772,8 +2739,6 @@ HuertaErrorEstimatorInterface :: setupRefinedElementProblem3D(Element *element, 
                                             }
                                         }
                                     }
-
-#endif
                                 }
 
 #ifdef EXACT_ERROR
@@ -2861,12 +2826,8 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
     }
 
 #ifdef INFO
- #ifdef __PARALLEL_MODE
     OOFEM_LOG_DEBUG( "[%d] Element no %d: estimating error [step number %5d]\n",
                     domain->giveEngngModel()->giveRank(), elemId, tStep->giveNumber() );
- #else
-    OOFEM_LOG_DEBUG( "Element no %d: estimating error [step number %5d]\n", elemId, tStep->giveNumber() );
- #endif
 #endif
 
     refinedElement = &this->refinedElementList[elemId-1];
@@ -3314,12 +3275,8 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
     }
 
 #ifdef INFO
- #ifdef __PARALLEL_MODE
     OOFEM_LOG_INFO( "[%d] Patch no %d: estimating error [step number %5d]\n",
                    domain->giveEngngModel()->giveRank(), nodeId, tStep->giveNumber() );
- #else
-    OOFEM_LOG_INFO( "Patch no %d: estimating error [step number %5d]\n", nodeId, tStep->giveNumber() );
- #endif
 #endif
 
     problem = domain->giveEngngModel();
@@ -3341,12 +3298,9 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
         element = domain->giveElement(elemId);
 
         /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() == Element_remote ) {
             continue;
         }
-
-#endif
 
         refinedElement = &this->refinedElementList.at(elemId);
         interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
@@ -3379,12 +3333,9 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
             element = domain->giveElement(elemId);
 
             /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
             if ( element->giveParallelMode() == Element_remote ) {
                 continue;
             }
-
-#endif
 
             refinedElement = &this->refinedElementList.at(elemId);
             interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
@@ -3424,12 +3375,9 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
         element = domain->giveElement(elemId);
 
         /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() == Element_remote ) {
             continue;
         }
-
-#endif
 
         refinedElement = &this->refinedElementList.at(elemId);
         interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
@@ -3454,12 +3402,9 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
         element = domain->giveElement(elemId);
 
         /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() == Element_remote ) {
             continue;
         }
-
-#endif
 
         refinedElement = &this->refinedElementList.at(elemId);
         interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
@@ -3488,12 +3433,9 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
             element = domain->giveElement(elemId);
 
             /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
             if ( element->giveParallelMode() == Element_remote ) {
                 continue;
             }
-
-#endif
 
             refinedElement = &this->refinedElementList.at(elemId);
             interface = static_cast< HuertaErrorEstimatorInterface * >( element->giveInterface(HuertaErrorEstimatorInterfaceType) );
@@ -4114,9 +4056,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 #ifdef USE_CONTEXT_FILE
                 ir->setField(contextOutputStep, _IFT_EngngModel_contextoutputstep);
 #endif
-#ifdef __PARALLEL_MODE
                 ir->setField(0, _IFT_EngngModel_parallelflag);
-#endif
 
                 // this is not relevant but it is required
                 // the refined problem is made adaptive only to enable call to initializeAdaptiveFrom
@@ -4143,9 +4083,7 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 #ifdef USE_CONTEXT_FILE
                 ir->setField(contextOutputStep, _IFT_EngngModel_contextoutputstep);
 #endif
-#ifdef __PARALLEL_MODE
                 ir->setField(0, _IFT_EngngModel_parallelflag);
-#endif
 
                 // this is not relevant but it is required
                 // the refined problem is made adaptive only to enable call to initializeAdaptiveFrom

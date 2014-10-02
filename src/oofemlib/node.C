@@ -578,16 +578,16 @@ Node :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
     if ( mode & CM_Definition ) {
         int _haslcs = hasLocalCS();
-        if ( ( iores = coordinates.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = coordinates.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->write(& _haslcs, 1) ) {
+        if ( !stream->write(_haslcs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         if ( _haslcs ) {
-            if ( ( iores = localCoordinateSystem->storeYourself(stream, mode) ) != CIO_OK ) {
+            if ( ( iores = localCoordinateSystem->storeYourself(stream) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         }
@@ -615,11 +615,11 @@ Node :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 
     if ( mode & CM_Definition ) {
         int _haslcs;
-        if ( ( iores = coordinates.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = coordinates.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->read(& _haslcs, 1) ) {
+        if ( !stream->read(_haslcs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -628,7 +628,7 @@ Node :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
                 localCoordinateSystem = new FloatMatrix();
             }
 
-            if ( ( iores = localCoordinateSystem->restoreYourself(stream, mode) ) != CIO_OK ) {
+            if ( ( iores = localCoordinateSystem->restoreYourself(stream) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         } else {
@@ -670,7 +670,6 @@ Node :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
 
  #endif
 
- #ifdef __PARALLEL_MODE
         if ( this->giveParallelMode() == DofManager_local ) {
             EASValsSetColor( gc.getNodeColor() );
         } else if ( this->giveParallelMode() == DofManager_shared ) {
@@ -678,10 +677,6 @@ Node :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
         } else {
             EASValsSetColor( gc.getCrackPatternColor() );
         }
-
- #else
-        EASValsSetColor( gc.getNodeColor() );
- #endif
 
         bool ordinary = true;
 
@@ -710,11 +705,8 @@ Node :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
         p [ 0 ].x = ( FPNum ) this->giveCoordinate(1);
         p [ 0 ].y = ( FPNum ) this->giveCoordinate(2);
         p [ 0 ].z = ( FPNum ) this->giveCoordinate(3);
- #ifdef __PARALLEL_MODE
+ 
         sprintf( num, "%d(%d)", this->giveNumber(), this->giveGlobalNumber() );
- #else
-        sprintf( num, "%d", this->giveLabel() );
- #endif
         go = CreateAnnText3D(p, num);
         EGWithMaskChangeAttributes(COLOR_MASK | LAYER_MASK, go);
         EMAddGraphicsToModel(ESIModel(), go);

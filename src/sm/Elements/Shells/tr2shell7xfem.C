@@ -47,7 +47,6 @@
 #include "classfactory.h"
 #include "xfem/patchintegrationrule.h"
 #include "xfem/XFEMDebugTools.h"
-#include "xfem/enrichmentdomain.h"
 #include <string>
 #include <sstream>
 
@@ -120,7 +119,7 @@ Tr2Shell7XFEM :: computeGaussPoints()
             int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
             czIntegrationRulesArray.resize( numberOfInterfaces );
             for ( int i = 0; i < numberOfInterfaces; i++ ) {
-                czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
+                czIntegrationRulesArray [ i ].reset( new GaussIntegrationRule(1, this) );
                 czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
             }
         
@@ -177,8 +176,9 @@ bool Tr2Shell7XFEM :: updateIntegrationRuleMultiCrack()
                             }
 
                      
-                            integrationRulesArray [ i ] = new PatchIntegrationRule(i + 1, this, this->crackSubdivisions [ i ]);
-                            integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, numPointsThickness, _3dMat);         
+                            integrationRulesArray [ i ].reset( new PatchIntegrationRule(i + 1, this, this->crackSubdivisions [ i ]) );
+                            int nPointsTriSubTri = 3; 
+                            integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTriSubTri, numPointsThickness, _3dMat);         
                             this->numSubDivisionsArray [ i ] = this->crackSubdivisions [ i ].size();
                             createdRule = true;         
                             continue;
@@ -189,7 +189,7 @@ bool Tr2Shell7XFEM :: updateIntegrationRuleMultiCrack()
         }
             
         if( !createdRule ) {
-            integrationRulesArray [ i ] = new LayeredIntegrationRule(i + 1, this);
+            integrationRulesArray [ i ].reset( new LayeredIntegrationRule(i + 1, this) );
             integrationRulesArray [ i ]->SetUpPointsOnWedge(nPointsTri, numPointsThickness, _3dMat);
             this->numSubDivisionsArray [ i ] = 1;                 
         }
@@ -204,7 +204,7 @@ bool Tr2Shell7XFEM :: updateIntegrationRuleMultiCrack()
         int numberOfInterfaces = this->layeredCS->giveNumberOfLayers()-1;
         czIntegrationRulesArray.resize(numberOfInterfaces);
         for ( int i = 0; i < numberOfInterfaces; i++ ) {
-            czIntegrationRulesArray [ i ] = new GaussIntegrationRule(1, this);
+            czIntegrationRulesArray [ i ].reset( new GaussIntegrationRule(1, this) );
             czIntegrationRulesArray [ i ]->SetUpPointsOnTriangle(nPointsTri, _3dInterface);
         }
     }

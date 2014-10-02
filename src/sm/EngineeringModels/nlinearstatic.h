@@ -167,9 +167,8 @@ public:
     void showSparseMtrxStructure(int type, oofegGraphicContext &gc, TimeStep *tStep);
 #endif
 
+    virtual int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType);
 #ifdef __PARALLEL_MODE
-    virtual int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
-
     virtual LoadBalancer *giveLoadBalancer();
     virtual LoadBalancerMonitor *giveLoadBalancerMonitor();
 
@@ -185,10 +184,9 @@ protected:
                                                  FloatArray &_incrementalLoadVectorOfPrescribed,
                                                  SparseNonLinearSystemNM :: referenceLoadInputModeType _refMode,
                                                  Domain *sourceDomain, TimeStep *tStep);
-#ifdef __PARALLEL_MODE
+
     virtual void packMigratingData(TimeStep *tStep);
     virtual void unpackMigratingData(TimeStep *tStep);
-#endif
 };
 } // end namespace oofem
 #endif // nlinearstatic_h

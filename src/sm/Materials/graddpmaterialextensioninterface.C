@@ -38,10 +38,6 @@
 #include "nonlocalbarrier.h"
 #include "graddpmaterialextensioninterface.h"
 
-#ifdef __PARALLEL_MODE
- #include "parallel.h"
-#endif
-
 #include <list>
 
 

@@ -36,8 +36,8 @@
 #define supg_h
 
 #include "fluidmodel.h"
+#include "sparsemtrxtype.h"
 #include "sparselinsystemnm.h"
-#include "sparsemtrx.h"
 #include "primaryfield.h"
 #include "materialinterface.h"
 
@@ -61,6 +61,9 @@
 //@}
 
 namespace oofem {
+class SparseMtrx;
+class SparseNonLinearSystemNM;
+
 /**
  * This class represents transient incompressible flow problem. Solution is based on
  * algorithm with SUPG/PSPG stabilization.
@@ -79,6 +82,9 @@ protected:
     //PrimaryField VelocityField;
     FloatArray accelerationVector; //, previousAccelerationVector;
     FloatArray incrementalSolutionVector;
+
+    FloatArray internalForces;
+    FloatArray eNorm;
 
     ///@todo Use ScalarFunction here!
     double deltaT;
@@ -112,28 +118,14 @@ protected:
     // int fsflag;
 
 public:
-    SUPG(int i, EngngModel * _master = NULL) : FluidModel(i, _master), accelerationVector() {
-        initFlag = 1;
-        lhs = NULL;
-        ndomains = 1;
-        nMethod = NULL;
-        VelocityPressureField = NULL;
-        consistentMassFlag = 0;
-        equationScalingFlag = false;
-        lscale = uscale = dscale = 1.0;
-        materialInterface = NULL;
-    }
-    virtual ~SUPG() {
-        delete VelocityPressureField;
-        delete materialInterface;
-        delete nMethod;
-        delete lhs;
-    }
+    SUPG(int i, EngngModel * _master = NULL);
+    virtual ~SUPG();
 
     virtual void solveYourselfAt(TimeStep *tStep);
     virtual void updateYourself(TimeStep *tStep);
 
     virtual double giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof);
+    virtual void updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d);
     virtual double giveReynoldsNumber();
     virtual void giveElementCharacteristicVector(FloatArray &answer, int num, CharType type, ValueModeType mode, TimeStep *tStep, Domain *domain);
     virtual void giveElementCharacteristicMatrix(FloatMatrix &answer, int num, CharType type, TimeStep *tStep, Domain *domain);

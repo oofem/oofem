@@ -42,10 +42,6 @@
 #include <algorithm>
 #include <memory>
 
-#ifdef __PARALLEL_MODE
- #include "combuff.h"
-#endif
-
 namespace oofem {
 
 void IntArray :: zero()
@@ -255,11 +251,10 @@ void IntArray :: printYourself(const std::string name) const
 }
 
 
-contextIOResultType IntArray :: storeYourself(DataStream *stream, ContextMode mode) const
+contextIOResultType IntArray :: storeYourself(DataStream *stream) const
 {
     // write size
-    int size = this->giveSize();
-    if ( !stream->write(& size, 1) ) {
+    if ( !stream->write(this->giveSize()) ) {
         return ( CIO_IOERR );
     }
 
@@ -272,11 +267,11 @@ contextIOResultType IntArray :: storeYourself(DataStream *stream, ContextMode mo
     return CIO_OK;
 }
 
-contextIOResultType IntArray :: restoreYourself(DataStream *stream, ContextMode mode)
+contextIOResultType IntArray :: restoreYourself(DataStream *stream)
 {
     // read size
     int size;
-    if ( !stream->read(& size, 1) ) {
+    if ( !stream->read(size) ) {
         return ( CIO_IOERR );
     }
 
@@ -289,6 +284,12 @@ contextIOResultType IntArray :: restoreYourself(DataStream *stream, ContextMode 
 
     // return result back
     return CIO_OK;
+}
+
+
+int IntArray :: givePackSize(DataStream &buff) const
+{
+    return buff.givePackSizeOfInt(1) + buff.givePackSizeOfInt(this->giveSize());
 }
 
 
@@ -388,38 +389,6 @@ void IntArray :: sort()
     std::sort(this->begin(), this->end());
 }
 
-
-#ifdef __PARALLEL_MODE
-int IntArray :: packToCommBuffer(CommunicationBuffer &buff) const
-{
-    int result = 1;
-    // pack size
-    result &= buff.packInt(this->giveSize());
-    // pack data
-    result &= buff.packArray(this->values.data(), this->giveSize());
-
-    return result;
-}
-
-
-int IntArray :: unpackFromCommBuffer(CommunicationBuffer &buff)
-{
-    int newSize, result = 1;
-    // unpack size
-    result &= buff.unpackInt(newSize);
-    // resize yourself
-    this->values.resize(newSize);
-    result &= buff.unpackArray(this->values.data(), newSize);
-
-    return result;
-}
-
-
-int IntArray :: givePackSize(CommunicationBuffer &buff)
-{
-    return buff.givePackSize(MPI_INT, 1) + buff.givePackSize(MPI_INT, this->giveSize());
-}
-#endif
 
 std :: ostream &operator<<(std :: ostream &out, const IntArray &x)
 {

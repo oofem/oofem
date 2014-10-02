@@ -280,6 +280,7 @@ IntMatIsoDamage :: initializeFrom(InputRecord *ir)
     this->e0 = ft / kn;
 
     //Set limit on the maximum isotropic damage parameter if needed
+    maxOmega = 0.999999;
     IR_GIVE_OPTIONAL_FIELD(ir, maxOmega, _IFT_IntMatIsoDamage_maxOmega);
     maxOmega = min(maxOmega, 0.999999);
     maxOmega = max(maxOmega, 0.0);
@@ -382,11 +383,11 @@ IntMatIsoDamageStatus :: saveContext(DataStream *stream, ContextMode mode, void 
     }
 
     // write a raw data
-    if ( !stream->write(& kappa, 1) ) {
+    if ( !stream->write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& damage, 1) ) {
+    if ( !stream->write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -404,11 +405,11 @@ IntMatIsoDamageStatus :: restoreContext(DataStream *stream, ContextMode mode, vo
     }
 
     // read raw data
-    if ( !stream->read(& kappa, 1) ) {
+    if ( !stream->read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& damage, 1) ) {
+    if ( !stream->read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

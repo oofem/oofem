@@ -239,10 +239,7 @@ void IncrementalLinearStatic :: solveYourselfAt(TimeStep *tStep)
                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
     loadVector.subtract(internalLoadVector);
-
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), ReactionExchangeTag);
-#endif
 
 
 #ifdef VERBOSE

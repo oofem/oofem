@@ -213,7 +213,7 @@ NonlocalMaterialWTP :: migrate()
         OOFEM_ERROR("MPI_Allreduce to determine  broadcast buffer size failed");
     }
 
-    commBuff.resize( commBuff.givePackSize(MPI_INT, _globsize) );
+    commBuff.resize( commBuff.givePackSizeOfInt(_globsize) );
     // remote domain wish list
     std :: set< int >remoteWishSet;
 
@@ -223,9 +223,9 @@ NonlocalMaterialWTP :: migrate()
         toSendList [ i ].clear();
         if ( i == myrank ) {
             // current domain has to send its receive wish list to all domains
-            commBuff.packInt(_locsize);
+            commBuff.write(_locsize);
             for ( int eldep: domainElementDepSet ) {
-                commBuff.packInt(eldep);
+                commBuff.write(eldep);
             }
 
             result = commBuff.bcast(i);
@@ -234,9 +234,9 @@ NonlocalMaterialWTP :: migrate()
             remoteWishSet.clear();
             result = commBuff.bcast(i);
             // unpack size
-            commBuff.unpackInt(_size);
+            commBuff.read(_size);
             for ( _i = 1; _i < _size; _i++ ) {
-                commBuff.unpackInt(_val);
+                commBuff.read(_val);
                 remoteWishSet.insert(_val);
             }
 
@@ -349,7 +349,7 @@ int NonlocalMaterialWTP :: unpackMigratingElementDependencies(Domain *d, Process
 
     // unpack element data
     do {
-        pcbuff->unpackInt(_globnum);
+        pcbuff->read(_globnum);
         if ( _globnum == NonlocalMaterialWTP_END_DATA ) {
             break;
         }
@@ -397,22 +397,22 @@ int NonlocalMaterialWTP :: packRemoteElements(Domain *d, ProcessCommunicator &pc
     for ( int in: nodesToSend ) {
         inode = d->dofmanGlobal2Local(in);
         dofman = d->giveDofManager(inode);
-        pcbuff->packString( dofman->giveInputRecordName() );
+        pcbuff->write( dofman->giveInputRecordName() );
         dofman->saveContext(& pcDataStream, CM_Definition | CM_State | CM_UnknownDictState);
     }
 
-    pcbuff->packString("");
+    pcbuff->write("");
 
     for ( int ie: toSendList [ iproc ] ) {
         //ie = d->elementGlobal2Local(gie);
         elem = d->giveElement(ie);
         // pack local element (node numbers shuld be global ones!!!)
         // pack type
-        pcbuff->packString( elem->giveInputRecordName() );
+        pcbuff->write( elem->giveInputRecordName() );
         elem->saveContext(& pcDataStream, CM_Definition | CM_DefinitionGlobal | CM_State);
     }
 
-    pcbuff->packString("");
+    pcbuff->write("");
 
 
     return 1;
@@ -436,7 +436,7 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
 
     // unpack dofman data
     do {
-        pcbuff->unpackString(_type);
+        pcbuff->read(_type);
         if ( _type.size() == 0 ) {
             break;
         }
@@ -459,7 +459,7 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
     _partitions.resize(1);
     _partitions.at(1) = iproc;
     do {
-        pcbuff->unpackString(_type);
+        pcbuff->read(_type);
         if ( _type.size() == 0 ) {
             break;
         }

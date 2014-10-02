@@ -45,7 +45,7 @@ ConstantFunction 1 f(t) 1.0
 XfemManager 1 numberofenrichmentitems 1 numberofgppertri 3 debugvtk 0
 crack 1 enrichmentfront 1 propagationlaw 1
 DiscontinuousFunction 1
-polygoncrack 1 points 6 -1.0 1.0 0.333333333333333 1.0 0.56666666666667 1.0
+PolygonLine 1 points 6 -1.0 1.0 0.333333333333333 1.0 0.56666666666667 1.0
 EnrFrontLinearBranchFuncRadius radius 0.5
 EnrFrontLinearBranchFuncRadius radius 0.5
 PropagationLawCrackPrescribedDir 1 angle 0.0 incrementLength 0.55

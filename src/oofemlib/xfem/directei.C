@@ -32,23 +32,41 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef problemcommunicatormode_h
-#define problemcommunicatormode_h
+#include "xfem/directei.h"
+#include "geometry.h"
 
 namespace oofem {
-/**
- * ProblemCommunicatorMode determines the valid mode.
- * The mode is used to set up communication pattern, which differ for
- * node and element cut algorithms.
- * Additional remote element mode has been added to capture the case, when CommunicatorM is intended to
- * support remote element data exchange (for example when nonlocal material models are present).
- */
-enum ProblemCommunicatorMode {
-    ProblemCommMode__UNKNOWN_MODE,
-    ProblemCommMode__NODE_CUT,
-    ProblemCommMode__ELEMENT_CUT,
-    ProblemCommMode__REMOTE_ELEMENT_MODE,
-};
-} // end namespace oofem
 
-#endif // problemcommunicatormode_h
+DirectEI::DirectEI(int n, XfemManager *xm, Domain *aDomain):
+GeometryBasedEI(n, xm, aDomain)
+{
+
+}
+
+DirectEI::~DirectEI() {
+    // TODO Auto-generated destructor stub
+}
+
+void DirectEI::evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const
+{
+    mpBasicGeometry->computeNormalSignDist(oLevelSet, iGlobalCoord);
+}
+
+void DirectEI::evalLevelSetTangential(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const
+{
+    double arcPos = 0.0;
+    mpBasicGeometry->computeTangentialSignDist(oLevelSet, iGlobalCoord, arcPos);
+}
+
+void DirectEI::evalGradLevelSetNormal(FloatArray &oGradLevelSet, const FloatArray &iGlobalCoord, const FloatMatrix &idNdX, const IntArray &iNodeInd) const
+{
+    double arcPos = 0.0, tangSignDist = 0.0;
+    mpBasicGeometry->computeTangentialSignDist(tangSignDist, iGlobalCoord, arcPos);
+
+    FloatArray tangent;
+    mpBasicGeometry->giveTangent(tangent, arcPos);
+
+    oGradLevelSet = {-tangent[1], tangent[0]};
+}
+
+} /* namespace oofem */

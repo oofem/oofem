@@ -200,7 +200,6 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
 }
 
 
-//#ifndef __PARALLEL_MODE
 #if 0
 ///@todo Parallel mode of this.
 NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)

@@ -78,9 +78,6 @@ Element :: Element(int n, Domain *aDomain) :
 
 Element :: ~Element()
 {
-    for ( auto &iRule: integrationRulesArray ) {
-        delete iRule;
-    }
 }
 
 
@@ -535,13 +532,9 @@ Element :: setDofManagers(const IntArray &_dmans)
 
 
 void
-Element :: setIntegrationRules(const std :: vector< IntegrationRule * > &irlist)
+Element :: setIntegrationRules(std :: vector< std :: unique_ptr< IntegrationRule > > irlist)
 {
-    for ( auto &iRule: integrationRulesArray ) {
-        delete iRule;
-    }
-
-    integrationRulesArray = irlist;
+    integrationRulesArray = std :: move(irlist);
 }
 
 
@@ -650,7 +643,6 @@ Element :: initializeFrom(InputRecord *ir)
         //elemLocalCS.printYourself();
     }
 
-#ifdef __PARALLEL_MODE
     partitions.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, partitions, _IFT_Element_partitions);
     if ( ir->hasField(_IFT_Element_remote) ) {
@@ -658,8 +650,6 @@ Element :: initializeFrom(InputRecord *ir)
     } else {
         parallel_mode = Element_local;
     }
-
-#endif
 
     IR_GIVE_OPTIONAL_FIELD(ir, activityTimeFunction, _IFT_Element_activityTimeFunction);
 
@@ -700,14 +690,12 @@ Element :: giveInputRecord(DynamicInputRecord &input)
     }
 
 
-#ifdef __PARALLEL_MODE
     if ( partitions.giveSize() > 0 ) {
         input.setField(this->partitions, _IFT_Element_partitions);
         if ( this->parallel_mode == Element_remote ) {
             input.setField(_IFT_Element_remote);
         }
     }
-#endif
 
     if ( activityTimeFunction > 0 ) {
         input.setField(activityTimeFunction, _IFT_Element_activityTimeFunction);
@@ -729,6 +717,11 @@ Element :: printOutputAt(FILE *file, TimeStep *tStep)
 // Performs end-of-step operations.
 {
     fprintf( file, "element %d (%8d) :\n", this->giveLabel(), this->giveNumber() );
+
+    for ( int i = 1; i <= this->giveNumberOfInternalDofManagers(); ++i ) {
+        DofManager *dman = this->giveInternalDofManager(i);
+        dman->printOutputAt(file, tStep);
+    }
 
     for ( auto &iRule: integrationRulesArray ) {
         iRule->printOutputAt(file, tStep);
@@ -789,19 +782,18 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
     }
 
     if ( ( mode & CM_Definition ) ) {
-        if ( !stream->write(& numberOfDofMans, 1) ) {
+        if ( !stream->write(numberOfDofMans) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->write(& material, 1) ) {
+        if ( !stream->write(material) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->write(& crossSection, 1) ) {
+        if ( !stream->write(crossSection) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-#ifdef __PARALLEL_MODE
         if ( mode & CM_DefinitionGlobal ) {
             // send global numbers instead of local ones
             int s = dofManArray.giveSize();
@@ -810,57 +802,48 @@ contextIOResultType Element :: saveContext(DataStream *stream, ContextMode mode,
                 globDN.at(i) = this->giveDofManager(i)->giveGlobalNumber();
             }
 
-            if ( ( iores = globDN.storeYourself(stream, mode) ) != CIO_OK ) {
+            if ( ( iores = globDN.storeYourself(stream) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         } else {
-            if ( ( iores = dofManArray.storeYourself(stream, mode) ) != CIO_OK ) {
+            if ( ( iores = dofManArray.storeYourself(stream) ) != CIO_OK ) {
                 THROW_CIOERR(iores);
             }
         }
 
-#else
-        if ( ( iores = dofManArray.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = bodyLoadArray.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
-#endif
-        if ( ( iores = bodyLoadArray.storeYourself(stream, mode) ) != CIO_OK ) {
-            THROW_CIOERR(iores);
-        }
-
-        if ( ( iores = boundaryLoadArray.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = boundaryLoadArray.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
         int numberOfIntegrationRules = (int)integrationRulesArray.size();
-        if ( !stream->write(& numberOfIntegrationRules, 1) ) {
+        if ( !stream->write(numberOfIntegrationRules) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         for ( auto &iRule: integrationRulesArray ) {
             _val = iRule->giveIntegrationRuleType();
-            if ( !stream->write(& _val, 1) ) {
+            if ( !stream->write(_val) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
         }
 
-#ifdef __PARALLEL_MODE
         int _mode;
-        if ( !stream->write(& globalNumber, 1) ) {
+        if ( !stream->write(globalNumber) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         _mode = parallel_mode;
-        if ( !stream->write(& _mode, 1) ) {
+        if ( !stream->write(_mode) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( ( iores = partitions.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = partitions.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-
-#endif
     }
 
     for ( auto &iRule: integrationRulesArray ) {
@@ -887,78 +870,70 @@ contextIOResultType Element :: restoreContext(DataStream *stream, ContextMode mo
     }
 
     if ( mode & CM_Definition ) {
-        if ( !stream->read(& numberOfDofMans, 1) ) {
+        if ( !stream->read(numberOfDofMans) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(& material, 1) ) {
+        if ( !stream->read(material) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(& crossSection, 1) ) {
+        if ( !stream->read(crossSection) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( ( iores = dofManArray.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = dofManArray.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
-        if ( ( iores = bodyLoadArray.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = bodyLoadArray.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
-        if ( ( iores = boundaryLoadArray.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = boundaryLoadArray.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->read(& _nrules, 1) ) {
+        if ( !stream->read(_nrules) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         // restore integration rules
         IntArray dtypes(_nrules);
         for ( int i = 1; i <= _nrules; i++ ) {
-            if ( !stream->read(& dtypes.at(i), 1) ) {
+            if ( !stream->read(dtypes.at(i)) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
         }
 
         if ( _nrules != (int)integrationRulesArray.size() ) {
-            // delete old int rule array
-            for ( auto &iRule: integrationRulesArray ) {
-                delete iRule;
-            }
 
             // AND ALLOCATE NEW ONE
             integrationRulesArray.resize( _nrules );
             for ( int i = 0; i < _nrules; i++ ) {
-                integrationRulesArray [ i ] = classFactory.createIRule( ( IntegrationRuleType ) dtypes(i), i + 1, this );
+                integrationRulesArray [ i ].reset( classFactory.createIRule( ( IntegrationRuleType ) dtypes(i), i + 1, this ) );
             }
         } else {
             for ( int i = 0; i < _nrules; i++ ) {
                 if ( integrationRulesArray [ i ]->giveIntegrationRuleType() != dtypes(i) ) {
-                    delete integrationRulesArray [ i ];
-                    integrationRulesArray [ i ] = classFactory.createIRule( ( IntegrationRuleType ) dtypes(i), i + 1, this );
+                    integrationRulesArray [ i ].reset( classFactory.createIRule( ( IntegrationRuleType ) dtypes(i), i + 1, this ) );
                 }
             }
         }
 
-#ifdef __PARALLEL_MODE
         int _mode;
-        if ( !stream->read(& globalNumber, 1) ) {
+        if ( !stream->read(globalNumber) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(& _mode, 1) ) {
+        if ( !stream->read(_mode) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         parallel_mode = ( elementParallelMode ) _mode;
-        if ( ( iores = partitions.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = partitions.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-
-#endif
     }
 
 
@@ -978,7 +953,7 @@ Element :: computeVolumeAreaOrLength()
 // (depending on the spatial dimension of that element)
 {
     double answer = 0.;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     if ( iRule ) {
         for ( GaussPoint *gp: *iRule ) {
             answer += this->computeVolumeAround(gp);
@@ -1457,9 +1432,8 @@ Element :: computeGtoLRotationMatrix(FloatMatrix &answer)
 }
 
 
-#ifdef __PARALLEL_MODE
 int
-Element :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep)
+Element :: packUnknowns(DataStream &buff, TimeStep *tStep)
 {
     int result = 1;
 
@@ -1474,7 +1448,7 @@ Element :: packUnknowns(CommunicationBuffer &buff, TimeStep *tStep)
 
 
 int
-Element :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep)
+Element :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep)
 {
     int result = 1;
 
@@ -1489,7 +1463,7 @@ Element :: unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep)
 
 
 int
-Element :: estimatePackSize(CommunicationBuffer &buff)
+Element :: estimatePackSize(DataStream &buff)
 {
     int result = 0;
 
@@ -1514,7 +1488,6 @@ Element :: predictRelativeComputationalCost()
 
     return ( this->giveRelativeSelfComputationalCost() * wgt );
 }
-#endif
 
 
 #ifdef __OOFEG
@@ -1544,7 +1517,7 @@ Element :: drawYourself(oofegGraphicContext &gc, TimeStep *tStep)
 void
 Element :: drawAnnotation(oofegGraphicContext &gc, TimeStep *tStep)
 {
-    int i, count = 0;
+    int count = 0;
     Node *node;
     WCRec p [ 1 ]; /* point */
     GraphicObj *go;
@@ -1552,7 +1525,7 @@ Element :: drawAnnotation(oofegGraphicContext &gc, TimeStep *tStep)
 
     p [ 0 ].x = p [ 0 ].y = p [ 0 ].z = 0.0;
     // compute element center
-    for ( i = 1; i <= this->giveNumberOfDofManagers(); i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         if ( ( node = this->giveNode(i) ) ) {
             p [ 0 ].x += node->giveCoordinate(1);
             p [ 0 ].y += node->giveCoordinate(2);
@@ -1567,11 +1540,8 @@ Element :: drawAnnotation(oofegGraphicContext &gc, TimeStep *tStep)
 
     EASValsSetLayer(OOFEG_ELEMENT_ANNOTATION_LAYER);
     EASValsSetColor( gc.getElementColor() );
- #ifdef __PARALLEL_MODE
     sprintf( num, "%d(%d)", this->giveNumber(), this->giveGlobalNumber() );
- #else
-    sprintf( num, "%d", this->giveNumber() );
- #endif
+
     go = CreateAnnText3D(p, num);
     EGWithMaskChangeAttributes(COLOR_MASK | LAYER_MASK, go);
     EMAddGraphicsToModel(ESIModel(), go);

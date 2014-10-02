@@ -100,7 +100,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
                 du = knotValuesU->at(ui + 1) - knotValuesU->at(ui);
                 knotSpan.at(1) += knotMultiplicityU->at(ui);
 
-                integrationRulesArray [ indx ] = new IGAIntegrationElement(indx, this, knotSpan);
+                integrationRulesArray [ indx ].reset( new IGAIntegrationElement(indx, this, knotSpan) );
                 integrationRulesArray [ indx ]->SetUpPointsOnSquare(numberOfGaussPoints, _PlaneStress); // HUHU _PlaneStress, rectangle
 
                 // remap local subelement gp coordinates into knot span coordinates and update integration weight
@@ -151,7 +151,7 @@ IRResultType IGAElement :: initializeFrom(InputRecord *ir)
                     du = knotValuesU->at(ui + 1) - knotValuesU->at(ui);
                     knotSpan.at(1) += knotMultiplicityU->at(ui);
 
-                    integrationRulesArray [ indx ] = new IGAIntegrationElement(indx, this, knotSpan);
+                    integrationRulesArray [ indx ].reset( new IGAIntegrationElement(indx, this, knotSpan) );
                     integrationRulesArray [ indx ]->SetUpPointsOnCube(numberOfGaussPoints, _3dMat);
 
                     // remap local subelement gp coordinates into knot span coordinates and update integration weight
@@ -259,7 +259,7 @@ IRResultType IGATSplineElement :: initializeFrom(InputRecord *ir)
                 du = knotValuesU->at(ui + 1) - knotValuesU->at(ui);
                 knotSpan.at(1) += knotMultiplicityU->at(ui);
 
-                integrationRulesArray [ indx ] = new IGAIntegrationElement(indx, this, knotSpan);
+                integrationRulesArray [ indx ].reset( new IGAIntegrationElement(indx, this, knotSpan) );
                 integrationRulesArray [ indx ]->SetUpPointsOnSquare(numberOfGaussPoints, _PlaneStress); // HUHU _PlaneStress, rectangle
 
                 // remap local subelement gp coordinates into knot span coordinates and update integration weight

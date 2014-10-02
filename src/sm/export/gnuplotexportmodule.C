@@ -49,7 +49,6 @@
 #include "xfem/enrichmentitem.h"
 #include "xfem/xfemmanager.h"
 #include "../sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
-#include "xfem/enrichmentdomain.h"
 #include "xfem/XFEMDebugTools.h"
 #include "prescribedgradient.h"
 #include "prescribedgradientbcneumann.h"
@@ -137,9 +136,12 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
                 EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
                 ei->callGnuplotExportModule(*this);
 
-                std::vector<FloatArray> eiPoints;
-                ei->giveSubPolygon(eiPoints, 0.0, 1.0);
-                points.push_back(eiPoints);
+                GeometryBasedEI *geoEI = dynamic_cast<GeometryBasedEI*>(ei);
+                if(geoEI != NULL) {
+                    std::vector<FloatArray> eiPoints;
+                    geoEI->giveSubPolygon(eiPoints, 0.0, 1.0);
+                    points.push_back(eiPoints);
+                }
             }
 
             outputXFEMGeometry(points);
@@ -279,7 +281,7 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack)
 
 	std::vector<double> arcLengthPositions, normalJumps, tangJumps;
 
-	const EnrichmentDomain *ed = iCrack.giveEnrichmentDomain();
+	const BasicGeometry *bg = iCrack.giveGeometry();
 
 	for( GaussPoint *gp: czGaussPoints ) {
 
@@ -289,7 +291,7 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack)
 			// Compute arc length position of the Gauss point
 			const FloatArray &coord = *(gp->giveNaturalCoordinates());
 			double tangDist = 0.0, arcPos = 0.0;
-			ed->computeTangentialSignDist(tangDist, coord, arcPos);
+			bg->computeTangentialSignDist(tangDist, coord, arcPos);
 			arcLengthPositions.push_back(arcPos);
 
 			// Compute displacement jump in normal and tangential direction

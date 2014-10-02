@@ -207,7 +207,7 @@ void CohesiveSurface3d :: computeGaussPoints()
     // The Gauss point is used only when methods from crosssection and/or material
     // classes are requested.
     integrationRulesArray.resize( 1 );
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this);
+    integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this) );
     this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
 }
 
@@ -407,17 +407,6 @@ CohesiveSurface3d :: computeGlobalCoordinates(FloatArray &answer, const FloatArr
     return 1;
 }
 
-void
-CohesiveSurface3d :: printOutputAt(FILE *File, TimeStep *tStep)
-{
-    fprintf(File, "element %d :\n", number);
-
-    for ( auto &iRule: integrationRulesArray ) {
-        iRule->printOutputAt(File, tStep);
-    }
-
-    fprintf(File, "\n");
-}
 
 #ifdef __OOFEG
 void CohesiveSurface3d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)

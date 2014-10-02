@@ -107,13 +107,10 @@ OutputExportModule :: doDofManOutput(FILE *file, Domain *domain, TimeStep *tStep
         for ( int i = 1; i <= ndofman; i++ ) {
             DofManager *dman = domain->giveDofManager(i);
 
-#ifdef __PARALLEL_MODE
-            // test for null dof in parallel mode
             if ( dman->giveParallelMode() == DofManager_null ) {
                 continue;
             }
 
-#endif
             dman->printOutputAt(file, tStep);
         }
     } else {
@@ -123,13 +120,10 @@ OutputExportModule :: doDofManOutput(FILE *file, Domain *domain, TimeStep *tStep
         for ( int i = 1; i <= ndofman; i++ ) {
             DofManager *dman = domain->giveDofManager(i);
 
-#ifdef __PARALLEL_MODE
-            // test for null dof in parallel mode
             if ( domain->giveDofManager(i)->giveParallelMode() == DofManager_null ) {
                 continue;
             }
 
-#endif
             if ( nodes.containsSorted(i) ) {
                 dman->printOutputAt(file, tStep);
             }
@@ -152,13 +146,9 @@ OutputExportModule :: doElementOutput(FILE *file, Domain *domain, TimeStep *tSte
         for ( int i = 1; i <= nelem; i++ ) {
             Element *element = domain->giveElement(i);
 
-#ifdef __PARALLEL_MODE
-            // test for remote element in parallel mode
             if ( element->giveParallelMode() == Element_remote ) {
                 continue;
             }
-
-#endif
 
             element->printOutputAt(file, tStep);
         }
@@ -169,13 +159,9 @@ OutputExportModule :: doElementOutput(FILE *file, Domain *domain, TimeStep *tSte
         for ( int i = 1; i <= nelem; i++ ) {
             Element *element = domain->giveElement(i);
 
-#ifdef __PARALLEL_MODE
-            // test for remote element in parallel mode
             if ( element->giveParallelMode() == Element_remote ) {
                 continue;
             }
-
-#endif
 
             if ( elements.containsSorted(i) ) {
                 element->printOutputAt(file, tStep);

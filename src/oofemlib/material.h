@@ -61,7 +61,6 @@ class FloatArray;
 class FloatMatrix;
 class Element;
 class ProcessCommunicator;
-class CommunicationBuffer;
 
 /**
  * Abstract base class for all material models. Declares the basic common interface
@@ -264,7 +263,6 @@ public:
      */
     //virtual NonlocalMaterialExtension* giveNonlocalMaterialExtensionPtr () {return NULL;}
 
-#ifdef __PARALLEL_MODE
     /**
      * Pack all necessary data of integration point (according to element parallel_mode)
      * into given communication buffer. The nature of packed data is material model dependent.
@@ -275,8 +273,7 @@ public:
      * @param tStep Solution step.
      * @param ip Integration point.
      */
-    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
-    { return 1; }
+    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) { return 1; }
     /**
      * Unpack and updates all necessary data of given integration point (according to element parallel_mode)
      * into given communication buffer.
@@ -285,13 +282,11 @@ public:
      * @param tStep Solution step.
      * @param ip Integration point.
      */
-    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip)
-    { return 1; }
+    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) { return 1; }
     /**
      * Estimates the necessary pack size to hold all packed data of receiver.
      */
-    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip)
-    { return 0; }
+    virtual int estimatePackSize(DataStream &buff, GaussPoint *ip) { return 0; }
     /**
      * Returns the weight representing relative computational cost of receiver
      * The reference material model is linear isotropic material - its weight is set to 1.0
@@ -302,7 +297,6 @@ public:
      * Returns the relative redistribution cost of the receiver
      */
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
-#endif
 
 
     /**

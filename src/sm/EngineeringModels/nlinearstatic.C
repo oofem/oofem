@@ -50,6 +50,7 @@
 #include "sparsemtrx.h"
 #include "errorestimator.h"
 #include "mathfem.h"
+#include "dofmanager.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
@@ -80,9 +81,8 @@ NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i,
     nMethod = NULL;
     initialGuessType = IG_None;
 
-#ifdef __PARALLEL_MODE
-    commMode = ProblemCommMode__NODE_CUT;
     nonlocalExt = 0;
+#ifdef __PARALLEL_MODE
     communicator = nonlocCommunicator = NULL;
     commBuff = NULL;
 #endif
@@ -206,21 +206,16 @@ NonLinearStatic :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, nonlocalStiffnessFlag, _IFT_NonLinearStatic_nonlocstiff);
 
 #ifdef __PARALLEL_MODE
-    //if (ir->hasField ("nodecutmode")) commMode = ProblemCommunicator::ProblemCommMode__NODE_CUT;
-    //else if (ir->hasField ("elementcutmode")) commMode = ProblemCommunicator::ProblemCommMode__ELEMENT_CUT;
-    //else OOFEM_ERROR("ProblemCommunicator comm mode not specified");
     if ( isParallel() ) {
         //commBuff = new CommunicatorBuff (this->giveNumberOfProcesses(), CBT_dynamic);
         commBuff = new CommunicatorBuff(this->giveNumberOfProcesses(), CBT_static);
-        communicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
-                                               this->giveNumberOfProcesses(),
-                                               this->commMode);
+        communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
+                                            this->giveNumberOfProcesses());
 
         if ( ir->hasField(_IFT_NonLinearStatic_nonlocalext) ) {
             nonlocalExt = 1;
-            nonlocCommunicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
-                                                         this->giveNumberOfProcesses(),
-                                                         ProblemCommMode__REMOTE_ELEMENT_MODE);
+            nonlocCommunicator = new ElementCommunicator(this, commBuff, this->giveRank(),
+                                                         this->giveNumberOfProcesses());
         }
     }
 #endif
@@ -320,7 +315,6 @@ TimeStep *NonLinearStatic :: giveNextStep()
 
 void NonLinearStatic :: solveYourself()
 {
-#ifdef __PARALLEL_MODE
     if ( this->isParallel() ) {
  #ifdef __VERBOSE_PARALLEL
         // force equation numbering before setting up comm maps
@@ -333,7 +327,6 @@ void NonLinearStatic :: solveYourself()
         // init remote dofman list
         // this->initRemoteDofManList ();
     }
-#endif
     StructuralEngngModel :: solveYourself();
 }
 
@@ -632,33 +625,33 @@ NonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
     //if ((iores = this->giveNumericalMethod(giveCurrentStep())->saveContext (stream)) != CIO_OK) THROW_CIOERR(iores);
 
-    if ( ( iores = totalDisplacement.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = totalDisplacement.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = incrementOfDisplacement.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = incrementOfDisplacement.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     int _cm = controlMode;
-    if ( !stream->write(& _cm, 1) ) {
+    if ( !stream->write(_cm) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& loadLevel, 1) ) {
+    if ( !stream->write(loadLevel) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& cumulatedLoadLevel, 1) ) {
+    if ( !stream->write(cumulatedLoadLevel) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // store InitialLoadVector
-    if ( ( iores = initialLoadVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = initialLoadVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = initialLoadVectorOfPrescribed.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = initialLoadVectorOfPrescribed.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -701,35 +694,35 @@ NonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *ob
 
     //if ((iores = this->giveNumericalMethod(giveCurrentStep())->restoreContext (stream)) !=CIO_OK) THROW_CIOERR(iores);
 
-    if ( ( iores = totalDisplacement.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = totalDisplacement.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = incrementOfDisplacement.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = incrementOfDisplacement.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     int _cm;
-    if ( !stream->read(& _cm, 1) ) {
+    if ( !stream->read(_cm) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     controlMode = ( NonLinearStatic_controlType ) _cm;
-    if ( !stream->read(& loadLevel, 1) ) {
+    if ( !stream->read(loadLevel) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& cumulatedLoadLevel, 1) ) {
+    if ( !stream->read(cumulatedLoadLevel) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
 
     // store InitialLoadVector
-    if ( ( iores = initialLoadVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = initialLoadVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = initialLoadVectorOfPrescribed.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = initialLoadVectorOfPrescribed.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -856,27 +849,17 @@ NonLinearStatic :: assembleIncrementalReferenceLoadVectors(FloatArray &_incremen
                              VM_Total, EModelDefaultPrescribedEquationNumbering(), sourceDomain);
     }
 
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(_incrementalLoadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 }
 
 
-#ifdef __PARALLEL_MODE
 int
-NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
+NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType)
 {
     int count = 0, pcount = 0;
-    IntArray locationArray;
     Domain *domain = this->giveDomain(1);
 
-    if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
-        for ( int map: commMap ) {
-            count += domain->giveDofManager( map )->giveNumberOfDofs();
-        }
-
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
-    } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
+    if ( packUnpackType == 0 ) { ///@todo Fix this old ProblemCommMode__NODE_CUT value
         for ( int map: commMap ) {
             DofManager *dman = domain->giveDofManager( map );
             for ( Dof *dof: *dman ) {
@@ -889,8 +872,8 @@ NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &b
         }
 
         //printf ("\nestimated count is %d\n",count);
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * max(count, pcount) );
-    } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
+        return ( buff.givePackSizeOfDouble(1) * max(count, pcount) );
+    } else if ( packUnpackType == 1 ) {
         for ( int map: commMap ) {
             count += domain->giveElement( map )->estimatePackSize(buff);
         }
@@ -902,6 +885,7 @@ NonLinearStatic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &b
 }
 
 
+#ifdef __PARALLEL_MODE
 LoadBalancer *
 NonLinearStatic :: giveLoadBalancer()
 {
@@ -933,7 +917,7 @@ NonLinearStatic :: giveLoadBalancerMonitor()
         return NULL;
     }
 }
-
+#endif
 
 void
 NonLinearStatic :: packMigratingData(TimeStep *tStep)
@@ -1033,5 +1017,5 @@ NonLinearStatic :: unpackMigratingData(TimeStep *tStep)
 
     initFlag = true;
 }
-#endif
+
 } // end namespace oofem

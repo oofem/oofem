@@ -238,16 +238,16 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
 {
     contextIOResultType iores(CIO_IOERR);
 
-    if ( !stream->write(& actualStepNumber, 1) ) {
+    if ( !stream->write(actualStepNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& actualStepIndx, 1) ) {
+    if ( !stream->write(actualStepIndx) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( ( iores = solutionVectors[i].storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = solutionVectors[i].storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -266,16 +266,16 @@ PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
 {
     contextIOResultType iores(CIO_IOERR);
 
-    if ( !stream->read(& actualStepNumber, 1) ) {
+    if ( !stream->read(actualStepNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& actualStepIndx, 1) ) {
+    if ( !stream->read(actualStepIndx) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( ( iores = solutionVectors[i].restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = solutionVectors[i].restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

@@ -64,7 +64,6 @@ namespace oofem {
 class FloatArray;
 class IntArray;
 class DataStream;
-class CommunicationBuffer;
 
 /**
  * Implementation of matrix containing floating point numbers. FloatMatrix can grow and shrink
@@ -558,16 +557,12 @@ public:
     void changeComponentOrder();
 
     // Overloaded methods:
-    contextIOResultType storeYourself(DataStream *stream, ContextMode mode);
-    contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
+    contextIOResultType storeYourself(DataStream *stream) const;
+    contextIOResultType restoreYourself(DataStream *stream);
+    int givePackSize(DataStream &buff) const;
 
     friend std :: ostream &operator<<(std :: ostream &out, const FloatMatrix &r);
 
-#ifdef __PARALLEL_MODE
-    int packToCommBuffer(CommunicationBuffer &buff) const;
-    int unpackFromCommBuffer(CommunicationBuffer &buff);
-    int givePackSize(CommunicationBuffer &buff);
-#endif
 
 #ifdef BOOST_PYTHON
     void __setitem__(boost :: python :: api :: object t, double val);

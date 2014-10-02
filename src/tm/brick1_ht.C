@@ -85,7 +85,7 @@ Brick1_ht :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
@@ -98,11 +98,6 @@ Brick1_ht :: initializeFrom(InputRecord *ir)
     IRResultType result = this->TransportElement :: initializeFrom(ir);
     if ( result != IRRT_OK ) {
         return result;
-    }
-
-    if ( !( ( numberOfGaussPoints == 8 ) ||
-           ( numberOfGaussPoints == 27 ) ) ) {
-        numberOfGaussPoints = 8;
     }
 
     return IRRT_OK;

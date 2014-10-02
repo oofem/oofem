@@ -57,8 +57,6 @@ DirectErrorIndicatorRC :: DirectErrorIndicatorRC(int n, ErrorEstimator *e) : Rem
 
 DirectErrorIndicatorRC :: ~DirectErrorIndicatorRC()
 {
-#ifdef __PARALLEL_MODE
-#endif
 }
 
 void
@@ -251,14 +249,9 @@ DirectErrorIndicatorRC :: initializeFrom(InputRecord *ir)
 
 #ifdef __PARALLEL_MODE
     EngngModel *emodel = domain->giveEngngModel();
-    ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
-    if ( commMode == ProblemCommMode__NODE_CUT ) {
-        commBuff = new CommunicatorBuff(emodel->giveNumberOfProcesses(), CBT_dynamic);
-        communicator = new ProblemCommunicator(emodel, commBuff, emodel->giveRank(),
-                                               emodel->giveNumberOfProcesses(),
-                                               commMode);
-    }
-
+    commBuff = new CommunicatorBuff(emodel->giveNumberOfProcesses(), CBT_dynamic);
+    communicator = new NodeCommunicator(emodel, commBuff, emodel->giveRank(),
+                                        emodel->giveNumberOfProcesses());
 #endif
     return IRRT_OK;
 }
@@ -297,26 +290,22 @@ void
 DirectErrorIndicatorRC :: exchangeDofManDensities()
 {
     Domain *domain = this->giveDomain();
-    EngngModel *emodel = domain->giveEngngModel();
-    ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
 
     if ( this->dofManDensityExchangeFlag ) {
-        if ( commMode == ProblemCommMode__NODE_CUT ) {
-            ///@todo Compute local shared dofman densities
-            sharedDofManDensities.clear();
-            int i, size = domain->giveNumberOfDofManagers();
-            for ( i = 1; i <= size; i++ ) {
-                if ( domain->giveDofManager(i)->giveParallelMode() == DofManager_shared ) {
-                    sharedDofManDensities [ i ] = this->giveLocalDofManDensity(i);
-                }
+        ///@todo Compute local shared dofman densities
+        sharedDofManDensities.clear();
+        int size = domain->giveNumberOfDofManagers();
+        for ( int i = 1; i <= size; i++ ) {
+            if ( domain->giveDofManager(i)->giveParallelMode() == DofManager_shared ) {
+                sharedDofManDensities [ i ] = this->giveLocalDofManDensity(i);
             }
-
-            // exchange them
-            communicator->packAllData(this, & DirectErrorIndicatorRC :: packSharedDofManLocalDensities);
-            communicator->initExchange(999);
-            communicator->unpackAllData(this, & DirectErrorIndicatorRC :: unpackSharedDofManLocalDensities);
-            communicator->finishExchange();
         }
+
+        // exchange them
+        communicator->packAllData(this, & DirectErrorIndicatorRC :: packSharedDofManLocalDensities);
+        communicator->initExchange(999);
+        communicator->unpackAllData(this, & DirectErrorIndicatorRC :: unpackSharedDofManLocalDensities);
+        communicator->finishExchange();
 
         this->dofManDensityExchangeFlag = false;
     } // if (this->dofManDensityExchangeFlag)
@@ -348,7 +337,7 @@ DirectErrorIndicatorRC :: unpackSharedDofManLocalDensities(ProcessCommunicator &
 
     size = toRecvMap->giveSize();
     for ( i = 1; i <= size; i++ ) {
-        result &= pcbuff->unpackDouble(value);
+        result &= pcbuff->read(value);
         this->sharedDofManDensities [ toRecvMap->at(i) ] = max(value, this->sharedDofManDensities [ toRecvMap->at(i) ]);
  #ifdef __VERBOSE_PARALLEL
         OOFEM_LOG_INFO("unpackSharedDofManLocalDensities: node %d[%d], value %f\n", toRecvMap->at(i), domain->giveDofManager( toRecvMap->at(i) )->giveGlobalNumber(), this->sharedDofManDensities [ toRecvMap->at(i) ]);
@@ -365,25 +354,21 @@ void
 DirectErrorIndicatorRC :: exchangeDofManIndicatorVals(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain();
-    EngngModel *emodel = domain->giveEngngModel();
-    ProblemCommunicatorMode commMode = emodel->giveProblemCommMode();
 
-    if ( commMode == ProblemCommMode__NODE_CUT ) {
-        ///@todo Compute local shared dofman indicator values
-        sharedDofManIndicatorVals.clear();
-        int i, size = domain->giveNumberOfDofManagers();
-        for ( i = 1; i <= size; i++ ) {
-            if ( domain->giveDofManager(i)->giveParallelMode() == DofManager_shared ) {
-                sharedDofManIndicatorVals [ i ] = this->giveLocalDofManIndicator(i, tStep);
-            }
+    ///@todo Compute local shared dofman indicator values
+    sharedDofManIndicatorVals.clear();
+    int size = domain->giveNumberOfDofManagers();
+    for ( int i = 1; i <= size; i++ ) {
+        if ( domain->giveDofManager(i)->giveParallelMode() == DofManager_shared ) {
+            sharedDofManIndicatorVals [ i ] = this->giveLocalDofManIndicator(i, tStep);
         }
-
-        // exchange them
-        communicator->packAllData(this, & DirectErrorIndicatorRC :: packSharedDofManLocalIndicatorVals);
-        communicator->initExchange(999);
-        communicator->unpackAllData(this, & DirectErrorIndicatorRC :: unpackSharedDofManLocalIndicatorVals);
-        communicator->finishExchange();
     }
+
+    // exchange them
+    communicator->packAllData(this, & DirectErrorIndicatorRC :: packSharedDofManLocalIndicatorVals);
+    communicator->initExchange(999);
+    communicator->unpackAllData(this, & DirectErrorIndicatorRC :: unpackSharedDofManLocalIndicatorVals);
+    communicator->finishExchange();
 }
 
 int
@@ -413,7 +398,7 @@ DirectErrorIndicatorRC :: unpackSharedDofManLocalIndicatorVals(ProcessCommunicat
 
     size = toRecvMap->giveSize();
     for ( i = 1; i <= size; i++ ) {
-        result &= pcbuff->unpackDouble(value);
+        result &= pcbuff->read(value);
         this->sharedDofManIndicatorVals [ toRecvMap->at(i) ] = max(value, this->sharedDofManIndicatorVals [ toRecvMap->at(i) ]);
  #ifdef __VERBOSE_PARALLEL
         OOFEM_LOG_INFO("unpackSharedDofManLocalIndicatorVals: node %d[%d], value %f\n", toRecvMap->at(i), domain->giveDofManager( toRecvMap->at(i) )->giveGlobalNumber(), this->sharedDofManIndicatorVals [ toRecvMap->at(i) ]);

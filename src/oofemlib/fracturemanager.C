@@ -42,7 +42,6 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "xfem/xfemmanager.h"
-#include "xfem/enrichmentdomain.h"
 #include "classfactory.h"
 #include "element.h"
 

@@ -56,9 +56,6 @@ StokesFlow :: StokesFlow(int i, EngngModel *_master) : FluidModel(i, _master)
     this->stiffnessMatrix = NULL;
     this->meshqualityee = NULL;
     this->velocityPressureField = NULL;
-#ifdef __PARALLEL_MODE
-    commMode = ProblemCommMode__NODE_CUT;
-#endif
 }
 
 StokesFlow :: ~StokesFlow()
@@ -96,7 +93,7 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
 
     this->maxdef = 25; ///@todo Deal with this parameter (set to some reasonable value by default now)
 
-    return EngngModel :: initializeFrom(ir);
+    return FluidModel :: initializeFrom(ir);
 }
 
 
@@ -152,9 +149,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     this->externalForces.zero();
     this->assembleVector( this->externalForces, tStep, ExternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 
     if ( this->giveProblemScale() == macroScale ) {
         OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving step %d, metastep %d, (neq = %d)\n", tStep->giveNumber(), tStep->giveMetaStepNumber(), neq);
@@ -210,10 +205,8 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
     if ( cmpn == InternalRhs ) {
         this->internalForces.zero();
         this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
-                             EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
-#ifdef __PARALLEL_MODE
+                             EModelDefaultEquationNumbering(), d, & this->eNorm);
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
-#endif
         return;
     } else if ( cmpn == NonLinearLhs ) {
         this->stiffnessMatrix->zero();
@@ -228,7 +221,7 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
 void StokesFlow :: updateYourself(TimeStep *tStep)
 {
     this->updateInternalState(tStep);
-    EngngModel :: updateYourself(tStep);
+    FluidModel :: updateYourself(tStep);
 }
 
 int StokesFlow :: forceEquationNumbering(int id)
@@ -304,7 +297,7 @@ void StokesFlow :: doStepOutput(TimeStep *tStep)
         tp->doOutput(tStep);
     }
 
-    EngngModel :: doStepOutput(tStep);
+    FluidModel :: doStepOutput(tStep);
 }
 
 NumericalMethod *StokesFlow :: giveNumericalMethod(MetaStep *mStep)

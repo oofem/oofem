@@ -896,17 +896,17 @@ MisesMatStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     // write raw data
 
     // write plastic strain (vector)
-    if ( ( iores = plasticStrain.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasticStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // write cumulative plastic strain (scalar)
-    if ( !stream->write(& kappa, 1) ) {
+    if ( !stream->write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // write damage (scalar)
-    if ( !stream->write(& damage, 1) ) {
+    if ( !stream->write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -929,17 +929,17 @@ MisesMatStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj
     }
 
     // read plastic strain (vector)
-    if ( ( iores = plasticStrain.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasticStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // read cumulative plastic strain (scalar)
-    if ( !stream->read(& kappa, 1) ) {
+    if ( !stream->read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // read damage (scalar)
-    if ( !stream->read(& damage, 1) ) {
+    if ( !stream->read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

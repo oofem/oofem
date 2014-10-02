@@ -40,14 +40,14 @@
 #include "domaintype.h"
 #include "statecountertype.h"
 #include "intarray.h"
+#ifdef __PARALLEL_MODE
+ #include "entityrenumberingscheme.h"
+#endif
 
 #include <unordered_map>
 #include <map>
 #include <string>
-#ifdef __PARALLEL_MODE
- #include <list>
- #include "entityrenumberingscheme.h"
-#endif
+#include <list>
 
 ///@name Input fields for domains
 //@{
@@ -63,6 +63,7 @@
 #define _IFT_Domain_nbarrier "nbarrier"
 #define _IFT_Domain_topology "topology"
 #define _IFT_Domain_nxfemman "nxfemman" /// [in,optional] Specifies if there is an xfem-manager.
+#define _IFT_Domain_ncontactman "ncontactman" /// [in,optional] Specifies if there is a contact manager.
 #define _IFT_Domain_numberOfSpatialDimensions "nsd" ///< [in,optional] Specifies how many spatial dimensions the domain has.
 #define _IFT_Domain_nfracman "nfracman" /// [in,optional] Specifies if there is a fracture manager.
 #define _IFT_Domain_axisymmetric "axisymm" /// [optional] Specifies if the problem is axisymmetric.
@@ -95,7 +96,7 @@ class FractureManager;
 class oofegGraphicContext;
 class ProcessCommunicator;
 class LoadBalancer;
-
+class ContactManager;
 /**
  * Class and object Domain. Domain contains mesh description, or if program runs in parallel then it contains
  * description of domain associated to particular processor or thread of execution. Generally, it contain and
@@ -189,6 +190,10 @@ private:
     /// Fracture Manager
     FractureManager *fracManager;
 
+    /// Contact Manager
+    ContactManager *contactManager;
+    
+    
     /**
      * Map from an element's global number to its place
      * in the element array. Added by ES 140326.
@@ -471,6 +476,9 @@ public:
     XfemManager *giveXfemManager();
     bool hasXfemManager();
 
+    ContactManager *giveContactManager();
+    bool hasContactManager();
+    
     FractureManager *giveFractureManager();
     bool hasFractureManager();
 

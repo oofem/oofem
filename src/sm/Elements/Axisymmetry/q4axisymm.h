@@ -57,7 +57,7 @@ class Q4Axisymm : public AxisymElement, public ZZNodalRecoveryModelInterface
 {
 protected:
     static FEI2dQuadQuad interp;
-    int numberOfGaussPoints, numberOfFiAndShGaussPoints;
+    int numberOfFiAndShGaussPoints;
 
 public:
     Q4Axisymm(int n, Domain * d);

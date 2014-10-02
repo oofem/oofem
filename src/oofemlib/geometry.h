@@ -71,6 +71,7 @@ namespace oofem {
 class Element;
 class DynamicInputRecord;
 class oofegGraphicContext;
+class TipInfo;
 
 /**
  * Abstract representation of Geometry
@@ -169,6 +170,14 @@ public:
      * Line 2 has start point iQ1 and end point iQ2.
      */
     static double computeLineDistance(const FloatArray &iP1, const FloatArray &iP2, const FloatArray &iQ1, const FloatArray &iQ2);
+
+    /**
+     * Returns start and end tip of the geometry, if applicable.
+     */
+    virtual bool giveTips(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const {return false;}
+
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius) {OOFEM_ERROR("Not implemented.")};
+
 };
 
 class OOFEM_EXPORT Line : public BasicGeometry
@@ -265,6 +274,9 @@ public:
     virtual void printYourself();
 
     double giveRadius() const {return radius;}
+
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
+
 };
 
 class OOFEM_EXPORT PolygonLine : public BasicGeometry
@@ -320,6 +332,17 @@ public:
     // Upper and lower corner
     bPoint2 LC, UC;
 #endif
+
+    virtual bool giveTips(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const;
+
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
+
+    /**
+     * Keep only a part of the underlying geometry,
+     * characterized by iArcPosStart and iArcPosEnd.
+     */
+    void cropPolygon(const double &iArcPosStart, const double &iArcPosEnd);
+
 };
 
 

@@ -1169,48 +1169,48 @@ RCM2MaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *ob
 
     // write a raw data
 
-    if ( ( iores = crackStatuses.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = crackStatuses.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = maxCrackStrains.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = maxCrackStrains.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = crackDirs.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = crackDirs.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     //if ((iores = minEffStrainsForFullyOpenCrack.storeYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
-    if ( ( iores = charLengths.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = charLengths.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = crackStrainVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = crackStrainVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = oldCrackStrainVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = oldCrackStrainVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = oldPrincipalStrain.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = oldPrincipalStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = principalStrain.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = principalStrain.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = oldPrincipalStress.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = oldPrincipalStress.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = principalStress.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = principalStress.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = crackMap.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = crackMap.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1232,48 +1232,48 @@ RCM2MaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void 
 
     // read raw data
 
-    if ( ( iores = crackStatuses.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = crackStatuses.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = maxCrackStrains.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = maxCrackStrains.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = crackDirs.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = crackDirs.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     //if ((iores = minEffStrainsForFullyOpenCrack.restoreYourself(stream)) != CIO_OK) THROW_CIOERR(iores);
-    if ( ( iores = charLengths.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = charLengths.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = crackStrainVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = crackStrainVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = oldCrackStrainVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = oldCrackStrainVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = oldPrincipalStrain.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = oldPrincipalStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = principalStrain.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = principalStrain.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = oldPrincipalStress.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = oldPrincipalStress.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = principalStress.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = principalStress.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = crackMap.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = crackMap.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

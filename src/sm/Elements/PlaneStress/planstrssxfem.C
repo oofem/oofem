@@ -38,7 +38,6 @@
 #include "xfem/xfemelementinterface.h"
 #include "xfem/enrichmentfunction.h"
 #include "xfem/enrichmentitem.h"
-#include "xfem/enrichmentdomain.h"
 #include "vtkxmlexportmodule.h"
 #include "dynamicinputrecord.h"
 #include "feinterpol.h"
@@ -391,8 +390,8 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces,
         for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
             InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
             FloatArray average;
-            IntegrationRule *iRule = integrationRulesArray [ 0 ];
-            VTKXMLExportModule :: computeIPAverage(average, iRule, this, type, tStep);
+            std :: unique_ptr< IntegrationRule >&iRule = integrationRulesArray [ 0 ];
+            VTKXMLExportModule :: computeIPAverage(average, iRule.get(), this, type, tStep);
 
             FloatArray averageV9(9);
             averageV9.at(1) = average.at(1);
@@ -437,7 +436,7 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces,
 
                             for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
                                 DofManager *dMan = giveDofManager(elNodeInd);
-                                ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber() );
+                                ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber(), *(dMan->giveCoordinates()) );
 
                                 levelSet += N.at(elNodeInd)*levelSetInNode;
                             }
@@ -451,7 +450,7 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces,
 
                             for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
                                 DofManager *dMan = giveDofManager(elNodeInd);
-                                ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber() );
+                                ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber(), *(dMan->giveCoordinates()) );
 
                                 levelSet += N.at(elNodeInd)*levelSetInNode;
                             }

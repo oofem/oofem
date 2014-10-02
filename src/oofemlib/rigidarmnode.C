@@ -96,7 +96,6 @@ RigidArmNode :: postInitialize()
     }
 
 #if 0
- #ifdef __PARALLEL_MODE
     // check if master in same mode
     if ( parallel_mode != DofManager_local ) {
         if ( ( * masterNode )->giveParallelMode() != parallel_mode ) {
@@ -104,7 +103,6 @@ RigidArmNode :: postInitialize()
             result = 0;
         }
     }
- #endif
 #endif
 }
 

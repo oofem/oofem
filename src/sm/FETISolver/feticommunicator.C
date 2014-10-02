@@ -82,7 +82,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
     }
 
     // resize receive buffer
-    commBuff.resize( commBuff.givePackSize(MPI_INT, 1) );
+    commBuff.resize( commBuff.givePackSizeOfInt(1) );
 
     //
     // receive data
@@ -94,7 +94,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
         }
 
         // unpack data
-        commBuff.unpackInt(j);
+        commBuff.read(j);
 #ifdef __VERBOSE_PARALLEL
         OOFEM_LOG_DEBUG("[process rank %3d]: %-30s: Received data from partition %3d (received %d)\n",
                         rank, "FETICommunicator :: setUpCommunicationMaps : received number of boundary dofMans", source, j);
@@ -129,7 +129,7 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
         }
     }
 
-    commBuff.resize( 2 * maxRec * commBuff.givePackSize(MPI_INT, 1) );
+    commBuff.resize( 2 * maxRec * commBuff.givePackSizeOfInt(1) );
     // resize communication maps acordingly
     for ( i = 0; i < size; i++ ) {
         j = numberOfPartitionBoundaryDofMans.at(i + 1);
@@ -191,8 +191,8 @@ FETICommunicator :: setUpCommunicationMaps(EngngModel *pm)
 
         // loop over all dofmanager data received
         for ( j = 1; j <= numberOfPartitionBoundaryDofMans.at(source + 1); j++ ) {
-            commBuff.unpackInt(globaldofmannum);
-            commBuff.unpackInt(ndofs);
+            commBuff.read(globaldofmannum);
+            commBuff.read(ndofs);
 
             // add corresponding entry to master map of boundary dof managers
             if ( ( localNumber = BoundaryDofManagerMap [ globaldofmannum ] ) == 0 ) { // no local counterpart exist

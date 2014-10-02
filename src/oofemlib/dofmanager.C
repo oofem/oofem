@@ -53,8 +53,7 @@
 
 namespace oofem {
 DofManager :: DofManager(int n, Domain *aDomain) :
-    FEMComponent(n, aDomain), dofArray(), loadArray()
-    // Constructor. Creates a node with number n, belonging to aDomain.
+    FEMComponent(n, aDomain), dofArray(), loadArray(), partitions()
 {
     isBoundaryFlag = false;
     hasSlaveDofs  = false;
@@ -63,15 +62,11 @@ DofManager :: DofManager(int n, Domain *aDomain) :
     dofMastermap = NULL;
     dofBCmap = NULL;
     dofICmap = NULL;
-#ifdef __PARALLEL_MODE
-    partitions.clear();
     parallel_mode = DofManager_local;
-#endif
 }
 
 
 DofManager :: ~DofManager()
-// Destructor.
 {
     for ( Dof *dof: dofArray ) {
         delete dof;
@@ -352,7 +347,6 @@ DofManager :: initializeFrom(InputRecord *ir)
 
     IntArray dofIDArry;
     IntArray ic, masterMask, dofTypeMask;
-    mBC.clear();
 
     loadArray.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, loadArray, _IFT_DofManager_load);
@@ -388,7 +382,6 @@ DofManager :: initializeFrom(InputRecord *ir)
     }
 
 
-#ifdef __PARALLEL_MODE
     partitions.clear();
     IR_GIVE_OPTIONAL_FIELD(ir, partitions, _IFT_DofManager_partitions);
 
@@ -404,7 +397,6 @@ DofManager :: initializeFrom(InputRecord *ir)
 
     // in parallel mode,  slaves are allowed, because ((Dr. Rypl promissed)
     // masters have to be in same partition as slaves. They can be again Remote copies.
-#endif
 
 
     bool hasIc = !( ic.giveSize() == 0 );
@@ -502,7 +494,6 @@ void DofManager :: giveInputRecord(DynamicInputRecord &input)
     }
 
 
-#ifdef __PARALLEL_MODE
     if ( this->partitions.giveSize() > 0 ) {
         input.setField(this->partitions, _IFT_DofManager_partitions);
     }
@@ -514,7 +505,6 @@ void DofManager :: giveInputRecord(DynamicInputRecord &input)
     } else if ( parallel_mode == DofManager_null ) {
         input.setField(_IFT_DofManager_nullflag);
     }
-#endif
 }
 
 
@@ -566,14 +556,14 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
 
 
     int numberOfDofs = this->giveNumberOfDofs();
-    if ( !stream->write(& numberOfDofs, 1) ) {
+    if ( !stream->write(numberOfDofs) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // store dof types
     for ( Dof *dof: *this ) {
         _val = dof->giveDofType();
-        if ( !stream->write(& _val, 1) ) {
+        if ( !stream->write(_val) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
@@ -581,13 +571,13 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
     // store dof types
     for ( Dof *dof: *this ) {
         _val = dof->giveDofID();
-        if ( !stream->write(& _val, 1) ) {
+        if ( !stream->write(_val) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
 
     if ( mode & CM_Definition ) {
-        if ( ( iores = loadArray.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = loadArray.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
@@ -599,21 +589,18 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
             THROW_CIOERR(CIO_IOERR);
         }
 
-#ifdef __PARALLEL_MODE
-        if ( !stream->write(& globalNumber, 1) ) {
+        if ( !stream->write(globalNumber) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         _val = ( int ) parallel_mode;
-        if ( !stream->write(& _val, 1) ) {
+        if ( !stream->write(_val) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( ( iores = partitions.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = partitions.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-
-#endif
     }
 
     for ( Dof *dof: *this ) {
@@ -639,14 +626,14 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
     }
 
     int _numberOfDofs;
-    if ( !stream->read(& _numberOfDofs, 1) ) {
+    if ( !stream->read(_numberOfDofs) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     IntArray dtypes(_numberOfDofs);
     // restore dof types
     for ( int i = 1; i <= _numberOfDofs; i++ ) {
-        if ( !stream->read(& dtypes.at(i), 1) ) {
+        if ( !stream->read(dtypes.at(i)) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
@@ -654,7 +641,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
     IntArray dofids(_numberOfDofs);
     // restore dof ids
     for ( int i = 1; i <= _numberOfDofs; i++ ) {
-        if ( !stream->read(& dofids.at(i), 1) ) {
+        if ( !stream->read(dofids.at(i)) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
@@ -668,7 +655,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
     }
 
     if ( mode & CM_Definition ) {
-        if ( ( iores = loadArray.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = loadArray.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
@@ -680,22 +667,19 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
             THROW_CIOERR(CIO_IOERR);
         }
 
-#ifdef __PARALLEL_MODE
-        if ( !stream->read(& globalNumber, 1) ) {
+        if ( !stream->read(globalNumber) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         int _val;
-		if ( !stream->read(& _val, 1) ) {
+        if ( !stream->read(_val) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         parallel_mode = ( dofManagerParallelMode ) _val;
-        if ( ( iores = partitions.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = partitions.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-
-#endif
     }
 
     for ( Dof *dof: *this ) {
@@ -995,7 +979,6 @@ void DofManager :: updateLocalNumbering(EntityRenumberingFunctor &f)
 }
 
 
-#ifdef __PARALLEL_MODE
 void DofManager :: mergePartitionList(IntArray &_p)
 {
     // more optimized version can be made requiring sorted partition list of receiver
@@ -1006,16 +989,15 @@ void DofManager :: mergePartitionList(IntArray &_p)
 }
 
 
-int
-DofManager :: packDOFsUnknowns(CommunicationBuffer &buff,
-                               ValueModeType mode, TimeStep *tStep)
+int DofManager :: givePartitionsConnectivitySize()
 {
-    int result = 1;
-    for ( Dof *dof: *this ) {
-        result &= dof->packUnknowns(buff, mode, tStep);
+    int n = partitions.giveSize();
+    int myrank = this->giveDomain()->giveEngngModel()->giveRank();
+    if ( partitions.findFirstIndexOf(myrank) ) {
+        return n;
+    } else {
+        return n + 1;
     }
-
-    return result;
 }
 
 
@@ -1044,17 +1026,4 @@ bool DofManager :: isLocal()
     return false;
 }
 
-
-int DofManager :: givePartitionsConnectivitySize()
-{
-    int n = partitions.giveSize();
-    int myrank = this->giveDomain()->giveEngngModel()->giveRank();
-    if ( partitions.findFirstIndexOf(myrank) ) {
-        return n;
-    } else {
-        return n + 1;
-    }
-}
-
-#endif
 } // end namespace oofem

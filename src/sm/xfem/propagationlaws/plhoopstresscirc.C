@@ -35,7 +35,6 @@
 #include "xfem/propagationlaws/plhoopstresscirc.h"
 
 #include "xfem/propagationlaw.h"
-#include "xfem/enrichmentdomain.h"
 #include "xfem/tipinfo.h"
 #include "classfactory.h"
 #include "mathfem.h"

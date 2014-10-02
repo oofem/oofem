@@ -13,7 +13,6 @@
 #include "xfem/xfemelementinterface.h"
 #include "xfem/enrichmentfunction.h"
 #include "xfem/enrichmentitem.h"
-#include "xfem/enrichmentdomain.h"
 #include "xfem/delaunay.h"
 #include "xfem/XFEMDebugTools.h"
 #include "feinterpol.h"
@@ -160,6 +159,16 @@ void TrPlaneStress2dXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatRespo
 {
     TrPlaneStress2d :: computeStiffnessMatrix(answer, rMode, tStep);
     XfemStructuralElementInterface :: computeCohesiveTangent(answer, tStep);
+
+    const double tol = 1.0e-6;
+    const double regularizationCoeff = 1.0e-6;
+    int numRows = answer.giveNumberOfRows();
+    for(int i = 0; i < numRows; i++) {
+        if( fabs(answer(i,i)) < tol ) {
+            answer(i,i) += regularizationCoeff;
+//          printf("Found zero on diagonal.\n");
+        }
+    }
 }
 
 void
@@ -399,8 +408,8 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiece
         for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
             InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
             FloatArray average;
-            IntegrationRule *iRule = integrationRulesArray [ 0 ];
-            VTKXMLExportModule :: computeIPAverage(average, iRule, this, type, tStep);
+            std :: unique_ptr< IntegrationRule > &iRule = integrationRulesArray [ 0 ];
+            VTKXMLExportModule :: computeIPAverage(average, iRule.get(), this, type, tStep);
 
             FloatArray averageV9(9);
             averageV9.at(1) = average.at(1);
@@ -445,7 +454,7 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiece
 
                             for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
                                 DofManager *dMan = giveDofManager(elNodeInd);
-                                ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber() );
+                                ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber(), *(dMan->giveCoordinates()) );
 
                                 levelSet += N.at(elNodeInd)*levelSetInNode;
                             }
@@ -459,7 +468,7 @@ TrPlaneStress2dXFEM :: giveCompositeExportData(std::vector< VTKPiece > &vtkPiece
 
                             for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
                                 DofManager *dMan = giveDofManager(elNodeInd);
-                                ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber() );
+                                ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber(), *(dMan->giveCoordinates()) );
 
                                 levelSet += N.at(elNodeInd)*levelSetInNode;
                             }

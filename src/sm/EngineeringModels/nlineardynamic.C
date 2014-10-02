@@ -74,14 +74,12 @@ NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEng
     massMatrix               = NULL;
     nMethod                  = NULL;
 
-#ifdef __PARALLEL_MODE
     nonlocalExt = 0;
+#ifdef __PARALLEL_MODE
 
     communicator       = NULL;
     nonlocCommunicator = NULL;
     commBuff           = NULL;
-
-    commMode = ProblemCommMode__NODE_CUT;
 #endif
 }
 
@@ -178,15 +176,13 @@ NonLinearDynamic :: initializeFrom(InputRecord *ir)
 #ifdef __PARALLEL_MODE
     if ( isParallel() ) {
         commBuff = new CommunicatorBuff(this->giveNumberOfProcesses(), CBT_static);
-        communicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
-                                               this->giveNumberOfProcesses(),
-                                               this->commMode);
+        communicator = new NodeCommunicator(this, commBuff, this->giveRank(),
+                                            this->giveNumberOfProcesses());
 
         if ( ir->hasField(_IFT_NonLinearDynamic_nonlocalext) ) {
             nonlocalExt = 1;
-            nonlocCommunicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
-                                                         this->giveNumberOfProcesses(),
-                                                         ProblemCommMode__REMOTE_ELEMENT_MODE);
+            nonlocCommunicator = new ElementCommunicator(this, commBuff, this->giveRank(),
+                                                         this->giveNumberOfProcesses());
         }
     }
 #endif
@@ -270,7 +266,6 @@ TimeStep *NonLinearDynamic :: giveNextStep()
 void NonLinearDynamic :: solveYourself()
 {
     if ( commInitFlag ) {
-#ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
         // Force equation numbering before setting up comm maps.
         int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
@@ -280,7 +275,6 @@ void NonLinearDynamic :: solveYourself()
             // Set up communication patterns.
             this->initializeCommMaps();
         }
-#endif
         commInitFlag = 0;
     }
 
@@ -292,7 +286,6 @@ void
 NonLinearDynamic :: solveYourselfAt(TimeStep *tStep)
 {
     if ( commInitFlag ) {
-#ifdef __PARALLEL_MODE
  #ifdef __VERBOSE_PARALLEL
         // Force equation numbering before setting up comm maps.
         int neq = this->giveNumberOfDomainEquations(1, EModelDefaultEquationNumbering());
@@ -302,7 +295,6 @@ NonLinearDynamic :: solveYourselfAt(TimeStep *tStep)
             // Set up communication patterns.
             this->initializeCommMaps();
         }
-#endif
         commInitFlag = 0;
     }
 
@@ -440,10 +432,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
     loadVector.zero();
     this->assembleVector( loadVector, tStep, ExternalForcesVector,
                          VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(di) );
-
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(loadVector, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 
     // Assembling the effective load vector
     for ( int i = 1; i <= neq; i++ ) {
@@ -719,19 +708,19 @@ contextIOResultType NonLinearDynamic :: saveContext(DataStream *stream, ContextM
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = incrementOfDisplacement.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = incrementOfDisplacement.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = totalDisplacement.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = totalDisplacement.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = velocityVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -767,19 +756,19 @@ contextIOResultType NonLinearDynamic :: restoreContext(DataStream *stream, Conte
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = incrementOfDisplacement.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = incrementOfDisplacement.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = totalDisplacement.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = totalDisplacement.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = velocityVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -875,15 +864,12 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
     answer.zero();
     for ( int i = 1; i <= nelem; i++ ) {
         Element *element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
         // Skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
         if ( element->giveParallelMode() == Element_remote ) {
             continue;
         }
-
-#endif
 
         element->giveLocationArray(loc, en);
         element->giveCharacteristicMatrix(charMtrx, type, tStep);
@@ -913,27 +899,17 @@ NonLinearDynamic :: timesMtrx(FloatArray &vec, FloatArray &answer, CharType type
         }
     }
 
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(answer, EModelDefaultEquationNumbering(), MassExchangeTag);
-#endif
 }
 
 
-#ifdef __PARALLEL_MODE
 int
-NonLinearDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType)
+NonLinearDynamic :: estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType)
 {
     int count = 0, pcount = 0;
-    IntArray locationArray;
     Domain *domain = this->giveDomain(1);
 
-    if ( packUnpackType == ProblemCommMode__ELEMENT_CUT ) {
-        for ( int map: commMap ) {
-            count += domain->giveDofManager( map )->giveNumberOfDofs();
-        }
-
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * count );
-    } else if ( packUnpackType == ProblemCommMode__NODE_CUT ) {
+    if ( packUnpackType == 0 ) { ///@todo Fix this old ProblemCommMode__NODE_CUT value
         for ( int map: commMap ) {
             DofManager *dman = domain->giveDofManager( map );
             for ( Dof *dof: *dman ) {
@@ -945,9 +921,8 @@ NonLinearDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
             }
         }
 
-        //printf ("\nestimated count is %d\n",count);
-        return ( buff.givePackSize(MPI_DOUBLE, 1) * max(count, pcount) );
-    } else if ( packUnpackType == ProblemCommMode__REMOTE_ELEMENT_MODE ) {
+        return ( buff.givePackSizeOfDouble(1) * max(count, pcount) );
+    } else if ( packUnpackType == 1 ) {
         for ( int map: commMap ) {
             count += domain->giveElement( map )->estimatePackSize(buff);
         }
@@ -959,17 +934,7 @@ NonLinearDynamic :: estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &
 }
 
 
-void
-NonLinearDynamic :: initializeCommMaps(bool forceInit)
-{
-    // set up communication patterns
-    communicator->setUpCommunicationMaps(this, true, forceInit);
-    if ( nonlocalExt ) {
-        nonlocCommunicator->setUpCommunicationMaps(this, true, forceInit);
-    }
-}
-
-
+#ifdef __PARALLEL_MODE
 LoadBalancer *
 NonLinearDynamic :: giveLoadBalancer()
 {
@@ -1000,7 +965,7 @@ NonLinearDynamic :: giveLoadBalancerMonitor()
         return NULL;
     }
 }
-
+#endif
 
 void
 NonLinearDynamic :: packMigratingData(TimeStep *tStep)
@@ -1048,7 +1013,7 @@ NonLinearDynamic :: unpackMigratingData(TimeStep *tStep)
                         fprintf(stderr, "[%d] Local : %d(%d) -> %d\n", myrank, idofman, idof, _eq);
                     }
 
- #endif
+ #endif 
                 }
             }
         }
@@ -1063,5 +1028,5 @@ NonLinearDynamic :: unpackMigratingData(TimeStep *tStep)
 
     initFlag = true;
 }
-#endif
+
 } // end namespace oofem

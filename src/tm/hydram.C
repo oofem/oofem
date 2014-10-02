@@ -76,7 +76,7 @@ contextIOResultType
 HydrationModelStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 // saves current context(state) into stream
 {
-    if ( !stream->write(& hydrationDegree, 1) ) {
+    if ( !stream->write(hydrationDegree) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -88,7 +88,7 @@ contextIOResultType
 HydrationModelStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 // restores current context(state) from stream
 {
-    if ( !stream->read(& hydrationDegree, 1) ) {
+    if ( !stream->read(hydrationDegree) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

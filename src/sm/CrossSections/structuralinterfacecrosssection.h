@@ -130,11 +130,11 @@ public:
 
     virtual int checkConsistency();
 
-#ifdef __PARALLEL_MODE
-    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp);
-    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *gp);
-    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *gp);
-#endif
+    virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
+
+    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp);
+    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *gp);
+    virtual int estimatePackSize(DataStream &buff, GaussPoint *gp);
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "StructuralInterfaceCrossSection"; }

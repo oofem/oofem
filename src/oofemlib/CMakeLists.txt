@@ -12,10 +12,13 @@ set (core_unsorted
     set.C
     rvematerial.C
     weakperiodicbc.C
-    prescribedmean.C
     solutionbasedshapefunction.C
     fracturemanager.C
     neumannmomentload.C
+    parallelcontext.C
+	contact/contactmanager.C
+	contact/contactdefinition.C
+	contact/contactelement.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
@@ -197,8 +200,12 @@ set (core_xfem
     xfem/enrichmentfunction.C
     xfem/xfemmanager.C
     xfem/enrichmentitem.C
+    xfem/geometrybasedei.C
+    xfem/hybridei.C
+    xfem/directei.C
+    xfem/listbasedei.C
+    xfem/inclusion.C
     xfem/patchintegrationrule.C
-    xfem/enrichmentdomain.C
     xfem/propagationlaw.C
     xfem/XFEMDebugTools.C
     xfem/enrichmentfronts/enrichmentfront.C
@@ -219,7 +226,6 @@ set (core_parallel
     combuff.C
     domaintransactionmanager.C
     parallelordering.C
-    parallelcontext.C
     dyncombuff.C
     loadbalancer.C
     nonlocalmatwtp.C

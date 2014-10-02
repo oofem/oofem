@@ -69,13 +69,9 @@ void Dof :: giveDofIDs(IntArray &masterDofIDs)
     masterDofIDs = {this->giveDofID()};
 }
 
-int
-Dof :: giveDofManNumber() const { return this->dofManager->giveNumber(); } // termitovo
+int Dof :: giveDofManNumber() const { return this->dofManager->giveNumber(); }
 
-#ifdef __PARALLEL_MODE
-int
-Dof :: giveDofManGlobalNumber() const { return this->dofManager->giveGlobalNumber(); }
-#endif
+int Dof :: giveDofManGlobalNumber() const { return this->dofManager->giveGlobalNumber(); }
 
 void Dof :: printSingleOutputAt(FILE *File, TimeStep *tStep, char ch, ValueModeType mode, double scale)
 // Prints in the data file the unknown 'u' (for example, the displacement
@@ -138,7 +134,7 @@ Dof :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
     // store dofid
     int _val = dofID;
-    if ( !stream->write(& _val, 1) ) {
+    if ( !stream->write(_val) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -151,7 +147,7 @@ Dof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     // restore dofid
     int _val;
-    if ( !stream->read(& _val, 1) ) {
+    if ( !stream->read(_val) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

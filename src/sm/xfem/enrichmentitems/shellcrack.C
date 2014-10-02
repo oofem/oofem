@@ -51,8 +51,8 @@ IRResultType ShellCrack :: initializeFrom(InputRecord *ir)
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
     this->xiBottom = 0.0;
     this->xiTop = 0.0;
-    IR_GIVE_OPTIONAL_FIELD(ir, this->xiBottom, _IFT_ShellCrack_xiBottom);
-    IR_GIVE_OPTIONAL_FIELD(ir, this->xiTop, _IFT_ShellCrack_xiTop);
+    IR_GIVE_FIELD(ir, this->xiBottom, _IFT_ShellCrack_xiBottom);
+    IR_GIVE_FIELD(ir, this->xiTop, _IFT_ShellCrack_xiTop);
     return IRRT_OK;
 }
 

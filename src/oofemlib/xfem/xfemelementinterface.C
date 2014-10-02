@@ -34,6 +34,7 @@
 
 #include "xfemelementinterface.h"
 #include "enrichmentitem.h"
+#include "geometrybasedei.h"
 #include "engngm.h"
 #include "gausspoint.h"
 #include "materialmode.h"
@@ -43,7 +44,6 @@
 #include "xfemmanager.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
-#include "enrichmentdomain.h"
 #include "dynamicinputrecord.h"
 
 
@@ -63,16 +63,6 @@ XfemElementInterface :: XfemElementInterface(Element *e) :
 
 XfemElementInterface :: ~XfemElementInterface()
 {
-    size_t numCZRules = mpCZIntegrationRules.size();
-
-    for ( size_t i = 0; i < numCZRules; i++ ) {
-        if ( mpCZIntegrationRules [ i ] != NULL ) {
-            delete mpCZIntegrationRules [ i ];
-            mpCZIntegrationRules [ i ] = NULL;
-        }
-    }
-
-    mpCZIntegrationRules.clear();
 }
 
 void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl)
@@ -178,33 +168,27 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
             for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
                 EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices [ i ]);
 
-                double levelSetGP = 0.0;
-                ei->interpLevelSet(levelSetGP, N, elNodes);
-
-                FloatArray gradLevelSetGP(dim);
-                ei->interpGradLevelSet(gradLevelSetGP, dNdx, elNodes);
-
-
                 if ( ei->isDofManEnriched(* dMan) ) {
                     int numEnr = ei->giveNumDofManEnrichments(* dMan);
 
                     // Enrichment function derivative in Gauss point
                     std :: vector< FloatArray >efgpD;
-                    ei->evaluateEnrFuncDerivAt(efgpD, globalCoord, levelSetGP, gradLevelSetGP, globalNodeInd);
-
+                    ei->evaluateEnrFuncDerivAt(efgpD, globalCoord, * iGP.giveNaturalCoordinates(), globalNodeInd, *element, N, dNdx, elNodes);
                     // Enrichment function in Gauss Point
                     std :: vector< double >efGP;
-                    ei->evaluateEnrFuncAt(efGP, globalCoord, levelSetGP, globalNodeInd);
+                    ei->evaluateEnrFuncAt(efGP, globalCoord, * iGP.giveNaturalCoordinates(), globalNodeInd, *element, N, elNodes);
 
 
                     const FloatArray &nodePos = node->giveNodeCoordinates();
 
                     double levelSetNode  = 0.0;
-                    ei->evalLevelSetNormalInNode( levelSetNode, globalNodeInd );
+                    ei->evalLevelSetNormalInNode( levelSetNode, globalNodeInd, nodePos );
 
                     std :: vector< double >efNode;
-                    ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
-
+                    FloatArray nodeNaturalCoord;
+                    iEl.computeLocalCoordinates(nodeNaturalCoord, nodePos);
+//                    ei->evaluateEnrFuncAt(efNode, nodePos, nodeNaturalCoord, globalNodeInd, iEl);
+                    ei->evaluateEnrFuncInNode(efNode, *node);
 
                     for ( int k = 0; k < numEnr; k++ ) {
                         // matrix to be added anytime a node is enriched
@@ -306,9 +290,6 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
         const std :: vector< int > &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices(globalNodeInd);
         for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
             EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices [ i ]);
-            double levelSetGP = 0.0;
-            ei->interpLevelSet(levelSetGP, Nc, elNodes);
-
 
             if ( ei->isDofManEnriched(* dMan) ) {
                 int numEnr = ei->giveNumDofManEnrichments(* dMan);
@@ -316,16 +297,16 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
 
                 // Enrichment function in Gauss Point
                 std :: vector< double >efGP;
-                ei->evaluateEnrFuncAt(efGP, globalCoord, levelSetGP, globalNodeInd);
+                ei->evaluateEnrFuncAt(efGP, globalCoord, iLocCoord, globalNodeInd, iEl, Nc, elNodes);
 
 
                 const FloatArray &nodePos = * ( dMan->giveCoordinates() );
 
-                double levelSetNode  = 0.0;
-                ei->evalLevelSetNormalInNode( levelSetNode, dMan->giveGlobalNumber() );
-
                 std :: vector< double >efNode;
-                ei->evaluateEnrFuncAt(efNode, nodePos, levelSetNode, globalNodeInd);
+
+                FloatArray nodePosLocCoord;
+                iEl.computeLocalCoordinates(nodePosLocCoord, nodePos);
+                ei->evaluateEnrFuncAt(efNode, nodePos, nodePosLocCoord, globalNodeInd, iEl, Nc, elNodes);
 
 
                 for ( int k = 0; k < numEnr; k++ ) {
@@ -474,9 +455,10 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
         int ruleNum = 1;
         if ( partitionSucceeded ) {
-            IntegrationRule *intRule = new PatchIntegrationRule(ruleNum, element, allTri);
-            intRule->SetUpPointsOnTriangle(xMan->giveNumGpPerTri(), matMode);
-            element->setIntegrationRules({intRule});
+            std :: vector< std :: unique_ptr< IntegrationRule > > intRule;
+            intRule.emplace_back(new PatchIntegrationRule(ruleNum, element, allTri));
+            intRule[0]->SetUpPointsOnTriangle(xMan->giveNumGpPerTri(), matMode);
+            element->setIntegrationRules(std :: move(intRule));
         }
     }
 
@@ -495,7 +477,12 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
     elCenter.times( 1.0 / double( element->giveNumberOfDofManagers() ) );
 
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
-    EnrichmentItem *ei = xMan->giveEnrichmentItem(iEnrItemIndex);
+    GeometryBasedEI *ei = dynamic_cast<GeometryBasedEI*>(xMan->giveEnrichmentItem(iEnrItemIndex));
+
+    if(ei == NULL) {
+        oIntersection = false;
+        return;
+    }
 
     std :: vector< FloatArray >intersecPoints;
     std :: vector< int >intersecEdgeInd;
@@ -532,7 +519,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         bool foundTip = false;
         double tipArcPos = -1.0;
 
-        if ( ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), elCenter) ) {
+        if ( ei->giveElementTipCoord(tipCoord, tipArcPos, *element, elCenter) ) {
             foundTip = true;
         }
         int nEdges = this->element->giveInterpolation()->giveNumberOfEdges();
@@ -650,14 +637,18 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
     elCenter.times(1.0 / 3.0);
 
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
-    EnrichmentItem *ei = xMan->giveEnrichmentItem(iEnrItemIndex);
+    GeometryBasedEI *ei = dynamic_cast<GeometryBasedEI*>(xMan->giveEnrichmentItem(iEnrItemIndex));
+
+    if(ei == NULL) {
+        oIntersection = false;
+        return;
+    }
 
     std :: vector< FloatArray >intersecPoints;
     std :: vector< int >intersecEdgeInd;
 
     std :: vector< double >minDistArcPos;
     ei->computeIntersectionPoints(intersecPoints, intersecEdgeInd, element, iTri, minDistArcPos);
-
 
     if ( intersecPoints.size() == 2 ) {
         // The element is completely cut in two.
@@ -689,7 +680,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         //if ( ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), iTri, elCenter) ) {
         //    foundTip = true;
         //}
-		if (ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), elCenter)) {
+		if (ei->giveElementTipCoord(tipCoord, tipArcPos, *element, elCenter)) {
 			foundTip = true;
 		}
 
@@ -883,13 +874,14 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, const double &i
 
 
             for ( int i = 1; i <= Ns.giveSize(); i++ ) {
+                const FloatArray &nodePos = *(element->giveNode(i)->giveCoordinates() );
                 double phiNode = 0.0;
-                if(!ei->evalLevelSetNormalInNode(phiNode, elNodes [ i - 1 ])) {
+                if(!ei->evalLevelSetNormalInNode(phiNode, elNodes [ i - 1 ], nodePos)) {
                     evaluationSucceeded = false;
                 }
 
                 double gammaNode = 0.0;
-                if(!ei->evalLevelSetTangInNode(gammaNode, elNodes [ i - 1 ])) {
+                if(!ei->evalLevelSetTangInNode(gammaNode, elNodes [ i - 1 ], nodePos)) {
                     evaluationSucceeded = false;
                 }
 
@@ -1002,32 +994,37 @@ void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, 
         for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
             EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices [ i ]);
 
-            if ( ei->isDofManEnriched(* dMan) ) {
-                int numEnr = ei->giveNumDofManEnrichments(* dMan);
+            GeometryBasedEI *geoEI = dynamic_cast<GeometryBasedEI*>(ei);
 
-                std :: vector< double >efJumps;
-                bool gpLivesOnCurrentCrack = (nodeEiIndices [ i ] == iEnrItemIndex);
+            if(geoEI != NULL) {
 
-                bool gpLivesOnInteractingCrack = false;
-                for( int touchingEIIndex : iTouchingEnrItemIndices ) {
-                    if( nodeEiIndices [ i ] == touchingEIIndex ) {
-                        gpLivesOnInteractingCrack = true;
+                if ( geoEI->isDofManEnriched(* dMan) ) {
+                    int numEnr = geoEI->giveNumDofManEnrichments(* dMan);
+
+                    std :: vector< double >efJumps;
+                    bool gpLivesOnCurrentCrack = (nodeEiIndices [ i ] == iEnrItemIndex);
+
+                    bool gpLivesOnInteractingCrack = false;
+                    for( int touchingEIIndex : iTouchingEnrItemIndices ) {
+                        if( nodeEiIndices [ i ] == touchingEIIndex ) {
+                            gpLivesOnInteractingCrack = true;
+                        }
                     }
-                }
 
-                if ( nodeEiIndices [ i ] == iEnrItemIndex || gpLivesOnInteractingCrack) {
-                    ei->evaluateEnrFuncJumps(efJumps, globalNodeInd, iGP, gpLivesOnCurrentCrack);
-                }
-
-                for ( int k = 0; k < numEnr; k++ ) {
                     if ( nodeEiIndices [ i ] == iEnrItemIndex || gpLivesOnInteractingCrack) {
-                        NdNode [ ndNodeInd ] = efJumps [ k ] * Nc.at(j);
-                    } else {
-                        NdNode [ ndNodeInd ] = 0.0;
+                        geoEI->evaluateEnrFuncJumps(efJumps, globalNodeInd, iGP, gpLivesOnCurrentCrack);
                     }
 
-                    counter++;
-                    ndNodeInd++;
+                    for ( int k = 0; k < numEnr; k++ ) {
+                        if ( nodeEiIndices [ i ] == iEnrItemIndex || gpLivesOnInteractingCrack) {
+                            NdNode [ ndNodeInd ] = efJumps [ k ] * Nc.at(j);
+                        } else {
+                            NdNode [ ndNodeInd ] = 0.0;
+                        }
+
+                        counter++;
+                        ndNodeInd++;
+                    }
                 }
             }
         }

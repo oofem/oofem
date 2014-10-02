@@ -5,6 +5,8 @@ set (sm_element
     Elements/igaelements.C
     Elements/structuralelement.C
     Elements/nlstructuralelement.C
+    Elements/structural2delement.C
+    Elements/structural3delement.C
     Elements/3D/lspace.C 
     Elements/3D/lspacebb.C
     Elements/3D/qspace.C 
@@ -15,14 +17,14 @@ set (sm_element
     Elements/3D/qtrspacegrad.C
     Elements/3D/lwedge.C 
     Elements/3D/qwedge.C 
+    Elements/3D/macrolspace.C
+    Elements/3D/qspacegrad.C
     Elements/3D/qwedgegrad.C
-    Elements/htselement.C
     Elements/Bars/truss1d.C 
     Elements/Bars/truss2d.C 
     Elements/Bars/truss3d.C
-    Elements/PlaneStress/trplanstrss.C 
-    Elements/PlaneStrain/trplanestrain.C 
-    Elements/PlaneStress/trplanrot.C
+    Elements/Bars/qtruss1d.C 
+    Elements/Bars/qtruss1dgrad.C
     Elements/Beams/libeam2d.C 
     Elements/Beams/libeam2dnl.C
     Elements/Beams/libeam3d.C 
@@ -31,59 +33,56 @@ set (sm_element
     Elements/Beams/libeam3d2.C
     Elements/Beams/beam2d.C 
     Elements/Beams/beam3d.C
-    Elements/PlaneStrain/quad1planestrain.C 
+    Elements/Plates/cct.C
+    Elements/Plates/dkt.C 
+    Elements/Plates/qdkt.C
+    Elements/Plates/quad1mindlin.C
     Elements/Shells/rershell.C 
     Elements/Shells/tr_shell01.C 
-    Elements/PlaneStress/qplanstrss.C 
-    Elements/PlaneStress/q9planstrss.C 
-    Elements/PlaneStress/qtrplstr.C 
-    Elements/Axisymmetry/q4axisymm.C
-    Elements/PlaneStress/planstrss.C
-    Elements/PlaneStress/planstrssxfem.C
-    Elements/PlaneStress/trplanstrssxfem.C
-    Elements/Axisymmetry/axisymm3d.C 
-    Elements/Axisymmetry/l4axisymm.C
-    Elements/3D/macrolspace.C
-    Elements/Plates/cct.C
-    Elements/Interfaces/cohsur3d.C
     Elements/Shells/cct3d.C
-    Elements/Plates/quad1mindlin.C
     Elements/Shells/quad1mindlinshell3d.C
-    Elements/PlaneStress/trplanrot3d.C
-    Elements/lumpedmasselement.C
-    Elements/springelement.C
-    Elements/PlaneStress/qtrplstrgrad.C
-    Elements/PlaneStress/qplanestressgrad.C
-    Elements/latticestructuralelement.C
-    Elements/lattice2d.C
     Elements/Shells/shell7base.C
     Elements/Shells/tr2shell7.C
     Elements/Shells/shell7basexfem.C
     Elements/Shells/tr2shell7xfem.C
-    Elements/PlaneStress/trplanestressrotallman.C
-    Elements/Interfaces/structuralinterfaceelement.C
-    Elements/tet21ghostsolid.C
-    Elements/graddpelement.C 
-    Materials/graddpmaterialextensioninterface.C
-    Elements/Bars/qtruss1d.C 
-    Elements/Bars/qtruss1dgrad.C
+    Elements/Axisymmetry/q4axisymm.C
+    Elements/Axisymmetry/axisymm3d.C 
+    Elements/Axisymmetry/l4axisymm.C
+    Elements/PlaneStrain/quad1planestrain.C 
     Elements/PlaneStrain/qplanestrain.C 
     Elements/PlaneStrain/qplanestraingrad.C
     Elements/PlaneStrain/qtrplanestrain.C 
     Elements/PlaneStrain/qtrplanestraingrad.C
-    Elements/3D/qspacegrad.C
-    Elements/Plates/dkt.C 
-    Elements/Plates/qdkt.C
+    Elements/PlaneStrain/trplanestrain.C 
+    Elements/PlaneStress/trplanrot.C
+    Elements/PlaneStress/trplanstrss.C 
+    Elements/PlaneStress/qplanstrss.C 
+    Elements/PlaneStress/q9planstrss.C 
+    Elements/PlaneStress/qtrplstr.C 
+    Elements/PlaneStress/planstrss.C
+    Elements/PlaneStress/planstrssxfem.C
+    Elements/PlaneStress/trplanstrssxfem.C
+    Elements/PlaneStress/qtrplstrgrad.C
+    Elements/PlaneStress/trplanrot3d.C
+    Elements/PlaneStress/qplanestressgrad.C
+    Elements/PlaneStress/trplanestressrotallman.C
+    Elements/PlaneStress/basicelement.C
+    Elements/htselement.C
+    Elements/latticestructuralelement.C
+    Elements/graddpelement.C 
+    Elements/lumpedmasselement.C
+    Elements/springelement.C
+    Elements/lattice2d.C
+    Elements/tet21ghostsolid.C
     Elements/quad1platesubsoil.C 
     Elements/tria1platesubsoil.C
     Elements/trwarp.C
-    Elements/PlaneStress/basicelement.C
-    Elements/structural2delement.C
-    Elements/structural3delement.C
     #qplanstrssphf.C
     )
 
 set (sm_interface_elements
+    Elements/Interfaces/cohsur3d.C
+    Elements/Interfaces/structuralinterfaceelement.C
     Elements/Interfaces/intelpoint.C
     Elements/Interfaces/intelline1.C
     Elements/Interfaces/intelline2.C
@@ -137,39 +136,9 @@ set (sm_loads
 set (sm_material
     Materials/abaqususermaterial.C
     Materials/structuralmaterial.C
-    Materials/InterfaceMaterials/structuralinterfacematerial.C
     Materials/linearelasticmaterial.C
     Materials/isolinearelasticmaterial.C
     Materials/ortholinearelasticmaterial.C
-    Materials/ConcreteMaterials/concrete2.C 
-    Materials/ConcreteMaterials/concrete3.C 
-    Materials/ConcreteMaterials/concretedpm.C 
-    Materials/ConcreteMaterials/concretedpm2.C
-    Materials/RheoChainMaterials/cebfip78.C
-    Materials/RheoChainMaterials/doublepowerlaw.C
-    Materials/b3mat.C
-    Materials/ConcreteMaterials/b3solidmat.C
-    Materials/rcsd.C 
-    Materials/rcsde.C 
-    Materials/rcsdnl.C
-    Materials/m4.C
-    Materials/ConcreteMaterials/idm1.C 
-    Materials/ConcreteMaterials/idmnl1.C 
-    Materials/ConcreteMaterials/idmgrad1.C
-    Materials/ConcreteMaterials/mazarsmodel.C 
-    Materials/ConcreteMaterials/mazarsmodelnl.C
-    Materials/druckerPragerPlasticitySM.C
-    Materials/druckerpragercutmat.C
-    Materials/masonry02.C
-    Materials/j2mat.C
-    Materials/mat_cebfip90.C
-    Materials/mdm.C
-    Materials/ConcreteMaterials/compodamagemat.C
-    Materials/micromaterial.C
-    Materials/hyperelasticmaterial.C
-    Materials/misesmat.C 
-    Materials/misesmatgrad.C 
-    Materials/misesmatnl.C
     Materials/BoneMaterials/trabbonematerial.C 
     Materials/BoneMaterials/trabbonenl3d.C 
     Materials/BoneMaterials/trabbonenl.C 
@@ -177,12 +146,45 @@ set (sm_material
     Materials/BoneMaterials/trabboneembed.C 
     Materials/BoneMaterials/trabbonenlembed.C 
     Materials/BoneMaterials/trabbonegrad3d.C
-    Materials/InterfaceMaterials/cohint.C
+    Materials/ConcreteMaterials/concrete2.C 
+    Materials/ConcreteMaterials/concrete3.C 
+    Materials/ConcreteMaterials/concretedpm.C 
+    Materials/ConcreteMaterials/concretedpm2.C
+    Materials/ConcreteMaterials/idm1.C 
+    Materials/ConcreteMaterials/idmnl1.C 
+    Materials/ConcreteMaterials/idmgrad1.C
+    Materials/ConcreteMaterials/mazarsmodel.C 
+    Materials/ConcreteMaterials/mazarsmodelnl.C
+    Materials/ConcreteMaterials/b3solidmat.C
+    Materials/ConcreteMaterials/mplasticmaterial2.C
+    Materials/ConcreteMaterials/compodamagemat.C
+    Materials/RheoChainMaterials/cebfip78.C
+    Materials/RheoChainMaterials/doublepowerlaw.C
     Materials/RheoChainMaterials/mps.C
+    Materials/RheoChainMaterials/rheoChM.C 
+    Materials/RheoChainMaterials/maxwellChM.C 
+    Materials/RheoChainMaterials/kelvinChM.C
+    Materials/RheoChainMaterials/kelvinChSolM.C
+    Materials/b3mat.C
+    Materials/rcsd.C 
+    Materials/rcsde.C 
+    Materials/rcsdnl.C
+    Materials/RheoChainMaterials/mooneyrivlin.C # TODO This isn't a rheochain material at al
+    Materials/m4.C
+    Materials/druckerPragerPlasticitySM.C
+    Materials/druckerpragercutmat.C
+    Materials/masonry02.C
+    Materials/j2mat.C
+    Materials/mat_cebfip90.C
+    Materials/mdm.C
+    Materials/micromaterial.C
+    Materials/hyperelasticmaterial.C
+    Materials/misesmat.C 
+    Materials/misesmatgrad.C 
+    Materials/misesmatnl.C
     Materials/rankinemat.C
     Materials/rankinematgrad.C
     Materials/rankinematnl.C
-    Materials/RheoChainMaterials/kelvinChSolM.C
     Materials/latticematstatus.C
     Materials/latticedamage2d.C
     Materials/dustmat.C
@@ -192,12 +194,20 @@ set (sm_material
     Materials/anisodamagemodel.C
     Materials/winklerpasternak.C
     Materials/structmatsettable.C
-    Materials/InterfaceMaterials/bondceb.C
-    Materials/RheoChainMaterials/mooneyrivlin.C
     Materials/tutorialmaterial.C
-	)
+    Materials/graddpmaterialextensioninterface.C
+    Materials/rcm2.C
+    Materials/isodamagemodel.C
+    )
+
+if (USE_PYTHON)
+    list (APPEND sm_material Materials/structuralpythonmaterial.C)
+endif ()
 
 set (sm_interface_materials
+    Materials/InterfaceMaterials/structuralinterfacematerial.C
+    Materials/InterfaceMaterials/bondceb.C
+    Materials/InterfaceMaterials/cohint.C
     Materials/InterfaceMaterials/intmatbilinczfagerstrom.C
     Materials/InterfaceMaterials/intmatbilinczjansson.C
     Materials/InterfaceMaterials/intmatbilinearcz.C
@@ -234,26 +244,20 @@ set (sm_barrier
 set (sm_status
     Materials/structuralms.C
     Materials/InterfaceMaterials/structuralinterfacematerialstatus.C
-    Materials/RheoChainMaterials/rheoChM.C 
-    Materials/RheoChainMaterials/maxwellChM.C 
-    Materials/RheoChainMaterials/kelvinChM.C
-    Materials/rcm2.C
-    Materials/isodamagemodel.C
-    Materials/ConcreteMaterials/mplasticmaterial2.C
     Materials/deformationtheorymaterial.C
     Materials/microplanematerial.C 
     Materials/microplanematerial_bazant.C
     )
 
 set (sm_xfem
-	xfem/xfemstructuralelementinterface.C
-	xfem/enrichmentitems/crack.C
-	xfem/enrichmentitems/delamination.C
-	xfem/enrichmentitems/shellcrack.C
-	xfem/propagationlaws/plhoopstresscirc.C
-	xfem/xfemstructuremanager.C
-	EngineeringModels/xfemsolverinterface.C
-	)
+    xfem/xfemstructuralelementinterface.C
+    xfem/enrichmentitems/crack.C
+    xfem/enrichmentitems/delamination.C
+    xfem/enrichmentitems/shellcrack.C
+    xfem/propagationlaws/plhoopstresscirc.C
+    xfem/xfemstructuremanager.C
+    EngineeringModels/xfemsolverinterface.C
+    )
 
 set (sm_unsorted
     particle.C
@@ -263,12 +267,14 @@ set (sm_unsorted
     gpinitmodule.C
     stressstrainbasevector.C stressvector.C strainvector.C
     mappers/primvarmapper.C
+    Contact/cdefnode2node.C
+    Contact/celnode2node.C
     )
 
 set (sm_parallel
-    feticommunicator.C
-    fetiboundarydofman.C
-    fetisolver.C
+    FETISolver/feticommunicator.C
+    FETISolver/fetiboundarydofman.C
+    FETISolver/fetisolver.C
     )
 
 set (sm_obsolete
@@ -297,7 +303,7 @@ set (sm
     ${sm_unsorted}
     ${sm_obsolete}
     ${sm_new}
-	${sm_boundary_conditions}
+    ${sm_boundary_conditions}
     )
 
 if (USE_PARALLEL)

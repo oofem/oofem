@@ -99,9 +99,7 @@ public:
     virtual const char *giveClassName() const { return "LinearStatic"; }
     virtual fMode giveFormulation() { return TL; }
 
-#ifdef __PARALLEL_MODE
-    int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType);
-#endif
+    virtual int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType);
 };
 } // end namespace oofem
 #endif // linearstatic_h

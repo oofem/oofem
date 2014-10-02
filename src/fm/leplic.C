@@ -88,15 +88,15 @@ LEPlicElementInterface :: saveContext(DataStream *stream, ContextMode mode, void
     contextIOResultType iores;
 
     // write a raw data
-    if ( !stream->write(& vof, 1) ) {
+    if ( !stream->write(vof) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& p, 1) ) {
+    if ( !stream->write(p) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = normal.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = normal.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -109,17 +109,17 @@ LEPlicElementInterface :: restoreContext(DataStream *stream, ContextMode mode, v
     contextIOResultType iores;
 
     // read raw data
-    if ( !stream->read(& vof, 1) ) {
+    if ( !stream->read(vof) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     temp_vof = vof;
-    if ( !stream->read(& p, 1) ) {
+    if ( !stream->read(p) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     temp_p = p;
-    if ( ( iores = normal.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = normal.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

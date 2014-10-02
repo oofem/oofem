@@ -139,19 +139,19 @@ DruckerPragerPlasticitySMStatus :: saveContext(DataStream *stream, ContextMode m
     }
 
     // write raw data
-    if ( ( iores = plasticStrainDeviator.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasticStrainDeviator.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->write(& volumetricPlasticStrain, 1) ) {
+    if ( !stream->write(volumetricPlasticStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& kappa, 1) ) {
+    if ( !stream->write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& temp_state_flag, 1) ) {
+    if ( !stream->write(temp_state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -170,19 +170,19 @@ DruckerPragerPlasticitySMStatus :: restoreContext(DataStream *stream, ContextMod
     }
 
     // read raw data
-    if ( ( iores = plasticStrainDeviator.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = plasticStrainDeviator.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(& volumetricPlasticStrain, 1) ) {
+    if ( !stream->read(volumetricPlasticStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& kappa, 1) ) {
+    if ( !stream->read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& temp_state_flag, 1) ) {
+    if ( !stream->read(temp_state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -828,7 +828,6 @@ DruckerPragerPlasticitySM :: CreateStatus(GaussPoint *gp) const
 }
 
 
-#ifdef __PARALLEL_MODE
 double
 DruckerPragerPlasticitySM :: predictRelativeComputationalCost(GaussPoint *gp)
 {
@@ -845,7 +844,6 @@ DruckerPragerPlasticitySM :: predictRelativeComputationalCost(GaussPoint *gp)
     }
 }
 
-#endif
 } // end namespace oofem
 
 #undef PRINTFDP

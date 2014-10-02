@@ -426,7 +426,7 @@ LIBeam3dNL2 :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 1 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
     }
 }
@@ -908,7 +908,7 @@ LIBeam3dNL2 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = q.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = q.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -928,7 +928,7 @@ LIBeam3dNL2 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = q.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = q.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

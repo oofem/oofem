@@ -46,9 +46,7 @@
 #include "dof.h"
 #include "contextioerr.h"
 #include "exportmodulemanager.h"
-#ifdef __PARALLEL_MODE
- #include "parallelcontext.h"
-#endif
+#include "parallelcontext.h"
 
 namespace oofem {
 #define CALM_RESET_STEP_REDUCE 0.25
@@ -102,9 +100,7 @@ CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
     // Maximum number of restarts when convergence not reached during maxiter
     maxRestarts = 4;
 
-#ifdef __PARALLEL_MODE
     parallel_context = engngModel->giveParallelContext( d->giveNumber() );
-#endif
 }
 
 
@@ -179,12 +175,8 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     }
 
     if ( R0 ) {
-#ifdef __PARALLEL_MODE
         RR0 = parallel_context->localNorm(* R0);
         RR0 *= RR0;
-#else
-        RR0 = R0->computeSquaredNorm();
-#endif
     } else {
         RR0 = 0.0;
     }
@@ -197,12 +189,8 @@ CylindricalALM :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     //
     // A.2.   We assume positive-definite (0)Kt (tangent stiffness mtrx).
     //
-#ifdef __PARALLEL_MODE
     RR = parallel_context->localNorm(* R);
     RR *= RR;
-#else
-    RR = R->computeSquaredNorm();
-#endif
 
 restart:
     //
@@ -222,12 +210,8 @@ restart:
     SparseNonLinearSystemNM :: applyPerturbation(&deltaXt);
 
     if ( calm_Control == calm_hpc_off ) {
-#ifdef __PARALLEL_MODE
         XX = parallel_context->localNorm(deltaXt);
         XX *= XX;
-#else
-        XX = deltaXt.computeSquaredNorm();
-#endif
         p = sqrt(XX + Psi * Psi * RR);
     } else if ( calm_Control == calm_hpc_on ) {
         HPsize = calm_HPCIndirectDofMask.giveSize();
@@ -240,15 +224,11 @@ restart:
             }
         }
 
-#ifdef __PARALLEL_MODE
-        FloatArray XXRR(2), collected_XXRR;
-        XXRR(0) = _XX;
-        XXRR(1) = _RR;
-
-        parallel_context->accumulate(XXRR, collected_XXRR);
+        // In case of paralllel analysis:
+        FloatArray collected_XXRR;
+        parallel_context->accumulate({_XX, _RR}, collected_XXRR);
         _XX = collected_XXRR(0);
         _RR = collected_XXRR(1);
-#endif
 
         p = sqrt(_XX + Psi * Psi * _RR);
     } else if ( calm_Control == calml_hpc ) {
@@ -260,16 +240,11 @@ restart:
             }
         }
 
-#ifdef __PARALLEL_MODE
+        // In case of paralllel analysis:
         p = parallel_context->accumulate(p);
-#endif
     }
 
-#ifdef __PARALLEL_MODE
     XR = parallel_context->localDotProduct(deltaXt, * R);
-#else
-    XR = deltaXt.dotProduct(* R);
-#endif
     /* XR is unscaled Bergan's param of current stiffness XR = deltaXt^T k deltaXt
      * this is used to test whether k has negative or positive slope */
 
@@ -394,12 +369,9 @@ restart:
             * X = XInitial;
             X->add(* dX);
 
-#ifdef __PARALLEL_MODE
             drProduct = parallel_context->localNorm(ddX);
             drProduct *= drProduct;
-#else
-            drProduct = ddX.computeSquaredNorm();
-#endif
+
             tNow->incrementStateCounter();     // update solution state counter
             //
             // B.6.
@@ -467,13 +439,9 @@ restart:
     // Seems to be completely unused / Mikael
 #if 0
     /* compute Bergan's parameter of current stiffness */
- #ifdef __PARALLEL_MODE
     double RDR = parallel_context->localDotProduct(* R, * dX);
     double DR = parallel_context->localNorm(* dX);
     bk = DeltaLambda * RDR / ( DR * DR );
- #else
-    bk = DeltaLambda * dX->dotProduct(* R) / dX->computeSquaredNorm();
- #endif
 
     if ( tNow->giveNumber() == 1 ) {
         // compute Bergan_k0
@@ -525,11 +493,9 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
      * std::list<__DofIDSet> __ccDofGroups;
      * int nccdg; // number of Convergence Criteria Dof Groups
      */
-    int _dg, _idofman, _ielem, _eq, _ng = nccdg, ndofman = domain->giveNumberOfDofManagers();
+    int _ng = nccdg, ndofman = domain->giveNumberOfDofManagers();
     int nelem = domain->giveNumberOfElements();
-    double forceErr, dispErr, _val;
-    DofManager *_idofmanptr;
-    Element *_ielemptr;
+    double forceErr, dispErr;
     FloatArray rhs; // residual of momentum balance eq (unbalanced nodal forces)
     FloatArray dg_forceErr(nccdg), dg_dispErr(nccdg), dg_totalLoadLevel(nccdg), dg_totalDisp(nccdg);
     bool answer;
@@ -558,22 +524,19 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
         dg_totalLoadLevel.zero();
         dg_totalDisp.zero();
         // loop over dof managers
-        for ( _idofman = 1; _idofman <= ndofman; _idofman++ ) {
-            _idofmanptr = domain->giveDofManager(_idofman);
-#ifdef __PARALLEL_MODE
+        for ( int _idofman = 1; _idofman <= ndofman; _idofman++ ) {
+            DofManager *_idofmanptr = domain->giveDofManager(_idofman);
             if ( !_idofmanptr->isLocal() ) {
                 continue;
             }
 
-#endif
-
             // loop over individual dofs
             for ( Dof *_idofptr: *_idofmanptr ) {
                 // loop over dof groups
-                for ( _dg = 1; _dg <= _ng; _dg++ ) {
+                for ( int _dg = 1; _dg <= _ng; _dg++ ) {
                     // test if dof ID is in active set
                     if ( ccDofGroups.at(_dg - 1).find( _idofptr->giveDofID() ) != ccDofGroups.at(_dg - 1).end() ) {
-                        _eq = _idofptr->giveEquationNumber(dn);
+                        int _eq = _idofptr->giveEquationNumber(dn);
 
                         if ( _eq ) {
 #ifdef __PARALLEL_MODE
@@ -582,7 +545,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
                             }
 #endif
 
-                            _val = rhs.at(_eq);
+                            double _val = rhs.at(_eq);
                             dg_forceErr.at(_dg) += _val * _val;
                             _val = ddX.at(_eq);
                             dg_dispErr.at(_dg)  += _val * _val;
@@ -603,23 +566,21 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
         } // end loop over dof managers
 
         // loop over elements and their DOFs
-        for ( _ielem = 1; _ielem <= nelem; _ielem++ ) {
-            _ielemptr = domain->giveElement(_ielem);
-#ifdef __PARALLEL_MODE
+        for ( int _ielem = 1; _ielem <= nelem; _ielem++ ) {
+            Element *_ielemptr = domain->giveElement(_ielem);
             if ( _ielemptr->giveParallelMode() != Element_local ) {
                 continue;
             }
 
-#endif
             // loop over element internal Dofs
-            for ( _idofman = 1; _idofman <= _ielemptr->giveNumberOfInternalDofManagers(); _idofman++ ) {
+            for ( int _idofman = 1; _idofman <= _ielemptr->giveNumberOfInternalDofManagers(); _idofman++ ) {
                 // loop over individual dofs
                 for ( Dof *_idofptr: *_ielemptr->giveInternalDofManager(_idofman) ) {
                     // loop over dof groups
-                    for ( _dg = 1; _dg <= _ng; _dg++ ) {
+                    for ( int _dg = 1; _dg <= _ng; _dg++ ) {
                         // test if dof ID is in active set
                         if ( ccDofGroups.at(_dg - 1).find( _idofptr->giveDofID() ) != ccDofGroups.at(_dg - 1).end() ) {
-                            _eq = _idofptr->giveEquationNumber(dn);
+                            int _eq = _idofptr->giveEquationNumber(dn);
 
                             if ( _eq ) {
 #ifdef __PARALLEL_MODE
@@ -628,7 +589,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
                                 }
 #endif
 
-                                _val = rhs.at(_eq);
+                                double _val = rhs.at(_eq);
                                 dg_forceErr.at(_dg) += _val * _val;
                                 _val = ddX.at(_eq);
                                 dg_dispErr.at(_dg)  += _val * _val;
@@ -649,9 +610,8 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
             } // end loop over internal element dofmans
         } // end loop over elements
 
-#ifdef __PARALLEL_MODE
         // exchange individual partition contributions (simultaneously for all groups)
-        FloatArray collectiveErr(_ng);
+        FloatArray collectiveErr;
         parallel_context->accumulate(dg_forceErr, collectiveErr);
         dg_forceErr = collectiveErr;
         parallel_context->accumulate(dg_dispErr, collectiveErr);
@@ -660,11 +620,10 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
         dg_totalLoadLevel = collectiveErr;
         parallel_context->accumulate(dg_totalDisp, collectiveErr);
         dg_totalDisp = collectiveErr;
-#endif
 
         OOFEM_LOG_INFO("CALMLS:       %-15d %-15e ", nite, Lambda);
         // loop over dof groups
-        for ( _dg = 1; _dg <= _ng; _dg++ ) {
+        for ( int _dg = 1; _dg <= _ng; _dg++ ) {
             //  compute a relative error norm
             if ( ( dg_totalLoadLevel.at(_dg) ) < calm_SMALL_ERROR_NUM ) {
                 dg_forceErr.at(_dg) = sqrt( dg_forceErr.at(_dg) );
@@ -704,18 +663,11 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
         // compute force error(s)
         //
         double dXX;
-#ifdef __PARALLEL_MODE
         forceErr = parallel_context->localNorm(rhs);
         forceErr *= forceErr;
         dXX = parallel_context->localNorm(X);
         dXX *= dXX;
-#else
-        // err is relative error of unbalanced forces
-        forceErr = rhs.computeSquaredNorm();
-        // err is relative displacement change
-        dXX = X.computeSquaredNorm();
 
-#endif
         double eNorm = internalForcesEBENorm.sum();
         // we compute a relative error norm
         if ( ( RR0 + RR * Lambda * Lambda ) > calm_SMALL_ERROR_NUM ) {
@@ -922,19 +874,18 @@ CylindricalALM :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, nccdg, _IFT_CylindricalALM_nccdg);
 
     if ( nccdg >= 1 ) {
-        int _i, _j;
         IntArray _val;
         char name [ 12 ];
         // create an empty set
         __DofIDSet _set;
         // resize dof group vector
         this->ccDofGroups.resize(nccdg, _set);
-        for ( _i = 0; _i < nccdg; _i++ ) {
+        for ( int _i = 0; _i < nccdg; _i++ ) {
             sprintf(name, "%s%d", _IFT_CylindricalALM_ccdg, _i + 1);
             // read dof group as int array under ccdg# keyword
             IR_GIVE_FIELD(ir, _val, name);
             // convert aray into set
-            for ( _j = 1; _j <= _val.giveSize(); _j++ ) {
+            for ( int _j = 1; _j <= _val.giveSize(); _j++ ) {
                 ccDofGroups.at(_i).insert( ( DofIDItem ) _val.at(_j) );
             }
         }
@@ -992,7 +943,6 @@ void CylindricalALM :: convertHPCMap()
     IntArray indirectMap;
     FloatArray weights;
     int size;
-    int inode, idofid;
     EModelDefaultEquationNumbering dn;
 
     int jglobnum, count = 0, ndofman = domain->giveNumberOfDofManagers();
@@ -1002,25 +952,15 @@ void CylindricalALM :: convertHPCMap()
     for ( int j = 1; j <= ndofman; j++ ) {
         jglobnum = domain->giveNode(j)->giveLabel();
         for ( int i = 1; i <= size; i++ ) {
-            inode = calm_HPCDmanDofSrcArray.at(2 * i - 1);
-            idofid = calm_HPCDmanDofSrcArray.at(2 * i);
+            int inode = calm_HPCDmanDofSrcArray.at(2 * i - 1);
+            int idofid = calm_HPCDmanDofSrcArray.at(2 * i);
             if ( inode == jglobnum ) {
-#ifdef __PARALLEL_MODE
-                // HUHU hard wired domain no 1
                 if ( parallel_context->isLocal( domain->giveNode(j) ) ) {
                     indirectMap.at(++count) = domain->giveNode(j)->giveDofWithID(idofid)->giveEquationNumber(dn);
                     if ( calm_Control == calml_hpc ) {
                         weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
                     }
                 }
-
-#else
-                indirectMap.at(++count) = domain->giveNode(j)->giveDofWithID(idofid)->giveEquationNumber(dn);
-                if ( calm_Control == calml_hpc ) {
-                    weights.at(count) = calm_HPCDmanWeightSrcArray.at(i);
-                }
-
-#endif
 
                 continue;
             }
@@ -1050,7 +990,7 @@ contextIOResultType
 CylindricalALM :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 {
     // write current deltaL
-    if ( !stream->write(& deltaL, 1) ) {
+    if ( !stream->write(deltaL) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1062,7 +1002,7 @@ contextIOResultType
 CylindricalALM :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
 {
     // read last deltaL
-    if ( !stream->read(& deltaL, 1) ) {
+    if ( !stream->read(deltaL) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1096,13 +1036,6 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
                                      double deltaL, double DeltaLambda0, int neq)
 {
     double a1 = 0.0, a2 = 0.0, a3 = 0.0, a4, a5;
-    double _RR, _rr, _a2, _a3, _pr;
-    double lam1, lam2, cos1, cos2;
-    int i, ind, HPsize = 0;
-    FloatArray help;
-#ifndef __PARALLEL_MODE
-    double XX;
-#endif
     //
     // B.3.
     //
@@ -1110,69 +1043,46 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
         if ( calm_Control == calm_hpc_off ) {
             // this two lines are necessary if NRM is used
             // (for MNRM they can be computed at startup A1).
-#ifdef __PARALLEL_MODE
-            double prod [ 6 ];
-            prod [ 0 ] = parallel_context->localNorm(deltaXt);
-            prod [ 0 ] *= prod [ 0 ];
-            prod [ 1 ] = parallel_context->localDotProduct(dX, deltaXt);
-            prod [ 2 ] = parallel_context->localDotProduct(deltaX_, deltaXt);
-            prod [ 3 ] = parallel_context->localNorm(dX);
-            prod [ 3 ] *= prod [ 3 ];
-            prod [ 4 ] = parallel_context->localDotProduct(dX, deltaX_);
-            prod [ 5 ] = parallel_context->localNorm(deltaX_);
-            prod [ 5 ] *= prod [ 5 ];
+            double XX = parallel_context->localNorm(deltaXt);
+            XX *= XX;
+            double XXt = parallel_context->localDotProduct(dX, deltaXt);
+            double X_Xt = parallel_context->localDotProduct(deltaX_, deltaXt);
+            double dXdX = parallel_context->localNorm(dX);
+            dXdX *= dXdX;
+            double dXX_ = parallel_context->localDotProduct(dX, deltaX_);
+            double X_X_ = parallel_context->localNorm(deltaX_);
+            X_X_ *= X_X_;
 
-            a1 = eta * eta * prod [ 0 ] + Psi * Psi * RR;
-            a2 = RR * Psi * Psi * DeltaLambda0 * 2.0;
-            a2 += 2.0 * eta * prod [ 1 ];
-            a2 += 2.0 * eta * eta * prod [ 2 ];
-            a3 = prod [ 3 ];
-            a3 += 2.0 * eta * prod [ 4 ];
-            a3 += eta * eta * prod [ 5 ];
-            a3 += DeltaLambda0 * DeltaLambda0 * RR * Psi * Psi - deltaL * deltaL;
-#else
-            XX = deltaXt.computeSquaredNorm();
             a1 = eta * eta * XX + Psi * Psi * RR;
-            a2 = RR * Psi * Psi * DeltaLambda0 * 2.0;
-            a2 += 2.0 *eta *dX.dotProduct(deltaXt);
-            a2 += 2.0 *eta *eta *deltaX_.dotProduct(deltaXt);
-            a3 = dX.computeSquaredNorm();
-            a3 += 2.0 *eta *dX.dotProduct(deltaX_);
-            a3 += eta * eta * deltaX_.computeSquaredNorm();
-            a3 += DeltaLambda0 * DeltaLambda0 * RR * Psi * Psi - deltaL * deltaL;
-#endif
+            a2 = RR * Psi * Psi * DeltaLambda0 * 2.0
+                    + 2.0 * eta * XXt
+                    + 2.0 * eta * eta * X_Xt;
+            a3 = dXdX
+                    + 2.0 * eta * dXX_
+                    + eta * eta * X_X_
+                    + DeltaLambda0 * DeltaLambda0 * RR * Psi * Psi - deltaL * deltaL;
         } else if ( calm_Control == calm_hpc_on ) {
-            HPsize = calm_HPCIndirectDofMask.giveSize();
-            _rr = 0.;
-            _RR = 0.;
-            _a2 = _a3 = 0.;
-            for ( i = 1; i <= HPsize; i++ ) {
+            double _rr = 0.;
+            double _RR = 0.;
+            double _a2 = 0.;
+            double _a3 = 0.;
+            for ( int i = 1; i <= calm_HPCIndirectDofMask.giveSize(); i++ ) {
+                int ind;
                 if ( ( ind = calm_HPCIndirectDofMask.at(i) ) != 0 ) {
+                    double _pr   = ( dX.at(ind) + eta * deltaX_.at(ind) );
                     _rr += deltaXt.at(ind) * deltaXt.at(ind);
                     _RR += R.at(ind) * R.at(ind);
-                    _pr   = ( dX.at(ind) + eta * deltaX_.at(ind) );
                     _a2 += eta * deltaXt.at(ind)  * _pr;
                     _a3 += _pr * _pr;
                 }
             }
 
-#ifdef __PARALLEL_MODE
-            FloatArray my_(4), col_;
-            my_(0) = _rr;
-            my_(1) = _RR;
-            my_(2) = _a2;
-            my_(3) = _a3;
-            parallel_context->accumulate(my_, col_);
+            FloatArray col_;
+            parallel_context->accumulate({_rr, _RR, _a2, _a3}, col_);
             a1 = eta * eta * col_(0) + Psi *Psi *col_(1);
             a2 = col_(1) * Psi * Psi * DeltaLambda0 * 2.0;
             a2 += 2.0 * col_(2);
             a3 = col_(3) - deltaL * deltaL + DeltaLambda0 *DeltaLambda0 *col_(1) * Psi * Psi;
-#else
-            a1 = eta * eta * _rr + Psi * Psi * _RR;
-            a2 = _RR * Psi * Psi * DeltaLambda0 * 2.0;
-            a2 += 2.0 * _a2;
-            a3 = _a3 - deltaL * deltaL + DeltaLambda0 * DeltaLambda0 * _RR * Psi * Psi;
-#endif
             //printf ("\na1=%e, a2=%e, a3=%e", a1,a2,a3);
         }
 
@@ -1183,45 +1093,38 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
         }
 
         discr = sqrt(discr);
-        lam1 = ( -a2 + discr ) / 2. / a1;
-        lam2 = ( -a2 - discr ) / 2. / a1;
+        double lam1 = ( -a2 + discr ) / 2. / a1;
+        double lam2 = ( -a2 - discr ) / 2. / a1;
 
         // select better lam (according to angle between deltar0 and deltar1(2).
         //
         // up to there rewritten
         //
         if ( calm_Control == calm_hpc_off ) {
-#ifdef __PARALLEL_MODE
             double tmp = parallel_context->localNorm(dX);
             tmp *= tmp;
             a4 = eta * parallel_context->localDotProduct(dX, deltaX_) + tmp;
             a5 = eta * parallel_context->localDotProduct(dX, deltaXt);
-#else
-            a4 = eta * dX.dotProduct(deltaX_) + dX.computeSquaredNorm();
-            a5 = eta * dX.dotProduct(deltaXt);
-#endif
         } else {
             a4 = 0.;
             a5 = 0.;
-            for ( i = 1; i <= HPsize; i++ ) {
+            for ( int i = 1; i <= calm_HPCIndirectDofMask.giveSize(); i++ ) {
+                int ind;
                 if ( ( ind = calm_HPCIndirectDofMask.at(i) ) != 0 ) {
                     a4 += eta * dX.at(ind) * deltaX_.at(ind) + dX.at(ind) * dX.at(ind);
                     a5 += eta * dX.at(ind) * deltaXt.at(ind);
                 }
             }
 
-#ifdef __PARALLEL_MODE
-            FloatArray mya(2), cola;
-            mya(0) = a4;
-            mya(1) = a5;
-            parallel_context->accumulate(mya, cola);
+            // In case of parallel simulations (equiv to no-op on seq sim):
+            FloatArray cola;
+            parallel_context->accumulate({a4, a5}, cola);
             a4 = cola(0);
             a5 = cola(1);
-#endif
         }
 
-        cos1 = ( a4 + a5 * lam1 ) / deltaL / deltaL;
-        cos2 = ( a4 + a5 * lam2 ) / deltaL / deltaL;
+        double cos1 = ( a4 + a5 * lam1 ) / deltaL / deltaL;
+        double cos2 = ( a4 + a5 * lam2 ) / deltaL / deltaL;
         if ( cos1 > cos2 ) {
             deltaLambda = lam1;
         } else {
@@ -1233,22 +1136,20 @@ CylindricalALM :: computeDeltaLambda(double &deltaLambda, const FloatArray &dX, 
         // linearized control
         double nom = 0., denom = 0.;
 
-        HPsize = calm_HPCIndirectDofMask.giveSize();
-        for ( i = 1; i <= HPsize; i++ ) {
+        for ( int i = 1; i <= calm_HPCIndirectDofMask.giveSize(); i++ ) {
+            int ind;
             if ( ( ind = calm_HPCIndirectDofMask.at(i) ) != 0 ) {
                 nom += ( dX.at(ind) + eta * deltaX_.at(ind) ) * calm_HPCWeights.at(i);
                 denom += eta * deltaXt.at(ind) * calm_HPCWeights.at(i);
             }
         }
 
-#ifdef __PARALLEL_MODE
-        FloatArray myv(2), colv(2);
-        myv(0) = nom;
-        myv(1) = denom;
-        parallel_context->accumulate(myv, colv);
+        // In case of parallel simulations (equiv to no-op on seq sim):
+        FloatArray colv;
+        parallel_context->accumulate({nom, denom}, colv);
         nom = colv(0);
         denom = colv(1);
-#endif
+
         if ( fabs(denom) < calm_SMALL_NUM ) {
             OOFEM_ERROR("zero denominator in linearized control");
         }
@@ -1264,7 +1165,7 @@ void
 CylindricalALM :: search(int istep, FloatArray &prod, FloatArray &eta, double amp,
                          double maxetalim, double minetalim, int &ico)
 {
-    int i, ipos, ineg = 0;
+    int ineg = 0;
     double etaneg = 1.0;
     double etamax = 0.0;
 
@@ -1272,7 +1173,7 @@ CylindricalALM :: search(int istep, FloatArray &prod, FloatArray &eta, double am
     // obtain ineg (number of previous line search iteration with negative ratio nearest to origin)
     // as well as max previous step length, etamax
 
-    for ( i = 1; i <= istep; i++ ) {
+    for ( int i = 1; i <= istep; i++ ) {
         etamax = max( etamax, eta.at(i) );
         if ( prod.at(i) >= 0.0 ) {
             continue;
@@ -1290,8 +1191,8 @@ CylindricalALM :: search(int istep, FloatArray &prod, FloatArray &eta, double am
         // allow interpolation
         // first find ipos (position of previous s-l with positive ratio that is
         // closest to ineg (but with smaller s-l)
-        ipos = 1;
-        for ( i = 1; i <= istep; i++ ) {
+        int ipos = 1;
+        for ( int i = 1; i <= istep; i++ ) {
             if ( prod.at(i) <= 0.0 ) {
                 continue;
             }
@@ -1369,17 +1270,11 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
 
     double d6, d7, d8, d9;
 
-#ifdef __PARALLEL_MODE
     d6 = parallel_context->localDotProduct(deltaX_, F);
     d7 = parallel_context->localDotProduct(deltaXt, F);
     d8 = -1.0 * parallel_context->localDotProduct(deltaX_, R);
     d9 = -1.0 * parallel_context->localDotProduct(deltaXt, R);
-#else
-    d6 = deltaX_.dotProduct(F);
-    d7 = deltaXt.dotProduct(F);
-    d8 = -1.0 * deltaX_.dotProduct(R);
-    d9 = -1.0 * deltaXt.dotProduct(R);
-#endif
+
     double e1, e2, d10 = 0.0, d11 = 0.0;
     double s0, si;
     double prevEta, currEta;
@@ -1388,13 +1283,8 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
 
 
     if ( R0 ) {
-#ifdef __PARALLEL_MODE
         d10 = -1.0 * parallel_context->localDotProduct(deltaX_, * R0);
         d11 = -1.0 * parallel_context->localDotProduct(deltaXt, * R0);
-#else
-        d10 = -1.0 * deltaX_.dotProduct(* R0);
-        d11 = -1.0 * deltaXt.dotProduct(* R0);
-#endif
     }
 
     // prepare starting product ratios and step lengths
@@ -1418,24 +1308,15 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
         dX = dXm1;
         dX.add(ddX);
 
-#ifdef __PARALLEL_MODE
         drProduct = parallel_context->localNorm(ddX);
         drProduct *= drProduct;
-#else
-        drProduct = ddX.computeSquaredNorm();
-#endif
 
         tNow->incrementStateCounter(); // update solution state counter
         // update internal forces according to new state
         engngModel->updateComponent(tNow, InternalRhs, domain);
 
-#ifdef __PARALLEL_MODE
         e1 = parallel_context->localDotProduct(deltaX_, F);
         e2 = parallel_context->localDotProduct(deltaXt, F);
-#else
-        e1 = deltaX_.dotProduct(F);
-        e2 = deltaXt.dotProduct(F);
-#endif
 
         s0 = d6 + deltaLambda * d7 + Lambda * d8 + deltaLambda * Lambda * d9 + d10 + deltaLambda * d11;
         si = e1 + deltaLambda * e2 + Lambda * d8 + deltaLambda * Lambda * d9 + d10 + deltaLambda * d11;
@@ -1507,10 +1388,9 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
         dX = dXm1;
         dX.add(ddX);
 
-#ifdef __PARALLEL_MODE
         drProduct = parallel_context->localNorm(ddX);
         drProduct *= drProduct;
-#endif
+
         tNow->incrementStateCounter(); // update solution state counter
         engngModel->updateComponent(tNow, InternalRhs, domain);
         DeltaLambda = DeltaLambdam1 + deltaLambda;

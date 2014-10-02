@@ -128,8 +128,8 @@ TR1_2D_SUPG2_AXI :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize( 2 );
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3, true);
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3, true);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3, true) );
+        integrationRulesArray [ 1 ].reset( new GaussIntegrationRule(2, this, 1, 3, true) );
     }
 }
 
