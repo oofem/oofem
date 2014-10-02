@@ -114,15 +114,9 @@ public:
      * @param n Cross section number.
      * @param d Domain.
      */
-    CrossSection(int n, Domain * d) : FEMComponent(n, d)
-    {
-        propertyDictionary = new Dictionary();
-        setNumber = 0;
-    }
+    CrossSection(int n, Domain * d);
     /// Destructor.
-    virtual ~CrossSection() {
-        delete propertyDictionary;
-    }
+    virtual ~CrossSection();
 
     int giveSetNumber() const { return this->setNumber; };
 

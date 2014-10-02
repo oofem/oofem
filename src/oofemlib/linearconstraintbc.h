@@ -89,9 +89,7 @@ protected:
 public:
     LinearConstraintBC(int n, Domain * d);
     /// Destructor.
-    virtual ~LinearConstraintBC() {
-        delete this->md;
-    }
+    virtual ~LinearConstraintBC();
 
     IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveInputRecordName() const { return _IFT_LinearConstraintBC_Name; }

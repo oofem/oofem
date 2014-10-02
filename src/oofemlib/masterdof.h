@@ -115,9 +115,7 @@ public:
     MasterDof(DofManager * aNode, int nbc, int nic, DofIDItem id);
     MasterDof(DofManager * aNode, DofIDItem id = Undef);
     /// Destructor.
-    virtual ~MasterDof() {
-        delete unknowns;
-    }
+    virtual ~MasterDof();
 
     virtual dofType giveDofType() { return DT_master; }
     virtual const char *giveClassName() const { return "MasterDof"; }

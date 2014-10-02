@@ -48,7 +48,6 @@
 namespace oofem {
 REGISTER_BoundaryCondition(LinearConstraintBC);
 
-
 LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondition(n, d)
 {
     this->md = new Node(0, domain);
@@ -57,6 +56,12 @@ LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondi
     this->md->appendDof( new MasterDof( this->md, ( DofIDItem ) ( d->giveNextFreeDofID() ) ) );
     this->lhsType.clear();
     this->rhsType.clear();
+}
+
+
+LinearConstraintBC :: ~LinearConstraintBC()
+{
+    delete this->md;
 }
 
 

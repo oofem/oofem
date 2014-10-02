@@ -39,9 +39,19 @@
 #include "contextioerr.h"
 #include "gaussintegrationrule.h"
 
-
-
 namespace oofem {
+    
+CrossSection :: CrossSection(int n, Domain* d) : FEMComponent(n, d)
+{
+    propertyDictionary = new Dictionary();
+    setNumber = 0;
+}
+
+CrossSection :: ~CrossSection()
+{
+    delete propertyDictionary;
+}
+
 int
 CrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element)
 {

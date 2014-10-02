@@ -118,11 +118,9 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    Material(int n, Domain * d) : FEMComponent(n, d), propertyDictionary( new Dictionary() ), castingTime(-1.) { }
+    Material(int n, Domain * d);
     /// Destructor.
-    virtual ~Material() {
-        delete propertyDictionary;
-    }
+    virtual ~Material();
 
     /**
      * Returns true if stiffness matrix of receiver is symmetric

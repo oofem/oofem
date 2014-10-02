@@ -195,17 +195,9 @@ protected:
 
 public:
     /// Constructor
-    OctreeSpatialLocalizer(Domain * d) : SpatialLocalizer(d), octreeMask(3) {
-        rootCell = NULL;
-        elementIPListsInitialized = false;
-        elementListsInitialized.clear();
-    }
+    OctreeSpatialLocalizer(Domain * d);
     /// Destructor - deletes the octree tree
-    virtual ~OctreeSpatialLocalizer() {
-        if ( rootCell ) {
-            delete rootCell;
-        }
-    }
+    virtual ~OctreeSpatialLocalizer();
 
     /**
      * Returns the octreeMask value given by the index

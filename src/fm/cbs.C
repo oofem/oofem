@@ -56,6 +56,33 @@
 namespace oofem {
 REGISTER_EngngModel(CBS);
 
+CBS :: CBS(int i, EngngModel* _master) : FluidModel ( i, _master ),
+    PressureField ( this, 1, FT_Pressure, 1 ),
+    VelocityField ( this, 1, FT_Velocity, 1 ),
+    vnum ( false ), vnumPrescribed ( true ), pnum ( false ), pnumPrescribed ( true )
+{
+    initFlag = 1;
+    lhs = NULL;
+    ndomains = 1;
+    nMethod = NULL;
+    consistentMassFlag = 0;
+    equationScalingFlag = false;
+    lscale = uscale = dscale = 1.0;
+    //<RESTRICTED_SECTION>
+    materialInterface = NULL;
+    //</RESTRICTED_SECTION>
+}
+
+CBS :: ~CBS()
+{
+    //<RESTRICTED_SECTION>
+    delete materialInterface;
+
+    //</RESTRICTED_SECTION>
+    delete this->nMethod;
+    delete this->lhs;
+}
+
 NumericalMethod *CBS :: giveNumericalMethod(MetaStep *mStep)
 {
     if ( nMethod ) {

@@ -41,6 +41,16 @@
 #include "contextioerr.h"
 
 namespace oofem {
+
+Material :: Material(int n, Domain* d) : FEMComponent(n, d), propertyDictionary ( new Dictionary() ), castingTime ( -1. ) { }
+
+
+Material :: ~Material()
+{
+    delete propertyDictionary;
+}
+
+
 double
 Material :: give(int aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty (e.g. the Young's modulus

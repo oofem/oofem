@@ -235,6 +235,24 @@ void OctantRec :: printYourself()
 }
 
 
+
+
+OctreeSpatialLocalizer :: OctreeSpatialLocalizer(Domain* d) : SpatialLocalizer(d), octreeMask(3)
+{
+    rootCell = NULL;
+    elementIPListsInitialized = false;
+    elementListsInitialized.clear();
+}
+
+
+OctreeSpatialLocalizer :: ~OctreeSpatialLocalizer()
+{
+    if ( rootCell ) {
+        delete rootCell;
+    }
+}
+
+
 OctantRec *
 OctreeSpatialLocalizer :: findTerminalContaining(OctantRec *startCell, const FloatArray &coords)
 {

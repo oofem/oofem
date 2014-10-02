@@ -71,10 +71,7 @@ protected:
 public:
     /// Constructor, creates empty send and receive com buffs in MPI_COMM_WORLD.
     ProcessCommunicatorBuff(CommBuffType t);
-    virtual ~ProcessCommunicatorBuff() {
-        delete send_buff;
-        delete recv_buff;
-    }
+    virtual ~ProcessCommunicatorBuff();
 
     virtual int givePackSizeOfInt(int count) { return send_buff->givePackSizeOfInt(count); }
     virtual int givePackSizeOfDouble(int count) { return send_buff->givePackSizeOfDouble(count); }

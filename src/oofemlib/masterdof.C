@@ -63,6 +63,13 @@ MasterDof :: MasterDof(DofManager *aNode, DofIDItem id) : Dof(aNode, id)
     unknowns = new Dictionary();
 }
 
+
+MasterDof :: ~MasterDof()
+{
+    delete unknowns;
+}
+
+
 BoundaryCondition *MasterDof :: giveBc()
 // Returns the boundary condition the receiver is subjected to.
 {
