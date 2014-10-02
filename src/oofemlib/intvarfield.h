@@ -77,8 +77,8 @@ public:
     virtual int evaluateAt(FloatArray &answer, FloatArray &coords, ValueModeType mode, TimeStep *tStep);
     virtual int evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
     virtual const char *giveClassName() const { return "InternalVariableField"; }
 };
 } // end namespace oofem

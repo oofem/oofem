@@ -465,15 +465,15 @@ CBS :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = PressureField.saveContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = PressureField.saveContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = VelocityField.saveContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = VelocityField.saveContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = prescribedTractionPressure.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = prescribedTractionPressure.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -514,15 +514,15 @@ CBS :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = PressureField.restoreContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = PressureField.restoreContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = VelocityField.restoreContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = VelocityField.restoreContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = prescribedTractionPressure.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = prescribedTractionPressure.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

@@ -484,8 +484,8 @@ public:
      */
     void beColumnOf(const FloatMatrix &mat, int col);
 
-    contextIOResultType storeYourself(DataStream *stream) const;
-    contextIOResultType restoreYourself(DataStream *stream);
+    contextIOResultType storeYourself(DataStream &stream) const;
+    contextIOResultType restoreYourself(DataStream &stream);
     int givePackSize(DataStream &buff) const;
 
     friend std :: ostream &operator << ( std :: ostream & out, const FloatArray & x );

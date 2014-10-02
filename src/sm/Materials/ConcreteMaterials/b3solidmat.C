@@ -1019,23 +1019,19 @@ B3SolidMaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-B3SolidMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+B3SolidMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 //
 {
     contextIOResultType iores;
 
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
-
     if ( ( iores = KelvinChainMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // write microprestress value
-    if ( !stream->write(microprestress_old) ) {
+    if ( !stream.write(microprestress_old) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1043,7 +1039,7 @@ B3SolidMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void 
 }
 
 contextIOResultType
-B3SolidMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+B3SolidMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restore the state variables from a stream
 //
@@ -1054,7 +1050,7 @@ B3SolidMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, vo
     }
 
     // write microprestress value
-    if ( !stream->read(microprestress_old) ) {
+    if ( !stream.read(microprestress_old) ) {
         return CIO_IOERR;
     }
 

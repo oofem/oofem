@@ -208,7 +208,7 @@ int SlaveDof :: __givePrescribedEquationNumber()
     return 0;
 }
 
-contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType SlaveDof :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores = Dof :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -216,11 +216,11 @@ contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode
     }
 
     if ( mode & CM_Definition ) {
-        if ( !stream->write(countOfMasterDofs) ) {
+        if ( !stream.write(countOfMasterDofs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->write(countOfPrimaryMasterDofs) ) {
+        if ( !stream.write(countOfPrimaryMasterDofs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -236,7 +236,7 @@ contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode
                 _idofmanNum = masterDofMans.at(_idof);
             }
 
-            if ( !stream->write(_idofmanNum) ) {
+            if ( !stream.write(_idofmanNum) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
         }
@@ -249,7 +249,7 @@ contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode
     return CIO_OK;
 }
 
-contextIOResultType SlaveDof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType SlaveDof :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores = Dof :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
@@ -257,11 +257,11 @@ contextIOResultType SlaveDof :: restoreContext(DataStream *stream, ContextMode m
     }
 
     if ( mode & CM_Definition ) {
-        if ( !stream->read(countOfMasterDofs) ) {
+        if ( !stream.read(countOfMasterDofs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(countOfPrimaryMasterDofs) ) {
+        if ( !stream.read(countOfPrimaryMasterDofs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -273,7 +273,7 @@ contextIOResultType SlaveDof :: restoreContext(DataStream *stream, ContextMode m
 
         masterDofMans.resize(countOfMasterDofs);
         for ( _idof = 1; _idof <= countOfMasterDofs; _idof++ ) {
-            if ( !stream->read(masterDofMans.at(_idof)) ) {
+            if ( !stream.read(masterDofMans.at(_idof)) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
         }

@@ -1130,7 +1130,7 @@ TR1_2D_CBS :: printOutputAt(FILE *file, TimeStep *tStep)
 
 
 
-contextIOResultType TR1_2D_CBS :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType TR1_2D_CBS :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
 // current state)
@@ -1154,7 +1154,7 @@ contextIOResultType TR1_2D_CBS :: saveContext(DataStream *stream, ContextMode mo
 
 
 
-contextIOResultType TR1_2D_CBS :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType TR1_2D_CBS :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
 // current state)

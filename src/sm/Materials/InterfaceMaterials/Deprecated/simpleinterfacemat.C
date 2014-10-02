@@ -350,7 +350,7 @@ SimpleInterfaceMaterialStatus :: giveTempShearStressShift()
 
 
 contextIOResultType
-SimpleInterfaceMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+SimpleInterfaceMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -360,7 +360,7 @@ SimpleInterfaceMaterialStatus :: saveContext(DataStream *stream, ContextMode mod
     }
 
     // write a raw data
-    //if ( !stream->write(kappa) ) {
+    //if ( !stream.write(kappa) ) {
     //THROW_CIOERR(CIO_IOERR);
     //}
 
@@ -369,7 +369,7 @@ SimpleInterfaceMaterialStatus :: saveContext(DataStream *stream, ContextMode mod
 
 
 contextIOResultType
-SimpleInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+SimpleInterfaceMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -379,7 +379,7 @@ SimpleInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextMode 
     }
 
     // read raw data
-    //if ( !stream->read(kappa) ) {
+    //if ( !stream.read(kappa) ) {
     //THROW_CIOERR(CIO_IOERR);
     //}
 

@@ -116,8 +116,8 @@ public:
     virtual int giveIcId();
     virtual double giveBcValue(ValueModeType mode, TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     /// Returns Master Dof Manager Number.
     int giveMasterDofManagerNum() const { return masterDofMngr; }

@@ -146,7 +146,7 @@ Material :: printYourself()
 //
 
 contextIOResultType
-Material :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
+Material :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
 //
 // saves full material status (saves state variables, that completely describe
 // current state) stored in gp->matstatusDict with key = this->giveNumber()
@@ -177,7 +177,7 @@ Material :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
 }
 
 contextIOResultType
-Material :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
+Material :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
 //
 // restores full material status (saves state variables, that completely describe
 // current state) stored in gp->matstatusDict with key = this->giveNumber()

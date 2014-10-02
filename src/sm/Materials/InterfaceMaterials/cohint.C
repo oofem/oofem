@@ -203,7 +203,7 @@ CohesiveInterfaceMaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 contextIOResultType
-CohesiveInterfaceMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+CohesiveInterfaceMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -216,7 +216,7 @@ CohesiveInterfaceMaterialStatus :: saveContext(DataStream *stream, ContextMode m
 }
 
 contextIOResultType
-CohesiveInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+CohesiveInterfaceMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 

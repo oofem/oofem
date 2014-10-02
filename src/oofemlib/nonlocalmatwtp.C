@@ -322,7 +322,7 @@ int NonlocalMaterialWTP :: packMigratingElementDependencies(Domain *d, ProcessCo
             // pack type
             _globnum = elem->giveGlobalNumber();
             pcbuff->write(_globnum);
-            nonlocElementDependencyMap [ _globnum ].storeYourself(pcbuff);
+            nonlocElementDependencyMap [ _globnum ].storeYourself(*pcbuff);
         }
     } // end loop over elements
 
@@ -352,7 +352,7 @@ int NonlocalMaterialWTP :: unpackMigratingElementDependencies(Domain *d, Process
             break;
         }
 
-        nonlocElementDependencyMap [ _globnum ].restoreYourself(pcbuff);
+        nonlocElementDependencyMap [ _globnum ].restoreYourself(*pcbuff);
     } while ( 1 );
 
     return 1;
@@ -395,7 +395,7 @@ int NonlocalMaterialWTP :: packRemoteElements(Domain *d, ProcessCommunicator &pc
         inode = d->dofmanGlobal2Local(in);
         dofman = d->giveDofManager(inode);
         pcbuff->write( dofman->giveInputRecordName() );
-        dofman->saveContext(pcbuff, CM_Definition | CM_State | CM_UnknownDictState);
+        dofman->saveContext(*pcbuff, CM_Definition | CM_State | CM_UnknownDictState);
     }
 
     pcbuff->write("");
@@ -406,7 +406,7 @@ int NonlocalMaterialWTP :: packRemoteElements(Domain *d, ProcessCommunicator &pc
         // pack local element (node numbers shuld be global ones!!!)
         // pack type
         pcbuff->write( elem->giveInputRecordName() );
-        elem->saveContext(pcbuff, CM_Definition | CM_DefinitionGlobal | CM_State);
+        elem->saveContext(*pcbuff, CM_Definition | CM_DefinitionGlobal | CM_State);
     }
 
     pcbuff->write("");
@@ -437,7 +437,7 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
             break;
         }
         dofman = classFactory.createDofManager(_type.c_str(), 0, d);
-        dofman->restoreContext(pcbuff, CM_Definition | CM_State | CM_UnknownDictState);
+        dofman->restoreContext(*pcbuff, CM_Definition | CM_State | CM_UnknownDictState);
         dofman->setParallelMode(DofManager_null);
         if ( d->dofmanGlobal2Local( dofman->giveGlobalNumber() ) ) {
             // record already exist
@@ -461,7 +461,7 @@ int NonlocalMaterialWTP :: unpackRemoteElements(Domain *d, ProcessCommunicator &
         }
 
         elem = classFactory.createElement(_type.c_str(), 0, d);
-        elem->restoreContext(pcbuff, CM_Definition | CM_State);
+        elem->restoreContext(*pcbuff, CM_Definition | CM_State);
         elem->setParallelMode(Element_remote);
         elem->setPartitionList(_partitions);
         d->giveTransactionManager()->addElementTransaction(DomainTransactionManager :: DTT_ADD,

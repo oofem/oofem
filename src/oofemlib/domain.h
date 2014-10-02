@@ -509,7 +509,7 @@ public:
      * @return contextIOResultType.
      * @exception ContextIOERR If error encountered.
      */
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     /**
      * Restores the domain state from output stream. Restores recursively the state of all
      * managed objects, like DofManagers and Elements.
@@ -525,7 +525,7 @@ public:
      * @return contextIOResultType.
      * @exception ContextIOERR exception if error encountered.
      */
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     /**
      * Returns default DofID array which defines physical meaning of particular DOFs.
      * of nodal dofs. Default values are determined using current domain type.

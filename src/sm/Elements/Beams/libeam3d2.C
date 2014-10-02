@@ -618,7 +618,7 @@ LIBeam3d2 :: initForNewStep()
 
 
 
-contextIOResultType LIBeam3d2 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType LIBeam3d2 :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
 // current state)
@@ -637,7 +637,7 @@ contextIOResultType LIBeam3d2 :: saveContext(DataStream *stream, ContextMode mod
 }
 
 
-contextIOResultType LIBeam3d2 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType LIBeam3d2 :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
 // current state)

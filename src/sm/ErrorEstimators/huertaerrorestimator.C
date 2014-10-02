@@ -636,7 +636,7 @@ HuertaErrorEstimator :: initializeFrom(InputRecord *ir)
 
 
 contextIOResultType
-HuertaErrorEstimator :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+HuertaErrorEstimator :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     TimeStep *tStep = this->domain->giveEngngModel()->giveCurrentStep();
@@ -655,7 +655,7 @@ HuertaErrorEstimator :: saveContext(DataStream *stream, ContextMode mode, void *
     }
 
     // write a raw data
-    if ( !stream->write(stateCounter) ) {
+    if ( !stream.write(stateCounter) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -664,7 +664,7 @@ HuertaErrorEstimator :: saveContext(DataStream *stream, ContextMode mode, void *
 
 
 contextIOResultType
-HuertaErrorEstimator :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+HuertaErrorEstimator :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -678,7 +678,7 @@ HuertaErrorEstimator :: restoreContext(DataStream *stream, ContextMode mode, voi
     }
 
     // read raw data
-    if ( !stream->read(stateCounter) ) {
+    if ( !stream.read(stateCounter) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -2803,15 +2803,12 @@ HuertaErrorEstimator :: solveRefinedElementProblem(int elemId, IntArray &localNo
 
     element = domain->giveElement(elemId);
 
-#ifdef __PARALLEL_MODE
     if ( element->giveParallelMode() == Element_remote ) {
         this->skippedNelems++;
         this->eNorms.at(elemId) = 0.0;
         //  uNormArray.at(elemId) = 0.0;
         return;
     }
-
-#endif
 
     if ( this->skipRegion( element->giveRegionNumber() ) != 0 ) {
         this->skippedNelems++;
@@ -3235,15 +3232,10 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
     timer.startTimer();
 #endif
 
-#ifdef __PARALLEL_MODE
-    dofManagerParallelMode parMode;
-
-    parMode = domain->giveDofManager(nodeId)->giveParallelMode();
+    dofManagerParallelMode parMode = domain->giveDofManager(nodeId)->giveParallelMode();
     if ( parMode == DofManager_remote || parMode == DofManager_null ) {
         return;
     }
-
-#endif
 
     con = ct->giveDofManConnectivityArray(nodeId);
     elems = con->giveSize();
@@ -3253,13 +3245,10 @@ HuertaErrorEstimator :: solveRefinedPatchProblem(int nodeId, IntArray &localNode
         element = domain->giveElement(elemId);
 
         /* HUHU CHEATING */
-#ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() == Element_remote ) {
             skipped++;
             continue;
         }
-
-#endif
 
         if ( this->skipRegion( element->giveRegionNumber() ) != 0 ) {
             skipped++;
@@ -3967,9 +3956,6 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 #ifdef USE_CONTEXT_FILE
         ir->setField(contextOutputStep, _IFT_EngngModel_contextoutputstep);
 #endif
-#ifdef __PARALLEL_MODE
-        ir->setField(0, _IFT_EngngModel_parallelflag);
-#endif
         refinedReader.insertInputRecord(DataReader :: IR_emodelRec, ir);
     } else if ( dynamic_cast< AdaptiveNonLinearStatic * >(problem) ) {
         InputRecord *ir;
@@ -4056,7 +4042,6 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 #ifdef USE_CONTEXT_FILE
                 ir->setField(contextOutputStep, _IFT_EngngModel_contextoutputstep);
 #endif
-                ir->setField(0, _IFT_EngngModel_parallelflag);
 
                 // this is not relevant but it is required
                 // the refined problem is made adaptive only to enable call to initializeAdaptiveFrom
@@ -4083,7 +4068,6 @@ HuertaErrorEstimator :: setupRefinedProblemProlog(const char *problemName, int p
 #ifdef USE_CONTEXT_FILE
                 ir->setField(contextOutputStep, _IFT_EngngModel_contextoutputstep);
 #endif
-                ir->setField(0, _IFT_EngngModel_parallelflag);
 
                 // this is not relevant but it is required
                 // the refined problem is made adaptive only to enable call to initializeAdaptiveFrom

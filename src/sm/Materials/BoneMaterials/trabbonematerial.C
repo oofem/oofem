@@ -393,7 +393,7 @@ TrabBoneMaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-TrabBoneMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+TrabBoneMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -411,7 +411,7 @@ TrabBoneMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void
 
 
 contextIOResultType
-TrabBoneMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+TrabBoneMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 

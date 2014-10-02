@@ -386,7 +386,7 @@ void FE2FluidMaterialStatus :: initTempStatus()
     FluidDynamicMaterialStatus :: initTempStatus();
 }
 
-contextIOResultType FE2FluidMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType FE2FluidMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores = FluidDynamicMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -396,7 +396,7 @@ contextIOResultType FE2FluidMaterialStatus :: saveContext(DataStream *stream, Co
     return CIO_OK;
 }
 
-contextIOResultType FE2FluidMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType FE2FluidMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores = FluidDynamicMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

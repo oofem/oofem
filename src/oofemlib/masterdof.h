@@ -147,8 +147,8 @@ public:
 
     virtual void giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode, double &dofValue);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     virtual void setBcId(int bcId) { this->bc = bcId; }
     virtual void setIcId(int icId) { this->ic = icId; }

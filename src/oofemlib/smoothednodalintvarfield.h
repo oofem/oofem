@@ -72,8 +72,8 @@ public:
     virtual int evaluateAt(FloatArray &answer, DofManager *dman, ValueModeType mode, TimeStep *tStep);
 
     InternalStateType giveInternalType() { return istType; }
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
     virtual const char *giveClassName() const { return "SmoothedNodalInternalVariableField"; }
 };
 } // end namespace oofem

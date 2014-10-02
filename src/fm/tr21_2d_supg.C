@@ -1360,7 +1360,7 @@ TR21_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTyp
     return SUPGElement2 :: giveIPValue(answer, gp, type, tStep);
 }
 
-contextIOResultType TR21_2D_SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType TR21_2D_SUPG :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
 // current state)
@@ -1377,7 +1377,7 @@ contextIOResultType TR21_2D_SUPG :: saveContext(DataStream *stream, ContextMode 
 
 
 
-contextIOResultType TR21_2D_SUPG :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType TR21_2D_SUPG :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
 // current state)

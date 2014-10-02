@@ -1413,7 +1413,7 @@ TrabBone3DStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-TrabBone3DStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+TrabBone3DStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -1427,15 +1427,15 @@ TrabBone3DStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
 
-    if ( !stream->write(dam) ) {
+    if ( !stream.write(dam) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(kappa) ) {
+    if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(beta) ) {
+    if ( !stream.write(beta) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1467,7 +1467,7 @@ TrabBone3DStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 contextIOResultType
-TrabBone3DStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+TrabBone3DStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -1482,15 +1482,15 @@ TrabBone3DStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
     }
 
 
-    if ( !stream->read(dam) ) {
+    if ( !stream.read(dam) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(kappa) ) {
+    if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(beta) ) {
+    if ( !stream.read(beta) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

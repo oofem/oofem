@@ -223,9 +223,9 @@ LoadBalancer :: packMigratingData(Domain *d, ProcessCommunicator &pc)
             /* this is a potential performance leak, sending shared dofman to a partition,
              * in which is already shared does not require to send context (is already there)
              * here for simplicity it is always send */
-            dofman->saveContext(pcbuff, CM_Definition | CM_DefinitionGlobal | CM_State | CM_UnknownDictState);
+            dofman->saveContext(*pcbuff, CM_Definition | CM_DefinitionGlobal | CM_State | CM_UnknownDictState);
             // send list of new partitions
-            this->giveDofManPartitions(idofman)->storeYourself(pcbuff);
+            this->giveDofManPartitions(idofman)->storeYourself(*pcbuff);
         }
     }
 
@@ -242,7 +242,7 @@ LoadBalancer :: packMigratingData(Domain *d, ProcessCommunicator &pc)
             // pack type
             pcbuff->write( elem->giveInputRecordName() );
             // nodal numbers should be packed as global !!
-            elem->saveContext(pcbuff, CM_Definition | CM_DefinitionGlobal | CM_State);
+            elem->saveContext(*pcbuff, CM_Definition | CM_DefinitionGlobal | CM_State);
             nsend++;
         }
     } // end loop over elements
@@ -312,9 +312,9 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
 
             dofman->setGlobalNumber(_globnum);
             // unpack dofman state (this is the local dofman, not available on remote)
-            dofman->restoreContext(pcbuff, CM_Definition | CM_DefinitionGlobal | CM_State | CM_UnknownDictState);
+            dofman->restoreContext(*pcbuff, CM_Definition | CM_DefinitionGlobal | CM_State | CM_UnknownDictState);
             // unpack list of new partitions
-            _partitions.restoreYourself(pcbuff);
+            _partitions.restoreYourself(*pcbuff);
             dofman->setPartitionList(& _partitions);
             dofman->setParallelMode(DofManager_local);
             // add transaction if new entry allocated; otherwise existing one has been modified via returned dofman
@@ -343,9 +343,9 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
 
             dofman->setGlobalNumber(_globnum);
             // unpack dofman state (this is the local dofman, not available on remote)
-            dofman->restoreContext(pcbuff, CM_Definition | CM_DefinitionGlobal | CM_State | CM_UnknownDictState);
+            dofman->restoreContext(*pcbuff, CM_Definition | CM_DefinitionGlobal | CM_State | CM_UnknownDictState);
             // unpack list of new partitions
-            _partitions.restoreYourself(pcbuff);
+            _partitions.restoreYourself(*pcbuff);
             dofman->setPartitionList(& _partitions);
             dofman->setParallelMode(DofManager_shared);
 #ifdef __VERBOSE_PARALLEL
@@ -374,7 +374,7 @@ LoadBalancer :: unpackMigratingData(Domain *d, ProcessCommunicator &pc)
         }
 
         elem = classFactory.createElement(_type.c_str(), 0, d);
-        elem->restoreContext(pcbuff, CM_Definition | CM_State);
+        elem->restoreContext(*pcbuff, CM_Definition | CM_State);
         elem->initForNewStep();
         dtm->addElementTransaction(DomainTransactionManager :: DTT_ADD, elem->giveGlobalNumber(), elem);
         nrecv++;

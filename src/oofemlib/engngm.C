@@ -1273,7 +1273,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
     }
 
     // store solution step
-    if ( ( iores = giveCurrentStep()->saveContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = giveCurrentStep()->saveContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1282,7 +1282,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainNeqs.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = domainNeqs.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1291,7 +1291,7 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainPrescribedNeqs.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = domainPrescribedNeqs.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1302,14 +1302,14 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
 
 
     for ( auto &domain: domainList ) {
-        domain->saveContext(stream, mode, obj);
+        domain->saveContext(*stream, mode, obj);
     }
 
 
     // store nMethod
     NumericalMethod *nmethod = this->giveNumericalMethod( this->giveMetaStep( giveCurrentStep()->giveMetaStepNumber() ) );
     if ( nmethod ) {
-        if ( ( iores = nmethod->saveContext(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = nmethod->saveContext(*stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -1369,7 +1369,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
         currentStep = new TimeStep(istep, this, 0, 0., 0., 0);
     }
 
-    if ( ( iores = currentStep->restoreContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = currentStep->restoreContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1394,7 +1394,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainNeqs.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = domainNeqs.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1403,7 +1403,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainPrescribedNeqs.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = domainPrescribedNeqs.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1413,13 +1413,13 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     }
 
     for ( auto &domain: domainList ) {
-        domain->restoreContext(stream, mode, obj);
+        domain->restoreContext(*stream, mode, obj);
     }
 
     // restore nMethod
     NumericalMethod *nmethod = this->giveNumericalMethod( this->giveCurrentMetaStep() );
     if ( nmethod ) {
-        if ( ( iores = nmethod->restoreContext(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = nmethod->restoreContext(*stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

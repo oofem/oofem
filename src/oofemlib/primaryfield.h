@@ -203,8 +203,8 @@ public:
      */
     virtual void advanceSolution(TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
 
     virtual const char *giveClassName() const { return "PrimaryField"; }
 

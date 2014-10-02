@@ -614,11 +614,11 @@ NonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
     //if ((iores = this->giveNumericalMethod(giveCurrentStep())->saveContext (stream)) != CIO_OK) THROW_CIOERR(iores);
 
-    if ( ( iores = totalDisplacement.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = totalDisplacement.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = incrementOfDisplacement.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = incrementOfDisplacement.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -636,11 +636,11 @@ NonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
     // store InitialLoadVector
-    if ( ( iores = initialLoadVector.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = initialLoadVector.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = initialLoadVectorOfPrescribed.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = initialLoadVectorOfPrescribed.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -683,11 +683,11 @@ NonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *ob
 
     //if ((iores = this->giveNumericalMethod(giveCurrentStep())->restoreContext (stream)) !=CIO_OK) THROW_CIOERR(iores);
 
-    if ( ( iores = totalDisplacement.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = totalDisplacement.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = incrementOfDisplacement.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = incrementOfDisplacement.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -707,11 +707,11 @@ NonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *ob
 
 
     // store InitialLoadVector
-    if ( ( iores = initialLoadVector.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = initialLoadVector.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = initialLoadVectorOfPrescribed.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = initialLoadVectorOfPrescribed.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

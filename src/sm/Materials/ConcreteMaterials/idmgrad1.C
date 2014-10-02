@@ -488,7 +488,7 @@ IDGMaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-IDGMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+IDGMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -501,7 +501,7 @@ IDGMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj
     }
 
     // write a raw data
-    if ( !stream->write(le) ) {
+    if ( !stream.write(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -509,7 +509,7 @@ IDGMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj
 }
 
 contextIOResultType
-IDGMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+IDGMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -521,7 +521,7 @@ IDGMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *
     }
 
     // read raw data
-    if ( !stream->read(le) ) {
+    if ( !stream.read(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

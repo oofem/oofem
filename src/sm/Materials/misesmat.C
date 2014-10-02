@@ -884,7 +884,7 @@ MisesMatStatus :: updateYourself(TimeStep *tStep)
 // saves full information stored in this status
 // temporary variables are NOT stored
 contextIOResultType
-MisesMatStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+MisesMatStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -901,12 +901,12 @@ MisesMatStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
     // write cumulative plastic strain (scalar)
-    if ( !stream->write(kappa) ) {
+    if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // write damage (scalar)
-    if ( !stream->write(damage) ) {
+    if ( !stream.write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -916,7 +916,7 @@ MisesMatStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 contextIOResultType
-MisesMatStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+MisesMatStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -934,12 +934,12 @@ MisesMatStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj
     }
 
     // read cumulative plastic strain (scalar)
-    if ( !stream->read(kappa) ) {
+    if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // read damage (scalar)
-    if ( !stream->read(damage) ) {
+    if ( !stream.read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

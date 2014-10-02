@@ -1466,7 +1466,7 @@ MPlasticMaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-MPlasticMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+MPlasticMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -1488,7 +1488,7 @@ MPlasticMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->write(state_flag) ) {
+    if ( !stream.write(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1506,7 +1506,7 @@ MPlasticMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void
 
 
 contextIOResultType
-MPlasticMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+MPlasticMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -1526,7 +1526,7 @@ MPlasticMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, v
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(state_flag) ) {
+    if ( !stream.read(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

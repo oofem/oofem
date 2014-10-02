@@ -325,7 +325,7 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
 
 
 contextIOResultType
-TR_SHELL01 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+TR_SHELL01 :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores =  StructuralElement :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -341,7 +341,7 @@ TR_SHELL01 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 }
 
 contextIOResultType
-TR_SHELL01 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+TR_SHELL01 :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores =  StructuralElement :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

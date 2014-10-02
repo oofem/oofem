@@ -1864,7 +1864,7 @@ TR1_2D_SUPG2 :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 
-contextIOResultType TR1_2D_SUPG2 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType TR1_2D_SUPG2 :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
 // current state)
@@ -1885,7 +1885,7 @@ contextIOResultType TR1_2D_SUPG2 :: saveContext(DataStream *stream, ContextMode 
 
 
 
-contextIOResultType TR1_2D_SUPG2 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType TR1_2D_SUPG2 :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
 // current state)

@@ -76,8 +76,8 @@ public:
     virtual int SetUpPointsOnTriangle(int nPoints, MaterialMode mode);
     virtual int SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj);
 };
 } // end namespace oofem
 #endif // patchintegrationrule_h

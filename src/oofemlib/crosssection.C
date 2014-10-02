@@ -85,7 +85,7 @@ CrossSection :: printYourself()
 
 
 contextIOResultType
-CrossSection :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
+CrossSection :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
 //
 // saves full material context (saves state variables, that completely describe
 // current state)
@@ -103,7 +103,7 @@ CrossSection :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *
 
 
 contextIOResultType
-CrossSection :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
+CrossSection :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)

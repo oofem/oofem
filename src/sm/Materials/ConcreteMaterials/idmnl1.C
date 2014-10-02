@@ -985,7 +985,7 @@ IDNLMaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-IDNLMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+IDNLMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -997,12 +997,12 @@ IDNLMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *ob
         THROW_CIOERR(iores);
     }
 
-    //if (!stream->write(&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
+    //if (!stream.write(&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
     return CIO_OK;
 }
 
 contextIOResultType
-IDNLMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+IDNLMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -1014,7 +1014,7 @@ IDNLMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void 
     }
 
     // read raw data
-    //if (!stream->read (&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
+    //if (!stream.read (&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
 
     return CIO_OK;
 }

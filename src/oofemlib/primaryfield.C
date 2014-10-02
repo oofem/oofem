@@ -234,15 +234,15 @@ PrimaryField :: advanceSolution(TimeStep *tStep)
 
 
 contextIOResultType
-PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
+PrimaryField :: saveContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores(CIO_IOERR);
 
-    if ( !stream->write(actualStepNumber) ) {
+    if ( !stream.write(actualStepNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(actualStepIndx) ) {
+    if ( !stream.write(actualStepIndx) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -262,15 +262,15 @@ PrimaryField :: saveContext(DataStream *stream, ContextMode mode)
 }
 
 contextIOResultType
-PrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
+PrimaryField :: restoreContext(DataStream &stream, ContextMode mode)
 {
     contextIOResultType iores(CIO_IOERR);
 
-    if ( !stream->read(actualStepNumber) ) {
+    if ( !stream.read(actualStepNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(actualStepIndx) ) {
+    if ( !stream.read(actualStepIndx) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

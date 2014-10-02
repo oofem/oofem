@@ -110,13 +110,13 @@ SmoothedNodalInternalVariableField :: evaluateAt(FloatArray &answer, DofManager 
 }
 
 contextIOResultType
-SmoothedNodalInternalVariableField :: saveContext(DataStream *stream, ContextMode mode)
+SmoothedNodalInternalVariableField :: saveContext(DataStream &stream, ContextMode mode)
 {
     return CIO_OK;
 }
 
 contextIOResultType
-SmoothedNodalInternalVariableField :: restoreContext(DataStream *stream, ContextMode mode)
+SmoothedNodalInternalVariableField :: restoreContext(DataStream &stream, ContextMode mode)
 {
     return CIO_OK;
 }
