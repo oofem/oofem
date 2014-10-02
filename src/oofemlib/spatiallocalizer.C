@@ -43,7 +43,6 @@
 #include "feinterpol.h"
 
 namespace oofem {
-#define POINT_TOL 1.e-6
 
 int
 SpatialLocalizerInterface :: SpatialLocalizerI_containsPoint(const FloatArray &coords)
@@ -88,11 +87,7 @@ SpatialLocalizerInterface :: SpatialLocalizerI_BBoxContainsPoint(const FloatArra
 
     int size = min( coordMin.giveSize(), coords.giveSize() );
     for ( int j = 1; j <= size; j++ ) {
-        if ( coords.at(j) < coordMin.at(j) - POINT_TOL ) {
-            return 0;
-        }
-
-        if ( coords.at(j) > coordMax.at(j) + POINT_TOL ) {
+        if ( coords.at(j) < coordMin.at(j) || coords.at(j) > coordMax.at(j) ) {
             return 0;
         }
     }

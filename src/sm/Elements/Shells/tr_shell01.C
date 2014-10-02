@@ -428,19 +428,6 @@ TR_SHELL01 :: ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArra
 }
 
 
-double
-TR_SHELL01 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray c(3);
-    c.zero();
-    // evaluate element center
-    for ( int i = 1; i <= 3; i++ ) {
-        c.add( * plate->giveNode(i)->giveCoordinates() );
-    }
-    c.times(1. / 3.);
-    return c.distance(coords);
-}
-
 void
 TR_SHELL01 :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)
 {

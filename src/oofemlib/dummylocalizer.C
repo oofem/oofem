@@ -106,36 +106,6 @@ DummySpatialLocalizer :: giveElementContainingPoint(const FloatArray &coords, co
 
 
 Element *
-DummySpatialLocalizer :: giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList)
-{
-    int nelems = this->giveDomain()->giveNumberOfElements();
-    Element *answer = NULL;
-    double dist = 0.0;
-
-    for ( int ielem = 1; ielem <= nelems; ielem++ ) {
-        Element *ielemptr = this->giveDomain()->giveElement(ielem);
-        SpatialLocalizerInterface *interface = static_cast< SpatialLocalizerInterface * >( ielemptr->giveInterface(SpatialLocalizerInterfaceType) );
-        if ( interface ) {
-            if ( regionList && ( regionList->findFirstIndexOf( ielemptr->giveRegionNumber() ) == 0 ) ) {
-                continue;
-            }
-
-            double currDist = interface->SpatialLocalizerI_giveDistanceFromParametricCenter(coords);
-            if ( answer == NULL || currDist < dist ) {
-                answer = ielemptr;
-                dist = currDist;
-                if ( dist == 0.0 ) {
-                    break;
-                }
-            }
-        }
-    }
-
-    return answer;
-}
-
-
-Element *
 DummySpatialLocalizer :: giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &coords, int region)
 {
     int nelems;

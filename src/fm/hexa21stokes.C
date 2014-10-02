@@ -388,13 +388,6 @@ void Hexa21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(Value
     }
 }
 
-double Hexa21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray center;
-    FloatArray lcoords = {0.25, 0.25, 0.25};
-    this->computeGlobalCoordinates(center, lcoords);
-    return center.distance(coords);
-}
 
 void Hexa21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {

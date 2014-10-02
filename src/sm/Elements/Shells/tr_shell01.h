@@ -123,7 +123,6 @@ public:
     virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArray &sig);
 
     // SpatialLocalizerI
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
     virtual void SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1);
 
 

@@ -201,13 +201,4 @@ QBrick1_ht :: SPRNodalRecoveryMI_givePatchType()
     return SPRPatchType_3dBiQuadratic;
 }
 
-
-double
-QBrick1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(3), gcoords;
-    lcoords.zero();
-    this->computeGlobalCoordinates(gcoords, lcoords);
-    return gcoords.distance(coords);
-}
 } // end namespace oofem

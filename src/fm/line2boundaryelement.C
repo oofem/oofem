@@ -77,11 +77,6 @@ Interface *Line2BoundaryElement :: giveInterface(InterfaceType it)
     }
 }
 
-double Line2BoundaryElement :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    return this->giveNode(3)->giveCoordinates()->distance(coords);
-}
-
 void Line2BoundaryElement :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                                    TimeStep *tStep, const FloatArray &lcoords, FloatArray &answer)
 {

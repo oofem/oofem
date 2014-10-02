@@ -73,8 +73,6 @@ public:
     virtual int testElementExtension(ElementExtension ext)
     { return ( ( ( ext == Element_EdgeLoadSupport ) || ( ext == Element_SurfaceLoadSupport ) ) ? 1 : 0 ); }
 
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-
 #ifdef __OOFEG
     // Graphics output
     virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);

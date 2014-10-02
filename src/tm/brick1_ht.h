@@ -83,8 +83,6 @@ public:
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
 
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-
 #ifdef __OOFEG
     // Graphics output
     virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);
