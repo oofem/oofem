@@ -43,6 +43,7 @@
 #include "floatmatrix.h"
 #include "floatarray.h"
 #include "intarray.h"
+#include "gausspoint.h"
 
 ///@name Input fields for WeakPeriodicBoundaryCondition
 //@{
@@ -140,6 +141,8 @@ private:
 
     /** gsMatrix contains coefficients for the Gram-Schmidt polynomials*/
     FloatMatrix gsMatrix;
+
+    void computeDeformationGradient(FloatMatrix &answer, Element *e, FloatArray *lcoord, TimeStep *tStep);
 public:
     WeakPeriodicBoundaryCondition(int n, Domain * d);
     virtual ~WeakPeriodicBoundaryCondition();
@@ -173,7 +176,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_WeakPeriodicBoundaryCondition_Name; }
 
 protected:
-    void computeElementTangent(FloatMatrix &answer, Element *e, int boundary);
+    void computeElementTangent(FloatMatrix &answer, Element *e, int boundary, TimeStep *tStep);
 };
 }
 #endif /* WEAKPERIODICBC_H_ */

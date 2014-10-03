@@ -53,6 +53,10 @@
 #include "set.h"
 #include "function.h"
 
+#include "timestep.h"
+#include "../sm/Elements/tet21ghostsolid.h"
+#include "../sm/Elements/nlstructuralelement.h"
+
 namespace oofem {
 REGISTER_BoundaryCondition(WeakPeriodicBoundaryCondition);
 
@@ -384,7 +388,49 @@ void WeakPeriodicBoundaryCondition :: addElementSide(int newElement, int newSide
     side [ addToList ].push_back(newSide);
 }
 
-void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Element *e, int boundary)
+void
+WeakPeriodicBoundaryCondition :: computeDeformationGradient(FloatMatrix &answer, Element *e, FloatArray *lcoord, TimeStep *tStep)
+{
+
+    FloatArray F, u;
+    FloatMatrix dNdx, BH, Fmatrix, Finv;
+    FEInterpolation *interpolation = e->giveInterpolation( ( DofIDItem ) dofid );
+
+    // Fetch displacements
+    e->computeVectorOf({1, 2, 3}, VM_Total, tStep, u);
+
+    // Compute dNdx on boundary.
+    interpolation->evaldNdx(dNdx, *lcoord, FEIElementGeometryWrapper (e) );
+
+    // Compute displcement gradient BH
+    BH.resize(9, dNdx.giveNumberOfRows() * 3);
+    BH.zero();
+
+    for ( int i = 1; i <= dNdx.giveNumberOfRows(); i++ ) {
+        BH.at(1, 3 * i - 2) = dNdx.at(i, 1);     // du/dx
+        BH.at(2, 3 * i - 1) = dNdx.at(i, 2);     // dv/dy
+        BH.at(3, 3 * i - 0) = dNdx.at(i, 3);     // dw/dz
+        BH.at(4, 3 * i - 1) = dNdx.at(i, 3);     // dv/dz
+        BH.at(7, 3 * i - 0) = dNdx.at(i, 2);     // dw/dy
+        BH.at(5, 3 * i - 2) = dNdx.at(i, 3);     // du/dz
+        BH.at(8, 3 * i - 0) = dNdx.at(i, 1);     // dw/dx
+        BH.at(6, 3 * i - 2) = dNdx.at(i, 2);     // du/dy
+        BH.at(9, 3 * i - 1) = dNdx.at(i, 1);     // dv/dx
+    }
+
+    // Finally, compute deformation gradient F=BH*u+I
+    F.beProductOf(BH, u);
+    F.at(1)+=1.0;
+    F.at(2)+=1.0;
+    F.at(3)+=1.0;
+
+    Fmatrix.beMatrixForm(F);
+    Finv.beInverseOf(Fmatrix);
+    answer.beTranspositionOf(Finv);
+
+}
+
+void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Element *e, int boundary, TimeStep *tStep)
 {
     FloatArray gcoords;
     IntArray bnodes;
@@ -408,6 +454,20 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
 
         // Find the value of parameter s which is the vert/horiz distance to 0
         geoInterpolation->boundaryLocal2Global( gcoords, boundary, * lcoords, FEIElementGeometryWrapper(e) );
+
+        FloatArray boundaryLocal;
+        interpolation->global2local( boundaryLocal, gcoords, FEIElementGeometryWrapper(e) );
+
+#if 0
+        FloatMatrix FinvT;
+        if (tStep->giveNumber()>0) {
+            if ( dynamic_cast <NLStructuralElement *> (e) != NULL ) { // If finite strains, compute deformation gradient
+                this->computeDeformationGradient(FinvT, e, &boundaryLocal, tStep);
+                FinvT.printYourself();
+            }
+        }
+
+#endif
         double s = gcoords.at( surfaceIndexes.at(1) );
 
         // Compute base function values
@@ -446,8 +506,7 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
     gammaDman->giveLocationArray(gamma_ids, c_loc, c_s);
 
     FloatMatrix B, BT;
-    FloatArray gcoords, normal;
-    int normalSign, dofCountOnBoundary;
+    int normalSign;
 
     updateSminmax();
 
@@ -462,36 +521,18 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
             IntArray r_sideLoc, c_sideLoc;
 
             // Find dofs for this element which should be periodic
-            IntArray bNodes, nodeDofIDMask, periodicDofIDMask, nodalArray;
+            IntArray bNodes, periodicDofIDMask;
             periodicDofIDMask.resize(1);
             periodicDofIDMask.at(1) = dofid;
 
             FEInterpolation *interpolation = thisElement->giveInterpolation( ( DofIDItem ) dofid );
             interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
 
-            ///@todo See todo on assembleVector
-            //thisElement->giveBoundaryLocationArray(r_sideLoc, bNodes, this->dofs, r_s);
-            //thisElement->giveBoundaryLocationArray(c_sideLoc, bNodes, this->dofs, c_s);
+            thisElement->giveBoundaryLocationArray(r_sideLoc, bNodes, {( DofIDItem ) dofid}, r_s);
+            thisElement->giveBoundaryLocationArray(c_sideLoc, bNodes, {( DofIDItem ) dofid}, c_s);
 
-            r_sideLoc.clear();
-            c_sideLoc.clear();
-            dofCountOnBoundary = 0;
-            for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
-                thisElement->giveDofManDofIDMask(bNodes.at(i), nodeDofIDMask);
+            this->computeElementTangent( B, thisElement, side [ thisSide ].at(ielement), tStep );
 
-                for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
-                    if ( nodeDofIDMask.at(j) == dofid ) {
-                        thisElement->giveDofManager( bNodes.at(i) )->giveLocationArray(periodicDofIDMask, nodalArray, r_s);
-                        r_sideLoc.followedBy(nodalArray);
-                        thisElement->giveDofManager( bNodes.at(i) )->giveLocationArray(periodicDofIDMask, nodalArray, c_s);
-                        c_sideLoc.followedBy(nodalArray);
-                        dofCountOnBoundary++;
-                        break;
-                    }
-                }
-            }
-
-            this->computeElementTangent( B, thisElement, side [ thisSide ].at(ielement) );
             B.times(normalSign);
 
             BT.beTranspositionOf(B);
@@ -582,7 +623,7 @@ WeakPeriodicBoundaryCondition :: giveInternalForcesVector(FloatArray &answer, Ti
 
     FloatMatrix B;
 
-    int normalSign, dofCountOnBoundary;
+    int normalSign;
 
     updateSminmax();
 
@@ -594,39 +635,17 @@ WeakPeriodicBoundaryCondition :: giveInternalForcesVector(FloatArray &answer, Ti
             Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
 
             // Find dofs for this element which should be periodic
-            IntArray bNodes, periodicDofIDMask, nodalArray;
+            IntArray bNodes, periodicDofIDMask;
             periodicDofIDMask.resize(1);
             periodicDofIDMask.at(1) = dofid;
 
             FEInterpolation *interpolation = thisElement->giveInterpolation( ( DofIDItem ) dofid );
             interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
 
-            ///@todo Carl, change to this?
-            //thisElement->giveBoundaryLocationArray(sideLocation, bNodes, &dofids, this->dofs, s, &masterDofIDs);
-            //thisElement->computeBoundaryVectorOf(bNodes, this->dofs, VM_Total, tStep, a);
+            thisElement->giveBoundaryLocationArray(sideLocation, bNodes, {( DofIDItem ) dofid}, s, &masterDofIDs);
+            thisElement->computeBoundaryVectorOf(bNodes, {(DofIDItem)dofid}, VM_Total, tStep, a);
 
-            sideLocation.clear();
-            masterDofIDs.clear();
-            a.clear();
-            dofCountOnBoundary = 0;
-            for ( int i = 1; i <= bNodes.giveSize(); i++ ) {
-                DofManager *node = thisElement->giveDofManager( bNodes.at(i) );
-
-                auto it = node->findDofWithDofId((DofIDItem)dofid);
-                if ( it != node->end() ) {
-                    node->giveLocationArray(periodicDofIDMask, nodalArray, s);
-                    sideLocation.followedBy(nodalArray);
-                    node->giveMasterDofIDArray(periodicDofIDMask, nodalArray);
-                    masterDofIDs.followedBy(nodalArray);
-
-                    double value = (*it)->giveUnknown(mode, tStep);
-                    a.resizeWithValues( sideLocation.giveSize() );
-                    a.at( sideLocation.giveSize() ) = value;
-                    dofCountOnBoundary++;
-                }
-            }
-
-            this->computeElementTangent( B, thisElement, side [ thisSide ].at(ielement) );
+            this->computeElementTangent( B, thisElement, side [ thisSide ].at(ielement), tStep);
             B.times(normalSign);
 
             FloatArray myProd, myProdGamma;
