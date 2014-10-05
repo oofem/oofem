@@ -168,7 +168,7 @@ protected:
     MaterialInterface *materialInterface;
     //</RESTRICTED_SECTION>
 public:
-    CBS(int i, EngngModel * _master = NULL;
+    CBS(int i, EngngModel * _master = NULL);
     virtual ~CBS();
 
     virtual void solveYourselfAt(TimeStep *tStep);
