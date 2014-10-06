@@ -468,7 +468,6 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
         }
 
 #endif
-        double s = gcoords.at( surfaceIndexes.at(1) );
 
         // Compute base function values
         interpolation->boundaryEvalN( N, boundary, * lcoords, FEIElementGeometryWrapper(e) );
@@ -476,17 +475,8 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
         double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( boundary, * lcoords, FEIElementGeometryWrapper(e) ) );
 
         for ( int j = 0; j < B.giveNumberOfColumns(); j++ ) {
-            double fVal;
 
-            if ( this->domain->giveNumberOfSpatialDimensions() == 2 ) {
-                fVal = computeBaseFunctionValue1D(j, s);
-            } else {
-                FloatArray coord;
-                coord.resize(2);
-                coord.at(1) = gcoords.at( surfaceIndexes.at(1) );
-                coord.at(2) = gcoords.at( surfaceIndexes.at(2) );
-                fVal = computeBaseFunctionValue2D(j + 1, coord);
-            }
+            double fVal = computeBaseFunctionValue(j, gcoords);
 
             for ( int k = 0; k < B.giveNumberOfRows(); k++ ) {
                 B(k, j) += N(k) * fVal * detJ * gp->giveWeight();
@@ -516,25 +506,46 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 
         for ( size_t ielement = 0; ielement < element [ thisSide ].size(); ielement++ ) {               // Loop over each element on this edge
             Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
+            int boundary = side [ thisSide ].at(ielement);
 
             // Find dofs for this element side
             IntArray r_sideLoc, c_sideLoc;
 
             // Find dofs for this element which should be periodic
-            IntArray bNodes, periodicDofIDMask;
-            periodicDofIDMask.resize(1);
-            periodicDofIDMask.at(1) = dofid;
+            IntArray bNodes;
 
             FEInterpolation *interpolation = thisElement->giveInterpolation( ( DofIDItem ) dofid );
+            FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
+
             interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
 
             thisElement->giveBoundaryLocationArray(r_sideLoc, bNodes, {( DofIDItem ) dofid}, r_s);
             thisElement->giveBoundaryLocationArray(c_sideLoc, bNodes, {( DofIDItem ) dofid}, c_s);
 
-            this->computeElementTangent( B, thisElement, side [ thisSide ].at(ielement), tStep );
+            B.resize(bNodes.giveSize(), ndof);
+            B.zero();
+
+            std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, boundary));
+
+            for ( GaussPoint *gp: *iRule ) {
+                FloatArray *lcoords = gp->giveNaturalCoordinates();
+                FloatArray N, gcoords;
+
+                geoInterpolation->boundaryLocal2Global( gcoords, boundary , *lcoords, FEIElementGeometryWrapper(thisElement));
+
+                interpolation->boundaryEvalN(N, boundary, *lcoords, FEIElementGeometryWrapper(thisElement));
+
+                double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( boundary, * lcoords, FEIElementGeometryWrapper(thisElement) ) );
+
+                for (int i=0; i<ndof; i++) {
+                    double fVal = computeBaseFunctionValue(i, gcoords);
+                    for ( int k = 0; k < B.giveNumberOfRows(); k++ ) {
+                        B(k, i) += N(k) * fVal * detJ * gp->giveWeight();
+                    }
+                }
+            }
 
             B.times(normalSign);
-
             BT.beTranspositionOf(B);
 
             answer->assemble(r_sideLoc, c_loc, B);
@@ -544,19 +555,29 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 
 }
 
+double
+WeakPeriodicBoundaryCondition :: computeBaseFunctionValue(int baseID, FloatArray coordinate)
+{
+    if (this->domain->giveNumberOfSpatialDimensions() == 2) {
+        return computeBaseFunctionValue1D(baseID, coordinate.at(surfaceIndexes.at(1)));
+    } else {
+        return computeBaseFunctionValue2D(baseID, {coordinate.at(surfaceIndexes.at(1)), coordinate.at(surfaceIndexes.at(2))});
+    }
+}
+
 double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue2D(int baseID, FloatArray coordinate)
 {
     double fVal = 0.0;
 
     if ( useBasisType == monomial ) {
         int a, b;
-        getExponents(baseID, a, b);
+        getExponents(baseID+1, a, b);
         fVal = pow(coordinate.at(1), a) * pow(coordinate.at(2), b);
     } else if ( useBasisType == legendre ) {
         for ( int i = 1; i <= ndof; i++ ) {
             int a, b;
             getExponents(i, a, b);
-            fVal = fVal + gsMatrix.at(baseID, i) * pow(coordinate.at(1), a) * pow(coordinate.at(2), b);
+            fVal = fVal + gsMatrix.at(baseID+1, i) * pow(coordinate.at(1), a) * pow(coordinate.at(2), b);
         }
     }
     // printf("Value for u_%u att coordinate %f, %f is %f\n", baseID, coordinate.at(1), coordinate.at(2), fVal);
@@ -633,24 +654,52 @@ WeakPeriodicBoundaryCondition :: giveInternalForcesVector(FloatArray &answer, Ti
 
         for ( size_t ielement = 0; ielement < element [ thisSide ].size(); ielement++ ) {                   // Loop over each element on this edge
             Element *thisElement = this->domain->giveElement( element [ thisSide ].at(ielement) );
+            int boundary = side [ thisSide ].at(ielement);
 
             // Find dofs for this element which should be periodic
-            IntArray bNodes, periodicDofIDMask;
-            periodicDofIDMask.resize(1);
-            periodicDofIDMask.at(1) = dofid;
+            IntArray bNodes;
 
             FEInterpolation *interpolation = thisElement->giveInterpolation( ( DofIDItem ) dofid );
-            interpolation->boundaryGiveNodes( bNodes, side [ thisSide ].at(ielement) );
+            FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
+
+            interpolation->boundaryGiveNodes( bNodes, boundary );
 
             thisElement->giveBoundaryLocationArray(sideLocation, bNodes, {( DofIDItem ) dofid}, s, &masterDofIDs);
             thisElement->computeBoundaryVectorOf(bNodes, {(DofIDItem)dofid}, VM_Total, tStep, a);
 
-            this->computeElementTangent( B, thisElement, side [ thisSide ].at(ielement), tStep);
-            B.times(normalSign);
-
             FloatArray myProd, myProdGamma;
-            myProd.beTProductOf(B, a);
-            myProdGamma.beProductOf(B, gamma);
+
+            B.resize(bNodes.giveSize(), ndof);
+            B.zero();
+
+            std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, boundary));
+
+            myProd.resize(ndof);
+            myProd.zero();
+            myProdGamma.resize(bNodes.giveSize());
+            myProdGamma.zero();
+
+            for ( GaussPoint *gp: *iRule ) {
+                FloatArray *lcoords = gp->giveNaturalCoordinates();
+                FloatArray N, gcoords, BaseFunctionValues;
+                FloatMatrix C, D;
+
+                geoInterpolation->boundaryLocal2Global( gcoords, boundary , *lcoords, FEIElementGeometryWrapper(thisElement));
+                interpolation->boundaryEvalN(N, boundary, *lcoords, FEIElementGeometryWrapper(thisElement));
+                double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( boundary, * lcoords, FEIElementGeometryWrapper(thisElement) ) );
+
+                BaseFunctionValues.resize(ndof);
+                BaseFunctionValues.zero();
+                for (int i=0; i<ndof; i++) {
+                    BaseFunctionValues.at(i+1) = computeBaseFunctionValue(i, gcoords);
+                }
+
+                C.beDyadicProductOf(N, BaseFunctionValues);
+                D.beTranspositionOf(C);
+
+                myProd.plusProduct(C, a, detJ*gp->giveWeight()*normalSign);
+                myProdGamma.plusProduct(D, gamma, detJ*gp->giveWeight()*normalSign);
+            }
 
             if ( eNorms ) {
                 eNorms->assembleSquared( myProd, gamma_ids );

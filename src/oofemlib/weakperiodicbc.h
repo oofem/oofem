@@ -120,6 +120,8 @@ private:
 
     void updateDirection();
 
+    double computeBaseFunctionValue(int baseID, FloatArray coordinate);
+
     double computeBaseFunctionValue1D(int baseID, double coordinate);
 
     double computeBaseFunctionValue2D(int baseID, FloatArray coordinate);
