@@ -1,8 +1,8 @@
 scctest01.out
 scc specimen, gravity colapse
 #supg nsteps 20 lstype 1 smtype 2 stype 1 lsprecond 2 deltaT 1.0e-2 rtolv 5.e-3 alpha 0.5 miflag 1 nmodules 0 stopmaxiter 0
-supg nsteps 20 lstype 0 smtype 1 deltaT 1.0e-2 rtolv 5.e-3 alpha 0.5 miflag 1 nmodules 1 stopmaxiter 0
-errorcheck
+supg nsteps 20 lstype 0 smtype 1 deltaT 1.0e-2 rtolv 5.e-3 alpha 0.5 miflag 1 nmodules 0 stopmaxiter 0
+#errorcheck
 #vtkxml tstep_step 1 domain_all primvars 2 1 5 vars 1 43
 domain 2dIncompFlow
 OutputManager tstep_all dofman_all element_all
