@@ -307,7 +307,7 @@ tet21ghostsolid :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
             if (this->nlGeometry) {
                 FloatArray Fa, temp;
                 FloatMatrix F, Finv, FinvT;
-                computeDeformationGradientVector(Fa, gp, tStep, u);
+                computeDeformationGradientVectorFromDispl(Fa, gp, tStep, u);
                 F.beMatrixForm(Fa);
                 Finv.beInverseOf(F);
                 FinvT.beTranspositionOf(Finv);
@@ -471,7 +471,7 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
             FloatArray Fa, FinvTa;
             FloatMatrix F, Finv, FinvT, fluidStressMatrix;
 
-            computeDeformationGradientVector(Fa, gp, tStep, aGhostDisplacement);
+            computeDeformationGradientVectorFromDispl(Fa, gp, tStep, aGhostDisplacement);
             F.beMatrixForm(Fa);
             double J=F.giveDeterminant();
             Finv.beInverseOf(F);
@@ -613,7 +613,7 @@ tet21ghostsolid :: giveUnknownData(FloatArray &u_prev, FloatArray &u, FloatArray
 }
 
 void
-tet21ghostsolid :: computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &u)
+tet21ghostsolid :: computeDeformationGradientVectorFromDispl(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &u)
 {
     // Computes the deformation gradient in the Voigt format at the Gauss point gp of
     // the receiver at time step tStep.
@@ -643,6 +643,14 @@ tet21ghostsolid :: computeDeformationGradientVector(FloatArray &answer, GaussPoi
     } else {
         OOFEM_ERROR("MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
     }
+}
+
+void
+tet21ghostsolid :: computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    FloatArray u;
+    this->computeVectorOf({1, 2, 3}, VM_Total, tStep, u);
+    computeDeformationGradientVectorFromDispl(answer, gp, tStep, u);
 }
 
 double
