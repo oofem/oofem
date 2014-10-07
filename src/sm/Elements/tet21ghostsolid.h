@@ -80,6 +80,7 @@ public:
 
     virtual void computeDeformationGradientVectorFromDispl(FloatArray &answer, GaussPoint *gp, TimeStep *tStep, FloatArray &u);
     virtual void computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+    virtual void computeDeformationGradientVectorAt(FloatArray &answer, FloatArray lcoord, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     virtual double computeVolumeAround(GaussPoint *gp);

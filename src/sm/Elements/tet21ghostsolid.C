@@ -501,12 +501,6 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
             // Ghost solid part -----
             Strain.beProductOf(B, aGhostDisplacement);
             Stress.beProductOf(Dghost, Strain);
-
-/*            fluidCauchyMatrix.beMatrixFormOfStress(fluidCauchy);
-            fluidStressMatrix.beProductOf(FinvT, fluidCauchyMatrix);
-            fluidStressMatrix.times( J );
-            fluidStress.beVectorForm(fluidStressMatrix);
-  */
             auxstress.plusProduct(B, Stress, detJ * weight);
         }
 
@@ -571,6 +565,45 @@ tet21ghostsolid :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li,
         answer.at(6, 3 * i - 1) = dnx.at(i, 1);
     }
     //answer.printYourself();
+}
+
+void
+tet21ghostsolid :: computeDeformationGradientVectorAt(FloatArray &answer, FloatArray lcoord, TimeStep *tStep)
+{
+
+    FloatArray F, u;
+    FloatMatrix dNdx, BH, Fmatrix, Finv;
+    FEInterpolation *interpolation = this->giveInterpolation();
+
+    // Fetch displacements
+    this->computeVectorOf({1, 2, 3}, VM_Total, tStep, u);
+
+    // Compute dNdx in point
+    interpolation->evaldNdx(dNdx, lcoord, FEIElementGeometryWrapper (this) );
+
+    // Compute displcement gradient BH
+    BH.resize(9, dNdx.giveNumberOfRows() * 3);
+    BH.zero();
+
+    for ( int i = 1; i <= dNdx.giveNumberOfRows(); i++ ) {
+        BH.at(1, 3 * i - 2) = dNdx.at(i, 1);     // du/dx
+        BH.at(2, 3 * i - 1) = dNdx.at(i, 2);     // dv/dy
+        BH.at(3, 3 * i - 0) = dNdx.at(i, 3);     // dw/dz
+        BH.at(4, 3 * i - 1) = dNdx.at(i, 3);     // dv/dz
+        BH.at(7, 3 * i - 0) = dNdx.at(i, 2);     // dw/dy
+        BH.at(5, 3 * i - 2) = dNdx.at(i, 3);     // du/dz
+        BH.at(8, 3 * i - 0) = dNdx.at(i, 1);     // dw/dx
+        BH.at(6, 3 * i - 2) = dNdx.at(i, 2);     // du/dy
+        BH.at(9, 3 * i - 1) = dNdx.at(i, 1);     // dv/dx
+    }
+
+    // Finally, compute deformation gradient F=BH*u+I
+    F.beProductOf(BH, u);
+    F.at(1)+=1.0;
+    F.at(2)+=1.0;
+    F.at(3)+=1.0;
+
+    answer = F;
 }
 
 void
@@ -861,7 +894,7 @@ tet21ghostsolid :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *l
 
     FloatArray n_vec, f(18);
     FloatMatrix n, T;
-    FloatArray force, globalIPcoords;
+    FloatArray force;
     int nsd = fei->giveNsd();
 
     f.zero();
@@ -869,15 +902,27 @@ tet21ghostsolid :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *l
 
     for ( GaussPoint *gp: *iRule ) {
         FloatArray &lcoords = * gp->giveNaturalCoordinates();
-
         if ( load->giveFormulationType() == Load :: FT_Entity ) {
             load->computeValueAt(force, tStep, lcoords, mode);
         } else {
-            FloatArray gcoords;
+            FloatArray gcoords, elcoords;
             this->interpolation.surfaceLocal2global( gcoords, boundary, lcoords, FEIElementGeometryWrapper(this) );
-            NeumannMomentLoad *e= dynamic_cast<NeumannMomentLoad*> (load) ;
-            if (e != NULL ) {
-                e->computeValueAtBoundary(force, tStep, gcoords, VM_Total, this, boundary);
+            this->interpolation.global2local(elcoords, gcoords, FEIElementGeometryWrapper(this));
+            NeumannMomentLoad *thisLoad= dynamic_cast<NeumannMomentLoad*> (load) ;
+            if (thisLoad != NULL ) {
+                FloatArray temp;
+                thisLoad->computeValueAtBoundary(temp, tStep, gcoords, VM_Total, this, boundary);
+
+                FloatArray F;
+                FloatMatrix Fm, Finv, FinvT;
+                this->computeDeformationGradientVectorAt(F, elcoords, tStep);
+                Fm.beMatrixForm(F);
+                double J=Fm.giveDeterminant();
+                Finv.beInverseOf(Fm);
+                FinvT.beTranspositionOf(Finv);
+                force.beProductOf(Finv, temp);
+                force.times(J);
+
             } else {
                 load->computeValueAt(force, tStep, gcoords, VM_Total);
             }
