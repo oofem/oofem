@@ -45,10 +45,6 @@
 #include "floatarray.h"
 #include "linesearch.h"
 
-#ifdef __PETSC_MODULE
- #include <petscksp.h>
-#endif
-
 ///@name Input fields for NRSolver
 //@{
 #define _IFT_NRSolver_Name "nrsolver"
