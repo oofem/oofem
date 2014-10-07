@@ -32,12 +32,6 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/*
- * primvarmapper.C
- *
- * @author: Erik Svenning
- */
-
 #include "primvarmapper.h"
 #include "domain.h"
 #include "dofmanager.h"
@@ -55,11 +49,6 @@
 #include "prescribedgradientbcweak.h"
 
 #include <fstream>
-
-#ifdef __PETSC_MODULE
-#include "petscsparsemtrx.h"
-#include <petscksp.h>
-#endif
 
 namespace oofem {
 PrimaryVariableMapper :: PrimaryVariableMapper() { }
@@ -94,16 +83,17 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
     FloatArray res(numDofsNew);
 
-#ifdef __PETSC_MODULE
-    PetscSparseMtrx *K = dynamic_cast<PetscSparseMtrx*>( classFactory.createSparseMtrx(SMT_PetscMtrx) );
-    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver(ST_Petsc, & iOldDom, engngMod);
-#else
-    SparseMtrx *K = classFactory.createSparseMtrx(SMT_Skyline);
-    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver(ST_Direct, & iOldDom, engngMod);
-#endif
+    SparseMtrx *K;
+    SparseLinearSystemNM *solver;
 
+    K = classFactory.createSparseMtrx(SMT_PetscMtrx);
+    solver = classFactory.createSparseLinSolver(ST_Petsc, & iOldDom, engngMod);
+    if (!K) {
+        K = classFactory.createSparseMtrx(SMT_Skyline);
+        solver = classFactory.createSparseLinSolver(ST_Direct, & iOldDom, engngMod);
+    }
 
-    K->buildInternalStructure( engngMod, 1, num );
+    K->buildInternalStructure( engngMod, iNewDom.giveNumber(), num );
 
     int maxIter = 1;
 
@@ -148,25 +138,9 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
                     //////////////
                     // Global coordinates of GP
-                    const int nDofMan = elNew->giveNumberOfDofManagers();
-
-                    FloatArray Nc;
-                    FEInterpolation *interp = elNew->giveInterpolation();
                     const FloatArray &localCoord = * ( gp->giveNaturalCoordinates() );
-                    interp->evalN( Nc, localCoord, FEIElementGeometryWrapper(elNew) );
-
-                    const IntArray &elNodes = elNew->giveDofManArray();
-
-                    FloatArray globalCoord(dim);
-                    globalCoord.zero();
-
-                    for ( int i = 1; i <= nDofMan; i++ ) {
-                        DofManager *dMan = elNew->giveDofManager(i);
-
-                        for ( int j = 1; j <= dim; j++ ) {
-                            globalCoord.at(j) += Nc.at(i) * dMan->giveCoordinate(j);
-                        }
-                    }
+                    FloatArray globalCoord;
+                    elNew->computeGlobalCoordinates(globalCoord, localCoord);
                     //////////////
 
 
@@ -187,8 +161,8 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
 
                     int dofsPassed = 1;
-                    for ( int i = 1; i <= elNodes.giveSize(); i++ ) {
-                        DofManager *dMan = elNew->giveDofManager(i);
+                    for ( int elNode: elNew->giveDofManArray() ) {
+                        DofManager *dMan = iNewDom.giveNode(elNode);
 
                         for ( Dof *dof: *dMan ) {
                             if ( elDofsGlob.at(dofsPassed) != 0 ) {
@@ -321,12 +295,8 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 #endif
 
 //        printf("iter: %d res norm: %e\n", iter, res.computeNorm() );
-
-
-#ifdef __PETSC_MODULE
-        MatAssemblyBegin( *K->giveMtrx(), MAT_FINAL_ASSEMBLY);
-        MatAssemblyEnd( *K->giveMtrx(), MAT_FINAL_ASSEMBLY);
-#endif
+        K->assembleBegin();
+        K->assembleEnd();
 //        K->writeToFile("Kmapping.txt");
 
         // Solve
