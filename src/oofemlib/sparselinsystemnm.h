@@ -38,6 +38,7 @@
 #include "nummet.h"
 #include "nmstatus.h"
 #include "linsystsolvertype.h"
+#include "sparsemtrxtype.h"
 
 namespace oofem {
 class EngngModel;
@@ -88,6 +89,10 @@ public:
      * @return Status of the solver.
      */
     virtual NM_Status solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X);
+    /**
+     * Returns the recommended sparse matrix type for this solver.
+     */
+    virtual SparseMtrxType giveRecommendedMatrix(bool symmetric) const = 0;
 };
 } // end namespace oofem
 #endif // sparselinsystemnm_h

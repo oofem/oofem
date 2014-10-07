@@ -75,6 +75,7 @@ public:
 
     virtual const char *giveClassName() const { return "DSSSolver"; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_DSS; }
+    virtual SparseMtrxType giveRecommendedMatrix(bool symmetric) const { return symmetric ? SMT_DSS_sym_LDL : SMT_DSS_unsym_LU; } ///@todo Check
 };
 } // end namespace oofem
 

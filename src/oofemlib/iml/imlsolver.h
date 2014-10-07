@@ -104,6 +104,7 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveClassName() const { return "IMLSolver"; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_IML; }
+    virtual SparseMtrxType giveRecommendedMatrix(bool symmetric) const { return symmetric ? SMT_SymCompCol : SMT_CompCol; }
 };
 } // end namespace oofem
 #endif // imlsolver_h

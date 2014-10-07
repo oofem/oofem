@@ -78,6 +78,7 @@ public:
 
     virtual const char *giveClassName() const { return "LDLTFactorization"; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_Direct; }
+    virtual SparseMtrxType giveRecommendedMatrix(bool symmetric) const { return symmetric ? SMT_SymCompCol : SMT_CompCol; }
 };
 } // end namespace oofem
 #endif // ldltfact_h
