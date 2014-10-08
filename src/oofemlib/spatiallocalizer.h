@@ -199,7 +199,16 @@ public:
      * @param radius Radius of bounding sphere.
      */
     virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords,
-                                                const double radius) = 0;
+                                                 const double radius) = 0;
+ 
+    /**
+     * Returns container (set) of all domain elements having integration point within given box, even if this set is empty.
+     * @param elemSet Answer containing the list of elements meeting the criteria.
+     * @param coords Center of box of interest.
+     * @param radius Radius of bounding sphere.
+     */
+    virtual void giveAllElementsWithIpWithinBox_EvenIfEmpty(elementContainerType &elemSet, const FloatArray &coords,
+                                                 const double radius) = 0;
     /**
      * Returns container (set) of all domain elements having node within given box.
      * @param elemSet Answer containing the list of elements meeting the criteria.

@@ -1503,9 +1503,8 @@ OctreeSpatialLocalizer :: giveClosestIPWithinOctant(OctantRec *currentCell, //el
 }
 
 
-
 void
-OctreeSpatialLocalizer :: giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords,
+OctreeSpatialLocalizer :: giveAllElementsWithIpWithinBox_EvenIfEmpty(elementContainerType &elemSet, const FloatArray &coords,
                                                          const double radius, bool iCohesiveZoneGP)
 {
     this->init();
@@ -1524,6 +1523,14 @@ OctreeSpatialLocalizer :: giveAllElementsWithIpWithinBox(elementContainerType &e
 
     // loop over all child (if any) and found all nodes meeting the criteria
     this->giveElementsWithIPWithinBox(elemSet, currCell, coords, radius, iCohesiveZoneGP);
+}
+
+
+void
+OctreeSpatialLocalizer :: giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords,
+                                                         const double radius, bool iCohesiveZoneGP)
+{
+    this->giveAllElementsWithIpWithinBox_EvenIfEmpty(elemSet, coords, radius, iCohesiveZoneGP);
     if ( elemSet.empty() ) {
         OOFEM_ERROR("empty set found");
     }
