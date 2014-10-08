@@ -48,9 +48,9 @@ CompCol_ICPreconditioner :: initializeFrom(InputRecord *ir)
 void
 CompCol_ICPreconditioner :: init(const SparseMtrx &A)
 {
-    if ( A.giveType() == SMT_SymCompCol ) {
+    if ( dynamic_cast< SymCompCol * >(&A) ) {
         this->initialize( * ( ( SymCompCol * ) & A ) );
-    } else if ( A.giveType() == SMT_CompCol ) {
+    } else if ( dynamic_cast< CompCol * >(&A) ) {
         this->initialize( * ( ( CompCol * ) & A ) );
     } else {
         OOFEM_ERROR("unsupported sparse matrix type");

@@ -262,7 +262,7 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
     SparseLinearSystemNM *solver = classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ); // = rve->giveLinearSolver();
-    SparseMtrxType stype = SMT_PetscMtrx; // = rve->giveSparseMatrixType();
+    SparseMtrxType stype = solver->giveRecommendedMatrix(true);
     EModelDefaultEquationNumbering fnum;
     EModelDefaultPrescribedEquationNumbering pnum;
 

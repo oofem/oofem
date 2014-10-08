@@ -425,13 +425,8 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
     }
 
 #ifdef __PETSC_MODULE
-    if ( solverType == ST_Petsc ) {
-        if ( k->giveType() != SMT_PetscMtrx ) {
-            OOFEM_ERROR("PetscSparseMtrx Expected");
-        }
-
-        PetscSparseMtrx *lhs = static_cast< PetscSparseMtrx * >(k);
-
+    PetscSparseMtrx *lhs = dynamic_cast< PetscSparseMtrx * >(k);
+    if ( lhs ) {
         Vec diag;
         PetscScalar *ptr;
         int eq;
@@ -495,13 +490,8 @@ NRSolver :: applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, Float
  #endif
 #else
  #ifdef __PETSC_MODULE
-        if ( solverType == ST_Petsc ) {
-            if ( k->giveType() != SMT_PetscMtrx ) {
-                OOFEM_ERROR("PetscSparseMtrx Expected");
-            }
-
-            const PetscSparseMtrx *lhs = static_cast< const PetscSparseMtrx * >(k);
-
+        const PetscSparseMtrx *lhs = dynamic_cast< const PetscSparseMtrx * >(k);
+        if ( lhs ) {
             Vec diag;
             PetscScalar *ptr;
             lhs->createVecGlobal(& diag);

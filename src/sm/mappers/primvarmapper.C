@@ -86,12 +86,11 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
     SparseMtrx *K;
     SparseLinearSystemNM *solver;
 
-    K = classFactory.createSparseMtrx(SMT_PetscMtrx);
     solver = classFactory.createSparseLinSolver(ST_Petsc, & iOldDom, engngMod);
-    if (!K) {
-        K = classFactory.createSparseMtrx(SMT_Skyline);
+    if (!solver) {
         solver = classFactory.createSparseLinSolver(ST_Direct, & iOldDom, engngMod);
     }
+    K = classFactory.createSparseMtrx(solver->giveRecommendedMatrix(true));
 
     K->buildInternalStructure( engngMod, iNewDom.giveNumber(), num );
 

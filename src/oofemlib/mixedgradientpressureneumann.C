@@ -549,7 +549,7 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
     ///@todo Get this from engineering model
     SparseLinearSystemNM *solver = classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ); // = rve->giveLinearSolver();
     SparseMtrx *Kff;
-    SparseMtrxType stype = SMT_PetscMtrx; // = rve->giveSparseMatrixType();
+    SparseMtrxType stype = solver->giveRecommendedMatrix(true);
     EModelDefaultEquationNumbering fnum;
     Set *set = this->giveDomain()->giveSet(this->set);
     IntArray bNodes;
