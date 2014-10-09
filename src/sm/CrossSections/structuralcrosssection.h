@@ -295,8 +295,6 @@ public:
 
     IRResultType  initializeFrom(InputRecord *ir);
 
-    int hasMaterialModeCapability(MaterialMode mode); // JB
-
     virtual void createMaterialStatus(GaussPoint &iGP) = 0; // ES
 
     virtual int checkConsistency() = 0;
