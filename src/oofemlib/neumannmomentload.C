@@ -126,6 +126,8 @@ NeumannMomentLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const F
         OOFEM_ERROR("mode not supported");
     }
 
+    OOFEM_ERROR("Should not happen!");
+
     // ask time distribution
 
     /*
@@ -172,13 +174,14 @@ NeumannMomentLoad :: computeValueAtBoundary(FloatArray &answer, TimeStep *tStep,
     interpolation->boundaryEvalNormal( n, iside, lcoords, FEIElementGeometryWrapper(e) );
 
     // Compute l=p+g.[x-x^f]
-    FloatArray xdiff, x;
+    FloatArray xdiff;
     //coords.printYourself();
 
     xdiff = coords-xbar;
+
     double l = p+g.dotProduct(xdiff);
 
-    answer = l*n;
+    answer = l*n; // {1.0, 0 ,0};// 
 
     // Finally, compute value of loadtimefunction
     double factor;

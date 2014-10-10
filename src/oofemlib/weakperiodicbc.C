@@ -752,17 +752,8 @@ WeakPeriodicBoundaryCondition :: giveExternalForcesVector(FloatArray &answer, Ti
                 for (int j=0; j<ndof; j++) {
                     FloatArray coord;
 
-                    double fVal;
+                    double fVal = computeBaseFunctionValue(j, gcoords );
 
-                    if ( this->domain->giveNumberOfSpatialDimensions() == 2 ) {
-                        // Not tested
-                        fVal = computeBaseFunctionValue1D(j, gcoords.at( surfaceIndexes.at(1) ));
-                    } else {
-                        coord.resize(2);
-                        coord.at(1) = gcoords.at( surfaceIndexes.at(1) );
-                        coord.at(2) = gcoords.at( surfaceIndexes.at(2) );
-                        fVal = computeBaseFunctionValue2D(j + 1, coord);
-                    }
                     temp.at(j+1)=temp.at(j+1) + normalSign*this->g.dotProduct(gcoords)*fVal*gp->giveWeight()*detJ;
                 }
             }
