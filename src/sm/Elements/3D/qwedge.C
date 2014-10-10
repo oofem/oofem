@@ -205,14 +205,6 @@ QWedge :: SPRNodalRecoveryMI_giveNumberOfIP()
 }
 
 
-void
-QWedge :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
-{
-    if ( this->computeGlobalCoordinates( coords, * gp->giveNaturalCoordinates() ) == 0 ) {
-        OOFEM_ERROR("computeGlobalCoordinates failed");
-    }
-}
-
 SPRPatchType
 QWedge :: SPRNodalRecoveryMI_givePatchType()
 {

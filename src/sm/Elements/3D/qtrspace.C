@@ -135,15 +135,6 @@ QTRSpace :: SPRNodalRecoveryMI_giveNumberOfIP()
     return numberOfGaussPoints;
 }
 
-
-void
-QTRSpace :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
-{
-    if ( this->computeGlobalCoordinates( coords, * gp->giveNaturalCoordinates() ) == 0 ) {
-        OOFEM_ERROR("computeGlobalCoordinates failed");
-    }
-}
-
 SPRPatchType
 QTRSpace :: SPRNodalRecoveryMI_givePatchType()
 {
