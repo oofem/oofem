@@ -50,6 +50,7 @@
 #include "classfactory.h"
 #include "set.h"
 #include "unknownnumberingscheme.h"
+#include "prescribedmean.h"
 
 #ifdef __FM_MODULE
 #include "../fm/tr21stokes.h"
@@ -420,7 +421,7 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
     }
 
     // Output weak periodic boundary conditions
-    unsigned int wpbccount = 1, sbsfcount = 1;
+    unsigned int wpbccount = 1, sbsfcount = 1, mcount = 1;
 
     for ( int i = 1; i <= domain->giveNumberOfBoundaryConditions(); i++ ) {
         WeakPeriodicBoundaryCondition *wpbc = dynamic_cast< WeakPeriodicBoundaryCondition * >( domain->giveBc(i) );
@@ -451,6 +452,17 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
             fprintf(FID, "];\n");
             sbsfcount++;
         }
+        PrescribedMean *m = dynamic_cast<PrescribedMean *> (domain->giveBc(i));
+        if (m) {
+            fprintf(FID, "\tspecials.prescribedmean{%u}.value=[", mcount);
+            for ( Dof *dof: *m->giveInternalDofManager(1)) {
+                double X = dof->giveUnknown(VM_Total, tStep);
+                fprintf(FID, "%e\t", X);
+            }
+            fprintf(FID, "];\n");
+            mcount++;
+        }
+
     }
 }
 
