@@ -557,8 +557,8 @@ public:
     void changeComponentOrder();
 
     // Overloaded methods:
-    contextIOResultType storeYourself(DataStream *stream) const;
-    contextIOResultType restoreYourself(DataStream *stream);
+    contextIOResultType storeYourself(DataStream &stream) const;
+    contextIOResultType restoreYourself(DataStream &stream);
     int givePackSize(DataStream &buff) const;
 
     friend std :: ostream &operator<<(std :: ostream &out, const FloatMatrix &r);

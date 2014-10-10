@@ -62,23 +62,13 @@ LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(
     nMethod = NULL;
     initFlag = 1;
     solverType = ST_Direct;
-
-    nonlocalExt = 0;
-#ifdef __PARALLEL_MODE
-    communicator = nonlocCommunicator = NULL;
-    commBuff = NULL;
-#endif
 }
 
 
 LinearStatic :: ~LinearStatic()
 {
-    if ( stiffnessMatrix ) {
-        delete stiffnessMatrix;
-    }
-    if ( nMethod ) {
-        delete nMethod;
-    }
+    delete stiffnessMatrix;
+    delete nMethod;
 }
 
 
@@ -304,7 +294,7 @@ contextIOResultType LinearStatic :: saveContext(DataStream *stream, ContextMode 
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -343,7 +333,7 @@ contextIOResultType LinearStatic :: restoreContext(DataStream *stream, ContextMo
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

@@ -68,8 +68,8 @@ public:
     virtual const char *giveClassName() const { return "PiecewiceLinFunction"; }
     virtual const char *giveInputRecordName() const { return _IFT_PiecewiseLinFunction_Name; }
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     virtual double evaluateAtTime(double t);
     virtual double evaluateVelocityAtTime(double t);

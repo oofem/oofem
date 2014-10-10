@@ -152,16 +152,6 @@ Quad1_ht :: giveInterface(InterfaceType interface)
 }
 
 
-double
-Quad1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(2), gcoords;
-    lcoords.zero();
-    this->computeGlobalCoordinates(gcoords, lcoords);
-    return gcoords.distance(coords);
-}
-
-
 #ifdef __OOFEG
 void Quad1_ht :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {

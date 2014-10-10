@@ -131,15 +131,12 @@ void StructuralMaterialStatus :: initTempStatus()
 
 
 contextIOResultType
-StructuralMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+StructuralMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full ms context (saves state variables, that completely describe
 // current state)
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = MaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -158,16 +155,13 @@ StructuralMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, vo
 
 
 contextIOResultType
-StructuralMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+StructuralMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)
 //
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = MaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);

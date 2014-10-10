@@ -127,14 +127,14 @@ DofDistributedPrimaryField :: advanceSolution(TimeStep *tStep)
 
 
 contextIOResultType
-DofDistributedPrimaryField :: saveContext(DataStream *stream, ContextMode mode)
+DofDistributedPrimaryField :: saveContext(DataStream &stream, ContextMode mode)
 {
     // all the job is done by dofs alone
     return CIO_OK;
 }
 
 contextIOResultType
-DofDistributedPrimaryField :: restoreContext(DataStream *stream, ContextMode mode)
+DofDistributedPrimaryField :: restoreContext(DataStream &stream, ContextMode mode)
 {
     return CIO_OK;
 }

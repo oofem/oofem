@@ -229,6 +229,7 @@ set (core_parallel
     parallelordering.C
     dyncombuff.C
     loadbalancer.C
+    wallclockloadbalancermonitor.C
     nonlocalmatwtp.C
     )
 

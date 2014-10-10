@@ -239,7 +239,7 @@ HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoi
 }
 
 contextIOResultType
-HydratingHeMoMaterial :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
+HydratingHeMoMaterial :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
 // saves full status for this material, also invokes saving
 // for sub-objects of this.
 {
@@ -259,7 +259,7 @@ HydratingHeMoMaterial :: saveIPContext(DataStream *stream, ContextMode mode, Gau
 }
 
 contextIOResultType
-HydratingHeMoMaterial :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
+HydratingHeMoMaterial :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
 // restores full status for this material, also invokes restoring for sub-objects of this.
 {
     contextIOResultType iores;

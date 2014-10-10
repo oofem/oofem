@@ -457,10 +457,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     this->domainNeqs.at(2) = 0;
     this->domainPrescribedNeqs.at(2) = 0;
     this->domainList.emplace(domainList.begin() + 1, dNew);
-
-#ifdef __PARALLEL_MODE
     this->parallelContextList.emplace(parallelContextList.begin() + 1, this);
-#endif
 
     // init equation numbering
     //this->forceEquationNumbering(2);
@@ -510,10 +507,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
     //domainList->put(2, NULL);
     domainList[0] = std :: move(domainList[1]);
     domainList[0]->setNumber(1);
-
-#ifdef __PARALLEL_MODE
     parallelContextList = {parallelContextList[1]};
-#endif
 
     // keep equation numbering of new domain
     this->numberOfEquations = this->domainNeqs.at(1) = this->domainNeqs.at(2);
@@ -755,7 +749,7 @@ AdaptiveNonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, voi
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = timeStepLoadLevels.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = timeStepLoadLevels.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -790,7 +784,7 @@ AdaptiveNonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, 
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = timeStepLoadLevels.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = timeStepLoadLevels.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

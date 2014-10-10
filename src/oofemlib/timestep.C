@@ -146,41 +146,41 @@ bool TimeStep :: isTheCurrentTimeStep()
 
 
 contextIOResultType
-TimeStep :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+TimeStep :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     // write step number
-    if ( !stream->write(number) ) {
+    if ( !stream.write(number) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // write meta step number
-    if ( !stream->write(mStepNumber) ) {
+    if ( !stream.write(mStepNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // write target time
-    if ( !stream->write(this->targetTime) ) {
+    if ( !stream.write(this->targetTime) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // write intrinsic time
-    if ( !stream->write(this->intrinsicTime) ) {
+    if ( !stream.write(this->intrinsicTime) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // write deltaT
-    if ( !stream->write(this->deltaT) ) {
+    if ( !stream.write(this->deltaT) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // write solutionStateCounter
-    if ( !stream->write(this->solutionStateCounter) ) {
+    if ( !stream.write(this->solutionStateCounter) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // write timeDiscretization
     int tDiscretization = ( int ) timeDiscretization;
-    if ( !stream->write(tDiscretization) ) {
+    if ( !stream.write(tDiscretization) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -189,41 +189,41 @@ TimeStep :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 }
 
 contextIOResultType
-TimeStep :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+TimeStep :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     // read step number
-    if ( !stream->read(number) ) {
+    if ( !stream.read(number) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // read meta step number
-    if ( !stream->read(mStepNumber) ) {
+    if ( !stream.read(mStepNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // read target time
-    if ( !stream->read(this->targetTime) ) {
+    if ( !stream.read(this->targetTime) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // read intrinsic time
-    if ( !stream->read(this->intrinsicTime) ) {
+    if ( !stream.read(this->intrinsicTime) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // read deltaT
-    if ( !stream->read(this->deltaT) ) {
+    if ( !stream.read(this->deltaT) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // read solutionStateCounter
-    if ( !stream->read(this->solutionStateCounter) ) {
+    if ( !stream.read(this->solutionStateCounter) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // read timeDiscretization
     int tDiscretization = 0;
-    if ( !stream->read(tDiscretization) ) {
+    if ( !stream.read(tDiscretization) ) {
         THROW_CIOERR(CIO_IOERR);
     }
     timeDiscretization = ( TimeDiscretizationType ) tDiscretization;

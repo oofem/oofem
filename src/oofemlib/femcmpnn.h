@@ -141,7 +141,7 @@ public:
      * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     /**
      * Restores the receiver state previously written in stream.
      * @see saveContext
@@ -151,7 +151,7 @@ public:
      * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     /**
      * Allows programmer to test some internal data, before computation begins.
      * For example, one may use this function, to ensure that element has material with

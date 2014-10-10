@@ -56,6 +56,8 @@ using namespace std;
 
 #ifdef __PARALLEL_MODE
  #include "loadbalancer.h"
+ #include "problemcomm.h"
+ #include "processcomm.h"
 #endif
 
 namespace oofem {
@@ -73,14 +75,6 @@ NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEng
     effectiveStiffnessMatrix = NULL;
     massMatrix               = NULL;
     nMethod                  = NULL;
-
-    nonlocalExt = 0;
-#ifdef __PARALLEL_MODE
-
-    communicator       = NULL;
-    nonlocCommunicator = NULL;
-    commBuff           = NULL;
-#endif
 }
 
 
@@ -708,19 +702,19 @@ contextIOResultType NonLinearDynamic :: saveContext(DataStream *stream, ContextM
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = incrementOfDisplacement.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = incrementOfDisplacement.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = totalDisplacement.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = totalDisplacement.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = velocityVector.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -756,19 +750,19 @@ contextIOResultType NonLinearDynamic :: restoreContext(DataStream *stream, Conte
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = incrementOfDisplacement.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = incrementOfDisplacement.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = totalDisplacement.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = totalDisplacement.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = velocityVector.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = velocityVector.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

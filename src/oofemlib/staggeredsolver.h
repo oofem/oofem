@@ -32,10 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
 #ifndef staggeredsolver_h
 #define staggeredsolver_h
-
 
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
@@ -82,12 +80,12 @@ public:
     
     virtual int giveDofEquationNumber(Dof *dof) const {
         DofIDItem id = dof->giveDofID();
-	//printf("asking for num %d \n", (int)id);
-         if ( this->dofIdArray.contains( (int)id ) ) {
- 	    return prescribed ? dof->__givePrescribedEquationNumber() : dof->__giveEquationNumber();    
- 	} else {
- 	    return 0;  
- 	}
+        //printf("asking for num %d \n", (int)id);
+            if ( this->dofIdArray.contains( (int)id ) ) {
+            return prescribed ? dof->__givePrescribedEquationNumber() : dof->__giveEquationNumber();    
+        } else {
+            return 0;  
+        }
     }
     
 

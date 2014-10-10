@@ -326,11 +326,11 @@ public:
     /**
      * Stores array to output stream.
      */
-    contextIOResultType storeYourself(DataStream *stream) const;
+    contextIOResultType storeYourself(DataStream &stream) const;
     /**
      * Restores array from image on stream.
      */
-    contextIOResultType restoreYourself(DataStream *stream);
+    contextIOResultType restoreYourself(DataStream &stream);
     /**
      * Returns how much space is needed to pack receivers message.
      * @param buff Buffer used for packing.

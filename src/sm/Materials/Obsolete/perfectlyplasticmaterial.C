@@ -715,7 +715,7 @@ PerfectlyPlasticMaterialStatus :: ~PerfectlyPlasticMaterialStatus()
 
 
 contextIOResultType
-PerfectlyPlasticMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+PerfectlyPlasticMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 //
@@ -727,7 +727,7 @@ PerfectlyPlasticMaterialStatus :: saveContext(DataStream *stream, ContextMode mo
     }
 
     // write a raw data
-    if ( !stream->write(yield_flag) ) {
+    if ( !stream.write(yield_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -741,7 +741,7 @@ PerfectlyPlasticMaterialStatus :: saveContext(DataStream *stream, ContextMode mo
 
 
 contextIOResultType
-PerfectlyPlasticMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+PerfectlyPlasticMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restore state variables from stream
 //
@@ -753,7 +753,7 @@ PerfectlyPlasticMaterialStatus :: restoreContext(DataStream *stream, ContextMode
     }
 
     // read raw data
-    if ( !stream->read(yield_flag) ) {
+    if ( !stream.read(yield_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

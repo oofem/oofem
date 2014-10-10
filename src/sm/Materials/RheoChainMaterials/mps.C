@@ -70,27 +70,23 @@ MPSMaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 contextIOResultType
-MPSMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+MPSMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 //
 {
     contextIOResultType iores;
 
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
-
     if ( ( iores = KelvinChainSolidMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
 
-    if ( !stream->write(equivalentTime) ) {
+    if ( !stream.write(equivalentTime) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(flowTermViscosity) ) {
+    if ( !stream.write(flowTermViscosity) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -98,7 +94,7 @@ MPSMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj
 }
 
 contextIOResultType
-MPSMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+MPSMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restore the state variables from a stream
 //
@@ -108,11 +104,11 @@ MPSMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(equivalentTime) ) {
+    if ( !stream.read(equivalentTime) ) {
         return CIO_IOERR;
     }
 
-    if ( !stream->read(flowTermViscosity) ) {
+    if ( !stream.read(flowTermViscosity) ) {
         return CIO_IOERR;
     }
 

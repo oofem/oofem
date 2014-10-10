@@ -149,8 +149,8 @@ public:
     virtual void updateYourself(TimeStep *tStep);
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     int setIPValue(const FloatArray &value, InternalStateType type);
 

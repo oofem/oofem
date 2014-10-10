@@ -92,8 +92,8 @@ public:
                                            GaussPoint *gp,
                                            TimeStep *tStep);
 
-    virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
-    virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
+    virtual contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
+    virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
 
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_HydratingIsoHeatMaterial_Name; }

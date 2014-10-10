@@ -52,9 +52,6 @@
  #include "petscsolver.h"
  #include "petscsparsemtrx.h"
 #endif
-#ifdef __PARALLEL_MODE
- #include "parallelordering.h"
-#endif
 
 #include <cstdio>
 
@@ -94,32 +91,13 @@ NRSolver :: NRSolver(Domain *d, EngngModel *m) :
 
     smConstraintVersion = 0;
     mCalcStiffBeforeRes = true;
-#ifdef __PETSC_MODULE
-    prescribedEgsIS_defined = false;
-#endif
 }
 
 
 NRSolver :: ~NRSolver()
 {
-    //
-    // destructor
-    //
-    if ( linSolver ) {
-        delete linSolver;
-    }
-
-    if ( linesearchSolver ) {
-        delete linesearchSolver;
-    }
-
-#ifdef __PETSC_MODULE
- #ifdef __PARALLEL_MODE
-    if ( prescribedEgsIS_defined ) {
-        ISDestroy(& prescribedEgsIS);
-    }
- #endif
-#endif
+    delete linSolver;
+    delete linesearchSolver;
 }
 
 
@@ -446,43 +424,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
         return;
     }
 
-#if 0
- #ifdef __PETSC_MODULE
-    if ( solverType == ST_Petsc ) {
-        PetscScalar diagVal = 1.0;
-        if ( k->giveType() != SMT_PetscMtrx ) {
-            OOFEM_ERROR("PetscSparseMtrx Expected");
-        }
-
-        PetscSparseMtrx *lhs = static_cast< PetscSparseMtrx * >(k);
-
-        if ( !prescribedEgsIS_defined ) {
-            IntArray eqs;
-            Natural2GlobalOrdering *n2lpm = engngModel->giveParallelContext(1)->giveN2Gmap();
-            int s = prescribedEqs.giveSize();
-            eqs.resize(s);
-            for ( int i = 1; i <= s; i++ ) {
-                eqs.at(i) = n2lpm->giveNewEq( prescribedEqs.at(i) );
-            }
-
-            ISCreateGeneral(PETSC_COMM_WORLD, s, eqs.givePointer(), & prescribedEgsIS);
-            //ISView(prescribedEgsIS,PETSC_VIEWER_STDOUT_WORLD);
-            prescribedEgsIS_defined = true;
-        }
-
-        //MatView(*(lhs->giveMtrx()),PETSC_VIEWER_STDOUT_WORLD);
-        MatZeroRows(* ( lhs->giveMtrx() ), prescribedEgsIS, & diagVal);
-        //MatView(*(lhs->giveMtrx()),PETSC_VIEWER_STDOUT_WORLD);
-        if ( numberOfPrescribedDofs ) {
-            this->smConstraintVersion = k->giveVersion();
-        }
-
-        return;
-    }
-
- #endif // __PETSC_MODULE
-#else
- #ifdef __PETSC_MODULE
+#ifdef __PETSC_MODULE
     if ( solverType == ST_Petsc ) {
         if ( k->giveType() != SMT_PetscMtrx ) {
             OOFEM_ERROR("PetscSparseMtrx Expected");
@@ -513,8 +455,7 @@ NRSolver :: applyConstraintsToStiffness(SparseMtrx *k)
         return;
     }
 
- #endif // __PETSC_MODULE
-#endif
+#endif // __PETSC_MODULE
     for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
         k->at( prescribedEqs.at(i), prescribedEqs.at(i) ) *= 1.e6;
     }
@@ -622,9 +563,6 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
     bool answer;
     EModelDefaultEquationNumbering dn;
     ParallelContext *parallel_context = engngModel->giveParallelContext( this->domain->giveNumber() );
-#ifdef __PARALLEL_MODE
-    Natural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
-#endif
 
     /*
      * The force errors are (if possible) evaluated as relative errors.
@@ -709,11 +647,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                     if ( !eq ) {
                         continue;
                     }
-#ifdef __PARALLEL_MODE
-                    if ( engngModel->isParallel() && !n2l->giveNewEq(eq) ) {
-                        continue;
-                    }
-#endif
+
                     dg_forceErr.at(dofid) += rhs.at(eq) * rhs.at(eq);
                     dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
                     dg_totalLoadLevel.at(dofid) += RT.at(eq) * RT.at(eq);
@@ -741,11 +675,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
                     if ( !eq ) {
                         continue;
                     }
-#ifdef __PARALLEL_MODE
-                    if ( engngModel->isParallel() && !n2l->giveNewEq(eq) ) {
-                        continue;
-                    }
-#endif
+
                     dg_forceErr.at(dofid) += rhs.at(eq) * rhs.at(eq);
                     dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
                     dg_totalLoadLevel.at(dofid) += RT.at(eq) * RT.at(eq);

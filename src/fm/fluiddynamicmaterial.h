@@ -69,8 +69,8 @@ public:
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
     virtual void initTempStatus();
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     /**
      * Gives the deviatoric stress.

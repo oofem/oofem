@@ -62,23 +62,13 @@ FreeWarping :: FreeWarping(int i, EngngModel *_master) : StructuralEngngModel(i,
     nMethod = NULL;
     initFlag = 1;
     solverType = ST_Direct;
-
-    nonlocalExt = 0;
-#ifdef __PARALLEL_MODE
-    communicator = nonlocCommunicator = NULL;
-    commBuff = NULL;
-#endif
 }
 
 
 FreeWarping :: ~FreeWarping()
 {
-    if ( stiffnessMatrix ) {
-        delete stiffnessMatrix;
-    }
-    if ( nMethod ) {
-        delete nMethod;
-    }
+    delete stiffnessMatrix;
+    delete nMethod;
 }
 
 
@@ -307,7 +297,7 @@ contextIOResultType FreeWarping :: saveContext(DataStream *stream, ContextMode m
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -346,7 +336,7 @@ contextIOResultType FreeWarping :: restoreContext(DataStream *stream, ContextMod
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = displacementVector.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = displacementVector.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

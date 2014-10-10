@@ -59,10 +59,6 @@ REGISTER_SparseNonLinearSystemNM(CylindricalALM)
 CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
     SparseNonLinearSystemNM(d, m), calm_HPCWeights(), calm_HPCIndirectDofMask(), calm_HPCDmanDofSrcArray(), ccDofGroups()
 {
-    //
-    // constructor
-    //
-
     nsmax  = 60;       // default maximum number of sweeps allowed
     numberOfRequiredIterations = 3;
     //rtol   = 10.E-3  ;   // convergence tolerance
@@ -106,9 +102,6 @@ CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
 
 CylindricalALM :: ~CylindricalALM()
 {
-    //
-    // destructor
-    //
     delete linSolver;
 }
 
@@ -493,16 +486,12 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
      * std::list<__DofIDSet> __ccDofGroups;
      * int nccdg; // number of Convergence Criteria Dof Groups
      */
-    int _ng = nccdg, ndofman = domain->giveNumberOfDofManagers();
-    int nelem = domain->giveNumberOfElements();
+    int _ng = nccdg;
     double forceErr, dispErr;
     FloatArray rhs; // residual of momentum balance eq (unbalanced nodal forces)
     FloatArray dg_forceErr(nccdg), dg_dispErr(nccdg), dg_totalLoadLevel(nccdg), dg_totalDisp(nccdg);
     bool answer;
     EModelDefaultEquationNumbering dn;
-#ifdef __PARALLEL_MODE
-    Natural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
-#endif
 
     answer = true;
     errorOutOfRange = false;
@@ -524,6 +513,7 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
         dg_totalLoadLevel.zero();
         dg_totalDisp.zero();
         // loop over dof managers
+        int ndofman = domain->giveNumberOfDofManagers();
         for ( int _idofman = 1; _idofman <= ndofman; _idofman++ ) {
             DofManager *_idofmanptr = domain->giveDofManager(_idofman);
             if ( !_idofmanptr->isLocal() ) {
@@ -539,33 +529,24 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
                         int _eq = _idofptr->giveEquationNumber(dn);
 
                         if ( _eq ) {
-#ifdef __PARALLEL_MODE
-                            if ( !n2l->giveNewEq(_eq) ) {
-                                continue;
-                            }
-#endif
-
-                            double _val = rhs.at(_eq);
-                            dg_forceErr.at(_dg) += _val * _val;
-                            _val = ddX.at(_eq);
-                            dg_dispErr.at(_dg)  += _val * _val;
-                            // missing - compute norms of total displacement and load vectors (but only for selected dofs)!
-                            if ( R0 ) {
-                                _val = R0->at(_eq);
-                                dg_totalLoadLevel.at(_dg) += _val * _val;
-                            }
-
-                            _val = R.at(_eq);
-                            dg_totalLoadLevel.at(_dg) += _val * _val * Lambda * Lambda;
-                            _val = X.at(_eq);
-                            dg_totalDisp.at(_dg) += _val * _val;
+                            continue;
                         }
+                        dg_forceErr.at(_dg) += rhs.at(_eq) * rhs.at(_eq);
+                        dg_dispErr.at(_dg)  += ddX.at(_eq) * ddX.at(_eq);
+                        // missing - compute norms of total displacement and load vectors (but only for selected dofs)!
+                        if ( R0 ) {
+                            dg_totalLoadLevel.at(_dg) += R0->at(_eq) * R0->at(_eq);
+                        }
+
+                        dg_totalLoadLevel.at(_dg) += R.at(_eq) * R.at(_eq) * Lambda * Lambda;
+                        dg_totalDisp.at(_dg) += X.at(_eq) * X.at(_eq);
                     }
                 } // end loop over dof groups
             } // end loop over DOFs
         } // end loop over dof managers
 
         // loop over elements and their DOFs
+        int nelem = domain->giveNumberOfElements();
         for ( int _ielem = 1; _ielem <= nelem; _ielem++ ) {
             Element *_ielemptr = domain->giveElement(_ielem);
             if ( _ielemptr->giveParallelMode() != Element_local ) {
@@ -583,27 +564,17 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
                             int _eq = _idofptr->giveEquationNumber(dn);
 
                             if ( _eq ) {
-#ifdef __PARALLEL_MODE
-                                if ( !n2l->giveNewEq(_eq) ) {
-                                    continue;
-                                }
-#endif
-
-                                double _val = rhs.at(_eq);
-                                dg_forceErr.at(_dg) += _val * _val;
-                                _val = ddX.at(_eq);
-                                dg_dispErr.at(_dg)  += _val * _val;
-                                // missing - compute norms of total displacement and load vectors (but only for selected dofs)!
-                                if ( R0 ) {
-                                    _val = R0->at(_eq);
-                                    dg_totalLoadLevel.at(_dg) += _val * _val;
-                                }
-
-                                _val = R.at(_eq);
-                                dg_totalLoadLevel.at(_dg) += _val * _val * Lambda * Lambda;
-                                _val = X.at(_eq);
-                                dg_totalDisp.at(_dg) += _val * _val;
+                                continue;
                             }
+                            dg_forceErr.at(_dg) += rhs.at(_eq) * rhs.at(_eq);
+                            dg_dispErr.at(_dg)  += ddX.at(_eq) * ddX.at(_eq);
+                            // missing - compute norms of total displacement and load vectors (but only for selected dofs)!
+                            if ( R0 ) {
+                                dg_totalLoadLevel.at(_dg) += R0->at(_eq) * R0->at(_eq);
+                            }
+
+                            dg_totalLoadLevel.at(_dg) += R.at(_eq) * R.at(_eq) * Lambda * Lambda;
+                            dg_totalDisp.at(_dg) += X.at(_eq) * X.at(_eq);
                         }
                     } // end loop over dof groups
                 } // end loop over DOFs
@@ -707,9 +678,6 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
 
 IRResultType
 CylindricalALM :: initializeFrom(InputRecord *ir)
-//
-//
-//
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
@@ -967,12 +935,9 @@ void CylindricalALM :: convertHPCMap()
         }
     }
 
-#ifndef __PARALLEL_MODE
     if ( count != size ) {
         OOFEM_WARNING("some dofmans/Dofs in HPCarray not recognized");
     }
-
-#endif
 
     calm_HPCIndirectDofMask.resize(count);
     if ( calm_Control == calml_hpc ) {
@@ -987,10 +952,10 @@ void CylindricalALM :: convertHPCMap()
 
 
 contextIOResultType
-CylindricalALM :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+CylindricalALM :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     // write current deltaL
-    if ( !stream->write(deltaL) ) {
+    if ( !stream.write(deltaL) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -999,10 +964,10 @@ CylindricalALM :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 contextIOResultType
-CylindricalALM :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+CylindricalALM :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     // read last deltaL
-    if ( !stream->read(deltaL) ) {
+    if ( !stream.read(deltaL) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

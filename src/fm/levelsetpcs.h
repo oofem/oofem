@@ -170,8 +170,8 @@ public:
     // identification
     virtual const char *giveClassName() const { return "LevelSetPCS"; }
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
 protected:
     void pcs_stage1(FloatArray &ls, FloatArray &fs, FloatArray &w, TimeStep *tStep, PCSEqType t);

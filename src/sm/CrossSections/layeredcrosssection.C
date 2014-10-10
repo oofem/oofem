@@ -991,7 +991,7 @@ LayeredCrossSection :: printYourself()
 
 
 contextIOResultType
-LayeredCrossSection :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *masterGp)
+LayeredCrossSection :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *masterGp)
 //
 // saves full material context (saves state variables, that completely describe
 // current state)
@@ -1020,7 +1020,7 @@ LayeredCrossSection :: saveIPContext(DataStream *stream, ContextMode mode, Gauss
 
 
 contextIOResultType
-LayeredCrossSection :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *masterGp)
+LayeredCrossSection :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *masterGp)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)

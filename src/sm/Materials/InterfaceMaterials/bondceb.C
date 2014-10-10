@@ -287,7 +287,7 @@ BondCEBMaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-BondCEBMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+BondCEBMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -297,7 +297,7 @@ BondCEBMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void 
     }
 
     // write a raw data
-    if ( !stream->write(kappa) ) {
+    if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -305,7 +305,7 @@ BondCEBMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void 
 }
 
 contextIOResultType
-BondCEBMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+BondCEBMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -315,7 +315,7 @@ BondCEBMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, vo
     }
 
     // read raw data
-    if ( !stream->read(kappa) ) {
+    if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

@@ -88,9 +88,6 @@ public:
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-
-
     virtual const char *giveClassName() const { return "Axisymm3d"; }
     virtual const char *giveInputRecordName() const { return _IFT_Axisymm3d_Name; }
     virtual IRResultType initializeFrom(InputRecord *ir);

@@ -77,8 +77,6 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_QTrPlaneStrain_Name; }
     virtual const char *giveClassName() const { return "QTrPlaneStrain"; }
     
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-
     virtual void SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap);
     virtual void SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap);
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();

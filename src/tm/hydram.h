@@ -134,8 +134,8 @@ public:
     virtual void updateYourself(TimeStep *tStep);
 
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     // --- identification and auxiliary functions ---
     virtual const char *giveClassName() const { return "HydrationModelStatus"; }
@@ -324,7 +324,7 @@ public:
      */
     IRResultType initializeFrom(InputRecord *ir);
 
-    contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL)
+    contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL)
     {
         if ( hydrationModel ) {
             hydrationModel->saveContext(stream, mode, obj);
@@ -332,7 +332,7 @@ public:
 
         return CIO_OK;
     }
-    contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL)
+    contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL)
     {
         if ( hydrationModel ) {
             hydrationModel->restoreContext(stream, mode, obj);

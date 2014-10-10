@@ -373,7 +373,7 @@ IntMatIsoDamageStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-IntMatIsoDamageStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+IntMatIsoDamageStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -383,11 +383,11 @@ IntMatIsoDamageStatus :: saveContext(DataStream *stream, ContextMode mode, void 
     }
 
     // write a raw data
-    if ( !stream->write(kappa) ) {
+    if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(damage) ) {
+    if ( !stream.write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -395,7 +395,7 @@ IntMatIsoDamageStatus :: saveContext(DataStream *stream, ContextMode mode, void 
 }
 
 contextIOResultType
-IntMatIsoDamageStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+IntMatIsoDamageStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -405,11 +405,11 @@ IntMatIsoDamageStatus :: restoreContext(DataStream *stream, ContextMode mode, vo
     }
 
     // read raw data
-    if ( !stream->read(kappa) ) {
+    if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(damage) ) {
+    if ( !stream.read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

@@ -35,10 +35,6 @@
 #include "datastream.h"
 #include "error.h"
 
-#ifdef __PARALLEL_MODE
- #include "processcomm.h"
-#endif
-
 namespace oofem
 {
 int DataStream :: read(std :: string &data)
@@ -152,102 +148,4 @@ int FileDataStream :: givePackSizeOfLong(int count)
     return sizeof(int)*count;
 }
 
-
-#ifdef __PARALLEL_MODE
-
-int ProcessCommDataStream :: read(int *data, int count)
-{
-    return pc->read(data, count);
-}
-
-int ProcessCommDataStream :: read(unsigned long *data, int count)
-{
-    return pc->read(data, count);
-}
-
-int ProcessCommDataStream :: read(long *data, int count)
-{
-    return pc->read(data, count);
-}
-
-int ProcessCommDataStream :: read(double *data, int count)
-{
-    return pc->read(data, count);
-}
-
-int ProcessCommDataStream :: read(char *data, int count)
-{
-    return pc->read(data, count);
-}
-
-int ProcessCommDataStream :: read(bool &data)
-{
-    char val;
-    int ret = pc->read(& val, 1);
-    data = val != 0;
-    return ret;
-}
-
-int ProcessCommDataStream :: write(const int *data, int count)
-{
-    return pc->write(data, count);
-}
-
-int ProcessCommDataStream :: write(const unsigned long *data, int count)
-{
-    return pc->write(data, count);
-}
-
-int ProcessCommDataStream :: write(const long *data, int count)
-{
-    return pc->write(data, count);
-}
-
-int ProcessCommDataStream :: write(const double *data, int count)
-{
-    return pc->write(data, count);
-}
-
-int ProcessCommDataStream :: write(const char *data, int count)
-{
-    return pc->write(data, count);
-}
-
-int ProcessCommDataStream :: write(bool data)
-{
-    char val = data;
-    return pc->write(& val, 1);
-}
-
-int ProcessCommDataStream :: givePackSizeOfInt(int count)
-{
-    OOFEM_ERROR("remove this function");
-    return 0;
-}
-
-int ProcessCommDataStream :: givePackSizeOfDouble(int count)
-{
-    OOFEM_ERROR("remove this function");
-    return 0;
-}
-
-int ProcessCommDataStream :: givePackSizeOfChar(int count)
-{
-    OOFEM_ERROR("remove this function");
-    return 0;
-}
-
-int ProcessCommDataStream :: givePackSizeOfBool(int count)
-{
-    OOFEM_ERROR("remove this function");
-    return 0;
-}
-
-int ProcessCommDataStream :: givePackSizeOfLong(int count)
-{
-    OOFEM_ERROR("remove this function");
-    return 0;
-}
-
-#endif //__PARALLEL_MODE
 }

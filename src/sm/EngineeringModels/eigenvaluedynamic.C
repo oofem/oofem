@@ -283,11 +283,11 @@ contextIOResultType EigenValueDynamic :: saveContext(DataStream *stream, Context
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = eigVal.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = eigVal.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( eigVec.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( eigVec.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -328,11 +328,11 @@ contextIOResultType EigenValueDynamic :: restoreContext(DataStream *stream, Cont
             THROW_CIOERR(iores);
         }
 
-        if ( ( iores = eigVal.restoreYourself(stream) ) != CIO_OK ) {
+        if ( ( iores = eigVal.restoreYourself(*stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
-        if ( ( iores = eigVec.restoreYourself(stream) ) != CIO_OK ) {
+        if ( ( iores = eigVec.restoreYourself(*stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 

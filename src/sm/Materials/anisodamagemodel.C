@@ -2229,7 +2229,7 @@ AnisotropicDamageMaterialStatus :: updateYourself(TimeStep *atTime)
 
 
 contextIOResultType
-AnisotropicDamageMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+AnisotropicDamageMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     /*    contextIOResultType iores;
      *
@@ -2239,20 +2239,20 @@ AnisotropicDamageMaterialStatus :: saveContext(DataStream *stream, ContextMode m
      *  }
      *
      *  // write raw data
-     *  if ( !stream->write(kappa) ) {
+     *  if ( !stream.write(kappa) ) {
      *      THROW_CIOERR(CIO_IOERR);
      *  }
      *
-     *  if ( !stream->write(damage) ) {
+     *  if ( !stream.write(damage) ) {
      *      THROW_CIOERR(CIO_IOERR);
      *  }
      *
      * #ifdef keep_track_of_dissipated_energy
-     *  if ( !stream->write(stressWork) ) {
+     *  if ( !stream.write(stressWork) ) {
      *      THROW_CIOERR(CIO_IOERR);
      *  }
      *
-     *  if ( !stream->write(dissWork) ) {
+     *  if ( !stream.write(dissWork) ) {
      *      THROW_CIOERR(CIO_IOERR);
      *  }
      *
@@ -2260,17 +2260,13 @@ AnisotropicDamageMaterialStatus :: saveContext(DataStream *stream, ContextMode m
      */
     contextIOResultType iores;
 
-    if ( stream == NULL ) {
-        OOFEM_ERROR("saveContext : can't write into NULL stream");
-    }
-
     // save parent class status
     if ( ( iores = StructuralMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // write raw data
-    if ( !stream->write(kappa) ) {
+    if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -2281,11 +2277,11 @@ AnisotropicDamageMaterialStatus :: saveContext(DataStream *stream, ContextMode m
     }
 
 #ifdef keep_track_of_dissipated_energy
-    if ( !stream->write(stressWork) ) {
+    if ( !stream.write(stressWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(dissWork) ) {
+    if ( !stream.write(dissWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -2297,7 +2293,7 @@ AnisotropicDamageMaterialStatus :: saveContext(DataStream *stream, ContextMode m
 
 
 contextIOResultType
-AnisotropicDamageMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+AnisotropicDamageMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     /*    contextIOResultType iores;
      *
@@ -2307,20 +2303,20 @@ AnisotropicDamageMaterialStatus :: restoreContext(DataStream *stream, ContextMod
      *  }
      *
      *  // read raw data
-     *  if ( !stream->read(kappa) ) {
+     *  if ( !stream.read(kappa) ) {
      *      THROW_CIOERR(CIO_IOERR);
      *  }
      *
-     *  if ( !stream->read(damage) ) {
+     *  if ( !stream.read(damage) ) {
      *      THROW_CIOERR(CIO_IOERR);
      *  }
      *
      * #ifdef keep_track_of_dissipated_energy
-     *  if ( !stream->read(stressWork) ) {
+     *  if ( !stream.read(stressWork) ) {
      *      THROW_CIOERR(CIO_IOERR);
      *  }
      *
-     *  if ( !stream->read(dissWork) ) {
+     *  if ( !stream.read(dissWork) ) {
      *      THROW_CIOERR(CIO_IOERR);
      *  }
      *
@@ -2336,7 +2332,7 @@ AnisotropicDamageMaterialStatus :: restoreContext(DataStream *stream, ContextMod
     }
 
     // read raw data
-    if ( !stream->read(kappa) ) {
+    if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -2347,11 +2343,11 @@ AnisotropicDamageMaterialStatus :: restoreContext(DataStream *stream, ContextMod
     }
 
 #ifdef keep_track_of_dissipated_energy
-    if ( !stream->read(stressWork) ) {
+    if ( !stream.read(stressWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(dissWork) ) {
+    if ( !stream.read(dissWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

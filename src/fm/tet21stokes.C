@@ -404,14 +404,6 @@ void Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueM
     }
 }
 
-double Tet21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray center;
-    FloatArray lcoords = {0.3333333, 0.3333333, 0.3333333};
-    this->computeGlobalCoordinates(center, lcoords);
-    return center.distance(coords);
-}
-
 void Tet21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_Pressure ) {

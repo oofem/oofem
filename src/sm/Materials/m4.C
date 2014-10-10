@@ -344,13 +344,13 @@ M4MaterialStatus :: updateYourself(TimeStep *tStep)
 }
 
 contextIOResultType
-M4MaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+M4MaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     return StructuralMaterialStatus :: saveContext(stream, mode, obj);
 }
 
 contextIOResultType
-M4MaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+M4MaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     return StructuralMaterialStatus :: restoreContext(stream, mode, obj);
 }

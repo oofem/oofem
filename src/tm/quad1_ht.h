@@ -72,8 +72,6 @@ public:
 
     virtual Interface *giveInterface(InterfaceType t);
 
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-
 #ifdef __OOFEG
     // Graphics output
     virtual void drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep);

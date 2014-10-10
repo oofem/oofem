@@ -179,7 +179,7 @@ void PiecewiseLinFunction :: giveInputRecord(DynamicInputRecord &input)
 
 
 contextIOResultType
-PiecewiseLinFunction :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+PiecewiseLinFunction :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     if ( mode & CM_Definition ) {
         dates.storeYourself(stream);
@@ -191,7 +191,7 @@ PiecewiseLinFunction :: saveContext(DataStream *stream, ContextMode mode, void *
 
 
 contextIOResultType
-PiecewiseLinFunction :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+PiecewiseLinFunction :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     if ( mode & CM_Definition ) {
         dates.restoreYourself(stream);

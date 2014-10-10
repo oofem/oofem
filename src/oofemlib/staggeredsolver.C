@@ -32,9 +32,7 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-
 #include "staggeredsolver.h"
-
 #include "timestep.h"
 #include "classfactory.h"
 #include "exportmodulemanager.h"
@@ -42,13 +40,10 @@
 #include "domain.h"
 #include "dofmanager.h"
 #include "element.h"
-
-//for checkConvergence
 #include "generalboundarycondition.h"
-namespace oofem {
-    
 
-    
+namespace oofem {
+
 #define nrsolver_ERROR_NORM_SMALL_NUM 1.e-6
 #define NRSOLVER_MAX_REL_ERROR_BOUND 1.e20
 #define NRSOLVER_MAX_RESTARTS 4
@@ -59,9 +54,7 @@ REGISTER_SparseNonLinearSystemNM(StaggeredSolver)
 
 StaggeredSolver :: StaggeredSolver(Domain *d, EngngModel *m) : NRSolver(d, m)
 {
- 
     this->UnknownNumberingSchemeList.resize(0);
-    
 }
 
 
@@ -176,9 +169,7 @@ StaggeredSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     int neq = Xtotal->giveSize();
     NM_Status status;
     bool converged, errorOutOfRangeFlag;
-#ifdef __PARALLEL_MODE
     ParallelContext *parallel_context = engngModel->giveParallelContext( this->domain->giveNumber() );
-#endif
         
     if ( engngModel->giveProblemScale() == macroScale ) {
         OOFEM_LOG_INFO("StaggeredSolver: Iteration");
@@ -202,12 +193,8 @@ StaggeredSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
         RT.add(* R0);
     }
 
-#ifdef __PARALLEL_MODE
     RRTtotal = parallel_context->localNorm(RT);
     RRTtotal *= RRTtotal;
-#else
-    RRTtotal = RT.computeSquaredNorm();
-#endif
 
     ddXtotal.resize(neq);
     ddXtotal.zero();
@@ -396,10 +383,7 @@ StaggeredSolver :: checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, Flo
     FloatArray dg_forceErr, dg_dispErr, dg_totalLoadLevel, dg_totalDisp;
     bool answer;
     EModelDefaultEquationNumbering dn;
-#ifdef __PARALLEL_MODE
     ParallelContext *parallel_context = engngModel->giveParallelContext( this->domain->giveNumber() );
-    Natural2LocalOrdering *n2l = parallel_context->giveN2Lmap();
-#endif
 
     /*
      * The force errors are (if possible) evaluated as relative errors.
@@ -439,12 +423,9 @@ StaggeredSolver :: checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, Flo
         int ndofman = domain->giveNumberOfDofManagers();
         for ( int idofman = 1; idofman <= ndofman; idofman++ ) {
             DofManager *dofman = domain->giveDofManager(idofman);
-#ifdef __PARALLEL_MODE
             if ( !parallel_context->isLocal(dofman) ) {
                 continue;
             }
-
-#endif
 
             // loop over individual dofs
             for ( Dof *dof: *dofman ) {
@@ -469,12 +450,10 @@ StaggeredSolver :: checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, Flo
         int nelem = domain->giveNumberOfElements();
         for ( int ielem = 1; ielem <= nelem; ielem++ ) {
             Element *elem = domain->giveElement(ielem);
-#ifdef __PARALLEL_MODE
             if ( elem->giveParallelMode() != Element_local ) {
                 continue;
             }
 
-#endif
             // loop over element internal Dofs
             for ( int idofman = 1; idofman <= elem->giveNumberOfInternalDofManagers(); idofman++ ) {
                 DofManager *dofman = elem->giveInternalDofManager(idofman);
@@ -489,11 +468,7 @@ StaggeredSolver :: checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, Flo
                     if ( !eq ) {
                         continue;
                     }
-#ifdef __PARALLEL_MODE
-                    if ( engngModel->isParallel() && !n2l->giveNewEq(eq) ) {
-                        continue;
-                    }
-#endif
+
                     dg_forceErr.at(dofid) += rhs.at(eq) * rhs.at(eq);
                     dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
                     dg_totalLoadLevel.at(dofid) += RT.at(eq) * RT.at(eq);
@@ -521,11 +496,7 @@ StaggeredSolver :: checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, Flo
                     if ( !eq ) {
                         continue;
                     }
-#ifdef __PARALLEL_MODE
-                    if ( engngModel->isParallel() && !n2l->giveNewEq(eq) ) {
-                        continue;
-                    }
-#endif
+
                     dg_forceErr.at(dofid) += rhs.at(eq) * rhs.at(eq);
                     dg_dispErr.at(dofid) += ddX.at(eq) * ddX.at(eq);
                     dg_totalLoadLevel.at(dofid) += RT.at(eq) * RT.at(eq);
@@ -535,7 +506,6 @@ StaggeredSolver :: checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, Flo
             } // end loop over element internal dofmans
         } // end loop over elements
 
-#ifdef __PARALLEL_MODE
         // exchange individual partition contributions (simultaneously for all groups)
         FloatArray collectiveErr(nccdg);
         parallel_context->accumulate(dg_forceErr,       collectiveErr);
@@ -546,8 +516,8 @@ StaggeredSolver :: checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, Flo
         dg_totalLoadLevel = collectiveErr;
         parallel_context->accumulate(dg_totalDisp,      collectiveErr);
         dg_totalDisp      = collectiveErr;
-#endif
-        OOFEM_LOG_INFO("NRSolver: %-5d", nite);
+
+        OOFEM_LOG_INFO("StaggeredSolver: %-5d", nite);
         //bool zeroNorm = false;
         // loop over dof groups and check convergence individually
         for ( int dg = 1; dg <= nccdg; dg++ ) {
@@ -614,23 +584,18 @@ StaggeredSolver :: checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, Flo
         double dXX, dXdX;
 
         if ( engngModel->giveProblemScale() == macroScale ) {
-            OOFEM_LOG_INFO("NRSolver:     %-15d", nite);
+            OOFEM_LOG_INFO("StaggeredSolver:     %-15d", nite);
         } else {
-            OOFEM_LOG_INFO("  NRSolver:     %-15d", nite);
+            OOFEM_LOG_INFO("  StaggeredSolver:     %-15d", nite);
         }
 
-#ifdef __PARALLEL_MODE
         forceErr = parallel_context->localNorm(rhs);
         forceErr *= forceErr;
         dXX = parallel_context->localNorm(X);
         dXX *= dXX;                                       // Note: Solutions are always total global values (natural distribution makes little sense for the solution)
         dXdX = parallel_context->localNorm(ddX);
         dXdX *= dXdX;
-#else
-        forceErr = rhs.computeSquaredNorm();
-        dXX = X.computeSquaredNorm();
-        dXdX = ddX.computeSquaredNorm();
-#endif
+
         if ( rtolf.at(1) > 0.0 ) {
             // we compute a relative error norm
             if ( ( RRT + internalForcesEBENorm.at(1) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {

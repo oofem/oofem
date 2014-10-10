@@ -39,9 +39,19 @@
 #include "contextioerr.h"
 #include "gaussintegrationrule.h"
 
-
-
 namespace oofem {
+    
+CrossSection :: CrossSection(int n, Domain* d) : FEMComponent(n, d)
+{
+    propertyDictionary = new Dictionary();
+    setNumber = 0;
+}
+
+CrossSection :: ~CrossSection()
+{
+    delete propertyDictionary;
+}
+
 int
 CrossSection :: setupIntegrationPoints(IntegrationRule &irule, int npoints, Element *element)
 {
@@ -85,7 +95,7 @@ CrossSection :: printYourself()
 
 
 contextIOResultType
-CrossSection :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
+CrossSection :: saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
 //
 // saves full material context (saves state variables, that completely describe
 // current state)
@@ -103,7 +113,7 @@ CrossSection :: saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *
 
 
 contextIOResultType
-CrossSection :: restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp)
+CrossSection :: restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)

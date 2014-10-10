@@ -316,17 +316,17 @@ ZZNodalRecoveryModel :: packSharedDofManData(parallelStruct *s, ProcessCommunica
         indx = s->regionNodalNumbers->at( toSendMap->at(i) );
         if ( indx ) {
             // pack "1" to indicate that for given shared node this is a valid contribution
-            result &= pcbuff->packInt(1);
-            result &= pcbuff->packDouble( s->lhs->at(indx) );
+            result &= pcbuff->write(1);
+            result &= pcbuff->write( s->lhs->at(indx) );
             for ( int j = 1; j <= nc; j++ ) {
-                result &= pcbuff->packDouble( s->rhs->at(indx, j) );
+                result &= pcbuff->write( s->rhs->at(indx, j) );
             }
 
             //printf("[%d] ZZ: Sending data for shred node %d[%d]\n", domain->giveEngngModel()->giveRank(),
             //       toSendMap->at(i), domain->giveDofManager(toSendMap->at(i))->giveGlobalNumber());
         } else {
             // ok shared node is not in active region (determined by s->regionNodalNumbers)
-            result &= pcbuff->packInt(0);
+            result &= pcbuff->write(0);
         }
     }
 

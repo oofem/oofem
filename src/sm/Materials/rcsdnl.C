@@ -501,7 +501,7 @@ RCSDNLMaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-RCSDNLMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+RCSDNLMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -524,7 +524,7 @@ RCSDNLMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *
 
 
 contextIOResultType
-RCSDNLMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+RCSDNLMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -565,7 +565,7 @@ RCSDNLMaterial :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(tStep);
 
-    return status->giveLocalStrainVectorForAverage().storeYourself(&buff);
+    return status->giveLocalStrainVectorForAverage().storeYourself(buff);
 }
 
 int
@@ -575,7 +575,7 @@ RCSDNLMaterial :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, Gau
     RCSDNLMaterialStatus *status = static_cast< RCSDNLMaterialStatus * >( this->giveStatus(ip) );
     FloatArray localStrainVectorForAverage;
 
-    result = localStrainVectorForAverage.restoreYourself(&buff);
+    result = localStrainVectorForAverage.restoreYourself(buff);
     status->setLocalStrainVectorForAverage(localStrainVectorForAverage);
     return result;
 }

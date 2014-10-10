@@ -565,7 +565,7 @@ RCSDMaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-RCSDMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+RCSDMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -579,15 +579,15 @@ RCSDMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *ob
     }
 
     // write a raw data
-    if ( !stream->write(maxEquivStrain) ) {
+    if ( !stream.write(maxEquivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(damageCoeff) ) {
+    if ( !stream.write(damageCoeff) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(mode) ) {
+    if ( !stream.write(mode) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -600,7 +600,7 @@ RCSDMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *ob
 
 
 contextIOResultType
-RCSDMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+RCSDMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -613,15 +613,15 @@ RCSDMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void 
     }
 
     // read raw data
-    if ( !stream->read(maxEquivStrain) ) {
+    if ( !stream.read(maxEquivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(damageCoeff) ) {
+    if ( !stream.read(damageCoeff) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(mode) ) {
+    if ( !stream.read(mode) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

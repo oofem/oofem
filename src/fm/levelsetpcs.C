@@ -621,11 +621,11 @@ LevelSetPCS :: FMMReinitialization(FloatArray &dmanValues)
 
 
 contextIOResultType
-LevelSetPCS :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+LevelSetPCS :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
-    if ( !stream->write(levelSetVersion) ) {
+    if ( !stream.write(levelSetVersion) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -638,11 +638,11 @@ LevelSetPCS :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 contextIOResultType
-LevelSetPCS :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+LevelSetPCS :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
-    if ( !stream->read(levelSetVersion) ) {
+    if ( !stream.read(levelSetVersion) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

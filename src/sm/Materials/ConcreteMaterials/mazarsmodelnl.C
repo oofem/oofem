@@ -222,7 +222,7 @@ MazarsNLMaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-MazarsNLMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+MazarsNLMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -235,12 +235,12 @@ MazarsNLMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void
         THROW_CIOERR(iores);
     }
 
-    //if (!stream->write(&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
+    //if (!stream.write(&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
     return CIO_OK;
 }
 
 contextIOResultType
-MazarsNLMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+MazarsNLMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -252,7 +252,7 @@ MazarsNLMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, v
     }
 
     // read raw data
-    //if (!stream->read (&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
+    //if (!stream.read (&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
 
     return CIO_OK;
 }

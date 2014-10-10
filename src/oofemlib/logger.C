@@ -161,9 +161,9 @@ Logger :: appendLogTo(const std :: string &fname)
 {
     FILE *stream = NULL;
     if ( this->closeFlag ) {
-        stream = freopen(fname.c_str(), "w", this->logStream);
+        stream = freopen(fname.c_str(), "a", this->logStream);
     } else {
-        stream = fopen(fname.c_str(), "w");
+        stream = fopen(fname.c_str(), "a");
     }
 
     if ( stream == NULL ) {
@@ -180,9 +180,9 @@ Logger :: appendErrorTo(const std :: string &fname)
 {
     FILE *stream = NULL;
     if ( this->errCloseFlag ) {
-        stream = freopen(fname.c_str(), "w", this->errStream);
+        stream = freopen(fname.c_str(), "a", this->errStream);
     } else {
-        stream = fopen(fname.c_str(), "w");
+        stream = fopen(fname.c_str(), "a");
     }
 
     if ( stream == NULL ) {
@@ -193,6 +193,40 @@ Logger :: appendErrorTo(const std :: string &fname)
 
     this->errCloseFlag = true;
 }
+
+void
+Logger :: appendLogTo(FILE *stream)
+{
+    if ( this->closeFlag ) {
+      fclose (this->logStream);
+    }
+
+    if ( stream == NULL ) {
+        OOFEM_ERROR( "Logger::appendLogTo : null stream given" );
+    } else {
+        this->logStream = stream;
+    }
+
+    this->closeFlag = false;
+}
+
+void
+Logger :: appendErrorTo(FILE *stream)
+{
+    if ( this->errCloseFlag ) {
+        fclose (this->errStream);
+    }
+
+    if ( stream == NULL ) {
+        OOFEM_ERROR( "Logger::appendLogTo : null stream given" );
+    } else {
+        this->errStream = stream;
+    }
+
+    this->errCloseFlag = false;
+}
+
+
 
 void
 Logger :: writeLogMsg(logLevelType level, const char *format, ...)

@@ -825,7 +825,7 @@ void FloatArray :: copySubVector(const FloatArray &src, int si)
 }
 
 
-contextIOResultType FloatArray :: storeYourself(DataStream *stream) const
+contextIOResultType FloatArray :: storeYourself(DataStream &stream) const
 // writes receiver's binary image into stream
 // use id to distinguish some instances
 // return value >0 success
@@ -833,13 +833,13 @@ contextIOResultType FloatArray :: storeYourself(DataStream *stream) const
 {
     // write size
     int size = this->giveSize();
-    if ( !stream->write(size) ) {
+    if ( !stream.write(size) ) {
         return CIO_IOERR;
     }
 
     // write raw data
     if ( size ) {
-        if ( !stream->write(this->givePointer(), size) ) {
+        if ( !stream.write(this->givePointer(), size) ) {
             return CIO_IOERR;
         }
     }
@@ -848,7 +848,7 @@ contextIOResultType FloatArray :: storeYourself(DataStream *stream) const
     return CIO_OK;
 }
 
-contextIOResultType FloatArray :: restoreYourself(DataStream *stream)
+contextIOResultType FloatArray :: restoreYourself(DataStream &stream)
 // reads receiver from stream
 // warning - overwrites existing data!
 // returns 0 if file i/o error
@@ -856,7 +856,7 @@ contextIOResultType FloatArray :: restoreYourself(DataStream *stream)
 {
     // read size
     int size;
-    if ( !stream->read(size) ) {
+    if ( !stream.read(size) ) {
         return CIO_IOERR;
     }
 
@@ -864,7 +864,7 @@ contextIOResultType FloatArray :: restoreYourself(DataStream *stream)
 
     // read raw data
     if ( size ) {
-        if ( !stream->read(this->givePointer(), size) ) {
+        if ( !stream.read(this->givePointer(), size) ) {
             return CIO_IOERR;
         }
     }

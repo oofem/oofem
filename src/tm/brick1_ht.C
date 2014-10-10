@@ -206,16 +206,6 @@ Brick1_ht :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-double
-Brick1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(3), gcoords;
-    lcoords.zero();
-    this->computeGlobalCoordinates(gcoords, lcoords);
-    return gcoords.distance(coords);
-}
-
-
 #ifdef __OOFEG
 void Brick1_ht :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {

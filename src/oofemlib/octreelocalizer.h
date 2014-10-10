@@ -195,17 +195,9 @@ protected:
 
 public:
     /// Constructor
-    OctreeSpatialLocalizer(Domain * d) : SpatialLocalizer(d), octreeMask(3) {
-        rootCell = NULL;
-        elementIPListsInitialized = false;
-        elementListsInitialized.clear();
-    }
+    OctreeSpatialLocalizer(Domain * d);
     /// Destructor - deletes the octree tree
-    virtual ~OctreeSpatialLocalizer() {
-        if ( rootCell ) {
-            delete rootCell;
-        }
-    }
+    virtual ~OctreeSpatialLocalizer();
 
     /**
      * Returns the octreeMask value given by the index
@@ -222,7 +214,6 @@ public:
 
     virtual Element *giveElementContainingPoint(const FloatArray &coords, const IntArray *regionList = NULL);
     virtual Element *giveElementContainingPoint(const FloatArray &coords, const Set &eset);
-    virtual Element *giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList = NULL);
     virtual Element *giveElementClosestToPoint(FloatArray &lcoords, FloatArray &closest, const FloatArray &gcoords, int region);
     virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP = false);
     virtual GaussPoint *giveClosestIP(const FloatArray &coords, Set &elemSet, bool iCohesiveZoneGP = false);
@@ -356,19 +347,6 @@ protected:
      */
     Element *giveElementContainingPoint(OctantRec *cell, const FloatArray &coords,
                                         OctantRec *scannedChild = NULL, const Set *elset = NULL);
-    /**
-     * Returns the element close to given point as element which center is closest to the given point.
-     * Only elements with IP in given cell are considered.
-     * The search is done only for given cell and its children, skipping the given child from search.
-     * @param cell Top level cell to search.
-     * @param coords Point coordinates.
-     * @param minDist Distance from the center of returned element.
-     * @param answer Requested element.
-     * @param regionList Only elements within given regions are considered, if NULL all regions are considered.
-     */
-    void giveElementCloseToPointWithinOctant(OctantRec *cell, const FloatArray &coords,
-                                             double &minDist, Element **answer,
-                                             const IntArray *regionList);
     /**
      * Returns the element closest to the given point within the
      * @param currCell Terminal cell to look in.

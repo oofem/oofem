@@ -122,7 +122,7 @@ DustMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 contextIOResultType
-DustMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+DustMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -136,7 +136,7 @@ DustMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *ob
 
 
 contextIOResultType
-DustMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+DustMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 

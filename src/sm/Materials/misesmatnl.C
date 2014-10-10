@@ -498,7 +498,7 @@ MisesMatNlStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-MisesMatNlStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+MisesMatNlStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -510,13 +510,13 @@ MisesMatNlStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    //if (!stream->write(&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
+    //if (!stream.write(&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
     return CIO_OK;
 }
 
 
 contextIOResultType
-MisesMatNlStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+MisesMatNlStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -528,7 +528,7 @@ MisesMatNlStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
     }
 
     // read raw data
-    //if (!stream->read (&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
+    //if (!stream.read (&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
 
     return CIO_OK;
 }

@@ -516,7 +516,7 @@ ExpCZMaterialStatus :: updateYourself(TimeStep *tStep)
 
 #if 0
 contextIOResultType
-ExpCZMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+ExpCZMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -526,11 +526,11 @@ ExpCZMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *o
     }
 
     // write a raw data
-    if ( !stream->write(kappa) ) {
+    if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(damage) ) {
+    if ( !stream.write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -538,7 +538,7 @@ ExpCZMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *o
 }
 
 contextIOResultType
-ExpCZMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+ExpCZMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -548,11 +548,11 @@ ExpCZMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void
     }
 
     // read raw data
-    if ( !stream->read(kappa) ) {
+    if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(damage) ) {
+    if ( !stream.read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
