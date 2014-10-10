@@ -166,39 +166,25 @@ TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueMode
                                                                   TimeStep *tStep, const FloatArray &lcoords,
                                                                   FloatArray &answer)
 {
-    FloatArray u, nv;
+    FloatArray u;
     FloatMatrix n;
-
-    this->interp.evalN( nv, lcoords, FEIElementGeometryWrapper(this) );
-
-    n.beNMatrixOf(nv, 2);
-
+    this->computeNmatrixAt(lcoords, n);
     this->computeVectorOf(mode, tStep, u);
-
     answer.beProductOf(n, u);
 }
 
 
 void
-TrPlaneStrain :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
-                                                                      coordType ct, nodalValContainerType &list,
+TrPlaneStrain :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &lcoords,
+                                                                      nodalValContainerType &list,
                                                                       InternalStateType type, TimeStep *tStep)
 {
-    FloatArray n, lcoords;
-
-    if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
-        lcoords = coords;
-    } else {
-        computeLocalCoordinates(lcoords, coords);
-    }
-
-    this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
-
-    ///@todo Introduce support function for this type of construction..
+    FloatArray n;
+    this->giveInterpolation()->evalN( n, lcoords, FEIElementGeometryWrapper(this) );
     answer.resize(0);
-    answer.add(n.at(1), list[0]);
-    answer.add(n.at(2), list[1]);
-    answer.add(n.at(3), list[2]);
+    for ( int i = 0; i < n.giveSize(); ++i ) {
+        answer.add(n[i], list[i]);
+    }
 }
 
 

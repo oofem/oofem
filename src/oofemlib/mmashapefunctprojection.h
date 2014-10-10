@@ -73,14 +73,13 @@ public:
      * Interpolates the internal variables, using given nodal values
      * to given point (given by global coordinates) using element shape functions.
      * @param answer Computed internal variable.
-     * @param coords Global/local coordinates of point of interest, see param ct.
-     * @param ct Determines type of coordinates system used.
+     * @param lcoords Local coordinates of point of interest.
      * @param list Container of nodal values.
      * @param type Internal variable type.
      * @param tStep Solution step.
      */
-    virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
-                                                                      coordType ct, nodalValContainerType &list,
+    virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &lcoords,
+                                                                      nodalValContainerType &list,
                                                                       InternalStateType type, TimeStep *tStep) = 0;
     //@}
 };

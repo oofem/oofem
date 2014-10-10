@@ -63,16 +63,8 @@ QSpaceGrad :: QSpaceGrad(int n, Domain *aDomain) :  QSpace(n, aDomain), GradDpEl
 IRResultType
 QSpaceGrad :: initializeFrom(InputRecord *ir)
 {
-    IRResultType result = this->StructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( ( numberOfGaussPoints != 8 ) && ( numberOfGaussPoints != 14 ) && ( numberOfGaussPoints != 27 ) && ( numberOfGaussPoints != 64 ) ) {
-        numberOfGaussPoints = 27;
-    }
-
-    return IRRT_OK;
+    numberOfGaussPoints = 27;
+    return this->Structural3DElement :: initializeFrom(ir);
 }
 
 

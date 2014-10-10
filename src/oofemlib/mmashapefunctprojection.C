@@ -113,8 +113,7 @@ MMAShapeFunctProjection :: mapVariable(FloatArray &answer, GaussPoint *gp, Inter
             container.emplace_back(*nvec);
         }
 
-        interface->MMAShapeFunctProjectionInterface_interpolateIntVarAt(answer, ( * gp->giveNaturalCoordinates() ),
-                                                                        MMAShapeFunctProjectionInterface :: coordType_local,
+        interface->MMAShapeFunctProjectionInterface_interpolateIntVarAt(answer, * gp->giveNaturalCoordinates(),
                                                                         container, type, tStep);
     } else {
         OOFEM_ERROR("var not initialized");
@@ -151,9 +150,9 @@ MMAShapeFunctProjection :: __mapVariable(FloatArray &answer, FloatArray &coords,
             container.emplace_back(*nvec);
         }
 
-        interface->MMAShapeFunctProjectionInterface_interpolateIntVarAt(answer, coords,
-                                                                        MMAShapeFunctProjectionInterface :: coordType_global,
-                                                                        container, type, tStep);
+        FloatArray lcoords;
+        elem->computeLocalCoordinates(lcoords, coords);
+        interface->MMAShapeFunctProjectionInterface_interpolateIntVarAt(answer, lcoords, container, type, tStep);
     } else {
         OOFEM_ERROR("var not initialized");
     }

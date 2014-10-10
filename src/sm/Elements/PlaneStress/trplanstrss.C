@@ -594,35 +594,24 @@ TrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueMo
                                                                     TimeStep *tStep, const FloatArray &lcoords,
                                                                     FloatArray &answer)
 {
-    FloatArray u;
     FloatMatrix n;
-
-    n.beNMatrixOf(lcoords, 2);
-
-    this->computeVectorOf({D_u, D_v}, mode, tStep, u);
+    FloatArray u;
+    this->computeNmatrixAt(lcoords, n);
+    this->computeVectorOf(mode, tStep, u);
     answer.beProductOf(n, u);
 }
 
 
 void
-TrPlaneStress2d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
-                                                                        coordType ct, nodalValContainerType &list,
+TrPlaneStress2d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &lcoords,
+                                                                        nodalValContainerType &list,
                                                                         InternalStateType type, TimeStep *tStep)
 {
-    double l1, l2, l3;
-    FloatArray lcoords;
-    if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
-        lcoords = coords;
-    } else {
-        computeLocalCoordinates(lcoords, coords);
-    }
-
-    l1 = lcoords.at(1);
-    l2 = lcoords.at(2);
-    l3 = 1.0 - l1 - l2;
+    FloatArray n;
+    this->giveInterpolation()->evalN( n, lcoords, FEIElementGeometryWrapper(this) );
     answer.resize(0);
-    answer.add(l1, list[0]);
-    answer.add(l2, list[1]);
-    answer.add(l3, list[2]);
+    for ( int i = 0; i < n.giveSize(); ++i ) {
+        answer.add(n[i], list[i]);
+    }
 }
 } // end namespace oofem

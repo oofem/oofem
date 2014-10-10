@@ -505,35 +505,23 @@ LTRSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType 
 {
     FloatArray u;
     FloatMatrix n;
-    n.beNMatrixOf(lcoords, 3);
-
+    this->computeNmatrixAt(lcoords, n);
     this->computeVectorOf(mode, tStep, u);
     answer.beProductOf(n, u);
 }
 
 
 void
-LTRSpace :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
-                                                                 coordType ct, nodalValContainerType &list,
+LTRSpace :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &lcoords,
+                                                                 nodalValContainerType &list,
                                                                  InternalStateType type, TimeStep *tStep)
 {
-    double l1, l2, l3, l4;
-    FloatArray lcoords;
-    if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
-        lcoords = coords;
-    } else {
-        computeLocalCoordinates(lcoords, coords);
-    }
-
-    l1 = lcoords.at(1);
-    l2 = lcoords.at(2);
-    l3 = lcoords.at(3);
-    l4 = 1.0 - l1 - l2 - l3;
+    FloatArray n;
+    this->giveInterpolation()->evalN( n, lcoords, FEIElementGeometryWrapper(this) );
     answer.resize(0);
-    answer.add(l1, list[0]);
-    answer.add(l2, list[1]);
-    answer.add(l3, list[2]);
-    answer.add(l4, list[3]);
+    for ( int i = 0; i < n.giveSize(); ++i ) {
+        answer.add(n[i], list[i]);
+    }
 }
 
 

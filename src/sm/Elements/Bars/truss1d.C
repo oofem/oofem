@@ -405,30 +405,24 @@ Truss1d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType m
                                                             TimeStep *tStep, const FloatArray &lcoords,
                                                             FloatArray &answer)
 {
-    FloatArray n, u;
-
-    this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
-    this->computeVectorOf(IntArray{D_u}, mode, tStep, u);
-    answer = FloatArray{n.dotProduct(u)};
+    FloatArray u;
+    FloatMatrix n;
+    this->computeNmatrixAt(lcoords, n);
+    this->computeVectorOf(mode, tStep, u);
+    answer.beProductOf(n, u);
 }
 
 
 void
-Truss1d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
-                                                                coordType ct, nodalValContainerType &list,
+Truss1d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &lcoords,
+                                                                nodalValContainerType &list,
                                                                 InternalStateType type, TimeStep *tStep)
 {
-    FloatArray lcoords, n;
-    if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
-        lcoords = coords;
-    } else {
-        computeLocalCoordinates(lcoords, coords);
-    }
-
-    this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
-
+    FloatArray n;
+    this->giveInterpolation()->evalN( n, lcoords, FEIElementGeometryWrapper(this) );
     answer.resize(0);
-    answer.add(n.at(1), list[0]);
-    answer.add(n.at(2), list[1]);
+    for ( int i = 0; i < n.giveSize(); ++i ) {
+        answer.add(n[i], list[i]);
+    }
 }
 } // end namespace oofem

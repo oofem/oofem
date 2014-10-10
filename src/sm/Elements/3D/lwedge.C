@@ -66,16 +66,7 @@ IRResultType
 LWedge :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 6;
-    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( ( numberOfGaussPoints != 6 ) && ( numberOfGaussPoints != 9 ) ) {
-        numberOfGaussPoints = 6;
-    }
-
-    return IRRT_OK;
+    return this->Structural3DElement :: initializeFrom(ir);
 }
 
 

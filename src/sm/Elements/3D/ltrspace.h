@@ -100,8 +100,8 @@ public:
                                                                        TimeStep *tStep, const FloatArray &lcoords,
                                                                        FloatArray &answer);
 
-    virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
-                                                                      coordType ct, nodalValContainerType &list,
+    virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &lcoords,
+                                                                      nodalValContainerType &list,
                                                                       InternalStateType type, TimeStep *tStep);
 
     // HuertaErrorEstimatorInterface

@@ -66,16 +66,7 @@ IRResultType
 QTRSpace :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 4;
-    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( ( numberOfGaussPoints != 1 ) && ( numberOfGaussPoints != 4 ) && ( numberOfGaussPoints != 5 ) ) {
-        numberOfGaussPoints = 4;
-    }
-
-    return IRRT_OK;
+    return this->Structural3DElement :: initializeFrom(ir);
 }
 
 
