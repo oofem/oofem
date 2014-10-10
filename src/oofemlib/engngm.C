@@ -557,12 +557,12 @@ EngngModel :: solveYourself()
             
             this->solveYourselfAt( this->giveCurrentStep() );
             this->updateYourself( this->giveCurrentStep() );
-            this->terminate( this->giveCurrentStep() );
-
 
             this->timer.stopTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
 
-            double _steptime = this->timer.getUtime(EngngModelTimer :: EMTT_SolutionStepTimer);
+            this->terminate( this->giveCurrentStep() );
+
+            double _steptime = this->giveSolutionStepTime();
             OOFEM_LOG_INFO("EngngModel info: user time consumed by solution step %d: %.2fs\n",
                            this->giveCurrentStep()->giveNumber(), _steptime);
 
@@ -698,7 +698,6 @@ EngngModel :: saveStepContext(TimeStep *tStep)
 void
 EngngModel :: printOutputAt(FILE *File, TimeStep *tStep)
 {
-    //FILE* File = this -> giveDomain() -> giveOutputStream() ;
     int domCount = 0;
 
     // fprintf (File,"\nOutput for time step number %d \n\n",tStep->giveNumber());
@@ -711,7 +710,7 @@ EngngModel :: printOutputAt(FILE *File, TimeStep *tStep)
     }
 
     fprintf(File, "\n==============================================================");
-    fprintf( File, "\nOutput for time % .8e ", tStep->giveTargetTime() * this->giveVariableScale(VST_Time) );
+    fprintf(File, "\nOutput for time % .8e ", tStep->giveTargetTime() * this->giveVariableScale(VST_Time) );
     fprintf(File, "\n==============================================================\n");
     for ( auto &domain: domainList ) {
         fprintf( File, "Output for domain %3d\n", domain->giveNumber() );
@@ -1620,27 +1619,41 @@ EngngModel :: giveOutputStream()
     return outputStream;
 }
 
+double
+EngngModel :: giveSolutionStepTime()
+{
+    return this->timer.getUtime(EngngModelTimer :: EMTT_SolutionStepTimer);
+}
+
+void
+EngngModel :: giveAnalysisTime(int &rhrs, int &rmin, int &rsec, int &uhrs, int &umin, int &usec)
+{
+    double rtsec = this->timer.getWtime(EngngModelTimer :: EMTT_AnalysisTimer);
+    double utsec = this->timer.getUtime(EngngModelTimer :: EMTT_AnalysisTimer);
+    rsec = rmin = rhrs = 0;
+    usec = umin = uhrs = 0;
+    this->timer.convert2HMS(rhrs, rmin, rsec, rtsec);
+    this->timer.convert2HMS(uhrs, umin, usec, utsec);
+}
+
 void
 EngngModel :: terminateAnalysis()
 {
-    double tsec;
-    int nsec = 0, nmin = 0, nhrs = 0;
+    int rsec = 0, rmin = 0, rhrs = 0;
+    int usec = 0, umin = 0, uhrs = 0;
     FILE *out = this->giveOutputStream();
     time_t endTime = time(NULL);
     this->timer.stopTimer(EngngModelTimer :: EMTT_AnalysisTimer);
 
-
-    fprintf( out, "\nFinishing analysis on: %s\n", ctime(& endTime) );
+    
+    fprintf(out, "\nFinishing analysis on: %s\n", ctime(& endTime) );
     // compute real time consumed
-    tsec = this->timer.getWtime(EngngModelTimer :: EMTT_AnalysisTimer);
-    this->timer.convert2HMS(nhrs, nmin, nsec, tsec);
-    fprintf(out, "Real time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
+    this->giveAnalysisTime(rhrs, rmin, rsec, uhrs, umin, usec);
+    fprintf(out, "Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
     OOFEM_LOG_FORCED("\n\nANALYSIS FINISHED\n\n\n");
-    OOFEM_LOG_FORCED("Real time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
-    tsec = this->timer.getUtime(EngngModelTimer :: EMTT_AnalysisTimer);
-    this->timer.convert2HMS(nhrs, nmin, nsec, tsec);
-    fprintf(out, "User time consumed: %03dh:%02dm:%02ds\n\n\n", nhrs, nmin, nsec);
-    OOFEM_LOG_FORCED("User time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
+    OOFEM_LOG_FORCED("Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
+    fprintf(out, "User time consumed: %03dh:%02dm:%02ds\n\n\n", uhrs, umin, usec);
+    OOFEM_LOG_FORCED("User time consumed: %03dh:%02dm:%02ds\n", uhrs, umin, usec);
     exportModuleManager->terminate();
 }
 
