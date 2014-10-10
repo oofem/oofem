@@ -78,7 +78,7 @@ public:
 
     FormulationType giveFormulationType() { return FT_Global; }
 
-    virtual void computeValueAtBoundary(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode, Element *e, int iside);
+    virtual void computeValueAtBoundary(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode, Element *e, int boundary);
     /**
      * Sets a new load vector.
      * @param newValue New load.

@@ -41,6 +41,7 @@
 #include "element.h"
 #include "feinterpol.h"
 #include "gausspoint.h"
+#include "timestep.h"
 
 
 namespace oofem {
@@ -72,7 +73,7 @@ void
 NeumannMomentLoad :: computeXbar()
 {
 
-    if (!xbar.isEmpty()) return;
+    //if (!xbar.isEmpty()) return;
 
     xbar.resize(this->giveDomain()->giveNumberOfSpatialDimensions());
     xbar.zero();
@@ -99,16 +100,14 @@ NeumannMomentLoad :: computeXbar()
 
             V=V+gp->giveWeight()*fabs(detJ);
 
-            //printf("(%f, %f, %f), detJ = %f\n", coord.at(1), coord.at(2), coord.at(3), detJ);
-
             xbar.add(coord);
         }
+
+        delete iRule;
+
     }
 
     xbar.times(1.0/V);
-
-    //xbar.printYourself();
-    //printf("%f\n", V);
 
 }
 
@@ -160,25 +159,50 @@ NeumannMomentLoad :: computeNormal(FloatArray &answer, Element *e, int side)
 }
 
 void
-NeumannMomentLoad :: computeValueAtBoundary(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode, Element *e, int iside)
+NeumannMomentLoad :: computeValueAtBoundary(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode, Element *e, int boundary)
 {
     computeXbar();
 
     FEInterpolation *interpolation = e->giveInterpolation();
 
     // Compute normal
-    FloatArray n, lcoords;
+    FloatArray Normal, lcoords;
     interpolation->global2local(lcoords, coords, FEIElementGeometryWrapper(e));
-    interpolation->boundaryEvalNormal( n, iside, lcoords, FEIElementGeometryWrapper(e) );
+    interpolation->boundaryEvalNormal( Normal, boundary, lcoords, FEIElementGeometryWrapper(e) );
+
+    // Compute x in current configuration
+    FloatArray u, N;
+    IntArray bNodes;
+
+/*    interpolation->boundaryGiveNodes( bNodes, boundary);
+    e->computeBoundaryVectorOf(bNodes, {1, 2, 3}, VM_Total, tStep, u);
+    interpolation->boundaryEvalN(N, boundary, lcoords, FEIElementGeometryWrapper(e));
+
+    FloatMatrix N2;
+    N2.resize(this->giveDomain()->giveNumberOfSpatialDimensions(), N.giveSize()*this->giveDomain()->giveNumberOfSpatialDimensions());
+
+    // todo: Add support for 2D
+    for (int i=1; i<=N.giveSize(); i++) {
+        N2.at(1, 3*i-2) = N.at(i);
+        N2.at(2, 3*i-1) = N.at(i);
+        N2.at(3, 3*i-0) = N.at(i);
+    }
+
+    if (tStep->giveNumber() > 1) {
+        u.printYourself();
+    }
 
     // Compute l=p+g.[x-x^f]
-    FloatArray xdiff, x;
+    FloatArray x;
+    x.beProductOf(N2, u);
+
+    x=x+coords; */
     //coords.printYourself();
 
-    xdiff = coords-xbar;
+    FloatArray xdiff = coords-xbar;
     double l = p+g.dotProduct(xdiff);
 
-    answer = l*n;
+    answer = l*Normal;
 
     // Finally, compute value of loadtimefunction
     double factor;
