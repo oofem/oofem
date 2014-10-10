@@ -125,6 +125,8 @@ NeumannMomentLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const F
         OOFEM_ERROR("mode not supported");
     }
 
+    OOFEM_ERROR("Should not happen!");
+
     // ask time distribution
 
     /*
@@ -174,35 +176,11 @@ NeumannMomentLoad :: computeValueAtBoundary(FloatArray &answer, TimeStep *tStep,
     FloatArray u, N;
     IntArray bNodes;
 
-/*    interpolation->boundaryGiveNodes( bNodes, boundary);
-    e->computeBoundaryVectorOf(bNodes, {1, 2, 3}, VM_Total, tStep, u);
-    interpolation->boundaryEvalN(N, boundary, lcoords, FEIElementGeometryWrapper(e));
+    FloatArray xdiff = coords-xbar;;
 
-    FloatMatrix N2;
-    N2.resize(this->giveDomain()->giveNumberOfSpatialDimensions(), N.giveSize()*this->giveDomain()->giveNumberOfSpatialDimensions());
-
-    // todo: Add support for 2D
-    for (int i=1; i<=N.giveSize(); i++) {
-        N2.at(1, 3*i-2) = N.at(i);
-        N2.at(2, 3*i-1) = N.at(i);
-        N2.at(3, 3*i-0) = N.at(i);
-    }
-
-    if (tStep->giveNumber() > 1) {
-        u.printYourself();
-    }
-
-    // Compute l=p+g.[x-x^f]
-    FloatArray x;
-    x.beProductOf(N2, u);
-
-    x=x+coords; */
-    //coords.printYourself();
-
-    FloatArray xdiff = coords-xbar;
     double l = p+g.dotProduct(xdiff);
 
-    answer = l*Normal;
+    answer = l*n; 
 
     // Finally, compute value of loadtimefunction
     double factor;
