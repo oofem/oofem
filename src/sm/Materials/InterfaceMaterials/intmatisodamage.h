@@ -139,13 +139,7 @@ public:
                                       const FloatArray &jump, TimeStep *tStep);
 
     virtual void giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &jump,
-                                        const FloatMatrix &F, TimeStep *tStep)
-    {
-        giveEngTraction_3d(answer, gp, jump, tStep);
-        IntMatIsoDamageStatus *status = static_cast< IntMatIsoDamageStatus * >( this->giveStatus(gp) );
-        status->letTempFirstPKTractionBe(answer);
-
-    }
+                                        const FloatMatrix &F, TimeStep *tStep);
 
     virtual int giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateType type, TimeStep *tStep);
     
