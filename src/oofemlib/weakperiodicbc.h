@@ -50,7 +50,7 @@
 #define _IFT_WeakPeriodicBoundaryCondition_Name "weakperiodicbc"
 #define _IFT_WeakPeriodicBoundaryCondition_order "order"
 #define _IFT_WeakPeriodicBoundaryCondition_descritizationType "descritizationtype"
-#define _IFT_WeakPeriodicBoundaryCondition_dofid "dofid"
+#define _IFT_WeakPeriodicBoundaryCondition_dofids "dofids"
 #define _IFT_WeakPeriodicBoundaryCondition_ngp "ngp"
 #define _IFT_WeakPeriodicBoundaryCondition_gradient "gradient"
 #define _IFT_WeakPeriodicBoundaryCondition_elementSidesPositive "elementsidespositive"
@@ -103,7 +103,7 @@ private:
     int negSet;
 
     /** ID of dofs on which weak periodicity is imposed */
-    int dofid;
+    IntArray dofids;
 
     /** sideSign is the sign of the normal for each side */
     signed int sideSign [ 2 ];
@@ -145,6 +145,13 @@ private:
     FloatMatrix gsMatrix;
 
     void computeDeformationGradient(FloatMatrix &answer, Element *e, FloatArray *lcoord, TimeStep *tStep);
+
+    /** Number of terms in polynomial */
+    int tcount;
+
+    /** Number of dofIDs*/
+    int ndofids;
+
 public:
     WeakPeriodicBoundaryCondition(int n, Domain * d);
     virtual ~WeakPeriodicBoundaryCondition();
