@@ -450,6 +450,17 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
             this->computeBHmatrixAt(gp, BH);
             this->computeBmatrixAt(gp, B);
 
+            // Compute deformation gradient etc.
+            FloatArray Fa, FinvTa;
+            FloatMatrix F, Finv, FinvT, fluidStressMatrix;
+
+            computeDeformationGradientVectorFromDispl(Fa, gp, tStep, aGhostDisplacement);
+            F.beMatrixForm(Fa);
+            double J=F.giveDeterminant();
+            Finv.beInverseOf(F);
+            FinvT.beTranspositionOf(Finv);
+            FinvTa.beVectorForm(FinvT);
+
             FloatArray aTotal;
             aTotal.operator = (aVelocity + aIncGhostDisplacement*velocityCoeff); // Assume deltaT=1 gives that the increment is the velocity
 
@@ -468,16 +479,6 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
             gp->setMaterialMode(_3dMat);
 
             // Transform to 1st Piola-Kirshhoff
-            FloatArray Fa, FinvTa;
-            FloatMatrix F, Finv, FinvT, fluidStressMatrix;
-
-            computeDeformationGradientVectorFromDispl(Fa, gp, tStep, aGhostDisplacement);
-            F.beMatrixForm(Fa);
-            double J=F.giveDeterminant();
-            Finv.beInverseOf(F);
-            FinvT.beTranspositionOf(Finv);
-            FinvTa.beVectorForm(FinvT);
-
             fluidCauchyMatrix.beMatrixFormOfStress(fluidCauchy);
             fluidStressMatrix.beProductOf(FinvT, fluidCauchyMatrix);
             fluidStressMatrix.times( J );
@@ -920,7 +921,7 @@ tet21ghostsolid :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *l
                 double J=Fm.giveDeterminant();
                 Finv.beInverseOf(Fm);
                 FinvT.beTranspositionOf(Finv);
-                force.beProductOf(Finv, temp);
+                force.beTProductOf(Finv, temp);
                 force.times(J);
 
             } else {
