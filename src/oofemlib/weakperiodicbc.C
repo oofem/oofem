@@ -133,7 +133,7 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
             ndof = ndof + ( i + 1 );
         }
         tcount = ndof;
-        ndof = ndof * dofids.giveSize();
+        ndof = ndof * ndofids;
     }
 
     // Create dofs for coefficients
@@ -516,7 +516,7 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
             thisElement->giveBoundaryLocationArray(r_sideLoc, bNodes, dofids, r_s);
             thisElement->giveBoundaryLocationArray(c_sideLoc, bNodes, dofids, c_s);
 
-            B.resize(bNodes.giveSize(), ndof);
+            B.resize(bNodes.giveSize()*ndofids, ndofids*tcount);
             B.zero();
 
             std :: unique_ptr< IntegrationRule >iRule(geoInterpolation->giveBoundaryIntegrationRule(orderOfPolygon, boundary));
@@ -531,12 +531,32 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
 
                 double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( boundary, * lcoords, FEIElementGeometryWrapper(thisElement) ) );
 
-                for (int i=0; i<ndof; i++) {
+                FloatMatrix Mbeta(ndofids, ndof), Mv(ndofids, bNodes.giveSize()*ndofids), NvTNbeta;
+
+                for (int i=0; i<tcount; i++) {
+                    for (int j=0; j<ndofids; j++) {
+                        Mbeta.at(j+1, ndofids*i+j+1) = computeBaseFunctionValue(i, gcoords);
+                    }
+                }
+
+                for (int i=0; i<N.giveSize(); i++) {
+                    for (int j=0; j<ndofids; j++) {
+                        Mv.at(j+1, ndofids*i+j+1) = N.at(i+1);
+                    }
+                }
+
+                NvTNbeta.beTProductOf(Mv, Mbeta);
+                NvTNbeta.times(detJ * gp->giveWeight());
+                B.add(NvTNbeta);
+
+/*                for (int i=0; i<ndof; i++) {
                     double fVal = computeBaseFunctionValue(i, gcoords);
                     for ( int k = 0; k < B.giveNumberOfRows(); k++ ) {
                         B(k, i) += N(k) * fVal * detJ * gp->giveWeight();
                     }
-                }
+                }*/
+
+
             }
 
             B.times(normalSign);
