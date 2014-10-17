@@ -79,6 +79,7 @@ NeumannMomentLoad :: computeXbar()
     xbar.zero();
 
     celements = this->giveDomain()->giveSet(cset)->giveElementList();
+    //this->giveDomain()->giveSet(cset)->giveBoundaryList()
     //celements.printYourself();
 
     double V=0.0;
@@ -173,14 +174,14 @@ NeumannMomentLoad :: computeValueAtBoundary(FloatArray &answer, TimeStep *tStep,
     interpolation->boundaryEvalNormal( Normal, boundary, lcoords, FEIElementGeometryWrapper(e) );
 
     // Compute x in current configuration
-    FloatArray u, N;
+    FloatArray u;
     IntArray bNodes;
 
     FloatArray xdiff = coords-xbar;;
 
     double l = p+g.dotProduct(xdiff);
 
-    answer = l*n; 
+    answer = l*Normal;
 
     // Finally, compute value of loadtimefunction
     double factor;
