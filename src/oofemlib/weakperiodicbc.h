@@ -53,6 +53,7 @@
 #define _IFT_WeakPeriodicBoundaryCondition_dofids "dofids"
 #define _IFT_WeakPeriodicBoundaryCondition_ngp "ngp"
 #define _IFT_WeakPeriodicBoundaryCondition_gradient "gradient"
+#define _IFT_WeakPeriodicBoundaryCondition_nlgeo "nlgeo"
 #define _IFT_WeakPeriodicBoundaryCondition_elementSidesPositive "elementsidespositive"
 #define _IFT_WeakPeriodicBoundaryCondition_elementSidesNegative "elementsidesnegative"
 #define _IFT_WeakPeriodicBoundaryCondition_elementSidesPositiveSet "elementsidespositiveset"
@@ -151,6 +152,9 @@ private:
 
     /** Number of dofIDs*/
     int ndofids;
+
+    /** Use finite strains? */
+    bool nlgeo;
 
 public:
     WeakPeriodicBoundaryCondition(int n, Domain * d);

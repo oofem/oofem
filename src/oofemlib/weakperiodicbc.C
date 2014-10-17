@@ -96,6 +96,11 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
         OOFEM_ERROR("ngp isn't being used anymore! see how the interpolator constructs the integration rule automatically.");
     }
 
+
+    nlgeo = false;
+    IR_GIVE_OPTIONAL_FIELD(ir, nlgeo, _IFT_WeakPeriodicBoundaryCondition_nlgeo );
+
+
     g.resize(domain->giveNumberOfSpatialDimensions());
     g.zero();
     IR_GIVE_OPTIONAL_FIELD(ir, g, _IFT_WeakPeriodicBoundaryCondition_gradient);
@@ -426,6 +431,9 @@ WeakPeriodicBoundaryCondition :: computeDeformationGradient(FloatMatrix &answer,
 
 void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Element *e, int boundary, TimeStep *tStep)
 {
+
+    OOFEM_ERROR("Function obsolete");
+
     FloatArray gcoords;
     IntArray bnodes;
 
@@ -545,9 +553,25 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
                     }
                 }
 
-                NvTNbeta.beTProductOf(Mv, Mbeta);
-                NvTNbeta.times(detJ * gp->giveWeight());
+                FloatMatrix defNv, F, Finv;
+                double J=1.0;
+
+                if (nlgeo) {
+                    FloatArray elocal;
+                    geoInterpolation->global2local(elocal, gcoords, FEIElementGeometryWrapper(thisElement));
+                    computeDeformationGradient(F, thisElement, &elocal, tStep);
+//                    J=F.giveDeterminant();
+                    Finv.beInverseOf(F);
+                    defNv.beProductOf(Finv, Mv);
+                } else {
+                    defNv = Mv;
+                }
+
+                NvTNbeta.beTProductOf(defNv, Mbeta);
+
+                NvTNbeta.times(J * detJ * gp->giveWeight());
                 B.add(NvTNbeta);
+
 
 /*                for (int i=0; i<ndof; i++) {
                     double fVal = computeBaseFunctionValue(i, gcoords);
@@ -696,37 +720,70 @@ WeakPeriodicBoundaryCondition :: giveInternalForcesVector(FloatArray &answer, Ti
             gammaProd.resize(ndof);
             gammaProd.zero();
 
+            // For test:
+            FloatArray myProd(gammaProd.giveSize()), myProdGamma(vProd.giveSize());
+
             for ( GaussPoint *gp: *iRule ) {
                 FloatArray *lcoords = gp->giveNaturalCoordinates();
                 FloatArray N, gcoords;
-                FloatMatrix C, D, BaseFunctionMatrix, NMatrix;
+                FloatMatrix C, D, Nbeta, Nv;
 
                 geoInterpolation->boundaryLocal2Global( gcoords, boundary , *lcoords, FEIElementGeometryWrapper(thisElement));
                 interpolation->boundaryEvalN(N, boundary, *lcoords, FEIElementGeometryWrapper(thisElement));
                 double detJ = fabs( geoInterpolation->boundaryGiveTransformationJacobian( boundary, * lcoords, FEIElementGeometryWrapper(thisElement) ) );
 
-                BaseFunctionMatrix.resize(ndof, ndofids);
-                BaseFunctionMatrix.zero();
+                Nbeta.resize(ndofids, ndof);
+                Nbeta.zero();
                 for (int i=0; i<tcount; i++) {
                     double val = computeBaseFunctionValue(i, gcoords);
                     for (int j=0; j<ndofids; j++) {
-                        BaseFunctionMatrix.at(i*ndofids+j+1, j+1) = val;
+                        Nbeta.at(j+1, i*ndofids+j+1) = val;
                     }
                 }
 
-                NMatrix.resize(ndofids, N.giveSize()*ndofids);
-                NMatrix.zero();
+                Nv.resize(ndofids, N.giveSize()*ndofids);
+                Nv.zero();
                 for (int i=0; i<ndofids; i++) {
                     for (int j=0; j<N.giveSize(); j++) {
-                        NMatrix.at(i+1, ndofids*j+i+1) = N(j);
+                        Nv.at(i+1, ndofids*j+i+1) = N(j);
                     }
                 }
 
-                C.beProductOf(BaseFunctionMatrix, NMatrix);
+                FloatMatrix defNv, F, Finv;
+                double J=1.0;
+
+                if (nlgeo) {
+                    FloatArray elocal;
+                    geoInterpolation->global2local(elocal, gcoords, FEIElementGeometryWrapper(thisElement));
+                    computeDeformationGradient(F, thisElement, &elocal, tStep);
+//                    J = F.giveDeterminant();
+                    Finv.beInverseOf(F);
+                    defNv.beProductOf(Finv, Nv);
+                } else {
+                    J=1.0;
+                    defNv = Nv;
+                }
+
+                C.beTProductOf(Nbeta, defNv);
                 D.beTranspositionOf(C);
 
-                vProd.plusProduct(C, gamma, detJ*gp->giveWeight()*normalSign);
-                gammaProd.plusProduct(D, a, detJ*gp->giveWeight()*normalSign);
+                gammaProd.plusProduct(D, a, J*detJ*gp->giveWeight()*normalSign);
+                vProd.plusProduct(C, gamma, J*detJ*gp->giveWeight()*normalSign);
+
+                // Old:
+/*                FloatArray BaseFunctionValues;
+                BaseFunctionValues.resize(ndof);
+                BaseFunctionValues.zero();
+                for (int i=0; i<ndof; i++) {
+                    BaseFunctionValues.at(i+1) = computeBaseFunctionValue(i, gcoords);
+                }
+
+                C.beDyadicProductOf(N, BaseFunctionValues);
+                D.beTranspositionOf(C);
+
+                myProd.plusProduct(C, a, detJ*gp->giveWeight()*normalSign);
+                myProdGamma.plusProduct(D, gamma, detJ*gp->giveWeight()*normalSign); */
+
             }
 
             if ( eNorms ) {
@@ -736,6 +793,8 @@ WeakPeriodicBoundaryCondition :: giveInternalForcesVector(FloatArray &answer, Ti
 
             answer.assemble(gammaProd, gammaLoc);
             answer.assemble(vProd, sideLocation);
+//            answer.assemble(myProd, gammaLoc);
+//            answer.assemble(myProdGamma, sideLocation);
         }
     }
 }
