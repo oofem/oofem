@@ -80,6 +80,7 @@ MatlabExportModule :: MatlabExportModule(int n, EngngModel *e) : ExportModule(n,
     elList.clear();
     reactionForcesNodeSet = 0;
     IPFieldsElSet = 0;
+    noscaling = false;
 }
 
 
@@ -118,6 +119,9 @@ MatlabExportModule :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, IPFieldsElSet, _IFT_MatlabExportModule_IPFieldsElSet);
     }
 
+    IR_GIVE_OPTIONAL_FIELD(ir, noscaling, _IFT_MatlabExportModule_noScaledHomogenization);
+    IR_GIVE_OPTIONAL_FIELD(ir, regionsets, _IFT_MatlabExportModule_regionsets);
+
     return IRRT_OK;
 }
 
@@ -147,8 +151,8 @@ MatlabExportModule :: computeArea(TimeStep *tStep)
     Volume=0;
 
     if (domain->giveNumberOfSpatialDimensions()==2) {
-        for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
-            Area = Area + domain->giveElement(i)->computeArea();
+        for ( int i = 1; i <= elList.giveSize(); i++ ) {
+            Area = Area + domain->giveElement(elList.at(i))->computeArea();
         }
     } else {
 
@@ -156,20 +160,20 @@ MatlabExportModule :: computeArea(TimeStep *tStep)
             partVolume.at(i)=0.0;
         }
 
-        for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
+        for ( int i = 1; i <= this->elList.giveSize(); i++ ) {
             //
             double v;
 #ifdef __SM_MODULE
-            if ( NLStructuralElement *e = dynamic_cast< NLStructuralElement *>(domain->giveElement(i)) ) {
+            if ( NLStructuralElement *e = dynamic_cast< NLStructuralElement *>(domain->giveElement(elList.at(i))) ) {
                 v = e->computeCurrentVolume(tStep);
             } else {
 #endif
-                v = domain->giveElement(i)->computeVolume();
+                v = domain->giveElement(elList.at(i))->computeVolume();
 #ifdef __SM_MODULE
             }
 #endif
 
-            std :: string eName ( domain->giveElement(i)->giveClassName() );
+            std :: string eName ( domain->giveElement(elList.at(i))->giveClassName() );
             int j = -1;
 
             //printf("%s\n", eName.c_str());
@@ -183,14 +187,12 @@ MatlabExportModule :: computeArea(TimeStep *tStep)
             }
 
             if (j==-1) {
-                partName.push_back( domain->giveElement(i)->giveClassName() );
+                partName.push_back( domain->giveElement(elList.at(i))->giveClassName() );
                 partVolume.push_back( v );
                 j=partVolume.size()-1;
             } else {
                 partVolume.at(j) = partVolume.at(j) + v;
             }
-
-            //printf("%s, partVolume.at(%u)=%f\n", eName.c_str(), j, partVolume.at(j));
 
             Volume = Volume + v;
 
@@ -203,9 +205,14 @@ MatlabExportModule :: computeArea(TimeStep *tStep)
 void
 MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
+
     if ( !( testTimeStepOutput(tStep) || forcedOutput ) ) {
         return;
     }
+
+    elList.clear();
+    elList = emodel->giveDomain(1)->giveSet(regionsets.at(1))->giveElementList();
+
 
 
     int nelem = this->elList.giveSize();
@@ -318,10 +325,10 @@ MatlabExportModule :: doOutputMesh(TimeStep *tStep, FILE *FID)
     int numberOfDofMans=domain->giveElement(1)->giveNumberOfDofManagers();
 
     fprintf(FID, "\tmesh.t=[");
-    for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
-        if (domain->giveElement(i)->giveNumberOfDofManagers()==numberOfDofMans) {
-            for ( int j = 1; j <= domain->giveElement(i)->giveNumberOfDofManagers(); j++ ) {
-                fprintf( FID, "%d,", domain->giveElement(i)->giveDofManagerNumber(j) );
+    for ( int i = 1; i <= elList.giveSize(); i++ ) {
+        if (domain->giveElement(elList.at(i))->giveNumberOfDofManagers()==numberOfDofMans)  {
+            for ( int j = 1; j <= domain->giveElement(elList.at(i))->giveNumberOfDofManagers(); j++ ) {
+                fprintf( FID, "%d,", domain->giveElement(elList.at(i))->giveDofManagerNumber(j) );
             }
         }
         fprintf(FID, ";");
@@ -382,13 +389,14 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 
     v_hat.clear();
 
-    for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
+    for ( int i = 1; i <= elList.giveSize(); i++ ) {
+        int elid = elList.at(i);
 #ifdef __FM_MODULE
 
-        if ( Tr21Stokes *T = dynamic_cast< Tr21Stokes * >( domain->giveElement(i) ) ) {
+        if ( Tr21Stokes *T = dynamic_cast< Tr21Stokes * >( domain->giveElement(elid) ) ) {
             T->giveIntegratedVelocity(v_hatTemp, tStep);
             v_hat.add(v_hatTemp);
-        } else if (Tet21Stokes *T = dynamic_cast< Tet21Stokes * >( domain->giveElement(i) )) {
+        } else if (Tet21Stokes *T = dynamic_cast< Tet21Stokes * >( domain->giveElement(elid) )) {
             T->giveIntegratedVelocity(v_hatTemp, tStep);
             v_hat.add(v_hatTemp);
         }
@@ -748,7 +756,12 @@ MatlabExportModule :: doOutputHomogenizeDofIDs(TimeStep *tStep,    FILE *FID)
 
             for (int j=0; j<internalVarsToExport.giveSize(); j++) {
                 FloatArray elementValues;
+                if (strcmp( e->giveClassName(), "tet21ghostsolid") == 0) {
+                    j=j;
+                }
                 e->giveIPValue(elementValues, gp, (InternalStateType) internalVarsToExport(j), tStep);
+                //printf("%s values:\n", e->giveClassName());
+                //elementValues.printYourself();
                 elementValues.times(gp->giveWeight());
                 if (HomQuantities.at(j)->giveSize() == 0) {
                     HomQuantities.at(j)->resize(elementValues.giveSize());
@@ -759,6 +772,8 @@ MatlabExportModule :: doOutputHomogenizeDofIDs(TimeStep *tStep,    FILE *FID)
         }
     }
 
+
+    if (noscaling) Vol=1.0;
 
     for ( std :: size_t i = 0; i<HomQuantities.size(); i ++) {
         FloatArray *thisIS;
@@ -773,7 +788,10 @@ MatlabExportModule :: doOutputHomogenizeDofIDs(TimeStep *tStep,    FILE *FID)
             }
         }
         fprintf(FID, "];\n");
+
+        //fprintf(FID, "\tspecials.HomogenizedVolume_%s = [%f];\n", __InternalStateTypeToString ( InternalStateType (internalVarsToExport(i)) ), Vol );
         // HomQuantities.at(i)->printYourself();
+        delete HomQuantities.at(i);
     }
 
 }

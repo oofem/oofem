@@ -47,6 +47,8 @@
 #define _IFT_MatlabExportModule_area "area"
 #define _IFT_MatlabExportModule_specials "specials"
 #define _IFT_MatlabExportModule_homogenizeInternalVars "homogenizeivars"
+#define _IFT_MatlabExportModule_noScaledHomogenization "noscaling"
+#define _IFT_MatlabExportModule_regionsets "regionsets"
 // Reaction forces
 #define _IFT_MatlabExportModule_ReactionForces "reactionforces"
 #define _IFT_MatlabExportModule_DofManList "dofmanlist"
@@ -96,6 +98,10 @@ protected:
 
     int reactionForcesNodeSet;
     int IPFieldsElSet;
+
+    bool noscaling;
+
+    IntArray regionsets;
 
 private:
     void computeArea(TimeStep *tStep);
