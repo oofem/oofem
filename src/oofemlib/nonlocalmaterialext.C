@@ -80,6 +80,8 @@ NonlocalMaterialExtensionInterface :: NonlocalMaterialExtensionInterface(Domain 
     beta = 0.;
     zeta = 0.;
     nlvar = NLVT_Standard;
+
+    px = 0.;
 }
 
 void
@@ -118,42 +120,46 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
         OOFEM_ERROR("local material status encountered");
     }
 
-    // test for bounded support - if no bounded support, the nonlocal point table is
-    // big vasting of space.
-    /*
-     * if ( !this->hasBoundedSupport() ) {
-     *  return;
-     * }
-     */
-
     if ( !statusExt->giveIntegrationDomainList()->empty() ) {
         return;                                                  // already done
     }
 
     iList = statusExt->giveIntegrationDomainList();
 
-    FloatArray gpCoords, jGpCoords;
+    FloatArray gpCoords, jGpCoords, shiftedGpCoords;
     SpatialLocalizer :: elementContainerType elemSet;
     if ( gp->giveElement()->computeGlobalCoordinates( gpCoords, * ( gp->giveNaturalCoordinates() ) ) == 0 ) {
         OOFEM_ERROR("computeGlobalCoordinates of target failed");
     }
 
-    //If nonlocal variation is set to the distance-based approach, a new nonlocal radius
-    // is calculated as a function of the distance from the gausspoint to the nonlocal boundaries
+    // If nonlocal variation is set to the distance-based approach, a new nonlocal radius
+    // is calculated as a function of the distance from the Gauss point to the nonlocal boundaries
     if ( nlvar == NLVT_DistanceBasedLinear || nlvar == NLVT_DistanceBasedExponential ) {
         //      cl=cl0;
         cl = giveDistanceBasedInteractionRadius(gpCoords);
         suprad = evaluateSupportRadius();
     }
 
+    // If the mesh represents a periodic cell, nonlocal interaction is considered not only for the real neighbors
+    // but also for their periodic images, shifted by +px or -px in the x-direction. In the implementation,
+    // instead of shifting the potential neighbors, we shift the receiver point gp. In the non-periodic case (typical),
+    // px=0 and the following loop is executed only once.  
+
+    int ix, nx = 0; // typical case
+    if ( px > 0. ) nx = 1; // periodicity taken into account
+
+    for (ix=-nx; ix<=nx; ix++) { // loop over periodic images shifted in x-direction
+
+      shiftedGpCoords = gpCoords;
+      shiftedGpCoords.at(1) += ix*px;
 
     // ask domain spatial localizer for list of elements with IP within this zone
 #ifdef NMEI_USE_ALL_ELEMENTS_IN_SUPPORT
-    this->giveDomain()->giveSpatialLocalizer()->giveAllElementsWithNodesWithinBox(elemSet, gpCoords, suprad);
+    this->giveDomain()->giveSpatialLocalizer()->giveAllElementsWithNodesWithinBox(elemSet, shiftedGpCoords, suprad);
     // insert element containing given gp
     elemSet.insert( gp->giveElement()->giveNumber() );
 #else
-    this->giveDomain()->giveSpatialLocalizer()->giveAllElementsWithIpWithinBox(elemSet, gpCoords, suprad);
+    this->giveDomain()->giveSpatialLocalizer()->giveAllElementsWithIpWithinBox_EvenIfEmpty(elemSet, shiftedGpCoords, suprad);
 #endif
     // initialize iList
 
@@ -163,15 +169,12 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
             iRule = ielem->giveDefaultIntegrationRulePtr();
             for ( GaussPoint *jGp: *iRule ) {
                 if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
-                    weight = this->computeWeightFunction(gpCoords, jGpCoords);
+                    weight = this->computeWeightFunction(shiftedGpCoords, jGpCoords);
 
                     //manipulate weights for a special averaging of strain (OFF by default)
                     this->manipulateWeight(weight, gp, jGp);
 
-                    /*
-                     * if ((weight > NonlocalMaterialZeroWeight) && (!this->isBarrierActivated(gpCoords, jGpCoords))) {
-                     */
-                    this->applyBarrierConstraints(gpCoords, jGpCoords, weight);
+                    this->applyBarrierConstraints(shiftedGpCoords, jGpCoords, weight);
 #ifdef NMEI_USE_ALL_ELEMENTS_IN_SUPPORT
                     if ( 1 ) {
 #else
@@ -190,8 +193,9 @@ NonlocalMaterialExtensionInterface :: buildNonlocalPointTable(GaussPoint *gp)
             }
         }
     } // loop over elements
+    }
 
-    statusExt->setIntegrationScale(integrationVolume); // remember scaling factor
+    statusExt->setIntegrationScale(integrationVolume); // store scaling factor
 
     /*
      * // Old implementation without spatial localizer
@@ -236,14 +240,6 @@ NonlocalMaterialExtensionInterface :: rebuildNonlocalPointTable(GaussPoint *gp, 
     if ( !statusExt ) {
         OOFEM_ERROR("local material status encountered");
     }
-
-    // test for bounded support - if no bounded support, the nonlocal point table is
-    // big vasting of space.
-    /*
-     * if ( !this->hasBoundedSupport() ) {
-     *  return;
-     * }
-     */
 
     iList = statusExt->giveIntegrationDomainList();
     iList->clear();
@@ -549,7 +545,7 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_NonlocalMaterialExtensionInterface_averagedquantity);
     this->averagedVar = ( AveragedVarType ) val;
 
-    //Read the nonlocal variation type (default is zero)
+    // read the nonlocal variation type (default is zero)
     cl0 = cl;
     int nlvariation = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, nlvariation, _IFT_NonlocalMaterialExtensionInterface_nonlocalvariation);
@@ -565,6 +561,10 @@ NonlocalMaterialExtensionInterface :: initializeFrom(InputRecord *ir)
         IR_GIVE_FIELD(ir, beta, _IFT_NonlocalMaterialExtensionInterface_beta);
         IR_GIVE_FIELD(ir, zeta, _IFT_NonlocalMaterialExtensionInterface_zeta);
     }
+
+    // read the periodic shift (default is zero)
+    px = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, px, _IFT_NonlocalMaterialExtensionInterface_px);
 
     return IRRT_OK;
 }
@@ -634,7 +634,7 @@ NonlocalMaterialExtensionInterface :: manipulateWeight(double &weight, GaussPoin
 
     if ( ielem->giveMaterial()->hasProperty(AVERAGING_TYPE, jGp) ) {
         if ( ielem->giveMaterial()->give(AVERAGING_TYPE, jGp) == 1 ) {
-            weight = 1. / ( iRule->giveNumberOfIntegrationPoints() ); //asign the same weights over the whole element
+            weight = 1. / ( iRule->giveNumberOfIntegrationPoints() ); //assign the same weights over the whole element
         }
     }
 }
