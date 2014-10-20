@@ -51,6 +51,7 @@
 #include "set.h"
 #include "unknownnumberingscheme.h"
 #include "prescribedmean.h"
+#include "feinterpol.h"
 
 #ifdef __FM_MODULE
 #include "../fm/tr21stokes.h"
@@ -750,9 +751,11 @@ MatlabExportModule :: doOutputHomogenizeDofIDs(TimeStep *tStep,    FILE *FID)
     int nelem = this->elList.giveSize();
     for (int i = 1; i<=nelem; i++) {
         Element *e = this->emodel->giveDomain(1)->giveElement(elList.at(i));
-        Vol = Vol + e->computeVolumeAreaOrLength();
+        FEInterpolation *Interpolation = e->giveInterpolation();
 
-        for ( GaussPoint *gp: *e->giveDefaultIntegrationRulePtr() ) {
+        Vol = Vol + e->computeVolumeAreaOrLength();
+        //Interpolation->giveIn
+        for ( GaussPoint *gp: *e->giveIntegrationRule(0)){// giveDefaultIntegrationRulePtr() ) {
 
             for (int j=0; j<internalVarsToExport.giveSize(); j++) {
                 FloatArray elementValues;
@@ -760,9 +763,9 @@ MatlabExportModule :: doOutputHomogenizeDofIDs(TimeStep *tStep,    FILE *FID)
                     j=j;
                 }
                 e->giveIPValue(elementValues, gp, (InternalStateType) internalVarsToExport(j), tStep);
-                //printf("%s values:\n", e->giveClassName());
-                //elementValues.printYourself();
-                elementValues.times(gp->giveWeight());
+                double detJ=fabs(Interpolation->giveTransformationJacobian( *gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(e)));
+
+                elementValues.times(gp->giveWeight()*detJ);
                 if (HomQuantities.at(j)->giveSize() == 0) {
                     HomQuantities.at(j)->resize(elementValues.giveSize());
                     HomQuantities.at(j)->zero();
