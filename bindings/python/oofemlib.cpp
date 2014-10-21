@@ -110,8 +110,9 @@ struct PyFloatArray : FloatArray, wrapper<FloatArray>
     PyFloatArray(int n=0) : FloatArray(n) {}
     PyFloatArray(FloatArray &src): FloatArray(src) {}
 
-    void printYourself() const {
-      this->get_override("printYourself")();
+    void printYourseelf() const {
+        if (override f = this->get_override("printYourself")) {f();} 
+	this->get_override("printYourself")();
     }
 };
 
@@ -964,24 +965,47 @@ void pyclass_Field()
         ;
 }
 
-
 /*****************************************************
 * FieldManager
 *****************************************************/
 class PyFieldManager;
+  //
+  // note boost python does not support std::shared_ptr
+  // needs check if referecnces are released properly
+  //
+void FieldManager_registerField (FieldManager* fm, Field* a, FieldType key) // ok
+{
+  FM_FieldPtr ptr(a);
+  fm->registerField(ptr, key);
+  printf("Registering field\n");
+};
+
+  Field* FieldManager_getField(FieldManager *fm, FieldType key)
+  {
+    FM_FieldPtr ptr = fm->giveField(key);
+    return ptr.get();
+  }
+
+
 class PyFieldManager : public FieldManager, public wrapper<FieldManager>
 {
 public:
-    PyFieldManager (): FieldManager() {}
-    //void myRegisterField(std::auto_ptr<Field>& a, FieldType key, bool managedFlag = false) {
+  PyFieldManager (): FieldManager() {}
+  void myRegisterField(Field* a, FieldType key) {
+    FieldManager_registerField (this, a, key);
+  }  
+
+  Field* myGiveField(FieldType key) {
+    return FieldManager_getField(this, key);
+  }
 };
 
 void pyclass_FieldManager()
 {
     class_<FieldManager, PyFieldManager, boost::noncopyable>("FieldManager", no_init)
-        .def("registerField", &FieldManager::registerField)
+        .def("registerField", &PyFieldManager::myRegisterField)
         .def("isFieldRegistered", &FieldManager::isFieldRegistered)
-        .def("giveField", &FieldManager::giveField, return_internal_reference<>())
+        .def("giveField", &PyFieldManager::myGiveField, return_internal_reference<>())
         .def("unregisterField", &FieldManager::unregisterField)
         ;
 }
@@ -1256,7 +1280,8 @@ OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(bp::dict &kw)
         ;
     exec(command,temp,temp);
     // extract string from globals["ret"], convert it to char* and return OOFEMTXTInputRecord from it
-    return OOFEMTXTInputRecord( ( extract<string>(temp["ret"])() ).c_str() );
+    //return OOFEMTXTInputRecord( ( extract<string>(temp["ret"])() ).c_str() );
+    return OOFEMTXTInputRecord( 0, ( extract<string>(temp["ret"])() ) );
 }
 
 OOFEMTXTInputRecord makeOutputManagerOOFEMTXTInputRecordFrom(bp::dict &kw)
@@ -1317,7 +1342,8 @@ object engngModel(bp::tuple args, bp::dict kw)
        outFile = "oofem.out.XXXXXX";
     }
     //engngm->Instanciate_init(outFile.c_str(), engngm->giveNumberOfDomains());
-    engngm->Instanciate_init(engngm->giveNumberOfDomains());
+    engngm->letOutputBaseFileNameBe(outFile);
+    engngm->Instanciate_init();
     //
     object ret = object(ptr(engngm));
     /* ????????????????????
