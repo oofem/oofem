@@ -366,7 +366,7 @@ NRSolver :: giveLinearSolver()
 
     linSolver = classFactory.createSparseLinSolver(solverType, domain, engngModel);
     if ( linSolver == NULL ) {
-        OOFEM_ERROR("linear solver creation failed");
+        OOFEM_ERROR("linear solver creation failed for type %d", solverType);
     }
 
     return linSolver;

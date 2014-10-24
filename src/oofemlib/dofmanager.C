@@ -120,6 +120,10 @@ void DofManager :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
     if ( load->giveBCGeoType() != NodalLoadBGT ) {
         OOFEM_ERROR("incompatible load type applied");
     }
+    if ( type != ExternalForcesVector ) {
+        answer.clear();
+        return;
+    }
     load->computeComponentArrayAt(answer, tStep, mode);
 }
 
