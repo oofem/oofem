@@ -692,10 +692,10 @@ EngngModel :: saveStepContext(TimeStep *tStep)
 
     if ( ( this->giveContextOutputMode() == COM_Always ) ||
         ( this->giveContextOutputMode() == COM_Required ) ) {
-        this->saveContext(NULL, CM_State);
+        this->saveContext(NULL, CM_State | CM_Definition);
     } else if ( this->giveContextOutputMode() == COM_UserDefined ) {
         if ( tStep->giveNumber() % this->giveContextOutputStep() == 0 ) {
-            this->saveContext(NULL, CM_State);
+            this->saveContext(NULL, CM_State | CM_Definition);
         }
     }
 }

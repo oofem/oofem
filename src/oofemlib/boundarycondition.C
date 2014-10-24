@@ -39,6 +39,7 @@
 #include "dynamicinputrecord.h"
 #include "dof.h"
 #include "classfactory.h"
+#include "contextioerr.h"
 
 namespace oofem {
 REGISTER_BoundaryCondition(BoundaryCondition);
@@ -109,5 +110,41 @@ void
 BoundaryCondition :: scale(double s)
 {
     values.times(s);
+}
+
+
+contextIOResultType
+BoundaryCondition :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    contextIOResultType iores;
+    if ( ( iores = GeneralBoundaryCondition :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( mode & CM_Definition ) {
+      if ( (iores = values.storeYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+    }
+
+    return CIO_OK;
+}
+
+
+contextIOResultType
+BoundaryCondition :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    contextIOResultType iores;
+    if ( ( iores = GeneralBoundaryCondition :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( mode & CM_Definition ) {
+      if ( (iores = values.restoreYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+    }
+
+    return CIO_OK;
 }
 } // end namespace oofem

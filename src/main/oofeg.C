@@ -1153,14 +1153,14 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
             stepInfo [ 1 ] = istepVersion;
             printf("OOFEG: restoring context file %d.%d\n", stepInfo [ 0 ], stepInfo [ 1 ]);
             try {
-                problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
+                problem->restoreContext(NULL, CM_State| CM_Definition, ( void * ) stepInfo);
             } catch(ContextIOERR & m) {
                 m.print();
                 istepVersion = 0;
                 stepInfo [ 0 ] = prevStep;
                 stepInfo [ 1 ] = 0;
                 try {
-                    problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
+                    problem->restoreContext(NULL, CM_State| CM_Definition, ( void * ) stepInfo);
                 } catch(ContextIOERR & m2) {
                     m2.print();
                     exit(1);
@@ -1176,13 +1176,13 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
 
             //printf ("NextStep: prevStep %d, nstep %d, stepStep %d\n", prevStep, istep, stepStep);
             try {
-                problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
+                problem->restoreContext(NULL, CM_State| CM_Definition, ( void * ) stepInfo);
             } catch(ContextIOERR & m) {
                 m.print();
                 stepInfo [ 0 ] = prevStep;
                 stepInfo [ 1 ] = 0;
                 try {
-                    problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
+                    problem->restoreContext(NULL, CM_State| CM_Definition, ( void * ) stepInfo);
                 } catch(ContextIOERR & m2) {
                     m2.print();
                     exit(1);
@@ -1198,7 +1198,7 @@ void nextStep(Widget wid, XtPointer cl, XtPointer cd)
         stepInfo [ 0 ] = istep;
         stepInfo [ 1 ] = 0;
         try {
-            problem->restoreContext(NULL, CM_State, ( void * ) stepInfo);
+            problem->restoreContext(NULL, CM_State| CM_Definition, ( void * ) stepInfo);
         } catch(ContextIOERR & m) {
             m.print();
             exit(1);
