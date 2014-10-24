@@ -67,7 +67,9 @@ protected:
     int solverType;
     
     double deltaT;
-    
+
+    InitialGuess initialGuessType;
+
 public:
     StaticStructural(int i, EngngModel * _master = NULL);
     virtual ~StaticStructural();

@@ -89,8 +89,6 @@ PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
         OOFEM_ERROR("invalid equation number (slave dof maybe?)");
     }
 
-    ///@todo Mikael: Prescribed values should be stored here too when we extend the usage of fields.
-    /// We should store this in a different way than eqn.-numbers since they may change in-between time steps (requires complicated renumbering).
     if ( mode == VM_Total ) {
         int indxm0 = this->resolveIndx(tStep, 0);
         if ( eq > 0 )
@@ -100,6 +98,8 @@ PrimaryField :: giveUnknownValue(Dof *dof, ValueModeType mode, TimeStep *tStep)
     } else if ( mode == VM_Incremental ) {
         int indxm0 = this->resolveIndx(tStep, 0);
         int indxm1 = this->resolveIndx(tStep, -1);
+        if ( this->giveSolutionVector(indxm1)->giveSize() == 0 ) ///@todo Clean this up, this is a hack for when we ask for the increment in the first step.
+            this->giveSolutionVector(indxm1)->resize(this->giveSolutionVector(indxm0)->giveSize());
         if ( eq > 0 )
             return ( this->giveSolutionVector(indxm0)->at(eq) - this->giveSolutionVector(indxm1)->at(eq) );
         else
