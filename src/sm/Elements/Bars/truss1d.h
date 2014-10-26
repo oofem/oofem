@@ -57,7 +57,7 @@ class FEI1dLin;
 class Truss1d : public StructuralElement,
 public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, public SpatialLocalizerInterface,
 public EIPrimaryUnknownMapperInterface,
-public ZZErrorEstimatorInterface, public MMAShapeFunctProjectionInterface,
+public ZZErrorEstimatorInterface,
 public HuertaErrorEstimatorInterface
 {
 protected:
@@ -115,10 +115,6 @@ public:
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode);
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-
-    virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &lcoords,
-                                                                      nodalValContainerType &list,
-                                                                      InternalStateType type, TimeStep *tStep);
 
 protected:
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int = 1, int = ALL_STRAINS);

@@ -62,7 +62,7 @@ class TrPlaneStress2d : public PlaneStressElement, public ZZNodalRecoveryModelIn
 public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
 public EIPrimaryUnknownMapperInterface,
-public ZZErrorEstimatorInterface, public MMAShapeFunctProjectionInterface,
+public ZZErrorEstimatorInterface,
 public HuertaErrorEstimatorInterface
 {
 protected:
@@ -109,10 +109,6 @@ public:
                                                                   IntArray &controlNode, IntArray &controlDof,
                                                                   HuertaErrorEstimator :: AnalysisMode aMode);
     virtual void HuertaErrorEstimatorI_computeNmatrixAt(GaussPoint *gp, FloatMatrix &answer);
-
-    virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &lcoords,
-                                                                      nodalValContainerType &list,
-                                                                      InternalStateType type, TimeStep *tStep);
 
 protected:
 

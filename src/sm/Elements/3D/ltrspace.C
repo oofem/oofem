@@ -62,7 +62,7 @@ LTRSpace :: LTRSpace(int n, Domain *aDomain) :
     Structural3DElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
     EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
-    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface()
+    HuertaErrorEstimatorInterface()
 
 {
     numberOfDofMans  = 4;
@@ -85,8 +85,6 @@ LTRSpace :: giveInterface(InterfaceType interface)
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
-        return static_cast< MMAShapeFunctProjectionInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
     }
@@ -509,23 +507,6 @@ LTRSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType 
     this->computeVectorOf(mode, tStep, u);
     answer.beProductOf(n, u);
 }
-
-
-void
-LTRSpace :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &lcoords,
-                                                                 nodalValContainerType &list,
-                                                                 InternalStateType type, TimeStep *tStep)
-{
-    FloatArray n;
-    this->giveInterpolation()->evalN( n, lcoords, FEIElementGeometryWrapper(this) );
-    answer.resize(0);
-    for ( int i = 0; i < n.giveSize(); ++i ) {
-        answer.add(n[i], list[i]);
-    }
-}
-
-
-
 
 
 IntegrationRule *

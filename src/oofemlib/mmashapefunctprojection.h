@@ -48,45 +48,6 @@ class Element;
 class TimeStep;
 
 /**
- * Element interface related to the MMAShapeFunctProjection.
- * Declares the required services at element level, which
- * are required by MMAShapeFunctProjection algorithm.
- */
-class OOFEM_EXPORT MMAShapeFunctProjectionInterface : public Interface
-{
-public:
-    /**
-     * Typedefs to introduce the container type for nodal numbers
-     */
-    typedef std::vector< FloatArray > nodalValContainerType;
-
-    enum coordType { coordType_local, coordType_global };
-
-    /// Constructor
-    MMAShapeFunctProjectionInterface() { }
-
-    /**
-     * @name The element interface required by MMAShapeFunctProjectionInterface
-     */
-    //@{
-    /**
-     * Interpolates the internal variables, using given nodal values
-     * to given point (given by global coordinates) using element shape functions.
-     * @param answer Computed internal variable.
-     * @param lcoords Local coordinates of point of interest.
-     * @param list Container of nodal values.
-     * @param type Internal variable type.
-     * @param tStep Solution step.
-     */
-    virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &lcoords,
-                                                                      nodalValContainerType &list,
-                                                                      InternalStateType type, TimeStep *tStep) = 0;
-    //@}
-};
-
-
-
-/**
  * The class implements the transfer of state variables based on
  * projection using shape functions.
  *
@@ -109,7 +70,7 @@ public:
 class OOFEM_EXPORT MMAShapeFunctProjection : public MaterialMappingAlgorithm
 {
 protected:
-    /// Smother.
+    /// Smoothers
     std :: vector< std :: unique_ptr< NodalRecoveryModel > > smootherList;
     /// Solution state counter.
     StateCounterType stateCounter;
@@ -136,6 +97,8 @@ public:
     virtual int __mapVariable(FloatArray &answer, FloatArray &coords, InternalStateType type, TimeStep *tStep);
 
     virtual int mapStatus(MaterialStatus &oStatus) const;
+
+    void interpolateIntVarAt(FloatArray &answer, Element *elem, FloatArray &lcoords, std :: vector< FloatArray > &list, InternalStateType type, TimeStep *tStep) const;
 
     virtual const char *giveClassName() const { return "MMAShapeFunctProjectionInterface"; }
 };

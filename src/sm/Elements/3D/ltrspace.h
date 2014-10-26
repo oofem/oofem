@@ -59,7 +59,7 @@ class LTRSpace : public Structural3DElement, public ZZNodalRecoveryModelInterfac
 public NodalAveragingRecoveryModelInterface, public SPRNodalRecoveryModelInterface,
 public SpatialLocalizerInterface,
 public EIPrimaryUnknownMapperInterface,
-public ZZErrorEstimatorInterface, public MMAShapeFunctProjectionInterface,
+public ZZErrorEstimatorInterface,
 public HuertaErrorEstimatorInterface
 {
 protected:
@@ -99,10 +99,6 @@ public:
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                        TimeStep *tStep, const FloatArray &lcoords,
                                                                        FloatArray &answer);
-
-    virtual void MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &lcoords,
-                                                                      nodalValContainerType &list,
-                                                                      InternalStateType type, TimeStep *tStep);
 
     // HuertaErrorEstimatorInterface
     virtual void HuertaErrorEstimatorI_setupRefinedElementProblem(RefinedElement *refinedElement, int level, int nodeId,

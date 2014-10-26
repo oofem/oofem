@@ -58,7 +58,7 @@ TrPlaneStrain :: TrPlaneStrain(int n, Domain *aDomain) :
     PlaneStrainElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
     EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
-    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface()
+    HuertaErrorEstimatorInterface()
     // Constructor.
 {
     numberOfDofMans  = 3;
@@ -85,8 +85,6 @@ TrPlaneStrain :: giveInterface(InterfaceType interface)
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
-        return static_cast< MMAShapeFunctProjectionInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
     }
@@ -171,20 +169,6 @@ TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueMode
     this->computeNmatrixAt(lcoords, n);
     this->computeVectorOf(mode, tStep, u);
     answer.beProductOf(n, u);
-}
-
-
-void
-TrPlaneStrain :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &lcoords,
-                                                                      nodalValContainerType &list,
-                                                                      InternalStateType type, TimeStep *tStep)
-{
-    FloatArray n;
-    this->giveInterpolation()->evalN( n, lcoords, FEIElementGeometryWrapper(this) );
-    answer.resize(0);
-    for ( int i = 0; i < n.giveSize(); ++i ) {
-        answer.add(n[i], list[i]);
-    }
 }
 
 
