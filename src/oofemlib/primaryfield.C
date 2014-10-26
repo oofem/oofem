@@ -44,7 +44,7 @@
 
 namespace oofem {
 PrimaryField :: PrimaryField(EngngModel *a, int idomain,
-                             FieldType ft, int nHist) : Field(ft), solutionVectors(nHist + 1), solStepList(nHist + 1, emodel)
+                             FieldType ft, int nHist) : Field(ft), solutionVectors(nHist + 1), solStepList(nHist + 1, a)
 {
     this->actualStepNumber = -999;
     this->actualStepIndx = 0;

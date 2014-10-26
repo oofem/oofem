@@ -110,8 +110,7 @@ HOMExportModule :: initialize()
 
     fprintf(this->stream, "#Time      Volume       ");
     for ( int var: this->ists ) {
-        fprintf(this->stream, __InternalStateTypeToString( ( InternalStateType ) var) );
-        fprintf(this->stream, "    ");
+        fprintf(this->stream, "%s    ", __InternalStateTypeToString( ( InternalStateType ) var) );
     }
     fprintf(this->stream, "\n" );
     fflush(this->stream);

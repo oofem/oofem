@@ -125,7 +125,7 @@ Tr1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     FloatArray gc;
-    double thick = this->giveCrossSection()->give(CS_Thickness, gp->giveNaturalCoordinates(), NULL, this); // 't'
+    double thick = this->giveCrossSection()->give(CS_Thickness, gp->giveNaturalCoordinates(), NULL); // 't'
     return determinant *thick *gp->giveWeight();
 }
 
