@@ -42,6 +42,7 @@
 #include "eleminterpmapperinterface.h"
 #include "huertaerrorestimator.h"
 #include "sprnodalrecoverymodel.h"
+#include "spatiallocalizer.h"
 
 #define _IFT_LWedge_Name "lwedge"
 
@@ -55,7 +56,7 @@ class FEI3dWedgeLin;
  * One single additional attribute is needed for Gauss integration purpose :
  * 'jacobianMatrix'. This 3x3 matrix contains polynomials.
  */
-class LWedge : public NLStructuralElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface
+class LWedge : public NLStructuralElement, public SPRNodalRecoveryModelInterface, public ZZNodalRecoveryModelInterface, public NodalAveragingRecoveryModelInterface, SpatialLocalizerInterface
 {
 protected:
     static FEI3dWedgeLin interpolation;
