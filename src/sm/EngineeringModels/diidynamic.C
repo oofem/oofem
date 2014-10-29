@@ -34,7 +34,7 @@
 
 #include "../sm/EngineeringModels/diidynamic.h"
 #include "../sm/Elements/structuralelement.h"
-#include "../sm/ElementEvaluators/structuralelementevaluator.h"
+#include "../sm/Elements/structuralelementevaluator.h"
 #include "timestep.h"
 #include "element.h"
 #include "dofmanager.h"

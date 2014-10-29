@@ -37,7 +37,7 @@ using namespace std;
 
 #include "../sm/EngineeringModels/nlineardynamic.h"
 #include "../sm/Elements/nlstructuralelement.h"
-#include "../sm/ElementEvaluators/structuralelementevaluator.h"
+#include "../sm/Elements/structuralelementevaluator.h"
 #include "nummet.h"
 #include "timestep.h"
 #include "metastep.h"
