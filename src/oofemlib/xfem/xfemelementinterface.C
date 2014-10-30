@@ -276,6 +276,7 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
     std :: vector< std :: vector< double > >Nd( iLocNodeInd.size() );
     for ( int j = 1; j <= int( iLocNodeInd.size() ); j++ ) {
         DofManager *dMan = iEl.giveDofManager(iLocNodeInd [ j - 1 ]);
+        Node *node = dynamic_cast<Node*>(dMan);
 
         // Compute the total number of enrichments for node j
         int numEnrNode = XfemElementInterface_giveNumDofManEnrichments(* dMan, * xMan);
@@ -306,7 +307,7 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
 
                 FloatArray nodePosLocCoord;
                 iEl.computeLocalCoordinates(nodePosLocCoord, nodePos);
-                ei->evaluateEnrFuncAt(efNode, nodePos, nodePosLocCoord, globalNodeInd, iEl, Nc, elNodes);
+                ei->evaluateEnrFuncInNode(efNode, *node);
 
 
                 for ( int k = 0; k < numEnr; k++ ) {
@@ -591,7 +592,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
 
             oPointPartitions.resize(1);
 
-            printf("Warning: No tip found.\n");
+//            printf("Warning: No tip found.\n");
 
             for ( int i = 1; i <= this->element->giveNumberOfDofManagers(); i++ ) {
                 const FloatArray &nodeCoord = * element->giveDofManager(i)->giveCoordinates();

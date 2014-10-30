@@ -84,29 +84,23 @@ PlaneStress2d :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
 // (epsilon_x,epsilon_y,gamma_xy) = B . r
 // r = ( u1,v1,u2,v2,u3,v3,u4,v4)
 {
-    int i;
     FloatMatrix dnx;
-#ifdef  PlaneStress2d_reducedShearIntegration
-    FloatArray coord;
-#endif
 
     this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
     answer.resize(3, 8);
     answer.zero();
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(1, 2 * i - 1) = dnx.at(i, 1);
         answer.at(2, 2 * i - 0) = dnx.at(i, 2);
     }
 
 #ifdef  PlaneStress2d_reducedShearIntegration
-    coord.resize(2);
-    coord.zero();
-    this->interpolation.evaldNdx( dnx, coord, FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, {0., 0.}, FEIElementGeometryWrapper(this) );
 #endif
 
-    for ( i = 1; i <= 4; i++ ) {
+    for ( int i = 1; i <= 4; i++ ) {
         answer.at(3, 2 * i - 1) = dnx.at(i, 2);
         answer.at(3, 2 * i - 0) = dnx.at(i, 1);
     }
@@ -121,9 +115,6 @@ PlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 // @todo not checked if correct
 {
     FloatMatrix dnx;
-#ifdef  PlaneStress2d_reducedShearIntegration
-    FloatArray coord;
-#endif
 
     this->interpolation.evaldNdx( dnx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
@@ -135,9 +126,7 @@ PlaneStress2d :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
     }
 
 #ifdef  PlaneStress2d_reducedShearIntegration
-    coord.resize(2);
-    coord.zero();
-    this->interpolation.evaldNdx( dnx, coord, FEIElementGeometryWrapper(this) );
+    this->interpolation.evaldNdx( dnx, {0., 0.}, FEIElementGeometryWrapper(this) );
 #endif
 
     for ( int i = 1; i <= 4; i++ ) {
