@@ -698,16 +698,16 @@ SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = VelocityPressureField->saveContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = VelocityPressureField->saveContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     if ( materialInterface ) {
-        if ( ( iores = materialInterface->saveContext(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = materialInterface->saveContext(*stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -745,16 +745,16 @@ SUPG :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = VelocityPressureField->restoreContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = VelocityPressureField->restoreContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = accelerationVector.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = accelerationVector.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     if ( materialInterface ) {
-        if ( ( iores = materialInterface->restoreContext(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = materialInterface->restoreContext(*stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

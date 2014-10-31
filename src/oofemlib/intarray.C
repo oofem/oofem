@@ -251,15 +251,15 @@ void IntArray :: printYourself(const std::string name) const
 }
 
 
-contextIOResultType IntArray :: storeYourself(DataStream *stream) const
+contextIOResultType IntArray :: storeYourself(DataStream &stream) const
 {
     // write size
-    if ( !stream->write(this->giveSize()) ) {
+    if ( !stream.write(this->giveSize()) ) {
         return ( CIO_IOERR );
     }
 
     // write raw data
-    if ( !stream->write(values.data(), this->giveSize()) ) {
+    if ( !stream.write(values.data(), this->giveSize()) ) {
         return ( CIO_IOERR );
     }
 
@@ -267,18 +267,18 @@ contextIOResultType IntArray :: storeYourself(DataStream *stream) const
     return CIO_OK;
 }
 
-contextIOResultType IntArray :: restoreYourself(DataStream *stream)
+contextIOResultType IntArray :: restoreYourself(DataStream &stream)
 {
     // read size
     int size;
-    if ( !stream->read(size) ) {
+    if ( !stream.read(size) ) {
         return ( CIO_IOERR );
     }
 
     values.resize(size);
 
     // read raw data
-    if ( !stream->read(values.data(), size) ) {
+    if ( !stream.read(values.data(), size) ) {
         return ( CIO_IOERR );
     }
 

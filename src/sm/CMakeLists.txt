@@ -1,12 +1,11 @@
 set (sm_element
-    ElementEvaluators/structuralelementevaluator.C
-    ElementEvaluators/space3delementevaluator.C
-    ElementEvaluators/planestresselementevaluator.C
+    Elements/structuralelementevaluator.C
     Elements/igaelements.C
     Elements/structuralelement.C
     Elements/nlstructuralelement.C
     Elements/structural2delement.C
     Elements/structural3delement.C
+    Elements/3D/space3delementevaluator.C
     Elements/3D/lspace.C 
     Elements/3D/lspacebb.C
     Elements/3D/qspace.C 
@@ -54,6 +53,7 @@ set (sm_element
     Elements/PlaneStrain/qtrplanestrain.C 
     Elements/PlaneStrain/qtrplanestraingrad.C
     Elements/PlaneStrain/trplanestrain.C 
+    Elements/PlaneStress/planestresselementevaluator.C
     Elements/PlaneStress/trplanrot.C
     Elements/PlaneStress/trplanstrss.C 
     Elements/PlaneStress/qplanstrss.C 

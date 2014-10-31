@@ -118,11 +118,9 @@ public:
      * @param n Material number.
      * @param d Domain to which new material will belong.
      */
-    Material(int n, Domain * d) : FEMComponent(n, d), propertyDictionary( new Dictionary() ), castingTime(-1.) { }
+    Material(int n, Domain * d);
     /// Destructor.
-    virtual ~Material() {
-        delete propertyDictionary;
-    }
+    virtual ~Material();
 
     /**
      * Returns true if stiffness matrix of receiver is symmetric
@@ -216,7 +214,7 @@ public:
      * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
+    virtual contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
     /**
      * Reads integration point state to output stream.
      * @param stream Output stream.
@@ -225,7 +223,7 @@ public:
      * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
+    virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
 
     /**
      * Initialize integration point (must be inside  material region associated to receiver)

@@ -81,12 +81,12 @@ void MicroMaterialStatus :: updateYourself(TimeStep *tStep)
 void MicroMaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 { }
 
-contextIOResultType MicroMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType MicroMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     return CIO_OK;
 }
 
-contextIOResultType MicroMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType MicroMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     return CIO_OK;
 }

@@ -57,7 +57,7 @@ namespace oofem {
 class StructuralMaterialSettable : public StructuralMaterial
 {
 private:
-	 IsotropicLinearElasticMaterial *isoLE;
+    IsotropicLinearElasticMaterial *isoLE;
 
 public:
     /// Constructor

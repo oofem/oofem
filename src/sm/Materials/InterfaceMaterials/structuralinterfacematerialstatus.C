@@ -130,7 +130,7 @@ void StructuralInterfaceMaterialStatus :: initTempStatus()
 
 
 contextIOResultType
-StructuralInterfaceMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+StructuralInterfaceMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full ms context (saves state variables, that completely describe
 // current state)
@@ -157,7 +157,7 @@ StructuralInterfaceMaterialStatus :: saveContext(DataStream *stream, ContextMode
 
 
 contextIOResultType
-StructuralInterfaceMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+StructuralInterfaceMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)

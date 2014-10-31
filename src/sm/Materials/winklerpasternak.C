@@ -88,10 +88,7 @@ WinklerPasternakMaterial::giveRealStressVector_2dPlateSubSoil(FloatArray &answer
 
 
 void
-WinklerPasternakMaterial :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer,
-							MatResponseMode mode,
-							GaussPoint *gp,
-							TimeStep *tStep)
+WinklerPasternakMaterial :: give2dPlateSubSoilStiffMtrx(FloatMatrix &answer, MatResponseMode mode, GaussPoint *gp, TimeStep *tStep)
 {
     answer.resize(3, 3);
     answer.zero();

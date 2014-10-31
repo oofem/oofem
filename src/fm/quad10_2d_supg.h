@@ -81,8 +81,8 @@ public:
     virtual void updateYourself(TimeStep *tStep);
     virtual int checkConsistency();
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     virtual double LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep);
     virtual void LS_PCS_computedN(FloatMatrix &answer);

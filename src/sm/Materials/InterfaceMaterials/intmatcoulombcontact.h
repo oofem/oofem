@@ -49,8 +49,8 @@
 #define _IFT_IntMatCoulombContact_normalClearance "normalclearance"
 //@}
 //
-///@author Milan Jirásek
-///@author Vít Šmilauer
+///@author Milan Jirï¿½sek
+///@author Vï¿½t ï¿½milauer
 ///@author Jim Brouzoulis
 //
 namespace oofem {
@@ -76,8 +76,8 @@ public:
     FloatArray giveTempShearStressShift();
     void setTempShearStressShift(FloatArray newShearStressShift) { tempShearStressShift = newShearStressShift; };
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 };
 
 

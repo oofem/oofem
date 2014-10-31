@@ -63,6 +63,12 @@ OutputExportModule :: initializeFrom(InputRecord *ir)
     return ExportModule :: initializeFrom(ir);
 }
 
+FILE *
+OutputExportModule :: giveOutputStream()
+{
+    return emodel->giveOutputStream();
+}
+
 void
 OutputExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 {
@@ -74,7 +80,7 @@ OutputExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         return;
     }
 
-    FILE *file = emodel->giveOutputStream();
+    FILE *file = this->giveOutputStream();
 
     fprintf(file, "\n==============================================================");
     fprintf(file, "\nOutput for time % .8e ", tStep->giveTargetTime() * emodel->giveVariableScale(VST_Time) );
@@ -92,6 +98,22 @@ OutputExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         ///@todo This module should handle printing reaction forces, we need more information from the domain/engineering model though.
         //emodel->printReactionForces(tStep, idomain);
     }
+
+    fprintf(file, "\nUser time consumed by solution step %d: %.3f [s]\n\n", tStep->giveNumber(), emodel->giveSolutionStepTime());
+}
+
+void
+OutputExportModule :: terminate()
+{
+    FILE *out = this->giveOutputStream();
+    int rhrs, rmin, rsec, uhrs, umin, usec;
+    time_t endTime = time(NULL);
+
+    emodel->giveAnalysisTime(rhrs, rmin, rsec, uhrs, umin, usec);
+
+    fprintf(out, "\nFinishing analysis on: %s\n", ctime(& endTime) );
+    fprintf(out, "Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
+    fprintf(out, "User time consumed: %03dh:%02dm:%02ds\n\n\n", uhrs, umin, usec);
 }
 
 void

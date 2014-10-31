@@ -78,6 +78,11 @@ public:
     void appendLogTo(const std :: string &fname);
     /// Redirects error output to given file name (with path).
     void appendErrorTo(const std :: string &fname);
+    /// Redirects log output to given stream.
+    void appendLogTo(FILE* stream);
+    /// Redirects error output to given stream.
+    void appendErrorTo(FILE* stream);
+
 
     /// Writes the normal log message.
     void writeLogMsg(logLevelType level, const char *format, ...);

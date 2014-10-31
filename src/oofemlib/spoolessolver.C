@@ -163,13 +163,14 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     Timer timer;
     timer.startTimer();
 
-    if ( A->giveType() != SMT_SpoolesMtrx ) {
+    SpoolesSparseMtrx *As = dynamic_cast< SpoolesSparseMtrx * >(A);
+    if ( !As ) {
         OOFEM_ERROR("SpoolesSparseMtrx Expected");
     }
 
-    mtxA = ( ( SpoolesSparseMtrx * ) A )->giveInpMtrx();
-    mtxType = ( ( SpoolesSparseMtrx * ) A )->giveValueType();
-    symmetryflag = ( ( SpoolesSparseMtrx * ) A )->giveSymmetryFlag();
+    mtxA = As->giveInpMtrx();
+    mtxType = As->giveValueType();
+    symmetryflag = As->giveSymmetryFlag();
 
     int i;
     int neqns = A->giveNumberOfRows();
@@ -186,7 +187,7 @@ SpoolesSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
         //
         // lhs has been changed -> new factorization
         //
-
+        ///@todo These factorizations should be kept in the matrix itself, rather than the solver.
         Lhs = A;
         this->lhsVersion = A->giveVersion();
 

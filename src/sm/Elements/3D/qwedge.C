@@ -68,7 +68,7 @@ QWedge :: initializeFrom(InputRecord *ir)
 
     this->matRotation = ir->hasField(_IFT_QWedge_materialCoordinateSystem);
 
-    return this->NLStructuralElement :: initializeFrom(ir);
+    return this->Structural3DElement :: initializeFrom(ir);
 }
 
 FEInterpolation *
@@ -204,14 +204,6 @@ QWedge :: SPRNodalRecoveryMI_giveNumberOfIP()
     return integrationRulesArray [ 0 ]->giveNumberOfIntegrationPoints();
 }
 
-
-void
-QWedge :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
-{
-    if ( this->computeGlobalCoordinates( coords, * gp->giveNaturalCoordinates() ) == 0 ) {
-        OOFEM_ERROR("computeGlobalCoordinates failed");
-    }
-}
 
 SPRPatchType
 QWedge :: SPRNodalRecoveryMI_givePatchType()

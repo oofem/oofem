@@ -1280,7 +1280,7 @@ Concrete2MaterialStatus :: ~Concrete2MaterialStatus()
 { }
 
 contextIOResultType
-Concrete2MaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+Concrete2MaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 //
@@ -1292,27 +1292,27 @@ Concrete2MaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
     }
 
     // write a raw data
-    if ( !stream->write(SCCM) ) {
+    if ( !stream.write(SCCM) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(EPM) ) {
+    if ( !stream.write(EPM) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(SCTM) ) {
+    if ( !stream.write(SCTM) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(E0PM) ) {
+    if ( !stream.write(E0PM) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(SRF) ) {
+    if ( !stream.write(SRF) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(SEZ) ) {
+    if ( !stream.write(SEZ) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -1326,7 +1326,7 @@ Concrete2MaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
 
 
 contextIOResultType
-Concrete2MaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+Concrete2MaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restore state variables from stream
 //
@@ -1338,27 +1338,27 @@ Concrete2MaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, 
     }
 
     // read raw data
-    if ( !stream->read(SCCM) ) {
+    if ( !stream.read(SCCM) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(EPM) ) {
+    if ( !stream.read(EPM) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(SCTM) ) {
+    if ( !stream.read(SCTM) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(E0PM) ) {
+    if ( !stream.read(E0PM) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(SRF) ) {
+    if ( !stream.read(SRF) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(SEZ) ) {
+    if ( !stream.read(SEZ) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

@@ -1313,7 +1313,7 @@ MDM :: packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip)
     this->buildNonlocalPointTable(ip);
     this->updateDomainBeforeNonlocAverage(tStep);
 
-    return status->giveLocalDamageTensorForAveragePtr()->storeYourself(&buff);
+    return status->giveLocalDamageTensorForAveragePtr()->storeYourself(buff);
 }
 
 int
@@ -1323,7 +1323,7 @@ MDM :: unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip
     MDMStatus *status = static_cast< MDMStatus * >( this->giveStatus(ip) );
     FloatMatrix _LocalDamageTensorForAverage;
 
-    result = _LocalDamageTensorForAverage.restoreYourself(&buff);
+    result = _LocalDamageTensorForAverage.restoreYourself(buff);
     status->setLocalDamageTensorForAverage(_LocalDamageTensorForAverage);
     return result;
 }
@@ -1385,13 +1385,8 @@ MDMStatus :: MDMStatus(int n, int nsd, int nmplanes, Domain *d, GaussPoint *g) :
 MDMStatus :: ~MDMStatus() { }
 
 contextIOResultType
-MDMStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+MDMStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
-    //if (stream == NULL) StructuralMaterialStatus::_error("saveContex : can't write into NULL stream");
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
-
     contextIOResultType iores;
 
     // save parent class status
@@ -1420,7 +1415,7 @@ MDMStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 contextIOResultType
-MDMStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+MDMStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 

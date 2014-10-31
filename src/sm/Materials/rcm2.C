@@ -1154,7 +1154,7 @@ RCM2MaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-RCM2MaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+RCM2MaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -1218,7 +1218,7 @@ RCM2MaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *ob
 }
 
 contextIOResultType
-RCM2MaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+RCM2MaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //

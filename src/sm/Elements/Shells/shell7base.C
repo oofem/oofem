@@ -646,8 +646,8 @@ Shell7Base :: computePressureTangentMatrix(FloatMatrix &answer, Load *load, cons
         L.times( -pressure.at(1) );
 
         // Tangent matrix (K = N^T*L*B*dA)
-	LB.beProductOf(L,B);
-	NLB.beTProductOf(N,LB);
+        LB.beProductOf(L,B);
+        NLB.beTProductOf(N,LB);
         double dA = this->computeAreaAround(ip, xi);
         answer.add(dA, NLB);
     }
@@ -1018,7 +1018,7 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
             M.plusProductSymmUpper(N, temp, rho*dV);
         }
         M.symmetrized();
-        const IntArray &ordering = this->giveOrderingDofTypes();	
+        const IntArray &ordering = this->giveOrderingDofTypes();
         answer.zero();
         answer.assemble(M, ordering, ordering);
 #endif

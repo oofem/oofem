@@ -1643,11 +1643,11 @@ void FloatMatrix :: beMatrixForm(const FloatArray &aArray)
 void FloatMatrix :: changeComponentOrder()
 {
     // Changes index order between abaqus <-> OOFEM
-    //#  ifdef DEBUG
-    //	if ( nRows != 6 || nColumns != 6 ) {
-    //		OOFEM_ERROR("matrix dimension is not 6x6");
-    //	}
-    //#  endif
+//#  ifdef DEBUG
+//    if ( nRows != 6 || nColumns != 6 ) {
+//        OOFEM_ERROR("matrix dimension is not 6x6");
+//    }
+//#  endif
 
     if ( nRows == 6 && nColumns == 6 ) {
         // This could probably be done more beautifully + efficiently.
@@ -1668,7 +1668,7 @@ void FloatMatrix :: changeComponentOrder()
         std :: swap( this->at(4, 5), this->at(6, 5) );
     } else if ( nRows == 9 && nColumns == 9 ) {
         // OOFEM:           11, 22, 33, 23, 13, 12, 32, 31, 21
-        // UMAT:			11, 22, 33, 12, 13, 23, 32, 21, 31
+        // UMAT:            11, 22, 33, 12, 13, 23, 32, 21, 31
         const int abq2oo [ 9 ] = {
             1,  2,  3,  6,  5,  4,  7,  9,  8
         };
@@ -1801,23 +1801,23 @@ bool FloatMatrix :: computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix 
 }
 #endif
 
-contextIOResultType FloatMatrix :: storeYourself(DataStream *stream) const
+contextIOResultType FloatMatrix :: storeYourself(DataStream &stream) const
 // writes receiver's binary image into stream
 // use id to distinguish some instances
 // return value >0 success
 //              =0 file i/o error
 {
     // write size
-    if ( !stream->write(nRows) ) {
+    if ( !stream.write(nRows) ) {
         return ( CIO_IOERR );
     }
 
-    if ( !stream->write(nColumns) ) {
+    if ( !stream.write(nColumns) ) {
         return ( CIO_IOERR );
     }
 
     // write raw data
-    if ( !stream->write(this->givePointer(), nRows * nColumns) ) {
+    if ( !stream.write(this->givePointer(), nRows * nColumns) ) {
         return ( CIO_IOERR );
     }
 
@@ -1826,25 +1826,25 @@ contextIOResultType FloatMatrix :: storeYourself(DataStream *stream) const
 }
 
 
-contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream)
+contextIOResultType FloatMatrix :: restoreYourself(DataStream &stream)
 // reads receiver from stream
 // warning - overwrites existing data!
 // returns 0 if file i/o error
 //        -1 if id of class id is not correct
 {
     // read size
-    if ( !stream->read(nRows) ) {
+    if ( !stream.read(nRows) ) {
         return ( CIO_IOERR );
     }
 
-    if ( !stream->read(nColumns) ) {
+    if ( !stream.read(nColumns) ) {
         return ( CIO_IOERR );
     }
 
     this->values.resize(nRows * nColumns);
 
     // read raw data
-    if ( !stream->read(this->givePointer(), nRows * nColumns) ) {
+    if ( !stream.read(this->givePointer(), nRows * nColumns) ) {
         return ( CIO_IOERR );
     }
 

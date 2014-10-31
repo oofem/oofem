@@ -120,6 +120,10 @@ void DofManager :: computeLoadVector(FloatArray &answer, Load *load, CharType ty
     if ( load->giveBCGeoType() != NodalLoadBGT ) {
         OOFEM_ERROR("incompatible load type applied");
     }
+    if ( type != ExternalForcesVector ) {
+        answer.clear();
+        return;
+    }
     load->computeComponentArrayAt(answer, tStep, mode);
 }
 
@@ -541,7 +545,7 @@ void DofManager :: updateYourself(TimeStep *tStep)
 }
 
 
-contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType DofManager :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full node context (saves state variables, that completely describe
 // current state)
@@ -556,14 +560,14 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
 
 
     int numberOfDofs = this->giveNumberOfDofs();
-    if ( !stream->write(numberOfDofs) ) {
+    if ( !stream.write(numberOfDofs) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // store dof types
     for ( Dof *dof: *this ) {
         _val = dof->giveDofType();
-        if ( !stream->write(_val) ) {
+        if ( !stream.write(_val) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
@@ -571,7 +575,7 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
     // store dof types
     for ( Dof *dof: *this ) {
         _val = dof->giveDofID();
-        if ( !stream->write(_val) ) {
+        if ( !stream.write(_val) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
@@ -581,20 +585,20 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->write(isBoundaryFlag) ) {
+        if ( !stream.write(isBoundaryFlag) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->write(hasSlaveDofs) ) {
+        if ( !stream.write(hasSlaveDofs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->write(globalNumber) ) {
+        if ( !stream.write(globalNumber) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         _val = ( int ) parallel_mode;
-        if ( !stream->write(_val) ) {
+        if ( !stream.write(_val) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -613,7 +617,7 @@ contextIOResultType DofManager :: saveContext(DataStream *stream, ContextMode mo
 }
 
 
-contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType DofManager :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full node context (saves state variables, that completely describe
 // current state)
@@ -626,14 +630,14 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
     }
 
     int _numberOfDofs;
-    if ( !stream->read(_numberOfDofs) ) {
+    if ( !stream.read(_numberOfDofs) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     IntArray dtypes(_numberOfDofs);
     // restore dof types
     for ( int i = 1; i <= _numberOfDofs; i++ ) {
-        if ( !stream->read(dtypes.at(i)) ) {
+        if ( !stream.read(dtypes.at(i)) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
@@ -641,7 +645,7 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
     IntArray dofids(_numberOfDofs);
     // restore dof ids
     for ( int i = 1; i <= _numberOfDofs; i++ ) {
-        if ( !stream->read(dofids.at(i)) ) {
+        if ( !stream.read(dofids.at(i)) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
@@ -659,20 +663,20 @@ contextIOResultType DofManager :: restoreContext(DataStream *stream, ContextMode
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->read(isBoundaryFlag) ) {
+        if ( !stream.read(isBoundaryFlag) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(hasSlaveDofs) ) {
+        if ( !stream.read(hasSlaveDofs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(globalNumber) ) {
+        if ( !stream.read(globalNumber) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
         int _val;
-        if ( !stream->read(_val) ) {
+        if ( !stream.read(_val) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -705,7 +709,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
         if ( pos == this->end() ) {
             if ( padding ) {
                 answer.at(++k) = 0.;
-		continue;
+                continue;
             } else {
                 continue;
             }
@@ -735,7 +739,7 @@ void DofManager :: giveUnknownVector(FloatArray &answer, const IntArray &dofIDAr
         if ( pos == this->end() ) {
             if ( padding ) {
                 answer.at(++k) = 0.;
-		continue;
+                continue;
             } else {
                 continue;
             }

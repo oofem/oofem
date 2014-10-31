@@ -548,7 +548,7 @@ RCSDEMaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-RCSDEMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+RCSDEMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -563,24 +563,24 @@ RCSDEMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *o
 
     // write a raw data
 
-    if ( !stream->write(maxEquivStrain) ) {
+    if ( !stream.write(maxEquivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(damageCoeff) ) {
+    if ( !stream.write(damageCoeff) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     int _mode = rcsdMode;
-    if ( !stream->write(_mode) ) {
+    if ( !stream.write(_mode) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(transitionEps) ) {
+    if ( !stream.write(transitionEps) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(epsF2) ) {
+    if ( !stream.write(epsF2) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -593,7 +593,7 @@ RCSDEMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *o
 
 
 contextIOResultType
-RCSDEMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+RCSDEMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -606,25 +606,25 @@ RCSDEMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void
     }
 
     // read raw data
-    if ( !stream->read(maxEquivStrain) ) {
+    if ( !stream.read(maxEquivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(damageCoeff) ) {
+    if ( !stream.read(damageCoeff) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     int _mode;
-    if ( !stream->read(_mode) ) {
+    if ( !stream.read(_mode) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     rcsdMode = ( __rcsdModeType ) _mode;
-    if ( !stream->read(transitionEps) ) {
+    if ( !stream.read(transitionEps) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(epsF2) ) {
+    if ( !stream.read(epsF2) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

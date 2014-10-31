@@ -329,7 +329,10 @@ IDNLMaterial :: computeStressBasedWeight(double &angle, double &ratio, GaussPoin
     rotation.at(2, 1) = sin(angle);
     rotation.at(2, 2) = cos(angle);
     //Rotate distance vector
-    FloatArray distanceRotated(distance);
+    FloatArray distanceRotated(2);
+    distanceRotated.at(1)=distance.at(1);        
+    distanceRotated.at(2)=distance.at(2); 
+
     distanceRotated.rotatedWith(rotation, 't'); // Operation distanceRotated= rotation^T *distance
     // Compute axis of ellipse and scale/stretch weak axis so that ellipse is converted to circle
     double gamma = this->beta + ( 1. - beta ) * pow(ratio, 2);
@@ -985,7 +988,7 @@ IDNLMaterialStatus :: updateYourself(TimeStep *tStep)
 
 
 contextIOResultType
-IDNLMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+IDNLMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -997,12 +1000,12 @@ IDNLMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *ob
         THROW_CIOERR(iores);
     }
 
-    //if (!stream->write(&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
+    //if (!stream.write(&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
     return CIO_OK;
 }
 
 contextIOResultType
-IDNLMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+IDNLMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -1014,7 +1017,7 @@ IDNLMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void 
     }
 
     // read raw data
-    //if (!stream->read (&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
+    //if (!stream.read (&localEquivalentStrainForAverage,1)) THROW_CIOERR(CIO_IOERR);
 
     return CIO_OK;
 }

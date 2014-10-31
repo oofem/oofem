@@ -54,8 +54,8 @@ namespace oofem {
 
 class PrescribedGradientBCNeumann : public PrescribedGradientBCWeakPeriodic {
 public:
-	PrescribedGradientBCNeumann(int n, Domain * d);
-	virtual ~PrescribedGradientBCNeumann();
+    PrescribedGradientBCNeumann(int n, Domain * d);
+    virtual ~PrescribedGradientBCNeumann();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

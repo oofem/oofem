@@ -1056,13 +1056,11 @@ FETISolver :: solve(SparseMtrx *A, FloatArray *partitionLoad, FloatArray *partit
     double nom = 0.0, denom, alpha, beta, energyNorm = 0.0;
     FloatMatrix l1;
     StaticCommunicationBuffer commBuff(MPI_COMM_WORLD);
-    Skyline *partitionStiffness;
-
-    if ( A->giveType() != SMT_Skyline ) {
+    Skyline *partitionStiffness = dynamic_cast< Skyline * >(A);
+    if ( !partitionStiffness ) {
         OOFEM_ERROR("unsuported sparse matrix type");
     }
 
-    partitionStiffness = static_cast< Skyline * >(A);
 
     if ( ( partitionSolution->giveSize() ) != partitionLoad->giveSize() ) {
         OOFEM_ERROR("size mismatch");

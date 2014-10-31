@@ -14,10 +14,11 @@
 
 namespace oofem {
 
-class PrescribedGradientBCWeakDirichlet: public PrescribedGradientBCWeak {
+class PrescribedGradientBCWeakDirichlet: public PrescribedGradientBCWeak
+{
 public:
-	PrescribedGradientBCWeakDirichlet(int n, Domain * d);
-	virtual ~PrescribedGradientBCWeakDirichlet();
+    PrescribedGradientBCWeakDirichlet(int n, Domain * d);
+    virtual ~PrescribedGradientBCWeakDirichlet();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

@@ -224,7 +224,7 @@ inline bool bSolve2by2(const bMatrix &iA, const bPoint2 &ib, bPoint2 &ox)
         return true;
     } else {
         return false;
-        //		printf("Warning in bSolve2by2. det: %e\n", det);
+        //printf("Warning in bSolve2by2. det: %e\n", det);
     }
 }
 

@@ -49,14 +49,10 @@
 
 namespace oofem {
 contextIOResultType
-FEMComponent :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+FEMComponent :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
-    if ( stream == NULL ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
     if ( mode & CM_Definition ) {
-        if ( !stream->write(number) ) {
+        if ( !stream.write(number) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
@@ -66,10 +62,10 @@ FEMComponent :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 contextIOResultType
-FEMComponent :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+FEMComponent :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     if ( mode & CM_Definition ) {
-        if ( !stream->read(number) ) {
+        if ( !stream.read(number) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }

@@ -115,9 +115,6 @@ public:
 
     virtual Interface *giveInterface(InterfaceType it);
 
-    // Spatial localizer interface:
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-
     // Element interpolation interface:
     virtual void EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType u,
                                                                        TimeStep *tStep, const FloatArray &coords, FloatArray &answer);

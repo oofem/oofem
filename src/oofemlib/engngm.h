@@ -409,6 +409,14 @@ public:
     virtual void resetRenumberFlag() { this->renumberFlag = false; }
 
     /**
+     * Returns the user time of the current simulation step in seconds.
+     */
+    double giveSolutionStepTime();
+    /**
+     * Returns the real and user time for the analysis.
+     */
+    void giveAnalysisTime(int &rhrs, int &rmin, int &rsec, int &uhrs, int &umin, int &usec);
+    /**
      * Performs analysis termination after finishing analysis.
      */
     void terminateAnalysis();

@@ -68,8 +68,8 @@ class Domain;
  */
 class OOFEM_EXPORT GnuplotExportModule : public ExportModule {
 public:
-	GnuplotExportModule(int n, EngngModel *e);
-	virtual ~GnuplotExportModule();
+    GnuplotExportModule(int n, EngngModel *e);
+    virtual ~GnuplotExportModule();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual void doOutput(TimeStep *tStep, bool forcedOutput = false);
@@ -102,8 +102,8 @@ public:
     static void WritePointsToGnuplot(const std :: string &iName, const std :: vector< std::vector<FloatArray> > &iPoints);
 
 protected:
-	bool mExportReactionForces;
-	bool mExportBoundaryConditions;
+    bool mExportReactionForces;
+    bool mExportBoundaryConditions;
     bool mExportMesh;
     bool mExportXFEM;
 

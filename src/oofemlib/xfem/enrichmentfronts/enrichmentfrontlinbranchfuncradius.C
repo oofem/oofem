@@ -157,14 +157,14 @@ void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncDerivAt(std :: vector< Flo
 
 void EnrFrontLinearBranchFuncRadius :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, GaussPoint &iGP, int iNodeInd, bool iGPLivesOnCurrentCrack, const double &iNormalSignDist) const
 {
-	const FloatArray &xTip = mTipInfo.mGlobalCoord;
-	const FloatArray &gpCoord = iGP.giveGlobalCoordinates();
-	double radius = gpCoord.distance(xTip);
+    const FloatArray &xTip = mTipInfo.mGlobalCoord;
+    const FloatArray &gpCoord = iGP.giveGlobalCoordinates();
+    double radius = gpCoord.distance(xTip);
 
-	std :: vector< double > jumps;
-	mpBranchFunc->giveJump(jumps, radius);
+    std :: vector< double > jumps;
+    mpBranchFunc->giveJump(jumps, radius);
 
-	oEnrFuncJumps.insert( oEnrFuncJumps.end(), jumps.begin(), jumps.end() );
+    oEnrFuncJumps.insert( oEnrFuncJumps.end(), jumps.begin(), jumps.end() );
 }
 
 IRResultType EnrFrontLinearBranchFuncRadius :: initializeFrom(InputRecord *ir)

@@ -168,7 +168,7 @@ ConcreteDPMStatus :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 contextIOResultType
-ConcreteDPMStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+ConcreteDPMStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -183,31 +183,31 @@ ConcreteDPMStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->write(kappaP) ) {
+    if ( !stream.write(kappaP) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(kappaD) ) {
+    if ( !stream.write(kappaD) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(equivStrain) ) {
+    if ( !stream.write(equivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(damage) ) {
+    if ( !stream.write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(state_flag) ) {
+    if ( !stream.write(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(deltaEquivStrain) ) {
+    if ( !stream.write(deltaEquivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(le) ) {
+    if ( !stream.write(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -216,7 +216,7 @@ ConcreteDPMStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj
 
 
 contextIOResultType
-ConcreteDPMStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+ConcreteDPMStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -230,31 +230,31 @@ ConcreteDPMStatus :: restoreContext(DataStream *stream, ContextMode mode, void *
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(kappaP) ) {
+    if ( !stream.read(kappaP) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(kappaD) ) {
+    if ( !stream.read(kappaD) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(equivStrain) ) {
+    if ( !stream.read(equivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(damage) ) {
+    if ( !stream.read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(state_flag) ) {
+    if ( !stream.read(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(deltaEquivStrain) ) {
+    if ( !stream.read(deltaEquivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(le) ) {
+    if ( !stream.read(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

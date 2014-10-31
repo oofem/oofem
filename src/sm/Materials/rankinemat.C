@@ -789,7 +789,7 @@ RankineMatStatus :: updateYourself(TimeStep *tStep)
 // saves full information stored in this status
 // temporary variables are NOT stored
 contextIOResultType
-RankineMatStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+RankineMatStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -806,21 +806,21 @@ RankineMatStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
     // write cumulative plastic strain (scalar)
-    if ( !stream->write(kappa) ) {
+    if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // write damage (scalar)
-    if ( !stream->write(damage) ) {
+    if ( !stream.write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
 #ifdef keep_track_of_dissipated_energy
-    if ( !stream->write(stressWork) ) {
+    if ( !stream.write(stressWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(dissWork) ) {
+    if ( !stream.write(dissWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -831,7 +831,7 @@ RankineMatStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 contextIOResultType
-RankineMatStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+RankineMatStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -849,21 +849,21 @@ RankineMatStatus :: restoreContext(DataStream *stream, ContextMode mode, void *o
     }
 
     // read cumulative plastic strain (scalar)
-    if ( !stream->read(kappa) ) {
+    if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     // read damage (scalar)
-    if ( !stream->read(damage) ) {
+    if ( !stream.read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
 #ifdef keep_track_of_dissipated_energy
-    if ( !stream->read(stressWork) ) {
+    if ( !stream.read(stressWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(dissWork) ) {
+    if ( !stream.read(dissWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

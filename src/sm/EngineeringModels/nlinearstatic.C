@@ -63,7 +63,7 @@ REGISTER_EngngModel(NonLinearStatic);
 
 NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i, _master),
     totalDisplacement(), incrementOfDisplacement(), internalForces(), initialLoadVector(), incrementalLoadVector(),
-								 initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed()
+    initialLoadVectorOfPrescribed(), incrementalLoadVectorOfPrescribed()
 {
     //
     // constructor
@@ -80,23 +80,12 @@ NonLinearStatic :: NonLinearStatic(int i, EngngModel *_master) : LinearStatic(i,
     refLoadInputMode = SparseNonLinearSystemNM :: rlm_total;
     nMethod = NULL;
     initialGuessType = IG_None;
-
-    nonlocalExt = 0;
-#ifdef __PARALLEL_MODE
-    communicator = nonlocCommunicator = NULL;
-    commBuff = NULL;
-#endif
 }
 
 
 NonLinearStatic :: ~NonLinearStatic()
 {
-    //
-    // destructor
-    //
-    if ( nMethod ) {
-        delete nMethod;
-    }
+    delete nMethod;
 }
 
 
@@ -517,7 +506,8 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
                                       & totalDisplacement, & incrementOfDisplacement, & internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     }
-    //this->updateComponent(tStep, NonLinearLhs, this->giveDomain(di));	//@todo Martin: ta bort!!!
+    ///@todo Martin: ta bort!!!
+    //this->updateComponent(tStep, NonLinearLhs, this->giveDomain(di));
 
     ///@todo Use temporary variables. updateYourself() should set the final values, while proceedStep should be callable multiple times for each step (if necessary). / Mikael
     OOFEM_LOG_RELEVANT("Equilibrium reached at load level = %f in %d iterations\n", cumulatedLoadLevel + loadLevel, currentIterations);
@@ -625,11 +615,11 @@ NonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
     //if ((iores = this->giveNumericalMethod(giveCurrentStep())->saveContext (stream)) != CIO_OK) THROW_CIOERR(iores);
 
-    if ( ( iores = totalDisplacement.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = totalDisplacement.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = incrementOfDisplacement.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = incrementOfDisplacement.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -647,11 +637,11 @@ NonLinearStatic :: saveContext(DataStream *stream, ContextMode mode, void *obj)
     }
 
     // store InitialLoadVector
-    if ( ( iores = initialLoadVector.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = initialLoadVector.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = initialLoadVectorOfPrescribed.storeYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = initialLoadVectorOfPrescribed.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -694,11 +684,11 @@ NonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *ob
 
     //if ((iores = this->giveNumericalMethod(giveCurrentStep())->restoreContext (stream)) !=CIO_OK) THROW_CIOERR(iores);
 
-    if ( ( iores = totalDisplacement.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = totalDisplacement.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = incrementOfDisplacement.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = incrementOfDisplacement.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -718,11 +708,11 @@ NonLinearStatic :: restoreContext(DataStream *stream, ContextMode mode, void *ob
 
 
     // store InitialLoadVector
-    if ( ( iores = initialLoadVector.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = initialLoadVector.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = initialLoadVectorOfPrescribed.restoreYourself(stream) ) != CIO_OK ) {
+    if ( ( iores = initialLoadVectorOfPrescribed.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

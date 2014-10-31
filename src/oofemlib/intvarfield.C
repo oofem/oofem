@@ -78,13 +78,13 @@ InternalVariableField :: evaluateAt(FloatArray &answer, DofManager *dman, ValueM
 }
 
 contextIOResultType
-InternalVariableField :: saveContext(DataStream *stream, ContextMode mode)
+InternalVariableField :: saveContext(DataStream &stream, ContextMode mode)
 {
     return CIO_OK;
 }
 
 contextIOResultType
-InternalVariableField :: restoreContext(DataStream *stream, ContextMode mode)
+InternalVariableField :: restoreContext(DataStream &stream, ContextMode mode)
 {
     return CIO_OK;
 }

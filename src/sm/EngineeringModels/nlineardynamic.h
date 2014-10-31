@@ -41,11 +41,6 @@
 #include "sparsenonlinsystemnm.h"
 #include "timediscretizationtype.h"
 
-#ifdef __PARALLEL_MODE
- #include "problemcomm.h"
- #include "processcomm.h"
-#endif
-
 ///@name Input fields for NonLinearDynamic
 //@{
 #define _IFT_NonLinearDynamic_Name "nonlineardynamic"

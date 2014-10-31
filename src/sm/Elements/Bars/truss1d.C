@@ -60,7 +60,7 @@ Truss1d :: Truss1d(int n, Domain *aDomain) :
     ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SpatialLocalizerInterface(this),
     EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
-    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface()
+    HuertaErrorEstimatorInterface()
 {
     numberOfDofMans = 2;
 }
@@ -381,8 +381,6 @@ Truss1d :: giveInterface(InterfaceType interface)
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
-        return static_cast< MMAShapeFunctProjectionInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
     }
@@ -400,62 +398,16 @@ Truss1d :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int no
 }
 
 
-double
-Truss1d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(1), gcoords;
-    double dist;
-    int size, gsize;
-
-    lcoords.at(1) = 0.0;
-    this->computeGlobalCoordinates(gcoords, lcoords);
-
-    if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
-    }
-
-    if ( size == gsize ) {
-        dist = coords.distance(gcoords);
-    } else {
-        FloatArray helpCoords = coords;
-
-        helpCoords.resizeWithValues(gsize);
-        dist = helpCoords.distance(gcoords);
-    }
-
-    return dist;
-}
-
-
 void
 Truss1d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                             TimeStep *tStep, const FloatArray &lcoords,
                                                             FloatArray &answer)
 {
-    FloatArray n, u;
-
-    this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
-    this->computeVectorOf(IntArray{D_u}, mode, tStep, u);
-    answer = FloatArray{n.dotProduct(u)};
+    FloatArray u;
+    FloatMatrix n;
+    this->computeNmatrixAt(lcoords, n);
+    this->computeVectorOf(mode, tStep, u);
+    answer.beProductOf(n, u);
 }
 
-
-void
-Truss1d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
-                                                                coordType ct, nodalValContainerType &list,
-                                                                InternalStateType type, TimeStep *tStep)
-{
-    FloatArray lcoords, n;
-    if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
-        lcoords = coords;
-    } else {
-        computeLocalCoordinates(lcoords, coords);
-    }
-
-    this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
-
-    answer.resize(0);
-    answer.add(n.at(1), list[0]);
-    answer.add(n.at(2), list[1]);
-}
 } // end namespace oofem

@@ -36,6 +36,7 @@
 #define cct3d_h
 
 #include "../sm/Elements/Plates/cct.h"
+#include "floatmatrix.h"
 
 #define _IFT_CCTPlate3d_Name "cctplate3d"
 
@@ -75,13 +76,11 @@ protected:
      * Transformation Matrix form GtoL(3,3) is stored
      * at the element level for computation efficiency.
      */
-    FloatMatrix *GtoLRotationMatrix;
+    FloatMatrix GtoLRotationMatrix;
 
 public:
     CCTPlate3d(int n, Domain * d);
-    virtual ~CCTPlate3d() {
-        delete GtoLRotationMatrix;
-    }
+    virtual ~CCTPlate3d() {}
 
 protected:
     void giveLocalCoordinates(FloatArray &answer, FloatArray &global);

@@ -561,16 +561,13 @@ Node :: computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry)
 
 
 contextIOResultType
-Node :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+Node :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full node context (saves state variables, that completely describe
 // current state)
 //
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = DofManager :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -582,7 +579,7 @@ Node :: saveContext(DataStream *stream, ContextMode mode, void *obj)
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->write(_haslcs) ) {
+        if ( !stream.write(_haslcs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
@@ -598,16 +595,13 @@ Node :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 contextIOResultType
-Node :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+Node :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full node context (saves state variables, that completely describe
 // current state)
 //
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = DofManager :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -619,7 +613,7 @@ Node :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
             THROW_CIOERR(iores);
         }
 
-        if ( !stream->read(_haslcs) ) {
+        if ( !stream.read(_haslcs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 

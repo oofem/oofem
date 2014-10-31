@@ -45,10 +45,9 @@ class Triangle;
 
 /**
  * O(n4) algorithm, only for testing purposes.
+ * Yes, but 4th order in n. For the xfem element subdivision, n does not increase when the mesh is refined.
+ * Time will tell if it is too slow ... /ES
  * @author chamrova
- *
- *  // Yes, but 4th order in n. For the xfem element subdivision, n does not increase when the mesh is refined. Time
- *	// will tell if it is too slow ... /ES
  * @author Erik Svenning
  */
 class OOFEM_EXPORT Delaunay

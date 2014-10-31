@@ -5,6 +5,7 @@ set (core_unsorted
     cltypes.C timer.C dictionary.C
     connectivitytable.C error.C mathfem.C logger.C util.C
     initmodulemanager.C initmodule.C initialcondition.C
+    assemblercallback.C
     homogenize.C
     nonlocalbarrier.C
     geotoolbox.C geometry.C
@@ -227,6 +228,7 @@ set (core_parallel
     parallelordering.C
     dyncombuff.C
     loadbalancer.C
+    wallclockloadbalancermonitor.C
     nonlocalmatwtp.C
     )
 

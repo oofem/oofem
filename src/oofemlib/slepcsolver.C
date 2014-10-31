@@ -80,12 +80,13 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
         OOFEM_ERROR("matrices size mismatch");
     }
 
-    if ( a->giveType() != SMT_PetscMtrx || b->giveType() != SMT_PetscMtrx ) {
+    A = dynamic_cast< PetscSparseMtrx * >(a);
+    B = dynamic_cast< PetscSparseMtrx * >(b);
+
+    if ( !A || !B ) {
         OOFEM_ERROR("PetscSparseMtrx Expected");
     }
 
-    A = static_cast< PetscSparseMtrx * >(a);
-    B = static_cast< PetscSparseMtrx * >(b);
     size = engngModel->giveParallelContext( A->giveDomainIndex() )->giveNumberOfNaturalEqs(); // A->giveLeqs();
 
     // check array for storing eigenvalues

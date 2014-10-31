@@ -544,8 +544,8 @@ public:
      * @param tStep Time step (most models are able to respond only when tStep is current time step).
      */
     virtual void give2dPlateSubSoilStiffMtrx(FloatMatrix &answer,
-					     MatResponseMode mmode, GaussPoint *gp,
-					     TimeStep *tStep);
+                                             MatResponseMode mmode, GaussPoint *gp,
+                                             TimeStep *tStep);
     /**
      * Transforms 3d strain vector into another coordinate system.
      * @param answer Transformed strain vector

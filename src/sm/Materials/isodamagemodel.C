@@ -444,7 +444,7 @@ IsotropicDamageMaterialStatus :: giveCrackVector(FloatArray &answer)
 
 
 contextIOResultType
-IsotropicDamageMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+IsotropicDamageMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -454,20 +454,20 @@ IsotropicDamageMaterialStatus :: saveContext(DataStream *stream, ContextMode mod
     }
 
     // write raw data
-    if ( !stream->write(kappa) ) {
+    if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(damage) ) {
+    if ( !stream.write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
 #ifdef keep_track_of_dissipated_energy
-    if ( !stream->write(stressWork) ) {
+    if ( !stream.write(stressWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(dissWork) ) {
+    if ( !stream.write(dissWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -477,7 +477,7 @@ IsotropicDamageMaterialStatus :: saveContext(DataStream *stream, ContextMode mod
 }
 
 contextIOResultType
-IsotropicDamageMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+IsotropicDamageMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -487,20 +487,20 @@ IsotropicDamageMaterialStatus :: restoreContext(DataStream *stream, ContextMode 
     }
 
     // read raw data
-    if ( !stream->read(kappa) ) {
+    if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(damage) ) {
+    if ( !stream.read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
 #ifdef keep_track_of_dissipated_energy
-    if ( !stream->read(stressWork) ) {
+    if ( !stream.read(stressWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(dissWork) ) {
+    if ( !stream.read(dissWork) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

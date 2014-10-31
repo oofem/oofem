@@ -485,9 +485,9 @@ void Triangle :: changeToAnticlockwise()
 
 bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
 {
-	FloatArray P(iP);
+    FloatArray P(iP);
 
-	const double tol2 = 1.0e-18;
+    const double tol2 = 1.0e-18;
 
     // Compute triangle normal
     FloatArray p1p2;
@@ -854,14 +854,14 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
         double dist2 = 0.0;
         if ( segId == 1 ) {
             // Vector from start P1 to point X
-        	FloatArray u = {point.at(1) - crackP1.at(1), point.at(2) - crackP1.at(2)};
+            FloatArray u = {point.at(1) - crackP1.at(1), point.at(2) - crackP1.at(2)};
 
             // Line tangent vector
             FloatArray t = {crackP2.at(1) - crackP1.at(1), crackP2.at(2) - crackP1.at(2)};
             double l2 = t.computeSquaredNorm();
 
             if ( l2 > 0.0 ) {
-            	double l = t.normalize();
+                double l = t.normalize();
                 double s = dot(u, t);
 
                 if ( s > l ) {
@@ -880,14 +880,14 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
             }
         } else if ( segId == numSeg ) {
             // Vector from start P1 to point X
-        	FloatArray u = {point.at(1) - crackP1.at(1), point.at(2) - crackP1.at(2)};
+            FloatArray u = {point.at(1) - crackP1.at(1), point.at(2) - crackP1.at(2)};
 
             // Line tangent vector
             FloatArray t = {crackP2.at(1) - crackP1.at(1), crackP2.at(2) - crackP1.at(2)};
             double l2 = t.computeSquaredNorm();
 
             if ( l2 > 0.0 ) {
-            	double l = t.normalize();
+                double l = t.normalize();
                 double s = dot(u, t);
 
                 if ( s < 0.0 ) {
@@ -897,7 +897,6 @@ void PolygonLine :: computeNormalSignDist(double &oDist, const FloatArray &iPoin
                     double xi = s / l;
                     FloatArray q = ( 1.0 - xi ) * crackP1 + xi * crackP2;
                     dist2 = point.distance_square(q);
-                    //					}
                 }
             } else {
                 // If the points P1 and P2 coincide,
@@ -1262,8 +1261,8 @@ bool PolygonLine :: boundingBoxIntersects(Element *element)
         eUC.y( max( eUC.y(), element->giveNode(i)->giveCoordinate(2) ) );
     }
 
-    //	printf("eLC: (%e, %e) eUC: (%e, %e) ", eLC.x(), eLC.y(), eUC.x(), eUC.y() );
-    //	printf(" LC: (%e, %e)  UC: (%e, %e)\n",  LC.x(),  LC.y(),  UC.x(),  UC.y() );
+    //printf("eLC: (%e, %e) eUC: (%e, %e) ", eLC.x(), eLC.y(), eUC.x(), eUC.y() );
+    //printf(" LC: (%e, %e)  UC: (%e, %e)\n",  LC.x(),  LC.y(),  UC.x(),  UC.y() );
 
 
     // Check if there is any chance of overlap

@@ -80,8 +80,6 @@ public:
     virtual int SPRNodalRecoveryMI_giveNumberOfIP();
     virtual SPRPatchType SPRNodalRecoveryMI_givePatchType();
 
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
-
 protected:
     virtual void computeGaussPoints();
     virtual double computeEdgeVolumeAround(GaussPoint *gp, int iEdge);

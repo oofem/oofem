@@ -421,12 +421,4 @@ void Tet1BubbleStokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(V
     }
 }
 
-
-double Tet1BubbleStokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray center;
-    FloatArray lcoords = {0.333333, 0.333333, 0.333333, 0.333333};
-    this->interp.local2global( center, lcoords, FEIElementGeometryWrapper(this) );
-    return center.distance(coords);
-}
 } // end namespace oofem

@@ -320,7 +320,7 @@ DirectErrorIndicatorRC :: packSharedDofManLocalDensities(ProcessCommunicator &pr
 
     size = toSendMap->giveSize();
     for ( i = 1; i <= size; i++ ) {
-        result &= pcbuff->packDouble(this->sharedDofManDensities [ toSendMap->at(i) ]);
+        result &= pcbuff->write(this->sharedDofManDensities [ toSendMap->at(i) ]);
     }
 
     return result;
@@ -381,7 +381,7 @@ DirectErrorIndicatorRC :: packSharedDofManLocalIndicatorVals(ProcessCommunicator
 
     size = toSendMap->giveSize();
     for ( i = 1; i <= size; i++ ) {
-        result &= pcbuff->packDouble(this->sharedDofManIndicatorVals [ toSendMap->at(i) ]);
+        result &= pcbuff->write(this->sharedDofManIndicatorVals [ toSendMap->at(i) ]);
     }
 
     return result;

@@ -43,6 +43,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "error.h"
+#include "logger.h"
 
 #include <string>
 
@@ -60,7 +61,7 @@ namespace oofem {
  * When comBuff will be registered, resize is needed only when maps change, and this will not occur frequently
  * (its even quite rare).
  */
-class OOFEM_EXPORT ProcessCommunicatorBuff
+class OOFEM_EXPORT ProcessCommunicatorBuff: public DataStream
 {
 protected:
     /// Send buffer.
@@ -70,108 +71,29 @@ protected:
 public:
     /// Constructor, creates empty send and receive com buffs in MPI_COMM_WORLD.
     ProcessCommunicatorBuff(CommBuffType t);
-    ~ProcessCommunicatorBuff() {
-        delete send_buff;
-        delete recv_buff;
-    }
+    virtual ~ProcessCommunicatorBuff();
 
-    /**@name Methods for datatype packing/unpacking to/from buffer */
-    //@{
-    /**
-     *  Packs single integer value into buffer.
-     *  Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     *  @return Nonzero if successful.
-     */
-    int packInt(int value) { return write(& value, 1); }
-    /**
-     *  Packs single double value into buffer.
-     *  Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     *  @return Nonzero if successful.
-     */
-    int packDouble(double value)  { return write(& value, 1); }
-    /**
-     * Packs array of values of given type into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     * @param src Address of first value in memory.
-     * @param n Number of packed integers.
-     * @return Nonzero if successful.
-     */
-    //@{
-    int write(const int *src, int n) { return send_buff->write(src, n); }
-    int write(const long *src, int n) { return send_buff->write(src, n); }
-    int write(const unsigned long *src, int n) { return send_buff->write(src, n); }
-    int write(const double *src, int n) { return send_buff->write(src, n); }
-    int write(const char *src, int n) { return send_buff->write(src, n); }
-    //@}
+    virtual int givePackSizeOfInt(int count) { return send_buff->givePackSizeOfInt(count); }
+    virtual int givePackSizeOfDouble(int count) { return send_buff->givePackSizeOfDouble(count); }
+    virtual int givePackSizeOfChar(int count) { return send_buff->givePackSizeOfChar(count); }
+    virtual int givePackSizeOfBool(int count) { return send_buff->givePackSizeOfBool(count); }
+    virtual int givePackSizeOfLong(int count) { return send_buff->givePackSizeOfLong(count); }
 
-    /**
-     * Packs given IntArray  value into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     * @return Nonzero if successful.
-     */
-    int packIntArray(const IntArray &arry) { return arry.storeYourself(send_buff); }
-    /**
-     * Packs given FloatArray  value into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     * @return Nonzero if successful.
-     */
-    int packFloatArray(const FloatArray &arry) { return arry.storeYourself(send_buff); }
-    /**
-     * Packs given FloatMatrix  value into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     * @return Nonzero if successful.
-     */
-    int packFloatMatrix(const FloatMatrix &mtrx) { return mtrx.storeYourself(send_buff); }
-    /**
-     * Packs given string into buffer.
-     * Buffer is enlarged if isDynamic flag is set, but it requires memory allocation and deallocation.
-     * @return Nonzero if successful.
-     */
-    int write(const std :: string &str) { return this->send_buff->write(str); }
-    /**
-     *  Unpacks single integer value from buffer.
-     *  @return Nonzero if successful.
-     */
-    int read(int &value)  { return read(& value, 1); }
-    /**
-     *  Unpacks single double value from buffer.
-     *  @return Nonzero if successful.
-     */
-    int read(double &value) { return read(& value, 1); }
-    /**
-     * unpacks array of value of given type from buffer.
-     * @param dest Address of first value in memory, where to store values.
-     * @param n Number of unpacked integers.
-     * @return Nonzero if successful.
-     */
-    //@{
-    int read(int *dest, int n) { return static_cast<DataStream*>(recv_buff)->read(dest, n); }
-    int read(long *dest, int n) { return static_cast<DataStream*>(recv_buff)->read(dest, n); }
-    int read(unsigned long *dest, int n) { return static_cast<DataStream*>(recv_buff)->read(dest, n); }
-    int read(double *dest, int n) { return static_cast<DataStream*>(recv_buff)->read(dest, n); }
-    int read(char *dest, int n) { return static_cast<DataStream*>(recv_buff)->read(dest, n); }
-    //@}
-    /**
-     * Unpacks given IntArray  value from buffer.
-     * @return Nonzero if successful.
-     */
-    int unpackIntArray(IntArray &arry) { return arry.restoreYourself(recv_buff); }
-    /**
-     * Unpacks given FloatArray  value from buffer.
-     * @return Nonzero if successful.
-     */
-    int unpackFloatArray(FloatArray &arry) { return arry.restoreYourself(recv_buff); }
-    /**
-     * Unpacks given FloatMatrix  value from buffer.
-     * @return Nonzero if successful.
-     */
-    int unpackFloatMatrix(FloatMatrix &mtrx) { return mtrx.restoreYourself(recv_buff); }
-    /**
-     * Unpacks given string value from buffer.
-     * @return Nonzero if successful.
-     */
-    int read(std :: string &str) { return recv_buff->read(str); }
-    //@}
+    using DataStream::write;
+    virtual int write(const int *data, int count) { return send_buff->write(data, count); }
+    virtual int write(const long *data, int count) { return send_buff->write(data, count); }
+    virtual int write(const unsigned long *data, int count) { return send_buff->write(data, count); }
+    virtual int write(const double *data, int count) { return send_buff->write(data, count); }
+    virtual int write(const char *data, int count) { return send_buff->write(data, count); }
+    virtual int write(bool data) { return send_buff->write(data); }
+
+    using DataStream::read;
+    virtual int read(int *data, int count) { return this->recv_buff->read(data, count); }
+    virtual int read(long *data, int count) { return this->recv_buff->read(data, count); }
+    virtual int read(unsigned long *data, int count) { return this->recv_buff->read(data, count); }
+    virtual int read(double *data, int count) { return this->recv_buff->read(data, count); }
+    virtual int read(char *data, int count) { return this->recv_buff->read(data, count); }
+    virtual int read(bool &data) { return recv_buff->read(data); }
 
     /// Initializes send buffer to empty state. All packed data are lost.
     void initSendBuff() { send_buff->init(); }

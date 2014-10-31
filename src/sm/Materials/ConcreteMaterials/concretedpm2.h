@@ -184,8 +184,8 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual contextIOResultType saveContext(DataStream *, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &, ContextMode mode, void *obj = NULL);
     virtual const char *giveClassName() const { return "ConcreteDPM2Status"; }
 
     // Inline functions for access to state variables

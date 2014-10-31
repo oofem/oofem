@@ -125,7 +125,7 @@ Tr1_ht :: computeEdgeVolumeAround(GaussPoint *gp, int iEdge)
 {
     double determinant = fabs( this->interp.edgeGiveTransformationJacobian( iEdge, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) ) );
     FloatArray gc;
-    double thick = this->giveCrossSection()->give(CS_Thickness, gp->giveNaturalCoordinates(), NULL, this); // 't'
+    double thick = this->giveCrossSection()->give(CS_Thickness, gp->giveNaturalCoordinates(), NULL); // 't'
     return determinant *thick *gp->giveWeight();
 }
 
@@ -144,13 +144,4 @@ Tr1_ht :: giveInterface(InterfaceType interface)
     return NULL;
 }
 
-
-double
-Tr1_ht :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(3), gcoords;
-    lcoords.at(1) = lcoords.at(2) = lcoords.at(3) = 1. / 3.;
-    this->computeGlobalCoordinates(gcoords, lcoords);
-    return gcoords.distance(coords);
-}
 } // end namespace oofem

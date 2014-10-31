@@ -213,8 +213,8 @@ Tr_Warp :: giveInterface(InterfaceType interface)
 {
     if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-	//    } else if ( interface == EIPrimaryFieldInterfaceType ) {
-	//        return static_cast< EIPrimaryFieldInterface * >(this);
+    //} else if ( interface == EIPrimaryFieldInterfaceType ) {
+        //return static_cast< EIPrimaryFieldInterface * >(this);
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return static_cast< ZZNodalRecoveryModelInterface * >(this);
     }
@@ -222,12 +222,4 @@ Tr_Warp :: giveInterface(InterfaceType interface)
     return NULL;
 }
 
-double
-Tr_Warp :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(3), gcoords;
-    lcoords.at(1) = lcoords.at(2) = lcoords.at(3) = 1. / 3.;
-    this->computeGlobalCoordinates(gcoords, lcoords);
-    return gcoords.distance(coords);
-}
 } // end namespace oofem

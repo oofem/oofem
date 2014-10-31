@@ -58,7 +58,7 @@ TrPlaneStrain :: TrPlaneStrain(int n, Domain *aDomain) :
     PlaneStrainElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
     EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
-    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface()
+    HuertaErrorEstimatorInterface()
     // Constructor.
 {
     numberOfDofMans  = 3;
@@ -85,8 +85,6 @@ TrPlaneStrain :: giveInterface(InterfaceType interface)
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
-        return static_cast< MMAShapeFunctProjectionInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
     }
@@ -161,71 +159,16 @@ TrPlaneStrain :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-double
-TrPlaneStrain :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(3), gcoords;
-    double dist;
-    int size, gsize;
-
-    lcoords.at(1) = lcoords.at(2) = lcoords.at(3) = 1. / 3.;
-    this->computeGlobalCoordinates(gcoords, lcoords);
-
-    if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
-    }
-
-    if ( size == gsize ) {
-        dist = coords.distance(gcoords);
-    } else {
-        FloatArray helpCoords = coords;
-
-        helpCoords.resizeWithValues(gsize);
-        dist = helpCoords.distance(gcoords);
-    }
-
-    return dist;
-}
-
-
 void
 TrPlaneStrain :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                   TimeStep *tStep, const FloatArray &lcoords,
                                                                   FloatArray &answer)
 {
-    FloatArray u, nv;
+    FloatArray u;
     FloatMatrix n;
-
-    this->interp.evalN( nv, lcoords, FEIElementGeometryWrapper(this) );
-
-    n.beNMatrixOf(nv, 2);
-
+    this->computeNmatrixAt(lcoords, n);
     this->computeVectorOf(mode, tStep, u);
-
     answer.beProductOf(n, u);
-}
-
-
-void
-TrPlaneStrain :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
-                                                                      coordType ct, nodalValContainerType &list,
-                                                                      InternalStateType type, TimeStep *tStep)
-{
-    FloatArray n, lcoords;
-
-    if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
-        lcoords = coords;
-    } else {
-        computeLocalCoordinates(lcoords, coords);
-    }
-
-    this->interp.evalN( n, lcoords, FEIElementGeometryWrapper(this) );
-
-    ///@todo Introduce support function for this type of construction..
-    answer.resize(0);
-    answer.add(n.at(1), list[0]);
-    answer.add(n.at(2), list[1]);
-    answer.add(n.at(3), list[2]);
 }
 
 

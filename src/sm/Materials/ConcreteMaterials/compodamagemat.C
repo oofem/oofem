@@ -655,7 +655,7 @@ void CompoDamageMatStatus :: updateYourself(TimeStep *tStep)
 }
 
 
-contextIOResultType CompoDamageMatStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj = NULL)
+contextIOResultType CompoDamageMatStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj = NULL)
 {
     contextIOResultType iores;
     // save parent class status
@@ -666,7 +666,7 @@ contextIOResultType CompoDamageMatStatus :: saveContext(DataStream *stream, Cont
     return CIO_OK;
 }
 
-contextIOResultType CompoDamageMatStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL) {
+contextIOResultType CompoDamageMatStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL) {
     contextIOResultType iores;
     // read parent class status
     if ( ( iores = StructuralMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

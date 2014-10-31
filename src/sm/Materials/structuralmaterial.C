@@ -445,7 +445,7 @@ StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix
       // Conversion expressed in index form. Seems a tiny bit slower than that above but easier to debug.  
       FloatMatrix I(3,3);
       I.beUnitMatrix();
-      	
+
       //I_ik * S_jl + F_im F_kn C_mjnl
       answer.resize(9,9);
       for ( int i = 1; i <= 3; i++) {
@@ -465,7 +465,7 @@ StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix
       }
       
 #endif
-	
+
     } else if ( matMode == _PlaneStress ) {
         // Save terms associated with H = [du/dx dv/dy du/dy dv/dx]
 
@@ -579,7 +579,7 @@ StructuralMaterial :: giveStiffnessMatrix(FloatMatrix &answer,
         break;
     case _Warping:
         answer.resize(2,2);
-	answer.beUnitMatrix();
+        answer.beUnitMatrix();
         break;
     default:
         OOFEM_ERROR("unknown mode (%s)", __MaterialModeToString(mMode) );

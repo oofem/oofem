@@ -200,15 +200,15 @@ NodalAveragingRecoveryModel :: packSharedDofManData(parallelStruct *s, ProcessCo
         int indx = s->regionNodalNumbers->at( toSendMap->at(i) );
         if ( indx ) {
             // pack "1" to indicate that for given shared node this is a valid contribution
-            result &= pcbuff->packInt(1);
-            result &= pcbuff->packInt( s->regionDofMansConnectivity->at(indx) );
+            result &= pcbuff->write(1);
+            result &= pcbuff->write( s->regionDofMansConnectivity->at(indx) );
             int eq = ( indx - 1 ) * s->regionValSize;
             for ( int j = 1; j <= s->regionValSize; j++ ) {
-                result &= pcbuff->packDouble( s->lhs->at(eq + j) );
+                result &= pcbuff->write( s->lhs->at(eq + j) );
             }
         } else {
             // ok shared node is not in active region (determined by s->regionNodalNumbers)
-            result &= pcbuff->packInt(0);
+            result &= pcbuff->write(0);
         }
     }
 

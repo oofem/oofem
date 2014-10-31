@@ -71,6 +71,7 @@ public:
 
     virtual const char *giveClassName() const { return "PetscSolver"; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_Petsc; }
+    virtual SparseMtrxType giveRecommendedMatrix(bool symmetric) const { return SMT_PetscMtrx; }
 };
 } // end namespace oofem
 #endif // petscsolver_h

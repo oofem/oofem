@@ -111,13 +111,13 @@ public:
     /// Sets the temp scalar measure of the largest strain level to given value.
     void setTempKappa(double newKappa) { tempKappa = newKappa; }
     /// Returns the last equilibrated second order damage tensor.
-    //	void giveDamage(FloatMatrix &answer){answer = damage;}
+    //void giveDamage(FloatMatrix &answer){answer = damage;}
     FloatMatrix giveDamage() { return damage; }
     /// Returns the temp. second order damage tensor.
-    //	void giveTempDamage(FloatMatrix &answer){answer = tempDamage;}
+    //void giveTempDamage(FloatMatrix &answer){answer = tempDamage;}
     FloatMatrix giveTempDamage() { return tempDamage; }
     // Assigns temp. damage tensor to given tensor d
-    //	void setTempDamage(FloatMatrix &d){tempDamage = d;}
+    //void setTempDamage(FloatMatrix &d){tempDamage = d;}
     void setTempDamage(FloatMatrix d) { tempDamage = d; }
     /// Returns the last equilibrated scalar measure of the out-of-plane strain to given value (for 2dPlaneStress mode).
     double giveStrainZ() { return strainZ; }
@@ -166,8 +166,8 @@ public:
     virtual void initTempStatus();
     virtual void updateYourself(TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 };
 
 

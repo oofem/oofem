@@ -34,7 +34,7 @@
 
 #include "../sm/EngineeringModels/staticstructural.h"
 #include "../sm/Elements/structuralelement.h"
-#include "../sm/ElementEvaluators/structuralelementevaluator.h"
+#include "../sm/Elements/structuralelementevaluator.h"
 #include "nummet.h"
 #include "timestep.h"
 #include "element.h"
@@ -68,12 +68,6 @@ StaticStructural :: StaticStructural(int i, EngngModel *_master) : StructuralEng
 {
     ndomains = 1;
     solverType = 0;
-
-#ifdef __PARALLEL_MODE
-    nonlocalExt = 0;
-    communicator = nonlocCommunicator = NULL;
-    commBuff = NULL;
-#endif
 }
 
 
@@ -122,7 +116,10 @@ StaticStructural :: initializeFrom(InputRecord *ir)
 
     this->solverType = 0; // Default NR
     IR_GIVE_OPTIONAL_FIELD(ir, solverType, _IFT_StaticStructural_solvertype);
-    
+
+    int _val = IG_None;
+    IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_initialGuess);
+    this->initialGuessType = ( InitialGuess ) _val;
     
 #ifdef __PARALLEL_MODE
     ///@todo Where is the best place to create these?
@@ -194,28 +191,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
 {
     int di = 1;
     int neq = this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() );
-
-    field->advanceSolution(tStep);
-
-    this->giveNumericalMethod( this->giveCurrentMetaStep() );
-    this->initMetaStepAttributes( this->giveCurrentMetaStep() );
-
-    // Fetch vector to fill in from primary field.
-    this->solution = field->giveSolutionVector(tStep);
-
-
-    if(!tStep->isTheFirstStep()) {
-        // Old solution as starting guess
-        FloatArray *oldSol = field->giveSolutionVector(tStep->givePreviousStep());
-        *solution = *oldSol;
-    }
-
-    if(solution->giveSize() != neq) {
-        printf("Resizing.\n");
-        this->solution->resize(neq);
-        this->solution->zero();
-    }
-
+    FloatArray incrementOfSolution(neq), externalForces(neq);
 
     // Create "stiffness matrix"
     if ( !this->stiffnessMatrix ) {
@@ -228,11 +204,45 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     }
     this->internalForces.resize(neq);
 
-    FloatArray incrementOfSolution(neq);
+    field->advanceSolution(tStep);
 
+    this->giveNumericalMethod( this->giveCurrentMetaStep() );
+    this->initMetaStepAttributes( this->giveCurrentMetaStep() );
+
+    // Fetch vector to fill in from primary field.
+    this->solution = field->giveSolutionVector(tStep);
+
+
+    if ( !tStep->isTheFirstStep() ) {
+        // Old solution as starting guess
+        FloatArray *oldSol = field->giveSolutionVector(tStep->givePreviousStep());
+        *solution = *oldSol;
+    }
+    if ( solution->giveSize() != neq ) {
+        this->solution->resize(neq);
+        this->solution->zero();
+    }
+
+    if ( this->initialGuessType == IG_Tangent ) {
+        OOFEM_LOG_RELEVANT("Computing initial guess\n");
+        FloatArray extrapolatedForces;
+        this->assembleExtrapolatedForces( extrapolatedForces, tStep, TangentStiffnessMatrix, this->giveDomain(di) );
+        extrapolatedForces.negated();
+
+        OOFEM_LOG_RELEVANT("Computing old tangent\n");
+        this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
+        SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
+        OOFEM_LOG_RELEVANT("Solving for increment\n");
+        linSolver->solve(stiffnessMatrix, & extrapolatedForces, & incrementOfSolution);
+        OOFEM_LOG_RELEVANT("Initial guess found\n");
+        solution->add(incrementOfSolution);
+    } else if ( this->initialGuessType != IG_None ) {
+        OOFEM_ERROR("Initial guess type: %d not supported", initialGuessType);
+    } else {
+        incrementOfSolution.zero();
+    }
 
     // Build initial/external load
-    FloatArray externalForces(neq);
     externalForces.zero();
     this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total,
                          EModelDefaultEquationNumbering(), this->giveDomain(1) );
@@ -314,7 +324,7 @@ contextIOResultType StaticStructural :: saveContext(DataStream *stream, ContextM
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = this->field->saveContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = this->field->saveContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -350,7 +360,7 @@ contextIOResultType StaticStructural :: restoreContext(DataStream *stream, Conte
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = this->field->restoreContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = this->field->restoreContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

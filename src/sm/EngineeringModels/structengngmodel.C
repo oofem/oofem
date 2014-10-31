@@ -34,7 +34,7 @@
 
 #include "../sm/EngineeringModels/structengngmodel.h"
 #include "../sm/Elements/structuralelement.h"
-#include "../sm/ElementEvaluators/structuralelementevaluator.h"
+#include "../sm/Elements/structuralelementevaluator.h"
 #include "../sm/Elements/Interfaces/structuralinterfaceelement.h"
 #include "dofmanager.h"
 #include "dof.h"

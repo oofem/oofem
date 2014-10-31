@@ -41,6 +41,7 @@
 #include "floatarray.h"
 #include "intarray.h"
 #include "mathfem.h"
+#include "feinterpol.h"
 #include "classfactory.h"
 
 #ifdef __OOFEG

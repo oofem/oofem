@@ -99,6 +99,7 @@ public:
     // identification
     virtual const char *giveClassName() const { return "SpoolesSolver"; }
     virtual LinSystSolverType giveLinSystSolverType() const { return ST_Spooles; }
+    virtual SparseMtrxType giveRecommendedMatrix(bool symmetric) const { return SMT_SpoolesMtrx; }
 };
 } // end namespace oofem
 #endif // spoolessolver_h

@@ -144,7 +144,7 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
         mDebugVTK = true;
     }
 
-	// TODO: Read as input.
+    // TODO: Read as input.
     XfemTolerances::setCharacteristicElementLength(0.001);
 
     return IRRT_OK;
@@ -202,12 +202,12 @@ void XfemManager :: setDomain(Domain *ipDomain)
     }
 }
 
-contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType XfemManager :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
     if ( mode & CM_Definition ) {
-        if ( !stream->write(this->numberOfEnrichmentItems) ) {
+        if ( !stream.write(this->numberOfEnrichmentItems) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
@@ -215,7 +215,7 @@ contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode m
     for ( int i = 1; i <= this->numberOfEnrichmentItems; i++ ) {
         EnrichmentItem *obj = this->giveEnrichmentItem(i);
         if ( ( mode & CM_Definition ) ) {
-            if ( !stream->write( obj->giveInputRecordName() ) ) {
+            if ( !stream.write( obj->giveInputRecordName() ) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
         }
@@ -229,12 +229,12 @@ contextIOResultType XfemManager :: saveContext(DataStream *stream, ContextMode m
 }
 
 
-contextIOResultType XfemManager :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType XfemManager :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
     if ( mode & CM_Definition ) {
-        if ( !stream->read(this->numberOfEnrichmentItems) ) {
+        if ( !stream.read(this->numberOfEnrichmentItems) ) {
             THROW_CIOERR(CIO_IOERR);
         }
         this->enrichmentItemList.resize(this->numberOfEnrichmentItems);
@@ -244,7 +244,7 @@ contextIOResultType XfemManager :: restoreContext(DataStream *stream, ContextMod
         EnrichmentItem *obj;
         if ( mode & CM_Definition ) {
             std :: string name;
-            if ( !stream->read(name) ) {
+            if ( !stream.read(name) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
 

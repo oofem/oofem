@@ -316,8 +316,8 @@ QDKTPlate :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatResponseMode rM
 
 void
 QDKTPlate :: giveNodeCoordinates(double &x1, double &x2, double &x3, double &x4,
-				 double &y1, double &y2, double &y3, double &y4,
-				 double &z1, double &z2, double &z3, double &z4)
+                                 double &y1, double &y2, double &y3, double &y4,
+                                 double &z1, double &z2, double &z3, double &z4)
 {
   FloatArray *nc1, *nc2, *nc3, *nc4;
     nc1 = this->giveNode(1)->giveCoordinates();
@@ -573,9 +573,9 @@ QDKTPlate :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, i
 {
     answer.resize(1);
     if ( ( pap == this->giveNode(1)->giveNumber() ) ||
-	 ( pap == this->giveNode(2)->giveNumber() ) ||
-	 ( pap == this->giveNode(3)->giveNumber() ) ||
-	 ( pap == this->giveNode(4)->giveNumber() ) ) {
+        ( pap == this->giveNode(2)->giveNumber() ) ||
+        ( pap == this->giveNode(3)->giveNumber() ) ||
+        ( pap == this->giveNode(4)->giveNumber() ) ) {
       answer.at(1) = pap;
     } else {
         OOFEM_ERROR("node unknown");
@@ -595,7 +595,7 @@ QDKTPlate :: SPRNodalRecoveryMI_givePatchType()
 //
 void
 QDKTPlate :: computeStrainVectorInLayer(FloatArray &answer, const FloatArray &masterGpStrain,
-					GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
+                                        GaussPoint *masterGp, GaussPoint *slaveGp, TimeStep *tStep)
 // returns full 3d strain vector of given layer (whose z-coordinate from center-line is
 // stored in slaveGp) for given tStep
 {
@@ -700,7 +700,7 @@ QDKTPlate :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int iEdge, Gaus
 void
 QDKTPlate :: computeSurfaceNMatrixAt(FloatMatrix &answer, int iSurf, GaussPoint *sgp)
 {
-  this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), answer);
+    this->computeNmatrixAt(* sgp->giveNaturalCoordinates(), answer);
 }
 
 void
@@ -709,9 +709,9 @@ QDKTPlate :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     answer.resize(12);
     answer.zero();
     if ( iSurf == 1 ) {
-      for (int i = 1; i<=12; i++) {
-	answer.at(i) = i;
-      }
+        for (int i = 1; i<=12; i++) {
+            answer.at(i) = i;
+        }
     } else {
         OOFEM_ERROR("wrong surface number");
     }

@@ -80,8 +80,8 @@ public:
     virtual double giveUnknown(ValueModeType mode, TimeStep *tStep);
     virtual double giveUnknown(PrimaryField &field, ValueModeType mode, TimeStep *tStep);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     virtual dofType giveDofType() { return DT_active; }
     virtual const char *giveClassName() const { return "ActiveDof"; }

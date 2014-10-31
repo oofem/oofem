@@ -117,7 +117,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
         }
 
         // Can not be used because it writes to the start of the array instead of appending.
-        //		int nPointsTri = GaussIntegrationRule :: SetUpPointsOnTriangle(nPoints, mode);
+        //int nPointsTri = GaussIntegrationRule :: SetUpPointsOnTriangle(nPoints, mode);
 
         for ( int j = 0; j < nPoints; j++ ) {
             FloatArray global;
@@ -316,7 +316,7 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
 
 
 contextIOResultType
-PatchIntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+PatchIntegrationRule :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     // TODO: Implement
 
@@ -337,7 +337,7 @@ PatchIntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *
      *  if ( this->patch ) {
      *      // store patch type
      *      int _type = this->patch->givePatchType();
-     *      if ( !stream->write(_type) ) {
+     *      if ( !stream.write(_type) ) {
      *          THROW_CIOERR(CIO_IOERR);
      *      }
      *
@@ -350,7 +350,7 @@ PatchIntegrationRule :: saveContext(DataStream *stream, ContextMode mode, void *
 }
 
 contextIOResultType
-PatchIntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+PatchIntegrationRule :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     // TODO: Implement
 
@@ -360,10 +360,6 @@ PatchIntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, voi
     //
 
     contextIOResultType iores;
-
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = IntegrationRule :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
@@ -376,7 +372,7 @@ PatchIntegrationRule :: restoreContext(DataStream *stream, ContextMode mode, voi
      *  }
      */
     int _ptype;
-    if ( !stream->read(_ptype) ) {
+    if ( !stream.read(_ptype) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

@@ -77,8 +77,8 @@ public:
     double giveKappa_nl() { return kappa_nl; }
     double giveKappa_hat() { return kappa_hat; }
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     virtual Interface *giveInterface(InterfaceType);
 };

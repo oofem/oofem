@@ -281,7 +281,7 @@ Shell7BaseXFEM :: computeInterfaceJumpAt(int interf, FloatArray &lCoords, TimeSt
     lCoords.at(3) += 1.0e-9; // bottom position for plus side + num. perturbation 
     this->vtkEvalUpdatedGlobalCoordinateAt(lCoords, interf + 1, answer, tStep); // position vector at + side
     lCoords.at(3) -= 2.0e-9; // top position for minus side - num. perturbation
-    this->vtkEvalUpdatedGlobalCoordinateAt(lCoords, interf, temp, tStep);	// position vector at - side
+    this->vtkEvalUpdatedGlobalCoordinateAt(lCoords, interf, temp, tStep); // position vector at - side
     answer.subtract(temp); // jump = x(+) - x(-)
     
 }
@@ -648,8 +648,8 @@ Shell7BaseXFEM :: computeCohesiveForces(FloatArray &answer, TimeStep *tStep, Flo
 
             // Compute jump vector
             this->computeInterfaceJumpAt(dei->giveDelamInterfaceNum(), lCoords, tStep, jump); // -> numerical tol. issue -> normal jump = 1e-10
-	    
-	    
+
+
             genEpsC.beProductOf(B, solVecC);
             //genEpsC.beProductOf(BEnr, solVecC); //TODO BUG old, incorrect version. Need to verify that the results are ok now
             this->computeFAt(lCoords, F, genEpsC, tStep);
@@ -729,7 +729,7 @@ Shell7BaseXFEM :: computeCohesiveTangent(FloatMatrix &answer, TimeStep *tStep)
 
                 // Assemble part correpsonding to active dofs
                 tempRed.beSubMatrixOf(temp, this->activeDofsArrays[dei->giveNumber()-1], this->activeDofsArrays[couplesToEi->giveNumber()-1]);
-                answer.assemble(tempRed, this->orderingArrays[dei->giveNumber()-1], this->orderingArrays[couplesToEi->giveNumber()-1]);	    
+                answer.assemble(tempRed, this->orderingArrays[dei->giveNumber()-1], this->orderingArrays[couplesToEi->giveNumber()-1]);
                 tempRedT.beTranspositionOf(tempRed);
                 answer.assemble(tempRedT, this->orderingArrays[couplesToEi->giveNumber()-1], this->orderingArrays[dei->giveNumber()-1]);     
                 // Add equal (but negative) tangent corresponding to the forces on the minus side
@@ -1045,7 +1045,7 @@ Shell7BaseXFEM :: OLDcomputeStiffnessMatrix(FloatMatrix &answer, MatResponseMode
         StructuralMaterial *layerMaterial = static_cast< StructuralMaterial* >( domain->giveMaterial( this->layeredCS->giveLayerMaterial(layer) ) );
         
         for ( GaussPoint *gp: *integrationRulesArray [ layer - 1 ] ) {
-	        const FloatArray &lCoords = * gp->giveNaturalCoordinates();
+            const FloatArray &lCoords = * gp->giveNaturalCoordinates();
             this->computeEnrichedBmatrixAt(lCoords, Bc, NULL);
             
             Shell7Base :: computeLinearizedStiffness(gp, layerMaterial, tStep, A);

@@ -59,7 +59,7 @@ TrPlaneStress2d :: TrPlaneStress2d(int n, Domain *aDomain) :
     PlaneStressElement(n, aDomain), ZZNodalRecoveryModelInterface(this), NodalAveragingRecoveryModelInterface(),
     SPRNodalRecoveryModelInterface(), SpatialLocalizerInterface(this),
     EIPrimaryUnknownMapperInterface(), ZZErrorEstimatorInterface(this),
-    MMAShapeFunctProjectionInterface(), HuertaErrorEstimatorInterface()
+    HuertaErrorEstimatorInterface()
 {
     numberOfDofMans  = 3;
     area = -1;
@@ -83,8 +83,6 @@ TrPlaneStress2d :: giveInterface(InterfaceType interface)
         return static_cast< EIPrimaryUnknownMapperInterface * >(this);
     } else if ( interface == ZZErrorEstimatorInterfaceType ) {
         return static_cast< ZZErrorEstimatorInterface * >(this);
-    } else if ( interface == MMAShapeFunctProjectionInterfaceType ) {
-        return static_cast< MMAShapeFunctProjectionInterface * >(this);
     } else if ( interface == HuertaErrorEstimatorInterfaceType ) {
         return static_cast< HuertaErrorEstimatorInterface * >(this);
     }
@@ -589,67 +587,16 @@ TrPlaneStress2d :: SPRNodalRecoveryMI_givePatchType()
 }
 
 
-double
-TrPlaneStress2d :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(3), gcoords;
-    double dist;
-    int size, gsize;
-
-    lcoords.at(1) = lcoords.at(2) = lcoords.at(3) = 1. / 3.;
-    this->computeGlobalCoordinates(gcoords, lcoords);
-
-    if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
-    }
-
-    if ( size == gsize ) {
-        dist = coords.distance(gcoords);
-    } else {
-        FloatArray helpCoords = coords;
-
-        helpCoords.resizeWithValues(gsize);
-        dist = helpCoords.distance(gcoords);
-    }
-
-    return dist;
-}
-
-
 void
 TrPlaneStress2d :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                                     TimeStep *tStep, const FloatArray &lcoords,
                                                                     FloatArray &answer)
 {
-    FloatArray u;
     FloatMatrix n;
-
-    n.beNMatrixOf(lcoords, 2);
-
-    this->computeVectorOf({D_u, D_v}, mode, tStep, u);
+    FloatArray u;
+    this->computeNmatrixAt(lcoords, n);
+    this->computeVectorOf(mode, tStep, u);
     answer.beProductOf(n, u);
 }
 
-
-void
-TrPlaneStress2d :: MMAShapeFunctProjectionInterface_interpolateIntVarAt(FloatArray &answer, FloatArray &coords,
-                                                                        coordType ct, nodalValContainerType &list,
-                                                                        InternalStateType type, TimeStep *tStep)
-{
-    double l1, l2, l3;
-    FloatArray lcoords;
-    if ( ct == MMAShapeFunctProjectionInterface :: coordType_local ) {
-        lcoords = coords;
-    } else {
-        computeLocalCoordinates(lcoords, coords);
-    }
-
-    l1 = lcoords.at(1);
-    l2 = lcoords.at(2);
-    l3 = 1.0 - l1 - l2;
-    answer.resize(0);
-    answer.add(l1, list[0]);
-    answer.add(l2, list[1]);
-    answer.add(l3, list[2]);
-}
 } // end namespace oofem

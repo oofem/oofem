@@ -325,7 +325,7 @@ TR_SHELL01 :: printOutputAt(FILE *file, TimeStep *tStep)
 
 
 contextIOResultType
-TR_SHELL01 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+TR_SHELL01 :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores =  StructuralElement :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -341,7 +341,7 @@ TR_SHELL01 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 }
 
 contextIOResultType
-TR_SHELL01 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+TR_SHELL01 :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores =  StructuralElement :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
@@ -427,19 +427,6 @@ TR_SHELL01 :: ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArra
     answer.at(6) = globTensor.at(1, 2); //mxyForce
 }
 
-
-double
-TR_SHELL01 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray c(3);
-    c.zero();
-    // evaluate element center
-    for ( int i = 1; i <= 3; i++ ) {
-        c.add( * plate->giveNode(i)->giveCoordinates() );
-    }
-    c.times(1. / 3.);
-    return c.distance(coords);
-}
 
 void
 TR_SHELL01 :: SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1)

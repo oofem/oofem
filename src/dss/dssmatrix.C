@@ -162,20 +162,20 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
         ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
         if ( bc != NULL ) {
             bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
-	    for (std::size_t k = 0; k < r_locs.size(); k++) {
-	      IntArray &krloc = r_locs[k];
-	      IntArray &kcloc = c_locs[k];
-	      for ( int ri = 1; ri <= krloc.giveSize(); ri++ ) {
-		if ( ( ii = krloc.at(ri) ) ) {
-		  for ( j = 1; j <= kcloc.giveSize(); j++ ) {
-		    if ( (jj = kcloc.at(j) ) ) {
-		      columns [ jj - 1 ].insert(ii - 1);
-		    }
-		  }
-		}
-	      }
-	    }
-	}
+            for (std::size_t k = 0; k < r_locs.size(); k++) {
+                IntArray &krloc = r_locs[k];
+                IntArray &kcloc = c_locs[k];
+                for ( int ri = 1; ri <= krloc.giveSize(); ri++ ) {
+                    if ( ( ii = krloc.at(ri) ) ) {
+                        for ( j = 1; j <= kcloc.giveSize(); j++ ) {
+                            if ( (jj = kcloc.at(j) ) ) {
+                                columns [ jj - 1 ].insert(ii - 1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     
     for ( i = 0; i < neq; i++ ) {
@@ -355,36 +355,36 @@ int DSSMatrix :: assemble(const IntArray &loc, const FloatMatrix &mat)
 
 int DSSMatrix :: assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat)
 {
-    int i, j, ii, jj, dim1, dim2;
+    int dim1, dim2;
 
     // this->checkSizeTowards(rloc, cloc);
 
     dim1 = mat.giveNumberOfRows();
     dim2 = mat.giveNumberOfColumns();
     if ( _type == unsym_LU ) {
-      for ( i = 1; i <= dim1; i++ ) {
-        ii = rloc.at(i);
-        if ( ii ) {
-	  for ( j = 1; j <= dim2; j++ ) {
-	    jj = cloc.at(j);
-	    if ( jj ) {
-	      _dss->ElementAt(ii - 1, jj - 1) += mat.at(i, j);
-	    }
-	  }
+        for ( int i = 1; i <= dim1; i++ ) {
+            int ii = rloc.at(i);
+            if ( ii ) {
+                for ( int j = 1; j <= dim2; j++ ) {
+                    int jj = cloc.at(j);
+                    if ( jj ) {
+                        _dss->ElementAt(ii - 1, jj - 1) += mat.at(i, j);
+                    }
+                }
+            }
         }
-      }
     } else { // symmetric pattern
-      for ( i = 1; i <= dim1; i++ ) {
-        ii = rloc.at(i);
-        if ( ii ) {
-	  for ( j = 1; j <= dim2; j++ ) {
-	    jj = cloc.at(j);
-	    if ( jj && (jj <= ii) ) {
-	      _dss->ElementAt(ii - 1, jj - 1) += mat.at(i, j);
-	    }
-	  }
+        for ( int i = 1; i <= dim1; i++ ) {
+            int ii = rloc.at(i);
+            if ( ii ) {
+                for ( int j = 1; j <= dim2; j++ ) {
+                    int jj = cloc.at(j);
+                    if ( jj && (jj <= ii) ) {
+                        _dss->ElementAt(ii - 1, jj - 1) += mat.at(i, j);
+                    }
+                }
+            }
         }
-      }
     }
 
     // increment version

@@ -85,9 +85,9 @@ GaussIntegrationRule :: SetUpPointsOn2DEmbeddedLine(int nPoints, MaterialMode mo
 
         this->gaussPoints [ i - 1 ]->setSubPatchCoordinates(subpatchCoord);
 
-        const FloatArray globalCoord = { 
-        ( 1. - x ) * coord0.at(1) + x * coord1.at(1),
-	    ( 1. - x ) * coord0.at(2) + x * coord1.at(2) };
+        FloatArray globalCoord = { 
+            ( 1. - x ) * coord0.at(1) + x * coord1.at(1),
+            ( 1. - x ) * coord0.at(2) + x * coord1.at(2) };
         this->gaussPoints [ i - 1 ]->setGlobalCoordinates(globalCoord);
 
         FloatArray naturalCoord;

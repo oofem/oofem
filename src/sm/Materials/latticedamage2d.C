@@ -441,28 +441,25 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
 
 double
 LatticeDamage2d :: computeBiot(double omega,
-			       double kappa,
-			       double le)
+                               double kappa,
+                               double le)
 {
   
-  double biot = 0.;
-  
-  if(this->softeningType == 1 || this->softeningType == 3){
-    if(omega == 0){
-      biot = this->biotCoefficient;
-    }
-    else if(omega*kappa*le>0 && omega*kappa*le<this->wf){
-      biot = this->biotCoefficient + (1.-biotCoefficient)*omega*kappa*le/this->wf;
-    }
-    else{
-      biot = 1.;
-    }
-  }
-  else{
-    OOFEM_ERROR("Wrong stype for btype=1. Only linear and exponential softening considered so far\n");
-  } 
-  
-  return biot;
+    double biot = 0.;
+    
+    if ( this->softeningType == 1 || this->softeningType == 3 ) {
+        if ( omega == 0 ) {
+            biot = this->biotCoefficient;
+        } else if ( omega*kappa*le > 0 && omega*kappa*le < this->wf ) {
+            biot = this->biotCoefficient + (1.-biotCoefficient)*omega*kappa*le/this->wf;
+        } else {
+            biot = 1.;
+        }
+    } else {
+        OOFEM_ERROR("Wrong stype for btype=1. Only linear and exponential softening considered so far\n");
+    } 
+    
+    return biot;
 }
 
 
@@ -800,7 +797,7 @@ LatticeDamage2dStatus :: setOldNormalStress(double val)
 
 
 contextIOResultType
-LatticeDamage2dStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+LatticeDamage2dStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full information stored in this Status
 // no temp variables stored
@@ -820,44 +817,44 @@ LatticeDamage2dStatus :: saveContext(DataStream *stream, ContextMode mode, void 
     }
 
     // write a raw data
-    if ( !stream->write(kappa) ) {
+    if ( !stream.write(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(equivStrain) ) {
+    if ( !stream.write(equivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(damage) ) {
+    if ( !stream.write(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(le) ) {
+    if ( !stream.write(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(dissipation) ) {
+    if ( !stream.write(dissipation) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(deltaDissipation) ) {
+    if ( !stream.write(deltaDissipation) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(crack_flag) ) {
+    if ( !stream.write(crack_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(crackWidth) ) {
+    if ( !stream.write(crackWidth) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
 
-    if ( !stream->write(e0) ) {
+    if ( !stream.write(e0) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(biot) ) {
+    if ( !stream.write(biot) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -901,7 +898,7 @@ LatticeDamage2dStatus :: giveCrackFlag()
 
 
 contextIOResultType
-LatticeDamage2dStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+LatticeDamage2dStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full information stored in stream to this Status
 //
@@ -917,43 +914,43 @@ LatticeDamage2dStatus :: restoreContext(DataStream *stream, ContextMode mode, vo
     }
 
     // read raw data
-    if ( !stream->read(kappa) ) {
+    if ( !stream.read(kappa) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(equivStrain) ) {
+    if ( !stream.read(equivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(damage) ) {
+    if ( !stream.read(damage) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(le) ) {
+    if ( !stream.read(le) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(dissipation) ) {
+    if ( !stream.read(dissipation) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(deltaDissipation) ) {
+    if ( !stream.read(deltaDissipation) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(crack_flag) ) {
+    if ( !stream.read(crack_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(crackWidth) ) {
+    if ( !stream.read(crackWidth) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(e0) ) {
+    if ( !stream.read(e0) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(biot) ) {
+    if ( !stream.read(biot) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

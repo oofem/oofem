@@ -315,9 +315,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
             double time = 0.0;
 
-            Element *el = element;
-
-            Domain *dom = el->giveDomain();
+            Domain *dom = element->giveDomain();
             if ( dom != NULL ) {
                 EngngModel *em = dom->giveEngngModel();
                 if ( em != NULL ) {
@@ -489,7 +487,7 @@ void XfemStructuralElementInterface :: computeGlobalCohesiveTractionVector(Float
     locToGlob.setColumn(crackNormal3D, 2);
     locToGlob.setColumn(ez, 3);
 
-    FloatArray TLoc(3), jump3DLoc, TLocRenumbered(3);
+    FloatArray TLoc, jump3DLoc, TLocRenumbered(3);
     jump3DLoc.beTProductOf(locToGlob, jump3D);
 
     FloatArray jump3DLocRenumbered = {
@@ -829,7 +827,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
     // Node coordinates
     std :: vector< FloatArray >nodeCoords;
     int nodesPassed = 1;
-    for(Triangle tri: mSubTri ) {
+    for( auto &tri: mSubTri ) {
         for(int i = 1; i <= 3; i++) {
             FloatArray x = tri.giveVertex(i);
             nodeCoords.push_back(x);
@@ -863,7 +861,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
 
         nodesPassed = 1;
 
-        for(Triangle tri: mSubTri ) {
+        for(auto &tri: mSubTri ) {
 
             FloatArray triCenter = tri.giveVertex(1);
             triCenter.add( tri.giveVertex(2) );

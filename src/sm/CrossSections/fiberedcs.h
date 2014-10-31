@@ -176,8 +176,8 @@ public:
     MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode);
     GaussPoint *giveSlaveGaussPoint(GaussPoint *gp, int);
 
-    virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
-    virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
+    virtual contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
+    virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
 
     virtual int checkConsistency();
 

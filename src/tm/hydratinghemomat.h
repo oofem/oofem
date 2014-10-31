@@ -71,8 +71,8 @@ public:
                                            TimeStep *tStep);
 
     // saves current context(state) into stream
-    virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
-    virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
+    virtual contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
+    virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
 
     // identification and auxiliary functions
     virtual const char *giveInputRecordName() const { return _IFT_HydratingHeMoMaterial_Name; }

@@ -309,7 +309,7 @@ bool PLHoopStressCirc ::propagateInterface(Domain &iDomain, EnrichmentFront &iEn
                 double theta                    = 0.5 * ( 1.0 - xi ) * angles [ segIndex ]         + 0.5 * ( 1.0 + xi ) * angles [ segIndex + 1 ];
                 double sigThetaTheta    = 0.5 * ( 1.0 - xi ) * sigTTArray [ segIndex ] + 0.5 * ( 1.0 + xi ) * sigTTArray [ segIndex + 1 ];
 
-                //					printf("Found candidate: theta: %e sigThetaTheta: %e\n", theta, sigThetaTheta);
+                //printf("Found candidate: theta: %e sigThetaTheta: %e\n", theta, sigThetaTheta);
 
                 if ( sigThetaTheta > maxSigTT ) {
                     foundZeroLevel = true;

@@ -37,15 +37,7 @@
 
 #include "oofemcfg.h"
 #include "inputrecord.h"
-#include "interface.h"
 #include "floatarray.h"
-#include "intarray.h"
-
-#define __LB_DEBUG
-#ifdef __LB_DEBUG
- #include <list>
- #include "range.h"
-#endif
 
 #include <vector>
 #include <memory>
@@ -57,24 +49,12 @@
 #define _IFT_LoadBalancerMonitor_initialnodeweights "nw"
 //@}
 
-///@name Input fields for WallClockLoadBalancerMonitor
-//@{
-#define _IFT_WallClockLoadBalancerMonitor_Name "wallclock"
-#define _IFT_WallClockLoadBalancerMonitor_relwct "relwct"
-#define _IFT_WallClockLoadBalancerMonitor_abswct "abswct"
-#define _IFT_WallClockLoadBalancerMonitor_minwct "minwct"
-#define _IFT_WallClockLoadBalancerMonitor_lbstep "lbstep"
-#define _IFT_WallClockLoadBalancerMonitor_perturbedsteps "lbperturbedsteps"
-#define _IFT_WallClockLoadBalancerMonitor_perturbfactor "lbperturbfactor"
-#define _IFT_WallClockLoadBalancerMonitor_recoveredsteps "lbrecoveredsteps"
-#define _IFT_WallClockLoadBalancerMonitor_processingweights "lbprocessingweights"
-//@}
-
 namespace oofem {
 class Domain;
 class EngngModel;
 class ProcessCommunicator;
 class TimeStep;
+class IntArray;
 
  #define MIGRATE_LOAD_TAG       9998
 
@@ -94,9 +74,7 @@ protected:
 public:
     enum LoadBalancerDecisionType { LBD_CONTINUE, LBD_RECOVER };
 
-    LoadBalancerMonitor(EngngModel * em) {
-        emodel = em;
-    }
+    LoadBalancerMonitor(EngngModel * em): emodel(em) { }
     virtual ~LoadBalancerMonitor() { }
 
     /// Initializes receiver according to object description stored in input record.
@@ -111,42 +89,7 @@ public:
     //@}
 
     /// Returns class name of the receiver.
-    const char *giveClassName() const { return "LoadBalancerMonitor"; }
-};
-
-/**
- * Implementation of simple wall-clock based monitor.
- * It detect imbalance based on wall clock difference required for solution step
- * on particular nodes. When difference in wall clock solution times is greater
- * than a threshold value, the load migration is performed.
- */
-class OOFEM_EXPORT WallClockLoadBalancerMonitor : public LoadBalancerMonitor
-{
-protected:
-    /// Declares min abs imbalance to perform relative imbalance check.
-    double relWallClockImbalanceTreshold, absWallClockImbalanceTreshold, minAbsWallClockImbalanceTreshold;
-    /// The rebalancing done every lbstep.
-    int lbstep;
- #ifdef __LB_DEBUG
-    /// List of steps with perturbed balancing.
-    std :: list< Range >perturbedSteps;
-    /// Perturbing factor.
-    double perturbFactor;
-    /// list of step at which to performed lb recovery.
-    IntArray recoveredSteps;
-    /// processing weights for lb recovery.
-    FloatArray processingWeights;
- #endif
-public:
-    WallClockLoadBalancerMonitor(EngngModel * em) : LoadBalancerMonitor(em) {
-        relWallClockImbalanceTreshold = 0.1;
-        absWallClockImbalanceTreshold = 10.0;
-        minAbsWallClockImbalanceTreshold = 0.0;
-        lbstep = 5;
-    }
-    LoadBalancerDecisionType decide(TimeStep *);
-    ///Initializes receiver according to object description stored in input record.
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual const char *giveClassName() const = 0;
 };
 
 
@@ -218,7 +161,7 @@ public:
     /// sets associated Domain
     virtual void setDomain(Domain *d) { this->domain = d; }
     /// Returns class name of the receiver.
-    const char *giveClassName() const { return "LoadBalancer"; }
+    virtual const char *giveClassName() const = 0;
 
 protected:
 

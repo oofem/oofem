@@ -45,10 +45,6 @@
 #include "floatarray.h"
 #include "linesearch.h"
 
-#ifdef __PETSC_MODULE
- #include <petscksp.h>
-#endif
-
 ///@name Input fields for NRSolver
 //@{
 #define _IFT_NRSolver_Name "nrsolver"
@@ -142,11 +138,6 @@ protected:
     double constrainedNRalpha;
     /// Minimum number of iterations before constraint is activated
     int constrainedNRminiter;
-
-#ifdef __PETSC_MODULE
-    IS prescribedEgsIS;
-    bool prescribedEgsIS_defined;
-#endif
 
     /// Relative unbalanced force tolerance for each group
     FloatArray rtolf;

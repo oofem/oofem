@@ -398,14 +398,6 @@ void Tr21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueMo
 }
 
 
-double Tr21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray center;
-    FloatArray lcoords = {0.333333, 0.333333, 0.333333};
-    interpolation_quad.local2global( center, lcoords, FEIElementGeometryWrapper(this) );
-    return center.distance(coords);
-}
-
 void Tr21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_Pressure ) {

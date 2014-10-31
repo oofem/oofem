@@ -46,8 +46,8 @@ class Triangle;
  * PatchIntegrationRule provides integration over a triangle patch.
  * Input to the constructor is:
  *  -int n:         number of quadrature points per triangle.
- *  -Element *e:	parent element pointer
- *  -iTriangles:	array of triangles describing the subdivision of the element.
+ *  -Element *e:    parent element pointer
+ *  -iTriangles:    array of triangles describing the subdivision of the element.
  *
  * @author Erik Svenning (Major modifications)
  *
@@ -76,8 +76,8 @@ public:
     virtual int SetUpPointsOnTriangle(int nPoints, MaterialMode mode);
     virtual int SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, MaterialMode mode);
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj);
 };
 } // end namespace oofem
 #endif // patchintegrationrule_h

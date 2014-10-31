@@ -66,16 +66,7 @@ IRResultType
 LWedge :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 6;
-    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( ( numberOfGaussPoints != 6 ) && ( numberOfGaussPoints != 9 ) ) {
-        numberOfGaussPoints = 6;
-    }
-
-    return IRRT_OK;
+    return this->Structural3DElement :: initializeFrom(ir);
 }
 
 
@@ -129,15 +120,6 @@ int
 LWedge :: SPRNodalRecoveryMI_giveNumberOfIP()
 {
     return numberOfGaussPoints;
-}
-
-
-void
-LWedge :: SPRNodalRecoveryMI_computeIPGlobalCoordinates(FloatArray &coords, GaussPoint *gp)
-{
-    if ( this->computeGlobalCoordinates( coords, * gp->giveNaturalCoordinates() ) == 0 ) {
-        OOFEM_ERROR("computeGlobalCoordinates failed");
-    }
 }
 
 

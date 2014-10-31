@@ -245,9 +245,9 @@ Tria1PlateSubSoil :: giveSurfaceDofMapping(IntArray &answer, int iSurf) const
     answer.resize(3);
     answer.zero();
     if ( iSurf == 1 ) {
-      for (int i = 1; i<=3; i++) {
-	answer.at(i) = i;
-      }
+        for (int i = 1; i<=3; i++) {
+            answer.at(i) = i;
+        }
     } else {
         OOFEM_ERROR("wrong surface number");
     }

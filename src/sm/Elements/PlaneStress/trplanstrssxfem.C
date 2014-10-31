@@ -127,20 +127,20 @@ TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, IntArray &answer) const
     TrPlaneStress2d :: giveDofManDofIDMask(inode, answer);
 
     // Discontinuous part
-	if( this->giveDomain()->hasXfemManager() ) {
-		DofManager *dMan = giveDofManager(inode);
-		XfemManager *xMan = giveDomain()->giveXfemManager();
+    if( this->giveDomain()->hasXfemManager() ) {
+        DofManager *dMan = giveDofManager(inode);
+        XfemManager *xMan = giveDomain()->giveXfemManager();
 
         const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices( dMan->giveGlobalNumber() );
         for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
             EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices[i]);
-			if ( ei->isDofManEnriched(* dMan) ) {
-				IntArray eiDofIdArray;
-				ei->computeEnrichedDofManDofIdArray(eiDofIdArray, *dMan);
-				answer.followedBy(eiDofIdArray);
-			}
-		}
-	}
+            if ( ei->isDofManEnriched(* dMan) ) {
+                IntArray eiDofIdArray;
+                ei->computeEnrichedDofManDofIdArray(eiDofIdArray, *dMan);
+                answer.followedBy(eiDofIdArray);
+            }
+        }
+    }
 }
 
 void

@@ -89,23 +89,12 @@ LSpace :: giveInterface(InterfaceType interface)
 }
 
 
-
 IRResultType
 LSpace :: initializeFrom(InputRecord *ir)
 {
     numberOfGaussPoints = 8;
-    IRResultType result = this->NLStructuralElement :: initializeFrom(ir);
-    if ( result != IRRT_OK ) {
-        return result;
-    }
-
-    if ( !( ( numberOfGaussPoints == 1 ) || ( numberOfGaussPoints == 8 ) || ( numberOfGaussPoints == 27 ) ) ) {
-        numberOfGaussPoints = 8;
-    }
-
-    return IRRT_OK;
+    return this->Structural3DElement :: initializeFrom(ir);
 }
-
 
 
 void
@@ -121,10 +110,10 @@ LSpace :: SPRNodalRecoveryMI_giveSPRAssemblyPoints(IntArray &pap)
 void
 LSpace :: SPRNodalRecoveryMI_giveDofMansDeterminedByPatch(IntArray &answer, int pap)
 {
-    int i, found = 0;
+    int found = 0;
     answer.resize(1);
 
-    for ( i = 1; i <= numberOfDofMans; i++ ) {
+    for ( int i = 1; i <= numberOfDofMans; i++ ) {
         if ( this->giveNode(i)->giveNumber() == pap ) {
             found = 1;
         }
@@ -259,43 +248,15 @@ LSpace :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int nod
 }
 
 
-double
-LSpace :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(3), gcoords;
-    double dist;
-    int size, gsize;
-
-    lcoords.at(1) = lcoords.at(2) = lcoords.at(3) = 0.0;
-    this->computeGlobalCoordinates(gcoords, lcoords);
-
-    if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
-    }
-
-    if ( size == gsize ) {
-        dist = coords.distance(gcoords);
-    } else {
-        FloatArray helpCoords = coords;
-
-        helpCoords.resizeWithValues(gsize);
-        dist = helpCoords.distance(gcoords);
-    }
-
-    return dist;
-}
-
-
 void
 LSpace :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueModeType mode,
                                                            TimeStep *tStep, const FloatArray &lcoords,
                                                            FloatArray &answer)
 {
-    FloatArray u, ni;
+    FloatArray u;
     FloatMatrix n;
-    this->interpolation.evalN( ni, lcoords, FEIElementGeometryWrapper(this) );
-    n.beNMatrixOf(ni, 3);
-    this->computeVectorOf({D_u, D_v, D_w}, mode, tStep, u);
+    this->computeNmatrixAt(lcoords, n);
+    this->computeVectorOf(mode, tStep, u);
     answer.beProductOf(n, u);
 }
 

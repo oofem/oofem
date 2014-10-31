@@ -65,10 +65,9 @@ IMLSolver :: IMLSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m)
 }
 
 
-IMLSolver :: ~IMLSolver() {
-    if ( M ) {
-        delete M;
-    }
+IMLSolver :: ~IMLSolver()
+{
+    delete M;
 }
 
 IRResultType

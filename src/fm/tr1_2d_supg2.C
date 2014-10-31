@@ -1202,33 +1202,6 @@ TR1_2D_SUPG2 :: giveInterface(InterfaceType interface)
 }
 
 
-double
-TR1_2D_SUPG2 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(3), gcoords;
-    double dist;
-    int size, gsize;
-
-    lcoords.at(1) = lcoords.at(2) = lcoords.at(3) = 1. / 3.;
-    this->computeGlobalCoordinates(gcoords, lcoords);
-
-    if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
-    }
-
-    if ( size == gsize ) {
-        dist = coords.distance(gcoords);
-    } else {
-        FloatArray helpCoords = coords;
-
-        helpCoords.resizeWithValues(gsize);
-        dist = helpCoords.distance(gcoords);
-    }
-
-    return dist;
-}
-
-
 void
 TR1_2D_SUPG2 :: computeDeviatoricStress(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
@@ -1891,7 +1864,7 @@ TR1_2D_SUPG2 :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 
-contextIOResultType TR1_2D_SUPG2 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType TR1_2D_SUPG2 :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
 // current state)
@@ -1912,7 +1885,7 @@ contextIOResultType TR1_2D_SUPG2 :: saveContext(DataStream *stream, ContextMode 
 
 
 
-contextIOResultType TR1_2D_SUPG2 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType TR1_2D_SUPG2 :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
 // current state)

@@ -265,7 +265,7 @@ KelvinChainSolidMaterialStatus :: initTempStatus()
 }
 
 contextIOResultType
-KelvinChainSolidMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+KelvinChainSolidMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
@@ -278,7 +278,7 @@ KelvinChainSolidMaterialStatus :: saveContext(DataStream *stream, ContextMode mo
 
 
 contextIOResultType
-KelvinChainSolidMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+KelvinChainSolidMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 

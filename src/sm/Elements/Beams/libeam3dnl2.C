@@ -897,7 +897,7 @@ LIBeam3dNL2 :: computeTempCurv(FloatArray &answer, TimeStep *tStep)
 
 
 contextIOResultType
-LIBeam3dNL2 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+LIBeam3dNL2 :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
 // current state)
@@ -917,7 +917,7 @@ LIBeam3dNL2 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
 
 
 contextIOResultType
-LIBeam3dNL2 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+LIBeam3dNL2 :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
 // current state)

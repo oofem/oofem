@@ -63,6 +63,13 @@ MasterDof :: MasterDof(DofManager *aNode, DofIDItem id) : Dof(aNode, id)
     unknowns = new Dictionary();
 }
 
+
+MasterDof :: ~MasterDof()
+{
+    delete unknowns;
+}
+
+
 BoundaryCondition *MasterDof :: giveBc()
 // Returns the boundary condition the receiver is subjected to.
 {
@@ -315,33 +322,30 @@ void MasterDof :: printYourself()
 }
 
 
-contextIOResultType MasterDof :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType MasterDof :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full node context (saves state variables, that completely describe
 // current state)
 //
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = Dof :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     if ( mode & CM_Definition ) {
-        if ( !stream->write(bc) ) {
+        if ( !stream.write(bc) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->write(ic) ) {
+        if ( !stream.write(ic) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
 
     // store equation number of receiver
-    if ( !stream->write(equationNumber) ) {
+    if ( !stream.write(equationNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -355,34 +359,31 @@ contextIOResultType MasterDof :: saveContext(DataStream *stream, ContextMode mod
 }
 
 
-contextIOResultType MasterDof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType MasterDof :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full node context (saves state variables, that completely describe
 // current state)
 //
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = Dof :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     if ( mode & CM_Definition ) {
-        if ( !stream->read(bc) ) {
+        if ( !stream.read(bc) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(ic) ) {
+        if ( !stream.read(ic) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
 
 
     // read equation number of receiver
-    if ( !stream->read(equationNumber) ) {
+    if ( !stream.read(equationNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

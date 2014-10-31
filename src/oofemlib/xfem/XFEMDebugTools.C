@@ -14,7 +14,7 @@ XFEMDebugTools :: ~XFEMDebugTools() { }
 
 void XFEMDebugTools :: WriteTrianglesToVTK(const std :: string &iName, const std :: vector< Triangle > &iTriangles)
 {
-    //	printf("Entering XFEMDebugTools::WriteTrianglesToVTK().\n");
+    //printf("Entering XFEMDebugTools::WriteTrianglesToVTK().\n");
     size_t numTri = iTriangles.size();
 
 
@@ -61,7 +61,7 @@ void XFEMDebugTools :: WriteTrianglesToVTK(const std :: string &iName, const std
 
 void XFEMDebugTools :: WritePointsToVTK(const std :: string &iName, const std :: vector< FloatArray > &iPoints)
 {
-    //	printf("Entering XFEMDebugTools::WriteTrianglesToVTK().\n");
+    //printf("Entering XFEMDebugTools::WriteTrianglesToVTK().\n");
 
 
     std :: ofstream file;
@@ -79,8 +79,7 @@ void XFEMDebugTools :: WritePointsToVTK(const std :: string &iName, const std ::
     file << "POINTS " << numPoints << " double\n";
 
     for ( int i = 1; i <= numPoints; i++ ) {
-        //			for(int j = 1; j <= 3; j++)
-        //			{
+        //for(int j = 1; j <= 3; j++) {
         const double &x = iPoints [ i - 1 ].at(1);
         const double &y = iPoints [ i - 1 ].at(2);
         double z = 0.0; 
@@ -89,7 +88,7 @@ void XFEMDebugTools :: WritePointsToVTK(const std :: string &iName, const std ::
         }
 
         file << x << " " << y << " " << z << "\n";
-        //			}
+        //}
     }
 
 

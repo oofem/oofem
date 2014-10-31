@@ -83,16 +83,16 @@ LEPlicElementInterface :: isBoundary()
 
 
 contextIOResultType
-LEPlicElementInterface :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+LEPlicElementInterface :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
     // write a raw data
-    if ( !stream->write(vof) ) {
+    if ( !stream.write(vof) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(p) ) {
+    if ( !stream.write(p) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -104,17 +104,17 @@ LEPlicElementInterface :: saveContext(DataStream *stream, ContextMode mode, void
 }
 
 contextIOResultType
-LEPlicElementInterface :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+LEPlicElementInterface :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
     // read raw data
-    if ( !stream->read(vof) ) {
+    if ( !stream.read(vof) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     temp_vof = vof;
-    if ( !stream->read(p) ) {
+    if ( !stream.read(p) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

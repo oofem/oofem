@@ -89,9 +89,7 @@ protected:
 public:
     LinearConstraintBC(int n, Domain * d);
     /// Destructor.
-    virtual ~LinearConstraintBC() {
-        delete this->md;
-    }
+    virtual ~LinearConstraintBC();
 
     IRResultType initializeFrom(InputRecord *ir);
     virtual const char *giveInputRecordName() const { return _IFT_LinearConstraintBC_Name; }
@@ -110,8 +108,8 @@ public:
     /// Gives an internal dof manager from receiver.
     virtual DofManager *giveInternalDofManager(int i) { return this->md; }
 
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     virtual const char *giveClassName() const { return "LinearConstraintBC"; }
 

@@ -145,7 +145,7 @@ SimpleSlaveDof :: giveBcValue(ValueModeType mode, TimeStep *tStep)
 }
 
 
-contextIOResultType SimpleSlaveDof :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType SimpleSlaveDof :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full node context (saves state variables, that completely describe
 // current state)
@@ -160,11 +160,11 @@ contextIOResultType SimpleSlaveDof :: saveContext(DataStream *stream, ContextMod
 
         if ( mode & CM_DefinitionGlobal ) {
             int _masterGlobNum = dofManager->giveDomain()->giveDofManager(masterDofMngr)->giveGlobalNumber();
-            if ( !stream->write(_masterGlobNum) ) {
+            if ( !stream.write(_masterGlobNum) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
         } else {
-            if ( !stream->write(masterDofMngr) ) {
+            if ( !stream.write(masterDofMngr) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
         }
@@ -174,7 +174,7 @@ contextIOResultType SimpleSlaveDof :: saveContext(DataStream *stream, ContextMod
 }
 
 
-contextIOResultType SimpleSlaveDof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType SimpleSlaveDof :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full node context (saves state variables, that completely describe
 // current state)
@@ -187,7 +187,7 @@ contextIOResultType SimpleSlaveDof :: restoreContext(DataStream *stream, Context
     }
 
     if ( mode & CM_Definition ) {
-        if ( !stream->read(masterDofMngr) ) {
+        if ( !stream.read(masterDofMngr) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }

@@ -96,8 +96,8 @@ public:
     virtual void updateYourself(TimeStep *tStep);
     virtual void updateInternalState(TimeStep *tStep);
     virtual void printOutputAt(FILE *file, TimeStep *tStep);
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     virtual void postInitialize();
     void updateLocalNumbering(EntityRenumberingFunctor &f);
     void setCrossSection(int csIndx);
@@ -123,7 +123,6 @@ public:
     virtual void ZZErrorEstimatorI_computeLocalStress(FloatArray &answer, FloatArray &sig);
 
     // SpatialLocalizerI
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords);
     virtual void SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1);
 
 

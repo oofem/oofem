@@ -40,7 +40,7 @@ IRResultType PrescribedGradientBC::initializeFrom(InputRecord *ir)
 
 void PrescribedGradientBC::giveInputRecord(DynamicInputRecord &input)
 {
-	GeneralBoundaryCondition :: giveInputRecord(input);
+    GeneralBoundaryCondition :: giveInputRecord(input);
     input.setField(mGradient, _IFT_PrescribedGradientBC_gradient);
     input.setField(mCenterCoord, _IFT_PrescribedGradientBC_centercoords);
 }
