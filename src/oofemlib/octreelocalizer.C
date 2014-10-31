@@ -878,7 +878,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, int region, bo
                                 if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
                                     // compute distance
                                     double dist = coords.distance(jGpCoords);
-                                    //									printf("czRuleIndex: %d j: %d dist: %e\n", czRuleIndex, j, dist);
+                                    //printf("czRuleIndex: %d j: %d dist: %e\n", czRuleIndex, j, dist);
                                     if ( dist < minDist ) {
                                         minDist   = dist;
                                         nearestGp = jGp;
@@ -1144,7 +1144,7 @@ OctreeSpatialLocalizer :: giveClosestIP(const FloatArray &coords, Set &elementSe
                                 if ( ielem->computeGlobalCoordinates( jGpCoords, * ( jGp->giveNaturalCoordinates() ) ) ) {
                                     // compute distance
                                     double dist = coords.distance(jGpCoords);
-                                    //									printf("czRuleIndex: %d j: %d dist: %e\n", czRuleIndex, j, dist);
+                                    //printf("czRuleIndex: %d j: %d dist: %e\n", czRuleIndex, j, dist);
                                     if ( dist < minDist ) {
                                         minDist   = dist;
                                         nearestGp = jGp;

@@ -1654,7 +1654,7 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
         // commented by bp: do what user wants
         //OOFEM_WARNING1("Material numbers are deprecated, outputing cross section number instead...");
         valueArray.at(1) = ( double ) el->giveMaterial()->giveNumber();
-	break;
+        break;
     case IST_CrossSectionNumber:
         valueArray.at(1) = ( double ) el->giveCrossSection()->giveNumber();
         break;

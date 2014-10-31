@@ -368,25 +368,24 @@ Domain :: giveGlobalElement(int n)
 
 int Domain :: giveElementPlaceInArray(int iGlobalElNum) const
 {
-	auto res = mElementPlaceInArray.find(iGlobalElNum);
+    auto res = mElementPlaceInArray.find(iGlobalElNum);
 
-	if(res != mElementPlaceInArray.end()) {
-		return res->second;
-	}
-	else {
-		OOFEM_ERROR("returning -1 for iGlobalElNum: %d.", iGlobalElNum );
-		return -1;
-	}
+    if(res != mElementPlaceInArray.end()) {
+        return res->second;
+    }
+    else {
+        OOFEM_ERROR("returning -1 for iGlobalElNum: %d.", iGlobalElNum );
+        return -1;
+    }
 }
 
 const IntArray &Domain :: giveElementsWithMaterialNum(int iMaterialNum) const
 {
     auto res = mMapMaterialNum2El.find(iMaterialNum);
 
-    if(res != mMapMaterialNum2El.end()) {
+    if ( res != mMapMaterialNum2El.end() ) {
         return res->second;
-    }
-    else {
+    } else {
         OOFEM_ERROR("Material not found.")
         return res->second;
     }

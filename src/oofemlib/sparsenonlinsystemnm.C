@@ -66,7 +66,7 @@ SparseNonLinearSystemNM :: initializeFrom(InputRecord *ir)
         if ( igp_PertWeightArray.giveSize() != nsize ) {
             OOFEM_ERROR("Pert map size and weight array size mismatch");
         }
-	    pert_init_needed = true;
+        pert_init_needed = true;
     } else {
         pert_init_needed = false;
     }
@@ -77,16 +77,16 @@ void
 SparseNonLinearSystemNM :: convertPertMap()
 {
     EModelDefaultEquationNumbering dn;
-    int i, j, inode, idof, jglobnum, count = 0, ndofman = this -> domain -> giveNumberOfDofManagers();
+    int count = 0, ndofman = this -> domain -> giveNumberOfDofManagers();
     int size = igp_PertDmanDofSrcArray.giveSize() / 2;
     igp_Map.resize(size);
     igp_Weight.resize(size);
 
-    for ( j = 1; j <= ndofman; j++ ) {
-        jglobnum = this->domain->giveNode(j)->giveLabel();
-        for ( i = 1; i <= size; i++ ) {
-            inode = igp_PertDmanDofSrcArray.at(2 * i - 1);
-            idof  = igp_PertDmanDofSrcArray.at(2 * i);
+    for ( int j = 1; j <= ndofman; j++ ) {
+        int jglobnum = this->domain->giveNode(j)->giveLabel();
+        for ( int i = 1; i <= size; i++ ) {
+            int inode = igp_PertDmanDofSrcArray.at(2 * i - 1);
+            int idof  = igp_PertDmanDofSrcArray.at(2 * i);
             if ( inode == jglobnum ) {
                 igp_Map.at(++count) = this -> domain ->giveNode(j)->giveDofWithID(idof)->giveEquationNumber(dn);
                 igp_Weight.at(count) = igp_PertWeightArray.at(i);
@@ -99,30 +99,30 @@ SparseNonLinearSystemNM :: convertPertMap()
 void 
 SparseNonLinearSystemNM :: applyPerturbation(FloatArray* displacement)
 {
-    int i, nsize;   
+    int nsize;
 
     // First type of perturbation - random perturbation with uniform probability density 
     // over the interval (-randPertAmplitude,randPertAmplitude) applied on each unknown.
     if (randPertAmplitude > 0.) {
         nsize = displacement -> giveSize();
         srand(randSeed);
-        for (i=1; i<=nsize; i++) {
-	        double pert = randPertAmplitude * (2. * rand() / RAND_MAX - 1.);
-        	displacement -> at(i) += pert;
+        for ( int i = 1; i <= nsize; i++ ) {
+            double pert = randPertAmplitude * (2. * rand() / RAND_MAX - 1.);
+            displacement->at(i) += pert;
         }
     }
 
     // Second type of perturbation - only selected unknowns perturbed by the amount specified by the user.
-    if (pert_init_needed) {
+    if ( pert_init_needed ) {
         convertPertMap();
         pert_init_needed = false;
     }
       
     nsize = igp_Weight.giveSize();
-    for (i=1; i<=nsize; i++) {
+    for ( int i = 1; i <= nsize; i++ ) {
         int iDof = igp_Map.at(i);
         double w = igp_Weight.at(i);
-        displacement -> at(iDof) += w;
+        displacement->at(iDof) += w;
     }
 }
 

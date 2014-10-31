@@ -213,8 +213,8 @@ Tr_Warp :: giveInterface(InterfaceType interface)
 {
     if ( interface == SpatialLocalizerInterfaceType ) {
         return static_cast< SpatialLocalizerInterface * >(this);
-	//    } else if ( interface == EIPrimaryFieldInterfaceType ) {
-	//        return static_cast< EIPrimaryFieldInterface * >(this);
+    //} else if ( interface == EIPrimaryFieldInterfaceType ) {
+        //return static_cast< EIPrimaryFieldInterface * >(this);
     } else if ( interface == ZZNodalRecoveryModelInterfaceType ) {
         return static_cast< ZZNodalRecoveryModelInterface * >(this);
     }

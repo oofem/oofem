@@ -129,20 +129,20 @@ PlaneStress2dXfem :: giveDofManDofIDMask(int inode, IntArray &answer) const
     PlaneStress2d :: giveDofManDofIDMask(inode, answer);
 
     // Discontinuous part
-	if( this->giveDomain()->hasXfemManager() ) {
-		DofManager *dMan = giveDofManager(inode);
-		XfemManager *xMan = giveDomain()->giveXfemManager();
+    if( this->giveDomain()->hasXfemManager() ) {
+        DofManager *dMan = giveDofManager(inode);
+        XfemManager *xMan = giveDomain()->giveXfemManager();
 
         const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices( dMan->giveGlobalNumber() );
         for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
             EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices[i]);
-			if ( ei->isDofManEnriched(* dMan) ) {
-				IntArray eiDofIdArray;
-				ei->computeEnrichedDofManDofIdArray(eiDofIdArray, *dMan);
-				answer.followedBy(eiDofIdArray);
-			}
-		}
-	}
+            if ( ei->isDofManEnriched(* dMan) ) {
+                IntArray eiDofIdArray;
+                ei->computeEnrichedDofManDofIdArray(eiDofIdArray, *dMan);
+                answer.followedBy(eiDofIdArray);
+            }
+        }
+    }
 }
 
 
@@ -167,10 +167,10 @@ void PlaneStress2dXfem :: computeStiffnessMatrix(FloatMatrix &answer, MatRespons
     const double regularizationCoeff = 1.0e-6;
     int numRows = answer.giveNumberOfRows();
     for(int i = 0; i < numRows; i++) {
-    	if( fabs(answer(i,i)) < tol ) {
-    		answer(i,i) += regularizationCoeff;
-//    		printf("Found zero on diagonal.\n");
-    	}
+        if( fabs(answer(i,i)) < tol ) {
+            answer(i,i) += regularizationCoeff;
+            //printf("Found zero on diagonal.\n");
+        }
     }
 }
 

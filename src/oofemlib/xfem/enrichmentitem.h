@@ -263,7 +263,7 @@ protected:
 
 
     // Level set for signed distance to the interface.
-    //	The sign is determined by the interface normal direction.
+    // The sign is determined by the interface normal direction.
     // This level set function is relevant for both open and closed interfaces.
     std :: unordered_map< int, double >mLevelSetNormalDirMap;
 

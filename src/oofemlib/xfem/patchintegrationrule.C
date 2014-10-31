@@ -117,7 +117,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
         }
 
         // Can not be used because it writes to the start of the array instead of appending.
-        //		int nPointsTri = GaussIntegrationRule :: SetUpPointsOnTriangle(nPoints, mode);
+        //int nPointsTri = GaussIntegrationRule :: SetUpPointsOnTriangle(nPoints, mode);
 
         for ( int j = 0; j < nPoints; j++ ) {
             FloatArray global;

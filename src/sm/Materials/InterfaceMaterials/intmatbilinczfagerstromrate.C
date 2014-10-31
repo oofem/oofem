@@ -58,7 +58,7 @@ IntMatBilinearCZFagerstromRate :: ~IntMatBilinearCZFagerstromRate()
 {
     // destructor
 }
-	
+
 void 
 IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, GaussPoint *gp, const FloatArray &d,
                                                      const FloatMatrix &F, TimeStep *tStep)
@@ -82,20 +82,20 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
     dJ.beProductOf(Finv,d);
     status->letTempMaterialJumpBe(dJ);
 
-    double oldDamage = status->giveDamage();	
+    double oldDamage = status->giveDamage();
     double dAlpha = 0.0;
-	double dt = tStep->giveTimeIncrement();
+    double dt = tStep->giveTimeIncrement();
 
     FloatArray Qold(3), Qtemp(3), Qtemp_comp(3);
     Qtemp.zero();
-	Qtemp_comp.zero();
+    Qtemp_comp.zero();
 
-	if (dJ.at(3)<0) {
-		Qtemp_comp.at(3) = this->knc*dJ.at(3);
-	} 
+    if ( dJ.at(3) < 0 ) {
+        Qtemp_comp.at(3) = this->knc*dJ.at(3);
+    } 
 
 
-    // 	SUBROUTINE stress_damage_XFEM_direct_Mandel(dJ,N,Qold,old_alpha,Fci,Q,Ea,new_alpha,adtim,dalpha_new,dalpha_old,diss,sig_f,fall);
+    // SUBROUTINE stress_damage_XFEM_direct_Mandel(dJ,N,Qold,old_alpha,Fci,Q,Ea,new_alpha,adtim,dalpha_new,dalpha_old,diss,sig_f,fall);
     if (oldDamage < 0.99) {
         
         FloatArray Qtrial = status->giveEffectiveMandelTraction(); 
@@ -121,18 +121,18 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
         Kstiff.at(1,1) = this->ks0;
         Kstiff.at(2,2) = this->ks0;
         Kstiff.at(3,3) = this->kn0;
-        
-//		if (dJ.at(3)>=0) {
-//			Kstiff.at(3,3) = this->kn0;
-//		} else {
-//			Kstiff.at(3,3) = this->kn0/(1-oldDamage);
-//		}
-		
 
+#if 0        
+        if (dJ.at(3)>=0) {
+            Kstiff.at(3,3) = this->kn0;
+        } else {
+            Kstiff.at(3,3) = this->kn0/(1-oldDamage);
+        }
+#endif
 
-        dJ.subtract(status->giveOldMaterialJump());	 ///@todo Martin: check with Mikael/Jim
+        dJ.subtract(status->giveOldMaterialJump()); ///@todo Martin: check with Mikael/Jim
         //dJ.rotatedWith(Rot,'n');
-		//dJ.printYourself();
+        //dJ.printYourself();
 
         help.beProductOf(Kstiff,dJ);
         Qtrial.add(help); 
@@ -152,20 +152,20 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
         double sigf = this->sigf;
         double gamma = this->gamma;
         //double gammaGf = this->GIIc/this->GIc;
-		double mu = this->mu;
-		double c_star = this->c_star;
-		double m = this->m;
-		//double S = this->GIc/this->sigf;
-		double S = (this->GIc - pow(sigf,2)/this->kn0)/sigf;
-		double gammaGf = gamma*(this->GIIc - pow(gamma*sigf,2)/this->ks0)/(this->GIc - pow(sigf,2)/this->kn0);
+        double mu = this->mu;
+        double c_star = this->c_star;
+        double m = this->m;
+        //double S = this->GIc/this->sigf;
+        double S = (this->GIc - pow(sigf,2)/this->kn0)/sigf;
+        double gammaGf = gamma*(this->GIIc - pow(gamma*sigf,2)/this->ks0)/(this->GIc - pow(sigf,2)/this->kn0);
 
 
 
         Qn_M = 0.5*(Qn + fabs(Qn));
 
-		
-		//double loadFun = sigf*pow(Qt/(gamma*sigf),2) + sigf*pow((Qn_M/sigf),2) - sigf;	///@todo Martin: no use of parameter mu!!!
-		double loadFun = sigf*pow(Qt/(gamma*sigf),2) + (sigf/gamma)*(gamma-mu)*pow((Qn_M/sigf),2) - 1/gamma*(gamma*sigf-mu*Qn); // Added support for parameter mu
+
+        //double loadFun = sigf*pow(Qt/(gamma*sigf),2) + sigf*pow((Qn_M/sigf),2) - sigf;    ///@todo Martin: no use of parameter mu!!!
+        double loadFun = sigf*pow(Qt/(gamma*sigf),2) + (sigf/gamma)*(gamma-mu)*pow((Qn_M/sigf),2) - 1/gamma*(gamma*sigf-mu*Qn); // Added support for parameter mu
 
         Qold = status->giveEffectiveMandelTraction();  ///@todo Martin: check with Mikael/Jim
         Qtemp = Qtrial;
@@ -179,57 +179,57 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
         //}
 
         if (loadFun/sigf < 0.0000001) {
-            dAlpha = 0.0;	// new_alpha=old_alpha
-		    status->letTempEffectiveMandelTractionBe(Qtemp);		
-			Qtemp.times(1-oldDamage);
-	} else {
+            dAlpha = 0.0;   // new_alpha=old_alpha
+            status->letTempEffectiveMandelTractionBe(Qtemp);
+            Qtemp.times(1-oldDamage);
+        } else {
             // dalpha = datr
             double Qt1,Qt2;
             Qt1 = Qtemp.at(1);
             Qt2 = Qtemp.at(2);
 
-            FloatArray M(3);				// M = (/2*Q_t/(sig_f*gamma**2), 2*Q_n/sig_f, 0.d0/)
-            M.at(1) = 2*Qt1/(pow(gamma,2)*sigf);	// Qt = sqrt(Qt1^2 + Qt2^2)
+            FloatArray M(3); // M = (/2*Q_t/(sig_f*gamma**2), 2*Q_n/sig_f, 0.d0/)
+            M.at(1) = 2*Qt1/(pow(gamma,2)*sigf); // Qt = sqrt(Qt1^2 + Qt2^2)
             M.at(2) = 2*Qt2/(pow(gamma,2)*sigf);
             M.at(3) = 2*Qn_M/sigf;
 
-	    FloatArray dJElastic;
-            dJElastic = dJ;				// dJtn_e(1:2) = dJtn_v(1:2) - S*dalpha*M(1:2)
+            FloatArray dJElastic;
+            dJElastic = dJ; // dJtn_e(1:2) = dJtn_v(1:2) - S*dalpha*M(1:2)
             help = M;
-	    
-	    //dAlpha = (dt/(c_star*S))*pow(loadFun_M/sigf,m)*(1/M_norm);
+
+            //dAlpha = (dt/(c_star*S))*pow(loadFun_M/sigf,m)*(1/M_norm);
             help.times(S*dAlpha);
             dJElastic.subtract(help);
 
             FloatMatrix Smat(4,4), Smati(4,4);
             FloatArray R(4), inc(4), dJp(3);
-			double loadFunDyn = loadFun;
+            double loadFunDyn = loadFun;
 
             const double errorTol = 0.0001;
             for( int iter = 1; fabs(loadFunDyn)/sigf > errorTol; iter++) {
                 //printf("loadfun = %e \n",loadFun);
-		//double loadFun_M = 0.5*(loadFun + fabs(loadFun));
-		//double M_norm = sqrt(M.computeSquaredNorm());
+                //double loadFun_M = 0.5*(loadFun + fabs(loadFun));
+                //double M_norm = sqrt(M.computeSquaredNorm());
 
-				if (iter>40) {
+                if (iter>40) {
                     OOFEM_ERROR("BilinearCZMaterialFagerstrom :: giveRealStressVector - no convergence in constitutive driver");
-                    }
-				status->letTempDamageDevBe(true);
-                Smat.zero();	// S_mat=0.d0
+                }
+                status->letTempDamageDevBe(true);
+                Smat.zero(); // S_mat=0.d0
 
-                R.at(1) = dJElastic.at(1) - (dJ.at(1) - gammaGf*S*dAlpha*M.at(1));		// R(1:2) = dJtn_e(1:2) - (dJtn_v(1:2) - S*dalpha*M(1:2))
+                R.at(1) = dJElastic.at(1) - (dJ.at(1) - gammaGf*S*dAlpha*M.at(1)); // R(1:2) = dJtn_e(1:2) - (dJtn_v(1:2) - S*dalpha*M(1:2))
                 R.at(2) = dJElastic.at(2) - (dJ.at(2) - gammaGf*S*dAlpha*M.at(2));
                 R.at(3) = dJElastic.at(3) - (dJ.at(3) - S*dAlpha*M.at(3));
                 if (fabs(c_star)>0) {
-		    //R.at(4) = loadFun - c_star*pow((dAlpha/dt),m);
-		    //R.at(4) = loadFun - c_star*pow((sqrt(dJ.computeSquaredNorm())/dt),m);
-		    dJp = dJ;
-		    dJp.subtract(dJElastic);
-		    R.at(4) = loadFun - c_star*pow((sqrt(dJp.computeSquaredNorm())/dt),m);
-		    //R.at(4) = dAlpha - (dt/(c_star*S))*pow(loadFun_M/sigf,m)*(1/M_norm);
-		} else {
-		    R.at(4) = loadFun;	// R(3) = F/sig_f
-		}
+                    //R.at(4) = loadFun - c_star*pow((dAlpha/dt),m);
+                    //R.at(4) = loadFun - c_star*pow((sqrt(dJ.computeSquaredNorm())/dt),m);
+                    dJp = dJ;
+                    dJp.subtract(dJElastic);
+                    R.at(4) = loadFun - c_star*pow((sqrt(dJp.computeSquaredNorm())/dt),m);
+                    //R.at(4) = dAlpha - (dt/(c_star*S))*pow(loadFun_M/sigf,m)*(1/M_norm);
+                } else {
+                    R.at(4) = loadFun;  // R(3) = F/sig_f
+                }
 
                 // dMdJtn_e(1,1:2) = (/2/(sig_f*gamma**2),0.d0/)
                 // IF (Q_nM>0) THEN
@@ -240,8 +240,8 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
                                 
                 // dMdJtn_e = MATMUL(dMdJtn_e,Keye3(1:2,1:2))
 
-                Smat.at(1,1) = 1.0 + gammaGf*dAlpha*S*2*Kstiff.at(1,1)/(pow(gamma,2)*sigf);		// S_mat(1:2,1:2) = eye3(1:2,1:2)+ dalpha*S*dMdJtn_e(1:2,1:2)
-                Smat.at(2,2) = 1.0 + gammaGf*dAlpha*S*2*Kstiff.at(2,2)/(pow(gamma,2)*sigf);				
+                Smat.at(1,1) = 1.0 + gammaGf*dAlpha*S*2*Kstiff.at(1,1)/(pow(gamma,2)*sigf);  // S_mat(1:2,1:2) = eye3(1:2,1:2)+ dalpha*S*dMdJtn_e(1:2,1:2)
+                Smat.at(2,2) = 1.0 + gammaGf*dAlpha*S*2*Kstiff.at(2,2)/(pow(gamma,2)*sigf);
                 //dJElastic.printYourself();
                 if (Qn_M>0) {
                     Smat.at(3,3) = 1.0 + dAlpha*S*2*Kstiff.at(3,3)/(sigf);
@@ -249,36 +249,33 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
                     Smat.at(3,3) = 1.0;
                 }
 
-                Smat.at(1,4) = gammaGf*S*M.at(1);			// S_mat(1:2,3) = S*M(1:2)
+                Smat.at(1,4) = gammaGf*S*M.at(1);   // S_mat(1:2,3) = S*M(1:2)
                 Smat.at(2,4) = gammaGf*S*M.at(2);
                 Smat.at(3,4) = S*M.at(3);
                     
                 double fac1;
-				if (sqrt(dJp.computeSquaredNorm())>0) {
-					fac1 = c_star*m/(pow(dt,m))*pow(sqrt(dJp.computeSquaredNorm()),m-2);
-				} else {
-					fac1 = 0;
-				}
+                if (sqrt(dJp.computeSquaredNorm())>0) {
+                    fac1 = c_star*m/(pow(dt,m))*pow(sqrt(dJp.computeSquaredNorm()),m-2);
+                } else {
+                    fac1 = 0;
+                }
 
 
-				if (fabs(c_star)>0) {			// Rate-dependent case
-					Smat.at(4,1) = M.at(1)*Kstiff.at(1,1) + fac1*dJp.at(1);      // S_mat(3,1:2) = MATMUL(M(1:2),Keye3(1:2,1:2))
-					Smat.at(4,2) = M.at(2)*Kstiff.at(2,2) + fac1*dJp.at(2);
-					Smat.at(4,3) = (2*(gamma-mu)/(gamma*sigf)*Qn_M + mu/gamma)*Kstiff.at(3,3) + fac1*dJp.at(3);	//Martin: included parameter mu
-					//Smat.at(4,4) = -c_star*m*pow((dAlpha/dt),m-1);
-					//Smat.at(4,1) = -fac1*(fac2*M.at(1)*Kstiff.at(1,1) - fac3*M.at(1)*Kstiff.at(1,1));
-					//Smat.at(4,2) = -fac1*(fac2*M.at(2)*Kstiff.at(2,2) - fac3*M.at(2)*Kstiff.at(2,2));
-					//Smat.at(4,1) = -fac1*(fac2*M.at(3)*Kstiff.at(3,3) - fac4*M.at(3)*Kstiff.at(3,3));
-					//Smat.at(4,4) = 1.0;
-				} else {						// Rate-independent case
-					Smat.at(4,1) = M.at(1)*Kstiff.at(1,1);      // S_mat(3,1:2) = MATMUL(M(1:2),Keye3(1:2,1:2))
-					Smat.at(4,2) = M.at(2)*Kstiff.at(2,2);
-                //Smat.at(4,3) = M.at(3)*Kstiff.at(3,3);
-					Smat.at(4,3) = (2*(gamma-mu)/(gamma*sigf)*Qn_M + mu/gamma)*Kstiff.at(3,3);	//Martin: included parameter mu
-				}
-				
-				
-				
+                if ( fabs(c_star) > 0 ) { // Rate-dependent case
+                    Smat.at(4,1) = M.at(1)*Kstiff.at(1,1) + fac1*dJp.at(1);      // S_mat(3,1:2) = MATMUL(M(1:2),Keye3(1:2,1:2))
+                    Smat.at(4,2) = M.at(2)*Kstiff.at(2,2) + fac1*dJp.at(2);
+                    Smat.at(4,3) = (2*(gamma-mu)/(gamma*sigf)*Qn_M + mu/gamma)*Kstiff.at(3,3) + fac1*dJp.at(3); //Martin: included parameter mu
+                    //Smat.at(4,4) = -c_star*m*pow((dAlpha/dt),m-1);
+                    //Smat.at(4,1) = -fac1*(fac2*M.at(1)*Kstiff.at(1,1) - fac3*M.at(1)*Kstiff.at(1,1));
+                    //Smat.at(4,2) = -fac1*(fac2*M.at(2)*Kstiff.at(2,2) - fac3*M.at(2)*Kstiff.at(2,2));
+                    //Smat.at(4,1) = -fac1*(fac2*M.at(3)*Kstiff.at(3,3) - fac4*M.at(3)*Kstiff.at(3,3));
+                    //Smat.at(4,4) = 1.0;
+                } else { // Rate-independent case
+                    Smat.at(4,1) = M.at(1)*Kstiff.at(1,1);      // S_mat(3,1:2) = MATMUL(M(1:2),Keye3(1:2,1:2))
+                    Smat.at(4,2) = M.at(2)*Kstiff.at(2,2);
+                    //Smat.at(4,3) = M.at(3)*Kstiff.at(3,3);
+                    Smat.at(4,3) = (2*(gamma-mu)/(gamma*sigf)*Qn_M + mu/gamma)*Kstiff.at(3,3);  //Martin: included parameter mu
+                }
 
                 //FloatArray inc;
                 //bool transpose = false;
@@ -291,7 +288,7 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
                 dJElastic.at(1) = dJElastic.at(1) - inc.at(1);
                 dJElastic.at(2) = dJElastic.at(2) - inc.at(2);
                 dJElastic.at(3) = dJElastic.at(3) - inc.at(3);
-				//dJElastic.printYourself();
+                //dJElastic.printYourself();
                 dAlpha = dAlpha - inc.at(4);
 
                 Qtemp.at(1) = Qold.at(1) + Kstiff.at(1,1)*dJElastic.at(1);
@@ -301,67 +298,64 @@ IntMatBilinearCZFagerstromRate :: giveFirstPKTraction_3d(FloatArray &answer, Gau
                 Qt1 = Qtemp.at(1);
                 Qt2 = Qtemp.at(2);
                 Qt = sqrt(pow(Qt1,2) + pow(Qt2,2));
-				Qn = Qtemp.at(3);							// Martin: included parameter mu
+                Qn = Qtemp.at(3);                               // Martin: included parameter mu
                 Qn_M = 0.5*(Qtemp.at(3)+fabs(Qtemp.at(3)));
 
                 M.at(1) = 2*Qt1/(pow(gamma,2)*sigf);    // Qt = sqrt(Qt1^2 + Qt2^2)
                 M.at(2) = 2*Qt2/(pow(gamma,2)*sigf);
-                M.at(3) = 2*Qn_M/sigf;	
+                M.at(3) = 2*Qn_M/sigf;
 
                 //loadFun = sigf*pow(Qt/(gamma*sigf),2) + sigf*pow((Qn_M/sigf),2) - sigf;
-		        loadFun = sigf*pow(Qt/(gamma*sigf),2) + (sigf/gamma)*(gamma-mu)*pow((Qn_M/sigf),2) - 1/gamma*(gamma*sigf-mu*Qn);	//Martin: included parameter mu
-				loadFunDyn = loadFun - c_star*pow((sqrt(dJp.computeSquaredNorm())/dt),m);;
+                loadFun = sigf*pow(Qt/(gamma*sigf),2) + (sigf/gamma)*(gamma-mu)*pow((Qn_M/sigf),2) - 1/gamma*(gamma*sigf-mu*Qn);    //Martin: included parameter mu
+                loadFunDyn = loadFun - c_star*pow((sqrt(dJp.computeSquaredNorm())/dt),m);;
             }
-//			printf("converged, loadfun = %e, oldDamage = %e \n",loadFun, oldDamage);
-			if (oldDamage + dAlpha > 1) {
-				dAlpha = 1. - oldDamage;
-				
-			}
+            //printf("converged, loadfun = %e, oldDamage = %e \n",loadFun, oldDamage);
+            if (oldDamage + dAlpha > 1) {
+                dAlpha = 1. - oldDamage;
+            }
 
             FloatMatrix Iep(3,3);
             IntArray Indx(3);
-			Indx.at(1) = 1;
-			Indx.at(2) = 2;
-			Indx.at(3) = 3;
+            Indx.at(1) = 1;
+            Indx.at(2) = 2;
+            Indx.at(3) = 3;
 
-			Iep.beSubMatrixOf(Smati,Indx,Indx);
+            Iep.beSubMatrixOf(Smati,Indx,Indx);
             status->letTempIepBe(Iep);
                                                                 
             FloatArray alpha_v(3);
-            alpha_v.at(1) = Smati.at(4,1);			// alpha_v(1:2) = S_mati(3,1:2)
+            alpha_v.at(1) = Smati.at(4,1);  // alpha_v(1:2) = S_mati(3,1:2)
             alpha_v.at(2) = Smati.at(4,2);
             alpha_v.at(3) = Smati.at(4,3);
             
-			status->letTempAlphavBe(alpha_v);
-			status->letTempEffectiveMandelTractionBe(Qtemp);
-			Qtemp.times(1-oldDamage-dAlpha);
+            status->letTempAlphavBe(alpha_v);
+            status->letTempEffectiveMandelTractionBe(Qtemp);
+            Qtemp.times(1-oldDamage-dAlpha);
 
-			}
-			
-        
+        }
 
-    //Qtemp.rotatedWith(Rot,'t');							// Q=Qe
-    //status->letTempRotationMatrix(Rot);
+        //Qtemp.rotatedWith(Rot,'t');           // Q=Qe
+        //status->letTempRotationMatrix(Rot);
     } else {
         dAlpha = 1.0 - oldDamage;
-		dJ = status->giveTempJump();
-	    status->letTempEffectiveMandelTractionBe(Qtemp);		// SHOULD NEVER BE USED!!
-		//if (dJ.at(3)<0) {
-		//	Qtemp.at(3) = kn0*dJ.at(3);
-		//}
+        dJ = status->giveTempJump();
+        status->letTempEffectiveMandelTractionBe(Qtemp);  // SHOULD NEVER BE USED!!
+        //if (dJ.at(3)<0) {
+        //    Qtemp.at(3) = kn0*dJ.at(3);
+        //}
     }
 
-	Qtemp.at(1) = Qtemp.at(1) + Qtemp_comp.at(1);
-	Qtemp.at(2) = Qtemp.at(2) + Qtemp_comp.at(2);
-	Qtemp.at(3) = Qtemp.at(3) + Qtemp_comp.at(3);
+    Qtemp.at(1) = Qtemp.at(1) + Qtemp_comp.at(1);
+    Qtemp.at(2) = Qtemp.at(2) + Qtemp_comp.at(2);
+    Qtemp.at(3) = Qtemp.at(3) + Qtemp_comp.at(3);
 
 
-    answer.beTProductOf(Finv,Qtemp);					// t_1_hat = MATMUL(TRANSPOSE(Fci),Q)
-//    answer.times(1-oldDamage-dAlpha);					// t1_s = (1-al)*t_1_hat
+    answer.beTProductOf(Finv,Qtemp);            // t_1_hat = MATMUL(TRANSPOSE(Fci),Q)
+//    answer.times(1-oldDamage-dAlpha);         // t1_s = (1-al)*t_1_hat
 
         
     status->letTempDamageBe(oldDamage + dAlpha);
-//    status->letTempEffectiveMandelTractionBe(Qtemp);		// NEW!
+//    status->letTempEffectiveMandelTractionBe(Qtemp);  // NEW!
 
     status->letTempJumpBe(d);
     status->letTempFirstPKTractionBe(answer);
@@ -386,7 +380,7 @@ IntMatBilinearCZFagerstromRate :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, GIc, _IFT_IntMatBilinearCZFagerstrom_g1c);
 
-    this->GIIc = GIc;						//Defaults to GIc
+    this->GIIc = GIc;                       //Defaults to GIc
     IR_GIVE_OPTIONAL_FIELD(ir, GIIc, _IFT_IntMatBilinearCZFagerstrom_g2c);
 
     IR_GIVE_FIELD(ir, sigf, _IFT_IntMatBilinearCZFagerstrom_sigf);
@@ -395,7 +389,7 @@ IntMatBilinearCZFagerstromRate :: initializeFrom(InputRecord *ir)
 
     IR_GIVE_FIELD(ir, gamma, _IFT_IntMatBilinearCZFagerstrom_gamma);
 
-	IR_GIVE_FIELD(ir, c_star, _IFT_IntMatBilinearCZFagerstromRate_cstar);
+    IR_GIVE_FIELD(ir, c_star, _IFT_IntMatBilinearCZFagerstromRate_cstar);
 
     IR_GIVE_FIELD(ir, m, _IFT_IntMatBilinearCZFagerstromRate_m);
 
@@ -408,10 +402,10 @@ IntMatBilinearCZFagerstromRate :: initializeFrom(InputRecord *ir)
 
 void IntMatBilinearCZFagerstromRate :: giveInputRecord(DynamicInputRecord &input)
 {
-	IntMatBilinearCZFagerstrom::giveInputRecord(input);
+    IntMatBilinearCZFagerstrom::giveInputRecord(input);
 
-	input.setField(c_star, _IFT_IntMatBilinearCZFagerstromRate_cstar);
-	input.setField(knc, _IFT_IntMatBilinearCZFagerstromRate_m);
+    input.setField(c_star, _IFT_IntMatBilinearCZFagerstromRate_cstar);
+    input.setField(knc, _IFT_IntMatBilinearCZFagerstromRate_m);
 
 }
 
@@ -436,7 +430,7 @@ IntMatBilinearCZFagerstromRate :: checkConsistency()
 void
 IntMatBilinearCZFagerstromRate  :: printYourself()
 {
-	IntMatBilinearCZFagerstrom  :: printYourself();
+    IntMatBilinearCZFagerstrom  :: printYourself();
     printf("-Rate parameters \n");
     printf("  c_star  = %e \n", this->c_star);
     printf("  m  = %e \n", this->m);

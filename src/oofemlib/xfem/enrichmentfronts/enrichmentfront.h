@@ -101,7 +101,7 @@ public:
      *                      marked with 1, other entries are zero.
      *
      *  Output:
-     *  -ioNodeEnrMarker:	Modifies the vector by marking tip nodes as 2, meaning that they
+     *  -ioNodeEnrMarker:   Modifies the vector by marking tip nodes as 2, meaning that they
      *                      should get special treatment. May also modify the set of nodes
      *                      enriched by the interior enrichment.
      */

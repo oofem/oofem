@@ -49,7 +49,6 @@ REGISTER_Element(CCTPlate3d);
 
 CCTPlate3d :: CCTPlate3d(int n, Domain *aDomain) : CCTPlate(n, aDomain)
 {
-    GtoLRotationMatrix = NULL;
 }
 
 
@@ -67,13 +66,11 @@ CCTPlate3d :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
     }
 
     // first ensure that receiver's GtoLRotationMatrix[3,3] is defined
-    if ( GtoLRotationMatrix == NULL ) {
-        this->computeGtoLRotationMatrix();
-    }
+    this->computeGtoLRotationMatrix();
 
     offset = global;
     offset.subtract( * this->giveNode(1)->giveCoordinates() );
-    answer.beProductOf(* GtoLRotationMatrix, offset);
+    answer.beProductOf(GtoLRotationMatrix, offset);
 }
 
 
@@ -164,15 +161,12 @@ CCTPlate3d :: computeGtoLRotationMatrix()
 // e3'    : e1' x help
 // e2'    : e3' x e1'
 {
-    if ( GtoLRotationMatrix == NULL ) {
-        int i;
-        FloatArray e1(3), e2, e3, help(3);
+    if ( !GtoLRotationMatrix.isNotEmpty() ) {
+        FloatArray e1, e2, e3, help;
 
         // compute e1' = [N2-N1]  and  help = [N3-N1]
-        for ( i = 1; i <= 3; i++ ) {
-            e1.at(i) = ( this->giveNode(2)->giveCoordinate(i) - this->giveNode(1)->giveCoordinate(i) );
-            help.at(i) = ( this->giveNode(3)->giveCoordinate(i) - this->giveNode(1)->giveCoordinate(i) );
-        }
+        e1.beDifferenceOf(*this->giveNode(2)->giveCoordinates(), *this->giveNode(1)->giveCoordinates());
+        help.beDifferenceOf(*this->giveNode(3)->giveCoordinates(), *this->giveNode(1)->giveCoordinates());
 
         // let us normalize e1'
         e1.normalize();
@@ -186,16 +180,16 @@ CCTPlate3d :: computeGtoLRotationMatrix()
         e2.beVectorProductOf(e3, e1);
 
         //
-        GtoLRotationMatrix = new FloatMatrix(3, 3);
+        GtoLRotationMatrix.resize(3, 3);
 
-        for ( i = 1; i <= 3; i++ ) {
-            GtoLRotationMatrix->at(1, i) = e1.at(i);
-            GtoLRotationMatrix->at(2, i) = e2.at(i);
-            GtoLRotationMatrix->at(3, i) = e3.at(i);
+        for ( int i = 1; i <= 3; i++ ) {
+            GtoLRotationMatrix.at(1, i) = e1.at(i);
+            GtoLRotationMatrix.at(2, i) = e2.at(i);
+            GtoLRotationMatrix.at(3, i) = e3.at(i);
         }
     }
 
-    return GtoLRotationMatrix;
+    return &GtoLRotationMatrix;
 }
 
 
@@ -205,18 +199,15 @@ CCTPlate3d :: computeGtoLRotationMatrix(FloatMatrix &answer)
 // r(local) = T * r(global)
 // for one node (r written transposed): {w,r1,r2} = T * {u,v,w,r1,r2,r3}
 {
-    // test if previously computed
-    if ( GtoLRotationMatrix == NULL ) {
-        this->computeGtoLRotationMatrix();
-    }
+    this->computeGtoLRotationMatrix();
 
     answer.resize(9, 18);
     answer.zero();
 
     for ( int i = 1; i <= 3; i++ ) {
-        answer.at(1, i) = answer.at(1 + 3, i  + 6) = answer.at(1 + 6, i  + 12) = GtoLRotationMatrix->at(3, i);
-        answer.at(2, i + 3) = answer.at(2 + 3, i + 3 + 6) = answer.at(2 + 6, i + 3 + 12) = GtoLRotationMatrix->at(1, i);
-        answer.at(3, i + 3) = answer.at(3 + 3, i + 3 + 6) = answer.at(3 + 6, i + 3 + 12) = GtoLRotationMatrix->at(2, i);
+        answer.at(1, i) = answer.at(1 + 3, i  + 6) = answer.at(1 + 6, i  + 12) = GtoLRotationMatrix.at(3, i);
+        answer.at(2, i + 3) = answer.at(2 + 3, i + 3 + 6) = answer.at(2 + 6, i + 3 + 12) = GtoLRotationMatrix.at(1, i);
+        answer.at(3, i + 3) = answer.at(3 + 3, i + 3 + 6) = answer.at(3 + 6, i + 3 + 12) = GtoLRotationMatrix.at(2, i);
     }
 
     return 1;
@@ -273,7 +264,7 @@ CCTPlate3d :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gau
     if ( ( type == GlobalForceTensor  ) || ( type == GlobalMomentumTensor  ) ||
         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
-        answer.rotatedWith(* GtoLRotationMatrix);
+        answer.rotatedWith(GtoLRotationMatrix);
     }
 }
 
@@ -336,18 +327,15 @@ CCTPlate3d :: computeLoadGToLRotationMtrx(FloatMatrix &answer)
 // Returns the rotation matrix of the receiver of the size [6,6]
 // f(local) = T * f(global)
 {
-    // test if previously computed
-    if ( GtoLRotationMatrix == NULL ) {
-        this->computeGtoLRotationMatrix();
-    }
+    this->computeGtoLRotationMatrix();
 
     answer.resize(6, 6);
     answer.zero();
 
     for ( int i = 1; i <= 3; i++ ) {
-        answer.at(1, i) = answer.at(4, i + 3) = GtoLRotationMatrix->at(1, i);
-        answer.at(2, i) = answer.at(5, i + 3) = GtoLRotationMatrix->at(2, i);
-        answer.at(3, i) = answer.at(6, i + 3) = GtoLRotationMatrix->at(3, i);
+        answer.at(1, i) = answer.at(4, i + 3) = GtoLRotationMatrix.at(1, i);
+        answer.at(2, i) = answer.at(5, i + 3) = GtoLRotationMatrix.at(2, i);
+        answer.at(3, i) = answer.at(6, i + 3) = GtoLRotationMatrix.at(3, i);
     }
 
     return 1;

@@ -272,24 +272,24 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
         break;
     case 3: 
         this->softType = ST_Hordijk_Cohesive_Crack;
-	c1 = 3.;
+        c1 = 3.;
         IR_GIVE_OPTIONAL_FIELD(ir, c1, _IFT_IsotropicDamageMaterial1_c1);
-	c2 = 6.93;
+        c2 = 6.93;
         IR_GIVE_OPTIONAL_FIELD(ir, c2, _IFT_IsotropicDamageMaterial1_c2);
         if ( ir->hasField(_IFT_IsotropicDamageMaterial1_wf) ) {
-	  IR_GIVE_FIELD(ir, wf, _IFT_IsotropicDamageMaterial1_wf);
-	} else if ( ir->hasField(_IFT_IsotropicDamageMaterial1_gf) ) {
-	  IR_GIVE_FIELD(ir, gf, _IFT_IsotropicDamageMaterial1_gf);
-	  double E;
-	  IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
-	  double aux = c1*c1*c1/(c2*c2*c2*c2);
-	  aux *= (6.-(c2*c2*c2+3.*c2*c2+6.*c2+6.)*exp(-c2));
-	  aux += (1.-exp(-c2))/c2;
-	  aux -= 0.5*(1.+c1*c1*c1)*exp(-c2);
-	  wf = gf/(aux*E*e0);
-	} else {
-	  OOFEM_ERROR("wf or gf must be specified for Hordijk softening law");
-	}
+            IR_GIVE_FIELD(ir, wf, _IFT_IsotropicDamageMaterial1_wf);
+        } else if ( ir->hasField(_IFT_IsotropicDamageMaterial1_gf) ) {
+            IR_GIVE_FIELD(ir, gf, _IFT_IsotropicDamageMaterial1_gf);
+            double E;
+            IR_GIVE_FIELD(ir, E, _IFT_IsotropicLinearElasticMaterial_e);
+            double aux = c1*c1*c1/(c2*c2*c2*c2);
+            aux *= (6.-(c2*c2*c2+3.*c2*c2+6.*c2+6.)*exp(-c2));
+            aux += (1.-exp(-c2))/c2;
+            aux -= 0.5*(1.+c1*c1*c1)*exp(-c2);
+            wf = gf/(aux*E*e0);
+        } else {
+            OOFEM_ERROR("wf or gf must be specified for Hordijk softening law");
+        }
         break;
     case 4:
         this->softType = ST_Mazars;
@@ -320,7 +320,7 @@ IsotropicDamageMaterial1 :: initializeFrom(InputRecord *ir)
         break;
     case 8:     // power-exponential softening
         this->softType = ST_PowerExponential;
-	IR_GIVE_FIELD(ir, ef, _IFT_IsotropicDamageMaterial1_ef);
+        IR_GIVE_FIELD(ir, ef, _IFT_IsotropicDamageMaterial1_ef);
         IR_GIVE_FIELD(ir, md, _IFT_IsotropicDamageMaterial1_md);
         break;
     default:
@@ -954,7 +954,7 @@ IsotropicDamageMaterial1 :: damageFunction(double kappa, GaussPoint *gp)
 
     case ST_PowerExponential:
         if ( kappa > e0 ) {
-	  return 1.0 - ( e0 / kappa ) * exp( -pow(( kappa - e0 ) / ( ef - e0 ),md) );
+            return 1.0 - ( e0 / kappa ) * exp( -pow(( kappa - e0 ) / ( ef - e0 ),md) );
         } else {
             return 0.0;
         }

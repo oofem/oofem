@@ -16,8 +16,8 @@ namespace oofem {
 
 class PrescribedGradientBCWeakPeriodic: public PrescribedGradientBCWeak {
 public:
-	PrescribedGradientBCWeakPeriodic(int n, Domain * d);
-	virtual ~PrescribedGradientBCWeakPeriodic();
+    PrescribedGradientBCWeakPeriodic(int n, Domain * d);
+    virtual ~PrescribedGradientBCWeakPeriodic();
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 

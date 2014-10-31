@@ -144,7 +144,7 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
         mDebugVTK = true;
     }
 
-	// TODO: Read as input.
+    // TODO: Read as input.
     XfemTolerances::setCharacteristicElementLength(0.001);
 
     return IRRT_OK;

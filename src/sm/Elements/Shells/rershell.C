@@ -60,8 +60,6 @@ REGISTER_Element(RerShell);
 RerShell :: RerShell(int n, Domain *aDomain) :
     CCTPlate3d(n, aDomain)
 {
-    numberOfDofMans  = 3;
-    GtoLRotationMatrix = NULL;
     Rx = 1.e+40;
     Ry = 1.e+40;
     Rxy = 1.e+40;
@@ -386,7 +384,7 @@ RerShell :: giveLocalCoordinateSystem(FloatMatrix &answer)
 //
 {
     this->computeGtoLRotationMatrix();
-    answer = * GtoLRotationMatrix;
+    answer = GtoLRotationMatrix;
     return 1;
 }
 
@@ -478,10 +476,7 @@ RerShell :: computeGtoLRotationMatrix(FloatMatrix &answer)
 {
     double val;
 
-    // test if pereviously computed
-    if ( GtoLRotationMatrix == NULL ) {
-        this->computeGtoLRotationMatrix();
-    }
+    this->computeGtoLRotationMatrix();
 
 
     answer.resize(18, 18);
@@ -489,7 +484,7 @@ RerShell :: computeGtoLRotationMatrix(FloatMatrix &answer)
 
     for ( int i = 1; i <= 3; i++ ) {
         for ( int j = 1; j <= 3; j++ ) {
-            val = GtoLRotationMatrix->at(i, j);
+            val = GtoLRotationMatrix.at(i, j);
             answer.at(i, j)     = val;
             answer.at(i + 3, j + 3) = val;
             answer.at(i + 6, j + 6) = val;
@@ -521,7 +516,7 @@ RerShell :: giveLocalCoordinates(FloatArray &answer, const FloatArray &global)
     // is defined
 
     this->computeGtoLRotationMatrix();
-    answer.beProductOf(* GtoLRotationMatrix, global);
+    answer.beProductOf(GtoLRotationMatrix, global);
 }
 
 
@@ -581,7 +576,7 @@ RerShell :: giveCharacteristicTensor(FloatMatrix &answer, CharTensor type, Gauss
     if ( ( type == GlobalForceTensor ) || ( type == GlobalMomentumTensor ) ||
         ( type == GlobalStrainTensor ) || ( type == GlobalCurvatureTensor ) ) {
         this->computeGtoLRotationMatrix();
-        answer.rotatedWith(* GtoLRotationMatrix);
+        answer.rotatedWith(GtoLRotationMatrix);
     }
 }
 

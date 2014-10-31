@@ -441,28 +441,25 @@ LatticeDamage2d :: giveRealStressVector(FloatArray &answer,
 
 double
 LatticeDamage2d :: computeBiot(double omega,
-			       double kappa,
-			       double le)
+                               double kappa,
+                               double le)
 {
   
-  double biot = 0.;
-  
-  if(this->softeningType == 1 || this->softeningType == 3){
-    if(omega == 0){
-      biot = this->biotCoefficient;
-    }
-    else if(omega*kappa*le>0 && omega*kappa*le<this->wf){
-      biot = this->biotCoefficient + (1.-biotCoefficient)*omega*kappa*le/this->wf;
-    }
-    else{
-      biot = 1.;
-    }
-  }
-  else{
-    OOFEM_ERROR("Wrong stype for btype=1. Only linear and exponential softening considered so far\n");
-  } 
-  
-  return biot;
+    double biot = 0.;
+    
+    if ( this->softeningType == 1 || this->softeningType == 3 ) {
+        if ( omega == 0 ) {
+            biot = this->biotCoefficient;
+        } else if ( omega*kappa*le > 0 && omega*kappa*le < this->wf ) {
+            biot = this->biotCoefficient + (1.-biotCoefficient)*omega*kappa*le/this->wf;
+        } else {
+            biot = 1.;
+        }
+    } else {
+        OOFEM_ERROR("Wrong stype for btype=1. Only linear and exponential softening considered so far\n");
+    } 
+    
+    return biot;
 }
 
 

@@ -133,7 +133,7 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
         gammaDman->appendDof( new MasterDof( gammaDman, ( DofIDItem )dofid ) );
     }
 
-    //	computeOrthogonalBasis();
+    //computeOrthogonalBasis();
 
     return IRRT_OK;
 }
@@ -349,7 +349,7 @@ void WeakPeriodicBoundaryCondition :: updateSminmax()
 void WeakPeriodicBoundaryCondition :: addElementSide(int newElement, int newSide)
 {
     //printf ("Add element %u, side %u\n", newElement, newSide);
-    //	_error("Not supported");
+    //_error("Not supported");
 
     FloatArray normalNew, normal0;
     int addToList = 0;

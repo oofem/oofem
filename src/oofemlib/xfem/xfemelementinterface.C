@@ -680,9 +680,9 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         //if ( ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), iTri, elCenter) ) {
         //    foundTip = true;
         //}
-		if (ei->giveElementTipCoord(tipCoord, tipArcPos, *element, elCenter)) {
-			foundTip = true;
-		}
+        if ( ei->giveElementTipCoord(tipCoord, tipArcPos, *element, elCenter) ) {
+            foundTip = true;
+        }
 
         if ( foundTip ) {
             for ( int i = 1; i <= nNodes; i++ ) {

@@ -92,39 +92,39 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
         return;
     }
 
-	// Export the sum of reaction forces for each Dirichlet BC
-	if(mExportReactionForces) {
-		outputReactionForces(tStep);
-	}
+    // Export the sum of reaction forces for each Dirichlet BC
+    if(mExportReactionForces) {
+        outputReactionForces(tStep);
+    }
 
-	Domain *domain = emodel->giveDomain(1);
+    Domain *domain = emodel->giveDomain(1);
 
-	// Export output from boundary conditions
-	if(mExportBoundaryConditions) {
-		int numBC = domain->giveNumberOfBoundaryConditions();
+    // Export output from boundary conditions
+    if(mExportBoundaryConditions) {
+        int numBC = domain->giveNumberOfBoundaryConditions();
 
-		for(int i = 1; i <= numBC; i++) {
+        for(int i = 1; i <= numBC; i++) {
 
-			PrescribedGradient *presGradBC = dynamic_cast<PrescribedGradient*>( domain->giveBc(i) );
-			if(presGradBC != NULL) {
-				outputBoundaryCondition(*presGradBC, tStep);
-			}
+            PrescribedGradient *presGradBC = dynamic_cast<PrescribedGradient*>( domain->giveBc(i) );
+            if(presGradBC != NULL) {
+                outputBoundaryCondition(*presGradBC, tStep);
+            }
 
 
-			PrescribedGradientBCNeumann *presGradBCNeumann = dynamic_cast<PrescribedGradientBCNeumann*>( domain->giveBc(i) );
-			if(presGradBCNeumann != NULL) {
-				outputBoundaryCondition(*presGradBCNeumann, tStep);
-			}
+            PrescribedGradientBCNeumann *presGradBCNeumann = dynamic_cast<PrescribedGradientBCNeumann*>( domain->giveBc(i) );
+            if(presGradBCNeumann != NULL) {
+                outputBoundaryCondition(*presGradBCNeumann, tStep);
+            }
 
             PrescribedGradientBCWeak *presGradBCWeak = dynamic_cast<PrescribedGradientBCWeak*>( domain->giveBc(i) );
             if(presGradBCWeak != NULL) {
                 outputBoundaryCondition(*presGradBCWeak, tStep);
             }
 
-		}
-	}
+        }
+    }
 
-	if(mExportXFEM) {
+    if(mExportXFEM) {
         if(domain->hasXfemManager()) {
             XfemManager *xMan = domain->giveXfemManager();
 
@@ -146,11 +146,11 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 
             outputXFEMGeometry(points);
         }
-	}
+    }
 
-	if(mExportMesh) {
-	    outputMesh(*domain);
-	}
+    if(mExportMesh) {
+        outputMesh(*domain);
+    }
 }
 
 void GnuplotExportModule::initialize()
@@ -167,13 +167,13 @@ void GnuplotExportModule::terminate()
 // Help functions
 void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
 {
-	// Add sum of reaction forces to arrays
+    // Add sum of reaction forces to arrays
     // Compute sum of reaction forces for each BC number
-	Domain *domain = emodel->giveDomain(1);
-	StructuralEngngModel *seMod = dynamic_cast<StructuralEngngModel* >(emodel);
-	if(seMod == NULL) {
-		OOFEM_ERROR("failed to cast to StructuralEngngModel.");
-	}
+    Domain *domain = emodel->giveDomain(1);
+    StructuralEngngModel *seMod = dynamic_cast<StructuralEngngModel* >(emodel);
+    if(seMod == NULL) {
+        OOFEM_ERROR("failed to cast to StructuralEngngModel.");
+    }
 
     IntArray ielemDofMask;
     FloatArray reactions;
@@ -201,35 +201,35 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
     int numBC = domain->giveNumberOfBoundaryConditions();
 
     while ( mReactionForceHistory.size() < size_t(numBC) ) {
-    	std::vector<FloatArray> emptyArray;
-    	mReactionForceHistory.push_back( emptyArray );
+        std::vector<FloatArray> emptyArray;
+        mReactionForceHistory.push_back( emptyArray );
     }
 
     maxIndPresDof = domain->giveNumberOfSpatialDimensions();
 
     while ( mDispHist.size() < size_t(numBC) ) {
-    	std::vector<double> emptyArray;
-    	mDispHist.push_back( emptyArray );
+        std::vector<double> emptyArray;
+        mDispHist.push_back( emptyArray );
     }
 
     for(int bcInd = 0; bcInd < numBC; bcInd++) {
-    	FloatArray fR(maxIndPresDof), disp(numBC);
-    	fR.zero();
+        FloatArray fR(maxIndPresDof), disp(numBC);
+        fR.zero();
 
 
         for ( int i = 1; i <= dofManMap.giveSize(); i++ ) {
-        	DofManager *dMan = domain->giveDofManager( dofManMap.at(i) );
-        	Dof *dof = dMan->giveDofWithID( dofidMap.at(i) );
+            DofManager *dMan = domain->giveDofManager( dofManMap.at(i) );
+            Dof *dof = dMan->giveDofWithID( dofidMap.at(i) );
 
-        	if( dof->giveBcId() == bcInd+1) {
-        		fR.at( dofidMap.at(i) ) += reactions.at( eqnMap.at(i) );
+            if( dof->giveBcId() == bcInd+1) {
+                fR.at( dofidMap.at(i) ) += reactions.at( eqnMap.at(i) );
 
-        		// Slightly dirty
-        		BoundaryCondition *bc = dynamic_cast<BoundaryCondition*> (domain->giveBc(bcInd+1));
-        		if(bc != NULL) {
-        			disp.at(bcInd+1) = bc->give(dof, VM_Total, tStep);
-        		}
-        	}
+                // Slightly dirty
+                BoundaryCondition *bc = dynamic_cast<BoundaryCondition*> (domain->giveBc(bcInd+1));
+                if(bc != NULL) {
+                    disp.at(bcInd+1) = bc->give(dof, VM_Total, tStep);
+                }
+            }
         }
 
         mDispHist[bcInd].push_back(disp.at(bcInd+1));
@@ -246,7 +246,7 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
         fprintf(pFileX, "# %s\n", fileNameX);
         fprintf(pFileX, "#u Fx\n");
         for ( size_t j = 0; j < mDispHist[bcInd].size(); j++ ) {
-    		fprintf(pFileX, "%e %e\n", mDispHist[bcInd][j], mReactionForceHistory[bcInd][j].at(1) );
+            fprintf(pFileX, "%e %e\n", mDispHist[bcInd][j], mReactionForceHistory[bcInd][j].at(1) );
         }
 
         fclose(pFileX);
@@ -260,9 +260,9 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
         fprintf(pFileY, "# %s\n", fileNameY);
         fprintf(pFileY, "#u Fx\n");
         for ( size_t j = 0; j < mDispHist[bcInd].size(); j++ ) {
-        	if( mReactionForceHistory[bcInd][j].giveSize() >= 2 ) {
-        		fprintf(pFileY, "%e %e\n", mDispHist[bcInd][j], mReactionForceHistory[bcInd][j].at(2) );
-        	}
+            if( mReactionForceHistory[bcInd][j].giveSize() >= 2 ) {
+                fprintf(pFileY, "%e %e\n", mDispHist[bcInd][j], mReactionForceHistory[bcInd][j].at(2) );
+            }
         }
 
         fclose(pFileY);
@@ -277,58 +277,58 @@ void GnuplotExportModule::outputXFEM(EnrichmentItem &iEI)
 
 void GnuplotExportModule::outputXFEM(Crack &iCrack)
 {
-	const std::vector<GaussPoint*> &czGaussPoints = iCrack.giveCohesiveZoneGaussPoints();
+    const std::vector<GaussPoint*> &czGaussPoints = iCrack.giveCohesiveZoneGaussPoints();
 
-	std::vector<double> arcLengthPositions, normalJumps, tangJumps;
+    std::vector<double> arcLengthPositions, normalJumps, tangJumps;
 
-	const BasicGeometry *bg = iCrack.giveGeometry();
+    const BasicGeometry *bg = iCrack.giveGeometry();
 
-	for( GaussPoint *gp: czGaussPoints ) {
+    for( GaussPoint *gp: czGaussPoints ) {
 
-		StructuralInterfaceMaterialStatus *matStat = dynamic_cast<StructuralInterfaceMaterialStatus*> ( gp->giveMaterialStatus() );
-		if(matStat != NULL) {
+        StructuralInterfaceMaterialStatus *matStat = dynamic_cast<StructuralInterfaceMaterialStatus*> ( gp->giveMaterialStatus() );
+        if(matStat != NULL) {
 
-			// Compute arc length position of the Gauss point
-			const FloatArray &coord = *(gp->giveNaturalCoordinates());
-			double tangDist = 0.0, arcPos = 0.0;
-			bg->computeTangentialSignDist(tangDist, coord, arcPos);
-			arcLengthPositions.push_back(arcPos);
+            // Compute arc length position of the Gauss point
+            const FloatArray &coord = *(gp->giveNaturalCoordinates());
+            double tangDist = 0.0, arcPos = 0.0;
+            bg->computeTangentialSignDist(tangDist, coord, arcPos);
+            arcLengthPositions.push_back(arcPos);
 
-			// Compute displacement jump in normal and tangential direction
-			// Local numbering: (tang_z, tang, normal)
-			const FloatArray &jumpLoc 		= matStat->giveJump();
+            // Compute displacement jump in normal and tangential direction
+            // Local numbering: (tang_z, tang, normal)
+            const FloatArray &jumpLoc = matStat->giveJump();
 
-			double normalJump = jumpLoc.at(3);
-			normalJumps.push_back(normalJump);
-
-
-			tangJumps.push_back( jumpLoc.at(2) );
-		}
-	}
+            double normalJump = jumpLoc.at(3);
+            normalJumps.push_back(normalJump);
 
 
+            tangJumps.push_back( jumpLoc.at(2) );
+        }
+    }
 
-	Domain *domain = emodel->giveDomain(1);
+
+
+    Domain *domain = emodel->giveDomain(1);
     XfemManager *xMan = domain->giveXfemManager();
     if ( xMan != NULL ) {
-    	double time = 0.0;
+        double time = 0.0;
 
-    	TimeStep *ts = emodel->giveCurrentStep();
-    	if ( ts != NULL ) {
-    		time = ts->giveTargetTime();
-    	}
+        TimeStep *ts = emodel->giveCurrentStep();
+        if ( ts != NULL ) {
+            time = ts->giveTargetTime();
+        }
 
-    	int eiIndex = iCrack.giveNumber();
+        int eiIndex = iCrack.giveNumber();
 
-    	std :: stringstream strNormalJump;
-    	strNormalJump << "NormalJumpGnuplotEI" << eiIndex << "Time" << time << ".dat";
-    	std :: string nameNormalJump = strNormalJump.str();
-    	XFEMDebugTools::WriteArrayToGnuplot(nameNormalJump, arcLengthPositions, normalJumps);
+        std :: stringstream strNormalJump;
+        strNormalJump << "NormalJumpGnuplotEI" << eiIndex << "Time" << time << ".dat";
+        std :: string nameNormalJump = strNormalJump.str();
+        XFEMDebugTools::WriteArrayToGnuplot(nameNormalJump, arcLengthPositions, normalJumps);
 
-    	std :: stringstream strTangJump;
-    	strTangJump << "TangJumpGnuplotEI" << eiIndex << "Time" << time << ".dat";
-    	std :: string nameTangJump = strTangJump.str();
-    	XFEMDebugTools::WriteArrayToGnuplot(nameTangJump, arcLengthPositions, tangJumps);
+        std :: stringstream strTangJump;
+        strTangJump << "TangJumpGnuplotEI" << eiIndex << "Time" << time << ".dat";
+        std :: string nameTangJump = strTangJump.str();
+        XFEMDebugTools::WriteArrayToGnuplot(nameTangJump, arcLengthPositions, tangJumps);
     }
 }
 
@@ -349,30 +349,30 @@ void GnuplotExportModule::outputXFEMGeometry(const std::vector< std::vector<Floa
 
 void GnuplotExportModule::outputBoundaryCondition(PrescribedGradient &iBC, TimeStep *tStep)
 {
-	FloatArray stress;
-	iBC.computeField(stress, tStep);
-	printf("Mean stress computed in Gnuplot export module: "); stress.printYourself();
+    FloatArray stress;
+    iBC.computeField(stress, tStep);
+    printf("Mean stress computed in Gnuplot export module: "); stress.printYourself();
 
-	double time = 0.0;
+    double time = 0.0;
 
-	TimeStep *ts = emodel->giveCurrentStep();
-	if ( ts != NULL ) {
-		time = ts->giveTargetTime();
-	}
+    TimeStep *ts = emodel->giveCurrentStep();
+    if ( ts != NULL ) {
+        time = ts->giveTargetTime();
+    }
 
-	int bcIndex = iBC.giveNumber();
+    int bcIndex = iBC.giveNumber();
 
-	std :: stringstream strMeanStress;
-	strMeanStress << "PrescribedGradientGnuplotMeanStress" << bcIndex << "Time" << time << ".dat";
-	std :: string nameMeanStress = strMeanStress.str();
-	std::vector<double> componentArray, stressArray;
+    std :: stringstream strMeanStress;
+    strMeanStress << "PrescribedGradientGnuplotMeanStress" << bcIndex << "Time" << time << ".dat";
+    std :: string nameMeanStress = strMeanStress.str();
+    std::vector<double> componentArray, stressArray;
 
-	for(int i = 1; i <= stress.giveSize(); i++) {
-		componentArray.push_back(i);
-		stressArray.push_back(stress.at(i));
-	}
+    for(int i = 1; i <= stress.giveSize(); i++) {
+        componentArray.push_back(i);
+        stressArray.push_back(stress.at(i));
+    }
 
-	XFEMDebugTools::WriteArrayToGnuplot(nameMeanStress, componentArray, stressArray);
+    XFEMDebugTools::WriteArrayToGnuplot(nameMeanStress, componentArray, stressArray);
 
 }
 
@@ -383,27 +383,26 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCNeumann &i
 
     printf("Mean stress computed in Gnuplot export module: "); stress.printYourself();
 
-	double time = 0.0;
+    double time = 0.0;
 
-	TimeStep *ts = emodel->giveCurrentStep();
-	if ( ts != NULL ) {
-		time = ts->giveTargetTime();
-	}
+    TimeStep *ts = emodel->giveCurrentStep();
+    if ( ts != NULL ) {
+        time = ts->giveTargetTime();
+    }
 
-	int bcIndex = iBC.giveNumber();
+    int bcIndex = iBC.giveNumber();
 
-	std :: stringstream strMeanStress;
-	strMeanStress << "PrescribedGradientGnuplotMeanStress" << bcIndex << "Time" << time << ".dat";
-	std :: string nameMeanStress = strMeanStress.str();
-	std::vector<double> componentArray, stressArray;
+    std :: stringstream strMeanStress;
+    strMeanStress << "PrescribedGradientGnuplotMeanStress" << bcIndex << "Time" << time << ".dat";
+    std :: string nameMeanStress = strMeanStress.str();
+    std::vector<double> componentArray, stressArray;
 
-	for(int i = 1; i <= stress.giveSize(); i++) {
-		componentArray.push_back(i);
-		stressArray.push_back(stress.at(i));
-	}
+    for(int i = 1; i <= stress.giveSize(); i++) {
+        componentArray.push_back(i);
+        stressArray.push_back(stress.at(i));
+    }
 
-	XFEMDebugTools::WriteArrayToGnuplot(nameMeanStress, componentArray, stressArray);
-	
+    XFEMDebugTools::WriteArrayToGnuplot(nameMeanStress, componentArray, stressArray);
 }
 
 void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC, TimeStep *tStep)

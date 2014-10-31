@@ -57,17 +57,17 @@
 namespace oofem {
 
 PrescribedGradientBCWeak::PrescribedGradientBCWeak(int n, Domain * d):
-PrescribedGradientBC(n, d),
-mTractionInterpOrder(0),
-mNumTractionNodesAtIntersections(1),
-mTractionNodeSpacing(1),
-mMeshIsPeriodic(false),
-mDuplicateCornerNodes(false),
-mTangDistPadding(0.0),
-mpDisplacementLock(NULL),
-mDispLockScaling(1.0)
+    PrescribedGradientBC(n, d),
+    mTractionInterpOrder(0),
+    mNumTractionNodesAtIntersections(1),
+    mTractionNodeSpacing(1),
+    mMeshIsPeriodic(false),
+    mDuplicateCornerNodes(false),
+    mTangDistPadding(0.0),
+    mpDisplacementLock(NULL),
+    mDispLockScaling(1.0)
 {
-	// Compute bounding box of the domain
+    // Compute bounding box of the domain
     computeDomainBoundingBox(*d, mLC, mUC);
 }
 
@@ -341,7 +341,7 @@ void PrescribedGradientBCWeak::assemble(SparseMtrx *answer, TimeStep *tStep,
         FloatMatrix Ke, KeT;
         IntArray tracRows, tracCols, dispRows, dispCols;
 
-        for(size_t i = 0; i < mpTractionElements.size(); i++) {
+        for (size_t i = 0; i < mpTractionElements.size(); i++ ) {
 
             // Rows and columns for displacement and traction contributions
             giveTractionLocationArrays( i, tracRows, type, r_s);
@@ -365,7 +365,7 @@ void PrescribedGradientBCWeak::assemble(SparseMtrx *answer, TimeStep *tStep,
         }
 
 
-        if(mpDisplacementLock != NULL) {
+        if ( mpDisplacementLock != NULL ) {
             int nsd = domain->giveNumberOfSpatialDimensions();
             FloatMatrix KeDispLock(nsd,nsd);
             KeDispLock.beUnitMatrix();
@@ -378,7 +378,7 @@ void PrescribedGradientBCWeak::assemble(SparseMtrx *answer, TimeStep *tStep,
             mpDisplacementLock->giveCompleteLocationArray(lockRows, r_s);
             node->giveCompleteLocationArray(nodeRows, r_s);
 
-			// TODO: Can be done nicer by prescribing which dof IDs to lock.
+            // TODO: Can be done nicer by prescribing which dof IDs to lock.
             IntArray nodeRowsRed;
             for(int m = 0; m < nsd; m++) {
                 nodeRowsRed.followedBy(nodeRows[m]);
@@ -1068,7 +1068,7 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
     // interacts with everywhere on gamma.
     SpatialLocalizer *localizer = domain->giveSpatialLocalizer();
     mMapTractionElDispElGamma.clear();
-    for(size_t i = 0; i < mpTractionElements.size(); i++) {
+    for ( size_t i = 0; i < mpTractionElements.size(); i++ ) {
 
 
         // Elements interacting on Gamma plus
@@ -1086,7 +1086,7 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
         // largest displacement element length along the boundary.
         localizer->giveAllElementsWithNodesWithinBox(elList_plus, xC_plus, 0.51*elLength_plus );
 
-        if( elList_plus.empty() ) {
+        if ( elList_plus.empty() ) {
             Element *el = localizer->giveElementContainingPoint(xC_plus); // TODO: Replace?! giveElementClosestToPoint
             int elPlaceInArray = domain->giveElementPlaceInArray(el->giveGlobalNumber());
             elList_plus.insert( elPlaceInArray );
@@ -1101,67 +1101,67 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
             Element *el = domain->giveElement(elNum);
 
             Line line_plus(xS_plus, xE_plus);
-            if( line_plus.intersects(el) ) {
+            if ( line_plus.intersects(el) ) {
                 displacementElements.push_back(elNum);
                 displacementElements_plus.push_back(elNum);
             }
         }
 
-        if(mMeshIsPeriodic) {
-        	//mMapTractionElDispElGamma[i] = displacementElements;
+        if ( mMeshIsPeriodic ) {
+            //mMapTractionElDispElGamma[i] = displacementElements;
 
-			if(xS_plus.distance(mUC) < 1.0e-12) {
-				// Perturb in direction of xE
-				FloatArray t;
-				t.beDifferenceOf(xE_plus, xS_plus);
-				xS_plus.add(1.0e-6, t);
-//				printf("xS_plus: %.12e %.12e\n", xS_plus[0], xS_plus[1]);
-			}
+            if ( xS_plus.distance(mUC) < 1.0e-12 ) {
+                // Perturb in direction of xE
+                FloatArray t;
+                t.beDifferenceOf(xE_plus, xS_plus);
+                xS_plus.add(1.0e-6, t);
+                //printf("xS_plus: %.12e %.12e\n", xS_plus[0], xS_plus[1]);
+            }
 
-			if(xE_plus.distance(mUC) < 1.0e-12) {
-				// Perturb in direction of xS
-				FloatArray t;
-				t.beDifferenceOf(xS_plus, xE_plus);
-				xE_plus.add(1.0e-6, t);
-//				printf("xE_plus: %.12e %.12e\n", xE_plus[0], xE_plus[1]);
-			}
+            if ( xE_plus.distance(mUC) < 1.0e-12 ) {
+                // Perturb in direction of xS
+                FloatArray t;
+                t.beDifferenceOf(xS_plus, xE_plus);
+                xE_plus.add(1.0e-6, t);
+                //printf("xE_plus: %.12e %.12e\n", xE_plus[0], xE_plus[1]);
+            }
 
-			// Elements interacting on Gamma minus
-			FloatArray xS_minus;
-			giveMirroredPointOnGammaMinus(xS_minus, xS_plus);
-			FloatArray xE_minus;
-			giveMirroredPointOnGammaMinus(xE_minus, xE_plus);
-			FloatArray xC_minus;
-			xC_minus.beScaled(0.5, xS_minus);
-			xC_minus.add(0.5, xE_minus);
+            // Elements interacting on Gamma minus
+            FloatArray xS_minus;
+            giveMirroredPointOnGammaMinus(xS_minus, xS_plus);
+            FloatArray xE_minus;
+            giveMirroredPointOnGammaMinus(xE_minus, xE_plus);
+            FloatArray xC_minus;
+            xC_minus.beScaled(0.5, xS_minus);
+            xC_minus.add(0.5, xE_minus);
 
-			double elLength_minus = xS_minus.distance(xE_minus);
-			std :: set< int >elList_minus;
-			// TODO: What if an element is cut by two cracks, so that the
-			// traction element becomes shorter than the displacement element?
-			// Make sure that the search radius is never smaller than the
-			// largest displacement element length along the boundary.
-			localizer->giveAllElementsWithNodesWithinBox(elList_minus, xC_minus, 0.51*elLength_minus );
+            double elLength_minus = xS_minus.distance(xE_minus);
+            std :: set< int >elList_minus;
+            // TODO: What if an element is cut by two cracks, so that the
+            // traction element becomes shorter than the displacement element?
+            // Make sure that the search radius is never smaller than the
+            // largest displacement element length along the boundary.
+            localizer->giveAllElementsWithNodesWithinBox(elList_minus, xC_minus, 0.51*elLength_minus );
 
-	        if( elList_minus.empty() ) {
-	            Element *el = localizer->giveElementContainingPoint(xC_minus);
+            if ( elList_minus.empty() ) {
+                Element *el = localizer->giveElementContainingPoint(xC_minus);
                 int elPlaceInArray = domain->giveElementPlaceInArray(el->giveGlobalNumber());
-	            elList_minus.insert( elPlaceInArray );
-	        }
+                elList_minus.insert( elPlaceInArray );
+            }
 
 
-			for ( int elNum: elList_minus ) {
+            for ( int elNum: elList_minus ) {
 
-				// Check if the traction element and the displacement element intersect
-				// Intersection occurs if at least one displacement element node is
-				// on the traction element.
-				Element *el = domain->giveElement(elNum);
+                // Check if the traction element and the displacement element intersect
+                // Intersection occurs if at least one displacement element node is
+                // on the traction element.
+                Element *el = domain->giveElement(elNum);
 
-				Line line_minus(xS_minus, xE_minus);
-				if( line_minus.intersects(el) ) {
-					displacementElements.push_back(elNum);
-				}
-			}
+                Line line_minus(xS_minus, xE_minus);
+                if ( line_minus.intersects(el) ) {
+                    displacementElements.push_back(elNum);
+                }
+            }
 
         }
 
@@ -1177,7 +1177,7 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
     mTractionElInteriorCoordinates.clear();
     const double distTol = 1.0e-12;
 
-    for(size_t i = 0; i < mpTractionElements.size(); i++) {
+    for ( size_t i = 0; i < mpTractionElements.size(); i++ ) {
 
         const FloatArray &xS = mpTractionElements[i]->mStartCoord;
         const FloatArray &xE = mpTractionElements[i]->mEndCoord;
@@ -1186,7 +1186,7 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
         pl.insertVertexBack(xS);
         pl.insertVertexBack(xE);
 
-        for(auto x :  iBndNodeCoordsFull) {
+        for (auto x :  iBndNodeCoordsFull) {
 
             double distN;
             pl.computeNormalSignDist(distN, x.first);
@@ -1194,7 +1194,7 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
             double distT, arcPos;
             pl.computeTangentialSignDist(distT, x.first, arcPos);
 
-            if( fabs(distN) < distTol && distT > -distTol && distT < (1.0+distTol) ) {
+            if ( fabs(distN) < distTol && distT > -distTol && distT < (1.0+distTol) ) {
                 mTractionElInteriorCoordinates[i].push_back(x.first);
             }
 
@@ -1209,11 +1209,11 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
     // Create map from a nodes global number to its local index
     // in the traction element.
     mTracElDispNodes.clear();
-    for(size_t i = 0; i < mpTractionElements.size(); i++) {
+    for ( size_t i = 0; i < mpTractionElements.size(); i++ ) {
 
         std::vector<int> tracElDispNodes;
 
-        for(int elIndex : mMapTractionElDispElGamma[i]) {
+        for ( int elIndex : mMapTractionElDispElGamma[i] ) {
             const IntArray &elNodes = domain->giveElement(elIndex)->giveDofManArray();
 
             for(int nodeInd : elNodes) {
@@ -1247,19 +1247,18 @@ void PrescribedGradientBCWeak::integrateTangent(FloatMatrix &oTangent, size_t iT
 
     // Number of rows and colums
     int numRows = 0;
-    if( mTractionInterpOrder == 0) {
+    if ( mTractionInterpOrder == 0 ) {
         numRows = dim;
-    }
-    else if( mTractionInterpOrder == 1 ) {
+    } else if( mTractionInterpOrder == 1 ) {
         numRows = 2*dim;
     }
 
     int numCols = 0;
     std :: unordered_map<int, IntArray > globalNodeIndToPosInLocalLocArray;
-    for(auto nodeInd : mTracElDispNodes[iTracElInd]) {
+    for ( auto nodeInd : mTracElDispNodes[iTracElInd] ) {
         DofManager *dMan = domain->giveDofManager(nodeInd);
 
-        for(int i = 0; i < dMan->giveNumberOfDofs(); i++) {
+        for ( int i = 0; i < dMan->giveNumberOfDofs(); i++ ) {
             globalNodeIndToPosInLocalLocArray[nodeInd].followedBy( numCols+i+1 );
         }
 
@@ -1284,10 +1283,10 @@ void PrescribedGradientBCWeak::integrateTangent(FloatMatrix &oTangent, size_t iT
         /*
          * Contribution from Gamma_minus if periodic.
          */
-        if(mMeshIsPeriodic) {
+        if ( mMeshIsPeriodic ) {
             FloatArray globalCoord_minus;
             giveMirroredPointOnGammaMinus(globalCoord_minus, globalCoord);
-        	assembleTangentGPContribution(oTangent, iTracElInd, *gp, globalCoord_minus, globalNodeIndToPosInLocalLocArray, -1.0);
+            assembleTangentGPContribution(oTangent, iTracElInd, *gp, globalCoord_minus, globalNodeIndToPosInLocalLocArray, -1.0);
         }
 
 
@@ -1474,25 +1473,25 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaMinus(FloatArray &oPosM
     oPosMinus = iPosPlus;
     const double distTol = 1.0e-12;
 
-    if(iPosPlus.distance(mUC) < distTol) {
+    if ( iPosPlus.distance(mUC) < distTol ) {
         printf("iPosPlus: %.12e %.12e\n", iPosPlus[0], iPosPlus[1]);
         OOFEM_ERROR("Unmappable point.")
     }
 
     double mappingPerformed = false;
 
-    if( iPosPlus[0] > mUC[0]-distTol ) {
+    if ( iPosPlus[0] > mUC[0]-distTol ) {
         oPosMinus[0] = mLC[0];
         mappingPerformed = true;
     }
 
-    if( iPosPlus[1] > mUC[1]-distTol ) {
+    if ( iPosPlus[1] > mUC[1]-distTol ) {
         oPosMinus[1] = mLC[1];
         mappingPerformed = true;
     }
 
-    if(!mappingPerformed) {
-    	iPosPlus.printYourself();
+    if ( !mappingPerformed ) {
+        iPosPlus.printYourself();
         OOFEM_ERROR("Mapping failed.")
     }
 
@@ -1505,25 +1504,25 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPl
     oPosPlus = iPosMinus;
     const double distTol = 1.0e-16;
 
-    if(iPosMinus.distance(mLC) < distTol) {
+    if ( iPosMinus.distance(mLC) < distTol ) {
         printf("iPosMinus: %.12e %.12e\n", iPosMinus[0], iPosMinus[1]);
         OOFEM_ERROR("Unmappable point.")
     }
 
     double mappingPerformed = false;
 
-    if( iPosMinus[0] < mLC[0]+distTol ) {
+    if ( iPosMinus[0] < mLC[0]+distTol ) {
         oPosPlus[0] = mUC[0];
         mappingPerformed = true;
     }
 
-    if( iPosMinus[1] < mLC[1]+distTol ) {
+    if ( iPosMinus[1] < mLC[1]+distTol ) {
         oPosPlus[1] = mUC[1];
         mappingPerformed = true;
     }
 
-    if(!mappingPerformed) {
-    	iPosMinus.printYourself();
+    if ( !mappingPerformed ) {
+        iPosMinus.printYourself();
         OOFEM_ERROR("Mapping failed.")
     }
 }
@@ -1531,12 +1530,7 @@ void PrescribedGradientBCWeak :: giveMirroredPointOnGammaPlus(FloatArray &oPosPl
 bool PrescribedGradientBCWeak :: pointIsMapapble(const FloatArray &iPos) const
 {
     const double distTol = 1.0e-13;
-    if(iPos.distance(mLC) < distTol) {
-        return false;
-    }
-    else {
-        return true;
-    }
+    return !( iPos.distance(mLC) < distTol );
 
 }
 

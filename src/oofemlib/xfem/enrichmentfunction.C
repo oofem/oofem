@@ -149,7 +149,7 @@ void LinElBranchFunction :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &
 
 void LinElBranchFunction :: giveJump(std :: vector< double > &oJumps) const
 {
-	OOFEM_ERROR("The radius is needed to compute the jump for branch functions.")
+    OOFEM_ERROR("The radius is needed to compute the jump for branch functions.")
 }
 
 void LinElBranchFunction :: giveJump(std :: vector< double > &oJumps, const double &iRadius) const

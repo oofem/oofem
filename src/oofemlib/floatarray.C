@@ -1010,14 +1010,14 @@ void FloatArray :: beSymVectorForm(const FloatMatrix &aMatrix)
 
 void FloatArray :: changeComponentOrder()
 {
-    // OOFEM: 			11, 22, 33, 23, 13, 12, 32, 31, 21
-    // UMAT:			11, 22, 33, 12, 13, 23, 32, 21, 31
+    // OOFEM:           11, 22, 33, 23, 13, 12, 32, 31, 21
+    // UMAT:            11, 22, 33, 12, 13, 23, 32, 21, 31
 
     if ( this->giveSize() == 6 ) {
         std :: swap( this->at(4), this->at(6) );
     } else if ( this->giveSize() == 9 )    {
-        // OOFEM: 			11, 22, 33, 23, 13, 12, 32, 31, 21
-        // UMAT:			11, 22, 33, 12, 13, 23, 32, 21, 31
+        // OOFEM:       11, 22, 33, 23, 13, 12, 32, 31, 21
+        // UMAT:        11, 22, 33, 12, 13, 23, 32, 21, 31
         const int abq2oo [ 9 ] = {
             1,  2,  3,  6,  5,  4,  7,  9,  8
         };
