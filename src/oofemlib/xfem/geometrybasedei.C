@@ -844,7 +844,9 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
                     // If the crack is parallel to the edge.
 
                     FloatArray ps(xS);
+                    ps.resizeWithValues(2);
                     FloatArray pe(xE);
+                    pe.resizeWithValues(2);
 
                     // Check that the intersection points have not already been identified.
                     // This may happen if the crack intersects the element exactly at a node,
@@ -927,6 +929,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
                         oIntersectionPoints.push_back(p);
 
                         double arcPos = 0.0, tangDist = 0.0;
+                        p.resizeWithValues(2);
                         mpBasicGeometry->computeTangentialSignDist(tangDist, p, arcPos);
                         oMinDistArcPos.push_back(arcPos);
 
@@ -956,6 +959,12 @@ void GeometryBasedEI :: writeVtkDebug() const
 
     }
 #endif
+
+//    PolygonLine *pl = dynamic_cast< PolygonLine * >( this->mpBasicGeometry );
+//    if(pl != NULL) {
+//        int tStepInd = 0;
+//        pl->printVTK(tStepInd, number);
+//    }
 }
 
 void GeometryBasedEI :: giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const
@@ -1021,23 +1030,17 @@ bool GeometryBasedEI :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos,
             minDist2 = tipInfos [ i ].mGlobalCoord.distance_square(iElCenter);
             minIndex = i;
             foundTip = true;
-            printf("foundTip = true.\n");
         }
     }
 
     if ( !foundTip ) {
-        printf("!foundTip, Returning false.\n");
         return false;
     } else   {
 
         // Check if the tip point is inside the element
-//        Element *el = domain->giveElement(iElIndex);
         const FloatArray &globCoord = tipInfos [ minIndex ].mGlobalCoord;
         FloatArray locCoord;
         if(!iEl.computeLocalCoordinates(locCoord, globCoord)) {
-            printf("globCoord: "); globCoord.printYourself();
-            printf("iElCenter: "); iElCenter.printYourself();
-            printf("!el->computeLocalCoordinates(locCoord, globCoord). Returning false.\n");
             return false;
         }
 

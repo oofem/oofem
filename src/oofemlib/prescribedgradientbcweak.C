@@ -1087,7 +1087,8 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
         localizer->giveAllElementsWithNodesWithinBox(elList_plus, xC_plus, 0.51*elLength_plus );
 
         if ( elList_plus.empty() ) {
-            Element *el = localizer->giveElementContainingPoint(xC_plus); // TODO: Replace?! giveElementClosestToPoint
+            FloatArray lCoords, closestPoint;
+            Element *el = localizer->giveElementClosestToPoint(lCoords, closestPoint, xC_plus);
             int elPlaceInArray = domain->giveElementPlaceInArray(el->giveGlobalNumber());
             elList_plus.insert( elPlaceInArray );
         }
@@ -1144,7 +1145,8 @@ void PrescribedGradientBCWeak::buildMaps(const std::vector< std::pair<FloatArray
             localizer->giveAllElementsWithNodesWithinBox(elList_minus, xC_minus, 0.51*elLength_minus );
 
             if ( elList_minus.empty() ) {
-                Element *el = localizer->giveElementContainingPoint(xC_minus);
+                FloatArray lCoords, closestPoint;
+                Element *el = localizer->giveElementClosestToPoint(lCoords, closestPoint, xC_minus);
                 int elPlaceInArray = domain->giveElementPlaceInArray(el->giveGlobalNumber());
                 elList_minus.insert( elPlaceInArray );
             }
