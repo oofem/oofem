@@ -960,7 +960,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
 
                     }
 
-                    if(joinNodes) {
+                    if(joinNodes && false) {
                         // if point on edge
                         XfemElementInterface_createEnrNmatrixAt(NMatrix, locCoord, * element, true);
                         element->computeVectorOf(VM_Total, tStep, solVec);
