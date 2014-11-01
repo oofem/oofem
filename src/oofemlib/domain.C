@@ -99,13 +99,6 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
 
     elementList              = new AList< Element >(0);
     dofManagerList           = new AList< DofManager >(0);
-    materialList             = new AList< Material >(0);
-    bcList                   = new AList< GeneralBoundaryCondition >(0);
-    icList                   = new AList< InitialCondition >(0);
-    functionList     = new AList< Function >(0);
-    crossSectionList         = new AList< CrossSection >(0);
-    nonlocalBarierList       = new AList< NonlocalBarrier >(0);
-    setList                  = new AList< Set >(0);
 
     dType                 = _unknownMode;
 
@@ -164,13 +157,13 @@ Domain *Domain :: Clone()
 
     //Components size record
     inputRec = new DynamicInputRecord();
-    inputRec->setField(this->giveNumberOfDofManagers(),                 _IFT_Domain_ndofman);
-    inputRec->setField(this->giveNumberOfElements(),                    _IFT_Domain_nelem);
+    inputRec->setField(this->giveNumberOfDofManagers(),         _IFT_Domain_ndofman);
+    inputRec->setField(this->giveNumberOfElements(),            _IFT_Domain_nelem);
     inputRec->setField(this->giveNumberOfCrossSectionModels(),  _IFT_Domain_ncrosssect);
-    inputRec->setField(this->giveNumberOfMaterialModels(),              _IFT_Domain_nmat);
+    inputRec->setField(this->giveNumberOfMaterialModels(),      _IFT_Domain_nmat);
     inputRec->setField(this->giveNumberOfBoundaryConditions(),  _IFT_Domain_nbc);
     inputRec->setField(this->giveNumberOfInitialConditions(),   _IFT_Domain_nic);
-    inputRec->setField(this->giveNumberOfFunctions(),   _IFT_Domain_nfunct);
+    inputRec->setField(this->giveNumberOfFunctions(),           _IFT_Domain_nfunct);
     inputRec->setField(this->giveNumberOfSets(),                _IFT_Domain_nset);
     inputRec->setField(this->giveNumberOfSpatialDimensions(),   _IFT_Domain_numberOfSpatialDimensions);
     if ( this->isAxisymmetric() ) {
@@ -209,49 +202,34 @@ Domain *Domain :: Clone()
         dataReader.insertInputRecord(DataReader :: IR_elemRec, elRec);
     }
 
-
     //CrossSection
-    int nCS = this->giveNumberOfCrossSectionModels();
-    for ( int i = 1; i <= nCS; i++ ) {
-        DynamicInputRecord *csRec = new DynamicInputRecord( *this->giveCrossSection ( i ) );
-        dataReader.insertInputRecord(DataReader :: IR_crosssectRec, csRec);
+    for ( auto &cs: crossSectionList ) {
+        dataReader.insertInputRecord(DataReader :: IR_crosssectRec, new DynamicInputRecord( *cs ));
     }
 
-
     //Material
-    int nMat = this->giveNumberOfMaterialModels();
-    for ( int i = 1; i <= nMat; i++ ) {
-        DynamicInputRecord *matRec = new DynamicInputRecord( *this->giveMaterial ( i ) );
-        dataReader.insertInputRecord(DataReader :: IR_matRec, matRec);
+    for ( auto &mat: materialList ) {
+        dataReader.insertInputRecord(DataReader :: IR_matRec, new DynamicInputRecord( *mat ));
     }
 
     //Boundary Conditions
-    int nBC = this->giveNumberOfBoundaryConditions();
-    for ( int i = 1; i <= nBC; i++ ) {
-        DynamicInputRecord *bcRec = new DynamicInputRecord( *this->giveBc ( i ) );
-        dataReader.insertInputRecord(DataReader :: IR_bcRec, bcRec);
+    for ( auto &bc: bcList ) {
+        dataReader.insertInputRecord(DataReader :: IR_bcRec, new DynamicInputRecord( *bc ));
     }
 
     //Initial Conditions
-    int nIC = this->giveNumberOfInitialConditions();
-    for ( int i = 1; i <= nIC; i++ ) {
-        DynamicInputRecord *icRec = new DynamicInputRecord( *this->giveIc ( i ) );
-        dataReader.insertInputRecord(DataReader :: IR_icRec, icRec);
+    for ( auto &ic: icList ) {
+        dataReader.insertInputRecord(DataReader :: IR_icRec, new DynamicInputRecord( *ic ));
     }
 
-    //Load-time functions
-    int nLoads = this->giveNumberOfFunctions();
-    for ( int i = 1; i <= nLoads; i++ ) {
-        DynamicInputRecord *funcRec = new DynamicInputRecord( *this->giveFunction ( i ) );
-        dataReader.insertInputRecord(DataReader :: IR_funcRec, funcRec);
+    //Functions
+    for ( auto &func: functionList ) {
+        dataReader.insertInputRecord(DataReader :: IR_funcRec, new DynamicInputRecord( *func ));
     }
-
 
     //Sets
-    int nSets = this->giveNumberOfSets();
-    for ( int i = 1; i <= nSets; i++ ) {
-        DynamicInputRecord *setRec = new DynamicInputRecord( *this->giveSet ( i ) );
-        dataReader.insertInputRecord(DataReader :: IR_setRec, setRec);
+    for ( auto &set: setList ) {
+        dataReader.insertInputRecord(DataReader :: IR_setRec, new DynamicInputRecord( *set ));
     }
 
     //XFEM manager
@@ -281,13 +259,6 @@ Domain :: ~Domain()
 {
     delete elementList;
     delete dofManagerList;
-    delete materialList;
-    delete bcList;
-    delete icList;
-    delete functionList;
-    delete crossSectionList;
-    delete nonlocalBarierList;
-    delete setList;
     delete xfemManager;
     delete connectivityTable;
     delete spatialLocalizer;
@@ -308,13 +279,13 @@ Domain :: clear()
     elementList->clear();
     mElementPlaceInArray.clear();
     dofManagerList->clear();
-    materialList->clear();
-    bcList->clear();
-    icList->clear();
-    functionList->clear();
-    crossSectionList->clear();
-    nonlocalBarierList->clear();
-    setList->clear();
+    materialList.clear();
+    bcList.clear();
+    icList.clear();
+    functionList.clear();
+    crossSectionList.clear();
+    nonlocalBarrierList.clear();
+    setList.clear();
     delete xfemManager;
     xfemManager = NULL;
     delete contactManager;
@@ -343,7 +314,6 @@ Domain :: clear()
 
 Element *
 Domain :: giveElement(int n)
-// Returns the n-th element. Generates error if it is not defined yet.
 {
 #ifdef DEBUG
     if ( !elementList->includes(n) ) {
@@ -355,7 +325,6 @@ Domain :: giveElement(int n)
 
 Element *
 Domain :: giveGlobalElement(int n)
-// Returns the global element with id n. Generates error if it is not defined yet.
 {
     for ( int i = 1; i <= elementList->giveSize(); i++ ) {
         if ( elementList->at(i)->giveGlobalNumber() == n ) {
@@ -370,10 +339,9 @@ int Domain :: giveElementPlaceInArray(int iGlobalElNum) const
 {
     auto res = mElementPlaceInArray.find(iGlobalElNum);
 
-    if(res != mElementPlaceInArray.end()) {
+    if ( res != mElementPlaceInArray.end() ) {
         return res->second;
-    }
-    else {
+    } else {
         OOFEM_ERROR("returning -1 for iGlobalElNum: %d.", iGlobalElNum );
         return -1;
     }
@@ -393,13 +361,12 @@ const IntArray &Domain :: giveElementsWithMaterialNum(int iMaterialNum) const
 
 Load *
 Domain :: giveLoad(int n)
-// Returns the n-th load. Generates the error if not defined.
 {
 #ifdef DEBUG
-    if ( !bcList->includes(n) ) {
+    if ( n < 1 || n > (int)bcList.size() ) {
         OOFEM_ERROR("undefined load (%d)", n);
     }
-    Load *answer = dynamic_cast< Load * >( bcList->at(n) );
+    Load *answer = dynamic_cast< Load * >( bcList[n-1].get() );
     if ( answer ) {
         return answer;
     } else {
@@ -407,7 +374,7 @@ Domain :: giveLoad(int n)
         return NULL;
     }
 #else
-    return static_cast< Load * >( bcList->at(n) );
+    return static_cast< Load * >( bcList[n-1].get() );
 
 #endif
 }
@@ -415,63 +382,56 @@ Domain :: giveLoad(int n)
 
 GeneralBoundaryCondition *
 Domain :: giveBc(int n)
-// Returns the n-th bc. Generates the error if not defined.
 {
 #ifdef DEBUG
-    if ( !bcList->includes(n) ) {
+    if ( n < 1 || n > (int)bcList.size() ) {
         OOFEM_ERROR("undefined bc (%d)", n);
     }
 #endif
-    return bcList->at(n);
+    return bcList[n-1].get();
 }
 
 
 InitialCondition *
 Domain :: giveIc(int n)
-// Returns the n-th ic. Generates the error if not defined.
 {
 #ifdef DEBUG
-    if ( !icList->includes(n) ) {
+    if ( n < 1 || n > (int)icList.size() ) {
         OOFEM_ERROR("undefined ic (%d)", n);
     }
 #endif
 
-    return icList->at(n);
+    return icList[n-1].get();
 }
 
 
 Function *
 Domain :: giveFunction(int n)
-// Returns the n-th load-time function. Creates this fuction if it does
-// not exist yet.
 {
 #ifdef DEBUG
-    if ( !functionList->includes(n) ) {
+    if ( n < 1 || n > (int)functionList.size() ) {
         OOFEM_ERROR("undefined load-time function (%d)", n);
     }
 #endif
 
-    return functionList->at(n);
+    return functionList[n-1].get();
 }
 
 
 Material *
 Domain :: giveMaterial(int n)
-// Returns the n-th material. Creates this material if it does not exist
-// yet.
 {
 #ifdef DEBUG
-    if ( !materialList->includes(n) ) {
+    if ( n < 1 || n > (int)materialList.size() ) {
         OOFEM_ERROR("undefined material (%d)", n);
     }
 #endif
 
-    return materialList->at(n);
+    return materialList[n-1].get();
 }
 
 ElementSide *
 Domain :: giveSide(int n)
-// Returns the n-th element side.
 {
 #ifdef DEBUG
     if ( !dofManagerList->includes(n) ) {
@@ -493,7 +453,6 @@ Domain :: giveSide(int n)
 
 DofManager *
 Domain :: giveDofManager(int n)
-// Returns the n-th node. Creates this node if it does not exist yet.
 {
 #ifdef DEBUG
     if ( !dofManagerList->includes(n) ) {
@@ -506,7 +465,6 @@ Domain :: giveDofManager(int n)
 
 DofManager *
 Domain :: giveGlobalDofManager(int n)
-// Returns the global element with id n. Generates error if it is not defined yet.
 {
     for ( int i = 1; i <= dofManagerList->giveSize(); i++ ) {
         if ( dofManagerList->at(i)->giveGlobalNumber() == n ) {
@@ -520,28 +478,25 @@ Domain :: giveGlobalDofManager(int n)
 
 CrossSection *
 Domain :: giveCrossSection(int n)
-// Returns the n-th cross section.
-// yet.
 {
 #ifdef DEBUG
-    if ( !crossSectionList->includes(n) ) {
+    if ( n < 1 || n > (int)crossSectionList.size() ) {
         OOFEM_ERROR("undefined cross section (%d)", n);
     }
 #endif
-    return crossSectionList->at(n);
+    return crossSectionList[n-1].get();
 }
 
 
 NonlocalBarrier *
 Domain :: giveNonlocalBarrier(int n)
-// Returns the n-th NonlocalBarrier.
 {
 #ifdef DEBUG
-    if ( !nonlocalBarierList->includes(n) ) {
+    if ( n < 1 || n > (int)nonlocalBarrierList.size() ) {
         OOFEM_ERROR("undefined barrier (%d)", n);
     }
 #endif
-    return nonlocalBarierList->at(n);
+    return nonlocalBarrierList[n-1].get();
 }
 
 
@@ -549,12 +504,12 @@ Set *
 Domain :: giveSet(int n)
 {
 #ifdef DEBUG
-    if ( !setList->includes(n) ) {
+    if ( n < 1 || n > (int)setList.size() ) {
         OOFEM_ERROR("undefined set (%d)", n);
     }
 #endif
 
-    return setList->at(n);
+    return setList[n-1].get();
 }
 
 XfemManager *
@@ -611,8 +566,6 @@ Domain :: giveFractureManager()
 
 EngngModel *
 Domain :: giveEngngModel()
-// Returns the time integration algorithm. Creates it if it does not
-// exist yet.
 {
 #ifdef DEBUG
     if ( !engineeringModel ) {
@@ -625,25 +578,25 @@ Domain :: giveEngngModel()
 
 void Domain :: resizeDofManagers(int _newSize) { dofManagerList->growTo(_newSize); }
 void Domain :: resizeElements(int _newSize) { elementList->growTo(_newSize); }
-void Domain :: resizeCrossSectionModels(int _newSize) { crossSectionList->growTo(_newSize); }
-void Domain :: resizeMaterials(int _newSize) { materialList->growTo(_newSize); }
-void Domain :: resizeNonlocalBarriers(int _newSize) { nonlocalBarierList->growTo(_newSize); }
-void Domain :: resizeBoundaryConditions(int _newSize) { bcList->growTo(_newSize); }
-void Domain :: resizeInitialConditions(int _newSize) { icList->growTo(_newSize); }
-void Domain :: resizeFunctions(int _newSize) { functionList->growTo(_newSize); }
-void Domain :: resizeSets(int _newSize) { setList->growTo(_newSize); }
+void Domain :: resizeCrossSectionModels(int _newSize) { crossSectionList.resize(_newSize); }
+void Domain :: resizeMaterials(int _newSize) { materialList.resize(_newSize); }
+void Domain :: resizeNonlocalBarriers(int _newSize) { nonlocalBarrierList.resize(_newSize); }
+void Domain :: resizeBoundaryConditions(int _newSize) { bcList.resize(_newSize); }
+void Domain :: resizeInitialConditions(int _newSize) { icList.resize(_newSize); }
+void Domain :: resizeFunctions(int _newSize) { functionList.resize(_newSize); }
+void Domain :: resizeSets(int _newSize) { setList.resize(_newSize); }
 
 void Domain :: setDofManager(int i, DofManager *obj) { dofManagerList->put(i, obj); }
 void Domain :: setElement(int i, Element *obj) { elementList->put(i, obj); mElementPlaceInArray[obj->giveGlobalNumber()] = i;}
-void Domain :: setCrossSection(int i, CrossSection *obj) { crossSectionList->put(i, obj); }
-void Domain :: setMaterial(int i, Material *obj) { materialList->put(i, obj); }
-void Domain :: setNonlocalBarrier(int i, NonlocalBarrier *obj) { nonlocalBarierList->put(i, obj); }
-void Domain :: setBoundaryCondition(int i, GeneralBoundaryCondition *obj) { bcList->put(i, obj); }
-void Domain :: setInitialCondition(int i, InitialCondition *obj) { icList->put(i, obj); }
-void Domain :: setFunction(int i, Function *obj) { functionList->put(i, obj); }
-void Domain :: setSet(int i, Set *obj) { setList->put(i, obj); }
+void Domain :: setCrossSection(int i, CrossSection *obj) { crossSectionList[i-1].reset(obj); }
+void Domain :: setMaterial(int i, Material *obj) { materialList[i-1].reset(obj); }
+void Domain :: setNonlocalBarrier(int i, NonlocalBarrier *obj) { nonlocalBarrierList[i-1].reset(obj); }
+void Domain :: setBoundaryCondition(int i, GeneralBoundaryCondition *obj) { bcList[i-1].reset(obj); }
+void Domain :: setInitialCondition(int i, InitialCondition *obj) { icList[i-1].reset(obj); }
+void Domain :: setFunction(int i, Function *obj) { functionList[i-1].reset(obj); }
+void Domain :: setSet(int i, Set *obj) { setList[i-1].reset(obj); }
 
-void Domain :: clearBoundaryConditions() { bcList->clear(true); }
+void Domain :: clearBoundaryConditions() { bcList.clear(); }
 
 int
 Domain :: instanciateYourself(DataReader *dr)
@@ -785,13 +738,14 @@ Domain :: instanciateYourself(DataReader *dr)
 #  endif
 
     // read cross sections
-    crossSectionList->growTo(ncrossSections);
+    crossSectionList.clear();
+    crossSectionList.resize(ncrossSections);
     for ( int i = 1; i <= ncrossSections; i++ ) {
-        CrossSection *crossSection;
         ir = dr->giveInputRecord(DataReader :: IR_crosssectRec, i);
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-        if ( ( crossSection = classFactory.createCrossSection(name.c_str(), num, this) ) == NULL ) {
+        std :: unique_ptr< CrossSection >crossSection( classFactory.createCrossSection(name.c_str(), num, this) );
+        if ( !crossSection ) {
             OOFEM_ERROR("Couldn't create crosssection: %s", name.c_str());
         }
 
@@ -802,8 +756,8 @@ Domain :: instanciateYourself(DataReader *dr)
             OOFEM_ERROR("Invalid crossSection number (num=%d)", num);
         }
 
-        if ( !crossSectionList->includes(num) ) {
-            crossSectionList->put(num, crossSection);
+        if ( !crossSectionList[num - 1] ) {
+            crossSectionList[num - 1] = std :: move(crossSection);
         } else {
             OOFEM_ERROR("crossSection entry already exist (num=%d)", num);
         }
@@ -816,14 +770,15 @@ Domain :: instanciateYourself(DataReader *dr)
 #  endif
 
     // read materials
-    materialList->growTo(nmat);
+    materialList.clear();
+    materialList.resize(nmat);
     for ( int i = 1; i <= nmat; i++ ) {
-        Material *mat;
         ir = dr->giveInputRecord(DataReader :: IR_matRec, i);
         // read type of material
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-        if ( ( mat = classFactory.createMaterial(name.c_str(), num, this) ) == NULL ) {
+        std :: unique_ptr< Material >mat( classFactory.createMaterial(name.c_str(), num, this) );
+        if ( !mat ) {
             OOFEM_ERROR("Couldn't create material: %s", name.c_str());
         }
 
@@ -834,8 +789,8 @@ Domain :: instanciateYourself(DataReader *dr)
             OOFEM_ERROR("Invalid material number (num=%d)", num);
         }
 
-        if ( !materialList->includes(num) ) {
-            materialList->put(num, mat);
+        if ( !materialList[num - 1] ) {
+            materialList[num - 1] = std :: move(mat);
         } else {
             OOFEM_ERROR("material entry already exist (num=%d)", num);
         }
@@ -848,14 +803,15 @@ Domain :: instanciateYourself(DataReader *dr)
 #  endif
 
     // read barriers
-    nonlocalBarierList->growTo(nbarrier);
+    nonlocalBarrierList.clear();
+    nonlocalBarrierList.resize(nbarrier);
     for ( int i = 1; i <= nbarrier; i++ ) {
-        NonlocalBarrier *barrier;
         ir = dr->giveInputRecord(DataReader :: IR_nlocBarRec, i);
         // read type of load
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-        if ( ( barrier = classFactory.createNonlocalBarrier(name.c_str(), num, this) ) == NULL ) {
+        std :: unique_ptr< NonlocalBarrier >barrier( classFactory.createNonlocalBarrier(name.c_str(), num, this) );
+        if ( !barrier ) {
             OOFEM_ERROR("Couldn't create barrier: %s", name.c_str());
         }
 
@@ -866,8 +822,8 @@ Domain :: instanciateYourself(DataReader *dr)
             OOFEM_ERROR("Invalid barrier number (num=%d)", num);
         }
 
-        if ( !nonlocalBarierList->includes(num) ) {
-            nonlocalBarierList->put(num, barrier);
+        if ( !nonlocalBarrierList[num - 1] ) {
+            nonlocalBarrierList[num - 1] = std :: move(barrier);
         } else {
             OOFEM_ERROR("barrier entry already exist (num=%d)", num);
         }
@@ -881,28 +837,28 @@ Domain :: instanciateYourself(DataReader *dr)
     }
 #  endif
 
-
     // read boundary conditions
-    bcList->growTo(nload);
+    bcList.clear();
+    bcList.resize(nload);
     for ( int i = 1; i <= nload; i++ ) {
-        GeneralBoundaryCondition *load;
         ir = dr->giveInputRecord(DataReader :: IR_bcRec, i);
-        // read type of load
+        // read type of bc
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-        if ( ( load = classFactory.createBoundaryCondition(name.c_str(), num, this) ) == NULL ) {
+        std :: unique_ptr< GeneralBoundaryCondition >bc( classFactory.createBoundaryCondition(name.c_str(), num, this) );
+        if ( !bc ) {
             OOFEM_ERROR("Couldn't create boundary condition: %s", name.c_str());
         }
 
-        load->initializeFrom(ir);
+        bc->initializeFrom(ir);
 
         // check number
         if ( ( num < 1 ) || ( num > nload ) ) {
             OOFEM_ERROR("Invalid boundary condition number (num=%d)", num);
         }
 
-        if ( !bcList->includes(num) ) {
-            bcList->put(num, load);
+        if ( !bcList[num - 1] ) {
+            bcList[num - 1] = std :: move(bc);
         } else {
             OOFEM_ERROR("boundary condition entry already exist (num=%d)", num);
         }
@@ -915,14 +871,15 @@ Domain :: instanciateYourself(DataReader *dr)
 #  endif
 
     // read initial conditions
-    icList->growTo(nic);
+    icList.clear();
+    icList.resize(nic);
     for ( int i = 1; i <= nic; i++ ) {
-        InitialCondition *ic;
         ir = dr->giveInputRecord(DataReader :: IR_icRec, i);
         // read type of load
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-        if ( ( ic = new InitialCondition(num, this) ) == NULL ) {
+        std :: unique_ptr< InitialCondition >ic( new InitialCondition(num, this) );
+        if ( !ic ) {
             OOFEM_ERROR("Creation of IC no. %d failed", num);
         }
 
@@ -933,8 +890,8 @@ Domain :: instanciateYourself(DataReader *dr)
             OOFEM_ERROR("Invalid initial condition number (num=%d)", num);
         }
 
-        if ( !icList->includes(num) ) {
-            icList->put(num, ic);
+        if ( !icList[num - 1] ) {
+            icList[num - 1] = std :: move(ic);
         } else {
             OOFEM_ERROR("initial condition entry already exist (num=%d)", num);
         }
@@ -948,13 +905,15 @@ Domain :: instanciateYourself(DataReader *dr)
 
 
     // read load time functions
-    functionList->growTo(nloadtimefunc);
+    functionList.clear();
+    functionList.resize(nloadtimefunc);
     for ( int i = 1; i <= nloadtimefunc; i++ ) {
-        Function *func;
         ir = dr->giveInputRecord(DataReader :: IR_funcRec, i);
         // read type of func
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
-        if ( ( func = classFactory.createFunction(name.c_str(), num, this) ) == NULL ) {
+
+        std :: unique_ptr< Function >func( classFactory.createFunction(name.c_str(), num, this) );
+        if ( !func ) {
             OOFEM_ERROR("Couldn't create time function: %s", name.c_str());
         }
 
@@ -965,8 +924,8 @@ Domain :: instanciateYourself(DataReader *dr)
             OOFEM_ERROR("Invalid Function number (num=%d)", num);
         }
 
-        if ( !functionList->includes(num) ) {
-            functionList->put(num, func);
+        if ( !functionList[num - 1] ) {
+            functionList[num - 1] = std :: move(func);
         } else {
             OOFEM_ERROR("Function entry already exist (num=%d)", num);
         }
@@ -979,16 +938,17 @@ Domain :: instanciateYourself(DataReader *dr)
 #  endif
 
     // read load time functions
-    setList->growTo(nset);
+    setList.clear();
+    setList.resize(nset);
     for ( int i = 1; i <= nset; i++ ) {
         ir = dr->giveInputRecord(DataReader :: IR_setRec, i);
         // read type of set
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
         // Only one set for now (i don't see any need to ever introduce any other version)
-        Set *set = new Set(num, this);
-        /*if ( ( set = classFactory.createSet(name.c_str(), num, this) ) == NULL ) {
-         *  OOFEM_ERROR("Couldn't create set: %s", name.c_str());
-         * }*/
+        std :: unique_ptr< Set > set(new Set(num, this)); //classFactory.createSet(name.c_str(), num, this)
+        if ( !set ) {
+            OOFEM_ERROR("Couldn't create set: %s", name.c_str());
+        }
 
         set->initializeFrom(ir);
 
@@ -997,8 +957,8 @@ Domain :: instanciateYourself(DataReader *dr)
             OOFEM_ERROR("Invalid set number (num=%d)", num);
         }
 
-        if ( !setList->includes(num) ) {
-            setList->put(num, set);
+        if ( !setList[num - 1] ) {
+            setList[num - 1] = std :: move(set);
         } else {
             OOFEM_ERROR("Set entry already exist (num=%d)", num);
         }
@@ -1020,12 +980,10 @@ Domain :: instanciateYourself(DataReader *dr)
 
         xfemManager->initializeFrom(ir);
         xfemManager->instanciateYourself(dr);
-    }
 #  ifdef VERBOSE
-    if ( nxfemman ) {
         VERBOSE_PRINT0("Instanciated xfem ", nxfemman);
-    }
 #  endif
+    }
 
 
     if ( ncontactman ) {
@@ -1053,12 +1011,10 @@ Domain :: instanciateYourself(DataReader *dr)
         }
 
         return this->topology->instanciateYourself(dr);
-    }
 #  ifdef VERBOSE
-    if ( topologytype.length() > 0 ) {
         VERBOSE_PRINT0("Instanciated topologies ", topologytype.length());
-    }
 #  endif
+    }
 
 
     if ( nfracman ) {
@@ -1066,12 +1022,10 @@ Domain :: instanciateYourself(DataReader *dr)
         ir = dr->giveInputRecord(DataReader :: IR_fracManRec, 1);
         fracManager->initializeFrom(ir);
         fracManager->instanciateYourself(dr);
-    }
 #  ifdef VERBOSE
-    if ( nfracman ) {
-        VERBOSE_PRINT0("Instanciated fracture manager ", nfracman);
-    }
+        VERBOSE_PRINT0("Instanciated fracture manager ", nxfemman);
 #  endif
+    }
 
     // change internal component references from labels to assigned local numbers
     MapBasedEntityRenumberingFunctor labelToLocNumFunctor(dofManLabelMap, elemLabelMap);
@@ -1083,8 +1037,8 @@ Domain :: instanciateYourself(DataReader *dr)
         this->giveElement(i)->updateLocalNumbering(labelToLocNumFunctor);
     }
 
-    for ( int i = 1; i <= nset; i++ ) {
-        this->giveSet(i)->updateLocalNumbering(labelToLocNumFunctor);
+    for ( auto &set: setList ) {
+        set->updateLocalNumbering(labelToLocNumFunctor);
     }
 
 
@@ -1127,8 +1081,8 @@ Domain :: postInitialize()
         this->elementList->at(i)->postInitialize();
     }
 
-    for ( int i = 1; i <= this->bcList->giveSize(); i++ ) {
-        this->bcList->at(i)->postInitialize();
+    for ( auto &bc: bcList ) {
+        bc->postInitialize();
     }
 }
 
@@ -1557,8 +1511,44 @@ Domain :: giveErrorEstimator()
     return engineeringModel->giveDomainErrorEstimator(this->number);
 }
 
+#define SAVE_COMPONENTS(list)                       \
+    {                                               \
+        for ( const auto &obj: list ) {             \
+            if ( ( mode & CM_Definition ) != 0 ) {       \
+                if ( stream.write( std :: string( obj->giveInputRecordName() ) ) == 0 ) { \
+                    THROW_CIOERR(CIO_IOERR);        \
+                }                                   \
+            }                                       \
+            if ( ( iores = obj->saveContext(stream, mode) ) != CIO_OK ) { \
+                THROW_CIOERR(iores);                \
+            }                                       \
+        }                                           \
+    }
 
-#define SAVE_COMPONENTS(size, type, giveMethod)    \
+#define RESTORE_COMPONENTS(size, list, creator) \
+    {                                           \
+        if ( mode & CM_Definition ) {           \
+            list.resize(size);                  \
+        }                                       \
+        for ( int i = 1; i <= size; i++ ) {     \
+            if ( mode & CM_Definition ) {       \
+                std :: string name;             \
+                if ( !stream.read(name) ) {     \
+                    THROW_CIOERR(CIO_IOERR);    \
+                }                               \
+                auto *obj = creator(name.c_str(), i, this); \
+                if ( !obj ) {                   \
+                    THROW_CIOERR(CIO_BADVERSION); \
+                }                               \
+                list[i-1].reset(obj);           \
+            }                                   \
+            if ( ( iores = list[i-1]->restoreContext(stream, mode) ) != CIO_OK ) { \
+                THROW_CIOERR(iores);            \
+            }                                   \
+        }                                       \
+    }
+
+#define SAVE_COMPONENTS2(size, type, giveMethod)    \
     {                                               \
         for ( int i = 1; i <= size; i++ ) {         \
             type *obj = giveMethod(i);              \
@@ -1573,7 +1563,7 @@ Domain :: giveErrorEstimator()
         }                                           \
     }
 
-#define RESTORE_COMPONENTS(size, type, resizeMethod, creator, giveMethod, setMethod) \
+#define RESTORE_COMPONENTS2(size, type, resizeMethod, creator, giveMethod, setMethod) \
     {                                           \
         if ( mode & CM_Definition ) {           \
             resizeMethod(size);                 \
@@ -1633,19 +1623,19 @@ Domain :: saveContext(DataStream &stream, ContextMode mode, void *obj)
         }
 
         // Have to store materials (and possible other things first) before restoring integration points and such).
-        SAVE_COMPONENTS(this->giveNumberOfMaterialModels(), Material, this->giveMaterial);
-        SAVE_COMPONENTS(this->giveNumberOfCrossSectionModels(), CrossSection, this->giveCrossSection);
-        SAVE_COMPONENTS(this->giveNumberOfInitialConditions(), InitialCondition, this->giveIc);
-        SAVE_COMPONENTS(this->giveNumberOfFunctions(), Function, this->giveFunction);
-        SAVE_COMPONENTS(this->giveNumberOfNonlocalBarriers(), NonlocalBarrier, this->giveNonlocalBarrier);
+        SAVE_COMPONENTS(this->materialList);
+        SAVE_COMPONENTS(this->crossSectionList);
+        SAVE_COMPONENTS(this->icList);
+        SAVE_COMPONENTS(this->functionList);
+        SAVE_COMPONENTS(this->nonlocalBarrierList);
     }
 
     // save dof managers
-    SAVE_COMPONENTS(this->giveNumberOfDofManagers(), DofManager, this->giveDofManager);
+    SAVE_COMPONENTS2(this->giveNumberOfDofManagers(), DofManager, this->giveDofManager);
     // elements and corresponding integration points
-    SAVE_COMPONENTS(this->giveNumberOfElements(), Element, this->giveElement);
+    SAVE_COMPONENTS2(this->giveNumberOfElements(), Element, this->giveElement);
     // boundary conditions
-    SAVE_COMPONENTS(this->giveNumberOfBoundaryConditions(), GeneralBoundaryCondition, this->giveBc);
+    SAVE_COMPONENTS(this->bcList);
 
     // store error estimator data
     ee = this->giveErrorEstimator();
@@ -1697,22 +1687,22 @@ Domain :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
         dofManagerList->clear();
         elementList->clear();
         mElementPlaceInArray.clear();
-        materialList->clear();
-        bcList->clear();
-        icList->clear();
-        functionList->clear();
-        nonlocalBarierList->clear();
-        setList->clear();
+        materialList.clear();
+        bcList.clear();
+        icList.clear();
+        functionList.clear();
+        nonlocalBarrierList.clear();
+        setList.clear();
         ///@todo Saving and restoring xfemmanagers.
         delete xfemManager;
         xfemManager = NULL;
         //this->clear();
 
-        RESTORE_COMPONENTS(nmat, Material, this->resizeMaterials, classFactory.createMaterial, this->giveMaterial, this->setMaterial);
-        RESTORE_COMPONENTS(ncs, CrossSection, this->resizeCrossSectionModels, classFactory.createCrossSection, this->giveCrossSection, this->setCrossSection);
-        RESTORE_COMPONENTS(nic, InitialCondition, this->resizeInitialConditions, classFactory.createInitialCondition, this->giveIc, setInitialCondition);
-        RESTORE_COMPONENTS(nfunc, Function, resizeFunctions, classFactory.createFunction, giveFunction, setFunction);
-        RESTORE_COMPONENTS(nnlb, NonlocalBarrier, resizeNonlocalBarriers, classFactory.createNonlocalBarrier, giveNonlocalBarrier, setNonlocalBarrier);
+        RESTORE_COMPONENTS(nmat, this->materialList, classFactory.createMaterial);
+        RESTORE_COMPONENTS(ncs, this->crossSectionList, classFactory.createCrossSection);
+        RESTORE_COMPONENTS(nic, this->icList, classFactory.createInitialCondition);
+        RESTORE_COMPONENTS(nfunc, this->functionList, classFactory.createFunction);
+        RESTORE_COMPONENTS(nnlb, this->nonlocalBarrierList, classFactory.createNonlocalBarrier);
 
         domainUpdated = true;
     } else {
@@ -1735,9 +1725,9 @@ Domain :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
         nbc = this->giveNumberOfBoundaryConditions();
     }
 
-    RESTORE_COMPONENTS(nnodes, DofManager, this->resizeDofManagers, classFactory.createDofManager, this->giveDofManager, this->setDofManager);
-    RESTORE_COMPONENTS(nelem, Element, this->resizeElements, classFactory.createElement, this->giveElement, this->setElement);
-    RESTORE_COMPONENTS(nbc, GeneralBoundaryCondition, this->resizeBoundaryConditions, classFactory.createBoundaryCondition, this->giveBc, this->setBoundaryCondition);
+    RESTORE_COMPONENTS2(nnodes, DofManager, this->resizeDofManagers, classFactory.createDofManager, this->giveDofManager, this->setDofManager);
+    RESTORE_COMPONENTS2(nelem, Element, this->resizeElements, classFactory.createElement, this->giveElement, this->setElement);
+    RESTORE_COMPONENTS(nbc, this->bcList, classFactory.createBoundaryCondition);
 
     // restore error estimator data
     ee = this->giveErrorEstimator();
@@ -2081,7 +2071,7 @@ Domain :: elementGlobal2Local(int _globnum)
 
 #endif
 
-void Domain::BuildElementPlaceInArrayMap()
+void Domain :: BuildElementPlaceInArrayMap()
 {
     mElementPlaceInArray.clear();
 
@@ -2093,7 +2083,7 @@ void Domain::BuildElementPlaceInArrayMap()
     }
 }
 
-void Domain::BuildMaterialToElementMap()
+void Domain :: BuildMaterialToElementMap()
 {
     mMapMaterialNum2El.clear();
 

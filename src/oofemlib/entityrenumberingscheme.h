@@ -38,6 +38,7 @@
 #include <map>
 
 #include "oofemcfg.h"
+#include "error.h"
 
 namespace oofem {
 /**

@@ -40,10 +40,12 @@
 #include "domaintype.h"
 #include "statecountertype.h"
 #include "intarray.h"
+#include "error.h"
 #ifdef __PARALLEL_MODE
  #include "entityrenumberingscheme.h"
 #endif
 
+#include <memory>
 #include <unordered_map>
 #include <map>
 #include <string>
@@ -118,19 +120,19 @@ private:
     /// Dof manager list.
     AList< DofManager > *dofManagerList;
     /// Material list.
-    AList< Material > *materialList;
+    std :: vector< std :: unique_ptr< Material > > materialList;
     /// Cross section list.
-    AList< CrossSection > *crossSectionList;
+    std :: vector< std :: unique_ptr< CrossSection > > crossSectionList;
     /// Boundary condition list.
-    AList< GeneralBoundaryCondition > *bcList;
+    std :: vector< std :: unique_ptr< GeneralBoundaryCondition > > bcList;
     /// Initial condition list.
-    AList< InitialCondition > *icList;
+    std :: vector< std :: unique_ptr< InitialCondition > > icList;
     /// Load time function list.
-    AList< Function > *functionList;
+    std :: vector< std :: unique_ptr< Function > > functionList;
     /// Set list.
-    AList< Set > *setList;
+    std :: vector< std :: unique_ptr< Set > > setList;
     /// Nonlocal barrier list.
-    AList< NonlocalBarrier > *nonlocalBarierList;
+    std :: vector< std :: unique_ptr< NonlocalBarrier > > nonlocalBarrierList;
 
     /// Default dofs for a node (depends on the domain type).
     IntArray defaultNodeDofIDArry;
@@ -400,28 +402,26 @@ public:
      * Intenal DOF managers are not affected, as those are created by the corresponding element/bc.
      */
     void createDofs();
-    //int giveNumberOfNodes () {return nodeList->giveSize();}
-    //int giveNumberOfSides () {return elementSideList->giveSize();}
     /// Returns number of dof managers in domain.
     int giveNumberOfDofManagers() const { return dofManagerList->giveSize(); }
     /// Returns number of elements in domain.
     int giveNumberOfElements() const { return elementList->giveSize(); }
     /// Returns number of material models in domain.
-    int giveNumberOfMaterialModels() const { return materialList->giveSize(); }
+    int giveNumberOfMaterialModels() const { return (int)materialList.size(); }
     /// Returns number of cross section models in domain.
-    int giveNumberOfCrossSectionModels() const { return crossSectionList->giveSize(); }
+    int giveNumberOfCrossSectionModels() const { return (int)crossSectionList.size(); }
     /// Returns number of boundary conditions in domain.
-    int giveNumberOfBoundaryConditions() const { return bcList->giveSize(); }
+    int giveNumberOfBoundaryConditions() const { return (int)bcList.size(); }
     /// Returns number of initial conditions in domain.
-    int giveNumberOfInitialConditions() const { return icList->giveSize(); }
+    int giveNumberOfInitialConditions() const { return (int)icList.size(); }
     /// Returns number of load time functions in domain.
-    int giveNumberOfFunctions() const { return functionList->giveSize(); }
+    int giveNumberOfFunctions() const { return (int)functionList.size(); }
     /// Returns number of regions. Currently regions corresponds to cross section models.
     int giveNumberOfRegions() const { return this->giveNumberOfCrossSectionModels(); }
     /// Returns number of nonlocal integration barriers
-    int giveNumberOfNonlocalBarriers() const { return nonlocalBarierList->giveSize(); }
+    int giveNumberOfNonlocalBarriers() const { return (int)nonlocalBarrierList.size(); }
     /// Returns number of sets
-    int giveNumberOfSets() const { return setList->giveSize(); }
+    int giveNumberOfSets() const { return (int)setList.size(); }
 
     /// Returns number of spatial dimensions.
     int giveNumberOfSpatialDimensions();
@@ -481,7 +481,6 @@ public:
     FractureManager *giveFractureManager();
     bool hasFractureManager();
 
-    /// List of Xfemmanagers.
     /**
      * Sets receiver's associated topology description.
      * @param topo New topology description for receiver.
