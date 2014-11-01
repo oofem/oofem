@@ -1621,7 +1621,6 @@ void PolygonLine :: printVTK(int iTStepIndex, int iLineIndex)
 
 bool PolygonLine :: giveTips(TipInfo &oStartTipInfo, TipInfo &oEndTipInfo) const
 {
-    printf("Entering PolygonLine :: giveTips()\n");
     int nVert = giveNrVertices();
     if ( nVert > 1 ) {
         // Start tip
