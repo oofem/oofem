@@ -97,9 +97,6 @@ Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
     this->number = n;
     this->serialNumber = serNum;
 
-    elementList              = new AList< Element >(0);
-    dofManagerList           = new AList< DofManager >(0);
-
     dType                 = _unknownMode;
 
     xfemManager           = NULL;
@@ -189,17 +186,13 @@ Domain *Domain :: Clone()
 
 
     //Nodes
-    int nDofMan = this->giveNumberOfDofManagers();
-    for ( int i = 1; i <= nDofMan; i++ ) {
-        DynamicInputRecord *nodeRec = new DynamicInputRecord( *this->giveDofManager ( i ) );
-        dataReader.insertInputRecord(DataReader :: IR_dofmanRec, nodeRec);
+    for ( auto &dman: dofManagerList ) {
+        dataReader.insertInputRecord(DataReader :: IR_dofmanRec, new DynamicInputRecord( *dman ));
     }
 
     //Elements
-    int nEl = this->giveNumberOfElements();
-    for ( int i = 1; i <= nEl; i++ ) {
-        DynamicInputRecord *elRec = new DynamicInputRecord( *this->giveElement ( i ) );
-        dataReader.insertInputRecord(DataReader :: IR_elemRec, elRec);
+    for ( auto &el: elementList ) {
+        dataReader.insertInputRecord(DataReader :: IR_elemRec, new DynamicInputRecord( *el ));
     }
 
     //CrossSection
@@ -257,8 +250,6 @@ Domain *Domain :: Clone()
 Domain :: ~Domain()
 // Destructor.
 {
-    delete elementList;
-    delete dofManagerList;
     delete xfemManager;
     delete connectivityTable;
     delete spatialLocalizer;
@@ -276,9 +267,9 @@ void
 Domain :: clear()
 // Clear receiver
 {
-    elementList->clear();
+    elementList.clear();
     mElementPlaceInArray.clear();
-    dofManagerList->clear();
+    dofManagerList.clear();
     materialList.clear();
     bcList.clear();
     icList.clear();
@@ -316,26 +307,27 @@ Element *
 Domain :: giveElement(int n)
 {
 #ifdef DEBUG
-    if ( !elementList->includes(n) ) {
+    if ( n < 1 || n > (int)elementList.size() ) {
         OOFEM_ERROR("undefined element (%d)", n);
     }
 #endif
-    return elementList->at(n);
+    return this->elementList[n-1].get();
 }
 
 Element *
 Domain :: giveGlobalElement(int n)
 {
-    for ( int i = 1; i <= elementList->giveSize(); i++ ) {
-        if ( elementList->at(i)->giveGlobalNumber() == n ) {
-            return elementList->at(i);
+    for ( auto &el: elementList ) {
+        if ( el->giveGlobalNumber() == n ) {
+            return el.get();
         }
     }
 
     return NULL;
 }
 
-int Domain :: giveElementPlaceInArray(int iGlobalElNum) const
+int
+Domain :: giveElementPlaceInArray(int iGlobalElNum) const
 {
     auto res = mElementPlaceInArray.find(iGlobalElNum);
 
@@ -347,7 +339,8 @@ int Domain :: giveElementPlaceInArray(int iGlobalElNum) const
     }
 }
 
-const IntArray &Domain :: giveElementsWithMaterialNum(int iMaterialNum) const
+const IntArray &
+Domain :: giveElementsWithMaterialNum(int iMaterialNum) const
 {
     auto res = mMapMaterialNum2El.find(iMaterialNum);
 
@@ -434,18 +427,18 @@ ElementSide *
 Domain :: giveSide(int n)
 {
 #ifdef DEBUG
-    if ( !dofManagerList->includes(n) ) {
+    if ( n < 1 || n > (int)dofManagerList.size() ) {
         OOFEM_ERROR("undefined dofManager (%d)", n);
     }
 
-    ElementSide *side = dynamic_cast< ElementSide * >( dofManagerList->at(n) );
+    ElementSide *side = dynamic_cast< ElementSide * >( dofManagerList[n-1].get() );
     if ( !side ) {
         OOFEM_ERROR("incompatible type of dofManager %d, can not convert", n);
     }
     return side;
 
 #else
-    return static_cast< ElementSide * >( dofManagerList->at(n) );
+    return static_cast< ElementSide * >( dofManagerList[n-1] );
 
 #endif
 }
@@ -455,20 +448,20 @@ DofManager *
 Domain :: giveDofManager(int n)
 {
 #ifdef DEBUG
-    if ( !dofManagerList->includes(n) ) {
+    if ( n < 1 || n > (int)dofManagerList.size() ) {
         OOFEM_ERROR("undefined dofManager (%d)", n);
     }
 #endif
-    return dofManagerList->at(n);
+    return this->dofManagerList[n-1].get();
 }
 
 
 DofManager *
 Domain :: giveGlobalDofManager(int n)
 {
-    for ( int i = 1; i <= dofManagerList->giveSize(); i++ ) {
-        if ( dofManagerList->at(i)->giveGlobalNumber() == n ) {
-            return dofManagerList->at(i);
+    for ( auto &dman: dofManagerList ) {
+        if ( dman->giveGlobalNumber() == n ) {
+            return dman.get();
         }
     }
 
@@ -576,8 +569,8 @@ Domain :: giveEngngModel()
     return engineeringModel;
 }
 
-void Domain :: resizeDofManagers(int _newSize) { dofManagerList->growTo(_newSize); }
-void Domain :: resizeElements(int _newSize) { elementList->growTo(_newSize); }
+void Domain :: resizeDofManagers(int _newSize) { dofManagerList.resize(_newSize); }
+void Domain :: resizeElements(int _newSize) { elementList.resize(_newSize); }
 void Domain :: resizeCrossSectionModels(int _newSize) { crossSectionList.resize(_newSize); }
 void Domain :: resizeMaterials(int _newSize) { materialList.resize(_newSize); }
 void Domain :: resizeNonlocalBarriers(int _newSize) { nonlocalBarrierList.resize(_newSize); }
@@ -586,8 +579,8 @@ void Domain :: resizeInitialConditions(int _newSize) { icList.resize(_newSize); 
 void Domain :: resizeFunctions(int _newSize) { functionList.resize(_newSize); }
 void Domain :: resizeSets(int _newSize) { setList.resize(_newSize); }
 
-void Domain :: setDofManager(int i, DofManager *obj) { dofManagerList->put(i, obj); }
-void Domain :: setElement(int i, Element *obj) { elementList->put(i, obj); mElementPlaceInArray[obj->giveGlobalNumber()] = i;}
+void Domain :: setDofManager(int i, DofManager *obj) { dofManagerList[i-1].reset(obj); }
+void Domain :: setElement(int i, Element *obj) { elementList[i-1].reset(obj); mElementPlaceInArray[obj->giveGlobalNumber()] = i;}
 void Domain :: setCrossSection(int i, CrossSection *obj) { crossSectionList[i-1].reset(obj); }
 void Domain :: setMaterial(int i, Material *obj) { materialList[i-1].reset(obj); }
 void Domain :: setNonlocalBarrier(int i, NonlocalBarrier *obj) { nonlocalBarrierList[i-1].reset(obj); }
@@ -673,20 +666,21 @@ Domain :: instanciateYourself(DataReader *dr)
     }
 
     // read nodes
-    dofManagerList->growTo(nnode);
+    dofManagerList.clear();
+    dofManagerList.resize(nnode);
     for ( int i = 1; i <= nnode; i++ ) {
-        DofManager *node;
         ir = dr->giveInputRecord(DataReader :: IR_dofmanRec, i);
         // read type of dofManager
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
         // assign component number according to record order
         // component number (as given in input record) becomes label
-        if ( ( node = classFactory.createDofManager(name.c_str(), i, this) ) == NULL ) {
+        std :: unique_ptr< DofManager > dman( classFactory.createDofManager(name.c_str(), i, this) );
+        if ( !dman ) {
             OOFEM_ERROR("Couldn't create node of type: %s\n", name.c_str());
         }
 
-        node->initializeFrom(ir);
+        dman->initializeFrom(ir);
         if ( dofManLabelMap.find(num) == dofManLabelMap.end() ) {
             // label does not exist yet
             dofManLabelMap [ num ] = i;
@@ -694,8 +688,8 @@ Domain :: instanciateYourself(DataReader *dr)
             OOFEM_ERROR("iDofmanager entry already exist (label=%d)", num);
         }
 
-        node->setGlobalNumber(num);    // set label
-        dofManagerList->put(i, node);
+        dman->setGlobalNumber(num);    // set label
+        dofManagerList[i - 1] = std :: move(dman);
 
         ir->finish();
     }
@@ -705,14 +699,15 @@ Domain :: instanciateYourself(DataReader *dr)
 #  endif
 
     // read elements
-    elementList->growTo(nelem);
+    elementList.clear();
+    elementList.resize(nelem);
     for ( int i = 1; i <= nelem; i++ ) {
-        Element *elem;
         ir = dr->giveInputRecord(DataReader :: IR_elemRec, i);
         // read type of element
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
 
-        if ( ( elem = classFactory.createElement(name.c_str(), i, this) ) == NULL ) {
+        std :: unique_ptr< Element >elem( classFactory.createElement(name.c_str(), i, this) );
+        if ( !elem ) {
             OOFEM_ERROR("Couldn't create element: %s", name.c_str());
         }
 
@@ -726,7 +721,7 @@ Domain :: instanciateYourself(DataReader *dr)
         }
 
         elem->setGlobalNumber(num);
-        elementList->put(i, elem);
+        elementList[i - 1] = std :: move(elem);
 
         ir->finish();
     }
@@ -1029,12 +1024,12 @@ Domain :: instanciateYourself(DataReader *dr)
 
     // change internal component references from labels to assigned local numbers
     MapBasedEntityRenumberingFunctor labelToLocNumFunctor(dofManLabelMap, elemLabelMap);
-    for ( int i = 1; i <= nnode; i++ ) {
-        this->giveDofManager(i)->updateLocalNumbering(labelToLocNumFunctor);
+    for ( auto &dman: this->dofManagerList ) {
+        dman->updateLocalNumbering(labelToLocNumFunctor);
     }
 
-    for ( int i = 1; i <= nelem; i++ ) {
-        this->giveElement(i)->updateLocalNumbering(labelToLocNumFunctor);
+    for ( auto &element: this->elementList ) {
+        element->updateLocalNumbering(labelToLocNumFunctor);
     }
 
     for ( auto &set: setList ) {
@@ -1054,8 +1049,8 @@ Domain :: postInitialize()
     // Dofs must be created before dof managers due their post-initialization:
     this->createDofs();
 
-    for ( int i = 1; i <= this->dofManagerList->giveSize(); i++ ) {
-        this->dofManagerList->at(i)->postInitialize();
+    for ( auto &dman: dofManagerList ) {
+        dman->postInitialize();
     }
 
     // New  - in development /JB
@@ -1064,9 +1059,8 @@ Domain :: postInitialize()
     for ( int i = 1; i <= this->giveNumberOfCrossSectionModels(); i++ ) {
         if ( int setNum = this->giveCrossSection(i)->giveSetNumber() ) {
             Set *set = this->giveSet(setNum);
-            const IntArray &elements = set->giveElementList();
-            for ( int ielem = 1; ielem <= elements.giveSize(); ++ielem ) {
-                Element *element = this->giveElement( elements.at(ielem) );
+            for ( int ielem: set->giveElementList() ) {
+                Element *element = this->giveElement( ielem );
                 element->setCrossSection(i);
             }
         }
@@ -1077,8 +1071,8 @@ Domain :: postInitialize()
         //this->giveXfemManager()->postInitialize();
     }
 
-    for ( int i = 1; i <= this->elementList->giveSize(); i++ ) {
-        this->elementList->at(i)->postInitialize();
+    for ( auto &el: elementList ) {
+        el->postInitialize();
     }
 
     for ( auto &bc: bcList ) {
@@ -1281,9 +1275,8 @@ Domain :: createDofs()
     ///////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////// Step 1. Scan all required nodal dofs.
     std :: vector< std :: set< int > > node_dofs( this->giveNumberOfDofManagers() );
-    for ( int i = 1; i <= this->giveNumberOfElements(); ++i ) {
+    for ( auto &element: this->elementList ) {
         // Scan for all dofs needed by element.
-        Element *element = this->giveElement(i);
         for ( int j = 1; j <= element->giveNumberOfNodes(); ++j ) {
             element->giveDofManDofIDMask(j, dofids);
             //dofids.printYourself();
@@ -1292,13 +1285,12 @@ Domain :: createDofs()
             }
         }
     }
-    for ( int i = 1; i <= this->giveNumberOfDofManagers(); ++i ) {
+    for ( auto &dman: this->dofManagerList ) {
         // Nodes can also contain their own list of dofs (typical usecase: RigidArmNode )
-        DofManager *dman = this->giveDofManager(i);
         const IntArray *dofids = dman->giveForcedDofIDs();
         if ( dofids ) {
             for ( int k = 1; k <= dofids->giveSize(); ++k ) {
-                node_dofs [ i - 1 ].insert( dofids->at(k) );
+                node_dofs [ dman->giveNumber() - 1 ].insert( dofids->at(k) );
             }
         }
     }
@@ -1433,22 +1425,17 @@ Domain :: checkConsistency()
 //
 {
     int result = 1;
-    int nnode, nelem, nmat;
 
-    nnode = this->giveNumberOfDofManagers();
-    nelem = this->giveNumberOfElements();
-    nmat  = this->giveNumberOfMaterialModels();
-
-    for ( int i = 1; i <= nnode; i++ ) {
-        result &= this->giveDofManager(i)->checkConsistency();
+    for ( auto &dman: this->dofManagerList ) {
+        result &= dman->checkConsistency();
     }
 
-    for ( int i = 1; i <= nelem; i++ ) {
-        result &= this->giveElement(i)->checkConsistency();
+    for ( auto &element: this->elementList ) {
+        result &= element->checkConsistency();
     }
 
-    for ( int i = 1; i <= nmat; i++ ) {
-        result &= this->giveMaterial(i)->checkConsistency();
+    for ( auto &material: this->materialList ) {
+        result &= material->checkConsistency();
     }
 
     return result;
@@ -1458,8 +1445,8 @@ double
 Domain :: giveArea()
 {
     double area = 0.0;
-    for ( int i = 1; i <= this->giveNumberOfElements(); ++i ) {
-        area += this->giveElement(i)->computeArea();
+    for ( auto &element: this->elementList ) {
+        area += element->computeArea();
     }
 
     return area;
@@ -1469,8 +1456,8 @@ double
 Domain :: giveVolume()
 {
     double volume = 0.0;
-    for ( int i = 1; i <= this->giveNumberOfElements(); ++i ) {
-        volume += this->giveElement(i)->computeVolume();
+    for ( auto &element: this->elementList ) {
+        volume += element->computeVolume();
     }
 
     return volume;
@@ -1480,8 +1467,8 @@ double
 Domain :: giveSize()
 {
     double volume = 0.0;
-    for ( int i = 1; i <= this->giveNumberOfElements(); ++i ) {
-        volume += this->giveElement(i)->computeVolumeAreaOrLength();
+    for ( auto &element: this->elementList ) {
+        volume += element->computeVolumeAreaOrLength();
     }
 
     return volume;
@@ -1548,49 +1535,6 @@ Domain :: giveErrorEstimator()
         }                                       \
     }
 
-#define SAVE_COMPONENTS2(size, type, giveMethod)    \
-    {                                               \
-        for ( int i = 1; i <= size; i++ ) {         \
-            type *obj = giveMethod(i);              \
-            if ( ( mode & CM_Definition ) != 0 ) {       \
-                if ( stream.write( std :: string( obj->giveInputRecordName() ) ) == 0 ) { \
-                    THROW_CIOERR(CIO_IOERR);        \
-                }                                   \
-            }                                       \
-            if ( ( iores = obj->saveContext(stream, mode) ) != CIO_OK ) { \
-                THROW_CIOERR(iores);                \
-            }                                       \
-        }                                           \
-    }
-
-#define RESTORE_COMPONENTS2(size, type, resizeMethod, creator, giveMethod, setMethod) \
-    {                                           \
-        if ( mode & CM_Definition ) {           \
-            resizeMethod(size);                 \
-        }                                       \
-        for ( int i = 1; i <= size; i++ ) {     \
-            type *obj;                          \
-            if ( mode & CM_Definition ) {       \
-                std :: string name;               \
-                if ( !stream.read(name) ) {    \
-                    THROW_CIOERR(CIO_IOERR);    \
-                }                               \
-                obj = creator(name.c_str(), 0, this); \
-                if ( !obj ) {                   \
-                    THROW_CIOERR(CIO_BADVERSION); \
-                }                               \
-            } else {                            \
-                obj = giveMethod(i);            \
-            }                                   \
-            if ( ( iores = obj->restoreContext(stream, mode) ) != CIO_OK ) { \
-                THROW_CIOERR(iores);            \
-            }                                   \
-            if ( mode & CM_Definition ) {       \
-                setMethod(i, obj);              \
-            }                                   \
-        }                                       \
-    }
-
 #define DOMAIN_NCOMP 8
 
 contextIOResultType
@@ -1631,9 +1575,9 @@ Domain :: saveContext(DataStream &stream, ContextMode mode, void *obj)
     }
 
     // save dof managers
-    SAVE_COMPONENTS2(this->giveNumberOfDofManagers(), DofManager, this->giveDofManager);
+    SAVE_COMPONENTS(this->dofManagerList);
     // elements and corresponding integration points
-    SAVE_COMPONENTS2(this->giveNumberOfElements(), Element, this->giveElement);
+    SAVE_COMPONENTS(this->elementList);
     // boundary conditions
     SAVE_COMPONENTS(this->bcList);
 
@@ -1684,8 +1628,8 @@ Domain :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
         nnlb  = ncomp [ 7 ];
 
         // clear receiver data
-        dofManagerList->clear();
-        elementList->clear();
+        dofManagerList.clear();
+        elementList.clear();
         mElementPlaceInArray.clear();
         materialList.clear();
         bcList.clear();
@@ -1725,8 +1669,8 @@ Domain :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
         nbc = this->giveNumberOfBoundaryConditions();
     }
 
-    RESTORE_COMPONENTS2(nnodes, DofManager, this->resizeDofManagers, classFactory.createDofManager, this->giveDofManager, this->setDofManager);
-    RESTORE_COMPONENTS2(nelem, Element, this->resizeElements, classFactory.createElement, this->giveElement, this->setElement);
+    RESTORE_COMPONENTS(nnodes, this->dofManagerList, classFactory.createDofManager);
+    RESTORE_COMPONENTS(nelem, this->elementList, classFactory.createElement);
     RESTORE_COMPONENTS(nbc, this->bcList, classFactory.createBoundaryCondition);
 
     // restore error estimator data
@@ -1769,67 +1713,41 @@ Domain :: giveTransactionManager()
 
 int Domain :: commitTransactions(DomainTransactionManager *tm)
 {
-    bool _exist;
-    AList< DofManager > *dofManagerList_new = new AList< DofManager >(0);
-    AList< Element > *elementList_new = new AList< Element >(0);
-
-
     if ( tm->dofmanTransactions.empty() && tm->elementTransactions.empty() ) {
         return 1;
     }
 
     this->initGlobalDofManMap();
-    if ( !tm->dofmanTransactions.empty() ) {
-        DofManager *dman;
-        for ( auto &dmanTrans: tm->dofmanTransactions ) {
-            _exist = false;
-            if ( dmanMap.find(dmanTrans.first) != dmanMap.end() ) {
-                _exist = true;
-            }
+    for ( auto &dmanTrans: tm->dofmanTransactions ) {
+        if ( dmanMap.find(dmanTrans.first) != dmanMap.end() ) {
+            int lnum = dmanMap [ dmanTrans.first ]->giveNumber();
+            DofManager *dman = dofManagerList[lnum-1].release();
+            dmanMap.erase(dmanTrans.first);
+            delete dman;
+        }
 
-            if ( _exist ) {
-                int lnum = dmanMap [ dmanTrans.first ]->giveNumber();
-                dman = dofManagerList->unlink(lnum);
-                dmanMap.erase(dmanTrans.first);
-                delete dman;
-            }
-
-            if ( dmanTrans.second ) {
-                dmanMap [ dmanTrans.first ] = ( DofManager * ) dmanTrans.second;
-            }
-        } // end loop over DofmanTransactions
+        if ( dmanTrans.second ) {
+            dmanMap [ dmanTrans.first ] = ( DofManager * ) dmanTrans.second;
+        }
     }
 
     this->initGlobalElementMap();
-    if ( !tm->elementTransactions.empty() ) {
-        int gen;
-        Element *elem;
+    for ( auto elTrans: tm->elementTransactions ) {
+        int gen = elTrans.first;
+        if ( elementMap.find(gen) != elementMap.end() ) {
+            int lnum = elementMap [ gen ]->giveNumber();
+            Element *elem = elementList[lnum-1].release();
+            elementMap.erase(gen);
+            delete elem;
+        }
 
-        for ( auto elTrans: tm->elementTransactions ) {
-            gen = elTrans.first;
-            bool _exist = false;
-            if ( elementMap.find(gen) != elementMap.end() ) {
-                _exist = true;
-            }
-
-            if ( _exist ) {
-                int lnum = elementMap [ gen ]->giveNumber();
-                elem = elementList->unlink(lnum);
-                elementMap.erase(gen);
-                delete elem;
-            }
-
-            if ( elTrans.second ) {
-                elementMap [ gen ] = ( Element * ) elTrans.second;
-            }
+        if ( elTrans.second ) {
+            elementMap [ gen ] = ( Element * ) elTrans.second;
         }
     }
 
     /*
      * if (tm->transactions.empty()) return 1;
-     *
-     * AList<DofManager> *dofManagerList_new = new AList<DofManager>(0) ;
-     * AList<Element>    *elementList_new    = new AList<Element>(0) ;
      *
      * // put existing domain dofman and element records into domain maps
      * this->initGlobalDofManMap ();
@@ -1841,10 +1759,10 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
      * if (t._ttype == DTT_Remove) {
      *  if (t._ctype == DCT_DofManager) {
      *    dmanMap.erase (t._num);
-     *    dman = dofManagerList->unlink (t._num);
+     *    dman = dofManagerList.release (t._num-1);
      *    delete dman;
      *  } else if (t._ctype == DCT_Element) {
-     *    elem = elementList->unlink (t._num);
+     *    elem = elementList.release (t._num-1);
      *    delete elem;
      *  } else {
      *    OOFEM_ERROR("unknown transaction component type");
@@ -1870,40 +1788,42 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
     this->renumberDofManagers();
     this->renumberDofManData(tm);
 
-    // initialize new dofman list
-    int _i, _size = dmanMap.size();
-    dofManagerList_new->clear();
-    dofManagerList_new->growTo(_size);
+    std :: vector< std :: unique_ptr< DofManager > > dofManagerList_new;
+    std :: vector< std :: unique_ptr< Element > > elementList_new;
 
-    _i = 0;
+    // initialize new dofman list
+    int _size = dmanMap.size();
+    dofManagerList_new.clear();
+    dofManagerList_new.reserve(dmanMap.size());
+
+    ///@todo This is a pretty messy way, we shouldn't do unique ptrs like this (we have the same ptr in 2 different unique_ptrs!!!)
+    for ( auto &dman: this->dofManagerList ) {
+        dman.release();
+    }
     for ( auto &map: dmanMap ) {
-        dofManagerList_new->put(++_i, map.second);
+        dofManagerList_new.emplace_back(map.second);
     }
 
     this->renumberElements();
     this->renumberElementData(tm);
     // initialize new element list
     _size = elementMap.size();
-    elementList_new->clear();
-    elementList_new->growTo(_size);
+    elementList_new.clear();
+    elementList_new.reserve(_size);
 
-    _i = 0;
+    for ( auto &el: this->elementList ) {
+        el.release();
+    }
     for ( auto &map: elementMap ) {
-        elementList_new->put(++_i, map.second);
+        elementList_new.emplace_back(map.second);
     }
 
 
     tm->dofmanTransactions.clear();
     tm->elementTransactions.clear();
 
-
-    this->dofManagerList->clear(false); // not the data
-    delete dofManagerList;
-    this->dofManagerList = dofManagerList_new;
-
-    this->elementList->clear(false);
-    delete elementList;
-    this->elementList = elementList_new;
+    this->dofManagerList = std :: move(dofManagerList_new);
+    this->elementList = std :: move(elementList_new);
     BuildElementPlaceInArrayMap();
 
     this->giveConnectivityTable()->reset();
@@ -1923,13 +1843,11 @@ Domain :: initGlobalDofManMap(bool forceinit)
      * -> we need to keep the list of received nodes! (now they are only introduced into globally indexed dmanMap!);
      */
     if ( forceinit || !dmanMapInitialized ) {
-        int key, ndofman = this->giveNumberOfDofManagers();
         dmanMap.clear();
 
-        for ( int idofman = 1; idofman <= ndofman; idofman++ ) {
-            DofManager *dofman = this->giveDofManager(idofman);
-            key = dofman->giveGlobalNumber();
-            dmanMap[key] = dofman;
+        for ( auto &dman: dofManagerList ) {
+            int key = dman->giveGlobalNumber();
+            dmanMap[key] = dman.get();
         }
     }
 }
@@ -1939,13 +1857,11 @@ void
 Domain :: initGlobalElementMap(bool forceinit)
 {
     if ( forceinit || !elementMapInitialized ) {
-        int key, nelem = this->giveNumberOfElements();
         elementMap.clear();
 
-        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-            Element *elem = this->giveElement(ielem);
-            key = elem->giveGlobalNumber();
-            elementMap[key] = elem;
+        for ( auto &elem: elementList ) {
+            int key = elem->giveGlobalNumber();
+            elementMap[key] = elem.get();
         }
     }
 }

@@ -36,7 +36,6 @@
 #define domain_h
 
 #include "oofemcfg.h"
-#include "alist.h"
 #include "domaintype.h"
 #include "statecountertype.h"
 #include "intarray.h"
@@ -116,9 +115,9 @@ class OOFEM_EXPORT Domain
 {
 private:
     /// Element list.
-    AList< Element > *elementList;
+    std :: vector< std :: unique_ptr< Element > > elementList;
     /// Dof manager list.
-    AList< DofManager > *dofManagerList;
+    std :: vector< std :: unique_ptr< DofManager > > dofManagerList;
     /// Material list.
     std :: vector< std :: unique_ptr< Material > > materialList;
     /// Cross section list.
@@ -232,7 +231,7 @@ private:
     /**@name Load Balancing data structures */
     //@{
     /// List of received elements.
-    std :: list< Element * >recvElemList;
+    std :: list< Element * >recvElemList; ///@todo This seems like dead, old unused code. Remove it? / Mikael
     //@}
 #endif
 
@@ -346,16 +345,16 @@ public:
     inline Node *giveNode(int n)
     {
     #ifdef DEBUG
-        if ( !dofManagerList->includes(n) ) {
+        if ( n < 1 || n > (int)dofManagerList.size() ) {
             OOFEM_ERROR("undefined dofManager (%d)", n);
         }
 
-        Node *node = reinterpret_cast< Node * >( dofManagerList->at(n) );
+        Node *node = reinterpret_cast< Node * >( dofManagerList[n-1].get() );
 
         return node;
 
     #else
-        return reinterpret_cast< Node * >( dofManagerList->at(n) );
+        return reinterpret_cast< Node * >( dofManagerList[n-1].get() );
     #endif
     }
     /**
@@ -403,9 +402,9 @@ public:
      */
     void createDofs();
     /// Returns number of dof managers in domain.
-    int giveNumberOfDofManagers() const { return dofManagerList->giveSize(); }
+    int giveNumberOfDofManagers() const { return (int)dofManagerList.size(); }
     /// Returns number of elements in domain.
-    int giveNumberOfElements() const { return elementList->giveSize(); }
+    int giveNumberOfElements() const { return (int)elementList.size(); }
     /// Returns number of material models in domain.
     int giveNumberOfMaterialModels() const { return (int)materialList.size(); }
     /// Returns number of cross section models in domain.
