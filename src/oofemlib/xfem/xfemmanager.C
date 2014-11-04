@@ -70,8 +70,7 @@ XfemManager :: XfemManager(Domain *domain)
 }
 
 XfemManager :: ~XfemManager()
-{
-}
+{}
 
 
 InternalStateValueType
@@ -145,7 +144,7 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
     }
 
     // TODO: Read as input.
-    XfemTolerances::setCharacteristicElementLength(0.001);
+    XfemTolerances :: setCharacteristicElementLength(0.001);
 
     return IRRT_OK;
 }
@@ -178,14 +177,14 @@ int XfemManager :: instanciateYourself(DataReader *dr)
             mir->report_error(this->giveClassName(), __func__, "", result, __FILE__, __LINE__);
         }
 
-        std :: unique_ptr< EnrichmentItem > ei( classFactory.createEnrichmentItem( name.c_str(), i, this, this->giveDomain() ) );
+        std :: unique_ptr< EnrichmentItem >ei( classFactory.createEnrichmentItem( name.c_str(), i, this, this->giveDomain() ) );
         if ( ei.get() == NULL ) {
             OOFEM_ERROR( "unknown enrichment item (%s)", name.c_str() );
         }
 
         ei->initializeFrom(mir);
         ei->instanciateYourself(dr);
-        this->enrichmentItemList[i-1] = std :: move(ei);
+        this->enrichmentItemList [ i - 1 ] = std :: move(ei);
     }
 
     updateNodeEnrichmentItemMap();
@@ -248,9 +247,9 @@ contextIOResultType XfemManager :: restoreContext(DataStream &stream, ContextMod
                 THROW_CIOERR(CIO_IOERR);
             }
 
-            std :: unique_ptr< EnrichmentItem > ei( classFactory.createEnrichmentItem(name.c_str(), i, this, this->domain) );
+            std :: unique_ptr< EnrichmentItem >ei( classFactory.createEnrichmentItem(name.c_str(), i, this, this->domain) );
             obj = ei.get();
-            enrichmentItemList.insert(enrichmentItemList.begin() + i-1, std :: move(ei));
+            enrichmentItemList.insert( enrichmentItemList.begin() + i - 1, std :: move(ei) );
         } else {
             obj = this->giveEnrichmentItem(i);
         }
@@ -280,10 +279,8 @@ void XfemManager :: propagateFronts()
 
 #if 0
         if ( giveVtkDebug() ) {
-
-            GeometryBasedEI *geoEI = dynamic_cast<GeometryBasedEI*>(ei);
-            if(geoEI != NULL) {
-
+            GeometryBasedEI *geoEI = dynamic_cast< GeometryBasedEI * >( ei );
+            if ( geoEI != NULL ) {
                 std :: vector< FloatArray >points;
                 geoEI->giveSubPolygon(points, -0.1, 1.1);
 
@@ -295,7 +292,7 @@ void XfemManager :: propagateFronts()
 
 
                 char fileName [ 200 ];
-                sprintf(fileName, "crack%d.dat", ei->giveNumber());
+                sprintf( fileName, "crack%d.dat", ei->giveNumber() );
                 XFEMDebugTools :: WriteArrayToGnuplot(fileName, x, y);
             }
         }
@@ -393,9 +390,4 @@ void XfemManager :: giveElementEnrichmentItemIndices(std :: vector< int > &oElem
         oElemEnrInd = res->second;
     }
 }
-
-
-   
-    
-
 } // end namespace oofem

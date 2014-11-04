@@ -147,7 +147,7 @@ public:
     virtual void giveJump(std :: vector< double > &oJumps) const;
     virtual void giveJump(std :: vector< double > &oJumps, const double &iRadius) const;
 
-    std :: string errorInfo(const char *func) const { return std :: string(giveClassName()) + func; }
+    std :: string errorInfo(const char *func) const { return std :: string( giveClassName() ) + func; }
     virtual const char *giveClassName() const { return "LinElBranchFunction"; }
 };
 

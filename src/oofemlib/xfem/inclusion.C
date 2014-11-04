@@ -44,15 +44,14 @@
 #include <string>
 
 namespace oofem {
-
 REGISTER_EnrichmentItem(Inclusion)
 
 Inclusion :: Inclusion(int n, XfemManager *xm, Domain *aDomain) :
-HybridEI(n, xm, aDomain),
-mpCrossSection(NULL)
+    HybridEI(n, xm, aDomain),
+    mpCrossSection(NULL)
 {
     mpEnrichesDofsWithIdArray = {
-            D_u, D_v, D_w
+        D_u, D_v, D_w
     };
 }
 
@@ -94,5 +93,4 @@ IRResultType Inclusion :: initializeFrom(InputRecord *ir)
 
     return IRRT_OK;
 }
-
 } /* namespace oofem */

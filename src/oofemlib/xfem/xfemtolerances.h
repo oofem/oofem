@@ -48,20 +48,20 @@ protected:
     static double sCharElLength;
 
     /// Loose relative length tolerance
-    #define sRelLengthTolLoose 1.0e-3;
+#define sRelLengthTolLoose 1.0e-3;
 
     /// Tight relative length tolerance
-    #define sRelLengthTolTight 1.0e-6;
+#define sRelLengthTolTight 1.0e-6;
 
 
     /// Loose dimensionless tolerance (e.g. natural coordinates)
-    #define sRelDimensionlessTolLoose 1.0e-3;
+#define sRelDimensionlessTolLoose 1.0e-3;
 
     /// Tight dimensionless tolerance (e.g. natural coordinates)
-    #define sRelDimensionlessTolTight 1.0e-6;
+#define sRelDimensionlessTolTight 1.0e-6;
 
     /// Approximate zero
-    #define sApproxZero 1.0e-12;
+#define sApproxZero 1.0e-12;
 
 private:
     XfemTolerances()
@@ -70,16 +70,15 @@ private:
 public:
 
     static void setCharacteristicElementLength(double iCharElLength);
-    static double giveCharacteristicElementLength() {return sCharElLength;}
+    static double giveCharacteristicElementLength() { return sCharElLength; }
 
     static double giveRelLengthTolLoose();
     static double giveRelLengthTolTight();
 
-    static double giveDimensionlessTolLoose() {return sRelDimensionlessTolLoose;}
-    static double giveDimensionlessTolTight() {return sRelDimensionlessTolTight;}
+    static double giveDimensionlessTolLoose() { return sRelDimensionlessTolLoose; }
+    static double giveDimensionlessTolTight() { return sRelDimensionlessTolTight; }
 
-    static double giveApproxZero() {return sApproxZero;}
-
+    static double giveApproxZero() { return sApproxZero; }
 };
 
 

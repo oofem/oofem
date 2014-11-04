@@ -223,10 +223,10 @@ public:
 
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius) = 0;
 
-    EnrichmentFront *giveEnrichmentFrontStart() {return mpEnrichmentFrontStart;}
+    EnrichmentFront *giveEnrichmentFrontStart() { return mpEnrichmentFrontStart; }
     void setEnrichmentFrontStart(EnrichmentFront *ipEnrichmentFrontStart);
 
-    EnrichmentFront *giveEnrichmentFrontEnd() {return mpEnrichmentFrontEnd;}
+    EnrichmentFront *giveEnrichmentFrontEnd() { return mpEnrichmentFrontEnd; }
     void setEnrichmentFrontEnd(EnrichmentFront *ipEnrichmentFrontEnd);
 
     bool tipIsTouchingEI(const TipInfo &iTipInfo);
@@ -287,7 +287,6 @@ inline bool EnrichmentItem :: isDofManEnriched(const DofManager &iDMan) const
     auto res = mNodeEnrMarkerMap.find( iDMan.giveGlobalNumber() );
     return !( res == mNodeEnrMarkerMap.end() );
 }
-
 } // end namespace oofem
 
 

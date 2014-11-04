@@ -54,7 +54,7 @@ REGISTER_EnrichmentItem(Delamination)
 Delamination :: Delamination(int n, XfemManager *xm, Domain *aDomain) : ListBasedEI(n, xm, aDomain)
 {
     mpEnrichesDofsWithIdArray = {
-            D_u, D_v, D_w, W_u, W_v, W_w
+        D_u, D_v, D_w, W_u, W_v, W_w
     };
     this->interfaceNum = {};
     this->crossSectionNum = -1;
@@ -153,8 +153,8 @@ int Delamination :: instanciateYourself(DataReader *dr)
 
 
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
-//    mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
-    this->updateNodeEnrMarker(*xMan);
+    //    mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
+    this->updateNodeEnrMarker(* xMan);
 
 
     writeVtkDebug();
@@ -200,13 +200,12 @@ Delamination :: updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep)
         }
 
         std :: sort( dofManList.begin(), this->dofManList.end() );
-
     }
 }
 
 void Delamination :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl) const
 {
-    if(iLocalCoord.giveSize() != 3) {
+    if ( iLocalCoord.giveSize() != 3 ) {
         OOFEM_ERROR("iLocalCoord.giveSize() != 3")
     }
 
@@ -238,15 +237,15 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     } else if ( this->interfaceNum.giveSize() < 1 || this->interfaceNum.giveSize() > 2 ) {
         OOFEM_ERROR("Size of record 'interfacenum' must be 1 or 2");
     }
-    
+
     // check that interface numbers are valid
     interfaceNum.printYourself("interface num");
     for ( int i = 1; i <= this->interfaceNum.giveSize(); i++ ) {
         if ( this->interfaceNum.at(i) < 1 || this->interfaceNum.at(i) >= layeredCS->giveNumberOfLayers() ) {
-            OOFEM_ERROR("Cross section does not contain the interface number (%d) specified in the record '%s' since number of layers is %d.", this->interfaceNum.at(i), _IFT_Delamination_interfacenum, layeredCS->giveNumberOfLayers());
+            OOFEM_ERROR( "Cross section does not contain the interface number (%d) specified in the record '%s' since number of layers is %d.", this->interfaceNum.at(i), _IFT_Delamination_interfacenum, layeredCS->giveNumberOfLayers() );
         }
     }
-    
+
     // compute xi-coord of the delamination
     this->delamXiCoord = -1.0;
     double totalThickness = layeredCS->give(CS_Thickness, NULL, NULL, false); // no position available
@@ -254,9 +253,9 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
         this->delamXiCoord += layeredCS->giveLayerThickness(i) / totalThickness * 2.0;
         this->xiBottom += layeredCS->giveLayerThickness(i) / totalThickness * 2.0;
     }
-    
+
     if ( this->interfaceNum.giveSize() == 2 ) {
-        if (this->interfaceNum.at(1) >= this->interfaceNum.at(2)) {
+        if ( this->interfaceNum.at(1) >= this->interfaceNum.at(2) ) {
             OOFEM_ERROR("second intercfacenum must be greater than the first one");
         }
         for ( int i = 1; i <= this->interfaceNum.at(2); i++ ) {
@@ -265,7 +264,7 @@ IRResultType Delamination :: initializeFrom(InputRecord *ir)
     } else {
         this->xiTop = 1.0; // default is the top surface
     }
-    
+
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->matNum, _IFT_Delamination_CohesiveZoneMaterial);
     if ( this->matNum > 0 ) {
@@ -335,16 +334,15 @@ Delamination :: appendInputRecords(DynamicDataReader &oDR)
     }
 }
 
-void Delamination::evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const
+void Delamination :: evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const
 {
     // TODO: For consistency, this should be evaluated based on giveDelamXiCoord() /ES
-//    interpLevelSet(oLevelSet, iN, iNodeInd);
+    //    interpLevelSet(oLevelSet, iN, iNodeInd);
 }
 
-void Delamination::evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet) const
+void Delamination :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet) const
 {
     oEnrFunc.resize(1, 0.0);
     mpEnrichmentFunc->evaluateEnrFuncAt(oEnrFunc [ 0 ], iPos, iLevelSet);
 }
-
 } // end namespace oofem

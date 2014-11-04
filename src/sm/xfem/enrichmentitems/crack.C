@@ -77,7 +77,7 @@ void Crack :: AppendCohesiveZoneGaussPoint(GaussPoint *ipGP)
 
         mCohesiveZoneGaussPoints.insert(iteratorGP, ipGP);
         mCohesiveZoneArcPositions.insert(iteratorPos, arcPos);
-    } else   {
+    } else {
         OOFEM_ERROR("matStat == NULL.")
     }
 }
@@ -87,49 +87,46 @@ void Crack :: callGnuplotExportModule(GnuplotExportModule &iExpMod)
     iExpMod.outputXFEM(* this);
 }
 
-void Crack :: computeCrackIntersectionPoints(Crack &iCrack, std::vector<FloatArray> &oIntersectionPoints, std::vector<double> &oArcPositions)
+void Crack :: computeCrackIntersectionPoints(Crack &iCrack, std :: vector< FloatArray > &oIntersectionPoints, std :: vector< double > &oArcPositions)
 {
     const double tol = 1.0e-12;
 
     // Enrichment domain of the current crack
-    PolygonLine *polygonLine1 = dynamic_cast<PolygonLine*>(mpBasicGeometry);
+    PolygonLine *polygonLine1 = dynamic_cast< PolygonLine * >( mpBasicGeometry );
 
     // Enrichment domain of the crack given as input
-    PolygonLine *polygonLine2 = dynamic_cast<PolygonLine*>(iCrack.giveGeometry());
+    PolygonLine *polygonLine2 = dynamic_cast< PolygonLine * >( iCrack.giveGeometry() );
 
-    if( polygonLine1 != NULL && polygonLine2 != NULL ) {
+    if ( polygonLine1 != NULL && polygonLine2 != NULL ) {
+        polygonLine2->computeIntersectionPoints(* polygonLine1, oIntersectionPoints);
 
-        polygonLine2->computeIntersectionPoints(*polygonLine1, oIntersectionPoints);
-
-        for(FloatArray pos:oIntersectionPoints) {
+        for ( FloatArray pos:oIntersectionPoints ) {
             double tangDist, arcPos;
             polygonLine1->computeTangentialSignDist(tangDist, pos, arcPos);
 
-            if(arcPos < -tol || arcPos > (1.0+tol)) {
+            if ( arcPos < -tol || arcPos > ( 1.0 + tol ) ) {
                 printf("arcPos: %e\n", arcPos);
                 OOFEM_ERROR("arcPos is outside the allowed range [0,1].")
             }
 
             oArcPositions.push_back(arcPos);
         }
-
     }
 }
 
-void Crack :: computeArcPoints(const std::vector<FloatArray> &iIntersectionPoints, std::vector<double> &oArcPositions)
+void Crack :: computeArcPoints(const std :: vector< FloatArray > &iIntersectionPoints, std :: vector< double > &oArcPositions)
 {
     const double tol = 1.0e-12;
 
     // Enrichment domain of the current crack
-    PolygonLine *polygonLine1 = dynamic_cast<PolygonLine*>(mpBasicGeometry);
+    PolygonLine *polygonLine1 = dynamic_cast< PolygonLine * >( mpBasicGeometry );
 
-    if( polygonLine1 != NULL ) {
-
-        for(FloatArray pos:iIntersectionPoints) {
+    if ( polygonLine1 != NULL ) {
+        for ( FloatArray pos:iIntersectionPoints ) {
             double tangDist, arcPos;
             polygonLine1->computeTangentialSignDist(tangDist, pos, arcPos);
 
-            if(arcPos < -tol || arcPos > (1.0+tol)) {
+            if ( arcPos < -tol || arcPos > ( 1.0 + tol ) ) {
                 printf("arcPos: %e\n", arcPos);
                 OOFEM_ERROR("arcPos is outside the allowed range [0,1].")
             }
@@ -137,13 +134,11 @@ void Crack :: computeArcPoints(const std::vector<FloatArray> &iIntersectionPoint
             oArcPositions.push_back(arcPos);
         }
     }
-
 }
 
 
-int Crack::giveDofPoolSize() const
+int Crack :: giveDofPoolSize() const
 {
-      return this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() + 5;
+    return this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs() + 5;
 }
-
 } // end namespace oofem

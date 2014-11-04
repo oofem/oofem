@@ -20,7 +20,8 @@ namespace oofem {
  * @author Erik Svenning
  *  August 2013
  */
-class TipInfo {
+class TipInfo
+{
 public:
     TipInfo() { }
     ~TipInfo() { }

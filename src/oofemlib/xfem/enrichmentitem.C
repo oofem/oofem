@@ -108,8 +108,8 @@ IRResultType EnrichmentItem :: initializeFrom(InputRecord *ir)
 }
 
 
-int 
-EnrichmentItem::giveDofPoolSize() const
+int
+EnrichmentItem :: giveDofPoolSize() const
 {
     return this->giveEnrichesDofsWithIdArray()->giveSize() * this->giveNumberOfEnrDofs();
 }
@@ -147,25 +147,28 @@ int EnrichmentItem :: giveNumDofManEnrichments(const DofManager &iDMan) const
     auto res = mNodeEnrMarkerMap.find(nodeInd);
 
     if ( res != mNodeEnrMarkerMap.end() ) {
-
-        switch(res->second) {
+        switch ( res->second ) {
         case NodeEnr_NONE:
             return 0;
+
             break;
         case NodeEnr_BULK:
             return 1;
+
             break;
         case NodeEnr_START_TIP:
             return mpEnrichmentFrontStart->giveNumEnrichments(iDMan);
+
             break;
         case NodeEnr_END_TIP:
             return mpEnrichmentFrontEnd->giveNumEnrichments(iDMan);
+
             break;
         case NodeEnr_START_AND_END_TIP:
             return mpEnrichmentFrontStart->giveNumEnrichments(iDMan) + mpEnrichmentFrontEnd->giveNumEnrichments(iDMan);
+
             break;
         }
-
     }
 
     return 0;
@@ -178,7 +181,7 @@ bool EnrichmentItem :: isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSe
 
 bool EnrichmentItem :: hasPropagatingFronts() const
 {
-    if(mpPropagationLaw == NULL) {
+    if ( mpPropagationLaw == NULL ) {
         return false;
     }
 
@@ -239,7 +242,7 @@ bool EnrichmentItem :: evalLevelSetNormalInNode(double &oLevelSet, int iNodeInd,
     if ( res != mLevelSetNormalDirMap.end() ) {
         oLevelSet = res->second;
         return true;
-    } else   {
+    } else {
         oLevelSet = 0.0;
         return false;
     }
@@ -251,7 +254,7 @@ bool EnrichmentItem :: evalLevelSetTangInNode(double &oLevelSet, int iNodeInd, c
     if ( res != mLevelSetTangDirMap.end() ) {
         oLevelSet = res->second;
         return true;
-    } else   {
+    } else {
         oLevelSet = 0.0;
         return false;
     }
@@ -261,9 +264,9 @@ bool EnrichmentItem :: evalNodeEnrMarkerInNode(double &oNodeEnrMarker, int iNode
 {
     auto res = mNodeEnrMarkerMap.find(iNodeInd);
     if ( res != mNodeEnrMarkerMap.end() ) {
-        oNodeEnrMarker = double(res->second);
+        oNodeEnrMarker = double( res->second );
         return true;
-    } else   {
+    } else {
         oNodeEnrMarker = 0.0;
         return false;
     }
@@ -287,14 +290,13 @@ void EnrichmentItem :: createEnrichedDofs()
             //printf("dofMan %i is enriched \n", dMan->giveNumber());
             computeEnrichedDofManDofIdArray(dofIdArray, * dMan);
             for ( auto &dofid: dofIdArray ) {
-
                 if ( !dMan->hasDofID( ( DofIDItem ) ( dofid ) ) ) {
                     if ( mInheritBoundaryConditions ) {
                         // Check if the other dofs in the dof manager have
                         // Dirichlet BCs. If so, let the new enriched dof
                         // inherit the same BC.
                         bool foundBC = false;
-                        for( Dof *dof: *dMan ) {
+                        for ( Dof *dof: *dMan ) {
                             if ( dof->giveBcId() > 0 ) {
                                 foundBC = true;
                                 bcIndex = dof->giveBcId();
@@ -304,14 +306,14 @@ void EnrichmentItem :: createEnrichedDofs()
 
                         if ( foundBC ) {
                             // Append dof with BC
-                            dMan->appendDof( new MasterDof( dMan, bcIndex, icIndex, ( DofIDItem ) dofid ) );
-                        } else   {
+                            dMan->appendDof( new MasterDof(dMan, bcIndex, icIndex, ( DofIDItem ) dofid) );
+                        } else {
                             // No BC found, append enriched dof without BC
-                            dMan->appendDof( new MasterDof( dMan, ( DofIDItem ) dofid ) );
+                            dMan->appendDof( new MasterDof(dMan, ( DofIDItem ) dofid) );
                         }
-                    } else   {
+                    } else {
                         // Append enriched dof without BC
-                        dMan->appendDof( new MasterDof( dMan, ( DofIDItem ) dofid ) );
+                        dMan->appendDof( new MasterDof(dMan, ( DofIDItem ) dofid) );
                     }
                 }
             }
@@ -388,40 +390,40 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
 
     const double pi = 3.14159265359;
 
-//    if( q.dotProduct(iT) > 0.0 ) {
-//        oTheta = asin( q.dotProduct(iN) );
-//    } else {
-//        if ( q.dotProduct(iN) > 0.0 ) {
-//            oTheta = pi - asin( q.dotProduct(iN) );
-//        } else {
-//            oTheta = -pi - asin( q.dotProduct(iN) );
-//        }
-//    }
+    //    if( q.dotProduct(iT) > 0.0 ) {
+    //        oTheta = asin( q.dotProduct(iN) );
+    //    } else {
+    //        if ( q.dotProduct(iN) > 0.0 ) {
+    //            oTheta = pi - asin( q.dotProduct(iN) );
+    //        } else {
+    //            oTheta = -pi - asin( q.dotProduct(iN) );
+    //        }
+    //    }
 
 
     const double tol_q = 1.0e-3;
     double phi = iEfInput.mLevelSet;
 
-    if( iFlipTangent ) {
+    if ( iFlipTangent ) {
         phi *= -1.0;
     }
 
     double phi_r = 0.0;
     if ( oR > tol ) {
-        phi_r = fabs(phi/oR);
+        phi_r = fabs(phi / oR);
     }
 
-    if(phi_r > 1.0-XfemTolerances::giveApproxZero()) {
-        phi_r = 1.0-XfemTolerances::giveApproxZero();
+    if ( phi_r > 1.0 - XfemTolerances :: giveApproxZero() ) {
+        phi_r = 1.0 - XfemTolerances :: giveApproxZero();
     }
 
-    if( iEfInput.mArcPos < tol_q || iEfInput.mArcPos > (1.0-tol_q) ) {
+    if ( iEfInput.mArcPos < tol_q || iEfInput.mArcPos > ( 1.0 - tol_q ) ) {
         double q_dot_n = q.dotProduct(iN);
-        if(q_dot_n > 1.0-XfemTolerances::giveApproxZero()) {
-            q_dot_n = 1.0-XfemTolerances::giveApproxZero();
+        if ( q_dot_n > 1.0 - XfemTolerances :: giveApproxZero() ) {
+            q_dot_n = 1.0 - XfemTolerances :: giveApproxZero();
         }
-        
-        oTheta = asin( q_dot_n );
+
+        oTheta = asin(q_dot_n);
     } else {
         if ( phi > 0.0 ) {
             oTheta = pi - asin( fabs(phi_r) );
@@ -454,8 +456,7 @@ bool EnrichmentItem :: tipIsTouchingEI(const TipInfo &iTipInfo)
     SpatialLocalizer *localizer = giveDomain()->giveSpatialLocalizer();
 
     Element *tipEl = localizer->giveElementContainingPoint(iTipInfo.mGlobalCoord);
-    if(tipEl != NULL) {
-
+    if ( tipEl != NULL ) {
         // Check if the candidate tip is located on the current crack
         FloatArray N;
         FloatArray locCoord;
@@ -464,18 +465,16 @@ bool EnrichmentItem :: tipIsTouchingEI(const TipInfo &iTipInfo)
         interp->evalN( N, locCoord, FEIElementGeometryWrapper(tipEl) );
 
         double normalSignDist;
-        evalLevelSetNormal(normalSignDist, iTipInfo.mGlobalCoord, N, tipEl->giveDofManArray() );
+        evalLevelSetNormal( normalSignDist, iTipInfo.mGlobalCoord, N, tipEl->giveDofManArray() );
 
         double tangSignDist;
-        evalLevelSetTangential(tangSignDist, iTipInfo.mGlobalCoord, N, tipEl->giveDofManArray() );
+        evalLevelSetTangential( tangSignDist, iTipInfo.mGlobalCoord, N, tipEl->giveDofManArray() );
 
-        if( fabs(normalSignDist) < tol && tangSignDist > tol ) {
+        if ( fabs(normalSignDist) < tol && tangSignDist > tol ) {
             return true;
         }
     }
 
     return false;
 }
-
-
 } // end namespace oofem

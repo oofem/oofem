@@ -55,19 +55,16 @@
 #include <set>
 
 namespace oofem {
-
 //REGISTER_EnrichmentItem(GeometryBasedEI)
 
-GeometryBasedEI::GeometryBasedEI(int n, XfemManager *xm, Domain *aDomain) :
-EnrichmentItem(n, xm, aDomain),
-mpBasicGeometry(NULL)
-{
+GeometryBasedEI :: GeometryBasedEI(int n, XfemManager *xm, Domain *aDomain) :
+    EnrichmentItem(n, xm, aDomain),
+    mpBasicGeometry(NULL)
+{}
 
-}
-
-GeometryBasedEI::~GeometryBasedEI()
+GeometryBasedEI :: ~GeometryBasedEI()
 {
-    if(mpBasicGeometry != NULL) {
+    if ( mpBasicGeometry != NULL ) {
         delete mpBasicGeometry;
         mpBasicGeometry = NULL;
     }
@@ -97,7 +94,7 @@ int GeometryBasedEI :: instanciateYourself(DataReader *dr)
     // Instantiate geometry
     mir = dr->giveInputRecord(DataReader :: IR_geoRec, 1);
     result = mir->giveRecordKeywordField(name);
-    mpBasicGeometry = classFactory.createGeometry(name.c_str());
+    mpBasicGeometry = classFactory.createGeometry( name.c_str() );
     if ( mpBasicGeometry == NULL ) {
         OOFEM_ERROR( "unknown geometry domain (%s)", name.c_str() );
     }
@@ -157,8 +154,8 @@ int GeometryBasedEI :: instanciateYourself(DataReader *dr)
 
 
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
-//    mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
-    this->updateNodeEnrMarker(*xMan);
+    //    mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
+    this->updateNodeEnrMarker(* xMan);
 
 
     writeVtkDebug();
@@ -211,18 +208,17 @@ void GeometryBasedEI :: appendInputRecords(DynamicDataReader &oDR)
     }
 }
 
-void GeometryBasedEI::updateGeometry()
+void GeometryBasedEI :: updateGeometry()
 {
     // Update enrichments ...
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
 
-    this->updateNodeEnrMarker(*xMan);
+    this->updateNodeEnrMarker(* xMan);
     // ... and create new dofs if necessary.
     createEnrichedDofs();
-
 }
 
-void GeometryBasedEI::updateNodeEnrMarker(XfemManager &ixFemMan)
+void GeometryBasedEI :: updateNodeEnrMarker(XfemManager &ixFemMan)
 {
     updateLevelSets(ixFemMan);
 
@@ -258,7 +254,7 @@ void GeometryBasedEI::updateNodeEnrMarker(XfemManager &ixFemMan)
             int nGlob = el->giveNode(elNodeInd)->giveGlobalNumber();
 
             double levelSetNormalNode = 0.0;
-            if ( evalLevelSetNormalInNode(levelSetNormalNode, nGlob, el->giveNode(elNodeInd)->giveNodeCoordinates() ) ) {
+            if ( evalLevelSetNormalInNode( levelSetNormalNode, nGlob, el->giveNode(elNodeInd)->giveNodeCoordinates() ) ) {
                 minSignPhi = std :: min( sgn(minSignPhi), sgn(levelSetNormalNode) );
                 maxSignPhi = std :: max( sgn(maxSignPhi), sgn(levelSetNormalNode) );
 
@@ -285,13 +281,13 @@ void GeometryBasedEI::updateNodeEnrMarker(XfemManager &ixFemMan)
                 int niLoc = bNodes.at(1);
                 int niGlob = el->giveNode(niLoc)->giveGlobalNumber();
                 const FloatArray &nodePosI = el->giveNode(niLoc)->giveNodeCoordinates();
-                int njLoc = bNodes.at( 2 );
+                int njLoc = bNodes.at(2);
                 int njGlob = el->giveNode(njLoc)->giveGlobalNumber();
                 const FloatArray &nodePosJ = el->giveNode(njLoc)->giveNodeCoordinates();
 
                 double levelSetNormalNodeI = 0.0;
                 double levelSetNormalNodeJ = 0.0;
-                if ( evalLevelSetNormalInNode(levelSetNormalNodeI, niGlob, nodePosI) && evalLevelSetNormalInNode(levelSetNormalNodeJ, njGlob,nodePosJ) ) {
+                if ( evalLevelSetNormalInNode(levelSetNormalNodeI, niGlob, nodePosI) && evalLevelSetNormalInNode(levelSetNormalNodeJ, njGlob, nodePosJ) ) {
                     if ( levelSetNormalNodeI * levelSetNormalNodeJ < mLevelSetTol ) {
                         double xi = calcXiZeroLevel(levelSetNormalNodeI, levelSetNormalNodeJ);
 
@@ -380,8 +376,8 @@ void GeometryBasedEI :: evaluateEnrFuncInNode(std :: vector< double > &oEnrFunc,
     int nodeInd = iNode.giveNumber();
     this->evalLevelSetNormalInNode(levelSetGP, nodeInd, globalCoord);
 
-//    const int dim = this->giveDomain()->giveNumberOfSpatialDimensions();
-//    FloatArray gradLevelSetGP(dim);
+    //    const int dim = this->giveDomain()->giveNumberOfSpatialDimensions();
+    //    FloatArray gradLevelSetGP(dim);
 
     double tangDist = 0.0, minDistArcPos = 0.0;
     mpBasicGeometry->computeTangentialSignDist(tangDist, globalCoord, minDistArcPos);
@@ -402,8 +398,7 @@ void GeometryBasedEI :: evaluateEnrFuncInNode(std :: vector< double > &oEnrFunc,
     } else {
         auto res = mNodeEnrMarkerMap.find(nodeInd);
         if ( res != mNodeEnrMarkerMap.end() ) {
-
-            switch(res->second) {
+            switch ( res->second ) {
             case NodeEnr_NONE:
                 break;
             case NodeEnr_BULK:
@@ -422,19 +417,18 @@ void GeometryBasedEI :: evaluateEnrFuncInNode(std :: vector< double > &oEnrFunc,
                 mpEnrichmentFrontEnd->evaluateEnrFuncAt(oEnrFunc, efInput);
                 break;
             }
-        } else   {
+        } else {
             printf("In EnrichmentItem :: evaluateEnrFuncAt: mNodeEnrMarkerMap not found for iNodeInd %d\n", nodeInd);
         }
     }
-
 }
 
 void GeometryBasedEI :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl) const
 {
     FloatArray N;
-    iEl.giveInterpolation()->evalN( N, iLocalCoord, FEIElementGeometryWrapper(&iEl) );
+    iEl.giveInterpolation()->evalN( N, iLocalCoord, FEIElementGeometryWrapper(& iEl) );
 
-    evaluateEnrFuncAt(oEnrFunc, iGlobalCoord, iLocalCoord, iNodeInd, iEl, N, iEl.giveDofManArray());
+    evaluateEnrFuncAt( oEnrFunc, iGlobalCoord, iLocalCoord, iNodeInd, iEl, N, iEl.giveDofManArray() );
 }
 
 void GeometryBasedEI :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl, const FloatArray &iN, const IntArray &iElNodes) const
@@ -442,11 +436,13 @@ void GeometryBasedEI :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, con
     double levelSetGP = 0.0;
     evalLevelSetNormal(levelSetGP, iGlobalCoord, iN, iElNodes);
 
-//    const int dim = this->giveDomain()->giveNumberOfSpatialDimensions();
-//    FloatArray gradLevelSetGP(dim);
+    //    const int dim = this->giveDomain()->giveNumberOfSpatialDimensions();
+    //    FloatArray gradLevelSetGP(dim);
 
     double tangDist = 0.0, minDistArcPos = 0.0;
-    const FloatArray globalCoord = {iGlobalCoord[0], iGlobalCoord[1]};
+    const FloatArray globalCoord = {
+        iGlobalCoord [ 0 ], iGlobalCoord [ 1 ]
+    };
     mpBasicGeometry->computeTangentialSignDist(tangDist, globalCoord, minDistArcPos);
 
     FloatArray edGlobalCoord, localTangDir;
@@ -465,8 +461,7 @@ void GeometryBasedEI :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, con
     } else {
         auto res = mNodeEnrMarkerMap.find(iNodeInd);
         if ( res != mNodeEnrMarkerMap.end() ) {
-
-            switch(res->second) {
+            switch ( res->second ) {
             case NodeEnr_NONE:
                 break;
             case NodeEnr_BULK:
@@ -485,11 +480,10 @@ void GeometryBasedEI :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, con
                 mpEnrichmentFrontEnd->evaluateEnrFuncAt(oEnrFunc, efInput);
                 break;
             }
-        } else   {
+        } else {
             printf("In EnrichmentItem :: evaluateEnrFuncAt: mNodeEnrMarkerMap not found for iNodeInd %d\n", iNodeInd);
         }
     }
-
 }
 
 void GeometryBasedEI :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl) const
@@ -497,18 +491,17 @@ void GeometryBasedEI :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnr
     FloatMatrix dNdx;
     FloatArray N;
     FEInterpolation *interp = iEl.giveInterpolation();
-    const FEIElementGeometryWrapper geomWrapper(&iEl);
-    interp->evaldNdx( dNdx, iLocalCoord, geomWrapper );
-    interp->evalN( N, iLocalCoord, geomWrapper );
+    const FEIElementGeometryWrapper geomWrapper(& iEl);
+    interp->evaldNdx(dNdx, iLocalCoord, geomWrapper);
+    interp->evalN(N, iLocalCoord, geomWrapper);
 
-    evaluateEnrFuncDerivAt(oEnrFuncDeriv, iGlobalCoord, iLocalCoord, iNodeInd, iEl, N, dNdx, iEl.giveDofManArray());
+    evaluateEnrFuncDerivAt( oEnrFuncDeriv, iGlobalCoord, iLocalCoord, iNodeInd, iEl, N, dNdx, iEl.giveDofManArray() );
 }
 
 void GeometryBasedEI :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl, const FloatArray &iN, const FloatMatrix &idNdX, const IntArray &iElNodes) const
 {
     auto res = mNodeEnrMarkerMap.find(iNodeInd);
     if ( res != mNodeEnrMarkerMap.end() ) {
-
         double levelSetGP = 0.0;
         evalLevelSetNormal(levelSetGP, iGlobalCoord, iN, iElNodes);
 
@@ -527,7 +520,7 @@ void GeometryBasedEI :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnr
 
         const EfInput efInput(iGlobalCoord, levelSetGP, iNodeInd, edGlobalCoord, minDistArcPos, localTangDir);
 
-        switch(res->second) {
+        switch ( res->second ) {
         case NodeEnr_NONE:
             break;
         case NodeEnr_BULK:
@@ -545,10 +538,9 @@ void GeometryBasedEI :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnr
             mpEnrichmentFrontEnd->evaluateEnrFuncDerivAt(oEnrFuncDeriv, efInput, gradLevelSetGP);
             break;
         }
-    } else   {
+    } else {
         printf("In EnrichmentItem :: evaluateEnrFuncDerivAt: mNodeEnrMarkerMap not found for iNodeInd %d\n", iNodeInd);
     }
-
 }
 
 void GeometryBasedEI :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, int iNodeInd, GaussPoint &iGP, bool iGPLivesOnCurrentCrack) const
@@ -557,24 +549,22 @@ void GeometryBasedEI :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJu
 
     SpatialLocalizer *localizer = this->giveDomain()->giveSpatialLocalizer();
 
-    Element *el = localizer->giveElementContainingPoint(iGP.giveGlobalCoordinates());
-    if(el != NULL) {
-
+    Element *el = localizer->giveElementContainingPoint( iGP.giveGlobalCoordinates() );
+    if ( el != NULL ) {
         FloatArray N;
-        FloatArray locCoord = *(iGP.giveNaturalCoordinates());
-//        el->computeLocalCoordinates(locCoord, iGlobalCoord);
+        FloatArray locCoord = * ( iGP.giveNaturalCoordinates() );
+        //        el->computeLocalCoordinates(locCoord, iGlobalCoord);
         FEInterpolation *interp = el->giveInterpolation();
         interp->evalN( N, locCoord, FEIElementGeometryWrapper(el) );
 
-        evalLevelSetNormal(normalSignDist, iGP.giveGlobalCoordinates(), N, el->giveDofManArray() );
+        evalLevelSetNormal( normalSignDist, iGP.giveGlobalCoordinates(), N, el->giveDofManArray() );
     }
 
-//    this->interpLevelSet(normalSignDist, iGP.giveGlobalCoordinates() );
+    //    this->interpLevelSet(normalSignDist, iGP.giveGlobalCoordinates() );
 
     auto res = mNodeEnrMarkerMap.find(iNodeInd);
     if ( res != mNodeEnrMarkerMap.end() ) {
-
-        switch(res->second) {
+        switch ( res->second ) {
         case NodeEnr_NONE:
             break;
         case NodeEnr_BULK:
@@ -592,7 +582,7 @@ void GeometryBasedEI :: evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJu
             mpEnrichmentFrontEnd->evaluateEnrFuncJumps(oEnrFuncJumps, iGP, iNodeInd, iGPLivesOnCurrentCrack, normalSignDist);
             break;
         }
-    } else   {
+    } else {
         printf("In EnrichmentItem :: evaluateEnrFuncDerivAt: evaluateEnrFuncJumps not found for iNodeInd %d\n", iNodeInd);
     }
 }
@@ -615,21 +605,21 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
 
             int nsLoc = bNodes.at(1);
             int nsGlob = element->giveNode(nsLoc)->giveGlobalNumber();
-            int neLoc = bNodes.at( 2 );
+            int neLoc = bNodes.at(2);
             int neGlob = element->giveNode(neLoc)->giveGlobalNumber();
 
             double phiS = 1.0;
-            bool foundPhiS = evalLevelSetNormalInNode(phiS, nsGlob, element->giveNode(nsLoc)->giveNodeCoordinates());
+            bool foundPhiS = evalLevelSetNormalInNode( phiS, nsGlob, element->giveNode(nsLoc)->giveNodeCoordinates() );
 
             double phiE = 1.0;
-            bool foundPhiE = evalLevelSetNormalInNode(phiE, neGlob, element->giveNode(neLoc)->giveNodeCoordinates());
+            bool foundPhiE = evalLevelSetNormalInNode( phiE, neGlob, element->giveNode(neLoc)->giveNodeCoordinates() );
 
-            const FloatArray &xS = *(element->giveNode(nsLoc)->giveCoordinates() );
-            const FloatArray &xE = *(element->giveNode(neLoc)->giveCoordinates() );
+            const FloatArray &xS = * ( element->giveNode(nsLoc)->giveCoordinates() );
+            const FloatArray &xE = * ( element->giveNode(neLoc)->giveCoordinates() );
             const double edgeLength2 = xS.distance_square(xE);
             const double gammaRelTol = 1.0e-2;
 
-            if ( (foundPhiS && foundPhiE) && phiS * phiE < mLevelSetRelTol*mLevelSetRelTol*edgeLength2 ) {
+            if ( ( foundPhiS && foundPhiE ) && phiS * phiE < mLevelSetRelTol * mLevelSetRelTol * edgeLength2 ) {
                 // Intersection detected
 
                 double xi = calcXiZeroLevel(phiS, phiE);
@@ -648,7 +638,7 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
 
 
                 // If we are inside in tangential direction
-                if ( gamma > -gammaRelTol*sqrt(edgeLength2) ) {
+                if ( gamma > -gammaRelTol * sqrt(edgeLength2) ) {
                     if ( fabs(phiS - phiE) < mLevelSetTol ) {
                         // If the crack is parallel to the edge.
 
@@ -800,34 +790,30 @@ void GeometryBasedEI :: computeIntersectionPoints(std :: vector< FloatArray > &o
         bool levelSetDefinedInAllNodes = true;
         for ( int i = 1; i <= Ns.giveSize(); i++ ) {
             double phiSNode = 0.0;
-            if ( evalLevelSetNormalInNode(phiSNode, elNodes [ i - 1 ], element->giveNode(i)->giveNodeCoordinates()) ) {
+            if ( evalLevelSetNormalInNode( phiSNode, elNodes [ i - 1 ], element->giveNode(i)->giveNodeCoordinates() ) ) {
                 phiS += Ns.at(i) * phiSNode;
-            }
-            else {
+            } else   {
                 levelSetDefinedInAllNodes = false;
             }
 
             double gammaSNode = 0.0;
-            if ( evalLevelSetTangInNode(gammaSNode, elNodes [ i - 1 ], element->giveNode(i)->giveNodeCoordinates()) ) {
+            if ( evalLevelSetTangInNode( gammaSNode, elNodes [ i - 1 ], element->giveNode(i)->giveNodeCoordinates() ) ) {
                 gammaS += Ns.at(i) * gammaSNode;
-            }
-            else {
+            } else   {
                 levelSetDefinedInAllNodes = false;
             }
 
             double phiENode = 0.0;
-            if ( evalLevelSetNormalInNode(phiENode, elNodes [ i - 1 ], element->giveNode(i)->giveNodeCoordinates()) ) {
+            if ( evalLevelSetNormalInNode( phiENode, elNodes [ i - 1 ], element->giveNode(i)->giveNodeCoordinates() ) ) {
                 phiE += Ne.at(i) * phiENode;
-            }
-            else {
+            } else   {
                 levelSetDefinedInAllNodes = false;
             }
 
             double gammaENode = 0.0;
-            if ( evalLevelSetTangInNode(gammaENode, elNodes [ i - 1 ], element->giveNode(i)->giveNodeCoordinates()) ) {
+            if ( evalLevelSetTangInNode( gammaENode, elNodes [ i - 1 ], element->giveNode(i)->giveNodeCoordinates() ) ) {
                 gammaE += Ne.at(i) * gammaENode;
-            }
-            else {
+            } else   {
                 levelSetDefinedInAllNodes = false;
             }
         }
@@ -956,15 +942,14 @@ void GeometryBasedEI :: writeVtkDebug() const
                 pl->printVTK(tStepInd, number);
             }
         }
-
     }
 #endif
 
-//    PolygonLine *pl = dynamic_cast< PolygonLine * >( this->mpBasicGeometry );
-//    if(pl != NULL) {
-//        int tStepInd = 0;
-//        pl->printVTK(tStepInd, number);
-//    }
+    //    PolygonLine *pl = dynamic_cast< PolygonLine * >( this->mpBasicGeometry );
+    //    if(pl != NULL) {
+    //        int tStepInd = 0;
+    //        pl->printVTK(tStepInd, number);
+    //    }
 }
 
 void GeometryBasedEI :: giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const
@@ -975,19 +960,18 @@ void GeometryBasedEI :: giveSubPolygon(std :: vector< FloatArray > &oPoints, con
 void GeometryBasedEI :: propagateFronts()
 {
     TipPropagation tipPropStart;
-    if( mpPropagationLaw->propagateInterface(*giveDomain(), *mpEnrichmentFrontStart, tipPropStart) ) {
-//        mpEnrichmentDomain->propagateTip(tipPropStart);
+    if ( mpPropagationLaw->propagateInterface(* giveDomain(), * mpEnrichmentFrontStart, tipPropStart) ) {
+        //        mpEnrichmentDomain->propagateTip(tipPropStart);
         // TODO: Generalize
         // Propagate start point
         FloatArray pos( mpBasicGeometry->giveVertex(1) );
         pos.add(tipPropStart.mPropagationLength, tipPropStart.mPropagationDir);
         mpBasicGeometry->insertVertexFront(pos);
-
     }
 
     TipPropagation tipPropEnd;
-    if( mpPropagationLaw->propagateInterface(*giveDomain(), *mpEnrichmentFrontEnd, tipPropEnd) ) {
-//        mpEnrichmentDomain->propagateTip(tipPropEnd);
+    if ( mpPropagationLaw->propagateInterface(* giveDomain(), * mpEnrichmentFrontEnd, tipPropEnd) ) {
+        //        mpEnrichmentDomain->propagateTip(tipPropEnd);
         // TODO: Generalize
         // Propagate end point
         FloatArray pos( mpBasicGeometry->giveVertex( mpBasicGeometry->giveNrVertices() ) );
@@ -1019,7 +1003,9 @@ bool GeometryBasedEI :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos,
     mpBasicGeometry->giveTips(tipInfoStart, tipInfoEnd);
 
 
-    std :: vector< TipInfo >tipInfos = {tipInfoStart, tipInfoEnd};
+    std :: vector< TipInfo >tipInfos = {
+        tipInfoStart, tipInfoEnd
+    };
 
     double minDist2 = std :: numeric_limits< double > :: max();
     size_t minIndex = 0;
@@ -1035,12 +1021,11 @@ bool GeometryBasedEI :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos,
 
     if ( !foundTip ) {
         return false;
-    } else   {
-
+    } else {
         // Check if the tip point is inside the element
         const FloatArray &globCoord = tipInfos [ minIndex ].mGlobalCoord;
         FloatArray locCoord;
-        if(!iEl.computeLocalCoordinates(locCoord, globCoord)) {
+        if ( !iEl.computeLocalCoordinates(locCoord, globCoord) ) {
             return false;
         }
 
@@ -1057,12 +1042,12 @@ void GeometryBasedEI :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
 
     // ... increase the radius to cover the support of
     //     the enrichment front ...
-    oRadius += max(mpEnrichmentFrontStart->giveSupportRadius(), mpEnrichmentFrontEnd->giveSupportRadius());
+    oRadius += max( mpEnrichmentFrontStart->giveSupportRadius(), mpEnrichmentFrontEnd->giveSupportRadius() );
 
 
-    if(domain->giveNumberOfSpatialDimensions() == 2) {
+    if ( domain->giveNumberOfSpatialDimensions() == 2 ) {
         // Compute mean area if applicable
-        double meanArea = domain->giveArea()/domain->giveNumberOfElements();
+        double meanArea = domain->giveArea() / domain->giveNumberOfElements();
         double meanLength = sqrt(meanArea);
         //printf("meanLength: %e\n", meanLength );
 
@@ -1072,5 +1057,4 @@ void GeometryBasedEI :: giveBoundingSphere(FloatArray &oCenter, double &oRadius)
     // ... and make sure that all nodes of partly cut elements are included.
     oRadius *= 2.0;     // TODO: Compute a better estimate based on maximum element size. /ES
 }
-
 } /* namespace oofem */

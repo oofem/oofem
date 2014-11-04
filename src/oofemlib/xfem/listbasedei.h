@@ -41,7 +41,6 @@
 #include "enrichmentitem.h"
 
 namespace oofem {
-
 class XfemManager;
 class Domain;
 
@@ -50,7 +49,8 @@ class Domain;
  * @author Erik Svenning
  * @date Sep 9, 2014
  */
-class ListBasedEI : public EnrichmentItem {
+class ListBasedEI : public EnrichmentItem
+{
 public:
     ListBasedEI(int n, XfemManager *xm, Domain *aDomain);
     virtual ~ListBasedEI();
@@ -64,15 +64,13 @@ public:
 
     virtual bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos,  Element &iEl, const FloatArray &iElCenter) const;
 
-    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius) {OOFEM_ERROR("Not implemented.")}
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius) { OOFEM_ERROR("Not implemented.") }
 
 protected:
     std :: vector< int >dofManList;
     double xi;
     int setNumber;
-
 };
-
 } /* namespace oofem */
 
 #endif /* LISTBASEDEI_H_ */
