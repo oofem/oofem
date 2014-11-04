@@ -788,7 +788,7 @@ void PrescribedGradientBCWeak::createTractionMesh(bool iEnforceCornerPeriodicity
         if(xfemElInt != NULL && domain->hasXfemManager() ) {
             std::vector<Line> segments;
             std::vector<FloatArray> intersecPoints;
-            xfemElInt->partitionEdgeSegment( boundary, mTangDistPadding, segments, intersecPoints );
+            xfemElInt->partitionEdgeSegment( boundary, segments, intersecPoints, mTangDistPadding );
 
             for(size_t i = 0; i < intersecPoints.size(); i++) {
 

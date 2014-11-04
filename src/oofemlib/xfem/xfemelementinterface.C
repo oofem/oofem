@@ -761,7 +761,7 @@ void XfemElementInterface :: putPointsInCorrectPartition(std :: vector< std :: v
     }
 }
 
-void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, const double &iTangDistPadding, std :: vector< Line > &oSegments, std::vector<FloatArray> &oIntersectionPoints)
+void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< Line > &oSegments, std::vector<FloatArray> &oIntersectionPoints, const double &iTangDistPadding)
 {
     const double levelSetTol2 = 1.0e-12;
 //    const double gammaPadding = 0.001;
