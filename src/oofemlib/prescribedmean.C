@@ -60,6 +60,8 @@ PrescribedMean :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, dofid, _IFT_PrescribedMean_DofID);
     IR_GIVE_FIELD(ir, set, _IFT_GeneralBoundaryCondition_set);
 
+    elementEdges = false;
+    IR_GIVE_OPTIONAL_FIELD(ir, elementEdges, _IFT_PrescribedMean_Edge);
 
     int dofid = this->domain->giveNextFreeDofID();
     lambdaIDs.clear();
@@ -84,7 +86,6 @@ PrescribedMean :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
 
     computeDomainSize();
 
-    //
     IntArray c_loc, r_loc;
     lambdaDman->giveLocationArray(lambdaIDs, r_loc, r_s);
     lambdaDman->giveLocationArray(lambdaIDs, c_loc, c_s);
@@ -94,36 +95,52 @@ PrescribedMean :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
         Element *thisElement = this->giveDomain()->giveElement(elementID);
         FEInterpolation *interpolator = thisElement->giveInterpolation(DofIDItem(dofid));
 
-        std :: unique_ptr< IntegrationRule >iRule(interpolator->giveBoundaryIntegrationRule(3, sides.at(i)));
+        IntegrationRule *iRule = (elementEdges) ? (interpolator->giveBoundaryIntegrationRule(3, sides.at(i))) :
+                                                  (interpolator->giveIntegrationRule(3));
 
         for ( GaussPoint * gp: * iRule ) {
             FloatArray *lcoords = gp->giveNaturalCoordinates();
-            FloatArray a, N;
+            FloatArray N; //, a;
             FloatMatrix temp, tempT;
+            double detJ = 0.0;
             IntArray boundaryNodes, dofids={(DofIDItem) this->dofid}, r_Sideloc, c_Sideloc;
 
-            // Compute integral
-            interpolator->boundaryGiveNodes( boundaryNodes, sides.at(i) );
+            if (elementEdges) {
+                // Compute boundary integral
+                interpolator->boundaryGiveNodes( boundaryNodes, sides.at(i) );
+                interpolator->boundaryEvalN(N, sides.at(i), *lcoords, FEIElementGeometryWrapper(thisElement));
+                detJ = fabs ( interpolator->boundaryGiveTransformationJacobian(sides.at(i), *lcoords, FEIElementGeometryWrapper(thisElement)) );
+                // Retrieve locations for dofs on boundary
+                thisElement->giveBoundaryLocationArray(r_Sideloc, boundaryNodes, dofids, r_s);
+                thisElement->giveBoundaryLocationArray(c_Sideloc, boundaryNodes, dofids, c_s);
+            } else {
+                interpolator->evalN(N, *lcoords, FEIElementGeometryWrapper(thisElement));
+                detJ = fabs ( interpolator->giveTransformationJacobian(*lcoords, FEIElementGeometryWrapper(thisElement) ) );
+                IntArray DofIDStemp, rloc, cloc;
 
-            thisElement->computeBoundaryVectorOf(boundaryNodes, dofids, VM_Total, tStep, a);
+                thisElement->giveLocationArray(rloc, r_s, &DofIDStemp);
+                thisElement->giveLocationArray(cloc, c_s, &DofIDStemp);
 
-            interpolator->boundaryEvalN(N, sides.at(i), *lcoords, FEIElementGeometryWrapper(thisElement));
-            double detJ = fabs ( interpolator->boundaryGiveTransformationJacobian(sides.at(i), *lcoords, FEIElementGeometryWrapper(thisElement)) );
+                r_Sideloc.clear();
+                c_Sideloc.clear();
+                for (int j=1; j<=DofIDStemp.giveSize(); j++) {
+                    if (DofIDStemp.at(j)==dofids.at(1)) {
+                        r_Sideloc.followedBy({rloc.at(j)});
+                        c_Sideloc.followedBy({cloc.at(j)});
+                    }
+                }
+            }
 
             // delta p part:
             temp = N*detJ*gp->giveWeight()*(1.0/domainSize);
-//            pressureEqns = N*detJ*gp->giveWeight()*(1.0/domainSize);
-//            pressureEqns.printYourself();
-
-            // Assemble result into answer
-            thisElement->giveBoundaryLocationArray(r_Sideloc, boundaryNodes, dofids, r_s);
-            thisElement->giveBoundaryLocationArray(c_Sideloc, boundaryNodes, dofids, c_s);
-
             tempT.beTranspositionOf(temp);
 
             answer->assemble(r_Sideloc, c_loc, temp);
             answer->assemble(r_loc, c_Sideloc, tempT);
         }
+
+        delete iRule;
+
     }
 
 }
@@ -159,33 +176,50 @@ PrescribedMean :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
         Element *thisElement = this->giveDomain()->giveElement(elementID);
         FEInterpolation *interpolator = thisElement->giveInterpolation(DofIDItem(dofid));
 
-        std :: unique_ptr< IntegrationRule >iRule(interpolator->giveBoundaryIntegrationRule(3, sides.at(i)));
+        IntegrationRule *iRule = (elementEdges) ? (interpolator->giveBoundaryIntegrationRule(3, sides.at(i))) :
+                                                  (interpolator->giveIntegrationRule(3));
 
         for ( GaussPoint * gp: * iRule ) {
             FloatArray *lcoords = gp->giveNaturalCoordinates();
             FloatArray a, N, pressureEqns, lambdaEqns;
             IntArray boundaryNodes, dofids={(DofIDItem) this->dofid}, locationArray;
+            double detJ=0.0;
 
-            // Compute integral
-            interpolator->boundaryGiveNodes( boundaryNodes, sides.at(i) );
+            if (elementEdges) {
+                // Compute integral
+                interpolator->boundaryGiveNodes( boundaryNodes, sides.at(i) );
+                thisElement->computeBoundaryVectorOf(boundaryNodes, dofids, VM_Total, tStep, a);
+                interpolator->boundaryEvalN(N, sides.at(i), *lcoords, FEIElementGeometryWrapper(thisElement));
+                detJ = fabs ( interpolator->boundaryGiveTransformationJacobian(sides.at(i), *lcoords, FEIElementGeometryWrapper(thisElement)) );
 
-            thisElement->computeBoundaryVectorOf(boundaryNodes, dofids, VM_Total, tStep, a);
+                // Retrieve locations for dofs with dofids
+                thisElement->giveBoundaryLocationArray(locationArray, boundaryNodes, dofids, s);
+            } else {
+                thisElement->computeVectorOf(dofids, VM_Total, tStep, a);
+                interpolator->evalN(N, *lcoords, FEIElementGeometryWrapper(thisElement));
+                detJ = fabs ( interpolator->giveTransformationJacobian(*lcoords, FEIElementGeometryWrapper(thisElement)));
 
-            interpolator->boundaryEvalN(N, sides.at(i), *lcoords, FEIElementGeometryWrapper(thisElement));
-            double detJ = fabs ( interpolator->boundaryGiveTransformationJacobian(sides.at(i), *lcoords, FEIElementGeometryWrapper(thisElement)) );
+                IntArray DofIDStemp, loc;
+
+                thisElement->giveLocationArray(loc, s, &DofIDStemp);
+
+                locationArray.clear();
+                for (int j=1; j<=DofIDStemp.giveSize(); j++) {
+                    if (DofIDStemp.at(j)==dofids.at(1)) {
+                        locationArray.followedBy({loc.at(j)});
+                    }
+                }
+            }
 
             // delta p part:
             pressureEqns = N*detJ*gp->giveWeight()*lambda.at(1)*(1.0/domainSize);
-            //pressureEqns.printYourself();
 
             // delta lambda part
             lambdaEqns.resize(1);
             lambdaEqns.at(1) = N.dotProduct(a);
-            lambdaEqns.times(detJ*gp->giveWeight()/domainSize);
+            lambdaEqns.times(detJ*gp->giveWeight()*1.0/domainSize);
             lambdaEqns.at(1) = lambdaEqns.at(1);
 
-            // Assemble result into answer
-            thisElement->giveBoundaryLocationArray(locationArray, boundaryNodes, dofids, s);
 
             // delta p part
             answer.assemble(pressureEqns, locationArray);
@@ -193,6 +227,7 @@ PrescribedMean :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep,
             // delta lambda part
             answer.assemble(lambdaEqns, lambdaLoc);
         }
+        delete iRule;
     }
 
 }
@@ -224,14 +259,20 @@ PrescribedMean :: computeDomainSize()
 {
     if (domainSize > 0.0) return;
 
-    setList = ((GeneralBoundaryCondition *)this)->giveDomain()->giveSet(set)->giveBoundaryList();
 
-    elements.resize(setList.giveSize() / 2);
-    sides.resize(setList.giveSize() / 2);
+    if (elementEdges) {
+        IntArray setList = ((GeneralBoundaryCondition *)this)->giveDomain()->giveSet(set)->giveBoundaryList();
 
-    for (int i=1; i<=setList.giveSize(); i=i+2) {
-        elements.at(i/2+1) = setList.at(i);
-        sides.at(i/2+1) = setList.at(i+1);
+        elements.resize(setList.giveSize() / 2);
+        sides.resize(setList.giveSize() / 2);
+
+        for (int i=1; i<=setList.giveSize(); i=i+2) {
+            elements.at(i/2+1) = setList.at(i);
+            sides.at(i/2+1) = setList.at(i+1);
+        }
+    } else {
+        IntArray setList = ((GeneralBoundaryCondition *)this)->giveDomain()->giveSet(set)->giveElementList();
+        elements = setList;
     }
 
     domainSize = 0.0;
@@ -241,13 +282,27 @@ PrescribedMean :: computeDomainSize()
         Element *thisElement = this->giveDomain()->giveElement(elementID);
         FEInterpolation *interpolator = thisElement->giveInterpolation(DofIDItem(dofid));
 
-        std :: unique_ptr< IntegrationRule >iRule(interpolator->giveBoundaryIntegrationRule(3, sides.at(i)));
+        IntegrationRule *iRule;
+
+        if (elementEdges) {
+            iRule = interpolator->giveBoundaryIntegrationRule(3, sides.at(i));
+        } else {
+            iRule = interpolator->giveIntegrationRule(3);
+        }
 
         for ( GaussPoint * gp: * iRule ) {
             FloatArray *lcoords = gp->giveNaturalCoordinates();
-            double detJ = fabs ( interpolator->boundaryGiveTransformationJacobian(sides.at(i), *lcoords, FEIElementGeometryWrapper(thisElement)) );
+
+            double detJ;
+            if (elementEdges) {
+                detJ = fabs ( interpolator->boundaryGiveTransformationJacobian(sides.at(i), *lcoords, FEIElementGeometryWrapper(thisElement)) );
+            } else {
+                detJ = fabs ( interpolator->giveTransformationJacobian(*lcoords, FEIElementGeometryWrapper(thisElement)) );
+            }
             domainSize = domainSize + detJ*gp->giveWeight();
         }
+
+        delete iRule;
     }
 
     printf("%f\n", domainSize);

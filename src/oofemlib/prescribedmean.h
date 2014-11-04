@@ -51,6 +51,7 @@ namespace oofem
 #define _IFT_PrescribedMean_Name "prescribedmean"
 #define _IFT_PrescribedMean_DofID "dofid"
 #define _IFT_PrescribedMean_Mean "mean"
+#define _IFT_PrescribedMean_Edge "edge"
 
 //@}
 
@@ -68,7 +69,7 @@ private:
 
     void computeDomainSize();
 
-    IntArray setList;
+    bool elementEdges;
 
     IntArray elements;
 
