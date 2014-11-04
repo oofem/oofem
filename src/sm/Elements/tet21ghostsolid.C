@@ -467,23 +467,25 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
             epsf.beProductOf(B, aTotal);
             pressure = Nlin.dotProduct(aPressure);
 
-            // Momentum equation -----
+            // Momentum equation --------------------------------------------------
 
             // Compute fluid cauchy stress
             FloatArray fluidCauchy;
             FloatMatrix fluidCauchyMatrix;
 
             gp->setMaterialMode(_3dFlow);
+#ifdef __FM_MODULE
             fluidMaterial->computeDeviatoricStressVector(fluidCauchy, epsvol, gp, epsf, pressure, tStep);
-            //fluidCauchy.printYourself();
+#else
+            OOFEM_ERROR("Missing FM module");
+#endif
             gp->setMaterialMode(_3dMat);
 
             // Transform to 1st Piola-Kirshhoff
             fluidCauchyMatrix.beMatrixFormOfStress(fluidCauchy);
-            fluidStressMatrix.beProductOf(FinvT, fluidCauchyMatrix);
+            fluidStressMatrix.beProductOf(fluidCauchyMatrix, FinvT);
             fluidStressMatrix.times( J );
             fluidStress.beVectorForm(fluidStressMatrix);
-            //fluidStress.printYourself();
 
             // Add to equation
             momentum.plusProduct(BH, fluidStress, detJ*weight);
@@ -493,13 +495,13 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
             ptemp.beTProductOf(BH, FinvTa);
             momentum.add(-pressure * detJ * weight *J, ptemp);
 
-            // Conservation equation -----
+            // Conservation equation ---------------------------------------------
             divv.beTProductOf(ptemp, aTotal);  // Also include external forces
             divv.times(-detJ * weight* J);
 
             conservation.add(divv.at(1), Nlin);
 
-            // Ghost solid part -----
+            // Ghost solid part --------------------------------------------------
             Strain.beProductOf(B, aGhostDisplacement);
             Stress.beProductOf(Dghost, Strain);
             auxstress.plusProduct(B, Stress, detJ * weight);
