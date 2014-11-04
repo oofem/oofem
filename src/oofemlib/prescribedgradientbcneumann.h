@@ -49,12 +49,13 @@ class Element;
  * @author Erik Svenning
  * @date Mar 5, 2014
  */
-class PrescribedGradientBCNeumann : public PrescribedGradientBC {
+class PrescribedGradientBCNeumann : public PrescribedGradientBC
+{
 public:
-	PrescribedGradientBCNeumann(int n, Domain * d);
-	virtual ~PrescribedGradientBCNeumann();
+    PrescribedGradientBCNeumann(int n, Domain *d);
+    virtual ~PrescribedGradientBCNeumann();
 
-    virtual int giveNumberOfInternalDofManagers() {return 1;}
+    virtual int giveNumberOfInternalDofManagers() { return 1; }
     virtual DofManager *giveInternalDofManager(int i);
 
     virtual bcType giveType() const { return UnknownBT; }
@@ -82,15 +83,13 @@ public:
     void computeField(FloatArray &sigma, TimeStep *tStep);
 
 protected:
-	/// DOF-manager containing the unknown homogenized stress.
-	Node *mpSigmaHom;
-	IntArray mSigmaIds;
+    /// DOF-manager containing the unknown homogenized stress.
+    Node *mpSigmaHom;
+    IntArray mSigmaIds;
 
     /// Help function that integrates the tangent contribution from a single element boundary.
     void integrateTangent(FloatMatrix &oTangent, Element *e, int iBndIndex);
-
 };
-
 } /* namespace oofem */
 
 #endif /* PRESCRIBEDGRADIENTBCNEUMANN_H_ */

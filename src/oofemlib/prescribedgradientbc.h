@@ -67,7 +67,7 @@ protected:
     double domainSize();
 
 public:
-    PrescribedGradientBC(int n, Domain * d);
+    PrescribedGradientBC(int n, Domain *d);
     virtual ~PrescribedGradientBC();
 
     virtual bcType giveType() const { return UnknownBT; }
@@ -79,7 +79,6 @@ public:
 
     void giveGradientVoigt(FloatArray &oGradient) const;
 };
-
 } /* namespace oofem */
 
 #endif /* PRESCRIBEDGRADIENTBC_H_ */

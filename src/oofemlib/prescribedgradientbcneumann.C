@@ -22,24 +22,24 @@
 namespace oofem {
 REGISTER_BoundaryCondition(PrescribedGradientBCNeumann);
 
-PrescribedGradientBCNeumann::PrescribedGradientBCNeumann(int n, Domain * d):
-PrescribedGradientBC(n, d)
+PrescribedGradientBCNeumann :: PrescribedGradientBCNeumann(int n, Domain *d) :
+    PrescribedGradientBC(n, d)
 {
     int nsd = d->giveNumberOfSpatialDimensions();
     int numComponents = 0;
 
-    switch(nsd){
+    switch ( nsd ) {
     case 1:
-    	numComponents = 1;
-    	break;
+        numComponents = 1;
+        break;
 
     case 2:
-    	numComponents = 4;
-    	break;
+        numComponents = 4;
+        break;
 
     case 3:
-    	numComponents = 9;
-    	break;
+        numComponents = 9;
+        break;
     }
 
     mSigmaIds.clear();
@@ -48,32 +48,29 @@ PrescribedGradientBC(n, d)
         // Just putting in X_i id-items since they don't matter.
         int dofId = d->giveNextFreeDofID();
         mSigmaIds.followedBy(dofId);
-    	mpSigmaHom->appendDof( new MasterDof( mpSigmaHom, ( DofIDItem ) ( dofId ) ) );
+        mpSigmaHom->appendDof( new MasterDof( mpSigmaHom, ( DofIDItem ) ( dofId ) ) );
     }
-
 }
 
-PrescribedGradientBCNeumann::~PrescribedGradientBCNeumann()
+PrescribedGradientBCNeumann :: ~PrescribedGradientBCNeumann()
 {
-	if(mpSigmaHom != NULL) {
-		delete mpSigmaHom;
-		mpSigmaHom = NULL;
-	}
+    if ( mpSigmaHom != NULL ) {
+        delete mpSigmaHom;
+        mpSigmaHom = NULL;
+    }
 }
 
-DofManager* PrescribedGradientBCNeumann::giveInternalDofManager(int i)
+DofManager *PrescribedGradientBCNeumann :: giveInternalDofManager(int i)
 {
-	return mpSigmaHom;
+    return mpSigmaHom;
 }
 
-void PrescribedGradientBCNeumann::scale(double s)
-{
+void PrescribedGradientBCNeumann :: scale(double s)
+{}
 
-}
-
-void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *tStep,
-                            CharType type, ValueModeType mode,
-                            const UnknownNumberingScheme &s, FloatArray *eNorm)
+void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep *tStep,
+                                                   CharType type, ValueModeType mode,
+                                                   const UnknownNumberingScheme &s, FloatArray *eNorm)
 {
     Set *setPointer = this->giveDomain()->giveSet(this->set);
     const IntArray &boundaries = setPointer->giveBoundaryList();
@@ -91,7 +88,6 @@ void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *t
 
         stressLoad.beScaled(-rve_size, gradVoigt);
         answer.assemble(stressLoad, sigma_loc);
-
     } else if ( type == InternalForcesVector ) {
         FloatMatrix Ke;
         FloatArray fe_v, fe_s;
@@ -108,7 +104,7 @@ void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *t
             int boundary = boundaries.at(pos * 2);
 
             // Fetch the element information;
-            e->giveLocationArray(loc, s, &masterDofIDs);
+            e->giveLocationArray(loc, s, & masterDofIDs);
             // Here, we could use only the nodes actually located on the boundary, but we don't.
             // Instead, we use all nodes belonging to the element, which is allowed because the
             // basis functions related to the interior nodes will be zero on the boundary.
@@ -135,10 +131,9 @@ void PrescribedGradientBCNeumann::assembleVector(FloatArray &answer, TimeStep *t
     }
 }
 
-void PrescribedGradientBCNeumann::assemble(SparseMtrx *answer, TimeStep *tStep,
-                      CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+void PrescribedGradientBCNeumann :: assemble(SparseMtrx *answer, TimeStep *tStep,
+                                             CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix ) {
         FloatMatrix Ke, KeT;
         IntArray loc_r, loc_c, sigma_loc_r, sigma_loc_c;
@@ -168,15 +163,13 @@ void PrescribedGradientBCNeumann::assemble(SparseMtrx *answer, TimeStep *tStep,
             answer->assemble(sigma_loc_r, loc_c, Ke); // Contribution to delta_s_i equations
             answer->assemble(loc_r, sigma_loc_c, KeT); // Contributions to delta_v equations
         }
+    } else   {
+        printf("Skipping assembly in PrescribedGradientBCNeumann::assemble().\n");
     }
-    else {
-    	printf("Skipping assembly in PrescribedGradientBCNeumann::assemble().\n");
-    }
-
 }
 
-void PrescribedGradientBCNeumann::giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
-                                const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
+void PrescribedGradientBCNeumann :: giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
+                                                       const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     IntArray bNodes, dofids;
     IntArray loc_r, loc_c, sigma_loc_r, sigma_loc_c;
@@ -219,19 +212,19 @@ void PrescribedGradientBCNeumann::giveLocationArrays(std :: vector< IntArray > &
     }
 }
 
-void PrescribedGradientBCNeumann::computeField(FloatArray &sigma, TimeStep *tStep)
+void PrescribedGradientBCNeumann :: computeField(FloatArray &sigma, TimeStep *tStep)
 {
     mpSigmaHom->giveUnknownVector(sigma, mSigmaIds, VM_Total, tStep);
 }
 
-void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Element *e, int iBndIndex)
+void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Element *e, int iBndIndex)
 {
     FloatArray normal, n;
     FloatMatrix nMatrix, E_n;
     FloatMatrix contrib;
 
     Domain *domain = e->giveDomain();
-    XfemElementInterface *xfemElInt = dynamic_cast<XfemElementInterface*> (e);
+    XfemElementInterface *xfemElInt = dynamic_cast< XfemElementInterface * >( e );
 
     FEInterpolation *interp = e->giveInterpolation(); // Geometry interpolation
 
@@ -242,26 +235,25 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
     IntegrationRule *ir = NULL;
 
     IntArray edgeNodes;
-    FEInterpolation2d *interp2d = dynamic_cast<FEInterpolation2d*> (interp);
-    if(interp2d == NULL) {
-    	OOFEM_ERROR("failed to cast to FEInterpolation2d.")
+    FEInterpolation2d *interp2d = dynamic_cast< FEInterpolation2d * >( interp );
+    if ( interp2d == NULL ) {
+        OOFEM_ERROR("failed to cast to FEInterpolation2d.")
     }
     interp2d->computeLocalEdgeMapping(edgeNodes, iBndIndex);
 
-    const FloatArray &xS = *(e->giveDofManager(edgeNodes.at(1))->giveCoordinates());
-    const FloatArray &xE = *(e->giveDofManager(edgeNodes.at(edgeNodes.giveSize()))->giveCoordinates());
+    const FloatArray &xS = * ( e->giveDofManager( edgeNodes.at(1) )->giveCoordinates() );
+    const FloatArray &xE = * ( e->giveDofManager( edgeNodes.at( edgeNodes.giveSize() ) )->giveCoordinates() );
 
-    if(xfemElInt != NULL && domain->hasXfemManager() ) {
-    	std::vector<Line> segments;
-    	std::vector<FloatArray> intersecPoints;
-    	xfemElInt->partitionEdgeSegment( iBndIndex, segments, intersecPoints );
+    if ( xfemElInt != NULL && domain->hasXfemManager() ) {
+        std :: vector< Line >segments;
+        std :: vector< FloatArray >intersecPoints;
+        xfemElInt->partitionEdgeSegment(iBndIndex, segments, intersecPoints);
         MaterialMode matMode = e->giveMaterialMode();
-    	ir = new DiscontinuousSegmentIntegrationRule(1, e, segments, xS, xE);
-    	int numPointsPerSeg = 1;
-    	ir->SetUpPointsOnLine(numPointsPerSeg, matMode);
-    }
-    else {
-    	ir = interp->giveBoundaryIntegrationRule(order, iBndIndex);
+        ir = new DiscontinuousSegmentIntegrationRule(1, e, segments, xS, xE);
+        int numPointsPerSeg = 1;
+        ir->SetUpPointsOnLine(numPointsPerSeg, matMode);
+    } else   {
+        ir = interp->giveBoundaryIntegrationRule(order, iBndIndex);
     }
 
     oTangent.clear();
@@ -276,7 +268,7 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
         interp->boundaryEvalN(n, iBndIndex, lcoords, cellgeo);
         // If cracks cross the edge, special treatment is necessary.
         // Exploit the XfemElementInterface to minimize duplication of code.
-        if(xfemElInt != NULL && domain->hasXfemManager()) {
+        if ( xfemElInt != NULL && domain->hasXfemManager() ) {
             // Compute global coordinates of Gauss point
             FloatArray globalCoord;
 
@@ -286,16 +278,15 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
             FloatArray locCoord;
             e->computeLocalCoordinates(locCoord, globalCoord);
 
-            xfemElInt->XfemElementInterface_createEnrNmatrixAt(nMatrix, locCoord, *e, false);
+            xfemElInt->XfemElementInterface_createEnrNmatrixAt(nMatrix, locCoord, * e, false);
         } else {
             // Evaluate the velocity/displacement coefficients
             nMatrix.beNMatrixOf(n, nsd);
         }
 
         if ( nsd == 3 ) {
-        	OOFEM_ERROR("not implemented for nsd == 3.")
+            OOFEM_ERROR("not implemented for nsd == 3.")
         } else if ( nsd == 2 ) {
-
             E_n.resize(4, 2);
             E_n.at(1, 1) = normal.at(1);
             E_n.at(1, 2) = 0.0;
@@ -308,8 +299,6 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
 
             E_n.at(4, 1) = 0.0;
             E_n.at(4, 2) = normal.at(1);
-
-
         } else {
             E_n.clear();
         }
@@ -320,6 +309,4 @@ void PrescribedGradientBCNeumann::integrateTangent(FloatMatrix &oTangent, Elemen
     }
     delete ir;
 }
-
-
 } /* namespace oofem */
