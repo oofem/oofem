@@ -120,7 +120,7 @@ MatlabExportModule :: initializeFrom(InputRecord *ir)
         IR_GIVE_OPTIONAL_FIELD(ir, IPFieldsElSet, _IFT_MatlabExportModule_IPFieldsElSet);
     }
 
-    IR_GIVE_OPTIONAL_FIELD(ir, noscaling, _IFT_MatlabExportModule_noScaledHomogenization);
+    noscaling = ir->hasField(_IFT_MatlabExportModule_noScaledHomogenization);
     IR_GIVE_OPTIONAL_FIELD(ir, regionsets, _IFT_MatlabExportModule_regionsets);
 
     return IRRT_OK;
