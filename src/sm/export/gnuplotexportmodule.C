@@ -57,6 +57,7 @@
 #include "timestep.h"
 #include "feinterpol.h"
 #include "xfem/enrichmentitems/crack.h"
+#include "dofmanager.h"
 
 #include <sstream>
 
@@ -68,7 +69,8 @@ ExportModule(n, e),
 mExportReactionForces(false),
 mExportBoundaryConditions(false),
 mExportMesh(false),
-mExportXFEM(false)
+mExportXFEM(false),
+mMonitorNodeIndex(-1)
 {
 
 }
@@ -83,6 +85,9 @@ IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
     mExportBoundaryConditions = ir->hasField(_IFT_GnuplotExportModule_BoundaryConditions);
     mExportMesh = ir->hasField(_IFT_GnuplotExportModule_mesh);
     mExportXFEM = ir->hasField(_IFT_GnuplotExportModule_xfem);
+
+    ir->giveOptionalField(mMonitorNodeIndex, _IFT_GnuplotExportModule_monitornode);
+
     return ExportModule::initializeFrom(ir);
 }
 
@@ -151,6 +156,11 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
     if(mExportMesh) {
         outputMesh(*domain);
     }
+
+    if(mMonitorNodeIndex != -1) {
+        DofManager *dMan = domain->giveDofManager(mMonitorNodeIndex);
+        outputNodeDisp(*dMan, tStep);
+    }
 }
 
 void GnuplotExportModule::initialize()
@@ -180,7 +190,7 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
     IntArray dofManMap, dofidMap, eqnMap;
 
     // test if solution step output is active
-    if ( !domain->giveOutputManager()->testTimeStepOutput(tStep) ) {
+    if ( !testTimeStepOutput(tStep) ) {
         return;
     }
 
@@ -649,6 +659,24 @@ void GnuplotExportModule::outputMesh(Domain &iDomain)
         WritePointsToGnuplot(nameMesh, pointArray);
     }
 }
+
+void GnuplotExportModule :: outputNodeDisp(DofManager &iDMan, TimeStep *tStep)
+{
+    // Append node solution to history
+    FloatArray nodeSol;
+    iDMan.giveCompleteUnknownVector(nodeSol, VM_Total, tStep);
+
+    mMonitorNodeDispHist.push_back(nodeSol);
+
+
+    // Write to file
+    std::vector< std::vector<FloatArray> > nodeDispHist;
+    nodeDispHist.push_back(mMonitorNodeDispHist);
+
+    std :: string name = "MonitorNodeSolGnuplot.dat";
+    WritePointsToGnuplot(name, nodeDispHist);
+}
+
 
 void GnuplotExportModule :: WritePointsToGnuplot(const std :: string &iName, const std :: vector< std::vector<FloatArray> > &iPoints)
 {

@@ -37,7 +37,7 @@
 
 #include "exportmodule.h"
 
-///@name Input fields for MatlabExportModule
+///@name Input fields for GnuplotExportModule
 //@{
 #define _IFT_GnuplotExportModule_Name "gnuplot"
 // Sum of reaction forces for each Dirichlet BC
@@ -48,6 +48,8 @@
 #define _IFT_GnuplotExportModule_mesh "mesh"
 // XFEM stuff
 #define _IFT_GnuplotExportModule_xfem "xfem"
+// Node for monitoring displacement
+#define _IFT_GnuplotExportModule_monitornode "monitornode"
 //@}
 
 namespace oofem {
@@ -57,6 +59,7 @@ class PrescribedGradient;
 class PrescribedGradientBCNeumann;
 class PrescribedGradientBCWeak;
 class Domain;
+class DofManager;
 
 /**
  * (Under development) The Gnuplot export module enables OOFEM to export some
@@ -99,6 +102,11 @@ public:
      */
     void outputMesh(Domain &iDomain);
 
+    /**
+     * Monitor node output
+     */
+    void outputNodeDisp(DofManager &iDMan, TimeStep *tStep);
+
     static void WritePointsToGnuplot(const std :: string &iName, const std :: vector< std::vector<FloatArray> > &iPoints);
 
 protected:
@@ -106,6 +114,9 @@ protected:
     bool mExportBoundaryConditions;
     bool mExportMesh;
     bool mExportXFEM;
+
+    int mMonitorNodeIndex;
+    std::vector<FloatArray> mMonitorNodeDispHist;
 
     /**
      * Stores the sum of reaction forces for each BC.
