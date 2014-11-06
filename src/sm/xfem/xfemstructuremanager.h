@@ -44,7 +44,6 @@
 //@}
 
 namespace oofem {
-
 /*
  * XfemStructureManager: XFEM manager with extra functionality
  * specific for the sm module.
@@ -52,7 +51,8 @@ namespace oofem {
  * @author Erik Svenning
  * @date Apr 28, 2014
  */
-class OOFEM_EXPORT XfemStructureManager : public XfemManager {
+class OOFEM_EXPORT XfemStructureManager : public XfemManager
+{
 public:
     XfemStructureManager(Domain *domain);
     virtual ~XfemStructureManager();
@@ -74,7 +74,6 @@ protected:
      */
     bool mSplitCracks;
 };
-
 } /* namespace oofem */
 
 #endif /* XFEMSTRUCTUREMANAGER_H_ */

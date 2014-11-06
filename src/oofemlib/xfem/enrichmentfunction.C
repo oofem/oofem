@@ -159,7 +159,7 @@ void LinElBranchFunction :: giveJump(std :: vector< double > &oJumps, const doub
      */
 
     oJumps.clear();
-    oJumps.push_back(2.0*sqrt(iRadius));
+    oJumps.push_back( 2.0 * sqrt(iRadius) );
     oJumps.push_back(0.0);
     oJumps.push_back(0.0);
     oJumps.push_back(0.0);

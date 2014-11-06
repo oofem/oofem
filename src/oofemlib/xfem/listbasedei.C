@@ -40,38 +40,33 @@
 #include <string>
 
 namespace oofem {
-
 //REGISTER_EnrichmentItem(ListBasedEI)
 
-ListBasedEI::ListBasedEI(int n, XfemManager *xm, Domain *aDomain) :
-EnrichmentItem(n, xm, aDomain)
+ListBasedEI :: ListBasedEI(int n, XfemManager *xm, Domain *aDomain) :
+    EnrichmentItem(n, xm, aDomain)
 {
     // TODO Auto-generated constructor stub
-
 }
 
-ListBasedEI::~ListBasedEI() {
+ListBasedEI :: ~ListBasedEI() {
     // TODO Auto-generated destructor stub
 }
 
-void ListBasedEI::updateGeometry()
+void ListBasedEI :: updateGeometry()
 {
     // Update enrichments ...
     XfemManager *xMan = this->giveDomain()->giveXfemManager();
-//    mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
+    //    mpEnrichmentDomain->CallNodeEnrMarkerUpdate(* this, * xMan);
 
-    this->updateNodeEnrMarker(*xMan);
+    this->updateNodeEnrMarker(* xMan);
     // ... and create new dofs if necessary.
     createEnrichedDofs();
-
 }
 
 void ListBasedEI :: propagateFronts()
-{
+{}
 
-}
-
-void ListBasedEI::updateNodeEnrMarker(XfemManager &ixFemMan)
+void ListBasedEI :: updateNodeEnrMarker(XfemManager &ixFemMan)
 {
     mNodeEnrMarkerMap.clear();
 
@@ -86,11 +81,10 @@ void ListBasedEI::updateNodeEnrMarker(XfemManager &ixFemMan)
     //mLevelSetSurfaceNormalDir.resize(nNodes, 0.0); // New /JB
 }
 
-bool ListBasedEI::giveElementTipCoord(FloatArray &oCoord, double &oArcPos,  Element &iEl, const FloatArray &iElCenter) const
+bool ListBasedEI :: giveElementTipCoord(FloatArray &oCoord, double &oArcPos,  Element &iEl, const FloatArray &iElCenter) const
 {
     // No tips can be defined for list based enrichment items.
     // Hence, we return false.
     return false;
 }
-
 } /* namespace oofem */

@@ -134,7 +134,7 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
     int npeq = domain->giveEngngModel()->giveNumberOfDomainEquations( domain->giveNumber(), EModelDefaultPrescribedEquationNumbering() );
     if ( nsd == 2 ) {
         C.resize(npeq, 4);
-    } else   {
+    } else {
         C.resize(npeq, nsd * ( nsd + 1 ) / 2);
     }
     C.zero();
@@ -214,9 +214,9 @@ void PrescribedGradient :: computeField(FloatArray &sigma, TimeStep *tStep)
     R_c.zero();
     R_ext.zero();
     emodel->assembleVector( R_c, tStep, InternalForcesVector, VM_Total,
-                           EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
+                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
     emodel->assembleVector( R_ext, tStep, ExternalForcesVector, VM_Total,
-                           EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
+                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
     R_c.subtract(R_ext);
 
     // Condense it;

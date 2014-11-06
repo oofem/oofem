@@ -40,7 +40,6 @@
 #include "xfem/geometrybasedei.h"
 
 namespace oofem {
-
 class XfemManager;
 class Domain;
 
@@ -51,7 +50,8 @@ class Domain;
  * @author Erik Svenning
  * @date Sep 10, 2014
  */
-class DirectEI : public GeometryBasedEI {
+class DirectEI : public GeometryBasedEI
+{
 public:
     DirectEI(int n, XfemManager *xm, Domain *aDomain);
     virtual ~DirectEI();
@@ -62,9 +62,7 @@ public:
     virtual void evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const;
     virtual void evalLevelSetTangential(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const;
     virtual void evalGradLevelSetNormal(FloatArray &oGradLevelSet, const FloatArray &iGlobalCoord, const FloatMatrix &idNdX, const IntArray &iNodeInd) const;
-
 };
-
 } /* namespace oofem */
 
 #endif /* DIRECTEI_H_ */

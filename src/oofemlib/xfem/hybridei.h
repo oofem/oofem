@@ -40,8 +40,6 @@
 #include "xfem/geometrybasedei.h"
 
 namespace oofem {
-
-
 class XfemManager;
 class Domain;
 
@@ -53,7 +51,8 @@ class Domain;
  * @author Erik Svenning
  * @date Sep 9, 2014
  */
-class HybridEI : public GeometryBasedEI {
+class HybridEI : public GeometryBasedEI
+{
 public:
     HybridEI(int n, XfemManager *xm, Domain *aDomain);
     virtual ~HybridEI();
@@ -68,16 +67,13 @@ public:
     // By templating the function this way, we may choose if we want to pass iNodeInd as
     // an IntArray, a std::vector<int> or something else.
     // Any container that contains int and implements [] is legal.
-//    template< typename T >
+    //    template< typename T >
     void interpLevelSet(double &oLevelSet, const FloatArray &iN, const IntArray &iNodeInd) const;
 
     void interpLevelSetTangential(double &oLevelSet, const FloatArray &iN, const IntArray &iNodeInd) const;
 
     void interpGradLevelSet(FloatArray &oGradLevelSet, const FloatMatrix &idNdX, const IntArray &iNodeInd) const;
-
 };
-
-
 } /* namespace oofem */
 
 #endif /* HYBRIDEI_H_ */

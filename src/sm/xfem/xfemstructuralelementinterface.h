@@ -76,7 +76,7 @@ public:
      * Identify enrichment items with an intersection enrichment
      * front that touches a given enrichment item.
      */
-    void giveIntersectionsTouchingCrack(std::vector<int> &oTouchingEnrItemIndices, const std::vector<int> &iCandidateIndices, int iEnrItemIndex, XfemManager &iXMan);
+    void giveIntersectionsTouchingCrack(std :: vector< int > &oTouchingEnrItemIndices, const std :: vector< int > &iCandidateIndices, int iEnrItemIndex, XfemManager &iXMan);
 
     // Cohesive Zone variables
     StructuralInterfaceMaterial *mpCZMat;
@@ -85,11 +85,10 @@ public:
 
 
     // Store element subdivision for postprocessing
-    std :: vector< Triangle > mSubTri;
+    std :: vector< Triangle >mSubTri;
 
     /// VTK Interface
-    void giveSubtriangulationCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
-
+    void giveSubtriangulationCompositeExportData(std :: vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
 };
 } /* namespace oofem */
 

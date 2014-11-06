@@ -36,29 +36,26 @@
 #include "geometry.h"
 
 namespace oofem {
+DirectEI :: DirectEI(int n, XfemManager *xm, Domain *aDomain) :
+    GeometryBasedEI(n, xm, aDomain)
+{}
 
-DirectEI::DirectEI(int n, XfemManager *xm, Domain *aDomain):
-GeometryBasedEI(n, xm, aDomain)
-{
-
-}
-
-DirectEI::~DirectEI() {
+DirectEI :: ~DirectEI() {
     // TODO Auto-generated destructor stub
 }
 
-void DirectEI::evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const
+void DirectEI :: evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const
 {
     mpBasicGeometry->computeNormalSignDist(oLevelSet, iGlobalCoord);
 }
 
-void DirectEI::evalLevelSetTangential(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const
+void DirectEI :: evalLevelSetTangential(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const
 {
     double arcPos = 0.0;
     mpBasicGeometry->computeTangentialSignDist(oLevelSet, iGlobalCoord, arcPos);
 }
 
-void DirectEI::evalGradLevelSetNormal(FloatArray &oGradLevelSet, const FloatArray &iGlobalCoord, const FloatMatrix &idNdX, const IntArray &iNodeInd) const
+void DirectEI :: evalGradLevelSetNormal(FloatArray &oGradLevelSet, const FloatArray &iGlobalCoord, const FloatMatrix &idNdX, const IntArray &iNodeInd) const
 {
     double arcPos = 0.0, tangSignDist = 0.0;
     mpBasicGeometry->computeTangentialSignDist(tangSignDist, iGlobalCoord, arcPos);
@@ -66,7 +63,8 @@ void DirectEI::evalGradLevelSetNormal(FloatArray &oGradLevelSet, const FloatArra
     FloatArray tangent;
     mpBasicGeometry->giveTangent(tangent, arcPos);
 
-    oGradLevelSet = {-tangent[1], tangent[0]};
+    oGradLevelSet = {
+        -tangent [ 1 ], tangent [ 0 ]
+    };
 }
-
 } /* namespace oofem */

@@ -22,8 +22,7 @@ BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
 BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.2e-1
 #
 PiecewiseLinFunction 1 npoints 2 t 2 0.0 5.0 f(t) 2 0.0 1.0
-XfemManager 1 numberofenrichmentitems 3 numberofgppertri 1
-#XfemManager 1 numberofenrichmentitems 3 numberofgppertri 1 debugvtk 1 vtkexport 1 exportfields 1 4
+XfemManager 1 numberofenrichmentitems 3 numberofgppertri 1 vtkexport 1 exportfields 3 2 3 4
 #DiscontinuousFunction 1
 #polygoncrack 1 points 6 -0.1 0.3 0.5 0.3 1.1 0.3
 # Crack 1

@@ -40,7 +40,9 @@ REGISTER_EnrichmentItem(ShellCrack)
 
 ShellCrack :: ShellCrack(int n, XfemManager *xm, Domain *aDomain) : Crack(n, xm, aDomain)
 {
-    mpEnrichesDofsWithIdArray = { D_u, D_v, D_w, W_u, W_v, W_w };
+    mpEnrichesDofsWithIdArray = {
+        D_u, D_v, D_w, W_u, W_v, W_w
+    };
 }
 
 
@@ -55,6 +57,4 @@ IRResultType ShellCrack :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, this->xiTop, _IFT_ShellCrack_xiTop);
     return IRRT_OK;
 }
-
-
 } // end namespace oofem

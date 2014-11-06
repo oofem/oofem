@@ -103,7 +103,7 @@ public:
     virtual void giveInputRecord(DynamicInputRecord &input);
 
     virtual bool hasPropagation() const { return false; }
-    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) {return false;};
+    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp) { return false; };
 };
 
 /**
@@ -128,7 +128,6 @@ public:
 protected:
     double mAngle, mIncrementLength;
 };
-
 } // end namespace oofem
 
 #endif /* PROPAGATIONLAW_H_ */

@@ -55,7 +55,7 @@ int DiscontinuousSegmentIntegrationRule :: SetUpPointsOnLine(int iNumPointsPerSe
     // Allocate Gauss point array
     FloatArray coords_xi, weights;
     this->giveLineCoordsAndWeights(iNumPointsPerSeg, coords_xi, weights);
-    this->gaussPoints.resize( numPointsTot );
+    this->gaussPoints.resize(numPointsTot);
     ////////////////////////////////////////////
 
     double totalLength = mXS.distance(mXE);
@@ -85,9 +85,9 @@ int DiscontinuousSegmentIntegrationRule :: SetUpPointsOnLine(int iNumPointsPerSe
 
             // Local coordinate along the line segment
             double xi = 2.0 * ( global.distance(mXS) / totalLength - 0.5 );
-            gp->setNaturalCoordinates({xi});
+            gp->setNaturalCoordinates({ xi });
 
-            gp->setSubPatchCoordinates({xi});
+            gp->setSubPatchCoordinates({ xi });
             gp->setGlobalCoordinates(global);
 
             gp->setWeight(1.0 * gp->giveWeight() * mSegments [ i ].giveLength() / totalLength);  // update integration weight

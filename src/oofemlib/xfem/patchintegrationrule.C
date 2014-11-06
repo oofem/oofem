@@ -99,7 +99,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     int nPointsTot = nPoints * triToKeep.size();
     FloatArray coords_xi1, coords_xi2, weights;
     this->giveTriCoordsAndWeights(nPoints, coords_xi1, coords_xi2, weights);
-    this->gaussPoints.resize( nPointsTot );
+    this->gaussPoints.resize(nPointsTot);
     ////////////////////////////////////////////
 
 
@@ -110,10 +110,10 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
     // Loop over triangles
     for ( int tri: triToKeep ) {
         // TODO: Probably unnecessary to allocate here
-        std::vector< FloatArray > coords( mTriangles [ tri ].giveNrVertices() );
+        std :: vector< FloatArray >coords( mTriangles [ tri ].giveNrVertices() );
         // this we should put into the function before
         for ( int k = 1; k <= mTriangles [ tri ].giveNrVertices(); k++ ) {
-            coords[ k - 1 ] = mTriangles [ tri ].giveVertex( k );
+            coords [ k - 1 ] = mTriangles [ tri ].giveVertex(k);
         }
 
         // Can not be used because it writes to the start of the array instead of appending.
@@ -131,7 +131,7 @@ PatchIntegrationRule :: SetUpPointsOnTriangle(int nPoints, MaterialMode mode)
 
 
             mTriInterp.local2global( global, * gp->giveNaturalCoordinates(),
-                                    FEIVertexListGeometryWrapper(coords) );
+                                     FEIVertexListGeometryWrapper(coords) );
 
             newGPCoord.push_back(global);
 
@@ -225,15 +225,14 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
 
     // Loop over triangles
     for ( int i = 0; i < int( triToKeep.size() ); i++ ) {
-
         Triangle triangle = mTriangles [ triToKeep [ i ] ];
-        
+
         // global coords of the the triangle verticies
-        std::vector< FloatArray > gCoords( triangle.giveNrVertices() );
+        std :: vector< FloatArray >gCoords( triangle.giveNrVertices() );
         for ( int j = 0; j < triangle.giveNrVertices(); j++ ) {
-            gCoords[j] = (triangle.giveVertex(j + 1));
+            gCoords [ j ] = ( triangle.giveVertex(j + 1) );
         }
-        
+
 
         for ( int k = 1; k <= nPointsTri; k++ ) {
             for ( int m = 1; m <= nPointsDepth; m++ ) {
@@ -245,26 +244,26 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
 
                 double refElArea = 0.5;
                 double oldWeight = weightsTri.at(k) * weightsDepth.at(m);
-                double newWeight = 2.0 * refElArea * oldWeight * triangle.getArea() / parentArea; 
-                
+                double newWeight = 2.0 * refElArea * oldWeight * triangle.getArea() / parentArea;
+
                 GaussPoint *gp = new GaussPoint(this, count + 1, lCoords, newWeight, mode);
-                this->gaussPoints[count] = gp;
+                this->gaussPoints [ count ] = gp;
                 count++;
-                
-                
+
+
                 // Compute global gp coordinate in the element from local gp coord in the sub triangle
                 FloatArray global;
                 mTriInterp.local2global( global, * gp->giveNaturalCoordinates(),
-                                    FEIVertexListGeometryWrapper(gCoords) );
-                 
-                
+                                         FEIVertexListGeometryWrapper(gCoords) );
+
+
                 // Compute local gp coordinate in the element from global gp coord in the element
                 FloatArray local;
                 this->elem->computeLocalCoordinates(local, global);
                 local.at(3) = coords_xi3.at(m); // manually set third coordinate
-                // compute global coords again, since interpolator dosn't give the z-coord 
+                // compute global coords again, since interpolator dosn't give the z-coord
                 this->elem->computeGlobalCoordinates(global, local);
-                
+
                 gp->setGlobalCoordinates(global);
                 gp->setNaturalCoordinates(local);
                 gp->setSubPatchCoordinates(local);
@@ -310,7 +309,7 @@ PatchIntegrationRule :: SetUpPointsOnWedge(int nPointsTri, int nPointsDepth, Mat
         }
     }
 
-    
+
     return this->giveNumberOfIntegrationPoints();
 }
 

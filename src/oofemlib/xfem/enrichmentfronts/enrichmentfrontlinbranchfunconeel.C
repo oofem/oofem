@@ -72,9 +72,13 @@ int EnrFrontLinearBranchFuncOneEl :: giveNumEnrichments(const DofManager &iDMan)
 
 void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const EfInput &iEfInput) const
 {
-    FloatArray xTip = { mTipInfo.mGlobalCoord.at(1), mTipInfo.mGlobalCoord.at(2) };
+    FloatArray xTip = {
+        mTipInfo.mGlobalCoord.at(1), mTipInfo.mGlobalCoord.at(2)
+    };
 
-    FloatArray pos = { iEfInput.mPos.at(1), iEfInput.mPos.at(2) };
+    FloatArray pos = {
+        iEfInput.mPos.at(1), iEfInput.mPos.at(2)
+    };
 
     // Crack tangent and normal
     FloatArray t, n;
@@ -87,8 +91,8 @@ void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncAt(std :: vector< double > 
     mpBranchFunc->evaluateEnrFuncAt(oEnrFunc, r, theta);
 
 #ifdef DEBUG
-    for(double val:oEnrFunc) {
-        if(!std::isfinite(val)) {
+    for ( double val:oEnrFunc ) {
+        if ( !std :: isfinite(val) ) {
             printf("r: %e theta: %e\n", r, theta);
             OOFEM_ERROR("!std::isfinite(val)")
         }
@@ -135,7 +139,7 @@ void EnrFrontLinearBranchFuncOneEl :: evaluateEnrFuncJumps(std :: vector< double
 
     double radius = gpCoord.distance(xTip);
 
-    std :: vector< double > jumps;
+    std :: vector< double >jumps;
     mpBranchFunc->giveJump(jumps, radius);
 
     oEnrFuncJumps.insert( oEnrFuncJumps.end(), jumps.begin(), jumps.end() );

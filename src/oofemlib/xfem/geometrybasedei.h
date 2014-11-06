@@ -40,7 +40,6 @@
 #include "enrichmentitem.h"
 
 namespace oofem {
-
 class XfemManager;
 class Domain;
 
@@ -49,7 +48,8 @@ class Domain;
  * @author Erik Svenning
  * @date Sep 9, 2014
  */
-class GeometryBasedEI : public EnrichmentItem {
+class GeometryBasedEI : public EnrichmentItem
+{
 public:
     GeometryBasedEI(int n, XfemManager *xm, Domain *aDomain);
     virtual ~GeometryBasedEI();
@@ -91,13 +91,11 @@ public:
 
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
 
-    BasicGeometry *giveGeometry() {return mpBasicGeometry;}
+    BasicGeometry *giveGeometry() { return mpBasicGeometry; }
 
 protected:
     BasicGeometry *mpBasicGeometry;
-
 };
-
 } /* namespace oofem */
 
 #endif /* GEOMETRYBASEDEI_H_ */

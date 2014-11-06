@@ -62,8 +62,7 @@ XfemElementInterface :: XfemElementInterface(Element *e) :
 }
 
 XfemElementInterface :: ~XfemElementInterface()
-{
-}
+{}
 
 void XfemElementInterface :: XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl)
 {
@@ -98,9 +97,9 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
     FloatMatrix dNdx;
     FloatArray N;
     FEInterpolation *interp = iEl.giveInterpolation();
-    const FEIElementGeometryWrapper geomWrapper(&iEl);
-    interp->evaldNdx( dNdx, * iGP.giveNaturalCoordinates(), geomWrapper );
-    interp->evalN( N, * iGP.giveNaturalCoordinates(), geomWrapper );
+    const FEIElementGeometryWrapper geomWrapper(& iEl);
+    interp->evaldNdx(dNdx, * iGP.giveNaturalCoordinates(), geomWrapper);
+    interp->evalN(N, * iGP.giveNaturalCoordinates(), geomWrapper);
 
     const IntArray &elNodes = iEl.giveDofManArray();
 
@@ -112,8 +111,8 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
     for ( int i = 1; i <= nDofMan; i++ ) {
         const Node *node = iEl.giveNode(i);
         const FloatArray &nodeCoord = node->giveNodeCoordinates();
-        globalCoord.at(1) += N.at(i) * nodeCoord[0];
-        globalCoord.at(2) += N.at(i) * nodeCoord[1];
+        globalCoord.at(1) += N.at(i) * nodeCoord [ 0 ];
+        globalCoord.at(2) += N.at(i) * nodeCoord [ 1 ];
     }
 
 
@@ -128,7 +127,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 
         if ( iComputeBH ) {
             BNode.at(shearInd + 1, 2)   = dNdx.at(i, 1);
-        } else   {
+        } else {
             BNode.at(shearInd, 2)   = dNdx.at(i, 1);
         }
     }
@@ -151,7 +150,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
         const Node *node = iEl.giveNode(j);
 
         // Compute the total number of enrichments for node j
-        if( iEl.giveDomain()->hasXfemManager() ) {
+        if ( iEl.giveDomain()->hasXfemManager() ) {
             numEnrNode = XfemElementInterface_giveNumDofManEnrichments(* dMan, * xMan);
         }
 
@@ -173,22 +172,21 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 
                     // Enrichment function derivative in Gauss point
                     std :: vector< FloatArray >efgpD;
-                    ei->evaluateEnrFuncDerivAt(efgpD, globalCoord, * iGP.giveNaturalCoordinates(), globalNodeInd, *element, N, dNdx, elNodes);
+                    ei->evaluateEnrFuncDerivAt(efgpD, globalCoord, * iGP.giveNaturalCoordinates(), globalNodeInd, * element, N, dNdx, elNodes);
                     // Enrichment function in Gauss Point
                     std :: vector< double >efGP;
-                    ei->evaluateEnrFuncAt(efGP, globalCoord, * iGP.giveNaturalCoordinates(), globalNodeInd, *element, N, elNodes);
+                    ei->evaluateEnrFuncAt(efGP, globalCoord, * iGP.giveNaturalCoordinates(), globalNodeInd, * element, N, elNodes);
 
 
                     const FloatArray &nodePos = node->giveNodeCoordinates();
 
                     double levelSetNode  = 0.0;
-                    ei->evalLevelSetNormalInNode( levelSetNode, globalNodeInd, nodePos );
+                    ei->evalLevelSetNormalInNode(levelSetNode, globalNodeInd, nodePos);
 
                     std :: vector< double >efNode;
                     FloatArray nodeNaturalCoord;
                     iEl.computeLocalCoordinates(nodeNaturalCoord, nodePos);
-//                    ei->evaluateEnrFuncAt(efNode, nodePos, nodeNaturalCoord, globalNodeInd, iEl);
-                    ei->evaluateEnrFuncInNode(efNode, *node);
+                    ei->evaluateEnrFuncInNode(efNode, * node);
 
                     for ( int k = 0; k < numEnr; k++ ) {
                         // matrix to be added anytime a node is enriched
@@ -205,7 +203,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 
                         if ( iComputeBH ) {
                             BdNode.at(shearInd + 1, nodeEnrCounter + 2)   = grad_ef_N.at(1);
-                        } else   {
+                        } else {
                             BdNode.at(shearInd, nodeEnrCounter + 2)   = grad_ef_N.at(1);
                         }
 
@@ -276,7 +274,7 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
     std :: vector< std :: vector< double > >Nd( iLocNodeInd.size() );
     for ( int j = 1; j <= int( iLocNodeInd.size() ); j++ ) {
         DofManager *dMan = iEl.giveDofManager(iLocNodeInd [ j - 1 ]);
-        Node *node = dynamic_cast<Node*>(dMan);
+        Node *node = dynamic_cast< Node * >( dMan );
 
         // Compute the total number of enrichments for node j
         int numEnrNode = XfemElementInterface_giveNumDofManEnrichments(* dMan, * xMan);
@@ -307,14 +305,13 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
 
                 FloatArray nodePosLocCoord;
                 iEl.computeLocalCoordinates(nodePosLocCoord, nodePos);
-                ei->evaluateEnrFuncInNode(efNode, *node);
+                ei->evaluateEnrFuncInNode(efNode, * node);
 
 
                 for ( int k = 0; k < numEnr; k++ ) {
-                    if(iSetDiscontContribToZero) {
+                    if ( iSetDiscontContribToZero ) {
                         NdNode [ nodeCounter ] = 0.0;
-                    }
-                    else {
+                    } else   {
                         NdNode [ nodeCounter ] = ( efGP [ k ] - efNode [ k ] ) * Nc.at(j);
                     }
                     counter++;
@@ -448,7 +445,7 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
             str3 << "TriEl" << elIndex << ".vtk";
             std :: string name3 = str3.str();
 
-            if(allTri.size() > 0) {
+            if ( allTri.size() > 0 ) {
                 XFEMDebugTools :: WriteTrianglesToVTK(name3, allTri);
             }
         }
@@ -456,10 +453,10 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
         int ruleNum = 1;
         if ( partitionSucceeded ) {
-            std :: vector< std :: unique_ptr< IntegrationRule > > intRule;
-            intRule.emplace_back(new PatchIntegrationRule(ruleNum, element, allTri));
-            intRule[0]->SetUpPointsOnTriangle(xMan->giveNumGpPerTri(), matMode);
-            element->setIntegrationRules(std :: move(intRule));
+            std :: vector< std :: unique_ptr< IntegrationRule > >intRule;
+            intRule.emplace_back( new PatchIntegrationRule(ruleNum, element, allTri) );
+            intRule [ 0 ]->SetUpPointsOnTriangle(xMan->giveNumGpPerTri(), matMode);
+            element->setIntegrationRules( std :: move(intRule) );
         }
     }
 
@@ -468,6 +465,8 @@ bool XfemElementInterface :: XfemElementInterface_updateIntegrationRule()
 
 void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, double &oCrackStartXi, double &oCrackEndXi, int iEnrItemIndex, bool &oIntersection)
 {
+    int dim = element->giveDofManager(1)->giveCoordinates()->giveSize();
+
     FloatArray elCenter( element->giveDofManager(1)->giveCoordinates()->giveSize() );
     elCenter.zero();
     std :: vector< const FloatArray * >nodeCoord;
@@ -478,9 +477,9 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
     elCenter.times( 1.0 / double( element->giveNumberOfDofManagers() ) );
 
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
-    GeometryBasedEI *ei = dynamic_cast<GeometryBasedEI*>(xMan->giveEnrichmentItem(iEnrItemIndex));
+    GeometryBasedEI *ei = dynamic_cast< GeometryBasedEI * >( xMan->giveEnrichmentItem(iEnrItemIndex) );
 
-    if(ei == NULL) {
+    if ( ei == NULL ) {
         oIntersection = false;
         return;
     }
@@ -490,6 +489,10 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
 
     std :: vector< double >minDistArcPos;
     ei->computeIntersectionPoints(intersecPoints, intersecEdgeInd, element, minDistArcPos);
+
+    for ( size_t i = 0; i < intersecPoints.size(); i++ ) {
+        intersecPoints [ i ].resizeWithValues(dim);
+    }
 
 
     if ( intersecPoints.size() == 2 ) {
@@ -508,10 +511,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         oIntersection = true;
         return;
     } else if ( intersecPoints.size() == 1 ) {
-        // TODO: For now, assume that the number of element edges is
-        // equal to the number of nodes. JB: cannot assume this
-        int nNodes = this->element->giveNumberOfNodes();
-        std :: vector< FloatArray >edgeCoords, nodeCoords;
+        std :: vector< FloatArray >edgeCoords;
 
         FloatArray tipCoord;
         int dim = element->giveDofManager(1)->giveCoordinates()->giveSize();
@@ -520,66 +520,41 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         bool foundTip = false;
         double tipArcPos = -1.0;
 
-        if ( ei->giveElementTipCoord(tipCoord, tipArcPos, *element, elCenter) ) {
+        if ( ei->giveElementTipCoord(tipCoord, tipArcPos, * element, elCenter) ) {
             foundTip = true;
+            tipCoord.resizeWithValues(dim);
         }
         int nEdges = this->element->giveInterpolation()->giveNumberOfEdges();
-        nNodes = nEdges; // JB: test
         if ( foundTip ) {
-            for ( int i = 1; i <= nNodes; i++ ) {
-                // Store edge points
-                if ( i == intersecEdgeInd [ 0 ] ) {
-                    // Take the intersection point ...
-                    edgeCoords.push_back(intersecPoints [ 0 ]);
-                } else {
-                    // ... or the center of the edge.
-                    IntArray bNodes;
-                    this->element->giveInterpolation()->boundaryGiveNodes(bNodes, i);
-
-                    int nsLoc = bNodes.at(1);
-                    //int neLoc = bNodes.at( bNodes.giveSize() );
-                    int neLoc = bNodes.at(2); // JB
-
-                    const FloatArray &coordS = * ( element->giveDofManager(nsLoc)->giveCoordinates() );
-                    const FloatArray &coordE = * ( element->giveDofManager(neLoc)->giveCoordinates() );
-
-                    FloatArray coordEdge;
-                    coordEdge = 0.5 * coordS + 0.5 * coordE;
-                    edgeCoords.push_back(coordEdge);
-                }
-
-                // Store node coords
-                const FloatArray &coord = * ( element->giveDofManager(i)->giveCoordinates() ); //JB: ok for 6 noded tri also but can't we use coordS?
-                nodeCoords.push_back(coord);
-            }
-
-            oPointPartitions.resize( ( 2 * nNodes ) );
+            oPointPartitions.resize( ( nEdges + 1 ) );
 
             // Divide into subdomains
-            for ( int i = 1; i <= nNodes; i++ ) {
-                ////////////////
-                // Take edge center or intersection point
-                oPointPartitions [ 2 * i - 1 ].push_back(edgeCoords [ i - 1 ]);
+            int triPassed = 0;
+            for ( int i = 1; i <= nEdges; i++ ) {
+                IntArray bNodes;
+                this->element->giveInterpolation()->boundaryGiveNodes(bNodes, i);
+                int nsLoc = bNodes.at(1);
+                int neLoc = bNodes.at( bNodes.giveSize() );
 
-                // Take crack tip position
-                oPointPartitions [ 2 * i - 1 ].push_back(tipCoord);
+                const FloatArray &coordS = * ( element->giveDofManager(nsLoc)->giveCoordinates() );
+                const FloatArray &coordE = * ( element->giveDofManager(neLoc)->giveCoordinates() );
 
-                // Take node
-                oPointPartitions [ 2 * i - 1 ].push_back( * ( element->giveDofManager(i)->giveCoordinates() ) );
+                if ( i == intersecEdgeInd [ 0 ] ) {
+                    oPointPartitions [ triPassed ].push_back(tipCoord);
+                    oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
+                    oPointPartitions [ triPassed ].push_back(coordE);
+                    triPassed++;
 
-                ////////////////
-                // Take edge center or intersection point
-                oPointPartitions [ 2 * i - 2 ].push_back(edgeCoords [ i - 1 ]);
-
-                // Take next node
-                if ( i == nNodes ) {
-                    oPointPartitions [ 2 * i - 2 ].push_back( * ( element->giveDofManager(1)->giveCoordinates() ) );
-                } else {
-                    oPointPartitions [ 2 * i - 2 ].push_back( * ( element->giveDofManager(i + 1)->giveCoordinates() ) );
+                    oPointPartitions [ triPassed ].push_back(tipCoord);
+                    oPointPartitions [ triPassed ].push_back(coordS);
+                    oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
+                    triPassed++;
+                } else   {
+                    oPointPartitions [ triPassed ].push_back(tipCoord);
+                    oPointPartitions [ triPassed ].push_back(coordS);
+                    oPointPartitions [ triPassed ].push_back(coordE);
+                    triPassed++;
                 }
-
-                // Take crack tip position
-                oPointPartitions [ 2 * i - 2 ].push_back(tipCoord);
             }
 
             // Export start and end points of
@@ -588,11 +563,9 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
             oCrackEndXi     = std :: max(minDistArcPos [ 0 ], tipArcPos);
         }             // If a tip was found
         else {
-//            printf( "Warning: no tip found in element %d with only one edge intersection.\n", element->giveGlobalNumber() );
+            //            printf( "Warning: no tip found in element %d with only one edge intersection.\n", element->giveGlobalNumber() );
 
             oPointPartitions.resize(1);
-
-//            printf("Warning: No tip found.\n");
 
             for ( int i = 1; i <= this->element->giveNumberOfDofManagers(); i++ ) {
                 const FloatArray &nodeCoord = * element->giveDofManager(i)->giveCoordinates();
@@ -601,7 +574,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
 
             // test Jim
             // Add first intersection point
-            oPointPartitions [ 0 ].push_back( intersecPoints [ 0 ] );
+            oPointPartitions [ 0 ].push_back(intersecPoints [ 0 ]);
 
             // want to add the extrapolated intersection point
             //FloatArray test;
@@ -628,6 +601,8 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
 
 void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std :: vector< std :: vector< FloatArray > > &oPointPartitions, double &oCrackStartXi, double &oCrackEndXi, const Triangle &iTri, int iEnrItemIndex, bool &oIntersection)
 {
+    int dim = element->giveDofManager(1)->giveCoordinates()->giveSize();
+
     FloatArray elCenter( iTri.giveVertex(1).giveSize() );
     elCenter.zero();
     std :: vector< const FloatArray * >nodeCoord;
@@ -637,10 +612,11 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
     }
     elCenter.times(1.0 / 3.0);
 
-    XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
-    GeometryBasedEI *ei = dynamic_cast<GeometryBasedEI*>(xMan->giveEnrichmentItem(iEnrItemIndex));
 
-    if(ei == NULL) {
+    XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
+    GeometryBasedEI *ei = dynamic_cast< GeometryBasedEI * >( xMan->giveEnrichmentItem(iEnrItemIndex) );
+
+    if ( ei == NULL ) {
         oIntersection = false;
         return;
     }
@@ -650,6 +626,9 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
 
     std :: vector< double >minDistArcPos;
     ei->computeIntersectionPoints(intersecPoints, intersecEdgeInd, element, iTri, minDistArcPos);
+    for ( size_t i = 0; i < intersecPoints.size(); i++ ) {
+        intersecPoints [ i ].resizeWithValues(dim);
+    }
 
     if ( intersecPoints.size() == 2 ) {
         // The element is completely cut in two.
@@ -668,7 +647,7 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         oIntersection = true;
         return;
     } else if ( intersecPoints.size() == 1 ) {
-        int nNodes = 3;
+        int nEdges = 3;
         std :: vector< FloatArray >edgeCoords, nodeCoords;
 
         FloatArray tipCoord;
@@ -678,81 +657,41 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         bool foundTip = false;
         double tipArcPos = -1.0;
 
-        //if ( ei->giveElementTipCoord(tipCoord, tipArcPos, element->giveNumber(), iTri, elCenter) ) {
-        //    foundTip = true;
-        //}
-        if ( ei->giveElementTipCoord(tipCoord, tipArcPos, *element, elCenter) ) {
+        if ( ei->giveElementTipCoord(tipCoord, tipArcPos, * element, elCenter) ) {
+            tipCoord.resizeWithValues(dim);
             foundTip = true;
         }
 
         if ( foundTip ) {
-            for ( int i = 1; i <= nNodes; i++ ) {
-                // Store edge points
-                if ( i == intersecEdgeInd [ 0 ] ) {
-                    // Take the intersection point ...
-                    edgeCoords.push_back(intersecPoints [ 0 ]);
-                } else {
-                    // ... or the center of the edge.
-
-                    FloatArray coordS, coordE;
-
-                    // Global coordinates of vertices
-                    switch ( i ) {
-                    case 1:
-                        coordS = * ( nodeCoord [ 0 ] );
-                        coordE = * ( nodeCoord [ 1 ] );
-                        break;
-                    case 2:
-                        coordS = * ( nodeCoord [ 1 ] );
-                        coordE = * ( nodeCoord [ 2 ] );
-                        break;
-
-                    case 3:
-                        coordS = * ( nodeCoord [ 2 ] );
-                        coordE = * ( nodeCoord [ 0 ] );
-                        break;
-                    default:
-                        break;
-                    }
-
-
-                    FloatArray coordEdge;
-                    coordEdge = 0.5 * coordS + 0.5 * coordE;
-                    edgeCoords.push_back(coordEdge);
-                }
-
-                // Store node coords
-                const FloatArray &coord = iTri.giveVertex(i);
-                nodeCoords.push_back(coord);
-            }
-
-            oPointPartitions.resize( ( 2 * nNodes ) );
+            oPointPartitions.resize( ( nEdges + 1 ) );
 
             // Divide into subdomains
-            for ( int i = 1; i <= nNodes; i++ ) {
-                ////////////////
-                // Take edge center or intersection point
-                oPointPartitions [ 2 * i - 1 ].push_back(edgeCoords [ i - 1 ]);
+            int triPassed = 0;
+            for ( int i = 1; i <= nEdges; i++ ) {
+                const FloatArray &coordS = iTri.giveVertex(i);
 
-                // Take crack tip position
-                oPointPartitions [ 2 * i - 1 ].push_back(tipCoord);
-
-                // Take node
-                oPointPartitions [ 2 * i - 1 ].push_back( iTri.giveVertex(i) );
-
-                ////////////////
-                // Take edge center or intersection point
-                oPointPartitions [ 2 * i - 2 ].push_back(edgeCoords [ i - 1 ]);
-
-                // Take next node
-                if ( i == nNodes ) {
-                    oPointPartitions [ 2 * i - 2 ].push_back( iTri.giveVertex(1) );
-                } else {
-                    oPointPartitions [ 2 * i - 2 ].push_back( iTri.giveVertex(i + 1) );
+                int endInd = i + 1;
+                if ( i == nEdges ) {
+                    endInd = 1;
                 }
+                const FloatArray &coordE = iTri.giveVertex(endInd);
 
-                // Take crack tip position
-                oPointPartitions [ 2 * i - 2 ].push_back(tipCoord);
+                if ( i == intersecEdgeInd [ 0 ] ) {
+                    oPointPartitions [ triPassed ].push_back(tipCoord);
+                    oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
+                    oPointPartitions [ triPassed ].push_back(coordE);
+                    triPassed++;
+
+                    oPointPartitions [ triPassed ].push_back(tipCoord);
+                    oPointPartitions [ triPassed ].push_back(coordS);
+                    oPointPartitions [ triPassed ].push_back(intersecPoints [ 0 ]);
+                    triPassed++;
+                } else   {
+                    oPointPartitions [ triPassed ].push_back(tipCoord);
+                    oPointPartitions [ triPassed ].push_back(coordS);
+                    oPointPartitions [ triPassed ].push_back(coordE);
+                    triPassed++;
+                }
             }
 
             // Export start and end points of
@@ -809,10 +748,10 @@ void XfemElementInterface :: putPointsInCorrectPartition(std :: vector< std :: v
     }
 }
 
-void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, const double &iTangDistPadding, std :: vector< Line > &oSegments, std::vector<FloatArray> &oIntersectionPoints)
+void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, std :: vector< Line > &oSegments, std :: vector< FloatArray > &oIntersectionPoints, const double &iTangDistPadding)
 {
     const double levelSetTol2 = 1.0e-12;
-//    const double gammaPadding = 0.001;
+    //    const double gammaPadding = 0.001;
 
     XfemManager *xMan = this->element->giveDomain()->giveXfemManager();
 
@@ -854,15 +793,15 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, const double &i
             // Local coordinates of vertices
             FloatArray xiS;
             bool evaluationSucceeded = true;
-            if(!element->computeLocalCoordinates(xiS, seg_xS)) {
+            if ( !element->computeLocalCoordinates(xiS, seg_xS) ) {
                 //TODO: Check for numerical round-off error
-//                printf("xiS: "); xiS.printYourself();
-//                evaluationSucceeded = false;
+                //                printf("xiS: "); xiS.printYourself();
+                //                evaluationSucceeded = false;
             }
             FloatArray xiE;
-            if(!element->computeLocalCoordinates(xiE, seg_xE)) {
-//                printf("xiE: "); xiE.printYourself();
-//                evaluationSucceeded = false;
+            if ( !element->computeLocalCoordinates(xiE, seg_xE) ) {
+                //                printf("xiE: "); xiE.printYourself();
+                //                evaluationSucceeded = false;
             }
 
             const IntArray &elNodes = element->giveDofManArray();
@@ -875,14 +814,14 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, const double &i
 
 
             for ( int i = 1; i <= Ns.giveSize(); i++ ) {
-                const FloatArray &nodePos = *(element->giveNode(i)->giveCoordinates() );
+                const FloatArray &nodePos = * ( element->giveNode(i)->giveCoordinates() );
                 double phiNode = 0.0;
-                if(!ei->evalLevelSetNormalInNode(phiNode, elNodes [ i - 1 ], nodePos)) {
+                if ( !ei->evalLevelSetNormalInNode(phiNode, elNodes [ i - 1 ], nodePos) ) {
                     evaluationSucceeded = false;
                 }
 
                 double gammaNode = 0.0;
-                if(!ei->evalLevelSetTangInNode(gammaNode, elNodes [ i - 1 ], nodePos)) {
+                if ( !ei->evalLevelSetTangInNode(gammaNode, elNodes [ i - 1 ], nodePos) ) {
                     evaluationSucceeded = false;
                 }
 
@@ -918,10 +857,10 @@ void XfemElementInterface :: partitionEdgeSegment(int iBndIndex, const double &i
 
                     // Export the intersection point
                     oIntersectionPoints.push_back(p);
-                } else   {
+                } else {
                     newSegments.push_back(oSegments [ segInd ]);
                 }
-            } else   {
+            } else {
                 // ... else keep the segment.
                 newSegments.push_back(oSegments [ segInd ]);
             }
@@ -951,14 +890,14 @@ void XfemElementInterface :: updateYourselfCZ(TimeStep *tStep)
     }
 }
 
-void XfemElementInterface :: computeDisplacementJump(oofem::GaussPoint& iGP, oofem::FloatArray& oJump, const oofem::FloatArray& iSolVec, const oofem::FloatMatrix& iNMatrix)
+void XfemElementInterface :: computeDisplacementJump(oofem :: GaussPoint &iGP, oofem :: FloatArray &oJump, const oofem :: FloatArray &iSolVec, const oofem :: FloatMatrix &iNMatrix)
 {
     const int dim = 2;
     oJump.resize(dim);
     oJump.beProductOf(iNMatrix, iSolVec);
 }
 
-void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, int iEnrItemIndex, const std::vector<int> &iTouchingEnrItemIndices)
+void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, int iEnrItemIndex, const std :: vector< int > &iTouchingEnrItemIndices)
 {
     const int dim = 2;
 
@@ -995,29 +934,28 @@ void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, 
         for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
             EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices [ i ]);
 
-            GeometryBasedEI *geoEI = dynamic_cast<GeometryBasedEI*>(ei);
+            GeometryBasedEI *geoEI = dynamic_cast< GeometryBasedEI * >( ei );
 
-            if(geoEI != NULL) {
-
+            if ( geoEI != NULL ) {
                 if ( geoEI->isDofManEnriched(* dMan) ) {
                     int numEnr = geoEI->giveNumDofManEnrichments(* dMan);
 
                     std :: vector< double >efJumps;
-                    bool gpLivesOnCurrentCrack = (nodeEiIndices [ i ] == iEnrItemIndex);
+                    bool gpLivesOnCurrentCrack = ( nodeEiIndices [ i ] == iEnrItemIndex );
 
                     bool gpLivesOnInteractingCrack = false;
-                    for( int touchingEIIndex : iTouchingEnrItemIndices ) {
-                        if( nodeEiIndices [ i ] == touchingEIIndex ) {
+                    for ( int touchingEIIndex : iTouchingEnrItemIndices ) {
+                        if ( nodeEiIndices [ i ] == touchingEIIndex ) {
                             gpLivesOnInteractingCrack = true;
                         }
                     }
 
-                    if ( nodeEiIndices [ i ] == iEnrItemIndex || gpLivesOnInteractingCrack) {
+                    if ( nodeEiIndices [ i ] == iEnrItemIndex || gpLivesOnInteractingCrack ) {
                         geoEI->evaluateEnrFuncJumps(efJumps, globalNodeInd, iGP, gpLivesOnCurrentCrack);
                     }
 
                     for ( int k = 0; k < numEnr; k++ ) {
-                        if ( nodeEiIndices [ i ] == iEnrItemIndex || gpLivesOnInteractingCrack) {
+                        if ( nodeEiIndices [ i ] == iEnrItemIndex || gpLivesOnInteractingCrack ) {
                             NdNode [ ndNodeInd ] = efJumps [ k ] * Nc.at(j);
                         } else {
                             NdNode [ ndNodeInd ] = 0.0;

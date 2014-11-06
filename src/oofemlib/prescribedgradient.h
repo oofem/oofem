@@ -74,7 +74,7 @@ public:
      * @param n Boundary condition number.
      * @param d Domain to which new object will belongs.
      */
-    PrescribedGradient(int n, Domain * d) : BoundaryCondition(n, d) { }
+    PrescribedGradient(int n, Domain *d) : BoundaryCondition(n, d) { }
 
     /// Destructor
     virtual ~PrescribedGradient() { }
@@ -138,7 +138,7 @@ public:
      * Set the center coordinate for the prescribed values to be set for.
      * @param x Center coordinate.
      */
-    virtual void setCenterCoordinate(FloatArray x) { centerCoord = std::move(x); }
+    virtual void setCenterCoordinate(FloatArray x) { centerCoord = std :: move(x); }
     /// Returns the center coordinate
     virtual FloatArray &giveCenterCoordinate() { return centerCoord; }
 

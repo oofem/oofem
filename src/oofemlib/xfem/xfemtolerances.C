@@ -34,22 +34,19 @@
 
 #include "xfemtolerances.h"
 
-double XfemTolerances::sCharElLength = 0.0;
+double XfemTolerances :: sCharElLength = 0.0;
 
-void XfemTolerances::setCharacteristicElementLength(double iCharElLength)
+void XfemTolerances :: setCharacteristicElementLength(double iCharElLength)
 {
     sCharElLength = iCharElLength;
 }
 
-double XfemTolerances::giveRelLengthTolLoose()
+double XfemTolerances :: giveRelLengthTolLoose()
 {
     return sRelLengthTolLoose;
 }
 
-double XfemTolerances::giveRelLengthTolTight()
+double XfemTolerances :: giveRelLengthTolTight()
 {
     return sRelLengthTolTight;
 }
-
-
-

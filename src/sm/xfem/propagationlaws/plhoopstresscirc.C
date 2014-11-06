@@ -86,9 +86,9 @@ void PLHoopStressCirc :: giveInputRecord(DynamicInputRecord &input)
     }
 }
 
-bool PLHoopStressCirc ::propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp)
+bool PLHoopStressCirc :: propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp)
 {
-    if(!iEnrFront.propagationIsAllowed()) {
+    if ( !iEnrFront.propagationIsAllowed() ) {
         return false;
     }
 
@@ -161,7 +161,6 @@ bool PLHoopStressCirc ::propagateInterface(Domain &iDomain, EnrichmentFront &iEn
                     Element *gpEl = iDomain.giveElement(elIndex);
 
                     for ( GaussPoint *gp_i: *gpEl->giveDefaultIntegrationRulePtr() ) {
-
                         ////////////////////////////////////////
                         // Compute global gp coordinates
                         FloatArray N;
@@ -332,7 +331,7 @@ bool PLHoopStressCirc ::propagateInterface(Domain &iDomain, EnrichmentFront &iEn
         }
 
         // Compare with threshold
-        printf("maxSigTT: %e mHoopStressThreshold: %e\n", maxSigTT, mHoopStressThreshold );
+        printf("maxSigTT: %e mHoopStressThreshold: %e\n", maxSigTT, mHoopStressThreshold);
         if ( maxSigTT > mHoopStressThreshold && foundZeroLevel ) {
             // Rotation matrix
             FloatMatrix rot(2, 2);
