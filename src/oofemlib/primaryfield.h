@@ -49,6 +49,8 @@
 namespace oofem {
 class PrimaryField;
 class Dof;
+class BoundaryCondition;
+class InitialCondition;
 
 /**
  * Element interface class. Declares the functionality required to support PrimaryField element interpolation.
@@ -83,8 +85,7 @@ public:
 
 
 /**
- * Abstract class representing field of primary variables (those, which are unknown and are typically
- * associated to nodes).
+ * Abstract class representing field of primary variables (those, which are unknown and are typically associated to nodes).
  * In the current design the primary field is understood as simple database, that allows to keep track
  * of the history of a solution vector representing primary field. The history is kept as sequence of
  * solution vectors. The history depth kept can be selected. PrimaryField class basically provides access to
@@ -97,6 +98,8 @@ public:
  * updated by EngngModel, it may contain a mix of different fields (this is especially true for
  * strongly coupled problems). Then masked primary field can be used to select only certain DOFs
  * (based on DofID) from its master PrimaryField.
+ * 
+ * @note This primary field will always assume default numbering schemes.
  */
 class OOFEM_EXPORT PrimaryField : public Field
 {
@@ -131,6 +134,22 @@ public:
      * @param answer Resulting vector.
      */
     virtual void initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answer, const UnknownNumberingScheme &s);
+    /**
+     * Applies the default initial values values for all DOFs (0) in given domain.
+     * @param domain Domain number
+     */
+    virtual void applyDefaultInitialCondition(int domain);
+    /**
+     * Applies initial condition to all DOFs.
+     * @param ic Initial condition for DOFs
+     */
+    virtual void applyInitialCondition(InitialCondition &ic);
+    /**
+     * Applies the boundary condition to all prescribed DOFs in given domain.
+     * @param bc Boundary condition.
+     * @param domain tStep Time step for when bc applies.
+     */
+    virtual void applyBoundaryCondition(BoundaryCondition &bc, TimeStep *tStep);
 
     /**
      * @param dof Pointer to DOF.
