@@ -66,6 +66,9 @@ protected:
      */
     IntegrationRule *compositeIR;
 
+    static IntArray loc_plate;
+    static IntArray loc_membrane;
+
 public:
     /// Constructor
     TR_SHELL01(int n, Domain * d);

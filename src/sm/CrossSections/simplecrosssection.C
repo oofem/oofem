@@ -124,6 +124,9 @@ SimpleCrossSection :: giveGeneralizedStress_Beam2d(FloatArray &answer, GaussPoin
   /**Note: (by bp): This assumes that the behaviour is elastic
      there exist a nuumber of nonlinear integral material models for beams defined directly in terms of integral forces and moments and corresponding 
      deformations and curvatures. This would require to implement support at material model level.
+     Mikael: That would not be a continuum material model, but it would highly depend on the cross-section shape, thus, it should be a special cross-section model instead.
+     This cross-section assumes you can split the response into inertia moments and pure material response. This is only possible for a constant, elastic response (i.e. elastic).
+     Therefore, this cross-section may only be allowed to give the elastic response.
   */
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
@@ -152,6 +155,7 @@ SimpleCrossSection :: giveGeneralizedStress_Beam3d(FloatArray &answer, GaussPoin
   /**Note: (by bp): This assumes that the behaviour is elastic
      there exist a nuumber of nonlinear integral material models for beams defined directly in terms of integral forces and moments and corresponding 
      deformations and curvatures. This would require to implement support at material model level.
+     Mikael: See earlier response to comment
   */
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
@@ -185,6 +189,7 @@ SimpleCrossSection :: giveGeneralizedStress_Plate(FloatArray &answer, GaussPoint
      there exist a nuumber of nonlinear integral material models for beams/plates/shells
      defined directly in terms of integral forces and moments and corresponding 
      deformations and curvatures. This would require to implement support at material model level.
+     Mikael: See earlier response to comment
   */
    StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;
@@ -214,6 +219,7 @@ SimpleCrossSection :: giveGeneralizedStress_Shell(FloatArray &answer, GaussPoint
      there exist a nuumber of nonlinear integral material models for beams/plates/shells
      defined directly in terms of integral forces and moments and corresponding 
      deformations and curvatures. This would require to implement support at material model level.
+     Mikael: See earlier response to comment
   */
     StructuralMaterial *mat = static_cast< StructuralMaterial * >( this->giveMaterial(gp) );
     FloatArray elasticStrain, et, e0;

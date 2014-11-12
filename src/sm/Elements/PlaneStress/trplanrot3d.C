@@ -42,6 +42,7 @@
 #include "classfactory.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
+#include "fei2dtrlin.h"
 
 namespace oofem {
 REGISTER_Element(TrPlaneStrRot3d);
@@ -73,6 +74,21 @@ TrPlaneStrRot3d :: giveLocalCoordinates(FloatArray &answer, FloatArray &global)
 }
 
 
+double
+TrPlaneStrRot3d :: computeVolumeAround(GaussPoint *gp)
+{
+    double detJ, weight;
+
+    FloatArray x, y;
+    this->giveNodeCoordinates(x, y);
+    std :: vector< FloatArray > lc = {{x[0], y[0]}, {x[1], y[1]}, {x[2], y[2]}};
+
+    weight = gp->giveWeight();
+    detJ = fabs( this->interp.giveTransformationJacobian( * gp->giveNaturalCoordinates(), FEIVertexListGeometryWrapper(lc) ) );
+    return detJ * weight * this->giveStructuralCrossSection()->give(CS_Thickness, gp);
+}
+
+
 void
 TrPlaneStrRot3d :: giveNodeCoordinates(FloatArray &x, FloatArray &y)
 {
@@ -82,10 +98,12 @@ TrPlaneStrRot3d :: giveNodeCoordinates(FloatArray &x, FloatArray &y)
     this->giveLocalCoordinates( nc2, * ( this->giveNode(2)->giveCoordinates() ) );
     this->giveLocalCoordinates( nc3, * ( this->giveNode(3)->giveCoordinates() ) );
 
+    x.resize(3);
     x.at(1) = nc1.at(1);
     x.at(2) = nc2.at(1);
     x.at(3) = nc3.at(1);
 
+    y.resize(3);
     y.at(1) = nc1.at(2);
     y.at(2) = nc2.at(2);
     y.at(3) = nc3.at(2);
