@@ -112,6 +112,7 @@ set (sm_material
     linearelasticmaterial.C
     isolinearelasticmaterial.C
     ortholinearelasticmaterial.C
+    anisolinearelasticmaterial.C
     concrete2.C concrete3.C concretedpm.C concretedpm2.C
     cebfip78.C
     doublepowerlaw.C
