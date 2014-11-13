@@ -262,7 +262,7 @@ contextIOResultType XfemManager :: restoreContext(DataStream &stream, ContextMod
     return CIO_OK;
 }
 
-void XfemManager :: updateYourself()
+void XfemManager :: updateYourself(TimeStep *tStep)
 {
     // Update level sets
     for ( auto &ei: enrichmentItemList ) {

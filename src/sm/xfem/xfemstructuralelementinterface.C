@@ -43,6 +43,7 @@
 #include "feinterpol.h"
 #include "spatiallocalizer.h"
 #include "engngm.h"
+#include "Elements/nlstructuralelement.h"
 
 #include "xfem/patchintegrationrule.h"
 #include "xfem/enrichmentitems/crack.h"
@@ -766,6 +767,42 @@ void XfemStructuralElementInterface :: initializeCZMaterial()
         if ( mpCZMat == NULL ) {
             OOFEM_ERROR("Failed to fetch pointer for mpCZMat.");
         }
+    }
+}
+
+void XfemStructuralElementInterface :: XfemElementInterface_computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    // Computes the deformation gradient in the Voigt format at the Gauss point gp of
+    // the receiver at time step tStep.
+    // Order of components: 11, 22, 33, 23, 13, 12, 32, 31, 21 in the 3D.
+
+    NLStructuralElement *nlStructEl = static_cast<NLStructuralElement*>( element );
+
+    // Obtain the current displacement vector of the element and subtract initial displacements (if present)
+    FloatArray u;
+    nlStructEl->computeVectorOf(VM_Total, tStep, u); // solution vector
+    if ( nlStructEl->initialDisplacements ) {
+        u.subtract(* nlStructEl->initialDisplacements);
+    }
+
+    // Displacement gradient H = du/dX
+    FloatMatrix B;
+    nlStructEl->computeBHmatrixAt(gp, B);
+    answer.beProductOf(B, u);
+
+    // Deformation gradient F = H + I
+    MaterialMode matMode = gp->giveMaterialMode();
+    if ( matMode == _3dMat || matMode == _PlaneStrain ) {
+        answer.at(1) += 1.0;
+        answer.at(2) += 1.0;
+        answer.at(3) += 1.0;
+    } else if ( matMode == _PlaneStress ) {
+        answer.at(1) += 1.0;
+        answer.at(2) += 1.0;
+    } else if ( matMode == _1dMat ) {
+        answer.at(1) += 1.0;
+    } else {
+        OOFEM_ERROR("MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
     }
 }
 

@@ -32,61 +32,41 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef XFEMSTRUCTUREMANAGER_H_
-#define XFEMSTRUCTUREMANAGER_H_
+/*
+ * matforceevaluator.h
+ *
+ *  Created on: Nov 12, 2014
+ *      Author: svennine
+ */
 
-#include "xfem/xfemmanager.h"
-
-///@name Input fields for XfemManager
-//@{
-#define _IFT_XfemStructureManager_Name "xfemstructuremanager"
-#define _IFT_XfemStructureManager_splitCracks "splitcracks"
-//@}
+#ifndef MATFORCEEVALUATOR_H_
+#define MATFORCEEVALUATOR_H_
 
 namespace oofem {
 
-class MaterialForceEvaluator;
+class TipInfo;
+class Domain;
+class FloatArray;
+class TimeStep;
 
-/*
- * XfemStructureManager: XFEM manager with extra functionality
- * specific for the sm module.
+/**
+ * Evaluates material forces.
+ *
+ * Under development. Currently, only elastic material and traction free cracks are considered.
  *
  * @author Erik Svenning
- * @date Apr 28, 2014
+ * @date Nov 12, 2014
  */
-class OOFEM_EXPORT XfemStructureManager : public XfemManager
-{
+class MaterialForceEvaluator {
 public:
-    XfemStructureManager(Domain *domain);
-    virtual ~XfemStructureManager();
+    MaterialForceEvaluator();
+    virtual ~MaterialForceEvaluator();
 
-    /// Initializes receiver according to object description stored in input record.
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    virtual void giveInputRecord(DynamicInputRecord &input);
+    void computeMaterialForce(FloatArray &oMatForce, Domain &iDomain, const TipInfo &iTipInfo, TimeStep *tStep, const double &iRadius);
 
-    virtual int instanciateYourself(DataReader *dr);
-    virtual const char *giveClassName() const { return "XfemStructureManager"; }
-    virtual const char *giveInputRecordName() const { return _IFT_XfemStructureManager_Name; }
-
-    /**
-     * Update enrichment items (level sets).
-     */
-    virtual void updateYourself(TimeStep *tStep);
-
-    void splitCracks();
-
-protected:
-
-    /**
-     * If cracks should be splitted at intersections as a pre-processing step.
-     */
-    bool mSplitCracks;
-
-    /**
-     * Evaluator for material forces.
-     */
-    MaterialForceEvaluator *mpMatForceEvaluator;
+    double computeWeightFunctionInPoint(const FloatArray &iCoord, const FloatArray &iTipCoord, const double &iRadius) const;
 };
+
 } /* namespace oofem */
 
-#endif /* XFEMSTRUCTUREMANAGER_H_ */
+#endif /* MATFORCEEVALUATOR_H_ */

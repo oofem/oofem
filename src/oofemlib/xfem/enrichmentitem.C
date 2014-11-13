@@ -433,7 +433,7 @@ void EnrichmentItem :: calcPolarCoord(double &oR, double &oTheta, const FloatArr
     }
 }
 
-void EnrichmentItem :: callGnuplotExportModule(GnuplotExportModule &iExpMod)
+void EnrichmentItem :: callGnuplotExportModule(GnuplotExportModule &iExpMod, TimeStep *tStep)
 {
     //iExpMod.outputXFEM(*this);
 }

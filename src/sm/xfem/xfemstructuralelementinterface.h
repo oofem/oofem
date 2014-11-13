@@ -72,6 +72,9 @@ public:
 
     virtual void initializeCZMaterial();
 
+    virtual void XfemElementInterface_computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep);
+
+
     /**
      * Identify enrichment items with an intersection enrichment
      * front that touches a given enrichment item.

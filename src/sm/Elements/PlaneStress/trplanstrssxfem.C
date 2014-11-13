@@ -171,6 +171,11 @@ void TrPlaneStress2dXFEM :: computeStiffnessMatrix(FloatMatrix &answer, MatRespo
     }
 }
 
+void TrPlaneStress2dXFEM :: computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    XfemStructuralElementInterface::XfemElementInterface_computeDeformationGradientVector(answer, gp, tStep);
+}
+
 void
 TrPlaneStress2dXFEM :: giveInternalForcesVector(FloatArray &answer, TimeStep *tStep, int useUpdatedGpRecord)
 {

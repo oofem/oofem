@@ -256,6 +256,7 @@ set (sm_xfem
     xfem/enrichmentitems/shellcrack.C
     xfem/propagationlaws/plhoopstresscirc.C
     xfem/xfemstructuremanager.C
+    xfem/matforceevaluator.C
     EngineeringModels/xfemsolverinterface.C
     )
 

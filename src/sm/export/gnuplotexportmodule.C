@@ -58,6 +58,7 @@
 #include "feinterpol.h"
 #include "xfem/enrichmentitems/crack.h"
 #include "dofmanager.h"
+#include "xfem/matforceevaluator.h"
 
 #include <sstream>
 
@@ -72,11 +73,14 @@ mExportMesh(false),
 mExportXFEM(false),
 mMonitorNodeIndex(-1)
 {
-
+    mpMatForceEvaluator = new  MaterialForceEvaluator();
 }
 
 GnuplotExportModule::~GnuplotExportModule() {
-
+    if(mpMatForceEvaluator != NULL) {
+        delete mpMatForceEvaluator;
+        mpMatForceEvaluator = NULL;
+    }
 }
 
 IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
@@ -87,6 +91,9 @@ IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
     mExportXFEM = ir->hasField(_IFT_GnuplotExportModule_xfem);
 
     ir->giveOptionalField(mMonitorNodeIndex, _IFT_GnuplotExportModule_monitornode);
+
+    ir->giveOptionalField(mMatForceRadii, _IFT_GnuplotExportModule_materialforceradii);
+    printf("mMatForceRadii: "); mMatForceRadii.printYourself();
 
     return ExportModule::initializeFrom(ir);
 }
@@ -139,7 +146,7 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 
             for(int i = 1; i <= numEI; i++) {
                 EnrichmentItem *ei = xMan->giveEnrichmentItem(i);
-                ei->callGnuplotExportModule(*this);
+                ei->callGnuplotExportModule(*this, tStep);
 
                 GeometryBasedEI *geoEI = dynamic_cast<GeometryBasedEI*>(ei);
                 if(geoEI != NULL) {
@@ -280,12 +287,12 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
     }
 }
 
-void GnuplotExportModule::outputXFEM(EnrichmentItem &iEI)
+void GnuplotExportModule::outputXFEM(EnrichmentItem &iEI, TimeStep *tStep)
 {
 
 }
 
-void GnuplotExportModule::outputXFEM(Crack &iCrack)
+void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
 {
     const std::vector<GaussPoint*> &czGaussPoints = iCrack.giveCohesiveZoneGaussPoints();
 
@@ -339,6 +346,63 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack)
         strTangJump << "TangJumpGnuplotEI" << eiIndex << "Time" << time << ".dat";
         std :: string nameTangJump = strTangJump.str();
         XFEMDebugTools::WriteArrayToGnuplot(nameTangJump, arcLengthPositions, tangJumps);
+
+
+        std::vector<FloatArray> matForcesStart, matForcesEnd;
+        std::vector<double> radii;
+
+        // Material forces
+        for(double matForceRadius : mMatForceRadii) {
+
+            radii.push_back(matForceRadius);
+
+            EnrichmentFront *efStart = iCrack.giveEnrichmentFrontStart();
+            const TipInfo &tipInfoStart = efStart->giveTipInfo();
+
+            FloatArray matForceStart;
+            mpMatForceEvaluator->computeMaterialForce(matForceStart, *domain, tipInfoStart, tStep, matForceRadius);
+
+            if(matForceStart.giveSize() > 0) {
+                matForcesStart.push_back(matForceStart);
+            }
+            else {
+                matForcesStart.push_back({0.0,0.0});
+            }
+
+
+            EnrichmentFront *efEnd = iCrack.giveEnrichmentFrontEnd();
+            const TipInfo &tipInfoEnd = efEnd->giveTipInfo();
+
+            FloatArray matForceEnd;
+            mpMatForceEvaluator->computeMaterialForce(matForceEnd, *domain, tipInfoEnd, tStep, matForceRadius);
+
+            if(matForceEnd.giveSize() > 0) {
+                matForcesEnd.push_back(matForceEnd);
+            }
+            else {
+                matForcesEnd.push_back({0.0,0.0});
+            }
+
+        }
+
+        std::vector< std::vector<FloatArray> > matForcesStartArray, matForcesEndArray;
+        matForcesStartArray.push_back(matForcesStart);
+        matForcesEndArray.push_back(matForcesEnd);
+
+
+        std :: stringstream strRadii;
+        strRadii << "MatForceRadiiGnuplotTime" << time << "Crack" << iCrack.giveNumber() << ".dat";
+        XFEMDebugTools::WriteArrayToGnuplot(strRadii.str(), radii, radii);
+
+
+        std :: stringstream strMatForcesStart;
+        strMatForcesStart << "MatForcesStartGnuplotTime" << time << "Crack" << iCrack.giveNumber() << ".dat";
+        WritePointsToGnuplot(strMatForcesStart.str(), matForcesStartArray);
+
+
+        std :: stringstream strMatForcesEnd;
+        strMatForcesEnd << "MatForcesEndGnuplotTime" << time << "Crack" << iCrack.giveNumber() << ".dat";
+        WritePointsToGnuplot(strMatForcesEnd.str(), matForcesEndArray);
     }
 }
 

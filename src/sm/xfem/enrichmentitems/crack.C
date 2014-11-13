@@ -82,9 +82,9 @@ void Crack :: AppendCohesiveZoneGaussPoint(GaussPoint *ipGP)
     }
 }
 
-void Crack :: callGnuplotExportModule(GnuplotExportModule &iExpMod)
+void Crack :: callGnuplotExportModule(GnuplotExportModule &iExpMod, TimeStep *tStep)
 {
-    iExpMod.outputXFEM(* this);
+    iExpMod.outputXFEM(* this, tStep);
 }
 
 void Crack :: computeCrackIntersectionPoints(Crack &iCrack, std :: vector< FloatArray > &oIntersectionPoints, std :: vector< double > &oArcPositions)

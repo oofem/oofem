@@ -36,6 +36,7 @@
 #define GNUPLOTEXPORTMODULE_H_
 
 #include "exportmodule.h"
+#include "floatarray.h"
 
 ///@name Input fields for GnuplotExportModule
 //@{
@@ -50,6 +51,8 @@
 #define _IFT_GnuplotExportModule_xfem "xfem"
 // Node for monitoring displacement
 #define _IFT_GnuplotExportModule_monitornode "monitornode"
+// Radii for material force evaluation
+#define _IFT_GnuplotExportModule_materialforceradii "matforceradii"
 //@}
 
 namespace oofem {
@@ -60,6 +63,8 @@ class PrescribedGradientBCNeumann;
 class PrescribedGradientBCWeak;
 class Domain;
 class DofManager;
+class MaterialForceEvaluator;
+
 
 /**
  * (Under development) The Gnuplot export module enables OOFEM to export some
@@ -85,8 +90,8 @@ public:
     /**
      * XFEM output
      */
-    void outputXFEM(EnrichmentItem &iEI);
-    void outputXFEM(Crack &iCrack);
+    void outputXFEM(EnrichmentItem &iEI, TimeStep *tStep);
+    void outputXFEM(Crack &iCrack, TimeStep *tStep);
 
     void outputXFEMGeometry(const std::vector< std::vector<FloatArray> > &iEnrItemPoints);
 
@@ -125,6 +130,12 @@ protected:
     std::vector< std::vector<double> > mDispHist;
 
     void outputReactionForces(TimeStep *tStep);
+
+    /**
+     * Evaluator for material forces.
+     */
+    MaterialForceEvaluator *mpMatForceEvaluator;
+    FloatArray mMatForceRadii;
 
 };
 } // end namespace oofem

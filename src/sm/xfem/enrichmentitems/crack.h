@@ -62,7 +62,7 @@ public:
 
     void AppendCohesiveZoneGaussPoint(GaussPoint *ipGP);
 
-    virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod);
+    virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod, TimeStep *tStep);
 
     const std :: vector< GaussPoint * > &giveCohesiveZoneGaussPoints() const { return mCohesiveZoneGaussPoints; }
     const std :: vector< double > &giveCohesiveZoneArcPositions() const { return mCohesiveZoneArcPositions; }

@@ -674,6 +674,23 @@ SimpleCrossSection :: giveCauchyStresses(FloatArray &answer, GaussPoint *gp, con
     }
 }
 
+void
+SimpleCrossSection :: giveEshelbyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep)
+{
+    MaterialMode mode = gp->giveMaterialMode();
+    StructuralMaterial *mat = dynamic_cast< StructuralMaterial * >( this->giveMaterial(gp) );
+
+    if ( mode == _3dMat ) {
+//        mat->giveCauchyStressVector_3d(answer, gp, reducedvF, tStep);
+    } else if ( mode == _PlaneStrain ) {
+        mat->giveEshelbyStressVector_PlaneStrain(answer, gp, reducedvF, tStep);
+    } else if ( mode == _PlaneStress ) {
+//        mat->giveCauchyStressVector_PlaneStress(answer, gp, reducedvF, tStep);
+    } else if ( mode == _1dMat ) {
+//        mat->giveCauchyStressVector_1d(answer, gp, reducedvF, tStep);
+    }
+}
+
 
 void
 SimpleCrossSection :: giveStiffnessMatrix_dPdF(FloatMatrix &answer,

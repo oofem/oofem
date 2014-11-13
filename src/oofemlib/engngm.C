@@ -626,7 +626,7 @@ EngngModel :: updateYourself(TimeStep *tStep)
 
         // Update xfem manager if it is present
         if ( domain->hasXfemManager() ) {
-            domain->giveXfemManager()->updateYourself();
+            domain->giveXfemManager()->updateYourself(tStep);
         }
 
 #  ifdef VERBOSE

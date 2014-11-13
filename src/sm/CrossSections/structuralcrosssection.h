@@ -171,6 +171,14 @@ public:
     virtual void giveCauchyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedFIncrement, TimeStep *tStep) = 0;
 
     /**
+     * Computes the Eshelby stress vector. Does not update history variables, this is a postprocesing computation.
+     * @param answer Contains the Eshelby stress.
+     * @param gp Integration point.
+     * @param tStep Current time step (most models are able to respond only when tStep is current time step).
+     */
+    virtual void giveEshelbyStresses(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedvF, TimeStep *tStep) {};
+
+    /**
      * Computes the material stiffness matrix dPdF of receiver in a given integration point, respecting its history.
      * The algorithm should use temporary or equilibrium  history variables stored in integration point status
      * to compute and return required result.

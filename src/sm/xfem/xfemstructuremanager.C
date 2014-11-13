@@ -42,15 +42,25 @@
 #include "xfem/enrichmentfronts/enrichmentfrontintersection.h"
 #include "geometry.h"
 
+#include "matforceevaluator.h"
+
 namespace oofem {
 REGISTER_XfemManager(XfemStructureManager)
 
 XfemStructureManager :: XfemStructureManager(Domain *domain) :
     XfemManager(domain),
     mSplitCracks(false)
-{}
+{
+    mpMatForceEvaluator = new  MaterialForceEvaluator();
+}
 
-XfemStructureManager :: ~XfemStructureManager() {}
+XfemStructureManager :: ~XfemStructureManager()
+{
+    if(mpMatForceEvaluator != NULL) {
+        delete mpMatForceEvaluator;
+        mpMatForceEvaluator = NULL;
+    }
+}
 
 IRResultType XfemStructureManager :: initializeFrom(InputRecord *ir)
 {
@@ -86,6 +96,11 @@ int XfemStructureManager :: instanciateYourself(DataReader *dr)
     updateNodeEnrichmentItemMap();
 
     return result;
+}
+
+void XfemStructureManager :: updateYourself(TimeStep *tStep)
+{
+    XfemManager::updateYourself(tStep);
 }
 
 void XfemStructureManager :: splitCracks()

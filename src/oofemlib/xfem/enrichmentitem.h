@@ -216,7 +216,7 @@ public:
     bool hasPropagationLaw() { return this->mPropLawIndex != 0; };
 
 
-    virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod);
+    virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod, TimeStep *tStep);
 
 
     const std :: unordered_map< int, NodeEnrichmentType > &giveEnrNodeMap() const { return mNodeEnrMarkerMap; }

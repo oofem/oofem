@@ -525,6 +525,12 @@ StructuralMaterial :: convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix
 }
 
 void
+StructuralMaterial :: giveEshelbyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep)
+{
+    OOFEM_ERROR("not implemented ")
+}
+
+void
 StructuralMaterial :: give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp)
 {
     // Default implementation for converting dSdE to dPdF. This includes updating the

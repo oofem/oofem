@@ -88,7 +88,7 @@ NLStructuralElement :: computeDeformationGradientVector(FloatArray &answer, Gaus
 
     // Obtain the current displacement vector of the element and subtract initial displacements (if present)
     FloatArray u;
-    this->computeVectorOf({1, 2, 3}, VM_Total, tStep, u); // solution vector
+    this->computeVectorOf({D_u, D_v, D_w}, VM_Total, tStep, u); // solution vector
     if ( initialDisplacements ) {
         u.subtract(* initialDisplacements);
     }

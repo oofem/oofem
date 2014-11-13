@@ -243,6 +243,11 @@ public:
     { OOFEM_ERROR("not implemented "); }
     //@}
 
+    /**
+     * Prototype for computation of Eshelby stress. No default implementation is provided.
+     */
+    virtual void giveEshelbyStressVector_PlaneStrain(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedF, TimeStep *tStep);
+
     void give_dPdF_from(const FloatMatrix &dSdE, FloatMatrix &answer, GaussPoint *gp);
     void convert_dSdE_2_dPdF(FloatMatrix &answer, const FloatMatrix &dSdE, FloatArray &S, FloatArray &F, MaterialMode matMode);
 

@@ -189,7 +189,7 @@ public:
     /**
      * Update enrichment items (level sets).
      */
-    void updateYourself();
+    virtual void updateYourself(TimeStep *tStep);
 
     void propagateFronts();
     bool hasPropagatingFronts();
