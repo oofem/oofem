@@ -129,23 +129,19 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
     int neq = eModel->giveNumberOfDomainEquations(di, s);
-    int nelem = domain->giveNumberOfElements();
-    int i, ii, j, jj, n;
     unsigned long indx;
-    Element *elem;
     // allocation map
     std :: vector< std :: set< int > >columns(neq);
 
     unsigned long nz_ = 0;
 
-    for ( n = 1; n <= nelem; n++ ) {
-        elem = domain->giveElement(n);
+    for ( auto &elem : domain->giveElements() ) {
         elem->giveLocationArray(loc, s);
 
-        for ( i = 1; i <= loc.giveSize(); i++ ) {
-            if ( ( ii = loc.at(i) ) ) {
-                for ( j = 1; j <= loc.giveSize(); j++ ) {
-                    if ( ( jj = loc.at(j) ) ) {
+        for ( int ii : loc ) {
+            if ( ii > 0 ) {
+                for ( int jj : loc ) {
+                    if ( jj > 0 ) {
                         columns [ jj - 1 ].insert(ii - 1);
                     }
                 }
@@ -154,21 +150,20 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
     }
 
     // loop over active boundary conditions
-    int nbc = domain->giveNumberOfBoundaryConditions();
     std::vector<IntArray> r_locs;
     std::vector<IntArray> c_locs;
     
-    for ( i = 1; i <= nbc; ++i ) {
-        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
+    for ( auto &gbc : domain->giveBcs() ) {
+        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( gbc.get() );
         if ( bc != NULL ) {
             bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for (std::size_t k = 0; k < r_locs.size(); k++) {
                 IntArray &krloc = r_locs[k];
                 IntArray &kcloc = c_locs[k];
-                for ( int ri = 1; ri <= krloc.giveSize(); ri++ ) {
-                    if ( ( ii = krloc.at(ri) ) ) {
-                        for ( j = 1; j <= kcloc.giveSize(); j++ ) {
-                            if ( (jj = kcloc.at(j) ) ) {
+                for ( int ii : krloc ) {
+                    if ( ii > 0 ) {
+                        for ( int jj : kcloc ) {
+                            if ( jj > 0 ) {
                                 columns [ jj - 1 ].insert(ii - 1);
                             }
                         }
@@ -178,7 +173,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
         }
     }
     
-    for ( i = 0; i < neq; i++ ) {
+    for ( int i = 0; i < neq; i++ ) {
         nz_ += columns [ i ].size();
     }
 
@@ -190,11 +185,10 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
 
     indx = 0;
 
-    std :: set< int > :: iterator pos;
-    for ( j = 0; j < neq; j++ ) { // column loop
+    for ( int j = 0; j < neq; j++ ) { // column loop
         colptr_ [ j ] = indx;
-        for ( pos = columns [ j ].begin(); pos != columns [ j ].end(); ++pos ) { // row loop
-            rowind_ [ indx++ ] = * pos;
+        for ( auto &val : columns [ j ] ) { // row loop
+            rowind_ [ indx++ ] = val;
         }
     }
 
@@ -217,20 +211,18 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
     int _ndofs, _neq, ndofmans = domain->giveNumberOfDofManagers();
     int ndofmansbc = 0;
     // count number of internal dofmans on active bc
-    for (n=1; n<=nbc; n++) {
-      ndofmansbc+=domain->giveBc(n)->giveNumberOfInternalDofManagers();
+    for ( auto &bc : domain->giveBcs() ) {
+        ndofmansbc += bc->giveNumberOfInternalDofManagers();
     }
 
     long *mcn = new long [ (ndofmans+ndofmansbc) * bsize ];
     long _c = 0;
-    DofManager *dman;
 
     if ( mcn == NULL ) {
         OOFEM_FATAL("free store exhausted, exiting");
     }
 
-    for ( n = 1; n <= ndofmans; n++ ) {
-        dman = domain->giveDofManager(n);
+    for ( auto &dman : domain->giveDofManagers() ) {
         _ndofs = dman->giveNumberOfDofs();
         if ( _ndofs > bsize ) {
             _succ = false;
@@ -248,16 +240,16 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
             }
         }
 
-        for ( i = _ndofs + 1; i <= bsize; i++ ) {
+        for ( int i = _ndofs + 1; i <= bsize; i++ ) {
             mcn [ _c++ ] = -1;                         // no corresponding row in sparse mtrx structure
         }
     }
 
     // loop over internal dofmans of active bc
-    for (int ibc=1; ibc<=nbc; ibc++) {
-      int ndman = domain->giveBc(ibc)->giveNumberOfInternalDofManagers();
+    for ( auto &bc : domain->giveBcs() ) {
+      int ndman = bc->giveNumberOfInternalDofManagers();
       for (int idman = 1; idman <= ndman; idman ++) {
-            dman = domain->giveBc(ibc)->giveInternalDofManager(idman);
+            DofManager *dman = bc->giveInternalDofManager(idman);
             _ndofs = dman->giveNumberOfDofs();
             if ( _ndofs > bsize ) {
                 _succ = false;
@@ -275,7 +267,7 @@ int DSSMatrix :: buildInternalStructure(EngngModel *eModel, int di, const Unknow
                 }
             }
 
-            for ( i = _ndofs + 1; i <= bsize; i++ ) {
+            for ( int i = _ndofs + 1; i <= bsize; i++ ) {
                 mcn [ _c++ ] = -1;                         // no corresponding row in sparse mtrx structure
             }
         }
