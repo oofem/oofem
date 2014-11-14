@@ -328,11 +328,9 @@ StationaryTransportProblem :: checkConsistency()
     Domain *domain = this->giveDomain(1);
 
     // check for proper element type
-    int nelem = domain->giveNumberOfElements();
-    for ( int i = 1; i <= nelem; i++ ) {
-        Element *ePtr = domain->giveElement(i);
-        if ( !dynamic_cast< TransportElement * >(ePtr) ) {
-            OOFEM_WARNING("Element %d has no TransportElement base", i);
+    for ( auto &elem : domain->giveElements() ) {
+        if ( !dynamic_cast< TransportElement * >( elem.get() ) ) {
+            OOFEM_WARNING("Element %d has no TransportElement base", elem->giveLabel());
             return 0;
         }
     }
@@ -361,9 +359,8 @@ StationaryTransportProblem :: updateInternalState(TimeStep *tStep)
 {
     ///@todo Remove this, unnecessary with solving as a nonlinear problem (left for now, since nonstationary problems might still need it)
     for ( auto &domain: domainList ) {
-        int nelem = domain->giveNumberOfElements();
-        for ( int j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(tStep);
+        for ( auto &elem : domain->giveElements() ) {
+            elem->updateInternalState(tStep);
         }
     }
 }

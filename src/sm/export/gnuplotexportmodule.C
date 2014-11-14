@@ -608,10 +608,7 @@ void GnuplotExportModule::outputMesh(Domain &iDomain)
 
     if(iDomain.giveNumberOfSpatialDimensions() == 2) {
         // Write all element edges to gnuplot
-        int numEl = iDomain.giveNumberOfElements();
-        for(int elInd = 1; elInd <= numEl; elInd++) {
-            Element *el = iDomain.giveElement(elInd);
-
+        for ( auto &el : iDomain.giveElements() ) {
             int numEdges = el->giveNumberOfNodes();
 
 
