@@ -265,6 +265,7 @@ public:
      * @param n Pointer to n-th element is returned.
      */
     Element *giveElement(int n);
+    std :: vector< std :: unique_ptr< Element > > &giveElements() { return this->elementList; }
     /**
      * Service for accessing particular domain fe element.
      * Generates error if no such element is defined.
@@ -298,12 +299,14 @@ public:
      * @param n Pointer to n-th bc is returned.
      */
     GeneralBoundaryCondition *giveBc(int n);
+    std :: vector< std :: unique_ptr< GeneralBoundaryCondition > > &giveBcs() { return this->bcList; }
     /**
      * Service for accessing particular domain ic.
      * Generates error if no such ic is defined.
      * @param n Pointer to n-th ic is returned.
      */
     InitialCondition *giveIc(int n);
+    std :: vector< std :: unique_ptr< InitialCondition > > &giveIcs() { return this->icList; }
 
     /**
      * Service for accessing particular domain load time function.
@@ -311,18 +314,21 @@ public:
      * @param n Pointer to n-th load time function is returned.
      */
     Function *giveFunction(int n);
+    std :: vector< std :: unique_ptr< Function > > &giveFunctions() { return this->functionList; }
     /**
      * Service for accessing particular domain material model.
      * Generates error if no such material model is defined.
      * @param n Pointer to n-th material model is returned.
      */
     Material *giveMaterial(int n);
+    std :: vector< std :: unique_ptr< Material > > &giveMaterials() { return this->materialList; }
     /**
      * Service for accessing particular domain cross section model.
      * Generates error if no such cross section  model is defined.
      * @param n Pointer to n-th cross section is returned.
      */
     CrossSection *giveCrossSection(int n);
+    std :: vector< std :: unique_ptr< CrossSection > > &giveCrossSections() { return this->crossSectionList; }
     /**
      * Service for accessing particular domain nonlocal barrier representation.
      * Generates error if no such barrier  model is defined.
@@ -335,7 +341,7 @@ public:
      * @param n Pointer to n-th object is returned.
      */
     Set *giveSet(int n);
-
+    std :: vector< std :: unique_ptr< Set > > &giveSets() { return this->setList; }
     /**
      * Service for accessing particular domain node.
      * Generates error if no such node is defined.
@@ -371,6 +377,7 @@ public:
      * @param n Pointer to n-th dof manager is returned.
      */
     DofManager *giveDofManager(int n);
+    std :: vector< std :: unique_ptr< DofManager > > &giveDofManagers() { return this->dofManagerList; }
     /**
      * Service for accessing particular domain dof manager.
      * Generates error if no such element is defined.
