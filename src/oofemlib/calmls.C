@@ -513,15 +513,13 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
         dg_totalLoadLevel.zero();
         dg_totalDisp.zero();
         // loop over dof managers
-        int ndofman = domain->giveNumberOfDofManagers();
-        for ( int _idofman = 1; _idofman <= ndofman; _idofman++ ) {
-            DofManager *_idofmanptr = domain->giveDofManager(_idofman);
-            if ( !_idofmanptr->isLocal() ) {
+        for ( auto &dman : domain->giveDofManagers() ) {
+            if ( !dman->isLocal() ) {
                 continue;
             }
 
             // loop over individual dofs
-            for ( Dof *_idofptr: *_idofmanptr ) {
+            for ( Dof *_idofptr: *dman ) {
                 // loop over dof groups
                 for ( int _dg = 1; _dg <= _ng; _dg++ ) {
                     // test if dof ID is in active set
@@ -546,17 +544,15 @@ CylindricalALM :: checkConvergence(const FloatArray &R, const FloatArray *R0, co
         } // end loop over dof managers
 
         // loop over elements and their DOFs
-        int nelem = domain->giveNumberOfElements();
-        for ( int _ielem = 1; _ielem <= nelem; _ielem++ ) {
-            Element *_ielemptr = domain->giveElement(_ielem);
-            if ( _ielemptr->giveParallelMode() != Element_local ) {
+        for ( auto &elem : domain->giveElements() ) {
+            if ( elem->giveParallelMode() != Element_local ) {
                 continue;
             }
 
             // loop over element internal Dofs
-            for ( int _idofman = 1; _idofman <= _ielemptr->giveNumberOfInternalDofManagers(); _idofman++ ) {
+            for ( int _idofman = 1; _idofman <= elem->giveNumberOfInternalDofManagers(); _idofman++ ) {
                 // loop over individual dofs
-                for ( Dof *_idofptr: *_ielemptr->giveInternalDofManager(_idofman) ) {
+                for ( Dof *_idofptr: *elem->giveInternalDofManager(_idofman) ) {
                     // loop over dof groups
                     for ( int _dg = 1; _dg <= _ng; _dg++ ) {
                         // test if dof ID is in active set

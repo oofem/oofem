@@ -391,8 +391,7 @@ ErrorCheckingExportModule :: writeCheck(Domain *domain, TimeStep *tStep)
         std :: cout << "#%BEGIN_CHECK% tolerance 1.e-3\n";
     }
 
-    for ( int i = 1; i <= domain->giveNumberOfDofManagers(); ++i ) {
-        DofManager *dman = domain->giveDofManager(i);
+    for ( auto &dman : domain->giveDofManagers() ) {
         for ( Dof *dof: *dman ) {
             if ( dof->giveEqn() < 0 ) {
                 continue;
@@ -406,8 +405,7 @@ ErrorCheckingExportModule :: writeCheck(Domain *domain, TimeStep *tStep)
         }
     }
 
-    for ( int i = 1; i <= domain->giveNumberOfElements(); ++i ) {
-        Element *element = domain->giveElement(i);
+    for ( auto &element : domain->giveElements() ) {
         IntegrationRule *iRule = element->giveDefaultIntegrationRulePtr();
         FloatArray ipval;
         for ( int ist: this->writeIST ) {

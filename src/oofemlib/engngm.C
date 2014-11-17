@@ -183,6 +183,7 @@ EngngModel :: ~EngngModel()
     delete nonlocCommunicator;
     delete commBuff;
 #endif
+    printf("REMOVEMEfoo1\n");
 }
 
 
@@ -432,34 +433,27 @@ EngngModel :: forceEquationNumbering(int id)
     // OUTPUT:
     // sets this->numberOfEquations and this->numberOfPrescribedEquations and returns this value
 
-    int nnodes, nelem, nbc;
     Domain *domain = this->giveDomain(id);
     TimeStep *currStep = this->giveCurrentStep();
-    IntArray loc;
 
     this->domainNeqs.at(id) = 0;
     this->domainPrescribedNeqs.at(id) = 0;
 
     if ( !this->profileOpt ) {
-        nnodes = domain->giveNumberOfDofManagers();
-        for ( int i = 1; i <= nnodes; i++ ) {
-            domain->giveDofManager(i)->askNewEquationNumbers(currStep);
+        for ( auto &node : domain->giveDofManagers() ) {
+            node->askNewEquationNumbers(currStep);
         }
 
-        nelem = domain->giveNumberOfElements();
-        for ( int i = 1; i <= nelem; ++i ) {
-            Element *elem = domain->giveElement(i);
-            nnodes = elem->giveNumberOfInternalDofManagers();
+        for ( auto &elem : domain->giveElements() ) {
+            int nnodes = elem->giveNumberOfInternalDofManagers();
             for ( int k = 1; k <= nnodes; k++ ) {
                 elem->giveInternalDofManager(k)->askNewEquationNumbers(currStep);
             }
         }
 
         // For special boundary conditions;
-        nbc = domain->giveNumberOfBoundaryConditions();
-        for ( int i = 1; i <= nbc; ++i ) {
-            GeneralBoundaryCondition *bc = domain->giveBc(i);
-            nnodes = bc->giveNumberOfInternalDofManagers();
+        for ( auto &bc : domain->giveBcs() ) {
+            int nnodes = bc->giveNumberOfInternalDofManagers();
             for ( int k = 1; k <= nnodes; k++ ) {
                 bc->giveInternalDofManager(k)->askNewEquationNumbers(currStep);
             }
@@ -619,9 +613,8 @@ EngngModel :: updateYourself(TimeStep *tStep)
         VERBOSE_PRINT0( "Updating domain ", domain->giveNumber() )
 #  endif
 
-        int nnodes = domain->giveNumberOfDofManagers();
-        for ( int j = 1; j <= nnodes; j++ ) {
-            domain->giveDofManager(j)->updateYourself(tStep);
+        for ( auto &dman : domain->giveDofManagers() ) {
+            dman->updateYourself(tStep);
         }
 
         // Update xfem manager if it is present
@@ -630,13 +623,11 @@ EngngModel :: updateYourself(TimeStep *tStep)
         }
 
 #  ifdef VERBOSE
-        VERBOSE_PRINT0("Updated nodes ", nnodes)
+        VERBOSE_PRINT0("Updated nodes ", domain->giveNumberOfDofManagers())
 #  endif
 
 
-        int nelem = domain->giveNumberOfElements();
-        for ( int j = 1; j <= nelem; j++ ) {
-            Element *elem = domain->giveElement(j);
+        for ( auto &elem : domain->giveElements() ) {
             // skip remote elements (these are used as mirrors of remote elements on other domains
             // when nonlocal constitutive models are used. They introduction is necessary to
             // allow local averaging on domains without fine grain communication between domains).
@@ -648,7 +639,7 @@ EngngModel :: updateYourself(TimeStep *tStep)
         }
 
 #  ifdef VERBOSE
-        VERBOSE_PRINT0("Updated Elements ", nelem)
+        VERBOSE_PRINT0("Updated Elements ", domain->giveNumberOfElements())
 #  endif
     }
 
@@ -722,8 +713,8 @@ EngngModel :: printOutputAt(FILE *File, TimeStep *tStep)
 
 void EngngModel :: printYourself()
 {
-    printf( "\nEngineeringModel: instance %s\n", this->giveClassName() );
-    printf( "number of steps: %d\n", this->giveNumberOfSteps() );
+    printf("\nEngineeringModel: instance %s\n", this->giveClassName() );
+    printf("number of steps: %d\n", this->giveNumberOfSteps() );
     printf("number of eq's : %d\n", numberOfEquations);
 }
 
@@ -1212,10 +1203,7 @@ EngngModel :: initStepIncrements()
 //
 {
     for ( auto &domain: domainList ) {
-        int nelem = domain->giveNumberOfElements();
-        for ( int j = 1; j <= nelem; j++ ) {
-            Element *elem = domain->giveElement(j);
-
+        for ( auto &elem : domain->giveElements() ) {
             // skip remote elements (these are used as mirrors of remote elements on other domains
             // when nonlocal constitutive models are used. They introduction is necessary to
             // allow local averaging on domains without fine grain communication between domains).
@@ -1732,8 +1720,8 @@ void EngngModel :: drawElements(oofegGraphicContext &gc)
 {
     Domain *d = this->giveDomain( gc.getActiveDomain() );
     TimeStep *tStep = this->giveCurrentStep();
-    for ( int i = 1; i <= d->giveNumberOfElements(); i++ ) {
-        d->giveElement(i)->drawYourself(gc, tStep);
+    for ( auto &elem : d->giveElements() ) {
+        elem->drawYourself(gc, tStep);
     }
 }
 
@@ -1741,8 +1729,8 @@ void EngngModel :: drawNodes(oofegGraphicContext &gc)
 {
     Domain *d = this->giveDomain( gc.getActiveDomain() );
     TimeStep *tStep = this->giveCurrentStep();
-    for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
-        d->giveDofManager(i)->drawYourself(gc, tStep);
+    for ( auto &dman : d->giveElements() ) {
+        dman->drawYourself(gc, tStep);
     }
 }
 

@@ -145,46 +145,46 @@ MatlabExportModule :: computeArea(TimeStep *tStep)
     Area=0;
     Volume=0;
 
-    if (domain->giveNumberOfSpatialDimensions()==2) {
-        for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
-            Area = Area + domain->giveElement(i)->computeArea();
+    if ( domain->giveNumberOfSpatialDimensions() == 2 ) {
+        for ( auto &elem : domain->giveElements() ) {
+            Area = Area + elem->computeArea();
         }
     } else {
 
-        for (size_t i = 0; i<partVolume.size(); i++ ) {
-            partVolume.at(i)=0.0;
+        for ( size_t i = 0; i < partVolume.size(); i++ ) {
+            partVolume.at(i) = 0.0;
         }
 
-        for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
+        for ( auto &elem : domain->giveElements() ) {
             //
             double v;
 #ifdef __SM_MODULE
-            if ( NLStructuralElement *e = dynamic_cast< NLStructuralElement *>(domain->giveElement(i)) ) {
+            if ( NLStructuralElement *e = dynamic_cast< NLStructuralElement *>( elem.get() ) ) {
                 v = e->computeCurrentVolume(tStep);
             } else {
 #endif
-                v = domain->giveElement(i)->computeVolume();
+                v = elem->computeVolume();
 #ifdef __SM_MODULE
             }
 #endif
 
-            std :: string eName ( domain->giveElement(i)->giveClassName() );
+            std :: string eName ( elem->giveClassName() );
             int j = -1;
 
             //printf("%s\n", eName.c_str());
 
-            for (size_t k=0; k<partName.size(); k++) {
+            for ( size_t k = 0; k < partName.size(); k++ ) {
                 //printf("partName.at(%u) = %s\n", k, partName.at(k).c_str() );
-                if (eName.compare(partName.at(k)) == 0) {
+                if ( eName.compare(partName.at(k)) == 0 ) {
                     j = k;
                     break;
                 }
             }
 
-            if (j==-1) {
-                partName.push_back( domain->giveElement(i)->giveClassName() );
+            if ( j == -1 ) {
+                partName.push_back( elem->giveClassName() );
                 partVolume.push_back( v );
-                j=partVolume.size()-1;
+                j = partVolume.size()-1;
             } else {
                 partVolume.at(j) = partVolume.at(j) + v;
             }
@@ -209,11 +209,7 @@ MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     int nelem = this->elList.giveSize();
     if ( nelem == 0 ) { // no list given, export all elements
-        nelem = this->emodel->giveDomain(1)->giveNumberOfElements();
-        this->elList.resize(nelem);
-        for ( int i = 1; i <= nelem; i++ ) {
-            this->elList.at(i) = i;
-        }
+        this->elList.enumerate(this->emodel->giveDomain(1)->giveNumberOfElements());
     }
 
     FILE *FID;
@@ -246,7 +242,7 @@ MatlabExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         fprintf(FID, "\tarea.xmin=%f;\n", smin.at(0));
         fprintf(FID, "\tarea.ymax=%f;\n", smax.at(1));
         fprintf(FID, "\tarea.ymin=%f;\n", smin.at(1));
-        if (ndim==2) {
+        if ( ndim == 2 ) {
             fprintf(FID, "\tarea.area=%f;\n", Area);
             fprintf(FID, "\tvolume=[];\n");
         } else {
@@ -303,10 +299,10 @@ MatlabExportModule :: doOutputMesh(TimeStep *tStep, FILE *FID)
     Domain *domain  = emodel->giveDomain(1);
 
     fprintf(FID, "\tmesh.p=[");
-    for ( int i = 1; i <= domain->giveNumberOfDofManagers(); i++ ) {
-        for ( int j = 1; j<=domain->giveNumberOfSpatialDimensions(); j++) {
-            //double x = domain->giveDofManager(i)->giveCoordinate(1), y = domain->giveDofManager(i)->giveCoordinate(2);
-            double c = domain->giveDofManager(i)->giveCoordinate(j);
+    for ( auto &dman : domain->giveDofManagers() ) {
+        for ( int j = 1; j <= domain->giveNumberOfSpatialDimensions(); j++) {
+            //double x = dman->giveCoordinate(1), y = dman->giveCoordinate(2);
+            double c = dman->giveCoordinate(j);
             fprintf(FID, "%f, ", c);
         }
         fprintf(FID, "; ");
@@ -317,10 +313,10 @@ MatlabExportModule :: doOutputMesh(TimeStep *tStep, FILE *FID)
     int numberOfDofMans=domain->giveElement(1)->giveNumberOfDofManagers();
 
     fprintf(FID, "\tmesh.t=[");
-    for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
-        if (domain->giveElement(i)->giveNumberOfDofManagers()==numberOfDofMans) {
-            for ( int j = 1; j <= domain->giveElement(i)->giveNumberOfDofManagers(); j++ ) {
-                fprintf( FID, "%d,", domain->giveElement(i)->giveDofManagerNumber(j) );
+    for ( auto &elem : domain->giveElements() ) {
+        if ( elem->giveNumberOfDofManagers() == numberOfDofMans ) {
+            for ( int j = 1; j <= elem->giveNumberOfDofManagers(); j++ ) {
+                fprintf( FID, "%d,", elem->giveDofManagerNumber(j) );
             }
         }
         fprintf(FID, ";");
@@ -338,8 +334,8 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
     std :: vector< int > :: iterator it;
     std :: vector< std :: vector< double > >valuesList;
 
-    for ( int i = 1; i <= domain->giveNumberOfDofManagers(); i++ ) {
-        for ( Dof *thisDof: *domain->giveDofManager(i) ) {
+    for ( auto &dman : domain->giveDofManagers() ) {
+        for ( Dof *thisDof: *dman ) {
             it = std :: find( DofIDList.begin(), DofIDList.end(), thisDof->giveDofID() );
 
             double value = thisDof->giveUnknown(VM_Total, tStep);
@@ -354,8 +350,8 @@ MatlabExportModule :: doOutputData(TimeStep *tStep, FILE *FID)
     }
 
     fprintf(FID, "\tdata.DofIDs=[");
-    for ( size_t i = 0; i < DofIDList.size(); i++ ) {
-        fprintf( FID, "%d, ", DofIDList.at(i) );
+    for ( auto &dofid : DofIDList ) {
+        fprintf( FID, "%d, ", dofid );
     }
 
     fprintf(FID, "];\n");
@@ -381,13 +377,13 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
 
     v_hat.clear();
 
-    for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
+    for ( auto &elem : domain->giveElements() ) {
 #ifdef __FM_MODULE
 
-        if ( Tr21Stokes *T = dynamic_cast< Tr21Stokes * >( domain->giveElement(i) ) ) {
+        if ( Tr21Stokes *T = dynamic_cast< Tr21Stokes * >( elem.get() ) ) {
             T->giveIntegratedVelocity(v_hatTemp, tStep);
             v_hat.add(v_hatTemp);
-        } else if (Tet21Stokes *T = dynamic_cast< Tet21Stokes * >( domain->giveElement(i) )) {
+        } else if ( Tet21Stokes *T = dynamic_cast< Tet21Stokes * >( elem.get() ) ) {
             T->giveIntegratedVelocity(v_hatTemp, tStep);
             v_hat.add(v_hatTemp);
         }
@@ -396,7 +392,7 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
     }
 
     // Compute intrinsic area/volume
-    double intrinsicSize=1.0;
+    double intrinsicSize = 1.0;
 
     std :: vector <double> V;
 
@@ -422,11 +418,11 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
     // Output weak periodic boundary conditions
     unsigned int wpbccount = 1, sbsfcount = 1;
 
-    for ( int i = 1; i <= domain->giveNumberOfBoundaryConditions(); i++ ) {
-        WeakPeriodicBoundaryCondition *wpbc = dynamic_cast< WeakPeriodicBoundaryCondition * >( domain->giveBc(i) );
+    for ( auto &gbc : domain->giveBcs() ) {
+        WeakPeriodicBoundaryCondition *wpbc = dynamic_cast< WeakPeriodicBoundaryCondition * >( gbc.get() );
         if ( wpbc ) {
             for ( int j = 1; j <= wpbc->giveNumberOfInternalDofManagers(); j++ ) {
-                fprintf( FID, "\tspecials.weakperiodic{%u}.descType=%u;\n", wpbccount, wpbc->giveBasisType() );
+                fprintf(FID, "\tspecials.weakperiodic{%u}.descType=%u;\n", wpbccount, wpbc->giveBasisType() );
                 fprintf(FID, "\tspecials.weakperiodic{%u}.coefficients=[", wpbccount);
                 for ( Dof *dof: *wpbc->giveInternalDofManager(j) ) {
                     FloatArray unknowns;
@@ -439,7 +435,7 @@ MatlabExportModule :: doOutputSpecials(TimeStep *tStep,    FILE *FID)
                 wpbccount++;
             }
         }
-        SolutionbasedShapeFunction *sbsf = dynamic_cast< SolutionbasedShapeFunction *>( domain->giveBc(i));
+        SolutionbasedShapeFunction *sbsf = dynamic_cast< SolutionbasedShapeFunction *>( gbc.get());
         if (sbsf) {
             fprintf(FID, "\tspecials.solutionbasedsf{%u}.values=[", sbsfcount);
             for ( Dof *dof: *sbsf->giveInternalDofManager(1) ) {                  // Only one internal dof manager

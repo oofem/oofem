@@ -438,7 +438,7 @@ Domain :: giveSide(int n)
     return side;
 
 #else
-    return static_cast< ElementSide * >( dofManagerList[n-1] );
+    return static_cast< ElementSide * >( dofManagerList[n-1].get() );
 
 #endif
 }
