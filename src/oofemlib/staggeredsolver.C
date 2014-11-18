@@ -44,11 +44,8 @@
 
 namespace oofem {
 
-#define nrsolver_ERROR_NORM_SMALL_NUM 1.e-6
-#define NRSOLVER_MAX_REL_ERROR_BOUND 1.e20
-#define NRSOLVER_MAX_RESTARTS 4
-#define NRSOLVER_RESET_STEP_REDUCE 0.25
-#define NRSOLVER_DEFAULT_NRM_TICKS 10
+#define ERROR_NORM_SMALL_NUM 1.e-6
+#define MAX_REL_ERROR_BOUND 1.e20
 
 REGISTER_SparseNonLinearSystemNM(StaggeredSolver)
 
@@ -68,9 +65,6 @@ StaggeredSolver :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, this->totalIdList, _IFT_StaggeredSolver_DofIdList);
     IR_GIVE_FIELD(ir, this->idPos, _IFT_StaggeredSolver_DofIdListPositions);
     
-    
- 
-    
     this->instanciateYourself();
     
     return IRRT_OK;
@@ -80,7 +74,6 @@ StaggeredSolver :: initializeFrom(InputRecord *ir)
 void 
 StaggeredSolver :: instanciateYourself()
 {
- 
     int numDofIdGroups = idPos.giveSize()/2;
     this->UnknownNumberingSchemeList.resize(numDofIdGroups);
     IntArray idList; 
@@ -109,8 +102,8 @@ StaggeredSolver :: instanciateYourself()
     for ( int dG = 0; dG < numDofIdGroups; dG++ ) {
         this->giveTotalLocationArray(this->locArrayList[dG], UnknownNumberingSchemeList[dG], domain);         
         int neq = locArrayList[dG].giveSize();
-        this->fIntList[dG].resize(neq);    
-        this->fExtList[dG].resize(neq);    
+        this->fIntList[dG].resize(neq);
+        this->fExtList[dG].resize(neq);
         
         this->X[dG].resize(neq);
         this->X[dG].zero();
@@ -119,11 +112,7 @@ StaggeredSolver :: instanciateYourself()
         this->ddX[dG].resize(neq);
         this->ddX[dG].zero();  
     }
-  
-    
-  
 }
-
 
    
 void
@@ -370,8 +359,6 @@ StaggeredSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 }
 
 
-
-
 //copied from nrsolver
 
 bool
@@ -529,7 +516,7 @@ StaggeredSolver :: checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, Flo
 
             if ( rtolf.at(1) > 0.0 ) {
                 //  compute a relative error norm
-                if ( ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
+                if ( ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) > ERROR_NORM_SMALL_NUM ) {
                     forceErr = sqrt( dg_forceErr.at(dg) / ( dg_totalLoadLevel.at(dg) + internalForcesEBENorm.at(dg) ) );
                 } else {
                     // If both external forces and internal ebe norms are zero, then the residual must be zero.
@@ -538,7 +525,7 @@ StaggeredSolver :: checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, Flo
                     forceErr = sqrt( dg_forceErr.at(dg) );
                 }
 
-                if ( forceErr > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+                if ( forceErr > rtolf.at(1) * MAX_REL_ERROR_BOUND ) {
                     errorOutOfRange = true;
                 }
                 if ( forceErr > rtolf.at(1) ) {
@@ -554,15 +541,15 @@ StaggeredSolver :: checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, Flo
 
             if ( rtold.at(1) > 0.0 ) {
                 // compute displacement error
-                if ( dg_totalDisp.at(dg) >  nrsolver_ERROR_NORM_SMALL_NUM ) {
+                if ( dg_totalDisp.at(dg) >  ERROR_NORM_SMALL_NUM ) {
                     dispErr = sqrt( dg_dispErr.at(dg) / dg_totalDisp.at(dg) );
                 } else {
-                    ///@todo This is almost always the case for displacement error. nrsolveR_ERROR_NORM_SMALL_NUM is no good.
+                    ///@todo This is almost always the case for displacement error. ERROR_NORM_SMALL_NUM is no good.
                     //zeroNorm = true; // Warning about this afterwards.
                     //zeroDNorm = true;
                     dispErr = sqrt( dg_dispErr.at(dg) );
                 }
-                if ( dispErr  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+                if ( dispErr  > rtold.at(1) * MAX_REL_ERROR_BOUND ) {
                     errorOutOfRange = true;
                 }
                 if ( dispErr > rtold.at(1) ) {
@@ -591,12 +578,12 @@ StaggeredSolver :: checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, Flo
 
         if ( rtolf.at(1) > 0.0 ) {
             // we compute a relative error norm
-            if ( ( RRT + internalForcesEBENorm.at(1) ) > nrsolver_ERROR_NORM_SMALL_NUM ) {
+            if ( ( RRT + internalForcesEBENorm.at(1) ) > ERROR_NORM_SMALL_NUM ) {
                 forceErr = sqrt( forceErr / ( RRT + internalForcesEBENorm.at(1) ) );
             } else {
                 forceErr = sqrt(forceErr);   // absolute norm as last resort
             }
-            if ( fabs(forceErr) > rtolf.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+            if ( fabs(forceErr) > rtolf.at(1) * MAX_REL_ERROR_BOUND ) {
                 errorOutOfRange = true;
             }
             if ( fabs(forceErr) > rtolf.at(1) ) {
@@ -613,12 +600,12 @@ StaggeredSolver :: checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, Flo
         if ( rtold.at(1) > 0.0 ) {
             // compute displacement error
             // err is relative displacement change
-            if ( dXX > nrsolver_ERROR_NORM_SMALL_NUM ) {
+            if ( dXX > ERROR_NORM_SMALL_NUM ) {
                 dispErr = sqrt(dXdX / dXX);
             } else {
                 dispErr = sqrt(dXdX);
             }
-            if ( fabs(dispErr)  > rtold.at(1) * NRSOLVER_MAX_REL_ERROR_BOUND ) {
+            if ( fabs(dispErr)  > rtold.at(1) * MAX_REL_ERROR_BOUND ) {
                 errorOutOfRange = true;
             }
             if ( fabs(dispErr)  > rtold.at(1) ) {

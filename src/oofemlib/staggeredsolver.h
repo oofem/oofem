@@ -64,19 +64,16 @@ protected:
     bool prescribed;
     int numEqs;
     int numPresEqs;
+    int number;
 
-    int number; 
-    
-     
-    
 public:
     CustomEquationNumbering() : UnknownNumberingScheme(), prescribed(false), numEqs(0), numPresEqs(0) { dofIdArray.resize(0); }
 
     IntArray dofIdArray; // should be private
     virtual bool isDefault() const { return true; }
-    void setDofIdArray(IntArray &array) { this->dofIdArray = array; };
-    void setNumber(int num) { this->number = num; };
-    int getNumber() { return this->number; };
+    void setDofIdArray(IntArray &array) { this->dofIdArray = array; }
+    void setNumber(int num) { this->number = num; }
+    int getNumber() { return this->number; }
     
     virtual int giveDofEquationNumber(Dof *dof) const {
         DofIDItem id = dof->giveDofID();
@@ -93,29 +90,29 @@ public:
 
     int giveNewEquationNumber() { return ++numEqs; }
     int giveNewPrescribedEquationNumber() { return ++numPresEqs; }
-    int giveNumEquations() { return this->numEqs; };
-    int giveNumPresEquations() { return this->numPresEqs; };
+    int giveNumEquations() { return this->numEqs; }
+    int giveNumPresEquations() { return this->numPresEqs; }
 };
 
 /**
- * This class implements a staggered solver
+ * The staggered solver will perform Newton iterations on subsets of DofIDs, in a staggered manner.
+ * @author Jim Brouzoulis
  */
 class OOFEM_EXPORT StaggeredSolver : public NRSolver
 {
 private:
-  
     IntArray totalIdList;
-    IntArray idPos; 
+    IntArray idPos;
   
     // Lists for each dof group
-    std :: vector< CustomEquationNumbering > UnknownNumberingSchemeList;    
+    std :: vector< CustomEquationNumbering > UnknownNumberingSchemeList;
     std :: vector< SparseMtrx *> stiffnessMatrixList;
     std :: vector< FloatArray > fIntList;
     std :: vector< FloatArray > fExtList;
     
-    std :: vector< IntArray > locArrayList;    
-    std :: vector< FloatArray > ddX;    
-    std :: vector< FloatArray > dX;   
+    std :: vector< IntArray > locArrayList;
+    std :: vector< FloatArray > ddX;
+    std :: vector< FloatArray > dX;
     std :: vector< FloatArray > X;
     
 
@@ -124,10 +121,10 @@ private:
                           double RRT, const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange, TimeStep *tNow, IntArray &dofIdArray);
 
     void instanciateYourself();
+
 public:
-    
     StaggeredSolver(Domain * d, EngngModel * m);
-    virtual ~StaggeredSolver(){};
+    virtual ~StaggeredSolver() {}
 
     // Overloaded methods:
     virtual NM_Status solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
@@ -139,9 +136,6 @@ public:
     
     virtual const char *giveClassName() const { return "StaggeredSolver"; }
     virtual const char *giveInputRecordName() const { return _IFT_StaggeredSolver_Name; }
-
-
-
 };
 } // end namespace oofem
-#endif // nrsolver_h
+#endif // staggeredsolver_h
