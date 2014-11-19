@@ -57,7 +57,8 @@ REGISTER_EngngModel(NlDEIDynamic);
 
 NlDEIDynamic :: NlDEIDynamic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), massMatrix(), loadVector(),
     previousIncrementOfDisplacementVector(), displacementVector(),
-    velocityVector(), accelerationVector(), internalForces()
+    velocityVector(), accelerationVector(), internalForces(),
+    nMethod(NULL)
 {
     ndomains = 1;
     initFlag = 1;
