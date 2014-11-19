@@ -46,7 +46,7 @@ int DataStream :: read(std :: string &data)
         data = "";
         return 0;
     }
-    str.resize(n+1);
+    str.resize(n);
     if ( !this->read(str.data(), n) ) {
         data = "";
         return 0;

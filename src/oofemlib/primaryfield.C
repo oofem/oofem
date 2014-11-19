@@ -41,10 +41,12 @@
 #include "datastream.h"
 #include "contextioerr.h"
 #include "engngm.h"
+#include "initialcondition.h"
+#include "boundarycondition.h"
 
 namespace oofem {
 PrimaryField :: PrimaryField(EngngModel *a, int idomain,
-                             FieldType ft, int nHist) : Field(ft), solutionVectors(nHist + 1), solStepList(nHist + 1, a)
+                             FieldType ft, int nHist) : Field(ft), solutionVectors(nHist + 1), prescribedVectors(nHist + 1), solStepList(nHist + 1, a)
 {
     this->actualStepNumber = -999;
     this->actualStepIndx = 0;
@@ -70,6 +72,84 @@ PrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answ
         OOFEM_ERROR("unsupported mode %s", __ValueModeTypeToString(mode));
     }
 }
+
+void
+PrimaryField :: applyDefaultInitialCondition(int domain)
+{
+    int neq = emodel->giveNumberOfDomainEquations( domain, EModelDefaultEquationNumbering() );
+    int npeq = emodel->giveNumberOfDomainEquations( domain, EModelDefaultPrescribedEquationNumbering() );
+    for ( auto &s : solutionVectors ) {
+        s.resize(neq);
+        s.zero();
+    }
+    for ( auto &s : prescribedVectors ) {
+        s.resize(npeq);
+        s.zero();
+    }
+}
+
+
+void
+PrimaryField :: applyInitialCondition(InitialCondition &ic)
+{
+    IntArray loc_s, loc_ps;
+    Domain *d = ic.giveDomain();
+    Set *set = d->giveSet(ic.giveSetNumber());
+    TimeStep *tStep = emodel->giveSolutionStepWhenIcApply();
+    int indxm0 = this->resolveIndx(tStep, 0);
+    int indxm1 = this->resolveIndx(tStep, -1);
+    FloatArray *f0 = this->giveSolutionVector(indxm0);
+    FloatArray *f1 = this->giveSolutionVector(indxm1);
+    FloatArray *p0 = this->givePrescribedVector(indxm0);
+    FloatArray *p1 = this->givePrescribedVector(indxm1);
+
+    // We have to set initial value, and velocity, for this particular primary field.
+    this->applyDefaultInitialCondition(d->giveNumber()); // Just resizes and fills with zeroes
+    for ( int inode : set->giveNodeList() ) {
+        DofManager *dman = d->giveDofManager(inode);
+        double tot0 = 0., tot1 = 0.;
+        if ( ic.hasConditionOn(VM_Total) ) {
+            tot0 = ic.give(VM_Total);
+        }
+        if ( ic.hasConditionOn(VM_Incremental) ) {
+            tot1 = tot0 - ic.give(VM_Incremental);
+        } else if ( ic.hasConditionOn(VM_Velocity) ) {
+            tot1 = tot0 - ic.give(VM_Velocity) * tStep->giveTimeIncrement();
+        } else {
+            tot1 = tot0;
+        }
+        for ( auto &dof : *dman ) {
+            int eq = dof->giveEqn();
+            if ( eq > 0 ) {
+                f0->at(eq) = tot0;
+                f1->at(eq) = tot1;
+            } else if ( eq < 0 ) {
+                p0->at(-eq) = tot0;
+                p1->at(-eq) = tot1;
+            }
+        }
+    }
+}
+
+
+void
+PrimaryField :: applyBoundaryCondition(BoundaryCondition &bc, TimeStep *tStep)
+{
+    Domain *d = bc.giveDomain();
+    Set *set = d->giveSet(bc.giveSetNumber());
+    FloatArray *f = this->giveSolutionVector(tStep);
+    for ( int inode : set->giveNodeList() ) {
+        DofManager *dman = d->giveDofManager(inode);
+        for ( auto &dofid : bc.giveDofIDs() ) {
+            Dof *dof = dman->giveDofWithID(dofid);
+            int peq = - dof->giveEqn(); // Note, only consider prescribed equations here
+            if ( peq > 0 ) {
+                f->at(peq) = bc.give(dof, VM_Total, tStep);
+            }
+        }
+    }
+}
+
 
 void
 PrimaryField :: update(ValueModeType mode, TimeStep *tStep, FloatArray &vectorToStore)
@@ -246,14 +326,20 @@ PrimaryField :: saveContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(CIO_IOERR);
     }
 
-    for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( ( iores = solutionVectors[i].storeYourself(stream) ) != CIO_OK ) {
+    for ( const auto &vec : solutionVectors ) {
+        if ( ( iores = vec.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
 
-    for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( ( iores = solStepList[i].saveContext(stream, mode) ) != CIO_OK ) {
+    for ( const auto &vec : prescribedVectors ) {
+        if ( ( iores = vec.storeYourself(stream) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+    }
+
+    for ( auto &step : solStepList ) {
+        if ( ( iores = step.saveContext(stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -274,8 +360,14 @@ PrimaryField :: restoreContext(DataStream &stream, ContextMode mode)
         THROW_CIOERR(CIO_IOERR);
     }
 
-    for ( int i = 0; i <= nHistVectors; i++ ) {
-        if ( ( iores = solutionVectors[i].restoreYourself(stream) ) != CIO_OK ) {
+    for ( auto &vec : solutionVectors ) {
+        if ( ( iores = vec.restoreYourself(stream) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+    }
+
+    for ( auto &vec : prescribedVectors ) {
+        if ( ( iores = vec.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

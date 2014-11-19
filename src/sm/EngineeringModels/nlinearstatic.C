@@ -754,9 +754,8 @@ NonLinearStatic :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
 
     if ( ( nonlocalStiffnessFlag ) && ( type == TangentStiffnessMatrix ) ) {
         // add nonlocal contribution
-        int nelem = domain->giveNumberOfElements();
-        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-            static_cast< StructuralElement * >( domain->giveElement(ielem) )->addNonlocalStiffnessContributions(* answer, s, tStep);
+        for ( auto &elem : domain->giveElements() ) {
+            static_cast< StructuralElement * >( elem.get() )->addNonlocalStiffnessContributions(* answer, s, tStep);
         }
 
         // print storage statistics
@@ -789,12 +788,11 @@ NonLinearStatic :: showSparseMtrxStructure(int type, oofegGraphicContext &gc, Ti
         ctype = SecantStiffnessMatrix;
     }
 
-    int nelems = domain->giveNumberOfElements();
-    for ( int i = 1; i <= nelems; i++ ) {
-        domain->giveElement(i)->showSparseMtrxStructure(ctype, gc, tStep);
+    for ( auto &elem : domain->giveElements() ) {
+        elem->showSparseMtrxStructure(ctype, gc, tStep);
     }
 
-    for ( int i = 1; i <= nelems; i++ ) {
+    for ( auto &elem : domain->giveElements() ) {
         domain->giveElement(i)->showExtendedSparseMtrxStructure(ctype, gc, tStep);
     }
 }

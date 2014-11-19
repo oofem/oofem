@@ -289,44 +289,36 @@ void
 LinearStability :: terminateLinStatic(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
-    FILE *File;
-    int j;
-    File = this->giveOutputStream();
+    FILE *File = this->giveOutputStream();
     tStep->setTime(0.);
 
-    fprintf( File, "\nOutput for time % .3e \n\n", tStep->giveTargetTime() );
+    fprintf(File, "\nOutput for time % .3e \n\n", tStep->giveTargetTime() );
     fprintf(File, "Linear static:\n\n");
 
-    int nnodes = domain->giveNumberOfDofManagers();
-
     if ( requiresUnknownsDictionaryUpdate() ) {
-        for ( j = 1; j <= nnodes; j++ ) {
-            this->updateDofUnknownsDictionary(domain->giveDofManager(j), tStep);
+        for ( auto &dman : domain->giveDofManagers() ) {
+            this->updateDofUnknownsDictionary(dman.get(), tStep);
         }
     }
 
-    for ( j = 1; j <= nnodes; j++ ) {
-        domain->giveDofManager(j)->updateYourself(tStep);
-        domain->giveDofManager(j)->printOutputAt(File, tStep);
+    for ( auto &dman : domain->giveDofManagers() ) {
+        dman->updateYourself(tStep);
+        dman->printOutputAt(File, tStep);
     }
 
 #  ifdef VERBOSE
-    VERBOSE_PRINT0("Updated nodes & sides ", nnodes)
+    VERBOSE_PRINT0("Updated nodes & sides ", domain->giveNumberOfDofManagers())
 #  endif
 
 
-    Element *elem;
-
-    int nelem = domain->giveNumberOfElements();
-    for ( j = 1; j <= nelem; j++ ) {
-        elem = domain->giveElement(j);
+    for ( auto &elem : domain->giveElements() ) {
         elem->updateInternalState(tStep);
         elem->updateYourself(tStep);
         elem->printOutputAt(File, tStep);
     }
 
 #  ifdef VERBOSE
-    VERBOSE_PRINT0("Updated Elements ", nelem)
+    VERBOSE_PRINT0("Updated Elements ", domain->giveNumberOfElements())
 #  endif
     fprintf(File, "\n");
     /*
@@ -351,15 +343,12 @@ void LinearStability :: terminate(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
     FILE *outputStream = this->giveOutputStream();
-    //FloatArray *eigv;
-    // Element *elem;
-    int i, j;
 
     // print eigen values on output
     fprintf(outputStream, "\nLinear Stability:");
     fprintf(outputStream, "\nEigen Values are:\n-----------------\n");
 
-    for ( i = 1; i <= numberOfRequiredEigenValues; i++ ) {
+    for ( int i = 1; i <= numberOfRequiredEigenValues; i++ ) {
         fprintf( outputStream, "%15.8e ", eigVal.at(i) );
         if ( ( i % 5 ) == 0 ) {
             fprintf(outputStream, "\n");
@@ -370,7 +359,7 @@ void LinearStability :: terminate(TimeStep *tStep)
 
     int nnodes = domain->giveNumberOfDofManagers();
 
-    for ( i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
+    for ( int i = 1; i <= numberOfRequiredEigenValues; i++ ) {
         fprintf(outputStream, "\nOutput for eigen value no.  % .3e \n", ( double ) i);
         fprintf( outputStream,
                 "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
@@ -378,15 +367,15 @@ void LinearStability :: terminate(TimeStep *tStep)
         tStep->setTime( ( double ) i );
 
         if ( this->requiresUnknownsDictionaryUpdate() ) {
-            for ( j = 1; j <= nnodes; j++ ) {
-                this->updateDofUnknownsDictionary(domain->giveDofManager(j), tStep);
+            for ( auto &dman : domain->giveDofManagers() ) {
+                this->updateDofUnknownsDictionary(dman.get(), tStep);
             }
         }
 
 
-        for ( j = 1; j <= nnodes; j++ ) {
-            domain->giveDofManager(j)->updateYourself(tStep);
-            domain->giveDofManager(j)->printOutputAt(outputStream, tStep);
+        for ( auto &dman : domain->giveDofManagers() ) {
+            dman->updateYourself(tStep);
+            dman->printOutputAt(outputStream, tStep);
         }
 
         tStep->setNumber(i);

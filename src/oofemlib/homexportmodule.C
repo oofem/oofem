@@ -72,9 +72,7 @@ HOMExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         FloatArray ipState, avgState;
         double VolTot = 0.;
         Domain *d = emodel->giveDomain(1);
-        int nelem = d->giveNumberOfElements();
-        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-            Element *elem = d->giveElement(ielem);
+        for ( auto &elem : d->giveElements() ) {
             if ( this->matnum.giveSize() == 0 || this->matnum.contains( elem->giveMaterial()->giveNumber() ) ) { ///@todo We shouldn't rely on element->giveMaterial, won't work for layered cross-sections
                 for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
                     double dV = elem->computeVolumeAround(gp);

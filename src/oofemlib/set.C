@@ -62,11 +62,7 @@ IRResultType Set :: initializeFrom(InputRecord *ir)
 
 
     if ( ir->hasField(_IFT_Set_allElements) ) { // generate a list with all the el numbers
-        int numEl = this->giveDomain()->giveNumberOfElements();
-        this->elements.resize(numEl);
-        for ( int i = 1; i <= numEl; i++ ) {
-            this->elements.at(i) = i;
-        }
+        this->elements.enumerate(this->giveDomain()->giveNumberOfElements());
         mElementListIsSorted = false;
     } else {
         IntArray inputElements;

@@ -110,99 +110,22 @@ SparseMtrx *SymCompCol :: GiveCopy() const
 
 int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme &s)
 {
-    /*
-     * IntArray  loc;
-     * Domain* domain = eModel->giveDomain(di);
-     * int neq = eModel -> giveNumberOfDomainEquations (di);
-     * int nelem = domain -> giveNumberOfElements() ;
-     * int i,ii,j,jj,n, indx;
-     * Element* elem;
-     * // allocation map
-     * int nmap = neq*neq-neq*(neq-1)/2;
-     * char* map = new char[nmap];
-     * if (map == NULL) {
-     * printf ("CompCol::buildInternalStructure - map creation failed");
-     * exit (1);
-     * }
-     *
-     * for (i=0; i<nmap; i++)
-     * map[i]=0;
-     *
-     * this->nz_ = 0;
-     *
-     * for (n=1 ; n<=nelem ; n++) {
-     * elem = domain -> giveElement(n);
-     * elem -> giveLocationArray (loc) ;
-     *
-     * for (i=1 ; i <= loc.giveSize() ; i++) {
-     * if ((ii = loc.at(i))) {
-     *  for (j=1; j <= loc.giveSize() ; j++) {
-     *   if ((jj=loc.at(j)) && (ii>=jj)) {
-     *    if (MAP(ii-1,jj-1) == 0) {
-     *     MAP(ii-1,jj-1) = 1;
-     *     this->nz_ ++;
-     *    }
-     *   }
-     *  }
-     * }
-     * }
-     * }
-     *
-     * rowind_.resize (nz_);
-     * colptr_.resize (neq+1);
-     * indx = 0;
-     * for (j=0; j<neq; j++) { // column loop
-     * colptr_(j) = indx;
-     * for (i=j; i<neq; i++) { // row loop
-     *  if (MAP(i,j)) {
-     *   rowind_(indx) = i;
-     *   indx++;
-     *  }
-     * }
-     * }
-     * colptr_(neq) = indx;
-     *
-     * // delete map
-     * delete (map);
-     *
-     * // allocate value array
-     * val_.resize(nz_);
-     * val_.zero();
-     *
-     * printf ("\nSymCompCol info: neq is %d, nwk is %d\n",neq,nz_);
-     *
-     * dim_[0] = dim_[1] = nColumns = nRows = neq;
-     *
-     * // increment version
-     * this->version++;
-     *
-     * return true;
-     */
     IntArray loc;
     Domain *domain = eModel->giveDomain(di);
     int neq = eModel->giveNumberOfDomainEquations(di, s);
-    int nelem = domain->giveNumberOfElements();
-    int i, ii, j, jj, n, indx;
-    Element *elem;
+    int indx;
     // allocation map
     std :: vector< std :: set< int > > columns(neq);
-    /*
-     * std::set<int> **columns = new std::set<int>*[neq];
-     * for (j=0; j<neq; j++) {
-     * columns[j] = new std::set<int>;
-     * }
-     */
 
     this->nz_ = 0;
 
-    for ( n = 1; n <= nelem; n++ ) {
-        elem = domain->giveElement(n);
+    for ( auto &elem : domain->giveElements() ) {
         elem->giveLocationArray(loc, s);
 
-        for ( i = 1; i <= loc.giveSize(); i++ ) {
-            if ( ( ii = loc.at(i) ) ) {
-                for ( j = 1; j <= loc.giveSize(); j++ ) {
-                    if ( ( jj = loc.at(j) ) && ( ii >= jj ) ) {
+        for ( int ii : loc ) {
+            if ( ii > 0 ) {
+                for ( int jj : loc ) {
+                    if ( jj > 0 && ii >= jj ) {
                         columns [ jj - 1 ].insert(ii - 1);
                     }
                 }
@@ -215,17 +138,17 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
     std :: vector< IntArray >r_locs;
     std :: vector< IntArray >c_locs;
 
-    for ( int i = 1; i <= nbc; ++i ) {
-        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
+    for ( auto &gbc : domain->giveBcs() ) {
+        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( gbc.get() );
         if ( bc != NULL ) {
             bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                 IntArray &krloc = r_locs [ k ];
                 IntArray &kcloc = c_locs [ k ];
-                for ( int i = 1; i <= krloc.giveSize(); i++ ) {
-                    if ( ( ii = krloc.at(i) ) ) {
-                        for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
-                            if ( ( jj = kcloc.at(j) ) && ( ii >= jj ) ) {
+                for ( int ii : krloc ) {
+                    if ( ii > 0 ) {
+                        for ( int jj > kcloc ) {
+                            if ( jj > 0 && ii >= jj ) {
                                 columns [ jj - 1 ].insert(ii - 1);
                             }
                         }
@@ -238,8 +161,8 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
 
 
 
-    for ( i = 0; i < neq; i++ ) {
-        this->nz_ += columns [ i ].size();
+    for ( auto &val : columns ) {
+        this->nz_ += val.size();
     }
 
     rowind_.resize(nz_);
@@ -254,12 +177,6 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
     }
 
     colptr_(neq) = indx;
-
-    /*
-     * // delete map
-     * for (i=0; i< neq; i++) {columns[i]->clear(); delete columns[i];}
-     * delete columns;
-     */
 
     // allocate value array
     val_.resize(nz_);

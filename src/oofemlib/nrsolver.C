@@ -589,10 +589,8 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         dg_totalDisp.resize(nccdg);
         dg_totalDisp.zero();
         // loop over dof managers
-        int ndofman = domain->giveNumberOfDofManagers();
-        for ( int idofman = 1; idofman <= ndofman; idofman++ ) {
-            DofManager *dofman = domain->giveDofManager(idofman);
-            if ( !parallel_context->isLocal(dofman) ) {
+        for ( auto &dofman : domain->giveDofManagers() ) {
+            if ( !parallel_context->isLocal(dofman.get()) ) {
                 continue;
             }
 
@@ -616,9 +614,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         } // end loop over dof managers
 
         // loop over elements and their DOFs
-        int nelem = domain->giveNumberOfElements();
-        for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-            Element *elem = domain->giveElement(ielem);
+        for ( auto &elem : domain->giveElements() ) {
             if ( elem->giveParallelMode() != Element_local ) {
                 continue;
             }
@@ -648,9 +644,7 @@ NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  Fl
         } // end loop over elements
 
         // loop over boundary conditions and their internal DOFs
-        for ( int ibc = 1; ibc <= domain->giveNumberOfBoundaryConditions(); ibc++ ) {
-            GeneralBoundaryCondition *bc = domain->giveBc(ibc);
-
+        for ( auto &bc : domain->giveBcs() ) {
             // loop over element internal Dofs
             for ( int idofman = 1; idofman <= bc->giveNumberOfInternalDofManagers(); idofman++ ) {
                 DofManager *dofman = bc->giveInternalDofManager(idofman);

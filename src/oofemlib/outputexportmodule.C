@@ -119,16 +119,12 @@ OutputExportModule :: terminate()
 void
 OutputExportModule :: doDofManOutput(FILE *file, Domain *domain, TimeStep *tStep)
 {
-    int ndofman = domain->giveNumberOfDofManagers();
-
     fprintf(file, "\n\nDofManager output:\n------------------\n");
 
     int setNum = nodeSets.isEmpty() ? 0 : nodeSets.at(domain->giveNumber()) ;
 
     if ( nodeSets.isEmpty() ) {
-        for ( int i = 1; i <= ndofman; i++ ) {
-            DofManager *dman = domain->giveDofManager(i);
-
+        for ( auto &dman : domain->giveDofManagers() ) {
             if ( dman->giveParallelMode() == DofManager_null ) {
                 continue;
             }
@@ -139,16 +135,14 @@ OutputExportModule :: doDofManOutput(FILE *file, Domain *domain, TimeStep *tStep
         Set *set = domain->giveSet(setNum);
         const IntArray &nodes = set->giveNodeList();
 
-        for ( int i = 1; i <= ndofman; i++ ) {
-            DofManager *dman = domain->giveDofManager(i);
+        for ( int inode : nodes ) {
+            DofManager *dman = domain->giveDofManager(inode);
 
-            if ( domain->giveDofManager(i)->giveParallelMode() == DofManager_null ) {
+            if ( dman->giveParallelMode() == DofManager_null ) {
                 continue;
             }
 
-            if ( nodes.containsSorted(i) ) {
-                dman->printOutputAt(file, tStep);
-            }
+            dman->printOutputAt(file, tStep);
         }
     }
 
@@ -158,36 +152,28 @@ OutputExportModule :: doDofManOutput(FILE *file, Domain *domain, TimeStep *tStep
 void
 OutputExportModule :: doElementOutput(FILE *file, Domain *domain, TimeStep *tStep)
 {
-    int nelem = domain->giveNumberOfElements();
-
     fprintf(file, "\n\nElement output:\n---------------\n");
 
     int setNum = elementSets.isEmpty() ? 0 : elementSets.at(domain->giveNumber()) ;
 
     if ( setNum == 0 ) {
-        for ( int i = 1; i <= nelem; i++ ) {
-            Element *element = domain->giveElement(i);
+        for ( auto &elem : domain->giveElements() ) {
+            if ( elem->giveParallelMode() == Element_remote ) {
+                continue;
+            }
+
+            elem->printOutputAt(file, tStep);
+        }
+    } else {
+        Set *set = domain->giveSet(setNum);
+        for ( int ielem : set->giveElementList() ) {
+            Element *element = domain->giveElement(ielem);
 
             if ( element->giveParallelMode() == Element_remote ) {
                 continue;
             }
 
             element->printOutputAt(file, tStep);
-        }
-    } else {
-        Set *set = domain->giveSet(setNum);
-        IntArray elements = set->giveElementList();
-        elements.sort();
-        for ( int i = 1; i <= nelem; i++ ) {
-            Element *element = domain->giveElement(i);
-
-            if ( element->giveParallelMode() == Element_remote ) {
-                continue;
-            }
-
-            if ( elements.containsSorted(i) ) {
-                element->printOutputAt(file, tStep);
-            }
         }
     }
 

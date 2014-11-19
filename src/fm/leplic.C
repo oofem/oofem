@@ -244,9 +244,8 @@ LEPlic :: doInterfaceReconstruction(TimeStep *tStep, bool coord_upd, bool temp_v
 
     int nelem = domain->giveNumberOfElements();
     double p;
-    FloatMatrix lhs(2, 2);
 
-    FloatArray rhs(2), fvgrad(2);
+    FloatArray fvgrad(2);
     LEPlicElementInterface *interface;
 
 
@@ -663,12 +662,11 @@ LEPlic :: giveInputRecord(DynamicInputRecord &input)
 double
 LEPlic :: computeCriticalTimeStep(TimeStep *tStep)
 {
-    int ie, nelem = domain->giveNumberOfElements();
     double dt = 1.e6;
     LEPlicElementInterface *interface;
 
-    for ( ie = 1; ie <= nelem; ie++ ) {
-        if ( ( interface = static_cast< LEPlicElementInterface * >( domain->giveElement(ie)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
+    for ( auto &elem : domain->giveElements() ) {
+        if ( ( interface = static_cast< LEPlicElementInterface * >( elem->giveInterface(LEPlicElementInterfaceType) ) ) ) {
             dt = min( dt, interface->computeCriticalLEPlicTimeStep(tStep) );
         }
     }
