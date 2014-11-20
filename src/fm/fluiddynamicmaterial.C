@@ -74,7 +74,7 @@ FluidDynamicMaterialStatus :: FluidDynamicMaterialStatus(int n, Domain *d, Gauss
 { }
 
 void
-FluidDynamicMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
+FluidDynamicMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
 // Prints the strains and stresses on the data file.
 {
     fprintf(File, "\n deviatoric stresses");

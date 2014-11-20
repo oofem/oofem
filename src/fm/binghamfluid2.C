@@ -566,7 +566,7 @@ BinghamFluidMaterial2Status :: BinghamFluidMaterial2Status(int n, Domain *d, Gau
 }
 
 void
-BinghamFluidMaterial2Status :: printOutputAt(FILE *File, TimeStep *tNow)
+BinghamFluidMaterial2Status :: printOutputAt(FILE *File, TimeStep *tStep)
 // Prints the strains and stresses on the data file.
 {
     fprintf(File, " strains ");
