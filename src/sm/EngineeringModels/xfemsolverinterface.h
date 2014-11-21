@@ -51,7 +51,7 @@ public:
     XfemSolverInterface();
     virtual ~XfemSolverInterface();
 
-    void propagateXfemInterfaces(TimeStep *tStep, StructuralEngngModel &ioEngngModel);
+    void propagateXfemInterfaces(TimeStep *tStep, StructuralEngngModel &ioEngngModel, bool iRecomputeStepAfterCrackProp);
     void mapVariables(TimeStep *tStep, StructuralEngngModel &ioEngngModel);
 
 #if 0

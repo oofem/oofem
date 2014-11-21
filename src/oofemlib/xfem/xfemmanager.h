@@ -191,7 +191,7 @@ public:
      */
     virtual void updateYourself(TimeStep *tStep);
 
-    void propagateFronts();
+    void propagateFronts(bool &oAnyFronHasPropagated);
     bool hasPropagatingFronts();
 
     bool giveVtkDebug() const { return mDebugVTK; }

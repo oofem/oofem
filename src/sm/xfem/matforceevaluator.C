@@ -61,8 +61,6 @@ void MaterialForceEvaluator::computeMaterialForce(FloatArray &oMatForce, Domain 
     oMatForce.resize(2);
     oMatForce.clear();
 
-    printf("Entering MaterialForceEvaluator::computeMaterialForce.\n");
-    printf("Tip coord: "); iTipInfo.mGlobalCoord.printYourself();
 
     // Fetch elements within a specified volume around the crack tip
     SpatialLocalizer *localizer = iDomain.giveSpatialLocalizer();
@@ -71,18 +69,13 @@ void MaterialForceEvaluator::computeMaterialForce(FloatArray &oMatForce, Domain 
 
     if( elList.empty() ) {
         FloatArray lcoords, closest;
-        printf("Fetching element closest to: "); iTipInfo.mGlobalCoord.printYourself();
         Element *closestEl = localizer->giveElementClosestToPoint(lcoords, closest, iTipInfo.mGlobalCoord);
-        printf("done.\n");
 
         if(closestEl != NULL) {
             if( closest.distance(iTipInfo.mGlobalCoord) < 1.0e-9 ) {
                 int elInd = closestEl->giveGlobalNumber();
                 int elPlaceInArray = iDomain.giveElementPlaceInArray(elInd);
                 elList.insert( elPlaceInArray );
-            }
-            else {
-                printf("closest.distance(iTipInfo.mGlobalCoord): %e\n", closest.distance(iTipInfo.mGlobalCoord) );
             }
         }
         else {
@@ -180,7 +173,7 @@ void MaterialForceEvaluator::computeMaterialForce(FloatArray &oMatForce, Domain 
 
     }
 
-    printf("oMatForce: "); oMatForce.printYourself();
+//    printf("oMatForce: "); oMatForce.printYourself();
 
 }
 

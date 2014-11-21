@@ -64,7 +64,7 @@ XfemSolverInterface::~XfemSolverInterface()
 
 }
 
-void XfemSolverInterface::propagateXfemInterfaces(TimeStep *tStep, StructuralEngngModel &ioEngngModel)
+void XfemSolverInterface::propagateXfemInterfaces(TimeStep *tStep, StructuralEngngModel &ioEngngModel, bool iRecomputeStepAfterCrackProp)
 {
     int domainInd = 1;
     Domain *domain = ioEngngModel.giveDomain(domainInd);
@@ -74,10 +74,23 @@ void XfemSolverInterface::propagateXfemInterfaces(TimeStep *tStep, StructuralEng
 
         if( xMan->hasPropagatingFronts() ) {
             // Propagate crack tips
-            printf("Propagating crack tips...\n");
-            xMan->propagateFronts();
+            bool frontsHavePropagated = false;
+            xMan->propagateFronts(frontsHavePropagated);
 
-            mNeedsVariableMapping = true;
+            if(frontsHavePropagated) {
+                mNeedsVariableMapping = true;
+
+                mapVariables(tStep, ioEngngModel);
+
+                if(iRecomputeStepAfterCrackProp) {
+                    printf("Recomputing time step.\n");
+                    ioEngngModel.forceEquationNumbering();
+                    ioEngngModel.solveYourselfAt(tStep);
+                    ioEngngModel.updateYourself( tStep );
+                    ioEngngModel.terminate( tStep );
+
+                }
+            }
         }
 
     }

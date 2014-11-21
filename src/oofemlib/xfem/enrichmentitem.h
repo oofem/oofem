@@ -147,7 +147,7 @@ public:
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep) { };
     virtual void updateGeometry() = 0;
-    virtual void propagateFronts() = 0;
+    virtual void propagateFronts(bool &oFrontsHavePropagated) = 0;
 
     virtual bool hasPropagatingFronts() const;
 

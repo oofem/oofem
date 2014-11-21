@@ -69,6 +69,7 @@ public:
 
     void computeCrackIntersectionPoints(Crack &iCrack, std :: vector< FloatArray > &oIntersectionPoints, std :: vector< double > &oArcPositions);
     void computeArcPoints(const std :: vector< FloatArray > &iIntersectionPoints, std :: vector< double > &oArcPositions);
+    double computeLength();
     virtual int giveDofPoolSize() const;
 
 protected:

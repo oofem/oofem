@@ -38,6 +38,8 @@
 #include "exportmodule.h"
 #include "floatarray.h"
 
+#include <unordered_map>
+
 ///@name Input fields for GnuplotExportModule
 //@{
 #define _IFT_GnuplotExportModule_Name "gnuplot"
@@ -53,6 +55,8 @@
 #define _IFT_GnuplotExportModule_monitornode "monitornode"
 // Radii for material force evaluation
 #define _IFT_GnuplotExportModule_materialforceradii "matforceradii"
+// Export length of cracks
+#define _IFT_GnuplotExportModule_cracklength "cracklength"
 //@}
 
 namespace oofem {
@@ -119,6 +123,7 @@ protected:
     bool mExportBoundaryConditions;
     bool mExportMesh;
     bool mExportXFEM;
+    bool mExportCrackLength;
 
     int mMonitorNodeIndex;
     std::vector<FloatArray> mMonitorNodeDispHist;
@@ -137,6 +142,11 @@ protected:
     MaterialForceEvaluator *mpMatForceEvaluator;
     FloatArray mMatForceRadii;
 
+    /**
+     * Store time history of crack lengths
+     */
+    std::unordered_map< int, std::vector<double> > mCrackLengthHist;
+    std::vector<double> mTimeHist;
 };
 } // end namespace oofem
 #endif /* GNUPLOTEXPORTMODULE_H_ */

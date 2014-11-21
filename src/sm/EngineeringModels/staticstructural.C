@@ -68,6 +68,7 @@ StaticStructural :: StaticStructural(int i, EngngModel *_master) : StructuralEng
 {
     ndomains = 1;
     solverType = 0;
+    mRecomputeStepAfterPropagation = false;
 }
 
 
@@ -121,6 +122,8 @@ StaticStructural :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_initialGuess);
     this->initialGuessType = ( InitialGuess ) _val;
     
+    mRecomputeStepAfterPropagation = ir->hasField(_IFT_StaticStructural_recomputeaftercrackpropagation);
+
 #ifdef __PARALLEL_MODE
     ///@todo Where is the best place to create these?
     if ( isParallel() ) {
@@ -273,10 +276,16 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
 
 void StaticStructural :: terminate(TimeStep *tStep)
 {
-    StructuralEngngModel::terminate(tStep);
-
-    XfemSolverInterface::propagateXfemInterfaces(tStep, *this);
-    XfemSolverInterface::mapVariables(tStep, *this);
+    if(mRecomputeStepAfterPropagation) {
+        // Propagate cracks and recompute time step
+        XfemSolverInterface::propagateXfemInterfaces(tStep, *this, true);
+        StructuralEngngModel::terminate(tStep);
+    }
+    else{
+        // Propagate cracks at the end of the time step
+        StructuralEngngModel::terminate(tStep);
+        XfemSolverInterface::propagateXfemInterfaces(tStep, *this, false);
+    }
 }
 
 double StaticStructural :: giveUnknownComponent(ValueModeType mode, TimeStep *tStep, Domain *d, Dof *dof)

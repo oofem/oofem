@@ -86,7 +86,7 @@ public:
 
     void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const;
 
-    virtual void propagateFronts();
+    virtual void propagateFronts(bool &oFrontsHavePropagated);
     virtual bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, Element &iEl, const FloatArray &iElCenter) const;
 
     virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);

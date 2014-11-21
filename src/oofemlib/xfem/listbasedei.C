@@ -63,8 +63,10 @@ void ListBasedEI :: updateGeometry()
     createEnrichedDofs();
 }
 
-void ListBasedEI :: propagateFronts()
-{}
+void ListBasedEI :: propagateFronts(bool &oFrontsHavePropagated)
+{
+    oFrontsHavePropagated = false;
+}
 
 void ListBasedEI :: updateNodeEnrMarker(XfemManager &ixFemMan)
 {

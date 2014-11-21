@@ -59,7 +59,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_ListBasedEI_Name; }
 
     virtual void updateGeometry();
-    virtual void propagateFronts();
+    virtual void propagateFronts(bool &oFrontsHavePropagated);
     virtual void updateNodeEnrMarker(XfemManager &ixFemMan);
 
     virtual bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos,  Element &iEl, const FloatArray &iElCenter) const;

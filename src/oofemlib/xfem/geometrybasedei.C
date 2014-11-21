@@ -957,8 +957,10 @@ void GeometryBasedEI :: giveSubPolygon(std :: vector< FloatArray > &oPoints, con
     mpBasicGeometry->giveSubPolygon(oPoints, iXiStart, iXiEnd);
 }
 
-void GeometryBasedEI :: propagateFronts()
+void GeometryBasedEI :: propagateFronts(bool &oFrontsHavePropagated)
 {
+    oFrontsHavePropagated = false;
+
     TipPropagation tipPropStart;
     if ( mpPropagationLaw->propagateInterface(* giveDomain(), * mpEnrichmentFrontStart, tipPropStart) ) {
         //        mpEnrichmentDomain->propagateTip(tipPropStart);
@@ -967,6 +969,8 @@ void GeometryBasedEI :: propagateFronts()
         FloatArray pos( mpBasicGeometry->giveVertex(1) );
         pos.add(tipPropStart.mPropagationLength, tipPropStart.mPropagationDir);
         mpBasicGeometry->insertVertexFront(pos);
+
+        oFrontsHavePropagated = true;
     }
 
     TipPropagation tipPropEnd;
@@ -977,6 +981,8 @@ void GeometryBasedEI :: propagateFronts()
         FloatArray pos( mpBasicGeometry->giveVertex( mpBasicGeometry->giveNrVertices() ) );
         pos.add(tipPropEnd.mPropagationLength, tipPropEnd.mPropagationDir);
         mpBasicGeometry->insertVertexBack(pos);
+
+        oFrontsHavePropagated = true;
     }
 
 #if 0

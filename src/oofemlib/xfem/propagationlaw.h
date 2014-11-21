@@ -46,18 +46,6 @@
 #define _IFT_PLCrackPrescribedDir_IncLength "incrementlength" // Increment per time step
 
 
-#define _IFT_PLHoopStressCirc_Name "propagationlawhoopstresscirc"
-// Radius of circle used for stress sampling points
-#define _IFT_PLHoopStressCirc_Radius "radius"
-// Angle between sampling points on the circle
-#define _IFT_PLHoopStressCirc_AngleInc "angleinc"
-// Increment length per time step
-#define _IFT_PLHoopStressCirc_IncLength "incrementlength"
-// Threshold for crack propagation
-#define _IFT_PLHoopStressCirc_HoopStressThreshold "hoopstressthreshold"
-// If radial basis functions should be used for stress interpolation
-#define _IFT_PLHoopStressCirc_RadialBasisFunc "useradialbasisfunc"
-
 namespace oofem {
 class Domain;
 class EnrichmentDomain;

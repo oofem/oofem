@@ -44,6 +44,8 @@
 #define _IFT_StaticStructural_Name "staticstructural"
 #define _IFT_StaticStructural_deltat "deltat"
 #define _IFT_StaticStructural_solvertype "solvertype"
+
+#define _IFT_StaticStructural_recomputeaftercrackpropagation "recomputeaftercrackprop"
 namespace oofem {
 class SparseMtrx;
 
@@ -69,6 +71,8 @@ protected:
     double deltaT;
 
     InitialGuess initialGuessType;
+
+    bool mRecomputeStepAfterPropagation;
 
 public:
     StaticStructural(int i, EngngModel * _master = NULL);

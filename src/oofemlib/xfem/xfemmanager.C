@@ -272,11 +272,18 @@ void XfemManager :: updateYourself(TimeStep *tStep)
     updateNodeEnrichmentItemMap();
 }
 
-void XfemManager :: propagateFronts()
+void XfemManager :: propagateFronts(bool &oAnyFronHasPropagated)
 {
-    for ( auto &ei: enrichmentItemList ) {
-        ei->propagateFronts();
+    oAnyFronHasPropagated = false;
 
+    for ( auto &ei: enrichmentItemList ) {
+
+        bool eiHasPropagated = false;
+        ei->propagateFronts(eiHasPropagated);
+
+        if(eiHasPropagated) {
+            oAnyFronHasPropagated = true;
+        }
 #if 0
         if ( giveVtkDebug() ) {
             GeometryBasedEI *geoEI = dynamic_cast< GeometryBasedEI * >( ei );

@@ -136,6 +136,16 @@ void Crack :: computeArcPoints(const std :: vector< FloatArray > &iIntersectionP
     }
 }
 
+double Crack :: computeLength()
+{
+    PolygonLine *polygonLine = dynamic_cast< PolygonLine * >( mpBasicGeometry );
+
+    if ( polygonLine != NULL ) {
+        return polygonLine->computeLength();
+    }
+
+    return 0.0;
+}
 
 int Crack :: giveDofPoolSize() const
 {

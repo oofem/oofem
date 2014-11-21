@@ -71,6 +71,7 @@ mExportReactionForces(false),
 mExportBoundaryConditions(false),
 mExportMesh(false),
 mExportXFEM(false),
+mExportCrackLength(false),
 mMonitorNodeIndex(-1)
 {
     mpMatForceEvaluator = new  MaterialForceEvaluator();
@@ -89,6 +90,7 @@ IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
     mExportBoundaryConditions = ir->hasField(_IFT_GnuplotExportModule_BoundaryConditions);
     mExportMesh = ir->hasField(_IFT_GnuplotExportModule_mesh);
     mExportXFEM = ir->hasField(_IFT_GnuplotExportModule_xfem);
+    mExportCrackLength = ir->hasField(_IFT_GnuplotExportModule_cracklength);
 
     ir->giveOptionalField(mMonitorNodeIndex, _IFT_GnuplotExportModule_monitornode);
 
@@ -135,6 +137,8 @@ void GnuplotExportModule::doOutput(TimeStep *tStep, bool forcedOutput)
 
         }
     }
+
+    mTimeHist.push_back( tStep->giveTargetTime() );
 
     if(mExportXFEM) {
         if(domain->hasXfemManager()) {
@@ -260,7 +264,6 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
         sprintf(fileNameX, "ReactionForceGnuplotBC%dX.dat", bcInd+1);
         pFileX = fopen ( fileNameX , "wb" );
 
-        fprintf(pFileX, "# %s\n", fileNameX);
         fprintf(pFileX, "#u Fx\n");
         for ( size_t j = 0; j < mDispHist[bcInd].size(); j++ ) {
             fprintf(pFileX, "%e %e\n", mDispHist[bcInd][j], mReactionForceHistory[bcInd][j].at(1) );
@@ -271,7 +274,6 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
         // Y
         FILE * pFileY;
         char fileNameY[100];
-        sprintf(fileNameY, "ReactionForceGnuplotBC%dY.dat", bcInd+1);
         pFileY = fopen ( fileNameY , "wb" );
 
         fprintf(pFileY, "# %s\n", fileNameY);
@@ -403,6 +405,13 @@ void GnuplotExportModule::outputXFEM(Crack &iCrack, TimeStep *tStep)
         std :: stringstream strMatForcesEnd;
         strMatForcesEnd << "MatForcesEndGnuplotTime" << time << "Crack" << iCrack.giveNumber() << ".dat";
         WritePointsToGnuplot(strMatForcesEnd.str(), matForcesEndArray);
+
+        double crackLength = iCrack.computeLength();
+    //    printf("crackLength: %e\n", crackLength );
+        mCrackLengthHist[eiIndex].push_back(crackLength);
+        std :: stringstream strCrackLength;
+        strCrackLength << "CrackLengthGnuplotEI" << eiIndex << "Time" << time << ".dat";
+        XFEMDebugTools::WriteArrayToGnuplot(strCrackLength.str(), mTimeHist, mCrackLengthHist[eiIndex]);
     }
 }
 
