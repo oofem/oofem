@@ -211,6 +211,13 @@ Truss3d :: initializeFrom(InputRecord *ir)
 
 
 void
+Truss3d :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_1d(answer, gp, strain, tStep);
+}
+
+
+void
 Truss3d :: giveDofManDofIDMask(int inode, IntArray &answer) const
 {
     answer = {D_u, D_v, D_w};
