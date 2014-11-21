@@ -1007,6 +1007,13 @@ StructuralElement :: giveCharacteristicVector(FloatArray &answer, CharType mtrx,
          * and this will cause to integrate internal forces using existing (nontemp, equlibrated) stresses in
          * statuses. Mainly used to compute reaction forces */
         this->giveInternalForcesVector(answer, tStep, 1);
+    } else if ( mtrx == LumpedMassMatrix ) {
+        FloatMatrix M;
+        this->computeLumpedMassMatrix(M, tStep);
+        answer.resize(M.giveNumberOfColumns());
+        for ( int i = 0; i < M.giveNumberOfColumns(); ++i ) {
+            answer[i] = M(i,i);
+        }
     } else {
         OOFEM_ERROR("Unknown Type of characteristic mtrx (%s)", __CharTypeToString(mtrx) );
     }
