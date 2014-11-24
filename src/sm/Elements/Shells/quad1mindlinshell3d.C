@@ -251,12 +251,22 @@ Quad1MindlinShell3D :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespo
 
 
 void
+Quad1MindlinShell3D :: computeVectorOfUnknowns(ValueModeType mode, TimeStep *tStep, FloatArray &shell, FloatArray &drill)
+{
+    FloatArray tmp;
+    this->computeVectorOf(mode, tStep, tmp);
+    shell.beSubArrayOf(tmp, {1, 2, 3, 4, 5,  7, 8, 9, 10, 11,  13, 14, 15, 16, 17,  19, 20, 21, 22, 23});
+    drill.beSubArrayOf(tmp, {6, 12, 18, 24});
+}
+
+
+void
 Quad1MindlinShell3D :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatArray shellUnknowns;
+    FloatArray shellUnknowns, tmp;
     FloatMatrix b;
     /* Here we do compute only the "traditional" part of shell strain vector, the quasi-strain related to rotations is not computed */
-    this->computeVectorOf({D_u, D_v, D_w, R_u, R_v}, VM_Total, tStep, shellUnknowns);
+    this->computeVectorOfUnknowns(VM_Total, tStep, shellUnknowns, tmp);
 
     this->computeBmatrixAt(gp, b);
     answer.beProductOf(b, shellUnknowns);
@@ -274,8 +284,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     bool drillCoeffFlag = false;
 
     // Split this for practical reasons into normal shell dofs and drilling dofs
-    this->computeVectorOf({D_u, D_v, D_w, R_u, R_v}, VM_Total, tStep, shellUnknowns);
-    this->computeVectorOf({R_w}, VM_Total, tStep, drillUnknowns);
+    this->computeVectorOfUnknowns(VM_Total, tStep, shellUnknowns, drillUnknowns);
 
     FloatArray shellForces, drillMoment;
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
