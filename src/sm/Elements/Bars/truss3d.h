@@ -94,6 +94,7 @@ public:
     virtual const char *giveClassName() const { return "Truss3d"; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual MaterialMode giveMaterialMode() { return _1dMat; }
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
 
 protected:
     // edge load support

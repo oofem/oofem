@@ -68,13 +68,13 @@ StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoin
 StructuralMaterialStatus :: ~StructuralMaterialStatus() { }
 
 
-void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
+void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
 // Prints the strains and stresses on the data file.
 {
     FloatArray helpVec;
     int n;
 
-    MaterialStatus :: printOutputAt(File, tNow);
+    MaterialStatus :: printOutputAt(File, tStep);
 
     fprintf(File, "  strains ");
     StructuralMaterial :: giveFullSymVectorForm( helpVec, strainVector, gp->giveMaterialMode() );

@@ -55,7 +55,6 @@ GJacobi :: ~GJacobi() { }
 
 NM_Status
 GJacobi :: solve(FloatMatrix *a, FloatMatrix *b, FloatArray *eigv, FloatMatrix *x)
-//void  GJacobi :: solveYourselfAt (TimeStep* tNow)
 //
 // this function solve the generalized eigenproblem using the Generalized
 // jacobi iteration

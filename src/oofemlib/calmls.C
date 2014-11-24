@@ -110,7 +110,7 @@ NM_Status
 CylindricalALM :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
                         FloatArray *X, FloatArray *dX, FloatArray *F,
                         const FloatArray &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
-                        int &nite, TimeStep *tNow)
+                        int &nite, TimeStep *tStep)
 {
     FloatArray rhs, deltaXt, deltaX_, dXm1, XInitial;
     FloatArray ddX; // total increment of displacements in iteration
@@ -190,8 +190,8 @@ restart:
     // A.1. calculation of (0)VarRt
     //
     dX->zero();
-    //engngModel->updateComponent(tNow, InternalRhs, domain); // By not updating this, one obtains the old equilibrated tangent.
-    engngModel->updateComponent(tNow, NonLinearLhs, domain);
+    //engngModel->updateComponent(tStep, InternalRhs, domain); // By not updating this, one obtains the old equilibrated tangent.
+    engngModel->updateComponent(tStep, NonLinearLhs, domain);
     linSolver->solve(k, R, & deltaXt);
 
     // If desired by the user, the solution is (slightly) perturbed, so that various symmetries can be broken.
@@ -259,12 +259,12 @@ restart:
     nite = 0;
 
     // update solution state counter
-    tNow->incrementStateCounter();
-    engngModel->updateComponent(tNow, InternalRhs, domain);
+    tStep->incrementStateCounter();
+    engngModel->updateComponent(tStep, InternalRhs, domain);
 
     do {
         nite++;
-        tNow->incrementSubStepNumber();
+        tStep->incrementSubStepNumber();
 
         dXm1 = * dX;
         DeltaLambdam1 = DeltaLambda;
@@ -282,7 +282,7 @@ restart:
             // internal state of elements is updated by previous calling
             // InternalRhs
             //
-            engngModel->updateComponent(tNow, NonLinearLhs, domain);
+            engngModel->updateComponent(tStep, NonLinearLhs, domain);
             //
             // compute deltaXt for i-th iteration
             //
@@ -322,7 +322,7 @@ restart:
                 // reset all changes fro previous equilibrium state
                 dX->zero();
                 // restore initial stiffness
-                engngModel->updateComponent(tNow, NonLinearLhs, domain);
+                engngModel->updateComponent(tStep, NonLinearLhs, domain);
 
                 OOFEM_LOG_INFO("CALMLS:       Iteration Reset ...\n");
 
@@ -349,7 +349,7 @@ restart:
                                 dXm1, * dX, ddX,
                                 * R, R0, * F,
                                 DeltaLambda, DeltaLambdam1, deltaLambda, Lambda, ReachedLambda,
-                                RR, drProduct, tNow);
+                                RR, drProduct, tStep);
         } else { // no line search
             //
             // update solution vectors
@@ -365,15 +365,15 @@ restart:
             drProduct = parallel_context->localNorm(ddX);
             drProduct *= drProduct;
 
-            tNow->incrementStateCounter();     // update solution state counter
+            tStep->incrementStateCounter();     // update solution state counter
             //
             // B.6.
             //
             DeltaLambda = DeltaLambdam1 + deltaLambda;
             Lambda = ReachedLambda + DeltaLambda;
 
-            tNow->incrementStateCounter();     // update solution state counter
-            engngModel->updateComponent(tNow, InternalRhs, domain);
+            tStep->incrementStateCounter();     // update solution state counter
+            engngModel->updateComponent(tStep, InternalRhs, domain);
         }
 
         //
@@ -402,7 +402,7 @@ restart:
                 engngModel->initStepIncrements();
                 dX->zero();
                 // restore initial stiffness
-                engngModel->updateComponent(tNow, NonLinearLhs, domain);
+                engngModel->updateComponent(tStep, NonLinearLhs, domain);
 
                 OOFEM_LOG_INFO("CALMLS:       Iteration Reset ...\n");
 
@@ -419,7 +419,7 @@ restart:
         }
 
         // output of per iteration data
-        engngModel->giveExportModuleManager()->doOutput(tNow, true);
+        engngModel->giveExportModuleManager()->doOutput(tStep, true);
     } while ( !converged || ( nite < minIterations ) );
 
     //
@@ -436,7 +436,7 @@ restart:
     double DR = parallel_context->localNorm(* dX);
     bk = DeltaLambda * RDR / ( DR * DR );
 
-    if ( tNow->giveNumber() == 1 ) {
+    if ( tStep->giveNumber() == 1 ) {
         // compute Bergan_k0
         Bergan_k0 = bk;
     } else {
@@ -1213,7 +1213,7 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
                                 const FloatArray &dXm1, FloatArray &dX, FloatArray &ddX,
                                 const FloatArray &R, const FloatArray *R0, const FloatArray &F,
                                 double &DeltaLambda, double &DeltaLambdam1, double &deltaLambda,
-                                double &Lambda, double &ReachedLambda, double RR, double &drProduct, TimeStep *tNow)
+                                double &Lambda, double &ReachedLambda, double RR, double &drProduct, TimeStep *tStep)
 {
     //
     //  LINE SEARCH
@@ -1272,9 +1272,9 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
         drProduct = parallel_context->localNorm(ddX);
         drProduct *= drProduct;
 
-        tNow->incrementStateCounter(); // update solution state counter
+        tStep->incrementStateCounter(); // update solution state counter
         // update internal forces according to new state
-        engngModel->updateComponent(tNow, InternalRhs, domain);
+        engngModel->updateComponent(tStep, InternalRhs, domain);
 
         e1 = parallel_context->localDotProduct(deltaX_, F);
         e2 = parallel_context->localDotProduct(deltaXt, F);
@@ -1352,8 +1352,8 @@ CylindricalALM :: do_lineSearch(FloatArray &r, const FloatArray &rInitial, const
         drProduct = parallel_context->localNorm(ddX);
         drProduct *= drProduct;
 
-        tNow->incrementStateCounter(); // update solution state counter
-        engngModel->updateComponent(tNow, InternalRhs, domain);
+        tStep->incrementStateCounter(); // update solution state counter
+        engngModel->updateComponent(tStep, InternalRhs, domain);
         DeltaLambda = DeltaLambdam1 + deltaLambda;
         Lambda = ReachedLambda + DeltaLambda;
 

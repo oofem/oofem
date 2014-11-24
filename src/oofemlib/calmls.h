@@ -263,7 +263,7 @@ protected:
                        const FloatArray &dXm1, FloatArray &dX, FloatArray &ddX,
                        const FloatArray &R, const FloatArray *R0, const FloatArray &F,
                        double &DeltaLambda, double &DeltaLambdam1, double &deltaLambda,
-                       double &Lambda, double &ReachedLambda, double RR, double &drProduct, TimeStep *tNow);
+                       double &Lambda, double &ReachedLambda, double RR, double &drProduct, TimeStep *tStep);
 };
 } // end namespace oofem
 #endif // calmls_h

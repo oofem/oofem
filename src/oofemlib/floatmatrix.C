@@ -1423,30 +1423,29 @@ double FloatMatrix :: giveDeterminant() const
     return 0.;
 }
 
+
+void FloatMatrix :: beDiagonal(const FloatArray &diag)
+{
+    int n = diag.giveSize();
+    this->resize(n, n);
+    for ( int i = 0; i < n; ++i ) {
+        (*this)(i, i) = diag[i];
+    }
+}
+
+
 double FloatMatrix :: giveTrace() const
-// Returns the trace (sum of diagonal terms) of the receiver.
 {
 #  ifdef DEBUG
     if ( !this->isSquare() ) {
         OOFEM_ERROR("cannot compute the trace of a non-square %d by %d matrix", nRows, nColumns);
     }
 #  endif
-
-    if ( nRows == 1 ) {
-        return values [ 0 ];
-    } else if ( nRows == 2 ) {
-        return ( values [ 0 ] + values [ 3 ] );
-    } else if ( nRows == 3 ) {
-        return ( values [ 0 ] + values [ 4 ] + values [ 8 ] );
-    } else {
-        double answer = 0.;
-        for ( int k = 0; k < nRows; k++ ) {
-            answer += values [ k * ( nRows + 1 ) ];
-        }
-        return answer;
+    double answer = 0.;
+    for ( int k = 0; k < nRows; k++ ) {
+        answer += values [ k * ( nRows + 1 ) ];
     }
-
-    return 0.;
+    return answer;
 }
 
 

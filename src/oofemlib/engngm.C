@@ -183,7 +183,6 @@ EngngModel :: ~EngngModel()
     delete nonlocCommunicator;
     delete commBuff;
 #endif
-    printf("REMOVEMEfoo1\n");
 }
 
 

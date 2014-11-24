@@ -243,9 +243,9 @@ LatticeTransportMaterial :: CreateStatus(GaussPoint *gp) const
 
 
 void
-LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
+LatticeTransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
 {
-    MaterialStatus :: printOutputAt(File, tNow);
+    MaterialStatus :: printOutputAt(File, tStep);
 
     fprintf(File, "  state");
 

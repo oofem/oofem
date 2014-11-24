@@ -35,7 +35,7 @@
 #include "Elements/structural2delement.h"
 #include "feinterpol2d.h"
 #include "gausspoint.h"
-#include "crosssection.h"
+#include "CrossSections/structuralcrosssection.h"
 #include "gaussintegrationrule.h"
 
 namespace oofem {
@@ -48,7 +48,7 @@ Structural2DElement :: Structural2DElement(int n, Domain *aDomain) :
 }
 
 void
-Structural2DElement::postInitialize()
+Structural2DElement :: postInitialize()
 {
     // Element must be created before giveNumberOfNodes can be called
     StructuralElement :: postInitialize();
@@ -212,8 +212,6 @@ Structural2DElement :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int i
 }
 
 
-
-
 double
 Structural2DElement :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 //
@@ -232,13 +230,13 @@ Structural2DElement :: giveCharacteristicLength(const FloatArray &normalToCrackP
 
 // Plane stress
 
-
 PlaneStressElement :: PlaneStressElement(int n, Domain *aDomain) :
     Structural2DElement(n, aDomain)
     // Constructor. Creates an element with number n, belonging to aDomain.
 {
     //nlGeometry = 0; // Geometrical nonlinearities disabled as default
 }
+
 
 void 
 PlaneStressElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx, int upperIndx)
@@ -261,12 +259,13 @@ PlaneStressElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int 
     }
 }
 
+
 void
 PlaneStressElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
     // Returns the [ 4 x (nno*2) ] displacement gradient matrix {BH} of the receiver,
     // evaluated at gp.
-    // @todo not checked if correct
+    /// @todo not checked if correct
   
     FloatMatrix dNdx;
     this->giveInterpolation()->evaldNdx( dNdx, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
@@ -283,6 +282,11 @@ PlaneStressElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 }
 
 
+void
+PlaneStressElement :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_PlaneStress(answer, gp, strain, tStep);
+}
 
 
 
@@ -299,6 +303,7 @@ PlaneStrainElement :: PlaneStrainElement(int n, Domain *aDomain) :
 {
     //nlGeometry = 0; // Geometrical nonlinearities disabled as default
 }
+
 
 void 
 PlaneStrainElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx, int upperIndx)
@@ -323,6 +328,7 @@ PlaneStrainElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int 
     }
 }
 
+
 void
 PlaneStrainElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 {
@@ -345,6 +351,12 @@ PlaneStrainElement :: computeBHmatrixAt(GaussPoint *gp, FloatMatrix &answer)
 }
 
 
+void
+PlaneStrainElement :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
+}
+
 
 
 
@@ -359,7 +371,6 @@ AxisymElement :: AxisymElement(int n, Domain *aDomain) :
 }
 
 
-
 double
 AxisymElement :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 //
@@ -369,7 +380,6 @@ AxisymElement :: giveCharacteristicLength(const FloatArray &normalToCrackPlane)
 {
     return this->giveCharacteristicLengthForAxisymmElements(normalToCrackPlane);
 }
-
 
 
 double
@@ -394,7 +404,6 @@ AxisymElement :: computeVolumeAround(GaussPoint *gp)
     return determinant * weight * r;
 
 }
-
 
 
 void
@@ -430,9 +439,6 @@ AxisymElement :: computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int li, i
     }
   
 }
-
-
-
 
 
 void
@@ -500,6 +506,11 @@ AxisymElement :: computeGaussPoints()
    
 }
 
+void
+AxisymElement :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
+}
 
 
 
