@@ -43,6 +43,8 @@
 #include "intarray.h"
 #include "floatarray.h"
 #include "mathfem.h"
+#include "datastream.h"
+#include "contextioerr.h"
 #include "latticestructuralelement.h"
 #include "classfactory.h"
 
@@ -422,6 +424,78 @@ Lattice2d :: giveGpCoordinates(FloatArray &answer)
     return;
 }
 
+
+contextIOResultType Lattice2d :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    contextIOResultType iores;
+
+    if ( ( iores =  LatticeStructuralElement :: saveContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( ( mode & CM_Definition ) ) {
+
+        if ( !stream->write(& width, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        if ( !stream->write(& thickness, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        if ( !stream->write(& couplingFlag, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        if ( ( iores = couplingNumbers.storeYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+
+        if ( ( iores = gpCoords.storeYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+    }
+
+    return CIO_OK;
+}
+
+
+
+contextIOResultType Lattice2d :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+{
+    contextIOResultType iores;
+
+    if ( ( iores = LatticeStructuralElement :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        THROW_CIOERR(iores);
+    }
+
+    if ( mode & CM_Definition ) {
+     
+        if ( !stream->read(& width, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        if ( !stream->read(& thickness, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        if ( !stream->read(& couplingFlag, 1) ) {
+            THROW_CIOERR(CIO_IOERR);
+        }
+
+        if ( ( iores = couplingNumbers.restoreYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+
+        if ( ( iores = gpCoords.restoreYourself(stream, mode) ) != CIO_OK ) {
+            THROW_CIOERR(iores);
+        }
+
+    }
+
+    return CIO_OK;
+}
+
 #ifdef __OOFEG
 
 void
@@ -498,13 +572,14 @@ Lattice2d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, Unkn
 
     go = CreateLine3D(p);
     EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, go);
+    EGAttachObject(go, ( EObjectP ) this);
     EMAddGraphicsToModel(ESIModel(), go);
 }
 
 void
 Lattice2d :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
 {
-    WCRec l [ 2 ];
+    WCRec p [ 2 ];
     GraphicObj *tr;
     GaussPoint *gp;
     FloatArray crackStatuses, cf;
@@ -517,40 +592,16 @@ Lattice2d :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
         gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
         this->giveIPValue(crackStatuses, gp, IST_CrackStatuses, tStep);
         if ( crackStatuses(0) == 1. || crackStatuses(0) == 2. || crackStatuses(0) == 3 || crackStatuses(0) == 4 ) {
-            double x1, y1, x2, y2;
-            x1 = this->giveNode(1)->giveCoordinate(1);
-            y1 = this->giveNode(1)->giveCoordinate(2);
-            x2 = this->giveNode(2)->giveCoordinate(1);
-            y2 = this->giveNode(2)->giveCoordinate(2);
+	  FloatArray coords;
+	  this->giveCrossSectionCoordinates(coords);
 
-            //Compute normal and shear direction
-            FloatArray normalDirection;
-            FloatArray shearDirection;
-            normalDirection.resize(2);
-            normalDirection.zero();
-            shearDirection.resize(2);
-            shearDirection.zero();
-            normalDirection.at(1) = x2 - x1;
-            normalDirection.at(2) = y2 - y1;
-            normalDirection.normalize();
-            if ( normalDirection.at(2) == 0. ) {
-                shearDirection.at(1) = 0.;
-                shearDirection.at(2) = 1.;
-            } else {
-                shearDirection.at(1) = 1.0;
-                shearDirection.at(2) =
-                    -normalDirection.at(1) / normalDirection.at(2);
-            }
+	    p [ 0 ].x = ( FPNum ) coords.at(1);
+	    p [ 0 ].y = ( FPNum ) coords.at(2);
+	    p [ 0 ].z = ( FPNum ) coords.at(3);
+	    p [ 1 ].x = ( FPNum ) coords.at(4);
+	    p [ 1 ].y = ( FPNum ) coords.at(5);
+	    p [ 1 ].z = ( FPNum ) coords.at(6);
 
-            shearDirection.normalize();
-
-            l [ 0 ].x = ( FPNum ) this->gpCoords.at(1) - shearDirection.at(1) * this->width / 2.;
-            l [ 0 ].y = ( FPNum ) this->gpCoords.at(2) - shearDirection.at(2) * this->width / 2.;
-            l [ 0 ].z = 0.;
-            l [ 1 ].x = ( FPNum ) this->gpCoords.at(1) + shearDirection.at(1) * this->width / 2.;
-            ;
-            l [ 1 ].y = ( FPNum ) this->gpCoords.at(2) + shearDirection.at(2) * this->width / 2.;
-            l [ 1 ].z = 0.;
 
             EASValsSetLayer(OOFEG_CRACK_PATTERN_LAYER);
             EASValsSetLineWidth(OOFEG_CRACK_PATTERN_WIDTH);
@@ -565,8 +616,9 @@ Lattice2d :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
             }
 
 
-            tr = CreateLine3D(l);
+            tr = CreateLine3D(p);
             EGWithMaskChangeAttributes(WIDTH_MASK | COLOR_MASK | LAYER_MASK, tr);
+	    EGAttachObject(tr, ( EObjectP ) this);
             EMAddGraphicsToModel(ESIModel(), tr);
         }
     }

@@ -1,0 +1,18 @@
+lattice2dcrackinput.out
+Direct tension. 2D Model
+nltransienttransportproblem nsteps 1. deltat 6.00 rtol 5.e-11 alpha 1. nsmax 2000 contextOutputStep 100 nmodules 0
+domain 2dMassLatticeTransport 
+OutputManager tstep_all dofman_all element_all 
+ndofman 2 nelem 1 ncrosssect 1 nmat 1 nbc 2 nic 0 nltf 1
+node 1 coords 2 0 0 bc 1 1
+node 2 coords 2 1.0 1.0 bc 1 2
+latticemt2d 1 nodes 2 1 2 crossSect 1 dim 2 mat 1 thick 1. width 1.0 gpCoords 2 0.5 0.5 crackwidth 5
+simplecs 1 
+latticetransmat 1 d 1.e-9 k 1.e-13 vis 1.e-9 thetas 0.0924 thetar 0. ctor 0.001
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 0.0
+BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 1.0
+ConstantFunction 1 f(t) 1.
+#%BEGIN_CHECK% tolerance 1.e-5
+#REACTION tStep 0 number 1 dof 1 value 7.3657e-03
+#REACTION tStep 0 number 2 dof 1 value -7.3657e-03
+#%END_CHECK%

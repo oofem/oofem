@@ -64,7 +64,10 @@ Lattice2d_mt :: Lattice2d_mt(int n, Domain *aDomain, ElementMode em) :
     numberOfDofMans  = 2;
     area = -1.0;
     length = 0.0;
-    crackWidth = 0.;
+    couplingFlag = 0;
+    couplingNumbers.zero();
+    crackWidths.zero();
+    crackLengths.zero();
 }
 
 Lattice2d_mt :: ~Lattice2d_mt()
@@ -89,23 +92,20 @@ double Lattice2d_mt :: giveLength()
 }
 
 double
-Lattice2d_mt :: giveCrackFactor()
+Lattice2d_mt :: givePressure()
 {
-    double crackFactor = 0.;
+    LatticeTransportMaterialStatus *status;
+    GaussPoint *gp;
+    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    gp = iRule->getIntegrationPoint(0);
 
-    if ( this->crackWidth > 0. ) {
-        if ( width > 1.e-10 ) {
-            crackFactor =  pow(this->crackWidth, 3.) / this->width;
-        } else {
-            printf( "Something wrong with width for element = %d", this->giveNumber() );
-        }
-    }
+    status = ( LatticeTransportMaterialStatus * ) gp->giveMaterialStatus();
 
-    return crackFactor;
+    return status->givePressure();
 }
 
 double
-Lattice2d_mt :: givePressure()
+Lattice2d_mt :: giveOldPressure()
 {
     LatticeTransportMaterialStatus *status;
     IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
@@ -113,7 +113,7 @@ Lattice2d_mt :: givePressure()
 
     status = static_cast< LatticeTransportMaterialStatus * >( gp->giveMaterialStatus() );
 
-    return status->givePressure();
+    return status->giveOldPressure();
 }
 
 
@@ -200,7 +200,7 @@ Lattice2d_mt :: computeGaussPoints()
 {
     integrationRulesArray.resize( 1 );
     integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
-    integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _1dHeat);
+    integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _2dMTLattice);
 }
 
 void
@@ -219,20 +219,26 @@ Lattice2d_mt :: initializeFrom(InputRecord *ir)
     dimension = 2.;
     IR_GIVE_OPTIONAL_FIELD(ir, dimension, _IFT_Lattice2DMT_dim);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, thickness, _IFT_Lattice2DMT_thick);
+    IR_GIVE_FIELD(ir, thickness, _IFT_Lattice2DMT_thick);
 
-    IR_GIVE_OPTIONAL_FIELD(ir, width, _IFT_Lattice2DMT_width);
+    IR_GIVE_FIELD(ir, width, _IFT_Lattice2DMT_width);
+    crackLengths.resize(1);
+    crackLengths.at(1) = width;
+    
 
-    IR_GIVE_OPTIONAL_FIELD(ir, gpCoords, _IFT_Lattice2DMT_gpcoords);
+    IR_GIVE_FIELD(ir, gpCoords, _IFT_Lattice2DMT_gpcoords);
 
-    crackWidth = 0.;
-    IR_GIVE_OPTIONAL_FIELD(ir, crackWidth, _IFT_Lattice2DMT_crackwidth);
+    crackWidths.resize(1);
+    crackWidths.zero();
+    IR_GIVE_OPTIONAL_FIELD(ir, crackWidths.at(1), _IFT_Lattice2DMT_crackwidth);
 
     couplingFlag = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, couplingFlag, _IFT_Lattice2DMT_couplingflag);
-
+    
+    couplingNumbers.resize(1);
+    couplingNumbers.zero();
     if ( couplingFlag == 1 ) {
-        IR_GIVE_OPTIONAL_FIELD(ir, couplingNumber, _IFT_Lattice2DMT_couplingnumber);
+      IR_GIVE_OPTIONAL_FIELD(ir, couplingNumbers.at(1), _IFT_Lattice2DMT_couplingnumber);
     }
 
     numberOfGaussPoints = 1;
@@ -335,7 +341,7 @@ Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *t
             dV  = this->computeVolumeAround(gp);
             load->computeValueAt(val, tStep, deltaX, mode);
 
-            k = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Conductivity_hh, gp, tStep);
+            k = static_cast< TransportMaterial * >( this->giveMaterial() )->giveCharacteristicValue(Conductivity, gp, tStep);
 
             double helpFactor = val.at(1) * k * dV;
 

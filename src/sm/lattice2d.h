@@ -113,10 +113,13 @@ public:
     virtual void drawSpecial(oofegGraphicContext &gc, TimeStep *tStep);
     virtual void drawRawCrossSections(oofegGraphicContext &gc, TimeStep *tStep);
     virtual void giveCrossSectionCoordinates(FloatArray &coords);
-    //virtual void drawDeformedCrossSections(oofegGraphicContext &gc, TimeStep *tStep, UnknownType);
+
 #endif
 
 protected:
+
+    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
 
     virtual void computeBmatrixAt(GaussPoint *, FloatMatrix &, int = 1, int = ALL_STRAINS);
     virtual bool computeGtoLRotationMatrix(FloatMatrix &);

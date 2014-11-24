@@ -4720,6 +4720,137 @@ Supported modes& \_2dHeMo\\
 %\end{center}
 \end{table}
 
+
+\subsection{Material for unsaturated flow in lattice models -- LatticeTransMat}
+
+\label{latticetransmat}
+Lattice transport elements have to be used with this material model. A positive sign is assumed for liquid tension, unlike the convention of soil mechanics which assumes compression positive.\\
+
+These transport elements are idealised as one-dimensional conductive pipes. The gradient of hydraulic head, which governs flow rate along each transport element, is determined from the capillary pressures $P_{c}$ at the two nodes.
+
+The mass balance equation describes the change in moisture inside a porous element as a consequence of liquid flow and solid-liquid retention. It leads to the following partial differential equation
+\begin{equation}\label{latticetransmat1}
+c\frac{\partial P_{c}}{\partial t} + k\mbox{div}(\nabla(\frac{P_{c}}{g}-\rho z)) =0
+\end{equation}
+where $P_{c}$ is the capillary pressure, $c$ is the mass capacity function($s^{2}m^{-2}$), $k$ is the Darcy hydraulic conductivity ($ms^{-1}$), $\rho$ is the fluid mass density, $g$ is the acceleration of gravity, $z$ is the capillary height and t is the time.\\
+
+The hydraulic conductivity $k$ consists of
+\begin{equation}\label{latticetransmat11}
+k=k_{0} + k_{c}
+\end{equation}
+where $k_{0} $ is the hydraulic conductivity of the intact material and $k_{c} $ is the additional conductivity due to cracking.\\
+
+Darcy hydraulic conductivity $k_{0}$ is defined as 
+\begin{equation}\label{latticetransmat12}
+k_{0}=\frac{\rho g}{\mu}\kappa
+\end{equation}
+where $\mu$ is the dynamic viscosity ($Pa.s$), $\kappa$ is the permeability also called intrinsic conductivity($m^{2}$), and $\kappa_{r}$ is the relative conductivity. $\kappa_{r}$ is a function of the effective degree of saturation.\\
+
+The cracking part is
+\begin{equation}\label{latticetransmat13}
+k_{c}=\xi\frac{\rho g}{\mu}\frac{w^{3}_{c}}{12h} \kappa_{r}
+\end{equation}
+where $\xi$ is a tortuosity factor taking into account the roughness of the crack surface, $w_{c}$ is the equivalent crack opening of the dual mechanical lattice and $h$ is the length of the dual mechanical element.
+
+\subsubsection{One-dimensional transport element}
+The discrete form of the differential equation for mass transport for a one-dimensional transport element is
+\begin{equation}\label{latticetransmat3}
+\alpha_{e}P_{c} + C_{e}\frac{\partial P_{c}}{\partial t}  = f_{e}
+\end{equation}
+where $P_{c}$ is a vector containing the nodal values of the capillary pressure, $\alpha_{e}$ is the conductivity matrix, $C_{e}$ is the capacity matrix and $f_{e}$ is the nodal flow rate vector ($kg.m^{3}$). \\
+
+The capacity matrix is
+\begin{equation}\label{latticetransmat4}
+ C_{e} = \frac{Al}{12}c \left(  \begin{array}{ c c }  2 & 1 \\  1 & 2 \end{array}  \right)
+\end{equation}
+where $c$ is the capacity of the material, l is the length of the transport element and $A$ is the cross-sectional area of the transport element. \\
+
+The conductivity matrix is defined as
+\begin{equation}\label{latticetransmat5}
+ \alpha_{e} = \frac{A}{l}\frac{k}{g} \left(  \begin{array}{ c c }  1 & -1 \\  -1 & 1 \end{array}  \right)
+\end{equation}
+\\
+
+\subsubsection{Constitutive laws}
+The mass transport equation is based on the constitutive laws for the capacity $c$ and the hydraulic conductivity $k$.\\
+
+The capacity $c$ is defined as 
+\begin{equation}\label{latticetransmat6}
+c=-\rho\frac{\partial \theta}{\partial P_{c}}
+\end{equation}
+where $\theta$ is the volumetric water content ($\theta=\frac{V_{w}}{V_{T}}$ with $V_{w}$ the volume of water, and $V_{T}$ the total volume) which is calculated by a modified version of van Genuchten’s retention model. Note that the presence of a crack in an element does not influence the capacity in the present model.\\
+
+The volumetric water content is 
+\begin{equation}\label{latticetransmat7}
+\theta = S_{e} (\theta_{s} - \theta_{r})+\theta_{r}
+\end{equation}
+where $\theta_{r}$ and $\theta_{s}$ are the residual and saturated water contents corresponding to effective saturation values of $S_{e} = 0$ and $S_{e} = 1$, respectively. \\
+
+The effective degree of saturation $S_{e}$ is defined as
+\begin{equation}\label{latticetransmat8}
+S_{e}  = \left\{
+    \begin{array}{ll}
+         \frac{\theta_{m}-\theta_{r}}{\theta_{s}-\theta_{r}}\left(1+\left(\frac{ P_{c}}{a}\right)^{\frac{1}{1-m}}\right)^{-m}  & \mbox{if } P_{c} \ge P_{c(aev)} \\
+         1 & \mbox{if } P_{c}<P_{c(aev)}
+    \end{array}
+\right.
+\end{equation}
+where $\theta_{m}$ is an additional model parameter and $P_{c(aev)}$ is the air-entry value of capillary pressure which separates saturated ($P_{c}<P_{c(aev)}$) from unsaturated states ($P_{c} \ge P_{c(aev)}$). It is intuitive that the smaller the pore size of the mate- rial, the larger the value of $P_{c(aev)}$ will be.
+
+The relative conductivity $\kappa_{r}$ is a function of the effective degree of saturation and is defined as
+\begin{equation}\label{latticetransmat9}
+\kappa_{r}  = \sqrt{S_{e}}\left(\frac{1-\left[1-\left(\frac{S_{e}}{  \frac{\theta_{m}-\theta_{r}}{\theta_{s}-\theta_{r}}}\right)^{\frac{1}{m}}\right]^{m}}{1-\left[1-\left(\frac{1}{  \frac{\theta_{m}-\theta_{r}}{\theta_{s}-\theta_{r}}}\right)^{\frac{1}{m}}\right]^{m}}\right)^{2}
+\end{equation}
+If $\theta_{m} = \theta_{s}$, we have $ \frac{\theta_{m}-\theta_{r}}{\theta_{s}-\theta_{r}}=1$ : the equation reduces to the expression of the relative conductivity of the original van Genuchten model.\\
+
+The model parameters are summarized
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Material for fluid transport in lattice models\\
+\hline
+Record Format & 
+\descitem{latticetransmat} 
+\elemparam{num}{in}
+\elemparam{d}{rn}
+\elemparam{k}{rn} 
+\elemparam{vis}{rn}
+\elemparam{contype}{in}
+\elemparam{thetas}{rn}
+\elemparam{thetar}{rn}
+\elemparam{paev}{rn}
+\elemparam{m}{rn}
+\elemparam{a}{rn}
+\elemparam{thetam}{rn}
+ \optelemparam{ctor}{rn}\\
+
+Parameters 
+&- \param{num} material model number\\
+&- \param{d} fluid mass density\\
+&- \param{k} permeability ($m^{2}$)\\
+&- \param{vis} dynamic viscosity ($Pa.s$)\\
+&- \param{contype} unsaturated flow allowed when contype=1\\
+&- \param{thetas} saturated water content\\
+&- \param{thetar} residual water content\\
+&- \param{paev} air-entry value of capillary pressure\\
+&- \param{m} van Genuchten parameter\\
+&- \param{a} van Genuchten parameter\\
+&- \param{thetam} additional model parameter for the modified version of van Genuchten’s retention model\\
+&- \param{ctor} coefficient of tortuosity ($ctor=\frac{1}{\tau}\le1$)\\
+
+Supported modes& 2dMassLatticeTransport\\
+\hline
+\end{tabular}
+
+\caption{Material for unsaturated flow in lattice models - summary.}
+\label{Iatticetransmat_table}
+%\end{center}
+\end{table}
+
+
+
 \clearpage
 
 \section{Material Models for Fluid Dynamic}

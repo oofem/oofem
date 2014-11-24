@@ -62,22 +62,16 @@ public:
     virtual double giveArea() = 0;
 
     /**
+     * Returns the radius of the lattice element.
+     * @return radius.
+     */
+    virtual double giveRadius(){return 0;}
+
+    /**
      * Returns the element length
      * @return Element length.
      */
     virtual double giveLength() = 0;
-
-    /**
-     * Returns the elements mid crosssection width
-     * @return mid crosssection width.
-     */
-    virtual double giveWidth() = 0;
-
-    /**
-     * Returns the crack factor
-     * @return crack factor.
-     */
-    virtual double giveCrackWidth() { return 0; }
 
     /**
      * Returns the pressure
@@ -86,27 +80,53 @@ public:
     virtual double givePressure() { return 0; }
 
     /**
+     * Returns the old pressure
+     * @return old pressure.
+     */
+    virtual double giveOldPressure() { return 0; }
+
+    /**
      * Returns the mass
      * @return mass.
      */
     virtual double giveMass() { return 0; }
-
+    
     /**
      * Returns the coupling flag
      * @return couplingFlag.
      */
-    virtual int giveCouplingFlag() { return 0; }
+    virtual int giveCouplingFlag(){return 0;}
 
     /**
-     * Returns the coupling flag
-     * @return couplingNumber.
+     * Returns the coupling numbers
+     * @return couplingNumbers.
      */
-    virtual int giveCouplingNumber() { return 0; }
+    virtual void giveCouplingNumbers(IntArray &numbers){return;}
+
+    /**
+     * Returns the crack lengths
+     * @return crackLengths.
+     */
+    virtual void giveCrackLengths(FloatArray &lengths){return;}
+
+    /**
+     * Returns the crack widths
+     * @return crackWidths.
+     */
+    virtual void giveCrackWidths(FloatArray &widths) {return;}
+
 
     /**
      * Gives the GP coordinates
      */
     virtual void  giveGpCoordinates(FloatArray &coords) { return; }
+
+    /**
+     * Returns the real volume
+     */
+    virtual double  computeLatticeVolumeAroundIt() {return 0;}
+
+
 };
 } // end namespace oofem
 #endif
