@@ -33,7 +33,6 @@
  */
 
 #include "inputrecord.h"
-#include "error.h"
 
 namespace oofem {
 InputRecord :: InputRecord() { }

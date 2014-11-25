@@ -16,9 +16,9 @@ set (core_unsorted
     solutionbasedshapefunction.C
     fracturemanager.C
     parallelcontext.C
-	contact/contactmanager.C
-	contact/contactdefinition.C
-	contact/contactelement.C
+    contact/contactmanager.C
+    contact/contactdefinition.C
+    contact/contactelement.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
@@ -75,6 +75,7 @@ set (core_nm
     sparselinsystemnm.C
     sparsenonlinsystemnm.C
     nrsolver.C
+    dynamicrelaxationsolver.C
     linesearch.C
     calmls.C
     staggeredsolver.C
