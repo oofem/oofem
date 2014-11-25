@@ -1479,6 +1479,56 @@ OctreeSpatialLocalizer :: giveAllNodesWithinBox(nodeContainerType &nodeSet, cons
 }
 
 
+Node *
+OctreeSpatialLocalizer :: giveNodeClosestToPoint(const FloatArray &gcoords)
+{
+    Node *answer = NULL;
+    std :: list< OctantRec * >cellList;
+    OctantRec *currCell;
+    double radius, prevRadius;
+    FloatArray c = this->rootCell->giveOrigin();
+
+    // Maximum distance given coordinate and furthest terminal cell ( center_distance + width/2*sqrt(3) )
+    double minDist = c.distance(gcoords) + this->rootCell->giveWidth() * 0.87;
+
+
+    // found terminal octant containing point
+    currCell = this->findTerminalContaining(rootCell, gcoords);
+
+    // Look in center, then expand.
+    this->giveNodeClosestToPointWithinOctant(currCell, gcoords, minDist, answer);
+    prevRadius = 0.;
+    radius = currCell->giveWidth();
+    while ( radius < minDist ) {
+        this->giveListOfTerminalCellsInBoundingBox(cellList, gcoords, radius, prevRadius, this->rootCell);
+        for ( OctantRec *cell: cellList ) {
+            this->giveNodeClosestToPointWithinOctant(cell, gcoords, minDist, answer);
+        }
+        prevRadius = radius;
+        radius *= 2.; // Keep expanding the scope until the radius is larger than the entire root cell, then give up (because we have checked every possible cell)
+    }
+    return answer;
+}
+
+
+void
+OctreeSpatialLocalizer :: giveNodeClosestToPointWithinOctant(OctantRec *currCell, const FloatArray &gcoords,
+                                                                double &minDist, Node * &answer)
+{
+    for ( auto &dman : this->giveDomain()->giveDofManagers() ) {
+        if ( dman->giveParallelMode() == DofManager_remote ) {
+            continue;
+        }
+
+        double currDist = gcoords.distance(*dman->giveCoordinates());
+        if ( currDist < minDist ) {
+            answer = dynamic_cast< Node* >( dman.get() );
+            minDist = currDist;
+        }
+    }
+}
+
+
 void
 OctreeSpatialLocalizer :: giveNodesWithinBox(nodeContainerType &nodeList, OctantRec *currentCell,
                                              const FloatArray &coords, const double radius)
