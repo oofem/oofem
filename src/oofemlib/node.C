@@ -203,15 +203,12 @@ void
 Node :: printYourself()
 // Prints the receiver on screen.
 {
-    double x, y;
-
-    x = this->giveCoordinate(1);
-    y = this->giveCoordinate(2);
-    printf("Node %d    coord : x %f  y %f\n", number, x, y);
+    printf("Node %d    coord : x %f  y %fz< %f\n", number, this->giveCoordinate(1), this->giveCoordinate(2), this->giveCoordinate(3));
     for ( Dof *dof: *this ) {
         dof->printYourself();
     }
 
+    printf("load array : ");
     loadArray.printYourself();
     printf("\n");
 }
