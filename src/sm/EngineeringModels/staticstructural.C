@@ -200,7 +200,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
             OOFEM_ERROR("Couldn't create requested sparse matrix of type %d", sparseMtrxType);
         }
 
-        //this->stiffnessMatrix->buildInternalStructure( this, di, EModelDefaultEquationNumbering() );
+        this->stiffnessMatrix->buildInternalStructure( this, di, EModelDefaultEquationNumbering() );
     }
     this->internalForces.resize(neq);
 
