@@ -509,7 +509,7 @@ AxisymElement :: computeGaussPoints()
 void
 AxisymElement :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
 {
-    this->giveStructuralCrossSection()->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
+    this->giveStructuralCrossSection()->giveRealStress_3d(answer, gp, strain, tStep);
 }
 
 
