@@ -134,6 +134,13 @@ public:
      * @param answer Resulting vector.
      */
     virtual void initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answer, const UnknownNumberingScheme &s);
+
+    // These functions are hardcoded to assume the default numbering scheme (as is the rest of primaryfield)
+    void storeDofManager(TimeStep *tStep, DofManager &dman);
+    void storeInDofDictionaries(TimeStep *tStep, Domain *d);
+    void readDofManager(TimeStep *tStep, DofManager &dman);
+    void readFromDofDictionaries(TimeStep *tStep, Domain *d);
+
     /**
      * Applies the default initial values values for all DOFs (0) in given domain.
      * @param domain Domain number

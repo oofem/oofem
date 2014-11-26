@@ -216,4 +216,24 @@ DummySpatialLocalizer :: giveAllNodesWithinBox(nodeContainerType &nodeSet, const
         }
     }
 }
+
+
+Node *
+DummySpatialLocalizer :: giveNodeClosestToPoint(const FloatArray &coords)
+{
+    Node *closest = NULL;
+    double maxdist = 0.;
+    for ( auto &dman : this->giveDomain()->giveDofManagers() ) {
+        Node *node = dynamic_cast< Node* >( dman.get() );
+        if ( node ) {
+            double dist = coords.distance( node->giveCoordinates() );
+            if ( closest == NULL || dist < maxdist ) {
+                closest = node;
+                maxdist = dist;
+            }
+        }
+    }
+    return closest;
+}
+
 } // end namespace oofem

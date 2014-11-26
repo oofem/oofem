@@ -59,6 +59,92 @@ PrimaryField :: PrimaryField(EngngModel *a, int idomain,
 PrimaryField :: ~PrimaryField()
 { }
 
+
+void
+PrimaryField :: storeDofManager(TimeStep *tStep, DofManager &dman)
+{
+    for ( Dof *dof: dman ) {
+        int eq = dof->giveEqn();
+        TimeStep *step = tStep;
+        for ( int hist = 0; hist <= this->nHistVectors; ++hist ) {
+            if ( eq > 0 ) {
+                FloatArray *vec = this->giveSolutionVector( resolveIndx(tStep, 0) );
+                dof->updateUnknownsDictionary(step, VM_Total, vec->at(eq));
+            } else if ( eq < 0 ) {
+                FloatArray *vec = this->givePrescribedVector( resolveIndx(tStep, 0) );
+                dof->updateUnknownsDictionary(step, VM_Total, vec->at(-eq));
+            }
+            step = tStep->givePreviousStep();
+        }
+    }
+}
+
+void
+PrimaryField :: storeInDofDictionaries(TimeStep *tStep, Domain *d)
+{
+    for ( auto &dman : d->giveDofManagers() ) {
+        this->storeDofManager(tStep, *dman);
+    }
+
+    for ( auto &elem : d->giveElements() ) {
+        int ndman = elem->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            this->storeDofManager(tStep, *elem->giveInternalDofManager(i));
+        }
+    }
+
+    for ( auto &bc : d->giveBcs() ) {
+        int ndman = bc->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            this->storeDofManager(tStep, *bc->giveInternalDofManager(i));
+        }
+    }
+}
+
+
+void
+PrimaryField :: readDofManager(TimeStep *tStep, DofManager &dman)
+{
+    for ( Dof *dof: dman ) {
+        int eq = dof->giveEqn();
+        TimeStep *step = tStep;
+        for ( int hist = 0; hist <= this->nHistVectors; ++hist ) {
+            if ( eq > 0 ) {
+                FloatArray *vec = this->giveSolutionVector( resolveIndx(tStep, 0));
+                dof->giveUnknownsDictionaryValue(step, VM_Total, vec->at(eq));
+            } else if ( eq < 0 ) {
+                FloatArray *vec = this->givePrescribedVector( resolveIndx(tStep, 0) );
+                dof->giveUnknownsDictionaryValue(step, VM_Total, vec->at(-eq));
+            }
+            step = tStep->givePreviousStep();
+        }
+    }
+}
+
+
+void
+PrimaryField :: readFromDofDictionaries(TimeStep *tStep, Domain *d)
+{
+    for ( auto &dman : d->giveDofManagers() ) {
+        this->readDofManager(tStep, *dman);
+    }
+
+    for ( auto &elem : d->giveElements() ) {
+        int ndman = elem->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            this->readDofManager(tStep, *elem->giveInternalDofManager(i));
+        }
+    }
+
+    for ( auto &bc : d->giveBcs() ) {
+        int ndman = bc->giveNumberOfInternalDofManagers();
+        for ( int i = 1; i <= ndman; i++ ) {
+            this->readDofManager(tStep, *bc->giveInternalDofManager(i));
+        }
+    }
+}
+
+
 void
 PrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answer, const UnknownNumberingScheme &s)
 {

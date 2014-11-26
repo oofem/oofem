@@ -71,7 +71,7 @@ public:
     virtual ~KelvinChainSolidMaterial() { }
 
     virtual void giveRealStressVector(FloatArray &answer, GaussPoint *gp, const FloatArray &reducedStrain, TimeStep *tStep);
-    void computeHiddenVars(GaussPoint *gp, TimeStep *tNow);
+    void computeHiddenVars(GaussPoint *gp, TimeStep *tStep);
 
     // identification and auxiliary functions
     virtual int hasNonLinearBehaviour() { return 0; }

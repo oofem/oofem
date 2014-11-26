@@ -193,7 +193,7 @@ NM_Status
 NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
                   FloatArray *X, FloatArray *dX, FloatArray *F,
                   const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
-                  int &nite, TimeStep *tNow)
+                  int &nite, TimeStep *tStep)
 //
 // this function solve the problem of the unbalanced equilibrium
 // using NR scheme
@@ -243,7 +243,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     // cause divergence for some nonlinear problems. Therefore a flag is used to determine if
     // the stiffness should be evaluated before the residual (default yes). /ES
 
-    engngModel->updateComponent(tNow, NonLinearLhs, domain);
+    engngModel->updateComponent(tStep, NonLinearLhs, domain);
     if ( this->prescribedDofsFlag ) {
         if ( !prescribedEqsInitFlag ) {
             this->initPrescribedEqs();
@@ -254,14 +254,14 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     nite = 0;
     do {
         // Compute the residual
-        engngModel->updateComponent(tNow, InternalRhs, domain);
+        engngModel->updateComponent(tStep, InternalRhs, domain);
         rhs.beDifferenceOf(RT, * F);
         if ( this->prescribedDofsFlag ) {
-            this->applyConstraintsToLoadIncrement(nite, k, rhs, rlm, tNow);
+            this->applyConstraintsToLoadIncrement(nite, k, rhs, rlm, tStep);
         }
 
         // convergence check
-        converged = this->checkConvergence(RT, * F, rhs, ddX, * X, RRT, internalForcesEBENorm, nite, errorOutOfRangeFlag, tNow);
+        converged = this->checkConvergence(RT, * F, rhs, ddX, * X, RRT, internalForcesEBENorm, nite, errorOutOfRangeFlag);
 
         if ( errorOutOfRangeFlag ) {
             status = NM_NoSuccess;
@@ -276,7 +276,7 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 
         if ( nite > 0 || !mCalcStiffBeforeRes ) {
             if ( ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
-                engngModel->updateComponent(tNow, NonLinearLhs, domain);
+                engngModel->updateComponent(tStep, NonLinearLhs, domain);
                 applyConstraintsToStiffness(k);
             }
         }
@@ -296,21 +296,22 @@ NRSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
             // line search
             LineSearchNM :: LS_status status;
             double eta;
-            this->giveLineSearchSolver()->solve(X, & ddX, F, R, R0, prescribedEqs, 1.0, eta, status, tNow);
-        } else if ( this->constrainedNRFlag && ( nite > this->constrainedNRminiter ) ) { 
+            this->giveLineSearchSolver()->solve(X, & ddX, F, R, R0, prescribedEqs, 1.0, eta, status, tStep);
+        } else if ( this->constrainedNRFlag && ( nite > this->constrainedNRminiter ) ) {
+            ///@todo This doesn't check units, it is nonsense and must be corrected / Mikael
             if ( this->forceErrVec.computeSquaredNorm() > this->forceErrVecOld.computeSquaredNorm() ) {
                 printf("Constraining increment to be %e times full increment...\n", this->constrainedNRalpha);
                 ddX.times(this->constrainedNRalpha);
             }   
-            //this->giveConstrainedNRSolver()->solve(X, & ddX, this->forceErrVec, this->forceErrVecOld, status, tNow);
+            //this->giveConstrainedNRSolver()->solve(X, & ddX, this->forceErrVec, this->forceErrVecOld, status, tStep);
         }
         X->add(ddX);
         dX->add(ddX);
-        tNow->incrementStateCounter(); // update solution state counter
-        tNow->incrementSubStepNumber();
+        tStep->incrementStateCounter(); // update solution state counter
+        tStep->incrementSubStepNumber();
         nite++; // iteration increment
 
-        engngModel->giveExportModuleManager()->doOutput(tNow, true);
+        engngModel->giveExportModuleManager()->doOutput(tStep, true);
     } while ( true ); // end of iteration
 
     status |= NM_Success;
@@ -546,7 +547,7 @@ NRSolver :: printState(FILE *outputStream)
 bool
 NRSolver :: checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs,  FloatArray &ddX, FloatArray &X,
                              double RRT, const FloatArray &internalForcesEBENorm,
-                             int nite, bool &errorOutOfRange, TimeStep *tNow)
+                             int nite, bool &errorOutOfRange)
 {
     double forceErr, dispErr;
     FloatArray dg_forceErr, dg_dispErr, dg_totalLoadLevel, dg_totalDisp;

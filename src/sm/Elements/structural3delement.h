@@ -71,6 +71,8 @@ public:
     virtual IRResultType initializeFrom(InputRecord *ir);
     
     virtual double giveCharacteristicLength(const FloatArray &normalToCrackPlane);
+
+    virtual void computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep);
     
 protected:
      virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer, int lowerIndx = 1, int upperIndx = ALL_STRAINS);

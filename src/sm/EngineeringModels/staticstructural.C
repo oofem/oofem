@@ -35,20 +35,18 @@
 #include "../sm/EngineeringModels/staticstructural.h"
 #include "../sm/Elements/structuralelement.h"
 #include "../sm/Elements/structuralelementevaluator.h"
-#include "nummet.h"
 #include "timestep.h"
-#include "element.h"
 #include "sparsemtrx.h"
-#include "verbose.h"
-#include "primaryfield.h"
+#include "nummet.h"
 #include "nrsolver.h"
-#include "classfactory.h"
+#include "staggeredsolver.h"
+#include "dynamicrelaxationsolver.h"
+#include "primaryfield.h"
+#include "verbose.h"
 #include "error.h"
 #include "datastream.h"
 #include "contextioerr.h"
 #include "classfactory.h"
-
-#include "staggeredsolver.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
@@ -95,8 +93,10 @@ NumericalMethod *StaticStructural :: giveNumericalMethod(MetaStep *mStep)
             OOFEM_ERROR("Only Skyline sparse matrix type is currently supported (0) for the staggered solver");
         }
         
+    } else if ( solverType == 2 ) {
+        nMethod = new DynamicRelaxationSolver(this->giveDomain(1), this);
     } else {
-        OOFEM_ERROR("Unsupported solver (%d). Solvers currently supported are: 0 - NR (default) and 1 - staggered NR", solverType);
+        OOFEM_ERROR("Unsupported solver (%d). Solvers currently supported are: 0 - NR (default) and 1 - staggered NR, 2 - Dynamic relaxation solver", solverType);
     }
     
     return nMethod;
@@ -268,7 +268,6 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
                                             SparseNonLinearSystemNM :: rlm_total,
                                             currentIterations,
                                             tStep);
-
     if ( !( status & NM_Success ) ) {
         OOFEM_ERROR("No success in solving problem");
     }

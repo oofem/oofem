@@ -53,7 +53,7 @@ LineSearchNM :: LineSearchNM(Domain *d, EngngModel *m) :
 
 NM_Status
 LineSearchNM :: solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *R, FloatArray *R0,
-                      IntArray &eqnmask, double lambda, double &etaValue, LS_status &status, TimeStep *tNow)
+                      IntArray &eqnmask, double lambda, double &etaValue, LS_status &status, TimeStep *tStep)
 {
     int ico, ii, ils, neq = r->giveSize();
     double s0, si;
@@ -77,8 +77,8 @@ LineSearchNM :: solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *
         //printf ("\nLineSearchNM::solve starting inner product uphill, val=%e",s0);
         OOFEM_LOG_DEBUG("LS: product uphill, eta=%e\n", 1.0);
         r->add(* dr);
-        tNow->incrementStateCounter();        // update solution state counter
-        engngModel->updateComponent(tNow, InternalRhs, domain);
+        tStep->incrementStateCounter();        // update solution state counter
+        engngModel->updateComponent(tStep, InternalRhs, domain);
         etaValue = 1.0;
         status = ls_ok;
         return NM_Success;
@@ -103,9 +103,9 @@ LineSearchNM :: solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *
             r->at(ii) = rb.at(ii) + this->eta.at(ils) * dr->at(ii);
         }
 
-        tNow->incrementStateCounter();        // update solution state counter
+        tStep->incrementStateCounter();        // update solution state counter
         // update internal forces according to new state
-        engngModel->updateComponent(tNow, InternalRhs, domain);
+        engngModel->updateComponent(tStep, InternalRhs, domain);
         // compute out-of balance forces g in new state
         g = * R;
         g.times(lambda);
@@ -150,8 +150,8 @@ LineSearchNM :: solve(FloatArray *r, FloatArray *dr, FloatArray *F, FloatArray *
         r->at(ii) = rb.at(ii) + dr->at(ii);
     }
 
-    tNow->incrementStateCounter();           // update solution state counter
-    engngModel->updateComponent(tNow, InternalRhs, domain);
+    tStep->incrementStateCounter();           // update solution state counter
+    engngModel->updateComponent(tStep, InternalRhs, domain);
     etaValue = 1.0;
     status = ls_failed;
     return NM_NoSuccess;

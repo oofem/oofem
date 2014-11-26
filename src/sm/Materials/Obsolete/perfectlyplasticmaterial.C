@@ -799,9 +799,9 @@ PerfectlyPlasticMaterialStatus :: initTempStatus()
 
 
 void
-PerfectlyPlasticMaterialStatus :: updateYourself(TimeStep *tNow)
+PerfectlyPlasticMaterialStatus :: updateYourself(TimeStep *tStep)
 {
-    StructuralMaterialStatus :: updateYourself(tNow);
+    StructuralMaterialStatus :: updateYourself(tStep);
 
     plasticStrainVector.add(plasticStrainIncrementVector);
     plasticStrainIncrementVector.zero();

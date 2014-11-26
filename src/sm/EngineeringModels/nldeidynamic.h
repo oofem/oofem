@@ -64,17 +64,13 @@ namespace oofem {
  * in increments of displacements rather than in total variables.
  *
  * Solution of this problem is series of loading cases, maintained as sequence of
- * time-steps. For obtaining diagonal mass matrix from possibly non-diagonal one
- * returned from Element::giveMassMatrix() a FloatMatrix::Lumped() is called
- * to obtain diagonal form.
+ * time-steps.
  *
  * Analysis starts assembling governing equations at time step 0 ( 0 given by boundary and initial cond.)
  * they result in response at time step 1. For time step 0 we need special start code.
  * Because this method is explicit, when solving equations for step t, we obtain
  * solution in step t+dt. But printing is performed for step t.
  * So, when analyst specifies initial conditions, then he/she specifies them in time step 0.
- *
- * @note FloatMatrix::Lumped() works only for elements with Linear displacement filed !
  *
  * Current implementation supports parallel processing. Both node- and element cut strategies can
  * be used.

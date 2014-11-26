@@ -51,6 +51,7 @@ class TimeStep;
 class GaussPoint;
 class FloatArray;
 class IntArray;
+class Node;
 
 /**
  * The spatial localizer element interface associated to spatial localizer.
@@ -199,6 +200,13 @@ public:
      * @param radius Radius of bounding sphere.
      */
     virtual void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius) = 0;
+
+    /**
+     * Returns the node closest to the given coordinate.
+     * @param coords Global coordinate.
+     * @return Closest node, or NULL or none exists.
+     */
+    virtual Node *giveNodeClosestToPoint(const FloatArray &coords) = 0;
 
     /**
      * Initialize receiver data structure if not done previously

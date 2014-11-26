@@ -67,6 +67,7 @@ public:
     virtual GaussPoint *giveClosestIP(const FloatArray &coords, int region, bool iCohesiveZoneGP = false);
     virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius);
     virtual void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
+    virtual Node *giveNodeClosestToPoint(const FloatArray &coords);
 
     virtual const char *giveClassName() const { return "DummySpatialLocalizer"; }
 };

@@ -251,12 +251,22 @@ Quad1MindlinShell3D :: computeConstitutiveMatrixAt(FloatMatrix &answer, MatRespo
 
 
 void
+Quad1MindlinShell3D :: computeVectorOfUnknowns(ValueModeType mode, TimeStep *tStep, FloatArray &shell, FloatArray &drill)
+{
+    FloatArray tmp;
+    this->computeVectorOf(mode, tStep, tmp);
+    shell.beSubArrayOf(tmp, this->shellOrdering);
+    drill.beSubArrayOf(tmp, this->drillOrdering);
+}
+
+
+void
 Quad1MindlinShell3D :: computeStrainVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
 {
-    FloatArray shellUnknowns;
+    FloatArray shellUnknowns, tmp;
     FloatMatrix b;
     /* Here we do compute only the "traditional" part of shell strain vector, the quasi-strain related to rotations is not computed */
-    this->computeVectorOf({D_u, D_v, D_w, R_u, R_v}, VM_Total, tStep, shellUnknowns);
+    this->computeVectorOfUnknowns(VM_Total, tStep, shellUnknowns, tmp);
 
     this->computeBmatrixAt(gp, b);
     answer.beProductOf(b, shellUnknowns);
@@ -274,8 +284,7 @@ Quad1MindlinShell3D :: giveInternalForcesVector(FloatArray &answer, TimeStep *tS
     bool drillCoeffFlag = false;
 
     // Split this for practical reasons into normal shell dofs and drilling dofs
-    this->computeVectorOf({D_u, D_v, D_w, R_u, R_v}, VM_Total, tStep, shellUnknowns);
-    this->computeVectorOf({R_w}, VM_Total, tStep, drillUnknowns);
+    this->computeVectorOfUnknowns(VM_Total, tStep, shellUnknowns, drillUnknowns);
 
     FloatArray shellForces, drillMoment;
     StructuralCrossSection *cs = this->giveStructuralCrossSection();
@@ -454,7 +463,7 @@ Quad1MindlinShell3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
         return 1;
     } else if ( ( type == IST_ShellStrainTensor )  || ( type == IST_ShellCurvatureTensor ) ) {
         const FloatArray &help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
-        if ( type == IST_ShellForceTensor ) {
+        if ( type == IST_ShellStrainTensor ) {
             answer.at(1) = help.at(1); // nx
             answer.at(2) = help.at(3); // vxy
             answer.at(3) = help.at(7); // vxz
@@ -564,12 +573,12 @@ Quad1MindlinShell3D :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int i
 void
 Quad1MindlinShell3D :: computeLCS()
 {
-    lcsMatrix.resize(3, 3);
+    lcsMatrix.resize(3, 3); // Note! G -> L transformation matrix
     FloatArray e1, e2, e3, help;
 
-    // compute e1' = [N2-N1]  and  help = [N3-N1]
+    // compute e1' = [N2-N1]  and  help = [N4-N1]
     e1.beDifferenceOf( * this->giveNode(2)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
-    help.beDifferenceOf( * this->giveNode(3)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
+    help.beDifferenceOf( * this->giveNode(4)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
     e1.normalize();
     e3.beVectorProductOf(e1, help);
     e3.normalize();
@@ -581,7 +590,7 @@ Quad1MindlinShell3D :: computeLCS()
     }
 
     for ( int i = 1; i <= 4; i++ ) {
-        this->lnodes [ i - 1 ].beTProductOf( this->lcsMatrix, * this->giveNode(i)->giveCoordinates() );
+        this->lnodes [ i - 1 ].beProductOf( this->lcsMatrix, * this->giveNode(i)->giveCoordinates() );
     }
 }
 

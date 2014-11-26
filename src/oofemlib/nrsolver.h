@@ -144,6 +144,9 @@ protected:
     /// Relative iterative displacement change tolerance for each group
     FloatArray rtold;
 
+    ///@todo This doesn't check units, it is nonsense and must be corrected / Mikael
+    FloatArray forceErrVec;
+    FloatArray forceErrVecOld;
 public:
     NRSolver(Domain * d, EngngModel * m);
     virtual ~NRSolver();
@@ -191,15 +194,7 @@ protected:
      * @return True if solution has converged, otherwise false.
      */
     bool checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs, FloatArray &ddX, FloatArray &X,
-                          double RRT, const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange, TimeStep *tNow);
-
-    bool checkConvergenceDofIdArray(FloatArray &RT, FloatArray &F, FloatArray &rhs, FloatArray &ddX, FloatArray &X,
-                          double RRT, const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange, TimeStep *tNow, IntArray &dofIdArray);
-
-    ///NEW JB
-    FloatArray forceErrVec;
-    FloatArray forceErrVecOld;
-
+                          double RRT, const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange);
 };
 } // end namespace oofem
 #endif // nrsolver_h

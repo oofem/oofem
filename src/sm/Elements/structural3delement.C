@@ -35,7 +35,7 @@
 #include "Elements/structural3delement.h"
 #include "feinterpol3d.h"
 #include "gausspoint.h"
-#include "crosssection.h"
+#include "CrossSections/structuralcrosssection.h"
 #include "gaussintegrationrule.h"
 
 namespace oofem {
@@ -106,6 +106,13 @@ MaterialMode
 Structural3DElement :: giveMaterialMode()
 {
     return _3dMat;
+}
+
+
+void
+Structural3DElement :: computeStressVector(FloatArray &answer, const FloatArray &strain, GaussPoint *gp, TimeStep *tStep)
+{
+    this->giveStructuralCrossSection()->giveRealStress_3d(answer, gp, strain, tStep);
 }
 
 

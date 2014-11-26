@@ -68,7 +68,6 @@ SubspaceIteration :: ~SubspaceIteration()
 
 NM_Status
 SubspaceIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatrix *_r, double rtol, int nroot)
-//void  SubspaceIteration :: solveYourselfAt (TimeStep* tNow)
 //
 // this function solve the generalized eigenproblem using the Generalized
 // jacobi iteration
