@@ -1404,7 +1404,13 @@ StructuralMaterial :: computeVonMisesStress(const FloatArray *currentStress)
         return 0.0;
     }
 
-    if ( currentStress->giveSize() == 4 ) {
+    if ( currentStress->giveSize() == 3 ) {
+        // Plane stress
+
+        return sqrt( currentStress->at(1)*currentStress->at(1) + currentStress->at(2)*currentStress->at(2)
+                    -currentStress->at(1)*currentStress->at(2) + 3*currentStress->at(3)*currentStress->at(3) );
+    }
+    else if ( currentStress->giveSize() == 4 ) {
         // Plane strain
         v1 = ( ( currentStress->at(1) - currentStress->at(2) ) * ( currentStress->at(1) - currentStress->at(2) ) );
         v2 = ( ( currentStress->at(2) - currentStress->at(3) ) * ( currentStress->at(2) - currentStress->at(3) ) );

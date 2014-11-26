@@ -16,6 +16,7 @@
 #include "sparsemtrx.h"
 #include "xfem/xfemelementinterface.h"
 #include "xfem/integrationrules/discsegintegrationrule.h"
+#include "function.h"
 
 #include <cmath>
 
@@ -86,7 +87,10 @@ void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep 
         FloatArray gradVoigt;
         giveGradientVoigt(gradVoigt);
 
-        stressLoad.beScaled(-rve_size, gradVoigt);
+        double loadLevel = this->giveTimeFunction()->evaluate(tStep, mode);
+        stressLoad.beScaled(-rve_size*loadLevel, gradVoigt);
+
+
         answer.assemble(stressLoad, sigma_loc);
     } else if ( type == InternalForcesVector ) {
         FloatMatrix Ke;
@@ -215,6 +219,11 @@ void PrescribedGradientBCNeumann :: giveLocationArrays(std :: vector< IntArray >
 void PrescribedGradientBCNeumann :: computeField(FloatArray &sigma, TimeStep *tStep)
 {
     mpSigmaHom->giveUnknownVector(sigma, mSigmaIds, VM_Total, tStep);
+}
+
+void PrescribedGradientBCNeumann :: giveStressLocationArray(IntArray &oCols, const UnknownNumberingScheme &r_s)
+{
+    mpSigmaHom->giveCompleteLocationArray(oCols, r_s);
 }
 
 void PrescribedGradientBCNeumann :: integrateTangent(FloatMatrix &oTangent, Element *e, int iBndIndex)

@@ -36,6 +36,7 @@
 #define XFEMSTRUCTURALELEMENTINTERFACE_H_
 
 #include "xfem/xfemelementinterface.h"
+#include "internalstatetype.h"
 namespace oofem {
 class StructuralInterfaceMaterial;
 class IntegrationRule;
@@ -92,6 +93,10 @@ public:
 
     /// VTK Interface
     void giveSubtriangulationCompositeExportData(std :: vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep);
+
+    /// Help functions for VTK export.
+    void computeIPAverageInTriangle(FloatArray &answer, IntegrationRule *iRule, Element *elem, InternalStateType isType, TimeStep *tStep, const Triangle &iTri);
+
 };
 } /* namespace oofem */
 

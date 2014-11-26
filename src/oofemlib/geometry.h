@@ -238,6 +238,11 @@ public:
      * @author Erik Svenning
      */
     bool pointIsInTriangle(const FloatArray &iP) const;
+
+    /**
+     * Split a triangle in four.
+     */
+    static void refineTriangle(std::vector<Triangle> &oRefinedTri, const Triangle &iTri);
 };
 
 class OOFEM_EXPORT Circle : public BasicGeometry

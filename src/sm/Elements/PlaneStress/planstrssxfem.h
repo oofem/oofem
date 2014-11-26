@@ -65,6 +65,9 @@ public:
     virtual const char *giveClassName() const { return "PlaneStress2dXfem"; }
     virtual int computeNumberOfDofs();
     virtual void computeGaussPoints();
+
+    void increaseNumGP();
+
     virtual void computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer);
     virtual void computeBmatrixAt(GaussPoint *gp, FloatMatrix &answer,
                                   int lowerIndx = 1, int upperIndx = ALL_STRAINS);

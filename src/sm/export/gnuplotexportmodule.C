@@ -51,6 +51,7 @@
 #include "../sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
 #include "xfem/XFEMDebugTools.h"
 #include "prescribedgradient.h"
+#include "prescribedgradientbc.h"
 #include "prescribedgradientbcneumann.h"
 #include "prescribedgradientbcweak.h"
 #include "gausspoint.h"
@@ -59,6 +60,7 @@
 #include "xfem/enrichmentitems/crack.h"
 #include "dofmanager.h"
 #include "xfem/matforceevaluator.h"
+#include "function.h"
 
 #include <sstream>
 
@@ -69,6 +71,7 @@ GnuplotExportModule::GnuplotExportModule(int n, EngngModel *e):
 ExportModule(n, e),
 mExportReactionForces(false),
 mExportBoundaryConditions(false),
+mExportBoundaryConditionsExtra(false),
 mExportMesh(false),
 mExportXFEM(false),
 mExportCrackLength(false),
@@ -88,6 +91,7 @@ IRResultType GnuplotExportModule::initializeFrom(InputRecord *ir)
 {
     mExportReactionForces = ir->hasField(_IFT_GnuplotExportModule_ReactionForces);
     mExportBoundaryConditions = ir->hasField(_IFT_GnuplotExportModule_BoundaryConditions);
+    mExportBoundaryConditionsExtra = ir->hasField(_IFT_GnuplotExportModule_BoundaryConditionsExtra);
     mExportMesh = ir->hasField(_IFT_GnuplotExportModule_mesh);
     mExportXFEM = ir->hasField(_IFT_GnuplotExportModule_xfem);
     mExportCrackLength = ir->hasField(_IFT_GnuplotExportModule_cracklength);
@@ -274,9 +278,9 @@ void GnuplotExportModule::outputReactionForces(TimeStep *tStep)
         // Y
         FILE * pFileY;
         char fileNameY[100];
+        sprintf(fileNameY, "ReactionForceGnuplotBC%dY.dat", bcInd+1);
         pFileY = fopen ( fileNameY , "wb" );
 
-        fprintf(pFileY, "# %s\n", fileNameY);
         fprintf(pFileY, "#u Fx\n");
         for ( size_t j = 0; j < mDispHist[bcInd].size(); j++ ) {
             if( mReactionForceHistory[bcInd][j].giveSize() >= 2 ) {
@@ -445,6 +449,7 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradient &iBC, TimeS
 
     int bcIndex = iBC.giveNumber();
 
+    // Homogenized stress
     std :: stringstream strMeanStress;
     strMeanStress << "PrescribedGradientGnuplotMeanStress" << bcIndex << "Time" << time << ".dat";
     std :: string nameMeanStress = strMeanStress.str();
@@ -486,6 +491,10 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCNeumann &i
     }
 
     XFEMDebugTools::WriteArrayToGnuplot(nameMeanStress, componentArray, stressArray);
+
+    // Homogenized strain
+    outputGradient(iBC, ts);
+
 }
 
 void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC, TimeStep *tStep)
@@ -517,172 +526,225 @@ void GnuplotExportModule::outputBoundaryCondition(PrescribedGradientBCWeak &iBC,
     XFEMDebugTools::WriteArrayToGnuplot(nameMeanStress, componentArray, stressArray);
 
 
+    // Homogenized strain
+    outputGradient(iBC, ts);
+#if 0
+    FloatArray grad;
+    iBC.giveGradientVoigt(grad);
+    double timeFactor = iBC.giveTimeFunction()->evaluate(ts, VM_Total);
+    printf("timeFactor: %e\n", timeFactor );
+    grad.times(timeFactor);
+    printf("Mean grad computed in Gnuplot export module: "); grad.printYourself();
 
-    // Traction node coordinates
-    std::vector< std::vector<FloatArray> > nodePointArray;
-    size_t numTracEl = iBC.giveNumberOfTractionElements();
-    for(size_t i = 0; i < numTracEl; i++) {
+    std :: stringstream strMeanGrad;
+    strMeanGrad << "PrescribedGradientGnuplotMeanGrad" << bcIndex << "Time" << time << ".dat";
+    std :: string nameMeanGrad = strMeanGrad.str();
+    std::vector<double> componentArrayGrad, gradArray;
 
-        std::vector<FloatArray> points;
-        FloatArray xS, xE;
-        iBC.giveTractionElCoord(i, xS, xE);
-        points.push_back(xS);
-        points.push_back(xE);
-
-        nodePointArray.push_back(points);
+    for(int i = 1; i <= grad.giveSize(); i++) {
+        componentArrayGrad.push_back(i);
+        gradArray.push_back(grad.at(i));
     }
 
-    std :: stringstream strTractionNodes;
-    strTractionNodes << "TractionNodesGnuplotTime" << time << ".dat";
-    std :: string nameTractionNodes = strTractionNodes.str();
+    XFEMDebugTools::WriteArrayToGnuplot(nameMeanGrad, componentArrayGrad, gradArray);
+#endif
 
-    WritePointsToGnuplot(nameTractionNodes, nodePointArray);
+    if(mExportBoundaryConditionsExtra) {
+
+        // Traction node coordinates
+        std::vector< std::vector<FloatArray> > nodePointArray;
+        size_t numTracEl = iBC.giveNumberOfTractionElements();
+        for(size_t i = 0; i < numTracEl; i++) {
+
+            std::vector<FloatArray> points;
+            FloatArray xS, xE;
+            iBC.giveTractionElCoord(i, xS, xE);
+            points.push_back(xS);
+            points.push_back(xE);
+
+            nodePointArray.push_back(points);
+        }
+
+        std :: stringstream strTractionNodes;
+        strTractionNodes << "TractionNodesGnuplotTime" << time << ".dat";
+        std :: string nameTractionNodes = strTractionNodes.str();
+
+        WritePointsToGnuplot(nameTractionNodes, nodePointArray);
 
 
 
-    // Traction element normal direction
-    std::vector< std::vector<FloatArray> > nodeNormalArray;
-    for(size_t i = 0; i < numTracEl; i++) {
+        // Traction element normal direction
+        std::vector< std::vector<FloatArray> > nodeNormalArray;
+        for(size_t i = 0; i < numTracEl; i++) {
 
-        std::vector<FloatArray> points;
-        FloatArray n,t;
-        iBC.giveTractionElNormal(i, n,t);
-        points.push_back(n);
-        points.push_back(n);
+            std::vector<FloatArray> points;
+            FloatArray n,t;
+            iBC.giveTractionElNormal(i, n,t);
+            points.push_back(n);
+            points.push_back(n);
 
-        nodeNormalArray.push_back(points);
+            nodeNormalArray.push_back(points);
+        }
+
+        std :: stringstream strTractionNodeNormals;
+        strTractionNodeNormals << "TractionNodeNormalsGnuplotTime" << time << ".dat";
+        std :: string nameTractionNodeNormals = strTractionNodeNormals.str();
+
+        WritePointsToGnuplot(nameTractionNodeNormals, nodeNormalArray);
+
+
+
+        // Traction (x,y)
+        std::vector< std::vector<FloatArray> > nodeTractionArray;
+        for(size_t i = 0; i < numTracEl; i++) {
+
+            std::vector<FloatArray> tractions;
+            FloatArray tS, tE;
+
+            iBC.giveTraction(i, tS, tE, VM_Total, tStep);
+
+            tractions.push_back(tS);
+            tractions.push_back(tE);
+            nodeTractionArray.push_back(tractions);
+        }
+
+        std :: stringstream strTractions;
+        strTractions << "TractionsGnuplotTime" << time << ".dat";
+        std :: string nameTractions = strTractions.str();
+
+        WritePointsToGnuplot(nameTractions, nodeTractionArray);
+
+
+
+        // Arc position along the boundary
+        std::vector< std::vector<FloatArray> > arcPosArray;
+        for(size_t i = 0; i < numTracEl; i++) {
+            std::vector<FloatArray> arcPos;
+            double xiS = 0.0, xiE = 0.0;
+            iBC.giveTractionElArcPos(i, xiS, xiE);
+            arcPos.push_back( FloatArray{xiS} );
+            arcPos.push_back( FloatArray{xiE} );
+
+            arcPosArray.push_back(arcPos);
+        }
+
+        std :: stringstream strArcPos;
+        strArcPos << "ArcPosGnuplotTime" << time << ".dat";
+        std :: string nameArcPos = strArcPos.str();
+
+        WritePointsToGnuplot(nameArcPos, arcPosArray);
+
+
+        // Traction (normal, tangent)
+        std::vector< std::vector<FloatArray> > nodeTractionNTArray;
+        for(size_t i = 0; i < numTracEl; i++) {
+
+            std::vector<FloatArray> tractions;
+            FloatArray tS, tE;
+
+            iBC.giveTraction(i, tS, tE, VM_Total, tStep);
+            FloatArray n,t;
+            iBC.giveTractionElNormal(i, n, t);
+
+
+            double tSn = tS.dotProduct(n,2);
+            double tSt = tS.dotProduct(t,2);
+            tractions.push_back( {tSn ,tSt} );
+
+            double tEn = tE.dotProduct(n,2);
+            double tEt = tE.dotProduct(t,2);
+            tractions.push_back( {tEn, tEt} );
+            nodeTractionNTArray.push_back(tractions);
+        }
+
+        std :: stringstream strTractionsNT;
+        strTractionsNT << "TractionsNormalTangentGnuplotTime" << time << ".dat";
+        std :: string nameTractionsNT = strTractionsNT.str();
+
+        WritePointsToGnuplot(nameTractionsNT, nodeTractionNTArray);
+
+
+
+        // Boundary points and displacements
+        IntArray boundaries, bNodes;
+        iBC.giveBoundaries(boundaries);
+
+        std::vector< std::vector<FloatArray> > bndNodes;
+
+        for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
+
+            Element *e = iBC.giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
+            int boundary = boundaries.at(pos * 2);
+
+            e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
+
+            std::vector<FloatArray> bndSegNodes;
+
+            // Add the start and end nodes of the segment
+            DofManager *startNode   = e->giveDofManager( bNodes[0] );
+            FloatArray xS    = *(startNode->giveCoordinates());
+
+            Dof *dSu = startNode->giveDofWithID(D_u);
+            double dU = dSu->giveUnknown(VM_Total, tStep);
+            xS.push_back(dU);
+
+            Dof *dSv = startNode->giveDofWithID(D_v);
+            double dV = dSv->giveUnknown(VM_Total, tStep);
+            xS.push_back(dV);
+
+            bndSegNodes.push_back(xS);
+
+            DofManager *endNode     = e->giveDofManager( bNodes[1] );
+            FloatArray xE    = *(endNode->giveCoordinates());
+
+            Dof *dEu = endNode->giveDofWithID(D_u);
+            dU = dEu->giveUnknown(VM_Total, tStep);
+            xE.push_back(dU);
+
+            Dof *dEv = endNode->giveDofWithID(D_v);
+            dV = dEv->giveUnknown(VM_Total, tStep);
+            xE.push_back(dV);
+
+            bndSegNodes.push_back(xE);
+
+            bndNodes.push_back(bndSegNodes);
+        }
+
+        std :: stringstream strBndNodes;
+        strBndNodes << "BndNodesGnuplotTime" << time << ".dat";
+        std :: string nameBndNodes = strBndNodes.str();
+
+        WritePointsToGnuplot(nameBndNodes, bndNodes);
+
+    }
+}
+
+void GnuplotExportModule::outputGradient(PrescribedGradientBC &iBC, TimeStep *tStep)
+{
+    int bcIndex = iBC.giveNumber();
+
+    // Homogenized strain
+    FloatArray grad;
+    iBC.giveGradientVoigt(grad);
+    double timeFactor = iBC.giveTimeFunction()->evaluate(tStep, VM_Total);
+    printf("timeFactor: %e\n", timeFactor );
+    grad.times(timeFactor);
+    printf("Mean grad computed in Gnuplot export module: "); grad.printYourself();
+
+    double time = tStep->giveTargetTime();
+
+
+    std :: stringstream strMeanGrad;
+    strMeanGrad << "PrescribedGradientGnuplotMeanGrad" << bcIndex << "Time" << time << ".dat";
+    std :: string nameMeanGrad = strMeanGrad.str();
+    std::vector<double> componentArrayGrad, gradArray;
+
+    for(int i = 1; i <= grad.giveSize(); i++) {
+        componentArrayGrad.push_back(i);
+        gradArray.push_back(grad.at(i));
     }
 
-    std :: stringstream strTractionNodeNormals;
-    strTractionNodeNormals << "TractionNodeNormalsGnuplotTime" << time << ".dat";
-    std :: string nameTractionNodeNormals = strTractionNodeNormals.str();
-
-    WritePointsToGnuplot(nameTractionNodeNormals, nodeNormalArray);
-
-
-
-    // Traction (x,y)
-    std::vector< std::vector<FloatArray> > nodeTractionArray;
-    for(size_t i = 0; i < numTracEl; i++) {
-
-        std::vector<FloatArray> tractions;
-        FloatArray tS, tE;
-
-        iBC.giveTraction(i, tS, tE, VM_Total, tStep);
-
-        tractions.push_back(tS);
-        tractions.push_back(tE);
-        nodeTractionArray.push_back(tractions);
-    }
-
-    std :: stringstream strTractions;
-    strTractions << "TractionsGnuplotTime" << time << ".dat";
-    std :: string nameTractions = strTractions.str();
-
-    WritePointsToGnuplot(nameTractions, nodeTractionArray);
-
-
-
-    // Arc position along the boundary
-    std::vector< std::vector<FloatArray> > arcPosArray;
-    for(size_t i = 0; i < numTracEl; i++) {
-        std::vector<FloatArray> arcPos;
-        double xiS = 0.0, xiE = 0.0;
-        iBC.giveTractionElArcPos(i, xiS, xiE);
-        arcPos.push_back( FloatArray{xiS} );
-        arcPos.push_back( FloatArray{xiE} );
-
-        arcPosArray.push_back(arcPos);
-    }
-
-    std :: stringstream strArcPos;
-    strArcPos << "ArcPosGnuplotTime" << time << ".dat";
-    std :: string nameArcPos = strArcPos.str();
-
-    WritePointsToGnuplot(nameArcPos, arcPosArray);
-
-
-    // Traction (normal, tangent)
-    std::vector< std::vector<FloatArray> > nodeTractionNTArray;
-    for(size_t i = 0; i < numTracEl; i++) {
-
-        std::vector<FloatArray> tractions;
-        FloatArray tS, tE;
-
-        iBC.giveTraction(i, tS, tE, VM_Total, tStep);
-        FloatArray n,t;
-        iBC.giveTractionElNormal(i, n, t);
-
-
-        double tSn = tS.dotProduct(n,2);
-        double tSt = tS.dotProduct(t,2);
-        tractions.push_back( {tSn ,tSt} );
-
-        double tEn = tE.dotProduct(n,2);
-        double tEt = tE.dotProduct(t,2);
-        tractions.push_back( {tEn, tEt} );
-        nodeTractionNTArray.push_back(tractions);
-    }
-
-    std :: stringstream strTractionsNT;
-    strTractionsNT << "TractionsNormalTangentGnuplotTime" << time << ".dat";
-    std :: string nameTractionsNT = strTractionsNT.str();
-
-    WritePointsToGnuplot(nameTractionsNT, nodeTractionNTArray);
-
-
-
-    // Boundary points and displacements
-    IntArray boundaries, bNodes;
-    iBC.giveBoundaries(boundaries);
-
-    std::vector< std::vector<FloatArray> > bndNodes;
-
-    for ( int pos = 1; pos <= boundaries.giveSize() / 2; ++pos ) {
-
-        Element *e = iBC.giveDomain()->giveElement( boundaries.at(pos * 2 - 1) );
-        int boundary = boundaries.at(pos * 2);
-
-        e->giveInterpolation()->boundaryGiveNodes(bNodes, boundary);
-
-        std::vector<FloatArray> bndSegNodes;
-
-        // Add the start and end nodes of the segment
-        DofManager *startNode   = e->giveDofManager( bNodes[0] );
-        FloatArray xS    = *(startNode->giveCoordinates());
-
-        Dof *dSu = startNode->giveDofWithID(D_u);
-        double dU = dSu->giveUnknown(VM_Total, tStep);
-        xS.push_back(dU);
-
-        Dof *dSv = startNode->giveDofWithID(D_v);
-        double dV = dSv->giveUnknown(VM_Total, tStep);
-        xS.push_back(dV);
-
-        bndSegNodes.push_back(xS);
-
-        DofManager *endNode     = e->giveDofManager( bNodes[1] );
-        FloatArray xE    = *(endNode->giveCoordinates());
-
-        Dof *dEu = endNode->giveDofWithID(D_u);
-        dU = dEu->giveUnknown(VM_Total, tStep);
-        xE.push_back(dU);
-
-        Dof *dEv = endNode->giveDofWithID(D_v);
-        dV = dEv->giveUnknown(VM_Total, tStep);
-        xE.push_back(dV);
-
-        bndSegNodes.push_back(xE);
-
-        bndNodes.push_back(bndSegNodes);
-    }
-
-    std :: stringstream strBndNodes;
-    strBndNodes << "BndNodesGnuplotTime" << time << ".dat";
-    std :: string nameBndNodes = strBndNodes.str();
-
-    WritePointsToGnuplot(nameBndNodes, bndNodes);
-
+    XFEMDebugTools::WriteArrayToGnuplot(nameMeanGrad, componentArrayGrad, gradArray);
 }
 
 void GnuplotExportModule::outputMesh(Domain &iDomain)

@@ -54,6 +54,10 @@
 #define _IFT_XfemManager_Name "xfemmanager"
 #define _IFT_XfemManager_numberOfEnrichmentItems "numberofenrichmentitems"
 #define _IFT_XfemManager_numberOfGpPerTri "numberofgppertri"
+
+/// How many times a subtriangle should be refined
+#define _IFT_XfemManager_numberOfTriRefs "numberoftrirefs"
+
 #define _IFT_XfemManager_debugVTK "debugvtk"
 #define _IFT_XfemManager_VTKExport "vtkexport"
 #define _IFT_XfemManager_VTKExportFields "exportfields"
@@ -112,6 +116,12 @@ protected:
      * subdividing cut elements.
      */
     int mNumGpPerTri;
+
+    /**
+     * The number of times a subtriangle should be refined.
+     */
+    int mNumTriRef;
+
     bool doVTKExport;
 
     /// If extra debug vtk files should be written.
@@ -147,6 +157,7 @@ public:
     XfemManager &operator=(const XfemManager &) = delete;
 
     int giveNumGpPerTri() const { return mNumGpPerTri; } /// Number of Gauss points per sub-triangle in cut elements.
+    int giveNumTriRefs() const { return mNumTriRef;}
 
     bool isElementEnriched(const Element *elem);
 

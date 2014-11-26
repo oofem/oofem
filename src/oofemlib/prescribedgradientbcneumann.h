@@ -82,6 +82,8 @@ public:
      */
     void computeField(FloatArray &sigma, TimeStep *tStep);
 
+
+    void giveStressLocationArray(IntArray &oCols, const UnknownNumberingScheme &r_s);
 protected:
     /// DOF-manager containing the unknown homogenized stress.
     Node *mpSigmaHom;

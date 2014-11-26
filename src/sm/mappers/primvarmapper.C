@@ -47,6 +47,7 @@
 #include "timestep.h"
 #include "activebc.h"
 #include "prescribedgradientbcweak.h"
+#include "prescribedgradientbcneumann.h"
 
 #include <fstream>
 
@@ -161,7 +162,8 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
                     int dofsPassed = 1;
                     for ( int elNode: elNew->giveDofManArray() ) {
-                        DofManager *dMan = iNewDom.giveNode(elNode);
+//                        DofManager *dMan = iNewDom.giveNode(elNode);
+                        DofManager *dMan = iNewDom.giveDofManager(elNode);
 
                         for ( Dof *dof: *dMan ) {
                             if ( elDofsGlob.at(dofsPassed) != 0 ) {
@@ -195,18 +197,25 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                         for ( Dof *dof: *dManOld ) {
                             if ( elDofsGlobOld.at(dofsPassed) != 0 ) {
                                 FloatArray dofUnknowns;
-                                dof->giveUnknowns(dofUnknowns, iMode, &iTStep);
+
+                                if(dof->giveEqn() > 0) {
+                                    dof->giveUnknowns(dofUnknowns, iMode, &iTStep);
 
 #ifdef DEBUG
-                                if(!dofUnknowns.isFinite()) {
-                                    OOFEM_ERROR("!dofUnknowns.isFinite()")
-                                }
+                                    if(!dofUnknowns.isFinite()) {
+                                        OOFEM_ERROR("!dofUnknowns.isFinite()")
+                                    }
 
-                                if(dofUnknowns.giveSize() < 1) {
-                                    OOFEM_ERROR("dofUnknowns.giveSize() < 1")
-                                }
+                                    if(dofUnknowns.giveSize() < 1) {
+                                        OOFEM_ERROR("dofUnknowns.giveSize() < 1")
+                                    }
 #endif
-                                nodeDispOld.push_back(dofUnknowns.at(1));
+                                    nodeDispOld.push_back(dofUnknowns.at(1));
+                                }
+                                else {
+                                    // TODO: Why does this case occur?
+                                    nodeDispOld.push_back(0.0);
+                                }
                             } else {
                                 if ( dof->hasBc(& iTStep) ) {
 //                                    printf("hasBC.\n");
@@ -285,6 +294,19 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                 massMtrxBc.beUnitMatrix(); // TODO: Compute correct mass matrix and add residual contribution.
                 K->assemble(tractionRows, massMtrxBc);
             }
+
+
+            PrescribedGradientBCNeumann *neumannBC = dynamic_cast<PrescribedGradientBCNeumann*> ( iNewDom.giveBc(bcInd) );
+
+            if(neumannBC != NULL) {
+                IntArray stressRows;
+                neumannBC->giveStressLocationArray(stressRows, num);
+
+                FloatMatrix massMtrxBc( stressRows.giveSize(), stressRows.giveSize() );
+                massMtrxBc.beUnitMatrix(); // TODO: Compute correct mass matrix and add residual contribution.
+                K->assemble(stressRows, massMtrxBc);
+            }
+
         }
 
 #ifdef DEBUG

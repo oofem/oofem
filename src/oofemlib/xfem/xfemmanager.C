@@ -60,6 +60,10 @@ XfemManager :: XfemManager(Domain *domain)
     this->domain = domain;
     numberOfEnrichmentItems = -1;
     mNumGpPerTri = 12;
+
+    // Default is no refinement of triangles.
+    mNumTriRef = 0;
+
     doVTKExport = false;
     mDebugVTK = false;
     vtkExportFields.clear();
@@ -130,6 +134,7 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
     IR_GIVE_FIELD(ir, numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
 
     IR_GIVE_OPTIONAL_FIELD(ir, mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
+    IR_GIVE_OPTIONAL_FIELD(ir, mNumTriRef, _IFT_XfemManager_numberOfTriRefs);
 
     IR_GIVE_OPTIONAL_FIELD(ir, doVTKExport, _IFT_XfemManager_VTKExport);
     if ( doVTKExport ) {
@@ -155,6 +160,7 @@ void XfemManager :: giveInputRecord(DynamicInputRecord &input)
     input.setRecordKeywordField(giveInputRecordName(), 1);
     input.setField(numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
     input.setField(mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
+    input.setField(mNumTriRef, _IFT_XfemManager_numberOfTriRefs);
     input.setField(doVTKExport, _IFT_XfemManager_VTKExport);
     input.setField(vtkExportFields, _IFT_XfemManager_VTKExportFields);
 

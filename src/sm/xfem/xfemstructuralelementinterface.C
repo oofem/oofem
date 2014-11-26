@@ -272,6 +272,20 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
             }
         }
 
+        // Refine triangles if desired
+        int numRefs = xMan->giveNumTriRefs();
+
+        for(int i = 0; i < numRefs; i++) {
+
+            std :: vector< Triangle > triRef;
+
+            for(const Triangle &tri : mSubTri) {
+                Triangle::refineTriangle(triRef, tri);
+            }
+
+            mSubTri = triRef;
+        }
+
         ////////////////////////////////////////
         // When we reach this point, we have a
         // triangulation that is adapted to all
@@ -988,7 +1002,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                         }
                     }
 
-                    if ( joinNodes && false ) {
+                    if ( joinNodes ) {
                         // if point on edge
                         XfemElementInterface_createEnrNmatrixAt(NMatrix, locCoord, * element, true);
                         element->computeVectorOf(VM_Total, tStep, solVec);
@@ -1030,20 +1044,39 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
     vtkPieces [ 0 ].setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
     for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
-        FloatArray average;
-        IntegrationRule *iRule = element->giveIntegrationRule(0);
-        VTKXMLExportModule :: computeIPAverage(average, iRule, element, type, tStep);
-
-        FloatArray averageV9(9);
-        averageV9.at(1) = average.at(1);
-        averageV9.at(5) = average.at(2);
-        averageV9.at(9) = average.at(3);
-        averageV9.at(6) = averageV9.at(8) = average.at(4);
-        averageV9.at(3) = averageV9.at(7) = average.at(5);
-        averageV9.at(2) = averageV9.at(4) = average.at(6);
 
         for ( size_t triInd = 1; triInd <= mSubTri.size(); triInd++ ) {
-            vtkPieces [ 0 ].setCellVar(i, triInd, averageV9);
+
+            FloatArray average;
+            IntegrationRule *iRule = element->giveIntegrationRule(0);
+            computeIPAverageInTriangle(average, iRule, element, type, tStep, mSubTri[triInd-1]);
+
+            if(average.giveSize() == 0) {
+                VTKXMLExportModule :: computeIPAverage(average, iRule, element, type, tStep);
+            }
+
+
+            FloatArray averageVoigt;
+
+            if( average.giveSize() == 6 ) {
+
+                averageVoigt.resize(9);
+
+                averageVoigt.at(1) = average.at(1);
+                averageVoigt.at(5) = average.at(2);
+                averageVoigt.at(9) = average.at(3);
+                averageVoigt.at(6) = averageVoigt.at(8) = average.at(4);
+                averageVoigt.at(3) = averageVoigt.at(7) = average.at(5);
+                averageVoigt.at(2) = averageVoigt.at(4) = average.at(6);
+            }
+            else {
+                if(average.giveSize() == 1) {
+                    averageVoigt.resize(1);
+                    averageVoigt.at(1) = average.at(1);
+                }
+            }
+
+            vtkPieces [ 0 ].setCellVar(i, triInd, averageVoigt);
         }
     }
 
@@ -1128,4 +1161,29 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
         }
     }
 }
+
+void XfemStructuralElementInterface :: computeIPAverageInTriangle(FloatArray &answer, IntegrationRule *iRule, Element *elem, InternalStateType isType, TimeStep *tStep, const Triangle &iTri)
+{
+    // Computes the volume average (over an element) for the quantity defined by isType
+    double gptot = 0.0;
+    answer.clear();
+    FloatArray temp;
+    if ( iRule ) {
+        for ( IntegrationPoint *ip: *iRule ) {
+
+            FloatArray globCoord = ip->giveGlobalCoordinates();
+            globCoord.resizeWithValues(2);
+
+            if( iTri.pointIsInTriangle(globCoord) ) {
+                elem->giveIPValue(temp, ip, isType, tStep);
+                gptot += ip->giveWeight();
+                answer.add(ip->giveWeight(), temp);
+            }
+        }
+
+        answer.times(1. / gptot);
+    }
+
+}
+
 } /* namespace oofem */

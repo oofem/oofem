@@ -196,7 +196,7 @@ protected:
     std :: vector< Node * >mpTractionNodes;
     std :: vector< Node * >mpTractionMasterNodes;
 
-    /// Lock displacements in one node i periodic
+    /// Lock displacements in one node if periodic
     Node *mpDisplacementLock;
     double mDispLockScaling;
 

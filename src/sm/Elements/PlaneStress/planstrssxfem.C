@@ -83,6 +83,9 @@ PlaneStress2dXfem :: computeGaussPoints()
 
         if ( xMan->isElementEnriched(this) ) {
             if ( !this->XfemElementInterface_updateIntegrationRule() ) {
+
+                // Blending element
+//                increaseNumGP();
                 PlaneStress2d :: computeGaussPoints();
             }
         } else {
@@ -90,6 +93,22 @@ PlaneStress2dXfem :: computeGaussPoints()
         }
     } else   {
         PlaneStress2d :: computeGaussPoints();
+    }
+}
+
+void PlaneStress2dXfem :: increaseNumGP()
+{
+    switch(numberOfGaussPoints)
+    {
+    case(4):
+        numberOfGaussPoints = 9;
+        break;
+    case(9):
+        numberOfGaussPoints = 16;
+        break;
+    case(16):
+        numberOfGaussPoints = 25;
+        break;
     }
 }
 
@@ -398,15 +417,27 @@ PlaneStress2dXfem :: giveCompositeExportData(std::vector< VTKPiece > &vtkPieces,
             std :: unique_ptr< IntegrationRule >&iRule = integrationRulesArray [ 0 ];
             VTKXMLExportModule :: computeIPAverage(average, iRule.get(), this, type, tStep);
 
-            FloatArray averageV9(9);
-            averageV9.at(1) = average.at(1);
-            averageV9.at(5) = average.at(2);
-            averageV9.at(9) = average.at(3);
-            averageV9.at(6) = averageV9.at(8) = average.at(4);
-            averageV9.at(3) = averageV9.at(7) = average.at(5);
-            averageV9.at(2) = averageV9.at(4) = average.at(6);
+            FloatArray averageVoigt;
 
-            vtkPieces[0].setCellVar( i, 1, averageV9 );
+            if( average.giveSize() == 6 ) {
+
+                averageVoigt.resize(9);
+
+                averageVoigt.at(1) = average.at(1);
+                averageVoigt.at(5) = average.at(2);
+                averageVoigt.at(9) = average.at(3);
+                averageVoigt.at(6) = averageVoigt.at(8) = average.at(4);
+                averageVoigt.at(3) = averageVoigt.at(7) = average.at(5);
+                averageVoigt.at(2) = averageVoigt.at(4) = average.at(6);
+            }
+            else {
+                if(average.giveSize() == 1) {
+                    averageVoigt.resize(1);
+                    averageVoigt.at(1) = average.at(1);
+                }
+            }
+
+            vtkPieces[0].setCellVar( i, 1, averageVoigt );
         }
 
 

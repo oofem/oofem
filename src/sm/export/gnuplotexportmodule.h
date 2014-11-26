@@ -47,6 +47,7 @@
 #define _IFT_GnuplotExportModule_ReactionForces "reactionforces"
 // Special output from boundary conditions
 #define _IFT_GnuplotExportModule_BoundaryConditions "boundaryconditions"
+#define _IFT_GnuplotExportModule_BoundaryConditionsExtra "boundaryconditionsextra"
 // Mesh
 #define _IFT_GnuplotExportModule_mesh "mesh"
 // XFEM stuff
@@ -65,6 +66,7 @@ class Crack;
 class PrescribedGradient;
 class PrescribedGradientBCNeumann;
 class PrescribedGradientBCWeak;
+class PrescribedGradientBC;
 class Domain;
 class DofManager;
 class MaterialForceEvaluator;
@@ -106,6 +108,12 @@ public:
     void outputBoundaryCondition(PrescribedGradientBCNeumann &iBC, TimeStep *tStep);
     void outputBoundaryCondition(PrescribedGradientBCWeak &iBC, TimeStep *tStep);
 
+
+    /**
+     * Help functions
+     */
+    void outputGradient(PrescribedGradientBC &iBC, TimeStep *tStep);
+
     /**
      * Mesh output
      */
@@ -121,6 +129,7 @@ public:
 protected:
     bool mExportReactionForces;
     bool mExportBoundaryConditions;
+    bool mExportBoundaryConditionsExtra;
     bool mExportMesh;
     bool mExportXFEM;
     bool mExportCrackLength;

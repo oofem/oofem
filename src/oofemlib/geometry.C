@@ -626,6 +626,30 @@ bool Triangle :: pointIsInTriangle(const FloatArray &iP) const
     return true;
 }
 
+void Triangle :: refineTriangle(std::vector<Triangle> &oRefinedTri, const Triangle &iTri)
+{
+    const FloatArray &p1 = iTri.giveVertex(1);
+    const FloatArray &p2 = iTri.giveVertex(2);
+    const FloatArray &p3 = iTri.giveVertex(3);
+
+    // Compute edge midpoints
+    FloatArray q1, q2, q3;
+
+    q1.beScaled(0.5, p1);
+    q1.add(0.5, p2);
+
+    q2.beScaled(0.5, p2);
+    q2.add(0.5, p3);
+
+    q3.beScaled(0.5, p3);
+    q3.add(0.5, p1);
+
+    oRefinedTri.push_back( Triangle(p1, q1, q3) );
+    oRefinedTri.push_back( Triangle(q1, q2, q3) );
+    oRefinedTri.push_back( Triangle(q1, p2, q2) );
+    oRefinedTri.push_back( Triangle(q3, q2, p3) );
+}
+
 Circle :: Circle(FloatArray &center, double radius) :
     mTangSignDist(1.0)
 {
