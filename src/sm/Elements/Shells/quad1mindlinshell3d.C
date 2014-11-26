@@ -255,8 +255,8 @@ Quad1MindlinShell3D :: computeVectorOfUnknowns(ValueModeType mode, TimeStep *tSt
 {
     FloatArray tmp;
     this->computeVectorOf(mode, tStep, tmp);
-    shell.beSubArrayOf(tmp, {1, 2, 3, 4, 5,  7, 8, 9, 10, 11,  13, 14, 15, 16, 17,  19, 20, 21, 22, 23});
-    drill.beSubArrayOf(tmp, {6, 12, 18, 24});
+    shell.beSubArrayOf(tmp, this->shellOrdering);
+    drill.beSubArrayOf(tmp, this->drillOrdering);
 }
 
 
@@ -463,7 +463,7 @@ Quad1MindlinShell3D :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalS
         return 1;
     } else if ( ( type == IST_ShellStrainTensor )  || ( type == IST_ShellCurvatureTensor ) ) {
         const FloatArray &help = static_cast< StructuralMaterialStatus * >( gp->giveMaterialStatus() )->giveStrainVector();
-        if ( type == IST_ShellForceTensor ) {
+        if ( type == IST_ShellStrainTensor ) {
             answer.at(1) = help.at(1); // nx
             answer.at(2) = help.at(3); // vxy
             answer.at(3) = help.at(7); // vxz
@@ -573,12 +573,12 @@ Quad1MindlinShell3D :: computeLoadLEToLRotationMatrix(FloatMatrix &answer, int i
 void
 Quad1MindlinShell3D :: computeLCS()
 {
-    lcsMatrix.resize(3, 3);
+    lcsMatrix.resize(3, 3); // Note! G -> L transformation matrix
     FloatArray e1, e2, e3, help;
 
-    // compute e1' = [N2-N1]  and  help = [N3-N1]
+    // compute e1' = [N2-N1]  and  help = [N4-N1]
     e1.beDifferenceOf( * this->giveNode(2)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
-    help.beDifferenceOf( * this->giveNode(3)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
+    help.beDifferenceOf( * this->giveNode(4)->giveCoordinates(), * this->giveNode(1)->giveCoordinates() );
     e1.normalize();
     e3.beVectorProductOf(e1, help);
     e3.normalize();
@@ -590,7 +590,7 @@ Quad1MindlinShell3D :: computeLCS()
     }
 
     for ( int i = 1; i <= 4; i++ ) {
-        this->lnodes [ i - 1 ].beTProductOf( this->lcsMatrix, * this->giveNode(i)->giveCoordinates() );
+        this->lnodes [ i - 1 ].beProductOf( this->lcsMatrix, * this->giveNode(i)->giveCoordinates() );
     }
 }
 
