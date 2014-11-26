@@ -64,7 +64,7 @@ protected:
     /// Center coordinate @f$ \bar{x}_i @f$
     FloatArray mCenterCoord;
 
-    double domainSize();
+    virtual double domainSize();
 
 public:
     PrescribedGradientBC(int n, Domain *d);

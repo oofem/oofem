@@ -1263,6 +1263,7 @@ Domain :: giveSpatialLocalizer()
         spatialLocalizer = new OctreeSpatialLocalizer(this);
     }
 
+    spatialLocalizer->init();
     return spatialLocalizer;
 }
 
