@@ -63,6 +63,7 @@
 #define _IFT_VTKXMLExportModule_ipvars "ipvars"
 #define _IFT_VTKXMLExportModule_stype "stype"
 #define _IFT_VTKXMLExportModule_regionsets "regionsets"
+#define _IFT_VTKXMLExportModule_timescale "timescale"
 //@}
 
 namespace oofem {
@@ -175,6 +176,10 @@ protected:
 
     /// Buffer for earlier time steps exported to *.pvd file.
     std :: list< std :: string >pvdBuffer;
+    
+    /// Buffer for earlier time steps with gauss points exported to *.gp.pvd file.
+    std :: list< std :: string >gpPvdBuffer;
+    
 
 public:
     /// Constructor. Creates empty Output Manager. By default all components are selected.
@@ -222,7 +227,10 @@ public:
 protected:
 
     /// Gives the full form of given symmetrically stored tensors, missing components are filled with zeros.
-    void makeFullForm(FloatArray &answer, const FloatArray &reducedForm);
+    void makeFullTensorForm(FloatArray &answer, const FloatArray &reducedForm);
+    
+    /// Gives an array with three components, it will pad with zero missing components.
+    void makeFullVectorForm(FloatArray &answer, const FloatArray &input);
 
     /// Returns the filename for the given time step.
     std :: string giveOutputFileName(TimeStep *tStep);
@@ -323,6 +331,9 @@ protected:
      * Writes a VTK collection file where time step data is stored.
      */
     void writeVTKCollection();
+    
+    /// Writes a VTK collection file for Gauss points.
+    void writeGPVTKCollection();
 
 #ifdef __VTK_MODULE
     void writeVTKPointData(const char *name, vtkSmartPointer< vtkDoubleArray >varArray);
