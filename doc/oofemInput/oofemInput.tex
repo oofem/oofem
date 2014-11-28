@@ -1374,10 +1374,10 @@ IML\_VoidPrec &0& all & No preconditioning\\
 \hline
 IML\_DiagPrec &1& all & Diagonal preconditioning\\
 \hline
-IML\_ILUPrec  &2& SMT\_CompCol & Incoplete LU Decomposition\\
+IML\_ILUPrec  &2& SMT\_CompCol & Incomplete LU Decomposition\\
               & & SMT\_DynCompCol&with no fill up\\
 \hline
-IML\_ILUPrec  &3& SMT\_DynCompRow & Incoplete LU (ILUT) with\\
+IML\_ILUPrec  &3& SMT\_DynCompRow & Incomplete LU (ILUT) with\\
               & &                 &  fillup. \\
               & &                 & The \param{precondattributes} are:\\
               & &                 & \optField{droptol}{rn}
@@ -1387,7 +1387,7 @@ tolerance\\
               & &                 & \param{partfill} level of
 fill-up\\
 \hline
-IML\_ICPrec   &4& SMT\_SymCompCol&Incoplete Cholesky\\
+IML\_ICPrec   &4& SMT\_SymCompCol&Incomplete Cholesky\\
               & & SMT\_CompCol   &with no fill up\\
 \hline
 \end{tabular}
@@ -1669,7 +1669,7 @@ is the following:\\
   \recentry{\entKeyword{EntType}}{[\fieldnotype{tstep\_all}]}
   \recentry{}{\optField{tstep\_step}{in}}
   \recentry{}{\optField{tsteps\_out}{rl}}
-  \recentry{}{\optField{subtsteps\_out}{rl}}
+  \recentry{}{\optField{subtsteps\_out}{in}}
   \recentry{}{[\fieldnotype{domain\_all}]}
   \recentry{}{\optField{domain\_mask}{in}}
 \end{record}
@@ -1683,7 +1683,7 @@ To select output for all domain of the problem the \param{domain\_all}
 keyword can be used. To select only specific domains,
 \param{domain\_mask} array can be used, where the values of the array
 specify the domain numbers to be exported.
-The parameter \param{subtsteps\_out} turns on the export of intermediate results, 
+If the parameter \param{subtsteps\_out} = 1, it turns on the export of intermediate results, 
 for example during the substepping or individual equilibrium iterations. This option requires support from the solver.
 
 Currently, the supported export modules are following
