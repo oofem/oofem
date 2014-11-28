@@ -41,6 +41,8 @@
 ///@name Input fields for MicroplaneMaterial
 //@{
 #define _IFT_MicroplaneMaterial_nmp "nmp"
+#define _IFT_MicroplaneMaterial_e "e"
+#define _IFT_MicroplaneMaterial_n "n"
 //@}
 
 namespace oofem {
@@ -87,6 +89,12 @@ protected:
      */
     double L [ MAX_NUMBER_OF_MICROPLANES ] [ 6 ];
 
+    /// Young's modulus
+    double E;
+
+    /// Poisson's ratio
+    double nu;
+
 public:
 
     /**
@@ -94,7 +102,7 @@ public:
      * @param n Material number.
      * @param d Domain to which newly created material belongs.
      */
-    MicroplaneMaterial(int n, Domain * d) : StructuralMaterial(n, d) {
+    MicroplaneMaterial(int n, Domain *d) : StructuralMaterial(n, d) {
         numberOfMicroplanes = 0;
     }
     /// Destructor.
@@ -169,6 +177,11 @@ public:
      */
     virtual MaterialMode giveCorrespondingSlaveMaterialMode(MaterialMode masterMode);
 
+    virtual void give3dMaterialStiffnessMatrix(FloatMatrix &answer,
+                                               MatResponseMode mode,
+                                               GaussPoint *gp,
+                                               TimeStep *tStep);
+
     virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
     virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
 
@@ -177,6 +190,7 @@ public:
 
     // identification and auxiliary functions
     virtual const char *giveClassName() const { return "MicroplaneMaterial"; }
+    virtual int hasMaterialModeCapability(MaterialMode mode) { return mode == _3dMat; }
 
     virtual IntegrationPointStatus *giveMicroplaneStatus(GaussPoint *gp);
 

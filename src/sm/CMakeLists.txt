@@ -119,7 +119,7 @@ set (sm_material
     b3mat.C
     b3solidmat.C
     rcsd.C rcsde.C rcsdnl.C
-    m4.C
+    m4.C microplane_m1.C
     idm1.C idmnl1.C idmgrad1.C
     mazarsmodel.C mazarsmodelnl.C
     druckerPragerPlasticitySM.C

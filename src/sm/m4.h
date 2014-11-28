@@ -48,8 +48,6 @@
 #define _IFT_M4Material_k2 "k2"
 #define _IFT_M4Material_k3 "k3"
 #define _IFT_M4Material_k4 "k4"
-#define _IFT_M4Material_e "e"
-#define _IFT_M4Material_n "n"
 #define _IFT_M4Material_talpha "talpha"
 //@}
 
@@ -62,7 +60,7 @@ namespace oofem {
 class M4MaterialStatus : public StructuralMaterialStatus
 {
 public:
-    M4MaterialStatus(int n, Domain * d, GaussPoint * g);
+    M4MaterialStatus(int n, Domain *d, GaussPoint *g);
     virtual ~M4MaterialStatus();
 
     // definition
@@ -97,7 +95,7 @@ public:
      * @param n Material number.
      * @param d Domain to which newly created material belongs.
      */
-    M4Material(int n, Domain * d);
+    M4Material(int n, Domain *d);
     /// Destructor.
     virtual ~M4Material() { }
 
