@@ -54,6 +54,7 @@
 #define _IFT_NonlocalMaterialExtensionInterface_nonlocalvariation "nlvariation"
 #define _IFT_NonlocalMaterialExtensionInterface_beta "beta"
 #define _IFT_NonlocalMaterialExtensionInterface_zeta "zeta"
+#define _IFT_NonlocalMaterialExtensionInterface_px "px"
 
 //@}
 
@@ -211,6 +212,15 @@ protected:
      * to cl0
      */
     double zeta;
+
+    /**
+     * Parameter specifying the periodic shift in x-direction. Typically it is zero.
+     * If it is set to a positive value, the nonlocal interaction is considered not only
+     * if the distance between the receiver and the source is smaller than the interaction radius
+     * but also if the source point shifted by -px or +px satisfies this condition.
+     * This is useful if the mesh represents a periodic cell.
+     */ 
+    double px;
 
 public:
     /**

@@ -190,6 +190,7 @@ def getKeywordValue (infilename, record, kwd, optional = None):
 def elemKwdToString(kwd):
     if kwd == '1' : return 'stresses'
     if kwd == '4' : return 'strains'
+    if kwd == '13' : return 'damage'
     print ( "Error. Can not translate element's keyword %s to string, exiting" % kwd )
     exit(0)
             

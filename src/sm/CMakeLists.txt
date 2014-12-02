@@ -138,6 +138,7 @@ set (sm_material
     Materials/structuralmaterial.C
     Materials/linearelasticmaterial.C
     Materials/isolinearelasticmaterial.C
+    Materials/anisolinearelasticmaterial.C
     Materials/ortholinearelasticmaterial.C
     Materials/BoneMaterials/trabbonematerial.C 
     Materials/BoneMaterials/trabbonenl3d.C 
@@ -171,6 +172,7 @@ set (sm_material
     Materials/rcsdnl.C
     Materials/RheoChainMaterials/mooneyrivlin.C # TODO This isn't a rheochain material at al
     Materials/m4.C
+    Materials/microplane_m1.C
     Materials/druckerPragerPlasticitySM.C
     Materials/druckerpragercutmat.C
     Materials/masonry02.C
@@ -255,7 +257,7 @@ set (sm_xfem
     xfem/enrichmentitems/delamination.C
     xfem/enrichmentitems/shellcrack.C
     xfem/propagationlaws/plhoopstresscirc.C
-    xfem/propagationlaws/plmaterialforce.C
+    #xfem/propagationlaws/plmaterialforce.C
     xfem/xfemstructuremanager.C
     xfem/matforceevaluator.C
     EngineeringModels/xfemsolverinterface.C

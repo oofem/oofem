@@ -359,7 +359,7 @@ public:
      * @see giveOutputBaseFileName
      * @param src New output file name.
      */
-    void letOutputBaseFileNameBe(const std :: string &src) { dataOutputFileName = src; }
+    void letOutputBaseFileNameBe(const std :: string &src);
     /**
      * Returns domain context output mode.
      */
@@ -586,9 +586,8 @@ public:
      * initialization of parallel context, etc)
      * before Initialization form DataReader. Called at the beginning of instanciateYourself.
      * @param dataOutputFileName Name of default output stream
-     * @param ndomains number of receiver domains
      */
-    void Instanciate_init(int ndomains);
+    void Instanciate_init();
     /**
      * Initializes receiver according to object description in input reader.
      * InitString can be imagined as data record in component database

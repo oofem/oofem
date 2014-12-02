@@ -196,7 +196,7 @@ void EngngModel :: setParallelMode(bool parallelFlag)
 
 
 void
-EngngModel :: Instanciate_init(int ndomains)
+EngngModel :: Instanciate_init()
 {
     // create domains
     domainNeqs.clear();
@@ -235,7 +235,7 @@ int EngngModel :: instanciateYourself(DataReader *dr, InputRecord *ir, const cha
         OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
     }
 
-    this->Instanciate_init(this->ndomains); // Must be done after initializeFrom
+    this->Instanciate_init(); // Must be done after initializeFrom
 
     fprintf(outputStream, "%s", PRG_HEADER);
     this->startTime = time(NULL);
@@ -676,10 +676,10 @@ EngngModel :: saveStepContext(TimeStep *tStep)
 
     if ( ( this->giveContextOutputMode() == COM_Always ) ||
         ( this->giveContextOutputMode() == COM_Required ) ) {
-        this->saveContext(NULL, CM_State);
+        this->saveContext(NULL, CM_State | CM_Definition);
     } else if ( this->giveContextOutputMode() == COM_UserDefined ) {
         if ( tStep->giveNumber() % this->giveContextOutputStep() == 0 ) {
-            this->saveContext(NULL, CM_State);
+            this->saveContext(NULL, CM_State | CM_Definition);
         }
     }
 }
@@ -1593,6 +1593,16 @@ EngngModel :: giveMetaStep(int i)
     }
 
     return NULL;
+}
+
+void 
+EngngModel::letOutputBaseFileNameBe(const std :: string &src) {
+  this->dataOutputFileName = src;
+
+  if ( outputStream) fclose(outputStream);
+  if ( ( outputStream = fopen(this->dataOutputFileName.c_str(), "w") ) == NULL ) {
+    OOFEM_ERROR("Can't open output file %s", this->dataOutputFileName.c_str());
+  }
 }
 
 FILE *

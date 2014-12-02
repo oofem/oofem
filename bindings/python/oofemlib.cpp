@@ -84,14 +84,14 @@ namespace bp = boost::python;
 #include "gausspoint.h"
 #include "internalstatetype.h"
 #include "matresponsemode.h"
-#include "structuralmaterial.h"
+#include "sm/Materials/structuralmaterial.h"
 #include "matstatus.h"
-#include "structuralms.h"
+#include "sm/Materials/structuralms.h"
 #include "exportmodulemanager.h"
 #include "outputmanager.h"
 #include "classfactory.h"
 
-#include "structmatsettable.h"
+#include "sm/Materials/structmatsettable.h"
 
 namespace oofem {
 
@@ -105,6 +105,18 @@ namespace oofem {
 /*****************************************************
 * FloatArray
 *****************************************************/
+struct PyFloatArray : FloatArray, wrapper<FloatArray>
+{
+    PyFloatArray(int n=0) : FloatArray(n) {}
+    PyFloatArray(FloatArray &src): FloatArray(src) {}
+
+    void printYourseelf() const {
+        if (override f = this->get_override("printYourself")) {f();} 
+        this->get_override("printYourself")();
+    }
+};
+
+
 void (FloatArray::*floatarray_add_1)(const FloatArray&) = &FloatArray::add;
 void (FloatArray::*floatarray_add_2)(double, const FloatArray&) = &FloatArray::add;
 void (FloatArray::*floatarray_add_3)(double) = &FloatArray::add;
@@ -112,10 +124,11 @@ double (FloatArray::*dotProduct_1)(const FloatArray&) const = &FloatArray::dotPr
 double (FloatArray::*dotProduct_2)(const FloatArray&, int) const = &FloatArray::dotProduct;
 void (FloatArray::*beDifferenceOf_1)(const FloatArray&, const FloatArray&) = &FloatArray::beDifferenceOf;
 void (FloatArray::*beDifferenceOf_2)(const FloatArray&, const FloatArray&, int) = &FloatArray::beDifferenceOf;
+void (PyFloatArray::*floatarray_printYourself_1)() const  = &PyFloatArray::printYourself;
 
 void pyclass_FloatArray()
 {
-    class_<FloatArray, boost::noncopyable>("FloatArray")
+    class_<PyFloatArray, boost::noncopyable>("FloatArray")
         .def(init< optional<int> >())
         .def(init< FloatArray& >())
         .def("resize", &FloatArray::resize, "Checks size of receiver towards requested bounds. If dimension mismatch, size is adjusted accordingly")
@@ -124,7 +137,7 @@ void pyclass_FloatArray()
         .def("isNotEmpty", &FloatArray::isNotEmpty, "Returns true if receiver is not empty")
         .def("isEmpty", &FloatArray::isEmpty, "Returns true if receiver is empty")
         .def("negated", &FloatArray::negated, "Switches the sign of every coefficient of receiver")
-        .def("printYourself", &FloatArray::printYourself, "Print receiver on stdout")
+        .def("printYourself", floatarray_printYourself_1, "Print receiver on stdout")
         .def("zero", &FloatArray::zero, "Zeroes all coefficients of receiver")
         .def("beProductOf", &FloatArray::beProductOf, "Receiver becomes the result of the product of aMatrix and anArray. Adjusts the size of receiver if necessary")
         .def("beTProductOf", &FloatArray::beTProductOf, "Receiver becomes the result of the product of aMatrix^T and anArray. Adjusts the size of receiver if necessary")
@@ -164,6 +177,8 @@ void (FloatMatrix::*assemble_2)(const FloatMatrix&, const IntArray&, const IntAr
 void (FloatMatrix::*assemble_3)(const FloatMatrix&, const int*, const int*) = &FloatMatrix::assemble;
 void (FloatMatrix::*floatmatrix_add_1)(const FloatMatrix&) = &FloatMatrix::add;
 void (FloatMatrix::*floatmatrix_add_2)(double, const FloatMatrix&) = &FloatMatrix::add;
+void (FloatMatrix::*floatmatrix_printYourself_1)() const = &FloatMatrix::printYourself;
+
 
 void pyclass_FloatMatrix()
 {
@@ -195,7 +210,7 @@ void pyclass_FloatMatrix()
         .def("symmetrized", &FloatMatrix::symmetrized, "Initializes the lower half of the receiver according to the upper half")
         .def("rotatedWith", &FloatMatrix::rotatedWith, "Returns the receiver 'a' transformed using give transformation matrix r. The method performs the operation  a = r^T * a * r")
         .def("resize", &FloatMatrix::resize, "Checks size of receiver towards requested bounds. If dimension mismatch, size is adjusted accordingly")
-        .def("printYourself", &FloatMatrix::printYourself, "Prints matrix to stdout")
+        .def("printYourself", floatmatrix_printYourself_1, "Prints matrix to stdout")
 
         .def("__setitem__", &FloatMatrix::__setitem__, "Coefficient access function. Implements 0-based indexing")
         .def("__getitem__", &FloatMatrix::__getitem__, "Coefficient access function. Implements 0-based indexing")
@@ -207,6 +222,7 @@ void pyclass_FloatMatrix()
 /*****************************************************
 * IntArray
 *****************************************************/
+void (IntArray::*intarray_printYourself_1)() const = &IntArray::printYourself;
 void pyclass_IntArray()
 {
     class_<IntArray, boost::noncopyable>("IntArray")
@@ -219,8 +235,8 @@ void pyclass_IntArray()
         .def("minimum", &IntArray::minimum, "Finds the minimum component in the array")
         .def("contains", &IntArray::contains, "Retuns true if receiver contains given value")
         .def("add", &IntArray::add, "Adds given scalar to all values of receiver")
-        .def("zero", &IntArray::printYourself, "Sets all component to zero")
-        .def("printYourself", &IntArray::printYourself, "Prints receiver on stdout")
+        .def("zero", &IntArray::zero, "Sets all component to zero")
+        .def("printYourself", intarray_printYourself_1, "Prints receiver on stdout")
 
         .def("__len__", &IntArray::giveSize, "Returns size of receiver")
         .def("__getitem__", &IntArray::__getitem__, "Coefficient access function. Provides 0-based indexing access")
@@ -251,13 +267,13 @@ struct PySparseMtrx : SparseMtrx, wrapper<SparseMtrx>
     }
 
 
-    int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& s) {
-        return this->get_override("buildInternalStructure")(eModel, di, ut, s);
+    int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme& s) {
+        return this->get_override("buildInternalStructure")(eModel, di, s);
     }
 
-    int buildInternalStructure(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& r, const UnknownNumberingScheme &s) {
-        if (override f = this->get_override("buildInternalStructure")) {return f(eModel, di, ut, r, s);}
-        return this->get_override("buildInternalStructure")(eModel, di, ut, r, s);
+    int buildInternalStructure(EngngModel *eModel, int di, const UnknownNumberingScheme& r, const UnknownNumberingScheme &s) {
+        if (override f = this->get_override("buildInternalStructure")) {return f(eModel, di, r, s);}
+        return this->get_override("buildInternalStructure")(eModel, di, r, s);
     }
 
     int assemble(const IntArray &loc, const FloatMatrix &mat) {
@@ -314,8 +330,8 @@ void (PySparseMtrx::*sm_times_2)(double x) = &PySparseMtrx::times;
 int (PySparseMtrx::*sm_assemble_1)(const IntArray &loc, const FloatMatrix &mat) = &PySparseMtrx::assemble;
 int (PySparseMtrx::*sm_assemble_2)(const IntArray &r, const IntArray& c, const FloatMatrix &mat) = &PySparseMtrx::assemble;
 
-int (PySparseMtrx::*sm_buildInternalStructure_1)(EngngModel *eModel, int di, EquationID ut, const UnknownNumberingScheme& s) = &PySparseMtrx::buildInternalStructure;
-int (PySparseMtrx::*sm_buildInternalStructure_2)(EngngModel *eModel, int di, EquationID, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) = &PySparseMtrx::buildInternalStructure;
+int (PySparseMtrx::*sm_buildInternalStructure_1)(EngngModel *eModel, int di, const UnknownNumberingScheme& s) = &PySparseMtrx::buildInternalStructure;
+int (PySparseMtrx::*sm_buildInternalStructure_2)(EngngModel *eModel, int di, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) = &PySparseMtrx::buildInternalStructure;
 
 void pyclass_SparseMtrx()
 {
@@ -621,9 +637,9 @@ class PyDofManager : public DofManager, public wrapper<DofManager>
 public:
     PyDofManager (int n, Domain *d) : DofManager (n,d) {}
 
-    void giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN) {
+  void giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN, bool padding) {
         if ( override f = this->get_override("giveUnknownVector") ) {
-        f (answer, dofMask, mode, stepN); return;}
+	  f (answer, dofMask, mode, stepN, padding); return;}
         DofManager::giveUnknownVector(answer, dofMask, mode, stepN);
     }
     bool computeL2GTransformation(FloatMatrix &answer, const IntArray &dofIDArry) {
@@ -631,11 +647,11 @@ public:
         return DofManager::computeL2GTransformation(answer, dofIDArry);
     }
 
-    void default_giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN)
-    { return this->DofManager::giveUnknownVector(answer, dofMask, mode, stepN); }
+  void default_giveUnknownVector(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN, bool padding)
+  { return this->DofManager::giveUnknownVector(answer, dofMask, mode, stepN, padding); }
 };
 
-void (DofManager::*giveUnknownVector_1)(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN) = &DofManager::giveUnknownVector;
+  void (DofManager::*giveUnknownVector_1)(FloatArray &answer, const IntArray &dofMask, ValueModeType mode, TimeStep *stepN, bool padding) = &DofManager::giveUnknownVector;
 
 void pyclass_DofManager()
 {
@@ -680,7 +696,7 @@ public:
     virtual void giveDefaultDofManDofIDMask(int inode, IntArray &answer) const {
         this->get_override("giveDefaultDofManDofIDMask")();
     }
-    virtual void giveDofManDofIDMask(int inode, EquationID ut, IntArray &answer) const {
+    virtual void giveDofManDofIDMask(int inode, IntArray &answer) const {
         this->get_override("giveDofManDofIDMask")();
     }
 
@@ -694,7 +710,7 @@ public:
 };
 
 
-void (PyElement::*giveLocationArray_1)(IntArray &locationArray, EquationID id, const UnknownNumberingScheme &s, IntArray *dofIds) const  = &Element::giveLocationArray;
+void (PyElement::*giveLocationArray_1)(IntArray &locationArray, const UnknownNumberingScheme &s, IntArray *dofIds) const  = &Element::giveLocationArray;
 void (PyElement::*giveLocationArray_2)(IntArray &locationArray, const IntArray &dofIDMask, const UnknownNumberingScheme &s, IntArray *dofIds) const = &Element::giveLocationArray;
 
 void pyclass_Element()
@@ -949,40 +965,39 @@ void pyclass_Field()
         ;
 }
 
-
 /*****************************************************
 * FieldManager
 *****************************************************/
 class PyFieldManager;
-//void FieldManager_registerField (FieldManager* fm, std::auto_ptr<Field>& a, FieldType key, bool managedFlag)
-/*
-void FieldManager_registerField (PyFieldManager* fm, DofManValueField* a, FieldType key, bool managedFlag)
+  //
+  // note boost python does not support std::shared_ptr
+  // needs check if referecnces are released properly
+  //
+void FieldManager_registerField (FieldManager* fm, Field* a, FieldType key) // ok
 {
-    //fm->registerField(a.get(), key, managedFlag);
-    //a.release();
-    printf("Registering field\n");
+  FM_FieldPtr ptr(a);
+  fm->registerField(ptr, key);
+  printf("Registering field\n");
 };
-*/
-//void FieldManager_registerField (FieldManager* fm, Field* a, FieldType key, bool managedFlag ) // ok
-void FieldManager_registerField (FieldManager* fm, std::auto_ptr<Field>& a, FieldType key, bool managedFlag ) // ok
-{
-    fm->registerField(a.get(), key, managedFlag);
-    a.release();
-    printf("Registering field\n");
-};
+
+  Field* FieldManager_getField(FieldManager *fm, FieldType key)
+  {
+    FM_FieldPtr ptr = fm->giveField(key);
+    return ptr.get();
+  }
+
 
 class PyFieldManager : public FieldManager, public wrapper<FieldManager>
 {
 public:
-    PyFieldManager (): FieldManager() {}
-    //void myRegisterField(std::auto_ptr<Field>& a, FieldType key, bool managedFlag = false) {
-    void myRegisterField(DofManValueField* a, FieldType key, bool managedFlag = false) {
-        //FieldManager_registerField(this, a, key, managedFlag);
-    }
-    //void registerField(std::auto_ptr<PyField> a, FieldType key, bool managedFlag = false) {
-    //  FieldManager_registerField(*this, a, key, managedFlag);
-    //}
+  PyFieldManager (): FieldManager() {}
+  void myRegisterField(Field* a, FieldType key) {
+    FieldManager_registerField (this, a, key);
+  }  
 
+  Field* myGiveField(FieldType key) {
+    return FieldManager_getField(this, key);
+  }
 };
 
 void pyclass_FieldManager()
@@ -990,7 +1005,7 @@ void pyclass_FieldManager()
     class_<FieldManager, PyFieldManager, boost::noncopyable>("FieldManager", no_init)
         .def("registerField", &PyFieldManager::myRegisterField)
         .def("isFieldRegistered", &FieldManager::isFieldRegistered)
-        .def("giveField", &FieldManager::giveField, return_internal_reference<>())
+        .def("giveField", &PyFieldManager::myGiveField, return_internal_reference<>())
         .def("unregisterField", &FieldManager::unregisterField)
         ;
 }
@@ -1097,19 +1112,6 @@ void pyenum_Element_Geometry_Type()
         .value("EGT_hexa_2", EGT_hexa_2)   /* hexahedron with 20 nodes */
         .value("EGT_Composite", EGT_Composite)/* Composite" geometry, vtk export supported by individual elements */
         .value("EGT_unknown", EGT_unknown)  /* unknown" element geometry type */
-        ;
-}
-
-
-/*****************************************************
-* EquationID
-*****************************************************/
-void pyenum_EquationID()
-{
-    enum_<EquationID>("EquationID")
-        .value("EID_MomentumBalance", EID_MomentumBalance)
-        .value("EID_ConservationEquation", EID_ConservationEquation)
-        .value("EID_MomentumBalance_ConservationEquation", EID_MomentumBalance_ConservationEquation)
         ;
 }
 
@@ -1278,7 +1280,8 @@ OOFEMTXTInputRecord makeOOFEMTXTInputRecordFrom(bp::dict &kw)
         ;
     exec(command,temp,temp);
     // extract string from globals["ret"], convert it to char* and return OOFEMTXTInputRecord from it
-    return OOFEMTXTInputRecord( ( extract<string>(temp["ret"])() ).c_str() );
+    //return OOFEMTXTInputRecord( ( extract<string>(temp["ret"])() ).c_str() );
+    return OOFEMTXTInputRecord( 0, ( extract<string>(temp["ret"])() ) );
 }
 
 OOFEMTXTInputRecord makeOutputManagerOOFEMTXTInputRecordFrom(bp::dict &kw)
@@ -1338,7 +1341,9 @@ object engngModel(bp::tuple args, bp::dict kw)
     } else {
        outFile = "oofem.out.XXXXXX";
     }
-    engngm->Instanciate_init(outFile.c_str(), engngm->giveNumberOfDomains());
+    //engngm->Instanciate_init(outFile.c_str(), engngm->giveNumberOfDomains());
+    engngm->letOutputBaseFileNameBe(outFile);
+    engngm->Instanciate_init();
     //
     object ret = object(ptr(engngm));
     /* ????????????????????
@@ -1621,7 +1626,6 @@ BOOST_PYTHON_MODULE (liboofem)
 
     pyenum_problemMode();
     pyenum_Element_Geometry_Type();
-    pyenum_EquationID();
     pyenum_ValueModeType();
     pyenum_DofManTransfType();
     pyenum_DofIDItem();
@@ -1634,7 +1638,7 @@ BOOST_PYTHON_MODULE (liboofem)
     //def("make_foo", make_foo, return_value_policy<manage_new_object>())
     def("InstanciateProblem", InstanciateProblem_1, return_value_policy<manage_new_object>());
     def("createDofManValueFieldPtr", &DofManValueField_create, with_custodian_and_ward_postcall<0,2>());
-    def("FieldManager_registerField", &FieldManager_registerField);
+    //def("FieldManager_registerField", &FieldManager_registerField);
 
     implicitly_convertible<std::auto_ptr<DofManValueField>, std::auto_ptr<Field> >();
     register_ptr_to_python< std::auto_ptr<Field> >();

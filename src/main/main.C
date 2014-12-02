@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
 
     if ( restartFlag ) {
         try {
-            problem->restoreContext(NULL, CM_State, ( void * ) restartStepInfo);
+            problem->restoreContext(NULL, CM_State | CM_Definition, ( void * ) restartStepInfo);
         } catch(ContextIOERR & c) {
             c.print();
             exit(1);
