@@ -55,6 +55,8 @@
 #define _IFT_LatticeTransportMaterial_thetam "thetam"
 #define _IFT_LatticeTransportMaterial_paev "paev"
 #define _IFT_LatticeTransportMaterial_ctor "ctor"
+#define _IFT_LatticeTransportMaterial_clim "clim"
+#define _IFT_LatticeTransportMaterial_c "c"
 //@}
 
 namespace oofem {
@@ -66,6 +68,7 @@ class LatticeTransportMaterialStatus : public TransportMaterialStatus
 protected:
     /// Liquid mass in element
     double mass;
+    double oldPressure;
 
 public:
     ///Constructor
@@ -77,6 +80,8 @@ public:
 
     /// Returns pressure
     double givePressure() { return field.at(1); }
+
+    double giveOldPressure() { return oldPressure; }
 
     /// Sets the mass
     void setMass(double input) { this->mass = input; }
@@ -118,6 +123,9 @@ protected:
     ///Type of conductivity and capcity laws.
     int conType;
 
+    ///Type of conductivity and capcity laws.
+    int capacity;
+
     ///Relative saturated water content
     double thetaS;
 
@@ -130,8 +138,15 @@ protected:
     ///crack tortuosity
     double crackTortuosity;
 
+    ///crack limit
+    double crackLimit;
+
+
     ///suction air entry value
     double suctionAirEntry;
+
+    /// Material mode for convenient access.
+    MaterialMode matMode;
 
 public:
     LatticeTransportMaterial(int n, Domain * d) : TransportMaterial(n, d) { }
