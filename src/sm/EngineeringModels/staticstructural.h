@@ -98,7 +98,7 @@ public:
     virtual void printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep);
     virtual fMode giveFormulation() { return TL; }
 
-    virtual void updatePrimaryField(ValueModeType mode, TimeStep *tStep, const FloatArray &vectorToStore);
+    void setSolution(TimeStep *tStep, const FloatArray &vectorToStore);
 
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_StaticStructural_Name; }

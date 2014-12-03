@@ -63,6 +63,7 @@ PrescribedGradientBCWeak :: PrescribedGradientBCWeak(int n, Domain *d) :
     mMeshIsPeriodic(false),
     mDuplicateCornerNodes(false),
     mTangDistPadding(0.0),
+    mTracDofScaling(1.0e0),
     mpDisplacementLock(NULL),
     mDispLockScaling(1.0)
 {
@@ -145,6 +146,9 @@ IRResultType PrescribedGradientBCWeak :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, mTangDistPadding, _IFT_PrescribedGradientBCWeak_TangDistPadding);
     printf("mTangDistPadding: %e\n", mTangDistPadding);
 
+    IR_GIVE_OPTIONAL_FIELD(ir, mTracDofScaling, _IFT_PrescribedGradientBCWeak_TracDofScaling);
+    printf("mTracDofScaling: %e\n", mTracDofScaling );
+
     return IRRT_OK;
 }
 
@@ -163,6 +167,7 @@ void PrescribedGradientBCWeak :: giveInputRecord(DynamicInputRecord &input)
     }
 
     input.setField(mTangDistPadding, _IFT_PrescribedGradientBCWeak_TangDistPadding);
+    input.setField(mTracDofScaling, _IFT_PrescribedGradientBCWeak_TracDofScaling);
 }
 
 void PrescribedGradientBCWeak :: postInitialize()
@@ -1295,7 +1300,12 @@ void PrescribedGradientBCWeak :: assembleTangentGPContribution(FloatMatrix &oTan
         cols.followedBy(iGlobalNodeIndToPosInLocalLocArray [ nodeInd ]);
     }
 
-    oTangent.assemble(contrib, rows, cols);
+    if(contrib.giveNumberOfRows() == rows.giveSize() && contrib.giveNumberOfColumns() == cols.giveSize()) {
+        oTangent.assemble(contrib, rows, cols);
+    }
+    else {
+        printf("Warning in PrescribedGradientBCWeak :: assembleTangentGPContribution: rows.giveSize(): %d cols.giveSize(): %d\n", rows.giveSize(), cols.giveSize() );
+    }
 }
 
 IntegrationRule *PrescribedGradientBCWeak :: createNewIntegrationRule(int iTracElInd)
@@ -1349,6 +1359,8 @@ void PrescribedGradientBCWeak :: computeNTraction(FloatArray &oN, const double &
     } else if ( mTractionInterpOrder == 1 )    {
         iEl.computeN_Linear(oN, iXi);
     }
+
+    oN.times(mTracDofScaling);
 }
 
 void PrescribedGradientBCWeak :: giveTractionUnknows(FloatArray &oTracUnknowns, ValueModeType mode, TimeStep *tStep, int iTracElInd)

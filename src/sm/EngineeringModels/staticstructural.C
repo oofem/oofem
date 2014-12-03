@@ -408,7 +408,7 @@ StaticStructural :: printDofOutputAt(FILE *stream, Dof *iDof, TimeStep *tStep)
     iDof->printSingleOutputAt(stream, tStep, 'd', VM_Total);
 }
 
-void StaticStructural :: updatePrimaryField(ValueModeType mode, TimeStep *tStep, const FloatArray &vectorToStore)
+void StaticStructural :: setSolution(TimeStep *tStep, const FloatArray &vectorToStore)
 {
 //    printf("Storing solution vector: "); vectorToStore.printYourself();
     *field->giveSolutionVector(tStep) = vectorToStore;

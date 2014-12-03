@@ -64,6 +64,9 @@ XfemManager :: XfemManager(Domain *domain)
     // Default is no refinement of triangles.
     mNumTriRef = 0;
 
+    // Default is no scaling of enrichment dofs.
+    mEnrDofScaleFac = 1.0;
+
     doVTKExport = false;
     mDebugVTK = false;
     vtkExportFields.clear();
@@ -136,6 +139,9 @@ IRResultType XfemManager :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
     IR_GIVE_OPTIONAL_FIELD(ir, mNumTriRef, _IFT_XfemManager_numberOfTriRefs);
 
+    IR_GIVE_OPTIONAL_FIELD(ir, mEnrDofScaleFac, _IFT_XfemManager_enrDofScaleFac);
+    printf("mEnrDofScaleFac: %e\n", mEnrDofScaleFac );
+
     IR_GIVE_OPTIONAL_FIELD(ir, doVTKExport, _IFT_XfemManager_VTKExport);
     if ( doVTKExport ) {
         IntArray exportFields;
@@ -161,6 +167,7 @@ void XfemManager :: giveInputRecord(DynamicInputRecord &input)
     input.setField(numberOfEnrichmentItems, _IFT_XfemManager_numberOfEnrichmentItems);
     input.setField(mNumGpPerTri, _IFT_XfemManager_numberOfGpPerTri);
     input.setField(mNumTriRef, _IFT_XfemManager_numberOfTriRefs);
+    input.setField(mEnrDofScaleFac, _IFT_XfemManager_enrDofScaleFac);
     input.setField(doVTKExport, _IFT_XfemManager_VTKExport);
     input.setField(vtkExportFields, _IFT_XfemManager_VTKExportFields);
 

@@ -134,9 +134,11 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
 
 
     // XFEM part of B-matrix
+    double enrDofsScaleFactor = 1.0;
     XfemManager *xMan = NULL;
     if ( iEl.giveDomain()->hasXfemManager() ) {
         xMan = iEl.giveDomain()->giveXfemManager();
+        enrDofsScaleFactor = xMan->giveEnrDofScaleFactor();
     }
 
     std :: vector< FloatMatrix >Bd(nDofMan);   // One Bd per node
@@ -224,6 +226,7 @@ void XfemElementInterface :: ComputeBOrBHMatrix(FloatMatrix &oAnswer, GaussPoint
         oAnswer.setSubMatrix(Bc [ i ], 1, column);
         column += 2;
         if ( Bd [ i ].isNotEmpty() ) {
+            Bd[i].times(enrDofsScaleFactor);
             oAnswer.setSubMatrix(Bd [ i ], 1, column);
 
             column += Bd [ i ].giveNumberOfColumns();
@@ -268,6 +271,7 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
 
     // XFEM part of N-matrix
     XfemManager *xMan = iEl.giveDomain()->giveXfemManager();
+    double enrDofsScaleFactor = xMan->giveEnrDofScaleFactor();
 
     int counter = iLocNodeInd.size() * dim;
 
@@ -338,7 +342,7 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
 
         const std :: vector< double > &NdNode = Nd [ i - 1 ];
         for ( size_t j = 1; j <= NdNode.size(); j++ ) {
-            NTot.at(column) = NdNode [ j - 1 ];
+            NTot.at(column) = NdNode [ j - 1 ]*enrDofsScaleFactor;
             column++;
         }
     }
@@ -911,6 +915,7 @@ void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, 
 
     // XFEM part of N-matrix
     XfemManager *xMan = element->giveDomain()->giveXfemManager();
+    double enrDofsScaleFactor = xMan->giveEnrDofScaleFactor();
 
 
     int counter = nDofMan * dim;
@@ -986,7 +991,7 @@ void XfemElementInterface :: computeNCohesive(FloatMatrix &oN, GaussPoint &iGP, 
 
         const std :: vector< double > &NdNode = Nd [ i - 1 ];
         for ( size_t j = 1; j <= NdNode.size(); j++ ) {
-            NTot.at(column) = NdNode [ j - 1 ];
+            NTot.at(column) = NdNode [ j - 1 ]*enrDofsScaleFactor;
             column++;
         }
     }

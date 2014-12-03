@@ -32,39 +32,55 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef XFEMSOLVERINTERFACE_H_
-#define XFEMSOLVERINTERFACE_H_
+#ifndef PLMATERIALFORCE_H_
+#define PLMATERIALFORCE_H_
+
+#include "xfem/propagationlaw.h"
+
+#define _IFT_PLMaterialForce_Name "propagationlawmaterialforce"
+// Radius of region for domain integral
+#define _IFT_PLMaterialForce_Radius "radius"
+// Increment length per time step
+#define _IFT_PLMaterialForce_IncLength "incrementlength"
+// Threshold for crack propagation
+#define _IFT_PLMaterialForce_CrackPropThreshold "gc"
 
 namespace oofem {
 
-class TimeStep;
-class StructuralEngngModel;
-class StaticStructural;
-class FloatArray;
+class Domain;
+class EnrichmentDomain;
+class DynamicInputRecord;
+class MaterialForceEvaluator;
+
 
 /**
- * Provides extra solver functionality needed for XFEM.
+ * Propagation law that propagates the crack in
+ * the direction of the material force.
+ *
  * @author Erik Svenning
+ * @date Nov 14, 2014
  */
-class XfemSolverInterface {
+class OOFEM_EXPORT PLMaterialForce : public PropagationLaw
+{
 public:
-    XfemSolverInterface();
-    virtual ~XfemSolverInterface();
+    PLMaterialForce();
+    virtual ~PLMaterialForce();
 
-    void propagateXfemInterfaces(TimeStep *tStep, StructuralEngngModel &ioEngngModel, bool iRecomputeStepAfterCrackProp);
-    void mapVariables(TimeStep *tStep, StructuralEngngModel &ioEngngModel);
+    virtual const char *giveClassName() const { return "PLMaterialForce"; }
+    virtual const char *giveInputRecordName() const { return _IFT_PLMaterialForce_Name; }
 
-#if 0
-    void mapVariables(TimeStep *tStep, StaticStructural &ioEngngModel);
-#endif
+    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual void giveInputRecord(DynamicInputRecord &input);
 
-    void xfemUpdatePrimaryField(StructuralEngngModel &ioEngngModel, TimeStep *tStep, const FloatArray &iNewSol) { };
-    void xfemUpdatePrimaryField(StaticStructural &ioEngngModel, TimeStep *tStep, const FloatArray &iNewSol);
+    virtual bool hasPropagation() const { return mIncrementLength > 0.; } ///@todo Could this be done smarter? / Mikael
+    virtual bool propagateInterface(Domain &iDomain, EnrichmentFront &iEnrFront, TipPropagation &oTipProp);
 
 protected:
-    bool mNeedsVariableMapping;
+    double mRadius, mIncrementLength, mCrackPropThreshold;
+
+    MaterialForceEvaluator *mpMaterialForceEvaluator;
 };
 
 } /* namespace oofem */
 
-#endif /* XFEMSOLVERINTERFACE_H_ */
+#endif /* PLMATERIALFORCE_H_ */

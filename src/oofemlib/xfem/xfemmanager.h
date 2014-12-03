@@ -58,6 +58,8 @@
 /// How many times a subtriangle should be refined
 #define _IFT_XfemManager_numberOfTriRefs "numberoftrirefs"
 
+#define _IFT_XfemManager_enrDofScaleFac "enrdofscalefac"
+
 #define _IFT_XfemManager_debugVTK "debugvtk"
 #define _IFT_XfemManager_VTKExport "vtkexport"
 #define _IFT_XfemManager_VTKExportFields "exportfields"
@@ -122,6 +124,11 @@ protected:
      */
     int mNumTriRef;
 
+    /* Scale factor for the enrichment dofs. Implies that the corresponding
+       dofs must be scaled with 1/factor in the input file
+     */
+    double mEnrDofScaleFac;
+
     bool doVTKExport;
 
     /// If extra debug vtk files should be written.
@@ -158,6 +165,7 @@ public:
 
     int giveNumGpPerTri() const { return mNumGpPerTri; } /// Number of Gauss points per sub-triangle in cut elements.
     int giveNumTriRefs() const { return mNumTriRef;}
+    double giveEnrDofScaleFactor() const {return mEnrDofScaleFac;}
 
     bool isElementEnriched(const Element *elem);
 

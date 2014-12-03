@@ -215,6 +215,7 @@ set (core_xfem
     xfem/enrichmentfronts/enrichmentfrontreducefront.C
     xfem/enrichmentfronts/enrichmentfrontlinbranchfuncradius.C
     xfem/enrichmentfronts/enrichmentfrontlinbranchfunconeel.C
+    xfem/enrichmentfronts/enrichmentfrontcohesivebranchfunconeel.C
     xfem/enrichmentfronts/enrichmentfrontintersection.C
     xfem/integrationrules/discsegintegrationrule.C
     xfem/xfemtolerances.C

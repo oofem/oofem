@@ -56,6 +56,8 @@ StructuralInterfaceMaterialStatus :: StructuralInterfaceMaterialStatus(int n, Do
     this->tempTraction        = this->traction;
     this->tempFirstPKTraction = this->firstPKTraction;
     this->tempF               = this->F;
+
+    mNewlyInserted = true;
 }
 
 

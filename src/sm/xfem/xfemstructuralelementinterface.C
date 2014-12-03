@@ -452,6 +452,8 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
                     OOFEM_ERROR("Failed to fetch material status.");
                 }
 
+                ms->setNewlyInserted(false); //TODO: Do this in a better place. /ES
+
                 FloatArray crackNormal( ms->giveNormal() );
 
                 // Compute jump vector
@@ -771,6 +773,8 @@ void XfemStructuralElementInterface :: giveCZInputRecord(DynamicInputRecord &inp
     if ( mUsePlaneStrain ) {
         input.setField(1, _IFT_XfemElementInterface_PlaneStrain);
     }
+
+    input.setField(mCSNumGaussPoints, _IFT_XfemElementInterface_NumIntPointsCZ);
 }
 
 void XfemStructuralElementInterface :: initializeCZMaterial()
@@ -965,7 +969,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                     XfemManager *xMan = element->giveDomain()->giveXfemManager();
                     int numEI =  xMan->giveNumberOfEnrichmentItems();
 
-                    bool joinNodes = true;
+                    bool joinNodes = false;
 
                     for ( int eiIndex = 1; eiIndex <= numEI; eiIndex++ ) {
                         EnrichmentItem *ei = xMan->giveEnrichmentItem(eiIndex);
@@ -997,7 +1001,11 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                         }
 
 
-                        if ( ( tangSignDist > ( 1.0e-3 ) * meanEdgeLength && fabs(levelSetNormal) < ( 1.0e-2 ) * meanEdgeLength ) && evaluationSucceeded ) {
+//                        if ( ( tangSignDist > ( 1.0e-3 ) * meanEdgeLength && fabs(levelSetNormal) < ( 1.0e-2 ) * meanEdgeLength ) && evaluationSucceeded ) {
+//                            joinNodes = false;
+//                        }
+
+                        if ( ( tangSignDist < ( 1.0e-3 ) * meanEdgeLength || fabs(levelSetNormal) > ( 1.0e-2 ) * meanEdgeLength ) || !evaluationSucceeded ) {
                             joinNodes = false;
                         }
                     }

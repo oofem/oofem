@@ -68,6 +68,12 @@ public:
     /// Discontinuity
     FloatArray mJumpOld, mJumpNew;
 
+    /**
+     * Increment of plastic multiplier. Storing this allows
+     * semi-explicit update of damage.
+     */
+    double mPlastMultIncNew, mPlastMultIncOld;
+
     virtual const char *giveClassName() const { return "IntMatBilinearCZStatus"; }
 
     virtual void initTempStatus();
@@ -99,6 +105,8 @@ protected:
 
     double mMu;    // loading function parameter
     double mGamma; // loading function parameter
+
+    bool mSemiExplicit; // If semi-explicit time integration should be used
 
     virtual int checkConsistency();
 

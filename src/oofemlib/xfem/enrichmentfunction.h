@@ -151,6 +151,26 @@ public:
     virtual const char *giveClassName() const { return "LinElBranchFunction"; }
 };
 
+/** Class representing a branch function for cohesive cracks. */
+class OOFEM_EXPORT CohesiveBranchFunction
+{
+public:
+    CohesiveBranchFunction():mExponent(0.5) { }
+    virtual ~CohesiveBranchFunction() { }
+
+    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const double &iR, const double &iTheta) const;
+    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const double &iR, const double &iTheta) const;
+
+    virtual void giveJump(std :: vector< double > &oJumps) const;
+    virtual void giveJump(std :: vector< double > &oJumps, const double &iRadius) const;
+
+    std :: string errorInfo(const char *func) const { return std :: string( giveClassName() ) + func; }
+    virtual const char *giveClassName() const { return "CohesiveBranchFunction"; }
+
+protected:
+    double mExponent;
+};
+
 /** Class representing bimaterial interface. */
 class OOFEM_EXPORT RampFunction : public EnrichmentFunction
 {

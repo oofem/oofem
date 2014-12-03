@@ -46,6 +46,7 @@
 #define _IFT_PrescribedGradientBCWeak_NumTractionNodeSpacing   "tractionnodespacing"
 #define _IFT_PrescribedGradientBCWeak_DuplicateCornerNodes   "duplicatecornernodes"
 #define _IFT_PrescribedGradientBCWeak_TangDistPadding   "tangdistpadding"
+#define _IFT_PrescribedGradientBCWeak_TracDofScaling   "tracdofscaling"
 
 namespace oofem {
 class IntegrationRule;
@@ -184,6 +185,8 @@ protected:
      * Parameter for creation of traction mesh
      */
     double mTangDistPadding;
+
+    double mTracDofScaling;
 
     /// Lower corner of domain (assuming a rectangular RVE)
     FloatArray mLC;

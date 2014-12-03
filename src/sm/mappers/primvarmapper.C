@@ -290,9 +290,16 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                 IntArray tractionRows;
                 activeBC->giveTractionLocationArray(tractionRows, num);
 
-                FloatMatrix massMtrxBc( tractionRows.giveSize(), tractionRows.giveSize() );
-                massMtrxBc.beUnitMatrix(); // TODO: Compute correct mass matrix and add residual contribution.
-                K->assemble(tractionRows, massMtrxBc);
+                // TODO: Compute correct mass matrix and add residual contribution.
+
+                FloatMatrix mNode(1,1);
+                mNode.beUnitMatrix();
+
+                for(int tracDofInd : tractionRows) {
+                    const IntArray tracDofArray = {tracDofInd};
+                    K->assemble(tracDofArray, tracDofArray, mNode);
+                }
+
             }
 
 
