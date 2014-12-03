@@ -50,6 +50,7 @@
 #include "entityrenumberingscheme.h"
 #include "unknowntype.h"
 #include "unknownnumberingscheme.h"
+#include "integrationrule.h"
 
 #include <cstdio>
 
