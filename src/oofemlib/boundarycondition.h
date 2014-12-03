@@ -123,6 +123,10 @@ public:
     virtual void scale(double s);
     virtual const char *giveClassName() const { return "BoundaryCondition"; }
     virtual const char *giveInputRecordName() const { return _IFT_BoundaryCondition_Name; }
+
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
+
 };
 } // end namespace oofem
 #endif // boudary_h
