@@ -57,6 +57,7 @@
 \newcommand{\vxi}{\mbf{\xi}}% vector xi
 \newcommand{\quarter}{\mbox{$\frac{1}{4}$}}
 \newcommand{\vx}{\mbf{x}}% vector x
+\newcommand{\tenss}[1]{\mbox{\boldmath$#1$}} %second-order tensor
 \newcommand{\refeq}[1]{Eq.~(\ref{#1})}
 \newcommand{\reffig}[1]{Fig.~(\ref{#1})}
 \newcommand{\refeqs}[2]{Eqs.~(\ref{#1}), (\ref{#2})}
@@ -4674,7 +4675,7 @@ Supported modes& \_2dHeat, \_3dHeat\\
 \end{figure}
 
 
-\subsection{Coupled heat and mass transfer material model - HeMotk}
+\subsection{Coupled heat and mass transport material model - HeMotk}
 Coupled heat and mass transfer material model.
 Source: T. Krejci doctoral thesis; Bazant and Najjar, 1972;
 Pedersen, 1990. Assumptions: water vapor is the only driving
@@ -4717,6 +4718,144 @@ Supported modes& \_2dHeMo\\
 \end{mmt}
 \caption{Coupled heat and mass transfer material model - summary.}
 \label{hemotk_table}
+%\end{center}
+\end{table}
+
+\clearpage
+\subsection{Coupled heat and mass transport material model - HeMoKunzel}
+The presented formulation is based on the work of Kuenzel \cite{Kuenzel}. 
+The model is suitable for problems with dominating water diffusion
+and negligible water convection. The governing equations for temperature and humidity reads
+
+\bea
+\frac{\partial Q}{\partial t} &=& \frac{\partial Q}{\partial T} \frac{\partial T}{\partial t} = C_v \frac{\partial T}{\partial t} = -\nabla q_T = \nabla \left( \lambda \nabla T \right ) + h_v \nabla \left( \delta_p \nabla (H p_{sat}) \right )\\
+\frac{\partial w}{\partial t} &=& \frac{\partial w}{\partial H} \frac{\partial H}{\partial t} = -\nabla q_H = \nabla \left( D_H \nabla H + \delta_p \nabla (H p_{sat}) \right )
+\eea 
+
+\begin{table}[!htb]
+\begin{center}
+{\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|l|l|l|}
+\hline
+$T$        &(K)         & Temperature\\
+$H$        &(-)         & Relative humidity 0-1\\
+\hline
+$\frac{\partial Q}{\partial T} \approx C_v$ &J/K/m$^3$ & Heat storage capacity per volume\\
+$\frac{\partial w}{\partial H}$ &kg/m$^3$ & Moisture storage capacity - sorption isotherm\\
+$Q$        &J/m$^3$   & Total amount of heat in unit volume\\
+$q_T$      &W/m$^2$   & Heat flux\\
+$\lambda$  &W/m/K     & Thermal conductivity\\
+$h_v$      &J/kg      & Evaporation enthalpy of water\\
+$\delta_p$ &kg/m/s/Pa & Water vapour permeability\\
+$p_{sat}$  &Pa        & Water vapour saturation pressure\\
+$w$        &kg/m$^3$  & Moisture content\\
+$D_H$      &kg/m/s    & Liquid conduction coefficient\\
+$D_w$      &m$^2$/s   & Water diffusivity\\
+\hline
+\end{tabular}
+}
+\caption{Parameters from Kunzel's model.}
+\end{center}
+\end{table}
+
+\noindent Numerical solution leads to the system of equations
+\begin{eqnarray}\label{final_eq}
+\left[ \begin{array}{cc}
+\tenss{K}_{TT} & \tenss{K}_{TH} \\
+\tenss{K}_{HT} & \tenss{K}_{HH}
+\end{array} \right]
+\left\{ \begin{array}{c}
+\tenss{r}_T \\
+\tenss{r}_H
+\end{array} \right\} + 
+\left[ \begin{array}{cc}
+\tenss{C}_{TT} & \tenss{C}_{TH} \\
+\tenss{C}_{HT} & \tenss{C}_{HH}
+\end{array} \right]
+\left\{ \begin{array}{c}
+\dot{\tenss{r}}_T \\
+\dot{\tenss{r}}_H
+\end{array} \right\} = 
+\left\{ \begin{array}{c}
+\tenss{q}_{T} \\
+\tenss{q}_{H}
+\end{array} \right\},
+\end{eqnarray}
+where
+\begin{eqnarray}
+\tenss{K}_{TT} = \int_{\Omega} \tenss{B}^T k_{TT} \tenss{B}{\rm d}\Omega,\qquad
+\tenss{K}_{TH} = \int_{\Omega} \tenss{B}^T k_{Th} \tenss{B}{\rm d}\Omega,\qquad
+\end{eqnarray}
+\begin{eqnarray}
+\tenss{K}_{HT} = \int_{\Omega} \tenss{B}^T k_{hT} \tenss{B}{\rm d}\Omega,\qquad
+\tenss{K}_{HH} = \int_{\Omega} \tenss{B}^T k_{hh} \tenss{B}{\rm d}\Omega,\qquad
+\end{eqnarray}
+\begin{eqnarray}
+\tenss{C}_{TT} = \int_{\Omega} \tenss{N}^T c_{TT}  \tenss{N} {\rm d}\Omega,\qquad
+\tenss{C}_{TH} = \int_{\Omega} \tenss{N}^T c_{Th}  \tenss{N} {\rm d}\Omega,\qquad
+\end{eqnarray}
+\begin{eqnarray}
+\tenss{C}_{HT} = \int_{\Omega} \tenss{N}^T c_{hT}  \tenss{N} {\rm d}\Omega,\qquad
+\tenss{C}_{HH} = \int_{\Omega} \tenss{N}^T c_{hh}  \tenss{N} {\rm d}\Omega,\qquad
+\end{eqnarray}
+\begin{eqnarray}
+\tenss{q}_T = \int_{\Gamma_2} \tenss{N}^T  \overline{q}_{T}{\rm d}\Gamma,\qquad
+\tenss{q}_H = \int_{\Gamma_2} \tenss{N}^T  \overline{q}^{h}{\rm d}\Gamma,\qquad
+\end{eqnarray}
+
+where
+
+\bea
+k_{TT} &=& \lambda(w) + h_v \cdot \delta_p(T) \cdot H \cdot  \frac{\Delta p_{sat}}{\Delta T}(T),\\
+k_{TH} &=& h_v \cdot \delta_p(T) \cdot p_{sat}(T),\\
+k_{HT} &=& \delta_p(T) \cdot H \cdot \frac{\Delta p_{sat}}{\Delta T}(T),\\
+k_{HH} &=& D_w(H) \cdot \frac{\Delta w}{\Delta H}(H) + \delta_p(T) \cdot p_{sat}(T),\\
+c_{TT} &=& C_s \cdot \rho + C_w \cdot w,\\
+c_{TH} &=& 0,\\
+c_{HT} &=& 0,\\
+c_{HH} &=& \frac{\Delta w}{\Delta H}(H).
+\eea
+
+The model parameters are summarized in Tab.~\ref{hemokunzel_table}.
+\begin{table}[!htb]
+%\begin{center}
+\begin{mmt}
+\hline
+Description & Coupled heat and mass transfer material model\\
+\hline
+Record Format & \descitem{HeMoKunzel} \elemparam{num}{in} \elemparam{d}{rn}
+\elemparam{iso\_type}{in}
+\elemparam{iso\_wh}{rn}
+\elemparam{mu}{rn}
+\elemparam{permeability\_type}{in}
+\elemparam{A}{rn}
+\elemparam{lambda0}{rn}
+\elemparam{b}{rn}
+\elemparam{rho}{rn}
+\elemparam{cs}{rn}
+\optelemparam{pl}{rn}
+\optelemparam{rhoH2O}{rn}
+\optelemparam{cw}{rn}
+\optelemparam{hv}{rn}\\
+Parameters &-\param{num} material model number\\
+&-\param{d} material density\\
+&-\param{iso\_type}=0 is isotherm from Hansen needing \param{iso\_n}, \param{iso\_a}, =1 is Kunzel which needs \param{iso\_b}\\
+&-\param{iso\_wh} maximum adsorbed water content [kg/m$^3$]\\
+&-\param{mu} water vapor diffusion resistance [-]\\
+&-\param{permeability\_type} =0 is Multilin\_h needing \param{perm\_h}, \param{perm\_Dw(h)}, =1 is Multilin\_wV needs \param{perm\_wV}, \param{perm\_DwwV}, =2 is Kunzelperm needs \param{A} as water absorption coefficient [kg/m/s$^0.5$]\\
+&-\param{lambda0}{rn} thermal conductivity [W/m/K]\\
+&-\param{b} thermal conductivity supplement [-]\\
+&-\param{rho} bulk density of dry building material [kg/m$^3$]\\
+&-\param{cs} specific heat capacity of the building material [J/kg/K]\\
+&-\optparam{pl} ambient air pressure [Pa], default = 101325\\
+&-\optparam{rhoH2O} water density [kg/m3], default = 1000\\
+&-\optparam{cw} specific heat capacity of liquid water, default = 4183\\
+&-\optparam{hv} latent heat of water phase change [J/kg], default = 2.5e+6\\
+Supported modes& \_2dHeMo, \_3dHeMo\\
+\hline
+\end{mmt}
+\caption{Coupled heat and mass transfer material model Kunzel - summary.}
+\label{hemokunzel_table}
 %\end{center}
 \end{table}
 
