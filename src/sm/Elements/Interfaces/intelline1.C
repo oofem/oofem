@@ -178,7 +178,7 @@ IntElLine1 :: giveInterpolation() const
 
 
 #ifdef __OOFEG
-void InterfaceElem2dLin :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+void IntElLine1 :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -203,7 +203,7 @@ void InterfaceElem2dLin :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tS
 }
 
 
-void InterfaceElem2dLin :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+void IntElLine1 :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -239,10 +239,10 @@ void InterfaceElem2dLin :: drawDeformedGeometry(oofegGraphicContext &gc, TimeSte
 }
 
 
-void InterfaceElem2dLin :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
+void IntElLine1 :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int indx, result = 0;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     FloatArray gcoord(3), v1;
     WCRec p [ 1 ];
     GraphicObj *go;

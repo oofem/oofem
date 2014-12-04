@@ -179,7 +179,7 @@ IntElSurfTr1 :: computeLocalCoordinates(FloatArray &answer, const FloatArray &gc
 
 ///@todo this code not tested, onlu copied from interfaceelem3dtrlin.C //JB
 #ifdef __OOFEG
-void InterfaceElement3dTrLin :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+void IntElSurfTr1 :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -210,11 +210,11 @@ void InterfaceElement3dTrLin :: drawRawGeometry(oofegGraphicContext &gc, TimeSte
 }
 
 
-void InterfaceElement3dTrLin :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+void IntElSurfTr1 :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 { }
 
 
-void InterfaceElement3dTrLin :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
+void IntElSurfTr1 :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 { }
 
 #endif

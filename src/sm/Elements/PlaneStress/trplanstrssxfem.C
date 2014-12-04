@@ -30,7 +30,6 @@
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
  #include "xfem/patchintegrationrule.h"
- #include "rcm2.h"
 #endif
 
 
@@ -245,7 +244,7 @@ void TrPlaneStress2dXFEM :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
             indx = gc.giveIntVarIndx();
 
             for ( auto &ir: integrationRulesArray ) {
-                PatchIntegrationRule *iRule = dynamic_cast< PatchIntegrationRule * >(ir);
+                PatchIntegrationRule *iRule = dynamic_cast< PatchIntegrationRule * >(ir.get());
 
  #if 0
                 val = iRule->giveMaterial();

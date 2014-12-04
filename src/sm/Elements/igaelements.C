@@ -208,7 +208,7 @@ void BsplinePlaneStressElement :: drawScalar(oofegGraphicContext &gc, TimeStep *
 
                         // create a dummy ip's
                         FloatArray *cc = new FloatArray(c [ k ]);         // constructor of gp does not make its own copy
-                        GaussPoint gp(iRule, 999, cc, 1.0, _PlaneStress);
+                        GaussPoint gp(iRule.get(), 999, cc, 1.0, _PlaneStress);
  #ifdef COMPUTE_STRAIN
                         this->computeStrainVector(val, & gp, tStep, u);
  #endif
@@ -320,7 +320,7 @@ void NURBSPlaneStressElement :: drawScalar(oofegGraphicContext &gc, TimeStep *tS
 
                         // create a dummy ip's
                         FloatArray *cc = new FloatArray(c [ k ]);         // constructor of gp does not make its own copy
-                        GaussPoint gp(iRule, 999, cc, 1.0, _PlaneStress);
+                        GaussPoint gp(iRule.get(), 999, cc, 1.0, _PlaneStress);
  #ifdef COMPUTE_STRAIN
                         this->computeStrainVector(val, & gp, tStep, u);
  #endif
@@ -523,7 +523,7 @@ void TSplinePlaneStressElement :: drawScalar(oofegGraphicContext &gc, TimeStep *
 
                         // create a dummy ip's
                         FloatArray *cc = new FloatArray(c [ k ]);         // constructor of gp does not make its own copy
-                        GaussPoint gp(iRule, 999, cc, 1.0, _PlaneStress);
+                        GaussPoint gp(iRule.get(), 999, cc, 1.0, _PlaneStress);
  #ifdef COMPUTE_STRAIN
                         this->computeStrainVector(val, & gp, tStep, u);
  #endif
@@ -715,7 +715,7 @@ void NURBSSpace3dElement :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
                         for ( k = 0; k < 8; k++ ) {
                             // create a dummy ip's
                             FloatArray *cc = new FloatArray(c [ k ]);         // constructor of gp does not make its own copy
-                            GaussPoint gp(iRule, 999, cc, 1.0, _3dMat);
+                            GaussPoint gp(iRule.get(), 999, cc, 1.0, _3dMat);
  #ifdef COMPUTE_STRAIN
                             this->computeStrainVector(val, & gp, tStep, u);
  #endif
