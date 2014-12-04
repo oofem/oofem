@@ -54,11 +54,10 @@
 #include "contextioresulttype.h"
 #include "unknownnumberingscheme.h"
 #include "metastep.h"
+#include "parallelcontext.h"
 
 #ifdef __PARALLEL_MODE
  #include "parallel.h"
- #include "problemcommunicatormode.h"
- #include "parallelcontext.h"
 #endif
 
 #include <string>
@@ -178,7 +177,6 @@ public:
 class OOFEM_EXPORT EngngModel
 {
 public:
-#ifdef __PARALLEL_MODE
     enum EngngModel_UpdateMode { EngngModel_Unknown_Mode, EngngModel_SUMM_Mode, EngngModel_SET_Mode };
     enum EngngModelCommType { PC_default, PC_nonlocal };
     /// Helper struct to pass array and numbering scheme as a single argument.
@@ -186,7 +184,6 @@ public:
         FloatArray *array;
         const UnknownNumberingScheme *numbering;
     };
-#endif
 
     /**
      * Means to choose methods for finding a good initial guess.
@@ -271,15 +268,15 @@ protected:
     /// Error estimator. Useful for adaptivity, or simply printing errors output.
     ErrorEstimator *defaultErrEstimator;
 
-#ifdef __PARALLEL_MODE
     /// Domain rank in a group of collaborating processes (0..groupSize-1).
     int rank;
     /// Total number of collaborating processes.
     int numProcs;
+    /// Flag indicating if nonlocal extension active, which will cause data to be sent between shared elements before computing the internal forces.
+    int nonlocalExt;
+#ifdef __PARALLEL_MODE
     /// Processor name.
     char processor_name [ PROCESSOR_NAME_LENGTH ];
-    /// Communicator mode. Determines current strategy used.
-    ProblemCommunicatorMode commMode;
  #ifdef __USE_MPI
     /// Communication object for this engineering model.
     MPI_Comm comm;
@@ -301,15 +298,13 @@ protected:
     /// Communicator.
     ProblemCommunicator *communicator;
 
-    /// Flag indicating if nonlocal extension active, which will cause data to be sent between shared elements before computing the internal forces.
-    int nonlocalExt;
     /// NonLocal Communicator. Necessary when nonlocal constitutive models are used.
     ProblemCommunicator *nonlocCommunicator;
+#endif
     /// Message tags
     enum { InternalForcesExchangeTag, MassExchangeTag, LoadExchangeTag, ReactionExchangeTag, RemoteElementExchangeTag };
     /// List where parallel contexts are stored.
     std :: vector< ParallelContext > parallelContextList;
-#endif
 
 public:
     /**
@@ -318,8 +313,8 @@ public:
     EngngModel(int i, EngngModel * _master = NULL);
     /// Destructor.
     virtual ~EngngModel();
-	EngngModel(const EngngModel &) = delete;
-	EngngModel &operator=(const EngngModel &) = delete;
+    EngngModel(const EngngModel &) = delete;
+    EngngModel &operator=(const EngngModel &) = delete;
     /**
      * Service for accessing particular problem domain.
      * Generates error if no such domain is defined.
@@ -414,6 +409,14 @@ public:
     virtual void resetRenumberFlag() { this->renumberFlag = false; }
 
     /**
+     * Returns the user time of the current simulation step in seconds.
+     */
+    double giveSolutionStepTime();
+    /**
+     * Returns the real and user time for the analysis.
+     */
+    void giveAnalysisTime(int &rhrs, int &rmin, int &rsec, int &uhrs, int &umin, int &usec);
+    /**
      * Performs analysis termination after finishing analysis.
      */
     void terminateAnalysis();
@@ -500,11 +503,9 @@ public:
     /// Only relevant for eigen value analysis. Otherwise returns zero.
     virtual double giveEigenValue(int eigNum) { return 0.0; }
 
-#ifdef __PARALLEL_MODE
-    /// Returns the communication object of reciever.
-    MPI_Comm giveParallelComm() { return this->comm; }
     /**
      * Exchanges necessary remote DofManagers data.
+     * @todo The name and description of this function is misleading, the function really just accumulates the total values for shared "equations".
      * @param answer Array with collected values.
      * @param ExchangeTag Exchange tag used by communicator.
      * @return Nonzero if successful.
@@ -518,6 +519,10 @@ public:
      * @return Nonzero if successful.
      */
     int exchangeRemoteElementData(int ExchangeTag);
+
+#ifdef __PARALLEL_MODE
+    /// Returns the communication object of reciever.
+    MPI_Comm giveParallelComm() { return this->comm; }
     /**
      * Packs data of local element to be received by their remote counterpart on remote partitions.
      * Remote elements are introduced when nonlocal constitutive models are used, in order to
@@ -559,8 +564,6 @@ public:
      */
     int unpackDofManagers(ArrayWithNumbering *dest, ProcessCommunicator &processComm);
 
-    void initializeCommMaps(bool forceInit = false);
-
     ProblemCommunicator *giveProblemCommunicator(EngngModelCommType t) {
         if ( t == PC_default ) {
             return communicator;
@@ -571,6 +574,7 @@ public:
         }
     }
 #endif
+    void initializeCommMaps(bool forceInit = false);
     /**
      * Initializes whole problem according to its description stored in inputStream.
      * Prints header, opens the outFileName, instanciate itself the receiver using
@@ -865,7 +869,6 @@ public:
      */
     virtual void giveElementCharacteristicVector(FloatArray &answer, int num, CharType type, ValueModeType mode, TimeStep *tStep, Domain *domain);
 
-#ifdef __PARALLEL_MODE
     /**
      * Returns the parallel context corresponding to given domain (n) and unknown type
      * Default implementation returns i-th context from parallelContextList.
@@ -876,7 +879,6 @@ public:
      * for context creation.
      */
     virtual void initParallelContexts();
-#endif
 
     /**
      * Assembles characteristic matrix of required type into given sparse matrix.
@@ -968,23 +970,25 @@ public:
      */
     void assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, CharType type, Domain *domain);
 
+
+    void assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+                                    const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
+        
 protected:
-#ifdef __PARALLEL_MODE
     /**
      * Packs receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.
      * Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
      * are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After
      * data migration and local renumbering, the solution vectors will be restored from dof dictionary data back.
      */
-    virtual void packMigratingData(TimeStep *) { }
+    virtual void packMigratingData(TimeStep *tStep) { }
     /**
      * Unpacks receiver data when rebalancing load. When rebalancing happens, the local numbering will be lost on majority of processors.
      * Instead of identifying values of solution vectors that have to be send/received and then performing renumbering, all solution vectors
      * are assumed to be stored in dof dictionaries before data migration. Then dofs will take care themselves for packing and unpacking. After
      * data migration and local renumbering, the solution vectors will be restored from dof dictionary data back.
      */
-    virtual void unpackMigratingData(TimeStep *) { }
-#endif
+    virtual void unpackMigratingData(TimeStep *tStep) { }
 
 public:
     /**
@@ -1036,7 +1040,12 @@ public:
     /// Returns nonzero if nonlocal stiffness option activated.
     virtual int useNonlocalStiffnessOption() { return 0; }
     /// Returns true if receiver in parallel mode
-    bool isParallel() { return ( parallelFlag != 0 ); }
+    bool isParallel() const { return ( parallelFlag != 0 ); }
+    /// Returns domain rank in a group of collaborating processes (0..groupSize-1)
+    int giveRank() const { return rank; }
+    /// Returns the number of collaborating processes.
+    int giveNumberOfProcesses() const { return numProcs; }
+
 
     /**
      * Indicates type of non linear computation (total or updated formulation).
@@ -1065,7 +1074,6 @@ public:
     virtual double giveVariableScale(VarScaleType varId) { return 1.0; }
 
 
-#ifdef __PARALLEL_MODE
     /**
      * Determines the space necessary for send/receive buffer.
      * It uses related communication map pattern to determine the maximum size needed.
@@ -1075,7 +1083,8 @@ public:
      * to estimate the size of pack/unpack buffer accordingly.
      * @return Upper bound of space needed.
      */
-    virtual int estimateMaxPackSize(IntArray &commMap, CommunicationBuffer &buff, int packUnpackType) { return 0; }
+    virtual int estimateMaxPackSize(IntArray &commMap, DataStream &buff, int packUnpackType) { return 0; }
+#ifdef __PARALLEL_MODE
     /**
      * Recovers the load balance between processors, if needed. Uses load balancer monitor and load balancer
      * instances to decide if rebalancing is needed (monitor) and to repartition the domain (load balancer).
@@ -1088,18 +1097,11 @@ public:
     virtual LoadBalancer *giveLoadBalancer() { return NULL; }
     /** Returns reference to receiver's load balancer monitor. */
     virtual LoadBalancerMonitor *giveLoadBalancerMonitor() { return NULL; }
-
-    /// Returns domain rank in a group of collaborating processes (0..groupSize-1)
-    int giveRank() { return rank; }
-    /// Returns the number of collaborating processes.
-    int giveNumberOfProcesses() { return numProcs; }
+#endif
     /// Request domain rank and problem size
     void initParallel();
     /// Returns reference to itself -> required by communicator.h
     EngngModel *giveEngngModel() { return this; }
-    /// Returns Communicator mode. Determines current domain-decomposition strategy used.
-    ProblemCommunicatorMode giveProblemCommMode() { return this->commMode; }
-#endif
 
 #ifdef __OOFEG
     virtual void drawYourself(oofegGraphicContext &gc);

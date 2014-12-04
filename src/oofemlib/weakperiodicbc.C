@@ -133,7 +133,7 @@ WeakPeriodicBoundaryCondition :: initializeFrom(InputRecord *ir)
         gammaDman->appendDof( new MasterDof( gammaDman, ( DofIDItem )dofid ) );
     }
 
-    //	computeOrthogonalBasis();
+    //computeOrthogonalBasis();
 
     return IRRT_OK;
 }
@@ -349,7 +349,7 @@ void WeakPeriodicBoundaryCondition :: updateSminmax()
 void WeakPeriodicBoundaryCondition :: addElementSide(int newElement, int newSide)
 {
     //printf ("Add element %u, side %u\n", newElement, newSide);
-    //	_error("Not supported");
+    //_error("Not supported");
 
     FloatArray normalNew, normal0;
     int addToList = 0;
@@ -428,7 +428,7 @@ void WeakPeriodicBoundaryCondition :: computeElementTangent(FloatMatrix &B, Elem
 
 void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
-    if ( type != StiffnessMatrix ) {
+    if ( type != TangentStiffnessMatrix && type != StiffnessMatrix ) {
         return;
     }
 
@@ -491,6 +491,7 @@ void WeakPeriodicBoundaryCondition :: assemble(SparseMtrx *answer, TimeStep *tSt
             answer->assemble(r_loc, c_sideLoc, BT);
         }
     }
+
 }
 
 double WeakPeriodicBoundaryCondition :: computeBaseFunctionValue2D(int baseID, FloatArray coordinate)

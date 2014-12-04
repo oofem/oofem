@@ -14,16 +14,11 @@
 #include <cmath>
 
 namespace oofem {
+PrescribedGradientBC :: PrescribedGradientBC(int n, Domain *d) : ActiveBoundaryCondition(n, d) {}
 
-PrescribedGradientBC::PrescribedGradientBC(int n, Domain * d) : ActiveBoundaryCondition(n, d) {
+PrescribedGradientBC :: ~PrescribedGradientBC() {}
 
-}
-
-PrescribedGradientBC::~PrescribedGradientBC() {
-
-}
-
-IRResultType PrescribedGradientBC::initializeFrom(InputRecord *ir)
+IRResultType PrescribedGradientBC :: initializeFrom(InputRecord *ir)
 {
     IRResultType result;                   // Required by IR_GIVE_FIELD macro
 
@@ -38,9 +33,9 @@ IRResultType PrescribedGradientBC::initializeFrom(InputRecord *ir)
     return IRRT_OK;
 }
 
-void PrescribedGradientBC::giveInputRecord(DynamicInputRecord &input)
+void PrescribedGradientBC :: giveInputRecord(DynamicInputRecord &input)
 {
-	GeneralBoundaryCondition :: giveInputRecord(input);
+    GeneralBoundaryCondition :: giveInputRecord(input);
     input.setField(mGradient, _IFT_PrescribedGradientBC_gradient);
     input.setField(mCenterCoord, _IFT_PrescribedGradientBC_centercoords);
 }
@@ -48,18 +43,23 @@ void PrescribedGradientBC::giveInputRecord(DynamicInputRecord &input)
 void PrescribedGradientBC :: giveGradientVoigt(FloatArray &oGradient) const
 {
     int numRows = mGradient.giveNumberOfRows();
-    switch(numRows) {
+    switch ( numRows ) {
     case 1:
-        oGradient = FloatArray{mGradient.at(1,1)};
+        oGradient = FloatArray {
+            mGradient.at(1, 1)
+        };
         break;
     case 2:
         // Do not assume symmetry
-        oGradient = {mGradient.at(1,1), mGradient.at(2,2), mGradient.at(1,2), mGradient.at(2,1)};
+        oGradient = {
+            mGradient.at(1, 1), mGradient.at(2, 2), mGradient.at(1, 2), mGradient.at(2, 1)
+        };
         break;
     case 3:
         OOFEM_ERROR("PrescribedGradientBC :: giveGradientVoigt() not implemented for 3 rows.\n")
         break;
-    };
+    }
+    ;
 }
 
 double PrescribedGradientBC :: domainSize()
@@ -78,7 +78,4 @@ double PrescribedGradientBC :: domainSize()
     }
     return fabs(domain_size / nsd);
 }
-
-
-
 } /* namespace oofem */

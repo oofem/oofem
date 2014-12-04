@@ -80,12 +80,13 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
         OOFEM_ERROR("matrices size mismatch");
     }
 
-    if ( a->giveType() != SMT_PetscMtrx || b->giveType() != SMT_PetscMtrx ) {
+    A = dynamic_cast< PetscSparseMtrx * >(a);
+    B = dynamic_cast< PetscSparseMtrx * >(b);
+
+    if ( !A || !B ) {
         OOFEM_ERROR("PetscSparseMtrx Expected");
     }
 
-    A = static_cast< PetscSparseMtrx * >(a);
-    B = static_cast< PetscSparseMtrx * >(b);
     size = engngModel->giveParallelContext( A->giveDomainIndex() )->giveNumberOfNaturalEqs(); // A->giveLeqs();
 
     // check array for storing eigenvalues
@@ -123,12 +124,12 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
          * Create eigensolver context
          */
 #ifdef __PARALLEL_MODE
-        ierr = EPSCreate(PETSC_COMM_WORLD, & eps);
-        CHKERRQ(ierr);
+        MPI_Comm comm = engngModel->giveParallelComm();
 #else
-        ierr = EPSCreate(PETSC_COMM_SELF, & eps);
-        CHKERRQ(ierr);
+        MPI_Comm comm = PETSC_COMM_SELF;
 #endif
+        ierr = EPSCreate(comm, & eps);
+        CHKERRQ(ierr);
         epsInit = true;
     }
 
@@ -184,9 +185,7 @@ SLEPcSolver :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatri
         ierr = MatGetVecs(* B->giveMtrx(), PETSC_NULL, & Vr);
         CHKERRQ(ierr);
 
-#ifdef __PARALLEL_MODE
         FloatArray Vr_loc;
-#endif
 
         for ( int i = 0; i < nconv && i < nroot; i++ ) {
             ierr = EPSGetEigenpair(eps, nconv - i - 1, & kr, PETSC_NULL, Vr, PETSC_NULL);

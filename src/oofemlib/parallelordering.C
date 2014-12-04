@@ -242,7 +242,7 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
     CommunicationBuffer **buffs = new CommunicationBuffer * [ nproc ];
     for ( int p = 0; p < nproc; p++ ) {
         buffs [ p ] = new StaticCommunicationBuffer(MPI_COMM_WORLD, 0);
-        buffs [ p ]->resize( buffs [ p ]->givePackSize(MPI_INT, 1) * sizeToSend(p) );
+        buffs [ p ]->resize( buffs [ p ]->givePackSizeOfInt(1) * sizeToSend(p) );
 
 #if 0
         OOFEM_LOG_INFO( "[%d]Natural2GlobalOrdering :: init: Send buffer[%d] size %d\n",
@@ -272,13 +272,13 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
                     OOFEM_LOG_INFO("[%d]Natural2GlobalOrdering :: init: Sending localShared node %d[%d] to proc %d\n",
                                    myrank, i, dman->giveGlobalNumber(), p);
 #endif
-                    buffs [ p ]->packInt( dman->giveGlobalNumber() );
+                    buffs [ p ]->write( dman->giveGlobalNumber() );
                     for ( Dof *dof: *dman ) {
                         if ( dof->isPrimaryDof() ) {
                             int eq = dof->giveEquationNumber(n);
 
                             if ( eq ) {
-                                buffs [ p ]->packInt( locGlobMap.at(eq) );
+                                buffs [ p ]->write( locGlobMap.at(eq) );
                             }
                         }
                     }
@@ -313,10 +313,10 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
                     minrank = min( minrank, plist->at(j) );
                 }
                 if ( minrank == myrank ) { // do send
-                    buffs [ p ]->packInt( dman->giveGlobalNumber() );
+                    buffs [ p ]->write( dman->giveGlobalNumber() );
                     for ( Dof *dof: *dman ) {
                         if ( dof->isPrimaryDof() ) {
-                            buffs [ p ]->packInt( locGlobMap.at( dof->giveEquationNumber() ) );
+                            buffs [ p ]->write( locGlobMap.at( dof->giveEquationNumber() ) );
                         }
                     }
                 }
@@ -331,7 +331,7 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
     CommunicationBuffer **rbuffs = new CommunicationBuffer * [ nproc ];
     for ( int p = 0; p < nproc; p++ ) {
         rbuffs [ p ] = new StaticCommunicationBuffer(MPI_COMM_WORLD, 0);
-        rbuffs [ p ]->resize( rbuffs [ p ]->givePackSize(MPI_INT, 1) * sizeToRecv(p) );
+        rbuffs [ p ]->resize( rbuffs [ p ]->givePackSizeOfInt(1) * sizeToRecv(p) );
 #if 0
         OOFEM_LOG_INFO( "[%d]Natural2GlobalOrdering :: init: Receive buffer[%d] size %d\n",
                        myrank, p, sizeToRecv(p) );
@@ -360,7 +360,7 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
                     int nite = nrecToReceive(p);
                     int shdm, ldm;
                     for ( int i = 1; i <= nite; i++ ) {
-                        rbuffs [ p ]->unpackInt(shdm);
+                        rbuffs [ p ]->read(shdm);
 
 #if 0
                         OOFEM_LOG_INFO("[%d]Natural2GlobalOrdering :: init: Received shared node [%d] from proc %d\n",
@@ -382,7 +382,7 @@ Natural2GlobalOrdering :: init(EngngModel *emodel, int di, const UnknownNumberin
 
                                 if ( eq ) {
                                     int val;
-                                    rbuffs [ p ]->unpackInt(val);
+                                    rbuffs [ p ]->read(val);
                                     locGlobMap.at(eq) = val;
                                 }
                             }

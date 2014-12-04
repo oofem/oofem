@@ -48,7 +48,6 @@
 namespace oofem {
 REGISTER_BoundaryCondition(LinearConstraintBC);
 
-
 LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondition(n, d)
 {
     this->md = new Node(0, domain);
@@ -57,6 +56,12 @@ LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondi
     this->md->appendDof( new MasterDof( this->md, ( DofIDItem ) ( d->giveNextFreeDofID() ) ) );
     this->lhsType.clear();
     this->rhsType.clear();
+}
+
+
+LinearConstraintBC :: ~LinearConstraintBC()
+{
+    delete this->md;
 }
 
 
@@ -201,32 +206,32 @@ void LinearConstraintBC :: giveLocationArrays(std :: vector< IntArray > &rows, s
 
 
 contextIOResultType
-LinearConstraintBC :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+LinearConstraintBC :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( mode & CM_Definition ) {
-        if ( ( iores = weights.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = weights.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = weightsTf.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = weightsTf.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = dofmans.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = dofmans.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = dofs.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = dofs.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( !stream->write(& rhs, 1) ) {
+        if ( !stream.write(rhs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
-        if ( !stream->write(& rhsTf, 1) ) {
+        if ( !stream.write(rhsTf) ) {
             THROW_CIOERR(CIO_IOERR);
         }
-        if ( ( iores = lhsType.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = lhsType.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = rhsType.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = rhsType.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -240,32 +245,32 @@ LinearConstraintBC :: saveContext(DataStream *stream, ContextMode mode, void *ob
 
 
 contextIOResultType
-LinearConstraintBC :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+LinearConstraintBC :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( mode & CM_Definition ) {
-        if ( ( iores = weights.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = weights.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = weightsTf.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = weightsTf.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = dofmans.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = dofmans.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = dofs.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = dofs.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( !stream->read(& rhs, 1) ) {
+        if ( !stream.read(rhs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
-        if ( !stream->read(& rhsTf, 1) ) {
+        if ( !stream.read(rhsTf) ) {
             THROW_CIOERR(CIO_IOERR);
         }
-        if ( ( iores = lhsType.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = lhsType.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
-        if ( ( iores = rhsType.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = rhsType.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

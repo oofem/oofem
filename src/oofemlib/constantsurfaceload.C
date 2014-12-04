@@ -53,7 +53,7 @@ ConstantSurfaceLoad :: initializeFrom(InputRecord *ir)
 }
 
 void
-ConstantSurfaceLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
+ConstantSurfaceLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
 {
     // we overload general implementation on the boundary load level due
     // to implementation efficiency

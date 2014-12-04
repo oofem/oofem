@@ -114,7 +114,7 @@ BoundaryCondition :: scale(double s)
 
 
 contextIOResultType
-BoundaryCondition :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+BoundaryCondition :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores = GeneralBoundaryCondition :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -122,7 +122,7 @@ BoundaryCondition :: saveContext(DataStream *stream, ContextMode mode, void *obj
     }
 
     if ( mode & CM_Definition ) {
-      if ( (iores = values.storeYourself(stream, mode) ) != CIO_OK ) {
+      if ( (iores = values.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
@@ -132,7 +132,7 @@ BoundaryCondition :: saveContext(DataStream *stream, ContextMode mode, void *obj
 
 
 contextIOResultType
-BoundaryCondition :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+BoundaryCondition :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores = GeneralBoundaryCondition :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
@@ -140,7 +140,7 @@ BoundaryCondition :: restoreContext(DataStream *stream, ContextMode mode, void *
     }
 
     if ( mode & CM_Definition ) {
-      if ( (iores = values.restoreYourself(stream, mode) ) != CIO_OK ) {
+      if ( (iores = values.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }

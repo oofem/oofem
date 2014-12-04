@@ -98,7 +98,7 @@ public:
      * @return contextIOResultType.
      * @exception Throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode);
     /**
      * Restores the receiver state previously written in stream.
      * Reads the FEMComponent class-id in order to allow test consistency.
@@ -107,7 +107,7 @@ public:
      * @return contextIOResultType.
      * @exception Throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode);
 
 
     /**

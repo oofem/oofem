@@ -286,7 +286,7 @@ int
 main(int argc, char *argv[])
 {
     int inputFileFlag = 0;
-    //int rank=0;
+    int rank = 0;
     std :: stringstream inputFileName;
     char buff [ 20 ];
     unsigned long mask = 0;
@@ -296,12 +296,9 @@ main(int argc, char *argv[])
     // print prg header on stdout
     printf("%s", PRG_HEADER_SM);
 
-#ifdef __PARALLEL_MODE
-    int rank = 0;
- #ifdef __USE_MPI
+#ifdef __USE_MPI
     MPI_Init(& argc, & argv);
     MPI_Comm_rank(MPI_COMM_WORLD, & rank);
- #endif
 #endif
 
 #ifdef __PETSC_MODULE
@@ -342,12 +339,9 @@ main(int argc, char *argv[])
         inputFileName << input;
     }
 
-#ifdef __PARALLEL_MODE
     if ( parallelFlag ) {
         inputFileName << "." << rank;
     }
-
-#endif
 
     OOFEMTXTDataReader dr( inputFileName.str ( ).c_str() );
 
@@ -423,7 +417,7 @@ main(int argc, char *argv[])
 #ifdef __PETSC_MODULE
     PetscFinalize();
 #endif
-#ifdef __PARALLEL_MODE
+#ifdef __USE_MPI
     MPI_Finalize();
 #endif
 
@@ -2784,7 +2778,7 @@ void debug_run(Widget w, XtPointer ptr, XtPointer call_data)
  #ifdef __PETSC_MODULE
         PetscFinalize();
  #endif
- #ifdef __PARALLEL_MODE
+ #ifdef __USE_MPI
         MPI_Finalize();
  #endif
     }

@@ -208,7 +208,7 @@ int SlaveDof :: __givePrescribedEquationNumber()
     return 0;
 }
 
-contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType SlaveDof :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores = Dof :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -216,37 +216,32 @@ contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode
     }
 
     if ( mode & CM_Definition ) {
-        if ( !stream->write(& countOfMasterDofs, 1) ) {
+        if ( !stream.write(countOfMasterDofs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->write(& countOfPrimaryMasterDofs, 1) ) {
+        if ( !stream.write(countOfPrimaryMasterDofs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( ( iores = masterContribution.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = masterContribution.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
-        int _idof, _idofmanNum;
-        for ( _idof = 1; _idof <= countOfMasterDofs; _idof++ ) {
-#ifdef __PARALLEL_MODE
+        for ( int _idof = 1; _idof <= countOfMasterDofs; _idof++ ) {
+            int _idofmanNum;
             if ( mode & CM_DefinitionGlobal ) {
                 _idofmanNum = dofManager->giveDomain()->giveDofManager( masterDofMans.at(_idof) )->giveGlobalNumber();
             } else {
                 _idofmanNum = masterDofMans.at(_idof);
             }
 
-#else
-            _idofmanNum = masterDofMans.at(_idof);
-#endif
-
-            if ( !stream->write(& _idofmanNum, 1) ) {
+            if ( !stream.write(_idofmanNum) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
         }
 
-        if ( ( iores = dofIDs.storeYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = dofIDs.storeYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     } // if ( mode & CM_Definition )
@@ -254,7 +249,7 @@ contextIOResultType SlaveDof :: saveContext(DataStream *stream, ContextMode mode
     return CIO_OK;
 }
 
-contextIOResultType SlaveDof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType SlaveDof :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores = Dof :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
@@ -262,15 +257,15 @@ contextIOResultType SlaveDof :: restoreContext(DataStream *stream, ContextMode m
     }
 
     if ( mode & CM_Definition ) {
-        if ( !stream->read(& countOfMasterDofs, 1) ) {
+        if ( !stream.read(countOfMasterDofs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(& countOfPrimaryMasterDofs, 1) ) {
+        if ( !stream.read(countOfPrimaryMasterDofs) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( ( iores = masterContribution.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = masterContribution.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
 
@@ -278,12 +273,12 @@ contextIOResultType SlaveDof :: restoreContext(DataStream *stream, ContextMode m
 
         masterDofMans.resize(countOfMasterDofs);
         for ( _idof = 1; _idof <= countOfMasterDofs; _idof++ ) {
-            if ( !stream->read(& masterDofMans.at(_idof), 1) ) {
+            if ( !stream.read(masterDofMans.at(_idof)) ) {
                 THROW_CIOERR(CIO_IOERR);
             }
         }
 
-        if ( ( iores = dofIDs.restoreYourself(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = dofIDs.restoreYourself(stream) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     } // if ( mode & CM_Definition )

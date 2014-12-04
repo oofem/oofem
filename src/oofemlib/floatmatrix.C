@@ -105,10 +105,6 @@ extern void dscal_(const int *n, const double *alpha, const double *x, const int
 #endif
 
 
-#ifdef __PARALLEL_MODE
- #include "combuff.h"
-#endif
-
 namespace oofem {
 FloatMatrix :: FloatMatrix(const FloatArray &vector, bool transpose)
 //
@@ -1427,30 +1423,29 @@ double FloatMatrix :: giveDeterminant() const
     return 0.;
 }
 
+
+void FloatMatrix :: beDiagonal(const FloatArray &diag)
+{
+    int n = diag.giveSize();
+    this->resize(n, n);
+    for ( int i = 0; i < n; ++i ) {
+        (*this)(i, i) = diag[i];
+    }
+}
+
+
 double FloatMatrix :: giveTrace() const
-// Returns the trace (sum of diagonal terms) of the receiver.
 {
 #  ifdef DEBUG
     if ( !this->isSquare() ) {
         OOFEM_ERROR("cannot compute the trace of a non-square %d by %d matrix", nRows, nColumns);
     }
 #  endif
-
-    if ( nRows == 1 ) {
-        return values [ 0 ];
-    } else if ( nRows == 2 ) {
-        return ( values [ 0 ] + values [ 3 ] );
-    } else if ( nRows == 3 ) {
-        return ( values [ 0 ] + values [ 4 ] + values [ 8 ] );
-    } else {
-        double answer = 0.;
-        for ( int k = 0; k < nRows; k++ ) {
-            answer += values [ k * ( nRows + 1 ) ];
-        }
-        return answer;
+    double answer = 0.;
+    for ( int k = 0; k < nRows; k++ ) {
+        answer += values [ k * ( nRows + 1 ) ];
     }
-
-    return 0.;
+    return answer;
 }
 
 
@@ -1647,11 +1642,11 @@ void FloatMatrix :: beMatrixForm(const FloatArray &aArray)
 void FloatMatrix :: changeComponentOrder()
 {
     // Changes index order between abaqus <-> OOFEM
-    //#  ifdef DEBUG
-    //	if ( nRows != 6 || nColumns != 6 ) {
-    //		OOFEM_ERROR("matrix dimension is not 6x6");
-    //	}
-    //#  endif
+//#  ifdef DEBUG
+//    if ( nRows != 6 || nColumns != 6 ) {
+//        OOFEM_ERROR("matrix dimension is not 6x6");
+//    }
+//#  endif
 
     if ( nRows == 6 && nColumns == 6 ) {
         // This could probably be done more beautifully + efficiently.
@@ -1672,7 +1667,7 @@ void FloatMatrix :: changeComponentOrder()
         std :: swap( this->at(4, 5), this->at(6, 5) );
     } else if ( nRows == 9 && nColumns == 9 ) {
         // OOFEM:           11, 22, 33, 23, 13, 12, 32, 31, 21
-        // UMAT:			11, 22, 33, 12, 13, 23, 32, 21, 31
+        // UMAT:            11, 22, 33, 12, 13, 23, 32, 21, 31
         const int abq2oo [ 9 ] = {
             1,  2,  3,  6,  5,  4,  7,  9,  8
         };
@@ -1805,23 +1800,23 @@ bool FloatMatrix :: computeEigenValuesSymmetric(FloatArray &lambda, FloatMatrix 
 }
 #endif
 
-contextIOResultType FloatMatrix :: storeYourself(DataStream *stream, ContextMode mode)
+contextIOResultType FloatMatrix :: storeYourself(DataStream &stream) const
 // writes receiver's binary image into stream
 // use id to distinguish some instances
 // return value >0 success
 //              =0 file i/o error
 {
     // write size
-    if ( !stream->write(& nRows, 1) ) {
+    if ( !stream.write(nRows) ) {
         return ( CIO_IOERR );
     }
 
-    if ( !stream->write(& nColumns, 1) ) {
+    if ( !stream.write(nColumns) ) {
         return ( CIO_IOERR );
     }
 
     // write raw data
-    if ( !stream->write(this->givePointer(), nRows * nColumns) ) {
+    if ( !stream.write(this->givePointer(), nRows * nColumns) ) {
         return ( CIO_IOERR );
     }
 
@@ -1830,30 +1825,38 @@ contextIOResultType FloatMatrix :: storeYourself(DataStream *stream, ContextMode
 }
 
 
-contextIOResultType FloatMatrix :: restoreYourself(DataStream *stream, ContextMode mode)
+contextIOResultType FloatMatrix :: restoreYourself(DataStream &stream)
 // reads receiver from stream
 // warning - overwrites existing data!
 // returns 0 if file i/o error
 //        -1 if id of class id is not correct
 {
     // read size
-    if ( !stream->read(& nRows, 1) ) {
+    if ( !stream.read(nRows) ) {
         return ( CIO_IOERR );
     }
 
-    if ( !stream->read(& nColumns, 1) ) {
+    if ( !stream.read(nColumns) ) {
         return ( CIO_IOERR );
     }
 
     this->values.resize(nRows * nColumns);
 
     // read raw data
-    if ( !stream->read(this->givePointer(), nRows * nColumns) ) {
+    if ( !stream.read(this->givePointer(), nRows * nColumns) ) {
         return ( CIO_IOERR );
     }
 
     // return result back
     return CIO_OK;
+}
+
+
+int
+FloatMatrix :: givePackSize(DataStream &buff) const
+{
+    return buff.givePackSizeOfInt(1) + buff.givePackSizeOfInt(1) +
+           buff.givePackSizeOfDouble(nRows * nColumns);
 }
 
 
@@ -2028,43 +2031,6 @@ bool FloatMatrix :: jaco_(FloatArray &eval, FloatMatrix &v, int nf)
     return 0;
 } /* jaco_ */
 
-
-
-#ifdef __PARALLEL_MODE
-int
-FloatMatrix :: packToCommBuffer(CommunicationBuffer &buff) const
-{
-    int result = 1;
-    // pack size
-    result &= buff.packInt(nRows);
-    result &= buff.packInt(nColumns);
-    // pack data
-    result &= buff.packArray(this->givePointer(), nRows * nColumns);
-
-    return result;
-}
-
-int
-FloatMatrix :: unpackFromCommBuffer(CommunicationBuffer &buff)
-{
-    int newNRows, newNColumns, result = 1;
-    // unpack size
-    result &= buff.unpackInt(newNRows);
-    result &= buff.unpackInt(newNColumns);
-    // resize yourself
-    this->resize(newNRows, newNColumns);
-    result &= buff.unpackArray(this->givePointer(), newNRows * newNColumns);
-
-    return result;
-}
-
-int
-FloatMatrix :: givePackSize(CommunicationBuffer &buff)
-{
-    return buff.givePackSize(MPI_INT, 1) + buff.givePackSize(MPI_INT, 1) +
-           buff.givePackSize(MPI_DOUBLE, nRows * nColumns);
-}
-#endif
 
 #ifdef BOOST_PYTHON
 void

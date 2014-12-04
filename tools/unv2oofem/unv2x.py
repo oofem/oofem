@@ -51,9 +51,9 @@ class UNVParser:
         oofem_elemProp.append(oofem_elementProperties("LIBeam3D2",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("LIBeam3Dnl",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("LIBeam3Dnl2",oofem_elemProp[-1]))
-        #oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,2,1], [[0,2],[2,1],[1,0]],[])) #old version - current numbering of triangle nodes is clockwise, the same orientation as in OOFEM.
-        oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,1,2], [[0,1],[1,2],[2,0]],[])) #new version- UNV export in SALOME, nodes on triangular elements are numbered anti-clockwise (NETGEN output)
-        oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2DXFEM", oofem_elemProp[-1]))
+        oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,2,1], [[0,2],[2,1],[1,0]],[])) #checked - current numbering of triangle nodes is anti-clockwise, the same orientation as in OOFEM.
+        oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2DXFEM", [0,2,1], [[0,2],[2,1],[1,0]],[])) 
+        #oofem_elemProp.append(oofem_elementProperties("TrPlaneStress2D", [0,1,2], [[0,1],[1,2],[2,0]],[])) #old version of UNV export in SALOME, nodes on triangular elements are numbered clockwise
         oofem_elemProp.append(oofem_elementProperties("TrplaneStrain",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Axisymm3D",oofem_elemProp[-1]))
         oofem_elemProp.append(oofem_elementProperties("Tr1ht",oofem_elemProp[-1]))
@@ -188,14 +188,14 @@ class UNVParser:
                     print "Group %s is empty, did you remesh the object and lost the members?" % groupname
                     exit(0)
                 else:
-                    id=dataline[0]
+                    id=0 # dataline[0]
                     nitems=dataline[7]
                 nlines=(nitems+1)/2
                 # read group items
                 lst=[]
                 for i in range(nlines):
                     dat=Line2Int(file.readline())
-                    print "dat = ", dat
+                    #print "dat = ", dat
                     lst.append(dat[0:3])
                     if len(dat)>4:
                         lst.append(dat[4:7])
@@ -216,6 +216,7 @@ class UNVParser:
                     FEM.nodesets.append(nset)
                 if elset.nitems>0:
                     FEM.elemsets.append(elset)
+                #print "%u \n" % elset.id
                 FEM.nnodesets=len(FEM.nodesets)
                 FEM.nelemsets=len(FEM.elemsets)
         return FEM
@@ -280,5 +281,4 @@ if __name__=='__main__':
 
     else:
         print(helpmsg)
-
 

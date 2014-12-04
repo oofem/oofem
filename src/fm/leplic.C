@@ -83,20 +83,20 @@ LEPlicElementInterface :: isBoundary()
 
 
 contextIOResultType
-LEPlicElementInterface :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+LEPlicElementInterface :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
     // write a raw data
-    if ( !stream->write(& vof, 1) ) {
+    if ( !stream.write(vof) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& p, 1) ) {
+    if ( !stream.write(p) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = normal.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = normal.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -104,22 +104,22 @@ LEPlicElementInterface :: saveContext(DataStream *stream, ContextMode mode, void
 }
 
 contextIOResultType
-LEPlicElementInterface :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+LEPlicElementInterface :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
 
     // read raw data
-    if ( !stream->read(& vof, 1) ) {
+    if ( !stream.read(vof) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     temp_vof = vof;
-    if ( !stream->read(& p, 1) ) {
+    if ( !stream.read(p) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
     temp_p = p;
-    if ( ( iores = normal.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = normal.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -244,9 +244,8 @@ LEPlic :: doInterfaceReconstruction(TimeStep *tStep, bool coord_upd, bool temp_v
 
     int nelem = domain->giveNumberOfElements();
     double p;
-    FloatMatrix lhs(2, 2);
 
-    FloatArray rhs(2), fvgrad(2);
+    FloatArray fvgrad(2);
     LEPlicElementInterface *interface;
 
 
@@ -663,12 +662,11 @@ LEPlic :: giveInputRecord(DynamicInputRecord &input)
 double
 LEPlic :: computeCriticalTimeStep(TimeStep *tStep)
 {
-    int ie, nelem = domain->giveNumberOfElements();
     double dt = 1.e6;
     LEPlicElementInterface *interface;
 
-    for ( ie = 1; ie <= nelem; ie++ ) {
-        if ( ( interface = static_cast< LEPlicElementInterface * >( domain->giveElement(ie)->giveInterface(LEPlicElementInterfaceType) ) ) ) {
+    for ( auto &elem : domain->giveElements() ) {
+        if ( ( interface = static_cast< LEPlicElementInterface * >( elem->giveInterface(LEPlicElementInterfaceType) ) ) ) {
             dt = min( dt, interface->computeCriticalLEPlicTimeStep(tStep) );
         }
     }

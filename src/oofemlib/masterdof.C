@@ -63,6 +63,13 @@ MasterDof :: MasterDof(DofManager *aNode, DofIDItem id) : Dof(aNode, id)
     unknowns = new Dictionary();
 }
 
+
+MasterDof :: ~MasterDof()
+{
+    delete unknowns;
+}
+
+
 BoundaryCondition *MasterDof :: giveBc()
 // Returns the boundary condition the receiver is subjected to.
 {
@@ -110,13 +117,11 @@ int MasterDof :: askNewEquationNumber(TimeStep *tStep)
 {
     EngngModel *model = dofManager->giveDomain()->giveEngngModel();
 
-#ifdef __PARALLEL_MODE
     if ( dofManager->giveParallelMode() == DofManager_null ) {
         equationNumber = 0;
         return 0;
     }
 
-#endif
     if ( this->hasBc(tStep) ) {
         equationNumber = -1 * model->giveNewPrescribedEquationNumber(dofManager->giveDomain()->giveNumber(), this->dofID);
     } else {
@@ -153,12 +158,9 @@ double MasterDof :: giveUnknown(ValueModeType mode, TimeStep *tStep)
     // OOFEM_ERROR("Noncompatible Request");
 #endif
 
-#ifdef __PARALLEL_MODE
     if ( dofManager->giveParallelMode() == DofManager_null ) {
         return 0.0;
     }
-
-#endif
 
     // first try if IC apply
     if ( tStep->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
@@ -206,15 +208,9 @@ double MasterDof :: giveUnknown(PrimaryField &field, ValueModeType mode, TimeSte
 {
     double value;
 
-#ifdef DEBUG
-#endif
-
-#ifdef __PARALLEL_MODE
     if ( dofManager->giveParallelMode() == DofManager_null ) {
         return 0.0;
     }
-
-#endif
 
     // first try if IC apply
     if ( tStep->giveNumber() == dofManager->giveDomain()->giveEngngModel()->giveNumberOfTimeStepWhenIcApply() ) { // step when Ic apply
@@ -243,12 +239,9 @@ bool MasterDof :: hasBc(TimeStep *tStep)
 // Returns True if the receiver is subjected to a boundary condition, else
 // returns False. If necessary, reads the answer in the data file.
 {
-#ifdef __PARALLEL_MODE
     if ( dofManager->giveParallelMode() == DofManager_null ) {
         return true;
     }
-
-#endif
 
     if ( bc == -1 ) {
         OOFEM_ERROR("does not know yet if has InitCond or not");
@@ -329,33 +322,30 @@ void MasterDof :: printYourself()
 }
 
 
-contextIOResultType MasterDof :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType MasterDof :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full node context (saves state variables, that completely describe
 // current state)
 //
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = Dof :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     if ( mode & CM_Definition ) {
-        if ( !stream->write(& bc, 1) ) {
+        if ( !stream.write(bc) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->write(& ic, 1) ) {
+        if ( !stream.write(ic) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
 
     // store equation number of receiver
-    if ( !stream->write(& equationNumber, 1) ) {
+    if ( !stream.write(equationNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -369,34 +359,31 @@ contextIOResultType MasterDof :: saveContext(DataStream *stream, ContextMode mod
 }
 
 
-contextIOResultType MasterDof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType MasterDof :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full node context (saves state variables, that completely describe
 // current state)
 //
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = Dof :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     if ( mode & CM_Definition ) {
-        if ( !stream->read(& bc, 1) ) {
+        if ( !stream.read(bc) ) {
             THROW_CIOERR(CIO_IOERR);
         }
 
-        if ( !stream->read(& ic, 1) ) {
+        if ( !stream.read(ic) ) {
             THROW_CIOERR(CIO_IOERR);
         }
     }
 
 
     // read equation number of receiver
-    if ( !stream->read(& equationNumber, 1) ) {
+    if ( !stream.read(equationNumber) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

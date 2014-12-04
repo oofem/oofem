@@ -68,52 +68,48 @@ SloanGraph :: ~SloanGraph()
 void SloanGraph :: initialize()
 {
     int nnodes = domain->giveNumberOfDofManagers();
-    int nelems = domain->giveNumberOfElements();
-    int nbcs = domain->giveNumberOfBoundaryConditions();
 
     this->nodes.reserve(nnodes);
     this->dmans.reserve(nnodes);
 
     // Add dof managers.
-    for ( int i = 1; i <= nnodes; i++ ) {
-        nodes.emplace_back(this, i);
-        dmans.push_back(domain->giveDofManager(i));
+    int count = 0;
+    for ( auto &dman : domain->giveDofManagers() ) {
+        nodes.emplace_back(this, ++count);
+        dmans.push_back(dman.get());
     }
     // Add element internal dof managers
-    for ( int i = 1; i <= nelems; i++ ) {
-        Element *ielem = domain->giveElement(i);
-        this->nodes.reserve( nodes.size() + ielem->giveNumberOfInternalDofManagers() );
-        this->dmans.reserve( dmans.size() + ielem->giveNumberOfInternalDofManagers() );
-        for ( int j = 1; j <= ielem->giveNumberOfInternalDofManagers(); ++j ) {
-            nodes.emplace_back(this, i);
-            dmans.push_back( ielem->giveInternalDofManager(i) );
+    for ( auto &elem : domain->giveElements() ) {
+        this->nodes.reserve( nodes.size() + elem->giveNumberOfInternalDofManagers() );
+        this->dmans.reserve( dmans.size() + elem->giveNumberOfInternalDofManagers() );
+        for ( int j = 1; j <= elem->giveNumberOfInternalDofManagers(); ++j ) {
+            ///@todo This must be broken! The index "i" will overlap with node numbers. Rethink the approach! / Mikael
+            nodes.emplace_back(this, ++count);
+            dmans.push_back( elem->giveInternalDofManager(j) );
         }
     }
     // Add boundary condition internal dof managers
-    for ( int i = 1; i <= nbcs; i++ ) {
-        GeneralBoundaryCondition *ibc = domain->giveBc(i);
-        if ( ibc ) {
-            this->nodes.reserve( nodes.size() + ibc->giveNumberOfInternalDofManagers() );
-            this->dmans.reserve( dmans.size() + ibc->giveNumberOfInternalDofManagers() );
-            for ( int j = 1; j <= ibc->giveNumberOfInternalDofManagers(); ++j ) {
-                nodes.emplace_back(this, i);
-                dmans.push_back( ibc->giveInternalDofManager(i) );
-            }
+    for ( auto &bc : domain->giveBcs() ) {
+        this->nodes.reserve( nodes.size() + bc->giveNumberOfInternalDofManagers() );
+        this->dmans.reserve( dmans.size() + bc->giveNumberOfInternalDofManagers() );
+        for ( int j = 1; j <= bc->giveNumberOfInternalDofManagers(); ++j ) {
+            ///@todo This must be broken! The index "i" will overlap with node numbers. Rethink the approach! / Mikael
+            nodes.emplace_back(this, ++count);
+            dmans.push_back( bc->giveInternalDofManager(j) );
         }
     }
 
     IntArray connections;
-    for ( int i = 1; i <= nelems; i++ ) {
-        Element *ielem = domain->giveElement(i);
-        int ielemnodes = ielem->giveNumberOfDofManagers();
-        int ielemintdmans = ielem->giveNumberOfInternalDofManagers();
+    for ( auto &elem : domain->giveElements() ) {
+        int ielemnodes = elem->giveNumberOfDofManagers();
+        int ielemintdmans = elem->giveNumberOfInternalDofManagers();
         int ndofmans = ielemnodes + ielemintdmans;
         connections.resize(ndofmans);
         for ( int j = 1; j <= ielemnodes; j++ ) {
-            connections.at(j) = ielem->giveDofManager(j)->giveNumber();
+            connections.at(j) = elem->giveDofManager(j)->giveNumber();
         }
         for ( int j = 1; j <= ielemintdmans; j++ ) {
-            connections.at(ielemnodes + j) = nnodes + ielem->giveInternalDofManager(j)->giveNumber();
+            connections.at(ielemnodes + j) = nnodes + elem->giveInternalDofManager(j)->giveNumber();
         }
         for ( int j = 1; j <= ndofmans; j++ ) {
             for ( int k = j + 1; k <= ndofmans; k++ ) {
@@ -125,27 +121,28 @@ void SloanGraph :: initialize()
     }
     ///@todo Add connections from dof managers to boundary condition internal dof managers.
 
-    std :: set< int, std :: less< int > >masters;
 
     IntArray dofMasters;
-    for ( int i = 1; i <= nnodes; i++ ) {
-        DofManager *iDofMan = domain->giveDofManager(i);
-        if ( iDofMan->hasAnySlaveDofs() ) {
+    for ( auto &dman : dmans ) {
+        ++count;
+        if ( dman->hasAnySlaveDofs() ) {
+            std :: set< int >masters;
             // slave dofs are present in dofManager
             // first - ask for masters, these may be different for each dof
-            masters.clear();
-            for ( Dof *dof: *iDofMan ) {
+            for ( Dof *dof: *dman ) {
                 if ( !dof->isPrimaryDof() ) {
+                    ///@todo FIXME This is inherently limited; It assumes that dofmanagers cannot be slaves to internal dofmanagers in BCs or Elements.
+                    /// If we were able to get the masters dofmanagers are pointers we could fix this.
                     dof->giveMasterDofManArray(dofMasters);
-                    for ( int mdof: masters ) {
-                        masters.insert( mdof );
+                    for ( int m : dofMasters ) {
+                        masters.insert( m );
                     }
                 }
             }
 
             for ( int connection: masters ) {
-                this->giveNode(i).addNeighbor(connection);
-                this->giveNode(connection).addNeighbor(i);
+                this->giveNode(count).addNeighbor(connection);
+                this->giveNode(connection).addNeighbor(count);
             }
         }
     } // end dof man loop
@@ -284,17 +281,16 @@ SloanGraph :: findBestRoot()
     int BestRoot = 0;
     int Diameter = 0;
     int nnodes = (int)nodes.size();
-    SloanLevelStructure *LSC;
     clock_t time_1, time_0 = :: clock();
     for ( int i = 1; i <= nnodes; i++ ) {
-        LSC = new SloanLevelStructure(this, i);
-        int Depth = LSC->giveDepth();
+        SloanLevelStructure LSC(this, i);
+        int Depth = LSC.giveDepth();
         if ( Depth > Diameter ) {
             Diameter = Depth;
             BestRoot = i;
         }
 
-        delete LSC;
+        ///@todo Use the timer functionalities from OOFEM here, instead of clock() directly
         time_1 = :: clock();
         if ( ( time_1 - time_0 ) / CLOCKS_PER_SEC > SLOAN_TIME_CHUNK ) {
             OOFEM_LOG_INFO("%d roots (%5.1f per cent) checked: largest pseudo-diameter = %d\n", i, float ( 100 * i ) / nnodes, Diameter);

@@ -51,8 +51,6 @@
 
 ///@name Input fields for XFEM
 //@{
-#define _IFT_Inclusion_Name "inclusion"
-#define _IFT_Inclusion_CrossSection "crosssection"
 
 #define _IFT_EnrichmentItem_domains "enrichmentdomains"
 #define _IFT_EnrichmentItem_domain "enrichmentdomain"
@@ -124,14 +122,14 @@ public:
      * without have to keep track of them globally.
      */
     virtual void giveInputRecord(DynamicInputRecord &input) { OOFEM_ERROR("This function must be called with DynamicDataReader as input."); }
-    virtual void appendInputRecords(DynamicDataReader &oDR);
+    virtual void appendInputRecords(DynamicDataReader &oDR) = 0;
 
-    int instanciateYourself(DataReader *dr);
+    virtual int instanciateYourself(DataReader *dr) = 0;
     virtual const char *giveClassName() const = 0;
     const IntArray *giveEnrichesDofsWithIdArray() const { return & mpEnrichesDofsWithIdArray; }
     int giveNumberOfEnrDofs() const;
 
-    void writeVtkDebug() const;
+    virtual void writeVtkDebug() const {};
 
     // Spatial query
     bool isElementEnriched(const Element *element) const;
@@ -148,15 +146,15 @@ public:
 
     // Should update receiver geometry to the state reached at given time step.
     virtual void updateGeometry(FailureCriteriaStatus *fc, TimeStep *tStep) { };
-    virtual void updateGeometry();
-    virtual void propagateFronts();
+    virtual void updateGeometry() = 0;
+    virtual void propagateFronts(bool &oFrontsHavePropagated) = 0;
 
     virtual bool hasPropagatingFronts() const;
 
 
     int giveStartOfDofIdPool() const { return this->startOfDofIdPool; };
     int giveEndOfDofIdPool() const { return this->endOfDofIdPool; };
-
+    virtual int giveDofPoolSize() const;
     /**
      * Compute Id's of enriched dofs for a given DofManager.
      */
@@ -164,46 +162,51 @@ public:
 
     void giveEIDofIdArray(IntArray &answer) const; // list of id's for the enrichment dofs
 
+    virtual void evaluateEnrFuncInNode(std :: vector< double > &oEnrFunc, const Node &iNode) const = 0;
 
-    void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iPos, const double &iLevelSet, int iNodeInd = -1) const;
-    void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iPos, const double &iLevelSet, const FloatArray &iGradLevelSet, int iNodeInd) const;
-    void evaluateEnrFuncJumps(std :: vector< double > &oEnrFuncJumps, int iNodeInd, GaussPoint &iGP, bool iGPLivesOnCurrentCrack) const;
+    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl) const = 0;
+    virtual void evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl, const FloatArray &iN, const IntArray &iElNodes) const = 0;
 
-    bool evalLevelSetNormalInNode(double &oLevelSet, int iNodeInd) const;
-    bool evalLevelSetTangInNode(double &oLevelSet, int iNodeInd) const;
+    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl) const = 0;
+    virtual void evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const FloatArray &iGlobalCoord, const FloatArray &iLocalCoord, int iNodeInd, const Element &iEl, const FloatArray &iN, const FloatMatrix &idNdX, const IntArray &iElNodes) const = 0;
+
+    bool evalLevelSetNormalInNode(double &oLevelSet, int iNodeInd, const FloatArray &iGlobalCoord) const;
+    bool evalLevelSetTangInNode(double &oLevelSet, int iNodeInd, const FloatArray &iGlobalCoord) const;
     bool evalNodeEnrMarkerInNode(double &oNodeEnrMarker, int iNodeInd) const;
 
-    void interpLevelSet(double &oLevelSet, const FloatArray &iGlobalCoord) const;
+protected:
+    /**
+     * Evaluate the normal direction level set in the
+     * point iGlobalCoord. To improve performance, basis
+     * function values corresponding to that point should also be provided.
+     */
+    virtual void evalLevelSetNormal(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const = 0;
 
-    // By templating the function this way, we may choose if we want to pass iNodeInd as
-    // an IntArray, a std::vector<int> or something else.
-    // Any container that contains int and implements [] is legal.
-    template< typename T >
-    inline void interpLevelSet(double &oLevelSet, const FloatArray &iN, const T &iNodeInd) const;
+    /**
+     * Evaluate the tangential direction level set in the
+     * point iGlobalCoord. To improve performance, basis
+     * function values corresponding to that point should also be provided.
+     */
+    virtual void evalLevelSetTangential(double &oLevelSet, const FloatArray &iGlobalCoord, const FloatArray &iN, const IntArray &iNodeInd) const = 0;
 
-    template< typename T >
-    void interpLevelSetTangential(double &oLevelSet, const FloatArray &iN, const T &iNodeInd) const;
+    /**
+     * Evaluate the gradient of the normal direction level set in the
+     * point iGlobalCoord. To improve performance, basis
+     * function values corresponding to that point should also be provided.
+     */
+    virtual void evalGradLevelSetNormal(FloatArray &oGradLevelSet, const FloatArray &iGlobalCoord, const FloatMatrix &idNdX, const IntArray &iNodeInd) const = 0;
 
-    template< typename T >
-    void interpGradLevelSet(FloatArray &oGradLevelSet, const FloatMatrix &idNdX, const T &iNodeInd) const;
 
     // Level set routines
-    bool giveLevelSetsNeedUpdate() const { return mLevelSetsNeedUpdate; }
-    virtual void updateLevelSets(XfemManager &ixFemMan);
-    virtual void updateNodeEnrMarker(XfemManager &ixFemMan, const EnrichmentDomain_BG &iEnrichmentDomain_BG);
-    virtual void updateNodeEnrMarker(XfemManager &ixFemMan, const DofManList &iDofManList);
-    virtual void updateNodeEnrMarker(XfemManager &ixFemMan, const WholeDomain &iWholeDomain);
+    virtual void updateNodeEnrMarker(XfemManager &ixFemMan) = 0;
+
+public:
 
     virtual void createEnrichedDofs();
 
-    virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, std :: vector< double > &oMinDistArcPos) const;
-    virtual void computeIntersectionPoints(std :: vector< FloatArray > &oIntersectionPoints, std :: vector< int > &oIntersectedEdgeInd, Element *element, const Triangle &iTri, std :: vector< double > &oMinDistArcPos) const;
-
-
     // Return the coordinates of the tip in element iElIndex,
     // if the element contains a tip.
-    bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const FloatArray &iElCenter) const;
-    bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, int iElIndex, const Triangle &iTri, const FloatArray &iElCenter) const;
+    virtual bool giveElementTipCoord(FloatArray &oCoord, double &oArcPos, Element &iEl, const FloatArray &iElCenter) const = 0;
 
     // Help functions
     static double calcXiZeroLevel(const double &iQ1, const double &iQ2);
@@ -212,25 +215,24 @@ public:
     PropagationLaw *givePropagationLaw() { return this->mpPropagationLaw; };
     bool hasPropagationLaw() { return this->mPropLawIndex != 0; };
 
-    void giveSubPolygon(std :: vector< FloatArray > &oPoints, const double &iXiStart, const double &iXiEnd) const;
 
-    virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod);
+    virtual void callGnuplotExportModule(GnuplotExportModule &iExpMod, TimeStep *tStep);
 
-    EnrichmentDomain *giveEnrichmentDomain() const { return mpEnrichmentDomain; }
 
     const std :: unordered_map< int, NodeEnrichmentType > &giveEnrNodeMap() const { return mNodeEnrMarkerMap; }
 
-    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius);
+    virtual void giveBoundingSphere(FloatArray &oCenter, double &oRadius) = 0;
 
-    EnrichmentFront *giveEnrichmentFrontStart() {return mpEnrichmentFrontStart;}
+    EnrichmentFront *giveEnrichmentFrontStart() { return mpEnrichmentFrontStart; }
     void setEnrichmentFrontStart(EnrichmentFront *ipEnrichmentFrontStart);
 
-    EnrichmentFront *giveEnrichmentFrontEnd() {return mpEnrichmentFrontEnd;}
+    EnrichmentFront *giveEnrichmentFrontEnd() { return mpEnrichmentFrontEnd; }
     void setEnrichmentFrontEnd(EnrichmentFront *ipEnrichmentFrontEnd);
 
-protected:
+    bool tipIsTouchingEI(const TipInfo &iTipInfo);
 
-    EnrichmentDomain *mpEnrichmentDomain;
+
+protected:
 
     EnrichmentFunction *mpEnrichmentFunc;
 
@@ -261,7 +263,7 @@ protected:
 
 
     // Level set for signed distance to the interface.
-    //	The sign is determined by the interface normal direction.
+    // The sign is determined by the interface normal direction.
     // This level set function is relevant for both open and closed interfaces.
     std :: unordered_map< int, double >mLevelSetNormalDirMap;
 
@@ -269,9 +271,6 @@ protected:
     // Only relevant for open interfaces.
     std :: unordered_map< int, double >mLevelSetTangDirMap;
 
-    //	The sign is determined by the surface normal direction. Currently used
-    //  to keep track of a delamination surface in a shell element
-    std :: vector< double >mLevelSetSurfaceNormalDir;
 
     // Field with desired node enrichment types
     std :: unordered_map< int, NodeEnrichmentType >mNodeEnrMarkerMap;
@@ -288,79 +287,6 @@ inline bool EnrichmentItem :: isDofManEnriched(const DofManager &iDMan) const
     auto res = mNodeEnrMarkerMap.find( iDMan.giveGlobalNumber() );
     return !( res == mNodeEnrMarkerMap.end() );
 }
-
-/** Inclusion. */
-class OOFEM_EXPORT Inclusion : public EnrichmentItem
-{
-protected:
-    CrossSection *mpCrossSection;
-public:
-    Inclusion(int n, XfemManager *xm, Domain *aDomain);
-    virtual ~Inclusion();
-
-    // Returns true if the enrichment item can assign
-    // a different material to any Gauss point.
-    inline virtual bool canModifyMaterial() const { return true; }
-
-    // Returns true if the enrichment item assigns a different material to the Gauss point
-    virtual bool isMaterialModified(GaussPoint &iGP, Element &iEl, CrossSection * &opCS) const;
-
-
-    virtual const char *giveClassName() const { return "Inclusion"; }
-    virtual const char *giveInputRecordName() const { return _IFT_Inclusion_Name; }
-    virtual IRResultType initializeFrom(InputRecord *ir);
-    CrossSection *giveCrossSection() { return mpCrossSection; }
-};
-
-
-/////////////////////////////////////////////////
-// Function implementations
-
-template< typename T >
-inline void EnrichmentItem :: interpLevelSet(double &oLevelSet, const FloatArray &iN, const T &iNodeInd) const
-{
-    oLevelSet = 0.0;
-    for ( int i = 1; i <= iN.giveSize(); i++ ) {
-        double levelSetNode = 0.0;
-        if ( evalLevelSetNormalInNode(levelSetNode, iNodeInd [ i - 1 ]) ) {
-            oLevelSet += iN.at(i) * levelSetNode;
-        }
-    }
-}
-
-template< typename T >
-void EnrichmentItem :: interpLevelSetTangential(double &oLevelSet, const FloatArray &iN, const T &iNodeInd) const
-{
-    oLevelSet = 0.0;
-    for ( int i = 1; i <= iN.giveSize(); i++ ) {
-        double levelSetNode = 0.0;
-        if ( evalLevelSetTangInNode(levelSetNode, iNodeInd [ i - 1 ]) ) {
-            oLevelSet += iN.at(i) * levelSetNode;
-        }
-    }
-}
-
-template< typename T >
-void EnrichmentItem :: interpGradLevelSet(FloatArray &oGradLevelSet, const FloatMatrix &idNdX, const T &iNodeInd) const
-{
-    int dim = idNdX.giveNumberOfColumns();
-
-    if ( oGradLevelSet.giveSize() != dim ) {
-        oGradLevelSet.resize(dim);
-    }
-
-    oGradLevelSet.zero();
-
-    for ( int i = 1; i <= idNdX.giveNumberOfRows(); i++ ) {
-        for ( int j = 1; j <= dim; j++ ) {
-            double levelSetNode = 0.0;
-            if ( evalLevelSetNormalInNode(levelSetNode, iNodeInd [ i - 1 ]) ) {
-                oGradLevelSet.at(j) += idNdX.at(i, j) * levelSetNode;
-            }
-        }
-    }
-}
-
 } // end namespace oofem
 
 

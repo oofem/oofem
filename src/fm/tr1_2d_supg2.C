@@ -162,8 +162,8 @@ TR1_2D_SUPG2 :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(2);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3, true);
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3, true);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3, true) );
+        integrationRulesArray [ 1 ].reset( new GaussIntegrationRule(2, this, 1, 3, true) );
     }
     if ( !defaultIRule ) {
         defaultIRule = new GaussIntegrationRule(1, this, 1, 3, true);
@@ -269,10 +269,9 @@ TR1_2D_SUPG2 :: computeAccelerationTerm_MB(FloatMatrix &answer, TimeStep *tStep)
 #ifdef TR1_2D_SUPG2_DEBUG
     /* test */
     FloatMatrix test;
-    IntegrationRule *__ir0 = integrationRulesArray [ 0 ];
-    integrationRulesArray [ 0 ] = integrationRulesArray [ 1 ];
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     TR1_2D_SUPG :: computeAccelerationTerm_MB(test, tStep);
-    integrationRulesArray [ 0 ] = __ir0;
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     for ( i = 1; i <= 6; i++ ) {
         for ( j = 1; j <= 6; j++ ) {
             if ( fabs( ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) ) >= 1.e-10 ) {
@@ -353,10 +352,9 @@ TR1_2D_SUPG2 :: computeAdvectionTerm_MB(FloatArray &answer, TimeStep *tStep)
 #ifdef TR1_2D_SUPG2_DEBUG
     /* test */
     FloatArray test;
-    IntegrationRule *__ir0 = integrationRulesArray [ 0 ];
-    integrationRulesArray [ 0 ] = integrationRulesArray [ 1 ];
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     TR1_2D_SUPG :: computeAdvectionTerm_MB(test, tStep);
-    integrationRulesArray [ 0 ] = __ir0;
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     for ( int i = 1; i <= 6; i++ ) {
         if ( fabs( ( answer.at(i) - test.at(i) ) / test.at(i) ) >= 1.e-10 ) {
             OOFEM_ERROR("test failure");
@@ -433,10 +431,9 @@ TR1_2D_SUPG2 :: computeAdvectionDerivativeTerm_MB(FloatMatrix &answer, TimeStep 
 #ifdef TR1_2D_SUPG2_DEBUG
     /* test */
     FloatMatrix test;
-    IntegrationRule *__ir0 = integrationRulesArray [ 0 ];
-    integrationRulesArray [ 0 ] = integrationRulesArray [ 1 ];
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     TR1_2D_SUPG :: computeAdvectionDerivativeTerm_MB(test, tStep);
-    integrationRulesArray [ 0 ] = __ir0;
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     for ( int i = 1; i <= 6; i++ ) {
         for ( int j = 1; j <= 6; j++ ) {
             if ( fabs( ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) ) >= 1.e-8 ) {
@@ -499,10 +496,9 @@ TR1_2D_SUPG2 :: computeDiffusionTerm_MB(FloatArray &answer, TimeStep *tStep)
 #ifdef TR1_2D_SUPG2_DEBUG
     /* test */
     FloatArray test;
-    IntegrationRule *__ir0 = integrationRulesArray [ 0 ];
-    integrationRulesArray [ 0 ] = integrationRulesArray [ 1 ];
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     TR1_2D_SUPG :: computeDiffusionTerm_MB(test, tStep);
-    integrationRulesArray [ 0 ] = __ir0;
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     for ( int i = 1; i <= 6; i++ ) {
         if ( fabs( ( answer.at(i) - test.at(i) ) / test.at(i) ) >= 1.e-10 ) {
             OOFEM_ERROR("test failure");
@@ -578,10 +574,9 @@ TR1_2D_SUPG2 :: computeDiffusionDerivativeTerm_MB(FloatMatrix &answer, MatRespon
 #ifdef TR1_2D_SUPG2_DEBUG
     /* test */
     FloatMatrix test;
-    IntegrationRule *__ir0 = integrationRulesArray [ 0 ];
-    integrationRulesArray [ 0 ] = integrationRulesArray [ 1 ];
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     TR1_2D_SUPG :: computeDiffusionDerivativeTerm_MB(test, mode, tStep);
-    integrationRulesArray [ 0 ] = __ir0;
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     for ( int i = 1; i <= 6; i++ ) {
         for ( int j = 1; j <= 6; j++ ) {
             if ( fabs( ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) ) >= 1.e-8 ) {
@@ -677,10 +672,9 @@ TR1_2D_SUPG2 :: computeLSICStabilizationTerm_MB(FloatMatrix &answer, TimeStep *t
 #ifdef TR1_2D_SUPG2_DEBUG
     /* test */
     FloatMatrix test;
-    IntegrationRule *__ir0 = integrationRulesArray [ 0 ];
-    integrationRulesArray [ 0 ] = integrationRulesArray [ 1 ];
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     TR1_2D_SUPG :: computeLSICStabilizationTerm_MB(test, tStep);
-    integrationRulesArray [ 0 ] = __ir0;
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     for ( int i = 1; i <= 6; i++ ) {
         for ( int j = 1; j <= 6; j++ ) {
             if ( fabs( ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) ) >= 1.e-8 ) {
@@ -799,10 +793,9 @@ TR1_2D_SUPG2 :: computePressureTerm_MC(FloatMatrix &answer, TimeStep *tStep)
 #ifdef TR1_2D_SUPG2_DEBUG
     /* test */
     FloatMatrix test;
-    IntegrationRule *__ir0 = integrationRulesArray [ 0 ];
-    integrationRulesArray [ 0 ] = integrationRulesArray [ 1 ];
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     TR1_2D_SUPG :: computePressureTerm_MC(test, tStep);
-    integrationRulesArray [ 0 ] = __ir0;
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     for ( int i = 1; i <= 3; i++ ) {
         for ( int j = 1; j <= 3; j++ ) {
             if ( fabs( ( answer.at(i, j) - test.at(i, j) ) / test.at(i, j) ) >= 1.e-8 ) {
@@ -902,10 +895,9 @@ TR1_2D_SUPG2 :: computeBCRhsTerm_MB(FloatArray &answer, TimeStep *tStep)
 #ifdef TR1_2D_SUPG2_DEBUG
     /* test */
     FloatArray test;
-    IntegrationRule *__ir0 = integrationRulesArray [ 0 ];
-    integrationRulesArray [ 0 ] = integrationRulesArray [ 1 ];
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     TR1_2D_SUPG :: computeBCRhsTerm_MB(test, tStep);
-    integrationRulesArray [ 0 ] = __ir0;
+    std :: swap(integrationRulesArray [ 0 ], integrationRulesArray [ 1 ]);
     for ( int i = 1; i <= 6; i++ ) {
         if ( fabs( ( answer.at(i) - test.at(i) ) / test.at(i) ) >= 1.e-10 ) {
             OOFEM_ERROR("test failure");
@@ -1207,33 +1199,6 @@ TR1_2D_SUPG2 :: giveInterface(InterfaceType interface)
     }
 
     return NULL;
-}
-
-
-double
-TR1_2D_SUPG2 :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray lcoords(3), gcoords;
-    double dist;
-    int size, gsize;
-
-    lcoords.at(1) = lcoords.at(2) = lcoords.at(3) = 1. / 3.;
-    this->computeGlobalCoordinates(gcoords, lcoords);
-
-    if ( ( size = coords.giveSize() ) < ( gsize = gcoords.giveSize() ) ) {
-        OOFEM_ERROR("coordinates size mismatch");
-    }
-
-    if ( size == gsize ) {
-        dist = coords.distance(gcoords);
-    } else {
-        FloatArray helpCoords = coords;
-
-        helpCoords.resizeWithValues(gsize);
-        dist = helpCoords.distance(gcoords);
-    }
-
-    return dist;
 }
 
 
@@ -1899,7 +1864,7 @@ TR1_2D_SUPG2 :: printOutputAt(FILE *file, TimeStep *tStep)
 }
 
 
-contextIOResultType TR1_2D_SUPG2 :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType TR1_2D_SUPG2 :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
 // current state)
@@ -1920,7 +1885,7 @@ contextIOResultType TR1_2D_SUPG2 :: saveContext(DataStream *stream, ContextMode 
 
 
 
-contextIOResultType TR1_2D_SUPG2 :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType TR1_2D_SUPG2 :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
 // current state)

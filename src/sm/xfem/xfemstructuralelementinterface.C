@@ -33,17 +33,17 @@
  */
 
 #include "xfemstructuralelementinterface.h"
-
-#include "structuralinterfacematerial.h"
-#include "structuralinterfacematerialstatus.h"
-#include "structuralelement.h"
-#include "structuralcrosssection.h"
+#include "../sm/Materials/InterfaceMaterials/structuralinterfacematerial.h"
+#include "../sm/Materials/InterfaceMaterials/structuralinterfacematerialstatus.h"
+#include "../sm/Elements/structuralelement.h"
+#include "../sm/CrossSections/structuralcrosssection.h"
 #include "gaussintegrationrule.h"
 #include "gausspoint.h"
 #include "dynamicinputrecord.h"
 #include "feinterpol.h"
 #include "spatiallocalizer.h"
 #include "engngm.h"
+#include "Elements/nlstructuralelement.h"
 
 #include "xfem/patchintegrationrule.h"
 #include "xfem/enrichmentitems/crack.h"
@@ -51,7 +51,6 @@
 #include "xfem/xfemtolerances.h"
 
 #include "xfem/enrichmentfronts/enrichmentfrontintersection.h"
-#include "xfem/enrichmentdomain.h"
 
 #include "vtkxmlexportmodule.h"
 
@@ -76,12 +75,6 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
 
     if ( mpCZMat != NULL ) {
-        for ( size_t i = 0; i < mpCZIntegrationRules.size(); i++ ) {
-            if ( mpCZIntegrationRules [ i ] != NULL ) {
-                delete mpCZIntegrationRules [ i ];
-            }
-        }
-
         mpCZIntegrationRules.clear();
         mCZEnrItemIndices.clear();
         mCZTouchingEnrItemIndices.clear();
@@ -107,13 +100,12 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
 
         for ( size_t p = 0; p < enrichingEIs.size(); p++ ) {
-
             // Index of current ei
             int eiIndex = enrichingEIs [ p ];
 
             // Indices of other ei interaction with this ei through intersection enrichment fronts.
-            std::vector<int> touchingEiIndices;
-            giveIntersectionsTouchingCrack(touchingEiIndices, enrichingEIs, eiIndex, *xMan);
+            std :: vector< int >touchingEiIndices;
+            giveIntersectionsTouchingCrack(touchingEiIndices, enrichingEIs, eiIndex, * xMan);
 
             if ( firstIntersection ) {
                 // Get the points describing each subdivision of the element
@@ -147,7 +139,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                         for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
                             int czRuleNum = 1;
-                            mpCZIntegrationRules.push_back( new GaussIntegrationRule(czRuleNum, element) );
+                            mpCZIntegrationRules.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
 
                             // Add index of current ei
                             mCZEnrItemIndices.push_back(eiIndex);
@@ -169,7 +161,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                             };
 
                             mpCZIntegrationRules [ segIndex ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
-                                                                        crackPolygon[segIndex],crackPolygon[segIndex + 1]);
+                                                                                           crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
 
                             for ( GaussPoint *gp: *mpCZIntegrationRules [ segIndex ] ) {
                                 double gw = gp->giveWeight();
@@ -230,7 +222,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
 
                             for ( int segIndex = 0; segIndex < numSeg; segIndex++ ) {
                                 int czRuleNum = 1;
-                                mpCZIntegrationRules.push_back( new GaussIntegrationRule(czRuleNum, element) );
+                                mpCZIntegrationRules.emplace_back( new GaussIntegrationRule(czRuleNum, element) );
                                 size_t newRuleInd = mpCZIntegrationRules.size() - 1;
                                 mCZEnrItemIndices.push_back(eiIndex);
 
@@ -248,10 +240,10 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
                                     -crackTang.at(2), crackTang.at(1)
                                 };
 
-                                mpCZIntegrationRules [ newRuleInd ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode, 
-                                                                            crackPolygon[segIndex],crackPolygon[segIndex + 1]);
+                                mpCZIntegrationRules [ newRuleInd ]->SetUpPointsOn2DEmbeddedLine(mCSNumGaussPoints, matMode,
+                                                                                                 crackPolygon [ segIndex ], crackPolygon [ segIndex + 1 ]);
 
-                                for ( GaussPoint *gp: * mpCZIntegrationRules [ newRuleInd ] ) {
+                                for ( GaussPoint *gp: *mpCZIntegrationRules [ newRuleInd ] ) {
                                     double gw = gp->giveWeight();
                                     double segLength = crackPolygon [ segIndex ].distance(crackPolygon [ segIndex + 1 ]);
                                     gw *= 0.5 * segLength;
@@ -280,6 +272,20 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
             }
         }
 
+        // Refine triangles if desired
+        int numRefs = xMan->giveNumTriRefs();
+
+        for(int i = 0; i < numRefs; i++) {
+
+            std :: vector< Triangle > triRef;
+
+            for(const Triangle &tri : mSubTri) {
+                Triangle::refineTriangle(triRef, tri);
+            }
+
+            mSubTri = triRef;
+        }
+
         ////////////////////////////////////////
         // When we reach this point, we have a
         // triangulation that is adapted to all
@@ -293,7 +299,7 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
             str3 << "TriEl" << elIndex << ".vtk";
             std :: string name3 = str3.str();
 
-            if(mSubTri.size() > 0) {
+            if ( mSubTri.size() > 0 ) {
                 XFEMDebugTools :: WriteTrianglesToVTK(name3, mSubTri);
             }
         }
@@ -302,9 +308,10 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
         int ruleNum = 1;
 
         if ( partitionSucceeded ) {
-            IntegrationRule *intRule = new PatchIntegrationRule(ruleNum, element, mSubTri);
-            intRule->SetUpPointsOnTriangle(xMan->giveNumGpPerTri(), matMode);
-            element->setIntegrationRules({intRule});
+            std :: vector< std :: unique_ptr< IntegrationRule > >intRule;
+            intRule.emplace_back( new PatchIntegrationRule(ruleNum, element, mSubTri) );
+            intRule [ 0 ]->SetUpPointsOnTriangle(xMan->giveNumGpPerTri(), matMode);
+            element->setIntegrationRules( std :: move(intRule) );
         }
 
 
@@ -315,16 +322,14 @@ bool XfemStructuralElementInterface :: XfemElementInterface_updateIntegrationRul
             std :: vector< FloatArray >czGPCoord;
 
             for ( size_t czRulInd = 0; czRulInd < mpCZIntegrationRules.size(); czRulInd++ ) {
-                for ( GaussPoint *gp: * mpCZIntegrationRules [ czRulInd ] ) {
+                for ( GaussPoint *gp: *mpCZIntegrationRules [ czRulInd ] ) {
                     czGPCoord.push_back( gp->giveGlobalCoordinates() );
                 }
             }
 
             double time = 0.0;
 
-            Element *el = element;
-
-            Domain *dom = el->giveDomain();
+            Domain *dom = element->giveDomain();
             if ( dom != NULL ) {
                 EngngModel *em = dom->giveEngngModel();
                 if ( em != NULL ) {
@@ -399,7 +404,7 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(
                 if ( structCSInclusion != NULL ) {
                     if ( mUsePlaneStrain ) {
                         structCSInclusion->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
-                    } else   {
+                    } else {
                         structCSInclusion->giveRealStress_PlaneStress(answer, gp, strain, tStep);
                     }
 
@@ -414,7 +419,7 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeStressVector(
 
     if ( mUsePlaneStrain ) {
         cs->giveRealStress_PlaneStrain(answer, gp, strain, tStep);
-    } else   {
+    } else {
         cs->giveRealStress_PlaneStress(answer, gp, strain, tStep);
     }
 }
@@ -427,13 +432,12 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
 
         size_t numSeg = mpCZIntegrationRules.size();
         for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
-
-            for ( GaussPoint *gp: * mpCZIntegrationRules [ segIndex ] ) {
+            for ( GaussPoint *gp: *mpCZIntegrationRules [ segIndex ] ) {
                 ////////////////////////////////////////////////////////
                 // Compute a (slightly modified) N-matrix
 
                 FloatMatrix NMatrix;
-                computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ], mCZTouchingEnrItemIndices[segIndex]);
+                computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ], mCZTouchingEnrItemIndices [ segIndex ]);
                 ////////////////////////////////////////////////////////
 
 
@@ -447,6 +451,8 @@ void XfemStructuralElementInterface :: computeCohesiveForces(FloatArray &answer,
                 if ( ms == NULL ) {
                     OOFEM_ERROR("Failed to fetch material status.");
                 }
+
+                ms->setNewlyInserted(false); //TODO: Do this in a better place. /ES
 
                 FloatArray crackNormal( ms->giveNormal() );
 
@@ -496,7 +502,7 @@ void XfemStructuralElementInterface :: computeGlobalCohesiveTractionVector(Float
     locToGlob.setColumn(crackNormal3D, 2);
     locToGlob.setColumn(ez, 3);
 
-    FloatArray TLoc(3), jump3DLoc, TLocRenumbered(3);
+    FloatArray TLoc, jump3DLoc, TLocRenumbered(3);
     jump3DLoc.beTProductOf(locToGlob, jump3D);
 
     FloatArray jump3DLocRenumbered = {
@@ -527,13 +533,12 @@ void XfemStructuralElementInterface :: computeCohesiveTangent(FloatMatrix &answe
         size_t numSeg = mpCZIntegrationRules.size();
 
         for ( size_t segIndex = 0; segIndex < numSeg; segIndex++ ) {
-            for ( GaussPoint *gp: * mpCZIntegrationRules [ segIndex ] ) {
-
+            for ( GaussPoint *gp: *mpCZIntegrationRules [ segIndex ] ) {
                 ////////////////////////////////////////////////////////
                 // Compute a (slightly modified) N-matrix
 
                 FloatMatrix NMatrix;
-                computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ], mCZTouchingEnrItemIndices[segIndex]);
+                computeNCohesive(NMatrix, * gp, mCZEnrItemIndices [ segIndex ], mCZTouchingEnrItemIndices [ segIndex ]);
 
                 ////////////////////////////////////////////////////////
                 // Compute jump vector
@@ -678,7 +683,6 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMas
     int ndofs = structEl->computeNumberOfDofs();
     double density, dV;
     FloatMatrix n;
-    IntegrationRule *iRule = element->giveIntegrationRule(0);
     IntArray mask;
 
     answer.resize(ndofs, ndofs);
@@ -691,7 +695,7 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMas
 
     mass = 0.;
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *element->giveIntegrationRule(0) ) {
         structEl->computeNmatrixAt(* ( gp->giveNaturalCoordinates() ), n);
         density = structEl->giveMaterial()->give('d', gp);
 
@@ -728,13 +732,12 @@ void XfemStructuralElementInterface :: XfemElementInterface_computeConsistentMas
     const double tol = 1.0e-9;
     const double regularizationCoeff = 1.0e-6;
     int numRows = answer.giveNumberOfRows();
-    for(int i = 0; i < numRows; i++) {
-        if( fabs(answer(i,i)) < tol ) {
-            answer(i,i) += regularizationCoeff;
-//          printf("Found zero on diagonal.\n");
+    for ( int i = 0; i < numRows; i++ ) {
+        if ( fabs( answer(i, i) ) < tol ) {
+            answer(i, i) += regularizationCoeff;
+            //          printf("Found zero on diagonal.\n");
         }
     }
-
 }
 
 IRResultType
@@ -770,6 +773,8 @@ void XfemStructuralElementInterface :: giveCZInputRecord(DynamicInputRecord &inp
     if ( mUsePlaneStrain ) {
         input.setField(1, _IFT_XfemElementInterface_PlaneStrain);
     }
+
+    input.setField(mCSNumGaussPoints, _IFT_XfemElementInterface_NumIntPointsCZ);
 }
 
 void XfemStructuralElementInterface :: initializeCZMaterial()
@@ -783,15 +788,49 @@ void XfemStructuralElementInterface :: initializeCZMaterial()
     }
 }
 
-void XfemStructuralElementInterface :: giveIntersectionsTouchingCrack(std::vector<int> &oTouchingEnrItemIndices, const std::vector<int> &iCandidateIndices, int iEnrItemIndex, XfemManager &iXMan)
+void XfemStructuralElementInterface :: XfemElementInterface_computeDeformationGradientVector(FloatArray &answer, GaussPoint *gp, TimeStep *tStep)
+{
+    // Computes the deformation gradient in the Voigt format at the Gauss point gp of
+    // the receiver at time step tStep.
+    // Order of components: 11, 22, 33, 23, 13, 12, 32, 31, 21 in the 3D.
+
+    NLStructuralElement *nlStructEl = static_cast<NLStructuralElement*>( element );
+
+    // Obtain the current displacement vector of the element and subtract initial displacements (if present)
+    FloatArray u;
+    nlStructEl->computeVectorOf(VM_Total, tStep, u); // solution vector
+    if ( nlStructEl->initialDisplacements ) {
+        u.subtract(* nlStructEl->initialDisplacements);
+    }
+
+    // Displacement gradient H = du/dX
+    FloatMatrix B;
+    nlStructEl->computeBHmatrixAt(gp, B);
+    answer.beProductOf(B, u);
+
+    // Deformation gradient F = H + I
+    MaterialMode matMode = gp->giveMaterialMode();
+    if ( matMode == _3dMat || matMode == _PlaneStrain ) {
+        answer.at(1) += 1.0;
+        answer.at(2) += 1.0;
+        answer.at(3) += 1.0;
+    } else if ( matMode == _PlaneStress ) {
+        answer.at(1) += 1.0;
+        answer.at(2) += 1.0;
+    } else if ( matMode == _1dMat ) {
+        answer.at(1) += 1.0;
+    } else {
+        OOFEM_ERROR("MaterialMode is not supported yet (%s)", __MaterialModeToString(matMode) );
+    }
+}
+
+void XfemStructuralElementInterface :: giveIntersectionsTouchingCrack(std :: vector< int > &oTouchingEnrItemIndices, const std :: vector< int > &iCandidateIndices, int iEnrItemIndex, XfemManager &iXMan)
 {
     EnrichmentItem *ei = iXMan.giveEnrichmentItem(iEnrItemIndex);
 
 
-    for( int candidateIndex : iCandidateIndices ) {
-
-        if( candidateIndex != iEnrItemIndex ) {
-
+    for ( int candidateIndex : iCandidateIndices ) {
+        if ( candidateIndex != iEnrItemIndex ) {
             // Fetch candidate enrichment item
             EnrichmentItem *eiCandidate = iXMan.giveEnrichmentItem(candidateIndex);
 
@@ -800,85 +839,46 @@ void XfemStructuralElementInterface :: giveIntersectionsTouchingCrack(std::vecto
             // dynamic cast.
 
             // Check start tip
-            EnrFrontIntersection *efStart = dynamic_cast<EnrFrontIntersection*>( eiCandidate->giveEnrichmentFrontStart() );
-            if(efStart != NULL) {
+            EnrFrontIntersection *efStart = dynamic_cast< EnrFrontIntersection * >( eiCandidate->giveEnrichmentFrontStart() );
+            if ( efStart != NULL ) {
                 const TipInfo &tipInfo = efStart->giveTipInfo();
 
-                if(tipIsTouchingEI(tipInfo, ei)) {
+                if ( ei->tipIsTouchingEI(tipInfo) ) {
                     //printf("Crack %d is touched by a tip on crack %d.\n", iEnrItemIndex, candidateIndex);
                     oTouchingEnrItemIndices.push_back(candidateIndex);
                 }
             }
 
             // Check end tip
-            EnrFrontIntersection *efEnd = dynamic_cast<EnrFrontIntersection*>( eiCandidate->giveEnrichmentFrontEnd() );
-            if(efEnd != NULL) {
+            EnrFrontIntersection *efEnd = dynamic_cast< EnrFrontIntersection * >( eiCandidate->giveEnrichmentFrontEnd() );
+            if ( efEnd != NULL ) {
                 const TipInfo &tipInfo = efEnd->giveTipInfo();
 
-                if(tipIsTouchingEI(tipInfo, ei)) {
+                if ( ei->tipIsTouchingEI(tipInfo) ) {
                     //printf("Crack %d is touched by a tip on crack %d.\n", iEnrItemIndex, candidateIndex);
                     oTouchingEnrItemIndices.push_back(candidateIndex);
                 }
             }
         }
-
     }
-
 }
 
-bool XfemStructuralElementInterface :: tipIsTouchingEI(const TipInfo &iTipInfo, EnrichmentItem *iEI)
-{
-    // TODO: Move this function to EnrichmentItem.
-
-    double tol = 1.0e-9;
-    SpatialLocalizer *localizer = element->giveDomain()->giveSpatialLocalizer();
-
-    //                printf("tipInfo.mGlobalCoord: "); tipInfo.mGlobalCoord.printYourself();
-
-    Element *tipEl = localizer->giveElementContainingPoint(iTipInfo.mGlobalCoord);
-    if(tipEl != NULL) {
-
-        // Check if the candidate tip is located on the current crack
-        FloatArray N;
-        FloatArray locCoord;
-        tipEl->computeLocalCoordinates(locCoord, iTipInfo.mGlobalCoord);
-        FEInterpolation *interp = tipEl->giveInterpolation();
-        interp->evalN( N, locCoord, FEIElementGeometryWrapper(tipEl) );
-
-        double normalSignDist;
-        iEI->interpLevelSet(normalSignDist, N, tipEl->giveDofManArray() );
-    //                    printf("normalSignDist: %e\n", normalSignDist );
-
-        double tangSignDist;
-        iEI->interpLevelSetTangential(tangSignDist, N, tipEl->giveDofManArray() );
-    //                    printf("tangSignDist: %e\n", tangSignDist );
-
-        if( fabs(normalSignDist) < tol && tangSignDist > tol ) {
-    //                        printf("normalSignDist: %e\n", normalSignDist );
-    //                        printf("tangSignDist: %e\n", tangSignDist );
-            return true;
-        }
-    }
-
-    return false;
-}
-
-void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(std::vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
+void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(std :: vector< VTKPiece > &vtkPieces, IntArray &primaryVarsToExport, IntArray &internalVarsToExport, IntArray cellVarsToExport, TimeStep *tStep)
 {
     const int numCells = mSubTri.size();
-    vtkPieces[0].setNumberOfCells(numCells);
+    vtkPieces [ 0 ].setNumberOfCells(numCells);
 
-    int numTotalNodes = numCells*3;
-    vtkPieces[0].setNumberOfNodes(numTotalNodes);
+    int numTotalNodes = numCells * 3;
+    vtkPieces [ 0 ].setNumberOfNodes(numTotalNodes);
 
     // Node coordinates
     std :: vector< FloatArray >nodeCoords;
     int nodesPassed = 1;
-    for(Triangle tri: mSubTri ) {
-        for(int i = 1; i <= 3; i++) {
+    for ( auto &tri: mSubTri ) {
+        for ( int i = 1; i <= 3; i++ ) {
             FloatArray x = tri.giveVertex(i);
             nodeCoords.push_back(x);
-            vtkPieces[0].setNodeCoords(nodesPassed, x);
+            vtkPieces [ 0 ].setNodeCoords(nodesPassed, x);
             nodesPassed++;
         }
     }
@@ -886,21 +886,23 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
     // Connectivity, offset and cell type
     nodesPassed = 1;
     int offset = 3;
-    for(size_t i = 1; i <= mSubTri.size(); i++ ) {
-        IntArray nodes = {nodesPassed, nodesPassed+1, nodesPassed+2};
+    for ( size_t i = 1; i <= mSubTri.size(); i++ ) {
+        IntArray nodes = {
+            nodesPassed, nodesPassed + 1, nodesPassed + 2
+        };
         nodesPassed += 3;
-        vtkPieces[0].setConnectivity(i, nodes);
+        vtkPieces [ 0 ].setConnectivity(i, nodes);
 
-        vtkPieces[0].setOffset(i, offset);
+        vtkPieces [ 0 ].setOffset(i, offset);
         offset += 3;
 
-        vtkPieces[0].setCellType(i, 5); // Linear triangle
+        vtkPieces [ 0 ].setCellType(i, 5); // Linear triangle
     }
 
 
 
     // Export nodal variables from primary fields
-    vtkPieces[0].setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
+    vtkPieces [ 0 ].setNumberOfPrimaryVarsToExport(primaryVarsToExport.giveSize(), numTotalNodes);
 
     for ( int fieldNum = 1; fieldNum <= primaryVarsToExport.giveSize(); fieldNum++ ) {
         UnknownType type = ( UnknownType ) primaryVarsToExport.at(fieldNum);
@@ -908,24 +910,24 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
 
         nodesPassed = 1;
 
-        for(Triangle tri: mSubTri ) {
-
+        for ( auto &tri: mSubTri ) {
             FloatArray triCenter = tri.giveVertex(1);
             triCenter.add( tri.giveVertex(2) );
             triCenter.add( tri.giveVertex(3) );
-            triCenter.times(1.0/3.0);
+            triCenter.times(1.0 / 3.0);
 
             double meanEdgeLength = 0.0;
-            meanEdgeLength += (1.0/3.0)*tri.giveVertex(1).distance( tri.giveVertex(2) );
-            meanEdgeLength += (1.0/3.0)*tri.giveVertex(2).distance( tri.giveVertex(3) );
-            meanEdgeLength += (1.0/3.0)*tri.giveVertex(3).distance( tri.giveVertex(1) );
+            meanEdgeLength += ( 1.0 / 3.0 ) * tri.giveVertex(1).distance( tri.giveVertex(2) );
+            meanEdgeLength += ( 1.0 / 3.0 ) * tri.giveVertex(2).distance( tri.giveVertex(3) );
+            meanEdgeLength += ( 1.0 / 3.0 ) * tri.giveVertex(3).distance( tri.giveVertex(1) );
 
-            const double relPertLength = XfemTolerances::giveRelLengthTolTight();
+            const double relPertLength = XfemTolerances :: giveRelLengthTolTight();
 
-            for(int i = 1; i <= 3; i++) {
-
+            for ( int i = 1; i <= 3; i++ ) {
                 if ( type == DisplacementVector ) { // compute displacement
-                    FloatArray u = {0.0, 0.0, 0.0};
+                    FloatArray u = {
+                        0.0, 0.0, 0.0
+                    };
 
 
                     // Fetch global coordinates (in undeformed configuration)
@@ -940,7 +942,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                     double pertLength = relPertLength;
 
                     int numTries = 1;
-                    for(int j = 0; j < numTries; j++) {
+                    for ( int j = 0; j < numTries; j++ ) {
                         // Perturb towards triangle center, to ensure that
                         // we end up on the correct side of the crack
                         pertVec.beDifferenceOf(triCenter, x);
@@ -951,7 +953,6 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
 
                         // Compute local coordinates
                         element->computeLocalCoordinates(locCoord, xPert);
-
                     }
 
                     // Compute displacement in point
@@ -968,44 +969,52 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                     XfemManager *xMan = element->giveDomain()->giveXfemManager();
                     int numEI =  xMan->giveNumberOfEnrichmentItems();
 
-                    bool joinNodes = true;
+                    bool joinNodes = false;
 
-                    for(int eiIndex = 1; eiIndex <= numEI; eiIndex++) {
+                    for ( int eiIndex = 1; eiIndex <= numEI; eiIndex++ ) {
                         EnrichmentItem *ei = xMan->giveEnrichmentItem(eiIndex);
 
                         double levelSetTang = 0.0, levelSetNormal = 0.0, levelSetInNode = 0.0;
 
                         bool evaluationSucceeded = true;
-                        for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
+                        for ( int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++ ) {
                             DofManager *dMan = element->giveDofManager(elNodeInd);
+                            const FloatArray &nodeCoord = * ( dMan->giveCoordinates() );
 
-                            if(!ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber() )) {
+                            if ( !ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber(), nodeCoord) ) {
                                 evaluationSucceeded = false;
                             }
-                            levelSetTang += N.at(elNodeInd)*levelSetInNode;
+                            levelSetTang += N.at(elNodeInd) * levelSetInNode;
 
-                            if(!ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber() )) {
+                            if ( !ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber(), nodeCoord) ) {
                                 evaluationSucceeded = false;
                             }
-                            levelSetNormal += N.at(elNodeInd)*levelSetInNode;
-
+                            levelSetNormal += N.at(elNodeInd) * levelSetInNode;
                         }
 
-                        double tangSignDist = 0.0, arcPos = 0.0;
-                        ei->giveEnrichmentDomain()->computeTangentialSignDist(tangSignDist, x, arcPos);
+                        double tangSignDist = levelSetTang, arcPos = 0.0;
 
-                        if( (tangSignDist > (1.0e-3)*meanEdgeLength && fabs(levelSetNormal) < (1.0e-2)*meanEdgeLength) && evaluationSucceeded) {
+                        GeometryBasedEI *geoEI = dynamic_cast< GeometryBasedEI * >( ei );
+                        if ( geoEI != NULL ) {
+                            // TODO: Consider removing this special treatment. /ES
+                            geoEI->giveGeometry()->computeTangentialSignDist(tangSignDist, x, arcPos);
+                        }
+
+
+//                        if ( ( tangSignDist > ( 1.0e-3 ) * meanEdgeLength && fabs(levelSetNormal) < ( 1.0e-2 ) * meanEdgeLength ) && evaluationSucceeded ) {
+//                            joinNodes = false;
+//                        }
+
+                        if ( ( tangSignDist < ( 1.0e-3 ) * meanEdgeLength || fabs(levelSetNormal) > ( 1.0e-2 ) * meanEdgeLength ) || !evaluationSucceeded ) {
                             joinNodes = false;
                         }
-
                     }
 
-                    if(joinNodes) {
+                    if ( joinNodes ) {
                         // if point on edge
                         XfemElementInterface_createEnrNmatrixAt(NMatrix, locCoord, * element, true);
                         element->computeVectorOf(VM_Total, tStep, solVec);
-                    }
-                    else {
+                    } else   {
                         XfemElementInterface_createEnrNmatrixAt(NMatrix, locCoord, * element, false);
                         element->computeVectorOf(VM_Total, tStep, solVec);
                     }
@@ -1014,51 +1023,68 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                     FloatArray uTemp;
                     uTemp.beProductOf(NMatrix, solVec);
 
-                    if(uTemp.giveSize() == 3) {
+                    if ( uTemp.giveSize() == 3 ) {
                         u = uTemp;
-                    }
-                    else {
-                        u = {uTemp[0], uTemp[1], 0.0};
+                    } else   {
+                        u = {
+                            uTemp [ 0 ], uTemp [ 1 ], 0.0
+                        };
                     }
 
 
                     FloatArray valuearray = u;
-                    vtkPieces[0].setPrimaryVarInNode(fieldNum, nodesPassed, valuearray);
+                    vtkPieces [ 0 ].setPrimaryVarInNode(fieldNum, nodesPassed, valuearray);
                 } else {
                     // TODO: Implement
                     printf("fieldNum: %d\n", fieldNum);
-
                 }
 
                 nodesPassed++;
             }
         }
-
-
-     }
+    }
 
 
     // Export nodal variables from internal fields
-    vtkPieces[0].setNumberOfInternalVarsToExport(0, numTotalNodes);
+    vtkPieces [ 0 ].setNumberOfInternalVarsToExport(0, numTotalNodes);
 
 
-    vtkPieces[0].setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
+    vtkPieces [ 0 ].setNumberOfCellVarsToExport(cellVarsToExport.giveSize(), numCells);
     for ( int i = 1; i <= cellVarsToExport.giveSize(); i++ ) {
         InternalStateType type = ( InternalStateType ) cellVarsToExport.at(i);
-        FloatArray average;
-        IntegrationRule *iRule = element->giveIntegrationRule(0);
-        VTKXMLExportModule :: computeIPAverage(average, iRule, element, type, tStep);
 
-        FloatArray averageV9(9);
-        averageV9.at(1) = average.at(1);
-        averageV9.at(5) = average.at(2);
-        averageV9.at(9) = average.at(3);
-        averageV9.at(6) = averageV9.at(8) = average.at(4);
-        averageV9.at(3) = averageV9.at(7) = average.at(5);
-        averageV9.at(2) = averageV9.at(4) = average.at(6);
+        for ( size_t triInd = 1; triInd <= mSubTri.size(); triInd++ ) {
 
-        for(size_t triInd = 1; triInd <= mSubTri.size(); triInd++) {
-            vtkPieces[0].setCellVar( i, triInd, averageV9 );
+            FloatArray average;
+            IntegrationRule *iRule = element->giveIntegrationRule(0);
+            computeIPAverageInTriangle(average, iRule, element, type, tStep, mSubTri[triInd-1]);
+
+            if(average.giveSize() == 0) {
+                VTKXMLExportModule :: computeIPAverage(average, iRule, element, type, tStep);
+            }
+
+
+            FloatArray averageVoigt;
+
+            if( average.giveSize() == 6 ) {
+
+                averageVoigt.resize(9);
+
+                averageVoigt.at(1) = average.at(1);
+                averageVoigt.at(5) = average.at(2);
+                averageVoigt.at(9) = average.at(3);
+                averageVoigt.at(6) = averageVoigt.at(8) = average.at(4);
+                averageVoigt.at(3) = averageVoigt.at(7) = average.at(5);
+                averageVoigt.at(2) = averageVoigt.at(4) = average.at(6);
+            }
+            else {
+                if(average.giveSize() == 1) {
+                    averageVoigt.resize(1);
+                    averageVoigt.at(1) = average.at(1);
+                }
+            }
+
+            vtkPieces [ 0 ].setCellVar(i, triInd, averageVoigt);
         }
     }
 
@@ -1069,7 +1095,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
         XfemManager *xMan = element->giveDomain()->giveXfemManager();
 
         int nEnrIt = xMan->giveNumberOfEnrichmentItems();
-        vtkPieces[0].setNumberOfInternalXFEMVarsToExport(xMan->vtkExportFields.giveSize(), nEnrIt, numTotalNodes);
+        vtkPieces [ 0 ].setNumberOfInternalXFEMVarsToExport(xMan->vtkExportFields.giveSize(), nEnrIt, numTotalNodes);
 
         const int nDofMan = element->giveNumberOfDofManagers();
 
@@ -1080,8 +1106,7 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
             for ( int enrItIndex = 1; enrItIndex <= nEnrIt; enrItIndex++ ) {
                 EnrichmentItem *ei = xMan->giveEnrichmentItem(enrItIndex);
                 for ( int nodeInd = 1; nodeInd <= numTotalNodes; nodeInd++ ) {
-
-                    const FloatArray &x = nodeCoords[nodeInd-1];
+                    const FloatArray &x = nodeCoords [ nodeInd - 1 ];
                     FloatArray locCoord;
                     element->computeLocalCoordinates(locCoord, x);
 
@@ -1093,52 +1118,78 @@ void XfemStructuralElementInterface :: giveSubtriangulationCompositeExportData(s
                     if ( xfemstype == XFEMST_LevelSetPhi ) {
                         double levelSet = 0.0, levelSetInNode = 0.0;
 
-                        for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
+                        for ( int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++ ) {
                             DofManager *dMan = element->giveDofManager(elNodeInd);
-                            ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber() );
+                            const FloatArray &nodeCoord = * ( dMan->giveCoordinates() );
+                            ei->evalLevelSetNormalInNode(levelSetInNode, dMan->giveGlobalNumber(), nodeCoord);
 
-                            levelSet += N.at(elNodeInd)*levelSetInNode;
+                            levelSet += N.at(elNodeInd) * levelSetInNode;
                         }
 
 
-                        FloatArray valueArray = {levelSet};
-                        vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
-
+                        FloatArray valueArray = {
+                            levelSet
+                        };
+                        vtkPieces [ 0 ].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
                     } else if ( xfemstype == XFEMST_LevelSetGamma ) {
                         double levelSet = 0.0, levelSetInNode = 0.0;
 
-                        for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
+                        for ( int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++ ) {
                             DofManager *dMan = element->giveDofManager(elNodeInd);
-                            ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber() );
+                            const FloatArray &nodeCoord = * ( dMan->giveCoordinates() );
+                            ei->evalLevelSetTangInNode(levelSetInNode, dMan->giveGlobalNumber(), nodeCoord);
 
-                            levelSet += N.at(elNodeInd)*levelSetInNode;
+                            levelSet += N.at(elNodeInd) * levelSetInNode;
                         }
 
 
-                        FloatArray valueArray = {levelSet};
-                        vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
-
+                        FloatArray valueArray = {
+                            levelSet
+                        };
+                        vtkPieces [ 0 ].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
                     } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
-
                         double nodeEnrMarker = 0.0, nodeEnrMarkerInNode = 0.0;
 
-                        for(int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++) {
+                        for ( int elNodeInd = 1; elNodeInd <= nDofMan; elNodeInd++ ) {
                             DofManager *dMan = element->giveDofManager(elNodeInd);
-                            ei->evalNodeEnrMarkerInNode(nodeEnrMarkerInNode, dMan->giveGlobalNumber() );
+                            ei->evalNodeEnrMarkerInNode( nodeEnrMarkerInNode, dMan->giveGlobalNumber() );
 
-                            nodeEnrMarker += N.at(elNodeInd)*nodeEnrMarkerInNode;
+                            nodeEnrMarker += N.at(elNodeInd) * nodeEnrMarkerInNode;
                         }
 
 
 
-                        FloatArray valueArray = {nodeEnrMarker};
-                        vtkPieces[0].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
-
+                        FloatArray valueArray = {
+                            nodeEnrMarker
+                        };
+                        vtkPieces [ 0 ].setInternalXFEMVarInNode(field, enrItIndex, nodeInd, valueArray);
                     }
-
                 }
             }
         }
+    }
+}
+
+void XfemStructuralElementInterface :: computeIPAverageInTriangle(FloatArray &answer, IntegrationRule *iRule, Element *elem, InternalStateType isType, TimeStep *tStep, const Triangle &iTri)
+{
+    // Computes the volume average (over an element) for the quantity defined by isType
+    double gptot = 0.0;
+    answer.clear();
+    FloatArray temp;
+    if ( iRule ) {
+        for ( IntegrationPoint *ip: *iRule ) {
+
+            FloatArray globCoord = ip->giveGlobalCoordinates();
+            globCoord.resizeWithValues(2);
+
+            if( iTri.pointIsInTriangle(globCoord) ) {
+                elem->giveIPValue(temp, ip, isType, tStep);
+                gptot += ip->giveWeight();
+                answer.add(ip->giveWeight(), temp);
+            }
+        }
+
+        answer.times(1. / gptot);
     }
 
 }

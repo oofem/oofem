@@ -62,7 +62,7 @@ public:
      * @param coords Global coordinates, which are used to evaluate components values.
      * @param mode Determines response mode-
      */
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
 
     virtual bcValType giveBCValType() const { return ForceLoadBVT; }
     virtual bcGeomType giveBCGeoType() const { return BodyLoadBGT; }

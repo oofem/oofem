@@ -84,14 +84,14 @@ namespace bp = boost::python;
 #include "gausspoint.h"
 #include "internalstatetype.h"
 #include "matresponsemode.h"
-#include "structuralmaterial.h"
+#include "sm/Materials/structuralmaterial.h"
 #include "matstatus.h"
-#include "structuralms.h"
+#include "sm/Materials/structuralms.h"
 #include "exportmodulemanager.h"
 #include "outputmanager.h"
 #include "classfactory.h"
 
-#include "structmatsettable.h"
+#include "sm/Materials/structmatsettable.h"
 
 namespace oofem {
 
@@ -112,7 +112,7 @@ struct PyFloatArray : FloatArray, wrapper<FloatArray>
 
     void printYourseelf() const {
         if (override f = this->get_override("printYourself")) {f();} 
-	this->get_override("printYourself")();
+        this->get_override("printYourself")();
     }
 };
 

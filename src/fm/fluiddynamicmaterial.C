@@ -74,7 +74,7 @@ FluidDynamicMaterialStatus :: FluidDynamicMaterialStatus(int n, Domain *d, Gauss
 { }
 
 void
-FluidDynamicMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
+FluidDynamicMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
 // Prints the strains and stresses on the data file.
 {
     fprintf(File, "\n deviatoric stresses");
@@ -170,18 +170,18 @@ FluidDynamicMaterial :: giveIPValue(FloatArray &answer, GaussPoint *gp, Internal
 
 
 contextIOResultType
-FluidDynamicMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+FluidDynamicMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores = MaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = deviatoricStressVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = deviatoricStressVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = deviatoricStrainRateVector.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = deviatoricStrainRateVector.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -190,18 +190,18 @@ FluidDynamicMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, 
 
 
 contextIOResultType
-FluidDynamicMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+FluidDynamicMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores = MaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = deviatoricStressVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = deviatoricStressVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = deviatoricStrainRateVector.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = deviatoricStrainRateVector.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

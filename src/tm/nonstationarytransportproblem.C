@@ -405,9 +405,8 @@ NonStationaryTransportProblem :: updateInternalState(TimeStep *tStep)
         }
 
         if ( internalVarUpdateStamp != tStep->giveSolutionStateCounter() ) {
-            int nelem = domain->giveNumberOfElements();
-            for ( int j = 1; j <= nelem; j++ ) {
-                domain->giveElement(j)->updateInternalState(tStep);
+            for ( auto &elem : domain->giveElements() ) {
+                elem->updateInternalState(tStep);
             }
 
             internalVarUpdateStamp = tStep->giveSolutionStateCounter();
@@ -439,7 +438,7 @@ NonStationaryTransportProblem :: saveContext(DataStream *stream, ContextMode mod
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = UnknownsField->saveContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = UnknownsField->saveContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -482,7 +481,7 @@ NonStationaryTransportProblem :: restoreContext(DataStream *stream, ContextMode 
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = UnknownsField->restoreContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = UnknownsField->restoreContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -503,17 +502,12 @@ NonStationaryTransportProblem :: checkConsistency()
 {
     // check internal consistency
     // if success returns nonzero
-    int nelem;
     Domain *domain = this->giveDomain(1);
 
-    nelem = domain->giveNumberOfElements();
     // check for proper element type
-
-    for ( int i = 1; i <= nelem; i++ ) {
-        Element *ePtr = domain->giveElement(i);
-        TransportElement *sePtr = dynamic_cast< TransportElement * >(ePtr);
-        if ( sePtr == NULL ) {
-            OOFEM_WARNING("Element %d has no TransportElement base", ePtr->giveNumber());
+    for ( auto &elem : domain->giveElements() ) {
+        if ( !dynamic_cast< TransportElement * >( elem.get() ) ) {
+            OOFEM_WARNING("Element %d has no TransportElement base", elem->giveLabel());
             return 0;
         }
     }
@@ -605,7 +599,6 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
 
     for ( int i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
@@ -613,7 +606,6 @@ NonStationaryTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer
             continue;
         }
 
-#endif
         element->giveLocationArray(loc, s);
         //(alpha-1)*K+C/dt
         this->giveElementCharacteristicMatrix(charMtrx, i, NSTP_MidpointRhs, tStep, domain);
@@ -691,8 +683,8 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 
     // Not relevant in linear case, but needed for CemhydMat for temperature averaging before solving balance equations
     // Update element state according to given ic
-    for ( int j = 1; j <= nelem; j++ ) {
-        TransportElement *element = static_cast< TransportElement * >( domain->giveElement(j) );
+    for ( auto &elem : domain->giveElements() ) {
+        TransportElement *element = static_cast< TransportElement * >( elem.get() );
         CemhydMat *cem = dynamic_cast< CemhydMat * >( element->giveMaterial() );
         //assign status to each integration point on each element
         if ( cem ) {
@@ -705,9 +697,8 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
     }
 
     //perform averaging on each material instance of CemhydMatClass
-    int nmat = domain->giveNumberOfMaterialModels();
-    for ( int j = 1; j <= nmat; j++ ) {
-        CemhydMat *cem = dynamic_cast< CemhydMat * >( domain->giveMaterial(j) );
+    for ( auto &mat : domain->giveMaterials() ) {
+        CemhydMat *cem = dynamic_cast< CemhydMat * >( mat.get() );
         if ( cem ) {
             cem->averageTemperature();
         }
@@ -759,9 +750,9 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
     int nelem = domain->giveNumberOfElements();
     FloatArray vecTemperature;
 
-    for ( int ielem = 1; ielem <= nelem; ielem++ ) {
-        TransportElement *element = static_cast< TransportElement * >( domain->giveElement(ielem) );
-        TransportMaterial *mat = static_cast< CemhydMat * >( element->giveMaterial() );
+    for ( auto &elem : domain->giveElements() ) {
+        TransportElement *element = static_cast< TransportElement * >( elem );
+        TransportMaterial * = static_cast< CemhydMat * >( element->giveMaterial() );
         if ( mat ) {
             for ( GaussPoint *gp: *element->giveDefaultIntegrationRulePtr() ) {
                 element->giveIPValue(vecTemperature, gp, IST_Temperature, tStep);
@@ -771,10 +762,10 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
         }
     }
 
-    for ( int i = 1; i <= domain->giveNumberOfMaterialModels(); i++ ) {
-        CemhydMat *mat = static_cast< CemhydMat * >( domain->giveMaterial(i) );
-        if ( mat ) {
-            //mat->average_temp /= mat->IP_volume;
+    for ( auto &mat : domain->giveMaterials() ) {
+        CemhydMat *cem = static_cast< CemhydMat * >( mat );
+        if ( cem ) {
+            //cem->average_temp /= mat->IP_volume;
         }
     }
 }

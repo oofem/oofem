@@ -74,11 +74,11 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
         OOFEM_ERROR("size mismatch");
     }
 
-    if ( A->giveType() != SMT_PetscMtrx ) {
+    PetscSparseMtrx *Lhs = dynamic_cast< PetscSparseMtrx * >(A);
+    if ( !Lhs ) {
         OOFEM_ERROR("PetscSparseMtrx Expected");
     }
 
-    PetscSparseMtrx *Lhs = static_cast< PetscSparseMtrx * >(A);
 
     Vec globRhsVec;
     Vec globSolVec;
@@ -109,9 +109,6 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
     int nite;
     PetscErrorCode err;
     KSPConvergedReason reason;
-    if ( Lhs->giveType() != SMT_PetscMtrx ) {
-        OOFEM_ERROR("PetscSparseMtrx Expected");
-    }
 
     Timer timer;
     timer.startTimer();
@@ -200,7 +197,6 @@ PetscSolver :: petsc_solve(PetscSparseMtrx *Lhs, Vec b, Vec x)
 }
 
 
-//#ifndef __PARALLEL_MODE
 #if 0
 ///@todo Parallel mode of this.
 NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
@@ -208,11 +204,11 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatMatrix &B, FloatMatrix &X)
     if ( !A ) {
         OOFEM_ERROR("Unknown Lhs");
     }
-    if ( A->giveType() != SMT_PetscMtrx ) {
+
+    PetscSparseMtrx *Lhs = dynamic_cast< PetscSparseMtrx * >(A);
+    if ( !Lhs ) {
         OOFEM_ERROR("PetscSparseMtrx Expected");
     }
-
-    PetscSparseMtrx *Lhs = static_cast< PetscSparseMtrx * >(A);
 
     Vec globRhsVec;
     Vec globSolVec;

@@ -42,7 +42,7 @@ namespace oofem {
 REGISTER_BoundaryCondition(PointLoad);
 
 void
-PointLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode)
+PointLoad :: computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode)
 {
     double factor;
     // returns component array for elements which use direct formulae

@@ -69,7 +69,6 @@ int HangingNode :: checkConsistency()
     int result = Node :: checkConsistency();
 
 #if 0
- #ifdef __PARALLEL_MODE
     // Check if master is in same mode
     if ( parallel_mode != DofManager_local ) {
         for ( int i = 1; i <= countOfMasterNodes; i++ ) {
@@ -79,7 +78,6 @@ int HangingNode :: checkConsistency()
             }
         }
     }
- #endif
 #endif
 
     // Check local coordinate systems

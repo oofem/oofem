@@ -47,7 +47,6 @@
 #include "contextioresulttype.h"
 
 namespace oofem {
-class CommunicationBuffer;
 class DataStream;
 class Dictionary;
 class PrimaryField;
@@ -123,9 +122,8 @@ public:
     /// @return Associated DofManager.
     DofManager *giveDofManager() const { return dofManager; }
 
-#ifdef __PARALLEL_MODE
     int giveDofManGlobalNumber() const;
-#endif
+
     /**
      * Returns value of boundary condition of dof if it is prescribed.
      * Use hasBc service to determine, if boundary condition is active.
@@ -377,9 +375,9 @@ public:
     /// Returns string for prepending output (used by error reporting macros).
     std :: string errorInfo(const char *func) const;
     /// Stores receiver state to output stream.
-    virtual contextIOResultType saveContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     /// Restores the receiver state previously written in stream.
-    virtual contextIOResultType restoreContext(DataStream *stream, ContextMode mode, void *obj = NULL);
+    virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     /// Overwrites the boundary condition id (0-inactive BC), intended for specific purposes such as coupling of bc's in multiscale simulations
     virtual void setBcId(int bcId) { }
     /// Overwrites the initial condition id (0-inactive IC)
@@ -408,7 +406,6 @@ public:
      */
     virtual int giveEqn() { return 0; }
 
-#ifdef __PARALLEL_MODE
     /**
      * Packs specific  DOF Manager's dofs unknowns into communication buffer.
      * If dof is slave, then no packing is done, this is maintained by master. This requires master
@@ -421,7 +418,7 @@ public:
      * @return Nonzero if successful.
      * @todo Remove this? It is not inherited by MasterDof. Is this leftovers? / Mikael
      */
-    virtual int packUnknowns(CommunicationBuffer &buff, ValueModeType mode, TimeStep *tStep)
+    virtual int packUnknowns(DataStream &buff, ValueModeType mode, TimeStep *tStep)
     { return 1; }
     /**
      * Unpacks DOF unknown from communication buffer and updates unknown if necessary.
@@ -440,9 +437,8 @@ public:
      * @return Nonzero if successful.
      * @todo Remove this? It is not inherited by MasterDof. Is this leftovers? / Mikael
      */
-    virtual int unpackAndUpdateUnknown(CommunicationBuffer &buff,
+    virtual int unpackAndUpdateUnknown(DataStream &buff,
                                        ValueModeType mode, TimeStep *tStep) { return 1; }
-#endif
 
 protected:
     /**

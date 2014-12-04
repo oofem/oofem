@@ -272,7 +272,7 @@ coords 3 1.0 2.0 3.0
 ..., are real numbers. Columns are seperated by space or comma and lines by semicolon.
 As an example, consider the real matrix attribute called $\param{mat1}=\left[\begin{array}{ccc}1.0&-1.0&0.0\\2.0&2.5&5.0\end{array}\right]$:
 \begin{lstlisting}[style=oofem, language=oofeminput, moreemph={mat1}]
-mat1 2 3 1.0 -1.0 0.0 2.0 2.5 5.0
+mat1 2 3 \{1.0 -1.0; 0.0 2.0; 2.5 5.0\}
 \end{lstlisting}
 
 \item \textbf{dc} - dictionary. Dictionary consist of pairs, each pair has key

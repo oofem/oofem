@@ -95,11 +95,10 @@ double
 Lattice2d_mt :: givePressure()
 {
     LatticeTransportMaterialStatus *status;
-    GaussPoint *gp;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    gp = iRule->getIntegrationPoint(0);
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
+    GaussPoint *gp = iRule->getIntegrationPoint(0);
 
-    status = ( LatticeTransportMaterialStatus * ) gp->giveMaterialStatus();
+    status = static_cast< LatticeTransportMaterialStatus * >( gp->giveMaterialStatus() );
 
     return status->givePressure();
 }
@@ -108,7 +107,7 @@ double
 Lattice2d_mt :: giveOldPressure()
 {
     LatticeTransportMaterialStatus *status;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     GaussPoint *gp = iRule->getIntegrationPoint(0);
 
     status = static_cast< LatticeTransportMaterialStatus * >( gp->giveMaterialStatus() );
@@ -122,9 +121,8 @@ Lattice2d_mt :: giveMass()
 {
     LatticeTransportMaterialStatus *status;
 
-    GaussPoint *gp;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
-    gp = iRule->getIntegrationPoint(0);
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
+    GaussPoint *gp = iRule->getIntegrationPoint(0);
 
     status = static_cast< LatticeTransportMaterialStatus * >( gp->giveMaterialStatus() );
     double mass = 0;
@@ -199,7 +197,7 @@ Lattice2d_mt :: computeGaussPoints()
 // Sets up the array containing the four Gauss points of the receiver.
 {
     integrationRulesArray.resize( 1 );
-    integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 2);
+    integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 2) );
     integrationRulesArray [ 0 ]->SetUpPointsOnLine(1, _2dMTLattice);
 }
 
@@ -259,7 +257,7 @@ Lattice2d_mt :: computeConductivityMatrix(FloatMatrix &answer, MatResponseMode r
     double dV;
     FloatMatrix b, d, db;
     GaussPoint *gp;
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
+    std :: unique_ptr< IntegrationRule >&iRule = integrationRulesArray [ 0 ];
     gp  = iRule->getIntegrationPoint(0);
 
     double length = giveLength();
@@ -284,8 +282,7 @@ Lattice2d_mt :: computeCapacityMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     double dV, c;
     FloatMatrix n;
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
-    GaussPoint *gp = iRule->getIntegrationPoint(0);
+    GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     answer.resize(2, 2);
     answer.zero();
     answer.at(1, 1) = 2.;
@@ -306,7 +303,7 @@ Lattice2d_mt :: computeInternalSourceRhsVectorAt(FloatArray &answer, TimeStep *t
     double dV;
     bcGeomType ltype;
     Load *load;
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
+    std :: unique_ptr< IntegrationRule > &iRule = integrationRulesArray [ 0 ];
     Node *nodeA, *nodeB;
 
 

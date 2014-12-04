@@ -41,30 +41,31 @@
 ///@name Input fields for Homogenization export module
 //@{
 #define _IFT_HOMExportModule_Name "hom"
-#define _IFT_HOMExportModule_scale "scale"
-#define _IFT_HOMExportModule_matnum "matnum"
-#define _IFT_HOMExportModule_tmExport "tmexport"
+#define _IFT_HOMExportModule_ISTs "ists" /// List of internal state types used for output
+#define _IFT_HOMExportModule_scale "scale" ///[optional] Scales the output variables
+#define _IFT_HOMExportModule_matnum "matnum" ///[optional] If specified, only these material are used
 //@}
 
 namespace oofem {
 /**
- * Represents HOM (Homogenization) export module. It averages strain and stress tensors over the whole domain
- * and all elements in global coordinate system. The strain and stress tensor (reduced to six components) is used through whole procedure.
- * Appropriate element strain and stress components are placed using the mask of tensor indexes.
- * Thus various element types (beam, plane element, brick) can be combined and will give correct macroscopic response.
+ * Represents HOM (Homogenization) export module. It averages internal variables over the whole domain
+ * and all elements in global coordinate system. Tensors are given in Voigt notation.
+ * Thus various element types (beam, plane element, brick) can be combined and will give correct averaged values.
  *
  * @author Vit Smilauer
+ * @author Mikael Öhman
  */
 class OOFEM_EXPORT HOMExportModule : public ExportModule
 {
 protected:
     /// Scale of all homogenized values.
     double scale;
-    bool tmexport;
-#ifdef RBR_SUPPORT
-    enum omodeType { wdmode, rbrmode }; // WholeDomain or RegionByRegion output
-    omodeType omode;
-#endif
+    /// Stream for file.
+    FILE *stream;
+    /// Material numbers over which averaging is performed.
+    IntArray matnum;
+    /// Internal states to export
+    IntArray ists;
 
 public:
     /// Constructor. Creates empty Output Manager.
@@ -77,17 +78,6 @@ public:
     virtual void terminate();
     virtual const char *giveClassName() const { return "HOMExportModule"; }
     virtual const char *giveInputRecordName() const { return _IFT_HOMExportModule_Name; }
-
-protected:
-    /// Stream for file.
-    FILE *stream;
-    /// Material numbers over which averaging is performed.
-    IntArray matnum;
-    /// Stores total internal energy released on a specific crosssection.
-    FloatArray internalSourceEnergy;
-    /// Stores total energy from material capacity released on a specific crosssection.
-    FloatArray capacityEnergy;
-    
 };
 } // end namespace oofem
 

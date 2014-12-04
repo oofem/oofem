@@ -36,7 +36,6 @@
 #include "gausspoint.h"
 #include "mathfem.h"
 #include "feinterpol.h"
-#include "enrichmentdomain.h"
 #include "classfactory.h"
 #include "dynamicdatareader.h"
 
@@ -150,7 +149,7 @@ void LinElBranchFunction :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &
 
 void LinElBranchFunction :: giveJump(std :: vector< double > &oJumps) const
 {
-	OOFEM_ERROR("The radius is needed to compute the jump for branch functions.")
+    OOFEM_ERROR("The radius is needed to compute the jump for branch functions.")
 }
 
 void LinElBranchFunction :: giveJump(std :: vector< double > &oJumps, const double &iRadius) const
@@ -160,9 +159,49 @@ void LinElBranchFunction :: giveJump(std :: vector< double > &oJumps, const doub
      */
 
     oJumps.clear();
-    oJumps.push_back(2.0*sqrt(iRadius));
+    oJumps.push_back( 2.0 * sqrt(iRadius) );
     oJumps.push_back(0.0);
     oJumps.push_back(0.0);
     oJumps.push_back(0.0);
 }
+
+void CohesiveBranchFunction :: evaluateEnrFuncAt(std :: vector< double > &oEnrFunc, const double &iR, const double &iTheta) const
+{
+    oEnrFunc.push_back( pow(iR,mExponent) * sin(0.5 * iTheta) );
+}
+
+void CohesiveBranchFunction :: evaluateEnrFuncDerivAt(std :: vector< FloatArray > &oEnrFuncDeriv, const double &iR, const double &iTheta) const
+{
+    // Evaluate the enrichment function derivatives using the chain rule:
+    // dPdx = dPdr*drdx + dPdt*dtdx
+    // dPdy = dPdr*drdy + dPdt*dtdy
+
+    const double drdx =  cos(iTheta);
+    const double drdy =  sin(iTheta);
+    const double dtdx = -( 1.0 / iR ) * sin(iTheta);
+    const double dtdy =  ( 1.0 / iR ) * cos(iTheta);
+
+    FloatArray dP;
+
+    // Psi 1
+    const double dP1dr = mExponent*pow(iR, mExponent-1.0) * sin(0.5 * iTheta);
+    const double dP1dt = 0.5 * pow(iR,mExponent) * cos(0.5 * iTheta);
+    oEnrFuncDeriv.push_back({ dP1dr *drdx + dP1dt *dtdx, dP1dr *drdy + dP1dt *dtdy });
+}
+
+void CohesiveBranchFunction :: giveJump(std :: vector< double > &oJumps) const
+{
+    OOFEM_ERROR("The radius is needed to compute the jump for branch functions.")
+}
+
+void CohesiveBranchFunction :: giveJump(std :: vector< double > &oJumps, const double &iRadius) const
+{
+    /**
+     * Psi1 is discontinuous with jump magnitude 2*sqrt(r), the others are continuous.
+     */
+
+    oJumps.clear();
+    oJumps.push_back( 2.0 * pow(iRadius,mExponent) );
+}
+
 } // end namespace oofem

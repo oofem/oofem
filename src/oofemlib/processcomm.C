@@ -63,6 +63,13 @@ ProcessCommunicator :: ProcessCommunicator(ProcessCommunicatorBuff *b, int rank,
 }
 
 
+ProcessCommunicatorBuff :: ~ProcessCommunicatorBuff()
+{
+    delete send_buff;
+    delete recv_buff;
+}
+
+
 int
 ProcessCommunicator :: initSend(int tag)
 {

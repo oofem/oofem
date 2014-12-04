@@ -47,7 +47,6 @@
 
 #include "xfem/xfemmanager.h"
 #include "xfem/enrichmentitem.h"
-#include "xfem/enrichmentdomain.h"
 
 #include <string>
 #include <sstream>
@@ -393,12 +392,9 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         for ( int i = 1; i <= elements.giveSize(); i++ ) {
             Element *el = d->giveElement(elements.at(i));
             if ( this->isElementComposite(el) ) {
-#ifdef __PARALLEL_MODE
                 if ( el->giveParallelMode() != Element_local ) {
                     continue;
                 }
-
-#endif
 
 #ifndef __VTK_MODULE
             //this->exportCompositeElement(this->defaultVTKPiece, el, tStep);
@@ -463,7 +459,6 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     // Write the *.pvd-file. Currently only contains time step information. It's named "timestep" but is actually the total time.
     // First we check to see that there are more than 1 time steps, otherwise it is redundant;
-#ifdef __PARALLEL_MODE
     if ( emodel->isParallel() && emodel->giveRank() == 0 ) {
         ///@todo Should use probably use PVTU-files instead. It is starting to get messy.
         // For this to work, all processes must have an identical output file name.
@@ -483,17 +478,15 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         }
 
         this->writeVTKCollection();
-    } else
-#endif
-        if ( !emodel->isParallel() && tStep->giveNumber() >= 1 ) { // For non-parallel enabled OOFEM, then we only check for multiple steps.
-            std :: ostringstream pvdEntry;
-            std :: stringstream subStep;
-            if (tstep_substeps_out_flag)
-                subStep << "." << tStep->giveSubStepNumber();
-            pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << subStep.str() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
-            this->pvdBuffer.push_back( pvdEntry.str() );
-            this->writeVTKCollection();
-        }
+    } else if ( !emodel->isParallel() && tStep->giveNumber() >= 1 ) { // For non-parallel, then we only check for multiple steps.
+        std :: ostringstream pvdEntry;
+        std :: stringstream subStep;
+        if (tstep_substeps_out_flag)
+            subStep << "." << tStep->giveSubStepNumber();
+        pvdEntry << "<DataSet timestep=\"" << tStep->giveIntrinsicTime() << subStep.str() << "\" group=\"\" part=\"\" file=\"" << fname << "\"/>";
+        this->pvdBuffer.push_back( pvdEntry.str() );
+        this->writeVTKCollection();
+    }
 }
 
 
@@ -623,12 +616,7 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
     // Assemble local->global and global->local region map and get number of
     // single cells to process, the composite cells exported individually.
     this->initRegionNodeNumbering(mapG2L, mapL2G, numNodes, numRegionEl, d, tStep, region);
-#ifndef __PARALLEL_MODE
-    if ( numNodes && numRegionEl ) {
-#else
-    if ( 1 ) {
-#endif
-
+    if ( numNodes > 0 && numRegionEl > 0 ) {
         // Export nodes as vtk vertices
         vtkPiece.setNumberOfNodes(numNodes);
         for ( int inode = 1; inode <= numNodes; inode++ ) {
@@ -656,12 +644,9 @@ VTKXMLExportModule :: setupVTKPiece(VTKPiece &vtkPiece, TimeStep *tStep, int reg
                 continue;
             }
 
-#ifdef __PARALLEL_MODE
             if ( elem->giveParallelMode() != Element_local ) {
                 continue;
             }
-
-#endif
 
             cellNum++;
 
@@ -1055,11 +1040,11 @@ VTKXMLExportModule :: getNodalVariableFromXFEMST(FloatArray &answer, Node *node,
     if ( xfemstype == XFEMST_LevelSetPhi ) {
         valueArray.resize(1);
         val = & valueArray;
-        ei->evalLevelSetNormalInNode( valueArray.at(1), node->giveNumber() );
+        ei->evalLevelSetNormalInNode( valueArray.at(1), node->giveNumber(), *(node->giveCoordinates()) );
     } else if ( xfemstype == XFEMST_LevelSetGamma ) {
         valueArray.resize(1);
         val = & valueArray;
-        ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber() );
+        ei->evalLevelSetTangInNode( valueArray.at(1), node->giveNumber(), *(node->giveCoordinates()) );
     } else if ( xfemstype == XFEMST_NodeEnrMarker ) {
         valueArray.resize(1);
         val = & valueArray;
@@ -1309,12 +1294,9 @@ VTKXMLExportModule :: initRegionNodeNumbering(IntArray &regionG2LNodalNumbers,
             continue;
         }
 
-#ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() != Element_local ) {
             continue;
         }
-
-#endif
 
         regionSingleCells++;
         elemNodes = element->giveNumberOfNodes();
@@ -1662,12 +1644,10 @@ VTKXMLExportModule :: exportCellVars(VTKPiece &vtkPiece, int numCells, TimeStep 
 
         for ( int ielem = 1; ielem <= numCells; ielem++ ) {
             Element *el = d->giveElement(ielem); ///@todo should be a pointer to an element in the region /JB
-#ifdef __PARALLEL_MODE
             if ( el->giveParallelMode() != Element_local ) {
                 continue;
             }
 
-#endif
             this->getCellVariableFromIS(valueArray, el, type, tStep);
             vtkPiece.setCellVar(field, ielem, valueArray);
         }
@@ -1694,7 +1674,7 @@ VTKXMLExportModule :: getCellVariableFromIS(FloatArray &answer, Element *el, Int
         // commented by bp: do what user wants
         //OOFEM_WARNING1("Material numbers are deprecated, outputing cross section number instead...");
         valueArray.at(1) = ( double ) el->giveMaterial()->giveNumber();
-	break;
+        break;
     case IST_CrossSectionNumber:
         valueArray.at(1) = ( double ) el->giveCrossSection()->giveNumber();
         break;

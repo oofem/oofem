@@ -85,7 +85,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_LinearEdgeLoad_Name; }
 
 protected:
-    virtual void computeNArray(FloatArray &answer, FloatArray &coords) const;
+    virtual void computeNArray(FloatArray &answer, const FloatArray &coords) const;
 };
 } // end namespace oofem
 #endif // linearedgeload_h

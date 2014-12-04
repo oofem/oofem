@@ -282,11 +282,8 @@ NLTransientTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
     NonStationaryTransportProblem :: applyIC(stepWhenIcApply);
 
     // update element state according to given ic
-    int nelem = domain->giveNumberOfElements();
-    TransportElement *element;
-
-    for ( int j = 1; j <= nelem; j++ ) {
-        element = static_cast< TransportElement * >( domain->giveElement(j) );
+    for ( auto &elem : domain->giveElements() ) {
+        TransportElement *element = static_cast< TransportElement * >( elem.get() );
         element->updateInternalState(stepWhenIcApply);
         element->updateYourself(stepWhenIcApply);
     }
@@ -297,10 +294,8 @@ NLTransientTransportProblem :: createPreviousSolutionInDofUnknownsDictionary(Tim
 {
     //Copy the last known temperature to be a previous solution
     for ( auto &domain: domainList ) {
-        int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( int inode = 1; inode <= nnodes; inode++ ) {
-                DofManager *node = domain->giveDofManager(inode);
+            for ( auto &node : domain->giveDofManagers() ) {
                 for ( Dof *dof: *node ) {
                     double val = dof->giveUnknown(VM_Total, tStep); //get number on hash=0(current)
                     dof->updateUnknownsDictionary(tStep->givePreviousStep(), VM_Total, val);
@@ -376,17 +371,15 @@ void
 NLTransientTransportProblem :: updateInternalState(TimeStep *tStep)
 {
     for ( auto &domain: domainList ) {
-        int nnodes = domain->giveNumberOfDofManagers();
         if ( requiresUnknownsDictionaryUpdate() ) {
-            for ( int j = 1; j <= nnodes; j++ ) {
+            for ( auto &dman : domain->giveDofManagers() ) {
                 //update dictionary entry or add a new pair if the position is missing
-                this->updateDofUnknownsDictionary(domain->giveDofManager(j), tStep);
+                this->updateDofUnknownsDictionary(dman.get(), tStep);
             }
         }
 
-        int nelem = domain->giveNumberOfElements();
-        for ( int j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(tStep);
+        for ( auto &elem : domain->giveElements() ) {
+            elem->updateInternalState(tStep);
         }
     }
 }
@@ -411,7 +404,6 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer,
 
     for ( int i = 1; i <= nelem; i++ ) {
         element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
@@ -419,7 +411,6 @@ NLTransientTransportProblem :: assembleAlgorithmicPartOfRhs(FloatArray &answer,
             continue;
         }
 
-#endif
         if ( !element->isActivated(tStep) ) {
             continue;
         }

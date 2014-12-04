@@ -32,17 +32,11 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-/*
- * primvarmapper.C
- *
- * @author: Erik Svenning
- */
-
 #include "primvarmapper.h"
 #include "domain.h"
 #include "dofmanager.h"
 #include "linsystsolvertype.h"
-#include "structuralelement.h"
+#include "../sm/Elements/structuralelement.h"
 #include "engngm.h"
 #include "gausspoint.h"
 #include "feinterpol.h"
@@ -53,13 +47,9 @@
 #include "timestep.h"
 #include "activebc.h"
 #include "prescribedgradientbcweak.h"
+#include "prescribedgradientbcneumann.h"
 
 #include <fstream>
-
-#ifdef __PETSC_MODULE
-#include "petscsparsemtrx.h"
-#include <petscksp.h>
-#endif
 
 namespace oofem {
 PrimaryVariableMapper :: PrimaryVariableMapper() { }
@@ -94,16 +84,16 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
     FloatArray res(numDofsNew);
 
-#ifdef __PETSC_MODULE
-    PetscSparseMtrx *K = dynamic_cast<PetscSparseMtrx*>( classFactory.createSparseMtrx(SMT_PetscMtrx) );
-    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver(ST_Petsc, & iOldDom, engngMod);
-#else
-    SparseMtrx *K = classFactory.createSparseMtrx(SMT_Skyline);
-    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver(ST_Direct, & iOldDom, engngMod);
-#endif
+    SparseMtrx *K;
+    SparseLinearSystemNM *solver;
 
+    solver = classFactory.createSparseLinSolver(ST_Petsc, & iOldDom, engngMod);
+    if (!solver) {
+        solver = classFactory.createSparseLinSolver(ST_Direct, & iOldDom, engngMod);
+    }
+    K = classFactory.createSparseMtrx(solver->giveRecommendedMatrix(true));
 
-    K->buildInternalStructure( engngMod, 1, num );
+    K->buildInternalStructure( engngMod, iNewDom.giveNumber(), num );
 
     int maxIter = 1;
 
@@ -138,9 +128,8 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
             // Loop over Gauss points
             for ( int intRuleInd = 0; intRuleInd < elNew->giveNumberOfIntegrationRules(); intRuleInd++ ) {
-                IntegrationRule *iRule = elNew->giveIntegrationRule(intRuleInd);
 
-                for ( GaussPoint *gp: *iRule ) {
+                for ( GaussPoint *gp: *elNew->giveIntegrationRule(intRuleInd) ) {
 
                     // New N-matrix
                     FloatMatrix NNew;
@@ -149,25 +138,9 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
                     //////////////
                     // Global coordinates of GP
-                    const int nDofMan = elNew->giveNumberOfDofManagers();
-
-                    FloatArray Nc;
-                    FEInterpolation *interp = elNew->giveInterpolation();
                     const FloatArray &localCoord = * ( gp->giveNaturalCoordinates() );
-                    interp->evalN( Nc, localCoord, FEIElementGeometryWrapper(elNew) );
-
-                    const IntArray &elNodes = elNew->giveDofManArray();
-
-                    FloatArray globalCoord(dim);
-                    globalCoord.zero();
-
-                    for ( int i = 1; i <= nDofMan; i++ ) {
-                        DofManager *dMan = elNew->giveDofManager(i);
-
-                        for ( int j = 1; j <= dim; j++ ) {
-                            globalCoord.at(j) += Nc.at(i) * dMan->giveCoordinate(j);
-                        }
-                    }
+                    FloatArray globalCoord;
+                    elNew->computeGlobalCoordinates(globalCoord, localCoord);
                     //////////////
 
 
@@ -188,8 +161,9 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 
 
                     int dofsPassed = 1;
-                    for ( int i = 1; i <= elNodes.giveSize(); i++ ) {
-                        DofManager *dMan = elNew->giveDofManager(i);
+                    for ( int elNode: elNew->giveDofManArray() ) {
+//                        DofManager *dMan = iNewDom.giveNode(elNode);
+                        DofManager *dMan = iNewDom.giveDofManager(elNode);
 
                         for ( Dof *dof: *dMan ) {
                             if ( elDofsGlob.at(dofsPassed) != 0 ) {
@@ -223,18 +197,25 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                         for ( Dof *dof: *dManOld ) {
                             if ( elDofsGlobOld.at(dofsPassed) != 0 ) {
                                 FloatArray dofUnknowns;
-                                dof->giveUnknowns(dofUnknowns, iMode, &iTStep);
+
+                                if(dof->giveEqn() > 0) {
+                                    dof->giveUnknowns(dofUnknowns, iMode, &iTStep);
 
 #ifdef DEBUG
-                                if(!dofUnknowns.isFinite()) {
-                                    OOFEM_ERROR("!dofUnknowns.isFinite()")
-                                }
+                                    if(!dofUnknowns.isFinite()) {
+                                        OOFEM_ERROR("!dofUnknowns.isFinite()")
+                                    }
 
-                                if(dofUnknowns.giveSize() < 1) {
-                                    OOFEM_ERROR("dofUnknowns.giveSize() < 1")
-                                }
+                                    if(dofUnknowns.giveSize() < 1) {
+                                        OOFEM_ERROR("dofUnknowns.giveSize() < 1")
+                                    }
 #endif
-                                nodeDispOld.push_back(dofUnknowns.at(1));
+                                    nodeDispOld.push_back(dofUnknowns.at(1));
+                                }
+                                else {
+                                    // TODO: Why does this case occur?
+                                    nodeDispOld.push_back(0.0);
+                                }
                             } else {
                                 if ( dof->hasBc(& iTStep) ) {
 //                                    printf("hasBC.\n");
@@ -309,10 +290,30 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                 IntArray tractionRows;
                 activeBC->giveTractionLocationArray(tractionRows, num);
 
-                FloatMatrix massMtrxBc( tractionRows.giveSize(), tractionRows.giveSize() );
-                massMtrxBc.beUnitMatrix(); // TODO: Compute correct mass matrix and add residual contribution.
-                K->assemble(tractionRows, massMtrxBc);
+                // TODO: Compute correct mass matrix and add residual contribution.
+
+                FloatMatrix mNode(1,1);
+                mNode.beUnitMatrix();
+
+                for(int tracDofInd : tractionRows) {
+                    const IntArray tracDofArray = {tracDofInd};
+                    K->assemble(tracDofArray, tracDofArray, mNode);
+                }
+
             }
+
+
+            PrescribedGradientBCNeumann *neumannBC = dynamic_cast<PrescribedGradientBCNeumann*> ( iNewDom.giveBc(bcInd) );
+
+            if(neumannBC != NULL) {
+                IntArray stressRows;
+                neumannBC->giveStressLocationArray(stressRows, num);
+
+                FloatMatrix massMtrxBc( stressRows.giveSize(), stressRows.giveSize() );
+                massMtrxBc.beUnitMatrix(); // TODO: Compute correct mass matrix and add residual contribution.
+                K->assemble(stressRows, massMtrxBc);
+            }
+
         }
 
 #ifdef DEBUG
@@ -322,12 +323,8 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
 #endif
 
 //        printf("iter: %d res norm: %e\n", iter, res.computeNorm() );
-
-
-#ifdef __PETSC_MODULE
-        MatAssemblyBegin( *K->giveMtrx(), MAT_FINAL_ASSEMBLY);
-        MatAssemblyEnd( *K->giveMtrx(), MAT_FINAL_ASSEMBLY);
-#endif
+        K->assembleBegin();
+        K->assembleEnd();
 //        K->writeToFile("Kmapping.txt");
 
         // Solve

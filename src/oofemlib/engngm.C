@@ -66,6 +66,8 @@
 #include "feinterpol3d.h"
 #include "classfactory.h"
 #include "xfem/xfemmanager.h"
+#include "parallelcontext.h"
+#include "contact/contactmanager.h"
 
 #ifdef __PARALLEL_MODE
  #include "problemcomm.h"
@@ -126,6 +128,9 @@ EngngModel :: EngngModel(int i, EngngModel *_master) : domainNeqs(), domainPresc
     }
 
     parallelFlag = 0;
+    numProcs = 1;
+    rank = 0;
+    nonlocalExt = 0;
 #ifdef __PARALLEL_MODE
     loadBalancingFlag = false;
     force_load_rebalance_in_first_step = false;
@@ -185,11 +190,7 @@ void EngngModel :: setParallelMode(bool parallelFlag)
 {
     this->parallelFlag = parallelFlag;
     if ( this->parallelFlag ) {
-#ifndef __PARALLEL_MODE
-        OOFEM_ERROR("Can't do it, only compiled for sequential runs");
-#else
         initParallel();
-#endif
     }
 }
 
@@ -208,9 +209,7 @@ EngngModel :: Instanciate_init()
         domainList.emplace_back(new Domain(i, 0, this));
     }
 
-#ifdef __PARALLEL_MODE
     this->initParallelContexts();
-#endif
 }
 
 
@@ -321,10 +320,10 @@ EngngModel :: initializeFrom(InputRecord *ir)
         this->defaultErrEstimator->initializeFrom(ir);
     }
 
-#ifdef __PARALLEL_MODE
     IR_GIVE_OPTIONAL_FIELD(ir, parallelFlag, _IFT_EngngModel_parallelflag);
     // fprintf (stderr, "Parallel mode is %d\n", parallelFlag);
 
+#ifdef __PARALLEL_MODE
     /* Load balancing support */
     _val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, _val, _IFT_EngngModel_loadBalancingFlag);
@@ -433,34 +432,27 @@ EngngModel :: forceEquationNumbering(int id)
     // OUTPUT:
     // sets this->numberOfEquations and this->numberOfPrescribedEquations and returns this value
 
-    int nnodes, nelem, nbc;
     Domain *domain = this->giveDomain(id);
     TimeStep *currStep = this->giveCurrentStep();
-    IntArray loc;
 
     this->domainNeqs.at(id) = 0;
     this->domainPrescribedNeqs.at(id) = 0;
 
     if ( !this->profileOpt ) {
-        nnodes = domain->giveNumberOfDofManagers();
-        for ( int i = 1; i <= nnodes; i++ ) {
-            domain->giveDofManager(i)->askNewEquationNumbers(currStep);
+        for ( auto &node : domain->giveDofManagers() ) {
+            node->askNewEquationNumbers(currStep);
         }
 
-        nelem = domain->giveNumberOfElements();
-        for ( int i = 1; i <= nelem; ++i ) {
-            Element *elem = domain->giveElement(i);
-            nnodes = elem->giveNumberOfInternalDofManagers();
+        for ( auto &elem : domain->giveElements() ) {
+            int nnodes = elem->giveNumberOfInternalDofManagers();
             for ( int k = 1; k <= nnodes; k++ ) {
                 elem->giveInternalDofManager(k)->askNewEquationNumbers(currStep);
             }
         }
 
         // For special boundary conditions;
-        nbc = domain->giveNumberOfBoundaryConditions();
-        for ( int i = 1; i <= nbc; ++i ) {
-            GeneralBoundaryCondition *bc = domain->giveBc(i);
-            nnodes = bc->giveNumberOfInternalDofManagers();
+        for ( auto &bc : domain->giveBcs() ) {
+            int nnodes = bc->giveNumberOfInternalDofManagers();
             for ( int k = 1; k <= nnodes; k++ ) {
                 bc->giveInternalDofManager(k)->askNewEquationNumbers(currStep);
             }
@@ -515,12 +507,9 @@ EngngModel :: forceEquationNumbering()
         this->numberOfPrescribedEquations += domainPrescribedNeqs.at(i);
     }
 
-#ifdef __PARALLEL_MODE
     for ( std :: size_t i = 1; i <= parallelContextList.size(); i++ ) {
         this->parallelContextList[i-1].init((int)i);
     }
-
-#endif
 
 
     return this->numberOfEquations;
@@ -561,12 +550,12 @@ EngngModel :: solveYourself()
             
             this->solveYourselfAt( this->giveCurrentStep() );
             this->updateYourself( this->giveCurrentStep() );
-            this->terminate( this->giveCurrentStep() );
-
 
             this->timer.stopTimer(EngngModelTimer :: EMTT_SolutionStepTimer);
 
-            double _steptime = this->timer.getUtime(EngngModelTimer :: EMTT_SolutionStepTimer);
+            this->terminate( this->giveCurrentStep() );
+
+            double _steptime = this->giveSolutionStepTime();
             OOFEM_LOG_INFO("EngngModel info: user time consumed by solution step %d: %.2fs\n",
                            this->giveCurrentStep()->giveNumber(), _steptime);
 
@@ -623,25 +612,21 @@ EngngModel :: updateYourself(TimeStep *tStep)
         VERBOSE_PRINT0( "Updating domain ", domain->giveNumber() )
 #  endif
 
-        int nnodes = domain->giveNumberOfDofManagers();
-        for ( int j = 1; j <= nnodes; j++ ) {
-            domain->giveDofManager(j)->updateYourself(tStep);
+        for ( auto &dman : domain->giveDofManagers() ) {
+            dman->updateYourself(tStep);
         }
 
         // Update xfem manager if it is present
         if ( domain->hasXfemManager() ) {
-            domain->giveXfemManager()->updateYourself();
+            domain->giveXfemManager()->updateYourself(tStep);
         }
 
 #  ifdef VERBOSE
-        VERBOSE_PRINT0("Updated nodes ", nnodes)
+        VERBOSE_PRINT0("Updated nodes ", domain->giveNumberOfDofManagers())
 #  endif
 
 
-        int nelem = domain->giveNumberOfElements();
-        for ( int j = 1; j <= nelem; j++ ) {
-            Element *elem = domain->giveElement(j);
-#ifdef __PARALLEL_MODE
+        for ( auto &elem : domain->giveElements() ) {
             // skip remote elements (these are used as mirrors of remote elements on other domains
             // when nonlocal constitutive models are used. They introduction is necessary to
             // allow local averaging on domains without fine grain communication between domains).
@@ -649,12 +634,11 @@ EngngModel :: updateYourself(TimeStep *tStep)
                 continue;
             }
 
-#endif
             elem->updateYourself(tStep);
         }
 
 #  ifdef VERBOSE
-        VERBOSE_PRINT0("Updated Elements ", nelem)
+        VERBOSE_PRINT0("Updated Elements ", domain->giveNumberOfElements())
 #  endif
     }
 
@@ -704,7 +688,6 @@ EngngModel :: saveStepContext(TimeStep *tStep)
 void
 EngngModel :: printOutputAt(FILE *File, TimeStep *tStep)
 {
-    //FILE* File = this -> giveDomain() -> giveOutputStream() ;
     int domCount = 0;
 
     // fprintf (File,"\nOutput for time step number %d \n\n",tStep->giveNumber());
@@ -717,7 +700,7 @@ EngngModel :: printOutputAt(FILE *File, TimeStep *tStep)
     }
 
     fprintf(File, "\n==============================================================");
-    fprintf( File, "\nOutput for time % .8e ", tStep->giveTargetTime() * this->giveVariableScale(VST_Time) );
+    fprintf(File, "\nOutput for time % .8e ", tStep->giveTargetTime() * this->giveVariableScale(VST_Time) );
     fprintf(File, "\n==============================================================\n");
     for ( auto &domain: domainList ) {
         fprintf( File, "Output for domain %3d\n", domain->giveNumber() );
@@ -729,8 +712,8 @@ EngngModel :: printOutputAt(FILE *File, TimeStep *tStep)
 
 void EngngModel :: printYourself()
 {
-    printf( "\nEngineeringModel: instance %s\n", this->giveClassName() );
-    printf( "number of steps: %d\n", this->giveNumberOfSteps() );
+    printf("\nEngineeringModel: instance %s\n", this->giveClassName() );
+    printf("number of steps: %d\n", this->giveNumberOfSteps() );
     printf("number of eq's : %d\n", numberOfEquations);
 }
 
@@ -754,7 +737,6 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
 #endif
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         Element *element = domain->giveElement(ielem);
-#ifdef __PARALLEL_MODE
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
@@ -762,7 +744,6 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
             continue;
         }
 
-#endif
         if ( !element->isActivated(tStep) ) {
             continue;
         }
@@ -791,7 +772,11 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
             bc->assemble(answer, tStep, type, s, s);
         }
     }
-
+    
+    if ( domain->hasContactManager() ) {
+        domain->giveContactManager()->assembleTangentFromContacts(answer, tStep, type, s, s);
+    }
+    
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
     answer->assembleBegin();
@@ -817,12 +802,11 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
 #endif
     for ( int ielem = 1; ielem <= nelem; ielem++ ) {
         Element *element = domain->giveElement(ielem);
-#ifdef __PARALLEL_MODE
+
         if ( element->giveParallelMode() == Element_remote ) {
             continue;
         }
 
-#endif
         if ( !element->isActivated(tStep) ) {
             continue;
         }
@@ -869,7 +853,7 @@ void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep,
 #ifdef __PARALLEL_MODE
         if ( this->isParallel() ) {
             int val;
-            MPI_Allreduce(& maxdofids, & val, 1, MPI_INT, MPI_SUM, this->comm);
+            MPI_Allreduce(& maxdofids, & val, 1, MPI_INT, MPI_MAX, this->comm);
             maxdofids = val;
         }
 #endif
@@ -881,15 +865,12 @@ void EngngModel :: assembleVector(FloatArray &answer, TimeStep *tStep,
     this->assembleVectorFromElements(answer, tStep, type, mode, s, domain, eNorms);
     this->assembleVectorFromBC(answer, tStep, type, mode, s, domain, eNorms);
 
-#ifdef __PARALLEL_MODE
     if ( this->isParallel() ) {
         if ( eNorms ) {
             FloatArray localENorms = * eNorms;
-            //this->giveParallelContext(domain->giveNumber())->accumulate(localENorms, *eNorms);
-            MPI_Allreduce(localENorms.givePointer(), eNorms->givePointer(), eNorms->giveSize(), MPI_DOUBLE, MPI_SUM, this->comm);
+            this->giveParallelContext(domain->giveNumber())->accumulate(localENorms, *eNorms);
         }
     }
-#endif
 }
 
 
@@ -920,12 +901,11 @@ void EngngModel :: assembleVectorFromDofManagers(FloatArray &answer, TimeStep *t
     for ( int i = 1; i <= nnode; i++ ) {
         DofManager *node = domain->giveDofManager(i);
         node->computeLoadVectorAt(charVec, tStep, mode);
-#ifdef __PARALLEL_MODE
+
         if ( node->giveParallelMode() == DofManager_shared ) {
             charVec.times( 1. / ( node->givePartitionsConnectivitySize() ) );
         }
 
-#endif
         if ( charVec.isNotEmpty() ) {
             if ( node->computeM2LTransformation(R, dofIDarry) ) {
                 charVec.rotatedWith(R, 't');
@@ -1080,14 +1060,12 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
     int nelem = domain->giveNumberOfElements();
 
 
-#ifdef __PARALLEL_MODE
     ///@todo Checking the chartype is not since there could be some other chartype in the future. We need to try and deal with chartype in a better way.
     /// For now, this is the best we can do.
     if ( this->isParallel() && type == InternalForcesVector ) {
         // Copies internal (e.g. Gauss-Point) data from remote elements to make sure they have all information necessary for nonlocal averaging.
         this->exchangeRemoteElementData(RemoteElementExchangeTag);
     }
-#endif
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     ///@todo Consider using private answer variables and sum them up at the end, but it just might be slower then a shared variable.
@@ -1096,7 +1074,7 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
 #endif
     for ( int i = 1; i <= nelem; i++ ) {
         Element *element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
+
         // skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. They introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
@@ -1104,7 +1082,6 @@ void EngngModel :: assembleVectorFromElements(FloatArray &answer, TimeStep *tSte
             continue;
         }
 
-#endif
         if ( !element->isActivated(tStep) ) {
             continue;
         }
@@ -1150,7 +1127,7 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Ch
 
     for ( int i = 1; i <= nelems; i++ ) {
         Element *element = domain->giveElement(i);
-#ifdef __PARALLEL_MODE
+
         // Skip remote elements (these are used as mirrors of remote elements on other domains
         // when nonlocal constitutive models are used. Their introduction is necessary to
         // allow local averaging on domains without fine grain communication between domains).
@@ -1158,7 +1135,6 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Ch
             continue;
         }
 
-#endif
         if ( !element->isActivated(tStep) ) {
             continue;
         }
@@ -1178,6 +1154,15 @@ EngngModel :: assembleExtrapolatedForces(FloatArray &answer, TimeStep *tStep, Ch
     }
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
+}
+
+void
+EngngModel :: assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
+                                    const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms)
+{
+    if( domain->hasContactManager()) {
+        domain->giveContactManager()->assembleVectorFromContacts(answer, tStep, type, mode, s, domain, eNorms);
+    } 
 }
 
 
@@ -1217,10 +1202,7 @@ EngngModel :: initStepIncrements()
 //
 {
     for ( auto &domain: domainList ) {
-        int nelem = domain->giveNumberOfElements();
-        for ( int j = 1; j <= nelem; j++ ) {
-            Element *elem = domain->giveElement(j);
-#ifdef __PARALLEL_MODE
+        for ( auto &elem : domain->giveElements() ) {
             // skip remote elements (these are used as mirrors of remote elements on other domains
             // when nonlocal constitutive models are used. They introduction is necessary to
             // allow local averaging on domains without fine grain communication between domains).
@@ -1228,7 +1210,6 @@ EngngModel :: initStepIncrements()
                 continue;
             }
 
-#endif
             elem->initForNewStep();
         }
     }
@@ -1278,25 +1259,25 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
     }
 
     // store solution step
-    if ( ( iores = giveCurrentStep()->saveContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = giveCurrentStep()->saveContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // store numberOfEquations and domainNeqs array
-    if ( !stream->write(& numberOfEquations, 1) ) {
+    if ( !stream->write(numberOfEquations) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainNeqs.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = domainNeqs.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // store numberOfPrescribedEquations and domainNeqs array
-    if ( !stream->write(& numberOfPrescribedEquations, 1) ) {
+    if ( !stream->write(numberOfPrescribedEquations) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainPrescribedNeqs.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = domainPrescribedNeqs.storeYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1307,14 +1288,14 @@ contextIOResultType EngngModel :: saveContext(DataStream *stream, ContextMode mo
 
 
     for ( auto &domain: domainList ) {
-        domain->saveContext(stream, mode, obj);
+        domain->saveContext(*stream, mode, obj);
     }
 
 
     // store nMethod
     NumericalMethod *nmethod = this->giveNumericalMethod( this->giveMetaStep( giveCurrentStep()->giveMetaStepNumber() ) );
     if ( nmethod ) {
-        if ( ( iores = nmethod->saveContext(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = nmethod->saveContext(*stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -1374,7 +1355,7 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
         currentStep = new TimeStep(istep, this, 0, 0., 0., 0);
     }
 
-    if ( ( iores = currentStep->restoreContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = currentStep->restoreContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1395,20 +1376,20 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
                                 currentStep->giveTimeIncrement(), currentStep->giveSolutionStateCounter() - 1);
 
     // restore numberOfEquations and domainNeqs array
-    if ( !stream->read(& numberOfEquations, 1) ) {
+    if ( !stream->read(numberOfEquations) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainNeqs.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = domainNeqs.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
     // restore numberOfPrescribedEquations and domainNeqs array
-    if ( !stream->read(& numberOfPrescribedEquations, 1) ) {
+    if ( !stream->read(numberOfPrescribedEquations) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( ( iores = domainPrescribedNeqs.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = domainPrescribedNeqs.restoreYourself(*stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -1418,13 +1399,13 @@ contextIOResultType EngngModel :: restoreContext(DataStream *stream, ContextMode
     }
 
     for ( auto &domain: domainList ) {
-        domain->restoreContext(stream, mode, obj);
+        domain->restoreContext(*stream, mode, obj);
     }
 
     // restore nMethod
     NumericalMethod *nmethod = this->giveNumericalMethod( this->giveCurrentMetaStep() );
     if ( nmethod ) {
-        if ( ( iores = nmethod->restoreContext(stream, mode) ) != CIO_OK ) {
+        if ( ( iores = nmethod->restoreContext(*stream, mode) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -1550,11 +1531,11 @@ EngngModel :: GiveDomainDataReader(int domainNum, int domainSerNum, ContextFileM
 std :: string
 EngngModel :: errorInfo(const char *func) const
 {
-#ifdef __PARALLEL_MODE
-    return std::string(this->giveClassName()) + "::" + func + ", Rank: " + std::to_string(rank);
-#else
-    return std::string(this->giveClassName()) + "::" + func;
-#endif
+    if ( this->isParallel() ) {
+        return std::string(this->giveClassName()) + "::" + func + ", Rank: " + std::to_string(rank);
+    } else {
+        return std::string(this->giveClassName()) + "::" + func;
+    }
 }
 
 Domain *
@@ -1582,8 +1563,6 @@ EngngModel :: setDomain(int i, Domain *ptr, bool iDeallocateOld)
 }
 
 
-
-#ifdef __PARALLEL_MODE
 ParallelContext *
 EngngModel :: giveParallelContext(int i)
 {
@@ -1602,8 +1581,6 @@ EngngModel :: initParallelContexts()
         parallelContextList.emplace_back(this);
     }
 }
-#endif
-
 
 
 MetaStep *
@@ -1639,27 +1616,41 @@ EngngModel :: giveOutputStream()
     return outputStream;
 }
 
+double
+EngngModel :: giveSolutionStepTime()
+{
+    return this->timer.getUtime(EngngModelTimer :: EMTT_SolutionStepTimer);
+}
+
+void
+EngngModel :: giveAnalysisTime(int &rhrs, int &rmin, int &rsec, int &uhrs, int &umin, int &usec)
+{
+    double rtsec = this->timer.getWtime(EngngModelTimer :: EMTT_AnalysisTimer);
+    double utsec = this->timer.getUtime(EngngModelTimer :: EMTT_AnalysisTimer);
+    rsec = rmin = rhrs = 0;
+    usec = umin = uhrs = 0;
+    this->timer.convert2HMS(rhrs, rmin, rsec, rtsec);
+    this->timer.convert2HMS(uhrs, umin, usec, utsec);
+}
+
 void
 EngngModel :: terminateAnalysis()
 {
-    double tsec;
-    int nsec = 0, nmin = 0, nhrs = 0;
+    int rsec = 0, rmin = 0, rhrs = 0;
+    int usec = 0, umin = 0, uhrs = 0;
     FILE *out = this->giveOutputStream();
     time_t endTime = time(NULL);
     this->timer.stopTimer(EngngModelTimer :: EMTT_AnalysisTimer);
 
-
-    fprintf( out, "\nFinishing analysis on: %s\n", ctime(& endTime) );
+    
+    fprintf(out, "\nFinishing analysis on: %s\n", ctime(& endTime) );
     // compute real time consumed
-    tsec = this->timer.getWtime(EngngModelTimer :: EMTT_AnalysisTimer);
-    this->timer.convert2HMS(nhrs, nmin, nsec, tsec);
-    fprintf(out, "Real time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
+    this->giveAnalysisTime(rhrs, rmin, rsec, uhrs, umin, usec);
+    fprintf(out, "Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
     OOFEM_LOG_FORCED("\n\nANALYSIS FINISHED\n\n\n");
-    OOFEM_LOG_FORCED("Real time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
-    tsec = this->timer.getUtime(EngngModelTimer :: EMTT_AnalysisTimer);
-    this->timer.convert2HMS(nhrs, nmin, nsec, tsec);
-    fprintf(out, "User time consumed: %03dh:%02dm:%02ds\n\n\n", nhrs, nmin, nsec);
-    OOFEM_LOG_FORCED("User time consumed: %03dh:%02dm:%02ds\n", nhrs, nmin, nsec);
+    OOFEM_LOG_FORCED("Real time consumed: %03dh:%02dm:%02ds\n", rhrs, rmin, rsec);
+    fprintf(out, "User time consumed: %03dh:%02dm:%02ds\n\n\n", uhrs, umin, usec);
+    OOFEM_LOG_FORCED("User time consumed: %03dh:%02dm:%02ds\n", uhrs, umin, usec);
     exportModuleManager->terminate();
 }
 
@@ -1703,7 +1694,6 @@ EngngModel :: init()
 }
 
 
-#ifdef __PARALLEL_MODE
 void
 EngngModel :: initParallel()
 {
@@ -1713,13 +1703,14 @@ EngngModel :: initParallel()
     this->comm = MPI_COMM_WORLD;
     MPI_Comm_rank(this->comm, & this->rank);
     MPI_Comm_size(this->comm, & numProcs);
+ #else
+    OOFEM_ERROR("Can't do it, only compiled for sequential runs");
  #endif
  #ifdef __VERBOSE_PARALLEL
     OOFEM_LOG_RELEVANT("[%d/%d] Running on %s\n", rank, numProcs, processor_name);
  #endif
 }
 
-#endif
 
 #ifdef __OOFEG
 void EngngModel :: drawYourself(oofegGraphicContext &gc)
@@ -1738,8 +1729,8 @@ void EngngModel :: drawElements(oofegGraphicContext &gc)
 {
     Domain *d = this->giveDomain( gc.getActiveDomain() );
     TimeStep *tStep = this->giveCurrentStep();
-    for ( int i = 1; i <= d->giveNumberOfElements(); i++ ) {
-        d->giveElement(i)->drawYourself(gc, tStep);
+    for ( auto &elem : d->giveElements() ) {
+        elem->drawYourself(gc, tStep);
     }
 }
 
@@ -1747,28 +1738,118 @@ void EngngModel :: drawNodes(oofegGraphicContext &gc)
 {
     Domain *d = this->giveDomain( gc.getActiveDomain() );
     TimeStep *tStep = this->giveCurrentStep();
-    for ( int i = 1; i <= d->giveNumberOfDofManagers(); i++ ) {
-        d->giveDofManager(i)->drawYourself(gc, tStep);
+    for ( auto &dman : d->giveElements() ) {
+        dman->drawYourself(gc, tStep);
     }
 }
 
 #endif
 
 
+void
+EngngModel :: initializeCommMaps(bool forceInit)
+{
+#ifdef __PARALLEL_MODE
+    // Set up communication patterns.
+    communicator->setUpCommunicationMaps(this, true, forceInit);
+    if ( nonlocalExt ) {
+        nonlocCommunicator->setUpCommunicationMaps(this, true, forceInit);
+    }
+#else
+    OOFEM_ERROR("Can't set up comm maps, parallel support not compiled");
+#endif
+}
+
+
+int
+EngngModel :: updateSharedDofManagers(FloatArray &answer, const UnknownNumberingScheme &s, int ExchangeTag)
+{
+    if ( isParallel() ) {
+#ifdef __PARALLEL_MODE
+        int result = 1;
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Packing data", this->giveRank() );
+ #endif
+
+        ArrayWithNumbering tmp;
+        tmp.array = & answer;
+        tmp.numbering = & s;
+        result &= communicator->packAllData(this, & tmp, & EngngModel :: packDofManagers);
+
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Exchange started", this->giveRank() );
+ #endif
+
+        result &= communicator->initExchange(ExchangeTag);
+
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Receiving and unpacking", this->giveRank() );
+ #endif
+
+        result &= communicator->unpackAllData(this, & tmp, & EngngModel :: unpackDofManagers);
+        result &= communicator->finishExchange();
+        return result;
+#else
+        OOFEM_ERROR("Support for parallel mode not compiled in.");
+        return 0;
+#endif
+    } else {
+        return 1;
+    }
+
+}
+
+
+int
+EngngModel :: exchangeRemoteElementData(int ExchangeTag)
+{
+
+    if ( isParallel() && nonlocalExt ) {
+#ifdef __PARALLEL_MODE
+        int result = 1;
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Packing remote element data", this->giveRank() );
+ #endif
+
+        result &= nonlocCommunicator->packAllData(this, & EngngModel :: packRemoteElementData);
+
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Remote element data exchange started", this->giveRank() );
+ #endif
+
+        result &= nonlocCommunicator->initExchange(ExchangeTag);
+
+ #ifdef __VERBOSE_PARALLEL
+        VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Receiveng and Unpacking remote element data", this->giveRank() );
+ #endif
+
+        if ( !( result &= nonlocCommunicator->unpackAllData(this, & EngngModel :: unpackRemoteElementData) ) ) {
+            OOFEM_ERROR("Receiveng and Unpacking remote element data");
+        }
+
+        result &= nonlocCommunicator->finishExchange();
+        return result;
+#else
+        OOFEM_ERROR("Support for parallel mode not compiled in.");
+        return 0;
+#endif
+    } else {
+        return 1;
+    }
+}
+
 #ifdef __PARALLEL_MODE
 void
 EngngModel :: balanceLoad(TimeStep *tStep)
 {
-    LoadBalancerMonitor :: LoadBalancerDecisionType _d;
     this->giveLoadBalancerMonitor();
     this->giveLoadBalancer();
-    EModelDefaultEquationNumbering dn;
 
     //print statistics for current step
     lb->printStatistics();
 
     if ( tStep->isNotTheLastStep() ) {
-        _d = lbm->decide(tStep);
+        LoadBalancerMonitor :: LoadBalancerDecisionType _d = lbm->decide(tStep);
         if ( ( _d == LoadBalancerMonitor :: LBD_RECOVER ) ||
             ( ( tStep->isTheFirstStep() ) && force_load_rebalance_in_first_step ) ) {
             this->timer.startTimer(EngngModelTimer :: EMTT_LoadBalancingTimer);
@@ -1783,6 +1864,7 @@ EngngModel :: balanceLoad(TimeStep *tStep)
             this->forceEquationNumbering();
  #ifdef __VERBOSE_PARALLEL
             // debug print
+            EModelDefaultEquationNumbering dn;
             int nnodes = giveDomain(1)->giveNumberOfDofManagers();
             int myrank = this->giveRank();
             fprintf(stderr, "\n[%d] Nodal Table\n", myrank);
@@ -1810,84 +1892,6 @@ EngngModel :: balanceLoad(TimeStep *tStep)
                            this->giveRank(), _steptime);
         }
     }
-}
-
-
-int
-EngngModel :: updateSharedDofManagers(FloatArray &answer, const UnknownNumberingScheme &s, int ExchangeTag)
-{
-    int result = 1;
-
-
-    if ( isParallel() ) {
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Packing data", this->giveRank() );
- #endif
-
-        ArrayWithNumbering tmp;
-        tmp.array = & answer;
-        tmp.numbering = & s;
-        result &= communicator->packAllData(this, & tmp, & EngngModel :: packDofManagers);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Exchange started", this->giveRank() );
- #endif
-
-        result &= communicator->initExchange(ExchangeTag);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "EngngModel :: updateSharedDofManagers", "Receiving and unpacking", this->giveRank() );
- #endif
-
-        result &= communicator->unpackAllData(this, & tmp, & EngngModel :: unpackDofManagers);
-        result &= communicator->finishExchange();
-    }
-
-    return result;
-}
-
-
-void
-EngngModel :: initializeCommMaps(bool forceInit)
-{
-    // Set up communication patterns.
-    communicator->setUpCommunicationMaps(this, true, forceInit);
-    if ( nonlocalExt ) {
-        nonlocCommunicator->setUpCommunicationMaps(this, true, forceInit);
-    }
-}
-
-
-int
-EngngModel :: exchangeRemoteElementData(int ExchangeTag)
-{
-    int result = 1;
-
-    if ( isParallel() && nonlocalExt ) {
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Packing remote element data", this->giveRank() );
- #endif
-
-        result &= nonlocCommunicator->packAllData(this, & EngngModel :: packRemoteElementData);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Remote element data exchange started", this->giveRank() );
- #endif
-
-        result &= nonlocCommunicator->initExchange(ExchangeTag);
-
- #ifdef __VERBOSE_PARALLEL
-        VERBOSEPARALLEL_PRINT( "EngngModel :: exchangeRemoteElementData", "Receiveng and Unpacking remote element data", this->giveRank() );
- #endif
-
-        if ( !( result &= nonlocCommunicator->unpackAllData(this, & EngngModel :: unpackRemoteElementData) ) ) {
-            OOFEM_ERROR("Receiveng and Unpacking remote element data");
-        }
-
-        result &= nonlocCommunicator->finishExchange();
-    }
-
-    return result;
 }
 
 
@@ -1948,7 +1952,7 @@ EngngModel :: packDofManagers(ArrayWithNumbering *srcData, ProcessCommunicator &
             if ( jdof->isPrimaryDof() ) {
                 int eqNum = jdof->giveEquationNumber(s);
                 if ( eqNum ) {
-                    result &= pcbuff->packDouble( src->at(eqNum) );
+                    result &= pcbuff->write( src->at(eqNum) );
                 }
             }
         }
@@ -1977,7 +1981,7 @@ EngngModel :: unpackDofManagers(ArrayWithNumbering *destData, ProcessCommunicato
         for ( Dof *jdof: *dman ) {
             int eqNum = jdof->giveEquationNumber(s);
             if ( jdof->isPrimaryDof() && eqNum ) {
-                result &= pcbuff->unpackDouble(value);
+                result &= pcbuff->read(value);
                 if ( dofmanmode == DofManager_shared ) {
                     dest->at(eqNum) += value;
                 } else if ( dofmanmode == DofManager_remote ) {

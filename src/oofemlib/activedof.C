@@ -224,12 +224,10 @@ int ActiveDof :: askNewEquationNumber(TimeStep *tStep)
 
     EngngModel *model = dofManager->giveDomain()->giveEngngModel();
 
-#ifdef __PARALLEL_MODE
     if ( dofManager->giveParallelMode() == DofManager_null ) {
         equationNumber = 0;
         return 0;
     }
-#endif
 
     if ( this->hasBc(tStep) ) {
         equationNumber = -model->giveNewPrescribedEquationNumber(dofManager->giveDomain()->giveNumber(), this->dofID);
@@ -270,13 +268,13 @@ int ActiveDof :: giveIcId() { return 0; }
 InitialCondition *ActiveDof :: giveIc() { return NULL; }
 
 
-contextIOResultType ActiveDof :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType ActiveDof :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     // Nothing here since the boundary condition deals with all the values.
     return CIO_OK;
 }
 
-contextIOResultType ActiveDof :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType ActiveDof :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     return CIO_OK;
 }

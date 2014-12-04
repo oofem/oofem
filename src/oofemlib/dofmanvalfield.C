@@ -94,13 +94,13 @@ DofManValueField :: setDofManValue(int dofMan, FloatArray value)
 }
 
 contextIOResultType
-DofManValueField :: saveContext(DataStream *stream, ContextMode mode)
+DofManValueField :: saveContext(DataStream &stream, ContextMode mode)
 {
     return CIO_OK;
 }
 
 contextIOResultType
-DofManValueField :: restoreContext(DataStream *stream, ContextMode mode)
+DofManValueField :: restoreContext(DataStream &stream, ContextMode mode)
 {
     return CIO_OK;
 }

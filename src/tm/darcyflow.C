@@ -16,11 +16,6 @@
 #include "nrsolver.h"
 #include "primaryfield.h"
 
-#ifdef __PARALLEL_MODE
- #include "problemcomm.h"
- #include "processcomm.h"
-#endif
-
 #include <iostream>
 #include <fstream>
 #include <cstdio>
@@ -60,20 +55,6 @@ IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
 
     // Create solution space for pressure field
     PressureField = new PrimaryField(this, 1, FT_Pressure, 1);
-#if 0
- #ifdef __PARALLEL_MODE
-
-
-    printf("Parallel mode!\n");
-    if ( isParallel() ) {
-        commBuff = new CommunicatorBuff( this->giveNumberOfProcesses() );
-        communicator = new ProblemCommunicator(this, commBuff, this->giveRank(),
-                                               this->giveNumberOfProcesses(),
-                                               this->commMode);
-    }
-
- #endif
-#endif
     return IRRT_OK;
 }
 
@@ -112,9 +93,7 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     this->externalForces.zero();
     this->assembleVectorFromElements( this->externalForces, tStep, ExternalForcesVector, VM_Total,
                                      EModelDefaultEquationNumbering(), this->giveDomain(1) );
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 
     this->incrementOfSolution.resize(neq);
     this->internalForces.resize(neq);
@@ -208,9 +187,7 @@ void DarcyFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d
         this->internalForces.zero();
         this->assembleVector(this->internalForces, tStep,  InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), d, & this->ebeNorm);
-#ifdef __PARALLEL_MODE
         this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
-#endif
         break;
 
     case NonLinearLhs:
@@ -271,6 +248,7 @@ TimeStep *DarcyFlow :: giveNextStep()
     previousStep = currentStep;
     currentStep = new TimeStep(istep, this, 1, ( double ) istep, 0., counter);
     // time and dt variables are set eq to 0 for statics - has no meaning
+    ///@todo They have important meaning in *quasi* static solutions, this must be fixed.
     return currentStep;
 }
 

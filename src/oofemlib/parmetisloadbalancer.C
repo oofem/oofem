@@ -506,12 +506,12 @@ ParmetisLoadBalancer :: packSharedDmanPartitions(ProcessCommunicator &pc)
             ( dofman->givePartitionList()->findFirstIndexOf(iproc) ) ) {
             // send new partitions to remote representation
             // fprintf (stderr, "[%d] sending shared plist of %d to [%d]\n", myrank, dofman->giveGlobalNumber(), iproc);
-            pcbuff->packInt( dofman->giveGlobalNumber() );
-            pcbuff->packIntArray( * ( this->giveDofManPartitions(idofman) ) );
+            pcbuff->write( dofman->giveGlobalNumber() );
+            this->giveDofManPartitions(idofman)->storeYourself(*pcbuff);
         }
     }
 
-    pcbuff->packInt(PARMETISLB_END_DATA);
+    pcbuff->write((int)PARMETISLB_END_DATA);
     return 1;
 }
 
@@ -532,10 +532,10 @@ ParmetisLoadBalancer :: unpackSharedDmanPartitions(ProcessCommunicator &pc)
     // init domain global2local map
     domain->initGlobalDofManMap();
 
-    pcbuff->unpackInt(_globnum);
+    pcbuff->read(_globnum);
     // unpack dofman data
     while ( _globnum != PARMETISLB_END_DATA ) {
-        pcbuff->unpackIntArray(_partitions);
+        _partitions.restoreYourself(*pcbuff);
         if ( ( _locnum = domain->dofmanGlobal2Local(_globnum) ) ) {
             this->addSharedDofmanPartitions(_locnum, _partitions);
         } else {
@@ -548,7 +548,7 @@ ParmetisLoadBalancer :: unpackSharedDmanPartitions(ProcessCommunicator &pc)
          * fprintf (stderr,"%d ", dofManPartitions[_locnum-1].at(_i));
          * fprintf (stderr,"\n");
          */
-        pcbuff->unpackInt(_globnum);
+        pcbuff->read(_globnum);
     }
 
     return 1;

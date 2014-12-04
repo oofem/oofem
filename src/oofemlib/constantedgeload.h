@@ -64,7 +64,7 @@ class OOFEM_EXPORT ConstantEdgeLoad : public BoundaryLoad
 public:
     ConstantEdgeLoad(int i, Domain * d) : BoundaryLoad(i, d) { }
 
-    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, FloatArray &coords, ValueModeType mode);
+    virtual void computeValueAt(FloatArray &answer, TimeStep *tStep, const FloatArray &coords, ValueModeType mode);
     virtual int giveApproxOrder() { return 0; }
     virtual IRResultType initializeFrom(InputRecord *ir);
     virtual bcGeomType giveBCGeoType() const { return EdgeLoadBGT; }
@@ -73,7 +73,7 @@ public:
     virtual const char *giveInputRecordName() const { return _IFT_ConstantEdgeLoad_Name; }
 
 private:
-    virtual void computeNArray(FloatArray &answer, FloatArray &coords) const { answer.clear(); }
+    virtual void computeNArray(FloatArray &answer, const FloatArray &coords) const { answer.clear(); }
 };
 } // end namespace oofem
 #endif // constantedgeload_h

@@ -566,7 +566,7 @@ BinghamFluidMaterial2Status :: BinghamFluidMaterial2Status(int n, Domain *d, Gau
 }
 
 void
-BinghamFluidMaterial2Status :: printOutputAt(FILE *File, TimeStep *tNow)
+BinghamFluidMaterial2Status :: printOutputAt(FILE *File, TimeStep *tStep)
 // Prints the strains and stresses on the data file.
 {
     fprintf(File, " strains ");
@@ -611,26 +611,23 @@ BinghamFluidMaterial2Status :: initTempStatus()
 
 
 contextIOResultType
-BinghamFluidMaterial2Status :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+BinghamFluidMaterial2Status :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full ms context (saves state variables, that completely describe
 // current state)
 // saving the data in dictionary is left to material (yield crit. level).
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = FluidDynamicMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->write(& devStrainMagnitude, 1) ) {
+    if ( !stream.write(devStrainMagnitude) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->write(& devStressMagnitude, 1) ) {
+    if ( !stream.write(devStressMagnitude) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -639,26 +636,23 @@ BinghamFluidMaterial2Status :: saveContext(DataStream *stream, ContextMode mode,
 
 
 contextIOResultType
-BinghamFluidMaterial2Status :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+BinghamFluidMaterial2Status :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)
 //
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = FluidDynamicMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( !stream->read(& devStrainMagnitude, 1) ) {
+    if ( !stream.read(devStrainMagnitude) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream->read(& devStressMagnitude, 1) ) {
+    if ( !stream.read(devStressMagnitude) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 

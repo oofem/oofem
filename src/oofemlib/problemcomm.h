@@ -36,7 +36,6 @@
 #define problemcomm_h
 
 #include "communicator.h"
-#include "problemcommunicatormode.h"
 #include "error.h"
 
 namespace oofem {
@@ -51,8 +50,6 @@ class EngngModel;
 class OOFEM_EXPORT ProblemCommunicator : public Communicator
 {
 protected:
-    // Setup mode.
-    ProblemCommunicatorMode mode;
     bool initialized;
 
 public:
@@ -62,9 +59,8 @@ public:
      * @param b Buffer object.
      * @param rank Rank of associated partition.
      * @param size Number of collaborating processes.
-     * @param mode Communicator mode.
      */
-    ProblemCommunicator(EngngModel * emodel, CommunicatorBuff * b, int rank, int size, ProblemCommunicatorMode mode);
+    ProblemCommunicator(EngngModel * emodel, CommunicatorBuff * b, int rank, int size);
     /// Destructor
     virtual ~ProblemCommunicator();
 
@@ -75,7 +71,7 @@ public:
      * @param excludeSelfCommFlag If set to true, the communication map of receiver with itself will be forced to be empty, otherwise it will be assembled.
      * @param forceReinit Forces reinitilaization.
      */
-    void setUpCommunicationMaps(EngngModel *emodel, bool excludeSelfCommFlag, bool forceReinit = false);
+    virtual void setUpCommunicationMaps(EngngModel *emodel, bool excludeSelfCommFlag, bool forceReinit = false) = 0;
     /**
      * Assigns given map to given process communicator.
      * Sorts map according to global entity (dofmanagers or element) numbers to ensure, that local and
@@ -85,7 +81,7 @@ public:
      * @param processComm Domain comm which send map will be set.
      * @param map Send map.
      */
-    int setProcessCommunicatorToSendArry(ProcessCommunicator *processComm, IntArray &map);
+    virtual int setProcessCommunicatorToSendArry(ProcessCommunicator *processComm, IntArray &map) = 0;
     /**
      * Assigns given map to given process communicator.
      * Sorts map according to global entity (dofmanagers or element) numbers to ensure, that local and
@@ -95,9 +91,9 @@ public:
      * @param processComm Process comm which received map will be set.
      * @param map Received map.
      */
-    int setProcessCommunicatorToRecvArry(ProcessCommunicator *processComm, IntArray &map);
+    virtual int setProcessCommunicatorToRecvArry(ProcessCommunicator *processComm, IntArray &map) = 0;
 
-private:
+protected:
     /**
      * Sorts given communication map, containing local DofManager numbers according to their
      * corresponding global numbers. It could not be sorted by standard techniques, because
@@ -112,33 +108,35 @@ private:
     /// Partitioning used in quicksort.
     int quickSortPartition( IntArray &map, int l, int r, int ( ProblemCommunicator :: *cmp )( int, int ) );
 
+public:
     /// Global dofManager number comparison function.
     int DofManCmp(int, int);
     /// Global element comparison function.
     int ElemCmp(int, int);
-
-    /**
-     * Service for setting up the receiver for node cut communication patterns with other remote process.
-     * Sets up the toSend and toRecv attributes in associated process communicators.
-     * @param emodel Associated engineering model.
-     * @param excludeSelfCommFlag If set to true, the communication map of receiver with itself will be forced to be empty, otherwise it will be assembled.
-     */
-    void setUpCommunicationMapsForNodeCut(EngngModel *emodel, bool excludeSelfCommFlag);
-    /**
-     * Service for setting up the receiver for element cut communication patterns with other remote process.
-     * Sets up the toSend and toRecv attributes in associated process communicators.
-     * @param emodel Associated engineering model.
-     * @param excludeSelfCommFlag If set to true, the communication map of receiver with itself will be forced to be empty, otherwise it will be assembled.
-     */
-    void setUpCommunicationMapsForElementCut(EngngModel *emodel, bool excludeSelfCommFlag);
-    /**
-     * Service for setting up the receiver for remote element communication patterns with other remote process.
-     * Sets up the toSend and toRecv attributes in associated process communicators.
-     * @param emodel Associated engineering model.
-     * @param excludeSelfCommFlag If set to true, the communication map of receiver with itself will be forced to be empty, otherwise it will be assembled.
-     */
-    void setUpCommunicationMapsForRemoteElementMode(EngngModel *emodel, bool excludeSelfCommFlag);
 };
+
+class OOFEM_EXPORT NodeCommunicator : public ProblemCommunicator
+{
+public:
+    NodeCommunicator(EngngModel * emodel, CommunicatorBuff * b, int rank, int size);
+    virtual ~NodeCommunicator() {}
+
+    virtual void setUpCommunicationMaps(EngngModel *emodel, bool excludeSelfCommFlag, bool forceReinit = false);
+    virtual int setProcessCommunicatorToSendArry(ProcessCommunicator *processComm, IntArray &map);
+    virtual int setProcessCommunicatorToRecvArry(ProcessCommunicator *processComm, IntArray &map);
+};
+
+class OOFEM_EXPORT ElementCommunicator : public ProblemCommunicator
+{
+public:
+    ElementCommunicator(EngngModel * emodel, CommunicatorBuff * b, int rank, int size);
+    virtual ~ElementCommunicator() {}
+
+    virtual void setUpCommunicationMaps(EngngModel *emodel, bool excludeSelfCommFlag, bool forceReinit = false);
+    virtual int setProcessCommunicatorToSendArry(ProcessCommunicator *processComm, IntArray &map);
+    virtual int setProcessCommunicatorToRecvArry(ProcessCommunicator *processComm, IntArray &map);
+};
+
 } // end namespace oofem
 
 #endif // problemcomm_h

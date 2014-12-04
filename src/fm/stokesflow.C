@@ -56,9 +56,6 @@ StokesFlow :: StokesFlow(int i, EngngModel *_master) : FluidModel(i, _master)
     this->stiffnessMatrix = NULL;
     this->meshqualityee = NULL;
     this->velocityPressureField = NULL;
-#ifdef __PARALLEL_MODE
-    commMode = ProblemCommMode__NODE_CUT;
-#endif
 }
 
 StokesFlow :: ~StokesFlow()
@@ -96,20 +93,21 @@ IRResultType StokesFlow :: initializeFrom(InputRecord *ir)
 
     this->maxdef = 25; ///@todo Deal with this parameter (set to some reasonable value by default now)
 
-    return EngngModel :: initializeFrom(ir);
+    return FluidModel :: initializeFrom(ir);
 }
 
 
 void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 {
+    Domain *d = this->giveDomain(1);
     FloatArray *solutionVector = NULL;
 
-    if ( this->giveDomain(1)->giveNumberOfElements() == 0 && this->giveDomain(1)->giveTopology() ) {
-        this->giveDomain(1)->giveTopology()->replaceFEMesh();
-        this->meshqualityee = new MeshQualityErrorEstimator( 1, this->giveDomain(1) );
+    if ( d->giveNumberOfElements() == 0 && d->giveTopology() ) {
+        d->giveTopology()->replaceFEMesh();
+        this->meshqualityee = new MeshQualityErrorEstimator( 1, d );
     }
 
-    if ( this->giveDomain(1)->giveTopology() && this->meshqualityee ) {
+    if ( d->giveTopology() && this->meshqualityee ) {
         // Check the quality of the deformed mesh.
         double meshdeformation = this->meshqualityee->giveValue(globalErrorEEV, tStep);
         if ( this->giveProblemScale() == macroScale ) {
@@ -117,8 +115,8 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
         }
 
         if ( this->ts == TS_NeedsRemeshing || meshdeformation > this->maxdef ) {
-            this->giveDomain(1)->giveTopology()->replaceFEMesh();
-            OOFEM_LOG_INFO( "StokesFlow :: solveYourselfAt - New mesh created (%d elements).\n", this->giveDomain(1)->giveNumberOfElements() );
+            d->giveTopology()->replaceFEMesh();
+            OOFEM_LOG_INFO( "StokesFlow :: solveYourselfAt - New mesh created (%d elements).\n", d->giveNumberOfElements() );
             /*meshdeformation =*/ this->meshqualityee->giveValue(globalErrorEEV, tStep);
             this->giveExportModuleManager()->initialize();
         }
@@ -151,10 +149,8 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     this->externalForces.resize(neq);
     this->externalForces.zero();
     this->assembleVector( this->externalForces, tStep, ExternalForcesVector, VM_Total,
-                         EModelDefaultEquationNumbering(), this->giveDomain(1) );
-#ifdef __PARALLEL_MODE
+                         EModelDefaultEquationNumbering(), d );
     this->updateSharedDofManagers(this->externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 
     if ( this->giveProblemScale() == macroScale ) {
         OOFEM_LOG_INFO("StokesFlow :: solveYourselfAt - Solving step %d, metastep %d, (neq = %d)\n", tStep->giveNumber(), tStep->giveMetaStepNumber(), neq);
@@ -165,7 +161,7 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 #if 1
     double loadLevel;
     int currentIterations;
-    this->updateComponent( tStep, InternalRhs, this->giveDomain(1) );
+    this->updateComponent( tStep, InternalRhs, d );
     NM_Status status = this->nMethod->solve(this->stiffnessMatrix,
                                             & ( this->externalForces ),
                                             NULL,
@@ -178,12 +174,12 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
                                             currentIterations,
                                             tStep);
 #else
-    this->updateComponent( tStep, InternalRhs, this->giveDomain(1) );
-    this->updateComponent( tStep, NonLinearLhs, this->giveDomain(1) );
+    this->updateComponent( tStep, InternalRhs, d );
+    this->updateComponent( tStep, NonLinearLhs, d );
     this->internalForces.negated();
     this->internalForces.add(externalForces);
     NM_Status status = this->nMethod->giveLinearSolver()->solve(this->stiffnessMatrix, & ( this->internalForces ), solutionVector);
-    this->updateComponent( tStep, NonLinearLhs, this->giveDomain(1) );
+    this->updateComponent( tStep, NonLinearLhs, d );
 #endif
 
     if ( !( status & NM_Success ) ) {
@@ -192,28 +188,23 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
 
 
     // update element stabilization
-    Domain *d = this->giveDomain(1);
-    int nelem = d->giveNumberOfElements();
-    for ( int i = 1; i <= nelem; ++i ) {
-        static_cast< FMElement * >( d->giveElement(i) )->updateStabilizationCoeffs(tStep);
+    for ( auto &elem : d->giveElements() ) {
+        static_cast< FMElement * >( elem.get() )->updateStabilizationCoeffs(tStep);
     }
 }
 
 void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 {
     // update element stabilization
-    int nelem = d->giveNumberOfElements();
-    for ( int i = 1; i <= nelem; ++i ) {
-        static_cast< FMElement * >( d->giveElement(i) )->updateStabilizationCoeffs(tStep);
+    for ( auto &elem : d->giveElements() ) {
+        static_cast< FMElement * >( elem.get() )->updateStabilizationCoeffs(tStep);
     }
 
     if ( cmpn == InternalRhs ) {
         this->internalForces.zero();
         this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
-                             EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
-#ifdef __PARALLEL_MODE
+                             EModelDefaultEquationNumbering(), d, & this->eNorm);
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
-#endif
         return;
     } else if ( cmpn == NonLinearLhs ) {
         this->stiffnessMatrix->zero();
@@ -228,16 +219,12 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
 void StokesFlow :: updateYourself(TimeStep *tStep)
 {
     this->updateInternalState(tStep);
-    EngngModel :: updateYourself(tStep);
+    FluidModel :: updateYourself(tStep);
 }
 
 int StokesFlow :: forceEquationNumbering(int id)
 {
-
-  /*
     int neq = FluidModel :: forceEquationNumbering(id);
-  */
-    int neq = EngngModel::forceEquationNumbering(id);
     this->equationNumberingCompleted = false;
     if ( this->stiffnessMatrix ) {
         delete this->stiffnessMatrix;
@@ -263,13 +250,11 @@ double StokesFlow :: giveReynoldsNumber()
 int StokesFlow :: checkConsistency()
 {
     Domain *domain = this->giveDomain(1);
-    int nelem = domain->giveNumberOfElements();
 
     // check for proper element type
-    for ( int i = 1; i <= nelem; i++ ) {
-        FMElement *sePtr = dynamic_cast< FMElement * >( domain->giveElement(i) );
-        if ( sePtr == NULL ) {
-            OOFEM_WARNING("Element %d has no FMElement base", i);
+    for ( auto &elem : domain->giveElements() ) {
+        if ( dynamic_cast< FMElement * >( elem.get() ) == NULL ) {
+            OOFEM_WARNING("Element %d has no FMElement base", elem->giveLabel());
             return false;
         }
     }
@@ -290,9 +275,8 @@ void StokesFlow :: updateInternalState(TimeStep *tStep)
             this->ts = domain->giveTopology()->updateYourself(tStep);
         }
 
-        int nelem = domain->giveNumberOfElements();
-        for ( int j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(tStep);
+        for ( auto &elem : domain->giveElements() ) {
+            elem->updateInternalState(tStep);
         }
     }
 }
@@ -304,7 +288,7 @@ void StokesFlow :: doStepOutput(TimeStep *tStep)
         tp->doOutput(tStep);
     }
 
-    EngngModel :: doStepOutput(tStep);
+    FluidModel :: doStepOutput(tStep);
 }
 
 NumericalMethod *StokesFlow :: giveNumericalMethod(MetaStep *mStep)

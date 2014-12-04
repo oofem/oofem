@@ -143,23 +143,20 @@ VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
         fprintf(stream, "\n");
     }
 
-    int ielem, nelem = d->giveNumberOfElements(), elemToProcess = 0;
+    int elemToProcess = 0;
     int ncells, celllistsize = 0;
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-#ifdef __PARALLEL_MODE
-        if ( d->giveElement(ielem)->giveParallelMode() != Element_local ) {
+    for ( auto &elem : d->giveElements() ) {
+        if ( elem->giveParallelMode() != Element_local ) {
             continue;
         }
 
-#endif
         elemToProcess++;
         // element composed from same-type cells asumed
-        ncells = this->giveNumberOfElementCells( d->giveElement(ielem) );
-        celllistsize += ncells + ncells *this->giveNumberOfNodesPerCell( this->giveCellType ( d->giveElement ( ielem ) ) );
+        ncells = this->giveNumberOfElementCells( elem.get() );
+        celllistsize += ncells + ncells *this->giveNumberOfNodesPerCell( this->giveCellType ( elem.get() ) );
     }
 
     int nelemNodes;
-    Element *elem;
     int vtkCellType;
     IntArray cellNodes;
     // output cells
@@ -171,18 +168,15 @@ VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     // assemble global->local map
     this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 0);
     offset += regionDofMans;
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        elem = d->giveElement(ielem);
-#ifdef __PARALLEL_MODE
+    for ( auto &elem : d->giveElements() ) {
         if ( elem->giveParallelMode() != Element_local ) {
             continue;
         }
 
-#endif
-        vtkCellType = this->giveCellType(elem);
+        vtkCellType = this->giveCellType(elem.get());
 
         nelemNodes = this->giveNumberOfNodesPerCell(vtkCellType); //elem->giveNumberOfNodes(); // It HAS to be the same size as giveNumberOfNodesPerCell, otherwise the file will be incorrect.
-        this->giveElementCell(cellNodes, elem, 0);
+        this->giveElementCell(cellNodes, elem.get(), 0);
         fprintf(stream, "%d ", nelemNodes);
         for ( i = 1; i <= nelemNodes; i++ ) {
             fprintf(stream, "%d ", regionNodalNumbers.at( cellNodes.at(i) ) - 1);
@@ -193,15 +187,12 @@ VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
 
     // output cell types
     fprintf(stream, "\nCELL_TYPES %d\n", elemToProcess);
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        elem = d->giveElement(ielem);
-#ifdef __PARALLEL_MODE
+    for ( auto &elem : d->giveElements() ) {
         if ( elem->giveParallelMode() != Element_local ) {
             continue;
         }
 
-#endif
-        vtkCellType = this->giveCellType(elem);
+        vtkCellType = this->giveCellType(elem.get());
         fprintf(stream, "%d\n", vtkCellType);
     }
 
@@ -414,11 +405,9 @@ VTKExportModule :: exportIntVars(FILE *stream, TimeStep *tStep)
 void
 VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tStep)
 {
-    int ielem, pos;
+    int pos;
     InternalStateType type;
-    Element *elem;
     Domain *d  = emodel->giveDomain(1);
-    int nelem = d->giveNumberOfElements();
     FloatMatrix mtrx(3, 3);
     FloatArray temp, vec;
     double gptot;
@@ -430,13 +419,11 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
         case IST_MaterialNumber:
         case IST_ElementNumber:
             fprintf( stream, "SCALARS %s int\nLOOKUP_TABLE default\n", __InternalStateTypeToString(type) );
-            for ( ielem = 1; ielem <= nelem; ielem++ ) {
-                elem = d->giveElement(ielem);
-#ifdef __PARALLEL_MODE
+            for ( auto &elem : d->giveElements() ) {
                 if ( elem->giveParallelMode() != Element_local ) {
                     continue;
                 }
-#endif
+
                 if ( type == IST_MaterialNumber || type == IST_CrossSectionNumber ) {
                     OOFEM_WARNING("Material numbers are deprecated, outputing cross section number instead...");
                     fprintf( stream, "%d\n", elem->giveCrossSection()->giveNumber() );
@@ -461,8 +448,8 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
             }
 
             fprintf( stream, "VECTORS %s double\n", __InternalStateTypeToString(type) );
-            for ( ielem = 1; ielem <= nelem; ielem++ ) {
-                if ( !d->giveElement(ielem)->giveLocalCoordinateSystem(mtrx) ) {
+            for ( auto &elem : d->giveElements() ) {
+                if ( !elem->giveLocalCoordinateSystem(mtrx) ) {
                     mtrx.resize(3, 3);
                     mtrx.zero();
                 }
@@ -483,13 +470,11 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                 } else {
                     fprintf( stream, "VECTORS %s double\nLOOKUP_TABLE default\n", __InternalStateTypeToString(type) );
                 }
-                for ( ielem = 1; ielem <= nelem; ielem++ ) {
-                    elem = d->giveElement(ielem);
-#ifdef __PARALLEL_MODE
+                for ( auto &elem : d->giveElements() ) {
                     if ( elem->giveParallelMode() != Element_local ) {
                         continue;
                     }
-#endif
+
                     gptot = 0;
                     vec.clear();
                     for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
@@ -536,32 +521,27 @@ VTKExportModule :: giveTotalRBRNumberOfNodes(Domain *d)
 // vtk from smoothing the nodal values at region boundaries.
 //
 {
-    Element *elem;
-    int rbrnodes = 0, nnodes = d->giveNumberOfDofManagers(), nelems = d->giveNumberOfElements();
+    int rbrnodes = 0, nnodes = d->giveNumberOfDofManagers();
     std :: vector< char > map(nnodes);
     //char map[nnodes];
-    int j;
-    int elemnodes, ielemnode;
+    int elemnodes;
 
-    for ( j = 0; j < nnodes; j++ ) {
+    for ( int j = 0; j < nnodes; j++ ) {
         map [ j ] = 0;
     }
 
-    for ( j = 1; j <= nelems; j++ ) {
-        elem  = d->giveElement(j);
-#ifdef __PARALLEL_MODE
-        if ( d->giveElement(j)->giveParallelMode() != Element_local ) {
+    for ( auto &elem : d->giveElements() ) {
+        if ( elem->giveParallelMode() != Element_local ) {
             continue;
         }
 
-#endif
         elemnodes = elem->giveNumberOfNodes();
-        for ( ielemnode = 1; ielemnode <= elemnodes; ielemnode++ ) {
-            map [ elem->giveNode(ielemnode)->giveNumber() - 1 ] = 1;
+        for ( int ielemnode = 1; ielemnode <= elemnodes; ielemnode++ ) {
+             map [ elem->giveNode(ielemnode)->giveNumber() - 1 ] = 1;
         }
     }
 
-    for ( j = 0; j < nnodes; j++ ) {
+    for ( int j = 0; j < nnodes; j++ ) {
         rbrnodes += map [ j ];
     }
 
@@ -580,33 +560,26 @@ VTKExportModule :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int &re
     // The i-th value contains the corresponding global node number.
 
 
-    int ielem, nelem = domain->giveNumberOfElements();
     int nnodes = domain->giveNumberOfDofManagers();
     int elemNodes;
-    int elementNode, node;
     int currOffset = offset + 1;
-    Element *element;
 
     regionNodalNumbers.resize(nnodes);
     regionNodalNumbers.zero();
     regionDofMans = 0;
 
-    for ( ielem = 1; ielem <= nelem; ielem++ ) {
-        element = domain->giveElement(ielem);
+    for ( auto &element : domain->giveElements() ) {
 
-#ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() != Element_local ) {
             continue;
         }
-
-#endif
 
         elemNodes = element->giveNumberOfNodes();
         //  elemSides = element->giveNumberOfSides();
 
         // determine local region node numbering
-        for ( elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
-            node = element->giveNode(elementNode)->giveNumber();
+        for ( int elementNode = 1; elementNode <= elemNodes; elementNode++ ) {
+            int node = element->giveNode(elementNode)->giveNumber();
             if ( regionNodalNumbers.at(node) == 0 ) { // assign new number
                 /* mark for assignement. This is done later, as it allows to preserve
                  * natural node numbering.
@@ -619,8 +592,7 @@ VTKExportModule :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int &re
 
     if ( mode == 1 ) {
         IntArray answer(nnodes);
-        int i;
-        for ( i = 1; i <= nnodes; i++ ) {
+        for ( int i = 1; i <= nnodes; i++ ) {
             if ( regionNodalNumbers.at(i) ) {
                 regionNodalNumbers.at(i) = currOffset++;
                 answer.at( regionNodalNumbers.at(i) ) = i;
@@ -629,8 +601,7 @@ VTKExportModule :: initRegionNodeNumbering(IntArray &regionNodalNumbers, int &re
 
         regionNodalNumbers = answer;
     } else {
-        int i;
-        for ( i = 1; i <= nnodes; i++ ) {
+        for ( int i = 1; i <= nnodes; i++ ) {
             if ( regionNodalNumbers.at(i) ) {
                 regionNodalNumbers.at(i) = currOffset++;
             }

@@ -188,11 +188,16 @@ def getKeywordValue (infilename, record, kwd, optional = None):
 
 #translate numbers in internalstatetype.h to strings in out file (e.g. 1=stresses, 4=strains)
 def elemKwdToString(kwd):
-    if kwd == '1' : return 'stresses'
-    if kwd == '4' : return 'strains'
-    if kwd == '13' : return 'damage'
-    print ( "Error. Can not translate element's keyword %s to string, exiting" % kwd )
-    exit(0)
+
+    if (kwd == '1') : 
+        return 'stresses'
+    elif (kwd == '4') : 
+        return 'strains'
+    elif (kwd == '13') : 
+        return 'damage'
+    else:
+        # keyword is something else -> allow to use the string directly 
+        return kwd;
             
 # parses the extractor/checker input record
 def parse_input_rec (context, recline):

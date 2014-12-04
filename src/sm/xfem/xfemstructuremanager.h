@@ -45,6 +45,8 @@
 
 namespace oofem {
 
+class MaterialForceEvaluator;
+
 /*
  * XfemStructureManager: XFEM manager with extra functionality
  * specific for the sm module.
@@ -52,7 +54,8 @@ namespace oofem {
  * @author Erik Svenning
  * @date Apr 28, 2014
  */
-class OOFEM_EXPORT XfemStructureManager : public XfemManager {
+class OOFEM_EXPORT XfemStructureManager : public XfemManager
+{
 public:
     XfemStructureManager(Domain *domain);
     virtual ~XfemStructureManager();
@@ -65,6 +68,11 @@ public:
     virtual const char *giveClassName() const { return "XfemStructureManager"; }
     virtual const char *giveInputRecordName() const { return _IFT_XfemStructureManager_Name; }
 
+    /**
+     * Update enrichment items (level sets).
+     */
+    virtual void updateYourself(TimeStep *tStep);
+
     void splitCracks();
 
 protected:
@@ -73,8 +81,12 @@ protected:
      * If cracks should be splitted at intersections as a pre-processing step.
      */
     bool mSplitCracks;
-};
 
+    /**
+     * Evaluator for material forces.
+     */
+    MaterialForceEvaluator *mpMatForceEvaluator;
+};
 } /* namespace oofem */
 
 #endif /* XFEMSTRUCTUREMANAGER_H_ */

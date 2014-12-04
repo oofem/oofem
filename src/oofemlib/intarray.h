@@ -46,7 +46,6 @@
 
 namespace oofem {
 class DataStream;
-class CommunicationBuffer;
 
 /**
  * Class implementing an array of integers.
@@ -326,39 +325,20 @@ public:
 
     /**
      * Stores array to output stream.
-     * @see FEMComponent
      */
-    contextIOResultType storeYourself(DataStream *stream, ContextMode mode) const;
+    contextIOResultType storeYourself(DataStream &stream) const;
     /**
      * Restores array from image on stream.
-     * @see FEMComponent
      */
-    contextIOResultType restoreYourself(DataStream *stream, ContextMode mode);
-
-    friend std :: ostream &operator << ( std :: ostream & out, const IntArray & x );
-
-#ifdef __PARALLEL_MODE
-    /**@name Methods for packing/unpacking to/from communication buffer */
-    //@{
-    /**
-     * Packs receiver into communication buffer.
-     * @param buff Buffer to pack itself into.
-     * @return Nonzero if successful.
-     */
-    int packToCommBuffer(CommunicationBuffer &buff) const;
-    /**
-     * Unpacks receiver from communication buffer.
-     * @param buff Buffer from which unpack itself.
-     * @return Nonzero if successful.
-     */
-    int unpackFromCommBuffer(CommunicationBuffer &buff);
+    contextIOResultType restoreYourself(DataStream &stream);
     /**
      * Returns how much space is needed to pack receivers message.
      * @param buff Buffer used for packing.
      */
-    int givePackSize(CommunicationBuffer &buff);
-    //@}
-#endif
+    int givePackSize(DataStream &buff) const;
+
+
+    friend std :: ostream &operator << ( std :: ostream & out, const IntArray & x );
 
 #ifdef BOOST_PYTHON
     void __setitem__(int i, int val) { this->at(i + 1) = val; }

@@ -51,6 +51,7 @@ class TimeStep;
 class GaussPoint;
 class FloatArray;
 class IntArray;
+class Node;
 
 /**
  * The spatial localizer element interface associated to spatial localizer.
@@ -86,16 +87,6 @@ public:
      * @param bb1 Upper bounding box.
      */
     virtual void SpatialLocalizerI_giveBBox(FloatArray &bb0, FloatArray &bb1);
-    /**
-     * Check the distance from the parametric center.
-     * @param coords Global coordinate.
-     * @return Distance of given point from element parametric center.
-     */
-    virtual double SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-    {
-        OOFEM_ERROR( "Not implemented for %s", this->giveClassName() );
-        return 0.0;
-    }
 
     /**
      * Gives the closest point on the element.
@@ -150,13 +141,6 @@ public:
      * @return The element belonging to associated domain, containing given point, NULL otherwise.
      */
     virtual Element *giveElementContainingPoint(const FloatArray &coords, const Set &eset) = 0;
-    /**
-     * Returns the element close to point
-     * @param coords Global problem coordinates of point of interest.
-     * @param regionList Only elements within given regions are considered, if NULL all regions are considered.
-     * @return The element belonging to associated domain, close to given point, NULL otherwise.
-     */
-    virtual Element *giveElementCloseToPoint(const FloatArray &coords, const IntArray *regionList = NULL) = 0;
     /**
      * Returns the element closest to a given point.
      * @param[out] lcoords Local coordinates in element found.
@@ -225,6 +209,13 @@ public:
      * @param radius Radius of bounding sphere.
      */
     virtual void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius) = 0;
+
+    /**
+     * Returns the node closest to the given coordinate.
+     * @param coords Global coordinate.
+     * @return Closest node, or NULL or none exists.
+     */
+    virtual Node *giveNodeClosestToPoint(const FloatArray &coords) = 0;
 
     /**
      * Initialize receiver data structure if not done previously

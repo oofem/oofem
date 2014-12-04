@@ -123,14 +123,14 @@ TR21_2D_SUPG :: computeGaussPoints()
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(3);
 
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 3, this);
 
         //seven point Gauss integration
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3);
+        integrationRulesArray [ 1 ].reset( new GaussIntegrationRule(2, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], 7, this);
 
-        integrationRulesArray [ 2 ] = new GaussIntegrationRule(3, this, 1, 3);
+        integrationRulesArray [ 2 ].reset( new GaussIntegrationRule(3, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 2 ], 13, this);
 
 
@@ -277,9 +277,8 @@ TR21_2D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
     double mu_min, norm_N, norm_N_d, norm_M_d, norm_LSIC;
     FloatMatrix N, N_d, M_d, LSIC;
     FloatArray u;
-    IntegrationRule *iRule = integrationRulesArray [ 1 ];
     mu_min = 1;
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
         double mu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity(gp, tStep);
         if ( mu_min > mu ) {
             mu_min = mu;
@@ -326,9 +325,8 @@ TR21_2D_SUPG :: computeAdvectionTerm(FloatMatrix &answer, TimeStep *tStep)
 
     answer.clear();
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
@@ -345,9 +343,8 @@ TR21_2D_SUPG :: computeAdvectionDeltaTerm(FloatMatrix &answer, TimeStep *tStep)
 
     answer.clear();
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* consistent part + supg stabilization term */
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
@@ -366,9 +363,8 @@ TR21_2D_SUPG :: computeMassDeltaTerm(FloatMatrix &answer, TimeStep *tStep)
 
     answer.clear();
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
     /* mtrx for computing t_supg, norm of this mtrx is computed */
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
         this->computeNuMatrix(n, gp);
         this->computeUDotGradUMatrix(b, gp, tStep);
         double dV  = this->computeVolumeAround(gp);
@@ -385,8 +381,7 @@ TR21_2D_SUPG :: computeLSICTerm(FloatMatrix &answer, TimeStep *tStep)
 
     answer.clear();
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
         double dV  = this->computeVolumeAround(gp);
         double rho = this->giveMaterial()->give('d', gp);
         this->computeDivUMatrix(b, gp);
@@ -425,8 +420,7 @@ TR21_2D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
     }
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
         double dV = this->computeVolumeAround(gp);
         velocityInterpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         this->computeNuMatrix(n, gp);
@@ -444,11 +438,10 @@ void
 TR21_2D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
 {
     FloatMatrix dn;
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
     answer.clear();
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
 
         velocityInterpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 
@@ -462,8 +455,7 @@ TR21_2D_SUPG :: LS_PCS_computeVolume(double &answer, const FloatArray **coordina
     //double answer = 0.0;
     answer = 0.0;
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
         //answer += this->computeVolumeAround(gp);
 
         double determinant, weight, volume;
@@ -483,8 +475,7 @@ TR21_2D_SUPG :: LS_PCS_computeVolume()
 {
     double answer = 0.0;
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
         answer += this->computeVolumeAround(gp);
     }
 
@@ -495,7 +486,6 @@ double
 TR21_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep)
 {
     FloatArray fi(6), un, n;
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
 
     double vol = 0.0, eps = 0.0, _fi, S = 0.0;
 
@@ -503,7 +493,7 @@ TR21_2D_SUPG :: LS_PCS_computeS(LevelSetPCS *ls, TimeStep *tStep)
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
     }
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 1 ] ) {
         double dV = this->computeVolumeAround(gp);
         velocityInterpolation.evalN( n,  * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         vol += dV;
@@ -1370,7 +1360,7 @@ TR21_2D_SUPG :: giveIPValue(FloatArray &answer, GaussPoint *gp, InternalStateTyp
     return SUPGElement2 :: giveIPValue(answer, gp, type, tStep);
 }
 
-contextIOResultType TR21_2D_SUPG :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType TR21_2D_SUPG :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full element context (saves state variables, that completely describe
 // current state)
@@ -1387,7 +1377,7 @@ contextIOResultType TR21_2D_SUPG :: saveContext(DataStream *stream, ContextMode 
 
 
 
-contextIOResultType TR21_2D_SUPG :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType TR21_2D_SUPG :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full element context (saves state variables, that completely describe
 // current state)

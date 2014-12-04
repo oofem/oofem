@@ -134,7 +134,7 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
     int npeq = domain->giveEngngModel()->giveNumberOfDomainEquations( domain->giveNumber(), EModelDefaultPrescribedEquationNumbering() );
     if ( nsd == 2 ) {
         C.resize(npeq, 4);
-    } else   {
+    } else {
         C.resize(npeq, nsd * ( nsd + 1 ) / 2);
     }
     C.zero();
@@ -214,9 +214,9 @@ void PrescribedGradient :: computeField(FloatArray &sigma, TimeStep *tStep)
     R_c.zero();
     R_ext.zero();
     emodel->assembleVector( R_c, tStep, InternalForcesVector, VM_Total,
-                           EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
+                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
     emodel->assembleVector( R_ext, tStep, ExternalForcesVector, VM_Total,
-                           EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
+                            EModelDefaultPrescribedEquationNumbering(), this->giveDomain() );
     R_c.subtract(R_ext);
 
     // Condense it;
@@ -240,16 +240,16 @@ void PrescribedGradient :: computeTangent(FloatMatrix &tangent, TimeStep *tStep)
     // Fetch some information from the engineering model
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
-    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ); // = rve->giveLinearSolver();
-    SparseMtrxType stype = SMT_PetscMtrx; // = rve->giveSparseMatrixType();
+    std :: unique_ptr< SparseLinearSystemNM >solver( classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
+    SparseMtrxType stype = solver->giveRecommendedMatrix(true);
     EModelDefaultEquationNumbering fnum;
     EModelDefaultPrescribedEquationNumbering pnum;
 
     // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
-    SparseMtrx *Kff = classFactory.createSparseMtrx(stype);
-    SparseMtrx *Kfp = classFactory.createSparseMtrx(stype);
-    SparseMtrx *Kpf = classFactory.createSparseMtrx(stype);
-    SparseMtrx *Kpp = classFactory.createSparseMtrx(stype);
+    std :: unique_ptr< SparseMtrx >Kff( classFactory.createSparseMtrx(stype) );
+    std :: unique_ptr< SparseMtrx >Kfp( classFactory.createSparseMtrx(stype) );
+    std :: unique_ptr< SparseMtrx >Kpf( classFactory.createSparseMtrx(stype) );
+    std :: unique_ptr< SparseMtrx >Kpp( classFactory.createSparseMtrx(stype) );
     if ( !Kff ) {
         OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
@@ -257,28 +257,21 @@ void PrescribedGradient :: computeTangent(FloatMatrix &tangent, TimeStep *tStep)
     Kfp->buildInternalStructure(rve, 1, fnum, pnum);
     Kpf->buildInternalStructure(rve, 1, pnum, fnum);
     Kpp->buildInternalStructure(rve, 1, pnum);
-    rve->assemble(Kff, tStep, StiffnessMatrix, fnum, this->domain);
-    rve->assemble(Kfp, tStep, StiffnessMatrix, fnum, pnum, this->domain);
-    rve->assemble(Kpf, tStep, StiffnessMatrix, pnum, fnum, this->domain);
-    rve->assemble(Kpp, tStep, StiffnessMatrix, pnum, this->domain);
+    rve->assemble(Kff.get(), tStep, StiffnessMatrix, fnum, this->domain);
+    rve->assemble(Kfp.get(), tStep, StiffnessMatrix, fnum, pnum, this->domain);
+    rve->assemble(Kpf.get(), tStep, StiffnessMatrix, pnum, fnum, this->domain);
+    rve->assemble(Kpp.get(), tStep, StiffnessMatrix, pnum, this->domain);
 
     FloatMatrix C, X, Kpfa, KfpC, a;
 
     this->updateCoefficientMatrix(C);
     Kpf->timesT(C, KfpC);
-    solver->solve(Kff, KfpC, a);
+    solver->solve(Kff.get(), KfpC, a);
     Kpp->times(C, X);
     Kpf->times(a, Kpfa);
     X.subtract(Kpfa);
     tangent.beTProductOf(C, X);
     tangent.times( 1. / this->domainSize() );
-
-    delete Kff;
-    delete Kfp;
-    delete Kpf;
-    delete Kpp;
-
-    delete solver; ///@todo Remove this when solver is taken from engngmodel
 }
 
 

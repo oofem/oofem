@@ -387,15 +387,14 @@ SolutionbasedShapeFunction :: loadProblem()
         this->setLoads(myEngngModel, i + 1);
 
         // Check
-        for ( int j = 1; j <= myEngngModel->giveDomain(1)->giveNumberOfElements(); j++ ) {
-            Element *e = myEngngModel->giveDomain(1)->giveElement(j);
+        for ( auto &elem : myEngngModel->giveDomain(1)->giveElements() ) {
             FloatArray centerCoord;
             int vlockCount = 0;
             centerCoord.resize(3);
             centerCoord.zero();
 
-            for ( int k = 1; k <= e->giveNumberOfDofManagers(); k++ ) {
-                DofManager *dman = e->giveDofManager(k);
+            for ( int k = 1; k <= elem->giveNumberOfDofManagers(); k++ ) {
+                DofManager *dman = elem->giveDofManager(k);
                 centerCoord.add( * dman->giveCoordinates() );
                 for ( Dof *dof: *dman ) {
                     if ( dof->giveBcId() != 0 ) {
@@ -404,7 +403,7 @@ SolutionbasedShapeFunction :: loadProblem()
                 }
             }
             if ( vlockCount == 30 ) {
-                OOFEM_WARNING("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", e->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
+                OOFEM_WARNING("Element over-constrained (%u)! Center coordinate: %f, %f, %f\n", elem->giveNumber(), centerCoord.at(1) / 10, centerCoord.at(2) / 10, centerCoord.at(3) / 10);
             }
         }
 
@@ -498,9 +497,9 @@ SolutionbasedShapeFunction :: setLoads(EngngModel *myEngngModel, int d)
     myBodyLoad->initializeFrom(& ir);
     myEngngModel->giveDomain(1)->setBoundaryCondition(bcID, myBodyLoad);
 
-    for ( int i = 1; i <= myEngngModel->giveDomain(1)->giveNumberOfElements(); i++ ) {
+    for ( auto &elem : myEngngModel->giveDomain(1)->giveElements() ) {
         IntArray *blArray;
-        blArray = myEngngModel->giveDomain(1)->giveElement(i)->giveBodyLoadArray();
+        blArray = elem->giveBodyLoadArray();
         blArray->resizeWithValues(blArray->giveSize() + 1);
         blArray->at( blArray->giveSize() ) = bcID;
     }

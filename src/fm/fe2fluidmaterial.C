@@ -351,12 +351,10 @@ bool FE2FluidMaterialStatus :: createRVE(int n, GaussPoint *gp, const std :: str
 
     std :: ostringstream name;
     name << this->rve->giveOutputBaseFileName() << "-gp" << n;
-#ifdef __PARALLEL_MODE
     if ( this->domain->giveEngngModel()->isParallel() && this->domain->giveEngngModel()->giveNumberOfProcesses() > 1 ) {
         name << "." << this->domain->giveEngngModel()->giveRank();
     }
 
-#endif
     this->rve->letOutputBaseFileNameBe( name.str() );
 
     this->bc = dynamic_cast< MixedGradientPressureBC * >( this->rve->giveDomain(1)->giveBc(1) );
@@ -388,7 +386,7 @@ void FE2FluidMaterialStatus :: initTempStatus()
     FluidDynamicMaterialStatus :: initTempStatus();
 }
 
-contextIOResultType FE2FluidMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType FE2FluidMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores = FluidDynamicMaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
@@ -398,7 +396,7 @@ contextIOResultType FE2FluidMaterialStatus :: saveContext(DataStream *stream, Co
     return CIO_OK;
 }
 
-contextIOResultType FE2FluidMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+contextIOResultType FE2FluidMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 {
     contextIOResultType iores;
     if ( ( iores = FluidDynamicMaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {

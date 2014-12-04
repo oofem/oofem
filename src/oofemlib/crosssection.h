@@ -114,15 +114,9 @@ public:
      * @param n Cross section number.
      * @param d Domain.
      */
-    CrossSection(int n, Domain * d) : FEMComponent(n, d)
-    {
-        propertyDictionary = new Dictionary();
-        setNumber = 0;
-    }
+    CrossSection(int n, Domain * d);
     /// Destructor.
-    virtual ~CrossSection() {
-        delete propertyDictionary;
-    }
+    virtual ~CrossSection();
 
     int giveSetNumber() const { return this->setNumber; };
 
@@ -191,7 +185,6 @@ public:
      */
     virtual int giveIPValue(FloatArray &answer, GaussPoint *ip, InternalStateType type, TimeStep *tStep);
 
-#ifdef __PARALLEL_MODE
     /**
      * Pack all necessary data of integration point (according to element parallel_mode)
      * into given communication buffer. The corresponding material model service for particular integration point
@@ -204,7 +197,7 @@ public:
      * @param ip Integration point.
      * @return Nonzero if successful.
      */
-    virtual int packUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip) = 0;
+    virtual int packUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) = 0;
     /**
      * Unpack and updates all necessary data of given integration point (according to element parallel_mode)
      * into given communication buffer.
@@ -214,7 +207,7 @@ public:
      * @param ip Integration point.
      * @return Nonzero if successful.
      */
-    virtual int unpackAndUpdateUnknowns(CommunicationBuffer &buff, TimeStep *tStep, GaussPoint *ip) = 0;
+    virtual int unpackAndUpdateUnknowns(DataStream &buff, TimeStep *tStep, GaussPoint *ip) = 0;
     /**
      * Estimates the necessary pack size to hold all packed data of receiver.
      * The corresponding material model  service is invoked. The
@@ -223,7 +216,7 @@ public:
      * @param ip Integration point.
      * @return Estimate of pack size.
      */
-    virtual int estimatePackSize(CommunicationBuffer &buff, GaussPoint *ip) = 0;
+    virtual int estimatePackSize(DataStream &buff, GaussPoint *ip) = 0;
     /**
      * Returns the weight representing relative computational cost of receiver
      * The reference cross section is integral model in plane stress.
@@ -247,7 +240,6 @@ public:
      * @return Relative redistribution cost of the receiver.
      */
     virtual double predictRelativeRedistributionCost(GaussPoint *gp) { return 1.0; }
-#endif
 
     virtual IRResultType initializeFrom(InputRecord *ir);
 
@@ -259,7 +251,7 @@ public:
      * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType saveIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
+    virtual contextIOResultType saveIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
     /**
      * Reads integration point state to output stream.
      * @param stream Output stream.
@@ -268,7 +260,7 @@ public:
      * @return contextIOResultType.
      * @exception throws an ContextIOERR exception if error encountered.
      */
-    virtual contextIOResultType restoreIPContext(DataStream *stream, ContextMode mode, GaussPoint *gp);
+    virtual contextIOResultType restoreIPContext(DataStream &stream, ContextMode mode, GaussPoint *gp);
 };
 } // end namespace oofem
 #endif // crosssection_h

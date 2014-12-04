@@ -89,19 +89,17 @@ StokesFlowVelocityHomogenization :: handlePrescribedValues()
     this->giveDomain(1)->giveArea();
     this->giveAreaOfDomain();
 
-    for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfElements(); i++ ) {
 #if 0
-        if ( CarlTr * ThisElement = dynamic_cast< CarlTr * >( this->giveDomain(1)->giveElement(i) ) ) {
-            ThisElement = ( CarlTr * ) this->giveDomain(1)->giveElement(i);
+    for ( auto &elem : this->giveDomain(1)->giveElements() ) {
+        if ( CarlTr * ThisElement = dynamic_cast< CarlTr * >( elem.get() ) ) {
             ThisElement->numberOfElementsOnDomain = this->giveDomain(1)->giveNumberOfElements();
             ThisElement->totalAreaOfDomain = this->giveAreaOfDomain();
             ThisElement->specialUnknowns = & ( this->SpecialUnknowns );
             DofMan = ( Node * ) ThisElement->giveDofManager(7);
             this->prescribedType = ThisElement->prescribedType;
         }
-
-#endif
     }
+#endif
 }
 
 void
@@ -130,8 +128,8 @@ StokesFlowVelocityHomogenization :: getMeans(FloatArray &gradP, FloatArray &v, T
     gradP.clear();
     v.clear();
 
-    for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfElements(); i++ ) {
-        if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( this->giveDomain(1)->giveElement(i) ) ) {
+    for ( auto &elem : this->giveDomain(1)->giveElements() ) {
+        if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( elem.get() ) ) {
             // The following only works for a rectangle
 
             for ( int j = 1; j <= T->giveNumberOfDofManagers(); j++ ) {
@@ -183,8 +181,8 @@ StokesFlowVelocityHomogenization :: rveGiveCharacteristicData(int DataType, void
         FloatArray thisGradP, v_hat;
         gradP = ( FloatArray * ) input;
 
-        for ( int i = 1; i < this->giveDomain(1)->giveNumberOfElements(); i++ ) {
-            if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( this->giveDomain(1)->giveElement(i) ) ) {
+        for ( auto &elem : this->giveDomain(1)->giveElements() ) {
+            if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( elem.get() ) ) {
                 IntArray *bodyLoad = T->giveBodyLoadArray();
                 DeadWeight *load;
                 load = dynamic_cast< DeadWeight * >( this->giveDomain(1)->giveLoad( bodyLoad->at(1) ) );
@@ -243,8 +241,8 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
     F.zero();
     col = {1,2};
 
-    for ( int i = 1; i <= domain->giveNumberOfElements(); i++ ) {
-        if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( this->giveDomain(1)->giveElement(i) ) ) {
+    for ( auto &elem : domain->giveElements() ) {
+        if ( Tr21Stokes * T = dynamic_cast< Tr21Stokes * >( elem.get() ) ) {
             T->giveElementFMatrix(Fe);
             T->giveLocationArray( loc, {V_u, V_v}, EModelDefaultEquationNumbering() );
 

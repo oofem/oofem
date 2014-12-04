@@ -79,7 +79,7 @@ void Tet21Stokes :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], this->numberOfGaussPoints, this);
     }
 }
@@ -124,7 +124,6 @@ void Tet21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     FloatArray a_pressure, a_velocity, devStress, epsp, Nh, dN_V(30);
     FloatMatrix dN, B(6, 30);
@@ -134,7 +133,7 @@ void Tet21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tS
     FloatArray momentum, conservation;
 
     B.zero();
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         FloatArray *lcoords = gp->giveNaturalCoordinates();
 
         double detJ = fabs( this->interpolation_quad.evaldNdx( dN, * lcoords, FEIElementGeometryWrapper(this) ) );
@@ -203,13 +202,12 @@ void Tet21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType t
     }
 
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatArray N, gVector, temparray(30);
 
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( GaussPoint *gp: *iRule ) {
+        for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
             FloatArray *lcoords = gp->giveNaturalCoordinates();
 
             double rho = mat->give('d', gp);
@@ -282,14 +280,13 @@ void Tet21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
 void Tet21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatMatrix B(6, 30), EdB, K, G, Dp, DvT, C, Ed, dN;
     FloatArray dN_V(30), Nlin, Ep, Cd, tmpA, tmpB;
     double Cp;
 
     B.zero();
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ 0 ] ) {
         // Compute Gauss point and determinant at current element
         FloatArray *lcoords = gp->giveNaturalCoordinates();
 
@@ -396,14 +393,6 @@ void Tet21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(ValueM
     }
 }
 
-double Tet21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray center;
-    FloatArray lcoords = {0.3333333, 0.3333333, 0.3333333};
-    this->computeGlobalCoordinates(center, lcoords);
-    return center.distance(coords);
-}
-
 void Tet21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
     if ( type == IST_Pressure ) {
@@ -428,7 +417,6 @@ void Tet21Stokes :: giveIntegratedVelocity(FloatArray &answer, TimeStep *tStep)
      * Integrate velocity over element
      */
 
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FloatMatrix Nmatrix;
     FloatArray v, N, tmp;
     int k = 0;
@@ -447,7 +435,7 @@ void Tet21Stokes :: giveIntegratedVelocity(FloatArray &answer, TimeStep *tStep)
 
     answer.clear();
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ 0 ] ) {
         const FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         this->interpolation_quad.evalN( N, lcoords, FEIElementGeometryWrapper(this) );

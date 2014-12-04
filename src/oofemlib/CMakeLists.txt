@@ -5,6 +5,7 @@ set (core_unsorted
     cltypes.C timer.C dictionary.C
     connectivitytable.C error.C mathfem.C logger.C util.C
     initmodulemanager.C initmodule.C initialcondition.C
+    assemblercallback.C
     homogenize.C
     nonlocalbarrier.C
     geotoolbox.C geometry.C
@@ -14,6 +15,10 @@ set (core_unsorted
     weakperiodicbc.C
     solutionbasedshapefunction.C
     fracturemanager.C
+    parallelcontext.C
+    contact/contactmanager.C
+    contact/contactdefinition.C
+    contact/contactelement.C
     # Semi sorted:
     errorestimator.C meshqualityerrorestimator.C remeshingcrit.C
     sloangraph.C sloangraphnode.C sloanlevelstruct.C
@@ -70,8 +75,10 @@ set (core_nm
     sparselinsystemnm.C
     sparsenonlinsystemnm.C
     nrsolver.C
+    dynamicrelaxationsolver.C
     linesearch.C
     calmls.C
+    staggeredsolver.C
     )
 
 if (USE_PETSC)
@@ -194,8 +201,12 @@ set (core_xfem
     xfem/enrichmentfunction.C
     xfem/xfemmanager.C
     xfem/enrichmentitem.C
+    xfem/geometrybasedei.C
+    xfem/hybridei.C
+    xfem/directei.C
+    xfem/listbasedei.C
+    xfem/inclusion.C
     xfem/patchintegrationrule.C
-    xfem/enrichmentdomain.C
     xfem/propagationlaw.C
     xfem/XFEMDebugTools.C
     xfem/enrichmentfronts/enrichmentfront.C
@@ -204,6 +215,7 @@ set (core_xfem
     xfem/enrichmentfronts/enrichmentfrontreducefront.C
     xfem/enrichmentfronts/enrichmentfrontlinbranchfuncradius.C
     xfem/enrichmentfronts/enrichmentfrontlinbranchfunconeel.C
+    xfem/enrichmentfronts/enrichmentfrontcohesivebranchfunconeel.C
     xfem/enrichmentfronts/enrichmentfrontintersection.C
     xfem/integrationrules/discsegintegrationrule.C
     xfem/xfemtolerances.C
@@ -216,9 +228,9 @@ set (core_parallel
     combuff.C
     domaintransactionmanager.C
     parallelordering.C
-    parallelcontext.C
     dyncombuff.C
     loadbalancer.C
+    wallclockloadbalancermonitor.C
     nonlocalmatwtp.C
     )
 
@@ -235,6 +247,7 @@ set (core_bc
     prescribedgradientbcweak.C
     prescribedgradientbcweakperiodic.C
     prescribedgradientbcweakdirichlet.C
+    prescribedgradientbcperiodic.C
     mixedgradientpressurebc.C
     mixedgradientpressuredirichlet.C
     mixedgradientpressureneumann.C

@@ -43,6 +43,10 @@
 #include "sparsemtrxtype.h"
 #include "classfactory.h"
 #include "activebc.h"
+#include "contact/contactmanager.h"
+#include "contact/contactdefinition.h"
+#include "contact/contactelement.h"
+
 
 #include <climits>
 #include <cstdlib>
@@ -192,7 +196,14 @@ Skyline :: toFloatMatrix(FloatMatrix &answer) const
 
     int d1, d2, pk, size;
 
-    size = this->giveNumberOfRows();
+    size = this->giveNumberOfColumns();
+    
+#  ifdef DEBUG
+    if ( size != this->adr.giveSize() - 1 ) {
+        OOFEM_ERROR("Internal error in skyline matrix: num columns != size(adr)-1: %d != %d", size, this->adr.giveSize() - 1);
+    }
+#  endif    
+
     answer.resize(size, size);
     answer.zero();
 
@@ -205,6 +216,7 @@ Skyline :: toFloatMatrix(FloatMatrix &answer) const
             pk--;
         }
     }
+    answer.symmetrized();
 }
 
 
@@ -354,7 +366,7 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
     // maximal column height for assembled characteristics matrix
     //
 
-    int js, maxle;
+    int maxle;
     int ac1;
     int neq;
     if ( s.isDefault() ) {
@@ -379,22 +391,17 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
         mht.at(j) = j; // initialize column height, maximum is line number (since it only stores upper triangular)
     }
 
-    int nelem = domain->giveNumberOfElements();
-
     // loop over elements code numbers
-    for ( int i = 1; i <= nelem; i++ ) {
-        domain->giveElement(i)->giveLocationArray(loc, s);
-        js = loc.giveSize();
+    for ( auto &elem : domain->giveElements() ) {
+        elem->giveLocationArray(loc, s);
         maxle = INT_MAX;
-        for ( int j = 1; j <= js; j++ ) {
-            int ieq = loc.at(j);
+        for ( int ieq : loc ) {
             if ( ieq != 0 ) {
                 maxle = min(maxle, ieq);
             }
         }
 
-        for ( int j = 1; j <= js; j++ ) {
-            int ieq = loc.at(j);
+        for ( int ieq : loc ) {
             if ( ieq != 0 ) {
                 mht.at(ieq) = min( maxle, mht.at(ieq) );
             }
@@ -402,26 +409,24 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
     }
 
     // loop over active boundary conditions (e.g. relative kinematic constraints)
-    int ii, jj, nbc = domain->giveNumberOfBoundaryConditions();
     std :: vector< IntArray >r_locs;
     std :: vector< IntArray >c_locs;
 
-    for ( int i = 1; i <= nbc; ++i ) {
-        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( domain->giveBc(i) );
+    for ( auto &gbc : domain->giveBcs() ) {
+        ActiveBoundaryCondition *bc = dynamic_cast< ActiveBoundaryCondition * >( gbc.get() );
         if ( bc != NULL ) {
             bc->giveLocationArrays(r_locs, c_locs, UnknownCharType, s, s);
             for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                 IntArray &krloc = r_locs [ k ];
                 IntArray &kcloc = c_locs [ k ];
                 maxle = INT_MAX;
-                for ( int i = 1; i <= krloc.giveSize(); i++ ) {
-                    if ( ( ii = krloc.at(i) ) ) {
+                for ( int ii : krloc ) {
+                    if ( ii > 0 ) {
                         maxle = min(maxle, ii);
                     }
                 }
-                for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
-                    jj = kcloc.at(j);
-                    if ( jj ) {
+                for ( int jj : kcloc ) {
+                    if ( jj > 0 ) {
                         mht.at(jj) = min( maxle, mht.at(jj) );
                     }
                 }
@@ -429,6 +434,33 @@ int Skyline :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
         }
     }
 
+    
+    if ( domain->hasContactManager() ) {
+        ContactManager *cMan = domain->giveContactManager();
+            
+        for ( int i =1; i <= cMan->giveNumberOfContactDefinitions(); i++ ) {
+            ContactDefinition *cDef = cMan->giveContactDefinition(i);
+            for ( int k = 1; k <= cDef->giveNumbertOfContactElements(); k++ ) {
+                ContactElement *cEl = cDef->giveContactElement(k);
+                cEl->giveLocationArray(loc, s);
+            
+                maxle = INT_MAX;
+                for ( int ieq : loc ) {
+                    if ( ieq != 0 ) {
+                        maxle = min(maxle, ieq);
+                    }
+                }
+
+                for ( int ieq : loc ) {
+                    if ( ieq != 0 ) {
+                        mht.at(ieq) = min( maxle, mht.at(ieq) );
+                    }
+                  
+                }
+            }
+        }
+    }
+    
     // NOTE
     // add there call to eModel if any possible additional equation added by
     // eModel
@@ -669,7 +701,77 @@ Skyline :: Skyline(int neq, int nwk1, double *mtrx1, const IntArray &adr1) : Spa
     nwk  = nwk1;
     mtrx = mtrx1;
     adr  = adr1;
+    isFactorized = 0;
 }
+
+
+//Skyline *Skyline :: giveSubMatrix(Skyline *mat, IntArray &rows, IntArray &cols)
+//Skyline *Skyline :: beSubMatrixOf(const Skyline *mat, IntArray &rows, IntArray &cols)
+//SparseMtrx *Skyline :: beSubMatrixOf(const SparseMtrx *mat, IntArray &rows, IntArray &cols)
+SparseMtrx *Skyline :: giveSubMatrix(const IntArray &rows, const IntArray &cols) 
+{
+
+    IntArray positions( cols.giveSize() + 1 );
+
+    FloatArray values( this->giveNumberOfNonZeros() ); //TODO choose a better initial size? 
+    int diagPos = 1;
+    int nnz = 0; // number of nonzeros 
+    
+    for ( int j = 1; j <= cols.giveSize(); j++ ) {
+        for ( int i = rows.giveSize(); i >= 1; i-- ) { // start from the "bottom of the matrix"
+            //if( cols.at(j) < rows.at(i) ){
+            if( j < i ){                
+             continue;   
+            }
+                
+            bool hasValue = this->isAllocatedAt( rows.at(i), cols.at(j) );
+            
+            if ( hasValue  && i == j ) { // allocated diagonal element
+                values.at(++nnz) = this->at( rows.at(i), cols.at(j) );
+                positions.at(diagPos++) = nnz;
+            } else if ( i == j  ) { // empty diagonal element
+                values.at(++nnz) = 0.0;
+                positions.at(diagPos++) = nnz;
+            } else if ( hasValue  ) {
+                values.at(++nnz) = this->at( rows.at(i), cols.at(j) );
+            }
+            
+        }
+    }
+    
+    positions.at(diagPos++) = ++nnz;
+    
+    double *mtrxValues;
+    mtrxValues = ( double * ) malloc( nnz * sizeof( double ) );
+    if ( !mtrxValues ) {
+        OOFEM_ERROR("Can't allocate: %d", nnz);
+    }
+    
+    for ( int i = 0; i < nnz-1; i++ ) {
+        mtrxValues [ i + 1] = values [ i ];
+    }
+    int neq = rows.giveSize();
+     
+    Skyline *answer = new Skyline(neq, nnz, mtrxValues, positions);
+
+    
+    
+    //this->adr.printYourself();
+    //answer->adr.printYourself();
+    //this->printYourself();
+
+    for ( int i = 0; i < nnz; i++ ) {
+       // printf("old %e, new %e \n", this->mtrx[i], answer->mtrx[i]);
+    //answer->mtrx.printYourself();
+    }    
+    
+    
+    
+    return answer;
+    
+}
+
+
 
 void Skyline :: rbmodes(FloatMatrix &r, int &nse, IntArray &se,
                         double limit, int tc)

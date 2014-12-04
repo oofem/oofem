@@ -35,34 +35,63 @@
 #ifndef PRESCRIBEDGRADIENTBCNEUMANN_H_
 #define PRESCRIBEDGRADIENTBCNEUMANN_H_
 
-#include "prescribedgradientbcweakperiodic.h"
+#include "prescribedgradientbc.h"
 
 #define _IFT_PrescribedGradientBCNeumann_Name   "prescribedgradientbcneumann"
 
 namespace oofem {
+class Node;
+class Element;
 /**
  * Imposes a prescribed gradient weakly on the boundary
  * with a Neumann boundary condition.
  *
- * To reduce duplication of code, we exploit the fact that
- * Neumann boundary conditions can be obtained as a special
- * case of weakly periodic boundary conditions.
- *
  * @author Erik Svenning
  * @date Mar 5, 2014
  */
-
-class PrescribedGradientBCNeumann : public PrescribedGradientBCWeakPeriodic {
+class PrescribedGradientBCNeumann : public PrescribedGradientBC
+{
 public:
-	PrescribedGradientBCNeumann(int n, Domain * d);
-	virtual ~PrescribedGradientBCNeumann();
+    PrescribedGradientBCNeumann(int n, Domain *d);
+    virtual ~PrescribedGradientBCNeumann();
 
-    virtual IRResultType initializeFrom(InputRecord *ir);
+    virtual int giveNumberOfInternalDofManagers() { return 1; }
+    virtual DofManager *giveInternalDofManager(int i);
+
+    virtual bcType giveType() const { return UnknownBT; }
+
+    virtual void scale(double s);
+
+    virtual void assembleVector(FloatArray &answer, TimeStep *tStep,
+                                CharType type, ValueModeType mode,
+                                const UnknownNumberingScheme &s, FloatArray *eNorm = NULL);
+
+    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
+                          CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
+
+    virtual void giveLocationArrays(std :: vector< IntArray > &rows, std :: vector< IntArray > &cols, CharType type,
+                                    const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual const char *giveClassName() const { return "PrescribedGradientBCNeumann"; }
     virtual const char *giveInputRecordName() const { return _IFT_PrescribedGradientBCNeumann_Name; }
-};
 
+    /**
+     * Computes the homogenized, macroscopic, field (stress).
+     * @param sigma Output quantity (typically stress).
+     * @param tStep Active time step.
+     */
+    void computeField(FloatArray &sigma, TimeStep *tStep);
+
+
+    void giveStressLocationArray(IntArray &oCols, const UnknownNumberingScheme &r_s);
+protected:
+    /// DOF-manager containing the unknown homogenized stress.
+    Node *mpSigmaHom;
+    IntArray mSigmaIds;
+
+    /// Help function that integrates the tangent contribution from a single element boundary.
+    void integrateTangent(FloatMatrix &oTangent, Element *e, int iBndIndex);
+};
 } /* namespace oofem */
 
 #endif /* PRESCRIBEDGRADIENTBCNEUMANN_H_ */

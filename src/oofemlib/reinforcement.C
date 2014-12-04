@@ -32,18 +32,9 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "load.h"
 #include "reinforcement.h"
-#include "nodalload.h"
-#include "boundarycondition.h"
-#include "initialcondition.h"
-//#include "temperatureload.h"
 #include "verbose.h"
 #include "classfactory.h"
-#include "timestep.h"
-#include "classfactory.h"
-
-#include <cstdlib>
 
 namespace oofem {
 REGISTER_BoundaryCondition(Reinforcement);

@@ -140,7 +140,7 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                 if CTRL.oofem_elemProp[belem.oofem_elemtype].name == 'RepresentsBoundaryLoad':#found element, which represents boundary load
                     nodesOnBoundary = belem.cntvt
                     nodesOnBoundary.sort()
-                    for elem in elemNotBoundary: #loop over, e.g. triangular elements
+                    for elem in elemNotBoundary: #loop over, e.g. triangular elements, in order to find which element belem is a boundary to
                         cnt=0
                         for n in range(len(nodesOnBoundary)):
                             if(elem.cntvt.count(int(nodesOnBoundary[n]))):
@@ -177,12 +177,12 @@ UNV2OOFEM: Converts UNV file from Salome to OOFEM native file format
                                                 print "Boundary load \"%s\" found for element %d " % (bel.name.rstrip('\n'), elem.id)
                                                 #print bel.name, elem.id, elem.oofem_bLoads
                                                 
-                                            if (bel.oofem_sets):
-                                                print "Set \"%s\" found for element %d " % (bel.name.rstrip('\n'), elem.id)
-                                                setNum = bel.oofem_sets;
-                                                # setID, element id, element side
-                                                for thisSet in setNum:
-                                                    boundarySets.append([thisSet, elem.id, i+1])
+                                        if (bel.oofem_sets):
+                                            print "Set \"%s\" found for boundary of element %d " % (bel.name.rstrip('\n'), elem.id)
+                                            setNum = bel.oofem_sets;
+                                            # setID, element id, element side
+                                            for thisSet in setNum:
+                                                boundarySets.append([thisSet, elem.id, i+1])
                                                 
                             if(success==0):
                                 print "Can not assign edge/face load \"%s\" to unv element %d" % (bel.name, elem.id)

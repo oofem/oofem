@@ -45,10 +45,6 @@
 #include "floatarray.h"
 #include "linesearch.h"
 
-#ifdef __PETSC_MODULE
- #include <petscksp.h>
-#endif
-
 ///@name Input fields for NRSolver
 //@{
 #define _IFT_NRSolver_Name "nrsolver"
@@ -92,7 +88,7 @@ class EngngModel;
  */
 class OOFEM_EXPORT NRSolver : public SparseNonLinearSystemNM
 {
-private:
+protected:
     enum nrsolver_ModeType { nrsolverModifiedNRM, nrsolverFullNRM, nrsolverAccelNRM };
 
     int nsmax, minIterations;
@@ -143,16 +139,14 @@ private:
     /// Minimum number of iterations before constraint is activated
     int constrainedNRminiter;
 
-#ifdef __PETSC_MODULE
-    IS prescribedEgsIS;
-    bool prescribedEgsIS_defined;
-#endif
-
     /// Relative unbalanced force tolerance for each group
     FloatArray rtolf;
     /// Relative iterative displacement change tolerance for each group
     FloatArray rtold;
 
+    ///@todo This doesn't check units, it is nonsense and must be corrected / Mikael
+    FloatArray forceErrVec;
+    FloatArray forceErrVecOld;
 public:
     NRSolver(Domain * d, EngngModel * m);
     virtual ~NRSolver();
@@ -200,12 +194,7 @@ protected:
      * @return True if solution has converged, otherwise false.
      */
     bool checkConvergence(FloatArray &RT, FloatArray &F, FloatArray &rhs, FloatArray &ddX, FloatArray &X,
-                          double RRT, const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange, TimeStep *tNow);
-
-    ///NEW JB
-    FloatArray forceErrVec;
-    FloatArray forceErrVecOld;
-
+                          double RRT, const FloatArray &internalForcesEBENorm, int nite, bool &errorOutOfRange);
 };
 } // end namespace oofem
 #endif // nrsolver_h

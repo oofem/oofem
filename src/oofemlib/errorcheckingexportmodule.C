@@ -44,7 +44,7 @@
 #include "timestep.h"
 #include "classfactory.h"
 #ifdef __SM_MODULE
- #include "structengngmodel.h"
+ #include "../sm/EngineeringModels/structengngmodel.h"
 #endif
 
 namespace oofem {
@@ -96,11 +96,10 @@ NodeErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
             return false;
         }
     }
-#ifdef __PARALLEL_MODE
+
     if ( dman->giveParallelMode() == DofManager_remote || dman->giveParallelMode() == DofManager_null ) {
         return true;
     }
-#endif
 
     Dof *dof = dman->giveDofWithID(dofid);
 
@@ -150,11 +149,9 @@ ElementErrorCheckingRule :: check(Domain *domain, TimeStep *tStep)
             return false;
         }
     }
-#ifdef __PARALLEL_MODE
         if ( element->giveParallelMode() != Element_local ) {
             return true;
         }
-#endif
 
     // note! GPs are numbered from 0 internally, but written with 1-index, inconsistent!
     GaussPoint *gp = element->giveIntegrationRule(irule)->getIntegrationPoint(gpnum-1);
@@ -394,8 +391,7 @@ ErrorCheckingExportModule :: writeCheck(Domain *domain, TimeStep *tStep)
         std :: cout << "#%BEGIN_CHECK% tolerance 1.e-3\n";
     }
 
-    for ( int i = 1; i <= domain->giveNumberOfDofManagers(); ++i ) {
-        DofManager *dman = domain->giveDofManager(i);
+    for ( auto &dman : domain->giveDofManagers() ) {
         for ( Dof *dof: *dman ) {
             if ( dof->giveEqn() < 0 ) {
                 continue;
@@ -409,8 +405,7 @@ ErrorCheckingExportModule :: writeCheck(Domain *domain, TimeStep *tStep)
         }
     }
 
-    for ( int i = 1; i <= domain->giveNumberOfElements(); ++i ) {
-        Element *element = domain->giveElement(i);
+    for ( auto &element : domain->giveElements() ) {
         IntegrationRule *iRule = element->giveDefaultIntegrationRulePtr();
         FloatArray ipval;
         for ( int ist: this->writeIST ) {

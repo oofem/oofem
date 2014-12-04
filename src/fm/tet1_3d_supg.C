@@ -89,13 +89,13 @@ Tet1_3D_SUPG :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(3);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], 1, this);
 
-        integrationRulesArray [ 1 ] = new GaussIntegrationRule(2, this, 1, 3);
+        integrationRulesArray [ 1 ].reset( new GaussIntegrationRule(2, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 1 ], 4, this);
 
-        integrationRulesArray [ 2 ] = new GaussIntegrationRule(3, this, 1, 3);
+        integrationRulesArray [ 2 ].reset( new GaussIntegrationRule(3, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 2 ], 4, this);
     }
 }
@@ -261,7 +261,7 @@ Tet1_3D_SUPG :: updateStabilizationCoeffs(TimeStep *tStep)
 
     dt = tStep->giveTimeIncrement() * tscale;
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 1 ];
+    std :: unique_ptr< IntegrationRule > &iRule = this->integrationRulesArray [ 1 ];
     GaussPoint *gp = iRule->getIntegrationPoint(0);
     nu = static_cast< FluidDynamicMaterial * >( this->giveMaterial() )->giveEffectiveViscosity( gp, tStep->givePreviousStep() );
     nu *= domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
@@ -411,8 +411,7 @@ Tet1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
         fi.at(i) = ls->giveLevelSetDofManValue( dofManArray.at(i) );
     }
 
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ 0 ] ) {
         dV  = this->computeVolumeAround(gp);
         interpolation.evaldNdx( dn, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
         this->computeNuMatrix(n, gp);
@@ -430,8 +429,7 @@ Tet1_3D_SUPG :: LS_PCS_computeF(LevelSetPCS *ls, TimeStep *tStep)
 void
 Tet1_3D_SUPG :: LS_PCS_computedN(FloatMatrix &answer)
 {
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    GaussPoint *gp = iRule->getIntegrationPoint(0);
+    GaussPoint *gp = this->integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     interpolation.evaldNdx( answer, * gp->giveNaturalCoordinates(), FEIElementGeometryWrapper(this) );
 }
 
@@ -441,8 +439,7 @@ Tet1_3D_SUPG :: LS_PCS_computeVolume()
 {
     double answer = 0.0;
  
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *this->integrationRulesArray [ 0 ] ) {
         answer += this->computeVolumeAround(gp);
     }
 

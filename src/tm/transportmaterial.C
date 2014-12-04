@@ -69,13 +69,13 @@ TransportMaterialStatus :: TransportMaterialStatus(int n, Domain *d, GaussPoint 
     MaterialStatus(n, d, g), temp_field(), temp_gradient(), temp_flux(), field(), gradient(), flux(), maturity(0.)
 { }
 
-void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
+void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
 // Print the state variable and the flow vector on the data file.
 {
     FloatArray flowVec;
     TransportElement *transpElem = static_cast< TransportElement * >( gp->giveElement() );
 
-    MaterialStatus :: printOutputAt(File, tNow);
+    MaterialStatus :: printOutputAt(File, tStep);
 
     fprintf(File, "  state");
 
@@ -83,7 +83,7 @@ void TransportMaterialStatus :: printOutputAt(FILE *File, TimeStep *tNow)
         fprintf( File, " % .4e", field.at(i) );
     }
 
-    transpElem->computeFlow(flowVec, gp, tNow);
+    transpElem->computeFlow(flowVec, gp, tStep);
 
     fprintf(File, "   flow");
     for ( int i = 1; i <= flowVec.giveSize(); i++ ) {
@@ -119,29 +119,26 @@ TransportMaterialStatus :: initTempStatus()
 
 
 contextIOResultType
-TransportMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, void *obj)
+TransportMaterialStatus :: saveContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // saves full ms context (saves state variables, that completely describe
 // current state)
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = MaterialStatus :: saveContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = gradient.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = gradient.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = field.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = field.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = flux.storeYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = flux.storeYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -150,28 +147,25 @@ TransportMaterialStatus :: saveContext(DataStream *stream, ContextMode mode, voi
 
 
 contextIOResultType
-TransportMaterialStatus :: restoreContext(DataStream *stream, ContextMode mode, void *obj)
+TransportMaterialStatus :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
 //
 // restores full material context (saves state variables, that completely describe
 // current state)
 //
 {
     contextIOResultType iores;
-    if ( stream == NULL ) {
-        OOFEM_ERROR("can't write into NULL stream");
-    }
 
     if ( ( iores = MaterialStatus :: restoreContext(stream, mode, obj) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = gradient.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = gradient.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-    if ( ( iores = field.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = field.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
-    if ( ( iores = flux.restoreYourself(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = flux.restoreYourself(stream) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 

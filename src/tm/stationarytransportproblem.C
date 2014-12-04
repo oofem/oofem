@@ -180,9 +180,7 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     FloatArray externalForces(neq);
     externalForces.zero();
     this->assembleVector( externalForces, tStep, ExternalForcesVector, VM_Total, EModelDefaultEquationNumbering(), this->giveDomain(1) );
-#ifdef __PARALLEL_MODE
     this->updateSharedDofManagers(externalForces, EModelDefaultEquationNumbering(), LoadExchangeTag);
-#endif
 
     // set-up numerical method
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
@@ -222,9 +220,7 @@ StationaryTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmp
         this->internalForces.zero();
         this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), this->giveDomain(1), & this->eNorm);
-#ifdef __PARALLEL_MODE
         this->updateSharedDofManagers(this->internalForces, EModelDefaultEquationNumbering(), InternalForcesExchangeTag);
-#endif
         return;
     } else if ( cmpn == NonLinearLhs ) {
         if ( !this->keepTangent ) {
@@ -266,7 +262,7 @@ StationaryTransportProblem :: saveContext(DataStream *stream, ContextMode mode, 
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = UnknownsField->saveContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = UnknownsField->saveContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -309,7 +305,7 @@ StationaryTransportProblem :: restoreContext(DataStream *stream, ContextMode mod
         THROW_CIOERR(iores);
     }
 
-    if ( ( iores = UnknownsField->restoreContext(stream, mode) ) != CIO_OK ) {
+    if ( ( iores = UnknownsField->restoreContext(*stream, mode) ) != CIO_OK ) {
         THROW_CIOERR(iores);
     }
 
@@ -332,11 +328,9 @@ StationaryTransportProblem :: checkConsistency()
     Domain *domain = this->giveDomain(1);
 
     // check for proper element type
-    int nelem = domain->giveNumberOfElements();
-    for ( int i = 1; i <= nelem; i++ ) {
-        Element *ePtr = domain->giveElement(i);
-        if ( !dynamic_cast< TransportElement * >(ePtr) ) {
-            OOFEM_WARNING("Element %d has no TransportElement base", i);
+    for ( auto &elem : domain->giveElements() ) {
+        if ( !dynamic_cast< TransportElement * >( elem.get() ) ) {
+            OOFEM_WARNING("Element %d has no TransportElement base", elem->giveLabel());
             return 0;
         }
     }
@@ -365,9 +359,8 @@ StationaryTransportProblem :: updateInternalState(TimeStep *tStep)
 {
     ///@todo Remove this, unnecessary with solving as a nonlinear problem (left for now, since nonstationary problems might still need it)
     for ( auto &domain: domainList ) {
-        int nelem = domain->giveNumberOfElements();
-        for ( int j = 1; j <= nelem; j++ ) {
-            domain->giveElement(j)->updateInternalState(tStep);
+        for ( auto &elem : domain->giveElements() ) {
+            elem->updateInternalState(tStep);
         }
     }
 }

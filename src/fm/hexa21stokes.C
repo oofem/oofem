@@ -83,7 +83,7 @@ void Hexa21Stokes :: computeGaussPoints()
 {
     if ( integrationRulesArray.size() == 0 ) {
         integrationRulesArray.resize(1);
-        integrationRulesArray [ 0 ] = new GaussIntegrationRule(1, this, 1, 3);
+        integrationRulesArray [ 0 ].reset( new GaussIntegrationRule(1, this, 1, 3) );
         this->giveCrossSection()->setupIntegrationPoints(* integrationRulesArray [ 0 ], numberOfGaussPoints, this);
     }
 }
@@ -128,7 +128,6 @@ void Hexa21Stokes :: giveCharacteristicMatrix(FloatMatrix &answer,
 
 void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *tStep)
 {
-    IntegrationRule *iRule = integrationRulesArray [ 0 ];
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
     FloatArray a_pressure, a_velocity, devStress, epsp, Nh, dN_V(81);
     FloatMatrix dN, B(6, 81);
@@ -138,7 +137,7 @@ void Hexa21Stokes :: computeInternalForcesVector(FloatArray &answer, TimeStep *t
     FloatArray momentum, conservation;
 
     B.zero();
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         const FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
         double detJ = fabs( this->interpolation_quad.evaldNdx( dN, lcoords, FEIElementGeometryWrapper(this) ) );
@@ -202,13 +201,12 @@ void Hexa21Stokes :: computeLoadVector(FloatArray &answer, Load *load, CharType 
     }
 
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatArray N, gVector, temparray(81);
 
     load->computeComponentArrayAt(gVector, tStep, VM_Total);
     temparray.zero();
     if ( gVector.giveSize() ) {
-        for ( GaussPoint *gp: *iRule ) {
+        for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
             FloatArray *lcoords = gp->giveNaturalCoordinates();
 
             double rho = mat->give('d', gp);
@@ -280,14 +278,13 @@ void Hexa21Stokes :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad 
 void Hexa21Stokes :: computeStiffnessMatrix(FloatMatrix &answer, TimeStep *tStep)
 {
     FluidDynamicMaterial *mat = static_cast< FluidCrossSection * >( this->giveCrossSection() )->giveFluidMaterial();
-    IntegrationRule *iRule = this->integrationRulesArray [ 0 ];
     FloatMatrix B(6, 81), EdB, K, G, Dp, DvT, C, Ed, dN;
     FloatArray dN_V(81), Nlin, Ep, Cd, tmpA, tmpB;
     double Cp;
 
     B.zero();
 
-    for ( GaussPoint *gp: *iRule ) {
+    for ( GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         // Compute Gauss point and determinant at current element
         const FloatArray &lcoords = * gp->giveNaturalCoordinates();
 
@@ -391,13 +388,6 @@ void Hexa21Stokes :: EIPrimaryUnknownMI_computePrimaryUnknownVectorAtLocal(Value
     }
 }
 
-double Hexa21Stokes :: SpatialLocalizerI_giveDistanceFromParametricCenter(const FloatArray &coords)
-{
-    FloatArray center;
-    FloatArray lcoords = {0.25, 0.25, 0.25};
-    this->computeGlobalCoordinates(center, lcoords);
-    return center.distance(coords);
-}
 
 void Hexa21Stokes :: NodalAveragingRecoveryMI_computeNodalValue(FloatArray &answer, int node, InternalStateType type, TimeStep *tStep)
 {
