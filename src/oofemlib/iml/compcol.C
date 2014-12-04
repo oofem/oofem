@@ -204,7 +204,6 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
 
 
     // loop over active boundary conditions
-    int nbc = domain->giveNumberOfBoundaryConditions();
     std :: vector< IntArray >r_locs;
     std :: vector< IntArray >c_locs;
 
@@ -228,7 +227,7 @@ int CompCol :: buildInternalStructure(EngngModel *eModel, int di, const UnknownN
         }
     }
 
-    for ( i = 0; i < neq; i++ ) {
+    for ( int i = 0; i < neq; i++ ) {
         this->nz_ += columns [ i ].size();
     }
 
