@@ -151,6 +151,8 @@ public:
      * @param ic Initial condition for DOFs
      */
     virtual void applyInitialCondition(InitialCondition &ic);
+    /// Apply b.c.s from the old method
+    virtual void applyBoundaryCondition(TimeStep *tStep, int di);
     /**
      * Applies the boundary condition to all prescribed DOFs in given domain.
      * @param bc Boundary condition.
