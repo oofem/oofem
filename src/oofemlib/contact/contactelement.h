@@ -100,7 +100,7 @@ public:
     virtual int instanciateYourself(DataReader *dr){ return 1; };
     //virtual const char *giveClassName() const { return "ContactDefinition"; }
     bool isInContact() { return inContact; };
-    virtual void giveDofManagersToAppendTo(IntArray &answer) { answer = {}; }; 
+    virtual void giveDofManagersToAppendTo(IntArray &answer) { answer.clear(); }; 
     
     
     virtual void computeContactForces(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
