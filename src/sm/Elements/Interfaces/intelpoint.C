@@ -309,7 +309,7 @@ IntElPoint :: computeLocalSlipDir(FloatArray &normal)
 
 
 #ifdef __OOFEG
-void InterfaceElem1d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
+void IntElPoint :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -333,7 +333,7 @@ void InterfaceElem1d :: drawRawGeometry(oofegGraphicContext &gc, TimeStep *tStep
 }
 
 
-void InterfaceElem1d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
+void IntElPoint :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *tStep, UnknownType type)
 {
     GraphicObj *go;
     //  if (!go) { // create new one
@@ -361,10 +361,10 @@ void InterfaceElem1d :: drawDeformedGeometry(oofegGraphicContext &gc, TimeStep *
 }
 
 
-void InterfaceElem1d :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
+void IntElPoint :: drawScalar(oofegGraphicContext &gc, TimeStep *tStep)
 {
     int indx, result = 0;
-    IntegrationRule *iRule = integrationRulesArray [ giveDefaultIntegrationRule() ];
+    IntegrationRule *iRule = this->giveDefaultIntegrationRulePtr();
     FloatArray gcoord(3), v1;
     WCRec p [ 1 ];
     GraphicObj *go;

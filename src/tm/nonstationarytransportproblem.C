@@ -679,8 +679,6 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
     //     }
 
 #ifdef __CEMHYD_MODULE
-    int nelem = domain->giveNumberOfElements();
-
     // Not relevant in linear case, but needed for CemhydMat for temperature averaging before solving balance equations
     // Update element state according to given ic
     for ( auto &elem : domain->giveElements() ) {

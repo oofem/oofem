@@ -793,7 +793,7 @@ NonLinearStatic :: showSparseMtrxStructure(int type, oofegGraphicContext &gc, Ti
     }
 
     for ( auto &elem : domain->giveElements() ) {
-        domain->giveElement(i)->showExtendedSparseMtrxStructure(ctype, gc, tStep);
+        elem->showExtendedSparseMtrxStructure(ctype, gc, tStep);
     }
 }
 #endif
