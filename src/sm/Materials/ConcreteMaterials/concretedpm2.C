@@ -475,7 +475,7 @@ ConcreteDPM2Status :: computeWork(GaussPoint *gp, double gf)
 
     //Ask for stress tensor at step
     StressVector stress(tempStressVector, matMode);
-    double n = stress.giveSize();
+    int n = stress.giveSize();
     //Calculate increase/decrease in total work
     double dSW = ( tempStressVector.dotProduct(deltaTotalStrain, n) + stressVector.dotProduct(deltaTotalStrain, n) ) / 2.;
 

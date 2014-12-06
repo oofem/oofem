@@ -613,7 +613,7 @@ public:
      * @param smoother New smoother for receiver.
      * @param destroyOld Determines if any preexisting smoother should be deleted.
      */
-    void setSmoother(NodalRecoveryModel *smoother, bool destroyOld = true);
+    void setSmoother(NodalRecoveryModel *newSmoother, bool destroyOld = true);
 
 #ifdef __PARALLEL_MODE
     /**@name Domain transaction support methods.

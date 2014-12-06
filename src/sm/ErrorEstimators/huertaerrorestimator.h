@@ -159,7 +159,7 @@ public:
 
     virtual double giveValue(EE_ValueType type, TimeStep *tStep);
 
-    virtual int estimateError(EE_ErrorMode mode, TimeStep *tStep);
+    virtual int estimateError(EE_ErrorMode err_mode, TimeStep *tStep);
 
     virtual RemeshingCriteria *giveRemeshingCrit();
 

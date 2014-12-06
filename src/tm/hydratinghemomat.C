@@ -205,7 +205,6 @@ double
 HydratingHeMoMaterial :: giveCharacteristicValue(MatResponseMode rmode, GaussPoint *gp, TimeStep *tStep)
 {
     double answer = 0;
-    FloatArray vec;
 
     if ( ( rmode >= Capacity_ww ) && ( rmode <= Capacity_wh ) ) { // standard HeMoTK values
         answer = HeMoTKMaterial :: giveCharacteristicValue(rmode, gp, tStep);

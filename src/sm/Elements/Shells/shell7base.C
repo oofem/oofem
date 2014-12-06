@@ -980,7 +980,7 @@ Shell7Base :: computeMassMatrixNum(FloatMatrix &answer, TimeStep *tStep)
     // Num refers in this case to  numerical integration in both in-plane and through the thickness.
     // For analytically integrated throught the thickness, see computeMassMatrix
 
-    FloatMatrix mass, temp;
+    FloatMatrix mass;
     FloatArray solVec;
     this->giveUpdatedSolutionVector(solVec, tStep);
     int numberOfLayers = this->layeredCS->giveNumberOfLayers();     // conversion of data
@@ -1037,7 +1037,7 @@ Shell7Base :: computeConvectiveMassForce(FloatArray &answer, TimeStep *tStep)
     iRule->SetUpPointsOnWedge(nPointsTri, 1, _3dMat); //@todo replce with triangle which has a xi3-coord
         
     FloatMatrix N;
-    FloatArray lCoords, a, da, m, dm, aVec, daVec, fm(7);
+    FloatArray a, da, m, dm, aVec, daVec, fm(7);
     double gam, dgam, dA;
 
     answer.resize(42);

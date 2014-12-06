@@ -87,6 +87,8 @@ public:
     XfemElementInterface(Element *e);
 
     virtual ~XfemElementInterface();
+	XfemElementInterface (const XfemElementInterface& src) = delete;
+	XfemElementInterface &operator = (const XfemElementInterface &src) = delete;
 
     /// Creates enriched B-matrix.
     void XfemElementInterface_createEnrBmatrixAt(FloatMatrix &oAnswer, GaussPoint &iGP, Element &iEl);

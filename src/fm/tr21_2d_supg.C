@@ -514,7 +514,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
     answer.resize(2);
 
-    for ( int ifi: fi ) {  //comparing values of fi in vertices
+    for ( double ifi: fi ) {  //comparing values of fi in vertices
         if ( ifi > 0. ) {
             pos++;
         } else if ( ifi < 0.0 ) {
@@ -547,7 +547,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
         int inter_case, negq = 0, posq = 0, zeroq = 0; //inter_case is variable that differs type of which fi crosses the triangle
 
-        for ( int ifi: fi ) { //loop over edge nodes
+        for ( double ifi: fi ) { //loop over edge nodes
             if ( ifi > 0. ) {
                 posq++;
             } else if ( ifi < 0.0 ) {
@@ -597,7 +597,7 @@ TR21_2D_SUPG :: LS_PCS_computeVOFFractions(FloatArray &answer, FloatArray &fi)
 
 
         int edge1 = 0, edge2 = 0;
-        FloatArray Coeff(3), helplcoords(3);
+        FloatArray helplcoords(3);
 
 
         if ( inter_case > 3 ) { //only one node (vertex in this case) of triangle has diffenert level set value, than others

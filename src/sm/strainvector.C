@@ -152,18 +152,18 @@ StrainVector :: computePrincipalValues(FloatArray &answer) const
          * Call cubic3r to ensure, that all three real eigenvalues will be found, because we have symmetric tensor.
          * This allows to overcome various rounding errors when solving general cubic equation.
          */
-        int i;
-        cubic3r( ( double ) -1., I1, -I2, I3, & s1, & s2, & s3, & i );
+        int num;
+        cubic3r( ( double ) -1., I1, -I2, I3, & s1, & s2, & s3, &num);
 
-        if ( i > 0 ) {
+        if (num > 0 ) {
             answer.at(1) = s1;
         }
 
-        if ( i > 1 ) {
+        if (num > 1 ) {
             answer.at(2) = s2;
         }
 
-        if ( i > 2 ) {
+        if (num > 2 ) {
             answer.at(3) = s3;
         }
 

@@ -1217,13 +1217,13 @@ Domain :: giveSmoother()
 
 
 void
-Domain :: setSmoother(NodalRecoveryModel *smoother, bool destroyOld)
+Domain :: setSmoother(NodalRecoveryModel *newSmoother, bool destroyOld)
 {
     if ( destroyOld ) {
-        delete this->smoother;
+        delete smoother;
     }
 
-    this->smoother = smoother;
+    smoother = newSmoother;
 }
 
 
@@ -1271,16 +1271,15 @@ Domain :: giveSpatialLocalizer()
 void
 Domain :: createDofs()
 {
-    IntArray dofids;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////// Step 1. Scan all required nodal dofs.
     std :: vector< std :: set< int > > node_dofs( this->giveNumberOfDofManagers() );
     for ( auto &element: this->elementList ) {
+		IntArray dofids;
         // Scan for all dofs needed by element.
         for ( int j = 1; j <= element->giveNumberOfNodes(); ++j ) {
             element->giveDofManDofIDMask(j, dofids);
-            //dofids.printYourself();
             for ( int k = 1; k <= dofids.giveSize(); k++ ) {
                 node_dofs [ element->giveNode(j)->giveNumber() - 1 ].insert( dofids.at(k) );
             }
@@ -1501,13 +1500,13 @@ Domain :: giveErrorEstimator()
 
 #define SAVE_COMPONENTS(list)                       \
     {                                               \
-        for ( const auto &obj: list ) {             \
+        for ( const auto &object: list ) {             \
             if ( ( mode & CM_Definition ) != 0 ) {       \
-                if ( stream.write( std :: string( obj->giveInputRecordName() ) ) == 0 ) { \
+                if ( stream.write( std :: string( object->giveInputRecordName() ) ) == 0 ) { \
                     THROW_CIOERR(CIO_IOERR);        \
                 }                                   \
             }                                       \
-            if ( ( iores = obj->saveContext(stream, mode) ) != CIO_OK ) { \
+            if ( ( iores = object->saveContext(stream, mode) ) != CIO_OK ) { \
                 THROW_CIOERR(iores);                \
             }                                       \
         }                                           \
@@ -1524,11 +1523,11 @@ Domain :: giveErrorEstimator()
                 if ( !stream.read(name) ) {     \
                     THROW_CIOERR(CIO_IOERR);    \
                 }                               \
-                auto *obj = creator(name.c_str(), i, this); \
-                if ( !obj ) {                   \
+                auto *object = creator(name.c_str(), i, this); \
+                if ( !object ) {                   \
                     THROW_CIOERR(CIO_BADVERSION); \
                 }                               \
-                list[i-1].reset(obj);           \
+                list[i-1].reset(object);           \
             }                                   \
             if ( ( iores = list[i-1]->restoreContext(stream, mode) ) != CIO_OK ) { \
                 THROW_CIOERR(iores);            \

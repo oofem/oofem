@@ -652,7 +652,7 @@ NonlocalMaterialExtensionInterface :: giveDistanceBasedInteractionRadius(const F
     }
 
     //Calculate interaction radius based on the minimum distance from the nonlocal boundaries
-    double newradius;
+    double newradius = 0.0;
     if ( nlvar == NLVT_DistanceBasedLinear ) {
         if ( distance < zeta * cl0 ) {
             newradius = ( 1. - beta ) / ( zeta * cl0 ) * distance + beta;

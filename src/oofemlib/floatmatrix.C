@@ -188,7 +188,6 @@ void FloatMatrix :: checkBounds(int i, int j) const
     if ( i <= 0 ) {
         OOFEM_ERROR("matrix error on rows : %d < 0", i);
     }
-
     if ( j <= 0 ) {
         OOFEM_ERROR("matrix error on columns : %d < 0", j);
     }
@@ -198,6 +197,7 @@ void FloatMatrix :: checkBounds(int i, int j) const
     }
 
     if ( j > nColumns ) {
+		printf("APA \n");
         OOFEM_ERROR("matrix error on columns : %d > %d", j, nColumns);
     }
 }
