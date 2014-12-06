@@ -143,7 +143,7 @@ public:
 
     virtual void updateUnknownsDictionary(TimeStep *tStep, ValueModeType mode, double dofValue);
 
-    virtual void giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode, double &dofValue);
+    virtual double giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode);
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);

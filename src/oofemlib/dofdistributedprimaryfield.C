@@ -65,21 +65,16 @@ void
 DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answer, const UnknownNumberingScheme &s)
 {
     Domain *domain = emodel->giveDomain(domainIndx);
-    int neq =  emodel->giveNumberOfDomainEquations(domainIndx, s);
-    int nnodes = domain->giveNumberOfDofManagers();
+    int neq = emodel->giveNumberOfDomainEquations(domainIndx, s);
 
     answer.resize(neq);
     answer.zero();
 
-    for ( int j = 1; j <= nnodes; j++ ) {
-        DofManager *inode = domain->giveDofManager(j);
-        for ( Dof *iDof: *inode ) {
+    for ( auto &node : domain->giveDofManagers() ) {
+        for ( Dof *iDof: *node ) {
             int eqNum = iDof->__giveEquationNumber();
-            double val;
             if ( eqNum ) {
-                iDof->giveUnknownsDictionaryValue(tStep, mode, val);
-                answer.at(eqNum) = val;
-                //answer.at(eqNum) = iDof->giveUnknown( mode, tStep);
+                answer.at(eqNum) = iDof->giveUnknownsDictionaryValue(tStep, mode);
             }
         }
     }
@@ -90,18 +85,15 @@ void
 DofDistributedPrimaryField :: update(ValueModeType mode, TimeStep *tStep, FloatArray &vectorToStore)
 {
     Domain *domain = emodel->giveDomain(domainIndx);
-    int nnodes = domain->giveNumberOfDofManagers();
 
-    for ( int j = 1; j <= nnodes; j++ ) {
-        DofManager *inode = domain->giveDofManager(j);
-        for ( Dof *iDof: *inode ) {
+    for ( auto &node : domain->giveDofManagers() ) {
+        for ( Dof *iDof: *node ) {
             int eqNum = iDof->__giveEquationNumber();
             double val;
             if ( mode == VM_Total ) {
                 if ( iDof->hasBc(tStep) ) { // boundary condition
                     val = iDof->giveBcValue(VM_Total, tStep);
                 } else {
-                    //vect = this->UnknownsField->giveSolutionVector(tStep);
                     val = vectorToStore.at(eqNum);
                 }
             } else { //all other modes, e.g. VM_RhsTotal

@@ -1107,10 +1107,10 @@ StructuralElement :: checkConsistency()
 void
 StructuralElement :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 {
-    const int numNodes = this->giveNumberOfDofManagers();
+    int numNodes = this->giveNumberOfDofManagers();
     FloatArray N(numNodes);
 
-    const int dim = this->giveSpatialDimension();
+    int dim = this->giveSpatialDimension();
 
     answer.resize(dim, dim * numNodes);
     answer.zero();

@@ -355,11 +355,9 @@ void
 NLTransientTransportProblem :: copyUnknownsInDictionary(ValueModeType mode, TimeStep *fromTime, TimeStep *toTime)
 {
     Domain *domain = this->giveDomain(1);
-    int nnodes = domain->giveNumberOfDofManagers();
 
-    for ( int j = 1; j <= nnodes; j++ ) {
-        DofManager *inode = domain->giveDofManager(j);
-        for ( Dof *dof: *inode ) {
+    for ( auto &node : domain->giveDofManagers() ) {
+        for ( Dof *dof: *node ) {
             double val = dof->giveUnknown(mode, fromTime);
             dof->updateUnknownsDictionary(toTime, mode, val);
         }

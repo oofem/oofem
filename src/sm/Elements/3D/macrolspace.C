@@ -196,8 +196,7 @@ void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
     microDomain->resizeBoundaryConditions( 3 * microBoundaryNodes.giveSize() ); //from domain.C
 
     counter = 1;
-    for ( int i = 1; i <= microDomain->giveNumberOfDofManagers(); i++ ) { //go through all nodes on microDomain
-        DofMan = microDomain->giveDofManager(i);
+    for ( auto &DofMan : microDomain->giveDofManagers() ) { //go through all nodes on microDomain
         if ( microBoundaryNodes.contains( DofMan->giveGlobalNumber() ) ) { //if the node number is on boundary
             this->evalInterpolation( n, microMaterial->microMasterCoords, * DofMan->giveCoordinates() );
             //n.printYourself();

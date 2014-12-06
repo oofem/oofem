@@ -730,9 +730,7 @@ tet21ghostsolid :: giveRowTransformationMatrix(FloatMatrix &Itransform, TimeStep
     }
 
     // Create identity matrix
-    for (int i=1; i<=64; i++) {
-        Itransform.at(i, i) = 1;
-    }
+    Itransform.beUnitMatrix();
 
     // Create tranformation matrix by switching rows
     for (int i=1; i<=row1List.giveSize(); i++) {

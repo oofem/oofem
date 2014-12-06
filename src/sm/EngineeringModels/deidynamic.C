@@ -140,7 +140,6 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
     // for first time step we need special start code
     Domain *domain = this->giveDomain(1);
     int nelem = domain->giveNumberOfElements();
-    int nman = domain->giveNumberOfDofManagers();
     IntArray loc;
     Element *element;
     DofManager *node;
@@ -235,9 +234,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
         accelerationVector.zero();
 
 
-        for ( j = 1; j <= nman; j++ ) {
-            node = domain->giveDofManager(j);
-
+        for ( auto &node : domain->giveDofManagers() ) {
             for ( Dof *iDof: *node ) {
                 // ask for initial values obtained from
                 // bc (boundary conditions) and ic (initial conditions)
@@ -246,7 +243,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
                     continue;
                 }
 
-                jj = iDof->__giveEquationNumber();
+                int jj = iDof->__giveEquationNumber();
                 if ( jj ) {
                     nextDisplacementVector.at(jj) = iDof->giveUnknown(VM_Total, tStep);
                     // become displacementVector after init
@@ -256,9 +253,7 @@ void DEIDynamic :: solveYourselfAt(TimeStep *tStep)
             }
         }
 
-        for ( j = 1; j <= neq; j++ ) {
-            nextDisplacementVector.at(j) -= velocityVector.at(j) * ( deltaT );
-        }
+        nextDisplacementVector.add(-deltaT, velocityVector);
 
         return;
     } // end of init step

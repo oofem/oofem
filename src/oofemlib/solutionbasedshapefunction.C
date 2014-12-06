@@ -134,16 +134,15 @@ SolutionbasedShapeFunction :: isCoeff(ActiveDof *dof)
 void
 SolutionbasedShapeFunction :: init()
 {
-    Node *n;
-    n = this->giveDomain()->giveNode(1);
+    Node *n1 = this->giveDomain()->giveNode(1);
 
-    maxCoord = * n->giveCoordinates();
-    minCoord = * n->giveCoordinates();
+    maxCoord = * n1->giveCoordinates();
+    minCoord = * n1->giveCoordinates();
 
-    for ( int i = 1; i <= this->giveDomain()->giveNumberOfDofManagers(); i++ ) {
+    for ( auto &n :this->giveDomain()->giveDofManagers() ) {
         for ( int j = 1; j <= maxCoord.giveSize(); j++ ) {
-            maxCoord.at(j) = max( this->giveDomain()->giveDofManager(i)->giveCoordinate(j), maxCoord.at(j) );
-            minCoord.at(j) = min( this->giveDomain()->giveDofManager(i)->giveCoordinate(j), minCoord.at(j) );
+            maxCoord.at(j) = max( n->giveCoordinate(j), maxCoord.at(j) );
+            minCoord.at(j) = min( n->giveCoordinate(j), minCoord.at(j) );
         }
     }
 }

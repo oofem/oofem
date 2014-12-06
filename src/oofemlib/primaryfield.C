@@ -111,10 +111,10 @@ PrimaryField :: readDofManager(TimeStep *tStep, DofManager &dman)
         for ( int hist = 0; hist < this->nHistVectors; ++hist ) {
             if ( eq > 0 ) {
                 FloatArray *vec = this->giveSolutionVector( resolveIndx(tStep, 0));
-                dof->giveUnknownsDictionaryValue(step, VM_Total, vec->at(eq));
+                vec->at(eq) = dof->giveUnknownsDictionaryValue(step, VM_Total);
             } else if ( eq < 0 ) {
                 FloatArray *vec = this->givePrescribedVector( resolveIndx(tStep, 0) );
-                dof->giveUnknownsDictionaryValue(step, VM_Total, vec->at(-eq));
+                vec->at(-eq) = dof->giveUnknownsDictionaryValue(step, VM_Total);
             }
             step = tStep->givePreviousStep();
         }

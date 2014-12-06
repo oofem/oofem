@@ -642,15 +642,13 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Applying initial conditions\n");
 #endif
-    int nman  = domain->giveNumberOfDofManagers();
 
     UnknownsField->advanceSolution(stepWhenIcApply);
     solutionVector = UnknownsField->giveSolutionVector(stepWhenIcApply);
     solutionVector->resize(neq);
     solutionVector->zero();
 
-    for ( int j = 1; j <= nman; j++ ) {
-        DofManager *node = domain->giveDofManager(j);
+    for ( auto &node : domain->giveDofManagers() ) {
 
         for ( Dof *dof: *node ) {
             // ask for initial values obtained from
