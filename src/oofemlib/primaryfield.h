@@ -137,22 +137,22 @@ public:
 
     // These functions are hardcoded to assume the default numbering scheme (as is the rest of primaryfield)
     void storeDofManager(TimeStep *tStep, DofManager &dman);
-    void storeInDofDictionaries(TimeStep *tStep, Domain *d);
+    void storeInDofDictionaries(TimeStep *tStep);
     void readDofManager(TimeStep *tStep, DofManager &dman);
-    void readFromDofDictionaries(TimeStep *tStep, Domain *d);
+    void readFromDofDictionaries(TimeStep *tStep);
 
     /**
      * Applies the default initial values values for all DOFs (0) in given domain.
      * @param domain Domain number
      */
-    virtual void applyDefaultInitialCondition(int domain);
+    virtual void applyDefaultInitialCondition();
     /**
      * Applies initial condition to all DOFs.
      * @param ic Initial condition for DOFs
      */
     virtual void applyInitialCondition(InitialCondition &ic);
     /// Apply b.c.s from the old method
-    virtual void applyBoundaryCondition(TimeStep *tStep, int di);
+    virtual void applyBoundaryCondition(TimeStep *tStep);
     /**
      * Applies the boundary condition to all prescribed DOFs in given domain.
      * @param bc Boundary condition.

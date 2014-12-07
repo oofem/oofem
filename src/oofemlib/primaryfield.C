@@ -80,8 +80,9 @@ PrimaryField :: storeDofManager(TimeStep *tStep, DofManager &dman)
 }
 
 void
-PrimaryField :: storeInDofDictionaries(TimeStep *tStep, Domain *d)
+PrimaryField :: storeInDofDictionaries(TimeStep *tStep)
 {
+    Domain *d = emodel->giveDomain(domainIndx);
     for ( auto &dman : d->giveDofManagers() ) {
         this->storeDofManager(tStep, *dman);
     }
@@ -123,8 +124,11 @@ PrimaryField :: readDofManager(TimeStep *tStep, DofManager &dman)
 
 
 void
-PrimaryField :: readFromDofDictionaries(TimeStep *tStep, Domain *d)
+PrimaryField :: readFromDofDictionaries(TimeStep *tStep)
 {
+    Domain *d = emodel->giveDomain(domainIndx);
+    //int neq = this->emodel->giveNumberOfDomainEquations(domainIndx, EModelDefaultEquationNumbering());
+    //int peq = this->emodel->giveNumberOfDomainEquations(domainIndx, EModelDefaultPrescribedEquationNumbering());
     for ( auto &dman : d->giveDofManagers() ) {
         this->readDofManager(tStep, *dman);
     }
@@ -160,10 +164,10 @@ PrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, FloatArray &answ
 }
 
 void
-PrimaryField :: applyDefaultInitialCondition(int domain)
+PrimaryField :: applyDefaultInitialCondition()
 {
-    int neq = emodel->giveNumberOfDomainEquations( domain, EModelDefaultEquationNumbering() );
-    int npeq = emodel->giveNumberOfDomainEquations( domain, EModelDefaultPrescribedEquationNumbering() );
+    int neq = emodel->giveNumberOfDomainEquations( domainIndx, EModelDefaultEquationNumbering() );
+    int npeq = emodel->giveNumberOfDomainEquations( domainIndx, EModelDefaultPrescribedEquationNumbering() );
     for ( auto &s : solutionVectors ) {
         s.resize(neq);
         s.zero();
@@ -218,9 +222,9 @@ PrimaryField :: applyInitialCondition(InitialCondition &ic)
 
 
 void
-PrimaryField :: applyBoundaryCondition(TimeStep *tStep, int di)
+PrimaryField :: applyBoundaryCondition(TimeStep *tStep)
 {
-    Domain *d = emodel->giveDomain(di);
+    Domain *d = emodel->giveDomain(domainIndx);
     FloatArray *f = this->givePrescribedVector(resolveIndx(tStep, 0));
     for ( auto &dman : d->giveDofManagers() ) {
         for ( auto &dof : *dman ) {
