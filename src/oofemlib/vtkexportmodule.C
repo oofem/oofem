@@ -163,11 +163,9 @@ VTKExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
     fprintf(stream, "\nCELLS %d %d\n", elemToProcess, celllistsize);
 
     IntArray regionNodalNumbers(nnodes);
-    int offset = 0;
 
     // assemble global->local map
-    this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, offset, d, ireg, 0);
-    offset += regionDofMans;
+    this->initRegionNodeNumbering(regionNodalNumbers, regionDofMans, 0, d, ireg, 0);
     for ( auto &elem : d->giveElements() ) {
         if ( elem->giveParallelMode() != Element_local ) {
             continue;
