@@ -66,7 +66,7 @@ PrimaryField :: storeDofManager(TimeStep *tStep, DofManager &dman)
     for ( Dof *dof: dman ) {
         int eq = dof->giveEqn();
         TimeStep *step = tStep;
-        for ( int hist = 0; hist <= this->nHistVectors; ++hist ) {
+        for ( int hist = 0; hist < this->nHistVectors; ++hist ) {
             if ( eq > 0 ) {
                 FloatArray *vec = this->giveSolutionVector( resolveIndx(tStep, 0) );
                 dof->updateUnknownsDictionary(step, VM_Total, vec->at(eq));
@@ -108,7 +108,7 @@ PrimaryField :: readDofManager(TimeStep *tStep, DofManager &dman)
     for ( Dof *dof: dman ) {
         int eq = dof->giveEqn();
         TimeStep *step = tStep;
-        for ( int hist = 0; hist <= this->nHistVectors; ++hist ) {
+        for ( int hist = 0; hist < this->nHistVectors; ++hist ) {
             if ( eq > 0 ) {
                 FloatArray *vec = this->giveSolutionVector( resolveIndx(tStep, 0));
                 dof->giveUnknownsDictionaryValue(step, VM_Total, vec->at(eq));
@@ -190,7 +190,6 @@ PrimaryField :: applyInitialCondition(InitialCondition &ic)
     FloatArray *p1 = this->givePrescribedVector(indxm1);
 
     // We have to set initial value, and velocity, for this particular primary field.
-    this->applyDefaultInitialCondition(d->giveNumber()); // Just resizes and fills with zeroes
     for ( int inode : set->giveNodeList() ) {
         DofManager *dman = d->giveDofManager(inode);
         double tot0 = 0., tot1 = 0.;
@@ -219,11 +218,31 @@ PrimaryField :: applyInitialCondition(InitialCondition &ic)
 
 
 void
+PrimaryField :: applyBoundaryCondition(TimeStep *tStep, int di)
+{
+    Domain *d = emodel->giveDomain(di);
+    FloatArray *f = this->givePrescribedVector(resolveIndx(tStep, 0));
+    for ( auto &dman : d->giveDofManagers() ) {
+        for ( auto &dof : *dman ) {
+            int peq = - dof->giveEqn();
+            if ( peq > 0 ) {
+                f->at(peq) = dof->giveBcValue(VM_Total, tStep);
+            }
+        }
+    }
+}
+
+
+void
 PrimaryField :: applyBoundaryCondition(BoundaryCondition &bc, TimeStep *tStep)
 {
+    if ( bc.giveSetNumber() == 0 ) {
+        return;
+    }
+
     Domain *d = bc.giveDomain();
     Set *set = d->giveSet(bc.giveSetNumber());
-    FloatArray *f = this->giveSolutionVector(tStep);
+    FloatArray *f = this->givePrescribedVector(resolveIndx(tStep, 0));
     for ( int inode : set->giveNodeList() ) {
         DofManager *dman = d->giveDofManager(inode);
         for ( auto &dofid : bc.giveDofIDs() ) {
@@ -375,7 +394,7 @@ PrimaryField :: resolveIndx(TimeStep *tStep, int shift)
     if ( ( relPos >= 0 ) && ( relPos <= nHistVectors ) ) {
         return ( actualStepIndx + relPos ) % ( nHistVectors + 1 ) + 1;
     } else {
-        OOFEM_ERROR("History not available for relative step no. %d to step no. %d", shift, tStepo);
+        OOFEM_ERROR("History not available for relative step no. %d to step no. %d (actualStepNumber = %d)", shift, tStepo, actualStepNumber);
     }
 
     return 0;
@@ -396,6 +415,13 @@ PrimaryField :: advanceSolution(TimeStep *tStep)
     actualStepIndx = ( actualStepIndx > 0 ) ? actualStepIndx - 1 : nHistVectors;
     actualStepNumber = tStep->giveNumber();
     solStepList[actualStepIndx] = * tStep;
+    if ( nHistVectors > 1 ) {
+        // Copy over the old status to the new nodes
+        int curr = this->resolveIndx(tStep, 0);
+        int prev = this->resolveIndx(tStep, -1);
+        *this->giveSolutionVector(curr) = *this->giveSolutionVector(prev);
+        *this->givePrescribedVector(curr) = *this->givePrescribedVector(prev);
+    }
 }
 
 
