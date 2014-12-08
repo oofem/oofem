@@ -44,6 +44,7 @@ set (tm_material
     hydratinghemomat.C
     hydratingconcretemat.C
     hemotkmat.C
+    hemokunzelmat.C
     isoheatmat.C
     isomoisturemat.C
     isolinmoisturemat.C

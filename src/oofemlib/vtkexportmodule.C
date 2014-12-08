@@ -801,7 +801,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 
     if ( ( valID == DisplacementVector ) || ( valID == EigenVector ) || ( valID == VelocityVector ) ) {
         type = ISVT_VECTOR;
-    } else if ( ( valID == FluxVector ) || ( valID == PressureVector ) || ( valID == Temperature ) ) {
+    } else if ( ( valID == FluxVector ) || ( valID == PressureVector ) || ( valID == Temperature ) || ( valID == Humidity )) {
         type = ISVT_SCALAR;
         //nScalarComp = d->giveNumberOfDefaultNodeDofs();
     } else {
@@ -851,7 +851,7 @@ VTKExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
                     iVal.at(3) = dof->giveUnknown(VM_Total, tStep);
                 }
             }
-        } else if ( valID == FluxVector ) {
+        } else if ( (valID == FluxVector) || (valID == Humidity) ) {
             iVal.resize(1);
 
             for ( Dof *dof: *dman ) {

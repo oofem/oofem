@@ -4803,7 +4803,7 @@ where
 \tenss{q}_H = \int_{\Gamma_2} \tenss{N}^T  \overline{q}^{h}{\rm d}\Gamma,\qquad
 \end{eqnarray}
 
-where
+\noindent where
 
 \bea
 k_{TT} &=& \lambda(w) + h_v \cdot \delta_p(T) \cdot H \cdot  \frac{\Delta p_{sat}}{\Delta T}(T),\\
@@ -4815,6 +4815,7 @@ c_{TH} &=& 0,\\
 c_{HT} &=& 0,\\
 c_{HH} &=& \frac{\Delta w}{\Delta H}(H).
 \eea
+Note, that conductivity matrix \tenss{K} is unsymmetric hence unsymmetric matrix storage needs to be used (smtype).
 
 The model parameters are summarized in Tab.~\ref{hemokunzel_table}.
 \begin{table}[!htb]
@@ -4831,21 +4832,19 @@ Record Format & \descitem{HeMoKunzel} \elemparam{num}{in} \elemparam{d}{rn}
 \elemparam{A}{rn}
 \elemparam{lambda0}{rn}
 \elemparam{b}{rn}
-\elemparam{rho}{rn}
 \elemparam{cs}{rn}
 \optelemparam{pl}{rn}
 \optelemparam{rhoH2O}{rn}
 \optelemparam{cw}{rn}
 \optelemparam{hv}{rn}\\
 Parameters &-\param{num} material model number\\
-&-\param{d} material density\\
+&-\param{d} bulk density of dry building material [kg/m$^3$]\\
 &-\param{iso\_type}=0 is isotherm from Hansen needing \param{iso\_n}, \param{iso\_a}, =1 is Kunzel which needs \param{iso\_b}\\
 &-\param{iso\_wh} maximum adsorbed water content [kg/m$^3$]\\
 &-\param{mu} water vapor diffusion resistance [-]\\
 &-\param{permeability\_type} =0 is Multilin\_h needing \param{perm\_h}, \param{perm\_Dw(h)}, =1 is Multilin\_wV needs \param{perm\_wV}, \param{perm\_DwwV}, =2 is Kunzelperm needs \param{A} as water absorption coefficient [kg/m/s$^0.5$]\\
 &-\param{lambda0}{rn} thermal conductivity [W/m/K]\\
 &-\param{b} thermal conductivity supplement [-]\\
-&-\param{rho} bulk density of dry building material [kg/m$^3$]\\
 &-\param{cs} specific heat capacity of the building material [J/kg/K]\\
 &-\optparam{pl} ambient air pressure [Pa], default = 101325\\
 &-\optparam{rhoH2O} water density [kg/m3], default = 1000\\

@@ -262,7 +262,7 @@ POIExportModule :: exportPrimVarAs(UnknownType valID, FILE *stream, TimeStep *tS
 
     if ( valID == DisplacementVector ) {
         type = ISVT_VECTOR;
-    } else if ( valID == FluxVector ) {
+    } else if ( valID == FluxVector || type == Humidity) {
         type = ISVT_SCALAR;
     } else {
         OOFEM_ERROR("unsupported UnknownType");

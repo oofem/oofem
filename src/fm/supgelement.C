@@ -99,7 +99,6 @@ SUPGElement :: giveCharacteristicMatrix(FloatMatrix &answer,
         double dscale = this->giveDomain()->giveEngngModel()->giveVariableScale(VST_Density);
         double uscale = this->giveDomain()->giveEngngModel()->giveVariableScale(VST_Velocity);
 
-
         IntArray vloc, ploc;
         FloatMatrix h;
         int size = this->computeNumberOfDofs();

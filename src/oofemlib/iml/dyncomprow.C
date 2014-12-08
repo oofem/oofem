@@ -273,7 +273,7 @@ int DynCompRow :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
 
 
     // loop over active boundary conditions
-    int nbc = domain->giveNumberOfBoundaryConditions();
+    //int nbc = domain->giveNumberOfBoundaryConditions();
     std :: vector< IntArray >r_locs;
     std :: vector< IntArray >c_locs;
 
