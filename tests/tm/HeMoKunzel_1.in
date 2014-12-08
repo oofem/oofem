@@ -1,0 +1,46 @@
+HeMoKunzel_1.out
+Heat and moisture transport - Kunzel's model. Direct solver and unsymmetric skyline.
+nltransienttransportproblem nsteps 10 deltat 36000. alpha 0.5 rtol 1.e-10 nsmax 150 lumpedcapa lstype 0 smtype 1 nmodules 1
+Errorcheck
+#vtkxml tstep_all domain_all primvars 2 6 7 vars 2 37 40 stype 1
+domain HeMa1
+OutputManager tstep_all dofman_all element_all
+ndofman 10 nelem 8 ncrosssect 1 nmat 1 nbc 3 nic 2 nltf 1
+node   1   coords 3  0.00  0.00  0.0 ic 2 1 2 bc 2   1   2
+node   2   coords 3  0.05  0.00  0.0 ic 2 1 2 bc 2   0   0
+node   3   coords 3  0.10  0.00  0.0 ic 2 1 2 bc 2   0   0
+node   4   coords 3  0.15  0.00  0.0 ic 2 1 2 bc 2   0   0
+node   5   coords 3  0.20  0.00  0.0 ic 2 1 2 bc 2   3   0
+node   6   coords 3  0.00  0.05  0.0 ic 2 1 2 bc 2   1   2
+node   7   coords 3  0.05  0.05  0.0 ic 2 1 2 bc 2   0   0
+node   8   coords 3  0.10  0.05  0.0 ic 2 1 2 bc 2   0   0
+node   9   coords 3  0.15  0.05  0.0 ic 2 1 2 bc 2   0   0
+node   10  coords 3  0.20  0.05  0.0 ic 2 1 2 bc 2   3   0
+tr1hmt   1   nodes 3    1  7  6 crossSect 1 mat 1 
+tr1hmt   2   nodes 3    1  2  7 crossSect 1 mat 1
+tr1hmt   3   nodes 3    2  3  8 crossSect 1 mat 1
+tr1hmt   4   nodes 3    2  8  7 crossSect 1 mat 1
+tr1hmt   5   nodes 3    3  9  8 crossSect 1 mat 1
+tr1hmt   6   nodes 3    3  4  9 crossSect 1 mat 1
+tr1hmt   7   nodes 3    4 10  9 crossSect 1 mat 1
+tr1hmt   8   nodes 3    4  5 10 crossSect 1 mat 1
+SimpleCS 1 thick 1.0
+hemokunzel 1 d 2000. iso_type 0 iso_a 4.83 iso_n 0.183 iso_wh 109.5 mu 10. permeability_type 2 A 0.001 lambda0 1.3 b 8. cs 880.
+# temperature
+BoundaryCondition 1 loadTimeFunction 1 prescribedvalue 298.15
+# humidity
+BoundaryCondition 2 loadTimeFunction 1 prescribedvalue 0.6
+# temparature
+BoundaryCondition 3 loadTimeFunction 1 prescribedvalue 323.15
+# temparature ic
+InitialCondition 1 Conditions 1 u 293.15
+# humidity ic
+InitialCondition 2 Conditions 1 u 0.9
+ConstantFunction 1 f(t) 1.
+#%BEGIN_CHECK% tolerance 1.e-5
+#NODE tStep 5 number 3 dof 10 unknown d value 3.10461346e+02
+#NODE tStep 5 number 5 dof 14 unknown d value 8.19363752e-01
+#NODE tStep 9 number 3 dof 10 unknown d value 3.10801670e+02
+#NODE tStep 9 number 5 dof 14 unknown d value 7.78261132e-01
+#%END_CHECK%
+
