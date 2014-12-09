@@ -269,6 +269,7 @@ Domain :: clear()
 {
     elementList.clear();
     mElementPlaceInArray.clear();
+    mDofManPlaceInArray.clear();
     dofManagerList.clear();
     materialList.clear();
     bcList.clear();
@@ -335,6 +336,19 @@ Domain :: giveElementPlaceInArray(int iGlobalElNum) const
         return res->second;
     } else {
         OOFEM_ERROR("returning -1 for iGlobalElNum: %d.", iGlobalElNum );
+        return -1;
+    }
+}
+
+int
+Domain :: giveDofManPlaceInArray(int iGlobalDofManNum) const
+{
+    auto res = mDofManPlaceInArray.find(iGlobalDofManNum);
+
+    if ( res != mDofManPlaceInArray.end() ) {
+        return res->second;
+    } else {
+        OOFEM_ERROR("returning -1 for iGlobalDofManNum: %d.", iGlobalDofManNum );
         return -1;
     }
 }
@@ -579,7 +593,7 @@ void Domain :: resizeInitialConditions(int _newSize) { icList.resize(_newSize); 
 void Domain :: resizeFunctions(int _newSize) { functionList.resize(_newSize); }
 void Domain :: resizeSets(int _newSize) { setList.resize(_newSize); }
 
-void Domain :: setDofManager(int i, DofManager *obj) { dofManagerList[i-1].reset(obj); }
+void Domain :: setDofManager(int i, DofManager *obj) { dofManagerList[i-1].reset(obj); mDofManPlaceInArray[obj->giveGlobalNumber()] = i;}
 void Domain :: setElement(int i, Element *obj) { elementList[i-1].reset(obj); mElementPlaceInArray[obj->giveGlobalNumber()] = i;}
 void Domain :: setCrossSection(int i, CrossSection *obj) { crossSectionList[i-1].reset(obj); }
 void Domain :: setMaterial(int i, Material *obj) { materialList[i-1].reset(obj); }
@@ -727,6 +741,7 @@ Domain :: instanciateYourself(DataReader *dr)
     }
 
     BuildElementPlaceInArrayMap();
+    BuildDofManPlaceInArrayMap();
 
 #  ifdef VERBOSE
     VERBOSE_PRINT0("Instanciated elements ", nelem);
@@ -1632,6 +1647,7 @@ Domain :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
         dofManagerList.clear();
         elementList.clear();
         mElementPlaceInArray.clear();
+        mDofManPlaceInArray.clear();
         materialList.clear();
         bcList.clear();
         icList.clear();
@@ -1826,6 +1842,7 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
     this->dofManagerList = std :: move(dofManagerList_new);
     this->elementList = std :: move(elementList_new);
     BuildElementPlaceInArrayMap();
+    BuildDofManPlaceInArrayMap();
 
     this->giveConnectivityTable()->reset();
     this->giveSpatialLocalizer()->init(true);
@@ -1997,6 +2014,18 @@ void Domain :: BuildElementPlaceInArrayMap()
     for ( int i = 1; i <= nelem; i++ ) {
         Element *elem = this->giveElement(i);
         mElementPlaceInArray[ elem->giveGlobalNumber() ] = i;
+    }
+}
+
+void Domain :: BuildDofManPlaceInArrayMap()
+{
+    mDofManPlaceInArray.clear();
+
+    int ndman = giveNumberOfDofManagers();
+
+    for ( int i = 1; i <= ndman; i++ ) {
+        DofManager *dMan = this->giveDofManager(i);
+        mDofManPlaceInArray[ dMan->giveGlobalNumber() ] = i;
     }
 }
 
