@@ -43,7 +43,7 @@
  #include "oofeggraphiccontext.h"
  #include "connectivitytable.h"
  #include "oofegutils.h"
- #include "rcm2.h"
+ #include "Materials/rcm2.h"
 #endif
 
 

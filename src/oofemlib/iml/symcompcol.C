@@ -134,7 +134,6 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
     }
 
     // loop over active boundary conditions
-    int nbc = domain->giveNumberOfBoundaryConditions();
     std :: vector< IntArray >r_locs;
     std :: vector< IntArray >c_locs;
 
@@ -147,7 +146,7 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
                 IntArray &kcloc = c_locs [ k ];
                 for ( int ii : krloc ) {
                     if ( ii > 0 ) {
-                        for ( int jj > kcloc ) {
+                        for ( int jj : kcloc ) {
                             if ( jj > 0 && ii >= jj ) {
                                 columns [ jj - 1 ].insert(ii - 1);
                             }
@@ -169,7 +168,7 @@ int SymCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
     colptr_.resize(neq + 1);
     indx = 0;
 
-    for ( j = 0; j < neq; j++ ) { // column loop
+    for ( int j = 0; j < neq; j++ ) { // column loop
         colptr_(j) = indx;
         for ( int row: columns [ j ] ) { // row loop
             rowind_(indx++) = row;

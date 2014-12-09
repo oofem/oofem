@@ -271,7 +271,19 @@ ConcreteDPM2Status :: saveContext(DataStream &stream, ContextMode mode, void *ob
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream.write(equivStrain) ) {
+    if ( !stream.write(deltaLambda) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.write(dFDKappa) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.write(le) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.write(alpha) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -283,7 +295,11 @@ ConcreteDPM2Status :: saveContext(DataStream &stream, ContextMode mode, void *ob
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream.write(kappaDTensionOne) ) {
+    if ( !stream.write(kappaDTension) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.write(kappaDCompression) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -299,13 +315,6 @@ ConcreteDPM2Status :: saveContext(DataStream &stream, ContextMode mode, void *ob
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream.write(kappaDTension) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    if ( !stream.write(kappaDCompression) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
 
     if ( !stream.write(damageTension) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -315,11 +324,20 @@ ConcreteDPM2Status :: saveContext(DataStream &stream, ContextMode mode, void *ob
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream.write(state_flag) ) {
+    if ( !stream.write(deltaEquivStrain) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream.write(le) ) {
+    if ( !stream.write(rateFactor) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.write(rateStrain) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+
+    if ( !stream.write(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -356,7 +374,19 @@ ConcreteDPM2Status :: restoreContext(DataStream &stream, ContextMode mode, void 
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream.read(equivStrain) ) {
+    if ( !stream.read(deltaLambda) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.read(dFDKappa) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.read(le) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.read(alpha) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -368,7 +398,11 @@ ConcreteDPM2Status :: restoreContext(DataStream &stream, ContextMode mode, void 
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream.read(kappaDTensionOne) ) {
+    if ( !stream.read(kappaDTension) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.read(kappaDCompression) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
@@ -384,13 +418,6 @@ ConcreteDPM2Status :: restoreContext(DataStream &stream, ContextMode mode, void 
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream.read(kappaDTension) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
-
-    if ( !stream.read(kappaDCompression) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
 
     if ( !stream.read(damageTension) ) {
         THROW_CIOERR(CIO_IOERR);
@@ -400,13 +427,23 @@ ConcreteDPM2Status :: restoreContext(DataStream &stream, ContextMode mode, void 
         THROW_CIOERR(CIO_IOERR);
     }
 
+    if ( !stream.read(deltaEquivStrain) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.read(rateFactor) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+    if ( !stream.read(rateStrain) ) {
+        THROW_CIOERR(CIO_IOERR);
+    }
+
+
     if ( !stream.read(state_flag) ) {
         THROW_CIOERR(CIO_IOERR);
     }
 
-    if ( !stream.read(le) ) {
-        THROW_CIOERR(CIO_IOERR);
-    }
 
 #ifdef keep_track_of_dissipated_energy
     if ( !stream.read(stressWork) ) {
@@ -550,7 +587,7 @@ ConcreteDPM2 :: initializeFrom(InputRecord *ir)
     dilationConst = 0.85;
     IR_GIVE_OPTIONAL_FIELD(ir, dilationConst, _IFT_ConcreteDPM2_dilation);
 
-    softeningType = 1; //0-Linear softening; 1-Bilinear softening
+    softeningType = 1; //0-Linear softening; 1-Bilinear softening; 2-Exponential
     IR_GIVE_OPTIONAL_FIELD(ir, softeningType, _IFT_ConcreteDPM2_softeningType);
 
     if ( softeningType > 2 ) {
@@ -1472,6 +1509,26 @@ ConcreteDPM2 :: performPlasticityReturn(GaussPoint *gp,
         if ( returnResult == RR_NotConverged ) {
             subincrementcounter++;
             if ( subincrementcounter > 10 ) {
+                OOFEM_LOG_INFO( "Unstable element %d \n", gp->giveElement()->giveGlobalNumber() );
+                OOFEM_LOG_INFO( "Old strain vector %g %g %g %g %g %g  \n", oldStrain.at(1), oldStrain.at(2), oldStrain.at(3), oldStrain.at(4), oldStrain.at(5), oldStrain.at(6) );
+                StrainVector help(status->giveTempPlasticStrain(), matMode);
+                StressVector help1(matMode);
+                double sig1, rho1, theta1;
+                oldStrain.subtract(help);
+                oldStrain.applyElasticStiffness(help1, eM, nu);
+                OOFEM_LOG_INFO( "Old plastic strain vector %g %g %g %g %g %g  \n", help.at(1), help.at(2), help.at(3), help.at(4), help.at(5), help.at(6) );
+                OOFEM_LOG_INFO( "New strain vector %g %g %g %g %g %g  \n", strain.at(1), strain.at(2), strain.at(3), strain.at(4), strain.at(5), strain.at(6) );
+                computeTrialCoordinates(effectiveStress, this->sig, this->rho, theta);
+                computeTrialCoordinates(help1, sig1, rho1, theta1);
+                yieldValue = computeYieldValue(this->sig, this->rho, this->thetaTrial, tempKappaP);
+                OOFEM_LOG_INFO("OLD Sig %g rho %g theta %g  \n", sig1, rho1, theta1);
+                OOFEM_LOG_INFO("NEW Sig %g rho %g theta %g  \n", sig, rho, theta);
+                if ( returnType == RT_Tension || returnType == RT_Compression ) {
+                    OOFEM_LOG_INFO("Vertex case apexstress %g\n", apexStress);
+                } else {
+                    OOFEM_LOG_INFO("Regular case %g \n", 15.18);
+                }
+                OOFEM_LOG_INFO("KappaP old %g new %g yieldfun %g\n", status->giveTempKappaP(), tempKappaP, yieldValue);
                 OOFEM_ERROR("ConcreteDPM2 :: performPlasticityReturn - Could not reach convergence with small deltaStrain, giving up.");
             } else if ( subincrementcounter > 9 && tempKappaP < 1. ) {
                 tempKappaP = 1.;
@@ -1516,18 +1573,12 @@ ConcreteDPM2 :: checkForVertexCase(double &answer,
         returnType = RT_Regular;
         return false;
     }
-    const double yieldHardTwo = computeHardeningTwo(tempKappa);
 
+    answer = 0.;
     if ( sig > 0. ) {
-        if ( tempKappa < 1. ) {
-            answer = 0.;
-        } else {
-            answer = yieldHardTwo * fc / m;
-        }
         returnType = RT_Tension;
     } else if ( sig < 0. &&  tempKappa < 1. ) {
         returnType = RT_Compression;
-        answer = 0.;
     } else {
         returnType = RT_Regular;
     }
@@ -1660,7 +1711,7 @@ ConcreteDPM2 :: computeTempKappa(const double kappaInitial,
     equivalentDeltaPlasticStrain = sqrt( 1. / 9. * pow( ( sigTrial - sig ) / ( kM ), 2. ) +
                                          pow(rhoTrial / ( 2. * gM ), 2.) );
 
-    double thetaVertex = 0.;
+    double thetaVertex = 3.141592653589793 / 3.;
     double ductilityMeasure = computeDuctilityMeasure(sig, rho, thetaVertex);
 
     return kappaInitial + equivalentDeltaPlasticStrain / ductilityMeasure;
@@ -1714,7 +1765,7 @@ ConcreteDPM2 :: computeRatioPotential(const double sig,
 
     const double dgdrho = Al / ( sqrt(6.) * fc ) * ( 4. * ( 1. - yieldHardOne ) * Bl + 6. ) +
 
-                          m *pow(yieldHardOne, 2.) / ( sqrt(6.) * fc );
+      m *pow(yieldHardOne, 2.) / ( sqrt(6.) * fc );
 
     return dgdrho / dgdsig * 3. * ( 1. - 2. * nu ) / ( 1. + nu );
 }
@@ -3111,6 +3162,7 @@ ConcreteDPM2 :: giveIPValue(FloatArray &answer,
         answer.zero();
         answer.at(1) = status->giveDamageTension();
         answer.at(2) = status->giveDamageCompression();
+        answer.at(3) = status->giveDissWork();
         return 1;
 
 #ifdef keep_track_of_dissipated_energy

@@ -1953,7 +1953,7 @@ $$
 obtained by reduction of the exponential function from 2D to 1D.
 The integral cannot be evaluated in closed form and is computed by OOFEM numerically.
 This function can be used in one-dimensional simulations of a two-dimensional specimen 
-under uniaxial tension; for more details see \cite{Gra13}.
+under uniaxial tension; for more details see \cite{Gra14}.
 \end{itemize}  
  
 The above functions depend only on the distance $s$ between the interacting
@@ -2006,7 +2006,7 @@ $$
 The term on the right-hand side after the integral is a multiple of the local
 variable, and so it can be referred to as the local complement.  
 
-In a recent paper \cite{Gra13}, special techniques that modify the averaging procedure based on the distance from a physical boundary of the domain or on the stress state have been considered. The details are explained in \cite{Gra13}. These techniques can be invoked by setting the optional parameter {\it nlVariation} to 1, 2 or 3 and specifying additional parameters $\beta$ and $\zeta$ for distance-based averaging, or $\beta$ for stress-based averaging.  
+In a recent paper \cite{Gra14}, special techniques that modify the averaging procedure based on the distance from a physical boundary of the domain or on the stress state have been considered. The details are explained in \cite{Gra14}. These techniques can be invoked by setting the optional parameter {\it nlVariation} to 1, 2 or 3 and specifying additional parameters $\beta$ and $\zeta$ for distance-based averaging, or $\beta$ for stress-based averaging.  
 
 The model parameters are summarized
 in Tabs.~\ref{idnl_table} and \ref{idnl_table_cont}.
@@ -3293,7 +3293,7 @@ Supported modes& 3dMat\\
 \newcommand{\mD}{\mbf{D}}
 \newcommand{\qh}{q_{\rm h}}
 
-\subsubsection{Damage-plastic model for concrete - ConcreteDPM}
+\subsubsection{Damage-plastic model for concrete - ConcreteDPM} \label{sec:cdpm}
 
 This model, developed by Grassl and Jir\'{a}sek for failure of concrete
 under general triaxial stress, is described in detail in \cite{GraJir}.
@@ -3612,6 +3612,175 @@ If the condition $h<h_{\max}$ is violated, the mesh needs to be refined.
 Note that the effective element size $h$ is obtained by projecting the element.
 For instance, if the element is a cube of edge length 100 mm, its effective
 size in the direction of the body diagonal can be 173 mm. 
+
+\subsubsection{CDPM2}
+
+This model is an extension of the ConcreteDPM presented in \ref{sec:cdpm}.
+CDPM2 has been developed by Grassl, Xenos, Nystr\"{o}m, Rempling and Gylltoft for modelling the failure of concrete for both static and dynamic loading. It is is described in detail in \cite{GraXenNys13}.
+The main differences between CDPM2 and ConcreteDPM are that in CDPM2 the plasticity part exhibits hardening once damage is active. Furthermore, two independent damage parameters describing tensile and compressive damage are introduced.
+The parameters of CDPM2 are summarised in Tab.~\ref{cdpm2_table}
+
+The stress for the anisotropic damage plasticity model (ISOFLAG=0) is defined as
+\begin{equation}
+\boldsymbol{\sigma} = \left(1-\omega_{\rm t}\right) \bar{\boldsymbol{\sigma}}_{\rm t} + \left(1-\omega_{\rm c}\right) \bar{\boldsymbol{\sigma}}_{\rm c}
+\end{equation}
+where $\bar{\boldsymbol{\sigma}}_{\rm t}$ and $\bar{\boldsymbol{\sigma}}_{\rm c}$ are the positive and negative parts of the effective stress tensor $\bar{\boldsymbol{\sigma}}$, respectively, and $\omega_{\rm t}$ and $\omega_{\rm c}$ are two scalar damage variables, ranging from 0 (undamaged) to 1 (fully damaged).
+
+The stress for the isotropic damage plasticity model (ISOFLAG=1) is defined as 
+\begin{equation}
+\boldsymbol{\sigma} = \left(1-\omega_{\rm t}\right) \bar{\boldsymbol{\sigma}}
+\end{equation}
+The effective stress $\bar{\boldsymbol{\sigma}}$ is defined according to the damage mechanics convention as 
+\begin{equation}
+\bar{\boldsymbol{\sigma}} = \mathbf{D}_{\rm e} : \left(\boldsymbol{\varepsilon} - \boldsymbol{\varepsilon}_{\rm p}\right) 
+\end{equation}
+
+\noindent\textbf{Plasticity:}
+
+The yield surface is described by the Haigh-Westergaard coordinates: the volumetric effective stress $\sigma_{\rm V}$, the norm of the deviatoric effective stress $\rho$ and the Lode angle $\theta$. The yield surface is
+\begin{equation} \label{eqcdpm2:yieldSurface}    
+\begin{split}
+& f_{\rm p}(\bar{\sigma}_{\rm V},\bar\rho,\bar\theta;\kappa_{\rm p})=  \left\{\left[1-q_{\rm{h1}}(\kappa_{\rm p})\right]\left( \frac{\bar{\rho}} {\sqrt{6}f_{\rm c}} + \frac{\bar{\sigma}_{\rm V}} {f_{\rm c}} \right)^2 + \sqrt{\frac{3}{2}} \frac {\bar{\rho}}{f_{\rm c}} \right\}^2 \\
+& +m_0 q^2_{\rm{h1}}(\kappa_{\rm p})q_{\rm{h2}}(\kappa_{\rm p}) \left[\frac{\bar{\rho} }{\sqrt{6}f_{\rm c}}r(\cos{\bar{\theta}}) + \frac{\bar{\sigma}_{\rm V}}{f_{\rm c}} \right] - q_{\rm{h1}}^2(\kappa_{\rm p}) q_{{\rm h2}}^2(\kappa_{\rm p})
+\end{split}
+\end{equation}
+It depends also on the hardening variable $\kappa_{\rm p}$ (which enters through the dimensionless variables $q_{\rm h1}$ and $q_{\rm h2}$). Parameter $f_{\rm c}$ is the uniaxial compressive strength. For $q_{\rm h2} = 1$, the yield function is identical to the one of CDPM.
+The shape of the deviatoric section is controlled by the Willam-Warnke function
+\begin{equation} \label{eq:rFunction}
+\begin{split}
+&r(\cos{\bar{\theta}}) = \frac{4(1-e^2)\cos^2{\bar{\theta}} + (2e-1)^2}{2(1-e^2)\cos{\bar{\theta}} + (2e-1)\sqrt{4(1-e^2)\cos^2{\bar{\theta}}+5e^2 -4e}} 
+\end{split}
+\end{equation} 
+Here, $e$ is the eccentricity parameter.
+The friction parameter $m_0$ is given by 
+\begin{equation}\label{eq:frictionM}
+m_0 = \dfrac{3 \left(f_{\rm c}^2 - f_{\rm t}^2\right)}{f_{\rm c}f_{\rm t}} \dfrac{e}{e+1}
+\end{equation}
+where $f_{\rm t}$ is the tensile strength.
+
+The flow rule (\ref{eq:flowRule}) is split into a volumetric and a deviatoric part, i.e., the gradient of the plastic potential is decomposed as
+%
+\begin{equation}\label{eq:generalFlow}
+\mathbf{m} = \dfrac{\partial g}{\partial \bar{\boldsymbol{\sigma}} } = \frac{\partial g}{\partial \bar{\sigma}_{\rm V}} \frac{\partial \bar{\sigma}_{\rm V}}{\partial \bar{\boldsymbol{\sigma}}} + \frac{\partial g}{\partial \bar{\rho}} \frac{\partial \bar{\rho} }{\partial \bar{\boldsymbol{\sigma}}}
+\end{equation}
+Taking into account that $\partial\bar{\sigma}_{\rm V}/\partial\bar{\boldsymbol{\sigma}}=\boldsymbol{\delta}/3$ and $\partial\bar{\rho}/\partial\bar{\boldsymbol{\sigma}}=\bar{\mbf{s}}/\bar\rho$, restricting attention to the post-peak regime (in which $q_{\rm h1} = 1$) and differentiating the plastic potential (\ref{eq:plasticPotential}), we rewrite equation (\ref{eq:generalFlow}) as
+\begin{equation}\label{eq:detailedFlow}
+\mbf{m} = \dfrac{\partial g}{\partial \bar{\boldsymbol{\sigma}}} =  \frac{{\partial}{m_{\rm g}}}{{\partial}{\bar{\sigma}_{\rm V}}} \frac{\boldsymbol{\delta}}{3f_{\rm c}} 
+ + \left(\frac{3}{f_{\rm c}} + \frac{m_0}{\sqrt{6}\bar\rho} \right)\frac{\bar{\mbf{s}}}{f_{\rm c}}
+\end{equation}
+The flow rule is non-associative which means that the direction of the plastic flow is not normal to the yield surface. This is important for concrete since an associative flow rule would give an overestimated maximum stress for passive confinement. 
+
+The dimensionless variables $q_{\rm h1}$ and $q_{\rm h2}$ that appear in (\ref{eq:yieldSurface}), (\ref{eq:plasticPotential}) and (\ref{eq:mg}) are functions of the hardening variable $\kappa_{\rm p}$. They control the evolution of the size and shape of the yield surface and plastic potential. 
+The first hardening law $q_{\rm h1}$ is
+%
+\begin{equation} \label{eq:hardeningLawOne}
+q_{\rm h1}(\kappa_{\rm p}) = 
+\left \{ \begin{array}{ll} q_{\rm h0} + \left(1-q_{\rm h0}\right) \left( \kappa_{\rm p}^3 - 3 \kappa_{\rm p}^2 + 3 \kappa_{\rm p} \right) - H_{\rm p} \left(\kappa_{\rm p}^3 - 3 \kappa_{\rm p}^2 + 2 \kappa_{\rm p}\right) & \mbox{if $\kappa_{\rm p} < 1$} \\
+1 & \mbox{if $\kappa_{\rm p} \ge 1$}
+\end{array}
+\right.
+\end{equation}
+%
+The second hardening law $q_{\rm h2}$ is given by
+\begin{equation} \label{eq:hardeningLawTwo}
+q_{\rm h2}(\kappa_{\rm p}) = \left \{ \begin{array}{ll} 1 & \mbox{if $\kappa_{\rm p} < 1$} \\
+1 + H_{\rm p} (\kappa_{\rm p} - 1)  & \mbox{if $\kappa_{\rm p} \ge 1$}
+\end{array}
+\right.
+\end{equation}
+
+The evolution law for the hardening variable,
+\begin{equation}
+\dot{\kappa}_{\rm {p}} = \frac {\| \dot{\veps_{\rm{p}}}\|}{x_{\rm{h}}\left(\bar{\sigma}_{\rm V} \right)} \left(2 \cos{\bar{\theta}}\right)^2 = \frac {\dot{\lambda} \| \mbf{m}\|}{x_{\rm{h}}\left(\bar{\sigma}_{\rm V} \right)} \left(2\cos{\bar{\theta}}\right)^2
+\end{equation}
+sets the rate of the hardening variable equal to the norm of the plastic strain rate scaled by a hardening ductility measure, which is identical to the one used for the CDPM.
+
+\noindent\textbf{Damage:}
+
+Damage is initiated when the maximum equivalent strain in the history of the material reaches the threshold $\varepsilon_{0} = f_{\rm t}/E$. 
+This expression is determined from the yield surface ($f_{\rm p} = 0$) by setting $q_{\rm {h1}}=1$ and $q_{\rm{h2}} = \tilde{\varepsilon}/\varepsilon_{0}$.
+From this quadratic equation for $\tilde{\varepsilon}$, the equivalent strain is determined as
+\begin{equation}
+\tilde{\varepsilon} = \dfrac{\varepsilon_0 m_0}{2}  \left(\dfrac{\bar{\rho}}{\sqrt{6} f_{\rm c}} r\left(\cos\theta\right) + \dfrac{\bar{\sigma}_{\rm V}}{f_{c}}\right) + \sqrt{\dfrac{\varepsilon_0^2 m_0^2}{4} \left(\dfrac{\bar{\rho}}{\sqrt{6}f_{\rm c}} r\left(\cos\theta\right) + \dfrac{\bar{\sigma}_{\rm V}}{f_{\rm c}}\right)^2 + \dfrac{3 \varepsilon_0^2 \bar{\rho}^2}{2 f_{\rm c}^2}}
+\end{equation}
+
+Tensile damage is described by a stress-inelastic displacement law. For linear and exponential damage type the stress value $f_{\rm t}$ and the displacement value $w_{\rm f}$ must be defined. For the bi-linear type two additional parameters $f_{\rm t1}$ and  $w_{\rm f1}$ are required.
+ 
+For the compressive damage variable, an evolution based on an exponential stress-inelastic strain law is used. The stress versus inelastic strain in the softening regime in compression is
+\begin{equation}
+\begin{array}{ll}
+\sigma = f_{\rm t} \exp\left(-\dfrac{\varepsilon_{\rm i}}{\varepsilon_{\rm fc}}\right) & \mbox{if $0 < \varepsilon_{\rm i}$}
+\end{array}
+\end{equation}
+where $\varepsilon_{\rm fc}$ is an inelastic strain threshold which controls the initial inclination of the softening curve. The use of different damage evolution for tension and compression is one important improvement over CDPM.
+
+The history variables $\kappa_{\rm dt1}$, $\kappa_{\rm dt2}$, $\kappa_{\rm dc1}$ and $\kappa_{\rm dc2}$ depend on a ductility measure $x_{\rm s}$, which takes into account the influence of multiaxial stress states on the damage evolution.
+This ductility measure is given by
+\begin{equation}
+x_{\rm s} = 1+ \left(A_{\rm s}-1\right) R_{\rm s}
+\end{equation}
+where $R_{\rm s}$ is
+\begin{equation}
+R_{\rm s} = \left \{ \begin{array}{ll} -\dfrac{\sqrt{6} \bar{\sigma}_{\rm V}}{\bar{\rho}} & \mbox{if $\bar{\sigma}_{\rm V} \leq 0$} \\
+    0 & \mbox{if $\bar{\sigma}_{\rm V} > 0$}  \end{array} \right.
+\end{equation}
+and $A_{\rm s}$ is a model parameter.
+ 
+\noindent\textbf{Strain rate:}
+
+Concrete is strongly rate dependent. If the loading rate is increased, the tensile and compressive strength increase and are more prominent in tension then in compression. The dependency is taken into account by an additional variable $alpha_{\rm r}$. The rate dependency is included by scaling both the equivalent strain rate and the inelastic strain. The rate parameter is defined by
+\begin{equation}
+\alpha_{\rm r}=(1-X) \alpha_{\rm rt} + X  \alpha_{\rm rc}
+\end{equation}
+where $X$ is the continuous compression measure (= 1 means only compression, = 0 means only tension).
+
+The functions $\alpha_{\rm rt}$ and $\alpha_{\rm rc}$ depend on the input parameter $f_{\rm c0}$. A recommended value for $f_{\rm c0}$ is 10~MPa.
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{mmt}
+\hline
+Description & CDPM2\\
+\hline
+Record Format & \descitem{con2dpm}  \elemparam{d}{rn} \elemparam{E}{rn} \elemparam{n}{rn} \elemparam{tAlpha}{rn} \elemparam{ft}{rn} \elemparam{fc}{rn} \elemparam{wf}{rn} [\elemparam{stype}{in}] [\elemparam{ft1}{rn}] [\elemparam{wf1}{rn}] [\elemparam{efc}{rn}] [\elemparam{ecc}{rn}] [\elemparam{kinit}{rn}] [\elemparam{Ahard}{rn}] [\elemparam{Bhard}{rn}] [\elemparam{Chard}{rn}] [\elemparam{Dhard}{rn}] [\elemparam{Asoft}{rn}] [\elemparam{helem}{rn}] [\elemparam{dilation}{rn}] [\elemparam{hp}{rn}] [\elemparam{isoflag}{in}] [\elemparam{rateflag}{in}] \elemparam{fcZero}{in} [\elemparam{yieldtol}{rn}] [\elemparam{newtoniter}{in}] \\
+Parameters &- \param{d} material density\\
+&- \param{E} Young modulus\\
+&- \param{n} Poisson ratio\\
+&- \param{tAlpha} thermal dilatation coefficient\\
+&- \param{ft} uniaxial tensile strength\\
+&- \param{fc} uniaxial compressive strength\\
+&- \param{wf} parameter that controls the slope of the softening branch to be used\\
+&- \param{stype} allows to choose different types of softening laws, default value 1:
+\begin{itemize}\setlength{\itemsep}{-3pt}
+\item[0 -] linear softening 
+\item[1 -] bilinear softening
+\item[2 -] exponential softening
+\end{itemize}\\
+&- \param{ft1}  parameter for the bilinear softening law (stype = 1) defining the ratio between intermediate stress and tensile strength, optional, default value 0.3\\
+&- \param{wf1}  parameter for the bilinear softening law (stype = 1) defining the intermediate crack opening, optional, default value 0.15\\
+&- \param{efc}  parameter for exponential softening law in compression, optional, default value $100 \times 10^{-6}$\\
+&- \param{ecc} eccentricity parameter, optional, default value 0.525\\
+&- \param{kinit} initial value of hardening law, optional, default value 0.3\\
+&- \param{Ahard} hardening parameter, optional, default value 0.08\\
+&- \param{Bhard} hardening parameter, optional, default value 0.003\\
+&- \param{Chard} hardening parameter, optional, default value 2\\
+&- \param{Dhard} hardening parameter, optional, default value $1\times 10^{-6}$\\
+&- \param{Asoft} softening parameter, optional, default value 15\\
+&- \param{helem} element size $h$, optional (if not specified, the actual element size is used)\\
+&- \param{dilation} dilation factor, optional, default value 0.85\\
+&- \param{hp} hardening modulus, optional, default value 0.5\\
+&- \param{isoflag} flag which allows for the use of only one damage parameter if set to 1, default value 0\\
+&- \param{rateflag} flag which allows for the consideration of the effect of strain rates if set to 1, default value 0\\
+&- \param{fcZero} Input parameter for modelling the effect of strain value. Recommended value $10$~MPa. Only if rateflag=1, \param{fcZero} has to be specified.\\
+&- \param{yieldtol} tolerance for the implicit stress return algorithm, optional, default value $1 \times 10^{-6}$\\
+&- \param{newtoniter} maximum number of iterations in the implicit stress return algorithm, optional, default value 100\\
+Supported modes& 3dMat, PlaneStrain\\
+\hline
+\end{mmt}
+\caption{CDPM2 -- summary.}
+\label{cdpm2_table}
+%\end{center}
+\end{table}
 
 \subsection{Orthotropic damage model with fixed crack orientations for composites - CompDamMat}
 
@@ -4551,6 +4720,137 @@ Supported modes& \_2dHeMo\\
 %\end{center}
 \end{table}
 
+
+\subsection{Material for unsaturated flow in lattice models -- LatticeTransMat}
+
+\label{latticetransmat}
+Lattice transport elements have to be used with this material model. A positive sign is assumed for liquid tension, unlike the convention of soil mechanics which assumes compression positive.\\
+
+These transport elements are idealised as one-dimensional conductive pipes. The gradient of hydraulic head, which governs flow rate along each transport element, is determined from the capillary pressures $P_{c}$ at the two nodes.
+
+The mass balance equation describes the change in moisture inside a porous element as a consequence of liquid flow and solid-liquid retention. It leads to the following partial differential equation
+\begin{equation}\label{latticetransmat1}
+c\frac{\partial P_{c}}{\partial t} + k\mbox{div}(\nabla(\frac{P_{c}}{g}-\rho z)) =0
+\end{equation}
+where $P_{c}$ is the capillary pressure, $c$ is the mass capacity function($s^{2}m^{-2}$), $k$ is the Darcy hydraulic conductivity ($ms^{-1}$), $\rho$ is the fluid mass density, $g$ is the acceleration of gravity, $z$ is the capillary height and t is the time.\\
+
+The hydraulic conductivity $k$ consists of
+\begin{equation}\label{latticetransmat11}
+k=k_{0} + k_{c}
+\end{equation}
+where $k_{0} $ is the hydraulic conductivity of the intact material and $k_{c} $ is the additional conductivity due to cracking.\\
+
+Darcy hydraulic conductivity $k_{0}$ is defined as 
+\begin{equation}\label{latticetransmat12}
+k_{0}=\frac{\rho g}{\mu}\kappa
+\end{equation}
+where $\mu$ is the dynamic viscosity ($Pa.s$), $\kappa$ is the permeability also called intrinsic conductivity($m^{2}$), and $\kappa_{r}$ is the relative conductivity. $\kappa_{r}$ is a function of the effective degree of saturation.\\
+
+The cracking part is
+\begin{equation}\label{latticetransmat13}
+k_{c}=\xi\frac{\rho g}{\mu}\frac{w^{3}_{c}}{12h} \kappa_{r}
+\end{equation}
+where $\xi$ is a tortuosity factor taking into account the roughness of the crack surface, $w_{c}$ is the equivalent crack opening of the dual mechanical lattice and $h$ is the length of the dual mechanical element.
+
+\subsubsection{One-dimensional transport element}
+The discrete form of the differential equation for mass transport for a one-dimensional transport element is
+\begin{equation}\label{latticetransmat3}
+\alpha_{e}P_{c} + C_{e}\frac{\partial P_{c}}{\partial t}  = f_{e}
+\end{equation}
+where $P_{c}$ is a vector containing the nodal values of the capillary pressure, $\alpha_{e}$ is the conductivity matrix, $C_{e}$ is the capacity matrix and $f_{e}$ is the nodal flow rate vector ($kg.m^{3}$). \\
+
+The capacity matrix is
+\begin{equation}\label{latticetransmat4}
+ C_{e} = \frac{Al}{12}c \left(  \begin{array}{ c c }  2 & 1 \\  1 & 2 \end{array}  \right)
+\end{equation}
+where $c$ is the capacity of the material, l is the length of the transport element and $A$ is the cross-sectional area of the transport element. \\
+
+The conductivity matrix is defined as
+\begin{equation}\label{latticetransmat5}
+ \alpha_{e} = \frac{A}{l}\frac{k}{g} \left(  \begin{array}{ c c }  1 & -1 \\  -1 & 1 \end{array}  \right)
+\end{equation}
+\\
+
+\subsubsection{Constitutive laws}
+The mass transport equation is based on the constitutive laws for the capacity $c$ and the hydraulic conductivity $k$.\\
+
+The capacity $c$ is defined as 
+\begin{equation}\label{latticetransmat6}
+c=-\rho\frac{\partial \theta}{\partial P_{c}}
+\end{equation}
+where $\theta$ is the volumetric water content ($\theta=\frac{V_{w}}{V_{T}}$ with $V_{w}$ the volume of water, and $V_{T}$ the total volume) which is calculated by a modified version of van Genuchten’s retention model. Note that the presence of a crack in an element does not influence the capacity in the present model.\\
+
+The volumetric water content is 
+\begin{equation}\label{latticetransmat7}
+\theta = S_{e} (\theta_{s} - \theta_{r})+\theta_{r}
+\end{equation}
+where $\theta_{r}$ and $\theta_{s}$ are the residual and saturated water contents corresponding to effective saturation values of $S_{e} = 0$ and $S_{e} = 1$, respectively. \\
+
+The effective degree of saturation $S_{e}$ is defined as
+\begin{equation}\label{latticetransmat8}
+S_{e}  = \left\{
+    \begin{array}{ll}
+         \frac{\theta_{m}-\theta_{r}}{\theta_{s}-\theta_{r}}\left(1+\left(\frac{ P_{c}}{a}\right)^{\frac{1}{1-m}}\right)^{-m}  & \mbox{if } P_{c} \ge P_{c(aev)} \\
+         1 & \mbox{if } P_{c}<P_{c(aev)}
+    \end{array}
+\right.
+\end{equation}
+where $\theta_{m}$ is an additional model parameter and $P_{c(aev)}$ is the air-entry value of capillary pressure which separates saturated ($P_{c}<P_{c(aev)}$) from unsaturated states ($P_{c} \ge P_{c(aev)}$). It is intuitive that the smaller the pore size of the mate- rial, the larger the value of $P_{c(aev)}$ will be.
+
+The relative conductivity $\kappa_{r}$ is a function of the effective degree of saturation and is defined as
+\begin{equation}\label{latticetransmat9}
+\kappa_{r}  = \sqrt{S_{e}}\left(\frac{1-\left[1-\left(\frac{S_{e}}{  \frac{\theta_{m}-\theta_{r}}{\theta_{s}-\theta_{r}}}\right)^{\frac{1}{m}}\right]^{m}}{1-\left[1-\left(\frac{1}{  \frac{\theta_{m}-\theta_{r}}{\theta_{s}-\theta_{r}}}\right)^{\frac{1}{m}}\right]^{m}}\right)^{2}
+\end{equation}
+If $\theta_{m} = \theta_{s}$, we have $ \frac{\theta_{m}-\theta_{r}}{\theta_{s}-\theta_{r}}=1$ : the equation reduces to the expression of the relative conductivity of the original van Genuchten model.\\
+
+The model parameters are summarized
+
+\begin{table}[!htb]
+%\begin{center}
+\begin{tabular}{|l|p{9cm}|}
+\hline
+Description & Material for fluid transport in lattice models\\
+\hline
+Record Format & 
+\descitem{latticetransmat} 
+\elemparam{num}{in}
+\elemparam{d}{rn}
+\elemparam{k}{rn} 
+\elemparam{vis}{rn}
+\elemparam{contype}{in}
+\elemparam{thetas}{rn}
+\elemparam{thetar}{rn}
+\elemparam{paev}{rn}
+\elemparam{m}{rn}
+\elemparam{a}{rn}
+\elemparam{thetam}{rn}
+ \optelemparam{ctor}{rn}\\
+
+Parameters 
+&- \param{num} material model number\\
+&- \param{d} fluid mass density\\
+&- \param{k} permeability ($m^{2}$)\\
+&- \param{vis} dynamic viscosity ($Pa.s$)\\
+&- \param{contype} unsaturated flow allowed when contype=1\\
+&- \param{thetas} saturated water content\\
+&- \param{thetar} residual water content\\
+&- \param{paev} air-entry value of capillary pressure\\
+&- \param{m} van Genuchten parameter\\
+&- \param{a} van Genuchten parameter\\
+&- \param{thetam} additional model parameter for the modified version of van Genuchten’s retention model\\
+&- \param{ctor} coefficient of tortuosity ($ctor=\frac{1}{\tau}\le1$)\\
+
+Supported modes& 2dMassLatticeTransport\\
+\hline
+\end{tabular}
+
+\caption{Material for unsaturated flow in lattice models - summary.}
+\label{Iatticetransmat_table}
+%\end{center}
+\end{table}
+
+
+
 \clearpage
 
 \section{Material Models for Fluid Dynamic}
@@ -5215,12 +5515,15 @@ Note that the matrices $\mbf{K}(\mbf{r}_\tau), \mbf{C}(\mbf{r}_\tau)$ and the ve
 \bibitem{GraJir} P.~Grassl and M.~Jir\'{a}sek.
 \newblock Damage-plastic model for concrete failure.
 \newblock {\em International Journal of Solids and Structures}, 43:7166--7196, 2006.
+\bibitem{GraXenNys13} P.~Grassl and M.~Jir\'{a}sek.
+\newblock CDPM2: A damage-plasticity approach to modelling the failure of concrete.
+\newblock {\em International Journal of Solids and Structures}, 50:3805--3816, 2013.
 \bibitem{GraJir10} P.~Grassl and M.~Jir\'{a}sek.
 \newblock Meso-scale approach to modelling the fracture process zone of concrete subjected to uniaxial tension.
 \newblock {\em International Journal of Solids and Structures}, 47: 957--968, 2010.
-\bibitem{Gra13} P.~Grassl, D.~Xenos, M.~Jir\'{a}sek andM.~ Hor\'{a}k.
+\bibitem{Gra14} P.~Grassl, D.~Xenos, M.~Jir\'{a}sek and M.~ Hor\'{a}k.
 \newblock  Evaluation of nonlocal approaches for modelling fracture near nonconvex boundaries.
-\newblock {\em International Journal of Solids and Structures}, submitted in 2013.
+\newblock {\em International Journal of Solids and Structures}, 51: 3239–-3251, 2014.
 \bibitem{inel} M. Jir\'asek, Z.P. Ba\v zant: Inelastic analysis of
   structures, John Wiley, 2001.
 \bibitem{Hansen} P.F. Hansen: Coupled Moisture/Heat Transport in

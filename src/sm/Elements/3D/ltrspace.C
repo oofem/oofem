@@ -48,7 +48,7 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "rcm2.h"
+ #include "Materials/rcm2.h"
 
  #include <Etetrawd.h>
 #endif
@@ -409,8 +409,7 @@ LTRSpace :: drawSpecial(oofegGraphicContext &gc, TimeStep *tStep)
 
         //   for (GaussPoint *gp: *integrationRulesArray [ 0 ] ) {
         {
-            IntegrationRule *iRule = integrationRulesArray [ 0 ];
-            GaussPoint *gp = iRule->getIntegrationPoint(0);
+            GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
             if ( this->giveIPValue(cf, gp, IST_CrackedFlag, tStep) == 0 ) {
                 return;
             }

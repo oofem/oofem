@@ -196,6 +196,8 @@ public:
      * @param aDomain Pointer to the domain to which element belongs.
      */
     Element(int n, Domain * aDomain);
+    Element(const Element& src) = delete;
+    Element &operator = (const Element &src) = delete;
     /// Virtual destructor.
     virtual ~Element();
 

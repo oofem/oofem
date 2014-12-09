@@ -679,8 +679,6 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
     //     }
 
 #ifdef __CEMHYD_MODULE
-    int nelem = domain->giveNumberOfElements();
-
     // Not relevant in linear case, but needed for CemhydMat for temperature averaging before solving balance equations
     // Update element state according to given ic
     for ( auto &elem : domain->giveElements() ) {
@@ -747,15 +745,13 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
 {
     ///@todo Verify this, the function is completely unused.
     Domain *domain = this->giveDomain(1);
-    int nelem = domain->giveNumberOfElements();
     FloatArray vecTemperature;
 
     for ( auto &elem : domain->giveElements() ) {
-        TransportElement *element = static_cast< TransportElement * >( elem );
-        TransportMaterial * = static_cast< CemhydMat * >( element->giveMaterial() );
+        TransportMaterial *mat = dynamic_cast< CemhydMat * >( elem->giveMaterial() );
         if ( mat ) {
-            for ( GaussPoint *gp: *element->giveDefaultIntegrationRulePtr() ) {
-                element->giveIPValue(vecTemperature, gp, IST_Temperature, tStep);
+            for ( GaussPoint *gp: *elem->giveDefaultIntegrationRulePtr() ) {
+                elem->giveIPValue(vecTemperature, gp, IST_Temperature, tStep);
                 //mat->IP_volume += dV;
                 //mat->average_temp += vecState.at(1) * dV;
             }
@@ -763,7 +759,7 @@ NonStationaryTransportProblem :: averageOverElements(TimeStep *tStep)
     }
 
     for ( auto &mat : domain->giveMaterials() ) {
-        CemhydMat *cem = static_cast< CemhydMat * >( mat );
+        CemhydMat *cem = dynamic_cast< CemhydMat * >( mat.get() );
         if ( cem ) {
             //cem->average_temp /= mat->IP_volume;
         }

@@ -1805,44 +1805,37 @@ int Domain :: commitTransactions(DomainTransactionManager *tm)
     this->renumberDofManagers();
     this->renumberDofManData(tm);
 
-    std :: vector< std :: unique_ptr< DofManager > > dofManagerList_new;
-    std :: vector< std :: unique_ptr< Element > > elementList_new;
-
-    // initialize new dofman list
-    int _size = dmanMap.size();
-    dofManagerList_new.clear();
-    dofManagerList_new.reserve(dmanMap.size());
-
-    ///@todo This is a pretty messy way, we shouldn't do unique ptrs like this (we have the same ptr in 2 different unique_ptrs!!!)
-    for ( auto &dman: this->dofManagerList ) {
-        dman.release();
-    }
-    for ( auto &map: dmanMap ) {
-        dofManagerList_new.emplace_back(map.second);
-    }
-
     this->renumberElements();
     this->renumberElementData(tm);
-    // initialize new element list
-    _size = elementMap.size();
-    elementList_new.clear();
-    elementList_new.reserve(_size);
 
-    for ( auto &el: this->elementList ) {
-        el.release();
-    }
+    ///@todo This is really quite bad. We shouldn't do unique ptrs like this (we have the same ptr in 2 different unique_ptrs!!!)
+    // initialize new element list
+    std :: vector< std :: unique_ptr< Element > > elementList_new;
+    elementList_new.reserve(elementMap.size());
     for ( auto &map: elementMap ) {
         elementList_new.emplace_back(map.second);
     }
+    for ( auto &el: this->elementList ) {
+        el.release();
+    }
+    this->elementList = std :: move(elementList_new);
 
+    // initialize new dofman list
+    std :: vector< std :: unique_ptr< DofManager > > dofManagerList_new;
+    dofManagerList_new.reserve(dmanMap.size());
+    for ( auto &map: dmanMap ) {
+        dofManagerList_new.emplace_back(map.second);
+    }
+    for ( auto &dman: this->dofManagerList ) {
+        dman.release();
+    }
+    this->dofManagerList = std :: move(dofManagerList_new);
+
+    BuildElementPlaceInArrayMap();
+    BuildDofManPlaceInArrayMap();
 
     tm->dofmanTransactions.clear();
     tm->elementTransactions.clear();
-
-    this->dofManagerList = std :: move(dofManagerList_new);
-    this->elementList = std :: move(elementList_new);
-    BuildElementPlaceInArrayMap();
-    BuildDofManPlaceInArrayMap();
 
     this->giveConnectivityTable()->reset();
     this->giveSpatialLocalizer()->init(true);

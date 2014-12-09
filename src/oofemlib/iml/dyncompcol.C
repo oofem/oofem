@@ -318,7 +318,7 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
     for ( auto &elem : domain->giveElements() ) {
         elem->giveLocationArray(loc, s);
 
-        for ( int jj : loc ) {
+        for ( int ii : loc ) {
             if ( ii > 0 ) {
                 for ( int jj : loc ) {
                     if ( jj > 0 ) {
@@ -330,7 +330,6 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
     }
 
     // loop over active boundary conditions
-    int nbc = domain->giveNumberOfBoundaryConditions();
     std :: vector< IntArray >r_locs;
     std :: vector< IntArray >c_locs;
 
@@ -341,10 +340,10 @@ int DynCompCol :: buildInternalStructure(EngngModel *eModel, int di, const Unkno
             for ( std :: size_t k = 0; k < r_locs.size(); k++ ) {
                 IntArray &krloc = r_locs [ k ];
                 IntArray &kcloc = c_locs [ k ];
-                for ( int i = 1; i <= krloc.giveSize(); i++ ) {
-                    if ( ( ii = krloc.at(i) ) ) {
-                        for ( int j = 1; j <= kcloc.giveSize(); j++ ) {
-                            if ( ( jj = kcloc.at(j) ) ) {
+                for ( int ii : krloc ) {
+                    if ( ii > 0 ) {
+                        for ( int jj : kcloc ) {
+                            if ( jj > 0 ) {
                                 this->insertRowInColumn(jj - 1, ii - 1);
                             }
                         }

@@ -43,7 +43,7 @@
 #ifdef __OOFEG
  #include "oofeggraphiccontext.h"
  #include "oofegutils.h"
- #include "structuralelementevaluator.h"
+ #include "../sm/Elements/structuralelementevaluator.h"
 #endif
 
 
