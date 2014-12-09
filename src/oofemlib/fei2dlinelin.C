@@ -125,6 +125,22 @@ double FEI2dLineLin :: giveTransformationJacobian(const FloatArray &lcoords, con
     return sqrt(x2_x1 * x2_x1 + y2_y1 * y2_y1) / 2.0;
 }
 
+void FEI2dLineLin :: computeLocalEdgeMapping(IntArray &edgeNodes, int iedge)
+{
+    int aNode = 0, bNode = 0;
+    edgeNodes.resize(1);
+
+    if ( iedge == 1 ) { // edge between nodes 1 2
+        aNode = 1;
+        bNode = 2;
+    } else {
+        OOFEM_ERROR("wrong egde number (%d)", iedge);
+    }
+
+    edgeNodes.at(1) = aNode;
+    edgeNodes.at(2) = bNode;
+}
+
 double FEI2dLineLin :: edgeComputeLength(IntArray &edgeNodes, const FEICellGeometry &cellgeo)
 {
     double x2_x1, y2_y1;
