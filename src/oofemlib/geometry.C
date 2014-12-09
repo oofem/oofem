@@ -268,7 +268,7 @@ int Line :: computeNumberOfIntersectionPoints(Element *element)
     const double LineLength = giveLength();
     const double absTol = relTol*std::max(LineLength, XfemTolerances::giveCharacteristicElementLength() );
 
-    const int numEdges = element->giveNumberOfNodes();
+    const int numEdges = element->giveInterpolation()->giveNumberOfEdges();
 
     for ( int edgeIndex = 1; edgeIndex <= numEdges; edgeIndex++ ) {
         IntArray bNodes;

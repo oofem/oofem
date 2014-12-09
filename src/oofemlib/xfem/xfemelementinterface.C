@@ -290,7 +290,8 @@ void XfemElementInterface :: XfemElementInterface_createEnrNmatrixAt(FloatMatrix
 
         size_t nodeCounter = 0;
 
-        const std :: vector< int > &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices(globalNodeInd);
+        int placeInArray = element->giveDomain()->giveDofManPlaceInArray(globalNodeInd);
+        const std :: vector< int > &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices(placeInArray);
         for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
             EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices [ i ]);
 
@@ -354,7 +355,8 @@ int XfemElementInterface :: XfemElementInterface_giveNumDofManEnrichments(const 
 {
     int numEnrNode = 0;
     int globalNodeInd = iDMan.giveGlobalNumber();
-    const std :: vector< int > &nodeEiIndices = iXMan.giveNodeEnrichmentItemIndices(globalNodeInd);
+    int placeInArray = element->giveDomain()->giveDofManPlaceInArray(globalNodeInd);
+    const std :: vector< int > &nodeEiIndices = iXMan.giveNodeEnrichmentItemIndices(placeInArray);
     for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
         EnrichmentItem *ei = iXMan.giveEnrichmentItem(nodeEiIndices [ i ]);
         if ( ei->isDofManEnriched(iDMan) ) {
