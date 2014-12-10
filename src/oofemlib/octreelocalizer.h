@@ -222,7 +222,7 @@ public:
     virtual void giveAllElementsWithIpWithinBox_EvenIfEmpty(elementContainerType &elemSet, const FloatArray &coords, const double radius, bool iCohesiveZoneGP);
     virtual void giveAllElementsWithIpWithinBox(elementContainerType &elemSet, const FloatArray &coords, const double radius, bool iCohesiveZoneGP);
     virtual void giveAllNodesWithinBox(nodeContainerType &nodeList, const FloatArray &coords, const double radius);
-    virtual Node * giveNodeClosestToPoint(const FloatArray &coords);
+    virtual Node * giveNodeClosestToPoint(const FloatArray &coords, double maxDist);
 
     virtual const char *giveClassName() const { return "OctreeSpatialLocalizer"; }
 

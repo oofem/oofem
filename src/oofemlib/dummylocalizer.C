@@ -219,7 +219,7 @@ DummySpatialLocalizer :: giveAllNodesWithinBox(nodeContainerType &nodeSet, const
 
 
 Node *
-DummySpatialLocalizer :: giveNodeClosestToPoint(const FloatArray &coords)
+DummySpatialLocalizer :: giveNodeClosestToPoint(const FloatArray &coords, double maxDist)
 {
     Node *closest = NULL;
     double maxdist = 0.;
@@ -233,7 +233,7 @@ DummySpatialLocalizer :: giveNodeClosestToPoint(const FloatArray &coords)
             }
         }
     }
-    return closest;
+    return maxdist > maxDist ? closest : NULL;
 }
 
 } // end namespace oofem
