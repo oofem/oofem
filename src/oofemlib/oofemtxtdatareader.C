@@ -127,7 +127,7 @@ OOFEMTXTDataReader :: giveLineFromInput(std :: ifstream &stream, int &lineNum, s
         }
 
         if ( !flag ) {
-            c = tolower(c); // convert line to lowercase
+            c = (char)tolower(c); // convert line to lowercase
         }
     }
     return true;

@@ -483,8 +483,8 @@ VTKExportModule :: exportCellVars(FILE *stream, int elemToProcess, TimeStep *tSt
                         vec.add(gp->giveWeight(), temp);
                     }
                     vec.times(1 / gptot);
-                    for ( int i = 1; i <= vec.giveSize(); ++i ) {
-                        fprintf( stream, "%e ", vec.at(i) );
+                    for ( int j = 1; j <= vec.giveSize(); ++j ) {
+                        fprintf( stream, "%e ", vec.at(j) );
                     }
                     fprintf(stream, "\n");
                 }

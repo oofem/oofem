@@ -417,7 +417,7 @@ TrabBone3D :: projectOnYieldSurface(double &tempKappa, FloatArray &tempEffective
             if ( lineSearchFlag == 1 ) {
                 max_num_iter = 4000;
                 double eta = 0.1;
-                double beta = 25.e-4;
+                beta = 25.e-4;
                 int j = 0;
                 int jMax = 10;
                 double alfa = 1;

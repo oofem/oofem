@@ -126,7 +126,7 @@ LatticeDamage2d :: initializeFrom(InputRecord *ir)
     this->biotCoefficient = 0.;
     IR_GIVE_OPTIONAL_FIELD(ir, this->biotCoefficient, _IFT_LatticeDamage2d_bio);
 
-    this->biotType = 0.;
+    this->biotType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->biotType, _IFT_LatticeDamage2d_btype);
 
     return IRRT_OK;

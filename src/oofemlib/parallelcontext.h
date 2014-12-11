@@ -73,7 +73,7 @@ public:
      * Initiates the mapping for given domain.
      * @param di Domain index.
      */
-    void init(int di);
+    void init(int newDi);
 
     int giveNumberOfLocalEqs();
     int giveNumberOfGlobalEqs();

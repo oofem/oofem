@@ -520,7 +520,6 @@ void XfemElementInterface :: XfemElementInterface_prepareNodesForDelaunay(std ::
         std :: vector< FloatArray >edgeCoords;
 
         FloatArray tipCoord;
-        int dim = element->giveDofManager(1)->giveCoordinates()->giveSize();
         tipCoord.resize(dim);
 
         bool foundTip = false;

@@ -157,8 +157,8 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
 
     double A0p = 0.0, App = 0.0, A0m = 0.0, Amm = 0.0, Bp = 0.0, Bm = 0.0, c0 = 0.0, cp = 0.0, cm = 0.0;
 
-    EngngModel *m = myMode.myEngngModel;
-    Set *mySet = m->giveDomain(1)->giveSet(externalSet);
+    EngngModel *model = myMode.myEngngModel;
+    Set *mySet = model->giveDomain(1)->giveSet(externalSet);
 
     IntArray BoundaryList = mySet->giveBoundaryList();
 
@@ -166,7 +166,7 @@ SolutionbasedShapeFunction :: computeCorrectionFactors(modeStruct &myMode, IntAr
         int ElementID = BoundaryList(2 * i);
         int Boundary = BoundaryList(2 * i + 1);
 
-        Element *thisElement = m->giveDomain(1)->giveElement(ElementID);
+        Element *thisElement = model->giveDomain(1)->giveElement(ElementID);
         FEInterpolation *geoInterpolation = thisElement->giveInterpolation();
         IntArray bnodes, zNodes, pNodes, mNodes;
         FloatMatrix nodeValues;

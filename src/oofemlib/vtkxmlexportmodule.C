@@ -400,8 +400,8 @@ VTKXMLExportModule :: doOutput(TimeStep *tStep, bool forcedOutput)
             //this->exportCompositeElement(this->defaultVTKPiece, el, tStep);
             this->exportCompositeElement(this->defaultVTKPieces, el, tStep);
 
-            for ( int i = 0; i < (int)this->defaultVTKPieces.size(); i++ ) {
-                this->writeVTKPiece(this->defaultVTKPieces[i], tStep);
+            for ( int j = 0; j < (int)this->defaultVTKPieces.size(); j++ ) {
+                this->writeVTKPiece(this->defaultVTKPieces[j], tStep);
             }
 #else
                 // No support for binary export yet

@@ -48,7 +48,7 @@ class Domain;
  * @author Erik Svenning
  * @date Sep 9, 2014
  */
-class GeometryBasedEI : public EnrichmentItem
+class OOFEM_EXPORT GeometryBasedEI : public EnrichmentItem
 {
 public:
     GeometryBasedEI(int n, XfemManager *xm, Domain *aDomain);
