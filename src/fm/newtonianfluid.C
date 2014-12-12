@@ -138,7 +138,7 @@ NewtonianFluidMaterial :: computeDeviatoricStressVector(FloatArray &answer, Gaus
             eps.at(6) * viscosity
         };
     }  else {
-        OOFEM_ERROR("unsuported material mode");
+        OOFEM_ERROR("unsupported material mode");
     }
 
 

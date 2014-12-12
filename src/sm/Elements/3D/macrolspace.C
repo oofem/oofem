@@ -155,10 +155,6 @@ void MacroLSpace :: computeStiffnessMatrix(FloatMatrix &answer, MatResponseMode 
 //assign values to DOF on the boundary according to definition on macrolspace and actual displacement stage
 void MacroLSpace :: changeMicroBoundaryConditions(TimeStep *tStep)
 {
-    //Domain *microDomain = problemMicro->giveDomain(1);
-    //EngngModel *microEngngModel = microDomain->giveEngngModel();
-    //Domain *domain = this->giveDomain();
-    DofManager *DofMan;
     GeneralBoundaryCondition *GeneralBoundaryCond;
     Function *timeFunct;
     DynamicInputRecord ir_func, ir_bc;

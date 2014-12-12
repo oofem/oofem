@@ -588,7 +588,8 @@ CBS :: checkConsistency()
             } else if ( bc->giveBCValType() == ForceLoadBVT ) {
                 bc->scale( 1. / this->giveVariableScale(VST_Force) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type");
+                OOFEM_WARNING("unknown bc/ic type");
+                return 0;
             }
         }
 
@@ -598,7 +599,8 @@ CBS :: checkConsistency()
             } else if ( ic->giveICValType() == PressureBVT ) {
                 ic->scale( VM_Total, 1. / this->giveVariableScale(VST_Pressure) );
             } else {
-                OOFEM_ERROR("unknown bc/ic type");
+                OOFEM_WARNING("unknown bc/ic type");
+                return 0;
             }
         }
     }
