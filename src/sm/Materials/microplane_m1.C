@@ -41,7 +41,7 @@ namespace oofem {
 REGISTER_Material(M1Material);
 
 M1Material :: M1Material(int n, Domain *d) : StructuralMaterial(n, d)
-{ E = 0.; nu = 0.; EN = 0.; s0 = 0.; }
+{ E = 0.; nu = 0.; EN = 0.; s0 = 0.; HN = 0.; }
 
 void
 M1Material :: giveRealStressVector_PlaneStress(FloatArray &answer,
@@ -50,11 +50,13 @@ M1Material :: giveRealStressVector_PlaneStress(FloatArray &answer,
                                                TimeStep *tStep)
 {
     int i, imp;
-    FloatArray sigmaN, deps;
-    double depsN;
+    FloatArray sigmaN, deps, sigmaNyield;
+    double depsN, epsN;
 
     answer.resize(3);
     answer.zero();
+    sigmaNyield.resize(nmp);
+    sigmaNyield.zero();
 
     M1MaterialStatus *status = static_cast< M1MaterialStatus * >( this->giveStatus(gp) );
     this->initTempStatus(gp);
@@ -67,9 +69,11 @@ M1Material :: giveRealStressVector_PlaneStress(FloatArray &answer,
 
     for ( imp = 1; imp <= nmp; imp++ ) {
         depsN = N.at(imp, 1) * deps.at(1) + N.at(imp, 2) * deps.at(2) + N.at(imp, 3) * deps.at(3);
+        epsN = N.at(imp, 1) * totalStrain.at(1) + N.at(imp, 2) * totalStrain.at(2) + N.at(imp, 3) * totalStrain.at(3);
         sigmaN.at(imp) += EN * depsN;
-        if ( sigmaN.at(imp) > s0 ) {
-            sigmaN.at(imp) = s0;
+        sigmaNyield.at(imp) = EN * ( s0 + HN * epsN ) / ( EN + HN ); // current microplane yield stress
+        if ( sigmaN.at(imp) > sigmaNyield.at(imp) ) {
+            sigmaN.at(imp) = sigmaNyield.at(imp);
         }
         for ( i = 1; i <= 3; i++ ) {
             answer.at(i) += N.at(imp, i) * sigmaN.at(imp) * mw.at(imp);
@@ -79,6 +83,7 @@ M1Material :: giveRealStressVector_PlaneStress(FloatArray &answer,
     // update status
     status->letTempStrainVectorBe(totalStrain);
     status->letTempNormalMplaneStressesBe(sigmaN);
+    status->letNormalMplaneYieldStressesBe(sigmaNyield);
     status->letTempStressVectorBe(answer);
 }
 
@@ -92,7 +97,6 @@ M1Material :: giveElasticPlaneStressStiffMtrx(FloatMatrix &answer)
     answer.at(3, 3) = E / ( 2. * ( 1. + nu ) );
 }
 
-#define ALMOST_ONE 0.999999
 void
 M1Material :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode rMode, GaussPoint *gp, TimeStep *tStep)
 {
@@ -103,8 +107,7 @@ M1Material :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode rMod
     }
 
     M1MaterialStatus *status = static_cast< M1MaterialStatus * >( this->giveStatus(gp) );
-    FloatArray sigmaN;
-    sigmaN = status->giveTempNormalMplaneStresses();
+    FloatArray sigmaN = status->giveTempNormalMplaneStresses();
     if ( sigmaN.giveSize() != nmp ) {
         sigmaN = status->giveNormalMplaneStresses();
         if ( sigmaN.giveSize() != nmp ) {
@@ -112,18 +115,21 @@ M1Material :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode rMod
             return;
         }
     }
+    FloatArray sigmaNyield = status->giveNormalMplaneYieldStresses();
 
-    double D11, D12, D13, D22, D23;
+    double D11, D12, D13, D22, D23, aux;
     D11 = D12 = D13 = D22 = D23 = 0.;
     for ( int imp = 1; imp <= nmp; imp++ ) {
-        if ( sigmaN.at(imp) < s0 * ALMOST_ONE ) { // otherwise the plane is yielding and the stiffness contribution is zero
-            double aux = EN * mw.at(imp);
-            D11 += aux * NN.at(imp, 1);
-            D12 += aux * NN.at(imp, 3);
-            D13 += aux * NN.at(imp, 2);
-            D22 += aux * NN.at(imp, 5);
-            D23 += aux * NN.at(imp, 4);
+        if ( sigmaN.at(imp) < sigmaNyield.at(imp) ) { // otherwise the plane is yielding
+            aux = mw.at(imp) * EN;
+        } else {
+            aux = mw.at(imp) * EN * HN / ( EN + HN );
         }
+        D11 += aux * NN.at(imp, 1);
+        D12 += aux * NN.at(imp, 3);
+        D13 += aux * NN.at(imp, 2);
+        D22 += aux * NN.at(imp, 5);
+        D23 += aux * NN.at(imp, 4);
     }
     answer.at(1, 1) = D11;
     answer.at(1, 2) = answer.at(2, 1) = answer.at(3, 3) = D12;
@@ -144,6 +150,8 @@ M1Material :: initializeFrom(InputRecord *ir)
     EN = 1.5 * E;
     nu = 1. / 3.;
     IR_GIVE_FIELD(ir, s0, _IFT_M1Material_s0);
+    HN = 0.;
+    IR_GIVE_OPTIONAL_FIELD(ir, HN, _IFT_M1Material_hn);
 
     // specify microplanes
     IR_GIVE_FIELD(ir, nmp, _IFT_M1Material_nmp);
@@ -225,6 +233,18 @@ void
 M1MaterialStatus :: initTempStatus()
 {
     StructuralMaterialStatus :: initTempStatus();
+}
+
+void
+M1MaterialStatus :: printOutputAt(FILE *file, TimeStep *tStep)
+{
+    StructuralMaterialStatus :: printOutputAt(file, tStep);
+    fprintf(file, "status { sigN ");
+    int nm = sigN.giveSize();
+    for ( int imp = 1; imp <= nm; imp++ ) {
+        fprintf( file, " %f ", sigN.at(imp) );
+    }
+    fprintf(file, "}\n");
 }
 
 void
