@@ -201,6 +201,7 @@ protected:
 
     /// Lock displacements in one node if periodic
     Node *mpDisplacementLock;
+    int mLockNodeInd;
     double mDispLockScaling;
 
     /// Elements for the independent traction discretization

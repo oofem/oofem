@@ -65,6 +65,7 @@ PrescribedGradientBCWeak :: PrescribedGradientBCWeak(int n, Domain *d) :
     mTangDistPadding(0.0),
     mTracDofScaling(1.0e0),
     mpDisplacementLock(NULL),
+    mLockNodeInd(0),
     mDispLockScaling(1.0)
 {
     // Compute bounding box of the domain
@@ -303,10 +304,10 @@ void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tS
             mpDisplacementLock->giveCompleteLocationArray(dispLockRows, s);
 
             FloatArray fe_dispLock;
-            int lockNodeInd = 1;
 
+            int lockNodePlaceInArray = domain->giveDofManPlaceInArray(mLockNodeInd);
             FloatArray nodeUnknowns;
-            domain->giveDofManager(lockNodeInd)->giveCompleteUnknownVector(nodeUnknowns, mode, tStep);
+            domain->giveDofManager(lockNodePlaceInArray)->giveCompleteUnknownVector(nodeUnknowns, mode, tStep);
 
             for ( int i = 0; i < domain->giveNumberOfSpatialDimensions(); i++ ) {
                 fe_dispLock.push_back(nodeUnknowns [ i ]);
@@ -355,8 +356,8 @@ void PrescribedGradientBCWeak :: assemble(SparseMtrx *answer, TimeStep *tStep,
             KeDispLock.beUnitMatrix();
             KeDispLock.times(mDispLockScaling);
 
-            int lockNodeInd = 1;
-            DofManager *node = domain->giveDofManager(lockNodeInd);
+            int placeInArray = domain->giveDofManPlaceInArray(mLockNodeInd);
+            DofManager *node = domain->giveDofManager(placeInArray);
 
             IntArray lockRows, lockCols, nodeRows, nodeCols;
             mpDisplacementLock->giveCompleteLocationArray(lockRows, r_s);
@@ -1011,6 +1012,7 @@ void PrescribedGradientBCWeak :: createTractionMesh(bool iEnforceCornerPeriodici
 
         int numNodes = domain->giveNumberOfDofManagers();
         mpDisplacementLock = new Node(numNodes + 1, domain);
+        mLockNodeInd = domain->giveElement(1)->giveNode(1)->giveGlobalNumber();
 
 
         int nsd = domain->giveNumberOfSpatialDimensions();
@@ -1280,19 +1282,22 @@ void PrescribedGradientBCWeak :: assembleTangentGPContribution(FloatMatrix &oTan
     FloatMatrix NdispMat_minus;
 
     if ( xfemElInt_minus != NULL && domain->hasXfemManager() ) {
-        //printf("Computing enriched N-matrix.\n");
+        // If the element is an XFEM element, we use the XfemElementInterface to compute the N-matrix
+        // of the enriched element.
         xfemElInt_minus->XfemElementInterface_createEnrNmatrixAt(NdispMat_minus, dispElLocCoord_minus, * dispEl_minus, false);
     } else   {
-        if(!domain->hasXfemManager()) {
-            printf("!domain->hasXfemManager()\n");
-        }
+        // Otherwise, use the usual N-matrix.
+        const int numNodes = dispEl_minus->giveNumberOfDofManagers();
+        FloatArray N(numNodes);
 
-        if(xfemElInt_minus == NULL) {
-            printf("xfemElInt_minus == NULL\n");
-            printf("dispEl_minus->giveClassName(): %s\n", dispEl_minus->giveClassName() );
-        }
+        const int dim = dispEl_minus->giveSpatialDimension();
 
-        OOFEM_ERROR("Unable to compute N-matrix.")
+        NdispMat_minus.resize(dim, dim * numNodes);
+        NdispMat_minus.zero();
+        dispEl_minus->giveInterpolation()->evalN( N, dispElLocCoord_minus, FEIElementGeometryWrapper(dispEl_minus) );
+
+        NdispMat_minus.beNMatrixOf(N, dim);
+
     }
 
     FloatMatrix contrib;
