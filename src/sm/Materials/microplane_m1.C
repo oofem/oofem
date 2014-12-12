@@ -71,10 +71,14 @@ M1Material :: giveRealStressVector_PlaneStress(FloatArray &answer,
         depsN = N.at(imp, 1) * deps.at(1) + N.at(imp, 2) * deps.at(2) + N.at(imp, 3) * deps.at(3);
         epsN = N.at(imp, 1) * totalStrain.at(1) + N.at(imp, 2) * totalStrain.at(2) + N.at(imp, 3) * totalStrain.at(3);
         sigmaN.at(imp) += EN * depsN;
-        sigmaNyield.at(imp) = EN * ( s0 + HN * epsN ) / ( EN + HN ); // current microplane yield stress
-        if ( sigmaN.at(imp) > sigmaNyield.at(imp) ) {
-            sigmaN.at(imp) = sigmaNyield.at(imp);
+        double sy = EN * ( s0 + HN * epsN ) / ( EN + HN ); // current microplane yield stress
+        if ( sy < 0. ) {
+            sy = 0.;
         }
+        if ( sigmaN.at(imp) > sy ) {
+            sigmaN.at(imp) = sy;
+        }
+        sigmaNyield.at(imp) = sy;
         for ( i = 1; i <= 3; i++ ) {
             answer.at(i) += N.at(imp, i) * sigmaN.at(imp) * mw.at(imp);
         }
@@ -122,8 +126,10 @@ M1Material :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode rMod
     for ( int imp = 1; imp <= nmp; imp++ ) {
         if ( sigmaN.at(imp) < sigmaNyield.at(imp) ) { // otherwise the plane is yielding
             aux = mw.at(imp) * EN;
-        } else {
+        } else if ( sigmaNyield.at(imp) > 0. ) {
             aux = mw.at(imp) * EN * HN / ( EN + HN );
+        } else {
+            aux = 0.;
         }
         D11 += aux * NN.at(imp, 1);
         D12 += aux * NN.at(imp, 3);
