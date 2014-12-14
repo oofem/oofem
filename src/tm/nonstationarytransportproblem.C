@@ -399,9 +399,9 @@ NonStationaryTransportProblem :: updateInternalState(TimeStep *tStep)
     for ( auto &domain: domainList ) {
         if ( requiresUnknownsDictionaryUpdate() ) {
             //update temperature vector
-            UnknownsField->update( VM_Total, tStep, * ( this->UnknownsField->giveSolutionVector(tStep) ) );
+            UnknownsField->update( VM_Total, tStep, * ( this->UnknownsField->giveSolutionVector(tStep) ), EModelDefaultEquationNumbering() );
             //update Rhs vector
-            UnknownsField->update(VM_RhsTotal, tStep, bcRhs);
+            UnknownsField->update(VM_RhsTotal, tStep, bcRhs, EModelDefaultEquationNumbering());
         }
 
         if ( internalVarUpdateStamp != tStep->giveSolutionStateCounter() ) {

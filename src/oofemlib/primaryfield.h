@@ -150,15 +150,18 @@ public:
      * Applies initial condition to all DOFs.
      * @param ic Initial condition for DOFs
      */
-    virtual void applyInitialCondition(InitialCondition &ic);
-    /// Apply b.c.s from the old method
+    void applyInitialCondition(InitialCondition &ic);
+    /**
+     * Applies all boundary conditions to all prescribed DOFs.
+     * @param tStep Current time step.
+     */
     virtual void applyBoundaryCondition(TimeStep *tStep);
     /**
      * Applies the boundary condition to all prescribed DOFs in given domain.
      * @param bc Boundary condition.
      * @param domain tStep Time step for when bc applies.
      */
-    virtual void applyBoundaryCondition(BoundaryCondition &bc, TimeStep *tStep);
+    void applyBoundaryCondition(BoundaryCondition &bc, TimeStep *tStep);
 
     /**
      * @param dof Pointer to DOF.
@@ -223,7 +226,7 @@ public:
      * @param mode Mode of the unknown (increment, total value etc.)
      * @param tStep Time step unknowns belong to.
      */
-    virtual void update(ValueModeType mode, TimeStep *tStep, FloatArray &vectorToStore);
+    virtual void update(ValueModeType mode, TimeStep *tStep, const FloatArray &vectorToStore, const UnknownNumberingScheme &s);
 
     /**
      * Brings up a new solution vector for given time step.
