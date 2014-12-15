@@ -56,8 +56,8 @@ class SparseMtrx;
 class StaticStructural : public StructuralEngngModel, public XfemSolverInterface
 {
 protected:
+    FloatArray solution;
     FloatArray internalForces;
-    FloatArray *solution;
     FloatArray eNorm;
     SparseMtrx *stiffnessMatrix;
 
@@ -99,6 +99,8 @@ public:
     virtual fMode giveFormulation() { return TL; }
 
     void setSolution(TimeStep *tStep, const FloatArray &vectorToStore);
+
+    virtual bool requiresEquationRenumbering(TimeStep *tStep);
 
     // identification
     virtual const char *giveInputRecordName() const { return _IFT_StaticStructural_Name; }
