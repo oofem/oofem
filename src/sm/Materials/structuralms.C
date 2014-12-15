@@ -51,12 +51,14 @@ StructuralMaterialStatus :: StructuralMaterialStatus(int n, Domain *d, GaussPoin
     tempStressVector = stressVector;
     tempStrainVector = strainVector;
 
+    /// Hack to prevent crashing when there are only "loose" gausspoints
+    if ( gp->giveIntegrationRule() == NULL ) {
+        return;
+    }
     if ( NLStructuralElement * el = dynamic_cast< NLStructuralElement * >( gp->giveElement() ) ) {
         if ( el->giveGeometryMode() == 1  ) { // if large def, initialize F and P
             PVector.resize(9);
-            PVector.zero();
             FVector.resize(9);
-            FVector.zero();
             FVector.at(1) = FVector.at(2) = FVector.at(3) = 1.;
         }
         tempPVector = PVector;
@@ -72,23 +74,20 @@ void StructuralMaterialStatus :: printOutputAt(FILE *File, TimeStep *tStep)
 // Prints the strains and stresses on the data file.
 {
     FloatArray helpVec;
-    int n;
 
     MaterialStatus :: printOutputAt(File, tStep);
 
     fprintf(File, "  strains ");
     StructuralMaterial :: giveFullSymVectorForm( helpVec, strainVector, gp->giveMaterialMode() );
-    n = helpVec.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( File, " % .4e", helpVec.at(i) );
+    for ( auto &var : helpVec ) {
+        fprintf( File, " % .4e", var );
     }
 
     fprintf(File, "\n              stresses");
     StructuralMaterial :: giveFullSymVectorForm( helpVec, stressVector, gp->giveMaterialMode() );
 
-    n = helpVec.giveSize();
-    for ( int i = 1; i <= n; i++ ) {
-        fprintf( File, " % .4e", helpVec.at(i) );
+    for ( auto &var : helpVec ) {
+        fprintf( File, " % .4e", var );
     }
     fprintf(File, "\n");
 }
