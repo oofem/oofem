@@ -120,8 +120,8 @@ NodalAveragingRecoveryModel :: recoverValues(Set elementSet, InternalStateType t
                 continue;
             }
             int eq = ( regionNodalNumbers.at(node) - 1 ) * regionValSize;
-            for ( int i = 1; i <= regionValSize; i++ ) {
-                lhs.at(eq + i) += val.at(i);
+            for ( int j = 1; j <= regionValSize; j++ ) {
+                lhs.at(eq + j) += val.at(j);
             }
 
             regionDofMansConnectivity.at( regionNodalNumbers.at(node) )++;

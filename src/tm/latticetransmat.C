@@ -65,7 +65,7 @@ LatticeTransportMaterial :: initializeFrom(InputRecord *ir)
     //Options are 0 = constant conductivity and capacity and 1 = van Genuchten conductivity and capactity
     conType = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, this->conType, _IFT_LatticeTransportMaterial_contype);
-    this->capacity = 0.;
+    this->capacity = 0;
     if(conType == 0){
       IR_GIVE_OPTIONAL_FIELD(ir, this->capacity, _IFT_LatticeTransportMaterial_c);  
     }

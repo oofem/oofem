@@ -917,8 +917,6 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
     ParticlePoint *origin;
     std :: list< node >nodes;
     std :: list< ParticlePoint * >points;
-    std :: list< ParticlePoint * > :: iterator pit;
-    ParticleGrid< ParticlePoint > :: iterator it;
     FloatArray x0, x1, grid_coord;
 
     // Nodal merge limit (for very close points, 1/10 of the grid step).
@@ -958,7 +956,7 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
 
         this->getBoundingBox(x0, x1, cit->foot, 2 * this->tubeWidth);
         this->grid->getPointsWithin(points, x0, x1);
-        for ( pit = points.begin(); pit != points.end(); pit++ ) {
+        for ( auto pit = points.begin(); pit != points.end(); pit++ ) {
             if ( ( cit->foot.distance_square( ( * pit )->foot ) <= merge2 ) && ( * pit )->node == 0 ) {
                 ( * pit )->node = cit->node;
                 ( * pit )->foot = cit->foot;
@@ -981,7 +979,7 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
 
             this->getBoundingBox(x0, x1, origin->foot, 2 * this->tubeWidth);
             this->grid->getPointsWithin(points, x0, x1);
-            for ( pit = points.begin(); pit != points.end(); pit++ ) {
+            for ( auto pit = points.begin(); pit != points.end(); pit++ ) {
                 if ( ( * pit )->node == 0 ) {
                     /*
                      * temp.beDifferenceOf((*pit)->foot, origin->foot);
@@ -1031,7 +1029,7 @@ void ParticleTopologyDescription :: generatePSLG(Triangle_PSLG &pslg)
                 points.push_front(& * cit);
             }
 
-            for ( pit = points.begin(); pit != points.end(); ++pit ) {
+            for ( auto pit = points.begin(); pit != points.end(); ++pit ) {
                 ParticlePoint *p = * pit;
 
                 if ( p->id != origin->id || origin->node == p->node ) {

@@ -910,6 +910,7 @@ AnisotropicDamageMaterial :: obtainAlpha2(FloatMatrix tempDamageTensor, double d
     FloatMatrix deltaD, positiveStrainTensorSquared, resultingDamageTensor, eVecs;
     FloatArray eVals;
     int cont;
+	maxDamage = 0.0;
     cont = 1;
     alpha_a = 0;
     alpha_b = 1;
@@ -1121,7 +1122,7 @@ AnisotropicDamageMaterial :: computeCorrectionFactor(FloatMatrix tempDamageTenso
     int tempFlag = status->giveFlag();
     double tempStoredFactor = status->giveStoredFactor();
     double Dc = 1.00, trD = 0;
-    double factor;
+    double factor = 0.0;
     trD = tempDamageTensor.at(1, 1) + tempDamageTensor.at(2, 2) + tempDamageTensor.at(3, 3);
     // If flag = 0, the trace of the damage tensor has never been greater than Dc under compression before
     if ( tempFlag == 0 ) {
@@ -1198,7 +1199,6 @@ AnisotropicDamageMaterial :: give3dMaterialStiffnessMatrix(FloatMatrix &answer,
 void AnisotropicDamageMaterial :: givePlaneStressStiffMtrx(FloatMatrix &answer, MatResponseMode mode,
                                                            GaussPoint *gp, TimeStep *atTime)
 {
-    FloatArray totalStrain;
     AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     if ( mode == ElasticStiffness ) {
         this->giveLinearElasticMaterial()->giveStiffnessMatrix(answer, mode, gp, atTime);
@@ -1458,8 +1458,8 @@ AnisotropicDamageMaterial :: computeDamageTensor(FloatMatrix &answer, GaussPoint
     AnisotropicDamageMaterialStatus *status = static_cast< AnisotropicDamageMaterialStatus * >( this->giveStatus(gp) );
     double Dc = 1.00;
     double Kappa;
-    FloatMatrix de, strainTensor, damageTensor, tempDamageTensor, eVecs;
-    FloatArray strainVector, eVals;
+    FloatMatrix de, damageTensor, tempDamageTensor;
+    FloatArray strainVector;
     //this->computeEquivalentStrain(equivStrain, reducedTotalStrainVector, gp, atTime);
     FloatMatrix Dn = status->giveDamage();
     Kappa = this->computeKappa(Dn);

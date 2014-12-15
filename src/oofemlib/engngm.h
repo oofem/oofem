@@ -393,7 +393,7 @@ public:
      * Sets the problem to run in parallel (or not).
      * @param parallelFlag Determines parallel mode.
      */
-    void setParallelMode(bool parallelFlag);
+    void setParallelMode(bool newParallelFlag);
     /// Returns domain mode.
     problemMode giveProblemMode() { return pMode; }
     /**

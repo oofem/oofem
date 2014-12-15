@@ -150,8 +150,8 @@ public:
 
     virtual void setBcId(int bcId) { this->bc = bcId; }
     virtual void setIcId(int icId) { this->ic = icId; }
-    virtual void setEquationNumber(int equationNumber) { this->equationNumber = equationNumber; }
-    virtual void setUnknowns(Dictionary *unknowns) { this->unknowns = unknowns; }
+    virtual void setEquationNumber(int newEquationNumber) { this->equationNumber = newEquationNumber; }
+    virtual void setUnknowns(Dictionary *newUnknowns) { this->unknowns = newUnknowns; }
     virtual Dictionary *giveUnknowns() { return this->unknowns; }
     virtual int giveEqn() { return equationNumber; }
 

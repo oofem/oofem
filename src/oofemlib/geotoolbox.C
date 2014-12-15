@@ -289,14 +289,11 @@ Graph :: testIfCoincident(node *p1, node *p2, node *q1, node *q2, double *alpha1
      * 220 ... common part is only p2=q2, lines are parallel
      */
 
-    double par, d1, d2;
-    double ptx, pty, pnx, pny, plength, qlength;
-    double qt1, qt2;
 
     //par = ((p2->x - p1->x)*(q2->y - q1->y) -
     //       (p2->y - p1->y)*(q2->x - q1->x));
 
-    par = ( ( p1->x - p2->x ) * ( q2->y - q1->y ) -
+    double par = ( ( p1->x - p2->x ) * ( q2->y - q1->y ) -
            ( p1->y - p2->y ) * ( q2->x - q1->x ) );
 
 #ifdef GRAPH_DEBUG_PRINT
@@ -306,14 +303,14 @@ Graph :: testIfCoincident(node *p1, node *p2, node *q1, node *q2, double *alpha1
     //if (!par) return 0;                               /* parallel lines */
     if ( fabs(par) < GT_TEPS ) { /* parallel lines */
         /* test if identical part exist */
-        plength = dist(p1->x, p1->y, p2->x, p2->y);
-        qlength = dist(q1->x, q1->y, q2->x, q2->y);
-        ptx = ( p2->x - p1->x ) / plength;
-        pty = ( p2->y - p1->y ) / plength;
-        pnx = -pty;
-        pny =  ptx;
-        d1 = ( pnx * ( q1->x - p1->x ) + pny * ( q1->y - p1->y ) );
-        d2 = ( pnx * ( q2->x - p1->x ) + pny * ( q2->y - p1->y ) );
+        double plength = dist(p1->x, p1->y, p2->x, p2->y);
+        double qlength = dist(q1->x, q1->y, q2->x, q2->y);
+        double ptx = ( p2->x - p1->x ) / plength;
+        double pty = ( p2->y - p1->y ) / plength;
+        double pnx = -pty;
+        double pny =  ptx;
+        double d1 = ( pnx * ( q1->x - p1->x ) + pny * ( q1->y - p1->y ) );
+        double d2 = ( pnx * ( q2->x - p1->x ) + pny * ( q2->y - p1->y ) );
 #ifdef GRAPH_DEBUG_PRINT
         fprintf(stderr, "dist (q-line, p-line)=%e\n", d1);
 #endif
@@ -321,8 +318,8 @@ Graph :: testIfCoincident(node *p1, node *p2, node *q1, node *q2, double *alpha1
             return 0;                                                                                                              // lines are parallel with nonzero distance
         }
 
-        qt1 = ( ptx * ( q1->x - p1->x ) + pty * ( q1->y - p1->y ) ) / plength;
-        qt2 = ( ptx * ( q2->x - p1->x ) + pty * ( q2->y - p1->y ) ) / plength;
+        double qt1 = ( ptx * ( q1->x - p1->x ) + pty * ( q1->y - p1->y ) ) / plength;
+        double qt2 = ( ptx * ( q2->x - p1->x ) + pty * ( q2->y - p1->y ) ) / plength;
 #ifdef GRAPH_DEBUG_PRINT
         fprintf(stderr, "param of q1 on pline t1=%e\n", qt1);
         fprintf(stderr, "param of q2 on pline t2=%e\n", qt2);

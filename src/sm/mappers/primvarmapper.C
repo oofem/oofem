@@ -241,7 +241,7 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                     FloatArray oldDisp;
                     oldDisp.beProductOf(NOld, nodeDispOld);
 
-                    FloatArray temp, du;
+                    FloatArray temp, duu;
 
 #ifdef DEBUG
                     if(!oldDisp.isFinite()) {
@@ -253,8 +253,8 @@ void LSPrimaryVariableMapper :: mapPrimaryVariables(FloatArray &oU, Domain &iOld
                     }
 #endif
 
-                    du.beDifferenceOf(oldDisp, newDisp);
-                    temp.beTProductOf(NNew, du);
+                    duu.beDifferenceOf(oldDisp, newDisp);
+                    temp.beTProductOf(NNew, duu);
                     double dV = elNew->computeVolumeAround(gp);
                     elRes.add(dV, temp);
                 }
