@@ -32,8 +32,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#ifndef fluidmaterialevaluator_h
-#define fluidmaterialevaluator_h
+#ifndef structuralmaterialevaluator_h
+#define structuralmaterialevaluator_h
 
 #include "engngm.h"
 
@@ -91,4 +91,4 @@ public:
 };
 } // end namespace oofem
 
-#endif // fluidmaterialevaluator_h
+#endif // structuralmaterialevaluator_h
