@@ -145,13 +145,6 @@ public:
     virtual void give1dStressStiffMtrx(FloatMatrix &answer,
                                        MatResponseMode, GaussPoint *gp,
                                        TimeStep *tStep);
-    /**
-     * Creates new copy of associated status (StructuralMaterialStatus class )
-     * and inserts it into given integration point.
-     * @param gp Integration point where newly created status will be stored.
-     * @return reference to new status.
-     */
-    virtual MaterialStatus *CreateStatus(GaussPoint *gp) const;
 
     /**
      * Computes bulk modulus from given Young's modulus and Poisson's ratio.

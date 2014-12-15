@@ -232,17 +232,12 @@ IsotropicLinearElasticMaterial :: giveThermalDilatationVector(FloatArray &answer
 // gp (element) local axes
 //
 {
+    double alpha = this->give(tAlpha, gp);
     answer.resize(6);
     answer.zero();
-    answer.at(1) = this->give(tAlpha, gp);
-    answer.at(2) = this->give(tAlpha, gp);
-    answer.at(3) = this->give(tAlpha, gp);
+    answer.at(1) = alpha;
+    answer.at(2) = alpha;
+    answer.at(3) = alpha;
 }
 
-
-MaterialStatus *
-IsotropicLinearElasticMaterial :: CreateStatus(GaussPoint *gp) const
-{
-    return new StructuralMaterialStatus(1, this->giveDomain(), gp);
-}
 } // end namespace oofem
