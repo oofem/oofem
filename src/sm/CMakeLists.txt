@@ -122,6 +122,7 @@ set (sm_emodel
     EngineeringModels/nldeidynamic.C
     EngineeringModels/incrementallinearstatic.C
     EngineeringModels/freewarping.C 
+    EngineeringModels/structuralmaterialevaluator.C
     )
 
 set (sm_loads
