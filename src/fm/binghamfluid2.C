@@ -534,7 +534,7 @@ BinghamFluidMaterial2 :: computeDeviatoricStress(FloatArray &answer, const Float
             deps.at(6) * _nu
         };
     } else {
-        OOFEM_ERROR("unsuported material mode");
+        OOFEM_ERROR("unsupported material mode");
     }
 }
 

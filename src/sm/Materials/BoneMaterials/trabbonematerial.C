@@ -342,19 +342,19 @@ TrabBoneMaterialStatus :: giveMatConstC()
     return matConstC;
 }
 
-FloatArray
+const FloatArray &
 TrabBoneMaterialStatus :: givePlasStrainVector()
 {
     return epsp;
 }
 
-FloatArray
+const FloatArray &
 TrabBoneMaterialStatus :: giveTempPlasStrainVector()
 {
     return tempEpsp;
 }
 
-FloatArray
+const FloatArray &
 TrabBoneMaterialStatus :: giveTempIncPlasStrainVector()
 {
     return tempDepsp;

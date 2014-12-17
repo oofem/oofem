@@ -130,7 +130,8 @@ TrPlaneStress2dXFEM :: giveDofManDofIDMask(int inode, IntArray &answer) const
         DofManager *dMan = giveDofManager(inode);
         XfemManager *xMan = giveDomain()->giveXfemManager();
 
-        const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices( dMan->giveGlobalNumber() );
+        int placeInArray = domain->giveDofManPlaceInArray(dMan->giveGlobalNumber());
+        const std::vector<int> &nodeEiIndices = xMan->giveNodeEnrichmentItemIndices( placeInArray );
         for ( size_t i = 0; i < nodeEiIndices.size(); i++ ) {
             EnrichmentItem *ei = xMan->giveEnrichmentItem(nodeEiIndices[i]);
             if ( ei->isDofManEnriched(* dMan) ) {

@@ -201,6 +201,12 @@ private:
     std::unordered_map< int, int > mElementPlaceInArray;
 
     /**
+     * Map from a dofmans's global number to its place
+     * in the dofman array.
+     */
+    std::unordered_map< int, int > mDofManPlaceInArray;
+
+    /**
      * Map from material number to elements that have the
      * given material number. Added by ES 140718.
      */
@@ -281,6 +287,12 @@ public:
      * calling giveElement. Returns -1 if not found.
      */
     int giveElementPlaceInArray(int iGlobalElNum) const;
+    /**
+     * Returns the array index of the dofman with global
+     * number iGlobalDofManNum, so that it can be fetched by
+     * calling giveDofManager. Returns -1 if not found.
+     */
+    int giveDofManPlaceInArray(int iGlobalDofManNum) const;
     /**
      * Returns array with indices of elements that have a
      * given material number.
@@ -613,7 +625,7 @@ public:
      * @param smoother New smoother for receiver.
      * @param destroyOld Determines if any preexisting smoother should be deleted.
      */
-    void setSmoother(NodalRecoveryModel *smoother, bool destroyOld = true);
+    void setSmoother(NodalRecoveryModel *newSmoother, bool destroyOld = true);
 
 #ifdef __PARALLEL_MODE
     /**@name Domain transaction support methods.
@@ -685,6 +697,12 @@ private:
      * its place the element array.
      */
     void BuildElementPlaceInArrayMap();
+
+    /**
+     * Construct map from a dofman's global number to
+     * its place the dofman array.
+     */
+    void BuildDofManPlaceInArrayMap();
 
     /**
      * Construct map from a material number to

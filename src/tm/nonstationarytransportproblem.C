@@ -399,9 +399,9 @@ NonStationaryTransportProblem :: updateInternalState(TimeStep *tStep)
     for ( auto &domain: domainList ) {
         if ( requiresUnknownsDictionaryUpdate() ) {
             //update temperature vector
-            UnknownsField->update( VM_Total, tStep, * ( this->UnknownsField->giveSolutionVector(tStep) ) );
+            UnknownsField->update( VM_Total, tStep, * ( this->UnknownsField->giveSolutionVector(tStep) ), EModelDefaultEquationNumbering() );
             //update Rhs vector
-            UnknownsField->update(VM_RhsTotal, tStep, bcRhs);
+            UnknownsField->update(VM_RhsTotal, tStep, bcRhs, EModelDefaultEquationNumbering());
         }
 
         if ( internalVarUpdateStamp != tStep->giveSolutionStateCounter() ) {
@@ -642,15 +642,13 @@ NonStationaryTransportProblem :: applyIC(TimeStep *stepWhenIcApply)
 #ifdef VERBOSE
     OOFEM_LOG_INFO("Applying initial conditions\n");
 #endif
-    int nman  = domain->giveNumberOfDofManagers();
 
     UnknownsField->advanceSolution(stepWhenIcApply);
     solutionVector = UnknownsField->giveSolutionVector(stepWhenIcApply);
     solutionVector->resize(neq);
     solutionVector->zero();
 
-    for ( int j = 1; j <= nman; j++ ) {
-        DofManager *node = domain->giveDofManager(j);
+    for ( auto &node : domain->giveDofManagers() ) {
 
         for ( Dof *dof: *node ) {
             // ask for initial values obtained from

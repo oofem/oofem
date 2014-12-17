@@ -312,18 +312,17 @@ int IntArray :: findSorted(int _val)   const
 }
 
 
-int IntArray :: insertSorted(int val, int allocChunk)
+void IntArray :: insertSorted(int val, int allocChunk)
 {
     if ( allocChunk > 0 && values.size() + 1 >= values.capacity() ) {
         values.reserve(allocChunk + values.capacity());
     }
     auto low = std::lower_bound(values.begin(), values.end(), val);
     values.insert(low, val);
-    return (int)(low - values.begin() + 1); // return 1-based index
 }
 
 
-int IntArray :: insertSortedOnce(int val, int allocChunk)
+void IntArray :: insertSortedOnce(int val, int allocChunk)
 {
     if ( allocChunk > 0 && values.size() + 1 >= values.capacity() ) {
         values.reserve(allocChunk + values.capacity());
@@ -332,7 +331,6 @@ int IntArray :: insertSortedOnce(int val, int allocChunk)
     if ( low == values.end() || *low != val ) {
         values.insert(low, val);
     }
-    return (int)(low - values.begin() + 1); // return 1-based index
 }
 
 

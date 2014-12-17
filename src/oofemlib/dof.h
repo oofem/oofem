@@ -368,9 +368,9 @@ public:
      * Access dictionary value, if not present zero is returned.
      * @param tStep Time step.
      * @param mode Mode of value.
-     * @param dofValue Value of the dof.
+     * @return The requested value.
      */
-    virtual void giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode, double &dofValue) { }
+    virtual double giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode) { return 0; }
 
     /// Returns string for prepending output (used by error reporting macros).
     std :: string errorInfo(const char *func) const;

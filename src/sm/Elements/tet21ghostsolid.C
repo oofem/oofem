@@ -432,15 +432,15 @@ tet21ghostsolid :: giveInternalForcesVectorGivenSolution(FloatArray &answer, Tim
             auxstress.plusProduct(B, Stress, detJ * weight);
 
         } else {
-            FloatMatrix B, BH;
+            FloatMatrix Bmat, BH;
 
             this->computeBHmatrixAt(gp, BH);
-            this->computeBmatrixAt(gp, B);
+            this->computeBmatrixAt(gp, Bmat);
 
             FloatArray aTotal;
             aTotal.operator = (aVelocity + aIncGhostDisplacement*velocityCoeff); // Assume deltaT=1 gives that the increment is the velocity
 
-            epsf.beProductOf(B, aTotal);
+            epsf.beProductOf(Bmat, aTotal);
             pressure = Nlin.dotProduct(aPressure);
 
             // Momentum equation -----
@@ -730,9 +730,7 @@ tet21ghostsolid :: giveRowTransformationMatrix(FloatMatrix &Itransform, TimeStep
     }
 
     // Create identity matrix
-    for (int i=1; i<=64; i++) {
-        Itransform.at(i, i) = 1;
-    }
+    Itransform.beUnitMatrix();
 
     // Create tranformation matrix by switching rows
     for (int i=1; i<=row1List.giveSize(); i++) {

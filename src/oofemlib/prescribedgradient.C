@@ -128,7 +128,6 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
 //     [ ......... ] in 3D, voigt form [d_11, d_22, d_33, d_23, d_13, d_12]
 {
     Domain *domain = this->giveDomain();
-    int nNodes = domain->giveNumberOfDofManagers();
 
     int nsd = domain->giveNumberOfSpatialDimensions();
     int npeq = domain->giveEngngModel()->giveNumberOfDomainEquations( domain->giveNumber(), EModelDefaultPrescribedEquationNumbering() );
@@ -145,8 +144,7 @@ void PrescribedGradient :: updateCoefficientMatrix(FloatMatrix &C)
         zbar = cCoords.at(3);
     }
 
-    for ( int i = 1; i <= nNodes; i++ ) {
-        Node *n = domain->giveNode(i);
+    for ( auto &n : domain->giveDofManagers() ) {
         FloatArray *coords = n->giveCoordinates();
         Dof *d1 = n->giveDofWithID( this->dofs(0) );
         Dof *d2 = n->giveDofWithID( this->dofs(1) );

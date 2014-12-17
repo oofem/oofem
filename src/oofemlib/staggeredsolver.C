@@ -275,9 +275,9 @@ StaggeredSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
                 //
                 if ( this->lsFlag && ( nite > 0 ) ) { // Why not nite == 0 ?
                     // line search
-                    LineSearchNM :: LS_status status;
+                    LineSearchNM :: LS_status LSstatus;
                     double eta;               
-                    this->giveLineSearchSolver()->solve( &X[dG], &ddX[dG], &fIntList[dG], &fExtList[dG], R0, prescribedEqs, 1.0, eta, status, tStep);
+                    this->giveLineSearchSolver()->solve( &X[dG], &ddX[dG], &fIntList[dG], &fExtList[dG], R0, prescribedEqs, 1.0, eta, LSstatus, tStep);
                 } else if ( this->constrainedNRFlag && ( nite > this->constrainedNRminiter ) ) { 
                     if ( this->forceErrVec.computeSquaredNorm() > this->forceErrVecOld.computeSquaredNorm() ) {
                         printf("Constraining increment to be %e times full increment...\n", this->constrainedNRalpha);

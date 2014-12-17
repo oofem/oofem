@@ -969,9 +969,9 @@ NonLinearStatic :: unpackMigratingData(TimeStep *tStep)
                 int _eq;
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
-                    _dof->giveUnknownsDictionaryValue( tStep, VM_Total, totalDisplacement.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( tStep, VM_RhsInitial, initialLoadVector.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( tStep, VM_RhsIncremental, incrementalLoadVector.at(_eq) );
+                    totalDisplacement.at(_eq) = _dof->giveUnknownsDictionaryValue( tStep, VM_Total );
+                    initialLoadVector.at(_eq) = _dof->giveUnknownsDictionaryValue( tStep, VM_RhsInitial );
+                    incrementalLoadVector.at(_eq) = _dof->giveUnknownsDictionaryValue( tStep, VM_RhsIncremental );
 
  #if 0
                     // debug print
@@ -984,8 +984,8 @@ NonLinearStatic :: unpackMigratingData(TimeStep *tStep)
  #endif
                 } else if ( ( _eq = _dof->__givePrescribedEquationNumber() ) ) {
                     // pack values in prescribed solution vectors
-                    _dof->giveUnknownsDictionaryValue( tStep, VM_RhsInitial, initialLoadVectorOfPrescribed.at(_eq) );
-                    _dof->giveUnknownsDictionaryValue( tStep, VM_RhsIncremental, incrementalLoadVectorOfPrescribed.at(_eq) );
+                    initialLoadVectorOfPrescribed.at(_eq) = _dof->giveUnknownsDictionaryValue( tStep, VM_RhsInitial );
+                    incrementalLoadVectorOfPrescribed.at(_eq) = _dof->giveUnknownsDictionaryValue( tStep, VM_RhsIncremental );
 
  #if 0
                     // debug print

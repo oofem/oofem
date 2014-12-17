@@ -229,13 +229,13 @@ SUPG :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
         return;
     } else if ( cmpn == NonLinearLhs ) {
         this->lhs->zero();
-        if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
-            this->assemble( lhs, tStep, TangentStiffnessMatrix,
-                            EModelDefaultEquationNumbering(), d );
-        } else {
-            this->assemble( lhs, tStep, SecantStiffnessMatrix,
-                            EModelDefaultEquationNumbering(), d );
-        }
+        //if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
+        this->assemble( lhs, tStep, TangentStiffnessMatrix,
+                        EModelDefaultEquationNumbering(), d );
+       // } else {
+       //     this->assemble( lhs, tStep, SecantStiffnessMatrix,
+       //                     EModelDefaultEquationNumbering(), d );
+       // }
         return;
     } else {
         OOFEM_ERROR("Unknown component");

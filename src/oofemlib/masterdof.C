@@ -306,13 +306,10 @@ void MasterDof :: updateUnknownsDictionary(TimeStep *tStep, ValueModeType mode, 
     unknowns->at(hash) = dofValue;
 }
 
-void MasterDof :: giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode, double &dofValue)
+double MasterDof :: giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode)
 {
-    // Updates the receiver's unknown dictionary at end of step.
-    // to value dofValue.
-
     int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(mode, tStep);
-    dofValue = unknowns->at(hash);
+    return unknowns->at(hash);
 }
 
 void MasterDof :: printYourself()

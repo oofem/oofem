@@ -345,12 +345,8 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         TimeStep *stepWhenIcApply = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0,
                                                  -deltaT, deltaT, 0);
 
-        int nman = this->giveDomain(di)->giveNumberOfDofManagers();
-
         // Considering initial conditions.
-        for ( int j = 1; j <= nman; j++ ) {
-            DofManager *node = this->giveDomain(di)->giveDofManager(j);
-
+        for ( auto &node : this->giveDomain(di)->giveDofManagers() ) {
             for ( Dof *dof: *node ) {
                 // Ask for initial values obtained from
                 // bc (boundary conditions) and ic (initial conditions).
@@ -996,7 +992,7 @@ NonLinearDynamic :: unpackMigratingData(TimeStep *tStep)
             if ( _dof->isPrimaryDof() ) {
                 if ( ( _eq = _dof->__giveEquationNumber() ) ) {
                     // pack values in solution vectors
-                    _dof->giveUnknownsDictionaryValue( tStep, VM_Total, totalDisplacement.at(_eq) );
+                    totalDisplacement.at(_eq) = _dof->giveUnknownsDictionaryValue( tStep, VM_Total );
  #if 0
                     // debug print
                     if ( _dm->giveParallelMode() == DofManager_shared ) {

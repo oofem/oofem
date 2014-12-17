@@ -207,14 +207,13 @@ void EigenValueDynamic :: terminate(TimeStep *tStep)
 {
     Domain *domain = this->giveDomain(1);
     FILE *outputStream = this->giveOutputStream();
-    int i, j;
 
     // print loadcase header
     fprintf(outputStream, "\nOutput for time % .3e \n\n", 1.0);
     // print eigen values on output
     fprintf(outputStream, "\n\nEigen Values (Omega^2) are:\n-----------------\n");
 
-    for ( i = 1; i <= numberOfRequiredEigenValues; i++ ) {
+    for ( int i = 1; i <= numberOfRequiredEigenValues; i++ ) {
         fprintf( outputStream, "%15.8e ", eigVal.at(i) );
         if ( ( i % 5 ) == 0 ) {
             fprintf(outputStream, "\n");
@@ -223,9 +222,7 @@ void EigenValueDynamic :: terminate(TimeStep *tStep)
 
     fprintf(outputStream, "\n\n");
 
-    int nnodes = domain->giveNumberOfDofManagers();
-
-    for ( i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
+    for ( int i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
         fprintf(outputStream, "\nOutput for eigen value no.  % .3e \n", ( double ) i);
         fprintf( outputStream,
                 "Printing eigen vector no. %d, corresponding eigen value is %15.8e\n\n",
@@ -233,23 +230,19 @@ void EigenValueDynamic :: terminate(TimeStep *tStep)
         tStep->setTime( ( double ) i ); // we use time as intrinsic eigen value index
 
         if ( this->requiresUnknownsDictionaryUpdate() ) {
-            for ( j = 1; j <= nnodes; j++ ) {
-                this->updateDofUnknownsDictionary(domain->giveDofManager(j), tStep);
+            for ( auto &dman : domain->giveDofManagers() ) {
+                this->updateDofUnknownsDictionary(dman.get(), tStep);
             }
         }
 
 
-        for ( j = 1; j <= nnodes; j++ ) {
-            domain->giveDofManager(j)->updateYourself(tStep);
-            domain->giveDofManager(j)->printOutputAt(outputStream, tStep);
+        for ( auto &dman : domain->giveDofManagers() ) {
+            dman->updateYourself(tStep);
+            dman->printOutputAt(outputStream, tStep);
         }
     }
 
-#  ifdef VERBOSE
-    VERBOSE_PRINT0("Updated nodes & sides ", nnodes)
-#  endif
-
-    for ( i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
+    for ( int i = 1; i <=  numberOfRequiredEigenValues; i++ ) {
         // export using export manager
         tStep->setTime( ( double ) i ); // we use time as intrinsic eigen value index
         tStep->setNumber(i);

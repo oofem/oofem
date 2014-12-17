@@ -74,9 +74,9 @@ StokesFlowVelocityHomogenization :: giveAreaOfRVE()
     min = * this->giveDomain(1)->giveDofManager(1)->giveCoordinates();
     max = * this->giveDomain(1)->giveDofManager(1)->giveCoordinates();
 
-    for ( int i = 1; i <= this->giveDomain(1)->giveNumberOfDofManagers(); i++ ) {
-        min.beMinOf( min, * this->giveDomain(1)->giveDofManager(i)->giveCoordinates() );
-        max.beMaxOf( max, * this->giveDomain(1)->giveDofManager(i)->giveCoordinates() );
+    for ( auto &node : this->giveDomain(1)->giveDofManagers() ) {
+        min.beMinOf( min, * node->giveCoordinates() );
+        max.beMaxOf( max, * node->giveCoordinates() );
     }
 
     areaOfRVE = ( max.at(1) - min.at(1) ) * ( max.at(2) - min.at(2) );
@@ -106,7 +106,6 @@ void
 StokesFlowVelocityHomogenization :: solveYourselfAt(TimeStep *tStep)
 {
     handlePrescribedValues();
-    this->giveCurrentStep();
     currentStep->setNumber( tStep->giveNumber() );
     currentStep->setTime( tStep->giveTargetTime() );
     currentStep->setTimeIncrement( tStep->giveTimeIncrement() );

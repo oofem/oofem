@@ -553,7 +553,7 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
 
     IntArray nodeDofIDMask, dimFlag(3);
     IntArray nodalArray;
-    int indx = 0, k, ldofs, dim;
+    int indx = 0, ldofs, dim;
     double summ;
 
     if ( !this->isActivated(tStep) ) {
@@ -572,7 +572,7 @@ StructuralElement :: computeLumpedMassMatrix(FloatMatrix &answer, TimeStep *tSte
         for ( int j = 1; j <= nodeDofIDMask.giveSize(); j++ ) {
             indx++;
             // zero all off-diagonal terms
-            for ( k = 1; k <= ldofs; k++ ) {
+            for (int k = 1; k <= ldofs; k++ ) {
                 if ( k != indx ) {
                     answer.at(indx, k) = 0.;
                     answer.at(k, indx) = 0.;
@@ -1107,10 +1107,10 @@ StructuralElement :: checkConsistency()
 void
 StructuralElement :: computeNmatrixAt(const FloatArray &iLocCoord, FloatMatrix &answer)
 {
-    const int numNodes = this->giveNumberOfDofManagers();
+    int numNodes = this->giveNumberOfDofManagers();
     FloatArray N(numNodes);
 
-    const int dim = this->giveSpatialDimension();
+    int dim = this->giveSpatialDimension();
 
     answer.resize(dim, dim * numNodes);
     answer.zero();

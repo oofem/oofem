@@ -573,7 +573,7 @@ IsotropicDamageMaterial1 :: computeEta(FloatArray &answer, const FloatArray &str
         int dim = 0;
         double posNorm = 0.0;
         double nu = lmat->give(NYxz, gp);
-        FloatArray principalStrains, fullStrain;
+        FloatArray principalStrains;
         FloatMatrix N, m;
 
         if ( gp->giveMaterialMode() == _1dMat ) {
@@ -1047,7 +1047,7 @@ IsotropicDamageMaterial1 :: damageFunctionPrime(double kappa, GaussPoint *gp)
     case ST_Exponential_Cohesive_Crack:
     {
         if ( kappa > e0 ) {
-            double ef = gf / E / e0 / Le;
+            ef = gf / E / e0 / Le;
             double omega = status->giveTempDamage();
             double help = exp(omega * kappa / ef);
             double ret = -( ( omega * ef - ef ) * help - omega * e0 ) / ( ef * kappa * help - e0 * kappa );
@@ -1076,7 +1076,7 @@ IsotropicDamageMaterial1 :: complianceFunction(double kappa, GaussPoint *gp)
 void
 IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, GaussPoint *gp)
 {
-    int i, indx = 1;
+    int indx = 1;
     double le = 0.;
     double E = this->giveLinearElasticMaterial()->give('E', gp);
     FloatArray principalStrains, crackPlaneNormal(3), fullStrain, crackVect(3);
@@ -1110,19 +1110,19 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
     if ( ( kappa > e0 ) && ( status->giveDamage() == 0. ) ) {
         this->computePrincipalValDir(principalStrains, principalDir, fullStrain, principal_strain);
         // find index of max positive principal strain
-        for ( i = 2; i <= 3; i++ ) {
+        for (int i = 2; i <= 3; i++ ) {
             if ( principalStrains.at(i) > principalStrains.at(indx) ) {
                 indx = i;
             }
         }
 
-        for ( i = 1; i <= 3; i++ ) {
+        for (int i = 1; i <= 3; i++ ) {
             crackPlaneNormal.at(i) = principalDir.at(i, indx);
         }
 
         // find index with minimal value but non-zero for plane-stress condition - this is the crack direction
         indx = 1;
-        for ( i = 2; i <= 3; i++ ) {
+        for (int i = 2; i <= 3; i++ ) {
             if ( principalStrains.at(i) < principalStrains.at(indx) && fabs( principalStrains.at(i) ) > 1.e-10 ) {
                 indx = i;
             }
@@ -1190,7 +1190,7 @@ IsotropicDamageMaterial1 :: initDamaged(double kappa, FloatArray &strainVector, 
         }
 
 
-        for ( i = 1; i <= 3; i++ ) {
+        for (int i = 1; i <= 3; i++ ) {
             crackVect.at(i) = principalDir.at(i, indx);
         }
 

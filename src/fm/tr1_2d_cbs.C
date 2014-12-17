@@ -277,13 +277,11 @@ void
 TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
 {
     FloatArray stress;
-    int nLoads;
     FluidDynamicMaterial *mat = static_cast< FluidDynamicMaterial * >( this->giveMaterial() );
     double Re = static_cast< FluidModel * >( domain->giveEngngModel() )->giveReynoldsNumber();
     double coeff, rho = mat->give( 'd', integrationRulesArray [ 0 ]->getIntegrationPoint(0) );
     GaussPoint *gp = integrationRulesArray [ 0 ]->getIntegrationPoint(0);
     bcGeomType ltype;
-    Load *load;
     FloatArray gVector;
     double ar3 = area / 3.0;
 
@@ -301,9 +299,9 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
     // add boundary termms
     coeff = ar3 * rho;
     // body load (gravity effects)
-    nLoads = this->giveBodyLoadArray()->giveSize();
+    int nLoads = this->giveBodyLoadArray()->giveSize();
     for ( int i = 1; i <= nLoads; i++ ) {
-        load = domain->giveLoad( bodyLoadArray.at(i) );
+        auto load = domain->giveLoad( bodyLoadArray.at(i) );
         ltype = load->giveBCGeoType();
         if ( ( ltype == BodyLoadBGT ) && ( load->giveBCValType() == ForceLoadBVT ) ) {
             load->computeComponentArrayAt(gVector, tStep, VM_Total);
@@ -330,7 +328,7 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
 
             //_error("computeDiffusionTermsI: traction bc not supported");
             FloatArray t, coords(1);
-            int nLoads, n;
+
             BoundaryLoad *load;
             // integrate tractions
             n1 = boundarySides.at(j);
@@ -343,9 +341,9 @@ TR1_2D_CBS :: computeDiffusionTermsI(FloatArray &answer, TimeStep *tStep)
             ny = -tx / l;
 
             // loop over boundary load array
-            nLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
-            for ( int i = 1; i <= nLoads; i++ ) {
-                n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
+            int numLoads = this->giveBoundaryLoadArray()->giveSize() / 2;
+            for ( int i = 1; i <= numLoads; i++ ) {
+                int n = boundaryLoadArray.at(1 + ( i - 1 ) * 2);
                 load = dynamic_cast< BoundaryLoad * >( domain->giveLoad(n) );
                 if ( load ) {
                     load->computeValueAt(t, tStep, coords, VM_Total);

@@ -143,15 +143,15 @@ public:
 
     virtual void updateUnknownsDictionary(TimeStep *tStep, ValueModeType mode, double dofValue);
 
-    virtual void giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode, double &dofValue);
+    virtual double giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode);
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);
 
     virtual void setBcId(int bcId) { this->bc = bcId; }
     virtual void setIcId(int icId) { this->ic = icId; }
-    virtual void setEquationNumber(int equationNumber) { this->equationNumber = equationNumber; }
-    virtual void setUnknowns(Dictionary *unknowns) { this->unknowns = unknowns; }
+    virtual void setEquationNumber(int newEquationNumber) { this->equationNumber = newEquationNumber; }
+    virtual void setUnknowns(Dictionary *newUnknowns) { this->unknowns = newUnknowns; }
     virtual Dictionary *giveUnknowns() { return this->unknowns; }
     virtual int giveEqn() { return equationNumber; }
 
