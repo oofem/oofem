@@ -9,6 +9,7 @@ set (tm_emodel
     nonstationarytransportproblem.C
     nltransienttransportproblem.C
     darcyflow.C
+    transienttransportproblem.C
     )
 
 set (tm_element

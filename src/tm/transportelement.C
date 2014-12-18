@@ -87,7 +87,12 @@ TransportElement :: giveCharacteristicMatrix(FloatMatrix &answer,
 // returns characteristics matrix of receiver according to mtrx
 //
 {
-    if ( mtrx == ConductivityMatrix ) {
+    if ( mtrx == TangentStiffnessMatrix ) {
+        FloatMatrix tmp;
+        this->computeConductivityMatrix(answer, Conductivity, tStep);
+        this->computeBCMtrxAt(tmp, tStep, VM_Total);
+        answer.add(tmp);
+    } else if ( mtrx == ConductivityMatrix ) {
         this->computeConductivityMatrix(answer, Conductivity, tStep);
     } else if ( mtrx == CapacityMatrix ) {
         this->computeCapacityMatrix(answer, tStep);
