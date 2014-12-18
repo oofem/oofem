@@ -4,11 +4,12 @@ if (USE_CEMHYD)
         )
 endif ()
 
-set (tm_emodel 
+set (tm_emodel
     stationarytransportproblem.C
     nonstationarytransportproblem.C
     nltransienttransportproblem.C
     darcyflow.C
+    transienttransportproblem.C
     )
 
 set (tm_element
@@ -44,7 +45,7 @@ set (tm_material
     hydratinghemomat.C
     hydratingconcretemat.C
     hemotkmat.C
-    hemokunzelmat.C
+    #hemokunzelmat.C
     isoheatmat.C
     isomoisturemat.C
     isolinmoisturemat.C
