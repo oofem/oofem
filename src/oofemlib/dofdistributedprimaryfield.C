@@ -78,7 +78,7 @@ DofDistributedPrimaryField :: initialize(ValueModeType mode, TimeStep *tStep, Fl
 
     for ( auto &node : d->giveDofManagers() ) {
         for ( Dof *dof: *node ) {
-            int eqNum = dof->__giveEquationNumber();
+            int eqNum = dof->giveEquationNumber(s);
             if ( eqNum ) {
                 answer.at(eqNum) = dof->giveUnknownsDictionaryValue(tStep, mode);
             }
@@ -245,8 +245,8 @@ DofDistributedPrimaryField :: applyBoundaryCondition(TimeStep *tStep)
     Domain *d = emodel->giveDomain(domainIndx);
     for ( auto &dman : d->giveDofManagers() ) {
         for ( auto &dof : *dman ) {
-            int bcid = dof->giveBcId();
-            if ( bcid > 0 && dof->isPrimaryDof() ) {
+            if ( dof->hasBc(tStep) && dof->isPrimaryDof() ) {
+                int bcid = dof->giveBcId();
                 //double val = static_cast< BoundaryCondition* >(d->giveBc(bcid))->give(dof, VM_Total, tStep);
                 double val = static_cast< BoundaryCondition* >(d->giveBc(bcid))->give(dof, tStep->giveTargetTime());
                 dof->updateUnknownsDictionary(tStep, VM_Total, val);
@@ -256,7 +256,7 @@ DofDistributedPrimaryField :: applyBoundaryCondition(TimeStep *tStep)
 
     for ( auto &bc : d->giveBcs() ) {
         BoundaryCondition *dbc = dynamic_cast< BoundaryCondition* >(bc.get());
-        if ( dbc ) {
+        if ( dbc && dbc->isImposed(tStep) ) {
             this->applyBoundaryCondition(*dbc, tStep);
         }
     }
@@ -297,11 +297,8 @@ DofDistributedPrimaryField :: advanceSolution(TimeStep *tStep)
 {
     PrimaryField :: advanceSolution(tStep);
 #if 0
-    Domain *d = emodel->giveDomain(1);
-    // Apply dirichlet b.c.s
-    this->applyBoundaryCondition(tStep);
-
     // Copy over the old dictionary values to the new step as the initial guess:
+    Domain *d = emodel->giveDomain(1);
     TimeStep *prev = tStep->givePreviousStep();
     for ( auto &dman : d->giveDofManagers() ) {
         this->setInitialGuess(*dman, tStep, prev);
@@ -320,6 +317,9 @@ DofDistributedPrimaryField :: advanceSolution(TimeStep *tStep)
             this->setInitialGuess(*bc->giveInternalDofManager(i), tStep, prev);
         }
     }
+
+    // Apply dirichlet b.c.s
+    this->applyBoundaryCondition(tStep);
 #endif
 }
 

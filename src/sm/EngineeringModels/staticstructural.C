@@ -141,7 +141,7 @@ StaticStructural :: initializeFrom(InputRecord *ir)
 #endif
 
     delete this->field;
-    this->field = new DofDistributedPrimaryField(this, 1, FT_Displacements, 1);
+    this->field = new DofDistributedPrimaryField(this, 1, FT_Displacements, 0);
 
     return IRRT_OK;
 }
@@ -159,7 +159,7 @@ TimeStep *StaticStructural :: giveNextStep()
         previousStep = new TimeStep(giveNumberOfTimeStepWhenIcApply(), this, 0, -this->deltaT, this->deltaT, 0);
         currentStep = new TimeStep(istep, this, 1, 0.0, this->deltaT, 1);
     } else {
-        int istep =  currentStep->giveNumber() + 1;
+        int istep = currentStep->giveNumber() + 1;
         StateCounterType counter = currentStep->giveSolutionStateCounter() + 1;
         previousStep = currentStep;
         double dt = currentStep->giveTimeIncrement();
@@ -200,6 +200,34 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     int di = 1;
 
     this->field->advanceSolution(tStep);
+#if 1
+    {
+        // Copy over the old dictionary values to the new step as the initial guess:
+        /*
+        Domain *d = this->giveDomain(1);
+        TimeStep *prev = tStep->givePreviousStep();
+        for ( auto &dman : d->giveDofManagers() ) {
+            static_cast< DofDistributedPrimaryField* >(field)->setInitialGuess(*dman, tStep, prev);
+        }
+
+        for ( auto &elem : d->giveElements() ) {
+            int ndman = elem->giveNumberOfInternalDofManagers();
+            for ( int i = 1; i <= ndman; i++ ) {
+                static_cast< DofDistributedPrimaryField* >(field)->setInitialGuess(*elem->giveInternalDofManager(i), tStep, prev);
+            }
+        }
+
+        for ( auto &bc : d->giveBcs() ) {
+            int ndman = bc->giveNumberOfInternalDofManagers();
+            for ( int i = 1; i <= ndman; i++ ) {
+                static_cast< DofDistributedPrimaryField* >(field)->setInitialGuess(*bc->giveInternalDofManager(i), tStep, prev);
+            }
+        }
+        */
+        // Apply dirichlet b.c.s
+        field->applyBoundaryCondition(tStep);
+    }
+#endif
 
     neq = this->giveNumberOfDomainEquations( di, EModelDefaultEquationNumbering() );
     this->field->initialize(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering() ); 
@@ -232,7 +260,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
         OOFEM_LOG_RELEVANT("Solving for increment\n");
         linSolver->solve(stiffnessMatrix, & extrapolatedForces, & incrementOfSolution);
         OOFEM_LOG_RELEVANT("Initial guess found\n");
-        solution.add(incrementOfSolution);
+        this->solution.add(incrementOfSolution);
     } else if ( this->initialGuessType != IG_None ) {
         OOFEM_ERROR("Initial guess type: %d not supported", initialGuessType);
     } else {
@@ -254,9 +282,9 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
     NM_Status status = this->nMethod->solve(this->stiffnessMatrix,
                                             & externalForces,
                                             NULL,
-                                            & solution,
+                                            & this->solution,
                                             & incrementOfSolution,
-                                            & ( this->internalForces ),
+                                            & this->internalForces,
                                             this->eNorm,
                                             loadLevel, // Only relevant for incrementalBCLoadVector?
                                             SparseNonLinearSystemNM :: rlm_total,
@@ -288,11 +316,12 @@ double StaticStructural :: giveUnknownComponent(ValueModeType mode, TimeStep *tS
 
 void StaticStructural :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
 {
-    // Updates the solution in case it has changed 
-    ///@todo NRSolver should report when the solution changes instead of doing it this way.
-    this->field->update(VM_Total, tStep, solution, EModelDefaultEquationNumbering());
-
     if ( cmpn == InternalRhs ) {
+        // Updates the solution in case it has changed 
+        ///@todo NRSolver should report when the solution changes instead of doing it this way.
+        this->field->update(VM_Total, tStep, this->solution, EModelDefaultEquationNumbering());
+        this->field->applyBoundaryCondition(tStep);
+
         this->internalForces.zero();
         this->assembleVector(this->internalForces, tStep, InternalForcesVector, VM_Total,
                              EModelDefaultEquationNumbering(), d, & this->eNorm);
@@ -389,12 +418,9 @@ StaticStructural :: updateDomainLinks()
 int
 StaticStructural :: forceEquationNumbering()
 {
-    int numEqn = StructuralEngngModel::forceEquationNumbering();
-
     delete stiffnessMatrix;
     stiffnessMatrix = NULL;
-
-    return numEqn;
+    return StructuralEngngModel::forceEquationNumbering();
 }
 
 
