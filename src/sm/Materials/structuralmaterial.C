@@ -46,7 +46,6 @@
 #include "fieldmanager.h"
 #include "dynamicinputrecord.h"
 #include "eleminterpmapperinterface.h"
-#include <boost/concept_check.hpp>
 
 namespace oofem {
 StructuralMaterial :: StructuralMaterial(int n, Domain * d) : Material(n, d) 

@@ -38,7 +38,8 @@
 #include "engngm.h"
 #include "sparselinsystemnm.h"
 #include "sparsemtrx.h"
-#include <boost/concept_check.hpp>
+
+#include <memory>
 
 ///@name Input fields for TransientTransportProblem
 //@{
