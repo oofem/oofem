@@ -274,6 +274,9 @@ DofDistributedPrimaryField :: applyBoundaryCondition(BoundaryCondition &bc, Time
     for ( int inode : set->giveNodeList() ) {
         DofManager *dman = d->giveDofManager(inode);
         for ( auto &dofid : bc.giveDofIDs() ) {
+            if ( !dman->hasDofID((DofIDItem)dofid) ) { ///@todo It's unfortunate that we have to search for the dofid twice.
+                continue;
+            }
             Dof *dof = dman->giveDofWithID(dofid);
             if ( dof->isPrimaryDof() ) {
                 dof->updateUnknownsDictionary( tStep, VM_Total, bc.give(dof, tStep->giveTargetTime()) );
