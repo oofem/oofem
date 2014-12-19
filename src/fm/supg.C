@@ -63,37 +63,27 @@ REGISTER_EngngModel(SUPG);
 SUPG :: SUPG(int i, EngngModel * _master) : FluidModel(i, _master), accelerationVector()
 {
     initFlag = 1;
-    lhs = NULL;
     ndomains = 1;
-    nMethod = NULL;
-    VelocityPressureField = NULL;
     consistentMassFlag = 0;
     equationScalingFlag = false;
     lscale = uscale = dscale = 1.0;
-    materialInterface = NULL;
 }
 
 
 SUPG :: ~SUPG()
 {
-    delete VelocityPressureField;
-    delete materialInterface;
-    delete nMethod;
-    delete lhs;
 }
 
 
 NumericalMethod *SUPG :: giveNumericalMethod(MetaStep *mStep)
 {
-    if ( this->nMethod ) {
-        return this->nMethod;
+    if ( !this->nMethod ) {
+        this->nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) ); 
+        if ( !this->nMethod ) { 
+            OOFEM_ERROR("linear solver creation failed"); 
+        }
     }
-
-    this->nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this); 
-    if ( this->nMethod == NULL ) { 
-        OOFEM_ERROR("linear solver creation failed"); 
-    }
-    return this->nMethod;
+    return this->nMethod.get();
 }
 
 IRResultType
@@ -145,29 +135,29 @@ SUPG :: initializeFrom(InputRecord *ir)
     }
 
     if ( requiresUnknownsDictionaryUpdate() ) {
-        VelocityPressureField = new DofDistributedPrimaryField(this, 1, FT_VelocityPressure, 1);
+        VelocityPressureField.reset( new DofDistributedPrimaryField(this, 1, FT_VelocityPressure, 1) );
     } else {
-        VelocityPressureField = new PrimaryField(this, 1, FT_VelocityPressure, 1);
+        VelocityPressureField.reset( new PrimaryField(this, 1, FT_VelocityPressure, 1) );
     }
 
     val = 0;
     IR_GIVE_OPTIONAL_FIELD(ir, val, _IFT_SUPG_miflag);
     if ( val == 1 ) {
-        this->materialInterface = new LEPlic( 1, this->giveDomain(1) );
+        this->materialInterface.reset( new LEPlic( 1, this->giveDomain(1) ) );
         this->materialInterface->initializeFrom(ir);
         // export velocity field
         FieldManager *fm = this->giveContext()->giveFieldManager();
         IntArray mask;
         mask = {V_u, V_v, V_w};
 
-        std :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, this->VelocityPressureField, mask ) );
+        std :: shared_ptr< Field > _velocityField( new MaskedPrimaryField ( FT_Velocity, this->VelocityPressureField.get(), mask ) );
         fm->registerField(_velocityField, FT_Velocity);
 
         //fsflag = 0;
         //IR_GIVE_OPTIONAL_FIELD (ir, fsflag, _IFT_SUPG_fsflag, "fsflag");
     } else if ( val == 2 ) {
         // positive coefficient scheme level set alg
-        this->materialInterface = new LevelSetPCS( 1, this->giveDomain(1) );
+        this->materialInterface.reset( new LevelSetPCS( 1, this->giveDomain(1) ) );
         this->materialInterface->initializeFrom(ir);
     }
 
@@ -230,7 +220,7 @@ SUPG :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
     } else if ( cmpn == NonLinearLhs ) {
         this->lhs->zero();
         //if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
-        this->assemble( lhs, tStep, TangentStiffnessMatrix,
+        this->assemble( lhs.get(), tStep, TangentStiffnessMatrix,
                         EModelDefaultEquationNumbering(), d );
        // } else {
        //     this->assemble( lhs, tStep, SecantStiffnessMatrix,
@@ -350,8 +340,8 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
         incrementalSolutionVector.resize(neq);
 
-        lhs = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( lhs == NULL ) {
+        lhs.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        if ( !lhs ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 
@@ -370,9 +360,7 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
 
 
     if ( !requiresUnknownsDictionaryUpdate() ) {
-        for ( int i = 1; i <= neq; i++ ) {
-            solutionVector->at(i) = prevSolutionVector->at(i);
-        }
+        *solutionVector = *prevSolutionVector;
     }
 
     //previousAccelerationVector=accelerationVector;
@@ -476,17 +464,17 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             // momentum balance part
             lhs->zero();
             if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
-                this->assemble( lhs, tStep, TangentStiffnessMatrix,
+                this->assemble( lhs.get(), tStep, TangentStiffnessMatrix,
                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
             } else {
-                this->assemble( lhs, tStep, SecantStiffnessMatrix,
+                this->assemble( lhs.get(), tStep, SecantStiffnessMatrix,
                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
             }
         }
         //if (this->fsflag) this->imposeAmbientPressureInOuterNodes(lhs,&rhs,tStep);
 
 #if 1
-        nMethod->solve(lhs, & rhs, & incrementalSolutionVector);
+        nMethod->solve(lhs.get(), & rhs, & incrementalSolutionVector);
 #else
 
         SparseMtrx *__lhs = lhs->GiveCopy();

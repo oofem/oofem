@@ -72,17 +72,10 @@ TR1_2D_SUPG2 :: TR1_2D_SUPG2(int n, Domain *aDomain) :
     TR1_2D_SUPG(n, aDomain)
 {
     numberOfDofMans  = 3;
-    defaultIRule = NULL;
 }
 
 TR1_2D_SUPG2 :: ~TR1_2D_SUPG2()
 {
-    for ( int i = 0; i < 2; i++ ) {
-        myPoly [ i ].clear();
-    }
-    if ( defaultIRule ) {
-        delete defaultIRule;
-    }
 }
 
 
@@ -166,7 +159,7 @@ TR1_2D_SUPG2 :: computeGaussPoints()
         integrationRulesArray [ 1 ].reset( new GaussIntegrationRule(2, this, 1, 3, true) );
     }
     if ( !defaultIRule ) {
-        defaultIRule = new GaussIntegrationRule(1, this, 1, 3, true);
+        defaultIRule.reset( new GaussIntegrationRule(1, this, 1, 3, true) );
         this->giveCrossSection()->setupIntegrationPoints(* defaultIRule, 1, this);
     }
 }

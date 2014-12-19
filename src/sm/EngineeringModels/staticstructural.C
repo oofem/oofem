@@ -63,10 +63,7 @@ REGISTER_EngngModel(StaticStructural);
 StaticStructural :: StaticStructural(int i, EngngModel *_master) : StructuralEngngModel(i, _master),
     internalForces(),
     eNorm(),
-    stiffnessMatrix(NULL),
-    field(NULL),
-    sparseMtrxType(SMT_Skyline),
-    nMethod(NULL)
+    sparseMtrxType(SMT_Skyline)
 {
     ndomains = 1;
     solverType = 0;
@@ -76,34 +73,28 @@ StaticStructural :: StaticStructural(int i, EngngModel *_master) : StructuralEng
 
 StaticStructural :: ~StaticStructural()
 {
-    delete field;
-    delete stiffnessMatrix;
-    delete nMethod;
 }
 
 
 NumericalMethod *StaticStructural :: giveNumericalMethod(MetaStep *mStep)
 {
-    if ( nMethod ) {
-        return nMethod;
-    }
-    
-    if ( solverType == 0 ) {
-        nMethod = new NRSolver(this->giveDomain(1), this);
-    } else if ( solverType == 1 ) {
-        nMethod = new StaggeredSolver(this->giveDomain(1), this);
-        // Check if sparse matrix is SMT_Skyline
-        if ( this->sparseMtrxType != SMT_Skyline ) {
-            OOFEM_ERROR("Only Skyline sparse matrix type is currently supported (0) for the staggered solver");
+    if ( !nMethod ) {
+        if ( solverType == 0 ) {
+            nMethod.reset( new NRSolver(this->giveDomain(1), this) );
+        } else if ( solverType == 1 ) {
+            nMethod.reset( new StaggeredSolver(this->giveDomain(1), this) );
+            // Check if sparse matrix is SMT_Skyline
+            if ( this->sparseMtrxType != SMT_Skyline ) {
+                OOFEM_ERROR("Only Skyline sparse matrix type is currently supported (0) for the staggered solver");
+            }
+            
+        } else if ( solverType == 2 ) {
+            nMethod.reset( new DynamicRelaxationSolver(this->giveDomain(1), this) );
+        } else {
+            OOFEM_ERROR("Unsupported solver (%d). Solvers currently supported are: 0 - NR (default) and 1 - staggered NR, 2 - Dynamic relaxation solver", solverType);
         }
-        
-    } else if ( solverType == 2 ) {
-        nMethod = new DynamicRelaxationSolver(this->giveDomain(1), this);
-    } else {
-        OOFEM_ERROR("Unsupported solver (%d). Solvers currently supported are: 0 - NR (default) and 1 - staggered NR, 2 - Dynamic relaxation solver", solverType);
     }
-    
-    return nMethod;
+    return nMethod.get();
 }
 
 IRResultType
@@ -140,8 +131,7 @@ StaticStructural :: initializeFrom(InputRecord *ir)
 
 #endif
 
-    delete this->field;
-    this->field = new DofDistributedPrimaryField(this, 1, FT_Displacements, 0);
+    this->field.reset( new DofDistributedPrimaryField(this, 1, FT_Displacements, 0) );
 
     return IRRT_OK;
 }
@@ -236,7 +226,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
 
     // Create "stiffness matrix"
     if ( !this->stiffnessMatrix ) {
-        this->stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+        this->stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         if ( !this->stiffnessMatrix ) {
             OOFEM_ERROR("Couldn't create requested sparse matrix of type %d", sparseMtrxType);
         }
@@ -258,7 +248,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
         this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
         SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
         OOFEM_LOG_RELEVANT("Solving for increment\n");
-        linSolver->solve(stiffnessMatrix, & extrapolatedForces, & incrementOfSolution);
+        linSolver->solve(stiffnessMatrix.get(), & extrapolatedForces, & incrementOfSolution);
         OOFEM_LOG_RELEVANT("Initial guess found\n");
         this->solution.add(incrementOfSolution);
     } else if ( this->initialGuessType != IG_None ) {
@@ -279,7 +269,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
 
     double loadLevel;
     int currentIterations;
-    NM_Status status = this->nMethod->solve(this->stiffnessMatrix,
+    NM_Status status = this->nMethod->solve(this->stiffnessMatrix.get(),
                                             & externalForces,
                                             NULL,
                                             & this->solution,
@@ -330,7 +320,7 @@ void StaticStructural :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
         internalVarUpdateStamp = tStep->giveSolutionStateCounter(); // Hack for linearstatic
     } else if ( cmpn == NonLinearLhs ) {
         this->stiffnessMatrix->zero();
-        this->assemble(this->stiffnessMatrix, tStep, TangentStiffnessMatrix, EModelDefaultEquationNumbering(), d);
+        this->assemble(this->stiffnessMatrix.get(), tStep, TangentStiffnessMatrix, EModelDefaultEquationNumbering(), d);
     } else {
         OOFEM_ERROR("Unknown component");
     }
@@ -418,8 +408,7 @@ StaticStructural :: updateDomainLinks()
 int
 StaticStructural :: forceEquationNumbering()
 {
-    delete stiffnessMatrix;
-    stiffnessMatrix = NULL;
+    stiffnessMatrix.reset( NULL );
     return StructuralEngngModel::forceEquationNumbering();
 }
 

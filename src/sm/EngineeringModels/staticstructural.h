@@ -59,13 +59,13 @@ protected:
     FloatArray solution;
     FloatArray internalForces;
     FloatArray eNorm;
-    SparseMtrx *stiffnessMatrix;
+    std :: unique_ptr< SparseMtrx >stiffnessMatrix;
 
-    PrimaryField *field;
+    std :: unique_ptr< PrimaryField >field;
 
     SparseMtrxType sparseMtrxType;
 
-    SparseNonLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseNonLinearSystemNM >nMethod;
     int solverType;
     
     double deltaT;

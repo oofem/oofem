@@ -225,13 +225,11 @@ StokesFlowVelocityHomogenization :: rveGiveCharacteristicData(int DataType, void
 void
 StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep *tStep)
 {
-    int ndof;
-
     IntArray loc, col;
     FloatArray averagev;
 
     Domain *domain = this->giveDomain(1);
-    ndof = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
+    int ndof = this->giveNumberOfDomainEquations( 1, EModelDefaultEquationNumbering() );
 
     // Build F matrix
     FloatMatrix F, Fe;
@@ -252,7 +250,7 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
     FloatMatrix H;
 
     //    SparseLinearSystemNM *linMethod = classFactory.createSparseLinSolver(ST_Petsc, this->giveDomain(1), this);
-    SparseLinearSystemNM *linMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+    std :: unique_ptr< SparseLinearSystemNM > linMethod( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
 
     H.resize( F.giveNumberOfRows(), F.giveNumberOfColumns() );
     H.zero();
@@ -261,7 +259,5 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
 
     answer.beTProductOf(H, F);
     answer.times( 1. / this->giveAreaOfRVE() );
-
-    delete linMethod;
 }
 }

@@ -64,18 +64,12 @@
 namespace oofem {
 StructuralElement :: StructuralElement(int n, Domain *aDomain) :
     Element(n, aDomain)
-    // Constructor. Creates an element with number n, belonging to aDomain.
 {
-    initialDisplacements = NULL;
 }
 
 
 StructuralElement :: ~StructuralElement()
-// Destructor.
 {
-    if ( initialDisplacements ) {
-        delete initialDisplacements;
-    }
 }
 
 
@@ -128,7 +122,7 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
     FloatArray force, globalIPcoords;
     int nsd = fei->giveNsd();
 
-    IntegrationRule *iRule = fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary);
+    std :: unique_ptr< IntegrationRule >iRule( fei->giveBoundaryIntegrationRule(load->giveApproxOrder(), boundary) );
 
     for ( GaussPoint *gp: *iRule ) {
         FloatArray &lcoords = * gp->giveNaturalCoordinates();
@@ -166,8 +160,6 @@ void StructuralElement :: computeBoundaryLoadVector(FloatArray &answer, Boundary
         double dV = thickness * gp->giveWeight() * fei->boundaryGiveTransformationJacobian( boundary, lcoords, FEIElementGeometryWrapper(this) );
         answer.plusProduct(n, force, dV);
     }
-
-    delete iRule;
 }
 
 
@@ -337,14 +329,14 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
 
     BoundaryLoad *surfLoad = dynamic_cast< BoundaryLoad * >(load);
     if ( surfLoad ) {
-        IntegrationRule *iRule;
+        std :: unique_ptr< IntegrationRule > iRule;
         FloatArray reducedAnswer, force, ntf;
         IntArray mask;
         FloatMatrix n;
         FloatArray globalIPcoords;
 
         int approxOrder = surfLoad->giveApproxOrder() + this->giveInterpolation()->giveInterpolationOrder();
-        iRule = this->GetSurfaceIntegrationRule(approxOrder);
+        iRule.reset( this->GetSurfaceIntegrationRule(approxOrder) );
         for ( GaussPoint *gp: *iRule ) {
             this->computeSurfaceNMatrixAt(n, iSurf, gp);
             dV  = this->computeSurfaceVolumeAround(gp, iSurf);
@@ -373,7 +365,6 @@ StructuralElement :: computeSurfaceLoadVectorAt(FloatArray &answer, Load *load,
             reducedAnswer.add(dV, ntf);
         }
 
-        delete iRule;
         this->giveSurfaceDofMapping(mask, iSurf);
         answer.resize( this->computeNumberOfDofs() );
         answer.zero();
@@ -1027,7 +1018,7 @@ StructuralElement :: updateYourself(TimeStep *tStep)
     // record initial displacement if element not active
     if ( activityTimeFunction && !isActivated(tStep) ) {
         if ( !initialDisplacements ) {
-            initialDisplacements = new FloatArray();
+            initialDisplacements.reset( new FloatArray() );
         }
 
         this->computeVectorOf(VM_Total, tStep, * initialDisplacements);
@@ -1132,7 +1123,7 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
     int nkon = what->giveSize();
     int size = stiff->giveNumberOfRows();
     double coeff, dii, lii = 0;
-    FloatArray *gaussCoeff = NULL;
+    FloatArray gaussCoeff;
     // stored gauss coefficient
     // for mass condensation
 
@@ -1155,7 +1146,7 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
 
     // create gauss coeff array if mass condensation requested
     if ( mass ) {
-        gaussCoeff = new FloatArray(size);
+        gaussCoeff.resize(size);
     }
 
     for ( i = 1; i <= nkon; i++ ) {
@@ -1183,7 +1174,7 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
             }
 
             if ( mass ) {
-                gaussCoeff->at(j) = coeff;
+                gaussCoeff.at(j) = coeff;
             }
         }
 
@@ -1198,9 +1189,9 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
             for ( j = 1; j <= size; j++ ) {
                 for ( k = 1; k <= size; k++ ) {
                     if ( ( ii != j ) && ( ii != k ) ) {
-                        mass->at(j, k) += mass->at(j, ii) * gaussCoeff->at(k) +
-                        mass->at(ii, k) * gaussCoeff->at(j) +
-                        mass->at(ii, ii) * gaussCoeff->at(j) * gaussCoeff->at(k);
+                        mass->at(j, k) += mass->at(j, ii) * gaussCoeff.at(k) +
+                        mass->at(ii, k) * gaussCoeff.at(j) +
+                        mass->at(ii, ii) * gaussCoeff.at(j) * gaussCoeff.at(k);
                     }
                 }
             }
@@ -1210,10 +1201,6 @@ StructuralElement :: condense(FloatMatrix *stiff, FloatMatrix *mass, FloatArray 
                 mass->at(k, ii) = 0.;
             }
         }
-    }
-
-    if ( mass ) {
-        delete gaussCoeff;
     }
 }
 
