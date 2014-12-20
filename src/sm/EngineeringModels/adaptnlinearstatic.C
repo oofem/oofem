@@ -356,7 +356,7 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
             stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, this->giveCurrentStep(), SecantStiffnessMatrix,
+            this->assemble( *stiffnessMatrix, this->giveCurrentStep(), SecantStiffnessMatrix,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             initFlag = 0;
         }
@@ -674,7 +674,7 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 
             stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
             stiffnessMatrix->zero(); // zero stiffness matrix
-            this->assemble( stiffnessMatrix, this->giveCurrentStep(), SecantStiffnessMatrix,
+            this->assemble( *stiffnessMatrix, this->giveCurrentStep(), SecantStiffnessMatrix,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             initFlag = 0;
         }

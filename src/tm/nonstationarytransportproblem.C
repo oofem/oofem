@@ -301,11 +301,11 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
 #endif
 
         //Left hand side matrix due to convection
-        this->assemble( conductivityMatrix, stepWhenIcApply, LHSBCMatrix,
+        this->assemble( *conductivityMatrix, stepWhenIcApply, LHSBCMatrix,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
         conductivityMatrix->times(alpha);
         //Add contribution of alpha*K+C/dt
-        this->assemble( conductivityMatrix, stepWhenIcApply, NSTP_MidpointLhs,
+        this->assemble( *conductivityMatrix, stepWhenIcApply, NSTP_MidpointLhs,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
     }
 

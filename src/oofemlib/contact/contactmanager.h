@@ -94,7 +94,7 @@ public:
                                     const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms = NULL);
     
 
-    void assembleTangentFromContacts(SparseMtrx *answer, TimeStep *tStep,
+    void assembleTangentFromContacts(SparseMtrx &answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
 };

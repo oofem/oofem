@@ -320,7 +320,7 @@ void PrescribedGradientBCWeak :: assembleVector(FloatArray &answer, TimeStep *tS
 }
 
 
-void PrescribedGradientBCWeak :: assemble(SparseMtrx *answer, TimeStep *tStep,
+void PrescribedGradientBCWeak :: assemble(SparseMtrx &answer, TimeStep *tStep,
                                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix ) {
@@ -339,13 +339,13 @@ void PrescribedGradientBCWeak :: assemble(SparseMtrx *answer, TimeStep *tStep,
             Ke.negated();
             KeT.beTranspositionOf(Ke);
 
-            answer->assemble(tracRows, dispCols, Ke);
-            answer->assemble(dispRows, tracCols, KeT);
+            answer.assemble(tracRows, dispCols, Ke);
+            answer.assemble(dispRows, tracCols, KeT);
 
 
             FloatMatrix KZero( tracRows.giveSize(), tracCols.giveSize() );
             KZero.zero();
-            answer->assemble(tracRows, tracCols, KZero);
+            answer.assemble(tracRows, tracCols, KZero);
         }
 
 
@@ -376,12 +376,12 @@ void PrescribedGradientBCWeak :: assemble(SparseMtrx *answer, TimeStep *tStep,
                 nodeColsRed.followedBy(nodeCols [ m ]);
             }
 
-            answer->assemble(lockRows, nodeColsRed, KeDispLock);
-            answer->assemble(nodeRowsRed, lockCols, KeDispLock);
+            answer.assemble(lockRows, nodeColsRed, KeDispLock);
+            answer.assemble(nodeRowsRed, lockCols, KeDispLock);
 
             FloatMatrix KZero( lockRows.giveSize(), lockCols.giveSize() );
             KZero.zero();
-            answer->assemble(lockRows, lockCols, KZero);
+            answer.assemble(lockRows, lockCols, KZero);
         }
     } else   {
         printf("Skipping assembly in PrescribedGradientBCWeak::assemble().\n");

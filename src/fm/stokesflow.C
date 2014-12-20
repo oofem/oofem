@@ -192,7 +192,7 @@ void StokesFlow :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *
         return;
     } else if ( cmpn == NonLinearLhs ) {
         this->stiffnessMatrix->zero();
-        this->assemble(this->stiffnessMatrix.get(), tStep, StiffnessMatrix,
+        this->assemble(*stiffnessMatrix, tStep, StiffnessMatrix,
                        EModelDefaultEquationNumbering(), d);
         return;
     } else {

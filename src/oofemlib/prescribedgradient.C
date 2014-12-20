@@ -255,10 +255,10 @@ void PrescribedGradient :: computeTangent(FloatMatrix &tangent, TimeStep *tStep)
     Kfp->buildInternalStructure(rve, 1, fnum, pnum);
     Kpf->buildInternalStructure(rve, 1, pnum, fnum);
     Kpp->buildInternalStructure(rve, 1, pnum);
-    rve->assemble(Kff.get(), tStep, StiffnessMatrix, fnum, this->domain);
-    rve->assemble(Kfp.get(), tStep, StiffnessMatrix, fnum, pnum, this->domain);
-    rve->assemble(Kpf.get(), tStep, StiffnessMatrix, pnum, fnum, this->domain);
-    rve->assemble(Kpp.get(), tStep, StiffnessMatrix, pnum, this->domain);
+    rve->assemble(*Kff, tStep, StiffnessMatrix, fnum, this->domain);
+    rve->assemble(*Kfp, tStep, StiffnessMatrix, fnum, pnum, this->domain);
+    rve->assemble(*Kpf, tStep, StiffnessMatrix, pnum, fnum, this->domain);
+    rve->assemble(*Kpp, tStep, StiffnessMatrix, pnum, this->domain);
 
     FloatMatrix C, X, Kpfa, KfpC, a;
 

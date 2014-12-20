@@ -103,7 +103,7 @@ void LinearConstraintBC :: giveLocArray(const UnknownNumberingScheme &r_s,  IntA
 }
 
 
-void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep,
+void LinearConstraintBC :: assemble(SparseMtrx &answer, TimeStep *tStep,
                                     CharType type, const UnknownNumberingScheme &r_s,
                                     const UnknownNumberingScheme &c_s)
 {
@@ -127,15 +127,15 @@ void LinearConstraintBC :: assemble(SparseMtrx *answer, TimeStep *tStep,
         }
         contribt.beTranspositionOf(contrib);
 
-        answer->assemble(lambdaeq, locr, contribt);
-        answer->assemble(locr, lambdaeq, contrib);
+        answer.assemble(lambdaeq, locr, contribt);
+        answer.assemble(locr, lambdaeq, contrib);
     } else {
         // the bc is not imposed at specific time step, however in order to make the equation system regular
         // we initialize the allocated equation to the following form 1*labmda = 0, forcing lagrange multiplier
         // of inactive condition to be zero.
         FloatMatrix help(1, 1);
         help.at(1, 1) = 1.0;
-        answer->assemble(lambdaeq, lambdaeq, help);
+        answer.assemble(lambdaeq, lambdaeq, help);
     }
 }
 

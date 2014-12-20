@@ -135,7 +135,7 @@ void PrescribedGradientBCNeumann :: assembleVector(FloatArray &answer, TimeStep 
     }
 }
 
-void PrescribedGradientBCNeumann :: assemble(SparseMtrx *answer, TimeStep *tStep,
+void PrescribedGradientBCNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep,
                                              CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix ) {
@@ -164,8 +164,8 @@ void PrescribedGradientBCNeumann :: assemble(SparseMtrx *answer, TimeStep *tStep
             Ke.negated();
             KeT.beTranspositionOf(Ke);
 
-            answer->assemble(sigma_loc_r, loc_c, Ke); // Contribution to delta_s_i equations
-            answer->assemble(loc_r, sigma_loc_c, KeT); // Contributions to delta_v equations
+            answer.assemble(sigma_loc_r, loc_c, Ke); // Contribution to delta_s_i equations
+            answer.assemble(loc_r, sigma_loc_c, KeT); // Contributions to delta_v equations
         }
     } else   {
         printf("Skipping assembly in PrescribedGradientBCNeumann::assemble().\n");

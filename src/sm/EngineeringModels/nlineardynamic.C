@@ -388,7 +388,7 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         massMatrix->buildInternalStructure( this, di, EModelDefaultEquationNumbering() );
 
         // Assemble mass matrix
-        this->assemble( massMatrix, tStep, MassMatrix,
+        this->assemble( *massMatrix, tStep, MassMatrix,
                        EModelDefaultEquationNumbering(), this->giveDomain(di) );
 
         // Initialize vectors
@@ -596,7 +596,7 @@ void NonLinearDynamic :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Do
             timer.startTimer();
 #endif
             effectiveStiffnessMatrix->zero();
-            this->assemble(effectiveStiffnessMatrix, tStep, EffectiveStiffnessMatrix,
+            this->assemble(*effectiveStiffnessMatrix, tStep, EffectiveStiffnessMatrix,
                            EModelDefaultEquationNumbering(), d);
 #if 0
             this->assemble(effectiveStiffnessMatrix, tStep, TangentStiffnessMatrix,
@@ -788,7 +788,7 @@ NonLinearDynamic :: updateDomainLinks()
 
 
 void
-NonLinearDynamic :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
+NonLinearDynamic :: assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
                              const UnknownNumberingScheme &s, Domain *domain)
 {
 #ifdef TIME_REPORT
@@ -801,11 +801,11 @@ NonLinearDynamic :: assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
     if ( ( nonlocalStiffnessFlag ) && ( type == TangentStiffnessMatrix ) ) {
         // Add nonlocal contribution.
         for ( auto &elem : domain->giveElements() ) {
-            static_cast< NLStructuralElement * >( elem.get() )->addNonlocalStiffnessContributions(* answer, s, tStep);
+            static_cast< NLStructuralElement * >( elem.get() )->addNonlocalStiffnessContributions(answer, s, tStep);
         }
 
         // Print storage statistics.
-        answer->printStatistics();
+        answer.printStatistics();
     }
 
 #ifdef TIME_REPORT

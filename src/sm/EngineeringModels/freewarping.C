@@ -215,7 +215,7 @@ void FreeWarping :: solveYourselfAt(TimeStep *tStep)
 
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble( stiffnessMatrix, tStep, StiffnessMatrix,
+        this->assemble( *stiffnessMatrix, tStep, StiffnessMatrix,
                        EModelDefaultEquationNumbering(), this->giveDomain(1) );
 
         initFlag = 0;

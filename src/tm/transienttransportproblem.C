@@ -222,11 +222,11 @@ TransientTransportProblem :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn
     } else if ( cmpn == NonLinearLhs ) {
         //if ( !this->keepTangent ) {
             this->effectiveMatrix->zero();
-            this->assemble( effectiveMatrix.get(), tStep, TangentStiffnessMatrix,
+            this->assemble( *effectiveMatrix, tStep, TangentStiffnessMatrix,
                            EModelDefaultEquationNumbering(), this->giveDomain(1) );
             ///@todo Check sign
             effectiveMatrix->times(alpha * tStep->giveTimeIncrement());
-            this->assemble( effectiveMatrix.get(), tStep, CapacityMatrix,
+            this->assemble( *effectiveMatrix, tStep, CapacityMatrix,
                             EModelDefaultEquationNumbering(), this->giveDomain(1) );
             effectiveMatrix->times(1. / tStep->giveTimeIncrement());
         //}

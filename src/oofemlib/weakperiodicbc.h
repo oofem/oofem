@@ -144,7 +144,7 @@ public:
 
     basisType giveBasisType() { return useBasisType; }
 
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
                           const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s);
 
     virtual void assembleVector(FloatArray &answer, TimeStep *tStep,

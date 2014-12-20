@@ -888,7 +888,7 @@ public:
      * @param type Characteristic components of type type are requested from elements and assembled.
      * @param domain Source domain.
      */
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &s, Domain *domain);
     /**
      * Assembles characteristic matrix of required type into given sparse matrix.
@@ -899,7 +899,7 @@ public:
      * @param type Characteristic components of type type are requested from elements and assembled.
      * @param domain Source domain.
      */
-    virtual void assemble(SparseMtrx *answer, TimeStep *tStep,
+    virtual void assemble(SparseMtrx &answer, TimeStep *tStep,
                           CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s, Domain *domain);
     /**
      * Assembles characteristic vector of required type from dofManagers, element, and active boundary conditions, into given vector.

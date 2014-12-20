@@ -226,7 +226,7 @@ void PrescribedGradientBCPeriodic :: computeTangents(FloatMatrix &E, TimeStep *t
     std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx( stype ) );
 
     Kff->buildInternalStructure(rve, 1, fnum);
-    rve->assemble(Kff.get(), tStep, StiffnessMatrix, fnum, this->domain);
+    rve->assemble(*Kff, tStep, StiffnessMatrix, fnum, this->domain);
 
     OOFEM_ERROR("Not implemented yet");
 

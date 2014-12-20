@@ -717,7 +717,7 @@ void EngngModel :: printYourself()
     printf("number of eq's : %d\n", numberOfEquations);
 }
 
-void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
+void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep,
                             CharType type, const UnknownNumberingScheme &s, Domain *domain)
 //
 // assembles matrix
@@ -725,10 +725,6 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
 {
     IntArray loc;
     FloatMatrix mat, R;
-
-    if ( answer == NULL ) {
-        OOFEM_ERROR("NULL pointer encountered.");
-    }
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     int nelem = domain->giveNumberOfElements();
@@ -759,7 +755,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
 #ifdef _OPENMP
  #pragma omp critical
 #endif
-            if ( answer->assemble(loc, mat) == 0 ) {
+            if ( answer.assemble(loc, mat) == 0 ) {
                 OOFEM_ERROR("sparse matrix assemble error");
             }
         }
@@ -779,21 +775,18 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
     
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
-    answer->assembleBegin();
-    answer->assembleEnd();
+    answer.assembleBegin();
+    answer.assembleEnd();
 }
 
 
-void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
+void EngngModel :: assemble(SparseMtrx &answer, TimeStep *tStep,
                             CharType type, const UnknownNumberingScheme &rs, const UnknownNumberingScheme &cs,
                             Domain *domain)
 // Same as assemble, but with different numbering for rows and columns
 {
     IntArray r_loc, c_loc, dofids(0);
     FloatMatrix mat, R;
-    if ( answer == NULL ) {
-        OOFEM_ERROR("NULL pointer encountered.");
-    }
 
     this->timer.resumeTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
     int nelem = domain->giveNumberOfElements();
@@ -823,7 +816,7 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
 #ifdef _OPENMP
  #pragma omp critical
 #endif
-            if ( answer->assemble(r_loc, c_loc, mat) == 0 ) {
+            if ( answer.assemble(r_loc, c_loc, mat) == 0 ) {
                 OOFEM_ERROR("sparse matrix assemble error");
             }
         }
@@ -839,8 +832,8 @@ void EngngModel :: assemble(SparseMtrx *answer, TimeStep *tStep,
 
     this->timer.pauseTimer(EngngModelTimer :: EMTT_NetComputationalStepTimer);
 
-    answer->assembleBegin();
-    answer->assembleEnd();
+    answer.assembleBegin();
+    answer.assembleEnd();
 }
 
 

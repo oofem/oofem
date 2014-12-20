@@ -705,9 +705,9 @@ Skyline :: Skyline(int neq, int nwk1, double *mtrx1, const IntArray &adr1) : Spa
 }
 
 
-//Skyline *Skyline :: giveSubMatrix(Skyline *mat, IntArray &rows, IntArray &cols)
-//Skyline *Skyline :: beSubMatrixOf(const Skyline *mat, IntArray &rows, IntArray &cols)
-//SparseMtrx *Skyline :: beSubMatrixOf(const SparseMtrx *mat, IntArray &rows, IntArray &cols)
+//Skyline *Skyline :: giveSubMatrix(Skyline &mat, IntArray &rows, IntArray &cols)
+//Skyline *Skyline :: beSubMatrixOf(const Skyline &mat, IntArray &rows, IntArray &cols)
+//SparseMtrx *Skyline :: beSubMatrixOf(const SparseMtrx &mat, IntArray &rows, IntArray &cols)
 SparseMtrx *Skyline :: giveSubMatrix(const IntArray &rows, const IntArray &cols) 
 {
 

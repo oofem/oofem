@@ -96,9 +96,9 @@ public:
     virtual void times(double x);
     virtual int buildInternalStructure(EngngModel *, int, const UnknownNumberingScheme &);
 
-    //virtual Skyline *giveSubMatrix(Skyline *mat, IntArray &rows, IntArray &cols);
-    //virtual Skyline *beSubMatrixOf(const Skyline *mat, IntArray &rows, IntArray &cols);
-    //virtual SparseMtrx *beSubMatrixOf(const SparseMtrx *mat, IntArray &rows, IntArray &cols);
+    //virtual Skyline *giveSubMatrix(Skyline &mat, IntArray &rows, IntArray &cols);
+    //virtual Skyline *beSubMatrixOf(const Skyline &mat, IntArray &rows, IntArray &cols);
+    //virtual SparseMtrx *beSubMatrixOf(const SparseMtrx &mat, IntArray &rows, IntArray &cols);
     virtual SparseMtrx *giveSubMatrix(const IntArray &rows, const IntArray &cols); 
     /**
      * Allocates and builds internal structure according to given

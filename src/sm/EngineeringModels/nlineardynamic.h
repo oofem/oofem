@@ -159,7 +159,7 @@ public:
 #endif
 
 protected:
-    void assemble(SparseMtrx *answer, TimeStep *tStep, CharType type,
+    void assemble(SparseMtrx &answer, TimeStep *tStep, CharType type,
                   const UnknownNumberingScheme &, Domain *domain);
 
     void proceedStep(int di, TimeStep *tStep);

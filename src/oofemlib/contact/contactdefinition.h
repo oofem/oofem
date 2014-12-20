@@ -91,7 +91,7 @@ public:
     virtual void computeContactForces(FloatArray &answer, TimeStep *tStep, CharType type, ValueModeType mode,
                                 const UnknownNumberingScheme &s, Domain *domain, FloatArray *eNorms);
     
-    virtual void computeContactTangent(SparseMtrx *answer, TimeStep *tStep,
+    virtual void computeContactTangent(SparseMtrx &answer, TimeStep *tStep,
                       CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s); 
     
     ContactElement *giveContactElement(const int num) { return this->masterElementList[num-1]; };

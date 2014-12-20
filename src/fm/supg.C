@@ -220,7 +220,7 @@ SUPG :: updateComponent(TimeStep *tStep, NumericalCmpn cmpn, Domain *d)
     } else if ( cmpn == NonLinearLhs ) {
         this->lhs->zero();
         //if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
-        this->assemble( lhs.get(), tStep, TangentStiffnessMatrix,
+        this->assemble( *lhs, tStep, TangentStiffnessMatrix,
                         EModelDefaultEquationNumbering(), d );
        // } else {
        //     this->assemble( lhs, tStep, SecantStiffnessMatrix,
@@ -464,10 +464,10 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
             // momentum balance part
             lhs->zero();
             if ( 1 ) { //if ((nite > 5)) // && (rnorm < 1.e4))
-                this->assemble( lhs.get(), tStep, TangentStiffnessMatrix,
+                this->assemble( *lhs, tStep, TangentStiffnessMatrix,
                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
             } else {
-                this->assemble( lhs.get(), tStep, SecantStiffnessMatrix,
+                this->assemble( *lhs, tStep, SecantStiffnessMatrix,
                                EModelDefaultEquationNumbering(), this->giveDomain(1) );
             }
         }

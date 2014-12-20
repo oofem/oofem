@@ -468,7 +468,7 @@ void MixedGradientPressureNeumann :: assembleVector(FloatArray &answer, TimeStep
 }
 
 
-void MixedGradientPressureNeumann :: assemble(SparseMtrx *answer, TimeStep *tStep,
+void MixedGradientPressureNeumann :: assemble(SparseMtrx &answer, TimeStep *tStep,
                                               CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s)
 {
     if ( type == TangentStiffnessMatrix || type == SecantStiffnessMatrix || type == StiffnessMatrix || type == ElasticStiffnessMatrix ) {
@@ -494,8 +494,8 @@ void MixedGradientPressureNeumann :: assemble(SparseMtrx *answer, TimeStep *tSte
             Ke.negated();
             KeT.beTranspositionOf(Ke);
 
-            answer->assemble(sigma_loc_r, loc_c, Ke); // Contribution to delta_s_i equations
-            answer->assemble(loc_r, sigma_loc_c, KeT); // Contributions to delta_v equations
+            answer.assemble(sigma_loc_r, loc_c, Ke); // Contribution to delta_s_i equations
+            answer.assemble(loc_r, sigma_loc_c, KeT); // Contributions to delta_v equations
         }
     }
 }
@@ -562,7 +562,7 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
         OOFEM_ERROR("Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, this->domain->giveNumber(), fnum);
-    rve->assemble(Kff, tStep, StiffnessMatrix, fnum, fnum, this->domain);
+    rve->assemble(*Kff, tStep, StiffnessMatrix, fnum, fnum, this->domain);
 
     // Setup up indices and locations
     int neq = Kff->giveNumberOfRows();

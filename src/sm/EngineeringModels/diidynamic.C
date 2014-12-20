@@ -257,7 +257,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
 
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        this->assemble(stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
+        this->assemble(*stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
                        EModelDefaultEquationNumbering(), domain);
 
         help.resize(neq);
@@ -283,7 +283,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
         OOFEM_LOG_DEBUG("Assembling stiffness matrix\n");
 #endif
         stiffnessMatrix->zero();
-        this->assemble(stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
+        this->assemble(*stiffnessMatrix, tStep, EffectiveStiffnessMatrix,
                        EModelDefaultEquationNumbering(), domain);
     }
 

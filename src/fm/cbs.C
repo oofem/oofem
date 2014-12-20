@@ -262,7 +262,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
 
         lhs->buildInternalStructure(this, 1, pnum);
 
-        this->assemble( lhs.get(), stepWhenIcApply, PressureLhs,
+        this->assemble( *lhs, stepWhenIcApply, PressureLhs,
                        pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta1 * theta2);
 
@@ -273,7 +273,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
             }
 
             mss->buildInternalStructure(this, 1, vnum);
-            this->assemble( mss.get(), stepWhenIcApply, MassMatrix,
+            this->assemble( *mss, stepWhenIcApply, MassMatrix,
                            vnum, this->giveDomain(1) );
         } else {
             mm.resize(momneq);
@@ -294,13 +294,13 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     //<RESTRICTED_SECTION>
     else if ( materialInterface ) {
         lhs->zero();
-        this->assemble( lhs.get(), stepWhenIcApply, PressureLhs,
+        this->assemble( *lhs, stepWhenIcApply, PressureLhs,
                        pnum, this->giveDomain(1) );
         lhs->times(deltaT * theta1 * theta2);
 
         if ( consistentMassFlag ) {
             mss->zero();
-            this->assemble( mss.get(), stepWhenIcApply, MassMatrix,
+            this->assemble( *mss, stepWhenIcApply, MassMatrix,
                            vnum, this->giveDomain(1) );
         } else {
             mm.zero();

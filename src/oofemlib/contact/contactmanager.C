@@ -125,7 +125,7 @@ ContactManager :: assembleVectorFromContacts(FloatArray &answer, TimeStep *tStep
 
 
 void 
-ContactManager ::assembleTangentFromContacts(SparseMtrx *answer, TimeStep *tStep,
+ContactManager ::assembleTangentFromContacts(SparseMtrx &answer, TimeStep *tStep,
                       CharType type, const UnknownNumberingScheme &r_s, const UnknownNumberingScheme &c_s) 
 { 
   
