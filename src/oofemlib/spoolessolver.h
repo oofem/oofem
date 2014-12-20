@@ -91,7 +91,7 @@ public:
     /**
      * Solves the given linear system by LDL^T factorization.
      */
-    virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
+    virtual NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x);
 
     /// Initializes receiver from given record.
     virtual IRResultType initializeFrom(InputRecord *ir);

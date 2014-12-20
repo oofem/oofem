@@ -600,8 +600,8 @@ void MixedGradientPressureNeumann :: computeTangents(FloatMatrix &Ed, FloatArray
     }
 
     // Solve all sensitivities
-    solver->solve(Kff, ddev_pert, s_d);
-    solver->solve(Kff, & p_pert, & s_p);
+    solver->solve(*Kff, ddev_pert, s_d);
+    solver->solve(*Kff, p_pert, s_p);
 
     // Extract the stress response from the solutions
     FloatArray sigma_p(ndev);

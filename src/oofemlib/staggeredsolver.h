@@ -127,8 +127,8 @@ public:
     virtual ~StaggeredSolver() {}
 
     // Overloaded methods:
-    virtual NM_Status solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                            FloatArray *X, FloatArray *dX, FloatArray *F,
+    virtual NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+                            FloatArray &X, FloatArray &dX, FloatArray &F,
                             const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
 

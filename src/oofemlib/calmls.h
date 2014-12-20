@@ -213,8 +213,8 @@ public:
     virtual ~CylindricalALM();
 
     // Overloaded methods:
-    virtual NM_Status solve(SparseMtrx *K, FloatArray *R, FloatArray *R0,
-                            FloatArray *X, FloatArray *dX, FloatArray *F,
+    virtual NM_Status solve(SparseMtrx &K, FloatArray &R, FloatArray *R0,
+                            FloatArray &X, FloatArray &dX, FloatArray &F,
                             const FloatArray &internalForcesEBENorm, double &ReachedLambda, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
     virtual double giveCurrentStepLength() { return deltaL; }

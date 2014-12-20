@@ -40,15 +40,14 @@ DiagPreconditioner :: DiagPreconditioner(const SparseMtrx &C, InputRecord &attri
 void
 DiagPreconditioner :: init(const SparseMtrx &C)
 {
-    int i, n = C.giveNumberOfRows();
-    double diag;
+    int n = C.giveNumberOfRows();
 
-    diag_.resize( C.giveNumberOfRows() );
+    diag_.resize( n );
     diag_.zero();
 
     /* Find the diagonal elements */
-    for ( i = 1; i <= n; i++ ) {
-        diag = C.at(i, i);
+    for ( int i = 1; i <= n; i++ ) {
+        double diag = C.at(i, i);
         if ( diag  == 0 ) {
             OOFEM_ERROR("failed, zero diagonal detected in equation %d", i);
         }

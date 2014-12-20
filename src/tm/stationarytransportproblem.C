@@ -191,19 +191,19 @@ void StationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     FloatArray incrementOfSolution;
     double loadLevel;
     int currentIterations;
-    this->nMethod->solve(this->conductivityMatrix,
-                         & externalForces,
+    this->nMethod->solve(*this->conductivityMatrix,
+                         externalForces,
                          NULL,
-                         UnknownsField->giveSolutionVector(tStep),
-                         & incrementOfSolution,
-                         & this->internalForces,
+                         *UnknownsField->giveSolutionVector(tStep),
+                         incrementOfSolution,
+                         this->internalForces,
                          this->eNorm,
                          loadLevel, // Only relevant for incrementalBCLoadVector
                          SparseNonLinearSystemNM :: rlm_total,
                          currentIterations,
                          tStep);
 
-    //nMethod->solve( conductivityMatrix, & rhsVector, UnknownsField->giveSolutionVector(tStep) );
+    //nMethod->solve( *conductivityMatrix, rhsVector, *UnknownsField->giveSolutionVector(tStep) );
 }
 
 void

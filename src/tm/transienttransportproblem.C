@@ -180,12 +180,12 @@ void TransientTransportProblem :: solveYourselfAt(TimeStep *tStep)
     FloatArray incrementOfSolution;
     double loadLevel;
     int currentIterations;
-    this->nMethod->solve(this->effectiveMatrix.get(),
-                         & externalForces,
+    this->nMethod->solve(*this->effectiveMatrix,
+                         externalForces,
                          NULL,
-                         & this->solution,
-                         & incrementOfSolution,
-                         & this->internalForces,
+                         this->solution,
+                         incrementOfSolution,
+                         this->internalForces,
                          this->eNorm,
                          loadLevel, // Only relevant for incrementalBCLoadVector
                          SparseNonLinearSystemNM :: rlm_total,

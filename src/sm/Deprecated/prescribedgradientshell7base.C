@@ -257,7 +257,7 @@ void PrescribedGenStrainShell7 :: computeTangent(FloatMatrix &tangent, EquationI
 
     this->updateCoefficientMatrix(C);
     Kpf->timesT(C, KfpC);
-    solver->solve(Kff, KfpC, a);
+    solver->solve(*Kff, KfpC, a);
     Kpp->times(C, X);
     Kpf->times(a, Kpfa);
     X.subtract(Kpfa);

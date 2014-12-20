@@ -458,7 +458,7 @@ void NlDEIDynamic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_RELEVANT( "\n\nSolving [Step number %8d, Time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
-    //     NM_Status s = nMethod->solve(massMatrix, & loadVector, & displacementVector);
+    //     NM_Status s = nMethod->solve(*massMatrix, loadVector, displacementVector);
     //    if ( !(s & NM_Success) ) {
     //        OOFEM_ERROR("No success in solving system. Ma=f");
     //    }

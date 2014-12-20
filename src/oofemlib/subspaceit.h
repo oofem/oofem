@@ -97,7 +97,7 @@ public:
     SubspaceIteration(Domain * d, EngngModel * m);
     virtual ~SubspaceIteration();
 
-    virtual NM_Status solve(SparseMtrx *A, SparseMtrx *B, FloatArray *x, FloatMatrix *v, double rtol, int nroot);
+    virtual NM_Status solve(SparseMtrx &A, SparseMtrx &B, FloatArray &x, FloatMatrix &v, double rtol, int nroot);
     virtual const char *giveClassName() const { return "SubspaceIterationSolver"; }
 };
 } // end namespace oofem

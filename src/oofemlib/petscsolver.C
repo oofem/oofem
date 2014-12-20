@@ -51,34 +51,15 @@ PetscSolver :: PetscSolver(Domain *d, EngngModel *m) : SparseLinearSystemNM(d, m
 
 PetscSolver :: ~PetscSolver() { }
 
-NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
+NM_Status PetscSolver :: solve(SparseMtrx &A, FloatArray &b, FloatArray &x)
 {
-    int neqs;
+    int neqs = b.giveSize();
+    x.resize(neqs);
 
-    // first check whether Lhs is defined
-    if ( !A ) {
-        OOFEM_ERROR("unknown Lhs");
-    }
-
-    // and whether Rhs
-    if ( !b ) {
-        OOFEM_ERROR("unknown Rhs");
-    }
-
-    // and whether previous Solution exist
-    if ( !x ) {
-        OOFEM_ERROR("unknown solution array");
-    }
-
-    if ( x->giveSize() != ( neqs = b->giveSize() ) ) {
-        OOFEM_ERROR("size mismatch");
-    }
-
-    PetscSparseMtrx *Lhs = dynamic_cast< PetscSparseMtrx * >(A);
+    PetscSparseMtrx *Lhs = dynamic_cast< PetscSparseMtrx * >(&A);
     if ( !Lhs ) {
         OOFEM_ERROR("PetscSparseMtrx Expected");
     }
-
 
     Vec globRhsVec;
     Vec globSolVec;
@@ -87,7 +68,7 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
      * scatter and gather rhs to global representation (automatically detects sequential/parallel modes)
      */
     Lhs->createVecGlobal(& globRhsVec);
-    Lhs->scatterL2G(* b, globRhsVec);
+    Lhs->scatterL2G(b, globRhsVec);
 
     VecDuplicate(globRhsVec, & globSolVec);
 
@@ -95,7 +76,7 @@ NM_Status PetscSolver :: solve(SparseMtrx *A, FloatArray *b, FloatArray *x)
     NM_Status s = this->petsc_solve(Lhs, globRhsVec, globSolVec);
     //VecView(globSolVec,PETSC_VIEWER_STDOUT_WORLD);
 
-    Lhs->scatterG2L(globSolVec, * x);
+    Lhs->scatterG2L(globSolVec, x);
 
     VecDestroy(& globSolVec);
     VecDestroy(& globRhsVec);

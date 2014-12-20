@@ -232,7 +232,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Solving linear static problem\n");
 #endif
 
-    nMethodLS->solve(stiffnessMatrix, & loadVector, & displacementVector);
+    nMethodLS->solve(*stiffnessMatrix, loadVector, displacementVector);
     // terminate linear static computation (necessary, in order to compute stresses in elements).
     this->terminateLinStatic( this->giveCurrentStep() );
     /*
@@ -276,7 +276,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
 
-    nMethod->solve(stiffnessMatrix, initialStressMatrix, & eigVal, & eigVec, rtolv, numberOfRequiredEigenValues);
+    nMethod->solve(*stiffnessMatrix, *initialStressMatrix, eigVal, eigVec, rtolv, numberOfRequiredEigenValues);
     // compute eigen frequencies
     //for (i = 1; i<= numberOfRequiredEigenValues; i++)
     // eigVal.at(i) = sqrt(eigVal.at(i));

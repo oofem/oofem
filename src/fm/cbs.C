@@ -340,7 +340,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
         // Depends on prescribed v
         this->assembleVectorFromElements( rhs, tStep, PrescribedVelocityRhsVector, VM_Incremental,
                                          vnum, this->giveDomain(1) );
-        nMethod->solve(mss.get(), & rhs, & deltaAuxVelocity);
+        nMethod->solve(*mss, rhs, deltaAuxVelocity);
     } else {
         for ( int i = 1; i <= momneq; i++ ) {
             deltaAuxVelocity.at(i) = deltaT * rhs.at(i) / mm.at(i);
@@ -370,7 +370,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     this->assembleVectorFromElements( rhs, tStep, DensityRhsPressureTerms, VM_Total,
                                      pnum, this->giveDomain(1) );
     this->giveNumericalMethod( this->giveCurrentMetaStep() );
-    nMethod->solve(lhs.get(), & rhs, pressureVector);
+    nMethod->solve(*lhs, rhs, *pressureVector);
     pressureVector->times(this->theta2);
     pressureVector->add(* prevPressureVector);
 
@@ -383,7 +383,7 @@ CBS :: solveYourselfAt(TimeStep *tStep)
     if ( consistentMassFlag ) {
         rhs.times(deltaT);
         //this->assembleVectorFromElements(rhs, tStep, PrescribedRhsVector, VM_Incremental, vnum, this->giveDomain(1));
-        nMethod->solve(mss.get(), & rhs, velocityVector);
+        nMethod->solve(*mss, rhs, *velocityVector);
         velocityVector->add(deltaAuxVelocity);
         velocityVector->add(* prevVelocityVector);
     } else {

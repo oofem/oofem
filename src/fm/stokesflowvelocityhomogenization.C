@@ -255,7 +255,7 @@ StokesFlowVelocityHomogenization :: computeTangent(FloatMatrix &answer, TimeStep
     H.resize( F.giveNumberOfRows(), F.giveNumberOfColumns() );
     H.zero();
 
-    linMethod->solve(stiffnessMatrix.get(), F, H);
+    linMethod->solve(*stiffnessMatrix, F, H);
 
     answer.beTProductOf(H, F);
     answer.times( 1. / this->giveAreaOfRVE() );

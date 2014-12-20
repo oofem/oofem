@@ -55,7 +55,7 @@ InverseIteration :: InverseIteration(Domain *d, EngngModel *m) :
 InverseIteration :: ~InverseIteration() { }
 
 NM_Status
-InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, FloatMatrix *_r, double rtol, int nroot)
+InverseIteration :: solve(SparseMtrx &a, SparseMtrx &b, FloatArray &_eigv, FloatMatrix &_r, double rtol, int nroot)
 //
 //
 //
@@ -67,28 +67,28 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
     // check matrix size
     //
     nc = min(2 * nroot, nroot + 8);
-    if ( ( !a ) || ( !b ) ) {
-        OOFEM_ERROR("matrices are not defined");
-    }
 
-    if ( a->giveNumberOfColumns() != b->giveNumberOfColumns() ) {
+    if ( a.giveNumberOfColumns() != b.giveNumberOfColumns() ) {
         OOFEM_ERROR("matrices size mismatch");
     }
 
-    if ( !a->canBeFactorized() ) {
+    if ( !a.canBeFactorized() ) {
         OOFEM_ERROR("The a matrix does not support factorization");
     }
 
     //
     // check for wery small problem
     //
-    nn = a->giveNumberOfColumns();
+    nn = a.giveNumberOfColumns();
     if ( nc > nn ) {
         nc = nn;
     }
 
+    _eigv.resize(nroot);
+    _r.resize(nn, nroot);
+
     FloatArray w(nc), ww(nc), t(nn), tt(nn), * ptr, * ptr2;
-    FloatArray *z = new FloatArray [ nc ], *zz = new FloatArray [ nc ], *x = new FloatArray [ nc ];
+    std :: vector< FloatArray > z(nc), zz(nc), x(nc);
 
     for ( j = 0; j < nc; j++ ) {
         z [ j ].resize(nn);
@@ -109,7 +109,7 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
     }
 
     /*  stiffness factorization  */
-    a->factorized();
+    a.factorized();
 
     for ( i = 0; i < nitem; i++ ) {
         /*  copy zz=z  */
@@ -120,7 +120,7 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
         /*  solve matrix equation K.X = M.X  */
         for ( j = 0; j < nc; j++ ) {
             x [ j ] = z [ j ];
-            a->backSubstitutionWith(x [ j ]);
+            a.backSubstitutionWith(x [ j ]);
         }
 
         /*  evaluation of Rayleigh quotients  */
@@ -130,7 +130,7 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
 
         //mmc_sky (m,x,z,adrm,n,niv);
         for ( j = 0; j < nc; j++ ) {
-            b->times(x [ j ], z [ j ]);
+            b.times(x [ j ], z [ j ]);
         }
 
         for ( j = 0; j < nc; j++ ) {
@@ -154,7 +154,7 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
         /*  Gramm-Schmidt ortogonalization   */
         for ( j = 0; j < nc; j++ ) {
             if ( j != 0 ) {
-                b->times(x [ j ], t);
+                b.times(x [ j ], t);
             }
 
             for ( ii = 0; ii < j; ii++ ) {
@@ -166,7 +166,7 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
                 }
             }
 
-            b->times(x [ j ], t);
+            b.times(x [ j ], t);
             c = x [ j ].dotProduct(t);
             x [ j ].times( 1.0 / sqrt(c) );
         }
@@ -177,16 +177,16 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
 
         /*  compute new approximation of Z  */
         for ( j = 0; j < nc; j++ ) {
-            b->times(x [ j ], z [ j ]);
+            b.times(x [ j ], z [ j ]);
         }
     }
 
     // copy results
     for ( i = 1; i <= nroot; i++ ) {
-        _eigv->at(i) = w.at(i);
+        _eigv.at(i) = w.at(i);
         ptr = & x [ i - 1 ];
         for ( j = 1; j <= nn; j++ ) {
-            _r->at(j, i) = ptr->at(j);
+            _r.at(j, i) = ptr->at(j);
         }
     }
 
@@ -197,11 +197,6 @@ InverseIteration :: solve(SparseMtrx *a, SparseMtrx *b, FloatArray *_eigv, Float
     }
 
     solved = 1;
-
-    delete [] z;
-    delete [] zz;
-    delete [] x;
-
 
     return NM_Success;
 }

@@ -607,8 +607,8 @@ void MixedGradientPressureWeakPeriodic :: computeTangents(FloatMatrix &Ed, Float
     p_pert.at( e_loc.at(1) ) = - 1.0 * rve_size;
 
     // Solve all sensitivities
-    solver->solve(Kff, ddev_pert, s_d);
-    solver->solve(Kff, & p_pert, & s_p);
+    solver->solve(*Kff, ddev_pert, s_d);
+    solver->solve(*Kff, p_pert, s_p);
 
     // Extract the tractions from the sensitivity solutions s_d and s_p:
     FloatArray tractions_p( t_loc.giveSize() );

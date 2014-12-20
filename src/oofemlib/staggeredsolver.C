@@ -145,8 +145,8 @@ StaggeredSolver :: giveTotalLocationArray(IntArray &condensedLocationArray, cons
 
 
 NM_Status
-StaggeredSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                  FloatArray *Xtotal, FloatArray *dXtotal, FloatArray *F,
+StaggeredSolver :: solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+                  FloatArray &Xtotal, FloatArray &dXtotal, FloatArray &F,
                   const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                   int &nite, TimeStep *tStep)
 
@@ -154,7 +154,7 @@ StaggeredSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     // residual, iteration increment of solution, total external force
     FloatArray RHS, rhs, ddXtotal, RT;
     double RRTtotal;
-    int neq = Xtotal->giveSize();
+    int neq = Xtotal.giveSize();
     NM_Status status;
     bool converged, errorOutOfRangeFlag;
     ParallelContext *parallel_context = engngModel->giveParallelContext( this->domain->giveNumber() );
@@ -176,7 +176,7 @@ StaggeredSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     this->giveLinearSolver();
 
     // compute total load R = R+R0
-    RT = * R;
+    RT = R;
     if ( R0 ) {
         RT.add(* R0);
     }
@@ -212,7 +212,7 @@ StaggeredSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
             printf("\nSolving for dof group %d \n", dG+1);
             
             engngModel->updateComponent(tStep, NonLinearLhs, domain);      
-            this->stiffnessMatrixList[dG] = k->giveSubMatrix( locArrayList[dG], locArrayList[dG]);
+            this->stiffnessMatrixList[dG] = k.giveSubMatrix( locArrayList[dG], locArrayList[dG]);
 
             if ( this->prescribedDofsFlag ) {
                 if ( !prescribedEqsInitFlag ) {
@@ -225,9 +225,9 @@ StaggeredSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
             do {
                 // Compute the residual
                 engngModel->updateComponent(tStep, InternalRhs, domain);
-                RHS.beDifferenceOf(RT, * F); 
+                RHS.beDifferenceOf(RT, F); 
                 
-                this->fIntList[dG].beSubArrayOf( *F, locArrayList[dG] );
+                this->fIntList[dG].beSubArrayOf( F, locArrayList[dG] );
                 rhs.beDifferenceOf(this->fExtList[dG], this->fIntList[dG]);
                 
                 RHS.zero();
@@ -240,7 +240,7 @@ StaggeredSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 
                 // convergence check
                 IntArray &idArray = UnknownNumberingSchemeList[dG].dofIdArray;
-                converged = this->checkConvergenceDofIdArray(RT, * F, RHS, ddXtotal, * Xtotal, RRTtotal, internalForcesEBENorm, nite, errorOutOfRangeFlag, tStep, idArray);
+                converged = this->checkConvergenceDofIdArray(RT, F, RHS, ddXtotal, Xtotal, RRTtotal, internalForcesEBENorm, nite, errorOutOfRangeFlag, tStep, idArray);
                
 
                 if ( errorOutOfRangeFlag ) {
@@ -257,17 +257,17 @@ StaggeredSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
                 if ( nite > 0 || !mCalcStiffBeforeRes ) {
                     if ( ( NR_Mode == nrsolverFullNRM ) || ( ( NR_Mode == nrsolverAccelNRM ) && ( nite % MANRMSteps == 0 ) ) ) {
                         engngModel->updateComponent(tStep, NonLinearLhs, domain);
-                        this->stiffnessMatrixList[dG] = k->giveSubMatrix( locArrayList[dG], locArrayList[dG]);
-                        applyConstraintsToStiffness(this->stiffnessMatrixList[dG]);
+                        this->stiffnessMatrixList[dG] = k.giveSubMatrix( locArrayList[dG], locArrayList[dG]);
+                        applyConstraintsToStiffness(*this->stiffnessMatrixList[dG]);
                     }
                 }
 
                 if ( ( nite == 0 ) && ( deltaL < 1.0 ) ) { // deltaL < 1 means no increment applied, only equilibrate current state
                     rhs.zero();
-                    R->zero();
+                    R.zero();
                     ddX[dG] = rhs;
                 } else {
-                    status = linSolver->solve(this->stiffnessMatrixList[dG], & rhs, & ddX[dG]);
+                    status = linSolver->solve(*this->stiffnessMatrixList[dG], rhs, ddX[dG]);
                 }
 
                 //
@@ -277,7 +277,7 @@ StaggeredSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
                     // line search
                     LineSearchNM :: LS_status LSstatus;
                     double eta;               
-                    this->giveLineSearchSolver()->solve( &X[dG], &ddX[dG], &fIntList[dG], &fExtList[dG], R0, prescribedEqs, 1.0, eta, LSstatus, tStep);
+                    this->giveLineSearchSolver()->solve( X[dG], ddX[dG], fIntList[dG], fExtList[dG], R0, prescribedEqs, 1.0, eta, LSstatus, tStep);
                 } else if ( this->constrainedNRFlag && ( nite > this->constrainedNRminiter ) ) { 
                     if ( this->forceErrVec.computeSquaredNorm() > this->forceErrVecOld.computeSquaredNorm() ) {
                         printf("Constraining increment to be %e times full increment...\n", this->constrainedNRalpha);
@@ -289,8 +289,8 @@ StaggeredSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
 
                 
                 // Update total solution (containing all dofs)
-                Xtotal->assemble(ddX[dG], locArrayList[dG]);
-                dXtotal->assemble(ddX[dG], locArrayList[dG]);
+                Xtotal.assemble(ddX[dG], locArrayList[dG]);
+                dXtotal.assemble(ddX[dG], locArrayList[dG]);
                 ddXtotal.zero();
                 ddXtotal.assemble(ddX[dG], locArrayList[dG]);
                 
@@ -306,8 +306,8 @@ StaggeredSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
         printf("\nStaggered iteration (all dof id's) \n");
         
         // Check convergence of total system
-        RHS.beDifferenceOf(RT, * F);
-        converged = this->checkConvergence(RT, * F, RHS, ddXtotal, * Xtotal, RRTtotal, internalForcesEBENorm, nStaggeredIter, errorOutOfRangeFlag);
+        RHS.beDifferenceOf(RT, F);
+        converged = this->checkConvergence(RT, F, RHS, ddXtotal, Xtotal, RRTtotal, internalForcesEBENorm, nStaggeredIter, errorOutOfRangeFlag);
         if ( converged && ( nStaggeredIter >= minIterations ) ) {
             break;
         }    
@@ -325,11 +325,11 @@ StaggeredSolver :: solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
     // Modify Load vector to include "quasi reaction"
     if ( R0 ) {
         for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
-            R->at( prescribedEqs.at(i) ) = F->at( prescribedEqs.at(i) ) - R0->at( prescribedEqs.at(i) ) - R->at( prescribedEqs.at(i) );
+            R.at( prescribedEqs.at(i) ) = F.at( prescribedEqs.at(i) ) - R0->at( prescribedEqs.at(i) ) - R.at( prescribedEqs.at(i) );
         }
     } else {
         for ( int i = 1; i <= numberOfPrescribedDofs; i++ ) {
-            R->at( prescribedEqs.at(i) ) = F->at( prescribedEqs.at(i) ) - R->at( prescribedEqs.at(i) );
+            R.at( prescribedEqs.at(i) ) = F.at( prescribedEqs.at(i) ) - R.at( prescribedEqs.at(i) );
         }
     }
 

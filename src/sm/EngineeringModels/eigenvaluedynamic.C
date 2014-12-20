@@ -191,7 +191,7 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
 
-    nMethod->solve(stiffnessMatrix, massMatrix, & eigVal, & eigVec, rtolv, numberOfRequiredEigenValues);
+    nMethod->solve(*stiffnessMatrix, *massMatrix, eigVal, eigVec, rtolv, numberOfRequiredEigenValues);
 
     delete stiffnessMatrix;
     delete massMatrix;

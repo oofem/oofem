@@ -97,7 +97,7 @@ public:
     virtual int assemble(const IntArray &rloc, const IntArray &cloc, const FloatMatrix &mat);
     virtual bool canBeFactorized() const { return true; }
     virtual SparseMtrx *factorized();
-    virtual void solve(FloatArray *b, FloatArray *x);
+    virtual void solve(FloatArray &b, FloatArray &x);
     virtual void zero();
     virtual double &at(int i, int j);
     virtual double at(int i, int j) const;

@@ -152,8 +152,8 @@ public:
     virtual ~NRSolver();
 
     // Overloaded methods:
-    virtual NM_Status solve(SparseMtrx *k, FloatArray *R, FloatArray *R0,
-                            FloatArray *X, FloatArray *dX, FloatArray *F,
+    virtual NM_Status solve(SparseMtrx &k, FloatArray &R, FloatArray *R0,
+                            FloatArray &X, FloatArray &dX, FloatArray &F,
                             const FloatArray &internalForcesEBENorm, double &l, referenceLoadInputModeType rlm,
                             int &nite, TimeStep *);
     virtual void printState(FILE *outputStream);
@@ -185,8 +185,8 @@ protected:
 
     /// Initiates prescribed equations
     void initPrescribedEqs();
-    void applyConstraintsToStiffness(SparseMtrx *k);
-    void applyConstraintsToLoadIncrement(int nite, const SparseMtrx *k, FloatArray &R,
+    void applyConstraintsToStiffness(SparseMtrx &k);
+    void applyConstraintsToLoadIncrement(int nite, const SparseMtrx &k, FloatArray &R,
                                          referenceLoadInputModeType rlm, TimeStep *tStep);
 
     /**

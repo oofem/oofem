@@ -58,7 +58,7 @@ public:
 
     virtual ~PetscSolver();
 
-    virtual NM_Status solve(SparseMtrx *A, FloatArray *b, FloatArray *x);
+    virtual NM_Status solve(SparseMtrx &A, FloatArray &b, FloatArray &x);
 
     /**
      * Solves the given linear system.

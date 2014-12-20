@@ -342,7 +342,7 @@ void DIIDynamic :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_RELEVANT( "\n\nSolving [step number %8d, time %15e]\n", tStep->giveNumber(), tStep->giveTargetTime() );
 #endif
 
-    nMethod->solve(stiffnessMatrix, & rhs, & displacementVector);
+    nMethod->solve(*stiffnessMatrix, rhs, displacementVector);
 
     if ( tStep->giveTimeDiscretization() == TD_Wilson ) {
         OOFEM_LOG_INFO("TD_Wilson: Updating acceleration, velocity and displacement.\n");

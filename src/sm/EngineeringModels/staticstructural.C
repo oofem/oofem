@@ -248,7 +248,7 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
         this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
         SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
         OOFEM_LOG_RELEVANT("Solving for increment\n");
-        linSolver->solve(stiffnessMatrix.get(), & extrapolatedForces, & incrementOfSolution);
+        linSolver->solve(*stiffnessMatrix, extrapolatedForces, incrementOfSolution);
         OOFEM_LOG_RELEVANT("Initial guess found\n");
         this->solution.add(incrementOfSolution);
     } else if ( this->initialGuessType != IG_None ) {
@@ -269,12 +269,12 @@ void StaticStructural :: solveYourselfAt(TimeStep *tStep)
 
     double loadLevel;
     int currentIterations;
-    NM_Status status = this->nMethod->solve(this->stiffnessMatrix.get(),
-                                            & externalForces,
+    NM_Status status = this->nMethod->solve(*this->stiffnessMatrix,
+                                            externalForces,
                                             NULL,
-                                            & this->solution,
-                                            & incrementOfSolution,
-                                            & this->internalForces,
+                                            this->solution,
+                                            incrementOfSolution,
+                                            this->internalForces,
                                             this->eNorm,
                                             loadLevel, // Only relevant for incrementalBCLoadVector?
                                             SparseNonLinearSystemNM :: rlm_total,

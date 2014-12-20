@@ -418,12 +418,12 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
     double loadLevel;
     int currentIterations;
     this->updateComponent( tStep, InternalRhs, this->giveDomain(1) );
-    NM_Status status = this->nMethod->solve(this->lhs,
-                                            & externalForces,
+    NM_Status status = this->nMethod->solve(*this->lhs,
+                                            externalForces,
                                             NULL,
                                             solutionVector,
-                                            & ( this->incrementalSolutionVector ),
-                                            & ( this->internalForces ),
+                                            this->incrementalSolutionVector,
+                                            this->internalForces,
                                             this->eNorm,
                                             loadLevel, // Only relevant for incrementalBCLoadVector?
                                             SparseNonLinearSystemNM :: rlm_total,
@@ -474,12 +474,12 @@ SUPG :: solveYourselfAt(TimeStep *tStep)
         //if (this->fsflag) this->imposeAmbientPressureInOuterNodes(lhs,&rhs,tStep);
 
 #if 1
-        nMethod->solve(lhs.get(), & rhs, & incrementalSolutionVector);
+        nMethod->solve(*lhs, rhs, incrementalSolutionVector);
 #else
 
         SparseMtrx *__lhs = lhs->GiveCopy();
 
-        nMethod->solve(lhs, & rhs, & incrementalSolutionVector);
+        nMethod->solve(*lhs, rhs, incrementalSolutionVector);
 
         // check solver
         FloatArray __rhs(neq);

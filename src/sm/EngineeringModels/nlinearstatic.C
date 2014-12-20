@@ -487,7 +487,7 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         this->updateComponent( tStep, NonLinearLhs, this->giveDomain(di) );
         SparseLinearSystemNM *linSolver = nMethod->giveLinearSolver();
         OOFEM_LOG_RELEVANT("solving for increment\n");
-        linSolver->solve(stiffnessMatrix, & extrapolatedForces, & incrementOfDisplacement);
+        linSolver->solve(*stiffnessMatrix, extrapolatedForces, incrementOfDisplacement);
         OOFEM_LOG_RELEVANT("initial guess found\n");
         totalDisplacement.add(incrementOfDisplacement);
     } else if ( this->initialGuessType != IG_None ) {
@@ -498,12 +498,12 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
 
     //totalDisplacement.printYourself();
     if ( initialLoadVector.isNotEmpty() ) {
-        numMetStatus = nMethod->solve(stiffnessMatrix, & incrementalLoadVector, & initialLoadVector,
-                                      & totalDisplacement, & incrementOfDisplacement, & internalForces,
+        numMetStatus = nMethod->solve(*stiffnessMatrix, incrementalLoadVector, & initialLoadVector,
+                                      totalDisplacement, incrementOfDisplacement, internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     } else {
-        numMetStatus = nMethod->solve(stiffnessMatrix, & incrementalLoadVector, NULL,
-                                      & totalDisplacement, & incrementOfDisplacement, & internalForces,
+        numMetStatus = nMethod->solve(*stiffnessMatrix, incrementalLoadVector, NULL,
+                                      totalDisplacement, incrementOfDisplacement, internalForces,
                                       internalForcesEBENorm, loadLevel, refLoadInputMode, currentIterations, tStep);
     }
     ///@todo Martin: ta bort!!!

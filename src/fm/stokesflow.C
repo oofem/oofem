@@ -150,12 +150,12 @@ void StokesFlow :: solveYourselfAt(TimeStep *tStep)
     double loadLevel;
     int currentIterations;
     this->updateComponent( tStep, InternalRhs, d );
-    NM_Status status = this->nMethod->solve(this->stiffnessMatrix.get(),
-                                            & externalForces,
+    NM_Status status = this->nMethod->solve(*this->stiffnessMatrix,
+                                            externalForces,
                                             NULL,
-                                            & solutionVector,
-                                            & incrementOfSolution,
-                                            & this->internalForces,
+                                            solutionVector,
+                                            incrementOfSolution,
+                                            this->internalForces,
                                             this->eNorm,
                                             loadLevel, // Only relevant for incrementalBCLoadVector?
                                             SparseNonLinearSystemNM :: rlm_total,

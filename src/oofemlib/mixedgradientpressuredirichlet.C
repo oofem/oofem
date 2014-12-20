@@ -318,8 +318,8 @@ void MixedGradientPressureDirichlet :: computeTangents(FloatMatrix &Ed, FloatArr
             OOFEM_ERROR("MixedGradientPressureDirichlet :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
         }
         rve->assemble(Kff, tStep, StiffnessMatrix, fnum, this->domain);
-        solver->solve(Kff, & rhs_p, & s_p);
-        solver->solve(Kff, rhs_d, s_d);
+        solver->solve(*Kff, rhs_p, s_p);
+        solver->solve(*Kff, rhs_d, s_d);
         delete Kff;
     }
 

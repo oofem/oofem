@@ -405,10 +405,10 @@ SparseMtrx *DSSMatrix :: factorized()
     return this;
 }
 
-void DSSMatrix :: solve(FloatArray *b, FloatArray *x)
+void DSSMatrix :: solve(FloatArray &b, FloatArray &x)
 {
-    x->resize( b->giveSize() );
-    _dss->Solve( x->givePointer(), b->givePointer() );
+    x.resize( b.giveSize() );
+    _dss->Solve( x.givePointer(), b.givePointer() );
 }
 
 /*********************/

@@ -61,7 +61,7 @@ public:
     SLEPcSolver(Domain * d, EngngModel * m);
     virtual ~SLEPcSolver();
 
-    virtual NM_Status solve(SparseMtrx *a, SparseMtrx *b, FloatArray *v, FloatMatrix *x, double rtol, int nroot);
+    virtual NM_Status solve(SparseMtrx &a, SparseMtrx &b, FloatArray &v, FloatMatrix &x, double rtol, int nroot);
     virtual const char *giveClassName() const { return "SLEPcSolver"; }
 };
 } // end namespace oofem

@@ -105,12 +105,12 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
     this->updateComponent( tStep, NonLinearLhs, this->giveDomain(1) );
 
     FloatArray incrementalLoadVector(0); // Should be allowed to be null
-    NM_Status status = this->nMethod->solve(this->stiffnessMatrix,
-                                            & ( this->externalForces ),
+    NM_Status status = this->nMethod->solve(*this->stiffnessMatrix,
+                                            this->externalForces,
                                             NULL,
-                                            solutionVector,
-                                            & ( this->incrementOfSolution ),
-                                            & ( this->internalForces ),
+                                            * solutionVector,
+                                            this->incrementOfSolution,
+                                            this->internalForces,
                                             this->ebeNorm,
                                             loadLevel, // Only relevant for incrementalBCLoadVector?
                                             SparseNonLinearSystemNM :: rlm_total, // Why this naming scheme? Should be RLM_Total, and ReferenceLoadInputModeType

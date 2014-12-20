@@ -355,7 +355,7 @@ void NonStationaryTransportProblem :: solveYourselfAt(TimeStep *tStep)
     OOFEM_LOG_INFO("Solving ...\n");
 #endif
     UnknownsField->giveSolutionVector(tStep)->resize(neq);
-    linSolver->solve( conductivityMatrix, & rhs, UnknownsField->giveSolutionVector(tStep) );
+    linSolver->solve(*conductivityMatrix, rhs, *UnknownsField->giveSolutionVector(tStep) );
     // update solution state counter
     tStep->incrementStateCounter();
 }
