@@ -35,6 +35,7 @@
 #include "microplane_m1.h"
 #include "floatarray.h"
 #include "floatmatrix.h"
+#include "mathfem.h"
 #include "classfactory.h"
 
 namespace oofem {
