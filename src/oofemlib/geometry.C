@@ -63,12 +63,6 @@ BasicGeometry :: BasicGeometry(const BasicGeometry &iBasicGeometry) :
 BasicGeometry :: ~BasicGeometry()
 { }
 
-// TODO: change to const FloatArray &iVertex
-void BasicGeometry :: setVertex(FloatArray *vertex)
-{
-    mVertices.push_back(* vertex);
-    delete vertex;
-}
 
 void  BasicGeometry :: removeDuplicatePoints(const double &iTolSquare)
 {

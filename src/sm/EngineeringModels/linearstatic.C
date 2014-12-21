@@ -57,40 +57,32 @@ REGISTER_EngngModel(LinearStatic);
 
 LinearStatic :: LinearStatic(int i, EngngModel *_master) : StructuralEngngModel(i, _master), loadVector(), displacementVector()
 {
-    stiffnessMatrix = NULL;
     ndomains = 1;
-    nMethod = NULL;
     initFlag = 1;
     solverType = ST_Direct;
 }
 
 
-LinearStatic :: ~LinearStatic()
-{
-    delete stiffnessMatrix;
-    delete nMethod;
-}
+LinearStatic :: ~LinearStatic() { }
 
 
 NumericalMethod *LinearStatic :: giveNumericalMethod(MetaStep *mStep)
 {
-    if ( nMethod ) {
-        return nMethod;
-    }
-
-    if ( isParallel() ) {
-        if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
-            nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+    if ( !nMethod ) {
+        if ( isParallel() ) {
+            if ( ( solverType == ST_Petsc ) || ( solverType == ST_Feti ) ) {
+                nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
+            }
+        } else {
+            nMethod.reset( classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this) );
         }
-    } else {
-        nMethod = classFactory.createSparseLinSolver(solverType, this->giveDomain(1), this);
+        if ( !nMethod ) {
+            OOFEM_ERROR("linear solver creation failed");
+        }
     }
 
-    if ( nMethod == NULL ) {
-        OOFEM_ERROR("linear solver creation failed");
-    }
 
-    return nMethod;
+    return nMethod.get();
 }
 
 IRResultType
@@ -208,8 +200,8 @@ void LinearStatic :: solveYourselfAt(TimeStep *tStep)
         //
         // first step  assemble stiffness Matrix
         //
-        stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-        if ( stiffnessMatrix == NULL ) {
+        stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+        if ( !stiffnessMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 

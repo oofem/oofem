@@ -99,7 +99,7 @@ protected:
     /// Initial condition number associated to dof.
     int ic;
     /// Unknowns dictionary to support changes of static system.
-    Dictionary *unknowns;
+    Dictionary unknowns;
 
 public:
     /**
@@ -151,8 +151,7 @@ public:
     virtual void setBcId(int bcId) { this->bc = bcId; }
     virtual void setIcId(int icId) { this->ic = icId; }
     virtual void setEquationNumber(int newEquationNumber) { this->equationNumber = newEquationNumber; }
-    virtual void setUnknowns(Dictionary *newUnknowns) { this->unknowns = newUnknowns; }
-    virtual Dictionary *giveUnknowns() { return this->unknowns; }
+    virtual Dictionary *giveUnknowns() { return &this->unknowns; }
     virtual int giveEqn() { return equationNumber; }
 
 protected:

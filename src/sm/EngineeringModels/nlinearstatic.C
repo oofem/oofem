@@ -410,10 +410,10 @@ NonLinearStatic :: proceedStep(int di, TimeStep *tStep)
         // first step  create space for stiffness Matrix
         //
         if ( !stiffnessMatrix ) {
-            stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+            stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         }
 
-        if ( stiffnessMatrix == NULL ) {
+        if ( !stiffnessMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 

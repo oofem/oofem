@@ -652,8 +652,8 @@ PerfectlyPlasticMaterial :: give(int aProperty, GaussPoint *gp)
 {
     double value = 0.0;
 
-    if ( propertyDictionary->includes(aProperty) ) {
-        value = propertyDictionary->at(aProperty);
+    if ( propertyDictionary.includes(aProperty) ) {
+        value = propertyDictionary.at(aProperty);
     } else {
         if ( linearElasticMaterial ) {
             value = this->linearElasticMaterial->give(aProperty, gp);

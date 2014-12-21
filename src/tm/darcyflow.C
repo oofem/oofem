@@ -25,18 +25,12 @@ REGISTER_EngngModel(DarcyFlow);
 
 DarcyFlow :: DarcyFlow(int i, EngngModel *_master) : EngngModel(i, _master)
 {
-    this->PressureField = NULL;
-    this->nMethod = NULL;
     this->ndomains = 1;
     this->hasAdvanced = false;
-    this->stiffnessMatrix = NULL;
 }
 
 DarcyFlow :: ~DarcyFlow()
 {
-    delete PressureField;
-    delete nMethod;
-    delete stiffnessMatrix;
 }
 
 IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
@@ -54,7 +48,7 @@ IRResultType DarcyFlow :: initializeFrom(InputRecord *ir)
     sparseMtrxType = ( SparseMtrxType ) val;
 
     // Create solution space for pressure field
-    PressureField = new PrimaryField(this, 1, FT_Pressure, 1);
+    PressureField.reset( new PrimaryField(this, 1, FT_Pressure, 1) );
     return IRRT_OK;
 }
 
@@ -83,7 +77,7 @@ void DarcyFlow :: solveYourselfAt(TimeStep *tStep)
 
     // Create "stiffness matrix"
     if ( !this->stiffnessMatrix ) {
-        this->stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+        this->stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         this->stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
     }
 
@@ -207,10 +201,7 @@ int DarcyFlow :: forceEquationNumbering(int id)  // Is this really needed???!?
     int neq = EngngModel :: forceEquationNumbering(id);
 
     this->equationNumberingCompleted = false;
-    if ( this->stiffnessMatrix ) {
-        delete this->stiffnessMatrix;
-        this->stiffnessMatrix = NULL;
-    }
+    this->stiffnessMatrix.reset(NULL);
 
     return neq;
 }
@@ -222,15 +213,14 @@ NumericalMethod *DarcyFlow :: giveNumericalMethod(MetaStep *mStep)
      * If no solver has bee initialized, create one, otherwise, return the existing solver.
      */
 
-    if ( this->nMethod ) {
-        return this->nMethod;
+    if ( !this->nMethod ) {
+        this->nMethod.reset( new NRSolver(this->giveDomain(1), this) );
+        if ( !nMethod ) {
+            OOFEM_ERROR("numerical method creation failed");
+        }
     }
 
-    this->nMethod = new NRSolver(this->giveDomain(1), this);
-    if ( !nMethod ) {
-        OOFEM_ERROR("numerical method creation failed");
-    }
-    return this->nMethod;
+    return this->nMethod.get();
 }
 
 TimeStep *DarcyFlow :: giveNextStep()

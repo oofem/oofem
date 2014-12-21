@@ -90,23 +90,15 @@
 #include <set>
 
 namespace oofem {
-Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry()
+Domain :: Domain(int n, int serNum, EngngModel *e) : defaultNodeDofIDArry(),
+    outputManager( new OutputManager(this) )
     // Constructor. Creates a new domain.
 {
     this->engineeringModel = e;
     this->number = n;
     this->serialNumber = serNum;
 
-    dType                 = _unknownMode;
-
-    xfemManager           = NULL;
-    connectivityTable     = NULL;
-    spatialLocalizer      = NULL;
-    outputManager         = new OutputManager(this);
-    smoother              = NULL;
-    topology              = NULL;
-    fracManager           = NULL;
-    contactManager        = NULL;
+    dType = _unknownMode;
 
     nonlocalUpdateStateCounter = 0;
 
@@ -247,21 +239,7 @@ Domain *Domain :: Clone()
     return dNew;
 }
 
-Domain :: ~Domain()
-// Destructor.
-{
-    delete xfemManager;
-    delete connectivityTable;
-    delete spatialLocalizer;
-    delete outputManager;
-    delete smoother;
-    delete topology;
-    delete contactManager;
-
-#ifdef __PARALLEL_MODE
-    delete transactionManager;
-#endif
-}
+Domain :: ~Domain() { }
 
 void
 Domain :: clear()
@@ -278,28 +256,23 @@ Domain :: clear()
     crossSectionList.clear();
     nonlocalBarrierList.clear();
     setList.clear();
-    delete xfemManager;
-    xfemManager = NULL;
-    delete contactManager;
-    contactManager = NULL;
+    xfemManager.reset(NULL);
+    contactManager.reset(NULL);
     if ( connectivityTable ) {
         connectivityTable->reset();
     }
 
-    delete spatialLocalizer;
-    spatialLocalizer = NULL;
+    spatialLocalizer.reset(NULL);
 
     if ( smoother ) {
         smoother->clear();
     }
 
-    // bp: how to clear/reset topology data?
-    delete topology;
-    topology = NULL;
+    ///@todo bp: how to clear/reset topology data?
+    topology.reset(NULL);
 
 #ifdef __PARALLEL_MODE
-    delete transactionManager;
-    transactionManager = NULL;
+    transactionManager.reset(NULL);
 #endif
 }
 
@@ -527,13 +500,13 @@ Domain :: giveXfemManager()
         OOFEM_ERROR("undefined xfem manager");
     }
 #endif
-    return xfemManager;
+    return xfemManager.get();
 }
 
 bool
 Domain :: hasXfemManager()
 {
-    return xfemManager != NULL;
+    return xfemManager.get() != NULL;
 }
 
 
@@ -545,19 +518,19 @@ Domain :: giveContactManager()
         OOFEM_ERROR("undefined contact manager");
     }
 #endif
-    return contactManager;
+    return contactManager.get();
 }
 
 bool
 Domain :: hasContactManager()
 {
-    return contactManager != NULL;
+    return contactManager.get() != NULL;
 }
 
 bool
 Domain :: hasFractureManager()
 {
-    return fracManager != NULL;
+    return fracManager.get() != NULL;
 }
 
 FractureManager *
@@ -568,7 +541,7 @@ Domain :: giveFractureManager()
         OOFEM_ERROR("undefined fracture manager");
     }
 #endif
-    return fracManager;
+    return fracManager.get();
 }
 
 EngngModel *
@@ -602,6 +575,7 @@ void Domain :: setBoundaryCondition(int i, GeneralBoundaryCondition *obj) { bcLi
 void Domain :: setInitialCondition(int i, InitialCondition *obj) { icList[i-1].reset(obj); }
 void Domain :: setFunction(int i, Function *obj) { functionList[i-1].reset(obj); }
 void Domain :: setSet(int i, Set *obj) { setList[i-1].reset(obj); }
+void Domain :: setXfemManager(XfemManager *ipXfemManager) { xfemManager.reset(ipXfemManager); }
 
 void Domain :: clearBoundaryConditions() { bcList.clear(); }
 
@@ -986,8 +960,7 @@ Domain :: instanciateYourself(DataReader *dr)
         ir = dr->giveInputRecord(DataReader :: IR_xfemManRec, 1);
 
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
-        xfemManager = classFactory.createXfemManager(name.c_str(), this);
-
+        xfemManager.reset( classFactory.createXfemManager(name.c_str(), this) );
         xfemManager->initializeFrom(ir);
         xfemManager->instanciateYourself(dr);
 #  ifdef VERBOSE
@@ -1001,8 +974,7 @@ Domain :: instanciateYourself(DataReader *dr)
         ir = dr->giveInputRecord(DataReader :: IR_contactManRec, 1);
 
         IR_GIVE_RECORD_KEYWORD_FIELD(ir, name, num);
-        contactManager = classFactory.createContactManager(name.c_str(), this);
-
+        contactManager.reset( classFactory.createContactManager(name.c_str(), this) );
         contactManager->initializeFrom(ir);
         contactManager->instanciateYourself(dr);
     }
@@ -1015,7 +987,7 @@ Domain :: instanciateYourself(DataReader *dr)
 
     this->topology = NULL;
     if ( topologytype.length() > 0 ) {
-        this->topology = classFactory.createTopology(topologytype.c_str(), this);
+        this->topology.reset( classFactory.createTopology(topologytype.c_str(), this) );
         if ( !this->topology ) {
             OOFEM_ERROR("Couldn't create topology of type '%s'", topologytype.c_str());
         }
@@ -1028,8 +1000,8 @@ Domain :: instanciateYourself(DataReader *dr)
 
 
     if ( nfracman ) {
-        fracManager = new FractureManager(this);
         ir = dr->giveInputRecord(DataReader :: IR_fracManRec, 1);
+        fracManager.reset( new FractureManager(this) );
         fracManager->initializeFrom(ir);
         fracManager->instanciateYourself(dr);
 #  ifdef VERBOSE
@@ -1227,29 +1199,29 @@ Domain :: resolveDomainDofsDefaults(const char *typeName)
 NodalRecoveryModel *
 Domain :: giveSmoother()
 {
-    return this->smoother;
+    return this->smoother.get();
 }
 
 
 void
 Domain :: setSmoother(NodalRecoveryModel *newSmoother, bool destroyOld)
 {
-    if ( destroyOld ) {
-        delete smoother;
+    if ( !destroyOld ) {
+        this->smoother.release();
     }
 
-    smoother = newSmoother;
+    this->smoother.reset(newSmoother);
 }
 
 
 void
 Domain :: setTopology(TopologyDescription *topo, bool destroyOld)
 {
-    if ( destroyOld ) {
-        delete this->topology;
+    if ( !destroyOld ) {
+        this->topology.release();
     }
 
-    this->topology = topo;
+    this->topology.reset(topo);
 }
 
 
@@ -1259,11 +1231,11 @@ Domain :: giveConnectivityTable()
 // return connectivity Table - if no defined - creates new one
 //
 {
-    if ( connectivityTable == NULL ) {
-        connectivityTable = new ConnectivityTable(this);
+    if ( !connectivityTable ) {
+        connectivityTable.reset( new ConnectivityTable(this) );
     }
 
-    return connectivityTable;
+    return connectivityTable.get();
 }
 
 
@@ -1274,12 +1246,12 @@ Domain :: giveSpatialLocalizer()
 //
 {
     //  if (spatialLocalizer == NULL) spatialLocalizer = new DummySpatialLocalizer(1, this);
-    if ( spatialLocalizer == NULL ) {
-        spatialLocalizer = new OctreeSpatialLocalizer(this);
+    if ( !spatialLocalizer ) {
+        spatialLocalizer.reset( new OctreeSpatialLocalizer(this) );
     }
 
     spatialLocalizer->init();
-    return spatialLocalizer;
+    return spatialLocalizer.get();
 }
 
 
@@ -1513,6 +1485,22 @@ Domain :: giveErrorEstimator()
     return engineeringModel->giveDomainErrorEstimator(this->number);
 }
 
+
+OutputManager *
+Domain :: giveOutputManager()
+{
+    return outputManager.get();
+}
+
+
+TopologyDescription *
+Domain :: giveTopology()
+{
+    return topology.get();
+}
+
+
+
 #define SAVE_COMPONENTS(list)                       \
     {                                               \
         for ( const auto &object: list ) {             \
@@ -1654,8 +1642,7 @@ Domain :: restoreContext(DataStream &stream, ContextMode mode, void *obj)
         nonlocalBarrierList.clear();
         setList.clear();
         ///@todo Saving and restoring xfemmanagers.
-        delete xfemManager;
-        xfemManager = NULL;
+        xfemManager.reset(NULL);
         //this->clear();
 
         RESTORE_COMPONENTS(nmat, this->materialList, classFactory.createMaterial);

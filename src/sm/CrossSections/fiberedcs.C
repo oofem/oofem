@@ -503,7 +503,7 @@ FiberedCrossSection :: printYourself()
 // Prints the receiver on screen.
 {
     printf("Cross Section with properties : \n");
-    propertyDictionary->printYourself();
+    propertyDictionary.printYourself();
     printf("Fiber Materials: \n");
     fiberMaterials.printYourself();
     printf("Fiber Thicks   : \n");

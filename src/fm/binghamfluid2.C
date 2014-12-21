@@ -393,7 +393,7 @@ BinghamFluidMaterial2 :: checkConsistency()
     if ( domain->giveEngngModel()->giveEquationScalingFlag() ) {
         double scale;
         scale = domain->giveEngngModel()->giveVariableScale(VST_Density);
-        propertyDictionary->at('d') /= scale;
+        propertyDictionary.at('d') /= scale;
 
         scale = domain->giveEngngModel()->giveVariableScale(VST_Viscosity);
         this->mu_0 /= scale;

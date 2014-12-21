@@ -37,10 +37,12 @@
 
 #include "chartype.h"
 #include "valuemodetype.h"
-
 #include "oofemcfg.h"
 #include "datareader.h"
 #include "inputrecord.h"
+
+#include <vector>
+#include <memory>
 
 ///@name Input fields for _IFT_ContactManager
 //@{
@@ -66,7 +68,7 @@ protected:
     Domain *domain;
 
 private:
-    std :: vector< ContactDefinition *> contactDefinitionList;
+    std :: vector< std :: unique_ptr< ContactDefinition > > contactDefinitionList;
 
 public:
 
@@ -86,7 +88,7 @@ public:
 
     Domain *giveDomain() { return this->domain; }
     int numberOfContactDefinitions;
-    ContactDefinition *giveContactDefinition(const int num) { return this->contactDefinitionList[num-1]; };
+    ContactDefinition *giveContactDefinition(const int num) { return this->contactDefinitionList[num-1].get(); };
     int giveNumberOfContactDefinitions() const { return (int)contactDefinitionList.size(); }
 
     

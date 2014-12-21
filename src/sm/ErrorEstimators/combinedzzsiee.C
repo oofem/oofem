@@ -83,11 +83,11 @@ CombinedZZSIErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep)
 RemeshingCriteria *
 CombinedZZSIErrorEstimator :: giveRemeshingCrit()
 {
-    if ( this->rc ) {
-        return this->rc;
+    if ( !this->rc ) {
+        this->rc.reset( new CombinedZZSIRemeshingCriteria(1, this) );
     }
 
-    return ( this->rc = new CombinedZZSIRemeshingCriteria(1, this) );
+    return this->rc.get();
 }
 
 IRResultType

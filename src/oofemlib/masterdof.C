@@ -52,21 +52,16 @@ MasterDof :: MasterDof(DofManager *aNode, int nbc, int nic, DofIDItem id) : Dof(
     equationNumber = 0;                         // means "uninitialized"
     bc             = nbc;
     ic             = nic;
-    unknowns       = new Dictionary();
-    /*   unknowns       = new Dictionary() ;           // unknown size ?
-     * pastUnknowns   = NULL ; */
 }
 
 MasterDof :: MasterDof(DofManager *aNode, DofIDItem id) : Dof(aNode, id)
 {
     ic = bc = equationNumber = 0;                        // means "uninitialized"
-    unknowns = new Dictionary();
 }
 
 
 MasterDof :: ~MasterDof()
 {
-    delete unknowns;
 }
 
 
@@ -292,9 +287,6 @@ void MasterDof :: updateYourself(TimeStep *tStep)
 // Updates the receiver at end of step.
 {
     Dof :: updateYourself(tStep);
-    /*   delete pastUnknowns ;
-     * pastUnknowns = unknowns ;
-     * unknowns     = new Dictionary() ; */
 }
 
 void MasterDof :: updateUnknownsDictionary(TimeStep *tStep, ValueModeType mode, double dofValue)
@@ -303,13 +295,13 @@ void MasterDof :: updateUnknownsDictionary(TimeStep *tStep, ValueModeType mode, 
     // to value dofValue.
 
     int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(mode, tStep);
-    unknowns->at(hash) = dofValue;
+    unknowns.at(hash) = dofValue;
 }
 
 double MasterDof :: giveUnknownsDictionaryValue(TimeStep *tStep, ValueModeType mode)
 {
     int hash = dofManager->giveDomain()->giveEngngModel()->giveUnknownDictHashIndx(mode, tStep);
-    return unknowns->at(hash);
+    return unknowns.at(hash);
 }
 
 void MasterDof :: printYourself()
@@ -347,7 +339,7 @@ contextIOResultType MasterDof :: saveContext(DataStream &stream, ContextMode mod
     }
 
     if ( ( mode & CM_UnknownDictState ) || ( dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) ) {
-        if ( ( iores = unknowns->saveContext(stream, mode, obj) ) != CIO_OK ) {
+        if ( ( iores = unknowns.saveContext(stream, mode, obj) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }
@@ -385,7 +377,7 @@ contextIOResultType MasterDof :: restoreContext(DataStream &stream, ContextMode 
     }
 
     if ( ( mode & CM_UnknownDictState ) || ( dofManager->giveDomain()->giveEngngModel()->requiresUnknownsDictionaryUpdate() ) ) {
-        if ( ( iores = unknowns->restoreContext(stream, mode, obj) ) != CIO_OK ) {
+        if ( ( iores = unknowns.restoreContext(stream, mode, obj) ) != CIO_OK ) {
             THROW_CIOERR(iores);
         }
     }

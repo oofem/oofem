@@ -447,13 +447,13 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     double thick = 0.0;
     if ( ir->hasField(_IFT_SimpleCrossSection_thick) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, thick, _IFT_SimpleCrossSection_thick);
-        propertyDictionary->add(CS_Thickness, thick);
+        propertyDictionary.add(CS_Thickness, thick);
     }
 
     double width = 0.0;
     if ( ir->hasField(_IFT_SimpleCrossSection_width) ) {
         IR_GIVE_OPTIONAL_FIELD(ir, width, _IFT_SimpleCrossSection_width);
-        propertyDictionary->add(CS_Width, width);
+        propertyDictionary.add(CS_Width, width);
     }
 
     double area = 0.0;
@@ -462,41 +462,41 @@ SimpleCrossSection :: initializeFrom(InputRecord *ir)
     } else {
         area = thick * width;
     }
-    propertyDictionary->add(CS_Area, area);
+    propertyDictionary.add(CS_Area, area);
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_iy);
-    propertyDictionary->add(CS_InertiaMomentY, value);
+    propertyDictionary.add(CS_InertiaMomentY, value);
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_iz);
-    propertyDictionary->add(CS_InertiaMomentZ, value);
+    propertyDictionary.add(CS_InertiaMomentZ, value);
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_ik);
-    propertyDictionary->add(CS_TorsionMomentX, value);
+    propertyDictionary.add(CS_TorsionMomentX, value);
 
     double beamshearcoeff = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, beamshearcoeff, _IFT_SimpleCrossSection_shearcoeff);
-    propertyDictionary->add(CS_BeamShearCoeff, beamshearcoeff);
+    propertyDictionary.add(CS_BeamShearCoeff, beamshearcoeff);
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_shearareay);
     if ( value == 0.0 ) {
         value = beamshearcoeff * area;
     }
-    propertyDictionary->add(CS_ShearAreaY, value);
+    propertyDictionary.add(CS_ShearAreaY, value);
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_shearareaz);
     if ( value == 0.0 ) {
         value = beamshearcoeff * area;
     }
-    propertyDictionary->add(CS_ShearAreaZ, value);
+    propertyDictionary.add(CS_ShearAreaZ, value);
 
     value = 0.0;
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_SimpleCrossSection_drillStiffness);
-    propertyDictionary->add(CS_DrillingStiffness, value);
+    propertyDictionary.add(CS_DrillingStiffness, value);
 
     IR_GIVE_OPTIONAL_FIELD(ir, this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);
 
@@ -509,40 +509,40 @@ SimpleCrossSection :: giveInputRecord(DynamicInputRecord &input)
 {
     StructuralCrossSection :: giveInputRecord(input);
 
-    if ( this->propertyDictionary->includes(CS_Thickness) ) {
-        input.setField(this->propertyDictionary->at(CS_Thickness), _IFT_SimpleCrossSection_thick);
+    if ( this->propertyDictionary.includes(CS_Thickness) ) {
+        input.setField(this->propertyDictionary.at(CS_Thickness), _IFT_SimpleCrossSection_thick);
     }
 
-    if ( this->propertyDictionary->includes(CS_Width) ) {
-        input.setField(this->propertyDictionary->at(CS_Width), _IFT_SimpleCrossSection_width);
+    if ( this->propertyDictionary.includes(CS_Width) ) {
+        input.setField(this->propertyDictionary.at(CS_Width), _IFT_SimpleCrossSection_width);
     }
 
-    if ( this->propertyDictionary->includes(CS_Area) ) {
-        input.setField(this->propertyDictionary->at(CS_Area), _IFT_SimpleCrossSection_area);
+    if ( this->propertyDictionary.includes(CS_Area) ) {
+        input.setField(this->propertyDictionary.at(CS_Area), _IFT_SimpleCrossSection_area);
     }
 
-    if ( this->propertyDictionary->includes(CS_TorsionMomentX) ) {
-        input.setField(this->propertyDictionary->at(CS_TorsionMomentX), _IFT_SimpleCrossSection_ik);
+    if ( this->propertyDictionary.includes(CS_TorsionMomentX) ) {
+        input.setField(this->propertyDictionary.at(CS_TorsionMomentX), _IFT_SimpleCrossSection_ik);
     }
 
-    if ( this->propertyDictionary->includes(CS_InertiaMomentY) ) {
-        input.setField(this->propertyDictionary->at(CS_InertiaMomentY), _IFT_SimpleCrossSection_iy);
+    if ( this->propertyDictionary.includes(CS_InertiaMomentY) ) {
+        input.setField(this->propertyDictionary.at(CS_InertiaMomentY), _IFT_SimpleCrossSection_iy);
     }
 
-    if ( this->propertyDictionary->includes(CS_InertiaMomentZ) ) {
-        input.setField(this->propertyDictionary->at(CS_InertiaMomentZ), _IFT_SimpleCrossSection_iz);
+    if ( this->propertyDictionary.includes(CS_InertiaMomentZ) ) {
+        input.setField(this->propertyDictionary.at(CS_InertiaMomentZ), _IFT_SimpleCrossSection_iz);
     }
 
-    if ( this->propertyDictionary->includes(CS_ShearAreaY) ) {
-        input.setField(this->propertyDictionary->at(CS_ShearAreaY), _IFT_SimpleCrossSection_shearareay);
+    if ( this->propertyDictionary.includes(CS_ShearAreaY) ) {
+        input.setField(this->propertyDictionary.at(CS_ShearAreaY), _IFT_SimpleCrossSection_shearareay);
     }
 
-    if ( this->propertyDictionary->includes(CS_ShearAreaZ) ) {
-        input.setField(this->propertyDictionary->at(CS_ShearAreaZ), _IFT_SimpleCrossSection_shearareaz);
+    if ( this->propertyDictionary.includes(CS_ShearAreaZ) ) {
+        input.setField(this->propertyDictionary.at(CS_ShearAreaZ), _IFT_SimpleCrossSection_shearareaz);
     }
 
-    if ( this->propertyDictionary->includes(CS_BeamShearCoeff) ) {
-        input.setField(this->propertyDictionary->at(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
+    if ( this->propertyDictionary.includes(CS_BeamShearCoeff) ) {
+        input.setField(this->propertyDictionary.at(CS_BeamShearCoeff), _IFT_SimpleCrossSection_shearcoeff);
     }
 
     input.setField(this->materialNumber, _IFT_SimpleCrossSection_MaterialNumber);

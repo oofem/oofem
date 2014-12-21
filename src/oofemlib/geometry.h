@@ -119,7 +119,6 @@ public:
 
     inline const FloatArray &giveVertex(int n) const { return mVertices [ n - 1 ]; }
 
-    void setVertex(FloatArray *vertex);
     void setVertices(const std::vector<FloatArray> &iVertices) {mVertices = iVertices;}
 
     void removeDuplicatePoints(const double &iTolSquare);

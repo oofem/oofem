@@ -521,7 +521,7 @@ TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType t
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *fieldInterp = this->giveInterpolation( ( DofIDItem ) dofid.at(1) );
     FEInterpolation *interp = this->giveInterpolation();
-    IntegrationRule *iRule = interp->giveIntegrationRule( load->giveApproxOrder() + fieldInterp->giveInterpolationOrder() );
+    std :: unique_ptr< IntegrationRule > iRule( interp->giveIntegrationRule( load->giveApproxOrder() + fieldInterp->giveInterpolationOrder() ) );
 
     if ( load->giveType() == ConvectionBC ) {
         this->computeVectorOf(dofid, VM_Total, tStep, unknowns);
@@ -557,8 +557,6 @@ TransportElement :: computeLoadVector(FloatArray &answer, Load *load, CharType t
 
         answer.add(val.at(1) * dV, n);
     }
-
-    delete iRule;
 }
 
 
@@ -580,7 +578,7 @@ TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *fieldInterp = this->giveInterpolation( ( DofIDItem ) dofid.at(1) );
     FEInterpolation *interp = this->giveInterpolation();
-    IntegrationRule *iRule = interp->giveBoundaryIntegrationRule(load->giveApproxOrder() + 1 + fieldInterp->giveInterpolationOrder(), boundary);
+    std :: unique_ptr< IntegrationRule > iRule( interp->giveBoundaryIntegrationRule(load->giveApproxOrder() + 1 + fieldInterp->giveInterpolationOrder(), boundary) );
 
     if ( load->giveType() == ConvectionBC ) {
         IntArray bNodes;
@@ -616,8 +614,6 @@ TransportElement :: computeBoundaryLoadVector(FloatArray &answer, BoundaryLoad *
 
         answer.add(val.at(1) * dA, n);
     }
-
-    delete iRule;
 }
 
 
@@ -639,7 +635,7 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
     ///@todo Deal with coupled fields (I think they should be another class of problems completely).
     FEInterpolation *fieldInterp = this->giveInterpolation( ( DofIDItem ) dofid.at(1) );
     FEInterpolation *interp = this->giveInterpolation();
-    IntegrationRule *iRule = interp->giveBoundaryEdgeIntegrationRule(load->giveApproxOrder() + 1 + fieldInterp->giveInterpolationOrder(), boundary);
+    std :: unique_ptr< IntegrationRule > iRule( interp->giveBoundaryEdgeIntegrationRule(load->giveApproxOrder() + 1 + fieldInterp->giveInterpolationOrder(), boundary) );
 
     if ( load->giveType() == ConvectionBC ) {
         IntArray bNodes;
@@ -675,8 +671,6 @@ TransportElement :: computeBoundaryEdgeLoadVector(FloatArray &answer, BoundaryLo
 
         answer.add(val.at(1) * dL, n);
     }
-
-    delete iRule;
 }
 
 
@@ -838,7 +832,7 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
 
         int approxOrder = surfLoad->giveApproxOrder() + this->giveApproxOrder(indx);
 
-        IntegrationRule *iRule = this->GetSurfaceIntegrationRule(approxOrder);
+        std :: unique_ptr< IntegrationRule > iRule( this->GetSurfaceIntegrationRule(approxOrder) );
         for ( GaussPoint *gp: *iRule ) {
             this->computeSurfaceNAt( n, iSurf, * gp->giveNaturalCoordinates() );
             double dV = this->computeSurfaceVolumeAround(gp, iSurf);
@@ -855,8 +849,6 @@ TransportElement :: computeSurfaceBCSubVectorAt(FloatArray &answer, Load *load,
 
         this->giveSurfaceDofMapping(mask, iSurf);
         answer.assemble(reducedAnswer, mask);
-
-        delete iRule;
     } else {
         OOFEM_ERROR("unsupported bc type encountered");
     }
@@ -917,7 +909,7 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
 
                 defined = 1;
                 int approxOrder = 2 * this->giveApproxOrder(indx);
-                IntegrationRule *iRule = this->GetSurfaceIntegrationRule(approxOrder);
+                std :: unique_ptr< IntegrationRule > iRule( this->GetSurfaceIntegrationRule(approxOrder) );
 
                 for ( GaussPoint *gp: *iRule ) {
                     this->computeSurfaceNAt( n, id, * gp->giveNaturalCoordinates() );
@@ -925,7 +917,6 @@ TransportElement :: computeBCSubMtrxAt(FloatMatrix &answer, TimeStep *tStep, Val
                     subAnswer.plusDyadSymmUpper( n, dV * surfLoad->giveProperty('a', tStep) );
                 }
 
-                delete iRule;
                 subAnswer.symmetrized();
                 this->giveSurfaceDofMapping(mask, id);
                 answer.assemble(subAnswer, mask);

@@ -43,6 +43,8 @@
 #include "dofmanager.h"
 #include "error.h"
 
+#include <memory>
+
 #define _IFT_LinearConstraintBC_Name   "linearconstraintbc"
 
 ///@name Input fields for active boundary condition
@@ -78,7 +80,7 @@ protected:
     int rhsTf;
     IntArray dofmans;
     IntArray dofs;
-    DofManager *md;
+    std :: unique_ptr< DofManager > md;
 
 
     // characteristicType of LHS and RHS contributions (this makes this bc trully general, as one can customize, to which
@@ -106,7 +108,7 @@ public:
     /// Gives the number of internal dof managers.
     virtual int giveNumberOfInternalDofManagers() { return 1; }
     /// Gives an internal dof manager from receiver.
-    virtual DofManager *giveInternalDofManager(int i) { return this->md; }
+    virtual DofManager *giveInternalDofManager(int i) { return this->md.get(); }
 
     virtual contextIOResultType saveContext(DataStream &stream, ContextMode mode, void *obj = NULL);
     virtual contextIOResultType restoreContext(DataStream &stream, ContextMode mode, void *obj = NULL);

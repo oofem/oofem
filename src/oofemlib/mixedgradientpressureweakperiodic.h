@@ -43,6 +43,8 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
+#include <memory>
+
 #define _IFT_MixedGradientPressureWeakPeriodic_Name "mixedgradientpressureweakperiodic"
 #define _IFT_MixedGradientPressureWeakPeriodic_order "order" ///< Order of global polynomial in the unknown tractions. Should be at least 1.
 
@@ -77,11 +79,11 @@ protected:
     int order;
 
     /// DOF-manager containing the unknown volumetric gradient (always exactly one dof).
-    Node *voldman;
+    std :: unique_ptr< Node > voldman;
     IntArray v_id;
 
     /// DOF-manager containing the unknown tractions (Lagrange mult. for micro-periodic velocity)
-    Node *tractionsdman;
+    std :: unique_ptr< Node > tractionsdman;
     IntArray t_id;
 
 public:

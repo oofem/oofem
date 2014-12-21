@@ -68,8 +68,8 @@ namespace oofem {
 class LinearStability : public StructuralEngngModel
 {
 private:
-    SparseMtrx *stiffnessMatrix;
-    SparseMtrx *initialStressMatrix;
+    std :: unique_ptr< SparseMtrx > stiffnessMatrix;
+    std :: unique_ptr< SparseMtrx > initialStressMatrix;
     FloatArray loadVector;
     FloatArray displacementVector;
     FloatMatrix eigVec;
@@ -78,31 +78,18 @@ private:
     double rtolv;
     /// Numerical method used to solve the problem.
     GenEigvalSolverType solverType;
-    SparseGeneralEigenValueSystemNM *nMethod;
+    std :: unique_ptr< SparseGeneralEigenValueSystemNM > nMethod;
     /// Numerical method used to solve the static problem.
-    SparseLinearSystemNM *nMethodLS;
+    std :: unique_ptr< SparseLinearSystemNM > nMethodLS;
 
 public:
     LinearStability(int i, EngngModel * _master = NULL) : StructuralEngngModel(i, _master),
         loadVector(), displacementVector(), eigVec(), eigVal()
     {
-        stiffnessMatrix = NULL;
-        initialStressMatrix = NULL;
         numberOfSteps = 1;
-        nMethodLS = NULL;
-        nMethod = NULL;
         ndomains = 1;
     }
-    virtual ~LinearStability() {
-        delete stiffnessMatrix;
-        delete initialStressMatrix;
-        if ( nMethodLS ) {
-            delete nMethodLS;
-        }
-        if ( nMethod ) {
-            delete nMethod;
-        }
-    }
+    virtual ~LinearStability() { }
 
     virtual void solveYourself();
     virtual void solveYourselfAt(TimeStep *tStep);

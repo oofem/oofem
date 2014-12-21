@@ -102,7 +102,6 @@ CylindricalALM :: CylindricalALM(Domain *d, EngngModel *m) :
 
 CylindricalALM :: ~CylindricalALM()
 {
-    delete linSolver;
 }
 
 
@@ -976,18 +975,16 @@ CylindricalALM :: giveLinearSolver()
 {
     if ( linSolver ) {
         if ( linSolver->giveLinSystSolverType() == solverType ) {
-            return linSolver;
-        } else {
-            delete linSolver;
+            return linSolver.get();
         }
     }
 
-    linSolver = classFactory.createSparseLinSolver(solverType, domain, engngModel);
-    if ( linSolver == NULL ) {
+    linSolver.reset( classFactory.createSparseLinSolver(solverType, domain, engngModel) );
+    if ( !linSolver ) {
         OOFEM_ERROR("linear solver creation failed");
     }
 
-    return linSolver;
+    return linSolver.get();
 }
 
 

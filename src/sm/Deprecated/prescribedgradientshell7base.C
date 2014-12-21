@@ -231,27 +231,27 @@ void PrescribedGenStrainShell7 :: computeTangent(FloatMatrix &tangent, EquationI
     // Fetch some information from the engineering model
     EngngModel *rve = this->giveDomain()->giveEngngModel();
     ///@todo Get this from engineering model
-    SparseLinearSystemNM *solver = classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ); // = rve->giveLinearSolver();
+    std :: unique_ptr< SparseLinearSystemNM > solver( classFactory.createSparseLinSolver( ST_Petsc, this->domain, this->domain->giveEngngModel() ) ); // = rve->giveLinearSolver();
     SparseMtrxType stype = solver->giveRecommendedMatrix(true);
     EModelDefaultEquationNumbering fnum;
     EModelDefaultPrescribedEquationNumbering pnum;
 
     // Set up and assemble tangent FE-matrix which will make up the sensitivity analysis for the macroscopic material tangent.
-    SparseMtrx *Kff = classFactory.createSparseMtrx(stype);
-    SparseMtrx *Kfp = classFactory.createSparseMtrx(stype);
-    SparseMtrx *Kpf = classFactory.createSparseMtrx(stype);
-    SparseMtrx *Kpp = classFactory.createSparseMtrx(stype);
+    std :: unique_ptr< SparseMtrx > Kff( classFactory.createSparseMtrx(stype) );
+    std :: unique_ptr< SparseMtrx > Kfp( classFactory.createSparseMtrx(stype) );
+    std :: unique_ptr< SparseMtrx > Kpf( classFactory.createSparseMtrx(stype) );
+    std :: unique_ptr< SparseMtrx > Kpp( classFactory.createSparseMtrx(stype) );
     if ( !Kff ) {
-        OOFEM_ERROR2("MixedGradientPressureBC :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
+        OOFEM_ERROR("MixedGradientPressureBC :: computeTangents - Couldn't create sparse matrix of type %d\n", stype);
     }
     Kff->buildInternalStructure(rve, 1, eid, fnum);
     Kfp->buildInternalStructure(rve, 1, eid, fnum, pnum);
     Kpf->buildInternalStructure(rve, 1, eid, pnum, fnum);
     Kpp->buildInternalStructure(rve, 1, eid, pnum);
-    rve->assemble(Kff, tStep, eid, StiffnessMatrix, fnum, this->domain);
-    rve->assemble(Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain);
-    rve->assemble(Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain);
-    rve->assemble(Kpp, tStep, eid, StiffnessMatrix, pnum, this->domain);
+    rve->assemble(*Kff, tStep, eid, StiffnessMatrix, fnum, this->domain);
+    rve->assemble(*Kfp, tStep, eid, StiffnessMatrix, fnum, pnum, this->domain);
+    rve->assemble(*Kpf, tStep, eid, StiffnessMatrix, pnum, fnum, this->domain);
+    rve->assemble(*Kpp, tStep, eid, StiffnessMatrix, pnum, this->domain);
 
     FloatMatrix C, X, Kpfa, KfpC, a;
 
@@ -263,13 +263,6 @@ void PrescribedGenStrainShell7 :: computeTangent(FloatMatrix &tangent, EquationI
     X.subtract(Kpfa);
     tangent.beTProductOf(C, X);
     tangent.times( 1. / this->domainSize() );
-
-    delete Kff;
-    delete Kfp;
-    delete Kpf;
-    delete Kpp;
-
-    delete solver; ///@todo Remove this when solver is taken from engngmodel
 }
 
 

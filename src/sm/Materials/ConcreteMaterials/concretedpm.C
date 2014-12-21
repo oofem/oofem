@@ -364,11 +364,11 @@ ConcreteDPM :: initializeFrom(InputRecord *ir)
     // elastic parameters
     IR_GIVE_FIELD(ir, eM, _IFT_IsotropicLinearElasticMaterial_e);
     IR_GIVE_FIELD(ir, nu, _IFT_IsotropicLinearElasticMaterial_n);
-    propertyDictionary->add('E', eM);
-    propertyDictionary->add('n', nu);
+    propertyDictionary.add('E', eM);
+    propertyDictionary.add('n', nu);
 
     IR_GIVE_FIELD(ir, value, _IFT_IsotropicLinearElasticMaterial_talpha);
-    propertyDictionary->add(tAlpha, value);
+    propertyDictionary.add(tAlpha, value);
 
     gM = eM / ( 2. * ( 1. + nu ) );
     kM = eM / ( 3. * ( 1. - 2. * nu ) );
@@ -376,8 +376,8 @@ ConcreteDPM :: initializeFrom(InputRecord *ir)
     // instanciate the variables of the plasticity model
     IR_GIVE_FIELD(ir, fc, _IFT_ConcreteDPM_fc);
     IR_GIVE_FIELD(ir, ft, _IFT_ConcreteDPM_ft);
-    propertyDictionary->add(ft_strength, ft);
-    propertyDictionary->add(fc_strength, fc);
+    propertyDictionary.add(ft_strength, ft);
+    propertyDictionary.add(fc_strength, fc);
 
     // damage parameters - only exponential softening
     // [in ef variable the wf (crack opening) is stored]

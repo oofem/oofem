@@ -62,14 +62,14 @@ class SparseMtrx;
 class LinearStatic : public StructuralEngngModel
 {
 protected:
-    SparseMtrx *stiffnessMatrix;
+    std :: unique_ptr< SparseMtrx > stiffnessMatrix;
     FloatArray loadVector;
     FloatArray displacementVector;
 
     LinSystSolverType solverType;
     SparseMtrxType sparseMtrxType;
     /// Numerical method used to solve the problem.
-    SparseLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseLinearSystemNM > nMethod;
 
     int initFlag;
 

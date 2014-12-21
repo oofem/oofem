@@ -32,11 +32,11 @@ private:
     LinSystSolverType solverType;
 
 protected:
-    PrimaryField *PressureField;
+    std :: unique_ptr< PrimaryField > PressureField;
     SparseMtrxType sparseMtrxType;
-    SparseNonLinearSystemNM *nMethod;
+    std :: unique_ptr< SparseNonLinearSystemNM > nMethod;
 
-    SparseMtrx *stiffnessMatrix;
+    std :: unique_ptr< SparseMtrx > stiffnessMatrix;
     FloatArray internalForces;
     FloatArray externalForces;
     FloatArray incrementOfSolution;

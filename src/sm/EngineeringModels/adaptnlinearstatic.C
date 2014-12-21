@@ -343,8 +343,8 @@ AdaptiveNonLinearStatic :: initializeAdaptiveFrom(EngngModel *sourceProblem)
 
 
         if ( initFlag ) {
-            stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-            if ( stiffnessMatrix == NULL ) {
+            stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+            if ( !stiffnessMatrix ) {
                 OOFEM_ERROR("sparse matrix creation failed");
             }
 
@@ -660,8 +660,8 @@ AdaptiveNonLinearStatic :: adaptiveRemap(Domain *dNew)
 
         if ( initFlag ) {
             if ( !stiffnessMatrix ) {
-                stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-                if ( stiffnessMatrix == NULL ) {
+                stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+                if ( !stiffnessMatrix ) {
                     OOFEM_ERROR("sparse matrix creation failed");
                 }
             }

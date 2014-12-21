@@ -71,16 +71,11 @@ NonLinearDynamic :: NonLinearDynamic(int i, EngngModel *_master) : StructuralEng
     ndomains                = 1;
     internalVarUpdateStamp  = 0;
     initFlag = commInitFlag = 1;
-
-    effectiveStiffnessMatrix = NULL;
-    massMatrix               = NULL;
-    nMethod                  = NULL;
 }
 
 
 NonLinearDynamic :: ~NonLinearDynamic()
 {
-    delete nMethod;
 }
 
 
@@ -91,12 +86,12 @@ NumericalMethod *NonLinearDynamic :: giveNumericalMethod(MetaStep *mStep)
     }
 
     if ( this->nMethod ) {
-        nMethod->reinitialize();
-        return nMethod;
+        this->nMethod->reinitialize();
+    } else {
+        this->nMethod.reset( new NRSolver(this->giveDomain(1), this) );
     }
 
-    this->nMethod = new NRSolver(this->giveDomain(1), this);
-    return this->nMethod;
+    return this->nMethod.get();
 }
 
 
@@ -370,11 +365,11 @@ NonLinearDynamic :: proceedStep(int di, TimeStep *tStep)
         // First assemble problem at current time step.
         // Option to take into account initial conditions.
         if ( !effectiveStiffnessMatrix ) {
-            effectiveStiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
-            massMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+            effectiveStiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
+            massMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         }
 
-        if ( effectiveStiffnessMatrix == NULL || massMatrix == NULL ) {
+        if ( !effectiveStiffnessMatrix || !massMatrix ) {
             OOFEM_ERROR("sparse matrix creation failed");
         }
 

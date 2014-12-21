@@ -56,30 +56,26 @@ REGISTER_EngngModel(LinearStability);
 
 NumericalMethod *LinearStability :: giveNumericalMethod(MetaStep *mStep)
 {
-    if ( nMethod ) {
-        return nMethod;
+    if ( !nMethod ) {
+        nMethod.reset( classFactory.createGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this) );
+        if ( !nMethod ) {
+            OOFEM_ERROR("solver creation failed");
+        }
     }
 
-    nMethod = classFactory.createGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this);
-    if ( nMethod == NULL ) {
-        OOFEM_ERROR("solver creation failed");
-    }
-
-    return nMethod;
+    return nMethod.get();
 }
 
 SparseLinearSystemNM *LinearStability :: giveNumericalMethodForLinStaticProblem(TimeStep *tStep)
 {
-    if ( nMethodLS ) {
-        return nMethodLS;
+    if ( !nMethodLS ) {
+        nMethodLS.reset( classFactory.createSparseLinSolver(ST_Direct, this->giveDomain(1), this) ); ///@todo Support other solvers
+        if ( !nMethodLS ) {
+            OOFEM_ERROR("solver creation failed");
+        }
     }
 
-    nMethodLS = classFactory.createSparseLinSolver(ST_Direct, this->giveDomain(1), this); ///@todo Support other solvers
-    if ( nMethodLS == NULL ) {
-        OOFEM_ERROR("solver creation failed");
-    }
-
-    return nMethodLS;
+    return nMethodLS.get();
 }
 
 IRResultType
@@ -186,7 +182,7 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
         //
         // first step - solve linear static problem
         //
-        stiffnessMatrix = classFactory.createSparseMtrx(SMT_Skyline); ///@todo Don't hardcode skyline matrix only
+        stiffnessMatrix.reset( classFactory.createSparseMtrx(SMT_Skyline) ); ///@todo Don't hardcode skyline matrix only
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
         //
@@ -240,8 +236,8 @@ void LinearStability :: solveYourselfAt(TimeStep *tStep)
      */
 
     stiffnessMatrix->zero();
-    if ( initialStressMatrix == NULL ) {
-        initialStressMatrix = stiffnessMatrix->GiveCopy();
+    if ( !initialStressMatrix ) {
+        initialStressMatrix.reset( stiffnessMatrix->GiveCopy() );
     } else {
         initialStressMatrix->zero();
     }

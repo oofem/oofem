@@ -55,16 +55,14 @@ REGISTER_EngngModel(EigenValueDynamic);
 
 NumericalMethod *EigenValueDynamic :: giveNumericalMethod(MetaStep *mStep)
 {
-    if ( nMethod ) {
-        return nMethod;
+    if ( !nMethod ) {
+        nMethod.reset( classFactory.createGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this) );
+        if ( !nMethod ) {
+            OOFEM_ERROR("solver creation failed");
+        }
     }
 
-    nMethod = classFactory.createGeneralizedEigenValueSolver(solverType, this->giveDomain(1), this);
-    if ( nMethod == NULL ) {
-        OOFEM_ERROR("solver creation failed");
-    }
-
-    return nMethod;
+    return nMethod.get();
 }
 
 IRResultType
@@ -160,10 +158,10 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
         // first step  assemble stiffness Matrix
         //
 
-        stiffnessMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+        stiffnessMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         stiffnessMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
-        massMatrix = classFactory.createSparseMtrx(sparseMtrxType);
+        massMatrix.reset( classFactory.createSparseMtrx(sparseMtrxType) );
         massMatrix->buildInternalStructure( this, 1, EModelDefaultEquationNumbering() );
 
         this->assemble( *stiffnessMatrix, tStep, StiffnessMatrix,
@@ -193,9 +191,8 @@ void EigenValueDynamic :: solveYourselfAt(TimeStep *tStep)
 
     nMethod->solve(*stiffnessMatrix, *massMatrix, eigVal, eigVec, rtolv, numberOfRequiredEigenValues);
 
-    delete stiffnessMatrix;
-    delete massMatrix;
-    stiffnessMatrix = massMatrix = NULL;
+    stiffnessMatrix.reset(NULL);
+    massMatrix.reset(NULL);
 }
 
 

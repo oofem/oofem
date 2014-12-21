@@ -38,6 +38,8 @@
 #include "sparsemtrx.h"
 #include "intarray.h"
 
+#include <memory>
+
 /* DSS module lives in global namespace, not in oofem namespace */
 class DSSolver;
 struct SparseMatrixF;
@@ -56,9 +58,9 @@ public:
 
 protected:
     /// Pointer to SparseMatrixF class rep
-    SparseMatrixF *_sm;
+    std :: unique_ptr< SparseMatrixF > _sm;
     /// pointer to DSSolver class (representation of Direct Sparse Solver in DSS lib)
-    DSSolver *_dss;
+    std :: unique_ptr< DSSolver > _dss;
     /// Flag indicating whether factorized.
     bool isFactorized;
     /// type of storage & factorization

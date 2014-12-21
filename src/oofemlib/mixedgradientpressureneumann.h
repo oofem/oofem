@@ -43,6 +43,8 @@
 #include "floatarray.h"
 #include "floatmatrix.h"
 
+#include <memory>
+
 #define _IFT_MixedGradientPressureNeumann_Name   "mixedgradientpressureneumann"
 
 namespace oofem {
@@ -101,7 +103,7 @@ protected:
     double pressure;
 
     /// DOF-manager containing the unknown deviatoric stress.
-    Node *sigmaDev;
+    std :: unique_ptr< Node > sigmaDev;
     /// Dof IDs for the lagrange multipliers in sigmaDev
     IntArray dev_id;
 

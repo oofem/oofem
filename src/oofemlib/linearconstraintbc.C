@@ -48,12 +48,12 @@
 namespace oofem {
 REGISTER_BoundaryCondition(LinearConstraintBC);
 
-LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondition(n, d)
+LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondition(n, d),
+    md( new Node(0, domain) )
 {
-    this->md = new Node(0, domain);
     // this is internal lagrange multiplier used to enforce the receiver constrain
     // this allocates a new equation related to this constraint
-    this->md->appendDof( new MasterDof( this->md, ( DofIDItem ) ( d->giveNextFreeDofID() ) ) );
+    this->md->appendDof( new MasterDof( this->md.get(), ( DofIDItem ) ( d->giveNextFreeDofID() ) ) );
     this->lhsType.clear();
     this->rhsType.clear();
 }
@@ -61,7 +61,6 @@ LinearConstraintBC :: LinearConstraintBC(int n, Domain *d) : ActiveBoundaryCondi
 
 LinearConstraintBC :: ~LinearConstraintBC()
 {
-    delete this->md;
 }
 
 

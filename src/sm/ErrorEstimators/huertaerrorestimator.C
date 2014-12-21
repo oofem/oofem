@@ -552,11 +552,11 @@ HuertaErrorEstimator :: giveValue(EE_ValueType type, TimeStep *tStep)
 RemeshingCriteria *
 HuertaErrorEstimator :: giveRemeshingCrit()
 {
-    if ( this->rc ) {
-        return this->rc;
+    if ( !this->rc ) {
+        this->rc.reset( new HuertaRemeshingCriteria(1, this) );
     }
 
-    return ( this->rc = new HuertaRemeshingCriteria(1, this) );
+    return this->rc.get();
 }
 
 

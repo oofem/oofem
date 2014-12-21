@@ -42,12 +42,11 @@
 
 namespace oofem {
 
-Material :: Material(int n, Domain* d) : FEMComponent(n, d), propertyDictionary ( new Dictionary() ), castingTime ( -1. ) { }
+Material :: Material(int n, Domain* d) : FEMComponent(n, d), propertyDictionary(), castingTime ( -1. ) { }
 
 
 Material :: ~Material()
 {
-    delete propertyDictionary;
 }
 
 
@@ -59,8 +58,8 @@ Material :: give(int aProperty, GaussPoint *gp)
 {
     double value = 0.0;
 
-    if ( propertyDictionary->includes(aProperty) ) {
-        value = propertyDictionary->at(aProperty);
+    if ( propertyDictionary.includes(aProperty) ) {
+        value = propertyDictionary.at(aProperty);
     } else {
         OOFEM_ERROR("property #%d on element %d and GP %d not defined", aProperty, gp->giveElement()->giveNumber(), gp->giveNumber() );
     }
@@ -73,15 +72,15 @@ bool
 Material :: hasProperty(int aProperty, GaussPoint *gp)
 // Returns true if the aProperty is defined on a material
 {
-    return propertyDictionary->includes(aProperty);
+    return propertyDictionary.includes(aProperty);
 }
 
 
 void
 Material :: modifyProperty(int aProperty, double value, GaussPoint *gp)
 {
-    if ( propertyDictionary->includes(aProperty) ) {
-        propertyDictionary->at(aProperty) = value;
+    if ( propertyDictionary.includes(aProperty) ) {
+        propertyDictionary.at(aProperty) = value;
     } else {
         OOFEM_ERROR("property #%d on element %d and GP %d not defined", aProperty, gp->giveElement()->giveNumber(), gp->giveNumber() );
     }
@@ -100,7 +99,7 @@ Material :: initializeFrom(InputRecord *ir)
 #  endif
 
     IR_GIVE_FIELD(ir, value, _IFT_Material_density);
-    propertyDictionary->add('d', value);
+    propertyDictionary.add('d', value);
 
     this->castingTime = -1.e10;
     IR_GIVE_OPTIONAL_FIELD(ir, castingTime, _IFT_Material_castingtime);
@@ -113,7 +112,7 @@ void
 Material :: giveInputRecord(DynamicInputRecord &input)
 {
     FEMComponent :: giveInputRecord(input);
-    input.setField(this->propertyDictionary->at('d'), _IFT_Material_density);
+    input.setField(this->propertyDictionary.at('d'), _IFT_Material_density);
     input.setField(this->castingTime, _IFT_Material_castingtime);
 }
 
@@ -147,7 +146,7 @@ Material :: printYourself()
 // Prints the receiver on screen.
 {
     printf("Material with properties : \n");
-    propertyDictionary->printYourself();
+    propertyDictionary.printYourself();
 }
 
 

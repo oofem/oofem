@@ -607,7 +607,8 @@ HydrationModelInterface :: initializeFrom(InputRecord *ir)
     IR_GIVE_OPTIONAL_FIELD(ir, value, _IFT_HydrationModelInterface_hydration);
     if ( value >= 0. ) {
         OOFEM_LOG_INFO("HydratingMaterial: creating HydrationModel.");
-        if ( !( hydrationModel = new HydrationModel() ) ) {
+        hydrationModel.reset( new HydrationModel() );
+        if ( !hydrationModel ) {
             OOFEM_ERROR("Could not create HydrationModel instance.");
         }
 
@@ -636,21 +637,19 @@ void
 HydrationModelInterface :: updateInternalState(const FloatArray &vec, GaussPoint *gp, TimeStep *tStep)
 {
     if ( hydrationModel ) {
-        TimeStep *hydraTime = new TimeStep( ( const TimeStep ) *tStep );
+        TimeStep hydraTime( ( const TimeStep ) *tStep );
         int notime = 0;
         if ( tStep->giveTargetTime() - tStep->giveTimeIncrement() < castAt ) {
             if ( tStep->giveTargetTime() >= castAt ) {
-                hydraTime->setTimeIncrement(tStep->giveTargetTime() - castAt);
+                hydraTime.setTimeIncrement(tStep->giveTargetTime() - castAt);
             } else {
                 notime = 1;
             }
         }
 
         if ( !notime ) {
-            hydrationModel->updateInternalState(vec, gp, hydraTime);
+            hydrationModel->updateInternalState(vec, gp, &hydraTime);
         }
-
-        delete hydraTime;
     }
 }
 

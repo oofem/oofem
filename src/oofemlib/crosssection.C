@@ -41,15 +41,12 @@
 
 namespace oofem {
     
-CrossSection :: CrossSection(int n, Domain* d) : FEMComponent(n, d)
+CrossSection :: CrossSection(int n, Domain* d) : FEMComponent(n, d), propertyDictionary(), setNumber(0)
 {
-    propertyDictionary = new Dictionary();
-    setNumber = 0;
 }
 
 CrossSection :: ~CrossSection()
 {
-    delete propertyDictionary;
 }
 
 int
@@ -90,7 +87,7 @@ CrossSection :: printYourself()
 // Prints the receiver on screen.
 {
     printf("Cross Section with properties : \n");
-    propertyDictionary->printYourself();
+    propertyDictionary.printYourself();
 }
 
 
@@ -134,8 +131,8 @@ double
 CrossSection :: give(CrossSectionProperty aProperty, GaussPoint *gp)
 // Returns the value of the property aProperty of the receiver.
 {
-    if ( propertyDictionary->includes(aProperty) ) {
-        return propertyDictionary->at(aProperty);
+    if ( propertyDictionary.includes(aProperty) ) {
+        return propertyDictionary.at(aProperty);
     } else {
         OOFEM_ERROR("Undefined property ID %d", aProperty);
     }
@@ -147,8 +144,8 @@ double
 CrossSection :: give(CrossSectionProperty aProperty, const FloatArray *coords, Element *elem, bool local)
 // Returns the value of the property aProperty of the receiver.
 {
-    if ( propertyDictionary->includes(aProperty) ) {
-        return propertyDictionary->at(aProperty);
+    if ( propertyDictionary.includes(aProperty) ) {
+        return propertyDictionary.at(aProperty);
     } else {
         OOFEM_ERROR("Undefined property ID %d", aProperty);
     }

@@ -37,6 +37,7 @@
 
 #include <set>
 #include <vector>
+#include <memory>
 
 #include "sparselinsystemnm.h"
 #include "sparsenonlinsystemnm.h"
@@ -183,7 +184,7 @@ protected:
     FloatArray calm_HPCDmanWeightSrcArray;
 
     /// Linear system solver.
-    SparseLinearSystemNM *linSolver;
+    std :: unique_ptr< SparseLinearSystemNM > linSolver;
     /// linear system solver ID.
     LinSystSolverType solverType;
 
